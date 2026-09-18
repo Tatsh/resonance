@@ -13,6 +13,21 @@ constexpr int kArkVersion = 2;
 /** The number of bytes the mount point occupies, which is the rest of the record. */
 constexpr int kArkMountPointSize = 0x80;
 
+/** Rows the sector cache is asked for on the first mount. */
+constexpr int kArkSectorCacheRows = 8;
+
+/** The number of bytes of the device path Open() builds on its stack. */
+constexpr int kArkDevicePathSize = 0x100;
+
+/** Directory the archives live in on the disc. */
+constexpr char kArkDiscRoot[] = "cdrom0:\\ARK";
+
+/** Prefix that reads an archive over the host link instead. */
+constexpr char kArkHostRoot[] = "host0:";
+
+/** Path component of the archive header that fixes the mount point. */
+constexpr char kArkRunComponent[] = "run";
+
 /**
  * One entry of the archive's directory table.
  *
@@ -82,6 +97,14 @@ public:
     static int Open(const char *pszPath);
 
     /**
+     * Construct an unmounted archive.
+     *
+     * Only the path and the four table pointers are cleared. mFile is deliberately not, which the
+     * one unreachable branch of Open() depends on.
+     */
+    ArkFile();
+
+    /**
      * Unmount a previously mounted archive.
      *
      * The unmount is refused, and reports zero, when the path is not mounted and when a stream is
@@ -127,7 +150,7 @@ private:
     ArkDirEntry *mDirEntries;                // +0x110 mTables
     ArkFileEntry *mFileEntries;              // +0x114 mTables plus the file table's offset
     char *mNames;                            // +0x118 mTables plus the name pool's offset
-    int mOptimizedFlag;                      // +0x11c parsed out of the path after the mount
+    int mDiscLsn;                            // +0x11c the archive's start sector on the disc
     void *mOptimizedTable;                   // +0x120
     int mHasOptimizedTable;                  // +0x124
     char mMountPoint[kArkMountPointSize];    // +0x128 the header path after its `run` component

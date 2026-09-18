@@ -28,17 +28,17 @@ constexpr int kLoadingDotsPerLine = 64;
 
 int g_nLoadingDots;
 
-const char *g_pszLastFailure;
+const char *g_szLastFailure;
 
 // 0x001f2638
 void RecordFailMessage(const char *pszMessage) {
     g_debugStream << pszMessage;
-    g_pszLastFailure = pszMessage;
+    g_szLastFailure = pszMessage;
 }
 
 // 0x001f2670
 void HaltOnFailure() {
-    Fatal(g_pszLastFailure);
+    Fatal(g_szLastFailure);
 }
 
 // 0x001ef620

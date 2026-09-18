@@ -230,6 +230,12 @@ line plus the failed expression pins each check to its original source line.
 - A class with no RTTI (a non-polymorphic class emits none) is titled after its embedded `__FILE__`
   basename, its allocation tag, or its methods, and its header marks the name as inferred.
 - Every reconstructed routine includes `@ghidraAddress` for checking against the binary.
+- A global that points at a NUL-terminated string takes the `g_sz` prefix rather than `g_psz`, in
+  both the source and the Ghidra label, so that the two agree. The tooling enforces `sz` for a
+  `char *` global and rejects `psz`, and `reconstruction.md` requires reconstructed globals to
+  retain their Ghidra names, so the source follows. Parameters and data members are not subject to
+  that check and keep the `psz` and `p` prefixes, which is why `g_szLastFailure` is assigned from a
+  parameter titled `pszMessage`.
 
 ### Source layout evidence
 

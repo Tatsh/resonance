@@ -1,5 +1,6 @@
 #include "os/seccache.h"
 
+#include "os/log.h"
 #include "os/mem.h"
 #include "os/zone.h"
 
@@ -8,8 +9,9 @@ namespace {
 // The zone the cache carves its row buffers out of.
 constexpr char kSectorCacheZoneName[] = "seccache";
 
-// 0x008de798
-int g_bSectorCacheReady;
+// 0x008de798. The access clock, not a flag. Stamps start at 1 so that a row that has never been
+// used, whose stamp is zero, always sorts as the oldest.
+unsigned g_nSectorCacheClock;
 
 // 0x00724bf0. Nothing anywhere in the image writes this word. The read below is its only
 // reference, so it is permanently zero and the ZoneFree() branch it selects is dead code.
@@ -34,13 +36,13 @@ void InitSectorCache(int nRows) {
 
     g_pSectorCacheRows = static_cast<SectorCacheRow *>(
         MemAllocTagged(g_nSectorCacheRows * sizeof(SectorCacheRow), __FILE__, __LINE__));
-    g_bSectorCacheReady = 1;
+    g_nSectorCacheClock = 1;
 
     SectorCacheRow *pRow = g_pSectorCacheRows;
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
         pRow->mFile = kSectorCacheRowEmpty;
         pRow->mSector = kSectorCacheRowEmpty;
-        pRow->mUnknown08 = 0;
+        pRow->mStamp = 0;
         pRow->mBuffer = ZoneAlloc(kSectorCacheRowSize);
         ++pRow;
     }
@@ -73,7 +75,65 @@ void InvalidateCachedSectors(int nFile) {
         if (pRow->mFile == nFile) {
             pRow->mFile = kSectorCacheRowEmpty;
             pRow->mSector = kSectorCacheRowEmpty;
-            pRow->mUnknown08 = 0;
+            pRow->mStamp = 0;
         }
     }
+}
+
+SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
+    for (int i = 0; i < g_nSectorCacheRows; ++i) {
+        SectorCacheRow *pRow = &g_pSectorCacheRows[i];
+        if (pRow->mFile != nFile || pRow->mSector != nSector) {
+            continue;
+        }
+        if (pRow->mStamp != kSectorCacheLocked) {
+            pRow->mStamp = g_nSectorCacheClock;
+            ++g_nSectorCacheClock;
+        }
+        return pRow;
+    }
+    return nullptr;
+}
+
+SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
+    unsigned nOldest = kSectorCacheStampCeiling;
+    SectorCacheRow *pChosen = nullptr;
+    SectorCacheRow *pRow = g_pSectorCacheRows;
+    for (int i = g_nSectorCacheRows; i != 0; --i) {
+        // The unsigned comparison already excludes a locked row, because the locked stamp sorts
+        // above the ceiling. The second test is the shipped code's own belt and braces.
+        if (pRow->mStamp < nOldest && pRow->mStamp != kSectorCacheLocked) {
+            nOldest = pRow->mStamp;
+            pChosen = pRow;
+        }
+        ++pRow;
+    }
+    if (pChosen == nullptr) {
+        return nullptr;
+    }
+
+    if (pChosen->mStamp > kSectorCacheStampHalfway && pChosen->mStamp != kSectorCacheStampCeiling) {
+        // The clock has run far enough that stamps are rebased downward rather than allowed to
+        // wrap, which preserves their order.
+        pRow = g_pSectorCacheRows;
+        for (int i = 0; i < g_nSectorCacheRows; ++i) {
+            if (pRow->mStamp > kSectorCacheStampHalfway && pRow->mStamp != kSectorCacheLocked) {
+                pRow->mStamp -= kSectorCacheStampRebase;
+            }
+            ++pRow;
+        }
+        if (g_nSectorCacheClock > kSectorCacheStampHalfway) {
+            g_nSectorCacheClock -= kSectorCacheStampRebase;
+        }
+    }
+
+    pChosen->mFile = nFile;
+    pChosen->mSector = nSector;
+    if (pChosen->mStamp == kSectorCacheLocked) {
+        // Unreachable, because the search above never chooses a locked row.
+        LogPrintf("ARRGHGHGHGH - SECTORCACHEGETLRU GOT LOCKED SECTOR\n");
+    }
+    pChosen->mStamp = g_nSectorCacheClock;
+    ++g_nSectorCacheClock;
+    return pChosen;
 }
