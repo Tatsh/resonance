@@ -13,6 +13,12 @@ inline void DeleteStoredMessages(std::vector<Message *> &messages) {
 
 } // namespace
 
+// 0x0054a738
+MsgQueue::MsgQueue() {
+    mTarget = &mFirst;
+    mUnknown38 = 0;
+}
+
 // 0x0054a7a0
 MsgQueue::~MsgQueue() {
     DeleteStoredMessages(mFirst);

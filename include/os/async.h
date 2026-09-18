@@ -47,6 +47,18 @@ void InitAsync();
 void ShutdownAsync();
 
 /**
+ * Run the asynchronous layer until an outstanding operation settles.
+ *
+ * Every caller passes 1, and every call site sits immediately before a synchronous media read, so
+ * the routine is what stops a queued asynchronous read from racing that read. The body returns at
+ * once unless the mode word at 0x006e9150 is 1 or 2, and beyond that it is not reconstructed.
+ *
+ * @param nFlags The one argument, which is 1 at both call sites.
+ * @ghidraAddress 0x00460590
+ */
+void PumpAsyncUntilIdle(int nFlags);
+
+/**
  * Take the next job off the free list.
  *
  * Exhausting the free list is fatal.

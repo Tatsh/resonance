@@ -63,6 +63,42 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
 int UsingCdMedia();
 
 /**
+ * Open a file, whether it resolves to an ark stream or a loose file.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so ArkFile::Open() can
+ * call it.
+ *
+ * @param pszPath The path to open, device prefix included.
+ * @return The handle, or a negative value on failure.
+ * @ghidraAddress 0x0055c400
+ */
+int OpenStreamByPath(const char *pszPath);
+
+/**
+ * Read one chunk of a file into a buffer.
+ *
+ * @param nFile The file to read.
+ * @param nSector The chunk index.
+ * @param pBuffer The destination.
+ * @param nLength The number of bytes to read.
+ * @ghidraAddress 0x0055c498
+ */
+void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength);
+
+/**
+ * Append a component to a device path.
+ *
+ * A backslash is appended first when the component is not empty, and the component is normalised
+ * as it is copied. The argument order is the component before the buffer, which is the image's own
+ * order rather than a transcription slip.
+ *
+ * @param pszComponent The component to append.
+ * @param pszPath The buffer to append to.
+ * @ghidraAddress 0x0047dec0
+ */
+void AppendPathComponent(const char *pszComponent, char *pszPath);
+
+/**
  * Close an open file, whether it is an ark stream or a loose file.
  *
  * The routine belongs to another agent's subsystem and is declared here so ArkFile::Close() can
