@@ -43,8 +43,16 @@ A vtable is an array of 8-byte entries rather than an array of function pointers
 | `+0x4` | `void*` | `pfn`, the function                  |
 
 A virtual call therefore reads `vptr[n].pfn` at `8 * n + 4` and invokes it with
-`this + vptr[n].delta`. Slot 0 is the class's `GetTypeInfo`, slot 1 its destructor (with the
-g++ 2.x `__in_chrg` argument), and user virtuals start at slot 2.
+`this + vptr[n].delta`.
+
+Slot 0 always holds the compiler-generated `GetTypeInfo`. Every slot after it holds one of the
+class's own virtuals **in declaration order**, and the destructor occupies whichever slot its
+declaration earned. The destructor is not fixed at slot 1. `Globals` declares its destructor first,
+so its destructor is slot 1 and its two pure virtuals are slots 2 and 3. `Rnd::Stream` declares ten
+transfer virtuals ahead of its destructor, so its eleven-entry table ends with the destructor at
+slot 10, which the `Rnd::FileStream` table at `0x008261d8` confirms. Read the order off the table
+rather than assuming it, and remember that a destructor in the table takes the g++ 2.x `__in_chrg`
+argument.
 
 A class with no base class stores its vptr **after** its data members rather than at offset 0.
 `Globals` stores its vptr at `+0x1c`. Virtual base subobjects are placed at the end of the most
