@@ -152,6 +152,13 @@ evidence for each promotion belongs in the class documentation.
 - A virtual override takes the access of the base declaration.
 - Order the sections public, then protected, then private.
 
+An inline member is reconstructible only when its body appears at the call sites. The `HxStr`
+destructor qualifies, because `if (mStr != 0) MemFree(mStr)` appears inline at every site that
+destroys a string. A trivial accessor does not qualify: a `Str()` that returns `mStr` and a public
+`mStr` compile to the same single load, so the image cannot distinguish them. Where the two
+readings are indistinguishable, prefer the public member, because it asserts a property while an
+invented accessor adds a function that no address can be attached to.
+
 Whatever stays public is part of the class's documented surface, so every public member takes a
 Doxygen comment. A private member uses a plain `//` comment, because it is internal commentary.
 For a public data member, fold the recovered offset into the trailing member comment so that one
