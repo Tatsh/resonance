@@ -158,7 +158,12 @@ evidence for each promotion belongs in the class documentation.
 - A method is public when a call site outside the class hierarchy exists, protected when only
   derived classes invoke it, and private when only the methods of its own class invoke it.
 - A virtual override takes the access of the base declaration.
-- Order the sections public, then protected, then private.
+- Order the **method** sections public, then protected, then private.
+- **Data members are declared in recovered offset order**, and access specifiers interleave between
+  them as the inference requires. Layout fidelity outranks section tidiness, because reordering two
+  members to group them by access silently changes every offset after the first of them. `FailSink`
+  declares a public handler at `+0x00`, two private members at `+0x04` and `+0x08`, and a public
+  dump level at `+0x0c`, in that order.
 
 An inline member is reconstructible only when its body appears at the call sites. The `HxStr`
 destructor qualifies, because `if (mStr != 0) MemFree(mStr)` appears inline at every site that
@@ -166,6 +171,12 @@ destroys a string. A trivial accessor does not qualify: a `Str()` that returns `
 `mStr` compile to the same single load, so the image cannot distinguish them. Where the two
 readings are indistinguishable, prefer the public member, because it asserts a property while an
 invented accessor adds a function that no address can be attached to.
+
+The dividing line is necessity rather than taste. An inferred member is acceptable when the code
+cannot be expressed without it. `HxStr::Mid()` returns a string by value, so something has to
+construct that return value from the buffer it just allocated, and the private constructor that
+adopts a buffer and a length is therefore structural. An accessor that only wraps a field access is
+not structural, because the reader can name the field.
 
 Whatever stays public is part of the class's documented surface, so every public member takes a
 Doxygen comment. A private member uses a plain `//` comment, because it is internal commentary.
