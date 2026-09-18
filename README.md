@@ -3,9 +3,23 @@
 Reconstructed C++ source for Harmonix's _FreQuency_ (PlayStation 2, `SCUS-97125`, 2001), recovered
 from the shipped ELF by reading its MIPS R5900 disassembly.
 
-The target is the PlayStation 2. Where a subsystem is inherently PS2 hardware (IOP module loading,
-the GS/GIF display path, VU1 microcode), the reconstruction treats the PS2 code as the primary path
-and includes a clearly marked stub for a future PC port behind `FREQ_PLATFORM_PS2`.
+## Platform division
+
+The target is the PlayStation 2. The shipped game was PS2 only, so the original source had no
+platform conditionals whatsoever. Every `#if FREQ_PLATFORM_PS2` is therefore an addition rather
+than a recovery, and one that misstates the original if it appears inside a reconstructed body.
+
+A reconstructed function reproduces the original. It gains no conditional the original did not
+have. Platform divergence belongs at the module boundary instead. The header stays common, a PS2
+implementation file provides the real body, and a port supplies its own file for the same header
+with the build selecting between them. `main` calls `InitIop()` and `LoadIopModules()`
+unconditionally, exactly as the image does, and a port that has no IOP satisfies those two
+declarations with its own file.
+
+Threads, semaphores, files, heaps, and timers are not PS2-specific and must not be restricted. What
+is genuinely PS2-only is IOP module loading, the GS and GIF register path, VU microcode, the EE
+`Count` register, the scratchpad at `0x70000000`, and a `cdrom0:` path. Even for those, prefer a
+separate implementation file over a conditional inside a recovered routine.
 
 ## Facts recovered from the binary
 

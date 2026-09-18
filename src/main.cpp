@@ -8,7 +8,6 @@
 #include "os/hxstr.h"
 #include "os/iop.h"
 #include "os/log.h"
-#include "os/platform.h"
 #include "os/zone.h"
 #include "rnd/asyncloader.h"
 #include "rnd/manager.h"
@@ -71,9 +70,7 @@ int main() {
     LogPrintf("**********************\n");
 
     SetZonesEnabled(1);
-#if FREQ_PLATFORM_PS2
     InitIop();
-#endif
     InitAsync();
 
     g_failSink.SetReportHandler(RecordFailMessage);
@@ -95,9 +92,7 @@ int main() {
     }
 
     InitArk(); // Yes, the binary discards this call's result.
-#if FREQ_PLATFORM_PS2
     LoadIopModules();
-#endif
 
     Application::shared()->Run(); // Yes, the binary discards this call's result.
     return 0;
