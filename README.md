@@ -63,6 +63,28 @@ classes titled `RndMesh`.
 A `dynamic_cast` compiles to a call to the runtime helper at `0x005570e0`, which receives the
 source and target `GetTypeInfo` functions as arguments.
 
+### Compiler-generated code is never written
+
+The reconstruction includes only what a programmer wrote. Everything the compiler synthesised is
+recognised, documented, and then omitted from the source. Modelling an artefact as a Ghidra
+structure field or naming its function in the program is correct and helps the decompiler, but
+none of it belongs in a header or an implementation file.
+
+- The vptr. A class with no base stores it after its data members, and a polymorphic subobject
+  stores one at its own offset. `Rnd::Drawable` stores its vptr at `+0x10`, which its header
+  records in prose rather than as a member.
+- The virtual-base pointer at offset 0 of a subobject that inherits virtually.
+- Vtable slot 0, the `GetTypeInfo` accessor, and the `__in_chrg` argument on a destructor.
+- The four-step virtual dispatch. A vptr load, a signed halfword `delta` read at `8 * n`, a `pfn`
+  read at `8 * n + 4`, and a `this + delta` adjustment together are one source statement, a plain
+  virtual call.
+- A `this` adjustment onto a base subobject. A call that receives `pView + 0x18` is
+  `pView->Draw()`, because `Rnd::View` places its `Rnd::Drawable` subobject at `+0x18`.
+- The static initialisation stub for a global with a constructor, which has the g++ 2.x signature
+  `(int __initialize_p, int __priority)` and tests `__priority == 0xffff`. The source is the global
+  definition and its constructor arguments.
+- `__main`, `__do_global_ctors`, and `crt0.s`.
+
 ### Naming policy
 
 - A class name attested by RTTI is used verbatim, including its namespace.
