@@ -33,11 +33,11 @@ struct AsyncOp {
                     // count
 };
 
-// 0x006e9128
-std::list<AsyncJob *> g_asyncPendingJobs;
+// 0x006e9128. The element is the 48-byte request inline, not a pointer to one.
+std::list<AsyncRequest> g_asyncPendingJobs;
 
 // 0x006e9130
-std::list<AsyncJob *> g_asyncCompletedJobs;
+std::list<AsyncRequest> g_asyncCompletedJobs;
 
 // 0x006e9134
 int g_nAsyncNextJobId;

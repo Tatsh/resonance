@@ -71,7 +71,7 @@ int ArkFile::Open(const char *pszPath) {
         InitSectorCache(kArkSectorCacheRows);
         g_bArkSectorCacheReady = 1;
     }
-    PumpAsyncUntilIdle(1);
+    AsyncCheck(1);
 
     // Every failure below returns without releasing this record, so a failed mount leaks it.
     ArkFile *pArk = new ArkFile;

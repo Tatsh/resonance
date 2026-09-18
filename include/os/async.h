@@ -47,16 +47,73 @@ void InitAsync();
 void ShutdownAsync();
 
 /**
- * Run the asynchronous layer until an outstanding operation settles.
+ * One queued or completed asynchronous request.
  *
- * Every caller passes 1, and every call site sits immediately before a synchronous media read, so
- * the routine is what stops a queued asynchronous read from racing that read. The body returns at
- * once unless the mode word at 0x006e9150 is 1 or 2, and beyond that it is not reconstructed.
+ * The record is 48 bytes and lives inline in the pending and completed lists, so a list node is
+ * the sixteen-byte node header followed by this. Only the fields the poll and cancel paths touch
+ * have been recovered, and the submit path builds the same 48-byte shape before handing it over.
+ */
+struct AsyncRequest {
+    int mId;            /*!< Identifier the poll and cancel paths match on. +0x00 */
+    int mFile;          /*!< The file, closed on cancel when bit 0 of mFlags is set. +0x04 */
+    void *mBuffer;      /*!< Destination, released on cancel when mOwnsBuffer is set. +0x08 */
+    int mUnknown0c;     /*!< Undetermined. +0x0c */
+    int mUnknown10;     /*!< Undetermined. +0x10 */
+    unsigned mFlags;    /*!< Bit 0 makes cancel close mFile. +0x14 */
+    int mUnknown18;     /*!< Undetermined. +0x18 */
+    int mUnknown1c;     /*!< Undetermined. +0x1c */
+    AsyncJob *mJobs;    /*!< Job chain, released whenever the request leaves a list. +0x20 */
+    int mOwnsBuffer;    /*!< Non-zero when cancel must release mBuffer. +0x24 */
+    int mStatus;        /*!< What AsyncPollComplete reports. +0x28 */
+    int mUnknown2c;     /*!< Undetermined. +0x2c */
+};
+
+/**
+ * Advance the operation the media is servicing.
  *
- * @param nFlags The one argument, which is 1 at both call sites.
+ * The name is attested by the routine's own report, `AsyncCheck: unexpected op status: %d`. The
+ * body returns at once unless the operation state at 0x006e9150 is 1 or 2. Otherwise it polls the
+ * media, reports `HEY - 10 SECONDS SINCE ASYNC OP` once the wait passes 10001 ticks, treats a CD
+ * error as fatal through `CD ERROR: %d on sector %d, NOT retrying...`, and on completion advances
+ * the state through AsyncIssueOp. Both call sites, ArkFile::Open and the ark reader, pass 1 and
+ * sit immediately before a synchronous read, which is what stops a queued read from racing it.
+ *
+ * @param nBlocking Non-zero to keep polling until the operation settles.
  * @ghidraAddress 0x00460590
  */
-void PumpAsyncUntilIdle(int nFlags);
+void AsyncCheck(int nBlocking);
+
+/**
+ * Report a finished request and take it off the completed list.
+ *
+ * The request's job chain is released and its node erased. Either output pointer may be null.
+ *
+ * @param nId The request identifier.
+ * @param pnOut1 Receives the request's +0x08 field, or null.
+ * @param pnOut2 Receives the request's +0x14 field, or null.
+ * @return The request's status, or -1 when no completed request has that identifier.
+ * @ghidraAddress 0x0045f658
+ */
+int AsyncPollComplete(int nId, int *pnOut1, int *pnOut2);
+
+/**
+ * Abandon a request wherever it sits.
+ *
+ * Both lists are searched. A matching request has its buffer released when it owns it, its file
+ * closed when bit 0 of its flags is set, its job chain released, and its node erased. async.cpp
+ * lines 481 and 499.
+ *
+ * @param nId The request identifier.
+ * @ghidraAddress 0x0045f738
+ */
+void AsyncCancelRequest(int nId);
+
+/**
+ * Report the queue to the log.
+ *
+ * @ghidraAddress 0x0045faf0
+ */
+void AsyncDump();
 
 /**
  * Take the next job off the free list.

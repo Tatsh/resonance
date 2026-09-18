@@ -8,9 +8,23 @@ namespace Rnd {
  * PlayStation 2 texture, which owns the GS residency of its mip levels.
  *
  * `Q23Rnd5PsTex` in the RTTI descriptor at `0x008efec0`, with `Rnd::Tex` as its one public base at
- * offset 0. The subclass extends the object well past the 0x58 bytes of the base; the recovered
- * accesses reach a vector at `+0x58`, a cached TEX0 register value at `+0x68`, and a GS slot table
- * at `+0x4a8`. The exact layout is not recovered, so no member is declared here.
+ * offset 0. The class factory allocates 0x4b0 bytes against the tag at `0x00831590`, so the
+ * subclass occupies `+0x58` through `+0x4af`.
+ *
+ * The constructor at `0x00596f80` initialises only four of those fields, a vector at `+0x58` whose
+ * elements are 8 bytes, and three words at `+0x4a0`, `+0x4a4`, and `+0x4a8`. Everything between
+ * `+0x64` and `+0x49f` is left indeterminate, which makes that region a fixed array the upload path
+ * fills rather than state the constructor owns. The cached TEX0 register value at `+0x68` that
+ * BindToGsSlot() merges the sampler index into sits inside that region, so the array is a run of
+ * per-mip GS register values. The destructor at `0x0059a558` releases `+0x4a0` through the scalar
+ * path and walks the vector at `+0x58` in 8-byte steps.
+ *
+ * The class registration at `0x0059a888` installs the creator at `0x0059a770` over the texture
+ * creator hook and then initialises a pool of 0x14 entries of 0x30 bytes, which is the GS slot
+ * table the whole texture layer shares rather than per-texture state.
+ *
+ * No member is declared here, because only the four the constructor writes are pinned and a
+ * partial member list would misstate the offsets of everything after the indeterminate region.
  *
  * Binding waits for the asynchronous mip loads to finish. BindToGsSlot() polls PollAsyncMips() and
  * yields until every requested level has arrived, then merges the slot index into the cached TEX0
