@@ -415,6 +415,26 @@ in `ceval.c`, three in `pythonrun.c`, and thirty in `posixmodule.c`, the latter 
 group has a plausible explanation and none is demonstrated, so they stay itemised rather than
 absorbed into a category to make the count reach zero.
 
+The test has a limitation worth stating, because it bears on how much weight it can carry. It
+cannot distinguish a real deletion from a macro that was never defined. A patch removing every
+`WITH_THREAD` block from `ceval.c` would drive that file's count to zero and still be false, since
+the port did not edit `ceval.c` at all. So a passing patch is necessary evidence and not sufficient
+evidence, and a difference that lives in a macro belongs in the undefined-macro list rather than in
+a diff. That is why only `import.c` has a patch.
+
+### Module finding needs no hook
+
+Upstream 2.0 does not use file metadata to find a module. `find_module` walks
+`_PyImport_Filetab`, appends each suffix in turn, and calls `fopen(buf, fdp->mode)`, taking the
+first that opens. `stat` appears in that function for one purpose only, the `S_ISDIR` test that
+recognises a package directory. So a device with no file metadata is already served by the `fopen`
+redirect, which is why the port needed no import hook.
+
+No package directory appears in the shipped scripts. There is no `__init__.py` anywhere in the
+extracted data, so `hx` resolves to the built-in module of that name in `_PyImport_Inittab`, and the
+`gscripts/hx` directory is merely a location on `sys.path` holding the plain modules `hxcons` and
+`hxutl`. The `S_ISDIR` path therefore has nothing in the shipped data to exercise it.
+
 ### Absent literals by file
 
 Inverting the string comparison is what characterises the trim. A literal that upstream has and the

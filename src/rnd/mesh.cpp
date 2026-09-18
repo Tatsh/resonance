@@ -323,15 +323,24 @@ inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
     // Yes, a singular transform produces a zero scale rather than a reported failure.
     const float flScale = flDet != 0.0f ? 1.0f / flDet : 0.0f;
 
-    aflInverse[0][0] = (aflWorld[1][1] * aflWorld[2][2] - aflWorld[2][1] * aflWorld[1][2]) * flScale;
-    aflInverse[0][1] = (aflWorld[2][1] * aflWorld[0][2] - aflWorld[0][1] * aflWorld[2][2]) * flScale;
-    aflInverse[0][2] = (aflWorld[0][1] * aflWorld[1][2] - aflWorld[1][1] * aflWorld[0][2]) * flScale;
-    aflInverse[1][0] = (aflWorld[2][0] * aflWorld[1][2] - aflWorld[1][0] * aflWorld[2][2]) * flScale;
-    aflInverse[1][1] = (aflWorld[0][0] * aflWorld[2][2] - aflWorld[2][0] * aflWorld[0][2]) * flScale;
-    aflInverse[1][2] = (aflWorld[1][0] * aflWorld[0][2] - aflWorld[0][0] * aflWorld[1][2]) * flScale;
-    aflInverse[2][0] = (aflWorld[1][0] * aflWorld[2][1] - aflWorld[2][0] * aflWorld[1][1]) * flScale;
-    aflInverse[2][1] = (aflWorld[2][0] * aflWorld[0][1] - aflWorld[0][0] * aflWorld[2][1]) * flScale;
-    aflInverse[2][2] = (aflWorld[0][0] * aflWorld[1][1] - aflWorld[1][0] * aflWorld[0][1]) * flScale;
+    aflInverse[0][0] =
+        (aflWorld[1][1] * aflWorld[2][2] - aflWorld[2][1] * aflWorld[1][2]) * flScale;
+    aflInverse[0][1] =
+        (aflWorld[2][1] * aflWorld[0][2] - aflWorld[0][1] * aflWorld[2][2]) * flScale;
+    aflInverse[0][2] =
+        (aflWorld[0][1] * aflWorld[1][2] - aflWorld[1][1] * aflWorld[0][2]) * flScale;
+    aflInverse[1][0] =
+        (aflWorld[2][0] * aflWorld[1][2] - aflWorld[1][0] * aflWorld[2][2]) * flScale;
+    aflInverse[1][1] =
+        (aflWorld[0][0] * aflWorld[2][2] - aflWorld[2][0] * aflWorld[0][2]) * flScale;
+    aflInverse[1][2] =
+        (aflWorld[1][0] * aflWorld[0][2] - aflWorld[0][0] * aflWorld[1][2]) * flScale;
+    aflInverse[2][0] =
+        (aflWorld[1][0] * aflWorld[2][1] - aflWorld[2][0] * aflWorld[1][1]) * flScale;
+    aflInverse[2][1] =
+        (aflWorld[2][0] * aflWorld[0][1] - aflWorld[0][0] * aflWorld[2][1]) * flScale;
+    aflInverse[2][2] =
+        (aflWorld[0][0] * aflWorld[1][1] - aflWorld[1][0] * aflWorld[0][1]) * flScale;
 
     // The inverse translation is the negated world translation run through the inverse basis.
     Vector3 negated;
