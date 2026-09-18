@@ -15,3 +15,15 @@ struct Vector3 {
     float z;
     float w; // +0x0c Padding for quadword access, set to 1.0 on construction.
 };
+
+/**
+ * Subtract one three-component vector from another.
+ *
+ * Writes three components and does not touch the fourth word of the destination.
+ *
+ * @param pA The vector subtracted from.
+ * @param pB The vector to subtract.
+ * @param pOut Receives pA less pB, and may alias either input.
+ * @ghidraAddress 0x00317160
+ */
+void Vec3Sub(const float *pA, const float *pB, float *pOut);

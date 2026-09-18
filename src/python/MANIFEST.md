@@ -147,16 +147,24 @@ image is still present after patching. That is the half a naive check misses, si
 function that holds a present literal does not raise the missing count, it merely stops the literal
 being checked.
 
-**The suite exits non-zero, and it should.** Only `import.c` is fully accounted for. Thirty-four
-literals across the other three remain unexplained, so the test reports failure rather than a
-green light, which is the point of having it.
+A fifth heading, **ARTEFACT**, covers a fragment the extractor split across a quote boundary. Such
+a fragment opens with a close paren or a comma, so it was never one literal.
+
+**The suite exits non-zero, and it should.** Three literals remain unexplained out of the 165
+absent, and the test reports that rather than absorbing them, which is the point of having it.
 
 | File | Absent | Account | Verdict |
 | ---- | ------ | ------- | ------- |
 | `Python/import.c` | 10 of 47 | 6 guarded, 2 comment, 2 dropped by the patch | accounted for |
 | `Python/ceval.c` | 10 of 60 | 9 guarded, 1 unexplained | 1 open |
-| `Python/pythonrun.c` | 5 of 36 | 2 guarded, 3 unexplained, 2 being artefacts | 1 open |
-| `Modules/posixmodule.c` | 140 of 143 | 110 guarded, 30 unexplained | 30 open |
+| `Python/pythonrun.c` | 5 of 36 | 2 guarded, 2 artefact, 1 unexplained | 1 open |
+| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained | 1 open |
+
+Every guard was read off the literal's own enclosing block rather than assumed. The confstr,
+sysconf, and pathconf table entries are guarded by an underscore plus the entry name, which is
+tested exactly. The rest sit under autoconf feature macros the console does not satisfy,
+`HAVE_EXECV`, `HAVE_POPEN`, `HAVE_TMPNAM`, `USE_TMPNAM_R`, `HAVE_FPATHCONF`, `HAVE_PATHCONF`,
+`HAVE_STRERROR`, and `PYOS_OS2`.
 
 ### The one patch
 
@@ -183,11 +191,8 @@ unguarded and in no static function.
 two absences, `) == 0 || strcmp(ext,` and `, v = PyString_FromString(`, are not literals at all but
 code fragments the extractor mis-split across a quote boundary.
 
-`posixmodule.c` accounts for thirty of the thirty-four. They are the `popen`, `spawn`,
-`tmpnam`, and `strerror` argument messages, plus the `MIPS_CS_*` entries whose guards the
-constant-family rule does not match. A console with no process model would be expected to drop
-the first group, and the second is the same per-constant guarding as the rest of the table, but
-neither is demonstrated yet, so both stay in this list rather than being assumed.
+`posixmodule.c` lacks `Second argument must be a 2-tuple of numbers.` from `posix_utime`, which
+sits under no guard at all.
 
 ## Compiled-in translation units
 
