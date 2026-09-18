@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "app/message.h"
 #include "app/msgsink.h"
 #include "app/msgsource.h"
+#include "msg/message.h"
 
 /**
  * Relay that stores a copy of every message it accepts and forwards to its own sinks.

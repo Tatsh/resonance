@@ -117,36 +117,65 @@ branch, which is a third independent confirmation of the Windows lineage after `
 
 `hx` and `ucnhash` are registered from outside the table. `hx` is the game's own extension module.
 
-### Four deletions, recorded rather than reconstructed
+### The trim is configuration, not code
 
-Each of these is upstream code removed, not port code added, so the files stay upstream and the
-deletion is recorded here. Every one is a consequence of the platform.
+An earlier reading of this called the trim four deletions of upstream code. That was wrong, and the
+correction matters because it changes how invasive the fork is. Almost every absence is an upstream
+`#ifdef` the port simply does not define, so the file is byte-identical upstream and no patch
+exists to write. The undefined macros are listed with their evidence in
+[PC/config.h](PC/config.h).
 
-**No thread locking, but the thread state remains.** `Python/ceval.c` is missing both
-`PyEval_AcquireThread` reports, both `PyEval_ReleaseThread` reports, and the `ceval: orphan tstate`
-and `ceval: tstate mix-up` checks. `Python/import.c` is missing `unlock_import: not holding the
-import lock`. `threadmodule.c` and `thread.c` are both absent, so there is no global interpreter
-lock in this build.
+`.wiswa-ci/freq/py_verify_patch.py` is the acceptance test and it accounts for every absent literal
+under exactly one of four headings, because a test that only drives a missing count to zero cannot
+work when the source is unmodified:
 
-The single-threaded bookkeeping around it survives untouched. Seven `PyThreadState_Get`,
-`_Delete`, `_Clear`, and `_GetDict` messages are present, and they come from `Python/pystate.c`,
-which the inventory finds at 9 of 9. So `pystate.c` is verbatim upstream rather than trimmed, and
-the accurate statement is that the lock interface is gone while the state object is not.
+- **GUARDED**, behind a macro the port does not define
+- **COMMENT**, quoted text the literal extractor matched inside a comment, so never a literal
+- **DROPPED**, inside a static function that nothing references once a patch applies, so the
+  compiler discards the function and its literals with it
+- **PATCHED**, removed outright by a patch
 
-**No compiled-module writing and no timestamp or case validation.** `import.c` is missing
-`# can't create %s`, `# can't write %s`, `modification time overflows a 4 bytes`,
-`Can't find file for module %.100s`, and `Case mismatch for module name %.100s`. The media is
-read-only and there is nothing to stat.
+It also rejects overcutting, by requiring that every literal the unpatched file had present in the
+image is still present after patching. That is the half a naive check misses, since deleting a
+function that holds a present literal does not raise the missing count, it merely stops the literal
+being checked.
 
-**No dynamic loading.** `import.c` is missing `ss|O!:load_dynamic` and `ss:load_resource`, and every
-`dynload_*.c` is absent.
+Current results, all four files passing:
 
-**No reference-count debugging.** `Python/pythonrun.c` is missing `PYTHONDUMPREFS` and
-`Print left references?`.
+| File | Absent | Account |
+| ---- | ------ | ------- |
+| `Python/import.c` | 10 of 47 | 6 guarded, 2 comment false positives, 2 dropped by the one patch |
+| `Python/ceval.c` | 10 of 60 | 9 guarded, 1 unexplained |
+| `Python/pythonrun.c` | 5 of 36 | 2 guarded, 2 extractor artefacts, 1 unexplained |
+| `Modules/posixmodule.c` | 140 of 143 | mostly per-constant guards, about 30 unexplained |
 
-`Modules/posixmodule.c` is trimmed hardest, matching 3 literals of 143. The three survivors are the
-`confstr`, `sysconf`, and `abort` texts, and whether even those are live code rather than the
-surviving name tables is unresolved.
+### The one patch
+
+[patches/import.c.patch](patches/import.c.patch) removes a single line, the
+`write_compiled_module` call in `load_source_module`. The function is static and that was its only
+call site, so the compiler then discards it along with its two verbose messages, which is exactly
+what the image shows. The port cannot write a compiled module next to a source file on read-only
+media, and this is the smallest edit that produces that.
+
+No other file gets a patch. `ceval.c` needs none. `posixmodule.c` needs none, because its trim is
+configuration. `pythonrun.c` has one unexplained literal and inventing a patch shape around it
+would pass the acceptance test without being evidence, since any cut containing that literal would
+pass equally.
+
+### Still unexplained
+
+Four literals resist all four headings, and they are recorded rather than papered over.
+
+`ceval.c` lacks `standard sequence type does not support step size other than one`, which is
+unguarded and in no static function.
+
+`pythonrun.c` lacks `python: Can't reopen .pyc file` from the compiled-module branch of
+`PyRun_SimpleFileEx`, which is consistent with that branch being cut but not proof of it. Its other
+two absences, `) == 0 || strcmp(ext,` and `, v = PyString_FromString(`, are not literals at all but
+code fragments the extractor mis-split across a quote boundary.
+
+`posixmodule.c` lacks the `popen`, `spawn`, `tmpnam`, and `strerror` argument messages, which is
+what a console with no process model would be expected to drop.
 
 ## Compiled-in translation units
 

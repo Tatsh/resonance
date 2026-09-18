@@ -22,6 +22,27 @@
    it does not: tupleobject.c and unicodeobject.c both appear and both allocate through the object
    interface. */
 
+/* Macros this port does NOT define, which is where most of the trim actually lives. Each one
+   compiles out an upstream block, so the affected files are byte-identical upstream and need no
+   patch. The evidence for each is the absence of its text from the image, cross-checked by
+   .wiswa-ci/freq/py_verify_patch.py.
+
+     WITH_THREAD             the import lock, and ceval's PyEval_AcquireThread and
+                             PyEval_ReleaseThread interface. threadmodule.c and thread.c are both
+                             absent, so there is no global interpreter lock in this build. The
+                             single-threaded PyThreadState bookkeeping in pystate.c is untouched.
+     HAVE_DYNAMIC_LOADING    imp.load_dynamic. Every dynload_*.c is absent.
+     CHECK_IMPORT_CASE       the case-mismatch and find-file checks in import.c.
+     USE_STACKCHECK          ceval's stack-overflow check.
+     CHECKEXC               ceval's undetected-error assertions.
+     Py_TRACE_REFS           PYTHONDUMPREFS and the reference-count dump.
+     macintosh, MS_WIN32     imp.load_resource and the Windows and Macintosh path branches.
+     SIZEOF_TIME_T > 4       the timestamp-overflow check, because time_t is four bytes here.
+
+   posixmodule.c is trimmed the same way rather than by editing. Its confstr, sysconf and pathconf
+   tables guard every entry with that entry's own constant, and the console defines almost none of
+   them, which is why 140 of its 143 literals are absent while the module itself is compiled in. */
+
 #include "os/heap.h"
 
 /* The one interpreter heap, built by Py_Initialize over the whole of the zone titled python. */

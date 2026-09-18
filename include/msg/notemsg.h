@@ -46,7 +46,7 @@ public:
 private:
     unsigned char mUnknown09; // +0x09
     unsigned char mUnknown0a; // +0x0a
-    int mUnknown0c; // +0x0c
+    int mUnknown0c;           // +0x0c
 };
 
 /**

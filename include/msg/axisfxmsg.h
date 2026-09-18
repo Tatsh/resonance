@@ -44,10 +44,10 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
+    int mUnknown04;   // +0x04
     float mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    int mUnknown0c;   // +0x0c
+    int mUnknown10;   // +0x10
 };
 
 /**

@@ -36,7 +36,7 @@ public:
     /**
      * Refresh the display without a full frame.
      *
-     * Vtable slot 5. MainLoop uses this to keep the screen alive during a long operation.
+     * Vtable slot 5. MainLoop uses this to refresh the screen during a long operation.
      *
      * @ghidraAddress 0x0010bfa0
      */

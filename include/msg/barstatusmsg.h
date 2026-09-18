@@ -47,14 +47,14 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14
-    int mUnknown18; // +0x18
+    int mUnknown04;       // +0x04
+    int mUnknown08;       // +0x08
+    int mUnknown0c;       // +0x0c
+    int mUnknown10;       // +0x10
+    int mUnknown14;       // +0x14
+    int mUnknown18;       // +0x18
     long long mUnknown20; // +0x20
-    int mUnknown28; // +0x28
+    int mUnknown28;       // +0x28
 };
 
 /**
