@@ -43,7 +43,17 @@ public:
      */
     FailSink *Format(const char *pszFormat, ...);
 
-    FailAbortProc mAbortProc;   // +0x00
+    /**
+     * Handler that finishes a failure report.
+     *
+     * Public because `main` assigns it directly and the image has no accessor for it, unlike the
+     * report handler.
+     *
+     * +0x00
+     */
+    FailAbortProc mAbortProc;
+
+private:
     FailReportProc mReportProc; // +0x04
 };
 

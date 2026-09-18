@@ -85,6 +85,65 @@ none of it belongs in a header or an implementation file.
   definition and its constructor arguments.
 - `__main`, `__do_global_ctors`, and `crt0.s`.
 
+### Access specifiers are inferred
+
+Access control is resolved at compile time and survives nowhere in the image, so every specifier is
+an inference rather than a recovered fact. These rules produce a consistent result, and the
+evidence for each promotion belongs in the class documentation.
+
+- A plain data record with no behaviour stays a `struct` with public members. `Zone`, `IopModule`,
+  `MemTagTotal`, and `Timer` are records of this kind.
+- A class with behaviour declares its data members private.
+- A data member becomes protected when the code of a derived class reads or writes it.
+- A data member becomes public only when code outside the class and its derived classes reads or
+  writes it directly, and the image has no accessor for it. State that evidence, because a direct
+  field access from foreign code is frequently an inlined accessor rather than a public field.
+  Access from another instance of the same class proves nothing, since private access permits it.
+- A method is public when a call site outside the class hierarchy exists, protected when only
+  derived classes invoke it, and private when only the methods of its own class invoke it.
+- A virtual override takes the access of the base declaration.
+- Order the sections public, then protected, then private.
+
+Whatever stays public is part of the class's documented surface, so every public member takes a
+Doxygen comment. A private member uses a plain `//` comment, because it is internal commentary.
+For a public data member, fold the recovered offset into the trailing member comment so that one
+comment serves both purposes.
+
+```cpp
+class Transformable : public virtual Object {
+public:
+    /**
+     * Report the transformable that positions this one.
+     *
+     * @return The parent transformable, or null when no referrer positions this one.
+     * @ghidraAddress 0x004f0770
+     */
+    Transformable *Parent();
+
+    float mWorldXfm[kXfmRowCount][kXfmRowFloatCount]; /*!< Composed world transform. +0x50 */
+
+private:
+    std::list<Transformable *> mTransList; // +0x04
+    int mUnknown08;                        // +0x08
+};
+```
+
+### Assert text is recovered data
+
+`HX_ASSERT` stringifies its argument with `#expression`, and that text survives in `.rodata`. The
+image stores `mStr != 0` at `0x008211d0`, alongside `HxStr.cpp` and the line number, so the
+argument is written as `mStr != 0` rather than as `mStr != nullptr`. Rewriting it would emit a
+different string constant and break the match against the image. Treat an assert argument as
+recovered data, exactly like a class name.
+
+The house preference for `nullptr` still governs ordinary pointer comparisons, including the
+inline destructor in [include/os/hxstr.h](include/os/hxstr.h). A 2001 g++ 2.9x build had no
+`nullptr` keyword in any case, so the original could only have written `0` or `NULL`, and the
+string constant proves which.
+
+These assert strings are also how the reconstruction recovers line numbers. A file name plus a
+line plus the failed expression pins each check to its original source line.
+
 ### Naming policy
 
 - A class name attested by RTTI is used verbatim, including its namespace.
