@@ -97,8 +97,11 @@ suffix, taking the first that opens, so a device with no file metadata is alread
 not to the loop that does the finding.
 
 `stat` appears in `find_module` for one purpose only, the `S_ISDIR` test that recognises a package
-directory. It must work at least that far on this target, because `grvscript.py` imports `os.path`
-and `hx`, and `hx` is a package under `gscripts/`.
+directory, and nothing in the shipped data exercises it. There is no `__init__.py` anywhere, and
+`hx` is in `_PyImport_Inittab`, so `import hx` resolves to the built-in C module rather than to a
+directory. `gscripts/hx` is only a location on `sys.path` holding two plain modules, `hxcons` and
+`hxutl`. So the port may not need a working `stat` at all, which tightens the account to exactly
+two substitutions, the allocator and the file primitive.
 
 ### Path and configuration, taken from the Windows build
 
@@ -266,6 +269,7 @@ needs the checks noted underneath.
 | `PC/config.c` | | modified, reconstructed here |
 | `PC/config.h` | | modified, allocator hooks reconstructed here |
 | `Lib/os.py` | | modified script, `ps2` branch at line 92 |
+| `Modules/posixmodule.c` | | trimmed to twelve methods and renamed `ps2`, see above |
 
 ### Ratios that need a check before they count
 
@@ -281,14 +285,34 @@ rather than evidence of absence.
 `Python/frozen.c` matches exactly one literal, `__phello__.spam`, which is upstream's own test
 package. The frozen table is unmodified and no library is frozen into the image.
 
-## Outstanding
+### The `ps2` method table
 
-Which functions survive in `ps2`. The literals cannot answer it, but the `PyMethodDef` table that
-`PC/config.c` installs enumerates them by name, which is the bounded way in.
+Twelve of upstream's ninety-four `posix_methods[]` entries survive. The literals could not answer
+this, because a surviving error message does not imply a surviving method, so the evidence is the
+name pool instead: the twelve names sit in one run of 0x58 bytes at file offset `0x745738`, while
+every other occurrence of a candidate name in the image is scattered elsewhere and belongs to libc
+or another module.
+
+`listdir`, `lstat`, `stat`, `getpid`, `open`, `close`, `lseek`, `read`, `write`, `fstat`, `isatty`,
+and `abort`.
+
+That is a read-only file interface plus `getpid` and `abort`, which is what the rest of the port
+predicts: the directory and metadata calls needed to import a module, the descriptor calls under
+`fopen`, and nothing that mutates a filesystem. No `chdir`, no `mkdir`, no `unlink`, no `rename`,
+no process control beyond `abort`. It also explains the third surviving literal, because `abort` is
+a real method here.
+
+The `abort` method accounts for one of the three surviving literals. The other two, `unrecognized
+configuration name` and `configuration names must be strings or integers`, remain unexplained:
+`confstr`, `sysconf`, `fpathconf`, and `pathconf` are all absent from the method table, so the
+messages survive without a caller that can produce them.
+
+## Outstanding
 
 The PyCXX release is deliberately deferred until the core is verified, because its version marker
 is likely a header comment that does not survive compilation.
 
-The four deletions are recorded above rather than reconstructed as files. Each is upstream minus a
-removed path, so a file would mean copying several thousand lines of unmodified upstream to record
-the absence of a handful of functions, which is the same trade this tree declines everywhere else.
+`ceval.c` and `pythonrun.c` get no patch, and the reason is not size. Nine of `ceval.c`'s ten
+absences are macros the port does not define, so a patch would assert an edit that never happened.
+The acceptance test cannot tell the difference, which means it would pass and still be false, so a
+passing patch is necessary evidence rather than sufficient evidence.

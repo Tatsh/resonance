@@ -169,11 +169,14 @@ protected:
      */
     void ReleaseDrawsRefs();
 
+    // Declared in recovered offset order, with the access specifiers interleaved. Protected
+    // because Rnd::Mesh derives from this class and Mesh::Collide tests this flag at its top.
+    int mShowing; // +0x04
+
 private:
     // 0x00506c18. Only Copy() and Load() invoke this.
     void AcquireDrawsRefs();
 
-    int mShowing;                 // +0x04
     int mHighlight;               // +0x08
     std::list<Drawable *> mDraws; // +0x0c
 };

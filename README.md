@@ -409,11 +409,23 @@ or patched, and fails on anything left over. It also checks the reverse directio
 literal present before patching survives, which catches a cut that removes a function holding a
 live literal.
 
-The suite currently exits non-zero with 34 unexplained literals, which is the honest state. One is
-in `ceval.c`, three in `pythonrun.c`, and thirty in `posixmodule.c`, the latter being the `popen`,
-`spawn`, `tmpnam`, and `strerror` argument messages together with the `MIPS_CS_*` entries. Each
-group has a plausible explanation and none is demonstrated, so they stay itemised rather than
-absorbed into a category to make the count reach zero.
+The suite exits non-zero with **three** unexplained literals of 165 absences, which is the honest
+state. Each is named with its function and its guard state rather than absorbed into a category to
+make the count reach zero.
+
+- `ceval.c`, "standard sequence type does not support step size other than one". Unguarded, not in
+  a static function, and absent in every substring form.
+- `pythonrun.c`, "python: Can't reopen .pyc file", in the compiled-module branch of
+  `PyRun_SimpleFileEx`.
+- `posixmodule.c`, "Second argument must be a 2-tuple of numbers." from `posix_utime`, confirmed
+  under no guard at line 1229.
+
+Everything else resolves to an undefined autoconf feature macro, each one read from the literal's
+actual enclosing guard rather than inferred from a name: `HAVE_EXECV`, `HAVE_POPEN`, `HAVE_TMPNAM`
+with `USE_TMPNAM_R`, `HAVE_FPATHCONF` or `HAVE_PATHCONF`, `HAVE_STRERROR`, and `PYOS_OS2`, all
+meaning the platform provides the function and the console does not. The `_SC_*`, `_CS_*`, `_PC_*`,
+and `MIPS_CS_*` table entries resolve on one exact rule, that the guard equals an underscore
+followed by the entry name, which avoids widening a family pattern until it swallows things.
 
 The test has a limitation worth stating, because it bears on how much weight it can carry. It
 cannot distinguish a real deletion from a macro that was never defined. A patch removing every

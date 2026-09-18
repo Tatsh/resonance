@@ -5,6 +5,7 @@
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
+#include "rnd/raytest.h"
 #include "rnd/stream.h"
 #include "rnd/transformable.h"
 
@@ -290,10 +291,10 @@ void NegateVec3(const float *pSrc, float *pDest) {
 
 // The cross product is a VU0 outer-product pair in the image, vopmula followed by vopmsub, rather
 // than a call.
-inline void Vec3Cross(const Vector3 &left, const Vector3 &right, Vector3 &out) {
-    out.x = left.y * right.z - left.z * right.y;
-    out.y = left.z * right.x - left.x * right.z;
-    out.z = left.x * right.y - left.y * right.x;
+inline void Vec3Cross(const float *pLeft, const float *pRight, float *pOut) {
+    pOut[0] = pLeft[1] * pRight[2] - pLeft[2] * pRight[1];
+    pOut[1] = pLeft[2] * pRight[0] - pLeft[0] * pRight[2];
+    pOut[2] = pLeft[0] * pRight[1] - pLeft[1] * pRight[0];
 }
 
 // Also inlined in the image, as the VU0 sequence vmulax, vmadday, vmaddaz, vmaddw.
@@ -303,14 +304,6 @@ inline void TransformPoint(const float aflXfm[kXfmRowCount][kXfmRowFloatCount], 
     pOut[1] = aflXfm[0][1] * pIn[0] + aflXfm[1][1] * pIn[1] + aflXfm[2][1] * pIn[2] + aflXfm[3][1];
     pOut[2] = aflXfm[0][2] * pIn[0] + aflXfm[1][2] * pIn[1] + aflXfm[2][2] * pIn[2] + aflXfm[3][2];
 }
-
-// The block the ray and triangle test receives, four quadwords the caller assembles in place.
-struct TriangleTest {
-    Vector3 mPoint;  // +0x00 The first vertex of the face.
-    Vector3 mEdge1;  // +0x10 Second vertex less the first.
-    Vector3 mEdge2;  // +0x20 Third vertex less the first.
-    Vector3 mNormal; // +0x30 Cross product of the two edges.
-};
 
 // De-inlined from the head of Mesh::Collide, which inverts the owner's world transform by hand
 // rather than through a helper.
@@ -756,14 +749,14 @@ void Mesh::Refresh() {
 
 // 0x0047f950
 void Mesh::Collide(const Ray &ray, HitSink &sink) {
-    if (Drawable::GetShowing() == 0) {
+    if (Drawable::mShowing == 0) {
         return;
     }
 
     // A sphere of zero radius stands for no bound at all and skips straight to the faces.
     if (mSphere.mRadius != 0.0f) {
         Sphere worldSphere;
-        TransformPoint(mTransOwner->GetWorldXfm(), mSphere.mCenter, worldSphere.mCenter);
+        TransformPoint(mTransOwner->mWorldXfm, &mSphere.mCenter.x, &worldSphere.mCenter.x);
         worldSphere.mRadius = mSphere.mRadius;
         float flSphereDistance = 0.0f;
         if (!TestRayAgainstSphere(ray, worldSphere, &flSphereDistance)) {
@@ -774,7 +767,7 @@ void Mesh::Collide(const Ray &ray, HitSink &sink) {
     // The faces are tested in local space, so the ray is brought there rather than every vertex
     // being brought out.
     float aflInverse[kXfmRowCount][kXfmRowFloatCount];
-    InvertXfm(mTransOwner->GetWorldXfm(), aflInverse);
+    InvertXfm(mTransOwner->mWorldXfm, aflInverse);
     Ray localRay;
     TransformPoint(aflInverse, ray.mStart, localRay.mStart);
     TransformPoint(aflInverse, ray.mEnd, localRay.mEnd);
@@ -784,10 +777,14 @@ void Mesh::Collide(const Ray &ray, HitSink &sink) {
     const Mat::CullMode nCull = mMat != nullptr ? mMat->mCull : Mat::kCullModeCw;
     const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
     for (const auto &face : mFacesOwner->mFaces) {
+        // The first vertex moves as a whole quadword, padding word included.
         TriangleTest tri;
-        tri.mPoint = verts[face.mV1].mPoint;
-        Vec3Sub(&verts[face.mV2].mPoint.x, &verts[face.mV1].mPoint.x, &tri.mEdge1.x);
-        Vec3Sub(&verts[face.mV3].mPoint.x, &verts[face.mV1].mPoint.x, &tri.mEdge2.x);
+        tri.mVertex[0] = verts[face.mV1].mPoint.x;
+        tri.mVertex[1] = verts[face.mV1].mPoint.y;
+        tri.mVertex[2] = verts[face.mV1].mPoint.z;
+        tri.mVertex[3] = verts[face.mV1].mPoint.w;
+        Vec3Sub(&verts[face.mV2].mPoint.x, &verts[face.mV1].mPoint.x, tri.mEdge1);
+        Vec3Sub(&verts[face.mV3].mPoint.x, &verts[face.mV1].mPoint.x, tri.mEdge2);
         Vec3Cross(tri.mEdge1, tri.mEdge2, tri.mNormal);
 
         float flDistance = 0.0f;

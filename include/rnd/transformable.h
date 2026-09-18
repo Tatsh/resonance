@@ -96,12 +96,25 @@ protected:
      */
     void AdoptXfmFrom(const Transformable &owner);
 
-    // Declared in recovered offset order, with the access specifiers interleaved. Every member
+    // Declared in recovered offset order, with the access specifiers interleaved. Each member
     // below is protected because Rnd::Mesh reads and writes it directly: Mesh::Replace adopts a
     // departing owner's transform and Mesh::Load reads mBillboard and mOrigin for files below
     // version 3.
     float mLocalXfm[kXfmRowCount][kXfmRowFloatCount]; // +0x10
-    float mWorldXfm[kXfmRowCount][kXfmRowFloatCount]; // +0x50
+
+public:
+    /**
+     * Composed world transform.
+     *
+     * Public rather than protected because `Rnd::Mesh::Collide` reads it through a
+     * `Transformable *` that need not be a mesh, and protected access cannot reach a member
+     * through a pointer to the base type. The image exposes no accessor for it.
+     *
+     * +0x50
+     */
+    float mWorldXfm[kXfmRowCount][kXfmRowFloatCount];
+
+protected:
     float mOrigin[kXfmRowFloatCount];                 // +0x90
     // Set by every writer of a transform field and cleared once UpdateWorldXfm has recomposed.
     int mDirty;     // +0xa0
