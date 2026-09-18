@@ -373,8 +373,21 @@ therefore arrive through the game's own loader rather than frozen into the execu
 the import hook in `Python/import.c` the open question in this area. That file matches 37 of its 47
 literals, and the ten absent ones are the likely site of the edit.
 
-`Modules/posixmodule.c` survives as almost nothing, 3 literals of 143, and the three name
-`posix_confstr`, `posix_sysconf`, and `posix_abort`.
+**The `ps2` module keeps twelve of upstream's ninety-four methods**: `listdir`, `lstat`, `stat`,
+`getpid`, `open`, `close`, `lseek`, `read`, `write`, `fstat`, `isatty`, and `abort`. The evidence is
+the name pool rather than the literals, because names as short as `open` and `read` occur several
+times in the image for unrelated reasons and a presence test cannot separate them. All twelve sit
+in one contiguous run from `0x00745738` to `0x00745796`, while the next largest cluster of
+candidate names spans `0x220` bytes and is noise.
+
+The shape follows the platform: a read-only file interface, the descriptor calls that sit beneath
+`fopen`, and `getpid` with `abort`. There is no `chdir`, `mkdir`, `unlink`, or `rename`, and no
+process control, which is what a console that imports modules and never writes needs.
+
+That also explains one anomaly and creates another. `posix_abort` is a real method, so its literal
+has a caller. The two configuration-name messages do not: `confstr`, `sysconf`, `fpathconf`, and
+`pathconf` are all absent from the table, so those strings survive in the image with nothing able
+to produce them.
 
 ### The trim is configuration, not deleted code
 

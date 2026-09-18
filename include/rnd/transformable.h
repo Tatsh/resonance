@@ -115,7 +115,7 @@ public:
     float mWorldXfm[kXfmRowCount][kXfmRowFloatCount];
 
 protected:
-    float mOrigin[kXfmRowFloatCount];                 // +0x90
+    float mOrigin[kXfmRowFloatCount]; // +0x90
     // Set by every writer of a transform field and cleared once UpdateWorldXfm has recomposed.
     int mDirty;     // +0xa0
     int mBillboard; // +0xa4

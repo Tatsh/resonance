@@ -292,8 +292,8 @@ public:
     CullMode mCull;
 
 protected:
-    int mMultiPass;             // +0x90
-    int mFlat;                  // +0x94 Serialised as one byte.
+    int mMultiPass; // +0x90
+    int mFlat;      // +0x94 Serialised as one byte.
 };
 
 /**

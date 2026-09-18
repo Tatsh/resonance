@@ -298,8 +298,8 @@ inline void Vec3Cross(const float *pLeft, const float *pRight, float *pOut) {
 }
 
 // Also inlined in the image, as the VU0 sequence vmulax, vmadday, vmaddaz, vmaddw.
-inline void TransformPoint(const float aflXfm[kXfmRowCount][kXfmRowFloatCount], const float *pIn,
-                           float *pOut) {
+inline void
+TransformPoint(const float aflXfm[kXfmRowCount][kXfmRowFloatCount], const float *pIn, float *pOut) {
     pOut[0] = aflXfm[0][0] * pIn[0] + aflXfm[1][0] * pIn[1] + aflXfm[2][0] * pIn[2] + aflXfm[3][0];
     pOut[1] = aflXfm[0][1] * pIn[0] + aflXfm[1][1] * pIn[1] + aflXfm[2][1] * pIn[2] + aflXfm[3][1];
     pOut[2] = aflXfm[0][2] * pIn[0] + aflXfm[1][2] * pIn[1] + aflXfm[2][2] * pIn[2] + aflXfm[3][2];
@@ -338,12 +338,12 @@ inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
     // The inverse translation is the negated world translation run through the inverse basis.
     Vector3 negated;
     NegateVec3(&aflWorld[3][0], &negated.x);
-    aflInverse[3][0] = aflInverse[0][0] * negated.x + aflInverse[1][0] * negated.y +
-                       aflInverse[2][0] * negated.z;
-    aflInverse[3][1] = aflInverse[0][1] * negated.x + aflInverse[1][1] * negated.y +
-                       aflInverse[2][1] * negated.z;
-    aflInverse[3][2] = aflInverse[0][2] * negated.x + aflInverse[1][2] * negated.y +
-                       aflInverse[2][2] * negated.z;
+    aflInverse[3][0] =
+        aflInverse[0][0] * negated.x + aflInverse[1][0] * negated.y + aflInverse[2][0] * negated.z;
+    aflInverse[3][1] =
+        aflInverse[0][1] * negated.x + aflInverse[1][1] * negated.y + aflInverse[2][1] * negated.z;
+    aflInverse[3][2] =
+        aflInverse[0][2] * negated.x + aflInverse[1][2] * negated.y + aflInverse[2][2] * negated.z;
 }
 
 // 0x0048c138
