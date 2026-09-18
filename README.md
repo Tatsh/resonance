@@ -85,6 +85,40 @@ none of it belongs in a header or an implementation file.
   definition and its constructor arguments.
 - `__main`, `__do_global_ctors`, and `crt0.s`.
 
+### STL container layout
+
+The STL is the SGI implementation that g++ 2.9x shipped, and its layout differs from a modern
+library in a way that changes every recovered structure.
+
+A `std::list` is **one pointer**, four bytes. The constructor allocates a single dummy node and
+self-links it, so an empty list is a pointer to a 16-byte node whose `next` and `prev` both address
+the node itself. A list member therefore occupies four bytes rather than eight or sixteen.
+`Rnd::Object` proves it: the constructor at `0x0053e0d8` takes a 16-byte node from the pool at
+`0x00667080`, writes it to `this + 0x00`, self-links it, and then constructs the `HxStr` name at
+`this + 0x04`.
+
+A list node is `{ next, prev, value }`, so the value of a node sits at `+0x08`. The pool rounds
+the 12 bytes up to a 16-byte bucket.
+
+Do not assume the size of any other container. Measure `std::map` and `std::vector` members
+against the disassembly rather than against a modern layout.
+
+The STL is toolchain code, so it is not reconstructed, for the same reason the PlayStation 2 SDK
+and the embedded Python are not reconstructed. No replacement container library is written here.
+The layout difference above is a fact to apply while recovering a structure, not code to produce.
+Built with the real SCE toolchain, `<list>` produces the correct layout without help.
+
+Every standard-library type in the image is mangled unqualified, `9bad_alloc`, `9exception`,
+`7fstream`, and `16__user_type_info` among them, and none is mangled `Q23std...`. The build
+therefore did not use `-fhonor-std`, so `namespace std` resolved to the global namespace and both
+`list<T>` and `std::list<T>` named one type with one mangling. Which spelling the original source
+used is not recoverable. The reconstruction writes `std::` for containers by convention, because
+that spelling was legal and layout-identical in this build and also compiles under a modern
+library, which is what makes the headers checkable here. The pre-standard iostreams are written
+unqualified, as `ostream`, because `<iostream.h>` declared them in the global namespace in every
+configuration.
+
+
 ### Access specifiers are inferred
 
 Access control is resolved at compile time and survives nowhere in the image, so every specifier is
