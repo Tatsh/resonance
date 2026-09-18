@@ -11,8 +11,10 @@
  * PollAsyncLoads() and test the individual request with Poll() until it reports completion.
  *
  * The object is 0x2c bytes. The constructor builds three `std::list` members at `+0x00`, `+0x04`,
- * and `+0x08`, whose element types are not recovered; the list at `+0x00` stores the objects the
- * request has produced so far, which is what Poll() counts. Everything from `+0x0c` on is declared
+ * and `+0x08`, each of which takes a 0x10-byte sentinel; that bounds their element at 8 bytes or
+ * less, so all three are lists of pointers rather than of records. The list at `+0x00` stores the
+ * objects the request has produced so far, which is what Poll() counts and what
+ * RndAsyncLoader::HarvestLoadedObjects() walks. Everything from `+0x0c` on is declared
  * below. The three flag titles are inferred from their initial values and from the order Poll()
  * tests them in.
  */

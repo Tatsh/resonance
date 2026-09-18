@@ -1,7 +1,7 @@
 #include "app/scriptsink.h"
 
 #include "app/globals.h"
-#include "app/scriptmsg.h"
+#include "msg/scriptmsg.h"
 #include "script/scripthost.h"
 
 ScriptSink::ScriptSink(Globals *pOwner) : mGlobals(pOwner) {

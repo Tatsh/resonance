@@ -15,8 +15,11 @@ namespace Rnd {
  * `+0x00` and writing that vptr to View + 0x14.
  *
  * Recovery is partial. Two `std::list` members sit at `+0x04` and `+0x08`, and the fields at
- * `+0x0c` and `+0x10` are unrecovered. The title mAnims is inferred from the use Parent() makes of
- * the list rather than attested by a string. The class declares three virtuals of its own beyond
+ * `+0x0c` and `+0x10` are unrecovered. Both lists take a 0x10-byte sentinel, which bounds their
+ * element at 8 bytes or less, so each is a list of pointers rather than of records. The title
+ * mAnims is inferred from the use Parent() makes of the list rather than attested by a string.
+ *
+ * The class declares three virtuals of its own beyond
  * the compiler-generated slot 0, at vtable slots 1 through 3; for `Rnd::View` those are
  * `0x00494b50`, `0x0049a3b8`, and `0x0049a100`. Its overrides of the `Rnd::Object` virtuals are
  * `0x0049a640` (DumpText), `0x0049a6e8` (Save), `0x004951e0` (Replace), `0x00494e70` (Copy), and

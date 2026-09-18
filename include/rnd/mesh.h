@@ -33,10 +33,7 @@ namespace Rnd {
  * and Sync(), and GfxDevice::Init() replaces the creator hook at `0x006eed60` with the PsMesh
  * factory, so every mesh a file loads on the PlayStation 2 is a PsMesh.
  *
- * The following members are recovered but not reconstructed. `Collide()` at `0x0047f950` overrides
- * the first virtual of Rnd::Collideable and tests a ray against the bounding sphere, then against
- * the faces in local space; its second and third arguments are the ray and the hit sink of the
- * collision subsystem. The compiler-generated `GetTypeInfo()` is at `0x00492528`.
+ * The compiler-generated `GetTypeInfo()` is at `0x00492528`.
  */
 class Mesh : public Drawable, public Transformable, public Collideable {
 public:
@@ -185,6 +182,23 @@ public:
      * @ghidraAddress 0x00493c40
      */
     void SetTransOwner(Transformable *pOwner);
+
+    /**
+     * Test a ray against this mesh and append what it strikes to sink.
+     *
+     * Rnd::Collideable vtable slot 1. A bounding sphere with a non-zero radius rejects the ray
+     * first, in world space. The faces are then tested in the local space of mTransOwner, so the
+     * ray is brought there through the inverse of the owner's world transform rather than every
+     * vertex being brought out. Each face of mFacesOwner is tested against the vertices of
+     * mVertsOwner, with the cull mode of the material deciding whether a back-facing hit counts,
+     * and a strike appends this mesh and the distance along the ray. The base implementation runs
+     * last, so the children are tested after this mesh's own faces.
+     *
+     * @param ray The segment to test along.
+     * @param sink The collector to append intersections to.
+     * @ghidraAddress 0x0047f950
+     */
+    virtual void Collide(const Ray &ray, HitSink &sink);
 
 protected:
     // The four overrides below fill Rnd::Drawable vtable slots 4 through 7. The access of those

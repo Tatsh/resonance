@@ -89,9 +89,16 @@ function in `ARK/ROOT/gscripts/hx/hxutl.py` rather than a C symbol.
 The shipped library subset is `codeop`, `code`, `linecache`, `ntpath`, `os`, `stat`, `string`,
 `traceback`, `types`, and `whrandom`. `posixpath.py` is absent, which forces the `ntpath` branch.
 
-What remains open is narrower than the import hook in general: how `find_module` locates a file on
-a device with no `stat`, given that the compiled-module and case-check paths are deleted, and how
-the archive layer serves it.
+`find_module` needs no modification either, and the reason is structural. Upstream 2.0 does not
+stat to find a module. It walks `_PyImport_Filetab` and calls `fopen(buf, fdp->mode)` once per
+suffix, taking the first that opens, so a device with no file metadata is already served by the
+`fopen` redirect and nothing else is required. That is also why the absent
+`Can't find file for module` proves nothing about the search: it belongs to the case-check path,
+not to the loop that does the finding.
+
+`stat` appears in `find_module` for one purpose only, the `S_ISDIR` test that recognises a package
+directory. It must work at least that far on this target, because `grvscript.py` imports `os.path`
+and `hx`, and `hx` is a package under `gscripts/`.
 
 ### Path and configuration, taken from the Windows build
 
@@ -140,14 +147,16 @@ image is still present after patching. That is the half a naive check misses, si
 function that holds a present literal does not raise the missing count, it merely stops the literal
 being checked.
 
-Current results, all four files passing:
+**The suite exits non-zero, and it should.** Only `import.c` is fully accounted for. Thirty-four
+literals across the other three remain unexplained, so the test reports failure rather than a
+green light, which is the point of having it.
 
-| File | Absent | Account |
-| ---- | ------ | ------- |
-| `Python/import.c` | 10 of 47 | 6 guarded, 2 comment false positives, 2 dropped by the one patch |
-| `Python/ceval.c` | 10 of 60 | 9 guarded, 1 unexplained |
-| `Python/pythonrun.c` | 5 of 36 | 2 guarded, 2 extractor artefacts, 1 unexplained |
-| `Modules/posixmodule.c` | 140 of 143 | mostly per-constant guards, about 30 unexplained |
+| File | Absent | Account | Verdict |
+| ---- | ------ | ------- | ------- |
+| `Python/import.c` | 10 of 47 | 6 guarded, 2 comment, 2 dropped by the patch | accounted for |
+| `Python/ceval.c` | 10 of 60 | 9 guarded, 1 unexplained | 1 open |
+| `Python/pythonrun.c` | 5 of 36 | 2 guarded, 3 unexplained, 2 being artefacts | 1 open |
+| `Modules/posixmodule.c` | 140 of 143 | 110 guarded, 30 unexplained | 30 open |
 
 ### The one patch
 
@@ -174,8 +183,11 @@ unguarded and in no static function.
 two absences, `) == 0 || strcmp(ext,` and `, v = PyString_FromString(`, are not literals at all but
 code fragments the extractor mis-split across a quote boundary.
 
-`posixmodule.c` lacks the `popen`, `spawn`, `tmpnam`, and `strerror` argument messages, which is
-what a console with no process model would be expected to drop.
+`posixmodule.c` accounts for thirty of the thirty-four. They are the `popen`, `spawn`,
+`tmpnam`, and `strerror` argument messages, plus the `MIPS_CS_*` entries whose guards the
+constant-family rule does not match. A console with no process model would be expected to drop
+the first group, and the second is the same per-constant guarding as the rest of the table, but
+neither is demonstrated yet, so both stay in this list rather than being assumed.
 
 ## Compiled-in translation units
 
@@ -266,8 +278,8 @@ package. The frozen table is unmodified and no library is frozen into the image.
 
 ## Outstanding
 
-How `find_module` locates a script with no `stat` and no compiled-module path, and how the archive
-layer serves it, is the last genuine fork question in this area.
+Which functions survive in `ps2`. The literals cannot answer it, but the `PyMethodDef` table that
+`PC/config.c` installs enumerates them by name, which is the bounded way in.
 
 The PyCXX release is deliberately deferred until the core is verified, because its version marker
 is likely a header comment that does not survive compilation.

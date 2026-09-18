@@ -281,6 +281,69 @@ Stream &ReadEdgeVector(Stream &stream, std::vector<MeshEdge> &edges) {
     return stream;
 }
 
+// 0x00492458
+void NegateVec3(const float *pSrc, float *pDest) {
+    pDest[0] = -pSrc[0];
+    pDest[1] = -pSrc[1];
+    pDest[2] = -pSrc[2];
+}
+
+// The cross product is a VU0 outer-product pair in the image, vopmula followed by vopmsub, rather
+// than a call.
+inline void Vec3Cross(const Vector3 &left, const Vector3 &right, Vector3 &out) {
+    out.x = left.y * right.z - left.z * right.y;
+    out.y = left.z * right.x - left.x * right.z;
+    out.z = left.x * right.y - left.y * right.x;
+}
+
+// Also inlined in the image, as the VU0 sequence vmulax, vmadday, vmaddaz, vmaddw.
+inline void TransformPoint(const float aflXfm[kXfmRowCount][kXfmRowFloatCount], const float *pIn,
+                           float *pOut) {
+    pOut[0] = aflXfm[0][0] * pIn[0] + aflXfm[1][0] * pIn[1] + aflXfm[2][0] * pIn[2] + aflXfm[3][0];
+    pOut[1] = aflXfm[0][1] * pIn[0] + aflXfm[1][1] * pIn[1] + aflXfm[2][1] * pIn[2] + aflXfm[3][1];
+    pOut[2] = aflXfm[0][2] * pIn[0] + aflXfm[1][2] * pIn[1] + aflXfm[2][2] * pIn[2] + aflXfm[3][2];
+}
+
+// The block the ray and triangle test receives, four quadwords the caller assembles in place.
+struct TriangleTest {
+    Vector3 mPoint;  // +0x00 The first vertex of the face.
+    Vector3 mEdge1;  // +0x10 Second vertex less the first.
+    Vector3 mEdge2;  // +0x20 Third vertex less the first.
+    Vector3 mNormal; // +0x30 Cross product of the two edges.
+};
+
+// De-inlined from the head of Mesh::Collide, which inverts the owner's world transform by hand
+// rather than through a helper.
+inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
+                      float aflInverse[kXfmRowCount][kXfmRowFloatCount]) {
+    const float flDet =
+        aflWorld[0][0] * (aflWorld[1][1] * aflWorld[2][2] - aflWorld[2][1] * aflWorld[1][2]) -
+        aflWorld[0][1] * (aflWorld[1][0] * aflWorld[2][2] - aflWorld[2][0] * aflWorld[1][2]) +
+        aflWorld[0][2] * (aflWorld[1][0] * aflWorld[2][1] - aflWorld[2][0] * aflWorld[1][1]);
+    // Yes, a singular transform produces a zero scale rather than a reported failure.
+    const float flScale = flDet != 0.0f ? 1.0f / flDet : 0.0f;
+
+    aflInverse[0][0] = (aflWorld[1][1] * aflWorld[2][2] - aflWorld[2][1] * aflWorld[1][2]) * flScale;
+    aflInverse[0][1] = (aflWorld[2][1] * aflWorld[0][2] - aflWorld[0][1] * aflWorld[2][2]) * flScale;
+    aflInverse[0][2] = (aflWorld[0][1] * aflWorld[1][2] - aflWorld[1][1] * aflWorld[0][2]) * flScale;
+    aflInverse[1][0] = (aflWorld[2][0] * aflWorld[1][2] - aflWorld[1][0] * aflWorld[2][2]) * flScale;
+    aflInverse[1][1] = (aflWorld[0][0] * aflWorld[2][2] - aflWorld[2][0] * aflWorld[0][2]) * flScale;
+    aflInverse[1][2] = (aflWorld[1][0] * aflWorld[0][2] - aflWorld[0][0] * aflWorld[1][2]) * flScale;
+    aflInverse[2][0] = (aflWorld[1][0] * aflWorld[2][1] - aflWorld[2][0] * aflWorld[1][1]) * flScale;
+    aflInverse[2][1] = (aflWorld[2][0] * aflWorld[0][1] - aflWorld[0][0] * aflWorld[2][1]) * flScale;
+    aflInverse[2][2] = (aflWorld[0][0] * aflWorld[1][1] - aflWorld[1][0] * aflWorld[0][1]) * flScale;
+
+    // The inverse translation is the negated world translation run through the inverse basis.
+    Vector3 negated;
+    NegateVec3(&aflWorld[3][0], &negated.x);
+    aflInverse[3][0] = aflInverse[0][0] * negated.x + aflInverse[1][0] * negated.y +
+                       aflInverse[2][0] * negated.z;
+    aflInverse[3][1] = aflInverse[0][1] * negated.x + aflInverse[1][1] * negated.y +
+                       aflInverse[2][1] * negated.z;
+    aflInverse[3][2] = aflInverse[0][2] * negated.x + aflInverse[1][2] * negated.y +
+                       aflInverse[2][2] * negated.z;
+}
+
 // 0x0048c138
 // Versions 1 through 3 stored a run of vertex indices per record. The renderer no longer uses
 // them, and the loader releases the vector as soon as it has been read.
@@ -680,6 +743,55 @@ void Mesh::Refresh() {
     AddObjectRefs();
     SyncAll();
     Sync();
+}
+
+// 0x0047f950
+void Mesh::Collide(const Ray &ray, HitSink &sink) {
+    if (Drawable::GetShowing() == 0) {
+        return;
+    }
+
+    // A sphere of zero radius stands for no bound at all and skips straight to the faces.
+    if (mSphere.mRadius != 0.0f) {
+        Sphere worldSphere;
+        TransformPoint(mTransOwner->GetWorldXfm(), mSphere.mCenter, worldSphere.mCenter);
+        worldSphere.mRadius = mSphere.mRadius;
+        float flSphereDistance = 0.0f;
+        if (!TestRayAgainstSphere(ray, worldSphere, &flSphereDistance)) {
+            return;
+        }
+    }
+
+    // The faces are tested in local space, so the ray is brought there rather than every vertex
+    // being brought out.
+    float aflInverse[kXfmRowCount][kXfmRowFloatCount];
+    InvertXfm(mTransOwner->GetWorldXfm(), aflInverse);
+    Ray localRay;
+    TransformPoint(aflInverse, ray.mStart, localRay.mStart);
+    TransformPoint(aflInverse, ray.mEnd, localRay.mEnd);
+
+    // Yes, a mesh with no material tests as though the winding were clockwise, because the
+    // binary passes a zero cull mode rather than skipping the facing test.
+    const Mat::CullMode nCull = mMat != nullptr ? mMat->mCull : Mat::kCullModeCw;
+    const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+    for (const auto &face : mFacesOwner->mFaces) {
+        TriangleTest tri;
+        tri.mPoint = verts[face.mV1].mPoint;
+        Vec3Sub(&verts[face.mV2].mPoint.x, &verts[face.mV1].mPoint.x, &tri.mEdge1.x);
+        Vec3Sub(&verts[face.mV3].mPoint.x, &verts[face.mV1].mPoint.x, &tri.mEdge2.x);
+        Vec3Cross(tri.mEdge1, tri.mEdge2, tri.mNormal);
+
+        float flDistance = 0.0f;
+        if (TestRayAgainstTriangle(localRay, tri, nCull, &flDistance)) {
+            Hit hit;
+            hit.mObject = this;
+            hit.mDistance = flDistance;
+            sink.mHits.push_back(hit);
+        }
+    }
+
+    // The children are tested after this mesh's own faces.
+    Collideable::Collide(ray, sink);
 }
 
 // 0x00493a78

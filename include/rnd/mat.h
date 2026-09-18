@@ -284,7 +284,14 @@ protected:
     int mVertEmissive;          // +0x80 Serialised as one byte.
     int mVertAlpha;             // +0x84 Serialised as one byte.
     int mNormalize;             // +0x88 Serialised as one byte.
-    CullMode mCull;             // +0x8c
+
+public:
+    /*!< Winding the rasteriser discards. Public because Rnd::Mesh::Collide() at 0x0047f950 reads
+         it directly to decide whether a back-facing hit counts, which is access from outside the
+         hierarchy, and the image has no accessor for it. +0x8c */
+    CullMode mCull;
+
+protected:
     int mMultiPass;             // +0x90
     int mFlat;                  // +0x94 Serialised as one byte.
 };

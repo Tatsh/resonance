@@ -376,7 +376,46 @@ literals, and the ten absent ones are the likely site of the edit.
 `Modules/posixmodule.c` survives as almost nothing, 3 literals of 143, and the three name
 `posix_confstr`, `posix_sysconf`, and `posix_abort`.
 
-### The fork is four deletions
+### The trim is configuration, not deleted code
+
+An earlier version of this section recorded the trim as four deletions. That was wrong, and the
+correction came from building the acceptance test rather than from more reading.
+
+Almost every literal that upstream has and the image lacks sits inside an `#ifdef` the port does
+not define, so the file is byte-identical upstream and there is nothing to patch. The undefined
+macros are `WITH_THREAD`, which accounts for the import lock, `PyEval_AcquireThread`,
+`PyEval_ReleaseThread`, and nine of `ceval.c`'s ten absent literals; `CHECK_IMPORT_CASE` for the
+case-mismatch and find-file checks; `HAVE_DYNAMIC_LOADING` for `imp.load_dynamic`; `macintosh` for
+`imp.load_resource`; `USE_STACKCHECK` for the stack overflow path; `CHECKEXC` for both undetected
+error paths; `Py_TRACE_REFS` for `PYTHONDUMPREFS` and the reference dump; and `SIZEOF_TIME_T > 4`
+for the timestamp overflow message. Upstream proves the mechanism directly: `import.c` line 144
+opens `#ifdef WITH_THREAD` and lines 190 and 191 define `lock_import` and `unlock_import` away as
+empty macros in the `#else`.
+
+So the fork is far less invasive than deletion would imply. Its home is the undefined-macro list in
+`src/python/PC/config.h`, with the evidence for each.
+
+### The one patch
+
+`src/python/patches/import.c.patch` is a single line: the `write_compiled_module` call in
+`load_source_module`. That function is static and this was its only call site, so the compiler then
+discards the function along with both of its verbose messages, which is what the image shows.
+Read-only media cannot write a compiled module beside its source. No other file needs a patch.
+
+### Acceptance test
+
+`.wiswa-ci/freq/py_verify_patch.py` accounts for every absent literal as guarded, comment, dropped,
+or patched, and fails on anything left over. It also checks the reverse direction, that every
+literal present before patching survives, which catches a cut that removes a function holding a
+live literal.
+
+The suite currently exits non-zero with 34 unexplained literals, which is the honest state. One is
+in `ceval.c`, three in `pythonrun.c`, and thirty in `posixmodule.c`, the latter being the `popen`,
+`spawn`, `tmpnam`, and `strerror` argument messages together with the `MIPS_CS_*` entries. Each
+group has a plausible explanation and none is demonstrated, so they stay itemised rather than
+absorbed into a category to make the count reach zero.
+
+### Absent literals by file
 
 Inverting the string comparison is what characterises the trim. A literal that upstream has and the
 image lacks marks a deleted code path, and the deletions describe the port far better than the
