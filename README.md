@@ -352,6 +352,55 @@ literals, and the ten absent ones are the likely site of the edit.
 `Modules/posixmodule.c` survives as almost nothing, 3 literals of 143, and the three name
 `posix_confstr`, `posix_sysconf`, and `posix_abort`.
 
+### The fork is four deletions
+
+Inverting the string comparison is what characterises the trim. A literal that upstream has and the
+image lacks marks a deleted code path, and the deletions describe the port far better than the
+additions do.
+
+`Python/import.c` is missing ten literals of 47 and they group cleanly. The `.pyc` writing path, the
+timestamp validation, `find_module`'s failure path, the case check, `load_dynamic` and
+`load_resource`, the import lock, and the Windows registry import are all gone. `Python/ceval.c` is
+missing ten of 60, four being the thread-state acquire and release interface, plus the stack
+overflow and undetected error paths. `Python/pythonrun.c` is missing five of 36, including
+`PYTHONDUMPREFS` and the reference-count debug.
+
+So the fork is four deletions rather than a rewrite: no threading, no `.pyc` writing or timestamp
+and case validation, no dynamic loading, and no reference-count debug. Each follows from the
+platform, a read-only disc with no real filesystem and a single thread, and `thread.c`,
+`threadmodule.c`, and every `dynload_*.c` being absent from the inventory agrees. `Python/pystate.c`
+is present, so the single-threaded `PyThreadState` bookkeeping remains while the lock interface
+around it is gone.
+
+### Built-in modules and the ps2 module
+
+`_PyImport_Inittab`'s name pool at `0x00741380` gives the table directly: `errno`, `_sre`,
+`exceptions`, `sys`, `__builtin__`, `__main__`, `imp`, `marshal`, `_codecs`, `pcre`, `cPickle`,
+`cStringIO`, `struct`, `strop`, `signal`, `regex`, `ps2`, `new`, and `array`, with `hx` and
+`ucnhash` registered elsewhere.
+
+`ps2` is the port's name for `Modules/posixmodule.c`. Neither `nt` nor `posix` appears anywhere in
+the image, while `ps2` sits both in that name pool and in posixmodule's own string pool beside
+`O_CREAT`, `O_EXCL`, and `O_TRUNC`. So the module is compiled in and registered under a new name
+rather than reduced to data tables. The shipped `os.py` is modified to match: its platform chain
+gains an `elif 'ps2' in _names:` branch at line 92, which selects `ntpath` for path handling and is
+a third independent confirmation of the Windows lineage.
+
+`hx` is the game's own extension module, exposed through PyCXX.
+
+### The scripts are shipped as source
+
+The game's Python is in the archives as `.py` text, not as bytecode, and no `.pyc` exists anywhere
+in the extracted data. `ARK/ROOT/global/grvscript.py` is the file `RunMasterInitScript` runs; it
+imports `os`, `os.path`, and `hx`, calls `hx.get_freq_root()`, and then executes
+`global/defaults.py`. The host's `traceback_str` is a Python function, defined in
+`ARK/ROOT/gscripts/hx/hxutl.py`, which closes the loop between the C++ host and the script layer.
+
+The shipped standard library subset is `codeop`, `code`, `linecache`, `ntpath`, `os`, `stat`,
+`string`, `traceback`, `types`, and `whrandom`. `posixpath.py` is not shipped, which is what forces
+the `ntpath` branch. These files are data rather than reconstruction targets, but `os.py` carries a
+port modification and so belongs in the difference record.
+
 ### Inventory by allocation tag
 
 Matching string literals misses any file whose literals are all shorter than the threshold:
