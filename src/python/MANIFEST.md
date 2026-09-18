@@ -55,9 +55,9 @@ overriding only the raw macro would leave every object allocation going to `mall
 they do not: `tupleobject.c` and `unicodeobject.c` both appear, and both allocate through the
 object interface.
 
-These six lines stay in this manifest rather than in a file of their own until the configuration
-header that hosts them is confirmed, which the `_PyImport_Inittab` recovery will settle, since the
-module table lives in the same header.
+They are reconstructed in [PC/config.h](PC/config.h). The `_PyImport_Inittab` recovery settled the
+host file: the module table is `PC/config.c`, so the sibling header is where the port's compiler
+settings go.
 
 `Py_Initialize` builds that heap over the whole of the zone titled `python`, which the start-up
 table sizes at 2400 KiB, above the 2 MiB fallback the call passes, so the fallback never applies on
@@ -75,10 +75,23 @@ in mode `r`, and hands the `FILE *` straight to `PyRun_File` with a start symbol
 is reported through the host's error path.
 
 That `fopen` resolves through the game's own FILE layer down to the PlayStation 2 open primitive,
-so a Python source file is read as a loose file through the SDK. It is not read out of an ark
-archive and it is not frozen, which is consistent with three separate findings: the frozen table is
-upstream's stock test-module table, `getpathp.c` computes `sys.path` normally, and the game's
-`LoadWholeFile` has no callers anywhere in the image.
+so a Python source file is read through the SDK rather than through any interpreter-side hook. It
+is not frozen, which three separate findings agree on: the frozen table is upstream's stock
+test-module table, `getpathp.c` computes `sys.path` normally, and the game's `LoadWholeFile` has no
+callers anywhere in the image.
+
+The scripts ship as **`.py` source text** in the archives, with no `.pyc` anywhere, so the
+interpreter compiles every script at run time. `ARK/ROOT/global/grvscript.py` is the file
+`RunMasterInitScript` runs; it imports `os`, `os.path`, and `hx`, calls `hx.get_freq_root()`, and
+executes `global/defaults.py`. The host loop closes back into Python, because `traceback_str` is a
+function in `ARK/ROOT/gscripts/hx/hxutl.py` rather than a C symbol.
+
+The shipped library subset is `codeop`, `code`, `linecache`, `ntpath`, `os`, `stat`, `string`,
+`traceback`, `types`, and `whrandom`. `posixpath.py` is absent, which forces the `ntpath` branch.
+
+What remains open is narrower than the import hook in general: how `find_module` locates a file on
+a device with no `stat`, given that the compiled-module and case-check paths are deleted, and how
+the archive layer serves it.
 
 ### Path and configuration, taken from the Windows build
 
@@ -90,20 +103,35 @@ The tag `PCacceler.c` corroborates the same conclusion from the other direction,
 `PC` tree uses that spelling while upstream has `Parser/acceler.c`. The build therefore drew on
 `PC/` and flattened it.
 
-By the same reasoning the built-in module table is most likely `PC/config.c` with its list edited
-to the modules below, since upstream has no `Modules/config.c` at all, only a `config.c.in` that
-the Unix build generates. Recovering `_PyImport_Inittab` to confirm that is outstanding.
+The built-in module table is `PC/config.c` with its list replaced, which the `_PyImport_Inittab`
+name pool at `0x00741380` confirms rather than infers. Upstream has no `Modules/config.c` at all,
+only a `config.c.in` the Unix build generates, so the PC file is the only candidate. The nineteen
+entries are reconstructed in [PC/config.c](PC/config.c).
+
+**`ps2` is the port's name for `posixmodule.c`.** That settles whether its three surviving literals
+were live code or orphaned tables: they are code. Neither `nt` nor `posix` appears anywhere in the
+image, while `ps2` appears five times, so the module is compiled in and renamed rather than reduced
+to data. The shipped `os.py` agrees, because its platform chain gains an `elif 'ps2' in _names:`
+branch, which is a third independent confirmation of the Windows lineage after `getpathp.c` and
+`PCacceler.c`.
+
+`hx` and `ucnhash` are registered from outside the table. `hx` is the game's own extension module.
 
 ### Four deletions, recorded rather than reconstructed
 
 Each of these is upstream code removed, not port code added, so the files stay upstream and the
 deletion is recorded here. Every one is a consequence of the platform.
 
-**No threads.** `Python/ceval.c` is missing the whole thread-state interface, both
+**No thread locking, but the thread state remains.** `Python/ceval.c` is missing both
 `PyEval_AcquireThread` reports, both `PyEval_ReleaseThread` reports, and the `ceval: orphan tstate`
 and `ceval: tstate mix-up` checks. `Python/import.c` is missing `unlock_import: not holding the
-import lock`. `threadmodule.c` and `thread.c` are both absent. There is no global interpreter lock
-in this build.
+import lock`. `threadmodule.c` and `thread.c` are both absent, so there is no global interpreter
+lock in this build.
+
+The single-threaded bookkeeping around it survives untouched. Seven `PyThreadState_Get`,
+`_Delete`, `_Clear`, and `_GetDict` messages are present, and they come from `Python/pystate.c`,
+which the inventory finds at 9 of 9. So `pystate.c` is verbatim upstream rather than trimmed, and
+the accurate statement is that the lock interface is gone while the state object is not.
 
 **No compiled-module writing and no timestamp or case validation.** `import.c` is missing
 `# can't create %s`, `# can't write %s`, `modification time overflows a 4 bytes`,
@@ -189,7 +217,9 @@ needs the checks noted underneath.
 | `Parser/node.c` | none | yes |
 | `PC/getpathp.c` | | yes |
 | `PC/config.c` | | inferred, see above |
-| configuration header | | modified, allocator hooks recovered above |
+| `PC/config.c` | | modified, reconstructed here |
+| `PC/config.h` | | modified, allocator hooks reconstructed here |
+| `Lib/os.py` | | modified script, `ps2` branch at line 92 |
 
 ### Ratios that need a check before they count
 
@@ -207,6 +237,12 @@ package. The frozen table is unmodified and no library is frozen into the image.
 
 ## Outstanding
 
-Recovering `_PyImport_Inittab` to confirm or refute the `PC/config.c` inference is the next item.
+How `find_module` locates a script with no `stat` and no compiled-module path, and how the archive
+layer serves it, is the last genuine fork question in this area.
+
 The PyCXX release is deliberately deferred until the core is verified, because its version marker
 is likely a header comment that does not survive compilation.
+
+The four deletions are recorded above rather than reconstructed as files. Each is upstream minus a
+removed path, so a file would mean copying several thousand lines of unmodified upstream to record
+the absence of a handful of functions, which is the same trade this tree declines everywhere else.

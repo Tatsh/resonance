@@ -18,7 +18,7 @@
  * overrides, and inherits MsgSink::Handle() with no adjustment at all.
  *
  * Deriving from both mix-ins is the whole design. A message arrives through the MsgSink side,
- * which stores a copy, and reaches its readers through the inherited MsgSource sink list. The
+ * which stores a copy, and arrives at its readers through the inherited MsgSource sink list. The
  * class therefore has no drain member of its own, and none exists in its translation unit.
  * GameManagerImpl demonstrates the arrangement: its constructor builds the embedded queue and then
  * registers itself as a sink of it at `0x00105fec`.
@@ -29,7 +29,7 @@
  *
  * One thing is unresolved. The constructor points mTarget at mFirst, and HandleMessage() appends
  * through mTarget, so the class can switch which vector accepts a message. Nothing recovered ever
- * writes mTarget again, so the second vector is never reached and the reason for the pair stays
+ * writes mTarget again, so the second vector is never used and the reason for the pair stays
  * open. The two trailing words are likewise unrecovered.
  */
 class MsgQueue : public MsgSource, public MsgSink {

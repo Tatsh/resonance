@@ -16,11 +16,23 @@ namespace Rnd {
  * GfxDevice::Init() installs the creator at `0x00606928` over the mesh creator hook, so a mesh
  * loaded from a file is a PsMesh.
  *
- * Recovery is partial. The strip records and the GIF packet building are not reconstructed. The
- * routines recovered so far are the vertex transform and lighting pass at `0x00584040`, the
- * software face and edge paths at `0x00601410` and `0x006017c0`, the VU1 face and edge paths at
- * `0x006019e0` and `0x00601de0`, the strip vector helpers between `0x00604da0` and `0x00606678`,
- * and the two index helpers at `0x00607170` and `0x00607198`.
+ * Sync() rebuilds the cache on whichever mesh owns the faces rather than on this one. It reads
+ * mFacesOwner and works through that mesh's two words at `+0x150` and `+0x154`, iterating to the
+ * owner's edge vector end at `+0x104`, so a mesh that shares its geometry also shares the strips
+ * built from it. The cache is a bit array allocated in 16-byte groups, one group per eight
+ * halfwords of index. Sync() makes no contact with the VU1 microcode; it emits no VIF code and
+ * calls no microprogram, so the geometry half of the draw path is recoverable from the MIPS text
+ * alone.
+ *
+ * Recovery is partial. Sync() at `0x00600590` is 793 instructions of mostly inlined container
+ * work and is not reconstructed yet, and neither is the GIF packet building. The other routines
+ * are the vertex transform and lighting pass at `0x00584040`, the software face and edge paths at
+ * `0x00601410` and `0x006017c0`, and the VU1 face and edge paths at `0x006019e0` and `0x00601de0`.
+ *
+ * The seven routines between `0x00604da0` and `0x00606678` are `std::vector` and `std::list`
+ * instantiations over the strip record and over `unsigned short`, and the two at `0x00607170` and
+ * `0x00607198` are `std::fill_n` and `std::find` over `unsigned short`. All nine are toolchain
+ * code, so none of them is reconstructed here.
  */
 class PsMesh : public Mesh {
 public:
