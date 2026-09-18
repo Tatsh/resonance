@@ -261,6 +261,72 @@ The game allocates through an instrumented allocator that records the caller's f
 such as `Rnd::Manager` and pool titles such as `stl_list` therefore appear as string literals
 throughout `.rodata`. Blocks live in one of twelve named zones (`zone.cpp`).
 
+## Embedded Python
+
+The game embeds a trimmed fork of **CPython 2.0**, the BeOpen release, and it is reconstructed
+under `src/python/`. Five independent markers fix the version.
+
+- The copyright banner at `0x007b25e0` is `getcopyright.c` from 2.0 verbatim, with the BeOpen,
+  CNRI, and Stichting parts and no Python Software Foundation line. 1.6 has only the CNRI part, and
+  2.0.1 onward add the foundation line.
+- `Objects/unicodeobject.c`, `ucnhash`, and `UnicodeError` are present. 1.5.2 has no Unicode at all.
+- The `\N{...}` named escape, whose failure text is `Unicode name missing closing brace`, arrived in
+  2.0.
+- The image stores the bare version string `2.0`, the build date `Oct 12 2001`, and the compiler
+  banner `[GCC 2.95.2 v2]`, which `Py_GetCompiler()` produces. That date matches the shipped ELF.
+- The release archive for 2.0 is titled `BeOpen-Python-2.0.tar.gz`, matching the banner.
+
+### Differential reconstruction
+
+The core is upstream, so it is not re-derived from the disassembly. The method is to take the
+upstream file, verify it against the image, and record only what the port changed. Matching every
+string literal of each upstream `.c` file against the image identifies which translation units are
+compiled in, and several match completely: `Modules/cPickle.c` at 72 literals of 72,
+`Objects/abstract.c` at 60 of 60, `Modules/cStringIO.c` at 40 of 40, `Modules/arraymodule.c` at 34
+of 34, `Modules/stropmodule.c` at 20 of 20, and `Modules/structmodule.c` at 19 of 19. A file whose
+literals all appear is near-verbatim upstream and needs verification rather than recovery.
+
+Around 55 upstream translation units are compiled in, and 73 are absent. The absent set is the
+optional and platform modules, `_cursesmodule.c`, `bsddbmodule.c`, `dbmmodule.c`, `dlmodule.c`,
+`audioop.c`, `binascii.c`, `cdmodule.c`, `clmodule.c`, `cmathmodule.c`, and the rest. Both regular
+expression engines survive, the old `regexmodule.c` with `regexpr.c` and `pcremodule.c` with
+`pypcre.c`, alongside the newer `_sre.c`. `Modules/posixmodule.c` is compiled in but heavily
+trimmed, matching 3 literals of 143.
+
+A low match ratio needs checking before it counts. `_tkinter.c`, `almodule.c`, and `mmapmodule.c`
+each matched one literal, and in every case the text is shared with another file that is genuinely
+present, so all three are absent.
+
+### Three layers, three homes
+
+The embedded interpreter is three separate bodies of code and they do not share a directory.
+
+Upstream CPython 2.0, verbatim or nearly so, goes under `src/python/` mirroring the upstream
+layout. A file whose literals all match upstream is verified against the image rather than
+recovered from it, and any difference found is recorded in that file.
+
+The C++ binding layer is **PyCXX**, a third-party wrapper, and it goes under `3rdparty/`. The RTTI
+proves the whole library is linked in, 29 descriptors in namespace `Py`: `Object`, `Int`, `Float`,
+`Char`, `String`, `Tuple`, `List`, `Dict`, `Callable`, `Type`, `Module`, `MethodTable`,
+`PythonType`, `PythonExtensionBase`, `ExtensionModuleBase`, `FromAPI`, the `SeqBase` and `MapBase`
+templates, and an exception hierarchy of `Exception`, `StandardError`, `AttributeError`,
+`LookupError`, `KeyError`, `NameError`, `RuntimeError`, and `TypeError`. `Py::PythonExtensionBase`
+derives from `_object`, which is how a C++ class becomes a Python object.
+
+The game's own script host is Harmonix code and belongs with the rest of the game rather than under
+`src/python/`. `RunMasterInitScript` at `0x00508e0c` runs `Global/GrvScript.py`, and the host
+reports failures as `python error: `, `no python exception found`, and
+`while initializing PyShell`, while fetching `traceback_str` from the interpreter for the detail.
+
+### Port differences found so far
+
+The allocator is replaced. `Py_Initialize` selects the zone titled `python`, takes the whole zone
+in one `ZoneAlloc`, and builds a `Heap` over it with first-fit and fatal-when-full, so interpreter
+allocation runs through the game's own allocator rather than through `malloc`. The zone is 2400 KiB
+in the start-up table, which exceeds the 2 MiB fallback `Py_Initialize` passes, so the fallback
+never applies on the shipped configuration. Exhaustion reports `Python heap is out of memory!` and
+stops the machine.
+
 ## Start-up
 
 `entry` (`0x00458688`) is Sony's stock `crt0.s` and is not reconstructed. It clears `.bss`, calls
