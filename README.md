@@ -320,12 +320,46 @@ reports failures as `python error: `, `no python exception found`, and
 
 ### Port differences found so far
 
-The allocator is replaced. `Py_Initialize` selects the zone titled `python`, takes the whole zone
-in one `ZoneAlloc`, and builds a `Heap` over it with first-fit and fatal-when-full, so interpreter
-allocation runs through the game's own allocator rather than through `malloc`. The zone is 2400 KiB
-in the start-up table, which exceeds the 2 MiB fallback `Py_Initialize` passes, so the fallback
+**The allocator replacement is one header, not a new file.** `Objects/obmalloc.c` does not exist in
+2.0; it arrived in 2.1. In 2.0 `PyMem_MALLOC` and its siblings are macros in `Include/mymalloc.h`
+that expand to `malloc`, and the fork edits those macros to call the game's `Heap` instead. The
+evidence is at the call sites: of the 150 callers of `Heap::Alloc`, 106 are in the interpreter's
+address range, and each passes the `g_pPythonHeap` at `0x00723998` as the receiver **together with
+`__FILE__` and `__LINE__`**, which upstream's macros do not take. That makes it the most invasive
+change in the port, because it touches every translation unit, while living in a single header.
+
+`Py_Initialize` builds that heap by selecting the zone titled `python`, taking the whole zone in one
+`ZoneAlloc`, and constructing a `Heap` over it with first-fit and fatal-when-full. The zone is
+2400 KiB in the start-up table, above the 2 MiB fallback `Py_Initialize` passes, so the fallback
 never applies on the shipped configuration. Exhaustion reports `Python heap is out of memory!` and
 stops the machine.
+
+**The port reused the Windows build, not the Unix one.** `Modules/getpath.c` is absent and
+`getpathp.c` is present, and upstream keeps the latter at `PC/getpathp.c`. A console has no Unix
+filesystem layout, and the Windows path module is the one already written not to assume one.
+`PCacceler.c` corroborates the same choice, since upstream keeps that file at `Parser/acceler.c`
+and only the `PC/` tree uses the prefixed spelling, so the build drew on `PC/` and flattened it.
+`Modules/config.c` does not exist upstream at all, only a `config.c.in` that the Unix build
+generates, while `PC/config.c` is a static built-in module table, so the table is very likely that
+file with its module list cut to the set actually compiled in.
+
+**There is no frozen standard library.** `Python/frozen.c` is unmodified: the image stores exactly
+upstream's stock `__hello__`, `__phello__`, and `__phello__.spam` and nothing else. The scripts
+therefore arrive through the game's own loader rather than frozen into the executable, which makes
+the import hook in `Python/import.c` the open question in this area. That file matches 37 of its 47
+literals, and the ten absent ones are the likely site of the edit.
+
+`Modules/posixmodule.c` survives as almost nothing, 3 literals of 143, and the three name
+`posix_confstr`, `posix_sysconf`, and `posix_abort`.
+
+### Inventory by allocation tag
+
+Matching string literals misses any file whose literals are all shorter than the threshold:
+`Objects/sliceobject.c` and `Parser/node.c` are provably compiled in yet appear in neither the
+present nor the absent list. For a file that allocates, the allocator tag is the better evidence,
+because the edited macros pass `__FILE__`. The image stores 45 such tags, and two of them,
+`cutscene.c` and `libscf.c`, are game files rather than interpreter files, so the tag list needs
+that filter before it is used as an inventory.
 
 ## Start-up
 
