@@ -156,11 +156,13 @@ public:
      *
      * @param pBlock The payload to resize.
      * @param nSize The new payload size in bytes.
+     * @param pszFile The requesting file, which the shipped body ignores.
+     * @param nLine The requesting line, which the shipped body ignores.
      * @return The payload, which differs from pBlock only when the block moved, or null when the
      *         move could not allocate.
      * @ghidraAddress 0x005519d0
      */
-    void *Realloc(void *pBlock, unsigned nSize);
+    void *Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine);
 
     /**
      * Shorten the whole heap.

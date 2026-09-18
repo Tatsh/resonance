@@ -79,3 +79,18 @@ AsyncJob *AsyncGetFreeJobChain();
  * @ghidraAddress 0x00460dd8
  */
 void AsyncReleaseJobChain(AsyncJob *pChain);
+
+/**
+ * Collect a finished read by handle.
+ *
+ * Walks the completed list for the job whose identifier matches, reports its result and status
+ * through whichever out-parameters are supplied, then releases the job chain and unlinks it. Both
+ * out-parameters are optional and a null one is skipped.
+ *
+ * @param nHandle The identifier the submit returned.
+ * @param ppResult Receives the job's result, or null to discard it.
+ * @param pnStatus Receives the job's status, or null to discard it.
+ * @return Non-zero when a matching job was collected.
+ * @ghidraAddress 0x0045f658
+ */
+int AsyncPollComplete(int nHandle, void **ppResult, int *pnStatus);

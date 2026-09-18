@@ -20,11 +20,33 @@ namespace Rnd {
  * hardware residency belongs to the PlayStation 2 subclass Rnd::PsTex, whose GS slot state extends
  * the object past `+0x4a8`.
  *
+ * The vtable has sixteen entries, so the class declares eight virtuals of its own beyond the six
+ * of Rnd::Object. Slots 8 through 12 at `0x004e73c8`, `0x004e75a0`, `0x004e75f8`, `0x004e7600`,
+ * and `0x004e7608` are small routines that are not yet identified.
+ *
  * Recovery is partial. The three configuration words the loader passes to SetBitmapConfig() are
  * not yet identified, so they are recorded by offset.
+ *
+ * Two routines that look like members are not. `0x004e4bd8` and `0x004e7b70` both take the address
+ * of the mBitmapPath member rather than the texture, and `0x004e4d88`, which both of them finish
+ * with, takes the same string and lowercases a copy of it. They belong to the art library that
+ * owns the bitmap file rather than to this class, which is also where
+ * `C:/FREQ/src/rndartt/abitmap.h` and the `ABmpFile` descriptor point. SetBitmapConfig() reaches
+ * them to install the path, choosing `0x004e7b70` for a verbatim path and `0x004e4bd8` to prefix
+ * the texture directory stored at `0x007033b8`.
  */
 class Tex : public Object {
 public:
+    /**
+     * Construct a texture with no bitmap.
+     *
+     * The mip selector starts at -0x80 and the GS handle at -1, which stands for no residency.
+     *
+     * @param name The object name, passed to the Rnd::Object constructor.
+     * @ghidraAddress 0x004e3dc8
+     */
+    Tex(const HxStr &name);
+
     /**
      * Report whether every requested mip level has finished loading.
      *
@@ -56,27 +78,14 @@ public:
                          int nUnknown28);
 
     /**
-     * Release every loaded bitmap and drop the GS associations.
+     * Advance the asynchronous mip loads and report whether any level is still outstanding.
      *
-     * A level whose handle is set while the GS handle is absent trips the assert at line 0x262 of
-     * `rndtex.cpp`.
+     * Each pending level is polled once. A level that has arrived is stored, reported through
+     * OnMipLoaded(), and cleared from the pending mask. A level that failed is reported through the
+     * failure sink and also cleared, which stops a caller spinning on a read that will never
+     * finish. OnAllMipsLoaded() runs once the mask empties.
      *
-     * @ghidraAddress 0x004e7aa8
-     */
-    void FreeLoadedBitmaps();
-
-    /**
-     * Forget the current bitmap path.
-     *
-     * @param path The path to store, normally empty.
-     * @ghidraAddress 0x004e7b70
-     */
-    void ClearBitmap(const HxStr &path);
-
-    /**
-     * Advance the asynchronous mip loads and report whether they have all arrived.
-     *
-     * @return True once no level is outstanding.
+     * @return True once no level is outstanding, including after a failure.
      * @ghidraAddress 0x004e4410
      */
     bool PollAsyncMips();
@@ -89,27 +98,58 @@ public:
     void AllocateBitmapFromStream();
 
     /**
-     * Begin loading the bitmap at a path.
+     * Cancel whatever mip reads are still outstanding.
      *
-     * @param path The bitmap path.
-     * @ghidraAddress 0x004e4bd8
+     * @ghidraAddress 0x004e4648
      */
-    void LoadBitmapFromPath(const HxStr &path);
+    void CancelPendingMips();
+
+    /**
+     * Release every loaded bitmap and cancel the outstanding reads.
+     *
+     * Vtable slot 13. A bitmap already resident in GS memory belongs to its slot, so only a copy
+     * that never arrived there is released, and the release is billed to `rndtex.cpp` line 610.
+     *
+     * @ghidraAddress 0x004e7aa8
+     */
+    virtual void FreeLoadedBitmaps();
+
+protected:
+    /**
+     * Take delivery of one mip level whose read has just finished.
+     *
+     * Vtable slot 15. Empty in Rnd::Tex. Rnd::PsTex uploads the level to GS memory here. The name
+     * is inferred from the position of the call inside PollAsyncMips().
+     *
+     * @ghidraAddress 0x004e5928
+     */
+    virtual void OnMipLoaded();
+
+    /**
+     * Take delivery of the last outstanding mip level.
+     *
+     * Vtable slot 14. Empty in Rnd::Tex, and the point at which Rnd::PsTex knows the whole texture
+     * is resident. The name is inferred as above.
+     *
+     * @ghidraAddress 0x004e4598
+     */
+    virtual void OnAllMipsLoaded();
 
 protected:
     // Every member is protected rather than private, because Rnd::PsTex reads the mip handles, the
     // pending mask, and the bitmap path while it uploads to GS memory. No access from outside the
     // hierarchy is recovered. The order below is the recovered offset order.
-    int mUnknown1c;                  // +0x1c
-    int mUnknown20;                  // +0x20
-    int mUnknown24;                  // +0x24
-    int mUnknown28;                  // +0x28
-    std::vector<int> mMipHandles;    // +0x2c
-    unsigned char mPendingMipMask;   // +0x38 One bit per mip level still loading.
-    int mMipSelect;                  // +0x3c Starts at -0x80.
-    HxStr mBitmapPath;               // +0x40
-    int mGsHandle;                   // +0x48 Starts at -1, which stands for no residency.
-    std::vector<int> mLoadedBitmaps; // +0x4c
+    int mUnknown1c;                // +0x1c
+    int mUnknown20;                // +0x20
+    int mUnknown24;                // +0x24
+    int mUnknown28;                // +0x28
+    std::vector<int> mMipHandles;  // +0x2c
+    unsigned char mPendingMipMask; // +0x38 One bit per mip level still loading.
+    int mMipSelect;                // +0x3c Starts at -0x80.
+    HxStr mBitmapPath;             // +0x40
+    int mGsHandle;                 // +0x48 Starts at -1, which stands for no residency.
+    // The element is a bitmap block the art library allocated, opaque to this class.
+    std::vector<void *> mLoadedBitmaps; // +0x4c
 };
 
 /**

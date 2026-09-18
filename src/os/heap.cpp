@@ -283,7 +283,7 @@ void Heap::Free(void *pBlock, const char *pszFile, int nLine) {
     AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
 }
 
-void *Heap::Realloc(void *pBlock, unsigned nSize) {
+void *Heap::Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine) {
     unsigned nStart = ReadCycleCount();
     ++mCallsRealloc;
 
