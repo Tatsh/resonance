@@ -24,6 +24,28 @@ namespace Rnd {
  * calls no microprogram, so the geometry half of the draw path is recoverable from the MIPS text
  * alone.
  *
+ * The VU1 paths upload geometry rather than register state. Both walk the 16-bit index list,
+ * scaling each index by 0x40 to reach an Rnd::MeshVert, and copy the vertex into an UNPACK V4-32
+ * batch whose VIFcode header they reserve ahead of the data and patch once the count is known. The
+ * face path closes and reopens that batch every 252 quadwords. Each index list travels separately
+ * in its packed form, UNPACK V3-16 for faces and V2-16 for edges, to VU address 0. Edges enter the
+ * microprogram through MSCAL 0x1c2, always, and MSCNT continues an already-running program.
+ *
+ * How much of a vertex reaches VU1 depends on g_nStageTextureBound at `0x0076d668`, which
+ * RndMat::BindStageTexture sets to 1 when a stage has a texture and 0 when it does not. With a
+ * texture, DrawFacesVU1 uploads all four quadwords per vertex under STCYCL 1:1 and calls
+ * microprogram address 0; without one it uploads three under STCYCL 4:3, leaving every fourth
+ * destination quadword untouched, and calls 0x4ce. The write cycle keeps the destination stride at
+ * four either way, so the fourth quadword of Rnd::MeshVert is the texture coordinate and the
+ * untextured path simply omits it.
+ *
+ * Neither path builds a GIFtag. The microprogram cannot hold one: the whole `.vutext` section is
+ * 1140 instruction pairs carrying exactly three literals, and all three are 255.0f, the vertex
+ * colour scale. Nor can it assemble one integer-side, because a VU integer register is 16 bits and
+ * a tag's PRIM field starts at bit 47. The primitive type therefore arrives in the parameter
+ * quadwords the EE unpacks to VU addresses 8 and 9 for edges and 0x12 for faces, and where those
+ * get their contents is not yet established.
+ *
  * Recovery is partial. Sync() at `0x00600590` is 793 instructions of mostly inlined container
  * work and is not reconstructed yet, and neither is the GIF packet building. The other routines
  * are the vertex transform and lighting pass at `0x00584040`, the software face and edge paths at
