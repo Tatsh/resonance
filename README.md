@@ -119,8 +119,10 @@ the node itself. A list member therefore occupies four bytes rather than eight o
 `0x00667080`, writes it to `this + 0x00`, self-links it, and then constructs the `HxStr` name at
 `this + 0x04`.
 
-A list node is `{ next, prev, value }`, so the value of a node sits at `+0x08`. The pool rounds
-the 12 bytes up to a 16-byte bucket.
+A list node is `{ next, prev, value }`, so the value of a node sits at `+0x08`. A node of a list
+of pointers is allocated as 16 bytes, which is the 12 bytes of the node rounded up to the pool's
+bucket. Node size follows the element type rather than a fixed bucket, so measure it: the
+`Watchdog` list allocates 0x18 bytes per node, which puts a 16-byte value at `+0x08`.
 
 Do not assume the size of any other container. Measure `std::map` and `std::vector` members
 against the disassembly rather than against a modern layout.

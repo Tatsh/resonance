@@ -46,15 +46,15 @@ void ShowLoadingScreen() {
     RndAsyncLoader loader(HxStr("loading/"), HxStr("loading.rnd"), -1);
     loader.Enqueue();
 
-    Rnd::Object *pLoaded = nullptr;
-    while (loader.Poll(&pLoaded) == 0) {
+    float flProgress = 0.0f;
+    while (loader.Poll(&flProgress) == 0) {
         ++g_nLoadingDots;
         LogPrintf(".%s", (g_nLoadingDots & (kLoadingDotsPerLine - 1)) == 0 ? "\n" : "");
         RndAsyncLoader::PollAsyncLoads();
     }
 
-    // The loaded object is discarded; the screen is found by name instead. The binary really does
-    // dispatch this through the runtime cast helper.
+    // The progress the poll reports is discarded; the screen is resolved by name instead. The
+    // binary really does dispatch this through the runtime cast helper.
     Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("view")));
     g_gfxDevice.BeginFrame();
     pView->Draw();
