@@ -272,6 +272,17 @@ public:
     HxStr &Replace(unsigned pos, unsigned len, const HxStr &other);
 
     /**
+     * Empty the string in place.
+     *
+     * This is a distinct routine rather than Truncate(0). It tolerates an empty string, where
+     * Truncate() would assert, and it asserts nothing itself. The buffer is retained.
+     *
+     * @return This string.
+     * @ghidraAddress 0x004b89f0
+     */
+    HxStr &Clear();
+
+    /**
      * Shorten the string in place.
      *
      * The buffer is not reallocated, so the excess capacity survives until the next assignment.

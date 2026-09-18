@@ -5,8 +5,20 @@
 /**
  * The FreQuency application.
  *
- * `11Application` in the RTTI descriptor at `0x008f0870`, deriving from `Globals`. A single
- * instance is constructed by a static initialiser before `main` runs and is vended by shared().
+ * `11Application` in the RTTI descriptor at `0x008f0870`, deriving from Globals. Its vtable is at
+ * `0x007dcf68` and it adds no data members, so the constructor is the base constructor alone and
+ * the compiler inlined it into the static initialiser at `0x00198c58` that creates the instance
+ * before main() runs.
+ *
+ * The instance has file-scope linkage. Its only three references in the image all sit in this
+ * translation unit, at `0x00198c7c` and `0x00198c9c` in the static initialiser and at
+ * `0x00198db0` in shared(). Nothing outside the unit refers to it, and shared() exists so that
+ * nothing has to.
+ *
+ * The two overrides are the whole of the Globals interface. Their titles come from the two
+ * exception templates the script layer registers,
+ * `An exception was thrown by the function Application::Run().` and
+ * `An exception was thrown by the function Application::ExitInstance().`
  */
 class Application : public Globals {
 public:
@@ -16,10 +28,11 @@ public:
     virtual ~Application();
 
     /**
-     * Run the game until it exits.
+     * Bring the game up and run it until the frame loop stops.
      *
-     * Brings up the script host and the main loop, then drives the main loop through its own
-     * virtual entry point.
+     * The routine registers the script call templates, creates the script module, creates every
+     * service through Globals::Init(), runs `autoexec()`, loads the memory-card save icon, starts
+     * the game manager, and then hands control to the frame loop.
      *
      * @return Always 1.
      * @ghidraAddress 0x00198d20
@@ -27,15 +40,17 @@ public:
     virtual int Run();
 
     /**
-     * Overridden with an empty body.
+     * Tear the game down as it exits.
      *
+     * The override has no effect. Nothing in the image invokes it.
+     *
+     * @return Always zero.
      * @ghidraAddress 0x00198da0
      */
-    virtual void Reset();
+    virtual int ExitInstance();
 
     /**
-     * The single application instance.
-     *
+     * @return The single application instance.
      * @ghidraAddress 0x00198da8
      */
     static Application *shared();

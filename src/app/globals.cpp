@@ -1,0 +1,80 @@
+#include "app/globals.h"
+
+char g_abLogBuffer[kLogBufferSize];
+
+// 0x00118c40
+Globals::Globals() {
+    mGameManager = nullptr;
+    mMainLoop = nullptr;
+    mWatchdog = nullptr;
+    mWatchdogTimer = nullptr;
+    mLog = nullptr;
+    // Yes, the binary clears neither mSynth nor mScriptSink here.
+}
+
+// 0x00118c68
+Globals::~Globals() {
+}
+
+// 0x001170d0
+void Globals::Init() {
+    mWatchdog = new Watchdog;
+    mWatchdogTimer = new WatchdogTimer(mWatchdog);
+    mWatchdogTimer->SetOrigin(0);
+    mScriptSink = new ScriptSink(this);
+    mGameManager = new GameManagerImpl;
+    mMainLoop = new MainLoop(mWatchdog, mGameManager);
+    mLog = new OBStream(g_abLogBuffer, kLogBufferSize);
+    CreateSynth();
+}
+
+// 0x00117270
+void Globals::Shutdown() {
+    if (mWatchdog != nullptr) {
+        mWatchdog->Snapshot();
+    }
+    delete mSynth;
+    mSynth = nullptr;
+    delete mMainLoop;
+    mMainLoop = nullptr;
+    delete mGameManager;
+    mGameManager = nullptr;
+    delete mScriptSink;
+    mScriptSink = nullptr;
+    delete mWatchdogTimer;
+    mWatchdogTimer = nullptr;
+    delete mWatchdog;
+    mWatchdog = nullptr;
+    delete mLog;
+    mLog = nullptr;
+}
+
+// 0x00118c98
+void Globals::CreateSynth() {
+    mSynth = CreatePs2HardSynth();
+}
+
+// 0x00118cc8
+void Globals::RunMainLoop() {
+    mMainLoop->Run();
+}
+
+// 0x00118eb8
+GameManagerImpl *Globals::GetGameManager() {
+    return mGameManager;
+}
+
+// 0x00118ec0
+Ps2HardSynth *Globals::GetSynth() {
+    return mSynth;
+}
+
+// 0x00118eb0
+Watchdog *Globals::GetWatchdog() {
+    return mWatchdog;
+}
+
+// 0x00118e70
+WatchdogTimer *Globals::GetWatchdogTimer() {
+    return mWatchdogTimer;
+}
