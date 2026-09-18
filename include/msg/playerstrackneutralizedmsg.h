@@ -51,6 +51,10 @@ public:
 /**
  * Identity that PlayersTrackNeutralizedMsg::Type() reports.
  *
+ * This word belongs to PlayersTrackNeutralizedMsg because PlayersTrackNeutralizedMsg::Type() at
+ * `0x003e0618` returns it. Several handlers elsewhere read the same word to compare against it,
+ * which is the expected shape for a registered identity and does not make the word theirs.
+ *
  * @ghidraAddress 0x006d0324
  */
 extern int g_nPlayersTrackNeutralizedMsgType;

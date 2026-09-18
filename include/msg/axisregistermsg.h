@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -44,14 +44,18 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04;   // +0x04
+    int mUnknown04; // +0x04
     float mUnknown08; // +0x08
-    int mUnknown0c;   // +0x0c
-    int mUnknown10;   // +0x10
+    int mUnknown0c; // +0x0c
+    int mUnknown10; // +0x10
 };
 
 /**
  * Identity that AxisRegisterMsg::Type() reports.
+ *
+ * This word belongs to AxisRegisterMsg because AxisRegisterMsg::Type() at `0x003dab50` returns
+ * it. Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d014c
  */

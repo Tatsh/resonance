@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -46,6 +46,10 @@ private:
 
 /**
  * Identity that StreakOverMsg::Type() reports.
+ *
+ * This word belongs to StreakOverMsg because StreakOverMsg::Type() at `0x003dbd40` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d01ac
  */

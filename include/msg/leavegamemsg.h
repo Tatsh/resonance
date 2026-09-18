@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -43,6 +43,10 @@ public:
 
 /**
  * Identity that LeaveGameMsg::Type() reports.
+ *
+ * This word belongs to LeaveGameMsg because LeaveGameMsg::Type() at `0x003e0fb8` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d035c
  */

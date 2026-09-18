@@ -8,7 +8,7 @@ Message *NoteMsg::Clone() {
 
 // 0x003dc280
 int NoteMsg::Type() {
-    return g_dwMsgIdAddLightDir;
+    return g_dwNoteMsgType;
 }
 
 // 0x003dc290

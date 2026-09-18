@@ -51,6 +51,10 @@ private:
 /**
  * Identity that NeutralizeMsg::Type() reports.
  *
+ * This word belongs to NeutralizeMsg because NeutralizeMsg::Type() at `0x003e0418` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
+ *
  * @ghidraAddress 0x006d031c
  */
 extern int g_nNeutralizeMsgType;

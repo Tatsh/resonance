@@ -50,6 +50,10 @@ private:
 /**
  * Identity that BumpMsg::Type() reports.
  *
+ * This word belongs to BumpMsg because BumpMsg::Type() at `0x003e1440` returns it. Several
+ * handlers elsewhere read the same word to compare against it, which is the expected shape for a
+ * registered identity and does not make the word theirs.
+ *
  * @ghidraAddress 0x006d0374
  */
 extern int g_nBumpMsgType;

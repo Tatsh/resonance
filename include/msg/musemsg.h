@@ -24,6 +24,6 @@
  */
 class MuseMsg : public Message {
 protected:
-    int mUnknown04;           // +0x04
+    int mUnknown04; // +0x04
     unsigned char mUnknown08; // +0x08
 };

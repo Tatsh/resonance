@@ -50,6 +50,10 @@ private:
 /**
  * Identity that CrippleMsg::Type() reports.
  *
+ * This word belongs to CrippleMsg because CrippleMsg::Type() at `0x003e27f8` returns it. Several
+ * handlers elsewhere read the same word to compare against it, which is the expected shape for a
+ * registered identity and does not make the word theirs.
+ *
  * @ghidraAddress 0x006d03d4
  */
 extern int g_nCrippleMsgType;

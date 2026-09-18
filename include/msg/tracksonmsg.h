@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -30,7 +30,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_dwMsgIdSongSelect.
+     * @return g_dwTracksOnMsgType.
      * @ghidraAddress 0x003de960
      */
     virtual int Type();
@@ -51,11 +51,10 @@ private:
 /**
  * Identity that TracksOnMsg::Type() reports.
  *
- * This word was already titled `g_dwMsgIdSongSelect` in the program by another subsystem, and the
- * reconstruction follows that name rather than imposing its own. The two disagree:
- * TracksOnMsg::Type() is the only routine that reads the word, so the existing title describes a
- * handler that compares against it rather than the class that reports it, and it is likely wrong.
+ * This word belongs to TracksOnMsg because TracksOnMsg::Type() at `0x003de960` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d0294
  */
-extern unsigned int g_dwMsgIdSongSelect;
+extern unsigned int g_dwTracksOnMsgType;

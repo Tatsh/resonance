@@ -8,7 +8,7 @@ Message *SustainNoteMsg::Clone() {
 
 // 0x003dc7d8
 int SustainNoteMsg::Type() {
-    return g_dwMsgIdMidiMsgAlt;
+    return g_dwSustainNoteMsgType;
 }
 
 // 0x003dc7e8

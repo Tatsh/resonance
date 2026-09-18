@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -30,7 +30,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_dwMsgIdSectionChange.
+     * @return g_dwTrackSelectMsgType.
      * @ghidraAddress 0x003dc990
      */
     virtual int Type();
@@ -53,12 +53,10 @@ private:
 /**
  * Identity that TrackSelectMsg::Type() reports.
  *
- * This word was already titled `g_dwMsgIdSectionChange` in the program by another subsystem, and
- * the reconstruction follows that name rather than imposing its own. The two disagree:
- * TrackSelectMsg::Type() is the only routine that reads the word, so the existing title describes
- * a handler that compares against it rather than the class that reports it, and it is likely
- * wrong.
+ * This word belongs to TrackSelectMsg because TrackSelectMsg::Type() at `0x003dc990` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d01ec
  */
-extern unsigned int g_dwMsgIdSectionChange;
+extern unsigned int g_dwTrackSelectMsgType;

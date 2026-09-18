@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -47,18 +47,22 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04;       // +0x04
-    int mUnknown08;       // +0x08
-    int mUnknown0c;       // +0x0c
-    int mUnknown10;       // +0x10
-    int mUnknown14;       // +0x14
-    int mUnknown18;       // +0x18
+    int mUnknown04; // +0x04
+    int mUnknown08; // +0x08
+    int mUnknown0c; // +0x0c
+    int mUnknown10; // +0x10
+    int mUnknown14; // +0x14
+    int mUnknown18; // +0x18
     long long mUnknown20; // +0x20
-    int mUnknown28;       // +0x28
+    int mUnknown28; // +0x28
 };
 
 /**
  * Identity that BarStatusMsg::Type() reports.
+ *
+ * This word belongs to BarStatusMsg because BarStatusMsg::Type() at `0x003df050` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d02b4
  */

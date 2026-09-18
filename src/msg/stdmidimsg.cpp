@@ -8,7 +8,7 @@ Message *StdMidiMsg::Clone() {
 
 // 0x003dc010
 int StdMidiMsg::Type() {
-    return g_dwMsgIdMidiMsg;
+    return g_dwStdMidiMsgType;
 }
 
 // 0x003dc020

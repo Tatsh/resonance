@@ -29,10 +29,12 @@ namespace Rnd {
  * are the vertex transform and lighting pass at `0x00584040`, the software face and edge paths at
  * `0x00601410` and `0x006017c0`, and the VU1 face and edge paths at `0x006019e0` and `0x00601de0`.
  *
- * The seven routines between `0x00604da0` and `0x00606678` are `std::vector` and `std::list`
- * instantiations over the strip record and over `unsigned short`, and the two at `0x00607170` and
- * `0x00607198` are `std::fill_n` and `std::find` over `unsigned short`. All nine are toolchain
- * code, so none of them is reconstructed here.
+ * The routines between `0x00604da0` and `0x00606678`, along with `0x00607170` and `0x00607198`,
+ * are `std::vector`, `std::list`, `std::fill_n`, and `std::find` instantiations over
+ * `unsigned short` and over the cache record. All of them are toolchain code, so none is
+ * reconstructed here. Two of them, `0x00604da0` and `0x00605340`, operate on a different 20-byte
+ * record altogether, a word, a word, an HxStr, and a word, which Sync() never touches; the earlier
+ * names attributing them to a strip record were wrong.
  */
 class PsMesh : public Mesh {
 public:

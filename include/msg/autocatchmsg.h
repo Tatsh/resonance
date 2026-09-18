@@ -51,6 +51,10 @@ private:
 /**
  * Identity that AutoCatchMsg::Type() reports.
  *
+ * This word belongs to AutoCatchMsg because AutoCatchMsg::Type() at `0x003e25f0` returns it.
+ * Several handlers elsewhere read the same word to compare against it, which is the expected
+ * shape for a registered identity and does not make the word theirs.
+ *
  * @ghidraAddress 0x006d03cc
  */
 extern int g_nAutoCatchMsgType;

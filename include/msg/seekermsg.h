@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/message.h"
+#include "msg/message.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -54,6 +54,10 @@ private:
 
 /**
  * Identity that SeekerMsg::Type() reports.
+ *
+ * This word belongs to SeekerMsg because SeekerMsg::Type() at `0x003dcd50` returns it. Several
+ * handlers elsewhere read the same word to compare against it, which is the expected shape for a
+ * registered identity and does not make the word theirs.
  *
  * @ghidraAddress 0x006d01fc
  */
