@@ -320,13 +320,37 @@ reports failures as `python error: `, `no python exception found`, and
 
 ### Port differences found so far
 
-**The allocator replacement is one header, not a new file.** `Objects/obmalloc.c` does not exist in
-2.0; it arrived in 2.1. In 2.0 `PyMem_MALLOC` and its siblings are macros in `Include/mymalloc.h`
-that expand to `malloc`, and the fork edits those macros to call the game's `Heap` instead. The
-evidence is at the call sites: of the 150 callers of `Heap::Alloc`, 106 are in the interpreter's
-address range, and each passes the `g_pPythonHeap` at `0x00723998` as the receiver **together with
-`__FILE__` and `__LINE__`**, which upstream's macros do not take. That makes it the most invasive
-change in the port, because it touches every translation unit, while living in a single header.
+**The allocator is replaced through upstream's own hook, and no upstream header is edited.**
+`Objects/obmalloc.c` does not exist in 2.0; it arrived in 2.1. In 2.0 the allocator is a set of
+macros in `Include/pymem.h` and `Include/objimpl.h`, each guarded by `#ifndef`, and `pymem.h`
+documents that guard as the supported way to plug in a different allocator. The port defines
+`PyCore_MALLOC` and its siblings in its own configuration header, so both upstream headers are
+unmodified.
+
+The object variants have to be overridden as well as the raw ones. `objimpl.h` defaults
+`PyCore_OBJECT_MALLOC_FUNC` to `PyCore_MALLOC_FUNC` rather than to the `PyCore_MALLOC` macro, so
+overriding only the raw macro would leave every object allocation calling `malloc`. The tags prove
+both are overridden, since `tupleobject.c` and `unicodeobject.c` appear among them and both
+allocate through the object interface.
+
+The evidence at the call sites is that of the 150 callers of `Heap::Alloc`, 106 are in the
+interpreter's address range, and each passes the `g_pPythonHeap` at `0x00723998` as the receiver
+**together with `__FILE__` and `__LINE__`**, which upstream's macros do not take.
+
+**There is no import hook.** The port keeps upstream's stdio import machinery and redirects the
+file primitive underneath it, which is why nothing in `import.c` needed replacing.
+`RunMasterInitScript` at `0x00508de8` composes an empty prefix with `Global/GrvScript.py`, opens it
+with `fopen` in mode `r`, and hands the `FILE *` to `PyRun_File` at `0x0054eef0` with a start symbol
+of 257, which is `Py_file_input`. Underneath, `fopen` reaches the SDK's `open` through
+`0x00551750`, `0x00551670`, and `0x005da840`. So a script is read as a loose file through the SDK,
+neither out of an archive nor frozen.
+
+Three findings agree. The frozen table is upstream's stock test-module table, `getpathp.c` computes
+`sys.path` in the ordinary way, and `LoadWholeFile` has no callers anywhere in the image, which is
+what one would expect when the interpreter uses stdio and nothing needs a whole-file loader.
+
+The whole port is therefore two substitutions, the allocator macros and the file primitive, plus
+four deletions. The interpreter itself is left alone.
 
 `Py_Initialize` builds that heap by selecting the zone titled `python`, taking the whole zone in one
 `ZoneAlloc`, and constructing a `Heap` over it with first-fit and fatal-when-full. The zone is

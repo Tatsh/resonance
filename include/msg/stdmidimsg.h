@@ -33,7 +33,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nStdMidiMsgType.
+     * @return g_dwMsgIdMidiMsg.
      * @ghidraAddress 0x003dc010
      */
     virtual int Type();
@@ -54,6 +54,11 @@ private:
 /**
  * Identity that StdMidiMsg::Type() reports.
  *
+ * This word was already titled `g_dwMsgIdMidiMsg` in the program by another subsystem, and the
+ * reconstruction follows that name rather than imposing its own. The two disagree:
+ * StdMidiMsg::Type() is the only routine that reads the word, so the existing title describes a
+ * handler that compares against it rather than the class that reports it, and it is likely wrong.
+ *
  * @ghidraAddress 0x006d01c4
  */
-extern int g_nStdMidiMsgType;
+extern unsigned int g_dwMsgIdMidiMsg;

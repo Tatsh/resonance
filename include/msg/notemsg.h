@@ -30,7 +30,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nNoteMsgType.
+     * @return g_dwMsgIdAddLightDir.
      * @ghidraAddress 0x003dc280
      */
     virtual int Type();
@@ -52,6 +52,11 @@ private:
 /**
  * Identity that NoteMsg::Type() reports.
  *
+ * This word was already titled `g_dwMsgIdAddLightDir` in the program by another subsystem, and
+ * the reconstruction follows that name rather than imposing its own. The two disagree:
+ * NoteMsg::Type() is the only routine that reads the word, so the existing title describes a
+ * handler that compares against it rather than the class that reports it, and it is likely wrong.
+ *
  * @ghidraAddress 0x006d01cc
  */
-extern int g_nNoteMsgType;
+extern unsigned int g_dwMsgIdAddLightDir;

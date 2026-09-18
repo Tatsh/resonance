@@ -8,7 +8,7 @@ Message *TrackSelectMsg::Clone() {
 
 // 0x003dc990
 int TrackSelectMsg::Type() {
-    return g_nTrackSelectMsgType;
+    return g_dwMsgIdSectionChange;
 }
 
 // 0x003dc9a0

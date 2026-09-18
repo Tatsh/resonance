@@ -30,7 +30,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nTracksOnMsgType.
+     * @return g_dwMsgIdSongSelect.
      * @ghidraAddress 0x003de960
      */
     virtual int Type();
@@ -51,6 +51,11 @@ private:
 /**
  * Identity that TracksOnMsg::Type() reports.
  *
+ * This word was already titled `g_dwMsgIdSongSelect` in the program by another subsystem, and the
+ * reconstruction follows that name rather than imposing its own. The two disagree:
+ * TracksOnMsg::Type() is the only routine that reads the word, so the existing title describes a
+ * handler that compares against it rather than the class that reports it, and it is likely wrong.
+ *
  * @ghidraAddress 0x006d0294
  */
-extern int g_nTracksOnMsgType;
+extern unsigned int g_dwMsgIdSongSelect;

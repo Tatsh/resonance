@@ -30,7 +30,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nTrackSelectMsgType.
+     * @return g_dwMsgIdSectionChange.
      * @ghidraAddress 0x003dc990
      */
     virtual int Type();
@@ -53,6 +53,12 @@ private:
 /**
  * Identity that TrackSelectMsg::Type() reports.
  *
+ * This word was already titled `g_dwMsgIdSectionChange` in the program by another subsystem, and
+ * the reconstruction follows that name rather than imposing its own. The two disagree:
+ * TrackSelectMsg::Type() is the only routine that reads the word, so the existing title describes
+ * a handler that compares against it rather than the class that reports it, and it is likely
+ * wrong.
+ *
  * @ghidraAddress 0x006d01ec
  */
-extern int g_nTrackSelectMsgType;
+extern unsigned int g_dwMsgIdSectionChange;

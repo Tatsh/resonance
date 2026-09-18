@@ -34,7 +34,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nSustainNoteMsgType.
+     * @return g_dwMsgIdMidiMsgAlt.
      * @ghidraAddress 0x003dc7d8
      */
     virtual int Type();
@@ -51,6 +51,12 @@ public:
 /**
  * Identity that SustainNoteMsg::Type() reports.
  *
+ * This word was already titled `g_dwMsgIdMidiMsgAlt` in the program by another subsystem, and the
+ * reconstruction follows that name rather than imposing its own. The two disagree:
+ * SustainNoteMsg::Type() is the only routine that reads the word, so the existing title describes
+ * a handler that compares against it rather than the class that reports it, and it is likely
+ * wrong.
+ *
  * @ghidraAddress 0x006d01e4
  */
-extern int g_nSustainNoteMsgType;
+extern unsigned int g_dwMsgIdMidiMsgAlt;

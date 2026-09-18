@@ -8,7 +8,7 @@ Message *TracksOnMsg::Clone() {
 
 // 0x003de960
 int TracksOnMsg::Type() {
-    return g_nTracksOnMsgType;
+    return g_dwMsgIdSongSelect;
 }
 
 // 0x003de970
