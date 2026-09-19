@@ -43,19 +43,24 @@ void SynthCommand(int nCommand);
  * Submit one command to the sound driver.
  *
  * Every routine in the module funnels through this, twenty call sites in all, each passing a
- * selector word and either a command block or nothing. The selector is a bit field: the routine
- * tests bits 0x8000 and 0x1000 of it, spins on a semaphore, and then hands the block on. Observed
- * selectors are 0xd0 from SynthCommand() and from the tail of DumpSynthVoices(), 0x1070 and 0x1050
- * from the bank loader, 0x10e0 from ConfigureSpu2Effects(), and 0x8130 from `0x004642c8`.
+ * selector word and either a command block or nothing. Observed selectors are 0xd0 from
+ * SynthCommand() and from the tail of DumpSynthVoices(), 0x1070 and 0x1050 from a bank transfer,
+ * 0x10e0 from ConfigureSpu2Effects(), and 0x8130 from `0x004642c8`.
+ *
+ * Two bits of the selector steer the send. Bit 0x1000 ships a whole 0x80-byte SoundDriverCommand
+ * from the caller's block; without it the block pointer travels as the single word of a 0x10-byte
+ * request, which is what makes a null block valid. Bit 0x8000 skips the busy flag and sends a
+ * different mode. On entry the routine spins until the previous request has been collected.
  *
  * The title comes from what the twenty call sites have in common rather than from any one of them.
- * The block's shape varies by selector, so it is opaque here; a null block is valid.
  *
  * @param nSelector The command selector.
  * @param pCommand The command block, or null.
+ * @return The first word of the reply buffer at `0x008e5b80`. Every call site in the module
+ *         discards it.
  * @ghidraAddress 0x005f96c8
  */
-void SubmitSoundDriverRequest(int nSelector, void *pCommand);
+int SubmitSoundDriverRequest(int nSelector, void *pCommand);
 
 /**
  * Move a buffer from main memory into the sound driver's memory on the IOP.
@@ -81,8 +86,11 @@ constexpr int kSoundDriverCommandPayloadSize = 0x6c;
  * together rather than from either alone. The chunk block writes mStagingAddress and clears
  * mBankAddress; the bank block writes mBankAddress and never touches mStagingAddress. All three of
  * mLength, mDest and mTag sit at the same offset in both, and both have a payload at `+0x14`, which
- * is what identifies the header as shared. The payload is 0x6c bytes because the chunk path clears
- * exactly that much, putting the block at 0x80 in total.
+ * is what identifies the header as shared.
+ *
+ * The 0x80-byte total is the consumer's figure rather than the writers'. SubmitSoundDriverRequest()
+ * sends exactly 0x80 bytes from the caller's block for a selector with bit 0x1000 set, which both
+ * bank selectors have. The chunk path clearing 0x6c bytes above the header agrees with it.
  */
 struct SoundDriverCommand {
     int mBankAddress;    // +0x00 where the bank lives on the IOP; the chunk path clears it

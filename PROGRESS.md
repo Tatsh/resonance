@@ -50,7 +50,7 @@ A header is checked on its own, through a translation unit that includes nothing
 a break in a header which no implementation file happens to include.
 
 ```shell
-g++ -fsyntax-only -D_EE -I include -I ../.wiswa-ci/freq/compat -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include -I ../ps2sdk/ee/rpc/sdr/include -I ../ps2sdk/ee/rpc/sif/include <file>
+g++ -fsyntax-only -D_EE -I include -I ../.wiswa-ci/freq/compat -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include -I ../ps2sdk/ee/rpc/sdr/include <file>
 ```
 
 The PlayStation 2 SDK is available and every SDK call is checked against its real declaration. The
