@@ -156,12 +156,12 @@ a fragment opens with a close paren or a comma, so it was never one literal.
 **The suite exits non-zero, and it should.** Three literals remain unexplained out of the 165
 absent, and the test reports that rather than absorbing them, which is the point of having it.
 
-| File | Absent | Account | Verdict |
-| ---- | ------ | ------- | ------- |
-| `Python/import.c` | 10 of 47 | 6 guarded, 2 comment, 2 dropped by the patch | accounted for |
-| `Python/ceval.c` | 10 of 60 | 9 guarded, 1 unexplained | 1 open |
-| `Python/pythonrun.c` | 5 of 36 | 2 guarded, 2 artefact, 1 unexplained | 1 open |
-| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained | 1 open |
+| File                    | Absent     | Account                                      | Verdict       |
+| ----------------------- | ---------- | -------------------------------------------- | ------------- |
+| `Python/import.c`       | 10 of 47   | 6 guarded, 2 comment, 2 dropped by the patch | accounted for |
+| `Python/ceval.c`        | 10 of 60   | 9 guarded, 1 unexplained                     | 1 open        |
+| `Python/pythonrun.c`    | 5 of 36    | 2 guarded, 2 artefact, 1 unexplained         | 1 open        |
+| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained                   | 1 open        |
 
 Every guard was read off the literal's own enclosing block rather than assumed. The confstr,
 sysconf, and pathconf table entries are guarded by an underscore plus the entry name, which is
@@ -202,74 +202,74 @@ sits under no guard at all.
 64 upstream units, by evidence. A tag is proof. A literal ratio is corroboration, and a low ratio
 needs the checks noted underneath.
 
-| Unit | Literals | Tag |
-| ---- | -------- | --- |
-| `Modules/cPickle.c` | 72/72 | yes |
-| `Objects/unicodeobject.c` | 66/70 | yes |
-| `Objects/abstract.c` | 60/60 | |
-| `Python/ceval.c` | 50/60 | yes |
-| `Python/compile.c` | 47/54 | yes |
-| `Python/exceptions.c` | 47/49 | yes |
-| `Modules/_codecsmodule.c` | 40/42 | |
-| `Modules/cStringIO.c` | 40/40 | yes |
-| `Modules/errnomodule.c` | 40/181 | |
-| `Python/getargs.c` | 39/42 | yes |
-| `Python/import.c` | 37/47 | yes |
-| `Objects/stringobject.c` | 35/36 | yes |
-| `Python/bltinmodule.c` | 35/42 | yes |
-| `Modules/arraymodule.c` | 34/34 | yes |
-| `Objects/classobject.c` | 32/34 | yes |
-| `Python/pythonrun.c` | 31/36 | yes |
-| `Objects/listobject.c` | 23/24 | yes |
-| `Modules/stropmodule.c` | 20/20 | yes |
-| `Modules/structmodule.c` | 19/19 | |
-| `Python/sysmodule.c` | 19/21 | |
-| `Objects/intobject.c` | 18/20 | yes |
-| `Modules/pcremodule.c` | 14/14 | |
-| `Modules/regexpr.c` | 14/15 | yes |
-| `Modules/socketmodule.c` | 14/107 | |
-| `Objects/fileobject.c` | 14/17 | yes |
-| `Modules/newmodule.c` | 13/13 | |
-| `Objects/floatobject.c` | 13/13 | yes |
-| `Objects/longobject.c` | 12/12 | yes |
-| `Objects/bufferobject.c` | 11/11 | yes |
-| `Objects/object.c` | 11/20 | yes |
-| `Modules/pypcre.c` | 10/29 | yes |
-| `Python/codecs.c` | 10/10 | |
-| `Python/pystate.c` | 9/9 | yes |
-| `Python/marshal.c` | 8/9 | yes |
-| `Modules/_sre.c` | 7/10 | yes |
-| `Modules/regexmodule.c` | 7/7 | yes |
-| `Parser/tokenizer.c` | 7/7 | yes |
-| `Objects/funcobject.c` | 6/7 | yes |
-| `Python/modsupport.c` | 6/6 | |
-| `Objects/cobject.c` | 5/5 | yes |
-| `Objects/rangeobject.c` | 5/6 | yes |
-| `Objects/methodobject.c` | 4/4 | yes |
-| `Objects/moduleobject.c` | 4/4 | yes |
-| `Parser/acceler.c` | 4/5 | |
-| `Python/errors.c` | 4/5 | |
-| `Modules/posixmodule.c` | 3/143 | |
-| `Modules/signalmodule.c` | 3/5 | |
-| `Objects/frameobject.c` | 3/4 | yes |
-| `Objects/tupleobject.c` | 3/3 | yes |
-| `Python/structmember.c` | 3/4 | |
-| `Parser/parsetok.c` | 2/2 | yes |
-| `Python/graminit.c` | 2/2 | |
-| `Python/traceback.c` | 2/3 | yes |
-| `Objects/dictobject.c` | 1/1 | yes |
-| `Objects/typeobject.c` | 1/1 | |
-| `Parser/myreadline.c` | 1/1 | |
-| `Parser/parser.c` | 1/7 | yes |
-| `Python/frozen.c` | 1/1 | |
-| `Objects/sliceobject.c` | none | yes |
-| `Parser/node.c` | none | yes |
-| `PC/getpathp.c` | | yes |
-| `PC/config.c` | | inferred, see above |
-| `PC/config.c` | | modified, reconstructed here |
-| `PC/config.h` | | modified, allocator hooks reconstructed here |
-| `Lib/os.py` | | modified script, `ps2` branch at line 92 |
-| `Modules/posixmodule.c` | | trimmed to twelve methods and renamed `ps2`, see above |
+| Unit                      | Literals | Tag                                                    |
+| ------------------------- | -------- | ------------------------------------------------------ |
+| `Modules/cPickle.c`       | 72/72    | yes                                                    |
+| `Objects/unicodeobject.c` | 66/70    | yes                                                    |
+| `Objects/abstract.c`      | 60/60    |                                                        |
+| `Python/ceval.c`          | 50/60    | yes                                                    |
+| `Python/compile.c`        | 47/54    | yes                                                    |
+| `Python/exceptions.c`     | 47/49    | yes                                                    |
+| `Modules/_codecsmodule.c` | 40/42    |                                                        |
+| `Modules/cStringIO.c`     | 40/40    | yes                                                    |
+| `Modules/errnomodule.c`   | 40/181   |                                                        |
+| `Python/getargs.c`        | 39/42    | yes                                                    |
+| `Python/import.c`         | 37/47    | yes                                                    |
+| `Objects/stringobject.c`  | 35/36    | yes                                                    |
+| `Python/bltinmodule.c`    | 35/42    | yes                                                    |
+| `Modules/arraymodule.c`   | 34/34    | yes                                                    |
+| `Objects/classobject.c`   | 32/34    | yes                                                    |
+| `Python/pythonrun.c`      | 31/36    | yes                                                    |
+| `Objects/listobject.c`    | 23/24    | yes                                                    |
+| `Modules/stropmodule.c`   | 20/20    | yes                                                    |
+| `Modules/structmodule.c`  | 19/19    |                                                        |
+| `Python/sysmodule.c`      | 19/21    |                                                        |
+| `Objects/intobject.c`     | 18/20    | yes                                                    |
+| `Modules/pcremodule.c`    | 14/14    |                                                        |
+| `Modules/regexpr.c`       | 14/15    | yes                                                    |
+| `Modules/socketmodule.c`  | 14/107   |                                                        |
+| `Objects/fileobject.c`    | 14/17    | yes                                                    |
+| `Modules/newmodule.c`     | 13/13    |                                                        |
+| `Objects/floatobject.c`   | 13/13    | yes                                                    |
+| `Objects/longobject.c`    | 12/12    | yes                                                    |
+| `Objects/bufferobject.c`  | 11/11    | yes                                                    |
+| `Objects/object.c`        | 11/20    | yes                                                    |
+| `Modules/pypcre.c`        | 10/29    | yes                                                    |
+| `Python/codecs.c`         | 10/10    |                                                        |
+| `Python/pystate.c`        | 9/9      | yes                                                    |
+| `Python/marshal.c`        | 8/9      | yes                                                    |
+| `Modules/_sre.c`          | 7/10     | yes                                                    |
+| `Modules/regexmodule.c`   | 7/7      | yes                                                    |
+| `Parser/tokenizer.c`      | 7/7      | yes                                                    |
+| `Objects/funcobject.c`    | 6/7      | yes                                                    |
+| `Python/modsupport.c`     | 6/6      |                                                        |
+| `Objects/cobject.c`       | 5/5      | yes                                                    |
+| `Objects/rangeobject.c`   | 5/6      | yes                                                    |
+| `Objects/methodobject.c`  | 4/4      | yes                                                    |
+| `Objects/moduleobject.c`  | 4/4      | yes                                                    |
+| `Parser/acceler.c`        | 4/5      |                                                        |
+| `Python/errors.c`         | 4/5      |                                                        |
+| `Modules/posixmodule.c`   | 3/143    |                                                        |
+| `Modules/signalmodule.c`  | 3/5      |                                                        |
+| `Objects/frameobject.c`   | 3/4      | yes                                                    |
+| `Objects/tupleobject.c`   | 3/3      | yes                                                    |
+| `Python/structmember.c`   | 3/4      |                                                        |
+| `Parser/parsetok.c`       | 2/2      | yes                                                    |
+| `Python/graminit.c`       | 2/2      |                                                        |
+| `Python/traceback.c`      | 2/3      | yes                                                    |
+| `Objects/dictobject.c`    | 1/1      | yes                                                    |
+| `Objects/typeobject.c`    | 1/1      |                                                        |
+| `Parser/myreadline.c`     | 1/1      |                                                        |
+| `Parser/parser.c`         | 1/7      | yes                                                    |
+| `Python/frozen.c`         | 1/1      |                                                        |
+| `Objects/sliceobject.c`   | none     | yes                                                    |
+| `Parser/node.c`           | none     | yes                                                    |
+| `PC/getpathp.c`           |          | yes                                                    |
+| `PC/config.c`             |          | inferred, see above                                    |
+| `PC/config.c`             |          | modified, reconstructed here                           |
+| `PC/config.h`             |          | modified, allocator hooks reconstructed here           |
+| `Lib/os.py`               |          | modified script, `ps2` branch at line 92               |
+| `Modules/posixmodule.c`   |          | trimmed to twelve methods and renamed `ps2`, see above |
 
 ### Ratios that need a check before they count
 

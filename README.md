@@ -1,5 +1,25 @@
 # FreQuency
 
+<!-- WISWA-GENERATED-README:START -->
+
+[![C++](https://img.shields.io/badge/C++-00599C?logo=c%2B%2B)](https://isocpp.org)
+[![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/resonance)](https://github.com/Tatsh/resonance/tags)
+[![License](https://img.shields.io/github/license/Tatsh/resonance)](https://github.com/Tatsh/resonance/blob/master/LICENSE.txt)
+[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/resonance/v0.0.0/master)](https://github.com/Tatsh/resonance/compare/v0.0.0...master)
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-blue?logo=dependabot)](https://github.com/dependabot)
+[![Stargazers](https://img.shields.io/github/stars/Tatsh/resonance?logo=github&style=flat)](https://github.com/Tatsh/resonance/stargazers)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Tatsh/resonance/master.svg)](https://results.pre-commit.ci/latest/github/Tatsh/resonance/master)
+[![CMake](https://img.shields.io/badge/CMake-6E6E6E?logo=cmake)](https://cmake.org/)
+[![Prettier](https://img.shields.io/badge/Prettier-black?logo=prettier)](https://prettier.io/)
+
+[![@Tatsh](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpublic.api.bsky.app%2Fxrpc%2Fapp.bsky.actor.getProfile%2F%3Factor=did%3Aplc%3Auq42idtvuccnmtl57nsucz72&query=%24.followersCount&label=Follow+%40Tatsh&logo=bluesky&style=social)](https://bsky.app/profile/Tatsh.bsky.social)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Tatsh-black?logo=buymeacoffee)](https://buymeacoffee.com/Tatsh)
+[![Libera.Chat](https://img.shields.io/badge/Libera.Chat-Tatsh-black?logo=liberadotchat)](irc://irc.libera.chat/Tatsh)
+[![Mastodon Follow](https://img.shields.io/mastodon/follow/109370961877277568?domain=hostux.social&style=social)](https://hostux.social/@Tatsh)
+[![Patreon](https://img.shields.io/badge/Patreon-Tatsh2-F96854?logo=patreon)](https://www.patreon.com/Tatsh2)
+
+<!-- WISWA-GENERATED-README:STOP -->
+
 Reconstructed source code for _FreQuency_, the 2001 PlayStation 2 rhythm game developed by Harmonix
 Music Systems and published by Sony Computer Entertainment.
 
@@ -25,11 +45,11 @@ port. What exists today is the start-up path and several complete subsystems.
 
 ## Layout
 
-```
-include/   headers, grouped by subsystem
-src/       implementations, mirroring include/
-3rdparty/  third-party code the game linked against
-```
+| Path        | Contents                                 |
+| ----------- | ---------------------------------------- |
+| `include/`  | Headers, grouped by subsystem            |
+| `src/`      | Implementations, mirroring `include/`    |
+| `3rdparty/` | Third-party code the game linked against |
 
 Within those, `rnd` is the renderer, `os` the memory and file layer, `app` the application shell,
 `msg` the message classes, `math` the vector and transform types, and `gfx` the display device.

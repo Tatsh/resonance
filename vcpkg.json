@@ -1,0 +1,14 @@
+{
+  "dependencies": [
+
+  ],
+  "description": "Reconstructed source of the PlayStation 2 game FreQuency.",
+  "documentation": "https://resonance.readthedocs.org",
+  "homepage": "https://tatsh.github.io/resonance/",
+  "license": "MIT",
+  "maintainers": [
+    "Andrew Udvare <audvare@gmail.com>"
+  ],
+  "name": "resonance",
+  "version": "0.0.0"
+}
