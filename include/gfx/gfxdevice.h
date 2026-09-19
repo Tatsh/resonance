@@ -43,6 +43,32 @@ public:
      * @ghidraAddress 0x0049b138
      */
     void InitDisplayMode();
+
+    /**
+     * Set the masked part of one GS register, unless it already agrees.
+     *
+     * The device shadows every GS register in an array of 64-bit words, indexed by register number,
+     * and compares the masked incoming value against the shadow before emitting anything. A write
+     * that would not change the masked bits is dropped, which is why callers pass a mask covering
+     * only the field they mean to set rather than the whole register.
+     *
+     * @param nReg The GS register number.
+     * @param qwValue The value to set, of which only the masked bits are used.
+     * @param qwMask The bits of the register this call owns.
+     * @ghidraAddress 0x0049ffd0
+     */
+    void SetGsReg(int nReg, unsigned long long qwValue, unsigned long long qwMask);
+
+    /**
+     * Make room for a GIF packet of the given size.
+     *
+     * @param nQuadwords The space to reserve.
+     * @ghidraAddress 0x0049fd98
+     */
+    void ReserveGifSpace(int nQuadwords);
+
+    /** Non-zero while geometry is submitted through VU1 rather than the software path. +0x44c */
+    int mnUseVu1;
 };
 
 /**

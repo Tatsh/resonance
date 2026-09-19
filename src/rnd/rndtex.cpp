@@ -20,7 +20,7 @@ constexpr int kFreeBitmapLine = 0x262;
 
 // 0x004e3dc8
 Tex::Tex(const HxStr &name)
-    : Object(name), mUnknown1c(0), mUnknown20(0), mUnknown24(0), mUnknown28(0), mPendingMipMask(0),
+    : Object(name), mWidth(0), mHeight(0), mBitsPerPixel(0), mUnknown28(0), mPendingMipMask(0),
       mMipSelect(-0x80), mBitmapPath(nullptr), mGsHandle(-1) {
 }
 
@@ -40,11 +40,11 @@ bool Tex::PollAsyncMips() {
             continue;
         }
 
-        void *pBitmap = nullptr;
-        const int nStatus = AsyncPollComplete(mMipHandles[nMip], &pBitmap, nullptr);
+        void *pBuffer = nullptr;
+        const int nStatus = AsyncPollComplete(mMipHandles[nMip], &pBuffer, nullptr);
         if (nStatus == 0) {
-            mLoadedBitmaps[nMip] = pBitmap;
-            OnMipLoaded();
+            mLoadedBitmaps[nMip] = static_cast<ABitmap *>(pBuffer);
+            OnMipLoaded(nMip);
             mPendingMipMask &= ~(1 << nMip);
             continue;
         }
@@ -61,7 +61,7 @@ bool Tex::PollAsyncMips() {
     if (mPendingMipMask != 0) {
         return false;
     }
-    OnAllMipsLoaded();
+    RestoreSurfaces();
     return true;
 }
 

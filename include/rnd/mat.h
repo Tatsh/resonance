@@ -314,4 +314,37 @@ extern HxStr g_matClassName;
  */
 extern int g_nRndMatLoadVersion;
 
+/**
+ * Creator the registered "Mat" class builds through.
+ *
+ * Rnd::PsMat::InstallCreator() overwrites the hook with the Rnd::PsMat creator at `0x005914b8`,
+ * the same arrangement Rnd::Tex uses.
+ *
+ * @ghidraAddress 0x00700418
+ */
+extern Mat *(*g_pfnNewMat)(const HxStr &name);
+
+/**
+ * Material that Rnd::Mat::SelectMaterial() last applied, or null when the applied state is stale.
+ *
+ * Selecting a material stores it here, and the PlayStation 2 entry point compares against it to
+ * skip work that is already done. Every property setter writes null so that the next selection
+ * applies the change, and Rnd::PsMat's destructor clears it when the dying material is the
+ * selected one.
+ *
+ * @ghidraAddress 0x0076d658
+ */
+extern Mat *g_pSelectedMat;
+
+/**
+ * Non-zero while the material stage being applied has a texture bound.
+ *
+ * Rnd::Mat::BindStageTexture() sets it from whether the bind succeeded. Rnd::PsMesh reads it to
+ * choose how much of each vertex to upload, which is what identifies Rnd::MeshVert's fourth
+ * quadword as the texture coordinate.
+ *
+ * @ghidraAddress 0x0076d668
+ */
+extern int g_nStageTextureBound;
+
 } // namespace Rnd

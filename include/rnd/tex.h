@@ -5,6 +5,7 @@
 #include "os/hxstr.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
+#include "rndartt/abitmap.h"
 
 namespace Rnd {
 
@@ -58,21 +59,21 @@ public:
     /**
      * Point the texture at a bitmap and restart its load.
      *
-     * Records the three configuration words and the mip selector, then either clears the current
-     * bitmap or begins loading the new path. The GS associations and the mip handle vector are
-     * dropped either way.
+     * Records the bitmap dimensions and the mip selector, then either clears the current bitmap or
+     * begins loading the new path. The GS associations and the mip handle vector are dropped either
+     * way.
      *
-     * @param nUnknown1c The first configuration word.
-     * @param nUnknown20 The second configuration word.
-     * @param nUnknown24 The third configuration word.
+     * @param nWidth The bitmap width.
+     * @param nHeight The bitmap height.
+     * @param nBitsPerPixel The bitmap depth.
      * @param path The bitmap path.
      * @param nMipSelect The mip selector, which starts at -0x80.
      * @param nUnknown28 The fourth configuration word.
      * @ghidraAddress 0x004e7908
      */
-    void SetBitmapConfig(int nUnknown1c,
-                         int nUnknown20,
-                         int nUnknown24,
+    void SetBitmapConfig(int nWidth,
+                         int nHeight,
+                         int nBitsPerPixel,
                          const HxStr &path,
                          int nMipSelect,
                          int nUnknown28);
@@ -83,7 +84,7 @@ public:
      * Each pending level is polled once. A level that has arrived is stored, reported through
      * OnMipLoaded(), and cleared from the pending mask. A level that failed is reported through the
      * failure sink and also cleared, which stops a caller spinning on a read that will never
-     * finish. OnAllMipsLoaded() runs once the mask empties.
+     * finish. RestoreSurfaces() runs once the mask empties.
      *
      * @return True once no level is outstanding, including after a failure.
      * @ghidraAddress 0x004e4410
@@ -114,6 +115,53 @@ public:
      */
     virtual void FreeLoadedBitmaps();
 
+    /**
+     * Lock the bitmap of one mip level for direct access.
+     *
+     * Vtable slot 9. Rnd::Tex returns null without doing anything. Rnd::PsTex records the level so
+     * that UnlockMipBitmap() can mark it dirty. The second parameter is read by neither
+     * implementation, so its purpose is unrecovered. The name is inferred from the pairing with
+     * slot 10 rather than from any string in the image.
+     *
+     * @param nMip The mip level.
+     * @param nUnknown The second parameter, which no recovered implementation reads.
+     * @param nFlags Bit 1 requests a read-back from GS memory.
+     * @return The bitmap, or null when the class holds none.
+     * @ghidraAddress 0x004e75a0
+     */
+    virtual void *LockMipBitmap(int nMip, int nUnknown, int nFlags);
+
+    /**
+     * Release the mip level that LockMipBitmap() locked.
+     *
+     * Vtable slot 10. Empty in Rnd::Tex. The name is inferred as above.
+     *
+     * @ghidraAddress 0x004e75f8
+     */
+    virtual void UnlockMipBitmap();
+
+    /**
+     * Replace the palette every mip level shares.
+     *
+     * Vtable slot 11. Empty in Rnd::Tex. The name is inferred as above.
+     *
+     * @param pPalette The replacement palette.
+     * @ghidraAddress 0x004e7600
+     */
+    virtual void SetPalette(APalette *pPalette);
+
+    /**
+     * Mark the texture's GS page as in use or free.
+     *
+     * Vtable slot 12. Empty in Rnd::Tex. The PlayStation 2 override sets or clears one bit of the
+     * page's membership mask, and which condition that bit stands for is unrecovered, so both the
+     * name and the parameter are inferred.
+     *
+     * @param bInUse Whether the page is in use.
+     * @ghidraAddress 0x004e7608
+     */
+    virtual void SetGsPageInUse(bool bInUse);
+
 protected:
     /**
      * Take delivery of one mip level whose read has just finished.
@@ -121,35 +169,38 @@ protected:
      * Vtable slot 15. Empty in Rnd::Tex. Rnd::PsTex uploads the level to GS memory here. The name
      * is inferred from the position of the call inside PollAsyncMips().
      *
+     * @param nMip The level that arrived, which both implementations use to index the loaded
+     * bitmaps.
      * @ghidraAddress 0x004e5928
      */
-    virtual void OnMipLoaded();
+    virtual void OnMipLoaded(int nMip);
 
     /**
-     * Take delivery of the last outstanding mip level.
+     * Rebuild whatever the texture keeps in GS memory.
      *
-     * Vtable slot 14. Empty in Rnd::Tex, and the point at which Rnd::PsTex knows the whole texture
-     * is resident. The name is inferred as above.
+     * Vtable slot 14. The name is the routine's own: the PlayStation 2 override reports
+     * `"ERROR - RestoreSurfaces(%s), mipmap %d has no bm!"`, and the helper it calls reports
+     * `"Got NULL Palette in RestoreSurfaces"`.
      *
      * @ghidraAddress 0x004e4598
      */
-    virtual void OnAllMipsLoaded();
+    virtual void RestoreSurfaces();
 
 protected:
     // Every member is protected rather than private, because Rnd::PsTex reads the mip handles, the
     // pending mask, and the bitmap path while it uploads to GS memory. No access from outside the
     // hierarchy is recovered. The order below is the recovered offset order.
-    int mUnknown1c;                // +0x1c
-    int mUnknown20;                // +0x20
-    int mUnknown24;                // +0x24
+    // RestoreSurfaces() writes the first three from the bitmap it is restoring.
+    int mWidth;
+    int mHeight;
+    int mBitsPerPixel;
     int mUnknown28;                // +0x28
     std::vector<int> mMipHandles;  // +0x2c
     unsigned char mPendingMipMask; // +0x38 One bit per mip level still loading.
     int mMipSelect;                // +0x3c Starts at -0x80.
     HxStr mBitmapPath;             // +0x40
     int mGsHandle;                 // +0x48 Starts at -1, which stands for no residency.
-    // The element is a bitmap block the art library allocated, opaque to this class.
-    std::vector<void *> mLoadedBitmaps; // +0x4c
+    std::vector<ABitmap *> mLoadedBitmaps;
 };
 
 /**

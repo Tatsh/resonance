@@ -287,10 +287,13 @@ public:
          the same evidence as mVertsOwner. +0x134 */
     Mesh *mFacesOwner;
 
-private:
+protected:
     // SetTransOwner() is the accessor for the first of the three, and the other two are written
-    // only by a load or a copy.
-    Transformable *mTransOwner;  // +0x138
+    // only by a load or a copy. Rnd::PsMesh::DrawSelf() reads mTransOwner directly, which is what
+    // keeps it out of the private section.
+    Transformable *mTransOwner; // +0x138
+
+private:
     Transformable *mTrans1Owner; // +0x13c
     Transformable *mTrans2Owner; // +0x140
 
