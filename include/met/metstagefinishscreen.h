@@ -49,22 +49,26 @@ public:
     virtual void PlayLeaveSound();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003c4230
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003c4238
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003c4240
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003c4248
      */
-    virtual void PlayErrorSound();
+    virtual void PlayErrorSound(int nSelector);
 };

@@ -46,17 +46,20 @@ public:
     virtual ~MetMultiTipsBaseScreen();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x0030d7a0
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x0030d790
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x0030d798
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 };

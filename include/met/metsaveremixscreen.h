@@ -49,9 +49,10 @@ public:
     virtual ~MetSaveRemixScreen();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00381968
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
      * @ghidraAddress 0x003817d8
@@ -59,19 +60,22 @@ public:
     virtual void PlayLeaveSound();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003817c0
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003817c8
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003817d0
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 
 private:
     MetButtonList *mUnknowne8; // +0xe8

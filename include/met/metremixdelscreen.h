@@ -59,19 +59,22 @@ public:
     virtual ~MetRemixDelScreen();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00343f28
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00343f18
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00343f20
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 
 private:
     int mUnknownf0;  // +0xf0, not written by the constructor

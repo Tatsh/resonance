@@ -42,22 +42,26 @@ public:
     virtual ~MetCreditsScreen();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00214d58
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00214d60
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00214d68
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00214d70
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 };

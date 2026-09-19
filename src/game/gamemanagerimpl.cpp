@@ -161,6 +161,7 @@ int GameManagerImpl::GetPlayMode() {
 }
 
 void GameManagerImpl::SetDrawEnabled(int nEnabled) {
+    // Yes, the binary inverts the low bit rather than the whole value, so 2 records 3.
     mDrawSuppressed = nEnabled ^ 1;
 }
 

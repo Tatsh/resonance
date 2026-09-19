@@ -49,9 +49,10 @@ public:
     virtual ~MetLoadGameScreen();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00291620
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
      * @ghidraAddress 0x00291628
@@ -59,17 +60,20 @@ public:
     virtual void PlayLeaveSound();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00291630
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00291638
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00291640
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 };

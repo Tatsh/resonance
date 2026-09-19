@@ -46,9 +46,10 @@ public:
     virtual ~MetSonyScreen();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003bd6f8
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
      * @ghidraAddress 0x003bd700
@@ -56,17 +57,20 @@ public:
     virtual void PlayLeaveSound();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003bd708
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003bd710
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003bd718
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 };

@@ -50,9 +50,10 @@ public:
     virtual ~MetMemDetectStartup();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x002e2e00
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
      * @ghidraAddress 0x002e2e08
@@ -60,24 +61,28 @@ public:
     virtual void PlayLeaveSound();
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x002e2e10
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x002e2e18
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x002e2e20
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 
     /**
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x002e2e28
      */
-    virtual void PlayErrorSound();
+    virtual void PlayErrorSound(int nSelector);
 
 private:
     int mUnknowna4; // +0xa4, a scalar block the destructor releases

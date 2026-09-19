@@ -82,6 +82,19 @@ struct MetContainerLoad {
  *  - 23 `0x00390180` PlayCycleLeftSound().
  *  - 24 `0x003901a0` PlayCycleRightSound().
  *  - 25 `0x003901e0` PlayErrorSound().
+ *
+ * Five of those six sound slots take one integer argument, which an earlier reading recorded as no
+ * argument at all. MetKeyboardScreen::StartRepeatingSound() at `0x0028c5e0` loads its own selector
+ * into `a1` immediately before each of its five virtual calls, to slots 20, 22, 23, 24, and 25, so
+ * the argument is set at a call site rather than inherited from a register. The same class
+ * overrides four of the five and each override reads `a1` and compares it against the selector it
+ * recorded. Slot 21 stays argument-free. It is the one slot of the six MetKeyboardScreen does not
+ * override, nothing loads `a1` before a call to it, and the MetFreqMakerInventoryScreen override at
+ * `0x00272bb8` forwards to this class with no argument. The asymmetry is recorded rather than
+ * smoothed over.
+ *
+ * What the selector identifies is not recovered. A screen that records -1 plays its sound for every
+ * value, which is the only part of the meaning the image settles.
  *  - 26 `0x0038fe38` empty.
  *  - 27 `0x0038fe40` empty.
  *  - 28 `0x00390498` StartRepeatingSound().
@@ -300,6 +313,20 @@ public:
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
 
     /**
+     * Unrecovered. Slot 26.
+     *
+     * The body is empty here. MetKeyboardScreen fills it at `0x0028c708` with a body that reads its
+     * argument out of `f12` and compares a float member against it, which is what fixes the single
+     * parameter as a float. Nine further screens fill the slot too. The argument is the renderer
+     * time, on the same evidence that fixes it for the two animation slots, because the
+     * MetKeyboardScreen body adds a fixed 240 to a recorded value and tests the sum against it.
+     *
+     * @param flTime The current renderer time.
+     * @ghidraAddress 0x0038fe38
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
      * Rewind the enter animation and record the time it starts at.
      *
      * Slot 31. The exit animation start time is cleared, so the two animations never run together.
@@ -393,9 +420,10 @@ public:
      * MetPauseBaseScreen, and MetJukeboxBaseScreen all override this slot, the last three with an
      * empty body, which is what proves the return type is void.
      *
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00390140
      */
-    virtual void PlaySlideSound();
+    virtual void PlaySlideSound(int nSelector);
 
     /**
      * Play the sound that accompanies departing a screen.
@@ -411,27 +439,30 @@ public:
      *
      * Passes the literal `SND_MET_HIGH` to the named-sound player at `0x0012f470`.
      *
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003901c0
      */
-    virtual void PlayHighSound();
+    virtual void PlayHighSound(int nSelector);
 
     /**
      * Play the sound that accompanies cycling a value to the left.
      *
      * Passes the literal `SND_MET_CYCLE_L` to the named-sound player at `0x0012f470`.
      *
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x00390180
      */
-    virtual void PlayCycleLeftSound();
+    virtual void PlayCycleLeftSound(int nSelector);
 
     /**
      * Play the sound that accompanies cycling a value to the right.
      *
      * Passes the literal `SND_MET_CYCLE_R` to the named-sound player at `0x0012f470`.
      *
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003901a0
      */
-    virtual void PlayCycleRightSound();
+    virtual void PlayCycleRightSound(int nSelector);
 
     /**
      * Play the sound that accompanies a rejected input.
@@ -439,9 +470,10 @@ public:
      * Passes the literal `SND_MET_ERROR` to the named-sound player at `0x0012f470`. This is the
      * one sound of the six that MetScreenMultiSoundBank does not override.
      *
+     * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x003901e0
      */
-    virtual void PlayErrorSound();
+    virtual void PlayErrorSound(int nSelector);
 
     /**
      * Draw the view.
