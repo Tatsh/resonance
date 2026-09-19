@@ -17,12 +17,12 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                      | Count  |
 | ---------------------------- | ------ |
 | Functions in the program     | 15,357 |
-| Excluded by rule             | 3,801  |
-| Reconstructable              | 11,556 |
-| Accounted for in source      | 2,048  |
-| Share of the reconstructable | 17.72% |
-| Remaining, with a name       | 2,378  |
-| Remaining, unidentified      | 7,130  |
+| Excluded by rule             | 4,691  |
+| Reconstructable              | 10,666 |
+| Accounted for in source      | 2,107  |
+| Share of the reconstructable | 19.75% |
+| Remaining, with a name       | 2,562  |
+| Remaining, unidentified      | 5,997  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -54,13 +54,13 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 822   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 565   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,011 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 286   | Container instantiations                                         |
-| Platform SDK                   | 33    | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 43    | Exception, cast, and unwinding support                           |
-| C runtime                      | 41    | String and memory routines, and the floating-point library       |
+| Compiler-generated             | 815   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 739   | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 2,045 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 552   | Container instantiations                                         |
+| Platform SDK                   | 277   | `sce` entry points and kernel syscalls                           |
+| C++ runtime                    | 110   | Exception, cast, and unwinding support                           |
+| C runtime                      | 153   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
@@ -69,8 +69,8 @@ Verification therefore stops at syntax and formatting.
 
 | Check                                | Status  |
 | ------------------------------------ | ------- |
-| Headers compiling standalone         | 397/397 |
-| Sources passing a syntax check       | 235/235 |
+| Headers compiling standalone         | 401/401 |
+| Sources passing a syntax check       | 241/241 |
 | Address annotations with no function | 0       |
 | Lines over 100 characters            | 0       |
 | `clang-format` differences           | 0       |
@@ -203,6 +203,21 @@ sharing one base compiles a byte-identical destructor, and 47 identical bodies c
 methods. Occupying a vtable slot is the test that separates the two cases, and 147 addresses the
 pass had marked hold one. All 147 are restored to placeholder names and are back in the
 denominator. The figure published before that correction was overstated by those 147.
+
+Identifying library and vendored code is what moved the exclusions from 3,801 to 4,691 in one
+round. The platform SDK entry grew eightfold once Sony's MPEG, DMA, configuration, disc, and DECI2
+libraries were recognised from their own diagnostics, and the C runtime entry grew once a
+third-party arbitrary-precision package, two formatting engines, and the signal set were. Every one
+of those is code the reconstruction does not owe, and leaving it unidentified overstated the work
+remaining rather than the work done.
+
+The exclusion rules are keyed on prefixes a band applies deliberately: `Stl` and `std_` for the
+template library, `Cxx` and the iostream names for the C++ runtime, `Lib` with a following c, k, or
+m for the vendored C library, kernel glue, and floating point, `sce` for the platform SDK, `Py` and
+`Python__` for the interpreter, and `Gzip` and `Netflow` for two further vendored packages. The
+stdio set is spelled out name by name rather than given a prefix, because a prefix there would
+catch a project's own routines. A test covers both directions of that, and it caught one rule that
+was too loose before it shipped.
 
 ### Identification levers, including the exhausted ones
 
