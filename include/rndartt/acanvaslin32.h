@@ -123,7 +123,7 @@ public:
     /**
      * Copy a four bit source bitmap, with no clip test.
      *
-     * Unpacks one row into the shared scratch buffer at 0x008f9f0 and stores one palette entry
+     * Unpacks one row into g_abCanvasRowScratch and stores one palette entry
      * per pixel. A skipped pixel still advances the destination.
      *
      * @param source The source bitmap.

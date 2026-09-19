@@ -659,7 +659,7 @@ public:
     /**
      * Copy a run length encoded eight bit source bitmap, with no clip test.
      *
-     * Decodes one row into the shared scratch buffer at 0x008f9f0, describes the decoded row as an
+     * Decodes one row into g_abCanvasRowScratch, describes the decoded row as an
      * eight bit ABitmap of one row, and copies it with Blit8NoClip().
      *
      * @param source The source bitmap.
@@ -839,7 +839,7 @@ public:
     /**
      * Copy a four bit source bitmap through a remap table.
      *
-     * Unpacks one row into the shared scratch buffer at 0x008f9f0 and stores the remapped row.
+     * Unpacks one row into g_abCanvasRowScratch and stores the remapped row.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1003,6 +1003,114 @@ protected:
      * @ghidraAddress 0x005e91b8
      */
     int ClipBlitToRect(ABitmap *pBitmap, int *pnX, int *pnY) const;
+
+    /**
+     * Copy a source bitmap through a remap table, choosing the arm by source format.
+     *
+     * Non-virtual, and orphaned in the shipped image: it fills no slot of this class's table and
+     * the program lists no caller and no data reference. Format code 0 goes to BlitRemap4(), code 1
+     * to BlitRemap8(), and code 5 to BlitRemapRle8NoClip(). Every other code returns without
+     * drawing, so only the three indexed formats are handled.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005ed6a8
+     */
+    void BlitRemapNoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+
+    /**
+     * Clip against the clip rectangle and then copy through a remap table.
+     *
+     * The clip runs against a stack copy of the source description, because ClipBlitToRect()
+     * rewrites what it is given. A zero result returns without drawing.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005ed718
+     */
+    void BlitRemap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+
+    /**
+     * Copy a run length encoded source through a remap table. Body not yet written.
+     *
+     * The run length encoded arm of BlitRemapNoClip(), reached only for format code 5. It decodes
+     * into g_abCanvasRowScratch through ARleReader.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005edbd8
+     */
+    void BlitRemapRle8NoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+
+    /**
+     * Clip and copy a run length encoded source through a remap table. Body not yet written.
+     *
+     * The clipped counterpart of BlitRemapRle8NoClip(), reached only from BlitRemap(). Rows above
+     * the clip rectangle are consumed through ARleReader::SkipRows() rather than decoded.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005ea280
+     */
+    void BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+
+    /**
+     * Copy a source bitmap through a table of blend tables, choosing the arm by source format.
+     *
+     * Non-virtual and orphaned, with the same shape as BlitRemapNoClip(). Format code 0 goes to
+     * BlitBlend4(), code 1 to BlitBlend8(), and code 5 to BlitBlendRle8NoClip().
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param ppBlend One blend table per destination index.
+     * @ghidraAddress 0x005ede08
+     */
+    void
+    BlitBlendNoClip(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+
+    /**
+     * Clip against the clip rectangle and then copy through a table of blend tables.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param ppBlend One blend table per destination index.
+     * @ghidraAddress 0x005ede78
+     */
+    void BlitBlend(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+
+    /**
+     * Copy a run length encoded source through a table of blend tables. Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param ppBlend One blend table per destination index.
+     * @ghidraAddress 0x005ee370
+     */
+    void
+    BlitBlendRle8NoClip(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+
+    /**
+     * Clip and copy a run length encoded source through a table of blend tables. Body not yet
+     * written.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param ppBlend One blend table per destination index.
+     * @ghidraAddress 0x005ea460
+     */
+    void BlitBlendRle8(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
      * Derive the per pixel step of a line and return the pixel count.

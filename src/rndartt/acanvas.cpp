@@ -885,3 +885,87 @@ void ACanvas::UnpackNibbleRow(const unsigned char *pSource,
         bStartHighNibble ^= 1;
     }
 }
+
+// 0x005ed6a8. A format the chain does not test draws nothing at all, rather than falling back to a
+// generic path.
+void ACanvas::BlitRemapNoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
+    switch (source.mFormat) {
+    case kABitmapFormatLinear4:
+        BlitRemap4(source, nX, nY, pRemap);
+        break;
+    case kABitmapFormatLinear8:
+        BlitRemap8(source, nX, nY, pRemap);
+        break;
+    case kABitmapFormatRle8:
+        BlitRemapRle8NoClip(source, nX, nY, pRemap);
+        break;
+    default:
+        break;
+    }
+}
+
+// 0x005ed718. The description is copied before clipping, because ClipBlitToRect() rewrites the one
+// it is given.
+void ACanvas::BlitRemap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
+    ABitmap clipped = source;
+    if (ClipBlitToRect(&clipped, &nX, &nY) == 0) {
+        return;
+    }
+    switch (source.mFormat) {
+    case kABitmapFormatLinear4:
+        BlitRemap4(clipped, nX, nY, pRemap);
+        break;
+    case kABitmapFormatLinear8:
+        BlitRemap8(clipped, nX, nY, pRemap);
+        break;
+    case kABitmapFormatRle8:
+        BlitRemapRle8(clipped, nX, nY, pRemap);
+        break;
+    default:
+        break;
+    }
+}
+
+// 0x005ede08
+void ACanvas::BlitBlendNoClip(const ABitmap &source,
+                              int nX,
+                              int nY,
+                              const unsigned char *const *ppBlend) {
+    switch (source.mFormat) {
+    case kABitmapFormatLinear4:
+        BlitBlend4(source, nX, nY, ppBlend);
+        break;
+    case kABitmapFormatLinear8:
+        BlitBlend8(source, nX, nY, ppBlend);
+        break;
+    case kABitmapFormatRle8:
+        BlitBlendRle8NoClip(source, nX, nY, ppBlend);
+        break;
+    default:
+        break;
+    }
+}
+
+// 0x005ede78
+void ACanvas::BlitBlend(const ABitmap &source,
+                        int nX,
+                        int nY,
+                        const unsigned char *const *ppBlend) {
+    ABitmap clipped = source;
+    if (ClipBlitToRect(&clipped, &nX, &nY) == 0) {
+        return;
+    }
+    switch (source.mFormat) {
+    case kABitmapFormatLinear4:
+        BlitBlend4(clipped, nX, nY, ppBlend);
+        break;
+    case kABitmapFormatLinear8:
+        BlitBlend8(clipped, nX, nY, ppBlend);
+        break;
+    case kABitmapFormatRle8:
+        BlitBlendRle8(clipped, nX, nY, ppBlend);
+        break;
+    default:
+        break;
+    }
+}
