@@ -17,12 +17,12 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                      | Count  |
 | ---------------------------- | ------ |
 | Functions in the program     | 15,526 |
-| Excluded by rule             | 5,962  |
-| Reconstructable              | 9,564  |
-| Accounted for in source      | 2,243  |
-| Share of the reconstructable | 23.45% |
-| Remaining, with a name       | 2,404  |
-| Remaining, unidentified      | 4,917  |
+| Excluded by rule             | 5,991  |
+| Reconstructable              | 9,536  |
+| Accounted for in source      | 2,293  |
+| Share of the reconstructable | 24.05% |
+| Remaining, with a name       | 2,351  |
+| Remaining, unidentified      | 4,892  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -55,12 +55,12 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 823   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 1,685 | CPython 2.0, identified by diagnostic literal                    |
+| Vendored upstream              | 1,712 | CPython 2.0, identified by diagnostic literal                    |
 | Per-translation-unit duplicate | 2,051 | Bodies proven byte-identical to another routine of the image     |
 | Template library               | 664   | Container instantiations                                         |
-| Platform SDK                   | 344   | `sce` entry points and kernel syscalls                           |
+| Platform SDK                   | 337   | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 184   | Exception, cast, and unwinding support                           |
-| C runtime                      | 211   | String and memory routines, and the floating-point library       |
+| C runtime                      | 220   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
@@ -69,13 +69,14 @@ Verification therefore stops at syntax and formatting.
 
 | Check                          | Status  |
 | ------------------------------ | ------- |
-| Headers compiling standalone   | 416/416 |
-| Sources passing a syntax check | 243/247 |
+| Headers compiling standalone   | 420/420 |
+| Sources passing a syntax check | 251/251 |
 
-Four sources fail at the moment this was measured, each on a header a live band is rewriting: two on
-a canvas class whose members changed access, one on a game manager member that was renamed, and one
-that a promotion in this commit resolves. Each was re-run with a gap before being reported, because
-a failure in a file another band holds open is usually a half-written file rather than a defect.
+The figures read the working tree rather than the commit history, so they lead it. A routine counts
+as accounted the moment its annotation is written to disk, which is before the change is committed
+and often before the agent that wrote it has reported. A commit landing several hundred lines can
+therefore move the share by almost nothing, because the measurement had already seen the file.
+Three bands landing together moved it by three routines for exactly that reason.
 | Address annotations with no function | 0 |
 | Lines over 100 characters | 0 |
 | `clang-format` differences | 0 |

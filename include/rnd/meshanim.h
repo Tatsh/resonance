@@ -171,6 +171,15 @@ public:
      * The channels read and written belong to mKeysOwner. The welding pass at `0x00483e70` is the
      * only caller, which is why the method is public.
      *
+     * A warning for whoever reconstructs that welding pass. Its seam-normal helper at `0x00483438`
+     * calls `0x00569bf0`, and that routine is not Harmonix code; it is the bipartite matching of
+     * Setubal's netflow package, vendored into the image, which its own diagnostics
+     * `"Inconsistent matching between %d(U) and %d(V)"` and `"matching NOT maximum; augm. path:"`
+     * establish, along with the package data path the image stores at `0x0083c160`. The game code
+     * is the part that builds the vertex graph and reads the matching back. The matcher itself is
+     * upstream and is not to be reconstructed, so it wants an external declaration rather than a
+     * body.
+     *
      * @param nFromVert The vertex slot to copy from.
      * @param nToVert The vertex slot to copy over.
      * @ghidraAddress 0x004867d8
