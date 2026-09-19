@@ -257,6 +257,32 @@ extern CallbackXferBdToIop *g_pBdXfer;
 int GetUncompressedFileLength(char *pszPath);
 
 /**
+ * Copy a four-character code into a buffer it can be printed from.
+ *
+ * The scratch buffer is eight bytes and only the first four are ever written, so the second word
+ * terminates the string. Nothing writes that word, which is what makes the result printable.
+ *
+ * @param pFourCc The code to copy.
+ * @return The scratch buffer at `0x00894740`, valid until the next call.
+ * @ghidraAddress 0x00464b50
+ */
+char *FourCcToString(const void *pFourCc);
+
+/**
+ * Move a bank that is already in memory to the IOP and report it complete.
+ *
+ * There is no file, no asynchronous read, and no chunking: the whole buffer goes across in one
+ * transfer. The claim on the current destination is released, the IOP address rotates, and the bank
+ * block is filled with a zero length and an empty payload, because an in-memory bank has no path.
+ *
+ * @param pData The bank.
+ * @param nLength The bank's length.
+ * @return Zero. There is no failure path.
+ * @ghidraAddress 0x00461db8
+ */
+int XferBankFromMemory(const void *pData, int nLength);
+
+/**
  * Start a chunked BD bank transfer and report the bank's size.
  *
  * Fills the bank block, measures the file, then opens it and queues the first chunk against a new

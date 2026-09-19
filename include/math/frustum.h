@@ -23,8 +23,8 @@ struct Frustum {
 /**
  * Build the six planes of a perspective view volume.
  *
- * Every plane is expressed in camera space, so a caller that needs world space transforms the
- * result afterwards. Rnd::Cam::UpdateProjection() is the only caller recovered.
+ * Every plane is expressed in camera space. A caller that needs world space therefore transforms
+ * the result afterwards. Rnd::Cam::UpdateProjection() is the only caller recovered.
  *
  * @param frustum Receives the six planes.
  * @param flNear Distance to the near plane.

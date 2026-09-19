@@ -12,8 +12,12 @@ namespace Rnd {
  * Per-vertex animation of one mesh.
  *
  * `Q23Rnd8MeshAnim` in the RTTI descriptor at `0x008ef4a0`, with `Rnd::Animatable` as its one
- * public base at offset 0. The Animatable subobject is 0xc bytes, so the members below start after
- * it.
+ * public base at offset 0. The Animatable subobject is 0x18 bytes and the members below start
+ * after it. An earlier reading of this class put the subobject at 0xc and attributed the three
+ * words between 0xc and 0x18 to this class. Those words belong to the base: the Rnd::Animatable
+ * constructor stores `this + 0x18` into its own virtual-base pointer, which places the shared
+ * Rnd::Object subobject there and fixes the base's width. Rnd::ParticleSysAnim confirms the same
+ * width from two further directions, its vtable adjustment and its allocation size.
  *
  * Three channels animate the mesh, one for the vertex positions, one for the texture coordinates,
  * and one for the vertex colours. The text dump titles them "vertPointsKeys:", "vertTexsKeys:",
@@ -63,9 +67,6 @@ public:
 private:
     // No class derives from Rnd::MeshAnim and no access from outside it is recovered, so every
     // member is private. The order below is the recovered offset order.
-    int mUnknown0c;       // +0x0c
-    int mUnknown10;       // +0x10
-    int mUnknown14;       // +0x14
     int mLight;           // +0x18 The dump titles the field "light:", so it references a light.
     int mVertPointsKeys;  // +0x1c Sentinel of the vertex position channel.
     int mVertTexsKeys;    // +0x20 Sentinel of the texture coordinate channel.

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "math/frustum.h"
-#include "math/vector3.h"
 #include "math/vector2.h"
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/collideable.h"
@@ -19,9 +19,9 @@ namespace Rnd {
  *
  * `Q23Rnd3Cam` in the RTTI descriptor at `0x008eeeb8`, with three public non-virtual bases:
  * `Rnd::Drawable` at offset 0, `Rnd::Transformable` at `0x20`, and `Rnd::Collideable` at `0xd0`.
- * The class is 0x330 bytes, which the factory at `0x004b2470` proves by allocating exactly that
- * much under the tag "Rnd::Cam". The virtual `Rnd::Object` subobject sits at `0x310`, which the
- * constructor proves by writing that address into all three virtual-base pointers.
+ * The class is 0x330 bytes. The factory at `0x004b2470` proves that size by allocating exactly
+ * that much under the tag "Rnd::Cam". The virtual `Rnd::Object` subobject sits at `0x310`, which
+ * the constructor proves by writing that address into all three virtual-base pointers.
  *
  * Each matrix and each frustum member is quadword aligned in the original. The four bytes between
  * the end of the `Rnd::Collideable` subobject at `0xdc` and the first matrix at `0xe0` are the
@@ -30,8 +30,8 @@ namespace Rnd {
  * The member titles come from the text DumpText() writes: "nearPlane:", " farPlane:", " fov:",
  * "yRatio:", "screenRect:", "zRange:", " targetTex:", " localProject:", "worldProject:", and
  * "invWorldProject:". Both frustum members are titled from the same dump. The two matrices the
- * dump omits are titled from what builds them: `0xe0` is the inverse of the world transform, and
- * `0x160` is the inverse of the local projection.
+ * dump omits are titled from what builds them. That is, `0xe0` is the inverse of the world
+ * transform and `0x160` is the inverse of the local projection.
  *
  * Four vtables belong to the class. The six-entry table at `0x00820958` is addressed by the
  * `Rnd::Drawable` vptr at `0x10` and stores the two virtuals declared here after the three
@@ -41,13 +41,14 @@ namespace Rnd {
  * `Rnd::Object` subobject vptr, each entry with the adjustment back to the Cam pointer.
  *
  * The routine at `0x004b1ff0` is an out-of-line copy of an inline accessor that returns
- * g_pCurrentCam. It has no caller: every reader in the image loads the global directly.
+ * g_pCurrentCam. It has no caller, because every reader in the image loads the global
+ * directly.
  *
- * One member is recovered and not declared here. Slot 2 of the `Rnd::Transformable` table holds
+ * One member is recovered and not declared here. Slot 2 of the `Rnd::Transformable` table stores
  * the override of UpdateWorldXfm() at `0x004b1fa0`, which chains to the base at `0x004f0b18` and
- * runs UpdateWorldProject() only when the base reports that it recomposed. It cannot be declared
- * until `Rnd::Transformable` declares that virtual as returning an int, which the base at
- * `0x004f0b18` does and `transformable.h` does not yet record.
+ * runs UpdateWorldProject() only when the base reports that it recomposed. Declaring it requires
+ * `Rnd::Transformable` to declare that virtual as returning an int. The base at `0x004f0b18`
+ * returns one and `transformable.h` does not yet record that.
  */
 class Cam : public Drawable, public Transformable, public Collideable {
 public:
@@ -71,8 +72,8 @@ public:
      *
      * The near plane starts at 1.0, the far plane at 1000.0, the field of view at a right angle,
      * the vertical ratio at 0.75, the depth range at 0.0 to 1.0, and the screen rectangle at the
-     * whole target. Every projection matrix is left with only its fourth column filled, and the
-     * final call builds them all.
+     * whole target. Every projection matrix retains only its fourth column, and the final
+     * call builds them all.
      *
      * @param name The registry key for this object.
      * @ghidraAddress 0x004aeb70
@@ -131,8 +132,8 @@ public:
      * Place a point of the screen rectangle in render target pixels.
      *
      * Vtable slot 4 of the Rnd::Drawable table. This implementation writes nothing and returns its
-     * result slot untouched, so the value a caller receives is indeterminate. Only
-     * Rnd::PsCam::ScreenToPixels() produces a result.
+     * result slot untouched. The value a caller receives is therefore indeterminate, and only
+     * Rnd::PsCam::ScreenToPixels() produces one.
      *
      * @param ptScreen The point, in the coordinates the screen rectangle is expressed in.
      * @return The same point in render target pixels.
@@ -144,8 +145,8 @@ public:
      * Take the aspect ratio from the render target and rebuild the projection.
      *
      * Vtable slot 5 of the Rnd::Drawable table. With a render target the vertical ratio becomes
-     * the target height divided by its width. With none the ratio is left as it is, which is what
-     * Rnd::PsCam overrides to supply a default.
+     * the target height divided by its width. With none the ratio is untouched, and
+     * Rnd::PsCam overrides this routine to supply a default.
      *
      * @ghidraAddress 0x004b2738
      */
@@ -178,8 +179,8 @@ public:
     /**
      * Repoint the render target when the object it addressed is replaced.
      *
-     * The three base implementations run first. A replacement is cast to Rnd::Tex, so a
-     * replacement that is not a texture clears the render target rather than storing a pointer of
+     * The three base implementations run first. A replacement is cast to Rnd::Tex. A replacement
+     * that is not a texture therefore clears the render target rather than storing a pointer of
      * the wrong type.
      *
      * @param pFrom The object going away.
@@ -292,7 +293,7 @@ protected:
      * Vtable slot 3 of the Rnd::Drawable table. Rnd::PsCam overrides it with the routine that also
      * submits the display registers.
      *
-     * @return Non-zero, so the children are always drawn.
+     * @return Non-zero, which draws the children as well.
      * @ghidraAddress 0x004b1fe0
      */
     virtual int DrawSelf();

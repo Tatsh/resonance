@@ -50,8 +50,15 @@ A header is checked on its own, through a translation unit that includes nothing
 a break in a header which no implementation file happens to include.
 
 ```shell
-g++ -fsyntax-only -D_EE -I include -I ../.wiswa-ci/freq/compat -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include -I ../ps2sdk/ee/rpc/sdr/include <file>
+g++ -fsyntax-only -D_EE -DHAVE_LIMITS_H -DSIZEOF_LONG=8 -I include -I src/python/PC -I ../.wiswa-ci/freq/compat -I ../.wiswa-ci/freq/Python-2.0/Include -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include -I ../ps2sdk/ee/rpc/sdr/include -I ../ps2sdk/ee/rpc/memorycard/include <file>
 ```
+
+One flag on that line is a host accommodation rather than a fact about the target, and it is
+recorded here rather than hidden. The interpreter's portability header rejects a 32-bit target
+configuration on a 64-bit host, refusing to agree that a long is four bytes wide while the host
+says eight, so the host width is asserted for the syntax check alone. That affects nothing the
+check is for, since the binding headers are checked for C++ validity rather than for the
+interpreter's own arithmetic, and the alternative is four headers checked by nothing at all.
 
 The PlayStation 2 SDK is available and every SDK call is checked against its real declaration. The
 original was built against Sony's official SDK, whose header names differ from the open-source

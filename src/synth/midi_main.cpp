@@ -114,6 +114,9 @@ void SetBankLoadProgressHook(void (*pfnProgress)()) {
     g_pfnBankLoadProgress = pfnProgress;
 }
 
+// Selector that reports a bank complete.
+constexpr int kSoundSelectorBankComplete = 0x1050;
+
 // Selector that releases a loaded bank. It puts the bank's tag in the register that a block
 // selector puts an address in, which is why the tag travels through a pointer parameter.
 constexpr int kSoundSelectorReleaseBank = 0x8130;
@@ -163,6 +166,43 @@ void ReleaseBankSlotAt(int nDest) {
     }
 }
 
+// Scratch the four-character code is copied into. The second word is never written and terminates
+// the string.
+char g_szFourCc[2 * sizeof(int)];
+
+// 0x00464b50
+char *FourCcToString(const void *pFourCc) {
+    *reinterpret_cast<int *>(g_szFourCc) = *static_cast<const int *>(pFourCc);
+    return g_szFourCc;
+}
+
+// The rotation StartHdBankXfer() and XferBankFromMemory() share. The wrap returns to the
+// second entry, so the first is used once and never again.
+inline void RotateBankIopAddress() {
+    g_nBankIopAddress = g_anBankIopAddress[g_nBankIopIndex];
+    ++g_nBankIopIndex;
+    if (g_nBankIopIndex == kBankIopAddressCount) {
+        g_nBankIopIndex = 1;
+    }
+}
+
+// 0x00461db8
+int XferBankFromMemory(const void *pData, int nLength) {
+    ReleaseBankSlotAt(g_nBankDestAddress);
+    RotateBankIopAddress();
+    RegisterBankSlot(g_nSynthXferTag, g_nBankDestAddress, g_nBankIopAddress);
+    g_bankCommand.mBankAddress = g_nBankIopAddress;
+    g_bankCommand.mStagingAddress = 0;
+    g_bankCommand.mLength = 0;
+    g_bankCommand.mDest = g_nBankDestAddress;
+    g_bankCommand.mTag = g_nSynthXferTag;
+    memset(g_bankCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
+    XferToIop(g_nBankIopAddress, pData, nLength);
+    SubmitSoundDriverRequest(kSoundSelectorBankComplete,
+                             reinterpret_cast<uintptr_t>(&g_bankCommand));
+    return 0;
+}
+
 // 0x00461f28
 int StartBdBankXfer(char *pszPath) {
     AsyncCheck(1);
@@ -209,12 +249,7 @@ int StartHdBankXfer(char *pszPath, int nPlacement) {
     if (nPlacement >= 0 && nPlacement < kBankPlacementFirstBuffer) {
         g_nBankIopAddress = g_anBankIopAddress[0];
     } else if (nPlacement >= kBankPlacementFirstBuffer && nPlacement <= kBankPlacementRotate) {
-        g_nBankIopAddress = g_anBankIopAddress[g_nBankIopIndex];
-        ++g_nBankIopIndex;
-        // The wrap returns to the second entry, so the first is used once and never again.
-        if (g_nBankIopIndex == kBankIopAddressCount) {
-            g_nBankIopIndex = 1;
-        }
+        RotateBankIopAddress();
     }
     if (g_nBankIopAddress < 0) {
         LogPrintf("\nCan't alloc heap \n");
