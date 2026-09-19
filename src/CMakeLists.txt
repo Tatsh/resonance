@@ -9,8 +9,35 @@
 # Everything the subsystem libraries share. An interface library carries the settings without
 # compiling anything itself.
 add_library(resonance_common INTERFACE)
-target_include_directories(resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/include")
 target_compile_options(resonance_common INTERFACE -Wall -Wextra -Wno-unknown-pragmas)
+
+# _EE selects the Emotion Engine side of every SDK header serving both processors. The SDK toolchain
+# file defines it, and a host configure has no toolchain file, where its absence makes tamtypes.h
+# refuse to define u32 and every use of that type then fails.
+target_compile_definitions(resonance_common INTERFACE _EE)
+
+# compat comes first so that its #include_next reaches the real SDK header behind it. The original
+# was built against Sony's official SDK, whose header names differ from the open-source ps2sdk in
+# places, and compat forwards those names rather than redeclaring anything.
+target_include_directories(resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/include"
+                                                      "${CMAKE_SOURCE_DIR}/compat")
+
+# Five headers the reconstruction includes do not sit in the two directories the SDK toolchain file
+# adds. An installed SDK flattens them into ee/include and a source checkout keeps them where they
+# are built from, so each candidate is added only where it exists and neither layout is assumed.
+foreach(
+  SDK_INCLUDE
+  ee/include
+  common/include
+  ee/kernel/include
+  ee/rpc/cdvd/include
+  ee/rpc/memorycard/include
+  ee/rpc/multitap/include
+  ee/rpc/sdr/include)
+  if(IS_DIRECTORY "${PS2SDK}/${SDK_INCLUDE}")
+    target_include_directories(resonance_common SYSTEM INTERFACE "${PS2SDK}/${SDK_INCLUDE}")
+  endif()
+endforeach()
 
 set(RESONANCE_SUBSYSTEMS
     app

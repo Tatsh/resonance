@@ -42,6 +42,17 @@ endif()
 
 # A docs-only configure must not require the cross toolchain, so the sources are skipped entirely.
 if(NOT BUILD_DOCS_ONLY)
+  # The SDK toolchain file sets this in its own scope, which does not reach here, and a host build
+  # configures without any toolchain file at all. Reading the environment covers both, and the
+  # sibling checkout is the fallback for a host build with nothing exported.
+  if(NOT PS2SDK)
+    if(DEFINED ENV{PS2SDK})
+      set(PS2SDK "$ENV{PS2SDK}" CACHE PATH "PlayStation 2 SDK root.")
+    else()
+      set(PS2SDK "${CMAKE_SOURCE_DIR}/../ps2sdk" CACHE PATH "PlayStation 2 SDK root.")
+    endif()
+  endif()
+  message(STATUS "PlayStation 2 SDK at ${PS2SDK}")
   include(FeatureSummary)
   include(GNUInstallDirs)
   feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)

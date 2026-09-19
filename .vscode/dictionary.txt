@@ -37,6 +37,7 @@ bartels
 bascus
 begingamelocalmsg
 beginphrasecatchmsg
+bitbltbuf
 blit
 bltinmodule
 bsky
@@ -46,7 +47,6 @@ buildsystems
 bumpmsg
 bumppacket
 buttonpowmsg
-bytearray
 cacceler
 callbackxferbdtoiop
 callbackxferhdtoiop
@@ -110,6 +110,7 @@ docstrings
 dsizeof
 dsubu
 durgemmsg
+eekernel
 egsw
 egwb
 elif
@@ -225,6 +226,7 @@ libc
 libcdvd
 libcdvd's
 libera
+libgraph
 libmc
 libscf
 libsd
@@ -427,7 +429,6 @@ pypcre
 pyproject
 pystate
 pythonrun
-qstringbuilder
 quadword
 quadwords
 quat
@@ -487,6 +488,7 @@ shellcheck
 shellformat
 shoemake
 showeraseeffectmsg
+sifdev
 signalmodule
 singlepowerupcollection
 skillstats
@@ -518,6 +520,7 @@ synthsustainer
 sysconf
 sysmodule
 tagfile
+tamtypes
 tatsh
 teardowns
 tempomap
@@ -539,6 +542,9 @@ transanim
 transformops
 treeview
 trmopn
+trxdir
+trxpos
+trxreg
 tupleobject
 tvel
 typeobject
