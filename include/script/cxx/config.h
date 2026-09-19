@@ -21,6 +21,11 @@
  * takes a string uses. The port also has no `owned` flag on Py::Object, and it adopts a new
  * reference through the separate Py::FromAPI holder instead.
  *
+ * Member names under `script/cxx/` follow PyCXX's own lower-case style, `accepts`, `validate`,
+ * `setItem`, and `new_reference_to` among them, rather than the CamelCase the rest of this tree
+ * uses. The names are third-party API and are preserved. Data members are the exception, because
+ * no member name survives compilation, so those take the tree's `m` prefix.
+ *
  * The interpreter headers are vendored outside this tree, at
  * `.wiswa-ci/freq/Python-2.0/Include`, so a syntax check of anything under `script/cxx/` needs
  * that directory and the port's own `src/python/PC` on the include path.

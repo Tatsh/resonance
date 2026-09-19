@@ -1,5 +1,7 @@
 #include "script/pyshell.h"
 
+#include "os/hostmode.h"
+#include "os/hxstr.h"
 #include "os/log.h"
 #include "script/cxx/callable.h"
 #include "script/cxx/config.h"
@@ -8,8 +10,6 @@
 #include "script/cxx/module.h"
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
-#include "script/defaulttext.h"
-#include "script/freqroot.h"
 #include "script/hxmodule.h"
 
 // The two sys.path entries the interpreter needs before any game script runs.
@@ -70,7 +70,7 @@ PyShell::~PyShell() {
 
 // 0x00508ca8
 Py::Object PyShell::Eval(const HxStr &source, int nStartSymbol) {
-    char *pszSource = const_cast<char *>(source.mStr != nullptr ? source.mStr : g_pszDefaultText);
+    char *pszSource = const_cast<char *>(source.mStr != nullptr ? source.mStr : g_szEmptyString);
     PyObject *pResult = PyRun_String(pszSource, nStartSymbol, mDict.mPtr, mDict.mPtr);
     if (pResult == nullptr) {
         ReportError(source, 1);
@@ -82,7 +82,7 @@ Py::Object PyShell::Eval(const HxStr &source, int nStartSymbol) {
 void PyShell::RunMasterInitScript() {
     HxStr path = GetFreqRoot();
     path += kMasterScriptPath;
-    char *pszPath = const_cast<char *>(path.mStr != nullptr ? path.mStr : g_pszDefaultText);
+    char *pszPath = const_cast<char *>(path.mStr != nullptr ? path.mStr : g_szEmptyString);
     FILE *pFile = fopen(pszPath, "r");
     PyObject *pResult = PyRun_File(pFile, pszPath, Py_file_input, mDict.mPtr, mDict.mPtr);
     fclose(pFile);
@@ -124,5 +124,5 @@ void PyShell::ReportError(const HxStr &context, int bWithTraceback) {
     }
 
     PyErr_Clear();
-    Fatal(message.mStr != nullptr ? message.mStr : g_pszDefaultText); // The message is the format.
+    Fatal(message.mStr != nullptr ? message.mStr : g_szEmptyString); // The message is the format.
 }

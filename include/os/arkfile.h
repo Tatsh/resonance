@@ -189,12 +189,3 @@ extern std::vector<ArkFile *> g_apMountedArks;
  * @ghidraAddress 0x00725ea0
  */
 extern std::vector<ArkStream> g_aArkStreams;
-
-/**
- * Empty string substituted for an archive whose own path buffer is null.
- *
- * The name is the one already applied in Ghidra, which agrees with the use here.
- *
- * @ghidraAddress 0x006fbd10
- */
-extern const char *g_pszEmpty;

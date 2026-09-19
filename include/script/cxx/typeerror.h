@@ -3,7 +3,7 @@
 #include "os/hxstr.h"
 #include "script/cxx/config.h"
 #include "script/cxx/standarderror.h"
-#include "script/defaulttext.h"
+#include "os/hxstr.h"
 
 namespace Py {
 
@@ -25,10 +25,10 @@ public:
      * Set the Python error indicator and become the thrown object.
      *
      * @param reason Text for the Python exception value. An empty string arrives at the
-     *               interpreter as g_pszDefaultText rather than as a null pointer.
+     *               interpreter as g_szEmptyString rather than as a null pointer.
      */
     TypeError(const HxStr &reason) {
-        PyErr_SetString(PyExc_TypeError, reason.mStr != nullptr ? reason.mStr : g_pszDefaultText);
+        PyErr_SetString(PyExc_TypeError, reason.mStr != nullptr ? reason.mStr : g_szEmptyString);
     }
 };
 

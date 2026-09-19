@@ -1,5 +1,7 @@
 #pragma once
 
+#include "os/hxstr.h"
+
 /**
  * Media the game loads its data from.
  *
@@ -29,3 +31,15 @@ HostMode GetHostMode();
  * @ghidraAddress 0x0050efa0
  */
 int UsingArkFiles();
+
+/**
+ * Root the game composes every data path against.
+ *
+ * The shipped build returns the empty string, so every composed path is relative. The routine
+ * shares a translation unit with GetHostMode() and UsingArkFiles(), which is what places it here
+ * rather than with any one of its ten callers across six subsystems.
+ *
+ * @return The root, empty in the shipped build.
+ * @ghidraAddress 0x0050ef30
+ */
+HxStr GetFreqRoot();

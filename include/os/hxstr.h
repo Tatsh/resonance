@@ -78,6 +78,19 @@ public:
     HxStr &operator+=(const HxStr &other);
 
     /**
+     * Append a C string.
+     *
+     * The routine builds the temporary string itself rather than taking one a call site built,
+     * which is what establishes that the overload exists rather than callers converting and
+     * reaching the HxStr overload. The temporary is released before returning.
+     *
+     * @param pszText The text to append.
+     * @return This string.
+     * @ghidraAddress 0x0010edb0
+     */
+    HxStr &operator+=(const char *pszText);
+
+    /**
      * Append one character.
      *
      * @param ch The character to append.

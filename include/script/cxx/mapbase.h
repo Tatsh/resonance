@@ -4,7 +4,7 @@
 #include "script/cxx/config.h"
 #include "script/cxx/exception.h"
 #include "script/cxx/object.h"
-#include "script/defaulttext.h"
+#include "os/hxstr.h"
 
 namespace Py {
 
@@ -72,12 +72,12 @@ public:
      * Store a value under a name.
      *
      * @param key The key, as text. An empty string arrives at the interpreter as
-     *            g_pszDefaultText rather than as a null pointer.
+     *            g_szEmptyString rather than as a null pointer.
      * @param value The value to store.
      * @ghidraAddress 0x0050d6f8
      */
     virtual void setItem(const HxStr &key, const Object &value) {
-        char *pszKey = const_cast<char *>(key.mStr != nullptr ? key.mStr : g_pszDefaultText);
+        char *pszKey = const_cast<char *>(key.mStr != nullptr ? key.mStr : g_szEmptyString);
         if (PyMapping_SetItemString(mPtr, pszKey, value.mPtr) == -1) {
             throw Exception();
         }

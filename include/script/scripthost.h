@@ -1,7 +1,6 @@
 #pragma once
 
 #include "os/hxstr.h"
-#include "script/defaulttext.h"
 
 /**
  * Identifier of the `autoexec()` call template, which Application::Run() invokes once the services

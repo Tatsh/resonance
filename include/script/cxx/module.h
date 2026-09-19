@@ -4,7 +4,7 @@
 #include "script/cxx/config.h"
 #include "script/cxx/dict.h"
 #include "script/cxx/object.h"
-#include "script/defaulttext.h"
+#include "os/hxstr.h"
 
 namespace Py {
 
@@ -38,11 +38,11 @@ public:
      * way, so the body is inlined at that site and has no address of its own.
      *
      * @param name The module name. An empty string arrives at the interpreter as
-     *             g_pszDefaultText rather than as a null pointer.
+     *             g_szEmptyString rather than as a null pointer.
      */
     explicit Module(const HxStr &name) : Object() {
         set(PyImport_ImportModule(
-            const_cast<char *>(name.mStr != nullptr ? name.mStr : g_pszDefaultText)));
+            const_cast<char *>(name.mStr != nullptr ? name.mStr : g_szEmptyString)));
         validate();
     }
 
