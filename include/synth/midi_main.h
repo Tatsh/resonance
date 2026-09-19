@@ -1,22 +1,32 @@
 #pragma once
 
+#include <libsdr.h>
+
 /**
  * Voice and sound-bank driver that Ps2HardSynth is a thin class over.
  *
  * Titled after `midi_main.cpp`, the file its own asserts record at `0x0046456c`, `0x00464d58`, and
  * `0x00464ed0`. The module spans `0x004620b0` through `0x00465100` and has the attested behaviour
- * of the sound subsystem: the voice table, the sound banks, and the script-facing command
+ * of the sound subsystem: the SPU2 voices, the sound banks, and the script-facing command
  * dispatcher. Neither Synth nor Ps2HardSynth has any of it.
  *
- * Recovery has started at the dispatcher and the entry points MainLoop already drives. Three
- * further routines are identified. The bank loaders at `0x00464430` and `0x00464d10` have no
- callers
- * at all: they are async completion callbacks, installed as function pointers, which is why each
- * reads `t1` at entry. That is where the asynchronous layer puts the completion status, and it is
- * the status each reports through `BD bank loading returned async error %d` and `HD bank loading
- * returned async error %d`. Their remaining parameters belong to the callback type in
- * `os/async.h`, which another subsystem owns, so they stay undeclared here.
-
+ * There is no voice table. Every routine here that reports or configures a voice queries the SPU2
+ * itself through libsdr's remote-call trampoline, `sceSdRemote()`, with the `rSd*` function code
+ * and the `SD_*` entry encoding inline at the call site. The image has no `sceSd*` wrapper
+ * function, so the SDK release of this era supplied the whole API as macros over that one entry
+ * point. Correspondence is exact at both levels: the function codes are `rSdInit`, `rSdSetParam`,
+ * `rSdGetParam`, `rSdGetSwitch`, `rSdSetAddr`, `rSdGetAddr`, `rSdSetCoreAttr`, `rSdGetCoreAttr` and
+ * `rSdSetEffectAttr`, and the entries carry libsd's `0x80` core-level flag on exactly the
+ * core-level registers.
+ *
+ * The two bank loaders at `0x00464430` and `0x00464d10` are virtual overrides, not free callbacks.
+ * The RTTI gives their classes as `CallbackXferBdToIop` and `CallbackXferHdToIop`, each with
+ * `AsyncCallback` as its one public base at offset 0, which is why each reads a register no
+ * ordinary call would pass: the argument list is the base's completion signature. Each reports its
+ * failure through `BD bank loading returned async error %d` or `HD bank loading returned async
+ * error %d`. Both stay undeclared until `AsyncCallback` is declared, which belongs to the
+ * asynchronous layer rather than here.
+ *
  * The BD loader is a chunked streaming read. It marks the request busy, fills a command block from
  * the request, submits it, then re-arms the asynchronous read for the next 0x2000 bytes until the
  * remaining count falls to zero, at which point it closes the file and notifies a completion hook.
@@ -43,7 +53,8 @@ void SynthCommand(int nCommand);
  * Every routine in the module funnels through this, twenty call sites in all, each passing a
  * selector word and either a command block or nothing. The selector is a bit field: the routine
  * tests bits 0x8000 and 0x1000 of it, spins on a semaphore, and then hands the block on. Observed
- * selectors are 0xd0 from SynthCommand(), and 0x1070 and 0x1050 from the bank loader.
+ * selectors are 0xd0 from SynthCommand() and from the tail of DumpSynthVoices(), 0x1070 and 0x1050
+ * from the bank loader, 0x10e0 from ConfigureSpu2Effects(), and 0x8130 from `0x004642c8`.
  *
  * The title comes from what the twenty call sites have in common rather than from any one of them.
  * The block's shape varies by selector, so it is opaque here; a null block is valid.
@@ -74,15 +85,53 @@ struct SynthBankLoad {
 };
 
 /**
- * Report every active voice to the log.
+ * Report the state of both SPU2 cores and all 48 voices to the log.
  *
- * Writes one `Voice %2.2d at %x env %x - end %d mix %d %d %d %d` line per voice and then
- * `Using %d voices total`. SynthCommand() passes 1.
+ * Writes one `Core    %2.2d: MMix %x eff %d vmix L %x %x R %x %x end %x` line per core, one
+ * `  Voice %2.2d at %x env %x - end %d mix %d %d %d %d` line per voice, and finally
+ * `Using %d voices total`. Every value is read back from the hardware, so the report is the live
+ * mixer state rather than anything the driver retains. A voice counts towards the total when its
+ * ENDX bit is clear, which is the sample not having run out.
  *
- * @param nDetail Retained on the stack and otherwise unrecovered.
+ * @param bActiveOnly Non-zero to report only the voices whose ENDX bit is clear. SynthCommand()
+ *                    passes 1, and zero reports all 24 voices of each core.
  * @ghidraAddress 0x00462558
  */
-void DumpSynthVoices(int nDetail);
+void DumpSynthVoices(int bActiveOnly);
+
+/**
+ * Bind libsdr and bring both SPU2 cores up.
+ *
+ * Sets the two mixer routings, silences the effect send, opens both master volumes fully, and gives
+ * each core a 128 KB effect work area at the top of sound RAM, core 0 taking the highest block.
+ * Core 1's mixer routing takes the external input that core 0's does not, which is what chains the
+ * two cores.
+ *
+ * InitSynthDriver() is the only caller.
+ *
+ * @ghidraAddress 0x004649f8
+ */
+void InitSpu2Cores();
+
+/**
+ * Apply the configured reverb to both SPU2 cores.
+ *
+ * Per core, the routine enables the effect only when the argument is non-zero and the configuration
+ * also enables it for that core; otherwise it clears both effect volumes and turns the core
+ * attribute off. Either way it then reopens both master volumes fully. When effects are enabled it
+ * fills a `sceSdEffectAttr` from five configuration values, ORs `SD_EFFECT_MODE_CLEAR` into the
+ * mode, and both depths are the configured value shifted left by eight.
+ *
+ * Enabling also submits a further command block to the sound driver under selector 0x10e0, built
+ * from eleven more configuration values.
+ *
+ * The body is not reconstructed. It reads every value through the two variadic configuration
+ * queries at `0x00509110` and `0x005093e0`, whose signatures belong to the data-array layer.
+ *
+ * @param bEnable Zero to force the effect off on both cores.
+ * @ghidraAddress 0x00462340
+ */
+void ConfigureSpu2Effects(int bEnable);
 
 /**
  * Bring the voice and bank driver up.

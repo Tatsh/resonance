@@ -11,8 +11,8 @@ function list of the disassembler project. Update this file whenever a subsystem
 | Functions in the program    | 14,666 |
 | Excluded by rule            | 1,449  |
 | Reconstructable             | 13,217 |
-| Accounted for in source     | 722    |
-| Share of the reconstructable| 5.46%  |
+| Accounted for in source     | 725    |
+| Share of the reconstructable| 5.49%  |
 | Remaining, with a name      | 921    |
 | Remaining, unidentified     | 11,574 |
 
@@ -41,7 +41,7 @@ Verification therefore stops at syntax and formatting.
 | Check                               | Status  |
 | ----------------------------------- | ------- |
 | Headers compiling standalone        | 164/164 |
-| Sources passing a syntax check      | 109/109 |
+| Sources passing a syntax check      | 110/110 |
 | Address annotations with no function | 0       |
 | Lines over 100 characters           | 0       |
 | `clang-format` differences          | 0       |
@@ -50,7 +50,7 @@ A header is checked on its own, through a translation unit that includes nothing
 a break in a header which no implementation file happens to include.
 
 ```shell
-g++ -fsyntax-only -D_EE -I include -I ../.wiswa-ci/freq/compat -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include <file>
+g++ -fsyntax-only -D_EE -I include -I ../.wiswa-ci/freq/compat -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include -I ../ps2sdk/ee/rpc/sdr/include -I ../ps2sdk/ee/rpc/sif/include <file>
 ```
 
 The PlayStation 2 SDK is available and every SDK call is checked against its real declaration. The
@@ -81,7 +81,7 @@ from the SDK is reconstructed.
 | Texture, PlayStation 2    | Upload and bind bodies, pending the GS video memory manager          |
 | Graphics device           | Packet submission, pending the GS video memory manager               |
 | Art library              | `ABitmap` layout is recorded from the disassembler, not yet verified |
-| Sound                     | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` started: the command dispatcher, the driver submit, and both bank-load callbacks. Thirteen interface slot titles are unrecoverable, and the voice table is next |
+| Sound                     | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` has its command dispatcher, its driver submit, its core and voice report, and its SPU2 bring-up. There is no voice table: the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array queries, and the two bank loaders wait on `AsyncCallback` |
 
 ### Not started
 
