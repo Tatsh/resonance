@@ -7,6 +7,7 @@ animatables
 anims
 apsz
 arkfile
+arkfiles
 arraymodule
 arrghghghgh
 atten
@@ -61,6 +62,7 @@ errnomodule
 erss
 esbenp
 execv
+ezmidi
 fileobject
 filetab
 floatobject
@@ -107,6 +109,7 @@ jsonschema
 juke
 keyframed
 keypanel
+khgb
 kochanek
 kscope
 libc
@@ -132,9 +135,11 @@ mainpage
 malloc
 mcdat
 mcfl
+mcman
 mcrd
 mcrf
 mcrl
+mcserv
 mdfile
 memcard
 memorycard
@@ -151,6 +156,10 @@ moduleobject
 mpfn
 mscal
 mscnt
+msifrpc
+mtap
+mtapman
+multitap
 mvoll
 mvolr
 mypy
@@ -168,6 +177,7 @@ obmalloc
 obstream
 oneline
 overcutting
+padman
 paletted
 pangame
 parsermodule
@@ -226,6 +236,7 @@ schemafile
 scratchpad
 screendump
 scus
+sdrdrv
 serialiser
 setubal's
 shellcheck
@@ -286,6 +297,7 @@ unpaletted
 unrecovered
 unsuffixed
 updateworldxfm
+usbd
 utime
 vendored
 venv

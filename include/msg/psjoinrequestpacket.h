@@ -13,6 +13,10 @@
  *
  * The class overrides Message::Print() at `0x003f1f38`. That body streams the payload and is not
  * recovered, so the override is recorded here rather than declared.
+ *
+ * Its vtable has eight entries and a zero terminator at index 8. Slots 6 and 7 are its own
+ * overrides rather than the inherited Packet ones at `0x003f1de8` and `0x003f1ea0`. Neither
+ * override calls the base: each repeats the four-word transfer inline and adds the appearance.
  */
 class PSJoinRequestPacket : public ToHostPacket {
 public:
@@ -39,6 +43,27 @@ public:
      * @ghidraAddress 0x003eef40
      */
     virtual const char *Name();
+
+    /**
+     * Write the packet to a stream.
+     *
+     * Slot 6. The word Packet stores at `+0x0c` is written twice, once in the four-word prefix and
+     * again after the appearance.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e5538
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the packet back from a stream.
+     *
+     * Slot 7. Mirrors Save(), including the repeated transfer of `+0x0c`.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e5638
+     */
+    virtual void Load(IBStream &stream);
 
 private:
     FreqAppearance mUnknown14; // +0x14
