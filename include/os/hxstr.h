@@ -381,6 +381,50 @@ private:
 };
 
 /**
+ * Concatenate two strings.
+ *
+ * Every call site inlines the body, so the operator has no address of its own. The body is
+ * recovered from that emission rather than invented. A concatenation compiles to a copy
+ * construction of the left operand into a temporary, the matching operator+=() on the temporary,
+ * and a second copy construction of the result into the destination. `0x0017a79c` through
+ * `0x0017a7b4` in SaveRemixMCT::ListRemixDir() and `0x00179de8` through `0x00179e08` are the two
+ * clearest copies, and the first temporary is released immediately afterwards at each one.
+ *
+ * Whether the original wrote a free function or a const member cannot be settled, because a member
+ * taking one operand and a free function taking two compile the same way once both are inlined.
+ * The free form is used here for the same reason the comparison operators use the member form,
+ * which is that one of the two has to be chosen.
+ *
+ * @param left The string the result starts with.
+ * @param right The string appended to it.
+ * @return The concatenation.
+ */
+inline HxStr operator+(const HxStr &left, const HxStr &right) {
+    HxStr result(left);
+    result += right;
+    return result;
+}
+
+/**
+ * Concatenate a string and a C string.
+ *
+ * Recovered on the same evidence as the overload above, from the triple at `0x0017a80c` through
+ * `0x0017a824` and the one at `0x0038b1d4` through `0x0038b1ec` in
+ * Rnd::MetScreen::ResolveContainerViews(). The middle call of each triple is the C string
+ * operator+=() at `0x0010edb0` rather than the string one at `0x004b7c68`, which is what
+ * distinguishes this overload from a call site converting its operand first.
+ *
+ * @param left The string the result starts with.
+ * @param pszRight The text appended to it.
+ * @return The concatenation.
+ */
+inline HxStr operator+(const HxStr &left, const char *pszRight) {
+    HxStr result(left);
+    result += pszRight;
+    return result;
+}
+
+/**
  * Substitute an empty HxStr passes in place of a null buffer.
  *
  * A string whose mStr is null is the empty representation, and a caller handing that string to an

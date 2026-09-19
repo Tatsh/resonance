@@ -102,6 +102,49 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector);
 SectorCacheRow *SectorCacheGetLru(int nFile, int nSector);
 
 /**
+ * Lock the row buffering a chunk against reuse.
+ *
+ * The search repeats SectorCacheFind() inline, stamp bump included, and the chosen row then takes
+ * kSectorCacheLocked. A miss is reported through LogPrintf() and otherwise ignored. Nothing in the
+ * image calls this routine, so it is dead code in the shipped build.
+ *
+ * @param nFile The buffered file.
+ * @param nSector The buffered chunk index.
+ * @ghidraAddress 0x005552f0
+ */
+void LockCachedSector(int nFile, int nSector);
+
+/**
+ * Lock one row against reuse.
+ *
+ * The routine exists out of line because a caller in the asynchronous loader already has the row.
+ *
+ * @param pRow The row to lock.
+ * @ghidraAddress 0x00555398
+ */
+void SetSectorRowLocked(SectorCacheRow *pRow);
+
+/**
+ * Release the lock on the row buffering a chunk.
+ *
+ * The search repeats SectorCacheFind() inline, whose stamp bump is skipped because a locked row
+ * stamp equals kSectorCacheLocked. Writing the current clock into the row both unlocks it and
+ * makes it the newest. A miss is reported through LogPrintf() and otherwise ignored.
+ *
+ * @param nFile The buffered file.
+ * @param nSector The buffered chunk index.
+ * @ghidraAddress 0x005553a8
+ */
+void UnlockCachedSector(int nFile, int nSector);
+
+/**
+ * Print every row through LogPrintf().
+ *
+ * @ghidraAddress 0x005554a0
+ */
+void DumpSectorCache();
+
+/**
  * Number of rows the cache was built with.
  *
  * @ghidraAddress 0x008de790

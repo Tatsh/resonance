@@ -95,6 +95,48 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
     return nullptr;
 }
 
+// 0x005552f0
+void LockCachedSector(int nFile, int nSector) {
+    // The inlined search advances the clock over the row it finds, and the sentinel below then
+    // replaces the value it wrote. One clock tick is therefore spent for nothing.
+    SectorCacheRow *pRow = SectorCacheFind(nFile, nSector);
+    if (pRow == nullptr) {
+        LogPrintf("UNABLE TO LOCK SECTOR %d\n", nSector);
+        return;
+    }
+    pRow->mStamp = kSectorCacheLocked;
+}
+
+// 0x00555398
+void SetSectorRowLocked(SectorCacheRow *pRow) {
+    pRow->mStamp = kSectorCacheLocked;
+}
+
+// 0x005553a8
+void UnlockCachedSector(int nFile, int nSector) {
+    SectorCacheRow *pRow = SectorCacheFind(nFile, nSector);
+    if (pRow == nullptr) {
+        LogPrintf("CAN'T FIND SECTOR IN CACHE TO UNLOCK!!!!\n");
+        return;
+    }
+    pRow->mStamp = g_nSectorCacheClock;
+    ++g_nSectorCacheClock;
+}
+
+// 0x005554a0
+void DumpSectorCache() {
+    LogPrintf("SECTOR CACHE:\n");
+    for (int i = 0; i < g_nSectorCacheRows; ++i) {
+        SectorCacheRow *pRow = &g_pSectorCacheRows[i];
+        LogPrintf("%d:  id:%d, sector:%d, timestamp:$%x, p:%p\n",
+                  i,
+                  pRow->mFile,
+                  pRow->mSector,
+                  pRow->mStamp,
+                  pRow->mBuffer);
+    }
+}
+
 SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
     unsigned nOldest = kSectorCacheStampCeiling;
     SectorCacheRow *pChosen = nullptr;
