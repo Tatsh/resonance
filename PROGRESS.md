@@ -16,13 +16,13 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                      | Count  |
 | ---------------------------- | ------ |
-| Functions in the program     | 15,526 |
-| Excluded by rule             | 6,258  |
+| Functions in the program     | 15,528 |
+| Excluded by rule             | 6,259  |
 | Reconstructable              | 9,269  |
-| Accounted for in source      | 2,368  |
-| Share of the reconstructable | 25.55% |
-| Remaining, with a name       | 2,283  |
-| Remaining, unidentified      | 4,618  |
+| Accounted for in source      | 2,476  |
+| Share of the reconstructable | 26.71% |
+| Remaining, with a name       | 2,220  |
+| Remaining, unidentified      | 4,573  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -67,18 +67,30 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 Every figure below is produced by a command rather than asserted. No target compiler is available.
 Verification therefore stops at syntax and formatting.
 
-| Check                          | Status  |
-| ------------------------------ | ------- |
-| Headers compiling standalone   | 420/420 |
-| Sources passing a syntax check | 251/251 |
+| Check                                | Status  |
+| ------------------------------------ | ------- |
+| Headers compiling standalone         | 408/433 |
+| Sources compiling                    | 291/297 |
+| Address annotations with no function | 0       |
+| Lines over 100 characters            | 0       |
+
+Both shortfalls are the same gap and neither is a defect. 25 headers under `include/script` and 6
+sources under `src/script` need the embedded interpreter's own `Python.h`, and this tree carries only
+the interpreter's differences rather than its headers. The host's Python 3 headers would report
+errors against Python 2 API use that describe nothing about the reconstruction. Every failure is
+confined to that one subsystem, which was verified by listing the failures and finding none outside
+it.
+
+Sources are measured by `.wiswa-ci/freq/syntax_check.sh`, which compiles each one with `-Wall
+-Wextra` against ps2sdk and a small set of stand-ins for the Sony SDK headers ps2sdk lacks. Use that
+script rather than a hand-written compiler line. Two bands reported a clean result from their own
+line, and neither reproduced: one depended on stand-ins that existed only in its own scratchpad, and
+the other was not passing the warning flags over reconstructed code at all.
 
 The figures read the working tree rather than the commit history, so they lead it. A routine counts
 as accounted the moment its annotation is written to disk, which is before the change is committed
 and often before the agent that wrote it has reported. A commit landing several hundred lines can
 therefore move the share by almost nothing, because the measurement had already seen the file.
-Three bands landing together moved it by three routines for exactly that reason.
-| Address annotations with no function | 0 |
-| Lines over 100 characters | 0 |
 | `clang-format` differences | 0 |
 
 Two changes to what the audit counts are recorded here rather than folded into the figure
