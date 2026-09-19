@@ -11,8 +11,13 @@
  * offset 0. It overrides the widest set of the three subclasses, slots 1, 5 through 14, and 16
  * through 19, and supplies slot 20, which no other subclass does.
  *
- * Its own members start at `+0x2c` of the derived object and include a second span at `+0x48` and
- * `+0x4c` that slot 20 walks. Neither is recovered further, so no member is declared here yet.
+ * The object is 0x64 bytes. Its own members follow the base at `+0x3c` and are recovered from the
+ * helper at `0x00129150`, which is the only routine that reads all four and the reason three of
+ * this class's slots could not be written before it was decoded. That helper advances a window
+ * forward over the source span and records how far it has advanced.
+ *
+ * The earlier note that the members start at `+0x2c` was wrong. The base occupies 0x3c bytes, and
+ * `+0x2c` is the base's fourth vector rather than anything of this class.
  */
 class PlayMapLinear : public PlayMap {
 public:
@@ -112,4 +117,45 @@ public:
      * @ghidraAddress 0x00128c38
      */
     virtual void Slot20();
+
+protected:
+    /**
+     * One element of the window, a value from the source span paired with a flag.
+     *
+     * Eight bytes. The helper builds each one from a word of mUnknown58 and sets the flag to 1,
+     * and nothing recovered so far sets it to anything else or reads it back, so the flag's
+     * purpose is unrecovered and only its initial value is known.
+     */
+    struct Entry {
+        int mValue;
+        int mFlag;
+    };
+
+    /**
+     * Advance the window until slot 8 passes the limit, then drop what it has passed.
+     *
+     * Non-virtual, and every one of slots 5, 12, and 13 calls it twice with its own argument before
+     * doing anything else. The growth half appends one element to mUnknown48 from slot 8's result
+     * and one Entry to mUnknown3c per element of mUnknown58, and the test is at the top of the loop
+     * so the body can run zero times. Slot 8 is dispatched through the table rather than called
+     * directly, so a further subclass would change what the loop grows towards.
+     *
+     * The trim half drops as many leading elements from mUnknown3c and mUnknown48 as mUnknown58
+     * holds, and adds that count to mUnknown54. Its guard compares a byte offset against an
+     * element count, which both the disassembly and the decompiler agree on, so the trim fires
+     * only once mUnknown3c is more than eight times the length of mUnknown58.
+     *
+     * @param nLimit The value slot 8 must exceed for the growth to stop.
+     * @ghidraAddress 0x00129150
+     */
+    void GrowPastLimit(int nLimit);
+
+    // Declared in recovered offset order, all four from the helper above.
+    std::vector<Entry> mUnknown3c; // +0x3c
+    std::vector<int> mUnknown48;   // +0x48
+    // Running count of elements the trim has dropped from the front of the two vectors above.
+    int mUnknown54; // +0x54
+    // The source the window is built from. Its element is eight bytes and only the first word is
+    // read, so the second word's purpose is unrecovered.
+    std::vector<Entry> mUnknown58; // +0x58
 };
