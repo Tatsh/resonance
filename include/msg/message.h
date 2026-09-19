@@ -2,6 +2,9 @@
 
 #include <iostream.h>
 
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
+
 /**
  * Base of every event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,13 +12,27 @@
  * compiler-generated vptr lands at offset 0 and every derived message adds its payload after it.
  * The RTTI lists 124 derived classes, among them ScriptMsg, GemMsg, LeaveGameMsg, and Packet.
  *
- * All four virtuals are recovered, and the table order gives the declaration order. Every one of
- * them was read off the concrete implementations rather than off the declaration: a scan of the
- * derived tables found 80 classes that implement Clone(), Type(), and Name(), while Packet and
- * eight others inherit all three as pure and are therefore abstract themselves.
+ * Every vtable in the family is eight entries, and the declaration order below reproduces the
+ * order after the compiler-generated slot 0. Each one was read off the concrete implementations
+ * rather than off the declaration: a scan of the derived tables found 80 classes that implement
+ * Clone(), Type(), and Name(), while Packet and eight others inherit all three as pure and are
+ * therefore abstract themselves.
+ *
+ * Slots 5, 6, and 7 all address a two-instruction `jr ra` stub in this class, at `0x001051f0`,
+ * `0x001051f8`, and `0x00105200`. Every translation unit that destroys a message emits its own
+ * copy of all three stubs after its copy of the destructor, which is a second measurement of the
+ * count.
  *
  * The three pure virtuals follow one pattern per class. LeaveGameMsg at `0x00812078` and GemMsg at
  * `0x00812588` are the two worked examples cited below.
+ *
+ * A concrete message also supplies a static New() that returns a default-constructed instance on
+ * the heap, and the translation unit at `0x003d9818` registers 92 of them against the identity
+ * Type() reports. Each registration constructs one file-scope object of a 4-byte class with the
+ * identity word immediately below it, passing the identity and the factory to a constructor at
+ * `0x00555948` that appends the pair to a sorted vector and stores nothing in the object. That
+ * class has no RTTI descriptor, no vtable, and no string anywhere in the image, so it is not
+ * titled here rather than being given an invented name.
  */
 class Message {
 public:
@@ -65,4 +82,34 @@ public:
      * @ghidraAddress 0x001051f0
      */
     virtual void Print(ostream &stream);
+
+    /**
+     * Write this message's payload to an output stream.
+     *
+     * Vtable slot 6. The default does nothing. An override copies each field into a temporary and
+     * hands the temporary to OBStream::Write(), chaining on the stream the call returns, which is
+     * how PSJoinRequestPacket's override at `0x003e5538` writes its four words and then delegates
+     * its FreqAppearance member to that class's own slot 2. The verb is inferred from the shape
+     * and from the position ahead of the reading half, since nothing in the image titles either
+     * slot.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x001051f8
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read this message's payload from an input stream.
+     *
+     * Vtable slot 7. The default does nothing. An override passes the address of each field
+     * straight to IBStream::Read() so that the transfer fills the field in place, which is how
+     * PSJoinRequestPacket's override at `0x003e5638` reads its four words and then delegates its
+     * FreqAppearance member to that class's own slot 3. Twenty-two of the classes that override
+     * this pair are packets and four are MIDI messages, so the pair is the wire format rather
+     * than a diagnostic.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x00105200
+     */
+    virtual void Load(IBStream &stream);
 };
