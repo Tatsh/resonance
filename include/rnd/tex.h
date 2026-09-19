@@ -48,6 +48,32 @@ public:
      */
     Tex(const HxStr &name);
 
+    /** @ghidraAddress 0x004e7628 */
+    virtual ~Tex();
+
+    // Rnd::Object leaves slots 3 through 7 pointing at the shared pure-virtual handler at
+    // `0x005381a8` and gives slot 2 a body of its own at `0x0053e5a8`. Every one of the six below
+    // is a distinct `rndtex.cpp` body in the Rnd::Tex table, so the class declares all six and is
+    // not abstract. Rnd::PsTex repeats them byte-identically, which is to say it inherits them.
+
+    /** @ghidraAddress 0x004e4738 */
+    virtual void DumpText(FailSink &sink);
+
+    /** @ghidraAddress 0x004e4910 */
+    virtual void Save(Stream &stream);
+
+    /** @ghidraAddress 0x004e7610 */
+    virtual void Replace(Object *pFrom, Object *pTo);
+
+    /** @ghidraAddress 0x004e7618 */
+    virtual const HxStr &ClassName() const;
+
+    /** @ghidraAddress 0x004e79f0 */
+    virtual void Copy(const Object *pSource, unsigned nFlags);
+
+    /** @ghidraAddress 0x004e4a20 */
+    virtual void Load(Stream &stream);
+
     /**
      * Report whether every requested mip level has finished loading.
      *
@@ -114,6 +140,33 @@ public:
      * @ghidraAddress 0x004e7aa8
      */
     virtual void FreeLoadedBitmaps();
+
+    /** Texture function, the GS `TEX0.TFX` field, which decides how a texel meets the vertex. */
+    enum TexFunc {
+        kTexFuncModulate = 0,  /*!< Texel times vertex colour. */
+        kTexFuncDecal = 1,     /*!< Texel alone. */
+        kTexFuncHighlight = 2, /*!< Texel plus vertex colour. */
+        kTexFuncHighlight2 = 3 /*!< Texel plus vertex colour, alpha from the texel. */
+    };
+
+    /**
+     * Make the texture current on the GS, with the given texture function.
+     *
+     * Waits for the outstanding mip reads, then reports false when no mip 0 bitmap or no residency
+     * entry exists. Otherwise it flushes the pending uploads, merges the texture function into
+     * TEX0, refreshes the CLUT base page and uploads the CLUT when a palette slot exists, refreshes
+     * TBP0, and programs TEX0_1 and TEX1_1. MIPTBP1_1 follows when the texture has more than one
+     * level and MIPTBP2_1 when it has more than four.
+     *
+     * The method is not virtual, and it appears in no vtable. Only the platform translation unit
+     * supplies a body, which is why a call through a Rnd::Tex pointer resolves here rather than to
+     * anything the subclass declares.
+     *
+     * @param nTexFunc The texture function, of which the low two bits reach TEX0.
+     * @return True once the texture is resident and bound.
+     * @ghidraAddress 0x00598000
+     */
+    bool BindToGsSlot(unsigned nTexFunc);
 
     /**
      * Lock the bitmap of one mip level for direct access.
