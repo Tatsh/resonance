@@ -46,8 +46,11 @@ public:
     /**
      * Deliver a message to every registered sink, in registration order.
      *
-     * The member is not virtual. The table at `0x00829b18` runs to its terminator after
-     * RemoveSink(), and every one of the hundreds of call sites is a direct call.
+     * The member is not virtual. This class's own table is at `0x008299f0` and runs to its
+     * terminator after RemoveSink(), and every one of the hundreds of call sites is a direct call.
+     * The table at `0x00829b18`, recorded here previously, belongs to the MsgSource subobject of
+     * MsgQueue rather than to this class. The conclusion holds for either table, because neither
+     * has a further entry.
      *
      * The loop reloads the vector's finish pointer on each iteration. A sink that registers a
      * further sink while receiving the message is therefore still included. Delivery to one sink
