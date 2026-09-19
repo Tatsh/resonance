@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "game/playmap.h"
 
 /**
@@ -24,11 +26,29 @@ public:
     /** @ghidraAddress 0x0012ba88 */
     virtual void Slot4();
 
-    /** @ghidraAddress 0x0012d500 */
-    virtual void Slot5();
+    /**
+     * Maps the position into one turn of the repeating ring.
+     *
+     * The body is not reconstructed.
+     *
+     * @param nValue The position to map.
+     * @return The mapped position.
+     * @ghidraAddress 0x0012d500
+     */
+    virtual int Slot5(int nValue);
 
-    /** @ghidraAddress 0x0012be68 */
-    virtual void Slot6();
+    /**
+     * Collects every position of one span into mUnknown2c.
+     *
+     * The body is not reconstructed.
+     *
+     * @param nStart The first position.
+     * @param nMin The lowest position to collect.
+     * @param nEnd The position to stop below.
+     * @return mUnknown2c.
+     * @ghidraAddress 0x0012be68
+     */
+    virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd);
 
     /** @ghidraAddress 0x0012bc48 */
     virtual void Slot15();

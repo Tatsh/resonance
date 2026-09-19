@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "game/playmap.h"
 
 /**
@@ -17,11 +19,29 @@ public:
     /** @ghidraAddress 0x0012a4d8 */
     virtual ~PlayMapLinear();
 
-    /** @ghidraAddress 0x0012ad58 */
-    virtual void Slot5();
+    /**
+     * Maps the position through the linear sequence.
+     *
+     * The body is not reconstructed. It calls two helpers at `0x00129150` and `0x0012ade8`, indexes
+     * three of the object's tables with the result, and finishes with a remainder, so the mapping
+     * is table-driven rather than the single wrap PlayMapRing performs.
+     *
+     * @param nValue The position to map.
+     * @return The mapped position.
+     * @ghidraAddress 0x0012ad58
+     */
+    virtual int Slot5(int nValue);
 
-    /** @ghidraAddress 0x00128d08 */
-    virtual void Slot6();
+    /**
+     * Collects every position of one span into mUnknown2c.
+     *
+     * @param nStart The first position.
+     * @param nMin The lowest position to collect.
+     * @param nEnd The position to stop below.
+     * @return mUnknown2c.
+     * @ghidraAddress 0x00128d08
+     */
+    virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd);
 
     /** @ghidraAddress 0x0012ae88 */
     virtual int Slot7(int nValue);

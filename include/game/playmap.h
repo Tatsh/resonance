@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
+
+#include "os/hxstr.h"
 
 /**
  * Traversal order over one playable sequence.
@@ -23,10 +26,21 @@
  * pure-virtual stub, so all three are concrete, which also settles a question raised while they
  * were recovered: no fourth subclass is missing, and the harvest records exactly these three.
  *
- * The object is 0x3c bytes with the vptr at `+0x38`. Its four vectors are recovered from the
- * destructor at `0x00127158`, which tears them down at `+0x2c`, `+0x1c`, `+0x10`, and `+0x04` and
- * so fixes their declaration order as the reverse. Element widths come from the shift each
- * teardown uses to divide the byte span.
+ * The object is 0x3c bytes with the vptr at `+0x38`. A leaf class with no base places its vptr
+ * after its data members under this toolchain, which is why the pointer is last rather than first.
+ * Its four vectors are recovered from the destructor at `0x00127158`, which tears them down at
+ * `+0x2c`, `+0x1c`, `+0x10`, and `+0x04` and so fixes their declaration order as the reverse.
+ * Element widths come from the shift each teardown uses to divide the byte span.
+ *
+ * The destructor body is empty. Everything the compiled destructor performs is the implicit
+ * teardown of those four members, and the release of the object itself sits behind the deleting
+ * flag this toolchain passes as a second argument. The declaration is real rather than implicit,
+ * because a leaf class with no base acquires a virtual destructor only when one is declared
+ * virtual.
+ *
+ * The class declares its own allocation pair. The release path of the destructor calls the tagged
+ * free with the literal `PlayMap` at `0x007d0dd0`, and a tag names the class that declares the
+ * operator.
  *
  * Every slot below whose verb is unrecovered keeps its table index as its title. The index is part
  * of the class layout, so a slot is declared whether or not its purpose is known, and the comment
@@ -35,25 +49,45 @@
 class PlayMap {
 public:
     /**
-     * One entry of the third vector.
+     * Allocate a map from the tagged heap under the tag `PlayMap`.
      *
-     * Eight bytes, of which the destructor releases the second word, so that word owns its
-     * allocation. Neither field's purpose is recovered.
+     * Unlike most classes in this tree the operator has an out-of-line body, which forwards the
+     * size the compiler supplies and the tag literal to the tagged allocator.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x00127118
      */
-    struct Entry {
-        int mUnknown00;   // +0x00
-        void *mUnknown04; // +0x04 released by ~PlayMap
-    };
+    void *operator new(size_t nSize);
+
+    /**
+     * Release a map to the tagged heap under the tag `PlayMap`.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x00127138
+     */
+    void operator delete(void *pBlock);
 
     /** @ghidraAddress 0x00127158 */
     virtual ~PlayMap();
 
     /**
-     * Slot 2. Shifts a position by the last element of mSteps.
+     * Slot 2. Appends one step, its distance from the previous step, and a label.
      *
+     * The body appends `nValue - mSteps.back()` to mUnknown10, then nValue to mSteps, then the
+     * label to mUnknown1c, so mUnknown10 stores the gap between consecutive steps and is always
+     * one element behind mSteps until this call completes. Reading mSteps.back() is unconditional,
+     * so the first call requires a step to already be present.
+     *
+     * The second parameter is passed by value. The body copy-constructs it into mUnknown1c through
+     * HxStr::HxStr(const HxStr &) at `0x004b7b50` and then releases the parameter's own buffer,
+     * which is this toolchain destroying a by-value class parameter in the callee.
+     *
+     * @param nValue The step position.
+     * @param strLabel The label, passed by value.
      * @ghidraAddress 0x001268b0
      */
-    virtual void Slot2(int nPosition, int nArg);
+    virtual void Slot2(int nValue, HxStr strLabel);
 
     /**
      * Slot 3. Stores its argument in mUnknown00 and does nothing else.
@@ -69,11 +103,36 @@ public:
      */
     virtual void Slot4();
 
-    /** Slot 5. Pure here; every subclass overrides it. */
-    virtual void Slot5() = 0;
+    /**
+     * Slot 5. Maps a position into the sequence, pure here and overridden by every subclass.
+     *
+     * The signature is recovered from both sides. Slots 12 and 13 forward their own argument
+     * without touching a1 and then consume the result in v0, and each override reads that argument
+     * and returns a value. PlayMapRing at `0x0012e408` returns `(nValue + mUnknown00) %
+     * mSteps.back()`, which is the wrap its name implies.
+     *
+     * Slots 12 and 13 take the delta for this dispatch into a0 rather than a1, which is what
+     * preserves the forwarded argument and is the reason the argument is recoverable at all.
+     *
+     * @param nValue The position to map.
+     * @return The mapped position.
+     */
+    virtual int Slot5(int nValue) = 0;
 
-    /** Slot 6. Pure here; every subclass overrides it. */
-    virtual void Slot6() = 0;
+    /**
+     * Slot 6. Collects the positions of one span into mUnknown2c, pure here.
+     *
+     * The signature comes from PlayMapRing at `0x0012dad8`, which clears mUnknown2c, walks a value
+     * from the first argument upward in steps of mSteps.back() while it remains below the third,
+     * appends every value not below the second, and returns the vector itself. The return is the
+     * address of the member, which is a reference in the original.
+     *
+     * @param nStart The first position.
+     * @param nMin The lowest position to collect.
+     * @param nEnd The position to stop below.
+     * @return mUnknown2c.
+     */
+    virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd) = 0;
 
     /**
      * Slot 7. Returns its argument unchanged.
@@ -110,11 +169,34 @@ public:
      */
     virtual int Slot11(int nValue);
 
-    /** @ghidraAddress 0x001276a0 */
-    virtual void Slot12();
+    /**
+     * Slot 12. Reports the index of the step at or before the position slot 5 returns.
+     *
+     * The body forwards its argument to slot 5 through the table, searches mSteps for the value
+     * that returns with an upper bound, and reports the distance from the start to the element
+     * before the result. Slot 5 is pure here, so the search key comes from whichever subclass is
+     * running.
+     *
+     * @param nValue The position to map through slot 5.
+     * @return The step index.
+     * @ghidraAddress 0x001276a0
+     */
+    virtual int Slot12(int nValue);
 
-    /** @ghidraAddress 0x00127700 */
-    virtual void Slot13();
+    /**
+     * Slot 13. Reports the same step index with a multiple of the last step folded in.
+     *
+     * The body performs the search slot 12 performs, forwarding the same argument to slot 5, and
+     * then adds `nTotal * (nValue - nValue % nTotal)` to the index, where nTotal is mSteps.back().
+     * Multiplying by nTotal after rounding nValue down to a multiple of nTotal scales the term by
+     * nTotal twice, which reads as an error and is what both the disassembly and the decompiler
+     * agree the binary computes.
+     *
+     * @param nValue The position to map through slot 5 and to fold in.
+     * @return The step index plus the folded term.
+     * @ghidraAddress 0x00127700
+     */
+    virtual int Slot13(int nValue);
 
     /**
      * Slot 14. Returns zero.
@@ -154,11 +236,12 @@ public:
 protected:
     // Declared in recovered offset order. Written by Slot3 and read nowhere yet recovered.
     int mUnknown00; // +0x00
-    // Slots 8 and 10 read the last element and the count of this one, which is the only vector
-    // whose use is recovered. Its element type is not.
+    // Slots 8, 10, 12, and 13 read the last element, the count, and an upper bound over this one,
+    // and slot 2 appends to it, so it stores an ascending sequence of positions. The element type
+    // is int, from the four-byte stride of every access.
     std::vector<int> mSteps;       // +0x04
     std::vector<int> mUnknown10;   // +0x10
-    std::vector<Entry> mUnknown1c; // +0x1c
+    std::vector<HxStr> mUnknown1c; // +0x1c
     int mUnknown28;                // +0x28
     std::vector<int> mUnknown2c;   // +0x2c
 };
