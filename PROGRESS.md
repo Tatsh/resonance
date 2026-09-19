@@ -16,13 +16,13 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                      | Count  |
 | ---------------------------- | ------ |
-| Functions in the program     | 14,963 |
-| Excluded by rule             | 3,917  |
-| Reconstructable              | 11,046 |
-| Accounted for in source      | 1,744  |
-| Share of the reconstructable | 15.79% |
-| Remaining, with a name       | 2,214  |
-| Remaining, unidentified      | 7,088  |
+| Functions in the program     | 15,357 |
+| Excluded by rule             | 3,801  |
+| Reconstructable              | 11,556 |
+| Accounted for in source      | 2,048  |
+| Share of the reconstructable | 17.72% |
+| Remaining, with a name       | 2,378  |
+| Remaining, unidentified      | 7,130  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -55,12 +55,12 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 822   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 563   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,172 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 248   | Container instantiations                                         |
+| Vendored upstream              | 565   | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 2,011 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 286   | Container instantiations                                         |
 | Platform SDK                   | 33    | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 43    | Exception, cast, and unwinding support                           |
-| C runtime                      | 36    | String and memory routines, and the floating-point library       |
+| C runtime                      | 41    | String and memory routines, and the floating-point library       |
 
 ## Verification
 
@@ -69,11 +69,21 @@ Verification therefore stops at syntax and formatting.
 
 | Check                                | Status  |
 | ------------------------------------ | ------- |
-| Headers compiling standalone         | 349/349 |
-| Sources passing a syntax check       | 181/181 |
-| Address annotations with no function | 1       |
+| Headers compiling standalone         | 397/397 |
+| Sources passing a syntax check       | 235/235 |
+| Address annotations with no function | 0       |
 | Lines over 100 characters            | 0       |
 | `clang-format` differences           | 0       |
+
+Two changes to what the audit counts are recorded here rather than folded into the figure
+silently. The function list grew by 393 routines, because a vtable slot points at its class's
+virtual function whether or not the disassembler has claimed the bytes, and claiming those raises
+the reconstructable total. And the annotation scanner now recognises the bare comment a file-local
+routine is tied by, not only the Doxygen tag. The tag belongs on a public declaration, so a routine
+with no header declaration cannot carry one, and 165 fully reconstructed routines were invisible to
+the audit for that reason. The scanner requires the comment to sit on its own line with a
+definition following it, which is what separates a routine marker from a comment merely mentioning
+an address.
 
 A header is checked on its own, through a translation unit that includes nothing else. That catches
 a break in a header which no implementation file happens to include.
@@ -172,6 +182,19 @@ overrides of one pure virtual.
 
 The surplus members carry titles of the form `UnidentifiedBody<address>Copy<n>`. That form asserts
 nothing about behaviour. It records which address the body repeats, and nothing more.
+
+A second pass of the same kind was over-applied and is also corrected. Titling a routine as a
+class's allocation operator required only that it call the tagged allocator with a class tag, and
+that is not sufficient: a clone allocates through that allocator and a destructor releases through
+it, so both reference the tag without being the operator. Of 287 routines titled that way, 138 are
+the genuine eight-instruction forwarder, 95 occupy a vtable slot that names their real owner and
+were retitled from it, and 54 had no evidence behind any title and were returned to placeholders.
+
+One further correction goes beyond the duplicate rule. Where a trivial destructor is implicitly
+declared, the source owes no definition at all rather than one, because the compiler generates it.
+The eighty-five identical copies of one such destructor in the message subsystem therefore owe
+nothing, and forty-seven of them are separate classes' destructors that coincide byte for byte
+through storing the shared base pointer.
 
 One rule behind that marking was wrong and is corrected. The pass accepted a cluster as one routine
 emitted many times whenever the body was long enough for coincidence to look implausible. Length
