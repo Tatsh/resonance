@@ -139,13 +139,15 @@ public:
     static Command *NewCommand(int nCmdID);
 
     /**
-     * Non-zero once the scheduler has queued this command through its deferred path.
+     * Non-zero while the command sits in the scheduler's queue.
      *
      * Public because the scheduler writes it from outside the hierarchy and the image exposes no
-     * accessor. The deferred queueing path writes 1 at `0x004ac768` and the run loop writes 0 at
-     * `0x004aae70` as soon as Sch::TimedCommand::Run() has returned. The immediate queueing path
-     * at `0x004ac608` does not write it at all. No instruction in the image reads the member. The
-     * title is therefore inferred from the two writes rather than from a test.
+     * accessor, and it writes it through the Sch::TimedCommand that refers to the command rather
+     * than through the command itself. Three writes exist. The delta queueing path writes 1 at
+     * `0x004ac768`, the stream playback path writes 1 at `0x004ac7c8` before it queues, and the run
+     * loop writes 0 at `0x004aae84` as soon as Sch::TimedCommand::Run() has returned. The absolute
+     * queueing path at `0x004ac608` does not write it at all. No instruction in the image reads the
+     * member. The title is therefore inferred from the three writes rather than from a test.
      *
      * +0x08
      */

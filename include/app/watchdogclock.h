@@ -1,11 +1,15 @@
 #pragma once
 
 /**
- * Millisecond clock that a Watchdog measures its operations against.
+ * Clock the scheduler reads its due times from, in nanoseconds.
  *
  * The class is not polymorphic and has no RTTI, and its title is inferred from its one owner. Only
  * the member this reconstruction reads is recovered; the rest of the 0x28-byte layout is recorded
  * as unknown words so that the offsets survive.
+ *
+ * The clock's own reading is in milliseconds and Now() returns nanoseconds. The scale is not a
+ * mystery constant: it is the double at `0x008263f8` divided by the 1000 that `0x00466360` returns,
+ * which is one million nanoseconds to the millisecond.
  *
  * mOriginMs is public because MainLoop::Poll() reads it directly and the image has no accessor for
  * it. It sits amid unrecovered words, so the members below are grouped by access rather than by

@@ -70,3 +70,19 @@ public:
      */
     virtual OBStream &Write(const void *pSrc, int nSize);
 };
+
+/**
+ * Write a truth value as one byte.
+ *
+ * The routine stores the low byte of its argument to the stack and moves a single byte through
+ * WriteBytes(). Its counterpart reads that byte back and stores a four-byte word, so the value is
+ * one byte on the wire and four bytes in memory. Whether the original declared the parameter as an
+ * int or as a bool of the four-byte width some builds of this compiler used cannot be settled from
+ * the transfer alone, and int is written here to match the width of the store.
+ *
+ * @param stream The stream to write to.
+ * @param bValue The value, of which only the low byte reaches the stream.
+ * @return The stream.
+ * @ghidraAddress 0x004edc80
+ */
+OBStream &operator<<(OBStream &stream, int bValue);

@@ -119,3 +119,18 @@ public:
     virtual ~IBStream() {
     }
 };
+
+/**
+ * Read a truth value from one byte.
+ *
+ * One byte arrives through ReadBytes() and the stored result is normalised to zero or one with an
+ * unsigned comparison against zero. The store is four bytes wide, which is what fixes the
+ * parameter's width; see the counterpart in `stream/obstream.h` for why the type is written as an
+ * int.
+ *
+ * @param stream The stream to read from.
+ * @param bValue Receives zero or one.
+ * @return The stream.
+ * @ghidraAddress 0x004edb78
+ */
+IBStream &operator>>(IBStream &stream, int &bValue);
