@@ -4,6 +4,7 @@
 #include "math/color.h"
 #include "math/sphere.h"
 #include "rnd/meshvert.h"
+#include "rnd/particle.h"
 
 namespace Rnd {
 
@@ -166,6 +167,32 @@ int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere);
  * @ghidraAddress 0x005837d0
  */
 void EmitEdgeVu1Setup(const float *pXfm, const Color &color);
+
+/**
+ * Emit the VU1 parameter quadwords for a particle pass.
+ *
+ * Takes no argument. The routine overwrites the first argument register with the packet write
+ * pointer before reading it, and the value the one call site leaves there is incidental. It
+ * returns nothing: the single exit leaves the advanced write pointer in the return register as a
+ * by-product of storing it, and the caller discards it.
+ *
+ * @ghidraAddress 0x005839d0
+ */
+void EmitParticleVu1Setup();
+
+/**
+ * Pack a run of live particles into the shared draw buffer.
+ *
+ * Walks the linked live set from pFirst rather than the pool, and stops at nMaxParticles.
+ *
+ * @param pOutVerts Destination, normally g_aDrawVerts.
+ * @param nMode The point, line, or sprite mode of the emitting system.
+ * @param pFirst Head of the live particle list.
+ * @param nMaxParticles Population ceiling of the emitting system.
+ * @return Vertices packed, one per point particle and two per line or sprite particle.
+ * @ghidraAddress 0x00584980
+ */
+int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nMaxParticles);
 
 /**
  * Non-zero while fog is enabled.

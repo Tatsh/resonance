@@ -8,7 +8,8 @@
  * that reads the block is at `0x0049c0c0`.
  */
 struct RenderStats {
-    int mUnknown00;
+    /** Point particles submitted, advanced by the point path by the whole vertex count. */
+    int mnPoints;
     /** Meshes submitted, incremented by Rnd::PsMesh::DrawSelf(). */
     int mnMeshDraws;
     /** Triangles with at least one vertex outside a plane, counted before the drop tests. */
@@ -20,8 +21,10 @@ struct RenderStats {
     int mnEdgesClipped;
     /** Lines emitted, which stands to the edge count as mnTriangles does to the face count. */
     int mnLines;
-    int mUnknown1c;
-    int mUnknown20;
+    /** Sprite pairs rejected whole by the corner test. */
+    int mnSpritesCulled;
+    /** Sprites drawn, advanced per sprite and by the batch count in the VU1 path. */
+    int mnSpritesDrawn;
     /** Vertices transformed, advanced by both vertex transform passes by the run length. */
     int mnVertsTransformed;
     int mUnknown28;
