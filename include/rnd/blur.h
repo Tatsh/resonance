@@ -311,6 +311,13 @@ extern int g_nRndBlurLoadRevision;
  *
  * Init() fills it with NewBlur(), and the thunk the class registry stores loads it rather than
  * calling the factory directly, which is what lets a platform layer substitute a subclass.
+ * Rnd::Manager::Init() writes the hook a second time, at `0x00519c98`.
+ *
+ * A second dispatcher sits at `0x004c3398`. It loads the same hook and returns what the hook
+ * produced without the narrowing to Rnd::Object that the registered thunk at `0x004c34e0`
+ * performs, so it is the entry point a caller wanting a Rnd::Blur would use. Nothing in the image
+ * calls it, and the only reference to it is the exception range table at `0x008693d0`. Its title
+ * is not recoverable from the image, so this tree records its address rather than inventing one.
  *
  * @ghidraAddress 0x006fd250
  */

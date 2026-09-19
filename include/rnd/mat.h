@@ -105,6 +105,15 @@ public:
     /** @ghidraAddress 0x004dbb10 */
     virtual ~Mat();
 
+protected:
+    // Drop this material's reference on every stage texture. Walks mStages and calls
+    // Rnd::Object::RemoveRef() for each stage whose mTex is set. Both destructors in the hierarchy
+    // call it out of line, this class's at 0x004dbb10 and Rnd::PsMat's at 0x005915d4, which is the
+    // evidence for protected rather than private access. Copy() and Load() inline the same body
+    // instead of calling it. 0x004dcd20.
+    void RemoveStageTexRefs();
+
+public:
     /**
      * Write the material to the engine text sink.
      *
@@ -268,7 +277,8 @@ public:
     // Rnd::Font::ComputeCharUV at 0x004ca050 reads the vector's bounds through a Rnd::Mat pointer
     // from outside the hierarchy, divides the span by 96 to size it, and then reads the first
     // stage's texture. The image supplies no accessor. That is the same evidence that makes
-    // mSpecular public.
+    // mSpecular public. The assignment operator Copy() uses is instantiated out of line at
+    // 0x004d77d8, which is library code and has no body in this tree.
     std::vector<Stage> mStages; // +0x1c
 
 protected:

@@ -35,7 +35,9 @@ constexpr int kGlyphMipLockFlags = 1;
 constexpr int kAtlasStage = 0;
 
 // Titles the weight and the family are dumped under. The binary stores each table as a global of
-// pointers and passes the entry to Print() rather than to Format(), with no bound check.
+// pointers and passes the entry to Print() rather than to Format(), with no bound check. Both
+// tables sit in the same literal pool as g_fontClassName, the weight table at 0x006fecc0 and the
+// family table at 0x006fecd0.
 constexpr const char *kWeightTitles[] = {"Thin", "Normal", "Bold"};
 constexpr const char *kFamilyTitles[] = {"Modern", "Roman", "Swiss", "Script"};
 
@@ -66,19 +68,28 @@ const char *StringText(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-void PrintFontType(FailSink &sink, FontType type) {
-    // 0x004d07e0. A value outside the three produces nothing at all.
+// 0x004d07e0. A value outside the three produces nothing at all. The sink comes back out so that
+// the three printers chain, which is how DumpText() reaches them.
+FailSink *PrintFontType(FailSink &sink, FontType type) {
     switch (type) {
     case kFontTypeDefault:
-        sink.Print("Default");
-        break;
+        return sink.Print("Default");
     case kFontTypeBuiltin:
-        sink.Print("Builtin");
-        break;
+        return sink.Print("Builtin");
     case kFontTypeMaterial:
-        sink.Print("Material");
-        break;
+        return sink.Print("Material");
     }
+    return &sink;
+}
+
+// 0x004d0858
+FailSink *PrintFontWeight(FailSink &sink, FontWeight weight) {
+    return sink.Print(kWeightTitles[weight]);
+}
+
+// 0x004d0898
+FailSink *PrintFontFamily(FailSink &sink, FontFamily family) {
+    return sink.Print(kFamilyTitles[family]);
 }
 
 void PrintObjectRef(FailSink &sink, const Object *pObject) {
@@ -208,11 +219,11 @@ void Font::DumpText(FailSink &sink) {
         sink.Print(" height:");
         sink.Format("%d", mHeight);
         sink.Print(" weight:");
-        sink.Print(kWeightTitles[mWeight]);
+        PrintFontWeight(sink, mWeight);
         sink.Print("italic:");
         sink.Print(mItalic != 0 ? "true" : "false");
         sink.Print(" family:");
-        sink.Print(kFamilyTitles[mFamily]);
+        PrintFontFamily(sink, mFamily);
         sink.Print(" name:");
         sink.Format("%s", StringText(mName));
         sink.Print("\n");

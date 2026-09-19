@@ -369,14 +369,19 @@ Mat::Mat(const HxStr &name)
     mSpecular.a = 1.0f;
 }
 
-// 0x004dbb10
-Mat::~Mat() {
-    // The stage textures are the only references a material takes.
+// 0x004dcd20
+void Mat::RemoveStageTexRefs() {
     for (auto &stage : mStages) {
         if (stage.mTex != nullptr) {
             stage.mTex->RemoveRef(this);
         }
     }
+}
+
+// 0x004dbb10
+Mat::~Mat() {
+    // The stage textures are the only references a material takes.
+    RemoveStageTexRefs();
 }
 
 // 0x004d0f78

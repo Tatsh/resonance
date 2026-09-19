@@ -24,17 +24,19 @@ enum FontType { kFontTypeDefault = 0, kFontTypeBuiltin = 1, kFontTypeMaterial = 
 /**
  * Stroke weight of a Builtin font.
  *
- * The three titles come from the table of format strings at `0x006fecc0`, which DumpText() indexes
- * with mWeight. A fourth table slot stores a null pointer, so a value of 3 writes nothing and a
- * value above 3 reads past the table.
+ * The three titles come from the table of pointers at `0x006fecc0`, which the printer at
+ * `0x004d0858` indexes with mWeight and hands straight to FailSink::Print() with no bound check.
+ * A fourth word follows the three and reads zero. The family table begins at the next quadword
+ * boundary, so that word is as likely to be alignment padding as a null element, and the source
+ * below writes three entries.
  */
 enum FontWeight { kFontWeightThin = 0, kFontWeightNormal = 1, kFontWeightBold = 2 };
 
 /**
  * Typeface family of a Builtin font.
  *
- * The four titles come from the table of format strings at `0x006fecd0`, which DumpText() indexes
- * with mFamily.
+ * The four titles come from the table of pointers at `0x006fecd0`, which the printer at
+ * `0x004d0898` indexes with mFamily.
  */
 enum FontFamily {
     kFontFamilyModern = 0,
@@ -297,6 +299,14 @@ private:
     // Measured metrics, one entry per distinct character of mChars, keyed by the character itself.
     // The key is read with a signed byte load at every comparison site, so a character above 127
     // sorts before every ASCII one.
+    //
+    // Seven of the tree operations are instantiated out of line, and all seven are library code
+    // that this tree writes no body for. For this map they are the insert helper at 0x004cdc50,
+    // insert() at 0x004ce040, the hinted insert at 0x004ce180, find() at 0x004ceb28, lower_bound()
+    // at 0x004d0d70, and the recursive subtree erase at 0x004d0d00. Load() builds a second,
+    // throwaway map of the revision 0 record over the same key type, whose insert helper is at
+    // 0x004ce318, whose insert() is at 0x004ce6e8, whose hinted insert is at 0x004ce828, and whose
+    // subtree erase is at 0x004d0db0.
     std::map<char, CharInfo> mCharMap; // +0x38
 
 public:

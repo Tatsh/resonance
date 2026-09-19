@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 
+#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
@@ -24,11 +25,27 @@ typedef Object *(*ClassFactory)(const HxStr &name);
 /**
  * Registry of every loaded renderer object, and of every class a `.rnd` file may instantiate.
  *
- * The class emits no RTTI descriptor, so it declares no virtual. Its title comes from the
- * allocation tag string "Rnd::Manager" at `0x00828f18`, which its own reports also use.
+ * The class emits no RTTI descriptor, so it declares no virtual. Its title is settled all the same,
+ * because the destructor at `0x00520348` passes the literal "Rnd::Manager" at `0x00826e98` to
+ * FreeTaggedMemory() as the tag for its own storage. Every other tag the renderer frees under is a
+ * class name the RTTI also carries, "Rnd::Button", "Rnd::Font", "Rnd::Mat", "Rnd::Mesh",
+ * "Rnd::Movie", and eleven more, so the vocabulary is the class-name vocabulary and this entry
+ * belongs to it. No embedded `__FILE__` corroborates it, because the whole image holds exactly one
+ * source path, `C:/FREQ/src/rndartt/abitmap.h`.
  *
- * The object is 0x1d bytes. Beyond mObjects it declares two `std::list` members at `+0x0c` and
- * `+0x10`, whose element types are unrecovered, and the class registry at `+0x14`.
+ * The object is 0x20 bytes, four members of 0x0c, 0x04, 0x04, and 0x0c. The highest store the
+ * constructor makes is the comparator byte of mClasses at `+0x1c`, and the four-member layout is
+ * what fills the rest.
+ *
+ * Both the default constructor at `0x005200c0` and the destructor at `0x00520348` are
+ * compiler-generated and therefore absent from this tree. The constructor default-constructs the
+ * four members and nothing else, and the destructor destroys them in reverse declaration order,
+ * mClasses, mMergeObjects, mLoaded, and then mObjects, before the tagged free. That order is the
+ * evidence for the member order declared below.
+ *
+ * Two further routines are library code rather than source. `0x0051fe58` is
+ * `mClasses.find()`, which Read() calls twice and Create() calls once, and `0x0051f798` is the
+ * printer DumpText() hands the class registry to.
  *
  * Every Rnd::Object registers itself in mObjects on construction and erases that entry on
  * destruction, so Find() resolves any live object by name.
@@ -98,10 +115,27 @@ public:
     /**
      * Rewrite a type name that a file older than version 3 wrote.
      *
-     * The four mix-in titles were shortened for version 3, so `AnimObject` becomes `Animatable`,
-     * `DrawObject` becomes `Drawable`, `CollideObject` becomes `Collideable`, and `TransObject`
-     * becomes `Transformable`. A file at version 3 or above is not touched. The version comes from
-     * the global at `0x0089df90` rather than from an argument.
+     * Seven names were rewritten across four format revisions, and each rewrite applies only to a
+     * file below the revision that introduced it. The version comes from the global at `0x0089df90`
+     * rather than from an argument.
+     *
+     * | Below version | Old name        | New name        |
+     * | ------------- | --------------- | --------------- |
+     * | 3             | `AnimObject`    | `Animatable`    |
+     * | 3             | `DrawObject`    | `Drawable`      |
+     * | 3             | `CollideObject` | `Collideable`   |
+     * | 3             | `TransObject`   | `Transformable` |
+     * | 4             | `DrawRect`      | `Sprite`        |
+     * | 5             | `TexMovie`      | `Movie`         |
+     * | 6             | `MeshGenerator` | `Generator`     |
+     *
+     * The four mix-in rewrites are mutually exclusive, because the first that matches skips the
+     * other three. The last three are each tested on their own, so a file below version 4 runs all
+     * four gates in turn.
+     *
+     * Two of the old titles identify no class in the shipped registry. Nothing named `DrawRect`
+     * survives, and `TexMovie` is the earlier title of Rnd::Movie, which is what makes a movie the
+     * texture-streaming class it is.
      *
      * @param name The type name to rewrite in place.
      * @ghidraAddress 0x0051be08
@@ -183,6 +217,37 @@ public:
      */
     Object *Find(const HxStr &name);
 
+    /**
+     * Write the registry and every object in it to sink.
+     *
+     * The class registry comes first, as its entry count and then one line per entry. The objects
+     * follow, each writing its own description. A dump level below 2 stops after the objects a file
+     * created, and a level of 2 or above adds a second section for the objects the renderer created
+     * itself.
+     *
+     * No call site survives in the shipped program, so the routine is a debugging entry point
+     * rather than dead analysis.
+     *
+     * @param sink The diagnostic sink to write to.
+     * @ghidraAddress 0x0051ad98
+     */
+    void DumpText(FailSink &sink);
+
+    /**
+     * Destroy every registered object that a file created.
+     *
+     * Scans mObjects from the first key for an object whose mInternal is clear, destroys it, and
+     * starts the scan again, until only the objects the renderer created itself remain. Restarting
+     * is what makes the scan correct, because destroying an Rnd::Object erases its own entry from
+     * mObjects and invalidates the position the scan held.
+     *
+     * The title is inferred from the behaviour. No call site survives, and the predicate is the
+     * inverse of the one the address was first recorded under.
+     *
+     * @ghidraAddress 0x0051bf70
+     */
+    void DeleteLoadedObjects();
+
     std::map<HxStr, Object *> mObjects; /*!< Name to object. Public because Rnd::Object drives this
                                              tree directly from outside the class at three sites,
                                              an inlined lower_bound plus insert in its constructor
@@ -190,8 +255,11 @@ public:
                                              destructor, and the image exposes no accessor that
                                              hands the tree out. +0x00 */
 
-    // Read() empties mLoaded but never appends to it. The append is most likely the one at
-    // 0x0051a578 inside ResolveAndLinkObject, which is not yet reconstructed.
+    // Read() empties mLoaded but never appends to it. The append is the one at 0x0051a578, inside
+    // the resolve-and-link routine at 0x0051a428, which is confirmed rather than supposed: that
+    // routine loads this object from its first argument, clears the list through the same
+    // std::list clear the destructor uses, and then allocates one 0x10-byte node under the
+    // "stl_list" tag with an element size of 4. It is not yet reconstructed.
     std::list<Object *> mLoaded; /*!< Objects the last file load produced. Public because
                                       RndAsyncLoader::HarvestLoadedObjects() at `0x003f8460` copies
                                       it wholesale into its own request list and then classifies

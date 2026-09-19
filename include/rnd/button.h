@@ -130,9 +130,13 @@ private:
     int mState;  // +0x1c
     Mesh *mMesh; // +0x20
     Text *mText; // +0x24
-    // Materials the state selects among, for mMesh.
+    // Materials the state selects among, for mMesh. The assignment operator this class uses is
+    // instantiated out of line at 0x00533260.
     std::vector<Mat *> mMats; // +0x28
-    // Fonts the state selects among, for mText.
+    // Fonts the state selects among, for mText. Three of its operations are instantiated out of
+    // line, the assignment operator at 0x00533488, the grow-and-fill that insert() and resize()
+    // share at 0x00533f88, and the uninitialised fill that grow-and-fill calls at 0x00534fd0.
+    // All four addresses are library code, so no body for any of them appears in this tree.
     std::vector<Font *> mFonts; // +0x34
 };
 
@@ -187,6 +191,11 @@ void RegisterButtonClass();
 
 /**
  * Registered class name of Rnd::Button, the string "Button".
+ *
+ * The stub at `0x00534410` is the per-unit static-initialisation glue for this global, invoked
+ * with a priority of 0xffff. Called to initialise it constructs the string from the literal
+ * "Button" at `0x00828320`, and called to finalise it frees the buffer. The compiler emits the
+ * stub, so this tree writes no body for it, only the constructor argument above.
  *
  * @ghidraAddress 0x0071d8f8
  */
