@@ -18,6 +18,11 @@ namespace Rnd {
  * Animatable the `Rnd::Object` subobject sits at `+0x18`. The `-0x18` adjustment on every entry of
  * the second vtable confirms that placement.
  *
+ * The size is also pinned from outside the class, which is the stronger argument. `Rnd::TransAnim`
+ * and `Rnd::View` each derive from this class at offset 0 and place `Rnd::Drawable` at offset 0x18,
+ * so the next base begins exactly 0x18 bytes in. A constructor's highest store would only give a
+ * lower bound.
+ *
  * Two vtables belong to the class. The four-entry table at `0x0081e7f0` is addressed by the vptr
  * at `+0x14` and stores the three virtuals declared here. The nine-entry table at `0x0081e818` is
  * addressed by the `Rnd::Object` subobject vptr and stores the overrides of the `Rnd::Object`

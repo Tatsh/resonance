@@ -265,17 +265,20 @@ public:
      */
     void SetFlat(int nFlat);
 
+    // Rnd::Font::ComputeCharUV at 0x004ca050 reads the vector's bounds through a Rnd::Mat pointer
+    // from outside the hierarchy, divides the span by 96 to size it, and then reads the first
+    // stage's texture. The image supplies no accessor. That is the same evidence that makes
+    // mSpecular public.
+    std::vector<Stage> mStages; // +0x1c
+
 protected:
     // Every member below is protected rather than private. Rnd::PsMat writes four of the colours in
     // its setter overrides, and the material selection path in the same file reads the whole
-    // surface to build the GS register writes. Every field the engine changes has a setter, and
-    // none of those is reached from outside the hierarchy. The order below is the recovered offset
-    // order.
-    std::vector<Stage> mStages; // +0x1c
-    BlendMode mBlend;           // +0x28 Defaults to kBlendModeSrcAlpha.
-    Color mEmissive;            // +0x30 Defaults to black with full alpha.
-    Color mAmbient;             // +0x40 Defaults to white.
-    Color mDiffuse;             // +0x50 Defaults to white.
+    // surface to build the GS register writes. The order below is the recovered offset order.
+    BlendMode mBlend; // +0x28 Defaults to kBlendModeSrcAlpha.
+    Color mEmissive;  // +0x30 Defaults to black with full alpha.
+    Color mAmbient;   // +0x40 Defaults to white.
+    Color mDiffuse;   // +0x50 Defaults to white.
 
 public:
     // Both edge draw paths read this through a Rnd::Mat pointer from outside the hierarchy, and the
