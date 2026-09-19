@@ -85,7 +85,7 @@ int PlayMap::Slot14() {
 }
 
 // 0x00127468
-void PlayMap::Slot15() {
+void PlayMap::Slot15(int) {
 }
 
 // 0x00127470

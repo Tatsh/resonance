@@ -206,11 +206,16 @@ public:
     virtual int Slot14();
 
     /**
-     * Slot 15. Empty in this class.
+     * Slot 15. Empty in this class, and it takes an argument the empty body cannot reveal.
      *
+     * The body is `jr ra` and reads no argument register, which is no evidence about the parameter
+     * list. PlayMapRepeatRing's override at `0x0012bc48` multiplies a1 by a step gap before storing
+     * the result, so the member takes an int.
+     *
+     * @param nValue The multiplier the override applies to a step gap.
      * @ghidraAddress 0x00127468
      */
-    virtual void Slot15();
+    virtual void Slot15(int nValue);
 
     /**
      * Slot 16. Returns zero.

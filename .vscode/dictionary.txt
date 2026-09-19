@@ -35,6 +35,7 @@ codeop
 collideable
 collideables
 confstr
+counta
 coveragerc
 cpprtti
 cycl
