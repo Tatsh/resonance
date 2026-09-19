@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/github/license/Tatsh/resonance)](https://github.com/Tatsh/resonance/blob/master/LICENSE.txt)
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/resonance/v0.0.0/master)](https://github.com/Tatsh/resonance/compare/v0.0.0...master)
 [![Dependabot](https://img.shields.io/badge/Dependabot-enabled-blue?logo=dependabot)](https://github.com/dependabot)
+[![pages-build-deployment](https://github.com/Tatsh/resonance/actions/workflows/pages/pages-build-deployment/badge.svg)](https://tatsh.github.io/resonance/)
 [![Stargazers](https://img.shields.io/github/stars/Tatsh/resonance?logo=github&style=flat)](https://github.com/Tatsh/resonance/stargazers)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Tatsh/resonance/master.svg)](https://results.pre-commit.ci/latest/github/Tatsh/resonance/master)
 [![CMake](https://img.shields.io/badge/CMake-6E6E6E?logo=cmake)](https://cmake.org/)

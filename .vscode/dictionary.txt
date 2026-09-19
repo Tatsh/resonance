@@ -280,7 +280,6 @@ unrecovered
 unsuffixed
 updateworldxfm
 utime
-vedantmgoyal
 vendored
 venv
 vmadday
