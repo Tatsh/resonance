@@ -11,10 +11,10 @@ function list of the disassembler project. Update this file whenever a subsystem
 | Functions in the program    | 14,666 |
 | Excluded by rule            | 1,449  |
 | Reconstructable             | 13,217 |
-| Accounted for in source     | 717    |
-| Share of the reconstructable| 5.42%  |
-| Remaining, with a name      | 920    |
-| Remaining, unidentified     | 11,580 |
+| Accounted for in source     | 722    |
+| Share of the reconstructable| 5.46%  |
+| Remaining, with a name      | 921    |
+| Remaining, unidentified     | 11,574 |
 
 Exclusions are keyed on the name a function has. A routine therefore has to be identified before it
 can be excluded, and the reconstructable figure falls as identification proceeds. That figure is
@@ -40,8 +40,8 @@ Verification therefore stops at syntax and formatting.
 
 | Check                               | Status  |
 | ----------------------------------- | ------- |
-| Headers compiling standalone        | 162/162 |
-| Sources passing a syntax check      | 108/109 |
+| Headers compiling standalone        | 164/164 |
+| Sources passing a syntax check      | 109/109 |
 | Address annotations with no function | 0       |
 | Lines over 100 characters           | 0       |
 | `clang-format` differences          | 0       |
@@ -71,12 +71,13 @@ from the SDK is reconstructed.
 | Message and packet family| 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg` and seven routing intermediates. `ScriptMsg` alone is still partial |
 | Material, PlayStation 2  | `Rnd::PsMat` in full, including the blend mode table                |
 | Streams                  | File, buffer, memory, and tool streams                              |
+| Mesh, PlayStation 2      | `Sync` and all four draw paths, software and VU1                    |
+| GIF packet buffer        | Reservation, tag closing, and the scratchpad double buffer          |
 
 ### Partial
 
 | Area                      | What remains                                                        |
 | ------------------------- | ------------------------------------------------------------------- |
-| Mesh, PlayStation 2       | `Sync` and the four draw paths, now unblocked                        |
 | Texture, PlayStation 2    | Upload and bind bodies, pending the GS video memory manager          |
 | Graphics device           | Packet submission, pending the GS video memory manager               |
 | Art library              | `ABitmap` layout is recorded from the disassembler, not yet verified |
