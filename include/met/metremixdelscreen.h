@@ -2,7 +2,9 @@
 
 #include "met/listdataprovider.h"
 #include "met/metmemcardpickeruser.h"
+#include "met/metremixselection.h"
 #include "met/metsaveremix.h"
+#include "met/scrollinglist.h"
 
 /**
  * Screen that deletes a remix from a memory card.
@@ -20,15 +22,21 @@
  *
  * The constructor at `0x003394a0` takes only the renderer and the load priority. It runs the
  * MetSaveRemix constructor at `0x00372120` with `mcrd` for the screen name, `metagame/Shared` for
- * the directory, and `memcard_remix_del` for the container, writes its four vptrs, zeroes `+0xf4`,
- * `+0xfc`, `+0x100`, and `+0x104`, writes `+0x108` and `+0x120`, zeroes `+0x138` and `+0x13c`,
- * clears MetScreen::mUnknown60, and pushes `mem_del_remix` into the container object-name vector
- * that MetScreen owns. It also addresses a nested object through `+0x0c`, `+0x10`, and `+0x14` of a
- * register the disassembly does not resolve to a member, so the span from `+0x10c` to `+0x137` is
- * recorded as reserved.
+ * the directory, and `memcard_remix_del` for the container, writes its four vptrs, zeroes
+ * mUnknownf4, mUnknownfc, mUnknown100, and mUnknown104, default-constructs the two
+ * MetRemixSelection records, zeroes mUnknown138 and mUnknown13c, clears MetScreen::mUnknown60,
+ * and pushes `mem_del_remix` into the container object-name vector MetScreen declares at `+0x38`.
  *
- * The destructor at `0x003397a8` restores the four vptrs, restores the ListDataProvider vptr to
- * `0x007ec830`, runs the MetSaveRemix destructor, and releases the object with the tag `MsgSink`.
+ * An earlier reading recorded the span from `+0x10c` to `+0x137` as reserved, on the grounds that
+ * the constructor addresses a nested object through a register it could not resolve. The two
+ * registers are `+0x108` and `+0x120`, exactly 0x18 apart, and each receives the identical
+ * five-store run from the same empty literal at `0x00805ca8`. Both are MetRemixSelection records.
+ *
+ * The destructor at `0x003397a8` restores the four vptrs, deletes mUnknownf4 through slot 1 of a
+ * table at `+0x94` of the object itself, which is where ScrollingList places its vptr, releases
+ * the two record names in reverse order as compiler-generated member teardown, restores the
+ * ListDataProvider vptr to `0x007ec830`, runs the MetSaveRemix destructor, and releases the object
+ * with the tag `MsgSink`.
  *
  * Thirteen slots differ from the MetSaveRemix table. Slots 23 and 24 sit eight bytes apart at
  * `0x00343f18` and `0x00343f20` and are two-instruction `jr ra` stubs. Of the rest only the
@@ -59,34 +67,43 @@ public:
     virtual ~MetRemixDelScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the slide sound.
+     *
+     * All three overrides are two-instruction stubs, so each was written inline with an empty
+     * body.
+     *
      * @ghidraAddress 0x00343f28
      */
-    virtual void PlaySlideSound(int nSelector);
+    virtual void PlaySlideSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
      * @ghidraAddress 0x00343f18
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x00343f20
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
 private:
-    int mUnknownf0;  // +0xf0, not written by the constructor
-    int mUnknownf4;  // +0xf4
+    int mUnknownf0; // +0xf0, not written by the constructor
+    // Deleted by the destructor. +0xf4
+    ScrollingList *mUnknownf4;
     int mUnknownf8;  // +0xf8, not written by the constructor
     int mUnknownfc;  // +0xfc
     int mUnknown100; // +0x100
     int mUnknown104; // +0x104
-    int mUnknown108; // +0x108
-    // Span the constructor addresses through a register the disassembly does not resolve to a
-    // member. Not recovered.
-    unsigned char mUnknown10c[0x2c]; // +0x10c
-    int mUnknown138;                 // +0x138
-    int mUnknown13c;                 // +0x13c
+    // The two remixes the screen tracks. +0x108 and +0x120
+    MetRemixSelection mUnknown108;
+    MetRemixSelection mUnknown120;
+    int mUnknown138; // +0x138
+    int mUnknown13c; // +0x13c
 };

@@ -23,15 +23,51 @@
  * on for another 0x400 bytes of asset registration that is not recovered here. The classes of the
  * two owned objects and the element types of the two vectors and the lists are all undetermined,
  * so the whole span is recorded as reserved rather than typed.
+ *
+ * The one instance is created by the routine at `0x00255158`, which allocates exactly 0x84 bytes,
+ * runs the constructor, and records the result in the global at `0x006a0f30` that shared() reads.
+ * Creation and access are separate routines, so shared() does not construct on first use.
+ *
+ * The titles shared(), PollLoad(), and WaitForLoad() are inferred. No string in the image
+ * identifies any of them.
  */
 class MetFreqMakerAssetManager {
 public:
+    /**
+     * Return the one instance, or null before the routine at `0x00255158` has created it.
+     *
+     * The compiler also emitted an out-of-line copy of this accessor at `0x00254950`.
+     *
+     * @return The instance.
+     * @ghidraAddress 0x002551f0
+     */
+    static MetFreqMakerAssetManager *shared();
+
     /**
      * Release the owned assets, the two vectors, and the list run.
      *
      * @ghidraAddress 0x00250808
      */
     virtual ~MetFreqMakerAssetManager();
+
+    /**
+     * Advance the asset load by one step and report whether it has finished.
+     *
+     * A load already marked finished at `+0x10` reports success without doing work. Otherwise the
+     * routine polls the loader at `+0x0c` and returns false while that loader is still running.
+     *
+     * @return True once every asset is resident.
+     * @ghidraAddress 0x0024f798
+     */
+    bool PollLoad();
+
+    /**
+     * Block until PollLoad() reports the assets resident, waiting for vertical blank between
+     * attempts.
+     *
+     * @ghidraAddress 0x00255200
+     */
+    void WaitForLoad();
 
 private:
     // The 0x80-byte span the destructor walks. Its members are described in the class

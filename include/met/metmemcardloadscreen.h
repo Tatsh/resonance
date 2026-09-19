@@ -4,7 +4,24 @@
 
 #include "met/metmemcardpickeruser.h"
 #include "met/metmemdetectscreen.h"
+#include "os/hxstr.h"
 #include "rnd/object.h"
+
+/**
+ * One memory card the picker lists.
+ *
+ * The record is 24 bytes, which the stride of the destructor's teardown walk over mCards pins. Its
+ * teardown releases exactly one buffer, at `+0x08`, which is the inlined HxStr destructor over an
+ * HxStr at `+0x04`. The remaining twelve bytes are never touched by any routine of
+ * MetMemCardLoadScreen, so they are recorded as a reserved span. The record emits no RTTI
+ * descriptor and no literal identifies it, so the name here is inferred from its role.
+ */
+struct MetMemCardEntry {
+    int mUnknown00;   /*!< +0x00 */
+    HxStr mUnknown04; /*!< The one member the teardown releases. +0x04 */
+    /** Never written by a recovered routine, and not recovered. +0x0c */
+    unsigned char mUnknown0c[0xc];
+};
 
 /**
  * Screen that picks a memory card to load from.
@@ -27,8 +44,10 @@
  * directory, and `memcard_load` for the container, and pushes `mcl_card` into the container
  * object-name vector that MetScreen owns.
  *
- * The destructor at `0x002cbcc8` restores both vptrs, returns buffers to the pool, runs the
- * MetMemDetectScreen destructor, and releases the object with the tag `MsgSink`.
+ * The destructor at `0x002cbcc8` restores both vptrs, tears down mCards element by element and
+ * then the two Rnd::Object vectors, runs the MetMemDetectScreen destructor, and releases the
+ * object with the tag `MsgSink`. Every part of that teardown is compiler-generated member
+ * destruction, so no destructor body is reconstructed.
  *
  * Of the fifteen differing slots only the destructor has a recovered name. Slots 22 through 24 at
  * `0x002d1d80`, `0x002d1eb0`, and `0x002d1ef8` are real bodies rather than stubs, and the rest are
@@ -52,25 +71,38 @@ public:
     virtual ~MetMemCardLoadScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Play the slide sound while at least one card is listed.
+     *
+     * The override tests neither the selector nor any recorded selector of its own. It forwards to
+     * MetScreen with the same selector whenever mCards is not empty.
+     *
+     * @param nSelector Passed through to MetScreen unchanged.
      * @ghidraAddress 0x002d1f40
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the high sound.
+     *
+     * A two-instruction stub, so it was written inline with an empty body.
+     *
      * @ghidraAddress 0x002d1d80
      */
-    virtual void PlayHighSound(int nSelector);
+    virtual void PlayHighSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Play the cycle-left sound while more than one card is listed.
+     *
+     * @param nSelector Passed through to MetScreen unchanged.
      * @ghidraAddress 0x002d1eb0
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Play the cycle-right sound under the same condition as PlayCycleLeftSound().
+     *
+     * @param nSelector Passed through to MetScreen unchanged.
      * @ghidraAddress 0x002d1ef8
      */
     virtual void PlayCycleRightSound(int nSelector);
@@ -84,6 +116,7 @@ private:
     std::vector<Rnd::Object *> mUnknownc4; // +0xc4
     int mUnknownd0;                        // +0xd0
     int mUnknownd4;                        // +0xd4
-    std::vector<Rnd::Object *> mUnknownd8; // +0xd8
-    int mUnknowne4;                        // +0xe4
+    // The listed cards. All three sound overrides read its size. +0xd8
+    std::vector<MetMemCardEntry> mCards;
+    int mUnknowne4; // +0xe4
 };

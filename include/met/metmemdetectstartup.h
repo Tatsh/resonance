@@ -1,6 +1,7 @@
 #pragma once
 
 #include "met/fadeuser.h"
+#include "met/metfade.h"
 #include "met/metmemdetectscreen.h"
 
 /**
@@ -20,12 +21,13 @@
  * MetMemDetectScreen constructor with an **empty** screen name, `metagame/Shared` for the
  * directory, and `memdetect1` for the container. The empty screen name is the one in the
  * subsystem, and it makes the two animation views resolve as `_EE.anim` and `_BF.anim` with
- * nothing before the underscore. It then allocates a scalar block into mUnknowna4 through the
- * routine at `0x0016a1c8`.
+ * nothing before the underscore. MetLoadGameScreen uses an empty screen name as well. The
+ * constructor then builds mFade, the same MetFade that MetLoadGameScreen builds.
  *
- * The destructor at `0x002e2eb8` releases that block through MemFreeScalar, restores the FadeUser
- * vptr to `0x007ec070`, runs the MetMemDetectScreen destructor, and releases the object with the
- * tag `MsgSink`.
+ * The destructor at `0x002e2eb8` releases mFade through the scalar deallocator with no null test,
+ * which is what a delete expression compiles to for a class with no destructor, restores the
+ * FadeUser vptr to `0x007ec070`, runs the MetMemDetectScreen destructor, and releases the object
+ * with the tag `MsgSink`.
  *
  * Twelve slots differ from the MetMemDetectScreen table. Slots 20 through 25 sit eight bytes apart
  * at `0x002e2e00` through `0x002e2e28` and are two-instruction `jr ra` stubs, so this screen plays
@@ -50,41 +52,57 @@ public:
     virtual ~MetMemDetectStartup();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the slide sound.
+     *
+     * All six overrides are two-instruction stubs, so each was written inline with an empty body.
+     * This is the one screen in the subsystem that silences every MetScreen sound.
+     *
      * @ghidraAddress 0x002e2e00
      */
-    virtual void PlaySlideSound(int nSelector);
+    virtual void PlaySlideSound(int) {
+    }
 
     /**
+     * Silence the leave sound.
+     *
      * @ghidraAddress 0x002e2e08
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound() {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the high sound.
+     *
      * @ghidraAddress 0x002e2e10
      */
-    virtual void PlayHighSound(int nSelector);
+    virtual void PlayHighSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
      * @ghidraAddress 0x002e2e18
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x002e2e20
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the error sound.
+     *
      * @ghidraAddress 0x002e2e28
      */
-    virtual void PlayErrorSound(int nSelector);
+    virtual void PlayErrorSound(int) {
+    }
 
 private:
-    int mUnknowna4; // +0xa4, a scalar block the destructor releases
+    MetFade *mFade; // +0xa4
     int mUnknowna8; // +0xa8
 };

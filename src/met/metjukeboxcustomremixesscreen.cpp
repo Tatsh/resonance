@@ -22,3 +22,7 @@ MetJukeboxCustomRemixesScreen::MetJukeboxCustomRemixesScreen(MetRenderer *pRende
 
 MetJukeboxCustomRemixesScreen::~MetJukeboxCustomRemixesScreen() {
 }
+
+int MetJukeboxCustomRemixesScreen::GetItemCount() {
+    return mUnknowna0->size();
+}

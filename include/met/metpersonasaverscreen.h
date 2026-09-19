@@ -1,8 +1,12 @@
 #pragma once
 
+#include <vector>
+
 #include "memcard/memcarduser.h"
 #include "met/metkbuser.h"
+#include "met/metpersonadata.h"
 #include "met/metscreen.h"
+#include "os/hxstr.h"
 
 /**
  * Dialogue that writes a persona to a memory card.
@@ -19,14 +23,19 @@
  *
  * The constructor at `0x0032ece0` takes only the renderer and the load priority, and supplies
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the
- * container. It writes `+0x8c` and `+0x90`, which are the two secondary vptrs, then `+0x98`,
- * `+0x9c`, a vector at `+0xa0`, a second at `+0xac`, then `+0xbc` and `+0xc0`.
+ * container. It writes `+0x8c` and `+0x90`, which are the two secondary vptrs, then zeroes
+ * mUnknown98 and mUnknown9c, default-constructs mPersonas and mUnknownac, zeroes mUnknownbc, sets
+ * mUnknownc0 to -1, constructs mUnknownc4 from the empty literal at `0x00805160`, and finishes
+ * with mUnknownd0 at -1, mUnknownd4 at zero, and mUnknowncc at -1. The last three are stored out
+ * of offset order, mUnknowncc last of all.
  *
- * The object is at least 0xc4 bytes. Nothing derives from the class, so no base offset in any
+ * The object is at least 0xd8 bytes. Nothing derives from the class, so no base offset in any
  * descriptor pins the total, and the figure is the lower bound the constructor's highest store
  * gives.
  *
- * The destructor is at `0x0032f020`.
+ * The destructor at `0x0032f020` calls ClearPersonas() and then runs the compiler-generated
+ * teardown of mUnknownc4, mUnknownac, and mPersonas in reverse declaration order, so the call is
+ * the whole of its reconstructed body.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
  * are 5 `0x003390c0`, 7 `0x003390f0`, 9 `0x00339110`, 15 `0x003346c8`, 23 `0x00338f88`, 24
@@ -49,14 +58,44 @@ public:
     virtual ~MetPersonaSaverScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
+     * Both overrides are two-instruction stubs, so each was written inline with an empty body.
+     *
      * @ghidraAddress 0x00338f88
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x00338f90
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
+
+private:
+    /**
+     * Delete every persona the screen built and empty mPersonas.
+     *
+     * Each element is released through slot 1 of its own table at `+0x168`, which is where
+     * MetPersonaData places its vptr, with the deleting `__in_chrg` value. The title is inferred.
+     *
+     * @ghidraAddress 0x0032f4d0
+     */
+    void ClearPersonas();
+
+    int mUnknown98; // +0x98
+    int mUnknown9c; // +0x9c
+    // The personas the screen offers. ClearPersonas() deletes every element. +0xa0
+    std::vector<MetPersonaData *> mPersonas;
+    std::vector<HxStr> mUnknownac; // +0xac
+    int mUnknownb8;                // +0xb8, not written by the constructor
+    int mUnknownbc;                // +0xbc
+    int mUnknownc0;                // +0xc0, starts at -1
+    HxStr mUnknownc4;              // +0xc4, constructed from the empty literal
+    int mUnknowncc;                // +0xcc, starts at -1
+    int mUnknownd0;                // +0xd0, starts at -1
+    int mUnknownd4;                // +0xd4
 };

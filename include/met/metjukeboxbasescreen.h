@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "met/listdataprovider.h"
+#include "met/metremixrecord.h"
 #include "met/metscreen.h"
 #include "met/scrollinglist.h"
 #include "met/texturepairrecord.h"
@@ -207,20 +208,21 @@ protected:
     // addresses and the second over the four-byte entries mUnknownc4 addresses.
     ScrollingList *mUnknown98; // +0x98
     ScrollingList *mUnknown9c; // +0x9c
-    // Really a pointer to a vector of 0x38-byte records, which slots 39 and 42 divide by 0x38 to
-    // obtain a row count. The record class emits no RTTI, and no allocation tag identifies it.
-    // The pointer target is therefore not modelled and the member is recorded as a word.
-    int mUnknowna0;            // +0xa0
-    Rnd::Drawable *mUnknowna4; // +0xa4
-    Rnd::Drawable *mUnknowna8; // +0xa8
-    Rnd::Drawable *mUnknownac; // +0xac
-    Rnd::Drawable *mUnknownb0; // +0xb0
-    Rnd::Drawable *mUnknownb4; // +0xb4
-    Rnd::Drawable *mUnknownb8; // +0xb8, the frame SetShowing() hides with the screen
-    int mUnknownbc;            // +0xbc, written by the child slot 38
-    int mUnknownc0;            // +0xc0, written by the child slot 38
-    // Really a pointer to a vector of four-byte entries, at `+0xc4` of the shared MetRemixManager.
-    // Recorded as a word for the reason recorded on mUnknowna0.
+    // The catalogue slots 39 and 42 count rows from. Slot 42 sets it from the shared
+    // MetRemixManager and the base constructor starts it null.
+    std::vector<MetRemixRecord> *mUnknowna0; // +0xa0
+    Rnd::Drawable *mUnknowna4;               // +0xa4
+    Rnd::Drawable *mUnknowna8;               // +0xa8
+    Rnd::Drawable *mUnknownac;               // +0xac
+    Rnd::Drawable *mUnknownb0;               // +0xb0
+    Rnd::Drawable *mUnknownb4;               // +0xb4
+    Rnd::Drawable *mUnknownb8;               // +0xb8, the frame SetShowing() hides with the screen
+    int mUnknownbc;                          // +0xbc, written by the child slot 38
+    int mUnknownc0;                          // +0xc0, written by the child slot 38
+    // Really a pointer to the nested object at `+0xc4` of the shared MetRemixManager, whose own
+    // `+0x00` starts a vector of four-byte entries that the edit screen counts rows from. That
+    // nested class emits no RTTI and its vptr sits at its own `+0x0c`, so it is not modelled and
+    // this member is recorded as a word.
     int mUnknownc4; // +0xc4
     // Distinguishes the three jukebox lists. Zero for the saved and edit screens and -1 for the
     // factory screen. Each of the three children writes it in its own constructor.

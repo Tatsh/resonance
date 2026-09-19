@@ -20,14 +20,16 @@
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the
  * container, the same container MetGlobalSettingsSaverScreen and MetRemixManager load.
  *
- * The total size is not recovered. The constructor empties the four vectors below and then zeroes
- * `+0xd4` and `+0xd8` along with a third pointer triple whose base register the disassembly does
- * not resolve, so everything from `+0xc0` onward is recorded as an open remainder rather than
- * modelled.
+ * The constructor default-constructs the four vectors from `+0x90` through `+0xbf`, zeroes
+ * mUnknownd4, and default-constructs a fifth vector at `+0xd8`. It never writes the span from
+ * `+0xc0` through `+0xd3`, which is recorded as reserved. The object is at least 0xe4 bytes, from
+ * the end of the fifth vector.
  *
- * The destructor at `0x002fa280` restores both vptrs, returns four buffers to the pool, restores
- * the MetRemixSaver vptr to `0x007ffcd0`, runs the MetScreen destructor, and releases the object
- * with the tag `MsgSink`.
+ * The destructor at `0x002fa280` tears down the fifth vector first and then the other four in
+ * reverse declaration order, restores the MetRemixSaver vptr to `0x007ffcd0`, runs the MetScreen
+ * destructor, and releases the object with the tag `MsgSink`. Every part of that teardown is
+ * compiler-generated member destruction, so no destructor body is reconstructed. The constructor
+ * likewise supplies only the three names and the one zeroed word.
  *
  * Eight slots differ from the MetScreen table. Slots 21 through 24 sit eight bytes apart at
  * `0x002feda0` through `0x002fedb8`, and the declaration order there puts the cycle sounds ahead
@@ -51,31 +53,46 @@ public:
     virtual ~MetMultiSaveRemixScreen();
 
     /**
+     * Silence the leave sound.
+     *
+     * All four overrides are two-instruction stubs, so each was written inline with an empty body.
+     *
      * @ghidraAddress 0x002fedb8
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound() {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the high sound.
+     *
      * @ghidraAddress 0x002fedb0
      */
-    virtual void PlayHighSound(int nSelector);
+    virtual void PlayHighSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
      * @ghidraAddress 0x002feda0
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x002feda8
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
 private:
     std::vector<Rnd::Object *> mUnknown90; // +0x90
     std::vector<Rnd::Object *> mUnknown9c; // +0x9c
     std::vector<Rnd::Object *> mUnknowna8; // +0xa8
     std::vector<Rnd::Object *> mUnknownb4; // +0xb4
+    // Never written by the constructor and not recovered. +0xc0
+    unsigned char mUnknownc0[0x14];
+    int mUnknownd4;                        // +0xd4
+    std::vector<Rnd::Object *> mUnknownd8; // +0xd8
 };

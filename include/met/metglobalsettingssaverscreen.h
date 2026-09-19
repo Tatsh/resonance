@@ -22,6 +22,9 @@
  *
  * The destructor at `0x0027c680` releases the string vector, restores the MemcardUser vptr to
  * `0x007daf78`, runs the MetScreen destructor, and releases the object with the tag `MsgSink`.
+ * Every part of that teardown is compiler-generated member destruction, so no destructor body is
+ * reconstructed. The constructor likewise supplies only the three names, because the one member
+ * below is default-constructed.
  *
  * Eight slots differ from the MetScreen table. Slots 23 and 24 are two-instruction `jr ra` stubs,
  * so this screen plays neither cycle sound. Of the rest only the destructor has a recovered name.
@@ -52,16 +55,22 @@ public:
     virtual ~MetGlobalSettingsSaverScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
+     * Both overrides are two-instruction stubs, so each was written inline with an empty body.
+     *
      * @ghidraAddress 0x00281fb0
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x00281fb8
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
 private:
     std::vector<HxStr> mUnknown90; // +0x90

@@ -17,9 +17,9 @@
  * owns, `smrt_new`, `smrt_load`, and `smrt_jukebox`, and then allocates a MetButtonList tagged
  * `MetButtonList` into the one member below.
  *
- * The destructor at `0x003696c0` restores the vptr, runs the MetScreen destructor, and releases
- * the object with the tag `MsgSink`. It releases nothing of its own, so the button list outlives
- * the screen.
+ * The destructor at `0x003696c0` restores the vptr, deletes mUnknown8c through slot 1 of the
+ * MetButtonList table with the deleting `__in_chrg` value, runs the MetScreen destructor, and
+ * releases the object with the tag `MsgSink`.
  *
  * Nine slots differ from the MetScreen table. Slots 23 and 24 sit eight bytes apart at
  * `0x00369628` and `0x00369630` and are two-instruction `jr ra` stubs. Of the rest only the
@@ -43,16 +43,22 @@ public:
     virtual ~MetRemixTypeScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
+     * Both overrides are two-instruction stubs, so each was written inline with an empty body.
+     *
      * @ghidraAddress 0x00369628
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x00369630
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
 private:
     MetButtonList *mUnknown8c; // +0x8c

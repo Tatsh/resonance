@@ -1,6 +1,7 @@
 #pragma once
 
 #include "met/fadeuser.h"
+#include "met/metfade.h"
 #include "met/metscreen.h"
 
 /**
@@ -14,19 +15,22 @@
  *
  * The four-entry FadeUser table at `0x007f5ef0` adjusts `this` by `-140` in every entry.
  *
- * The constructor at `0x0028d2c8` takes only the renderer and the load priority. It supplies
- * `metagame/Transition` for the directory and `loadgame` for the container. It writes `+0x8c`,
- * which is the FadeUser vptr, then `+0x94`, `+0x98`, `+0x9c`, and `+0xa8`.
+ * The constructor at `0x0028d2c8` takes only the renderer and the load priority. It supplies the
+ * empty string at `0x007f5ca8` for the screen name, `metagame/Transition` for the directory, and
+ * `loadgame` for the container. The empty screen name makes the two animation views resolve as
+ * `_EE.anim` and `_BF.anim` with nothing before the underscore, which MetMemDetectStartup also
+ * does. It zeroes `+0x94` through `+0xa8`, the pair at `+0xa0` in one 8-byte store, and then
+ * builds mFade.
  *
  * It declares one virtual of its own at slot 39, at `0x0028e158`, and the name is not recovered.
- * Its screen name is not a literal the constructor loads, unlike every other leaf, so it is not
- * recovered here.
  *
- * The object is at least 0xac bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the lower bound the constructor's highest store
- * gives.
+ * The object is 0xac bytes, which the constructor's zeroing run through `+0xa8` and the 4-byte
+ * mFade pointer settle together. Nothing derives from the class, so no base offset in any
+ * descriptor corroborates the total.
  *
- * The destructor is at `0x00291a50`.
+ * The destructor at `0x00291a50` releases mFade and then runs the MetScreen destructor. MetFade
+ * has no destructor of its own, which is why the release is a bare deallocator call with no null
+ * test.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
  * are 5 `0x0028d590`, 20 `0x00291620`, 21 `0x00291628`, 22 `0x00291630`, 23 `0x00291638`, 24
@@ -49,31 +53,56 @@ public:
     virtual ~MetLoadGameScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the slide sound.
+     *
+     * Every one of the five overrides below is a two-instruction stub, so each was written inline
+     * with an empty body. A transition screen plays no navigation sound.
+     *
      * @ghidraAddress 0x00291620
      */
-    virtual void PlaySlideSound(int nSelector);
+    virtual void PlaySlideSound(int) {
+    }
 
     /**
+     * Silence the leave sound.
+     *
      * @ghidraAddress 0x00291628
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound() {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the high sound.
+     *
      * @ghidraAddress 0x00291630
      */
-    virtual void PlayHighSound(int nSelector);
+    virtual void PlayHighSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
      * @ghidraAddress 0x00291638
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x00291640
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
+
+private:
+    int mUnknown90; // +0x90, not written by the constructor
+    int mUnknown94; // +0x94
+    int mUnknown98; // +0x98
+    int mUnknown9c; // +0x9c
+    // Zeroed together in one 8-byte store. +0xa0 and +0xa4
+    int mUnknowna0;
+    int mUnknowna4;
+    // The fade driver, built from the renderer. +0xa8
+    MetFade *mFade;
 };

@@ -2,6 +2,7 @@
 
 #include <map>
 
+#include "app/playsound.h"
 #include "met/metrenderer.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -23,6 +24,14 @@ static const char *const kViewSuffix = ".view";
 // The two animation view names, formatted from the screen name.
 static const char *const kEnterAnimationFormat = "%s_EE.anim";
 static const char *const kExitAnimationFormat = "%s_BF.anim";
+
+// The six sounds the front end plays as the user navigates.
+static const char *const kSlideSound = "SND_MET_SLIDE";
+static const char *const kLeaveSound = "SND_MET_LEAVE";
+static const char *const kCycleLeftSound = "SND_MET_CYCLE_L";
+static const char *const kCycleRightSound = "SND_MET_CYCLE_R";
+static const char *const kHighSound = "SND_MET_HIGH";
+static const char *const kErrorSound = "SND_MET_ERROR";
 
 } // namespace
 
@@ -174,6 +183,138 @@ void MetScreen::UpdateEnterAnimation(float flTime) {
     }
     if (mUnknown08 + mUnknown04 < flTime) {
         mUnknown7c = 1;
+    }
+}
+
+void MetScreen::OnUnknownSlot7() {
+}
+
+void MetScreen::OnUnknownSlot10() {
+}
+
+void MetScreen::OnKeyboardDismissed() {
+}
+
+void MetScreen::OnDrawPass() {
+}
+
+void MetScreen::OnDestroying() {
+}
+
+void MetScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
+}
+
+void MetScreen::OnMsgScreenShown(const HxStr &name) {
+}
+
+void MetScreen::HandleCommand(const MetScreenCommand *pCommand) {
+}
+
+void MetScreen::OnUnknownSlot26(float flTime) {
+}
+
+void MetScreen::UpdateIdleAnimation(float flTime) {
+}
+
+void MetScreen::OnUnknownSlot30(Rnd::Object *pObject) {
+}
+
+void MetScreen::OnUnknownSlot33() {
+}
+
+void MetScreen::OnUnknownSlot36() {
+}
+
+void MetScreen::HandleMessage(Message *pMsg) {
+}
+
+void MetScreen::PlaySlideSound(int nSelector) {
+    PlaySoundByName(kSlideSound);
+}
+
+void MetScreen::PlayLeaveSound() {
+    PlaySoundByName(kLeaveSound);
+}
+
+void MetScreen::PlayHighSound(int nSelector) {
+    PlaySoundByName(kHighSound);
+}
+
+void MetScreen::PlayCycleLeftSound(int nSelector) {
+    PlaySoundByName(kCycleLeftSound);
+}
+
+void MetScreen::PlayCycleRightSound(int nSelector) {
+    PlaySoundByName(kCycleRightSound);
+}
+
+void MetScreen::PlayErrorSound(int nSelector) {
+    PlaySoundByName(kErrorSound);
+}
+
+void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
+    if (mUnknown1c == 0) {
+        return;
+    }
+    if (mUnknown5c != 0) {
+        switch (pCommand->mCommand) {
+        case kMetScreenCommandPrevious:
+        case kMetScreenCommandNext:
+            PlayHighSound(pCommand->mPadIndex);
+            break;
+        case kMetScreenCommandLeft:
+            PlayCycleLeftSound(pCommand->mPadIndex);
+            break;
+        case kMetScreenCommandRight:
+            PlayCycleRightSound(pCommand->mPadIndex);
+            break;
+        case kMetScreenCommandSelect:
+            PlaySlideSound(pCommand->mPadIndex);
+            break;
+        case kMetScreenCommandBack:
+            // Yes, the binary loads the controller index into a1 here as it does for the other
+            // five, and this declaration accepts none.
+            PlayLeaveSound();
+            break;
+        default:
+            break;
+        }
+    }
+    HandleCommand(pCommand);
+}
+
+void MetScreen::Draw() {
+    mUnknown14->Drawable::Draw();
+}
+
+void MetScreen::StartExitAnimation(float flTime) {
+    mUnknown0c = flTime;
+    mUnknown1c = 0;
+    mUnknown08 = 0.0f;
+}
+
+void MetScreen::UpdateAnimationFrame(float flTime) {
+    if (mUnknown4c != 0) {
+        return;
+    }
+    if (mUnknown08 == 0.0f && mUnknown0c == 0.0f) {
+        UpdateIdleAnimation(flTime);
+    }
+    if (mUnknown08 != 0.0f && mUnknown30 != nullptr) {
+        const float flEnd = mUnknown08 + mUnknown04;
+        float flFrame = mUnknown08 + (mUnknown04 - flTime);
+        if (flEnd < flFrame) {
+            flFrame = flEnd;
+        }
+        mUnknown30->SetFrame(flFrame);
+    }
+    if (mUnknown0c != 0.0f && mUnknown30 != nullptr) {
+        float flFrame = flTime - mUnknown0c;
+        if (mUnknown0c + mUnknown04 < flFrame) {
+            // Yes, the clamp restores the start time rather than the end frame.
+            flFrame = mUnknown0c;
+        }
+        mUnknown30->SetFrame(flFrame);
     }
 }
 

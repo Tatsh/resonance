@@ -3,6 +3,7 @@
 #include "met/listdataprovider.h"
 #include "met/metbuttonlist.h"
 #include "met/metscreen.h"
+#include "met/scrollinglist.h"
 
 /**
  * Screen that lists the remixes on a memory card for loading.
@@ -17,12 +18,12 @@
  * `mcrl` for the screen name, `metagame/Shared` for the directory, and `memcard_remix_load` for
  * the container. It then clears MetScreen::mUnknown60, which is why that member is protected
  * rather than private, and allocates a MetButtonList tagged `MetButtonList` into mUnknowna8. The
- * words at `+0x90`,
- * `+0x98`, and `+0x9c` are never written.
+ * words at `+0x90`, `+0x98`, and `+0x9c` are never written.
  *
- * The destructor at `0x00352618` restores both vptrs, clears mUnknown94, restores the
- * ListDataProvider vptr to `0x007ec830`, runs the MetScreen destructor, and releases the object
- * with the tag `MsgSink`.
+ * The destructor at `0x00352618` restores both vptrs, deletes mUnknown94 and then clears it,
+ * deletes mUnknowna8, restores the ListDataProvider vptr to `0x007ec830`, runs the MetScreen
+ * destructor, and releases the object with the tag `MsgSink`. mUnknown94 is released through slot
+ * 1 of a table at `+0x94` of the object itself, which is where ScrollingList places its vptr.
  *
  * Nine slots differ from the MetScreen table, and only the destructor has a recovered name. The
  * rest are 5 `0x0034b568`, 19 `0x0034a2a8`, 20 `0x003526d0`, 22 `0x00352720`, 33 `0x00352770`,
@@ -45,10 +46,11 @@ public:
     virtual ~MetRemixLoadScreen();
 
 private:
-    int mUnknown90;            // +0x90, not written by the constructor
-    int mUnknown94;            // +0x94
-    int mUnknown98;            // +0x98
-    int mUnknown9c;            // +0x9c
+    int mUnknown90; // +0x90, not written by the constructor
+    // Deleted and then cleared by the destructor. +0x94
+    ScrollingList *mUnknown94;
+    int mUnknown98;            // +0x98, not written by the constructor
+    int mUnknown9c;            // +0x9c, not written by the constructor
     int mUnknowna0;            // +0xa0
     int mUnknowna4;            // +0xa4
     MetButtonList *mUnknowna8; // +0xa8

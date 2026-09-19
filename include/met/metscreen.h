@@ -30,28 +30,74 @@ struct MetContainerLoad {
 };
 
 /**
+ * One navigation command delivered to a screen.
+ *
+ * The record is 12 bytes and is not polymorphic, so it emits no RTTI and its title is inferred
+ * from its use rather than recovered. MetRenderer::HandleMessage builds one on its own stack from
+ * an input message through the translator at `0x002e3738` and passes it to
+ * MetScreen::DeliverCommand(). The three fields come straight from that translator, which copies
+ * the pad index and the button identifier out of the input message and maps the button to a
+ * command code.
+ */
+struct MetScreenCommand {
+    int mCommand;  /*!< What the user requested, from MetScreenCommandCode. +0x00 */
+    int mPadIndex; /*!< Which controller produced the command. +0x04 */
+    int mButton;   /*!< Raw button identifier the translator mapped. +0x08 */
+};
+
+/**
+ * What a navigation command requests.
+ *
+ * The six values are the ones MetScreen::DeliverCommand() routes to a sound, through a six-entry
+ * jump table at `0x0080b460` indexed by the command code less one. Left and right are fixed by
+ * the sound literals that branch plays, `SND_MET_CYCLE_L` and `SND_MET_CYCLE_R`. Previous and next
+ * both play `SND_MET_HIGH`, and MetMainScreen separates them at `0x002c6820` by routing one to
+ * MetButtonList vtable slot 2 and the other to slot 3, the two navigation virtuals that walk the
+ * button ring in opposite directions. Which of the two moves which way is not recovered.
+ *
+ * The translator at `0x002e3738` produces further codes from a 103-entry table, among them 7 and
+ * 15. A code above six is discarded by DeliverCommand() without a sound and passed to slot 19
+ * unchanged, and its meaning is recovered nowhere in the image.
+ */
+enum MetScreenCommandCode {
+    kMetScreenCommandNone = 0, /*!< The renderer discards the command instead of delivering it. */
+    kMetScreenCommandPrevious = 1, /*!< One step along the button ring. */
+    kMetScreenCommandNext = 2,     /*!< One step the other way along the button ring. */
+    kMetScreenCommandLeft = 3,     /*!< Cycle the selected value to the left. */
+    kMetScreenCommandRight = 4,    /*!< Cycle the selected value to the right. */
+    kMetScreenCommandSelect = 5,   /*!< Act on the selection. */
+    kMetScreenCommandBack = 6      /*!< Depart the screen. */
+};
+
+/**
  * Base of every front-end screen.
  *
  * `9MetScreen` in the RTTI descriptor at `0x008eed98`, with MsgSink as its one public non-virtual
  * base at offset 0. The object is 0x8c bytes, which MetMemDetectScreen, MetSaveRemix,
  * MetSoloWinScreen, and seven further classes fix by placing their second base at `+140`. The
- * vtable is at `0x0080b6a0` and has 39 entries.
+ * vtable is at `0x0080b6a0`. A walk of the table reads 39 entries, slots 0 to 38, followed by an
+ * all-zero terminating entry at `0x0080b838` and then the next class's table at `0x0080b840`. The
+ * terminator is not a slot.
  *
  * Thirty-two classes derive directly from the class, and five intermediate classes sit between it
  * and their own children, MetGizmoPanel, MetJukeboxBaseScreen, MetMultiTipsBaseScreen,
  * MetPauseBaseScreen, and MetScreenMultiSoundBank.
  *
- * A screen owns a Rnd::View loaded from a `.rnd` container. The constructor records the container
- * name and, when both name arguments are non-empty, starts the load through vtable slot 18. Slot
- * 14 polls the RndAsyncLoader until the load completes and then runs slot 38, which resolves the
- * view by appending `.view` to the container name and resolves the two animation views by
+ * A screen manages a Rnd::View loaded from a `.rnd` container. The constructor records the
+ * container name and, when both name arguments are non-empty, starts the load with a direct call to
+ * slot 18's body rather than a dispatch through the table. That is what a virtual call from a
+ * constructor compiles to, and the destructor invokes slot 13 the same way.
+ *
+ * Slot 14 polls the RndAsyncLoader until the load completes and then runs slot 38, which resolves
+ * the view by appending `.view` to the container name and resolves the two animation views by
  * formatting `%s_EE.anim` and `%s_BF.anim` from the screen name. A screen with no view trips the
  * diagnostic `the screen %s doesn't have a valid view!`.
  *
- * Every entry of the 39-entry table, with the slots that this class does not name recorded by
- * address and behaviour. Slot 0 is the compiler-generated GetTypeInfo at `0x0038fd78` and is not
- * source. An entry titled empty is a two-instruction `jr ra` stub, which is an inline virtual with
- * an empty body.
+ * The 39 entries follow in table order. Slot 0 is the compiler-generated GetTypeInfo at
+ * `0x0038fd78` and is not source. An entry marked empty is a two-instruction `jr ra` stub. Each
+ * such stub sits at its own address and several derived tables address the same stub, so the stub
+ * is an out-of-line definition rather than an inline body, and this class owes one definition for
+ * each.
  *
  *  - 1 `0x0038a848` the destructor.
  *  - 2 `0x00105158` MsgSink::Handle(), inherited unchanged.
@@ -59,44 +105,27 @@ struct MetContainerLoad {
  *  - 4 `0x00390200` PushNamedScreen().
  *  - 5 `0x003900a8` EnterAndShow().
  *  - 6 `0x0038b828` ActivateNamedPanel().
- *  - 7 `0x0038fdf8` empty.
+ *  - 7 `0x0038fdf8` OnUnknownSlot7(), empty.
  *  - 8 `0x003902d0` ExitScreenByName().
  *  - 9 `0x00390100` BeginExit().
- *  - 10 `0x00390130` empty.
- *  - 11 `0x00390138` empty.
- *  - 12 `0x0038fe00` empty.
- *  - 13 `0x003900a0` empty.
+ *  - 10 `0x00390130` OnUnknownSlot10(), empty and unrecovered.
+ *  - 11 `0x00390138` OnKeyboardDismissed(), empty.
+ *  - 12 `0x0038fe00` OnDrawPass(), empty.
+ *  - 13 `0x003900a0` OnDestroying(), empty.
  *  - 14 `0x0038b338` PollContainerLoad().
- *  - 15 `0x0038fe20` empty. MetConfigControllerScreen fills it at `0x00206bb0` with a body that
- *    compares an `HxStr` argument against a literal and then runs slot 6, which fixes the
- *    signature as one `const HxStr &` parameter.
- *  - 16 `0x0038fe28` empty.
+ *  - 15 `0x0038fe20` OnMsgScreenDismissed(), empty.
+ *  - 16 `0x0038fe28` OnMsgScreenShown(), empty.
  *  - 17 `0x0038b490` SetShowing().
  *  - 18 `0x0038aa00` BeginContainerLoad().
- *  - 19 `0x0038fe30` empty. MetConfigControllerScreen fills it at `0x00200ba8` with a dispatcher
- *    that reads a selector from `+0x00` of its argument and a sequence number from `+0x04`,
- *    which fixes the signature as one pointer to a command record.
+ *  - 19 `0x0038fe30` HandleCommand(), empty.
  *  - 20 `0x00390140` PlaySlideSound().
  *  - 21 `0x00390160` PlayLeaveSound().
  *  - 22 `0x003901c0` PlayHighSound().
  *  - 23 `0x00390180` PlayCycleLeftSound().
  *  - 24 `0x003901a0` PlayCycleRightSound().
  *  - 25 `0x003901e0` PlayErrorSound().
- *
- * Five of those six sound slots take one integer argument, which an earlier reading recorded as no
- * argument at all. MetKeyboardScreen::StartRepeatingSound() at `0x0028c5e0` loads its own selector
- * into `a1` immediately before each of its five virtual calls, to slots 20, 22, 23, 24, and 25, so
- * the argument is set at a call site rather than inherited from a register. The same class
- * overrides four of the five and each override reads `a1` and compares it against the selector it
- * recorded. Slot 21 stays argument-free. It is the one slot of the six MetKeyboardScreen does not
- * override, nothing loads `a1` before a call to it, and the MetFreqMakerInventoryScreen override at
- * `0x00272bb8` forwards to this class with no argument. The asymmetry is recorded rather than
- * smoothed over.
- *
- * What the selector identifies is not recovered. A screen that records -1 plays its sound for every
- * value, which is the only part of the meaning the image settles.
- *  - 26 `0x0038fe38` empty.
- *  - 27 `0x0038fe40` empty.
+ *  - 26 `0x0038fe38` OnUnknownSlot26(), empty.
+ *  - 27 `0x0038fe40` UpdateIdleAnimation(), empty.
  *  - 28 `0x00390498` StartRepeatingSound().
  *  - 29 `0x003904e0` UpdateRepeatingSound().
  *  - 30 `0x0038fe48` OnUnknownSlot30(), empty.
@@ -109,21 +138,59 @@ struct MetContainerLoad {
  *  - 37 `0x00390788` Draw().
  *  - 38 `0x0038b1b0` ResolveContainerViews().
  *
- * Two data members are protected and the rest are private. MetRemixLoadScreen and
+ * A walk of all 78 tables in the image that share at least twelve entries with this one settles
+ * which of the empty slots a derived class fills. Slot 19 is filled 53 times, slot 15 23 times,
+ * slot 27 6 times, slot 16 twice, and slot 11 once. Slots 10, 12, and 13 are filled by no derived
+ * table at all.
+ *
+ * Five of the six sound slots take one integer argument. MetKeyboardScreen::StartRepeatingSound()
+ * at `0x0028c5e0` loads its own selector into `a1` immediately before each of its five virtual
+ * calls, to slots 20, 22, 23, 24, and 25, so the argument is set at a call site rather than
+ * inherited from a register. The same class overrides four of the five and each override reads `a1`
+ * and compares it against the selector it recorded.
+ *
+ * The selector is the controller index. DeliverCommand() loads it from `+0x04` of the command
+ * record, MetRenderer::HandleMessage rejects a command whose `+0x04` exceeds its own bound at
+ * `+0xd4` before delivering it, and the translator at `0x002e3738` copies that word out of the
+ * input message unchanged. A screen that records -1 plays its sound for every controller.
+ *
+ * PlayLeaveSound() is declared here with no argument and the evidence now contradicts that.
+ * DeliverCommand() loads `a1` from the same `+0x04` for slot 21 at `0x0038b7e8` exactly as it does
+ * for the other five, and the MetFreqMakerInventoryScreen override at `0x00272bb8` that an earlier
+ * reading treated as an argument-free forward compiles identically either way, because the value
+ * already sits in `a1`. The declaration is unchanged here because nine derived headers in other
+ * files declare the override without the argument, and correcting one file alone would produce a
+ * base that its subclasses no longer override.
+ *
+ * Four data members are protected and the rest are private. MetRemixLoadScreen and
  * MetRemixDelScreen both clear mUnknown60 in their constructors, and MetSaveRemixScreen clears
- * mUnknown5c in its own, so those two are written by derived code and the others are not. Nothing
- * outside the class and its children reads any member.
+ * mUnknown5c in its own. Four derived constructors append to mUnknown38, and
+ * MetJukeboxBaseScreen::SetShowing() reads mUnknown48. Those four are written or read by derived
+ * code and the others are not. Nothing outside the class and its children reads any member.
  */
 class MetScreen : public MsgSink {
 public:
     /**
      * Construct a screen and start its container load.
      *
-     * The load starts only when both pszDirectory and pszFile are non-empty, and it runs through
-     * vtable slot 18 rather than directly. Registration as a sink on pRenderer happens last.
+     * The load starts only when HxStr::DiffersFromLiteral reports both directory and file different
+     * from the empty literal. BeginContainerLoad() is invoked with a direct call rather than
+     * through vtable slot 18, which is what a virtual call from a constructor compiles to. An
+     * earlier reading recorded a dispatched call and a registration that happens last, and both are
+     * wrong. MsgSource::AddSink() runs before the load starts, not after it.
      *
      * mUnknown04, mUnknown70, and mUnknown74 are not written, so a screen starts with three
      * indeterminate fields. Slot 38 writes mUnknown04 and slot 28 writes the other two.
+     *
+     * The body is not written. Every part is recovered: mUnknown10 takes pRenderer, mUnknown18
+     * takes 2, mUnknown58 takes 1.0f, mUnknown48, mUnknown5c, and mUnknown60 each take 1,
+     * mUnknown20 is copy-constructed from name, mUnknown80 from file, mUnknown88 from nPriority,
+     * every remaining integer, float, and pointer member is zeroed, mUnknown28 is assigned `file`
+     * with `.rnd` appended, `mUnknown10->AddSink(this)` registers the screen, and the load then
+     * starts. What blocks the body is MetRenderer's own header, which declares the class with no
+     * base and a reserved byte array over `+0x00` through `+0x67`, so AddSink() is unreachable
+     * through the member. The RTTI descriptor lists MsgSource at offset 0, RendererBase at 20, and
+     * FadeUser at 92, and the body follows once MetRenderer declares them.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority, passed to RndAsyncLoader unchanged.
@@ -140,6 +207,16 @@ public:
 
     /**
      * Unregister from the renderer and release the container.
+     *
+     * Slot 1. The hand-written part is three calls and nothing else. Everything the disassembly
+     * shows besides them is compiler-generated: the two table-pointer stores, the inlined `HxStr`
+     * destructors for mUnknown20, mUnknown28, and mUnknown80, the `std::vector` and `std::list`
+     * teardown, and the conditional release under the `__in_chrg` flag.
+     *
+     * The body is not written, and the three calls are
+     * `mUnknown10->RemoveScreen(this)`, `OnDestroying()`, and
+     * `mUnknown10->RemoveSink(this)`, in that order. RemoveSink() blocks it for the reason recorded
+     * on the constructor.
      *
      * @ghidraAddress 0x0038a848
      */
@@ -179,6 +256,58 @@ public:
      * @ghidraAddress 0x0038ff90
      */
     static MetScreen *FindScreenByName(const HxStr &name);
+
+    /**
+     * Play the sound one navigation command calls for and then act on the command.
+     *
+     * Not a vtable slot. MetRenderer::HandleMessage at `0x0036c6e8` and three further routines
+     * arrive at it with a direct call. A screen whose mUnknown1c is clear ignores the command
+     * completely, and a screen whose mUnknown5c is clear skips the sound and acts on the command
+     * regardless. The sound is chosen through a six-entry jump table at `0x0080b460` indexed by the
+     * command code less one, and every branch of that table passes MetScreenCommand::mPadIndex to
+     * the sound slot it runs. Slot 19 then receives the whole record.
+     *
+     * Declared public because MetRenderer calls it from outside the hierarchy and the image has
+     * no other route to it. A friend declaration fits the image equally well.
+     *
+     * @param pCommand The command the renderer translated from an input message.
+     * @ghidraAddress 0x0038b730
+     */
+    void DeliverCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Drive the frame of whichever animation is running and run the idle hook when none is.
+     *
+     * Not a vtable slot. MetRenderer::Slot9 at `0x0036b858` is its one caller. A screen still
+     * waiting for its container load, which is what a set mUnknown4c records, does nothing here.
+     * Both branches drive mUnknown30 rather than mUnknown34, matching UpdateExitAnimation().
+     *
+     * Declared public for the same reason as DeliverCommand().
+     *
+     * @param flTime The current renderer time.
+     * @ghidraAddress 0x00390380
+     */
+    void UpdateAnimationFrame(float flTime);
+
+    /**
+     * Finish entering a screen whose container load had not completed when it was pushed.
+     *
+     * Not a vtable slot. MetRenderer::Slot7 at `0x0036b650` is its one caller. A screen with
+     * mUnknown4c clear does nothing. Otherwise the interned container load is consulted and, once
+     * it reports finished, slot 38 resolves the views, the view is handed to the renderer, slot 5
+     * enters the screen, and a screen that also has mUnknown50 set becomes the active panel and
+     * runs slot 7.
+     *
+     * The body is not written. The routine builds two temporary map iterators over
+     * ContainerLoaderMap() through the tree helpers at `0x00390d98` and `0x0038fa68`, and the
+     * signature of neither helper is recovered.
+     *
+     * Declared public for the same reason as DeliverCommand().
+     *
+     * @param flTime The current renderer time.
+     * @ghidraAddress 0x0038b918
+     */
+    void PollDeferredEnter(float flTime);
 
     /**
      * Bring one named screen onto the renderer's screen stack.
@@ -243,6 +372,59 @@ public:
     virtual void BeginExit();
 
     /**
+     * Unrecovered. Slot 10.
+     *
+     * The body is empty. No derived table among the 78 in the image fills the slot, and no routine
+     * in the image dispatches it on a screen. Every one of the 42 sites that loads a table entry at
+     * this index dispatches it on the object Globals::GetGameManager() vends or on an unrelated
+     * class, and the destructor's direct call to slot 13 has no counterpart here. Neither the
+     * purpose nor the argument list is recovered.
+     *
+     * @ghidraAddress 0x00390130
+     */
+    virtual void OnUnknownSlot10();
+
+    /**
+     * Take control back after the keyboard screen has finished.
+     *
+     * Slot 11. The body is empty. MetKeyboardScreen::OnUnknownSlot36() at `0x00283b74` is the one
+     * caller in the image: once the entered text is committed it resolves the screen whose registry
+     * key it recorded, runs this slot on that screen with no argument, and then makes the same key
+     * its active panel. MetLoadNewFreqScreen fills the slot at `0x002a3978` and re-pushes two named
+     * screens and re-activates its panel, which is what fixes the hook as a resumption rather than
+     * a report of the entered text.
+     *
+     * @ghidraAddress 0x00390138
+     */
+    virtual void OnKeyboardDismissed();
+
+    /**
+     * Contribute to the renderer's draw pass.
+     *
+     * Slot 12. The body is empty and no derived table among the 78 fills it, so the hook exists and
+     * the shipped game implements it nowhere. MetRenderer::Slot8 at `0x003716c8` is the one caller
+     * on a screen: it draws its own root drawable, walks the screen vector at `+0x84` running this
+     * slot on each entry with no argument, and then draws the timing graph and the statistics
+     * overlay.
+     *
+     * @ghidraAddress 0x0038fe00
+     */
+    virtual void OnDrawPass();
+
+    /**
+     * Release what the screen acquired, ahead of the rest of destruction.
+     *
+     * Slot 13. The body is empty and no derived table among the 78 fills it. The destructor at
+     * `0x0038a890` is its one caller anywhere in the image, with a direct call and no argument,
+     * placed after the screen unregisters from the renderer and before any member is released. A
+     * direct rather than dispatched call is what a virtual invoked from a destructor compiles to,
+     * because the dynamic type there is this class.
+     *
+     * @ghidraAddress 0x003900a0
+     */
+    virtual void OnDestroying();
+
+    /**
      * Advance this screen's container load and resolve its views once the load finishes.
      *
      * Slot 14. The views are resolved only while mUnknown48 is set, which slot 38 clears, so the
@@ -252,6 +434,61 @@ public:
      * @ghidraAddress 0x0038b338
      */
     virtual int PollContainerLoad();
+
+    /**
+     * Act on the choice the user made in a message dialogue.
+     *
+     * Slot 15. The body is empty. MetMsgScreen::Slot36() at `0x002f05f4` is the one caller on a
+     * screen: once its own exit animation has finished it clears its `+0xd8` flag and runs this
+     * slot on the screen at its `+0xb8`, passing the `HxStr` at its `+0xb0` and the integer at its
+     * `+0xd4`. Twenty-three derived tables fill the slot, and each body compares the first argument
+     * against dialogue names through HxStr::MatchesLiteral and then branches on the second against
+     * 0, 1, and 2. MetExpansionPakScreen at `0x002193e8` matches `expansion_prepare`,
+     * `expansion_check`, `expansion_done`, `expansion_load`, and `expansion_retry`, and
+     * MetMemDetectScreen at `0x002d9e40` matches `mem_check`, `mem_format_check`, `mem_error`, and
+     * eight further keys. The second argument is which button the user chose, on the evidence that
+     * those screens build their dialogues with the button sets `CONTINUE`/`CANCEL`/`RETRY` and
+     * `YES`/`NO` and then branch on 0, 1, and 2. The MetSaveRemix override at `0x00375590` reads
+     * both arguments before writing either, passing the first to HxStr::MatchesLiteral and
+     * comparing the second against 1 at `0x003755b4`, which confirms the second argument
+     * independently of the caller.
+     *
+     * @param name The dialogue the screen requested, which the message screen reports back.
+     * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
+     * @ghidraAddress 0x0038fe20
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
+     * Act on a message dialogue becoming visible.
+     *
+     * Slot 16. The body is empty. MetMsgScreen::Slot33() at `0x002f0524` is the one caller on a
+     * screen: once its own enter animation has finished it sets its `+0xd8` flag and runs this slot
+     * on the screen at its `+0xb8`, passing only the `HxStr` at its `+0xb0`. No second argument is
+     * set. Two derived tables fill the slot. MetExpansionPakScreen at `0x0021d9e0` matches the name
+     * against `expansion_prepare` and `expansion_load` and records which dialogue is up, and
+     * MetRemixDelScreen at `0x003441a0` ignores the argument and activates a named panel.
+     *
+     * @param name The dialogue the screen requested, which the message screen reports back.
+     * @ghidraAddress 0x0038fe28
+     */
+    virtual void OnMsgScreenShown(const HxStr &name);
+
+    /**
+     * Show or hide the view and every drawable the container loaded.
+     *
+     * Slot 17. Forwards to Rnd::Drawable::SetShowing() on mUnknown14 and then, when mUnknown60 is
+     * set, on each entry of the drawable list that the loader recorded for mUnknown28. The name is
+     * inferred from the Rnd::Drawable virtual it forwards to.
+     *
+     * The body is not written. The second half builds a temporary `std::list` of drawables from the
+     * interned container load through the helper at `0x0014d560`, and the signature of that helper
+     * is not recovered.
+     *
+     * @param nShowing Non-zero to draw the screen.
+     * @ghidraAddress 0x0038b490
+     */
+    virtual void SetShowing(int nShowing);
 
     /**
      * Intern a container load under this screen's container name and enqueue it.
@@ -264,6 +501,128 @@ public:
      * @ghidraAddress 0x0038aa00
      */
     virtual void BeginContainerLoad(const HxStr &directory, const HxStr &file);
+
+    /**
+     * Act on a navigation command.
+     *
+     * Slot 19. The body is empty. DeliverCommand() is the one caller, and it passes the whole
+     * command record after playing the sound the command code calls for. Fifty-three derived tables
+     * fill the slot, more than any other, and every body inspected reads MetScreenCommand::mCommand
+     * and branches on it. MetMainScreen at `0x002c6820` routes command 1 to MetButtonList vtable
+     * slot 2, command 2 to slot 3, command 5 to a named panel, and command 6 elsewhere.
+     * MetConfigControllerScreen fills it at `0x00200ba8` and MetKeyboardScreen at `0x00283268`.
+     *
+     * @param pCommand The command the renderer translated from an input message.
+     * @ghidraAddress 0x0038fe30
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Play the sound that accompanies sliding between screens.
+     *
+     * Slot 20. Passes the literal `SND_MET_SLIDE` to the named-sound player at `0x0012f470`. The
+     * name is inferred from that literal. MetScreenMultiSoundBank, MetMultiTipsBaseScreen,
+     * MetPauseBaseScreen, and MetJukeboxBaseScreen all override this slot, the last three with an
+     * empty body, which is what proves the return type is void.
+     *
+     * The body ignores its argument. DeliverCommand() routes command 5 to this slot.
+     *
+     * @param nSelector The controller index the command came from, which an override compares
+     *                  against its own recorded selector.
+     * @ghidraAddress 0x00390140
+     */
+    virtual void PlaySlideSound(int nSelector);
+
+    /**
+     * Play the sound that accompanies departing a screen.
+     *
+     * Slot 21. Passes the literal `SND_MET_LEAVE` to the named-sound player at `0x0012f470`.
+     * DeliverCommand() routes command 6 to this slot, loading the controller index into `a1`
+     * first. The declaration retains no parameter for the reason recorded on the class.
+     *
+     * @ghidraAddress 0x00390160
+     */
+    virtual void PlayLeaveSound();
+
+    /**
+     * Play the sound that accompanies the emphasised selection.
+     *
+     * Slot 22. Passes the literal `SND_MET_HIGH` to the named-sound player at `0x0012f470`. The
+     * body ignores its argument. DeliverCommand() routes commands 1 and 2 to this slot.
+     *
+     * @param nSelector The controller index the command came from, which an override compares
+     *                  against its own recorded selector.
+     * @ghidraAddress 0x003901c0
+     */
+    virtual void PlayHighSound(int nSelector);
+
+    /**
+     * Play the sound that accompanies cycling a value to the left.
+     *
+     * Slot 23. Passes the literal `SND_MET_CYCLE_L` to the named-sound player at `0x0012f470`. The
+     * body ignores its argument. DeliverCommand() routes command 3 to this slot, which is what
+     * identifies command 3 as the leftward cycle.
+     *
+     * @param nSelector The controller index the command came from, which an override compares
+     *                  against its own recorded selector.
+     * @ghidraAddress 0x00390180
+     */
+    virtual void PlayCycleLeftSound(int nSelector);
+
+    /**
+     * Play the sound that accompanies cycling a value to the right.
+     *
+     * Slot 24. Passes the literal `SND_MET_CYCLE_R` to the named-sound player at `0x0012f470`. The
+     * body ignores its argument. DeliverCommand() routes command 4 to this slot, which is what
+     * identifies command 4 as the rightward cycle.
+     *
+     * @param nSelector The controller index the command came from, which an override compares
+     *                  against its own recorded selector.
+     * @ghidraAddress 0x003901a0
+     */
+    virtual void PlayCycleRightSound(int nSelector);
+
+    /**
+     * Play the sound that accompanies a rejected input.
+     *
+     * Slot 25. Passes the literal `SND_MET_ERROR` to the named-sound player at `0x0012f470`. This
+     * is the one sound of the six that MetScreenMultiSoundBank does not override. The body ignores
+     * its argument, and DeliverCommand() routes no command code to this slot.
+     *
+     * @param nSelector The controller index the command came from, which an override compares
+     *                  against its own recorded selector.
+     * @ghidraAddress 0x003901e0
+     */
+    virtual void PlayErrorSound(int nSelector);
+
+    /**
+     * Unrecovered. Slot 26.
+     *
+     * The body is empty here. MetKeyboardScreen fills it at `0x0028c708` with a body that reads its
+     * argument out of `f12` and compares a float member against it, which is what fixes the single
+     * parameter as a float. Nine further screens fill the slot too. The argument is the renderer
+     * time, on the same evidence that fixes it for the two animation slots, because the
+     * MetKeyboardScreen body adds a fixed 240 to a recorded value and tests the sum against it.
+     *
+     * @param flTime The current renderer time.
+     * @ghidraAddress 0x0038fe38
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Advance whatever the screen animates while it is neither entering nor exiting.
+     *
+     * Slot 27. The body is empty. UpdateAnimationFrame() is the one caller on a screen, and it runs
+     * the slot only while both mUnknown08 and mUnknown0c are zero, which is the interval after the
+     * enter animation has finished and before the exit animation starts. Six derived tables fill
+     * the slot. MetGizmoPanel at `0x0027b388` forwards to slot 26 unchanged, which is what pairs
+     * the two hooks and confirms the float. MetLogoScreen at `0x002be5a8` toggles one object every
+     * 120 units of renderer time and sets an animation view's frame to the time it received.
+     *
+     * @param flTime The current renderer time.
+     * @ghidraAddress 0x0038fe40
+     */
+    virtual void UpdateIdleAnimation(float flTime);
 
     /**
      * Start alternating one object between two material states.
@@ -311,20 +670,6 @@ public:
      * @ghidraAddress 0x0038fe48
      */
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
-
-    /**
-     * Unrecovered. Slot 26.
-     *
-     * The body is empty here. MetKeyboardScreen fills it at `0x0028c708` with a body that reads its
-     * argument out of `f12` and compares a float member against it, which is what fixes the single
-     * parameter as a float. Nine further screens fill the slot too. The argument is the renderer
-     * time, on the same evidence that fixes it for the two animation slots, because the
-     * MetKeyboardScreen body adds a fixed 240 to a recorded value and tests the sum against it.
-     *
-     * @param flTime The current renderer time.
-     * @ghidraAddress 0x0038fe38
-     */
-    virtual void OnUnknownSlot26(float flTime);
 
     /**
      * Rewind the enter animation and record the time it starts at.
@@ -390,6 +735,16 @@ public:
     virtual void OnUnknownSlot36();
 
     /**
+     * Draw the view.
+     *
+     * Slot 37. Forwards to Rnd::Drawable::Draw() on the Drawable subobject of mUnknown14, at
+     * `+0x18` within the view. The name is inferred from the Rnd::Drawable routine it forwards to.
+     *
+     * @ghidraAddress 0x00390788
+     */
+    virtual void Draw();
+
+    /**
      * Resolve the three views the container produced and hide the screen.
      *
      * Slot 38. The scene root is the object named by mUnknown80 with `.view` appended. A container
@@ -399,91 +754,6 @@ public:
      * @ghidraAddress 0x0038b1b0
      */
     virtual void ResolveContainerViews();
-
-    /**
-     * Show or hide the view and every drawable the container loaded.
-     *
-     * Forwards to Rnd::Drawable::SetShowing() on mUnknown14 and then, when mUnknown60 is set, on
-     * each entry of the drawable list that the loader recorded for mUnknown28. The name is
-     * inferred from the Rnd::Drawable virtual it forwards to.
-     *
-     * @param nShowing Non-zero to draw the screen.
-     * @ghidraAddress 0x0038b490
-     */
-    virtual void SetShowing(int nShowing);
-
-    /**
-     * Play the sound that accompanies sliding between screens.
-     *
-     * Passes the literal `SND_MET_SLIDE` to the named-sound player at `0x0012f470`. The name is
-     * inferred from that literal. MetScreenMultiSoundBank, MetMultiTipsBaseScreen,
-     * MetPauseBaseScreen, and MetJukeboxBaseScreen all override this slot, the last three with an
-     * empty body, which is what proves the return type is void.
-     *
-     * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00390140
-     */
-    virtual void PlaySlideSound(int nSelector);
-
-    /**
-     * Play the sound that accompanies departing a screen.
-     *
-     * Passes the literal `SND_MET_LEAVE` to the named-sound player at `0x0012f470`.
-     *
-     * @ghidraAddress 0x00390160
-     */
-    virtual void PlayLeaveSound();
-
-    /**
-     * Play the sound that accompanies the emphasised selection.
-     *
-     * Passes the literal `SND_MET_HIGH` to the named-sound player at `0x0012f470`.
-     *
-     * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x003901c0
-     */
-    virtual void PlayHighSound(int nSelector);
-
-    /**
-     * Play the sound that accompanies cycling a value to the left.
-     *
-     * Passes the literal `SND_MET_CYCLE_L` to the named-sound player at `0x0012f470`.
-     *
-     * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00390180
-     */
-    virtual void PlayCycleLeftSound(int nSelector);
-
-    /**
-     * Play the sound that accompanies cycling a value to the right.
-     *
-     * Passes the literal `SND_MET_CYCLE_R` to the named-sound player at `0x0012f470`.
-     *
-     * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x003901a0
-     */
-    virtual void PlayCycleRightSound(int nSelector);
-
-    /**
-     * Play the sound that accompanies a rejected input.
-     *
-     * Passes the literal `SND_MET_ERROR` to the named-sound player at `0x0012f470`. This is the
-     * one sound of the six that MetScreenMultiSoundBank does not override.
-     *
-     * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x003901e0
-     */
-    virtual void PlayErrorSound(int nSelector);
-
-    /**
-     * Draw the view.
-     *
-     * Forwards to Rnd::Drawable::Draw() on the Drawable subobject of mUnknown14, at `+0x18` within
-     * the view. The name is inferred from the Rnd::Drawable routine it forwards to.
-     *
-     * @ghidraAddress 0x00390788
-     */
-    virtual void Draw();
 
 protected:
     /**
@@ -508,22 +778,34 @@ private:
     // Time the enter animation started, or zero while no enter animation runs.
     float mUnknown08; // +0x08
     // Time the exit animation started, or zero while no exit animation runs.
-    float mUnknown0c;                      // +0x0c
-    MetRenderer *mUnknown10;               // +0x10
-    Rnd::View *mUnknown14;                 // +0x14
-    int mUnknown18;                        // +0x18, starts at 2
-    int mUnknown1c;                        // +0x1c
-    HxStr mUnknown20;                      // +0x20, the screen name
-    HxStr mUnknown28;                      // +0x28, mUnknown80 with `.rnd` appended
-    Rnd::View *mUnknown30;                 // +0x30, the view named `<screen>_EE.anim`
-    Rnd::View *mUnknown34;                 // +0x34, the view named `<screen>_BF.anim`
-    std::vector<HxStr> mUnknown38;         // +0x38
+    float mUnknown0c;        // +0x0c
+    MetRenderer *mUnknown10; // +0x10
+    Rnd::View *mUnknown14;   // +0x14
+    int mUnknown18;          // +0x18, starts at 2
+    int mUnknown1c;          // +0x1c
+    HxStr mUnknown20;        // +0x20, the screen name
+    HxStr mUnknown28;        // +0x28, mUnknown80 with `.rnd` appended
+    Rnd::View *mUnknown30;   // +0x30, the view named `<screen>_EE.anim`
+    Rnd::View *mUnknown34;   // +0x34, the view named `<screen>_BF.anim`
+protected:
+    // Extra container object names a screen wants resolved. MetMemCardLoadScreen,
+    // MetMemCardTypeScreen, MetRemixTypeScreen, and MetRemixDelScreen each append one in their
+    // constructors, which is why it is protected.
+    std::vector<HxStr> mUnknown38; // +0x38
+
+private:
     std::list<Rnd::Drawable *> mUnknown44; // +0x44
-    int mUnknown48;                        // +0x48, starts at 1
-    int mUnknown4c;                        // +0x4c
-    int mUnknown50;                        // +0x50
-    int mUnknown54;                        // +0x54
-    float mUnknown58;                      // +0x58, starts at 1.0f
+
+protected:
+    // Set while the container views still need resolving, and cleared by slot 38. Read by
+    // MetJukeboxBaseScreen::SetShowing(), which is why it is protected.
+    int mUnknown48; // +0x48, starts at 1
+
+private:
+    int mUnknown4c;   // +0x4c
+    int mUnknown50;   // +0x50
+    int mUnknown54;   // +0x54
+    float mUnknown58; // +0x58, starts at 1.0f
 
 protected:
     // Cleared by the MetSaveRemixScreen constructor, which is why it is protected.

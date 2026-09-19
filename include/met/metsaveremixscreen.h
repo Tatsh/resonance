@@ -2,6 +2,7 @@
 
 #include "met/metbuttonlist.h"
 #include "met/metsaveremix.h"
+#include "os/hxstr.h"
 
 /**
  * Solo screen that writes a finished remix to a memory card.
@@ -16,14 +17,19 @@
  *
  * The constructor at `0x0037ace0` takes only the renderer and the load priority. It runs the
  * MetSaveRemix constructor at `0x00372120` with `ers` for the screen name, `metagame/_Solo` for
- * the directory, and `save_remix` for the container, writes its own three vptrs, zeroes `+0xe8`,
- * `+0xec`, `+0x100`, `+0x104`, and `+0x108`, allocates a MetButtonList tagged `MetButtonList`
- * into mUnknowne8, and pushes `remix_save` into the container object-name vector that MetScreen
- * owns. It also clears MetScreen::mUnknown5c twice and the MetSaveRemix word at `+0xe0`, which is
- * why MetScreen::mUnknown5c is protected rather than private.
+ * the directory, and `save_remix` for the container, writes its own three vptrs, zeroes
+ * mUnknowne8, mUnknownec, and mUnknown100, default-constructs mUnknown104, allocates a
+ * MetButtonList tagged `MetButtonList` into mUnknowne8, and pushes `remix_save` into the
+ * container object-name vector MetScreen declares at `+0x38`. It then clears
+ * MetScreen::mUnknown5c, which is why MetScreen::mUnknown5c is protected rather than private, and
+ * MetSaveRemix::mUnknowne0, which requires that MetSaveRemix member to be protected as well. The
+ * image emits the mUnknown5c store on both paths of the temporary release above it, which is one
+ * source statement rather than two.
  *
- * The destructor at `0x00381868` restores the three vptrs, runs the MetSaveRemix destructor, and
- * releases the object with the tag `MsgSink`.
+ * The destructor at `0x00381868` restores the three vptrs, deletes mUnknowne8 through slot 1 of
+ * the MetButtonList table with the deleting `__in_chrg` value, releases the mUnknown104 buffer
+ * through the inlined HxStr destructor, runs the MetSaveRemix destructor, and releases the object
+ * with the tag `MsgSink`.
  *
  * Thirteen slots differ from the MetSaveRemix table. Slots 21 through 24 sit eight bytes apart at
  * `0x003817c0` through `0x003817d8` and are two-instruction `jr ra` stubs, and the declaration
@@ -49,33 +55,51 @@ public:
     virtual ~MetSaveRemixScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Play the slide sound when the selector matches MetSaveRemix::mUnknownc8.
+     *
+     * This is the one sound override of the class that is not an empty stub, and the only one in
+     * the band that genuinely compares the selector against a recorded value.
+     *
+     * @param nSelector Compared against MetSaveRemix::mUnknownc8, then passed through unchanged.
      * @ghidraAddress 0x00381968
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
+     * Silence the leave sound.
+     *
+     * The four overrides below are two-instruction stubs, so each was written inline with an empty
+     * body. Their declaration order puts leave before high, which is why their addresses do not
+     * ascend with the slot numbers.
+     *
      * @ghidraAddress 0x003817d8
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound() {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the high sound.
+     *
      * @ghidraAddress 0x003817c0
      */
-    virtual void PlayHighSound(int nSelector);
+    virtual void PlayHighSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-left sound.
+     *
      * @ghidraAddress 0x003817c8
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Silence the cycle-right sound.
+     *
      * @ghidraAddress 0x003817d0
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
 private:
     MetButtonList *mUnknowne8; // +0xe8
@@ -83,6 +107,6 @@ private:
     // Never written by the constructor and not recovered.
     unsigned char mUnknownf0[0x10]; // +0xf0
     int mUnknown100;                // +0x100
-    int mUnknown104;                // +0x104
-    int mUnknown108;                // +0x108
+    // Default-constructed, and its buffer is what the destructor releases at `+0x108`. +0x104
+    HxStr mUnknown104;
 };

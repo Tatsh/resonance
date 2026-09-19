@@ -26,3 +26,7 @@ MetJukeboxFactoryRemixesScreen::MetJukeboxFactoryRemixesScreen(MetRenderer *pRen
 
 MetJukeboxFactoryRemixesScreen::~MetJukeboxFactoryRemixesScreen() {
 }
+
+int MetJukeboxFactoryRemixesScreen::GetItemCount() {
+    return mUnknowna0->size();
+}

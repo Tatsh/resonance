@@ -1,7 +1,12 @@
 #pragma once
 
+#include <vector>
+
 #include "met/metbuttonlist.h"
 #include "met/metscreen.h"
+#include "rnd/button.h"
+#include "rnd/object.h"
+#include "rnd/tex.h"
 
 /**
  * Base of the three screens that pick a saved FreQ identity.
@@ -24,11 +29,13 @@
  * `cid` for the screen name, `metagame/_Solo` for the directory, and `create_id` for the
  * container. All three children call it, so all three load the same container and differ only in
  * behaviour. It allocates a MetButtonList tagged `MetButtonList` into mUnknown90, zeroes
- * mUnknown94, and stores the result of `0x001712c0` into mUnknowna0. The words at `+0x98` and
- * `+0x9c` are never written.
+ * mUnknown94, waits for the FreQ maker assets, and resolves
+ * `persona_texburn_texture_1.tex` into mBurnTexture. The words at `+0x98` and `+0x9c` are written
+ * by slot 38 rather than by the constructor.
  *
- * The destructor at `0x00296ae0` restores the vptr, runs the MetScreen destructor, and releases
- * the object with the tag `MsgSink`. It releases nothing of its own.
+ * The destructor at `0x00296ae0` restores the vptr, deletes mUnknown90 through slot 1 of the
+ * MetButtonList table with the deleting `__in_chrg` value, runs the MetScreen destructor, and
+ * releases the object with the tag `MsgSink`.
  *
  * Seven inherited slots differ from the MetScreen table, and all seven bodies are shared by all
  * three children, which is what proves they belong here. Slots 23 and 24 at `0x00296b60` and
@@ -52,21 +59,37 @@ public:
     virtual ~MetLoadFreqBaseScreen();
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Play the cycle-left sound while the carousel is selected and has more than one entry.
+     *
+     * The override tests neither the selector nor any recorded selector of its own. It forwards to
+     * MetScreen with the same selector when MetButtonList::mSelected is zero and the identity list
+     * at mUnknown8c has at least kMinimumCyclableEntries entries.
+     *
+     * @param nSelector Passed through to MetScreen unchanged.
      * @ghidraAddress 0x00296b60
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * Play the cycle-right sound under the same two conditions as PlayCycleLeftSound().
+     *
+     * @param nSelector Passed through to MetScreen unchanged.
      * @ghidraAddress 0x00296bb0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
 private:
+    // The identity list the carousel steps through. Both cycle sounds and slot 5 read it, and no
+    // routine of this class writes it, so it is filled from outside the class. Only the four-byte
+    // element width is recovered, and the element type follows the tree's default for a four-byte
+    // scene-object vector. +0x8c
+    std::vector<Rnd::Object *> *mUnknown8c;
     MetButtonList *mUnknown90; // +0x90
-    int mUnknown94;            // +0x94
-    int mUnknown98;            // +0x98, not written by the constructor
-    int mUnknown9c;            // +0x9c, not written by the constructor
-    int mUnknowna0;            // +0xa0, from the routine at 0x001712c0
+    // Index into the list at mUnknown8c. Slot 5 clears it once it has run past the end. +0x94
+    int mUnknown94;
+    // Slot 38 resolves both by name and casts each to Rnd::Button. +0x98 and +0x9c
+    Rnd::Button *mUnknown98;
+    Rnd::Button *mUnknown9c;
+    // The texture `persona_texburn_texture_1.tex`, resolved by the constructor. +0xa0
+    Rnd::Tex *mBurnTexture;
 };

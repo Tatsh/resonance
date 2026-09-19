@@ -51,6 +51,15 @@ public:
 private:
     int mUnknown00;                      // +0x00
     std::vector<Rnd::Object *> mButtons; // +0x04
-    // Index of the selected button, or -1 for none.
-    int mSelected; // +0x10
+
+public:
+    /**
+     * Index of the selected button, or -1 for none.
+     *
+     * Public rather than private, because MetLoadFreqBaseScreen reads it directly and the image
+     * has no accessor to route that read through. A friend declaration fits the image equally
+     * well. The member is declared after the two private ones so that the recovered order, and
+     * therefore the recovered layout, is preserved. +0x10
+     */
+    int mSelected;
 };
