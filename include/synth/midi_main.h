@@ -4,9 +4,9 @@
  * Voice and sound-bank driver that Ps2HardSynth is a thin class over.
  *
  * Titled after `midi_main.cpp`, the file its own asserts record at `0x0046456c`, `0x00464d58`, and
- * `0x00464ed0`. The module spans `0x004620b0` through `0x00465100` and holds the attested behaviour
+ * `0x00464ed0`. The module spans `0x004620b0` through `0x00465100` and has the attested behaviour
  * of the sound subsystem: the voice table, the sound banks, and the script-facing command
- * dispatcher. Neither Synth nor Ps2HardSynth carries any of it.
+ * dispatcher. Neither Synth nor Ps2HardSynth has any of it.
  *
  * Recovery has started at the dispatcher and the entry points MainLoop already drives. Three
  * further routines are identified and not declared, each for a stated reason. The bank loaders at
@@ -28,8 +28,8 @@
  * retained in its second argument register from entry so that the report can print it.
  *
  * The script layer exposes this as `synth_cmd`, which is the one attested title in the module. The
- * body is not written while command 2's callee has no title, because the only name available for it
- * would be inferred from this call site rather than from the routine.
+ * body is not written while command 2's callee has no title, because the only title available for
+ * it would be inferred from this call site rather than from the routine.
  *
  * @param nCommand The command to run.
  * @ghidraAddress 0x00464ad0
