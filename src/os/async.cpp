@@ -3,8 +3,11 @@
 #include <eekernel.h>
 #include <libcdvd.h>
 #include <list>
+#include <sifdev.h>
 #include <string.h>
 
+#include "os/arkfile.h"
+#include "os/cycles.h"
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
@@ -32,23 +35,45 @@ constexpr int kCdFunctionRead = 1;
 // Function code libcdvd reports for a finished seek.
 constexpr int kCdFunctionSeek = 4;
 
+// States the one chunk transfer the drive performs moves through. Idle means the record describes
+// no transfer at all.
+enum AsyncOpStatus { kAsyncOpIdle = 0, kAsyncOpSeeking = 1, kAsyncOpReading = 2, kAsyncOpDone = 3 };
+
+// Milliseconds an issued command is given before AsyncCheck starts consulting the drive itself.
+constexpr int kAsyncOpTimeoutMs = 3000;
+
+// Milliseconds an issued command may take before the wait is reported.
+constexpr int kAsyncOpWarnMs = 10000;
+
+// How long the wait report asks to stay on screen. The unit is not determined.
+constexpr int kAsyncWarnMessageDuration = 300;
+
+// Attempts one chunk is given before the failure is fatal.
+constexpr int kAsyncOpMaxAttempts = 3;
+
+// Reported by PickNextAsyncFetch while it has found nothing to fetch.
+constexpr int kAsyncNoSectorPending = 9999999;
+
 /**
- * The read the media is servicing right now.
+ * The one chunk transfer the media is performing right now.
  *
- * The field names come from the dump line, which reads `current op:  id: %d,
- * sector: %d, buffer: %p, status: %d, retry: %d (%d)`. mId is the resolved file
- * rather than a request identifier, which BeginAsyncOp proves by passing it
- * straight to SectorCacheGetLru().
+ * Every field name is attested. The dump line reads `current op:  id: %d,
+ * sector: %d, buffer: %p, status: %d, retry: %d (%d)`, and the fatal report in
+ * TakeFinishedAsyncOp reads `FAILED TRYING TO READ SECTOR: %d (id: %d,
+ * baseSector: %d)`. Only the second count the dump prints has no title of its
+ * own, and it is the attempt counter the fatal report is raised from.
+ *
+ * mId is the resolved file rather than a request identifier, which
+ * AsyncQueueCachedSector proves by passing it straight to SectorCacheGetLru().
  */
 struct AsyncOp {
-    int mId;        // +0x00
-    int mSector;    // +0x04
-    int mUnknown08; // +0x08 cleared to -1 alongside mId and mSector
-    void *mBuffer;  // +0x0c
-    int mStatus;    // +0x10
-    int mRetry;     // +0x14
-    int mUnknown18; // +0x18 the second count the dump prints after the retry
-                    // count
+    int mId;         // +0x00
+    int mSector;     // +0x04
+    int mBaseSector; // +0x08 the archive's own start sector on the disc
+    void *mBuffer;   // +0x0c the cache row the chunk is read into
+    int mStatus;     // +0x10 one of AsyncOpStatus
+    int mRetry;      // +0x14 set when the command has to be issued again
+    int mRetryCount; // +0x18
 };
 
 // 0x006e9128. The element is the 48-byte request inline, not a pointer to one.
@@ -67,13 +92,24 @@ int g_bAsyncInitialised;
 int g_nAsyncHostMedia;
 
 // 0x006e9140
-AsyncOp g_asyncOp;
+AsyncOp g_asyncCurrentOp;
 
 // 0x006e915c
 int g_bAsyncThreaded;
 
 // 0x006e9160. Raised by the drive callback and consumed by AsyncCheck.
 int g_nAsyncOpFinished;
+
+// 0x006e9168. Nothing in the image writes this, so every field stays at its zero: no retry limit,
+// no spindle override, and 2048-byte sectors.
+sceCdRMode g_asyncOpReadMode;
+
+// 0x006e9170. Cleared once the read finishes, which is what makes a zero here mean "no command in
+// flight" to AsyncCheck.
+long long g_llAsyncOpDeadline;
+
+// 0x006e9178
+long long g_llAsyncOpStartTime;
 
 // 0x006e91d0
 AsyncJob *g_pAsyncFreeJobs;
@@ -87,6 +123,9 @@ sceCdCBFunc g_pfnAsyncPrevCdCallback;
 // 0x006e91dc. The drive error code the last callback report latched.
 int g_nAsyncOpError;
 
+// 0x00892590. The absolute disc sector the seek moves to and the read then starts at.
+int g_nAsyncOpLsn;
+
 // 0x008925a0
 char g_abAsyncCallbackStack[kAsyncCallbackStackSize];
 
@@ -98,13 +137,13 @@ void InitAsync() {
     g_asyncCompletedJobs.clear();
     g_nAsyncNextJobId = 1;
 
-    g_asyncOp.mId = -1;
-    g_asyncOp.mUnknown08 = -1;
-    g_asyncOp.mUnknown18 = 0;
-    g_asyncOp.mSector = -1;
-    g_asyncOp.mBuffer = nullptr;
-    g_asyncOp.mStatus = 0;
-    g_asyncOp.mRetry = 0;
+    g_asyncCurrentOp.mId = -1;
+    g_asyncCurrentOp.mBaseSector = -1;
+    g_asyncCurrentOp.mRetryCount = 0;
+    g_asyncCurrentOp.mSector = -1;
+    g_asyncCurrentOp.mBuffer = nullptr;
+    g_asyncCurrentOp.mStatus = kAsyncOpIdle;
+    g_asyncCurrentOp.mRetry = 0;
 
     g_pAsyncFreeJobs = static_cast<AsyncJob *>(
         MemAllocTagged(kAsyncJobCount * sizeof(AsyncJob), __FILE__, __LINE__));
@@ -287,4 +326,306 @@ void AsyncReleaseJobChain(AsyncJob *pChain) {
     }
     pTail->mNext = g_pAsyncFreeJobs;
     g_pAsyncFreeJobs = pChain;
+}
+
+namespace {
+
+// Issue the command the current transfer's state calls for, 0x004604c8.
+//
+// The name is attested by the routine's own report. A state the routine does not recognise is
+// reported and nothing is issued, and the timing stamps are then not written either.
+void AsyncIssueOp() {
+    switch (g_asyncCurrentOp.mStatus) {
+    case kAsyncOpSeeking:
+        g_nAsyncOpLsn =
+            g_asyncCurrentOp.mBaseSector +
+            ArkfileLogicalToPhysicalSector(g_asyncCurrentOp.mId, g_asyncCurrentOp.mSector) *
+                kAsyncJobChunkSectors;
+        sceCdSeek(g_nAsyncOpLsn);
+        break;
+    case kAsyncOpReading:
+        // Both command results are discarded. A command the drive refuses outright is therefore
+        // noticed only once the deadline below expires.
+        sceCdRead(
+            g_nAsyncOpLsn, kAsyncJobChunkSectors, g_asyncCurrentOp.mBuffer, &g_asyncOpReadMode);
+        break;
+    default:
+        LogPrintf("AsyncIssueOp: unexpected op status: %d\n", g_asyncCurrentOp.mStatus);
+        return;
+    }
+
+    g_llAsyncOpStartTime = GetElapsedMilliseconds();
+    g_llAsyncOpDeadline = g_llAsyncOpStartTime + kAsyncOpTimeoutMs;
+}
+
+} // namespace
+
+void AsyncCheck(int nBlocking) {
+    if ((g_asyncCurrentOp.mStatus != kAsyncOpSeeking) &&
+        (g_asyncCurrentOp.mStatus != kAsyncOpReading)) {
+        return;
+    }
+
+    while (true) {
+        if (g_llAsyncOpDeadline != 0) {
+            const long long llNow = GetElapsedMilliseconds();
+            if (llNow >= g_llAsyncOpDeadline) {
+                if (sceCdDiskReady(SCECdNonblock) == SCECdNotReady) {
+                    sceCdDiskReady(SCECdBlock);
+                    g_asyncCurrentOp.mRetry = 1;
+                } else if ((llNow - g_llAsyncOpStartTime) > kAsyncOpWarnMs) {
+                    ShowScreenMessage("HEY - 10 SECONDS SINCE ASYNC OP\n",
+                                      kAsyncWarnMessageDuration);
+                }
+            }
+        }
+
+        int nBusy = 1;
+        int nError = 0;
+        if (g_bAsyncThreaded != 0) {
+            if (g_nAsyncOpFinished != 0) {
+                nBusy = 0;
+                nError = g_nAsyncOpError;
+                g_nAsyncOpFinished = 0;
+            } else if (nBlocking != 0) {
+                continue;
+            }
+        } else {
+            nBusy = sceCdSync((nBlocking != 0) ? SCECdBlock : SCECdNonblock);
+            nError = sceCdGetError();
+        }
+
+        if (nError != 0) {
+            if (nError != SCECdErTRMOPN) {
+                Fatal("CD ERROR: %d on sector %d, NOT retrying...\n",
+                      nError,
+                      g_asyncCurrentOp.mSector);
+            }
+            sceCdDiskReady(SCECdBlock);
+            g_asyncCurrentOp.mRetry = 1;
+            if (nBlocking == 0) {
+                return;
+            }
+            continue;
+        }
+
+        if (nBusy != 0) {
+            return;
+        }
+
+        switch (g_asyncCurrentOp.mStatus) {
+        case kAsyncOpSeeking:
+            g_asyncCurrentOp.mStatus = kAsyncOpReading;
+            AsyncIssueOp();
+            if (nBlocking == 0) {
+                return;
+            }
+            continue;
+        case kAsyncOpReading:
+            g_asyncCurrentOp.mStatus = kAsyncOpDone;
+            g_llAsyncOpDeadline = 0;
+            return;
+        default:
+            // A state AsyncIssueOp only reports is fatal here. The entry test above admits no
+            // other state, so the branch is unreachable from the one call path.
+            Fatal("AsyncCheck: unexpected op status: %d\n", g_asyncCurrentOp.mStatus);
+        }
+    }
+}
+
+namespace {
+
+// Advance the current transfer and take its results once it has finished, 0x004603d8.
+//
+// Reports non-zero only on the pass that finds the data in place, and the record is idle again
+// afterwards. A pending retry is counted and the command reissued instead.
+int TakeFinishedAsyncOp(int *pnFile, int *pnSector, void **ppBuffer) {
+    if (g_asyncCurrentOp.mStatus == kAsyncOpIdle) {
+        return 0;
+    }
+
+    if (g_asyncCurrentOp.mRetry != 0) {
+        ++g_asyncCurrentOp.mRetryCount;
+        if (g_asyncCurrentOp.mRetryCount == kAsyncOpMaxAttempts) {
+            Fatal("FAILED TRYING TO READ SECTOR: %d (id: %d, baseSector: %d)\n",
+                  g_asyncCurrentOp.mSector,
+                  g_asyncCurrentOp.mId,
+                  g_asyncCurrentOp.mBaseSector);
+        }
+        g_asyncCurrentOp.mRetry = 0;
+        AsyncIssueOp();
+        return 0;
+    }
+
+    AsyncCheck(0);
+    if (g_asyncCurrentOp.mStatus != kAsyncOpDone) {
+        return 0;
+    }
+
+    *pnFile = g_asyncCurrentOp.mId;
+    *pnSector = g_asyncCurrentOp.mSector;
+    *ppBuffer = g_asyncCurrentOp.mBuffer;
+
+    g_asyncCurrentOp.mId = -1;
+    g_asyncCurrentOp.mSector = -1;
+    g_asyncCurrentOp.mRetryCount = 0;
+    g_asyncCurrentOp.mBuffer = nullptr;
+    g_asyncCurrentOp.mStatus = kAsyncOpIdle;
+    // mBaseSector is not reset here. AsyncQueueCachedSector always rewrites it.
+    g_asyncCurrentOp.mRetry = 0;
+    return 1;
+}
+
+// Take one finished job out of its request's chain and put it back on the free list.
+inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJob *pJob) {
+    if (pJob->mNext != nullptr) {
+        pJob->mNext->mPrev = pJob->mPrev;
+    }
+    if (pJob->mPrev != nullptr) {
+        pJob->mPrev->mNext = pJob->mNext;
+    } else {
+        pRequest->mJobs = pJob->mNext;
+    }
+
+    pJob->mPrev = nullptr;
+    pJob->mNext = nullptr;
+    if (pJob != nullptr) { // The test cannot fire from either caller. The binary performs it.
+        pJob->mNext = g_pAsyncFreeJobs;
+        g_pAsyncFreeJobs = pJob;
+    }
+}
+
+// Perform one job at once rather than through the sector cache, 0x00460e10.
+//
+// This is the path a request on a loose file takes. The cache is keyed by 64 KiB chunks of an
+// archive, and a loose file has no archive to key it by. The job therefore reads straight from the
+// file through the SDK primitives.
+void DeliverAsyncJobData(AsyncRequest *pRequest, AsyncJob *pJob) {
+    const int nFile = ((pRequest->mFile & kFileHandleArkStream) != 0) ?
+                          GetArkStreamArkId(pRequest->mFile & ~kFileHandleArkStream) :
+                          pRequest->mFile;
+
+    sceLseek(nFile, pJob->mSector * kSectorCacheRowSize + pJob->mSectorOffset, SCE_SEEK_SET);
+    sceRead(nFile, pJob->mBuffer, pJob->mLength);
+    UnlinkAsyncJob(pRequest, pJob);
+}
+
+// Report the work the drive should do next, 0x00460120.
+//
+// A pending request on a loose file is serviced in place and ends the scan. The first pending
+// ark-stream request is copied out instead, and the chunk its first job wants is reported for the
+// caller to queue.
+int PickNextAsyncFetch(AsyncRequest *pRequest) {
+    int nSector = kAsyncNoSectorPending;
+    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
+        if ((it->mFile & kFileHandleArkStream) == 0) {
+            DeliverAsyncJobData(&*it, it->mJobs);
+            break;
+        }
+        if (nSector == kAsyncNoSectorPending) {
+            *pRequest = *it;
+            nSector = it->mJobs->mSector;
+        }
+    }
+
+    return (nSector != kAsyncNoSectorPending) ? nSector : -1;
+}
+
+// Hand a freshly read chunk to every pending request that wants it, 0x00460238.
+//
+// A request whose last job is satisfied here completes immediately. The data a caller asked for is
+// therefore in place before the caller is told about it.
+void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) {
+    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end();) {
+        if (it->mStreamFile != nFile) {
+            ++it;
+            continue;
+        }
+
+        AsyncJob *pJob = it->mJobs;
+        while (pJob != nullptr) {
+            AsyncJob *pNext = pJob->mNext;
+            if (pJob->mSector == nSector) {
+                memcpy(pJob->mBuffer,
+                       static_cast<const char *>(pSectorData) + pJob->mSectorOffset,
+                       pJob->mLength);
+                UnlinkAsyncJob(&*it, pJob);
+            }
+            pJob = pNext;
+        }
+
+        if (it->mJobs != nullptr) {
+            ++it;
+            continue;
+        }
+
+        AsyncJobComplete(&*it, kAsyncStatusOk);
+        it = g_asyncPendingJobs.erase(it);
+    }
+}
+
+// Start the transfer of one chunk into the cache, 0x00460ee0.
+//
+// The name is attested by the routine's own report. The row the transfer will fill is locked for
+// the whole of it, which is what stops AsyncQueueRequest() copying a half-filled row out. The
+// result is the constant 1 and the one caller discards it.
+int AsyncQueueCachedSector(int nFile, int nSector, int nBaseSector) {
+    SectorCacheRow *pRow = SectorCacheGetLru(nFile, nSector);
+    if (pRow == nullptr) {
+        Fatal("AsyncQueueCachedSector: internal error!!\n");
+    }
+    SetSectorRowLocked(pRow);
+
+    g_asyncCurrentOp.mId = nFile;
+    g_asyncCurrentOp.mSector = nSector;
+    g_asyncCurrentOp.mBaseSector = nBaseSector;
+    g_asyncCurrentOp.mStatus = kAsyncOpSeeking;
+    g_asyncCurrentOp.mBuffer = pRow->mBuffer;
+    g_asyncCurrentOp.mRetryCount = 0;
+    g_asyncCurrentOp.mRetry = 0;
+    AsyncIssueOp();
+    return 1;
+}
+
+} // namespace
+
+void AsyncPumpCompletedRequests() {
+    if (g_nAsyncHostMedia == 0) {
+        int nFile;
+        int nSector;
+        void *pSectorData;
+        if (TakeFinishedAsyncOp(&nFile, &nSector, &pSectorData) != 0) {
+            DistributeAsyncSectorData(nFile, nSector, pSectorData);
+            UnlockCachedSector(nFile, nSector);
+        }
+
+        if (g_asyncCurrentOp.mStatus == kAsyncOpIdle) {
+            AsyncRequest request;
+            const int nFetchSector = PickNextAsyncFetch(&request);
+            if (nFetchSector >= 0) {
+                AsyncQueueCachedSector(
+                    request.mStreamFile, nFetchSector, ArkfileGetBaseSector(request.mStreamFile));
+            }
+        }
+    }
+
+    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end();) {
+        if (it->mCallback != nullptr) {
+            it->mCallback->Done(it->mId, it->mFile, it->mBuffer, it->mLength, it->mStatus);
+        }
+        if (it->mJobs != nullptr) {
+            AsyncReleaseJobChain(it->mJobs);
+        }
+        it = g_asyncCompletedJobs.erase(it);
+    }
+}
+
+void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs) {
+    *pnPending = static_cast<int>(g_asyncPendingJobs.size());
+    *pnCompleted = static_cast<int>(g_asyncCompletedJobs.size());
+
+    *pnFreeJobs = 0;
+    for (const AsyncJob *pJob = g_pAsyncFreeJobs; pJob != nullptr; pJob = pJob->mNext) {
+        ++*pnFreeJobs;
+    }
 }

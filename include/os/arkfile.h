@@ -152,7 +152,7 @@ private:
     char *mNames;                            // +0x118 mTables plus the name pool's offset
     int mDiscLsn;                            // +0x11c the archive's start sector on the disc
     void *mOptimizedTable;                   // +0x120
-    int mHasOptimizedTable;                  // +0x124
+    int mOptimizedCursor;                    // +0x124 slot the next lookup tries first, or -1
     char mMountPoint[kArkMountPointSize];    // +0x128 the header path after its `run` component
 };
 
@@ -164,6 +164,63 @@ private:
  * @ghidraAddress 0x0055a1a0
  */
 int EraseArkStream(int nHandle);
+
+/**
+ * Find the record of an open stream.
+ *
+ * kFileHandleArkStream is masked off the handle before the search. A caller may therefore pass the
+ * handle with the bit or without it.
+ *
+ * @param nHandle The stream handle.
+ * @return The record, or null when no record has that handle.
+ * @ghidraAddress 0x0055c158
+ */
+ArkStream *FindOpenArkStream(int nHandle);
+
+/**
+ * Report the archive a stream reads from.
+ *
+ * @param nHandle The stream handle.
+ * @return The archive's file, or -1 when no record has that handle.
+ * @ghidraAddress 0x0055c000
+ */
+int GetArkStreamArkId(int nHandle);
+
+/**
+ * Report the disc sector a mounted archive starts at.
+ *
+ * A file that is not a mounted archive is fatal, and the report lists every mounted archive's file
+ * before stopping.
+ *
+ * @param nFile The archive's file.
+ * @return The archive's start sector.
+ * @ghidraAddress 0x0055a590
+ */
+int ArkfileGetBaseSector(int nFile);
+
+/**
+ * Map a chunk of an archive to the chunk position the disc stores it at.
+ *
+ * An archive built without the optimized block stores its chunks in order, and the argument is
+ * returned unchanged. An optimized archive stores them in the order the game reads them, and its
+ * optimized block is an array of two-byte logical chunk indices whose slot number is the position
+ * on the disc. The lookup is therefore a search of that array for the logical index, returning the
+ * slot it was found in.
+ *
+ * ArkFile::mOptimizedCursor makes the common case constant time. It records the slot after the one
+ * the last lookup resolved. That is the slot a sequential read wants next. A miss on the guess
+ * reports through the log, abandons the cursor, and falls back to searching the whole array. A
+ * chunk that appears in no slot is fatal.
+ *
+ * A file that is not a mounted archive is reported through the log, and the argument is returned
+ * unchanged.
+ *
+ * @param nFile The archive's file.
+ * @param nSector The logical chunk index.
+ * @return The chunk position on the disc.
+ * @ghidraAddress 0x0055a410
+ */
+int ArkfileLogicalToPhysicalSector(int nFile, int nSector);
 
 /**
  * Mount the archives the game needs for the whole session.

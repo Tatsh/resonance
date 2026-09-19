@@ -211,16 +211,43 @@ int MatchesCurrentAsyncOp(int nFile, int nSector);
  * Advance the operation the media is servicing.
  *
  * The name is attested by the routine's own report, `AsyncCheck: unexpected op status: %d`. The
- * body returns at once unless the operation state at 0x006e9150 is 1 or 2. Otherwise it polls the
- * media, reports `HEY - 10 SECONDS SINCE ASYNC OP` once the wait passes 10001 ticks, treats a CD
- * error as fatal through `CD ERROR: %d on sector %d, NOT retrying...`, and on completion advances
- * the state through AsyncIssueOp. Both call sites, ArkFile::Open and the ark reader, pass 1 and
- * sit immediately before a synchronous read, which is what stops a queued read from racing it.
+ * body returns at once unless the current chunk transfer has a command in flight. Otherwise it
+ * waits for that command, then advances the transfer: a finished seek issues the read, and a
+ * finished read marks the data ready for AsyncPumpCompletedRequests() to distribute.
  *
- * @param nBlocking Non-zero to keep polling until the operation settles.
+ * How the wait is performed depends on the media. On disc media the drive callback thread raises a
+ * flag the routine consumes, and without that thread the routine calls sceCdSync() instead. Either
+ * way a drive error of SCECdErTRMOPN waits for the tray and requests a retry, and every other drive
+ * error is fatal through `CD ERROR: %d on sector %d, NOT retrying...`.
+ *
+ * A command that has been in flight for more than three seconds also consults the drive directly. A
+ * drive reporting SCECdNotReady requests a retry, and a ready drive more than ten seconds in
+ * reports `HEY - 10 SECONDS SINCE ASYNC OP` through a routine whose body is empty in this build.
+ *
+ * Thirteen call sites, most of them immediately before a synchronous read. That is what stops a
+ * queued read from racing the synchronous one.
+ *
+ * @param nBlocking Non-zero to keep waiting until the command settles, zero to return as soon as
+ *                  the drive reports that it is still busy.
  * @ghidraAddress 0x00460590
  */
 void AsyncCheck(int nBlocking);
+
+/**
+ * Service the queue once.
+ *
+ * On disc media the routine advances the chunk transfer the drive is performing. A finished chunk
+ * is distributed to every pending request covering it and its cache row is unlocked, and an idle
+ * drive is then given the next chunk any pending request still needs. Nothing here waits for the
+ * drive. A caller that wants the data now calls AsyncCheck() instead.
+ *
+ * Every completed request is then reported to its callback, its jobs are released, and its record
+ * is erased. A request with no callback is erased in the same pass. A caller that wants the buffer
+ * back through AsyncPollComplete() therefore has to poll before the next pump.
+ *
+ * @ghidraAddress 0x0045f8d8
+ */
+void AsyncPumpCompletedRequests();
 
 /**
  * Drive completion callback the async layer installs on disc media.
@@ -265,6 +292,19 @@ void AsyncCancelRequest(int nHandle);
  * @ghidraAddress 0x0045faf0
  */
 void AsyncDump();
+
+/**
+ * Report how much work the queue is holding.
+ *
+ * Every count is walked rather than stored. AsyncDump() prints all three, and a debug caller
+ * outside this subsystem reads them as well.
+ *
+ * @param pnPending Receives the number of queued requests.
+ * @param pnCompleted Receives the number of finished requests no caller has taken yet.
+ * @param pnFreeJobs Receives the number of job records still free.
+ * @ghidraAddress 0x0045fa38
+ */
+void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs);
 
 /**
  * Take the next job off the free list.
