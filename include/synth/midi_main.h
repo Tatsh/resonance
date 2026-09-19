@@ -5,8 +5,8 @@
 /**
  * Voice and sound-bank driver that Ps2HardSynth is a thin class over.
  *
- * Titled after `midi_main.cpp`, the file its own asserts record at `0x0046456c`, `0x00464d58`, and
- * `0x00464ed0`. The module spans `0x004620b0` through `0x00465100` and has the attested behaviour
+ * Titled after `midi_main.cpp`, the string at `0x0081cc98` that the module bills its heap releases
+ * to. The module spans `0x00461f28` through `0x00465200` and has the attested behaviour
  * of the sound subsystem: the SPU2 voices, the sound banks, and the script-facing command
  * dispatcher. Neither Synth nor Ps2HardSynth has any of it.
  *
@@ -19,23 +19,15 @@
  * `rSdSetEffectAttr`, and the entries carry libsd's `0x80` core-level flag on exactly the
  * core-level registers.
  *
- * The two bank loaders at `0x00464430` and `0x00464d10` are virtual overrides, not free callbacks.
- * The RTTI gives their classes as `CallbackXferBdToIop` and `CallbackXferHdToIop`, each with
- * `AsyncCallback` as its one public base at offset 0, which is why each reads a register no
- * ordinary call would pass: the argument list is the base's completion signature. Each reports its
- * failure through `BD bank loading returned async error %d` or `HD bank loading returned async
- * error %d`. Both stay undeclared until `AsyncCallback` is declared, which belongs to the
- * asynchronous layer rather than here.
- *
- * The BD loader is a chunked streaming read. It marks the request busy, fills a command block from
- * the request, submits it, then re-arms the asynchronous read for the next 0x2000 bytes until the
- * remaining count falls to zero, at which point it closes the file and notifies a completion hook.
+ * The two bank transfers are classes rather than routines. CallbackXferBdToIop streams a BD bank in
+ * 0x2000-byte chunks and CallbackXferHdToIop moves an HD bank in one go, and both derive from
+ * AsyncCallback. The globals below are what the two share with the rest of the module.
  */
 
 /**
  * Run one script-facing synth command.
  *
- * Three command numbers are recognised. Command 0 does nothing. Command 1 reports the voice table
+ * Three command numbers are recognised. Command 0 does nothing. Command 1 reports the voices
  * through DumpSynthVoices(). Command 2 submits driver selector 0xd0 with no command block. Anything
  * else reports `Unrecognized synth cmd %d`, and the command number is retained in its second
  * argument register from entry so that the report can print it.
@@ -66,23 +58,137 @@ void SynthCommand(int nCommand);
 void SubmitSoundDriverRequest(int nSelector, void *pCommand);
 
 /**
- * One chunked sound-bank read in flight.
+ * Move a buffer from main memory into the sound driver's memory on the IOP.
  *
- * The layout comes from the BD bank loader at `0x00464430`, which is the only routine recovered
- * that touches every field. The title is inferred from what that routine does, because no string in
- * the image identifies the structure. The first word is not read by the loader, and the structure
- * is at least 0x20 bytes.
+ * Fills the descriptor at `0x008e5be8` with the three arguments and a zero fourth word, then issues
+ * the transfer and spins until it reports completion.
+ *
+ * @param nIopAddress The destination on the IOP.
+ * @param pSource The source in main memory.
+ * @param nLength The number of bytes to move.
+ * @return Zero once the transfer has completed, or -1 when it could not be started.
+ * @ghidraAddress 0x005f97d0
  */
-struct SynthBankLoad {
-    int mUnknown00;   // +0x00
-    int mRequestId;   // +0x04 asynchronous request the next chunk was submitted under
-    int mFile;        // +0x08 closed once the remaining count falls to zero
-    int mUnknown0c;   // +0x0c passed to the read and to `0x005f97d0`
-    int mChunkLength; // +0x10 bytes in the chunk just completed, 0x2000 until the last one
-    char *mDest;      // +0x14 advanced by mChunkLength per chunk
-    int mRemaining;   // +0x18 bytes still to read
-    int mBusy;        // +0x1c set while a chunk is in flight, cleared when idle
+int XferToIop(int nIopAddress, const void *pSource, int nLength);
+
+/** Bytes the chunk command block clears above its five recovered words. */
+constexpr int kSynthXferCommandTailSize = 0x6c;
+
+/**
+ * Sound-driver command block that describes one chunk of a sound bank.
+ *
+ * Both bank-transfer paths fill the same single block and submit it under selector 0x1070. The
+ * first word is cleared before every submission and read nowhere in the image, and the tail is
+ * cleared with it, so the block is 0x80 bytes in total.
+ */
+struct SynthXferCommand {
+    int mUnknown00;  // +0x00 cleared before every submission
+    int mIopAddress; // +0x04 staging buffer on the IOP the chunk was moved to
+    int mLength;     // +0x08
+    int mDest;       // +0x0c where the driver writes the chunk, advanced one chunk at a time
+    int mUnknown10;  // +0x10 copied from g_nSynthXferTag
+    char mUnused14[kSynthXferCommandTailSize]; // +0x14 cleared before every submission
 };
+
+/**
+ * Block that describes one chunk of a sound bank.
+ *
+ * @ghidraAddress 0x00894cc0
+ */
+extern SynthXferCommand g_synthXferCommand;
+
+/** Staging buffers on the IOP that chunk transfers alternate between. */
+constexpr int kIopStagingBufferCount = 2;
+
+/**
+ * Addresses of the staging buffers on the IOP.
+ *
+ * The table itself may be longer. Only the first two entries are reachable, because the index below
+ * is masked to one bit.
+ *
+ * @ghidraAddress 0x00894748
+ */
+extern int g_anIopStagingAddress[kIopStagingBufferCount];
+
+/**
+ * Staging buffer the next chunk transfer will use.
+ *
+ * @ghidraAddress 0x006e9b80
+ */
+extern int g_nIopStagingIndex;
+
+/**
+ * Address on the IOP a sound bank is moved to.
+ *
+ * CallbackXferHdToIop::Done() moves the whole bank there, and the routine that starts a BD transfer
+ * copies it into the first word of the bank-complete block.
+ *
+ * @ghidraAddress 0x006e9b84
+ */
+extern int g_nBankIopAddress;
+
+/**
+ * Word every chunk command block is stamped with at `+0x10`.
+ *
+ * What the driver does with it is unrecovered, and the writer has not been identified.
+ *
+ * @ghidraAddress 0x006e9bb4
+ */
+extern int g_nSynthXferTag;
+
+/**
+ * Called once after every chunk is submitted and once when a bank transfer finishes.
+ *
+ * Both call sites test the hook against null first. It takes no arguments.
+ *
+ * @ghidraAddress 0x006e9bc4
+ */
+extern void (*g_pfnBankLoadProgress)();
+
+/**
+ * Install the bank-load progress hook.
+ *
+ * @param pfnProgress The hook, which may be null.
+ * @ghidraAddress 0x00464378
+ */
+void SetBankLoadProgressHook(void (*pfnProgress)());
+
+/**
+ * Non-zero while an HD bank transfer occupies the shared command block.
+ *
+ * CallbackXferBdToIop defers to it, and CallbackXferHdToIop::Done() clears it. The routine that
+ * sets it is unrecovered.
+ *
+ * @ghidraAddress 0x006e9dc8
+ */
+extern int g_nHdXferInFlight;
+
+/**
+ * Block the bank-complete report submits.
+ *
+ * Its shape is unrecovered. The routine that fills it, at `0x00461f28`, starts a transfer and is
+ * not reconstructed, and the five words it writes do not line up with SynthXferCommand.
+ *
+ * @ghidraAddress 0x00894bc0
+ */
+extern char g_abBankCompleteCommand[];
+
+/**
+ * Buffer the HD bank transfer read into, released once the transfer reports.
+ *
+ * @ghidraAddress 0x006e9dcc
+ */
+extern void *g_pHdXferBuffer;
+
+/**
+ * Buffer the BD bank transfer reads into, released once the last chunk has been moved.
+ *
+ * This is the allocation as it came back from the heap. The read itself uses the pointer rounded up
+ * to a 64-byte boundary, which CallbackXferBdToIop stores separately.
+ *
+ * @ghidraAddress 0x006e9dd0
+ */
+extern void *g_pBdXferBuffer;
 
 /**
  * Report the state of both SPU2 cores and all 48 voices to the log.

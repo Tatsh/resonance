@@ -33,6 +33,38 @@ constexpr int kSpu2MaxVolume = 0x3fff;
 constexpr unsigned kSpu2EffectAreaTop = 0x1fffff;
 constexpr unsigned kSpu2EffectAreaSize = 0x20000;
 
+// 0x00894cc0
+SynthXferCommand g_synthXferCommand;
+
+// 0x00894748
+int g_anIopStagingAddress[kIopStagingBufferCount];
+
+// 0x006e9b80
+int g_nIopStagingIndex;
+
+// 0x006e9b84
+int g_nBankIopAddress;
+
+// 0x006e9bb4
+int g_nSynthXferTag;
+
+// 0x006e9bc4
+void (*g_pfnBankLoadProgress)();
+
+// 0x006e9dc8
+int g_nHdXferInFlight;
+
+// 0x006e9dcc
+void *g_pHdXferBuffer;
+
+// 0x006e9dd0
+void *g_pBdXferBuffer;
+
+// 0x00464378
+void SetBankLoadProgressHook(void (*pfnProgress)()) {
+    g_pfnBankLoadProgress = pfnProgress;
+}
+
 // 0x00464ad0. The command number stays in its second argument register from entry so that the
 // report below can print it.
 void SynthCommand(int nCommand) {

@@ -81,7 +81,7 @@ from the SDK is reconstructed.
 | Texture, PlayStation 2    | Upload and bind bodies, pending the GS video memory manager          |
 | Graphics device           | Packet submission, pending the GS video memory manager               |
 | Art library              | `ABitmap` layout is recorded from the disassembler, not yet verified |
-| Sound                     | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` has its command dispatcher, its driver submit, its core and voice report, and its SPU2 bring-up. There is no voice table: the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array queries, and the two bank loaders wait on `AsyncCallback` |
+| Sound                     | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot; `midi_main` has its command dispatcher, its driver submit, its core and voice report, and its SPU2 bring-up; and both bank transfers are reconstructed as `CallbackXferBdToIop` and `CallbackXferHdToIop`. There is no voice table: the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array queries, and the routine that starts a transfer is next |
 
 ### Not started
 
