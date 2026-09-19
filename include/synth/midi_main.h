@@ -9,32 +9,69 @@
  * dispatcher. Neither Synth nor Ps2HardSynth has any of it.
  *
  * Recovery has started at the dispatcher and the entry points MainLoop already drives. Three
- * further routines are identified and not declared, each for a stated reason. The bank loaders at
- * `0x00464430` and `0x00464d10`, which report `BD bank loading returned async error %d` and
- * `HD bank loading returned async error %d`, both read `t0` and `t1` at entry, so each takes at
- * least six integer arguments; they stay undeclared until those are typed rather than counted. The
- * routine at `0x005f96c8` that the dispatcher's third command calls is undeclared because it is
- * unidentified: it takes a flags word, testing bits `0x8000` and `0x1000` of it, spins on a
- * semaphore, and sits outside this module entirely, so no title for it follows from the one call
- * site.
+ * further routines are identified. The bank loaders at `0x00464430` and `0x00464d10` have no
+ callers
+ * at all: they are async completion callbacks, installed as function pointers, which is why each
+ * reads `t1` at entry. That is where the asynchronous layer puts the completion status, and it is
+ * the status each reports through `BD bank loading returned async error %d` and `HD bank loading
+ * returned async error %d`. Their remaining parameters belong to the callback type in
+ * `os/async.h`, which another subsystem owns, so they stay undeclared here.
+
+ * The BD loader is a chunked streaming read. It marks the request busy, fills a command block from
+ * the request, submits it, then re-arms the asynchronous read for the next 0x2000 bytes until the
+ * remaining count falls to zero, at which point it closes the file and notifies a completion hook.
  */
 
 /**
  * Run one script-facing synth command.
  *
  * Three command numbers are recognised. Command 0 does nothing. Command 1 reports the voice table
- * through DumpSynthVoices(). Command 2 calls the unidentified routine at `0x005f96c8` with a flags
- * word of 0xd0. Anything else reports `Unrecognized synth cmd %d`, and the command number is
- * retained in its second argument register from entry so that the report can print it.
+ * through DumpSynthVoices(). Command 2 submits driver selector 0xd0 with no command block. Anything
+ * else reports `Unrecognized synth cmd %d`, and the command number is retained in its second
+ * argument register from entry so that the report can print it.
  *
- * The script layer exposes this as `synth_cmd`, which is the one attested title in the module. The
- * body is not written while command 2's callee has no title, because the only title available for
- * it would be inferred from this call site rather than from the routine.
+ * The script layer exposes this as `synth_cmd`, which is the one attested title in the module.
  *
  * @param nCommand The command to run.
  * @ghidraAddress 0x00464ad0
  */
 void SynthCommand(int nCommand);
+
+/**
+ * Submit one command to the sound driver.
+ *
+ * Every routine in the module funnels through this, twenty call sites in all, each passing a
+ * selector word and either a command block or nothing. The selector is a bit field: the routine
+ * tests bits 0x8000 and 0x1000 of it, spins on a semaphore, and then hands the block on. Observed
+ * selectors are 0xd0 from SynthCommand(), and 0x1070 and 0x1050 from the bank loader.
+ *
+ * The title comes from what the twenty call sites have in common rather than from any one of them.
+ * The block's shape varies by selector, so it is opaque here; a null block is valid.
+ *
+ * @param nSelector The command selector.
+ * @param pCommand The command block, or null.
+ * @ghidraAddress 0x005f96c8
+ */
+void SubmitSoundDriverRequest(int nSelector, void *pCommand);
+
+/**
+ * One chunked sound-bank read in flight.
+ *
+ * The layout comes from the BD bank loader at `0x00464430`, which is the only routine recovered
+ * that touches every field. The title is inferred from what that routine does, because no string in
+ * the image identifies the structure. The first word is not read by the loader, and the structure
+ * is at least 0x20 bytes.
+ */
+struct SynthBankLoad {
+    int mUnknown00;   // +0x00
+    int mRequestId;   // +0x04 asynchronous request the next chunk was submitted under
+    int mFile;        // +0x08 closed once the remaining count falls to zero
+    int mUnknown0c;   // +0x0c passed to the read and to `0x005f97d0`
+    int mChunkLength; // +0x10 bytes in the chunk just completed, 0x2000 until the last one
+    char *mDest;      // +0x14 advanced by mChunkLength per chunk
+    int mRemaining;   // +0x18 bytes still to read
+    int mBusy;        // +0x1c set while a chunk is in flight, cleared when idle
+};
 
 /**
  * Report every active voice to the log.
