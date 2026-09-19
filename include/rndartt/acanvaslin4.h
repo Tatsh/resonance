@@ -86,7 +86,7 @@ public:
 
 private:
     /**
-     * Build one row of the alpha mask from the transparent colour. Body not yet written.
+     * Write one row of indices into this canvas at four bits per pixel. Body not yet written.
      *
      * Non-virtual, and it fills no slot of any table in this family, which was checked against all
      * 85 entries of ACanvas, ACanvas8, ACanvasLin4, and ACanvasLin8. Its three callers are this
@@ -94,7 +94,25 @@ private:
      * the attribution rests on a caller set entirely inside one class rather than on the title it
      * carries.
      *
+     * The program titled it for an alpha mask build. All three callers instead feed it a row of
+     * one byte per pixel and a destination position, which is what the retitle records. The fifth
+     * argument arrives in a register the decompiler does not bind, so the prototype read as taking
+     * no arguments at all.
+     *
+     * THE BODY IS UNRESOLVED, not merely unwritten. Its bulk loop packs two source bytes into one
+     * destination byte, which is the expected conversion. Its leading and trailing per-pixel paths
+     * instead store a literal 0 or 1 as a whole byte, which was confirmed by decoding the raw
+     * instruction words rather than by reading a listing. Those two destination meanings cannot
+     * both describe the same buffer. The per-pixel paths also read the destination byte and mask it
+     * by nibble phase, preserving the neighbouring nibble, and then discard the result by storing a
+     * constant. The phase-zero mask can never match when the byte only ever stores 0 or 1, so that
+     * test is dead.
+     *
+     * @param pSource The source bitmap the row came from, read for its transparency fields.
+     * @param pRow One byte per pixel, already expanded by the caller.
+     * @param nX The destination column.
+     * @param nY The destination row.
      * @ghidraAddress 0x00627cf8
      */
-    void BuildAlphaRowFromColorKey();
+    void WriteIndexedRow(const ABitmap *pSource, const unsigned char *pRow, int nX, int nY);
 };

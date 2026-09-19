@@ -2,10 +2,12 @@
 
 #include <string.h>
 
-namespace {
+#include "rndartt/apalette.h"
+#include "rndartt/apoint.h"
+#include "rndartt/arowspan.h"
+#include "rndartt/astretchspan.h"
 
-// 0x008f9f0, the row buffer every unpacking copy of the art library shares.
-unsigned char *const kRowScratch = reinterpret_cast<unsigned char *>(0x008f9f0);
+namespace {
 
 constexpr int kBytesPerPixel = 4;
 
@@ -137,8 +139,8 @@ void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestRow = ByteAt(mBitmap, nX, nY);
     for (int nRemainingRows = source.mHeight; nRemainingRows > 0; --nRemainingRows) {
-        UnpackNibbleRow(pSourceRow, kRowScratch, source.mWidth, source.mOddNibbleStart);
-        const unsigned char *pIndex = kRowScratch;
+        UnpackNibbleRow(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        const unsigned char *pIndex = g_abCanvasRowScratch;
         unsigned int *pDest = reinterpret_cast<unsigned int *>(pDestRow);
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
             if (source.mHasTransparentColor == 0 || *pIndex != source.mTransparentColor) {

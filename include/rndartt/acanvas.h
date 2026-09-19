@@ -1,13 +1,14 @@
 #pragma once
 
 #include "rndartt/abitmap.h"
-#include "rndartt/afont.h"
-#include "rndartt/apalette.h"
-#include "rndartt/apoint.h"
 #include "rndartt/arect.h"
 #include "rndartt/arlereader.h"
-#include "rndartt/arowspan.h"
-#include "rndartt/astretchspan.h"
+
+class APalette;
+struct AFont;
+struct APoint;
+struct ARowSpan;
+struct AStretchSpan;
 
 /** Fractional bits in the coordinates DrawLine() and TextureRowIndexed() take. */
 constexpr int kACanvasFractionBits = 8;
@@ -1049,6 +1050,23 @@ protected:
  * @ghidraAddress 0x0086f6f0
  */
 extern APalette *g_pDefaultPalette;
+
+/**
+ * One row of indices, shared by every block copy that has to expand a row before writing it.
+ *
+ * ACanvasLin4 unpacks a four-bit row into it, both four-bit layout classes decode a run length
+ * encoded row into it, and several ACanvas block copies use it the same way. Each writes the row
+ * and consumes it before returning, so the buffer carries nothing between calls.
+ *
+ * The bound is not recovered and no definition is written for it. The buffer is a plain static with
+ * no allocation to read a size from, and the nearest referenced address sits more than 0x400 bytes
+ * above it, which limits the space it could occupy without establishing what it does occupy. Which
+ * translation unit defines it is also unsettled. It is therefore declared without a bound rather
+ * than defined with an invented one.
+ *
+ * @ghidraAddress 0x008f09f0
+ */
+extern unsigned char g_abCanvasRowScratch[];
 
 /**
  * Pack an 8888 colour into 1555.

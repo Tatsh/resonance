@@ -1,9 +1,14 @@
 #include "rndartt/acanvaslin4.h"
 
+#include <string.h>
+
+#include "rndartt/arlereader.h"
+
 namespace {
 
 constexpr unsigned int kNibbleMask = 0xf;
 constexpr int kNibbleShift = 4;
+constexpr int kPixelsPerByte = 2;
 
 } // namespace
 
@@ -49,4 +54,56 @@ int ACanvasLin4::GetPixelIndexedNoClip(int nX, int nY) {
         return *pByte >> kNibbleShift;
     }
     return *pByte & kNibbleMask;
+}
+
+// 0x00627e88. Five conditions must all hold for the block copy: the source has no transparent
+// colour, neither bitmap starts on an odd nibble, and the destination column and the source width
+// are both even. Any one of them failing drops to unpacking each row into the shared scratch row
+// and writing it back a pixel at a time.
+void ACanvasLin4::Blit4NoClip(const ABitmap &source, int nX, int nY) {
+    const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
+    const bool bAligned = !source.mHasTransparentColor && mBitmap.mOddNibbleStart == 0 &&
+                          source.mOddNibbleStart == 0 && (nX & 1) == 0 && (source.mWidth & 1) == 0;
+    if (bAligned) {
+        unsigned char *pDest = static_cast<unsigned char *>(mBitmap.mPixels) +
+                               (nY * mBitmap.mBytesPerRow) +
+                               ((nX + mBitmap.mOddNibbleStart) / kPixelsPerByte);
+        for (int nRow = source.mHeight; nRow > 0; --nRow) {
+            memcpy(pDest, pSourceRow, static_cast<unsigned int>(source.mWidth / kPixelsPerByte));
+            pDest += mBitmap.mBytesPerRow;
+            pSourceRow += source.mBytesPerRow;
+        }
+        return;
+    }
+    for (int nRow = 0; nRow < source.mHeight; ++nRow) {
+        UnpackNibbleRow(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        WriteIndexedRow(&source, g_abCanvasRowScratch, nX, nY + nRow);
+        pSourceRow += source.mBytesPerRow;
+    }
+}
+
+// 0x00628248. The destination row advances by two per source row, which covers every other row of
+// the destination and consumes half the source height. The run length encoded sibling advances by
+// one. Both behaviours match the binary.
+void ACanvasLin4::Blit8NoClip(const ABitmap &source, int nX, int nY) {
+    const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
+    for (int nRow = nY; nRow < nY + source.mHeight; nRow += 2) {
+        WriteIndexedRow(&source, pSourceRow, nX, nRow);
+        pSourceRow += source.mBytesPerRow;
+    }
+}
+
+// 0x006282e0. Each row is decoded into the shared scratch row and written from there, so the
+// compressed stream is consumed in order without this routine tracking it.
+void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
+    ARleReader reader;
+    reader.mSource = static_cast<const unsigned char *>(source.mPixels);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = source.mHasTransparentColor ?
+                                   static_cast<int>(source.mTransparentColor) :
+                                   kARleReaderNoTransparentValue;
+    for (int nRow = nY; nRow < nY + source.mHeight; ++nRow) {
+        (void)reader.DecodeRow(g_abCanvasRowScratch); // The advanced destination is discarded.
+        WriteIndexedRow(&source, g_abCanvasRowScratch, nX, nRow);
+    }
 }

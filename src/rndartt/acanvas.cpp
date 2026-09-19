@@ -2,11 +2,12 @@
 
 #include <string.h>
 
-namespace {
+#include "rndartt/afont.h"
+#include "rndartt/apoint.h"
+#include "rndartt/arowspan.h"
+#include "rndartt/astretchspan.h"
 
-// 0x008f9f0. Every routine that decodes or unpacks a row before copying it writes into this one
-// shared buffer, so no two canvas operations may overlap.
-unsigned char *const kRowScratch = reinterpret_cast<unsigned char *>(0x008f9f0);
+namespace {
 
 constexpr unsigned int kChannelMask = 0xff;
 constexpr int kGreenShift = 8;
@@ -425,8 +426,12 @@ void ACanvas::Blit32(const ABitmap &source, int nX, int nY) {
 
 // 0x005ecb68
 void ACanvas::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
-    ABitmap row(
-        kRowScratch, kABitmapFormatLinear8, source.mHasTransparentColor != 0, source.mWidth, 1, 0);
+    ABitmap row(g_abCanvasRowScratch,
+                kABitmapFormatLinear8,
+                source.mHasTransparentColor != 0,
+                source.mWidth,
+                1,
+                0);
     row.mTransparentColor = source.mTransparentColor;
     row.mPalette = source.mPalette;
     ARleReader reader;
@@ -434,7 +439,7 @@ void ACanvas::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
     for (int y = nY; y < nY + source.mHeight; ++y) {
-        reader.DecodeRow(kRowScratch);
+        reader.DecodeRow(g_abCanvasRowScratch);
         Blit8NoClip(row, nX, y);
     }
 }
@@ -477,14 +482,18 @@ void ACanvas::BlitRle8(const ABitmap &source, int nX, int nY) {
         return;
     }
 
-    ABitmap row(
-        kRowScratch, kABitmapFormatLinear8, source.mHasTransparentColor != 0, source.mWidth, 1, 0);
-    row.mPixels = kRowScratch + nSkipLeft;
+    ABitmap row(g_abCanvasRowScratch,
+                kABitmapFormatLinear8,
+                source.mHasTransparentColor != 0,
+                source.mWidth,
+                1,
+                0);
+    row.mPixels = g_abCanvasRowScratch + nSkipLeft;
     row.mWidth = static_cast<short>(nStopColumn - nSkipLeft);
     row.mTransparentColor = source.mTransparentColor;
     row.mPalette = source.mPalette;
     for (int y = nY; y < nStopRow; ++y) {
-        reader.DecodeRow(kRowScratch);
+        reader.DecodeRow(g_abCanvasRowScratch);
         Blit8NoClip(row, nX, y);
     }
 }
@@ -663,7 +672,7 @@ void ACanvas::BlitRemap4(const ABitmap &source, int nX, int nY, const unsigned c
     span.mRight = static_cast<short>(source.mWidth + nX);
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = kRowScratch;
+    span.mSource = g_abCanvasRowScratch;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
@@ -673,7 +682,7 @@ void ACanvas::BlitRemap4(const ABitmap &source, int nX, int nY, const unsigned c
     }
     const unsigned char *pRow = SourceRow(source);
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++span.mY) {
-        UnpackNibbleRow(pRow, kRowScratch, source.mWidth, source.mOddNibbleStart);
+        UnpackNibbleRow(pRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
         RemapRowIndexed(span, pRemap);
         pRow += source.mBytesPerRow;
     }
@@ -721,7 +730,7 @@ void ACanvas::BlitBlend4(const ABitmap &source,
     span.mRight = static_cast<short>(source.mWidth + nX);
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = kRowScratch;
+    span.mSource = g_abCanvasRowScratch;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
@@ -731,7 +740,7 @@ void ACanvas::BlitBlend4(const ABitmap &source,
     }
     const unsigned char *pRow = SourceRow(source);
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++span.mY) {
-        UnpackNibbleRow(pRow, kRowScratch, source.mWidth, source.mOddNibbleStart);
+        UnpackNibbleRow(pRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
         BlendRowIndexed(span, ppBlend);
         pRow += source.mBytesPerRow;
     }
