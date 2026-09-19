@@ -5,12 +5,23 @@
 /**
  * Colour conversion for a canvas of 1555 pixels.
  *
- * The name comes from the RTTI descriptor at 0x008ef130, whose mangled form is `9ACanvas15` and
- * whose single public base is ACanvas at offset zero.
+ * The name comes from the RTTI descriptor at 0x008f0970, whose mangled form is `9ACanvas15` and
+ * whose single public base is ACanvas at offset zero. The address recorded here previously,
+ * 0x008ef130, is ACanvas8's descriptor rather than this one's.
  *
- * The class is the counterpart of ACanvas32: it supplies every colour format in terms of the two
- * 1555 accessors ACanvasLin15 provides, so it has no addressing of its own. Its translation unit
- * sits between 0x0062fb40 and 0x006300d0, around its type function at 0x0062fb70.
+ * THE CLASS IS ABSTRACT. Its table at 0x00840748 runs the same 85 entries as ACanvas's, filling 20
+ * of the base's pure slots and leaving slot 13 still pointing at the shared pure-virtual stub. So
+ * it cannot be instantiated, and the class that completes it is ACanvasLin15, whose descriptor
+ * records ACanvas15 as its base rather than ACanvas.
+ *
+ * That two-level shape is the design of the whole family. A format class supplies what depends on
+ * the colour format and leaves what depends on the pixel layout pure; the layout subclass supplies
+ * the rest. ACanvas8 leaves three slots pure rather than one, because two layout classes derive
+ * from it, ACanvasLin4 and ACanvasLin8, whose indexed addressing differs.
+ *
+ * The class is therefore the counterpart of ACanvas32: it supplies every colour format in terms of
+ * two 1555 accessors its own subclass provides. Its translation unit sits between 0x0062fb40 and
+ * 0x006300d0, around its type function at 0x0062fb70.
  *
  * mColor is the halfword at offset 0x24 rather than the word ACanvas32 stores there, which is the
  * only layout difference in the family; the object is 0x28 bytes either way.
