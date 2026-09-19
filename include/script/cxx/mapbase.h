@@ -4,7 +4,6 @@
 #include "script/cxx/config.h"
 #include "script/cxx/exception.h"
 #include "script/cxx/object.h"
-#include "os/hxstr.h"
 
 namespace Py {
 

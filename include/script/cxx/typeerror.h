@@ -3,7 +3,6 @@
 #include "os/hxstr.h"
 #include "script/cxx/config.h"
 #include "script/cxx/standarderror.h"
-#include "os/hxstr.h"
 
 namespace Py {
 

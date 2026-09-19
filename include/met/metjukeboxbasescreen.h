@@ -8,8 +8,11 @@
  *
  * `20MetJukeboxBaseScreen` in the RTTI descriptor at `0x00902330`, with two public non-virtual
  * bases at fixed offsets, MetScreen at `+0x00` and ListDataProvider at `+140`. The class therefore
- * starts its own members at `+144`, and the total size is not recovered because no child places a
- * further base after the subobject.
+ * starts its own members at `+144`, and the object is 0xc8 bytes. All three children write their
+ * own first member at `+0xc8`, which is what fixes that size.
+ *
+ * The constructor is at `0x0021dcc0`. It takes the renderer, the load priority, and the three
+ * names, and all three children call it rather than inlining it.
  *
  * Three classes derive from the class, MetJukeboxCustomRemixesScreen,
  * MetJukeboxEditPlaylistScreen, and MetJukeboxFactoryRemixesScreen.

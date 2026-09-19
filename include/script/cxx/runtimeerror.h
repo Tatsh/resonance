@@ -3,7 +3,6 @@
 #include "os/hxstr.h"
 #include "script/cxx/config.h"
 #include "script/cxx/standarderror.h"
-#include "os/hxstr.h"
 
 namespace Py {
 
@@ -27,8 +26,7 @@ public:
      *               interpreter as g_szEmptyString rather than as a null pointer.
      */
     RuntimeError(const HxStr &reason) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        reason.mStr != nullptr ? reason.mStr : g_szEmptyString);
+        PyErr_SetString(PyExc_RuntimeError, reason.mStr != nullptr ? reason.mStr : g_szEmptyString);
     }
 };
 

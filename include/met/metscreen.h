@@ -41,7 +41,9 @@
  *    and runs slot 5 on it once slot 14 reports the load finished. Otherwise clears mUnknown4c on
  *    the resolved screen.
  *  - 5 `0x003900a8` runs slot 17 with 1 and then slot 31 with the renderer time.
- *  - 6 `0x0038b828` takes a screen name. An empty name clears MetRenderer::mUnknown80. Otherwise
+ *  - 6 `0x0038b828` takes a screen registry key, which every caller supplies as a screen class
+ *    name such as `MetConfigControllerScreen`. An empty name clears MetRenderer::mUnknown80.
+ *    Otherwise
  *    resolves the screen, and once slot 14 reports the load finished hands it to the renderer
  *    routine at `0x003714c8`, sets MetRenderer::mUnknown80, and runs slot 7 on it.
  *  - 7 `0x0038fdf8` empty.
@@ -54,14 +56,18 @@
  *  - 13 `0x003900a0` empty.
  *  - 14 `0x0038b338` polls the RndAsyncLoader registered for mUnknown28, runs slot 38 once the
  *    poll succeeds and mUnknown48 is set, and reports whether the screen is ready.
- *  - 15 `0x0038fe20` empty.
+ *  - 15 `0x0038fe20` empty. MetConfigControllerScreen fills it at `0x00206bb0` with a body that
+ *    compares an `HxStr` argument against a literal and then runs slot 6, which fixes the
+ *    signature as one `const HxStr &` parameter.
  *  - 16 `0x0038fe28` empty.
  *  - 17 `0x0038b490` SetShowing().
  *  - 18 `0x0038aa00` takes a directory and a file name. Appends a separator to the directory,
  *    interns a 12-byte record in the loader map under mUnknown28, builds an RndAsyncLoader for it
  *    with mUnknown88 as the priority, and enqueues the load. The file argument is declared and
  *    ignored.
- *  - 19 `0x0038fe30` empty.
+ *  - 19 `0x0038fe30` empty. MetConfigControllerScreen fills it at `0x00200ba8` with a dispatcher
+ *    that reads a selector from `+0x00` of its argument and a sequence number from `+0x04`,
+ *    which fixes the signature as one pointer to a command record.
  *  - 20 `0x00390140` PlaySlideSound().
  *  - 21 `0x00390160` PlayLeaveSound().
  *  - 22 `0x003901c0` PlayHighSound().
@@ -75,26 +81,31 @@
  *    mUnknown6c, and sets the object state through `0x00534a48`.
  *  - 29 `0x003904e0` takes a float. Advances the alternating object state that slot 28 set up, one
  *    step each time the interval in mUnknown74 elapses, until mUnknown6c arrives at mUnknown70.
- *  - 30 `0x0038fe48` empty.
+ *  - 30 `0x0038fe48` empty. MetConfigOptionsButtonsScreen fills it at `0x00207fc0` with a body
+ *    that copies the `HxStr` at `+0x04` of its argument, which fixes the signature as one
+ *    pointer to a record whose name sits at `+0x04`.
  *  - 31 `0x003905c0` takes a float. Records it in mUnknown08, clears mUnknown0c, and rewinds
  *    mUnknown30 to mUnknown04 through Rnd::Animatable::SetFrame().
  *  - 32 `0x003905f0` takes a float. Drives mUnknown30 from mUnknown08, sets mUnknown7c when the
  *    animation passes its end, and on the following call sets mUnknown1c, clears mUnknown08, and
  *    runs slot 33.
- *  - 33 `0x0038fe50` empty.
+ *  - 33 `0x0038fe50` empty. MetConfigControllerScreen fills it at `0x002069d0` with a body that
+ *    reads no argument, which fixes the signature as taking none.
  *  - 34 `0x003906a0` takes a float. Records it in mUnknown0c, clears mUnknown1c and mUnknown08.
  *  - 35 `0x003906b0` takes a float. Drives mUnknown34 from mUnknown0c, and when the animation
  *    passes its end runs slot 17 with 0, hands this screen to the renderer routine at
  *    `0x00371a78`, and runs slot 36.
- *  - 36 `0x0038fe58` empty.
+ *  - 36 `0x0038fe58` empty. MetConfigControllerScreen fills it at `0x00201790` with a body that
+ *    reads no argument, which fixes the signature as taking none.
  *  - 37 `0x00390788` Draw().
  *  - 38 `0x0038b1b0` resolves mUnknown30 and mUnknown34 from `%s_EE.anim` and `%s_BF.anim`
  *    through the helper at `0x0038bd60`, resolves mUnknown14 by appending `.view` to mUnknown80,
  *    runs slot 17 with 0, and clears mUnknown48.
  *
- * Every data member is private. Nothing outside the class and its children reads one, and the
- * members that a child touches are listed with the slot that touches them above, which is a
- * member of the same hierarchy rather than foreign code.
+ * Two data members are protected and the rest are private. MetRemixLoadScreen and
+ * MetRemixDelScreen both clear mUnknown60 in their constructors, and MetSaveRemixScreen clears
+ * mUnknown5c in its own, so those two are written by derived code and the others are not. Nothing
+ * outside the class and its children reads any member.
  */
 class MetScreen : public MsgSink {
 public:
@@ -241,9 +252,16 @@ private:
     int mUnknown50;                        // +0x50
     int mUnknown54;                        // +0x54
     float mUnknown58;                      // +0x58, starts at 1.0f
-    int mUnknown5c;                        // +0x5c, starts at 1
-    int mUnknown60;                        // +0x60, starts at 1
-    float mUnknown64;                      // +0x64
+
+protected:
+    // Cleared by the MetSaveRemixScreen constructor, which is why it is protected.
+    int mUnknown5c; // +0x5c, starts at 1
+    // Gates the drawable-list walk in SetShowing(). Cleared by the MetRemixLoadScreen and
+    // MetRemixDelScreen constructors, which is why it is protected.
+    int mUnknown60; // +0x60, starts at 1
+
+private:
+    float mUnknown64; // +0x64
     // Object whose state slots 28 and 29 alternate through 0x00534a48. The exact class is not
     // identified, and Rnd::Object is the base that the destructor of MetButtonList proves for the
     // same class by releasing a vector of them through 0x00520be0.

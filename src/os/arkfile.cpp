@@ -25,7 +25,7 @@ int g_bArkSectorCacheReady;
 // the same one, so each build appears twice in the image.
 void BuildDiscPath(char *pszPath, const HxStr &name) {
     strcpy(pszPath, kArkDiscRoot);
-    AppendPathComponent(name.mStr != nullptr ? name.mStr : g_pszEmpty, pszPath);
+    AppendPathComponent(name.mStr != nullptr ? name.mStr : g_szEmptyString, pszPath);
 }
 
 void BuildHostPath(char *pszPath, const char *pszArchive) {
@@ -176,7 +176,7 @@ int ArkFile::Close(const char *pszPath) {
     while (nArk < g_apMountedArks.size()) {
         const char *pszMounted = g_apMountedArks[nArk]->mPath.mStr;
         if (pszMounted == nullptr) {
-            pszMounted = g_pszEmpty;
+            pszMounted = g_szEmptyString;
         }
         if (strcmp(pszMounted, pszPath) == 0) {
             break;

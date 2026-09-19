@@ -1,6 +1,7 @@
 #pragma once
 
 #include "script/cxx/config.h"
+#include "script/cxx/exception.h"
 #include "script/cxx/object.h"
 #include "script/cxx/seqbase.h"
 
@@ -20,10 +21,10 @@ namespace Py {
  * | 0 | compiler-generated type function | `0x004c67e8` |
  * | 1 | compiler-generated destructor | `0x004c6770` |
  * | 2 | `accepts` | `0x004c75c0` |
- * | 3 | inherited, unidentified | `0x0012ad48` |
- * | 4 | inherited, unidentified | `0x0012b378` |
- * | 5 | inherited, unidentified | `0x0012b3a0` |
- * | 6 | inherited, unidentified | `0x0012b358` |
+ * | 3 | inherited `max_size` | `0x0012ad48` |
+ * | 4 | inherited `capacity` | `0x0012b378` |
+ * | 5 | inherited `swap` | `0x0012b3a0` |
+ * | 6 | inherited `size` | `0x0012b358` |
  * | 7 | inherited `getItem` | `0x0012ac48` |
  * | 8 | `setItem` | `0x004c7428` |
  */
@@ -54,6 +55,24 @@ public:
      * @ghidraAddress 0x004c5690
      */
     explicit Tuple(int nSize);
+
+    /**
+     * Write one element.
+     *
+     * The override exists for the reference count. `PyTuple_SetItem()` steals a reference, so the
+     * body adds one before the call, where the base's `PySequence_SetItem()` path borrows and
+     * needs no such step.
+     *
+     * @param i The index.
+     * @param value The element to store.
+     * @ghidraAddress 0x004c7428
+     */
+    virtual void setItem(int i, const Object &value) {
+        Py_XINCREF(value.mPtr);
+        if (PyTuple_SetItem(mPtr, i, value.mPtr) == -1) {
+            throw Exception();
+        }
+    }
 
     /**
      * Accept only a tuple.

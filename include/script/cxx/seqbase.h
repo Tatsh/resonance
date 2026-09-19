@@ -1,6 +1,7 @@
 #pragma once
 
 #include "script/cxx/config.h"
+#include "script/cxx/exception.h"
 #include "script/cxx/object.h"
 
 namespace Py {
@@ -13,24 +14,24 @@ namespace Py {
  * from Py::Object at offset 0. The harvest demangles neither, because its demangler does not
  * handle the template form, so both names come from the mangled field instead.
  *
- * The vtable has nine entries, the three Py::Object slots plus six of its own. Four of the six
- * are unidentified, and the table below records their addresses so that a later pass can resume
- * from them rather than rediscover them. The two that are identified are declared below, and they
- * therefore appear here in an order that does not match the table.
+ * The vtable has nine entries, the three Py::Object slots plus six of its own. The six below are
+ * declared in table order, and that order is itself corroboration: released PyCXX declares
+ * `max_size`, `capacity`, `swap`, and `size` in exactly this sequence ahead of the element
+ * accessors.
  *
  * | Slot | Member | `SeqBase<Object>` | `SeqBase<Char>` |
  * | ---- | ------ | ----------------- | --------------- |
  * | 0 | compiler-generated type function | `0x0012abd0` | `0x004c64e8` |
  * | 1 | inherited destructor | `0x0012ab58` | `0x004c6470` |
  * | 2 | `accepts` | `0x0012b328` | `0x004c7c30` |
- * | 3 | unidentified | `0x0012ad48` | `0x004c7260` |
- * | 4 | unidentified | `0x0012b378` | `0x004c7c80` |
- * | 5 | unidentified | `0x0012b3a0` | `0x004c7890` |
- * | 6 | unidentified | `0x0012b358` | `0x004c73d0` |
+ * | 3 | `max_size` | `0x0012ad48` | `0x004c7260` |
+ * | 4 | `capacity` | `0x0012b378` | `0x004c7c80` |
+ * | 5 | `swap` | `0x0012b3a0` | `0x004c7890` |
+ * | 6 | `size` | `0x0012b358` | `0x004c73d0` |
  * | 7 | `getItem` | `0x0012ac48` | `0x004c7a48` |
  * | 8 | `setItem` | `0x0012b4d0` | `0x004c7bb8` |
  *
- * The two vtables for `SeqBase<Object>` at `0x007d0ff0`, `0x00821c68`, and `0x00825878` are
+ * The three vtables for `SeqBase<Object>` at `0x007d0ff0`, `0x00821c68`, and `0x00825878` are
  * identical copies that the linker did not fold. `SeqBase<Char>` sits at `0x00821d08`.
  */
 template <typename T>
@@ -71,28 +72,88 @@ public:
     }
 
     /**
+     * Longest sequence this handle could address.
+     *
+     * The routine is three instructions and loads one word, the shared not-found sentinel at
+     * `0x008211bc`, which is `0xffffffff`. That word sits in HxStr's own literal pool, one word
+     * past the empty string the string class returns for a null buffer, and four routines outside
+     * the binding read it as well, among them RndText::BuildGlyphMesh(). It is HxStr's `npos`,
+     * and released PyCXX returns `std::string::npos` from the same member, which is what settles
+     * the reading.
+     *
+     * No body is written, because the constant belongs in `os/hxstr.h` and this subsystem cannot
+     * declare it.
+     *
+     * @return The sentinel.
+     * @ghidraAddress 0x0012ad48
+     */
+    virtual int max_size() const;
+
+    /**
+     * Elements this handle could address without reallocating, which is its length.
+     *
+     * The routine tail-calls slot 6 through the table, so the value tracks size() in a derived
+     * class that narrows either one. Py::String overrides it to return max_size() instead.
+     *
+     * @return The length.
+     * @ghidraAddress 0x0012b378
+     */
+    virtual int capacity() const {
+        return size();
+    }
+
+    /**
+     * Exchange references with another handle of the same kind.
+     *
+     * Only the signature is recovered. The body opens by copy-constructing a handle of this type
+     * from the argument and then cross-assigns the two references, which is the shape released
+     * PyCXX has, and the exchange itself is not worked out, so no body is written.
+     *
+     * @param other The handle to exchange with.
+     * @ghidraAddress 0x0012b3a0
+     */
+    virtual void swap(SeqBase<T> &other);
+
+    /**
+     * Number of elements.
+     *
+     * The two instantiations do not share a body, and that is the one finding here worth pausing
+     * on. `SeqBase<Object>` calls `PySequence_Length()` at `0x004a53f0` and `SeqBase<Char>` calls
+     * `PyString_Size()` at `0x005a1ca0`, so a single template body cannot produce both. Whether
+     * the port wrote an explicit specialisation or routed the call through the element type is
+     * not recovered, and no body is written rather than picking one.
+     *
+     * @return The length.
+     * @ghidraAddress 0x0012b358
+     */
+    virtual int size() const;
+
+    /**
      * Read one element.
      *
-     * Slot 7 of the table above. The body is not recovered. The signature comes from the call in
-     * PyShell::ReportError(), which passes a hidden return slot, the adjusted receiver, and the
-     * index.
+     * The new reference from the interpreter is adopted through a Py::FromAPI temporary, so the
+     * returned handle owns exactly one count.
      *
      * @param i The index.
      * @return A handle on the element.
      * @ghidraAddress 0x0012ac48
      */
-    virtual T getItem(int i) const;
+    virtual T getItem(int i) const {
+        return T(FromAPI(PySequence_GetItem(mPtr, i)).mPtr);
+    }
 
     /**
      * Write one element.
-     *
-     * Slot 8 of the table above. The body is not recovered.
      *
      * @param i The index.
      * @param value The element to store.
      * @ghidraAddress 0x0012b4d0
      */
-    virtual void setItem(int i, const T &value);
+    virtual void setItem(int i, const T &value) {
+        if (PySequence_SetItem(mPtr, i, value.mPtr) == -1) {
+            throw Exception();
+        }
+    }
 };
 
 } // namespace Py

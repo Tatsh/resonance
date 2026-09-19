@@ -21,10 +21,10 @@ namespace Py {
  * | 0 | compiler-generated type function | `0x004c65d8` |
  * | 1 | compiler-generated destructor | `0x004c6560` |
  * | 2 | `accepts` | `0x004c73a8` |
- * | 3 | inherited, unidentified | `0x004c7260` |
- * | 4 | unidentified | `0x004c7270` |
- * | 5 | inherited, unidentified | `0x004c7890` |
- * | 6 | inherited, unidentified | `0x004c73d0` |
+ * | 3 | inherited `max_size` | `0x004c7260` |
+ * | 4 | `capacity` | `0x004c7270` |
+ * | 5 | inherited `swap` | `0x004c7890` |
+ * | 6 | inherited `size` | `0x004c73d0` |
  * | 7 | inherited `getItem` | `0x004c7a48` |
  * | 8 | inherited `setItem` | `0x004c7bb8` |
  *
@@ -63,6 +63,20 @@ public:
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyString_Check(pyob);
+    }
+
+    /**
+     * Report the sentinel rather than the length.
+     *
+     * The base returns size(), and this override tail-calls slot 3 instead, so the capacity of a
+     * Python string reads as the not-found sentinel. A Python string is immutable, so a capacity
+     * equal to its length would invite a caller to write into it.
+     *
+     * @return The value max_size() reports.
+     * @ghidraAddress 0x004c7270
+     */
+    virtual int capacity() const {
+        return max_size();
     }
 
     /**

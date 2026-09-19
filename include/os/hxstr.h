@@ -393,6 +393,19 @@ private:
 extern const char *g_szEmptyString;
 
 /**
+ * Sentinel a search returns when it finds nothing.
+ *
+ * The word holds all ones and sits one word past the empty string in the same literal pool, which
+ * is what places it beside HxStr rather than in any one of its six readers. Those readers span
+ * unrelated subsystems, including the glyph mesh builder and the PyCXX sequence binding, whose
+ * released form returns the standard string's own no-position constant from the member that reads
+ * it here.
+ *
+ * @ghidraAddress 0x008211bc
+ */
+extern const unsigned g_nHxStrNoPosition;
+
+/**
  * Write a string to a stream.
  *
  * The buffer is passed to the stream without a null check. An empty string therefore arrives at

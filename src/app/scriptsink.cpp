@@ -15,7 +15,7 @@ ScriptSink::~ScriptSink() {
 void ScriptSink::RunMessageScript(Message *pMsg) {
     const char *pszScript = static_cast<ScriptMsg *>(pMsg)->mScript;
     if (pszScript == nullptr) {
-        pszScript = g_pszDefaultText;
+        pszScript = g_szEmptyString;
     }
     RunScript(HxStr(pszScript));
 }

@@ -39,9 +39,10 @@ PyShell::PyShell() {
         HxStr appendCall("sys.path.append");
         HxStr root = GetFreqRoot();
 
-        // The binary composes each of these with operator+, so it builds one temporary per step
-        // and then materialises a further HxStr from the finished buffer for the call. The
-        // appends below produce the same text in one string.
+        // The binary copies into a fresh string at every step rather than appending in place,
+        // and then builds one further HxStr from the finished buffer for the call. Which source
+        // form produced that is not recoverable, because an inlined operator+ and a written
+        // temporary compile alike. The appends below produce the same text.
         HxStr scriptPath(appendCall);
         scriptPath += "('";
         scriptPath += root;
