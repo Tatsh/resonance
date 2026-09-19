@@ -62,6 +62,19 @@ public:
     enum { kSyncAllMask = 0x7f };
 
     /**
+     * Bits of the changed-parts mask SyncChanged() receives.
+     *
+     * Three of the seven bits of kSyncAllMask are recovered, each from the channel of
+     * Rnd::MeshAnim::SetFrameSelf() that reports it after writing into the vertex vector. The
+     * remaining four bits have no recovered producer.
+     */
+    enum {
+        kSyncPoints = 0x01, /*!< The vertex positions changed. */
+        kSyncColors = 0x10, /*!< The vertex colours changed. */
+        kSyncTexs = 0x20    /*!< The first texture coordinate of each vertex changed. */
+    };
+
+    /**
      * Bits of the copy flags Copy() tests.
      *
      * The flags belong to the Rnd::Object copy interface. Only the three bits the mesh reads are
@@ -184,6 +197,20 @@ public:
     void SetTransOwner(Transformable *pOwner);
 
     /**
+     * Point the mesh at the next level of detail in its chain.
+     *
+     * The same shape as SetMaterial() and SetTransOwner(), dropping the reference on the previous
+     * link and taking one on the new link, and storing nothing for a null argument.
+     *
+     * No out-of-line body exists. The compiler inlined the setter at `0x004e8444` and again at
+     * `0x004e84fc` inside Rnd::MultiMesh::DrawSelf(), its only call site, so the title is inferred
+     * from the member it writes.
+     *
+     * @param pNext The next mesh in the chain, or null to release the previous link alone.
+     */
+    void SetNext(Mesh *pNext);
+
+    /**
      * Decide whether this mesh draws, and yield its world bounding sphere.
      *
      * A mesh with neither faces nor edges is rejected. A sphere of zero radius is accepted without
@@ -218,38 +245,46 @@ public:
      */
     virtual void Collide(const Ray &ray, HitSink &sink);
 
-protected:
-    // The four overrides below fill Rnd::Drawable vtable slots 4 through 7. The access of those
-    // base declarations is not recovered yet, and protected is the narrowest that admits the
-    // Rnd::PsMesh overrides.
+    /**
+     * Report which parts of the mesh have changed.
+     *
+     * Rnd::Drawable vtable slot 5. Empty in Rnd::Mesh and in Rnd::PsMesh. The name is inferred
+     * from the slot it fills. Public because Rnd::MeshAnim::SetFrameSelf() at `0x004876b0` calls
+     * it on the mesh it animates, from outside this hierarchy and with no accessor in the image.
+     *
+     * @param nMask The changed parts, a set of the kSync bits above.
+     * @ghidraAddress 0x00492778
+     */
+    virtual void SyncChanged(int nMask);
 
     /**
      * Rebuild whatever the platform subclass derives from the geometry.
      *
-     * Empty in Rnd::Mesh. Rnd::PsMesh rebuilds its triangle strips here. The name is inferred
-     * from the Rnd::Drawable vtable slot it fills.
+     * Rnd::Drawable vtable slot 4. Empty in Rnd::Mesh. Rnd::PsMesh rebuilds its triangle strips
+     * here. The name is inferred from the slot it fills.
+     *
+     * Public rather than protected because Rnd::Text::BuildGlyphMesh() at `0x004c9c00` dispatches
+     * the slot on the mesh it owns, and Rnd::Text derives from Rnd::Drawable rather than from this
+     * class, which protected access cannot express. A friend declaration would fit the image
+     * equally well; public asserts the weaker of the two.
      *
      * @ghidraAddress 0x00492770
      */
     virtual void Sync();
 
     /**
-     * Report which parts of the mesh have changed.
-     *
-     * Empty in Rnd::Mesh and in Rnd::PsMesh. The name is inferred from the Rnd::Drawable vtable
-     * slot it fills.
-     *
-     * @param nMask The changed parts.
-     * @ghidraAddress 0x00492778
-     */
-    virtual void SyncChanged(int nMask);
-
-    /**
      * Report every part of the mesh as changed.
+     *
+     * Rnd::Drawable vtable slot 6. Public on the same evidence as Sync(), the same builder
+     * dispatching the slot at `0x004c9be8`.
      *
      * @ghidraAddress 0x00492780
      */
     virtual void SyncAll();
+
+protected:
+    // The override below fills Rnd::Drawable vtable slot 7. The access of that base declaration is
+    // not recovered yet, and protected is the narrowest that admits the Rnd::PsMesh override.
 
     /**
      * Restore the reference bookkeeping and resynchronise after a load or a copy.
@@ -276,10 +311,17 @@ private:
 
     // Data members follow the recovered offset order, and the access specifiers interleave.
 
-protected:
-    // Rnd::PsMesh::DrawSelf() reads both depth fields to build the GS register writes.
-    ZMode mZMode; // +0xe0
-    ZFunc mZFunc; // +0xe4
+public:
+    /*!< Depth buffer read and write mode. Rnd::PsMesh::DrawSelf() reads it to build the GS
+         register writes. Public rather than protected on two counts:
+         Rnd::PsMesh::SelectDepthRegsForPass() reads it through a `Rnd::Mesh &` that is not its own
+         object, and Rnd::Text::BuildGlyphMesh() at `0x004c9ad4` writes it on the mesh it owns from
+         outside this hierarchy. A friend declaration would fit the image equally well; public
+         asserts the weaker of the two. +0xe0 */
+    ZMode mZMode;
+    /*!< Depth comparison. Public on the same evidence as mZMode, the same builder writing it at
+         `0x004c9acc`. +0xe4 */
+    ZFunc mZFunc;
 
 public:
     /*!< Vertices, owned when mVertsOwner is this mesh. Public because Rnd::Blur::RebuildBlurMesh()
@@ -293,8 +335,14 @@ public:
     std::vector<MeshEdge> mEdges;
 
 protected:
-    // Rnd::PsMesh::DrawSelf() reads the material to select it and the sphere radius to cull.
-    Mat *mMat;      // +0x10c
+public:
+    /*!< Material this mesh draws with. Rnd::PsMesh::DrawSelf() reads it to select it, and public
+         rather than protected because Rnd::PsMultiMesh::DrawSelf() at `0x005b2f58` reads it out of
+         the mesh it instances, from outside this hierarchy. +0x10c */
+    Mat *mMat;
+
+protected:
+    // Rnd::PsMesh::DrawSelf() reads the sphere radius to cull.
     Sphere mSphere; // +0x110
 
 public:
@@ -319,9 +367,15 @@ protected:
     // Rnd::PsMesh::DrawSelf() reads the cap to decide how much of the mesh to submit.
     int mMaxVerts; // +0x144
 
-private:
-    float mMinScreen; // +0x148
-    Mesh *mNext;      // +0x14c
+public:
+    /*!< Projected size below which this mesh yields to a coarser link of the mNext chain. Zero
+         disables the substitution. Public because Rnd::MultiMesh::DrawSelf() at `0x004e83f4` saves
+         it, zeroes it for the run of instances, and restores it afterwards, and the image has no
+         accessor for it. +0x148 */
+    float mMinScreen;
+    /*!< Next coarser level of detail, or null at the end of the chain. Public on the same
+         evidence: the same routine reads it at `0x004e8444` to hand it back to SetNext(). +0x14c */
+    Mesh *mNext;
 };
 
 /**
@@ -345,6 +399,30 @@ Mesh *NewMesh(const HxStr &name);
  * @ghidraAddress 0x006eed60
  */
 extern Mesh *(*g_pfnNewMesh)(const HxStr &name);
+
+/**
+ * Build a mesh for the registered "Mesh" class.
+ *
+ * Calls through g_pfnNewMesh and narrows the result to its Rnd::Object subobject, which is why the
+ * routine exists at all rather than the hook being registered directly. Rnd::Manager::Init()
+ * registers this factory.
+ *
+ * @param name The object name.
+ * @return The new mesh, as its Rnd::Object subobject.
+ * @ghidraAddress 0x00492f50
+ */
+Object *CreateRegisteredMesh(const HxStr &name);
+
+/**
+ * Point g_pfnNewMesh at NewMesh() and register the "Mesh" class with Rnd::Manager.
+ *
+ * No call site survives in the shipped program. Rnd::Manager::Init() performs the registration
+ * itself, and the static initialiser of g_pfnNewMesh performs the assignment, so the routine is
+ * dead code in the original rather than an unfinished analysis.
+ *
+ * @ghidraAddress 0x004926b0
+ */
+void RegisterMeshClass();
 
 /**
  * Registered class name of Rnd::Mesh, the string "Mesh".

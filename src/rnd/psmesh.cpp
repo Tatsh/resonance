@@ -288,6 +288,27 @@ inline void SelectDepthRegs(int nZMask, int nZTest) {
 
 } // namespace
 
+// 0x00606d38
+void PsMesh::SelectDepthRegsForPass(const Mesh &mesh, int nPass) {
+    if (g_pCurrentCam->mpTargetTex != nullptr || nPass >= kDepthProgramPassLimit) {
+        return;
+    }
+
+    int nZMask = 0;
+    if (nPass != 0 || mesh.mZMode == kZModeDisable || mesh.mZMode == kZModeZReadOnly ||
+        mesh.mZMode == kZModeWReadOnly) {
+        nZMask = 1;
+    }
+
+    int nZTest = kGsZTestGEqual;
+    if (mesh.mZMode == kZModeDisable || mesh.mZFunc == kZFuncAlways) {
+        nZTest = kGsZTestAlways;
+    } else if (nPass == 0 && mesh.mZFunc != kZFuncLessEqual && mesh.mZFunc != kZFuncEqual) {
+        nZTest = mesh.mZFunc == kZFuncLess ? kGsZTestGreater : kGsZTestNever;
+    }
+    SelectDepthRegs(nZMask, nZTest);
+}
+
 // 0x00602600
 PsMesh::PsMesh(const HxStr &name) : Mesh(name) {
 }

@@ -376,6 +376,17 @@ Mesh *NewMesh(const HxStr &name) {
 // 0x006eed60
 Mesh *(*g_pfnNewMesh)(const HxStr &name) = NewMesh;
 
+// 0x00492f50
+Object *CreateRegisteredMesh(const HxStr &name) {
+    return g_pfnNewMesh(name);
+}
+
+// 0x004926b0
+void RegisterMeshClass() {
+    g_pfnNewMesh = NewMesh;
+    g_manager.RegisterClass(g_meshClassName, CreateRegisteredMesh);
+}
+
 // 0x006eed68
 HxStr g_meshClassName("Mesh");
 
@@ -398,6 +409,7 @@ Mesh::Mesh(const HxStr &name)
 // 0x00492838
 Mesh::~Mesh() {
     RemoveObjectRefs();
+    ReleaseAllRefs();
 }
 
 // 0x00480d80
@@ -821,6 +833,18 @@ void Mesh::SetTransOwner(Transformable *pOwner) {
     if (pOwner != nullptr) {
         mTransOwner = pOwner;
         pOwner->AddRef(this);
+    }
+}
+
+// Inlined at both of its call sites inside Rnd::MultiMesh::DrawSelf.
+void Mesh::SetNext(Mesh *pNext) {
+    if (mNext != nullptr) {
+        mNext->RemoveRef(this);
+    }
+    // Yes, the binary stores the new link only when it is not null.
+    if (pNext != nullptr) {
+        mNext = pNext;
+        pNext->AddRef(this);
     }
 }
 
