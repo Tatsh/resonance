@@ -35,7 +35,7 @@ public:
      * Construct over a bitmap.
      *
      * @param bitmap The bitmap the canvas addresses.
-     * @ghidraAddress 0x00630228
+     * @ghidraAddress 0x006302f8
      */
     explicit ACanvas24(const ABitmap &bitmap);
 
