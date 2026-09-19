@@ -178,6 +178,19 @@ int EraseArkStream(int nHandle);
 ArkStream *FindOpenArkStream(int nHandle);
 
 /**
+ * Report the directory entry a stream reads.
+ *
+ * The entry is what gives a caller the stream's stored and inflated sizes without a directory
+ * search of its own. The search walks the stream vector here rather than through
+ * FindOpenArkStream(), and it masks kFileHandleArkStream off the handle in the same way.
+ *
+ * @param nHandle The stream handle, with the bit or without it.
+ * @return The entry, or null when no record has that handle.
+ * @ghidraAddress 0x0055be80
+ */
+ArkDirEntry *GetArkStreamDirEntry(int nHandle);
+
+/**
  * Report the archive a stream reads from.
  *
  * @param nHandle The stream handle.

@@ -133,7 +133,9 @@ int ArkFile::Open(const char *pszPath) {
         memcpy(pArk->mOptimizedTable,
                static_cast<char *>(pRow->mBuffer) + pArk->mOptimizedOffset,
                nOptimized);
-        pArk->mHasOptimizedTable = 1;
+        // Slot 1 rather than slot 0, because the mount above has already read the chunk slot 0
+        // addresses.
+        pArk->mOptimizedCursor = 1;
     } else {
         pArk->mOptimizedTable = nullptr;
     }

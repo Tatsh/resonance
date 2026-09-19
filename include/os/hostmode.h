@@ -33,6 +33,48 @@ HostMode GetHostMode();
 int UsingArkFiles();
 
 /**
+ * Whether data is being read from the disc.
+ *
+ * The flag is one word of a block of nine boot options at 0x0070bf10 that each have an accessor of
+ * this shape. The retail configurator at 0x0050f030, which InitIop() calls first, writes the block
+ * in one pass and sets this word to 1 in the same instruction run that sets GetHostMode() to
+ * kHostModeCdOnly and UsingArkFiles() to 1. The `.data` default is zero, which is the
+ * host-development configuration. It is a separate word from the one UsingArkFiles() reads at
+ * 0x0070bf14.
+ *
+ * Both uses agree with that reading. InitAsync() starts the worker thread only when this reports
+ * the disc, because a host-link read needs no latency hiding, and ArkFile::Open() searches the
+ * path for a device prefix only then, because a prefix such as `cdrom0:` exists on no host path.
+ *
+ * @return Non-zero when data is read from the disc.
+ * @ghidraAddress 0x0050efd0
+ */
+int UsingCdMedia();
+
+/**
+ * Whether Warn() reports anything.
+ *
+ * Another word of the same boot-option block, at 0x0070bf18. Warn() is the only reader of either
+ * the word or this accessor, and it reports nothing unless the answer is 1, which is what fixes
+ * the meaning of the word.
+ *
+ * @return 1 when warnings are reported.
+ * @ghidraAddress 0x0050efb0
+ */
+int WarningsEnabled();
+
+/**
+ * Whether a reported message also goes to the screen.
+ *
+ * Another word of the same boot-option block, at 0x0070bf1c. ReportMessage() is the only reader of
+ * either the word or this accessor, and it skips the on-screen half unless the answer is 1.
+ *
+ * @return 1 when messages go to the screen.
+ * @ghidraAddress 0x0050efc0
+ */
+int ScreenMessagesEnabled();
+
+/**
  * Root the game composes every data path against.
  *
  * The shipped build returns the empty string, so every composed path is relative. The routine

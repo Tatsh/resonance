@@ -201,6 +201,21 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
 void MemLogWrite(const char *pszText);
 
 /**
+ * Close the memory report and print a summary of it.
+ *
+ * Closing is skipped when the report was never opened. The routine then clears the logging flag,
+ * formats a summary, and writes it through LogPrintf(). Fatal() is the only caller, which makes
+ * this the last thing the machine does with its allocation record before it stops.
+ *
+ * Only the closing half is recovered. The summary builds its text by scanning for a character and
+ * differencing two pointers, and neither the format string nor the quantity it reports has been
+ * determined, so the body is not reconstructed.
+ *
+ * @ghidraAddress 0x004a7d30
+ */
+void MemCloseLogAndReport();
+
+/**
  * Take a block from the backing allocator.
  *
  * The allocator underneath is the toolchain's own, whose state lives at 0x007819cc and whose

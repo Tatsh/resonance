@@ -32,8 +32,17 @@ constexpr int kAsyncStatusPending = -1;
 /** Stored in AsyncRequest::mStatus once the data is in place. */
 constexpr int kAsyncStatusOk = 0;
 
+/** Stored in AsyncRequest::mStatus when the path could not be opened. */
+constexpr int kAsyncStatusOpenFailed = 2;
+
+/** Stored in AsyncRequest::mStatus when the caller's buffer is smaller than the file. */
+constexpr int kAsyncStatusBufferTooSmall = 3;
+
 /** Stored in AsyncRequest::mStatus when the read itself failed. */
 constexpr int kAsyncStatusReadFailed = 4;
+
+/** Stored in AsyncRequest::mStatus when the read succeeded and the inflate did not. */
+constexpr int kAsyncStatusInflateFailed = 5;
 
 /**
  * One queued asynchronous read.
@@ -141,16 +150,28 @@ int AsyncSubmitRequest(int nFile,
  * A path ending in `.gz` is inflated in place once the read completes. The buffer is sized to the
  * larger of the stored and inflated sizes, the stored bytes are read into its tail, and
  * kAsyncRequestInflate makes completion inflate them forward over the buffer. With no buffer
- * supplied one is allocated, from the selected zone when there is one.
+ * supplied one is allocated, from the selected zone when there is one. An ark stream reports both
+ * sizes from its directory entry, and a loose gzip file reports the inflated size from its own
+ * last four bytes.
+ *
+ * Two failures are reported as a completed request rather than through the return value. A path
+ * that will not open completes with kAsyncStatusOpenFailed, and a buffer smaller than the file
+ * completes with kAsyncStatusBufferTooSmall. Either way the identifier is a real one a caller can
+ * poll.
  *
  * @param pszPath The file to read.
  * @param pBuffer The destination, or null to have one allocated.
- * @param nLength The destination size, which is ignored when pBuffer is null.
+ * @param nLength The destination size, ignored when pBuffer is null. The unsigned type is proven by
+ *                the unsigned comparison against the file size and by the zero extension at the
+ *                stream-advance call.
  * @param pCallback Receiver notified once the request completes, or null.
  * @return The request identifier.
  * @ghidraAddress 0x0045f148
  */
-int AsyncLoadFileByPath(const char *pszPath, void *pBuffer, int nLength, AsyncCallback *pCallback);
+int AsyncLoadFileByPath(const char *pszPath,
+                        void *pBuffer,
+                        unsigned nLength,
+                        AsyncCallback *pCallback);
 
 /**
  * Split a request into chunk jobs and put it on the pending list.
@@ -296,8 +317,9 @@ void AsyncDump();
 /**
  * Report how much work the queue is holding.
  *
- * Every count is walked rather than stored. AsyncDump() prints all three, and a debug caller
- * outside this subsystem reads them as well.
+ * Every count is walked rather than stored. AsyncDump() reports the same three quantities through
+ * its own copies of these loops rather than through this routine, and the names here come from the
+ * messages it prints them with. The one caller is a debug reader outside this subsystem.
  *
  * @param pnPending Receives the number of queued requests.
  * @param pnCompleted Receives the number of finished requests no caller has taken yet.
@@ -327,6 +349,19 @@ AsyncJob *AsyncGetFreeJobChain();
  * @ghidraAddress 0x00460dd8
  */
 void AsyncReleaseJobChain(AsyncJob *pChain);
+
+/**
+ * Open a file by path.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * A path inside a mounted archive resolves to an ark stream handle, with kFileHandleArkStream set.
+ *
+ * @param pszPath The file to open.
+ * @param nMode Zero at every call site in this subsystem.
+ * @return The file. A negative result reports that the open failed.
+ * @ghidraAddress 0x0047c9c0
+ */
+int FileOpen(const char *pszPath, int nMode);
 
 /**
  * Read one run of bytes from a file.

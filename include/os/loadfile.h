@@ -42,27 +42,6 @@ void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, un
 void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsigned *pnSize);
 
 /**
- * Whether data is being read from the disc.
- *
- * The flag is one word of a block of eight boot options at 0x0070bf10 that each have an accessor
- * of this shape. The retail configurator at 0x0050f030, which InitIop() calls first, writes the
- * block in one pass and sets this word to 1 in the same instruction run that sets GetHostMode() to
- * kHostModeCdOnly and UsingArkFiles() to 1. The `.data` default is zero, which is the
- * host-development configuration. It is a separate word from the one UsingArkFiles() reads at
- * 0x0070bf14.
- *
- * Both uses agree with that reading. InitAsync() starts the worker thread only when this reports
- * the disc, because a host-link read needs no latency hiding, and ArkFile::Open() searches the
- * path for a device prefix only then, because a prefix such as `cdrom0:` exists on no host path.
- *
- * The accessor belongs to another agent's subsystem.
- *
- * @return Non-zero when data is read from the disc.
- * @ghidraAddress 0x0050efd0
- */
-int UsingCdMedia();
-
-/**
  * Open a file, whether it resolves to an ark stream or a loose file.
  *
  * The routine belongs to another agent's subsystem and is declared here so ArkFile::Open() can
@@ -102,7 +81,10 @@ void AppendPathComponent(const char *pszComponent, char *pszPath);
  * Close an open file, whether it is an ark stream or a loose file.
  *
  * The routine belongs to another agent's subsystem and is declared here so ArkFile::Close() can
- * call it.
+ * call it. The whole body forwards to the SDK primitive at 0x0056af88 with the argument passed
+ * through. The Ghidra program titles it ReleaseLoadFileHandle rather than this name, because the
+ * bridge's naming policy rejects a title sharing every token of FileClose(). Its plate comment
+ * records the pairing.
  *
  * @param nFile The file to close.
  * @ghidraAddress 0x0055c438
@@ -140,3 +122,22 @@ unsigned GetGzFileSize(int nFile);
  * @ghidraAddress 0x005635b8
  */
 void InflateGzFileWhole(int nFile, void *pBuffer);
+
+/**
+ * Inflate a gzip member that is already in memory.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * The source and destination windows may overlap, and every caller in the async layer relies on
+ * that: the stored bytes sit against the end of the destination and the inflate runs forward over
+ * the whole of it.
+ *
+ * The routine still carries a placeholder title in the Ghidra program. The name here is inferred
+ * from its arguments and from the gzip state it writes.
+ *
+ * @param pSource The stored bytes.
+ * @param nSourceLength The number of stored bytes.
+ * @param pDest The destination.
+ * @return Positive once the data is in place, and not positive on failure.
+ * @ghidraAddress 0x005636a0
+ */
+int InflateGzBuffer(const void *pSource, int nSourceLength, void *pDest);

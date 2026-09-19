@@ -8,10 +8,12 @@
 
 #include "os/arkfile.h"
 #include "os/cycles.h"
+#include "os/hostmode.h"
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "os/seccache.h"
+#include "os/zone.h"
 
 namespace {
 
@@ -53,6 +55,13 @@ constexpr int kAsyncOpMaxAttempts = 3;
 
 // Reported by PickNextAsyncFetch while it has found nothing to fetch.
 constexpr int kAsyncNoSectorPending = 9999999;
+
+// Recorded as the file of a request whose path could not be opened. It is not a valid handle. The
+// record's flags stay clear, and nothing ever tries to close it.
+constexpr int kAsyncNoFile = 9999;
+
+// Bytes of the inflated size a gzip member ends with.
+constexpr int kGzInflatedSizeFieldLength = 4;
 
 /**
  * The one chunk transfer the media is performing right now.
@@ -618,6 +627,245 @@ void AsyncPumpCompletedRequests() {
         }
         it = g_asyncCompletedJobs.erase(it);
     }
+}
+
+int ResolveAsyncStreamFile(int nFile) {
+    if ((nFile & kFileHandleArkStream) == 0) {
+        return nFile;
+    }
+
+    return GetArkStreamArkId(nFile & ~kFileHandleArkStream);
+}
+
+int MatchesCurrentAsyncOp(int nFile, int nSector) {
+    if (g_asyncCurrentOp.mId != nFile) {
+        return 0;
+    }
+
+    return (g_asyncCurrentOp.mSector == nSector) ? 1 : 0;
+}
+
+void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
+    if (nStatus > 0) {
+        LogPrintf("AsyncJobComplete: job %d has error: %d\n", pRequest->mId, nStatus);
+    } else if ((pRequest->mFlags & kAsyncRequestInflate) != 0) {
+        if (InflateGzBuffer(pRequest->mReadBuffer, pRequest->mReadLength, pRequest->mBuffer) <= 0) {
+            nStatus = kAsyncStatusInflateFailed;
+        }
+    }
+
+    if ((pRequest->mFlags & kAsyncRequestCloseFile) != 0) {
+        FileClose(pRequest->mFile);
+    }
+    pRequest->mStatus = nStatus;
+    g_asyncCompletedJobs.push_back(*pRequest);
+}
+
+int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
+    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
+        if (it->mId != nHandle) {
+            continue;
+        }
+
+        const int nStatus = it->mStatus;
+        if (ppBuffer != nullptr) {
+            *ppBuffer = it->mBuffer;
+        }
+        if (pnLength != nullptr) {
+            *pnLength = it->mLength;
+        }
+        if (it->mJobs != nullptr) {
+            AsyncReleaseJobChain(it->mJobs);
+        }
+        g_asyncCompletedJobs.erase(it);
+        return nStatus;
+    }
+
+    return -1;
+}
+
+void AsyncCancelRequest(int nHandle) {
+    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
+        if (it->mId != nHandle) {
+            continue;
+        }
+
+        if (it->mOwnsBuffer != 0) {
+            MemFreeTagged(it->mBuffer, __FILE__, __LINE__);
+        }
+        if ((it->mFlags & kAsyncRequestCloseFile) != 0) {
+            FileClose(it->mFile);
+        }
+        if (it->mJobs != nullptr) {
+            AsyncReleaseJobChain(it->mJobs);
+        }
+        g_asyncPendingJobs.erase(it);
+        return;
+    }
+
+    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
+        if (it->mId != nHandle) {
+            continue;
+        }
+
+        if (it->mOwnsBuffer != 0) {
+            MemFreeTagged(it->mBuffer, __FILE__, __LINE__);
+        }
+        // A finished request's file is not closed here, unlike the pending case above. Nothing
+        // reopens it either.
+        if (it->mJobs != nullptr) {
+            AsyncReleaseJobChain(it->mJobs);
+        }
+        g_asyncCompletedJobs.erase(it);
+        return;
+    }
+}
+
+void AsyncDump() {
+    LogPrintf("\nASYNC DUMP\n\n");
+    LogPrintf("current op:  id: %d, sector: %d, buffer: %p, status: %d, retry: %d (%d)\n",
+              g_asyncCurrentOp.mId,
+              g_asyncCurrentOp.mSector,
+              g_asyncCurrentOp.mBuffer,
+              g_asyncCurrentOp.mStatus,
+              g_asyncCurrentOp.mRetry,
+              g_asyncCurrentOp.mRetryCount);
+
+    LogPrintf("num Pending Jobs: %d\n", static_cast<int>(g_asyncPendingJobs.size()));
+    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
+        LogPrintf("   h: %d\n", it->mId);
+    }
+
+    LogPrintf("num Completed Jobs: %d\n", static_cast<int>(g_asyncCompletedJobs.size()));
+    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
+        LogPrintf("   h: %d\n", it->mId);
+    }
+
+    int nFreeJobs = 0;
+    for (const AsyncJob *pJob = g_pAsyncFreeJobs; pJob != nullptr; pJob = pJob->mNext) {
+        ++nFreeJobs;
+    }
+    LogPrintf("num Free Job Chains: %d\n", nFreeJobs);
+}
+
+int AsyncLoadFileByPath(const char *pszPath,
+                        void *pBuffer,
+                        unsigned nLength,
+                        AsyncCallback *pCallback) {
+    if (g_bAsyncInitialised == 0) {
+        InitAsync();
+    }
+
+    const char *pszExtension = strrchr(pszPath, '.');
+    const int bGzipped = ((pszExtension != nullptr) && (pszExtension[1] == 'g') &&
+                          (pszExtension[2] == 'z') && (pszExtension[3] == '\0')) ?
+                             1 :
+                             0;
+
+    const int nFile = FileOpen(pszPath, 0);
+    if (nFile < 0) {
+        AsyncRequest request;
+        memset(&request, 0, sizeof(request));
+        request.mId = g_nAsyncNextJobId;
+        request.mFile = kAsyncNoFile;
+        request.mCallback = pCallback;
+        request.mStatus = kAsyncStatusPending;
+        AsyncJobComplete(&request, kAsyncStatusOpenFailed);
+        ++g_nAsyncNextJobId;
+        return request.mId;
+    }
+
+    const int bArkStream = (nFile & kFileHandleArkStream);
+    int nStoredLength;
+    int nInflatedLength;
+    if (bArkStream != 0) {
+        const ArkDirEntry *pEntry = GetArkStreamDirEntry(nFile & ~kFileHandleArkStream);
+        nStoredLength = pEntry->mStoredSize;
+        nInflatedLength = pEntry->mSize;
+    } else {
+        nStoredLength = FileSeek(nFile, 0, kFileSeekEnd);
+        if (bGzipped != 0) {
+            // The inflated size is the last four bytes of a gzip member.
+            FileSeek(nFile, -kGzInflatedSizeFieldLength, kFileSeekEnd);
+            FileRead(nFile, &nInflatedLength, kGzInflatedSizeFieldLength);
+        } else {
+            nInflatedLength = nStoredLength;
+        }
+        FileSeek(nFile, 0, kFileSeekSet);
+    }
+
+    const int nBufferLength = (nInflatedLength < nStoredLength) ? nStoredLength : nInflatedLength;
+    int bOwnsBuffer = 0;
+    if (pBuffer == nullptr) {
+        if (ZoneGetCurrent() == kNoZone) {
+            pBuffer = MemAllocTagged(nBufferLength, __FILE__, __LINE__);
+            bOwnsBuffer = 1;
+        } else {
+            pBuffer = ZoneAlloc(nBufferLength);
+        }
+        nLength = nBufferLength;
+    } else if (nLength < static_cast<unsigned>(nBufferLength)) {
+        AsyncRequest request;
+        memset(&request, 0, sizeof(request));
+        request.mId = g_nAsyncNextJobId;
+        request.mFile = nFile;
+        request.mCallback = pCallback;
+        request.mStatus = kAsyncStatusPending;
+        // The file stays open. No flag is set to close it, and the handle is not stored anywhere.
+        AsyncJobComplete(&request, kAsyncStatusBufferTooSmall);
+        ++g_nAsyncNextJobId;
+        return request.mId;
+    }
+
+    if (bGzipped != 0) {
+        AsyncRequest request;
+        memset(&request, 0, sizeof(request));
+        request.mId = g_nAsyncNextJobId;
+        request.mFile = nFile;
+        request.mBuffer = pBuffer;
+        // The stored bytes land against the end of the buffer. That is what makes room for the
+        // inflate to run forward over the whole of it.
+        request.mReadBuffer = static_cast<char *>(pBuffer) + (nBufferLength - nStoredLength);
+        request.mReadLength = nStoredLength;
+        request.mLength = nBufferLength;
+        request.mStreamFile = ResolveAsyncStreamFile(nFile);
+        request.mFlags = kAsyncRequestCloseFile | kAsyncRequestInflate;
+        request.mCallback = pCallback;
+        request.mStatus = kAsyncStatusPending;
+        request.mOwnsBuffer = bOwnsBuffer;
+        AsyncQueueRequest(request);
+        ++g_nAsyncNextJobId;
+        return request.mId;
+    }
+
+    // The layer was already brought up at the top of the routine, and this path tests it again.
+    if (g_bAsyncInitialised == 0) {
+        InitAsync();
+    }
+
+    AsyncRequest request;
+    memset(&request, 0, sizeof(request));
+    request.mId = g_nAsyncNextJobId;
+    request.mFile = nFile;
+    request.mBuffer = pBuffer;
+    request.mReadBuffer = pBuffer;
+    request.mReadLength = nLength;
+    request.mLength = nLength;
+    request.mStreamFile = ResolveAsyncStreamFile(nFile);
+    request.mFlags = kAsyncRequestCloseFile;
+    request.mCallback = pCallback;
+    request.mStatus = kAsyncStatusPending;
+    request.mOwnsBuffer = bOwnsBuffer;
+    AsyncQueueRequest(request);
+
+    if ((bArkStream != 0) && (g_nAsyncHostMedia == 0)) {
+        SeekArkStream(nFile, nLength, kFileSeekCur);
+    }
+    ++g_nAsyncNextJobId;
+    // The file is closed here and kAsyncRequestCloseFile closes it a second time once the request
+    // completes. On disc media that first close lands while the read is still queued.
+    FileClose(nFile);
+    return request.mId;
 }
 
 void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs) {
