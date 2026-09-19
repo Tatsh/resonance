@@ -27,7 +27,7 @@ public:
     virtual ~LocalPlayer();
 
     /** @ghidraAddress 0x00121ea0 */
-    virtual void Slot2();
+    virtual int Slot2();
 
     /** @ghidraAddress 0x00121e90 */
     virtual int Slot4();
@@ -42,10 +42,10 @@ public:
     virtual void Slot7();
 
     /** @ghidraAddress 0x00122898 */
-    virtual void Slot8();
+    virtual void Slot8(int first, int second);
 
     /** @ghidraAddress 0x001228a8 */
-    virtual int Slot9();
+    virtual int Slot9(int value);
 
     /** @ghidraAddress 0x00121eb0 */
     virtual int Slot10();
@@ -57,13 +57,13 @@ public:
     virtual void Slot12();
 
     /** @ghidraAddress 0x00121ec0 */
-    virtual void Slot14();
+    virtual int Slot14();
 
     /** @ghidraAddress 0x00121ed0 */
-    virtual void Slot15();
+    virtual int Slot15();
 
     /** @ghidraAddress 0x00122ca0 */
-    virtual int Slot16();
+    virtual int Slot16(int value);
 
     /** @ghidraAddress 0x00121ee0 */
     virtual int Slot17();
@@ -75,7 +75,7 @@ public:
     virtual int Slot19();
 
     /** @ghidraAddress 0x00122c00 */
-    virtual int Slot20();
+    virtual int Slot20(int value);
 
     /**
      * Slot 21. Declared by this class rather than inherited.
