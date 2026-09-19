@@ -32,7 +32,9 @@ jobs:
       - name: 'Count produced artifacts'
         if: always()
         run: |
-          OBJECTS=$(find build -name '*.o' | wc -l)
+          # CMAKE_SYSTEM_NAME is Generic for this target, and CMake then writes .obj rather than
+          # .o. Searching for .o alone counted zero over a build that had compiled all 352.
+          OBJECTS=$(find build \( -name '*.o' -o -name '*.obj' \) | wc -l)
           ARCHIVES=$(find build -name '*.a' | wc -l)
           # grep yields an empty string rather than a zero when the log is absent. That happens
           # whenever an earlier step failed and this one still runs.
