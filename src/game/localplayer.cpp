@@ -47,6 +47,15 @@ int LocalPlayer::Slot15() {
     return mUnknownac + 1;
 }
 
+// 0x00122cc8
+float LocalPlayer::Slot18() {
+    if (mCount9c == 0) {
+        return 0.0f;
+    }
+
+    return static_cast<float>(mCount9c) / static_cast<float>(mCount9c + mCounta0);
+}
+
 // 0x00121ee0
 int LocalPlayer::Slot17() {
     return mUnknown88;
