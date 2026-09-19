@@ -18,8 +18,7 @@
  * overrides, and inherits MsgSink::Handle() with no adjustment at all.
  *
  * Deriving from both mix-ins is the whole design. A message arrives through the MsgSink side,
- * which stores a copy, and arrives at its readers through the inherited MsgSource sink list. The
- * class therefore has no drain member of its own, and none exists in its translation unit.
+ * which stores a copy, and arrives at its readers through the inherited MsgSource sink list.
  * GameManagerImpl demonstrates the arrangement: its constructor builds the embedded queue and then
  * registers itself as a sink of it at `0x00105fec`.
  *
@@ -27,10 +26,10 @@
  * Message's virtual destructor, which is what establishes the ownership and in turn establishes
  * that Message::Clone() returns a heap copy.
  *
- * One thing is unresolved. The constructor points mTarget at mFirst, and HandleMessage() appends
- * through mTarget, so the class can switch which vector accepts a message. Nothing recovered ever
- * writes mTarget again, so the second vector is never used and the reason for the pair stays
- * open. The two trailing words are likewise unrecovered.
+ * Poll() at `0x0054aa58` is the drain, and an earlier reading of this class stated that no drain
+ * member existed. It also resolves what the pair of vectors is for. Poll() points mTarget at the
+ * vector it is not iterating, so a message that a sink stores while receiving an earlier one lands
+ * in the other vector and the iteration is undisturbed.
  */
 class MsgQueue : public MsgSource, public MsgSink {
 public:
@@ -58,6 +57,21 @@ public:
      */
     void Store(Message *pMsg);
 
+    /**
+     * Deliver and discard every stored message.
+     *
+     * The routine marks itself as running, swaps the accepting vector, then sends each stored
+     * message on to the queue's own sinks and deletes it. The drained vector is emptied
+     * afterwards. Rnd::World::DrawFrame() and slot 6 of the metagame renderer are the callers.
+     * Both run once per frame.
+     *
+     * The title is inferred from the behaviour. The member is not virtual and both call sites are
+     * direct calls. No recovered metadata records a title for it.
+     *
+     * @ghidraAddress 0x0054aa58
+     */
+    void Poll();
+
 protected:
     /**
      * Store a copy of a message.
@@ -68,9 +82,14 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
-    std::vector<Message *> mFirst;   // +0x18
-    std::vector<Message *> mSecond;  // +0x24
-    std::vector<Message *> *mTarget; // +0x30
-    int mUnknown34;                  // +0x34 not written by the constructor
-    int mUnknown38;                  // +0x38 cleared by the constructor
+    std::vector<Message *> mFirst;
+    std::vector<Message *> mSecond;
+    // The vector that accepts a stored message. The constructor points it at mFirst and Poll()
+    // swaps it.
+    std::vector<Message *> *mTarget;
+    // The vector Poll() is iterating. Poll() is the only writer, and it reloads the member on
+    // every iteration rather than retaining it in a register.
+    std::vector<Message *> *mDraining;
+    // Non-zero while Poll() runs. Nothing recovered reads it.
+    int mInPoll;
 };

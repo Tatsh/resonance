@@ -43,6 +43,21 @@ public:
      */
     virtual void RemoveSink(MsgSink *pSink);
 
+    /**
+     * Deliver a message to every registered sink, in registration order.
+     *
+     * The member is not virtual. The table at `0x00829b18` runs to its terminator after
+     * RemoveSink(), and every one of the hundreds of call sites is a direct call.
+     *
+     * The loop reloads the vector's finish pointer on each iteration. A sink that registers a
+     * further sink while receiving the message is therefore still included. Delivery to one sink
+     * goes through MsgSink::Handle(), table slot 2.
+     *
+     * @param pMsg The message to deliver.
+     * @ghidraAddress 0x0054a370
+     */
+    void Send(Message *pMsg);
+
 private:
     int mUnknown00;                // +0x00
     std::vector<MsgSink *> mSinks; // +0x04

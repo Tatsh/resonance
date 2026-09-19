@@ -16,7 +16,7 @@ inline void DeleteStoredMessages(std::vector<Message *> &messages) {
 // 0x0054a738
 MsgQueue::MsgQueue() {
     mTarget = &mFirst;
-    mUnknown38 = 0;
+    mInPoll = 0;
 }
 
 // 0x0054a7a0
@@ -34,4 +34,17 @@ void MsgQueue::Store(Message *pMsg) {
 void MsgQueue::HandleMessage(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
     mTarget->push_back(pMsg->Clone());
+}
+
+// 0x0054aa58
+void MsgQueue::Poll() {
+    mInPoll = 1;
+    mDraining = mTarget;
+    mTarget = (mTarget == &mFirst) ? &mSecond : &mFirst;
+    for (std::vector<Message *>::iterator it = mDraining->begin(); it != mDraining->end(); ++it) {
+        Send(*it);
+        delete *it;
+    }
+    mDraining->clear();
+    mInPoll = 0;
 }
