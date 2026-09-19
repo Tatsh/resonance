@@ -19,7 +19,7 @@ OpenWriteOp::~OpenWriteOp() {
 void OpenWriteOp::Issue() {
     sceMcOpen(mPortSlot >> kMemcardPortShift,
               mPortSlot & kMemcardSlotMask,
-              mPath.mStr != nullptr ? mPath.mStr : g_pszEmptyString,
+              mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString,
               sceMcFileCreateFile | sceMcFileAttrWriteable);
     mIssued = kMemcardOpInFlight;
 }

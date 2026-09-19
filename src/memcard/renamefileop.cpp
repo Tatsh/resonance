@@ -20,8 +20,8 @@ RenameFileOp::~RenameFileOp() {
 void RenameFileOp::Issue() {
     sceMcRename(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
-                mOldPath.mStr != nullptr ? mOldPath.mStr : g_pszEmptyString,
-                mNewPath.mStr != nullptr ? mNewPath.mStr : g_pszEmptyString);
+                mOldPath.mStr != nullptr ? mOldPath.mStr : g_szEmptyString,
+                mNewPath.mStr != nullptr ? mNewPath.mStr : g_szEmptyString);
     mIssued = kMemcardOpInFlight;
 }
 

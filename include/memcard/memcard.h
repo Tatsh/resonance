@@ -15,13 +15,13 @@
  *
  * Every entry point below constructs one MemcardOp subclass on the heap and appends it to the
  * queue. Nothing is issued at that moment. Update() drives the head of the queue, one libmc call
- * at a time, so a caller that queues an open, a write and a close in one turn gets them serviced
- * in order over the following frames. Ordering is what makes the queue rather than a set of direct
- * calls necessary, because libmc services one command at a time.
+ * at a time. A caller that queues an open, a write and a close in one turn therefore gets them
+ * serviced in order over the following frames. Ordering is what makes the queue rather than a set
+ * of direct calls necessary, because libmc services one command at a time.
  *
  * Every entry point takes a `pCookie` tag, which the operation stores and Cancel() matches on.
- * Every MemcardTask passes its own cookie, so abandoning a task abandons exactly the operations
- * that task queued, wherever they sit in the queue.
+ * Every MemcardTask passes its own cookie. Abandoning a task therefore abandons exactly the
+ * operations that task queued, wherever they sit in the queue.
  *
  * One instance exists. It is a `MemcardPS2` built with `new` inside the constructor at
  * `0x001f2960`, which belongs to a singleton outside this subsystem.
@@ -32,7 +32,7 @@ public:
      * Construct an empty queue.
      *
      * The body default-constructs the queue and nothing else. The compiler inlined it into
-     * `MemcardPS2::MemcardPS2()`, so no address of its own survives.
+     * `MemcardPS2::MemcardPS2()`. No address of its own survives.
      */
     Memcard();
 

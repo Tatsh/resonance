@@ -59,7 +59,7 @@ enum MemcardStatus {
  * so all three virtuals are declared with an empty body rather than as pure virtuals.
  *
  * Neither mResult nor mStatus is written by either constructor. An operation that libmc has not
- * finished therefore reports whatever those two words held when the block was allocated.
+ * finished therefore reports whatever those two words stored when the block was allocated.
  */
 class MemcardOp {
 public:
@@ -128,8 +128,8 @@ public:
      * Tag Memcard::Cancel() matches on.
      *
      * Public because Memcard::Cancel() compares this member against its argument directly, and the
-     * image exposes no accessor. Every MemcardTask passes its own cookie, so cancelling a task
-     * abandons exactly the operations that task queued.
+     * image exposes no accessor. Every MemcardTask passes its own cookie. Cancelling a task
+     * therefore abandons exactly the operations that task queued.
      *
      * +0x04
      */
@@ -170,18 +170,3 @@ protected:
     // The receiver Complete() reports to. +0x14
     MemcardCBHandler *mHandler;
 };
-
-/**
- * Text substituted for an `HxStr` whose buffer is null.
- *
- * Every operation that passes a path to libmc substitutes this pointer when its own `HxStr` is
- * empty, because an empty `HxStr` stores a null buffer. The global sits at `0x006fbd10` and its
- * initial value addresses a lone terminator at `0x008211b8`, which makes it the empty string.
- *
- * Twenty routines outside the memory-card layer read it with the same idiom, so the declaration
- * belongs beside `HxStr` rather than here. It is declared here only because `os/hxstr.h` is
- * another agent's file.
- *
- * @ghidraAddress 0x006fbd10
- */
-extern const char *g_pszEmptyString;

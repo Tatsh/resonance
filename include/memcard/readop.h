@@ -8,8 +8,8 @@
  * `6ReadOp` in the RTTI descriptor at `0x008ee7c8`, single inheritance from `MemcardOp` at offset
  * 0. An instance is 0x2c bytes and the vtable is at `0x0082bd60`.
  *
- * Issue() addresses the descriptor rather than the card, so MemcardOp::mPortSlot is recorded and
- * never read.
+ * Issue() addresses the descriptor rather than the card. MemcardOp::mPortSlot is therefore
+ * recorded and never read.
  */
 class ReadOp : public MemcardOp {
 public:

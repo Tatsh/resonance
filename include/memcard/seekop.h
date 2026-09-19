@@ -39,8 +39,8 @@ public:
      * Record the resulting position, or map the failure.
      *
      * On success the body writes mPosition and returns without writing MemcardOp::mStatus, which no
-     * constructor initialises. A successful seek therefore reports whatever that word held when the
-     * block was allocated. The behaviour matches the binary.
+     * constructor initialises. A successful seek therefore reports whatever that word stored when
+     * the block was allocated. The behaviour matches the binary.
      *
      * @ghidraAddress 0x0055eb10
      */

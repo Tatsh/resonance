@@ -21,10 +21,10 @@ constexpr int kMemcardTaskFinished = 2;
  * anywhere in the image, which is what establishes that it is abstract, and the two virtuals every
  * subclass overrides are therefore declared pure here.
  *
- * A task is a `MemcardCBHandler`, so it receives the completion of every operation it queues, and
- * it drives itself forward from inside those reports. `SaveFileMCT` for example creates the save
- * directory, then opens the file, then writes it, then closes it, advancing one step per report.
- * The task finally reports to the `MemcardUser` it was constructed with.
+ * A task is a `MemcardCBHandler` and therefore receives the completion of every operation it
+ * queues. It drives itself forward from inside those reports. `SaveFileMCT` for example creates the
+ * save directory, then opens the file, then writes it, then closes it, advancing one step per
+ * report. The task finally reports to the `MemcardUser` it was constructed with.
  *
  * Sixteen concrete subclasses exist. `SaveFileMCT` and `LoadFileMCT` perform the file transfer,
  * and the fourteen others either drive the card directly or wrap one of those two.
@@ -38,10 +38,10 @@ public:
     /**
      * Construct an idle task against one card slot.
      *
-     * mStatus is not written, so a task that is read before it reports carries whatever that word
-     * held when the block was allocated. The compiler inlined this body into every subclass
-     * constructor, so no address of its own survives. `GetConnectStateMCT::GetConnectStateMCT()`
-     * at `0x001848f8` is the clearest copy.
+     * mStatus is not written. A task that is read before it reports therefore exposes whatever
+     * that word stored when the block was allocated. The compiler inlined this body into every
+     * subclass constructor, and no address of its own survives.
+     * `GetConnectStateMCT::GetConnectStateMCT()` at `0x001848f8` is the clearest copy.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
@@ -69,8 +69,8 @@ public:
     /**
      * Unrecovered. Slot 18.
      *
-     * The body is empty and every subclass in the image inherits it, so neither its purpose nor
-     * its argument list can be established. It is declared without arguments because no call site
+     * The body is empty and every subclass in the image inherits it. Neither its purpose nor its
+     * argument list can be established. It is declared without arguments because no call site
      * exists to prove any.
      *
      * @ghidraAddress 0x00184530
@@ -84,8 +84,8 @@ protected:
     // The queue this task submits operations to. +0x08
     Memcard *mCard;
 
-    // The tag every queued operation records, so that Memcard::Cancel() abandons this task's work
-    // and nothing else. +0x0c
+    // The tag every queued operation records. Memcard::Cancel() therefore abandons this task's
+    // work and nothing else. +0x0c
     void *mCookie;
 
     // The packed port and slot. +0x10

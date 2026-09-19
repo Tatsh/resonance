@@ -1,6 +1,7 @@
 #pragma once
 
 #include "os/hxstr.h"
+#include "script/defaulttext.h"
 
 /**
  * Identifier of the `autoexec()` call template, which Application::Run() invokes once the services
@@ -21,20 +22,51 @@ constexpr int kScriptTemplateAutoexec = 0xc9;
 void RegisterScriptCallTemplates();
 
 /**
- * Create the embedded interpreter's host object on first use.
+ * Create the interpreter host on first use and run the master script.
  *
- * The interpreter is out of scope, so only this accessor is declared. Application::Run() invokes
- * it for the creation and discards the result.
+ * The host is created with twelve bytes of storage, constructed, handed to
+ * PyShell::RunMasterInitScript(), and only then stored in g_pPyShell, so the master script runs
+ * against a host the global does not yet publish. Application::Run() invokes this for the
+ * creation.
  *
- * @return The host object.
+ * The routine returns nothing. Its early exit and its creation path disagree about what the
+ * result register holds, so the value is scratch rather than a return.
+ *
  * @ghidraAddress 0x0050d588
  */
-void *GetPythonScriptHost();
+void GetPythonScriptHost();
 
 /**
- * Call one registered script template.
+ * Destroy the interpreter host and clear the global.
+ *
+ * The destructor is inlined here rather than called, so the body repeats PyShell's teardown.
+ *
+ * @ghidraAddress 0x0050d608
+ */
+void DestroyPythonScriptHost();
+
+/**
+ * Run the master script against the existing host.
+ *
+ * A second entry point onto PyShell::RunMasterInitScript(), separate from the one
+ * GetPythonScriptHost() takes during creation.
+ *
+ * @ghidraAddress 0x0050d698
+ */
+void InvokeMasterInitScript();
+
+/**
+ * Call one registered script template as a statement.
  *
  * The identifier selects a template, and the remaining arguments fill its format placeholders.
+ * The formatted text runs with `Py_file_input`.
+ *
+ * The routine is variadic, and the register homing in its prologue is not the only evidence for
+ * that. The homed block's address is passed on to the formatter as the argument list, which is
+ * what proves the arguments are read rather than merely reserved.
+ *
+ * Not reconstructed. The body needs the template registry reader at `0x00466438` and the HxStr
+ * formatter at `0x005e4148`, and neither belongs to this subsystem.
  *
  * @param nTemplate The template identifier.
  * @ghidraAddress 0x005099b0
@@ -42,7 +74,9 @@ void *GetPythonScriptHost();
 void CallScriptTemplate(int nTemplate, ...);
 
 /**
- * Run one line of script text.
+ * Run one piece of script text as a statement.
+ *
+ * The result is discarded. ScriptSink uses this for the text a ScriptMsg supplies.
  *
  * @param script The text to run.
  * @ghidraAddress 0x00509b00
@@ -50,12 +84,17 @@ void CallScriptTemplate(int nTemplate, ...);
 void RunScript(const HxStr &script);
 
 /**
- * Text that stands in for a null string.
+ * Describe the pending Python error as text.
  *
- * ScriptSink falls back on this when a message supplies no script text. The save-icon loader at
- * `0x00177608` reads the same global for the same purpose, so it is shared rather than specific to
- * the script layer and may belong elsewhere.
+ * The routine reports the error through PyShell::ReportError() with an empty context, which halts
+ * the machine, so the text it returns is unreachable on the normal path. The plain return is
+ * `no python exception found`, and a handler inside it prefixes `python error: ` to a message it
+ * recovers from the caught object.
  *
- * @ghidraAddress 0x006fbd10
+ * Not reconstructed. The caught type has a virtual accessor at its third slot and the type is not
+ * identified, so the handler cannot be written faithfully.
+ *
+ * @return The text.
+ * @ghidraAddress 0x00508f30
  */
-extern const char *g_pszDefaultText;
+HxStr GetPythonErrorText();

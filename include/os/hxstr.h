@@ -368,6 +368,18 @@ private:
 };
 
 /**
+ * Substitute an empty HxStr passes in place of a null buffer.
+ *
+ * A string whose mStr is null is the empty representation, and a caller handing that string to an
+ * interface taking a plain pointer substitutes this global rather than passing null. Twenty
+ * routines across unrelated subsystems read it through the same idiom, which is what places the
+ * declaration beside HxStr rather than in any one of them.
+ *
+ * @ghidraAddress 0x006fbd10
+ */
+extern const char *g_szEmptyString;
+
+/**
  * Write a string to a stream.
  *
  * The buffer is passed to the stream without a null check. An empty string therefore arrives at

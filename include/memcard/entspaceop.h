@@ -51,7 +51,7 @@ public:
      *
      * The operation is 0x28 bytes where its recovered members end at 0x24, and the word is
      * neither written by the constructor nor read anywhere in the image. `Memcard::EntSpace()` is
-     * itself never called, so nothing exercises the class.
+     * itself never called. Nothing exercises the class.
      *
      * +0x24
      */

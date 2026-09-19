@@ -167,7 +167,11 @@ public:
     unsigned char mReserved10[0x0c];
     /** GIFtag whose loop count is still to be filled in, or null when none is open. */
     GifQuadword *mpOpenTag;
-    unsigned char mReserved20[0x42c];
+    /** Display width in pixels, as Init() recorded it. Rnd::PsCam::ScreenToPixels() reads it. */
+    int mnDisplayWidth;
+    /** Display height in pixels. Read alongside the width by the same routine. */
+    int mnDisplayHeight;
+    unsigned char mReserved28[0x424];
     /** Non-zero while geometry is submitted through VU1 rather than the software path. +0x44c */
     int mnUseVu1;
     /** End of the region the end-of-packet path measures against. +0x450 */

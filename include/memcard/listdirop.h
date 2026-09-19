@@ -14,8 +14,8 @@ constexpr int kListDirMaxEntries = 20;
  * `9ListDirOp` in the RTTI descriptor at `0x008f47c0`, single inheritance from `MemcardOp` at
  * offset 0. An instance is 0x34 bytes and the vtable is at `0x0082bd90`.
  *
- * Every listing writes into the one shared table at `0x00726a40`, so a second listing overwrites
- * the first, and mEntries addresses that table rather than storage of its own.
+ * Every listing writes into the one shared table at `0x00726a40`. A second listing therefore
+ * overwrites the first, and mEntries addresses that table rather than storage of its own.
  */
 class ListDirOp : public MemcardOp {
 public:
@@ -24,7 +24,7 @@ public:
      *
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
-     * @param path The directory to list, which libmc accepts with wildcards.
+     * @param path The directory to list.
      * @param pCookie The tag Memcard::Cancel() matches on.
      * @param nMode The `sceMcGetDir()` mode, which selects between a fresh listing and a
      *              continuation of the previous one.
@@ -64,7 +64,7 @@ public:
     /** The `sceMcGetDir()` mode. +0x28 */
     unsigned mMode;
 
-    /** Non-zero once the listing filled the table, so that further entries may remain. +0x2c */
+    /** Non-zero once the listing filled the table and further entries may remain. +0x2c */
     int mTruncated;
 
     /** The shared entry table at `0x00726a40`. +0x30 */

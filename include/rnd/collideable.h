@@ -138,7 +138,9 @@ public:
      * Vtable slot 2. It has the same signature as Collide() and the same forwarding base
      * implementation. Only the overrides can distinguish the two. Slot 1 is overridden by
      * `Rnd::Mesh`, `Rnd::Tunnel`, and `Rnd::Arena`. Every derived table examined so far stores this
-     * base implementation in slot 2. The purpose of the second query is therefore unrecovered.
+     * base implementation in slot 2, with one exception. Rnd::Cam overrides it at `0x004ad820`
+     * with a routine that tests the ray start point against its screen rectangle, which makes
+     * the second query a screen-space pick rather than a geometric one.
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.

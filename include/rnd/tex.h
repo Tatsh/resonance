@@ -240,13 +240,19 @@ protected:
     virtual void RestoreSurfaces();
 
 protected:
-    // Every member is protected rather than private, because Rnd::PsTex reads the mip handles, the
-    // pending mask, and the bitmap path while it uploads to GS memory. No access from outside the
-    // hierarchy is recovered. The order below is the recovered offset order.
-    // RestoreSurfaces() writes the first three from the bitmap it is restoring.
+public:
+    // RestoreSurfaces() writes these three from the bitmap it is restoring. They are public rather
+    // than protected because Rnd::Cam reads the first two from outside the hierarchy, through a
+    // Rnd::Tex pointer, in both UpdateTargetAspect() and SetTargetTex(), and Rnd::PsCam does the
+    // same in ScreenToPixels(). The image supplies no accessor for either.
     int mWidth;
     int mHeight;
     int mBitsPerPixel;
+
+protected:
+    // Every member below is protected rather than private, because Rnd::PsTex reads the mip
+    // handles, the pending mask, and the bitmap path while it uploads to GS memory. No access from
+    // outside the hierarchy is recovered for any of them. The order is the recovered offset order.
     int mUnknown28;                // +0x28
     std::vector<int> mMipHandles;  // +0x2c
     unsigned char mPendingMipMask; // +0x38 One bit per mip level still loading.

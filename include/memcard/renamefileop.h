@@ -9,7 +9,7 @@
  * `12RenameFileOp` in the RTTI descriptor at `0x008f4990`, single inheritance from `MemcardOp` at
  * offset 0. An instance is 0x2c bytes and the vtable is at `0x0082bc10`.
  *
- * `Memcard::RenameFile()` has no caller in the image, so nothing exercises the class.
+ * `Memcard::RenameFile()` has no caller in the image. Nothing exercises the class.
  */
 class RenameFileOp : public MemcardOp {
 public:

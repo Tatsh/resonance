@@ -16,7 +16,7 @@ OpenReadOp::~OpenReadOp() {
 void OpenReadOp::Issue() {
     sceMcOpen(mPortSlot >> kMemcardPortShift,
               mPortSlot & kMemcardSlotMask,
-              mPath.mStr != nullptr ? mPath.mStr : g_pszEmptyString,
+              mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString,
               sceMcFileAttrReadable);
     mIssued = kMemcardOpInFlight;
 }

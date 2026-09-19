@@ -37,8 +37,9 @@ public:
     /**
      * Record the descriptor, or map the failure.
      *
-     * The body writes mFile from the result before it tests the sign, so a failed open stores the
-     * libmc error code in mFile as well as in MemcardOp::mResult. The behaviour matches the binary.
+     * The body writes mFile from the result before it tests the sign. A failed open therefore
+     * stores the libmc error code in mFile as well as in MemcardOp::mResult. The behaviour matches
+     * the binary.
      *
      * @ghidraAddress 0x0055eda0
      */

@@ -9,7 +9,7 @@
  * An instance is four bytes, which is the vptr alone, and the vtable is at `0x007daf78`.
  *
  * The interface declares one method per `MemcardTask` subclass, and every body is a single
- * `jr ra`, so an implementation overrides only the tasks it starts. Each method is pinned to its
+ * `jr ra`. An implementation overrides only the tasks it starts. Each method is pinned to its
  * task by the task's own reporting virtual, which reads one fixed vtable slot of the user it was
  * constructed with.
  *
@@ -33,7 +33,7 @@ public:
     virtual ~MemcardUser();
 
     /**
-     * Report what one slot holds. Slot 2, from `GetConnectStateMCT`.
+     * Report the state of one slot. Slot 2, from `GetConnectStateMCT`.
      *
      * The state arrives by value, which is why the slot's compiled body destroys the argument's
      * string rather than being empty like the rest.
@@ -178,7 +178,7 @@ public:
     /**
      * Unrecovered. Slot 17.
      *
-     * No task in the image reports through this slot and no subclass overrides it, so neither its
+     * No task in the image reports through this slot and no subclass overrides it. Neither its
      * purpose nor its argument list can be established. The two arguments are declared to match
      * every neighbouring slot.
      *

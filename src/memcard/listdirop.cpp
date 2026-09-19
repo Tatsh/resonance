@@ -19,7 +19,7 @@ ListDirOp::~ListDirOp() {
 void ListDirOp::Issue() {
     sceMcGetDir(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
-                mPath.mStr != nullptr ? mPath.mStr : g_pszEmptyString,
+                mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString,
                 mMode,
                 kListDirMaxEntries,
                 g_aMemcardDirEntries);
