@@ -187,6 +187,44 @@ from the SDK is reconstructed.
 
 The front end screens, the metagame, networking beyond the packet records, and the game modes.
 
+### Parked questions
+
+Fifteen bands were paused mid-round, and these decisions were open at that point. Each is recorded
+with what the band established, so none has to be re-derived.
+
+`Renderer` has no placement evidence. Both levers that settled placement elsewhere came back nil
+for the region 0x410000 to 0x43ffff: not one of the 30 anonymous-namespace markers falls inside it,
+and every string recovered from the assert arguments there is the template library rather than a
+game path. Sibling convention puts it in `app/` beside `RendererBase`, and that is a convention
+argument rather than evidence, so no file was created.
+
+Two addresses are the highest-yield pair in that same region, because each heads an unbroken run of
+unidentified routines as well as blocking `Overlay`'s destructor: 0x0042aa18 heads a run of 14 and
+0x0041ac18 heads a run of 12.
+
+`Phrase` has no header anywhere in the tree, and `PhrasePacket` is otherwise fully recovered and
+blocked only on that. `Phrase` has its own save, load, and print, so it belongs to whoever owns
+gameplay rather than to the message band that needs it.
+
+The class stored at +0x40 by `NotePitcher`, `SingleCatcher`, `MultiCatcher`, `Scratcher`, and
+`Voxer` is unidentified, and so is the time-conversion object at its own +0x1c. Identifying both
+makes bodies writable across all five classes at once. The entry points are 0x00127548,
+0x00127628, and 0x00105de8.
+
+`PowerupPlacer` and `JamPowerupPlacer` were declared by the message band because three of another
+band's bodies were blocked on them, and neither is a message class. A sibling `GamePowerupPlacer`
+sits beside them at 0x007e4ca0 with no header, and `GrooveWorld` is the likely owner.
+
+`include/app/rendererbase.h` needs an owner. The additive change is well evidenced: the table at
+0x007d2d20 runs eleven entries against `MsgSink`'s four, so slots 4 through 10 are `RendererBase`'s
+own seven virtuals and the class is abstract. Slots 3, 7, and 8 all hold 0x005381a8, the pure
+virtual stub. The placeholder spelling is preferred over verbs taken from `MetRenderer`, because
+naming an interface from one subclass is the same error as reading a signature off a call site.
+
+Four worklist lines are titled for the wrong class. 0x00372c10, 0x00373808, 0x00374208, and
+0x00374b58 are titled for `MetRemixDelScreen` but sit inside `MetSaveRemix`'s address region, and
+`MetRemixDelScreen`'s own code runs from 0x00339000 to 0x00344000.
+
 ## Duplicated routines
 
 An address count is not a function count in this image. Fingerprinting every routine by its opcode

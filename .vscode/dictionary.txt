@@ -204,6 +204,7 @@ pngr
 popen
 posixmodule
 posixpath
+powerup
 preapproved
 psgr
 psmat
@@ -235,6 +236,7 @@ regen
 regexmodule
 regexpr
 remixtype
+rendererbase
 reserveda
 reservedfc
 rgbaq
@@ -342,8 +344,10 @@ whrandom
 winget
 wiswa
 wiswa's
+worklist
 worklists
 worktree
+writable
 xdecref
 xfms
 xincref
