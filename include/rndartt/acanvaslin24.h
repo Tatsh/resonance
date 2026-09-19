@@ -58,6 +58,9 @@ public:
     virtual void BuildAlphaFromColorKey(unsigned int nColorKey);
 
     /** Slot 13. Writes the three stored channel bytes. @ghidraAddress 0x006184b0 */
+    // Lookup only, as in the base: this overload would otherwise hide the base's other one.
+    using ACanvas24::PutPixelNoClip;
+
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 19. @ghidraAddress 0x006184e8 */

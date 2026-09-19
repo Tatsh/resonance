@@ -45,6 +45,9 @@ public:
     virtual ~ACanvasLin8();
 
     /** Slot 13. @ghidraAddress 0x00628638 */
+    // Lookup only, as in the base: this overload would otherwise hide the base's other one.
+    using ACanvas8::PutPixelNoClip;
+
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 15. @ghidraAddress 0x00628658 */

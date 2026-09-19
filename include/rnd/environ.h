@@ -58,22 +58,15 @@ enum FogMode {
  * the sink it was handed. The one at `0x00519470` writes the name of a fog mode and the one at
  * `0x005185b0` writes mLights, and both are declared beside the implementation rather than here
  * because no code outside `environ.cpp` calls either.
+ *
+ * The class has the tagged allocation pair every class in this tree gets from the allocation macro,
+ * under the tag "Rnd::Environ". The allocation is inlined into NewEnviron(), its one call site at
+ * `0x00519324`, and no out-of-line copy of either half survives. Neither is declared here, for the
+ * same reason APalette declares neither: the macro generates them rather than a programmer writing
+ * them.
  */
 class Environ : public Drawable {
 public:
-    /**
-     * Allocate an environment from the tagged heap under the tag "Rnd::Environ".
-     *
-     * The body is inlined into NewEnviron(), its one call site, and no out-of-line copy survives
-     * anywhere in the image, so the routine has no address of its own. The declaration exists
-     * because the allocation at `0x00519324` passes the class tag rather than reaching the plain
-     * allocator.
-     *
-     * @param nSize The object size, which the compiler supplies.
-     * @return The block.
-     */
-    void *operator new(size_t nSize);
-
     /**
      * Construct an environment with no lights and no fog.
      *

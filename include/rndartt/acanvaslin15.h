@@ -56,6 +56,10 @@ public:
     virtual void BuildAlphaFromColorKey(unsigned int nColorKey);
 
     /** Slot 13. @ghidraAddress 0x006190c0 */
+    // Lookup only: this overload would otherwise hide the root's three-argument one, which
+    // ACanvas15 does not redeclare.
+    using ACanvas::PutPixelNoClip;
+
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 17. @ghidraAddress 0x006190e8 */

@@ -6,6 +6,11 @@
 #include "os/log.h"
 #include "os/zone.h"
 
+// Five of the log lines below pass a size_t through %d, which the format literals in the image do.
+// size_t is 32 bits on the Emotion Engine, where the pairing is exact, and the cross build reports
+// nothing. A 64-bit host widens the argument and warns. Neither the literal nor the argument is
+// changed for that: the literal is the one the image stores, and the warning describes the host.
+
 namespace {
 
 // The interned source table MemLogFindSource() matches against.

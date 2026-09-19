@@ -45,6 +45,18 @@ public:
     GameParams();
 
     /**
+     * Copy every member in declaration order.
+     *
+     * Defaulted rather than written, because the routine at `0x001fc480` is the compiler-generated
+     * copy constructor, as the class documentation records. Declaring it is what the destructor and
+     * the assignment operator below make necessary: a user-declared destructor deprecates an
+     * implicit copy constructor, and the three packets that embed a GameParams copy one.
+     *
+     * @ghidraAddress 0x001fc480
+     */
+    GameParams(const GameParams &other) = default;
+
+    /**
      * Release the three strings.
      *
      * The declaration is first among the class's virtuals, which is what places it at vtable

@@ -90,6 +90,11 @@ public:
      *
      * @ghidraAddress 0x00630558
      */
+    // The base declares a PutPixelNoClip of its own at a different slot, and declaring this
+    // overload would otherwise hide it from lookup on this class. The declaration below affects
+    // name lookup only: it adds no slot and changes no layout.
+    using ACanvas::PutPixelNoClip;
+
     virtual void PutPixelNoClip(int nX, int nY, unsigned int nColor);
 
     /** Slot 23. @ghidraAddress 0x006303f8 */

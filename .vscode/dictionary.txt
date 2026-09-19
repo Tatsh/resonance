@@ -601,6 +601,7 @@ vrsqrt
 vtable
 vtables
 vutext
+wdelete
 werror
 wextra
 whrandom
@@ -608,9 +609,11 @@ winget
 winmsg
 wiswa
 wiswa's
+wnonnull
 worklist
 worklists
 worktree
+wreturn
 writable
 writeop
 xdecref

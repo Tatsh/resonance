@@ -72,9 +72,10 @@ static FailSink &operator<<(FailSink &sink, const std::list<Animatable *> &anims
     return sink;
 }
 
-// 0x0049a8a8. No call site survives in the shipped build. The five literals below are the only
-// record of the FilterType names.
-static FailSink &operator<<(FailSink &sink, Animatable::FilterType nType) {
+// 0x0049a8a8. No call site survives in the shipped build, and the five literals below are the only
+// record of the FilterType names. The routine is not static: an out-of-line copy with no caller is
+// what external linkage produces, where internal linkage would have let the compiler discard it.
+FailSink &operator<<(FailSink &sink, Animatable::FilterType nType) {
     switch (nType) {
     case Animatable::kFilterScaleOffset:
         sink.Print("ScaleOffset");
@@ -440,8 +441,15 @@ Animatable::~Animatable() {
 void Animatable::ReleaseAnimsAndFilters() {
     ReleaseAnimsRefs();
     for (std::list<Filter *>::iterator it = mFilters.begin(); it != mFilters.end(); ++it) {
-        // Filter declares no destructor at all. This is a bare deallocation with no dispatch.
+        // Filter declares no destructor, so every subclass is released through a base pointer
+        // without one being run. 0x00494d2c calls MemFreeScalar on the pointer directly, with no
+        // vptr load and no dispatch, which confirms the original has the same defect rather than
+        // this being a reconstruction error. The diagnostic is suppressed at the two sites that
+        // reproduce it instead of over the file.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
         delete *it;
+#pragma GCC diagnostic pop
     }
     mFilters.clear();
 }
@@ -574,7 +582,11 @@ void Animatable::RemoveFilter(int nIndex) {
         return;
     }
 
+    // See ReleaseAnimsAndFilters() for why this deletion is faithful rather than defective here.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
     delete *it;
+#pragma GCC diagnostic pop
     mFilters.erase(it);
 }
 

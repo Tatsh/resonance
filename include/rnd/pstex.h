@@ -127,13 +127,12 @@ public:
      * rebuilds the CLUT staging buffer, and sets the dirty-CLUT bit. A null palette rebuilds the
      * buffer from the entries already present.
      *
-     * The parameter type is the art library's APalette, identified by the tag at `0x00831560`, and
-     * that class has no header in this tree yet.
+     * The parameter type is the art library's APalette, identified by the tag at `0x00831560`.
      *
      * @param pPalette The replacement palette, or null to rebuild from the current entries.
      * @ghidraAddress 0x0059ab78
      */
-    virtual void SetPalette(void *pPalette);
+    virtual void SetPalette(APalette *pPalette);
 
     /**
      * Mark the page of mip 0 as in use, or release that mark.

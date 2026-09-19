@@ -46,6 +46,9 @@ public:
     virtual ~ACanvasLin4();
 
     /** Slot 13. Writes the stored colour into the addressed nibble. @ghidraAddress 0x00628108 */
+    // Lookup only, as in the base: this overload would otherwise hide the base's other one.
+    using ACanvas8::PutPixelNoClip;
+
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 15. @ghidraAddress 0x00628180 */
