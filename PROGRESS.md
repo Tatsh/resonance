@@ -12,13 +12,17 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                      | Count  |
 | ---------------------------- | ------ |
-| Functions in the program     | 14,897 |
-| Excluded by rule             | 1,797  |
-| Reconstructable              | 13,100 |
-| Accounted for in source      | 1,405  |
-| Share of the reconstructable | 10.73% |
-| Remaining, with a name       | 711    |
-| Remaining, unidentified      | 10,984 |
+| Functions in the program     | 14,943 |
+| Excluded by rule             | 1,816  |
+| Reconstructable              | 13,127 |
+| Accounted for in source      | 1,557  |
+| Share of the reconstructable | 11.86% |
+| Remaining, with a name       | 804    |
+| Remaining, unidentified      | 10,766 |
+
+The identified remainder rises as well as falls, because identifying a routine moves it out of the
+unidentified column before any source accounts for it. A rise there is progress rather than
+regression.
 
 Exclusions are keyed on the name a function has. A routine therefore has to be identified before it
 can be excluded, and the reconstructable figure falls as identification proceeds. That figure is
@@ -26,8 +30,14 @@ still overstated. A large part of the 10,984 unidentified routines belongs to th
 compiler runtime, the template library, and the embedded interpreter. None of those is
 reconstructed.
 
-The 711 identified but unwritten routines are the cheapest remaining work, because the analysis
-behind each one is already done and only the source is missing.
+The identified but unwritten routines are the cheapest remaining work, because the analysis behind
+each one is already done and only the source is missing. Two cautions apply to that column. A
+routine's recorded title comes from an earlier pass and is sometimes wrong, and in one band
+seventeen of twenty-one entries were titled for the wrong class entirely. And an entry may already
+exist in the source under its real C++ name, because the column is built from unannotated addresses
+rather than from absent code, which accounted for thirty-six of another band's fifty entries. Both
+are fixed by confirming the owning class from the type-info accessor and by searching the tree
+before writing.
 
 ### Breakdown of exclusions
 
@@ -48,8 +58,8 @@ Verification therefore stops at syntax and formatting.
 
 | Check                                | Status  |
 | ------------------------------------ | ------- |
-| Headers compiling standalone         | 334/334 |
-| Sources passing a syntax check       | 160/160 |
+| Headers compiling standalone         | 346/346 |
+| Sources passing a syntax check       | 175/175 |
 | Address annotations with no function | 0       |
 | Lines over 100 characters            | 0       |
 | `clang-format` differences           | 0       |
@@ -77,17 +87,22 @@ from the SDK is reconstructed.
 
 ### Complete
 
-| Area                      | Notes                                                                                                                                                      |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Entry point               | `main` and the loading screen                                                                                                                              |
-| Asynchronous file layer   | Submission, the drive callback, the request and job records                                                                                                |
-| Animation base            | `Rnd::Animatable` with all five nested filters                                                                                                             |
-| Collision base            | `Rnd::Collideable` with its hit and sink types                                                                                                             |
-| Message and packet family | 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg` and seven routing intermediates. `ScriptMsg` alone is still partial |
-| Material, PlayStation 2   | `Rnd::PsMat` in full, including the blend mode table                                                                                                       |
-| Streams                   | File, buffer, memory, and tool streams, plus the nine-class byte stream family over the input and output interfaces                                        |
-| Mesh, PlayStation 2       | `Sync` and all four draw paths, software and VU1                                                                                                           |
-| GIF packet buffer         | Reservation, tag closing, and the scratchpad double buffer                                                                                                 |
+| Area                          | Notes                                                                                                                                                                                                          |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry point                   | `main` and the loading screen                                                                                                                                                                                  |
+| Asynchronous file layer       | Submission, the drive callback, the request and job records                                                                                                                                                    |
+| Animation base                | `Rnd::Animatable` with all five nested filters                                                                                                                                                                 |
+| Collision base                | `Rnd::Collideable` with its hit and sink types                                                                                                                                                                 |
+| Message and packet family     | 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg` and seven routing intermediates. `ScriptMsg` alone is still partial                                                     |
+| Material, PlayStation 2       | `Rnd::PsMat` in full, including the blend mode table                                                                                                                                                           |
+| Streams                       | File, buffer, memory, and tool streams, plus the nine-class byte stream family over the input and output interfaces                                                                                            |
+| Mesh, PlayStation 2           | `Sync` and all four draw paths, software and VU1                                                                                                                                                               |
+| GIF packet buffer             | Reservation, tag closing, and the scratchpad double buffer                                                                                                                                                     |
+| Scheduler command base        | `Sch::Command`, `Sch::TimedCommand`, and `Sch::Tick`. The command factory is dead in the shipped build                                                                                                         |
+| Transform and animation base  | `Rnd::TransAnim` with its keyframe channels, over the transform and animatable bases                                                                                                                           |
+| View, camera, and environment | `Rnd::Blur`, `Rnd::View` with its five class keys, and the camera and environment serialisation                                                                                                                |
+| Mesh animation and instancing | `Rnd::MeshAnim` with its three keyframe channels, `Rnd::MultiMesh`, and `Rnd::PsMultiMesh`                                                                                                                     |
+| Exception runtime             | Identified rather than reconstructed. The scheme is DWARF, and the unwinding driver, the frame-state builder, the handler-chain accessor, the terminate path, and the `dynamic_cast` entry point are all named |
 
 ### Partial
 
