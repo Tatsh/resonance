@@ -24,7 +24,10 @@ void Globals::Init() {
     mScriptSink = new ScriptSink(this);
     mGameManager = new GameManagerImpl;
     mMainLoop = new MainLoop(mWatchdog, mGameManager);
-    mLog = new OBStream(g_abLogBuffer, kLogBufferSize);
+    // 0x004ee2f8. The log stream is the preallocated read-write stream rather than the
+    // output interface: the constructor writes two base vtables and fills a 0x20-byte
+    // object, and the output interface declares four virtuals and no member at all.
+    mLog = new IOBPreallocMemStream(g_abLogBuffer, kLogBufferSize);
     CreateSynth();
 }
 

@@ -5,7 +5,7 @@
 #include "app/watchdog.h"
 #include "app/watchdogtimer.h"
 #include "game/gamemanagerimpl.h"
-#include "stream/obstream.h"
+#include "stream/iobpreallocmemstream.h"
 #include "synth/ps2hardsynth.h"
 
 /** Size of the buffer that Globals opens its log stream over. */
@@ -130,7 +130,7 @@ private:
     Watchdog *mWatchdog;           // +0x0c
     WatchdogTimer *mWatchdogTimer; // +0x10
     ScriptSink *mScriptSink;       // +0x14
-    OBStream *mLog;                // +0x18
+    IOBPreallocMemStream *mLog;    // +0x18
 };
 
 /**
