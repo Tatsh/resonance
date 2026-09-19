@@ -14,15 +14,29 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 ## Coverage
 
-| Measure                      | Count  |
-| ---------------------------- | ------ |
-| Functions in the program     | 15,528 |
-| Excluded by rule             | 6,259  |
-| Reconstructable              | 9,269  |
-| Accounted for in source      | 2,476  |
-| Share of the reconstructable | 26.71% |
-| Remaining, with a name       | 2,220  |
-| Remaining, unidentified      | 4,573  |
+| Measure                   | Count  |
+| ------------------------- | ------ |
+| Functions in the program  | 15,528 |
+| Excluded by rule          | 6,282  |
+| Reconstructable           | 9,246  |
+| Declared or defined       | 2,562  |
+| Share declared or defined | 27.71% |
+| Defined, with a body      | 1,434  |
+| Share implemented         | 15.51% |
+| Remaining, with a name    | 2,170  |
+| Remaining, unidentified   | 4,514  |
+
+Two shares are recorded because they measure different things and the larger one was quoted alone
+for most of this project's history. The audit counts an address as accounted once any file in the
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,383 of
+the 2,562 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 1,434 have a body, and 144 of those have a body with no matching declaration, which
+is the free-function case.
+
+Implementation is the figure the project's goal is stated against, so treat 15.51% as the answer to
+"how much is reconstructed" and 27.71% as the answer to "how much is accounted for". A pass that
+writes a header moves the larger share and not the smaller one, and a pass that writes bodies for an
+already-declared class moves neither, because the addresses were annotated when the header landed.
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -67,12 +81,14 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 Every figure below is produced by a command rather than asserted. No target compiler is available.
 Verification therefore stops at syntax and formatting.
 
-| Check                                | Status  |
-| ------------------------------------ | ------- |
-| Headers compiling standalone         | 408/433 |
-| Sources compiling                    | 291/297 |
-| Address annotations with no function | 0       |
-| Lines over 100 characters            | 0       |
+| Check                                 | Status       |
+| ------------------------------------- | ------------ |
+| Headers compiling standalone          | 421/446      |
+| Sources compiling                     | 300/306      |
+| Address annotations with no function  | 0            |
+| Lines over 100 characters             | 0            |
+| `clang-format` differences            | 0            |
+| Declared virtuals resolving to a base | 0 mismatches |
 
 Both shortfalls are the same gap and neither is a defect. 25 headers under `include/script` and 6
 sources under `src/script` need the embedded interpreter's own `Python.h`, and this tree carries only
@@ -91,7 +107,13 @@ The figures read the working tree rather than the commit history, so they lead i
 as accounted the moment its annotation is written to disk, which is before the change is committed
 and often before the agent that wrote it has reported. A commit landing several hundred lines can
 therefore move the share by almost nothing, because the measurement had already seen the file.
-| `clang-format` differences | 0 |
+
+The override check is `.wiswa-ci/freq/check_overrides.py` over `freq-src/include`. It reports a
+declared virtual whose name matches a base name only in letter case, and one whose name matches
+exactly while taking a different number of parameters. Neither shape produces a compiler
+diagnostic: both declare a new virtual, the class silently stops overriding, and its table grows
+past the entry count the image shows. Pass the directory rather than a file list, because with no
+base header in scope nothing can fail to match and the pass means nothing.
 
 Two changes to what the audit counts are recorded here rather than folded into the figure
 silently. The function list grew by 393 routines, because a vtable slot points at its class's
