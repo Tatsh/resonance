@@ -14,7 +14,8 @@
  * indexing the table with mId, and skips the clear when mId is kIDableUnregistered, which is the
  * value an object that never registered retains.
  */
-template <typename T> class IDable : public IDableBase {
+template <typename T>
+class IDable : public IDableBase {
 public:
     /** @ghidraAddress 0x00121db0 */
     virtual ~IDable();
