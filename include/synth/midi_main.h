@@ -1,18 +1,19 @@
 #pragma once
 
 #include <libsdr.h>
+#include <stdint.h>
 #include <vector>
 
 #include "os/hxstr.h"
+#include "synth/callbackxferbdtoiop.h"
 
 /**
  * Voice and sound-bank driver that Ps2HardSynth is a thin class over.
  *
  * Titled after `midi_main.cpp`, the string at `0x0081cc98` that the module bills its heap releases
  * to. The module spans `0x00461a88` through `0x00465200`, the zone allocator ending just below it,
- * and has the attested behaviour
- * of the sound subsystem: the SPU2 voices, the sound banks, and the script-facing command
- * dispatcher. Neither Synth nor Ps2HardSynth has any of it.
+ * and has the attested behaviour of the sound subsystem: the SPU2 voices, the sound banks, and the
+ * script-facing command dispatcher. Neither Synth nor Ps2HardSynth has any of it.
  *
  * There is no voice table. Every routine here that reports or configures a voice queries the SPU2
  * itself through libsdr's remote-call trampoline, `sceSdRemote()`, with the `rSd*` function code
@@ -52,19 +53,22 @@ void SynthCommand(int nCommand);
  * 0x10e0 from ConfigureSpu2Effects(), and 0x8130 from `0x004642c8`.
  *
  * Two bits of the selector steer the send. Bit 0x1000 ships a whole 0x80-byte SoundDriverCommand
- * from the caller's block; without it the block pointer travels as the single word of a 0x10-byte
- * request, which is what makes a null block valid. Bit 0x8000 skips the busy flag and sends a
+ * from the caller's argument, read as an address; without it the argument travels as the single
+ * word of a 0x10-byte request, read as a value. Bit 0x8000 skips the busy flag and sends a
  * different mode. On entry the routine spins until the previous request has been collected.
  *
  * The title comes from what the twenty call sites have in common rather than from any one of them.
  *
  * @param nSelector The command selector.
- * @param pCommand The command block, or null.
+ * @param nArgument One machine word whose meaning the selector decides. A selector with bit 0x1000
+ *                  set takes the address of a SoundDriverCommand, 0x8130 takes a bank's tag, and
+ *                  0xd0 takes nothing and is passed zero. The parameter is a word rather than a
+ *                  pointer because only half its callers pass one.
  * @return The first word of the reply buffer at `0x008e5b80`. Every call site in the module
  *         discards it.
  * @ghidraAddress 0x005f96c8
  */
-int SubmitSoundDriverRequest(int nSelector, void *pCommand);
+int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument);
 
 /**
  * Move a buffer from main memory into the sound driver's memory on the IOP.
@@ -213,6 +217,31 @@ void ReleaseBankSlotAt(int nDest);
  */
 void LoadSoundBank(char *pszBdPath, char *pszHdPath, int nTag, int nPlacement);
 
+/** Boundary both bank read buffers are rounded up to. */
+constexpr int kBankBufferAlignment = 0x40;
+
+/**
+ * Open a file, whether it resolves to an ark stream or a loose file.
+ *
+ * The routine belongs to the file layer and is declared here so StartBdBankXfer() can call it.
+ *
+ * @param pszPath The path to open, device prefix removed.
+ * @param nFlags The open flags, which both bank starters pass as zero.
+ * @return The handle.
+ * @ghidraAddress 0x0047c9c0
+ */
+int FileOpen(char *pszPath, int nFlags);
+
+/**
+ * Transfer currently streaming a BD bank, or null.
+ *
+ * StartBdBankXfer() stores the object here and then reads it back to register it with g_hdXfer,
+ * which is why the same pointer is written twice.
+ *
+ * @ghidraAddress 0x006e9dd4
+ */
+extern CallbackXferBdToIop *g_pBdXfer;
+
 /**
  * Report the uncompressed length of a file.
  *
@@ -248,8 +277,6 @@ int StartBdBankXfer(char *pszPath);
  * when the selected address is negative, which is what a failed allocation on the IOP side leaves
  * there. The read buffer is the bank's size plus 0x40, rounded up to a 64-byte boundary.
  *
- * The body is not reconstructed, for the same reason as StartBdBankXfer().
- *
  * @param pszPath The bank to read.
  * @param nPlacement Where the bank goes on the IOP.
  * @return Zero once the read is queued, or -1 on either failure.
@@ -259,10 +286,6 @@ int StartHdBankXfer(char *pszPath, int nPlacement);
 
 /**
  * Path of the BD bank currently loaded.
- *
- * Both this and g_hdBankName are declared rather than defined. The static initialiser at
- * `0x00464170` zeroes each as two words with no constructor call, which is a default constructor
- * inlined from the header, and HxStr has no default constructor declared yet.
  *
  * @ghidraAddress 0x006e9b90
  */

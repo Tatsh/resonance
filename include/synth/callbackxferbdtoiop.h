@@ -2,6 +2,9 @@
 
 #include "os/asynccallback.h"
 
+/** Largest read a single chunk of a BD bank transfer is asked for. */
+constexpr int kBankChunkSize = 0x2000;
+
 /**
  * Receiver that streams a BD sound bank into the sound driver one chunk at a time.
  *
@@ -21,6 +24,25 @@
  */
 class CallbackXferBdToIop : public AsyncCallback {
 public:
+    /**
+     * Prepare a transfer of a bank already measured.
+     *
+     * The transfer starts idle. StartBdBankXfer() queues the first read straight afterwards, with
+     * the same chunk length it passes here, which is why the length is a parameter rather than
+     * being derived from nLength inside.
+     *
+     * The constructor is inlined into its one caller, which is why the vptr store and all seven
+     * field stores appear there as one run rather than as a call. It has no address of its own.
+     *
+     * @param nFile The bank, positioned at its start.
+     * @param pReadBuffer The staging buffer every chunk is read into, aligned by the caller.
+     * @param nDest Where the driver writes the bank.
+     * @param nChunkLength The first chunk, which is the whole bank when it fits within
+     *                     kBankChunkSize.
+     * @param nLength The bank's length.
+     */
+    CallbackXferBdToIop(int nFile, char *pReadBuffer, int nDest, int nChunkLength, int nLength);
+
     /**
      * Move the chunk that has just been read and queue the next one.
      *

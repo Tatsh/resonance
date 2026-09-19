@@ -14,14 +14,17 @@ constexpr char kMidiMainFileName[] = "midi_main.cpp";
 // Line 305 of midi_main.cpp, which the release of the read buffer passes to the tagged free.
 constexpr int kFreeReadBufferLine = 0x131;
 
-// Largest read a single chunk is asked for.
-constexpr int kBankChunkSize = 0x2000;
-
 // Selector that hands one chunk to the driver.
 constexpr int kSoundSelectorXferChunk = 0x1070;
 
 // Selector that reports a bank complete. The block is the one the transfer was started from.
 constexpr int kSoundSelectorBankComplete = 0x1050;
+
+CallbackXferBdToIop::CallbackXferBdToIop(
+    int nFile, char *pReadBuffer, int nDest, int nChunkLength, int nLength)
+    : mRequestId(0), mFile(nFile), mpReadBuffer(pReadBuffer), mChunkLength(nChunkLength),
+      mDest(nDest), mRemaining(nLength), mBusy(0) {
+}
 
 // 0x00464430
 void CallbackXferBdToIop::Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus) {
@@ -56,7 +59,7 @@ inline void CallbackXferBdToIop::XferChunk() {
     g_chunkCommand.mTag = g_nSynthXferTag;
     memset(g_chunkCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
     XferToIop(g_chunkCommand.mStagingAddress, mpReadBuffer, mChunkLength);
-    SubmitSoundDriverRequest(kSoundSelectorXferChunk, &g_chunkCommand);
+    SubmitSoundDriverRequest(kSoundSelectorXferChunk, reinterpret_cast<uintptr_t>(&g_chunkCommand));
     if (g_pfnBankLoadProgress != nullptr) {
         g_pfnBankLoadProgress();
     }
@@ -71,7 +74,8 @@ inline void CallbackXferBdToIop::XferChunk() {
     // Yes, the binary finishes with the transfer still marked busy.
     MemFreeTagged(g_pBdXferBuffer, kMidiMainFileName, kFreeReadBufferLine);
     FileClose(mFile);
-    SubmitSoundDriverRequest(kSoundSelectorBankComplete, &g_bankCommand);
+    SubmitSoundDriverRequest(kSoundSelectorBankComplete,
+                             reinterpret_cast<uintptr_t>(&g_bankCommand));
     if (g_pfnBankLoadProgress != nullptr) {
         g_pfnBankLoadProgress();
     }

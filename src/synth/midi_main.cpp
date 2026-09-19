@@ -1,9 +1,24 @@
 #include "synth/midi_main.h"
 
+#include <eekernel.h>
 #include <libsdr.h>
 #include <stdint.h>
+#include <string.h>
 
+#include "os/async.h"
 #include "os/log.h"
+#include "os/mem.h"
+#include "synth/callbackxferhdtoiop.h"
+
+// The tag both allocations below bill to. It is the module's original file rather than this one,
+// because the whole of midi_main compiled as a single translation unit.
+constexpr char kMidiMainFileName[] = "midi_main.cpp";
+
+// Line 575 of midi_main.cpp, which the BD read buffer's allocation passes to the tagged allocator.
+constexpr int kStartBdXferLine = 0x23f;
+
+// Line 467 of midi_main.cpp, for the HD read buffer.
+constexpr int kStartHdXferLine = 0x1d3;
 
 // Selector submitted by SynthCommand's third command and by the tail of the voice report. What it
 // asks the driver to do is unrecovered, so the title records the selector rather than an effect.
@@ -49,6 +64,12 @@ int g_nIopStagingIndex;
 // 0x006e9b84
 int g_nBankIopAddress;
 
+// 0x006e9b90
+HxStr g_bdBankName;
+
+// 0x006e9b98
+HxStr g_hdBankName;
+
 // 0x006e9ba4
 int g_nBankDestAddress;
 
@@ -66,6 +87,9 @@ void *g_pHdXferBuffer;
 
 // 0x006e9dd0
 void *g_pBdXferBuffer;
+
+// 0x006e9dd4
+CallbackXferBdToIop *g_pBdXfer;
 
 // 0x006e9ba8
 int g_anBankDestAddress[kBankDestBufferCount];
@@ -103,9 +127,8 @@ void RegisterBankSlot(int nTag, int nDest, int nIopAddress) {
     for (auto &slot : g_bankSlots) {
         if (slot.mDest == nDest) {
             if (slot.mIopAddress != 0) {
-                SubmitSoundDriverRequest(
-                    kSoundSelectorReleaseBank,
-                    reinterpret_cast<void *>(static_cast<intptr_t>(slot.mTag)));
+                SubmitSoundDriverRequest(kSoundSelectorReleaseBank,
+                                         static_cast<uintptr_t>(slot.mTag));
             }
             slot.mTag = nTag;
             slot.mIopAddress = nIopAddress;
@@ -130,15 +153,80 @@ void ReleaseBankSlotAt(int nDest) {
     for (auto &slot : g_bankSlots) {
         if (slot.mDest == nDest) {
             if (slot.mIopAddress != 0) {
-                SubmitSoundDriverRequest(
-                    kSoundSelectorReleaseBank,
-                    reinterpret_cast<void *>(static_cast<intptr_t>(slot.mTag)));
+                SubmitSoundDriverRequest(kSoundSelectorReleaseBank,
+                                         static_cast<uintptr_t>(slot.mTag));
                 slot.mTag = kBankSlotTagNone;
                 slot.mIopAddress = 0;
             }
             return;
         }
     }
+}
+
+// 0x00461f28
+int StartBdBankXfer(char *pszPath) {
+    AsyncCheck(1);
+    g_bankCommand.mBankAddress = g_nBankIopAddress;
+    g_bankCommand.mDest = g_nBankDestAddress;
+    g_bankCommand.mTag = g_nSynthXferTag;
+    strcpy(g_bankCommand.mPayload, pszPath);
+    FlushCache(0);
+    char *pszColon = strchr(pszPath, ':');
+    char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
+    const int nLength = GetUncompressedFileLength(pszName);
+    // The measured length reaches the block whether or not the measurement succeeded.
+    g_bankCommand.mLength = nLength;
+    if (nLength <= 0) {
+        LogPrintf("file open failed. %s \n", pszName);
+        return -1;
+    }
+    const int nFile = FileOpen(pszName, 0);
+    g_pBdXferBuffer = MemAllocTagged(
+        kBankChunkSize + kBankBufferAlignment - 1, kMidiMainFileName, kStartBdXferLine);
+    const uintptr_t nRaw = reinterpret_cast<uintptr_t>(g_pBdXferBuffer) + kBankBufferAlignment - 1;
+    char *pReadBuffer =
+        reinterpret_cast<char *>(nRaw & ~static_cast<uintptr_t>(kBankBufferAlignment - 1));
+    const int nChunkLength = (nLength <= kBankChunkSize) ? nLength : kBankChunkSize;
+    CallbackXferBdToIop *pXfer =
+        new CallbackXferBdToIop(nFile, pReadBuffer, g_bankCommand.mDest, nChunkLength, nLength);
+    g_pBdXfer = pXfer;
+    g_hdXfer.mpBdXfer = g_pBdXfer;
+    pXfer->mRequestId = AsyncSubmitRequest(nFile, pReadBuffer, nChunkLength, 0, pXfer, 0);
+    return nLength;
+}
+
+// 0x00461c68
+int StartHdBankXfer(char *pszPath, int nPlacement) {
+    AsyncCheck(1);
+    strcpy(g_szHdBankPath, pszPath);
+    char *pszColon = strchr(pszPath, ':');
+    char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
+    const int nLength = GetUncompressedFileLength(pszName);
+    if (nLength <= 0) {
+        LogPrintf("file open failed. %s \n", pszName);
+        return -1;
+    }
+    if (nPlacement >= 0 && nPlacement < kBankPlacementFirstBuffer) {
+        g_nBankIopAddress = g_anBankIopAddress[0];
+    } else if (nPlacement >= kBankPlacementFirstBuffer && nPlacement <= kBankPlacementRotate) {
+        g_nBankIopAddress = g_anBankIopAddress[g_nBankIopIndex];
+        ++g_nBankIopIndex;
+        // The wrap returns to the second entry, so the first is used once and never again.
+        if (g_nBankIopIndex == kBankIopAddressCount) {
+            g_nBankIopIndex = 1;
+        }
+    }
+    if (g_nBankIopAddress < 0) {
+        LogPrintf("\nCan't alloc heap \n");
+        return -1;
+    }
+    g_pHdXferBuffer =
+        MemAllocTagged(nLength + kBankBufferAlignment, kMidiMainFileName, kStartHdXferLine);
+    const uintptr_t nRaw = reinterpret_cast<uintptr_t>(g_pHdXferBuffer) + kBankBufferAlignment - 1;
+    char *pReadBuffer =
+        reinterpret_cast<char *>(nRaw & ~static_cast<uintptr_t>(kBankBufferAlignment - 1));
+    g_nHdXferInFlight = AsyncLoadFileByPath(pszName, pReadBuffer, nLength, &g_hdXfer);
+    return 0;
 }
 
 // 0x004620b0
@@ -180,7 +268,7 @@ void SynthCommand(int nCommand) {
         DumpSynthVoices(1);
         break;
     case 2:
-        SubmitSoundDriverRequest(kSoundSelectorUnknownD0, nullptr);
+        SubmitSoundDriverRequest(kSoundSelectorUnknownD0, 0);
         break;
     default:
         LogPrintf("Unrecognized synth cmd %d\n", nCommand);
@@ -234,7 +322,7 @@ void DumpSynthVoices(int bActiveOnly) {
                       (nVMixER & nBit) != 0);
         }
     }
-    SubmitSoundDriverRequest(kSoundSelectorUnknownD0, nullptr);
+    SubmitSoundDriverRequest(kSoundSelectorUnknownD0, 0);
     LogPrintf("Using %d voices total\n", nActive);
 }
 
