@@ -33,7 +33,10 @@ jobs:
         # build that halts on source one reports nothing about the other 334.
         run: |
           mkdir -p build
-          cmake --build build --target archives -k 0 > build/compile.log 2>&1 || true
+          # -k belongs to Ninja rather than to cmake --build, so it goes after the separator. Given
+          # to cmake it is an unknown argument, and the step then logs a usage message and compiles
+          # nothing while still producing a log.
+          cmake --build build --target archives -- -k 0 > build/compile.log 2>&1 || true
           tail -40 build/compile.log
       - name: 'Report the first errors as annotations'
         # A run log and an artifact both need repository rights to read, and an annotation does not.
