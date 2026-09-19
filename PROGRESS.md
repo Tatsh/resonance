@@ -4,8 +4,12 @@ Reconstruction status for FreQuency (PlayStation 2, `SCUS-97125`). Figures come 
 below, which compares the address annotations in this tree against the function list of the
 disassembler project. Update this file whenever a subsystem lands.
 
+The function list is a fresh dump from the disassembler bridge rather than a stored file, because
+identification advances continuously and a stale list understates the denominator.
+
 ```shell
-uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/freq/funcs4.txt freq-src
+curl -s 'http://127.0.0.1:8089/list_functions?limit=30000' > .wiswa-ci/freq/funcs.txt
+uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/freq/funcs.txt freq-src
 ```
 
 ## Coverage
@@ -26,7 +30,7 @@ regression.
 
 Exclusions are keyed on the name a function has. A routine therefore has to be identified before it
 can be excluded, and the reconstructable figure falls as identification proceeds. That figure is
-still overstated. A large part of the 10,984 unidentified routines belongs to the platform SDK, the
+still overstated. A large part of the unidentified routines belongs to the platform SDK, the
 compiler runtime, the template library, and the embedded interpreter. None of those is
 reconstructed.
 
