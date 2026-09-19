@@ -1049,3 +1049,17 @@ protected:
  * @ghidraAddress 0x0086f6f0
  */
 extern APalette *g_pDefaultPalette;
+
+/**
+ * Pack an 8888 colour into 1555.
+ *
+ * The alpha bit comes from bit 31 and the low three bits of each channel are dropped. The helper
+ * is out of line because eleven call sites across ACanvas8, ACanvas15, and ACanvasLin15 share it,
+ * while the same packing inlined into ACanvas15::SetColor32() is written out there instruction for
+ * instruction.
+ *
+ * @param nColor The 8888 colour.
+ * @return The 1555 colour.
+ * @ghidraAddress 0x00618f38
+ */
+unsigned short APackRgb1555From8888(unsigned int nColor);
