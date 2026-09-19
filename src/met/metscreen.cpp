@@ -345,6 +345,40 @@ void MetScreen::UpdateAnimationFrame(float flTime) {
     }
 }
 
+void MetScreen::UpdateFrame(float flTime) {
+    if (mUnknown4c != 0) {
+        if (ContainerLoaderMap()[mUnknown28]->mUnknown04 != 0) {
+            if (mUnknown48 != 0) {
+                ResolveContainerViews();
+            }
+            mUnknown10->AddScreenView(mUnknown14);
+            EnterAndShow();
+            if (mUnknown50 != 0) {
+                mUnknown4c = 0;
+                mUnknown10->SetActivePanel(this);
+                mUnknown10->mUnknown80 = 1;
+                OnUnknownSlot7();
+                mUnknown50 = 0;
+            }
+            return;
+        }
+        float flProgress;
+        if (ContainerLoaderMap()[mUnknown28]->mLoader->Poll(&flProgress) != 1) {
+            return;
+        }
+        ContainerLoaderMap()[mUnknown28]->mUnknown04 = 1;
+        return;
+    }
+    UpdateEnterAnimation(flTime);
+    if (mUnknown54 != 0) {
+        OnUnknownSlot26(flTime);
+    } else if (mUnknown08 == 0.0f && mUnknown0c == 0.0f) {
+        OnUnknownSlot26(flTime);
+    }
+    UpdateRepeatingSound(flTime);
+    UpdateExitAnimation(flTime);
+}
+
 void MetScreen::UpdateExitAnimation(float flTime) {
     if (mUnknown78 != 0) {
         mUnknown0c = 0.0f;

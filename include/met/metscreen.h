@@ -290,24 +290,34 @@ public:
     void UpdateAnimationFrame(float flTime);
 
     /**
-     * Finish entering a screen whose container load had not completed when it was pushed.
+     * Advance one screen by one frame.
      *
-     * Not a vtable slot. MetRenderer::Slot7 at `0x0036b650` is its one caller. A screen with
-     * mUnknown4c clear does nothing. Otherwise the interned container load is consulted and, once
-     * it reports finished, slot 38 resolves the views, the view is handed to the renderer, slot 5
-     * enters the screen, and a screen that also has mUnknown50 set becomes the active panel and
-     * runs slot 7.
+     * Not a vtable slot. MetRenderer::Slot7 at `0x0036b650` is its one caller. The routine has two
+     * disjoint halves and mUnknown4c selects between them. A screen still waiting for its container
+     * load, which is what a set mUnknown4c records, takes the deferred-entry half and no animation
+     * runs. Every other screen takes the animation half.
      *
-     * The body is not written. The routine builds two temporary map iterators over
-     * ContainerLoaderMap() through the tree helpers at `0x00390d98` and `0x0038fa68`, and the
-     * signature of neither helper is recovered.
+     * The deferred half consults the container load interned under mUnknown28. Once that load
+     * reports finished, slot 38 resolves the views while mUnknown48 is set, the view is handed to
+     * the renderer, slot 5 enters the screen, and a screen that also has mUnknown50 set becomes the
+     * active panel and runs slot 7. While the load is unfinished the half polls the RndAsyncLoader
+     * instead and records the completion in the shared load record, which is the one place
+     * MetContainerLoad::mUnknown04 is written after BeginContainerLoad().
+     *
+     * The animation half runs slot 32, then slot 26 either when mUnknown54 is set or when neither
+     * animation is running, then slot 29 and slot 35. Slot 26 therefore fires on the same
+     * both-times-zero condition that UpdateAnimationFrame() uses for slot 27, which is what pairs
+     * the two idle hooks across the renderer's two passes.
+     *
+     * An earlier reading titled this routine for the deferred half alone and recorded the
+     * mUnknown4c test inverted. The animation half is the common path, not the exceptional one.
      *
      * Declared public for the same reason as DeliverCommand().
      *
      * @param flTime The current renderer time.
      * @ghidraAddress 0x0038b918
      */
-    void PollDeferredEnter(float flTime);
+    void UpdateFrame(float flTime);
 
     /**
      * Bring one named screen onto the renderer's screen stack.
