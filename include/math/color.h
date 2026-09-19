@@ -15,6 +15,22 @@ struct Color {
 };
 
 /**
+ * Clamp all four components of a colour to the unit range.
+ *
+ * The vector unit raises the floor with a maximum against a zero broadcast and lowers the ceiling
+ * with a minimum against a 1.0f broadcast, then stores the result as one quadword. All four
+ * components pass through both stages, so the alpha word is clamped along with the three colour
+ * words. The one caller is `Rnd::PsMesh::RefreshAfterLoad()`.
+ *
+ * The title is inferred. No literal in the image identifies the routine.
+ *
+ * @param source The colour to clamp.
+ * @param result Receives the clamped colour. It may alias the source.
+ * @ghidraAddress 0x00607268
+ */
+void ClampColorToUnitRange(const Color &source, Color &result);
+
+/**
  * Add two colours component by component.
  *
  * The result is a parameter rather than a return value, and that is measured rather than assumed.

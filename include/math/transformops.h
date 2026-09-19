@@ -136,3 +136,20 @@ void ScaleRows3x3(const float *pScale, const float *pMat3Rows, float *pOut);
  * @ghidraAddress 0x00453ea0
  */
 void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pOut);
+
+/**
+ * Multiply two affine transforms on VU0 across all four words of every row.
+ *
+ * The algorithm matches Mat44Multiply() exactly. The one difference is the destination field
+ * mask, which is `xyzw` here and `xyz` there, so this variant also multiplies the fourth column
+ * of the left factor through and adds the fourth word of the translation row. The two bodies sit
+ * next to each other in the image, at `0x005e7a58` and `0x005e7ab0`, which is what two
+ * instantiations of one inline routine under different masks produce. Every caller of this variant
+ * is a PlayStation 2 render path that consumes the fourth word.
+ *
+ * @param pDst Receives the product, four rows of four floats.
+ * @param pA The left factor, four rows of four floats.
+ * @param pB The right factor, four rows of four floats.
+ * @ghidraAddress 0x005e7a58
+ */
+void Mat44Concat(float *pDst, const float *pA, const float *pB);

@@ -237,3 +237,41 @@ void XfmInvertRigid(float *pDst, const float *pSrc) {
     pDst[14] = -((flBasisZx * flTransX) + (flBasisZy * flTransY) + (flBasisZz * flTransZ));
     pDst[15] = flTransW;
 }
+
+void Mat44Concat(float *pDst, const float *pA, const float *pB) {
+    // The image loads the whole left factor into vector registers before the first store, which is
+    // what permits the destination to alias it.
+    const float flA00 = pA[0];
+    const float flA01 = pA[1];
+    const float flA02 = pA[2];
+    const float flA03 = pA[3];
+    const float flA10 = pA[4];
+    const float flA11 = pA[5];
+    const float flA12 = pA[6];
+    const float flA13 = pA[7];
+    const float flA20 = pA[8];
+    const float flA21 = pA[9];
+    const float flA22 = pA[10];
+    const float flA23 = pA[11];
+
+    for (int nRow = 0; nRow < 3; ++nRow) {
+        const int nBase = nRow * kMatRowStride;
+        const float flX = pB[nBase];
+        const float flY = pB[nBase + 1];
+        const float flZ = pB[nBase + 2];
+
+        pDst[nBase] = (flA00 * flX) + (flA10 * flY) + (flA20 * flZ);
+        pDst[nBase + 1] = (flA01 * flX) + (flA11 * flY) + (flA21 * flZ);
+        pDst[nBase + 2] = (flA02 * flX) + (flA12 * flY) + (flA22 * flZ);
+        pDst[nBase + 3] = (flA03 * flX) + (flA13 * flY) + (flA23 * flZ);
+    }
+
+    const float flX = pB[12];
+    const float flY = pB[13];
+    const float flZ = pB[14];
+
+    pDst[12] = (flA00 * flX) + (flA10 * flY) + (flA20 * flZ) + pA[12];
+    pDst[13] = (flA01 * flX) + (flA11 * flY) + (flA21 * flZ) + pA[13];
+    pDst[14] = (flA02 * flX) + (flA12 * flY) + (flA22 * flZ) + pA[14];
+    pDst[15] = (flA03 * flX) + (flA13 * flY) + (flA23 * flZ) + pA[15];
+}
