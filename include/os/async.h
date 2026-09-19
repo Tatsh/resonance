@@ -1,6 +1,6 @@
-class AsyncCallback;
-
 #pragma once
+
+class AsyncCallback;
 
 /** The number of job records the ring is built from. */
 constexpr int kAsyncJobCount = 512;

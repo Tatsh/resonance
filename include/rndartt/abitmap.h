@@ -1,6 +1,6 @@
-class APalette;
-
 #pragma once
+
+class APalette;
 
 /**
  * Pixel layout code stored in ABitmap::mFormat.

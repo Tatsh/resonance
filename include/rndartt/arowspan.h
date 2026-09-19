@@ -1,6 +1,6 @@
-class APalette;
-
 #pragma once
+
+class APalette;
 
 /**
  * One row of source pixels addressed to one destination row of a canvas.

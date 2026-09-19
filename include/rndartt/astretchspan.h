@@ -1,6 +1,6 @@
-class APalette;
-
 #pragma once
+
+class APalette;
 
 /**
  * One destination row sampled from a source row at a fractional rate.

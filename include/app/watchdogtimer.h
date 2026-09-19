@@ -1,6 +1,6 @@
-class Watchdog;
-
 #pragma once
+
+class Watchdog;
 
 /**
  * Time base a scheduler measures its due times against, and the base class of Sch::TickClock.

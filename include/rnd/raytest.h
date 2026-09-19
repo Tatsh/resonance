@@ -1,9 +1,9 @@
+#pragma once
+
 namespace Rnd {
 struct Ray;
 }
 struct Sphere;
-
-#pragma once
 
 namespace Rnd {
 

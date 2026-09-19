@@ -1,3 +1,5 @@
+#pragma once
+
 class GameManagerImpl;
 class IOBPreallocMemStream;
 class MainLoop;
@@ -5,8 +7,6 @@ class Ps2HardSynth;
 class ScriptSink;
 class Watchdog;
 class WatchdogTimer;
-
-#pragma once
 
 /** Size of the buffer that Globals opens its log stream over. */
 constexpr int kLogBufferSize = 0x19000;

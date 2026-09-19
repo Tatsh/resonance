@@ -1,3 +1,5 @@
+#pragma once
+
 class CheckInfoOp;
 class CloseOp;
 class CreateDirOp;
@@ -12,8 +14,6 @@ class RenameFileOp;
 class SeekOp;
 class UnformatOp;
 class WriteOp;
-
-#pragma once
 
 /**
  * Receiver notified once a queued memory-card operation has finished.
