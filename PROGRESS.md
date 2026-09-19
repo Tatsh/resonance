@@ -80,11 +80,11 @@ from the SDK is reconstructed.
 | Texture, PlayStation 2    | Upload and bind bodies, pending the GS video memory manager          |
 | Graphics device           | Packet submission, pending the GS video memory manager               |
 | Art library              | `ABitmap` layout is recorded from the disassembler, not yet verified |
+| Sound                     | `Synth` and `Ps2HardSynth` declared, and the interface mapped slot by slot. Thirteen slot titles are unrecoverable, and the voice and bank driver at `0x00462558` is untouched |
 
 ### Not started
 
-Sound, the front end screens, the metagame, networking beyond the packet records, and the game
-modes.
+The front end screens, the metagame, networking beyond the packet records, and the game modes.
 
 ## Duplicated routines
 
