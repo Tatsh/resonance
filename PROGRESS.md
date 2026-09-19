@@ -68,7 +68,7 @@ from the SDK is reconstructed.
 | Asynchronous file layer  | Submission, the drive callback, the request and job records        |
 | Animation base           | `Rnd::Animatable` with all five nested filters                     |
 | Collision base           | `Rnd::Collideable` with its hit and sink types                     |
-| Message and packet family| `Packet`, four routing intermediates, 12 concrete packets           |
+| Message and packet family| 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg` and seven routing intermediates. `ScriptMsg` alone is still partial |
 | Material, PlayStation 2  | `Rnd::PsMat` in full, including the blend mode table                |
 | Streams                  | File, buffer, memory, and tool streams                              |
 
