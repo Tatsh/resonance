@@ -48,15 +48,15 @@ void CallbackXferBdToIop::Resume() {
 }
 
 inline void CallbackXferBdToIop::XferChunk() {
-    g_synthXferCommand.mUnknown00 = 0;
-    g_synthXferCommand.mIopAddress = g_anIopStagingAddress[g_nIopStagingIndex];
+    g_chunkCommand.mBankAddress = 0;
+    g_chunkCommand.mStagingAddress = g_anIopStagingAddress[g_nIopStagingIndex];
     g_nIopStagingIndex = (g_nIopStagingIndex + 1) & (kIopStagingBufferCount - 1);
-    g_synthXferCommand.mLength = mChunkLength;
-    g_synthXferCommand.mDest = mDest;
-    g_synthXferCommand.mUnknown10 = g_nSynthXferTag;
-    memset(g_synthXferCommand.mUnused14, 0, kSynthXferCommandTailSize);
-    XferToIop(g_synthXferCommand.mIopAddress, mpReadBuffer, mChunkLength);
-    SubmitSoundDriverRequest(kSoundSelectorXferChunk, &g_synthXferCommand);
+    g_chunkCommand.mLength = mChunkLength;
+    g_chunkCommand.mDest = mDest;
+    g_chunkCommand.mTag = g_nSynthXferTag;
+    memset(g_chunkCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
+    XferToIop(g_chunkCommand.mStagingAddress, mpReadBuffer, mChunkLength);
+    SubmitSoundDriverRequest(kSoundSelectorXferChunk, &g_chunkCommand);
     if (g_pfnBankLoadProgress != nullptr) {
         g_pfnBankLoadProgress();
     }
@@ -71,7 +71,7 @@ inline void CallbackXferBdToIop::XferChunk() {
     // Yes, the binary finishes with the transfer still marked busy.
     MemFreeTagged(g_pBdXferBuffer, kMidiMainFileName, kFreeReadBufferLine);
     FileClose(mFile);
-    SubmitSoundDriverRequest(kSoundSelectorBankComplete, g_abBankCompleteCommand);
+    SubmitSoundDriverRequest(kSoundSelectorBankComplete, &g_bankCommand);
     if (g_pfnBankLoadProgress != nullptr) {
         g_pfnBankLoadProgress();
     }

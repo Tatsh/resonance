@@ -71,31 +71,34 @@ void SubmitSoundDriverRequest(int nSelector, void *pCommand);
  */
 int XferToIop(int nIopAddress, const void *pSource, int nLength);
 
-/** Bytes the chunk command block clears above its five recovered words. */
-constexpr int kSynthXferCommandTailSize = 0x6c;
+/** Bytes of payload a command block has above its five-word header. */
+constexpr int kSoundDriverCommandPayloadSize = 0x6c;
 
 /**
- * Sound-driver command block that describes one chunk of a sound bank.
+ * Command block the sound driver reads a bank transfer out of.
  *
- * Both bank-transfer paths fill the same single block and submit it under selector 0x1070. The
- * first word is cleared before every submission and read nowhere in the image, and the tail is
- * cleared with it, so the block is 0x80 bytes in total.
+ * Two blocks of this shape exist, one per selector, and the shape is recovered from the two
+ * together rather than from either alone. The chunk block writes mStagingAddress and clears
+ * mBankAddress; the bank block writes mBankAddress and never touches mStagingAddress. All three of
+ * mLength, mDest and mTag sit at the same offset in both, and both have a payload at `+0x14`, which
+ * is what identifies the header as shared. The payload is 0x6c bytes because the chunk path clears
+ * exactly that much, putting the block at 0x80 in total.
  */
-struct SynthXferCommand {
-    int mUnknown00;  // +0x00 cleared before every submission
-    int mIopAddress; // +0x04 staging buffer on the IOP the chunk was moved to
-    int mLength;     // +0x08
-    int mDest;       // +0x0c where the driver writes the chunk, advanced one chunk at a time
-    int mUnknown10;  // +0x10 copied from g_nSynthXferTag
-    char mUnused14[kSynthXferCommandTailSize]; // +0x14 cleared before every submission
+struct SoundDriverCommand {
+    int mBankAddress;    // +0x00 where the bank lives on the IOP; the chunk path clears it
+    int mStagingAddress; // +0x04 buffer the chunk was moved to; the bank path never writes it
+    int mLength;         // +0x08
+    int mDest;           // +0x0c where the driver writes the data
+    int mTag;            // +0x10 copied from g_nSynthXferTag
+    char mPayload[kSoundDriverCommandPayloadSize]; // +0x14 the path for a bank, cleared for a chunk
 };
 
 /**
- * Block that describes one chunk of a sound bank.
+ * Block that describes one chunk of a sound bank, submitted under selector 0x1070.
  *
  * @ghidraAddress 0x00894cc0
  */
-extern SynthXferCommand g_synthXferCommand;
+extern SoundDriverCommand g_chunkCommand;
 
 /** Staging buffers on the IOP that chunk transfers alternate between. */
 constexpr int kIopStagingBufferCount = 2;
@@ -128,7 +131,17 @@ extern int g_nIopStagingIndex;
 extern int g_nBankIopAddress;
 
 /**
- * Word every chunk command block is stamped with at `+0x10`.
+ * Address in sound memory a bank is written to.
+ *
+ * The routine that starts a transfer copies it into the bank block's mDest, and a BD transfer takes
+ * its own starting destination from there and advances one chunk at a time.
+ *
+ * @ghidraAddress 0x006e9ba4
+ */
+extern int g_nBankDestAddress;
+
+/**
+ * Word every command block is stamped with at `+0x10`.
  *
  * What the driver does with it is unrecovered, and the writer has not been identified.
  *
@@ -164,14 +177,15 @@ void SetBankLoadProgressHook(void (*pfnProgress)());
 extern int g_nHdXferInFlight;
 
 /**
- * Block the bank-complete report submits.
+ * Block that describes a whole bank, submitted under selector 0x1050 when the last chunk lands.
  *
- * Its shape is unrecovered. The routine that fills it, at `0x00461f28`, starts a transfer and is
- * not reconstructed, and the five words it writes do not line up with SynthXferCommand.
+ * The routine that starts a transfer fills it once, at the start, and the completion path submits
+ * it unchanged. Its payload is the bank's path, copied in with strcpy(), and the cache is flushed
+ * straight afterwards because the driver reads the block from the IOP side.
  *
  * @ghidraAddress 0x00894bc0
  */
-extern char g_abBankCompleteCommand[];
+extern SoundDriverCommand g_bankCommand;
 
 /**
  * Buffer the HD bank transfer read into, released once the transfer reports.

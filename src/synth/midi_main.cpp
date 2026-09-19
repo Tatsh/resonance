@@ -34,7 +34,10 @@ constexpr unsigned kSpu2EffectAreaTop = 0x1fffff;
 constexpr unsigned kSpu2EffectAreaSize = 0x20000;
 
 // 0x00894cc0
-SynthXferCommand g_synthXferCommand;
+SoundDriverCommand g_chunkCommand;
+
+// 0x00894bc0
+SoundDriverCommand g_bankCommand;
 
 // 0x00894748
 int g_anIopStagingAddress[kIopStagingBufferCount];
@@ -44,6 +47,9 @@ int g_nIopStagingIndex;
 
 // 0x006e9b84
 int g_nBankIopAddress;
+
+// 0x006e9ba4
+int g_nBankDestAddress;
 
 // 0x006e9bb4
 int g_nSynthXferTag;
