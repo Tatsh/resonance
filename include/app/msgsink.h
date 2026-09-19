@@ -76,11 +76,15 @@ public:
      */
     virtual void Handle(Message *pMsg);
 
-protected:
     /**
      * Act on a message.
      *
-     * Only Handle() dispatches this member. The access is therefore protected rather than public.
+     * Public rather than protected, and the counter-example is the one class that overrides
+     * Handle(). RendererBase::Router at `0x00139f50` dispatches this member's slot on the separate
+     * sink it stores at `+0x04`, which is an object of an unrelated class, so protected access
+     * would not reach it. Every other dispatch in the image does come from Handle() on the same
+     * object, which is why the narrower reading held until that override was found. A friend
+     * declaration fits equally well.
      *
      * @param pMsg The message.
      */
