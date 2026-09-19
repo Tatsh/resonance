@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "app/attachment.h"
 #include "sch/cmdid.h"
@@ -89,7 +89,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x005d30b0
      */
-    void Print(ostream &stream);
+    void Print(std::ostream &stream);
 
     /**
      * Write the wrapper and the command it refers to.

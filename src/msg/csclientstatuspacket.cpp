@@ -1,5 +1,7 @@
 #include "msg/csclientstatuspacket.h"
 
+#include <iostream>
+
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -20,7 +22,7 @@ const char *CSClientStatusPacket::Name() {
 }
 
 // 0x003f2120
-void CSClientStatusPacket::Print(ostream &stream) {
+void CSClientStatusPacket::Print(std::ostream &stream) {
     stream << "ClientStatus: " << mUnknown14;
 }
 

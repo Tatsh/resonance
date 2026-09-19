@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <iostream>
 
 #include "app/application.h"
 #include "gfx/gfxdevice.h"
@@ -33,7 +33,7 @@ const char *g_szLastFailure;
 
 // 0x001f2638
 void RecordFailMessage(const char *pszMessage) {
-    cout << pszMessage;
+    std::cout << pszMessage;
     g_szLastFailure = pszMessage;
 }
 

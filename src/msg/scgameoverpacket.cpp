@@ -1,5 +1,7 @@
 #include "msg/scgameoverpacket.h"
 
+#include <iostream>
+
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -20,7 +22,7 @@ const char *SCGameOverPacket::Name() {
 }
 
 // 0x003f2a90
-void SCGameOverPacket::Print(ostream &stream) {
+void SCGameOverPacket::Print(std::ostream &stream) {
     stream << mUnknown14;
 }
 

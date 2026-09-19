@@ -1,6 +1,6 @@
 #include "game/player.h"
 
-#include <iostream.h>
+#include <iostream>
 
 #include "app/msgsource.h"
 #include "msg/juiceamountmsg.h"
@@ -72,7 +72,7 @@ void Player::Slot12() {
 }
 
 // 0x00133110
-void Player::Print(ostream &stream) {
+void Player::Print(std::ostream &stream) {
     if (IsNull() != 0) {
         stream << kNullText;
         return;

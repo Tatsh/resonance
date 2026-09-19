@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "os/mem.h"
 
@@ -460,4 +460,4 @@ extern const unsigned g_nHxStrNoPosition;
  * @return The stream.
  * @ghidraAddress 0x004b8e28
  */
-ostream &operator<<(ostream &stream, const HxStr &text);
+std::ostream &operator<<(std::ostream &stream, const HxStr &text);

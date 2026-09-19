@@ -1,5 +1,7 @@
 #include "game/freqappearance.h"
 
+#include <iostream>
+
 namespace {
 
 // Written by Save() and read back by Load() into a local that nothing consults.
@@ -52,7 +54,7 @@ void FreqAppearance::Load(IBStream &stream) {
 }
 
 // 0x00174878
-void FreqAppearance::Print(ostream &stream) {
+void FreqAppearance::Print(std::ostream &stream) {
     // The detail object is never written, so the two literals below arrive back to back.
     stream << "username=" << mUnknown00 << " Freq=" << " SkillStatus=" << mUnknown0c;
 }

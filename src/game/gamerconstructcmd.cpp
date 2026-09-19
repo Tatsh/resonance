@@ -1,6 +1,6 @@
 #include "game/gamerconstructcmd.h"
 
-#include <iostream.h>
+#include <iostream>
 
 namespace {
 
@@ -14,6 +14,6 @@ int GamerConstructCmd::CmdID() {
 }
 
 // 0x00116bf0
-void GamerConstructCmd::Print(ostream &stream) {
+void GamerConstructCmd::Print(std::ostream &stream) {
     stream << kDescription;
 }

@@ -1,5 +1,7 @@
 #include "msg/multimusemsg.h"
 
+#include <iostream>
+
 #include "mid/mbt.h"
 
 // 0x003d6e08
@@ -29,7 +31,7 @@ MultiMuseMsg::~MultiMuseMsg() {
 }
 
 // 0x003e3990
-void MultiMuseMsg::Print(ostream &stream) {
+void MultiMuseMsg::Print(std::ostream &stream) {
     // MuseMsg's member is a Mid::MBT rather than a plain int, which this body proves by handing
     // it to Mid::MBT::Print(). Its header still types it as an int.
     Mid::MBT position;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "game/freqappearancedetail.h"
 #include "os/hxstr.h"
@@ -86,7 +86,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x00174878
      */
-    void Print(ostream &stream);
+    void Print(std::ostream &stream);
 
     /**
      * Replace the username and the detail object with another appearance's.

@@ -1,5 +1,7 @@
 #include "sch/timedcommand.h"
 
+#include <iostream>
+
 #include "os/hxstr.h"
 #include "sch/command.h"
 #include "stream/ibstream.h"
@@ -30,7 +32,7 @@ void TimedCommand::Run() {
 }
 
 // 0x005d30b0
-void TimedCommand::Print(ostream &stream) {
+void TimedCommand::Print(std::ostream &stream) {
     HxStr sMode(" abs");
     if (mDelta != 0) {
         sMode = " delta";

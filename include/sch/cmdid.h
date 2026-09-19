@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 class IBStream;
 class OBStream;
@@ -58,7 +58,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x005e5958
      */
-    void Print(ostream &stream);
+    void Print(std::ostream &stream);
 
     /**
      * The value, or -2 while no value has been allocated.

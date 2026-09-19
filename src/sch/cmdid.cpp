@@ -1,5 +1,7 @@
 #include "sch/cmdid.h"
 
+#include <iostream>
+
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -15,6 +17,6 @@ IBStream &CmdID::Load(IBStream &stream) {
 }
 
 // 0x005e5958
-void CmdID::Print(ostream &stream) {
+void CmdID::Print(std::ostream &stream) {
     stream << "{cmdID " << mValue << '}';
 }

@@ -1,5 +1,7 @@
 #include "msg/updatescorepacket.h"
 
+#include <iostream>
+
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -20,7 +22,7 @@ const char *UpdateScorePacket::Name() {
 }
 
 // 0x003f2510
-void UpdateScorePacket::Print(ostream &stream) {
+void UpdateScorePacket::Print(std::ostream &stream) {
     stream << "pid:" << mUnknown14 << " score-delta:" << mUnknown18;
 }
 

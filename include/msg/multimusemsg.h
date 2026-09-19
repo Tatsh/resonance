@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "gs/multimuse.h"
 #include "msg/musemsg.h"
@@ -91,7 +91,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x003e3990
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Write the sequence to an output stream.

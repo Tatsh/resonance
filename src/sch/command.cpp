@@ -1,6 +1,7 @@
 #include "sch/command.h"
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
 #include "os/log.h"
@@ -41,7 +42,7 @@ Command::~Command() {
 }
 
 // 0x0053a088
-void Command::Print(ostream &stream) {
+void Command::Print(std::ostream &stream) {
     stream << "{Command}";
 }
 
@@ -56,7 +57,7 @@ void Command::Load(IBStream &stream) {
 // 0x00539fe8
 Command *Command::NewCommand(int nCmdID) {
     if (nCmdID == 0) {
-        cerr << " Attempted to call NewCommand(0); returning NULL" << endl;
+        std::cerr << " Attempted to call NewCommand(0); returning NULL" << std::endl;
         return nullptr;
     }
     CommandFactoryTable &table = CommandFactoryList();
@@ -80,7 +81,7 @@ OBStream &operator<<(OBStream &stream, Command *pCommand) {
             pCommand->Save(stream);
             return stream;
         }
-        pCommand->Print(cout);
+        pCommand->Print(std::cout);
         Fatal(" Attempted to serialize a command that is non-serializable!");
     }
     char cAbsent = '0';

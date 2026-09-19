@@ -1,11 +1,13 @@
 #include "msg/message.h"
 
+#include <iostream>
+
 // 0x001051c0
 Message::~Message() {
 }
 
 // 0x001051f0
-void Message::Print(ostream &) {
+void Message::Print(std::ostream &) {
 }
 
 // 0x001051f8

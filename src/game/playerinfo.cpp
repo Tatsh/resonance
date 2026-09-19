@@ -1,11 +1,13 @@
 #include "game/playerinfo.h"
 
+#include <iostream>
+
 // 0x00135e98
 PlayerInfo::~PlayerInfo() {
 }
 
 // 0x00133930
-void PlayerInfo::Print(ostream &stream) {
+void PlayerInfo::Print(std::ostream &stream) {
     stream << "{AppPlayerInfo: " << mUnknown00 << " " << mUnknown04 << " ";
     mAppearance.Print(stream);
     stream << " " << mUnknown20 << " " << mUnknown24 << " " << mUnknown28 << " ";

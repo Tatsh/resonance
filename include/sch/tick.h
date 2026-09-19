@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 class IBStream;
 class OBStream;
@@ -74,7 +74,7 @@ struct Tick {
      * @param stream The stream to write to.
      * @ghidraAddress 0x00610050
      */
-    void Print(ostream &stream);
+    void Print(std::ostream &stream);
 
     long long mValue; /*!< The count, in nanoseconds. +0x00 */
 };

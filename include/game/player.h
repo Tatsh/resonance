@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
@@ -132,7 +132,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x00133110
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Slot 14. Leaves the return register untouched, so the value it yields is indeterminate.

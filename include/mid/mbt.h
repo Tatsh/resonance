@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 class IBStream;
 class OBStream;
@@ -102,7 +102,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x004ace18
      */
-    void Print(ostream &stream);
+    void Print(std::ostream &stream);
 
     /**
      * The position, in MIDI ticks at 480 per quarter note.

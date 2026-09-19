@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <ctype.h>
-#include <iostream.h>
+#include <iostream>
 #include <libcdvd.h>
 #include <libmc.h>
 #include <libmtap.h>
@@ -156,16 +156,16 @@ void LoadIopModules() {
 
     switch (mode) {
     case kHostModeCdHost:
-        cout << kCdHostModeName;
+        std::cout << kCdHostModeName;
         break;
     case kHostModeCdOnly:
-        cout << kCdOnlyModeName;
+        std::cout << kCdOnlyModeName;
         break;
     case kHostModeHostOnly:
-        cout << kHostOnlyModeName;
+        std::cout << kHostOnlyModeName;
         break;
     }
-    cout << kModeBannerTail;
+    std::cout << kModeBannerTail;
 
     sceSifInitRpc(0);
     sceSifInitIopHeap();

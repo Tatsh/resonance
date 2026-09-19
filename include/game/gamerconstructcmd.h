@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "game/gamer.h"
 #include "sch/command.h"
@@ -53,7 +53,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x00116bf0
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
 private:
     Gamer *mGamer; // +0x0c the receiver Execute calls

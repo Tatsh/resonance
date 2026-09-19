@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 class IBStream;
 class OBStream;
@@ -90,7 +90,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x001051f0
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Write this message's payload to an output stream.

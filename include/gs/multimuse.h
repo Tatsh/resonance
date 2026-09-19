@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <iostream.h>
+#include <iostream>
 #include <vector>
 
 #include "app/attachment.h"
@@ -63,7 +63,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x001a8580
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Write the sequence to an output stream.
@@ -96,7 +96,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x001a97e8
      */
-    void PrintFields(ostream &stream);
+    void PrintFields(std::ostream &stream);
 
     /**
      * Every message of the sequence, in ascending song position.

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "app/attachment.h"
 
@@ -103,7 +103,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x0053a088
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Write this command's payload.

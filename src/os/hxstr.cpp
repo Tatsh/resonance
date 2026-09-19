@@ -1,6 +1,6 @@
 #include "os/hxstr.h"
 
-#include <iostream.h>
+#include <iostream>
 #include <string.h>
 
 #include "os/assert.h"
@@ -371,7 +371,7 @@ bool HxStr::operator<(const HxStr &right) const {
     return strcmp(mStr, right.mStr) < 0;
 }
 
-ostream &operator<<(ostream &stream, const HxStr &text) {
+std::ostream &operator<<(std::ostream &stream, const HxStr &text) {
     stream << text.mStr;
     return stream;
 }

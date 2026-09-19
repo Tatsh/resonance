@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/toallothergamesystemspacket.h"
 
 /**
@@ -54,7 +56,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x003f2510
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Write the packet to a stream.

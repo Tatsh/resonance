@@ -1,5 +1,7 @@
 #include "msg/gempacket.h"
 
+#include <iostream>
+
 #include "game/player.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
@@ -33,7 +35,7 @@ const char *GemPacket::Name() {
 }
 
 // 0x003f2878
-void GemPacket::Print(ostream &stream) {
+void GemPacket::Print(std::ostream &stream) {
     mFields.Print(stream);
     stream << " tr:" << mTr << " clid:" << mUnknown0c;
 }
@@ -63,7 +65,7 @@ void GemPacket::Fields::Save(OBStream &stream) {
 }
 
 // 0x001a2ce0
-void GemPacket::Fields::Print(ostream &stream) {
+void GemPacket::Fields::Print(std::ostream &stream) {
     stream << "gem: " << mGem << " trans:" << mTrans << " bar:" << mBar << " loc:";
     mLoc.Print(stream);
     stream << " pid:" << mPlayer->mId20;

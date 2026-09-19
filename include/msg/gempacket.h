@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "mid/mbt.h"
 #include "msg/toallothergamesystemspacket.h"
@@ -81,7 +81,7 @@ public:
          * @param stream The stream to write to.
          * @ghidraAddress 0x001a2ce0
          */
-        void Print(ostream &stream);
+        void Print(std::ostream &stream);
 
         int mGem;        /*!< Labelled `gem: `. +0x00 */
         int mTrans;      /*!< Labelled ` trans:`. +0x04 */
@@ -141,7 +141,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x003f2878
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Write the packet to a stream.

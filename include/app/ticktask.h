@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream.h>
+#include <iostream>
 
 #include "app/attachment.h"
 #include "mid/mbt.h"
@@ -52,7 +52,7 @@ public:
      * @param stream The stream to write to.
      * @ghidraAddress 0x0013ac48
      */
-    virtual void Print(ostream &stream);
+    virtual void Print(std::ostream &stream);
 
     /**
      * Run the task.
