@@ -14,9 +14,16 @@
  * Four classes derive from the class, MetPauseGameScreen, MetPauseMultiRemixScreen,
  * MetPauseSoloGameScreen, and MetPauseSoloRemixScreen.
  *
- * The size is not recovered. No child places a second base after the subobject, so nothing in the
- * RTTI fixes the width, and it is therefore at least the 0x8c of MetScreenMultiSoundBank. The
- * constructor is inline: only the routine at `0x00317d40` and the destructor write this vtable.
+ * The constructor is at `0x00317d40`. It takes the renderer, the load priority, the screen name,
+ * the directory, the container name, and the screen registry key, and all four children call it,
+ * each passing its own class name verbatim as the key. An earlier pass read the single extra
+ * writer of this vtable as evidence that the constructor was inline; that writer is the
+ * constructor.
+ *
+ * The size is at least 0xb4. MetPauseSoloGameScreen and MetPauseSoloRemixScreen both zero the word
+ * at `+0xb0` in their constructors and the other two children do not, so that word is either a
+ * protected member of this class that two children reset or a member of each of those two, and the
+ * two cannot be told apart from the constructors alone.
  *
  * Eleven slots differ from the MetScreenMultiSoundBank table. Slots 20 through 24 are
  * two-instruction `jr ra` stubs, so a pause screen plays none of the five sounds its base swapped

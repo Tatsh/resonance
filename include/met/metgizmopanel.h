@@ -12,10 +12,18 @@
  * Four classes derive from the class, MetEndGameGizmoScreen, MetLeftGizmoScreen,
  * MetLeftGizmoSmallScreen, and MetRightGizmoScreen.
  *
- * The size is not recovered. No child places a second base after the MetGizmoPanel subobject, so
- * nothing in the RTTI fixes the width, and the constructor is inline and appears folded into each
- * of the five derived constructors at `0x00276d38`, `0x0027b4b8`, `0x0027b738`, `0x0027b9b8`, and
- * `0x0027bd58` rather than as one routine. The size is therefore at least the 0x8c of MetScreen.
+ * The constructor is at `0x00276d38`. It takes the renderer, the load priority, and the three
+ * names, and all four children call it. An earlier pass recorded the constructor as inline and
+ * folded into the derived constructors, which was wrong. The other four functions that write this
+ * vtable are the four child destructors restoring the base vptr during teardown, which is the
+ * ordinary destruction sequence rather than construction.
+ *
+ * The class owns a vector of alternate view names. Each child registers its own into that vector
+ * after the constructor returns, and each child destructor tears it down.
+ *
+ * The size is not recovered. No child places a second base after the MetGizmoPanel subobject and
+ * none declares a data member of its own, so nothing fixes the width, and it is at least the 0x8c
+ * of MetScreen.
  *
  * Three slots differ from the MetScreen table, and none of the three has a recovered name.
  *

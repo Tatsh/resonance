@@ -14,8 +14,15 @@
  * `0x0030dd30`, and `0x0030dec0`, and each child constructor writes the shared vtable before its
  * own, which is how the constructor of this class is known to be inline.
  *
- * The size is not recovered. No child places a second base after the subobject, so nothing in the
- * RTTI fixes the width, and it is therefore at least the 0x8c of MetScreen.
+ * The constructor is at `0x00306cd8`. It takes the renderer, the load priority, the screen name,
+ * the container name, and two screen registry keys, one for the previous page and one for the
+ * next. The five children form a ring through those keys, and both ends of the ring lead to
+ * `MetLocNumPlayersScreen`. An earlier pass recorded the constructor as inline because five
+ * further functions write this vtable; those five are the child destructors restoring the base
+ * vptr during teardown.
+ *
+ * The size is not recovered. No child places a second base after the subobject and none declares a
+ * data member of its own, so nothing fixes the width, and it is at least the 0x8c of MetScreen.
  *
  * Nine slots differ from the MetScreen table. Slots 22, 23, and 24 are two-instruction `jr ra`
  * stubs, so this class silences three of the six MetScreen sounds by overriding them with an empty
