@@ -3,10 +3,16 @@
 /**
  * Report a failed check and stop the machine.
  *
- * The routine is newlib's own `__assert`. Its report goes to `stderr`, taken from the reentrancy
- * structure at 0x007819cc, through the format `assertion "%s" failed: file "%s", line %d`, which
- * is that library's text verbatim. It then tail-calls abort, which raises signal 6, calls exit, and
- * spins forever.
+ * The routine is newlib's own `__assert`, and this declaration exists because the game calls it.
+ * Nothing here is reconstruction. Its report goes to `stderr`, taken from the reentrancy structure
+ * at 0x007819cc, through the format `assertion "%s" failed: file "%s", line %d`, which is that
+ * library's text verbatim. It then tail-calls abort, which raises signal 6, calls exit, and spins
+ * forever.
+ *
+ * The identification is strong rather than verified. The format string, the argument order, and the
+ * three-parameter signature were matched against newlib from knowledge of that library and not
+ * against a copy of its source. HX_ASSERT below therefore wraps the standard `assert` rather than
+ * any routine of the game's own.
  *
  * Every call site in the binary falls through into the code the check was protecting. That is
  * because the declaration the game compiled against did not mark the routine as never returning,
