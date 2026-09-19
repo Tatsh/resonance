@@ -184,6 +184,24 @@ public:
     void SetTransOwner(Transformable *pOwner);
 
     /**
+     * Decide whether this mesh draws, and yield its world bounding sphere.
+     *
+     * A mesh with neither faces nor edges is rejected. A sphere of zero radius is accepted without
+     * a test. Otherwise the local sphere is brought through the transform owner's world transform
+     * and tested against the current camera's frustum.
+     *
+     * A non-zero mMinScreen then estimates the projected size, and a mesh too small for its own
+     * threshold is not simply rejected: the mNext chain is walked for a level of detail whose
+     * threshold admits that size, that mesh is drawn instead, and this one reports no draw. The
+     * substitution is why the name is not a question.
+     *
+     * @param worldSphere Receives the bounding sphere in world space.
+     * @return Non-zero when the caller is to draw this mesh.
+     * @ghidraAddress 0x00480818
+     */
+    int PrepareDraw(Sphere &worldSphere);
+
+    /**
      * Test a ray against this mesh and append what it strikes to sink.
      *
      * Rnd::Collideable vtable slot 1. A bounding sphere with a non-zero radius rejects the ray

@@ -6,6 +6,8 @@
 #include "math/sphere.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "rnd/cam.h"
+#include "rnd/drawverts.h"
 #include "rnd/mesh.h"
 #include "rnd/psmat.h"
 #include "rnd/transformable.h"
@@ -86,7 +88,7 @@ int PsMesh::DrawSelf() {
 
     Sphere worldSphere;
     worldSphere.mCenter.w = 1.0f;
-    if (CheckDrawVisible(worldSphere) == 0) {
+    if (PrepareDraw(worldSphere) == 0) {
         // A culled mesh that owns geometry suppresses its children as well, and one with neither
         // faces nor edges lets them draw.
         return mFacesOwner->mFaces.size() == 0 && mFacesOwner->mEdges.size() == 0;
@@ -102,7 +104,7 @@ int PsMesh::DrawSelf() {
     }
 
     int nClip = 1;
-    if (mSphere.mRadius != 0.0f && IsSphereInsideFrustum(worldSphere, g_viewFrustum) != 0) {
+    if (mSphere.mRadius != 0.0f && IsSphereInsideFrustum(worldSphere, g_afDrawFrustumPlanes) != 0) {
         nClip = 0;
     }
 

@@ -79,6 +79,18 @@ public:
      */
     void SetOrigin(const float *pOrigin);
 
+    /**
+     * Build the transform this object draws with and return it.
+     *
+     * With mBillboard clear the four mWorldXfm rows are copied out unchanged. With it set a
+     * camera-facing orientation is built instead. Either way the result is the one shared scratch
+     * buffer g_drawXfm, so it is valid only until the next call.
+     *
+     * @return The shared draw transform, four rows of four floats.
+     * @ghidraAddress 0x004f0cc0
+     */
+    float *GetDrawXfm();
+
 protected:
     /**
      * Adopt the transform of an owner this object is being detached from.
@@ -125,5 +137,15 @@ private:
     int mUnknown08;                        // +0x08
     int mUnknown0c;                        // +0x0c
 };
+
+/**
+ * Scratch transform GetDrawXfm() returns.
+ *
+ * One buffer serves every caller, which is why the value it returns survives only until the next
+ * call.
+ *
+ * @ghidraAddress 0x007067e0
+ */
+extern float g_drawXfm[kXfmRowCount][kXfmRowFloatCount];
 
 } // namespace Rnd

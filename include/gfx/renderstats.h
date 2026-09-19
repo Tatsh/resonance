@@ -19,11 +19,14 @@ struct RenderStats {
     int mUnknown18;
     int mUnknown1c;
     int mUnknown20;
-    int mUnknown24;
+    /** Vertices transformed, advanced by both vertex transform passes by the run length. */
+    int mnVertsTransformed;
     int mUnknown28;
     int mUnknown2c;
     /** Materials applied, incremented by each of the Rnd::PsMat select entry points. */
     int mnMatSelects;
+    /** Advanced by Rnd::TransformAndLightMeshVerts(). What it counts is undetermined. */
+    int mUnknown34;
 };
 
 /**
