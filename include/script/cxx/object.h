@@ -11,7 +11,9 @@ namespace Py {
 // Py::String derives from Py::SeqBase<Py::Char>, which derives from this class, so the two
 // headers cannot include each other. str() returns a String by value and is defined out of line
 // in src/script/cxx/object.cpp, where the complete type is available.
+namespace Rnd {
 class String;
+}
 
 /**
  * Reference-counted handle on any Python object, and the root of the PyCXX object hierarchy.

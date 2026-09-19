@@ -4,10 +4,13 @@
 
 #include "app/attachment.h"
 #include "sch/cmdid.h"
-#include "sch/command.h"
 #include "sch/tick.h"
-#include "stream/ibstream.h"
-#include "stream/obstream.h"
+
+namespace Sch {
+class Command;
+}
+class IBStream;
+class OBStream;
 
 namespace Sch {
 

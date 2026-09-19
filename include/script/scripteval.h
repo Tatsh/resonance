@@ -1,8 +1,9 @@
 #pragma once
 
-#include "os/hxstr.h"
 #include "script/cxx/object.h"
-#include "script/pyshell.h"
+
+class HxStr;
+class PyShell;
 
 /**
  * @file

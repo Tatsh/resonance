@@ -2,6 +2,8 @@
 
 #include <libmc.h>
 
+#include "memcard/memcardop.h"
+
 // `sceMcSync()` mode that reports the state of the current command without waiting for it.
 constexpr int kMemcardSyncCheck = 1;
 

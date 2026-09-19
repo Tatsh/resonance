@@ -1,8 +1,11 @@
 #pragma once
 
-#include "os/hxstr.h"
 #include "rnd/environ.h"
-#include "rnd/light.h"
+
+class HxStr;
+namespace Rnd {
+class Light;
+}
 
 namespace Rnd {
 

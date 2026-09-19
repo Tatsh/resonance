@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "os/arkfile.h"
+#include "os/asynccallback.h"
 #include "os/cycles.h"
 #include "os/hostmode.h"
 #include "os/loadfile.h"

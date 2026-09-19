@@ -1,7 +1,8 @@
 #pragma once
 
-#include "game/player.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.

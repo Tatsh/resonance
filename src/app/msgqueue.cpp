@@ -1,5 +1,7 @@
 #include "app/msgqueue.h"
 
+#include "msg/message.h"
+
 namespace {
 
 // Delete every stored message and empty the vector. The destructor inlines a copy of this for

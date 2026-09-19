@@ -1,8 +1,9 @@
 #pragma once
 
-#include "memcard/memcard.h"
 #include "memcard/memcardcbhandler.h"
-#include "memcard/memcarduser.h"
+
+class Memcard;
+class MemcardUser;
 
 /** MemcardTask::mState before Execute() has run. */
 constexpr int kMemcardTaskIdle = 0;

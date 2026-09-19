@@ -4,6 +4,8 @@
 
 #include "app/application.h"
 #include "app/longop.h"
+#include "app/watchdog.h"
+#include "game/gamemanagerimpl.h"
 #include "os/mem.h"
 #include "profile/profiler.h"
 #include "rnd/asyncloader.h"

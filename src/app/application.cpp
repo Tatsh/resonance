@@ -1,5 +1,6 @@
 #include "app/application.h"
 
+#include "game/gamemanagerimpl.h"
 #include "memcard/saveicon.h"
 #include "script/scripthost.h"
 

@@ -2,9 +2,12 @@
 
 #include <list>
 
-#include "os/failsink.h"
 #include "os/hxstr.h"
-#include "rnd/stream.h"
+
+class FailSink;
+namespace Rnd {
+class Stream;
+}
 
 namespace Rnd {
 

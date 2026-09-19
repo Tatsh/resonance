@@ -1,9 +1,10 @@
 #pragma once
 
 #include "app/task.h"
-#include "app/watchdog.h"
-#include "game/gamemanagerimpl.h"
 #include "os/hxstr.h"
+
+class GameManagerImpl;
+class Watchdog;
 
 /**
  * The game's frame loop.

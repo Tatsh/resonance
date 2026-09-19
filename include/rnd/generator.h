@@ -3,20 +3,39 @@
 #include <list>
 
 #include "math/transform.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
-#include "rnd/cam.h"
 #include "rnd/drawable.h"
-#include "rnd/mesh.h"
-#include "rnd/multimesh.h"
-#include "rnd/object.h"
-#include "rnd/particle.h"
-#include "rnd/particlesys.h"
-#include "rnd/stream.h"
-#include "rnd/transanim.h"
 #include "rnd/transformable.h"
-#include "rnd/view.h"
+
+namespace Rnd {
+class Cam;
+}
+class FailSink;
+namespace Rnd {
+class Mesh;
+}
+namespace Rnd {
+class MultiMesh;
+}
+namespace Rnd {
+class Object;
+}
+namespace Rnd {
+class ParticleSys;
+}
+namespace Rnd {
+class Stream;
+}
+namespace Rnd {
+class TransAnim;
+}
+namespace Rnd {
+class View;
+}
+namespace Rnd {
+struct Particle;
+}
 
 namespace Rnd {
 

@@ -1,5 +1,10 @@
 #include "memcard/minimumsavespacemct.h"
 
+#include "memcard/closeop.h"
+#include "memcard/memcard.h"
+#include "memcard/memcarduser.h"
+#include "memcard/openreadop.h"
+
 namespace {
 
 // The enquiry the first step queues addresses port 1 slot 1 rather than the slot the task was

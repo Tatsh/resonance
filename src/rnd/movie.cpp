@@ -6,6 +6,7 @@
 #include "rnd/manager.h"
 #include "rnd/stream.h"
 #include "rnd/tex.h"
+#include "rndartt/apalette.h"
 
 namespace Rnd {
 

@@ -2,7 +2,8 @@
 
 #include <vector>
 
-#include "app/msgsink.h"
+class Message;
+class MsgSink;
 
 /**
  * Sender of engine messages, which stores the list of sinks that receive them.

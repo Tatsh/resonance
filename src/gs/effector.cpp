@@ -1,5 +1,7 @@
 #include "gs/effector.h"
 
+#include "msg/message.h"
+
 // 0x001a18c8
 Effector::Effector() {
 }

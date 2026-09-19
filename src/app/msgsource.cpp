@@ -1,5 +1,8 @@
 #include "app/msgsource.h"
 
+#include "app/msgsink.h"
+#include "msg/message.h"
+
 namespace {
 
 // 0x00723208. Nesting depth of Send(). No instruction outside Send() touches the word. Nothing

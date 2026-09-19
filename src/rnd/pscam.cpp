@@ -2,6 +2,7 @@
 
 #include "rnd/cam.h"
 #include "rnd/tex.h"
+#include "rndartt/apalette.h"
 
 namespace Rnd {
 

@@ -1,9 +1,10 @@
 #pragma once
 
-#include "math/color.h"
-#include "math/transform.h"
 #include "math/vector3.h"
 #include "rnd/mat.h"
+
+struct Color;
+struct Transform;
 
 namespace Rnd {
 

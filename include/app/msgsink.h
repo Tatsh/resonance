@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include "msg/message.h"
+class Message;
 
 /**
  * Receiver of engine messages.

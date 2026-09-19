@@ -1,9 +1,12 @@
 #pragma once
 
 #include "math/vector2.h"
-#include "os/hxstr.h"
 #include "rnd/cam.h"
-#include "rnd/tex.h"
+
+class HxStr;
+namespace Rnd {
+class Tex;
+}
 
 namespace Rnd {
 

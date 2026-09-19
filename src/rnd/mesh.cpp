@@ -6,6 +6,7 @@
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
+#include "rnd/mat.h"
 #include "rnd/raytest.h"
 #include "rnd/stream.h"
 #include "rnd/transformable.h"

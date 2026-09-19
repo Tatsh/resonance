@@ -1,7 +1,8 @@
 #pragma once
 
 #include "os/failsink.h"
-#include "os/hxstr.h"
+
+class HxStr;
 
 namespace Rnd {
 

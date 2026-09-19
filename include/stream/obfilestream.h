@@ -2,8 +2,9 @@
 
 #include <stdio.h>
 
-#include "os/hxstr.h"
 #include "stream/obstream.h"
+
+class HxStr;
 
 /**
  * Output stream over a C library `FILE`.

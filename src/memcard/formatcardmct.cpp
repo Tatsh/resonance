@@ -1,5 +1,10 @@
 #include "memcard/formatcardmct.h"
 
+#include "memcard/checkinfoop.h"
+#include "memcard/formatop.h"
+#include "memcard/memcard.h"
+#include "memcard/memcarduser.h"
+
 FormatCardMCT::FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie)
     : MemcardTask(pUser, pCard, nPortSlot, pCookie), mUnformat(0) {
 }

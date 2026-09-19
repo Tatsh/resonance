@@ -1,5 +1,7 @@
 #include "memcard/deleteremixmct.h"
 
+#include "memcard/checkinfoop.h"
+#include "memcard/deletefileop.h"
 #include "memcard/memcard.h"
 #include "memcard/memcardop.h"
 #include "memcard/memcardsavepaths.h"

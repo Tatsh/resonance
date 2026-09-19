@@ -10,6 +10,7 @@
 #include "os/hxstr.h"
 #include "rnd/cam.h"
 #include "rnd/drawverts.h"
+#include "rnd/mat.h"
 #include "rnd/mesh.h"
 #include "rnd/psmat.h"
 #include "rnd/transformable.h"

@@ -1,5 +1,13 @@
 #include "app/globals.h"
 
+#include "app/mainloop.h"
+#include "app/scriptsink.h"
+#include "app/watchdog.h"
+#include "app/watchdogtimer.h"
+#include "game/gamemanagerimpl.h"
+#include "stream/iobpreallocmemstream.h"
+#include "synth/ps2hardsynth.h"
+
 char g_abLogBuffer[kLogBufferSize];
 
 // 0x00118c40

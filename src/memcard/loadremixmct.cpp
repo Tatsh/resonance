@@ -1,5 +1,6 @@
 #include "memcard/loadremixmct.h"
 
+#include "memcard/checkinfoop.h"
 #include "memcard/memcard.h"
 #include "memcard/memcardop.h"
 #include "memcard/memcardsavepaths.h"

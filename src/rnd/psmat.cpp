@@ -8,6 +8,7 @@
 #include "os/hxstr.h"
 #include "rnd/mat.h"
 #include "rnd/tex.h"
+#include "rndartt/apalette.h"
 
 namespace Rnd {
 

@@ -1,5 +1,8 @@
 #include "msg/scgameoverpacket.h"
 
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
+
 // 0x003f15d0. Clone allocates and hands off to the copy constructor at 0x003f3cd0, which is
 // the compiler expanding the implicit one.
 Message *SCGameOverPacket::Clone() {

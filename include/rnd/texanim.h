@@ -1,7 +1,8 @@
 #pragma once
 
-#include "os/failsink.h"
 #include "rnd/animatable.h"
+
+class FailSink;
 
 namespace Rnd {
 

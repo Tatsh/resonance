@@ -5,6 +5,7 @@
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
+#include "rnd/mat.h"
 #include "rnd/object.h"
 #include "rnd/particle.h"
 

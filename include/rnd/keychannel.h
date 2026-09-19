@@ -3,8 +3,11 @@
 #include <list>
 
 #include "math/color.h"
-#include "os/failsink.h"
-#include "rnd/stream.h"
+
+class FailSink;
+namespace Rnd {
+class Stream;
+}
 
 namespace Rnd {
 

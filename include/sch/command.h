@@ -3,8 +3,9 @@
 #include <iostream.h>
 
 #include "app/attachment.h"
-#include "stream/ibstream.h"
-#include "stream/obstream.h"
+
+class IBStream;
+class OBStream;
 
 namespace Sch {
 

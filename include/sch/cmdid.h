@@ -2,8 +2,8 @@
 
 #include <iostream.h>
 
-#include "stream/ibstream.h"
-#include "stream/obstream.h"
+class IBStream;
+class OBStream;
 
 /**
  * Handle that identifies one batch of commands the scheduler has queued.

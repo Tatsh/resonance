@@ -2,9 +2,9 @@
 
 #include <list>
 
-#include "memcard/memcardcbhandler.h"
-#include "memcard/memcardop.h"
-#include "os/hxstr.h"
+class HxStr;
+class MemcardCBHandler;
+class MemcardOp;
 
 /**
  * Queue of memory-card operations, with one entry point per libmc call.

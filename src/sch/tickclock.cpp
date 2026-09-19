@@ -1,5 +1,7 @@
 #include "sch/tickclock.h"
 
+#include "sch/tempomap.h"
+
 namespace Sch {
 
 namespace {

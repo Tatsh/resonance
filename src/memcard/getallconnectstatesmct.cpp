@@ -2,6 +2,10 @@
 
 #include <libmc.h>
 
+#include "memcard/checkinfoop.h"
+#include "memcard/memcard.h"
+#include "memcard/memcarduser.h"
+
 namespace {
 
 // First multi-tap entry in the parallel slot tables, and the entry after the last one port 1 owns.

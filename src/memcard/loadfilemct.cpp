@@ -1,5 +1,12 @@
 #include "memcard/loadfilemct.h"
 
+#include "memcard/checkinfoop.h"
+#include "memcard/closeop.h"
+#include "memcard/memcard.h"
+#include "memcard/memcarduser.h"
+#include "memcard/openreadop.h"
+#include "memcard/readop.h"
+
 LoadFileMCT::LoadFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie)
     : MemcardTask(pUser, pCard, nPortSlot, pCookie) {
 }

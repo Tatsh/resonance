@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "os/log.h"
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
 
 namespace Sch {
 

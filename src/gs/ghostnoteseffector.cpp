@@ -1,5 +1,7 @@
 #include "gs/ghostnoteseffector.h"
 
+#include "msg/message.h"
+
 // 0x001a1cf8
 GhostNotesEffector::~GhostNotesEffector() {
 }

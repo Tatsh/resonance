@@ -1,9 +1,10 @@
 #pragma once
 
-#include "os/hxstr.h"
 #include "script/cxx/config.h"
 #include "script/cxx/exception.h"
 #include "script/cxx/object.h"
+
+class HxStr;
 
 namespace Py {
 

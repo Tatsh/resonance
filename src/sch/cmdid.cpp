@@ -1,5 +1,8 @@
 #include "sch/cmdid.h"
 
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
+
 // 0x005e59a0
 OBStream &CmdID::Save(OBStream &stream) {
     int nValue = mValue;

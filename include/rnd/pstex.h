@@ -2,8 +2,9 @@
 
 #include <vector>
 
-#include "os/hxstr.h"
 #include "rnd/tex.h"
+
+class HxStr;
 
 namespace Rnd {
 

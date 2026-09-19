@@ -2,7 +2,8 @@
 
 #include "app/msgqueue.h"
 #include "app/msgsink.h"
-#include "msg/message.h"
+
+class Message;
 
 /**
  * Base of every renderer, with a message queue and a router of its own.

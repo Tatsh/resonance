@@ -1,5 +1,8 @@
 #include "msg/csclientstatuspacket.h"
 
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
+
 // 0x003ef970. Clone allocates and hands off to the copy constructor at 0x003f3250, which is
 // the compiler expanding the implicit one.
 Message *CSClientStatusPacket::Clone() {

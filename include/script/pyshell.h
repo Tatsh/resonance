@@ -1,8 +1,9 @@
 #pragma once
 
-#include "os/hxstr.h"
 #include "script/cxx/dict.h"
 #include "script/cxx/object.h"
+
+class HxStr;
 
 /**
  * Host of the embedded Python interpreter, and the one object the game runs script through.

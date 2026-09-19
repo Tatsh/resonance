@@ -1,5 +1,8 @@
 #include "msg/packet.h"
 
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
+
 // 0x003f1de8
 void Packet::Save(OBStream &stream) {
     int unknown04 = mUnknown04;

@@ -2,7 +2,13 @@
 
 #include <string.h>
 
+#include "memcard/closeop.h"
+#include "memcard/createdirop.h"
+#include "memcard/memcard.h"
+#include "memcard/memcarduser.h"
+#include "memcard/openwriteop.h"
 #include "memcard/saveicon.h"
+#include "memcard/writeop.h"
 
 namespace {
 

@@ -11,6 +11,7 @@
 #include "rnd/stream.h"
 #include "rnd/tex.h"
 #include "rndartt/acanvas.h"
+#include "rndartt/apalette.h"
 
 namespace Rnd {
 

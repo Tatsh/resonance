@@ -1,5 +1,7 @@
 #include "rndartt/acanvas32.h"
 
+#include "rndartt/apalette.h"
+
 namespace {
 
 constexpr unsigned int kChannelMask = 0xff;

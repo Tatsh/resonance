@@ -1,7 +1,8 @@
 #pragma once
 
-#include "os/hxstr.h"
 #include "rnd/multimesh.h"
+
+class HxStr;
 
 namespace Rnd {
 

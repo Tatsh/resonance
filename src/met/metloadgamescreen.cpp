@@ -1,5 +1,6 @@
 #include "met/metloadgamescreen.h"
 
+#include "msg/message.h"
 #include "os/hxstr.h"
 
 namespace {

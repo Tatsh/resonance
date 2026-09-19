@@ -15,6 +15,7 @@
 #include "rnd/stream.h"
 #include "rnd/tex.h"
 #include "rnd/transformable.h"
+#include "rndartt/apalette.h"
 
 namespace Rnd {
 

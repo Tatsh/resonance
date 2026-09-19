@@ -5,6 +5,7 @@
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/tex.h"
+#include "rndartt/apalette.h"
 
 namespace Rnd {
 

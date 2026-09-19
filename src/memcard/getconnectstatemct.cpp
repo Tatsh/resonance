@@ -2,6 +2,10 @@
 
 #include <libmc.h>
 
+#include "memcard/checkinfoop.h"
+#include "memcard/memcard.h"
+#include "memcard/memcarduser.h"
+
 namespace {
 
 // Value the record's port, free count and type all start at.

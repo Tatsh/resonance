@@ -2,8 +2,8 @@
 
 #include <iostream.h>
 
-#include "stream/ibstream.h"
-#include "stream/obstream.h"
+class IBStream;
+class OBStream;
 
 /**
  * Base of every event the game passes between a MsgSource and a MsgSink.

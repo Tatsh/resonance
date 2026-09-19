@@ -2,7 +2,7 @@
 
 #include <libgraph.h>
 
-#include "rndartt/abitmap.h"
+struct ABitmap;
 
 /** Bytes in one GS video memory block, the unit every address and size in this unit uses. */
 constexpr int kVramBlockBytes = 256;

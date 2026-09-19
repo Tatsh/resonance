@@ -4,8 +4,12 @@
 
 #include "os/hxstr.h"
 #include "rnd/object.h"
-#include "rnd/stream.h"
-#include "rndartt/abitmap.h"
+
+class APalette;
+namespace Rnd {
+class Stream;
+}
+struct ABitmap;
 
 namespace Rnd {
 

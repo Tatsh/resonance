@@ -4,7 +4,8 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
-#include "msg/message.h"
+
+class Message;
 
 /**
  * Relay that stores a copy of every message it accepts and forwards to its own sinks.

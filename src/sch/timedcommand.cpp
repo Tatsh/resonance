@@ -1,6 +1,9 @@
 #include "sch/timedcommand.h"
 
 #include "os/hxstr.h"
+#include "sch/command.h"
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
 
 namespace Sch {
 

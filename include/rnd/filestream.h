@@ -2,8 +2,9 @@
 
 #include <stdio.h>
 
-#include "os/hxstr.h"
 #include "rnd/stream.h"
+
+class HxStr;
 
 namespace Rnd {
 

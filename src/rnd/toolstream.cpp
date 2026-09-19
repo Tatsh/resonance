@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "os/failsink.h"
+#include "os/mem.h"
 #include "rnd/stream.h"
 
 namespace Rnd {

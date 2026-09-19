@@ -3,8 +3,9 @@
 #include <list>
 #include <vector>
 
-#include "os/hxstr.h"
 #include "rnd/mesh.h"
+
+class HxStr;
 
 namespace Rnd {
 

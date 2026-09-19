@@ -2,9 +2,10 @@
 
 #include <vector>
 
-#include "stream/ibstream.h"
 #include "stream/iobstream.h"
-#include "stream/obstream.h"
+
+class IBStream;
+class OBStream;
 
 /**
  * Bidirectional stream over a growing byte buffer.
