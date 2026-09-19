@@ -11,18 +11,22 @@ struct RenderStats {
     int mUnknown00;
     /** Meshes submitted, incremented by Rnd::PsMesh::DrawSelf(). */
     int mnMeshDraws;
-    int mUnknown08;
+    /** Triangles with at least one vertex outside a plane, counted before the drop tests. */
+    int mnFacesClipped;
     int mUnknown0c;
     /** Triangles submitted, advanced by Rnd::PsMesh::DrawFacesVU1() by the face count. */
     int mnTriangles;
-    int mUnknown14;
-    int mUnknown18;
+    /** Edges dropped by the clip test. */
+    int mnEdgesClipped;
+    /** Lines emitted, which stands to the edge count as mnTriangles does to the face count. */
+    int mnLines;
     int mUnknown1c;
     int mUnknown20;
     /** Vertices transformed, advanced by both vertex transform passes by the run length. */
     int mnVertsTransformed;
     int mUnknown28;
-    int mUnknown2c;
+    /** GIF packets submitted. */
+    int mnGifPackets;
     /** Materials applied, incremented by each of the Rnd::PsMat select entry points. */
     int mnMatSelects;
     /** Advanced by Rnd::TransformAndLightMeshVerts(). What it counts is undetermined. */

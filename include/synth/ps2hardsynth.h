@@ -1,5 +1,6 @@
 #pragma once
 
+#include "synth/midi_main.h"
 #include "synth/synth.h"
 
 /**
@@ -44,32 +45,3 @@ private:
  * @ghidraAddress 0x003f4db8
  */
 Ps2HardSynth *CreatePs2HardSynth();
-
-/**
- * Advance the streaming voice buffers.
- *
- * Performs no work while the stream at `0x006f9c58` is absent. MainLoop::Poll() drives this once
- * per frame.
- *
- * @ghidraAddress 0x00464bc8
- */
-void PollSynthStream();
-
-/**
- * Advance the synthesiser's pending events.
- *
- * One of MainLoop's two periodic timers drives this.
- *
- * @ghidraAddress 0x004648c8
- */
-void PollSynthEvents();
-
-/**
- * Report every active voice to the log.
- *
- * Writes one `Voice %2.2d at %x env %x - end %d mix %d %d %d %d` line per voice and then
- * `Using %d voices total`.
- *
- * @ghidraAddress 0x00462558
- */
-void DumpSynthVoices();

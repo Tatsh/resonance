@@ -58,12 +58,11 @@ namespace Rnd {
  * render-state word comes from `0x00583358` for faces and `0x005837d0` for edges. Both of those
  * read the whole cached material state, which is where the primitive type enters.
  *
- * Recovery is partial. Sync() at `0x00600590` is 793 instructions of mostly inlined container
- * work and is not reconstructed. The four draw paths are not reconstructed either, and the two
- * VU1 paths are held rather than unrecovered: their algorithm is recorded on each declaration
- * below, and what they need is a recovered GIF packet writer on GfxDevice, because more than half
- * of each body assembles VIFcodes into the device's quadword stream through members that this tree
- * has not yet recovered.
+ * Every member of the class is reconstructed. Sync() at `0x00600590` is 793 instructions, of
+ * which the strip builder is the part that belongs here and the rest is inlined container work.
+ * Two routines the VU1 paths depend on are not reconstructed and are not part of this class, the
+ * per-pass setup emitters at `0x00583358` and `0x005837d0`, and what their returned word means is
+ * undetermined.
  *
  * The routines between `0x00604da0` and `0x00606678`, along with `0x00607170` and `0x00607198`,
  * are `std::vector`, `std::list`, `std::fill_n`, and `std::find` instantiations over
@@ -103,7 +102,17 @@ protected:
     virtual int DrawSelf();
 
     /**
-     * Rebuild the triangle strips from the face vector.
+     * Rebuild the draw runs from the face and the edge vectors.
+     *
+     * Each run is filled until the next primitive would not fit in the VU1 data memory a run may
+     * occupy, then closed and a fresh one started. A vertex already in the run is reused rather
+     * than sent twice, which is what makes a run a strip rather than a list of separate triangles.
+     * The budget is expressed in VU1 destination quadwords, four for a face vertex and two for an
+     * edge vertex, which agrees with the write cycle each VU1 batch programs, plus one per
+     * primitive for its indices. A primitive that does not fit is un-done and reprocessed at the
+     * head of the next run.
+     *
+     * The runs are built on mFacesOwner, so a mesh that shares its geometry shares them.
      *
      * @ghidraAddress 0x00600590
      */
@@ -117,35 +126,6 @@ protected:
     virtual void Refresh();
 
 private:
-    // Submit every face run of mFacesOwner through VU1. 0x006019e0.
-    //
-    // Advances the triangle counter by the face count, opens a VIF DMA chain, and builds the
-    // render-state word from pXfm and mSphere. Then, once per run: the parameter quadword goes to
-    // VU address 0x12 as {mVertIndices count, mIndexCount / 3, render state, nClip}, the selected
-    // vertices follow it contiguously, the packed index data follows those, and the run enters the
-    // microprogram. With a stage texture bound each vertex contributes all four of its quadwords
-    // under the default write cycle and the program entry is address 0; without one each vertex
-    // contributes three under STCYCL CL=4 WL=3, which retains the destination stride of four, and
-    // the entry is 0x4ce. The textured path also closes and reopens the UNPACK every 252
-    // destination quadwords, because the VIFcode NUM field is eight bits.
-    void DrawFacesVU1(const float *pXfm, int nClip);
-
-    // Submit every edge run of mFacesOwner through VU1. 0x00601de0.
-    //
-    // Advances the line counter by the edge count and builds the render-state word from pXfm and
-    // the material specular colour, or from white when the mesh has no material. Each run then
-    // sends its parameter quadword to VU address 8, the vertex positions to address 9 as one
-    // quadword each under STCYCL CL=2 WL=1, the packed index data after those, and MSCAL 0x1c2.
-    // Only the first quadword of each vertex travels, which is why an edge needs no normal, no
-    // colour, and no texture coordinate.
-    void DrawEdgesVU1(const float *pXfm);
-
-    // Submit the faces of mFacesOwner from the already transformed vertex buffer. 0x00601410.
-    void DrawFacesSoftware(int nClip);
-
-    // Submit the edges of mFacesOwner from the already transformed vertex buffer. 0x006017c0.
-    void DrawEdgesSoftware(int nClip);
-
     /**
      * One batch of geometry the VU1 and software paths submit in a single go.
      *
@@ -175,6 +155,43 @@ private:
     // Rnd::PsMesh, so both are private.
     std::list<DrawRun> mFaceRuns; // +0x150
     std::list<DrawRun> mEdgeRuns; // +0x154
+
+    // Close one run, moving the two scratch index lists into a new node of runs. The compiler
+    // inlined this at both of its call sites in Sync(), which is the only reason no address
+    // belongs to it.
+    static void AppendRun(std::list<DrawRun> &runs,
+                          const std::vector<unsigned short> &vertIndices,
+                          const std::vector<unsigned short> &primIndices);
+
+    // Submit every face run of mFacesOwner through VU1. 0x006019e0.
+    //
+    // Advances the triangle counter by the face count, opens a VIF DMA chain, and builds the
+    // render-state word from pXfm and mSphere. Then, once per run: the parameter quadword goes to
+    // VU address 0x12 as {mVertIndices count, mIndexCount / 3, render state, nClip}, the selected
+    // vertices follow it contiguously, the packed index data follows those, and the run enters the
+    // microprogram. With a stage texture bound each vertex contributes all four of its quadwords
+    // under the default write cycle and the program entry is address 0; without one each vertex
+    // contributes three under STCYCL CL=4 WL=3, which retains the destination stride of four, and
+    // the entry is 0x4ce. The textured path also closes and reopens the UNPACK every 252
+    // destination quadwords, because the VIFcode NUM field is eight bits.
+    void DrawFacesVU1(const float *pXfm, int nClip);
+
+    // Submit every edge run of mFacesOwner through VU1. 0x00601de0.
+    //
+    // Advances the line counter by the edge count and builds the render-state word from pXfm and
+    // the material specular colour, or from white when the mesh has no material. Each run then
+    // sends its parameter quadword to VU address 8, the vertex positions to address 9 as one
+    // quadword each under STCYCL CL=2 WL=1, and the packed index data after those. Only the first
+    // quadword of each vertex travels, which is why an edge needs no normal, no colour, and no
+    // texture coordinate. As with faces, the first run of the list enters through MSCAL, at
+    // 0x1c2, and every run after it through MSCNT.
+    void DrawEdgesVU1(const float *pXfm);
+
+    // Submit the faces of mFacesOwner from the already transformed vertex buffer. 0x00601410.
+    void DrawFacesSoftware(int nClip);
+
+    // Submit the edges of mFacesOwner from the already transformed vertex buffer. 0x006017c0.
+    void DrawEdgesSoftware(int nClip);
 };
 
 /**

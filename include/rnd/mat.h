@@ -266,24 +266,30 @@ public:
     void SetFlat(int nFlat);
 
 protected:
-    // Every member is protected rather than private, because Rnd::PsMat writes four of the colours
-    // in its setter overrides and the material selection path in the same file reads the whole
-    // surface to build the GS register writes. No access from outside the hierarchy is recovered,
-    // and every field the engine changes has a setter, so none of them is public. The order below
-    // is the recovered offset order.
+    // Every member below is protected rather than private. Rnd::PsMat writes four of the colours in
+    // its setter overrides, and the material selection path in the same file reads the whole
+    // surface to build the GS register writes. Every field the engine changes has a setter, and
+    // none of those is reached from outside the hierarchy. The order below is the recovered offset
+    // order.
     std::vector<Stage> mStages; // +0x1c
     BlendMode mBlend;           // +0x28 Defaults to kBlendModeSrcAlpha.
     Color mEmissive;            // +0x30 Defaults to black with full alpha.
     Color mAmbient;             // +0x40 Defaults to white.
     Color mDiffuse;             // +0x50 Defaults to white.
-    Color mSpecular;            // +0x60 Defaults to black with full alpha.
-    int mEnable;                // +0x70 Defaults to 1. Serialised as one byte.
-    int mVertAmbient;           // +0x74 Serialised as one byte.
-    int mVertDiffuse;           // +0x78 Serialised as one byte.
-    int mVertSpecular;          // +0x7c Serialised as one byte.
-    int mVertEmissive;          // +0x80 Serialised as one byte.
-    int mVertAlpha;             // +0x84 Serialised as one byte.
-    int mNormalize;             // +0x88 Serialised as one byte.
+
+public:
+    // Both edge draw paths read this through a Rnd::Mat pointer from outside the hierarchy, and the
+    // image supplies no accessor for it. That is the same evidence that makes mCull public.
+    Color mSpecular; // +0x60 Defaults to black with full alpha.
+
+protected:
+    int mEnable;       // +0x70 Defaults to 1. Serialised as one byte.
+    int mVertAmbient;  // +0x74 Serialised as one byte.
+    int mVertDiffuse;  // +0x78 Serialised as one byte.
+    int mVertSpecular; // +0x7c Serialised as one byte.
+    int mVertEmissive; // +0x80 Serialised as one byte.
+    int mVertAlpha;    // +0x84 Serialised as one byte.
+    int mNormalize;    // +0x88 Serialised as one byte.
 
 public:
     /*!< Winding the rasteriser discards. Public because Rnd::Mesh::Collide() at 0x0047f950 reads

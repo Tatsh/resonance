@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gfx/gfxdevice.h"
+#include "math/color.h"
 #include "math/sphere.h"
 #include "rnd/meshvert.h"
 
@@ -15,15 +17,51 @@ constexpr int kFrustumPlaneCount = 6;
 constexpr int kFrustumPlaneFloatCount = 4;
 
 /**
+ * Vertex as the software draw paths leave it, ready for the GS.
+ *
+ * The stride is measured rather than inferred: the clipper multiplies its vertex index by 0x30.
+ * The three quadwords are pinned by the GIFtags that consume them rather than by the stride alone.
+ * A textured triangle declares NREG 9 with REGS `0x412412412`, which is ST, RGBAQ, and XYZF2 per
+ * vertex, and copies three quadwords from `+0x00`. An untextured one declares NREG 6 with REGS
+ * `0x414141` and copies two from `+0x10`. A line declares NREG 3 with REGS `0x441`, supplies its
+ * own colour, and copies one quadword from `+0x20` per endpoint. Register order and copy offset
+ * agree in all three cases.
+ *
+ * Only the first two words of the ST quadword reach the GS, and the path stores the clip flags in
+ * the fourth.
+ */
+struct DrawVert {
+    float mS;       // +0x00
+    float mT;       // +0x04
+    int mUnknown08; // +0x08
+    /** Which frustum planes this vertex falls outside. +0x0c */
+    int mClipFlags;
+    /** RGBAQ, already scaled to the range the GS takes. +0x10 */
+    GifQuadword mColor;
+    /** XYZF2. +0x20 */
+    GifQuadword mPos;
+};
+
+/** Every plane of the six-plane frustum. */
+constexpr int kDrawVertClipAnyPlane = 0x3f;
+
+/** Near plane, which drops a triangle outright rather than clipping it. */
+constexpr int kDrawVertClipNearPlane = 0x10;
+
+/** The five planes a triangle is rejected against only when all its vertices fail one. */
+constexpr int kDrawVertClipOtherPlanes = 0x2f;
+
+/**
  * Buffer every software draw path transforms its vertices into.
  *
- * One buffer serves the mesh paths and the particle system alike, so it is shared rather than
- * owned by any one of them. Exceeding the capacity is reported rather than clamped. The element
- * type is inferred from what the producers write, not measured.
+ * One buffer serves the mesh paths and the particle system alike, and is shared rather than owned
+ * by any one of them. The bound above is the guard the mesh path applies to its own vertex count,
+ * not the size of the allocation: the clipper appends beyond that index and the triangle fan reads
+ * its results back from there.
  *
  * @ghidraAddress 0x00784960
  */
-extern MeshVert g_aDrawVerts[kDrawVertCapacity];
+extern DrawVert g_aDrawVerts[];
 
 /**
  * Plane equations of the frustum IsSphereInsideFrustum() tests against.
@@ -84,5 +122,59 @@ void TransformAndLightMeshVerts(void *pOutVerts,
  * @ghidraAddress 0x00584700
  */
 void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, const float *pXfm);
+
+/**
+ * Clip one triangle against the frustum and append the pieces to the vertex buffer.
+ *
+ * The new vertices go above the index the fifth argument points at, and that index is advanced in
+ * place. The routine returns nothing: the value left in the return register at the single exit is
+ * the advanced index, but it is there as a by-product of storing it through the pointer, and
+ * neither caller reads the register.
+ *
+ * @param nIdx0 First vertex of the triangle.
+ * @param nIdx1 Second vertex.
+ * @param nIdx2 Third vertex.
+ * @param pVerts The vertex buffer, indexed by the three arguments above.
+ * @param pnNextIndex Where the next vertex is written, advanced by this call.
+ * @ghidraAddress 0x00584cc8
+ */
+void ClipTriangleToFrustum(
+    unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, DrawVert *pVerts, int *pnNextIndex);
+
+/**
+ * Emit the VU1 parameter quadwords for a face pass and return its third word.
+ *
+ * The routine writes quadwords into the packet buffer and advances the write pointer, making it an
+ * emitter rather than a builder. It returns a word deliberately, one path yielding the literal
+ * 0x2ee, and Rnd::PsMesh::DrawFacesVU1() stores the result in the third slot of the parameter
+ * quadword. What the word means is undetermined.
+ *
+ * @param pXfm The draw transform.
+ * @param sphere The mesh bounding sphere.
+ * @return The third word of the parameter quadword.
+ * @ghidraAddress 0x00583358
+ */
+int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere);
+
+/**
+ * Emit the VU1 parameter quadwords for an edge pass.
+ *
+ * The colour is the material specular colour, or opaque white when the mesh has no material.
+ *
+ * @param pXfm The draw transform.
+ * @param color The line colour.
+ * @ghidraAddress 0x005837d0
+ */
+void EmitEdgeVu1Setup(const float *pXfm, const Color &color);
+
+/**
+ * Non-zero while fog is enabled.
+ *
+ * Both software draw paths shift it into the GS PRIM fog-enable bit, which is what identifies it
+ * as fog rather than a general flag. Rnd::Environ::Select() is the writer.
+ *
+ * @ghidraAddress 0x00776118
+ */
+extern int g_nFogEnabled;
 
 } // namespace Rnd
