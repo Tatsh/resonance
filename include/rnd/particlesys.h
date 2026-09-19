@@ -1,7 +1,9 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
+#include "math/color.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
@@ -208,7 +210,38 @@ private:
     // Systems that share this one's particles. RemoveObjectRefs() removes this system from the
     // list of whichever system owns its particles.
     std::list<ParticleSys *> mSharers; // +0x104
-    unsigned char mUnknown108[0xd8];   // +0x108 The spawn parameter block. See the class note.
+    // The spawn parameter block. See the class note. Six of its fields are recovered, because
+    // Rnd::ParticleSysAnim::SetFrameSelf() writes them. The dump of this block writes every other
+    // range it has as a "…Low:" and "…High:" pair, "posLow:" against "posHigh:" and
+    // "startColorLow:" against "startColorHigh:", and the animation shifts the high member of each
+    // range by however far it moved the low member, which preserves the spread. The two emission
+    // rates take their titles from that pattern rather than from a label of their own.
+    unsigned char mUnknown108[0x50]; // +0x108
+
+public:
+    /*!< Low end of the emission rate range. Public because
+         Rnd::ParticleSysAnim::SetFrameSelf() writes it from outside the hierarchy and the image
+         exposes no accessor. A friend declaration fits the image equally well. +0x158 */
+    float mEmitRateLow;
+    /*!< High end of the emission rate range. Public on the same evidence as mEmitRateLow. +0x15c */
+    float mEmitRateHigh;
+
+private:
+    unsigned char mUnknown160[0x10]; // +0x160
+
+public:
+    /*!< Low end of the colour a particle spawns with. Public on the same evidence as
+         mEmitRateLow. +0x170 */
+    Color mStartColorLow;
+    /*!< High end of the colour a particle spawns with. +0x180 */
+    Color mStartColorHigh;
+    /*!< Low end of the colour a particle fades to. +0x190 */
+    Color mEndColorLow;
+    /*!< High end of the colour a particle fades to. +0x1a0 */
+    Color mEndColorHigh;
+
+private:
+    unsigned char mUnknown1b0[0x30]; // +0x1b0
 
 public:
     /*!< Material every particle draws with, or null for the default surface. Public because

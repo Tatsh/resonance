@@ -1,8 +1,11 @@
 #pragma once
 
+#include <list>
+
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
+#include "rnd/keychannel.h"
 #include "rnd/object.h"
 #include "rnd/particlesys.h"
 #include "rnd/stream.h"
@@ -25,25 +28,34 @@ namespace Rnd {
  * nothing of its own here.
  *
  * Three channels drive the system, and the text dump titles them "startColorKeys:",
- * "endColorKeys:", and "emitRateKeys:". Each is one word holding the sentinel of a `std::list`,
- * which the two channel dumps prove by reading the word and then comparing the first node against
- * it. The two colour channels share a dump routine at `0x004d8de8` and the emission rate channel
- * has its own at `0x004d8f08`, so the element types differ.
+ * "endColorKeys:", and "emitRateKeys:". The two colour channels are `std::list` of Rnd::ColorKey
+ * and share the dump routine at `0x004d8de8`. The emission rate channel is a `std::list` of
+ * Rnd::FloatKey and has its own dump at `0x004d8f08`. EndFrame() reads the frame of the two colour
+ * channels at list node `+0x20` and of the rate channel at node `+0x0c`, which is the two element
+ * sizes rather than one.
  *
  * Keys are shared rather than copied, the same arrangement Rnd::MeshAnim uses with mKeysOwner.
  * Both EndFrame() and SetFrameSelf() read the channels of mFramesOwner rather than their own, so
  * an animation whose frames belong to another animation reads that object's keys.
  *
- * Recovery is partial. The keyframe record of each channel is not reconstructed, and the only
- * offset inside it that is pinned is the frame at `+0x18` of the element, which both overrides read
- * through the list node at `+0x20`. Every routine that walks a channel therefore stays
- * unreconstructed: EndFrame() at `0x00527128`, SetFrameSelf() at `0x00527290`, Save() at
- * `0x00526b68`, Load() at `0x00526ce8`, Replace() at `0x005267a8`, Copy() at `0x00526fc8`, the
- * constructor at `0x0052bca0`, and the destructor at `0x0052b9c0`. The same gap keeps Rnd::MeshAnim
- * and Rnd::MatAnim from reconstructing their channels.
+ * Recovery is partial. Load() at `0x00526ce8`, Replace() at `0x005267a8`, the constructor at
+ * `0x0052bca0`, and the destructor at `0x0052b9c0` are understood and not yet written.
+ * SetFrameSelf() is blocked rather than unrecovered; see its own documentation.
  */
 class ParticleSysAnim : public Animatable {
 public:
+    /** Revision Save() writes, and the highest revision Load() accepts. */
+    enum { kSerialVersion = 1 };
+
+    /**
+     * Bit of the copy flags that shares the source's keyframe channels rather than copying them.
+     *
+     * Recovered from the `andi` at `0x0052706c` in Copy(). Rnd::MeshAnim reads bit 0x40 and
+     * Rnd::LightAnim bit 0x02 for the same purpose, so the bit is per class rather than shared
+     * across the hierarchy.
+     */
+    enum { kCopyShareKeys = 0x80 };
+
     /**
      * Construct an animation with no channels and no system.
      *
@@ -71,6 +83,9 @@ public:
     /**
      * Serialise the animation.
      *
+     * Writes kSerialVersion, the Rnd::Animatable subobject, mParticleSys as a name, the three
+     * channels, mFramesOwner as a name, and finally mEmitRateRatio.
+     *
      * @param stream The stream to write to.
      * @ghidraAddress 0x00526b68
      */
@@ -95,6 +110,10 @@ public:
 
     /**
      * Copy another animation over this one.
+     *
+     * kCopyShareKeys shares the source's channels instead of copying them, and a source that is
+     * itself sharing is always shared from rather than copied. mEmitRateRatio is copied either
+     * way.
      *
      * @param pSource The source object, which has to be an animation for the copy to have any
      *                effect.
@@ -130,9 +149,16 @@ protected:
     /**
      * Animate the system to a frame.
      *
-     * Rnd::Animatable vtable slot 3. Returns at once when mParticleSys is null. Otherwise it
-     * interpolates each channel of mFramesOwner at the frame and writes the results into the
-     * system.
+     * Rnd::Animatable vtable slot 3. Returns at once when mParticleSys is null. Each of the two
+     * colour channels of mFramesOwner selects the bracketing keyframe pair, blends the pair on
+     * VU0, and then moves one spawn colour range of the system so that the blended colour becomes
+     * the low end while the spread of the range survives. The move is AddColor() followed by
+     * SubColor().
+     *
+     * The emission rate channel interpolates its two scalars linearly instead, then divides
+     * Rnd::ParticleSys::mEmitRateHigh by mEmitRateLow into mEmitRateRatio whenever the second is
+     * not zero, and finally writes the interpolated rate to mEmitRateLow and that rate scaled by
+     * mEmitRateRatio to mEmitRateHigh. An empty rate channel finishes the routine.
      *
      * @param flFrame The filtered frame to animate to.
      * @ghidraAddress 0x00527290
@@ -146,12 +172,12 @@ private:
 
     // System this animation drives. SetFrameSelf() returns without doing anything when it is null.
     ParticleSys *mParticleSys; // +0x18
-    // Sentinel of the channel that drives the spawn colour at the low end of its range.
-    int mStartColorKeys; // +0x1c
-    // Sentinel of the channel that drives the spawn colour at the high end of its range.
-    int mEndColorKeys; // +0x20
-    // Sentinel of the channel that drives the emission rate.
-    int mEmitRateKeys; // +0x24
+    // Channel that drives the spawn colour at the low end of its range.
+    std::list<ColorKey> mStartColorKeys; // +0x1c
+    // Channel that drives the spawn colour at the high end of its range.
+    std::list<ColorKey> mEndColorKeys; // +0x20
+    // Channel that drives the emission rate.
+    std::list<FloatKey> mEmitRateKeys; // +0x24
     // Animation whose channels this one reads, itself for an animation that owns its keys.
     ParticleSysAnim *mFramesOwner; // +0x28
     // Scale the emission rate channel is multiplied by.

@@ -84,6 +84,33 @@ public:
      * `0x004f9160` titles the value "q:" and its components "x:", "y:", "z:", and "w:".
      */
     struct RotKey {
+        /**
+         * Build the two Kochanek-Bartels tangents of this keyframe from its neighbours.
+         *
+         * The body is not reconstructed, and the obstacle is a type rather than the algorithm. The
+         * routine works entirely through Rnd::QuatSlerp() at `0x004eec20`, which takes a
+         * quaternion pointer, while the four members below are float arrays that every other body
+         * in src/rnd/transanim.cpp indexes by axis. Retyping them would rewrite those bodies, so
+         * the decision belongs with whoever settles the quaternion type of this channel.
+         *
+         * The algebra is fully recovered. With both neighbours present, `toPrev` is the slerp of
+         * this key towards pPrev at `-(bias + 1) / 3` and `toNext` the slerp towards pNext at
+         * `(1 - bias) / 3`. mTangentOut is then the slerp of this key towards the slerp of that
+         * pair at `(1 - continuity) / 2`, weighted `1 - tension`, and mTangentIn the same with
+         * `(1 + continuity) / 2` and `tension - 1`. The two end weights differ only in sign, which
+         * is what opposes the two tangents. A keyframe with no previous neighbour writes only
+         * mTangentOut, as the slerp towards pNext at
+         * `(1 - tension) * (continuity * bias + 1) / 3`, and one with no next neighbour writes
+         * only mTangentIn, as the slerp towards pPrev at
+         * `(1 - tension) * (1 - continuity * bias) / 3`. A keyframe with neither neighbour is
+         * unchanged.
+         *
+         * @param pPrev The preceding keyframe, or null at the start of the channel.
+         * @param pNext The following keyframe, or null at the end of the channel.
+         * @ghidraAddress 0x00552588
+         */
+        void ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext);
+
         float mQuat[kXfmRowFloatCount];       /*!< x, y, z, and w. +0x00 */
         float mTangentIn[kXfmRowFloatCount];  /*!< Tangent entering the key. +0x10 */
         float mTangentOut[kXfmRowFloatCount]; /*!< Tangent leaving the key. +0x20 */
