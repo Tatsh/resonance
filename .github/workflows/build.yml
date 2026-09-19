@@ -23,20 +23,49 @@ jobs:
           mips64r5900el-ps2-elf-g++ --version
           cmake --version
       - name: 'Configure'
-        # The reconstruction compiles into an object library and is never linked, because the tree
-        # is partial and no link can succeed until every routine a call reaches has a body.
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="$PS2SDK/ps2dev.cmake" \
             -DCMAKE_BUILD_TYPE=Release
       - name: 'Compile'
-        run: cmake --build build --target resonance_objects
-      - name: 'Object count'
-        # A build that compiled nothing also reports success, so the object count is recorded.
+        # Keep going past a failing source rather than stopping at the first one. The goal at this
+        # stage is the object files and the archives the reconstruction can already produce, and a
+        # build that halts on source one reports nothing about the other 334.
         run: |
-          COUNT=$(find build -name '*.o' | wc -l)
-          echo "Compiled $COUNT object file(s)"
-          test "$COUNT" -gt 0
+          mkdir -p build
+          cmake --build build --target archives -k 0 > build/compile.log 2>&1 || true
+          tail -40 build/compile.log
+      - name: 'Count what was produced'
+        run: |
+          OBJECTS=$(find build -name '*.o' | wc -l)
+          ARCHIVES=$(find build -name '*.a' | wc -l)
+          ERRORS=$(grep -c 'error:' build/compile.log || true)
+          {
+            echo "## Emotion Engine build"
+            echo
+            echo "| Measure | Count |"
+            echo "| --- | --- |"
+            echo "| Object files | $OBJECTS |"
+            echo "| Archives | $ARCHIVES |"
+            echo "| Compiler errors | $ERRORS |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Compiled $OBJECTS object file(s) into $ARCHIVES archive(s), $ERRORS error(s)"
+          find build -name '*.a' | sort
+          test "$OBJECTS" -gt 0
+      - name: 'Upload the compile log'
+        if: always()
+        uses: 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'
+        with:
+          name: compile-log
+          path: build/compile.log
+          if-no-files-found: error
+      - name: 'Upload the archives'
+        if: always()
+        uses: 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'
+        with:
+          name: archives
+          path: 'build/**/*.a'
+          if-no-files-found: warn
 name: 'Build'
 'on':
   push:

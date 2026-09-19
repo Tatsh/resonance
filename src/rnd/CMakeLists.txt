@@ -1,0 +1,45 @@
+set(RESONANCE_RND_SRCS
+    animatable.cpp
+    arena.cpp
+    blur.cpp
+    bufstream.cpp
+    button.cpp
+    cam.cpp
+    collideable.cpp
+    drawable.cpp
+    environ.cpp
+    filestream.cpp
+    font.cpp
+    generator.cpp
+    keychannel.cpp
+    light.cpp
+    lightanim.cpp
+    manager.cpp
+    mat.cpp
+    matanim.cpp
+    memstream.cpp
+    mesh.cpp
+    meshanim.cpp
+    movie.cpp
+    multimesh.cpp
+    object.cpp
+    particlesys.cpp
+    particlesysanim.cpp
+    pscam.cpp
+    psmat.cpp
+    psmesh.cpp
+    psmultimesh.cpp
+    psparticlesys.cpp
+    pstex.cpp
+    rndtex.cpp
+    stream.cpp
+    string.cpp
+    text.cpp
+    toolstream.cpp
+    transanim.cpp
+    transformable.cpp
+    tunnel.cpp
+    view.cpp)
+
+add_library(resonance_rnd STATIC ${RESONANCE_RND_SRCS})
+target_link_libraries(resonance_rnd PRIVATE resonance_common)
