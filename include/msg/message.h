@@ -18,6 +18,10 @@
  * Clone(), Type(), and Name(), while Packet and eight others inherit all three as pure and are
  * therefore abstract themselves.
  *
+ * This class's own table is at `0x007ccbf8`, which its destructor stores at offset 0. It has eight
+ * entries and a zero terminator at index 8, with slots 2, 3, and 4 addressing the pure-virtual
+ * stub. MsgSink's table follows it immediately at `0x007ccc40`.
+ *
  * Slots 5, 6, and 7 all address a two-instruction `jr ra` stub in this class, at `0x001051f0`,
  * `0x001051f8`, and `0x00105200`. Every translation unit that destroys a message emits its own
  * copy of all three stubs after its copy of the destructor, which is a second measurement of the
@@ -36,6 +40,11 @@
  */
 class Message {
 public:
+    /**
+     * Vtable slot 1. The body is empty.
+     *
+     * @ghidraAddress 0x001051c0
+     */
     virtual ~Message();
 
     /**
