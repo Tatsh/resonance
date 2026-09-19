@@ -14,8 +14,10 @@
  * This class shares its RTTI accessor and vtable with ToAllGameControllersPacket, its own base,
  * which has no implementation of its own. The vtable belongs to this class.
  *
- * The class overrides Message::Print() at `0x003f2a90`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Its vtable has eight entries and a zero terminator at index 8. Slots 5, 6, and 7 are all its own
+ * overrides rather than the inherited ones. Both transfer members open by expanding the Packet pair
+ * inline rather than calling it, which every one of the twenty overriding packet classes does
+ * identically.
  */
 class SCGameOverPacket : public ToAllGameControllersPacket {
 public:
@@ -42,6 +44,36 @@ public:
      * @ghidraAddress 0x003f1658
      */
     virtual const char *Name();
+
+    /**
+     * Write the payload to a diagnostic stream.
+     *
+     * Slot 5. The one member is the whole output, with no literal around it.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2a90
+     */
+    virtual void Print(ostream &stream);
+
+    /**
+     * Write the packet to a stream.
+     *
+     * Slot 6. The member reaches the stream as a single byte rather than as a word.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2920
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the packet back from a stream.
+     *
+     * Slot 7.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003f29e8
+     */
+    virtual void Load(IBStream &stream);
 
 private:
     int mUnknown14; // +0x14

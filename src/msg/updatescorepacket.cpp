@@ -15,3 +15,26 @@ int UpdateScorePacket::Type() {
 const char *UpdateScorePacket::Name() {
     return "UpdateScorePacket";
 }
+
+// 0x003f2510
+void UpdateScorePacket::Print(ostream &stream) {
+    stream << "pid:" << mUnknown14 << " score-delta:" << mUnknown18;
+}
+
+// 0x003e7018
+void UpdateScorePacket::Save(OBStream &stream) {
+    Packet::Save(stream);
+
+    int unknown14 = mUnknown14;
+    stream.Write(&unknown14, sizeof(unknown14));
+
+    int unknown18 = mUnknown18;
+    stream.Write(&unknown18, sizeof(unknown18));
+}
+
+// 0x003e7120
+void UpdateScorePacket::Load(IBStream &stream) {
+    Packet::Load(stream);
+    stream.Read(&mUnknown14, sizeof(mUnknown14));
+    stream.Read(&mUnknown18, sizeof(mUnknown18));
+}

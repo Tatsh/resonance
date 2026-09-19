@@ -11,8 +11,14 @@
  * widths are recovered but the purpose of each field is not. The four words Packet owns are
  * declared there rather than here.
  *
- * The class overrides Message::Print() at `0x003f2510`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Its vtable has eight entries and a zero terminator at index 8. Slots 5, 6, and 7 are all its own
+ * overrides. Both transfer members open by expanding the Packet pair inline rather than calling it,
+ * which every one of the twenty overriding packet classes does identically.
+ *
+ * Print() labels the two members `pid:` and ` score-delta:`, so the first is a player identifier
+ * and the second a score change. Both labels are display text rather than identifiers, and one of
+ * them is not a valid identifier at all, so the members retain their recovered-purpose-pending
+ * spelling.
  */
 class UpdateScorePacket : public ToAllOtherGameSystemsPacket {
 public:
@@ -39,6 +45,36 @@ public:
      * @ghidraAddress 0x003f0748
      */
     virtual const char *Name();
+
+    /**
+     * Write the payload to a diagnostic stream.
+     *
+     * Slot 5. The literals are at `0x00814240` and `0x00814248`.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2510
+     */
+    virtual void Print(ostream &stream);
+
+    /**
+     * Write the packet to a stream.
+     *
+     * Slot 6.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e7018
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the packet back from a stream.
+     *
+     * Slot 7. Both members are filled in place rather than through a local.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e7120
+     */
+    virtual void Load(IBStream &stream);
 
 private:
     int mUnknown14; // +0x14

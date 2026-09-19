@@ -15,3 +15,20 @@ int SCGameOverPacket::Type() {
 const char *SCGameOverPacket::Name() {
     return "SCGameOverPacket";
 }
+
+// 0x003f2a90
+void SCGameOverPacket::Print(ostream &stream) {
+    stream << mUnknown14;
+}
+
+// 0x003f2920
+void SCGameOverPacket::Save(OBStream &stream) {
+    Packet::Save(stream);
+    stream << mUnknown14;
+}
+
+// 0x003f29e8
+void SCGameOverPacket::Load(IBStream &stream) {
+    Packet::Load(stream);
+    stream >> mUnknown14;
+}

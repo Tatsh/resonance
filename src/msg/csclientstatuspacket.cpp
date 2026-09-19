@@ -15,3 +15,33 @@ int CSClientStatusPacket::Type() {
 const char *CSClientStatusPacket::Name() {
     return "CSClientStatusPacket";
 }
+
+// 0x003f2120
+void CSClientStatusPacket::Print(ostream &stream) {
+    stream << "ClientStatus: " << mUnknown14;
+}
+
+// 0x003e6090
+void CSClientStatusPacket::Save(OBStream &stream) {
+    Packet::Save(stream);
+
+    int unknown14 = mUnknown14;
+    stream.Write(&unknown14, sizeof(unknown14));
+
+    // Yes, the binary moves the base word at +0x0c a second time.
+    int unknown0cAgain = mUnknown0c;
+    stream.Write(&unknown0cAgain, sizeof(unknown0cAgain));
+}
+
+// 0x003e6198
+void CSClientStatusPacket::Load(IBStream &stream) {
+    Packet::Load(stream);
+
+    int unknown14 = 0;
+    stream.Read(&unknown14, sizeof(unknown14));
+
+    // Yes, the binary moves the base word at +0x0c a second time.
+    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
+
+    mUnknown14 = unknown14;
+}

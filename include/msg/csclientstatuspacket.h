@@ -11,8 +11,14 @@
  * recovered but the purpose of each field is not. The four words Packet owns are declared there
  * rather than here.
  *
- * The class overrides Message::Print() at `0x003f2120`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Its vtable has eight entries and a zero terminator at index 8. Slots 5, 6, and 7 are all its own
+ * overrides. Both transfer members open by expanding the Packet pair inline rather than calling it,
+ * which every one of the twenty overriding packet classes does identically.
+ *
+ * Both transfer members move the word Packet stores at `+0x0c` a second time, after this class's
+ * own member. Six of the twenty do that, and each of the six gives the repeat its own stack slot
+ * rather than reusing the one from the prefix, which is what establishes it as two expressions in
+ * the original rather than one.
  */
 class CSClientStatusPacket : public ToHostPacket {
 public:
@@ -39,6 +45,36 @@ public:
      * @ghidraAddress 0x003ef9f8
      */
     virtual const char *Name();
+
+    /**
+     * Write the payload to a diagnostic stream.
+     *
+     * Slot 5. The output is the literal `ClientStatus: ` at `0x008141c8` followed by the member.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2120
+     */
+    virtual void Print(ostream &stream);
+
+    /**
+     * Write the packet to a stream.
+     *
+     * Slot 6.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e6090
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the packet back from a stream.
+     *
+     * Slot 7. The member arrives in a local that construction clears before the transfer.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e6198
+     */
+    virtual void Load(IBStream &stream);
 
 private:
     int mUnknown14; // +0x14
