@@ -64,6 +64,19 @@ public:
     void InitDisplayMode();
 
     /**
+     * Words of video memory the display and depth buffers occupy.
+     *
+     * VramTable::Init() divides the result by the words in a block to find where the palette
+     * region begins, which puts every cached texture above the buffers. The body is not
+     * reconstructed. It reads three members of the recorded geometry and a page count out of a
+     * structure at `+0x448` whose layout is unrecovered.
+     *
+     * @return Words in use, at four bytes each.
+     * @ghidraAddress 0x0049fec0
+     */
+    int GetReservedVramWords() const;
+
+    /**
      * Set the masked part of one GS register, unless it already agrees.
      *
      * The device shadows every GS register in an array of 64-bit words, indexed by register number,
@@ -143,8 +156,8 @@ public:
      * selected and the GIF otherwise. An empty buffer is not sent. Retaining the open tag reopens
      * it in the new half, letting a caller submit in the middle of a primitive.
      *
-     * The body is not reconstructed. It notifies the GS video memory manager, whose header does not
-     * exist yet.
+     * The body is not reconstructed. It calls VramTable::AdvanceLockCycle(), which moves the video
+     * memory cache to its next lock generation.
      *
      * @param bRetainOpenTag Non-zero to reopen the current tag in the new buffer half.
      * @param bOnlyWhenFull Non-zero to submit only once the buffer is full.
