@@ -1,7 +1,39 @@
 #pragma once
 
+#include "os/asynccallback.h"
+
 /** The number of job records the ring is built from. */
 constexpr int kAsyncJobCount = 512;
+
+/** Bit of a file handle that identifies a stream inside a mounted ark rather than a loose file. */
+constexpr int kFileHandleArkStream = 0x4000;
+
+/** Origins FileSeek() and SeekArkStream() accept. */
+enum FileSeekOrigin {
+    kFileSeekSet = 0, /*!< Measure the offset from the start. */
+    kFileSeekCur = 1, /*!< Measure the offset from the current position. */
+    kFileSeekEnd = 2  /*!< Measure the offset from the end. */
+};
+
+/** Bit of AsyncRequest::mFlags that makes completion close the request's file. */
+constexpr unsigned kAsyncRequestCloseFile = 1;
+
+/**
+ * Bit of AsyncRequest::mFlags that makes completion inflate what the read delivered.
+ *
+ * The inflate runs forward from mReadBuffer over mBuffer, which is why AsyncLoadFileByPath() reads
+ * a compressed file into the tail of its buffer.
+ */
+constexpr unsigned kAsyncRequestInflate = 2;
+
+/** Stored in AsyncRequest::mStatus while the request has not completed. */
+constexpr int kAsyncStatusPending = -1;
+
+/** Stored in AsyncRequest::mStatus once the data is in place. */
+constexpr int kAsyncStatusOk = 0;
+
+/** Stored in AsyncRequest::mStatus when the read itself failed. */
+constexpr int kAsyncStatusReadFailed = 4;
 
 /**
  * One queued asynchronous read.
@@ -12,25 +44,58 @@ constexpr int kAsyncJobCount = 512;
  * job onto exactly one of three lists at a time, which are the free list, a
  * stream's pending list, and the completed list.
  *
- * Only the fields the queue routines touch have been recovered.
+ * A job covers one chunk of kSectorCacheRowSize bytes. `mSector` therefore indexes 64 KiB chunks
+ * of the file rather than drive sectors, and DeliverAsyncJobData() reconstructs the byte offset as
+ * `mSector * kSectorCacheRowSize + mSectorOffset`.
  */
 struct AsyncJob {
     AsyncJob *mNext;   /*!< The next job, null at the end of a chain. +0x00 */
     AsyncJob *mPrev;   /*!< The previous job, null at the head of a chain. +0x04 */
-    int mSector;       /*!< The media sector the read starts at. +0x08 */
-    int mUnknown0c;    /*!< Undetermined. +0x0c */
+    int mSector;       /*!< The 64 KiB chunk of the file the job transfers. +0x08 */
+    int mUnknown0c;    /*!< Always 32, the drive sectors a chunk occupies. No reader. +0x0c */
     void *mBuffer;     /*!< The destination the copy writes to. +0x10 */
-    int mSectorOffset; /*!< Added to mSector scaled by the sector size. +0x14 */
+    int mSectorOffset; /*!< Byte offset inside the chunk the transfer starts at. +0x14 */
     int mLength;       /*!< Bytes to copy. +0x18 */
+};
+
+/**
+ * One queued or completed asynchronous request.
+ *
+ * The record is 48 bytes and lives inline in the pending and completed lists. A list node is
+ * therefore the eight-byte node header followed by this.
+ *
+ * Two windows are recorded rather than one. mBuffer and mLength describe what the caller receives
+ * and are what AsyncPollComplete() reports, while mReadBuffer and mReadLength describe where the
+ * drive data lands and how much of it there is. The two agree for an ordinary read, and they differ
+ * for a compressed one, where the stored bytes are read into the tail of the buffer and then
+ * inflated forward over the whole of it.
+ *
+ * Every member is public because AsyncSubmitRequest() and AsyncLoadFileByPath() build the record
+ * field by field with no accessor anywhere in the image, and the record has no behaviour of its
+ * own.
+ */
+struct AsyncRequest {
+    int mId;                  /*!< Identifier the poll and cancel paths match on. +0x00 */
+    int mFile;                /*!< The file, with kFileHandleArkStream for an ark stream. +0x04 */
+    void *mBuffer;            /*!< Destination the caller receives. +0x08 */
+    void *mReadBuffer;        /*!< Destination the drive data lands in. +0x0c */
+    int mReadLength;          /*!< Bytes to transfer from the file. +0x10 */
+    int mLength;              /*!< Bytes the caller receives. +0x14 */
+    int mStreamFile;          /*!< mFile resolved to the file the sector cache is keyed by. +0x18 */
+    unsigned mFlags;          /*!< kAsyncRequestCloseFile and kAsyncRequestInflate. +0x1c */
+    AsyncJob *mJobs;          /*!< Job chain, released whenever the request exits a list. +0x20 */
+    AsyncCallback *mCallback; /*!< Receiver the pump reports completion to, or null. +0x24 */
+    int mStatus;              /*!< What AsyncPollComplete() reports. +0x28 */
+    int mOwnsBuffer;          /*!< Non-zero when cancel must release mBuffer. +0x2c */
 };
 
 /**
  * Bring up the asynchronous file-I/O layer.
  *
- * Allocates the 512-job ring, threads it into one doubly linked free list, and
- * clears the current operation. When the layer runs threaded, a semaphore and a
- * worker thread are also created. The routine is idempotent through the
- * initialised flag, and every queue entry point calls it first.
+ * Allocates the 512-job ring, threads it into one doubly linked free list, and clears the current
+ * operation. On disc media the drive callback thread is created and AsyncMediaEventCallback() is
+ * installed as the drive completion callback. The routine is idempotent through the initialised
+ * flag, and every queue entry point calls it first.
  *
  * @ghidraAddress 0x0045f000
  */
@@ -47,26 +112,100 @@ void InitAsync();
 void ShutdownAsync();
 
 /**
- * One queued or completed asynchronous request.
+ * Queue one asynchronous read and report its identifier.
  *
- * The record is 48 bytes and lives inline in the pending and completed lists, so a list node is
- * the sixteen-byte node header followed by this. Only the fields the poll and cancel paths touch
- * have been recovered, and the submit path builds the same 48-byte shape before handing it over.
+ * Brings the layer up on first use, then builds a request whose caller window and read window both
+ * describe the whole transfer. For an ark stream on disc media the stream position is advanced past
+ * the data the read will deliver once the request is queued. A following request therefore
+ * continues where this one ends.
+ *
+ * @param nFile The file to read, positioned where the read should start.
+ * @param pBuffer The destination.
+ * @param nLength The number of bytes to read.
+ * @param bCloseOnComplete Non-zero to close nFile once the request completes.
+ * @param pCallback Receiver notified once the request completes, or null.
+ * @param bOwnsBuffer Non-zero to have a cancelled request release pBuffer.
+ * @return The request identifier, which AsyncPollComplete() and AsyncCancelRequest() match on.
+ * @ghidraAddress 0x00460bd0
  */
-struct AsyncRequest {
-    int mId;            /*!< Identifier the poll and cancel paths match on. +0x00 */
-    int mFile;          /*!< The file, closed on cancel when bit 0 of mFlags is set. +0x04 */
-    void *mBuffer;      /*!< Destination, released on cancel when mOwnsBuffer is set. +0x08 */
-    int mUnknown0c;     /*!< Undetermined. +0x0c */
-    int mUnknown10;     /*!< Undetermined. +0x10 */
-    unsigned mFlags;    /*!< Bit 0 makes cancel close mFile. +0x14 */
-    int mUnknown18;     /*!< Undetermined. +0x18 */
-    int mUnknown1c;     /*!< Undetermined. +0x1c */
-    AsyncJob *mJobs;    /*!< Job chain, released whenever the request leaves a list. +0x20 */
-    int mOwnsBuffer;    /*!< Non-zero when cancel must release mBuffer. +0x24 */
-    int mStatus;        /*!< What AsyncPollComplete reports. +0x28 */
-    int mUnknown2c;     /*!< Undetermined. +0x2c */
-};
+int AsyncSubmitRequest(int nFile,
+                       void *pBuffer,
+                       int nLength,
+                       int bCloseOnComplete,
+                       AsyncCallback *pCallback,
+                       int bOwnsBuffer);
+
+/**
+ * Open a path and queue the whole file as one asynchronous read.
+ *
+ * A path ending in `.gz` is inflated in place once the read completes. The buffer is sized to the
+ * larger of the stored and inflated sizes, the stored bytes are read into its tail, and
+ * kAsyncRequestInflate makes completion inflate them forward over the buffer. With no buffer
+ * supplied one is allocated, from the selected zone when there is one.
+ *
+ * @param pszPath The file to read.
+ * @param pBuffer The destination, or null to have one allocated.
+ * @param nLength The destination size, which is ignored when pBuffer is null.
+ * @param pCallback Receiver notified once the request completes, or null.
+ * @return The request identifier.
+ * @ghidraAddress 0x0045f148
+ */
+int AsyncLoadFileByPath(const char *pszPath, void *pBuffer, int nLength, AsyncCallback *pCallback);
+
+/**
+ * Split a request into chunk jobs and put it on the pending list.
+ *
+ * The request is passed by value, which is what the image does. Every caller copies the 48-byte
+ * record into its outgoing argument area and passes the address of the copy.
+ *
+ * On host media the read runs at once through FileRead() and the request completes in place. On
+ * disc media the file position is taken, the transfer is divided at kSectorCacheRowSize boundaries,
+ * and for an ark stream every chunk the sector cache already buffers is copied straight out of its
+ * row. Each remaining chunk takes a job off the free chain. A request with no job at all completes
+ * immediately.
+ *
+ * @param request The request to queue.
+ * @ghidraAddress 0x0045fc90
+ */
+void AsyncQueueRequest(AsyncRequest request);
+
+/**
+ * Finish a request and put it on the completed list.
+ *
+ * A positive status is reported through the log as `AsyncJobComplete: job %d has error: %d` and
+ * skips the inflate. kAsyncRequestInflate inflates mReadLength bytes from mReadBuffer over
+ * mBuffer, and a failed inflate is reported as status 5. kAsyncRequestCloseFile then closes mFile.
+ *
+ * @param pRequest The request to finish.
+ * @param nStatus The status to record.
+ * @ghidraAddress 0x0045ffa8
+ */
+void AsyncJobComplete(AsyncRequest *pRequest, int nStatus);
+
+/**
+ * Resolve a file handle to the file the sector cache is keyed by.
+ *
+ * An ark stream handle resolves to the archive's own file. Two streams inside one archive therefore
+ * share its cache rows. Any other handle resolves to itself.
+ *
+ * @param nFile The file handle.
+ * @return The resolved file, or -1 when no stream record has that handle.
+ * @ghidraAddress 0x00460d58
+ */
+int ResolveAsyncStreamFile(int nFile);
+
+/**
+ * Report whether the operation the drive is servicing right now covers a chunk.
+ *
+ * A row the in-flight operation is still filling must not be read out of the cache, which is the
+ * one use of this test.
+ *
+ * @param nFile The resolved file.
+ * @param nSector The 64 KiB chunk index.
+ * @return Non-zero when the current operation is filling that chunk.
+ * @ghidraAddress 0x00460f78
+ */
+int MatchesCurrentAsyncOp(int nFile, int nSector);
 
 /**
  * Advance the operation the media is servicing.
@@ -84,29 +223,41 @@ struct AsyncRequest {
 void AsyncCheck(int nBlocking);
 
 /**
+ * Drive completion callback the async layer installs on disc media.
+ *
+ * The shape is libcdvd's `sceCdCBFunc`, and the argument is the function code of the command that
+ * just finished. The drive error code is latched on every report, and a finished read or seek
+ * raises the flag AsyncCheck() waits on. Every other code only latches the error.
+ *
+ * @param nFunction The libcdvd function code of the finished command.
+ * @ghidraAddress 0x00460b28
+ */
+void AsyncMediaEventCallback(int nFunction);
+
+/**
  * Report a finished request and take it off the completed list.
  *
  * The request's job chain is released and its node erased. Either output pointer may be null.
  *
- * @param nId The request identifier.
- * @param pnOut1 Receives the request's +0x08 field, or null.
- * @param pnOut2 Receives the request's +0x14 field, or null.
+ * @param nHandle The identifier AsyncSubmitRequest() reported.
+ * @param ppBuffer Receives the request's buffer, or null to discard it.
+ * @param pnLength Receives the number of bytes the request covers, or null to discard it.
  * @return The request's status, or -1 when no completed request has that identifier.
  * @ghidraAddress 0x0045f658
  */
-int AsyncPollComplete(int nId, int *pnOut1, int *pnOut2);
+int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength);
 
 /**
  * Abandon a request wherever it sits.
  *
- * Both lists are searched. A matching request has its buffer released when it owns it, its file
- * closed when bit 0 of its flags is set, its job chain released, and its node erased. async.cpp
- * lines 481 and 499.
+ * Both lists are searched. A matching request has its buffer released when mOwnsBuffer is set, its
+ * file closed when kAsyncRequestCloseFile is set, its job chain released, and its node erased.
+ * async.cpp lines 481 and 499.
  *
- * @param nId The request identifier.
+ * @param nHandle The identifier AsyncSubmitRequest() reported.
  * @ghidraAddress 0x0045f738
  */
-void AsyncCancelRequest(int nId);
+void AsyncCancelRequest(int nHandle);
 
 /**
  * Report the queue to the log.
@@ -138,16 +289,65 @@ AsyncJob *AsyncGetFreeJobChain();
 void AsyncReleaseJobChain(AsyncJob *pChain);
 
 /**
- * Collect a finished read by handle.
+ * Read one run of bytes from a file.
  *
- * Walks the completed list for the job whose identifier matches, reports its result and status
- * through whichever out-parameters are supplied, then releases the job chain and unlinks it. Both
- * out-parameters are optional and a null one is skipped.
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * It dispatches on the handle, to the ark reader for an ark stream and to the host or disc reader
+ * otherwise.
  *
- * @param nHandle The identifier the submit returned.
- * @param ppResult Receives the job's result, or null to discard it.
- * @param pnStatus Receives the job's status, or null to discard it.
- * @return Non-zero when a matching job was collected.
- * @ghidraAddress 0x0045f658
+ * @param nFile The file to read.
+ * @param pBuffer The destination.
+ * @param nLength The number of bytes to read.
+ * @return The number of bytes transferred, which is not positive on failure.
+ * @ghidraAddress 0x0047e060
  */
-int AsyncPollComplete(int nHandle, void **ppResult, int *pnStatus);
+int FileRead(int nFile, void *pBuffer, int nLength);
+
+/**
+ * Move a file's read position.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ *
+ * @param nFile The file to move.
+ * @param nOffset The offset to move by.
+ * @param nOrigin One of FileSeekOrigin.
+ * @return The resulting position.
+ * @ghidraAddress 0x0047e1c8
+ */
+int FileSeek(int nFile, int nOffset, int nOrigin);
+
+/**
+ * Close a file.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ *
+ * @param nFile The file to close.
+ * @ghidraAddress 0x0047dfb0
+ */
+void FileClose(int nFile);
+
+/**
+ * Report an ark stream's read position.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * The position is measured inside the stream rather than inside the archive.
+ *
+ * @param nStream The ark stream handle, kFileHandleArkStream included.
+ * @return The position, or -1 when no stream record has that handle.
+ * @ghidraAddress 0x0055c028
+ */
+int GetArkStreamPosition(int nStream);
+
+/**
+ * Move an ark stream's read position.
+ *
+ * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * A resulting position before the start of the stream is clamped back to the start.
+ *
+ * @param nStream The ark stream handle, kFileHandleArkStream included.
+ * @param nOffset The offset to move by.
+ * @param nOrigin One of FileSeekOrigin.
+ * @return The resulting position, or -1 when no stream record has that handle.
+ * @ghidraAddress 0x0055bd38
+ */
+int SeekArkStream(int nStream, int nOffset, int nOrigin);
