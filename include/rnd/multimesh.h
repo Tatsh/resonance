@@ -53,18 +53,23 @@ public:
     virtual void Load(Stream &stream);
 
     /**
-     * Add this multi-mesh to the collision hit list of its mesh.
+     * Take a reference on the instanced mesh.
+     *
+     * Does nothing when mMesh is null. Otherwise it calls Rnd::Object::AddRef() with the mesh's
+     * Rnd::Object subobject and this multi-mesh's own. No list is involved.
      *
      * @ghidraAddress 0x004ebde0
      */
-    void AddToHitList();
+    void AcquireMeshRef();
 
     /**
-     * Remove this multi-mesh from the collision hit list of its mesh.
+     * Release the reference on the instanced mesh.
+     *
+     * The mirror of AcquireMeshRef(), through Rnd::Object::RemoveRef().
      *
      * @ghidraAddress 0x004ebe10
      */
-    void RemoveFromHitList();
+    void ReleaseMeshRef();
 
 protected:
     /**

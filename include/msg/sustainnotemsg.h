@@ -8,14 +8,14 @@
  * `14SustainNoteMsg` in the RTTI descriptor at `0x00901e20`, with MuseMsg as its one base. The
  * object is 0xc bytes and its vtable is at `0x00812db0`. The members below are the whole of the
  * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable. The fields through `+0x08` belong to MuseMsg and are declared
+ * type by anything but its vtable. The fields through `+0x07` belong to MuseMsg and are declared
  * there.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * Clone() copies only as far as `0x4` of the 0xc bytes it allocates, so the remaining 8 are
+ * Clone() copies only as far as `0x9` of the 0xc bytes it allocates, so the remaining 3 are
  * either alignment padding or a field the copy omits.
  *
  * The class overrides Message::Print() at `0x003e3a18`. That body streams the payload and is not
@@ -46,6 +46,9 @@ public:
      * @ghidraAddress 0x003dc7e8
      */
     virtual const char *Name();
+
+private:
+    unsigned char mUnknown08; // +0x08
 };
 
 /**
