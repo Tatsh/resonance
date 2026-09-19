@@ -53,11 +53,18 @@ public:
      * Vtable slot 2. Returns at once when nForce is clear, mDirty is clear, and the parent is
      * either absent or clean. Recurses over mTransList with the same call once it has recomposed.
      *
+     * The return is established by a caller rather than by the exits. Rnd::Cam's override calls
+     * this implementation and immediately branches on the result, running its own projection
+     * rebuild only when the base reports that it recomposed, and then reports the same itself.
+     * A caller that tests a value proves the value is meant, which is the mirror of a value every
+     * caller discards.
+     *
      * @param pParent The transformable this one hangs off, or null for a root.
      * @param nForce Non-zero to recompose even when nothing is marked dirty.
+     * @return Non-zero when the world transform was recomposed.
      * @ghidraAddress 0x004f0b18
      */
-    virtual void UpdateWorldXfm(Transformable *pParent, int nForce);
+    virtual int UpdateWorldXfm(Transformable *pParent, int nForce);
 
     /**
      * Set the billboard mode and mark the transform dirty.

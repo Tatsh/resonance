@@ -328,7 +328,7 @@ int PsMesh::DrawSelf() {
     if (mFacesOwner->mFaces.size() != 0) {
         do {
             g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
-            if (g_pCurrentCam->mnSuppressDepthRegs == 0 && nPass < kDepthProgramPassLimit) {
+            if (g_pCurrentCam->mpTargetTex == nullptr && nPass < kDepthProgramPassLimit) {
                 int nZMask = 0;
                 if (nPass != 0 || mZMode == kZModeDisable || mZMode == kZModeZReadOnly ||
                     mZMode == kZModeWReadOnly) {
@@ -374,7 +374,7 @@ int PsMesh::DrawSelf() {
     }
 
     g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
-    if (g_pCurrentCam->mnSuppressDepthRegs == 0) {
+    if (g_pCurrentCam->mpTargetTex == nullptr) {
         int nZTest = kGsZTestGEqual;
         if (mZMode == kZModeDisable || mZFunc == kZFuncAlways) {
             nZTest = kGsZTestAlways;
