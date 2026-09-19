@@ -4,7 +4,7 @@ concurrency:
   group: pages
 jobs:
   pages:
-    name: 'Publish the API reference'
+    name: 'Pages'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

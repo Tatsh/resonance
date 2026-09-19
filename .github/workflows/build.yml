@@ -4,14 +4,12 @@ concurrency:
   group: build-${{ github.ref }}
 jobs:
   compile:
-    name: 'Compile for the Emotion Engine'
+    name: 'Compile'
     runs-on: ubuntu-latest
     container:
       image: 'ghcr.io/ps2dev/ps2dev:latest'
     steps:
       - name: 'Install build dependencies'
-        # The image carries the toolchain and the SDK. CMake, Ninja, and git are added here rather
-        # than assumed, because the image exists to provide the cross compiler.
         run: apk add --no-cache build-base cmake git ninja
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
@@ -28,25 +26,18 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE="$PS2SDK/ps2dev.cmake" \
             -DCMAKE_BUILD_TYPE=Release
       - name: 'Compile'
-        # Keep going past a failing source rather than stopping at the first one. The goal at this
-        # stage is the object files and the archives the reconstruction can already produce, and a
-        # build halting on source one reports nothing about the other 334.
-        #
-        # -k belongs to Ninja rather than to cmake --build, so it goes after the separator. Given to
-        # cmake it is an unknown argument, and the step then logs a usage message and compiles
-        # nothing while still appearing to have run.
-        #
-        # The matcher turns each compiler line into an annotation, which is readable without
-        # repository rights where a run log and an artifact both need them.
         run: |
           echo "::add-matcher::.github/problem-matchers/gcc.json"
           cmake --build build --target archives -- -k 0 2>&1 | tee build/compile.log
-      - name: 'Count what was produced'
+      - name: 'Count produced artifacts'
         if: always()
         run: |
           OBJECTS=$(find build -name '*.o' | wc -l)
           ARCHIVES=$(find build -name '*.a' | wc -l)
+          # grep yields an empty string rather than a zero when the log is absent, which happens
+          # when an earlier step failed and this one still runs.
           ERRORS=$(grep -c 'error:' build/compile.log || true)
+          ERRORS=${ERRORS:-0}
           {
             echo "## Emotion Engine build"
             echo
@@ -59,7 +50,7 @@ jobs:
           echo "Compiled $OBJECTS object file(s) into $ARCHIVES archive(s), $ERRORS error(s)"
           find build -name '*.a' | sort
           test "$OBJECTS" -gt 0
-      - name: 'Upload the archives'
+      - name: 'Upload archives'
         if: always()
         uses: 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'
         with:
