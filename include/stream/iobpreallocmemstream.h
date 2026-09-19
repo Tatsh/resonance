@@ -91,7 +91,9 @@ public:
     /**
      * Report the caller-owned buffer.
      *
-     * IBStream vtable slot 10, the second virtual this class adds.
+     * IBStream vtable slot 10, the second virtual this class adds. No call site exists. Every
+     * reader of mBuffer in the image loads the member instead, and Ghidra reports no reference to
+     * the routine at all beyond the vtable entry.
      *
      * @return The buffer passed to the constructor.
      * @ghidraAddress 0x004edb60
@@ -125,8 +127,24 @@ public:
     /** @ghidraAddress 0x004ee498 */
     virtual OBStream &Reset();
 
-private:
+    /**
+     * Caller-owned byte buffer, which the constructor records and the destructor does not release.
+     *
+     * Public because three memory card task constructors load it directly out of the embedded
+     * stream immediately after constructing it, at `0x0017e5c8` in ListRemixesMCT, `0x0017bed0` in
+     * LoadRemixMCT, and `0x0017cee4` in DeleteRemixMCT. Each one is a plain word load at offset 8
+     * with no dispatch through Buffer(), and none of the three derives from this class.
+     *
+     * Two further readings fit the image equally well. A friend declaration per task class gives
+     * the same instructions. And a devirtualised inline `Buffer()` call would also compile to the
+     * one load, which is why the promotion is recorded as an inference rather than as a
+     * measurement.
+     *
+     * +0x08
+     */
     char *mBuffer;
+
+private:
     int mCapacity;
     int mWritePos;
     int mReadPos;

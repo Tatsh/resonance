@@ -46,8 +46,7 @@ MetScreen *MetScreen::FindScreenByName(const HxStr &name) {
 }
 
 void MetScreen::BeginContainerLoad(const HxStr &directory, const HxStr &file) {
-    HxStr dir(directory);
-    dir += kPathSeparator;
+    HxStr dir = directory + kPathSeparator;
     if (ContainerLoaderMap()[mUnknown28] == nullptr) {
         MetContainerLoad *pLoad = new MetContainerLoad;
         pLoad->mLoader = new RndAsyncLoader(dir, mUnknown28, mUnknown88);
@@ -97,14 +96,11 @@ void MetScreen::ResolveAnimationViews() {
 
 void MetScreen::ResolveContainerViews() {
     ResolveAnimationViews();
-    HxStr name(mUnknown80);
-    name += kViewSuffix;
+    HxStr name = mUnknown80 + kViewSuffix;
     Rnd::Object *pObject = Rnd::g_manager.Find(name);
     mUnknown14 = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     if (mUnknown14 != nullptr) {
-        // The binary runs Rnd::Animatable::ReleaseAnimsRefs() at 0x0049a960 on the resolved view
-        // here. The call is not written because that member is declared protected, and this class
-        // does not derive from Rnd::Animatable.
+        mUnknown14->ReleaseAnimsRefs();
     } else {
         LogPrintf(" the screen %s doesn't have a valid view!\n",
                   mUnknown80.mStr != nullptr ? mUnknown80.mStr : g_szEmptyString);

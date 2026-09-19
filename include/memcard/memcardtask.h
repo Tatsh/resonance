@@ -78,6 +78,18 @@ public:
     virtual void OnUnknown18();
 
 protected:
+    /**
+     * Abandon the task when the last operation reported a failure.
+     *
+     * An mStatus other than kMemcardStatusOk abandons every operation still queued under mCookie
+     * and then reports through Finish(). kMemcardStatusOk does nothing at all. Nothing in the
+     * image calls the out-of-line copy, every report handler across the sixteen subclasses having
+     * inlined the body instead.
+     *
+     * @ghidraAddress 0x00185998
+     */
+    void AbortOnError();
+
     // The receiver Finish() reports to. +0x04
     MemcardUser *mUser;
 

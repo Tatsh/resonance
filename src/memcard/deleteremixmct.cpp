@@ -19,9 +19,9 @@ DeleteRemixMCT::DeleteRemixMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie, const HxStr &remixName)
     : MemcardTask(pUser, pCard, nPortSlot, pCookie), mRemixName(remixName),
       mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
-    // The binary reads IOBPreallocMemStream::mBuffer directly. The accessor stands in for it
-    // because that member is declared private.
-    mBuffer = mStream.Buffer();
+    // The load at 0x0017cee4 reads the member rather than dispatching through
+    // IOBPreallocMemStream::Buffer(), which no call site in the image reaches.
+    mBuffer = mStream.mBuffer;
 }
 
 DeleteRemixMCT::~DeleteRemixMCT() {
@@ -29,9 +29,7 @@ DeleteRemixMCT::~DeleteRemixMCT() {
 
 void DeleteRemixMCT::ListRemixDir() {
     mStep = 0;
-    HxStr pattern(g_saveDirBase);
-    pattern += g_remixDirSuffix;
-    pattern += kAnyDirectory;
+    HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
