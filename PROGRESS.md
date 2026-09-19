@@ -16,13 +16,13 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                      | Count  |
 | ---------------------------- | ------ |
-| Functions in the program     | 14,943 |
-| Excluded by rule             | 1,816  |
-| Reconstructable              | 13,127 |
-| Accounted for in source      | 1,557  |
-| Share of the reconstructable | 11.86% |
-| Remaining, with a name       | 804    |
-| Remaining, unidentified      | 10,766 |
+| Functions in the program     | 14,954 |
+| Excluded by rule             | 1,824  |
+| Reconstructable              | 13,130 |
+| Accounted for in source      | 1,628  |
+| Share of the reconstructable | 12.40% |
+| Remaining, with a name       | 794    |
+| Remaining, unidentified      | 10,708 |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -43,17 +43,24 @@ rather than from absent code, which accounted for thirty-six of another band's f
 are fixed by confirming the owning class from the type-info accessor and by searching the tree
 before writing.
 
+A third caution outranks both. A title can identify a class that does not exist. Five renderer
+class names invented by an earlier pass appear on game code, and no descriptor among the 574 in the
+image bears any of them. Two bands were handed worklists grouped by those names, one of them 40
+entries of 50. The harvest's accessor field records the same invented names, because it ran after
+the pass that applied them. `.wiswa-ci/freq/make_band.py` now refuses a prefix that names no
+descriptor, and rejecting the three prefixes that caused the damage is its regression check.
+
 ### Breakdown of exclusions
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 821   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 458   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 284   | Bodies proven byte-identical to an already-named routine         |
-| Template library               | 170   | Container instantiations                                         |
+| Compiler-generated             | 820   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 457   | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 285   | Bodies proven byte-identical to an already-named routine         |
+| Template library               | 186   | Container instantiations                                         |
 | Platform SDK                   | 33    | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 16    | Exception and cast support                                       |
-| C runtime                      | 15    | String and memory routines                                       |
+| C++ runtime                    | 24    | Exception, cast, and unwinding support                           |
+| C runtime                      | 19    | String and memory routines, and the floating-point library       |
 
 ## Verification
 
@@ -62,8 +69,8 @@ Verification therefore stops at syntax and formatting.
 
 | Check                                | Status  |
 | ------------------------------------ | ------- |
-| Headers compiling standalone         | 346/346 |
-| Sources passing a syntax check       | 175/175 |
+| Headers compiling standalone         | 349/349 |
+| Sources passing a syntax check       | 181/181 |
 | Address annotations with no function | 0       |
 | Lines over 100 characters            | 0       |
 | `clang-format` differences           | 0       |
