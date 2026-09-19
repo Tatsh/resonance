@@ -16,13 +16,13 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                      | Count  |
 | ---------------------------- | ------ |
-| Functions in the program     | 14,954 |
-| Excluded by rule             | 3,914  |
-| Reconstructable              | 11,040 |
-| Accounted for in source      | 1,632  |
-| Share of the reconstructable | 14.78% |
-| Remaining, with a name       | 998    |
-| Remaining, unidentified      | 8,410  |
+| Functions in the program     | 14,963 |
+| Excluded by rule             | 3,917  |
+| Reconstructable              | 11,046 |
+| Accounted for in source      | 1,744  |
+| Share of the reconstructable | 15.79% |
+| Remaining, with a name       | 2,214  |
+| Remaining, unidentified      | 7,088  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -54,13 +54,13 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 820   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 508   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,320 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 190   | Container instantiations                                         |
+| Compiler-generated             | 822   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 563   | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 2,172 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 248   | Container instantiations                                         |
 | Platform SDK                   | 33    | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 24    | Exception, cast, and unwinding support                           |
-| C runtime                      | 19    | String and memory routines, and the floating-point library       |
+| C++ runtime                    | 43    | Exception, cast, and unwinding support                           |
+| C runtime                      | 36    | String and memory routines, and the floating-point library       |
 
 ## Verification
 
@@ -71,7 +71,7 @@ Verification therefore stops at syntax and formatting.
 | ------------------------------------ | ------- |
 | Headers compiling standalone         | 349/349 |
 | Sources passing a syntax check       | 181/181 |
-| Address annotations with no function | 0       |
+| Address annotations with no function | 1       |
 | Lines over 100 characters            | 0       |
 | `clang-format` differences           | 0       |
 
@@ -173,6 +173,14 @@ overrides of one pure virtual.
 The surplus members carry titles of the form `UnidentifiedBody<address>Copy<n>`. That form asserts
 nothing about behaviour. It records which address the body repeats, and nothing more.
 
+One rule behind that marking was wrong and is corrected. The pass accepted a cluster as one routine
+emitted many times whenever the body was long enough for coincidence to look implausible. Length
+does not decide it. A trivial destructor stores its class's vptr and nothing else, so every class
+sharing one base compiles a byte-identical destructor, and 47 identical bodies can be 47 distinct
+methods. Occupying a vtable slot is the test that separates the two cases, and 147 addresses the
+pass had marked hold one. All 147 are restored to placeholder names and are back in the
+denominator. The figure published before that correction was overstated by those 147.
+
 ### Identification levers, including the exhausted ones
 
 Three patterns in this image identify a routine from its own contents, with no inference. A class's
@@ -182,20 +190,22 @@ constructor. And slot zero of a class's vtable is that accessor, so an 8-byte en
 known accessor locates the table and the walk to its zero terminator enumerates the class's
 virtuals.
 
-The first of those named 375 routines across 33 tags. The other two are now **exhausted**, and the
-word is measured rather than assumed. Each pass was checked against routines whose answer was
-already established before its result was believed, because a detector that reports nothing looks
-exactly like a subsystem with nothing left to find. The accessor pass initially reported nothing
-because its demangler read a two-component qualified name as a twenty-three-component one and
-because it took the last name in the body rather than the one belonging to the final constructor
-call; five of six controls pass after both were fixed, and the result is still nothing, so every
-accessor in the image already carries its class's name. The vtable pass reports nothing for the
-same kind of reason and the controls confirm the walk: both control tables parse correctly, their
-terminators are found, and every slot of both is already titled.
+The allocation-tag pass named 375 routines across 33 tags. The accessor pass is exhausted: every
+type_info accessor in the image already carries its class's name. It first reported nothing through
+two defects of its own, a demangler reading a two-component qualified name as a
+twenty-three-component one and a detector taking the last name in the body rather than the one
+belonging to the final constructor call, and five of six controls pass after both were fixed.
 
-So the routines still unidentified are none of those things. They are non-virtual members reached
-by direct call, file-local helpers, free functions, and vendored library code, and each needs
-reading rather than a pattern.
+The vtable pass was recorded here as exhausted too, and that was wrong. Its walk computed each
+table's base one word below the true address, so it located tables and then misread every entry.
+An earlier control validated the entry layout using a separately computed table address, which
+meant the control never exercised the faulty arithmetic. With it corrected the same pass attributes
+1,069 routines to their owning class and 1,068 read back. A slot title records the owner and the
+slot index and nothing else, so ownership is measured and the verb stays open.
+
+Two lessons sit behind that. A pass reporting nothing looks exactly like a subsystem with nothing
+left to find, so a negative result needs a control before it is believed. And a control has to
+exercise the part that can be wrong, not merely the part that is easy to check.
 
 Four clusters of 148 copies each remain unidentified, at `0x00107d28`, `0x00107eb8`, `0x001080a8`,
 and `0x00108738`. They are members of one map keyed by object name: the comparator is
