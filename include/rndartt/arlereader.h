@@ -16,7 +16,11 @@ constexpr int kARleReaderNoTransparentValue = -1;
  *
  * The encoding is one control byte followed by data. The low seven bits are the run length. A set
  * top bit introduces that many literal bytes, and a clear top bit introduces one byte repeated
- * that many times. A control byte of zero terminates the stream.
+ * that many times.
+ *
+ * A control byte of zero terminates the stream, and both routines examine it only at a row
+ * boundary. A row ends when its pixel count is exhausted rather than on a zero, and a zero control
+ * byte reached part way through a row is decoded as a run of length zero.
  *
  * mTransparentValue changes what a run does to the destination rather than what it consumes. A
  * value of zero or more skips a byte equal to it, and kARleReaderNoTransparentValue stores every

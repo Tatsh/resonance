@@ -20,9 +20,9 @@
  * ONE BYTE IS ONE PIXEL, so the address of a pixel is `mPixels + nY * mBytesPerRow + nX` with no
  * packing and no odd-start flag. The four-bit sibling needs both.
  *
- * Nine bodies are not yet written: the three block copies, the four row operations, the two stretch
- * variants, and the textured row. Each is recoverable and each is a loop over the row primitives
- * the written bodies already establish.
+ * Six bodies are not yet written: two row operations, the three stretch variants, and the textured
+ * row. Each is recoverable and each is a loop over the row primitives the written bodies already
+ * establish.
  */
 class ACanvasLin8 : public ACanvas8 {
 public:
@@ -62,7 +62,7 @@ public:
     /** Slot 39. One memset per row. @ghidraAddress 0x00628718 */
     virtual void FillRectNoClip(ARect rect);
 
-    /** Slot 43. Body not yet written. @ghidraAddress 0x006287b8 */
+    /** Slot 43. @ghidraAddress 0x006287b8 */
     virtual void RemapRectIndices(ARect rect, const unsigned char *pRemap);
 
     /** Slot 46. Body not yet written. @ghidraAddress 0x00628db0 */
@@ -73,13 +73,22 @@ public:
                                    APoint *pSourcePosition,
                                    const APoint *pSourceStep);
 
-    /** Slot 47. Body not yet written. @ghidraAddress 0x00628848 */
+    /** Slot 47. Unpacks nibbles, honouring the source's odd-start flag. @ghidraAddress 0x00628848
+     */
     virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 49. Body not yet written. @ghidraAddress 0x00628918 */
+    /**
+     * Slot 49.
+     *
+     * Three tiers, widest first. An unkeyed source whose pitch matches this canvas's is copied in
+     * one block, an unkeyed source is copied a row at a time, and a keyed source is walked a byte
+     * at a time.
+     *
+     * @ghidraAddress 0x00628918
+     */
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 57. Body not yet written. @ghidraAddress 0x00628a48 */
+    /** Slot 57. Decodes through ARleReader, one row per call. @ghidraAddress 0x00628a48 */
     virtual void BlitRle8NoClip(const ABitmap &source, int nX, int nY);
 
     /** Slot 75. Body not yet written. @ghidraAddress 0x00628ae8 */
