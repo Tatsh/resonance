@@ -1,9 +1,9 @@
 #ifndef LIBGRAPH_H
 #define LIBGRAPH_H
 
-// Build support for the open-source SDK. Sony's libgraph is not part of ps2sdk, so the entry
-// points the reconstruction calls are declared here with the signatures the shipped program's call
-// sites prove. Nothing here is reconstructed source.
+// Build support for the open-source SDK. Sony's libgraph is not part of ps2sdk. The entry points
+// the reconstruction calls are declared here with the signatures the shipped program's call sites
+// prove. Nothing here is reconstructed source.
 
 #ifdef __cplusplus
 extern "C" {

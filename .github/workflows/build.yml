@@ -34,8 +34,8 @@ jobs:
         run: |
           OBJECTS=$(find build -name '*.o' | wc -l)
           ARCHIVES=$(find build -name '*.a' | wc -l)
-          # grep yields an empty string rather than a zero when the log is absent, which happens
-          # when an earlier step failed and this one still runs.
+          # grep yields an empty string rather than a zero when the log is absent. That happens
+          # whenever an earlier step failed and this one still runs.
           ERRORS=$(grep -c 'error:' build/compile.log || true)
           ERRORS=${ERRORS:-0}
           {

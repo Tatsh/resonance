@@ -228,6 +228,7 @@ libcdvd's
 libera
 libgraph
 libmc
+libmtap
 libscf
 libsd
 libsd's

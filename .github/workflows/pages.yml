@@ -20,13 +20,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y doxygen graphviz
       - name: 'Configure'
-        # A docs-only configure skips the sources entirely, so the cross toolchain is not needed
-        # here and this job runs on the plain runner.
+        # A docs-only configure skips the sources entirely. The cross toolchain is not needed here
+        # and this job runs on the plain runner.
         run: cmake -B "${{ github.workspace }}/build" -DBUILD_DOCS_ONLY=ON
       - name: 'Build documentation'
         run: cmake --build "${{ github.workspace }}/build" --target docs
       - name: 'Page count'
-        # Doxygen reports success over an empty output, so the page count is recorded.
+        # Doxygen reports success over an empty output. The page count is therefore recorded.
         run: |
           COUNT=$(find "${{ github.workspace }}/build/html" -name '*.html' | wc -l)
           echo "Generated $COUNT page(s)"
