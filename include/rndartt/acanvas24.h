@@ -14,10 +14,13 @@
  * stub: the alpha builder, the colourless store, and the two channel-triple pixel accessors. Its
  * layout subclass is ACanvasLin24, whose descriptor records ACanvas24 as its base.
  *
- * Each format class in this family leaves a different subset pure, which is the clearest evidence
- * that the division is by responsibility rather than by convenience. ACanvas8 leaves the two
- * indexed accessors and the colourless store; this class supplies both indexed accessors and
- * leaves the channel-triple pair instead.
+ * WHICH FOUR IT LEAVES IS THE DESIGN OF THE WHOLE FAMILY, and it is exact. A format class
+ * implements every colour format OTHER than its own, by converting into its own, and leaves its own
+ * format's pixel pair to whichever subclass knows the memory layout. This class leaves the
+ * channel-triple pair at 19 and 29, ACanvas15 leaves the 1555 pair at 17 and 27, and ACanvas8
+ * leaves the indexed pair at 15 and 25. Each also leaves slot 13, the colourless store. The alpha
+ * builder at slot 12 is left by this class and by ACanvas15 and supplied by ACanvas8, which can do
+ * it because an indexed format owns a palette whose entries can be rewritten.
  *
  * THE COLOUR MEMBER IS ACCESSED BOTH AS A WORD AND AS BYTES, so it is modelled as a union. The
  * native setter at 0x00630388 stores a whole word at `+0x24` with one instruction, while the index

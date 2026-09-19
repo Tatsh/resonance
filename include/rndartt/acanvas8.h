@@ -8,16 +8,23 @@
  * The name comes from the RTTI descriptor at 0x008ef130, whose mangled form is `8ACanvas8` and
  * whose single public base is ACanvas at offset zero.
  *
- * THE CLASS IS ABSTRACT, and it leaves more pure than its siblings do. Its table at 0x00841678 runs
- * the same 85 entries as ACanvas's, so it adds no virtual, and it fills 21 of the base's pure slots
- * while leaving slots 13, 15, and 25 pointing at the shared pure-virtual stub. Those three are the
- * two indexed pixel accessors and the colourless store, which are the three that depend on how
- * pixels are packed rather than on the colour format.
+ * THE CLASS IS ABSTRACT. Its table at 0x00841678 runs the same 85 entries as ACanvas's, so it adds
+ * no virtual, and of the base's 22 pure slots it leaves three pointing at the shared pure-virtual
+ * stub: 13, 15, and 25, which are the colourless store and the indexed pixel pair.
+ *
+ * WHICH THREE IT LEAVES IS THE DESIGN OF THE WHOLE FAMILY, and it is exact. A format class
+ * implements every colour format OTHER than its own, by converting into its own, and leaves its own
+ * format's pixel pair to whichever subclass knows the memory layout. This class leaves the indexed
+ * pair at 15 and 25, ACanvas15 leaves the 1555 pair at 17 and 27, and ACanvas24 leaves the
+ * channel-triple pair at 19 and 29. Each also leaves slot 13, the colourless store.
+ *
+ * This class differs from its two siblings in one slot and can explain it: the alpha builder at
+ * slot 12 is supplied here and left pure by both of them, because an indexed format owns a palette
+ * whose entries can be rewritten and neither of theirs does.
  *
  * Two layout classes derive from this one, ACanvasLin4 and ACanvasLin8, and their descriptors
  * record ACanvas8 as their base rather than ACanvas. Four bits and eight bits per pixel address
- * memory differently, which is why this class cannot implement those three slots and its 1555
- * sibling, with one layout subclass, leaves only slot 13.
+ * memory differently, which is why the indexed pair cannot live here.
  *
  * mColor is a single BYTE at offset 0x24, written with `sb` and read with `lbu`, where ACanvas15
  * keeps a halfword and ACanvas32 a word at the same offset. For this format the native value and

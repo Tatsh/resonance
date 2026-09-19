@@ -9,15 +9,21 @@
  * whose single public base is ACanvas at offset zero. The address recorded here previously,
  * 0x008ef130, is ACanvas8's descriptor rather than this one's.
  *
- * THE CLASS IS ABSTRACT. Its table at 0x00840748 runs the same 85 entries as ACanvas's, filling 20
- * of the base's pure slots and leaving slot 13 still pointing at the shared pure-virtual stub. So
- * it cannot be instantiated, and the class that completes it is ACanvasLin15, whose descriptor
- * records ACanvas15 as its base rather than ACanvas.
+ * THE CLASS IS ABSTRACT. Its table at 0x00840748 runs the same 85 entries as ACanvas's, and of the
+ * base's 22 pure slots it leaves FOUR still pointing at the shared pure-virtual stub: 12, 13, 17,
+ * and 27. So it cannot be instantiated, and the class that completes it is ACanvasLin15, whose
+ * descriptor records ACanvas15 as its base rather than ACanvas.
  *
- * That two-level shape is the design of the whole family. A format class supplies what depends on
- * the colour format and leaves what depends on the pixel layout pure; the layout subclass supplies
- * the rest. ACanvas8 leaves three slots pure rather than one, because two layout classes derive
- * from it, ACanvasLin4 and ACanvasLin8, whose indexed addressing differs.
+ * WHICH FOUR IT LEAVES IS THE DESIGN OF THE WHOLE FAMILY, and it is exact rather than approximate.
+ * A format class implements every colour format OTHER than its own, by converting into its own, and
+ * leaves its own format's pixel pair to whichever subclass knows the memory layout. This class
+ * leaves the 1555 pair at 17 and 27, ACanvas24 leaves the channel-triple pair at 19 and 29, and
+ * ACanvas8 leaves the indexed pair at 15 and 25. Each also leaves slot 13, the colourless store.
+ * The alpha builder at slot 12 is left by this class and by ACanvas24 and supplied by ACanvas8,
+ * which can do it because that format owns a palette to rewrite.
+ *
+ * So a format class converts inward and a layout class addresses memory, and the boundary between
+ * them falls exactly on the format each one is named for.
  *
  * The class is therefore the counterpart of ACanvas32: it supplies every colour format in terms of
  * two 1555 accessors its own subclass provides. Its translation unit sits between 0x0062fb40 and
