@@ -1,0 +1,108 @@
+#include "game/gameparams.h"
+
+// 0x00187170
+GameParams::GameParams() {
+    mUnknown10 = 0;
+    mUnknown1c = 0;
+    mUnknown20 = 0;
+    mUnknown24 = false;
+    mUnknown28 = false;
+    mUnknown2c = false;
+    mUnknown30 = false;
+}
+
+// 0x00187940
+GameParams::~GameParams() {
+}
+
+// 0x001871b8
+void GameParams::Save(OBStream *pStream) {
+    unsigned length00 = mUnknown00.mLen;
+    pStream->Write(&length00, sizeof(length00));
+    // An empty string has no buffer, and the stream receives the shared empty string in place of a
+    // null pointer.
+    pStream->WriteBytes(mUnknown00.mStr != nullptr ? mUnknown00.mStr : g_szEmptyString, length00);
+
+    unsigned length08 = mUnknown08.mLen;
+    pStream->Write(&length08, sizeof(length08));
+    pStream->WriteBytes(mUnknown08.mStr != nullptr ? mUnknown08.mStr : g_szEmptyString, length08);
+
+    int unknown10 = mUnknown10;
+    pStream->Write(&unknown10, sizeof(unknown10));
+
+    int unknown1c = mUnknown1c;
+    pStream->Write(&unknown1c, sizeof(unknown1c));
+
+    int unknown20 = mUnknown20;
+    pStream->Write(&unknown20, sizeof(unknown20));
+
+    int unknown24 = mUnknown24;
+    pStream->Write(&unknown24, sizeof(unknown24));
+
+    int unknown28 = mUnknown28;
+    pStream->Write(&unknown28, sizeof(unknown28));
+
+    int unknown2c = mUnknown2c;
+    pStream->Write(&unknown2c, sizeof(unknown2c));
+
+    int unknown30 = mUnknown30;
+    pStream->Write(&unknown30, sizeof(unknown30));
+}
+
+// 0x00187390
+void GameParams::Load(IBStream *pStream) {
+    unsigned length00;
+    pStream->Read(&length00, sizeof(length00));
+    mUnknown00.Alloc(length00);
+    pStream->ReadBytes(mUnknown00.mStr != nullptr ? mUnknown00.mStr :
+                                                    const_cast<char *>(g_szEmptyString),
+                       length00);
+
+    unsigned length08;
+    pStream->Read(&length08, sizeof(length08));
+    mUnknown08.Alloc(length08);
+    pStream->ReadBytes(mUnknown08.mStr != nullptr ? mUnknown08.mStr :
+                                                    const_cast<char *>(g_szEmptyString),
+                       length08);
+
+    pStream->Read(&mUnknown10, sizeof(mUnknown10));
+
+    // mUnknown1c arrives in a local and is copied across afterwards, where mUnknown10 and
+    // mUnknown20 are filled in place. Both are plain words, and the asymmetry matches the binary.
+    int unknown1c;
+    pStream->Read(&unknown1c, sizeof(unknown1c));
+
+    pStream->Read(&mUnknown20, sizeof(mUnknown20));
+
+    int unknown24;
+    pStream->Read(&unknown24, sizeof(unknown24));
+
+    int unknown28;
+    pStream->Read(&unknown28, sizeof(unknown28));
+
+    int unknown2c;
+    pStream->Read(&unknown2c, sizeof(unknown2c));
+
+    int unknown30;
+    pStream->Read(&unknown30, sizeof(unknown30));
+
+    mUnknown1c = unknown1c;
+    mUnknown24 = unknown24 != 0;
+    mUnknown28 = unknown28 != 0;
+    mUnknown2c = unknown2c != 0;
+    mUnknown30 = unknown30 != 0;
+}
+
+// 0x00187be8
+GameParams &GameParams::operator=(const GameParams &other) {
+    mUnknown00 = other.mUnknown00;
+    mUnknown08 = other.mUnknown08;
+    mUnknown10 = other.mUnknown10;
+    mUnknown1c = other.mUnknown1c;
+    mUnknown20 = other.mUnknown20;
+    mUnknown24 = other.mUnknown24;
+    mUnknown28 = other.mUnknown28;
+    mUnknown2c = other.mUnknown2c;
+    mUnknown30 = other.mUnknown30;
+    return *this;
+}

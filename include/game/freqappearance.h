@@ -1,48 +1,106 @@
 #pragma once
 
-#include "os/hxstr.h"
+#include <iostream.h>
 
-// Non-polymorphic 0xb0-byte class that FreqAppearance owns one of. Its constructor is at
-// 0x00249c40, it stores no vtable, and it has a std::list at its own +0xa0. Nothing in the image
-// names it, so the title here is inferred from its one owner. Only the pointer is needed, so the
-// class stays incomplete rather than being given an invented layout.
-class FreqAppearanceDetail;
+#include "game/freqappearancedetail.h"
+#include "os/hxstr.h"
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
 
 /**
  * Appearance of a player's avatar.
  *
  * `14FreqAppearance` in the RTTI descriptor at `0x0086f580`, with no base, so the compiler places
- * the vptr after the data at `+0x10` and the class is 0x14 bytes. Its vtable is at `0x007d98a0`.
+ * the vptr after the data at `+0x10` and the class is 0x14 bytes. Its vtable at `0x007d98a0` has
+ * four entries and a zero terminator at index 4, the type function, the destructor, and the two
+ * transfer members.
  *
- * The layout comes from the copy constructor at `0x00174668`, which builds the members and then
- * assigns from the source through the assignment operator rather than copying them one by one.
- * That constructor is also what establishes the ownership: it takes 0xb0 bytes from the allocator
- * for the detail object and stores the pointer at `+0x08`, and the assignment operator releases
- * and replaces it. The purpose of each member is not recovered, and no reader has been traced, so
- * every member is private.
+ * The purpose of two of the three members is recovered from the diagnostic literals Print() writes.
+ * `username=` precedes the string at `+0x00`, so that member is the player username, and
+ * ` SkillStatus=` precedes the word at `+0x0c`. The detail object at `+0x08` sits behind ` Freq=`.
+ * Both literals are display labels rather than identifiers, and they disagree with each other on
+ * capitalisation, so neither is treated as an attested member name and both members retain their
+ * recovered-purpose-pending spelling.
+ *
+ * The layout comes from the copy constructor and the destructor together. The copy constructor
+ * takes 0xb0 bytes from the allocator for the detail object and stores the pointer at `+0x08`, and
+ * the destructor releases the detail object and the string buffer. Every member is private, because
+ * the only readers outside the class are the two transfer members and Print().
+ *
+ * PSJoinRequestPacket::Save() and PlayerInfo::Save() both delegate an embedded FreqAppearance to
+ * slot 2 of this table, and their Load() counterparts to slot 3, which is what establishes the two
+ * slots as the transfer pair rather than inferring the roles from this class alone.
  */
 class FreqAppearance {
 public:
     /**
+     * Copy another appearance.
+     *
+     * The three members are initialised first and the assignment below then replaces the string
+     * and the detail object. The initial username and the cleared skill status therefore both
+     * survive into the copy only for as long as the assignment takes, and because the assignment
+     * does not touch the skill status, a copy always reports a skill status of zero.
+     *
      * @param other The appearance to copy.
      * @ghidraAddress 0x00174668
      */
     FreqAppearance(const FreqAppearance &other);
 
     /**
-     * Replace this appearance with a copy of another.
+     * Release the detail object.
      *
-     * Self-assignment is tested first and does nothing. Otherwise the name is assigned and the
-     * detail object at `+0x08` is released and replaced.
+     * @ghidraAddress 0x00174730
+     */
+    virtual ~FreqAppearance();
+
+    /**
+     * Write the appearance to a stream.
+     *
+     * Slot 2. A version word of 8 precedes the payload.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00171060
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the appearance back from a stream.
+     *
+     * Slot 3. The version word Save() writes is read and discarded, so no version older than the
+     * current one is handled differently.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x001747a8
+     */
+    virtual void Load(IBStream &stream);
+
+    /**
+     * Write the username and the skill status to a diagnostic stream.
+     *
+     * The two literals ` Freq=` and ` SkillStatus=` arrive back to back with no value between them,
+     * so the detail object is never written.
+     *
+     * The member is not virtual and occupies no table slot. PlayerInfo::Print() runs it on its
+     * embedded appearance.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00174878
+     */
+    void Print(ostream &stream);
+
+    /**
+     * Replace the username and the detail object with another appearance's.
+     *
+     * Self-assignment is tested first and does nothing. The skill status is not copied, and the
+     * routine returns nothing.
      *
      * @param other The appearance to copy.
-     * @return This appearance.
      * @ghidraAddress 0x001748e0
      */
-    FreqAppearance &operator=(const FreqAppearance &other);
+    void operator=(const FreqAppearance &other);
 
 private:
-    HxStr mUnknown00;              // +0x00 constructed from a literal at 0x007d97b8
+    HxStr mUnknown00;              // +0x00 the username, starting as the literal `initial name`
     FreqAppearanceDetail *mDetail; // +0x08 owned, 0xb0 bytes
-    int mUnknown0c;                // +0x0c cleared on construction
+    int mUnknown0c;                // +0x0c the skill status
 };
