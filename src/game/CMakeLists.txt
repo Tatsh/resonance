@@ -35,13 +35,5 @@ set(RESONANCE_GAME_SRCS
     trackselector.cpp
     voxingstg.cpp)
 
-# Each of these reconstructs a routine whose body ignores a parameter its
-# signature declares. The call sites prove the routine takes that parameter. The
-# warning therefore reports a property of the original rather than a defect here,
-# and it is disabled for these sources only.
-set_source_files_properties(
-    scoretrackgraph.cpp
-    PROPERTIES COMPILE_OPTIONS -Wno-unused-parameter)
-
 add_library(resonance_game STATIC ${RESONANCE_GAME_SRCS})
 target_link_libraries(resonance_game PRIVATE resonance_common)

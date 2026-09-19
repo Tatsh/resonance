@@ -41,19 +41,20 @@ void Synth::Slot10() {
 }
 
 // 0x003f65c8 is the one implementation. This body is empty.
-void Synth::SelectBank(unsigned char nChannel, unsigned char nBank) {
+void Synth::SelectBank([[maybe_unused]] unsigned char nChannel,
+                       [[maybe_unused]] unsigned char nBank) {
 }
 
 // 0x0013a208
-void Synth::Slot12(int bEnable) {
+void Synth::Slot12([[maybe_unused]] int bEnable) {
 }
 
 // 0x0013a210
-void Synth::Slot13(int nValue) {
+void Synth::Slot13([[maybe_unused]] int nValue) {
 }
 
 // 0x0013a218
-void Synth::Slot14(int nValue) {
+void Synth::Slot14([[maybe_unused]] int nValue) {
 }
 
 // 0x0013a220

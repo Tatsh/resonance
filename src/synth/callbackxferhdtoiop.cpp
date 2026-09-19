@@ -16,7 +16,11 @@ constexpr int kFreeReadBufferLine = 0x17e;
 CallbackXferHdToIop g_hdXfer;
 
 // 0x00464d10
-void CallbackXferHdToIop::Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus) {
+void CallbackXferHdToIop::Done([[maybe_unused]] int nHandle,
+                               [[maybe_unused]] int nFile,
+                               void *pBuffer,
+                               int nLength,
+                               int nStatus) {
     if (nStatus > 0) {
         LogPrintf("HD bank loading returned async error %d\n", nStatus);
     } else {

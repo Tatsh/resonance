@@ -501,7 +501,10 @@ void VramTableEntry::SetPinned(int bPinned) {
 }
 
 // 0x00515058
-int VramTableEntry::BlocksForImage(int nWidth, int nHeight, int nBitsPerPixel, int nPsm) const {
+int VramTableEntry::BlocksForImage(int nWidth,
+                                   int nHeight,
+                                   [[maybe_unused]] int nBitsPerPixel,
+                                   int nPsm) const {
     int nPageWidth;
     int nPageHeight;
     switch (nPsm) {
@@ -578,7 +581,7 @@ int VramTableEntry::GetBlockAddr() {
 
 // 0x00515160
 int VramTableEntry::UploadImage(
-    const void *pSource, int nWidth, int nHeight, int nBitsPerPixel, int nPsm) {
+    const void *pSource, int nWidth, int nHeight, [[maybe_unused]] int nBitsPerPixel, int nPsm) {
     if (mMemAddr == 0) {
         g_vramTable.AllocBlock(this, mSize);
     }
@@ -611,8 +614,12 @@ int VramTableEntry::UploadImage(
 }
 
 // 0x005152a8
-void VramTableEntry::UploadSubImage(
-    const void *pSource, int nWidth, int nHeight, int nBitsPerPixel, int nPsm, int nBlockOffset) {
+void VramTableEntry::UploadSubImage(const void *pSource,
+                                    int nWidth,
+                                    int nHeight,
+                                    [[maybe_unused]] int nBitsPerPixel,
+                                    int nPsm,
+                                    int nBlockOffset) {
     int nTbw = (nWidth + kGsTexelsPerTbwUnit - 1) / kGsTexelsPerTbwUnit;
     if (nPsm == kGsPsmT8 || nPsm == kGsPsmT4) {
         nTbw = (nTbw + 1) & ~1;
@@ -761,7 +768,7 @@ int VramPalEntry::GetBlockAddr() {
 
 // 0x00515590
 int VramPalEntry::UploadClut(
-    const void *pSource, int nWidth, int nHeight, int nBitsPerPixel, int nPsm) {
+    const void *pSource, int nWidth, int nHeight, [[maybe_unused]] int nBitsPerPixel, int nPsm) {
     if (mMemAddr == 0) {
         mMemAddr = static_cast<unsigned short>(AllocBlock());
         if (g_pVramPalUsed != nullptr) {

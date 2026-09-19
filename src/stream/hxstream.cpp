@@ -12,7 +12,7 @@ HxStream::~HxStream() {
 }
 
 // 0x00145f18
-void HxStream::Seek(int nOffset, int nWhence) {
+void HxStream::Seek([[maybe_unused]] int nOffset, [[maybe_unused]] int nWhence) {
 }
 
 // 0x00145f20
@@ -26,12 +26,12 @@ int HxStream::Size() {
 }
 
 // 0x00145f30
-HxStream &HxStream::Write(const void *pSrc, int nSize) {
+HxStream &HxStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
     return *this;
 }
 
 // 0x00145f38
-HxStream &HxStream::Read(void *pDest, int nSize) {
+HxStream &HxStream::Read([[maybe_unused]] void *pDest, [[maybe_unused]] int nSize) {
     return *this;
 }
 

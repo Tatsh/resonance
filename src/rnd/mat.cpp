@@ -503,7 +503,7 @@ const HxStr &Mat::ClassName() const {
 }
 
 // 0x004dce18
-void Mat::Copy(const Object *pSource, unsigned nFlags) {
+void Mat::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     const Mat *pMat = dynamic_cast<const Mat *>(pSource);
 
     for (auto &stage : mStages) {

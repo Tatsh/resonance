@@ -285,7 +285,7 @@ void Font::Replace(Object *pFrom, Object *pTo) {
 }
 
 // 0x004cb0b8
-void Font::Copy(const Object *pSource, unsigned nFlags) {
+void Font::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     // The cast result is dereferenced with no null check, so a pSource of another class faults here
     // rather than being rejected. No base implementation is invoked and nFlags is never read.
     const Font *pFont = pSource != nullptr ? dynamic_cast<const Font *>(pSource) : nullptr;

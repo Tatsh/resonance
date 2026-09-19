@@ -155,7 +155,8 @@ void Heap::Destroy() {
     }
 }
 
-void *Heap::Alloc(unsigned nSize, const char *pszFile, int nLine) {
+void *
+Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     ++mCallsAlloc;
 
@@ -226,7 +227,7 @@ void *Heap::Alloc(unsigned nSize, const char *pszFile, int nLine) {
     return NodePayload(pChosen);
 }
 
-void Heap::Free(void *pBlock, const char *pszFile, int nLine) {
+void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     if (pBlock == nullptr) {
         AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
@@ -283,7 +284,10 @@ void Heap::Free(void *pBlock, const char *pszFile, int nLine) {
     AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
 }
 
-void *Heap::Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine) {
+void *Heap::Realloc(void *pBlock,
+                    unsigned nSize,
+                    [[maybe_unused]] const char *pszFile,
+                    [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     ++mCallsRealloc;
 

@@ -27,7 +27,11 @@ CallbackXferBdToIop::CallbackXferBdToIop(
 }
 
 // 0x00464430
-void CallbackXferBdToIop::Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus) {
+void CallbackXferBdToIop::Done([[maybe_unused]] int nHandle,
+                               [[maybe_unused]] int nFile,
+                               [[maybe_unused]] void *pBuffer,
+                               [[maybe_unused]] int nLength,
+                               int nStatus) {
     if (nStatus > 0) {
         LogPrintf("BD bank loading returned async error %d\n", nStatus);
     }

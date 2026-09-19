@@ -47,11 +47,11 @@ void Command::Print(std::ostream &stream) {
 }
 
 // 0x00539f20
-void Command::Save(OBStream &stream) {
+void Command::Save([[maybe_unused]] OBStream &stream) {
 }
 
 // 0x00539f28
-void Command::Load(IBStream &stream) {
+void Command::Load([[maybe_unused]] IBStream &stream) {
 }
 
 // 0x00539fe8

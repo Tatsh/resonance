@@ -61,7 +61,7 @@ int HxMemStream::Size() {
 }
 
 // 0x00405ea0
-HxStream &HxMemStream::Write(const void *pSrc, int nSize) {
+HxStream &HxMemStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
     Fatal(kNoWriteMessage);
     return *this;
 }

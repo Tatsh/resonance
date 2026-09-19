@@ -81,7 +81,7 @@ MetScreen *MetScreen::FindScreenByName(const HxStr &name) {
     return pScreen;
 }
 
-void MetScreen::BeginContainerLoad(const HxStr &directory, const HxStr &file) {
+void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] const HxStr &file) {
     HxStr dir = directory + kPathSeparator;
     if (ContainerLoaderMap()[mUnknown28] == nullptr) {
         MetContainerLoad *pLoad = new MetContainerLoad;
@@ -241,22 +241,23 @@ void MetScreen::OnDrawPass() {
 void MetScreen::OnDestroying() {
 }
 
-void MetScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
+void MetScreen::OnMsgScreenDismissed([[maybe_unused]] const HxStr &name,
+                                     [[maybe_unused]] int nChoice) {
 }
 
-void MetScreen::OnMsgScreenShown(const HxStr &name) {
+void MetScreen::OnMsgScreenShown([[maybe_unused]] const HxStr &name) {
 }
 
-void MetScreen::HandleCommand(const MetScreenCommand *pCommand) {
+void MetScreen::HandleCommand([[maybe_unused]] const MetScreenCommand *pCommand) {
 }
 
-void MetScreen::OnUnknownSlot26(float flTime) {
+void MetScreen::OnUnknownSlot26([[maybe_unused]] float flTime) {
 }
 
-void MetScreen::UpdateIdleAnimation(float flTime) {
+void MetScreen::UpdateIdleAnimation([[maybe_unused]] float flTime) {
 }
 
-void MetScreen::OnUnknownSlot30(Rnd::Object *pObject) {
+void MetScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Object *pObject) {
 }
 
 void MetScreen::OnUnknownSlot33() {
@@ -265,10 +266,10 @@ void MetScreen::OnUnknownSlot33() {
 void MetScreen::OnUnknownSlot36() {
 }
 
-void MetScreen::HandleMessage(Message *pMsg) {
+void MetScreen::HandleMessage([[maybe_unused]] Message *pMsg) {
 }
 
-void MetScreen::PlaySlideSound(int nSelector) {
+void MetScreen::PlaySlideSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kSlideSound);
 }
 
@@ -276,19 +277,19 @@ void MetScreen::PlayLeaveSound() {
     PlaySoundByName(kLeaveSound);
 }
 
-void MetScreen::PlayHighSound(int nSelector) {
+void MetScreen::PlayHighSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kHighSound);
 }
 
-void MetScreen::PlayCycleLeftSound(int nSelector) {
+void MetScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kCycleLeftSound);
 }
 
-void MetScreen::PlayCycleRightSound(int nSelector) {
+void MetScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kCycleRightSound);
 }
 
-void MetScreen::PlayErrorSound(int nSelector) {
+void MetScreen::PlayErrorSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kErrorSound);
 }
 

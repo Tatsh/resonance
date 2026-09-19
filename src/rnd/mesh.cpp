@@ -739,7 +739,7 @@ void Mesh::Sync() {
 }
 
 // 0x00492778
-void Mesh::SyncChanged(int nMask) {
+void Mesh::SyncChanged([[maybe_unused]] int nMask) {
 }
 
 // 0x00492780

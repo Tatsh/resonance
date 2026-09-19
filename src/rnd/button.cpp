@@ -245,7 +245,7 @@ void Button::Replace(Object *pFrom, Object *pTo) {
 }
 
 // 0x00534780
-void Button::Copy(const Object *pSource, unsigned nFlags) {
+void Button::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     // The cast result is dereferenced with no null check, so a pSource of another class faults here
     // rather than being rejected. No base implementation is invoked and nFlags is never read.
     const Button *pButton = pSource != nullptr ? dynamic_cast<const Button *>(pSource) : nullptr;

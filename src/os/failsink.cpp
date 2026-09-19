@@ -48,6 +48,6 @@ FailSink *FailSink::Format(const char *pszFormat, ...) {
     return this;
 }
 
-FailSink *FailSink::Print(const char *pszText) {
+FailSink *FailSink::Print([[maybe_unused]] const char *pszText) {
     return this;
 }

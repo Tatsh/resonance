@@ -31,9 +31,9 @@ void SynthSustainer::HandleMessage(Message *pMsg) {
 
 // 0x001d20a0
 void SynthSustainer::HandleSustainNote(SustainNoteMsg *pMsg) {
-    std::find(mSustained.begin(),
-              mSustained.end(),
-              pMsg->mUnknown08); // Yes, the binary discards this result.
+    (void)std::find(mSustained.begin(),
+                    mSustained.end(),
+                    pMsg->mUnknown08); // Yes, the binary discards this result.
     if (std::find(mSounding.begin(), mSounding.end(), pMsg->mUnknown08) == mSounding.end()) {
         mSustained.push_back(pMsg->mUnknown08);
     }

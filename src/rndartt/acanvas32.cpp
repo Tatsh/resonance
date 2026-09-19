@@ -48,7 +48,7 @@ void ACanvas32::SetColorIndex(int nIndex) {
 }
 
 // 0x0062f7c8
-void ACanvas32::SetColor15(unsigned short nColor) {
+void ACanvas32::SetColor15([[maybe_unused]] unsigned short nColor) {
     // Yes, the compiled body is a bare return. A 1555 pen colour has no effect here.
 }
 

@@ -381,7 +381,7 @@ float Animatable::SecondOrder::Apply(float flValue) {
 }
 
 // 0x0049a630
-float Animatable::SecondOrder::Inverse(float flValue) {
+float Animatable::SecondOrder::Inverse([[maybe_unused]] float flValue) {
     return mLevel - mVel;
 }
 
@@ -498,7 +498,7 @@ void Animatable::SetFrame(float flFrame) {
 }
 
 // 0x0049a100
-void Animatable::SetFrameSelf(float flFrame) {
+void Animatable::SetFrameSelf([[maybe_unused]] float flFrame) {
 }
 
 // 0x00494b50

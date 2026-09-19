@@ -78,7 +78,7 @@ void MinimumSaveSpaceMCT::RunStep() {
 }
 
 // 0x00186200
-void MinimumSaveSpaceMCT::OnCheckInfo(CheckInfoOp *pOp) {
+void MinimumSaveSpaceMCT::OnCheckInfo([[maybe_unused]] CheckInfoOp *pOp) {
     RunStep();
 }
 

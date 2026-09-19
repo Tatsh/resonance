@@ -12,5 +12,5 @@ int GhostNotesEffector::Type() {
 }
 
 // 0x001a1e38
-void GhostNotesEffector::Enable(int bEnabled) {
+void GhostNotesEffector::Enable([[maybe_unused]] int bEnabled) {
 }

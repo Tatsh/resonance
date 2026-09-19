@@ -37,7 +37,7 @@ Stream &ToolStream::ReadBytes(void *pDest, int nSize) {
 }
 
 // 0x00510400
-Stream &ToolStream::WriteBytes(const void *pSrc, int nSize) {
+Stream &ToolStream::WriteBytes([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
     g_failSink.Report("Can't write to a PS ToolStream\n");
     if (g_failSink.mAbortProc != nullptr) {
         g_failSink.mAbortProc();
@@ -46,7 +46,7 @@ Stream &ToolStream::WriteBytes(const void *pSrc, int nSize) {
 }
 
 // 0x0050fde0
-Stream &ToolStream::Seek(int nOffset, int nWhence) {
+Stream &ToolStream::Seek([[maybe_unused]] int nOffset, [[maybe_unused]] int nWhence) {
     return *this;
 }
 
