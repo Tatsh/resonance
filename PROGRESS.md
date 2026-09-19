@@ -16,13 +16,13 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                      | Count  |
 | ---------------------------- | ------ |
-| Functions in the program     | 15,357 |
-| Excluded by rule             | 4,691  |
-| Reconstructable              | 10,666 |
-| Accounted for in source      | 2,107  |
-| Share of the reconstructable | 19.75% |
-| Remaining, with a name       | 2,562  |
-| Remaining, unidentified      | 5,997  |
+| Functions in the program     | 15,526 |
+| Excluded by rule             | 5,962  |
+| Reconstructable              | 9,564  |
+| Accounted for in source      | 2,243  |
+| Share of the reconstructable | 23.45% |
+| Remaining, with a name       | 2,404  |
+| Remaining, unidentified      | 4,917  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -54,26 +54,31 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 815   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 739   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,045 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 552   | Container instantiations                                         |
-| Platform SDK                   | 277   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 110   | Exception, cast, and unwinding support                           |
-| C runtime                      | 153   | String and memory routines, and the floating-point library       |
+| Compiler-generated             | 823   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 1,685 | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 2,051 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 664   | Container instantiations                                         |
+| Platform SDK                   | 344   | `sce` entry points and kernel syscalls                           |
+| C++ runtime                    | 184   | Exception, cast, and unwinding support                           |
+| C runtime                      | 211   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
 Every figure below is produced by a command rather than asserted. No target compiler is available.
 Verification therefore stops at syntax and formatting.
 
-| Check                                | Status  |
-| ------------------------------------ | ------- |
-| Headers compiling standalone         | 401/401 |
-| Sources passing a syntax check       | 241/241 |
-| Address annotations with no function | 0       |
-| Lines over 100 characters            | 0       |
-| `clang-format` differences           | 0       |
+| Check                          | Status  |
+| ------------------------------ | ------- |
+| Headers compiling standalone   | 416/416 |
+| Sources passing a syntax check | 243/247 |
+
+Four sources fail at the moment this was measured, each on a header a live band is rewriting: two on
+a canvas class whose members changed access, one on a game manager member that was renamed, and one
+that a promotion in this commit resolves. Each was re-run with a gap before being reported, because
+a failure in a file another band holds open is usually a half-written file rather than a defect.
+| Address annotations with no function | 0 |
+| Lines over 100 characters | 0 |
+| `clang-format` differences | 0 |
 
 Two changes to what the audit counts are recorded here rather than folded into the figure
 silently. The function list grew by 393 routines, because a vtable slot points at its class's
@@ -218,6 +223,22 @@ m for the vendored C library, kernel glue, and floating point, `sce` for the pla
 stdio set is spelled out name by name rather than given a prefix, because a prefix there would
 catch a project's own routines. A test covers both directions of that, and it caught one rule that
 was too loose before it shipped.
+
+A fifth lever exists, and it works where the other four do not. The vendored interpreter publishes
+a type object per type whose slots address that type's static functions in a fixed order, and a
+method table per module and per type pairing each method's text with its function. Both sit in the
+data section, and the upstream tree supplies the same two orders by name, so the join recovers exact
+upstream names with no literal and no call-graph inference. It recovered 578 across the image.
+
+The names are the smaller half of that result. 75 of those addresses had no function defined at
+all, because an over-long body swallows several upstream routines at once and every one of them is
+invisible to a count until something points at its entry. That is also why the function total rises
+here rather than staying fixed.
+
+Two limits are recorded with the tool. A type whose name reads through a size expression defeats
+the upstream side of the match. And the embedded interpreter is not exactly the release the tree
+records: its dictionary type fills a rich-comparison slot the release leaves empty, and leaves empty
+two the release fills, so the build has rich comparison for dictionaries and no cycle collector.
 
 ### Identification levers, including the exhausted ones
 
