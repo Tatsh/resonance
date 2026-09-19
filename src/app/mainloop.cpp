@@ -36,8 +36,12 @@ constexpr int kFrameLabelSize = 32;
 enum AppTimer { kAppTimerPreDraw = 0, kAppTimerDraw = 1, kAppTimerAsync = 2, kAppTimerBank = 3 };
 
 long long s_qwElapsedMs;
-long long s_qwFpsWindowStartNs;
-long long s_qwFpsWindowEndNs;
+
+// The initialisers below are run from this translation unit's static-initialisation function at
+// `0x001ef068`, rather than folded into the image, because a 64-bit initialiser is not a constant
+// expression to this compiler. That is why the zero is stored explicitly too.
+long long s_qwFpsWindowStartNs = 0;
+long long s_qwFpsWindowEndNs = kNanosecondsPerSecond;
 long long s_qwLastKeepAliveMs;
 long long s_qwKeepAliveNowMs;
 int s_nFramesPerSecond;
@@ -46,16 +50,6 @@ int s_nPollTicks;
 int s_bInKeepAliveDraw;
 MainLoop *s_pPumpedLoop;
 Watchdog *s_pPumpedWatchdog;
-
-// 0x001ef068, run from the static initialiser at 0x001ef600.
-struct FpsWindowInit {
-    FpsWindowInit() {
-        s_qwFpsWindowStartNs = 0;
-        s_qwFpsWindowEndNs = kNanosecondsPerSecond;
-    }
-};
-
-FpsWindowInit s_fpsWindowInit;
 
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
 // recorded when the run started.
