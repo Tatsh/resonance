@@ -16,6 +16,15 @@
  * `0x00814728` records the same two addresses because that class adds no payload and inherits the
  * pair. The 22 concrete packet classes all inherit both.
  *
+ * Both members are very likely inline in this header in the original, and the definitions in
+ * `packet.cpp` are the out-of-line emission that fills the table slots. Every one of the twenty
+ * overriding packet classes opens its own Save() with a byte-identical expansion of the four
+ * transfers below, and not one of them contains a call instruction to either address. A qualified
+ * call to a non-inline out-of-line member would compile to a call, so the body was available for
+ * expansion. That is the same evidence this tree already accepts for the inlined HxStr destructor.
+ * Moving the two definitions into this header is a deliberate one-time change rather than something
+ * to discover partway through the derived classes, so the question is recorded here instead.
+ *
  * The four words below transfer through those two overrides, which recovers the layout from the
  * class's own code. Three unrelated routing families give the identical shared prefix
  * independently, and two packets, CSInitiatePlayPacket and SCStartPlayingPacket, are exactly 0x14

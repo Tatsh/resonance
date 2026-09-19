@@ -97,7 +97,8 @@ inline void RebootIopWithImage() {
     sceCdMmode(SCECdMmodeCd);
 }
 
-// 0x004dfcc8
+// 0x004dfcc8. Named WalkIopModuleTable in the program, whose naming guard refuses this spelling as
+// a token superset of LoadIopModules.
 inline void LoadAllIopModules(unsigned nSources) {
     AsyncCheck(1);
 

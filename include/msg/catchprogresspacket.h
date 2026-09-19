@@ -1,6 +1,7 @@
 #pragma once
 
 #include "msg/toallothergamesystemspacket.h"
+#include "sch/cmdid.h"
 
 /**
  * Network packet the game sends between game systems.
@@ -42,9 +43,11 @@ public:
 
 private:
     long long mUnknown14; // +0x14
-    int mUnknown1c;       // +0x1c
-    int mUnknown20;       // +0x20
-    float mUnknown24;     // +0x24
+    // Save() hands the address of this member to CmdID::Save(), which the inline re-emission at
+    // 0x004acf28 establishes, so the member is a CmdID rather than a plain word.
+    CmdID mUnknown1c; // +0x1c
+    int mUnknown20;   // +0x20
+    float mUnknown24; // +0x24
 };
 
 /**

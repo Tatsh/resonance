@@ -1,6 +1,7 @@
 #pragma once
 
 #include "msg/toallothergamesystemspacket.h"
+#include "sch/cmdid.h"
 
 /**
  * Network packet the game sends between game systems.
@@ -41,7 +42,9 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown14;       // +0x14
+    // Save() hands the address of this member to CmdID::Save(), which the inline re-emission at
+    // 0x004acf28 establishes, so the member is a CmdID rather than a plain word.
+    CmdID mUnknown14;     // +0x14
     long long mUnknown18; // +0x18
     int mUnknown20;       // +0x20
     int mUnknown24;       // +0x24
