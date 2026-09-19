@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "math/frustum.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
@@ -43,15 +45,26 @@ namespace Rnd {
  * The routine at `0x004b1ff0` is an out-of-line copy of an inline accessor that returns
  * g_pCurrentCam. It has no caller, because every reader in the image loads the global
  * directly.
- *
- * One member is recovered and not declared here. Slot 2 of the `Rnd::Transformable` table stores
- * the override of UpdateWorldXfm() at `0x004b1fa0`, which chains to the base at `0x004f0b18` and
- * runs UpdateWorldProject() only when the base reports that it recomposed. Declaring it requires
- * `Rnd::Transformable` to declare that virtual as returning an int. The base at `0x004f0b18`
- * returns one and `transformable.h` does not yet record that.
  */
 class Cam : public Drawable, public Transformable, public Collideable {
 public:
+    /**
+     * Allocate a camera from the tagged heap under the tag "Rnd::Cam".
+     *
+     * @param nSize The object size, which the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x004b1e90
+     */
+    void *operator new(size_t nSize);
+
+    /**
+     * Release a camera to the tagged heap.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004b1eb0
+     */
+    void operator delete(void *pBlock);
+
     /**
      * Rectangle the projected image is placed in.
      *
@@ -189,8 +202,54 @@ public:
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
+    /**
+     * Recompose the world transform and, when it changed, the world projection.
+     *
+     * Rnd::Transformable vtable slot 2. The base routine reports whether it recomposed, and only
+     * then does UpdateWorldProject() run, which is what makes the projection follow the camera
+     * without rebuilding it every frame.
+     *
+     * @param pParent The transform to compose against.
+     * @param nForce Non-zero to recompose regardless of the dirty flag.
+     * @return Non-zero when the world transform was recomposed.
+     * @ghidraAddress 0x004b1fa0
+     */
+    virtual int UpdateWorldXfm(Transformable *pParent, int nForce);
+
+    /**
+     * Write this camera's serialised form to stream.
+     *
+     * The three base forms follow the revision word in the order Transformable, Drawable,
+     * Collideable, which is not the order the bases are declared in.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x004ae630
+     */
     virtual void Save(Stream &stream);
+
+    /**
+     * Copy the state of pSource into this camera.
+     *
+     * The render target is transferred with its reference, and the projection is rebuilt from the
+     * copied parameters rather than copied.
+     *
+     * @param pSource The camera to copy from.
+     * @param nFlags The set of fields to copy.
+     * @ghidraAddress 0x004b24f8
+     */
     virtual void Copy(const Object *pSource, unsigned nFlags);
+
+    /**
+     * Read this camera's serialised form from stream.
+     *
+     * A revision above 8 is rejected with "Can't load new Cam". Three revision-gated words are
+     * read and discarded, which is how the reader steps over fields the format has dropped. The
+     * depth range arrives from revision 4, the render target from revision 5, and the Collideable
+     * form from revision 8.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x004ae870
+     */
     virtual void Load(Stream &stream);
 
     /**
@@ -300,8 +359,12 @@ protected:
 
 private:
     // 0x004b27a8. Registers this camera as a referrer of the render target and then runs
-    // UpdateTargetAspect(). The constructor and SetTargetTex() are the callers.
+    // UpdateTargetAspect(). The constructor, SetTargetTex(), Copy(), and Load() are the callers.
     void AcquireTargetTex();
+
+    // 0x004b2778. Drops this camera's registration on the render target. Copy() and Load() are
+    // the callers.
+    void ReleaseTargetTex();
 
     // Neither written by the constructor nor read anywhere in the image. A reserved run records a
     // span that has not been recovered and is not a field. This one is either such a field or the

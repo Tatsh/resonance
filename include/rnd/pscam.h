@@ -24,6 +24,12 @@ namespace Rnd {
  *
  * The seventh entry of the first table proves SetTargetTex() is a virtual declared here rather
  * than an override. The base table has six entries and this one has seven.
+ *
+ * The routine at `0x00588428` is an unreferenced out-of-line emission of an inline routine whose
+ * live copy is inlined into the class-registration sweep at `0x0049b01c`. That routine destroys
+ * g_pDefaultCam, restores Rnd::g_pfnNewCam to the base Rnd::Cam factory, clears
+ * Rnd::g_pCurrentCam, and re-registers the "Cam" key, which undoes what Init() installs. Its
+ * title is undetermined, because the only live copy is inlined and no call site records one.
  */
 class PsCam : public Cam {
 public:
@@ -101,6 +107,28 @@ public:
      * @ghidraAddress 0x00588500
      */
     static PsCam *NewCam(const HxStr &name);
+
+    /**
+     * Install the PlayStation 2 camera factory and build the default camera.
+     *
+     * Rnd::g_pfnNewCam becomes NewCam(), which is how a `.rnd` file naming the unchanged "Cam"
+     * key loads this subclass. The camera named "[default cam]" is then built, marked internal,
+     * and placed at the translation (0, -150, 0) with its dirty flag set, which puts the default
+     * viewpoint 150 units back along the axis this engine looks down.
+     *
+     * @ghidraAddress 0x00582430
+     */
+    static void Init();
 };
+
+/**
+ * Camera the renderer falls back on when a scene selects none.
+ *
+ * Rnd::GfxDevice::BeginFrame() reads it, and Rnd::PsEnviron::Init() makes the default environment
+ * and the default light children of it.
+ *
+ * @ghidraAddress 0x00768410
+ */
+extern PsCam *g_pDefaultCam;
 
 } // namespace Rnd

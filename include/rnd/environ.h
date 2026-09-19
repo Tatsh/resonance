@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <list>
 
 #include "math/color.h"
@@ -17,7 +18,7 @@ namespace Rnd {
  *
  * The seven names come from the routine at `0x00519470`, which writes one of "None", "VertExp",
  * "VertExp2", "VertLinear", "PixelExp", "PixelExp2", and "PixelLinear" for the values below and
- * "out of memory in" for any other. The PlayStation 2 renderer distinguishes none of the six
+ * nothing at all for any other. The PlayStation 2 renderer distinguishes none of the six
  * enabled modes. Rnd::PsEnviron::DrawSelf() tests only whether the mode is None.
  */
 enum FogMode {
@@ -50,13 +51,26 @@ enum FogMode {
  * `0x00826ce0` is addressed by the `Rnd::Object` subobject vptr with a `-0x60` adjustment on every
  * entry.
  *
- * Two routines of this class are recovered and not declared. The one at `0x00519470` writes the
- * name of a fog mode to a diagnostic sink, and the one at `0x005185b0` writes mLights to one. Both
- * exist only to serve DumpText(). Nothing in the image separates a static member from a free
- * function for one or for the other.
+ * Two routines that serve DumpText() are free functions rather than members, because each returns
+ * the sink it was handed. The one at `0x00519470` writes the name of a fog mode and the one at
+ * `0x005185b0` writes mLights, and both are declared beside the implementation rather than here
+ * because no code outside `environ.cpp` calls either.
  */
 class Environ : public Drawable {
 public:
+    /**
+     * Allocate an environment from the tagged heap under the tag "Rnd::Environ".
+     *
+     * The body is inlined into NewEnviron(), its one call site, and no out-of-line copy survives
+     * anywhere in the image, so the routine has no address of its own. The declaration exists
+     * because the allocation at `0x00519324` passes the class tag rather than reaching the plain
+     * allocator.
+     *
+     * @param nSize The object size, which the compiler supplies.
+     * @return The block.
+     */
+    void *operator new(size_t nSize);
+
     /**
      * Construct an environment with no lights and no fog.
      *
@@ -95,10 +109,73 @@ public:
      */
     virtual void DumpText(FailSink &sink);
 
+    /**
+     * Write this environment's serialised form to stream.
+     *
+     * The revision word is 0, which is also the highest Load() accepts, so the format never
+     * changed.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00516028
+     */
     virtual void Save(Stream &stream);
+
+    /**
+     * Repoint a light entry when the object it addressed is replaced.
+     *
+     * An entry that already addresses pTo produces the report "%s already in %s" and is then
+     * replaced regardless. A replacement that is not a light empties the entry, and an empty entry
+     * is erased from the list rather than retained as a hole.
+     *
+     * @param pFrom The object going away.
+     * @param pTo The object to store instead, or null.
+     * @ghidraAddress 0x005156b0
+     */
     virtual void Replace(Object *pFrom, Object *pTo);
+
+    /**
+     * Copy the state of pSource into this environment.
+     *
+     * The light list is copied only while bit 0 of nFlags is clear. That bit does not agree with
+     * kCopyChildLists, which every other class in this subsystem tests, and the disagreement is
+     * what the binary does rather than a reconstruction slip.
+     *
+     * @param pSource The environment to copy from.
+     * @param nFlags The set of fields to copy.
+     * @ghidraAddress 0x00516560
+     */
     virtual void Copy(const Object *pSource, unsigned nFlags);
+
+    /**
+     * Read this environment's serialised form from stream.
+     *
+     * A revision above 0 is rejected with "Can't load new Environ". The fog mode arrives as a
+     * plain word and is assigned to the enumeration afterwards.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x00516260
+     */
     virtual void Load(Stream &stream);
+
+    /**
+     * Build an environment the class registry vends.
+     *
+     * @param name The registry key for the new environment.
+     * @return The new environment.
+     * @ghidraAddress 0x00519308
+     */
+    static Environ *NewEnviron(const HxStr &name);
+
+    /**
+     * Append a light to mLights.
+     *
+     * The list is searched for the light first, so the same light cannot be added twice. The body
+     * is not reconstructed.
+     *
+     * @param pLight The light to add.
+     * @ghidraAddress 0x005166d0
+     */
+    void AddLight(Light *pLight);
 
     // Declared in recovered offset order. Every member is public because
     // Rnd::PsEnviron::DrawSelf() reads mLights, mFogMode, the two fog distances, and mFogColor
@@ -153,7 +230,28 @@ protected:
      * @ghidraAddress 0x00518e60
      */
     virtual int DrawSelf();
+
+private:
+    // Registers this environment as a referrer of every mLights entry. Inlined at all three call
+    // sites, in Load(), Copy(), and the tail of Replace(), with no out-of-line copy anywhere in
+    // the image.
+    void AcquireLightsRefs();
+
+    // Drops this environment's registration on every mLights entry. Inlined the same way, in
+    // Load() and Copy().
+    void ReleaseLightsRefs();
 };
+
+/**
+ * Factory the registered environment creator dispatches through.
+ *
+ * Rnd::Manager::Init() fills it with Environ::NewEnviron() and Rnd::PsEnviron::Init() replaces it
+ * with Rnd::PsEnviron::NewEnviron(), which is how the PlayStation 2 layer substitutes its subclass
+ * under the unchanged class key.
+ *
+ * @ghidraAddress 0x00718d10
+ */
+extern Environ *(*g_pfnNewEnviron)(const HxStr &name);
 
 /**
  * Environment the subtree being drawn is under.

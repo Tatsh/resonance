@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
@@ -31,12 +33,45 @@ namespace Rnd {
  * A `.rnd` file exposes its scene root under the name "view", which start-up resolves through
  * Rnd::Manager::Find().
  *
- * Recovery is partial. The constructor is at `0x004e2740`, the factory at `0x004e2088`, the
- * sub-object reader at `0x004e7c50`, and the five display-mode routines at `0x004e32a0` through
- * `0x004e3618`.
+ * Five class keys resolve to this one class, which is what the four flags below record. Init()
+ * registers "View" against a factory that sets no flag, and "Animatable", "Collideable",
+ * "Drawable", and "Transformable" against four factories that each set one. A file naming a bare
+ * mix-in therefore loads a View that remembers which mix-in was asked for.
+ *
+ * One member is recovered and not declared. The routine at `0x004e2730` is two instructions that
+ * return, and the destructor calls it on this object immediately before ReleaseAllRefs(). Its
+ * title and its purpose are both undetermined, because an empty body records neither.
  */
 class View : public Animatable, public Drawable, public Transformable, public Collideable {
 public:
+    /**
+     * Allocate a view from the tagged heap under the tag "Rnd::View".
+     *
+     * @param nSize The object size, which the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x004e2048
+     */
+    void *operator new(size_t nSize);
+
+    /**
+     * Release a view to the tagged heap.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004e2068
+     */
+    void operator delete(void *pBlock);
+
+    /**
+     * Construct an empty scene root.
+     *
+     * The four flags below start zeroed, and each of the four base subobjects is constructed
+     * against the one shared `Rnd::Object` subobject at `+0x100`.
+     *
+     * @param name The registry key for this object.
+     * @ghidraAddress 0x004e2740
+     */
+    explicit View(const HxStr &name);
+
     /** @ghidraAddress 0x004e21b8 */
     virtual ~View();
 
@@ -57,6 +92,41 @@ public:
 
     /** @ghidraAddress 0x004e0128 */
     virtual void Load(Stream &stream);
+
+    /**
+     * Build a view the class registry vends.
+     *
+     * @param name The registry key for the new view.
+     * @return The new view.
+     * @ghidraAddress 0x004e2088
+     */
+    static View *NewView(const HxStr &name);
+
+    /**
+     * Register the five class keys this class answers to with Rnd::g_manager.
+     *
+     * The four mix-in keys are registered from temporary strings the routine builds from literals,
+     * and only the "View" key uses a string global.
+     *
+     * @ghidraAddress 0x004dff48
+     */
+    static void Init();
+
+    // Declared in recovered offset order. Each flag is titled from the class key of the factory
+    // that sets it. Every writer is one of those factories and no reader was located, so the four
+    // are public because nothing in the image constrains them further.
+
+    int mAnimatable;    /*!< Set when the class key was "Animatable". +0xf0 */
+    int mTransformable; /*!< Set when the class key was "Transformable". +0xf4 */
+    int mDrawable;      /*!< Set when the class key was "Drawable". +0xf8 */
+    int mCollideable;   /*!< Set when the class key was "Collideable". +0xfc */
 };
+
+/**
+ * Class key a `.rnd` file writes for a view.
+ *
+ * @ghidraAddress 0x00702b20
+ */
+extern HxStr g_viewClassName;
 
 } // namespace Rnd

@@ -2,6 +2,7 @@
 
 #include "os/hxstr.h"
 #include "rnd/environ.h"
+#include "rnd/light.h"
 
 namespace Rnd {
 
@@ -17,8 +18,9 @@ namespace Rnd {
  * `Rnd::Drawable` vptr at `0x10`, and the eight-entry table at `0x00833920` by the `Rnd::Object`
  * subobject vptr. DrawSelf() is the only entry that is not the base implementation.
  *
- * The routine at `0x005aea68` builds the environment the renderer falls back on, named
- * "[default environ]", and stores it in g_pDefaultEnviron.
+ * The routine at `0x005b2888` undoes what Init() installs. It destroys both default objects and
+ * restores Rnd::g_pfnNewEnviron to the base Rnd::Environ factory, and the class-registration sweep
+ * at `0x0049b0c4` is its one caller. Its title is undetermined.
  */
 class PsEnviron : public Environ {
 public:
@@ -43,6 +45,20 @@ public:
      * @ghidraAddress 0x005b27b0
      */
     static PsEnviron *NewEnviron(const HxStr &name);
+
+    /**
+     * Install the PlayStation 2 environment factory and build the default scene fixtures.
+     *
+     * Rnd::g_pfnNewEnviron becomes NewEnviron(), which is how a `.rnd` file naming the unchanged
+     * "Environ" key loads this subclass. The environment named "[default environ]" is then built
+     * with a direct allocation rather than through the factory, marked internal, and added to the
+     * draw list of Rnd::g_pDefaultCam. A light named "[default light]" follows, built through
+     * Rnd::g_pfnNewLight, marked internal, added to the environment, and made a transform child of
+     * Rnd::g_pDefaultCam.
+     *
+     * @ghidraAddress 0x005aea68
+     */
+    static void Init();
 
 protected:
     /**
@@ -72,6 +88,13 @@ protected:
  * @ghidraAddress 0x0077613c
  */
 extern PsEnviron *g_pDefaultEnviron;
+
+/**
+ * Light the default environment applies when a scene supplies none.
+ *
+ * @ghidraAddress 0x00776140
+ */
+extern Light *g_pDefaultLight;
 
 /**
  * Scale a camera space depth is multiplied by to arrive at the byte range of the GS fog
