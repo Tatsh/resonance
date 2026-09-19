@@ -37,11 +37,13 @@ confstr
 coveragerc
 cpprtti
 cycl
+cyclable
 daddu
 dashcam
 datarootdir
 dbuild
 deci
+demangled
 demangler
 demangles
 devirtualised
@@ -136,6 +138,7 @@ mcrl
 mdfile
 memcard
 memorycard
+metfade
 methodobject
 miptbp
 missingconfigvals
@@ -159,6 +162,7 @@ noone
 ntpath
 nullptr
 numpydoc
+objc
 objimpl
 obmalloc
 obstream
@@ -172,6 +176,7 @@ particlesysanim
 pathconf
 pcremodule
 phello
+pinkgrey
 pmgr
 pngr
 popen
@@ -216,6 +221,7 @@ rndfile
 rndglobal
 rndtex
 rodata
+rtti
 schemafile
 scratchpad
 screendump
@@ -250,6 +256,7 @@ tagfile
 tagfiles
 tatsh
 teardowns
+texburn
 texs
 tkinter
 tmpnam
