@@ -216,6 +216,17 @@ third-party arbitrary-precision package, two formatting engines, and the signal 
 of those is code the reconstruction does not owe, and leaving it unidentified overstated the work
 remaining rather than the work done.
 
+One residual risk in those exclusions is measured rather than left open. A platform-SDK title
+hides a routine twice over, out of the reconstructable total and out of the list still needing
+identification, so a wrong one is never asked about again. Two have been found and corrected:
+seven file routines carried a graphics-library title and one cache-maintenance routine carried an
+input-pad title, both inferred from a neighbour's prefix rather than from a body.
+
+An audit bounds what is left. 337 routines carry such a title, 146 of them in the placeholder form
+that records a proven library with an unrecovered role. Of those, 109 reference a hardware register
+or call another routine of the same library in their own body, and **37 rest on their band's cluster
+argument alone**. That is the exposure, and it is small enough to state exactly.
+
 The exclusion rules are keyed on prefixes a band applies deliberately: `Stl` and `std_` for the
 template library, `Cxx` and the iostream names for the C++ runtime, `Lib` with a following c, k, or
 m for the vendored C library, kernel glue, and floating point, `sce` for the platform SDK, `Py` and
