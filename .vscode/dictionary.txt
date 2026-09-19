@@ -13,6 +13,7 @@ arraymodule
 arrghghghgh
 atten
 augm
+autobrief
 autocatch
 bartels
 bascus
@@ -47,6 +48,7 @@ daddu
 dashcam
 datarootdir
 dbuild
+dcmake
 deci
 demangled
 demangler
@@ -61,6 +63,7 @@ dsubu
 egsw
 egwb
 elif
+endforeach
 endx
 envx
 errnomodule
@@ -85,14 +88,15 @@ getpath
 getpathp
 getpid
 gfxdevice
-ggdb
 ghidra
 graminit
+graphviz
 grvscript
 gscripts
 handoff
 harmonix
 hxcons
+hxmodule
 hxstr
 hxutl
 ifdef
@@ -123,7 +127,6 @@ libcdvd
 libcdvd's
 libera
 libmc
-libname
 libscf
 libsd
 libsd's
@@ -131,6 +134,7 @@ libsdr
 libsdr's
 libsonnet
 linecache
+linkfile
 listdir
 listobject
 listpan
@@ -140,6 +144,7 @@ lseek
 lvalues
 mainpage
 malloc
+math
 mcdat
 mcfl
 mcman
@@ -174,10 +179,10 @@ mvoll
 mvolr
 mypy
 myreadline
-namedebug
 netflow
 newmodule
 noone
+nostartfiles
 ntpath
 nullplayer
 nullptr
@@ -218,10 +223,10 @@ pyob
 pyos
 pypcre
 pyproject
+pyshell
 pystate
 pythonrun
 qstringbuilder
-qtcore
 quadword
 quadwords
 quat
@@ -251,6 +256,10 @@ rtti
 schemafile
 scratchpad
 screendump
+scripteval
+scriptfunc
+scripthost
+scriptsink
 scus
 sdrdrv
 serialiser
@@ -271,7 +280,6 @@ startable
 statusline
 stcycl
 strcmp
-strequal
 strerror
 stringobject
 stropmodule
@@ -280,7 +288,6 @@ structmodule
 sysconf
 sysmodule
 tagfile
-tagfiles
 tatsh
 teardowns
 texburn
@@ -288,6 +295,7 @@ texs
 tkinter
 tmpnam
 transanim
+treeview
 trmopn
 tupleobject
 tvel
@@ -318,6 +326,7 @@ unsuffixed
 updateworldxfm
 usbd
 utime
+vars
 vendored
 venv
 vmadday
