@@ -47,8 +47,16 @@ public:
      */
     virtual const char *Name();
 
-private:
-    unsigned char mUnknown08; // +0x08
+    /**
+     * Undetermined, and the one byte the message carries. +0x08
+     *
+     * Public because SynthSustainer::HandleSustainNote() at `0x001d20a0` reads it through a
+     * SustainNoteMsg pointer from outside the hierarchy, searching two held-note lists for it and
+     * appending it to one. The image exposes no accessor. A friend declaration fits equally well.
+     * The value is a note number on that evidence, but nothing in the image titles it, so the
+     * placeholder stands.
+     */
+    unsigned char mUnknown08;
 };
 
 /**

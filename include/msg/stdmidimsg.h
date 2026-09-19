@@ -46,10 +46,24 @@ public:
      */
     virtual const char *Name();
 
-private:
-    unsigned char mUnknown08; // +0x08
-    unsigned char mUnknown09; // +0x09
-    unsigned char mUnknown0a; // +0x0a
+    /**
+     * The three bytes of one Standard MIDI channel message. +0x08, +0x09, and +0x0a
+     *
+     * Public because SynthSustainer reads the first two through a StdMidiMsg pointer from outside
+     * the hierarchy at `0x001d20f8` and `0x001d2100`, and the image exposes no accessor. A friend
+     * declaration fits equally well.
+     *
+     * The first byte is the status, a message kind in its high nibble over a channel in its low
+     * one, which four inlined constructions in the sequencer confirm by composing it as a kind
+     * combined with a channel. The two that follow are the data bytes, and their meaning depends
+     * on that kind: a control-change status makes them a controller number and a value, while a
+     * note status makes the first a note number. Two bands read them under those two different
+     * titles and both readings were right for the status each had in view, which is why the
+     * placeholders stand. A single title for either data byte would be wrong.
+     */
+    unsigned char mUnknown08;
+    unsigned char mUnknown09;
+    unsigned char mUnknown0a;
 };
 
 /**
