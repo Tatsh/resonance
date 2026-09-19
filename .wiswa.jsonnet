@@ -6,6 +6,7 @@
   keywords: ['decompilation', 'frequency', 'game', 'playstation 2', 'reverse engineering'],
   want_codeql: false,
   want_tests: false,
+  want_winget: false,
   clang_format_args: 'include/*/*.h include/*/*/*.h src/*.cpp src/*/*.cpp src/*/*/*.cpp',
   clang_format+: {
     BreakInheritanceList: 'AfterColon',
