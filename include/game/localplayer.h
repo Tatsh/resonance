@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/msgsink.h"
+#include "app/msgsource.h"
 #include "game/player.h"
 
 /**
@@ -15,8 +16,13 @@
  * `AddSink` and `RemoveSink`, which the base leaves inherited, and in the `MsgSink` table it
  * replaces `HandleMessage`.
  *
- * Recovery is partial. Its own members are not enumerated, beyond the object at `+0xa8` that the
- * destructor releases by calling a virtual on it rather than by freeing it directly.
+ * Nine of its own members are recovered, eight being the values its accessor slots return and the
+ * ninth the pair of message sources at `+0xa4` and `+0xa8`. AddSink() and RemoveSink() fan
+ * registration out to both of those through slots 2 and 3 of a `MsgSource` table, and the vptr
+ * each is read through sits at `+0x10` of the target, which is where `MsgSource` places its own.
+ * The one at `+0xa8` also answers a slot 5, past the four entries a `MsgSource` table has, so its
+ * dynamic type extends `MsgSource` the way this class extends `Player`. The destructor releases
+ * that object by calling a virtual on it rather than by freeing it.
  *
  * A slot whose verb is unrecovered keeps its table index as its title, because the index is part
  * of the layout.
@@ -53,7 +59,15 @@ public:
     /** @ghidraAddress 0x0011e4e0 */
     virtual void Slot11();
 
-    /** @ghidraAddress 0x001228c8 */
+    /**
+     * Slot 12. Forwards to slot 5 of the object at `+0xa8`.
+     *
+     * Not reconstructed. That object answers a slot past the four a `MsgSource` table has, so its
+     * dynamic type extends `MsgSource` and is unidentified, and the call cannot be written through
+     * a `MsgSource` pointer.
+     *
+     * @ghidraAddress 0x001228c8
+     */
     virtual void Slot12();
 
     /** @ghidraAddress 0x00121ec0 */
@@ -99,4 +113,20 @@ public:
 
     /** @ghidraAddress 0x00122968 */
     virtual void RemoveSink(MsgSink *pSink);
+
+private:
+    int mUnknown50;       // +0x50 returned by Slot2
+    int mUnknown58;       // +0x58 returned by Slot4
+    int mUnknown5c;       // +0x5c returned by Slot5
+    int mUnknown60;       // +0x60 returned by Slot10
+    int mUnknown6c;       // +0x6c returned by Slot19
+    int mUnknown70;       // +0x70 written by Slot8, compared by Slot9
+    int mUnknown74;       // +0x74 written by Slot8
+    int mUnknown78;       // +0x78 compared by Slot20
+    int mUnknown7c;       // +0x7c compared by Slot16
+    int mUnknown88;       // +0x88 returned by Slot17
+    int mUnknownac;       // +0xac returned plus one by Slot15
+    int mUnknownb0;       // +0xb0 returned plus one by Slot14
+    MsgSource *mSourceA4; // +0xa4
+    MsgSource *mSourceA8; // +0xa8
 };

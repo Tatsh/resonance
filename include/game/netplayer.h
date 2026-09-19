@@ -41,10 +41,27 @@ public:
      */
     virtual int Slot5();
 
-    /** @ghidraAddress 0x00125f70 */
+    /**
+     * Receive one message.
+     *
+     * Dispatches on `Message::Type()` against two identities, `TrackSelectPacket` and
+     * `TrackSelectMsg`, so one handler covers track selection arriving locally and over the
+     * network. A `TrackSelectMsg` whose `+0x10` names this player updates the two cached words,
+     * and anything else falls through to the base.
+     *
+     * Not reconstructed. The packet branch calls the helper at `0x00122f78`, whose second half
+     * builds a further message and is not recovered.
+     *
+     * @param message The message.
+     * @ghidraAddress 0x00125f70
+     */
     virtual void HandleMessage(Message *message);
 
 private:
+    // The two payload words of a TrackSelectMsg addressed to this player, copied from the
+    // message's +0x04 and +0x08 by HandleMessage and reported by Slot4 and Slot5. The base
+    // returns -1 and 0 for the same two slots, so a remote player reports what a message
+    // announced where a local one computes it.
     int mUnknown48; // +0x48 returned by Slot4
     int mUnknown4c; // +0x4c returned by Slot5
 };
