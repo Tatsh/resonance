@@ -58,11 +58,38 @@ public:
     /** @ghidraAddress 0x0012aa80 */
     virtual int Slot11(int nValue);
 
-    /** @ghidraAddress 0x0012af30 */
-    virtual void Slot12();
+    /**
+     * Reports a step index for the mapped position.
+     *
+     * Declared void and nil-ary until the base's own signature was recovered, which made this a
+     * new virtual rather than an override: a differing parameter list compiles, extends the table,
+     * and silently detaches. The body proves both halves of the real signature, reading a1 into a
+     * saved register as its first act and returning a shifted difference.
+     *
+     * The body is not written. It passes its argument through the helper at `0x00129150` twice,
+     * upper-bounds a vector of its own at `+0x48`, and then combines that result with two further
+     * members, none of which is recovered.
+     *
+     * @param nValue The position to map.
+     * @return The step index.
+     * @ghidraAddress 0x0012af30
+     */
+    virtual int Slot12(int nValue);
 
-    /** @ghidraAddress 0x0012afb8 */
-    virtual void Slot13();
+    /**
+     * Reports the same index against a different member.
+     *
+     * Declared void and nil-ary for the same reason as slot 12, and detached in the same way. The
+     * body performs the same argument-through-helper and upper-bound sequence and then reads the
+     * member at `+0x54` rather than the pair slot 12 reads.
+     *
+     * The body is not written, for the same reason.
+     *
+     * @param nValue The position to map.
+     * @return The step index.
+     * @ghidraAddress 0x0012afb8
+     */
+    virtual int Slot13(int nValue);
 
     /** @ghidraAddress 0x0012b028 */
     virtual int Slot14();
