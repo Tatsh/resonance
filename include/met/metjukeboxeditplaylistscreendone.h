@@ -13,13 +13,18 @@
  *
  * The constructor at `0x00231728` takes only the renderer and the load priority, and supplies
  * `jbd` for the screen name, `metagame/Shared` for the directory, and `juke_done_butts` for the
- * container. The four object names the screen resolves are `met_jukebox_done_screen_tab_play`,
- * `met_jukebox_done_screen_ticker_play`, `met_jukebox_done_screen_tab_save`, and
- * `met_jukebox_done_screen_ticker_save`, at `0x007edfe8` through `0x007ee060`.
+ * container. It clears the four members below and then allocates a MetButtonList of 0x18 bytes
+ * tagged `MetButtonList` into mUnknown8c, so the clearing of that member is immediately
+ * overwritten.
+ *
+ * The constructor resolves no object name. The four names
+ * `met_jukebox_done_screen_tab_play`, `met_jukebox_done_screen_ticker_play`,
+ * `met_jukebox_done_screen_tab_save`, and `met_jukebox_done_screen_ticker_save`, at `0x007edfe8`
+ * through `0x007ee060`, are resolved by the routine at `0x00232598`, which is not declared here.
  *
  * The destructor at `0x00237210` restores the vptr, runs the MetScreen destructor, and releases
- * the object with the tag `MsgSink`. It releases nothing of its own, so the button list at
- * `+0x8c` outlives the screen.
+ * the object with the tag `MsgSink`. It releases nothing of its own. Nothing else frees the
+ * button list at `+0x8c` either, so the list is never freed.
  *
  * Fourteen slots differ from the MetScreen table. Slots 20 through 24 sit eight bytes apart at
  * `0x00237160` through `0x00237180` and are two-instruction `jr ra` stubs, so this screen plays
