@@ -145,6 +145,19 @@ void MetScreen::ResolveContainerViews() {
     mUnknown48 = 0;
 }
 
+void MetScreen::SetShowing(int nShowing) {
+    // Yes, the view is dereferenced without a null check, and ResolveContainerViews() calls this
+    // straight after a failed resolution leaves it null.
+    mUnknown14->Drawable::SetShowing(nShowing);
+    if (mUnknown60 == 0) {
+        return;
+    }
+    std::list<Rnd::Drawable *> draws(ContainerLoaderMap()[mUnknown28]->mLoader->mDrawables);
+    for (std::list<Rnd::Drawable *>::iterator it = draws.begin(); it != draws.end(); ++it) {
+        (*it)->SetShowing(nShowing);
+    }
+}
+
 void MetScreen::PushNamedScreen(const HxStr &name) {
     MetScreen *pScreen = FindScreenByName(name);
     mUnknown10->AddScreen(pScreen);

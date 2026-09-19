@@ -491,9 +491,10 @@ public:
      * set, on each entry of the drawable list that the loader recorded for mUnknown28. The name is
      * inferred from the Rnd::Drawable virtual it forwards to.
      *
-     * The body is not written. The second half builds a temporary `std::list` of drawables from the
-     * interned container load through the helper at `0x0014d560`, and the signature of that helper
-     * is not recovered.
+     * The second half copies RndAsyncLoader::mDrawables out of the interned container load into a
+     * temporary and walks it. The helper at `0x0014d560` that the copy expands to is
+     * `std::list::insert` over a range and is library code, so the source wrote a copy construction
+     * rather than a call. The view is dereferenced with no null check.
      *
      * @param nShowing Non-zero to draw the screen.
      * @ghidraAddress 0x0038b490

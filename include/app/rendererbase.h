@@ -1,10 +1,11 @@
 #pragma once
 
+#include "app/msgqueue.h"
 #include "app/msgsink.h"
 #include "msg/message.h"
 
 /**
- * Enclosing class of Router, declared only so that the nesting can be expressed.
+ * Base of every renderer, with a message queue and a router of its own.
  *
  * `12RendererBase` in the RTTI descriptor, with its own type function at `0x00139e88` and its
  * destructor at `0x00139e20`. The class itself is not recovered. Its table has entries at
@@ -15,7 +16,7 @@
  * without it. Adding a member to this class on anything short of recovered evidence would be
  * worse than the gap.
  */
-class RendererBase {
+class RendererBase : public MsgSink {
 public:
     /**
      * Sink that forwards every message it receives to one other sink.
@@ -68,4 +69,23 @@ public:
          */
         MsgSink *mTarget;
     };
+
+    /**
+     * Release the queue and the router.
+     *
+     * The body writes the MsgSink table pointer at `+0x00` and again at `+0x40`, tears the queue
+     * down through MsgQueue::~MsgQueue(), and releases the object under its `__in_chrg` flag. The
+     * second table write is the router member rather than a second base, because the RTTI records
+     * MsgSink as the one base of this class and Router as a nested class with its own descriptor.
+     *
+     * @ghidraAddress 0x00139e20
+     */
+    virtual ~RendererBase();
+
+private:
+    // Destroyed by the destructor through MsgQueue::~MsgQueue() at 0x0054a7a0, which is what
+    // identifies the member. +0x04
+    MsgQueue mQueue;
+    // The table pointer the destructor writes at +0x40 is this member's MsgSink subobject. +0x40
+    Router mRouter;
 };

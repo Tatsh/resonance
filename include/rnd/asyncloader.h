@@ -1,6 +1,9 @@
 #pragma once
 
+#include <list>
+
 #include "os/hxstr.h"
+#include "rnd/drawable.h"
 #include "rnd/object.h"
 
 /**
@@ -71,8 +74,28 @@ public:
     static void PollAsyncLoads();
 
 private:
-    HxStr mDirectory; // +0x0c
-    HxStr mFile;      // +0x14
+    // The objects the request has produced so far. Poll() counts it and
+    // RndAsyncLoader::HarvestLoadedObjects() walks it.
+    std::list<Rnd::Object *> mObjects; // +0x00
+
+public:
+    /**
+     * Drawables the container load produced.
+     *
+     * MetScreen::SetShowing() copies the list and shows or hides every entry, which is what fixes
+     * the element as a drawable rather than a bare object. Public because that read comes from
+     * outside the hierarchy and the image has no accessor to route it through. A friend declaration
+     * fits the image equally well. The member is declared between the two private lists so that the
+     * recovered order, and therefore the recovered layout, is preserved. +0x04
+     */
+    std::list<Rnd::Drawable *> mDrawables;
+
+private:
+    // The element type is unrecovered. Rnd::Object is the conservative base, and the 0x10-byte
+    // sentinel the constructor builds bounds the element at 8 bytes or less either way.
+    std::list<Rnd::Object *> mUnknown08; // +0x08
+    HxStr mDirectory;                    // +0x0c
+    HxStr mFile;                         // +0x14
     // Starts set and reports no progress while it stays set.
     int mPending;  // +0x1c
     int mStarted;  // +0x20
