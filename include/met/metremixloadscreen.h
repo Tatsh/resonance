@@ -2,6 +2,7 @@
 
 #include "met/listdataprovider.h"
 #include "met/metbuttonlist.h"
+#include "met/metremixrecord.h"
 #include "met/metscreen.h"
 #include "met/scrollinglist.h"
 
@@ -28,6 +29,13 @@
  * Nine slots differ from the MetScreen table, and only the destructor has a recovered name. The
  * rest are 5 `0x0034b568`, 19 `0x0034a2a8`, 20 `0x003526d0`, 22 `0x00352720`, 33 `0x00352770`,
  * 36 `0x0034cbd0`, and 38 `0x00349fc8`.
+ *
+ * Both pure virtuals of the four-entry ListDataProvider table are supplied here rather than
+ * inherited. Slot 2 at `0x0034d8b0` bounds-checks its index argument against the vector mUnknown90
+ * addresses and copy-constructs one 56-byte element, and slot 3 at `0x00352588` is a
+ * two-instruction body returning the constant 1. Neither has a recovered name, and slot 2 also
+ * reads a third argument in `a3` whose purpose is undetermined, so both are recorded rather than
+ * declared. The row type is MetRemixRecord, and `0x00184130` is its copy constructor.
  */
 class MetRemixLoadScreen : public MetScreen, public ListDataProvider {
 public:
@@ -46,7 +54,9 @@ public:
     virtual ~MetRemixLoadScreen();
 
 private:
-    int mUnknown90; // +0x90, not written by the constructor
+    // The row catalogue ListDataProvider slot 2 at `0x0034d8b0` indexes. Never written by any
+    // routine of this class, so it is filled from outside. +0x90
+    std::vector<MetRemixRecord> *mUnknown90;
     // Deleted and then cleared by the destructor. +0x94
     ScrollingList *mUnknown94;
     int mUnknown98;            // +0x98, not written by the constructor

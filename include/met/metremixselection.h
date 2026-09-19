@@ -15,6 +15,11 @@
  * and releases the name in its own destructor. Two of the three fields below start at -1, which is
  * the no-selection sentinel the same screens use for a MetButtonList index.
  *
+ * The layout was recovered twice independently, here from MetRemixDelScreen and by the jukebox
+ * band from MetSaveRemix, and the two readings agree field for field on the initial values.
+ * MetSaveRemix slot 39 takes the record as an argument, which is a use MetRemixDelScreen does not
+ * show.
+ *
  * Its constructor is inline, which is why it has no address of its own. Whether the original wrote
  * that constructor or assigned the five fields at each of the three sites is not settled by the
  * image, because the compiler emits the same stores either way and emits them out of offset order

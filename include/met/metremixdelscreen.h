@@ -2,6 +2,7 @@
 
 #include "met/listdataprovider.h"
 #include "met/metmemcardpickeruser.h"
+#include "met/metremixrecord.h"
 #include "met/metremixselection.h"
 #include "met/metsaveremix.h"
 #include "met/scrollinglist.h"
@@ -46,6 +47,14 @@
  *
  * Slot 16 is otherwise empty in every class of the subsystem, and this screen is the only one that
  * fills it.
+ *
+ * Both pure virtuals of the four-entry ListDataProvider table are supplied here rather than
+ * inherited. Slot 2 at `0x0033cc78` bounds-checks its index argument against the vector mUnknownf0
+ * addresses and copy-constructs one 56-byte element, and slot 3 at `0x00343f10` is a
+ * two-instruction body returning the constant 1. Both coincide in shape with the
+ * MetRemixLoadScreen pair. Neither has a recovered name, and slot 2 also reads a third argument in
+ * `a3` whose purpose is undetermined, so both are recorded rather than declared. The row type is
+ * MetRemixRecord, and `0x00184130` is its copy constructor.
  */
 class MetRemixDelScreen :
     public MetSaveRemix,
@@ -94,7 +103,9 @@ public:
     }
 
 private:
-    int mUnknownf0; // +0xf0, not written by the constructor
+    // The row catalogue ListDataProvider slot 2 at `0x0033cc78` indexes. Never written by any
+    // routine of this class, so it is filled from outside. +0xf0
+    std::vector<MetRemixRecord> *mUnknownf0;
     // Deleted by the destructor. +0xf4
     ScrollingList *mUnknownf4;
     int mUnknownf8;  // +0xf8, not written by the constructor

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app/msgsource.h"
 #include "rnd/view.h"
 
 // MetScreen stores its renderer and the renderer stores its screens, so one of the two
@@ -17,19 +18,26 @@ class MetScreen;
  * front end. Only the part of it that MetScreen uses is recovered here, the two fields below and
  * the four member functions that MetScreen calls with the renderer as their first argument. Every
  * one of the four titles is inferred from its body, because a C++ method name survives nowhere in
- * the image. The bases are documented rather than written, because RendererBase is not
- * reconstructed yet.
+ * the image.
  *
  * MetScreen stores its renderer at `+0x10` and registers itself on it as a message sink through
  * MsgSource::AddSink() during construction, which is how the pointer is known to address the
  * MsgSource subobject at offset 0.
+ *
+ * MsgSource is declared as the one base and the other two are still documented rather than
+ * written. MsgSource is safe to declare because it sits at offset 0 and its 0x14 bytes are fixed
+ * independently, by the RTTI base offset of 20 that RendererBase occupies. RendererBase cannot be
+ * declared yet: the RTTI places FadeUser at 92, so the RendererBase subobject spans `+0x14` through
+ * `+0x5b` and is 72 bytes, and its own header models no data member at all. Declaring it would put
+ * FadeUser near offset 28 and shift every field below, which would make the recovered offsets
+ * wrong. FadeUser is 4 bytes of vptr and follows the same reasoning.
  *
  * The screen stack is the `std::vector<MetScreen *>` at `+0x84` through `+0x8c`, which AddScreen()
  * appends to and RemoveScreen() erases from. Both write 1 to the flag at `+0x98` once they have
  * changed the stack. Neither the vector nor the flag is declared, because the span they sit in is
  * not otherwise recovered.
  */
-class MetRenderer {
+class MetRenderer : public MsgSource {
 public:
     /**
      * Record one screen as the active panel.
@@ -77,14 +85,15 @@ public:
     void RemoveScreen(MetScreen *pScreen);
 
     /**
-     * Span from the start of the object to mUnknown68, which is not recovered.
+     * Span from the end of the MsgSource base to mUnknown68, which is not recovered.
      *
-     * The three base subobjects occupy `+0x00` through `+0x5f`, and what follows them up to
-     * mUnknown68 is undetermined.
+     * The RendererBase subobject occupies `+0x14` through `+0x5b` and the FadeUser subobject
+     * `+0x5c` through `+0x5f`. Neither is declared, for the reason recorded on the class. What
+     * follows them up to mUnknown68 is undetermined.
      *
-     * +0x00
+     * +0x14
      */
-    unsigned char mReserved00[0x68];
+    unsigned char mReserved14[0x54];
 
     /**
      * Current front-end time in seconds.

@@ -21,6 +21,8 @@ namespace {
 static const char *const kPathSeparator = "/";
 // Appended to the container name to form the scene root's registry key.
 static const char *const kViewSuffix = ".view";
+// Appended to the container name to form the archive the loader requests.
+static const char *const kContainerSuffix = ".rnd";
 // The two animation view names, formatted from the screen name.
 static const char *const kEnterAnimationFormat = "%s_EE.anim";
 static const char *const kExitAnimationFormat = "%s_BF.anim";
@@ -34,6 +36,31 @@ static const char *const kHighSound = "SND_MET_HIGH";
 static const char *const kErrorSound = "SND_MET_ERROR";
 
 } // namespace
+
+MetScreen::MetScreen(MetRenderer *pRenderer,
+                     int nPriority,
+                     const HxStr &name,
+                     const HxStr &directory,
+                     const HxStr &file)
+    : mUnknown08(0.0f), mUnknown0c(0.0f), mUnknown10(pRenderer), mUnknown14(nullptr), mUnknown18(2),
+      mUnknown1c(0), mUnknown20(name), mUnknown30(nullptr), mUnknown34(nullptr), mUnknown48(1),
+      mUnknown4c(0), mUnknown50(0), mUnknown54(0), mUnknown58(1.0f), mUnknown5c(1), mUnknown60(1),
+      mUnknown64(0.0f), mUnknown68(nullptr), mUnknown6c(0), mUnknown78(0), mUnknown7c(0),
+      mUnknown80(file), mUnknown88(nPriority) {
+    mUnknown28 = file + kContainerSuffix;
+    mUnknown10->AddSink(this);
+    if (directory != "" && file != "") {
+        // Yes, the binary calls the virtual directly rather than through slot 18, which is what a
+        // virtual call from a constructor compiles to.
+        MetScreen::BeginContainerLoad(directory, file);
+    }
+}
+
+MetScreen::~MetScreen() {
+    mUnknown10->RemoveScreen(this);
+    OnDestroying();
+    mUnknown10->RemoveSink(this);
+}
 
 std::map<HxStr, MetContainerLoad *> &MetScreen::ContainerLoaderMap() {
     static std::map<HxStr, MetContainerLoad *> theMap;
