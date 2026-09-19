@@ -402,11 +402,13 @@ void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
     if (pCanvas != nullptr) {
         // The cell bounds are derived in the surface's own pixels and truncated to integers, so a
         // grid that does not divide the surface evenly loses the remainder.
-        nCellLeft = static_cast<int>(static_cast<float>(nCol * pCanvas->mWidth) / mCols);
-        nCellRight = static_cast<int>(static_cast<float>((nCol + 1) * pCanvas->mWidth) / mCols);
-        const int nCellTop = static_cast<int>(static_cast<float>(nRow * pCanvas->mHeight) / mRows);
+        nCellLeft = static_cast<int>(static_cast<float>(nCol * pCanvas->mBitmap.mWidth) / mCols);
+        nCellRight =
+            static_cast<int>(static_cast<float>((nCol + 1) * pCanvas->mBitmap.mWidth) / mCols);
+        const int nCellTop =
+            static_cast<int>(static_cast<float>(nRow * pCanvas->mBitmap.mHeight) / mRows);
         const int nCellBottom =
-            static_cast<int>(static_cast<float>((nRow + 1) * pCanvas->mHeight) / mRows);
+            static_cast<int>(static_cast<float>((nRow + 1) * pCanvas->mBitmap.mHeight) / mRows);
 
         nInkFirst = ScanForInkedColumn(*pCanvas, nCellLeft, nCellRight, nCellTop, nCellBottom);
         nInkLast =
