@@ -217,13 +217,13 @@ protected:
     /**
      * Apply the animation at a frame.
      *
-     * Rnd::Animatable vtable slot 3. The body is blocked rather than unrecovered, for two separate
-     * reasons. The colour half hands its results to Rnd::Mat::SetDiffuse() and
-     * Rnd::Mat::SetSpecular(), which include/rnd/mat.h declares as taking a Vector3 while the
-     * image passes a whole blended quadword, so one of the two headers is wrong and mat.h belongs
-     * to another part of the tree. The stage half walks `mMat->mStages` and writes the stage
-     * transform through the two helpers at `0x0045da58` and `0x004f0430`, neither of which is
-     * recovered.
+     * Rnd::Animatable vtable slot 3. The body is unrecovered. The stage half walks `mMat->mStages`
+     * and writes the stage transform through the two helpers at `0x0045da58` and `0x004f0430`,
+     * neither of which is recovered.
+     *
+     * The colour half is no longer blocked. Rnd::Mat::SetDiffuse() and Rnd::Mat::SetSpecular() now
+     * take a Color, which the four quadword blends of this routine settled against the three
+     * three-component blends of its stage half.
      *
      * Everything else about it is recovered. The specular call passes an alpha of zero, which
      * `clear f12` at `0x004d54ec` proves, and the alpha channel interpolates linearly rather than

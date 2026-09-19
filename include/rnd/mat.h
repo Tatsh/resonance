@@ -198,10 +198,17 @@ public:
     /**
      * Set the diffuse colour, retaining the current alpha.
      *
-     * @param rgb The three diffuse components.
+     * The body reads three floats and the fourth component of the argument is discarded, so the
+     * parameter type is not recoverable from the body alone. The one caller fixes it.
+     * Rnd::MatAnim::SetFrameSelf() blends the diffuse channel over all four components with
+     * `vmulax.xyzw` at `0x004d5028`, stores the whole quadword into the temporary it passes, and
+     * blends the three stage channels of the same routine over three components with `vmulax.xyz`
+     * instead. The argument is therefore a Color and not a Vector3.
+     *
+     * @param color The new diffuse colour, whose alpha is discarded.
      * @ghidraAddress 0x004db980
      */
-    virtual void SetDiffuse(const Vector3 &rgb);
+    virtual void SetDiffuse(const Color &color);
 
     /**
      * Set the emissive colour.
@@ -222,11 +229,16 @@ public:
     /**
      * Set the specular colour and its alpha.
      *
-     * @param rgb The three specular components.
+     * The colour argument is a Color on the same evidence as SetDiffuse(), the specular blend at
+     * `0x004d54d8` being the fourth of the four quadword blends. The alpha of the colour is
+     * discarded and the separate argument is stored in its place, and the only caller passes zero
+     * for it.
+     *
+     * @param color The new specular colour, whose alpha is discarded.
      * @param flAlpha The new specular alpha.
      * @ghidraAddress 0x004db9b8
      */
-    virtual void SetSpecular(const Vector3 &rgb, float flAlpha);
+    virtual void SetSpecular(const Color &color, float flAlpha);
 
     /**
      * Set the lighting enable flag, the five per-vertex source flags, and the normalise flag.

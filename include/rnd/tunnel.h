@@ -12,6 +12,7 @@
 #include "rnd/object.h"
 #include "rnd/raytest.h"
 #include "rnd/stream.h"
+#include "rnd/transanim.h"
 
 namespace Rnd {
 
@@ -64,12 +65,11 @@ namespace Rnd {
  * grids.
  *
  * Still unreconstructed and still owned by this class are the constructor at `0x00466620`, the
- * update at `0x00467f48`, the section node vector setup at `0x004694a0`, the mesh build at
- * `0x004699c0`, the face strip build at `0x0046adc0`, the VU1 upload at `0x0046c0e8`, the section
- * frame setter at `0x0046c638`, the ring mesh finalise at `0x0046d180`, the camera space
- * projection at `0x0046db80`, and the drawable index table rebuild at `0x00472488`.
+ * update at `0x00467f48`, the mesh build at `0x004699c0`, the face strip build at `0x0046adc0`, the
+ * VU1 upload at `0x0046c0e8`, the section frame setter at `0x0046c638`, and the camera space
+ * projection at `0x0046db80`.
  *
- * Seven addresses a worklist grouped under this class belong elsewhere, and each one is recorded
+ * Nine addresses a worklist grouped under this class belong elsewhere, and each one is recorded
  * here so the grouping is not repeated. `0x00466528` and `0x00476598` append triangles to the face
  * vector a `Rnd::Mesh` addresses through its own mFacesOwner at `+0x134`, which is past the end of
  * this class, so both are Rnd::Mesh members. `0x00493b60` and `0x00493bd0` set mVertsOwner and
@@ -79,7 +79,19 @@ namespace Rnd {
  * `std::vector` of 0x40-byte elements rather than anything of this class. `0x00476190`,
  * `0x00476a80`, and `0x00476b28` are the default constructor, the destructor, and the element
  * release of a `std::vector`, and `0x00476e48` takes a vector rather than a tunnel as its first
- * argument.
+ * argument. `0x00472488` is `std::vector<float>::operator=`, which six routines of this class and
+ * one of another share, and an earlier reading had it as a drawable index table rebuild of this
+ * class. `0x004698e8` resizes `std::vector<Rnd::MeshVert>` through the mVertsOwner of the first
+ * mesh of a mesh list, and an earlier reading had it as a bounding box resize of this class.
+ *
+ * The record the vector at `+0xdc` stores is a class of its own and is not recovered. The routine
+ * at `0x00477830` is one of its members rather than one of this class, which Update() pins by
+ * passing the vector element in $a0, the tunnel in $a1, and the element index in $a2. The fields
+ * that routine touches at `+0x50`, `+0x68`, `+0x6c`, and `+0x74` are fields of the record, and an
+ * earlier reading attributed all four to this class. `0x0046e830` is a second member of the same
+ * record, and between them they pin a tunnel pointer at `+0x24` and `+0x6c`, an object reference at
+ * `+0x20`, `+0x50`, and `+0x68`, three counters from `+0x2c`, a `std::vector` of 0x20-byte elements
+ * at `+0x38`, and the frame at `+0x74`.
  */
 class Tunnel : public Drawable, public Animatable, public Collideable {
 public:
@@ -233,6 +245,23 @@ public:
      */
     void AdvanceRing(int nSlice);
 
+    /**
+     * Replace the level of detail thresholds and apply them to every generated mesh.
+     *
+     * The argument is assigned over mUnknown68, then both mesh grids are walked. Each mesh takes
+     * the threshold whose index matches its position within its own list, and a mesh whose
+     * position passes the end of the threshold vector is skipped rather than clamped. The title is
+     * inferred from Rnd::Mesh::mMinScreen, the member it writes.
+     *
+     * Public because the stage classes between `0x00432000` and `0x00444000` supply nine callers,
+     * none of which derives from this class. A friend declaration per calling class fits the image
+     * equally well.
+     *
+     * @param screenSizes One threshold per ring, applied in index order.
+     * @ghidraAddress 0x0046d180
+     */
+    void ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes);
+
 protected:
     /**
      * Draw the tunnel.
@@ -261,14 +290,15 @@ private:
     // Build the mesh of the current ring set. 0x004699c0.
     void BuildMesh();
 
-    // Close the mesh of one ring. 0x0046d180.
-    void FinalizeRingMesh();
-
-    // Project one section into camera space. 0x0046db80.
-    void ProjectSectionToCameraSpace();
-
-    // Rebuild the table the draw path indexes its children through. 0x00472488.
-    void RebuildDrawableIndexTable();
+    // Project one ring into camera space. 0x0046db80. The signature is recovered and the body is
+    // not. A null mUnknown58 writes the identity into pOut and returns. Otherwise the three basis
+    // rows of mUnknownc0[nRing] are copied through, the translation row is the blend of that entry
+    // and its wrapped successor each scaled by flTangentScale, and the result is concatenated with
+    // whatever mUnknown58 evaluates to at flAnimFrame. The concatenation runs through the vector
+    // unit routine at 0x005e7ab0, which no header of this tree declares yet, and that is what
+    // blocks the body.
+    void ProjectSectionToCameraSpace(
+        int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale);
 
     // Empty the per-material section lists. 0x0046acf0.
     void ClearMaterialSectionLists();
@@ -295,21 +325,20 @@ private:
     float mUnknown4c; // +0x4c Starts at 0.099609375f.
     float mUnknown50; // +0x50 Starts at 0.25f.
     float mUnknown54; // +0x54 Starts at 0.01f.
-    int mUnknown58;   // +0x58 Starts at 0.
+    // +0x58 Starts at 0. The transform animation the camera space projection at 0x0046db80
+    // evaluates through Rnd::TransAnim::EvalFrame(), and the object Update() takes a reference on
+    // before it rebuilds. A null one makes the projection write the identity.
+    TransAnim *mUnknown58;
     int mUnknown5c;   // +0x5c Starts at 0.
     int mUnknown60;   // +0x60 Starts at 0.
     float mUnknown64; // +0x64 Starts at 480.0f, which is the display height.
-    // +0x68 Starts at 0. An object whose first word is its virtual Rnd::Object base pointer, which
-    // is how the setter at 0x00477830 registers this tunnel as a referrer of it. The static type is
-    // therefore a class deriving virtually from Rnd::Object rather than Rnd::Object itself, and no
-    // routine narrows it further, so it stays an offset-titled word.
-    int mUnknown68;
-    // +0x6c The object the setter at 0x00477830 stores, registered the same way as mUnknown68. Its
-    // own `+0x24` supplies mUnknown74.
-    int mUnknown6c;
-    // +0x70 Unrecovered. No routine reads or writes it.
-    int mUnknown70;
-    float mUnknown74; // +0x74 Starts at 1. The setter copies it from `+0x24` of mUnknown6c.
+    // +0x68 One level of detail threshold per ring, each written into the mMinScreen of the mesh at
+    // the matching position of its list. Three routines pin the shape. Copy() at 0x00476814 assigns
+    // it from the source tunnel through `std::vector<float>::operator=`, the setter at 0x0046d180
+    // assigns it from its argument through the same operator, and the same setter reads an element
+    // with `lwc1`, which is what fixes the element as a float rather than a word.
+    std::vector<float> mUnknown68;
+    float mUnknown74; // +0x74 Starts at 1.
     int mUnknown78;   // +0x78 Starts at 1.
     // +0x7c Starts at 99999999, which is a hand-written sentinel in the same style as the
     // -9999999.0f Rnd::ParticleSys uses for an unset frame. The ring advance at 0x00476fe0 compares
@@ -343,9 +372,18 @@ private:
     // row of entry `i` and entry `(i + 1) % mUnknown3c` and blends the two on the vector unit.
     std::vector<Transform> mUnknownc0;
     int mUnknowncc;                 // +0xcc Starts at 0.
-    unsigned char mUnknownd0[0x0c]; // +0xd0 Unrecovered.
-    int mUnknowndc;                 // +0xdc Starts at 0.
-    unsigned char mUnknowne0[0x08]; // +0xe0 Unrecovered.
+    unsigned char mUnknownd0[0x08]; // +0xd0 Unrecovered.
+    // +0xd8 A std::list whose element is one pointer to an object deriving virtually from
+    // Rnd::Object. Update() walks it taking a reference on every entry, in the same shape
+    // Rnd::Animatable::AcquireAnimsRefs() has, and Copy() assigns it through the list assignment
+    // operator at 0x004727b0. The element class is undetermined, which is why the member is a byte
+    // run rather than a container.
+    unsigned char mUnknownd8[0x04];
+    // +0xdc A std::vector whose element is the 0x80-byte record described in the class note.
+    // Update() walks it calling the record member at 0x00477830 once per element, and Copy()
+    // assigns it through the vector assignment operator at 0x004728e8. The element class is
+    // undetermined, which is why the member is a byte run rather than a container.
+    unsigned char mUnknowndc[0x0c];
 };
 
 /**

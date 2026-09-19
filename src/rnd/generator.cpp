@@ -169,6 +169,22 @@ std::list<Generator::Instance> &Generator::Instances() {
     return mInstances;
 }
 
+// 0x0045a998
+void Generator::Regenerate() {
+    if (mParticleSys == nullptr) {
+        return;
+    }
+    mParticleSys->FreeAllParticles();
+    // Only the instance count is read. The walk never visits an instance, and mParticleCursor
+    // ends on the last particle the loop allocated.
+    for (unsigned i = 0; i < mInstances.size(); ++i) {
+        mParticleCursor = mParticleSys->AllocParticle();
+        if (mParticleCursor != nullptr) {
+            mParticleSys->RandomizeColorAndSize(mParticleCursor);
+        }
+    }
+}
+
 // 0x00459618
 void Generator::DumpText(FailSink &sink) {
     Object::DumpText(sink);

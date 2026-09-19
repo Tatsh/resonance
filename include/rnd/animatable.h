@@ -830,6 +830,23 @@ public:
      */
     virtual void Load(Stream &stream);
 
+    /**
+     * Drop this object's reference on every mAnims entry and then empty mAnims.
+     *
+     * Every derived destructor invokes this before its own teardown. The tail at `0x0049a9c0`
+     * passes the address of mAnims to the list clear at `0x0045edc8`, whose body returns every
+     * node to the pool and re-self-links the dummy node. An earlier reading had the list surviving
+     * the call. ReleaseAnimsAndFilters() at `0x00494cb0` is the routine that walks mAnims without
+     * emptying it, and the two bodies are otherwise alike.
+     *
+     * Public because Rnd::MetScreen::ResolveContainerViews() calls it at `0x0038b294` on the
+     * Rnd::View it just resolved, and MetScreen derives from MsgSink rather than from this class.
+     * A friend declaration for MetScreen fits the image equally well.
+     *
+     * @ghidraAddress 0x0049a960
+     */
+    void ReleaseAnimsRefs();
+
 protected:
     /**
      * Animate this object alone to a frame.
@@ -842,15 +859,6 @@ protected:
      * @ghidraAddress 0x0049a100
      */
     virtual void SetFrameSelf(float flFrame);
-
-    /**
-     * Drop this object's reference on every mAnims entry without emptying the list.
-     *
-     * Every derived destructor invokes this before its own teardown.
-     *
-     * @ghidraAddress 0x0049a960
-     */
-    void ReleaseAnimsRefs();
 
 private:
     // 0x00494cb0. Drops this object's reference on every mAnims entry, deletes every filter, and

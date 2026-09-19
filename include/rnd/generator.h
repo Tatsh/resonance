@@ -165,15 +165,11 @@ public:
      * Give every live instance a fresh particle from mParticleSys.
      *
      * Does nothing while mParticleSys is null. Otherwise it releases every live particle, then
-     * walks the instance list and for each instance allocates one particle and randomises it. The
-     * pool running dry stops the walk early, because an allocation that fails ends the loop
-     * without consuming the rest of the list. mParticleCursor receives the allocation result
-     * whether or not it succeeded, because that store sits in the delay slot of the test.
-     *
-     * The body is not written, because the three Rnd::ParticleSys members it calls are the private
-     * FreeAllParticles() and the two the image has at `0x0052c378` and `0x0052c530` that
-     * `rnd/particlesys.h` does not yet declare. All three are used from outside that hierarchy
-     * here. All three are therefore public.
+     * allocates one particle per live instance and randomises the colour and the size of each one.
+     * Only the instance count is read. The loop never visits an instance, and an allocation that
+     * fails skips the randomisation and continues rather than ending the loop, which corrects an
+     * earlier reading of `0x0045aa0c`. mParticleCursor receives the allocation result whether or
+     * not it succeeded, because that store sits in the delay slot of the test.
      *
      * @ghidraAddress 0x0045a998
      */

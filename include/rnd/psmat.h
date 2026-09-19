@@ -61,7 +61,7 @@ public:
     virtual void SetAmbient(const Color &color);
 
     /** @ghidraAddress 0x005916c8 */
-    virtual void SetDiffuse(const Vector3 &rgb);
+    virtual void SetDiffuse(const Color &color);
 
     /** @ghidraAddress 0x005916f0 */
     virtual void SetEmissive(const Color &color);
@@ -70,7 +70,7 @@ public:
     virtual void SetAlpha(float flAlpha);
 
     /** @ghidraAddress 0x00591708 */
-    virtual void SetSpecular(const Vector3 &rgb, float flAlpha);
+    virtual void SetSpecular(const Color &color, float flAlpha);
 
     /**
      * Apply the next pass of this material to the GS.

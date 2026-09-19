@@ -34,11 +34,12 @@ namespace Rnd {
  * DrawSelf() at `0x005066f0`, which draws nothing. Drawing belongs to Rnd::PsParticleSys.
  *
  * Particles live in two places at once. The pool is a vector of 0x80-byte records that the
- * constructor sizes to ten, and the live set is a singly linked list threaded through
- * Particle::mNext from mLiveParticles. Allocation and release go through a pool shared with
- * Rnd::Generator, whose helpers are at `0x0052c378` and `0x0052c3c0` and are therefore not members
- * of this class. Releasing a particle that the pool does not own reports "Tried to refree particle
- * from ".
+ * constructor sizes to ten, and the live set is a linked list threaded through Particle::mNext
+ * from mLiveParticles. Allocation at `0x0052c378` and release at `0x0052c3c0` are members of this
+ * class rather than shared helpers, which the fields they touch establish: each one receives a
+ * system in $a0 and reads mParticlesOwner, mLiveParticles, and the pool of the owner through it.
+ * An earlier reading placed both outside the class. Releasing a particle that the pool does not
+ * own reports "Tried to refree particle from ".
  *
  * Geometry is shared rather than copied, in the same arrangement Rnd::Mesh uses. A system whose
  * mParticlesOwner is another system draws that system's particles.
@@ -148,6 +149,50 @@ public:
      */
     virtual void StartAnim();
 
+    // The three members below are public because code outside this hierarchy calls all three
+    // directly. Rnd::Generator::Regenerate() at `0x0045a998` calls every one of them, and the
+    // stage classes between `0x00412000` and `0x00457000` supply nineteen further callers of
+    // FreeAllParticles() and seven of AllocParticle(). A friend declaration per calling class fits
+    // the image equally well, and nothing in the image distinguishes the two readings.
+
+    /**
+     * Release every live particle back to the pool of its owner.
+     *
+     * The walk unlinks each particle from the live list and pushes it onto the free list of
+     * mParticlesOwner. A particle whose mPrev is null is already free, and releasing one reports
+     * "Tried to refree particle from " with the name of the system. The head of the live list
+     * stores its own address in mPrev as the marker that distinguishes it from a free particle.
+     *
+     * @ghidraAddress 0x00524a70
+     */
+    void FreeAllParticles();
+
+    /**
+     * Take one particle from the pool of the owner and push it onto the live list.
+     *
+     * The free list is threaded through Particle::mNext and terminates at the finish pointer of
+     * the pool vector, so an exhausted pool is the head equalling that pointer. The new particle
+     * becomes the head of the live list and stores its own address in mPrev.
+     *
+     * @return The particle, or null once the pool is exhausted.
+     * @ghidraAddress 0x0052c378
+     */
+    Particle *AllocParticle();
+
+    /**
+     * Draw a random spawn colour and size for one particle.
+     *
+     * Each of the five values is an independent draw from the 31-bit generator at `0x0054f770`,
+     * scaled by 2 to the power of -31 and interpolated from the high bound toward the low one. The
+     * four colour components come from mStartColorLow against mStartColorHigh and the size from
+     * mSizeLow against mSizeHigh. Neither the position nor the velocity of the particle is
+     * touched.
+     *
+     * @param pParticle The particle to write.
+     * @ghidraAddress 0x0052c530
+     */
+    void RandomizeColorAndSize(Particle *pParticle);
+
 protected:
     /**
      * Advance the emission to a frame.
@@ -169,9 +214,6 @@ private:
     // Allocate and initialise the particles the emission rate calls for over a span of frames.
     // 0x005244b0.
     void SpawnParticles(float flDeltaFrames);
-
-    // Release every live particle. StartAnim() and the destructor are its callers. 0x00524a70.
-    void FreeAllParticles();
 
     // Drop the reference on the material and on the particle owner, and remove this system from
     // the owner's sharer list. Copy() is its only caller. 0x0052c318.
@@ -210,8 +252,9 @@ private:
     // Systems that share this one's particles. RemoveObjectRefs() removes this system from the
     // list of whichever system owns its particles.
     std::list<ParticleSys *> mSharers; // +0x104
-    // The spawn parameter block. See the class note. Six of its fields are recovered, because
-    // Rnd::ParticleSysAnim::SetFrameSelf() writes them. The dump of this block writes every other
+    // The spawn parameter block. See the class note. Eight of its fields are recovered, six
+    // because Rnd::ParticleSysAnim::SetFrameSelf() writes them and the size range because
+    // RandomizeColorAndSize() draws from it. The dump of this block writes every other
     // range it has as a "…Low:" and "…High:" pair, "posLow:" against "posHigh:" and
     // "startColorLow:" against "startColorHigh:", and the animation shifts the high member of each
     // range by however far it moved the low member, which preserves the spread. The two emission
@@ -225,9 +268,14 @@ public:
     float mEmitRateLow;
     /*!< High end of the emission rate range. Public on the same evidence as mEmitRateLow. +0x15c */
     float mEmitRateHigh;
+    /*!< Low end of the size a particle spawns with, which RandomizeColorAndSize() draws against
+         mSizeHigh. Public on the same evidence as mEmitRateLow. +0x160 */
+    float mSizeLow;
+    /*!< High end of the size a particle spawns with. +0x164 */
+    float mSizeHigh;
 
 private:
-    unsigned char mUnknown160[0x10]; // +0x160
+    unsigned char mUnknown168[0x08]; // +0x168
 
 public:
     /*!< Low end of the colour a particle spawns with. Public on the same evidence as

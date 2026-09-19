@@ -623,10 +623,10 @@ void Mat::SetAmbient(const Color &color) {
 }
 
 // 0x004db980
-void Mat::SetDiffuse(const Vector3 &rgb) {
-    mDiffuse.r = rgb.x;
-    mDiffuse.g = rgb.y;
-    mDiffuse.b = rgb.z;
+void Mat::SetDiffuse(const Color &color) {
+    mDiffuse.r = color.r;
+    mDiffuse.g = color.g;
+    mDiffuse.b = color.b;
 }
 
 // 0x004db9a0
@@ -640,11 +640,11 @@ void Mat::SetAlpha(float flAlpha) {
 }
 
 // 0x004db9b8
-void Mat::SetSpecular(const Vector3 &rgb, float flAlpha) {
-    mSpecular.r = rgb.x;
-    mSpecular.g = rgb.y;
-    mSpecular.b = rgb.z;
-    mSpecular.a = flAlpha;
+void Mat::SetSpecular(const Color &color, float flAlpha) {
+    mSpecular.r = color.r;
+    mSpecular.g = color.g;
+    mSpecular.b = color.b;
+    mSpecular.a = flAlpha; // Yes, the binary discards color.a and stores the argument instead.
 }
 
 // 0x004dcbc0

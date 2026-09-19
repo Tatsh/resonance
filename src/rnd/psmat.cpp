@@ -151,10 +151,10 @@ void PsMat::SetAmbient(const Color &color) {
 }
 
 // 0x005916c8
-void PsMat::SetDiffuse(const Vector3 &rgb) {
-    mDiffuse.r = rgb.x;
-    mDiffuse.g = rgb.y;
-    mDiffuse.b = rgb.z;
+void PsMat::SetDiffuse(const Color &color) {
+    mDiffuse.r = color.r;
+    mDiffuse.g = color.g;
+    mDiffuse.b = color.b;
     g_pSelectedMat = nullptr;
 }
 
@@ -171,11 +171,11 @@ void PsMat::SetAlpha(float flAlpha) {
 }
 
 // 0x00591708
-void PsMat::SetSpecular(const Vector3 &rgb, float flAlpha) {
-    mSpecular.r = rgb.x;
-    mSpecular.g = rgb.y;
-    mSpecular.b = rgb.z;
-    mSpecular.a = flAlpha;
+void PsMat::SetSpecular(const Color &color, float flAlpha) {
+    mSpecular.r = color.r;
+    mSpecular.g = color.g;
+    mSpecular.b = color.b;
+    mSpecular.a = flAlpha; // Yes, the binary discards color.a and stores the argument instead.
     g_pSelectedMat = nullptr;
 }
 
