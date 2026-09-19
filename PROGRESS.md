@@ -17,12 +17,12 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                      | Count  |
 | ---------------------------- | ------ |
 | Functions in the program     | 14,954 |
-| Excluded by rule             | 1,824  |
-| Reconstructable              | 13,130 |
+| Excluded by rule             | 3,809  |
+| Reconstructable              | 11,145 |
 | Accounted for in source      | 1,628  |
-| Share of the reconstructable | 12.40% |
+| Share of the reconstructable | 14.61% |
 | Remaining, with a name       | 794    |
-| Remaining, unidentified      | 10,708 |
+| Remaining, unidentified      | 8,723  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -55,9 +55,9 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 820   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 457   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 285   | Bodies proven byte-identical to an already-named routine         |
-| Template library               | 186   | Container instantiations                                         |
+| Vendored upstream              | 508   | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 2,216 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 189   | Container instantiations                                         |
 | Platform SDK                   | 33    | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 24    | Exception, cast, and unwinding support                           |
 | C runtime                      | 19    | String and memory routines, and the floating-point library       |
@@ -158,6 +158,20 @@ whole set is excluded.
 That result is not derivable from the fingerprint groups, because the fingerprint discards the
 immediates. Two template instantiations differing only in an element size share a fingerprint and
 are different functions. Byte comparison against the image is the only test that separates them.
+
+The same test then applied to clusters whose every member was unidentified. 382 such clusters hold
+2,268 addresses, and marking the surplus removed 1,843 of them from the denominator, with a further
+142 removed where an unidentified body matched one already titled. Three safeguards make that
+honest rather than convenient. The lowest address of each cluster is deliberately untouched, because
+the one definition it stands for is still owed and still unidentified. An address the source already
+annotates is never retitled and always wins as its cluster's representative, which caught one case
+where the annotated routine would otherwise have been titled a copy of its own duplicate. And 25
+clusters were held back because their bodies are too short for identity to prove duplication, the
+shortest being two instructions, since two byte-identical trivial bodies are usually two distinct
+overrides of one pure virtual.
+
+The surplus members carry titles of the form `UnidentifiedBody<address>Copy<n>`. That form asserts
+nothing about behaviour. It records which address the body repeats, and nothing more.
 
 Four clusters of 148 copies each remain unidentified, at `0x00107d28`, `0x00107eb8`, `0x001080a8`,
 and `0x00108738`. They are members of one map keyed by object name: the comparator is

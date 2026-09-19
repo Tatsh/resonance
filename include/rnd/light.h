@@ -216,8 +216,18 @@ public:
     /** Light every vertex receives from this light regardless of its normal. +0xc0 */
     Color mAmbient;
 
+    /**
+     * Highlight colour the light contributes. +0xd0
+     *
+     * Public for the same reason as its two siblings. Rnd::LightAnim::SetFrameSelf() at
+     * `0x005418f8` reads all three through a Rnd::Light pointer it stores, and Rnd::LightAnim does
+     * not derive from Rnd::Light, so protected access would not cover it. A friend declaration
+     * fits the image equally well. The three stack quadwords that routine builds become the three
+     * arguments of SetColors(), which confirms both this offset and that parameter order.
+     */
+    Color mSpecular;
+
 private:
-    Color mSpecular;   // +0xd0
     float mInnerAngle; // +0xe0
     float mOuterAngle; // +0xe4
 
