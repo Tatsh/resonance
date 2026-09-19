@@ -26,17 +26,91 @@ struct MemTagTotal {
     int mBytes;                  /*!< Bytes allocated against the tag so far. +0x7c */
 };
 
+/** Bytes the tag the STL allocator hook formats may occupy, including the terminator. */
+constexpr int kMemStlTagSize = 128;
+
 /**
  * Allocate a block.
  *
  * The request is raised to one byte when it is zero. The allocation is billed
- * to the tag `UNK[]`, and a failure is fatal.
+ * to the tag `UNK[]`, and a failure is fatal. This is the array form, and
+ * MemAllocScalar() is the single-object form.
  *
  * @param nSize The block size in bytes.
  * @return The block.
  * @ghidraAddress 0x004a8380
  */
 void *MemAlloc(size_t nSize);
+
+/**
+ * Allocate a block for a single object.
+ *
+ * The request is raised to one byte when it is zero. The allocation is billed
+ * to the tag `UNK`, and a failure is fatal. The log line and the failure
+ * message both omit a tag, and the message reads
+ * `NEW ALLOCATION FAILURE, size: %d`.
+ *
+ * @param nSize The block size in bytes.
+ * @return The block.
+ * @ghidraAddress 0x004a81e0
+ */
+void *MemAllocScalar(size_t nSize);
+
+/**
+ * Allocate a block for one object of a named class.
+ *
+ * This is the allocator every class-specific `operator new` in the image
+ * forwards to. Each of those is eight instructions that pass the request
+ * through and supply the class name as the second argument. 637 call sites
+ * exist and at least 41 distinct class names appear among them, including the
+ * qualified forms `Rnd::Mesh` and `Rnd::Cam`. The tag reaches the accounting
+ * table unreduced, and the failure message reads
+ * `NEW ALLOCATION FAILURE, class: %s, size: %d`. The request is raised to one
+ * byte when it is zero, and a failure is fatal.
+ *
+ * @param nSize The block size in bytes.
+ * @param pszClass The class name to bill the allocation to.
+ * @return The block.
+ * @ghidraAddress 0x004a90a0
+ */
+void *AllocateTaggedMemory(size_t nSize, const char *pszClass);
+
+/**
+ * Release a block that AllocateTaggedMemory() handed out.
+ *
+ * The class name reaches the log line unreduced. Unlike MemFreeTagged() this
+ * path does not test the block against the zones.
+ *
+ * @param pBlock The block to release.
+ * @param pszClass The class name the allocation was billed to.
+ * @ghidraAddress 0x004a91e0
+ */
+void FreeTaggedMemory(void *pBlock, const char *pszClass);
+
+/**
+ * Address the buffer the STL allocator hook bills its allocations to.
+ *
+ * The buffer is the one MemSetStlTag() formats into, and MemAllocTagged()
+ * rewinds it to `stl_unk` after every tagged allocation. Callers pass the
+ * result straight on as a tag.
+ *
+ * @return The tag buffer.
+ * @ghidraAddress 0x004a9090
+ */
+char *MemGetCurrentTag();
+
+/**
+ * Bill the next STL allocation to a container kind and element size.
+ *
+ * The two arguments are formatted as `%s.%d`. That produces a tag such as
+ * `stl_vector.8`. Every STL allocation hook calls this and then passes
+ * MemGetCurrentTag() to MemAllocTagged().
+ *
+ * @param pszKind The container kind, for example `stl_vector`.
+ * @param nElemSize The element size in bytes.
+ * @ghidraAddress 0x004a9048
+ */
+void MemSetStlTag(const char *pszKind, int nElemSize);
 
 /**
  * Allocate a block and record the request against a tag.

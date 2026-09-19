@@ -16,8 +16,11 @@ constexpr int kMemLogSourceNameSize = 64;
 // spare room.
 constexpr int kMemLogSourceNameLimit = 40;
 
-// The tag the untagged allocation path bills to.
+// The tag the untagged array allocation path bills to.
 constexpr char kUntaggedTag[] = "UNK[]";
+
+// The tag the untagged single-object allocation path bills to.
+constexpr char kScalarTag[] = "UNK";
 
 // The tag the STL allocator hook is rewound to after every tagged allocation.
 constexpr char kStlUnknownTag[] = "stl_unk";
@@ -25,8 +28,9 @@ constexpr char kStlUnknownTag[] = "stl_unk";
 // 0x006f57d0
 int g_bMemLogging;
 
-// 0x006f57d8. Eight bytes, rewritten as one doubleword.
-char g_szStlAllocTag[sizeof(kStlUnknownTag)];
+// 0x006f57d8. The rewind to kStlUnknownTag compiles to one doubleword store. The array bound
+// comes from the distance to the next global rather than from any single access.
+char g_szStlAllocTag[kMemStlTagSize];
 
 // 0x006f5858
 int g_bMemAccounting;
@@ -106,6 +110,38 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
     return pBlock;
 }
 
+void *MemAllocScalar(size_t nSize) {
+    size_t nRequest = (nSize != 0) ? nSize : 1;
+    void *pBlock = HeapAlloc(nRequest);
+
+    if (g_bMemAccounting != 0) {
+        ChargeTagTotal(kScalarTag, nRequest);
+    }
+    if (g_bMemLogging != 0) {
+        fprintf(g_pMemLogFile, "new(UNK,%d,%p)\n", nRequest, pBlock);
+    }
+    if (pBlock == nullptr) {
+        Fatal("NEW ALLOCATION FAILURE, size: %d\n", nRequest);
+    }
+    return pBlock;
+}
+
+void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
+    size_t nRequest = (nSize != 0) ? nSize : 1;
+    void *pBlock = HeapAlloc(nRequest);
+
+    if (g_bMemAccounting != 0) {
+        ChargeTagTotal(pszClass, nRequest);
+    }
+    if (g_bMemLogging != 0) {
+        fprintf(g_pMemLogFile, "new(%s,%d,%p)\n", pszClass, nRequest, pBlock);
+    }
+    if (pBlock == nullptr) {
+        Fatal("NEW ALLOCATION FAILURE, class: %s, size: %d\n", pszClass, nRequest);
+    }
+    return pBlock;
+}
+
 void MemFree(void *pBlock) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK[],%p)\n", pBlock);
@@ -116,6 +152,13 @@ void MemFree(void *pBlock) {
 void MemFreeScalar(void *pBlock) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK,%p)\n", pBlock);
+    }
+    HeapFree(pBlock);
+}
+
+void FreeTaggedMemory(void *pBlock, const char *pszClass) {
+    if (g_bMemLogging != 0) {
+        fprintf(g_pMemLogFile, "del(%s,%p)\n", pszClass, pBlock);
     }
     HeapFree(pBlock);
 }
@@ -153,6 +196,14 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
         Fatal("MEMORY RE-ALLOCATION FAILURE, file: %s, line: %d, size: %d\n", pszTag, nLine, nSize);
     }
     return pNew;
+}
+
+char *MemGetCurrentTag() {
+    return g_szStlAllocTag;
+}
+
+void MemSetStlTag(const char *pszKind, int nElemSize) {
+    sprintf(g_szStlAllocTag, "%s.%d", pszKind, nElemSize);
 }
 
 void MemLogWrite(const char *pszText) {

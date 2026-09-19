@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -280,13 +281,6 @@ Stream &ReadEdgeVector(Stream &stream, std::vector<MeshEdge> &edges) {
         stream.Read(&edge.mV2, sizeof(edge.mV2));
     }
     return stream;
-}
-
-// 0x00492458
-void NegateVec3(const float *pSrc, float *pDest) {
-    pDest[0] = -pSrc[0];
-    pDest[1] = -pSrc[1];
-    pDest[2] = -pSrc[2];
 }
 
 // The cross product is a VU0 outer-product pair in the image, vopmula followed by vopmsub, rather
