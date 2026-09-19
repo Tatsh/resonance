@@ -17,12 +17,12 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                      | Count  |
 | ---------------------------- | ------ |
 | Functions in the program     | 15,526 |
-| Excluded by rule             | 5,991  |
-| Reconstructable              | 9,536  |
-| Accounted for in source      | 2,293  |
-| Share of the reconstructable | 24.05% |
-| Remaining, with a name       | 2,351  |
-| Remaining, unidentified      | 4,892  |
+| Excluded by rule             | 6,258  |
+| Reconstructable              | 9,269  |
+| Accounted for in source      | 2,368  |
+| Share of the reconstructable | 25.55% |
+| Remaining, with a name       | 2,283  |
+| Remaining, unidentified      | 4,618  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -56,9 +56,9 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 823   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 1,712 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,051 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 664   | Container instantiations                                         |
-| Platform SDK                   | 337   | `sce` entry points and kernel syscalls                           |
+| Per-translation-unit duplicate | 2,312 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 669   | Container instantiations                                         |
+| Platform SDK                   | 338   | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 184   | Exception, cast, and unwinding support                           |
 | C runtime                      | 220   | String and memory routines, and the floating-point library       |
 
@@ -251,6 +251,15 @@ Two limits are recorded with the tool. A type whose name reads through a size ex
 the upstream side of the match. And the embedded interpreter is not exactly the release the tree
 records: its dictionary type fills a rich-comparison slot the release leaves empty, and leaves empty
 two the release fills, so the build has rich comparison for dictionaries and no cycle collector.
+
+Three of the bulk passes had a defect repaired in the generator rather than in the output, which is
+the difference between fixing a fault and cleaning up after it. The allocation-operator pass now
+requires the body to be a short forwarder before it will title anything, because referencing a
+class tag is not the same as being that class's operator; on a re-run that rejected 93 of 94
+candidates, every one of which would have been a wrong title. The duplicate pass now refuses to
+mark any address that occupies a vtable slot, which is the guard whose absence produced 147
+markings that had to be undone. Both changes cost one condition each and remove a whole class of
+error rather than an instance of it.
 
 ### Identification levers, including the exhausted ones
 
