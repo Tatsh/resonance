@@ -109,10 +109,11 @@ public:
     virtual int Slot10();
 
     /**
-     * Slot 11. Publishes a message through the `MsgSource` subobject.
+     * Announce this player's juice amount.
      *
-     * Builds the message on the stack from this player and the value at `+0x34` clamped to a
-     * maximum of 800, then sends it with `MsgSource::Send`. The verb is unrecovered.
+     * Builds a `JuiceAmountMsg` on the stack naming this player, with mUnknown34 clamped to a
+     * maximum of 800, and sends it through the `MsgSource` subobject. The verb comes from the
+     * message class rather than from the slot.
      *
      * @ghidraAddress 0x0012f788
      */
@@ -210,4 +211,6 @@ protected:
     int mUnknown24; // +0x24
     // Released by ~Player, so this member owns its allocation.
     void *mUnknown28; // +0x28
+    // Slot11 clamps this to kJuiceMaximum before announcing it.
+    int mUnknown34; // +0x34
 };

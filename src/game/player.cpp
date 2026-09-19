@@ -3,11 +3,12 @@
 #include <iostream.h>
 
 #include "app/msgsource.h"
+#include "msg/juiceamountmsg.h"
 
 namespace {
 
 // Ceiling Slot11 applies to the value it publishes.
-constexpr int kSlot11Maximum = 800;
+constexpr int kJuiceMaximum = 800;
 
 constexpr char kNullText[] = "{player null}";
 constexpr char kOpenText[] = "{player ";
@@ -55,6 +56,15 @@ int Player::Slot9(int) {
 // 0x00132cc8
 int Player::Slot10() {
     return 0;
+}
+
+// 0x0012f788
+void Player::Slot11() {
+    JuiceAmountMsg message;
+    message.mUnknown04 = this;
+    message.mUnknown08 = mUnknown34 < kJuiceMaximum ? mUnknown34 : kJuiceMaximum;
+
+    Send(&message);
 }
 
 // 0x00132d30

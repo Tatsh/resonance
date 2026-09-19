@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/player.h"
 #include "msg/message.h"
 
 /**
@@ -43,11 +44,25 @@ public:
      */
     virtual const char *Name();
 
+public:
+    /** Copied into NetPlayer `+0x48` by its handler at `0x00125f70`. +0x04 */
+    int mUnknown04;
+    /** Copied into NetPlayer `+0x4c` by the same handler. +0x08 */
+    int mUnknown08;
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
     int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+
+public:
+    /**
+     * Player the message is addressed to.
+     *
+     * NetPlayer::HandleMessage() compares this member against the receiving player and acts only on
+     * a match, which is what types it as a player rather than as a payload word.
+     *
+     * +0x10
+     */
+    Player *mUnknown10;
 };
 
 /**

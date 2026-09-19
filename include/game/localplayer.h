@@ -3,6 +3,7 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/player.h"
+#include "game/powerupplacer.h"
 
 /**
  * Player driven by a controller on this machine.
@@ -56,15 +57,27 @@ public:
     /** @ghidraAddress 0x00121eb0 */
     virtual int Slot10();
 
-    /** @ghidraAddress 0x0011e4e0 */
+    /**
+     * Slot 11. Calls the base, then publishes a message of its own.
+     *
+     * Invokes `Player::Slot11` first, computes a value through three calls at `0x00198da8`,
+     * `0x00118e78`, and `0x004a7af8`, invokes slot 4 of the object at `+0xa8`, and publishes a
+     * message built from `+0x58`, this player, and that value.
+     *
+     * Not reconstructed, because the message class behind the vptr at `0x00812d68` is
+     * unidentified.
+     *
+     * @ghidraAddress 0x0011e4e0
+     */
     virtual void Slot11();
 
     /**
-     * Slot 12. Forwards to slot 5 of the object at `+0xa8`.
+     * Slot 12. Forwards to slot 5 of the placer at `+0xa8`.
      *
-     * Not reconstructed. That object answers a slot past the four a `MsgSource` table has, so its
-     * dynamic type extends `MsgSource` and is unidentified, and the call cannot be written through
-     * a `MsgSource` pointer.
+     * That slot is declared on `PowerupPlacer` and its body is two instructions, so the call
+     * reaches an empty routine. Both the `PowerupPlacer` and `JamPowerupPlacer` tables record the
+     * same address for it rather than a re-emitted copy each, which is what proves the empty body
+     * is inherited rather than a local override, so this dispatch is real and does nothing.
      *
      * @ghidraAddress 0x001228c8
      */
@@ -111,15 +124,27 @@ public:
     /**
      * Slot 22. Declared by this class rather than inherited.
      *
-     * Returns at once unless mMode68 is 2. Otherwise it stores its argument in `+0x64` and
-     * publishes a message through the `MsgSource` subobject. Not reconstructed, because the
-     * message class behind the vptr at `0x007cf4e8` is unidentified.
+     * Returns at once unless mMode68 is 2. Otherwise it stores its argument in mUnknown64 and
+     * sends a `ToggleGhostMsg` naming this player.
      *
      * @ghidraAddress 0x0011e908
      */
     virtual void Slot22(int value);
 
-    /** @ghidraAddress 0x0011ed98 */
+    /**
+     * Receive one message.
+     *
+     * Dispatches on `Message::Type()` down a chain of at least four identities. A
+     * `TrackSelectMsg` goes to the helper at `0x0011e980`; the identity at `0x006d0164` is
+     * accepted and ignored; the one at `0x006d015c` is acted on only when the message's `+0x04`
+     * names this player and `+0xa4` is present.
+     *
+     * Not reconstructed. Three of the identities in the chain are unidentified globals, and the
+     * chain runs to `0x0011f0b0`.
+     *
+     * @param pMsg The message.
+     * @ghidraAddress 0x0011ed98
+     */
     virtual void HandleMessage(Message *pMsg);
 
     /** @ghidraAddress 0x001228f8 */
@@ -141,11 +166,11 @@ private:
     int mUnknown88; // +0x88 returned by Slot17
     int mUnknown64; // +0x64 written by Slot22
     // Both Slot21 and Slot22 return at once unless this is 2, so it selects a mode.
-    int mMode68;          // +0x68
-    int mCount9c;         // +0x9c numerator of Slot18
-    int mCounta0;         // +0xa0 the rest of Slot18's total
-    int mUnknownac;       // +0xac returned plus one by Slot15
-    int mUnknownb0;       // +0xb0 returned plus one by Slot14
-    MsgSource *mSourceA4; // +0xa4
-    MsgSource *mSourceA8; // +0xa8
+    int mMode68;              // +0x68
+    int mCount9c;             // +0x9c numerator of Slot18
+    int mCounta0;             // +0xa0 the rest of Slot18's total
+    int mUnknownac;           // +0xac returned plus one by Slot15
+    int mUnknownb0;           // +0xb0 returned plus one by Slot14
+    MsgSource *mSourceA4;     // +0xa4
+    PowerupPlacer *mSourceA8; // +0xa8
 };

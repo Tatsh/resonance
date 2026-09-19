@@ -1,6 +1,15 @@
 #include "game/localplayer.h"
 
 #include "app/msgsource.h"
+#include "game/jampowerupplacer.h"
+#include "msg/toggleghostmsg.h"
+
+namespace {
+
+// The value mMode68 has to equal before Slot21 and Slot22 do anything.
+constexpr int kModeActive = 2;
+
+} // namespace
 
 // 0x00121ea0
 int LocalPlayer::Slot2() {
@@ -35,6 +44,24 @@ void LocalPlayer::Slot8(int first, int second) {
 // 0x00121eb0
 int LocalPlayer::Slot10() {
     return mUnknown60;
+}
+
+// 0x001228c8
+void LocalPlayer::Slot12() {
+    mSourceA8->OnUnknownSlot5();
+}
+
+// 0x0011e908
+void LocalPlayer::Slot22(int value) {
+    if (mMode68 != kModeActive) {
+        return;
+    }
+
+    mUnknown64 = value;
+
+    ToggleGhostMsg message;
+    message.mUnknown04 = this;
+    Send(&message);
 }
 
 // 0x00121ec0

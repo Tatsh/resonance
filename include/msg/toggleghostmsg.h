@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/player.h"
 #include "msg/message.h"
 
 /**
@@ -49,8 +50,18 @@ public:
      */
     virtual const char *Name();
 
+public:
+    /**
+     * Player the message is about.
+     *
+     * LocalPlayer::Slot22() at `0x0011e908` writes the player here before sending, which is what
+     * types this member as a player rather than as a payload word.
+     *
+     * +0x04
+     */
+    Player *mUnknown04;
+
 private:
-    int mUnknown04; // +0x04
     int mUnknown08; // +0x08
 };
 
