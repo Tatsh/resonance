@@ -30,7 +30,7 @@ MetJukeboxBaseScreen::MetJukeboxBaseScreen(MetRenderer *pRenderer,
       mUnknown94(kScrollingListArgument3), mUnknown98(nullptr), mUnknown9c(nullptr),
       mUnknowna0(nullptr), mUnknowna4(nullptr), mUnknowna8(nullptr), mUnknownac(nullptr),
       mUnknownb0(nullptr), mUnknownb4(nullptr), mUnknownb8(nullptr), mUnknownbc(0), mUnknownc0(0),
-      mUnknownc4(0), mUnknownc8(0), mUnknownd8(nullptr), mUnknowndc(nullptr),
+      mUnknownc4(nullptr), mUnknownc8(0), mUnknownd8(nullptr), mUnknowndc(nullptr),
       mUnknowne0(HxStr(kSongLogoTexture1), HxStr(kSongLogoTexture2)),
       mUnknown110(HxStr(kSongLabelTexture1), HxStr(kSongLabelTexture2)), mUnknown140(0),
       mUnknown144(0), mUnknown148(0), mUnknown14c(0) {

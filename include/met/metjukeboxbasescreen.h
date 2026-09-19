@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "game/jukeboxplaylist.h"
 #include "met/listdataprovider.h"
 #include "met/metremixrecord.h"
 #include "met/metscreen.h"
@@ -219,11 +220,9 @@ protected:
     Rnd::Drawable *mUnknownb8;               // +0xb8, the frame SetShowing() hides with the screen
     int mUnknownbc;                          // +0xbc, written by the child slot 38
     int mUnknownc0;                          // +0xc0, written by the child slot 38
-    // Really a pointer to the nested object at `+0xc4` of the shared MetRemixManager, whose own
-    // `+0x00` starts a vector of four-byte entries that the edit screen counts rows from. That
-    // nested class emits no RTTI and its vptr sits at its own `+0x0c`, so it is not modelled and
-    // this member is recorded as a word.
-    int mUnknownc4; // +0xc4
+    // The playlist the edit screen counts rows from. Slot 42 sets it to the instance embedded at
+    // `+0xc4` of the shared MetRemixManager.
+    JukeboxPlayList *mUnknownc4; // +0xc4
     // Distinguishes the three jukebox lists. Zero for the saved and edit screens and -1 for the
     // factory screen. Each of the three children writes it in its own constructor.
     int mUnknownc8;                        // +0xc8

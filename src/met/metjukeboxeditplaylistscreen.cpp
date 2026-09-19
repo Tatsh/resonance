@@ -22,3 +22,7 @@ MetJukeboxEditPlaylistScreen::MetJukeboxEditPlaylistScreen(MetRenderer *pRendere
 
 MetJukeboxEditPlaylistScreen::~MetJukeboxEditPlaylistScreen() {
 }
+
+int MetJukeboxEditPlaylistScreen::GetItemCount() {
+    return mUnknownc4->entries.size();
+}
