@@ -1,19 +1,19 @@
-#pragma once
+class CheckInfoOp;
+class CloseOp;
+class CreateDirOp;
+class DeleteFileOp;
+class EntSpaceOp;
+class FormatOp;
+class ListDirOp;
+class OpenReadOp;
+class OpenWriteOp;
+class ReadOp;
+class RenameFileOp;
+class SeekOp;
+class UnformatOp;
+class WriteOp;
 
-#include "memcard/checkinfoop.h"
-#include "memcard/closeop.h"
-#include "memcard/createdirop.h"
-#include "memcard/deletefileop.h"
-#include "memcard/entspaceop.h"
-#include "memcard/formatop.h"
-#include "memcard/listdirop.h"
-#include "memcard/openreadop.h"
-#include "memcard/openwriteop.h"
-#include "memcard/readop.h"
-#include "memcard/renamefileop.h"
-#include "memcard/seekop.h"
-#include "memcard/unformatop.h"
-#include "memcard/writeop.h"
+#pragma once
 
 /**
  * Receiver notified once a queued memory-card operation has finished.

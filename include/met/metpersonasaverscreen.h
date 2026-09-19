@@ -37,9 +37,23 @@
  * teardown of mUnknownc4, mUnknownac, and mPersonas in reverse declaration order, so the call is
  * the whole of its reconstructed body.
  *
- * Apart from the type function and the destructor, the slots that differ from the MetScreen table
- * are 5 `0x003390c0`, 7 `0x003390f0`, 9 `0x00339110`, 15 `0x003346c8`, 23 `0x00338f88`, 24
- * `0x00338f90`, 38 `0x003390a0`.
+ * A diff of the primary table against the MetScreen table at `0x0080b6a0` reads nine overrides,
+ * slots 1, 5, 7, 9, 15, 23, 24, and 38 apart from the type function.
+ *
+ * Five addresses that the memory-card band worklist assigned to primary slots 2, 5, 7, and 13 are
+ * in the two secondary tables instead. `0x0032f5a0`, `0x00331358`, `0x00333210`, and `0x00332428`
+ * are MemcardUser slots 2, 5, 7, and 13, and `0x003391a8` is MetKBUser slot 2. Two of those, the
+ * MemcardUser slots 5 and 7, carried the same slot numbers as the genuine primary overrides at
+ * `0x003390c0` and `0x003390f0`, and the table diff is what separates the two pairs.
+ *
+ * `0x00338f98` is the out-of-line emission of the `new` expression that builds one, which is
+ * compiler-generated glue rather than a member and is therefore not declared.
+ *
+ * Neither overridden MemcardUser virtual is declared here, because MemcardUser declares none of
+ * those slots by a recovered name. The MetKBUser override is declared, because that base declares
+ * its one pure virtual.
+ *
+ * Six bodies are not written, every one of them declared below with its address.
  */
 class MetPersonaSaverScreen : public MetScreen, public MemcardUser, public MetKBUser {
 public:
@@ -56,6 +70,66 @@ public:
      * @ghidraAddress 0x0032f020
      */
     virtual ~MetPersonaSaverScreen();
+
+    /**
+     * Populate the dialogue and enter.
+     *
+     * Slot 5, not the MemcardUser slot 5 at `0x00331358`. The body is not written.
+     *
+     * @ghidraAddress 0x003390c0
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Unrecovered. Slot 7, not the MemcardUser slot 7 at `0x00333210`.
+     *
+     * The MetScreen body is empty and reveals no parameter list, so the declaration follows the
+     * base and is provisional. The body is not written.
+     *
+     * @ghidraAddress 0x003390f0
+     */
+    virtual void OnUnknownSlot7();
+
+    /**
+     * Begin the exit.
+     *
+     * Slot 9. The body is not written.
+     *
+     * @ghidraAddress 0x00339110
+     */
+    virtual void BeginExit();
+
+    /**
+     * Respond to a message screen being dismissed.
+     *
+     * Slot 15. The body is not written.
+     *
+     * @param name The message screen that was dismissed.
+     * @param nChoice The response.
+     * @ghidraAddress 0x003346c8
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
+     * Resolve the container views.
+     *
+     * Slot 38. The body is not written.
+     *
+     * @ghidraAddress 0x003390a0
+     */
+    virtual void ResolveContainerViews();
+
+    /**
+     * Receive the text the keyboard committed.
+     *
+     * MetKBUser slot 2, in the secondary table at `0x00805530` with a `-144` adjustment. It
+     * supplies the one MetKBUser pure virtual, which is what makes this class concrete. The
+     * parameter comes from the base declaration. The body is not written.
+     *
+     * @param text The text the user entered.
+     * @ghidraAddress 0x003391a8
+     */
+    virtual void OnUnknownSlot2(const HxStr &text);
 
     /**
      * Silence the cycle-left sound.

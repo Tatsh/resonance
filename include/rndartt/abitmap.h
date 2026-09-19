@@ -1,6 +1,6 @@
-#pragma once
+class APalette;
 
-#include "rndartt/apalette.h"
+#pragma once
 
 /**
  * Pixel layout code stored in ABitmap::mFormat.

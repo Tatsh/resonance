@@ -2,16 +2,20 @@
 
 #include <vector>
 
-#include "os/failsink.h"
 #include "os/hxstr.h"
-#include "rnd/font.h"
-#include "rnd/mat.h"
-#include "rnd/mesh.h"
 #include "rnd/object.h"
-#include "rnd/stream.h"
-#include "rnd/text.h"
+
+class FailSink;
+namespace Rnd {
+class Font;
+class Mat;
+class Mesh;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
+
+class Text;
 
 /**
  * Selectable widget, as one mesh and one text run plus a palette for each.
@@ -25,11 +29,12 @@ namespace Rnd {
  * The member titles come from the text DumpText() writes, "state: ", " mesh: ", " text: ",
  * "mats: ", and "fonts: ".
  *
- * What the state selects is not implemented here. The class draws nothing, updates nothing, and
- * exposes no setter, so the two palettes and the index are a record the front end reads. Over two
- * hundred call sites across the metagame and the front-end screens narrow an object to this class,
- * and none of those translation units is reconstructed yet, so which palette entry a given state
- * applies to which of the two targets is recovered nowhere in this tree.
+ * What the state selects is not implemented here. SetState() records the index and SetShowing()
+ * forwards to both targets, and the class draws nothing and updates nothing, so the two palettes
+ * and the index are a record the front end reads. Over two hundred call sites across the metagame
+ * and the front-end screens narrow an object to this class, and few of those translation units are
+ * reconstructed yet, so which palette entry a given state applies to which of the two targets is
+ * recovered nowhere in this tree.
  */
 class Button : public Object {
 public:
@@ -115,6 +120,27 @@ public:
      */
     virtual void Load(Stream &stream);
 
+    /**
+     * Show or hide both targets.
+     *
+     * The argument goes to slot 1 of the Rnd::Drawable table of mMesh and then of mText, and a
+     * null target is passed over. The class declares no virtual of its own, so the member is an
+     * ordinary method rather than an override.
+     *
+     * @param nShowing Whether the button draws.
+     * @ghidraAddress 0x005349e0
+     */
+    void SetShowing(int nShowing);
+
+    /**
+     * Select one of mMats and one of mFonts.
+     *
+     * @param nState The state index. MetButtonList passes over an entry whose state is 3, which
+     * is how a disabled button is skipped.
+     * @ghidraAddress 0x00534a48
+     */
+    void SetState(int nState);
+
 private:
     // Take a reference on both targets and on every palette entry. Load() and Copy() are its
     // callers. 0x00534820.
@@ -124,12 +150,24 @@ private:
     // Copy() are its callers. 0x00534900.
     void RemoveObjectRefs();
 
-    // Declared in recovered offset order. Every member is private: nothing in the recovered part of
-    // the image touches any of them, and the class exposes no accessor.
+    // Declared in recovered offset order. Every member but mText is private, because nothing in
+    // the recovered part of the image touches one of these and the class exposes no accessor.
 
     int mState;  // +0x1c
     Mesh *mMesh; // +0x20
-    Text *mText; // +0x24
+
+public:
+    /**
+     * Label drawn over mMesh.
+     *
+     * Public rather than private, because MetButtonList::Add() and
+     * MetLoadFreqBaseScreen::UpdateNameLabel() both set the label text through a plain load at
+     * `+0x24` and the image has no accessor to route either read through. A friend declaration
+     * fits the image equally well. +0x24
+     */
+    Text *mText;
+
+private:
     // Materials the state selects among, for mMesh. The assignment operator this class uses is
     // instantiated out of line at 0x00533260.
     std::vector<Mat *> mMats; // +0x28

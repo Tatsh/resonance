@@ -49,7 +49,11 @@ public:
      */
     virtual const char *Name();
 
-private:
+public:
+    // Public because Voxer::HandleMessage(), Scratcher::HandleMessage(), and
+    // NotePitcher::HandleMessage() reads these directly, through a InvalidateSeekerMsg pointer from
+    // outside the hierarchy, and the image exposes no accessor. A friend declaration fits equally
+    // well.
     int mUnknown04; // +0x04
     int mUnknown08; // +0x08
 };

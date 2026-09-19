@@ -2,12 +2,15 @@
 
 #include <map>
 
-#include "math/vector2.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
-#include "rnd/mat.h"
 #include "rnd/object.h"
-#include "rnd/stream.h"
+
+class FailSink;
+namespace Rnd {
+class Mat;
+class Stream;
+} // namespace Rnd
+struct Vector2;
 
 namespace Rnd {
 

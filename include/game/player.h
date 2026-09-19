@@ -203,11 +203,21 @@ public:
      */
     virtual void HandleMessage(Message *pMsg);
 
-protected:
     // Declared in recovered offset order. The base subobjects occupy +0x00 through +0x1f.
-    // Printed by Print() after the "{player " literal, and compared against a field of an
-    // incoming message by HandleMessage, so this is the identifier a message addresses.
-    int mId20;      // +0x20
+    /**
+     * Identifier a message addresses this player by.
+     *
+     * Print() writes it after the "{player " literal and HandleMessage compares it against a
+     * field of an incoming message. GemPacket::Fields reads it directly at `0x001a2608` and
+     * `0x001a2d84` from outside the hierarchy and the image exposes no accessor, which is what
+     * makes the member public here. A friend declaration for GemPacket::Fields fits the image
+     * equally well.
+     *
+     * +0x20
+     */
+    int mId20;
+
+protected:
     int mUnknown24; // +0x24
     // Released by ~Player, so this member owns its allocation.
     void *mUnknown28; // +0x28

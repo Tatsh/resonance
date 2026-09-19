@@ -1,6 +1,8 @@
 #include "met/metsaveremixscreen.h"
 
+#include "met/metbuttonlist.h"
 #include "os/hxstr.h"
+#include "rnd/text.h"
 
 namespace {
 
@@ -33,5 +35,13 @@ MetSaveRemixScreen::~MetSaveRemixScreen() {
 void MetSaveRemixScreen::PlaySlideSound(int nSelector) {
     if (nSelector == mUnknownc8) {
         MetScreen::PlaySlideSound(nSelector);
+    }
+}
+
+void MetSaveRemixScreen::OnUnknownSlot2(const HxStr &text) {
+    mUnknownf8->SetText(text); // The binary dereferences the text object with no null check.
+    if (mUnknowne0 != 0) {
+        MetSaveRemix::OnUnknownSlot2(text);
+        mUnknowne0 = 0;
     }
 }

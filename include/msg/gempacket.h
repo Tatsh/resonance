@@ -1,24 +1,114 @@
 #pragma once
 
+#include <iostream.h>
+
+#include "mid/mbt.h"
 #include "msg/toallothergamesystemspacket.h"
+
+class IBStream;
+class OBStream;
+class Player;
 
 /**
  * Network packet the game sends between game systems.
  *
  * `9GemPacket` in the RTTI descriptor at `0x008ef710`, with ToAllOtherGameSystemsPacket as its
- * one base. The object is 0x2c bytes and its vtable is at `0x00814380`. The payload comes from
- * the copy constructor at `0x003f3d18`, which Clone() delegates to, so the offsets and widths are
- * recovered but the purpose of each field is not. The four words Packet owns are declared there
- * rather than here.
+ * one base. The object is 0x2c bytes and its vtable is at `0x00814380`, with eight entries and a
+ * zero terminator at index 8. Slot 1 is the compiler-generated destructor, slots 2 through 4
+ * supply the three pure slots Packet leaves open, and slots 5, 6, and 7 override Message::Print(),
+ * Packet::Save(), and Packet::Load(). The four words Packet provides are declared there rather
+ * than here.
  *
  * This class shares its RTTI accessor and vtable with ToAllOtherGameSystemsPacket, its own base,
  * which has no implementation of its own. The vtable belongs to this class.
  *
- * The class overrides Message::Print() at `0x003f2878`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The payload layout is recovered from the three field routines rather than from the copy
+ * constructor. The copy constructor at `0x003f3d18` moves `+0x14` through `+0x23` with two
+ * unaligned 64-bit pairs, which reads as two eight-byte members and is the compiler merging
+ * adjacent four-byte fields. Save() at `0x001a2560`, Load() at `0x001a2630`, and Print() at
+ * `0x001a2ce0` transfer the same region as five separate four-byte lvalues, and Print() labels
+ * each one, which is what recovers both the widths and the names.
+ *
+ * The allocation tag on both the allocation in Clone() and the release in the destructor is `MSG`,
+ * which is the tag Message declares rather than one of this class.
  */
 class GemPacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Gem event the packet reports.
+     *
+     * The five members form a subobject rather than part of the packet, because the three
+     * routines below receive `packet + 0x14` as their object and address it from zero. `Fields` is
+     * a placeholder for the name, which no descriptor, allocation tag, or literal in the image
+     * supplies. The name of each member is attested, from the label Print() writes ahead of it.
+     *
+     * Every member is public, because the three routines are the only code in the image that
+     * refers to the subobject and no accessor exists.
+     */
+    struct Fields {
+        /**
+         * Write the five values to a stream.
+         *
+         * The player arrives on the wire as its identifier rather than as a pointer, and the
+         * value written is mPlayer->mId20.
+         *
+         * @param stream The stream to write to.
+         * @ghidraAddress 0x001a2560
+         */
+        void Save(OBStream &stream);
+
+        /**
+         * Read the five values back from a stream.
+         *
+         * The body is not written yet. It reads mGem, mTrans, and mBar, calls Mid::MBT::Load() for
+         * mLoc, and reads the identifier into an eight-byte local pair of a cached pointer and an
+         * identifier, initialised to a null pointer and -1. It then resolves the pair: -1 yields a
+         * null pointer, kIDableUnregistered yields the one static NullPlayer the translation unit
+         * at `0x00132618` constructs at `0x0066f930`, and any other value indexes the
+         * IDable<Player> table at `0x0066f920`. Two things block the body. The pair is an inline
+         * member of a class the image never emits out of line and no descriptor, allocation tag,
+         * or literal supplies a name for, and both the table and the static NullPlayer are
+         * unreachable from here at present.
+         *
+         * @param stream The stream to read from.
+         * @ghidraAddress 0x001a2630
+         */
+        void Load(IBStream &stream);
+
+        /**
+         * Write the five values to a diagnostic stream.
+         *
+         * @param stream The stream to write to.
+         * @ghidraAddress 0x001a2ce0
+         */
+        void Print(ostream &stream);
+
+        int mGem;        /*!< Labelled `gem: `. +0x00 */
+        int mTrans;      /*!< Labelled ` trans:`. +0x04 */
+        int mBar;        /*!< Labelled ` bar:`. +0x08 */
+        Mid::MBT mLoc;   /*!< Labelled ` loc:`. +0x0c */
+        Player *mPlayer; /*!< Labelled ` pid:`, written as its identifier. +0x10 */
+    };
+
+    /**
+     * Initialise the position to kMBTInfinity.
+     *
+     * No address attaches to the constructor on its own. The one caller expands it into the
+     * allocation at `0x003e5148`.
+     */
+    GemPacket();
+
+    /**
+     * Produce a default-constructed packet on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nGemPacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e5148
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -43,11 +133,40 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write a description of the packet to a diagnostic stream.
+     *
+     * Slot 5, overriding Message::Print().
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2878
+     */
+    virtual void Print(ostream &stream);
+
+    /**
+     * Write the packet to a stream.
+     *
+     * Slot 6, overriding Packet::Save().
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e8258
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the packet back from a stream.
+     *
+     * Slot 7, overriding Packet::Load().
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e8368
+     */
+    virtual void Load(IBStream &stream);
+
 private:
-    long long mUnknown14; // +0x14
-    long long mUnknown1c; // +0x1c
-    int mUnknown24;       // +0x24
-    int mUnknown28;       // +0x28
+    Fields mFields; // +0x14
+    // Labelled ` tr:` by Print(), which is the only recovered evidence of its purpose.
+    int mTr; // +0x28
 };
 
 /**

@@ -17,26 +17,32 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                   | Count  |
 | ------------------------- | ------ |
 | Functions in the program  | 15,528 |
-| Excluded by rule          | 6,282  |
-| Reconstructable           | 9,246  |
-| Declared or defined       | 2,562  |
-| Share declared or defined | 27.71% |
-| Defined, with a body      | 1,434  |
-| Share implemented         | 15.51% |
-| Remaining, with a name    | 2,170  |
-| Remaining, unidentified   | 4,514  |
+| Excluded by rule          | 6,278  |
+| Reconstructable           | 9,250  |
+| Declared or defined       | 3,112  |
+| Share declared or defined | 33.64% |
+| Defined, with a body      | 1,573  |
+| Share implemented         | 17.01% |
+| Remaining, with a name    | 1,682  |
+| Remaining, unidentified   | 4,456  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,383 of
-the 2,562 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 1,434 have a body, and 144 of those have a body with no matching declaration, which
-is the free-function case.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,539 of
+the 3,112 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 1,573 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 15.51% as the answer to
-"how much is reconstructed" and 27.71% as the answer to "how much is accounted for". A pass that
+Implementation is the figure the project's goal is stated against, so treat 17.01% as the answer to
+"how much is reconstructed" and 33.64% as the answer to "how much is accounted for". A pass that
 writes a header moves the larger share and not the smaller one, and a pass that writes bodies for an
 already-declared class moves neither, because the addresses were annotated when the header landed.
+
+Both figures come from `.wiswa-ci/freq/implemented_report.py`, which intersects the body markers
+under `src` with the reconstructable set so that the two shares use one denominator. Do not measure
+the implemented share by grepping for address literals. A `.cpp` mentions an address in ordinary
+commentary as well as at a body marker, and that method returned 1,956 where the marker scanner
+returns 1,605, of which 1,573 fall inside the reconstructable set and 32 belong to excluded
+routines.
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -83,11 +89,12 @@ Verification therefore stops at syntax and formatting.
 
 | Check                                 | Status       |
 | ------------------------------------- | ------------ |
-| Headers compiling standalone          | 421/446      |
-| Sources compiling                     | 300/306      |
+| Headers compiling standalone          | 488/513      |
+| Sources compiling                     | 335/341      |
 | Address annotations with no function  | 0            |
 | Lines over 100 characters             | 0            |
 | `clang-format` differences            | 0            |
+| `cspell`                              | 0 issues     |
 | Declared virtuals resolving to a base | 0 mismatches |
 
 Both shortfalls are the same gap and neither is a defect. 25 headers under `include/script` and 6
@@ -95,7 +102,9 @@ sources under `src/script` need the embedded interpreter's own `Python.h`, and t
 the interpreter's differences rather than its headers. The host's Python 3 headers would report
 errors against Python 2 API use that describe nothing about the reconstruction. Every failure is
 confined to that one subsystem, which was verified by listing the failures and finding none outside
-it.
+it. Both checks are scripts rather than hand-written compiler lines,
+`.wiswa-ci/freq/syntax_check.sh` for sources and `.wiswa-ci/freq/header_check.sh` for headers, and
+both report their skip count so a partial run cannot read as a whole one.
 
 Sources are measured by `.wiswa-ci/freq/syntax_check.sh`, which compiles each one with `-Wall
 -Wextra` against ps2sdk and a small set of stand-ins for the Sony SDK headers ps2sdk lacks. Use that
@@ -380,3 +389,44 @@ batches reported success and then read back reverted, roughly 60 of 68 renames s
 minutes, while individual checks in between showed the names applied. Concurrent writers are the
 likely cause. Every write is now re-read, and a batch is applied in a loop until the read-back
 agrees.
+
+A header needs only a forward declaration wherever it uses a pointer or a reference, and that
+declaration belongs inside the class's own namespace. A global `class Mat;` for `Rnd::Mat` declares
+a second unrelated type. The header still compiles, because a pointer to an incomplete type is
+valid, and the failure appears in a distant implementation file as a conversion error between the
+phantom type and the real one. Two further effects followed the pass that applied this across the
+tree. An implementation file that had been receiving a definition transitively has to include it
+itself, and an include is not replaceable when the including header uses a constant, an enum, or a
+typedef from it rather than only the class.
+
+A pass that rewrites headers has to exclude the directories other bands are writing, and a commit
+from it has to exclude any file whose diff is not purely the rewrite.
+`.wiswa-ci/freq/stage_include_only.py` builds that list by rejecting a file with a changed line
+that is not an include, a forward declaration, a namespace brace, or blank. One met screen showed
+228 added lines with the include additions mixed in, which would have committed unfinished work
+under the pass's message.
+
+A detector that pattern-matches source has to blank the comments first. The override checker
+matched `class concrete:` inside a doc comment describing what "makes the class concrete", which
+registered a phantom class and, because its base-list pattern ran to the next brace, consumed the
+real declaration that followed. The verdict stayed correct by accident, since the phantom inherited
+the right base from the declaration it had swallowed. The only symptom was a class count that
+failed to increment after a file was added, which is why an unchanged count after adding an input
+is a failure report rather than a stable baseline.
+
+An address materialised by a `lui` and `addiu` pair has to be evaluated rather than read off. The
+low half is signed, so `addiu v0,v0,0x88c0` subtracts 0x7740. Two separate readings in this project
+have been wrong for that reason, one of them producing a buffer address a digit short, `0x008f9f0`
+for `0x008f09f0`, which was then duplicated across two translation units and two header comments
+and pointed at unrelated memory throughout.
+
+Two destination meanings in one routine mean the reading is incomplete, not that the routine is odd.
+`ACanvasLin4`'s row writer packs two source bytes into one destination byte in its bulk loop and
+stores a literal 0 or 1 as a whole byte in its per-pixel paths, which was confirmed by decoding the
+raw instruction words rather than by trusting a listing. The body is recorded as unresolved and its
+three callers are written, because their signatures are settled independently of it.
+
+A routine can be orphaned rather than merely unreferenced by a table. Eight members of the canvas
+remap and blend families fill no vtable slot and the program lists no caller and no data reference
+for any of them, so neither a slot nor a call site can attribute them. Their receiver argument and
+the slots they dispatch to are the whole evidence.

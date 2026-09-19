@@ -2,13 +2,16 @@
 
 #include <list>
 
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
-#include "rnd/light.h"
-#include "rnd/object.h"
-#include "rnd/stream.h"
+
+class FailSink;
+namespace Rnd {
+class Light;
+class Object;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

@@ -1,6 +1,6 @@
-#pragma once
+struct ABitmap;
 
-#include "rndartt/abitmap.h"
+#pragma once
 
 /**
  * Bitmap font of one glyph image per character code.

@@ -93,6 +93,14 @@ enum MetScreenCommandCode {
  * formatting `%s_EE.anim` and `%s_BF.anim` from the screen name. A screen with no view trips the
  * diagnostic `the screen %s doesn't have a valid view!`.
  *
+ * Every float this class passes or receives for an animation is a frame position rather than a time
+ * in seconds. MetRenderer advances the field at its own `+0x68` by a rate at `+0x64` that defaults
+ * to 500, and hands the result to Rnd::Animatable::SetFrame(). That is what makes the arithmetic
+ * here coherent: mUnknown08 and mUnknown0c store frame positions, mUnknown04 stores the enter
+ * animation's end frame from Rnd::View::EndFrame(), and UpdateEnterAnimation() subtracts one from
+ * the sum of the other two. An earlier reading described the argument as a time in seconds, which
+ * would have mixed units across that expression.
+ *
  * The 39 entries follow in table order. Slot 0 is the compiler-generated GetTypeInfo at
  * `0x0038fd78` and is not source. An entry marked empty is a two-instruction `jr ra` stub. Each
  * such stub sits at its own address and several derived tables address the same stub, so the stub
@@ -284,7 +292,7 @@ public:
      *
      * Declared public for the same reason as DeliverCommand().
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x00390380
      */
     void UpdateAnimationFrame(float flTime);
@@ -314,7 +322,7 @@ public:
      *
      * Declared public for the same reason as DeliverCommand().
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x0038b918
      */
     void UpdateFrame(float flTime);
@@ -615,7 +623,7 @@ public:
      * time, on the same evidence that fixes it for the two animation slots, because the
      * MetKeyboardScreen body adds a fixed 240 to a recorded value and tests the sum against it.
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x0038fe38
      */
     virtual void OnUnknownSlot26(float flTime);
@@ -630,7 +638,7 @@ public:
      * the two hooks and confirms the float. MetLogoScreen at `0x002be5a8` toggles one object every
      * 120 units of renderer time and sets an animation view's frame to the time it received.
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x0038fe40
      */
     virtual void UpdateIdleAnimation(float flTime);
@@ -647,7 +655,7 @@ public:
      * state-indexed arrays at `+0x28` and `+0x34`, and neither RTTI, an embedded path, nor a
      * method name for it survives anywhere in the image.
      *
-     * @param flStartTime The time the first step runs at.
+     * @param flStartTime The frame position the first step runs at.
      * @param flInterval The interval between steps.
      * @param pObject The object whose material state alternates.
      * @param nCycles The number of full cycles to run.
@@ -664,7 +672,7 @@ public:
      *
      * The body is not written, for the reason recorded on StartRepeatingSound().
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x003904e0
      */
     virtual void UpdateRepeatingSound(float flTime);
@@ -687,7 +695,7 @@ public:
      *
      * Slot 31. The exit animation start time is cleared, so the two animations never run together.
      *
-     * @param flTime The time the animation starts at.
+     * @param flTime The frame position the animation starts at.
      * @ghidraAddress 0x003905c0
      */
     virtual void StartEnterAnimation(float flTime);
@@ -698,7 +706,7 @@ public:
      * Slot 32. The end is detected on one call and acted on the next, which is what mUnknown7c
      * records between the two.
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x003905f0
      */
     virtual void UpdateEnterAnimation(float flTime);
@@ -719,7 +727,7 @@ public:
      * Slot 34. Clears the enter animation start time and mUnknown1c. The title is inferred to
      * pair with UpdateExitAnimation().
      *
-     * @param flTime The time the animation starts at.
+     * @param flTime The frame position the animation starts at.
      * @ghidraAddress 0x003906a0
      */
     virtual void StartExitAnimation(float flTime);
@@ -730,7 +738,7 @@ public:
      * Slot 35. The end is detected on one call and acted on the next, through mUnknown78. The
      * screen is hidden, erased from the renderer's stack, and then slot 36 runs.
      *
-     * @param flTime The current renderer time.
+     * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x003906b0
      */
     virtual void UpdateExitAnimation(float flTime);
@@ -789,15 +797,28 @@ private:
     // Time the enter animation started, or zero while no enter animation runs.
     float mUnknown08; // +0x08
     // Time the exit animation started, or zero while no exit animation runs.
-    float mUnknown0c;        // +0x0c
+    float mUnknown0c; // +0x0c
+
+protected:
+    // The renderer this screen registers on. MetLoadFreqBaseScreen reads MetRenderer::mUnknown68
+    // through it in slots 5, 19, and 39, which is why it is protected.
     MetRenderer *mUnknown10; // +0x10
-    Rnd::View *mUnknown14;   // +0x14
-    int mUnknown18;          // +0x18, starts at 2
-    int mUnknown1c;          // +0x1c
-    HxStr mUnknown20;        // +0x20, the screen name
-    HxStr mUnknown28;        // +0x28, mUnknown80 with `.rnd` appended
-    Rnd::View *mUnknown30;   // +0x30, the view named `<screen>_EE.anim`
-    Rnd::View *mUnknown34;   // +0x34, the view named `<screen>_BF.anim`
+
+private:
+    Rnd::View *mUnknown14; // +0x14
+
+protected:
+    // MetLoadFreqBaseScreen writes 2 in its slot 30 and 0 in its slot 19, and reads it in its slot
+    // 36 to choose between the gizmo panels and the three button actions, which is why it is
+    // protected.
+    int mUnknown18; // +0x18, starts at 2
+
+private:
+    int mUnknown1c;        // +0x1c
+    HxStr mUnknown20;      // +0x20, the screen name
+    HxStr mUnknown28;      // +0x28, mUnknown80 with `.rnd` appended
+    Rnd::View *mUnknown30; // +0x30, the view named `<screen>_EE.anim`
+    Rnd::View *mUnknown34; // +0x34, the view named `<screen>_BF.anim`
 protected:
     // Extra container object names a screen wants resolved. MetMemCardLoadScreen,
     // MetMemCardTypeScreen, MetRemixTypeScreen, and MetRemixDelScreen each append one in their
@@ -812,11 +833,39 @@ protected:
     // MetJukeboxBaseScreen::SetShowing(), which is why it is protected.
     int mUnknown48; // +0x48, starts at 1
 
+public:
+    /**
+     * Set when the screen was pushed before its container load finished.
+     *
+     * UpdateFrame() selects its deferred-entry half on this field and clears it once the screen has
+     * entered. MetRenderer writes 1 through the screen pointer at `0x0036b28c`, `0x0036b3cc`, and
+     * `0x0037164c`, each immediately after dispatching slot 14, so the access rule gives public. A
+     * friend declaration for MetRenderer fits the image equally well. +0x4c
+     */
+    int mUnknown4c;
+
+    /**
+     * Set when the screen was activated as a panel before its container load finished.
+     *
+     * Written by MetRenderer at `0x0036b294`, `0x0036b3d4`, and `0x0037164c` on the same three
+     * paths as mUnknown4c, and public for the same reason. +0x50
+     */
+    int mUnknown50;
+
 private:
-    int mUnknown4c;   // +0x4c
-    int mUnknown50;   // +0x50
-    int mUnknown54;   // +0x54
-    float mUnknown58; // +0x58, starts at 1.0f
+    int mUnknown54; // +0x54
+
+public:
+    /**
+     * Scale on the input auto-repeat interval.
+     *
+     * The auto-repeat driver at `0x002e55f8` multiplies the field by 50.0f and truncates to an
+     * integer, so the initial 1.0f gives a 50 millisecond repeat period. That reader is neither a
+     * MetScreen nor a MetRenderer: MetRenderer stores it at its own `+0x94`. A single friend
+     * declaration therefore cannot cover this access and the two above, which is what settles the
+     * three as public rather than as friendship. +0x58, starts at 1.0f
+     */
+    float mUnknown58;
 
 protected:
     // Cleared by the MetSaveRemixScreen constructor, which is why it is protected.

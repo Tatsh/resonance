@@ -3,16 +3,19 @@
 #include <vector>
 
 #include "math/sphere.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
-#include "rnd/mat.h"
 #include "rnd/meshedge.h"
 #include "rnd/meshface.h"
 #include "rnd/meshvert.h"
-#include "rnd/stream.h"
 #include "rnd/transformable.h"
+
+class FailSink;
+namespace Rnd {
+class Mat;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

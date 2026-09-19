@@ -5,14 +5,17 @@
 #include "math/frustum.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
-#include "os/hxstr.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
-#include "rnd/object.h"
-#include "rnd/stream.h"
-#include "rnd/tex.h"
 #include "rnd/transformable.h"
+
+class FailSink;
+class HxStr;
+namespace Rnd {
+class Object;
+class Stream;
+class Tex;
+} // namespace Rnd
 
 namespace Rnd {
 

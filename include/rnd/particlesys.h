@@ -4,15 +4,18 @@
 #include <vector>
 
 #include "math/color.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
-#include "rnd/mat.h"
-#include "rnd/object.h"
 #include "rnd/particle.h"
-#include "rnd/stream.h"
 #include "rnd/transformable.h"
+
+class FailSink;
+namespace Rnd {
+class Mat;
+class Object;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

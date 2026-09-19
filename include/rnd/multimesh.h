@@ -3,11 +3,14 @@
 #include <list>
 
 #include "math/transform.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/drawable.h"
-#include "rnd/mesh.h"
-#include "rnd/stream.h"
+
+class FailSink;
+namespace Rnd {
+class Mesh;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

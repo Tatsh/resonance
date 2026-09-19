@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+
+#include "met/metpersonadata.h"
+
 /**
  * Owner of the art and sound assets the FreQ maker works from.
  *
@@ -68,6 +72,23 @@ public:
      * @ghidraAddress 0x00255200
      */
     void WaitForLoad();
+
+    /**
+     * Resolve the list of prefabricated identities the FreQ maker offers.
+     *
+     * The body waits for the load through WaitForLoad() and then spins on two further asynchronous
+     * requests before returning one of the two element vectors, the one at `+0x74` or the one at
+     * `+0x68`. A word at `+0x78` of the object the accessor at `0x0018b9c8` vends selects between
+     * them. The title is inferred from the element type and from the one caller,
+     * MetLoadNewFreqScreen::AcquireIdentityList().
+     *
+     * The body is not written. The selecting accessor and the two asynchronous requests are not
+     * recovered.
+     *
+     * @return One of the two lists. It is never null.
+     * @ghidraAddress 0x00255090
+     */
+    std::vector<MetPersonaData *> *GetIdentityList();
 
 private:
     // The 0x80-byte span the destructor walks. Its members are described in the class

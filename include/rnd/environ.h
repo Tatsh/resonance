@@ -4,12 +4,15 @@
 #include <list>
 
 #include "math/color.h"
-#include "os/failsink.h"
-#include "os/hxstr.h"
 #include "rnd/drawable.h"
-#include "rnd/light.h"
-#include "rnd/object.h"
-#include "rnd/stream.h"
+
+class FailSink;
+class HxStr;
+namespace Rnd {
+class Light;
+class Object;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

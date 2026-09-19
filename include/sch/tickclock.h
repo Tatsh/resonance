@@ -1,10 +1,13 @@
 #pragma once
 
 #include "app/watchdogtimer.h"
-#include "sch/cmdid.h"
-#include "sch/command.h"
-#include "sch/tempomap.h"
 #include "sch/tick.h"
+
+class CmdID;
+namespace Sch {
+class Command;
+class TempoMap;
+} // namespace Sch
 
 namespace Sch {
 

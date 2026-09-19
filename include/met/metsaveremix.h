@@ -149,6 +149,23 @@ public:
      */
     virtual void OnUnknownSlot42();
 
+    /**
+     * Record the entered name and start the save. MetKBUser slot 2.
+     *
+     * The override assigns its argument to mUnknownb8, which is what settles the parameter of the
+     * MetKBUser virtual as a `const HxStr &`. Both subclasses forward to this body.
+     *
+     * The body is not written. After the assignment it takes a record from the memcard layer
+     * through `0x001f61b8`, writes its own MemcardUser subobject pointer into the first word of
+     * that record, takes a second record the same way, runs `0x001f2ae0` on it with mUnknown94,
+     * runs the routine at `0x00372760` on itself, and ends by running `0x002f0348` on mUnknownc8.
+     * Neither memcard routine is identified and the class the first returns is not recovered.
+     *
+     * @param text The remix name the user entered.
+     * @ghidraAddress 0x0037a650
+     */
+    virtual void OnUnknownSlot2(const HxStr &text);
+
 private:
     MetRemixSelection mUnknown94;           // +0x94
     std::vector<FreqAppearance> mUnknownac; // +0xac

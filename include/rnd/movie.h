@@ -4,8 +4,11 @@
 
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
-#include "rnd/stream.h"
-#include "rnd/tex.h"
+
+namespace Rnd {
+class Stream;
+class Tex;
+} // namespace Rnd
 
 namespace Rnd {
 

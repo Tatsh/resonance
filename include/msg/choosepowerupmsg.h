@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -19,6 +21,20 @@
  */
 class ChoosePowerupMsg : public Message {
 public:
+    /**
+     * Report a new selection in a player's collection.
+     *
+     * No address attaches to the constructor. The two collections build the message on their own
+     * stack at five sites, `0x001cb3e8`, `0x001cb494`, `0x001cb6e0`, `0x001cb8d4`, and
+     * `0x001cb98c`, and hand the address to MsgSource::Send(). The compiler expands the
+     * constructor into each site. The three arguments are the three members in declaration order.
+     *
+     * @param nIndex The selected entry, or 0 from SinglePowerupCollection, which stores one.
+     * @param pOwner The player whose selection changed.
+     * @param nType The selected powerup's kind, or -1 for none.
+     */
+    ChoosePowerupMsg(int nIndex, Player *pOwner, int nType);
+
     /**
      * Produce a heap copy of this message.
      *
@@ -44,9 +60,11 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    // The three names come from the two collections, the only producers of the message, which
+    // write the selected entry, the owning player, and the selected kind into them in this order.
+    int mIndex;     // +0x04
+    Player *mOwner; // +0x08
+    int mType;      // +0x0c
 };
 
 /**

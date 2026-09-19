@@ -1,0 +1,135 @@
+#pragma once
+
+#include "app/msgsink.h"
+#include "app/msgsource.h"
+#include "game/autoriffer.h"
+#include "game/axenewgemmaker.h"
+#include "game/axeoldgemmaker.h"
+#include "game/axephrasemaker.h"
+#include "game/axiscontrol.h"
+#include "game/gsperiodical.h"
+#include "game/pitchpicker.h"
+#include "game/scoretrackgraph.h"
+#include "game/trackdata.h"
+#include "synth/musesynth.h"
+#include "synth/synthsustainer.h"
+
+/**
+ * Gameplay stage for a guitar track.
+ *
+ * `8AxingSTG` in the RTTI descriptor at `0x008efe70`, with ScoreTrackGraph as its only base at
+ * offset 0. Its table is at `0x007ddf88` and runs thirteen entries, the same as the base's, so the
+ * class introduces no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12
+ * from the base. The object is 0x54 bytes.
+ *
+ * Every object this class builds is allocated through the tagged allocator, and the constructor
+ * builds nine of them. It also calls MuseSynth::CreateSustainer() on the base's synthesiser before
+ * it builds anything of its own.
+ *
+ * The constructor's body is not written. It needs the clock the base's application reaches through
+ * `GameManagerImpl::GetWorld()`, and GrooveWorld declares no accessor for the `Sch::TickClock *` at
+ * its `+0x64`. The out-of-line copy of that inline accessor is at `0x001952a0` and the copy that
+ * composes it with Application::shared() is at `0x00118e78`. The same gap blocks the other three
+ * stage constructors.
+ *
+ * The member at `+0x34` is the one the constructor never writes. It is declared so that the two
+ * members around it retain their offsets, and no reader for it was found.
+ *
+ * Three of this class's members were titled for renderer classes by an earlier pass. AutoRiffer
+ * was `RndSpotShadowMeshPass`, AxisControl was `RndSpotShadowCam`, and AxePhraseMaker was
+ * `RndSpotShadowMap`. No descriptor among the 574 in the image bears any of the three titles, and
+ * each real name comes from the descriptor its table's slot 0 accessor guards on.
+ */
+class AxingSTG : public ScoreTrackGraph {
+public:
+    /**
+     * @param pTrackData The track description the base retains.
+     * @ghidraAddress 0x0019daf0
+     */
+    AxingSTG(const TrackData *pTrackData);
+
+    /**
+     * Stop the stage and release everything the constructor built.
+     *
+     * Slot 1. The routine stops the stage through a direct call to this class's own Slot3(), then
+     * releases the periodical post and the eight objects it built, in an order that is not the
+     * order of their offsets.
+     *
+     * @ghidraAddress 0x0019de08
+     */
+    virtual ~AxingSTG();
+
+    /**
+     * Start the stage.
+     *
+     * Slot 2. In play mode 2 the routine sends controller 0x52 with value 0x7f on the track's MIDI
+     * channel, then starts the base and queues the periodical post.
+     *
+     * @ghidraAddress 0x0019e720
+     */
+    virtual void Slot2();
+
+    /**
+     * Stop the stage.
+     *
+     * Slot 3. In play mode 2 the routine sends controller 0x52 with value zero on the track's MIDI
+     * channel, then withdraws the periodical post and stops the base.
+     *
+     * @ghidraAddress 0x0019e798
+     */
+    virtual void Slot3();
+
+    /**
+     * Wire the stage's objects to the sources that drive it.
+     *
+     * Slot 4.
+     *
+     * @param pPrimary The source the stage registers eight of its objects with.
+     * @param pOptional A further source, which receives the phrase manager when it is supplied.
+     * @param pSecondary The source that receives the phrase manager and the phrase maker.
+     * @ghidraAddress 0x0019df58
+     */
+    virtual void Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
+
+    /**
+     * Install a word in the mixer and attach the mixer to the base's synthesiser.
+     *
+     * Slot 6.
+     *
+     * @param nValue The word to install.
+     * @ghidraAddress 0x0019e810
+     */
+    virtual void Slot6(int nValue);
+
+    /**
+     * Register one sink with every source the stage provides.
+     *
+     * Slot 7.
+     *
+     * @param pSink The sink to register.
+     * @ghidraAddress 0x0019e850
+     */
+    virtual void Slot7(MsgSink *pSink);
+
+    /**
+     * Install a word in the phrase manager.
+     *
+     * Slot 8.
+     *
+     * @param nValue The word to install, ignored when zero.
+     * @ghidraAddress 0x0019e928
+     */
+    virtual void Slot8(int nValue);
+
+private:
+    AutoRiffer *mAutoRiffer;      // +0x2c
+    PitchPicker *mPitchPicker;    // +0x30
+    int mUnknown34;               // +0x34, the constructor does not write it
+    AxisControl *mAxisControl;    // +0x38
+    AxeNewGemMaker *mNewGemMaker; // +0x3c
+    AxeOldGemMaker *mOldGemMaker; // +0x40
+    MuseSynth *mAxeSynth;         // +0x44, distinct from the base's synthesiser at +0x14
+    SynthSustainer *mSustainer;   // +0x48
+    AxePhraseMaker *mPhraseMaker; // +0x4c
+    GsPeriodical *mPeriodical;    // +0x50
+};

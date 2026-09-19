@@ -1,5 +1,8 @@
 #include "met/metremixloadscreen.h"
 
+#include "met/metbuttonlist.h"
+#include "met/metremixrecord.h"
+#include "met/scrollinglist.h"
 #include "os/hxstr.h"
 
 namespace {
@@ -15,7 +18,7 @@ static const char *const kContainerName = "memcard_remix_load";
 
 MetRemixLoadScreen::MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown94(nullptr), mUnknowna0(0), mUnknowna4(0), mUnknowna8(nullptr) {
+      mUnknown94(nullptr), mUnknowna0(nullptr), mUnknowna4(nullptr), mUnknowna8(nullptr) {
     mUnknown60 = 0;
     mUnknowna8 = new MetButtonList;
 }
@@ -24,4 +27,16 @@ MetRemixLoadScreen::~MetRemixLoadScreen() {
     delete mUnknown94;
     mUnknown94 = nullptr;
     delete mUnknowna8;
+}
+
+void MetRemixLoadScreen::PlaySlideSound(int nSelector) {
+    if (mUnknown90 != nullptr && mUnknown90->size() != 0) {
+        MetScreen::PlaySlideSound(nSelector);
+    }
+}
+
+void MetRemixLoadScreen::PlayHighSound(int nSelector) {
+    if (mUnknown90 != nullptr && mUnknown90->size() != 0) {
+        MetScreen::PlayHighSound(nSelector);
+    }
 }

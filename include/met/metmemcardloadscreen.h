@@ -49,10 +49,28 @@ struct MetMemCardEntry {
  * object with the tag `MsgSink`. Every part of that teardown is compiler-generated member
  * destruction, so no destructor body is reconstructed.
  *
- * Of the fifteen differing slots only the destructor has a recovered name. Slots 22 through 24 at
- * `0x002d1d80`, `0x002d1eb0`, and `0x002d1ef8` are real bodies rather than stubs, and the rest are
- * 5 `0x002cc9c0`, 19 `0x002cc328`, 20 `0x002d1f40`, 30 `0x002ccfb8`, 33 `0x002d2018`,
- * 36 `0x002cd0e8`, 38 `0x002cbeb8`, 39 `0x002ce2c0`, 41 `0x002cd4e0`, and 42 `0x002cdce0`.
+ * A diff of the primary table against the MetMemDetectScreen table at `0x007fccb8` reads the
+ * fifteen overrides as slots 1, 5, 19, 20, 22, 23, 24, 30, 33, 36, 38, 39, 41, and 42 apart from
+ * the type function. Slots 22 through 24 at `0x002d1d80`, `0x002d1eb0`, and `0x002d1ef8` are real
+ * bodies rather than stubs.
+ *
+ * Four addresses that the memory-card band worklist assigned to this class are not in either of
+ * its tables. `0x002d9e40`, `0x002dec10`, and `0x002db328` are MetMemDetectScreen primary slots 15,
+ * 26, and 40, and `0x002deb98` is MetMemDetectScreen MemcardUser slot 13. All four were titled
+ * `MetMemCardLoadScreen__Slot*` in the program and are now titled for MetMemDetectScreen, which
+ * the same diff establishes.
+ *
+ * Slots 39, 41, and 42 override virtuals MetMemDetectScreen declares of its own and whose verbs are
+ * unrecovered. That class records them rather than declaring them, so this class cannot declare an
+ * override of any of the three, and all three are recorded here instead, at `0x002ce2c0`,
+ * `0x002cd4e0`, and `0x002cdce0`. The base entry for slot 41 and the base entry for slot 42 are
+ * both two-instruction stubs, and both overrides here do real work, so both are genuine overrides
+ * rather than re-emitted empty bodies.
+ *
+ * Six bodies are not written. Every one of EnterAndShow(), HandleCommand(), OnUnknownSlot30(),
+ * OnUnknownSlot33(), OnUnknownSlot36(), and ResolveContainerViews() is declared below with its
+ * address, and its name comes from the base declaration through the table diff rather than from the
+ * body.
  */
 class MetMemCardLoadScreen : public MetMemDetectScreen, public MetMemCardPickerUser {
 public:
@@ -69,6 +87,62 @@ public:
      * @ghidraAddress 0x002cbcc8
      */
     virtual ~MetMemCardLoadScreen();
+
+    /**
+     * Populate the card list and enter.
+     *
+     * Slot 5. The body is not written.
+     *
+     * @ghidraAddress 0x002cc9c0
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Act on one navigation command.
+     *
+     * Slot 19. The body is not written.
+     *
+     * @param pCommand The command the renderer translated from an input message.
+     * @ghidraAddress 0x002cc328
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Respond to an alternation finishing.
+     *
+     * Slot 30. The body is not written.
+     *
+     * @param pObject The object slot 29 finished alternating.
+     * @ghidraAddress 0x002ccfb8
+     */
+    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+
+    /**
+     * Respond to the enter animation finishing.
+     *
+     * Slot 33. The body is not written.
+     *
+     * @ghidraAddress 0x002d2018
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Respond to the exit animation finishing.
+     *
+     * Slot 36. The body is not written.
+     *
+     * @ghidraAddress 0x002cd0e8
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views.
+     *
+     * Slot 38. The body is not written.
+     *
+     * @ghidraAddress 0x002cbeb8
+     */
+    virtual void ResolveContainerViews();
 
     /**
      * Play the slide sound while at least one card is listed.

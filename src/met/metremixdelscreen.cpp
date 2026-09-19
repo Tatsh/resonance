@@ -1,5 +1,6 @@
 #include "met/metremixdelscreen.h"
 
+#include "met/scrollinglist.h"
 #include "os/hxstr.h"
 
 namespace {
@@ -14,6 +15,10 @@ static const char *const kContainerName = "memcard_remix_del";
 // The one container object the screen registers.
 static const char *const kDeleteObjectName = "mem_del_remix";
 
+// This screen's own registry key, and the key of the panel slot 16 activates.
+static const char *const kOwnScreenName = "MetRemixDelScreen";
+static const char *const kMsgScreenName = "MetMsgScreen";
+
 } // namespace
 
 MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
@@ -27,4 +32,36 @@ MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
 
 MetRemixDelScreen::~MetRemixDelScreen() {
     delete mUnknownf4;
+}
+
+void MetRemixDelScreen::OnUnknownSlot7() {
+    if (mUnknowne0 != 0) {
+        mUnknowne0 = 0;
+        OnUnknownSlot40();
+    }
+}
+
+void MetRemixDelScreen::OnMsgScreenShown(const HxStr &) {
+    ActivateNamedPanel(HxStr(kMsgScreenName));
+}
+
+void MetRemixDelScreen::OnUnknownSlot33() {
+    ShowRowOnDataScreen(0);
+}
+
+void MetRemixDelScreen::OnUnknownSlot40() {
+    PushNamedScreen(HxStr(kOwnScreenName));
+    ActivateNamedPanel(HxStr(kOwnScreenName));
+}
+
+void MetRemixDelScreen::OnUnknownSlot41() {
+    PushNamedScreen(HxStr(kOwnScreenName));
+    ActivateNamedPanel(HxStr(kOwnScreenName));
+}
+
+void MetRemixDelScreen::OnUnknownSlot2(const HxStr &text) {
+    if (mUnknowne0 != 0) {
+        MetSaveRemix::OnUnknownSlot2(text);
+        mUnknowne0 = 0;
+    }
 }

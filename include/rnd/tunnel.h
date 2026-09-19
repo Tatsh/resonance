@@ -3,16 +3,19 @@
 #include <vector>
 
 #include "math/transform.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
-#include "rnd/mesh.h"
-#include "rnd/object.h"
 #include "rnd/raytest.h"
-#include "rnd/stream.h"
-#include "rnd/transanim.h"
+
+class FailSink;
+namespace Rnd {
+class Mesh;
+class Object;
+class Stream;
+class TransAnim;
+} // namespace Rnd
 
 namespace Rnd {
 

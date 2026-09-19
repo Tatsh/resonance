@@ -41,4 +41,27 @@ public:
      * @ghidraAddress 0x00393fa0
      */
     virtual ~MetScreenTitleScreen();
+
+    /**
+     * Replace the shared screen title.
+     *
+     * The routine resolves the screen registered under the literal `MetScreenTitleScreen`, casts
+     * it to this class, and forwards to ApplyTitle(). A front end with no title screen registered
+     * forwards through a null receiver, which ApplyTitle() tolerates. It is a static member rather
+     * than a free function, because it takes no receiver and vends exactly one class.
+     *
+     * @param title The title to display.
+     * @ghidraAddress 0x00393e00
+     */
+    static void SetTitle(const HxStr &title);
+
+    /**
+     * Apply one title.
+     *
+     * The body is not written. SetTitle() is the one caller.
+     *
+     * @param title The title to display.
+     * @ghidraAddress 0x00394010
+     */
+    void ApplyTitle(const HxStr &title);
 };

@@ -1,7 +1,9 @@
-#pragma once
+namespace Rnd {
+struct Ray;
+}
+struct Sphere;
 
-#include "math/sphere.h"
-#include "rnd/collideable.h"
+#pragma once
 
 namespace Rnd {
 

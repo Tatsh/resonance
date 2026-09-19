@@ -2,14 +2,17 @@
 
 #include <cstddef>
 
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
-#include "rnd/object.h"
-#include "rnd/stream.h"
 #include "rnd/transformable.h"
+
+class FailSink;
+namespace Rnd {
+class Object;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

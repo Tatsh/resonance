@@ -55,9 +55,14 @@ public:
     /**
      * Unrecovered. Slot 6, and an empty default.
      *
+     * The parameter comes from GamePowerupPlacer's override at `0x001cccb0`, which returns at once
+     * for an argument of zero and otherwise negates it and adds it to a bar cursor. An empty
+     * default reveals no parameter list of its own, so the arity rests on that one override.
+     *
+     * @param nStep The step, whose meaning beyond a signed increment is unrecovered.
      * @ghidraAddress 0x001cd9a0
      */
-    virtual void OnUnknownSlot6();
+    virtual void OnUnknownSlot6(int nStep);
 
     /**
      * Unrecovered. Slot 7, and an empty default.

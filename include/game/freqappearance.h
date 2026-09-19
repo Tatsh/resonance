@@ -99,8 +99,17 @@ public:
      */
     void operator=(const FreqAppearance &other);
 
+public:
+    /**
+     * Player username, starting as the literal `initial name`.
+     *
+     * Public rather than private, because MetLoadFreqBaseScreen::UpdateNameLabel() copy-constructs
+     * an HxStr straight from `+0x00` of the embedded appearance and the image has no accessor to
+     * route that read through. A friend declaration fits the image equally well. +0x00
+     */
+    HxStr mUnknown00;
+
 private:
-    HxStr mUnknown00;              // +0x00 the username, starting as the literal `initial name`
     FreqAppearanceDetail *mDetail; // +0x08 owned, 0xb0 bytes
     int mUnknown0c;                // +0x0c the skill status
 };

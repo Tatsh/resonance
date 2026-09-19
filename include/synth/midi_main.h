@@ -215,7 +215,7 @@ void ReleaseBankSlotAt(int nDest);
  * @param nPlacement Where the pair goes.
  * @ghidraAddress 0x004620b0
  */
-void LoadSoundBank(char *pszBdPath, char *pszHdPath, int nTag, int nPlacement);
+void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int nPlacement);
 
 /** Boundary both bank read buffers are rounded up to. */
 constexpr int kBankBufferAlignment = 0x40;
@@ -254,7 +254,7 @@ extern CallbackXferBdToIop *g_pBdXfer;
  * @return The uncompressed length, or zero or less when the file could not be opened.
  * @ghidraAddress 0x00555800
  */
-int GetUncompressedFileLength(char *pszPath);
+int GetUncompressedFileLength(const char *pszPath);
 
 /**
  * Copy a four-character code into a buffer it can be printed from.
@@ -293,7 +293,7 @@ int XferBankFromMemory(const void *pData, int nLength);
  * @return The bank's size, or -1 when the file could not be measured.
  * @ghidraAddress 0x00461f28
  */
-int StartBdBankXfer(char *pszPath);
+int StartBdBankXfer(const char *pszPath);
 
 /**
  * Start an HD bank transfer.
@@ -308,7 +308,7 @@ int StartBdBankXfer(char *pszPath);
  * @return Zero once the read is queued, or -1 on either failure.
  * @ghidraAddress 0x00461c68
  */
-int StartHdBankXfer(char *pszPath, int nPlacement);
+int StartHdBankXfer(const char *pszPath, int nPlacement);
 
 /**
  * Path of the BD bank currently loaded.
@@ -540,3 +540,94 @@ void PollSynthStream();
  * @ghidraAddress 0x004648c8
  */
 void PollSynthEvents();
+
+/**
+ * Wait until no bank transfer is outstanding.
+ *
+ * Pumps the async completion queue while the pending-transfer count at `0x006f9dc8` is non-zero,
+ * and then again while the streaming voice at `0x006f9dd4` reports work at its `+0x18`.
+ *
+ * The body is not reconstructed.
+ *
+ * @ghidraAddress 0x004645c8
+ */
+void WaitForBankTransfers();
+
+/**
+ * Release every loaded bank.
+ *
+ * Waits for the transfers in flight, releases the streaming voice through its own deleting
+ * destructor, clears the voice pointer, and assigns the empty string to both stored bank paths so
+ * that the next LoadSoundBank() cannot match what was resident.
+ *
+ * The body is not reconstructed.
+ *
+ * @ghidraAddress 0x00464660
+ */
+void ReleaseSoundBanks();
+
+/**
+ * Move one MIDI message to the sound driver.
+ *
+ * Retains the program each channel holds in the table at `0x006f9bd8` and the bank each channel
+ * holds in the table at `0x006f9c18`, and returns without submitting anything when a program
+ * change or a bank select repeats what the channel already holds. Otherwise it packs the status
+ * into the low byte, the first data byte into the second, and the second data byte into the third,
+ * and submits that word.
+ *
+ * The body is not reconstructed.
+ *
+ * @param nStatus The status byte.
+ * @param nData1 The first data byte.
+ * @param nData2 The second data byte.
+ * @ghidraAddress 0x00464928
+ */
+void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char nData2);
+
+/**
+ * Submit sound-driver selector 0x110 with one word.
+ *
+ * The meaning of the selector is unrecovered. Ps2HardSynth's slot 12 is the one caller and passes
+ * its own argument inverted.
+ *
+ * The body is one call to SubmitSoundDriverRequest().
+ *
+ * @param nValue The word.
+ * @ghidraAddress 0x00464868
+ */
+void SubmitDriverSelector110(int nValue);
+
+/**
+ * Submit sound-driver selector 0x100 with one word.
+ *
+ * The meaning of the selector is unrecovered. Ps2HardSynth's slot 13 is the one caller.
+ *
+ * The body is one call to SubmitSoundDriverRequest().
+ *
+ * @param nValue The word.
+ * @ghidraAddress 0x00464888
+ */
+void SubmitDriverSelector100(int nValue);
+
+/**
+ * Submit sound-driver selector 0xf0 with one word.
+ *
+ * The meaning of the selector is unrecovered. Ps2HardSynth's slot 14 is the one caller.
+ *
+ * The body is one call to SubmitSoundDriverRequest().
+ *
+ * @param nValue The word.
+ * @ghidraAddress 0x004648a8
+ */
+void SubmitDriverSelectorF0(int nValue);
+
+/**
+ * Take the voice and bank driver down.
+ *
+ * The body is a two-instruction bare return. Ps2HardSynth's destructor is the one caller, which is
+ * what identifies the routine as the counterpart of InitSynthDriver() rather than a stub of some
+ * other member.
+ *
+ * @ghidraAddress 0x00464b48
+ */
+void ShutdownSynthDriver();

@@ -1,10 +1,13 @@
 #pragma once
 
 #include "gfx/gfxdevice.h"
-#include "math/color.h"
-#include "math/sphere.h"
-#include "rnd/meshvert.h"
-#include "rnd/particle.h"
+
+struct Color;
+namespace Rnd {
+struct MeshVert;
+struct Particle;
+} // namespace Rnd
+struct Sphere;
 
 namespace Rnd {
 

@@ -204,15 +204,15 @@ int XferBankFromMemory(const void *pData, int nLength) {
 }
 
 // 0x00461f28
-int StartBdBankXfer(char *pszPath) {
+int StartBdBankXfer(const char *pszPath) {
     AsyncCheck(1);
     g_bankCommand.mBankAddress = g_nBankIopAddress;
     g_bankCommand.mDest = g_nBankDestAddress;
     g_bankCommand.mTag = g_nSynthXferTag;
     strcpy(g_bankCommand.mPayload, pszPath);
     FlushCache(0);
-    char *pszColon = strchr(pszPath, ':');
-    char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
+    const char *pszColon = strchr(pszPath, ':');
+    const char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
     const int nLength = GetUncompressedFileLength(pszName);
     // The measured length reaches the block whether or not the measurement succeeded.
     g_bankCommand.mLength = nLength;
@@ -236,11 +236,11 @@ int StartBdBankXfer(char *pszPath) {
 }
 
 // 0x00461c68
-int StartHdBankXfer(char *pszPath, int nPlacement) {
+int StartHdBankXfer(const char *pszPath, int nPlacement) {
     AsyncCheck(1);
     strcpy(g_szHdBankPath, pszPath);
-    char *pszColon = strchr(pszPath, ':');
-    char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
+    const char *pszColon = strchr(pszPath, ':');
+    const char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
     const int nLength = GetUncompressedFileLength(pszName);
     if (nLength <= 0) {
         LogPrintf("file open failed. %s \n", pszName);
@@ -265,7 +265,7 @@ int StartHdBankXfer(char *pszPath, int nPlacement) {
 }
 
 // 0x004620b0
-void LoadSoundBank(char *pszBdPath, char *pszHdPath, int nTag, int nPlacement) {
+void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int nPlacement) {
     const int nPreviousDest = g_nBankDestAddress;
     g_nSynthXferTag = nTag;
     if (g_bdBankName == pszBdPath && g_hdBankName == pszHdPath) {

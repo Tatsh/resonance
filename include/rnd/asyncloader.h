@@ -3,8 +3,11 @@
 #include <list>
 
 #include "os/hxstr.h"
-#include "rnd/drawable.h"
-#include "rnd/object.h"
+
+namespace Rnd {
+class Drawable;
+class Object;
+} // namespace Rnd
 
 /**
  * Request to load one renderer file in the background.

@@ -1,6 +1,6 @@
-#pragma once
+class APalette;
 
-#include "rndartt/apalette.h"
+#pragma once
 
 /**
  * One row of source pixels addressed to one destination row of a canvas.

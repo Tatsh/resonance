@@ -3,7 +3,8 @@
 #include <cstddef>
 #include <vector>
 
-#include "rnd/object.h"
+#include "os/hxstr.h"
+#include "rnd/button.h"
 
 /**
  * Ring of front-end buttons with one of them selected.
@@ -48,9 +49,109 @@ public:
      */
     virtual ~MetButtonList();
 
+    /**
+     * Step the selection one way along the ring.
+     *
+     * Slot 2. The verb is unrecovered, and which of the two directions this slot moves is not
+     * recovered either. MetMainScreen at `0x002c6820` routes one navigation command here and the
+     * other to OnUnknownSlot3(), and MetLoadFreqBaseScreen::HandleCommand() routes
+     * kMetScreenCommandPrevious here on the same pairing. The declaration exists so that the
+     * recovered slot order is preserved.
+     *
+     * @ghidraAddress 0x001fcc40
+     */
+    virtual void OnUnknownSlot2();
+
+    /**
+     * Step the selection the other way along the ring.
+     *
+     * Slot 3. Recorded on the same evidence as OnUnknownSlot2().
+     *
+     * @ghidraAddress 0x001fcd10
+     */
+    virtual void OnUnknownSlot3();
+
+    /**
+     * Respond to the selection moving.
+     *
+     * Slot 4. The verb is unrecovered. SetSelected() is the one caller, and it passes the index
+     * that was selected and the index that is now selected, in that order.
+     *
+     * @param nPreviousIndex The index the selection had.
+     * @param nIndex The index the selection now has.
+     * @ghidraAddress 0x001feed8
+     */
+    virtual void OnUnknownSlot4(int nPreviousIndex, int nIndex);
+
+    /**
+     * Release every button reference and empty mButtons.
+     *
+     * The body is the vector clear over mButtons, reached as `this + 4`, with the per-element
+     * release at `0x00520be0`. Ghidra titles the address as a duplicate body, which is what a
+     * clear over a four-byte element compiles to in every class that has one.
+     *
+     * @ghidraAddress 0x001fedb0
+     */
+    void Clear();
+
+    /**
+     * Resolve one button by object name and append it.
+     *
+     * The object is resolved through Rnd::Manager::Find() on Rnd::g_manager and cast to
+     * Rnd::Button. A name that resolves to nothing reports through `0x0053dde0` and the null is
+     * appended regardless, which is why every reader tests an entry before using it. A label whose
+     * buffer is null is not applied, and every MetLoadFreqBaseScreen call site passes the empty
+     * literal so that the label is set later by
+     * MetLoadFreqBaseScreen::UpdateNameLabel() instead.
+     *
+     * @param objectName The button object as written in the `.rnd` file.
+     * @param labelText The text for the button's label child, or the empty string for none.
+     * @ghidraAddress 0x001fcb28
+     */
+    void Add(const HxStr &objectName, const HxStr &labelText);
+
+    /**
+     * Move the selection to one index.
+     *
+     * A call on an empty list does nothing, and so does a call with the index already selected.
+     * The sentinel -1 puts the previously selected button back into state 0 and selects nothing.
+     * Any other index runs the selection-change notification in vtable slot 4.
+     *
+     * The routine then stores `mButtons[nIndex]` into mUnknown00 on every path, including the
+     * sentinel path, where the index is -1 and the read is one element below the first. That is
+     * what the binary does.
+     *
+     * @param nIndex The index to select, or -1 for none.
+     * @ghidraAddress 0x001fee08
+     */
+    void SetSelected(int nIndex);
+
+    /**
+     * Resolve one button by index.
+     *
+     * @param nIndex The index, or -1.
+     * @return The button, or null for the -1 sentinel. An index past the end is not checked.
+     * @ghidraAddress 0x001fef40
+     */
+    Rnd::Button *ButtonAt(int nIndex) const;
+
+    /**
+     * The button SetSelected() last stored.
+     *
+     * SetSelected() writes `mButtons[nIndex]` here on every path, including the path that takes
+     * the -1 sentinel, where the read is one element below the first.
+     *
+     * Public rather than private, because MetLoadFreqBaseScreen::HandleCommand() passes it
+     * straight to MetScreen::StartRepeatingSound() and the image has no accessor to route that
+     * read through. A friend declaration fits the image equally well. +0x00
+     */
+    Rnd::Button *mUnknown00;
+
 private:
-    int mUnknown00;                      // +0x00
-    std::vector<Rnd::Object *> mButtons; // +0x04
+    // The element is Rnd::Button rather than Rnd::Object. Add() appends the result of a
+    // `dynamic_cast` to Rnd::Button, and both navigation virtuals read Rnd::Button::mState at
+    // `+0x1c` to pass over a disabled entry. +0x04
+    std::vector<Rnd::Button *> mButtons;
 
 public:
     /**
@@ -58,8 +159,7 @@ public:
      *
      * Public rather than private, because MetLoadFreqBaseScreen reads it directly and the image
      * has no accessor to route that read through. A friend declaration fits the image equally
-     * well. The member is declared after the two private ones so that the recovered order, and
-     * therefore the recovered layout, is preserved. +0x10
+     * well. +0x10
      */
     int mSelected;
 };

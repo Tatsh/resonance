@@ -1,11 +1,14 @@
 #pragma once
 
 #include "math/color.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
-#include "rnd/object.h"
-#include "rnd/stream.h"
 #include "rnd/transformable.h"
+
+class FailSink;
+namespace Rnd {
+class Object;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

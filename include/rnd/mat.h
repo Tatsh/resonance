@@ -5,11 +5,14 @@
 #include "math/color.h"
 #include "math/transform.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/object.h"
-#include "rnd/stream.h"
-#include "rnd/tex.h"
+
+class FailSink;
+namespace Rnd {
+class Stream;
+class Tex;
+} // namespace Rnd
 
 namespace Rnd {
 

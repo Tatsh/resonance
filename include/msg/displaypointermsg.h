@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -19,6 +21,21 @@
  */
 class DisplayPointerMsg : public Message {
 public:
+    /**
+     * Report where a player's powerup pointer rests.
+     *
+     * No address attaches to the constructor. GamePowerupPlacer builds the message on its own
+     * stack at `0x001ccd64`, `0x001ccdac`, `0x001cce04`, `0x001ccec8`, `0x001ccfc0`, and
+     * `0x001cd0ec` and hands the address to MsgSource::Send(). The compiler expands the
+     * constructor into each of the six sites. The three arguments are the three members in
+     * declaration order.
+     *
+     * @param nBar The bar the pointer rests on.
+     * @param nPlayerValue Whatever Player::Slot4() reports for the player.
+     * @param pPlayer The player whose pointer moved.
+     */
+    DisplayPointerMsg(int nBar, int nPlayerValue, Player *pPlayer);
+
     /**
      * Produce a heap copy of this message.
      *
@@ -44,9 +61,11 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    // The three names come from GamePowerupPlacer, the one producer of the message, which writes
+    // the bar its cursor rests on, whatever Player::Slot4() reports, and the player itself.
+    int mBar;         // +0x04
+    int mPlayerValue; // +0x08
+    Player *mPlayer;  // +0x0c
 };
 
 /**

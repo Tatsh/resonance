@@ -1,6 +1,6 @@
-#pragma once
+class APalette;
 
-#include "rndartt/apalette.h"
+#pragma once
 
 /**
  * One destination row sampled from a source row at a fractional rate.

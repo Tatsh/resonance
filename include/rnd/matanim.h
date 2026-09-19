@@ -3,14 +3,17 @@
 #include <list>
 #include <vector>
 
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
-#include "rnd/mat.h"
-#include "rnd/object.h"
-#include "rnd/stream.h"
-#include "rnd/tex.h"
+
+class FailSink;
+namespace Rnd {
+class Mat;
+class Object;
+class Stream;
+class Tex;
+} // namespace Rnd
 
 namespace Rnd {
 

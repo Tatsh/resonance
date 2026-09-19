@@ -6,11 +6,14 @@
 #include "math/color.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
-#include "rnd/mesh.h"
-#include "rnd/stream.h"
+
+class FailSink;
+namespace Rnd {
+class Mesh;
+class Stream;
+} // namespace Rnd
 
 namespace Rnd {
 

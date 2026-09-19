@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -19,6 +21,20 @@
  */
 class PowerupCountMsg : public Message {
 public:
+    /**
+     * Report a new stored count for one entry of a player's collection.
+     *
+     * No address attaches to the constructor. PowerupCollection builds the message on its own
+     * stack at `0x001cb280`, `0x001cb554`, and `0x001cb658` and hands the address to
+     * MsgSource::Send(), and the compiler expands the constructor into each of the three sites.
+     * The three arguments are the three members in declaration order.
+     *
+     * @param nIndex The entry, as its index into the collection.
+     * @param nCount The stored count after the change.
+     * @param pOwner The player whose collection changed.
+     */
+    PowerupCountMsg(int nIndex, int nCount, Player *pOwner);
+
     /**
      * Produce a heap copy of this message.
      *
@@ -44,9 +60,11 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    // The three names come from PowerupCollection, the one producer of the message, which writes
+    // the entry index, the count after the change, and the owning player into them in this order.
+    int mIndex;     // +0x04
+    int mCount;     // +0x08
+    Player *mOwner; // +0x0c
 };
 
 /**

@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream.h>
+
+#include "gs/multimuse.h"
 #include "msg/musemsg.h"
+#include "stream/ibstream.h"
+#include "stream/obstream.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -14,11 +19,46 @@
  * NoteMsg and StdMidiMsg copy bytes, and a single word store cannot straddle a base and a derived
  * class in a member-wise copy, so `+0x08` belongs to each derived class rather than to MuseMsg.
  *
- * The class overrides Message::Print() at `0x003e3990`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * That word is a MultiMuse, and the class is how a sequence of timed messages moves between a
+ * MsgSource and a MsgSink. The copy constructor at `0x003e38a8` retains it, the destructor
+ * releases it, Print() writes it through MultiMuse::Print(), Save() writes it through
+ * MultiMuse::SaveFields(), and Load() replaces it with a freshly allocated sequence.
+ *
+ * Print() also settles MuseMsg's own member. It copies that word into a temporary and writes the
+ * temporary through Mid::MBT::Print(), so MuseMsg's payload is a song position. Both this class
+ * and StdMidiMsg initialise it to `0x2aaaaaab`, which Mid::MBT documents as inside its positive
+ * infinity range.
  */
 class MultiMuseMsg : public MuseMsg {
 public:
+    /**
+     * Produce a message with no sequence.
+     *
+     * New() takes 0xc bytes against the tag `MultiMuseMsg` and calls this with a null sequence,
+     * and the registration table at `0x003d9818` records it as this class's factory.
+     *
+     * @return The new message.
+     * @ghidraAddress 0x003d6e08
+     */
+    static MultiMuseMsg *New();
+
+    /**
+     * @param pMuse The sequence, retained when it is not null. It is stored either way.
+     * @ghidraAddress 0x003e38e8
+     */
+    MultiMuseMsg(MultiMuse *pMuse);
+
+    /**
+     * @param other The message to copy.
+     * @ghidraAddress 0x003e38a8
+     */
+    MultiMuseMsg(const MultiMuseMsg &other);
+
+    /**
+     * @ghidraAddress 0x003e3920
+     */
+    virtual ~MultiMuseMsg();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,8 +83,40 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the message to a diagnostic stream.
+     *
+     * Writes the inherited song position, a literal, and then the sequence.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3990
+     */
+    virtual void Print(ostream &stream);
+
+    /**
+     * Write the sequence to an output stream.
+     *
+     * The inherited song position is not written.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e39f8
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the sequence back from an input stream.
+     *
+     * Allocates a fresh MultiMuse with one reference and reads into it. Whatever sequence the
+     * message already stored is replaced without being released, which is faithful and leaks that
+     * sequence when the message already had one.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003d8180
+     */
+    virtual void Load(IBStream &stream);
+
 private:
-    int mUnknown08; // +0x08
+    MultiMuse *mMuse; // +0x08
 };
 
 /**

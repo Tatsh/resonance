@@ -39,9 +39,24 @@
  *
  * The destructor is at `0x002beca8`.
  *
- * Apart from the type function and the destructor, the slots that differ from the MetScreen table
- * are 5 `0x002c5be8`, 7 `0x002bf750`, 15 `0x002c0ad8`, 19 `0x002bf3a8`, 20 `0x002c5b58`, 23
- * `0x002c5b48`, 24 `0x002c5b50`, 36 `0x002c01c0`, 38 `0x002bee90`.
+ * A diff of the primary table against the MetScreen table at `0x0080b6a0` reads eleven overrides,
+ * slots 1, 5, 7, 15, 19, 20, 23, 24, 36, and 38 apart from the type function. Every one of the nine
+ * below is declared with its address and none has a written body. The three sound overrides sit
+ * eight bytes apart at `0x002c5b48`, `0x002c5b50`, and `0x002c5b58`, which bounds each at two
+ * instructions.
+ *
+ * Four addresses that the memory-card band worklist assigned to primary slots 2, 3, and 13 are in
+ * the two secondary tables instead. `0x002c1d10` is MemcardUser slot 2 and `0x002c1510` is
+ * MemcardUser slot 13, and `0x002c5c28` and `0x002c5b40` are ListDataProvider slots 2 and 3. The
+ * primary table leaves slot 2 as the inherited MsgSink::Handle and slot 3 as the MetScreen override
+ * of MsgSink::HandleMessage, and no derived table in the family fills primary slot 13 at all. All
+ * four are now titled for the table they occupy.
+ *
+ * `0x002c5b60` is the out-of-line emission of the `new` expression that builds one, which is
+ * compiler-generated glue rather than a member and is therefore not declared.
+ *
+ * Neither ListDataProvider virtual nor either overridden MemcardUser virtual is declared here,
+ * because neither base declares the slot by a recovered name.
  */
 class MetMCFreqDelScreen :
     public MetScreen,
@@ -62,4 +77,92 @@ public:
      * @ghidraAddress 0x002beca8
      */
     virtual ~MetMCFreqDelScreen();
+
+    /**
+     * Populate the FreQ list and enter.
+     *
+     * Slot 5. The body is not written.
+     *
+     * @ghidraAddress 0x002c5be8
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Unrecovered. Slot 7.
+     *
+     * The MetScreen body is empty and reveals no parameter list, so the declaration follows the
+     * base and is provisional. The body is not written.
+     *
+     * @ghidraAddress 0x002bf750
+     */
+    virtual void OnUnknownSlot7();
+
+    /**
+     * Respond to a message screen being dismissed.
+     *
+     * Slot 15. The body is not written.
+     *
+     * @param name The message screen that was dismissed.
+     * @param nChoice The response.
+     * @ghidraAddress 0x002c0ad8
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
+     * Act on one navigation command.
+     *
+     * Slot 19. The body is not written.
+     *
+     * @param pCommand The command the renderer translated from an input message.
+     * @ghidraAddress 0x002bf3a8
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Play the slide sound.
+     *
+     * Slot 20. The body is not written.
+     *
+     * @param nSelector The controller the command came from.
+     * @ghidraAddress 0x002c5b58
+     */
+    virtual void PlaySlideSound(int nSelector);
+
+    /**
+     * Play the cycle-left sound.
+     *
+     * Slot 23. The body is not written.
+     *
+     * @param nSelector The controller the command came from.
+     * @ghidraAddress 0x002c5b48
+     */
+    virtual void PlayCycleLeftSound(int nSelector);
+
+    /**
+     * Play the cycle-right sound.
+     *
+     * Slot 24. The body is not written.
+     *
+     * @param nSelector The controller the command came from.
+     * @ghidraAddress 0x002c5b50
+     */
+    virtual void PlayCycleRightSound(int nSelector);
+
+    /**
+     * Respond to the exit animation finishing.
+     *
+     * Slot 36. The body is not written.
+     *
+     * @ghidraAddress 0x002c01c0
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views.
+     *
+     * Slot 38. The body is not written.
+     *
+     * @ghidraAddress 0x002bee90
+     */
+    virtual void ResolveContainerViews();
 };

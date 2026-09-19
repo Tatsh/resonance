@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
 
 #include "game/campaignstats.h"
 #include "game/freqappearance.h"
@@ -63,6 +64,25 @@ public:
     MetPersonaData();
 
     /**
+     * Resolve the list of records the memory-card path last read.
+     *
+     * The list is a function-local static vector at `0x00891ab8` behind the guard flag at
+     * `0x00699d78`, in the accessor at `0x00215ca0`, which registers its destructor through
+     * `atexit`. `0x00215cf8` fills it and eight front-end screens read it, among them
+     * MetExpansionPakScreen, MetLoadFreqScreen, MetMemCardLoadScreen, MetPersonaSaverScreen, and
+     * MetLocPickCharScreen. The address recorded here is the single out-of-line emission of the
+     * inline accessor those eight share, and it forwards to the static holder.
+     *
+     * It is a static member rather than a free function, because it takes no receiver and vends
+     * exactly one class. The owning class is an inference from the element type alone, since no
+     * descriptor, literal, or file path in the image attributes either address.
+     *
+     * @return The list. It is never null.
+     * @ghidraAddress 0x00218118
+     */
+    static std::vector<MetPersonaData *> *loadList();
+
+    /**
      * @ghidraAddress 0x0032e278
      */
     virtual ~MetPersonaData();
@@ -108,9 +128,18 @@ public:
     virtual void Load(IBStream *pStream);
 
 private:
-    CampaignStats mUnknown00;   // +0x00
-    FreqAppearance mUnknown140; // +0x140
-    HxStr mUnknown154;          // +0x154
-    int mUnknown15c;            // +0x15c
-    HxStr mUnknown160;          // +0x160
+    CampaignStats mUnknown00; // +0x00
+
+public:
+    /**
+     * Appearance the front end displays and edits.
+     *
+     * Public rather than private, because MetLoadFreqBaseScreen::UpdateNameLabel() reads the
+     * username out of it directly and the image has no accessor to route that read through. A
+     * friend declaration fits the image equally well. +0x140
+     */
+    FreqAppearance mUnknown140;
+    HxStr mUnknown154; // +0x154
+    int mUnknown15c;   // +0x15c
+    HxStr mUnknown160; // +0x160
 };
