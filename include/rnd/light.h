@@ -124,9 +124,12 @@ public:
     /**
      * Sixth virtual of this class, whose purpose is unrecovered.
      *
-     * Vtable slot 8 of the Rnd::Transformable table. The body is empty, no caller is recovered,
-     * and no class overrides it. Nothing in the image records what it is for or what it takes,
-     * and the signature below is the narrowest one consistent with the body.
+     * Vtable slot 8 of the Rnd::Transformable table. The body is empty and no class overrides it.
+     * Two call sites are recovered, and both are a tail call on `this` with no argument. Load()
+     * ends with one at `0x00540e80` and Copy() ends with another at `0x0054545c`, which fixes the
+     * signature as a no-argument void and makes the slot a hook run after the whole state of the
+     * light changes at once. Nothing in the image records a better title, and every subclass that
+     * would supply a body is absent from this build.
      *
      * @ghidraAddress 0x00544818
      */
@@ -154,9 +157,53 @@ public:
      */
     virtual void DumpText(FailSink &sink);
 
+    /**
+     * Write the revision, the base, the three colours, the six scalars, and the type to stream.
+     *
+     * The revision is 1. Every colour goes out as its four components in turn rather than as one
+     * quadword.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x005408b8
+     */
     virtual void Save(Stream &stream);
+
+    /**
+     * Retarget the references of the base at pTo.
+     *
+     * The body forwards to Rnd::Transformable::Replace() and does nothing else, because a light
+     * stores no object reference of its own. The forwarding body has its own address rather than
+     * sharing the base entry. The override was therefore declared even though it adds nothing.
+     *
+     * @param pFrom The object being replaced.
+     * @param pTo The replacement, or null.
+     * @ghidraAddress 0x00545480
+     */
     virtual void Replace(Object *pFrom, Object *pTo);
+
+    /**
+     * Copy the three colours, the six scalars, and the type from pSource.
+     *
+     * The three colours move as one quadword each. The source is narrowed through `dynamic_cast`
+     * and the result is used with no null test. A pSource that is not a light therefore faults
+     * here. ApplyUnknown() finishes the routine.
+     *
+     * @param pSource The object to copy from.
+     * @param nFlags The set of fields to copy, passed straight to the base.
+     * @ghidraAddress 0x00545390
+     */
     virtual void Copy(const Object *pSource, unsigned nFlags);
+
+    /**
+     * Replace the three colours, the six scalars, and the type from stream.
+     *
+     * A revision above 1 produces the report "Can't load new Light" and no further reading. A
+     * revision of 0 predates the type word and retains mType unchanged. ApplyUnknown() finishes the
+     * routine.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x00540be8
+     */
     virtual void Load(Stream &stream);
 
     // Declared in recovered offset order, with the access specifiers interleaved. Each member that
@@ -192,5 +239,12 @@ private:
     // either such a field or the alignment the virtual base subobject at 0x100 is placed on.
     unsigned char mReservedfc[0x04];
 };
+
+/**
+ * Registered class name of Rnd::Light, the string "Light".
+ *
+ * @ghidraAddress 0x00720bd0
+ */
+extern HxStr g_lightClassName;
 
 } // namespace Rnd

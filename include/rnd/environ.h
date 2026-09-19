@@ -136,9 +136,12 @@ public:
     /**
      * Copy the state of pSource into this environment.
      *
-     * The light list is copied only while bit 0 of nFlags is clear. That bit does not agree with
-     * kCopyChildLists, which every other class in this subsystem tests, and the disagreement is
-     * what the binary does rather than a reconstruction slip.
+     * The light list is copied only while bit 0 of nFlags is clear, and there is no disagreement
+     * with kCopyChildLists. The two are different bits of one word with opposite polarity. Bit 0 is
+     * an opt-out for the light list, tested here at `0x00516560` by exclusive-or against one
+     * followed by a mask. Bit 9 is an opt-in for the child draw list, tested by
+     * Rnd::Drawable::Copy() at `0x00506af0`. This routine passes the same word into the base copy
+     * first, so one call tests both.
      *
      * @param pSource The environment to copy from.
      * @param nFlags The set of fields to copy.
