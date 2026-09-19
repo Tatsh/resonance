@@ -17,12 +17,12 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                      | Count  |
 | ---------------------------- | ------ |
 | Functions in the program     | 14,954 |
-| Excluded by rule             | 3,809  |
-| Reconstructable              | 11,145 |
-| Accounted for in source      | 1,628  |
-| Share of the reconstructable | 14.61% |
-| Remaining, with a name       | 794    |
-| Remaining, unidentified      | 8,723  |
+| Excluded by rule             | 3,914  |
+| Reconstructable              | 11,040 |
+| Accounted for in source      | 1,632  |
+| Share of the reconstructable | 14.78% |
+| Remaining, with a name       | 998    |
+| Remaining, unidentified      | 8,410  |
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
@@ -56,8 +56,8 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 820   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 508   | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,216 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 189   | Container instantiations                                         |
+| Per-translation-unit duplicate | 2,320 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 190   | Container instantiations                                         |
 | Platform SDK                   | 33    | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 24    | Exception, cast, and unwinding support                           |
 | C runtime                      | 19    | String and memory routines, and the floating-point library       |
@@ -172,6 +172,30 @@ overrides of one pure virtual.
 
 The surplus members carry titles of the form `UnidentifiedBody<address>Copy<n>`. That form asserts
 nothing about behaviour. It records which address the body repeats, and nothing more.
+
+### Identification levers, including the exhausted ones
+
+Three patterns in this image identify a routine from its own contents, with no inference. A class's
+allocation operator is a short body that calls the tagged allocator with its own class name as a
+string. A type_info accessor passes its class's length-prefixed mangled name to the descriptor
+constructor. And slot zero of a class's vtable is that accessor, so an 8-byte entry pointing at a
+known accessor locates the table and the walk to its zero terminator enumerates the class's
+virtuals.
+
+The first of those named 375 routines across 33 tags. The other two are now **exhausted**, and the
+word is measured rather than assumed. Each pass was checked against routines whose answer was
+already established before its result was believed, because a detector that reports nothing looks
+exactly like a subsystem with nothing left to find. The accessor pass initially reported nothing
+because its demangler read a two-component qualified name as a twenty-three-component one and
+because it took the last name in the body rather than the one belonging to the final constructor
+call; five of six controls pass after both were fixed, and the result is still nothing, so every
+accessor in the image already carries its class's name. The vtable pass reports nothing for the
+same kind of reason and the controls confirm the walk: both control tables parse correctly, their
+terminators are found, and every slot of both is already titled.
+
+So the routines still unidentified are none of those things. They are non-virtual members reached
+by direct call, file-local helpers, free functions, and vendored library code, and each needs
+reading rather than a pattern.
 
 Four clusters of 148 copies each remain unidentified, at `0x00107d28`, `0x00107eb8`, `0x001080a8`,
 and `0x00108738`. They are members of one map keyed by object name: the comparator is
