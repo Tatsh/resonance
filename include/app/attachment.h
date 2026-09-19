@@ -11,10 +11,13 @@
  * the destructor, then Destroy().
  *
  * A fresh object starts with one reference. Release() gives one back, and the last release
- * dispatches Destroy(), which deletes the object through the virtual destructor. A derived class
- * that takes a further reference increments mRefs directly, which is what Task::Start() does when
- * it hands a task to the run ring; that direct access from a derived class is why the field is
- * protected rather than private.
+ * dispatches Destroy(), which deletes the object through the virtual destructor.
+ *
+ * Callers increment mRefs directly rather than through a method, because the image declares no
+ * AddRef. Task::Start() does so on its own object when it hands a task to the run ring.
+ * Sch::TimedCommand's constructor at `0x005d32f8` instead increments the count of a separate
+ * Sch::Command that it stores, and Sch::Command does not derive from Sch::TimedCommand. Access
+ * from an unrelated class is why the field is public rather than protected.
  *
  * Sch::Command, Sch::TempoMap, Sch::TimedCommand, Source, Task, TickTask, TimeTask, MultiMuse, and
  * Phrase all derive from this class. Task derives virtually.
@@ -46,6 +49,5 @@ public:
      */
     virtual void Destroy();
 
-protected:
     int mRefs; // +0x00
 };

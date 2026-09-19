@@ -1,8 +1,9 @@
+#include <iostream.h>
+
 #include "app/application.h"
 #include "gfx/gfxdevice.h"
 #include "os/arkfile.h"
 #include "os/async.h"
-#include "os/debugstream.h"
 #include "os/failsink.h"
 #include "os/hostmode.h"
 #include "os/hxstr.h"
@@ -32,7 +33,7 @@ const char *g_szLastFailure;
 
 // 0x001f2638
 void RecordFailMessage(const char *pszMessage) {
-    g_debugStream << pszMessage;
+    cout << pszMessage;
     g_szLastFailure = pszMessage;
 }
 
