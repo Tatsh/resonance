@@ -35,6 +35,14 @@ jobs:
           mkdir -p build
           cmake --build build --target archives -k 0 > build/compile.log 2>&1 || true
           tail -40 build/compile.log
+      - name: 'Report the first errors as annotations'
+        # A run log and an artifact both need repository rights to read, and an annotation does not.
+        # Emitting the distinct errors as workflow commands is what makes them visible.
+        if: always()
+        run: |
+          grep 'error:' build/compile.log | sort -u | head -25 | while read -r LINE; do
+            echo "::error::${LINE}"
+          done
       - name: 'Count what was produced'
         run: |
           OBJECTS=$(find build -name '*.o' | wc -l)
