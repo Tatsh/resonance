@@ -102,9 +102,9 @@ void MainLoop::UpdateNextDeadline() {
 }
 
 // 0x001ef3d0
-void MainLoop::FireBankPoll(long long nNowNs) {
+void MainLoop::FirePollTimer(long long nNowNs) {
     mNextBankPollNs = nNowNs + kTimerPeriodNs;
-    mGameManager->PollBanks();
+    mGameManager->PollPlayback();
 }
 
 // 0x001ef398
@@ -117,7 +117,7 @@ void MainLoop::FireWatchdogPoll(long long nNowNs) {
 // 0x001ef308
 void MainLoop::FireDueTimers(long long nNowNs) {
     if (nNowNs >= mNextBankPollNs) {
-        FireBankPoll(nNowNs);
+        FirePollTimer(nNowNs);
     }
     if (nNowNs >= mNextWatchdogPollNs) {
         FireWatchdogPoll(nNowNs);

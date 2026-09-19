@@ -23,7 +23,7 @@
  * second, and then requests one frame from the game manager.
  *
  * Two periodic timers run alongside the frame, each with a four-millisecond period. One polls the
- * game manager's banks and the other services the long-operation watchdog. FireDueTimers() is what
+ * game manager and the other services the long-operation watchdog. FireDueTimers() is what
  * a blocked long operation calls back into through the poll callback the constructor installs, so
  * both timers continue to run while the frame loop itself is stalled.
  */
@@ -116,8 +116,12 @@ protected:
     virtual int Poll();
 
 private:
-    // Rearm the bank timer and poll the game manager's banks. 0x001ef3d0
-    void FireBankPoll(long long nNowNs);
+    // Rearm the timer and poll the game manager. The routine it dispatches ticks the input
+    // poller, accumulates a profile timer, and advances the game world when the world and the
+    // playback object are both present; nothing in it concerns a sound bank, and no literal
+    // attests the word, so the earlier spelling of both this member and its callee is dropped.
+    // 0x001ef3d0
+    void FirePollTimer(long long nNowNs);
 
     // Rearm the watchdog timer and service the watchdog. 0x001ef398
     void FireWatchdogPoll(long long nNowNs);
