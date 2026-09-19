@@ -200,17 +200,6 @@ inline GifQuadword *AppendVert(GifQuadword *pWrite, const MeshVert &vert, int nQ
     return pWrite + nQuadwords;
 }
 
-// 0x00607268. Clamps all four components through VU0 macro mode, with the source and the
-// destination aliased at its one call site.
-void ClampColorToUnitRange(const Color &in, Color &out) {
-    constexpr float kMin = 0.0f;
-    constexpr float kMax = 1.0f;
-    out.r = in.r < kMin ? kMin : (in.r > kMax ? kMax : in.r);
-    out.g = in.g < kMin ? kMin : (in.g > kMax ? kMax : in.g);
-    out.b = in.b < kMin ? kMin : (in.b > kMax ? kMax : in.b);
-    out.a = in.a < kMin ? kMin : (in.a > kMax ? kMax : in.a);
-}
-
 // Append part of a transformed vertex to the stream, one quadword at a time as the binary does.
 inline void AppendDrawVert(const DrawVert &vert, int nFirstQuadword, int nQuadwords) {
     const GifQuadword *pSource = AsQuadwords(&vert) + nFirstQuadword;
