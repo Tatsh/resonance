@@ -1,12 +1,16 @@
 #pragma once
 
 #include <libsdr.h>
+#include <vector>
+
+#include "os/hxstr.h"
 
 /**
  * Voice and sound-bank driver that Ps2HardSynth is a thin class over.
  *
  * Titled after `midi_main.cpp`, the string at `0x0081cc98` that the module bills its heap releases
- * to. The module spans `0x00461f28` through `0x00465200` and has the attested behaviour
+ * to. The module spans `0x00461a88` through `0x00465200`, the zone allocator ending just below it,
+ * and has the attested behaviour
  * of the sound subsystem: the SPU2 voices, the sound banks, and the script-facing command
  * dispatcher. Neither Synth nor Ps2HardSynth has any of it.
  *
@@ -137,6 +141,204 @@ extern int g_nIopStagingIndex;
  * @ghidraAddress 0x006e9b84
  */
 extern int g_nBankIopAddress;
+
+/**
+ * One loaded bank's claim on a region of sound memory.
+ *
+ * The record is 0xc bytes, measured from the stride the two walks advance by and confirmed by the
+ * static initialiser at `0x00464170`, which zeroes the vector as three pointers and whose destruct
+ * branch frees the same range with that stride.
+ *
+ * The three field titles come from the arguments LoadSoundBank() passes when it records a slot. The
+ * tag is what stops the bank again: releasing a slot submits mTag under selector 0x8130, which is
+ * also the word every command block is stamped with at `+0x10`.
+ */
+struct BankSlot {
+    int mTag;        // +0x00
+    int mDest;       // +0x04 the region in sound memory this bank claims, which the walks match on
+    int mIopAddress; // +0x08 zero for a slot that claims nothing
+};
+
+/**
+ * Every bank currently claiming sound memory.
+ *
+ * @ghidraAddress 0x006e9bb8
+ */
+extern std::vector<BankSlot> g_bankSlots;
+
+/**
+ * Record that a bank claims a region of sound memory, releasing whatever claimed it before.
+ *
+ * A slot whose mDest matches takes the new tag, and its previous tag is submitted under selector
+ * 0x8130 first when it claimed anything. A slot already using the new tag under a different
+ * destination is released. A destination with no slot is appended.
+ *
+ * @param nTag The bank's tag.
+ * @param nDest The region in sound memory.
+ * @param nIopAddress Where the bank lives on the IOP.
+ * @ghidraAddress 0x00461a88
+ */
+void RegisterBankSlot(int nTag, int nDest, int nIopAddress);
+
+/**
+ * Release the bank claiming a region of sound memory.
+ *
+ * The walk stops at the first slot whose mDest matches, whether or not that slot claimed anything.
+ *
+ * The image has no reference to this routine. LoadSoundBank() reaches the same body inline, so the
+ * out-of-line copy exists and nothing calls it.
+ *
+ * @param nDest The region in sound memory.
+ * @ghidraAddress 0x004642c8
+ */
+void ReleaseBankSlotAt(int nDest);
+
+/**
+ * Load a BD and HD bank pair and record the claim.
+ *
+ * Performs no work when both paths already match what is loaded. The placement argument selects
+ * where the pair goes: a negative value leaves both destinations as they are, 0 or 1 selects
+ * kBankFixedDestAddress and the first IOP address, 2 selects the first destination buffer, and 3
+ * rotates through both destination buffers and through the IOP addresses. Anything above 3 leaves
+ * the IOP address alone while still selecting a destination.
+ *
+ * A placement other than 3 restores the destination the call found, so only the rotating placement
+ * leaves the choice behind for the next caller.
+ *
+ * @param pszBdPath The BD bank.
+ * @param pszHdPath The HD bank.
+ * @param nTag The tag both banks are recorded and stamped with.
+ * @param nPlacement Where the pair goes.
+ * @ghidraAddress 0x004620b0
+ */
+void LoadSoundBank(char *pszBdPath, char *pszHdPath, int nTag, int nPlacement);
+
+/**
+ * Report the uncompressed length of a file.
+ *
+ * The routine belongs to the file layer and is declared here so both bank starters can call it. It
+ * opens the path, measures it from the ark directory record, the gzip trailer, or the file size,
+ * and reports the length without reporting the handle, which is why a caller that needs the file
+ * opens it again.
+ *
+ * @param pszPath The file to measure.
+ * @return The uncompressed length, or zero or less when the file could not be opened.
+ * @ghidraAddress 0x00555800
+ */
+int GetUncompressedFileLength(char *pszPath);
+
+/**
+ * Start a chunked BD bank transfer and report the bank's size.
+ *
+ * Fills the bank block, measures the file, then opens it and queues the first chunk against a new
+ * CallbackXferBdToIop. The measured length reaches the block whether or not the measurement
+ * succeeded.
+ *
+ * @param pszPath The bank to read.
+ * @return The bank's size, or -1 when the file could not be measured.
+ * @ghidraAddress 0x00461f28
+ */
+int StartBdBankXfer(char *pszPath);
+
+/**
+ * Start an HD bank transfer.
+ *
+ * Unlike the BD transfer this queues the whole file as one read against g_hdXfer. It selects the
+ * IOP address the same way LoadSoundBank() selects a destination, and reports `Can't alloc heap`
+ * when the selected address is negative, which is what a failed allocation on the IOP side leaves
+ * there. The read buffer is the bank's size plus 0x40, rounded up to a 64-byte boundary.
+ *
+ * The body is not reconstructed, for the same reason as StartBdBankXfer().
+ *
+ * @param pszPath The bank to read.
+ * @param nPlacement Where the bank goes on the IOP.
+ * @return Zero once the read is queued, or -1 on either failure.
+ * @ghidraAddress 0x00461c68
+ */
+int StartHdBankXfer(char *pszPath, int nPlacement);
+
+/**
+ * Path of the BD bank currently loaded.
+ *
+ * Both this and g_hdBankName are declared rather than defined. The static initialiser at
+ * `0x00464170` zeroes each as two words with no constructor call, which is a default constructor
+ * inlined from the header, and HxStr has no default constructor declared yet.
+ *
+ * @ghidraAddress 0x006e9b90
+ */
+extern HxStr g_bdBankName;
+
+/**
+ * Path of the HD bank currently loaded.
+ *
+ * @ghidraAddress 0x006e9b98
+ */
+extern HxStr g_hdBankName;
+
+/** Destination in sound memory a placement of 0 or 1 selects. */
+constexpr int kBankFixedDestAddress = 0x5010;
+
+/** Placement that selects the first destination buffer. */
+constexpr int kBankPlacementFirstBuffer = 2;
+
+/** Placement that rotates through the destination buffers and the IOP addresses. */
+constexpr int kBankPlacementRotate = 3;
+
+/**
+ * Bytes of g_szHdBankPath.
+ *
+ * Bounded by the next known object at `0x00894cc0` rather than measured.
+ */
+constexpr int kHdBankPathSize = 0x80;
+
+/** Destination buffers the rotating placement alternates between. */
+constexpr int kBankDestBufferCount = 2;
+
+/**
+ * Destinations in sound memory a bank pair may go to.
+ *
+ * @ghidraAddress 0x006e9ba8
+ */
+extern int g_anBankDestAddress[kBankDestBufferCount];
+
+/**
+ * Destination buffer the next rotating placement will use.
+ *
+ * @ghidraAddress 0x006e9bb0
+ */
+extern int g_nBankDestIndex;
+
+/**
+ * Addresses on the IOP a bank may go to.
+ *
+ * Three rather than two. The first is what a placement of 0 or 1 selects, and the rotation runs
+ * through all three once and then cycles between the second and the third.
+ */
+constexpr int kBankIopAddressCount = 3;
+
+/**
+ * Addresses on the IOP a bank may go to.
+ *
+ * @ghidraAddress 0x00894750
+ */
+extern int g_anBankIopAddress[kBankIopAddressCount];
+
+/**
+ * Entry of g_anBankIopAddress the next rotating placement will use.
+ *
+ * @ghidraAddress 0x0089475c
+ */
+extern int g_nBankIopIndex;
+
+/**
+ * Path of the HD bank, copied in by StartHdBankXfer().
+ *
+ * Nothing recovered reads it. The size is bounded by the next known object at `0x00894cc0` rather
+ * than measured.
+ *
+ * @ghidraAddress 0x00894c40
+ */
+extern char g_szHdBankPath[];
 
 /**
  * Address in sound memory a bank is written to.

@@ -25,6 +25,17 @@
 class HxStr {
 public:
     /**
+     * Construct an empty string.
+     *
+     * Defined in the header rather than compiled out of line, which is why it has no address of
+     * its own. A static initialisation that constructs a string global zeroes the two members in
+     * place with no call, which is what establishes both that the constructor exists and that it
+     * does nothing beyond producing the empty representation.
+     */
+    HxStr() : mLen(0), mStr(nullptr) {
+    }
+
+    /**
      * Construct a copy of a C string.
      *
      * A null argument produces an empty string with no allocation.

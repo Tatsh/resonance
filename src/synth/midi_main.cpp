@@ -1,6 +1,7 @@
 #include "synth/midi_main.h"
 
 #include <libsdr.h>
+#include <stdint.h>
 
 #include "os/log.h"
 
@@ -66,9 +67,107 @@ void *g_pHdXferBuffer;
 // 0x006e9dd0
 void *g_pBdXferBuffer;
 
+// 0x006e9ba8
+int g_anBankDestAddress[kBankDestBufferCount];
+
+// 0x006e9bb0
+int g_nBankDestIndex;
+
+// 0x00894750
+int g_anBankIopAddress[kBankIopAddressCount];
+
+// 0x0089475c
+int g_nBankIopIndex;
+
+// 0x00894c40
+char g_szHdBankPath[kHdBankPathSize];
+
+// 0x006e9bb8
+std::vector<BankSlot> g_bankSlots;
+
 // 0x00464378
 void SetBankLoadProgressHook(void (*pfnProgress)()) {
     g_pfnBankLoadProgress = pfnProgress;
+}
+
+// Selector that releases a loaded bank. It puts the bank's tag in the register that a block
+// selector puts an address in, which is why the tag travels through a pointer parameter.
+constexpr int kSoundSelectorReleaseBank = 0x8130;
+
+// Tag a released slot is marked with.
+constexpr int kBankSlotTagNone = -1;
+
+// 0x00461a88
+void RegisterBankSlot(int nTag, int nDest, int nIopAddress) {
+    bool bClaimed = false;
+    for (auto &slot : g_bankSlots) {
+        if (slot.mDest == nDest) {
+            if (slot.mIopAddress != 0) {
+                SubmitSoundDriverRequest(
+                    kSoundSelectorReleaseBank,
+                    reinterpret_cast<void *>(static_cast<intptr_t>(slot.mTag)));
+            }
+            slot.mTag = nTag;
+            slot.mIopAddress = nIopAddress;
+            bClaimed = true;
+            // The walk continues rather than stopping here, so a later slot using the same tag is
+            // released below.
+            continue;
+        }
+        if (slot.mTag == nTag) {
+            slot.mTag = kBankSlotTagNone;
+            slot.mIopAddress = 0;
+        }
+    }
+    if (!bClaimed) {
+        BankSlot slot{nTag, nDest, nIopAddress};
+        g_bankSlots.push_back(slot);
+    }
+}
+
+// 0x004642c8
+void ReleaseBankSlotAt(int nDest) {
+    for (auto &slot : g_bankSlots) {
+        if (slot.mDest == nDest) {
+            if (slot.mIopAddress != 0) {
+                SubmitSoundDriverRequest(
+                    kSoundSelectorReleaseBank,
+                    reinterpret_cast<void *>(static_cast<intptr_t>(slot.mTag)));
+                slot.mTag = kBankSlotTagNone;
+                slot.mIopAddress = 0;
+            }
+            return;
+        }
+    }
+}
+
+// 0x004620b0
+void LoadSoundBank(char *pszBdPath, char *pszHdPath, int nTag, int nPlacement) {
+    const int nPreviousDest = g_nBankDestAddress;
+    g_nSynthXferTag = nTag;
+    if (g_bdBankName == pszBdPath && g_hdBankName == pszHdPath) {
+        return;
+    }
+    g_bdBankName = pszBdPath;
+    g_hdBankName = pszHdPath;
+    if (nPlacement == kBankPlacementFirstBuffer) {
+        g_nBankDestAddress = g_anBankDestAddress[0];
+    } else if (nPlacement == kBankPlacementRotate) {
+        g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
+    } else if (nPlacement >= 0 && nPlacement < kBankPlacementFirstBuffer) {
+        g_nBankDestAddress = kBankFixedDestAddress;
+    }
+    ReleaseBankSlotAt(g_nBankDestAddress);
+    // Yes, the binary discards both results.
+    StartHdBankXfer(pszHdPath, nPlacement);
+    StartBdBankXfer(pszBdPath);
+    RegisterBankSlot(g_nSynthXferTag, g_nBankDestAddress, g_nBankIopAddress);
+    if (nPlacement != kBankPlacementRotate) {
+        g_nBankDestAddress = nPreviousDest;
+        return;
+    }
+    g_nBankDestIndex = (g_nBankDestIndex + 1) & (kBankDestBufferCount - 1);
+    g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
 }
 
 // 0x00464ad0. The command number stays in its second argument register from entry so that the
