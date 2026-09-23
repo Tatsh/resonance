@@ -35,10 +35,8 @@ class OBStream;
  * A concrete message also supplies a static New() that returns a default-constructed instance on
  * the heap, and the translation unit at `0x003d9818` registers 92 of them against the identity
  * Type() reports. Each registration constructs one file-scope object of a 4-byte class with the
- * identity word immediately below it, passing the identity and the factory to a constructor at
- * `0x00555948` that appends the pair to a sorted vector and stores nothing in the object. That
- * class has no RTTI descriptor, no vtable, and no string anywhere in the image, so it is not
- * titled here rather than being given an invented name.
+ * identity word immediately below it, passing the identity and the factory to the MessageFactory
+ * constructor, which inserts the pair into a sorted vector and stores nothing in the object.
  */
 class Message {
 public:
@@ -150,4 +148,29 @@ public:
      * @ghidraAddress 0x00105200
      */
     virtual void Load(IBStream &stream);
+
+    /**
+     * Write this message to a diagnostic stream as `{Name() Print()}`.
+     *
+     * The payload comes from Print(). PrintMuseEntry() is the one caller, and it discards the
+     * result. The title is inferred.
+     *
+     * @param stream The stream to write to.
+     * @return The stream.
+     * @ghidraAddress 0x00556290
+     */
+    std::ostream &PrintBraced(std::ostream &stream);
+
+    /**
+     * Produce a message of the identified class through the factory list.
+     *
+     * The list is searched with a binary search on the identity, and a hit calls the factory a
+     * MessageFactory registered. The shipped program does not call it, and
+     * ReadMessagePointerFromStream() expands the same search inline.
+     *
+     * @param nType The identity to construct for.
+     * @return The new message, or null when the identity is unregistered.
+     * @ghidraAddress 0x005563d0
+     */
+    static Message *NewMessage(int nType);
 };
