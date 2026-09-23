@@ -1,6 +1,7 @@
 #include "rndartt/abitmap.h"
 
 #include "os/mem.h"
+#include "rndartt/acanvas.h"
 #include "rndartt/apalette.h"
 
 namespace {
@@ -21,6 +22,8 @@ constexpr unsigned int kRed15Mask = 0x001f;
 constexpr unsigned int kGreen15Mask = 0x03e0;
 constexpr unsigned int kAlpha15Bit = 0x8000;
 constexpr int kBlue15Shift = 10;
+constexpr unsigned int kWhite15 = 0x7fff;
+constexpr unsigned int kColorChannelsMask = 0xffffff;
 
 } // namespace
 
@@ -117,6 +120,50 @@ void ABitmap::SwapRedBlue32(unsigned char *pPixels, int nCount) {
         pPixels[0] = pPixels[2];
         pPixels[2] = nFirst;
         pPixels += kBytesPerPixel32;
+    }
+}
+
+// 0x004e5b78
+void ABitmap::ApplyColorKey(int nFlags) {
+    if (nFlags != 0) {
+        if (mPalette != nullptr &&
+            (mFormat == kABitmapFormatLinear4 || mFormat == kABitmapFormatLinear8 ||
+             mFormat == kABitmapFormatRle8)) {
+            for (int i = 0; i < mPalette->mEnd; ++i) {
+                const unsigned int nColor = mPalette->mEntries[i] & kColorChannelsMask;
+                if ((nFlags & kABitmapColorKeyWhite) != 0 && nColor == kColorChannelsMask) {
+                    mTransparentColor = i;
+                    mHasTransparentColor = 1;
+                    break;
+                }
+                if ((nFlags & kABitmapColorKeyBlack) != 0 && nColor == 0) {
+                    mHasTransparentColor = 1;
+                    mTransparentColor = i;
+                    break;
+                }
+            }
+        } else if (mFormat == kABitmapFormatLinear15) {
+            if ((nFlags & kABitmapColorKeyWhite) != 0) {
+                mHasTransparentColor = 1;
+                mTransparentColor = kWhite15;
+            } else if ((nFlags & kABitmapColorKeyBlack) != 0) {
+                mTransparentColor = 0;
+                mHasTransparentColor = 1;
+            }
+        } else if (mFormat == kABitmapFormatLinear32) {
+            if ((nFlags & kABitmapColorKeyWhite) != 0) {
+                mHasTransparentColor = 1;
+                mTransparentColor = kColorChannelsMask;
+            } else if ((nFlags & kABitmapColorKeyBlack) != 0) {
+                mTransparentColor = 0;
+                mHasTransparentColor = 1;
+            }
+        }
+    }
+    if (mHasTransparentColor != 0) {
+        ACanvas *pCanvas = ACanvas::CreateForBitmap(*this, false);
+        pCanvas->BuildAlphaFromColorKey(mTransparentColor);
+        delete pCanvas;
     }
 }
 

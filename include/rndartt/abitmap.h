@@ -28,6 +28,12 @@ enum ABitmapFormat {
     kABitmapFormatCount = 6     /*!< One past the last code the factory accepts. */
 };
 
+/** Colour key choices ABitmap::ApplyColorKey() takes. */
+enum ABitmapColorKey {
+    kABitmapColorKeyWhite = 1, /*!< Key on white. */
+    kABitmapColorKeyBlack = 2  /*!< Key on black. */
+};
+
 /**
  * Bytes one pixel of each ABitmapFormat occupies.
  *
@@ -180,6 +186,27 @@ struct ABitmap {
      * @ghidraAddress 0x00559600
      */
     static void SwapRedBlue32(unsigned char *pPixels, int nCount);
+
+    /**
+     * Pick a colour key from the flags and rebuild the alpha of every pixel from it.
+     *
+     * An indexed bitmap with a palette takes the index of the first palette entry among the first
+     * APalette::mEnd whose colour channels are white (kABitmapColorKeyWhite) or black
+     * (kABitmapColorKeyBlack). A 1555 bitmap takes 0x7fff or zero, and a 32 bit bitmap 0xffffff or
+     * zero, the white bit winning when both are set. Other formats pick nothing.
+     *
+     * Whenever mHasTransparentColor is then set, whether by this call or before it, a canvas is
+     * built over the bitmap with ACanvas::CreateForBitmap(), its
+     * ACanvas::BuildAlphaFromColorKey() runs with mTransparentColor, and the canvas is deleted.
+     * The canvas is used before the null test that guards its deletion.
+     *
+     * The one out-of-line copy sits inside the Rnd::Tex translation unit, and Rnd::Tex's slot 15
+     * at 0x004e5928 is the one caller, passing the texture's flag word.
+     *
+     * @param nFlags ABitmapColorKey bits.
+     * @ghidraAddress 0x004e5b78
+     */
+    void ApplyColorKey(int nFlags);
 
     void *mPixels; /*!< The pixel rectangle, null until allocated. +0x00 */
     unsigned short mHasTransparentColor : 8; /*!< Whether mTransparentColor applies. +0x04 */
