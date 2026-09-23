@@ -6,12 +6,17 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "memcard/memcardmanager.h"
+#include "memcard/remixindex.h"
+#include "met/metsonglists.h"
 #include "os/async.h"
 #include "os/hostmode.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "os/r250.h"
 #include "os/zone.h"
+#include "script/scripthost.h"
+#include "stream/iobmemstream.h"
+#include "stream/iobpreallocmemstream.h"
 
 namespace {
 
@@ -22,6 +27,31 @@ constexpr char kContainerName[] = "dialogue";
 
 // The registry key shared() resolves the instance by.
 constexpr char kRegistryName[] = "MetRemixManager";
+
+// The message screen the listing and playlist completions exit.
+constexpr char kMsgScreen[] = "MetMsgScreen";
+
+// The two listing statuses OnRemixesListed() tests. The meaning of 3 is inferred.
+constexpr int kListStatusOk = 0;
+constexpr int kListStatusNoRemixes = 3;
+
+// What Done() does once a remix read completes, as mUnknownf4 records it.
+constexpr int kAfterLoadStart = 0;
+constexpr int kAfterLoadExit = 1;
+
+// The origin Done() rewinds the reset log to.
+constexpr int kSeekFromStart = 0;
+
+// The screens StartPlayList() records for the return from a jukebox game.
+constexpr char kTopButtonsScreen[] = "MetJukeboxTopButtonsScreen";
+constexpr char kHelpScreen[] = "MetHelpScreen";
+
+// The screen StartLoadedRemix() pushes and activates.
+constexpr char kLoadGameScreen[] = "MetLoadGameScreen";
+
+// The script template StartLoadedRemix() runs, and the one argument it passes.
+constexpr int kJukeboxStartTemplate = 0x267;
+constexpr char kJukeboxStartArgument[] = "1";
 
 // 0x006c1100
 HxStr g_remixIndexPath("Levels/remixes/ps2/index");
@@ -181,7 +211,7 @@ void MetRemixManager::PreviousTrack() {
 }
 
 // 0x00361358
-void MetRemixManager::NextTrack() {
+inline void MetRemixManager::NextTrack() {
     if (mShuffle != 0) {
         RandomTrack();
         return;
@@ -194,10 +224,55 @@ void MetRemixManager::NextTrack() {
     mCurrentPlaylistTrack = std::min(nLast, mCurrentPlaylistTrack + 1);
 }
 
+inline void MetRemixManager::SetReturnScreens(const std::vector<HxStr> &screens) {
+    mUnknownac.clear();
+    mUnknownac.resize(screens.size());
+    mUnknownac = screens;
+}
+
+// 0x003593d0
+void MetRemixManager::StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle) {
+    mUnknownb8.clear();
+    mUnknownb8.push_back(HxStr(kTopButtonsScreen));
+    mUnknownb8.push_back(HxStr(kHelpScreen));
+    mPlayedTracks.resize(mPlayList.entries.size());
+    std::fill(mPlayedTracks.begin(), mPlayedTracks.end(), false);
+    SetCurrentTrack(0);
+    mShuffle = nShuffle;
+    if (nShuffle != 0) {
+        RandomTrack();
+    }
+    SetReturnScreens(returnScreens);
+    LoadCurrentTrack();
+}
+
+// 0x0035abf8
+void MetRemixManager::StartLoadedRemix() {
+    MetRemixRecord *pRecord = FindRecord(mPlayList.GetEntry(mCurrentPlaylistTrack)->name);
+    GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    const int nArena = RandomInt(0, GetArenaList()->size() - 1);
+    params.mArenaName = (*GetArenaList())[nArena].mName;
+    params.mUnknown1c = kPlayModeJam;
+    params.mJukeboxMode = 1;
+    params.mLevelName = pRecord->unknown00_;
+    params.mLoadingGame = 1;
+    CallScriptTemplate(kJukeboxStartTemplate, kJukeboxStartArgument);
+    Application::shared()->GetGameManager()->SetParams(params);
+
+    const int nAppearances = pRecord->appearances.size();
+    for (int i = 0; i < nAppearances; ++i) {
+        pRecord->appearances[i].AttachToBurnSlot(i);
+    }
+
+    NextTrack();
+    PushNamedScreen(HxStr(kLoadGameScreen));
+    ActivateNamedPanel(HxStr(kLoadGameScreen));
+}
+
 // 0x0035a6b0
 void MetRemixManager::LeaveJukeboxMode() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    params.mJukeboxMode = false;
+    params.mJukeboxMode = 0;
     Application::shared()->GetGameManager()->SetParams(params);
     SetCurrentTrack(0);
 }
@@ -227,6 +302,86 @@ void MetRemixManager::PushUnknownacScreens() {
 // 0x003612a0
 void MetRemixManager::PrunePlayList() {
     mPlayList.RemoveUnknownEntries();
+}
+
+// 0x00361518
+void MetRemixManager::EnterAndShow() {
+    mUnknown14->SetShowing(0);
+}
+
+// 0x003553e8
+void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
+    mListStatus[nPortSlot] = nStatus;
+    ++mUnknownd4;
+    // Yes, the binary repeats the same exit on both sides of the status test.
+    if (nStatus == kListStatusOk || nStatus == kListStatusNoRemixes) {
+        if (mUnknownd4 == mUnknownd8 && mUnknowndc != 0) {
+            ExitScreenByName(HxStr(kMsgScreen));
+        }
+    } else if (mUnknownd4 == mUnknownd8 && mUnknowndc != 0) {
+        ExitScreenByName(HxStr(kMsgScreen));
+    }
+}
+
+// 0x003563e0
+void MetRemixManager::OnJukeboxPlayListLoaded([[maybe_unused]] int nPortSlot, int nStatus) {
+    mUnknowndc = 1;
+    // Yes, the binary repeats the same exit on both sides of the status test.
+    if (nStatus != 0) {
+        if (mUnknownd4 == mUnknownd8) {
+            ExitScreenByName(HxStr(kMsgScreen));
+        }
+    } else if (mUnknownd4 == mUnknownd8) {
+        ExitScreenByName(HxStr(kMsgScreen));
+    }
+}
+
+// 0x00358310
+void MetRemixManager::Done(int nHandle,
+                           [[maybe_unused]] int nFile,
+                           void *pBuffer,
+                           int nLength,
+                           [[maybe_unused]] int nStatus) {
+    if (nHandle == mRemixRequest) {
+        IOBPreallocMemStream *pLog = Application::shared()->GetResetLog();
+        pLog->WriteBytes(pBuffer, nLength);
+        pLog->Seek(0, kSeekFromStart);
+        mRemixRequest = 0;
+        if (mUnknownf4 == kAfterLoadStart) {
+            StartLoadedRemix();
+        } else if (mUnknownf4 == kAfterLoadExit) {
+            ExitScreenByName(HxStr(kMsgScreen));
+        }
+        return;
+    }
+
+    if (nHandle != mIndexRequest) {
+        return;
+    }
+
+    IOBMemStream stream;
+    stream.Load(pBuffer, nLength);
+    RemixIndex index;
+    index.ReadFromStream(stream);
+    for (std::vector<RemixIndexElement>::iterator it = index.elements.begin();
+         it != index.elements.end();
+         ++it) {
+        MetRemixRecord record(HxStr(it->LevelName),
+                              HxStr(it->RemixName),
+                              HxStr(it->FileName),
+                              it->dateTime,
+                              it->GameOK,
+                              it->appearances,
+                              it->AlbumNum);
+        record.unknown24_ = 1;
+        mRemixes[mUnknowne8].push_back(record);
+    }
+    MemFreeTagged(pBuffer, __FILE__, __LINE__);
+    mUnknowne8 = kFactorySlot;
+    mIndexRequest = 0;
+    if (++mUnknownd4 == mUnknownd8 && mUnknowndc != 0) {
+        ExitScreenByName(HxStr(kMsgScreen));
+    }
 }
 
 // 0x003612c0

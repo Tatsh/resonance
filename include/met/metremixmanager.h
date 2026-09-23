@@ -175,12 +175,12 @@ public:
     /**
      * Step to the next playlist track, or to a random one in shuffle mode.
      *
-     * The step wraps from the last track to the first. The image records no caller. The title is
-     * inferred.
+     * The step wraps from the last track to the first. Inline. StartLoadedRemix() expands it, and
+     * the out-of-line copy has no caller. The title is inferred.
      *
      * @ghidraAddress 0x00361358
      */
-    void NextTrack();
+    inline void NextTrack();
 
     /**
      * Pick a random track that has not played since the last reset.
@@ -191,6 +191,20 @@ public:
      * @ghidraAddress 0x0035a7e0
      */
     void RandomTrack();
+
+    /**
+     * Start playing the playlist.
+     *
+     * Records MetJukeboxTopButtonsScreen and MetHelpScreen as the screens to restore after a
+     * track, clears one played flag per track, rewinds, picks a random first track in shuffle
+     * mode, records the caller's screens, and loads the current track.
+     * MetJukeboxEditPlaylistScreenDone slot 36 is the caller. The title is inferred.
+     *
+     * @param returnScreens The screens the caller wants restored.
+     * @param nShuffle Non-zero to play in random order.
+     * @ghidraAddress 0x003593d0
+     */
+    void StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle);
 
     /**
      * Clear the jukebox flag in the game parameters and rewind the playlist.
@@ -209,10 +223,6 @@ public:
      * same subobject MetScreen::Draw() forwards to. The view is dereferenced with no null check,
      * and nothing is shown, which suits a manager that registers as a screen only to receive
      * messages.
-     *
-     * The body is not written because MetScreen still declares mUnknown14 private. That member is
-     * read by the code of a derived class here, so it belongs in the protected section on the same
-     * reasoning that already moved mUnknown10 and mUnknown18 there.
      *
      * @ghidraAddress 0x00361518
      */
@@ -263,9 +273,9 @@ public:
     /**
      * Record the remixes one card slot reported. MemcardUser slot 11.
      *
-     * The body is not written. It looks the port and slot up in the red-black tree at `+0xa0`
-     * through the routine at `0x003445f0`, which is not identified, and then merges what the card
-     * reported into the catalogue.
+     * Records the status under the port and slot in mListStatus and counts one more listing in
+     * mUnknownd4. Once that count reaches mUnknownd8 while mUnknowndc is set, the `MetMsgScreen`
+     * dialogue is exited. The status branches against 0 and 3 lead to the same code.
      *
      * @param nPortSlot Which card port and slot reported.
      * @param nStatus Zero on success.
@@ -294,10 +304,9 @@ public:
     /**
      * Act on the playlist load the card reported. MemcardUser slot 15.
      *
-     * The body is not written. It writes one into the word at `+0xdc` on every path. A zero status
-     * that also finds the two counters at `+0xd4` and `+0xd8` equal exits `MetMsgScreen`, and a
-     * non-zero status takes a second path from `0x00356450`. The port and slot argument is not
-     * read.
+     * Sets mUnknowndc on every path, and exits `MetMsgScreen` when the two counters mUnknownd4 and
+     * mUnknownd8 agree. The zero and non-zero status branches lead to the same code. The port and
+     * slot argument is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success.
@@ -308,10 +317,10 @@ public:
     /**
      * Act on the asynchronous read the file layer finished. AsyncCallback slot 2.
      *
-     * The body is not written. A handle that differs from the word at `+0xe4` returns at once
-     * through `0x00358428`, which is how the manager ignores a completion it did not request. The
-     * matching path resolves the game manager and runs for roughly 0x400 instructions parsing the
-     * buffer, and it reads the length as well as the handle.
+     * A completed remix read is copied into the reset log and started, or its dialogue exited, as
+     * mUnknownf4 selects. A completed index read is parsed into records filed under the slot key
+     * mUnknowne8, the buffer is released, and the listing is counted as OnRemixesListed() counts
+     * it. Any other handle is ignored.
      *
      * @param nHandle The request the completion belongs to, compared against the word at `+0xe4`.
      * @param nFile The file the request read from.
@@ -339,6 +348,13 @@ private:
     inline void LoadRemix(const MetRemixRecord &record, int nFactory);
     // 0x00361480
     void LoadCurrentTrack();
+    // 0x0035abf8. Starts a jukebox game on the current track's remix in a random arena, burns the
+    // recorded appearances, steps the playlist, and brings up MetLoadGameScreen. Both remix-load
+    // completions call it. The title is inferred.
+    void StartLoadedRemix();
+    // Replaces mUnknownac with the caller's screens by clearing, resizing, and then assigning.
+    // StartPlayList() and the playlist save at 0x00356508 expand it identically.
+    inline void SetReturnScreens(const std::vector<HxStr> &screens);
     // 0x003613d8. Clamps into zero through the track count, which admits one past the end.
     void SetCurrentTrack(int nTrack);
     // 0x003610d0. Pushes every screen named in mUnknownb8 and activates the first.
@@ -350,7 +366,7 @@ private:
     static MetRemixManager *sInstance;
 
     std::map<int, std::vector<MetRemixRecord>> mRemixes; // +0x94, keyed by card slot
-    std::map<int, int> mUnknowna0;                       // +0xa0
+    std::map<int, int> mListStatus;                      // +0xa0, by port and slot
     std::vector<HxStr> mUnknownac;                       // +0xac
     std::vector<HxStr> mUnknownb8;                       // +0xb8
     JukeboxPlayList mPlayList;                           // +0xc4
@@ -359,10 +375,11 @@ private:
     int mUnknowndc;                                      // +0xdc, starts at one
     int mIndexRequest;                                   // +0xe0
     int mRemixRequest;                                   // +0xe4, matched by Done()
-    int mUnknowne8;                                      // +0xe8, starts at -1
-    int mCurrentPlaylistTrack;                           // +0xec
-    int mShuffle;                                        // +0xf0, RandomTrack() steps when set
-    int mUnknownf4;                                      // +0xf4
-    std::vector<bool> mPlayedTracks;                     // +0xf8, one per playlist entry
-    MetRemixRecord mRecord;                              // +0x114
+    // The mRemixes key Done() files the index under. Starts at -1.
+    int mUnknowne8;                  // +0xe8
+    int mCurrentPlaylistTrack;       // +0xec
+    int mShuffle;                    // +0xf0, RandomTrack() steps when set
+    int mUnknownf4;                  // +0xf4
+    std::vector<bool> mPlayedTracks; // +0xf8, one per playlist entry
+    MetRemixRecord mRecord;          // +0x114
 };
