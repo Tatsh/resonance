@@ -1,5 +1,7 @@
 #include "rndartt/abitmap.h"
 
+#include <string.h>
+
 #include "os/mem.h"
 #include "rndartt/acanvas.h"
 #include "rndartt/apalette.h"
@@ -27,6 +29,17 @@ constexpr unsigned int kColorChannelsMask = 0xffffff;
 constexpr unsigned int kLowByteMask = 0xff;
 constexpr int kAlphaShift = 24;
 
+// The value Copy() returns when the allocation fails.
+constexpr int kCopyFailed = -1;
+
+// The packed row stride of a format, as the constructor and Copy() both derive it.
+inline short PackedBytesPerRow(int nFormat, int nWidth) {
+    if (nFormat == kABitmapFormatLinear4) {
+        return static_cast<short>((nWidth + 2) / 2);
+    }
+    return static_cast<short>(nWidth * g_abBitmapBytesPerPixel[nFormat]);
+}
+
 } // namespace
 
 // 0x00725cc0
@@ -49,10 +62,8 @@ ABitmap::ABitmap(void *pPixels,
     mWidth = static_cast<short>(nWidth);
     if (nBytesPerRow != 0) {
         mBytesPerRow = static_cast<short>(nBytesPerRow);
-    } else if (mFormat == kABitmapFormatLinear4) {
-        mBytesPerRow = static_cast<short>((mWidth + 2) / 2);
     } else {
-        mBytesPerRow = static_cast<short>(mWidth * g_abBitmapBytesPerPixel[mFormat]);
+        mBytesPerRow = PackedBytesPerRow(mFormat, mWidth);
     }
     mTransparentColor = 0;
     mByteCount = mBytesPerRow * mHeight;
@@ -127,6 +138,42 @@ void ABitmap::SwapRedBlue32(unsigned char *pPixels, int nCount) {
 
 // 0x00725cd0
 int g_nSkipColorSwap;
+
+// 0x00558f28
+int ABitmap::Copy(const ABitmap &source) {
+    mFormat = source.mFormat;
+    mHasTransparentColor = source.mHasTransparentColor;
+    mOddNibbleStart = source.mOddNibbleStart;
+    mWidth = source.mWidth;
+    mHeight = source.mHeight;
+    mBytesPerRow = source.mBytesPerRow;
+    mTransparentColor = source.mTransparentColor;
+    mByteCount = source.mByteCount;
+    mPalette = source.mPalette;
+    if (mFormat != kABitmapFormatRle8 && mBytesPerRow != PackedBytesPerRow(mFormat, mWidth)) {
+        mBytesPerRow = PackedBytesPerRow(mFormat, source.mWidth);
+        mByteCount = mBytesPerRow * mHeight;
+    }
+
+    mPixels = MemAllocTagged(mByteCount, kAllocTag, kAllocLine);
+    if (mPixels == nullptr) {
+        return kCopyFailed;
+    }
+    mOwnsPixels = 1;
+
+    if (mBytesPerRow == source.mBytesPerRow) {
+        memcpy(mPixels, source.mPixels, mByteCount);
+        return 0;
+    }
+    unsigned char *pDestRow = static_cast<unsigned char *>(mPixels);
+    const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
+    for (int nRow = 0; nRow < mHeight; ++nRow) {
+        memcpy(pDestRow, pSourceRow, mBytesPerRow);
+        pDestRow += mBytesPerRow;
+        pSourceRow += source.mBytesPerRow;
+    }
+    return 0;
+}
 
 // 0x00559140
 void ABitmap::SwapRedBlue() {

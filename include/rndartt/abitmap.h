@@ -245,6 +245,22 @@ struct ABitmap {
      */
     void SetPaletteAlphaFromLowByte(int bWhiten);
 
+    /**
+     * Make this bitmap an owning copy of another.
+     *
+     * Every descriptor field is taken from source, apart from mOwnsPixels, and mPalette is shared
+     * rather than copied. Unless the format is kABitmapFormatRle8, a stride that differs from the
+     * packed stride the constructor would derive is replaced by it, with mByteCount recomputed.
+     * mByteCount bytes are then allocated with the tag "abitmap.h" and line 0x47, and the pixels
+     * are copied in one block when both strides agree and row by row otherwise. No call site
+     * survives in the shipped program, and the name is inferred.
+     *
+     * @param source The bitmap to copy.
+     * @return 0, or -1 when the allocation fails.
+     * @ghidraAddress 0x00558f28
+     */
+    int Copy(const ABitmap &source);
+
     void *mPixels; /*!< The pixel rectangle, null until allocated. +0x00 */
     unsigned short mHasTransparentColor : 8; /*!< Whether mTransparentColor applies. +0x04 */
     unsigned short mFormat : 4;              /*!< The ABitmapFormat code. +0x05 bits 0 to 3 */
