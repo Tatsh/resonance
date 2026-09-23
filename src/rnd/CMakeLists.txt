@@ -40,6 +40,7 @@ set(RESONANCE_RND_SRCS
     transanim.cpp
     transformable.cpp
     tunnel.cpp
+    tunnelmeshchain.cpp
     view.cpp)
 
 add_library(resonance_rnd STATIC ${RESONANCE_RND_SRCS})

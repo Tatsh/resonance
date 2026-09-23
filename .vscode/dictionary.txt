@@ -417,6 +417,7 @@ pausegamesystemmsg
 pcremodule
 phello
 phrasecapturedmsg
+phrasedatabase
 phrasemsg
 phrasemuffedmsg
 phrasepacket
@@ -586,6 +587,7 @@ trmopn
 trxdir
 trxpos
 trxreg
+tunnelmeshchain
 tupleobject
 tvel
 typeobject

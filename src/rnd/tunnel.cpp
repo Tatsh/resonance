@@ -28,6 +28,24 @@ inline int WrapIndex(int nIndex, int nCount) {
 
 namespace Rnd {
 
+namespace {
+
+// 0x00476ec0
+void CollideMeshes(const std::vector<Mesh *> &meshes, const Ray &ray, Collideable::HitSink &sink) {
+    for (Mesh *pMesh : meshes) {
+        pMesh->Collide(ray, sink);
+    }
+}
+
+} // namespace
+
+// 0x00476a10
+void Tunnel::Collide(const Ray &ray, HitSink &sink) {
+    for (const std::vector<Mesh *> &meshes : mUnknowna4) {
+        CollideMeshes(meshes, ray, sink);
+    }
+}
+
 // 0x006eab10
 HxStr g_tunnelClassName("Tunnel");
 
@@ -180,6 +198,72 @@ void Tunnel::AdvanceRing(int nSlice) {
     } else {
         --mUnknown84;
         mUnknown80 += mUnknown9c / mUnknowna0;
+    }
+}
+
+// 0x0046d400
+void Tunnel::AddEvent(Drawable *pObject, float flFrame, int nId, int nUser) {
+    std::list<TunnelEvent>::iterator it = mEvents.begin();
+    while (it != mEvents.end() && !(flFrame <= it->mFrame)) {
+        ++it;
+    }
+    it = mEvents.insert(it, TunnelEvent(pObject, flFrame, nId, nUser));
+    if (it->mObject != nullptr) {
+        it->mObject->AddRef(this);
+    }
+}
+
+// 0x0046d540
+int Tunnel::MoveEvent(int nId, float flFrame) {
+    for (std::list<TunnelEvent>::iterator it = mEvents.begin(); it != mEvents.end(); ++it) {
+        if (it->mId == nId) {
+            Drawable *pObject = it->mObject;
+            mEvents.erase(it);
+            // Yes, the reference taken for the original entry is not dropped.
+            AddEvent(pObject, flFrame, nId, 0);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// 0x0046d5d8
+int Tunnel::RemoveEvent(int nId) {
+    for (std::list<TunnelEvent>::iterator it = mEvents.begin(); it != mEvents.end(); ++it) {
+        if (it->mId == nId) {
+            if (it->mObject != nullptr) {
+                it->mObject->RemoveRef(this);
+            }
+            mEvents.erase(it);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// 0x0046d680
+int Tunnel::RemoveEventsInRange(float flFrom, float flTo) {
+    int nRemoved = 0;
+    std::list<TunnelEvent>::iterator it = mEvents.begin();
+    while (it != mEvents.end()) {
+        if (it->mFrame < flTo && flFrom <= it->mFrame) {
+            if (it->mObject != nullptr) {
+                it->mObject->RemoveRef(this);
+            }
+            ++nRemoved;
+            it = mEvents.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    return nRemoved;
+}
+
+// 0x00477310
+void Tunnel::ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int nId, void *pUser),
+                          void *pUser) {
+    for (const TunnelEvent &event : mEvents) {
+        pfnVisit(event.mObject, event.mFrame, event.mId, pUser);
     }
 }
 

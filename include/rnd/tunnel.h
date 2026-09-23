@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 #include "math/transform.h"
@@ -8,6 +9,8 @@
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
 #include "rnd/raytest.h"
+#include "rnd/tunnelevent.h"
+#include "rnd/tunnelmeshchain.h"
 
 class FailSink;
 namespace Rnd {
@@ -69,8 +72,7 @@ namespace Rnd {
  *
  * Still unreconstructed and still owned by this class are the constructor at `0x00466620`, the
  * update at `0x00467f48`, the mesh build at `0x004699c0`, the face strip build at `0x0046adc0`, the
- * VU1 upload at `0x0046c0e8`, the section frame setter at `0x0046c638`, and the camera space
- * projection at `0x0046db80`.
+ * VU1 upload at `0x0046c0e8`, and the section frame setter at `0x0046c638`.
  *
  * Nine addresses a worklist grouped under this class belong elsewhere, and each one is recorded
  * here so the grouping is not repeated. `0x00466528` and `0x00476598` append triangles to the face
@@ -79,13 +81,13 @@ namespace Rnd {
  * mFacesOwner of a `Rnd::Mesh` at those same offsets, and `0x00494048` writes a quadword into each
  * 0x40-byte element of a range the object at `+0x130` owns, so all three are Rnd::Mesh members too.
  * `0x00473538` and `0x00474990` measure their range with an arithmetic shift of six, which is a
- * `std::vector` of 0x40-byte elements rather than anything of this class. `0x00476190`,
- * `0x00476a80`, and `0x00476b28` are the default constructor, the destructor, and the element
- * release of a `std::vector`, and `0x00476e48` takes a vector rather than a tunnel as its first
- * argument. `0x00472488` is `std::vector<float>::operator=`, which six routines of this class and
- * one of another share, and an earlier reading had it as a drawable index table rebuild of this
- * class. `0x004698e8` resizes `std::vector<Rnd::MeshVert>` through the mVertsOwner of the first
- * mesh of a mesh list, and an earlier reading had it as a bounding box resize of this class.
+ * `std::vector` of 0x40-byte elements rather than anything of this class. `0x00476190` is the
+ * default constructor of a `std::vector`, and `0x00476a80`, `0x00476b28`, and `0x00476e48` are
+ * members of Rnd::TunnelMeshChain. `0x00472488` is `std::vector<float>::operator=`, which six
+ * routines of this class and one of another share, and an earlier reading had it as a drawable
+ * index table rebuild of this class. `0x004698e8` resizes `std::vector<Rnd::MeshVert>` through the
+ * mVertsOwner of the first mesh of a mesh list, and an earlier reading had it as a bounding box
+ * resize of this class.
  *
  * The record the vector at `+0xdc` stores is a class of its own and is not recovered. The routine
  * at `0x00477830` is one of its members rather than one of this class, which Update() pins by
@@ -266,6 +268,67 @@ public:
      */
     void ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes);
 
+    /**
+     * Schedule a drawable at a frame.
+     *
+     * The event goes before the first one whose frame is not less than flFrame, so equal frames
+     * keep the newest first. The tunnel takes a reference on the drawable.
+     *
+     * @param pObject The drawable, which may be null.
+     * @param flFrame The frame to schedule at.
+     * @param nId The identifier MoveEvent() and RemoveEvent() match on.
+     * @param nUser A word stored with the event.
+     * @ghidraAddress 0x0046d400
+     */
+    void AddEvent(Drawable *pObject, float flFrame, int nId, int nUser);
+
+    /**
+     * Move the first event with an identifier to a new frame.
+     *
+     * The event is unlinked and scheduled again through AddEvent(), which takes a second reference
+     * on the drawable without the first being dropped, and its user word is reset to zero. The
+     * program lists no caller.
+     *
+     * @param nId The identifier to match.
+     * @param flFrame The new frame.
+     * @return One when an event matched, zero otherwise.
+     * @ghidraAddress 0x0046d540
+     */
+    int MoveEvent(int nId, float flFrame);
+
+    /**
+     * Remove the first event with an identifier and drop its reference.
+     *
+     * The program lists no caller.
+     *
+     * @param nId The identifier to match.
+     * @return One when an event matched, zero otherwise.
+     * @ghidraAddress 0x0046d5d8
+     */
+    int RemoveEvent(int nId);
+
+    /**
+     * Remove every event whose frame lies in a half open range, dropping each reference.
+     *
+     * @param flFrom The first frame removed.
+     * @param flTo The frame the range stops before.
+     * @return The number of events removed.
+     * @ghidraAddress 0x0046d680
+     */
+    int RemoveEventsInRange(float flFrom, float flTo);
+
+    /**
+     * Call a function once for every event, in frame order.
+     *
+     * The program lists no caller.
+     *
+     * @param pfnVisit The function, given the drawable, the frame, the identifier, and pUser.
+     * @param pUser Passed through to pfnVisit.
+     * @ghidraAddress 0x00477310
+     */
+    void ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int nId, void *pUser),
+                      void *pUser);
+
 protected:
     /**
      * Draw the tunnel.
@@ -359,14 +422,14 @@ private:
     int mUnknown98;                 // +0x98 Starts at 0.
     float mUnknown9c;               // +0x9c Starts at 0. The numerator of the per-step increment.
     int mUnknowna0;                 // +0xa0 Unrecovered. The divisor of the per-step increment.
-    // +0xa4 The mesh grid, addressed as `[slice % mUnknown40][ring % mUnknown3c]` by the lookup at
-    // 0x00477388, which then returns the first element of the inner vector. The 0xc-byte stride and
-    // the clear at 0x0046acf0 destroying each slot through the vector destructor at 0x00476a80 are
-    // what establish the element type.
-    std::vector<std::vector<Mesh *> > mUnknowna4;
-    // +0xb0 The per-slice mesh lists, addressed as `[slice % mUnknown40]` by the lookup at
-    // 0x004773e8 on the same evidence as mUnknowna4.
-    std::vector<std::vector<Mesh *> > mUnknownb0;
+    // +0xa4 The mesh grid, one chain per cell, addressed as `slice * mUnknown3c + ring` by the
+    // lookup at 0x00477388, which then returns the finest level of the chain. The 0xc-byte stride
+    // and the clear at 0x0046acf0 destroying each slot through the chain destructor at 0x00476a80
+    // are what establish the element type.
+    std::vector<TunnelMeshChain> mUnknowna4;
+    // +0xb0 One chain per slice, addressed as `[slice % mUnknown40]` by the lookup at 0x004773e8
+    // on the same evidence as mUnknowna4.
+    std::vector<TunnelMeshChain> mUnknownb0;
     // +0xbc Starts at 0. The first slice of the window the scroll at 0x00476f48 walks, which runs
     // mUnknown40 slices from here.
     int mUnknownbc;
@@ -375,12 +438,10 @@ private:
     std::vector<Transform> mUnknownc0;
     int mUnknowncc;                 // +0xcc Starts at 0.
     unsigned char mUnknownd0[0x08]; // +0xd0 Unrecovered.
-    // +0xd8 A std::list whose element is one pointer to an object deriving virtually from
-    // Rnd::Object. Update() walks it taking a reference on every entry, in the same shape
-    // Rnd::Animatable::AcquireAnimsRefs() has, and Copy() assigns it through the list assignment
-    // operator at 0x004727b0. The element class is undetermined, which is why the member is a byte
-    // run rather than a container.
-    unsigned char mUnknownd8[0x04];
+    // +0xd8 Drawables scheduled by frame, kept in ascending frame order by AddEvent(). Update()
+    // walks it taking a reference on every entry, and Copy() assigns it through the list assignment
+    // operator at 0x004727b0.
+    std::list<TunnelEvent> mEvents;
     // +0xdc A std::vector whose element is the 0x80-byte record described in the class note.
     // Update() walks it calling the record member at 0x00477830 once per element, and Copy()
     // assigns it through the vector assignment operator at 0x004728e8. The element class is
