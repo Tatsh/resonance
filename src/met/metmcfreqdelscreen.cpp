@@ -23,3 +23,9 @@ int MetMCFreqDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
 int MetMCFreqDelScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 1;
 }
+
+// 0x002c5d10
+void MetMCFreqDelScreen::SetCardSlot(MemcardConnectState slot) {
+    mUnknownbc = slot;
+    mUnknowne4 = 0;
+}

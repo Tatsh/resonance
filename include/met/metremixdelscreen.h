@@ -319,6 +319,16 @@ public:
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
+    /**
+     * Record the card the screen works on in mUnknown108.
+     *
+     * MetMemCardTypeScreen's slot 36 is the caller. The title is inferred.
+     *
+     * @param slot The card.
+     * @ghidraAddress 0x00343fb8
+     */
+    void SetCardSlot(MemcardConnectState slot);
+
 private:
     // 0x003440b8
     // Shows one catalogue row on the data screen. Slot 33 and four branches of slot 19

@@ -198,6 +198,16 @@ public:
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
+    /**
+     * Record the card the screen works on, and clear mUnknowne4.
+     *
+     * MetMemCardTypeScreen's slot 36 is the caller. The title is inferred.
+     *
+     * @param slot The card.
+     * @ghidraAddress 0x002c5d10
+     */
+    void SetCardSlot(MemcardConnectState slot);
+
 private:
     // The seven words from +0x98 through +0xb3 are not written by the constructor and no reader
     // is recovered.

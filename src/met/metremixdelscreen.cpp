@@ -78,6 +78,11 @@ void MetRemixDelScreen::OnUnknownSlot41() {
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
+// 0x00343fb8
+void MetRemixDelScreen::SetCardSlot(MemcardConnectState slot) {
+    mUnknown108 = slot;
+}
+
 void MetRemixDelScreen::OnUnknownSlot2(const HxStr &text) {
     if (mUnknowne0 != 0) {
         MetSaveRemix::OnUnknownSlot2(text);
