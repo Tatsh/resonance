@@ -56,10 +56,6 @@ ACanvasLin24::ACanvasLin24(const ABitmap &bitmap) : ACanvas24(bitmap) {
     mColorNative = 0;
 }
 
-// 0x006183d0
-ACanvasLin24::~ACanvasLin24() {
-}
-
 // 0x006184a8
 // Empty in the binary, and the slot exists only because ACanvas24 declares it pure.
 void ACanvasLin24::BuildAlphaFromColorKey(unsigned int nColorKey) {

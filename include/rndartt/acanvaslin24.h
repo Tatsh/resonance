@@ -29,6 +29,10 @@
  * block copy and the textured row resolve the palette from the source, then the canvas, then
  * g_pDefaultPalette, and the span overrides read ARowSpan::mPalette or AStretchSpan::mPalette.
  * Each returns without drawing when the palette is null.
+ *
+ * The destructor in slot 1 at `0x006183d0` is compiler-generated. It restores ACanvas's table at
+ * 0x00837dc8, which is all the inlined base destructors do, and frees the object when the
+ * deleting flag is set. Its bytes are identical to ACanvasLin32's at `0x006141a0`.
  */
 class ACanvasLin24 : public ACanvas24 {
 public:
@@ -43,13 +47,6 @@ public:
      * @ghidraAddress 0x00618470
      */
     explicit ACanvasLin24(const ABitmap &bitmap);
-
-    /**
-     * Slot 1.
-     *
-     * @ghidraAddress 0x006183d0
-     */
-    virtual ~ACanvasLin24();
 
     /**
      * Slot 12. Empty, because a 24-bit pixel has no alpha bit to key.
