@@ -56,8 +56,20 @@ public:
 
 private:
     Rnd::Text *mUnknown04; // +0x04
-    // When the pending change arrived. See the class documentation for the two sentinels.
-    float mUnknown08; // +0x08
-    // The score the text shows once Update() redraws.
-    int mUnknown0c; // +0x0c
+
+public:
+    /**
+     * When the pending change arrived. See the class documentation for the two sentinels. +0x08
+     *
+     * Public because Overlay's PointAmountMsg handler at `0x0042aff0` writes -1 into it directly
+     * when it records a new score, and the image has no accessor for it.
+     */
+    float mUnknown08;
+
+    /**
+     * The score the text shows once Update() redraws. +0x0c
+     *
+     * Public on the same evidence as mUnknown08.
+     */
+    int mUnknown0c;
 };

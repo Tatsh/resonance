@@ -15,7 +15,7 @@ class Player;
  * path identifies the class, and its name is inferred from its two parts.
  *
  * Overlay's constructor inlines the constructor. The members are public because code outside the
- * class reaches them directly. Overlay looks a badge up by mPlayer and marks the leader through
+ * class accesses them directly. Overlay looks a badge up by mPlayer and marks the leader through
  * mFreq, and HudScorePulse reads the position of mScore's mesh.
  */
 class HudBadge {

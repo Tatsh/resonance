@@ -6,6 +6,7 @@
 #include "os/hxstr.h"
 
 class HudBadge;
+class HudTrack;
 class Message;
 class Player;
 class Renderer;
@@ -27,8 +28,8 @@ class Renderer;
  * `0x0042c8cc`. The destructor releases the display object at `+0x04` (0x164 bytes, torn down
  * through `0x0041ac18` and then the scalar free), deletes every element of the vector at `+0x08`
  * through `0x0042aa18`, frees every element of the vector at `+0x14` with the scalar free, and
- * releases the string vector at `+0x20` and the vector at `+0x2c`. The panel and the track class
- * are not declared yet, and those two members are recorded by size.
+ * releases the string vector at `+0x20` and the vector at `+0x2c`. The panel class is not declared
+ * yet, and the panel pointer is recorded by size.
  */
 class Overlay : public MsgSink {
 public:
@@ -90,8 +91,8 @@ public:
     /**
      * Update the track display for one bar whose state a BarStatusMsg changed.
      *
-     * Does nothing unless the bar is the current bar in mUnknown4c. The title is inferred. The body
-     * is not written.
+     * Does nothing unless the bar is the current bar in mUnknown4c. Otherwise sets the effect lamps
+     * of every track display on that track from the value. The title is inferred.
      *
      * @param nTrack The track.
      * @param nBar The bar.
@@ -112,9 +113,91 @@ public:
     void OnLeaderChanged(Player *pOldLeader, Player *pNewLeader);
 
 private:
-    // 0x0042aec8. Runs script template 1001 when mUnknown44 is set. HandleMessage() inlines the
-    // body for a GameOverMsg, and this copy has no caller.
+    // HandleMessage() runs one of the handlers below per message identity. Each handler written
+    // "inlined" is expanded in place there, and its out-of-line copy has no caller. The bodies not
+    // written read message payloads their message headers declare private.
+
+    // 0x0041fdd8. TrackSelectMsg. Shows the track's instrument name on the selecting player's
+    // label, records the track, lights the effect lamps from the renderer's cell for the current
+    // bar, and banks the player's points unless mUnknown44 is set.
+    void OnTrackSelect(Message *pMsg);
+
+    // 0x0042aec8, inlined. GameOverMsg. Runs script template 1001 when mUnknown44 is set.
     void OnGameOver();
+
+    // 0x0041e020. WinMsg.
+    void OnWin(Message *pMsg);
+
+    // 0x0041e9b8. ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
+    // kPlayModeGame, and selects its effect lamp name otherwise. Runs script template 1016 when
+    // mUnknown44 is set.
+    void OnChoosePowerup(Message *pMsg);
+
+    // 0x0041eba0. PowerupCountMsg and CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's
+    // text message for 1500.
+    void OnPowerupCount(Message *pMsg);
+
+    // 0x0041eda8. DeployedPowerupMsg.
+    void OnDeployedPowerup(Message *pMsg);
+
+    // 0x0042aff0, inlined. PointAmountMsg. Records the new score in the player's badge, pending an
+    // untimed redraw.
+    void OnPointAmount(Message *pMsg);
+
+    // 0x0041f310. JuiceAmountMsg. In kGameModeSolo and kPlayModeGame, sets the player's energy
+    // level to the juice amount and pulses the player's icon while the juice is above 0.85.
+    void OnJuiceAmount(Message *pMsg);
+
+    // 0x0042b068, inlined. PhraseCapturedMsg. Runs script template 1005 when mUnknown44 is set.
+    // Otherwise, in kPlayModeGame before the bar in mUnknown54, shows the capturing player's
+    // points leaving.
+    void OnPhraseCaptured(Message *pMsg);
+
+    // 0x0041f5e8. TextMsg. Shows the message's text in the first track display's text message.
+    void OnText(Message *pMsg);
+
+    // 0x0041f708. LoopToggleMsg.
+    void OnLoopToggle(Message *pMsg);
+
+    // 0x0041f440. AdvanceSectionToggleMsg.
+    void OnAdvanceSectionToggle(Message *pMsg);
+
+    // 0x0041fba0. ShowEraseEffectMsg.
+    void OnShowEraseEffect(Message *pMsg);
+
+    // 0x0041f9a8. PlaybackToggleMsg.
+    void OnPlaybackToggle(Message *pMsg);
+
+    // 0x0042aef8, inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
+    // kHudItemGuides lamp. Runs script template 1021 when mUnknown44 is set.
+    void OnToggleGhost(Message *pMsg);
+
+    // 0x0042b130, inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mUnknown44
+    // is set. The message is not read.
+    void OnJamEffect();
+
+    // 0x0041fed8. CatchMsg.
+    void OnCatch(Message *pMsg);
+
+    // 0x0042b178, inlined. PhraseMuffedMsg. In kPlayModeGame without mUnknown44, banks the
+    // player's points.
+    void OnPhraseMuffed(Message *pMsg);
+
+    // 0x004201c0. BeginPhraseCatchMsg.
+    void OnBeginPhraseCatch(Message *pMsg);
+
+    // 0x0042b1f8, inlined. FadeGameMsg. Starts the screen flash over the message's duration, and
+    // hides the panel's message text when the message's second word is zero.
+    void OnFadeGame(Message *pMsg);
+
+    // 0x00420588. PlayersTrackNeutralizedMsg.
+    void OnPlayersTrackNeutralized(Message *pMsg);
+
+    // 0x00420408. MultiplierStateMsg.
+    void OnMultiplierState(Message *pMsg);
+
+    // 0x0041f138. PowerupFailedMsg.
+    void OnPowerupFailed(Message *pMsg);
 
     // 0x0042ae88. The badge whose mPlayer is pPlayer, or null.
     HudBadge *FindBadge(Player *pPlayer);
@@ -125,8 +208,8 @@ private:
 
     // The 0x164-byte panel, deleted by the destructor. +0x04
     unsigned char mUnknown04[0x04];
-    // Vector of pointers to objects the destructor deletes through 0x0042aa18. +0x08
-    unsigned char mUnknown08[0x0c];
+    // One track display per world player that has a slot, deleted by the destructor.
+    std::vector<HudTrack *> mUnknown08; // +0x08
     // One badge per world player.
     std::vector<HudBadge *> mUnknown14; // +0x14
     // One instrument name per track, which a TrackSelectMsg shows on the selecting player's label.

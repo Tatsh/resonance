@@ -15,6 +15,7 @@ analogr
 andi
 anim
 animatables
+animrange
 anims
 apalette
 apolygon
@@ -192,9 +193,18 @@ hardsynth
 harmonix
 hostmode
 hudbadge
+hudcountdown
+hudeffects
+hudenergy
 hudfreq
+hudloop
+hudpoints
+hudpowerup
 hudscore
 hudscorepulse
+hudtextmessage
+hudtrack
+hudtracklabel
 hudutil
 hxcons
 hxmemstream
@@ -255,6 +265,7 @@ libsdr
 libsdr's
 libsonnet
 lightanim
+linearramp
 linecache
 listdir
 listdirop
@@ -446,6 +457,9 @@ psmt
 psmultimesh
 psparticlesys
 pstex
+ptsmult
+ptstmp
+ptstmphot
 pyinstaller
 pylock
 pymem
@@ -610,6 +624,7 @@ venv
 vmadday
 vmaddaz
 vmaddw
+vmaddx
 vmix
 vmixel
 vmixer

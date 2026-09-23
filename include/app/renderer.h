@@ -254,7 +254,7 @@ private:
 
     // 0x00432318. Sends the message on, then outside game mode 1 and play mode 2 finds the one
     // world player with the highest score and reports a change of leader to the tunnel and the
-    // overlay. A tie for the top score leaves no leader. HandleMessage() inlines the body, and
+    // overlay. A tie for the top score produces no leader. HandleMessage() inlines the body, and
     // this copy has no caller.
     void OnPointAmount(Message *pMsg);
 
