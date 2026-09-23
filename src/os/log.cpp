@@ -1,10 +1,13 @@
 #include "os/log.h"
 
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "os/hostmode.h"
 #include "os/mem.h"
+#include "script/scripttemplatemap.h"
 
 namespace {
 
@@ -21,6 +24,12 @@ constexpr int kAlertMessageDuration = 50;
 
 // The argument Warn passes as the third one to FormatMessage(). The callee never reads it.
 constexpr int kFormatMessageUnknown = 1;
+
+// The third argument AlertScriptTemplate() passes to FormatMessage(). The callee never reads it.
+constexpr int kFormatMessageUnused = 0;
+
+// How long an assertion report asks to stay on screen.
+constexpr int kAssertionMessageDuration = 600;
 
 // 0x0071d368
 char g_szFatalMessage[kFatalMessageSize];
@@ -43,6 +52,25 @@ void Warn(const char *pszFormat, ...) {
     va_start(args, pszFormat);
     ShowReportedMessage(FormatMessage(HxStr(pszFormat), args, kFormatMessageUnknown),
                         kWarningMessageDuration);
+    va_end(args);
+}
+
+// 0x0052e510
+void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine) {
+    // The image builds the text in a pre-standard strstream, terminates it with ends, and never
+    // releases the frozen buffer. A string stream produces the same text without the leak.
+    std::ostringstream report;
+    report << "Assertion failed " << pszFile << ":" << nLine << ": " << pszMessage;
+    ShowScreenMessage(report.str().c_str(), kAssertionMessageDuration);
+    exit(0);
+}
+
+// 0x0052ea68
+void AlertScriptTemplate(int nTemplate, ...) {
+    const HxStr format = GetScriptTemplate(nTemplate);
+    va_list args;
+    va_start(args, nTemplate);
+    ShowAlertMessage(FormatMessage(format, args, kFormatMessageUnused));
     va_end(args);
 }
 

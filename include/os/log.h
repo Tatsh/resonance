@@ -52,6 +52,33 @@ void Warn(const char *pszFormat, ...);
 void Fatal(const char *pszFormat, ...) __attribute__((noreturn));
 
 /**
+ * Report a failed assertion on screen and exit.
+ *
+ * The report is built in a `strstream` as "Assertion failed ", the file, ":", the line, ": ", and
+ * the message, then shown through ShowScreenMessage() for 600 units before `exit(0)`. No call
+ * site survives in the shipped program, and the name is inferred from the text.
+ *
+ * @param pszMessage The message.
+ * @param pszFile The reporting file.
+ * @param nLine The reporting line.
+ * @ghidraAddress 0x0052e510
+ */
+void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine)
+    __attribute__((noreturn));
+
+/**
+ * Show a registered script template, formatted with the arguments, as an alert.
+ *
+ * The template text is fetched with GetScriptTemplate(), formatted through FormatMessage(), and
+ * passed to ShowAlertMessage(). No call site survives in the shipped program, and the name is
+ * inferred.
+ *
+ * @param nTemplate The template identifier.
+ * @ghidraAddress 0x0052ea68
+ */
+void AlertScriptTemplate(int nTemplate, ...);
+
+/**
  * Format a message the way the failure reports do.
  *
  * The routine belongs to another translation unit and is declared here so log.cpp can call it. The
