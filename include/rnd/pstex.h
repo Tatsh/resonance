@@ -40,9 +40,8 @@ namespace Rnd {
  *
  * Small levels of an eight-bit texture share a GS page. RestoreSurfaces() records in
  * mFirstPackedMip the first level whose larger side is 32 pixels or less, and
- * UploadMipAndBuildMipTbp() places every level from there on
- * inside the page of the level before it at the offsets in g_anPackedMipPageOffsets. Levels below
- * that point each have a page.
+ * UploadMipAndBuildMipTbp() places every level from there on inside the page of the level before it
+ * at the offsets in g_anPackedMipPageOffsets. Levels below that point each have a page.
  *
  * Two routines have their original names from their own diagnostics rather than from inference.
  * RestoreSurfaces() takes its name from the report "ERROR - RestoreSurfaces(%s), mipmap %d has no
@@ -137,13 +136,13 @@ public:
      * Rebuild the GS state of the whole texture from the loaded bitmaps.
      *
      * Vtable slot 14. Falls back to the Rnd::Tex body while mip 0 has not arrived. Otherwise it
-     * rebuilds and claims the CLUT for a paletted texture, sizes the residency vector to one entry
-     * per level, records mGsPsm and mBitsPerPixel from the bitmap format, finds mFirstPackedMip
-     * for an eight-bit format, assembles TEX0 and TEX1, and then for every level validates the
-     * dimensions against a power of two of at least 8, validates the format and the palette
-     * against level 0, records the level's buffer width in MIPTBP1 or MIPTBP2, marks the level
-     * dirty, builds its canvas, and claims its GS block. A level that fails validation is blanked
-     * but still made resident. The Rnd::Tex body runs last.
+     * rebuilds the CLUT and allocates its slot for a paletted texture, sizes the residency vector
+     * to one entry per level, records mGsPsm and mBitsPerPixel from the bitmap format, finds
+     * mFirstPackedMip for an eight-bit format, assembles TEX0 and TEX1, and then for every level
+     * validates the dimensions against a power of two of at least 8, validates the format and the
+     * palette against level 0, records the level's buffer width in MIPTBP1 or MIPTBP2, marks the
+     * level dirty, builds its canvas, and allocates its GS block. A level that fails validation is
+     * blanked but still made resident. The Rnd::Tex body runs last.
      *
      * @ghidraAddress 0x00597210
      */
@@ -159,9 +158,9 @@ public:
      * level is made resident, and MIPTBP1_1 follows when the texture has more than one level and
      * MIPTBP2_1 when it has more than four.
      *
-     * The method is not virtual. Rnd::PsMat reaches it by downcasting a Rnd::Tex pointer.
+     * The method is not virtual. Rnd::PsMat calls it through a downcast Rnd::Tex pointer.
      *
-     * @param nTexFunc The Rnd::Tex::TexFunc, of which the low two bits reach TEX0.
+     * @param nTexFunc The Rnd::Tex::TexFunc, of which the low two bits go into TEX0.
      * @return True once the texture is resident and bound.
      * @ghidraAddress 0x00598000
      */
@@ -176,7 +175,7 @@ public:
      * width and storage mode of TEX0, XYOFFSET_1 centres the surface in the GS coordinate space,
      * ZBUF_1 masks depth writes, and TEST_1 passes every depth test.
      *
-     * Rnd::PsCam::DrawSelf() is the one caller. The routine was previously titled after surface
+     * Rnd::PsCam::DrawSelf() is the one caller. The routine was previously labelled after surface
      * restoration.
      *
      * @ghidraAddress 0x00596d68

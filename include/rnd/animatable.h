@@ -880,8 +880,10 @@ private:
     std::list<Filter *> mFilters; // +0x08
     // The frame SetFrame() last received, before the filter chain.
     float mFrame; // +0x0c
+
+protected:
     // The same frame after the filter chain. This is the value handed to SetFrameSelf() and to
-    // every child.
+    // every child. Protected because Rnd::ParticleSys::UpdateParticles() reads it.
     float mFilteredFrame; // +0x10
 };
 

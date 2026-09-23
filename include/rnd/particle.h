@@ -11,10 +11,15 @@ namespace Rnd {
  * The structure is not polymorphic and emits no RTTI descriptor. Its member names come from the
  * labels its own dump writes at `0x00526308`, "\n\tpos:", "\n\tprevPos:", "\n\tvel:", "\n\tcol:",
  * "\n\tcolVel:", "size:", " deathFrame:", and " birthFrame:". The offsets below are the ones that
- * dump reads, so every named member except mPrev is measured rather than inferred.
+ * dump reads, so those members are measured rather than inferred. mPrev and the three bubble
+ * members are named from their use by Rnd::ParticleSys instead.
  *
- * A particle is 0x80 bytes, which the pool vector stride in Rnd::ParticleSys confirms. Two runs
- * inside it are unrecovered, because no recovered routine reads either of them.
+ * A particle is 0x80 bytes, which the pool vector stride in Rnd::ParticleSys confirms. One word at
+ * the end is unrecovered, because no recovered routine reads it.
+ *
+ * In line mode Rnd::ParticleSys::UpdateParticles() treats mPrevPos as the first of a run of
+ * quadwords and shifts a position history along it, one quadword per unit of line length. A line
+ * length above 1 therefore overwrites mVel and the bubble members with older positions.
  *
  * Live particles form a doubly linked list through mNext and mPrev rather than occupying the pool
  * vector in order, and free particles a singly linked list through mNext.
@@ -40,7 +45,15 @@ struct Particle {
     Vector3 mPrevPos;
     /** Velocity per frame. +0x40 */
     Vector3 mVel;
-    unsigned char mUnknown50[0x18]; // +0x50 Unrecovered. The particle dump reads none of it.
+    /**
+     * Displacement of the bubble motion, drawn from Rnd::ParticleSys's bubble size range. Inferred
+     * from use, because the particle dump does not read it. +0x50
+     */
+    Vector3 mBubbleSize;
+    /** Angular rate of the bubble motion, drawn from the bubble period range. Inferred. +0x60 */
+    float mBubbleFrequency;
+    /** Phase of the bubble motion. Inferred. +0x64 */
+    float mBubblePhase;
     /** Extent of the drawn primitive. +0x68 */
     float mSize;
     /** Frame this particle is released on. +0x6c */

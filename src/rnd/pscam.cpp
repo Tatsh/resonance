@@ -59,7 +59,7 @@ inline Plane LoadDrawFrustumPlane(int nPlane) {
 }
 
 // Widen one side plane of the local frustum by a guard band factor applied to the y component of
-// its normal, keeping the point of the plane nearest the origin.
+// its normal, retaining the point of the plane nearest the origin.
 inline Plane WidenSidePlane(const Plane &plane, float flScale) {
     const float flDistance = -plane.d;
     Vector3 point;

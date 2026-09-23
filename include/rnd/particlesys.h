@@ -130,9 +130,9 @@ public:
      * Copy another system over this one.
      *
      * Forwards to the three bases, releases this system's object references, and copies every
-     * parameter except mLineLength. Without kCopyShareParticles a source that owns its particles
-     * gives this system a copy of the pool. Otherwise this system shares the source's owner, and
-     * its own pool is emptied unless that owner is this system. The references are then taken
+     * parameter except mLineLength. Without kCopyShareParticles a source that is its own particle
+     * owner gives this system a copy of the pool. Otherwise this system shares the source's owner,
+     * and its own pool is emptied unless that owner is this system. The references are then taken
      * again.
      *
      * @param pSource The source object. The binary dereferences the cast result without a null
@@ -197,9 +197,10 @@ public:
     /**
      * Unlink one live particle and push it onto the free list of the owner.
      *
-     * A null particle yields null. A particle whose mPrev is null is already free, which reports
-     * "Tried to refree particle from " with the name of the system and yields null. The routine
-     * was previously titled as a Rnd::Generator member, and a Generator is one of its callers.
+     * A null particle yields null. A particle whose mPrev is null is already free. Releasing it
+     * reports "Tried to refree particle from " with the name of the system and yields null. The
+     * routine was previously labelled as a Rnd::Generator member, and a Generator is one of its
+     * callers.
      *
      * @param pParticle The particle to release, or null.
      * @return The live particle that followed it, which lets a caller release while walking.
@@ -248,10 +249,10 @@ private:
     // 0x0052c318.
     void RemoveObjectRefs();
 
-    // Take the references RemoveObjectRefs() drops. A system that owns its particles also threads
+    // Take the references RemoveObjectRefs() drops. A system that is its own owner also threads
     // the whole pool onto its free list and empties the live list of every sharer, and any other
     // system joins the sharer list of its owner. Either way this system's live list starts empty
-    // and mUnknown100 is cleared. The constructor, Copy(), Replace(), and Load() call it.
+    // and mEmitAccumulator is cleared. The constructor, Copy(), Replace(), and Load() call it.
     // 0x005241a8.
     void AddObjectRefs();
 
@@ -285,11 +286,13 @@ private:
     // Frame SetFrameSelf() last ran for. It starts at the sentinel -0.9997e7, whose bit pattern is
     // 0xcb18967f, and a frame equal to it makes SetFrameSelf() return without emitting.
     float mLastFrame;
-    int mUnknown100; // +0x100 Cleared by AddObjectRefs().
+    // Particles owed by the emission rate, of which SpawnParticles() emits the whole part and
+    // retains the fraction for the next call. The title is inferred.
+    float mEmitAccumulator;
     // Systems that share this one's particles. RemoveObjectRefs() removes this system from the
     // list of whichever system owns its particles.
     std::list<ParticleSys *> mSharers;
-    // The range pairs below print as "(x: y:)" and hold the low end in x and the high end in y.
+    // The range pairs below print as "(x: y:)" and store the low end in x and the high end in y.
     Vector2 mBubblePeriod;
     Vector2 mBubbleSize;
     Vector2 mLife;

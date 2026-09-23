@@ -121,7 +121,7 @@ constexpr unsigned long long kTex1LMask = 3ULL << 19;
 constexpr int kTex1KShift = 32;
 constexpr unsigned long long kTex1KMask = 0xfff;
 
-// Where each MIPTBP register keeps the buffer width of its three levels.
+// Where each MIPTBP register stores the buffer width of its three levels.
 constexpr int kMipTbpFirstTbwShift = 14;
 constexpr int kMipTbpSecondTbwShift = 34;
 constexpr int kMipTbpThirdTbwShift = 54;
@@ -227,7 +227,7 @@ CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *psz
 }
 
 // 0x0059a9e8
-// Blank a level that failed validation, leaving a run-length level untouched.
+// Blank a level that failed validation. A run-length level is not modified.
 inline void ClearBitmapPixels(ABitmap *pBitmap) {
     if (pBitmap->mFormat == kABitmapFormatRle8) {
         return;

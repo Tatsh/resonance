@@ -1,9 +1,15 @@
 #include "rnd/particlesys.h"
 
+#include <math.h>
 #include <vector>
 
+#include "math/color.h"
+#include "math/plane.h"
+#include "math/transformops.h"
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/random.h"
 #include "rnd/animatable.h"
 #include "rnd/mat.h"
 #include "rnd/object.h"
@@ -32,6 +38,34 @@ constexpr Color kDefaultColor = {1.0f, 1.0f, 1.0f, 1.0f};
 constexpr Vector3 kOrigin = {0.0f, 0.0f, 0.0f, 1.0f};
 constexpr Plane kDefaultCollidePlane = {0.0f, 0.0f, 1.0f, 0.0f};
 constexpr int kDefaultLineLength = 1;
+
+// Scale that maps a 31-bit NextRandomValue() result onto the unit range, 2 to the power of -31.
+constexpr float kRandomUnitScale = 1.0f / 2147483648.0f;
+
+// A random value interpolated from the high end of a range toward the low end.
+inline float RandomInRange(float flLow, float flHigh) {
+    return static_cast<float>(NextRandomValue()) * kRandomUnitScale * (flLow - flHigh) + flHigh;
+}
+
+// A full turn in radians, the float whose bit pattern is 0x40c90fda.
+constexpr float kTwoPi = 6.2831855f;
+
+// Move a point from local into world space. The binary open-codes this on VU0, accumulating the
+// three basis rows scaled by the components and then the translation row.
+inline void TransformPointByWorldXfm(Vector3 &point,
+                                     const float (&xfm)[kXfmRowCount][kXfmRowFloatCount]) {
+    const float flX = point.x;
+    const float flY = point.y;
+    const float flZ = point.z;
+    point.x = xfm[0][0] * flX + xfm[1][0] * flY + xfm[2][0] * flZ + xfm[3][0];
+    point.y = xfm[0][1] * flX + xfm[1][1] * flY + xfm[2][1] * flZ + xfm[3][1];
+    point.z = xfm[0][2] * flX + xfm[1][2] * flY + xfm[2][2] * flZ + xfm[3][2];
+}
+
+// Signed distance of a point from a plane. UpdateParticles() evaluates it twice.
+inline float DistanceToPlane(const Plane &plane, const Vector3 &point) {
+    return plane.a * point.x + plane.b * point.y + plane.c * point.z + plane.d;
+}
 
 } // namespace
 
@@ -186,7 +220,7 @@ void ParticleSys::AddObjectRefs() {
     } else {
         mParticlesOwner->mSharers.push_back(this);
     }
-    mUnknown100 = 0;
+    mEmitAccumulator = 0.0f;
     mLiveParticles = nullptr;
 }
 
@@ -265,6 +299,165 @@ void ParticleSys::SetFrameSelf(float flFrame) {
         SpawnParticles(flDeltaFrames);
     }
     mLastFrame = flFrame;
+}
+
+// 0x00524b70
+void ParticleSys::UpdateParticles(float flDeltaFrames) {
+    if (flDeltaFrames == 0.0f) {
+        return;
+    }
+
+    Vector3 forceStep;
+    forceStep.w = 1.0f;
+    Vec3Scale(&mForce.x, flDeltaFrames, &forceStep.x);
+
+    Particle *pParticle = mLiveParticles;
+    while (pParticle != nullptr) {
+        if (pParticle->mDeathFrame <= mFilteredFrame || mFilteredFrame < pParticle->mBirthFrame) {
+            pParticle = FreeParticle(pParticle);
+            continue;
+        }
+
+        if (mMode == kModeLine) {
+            // Yes, the history runs through the quadwords after mPrevPos, over mVel for a line
+            // length above 1.
+            Vector3 *pHistory = &pParticle->mPrevPos;
+            for (int nIndex = mLineLength - 1; nIndex > 0; --nIndex) {
+                pHistory[nIndex] = pHistory[nIndex - 1];
+            }
+        }
+        pParticle->mPrevPos = pParticle->mPos;
+
+        Vector3 step;
+        step.w = 1.0f;
+        Vec3Scale(&pParticle->mVel.x, flDeltaFrames, &step.x);
+        AddVec3(&pParticle->mPos.x, &step.x, &pParticle->mPos.x);
+
+        if (mBubble != 0) {
+            const float flRate =
+                cosf(mFilteredFrame * pParticle->mBubbleFrequency + pParticle->mBubblePhase) *
+                pParticle->mBubbleFrequency;
+            step.w = 1.0f;
+            Vec3Scale(&pParticle->mBubbleSize.x, flRate * flDeltaFrames, &step.x);
+            AddVec3(&pParticle->mPos.x, &step.x, &pParticle->mPos.x);
+        }
+
+        // A particle that crosses the collision plane from its positive side this step reflects
+        // its velocity about the plane and returns to its previous position.
+        if (mCollide != 0 && DistanceToPlane(mCollidePlane, pParticle->mPrevPos) > 0.0f &&
+            !(DistanceToPlane(mCollidePlane, pParticle->mPos) > 0.0f)) {
+            Vector3 doubledNormal;
+            doubledNormal.w = 1.0f;
+            Vec3Scale(&mCollidePlane.a, 2.0f, &doubledNormal.x);
+            const Vector3 normal = doubledNormal;
+            const float flNormalVelocity = mCollidePlane.a * pParticle->mVel.x +
+                                           mCollidePlane.b * pParticle->mVel.y +
+                                           mCollidePlane.c * pParticle->mVel.z;
+            doubledNormal.w = 1.0f;
+            Vec3Scale(&normal.x, flNormalVelocity, &doubledNormal.x);
+            const Vector3 reflection = doubledNormal;
+            Vector3 reflected;
+            reflected.w = 1.0f;
+            Vec3Sub(&pParticle->mVel.x, &reflection.x, &reflected.x);
+            pParticle->mVel = reflected;
+            pParticle->mPos = pParticle->mPrevPos;
+        }
+
+        AddVec3(&pParticle->mVel.x, &forceStep.x, &pParticle->mVel.x);
+
+        // The binary scales the colour rate through the routine at 0x00453e08.
+        Color colorStep;
+        colorStep.r = pParticle->mColVel.r * flDeltaFrames;
+        colorStep.g = pParticle->mColVel.g * flDeltaFrames;
+        colorStep.b = pParticle->mColVel.b * flDeltaFrames;
+        colorStep.a = pParticle->mColVel.a * flDeltaFrames;
+        AddColor(pParticle->mCol, colorStep, pParticle->mCol);
+
+        pParticle = pParticle->mNext;
+    }
+}
+
+// 0x005244b0
+void ParticleSys::SpawnParticles(float flDeltaFrames) {
+    if (flDeltaFrames <= 0.0f) {
+        return;
+    }
+    mEmitAccumulator += RandomInRange(mEmitRateLow, mEmitRateHigh) * flDeltaFrames;
+
+    while (mEmitAccumulator >= 1.0f) {
+        Particle *pParticle = AllocParticle();
+        if (pParticle == nullptr) {
+            mEmitAccumulator = 0.0f;
+            return;
+        }
+        pParticle->mBirthFrame = mFilteredFrame;
+        pParticle->mDeathFrame = pParticle->mBirthFrame + RandomInRange(mLife.x, mLife.y);
+
+        const float flSpeed = RandomInRange(mSpeed.x, mSpeed.y);
+        const float flPitch = RandomInRange(mPitch.x, mPitch.y);
+        const float flYaw = RandomInRange(mYaw.x, mYaw.y);
+        const float flCosPitch = cosf(flPitch);
+        pParticle->mVel.x = -flCosPitch * sinf(flYaw) * flSpeed;
+        pParticle->mVel.y = flCosPitch * cosf(flYaw) * flSpeed;
+        pParticle->mVel.z = sinf(flPitch) * flSpeed;
+        TransformVec3ByMat3VU0(&pParticle->mVel.x, &mWorldXfm[0][0], &pParticle->mVel.x);
+
+        pParticle->mPos.x = RandomInRange(mPosLow.x, mPosHigh.x);
+        pParticle->mPos.y = RandomInRange(mPosLow.y, mPosHigh.y);
+        pParticle->mPos.z = RandomInRange(mPosLow.z, mPosHigh.z);
+        TransformPointByWorldXfm(pParticle->mPos, mWorldXfm);
+
+        if (mBubble != 0) {
+            pParticle->mBubbleFrequency = kTwoPi / RandomInRange(mBubblePeriod.x, mBubblePeriod.y);
+            pParticle->mBubblePhase = RandomInRange(0.0f, kTwoPi);
+            const float flAngle = RandomInRange(0.0f, kTwoPi);
+            Vector3 direction;
+            direction.x = sinf(flAngle);
+            direction.y = 0.0f;
+            direction.z = cosf(flAngle);
+            direction.w = 1.0f;
+            Vector3 bubbleSize;
+            bubbleSize.w = 1.0f;
+            Vec3Scale(&direction.x, RandomInRange(mBubbleSize.x, mBubbleSize.y), &bubbleSize.x);
+            pParticle->mBubbleSize = bubbleSize;
+
+            Vector3 offset;
+            offset.w = 1.0f;
+            Vec3Scale(&pParticle->mBubbleSize.x, sinf(pParticle->mBubblePhase), &offset.x);
+            AddVec3(&pParticle->mPos.x, &offset.x, &pParticle->mPos.x);
+            pParticle->mBubblePhase -= mFilteredFrame * pParticle->mBubbleFrequency;
+        }
+
+        // Yes, the history runs through the quadwords after mPrevPos, as in UpdateParticles().
+        Vector3 *pHistory = &pParticle->mPrevPos;
+        for (int nIndex = 0; nIndex < mLineLength; ++nIndex) {
+            pHistory[nIndex] = pParticle->mPos;
+        }
+
+        RandomizeColorAndSize(pParticle);
+        pParticle->mColVel.r = RandomInRange(mEndColorLow.r, mEndColorHigh.r);
+        pParticle->mColVel.g = RandomInRange(mEndColorLow.g, mEndColorHigh.g);
+        pParticle->mColVel.b = RandomInRange(mEndColorLow.b, mEndColorHigh.b);
+        pParticle->mColVel.a = RandomInRange(mEndColorLow.a, mEndColorHigh.a);
+        SubColor(pParticle->mColVel, pParticle->mCol, pParticle->mColVel);
+        // The binary scales through the routine at 0x00453e08.
+        const float flRate = 1.0f / (pParticle->mDeathFrame - pParticle->mBirthFrame);
+        pParticle->mColVel.r *= flRate;
+        pParticle->mColVel.g *= flRate;
+        pParticle->mColVel.b *= flRate;
+        pParticle->mColVel.a *= flRate;
+
+        mEmitAccumulator -= 1.0f;
+    }
+}
+
+// 0x0052c530
+void ParticleSys::RandomizeColorAndSize(Particle *pParticle) {
+    pParticle->mCol.r = RandomInRange(mStartColorLow.r, mStartColorHigh.r);
+    pParticle->mCol.g = RandomInRange(mStartColorLow.g, mStartColorHigh.g);
+    pParticle->mCol.b = RandomInRange(mStartColorLow.b, mStartColorHigh.b);
+    pParticle->mCol.a = RandomInRange(mStartColorLow.a, mStartColorHigh.a);
+    pParticle->mSize = RandomInRange(mSizeLow, mSizeHigh);
 }
 
 // 0x0052c318
