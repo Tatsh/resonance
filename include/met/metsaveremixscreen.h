@@ -58,9 +58,9 @@ class Text;
  * The three-entry MetKBUser table overrides its one slot at `0x00381990`, which is declared below
  * with the spelling the base gives it.
  *
- * Two of the words in the span the constructor never writes are objects. mUnknownf8 is the
- * Rnd::Text the entered name is drawn into, which slot 38 resolves by name and narrows with a
- * dynamic_cast to Rnd::Text. The word at `+0xfc` is the MetRemixSaver subobject of the screen
+ * The words from `+0xf0` to `+0xfc`, which the constructor never writes, are objects. Slot 38
+ * resolves the three Rnd::Text objects by name, and mRemixNameText is the one the entered name is
+ * drawn into. The word at `+0xfc` is the MetRemixSaver subobject of the screen
  * that asked for the save, which Open() stores through SetSaver(). Both callers of Open() pass
  * their own subobject at `+140`, where MetMultiSaveRemixScreen and MetSoloEndRemixScreen place
  * MetRemixSaver.
@@ -163,11 +163,12 @@ public:
     virtual void EnterAndShow();
 
     /**
-     * Run the pending keyboard action once the panel has finished activating. Slot 7.
+     * Return from the keyboard once the panel has finished activating. Slot 7.
      *
-     * The body is not written. A clear MetSaveRemix::mUnknowne0 takes a second path that reads the
-     * renderer instead, and a null word at `+0xfc` returns at once. Otherwise it clears
-     * mUnknowne0, exits `MetHelpScreen`, and runs for roughly 0x180 further instructions.
+     * With no keyboard request pending (MetSaveRemix::mUnknowne0 clear) it only shows the first
+     * container object's help text. Otherwise it clears mUnknowne0 and, when a saver is set, brings
+     * back the help and save screens, reports to the saver through its slot 4 with 1, and makes
+     * the save screen the active panel.
      *
      * @ghidraAddress 0x0037b718
      */
@@ -176,10 +177,10 @@ public:
     /**
      * Act on the discard confirmation. Slot 15.
      *
-     * The body is not written. It compares the dialogue name against `discard_remix` through
-     * HxStr::MatchesLiteral and returns at once when it differs, then branches on the choice
-     * against 1. The accepting branch clears MetScreen::mUnknown18 and mUnknown100 and dispatches
-     * slot 36.
+     * Any other dialogue goes to MetSaveRemix::OnMsgScreenDismissed(). For `discard_remix`, the
+     * second button clears MetScreen::mUnknown18 and mUnknown100 and dispatches slot 36, and the
+     * first brings back the help and save screens, reports to the saver through its slot 4 with 1
+     * without a null check, and makes the save screen the active panel.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
@@ -250,9 +251,9 @@ public:
     /**
      * Depart to the help screen. Slot 30.
      *
-     * The body is not written. It records 2 in MetScreen::mUnknown18, dispatches slot 3 of the
-     * object at `+0xfc` when that word is set, and exits `MetHelpScreen`. MetScreen slot 29 passes
-     * the object it finished alternating, and this body does not read it.
+     * It records 2 in MetScreen::mUnknown18, calls the saver's slot 3 when a saver is set, exits
+     * `MetHelpScreen` and `MetScreenTitleScreen`, and begins the exit. MetScreen slot 29 passes the
+     * object it finished alternating, and this body does not read it.
      *
      * @param pObject The object slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x0037c110
@@ -273,10 +274,9 @@ public:
     /**
      * Resolve the three text objects the screen draws into. Slot 38.
      *
-     * The body is not written. It runs the MetSaveRemix slot 38 body, which is MetScreen's, then
-     * resolves three objects by name through Rnd::Manager::Find(), narrowing each with a
-     * dynamic_cast to Rnd::Text, and stores the last of the three in mUnknownf8. It ends by adding
-     * one entry to the MetButtonList at mUnknowne8 through `0x001fcb28`, which is not declared.
+     * It runs the MetScreen body, resolves `ers_freqname_player.txt`, `ers_instructions.txt`, and
+     * `ers_remix_title_val.txt` into the three text members, and adds `save_copy.but` with an
+     * empty label to the MetButtonList at mUnknowne8.
      *
      * @ghidraAddress 0x0037af98
      */
@@ -329,14 +329,15 @@ private:
     MetButtonList *mUnknowne8; // +0xe8
     // Slot 5 stores the result of the game-manager query at `0x002156b0` here. +0xec
     int mUnknownec;
-    // +0xf0 through +0xf7 are not written by the constructor and are not recovered.
-    unsigned char mUnknownf0[0x8]; // +0xf0
-    // The text object the entered name is drawn into. Slot 38 resolves it. +0xf8
-    Rnd::Text *mUnknownf8;
-    // The screen that asked for the save, which Open() stores through SetSaver(). Slots 30, 40,
-    // and 41 dispatch its slots 2 and 3. +0xfc
+    Rnd::Text *mFreqNameText;     // +0xf0, `ers_freqname_player.txt`
+    Rnd::Text *mInstructionsText; // +0xf4, `ers_instructions.txt`
+    // The text object the entered name is drawn into, `ers_remix_title_val.txt`. +0xf8
+    Rnd::Text *mRemixNameText;
+    // The screen that asked for the save, which Open() stores through SetSaver(). Slots 7, 15,
+    // 30, 40, and 41 and HandleCommand() dispatch its slots 2, 3, and 4. +0xfc
     MetRemixSaver *mUnknownfc;
-    int mUnknown100; // +0x100
+    // Set once the user has chosen to leave, which slot 36 tests and clears. +0x100
+    int mUnknown100;
     // Default-constructed, and its buffer is what the destructor releases at `+0x108`. +0x104
     HxStr mUnknown104;
 };

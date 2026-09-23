@@ -88,22 +88,19 @@ public:
     virtual ~MetSaveRemix();
 
     /**
-     * Unrecovered. Slot 39.
+     * Record the remix a save is about to write and enquire about the target card. Slot 39.
      *
-     * Records the remix a save is about to write. The six parameters are what the register reads
-     * prove: a1 is a MemcardConnectState whose five fields are copied into mUnknown94 through the
-     * compiler-generated assignment, a2 becomes mUnknownc8, a3 and t0 are assigned to mUnknownb8
-     * and mUnknownc0, t1 is assigned to mUnknownac, and t2 becomes mUnknowne4. It also clears
-     * mUnknownd8.
+     * The six parameters are what the register reads prove: a1 is a MemcardConnectState whose
+     * five fields are copied into mUnknown94 through the compiler-generated assignment, a2 becomes
+     * mUnknownc8, a3 and t0 are assigned to mUnknownb8 and mUnknownc0, t1 is assigned to
+     * mUnknownac, and t2 becomes mUnknowne4. It also clears mUnknownd8, stores itself in
+     * MemcardManager::mUser, and queues a connect-state enquiry for the selection's port and slot,
+     * which OnConnectState() receives.
      *
      * a3, t0, and t1 are by value rather than by reference, which the tail of the routine proves:
      * it frees the string buffer of each of the first two and destroys every element of the third
-     * before returning. a1 is not destroyed there, so it is a reference.
-     *
-     * The body is not written. After the assignments the routine runs the routine at `0x001f61b8`
-     * twice, writes its own MemcardUser subobject pointer into the result, and then runs
-     * `0x001f2ae0` on it. Both routines belong to the memcard layer, neither is identified, and the
-     * class the first returns is not recovered.
+     * before returning. a1 is not destroyed there, so it is a reference. OnMsgScreenDismissed() is
+     * the one recovered caller, and the title is inferred.
      *
      * @param selection The remix being saved.
      * @param selector The value the MetSaveRemixScreen sound overrides compare against.
@@ -113,12 +110,12 @@ public:
      * @param last Assigned to mUnknowne4.
      * @ghidraAddress 0x00372488
      */
-    virtual void OnUnknownSlot39(const MemcardConnectState &selection,
-                                 int selector,
-                                 HxStr first,
-                                 HxStr second,
-                                 std::vector<FreqAppearance> appearances,
-                                 int last);
+    virtual void RecordPendingSave(const MemcardConnectState &selection,
+                                   int selector,
+                                   HxStr first,
+                                   HxStr second,
+                                   std::vector<FreqAppearance> appearances,
+                                   int last);
 
     /**
      * Unrecovered. Slot 40, empty.
@@ -155,11 +152,9 @@ public:
      * The override assigns its argument to mUnknownb8, which is what settles the parameter of the
      * MetKBUser virtual as a `const HxStr &`. Both subclasses forward to this body.
      *
-     * The body is not written. After the assignment it takes a record from the memcard layer
-     * through `0x001f61b8`, writes its own MemcardUser subobject pointer into the first word of
-     * that record, takes a second record the same way, runs `0x001f2ae0` on it with mUnknown94,
-     * runs the routine at `0x00372760` on itself, and ends by running `0x002f0348` on mUnknownc8.
-     * Neither memcard routine is identified and the class the first returns is not recovered.
+     * After the assignment it stores itself in MemcardManager::mUser, queues a connect-state
+     * enquiry for mUnknown94, raises the save dialogue through BeginSave(), and limits that
+     * dialogue to the controller mUnknownc8 names.
      *
      * @param text The remix name the user entered.
      * @ghidraAddress 0x0037a650

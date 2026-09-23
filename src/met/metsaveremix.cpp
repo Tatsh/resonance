@@ -106,6 +106,33 @@ MetSaveRemix::MetSaveRemix(MetRenderer *pRenderer,
 MetSaveRemix::~MetSaveRemix() {
 }
 
+// 0x00372488
+void MetSaveRemix::RecordPendingSave(const MemcardConnectState &selection,
+                                     int selector,
+                                     HxStr first,
+                                     HxStr second,
+                                     std::vector<FreqAppearance> appearances,
+                                     int last) {
+    mUnknownc8 = selector;
+    mUnknown94 = selection;
+    mUnknownb8 = first;
+    mUnknownc0 = second;
+    mUnknownac = appearances;
+    mUnknowne4 = last;
+    mUnknownd8 = 0;
+    MemcardManager::shared()->mUser = this;
+    MemcardManager::shared()->CreateGetConnectStateTask(selection.mPortSlot);
+}
+
+// 0x0037a650
+void MetSaveRemix::OnUnknownSlot2(const HxStr &text) {
+    mUnknownb8 = text;
+    MemcardManager::shared()->mUser = this;
+    MemcardManager::shared()->CreateGetConnectStateTask(mUnknown94.mPortSlot);
+    BeginSave();
+    MetMsgScreen::SetOwnerPad(mUnknownc8);
+}
+
 // 0x0037a618
 void MetSaveRemix::OnUnknownSlot40() {
 }
@@ -320,7 +347,8 @@ void MetSaveRemix::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
                 HxStr(kFormatGoDialogue), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
             MetMsgScreen::SetOwnerPad(mUnknownc8);
         } else {
-            OnUnknownSlot39(mUnknown94, mUnknownc8, mUnknownb8, mUnknownc0, mUnknownac, mUnknowne4);
+            RecordPendingSave(
+                mUnknown94, mUnknownc8, mUnknownb8, mUnknownc0, mUnknownac, mUnknowne4);
         }
         return;
     } else if (name == kFormatDoneDialogue) {
