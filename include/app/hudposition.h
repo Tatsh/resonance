@@ -78,11 +78,20 @@ private:
     // MIDI ticks in one bar.
     static constexpr float kTicksPerBar = 1920.0f;
 
-    // 0x0041ad88. Give each block the material, the scale, and the label font for its place
-    // relative to the section of mBar, and place the repeat marker on that section when the play
-    // map reports it as repeating.
+public:
+    /**
+     * Style every section block for the current bar.
+     *
+     * Gives each block the material, the scale, and the label font for its place relative to the
+     * section of mBar, and places the repeat marker on that section when the play map reports it
+     * as repeating. Public because Overlay's AdvanceSectionToggleMsg handler at `0x0041f440`
+     * calls it. The title is inferred.
+     *
+     * @ghidraAddress 0x0041ad88
+     */
     void Update();
 
+private:
     std::vector<Section> mSections;
     PlayMap *mPlayMap;
     Rnd::View *mView;       // `<layout> pos.view`

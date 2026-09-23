@@ -64,9 +64,8 @@ public:
     /**
      * Act on one message the renderer sends on.
      *
-     * Compares the identity against about twenty registered message identities, among them
-     * TrackSelectMsg, GameOverMsg, ChoosePowerupMsg, PointAmountMsg, PhraseCapturedMsg, and
-     * FadeGameMsg, and runs one handler for each. The body is not written.
+     * Compares the identity against twenty-four registered message identities in a fixed order
+     * and runs one handler for each. A PowerupCountMsg is recognised and ignored.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x004206e0
@@ -124,8 +123,9 @@ public:
 
 private:
     // HandleMessage() runs one of the handlers below per message identity. Each handler written
-    // "inlined" is expanded in place there, and its out-of-line copy has no caller. The bodies not
-    // written read message payloads their message headers declare private.
+    // "inlined" is expanded in place there, and its out-of-line copy has no caller. Most handlers
+    // act on the track display of the message's player, which FindTrack() looks up, and show text
+    // through HudTextMessage::Show() at scale 1 for 1500 unless noted.
 
     // 0x0041fdd8. TrackSelectMsg. Shows the track's instrument name on the selecting player's
     // label, records the track, lights the effect lamps from the renderer's cell for the current
@@ -135,7 +135,10 @@ private:
     // 0x0042aec8, inlined. GameOverMsg. Runs script template 1001 when mUnknown44 is set.
     void OnGameOver();
 
-    // 0x0041e020. WinMsg.
+    // 0x0041e020. WinMsg. Resets every multiplier to 1. With the win sequence enabled in
+    // kGameModeSolo and a winner, starts the win message. Otherwise shows `YOU WIN`, `GAME OVER`,
+    // or `YOU LOSE` on each track display at scale 2 for 3000, over two lines when there are two
+    // or more displays, with the freestyle prompt for a solo winner.
     void OnWin(Message *pMsg);
 
     // 0x0041e9b8. ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
@@ -147,7 +150,8 @@ private:
     // 1500. HandleMessage() ignores a PowerupCountMsg outright.
     void OnCaughtPowerbar(Message *pMsg);
 
-    // 0x0041eda8. DeployedPowerupMsg.
+    // 0x0041eda8. DeployedPowerupMsg. In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the
+    // display's mUnknownec, and shows `YOU GOT\nBUMPED!` on the target's display for a bumper.
     void OnDeployedPowerup(Message *pMsg);
 
     // 0x0042aff0, inlined. PointAmountMsg. Records the new score in the player's badge, pending an
@@ -166,16 +170,22 @@ private:
     // 0x0041f5e8. TextMsg. Shows the message's text in the first track display's text message.
     void OnText(Message *pMsg);
 
-    // 0x0041f708. LoopToggleMsg.
+    // 0x0041f708. LoopToggleMsg. Outside kPlayModeGame, shows the player's loop indicator and,
+    // once the song is under way, `LOOP ON` or `LOOP OFF`. Runs script template 1011 when
+    // mUnknown44 is set.
     void OnLoopToggle(Message *pMsg);
 
-    // 0x0041f440. AdvanceSectionToggleMsg.
+    // 0x0041f440. AdvanceSectionToggleMsg. Without mUnknown44, restyles the section blocks and,
+    // outside playback, shows `ADVANCE TO\nNEXT SECTION` or `REPEAT\nSECTION` on every display.
     void OnAdvanceSectionToggle(Message *pMsg);
 
-    // 0x0041fba0. ShowEraseEffectMsg.
+    // 0x0041fba0. ShowEraseEffectMsg. Shows `BAR ERASED` for a range under two bars and
+    // `TRACK ERASED` otherwise.
     void OnShowEraseEffect(Message *pMsg);
 
-    // 0x0041f9a8. PlaybackToggleMsg.
+    // 0x0041f9a8. PlaybackToggleMsg. Records the state in mPlaybackOn, shows or hides the edit
+    // prompt, runs the assembly and letterbox animations the matching way, hides the FreQ icons
+    // during playback, and hides every text message.
     void OnPlaybackToggle(Message *pMsg);
 
     // 0x0042aef8, inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
@@ -186,31 +196,39 @@ private:
     // is set. The message is not read.
     void OnJamEffect();
 
-    // 0x0041fed8. CatchMsg.
+    // 0x0041fed8. CatchMsg. In kPlayModeGame before the last bar, pulses the points readout to
+    // the share of the phrase caught. In an easy solo game without mUnknown44, counts catches on
+    // bars that cannot be captured and shows `ROTATE TO\nNEW TRACK` at the third.
     void OnCatch(Message *pMsg);
 
     // 0x0042b178, inlined. PhraseMuffedMsg. In kPlayModeGame without mUnknown44, banks the
     // player's points.
     void OnPhraseMuffed(Message *pMsg);
 
-    // 0x004201c0. BeginPhraseCatchMsg.
+    // 0x004201c0. BeginPhraseCatchMsg. In kPlayModeGame before the last bar and without
+    // mUnknown44, shows the phrase's points and multiplier on the player's readout.
     void OnBeginPhraseCatch(Message *pMsg);
 
     // 0x0042b1f8, inlined. FadeGameMsg. Starts the screen flash over the message's duration, and
-    // hides the panel's message text when the message's second word is zero.
+    // hides the win message's prompt when the game fades out.
     void OnFadeGame(Message *pMsg);
 
-    // 0x00420588. PlayersTrackNeutralizedMsg.
+    // 0x00420588. PlayersTrackNeutralizedMsg. Shows `NEUTRALIZED!\n<points> POINTS`.
     void OnPlayersTrackNeutralized(Message *pMsg);
 
-    // 0x00420408. MultiplierStateMsg.
+    // 0x00420408. MultiplierStateMsg. Without mUnknown44 and before the last bar, shows the base
+    // plus the bonus multiplier and selects the hot material while a bonus applies.
     void OnMultiplierState(Message *pMsg);
 
-    // 0x0041f138. PowerupFailedMsg.
+    // 0x0041f138. PowerupFailedMsg. Shows the failure text for the powerup kind at scale 0.8.
     void OnPowerupFailed(Message *pMsg);
 
     // 0x0042ae88. The badge whose mPlayer is pPlayer, or null.
     HudBadge *FindBadge(Player *pPlayer);
+
+    // The track display whose mPlayer is pPlayer, or null. Every handler inlines the search, and
+    // no out-of-line copy is recovered.
+    HudTrack *FindTrack(Player *pPlayer);
 
     // Sets the layout prefix g_hudLayoutName to `HUD<n>`. The constructor inlines the body, and
     // this copy at 0x00429938 has no caller.
@@ -233,7 +251,8 @@ private:
     int mPlayMode;
     // Configuration code 0x3a1.
     int mUnknown44; // +0x44
-    int mUnknown48; // +0x48
+    // The state of the last PlaybackToggleMsg. The constructor starts it at 0.
+    int mPlaybackOn;
     // The bar SetFrame() last saw. The constructor starts it at -123123.
     int mCurrentBar;
     // Milliseconds per MIDI tick at the tempo in force at construction. SetFrame() times the text

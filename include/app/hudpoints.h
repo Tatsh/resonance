@@ -63,6 +63,20 @@ public:
     void Bank();
 
     /**
+     * Flash the readout and pulse it to a fraction of a phrase.
+     *
+     * Overlay's CatchMsg handler at `0x0041fed8` inlines the body, and no out-of-line copy is
+     * recovered. The title is inferred.
+     *
+     * @param flFraction The share of the phrase caught so far, which the pulse falls back to.
+     */
+    void Pulse(float flFraction) {
+        mPulseRest = flFraction;
+        mPulse = flFraction + kPulseLift;
+        mFlash = kFullFlash;
+    }
+
+    /**
      * Show a points total and start its flash from zero.
      *
      * The out-of-line copy has no caller. The title is inferred.
@@ -83,6 +97,11 @@ public:
     void SetMultiplier(int nMultiplier);
 
 private:
+    // The amount Pulse() lifts the pulse above its resting fraction.
+    static constexpr float kPulseLift = 0.25f;
+    // The flash at a change.
+    static constexpr float kFullFlash = 1.0f;
+
     // The flash, 1 at a change and falling by 0.2 each frame to 0.
     float mFlash;
     // The pulse, falling by 0.05 each frame to mPulseRest.
@@ -94,8 +113,17 @@ private:
     int mPoints;
     // Non-zero while points are shown.
     int mShowing;
-    // Selects the hot material for the multiplier text.
+
+public:
+    /**
+     * Selects the hot material for the multiplier text.
+     *
+     * Public because Overlay's MultiplierStateMsg handler at `0x00420408` writes it directly, and
+     * the image has no accessor to route the write through.
+     */
     int mHot;
+
+private:
     Rnd::View *mExitView;       // `pts_exit<n>.view`
     Rnd::Text *mExitText;       // `pts_exit<n>.txt`
     Rnd::Blur *mExitBlur;       // `pts_exit<n>.blur`

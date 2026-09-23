@@ -9,6 +9,10 @@
 #include "game/player.h"
 #include "game/screenanim.h"
 #include "game/soloscreenanim.h"
+#include "msg/juiceamountmsg.h"
+#include "msg/message.h"
+#include "msg/pointamountmsg.h"
+#include "msg/winmsg.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -29,6 +33,12 @@ constexpr int kDisplayModeConfigCode = 0x3a1;
 
 // The arena screens use `screen01.mat` through `screen04.mat`.
 constexpr int kScreenCount = 4;
+
+// A solo player's juice above kHighJuice selects kHighLevel, and below kLowJuice kLowLevel.
+constexpr double kHighJuice = 0.85;
+constexpr double kLowJuice = 0.2;
+constexpr int kHighLevel = 2;
+constexpr int kLowLevel = 0;
 
 } // namespace
 
@@ -104,6 +114,33 @@ TnlArena::~TnlArena() {
     for (std::vector<ScreenMesh>::iterator it = mScreenMeshes.begin(); it != mScreenMeshes.end();
          ++it) {
         it->SetMaterial(it->mMat);
+    }
+}
+
+void TnlArena::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == g_nPointAmountMsgType) {
+        mScreenAnim->UpdateLeaders();
+    } else if (nType == g_nJuiceAmountMsgType) {
+        if (mUnknown24 != kNoJuiceLock) {
+            return;
+        }
+        if (mGameMode != kGameModeSolo || Application::shared()->GetPlayMode() != kPlayModeGame) {
+            return;
+        }
+
+        const float flJuice = static_cast<JuiceAmountMsg *>(pMsg)->GetJuiceFraction();
+        mLevel = kNeutralLevel;
+        if (flJuice > kHighJuice) {
+            mLevel = kHighLevel;
+        } else if (flJuice < kLowJuice) {
+            mLevel = kLowLevel;
+        }
+        mScreenAnim->SetLevel(mLevel);
+    } else if (nType == g_nWinMsgType) {
+        if (mGameMode == kGameModeSolo && static_cast<WinMsg *>(pMsg)->mWinners.size() != 0) {
+            mScreenAnim->SetLevel(mLevel + 1);
+        }
     }
 }
 

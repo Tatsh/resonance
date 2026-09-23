@@ -111,7 +111,7 @@ public:
      * A PointAmountMsg runs ScreenAnim::UpdateLeaders(). A JuiceAmountMsg, only in game mode 1 and
      * play mode 1 and only while mUnknown24 is -1, sets the level from the juice amount (2 above
      * 0.85, 0 below 0.2, and 1 otherwise) and passes it to ScreenAnim::SetLevel(). A WinMsg in game
-     * mode 1 with a non-empty winner list passes one level higher. The body is not written.
+     * mode 1 with a non-empty winner list passes one level higher.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x00406ff0

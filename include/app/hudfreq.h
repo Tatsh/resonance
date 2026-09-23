@@ -1,11 +1,12 @@
 #pragma once
 
+#include "rnd/mesh.h"
+
 class Player;
 
 namespace Rnd {
 class Mat;
 class MatAnim;
-class Mesh;
 class TransAnim;
 } // namespace Rnd
 
@@ -44,6 +45,18 @@ public:
      * @ghidraAddress 0x0042a348
      */
     void SetPulsing(int nPulsing);
+
+    /**
+     * Show or hide the icon.
+     *
+     * Overlay's PlaybackToggleMsg handler at `0x0041f9a8` inlines the body, and no out-of-line
+     * copy is recovered. The title is inferred.
+     *
+     * @param nShowing Non-zero to show the icon.
+     */
+    void SetShowing(int nShowing) {
+        mMesh->SetShowing(nShowing);
+    }
 
     /**
      * Advance the icon animation and the pulse.
