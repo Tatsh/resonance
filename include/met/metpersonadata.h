@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
 #include <vector>
 
 #include "game/campaignstats.h"
@@ -58,6 +59,9 @@ public:
 
     /**
      * Construct an empty record.
+     *
+     * The campaign's level list is rebuilt from the configuration, the birthday starts as
+     * `0/0/00, 12:00`, and the pre-fab flag is clear.
      *
      * @ghidraAddress 0x0032b760
      */
@@ -192,7 +196,10 @@ public:
      * Read the record back from a stream.
      *
      * Slot 3. The counterpart of Save(), reaching slot 6 of IBStream, which is
-     * `Read(void *, int)`.
+     * `Read(void *, int)`. mUnknown160 takes the username just read. A record of version 0 or
+     * below then has a button list, a GameOptions record, and a list of numbered strings, all read
+     * and discarded, and a record of version 2 or above has the birthday. The skill status is
+     * recomputed last through UpdateSkillStatus(), expanded in place.
      *
      * @param pStream The stream to read from.
      * @ghidraAddress 0x0032b968
@@ -233,6 +240,29 @@ public:
     int GetSkillStatus();
 
     /**
+     * Replace the username in the embedded appearance.
+     *
+     * The image has no caller, so this is the out-of-line copy of an inline member. The name is
+     * inferred.
+     *
+     * @param name The new username.
+     * @ghidraAddress 0x0032e230
+     */
+    void SetName(const HxStr &name);
+
+    /**
+     * Write the record to a diagnostic stream.
+     *
+     * The campaign levels, the appearance, the birthday, and the pre-fab flag follow the labels
+     * ` CampaignStats=`, ` FreqAppearance=`, ` Birthday=`, and ` IsPrefab=`. The image has no
+     * caller.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x0032e380
+     */
+    void Print(std::ostream &stream);
+
+    /**
      * Campaign progress of this persona. +0x00
      *
      * Public because MetStageFinishScreen slot 5 records and queries the finished stage through it
@@ -249,7 +279,7 @@ public:
      * friend declaration fits the image equally well. +0x140
      */
     FreqAppearance mUnknown140;
-    HxStr mUnknown154; // +0x154
+    HxStr mUnknown154; // +0x154, the birthday Print() labels, starting as `0/0/00, 12:00`
 
     /**
      * Set to 1 by MetFreqLoader's parser on every pre-fab persona it reads. +0x15c
@@ -258,5 +288,5 @@ public:
      */
     int mUnknown15c;
 
-    HxStr mUnknown160; // +0x160
+    HxStr mUnknown160; // +0x160, the username as Load() last read it
 };
