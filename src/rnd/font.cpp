@@ -37,6 +37,9 @@ constexpr int kGlyphMipLockFlags = 1;
 // Stage of the material whose texture supplies the atlas.
 constexpr int kAtlasStage = 0;
 
+// SetAtlas() raises a row or column count below one cell to one.
+constexpr float kMinAtlasCells = 1.0f;
+
 // Titles the weight and the family are dumped under. The binary stores each table as a global of
 // pointers and passes the entry to Print() rather than to Format(), with no bound check. Both
 // tables sit in the same literal pool as g_fontClassName, the weight table at 0x006fecc0 and the
@@ -71,8 +74,9 @@ const char *StringText(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-// 0x004d07e0. A value outside the three produces nothing at all. The sink comes back out so that
-// the three printers chain, which is how DumpText() reaches them.
+// 0x004d07e0
+// A value outside the three produces nothing at all. The sink comes back out so that the three
+// printers chain, which is how DumpText() reaches them.
 FailSink *PrintFontType(FailSink &sink, FontType type) {
     switch (type) {
     case kFontTypeDefault:
@@ -462,6 +466,19 @@ void Font::SetMat(Mat *pMat) {
 void Font::SetSize(float flSize) {
     RemoveMatRef();
     mSize = flSize;
+    OnChanged();
+}
+
+// 0x004d0530
+void Font::SetAtlas(
+    Mat *pMat, const HxStr &chars, float flRows, float flCols, float flSize, float flSpace) {
+    RemoveMatRef();
+    mMat = pMat;
+    mRows = flRows < kMinAtlasCells ? kMinAtlasCells : flRows;
+    mCols = flCols < kMinAtlasCells ? kMinAtlasCells : flCols;
+    mSize = flSize;
+    mSpace = flSpace;
+    mChars = chars;
     OnChanged();
 }
 

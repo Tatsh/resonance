@@ -509,7 +509,6 @@ void Text::Load(Stream &stream) {
     AddObjectRefs();
 }
 
-// 0x004c9278
 float Text::MeasureRun(const char *pText, int nCount) {
     float flWidth = 0.0f;
     if (mFont != nullptr) {
@@ -520,6 +519,50 @@ float Text::MeasureRun(const char *pText, int nCount) {
     // The running total is truncated to a whole number before every comparison, which drops the
     // fractional part of an accumulated advance rather than rounding it.
     return static_cast<float>(static_cast<int>(flWidth));
+}
+
+// 0x004d0010
+float Text::MeasureText(const char *pText, int nCount) {
+    float flWidth = 0.0f;
+    if (mFont == nullptr) {
+        return flWidth;
+    }
+    for (int i = 0; i < nCount; ++i) {
+        flWidth += mFont->GetCharAdvance(pText[i]);
+    }
+    return flWidth;
+}
+
+// 0x004d0088
+void Text::GetVerticalBounds(float &flTop, float &flBottom) {
+    if (mFont == nullptr) {
+        flTop = 0.0f;
+        flBottom = 0.0f;
+        return;
+    }
+
+    const int nLines = CountLines();
+    const float flSize = mFont->mSize;
+    if ((mAlign & kTextAlignMiddle) != 0) {
+        flTop = static_cast<float>(nLines) * flSize * 0.5f;
+        flBottom = -flTop;
+    } else if ((mAlign & kTextAlignBottom) != 0) {
+        flTop = static_cast<float>(nLines) * flSize;
+        flBottom = 0.0f;
+    } else {
+        flTop = 0.0f;
+        flBottom = static_cast<float>(-nLines) * flSize;
+    }
+}
+
+// 0x004d0238
+int Text::CountLines() {
+    int nNewlines = 0;
+    for (int nFound = mText.Find('\n', 0); static_cast<unsigned>(nFound) != g_nHxStrNoPosition;
+         nFound = mText.Find('\n', nFound + 1)) {
+        ++nNewlines;
+    }
+    return nNewlines + 1;
 }
 
 // 0x004c9278

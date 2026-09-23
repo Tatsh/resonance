@@ -1,16 +1,22 @@
 #include <ctype.h>
 #include <list>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <vector>
 
 #include "os/async.h"
 #include "os/failsink.h"
+#include "os/genpath.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
+#include "os/zone.h"
 #include "rnd/filepath.h"
 #include "rnd/stream.h"
 #include "rnd/tex.h"
 #include "rndartt/abitmap.h"
+#include "rndartt/acanvas.h"
 #include "rndartt/apalette.h"
 
 namespace Rnd {
@@ -22,6 +28,40 @@ constexpr char kTexFileName[] = "rndtex.cpp";
 
 // Line 610 of rndtex.cpp, which FreeLoadedBitmaps() passes to the tagged release.
 constexpr int kFreeBitmapLine = 0x262;
+
+// Line 205 of rndtex.cpp, which AllocateBitmapFromStream() passes to the tagged allocation.
+constexpr int kBlankBitmapLine = 0xcd;
+
+// The path buffers the mip loader and the read queue work in.
+constexpr int kMaxPathLength = 0x100;
+
+// The files the mip loader reads. A mip level n is the base name with "_mn" inserted before the
+// extension, and every file is read as the compressed cache copy of its bitmap.
+constexpr char kMipSuffixFormat[] = "_m%d";
+constexpr char kCacheExtension[] = ".abm";
+constexpr char kCompressedSuffix[] = ".gz";
+
+// Texture flag bits AllocateBitmapFromStream() and the mip loader test. The first enables the
+// numbered mip files, and the second makes a blank level three times as wide and twice as tall.
+constexpr int kTexFlagMipChain = 0x04;
+constexpr int kTexFlagWideBlank = 0x40;
+constexpr int kWideBlankWidthFactor = 3;
+constexpr int kWideBlankHeightFactor = 2;
+
+// A blank level of this depth or less is indexed and carries a palette.
+constexpr int kMaxIndexedBitsPerPixel = 8;
+
+// The pixels of a loaded block start on a quadword boundary.
+constexpr uintptr_t kPixelAlignment = 16;
+
+// The allocation tag every texture block is billed to.
+constexpr char kTexTag[] = "Rnd::Tex";
+
+// The lock flag GetBitmapInfo() passes when it walks every level, which requests a read-back.
+constexpr int kLockMipReadBack = 1;
+
+// The character that follows a drive letter in an absolute path.
+constexpr char kDriveSeparator = ':';
 
 // Characters and components Rnd::FilePath splits and rebuilds paths with.
 constexpr char kPathSeparator = '/';
@@ -46,6 +86,13 @@ struct ABitmapImage : ABitmap {
     APalette mImagePalette;
     unsigned char mIndexedPixels[1];
 };
+
+// The first quadword boundary at or after pStart. Aligning an address needs the address as an
+// integer, which is the one place this file converts a pointer.
+inline void *AlignPixels(void *pStart) {
+    const uintptr_t nAddress = reinterpret_cast<uintptr_t>(pStart);
+    return reinterpret_cast<void *>((nAddress + kPixelAlignment - 1) & ~(kPixelAlignment - 1));
+}
 
 // -1 unless n is a power of two, 0 for one, and 1 for a larger power of two. OnMipLoaded() tests
 // only the sign.
@@ -72,12 +119,133 @@ inline int ClassifyPowerOfTwo(int n) {
 // 0x004e3dc8
 Tex::Tex(const HxStr &name)
     : Object(name), mWidth(0), mHeight(0), mBitsPerPixel(0), mUnknown28(0), mPendingMipMask(0),
-      mMipSelect(-0x80), mBitmapPath(nullptr), mGsHandle(-1) {
+      mMipSelect(-0x80), mBitmapPath(nullptr), mZone(-1) {
 }
 
 // 0x004e7878
 bool Tex::IsLoadComplete() {
     return mPendingMipMask == 0;
+}
+
+// 0x004e3e48
+int Tex::GetBitmapInfo(int &nWidth, int &nHeight, int &nBitsPerPixel, int &nBytes) {
+    ACanvas *pCanvas = LockMipBitmap(0, 0, 0);
+    if (pCanvas == nullptr) {
+        return 0;
+    }
+    if (pCanvas->mBitmap.mPixels == nullptr) {
+        return 0; // Yes, the binary returns without unlocking the level.
+    }
+    nWidth = pCanvas->mBitmap.mWidth;
+    nHeight = pCanvas->mBitmap.mHeight;
+    nBitsPerPixel = g_abBitmapBitsPerPixel[pCanvas->mBitmap.mFormat];
+    UnlockMipBitmap();
+
+    nBytes = 0;
+    for (unsigned nMip = 0; nMip < mLoadedBitmaps.size(); ++nMip) {
+        ACanvas *pLevel = LockMipBitmap(nMip, 0, kLockMipReadBack);
+        if (pLevel != nullptr && pLevel->mBitmap.mPixels != nullptr) {
+            nBytes += pLevel->mBitmap.mByteCount;
+            const APalette *pPalette = pLevel->mBitmap.mPalette;
+            if (pPalette != nullptr) {
+                nBytes += pPalette->mEnd * sizeof(pPalette->mEntries[0]);
+            }
+        }
+        UnlockMipBitmap();
+    }
+    return 1;
+}
+
+// 0x004e3fe8
+void Tex::AllocateBitmapFromStream() {
+    mMipHandles.clear();
+    mZone = ZoneGetCurrent();
+
+    if (mBitmapPath.mLen != 0) {
+        if (!LoadMipFiles()) {
+            mBitsPerPixel = 0;
+            mHeight = 0;
+            mWidth = 0;
+            RestoreSurfaces();
+        }
+        return;
+    }
+
+    int nWidth = mWidth;
+    int nHeight = mHeight;
+    if ((mUnknown28 & kTexFlagWideBlank) != 0) {
+        nWidth *= kWideBlankWidthFactor;
+        nHeight *= kWideBlankHeightFactor;
+    }
+    const int nFormat = ABitmap::FormatForBitsPerPixel(mBitsPerPixel);
+    const int nPixelBytes = ABitmap::ComputeByteCount(nFormat, nWidth, nHeight);
+    const bool bIndexed = mBitsPerPixel <= kMaxIndexedBitsPerPixel;
+    const size_t nHeaderBytes = bIndexed ? sizeof(ABitmap) + sizeof(APalette) : sizeof(ABitmap);
+    const size_t nBlockBytes = nPixelBytes + nHeaderBytes + kPixelAlignment - 1;
+
+    void *pBlock = mZone == -1 ? MemAllocTagged(nBlockBytes, kTexFileName, kBlankBitmapLine) :
+                                 ZoneAlloc(nBlockBytes);
+    if (pBlock == nullptr) {
+        return;
+    }
+
+    auto *pImage = static_cast<ABitmapImage *>(pBlock);
+    APalette *pPalette = nullptr;
+    void *pPixels = nullptr;
+    if (bIndexed) {
+        pPalette = &pImage->mImagePalette;
+        pPixels = AlignPixels(pImage->mIndexedPixels);
+    } else {
+        pPixels = AlignPixels(&pImage->mImagePalette);
+    }
+    const ABitmap bitmap(pPixels, nFormat, false, nWidth, nHeight, 0);
+    static_cast<ABitmap &>(*pImage) = bitmap;
+    pImage->mPalette = pPalette;
+
+    mLoadedBitmaps.push_back(pImage);
+    mPendingMipMask = 0;
+    RestoreSurfaces();
+}
+
+// 0x004e4208
+bool Tex::LoadMipFiles() {
+    mPendingMipMask = 0;
+    char szBase[kMaxPathLength];
+    strcpy(szBase, TextOf(mBitmapPath));
+
+    if ((mUnknown28 & kTexFlagMipChain) == 0) {
+        return QueueMipRead(szBase) != 0;
+    }
+
+    QueueMipRead(szBase); // Yes, the binary does not test the base level's result.
+    for (int nMip = 1;; ++nMip) {
+        char szSuffix[kMaxPathLength];
+        char szPath[kMaxPathLength];
+        sprintf(szSuffix, kMipSuffixFormat, nMip);
+        strcpy(szPath, szBase);
+        ReplaceFileNameExtension(szPath, szSuffix);
+        if (LoadBitmapFileFromPath(szPath) == 0) {
+            return true;
+        }
+        if (QueueMipRead(szPath) == 0) {
+            return false;
+        }
+    }
+}
+
+// 0x004e4300
+int Tex::QueueMipRead(const char *pszPath) {
+    char szCache[kMaxPathLength];
+    strcpy(szCache, pszPath);
+    BuildBitmapCacheFileName(szCache, kCacheExtension);
+    char szFile[kMaxPathLength];
+    strcpy(szFile, szCache);
+    strcat(szFile, kCompressedSuffix);
+
+    mMipHandles.push_back(AsyncLoadFileByPath(szFile, nullptr, 0, nullptr));
+    mLoadedBitmaps.push_back(nullptr);
+    mPendingMipMask |= 1 << (mMipHandles.size() - 1);
+    return 1; // Yes, the binary reports success whatever the read queue returned.
 }
 
 // 0x004e4410
@@ -176,13 +344,54 @@ void Tex::ReloadBitmaps() {
     AllocateBitmapFromStream();
 }
 
+// 0x004e7388
+void *Tex::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kTexTag);
+}
+
+// 0x004e73a8
+void Tex::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kTexTag);
+}
+
+// 0x004e7448
+Tex *NewTexThroughHook(const HxStr &name) {
+    return g_pfnNewTex(name);
+}
+
+// 0x004e7568
+const HxStr &Tex::GetRelativeBitmapPath() const {
+    return mBitmapPath.RelativeToRoot();
+}
+
+// 0x004e7cd8
+bool FilePath::IsAbsolute(const HxStr &path) {
+    if (path.mLen == 0) {
+        return true; // Yes, the binary counts an empty path as absolute.
+    }
+    return path[0] == kPathSeparator || path[0] == kBackslash || path[1] == kDriveSeparator;
+}
+
+// 0x004e4648
+void Tex::CancelPendingMips() {
+    if (mPendingMipMask == 0) {
+        return;
+    }
+    for (unsigned nMip = 0; nMip < mMipHandles.size(); ++nMip) {
+        if (((mPendingMipMask >> nMip) & 1) != 0) {
+            AsyncCancelRequest(mMipHandles[nMip]);
+            mMipHandles[nMip] = 0;
+        }
+    }
+    mMipHandles.clear(); // Yes, the binary leaves the pending mask set.
+}
+
 // 0x004e7aa8
 void Tex::FreeLoadedBitmaps() {
     CancelPendingMips();
     for (const auto pBitmap : mLoadedBitmaps) {
-        // A bitmap already resident in GS memory belongs to its slot, so only a copy that never
-        // arrived there is released here.
-        if (pBitmap != nullptr && mGsHandle == -1) {
+        // Zone memory goes with its zone. Only a bitmap from the tagged heap is released here.
+        if (pBitmap != nullptr && mZone == -1) {
             MemFreeTagged(pBitmap, kTexFileName, kFreeBitmapLine);
         }
     }

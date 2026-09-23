@@ -276,6 +276,26 @@ public:
     void BuildCharMap();
 
     /**
+     * Describe a Material font's glyph atlas in one call.
+     *
+     * Drops the reference on the previous material and records the new one, clamps the row and
+     * column counts to at least 1, records the cell size, the tracking, and the atlas characters,
+     * and then runs OnChanged(), which takes the new reference and discards the measured metrics.
+     * mType is left as it was. The routine has no caller in the shipped build. The name is
+     * inferred.
+     *
+     * @param pMat The atlas material, or null.
+     * @param chars The characters of the atlas cells, in reading order.
+     * @param flRows The cell rows.
+     * @param flCols The cell columns.
+     * @param flSize The height one cell occupies.
+     * @param flSpace The tracking added after every glyph.
+     * @ghidraAddress 0x004d0530
+     */
+    void SetAtlas(
+        Mat *pMat, const HxStr &chars, float flRows, float flCols, float flSize, float flSpace);
+
+    /**
      * Replace the glyph atlas material.
      *
      * Drops the reference on the previous material, records the new one, and then runs

@@ -336,6 +336,44 @@ public:
      */
     virtual int DrawSelf();
 
+    /**
+     * Report the total advance of the first nCount characters of pText in this text's font.
+     *
+     * Unlike the measurement FindLineBreak() inlines, the sum is not truncated. A text with no
+     * font measures nothing. The jukebox screens lay their lists out with it. The name is
+     * inferred.
+     *
+     * @param pText The characters to measure.
+     * @param nCount How many characters to measure.
+     * @return The summed advance.
+     * @ghidraAddress 0x004d0010
+     */
+    float MeasureText(const char *pText, int nCount);
+
+    /**
+     * Report the vertical extent of the text block about the origin.
+     *
+     * The block is the line count times the font's cell size. kTextAlignMiddle centres it, so the
+     * top is half of it and the bottom its negation. kTextAlignBottom puts all of it above the
+     * origin, and any other alignment all of it below. A text with no font reports zero for both.
+     * The name is inferred.
+     *
+     * @param flTop Receives the extent above the origin.
+     * @param flBottom Receives the extent below the origin, as a negative or zero value.
+     * @ghidraAddress 0x004d0088
+     */
+    void GetVerticalBounds(float &flTop, float &flBottom);
+
+    /**
+     * Report the number of lines of mText, one more than its newline count.
+     *
+     * The name is inferred.
+     *
+     * @return The line count, at least 1.
+     * @ghidraAddress 0x004d0238
+     */
+    int CountLines();
+
 private:
     /**
      * Rebuild the glyph mesh from mText.

@@ -9,8 +9,9 @@ namespace Rnd {
 // 0x00702b20
 HxStr g_viewClassName("View");
 
-// 0x004e32a0. The thunk registered against the "View" key. The null test is the conversion of a
-// View pointer to its virtual Rnd::Object base rather than a check the source asks for.
+// 0x004e32a0
+// The thunk registered against the "View" key. The null test is the conversion of a View pointer
+// to its virtual Rnd::Object base rather than a check the source asks for.
 static Object *NewViewObject(const HxStr &name) {
     return View::NewView(name);
 }

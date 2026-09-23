@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <vector>
 
 #include "os/async.h"
@@ -45,7 +46,7 @@ public:
     /**
      * Construct a texture with no bitmap.
      *
-     * The mip selector starts at -0x80 and the GS handle at -1, which stands for no residency.
+     * The mip selector starts at -0x80 and mZone at -1, which selects the tagged heap.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x004e3dc8
@@ -54,6 +55,51 @@ public:
 
     /** @ghidraAddress 0x004e7628 */
     virtual ~Tex();
+
+    /**
+     * Allocate a texture block under the tag "Rnd::Tex".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x004e7388
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a texture block under the same tag.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004e73a8
+     */
+    static void operator delete(void *pBlock);
+
+    /**
+     * Report the size of mip level 0 and the bytes every loaded level occupies.
+     *
+     * Level 0 is locked through LockMipBitmap() for its width, height, and depth. Every level is
+     * then locked with read-back requested, and each contributes its pixel bytes and four bytes per
+     * palette entry. A texture with no level 0 bitmap reports failure without unlocking it. The
+     * name is inferred.
+     *
+     * @param nWidth Receives the width of level 0.
+     * @param nHeight Receives the height of level 0.
+     * @param nBitsPerPixel Receives the depth of level 0.
+     * @param nBytes Receives the bytes of every level.
+     * @return Non-zero on success.
+     * @ghidraAddress 0x004e3e48
+     */
+    int GetBitmapInfo(int &nWidth, int &nHeight, int &nBitsPerPixel, int &nBytes);
+
+    /**
+     * Report mBitmapPath relative to FilePath::sRoot.
+     *
+     * The result lives in the function-local static FilePath::RelativeToRoot() returns. The routine
+     * has no caller in the shipped build. The name is inferred.
+     *
+     * @return The relative path.
+     * @ghidraAddress 0x004e7568
+     */
+    const HxStr &GetRelativeBitmapPath() const;
 
     // Rnd::Object leaves slots 3 through 7 pointing at the shared pure-virtual handler at
     // `0x005381a8` and gives slot 2 a body of its own at `0x0053e5a8`. Every one of the six below
@@ -122,14 +168,25 @@ public:
     bool PollAsyncMips();
 
     /**
-     * Allocate the bitmap of the next mip level from an open stream.
+     * Start loading the configured bitmap, or build a blank one when no path is set.
+     *
+     * The mip handles are dropped and the current zone becomes mZone. With a bitmap path the
+     * cached copies of the base level and its mip levels are queued for reading, and a failure
+     * zeroes the dimensions and the depth before RestoreSurfaces() runs. Without a path one blank
+     * level is allocated in a single block, from the tagged heap when mZone is -1 and from the
+     * zone otherwise. The block holds the bitmap header, then a palette for a depth of 8 bits or
+     * fewer, then the pixels on a 16-byte boundary. Flag 0x40 of mUnknown28 triples the width and
+     * doubles the height of that level. The level is recorded as loaded and RestoreSurfaces()
+     * runs.
      *
      * @ghidraAddress 0x004e3fe8
      */
     void AllocateBitmapFromStream();
 
     /**
-     * Cancel whatever mip reads are still outstanding.
+     * Cancel whatever mip reads are still outstanding and drop every mip handle.
+     *
+     * The pending mask is left as it was, so a later poll still waits on the cancelled levels.
      *
      * @ghidraAddress 0x004e4648
      */
@@ -205,8 +262,9 @@ public:
     /**
      * Release every loaded bitmap and cancel the outstanding reads.
      *
-     * Vtable slot 13. A bitmap already resident in GS memory belongs to its slot, so only a copy
-     * that never arrived there is released, and the release is billed to `rndtex.cpp` line 610.
+     * Vtable slot 13. A bitmap allocated from a zone goes with its zone. Only a bitmap from the
+     * tagged heap, while mZone is -1, is released, and the release is billed to `rndtex.cpp` line
+     * 610.
      *
      * @ghidraAddress 0x004e7aa8
      */
@@ -281,6 +339,16 @@ public:
      */
     int mUnknown28;
 
+private:
+    // Queue the base file and, when mUnknown28 has bit 0x4, every numbered mip file ("_m1", "_m2",
+    // and on) that exists, stopping at the first one missing. Reports false only when a queued
+    // read fails, which QueueMipRead() never reports.
+    bool LoadMipFiles();
+
+    // Queue an asynchronous read of the compressed cache copy of one bitmap file, and record a new
+    // pending mip level for it with a null bitmap. Always reports 1.
+    int QueueMipRead(const char *pszPath);
+
 protected:
     std::vector<int> mMipHandles;  // +0x2c
     unsigned char mPendingMipMask; // +0x38 One bit per mip level still loading.
@@ -294,7 +362,10 @@ public:
 
 protected:
     FilePath mBitmapPath; // +0x40
-    int mGsHandle;        // +0x48 Starts at -1, which stands for no residency.
+    // Zone the loaded bitmaps are allocated from, or -1 for the tagged heap. Starts at -1, and
+    // AllocateBitmapFromStream() records the current zone. FreeLoadedBitmaps() releases a bitmap
+    // only while this is -1, because zone memory goes with its zone. +0x48
+    int mZone;
     std::vector<ABitmap *> mLoadedBitmaps;
 };
 
@@ -323,6 +394,18 @@ extern HxStr g_texClassName;
  * @ghidraAddress 0x004e77f0
  */
 Tex *NewTex(const HxStr &name);
+
+/**
+ * Build a texture through the creator hook.
+ *
+ * No call site survives in the shipped program. The name is inferred from the Rnd::Button
+ * counterpart.
+ *
+ * @param name The object name.
+ * @return The new texture.
+ * @ghidraAddress 0x004e7448
+ */
+Tex *NewTexThroughHook(const HxStr &name);
 
 /**
  * Build a texture for the registered "Tex" class by calling through g_pfnNewTex.

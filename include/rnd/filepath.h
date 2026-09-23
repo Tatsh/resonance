@@ -115,6 +115,19 @@ public:
     static void SetRoot(const HxStr &root);
 
     /**
+     * Report whether a path names its location outright rather than relative to sRoot.
+     *
+     * A path that starts with a slash or a backslash, or whose second character is a colon, is
+     * absolute. So is an empty path. Rnd::Tex::SetBitmapConfig() is the one caller. The name is
+     * inferred.
+     *
+     * @param path The path to test.
+     * @return True for an absolute path.
+     * @ghidraAddress 0x004e7cd8
+     */
+    static bool IsAbsolute(const HxStr &path);
+
+    /**
      * Directory every relative path is resolved against, empty until SetRoot() is called.
      *
      * The Rnd::Tex unit's static initialiser constructs it after Rnd::g_texClassName.
