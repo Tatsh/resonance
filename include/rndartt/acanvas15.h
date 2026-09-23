@@ -32,9 +32,9 @@
  * mColor is the halfword at offset 0x24 rather than the word ACanvas32 stores there, which is the
  * only layout difference in the family; the object is 0x28 bytes either way.
  *
- * Every pixel slot converts and then forwards to the layout class, reading the destination from
- * the table rather than calling a sibling directly: the store slots dispatch through the entry at
- * table offset 0x88 and the read slots through the one at 0xd8. So each format costs one
+ * Every pixel slot converts and then forwards to the layout class through the table. The store
+ * slots dispatch through the entry at table offset 0x88, slot 17 or PutPixel15NoClip(), and the
+ * read slots through the one at 0xd8, slot 27 or GetPixel15NoClip(). So each format costs one
  * conversion body and one dispatch, never a second addressing body.
  */
 class ACanvas15 : public ACanvas {
@@ -170,6 +170,11 @@ public:
      */
     void PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB);
 
+    // The base declares a PutPixelNoClip of its own at a different slot, and declaring this
+    // overload would otherwise hide it from lookup on this class. The declaration below affects
+    // name lookup only: it adds no slot and changes no layout.
+    using ACanvas::PutPixelNoClip;
+
     /**
      * Store one 8888 colour at one point, with no clip test.
      *
@@ -178,7 +183,7 @@ public:
      * @param nColor The colour.
      * @ghidraAddress 0x0062ff18
      */
-    void PutPixel32NoClip(int nX, int nY, unsigned int nColor);
+    void PutPixelNoClip(int nX, int nY, unsigned int nColor);
 
     /**
      * Store one native value at one point, with no clip test.
@@ -218,7 +223,7 @@ public:
      * @return The colour.
      * @ghidraAddress 0x00630078
      */
-    unsigned int GetPixel32NoClip(int nX, int nY);
+    unsigned int GetPixelNoClip(int nX, int nY);
 
     /**
      * Read one point in the native width, with no clip test.

@@ -24,7 +24,7 @@ constexpr int kPaletteLastIndex = 255;
 
 // Expand a 1555 colour to 8888. Alpha is all ones when the 1555 alpha bit is set and zero
 // otherwise, and the low three bits of every channel expand to zero rather than being replicated.
-// GetColor32(), GetPixel32NoClip(), and both index lookups form the same value.
+// GetColor32(), GetPixelNoClip(), and both index lookups form the same value.
 inline unsigned int Rgb8888From1555(unsigned int nColor) {
     unsigned int nResult = ((nColor & kRed15Mask) << kChannel5Shift) |
                            ((nColor & kGreen15Mask) << 6) | ((nColor & kBlue15Mask) << 9);
@@ -34,7 +34,7 @@ inline unsigned int Rgb8888From1555(unsigned int nColor) {
     return nResult;
 }
 
-// Pack an 8888 colour into 1555, alpha bit from bit 31. SetColor32() and PutPixel32NoClip() both
+// Pack an 8888 colour into 1555, alpha bit from bit 31. SetColor32() and PutPixelNoClip() both
 // write this sequence out rather than reaching APackRgb1555From8888(), which is the same packing
 // out of line.
 inline unsigned short Rgb1555From8888(unsigned int nColor) {
@@ -138,22 +138,22 @@ void ACanvas15::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
             return;
         }
     }
-    PutPixelNoClip(nX, nY, APackRgb1555From8888(pPalette->mEntries[nIndex & kChannelMask]));
+    PutPixel15NoClip(nX, nY, APackRgb1555From8888(pPalette->mEntries[nIndex & kChannelMask]));
 }
 
 // 0x0062fec0
 void ACanvas15::PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) {
-    PutPixelNoClip(nX, nY, Rgb1555FromChannels(pRGB));
+    PutPixel15NoClip(nX, nY, Rgb1555FromChannels(pRGB));
 }
 
 // 0x0062ff18
-void ACanvas15::PutPixel32NoClip(int nX, int nY, unsigned int nColor) {
-    PutPixelNoClip(nX, nY, Rgb1555From8888(nColor));
+void ACanvas15::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
+    PutPixel15NoClip(nX, nY, Rgb1555From8888(nColor));
 }
 
 // 0x0062fcf0
 void ACanvas15::PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) {
-    PutPixelNoClip(nX, nY, nColor & 0xffff);
+    PutPixel15NoClip(nX, nY, static_cast<unsigned short>(nColor));
 }
 
 // 0x0062ff70
@@ -165,7 +165,7 @@ int ACanvas15::GetPixelIndexedNoClip(int nX, int nY) {
             return 0;
         }
     }
-    const unsigned int nColor = GetPixelNoClip(nX, nY);
+    const unsigned int nColor = GetPixel15NoClip(nX, nY);
     if (pPalette->mpRgb15ToIndex != nullptr) {
         return pPalette->mpRgb15ToIndex[nColor & kColor15Mask] & kChannelMask;
     }
@@ -176,18 +176,18 @@ int ACanvas15::GetPixelIndexedNoClip(int nX, int nY) {
 
 // 0x00630020
 void ACanvas15::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
-    const unsigned int nColor = GetPixelNoClip(nX, nY);
+    const unsigned int nColor = GetPixel15NoClip(nX, nY);
     pRGB[0] = static_cast<unsigned char>(nColor << kChannel5Shift);
     pRGB[1] = static_cast<unsigned char>((nColor >> 2) & kChannel5Mask);
     pRGB[2] = static_cast<unsigned char>((nColor >> 7) & kChannel5Mask);
 }
 
 // 0x00630078
-unsigned int ACanvas15::GetPixel32NoClip(int nX, int nY) {
-    return Rgb8888From1555(GetPixelNoClip(nX, nY));
+unsigned int ACanvas15::GetPixelNoClip(int nX, int nY) {
+    return Rgb8888From1555(GetPixel15NoClip(nX, nY));
 }
 
 // 0x0062fd20
 unsigned int ACanvas15::GetPixelNativeNoClip(int nX, int nY) {
-    return GetPixelNoClip(nX, nY);
+    return GetPixel15NoClip(nX, nY);
 }
