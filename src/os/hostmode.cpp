@@ -60,26 +60,32 @@ void ForceCdOnlyBoot() {
 
 } // namespace
 
+// 0x0050ef90
 HostMode GetHostMode() {
     return static_cast<HostMode>(g_nHostMode);
 }
 
+// 0x0050efa0
 int UsingArkFiles() {
     return g_nUsingArkFiles;
 }
 
+// 0x0050efb0
 int WarningsEnabled() {
     return g_nWarningsEnabled;
 }
 
+// 0x0050efc0
 int ScreenMessagesEnabled() {
     return g_nScreenMessagesEnabled;
 }
 
+// 0x0050efd0
 int UsingCdMedia() {
     return g_nUsingCdMedia;
 }
 
+// 0x0050ef30
 HxStr GetFreqRoot() {
     return HxStr("");
 }

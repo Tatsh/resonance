@@ -13,6 +13,7 @@
 #include "os/async.h"
 #include "os/hostmode.h"
 #include "os/hxstr.h"
+#include "os/log.h"
 #include "script/scripttemplatemap.h"
 
 namespace {
@@ -156,6 +157,7 @@ inline void InitMemoryCardLibrary() {
 
 } // namespace
 
+// 0x004dfe28
 void InitIop() {
     ConfigureRetailBoot();
     RebootIopWithImage();
@@ -163,6 +165,7 @@ void InitIop() {
     InitBootConfig();
 }
 
+// 0x004de170
 void LoadIopModule(const IopModule *pModule, unsigned nSources) {
     if ((nSources & kIopModuleSourceDisc) != 0) {
         HxStr name(pModule->mName);
@@ -183,6 +186,7 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources) {
     }
 }
 
+// 0x004de600
 void LoadIopModules() {
     const HostMode mode = GetHostMode();
     WaitVsync();
@@ -217,6 +221,7 @@ void LoadIopModules() {
     InitMemoryCardLibrary();
 }
 
+// 0x005e1210
 void RegisterHardEffectCommands() {
     RegisterScriptTemplate(kTemplateUseHardEffect, HxStr(kUseHardEffectExpression));
     RegisterScriptTemplate(kTemplateHardEffectId, HxStr(kHardEffectIdExpression));

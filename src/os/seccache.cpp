@@ -13,15 +13,16 @@ constexpr char kSectorCacheZoneName[] = "seccache";
 // used, whose stamp is zero, always sorts as the oldest.
 unsigned g_nSectorCacheClock;
 
-// 0x00724bf0. Nothing anywhere in the image writes this word. The read below is its only
-// reference, so it is permanently zero and the ZoneFree() branch it selects is dead code.
-int g_nSectorCacheZone;
+// 0x00724bf0. The image initialises this word to kNoZone and nothing writes it. The read below is
+// its only reference, so the ZoneFree() branch it selects is dead code.
+int g_nSectorCacheZone = kNoZone;
 
 } // namespace
 
 int g_nSectorCacheRows;
 SectorCacheRow *g_pSectorCacheRows;
 
+// 0x00554fb8
 void InitSectorCache(int nRows) {
     int nSaved = ZoneGetCurrent();
     int nZone = FindZoneByName(kSectorCacheZoneName);
@@ -50,6 +51,7 @@ void InitSectorCache(int nRows) {
     ZoneSetCurrent(nSaved);
 }
 
+// 0x005550c8
 void ShutdownSectorCache() {
     SectorCacheRow *pRow = g_pSectorCacheRows;
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
@@ -69,6 +71,7 @@ void ShutdownSectorCache() {
     g_nSectorCacheRows = 0;
 }
 
+// 0x00555298
 void InvalidateCachedSectors(int nFile) {
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
         SectorCacheRow *pRow = &g_pSectorCacheRows[i];
@@ -80,6 +83,7 @@ void InvalidateCachedSectors(int nFile) {
     }
 }
 
+// 0x00555190
 SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
         SectorCacheRow *pRow = &g_pSectorCacheRows[i];
@@ -137,6 +141,7 @@ void DumpSectorCache() {
     }
 }
 
+// 0x00554e50
 SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
     unsigned nOldest = kSectorCacheStampCeiling;
     SectorCacheRow *pChosen = nullptr;

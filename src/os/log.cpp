@@ -36,6 +36,7 @@ char g_szFatalMessage[kFatalMessageSize];
 
 } // namespace
 
+// 0x0053dde0
 void LogPrintf(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -43,6 +44,7 @@ void LogPrintf(const char *pszFormat, ...) {
     va_end(args);
 }
 
+// 0x0052e3e8
 void Warn(const char *pszFormat, ...) {
     if (WarningsEnabled() != 1) {
         return;
@@ -74,6 +76,7 @@ void AlertScriptTemplate(int nTemplate, ...) {
     va_end(args);
 }
 
+// 0x0052e868
 void Fatal(const char *pszFormat, ...) {
     MemCloseLogAndReport();
 
@@ -86,6 +89,23 @@ void Fatal(const char *pszFormat, ...) {
     }
 }
 
+// 0x0052e960
+void Error(const char *pszFormat, ...) {
+    va_list args;
+    va_start(args, pszFormat);
+    ShowAlertMessage(FormatMessage(HxStr(pszFormat), args, kFormatMessageUnused));
+    va_end(args);
+}
+
+// 0x00466368
+void ShowReportedMessage(const HxStr &text, int nDuration) {
+    if (ScreenMessagesEnabled() == 1) {
+        ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, nDuration);
+    }
+    std::cout << text << std::endl;
+}
+
+// 0x004663d8
 void ShowAlertMessage(const HxStr &text) {
     ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, kAlertMessageDuration);
     std::cout << "Alert! " << text << std::endl;

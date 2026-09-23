@@ -52,6 +52,20 @@ void Warn(const char *pszFormat, ...);
 void Fatal(const char *pszFormat, ...) __attribute__((noreturn));
 
 /**
+ * Report a problem and return to the caller.
+ *
+ * The message is formatted through FormatMessage() and handed to ShowAlertMessage(), with no boot
+ * option able to suppress it. Unlike Fatal() it returns, and every call site in iop.cpp calls
+ * exit(1) immediately afterwards.
+ *
+ * The name is inferred. Nothing in the image attests it.
+ *
+ * @param pszFormat A printf-style format string.
+ * @ghidraAddress 0x0052e960
+ */
+void Error(const char *pszFormat, ...);
+
+/**
  * Report a failed assertion on screen and exit.
  *
  * The report is built in a `strstream` as "Assertion failed ", the file, ":", the line, ": ", and
@@ -138,8 +152,8 @@ HxStr FormatScriptTemplate(int nTemplate, ...);
 /**
  * Show a message and write it to the report stream.
  *
- * The routine belongs to another translation unit and is declared here so log.cpp can call it. The
- * on-screen half is skipped unless ScreenMessagesEnabled() reports 1. The stream half always runs.
+ * The on-screen half is skipped unless ScreenMessagesEnabled() reports 1. The stream half, `cout`
+ * followed by `endl`, always runs.
  *
  * The name is inferred. Nothing in the image attests it.
  *

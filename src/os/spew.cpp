@@ -21,13 +21,16 @@ inline void LowerCase(HxStr &text) {
 
 } // namespace
 
+// 0x004b32b8
 Spew::Spew() {
 }
 
+// 0x004b32e8
 Spew::~Spew() {
     CloseChannels();
 }
 
+// 0x004b3528
 void Spew::Register(std::ostream **ppStream, const char *pszFile) {
     HxStr name(pszFile);
     int nPos = name.ReverseFind('.');
@@ -42,6 +45,7 @@ void Spew::Register(std::ostream **ppStream, const char *pszFile) {
     mConnections.push_back(Connection(name, ppStream, nullptr));
 }
 
+// 0x004b36b8
 void Spew::Connect(const HxStr &file, const HxStr &channel) {
     Channel *pChannel = nullptr;
     HxStr channelName(channel);
@@ -69,6 +73,7 @@ void Spew::Connect(const HxStr &file, const HxStr &channel) {
     }
 }
 
+// 0x004b3898
 Spew::Channel *Spew::NewChannel(const HxStr &name) {
     std::ostream *pStream = nullptr;
     if (name == kChannelOff) {
@@ -83,6 +88,7 @@ Spew::Channel *Spew::NewChannel(const HxStr &name) {
     return new Channel(name, pStream);
 }
 
+// 0x004b3448
 void Spew::CloseChannels() {
     for (Channel *pChannel : mChannels) {
         if (pChannel == nullptr) {
@@ -98,6 +104,7 @@ void Spew::CloseChannels() {
     mChannels.erase(mChannels.begin(), mChannels.end());
 }
 
+// 0x004b4550
 void Spew::PrintConnections(std::ostream &stream) {
     for (const auto &connection : mConnections) {
         stream << connection.mFile;

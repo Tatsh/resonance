@@ -85,22 +85,6 @@ void WaitVsync();
 void ConfigureRetailBoot();
 
 /**
- * Report a problem and return to the caller.
- *
- * The routine belongs to the same translation unit as Warn() and Fatal() and is declared here so
- * that iop.cpp can call it. The message is formatted through FormatMessage() and displayed for 50
- * of whatever unit ShowScreenMessage() takes, with no boot option able to suppress it. Unlike
- * Fatal() it returns, and both of its call sites in iop.cpp call exit(1) immediately afterwards.
- *
- * The name is inferred. Nothing in the image attests it. All five call sites are in iop.cpp,
- * although the routine sits with the logging family rather than here.
- *
- * @param pszFormat A printf-style format string.
- * @ghidraAddress 0x0052e960
- */
-void Error(const char *pszFormat, ...);
-
-/**
  * Bring up the graphics path and the on-screen debug console.
  *
  * The routine belongs to another translation unit and is declared here so that iop.cpp can call it.
