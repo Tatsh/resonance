@@ -42,11 +42,22 @@ constexpr char kCacheExtension[] = ".abm";
 constexpr char kCompressedSuffix[] = ".gz";
 
 // Texture flag bits AllocateBitmapFromStream() and the mip loader test. The first enables the
-// numbered mip files, and the second makes a blank level three times as wide and twice as tall.
+// numbered mip files, and the second makes a blank level three faces wide and two faces tall.
 constexpr int kTexFlagMipChain = 0x04;
-constexpr int kTexFlagWideBlank = 0x40;
-constexpr int kWideBlankWidthFactor = 3;
-constexpr int kWideBlankHeightFactor = 2;
+constexpr int kTexFlagCubeMap = 0x40;
+constexpr int kCubeMapWidthFactor = 3;
+constexpr int kCubeMapHeightFactor = 2;
+
+// The only revision Save() writes, and the highest Load() accepts.
+constexpr int kTexRevision = 4;
+
+// The revision that stores the width and the height as 16-bit values, the last revision that
+// stores a spare byte after the flags, and the first that stores mMipSelect.
+constexpr int kShortSizeRevision = 1;
+constexpr int kLastRevisionWithSpareByte = 2;
+constexpr int kFirstRevisionWithMipSelect = 4;
+
+constexpr char kIntFormat[] = "%d";
 
 // A blank level of this depth or less is indexed and carries a palette.
 constexpr int kMaxIndexedBitsPerPixel = 8;
@@ -79,6 +90,21 @@ inline const char *TextOf(const HxStr &text) {
 // wins when both are set.
 constexpr int kTexFlagPaletteAlpha = 0x10;
 constexpr int kTexFlagPaletteAlphaWhite = 0x20;
+
+// The flag bits DumpText() lists, in its order, with the text each prints.
+struct TexFlagName {
+    int nBit;
+    const char *pszName;
+};
+
+constexpr TexFlagName kTexFlagNames[] = {
+    {kABitmapColorKeyWhite, "TransparentWhite, "},
+    {kABitmapColorKeyBlack, "TransparentWhite, "}, // Yes, the binary prints the white key's name.
+    {kTexFlagMipChain, "MipMaps, "},
+    {kTexFlagPaletteAlpha, "GreyscaleAlpha, "},
+    {kTexFlagPaletteAlphaWhite, "GreyscaleWhite, "},
+    {kTexFlagCubeMap, "CubeMap, "},
+};
 
 // A loaded mip block. The bitmap header is followed by a palette and then the pixels of an indexed
 // format. A direct colour format's pixels begin where the palette would.
@@ -120,6 +146,174 @@ inline int ClassifyPowerOfTwo(int n) {
 Tex::Tex(const HxStr &name)
     : Object(name), mWidth(0), mHeight(0), mBitsPerPixel(0), mUnknown28(0), mPendingMipMask(0),
       mMipSelect(-0x80), mBitmapPath(nullptr), mZone(-1) {
+}
+
+// 0x004e7628
+Tex::~Tex() {
+    FreeLoadedBitmaps();
+    ReleaseAllRefs();
+}
+
+// 0x004e4738
+void Tex::DumpText(FailSink &sink) {
+    Object::DumpText(sink);
+    if (sink.mDumpLevel <= 0) {
+        return;
+    }
+
+    sink.Print("[Tex]\n");
+    sink.Print("width:");
+    sink.Format(kIntFormat, mWidth);
+    sink.Print(" height:");
+    sink.Format(kIntFormat, mHeight);
+    sink.Print(" bpp:");
+    sink.Format(kIntFormat, mBitsPerPixel);
+    sink.Print(" mipMapK:");
+    sink.Format(kIntFormat, mMipSelect);
+    sink.Print(" file:");
+    mBitmapPath.Print(sink);
+    sink.Print(" flags:");
+    if (mUnknown28 == 0) {
+        sink.Print("None");
+    } else {
+        for (const auto &flag : kTexFlagNames) {
+            if ((mUnknown28 & flag.nBit) != 0) {
+                sink.Print(flag.pszName);
+            }
+        }
+    }
+    sink.Print("\n");
+}
+
+// 0x004e4910
+void Tex::Save(Stream &stream) {
+    const int nRevision = kTexRevision;
+    stream.Write(&nRevision, sizeof(nRevision));
+    stream.Write(&mWidth, sizeof(mWidth));
+    stream.Write(&mHeight, sizeof(mHeight));
+    stream.Write(&mBitsPerPixel, sizeof(mBitsPerPixel));
+    mBitmapPath.Save(stream);
+    stream.Write(&mUnknown28, sizeof(mUnknown28));
+    stream.Write(&mMipSelect, sizeof(mMipSelect));
+}
+
+// 0x004e7610
+void Tex::Replace([[maybe_unused]] Object *pFrom, [[maybe_unused]] Object *pTo) {
+}
+
+// 0x004e7618
+const HxStr &Tex::ClassName() const {
+    return g_texClassName;
+}
+
+// 0x004e79f0
+void Tex::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
+    const Tex *pTex = dynamic_cast<const Tex *>(pSource);
+    FreeLoadedBitmaps();
+    mWidth = pTex->mWidth;
+    mHeight = pTex->mHeight;
+    mBitsPerPixel = pTex->mBitsPerPixel;
+    mBitmapPath = pTex->mBitmapPath;
+    mMipSelect = pTex->mMipSelect;
+    mUnknown28 = pTex->mUnknown28;
+    AllocateBitmapFromStream();
+}
+
+// 0x004e4a20
+void Tex::Load(Stream &stream) {
+    int nRevision = 0;
+    stream.Read(&nRevision, sizeof(nRevision));
+    if (nRevision > kTexRevision) {
+        g_failSink.Report("Can't load new Tex\n");
+        return;
+    }
+
+    FreeLoadedBitmaps();
+    if (nRevision == kShortSizeRevision) {
+        short nShortWidth = 0;
+        short nShortHeight = 0;
+        stream.Read(&nShortWidth, sizeof(nShortWidth));
+        stream.Read(&nShortHeight, sizeof(nShortHeight));
+        mWidth = nShortWidth;
+        mHeight = nShortHeight;
+    } else {
+        stream.Read(&mWidth, sizeof(mWidth));
+        stream.Read(&mHeight, sizeof(mHeight));
+    }
+    stream.Read(&mBitsPerPixel, sizeof(mBitsPerPixel));
+    mBitmapPath.Load(stream);
+    stream.Read(&mUnknown28, sizeof(mUnknown28));
+    if (nRevision >= kShortSizeRevision && nRevision <= kLastRevisionWithSpareByte) {
+        char cSpare = 0;
+        stream.ReadBytes(&cSpare, sizeof(cSpare)); // Read and then discarded, as in the binary.
+    }
+    if (nRevision >= kFirstRevisionWithMipSelect) {
+        stream.Read(&mMipSelect, sizeof(mMipSelect));
+    }
+    AllocateBitmapFromStream();
+}
+
+// 0x004e75a0
+ACanvas *Tex::LockMipBitmap([[maybe_unused]] int nMip,
+                            [[maybe_unused]] int nUnknown,
+                            [[maybe_unused]] int nFlags) {
+    return nullptr;
+}
+
+// 0x004e75f8
+void Tex::UnlockMipBitmap() {
+}
+
+// 0x004e7600
+void Tex::SetPalette([[maybe_unused]] APalette *pPalette, [[maybe_unused]] int nUnknown) {
+}
+
+// 0x004e7608
+void Tex::SetGsPageInUse([[maybe_unused]] bool bInUse) {
+}
+
+// 0x004e7908
+void Tex::SetBitmapConfig(
+    int nWidth, int nHeight, int nBitsPerPixel, const HxStr &path, int nMipSelect, int nUnknown28) {
+    mWidth = nWidth;
+    mHeight = nHeight;
+    mBitsPerPixel = nBitsPerPixel;
+    mMipSelect = nMipSelect;
+    mUnknown28 = nUnknown28;
+    if (FilePath::IsAbsolute(path)) {
+        mBitmapPath.Set(path);
+    } else {
+        mBitmapPath.SetFromRoot(path);
+    }
+    CancelPendingMips();
+    mMipHandles.clear();
+}
+
+// 0x004e4598
+void Tex::RestoreSurfaces() {
+    if (!mLoadedBitmaps.empty() && mLoadedBitmaps[0] != nullptr) {
+        const ABitmap *pBitmap = mLoadedBitmaps[0];
+        mWidth = pBitmap->mWidth;
+        mHeight = pBitmap->mHeight;
+        mBitsPerPixel = g_abBitmapBitsPerPixel[pBitmap->mFormat];
+    }
+    mMipHandles.clear();
+}
+
+// 0x007033b0
+HxStr g_texClassName("Tex");
+
+// 0x004e77f0
+Tex *NewTex(const HxStr &name) {
+    return new Tex(name);
+}
+
+// 0x007033a8
+Tex *(*g_pfnNewTex)(const HxStr &name) = NewTex;
+
+// 0x004e7770
+Object *CreateRegisteredTex(const HxStr &name) {
+    return g_pfnNewTex(name);
 }
 
 // 0x004e7878
@@ -173,9 +367,9 @@ void Tex::AllocateBitmapFromStream() {
 
     int nWidth = mWidth;
     int nHeight = mHeight;
-    if ((mUnknown28 & kTexFlagWideBlank) != 0) {
-        nWidth *= kWideBlankWidthFactor;
-        nHeight *= kWideBlankHeightFactor;
+    if ((mUnknown28 & kTexFlagCubeMap) != 0) {
+        nWidth *= kCubeMapWidthFactor;
+        nHeight *= kCubeMapHeightFactor;
     }
     const int nFormat = ABitmap::FormatForBitsPerPixel(mBitsPerPixel);
     const int nPixelBytes = ABitmap::ComputeByteCount(nFormat, nWidth, nHeight);

@@ -31,11 +31,11 @@ namespace Rnd {
  * the object past `+0x4a8`.
  *
  * The vtable has sixteen entries, so the class declares eight virtuals of its own beyond the six
- * of Rnd::Object. Slots 8 through 12 at `0x004e73c8`, `0x004e75a0`, `0x004e75f8`, `0x004e7600`,
- * and `0x004e7608` are small routines that are not yet identified.
+ * of Rnd::Object. Slots 8 through 15 are ReloadBitmaps(), LockMipBitmap(), UnlockMipBitmap(),
+ * SetPalette(), SetGsPageInUse(), FreeLoadedBitmaps(), RestoreSurfaces(), and OnMipLoaded().
  *
- * Recovery is partial. The three configuration words the loader passes to SetBitmapConfig() are
- * not yet identified, so they are recorded by offset.
+ * Recovery is partial. mUnknown28 is the flag word DumpText() labels " flags:", and its bits are
+ * the ones DumpText() lists by name.
  *
  * mBitmapPath is a Rnd::FilePath, whose routines sit in this unit and take the path's address
  * rather than the texture's. SetBitmapConfig() installs the path through FilePath::Set() for a
@@ -53,7 +53,11 @@ public:
      */
     Tex(const HxStr &name);
 
-    /** @ghidraAddress 0x004e7628 */
+    /**
+     * Free the loaded bitmaps and drop every reference to this texture.
+     *
+     * @ghidraAddress 0x004e7628
+     */
     virtual ~Tex();
 
     /**
@@ -106,22 +110,69 @@ public:
     // is a distinct `rndtex.cpp` body in the Rnd::Tex table, so the class declares all six and is
     // not abstract. Rnd::PsTex repeats them byte-identically, which is to say it inherits them.
 
-    /** @ghidraAddress 0x004e4738 */
+    /**
+     * Write the dimensions, the mip selector, the path, and the flag names to sink.
+     *
+     * The flag word is dumped under " flags:" by name, or as "None" when it is zero. Bit
+     * kABitmapColorKeyBlack prints "TransparentWhite, " as bit kABitmapColorKeyWhite does, because
+     * the image reuses the one string for both.
+     *
+     * @param sink The text sink.
+     * @ghidraAddress 0x004e4738
+     */
     virtual void DumpText(FailSink &sink);
 
-    /** @ghidraAddress 0x004e4910 */
+    /**
+     * Write revision 4, the three dimensions, the path, mUnknown28, and mMipSelect.
+     *
+     * Rnd::Object::Save() is not called.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x004e4910
+     */
     virtual void Save(Stream &stream);
 
-    /** @ghidraAddress 0x004e7610 */
+    /**
+     * Do nothing. A texture has no object references to retarget.
+     *
+     * @param pFrom Unused.
+     * @param pTo Unused.
+     * @ghidraAddress 0x004e7610
+     */
     virtual void Replace(Object *pFrom, Object *pTo);
 
-    /** @ghidraAddress 0x004e7618 */
+    /**
+     * Report the registered class name, "Tex".
+     *
+     * @return g_texClassName.
+     * @ghidraAddress 0x004e7618
+     */
     virtual const HxStr &ClassName() const;
 
-    /** @ghidraAddress 0x004e79f0 */
+    /**
+     * Take the dimensions, path, mip selector, and flags of another texture and reload.
+     *
+     * The loaded bitmaps are freed first and AllocateBitmapFromStream() runs last.
+     * Rnd::Object::Copy() is not called, and nFlags is ignored.
+     *
+     * @param pSource The texture to copy, which has to be a Rnd::Tex.
+     * @param nFlags Unused.
+     * @ghidraAddress 0x004e79f0
+     */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
-    /** @ghidraAddress 0x004e4a20 */
+    /**
+     * Replace this texture's configuration from stream and reload.
+     *
+     * A revision above 4 is reported as "Can't load new Tex" and nothing else is read. Revision
+     * 1 stores the width and the height as 16-bit values. Revisions 1 and 2 store one byte after
+     * the flags that is read and discarded, and mMipSelect is stored from revision 4. The loaded
+     * bitmaps are freed before the read and AllocateBitmapFromStream() runs after it.
+     * Rnd::Object::Load() is not called.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x004e4a20
+     */
     virtual void Load(Stream &stream);
 
     /**
@@ -135,9 +186,9 @@ public:
     /**
      * Point the texture at a bitmap and restart its load.
      *
-     * Records the bitmap dimensions and the mip selector, then either clears the current bitmap or
-     * begins loading the new path. The GS associations and the mip handle vector are dropped either
-     * way.
+     * Records the bitmap dimensions, the mip selector, and the flags. An absolute path is stored
+     * through FilePath::Set() and any other through FilePath::SetFromRoot(). The pending mip reads
+     * are then cancelled and the mip handle vector is emptied. No load starts here.
      *
      * @param nWidth The bitmap width.
      * @param nHeight The bitmap height.
@@ -290,7 +341,9 @@ protected:
     /**
      * Rebuild whatever the texture keeps in GS memory.
      *
-     * Vtable slot 14. The name is the routine's own: the PlayStation 2 override reports
+     * Vtable slot 14. The base body refreshes mWidth, mHeight, and mBitsPerPixel from the first
+     * loaded bitmap when there is one, and then empties the mip handle vector. The name is the
+     * routine's own. The PlayStation 2 override reports
      * `"ERROR - RestoreSurfaces(%s), mipmap %d has no bm!"`, and the helper it calls reports
      * `"Got NULL Palette in RestoreSurfaces"`.
      *
