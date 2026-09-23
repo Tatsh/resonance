@@ -38,10 +38,11 @@ public:
      * Allocate a sink from the tagged heap under the tag "MsgSink".
      *
      * No out-of-line body exists. Every allocation of a derived class inlines the call, 78 sites
-     * in all, among them `new SynthNull` at `0x0013a0c0` and `new MetArenasScreen` at
-     * `0x001fc690`. Both pass the literal `MsgSink`. MsgSource declares no allocation pair. Its
-     * destructor at `0x0054a168` proves that by releasing its vector without a tagged free, and a
-     * class deriving from both bases therefore resolves the operator here without ambiguity.
+     * in all, among them the Synth unit's file-local NullSynth::New() at `0x0013a0c0` and
+     * `new MetArenasScreen` at `0x001fc690`. Both pass the literal `MsgSink`. MsgSource declares
+     * no allocation pair. Its destructor at `0x0054a168` proves that by releasing its vector
+     * without a tagged free, and a class deriving from both bases therefore resolves the operator
+     * here without ambiguity.
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.

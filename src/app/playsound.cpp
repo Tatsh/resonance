@@ -1,7 +1,13 @@
 #include "app/playsound.h"
 
+#include <algorithm>
+
 #include "app/application.h"
+#include "app/globals.h"
+#include "app/ticktask.h"
+#include "mid/mbt.h"
 #include "os/hxstr.h"
+#include "sch/tickclock.h"
 #include "synth/ps2hardsynth.h"
 
 namespace {
@@ -14,8 +20,22 @@ constexpr int kSoundNeutralizer = 0x3f;
 constexpr int kSoundBumper = 0x40;
 constexpr int kSoundMultiplier = 0x41;
 
-constexpr int kPowerupSoundUnknown = -1;
 constexpr int kPowerupSoundVelocity = 127;
+
+// The note PlayActivateSound() plays.
+constexpr int kNoteActivate = 100;
+
+// A note-on on the last MIDI channel, and the ticks PlaySynthSound() lets an auto-stop note sound.
+constexpr unsigned char kNoteOnLastChannel = 0x9f;
+constexpr int kAutoStopTicks = 480;
+
+// The note destroyer runs every 120 ticks and can queue as many notes as MIDI has.
+constexpr int kDestroyerPeriodTicks = 120;
+constexpr int kDestroyerCapacity = 128;
+// The task runs at once rather than at the next multiple of its period.
+constexpr int kDestroyerUnaligned = 0;
+// The task asks to be run again after every pass.
+constexpr int kRunAgain = 1;
 
 // The values LookupSound() starts its outputs at, and the velocity of the two music loops.
 constexpr int kNoNote = -1;
@@ -79,7 +99,140 @@ constexpr int kNoteFreqMakerColorMove = 64;
 constexpr int kNoteFreqMakerDelete = 45;
 constexpr int kNoteError = 45;
 
+/**
+ * Task that releases the auto-stop notes PlaySynthSound() starts.
+ *
+ * `NoteDestroyer` in the anonymous namespace of `AppPlaySoundPS2.cpp`, as its RTTI name records,
+ * with TickTask as its one base. The vtable is at `0x007d1b18`, and the object is 0x42c bytes.
+ * CreateNoteDestroyer()
+ * expands the constructor, whose uncalled out-of-line copy is at `0x0012f1e0`.
+ */
+class NoteDestroyer : public TickTask {
+public:
+    /**
+     * @param pGlobals The globals whose song clock and synthesiser the task uses.
+     */
+    explicit NoteDestroyer(Globals *pGlobals)
+        : TickTask(
+              pGlobals->GetSongClock(), Mid::MBT(kDestroyerPeriodTicks).mTick, kDestroyerUnaligned),
+          mGlobals(pGlobals), mSynth(pGlobals->GetSynth()), mCount(0) {
+        for (int nIndex = 0; nIndex < kDestroyerCapacity; ++nIndex) {
+            mEntries[nIndex].mTick = kMBTInfinity;
+        }
+    }
+
+    /** @ghidraAddress 0x0012f2b8 */
+    virtual ~NoteDestroyer() {
+    }
+
+    /**
+     * Send a note-off for every queued note whose release tick has arrived, and drop it.
+     *
+     * A released entry is replaced by the last one, which is then tested in its place.
+     *
+     * @param nTick The song position.
+     * @return Always 1, to run again.
+     * @ghidraAddress 0x0012f308
+     */
+    virtual int Tick(int nTick) {
+        for (int nIndex = 0; nIndex < mCount;) {
+            if (!(nTick < mEntries[nIndex].mTick)) {
+                mSynth->SendMidi(kNoteOffLastChannel, mEntries[nIndex].mNote, kReleaseVelocity);
+                --mCount;
+                mEntries[nIndex] = mEntries[mCount];
+            } else {
+                ++nIndex;
+            }
+        }
+        return kRunAgain;
+    }
+
+    /**
+     * Queue a note for release. The capacity is not checked.
+     *
+     * @param nNote The note.
+     * @param nTick The song position to release it at.
+     */
+    void Add(int nNote, int nTick) {
+        mEntries[mCount].mNote = nNote;
+        mEntries[mCount].mTick = nTick;
+        ++mCount;
+    }
+
+private:
+    // One queued release.
+    struct Entry {
+        int mNote;
+        int mTick;
+    };
+
+    Globals *mGlobals;                  // +0x20
+    Ps2HardSynth *mSynth;               // +0x24
+    Entry mEntries[kDestroyerCapacity]; // +0x28
+    int mCount;                         // +0x428
+};
+
+// The note destroyer, from CreateNoteDestroyer() to DestroyNoteDestroyer().
+// 0x0066f538
+NoteDestroyer *g_pNoteDestroyer;
+
 } // namespace
+
+// 0x0012e460
+void CreateNoteDestroyer() {
+    g_pNoteDestroyer = new NoteDestroyer(Application::shared());
+}
+
+// 0x0012ea50
+void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
+    Ps2HardSynth *pSynth = Application::shared()->GetSynth();
+    // Yes, the binary tests the first note against 1 rather than -1.
+    if (nNote != kSkippedFirstNote) {
+        pSynth->SendMidi(kNoteOnLastChannel, nNote, nVelocity);
+        if (bAutoStop != 0) {
+            NoteDestroyer *pDestroyer = g_pNoteDestroyer;
+            const int nNow = Application::shared()->GetSongClock()->SongTick();
+            const Mid::MBT release(std::min(
+                std::max(nNow + Mid::MBT(kAutoStopTicks).mTick, kMBTMinimum), kMBTMaximum));
+            pDestroyer->Add(nNote, release.mTick);
+        }
+    }
+    if (nNote2 != kNoNote) {
+        pSynth->SendMidi(kNoteOnLastChannel, nNote2, nVelocity);
+    }
+}
+
+// 0x0012f3d8
+void StartNoteDestroyer() {
+    g_pNoteDestroyer->Start(kMBTInfinity);
+}
+
+// 0x0012f400
+void StopNoteDestroyer() {
+    g_pNoteDestroyer->Stop();
+}
+
+// 0x0012f428
+void DestroyNoteDestroyer() {
+    delete g_pNoteDestroyer;
+    g_pNoteDestroyer = nullptr;
+}
+
+// 0x0012f470
+void PlaySoundByName(const char *pszName) {
+    const HxStr name(pszName);
+    int nNote = kNoNote;
+    int nNote2 = kNoNote;
+    int nVelocity = kDefaultVelocity;
+    int bAutoStop = 0;
+    LookupSound(name, &nNote, &nNote2, &nVelocity, &bAutoStop);
+    PlaySynthSound(nNote, nNote2, nVelocity, bAutoStop);
+}
+
+// 0x0012f598
+void PlayActivateSound() {
+    PlaySynthSound(kNoteActivate, kNoNote, kDefaultVelocity, 0);
+}
 
 // 0x0012e570
 void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int *pAutoStop) {
@@ -238,5 +391,5 @@ void PlayPowerupSound(HudItemKind kind) {
     default:
         return;
     }
-    PlaySynthSound(nSound, kPowerupSoundUnknown, kPowerupSoundVelocity, 0);
+    PlaySynthSound(nSound, kNoNote, kPowerupSoundVelocity, 0);
 }

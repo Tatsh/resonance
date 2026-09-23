@@ -36,9 +36,9 @@ void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int
 /**
  * Play the sound registered under one name.
  *
- * The routine wraps the name in an HxStr, builds a four-word request on the stack, and hands it to
- * the request builder at `0x0012ea50`. Every metagame screen sound arrives at the mixer through
- * this one entry point.
+ * The routine wraps the name in an HxStr, looks its notes, velocity, and auto-stop flag up through
+ * LookupSound(), and plays them through PlaySynthSound(). Every metagame screen sound arrives at
+ * the synthesiser through this one entry point.
  *
  * @param pszName The registered name, such as `SND_MET_SLIDE`.
  * @ghidraAddress 0x0012f470
@@ -61,17 +61,67 @@ void StopSoundByName(const char *pszName);
 /**
  * Play one sound of the hardware synthesiser.
  *
- * Starts the sound through slot 9 of Globals::GetSynth() with the velocity, and when bAutoStop is
- * set queues its release 480 ticks later on the song clock. Not reconstructed, because the queue
- * the release goes into at `0x00669538` is unrecovered. The title is inferred.
+ * Sends a note-on for nNote on the last MIDI channel through Globals::GetSynth() with the
+ * velocity, and when bAutoStop is set queues its release 480 ticks later on the song clock with
+ * the note destroyer CreateNoteDestroyer() builds. nNote2 then sounds the same way when it is not
+ * -1, and is never queued for release. The first note is skipped when it is 1, not when it is -1,
+ * which matches StopSoundByName(). The title is inferred.
  *
- * @param nSound The sound number.
- * @param nUnknown The second argument. Every recovered caller passes -1.
+ * @param nNote The first note.
+ * @param nNote2 The second note, or -1 for none.
  * @param nVelocity The velocity, from 0 to 127.
- * @param bAutoStop Non-zero to release the sound after 480 ticks.
+ * @param bAutoStop Non-zero to release the first note after 480 ticks.
  * @ghidraAddress 0x0012ea50
  */
-void PlaySynthSound(int nSound, int nUnknown, int nVelocity, int bAutoStop);
+void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop);
+
+/**
+ * Build the note destroyer that releases the auto-stop notes PlaySynthSound() starts.
+ *
+ * The destroyer is a file-local TickTask that runs every 120 ticks on the song clock and sends a
+ * note-off for each queued note whose release tick has arrived. It is stored in a file-scope
+ * pointer. GrooveWorld::StartPlay() is the caller. The title is inferred.
+ *
+ * @ghidraAddress 0x0012e460
+ */
+void CreateNoteDestroyer();
+
+/**
+ * Start the note destroyer on the song clock with its epoch at zero.
+ *
+ * GrooveWorld::StartPlay() is the caller. The title is inferred.
+ *
+ * @ghidraAddress 0x0012f3d8
+ */
+void StartNoteDestroyer();
+
+/**
+ * Withdraw the note destroyer's queued run.
+ *
+ * GrooveWorld::Shutdown() is the caller. The title is inferred.
+ *
+ * @ghidraAddress 0x0012f400
+ */
+void StopNoteDestroyer();
+
+/**
+ * Delete the note destroyer and clear the pointer to it.
+ *
+ * GrooveWorld::Shutdown() is the caller, after StopNoteDestroyer(). The title is inferred.
+ *
+ * @ghidraAddress 0x0012f428
+ */
+void DestroyNoteDestroyer();
+
+/**
+ * Play the note 100 at full velocity with no second note and no release.
+ *
+ * The script commands that activate listen mode, practice mode, and team freqs are among the
+ * callers. The title is inferred from them.
+ *
+ * @ghidraAddress 0x0012f598
+ */
+void PlayActivateSound();
 
 /**
  * Play the sound of a captured powerup.

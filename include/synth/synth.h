@@ -3,6 +3,8 @@
 #include "app/msgsink.h"
 #include "msg/message.h"
 
+class StdMidiMsg;
+
 /**
  * Abstract base of the game's sound output.
  *
@@ -130,6 +132,7 @@ public:
      *
      * @param nChannel The channel.
      * @param nBank The bank, sent as the low half of the bank select.
+     * @ghidraAddress 0x0013a200
      */
     virtual void SelectBank(unsigned char nChannel, unsigned char nBank);
 
@@ -198,7 +201,37 @@ public:
      */
     void SetChannelVolume(unsigned char nVolume);
 
+    /**
+     * Put every channel into its starting state.
+     *
+     * On each of the sixteen channels, centres the pitch bend, resets every controller, silences
+     * every note, sets the channel volume to 100, and sets the expression to 127. The member is
+     * not virtual and nothing in the image calls it. It is the first routine of the unit, and the
+     * anonymous namespace of the unit takes its `_GLOBAL_$N$Setup__5Synth` prefix from it, which is
+     * what recovers the title.
+     *
+     * @ghidraAddress 0x00139fd0
+     */
+    void Setup();
+
+    /**
+     * Fade every channel's volume to silence over a duration.
+     *
+     * Creates a file-local SynthFade task on the watchdog time base, which samples a fade-out
+     * Source every 100 milliseconds and sends the scaled volume to all sixteen channels, then
+     * silences every note once the volume reaches zero. GrooveWorld::Exit() and
+     * MetLoadGameScreen's slot 33 are the callers. The title is inferred.
+     *
+     * @param nDurationMs The length of the fade, in milliseconds.
+     * @ghidraAddress 0x0013a480
+     */
+    void FadeOut(int nDurationMs);
+
 protected:
+    // 0x0013a360
+    // Inline, and HandleMessage() expands it. Sends the message's three bytes through SendMidi().
+    void OnStdMidi(StdMidiMsg *pMsg);
+
     /**
      * Act on a message.
      *
