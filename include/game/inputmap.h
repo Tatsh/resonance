@@ -145,10 +145,10 @@ public:
     /**
      * Rebuild mBindingMap from the controller configuration.
      *
-     * Binds every configured button of each of the four ports to that port's slot, then passes the
-     * configuration's force-feedback setting to the world's ForceFeedbackMgr.
-     * GameManagerImpl::OnUnpauseGameSystem() and GrooveWorld call it. The body is not written,
-     * because the configuration's class is unrecovered. The title is inferred.
+     * Empties the map, then binds every slot of each port's ControllerConfig in GlobalSettings to
+     * that port's player slot, with the slot's action code and riff index. It then passes
+     * GameOptions::mUnknown08 to the world's ForceFeedbackMgr, when the world has one.
+     * GameManagerImpl::OnUnpauseGameSystem() and GrooveWorld call it. The title is inferred.
      *
      * @ghidraAddress 0x0011a230
      */

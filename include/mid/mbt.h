@@ -31,7 +31,8 @@ constexpr int kMBTMinimum = -0x2aaaaaaa;
  * above `0x2aaaaaa8` as infinite while this test accepts up to `0x2aaaaaaa`, so two positions are
  * finite by this test and infinite to the printer.
  *
- * The body is not written yet.
+ * The one emission sits in the unit at `0x00100040`, between the Sequencer template and
+ * SequencerCmd, and every caller reaches that copy.
  *
  * @param nTick The position, in MIDI ticks.
  * @return Non-zero for a finite position.

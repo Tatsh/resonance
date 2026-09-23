@@ -24,10 +24,12 @@ LocalJamEnableMgr::LocalJamEnableMgr() {
     }
 }
 
+// 0x001025f0
 LocalJamEnableMgr *LocalJamEnableMgr::CreateSolo() {
     return new LocalJamEnableMgr;
 }
 
+// 0x001026c0
 LocalJamEnableMgr *LocalJamEnableMgr::CreateLocal() {
     return new LocalJamEnableMgr;
 }

@@ -73,6 +73,7 @@ constexpr int kRecordable = 1;
 
 } // namespace
 
+// 0x0010bec8
 int GameManagerImpl::CheckState() {
     // Yes, the binary branches on the state and then returns 1 either way. The instruction that
     // looks like the taken path is the branch-likely delay slot.
@@ -82,20 +83,37 @@ int GameManagerImpl::CheckState() {
     return 1;
 }
 
+// 0x0010b8f0
+void GameManagerImpl::RunStateCheck() {
+    CheckState(); // Yes, the binary discards this call's result.
+}
+
+// 0x0010c050
+void GameManagerImpl::DestroyWorld() {
+    Application::shared()->GetWatchdog()->Snapshot();
+    mpPoller->DetachController(mpWorld);
+    delete mpWorld;
+    mpWorld = nullptr;
+}
+
+// 0x0010b870
 int GameManagerImpl::GetUnknownfc() {
     return mUnknownfc;
 }
 
+// 0x00105e80
 void GameManagerImpl::AddPersona(const MetPersonaData &persona) {
     MetPersonaData *pPersona = new MetPersonaData;
     *pPersona = persona;
     mPersonas.push_back(pPersona);
 }
 
+// 0x0010b888
 std::vector<MetPersonaData *> *GameManagerImpl::GetPersonas() {
     return &mPersonas;
 }
 
+// 0x0010be20
 void GameManagerImpl::ClearPersonas() {
     for (std::vector<MetPersonaData *>::iterator it = mPersonas.begin(); it != mPersonas.end();
          ++it) {
@@ -105,26 +123,32 @@ void GameManagerImpl::ClearPersonas() {
     mPersonas.erase(mPersonas.begin(), mPersonas.end());
 }
 
+// 0x0010b890
 GrooveWorld *GameManagerImpl::GetWorld() {
     return mpWorld;
 }
 
+// 0x0010b898
 MetaGameWorld *GameManagerImpl::GetMetaWorld() {
     return mpMetaWorld;
 }
 
+// 0x0010b8a0
 InputPoller *GameManagerImpl::GetPoller() {
     return mpPoller;
 }
 
+// 0x0010b8a8
 int GameManagerImpl::GetUnknown18() {
     return mUnknown18;
 }
 
+// 0x0010b8b0
 GameStats *GameManagerImpl::GetStats() {
     return &mStats;
 }
 
+// 0x0010c588
 void GameManagerImpl::Save(OBStream *pStream) {
     pStream->Write(&mState, sizeof(mState))
         .Write(&mUnknown08, sizeof(mUnknown08))
@@ -132,10 +156,12 @@ void GameManagerImpl::Save(OBStream *pStream) {
     mParams.Save(pStream);
 }
 
+// 0x0010b8b8
 int GameManagerImpl::IsPlaybackActive() {
     return mpPlayback != nullptr;
 }
 
+// 0x0010c290
 void GameManagerImpl::SetGameMode(int nMode) {
     const char *pszName = "";
     mGameMode = nMode;
@@ -158,18 +184,22 @@ void GameManagerImpl::SetGameMode(int nMode) {
     ++mChangeCount;
 }
 
+// 0x0010b8c8
 int GameManagerImpl::GetGameMode() {
     return mGameMode;
 }
 
+// 0x0010b8d0
 GameParams *GameManagerImpl::GetParams() {
     return &mParams;
 }
 
+// 0x0010b8d8
 int GameManagerImpl::GetChangeCount() {
     return mChangeCount;
 }
 
+// 0x0010c210
 void GameManagerImpl::SetParams(const GameParams &params) {
     CheckState(); // Yes, the binary discards this call's result.
     mParams = params;
@@ -180,6 +210,7 @@ void GameManagerImpl::SetParams(const GameParams &params) {
     CheckState(); // Yes, the binary discards this call's result.
 }
 
+// 0x0010c3e0
 void GameManagerImpl::SetDifficulty(int nDifficulty) {
     mParams.mDifficulty = nDifficulty;
     // No literal maps the value, and the raw word goes out as the template argument.
@@ -187,6 +218,7 @@ void GameManagerImpl::SetDifficulty(int nDifficulty) {
     ++mChangeCount;
 }
 
+// 0x0010c348
 void GameManagerImpl::SetPlayMode(int nMode) {
     const char *pszName = "";
     mParams.mUnknown1c = nMode;
@@ -205,19 +237,23 @@ void GameManagerImpl::SetPlayMode(int nMode) {
     ++mChangeCount;
 }
 
+// 0x0010b8e0
 int GameManagerImpl::GetDifficulty() {
     return mParams.mDifficulty;
 }
 
+// 0x0010b8e8
 int GameManagerImpl::GetPlayMode() {
     return mParams.mUnknown1c;
 }
 
+// 0x0010b878
 void GameManagerImpl::SetDrawEnabled(int nEnabled) {
     // Yes, the binary inverts the low bit rather than the whole value, so 2 records 3.
     mDrawSuppressed = nEnabled ^ 1;
 }
 
+// 0x00107540
 void GameManagerImpl::HandleMessage(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nBeginGameLocalMsgType) {

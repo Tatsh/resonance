@@ -32,6 +32,7 @@ NetJamEnableMgr::NetJamEnableMgr(int nTrackCount,
         std::vector<std::vector<int> >(nSectionCount, std::vector<int>(mTrackCount, kNoOwner));
 }
 
+// 0x00105958
 NetJamEnableMgr *NetJamEnableMgr::Create(int nTrackCount,
                                          int nMaxOwned,
                                          const std::vector<int> *pOpenTracks,

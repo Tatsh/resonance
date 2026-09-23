@@ -336,10 +336,12 @@ bool Gamer::IsNonCatchTrack(int nTrack) {
     return GetTrack(nTrack)->mKind != kTrackModeCatch;
 }
 
+// 0x001168b0
 PhraseDatabase *Gamer::GetPhraseDatabase(int nTrack) {
     return (*mGraphs)[nTrack]->GetPhraseDatabase();
 }
 
+// 0x001168e0
 TrackData *Gamer::GetTrack(int nTrack) {
     return mGlobals->GetLevel()->TrackAt(nTrack);
 }

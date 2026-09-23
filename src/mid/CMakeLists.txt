@@ -1,4 +1,5 @@
 set(RESONANCE_MID_SRCS
+    mbt.cpp
     midifilereader.cpp
     receiver.cpp)
 

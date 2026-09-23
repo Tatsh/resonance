@@ -547,6 +547,16 @@ private:
     // all discard the result.
     int CheckState();
 
+    // 0x0010b8f0
+    // Runs CheckState() and discards its result. No caller is recovered. The title is inferred.
+    void RunStateCheck();
+
+    // 0x0010c050
+    // Snapshots the watchdog, withdraws the world from the poller, deletes it, and clears
+    // mpWorld. EndGame() expands the same sequence, and no caller of this copy is recovered. The
+    // title is inferred.
+    void DestroyWorld();
+
     // 0x001068a0
     // Creates the game world with the application and this manager's tally, publishes
     // two of the settings under script symbols 0x277 and 0x27b, and hands the world the container

@@ -47,14 +47,17 @@ GameEnableMgr::GameEnableMgr(int nTrackCount, Gamer *pGamer, int nReleaseWhenMet
     mRequirements.resize(mTrackCount, std::vector<int>());
 }
 
+// 0x00105280
 GameEnableMgr *GameEnableMgr::CreateReleasing(int nConfigCode, int nTrackCount, Gamer *pGamer) {
     return new GameEnableMgr(nConfigCode, nTrackCount, pGamer, 1);
 }
 
+// 0x00105308
 GameEnableMgr *GameEnableMgr::CreateInvalidating(int nConfigCode, int nTrackCount, Gamer *pGamer) {
     return new GameEnableMgr(nConfigCode, nTrackCount, pGamer, 0);
 }
 
+// 0x00105390
 GameEnableMgr *GameEnableMgr::CreateUnrestricted(int nTrackCount, Gamer *pGamer) {
     return new GameEnableMgr(nTrackCount, pGamer, 0);
 }

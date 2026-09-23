@@ -8,6 +8,10 @@ constexpr char kDescription[] = "{Gamer}";
 
 } // namespace
 
+// 0x00116b48
+GamerCmd::~GamerCmd() {
+}
+
 // 0x00116bc0
 int GamerCmd::CmdID() {
     return g_nGamerCmdID;

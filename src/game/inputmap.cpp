@@ -3,7 +3,11 @@
 #include "app/application.h"
 #include "app/globals.h"
 #include "app/watchdogtimer.h"
+#include "game/controllerconfig.h"
+#include "game/forcefeedbackmgr.h"
 #include "game/gamemanagerimpl.h"
+#include "game/globalsettings.h"
+#include "game/grooveworld.h"
 #include "game/player.h"
 #include "msg/advancesectionmsg.h"
 #include "msg/axisfxmsg.h"
@@ -48,6 +52,12 @@ constexpr long long kDoubleTapNanoseconds = 400000000;
 
 // ButtonPowMsg's configured argument for a `powb` press.
 constexpr int kButtonPowPressed = 1;
+
+// The device word of a controller reading, the characters `joy `.
+constexpr int kReadingTypeJoy = 0x6a6f7920;
+
+// The controller ports Rebuild() binds. A binding's port counts from 1.
+constexpr int kPortCount = 4;
 
 } // namespace
 
@@ -224,6 +234,7 @@ void InputMap::SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int
     Send(&msg);
 }
 
+// 0x0011d9a0
 InputMap *InputMap::shared() {
     return g_pInputMap;
 }
@@ -279,6 +290,24 @@ void InputMap::AddBinding(int nDevice, int nPort, int nButton, int nSlot, int nA
     const int nKey = MakeKey(nDevice, nPort, nButton);
     const Binding binding = {nSlot, nAction, nExtra, kBindingEnabled, nullptr};
     mBindingMap[nKey] = FindOrAddBinding(binding);
+}
+
+// 0x0011a230
+void InputMap::Rebuild() {
+    mBindingMap.clear();
+    for (int nPort = 0; nPort < kPortCount; ++nPort) {
+        ControllerConfig &config = GlobalSettings::shared()->mControllers[nPort];
+        const int nSlots = config.mButtons.size();
+        for (int i = 0; i < nSlots; ++i) {
+            const int nButton = config.mButtons[i];
+            const int nAction = config.ActionCode(i);
+            AddBinding(kReadingTypeJoy, nPort + 1, nButton, nPort, nAction, config.RiffIndex(i));
+        }
+    }
+    ForceFeedbackMgr *pForceFeedback = Application::shared()->GetWorld()->mForceFeedback;
+    if (pForceFeedback != nullptr) {
+        pForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mUnknown08);
+    }
 }
 
 // 0x00119dd0
