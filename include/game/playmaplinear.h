@@ -119,13 +119,13 @@ public:
     virtual int Slot14(int nValue);
 
     /** @ghidraAddress 0x00128ed8 */
-    virtual int Slot16();
+    virtual int Slot16(int nBar);
 
     /** @ghidraAddress 0x00129038 */
-    virtual int Slot17();
+    virtual int Slot17(int nBar);
 
     /** @ghidraAddress 0x0012b0a8 */
-    virtual int Slot18();
+    virtual int Slot18(int nBar);
 
     /** @ghidraAddress 0x0012aa18 */
     virtual void Slot19();

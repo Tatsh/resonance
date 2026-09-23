@@ -131,16 +131,16 @@ void PlayMap::Slot15(int) {
 }
 
 // 0x00127470
-int PlayMap::Slot16() {
+int PlayMap::Slot16(int) {
     return 0;
 }
 
 // 0x00127478
-int PlayMap::Slot17() {
+int PlayMap::Slot17(int) {
     return 0;
 }
 
 // 0x00127480
-int PlayMap::Slot18() {
+int PlayMap::Slot18(int) {
     return 0;
 }

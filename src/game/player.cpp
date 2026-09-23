@@ -1,9 +1,11 @@
 #include "game/player.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "app/msgsource.h"
 #include "msg/juiceamountmsg.h"
+#include "msg/updatescorepacket.h"
 
 namespace {
 
@@ -138,4 +140,23 @@ void Player::SetScore(int nScore, int nMaxScore) {
 void Player::SetJuice(int nJuice, int nMaxJuice) {
     mUnknown34 = nMaxJuice;
     mJuice = nJuice;
+}
+
+// 0x0012f970
+void Player::AddJuice(int nAmount, int bNotify) {
+    const int nOldJuice = mJuice;
+    mJuice = std::max(0, std::min(mJuice + nAmount, mUnknown34));
+    if (mJuice == nOldJuice) {
+        return;
+    }
+
+    JuiceAmountMsg message;
+    message.mUnknown04 = this;
+    message.mUnknown08 = std::min(mUnknown34, kJuiceMaximum);
+    Send(&message);
+
+    if (bNotify != 0) {
+        UpdateScorePacket packet(mId20, nAmount);
+        Send(&packet);
+    }
 }

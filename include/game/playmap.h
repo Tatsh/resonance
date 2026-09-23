@@ -229,25 +229,36 @@ public:
     virtual void Slot15(int nValue);
 
     /**
-     * Slot 16. Returns zero.
+     * Slot 16. Returns zero, ignoring its argument.
      *
+     * PlayMapLinear's override at `0x00128ed8` passes a1 to the routine at `0x00129150`, which is
+     * what proves the bar parameter. Gamer calls it with the current bar.
+     *
+     * @param nBar The bar.
      * @ghidraAddress 0x00127470
      */
-    virtual int Slot16();
+    virtual int Slot16(int nBar);
 
     /**
-     * Slot 17. Returns zero.
+     * Slot 17. Returns zero, ignoring its argument.
      *
+     * PlayMapRepeatRing's override at `0x0012bdd8` stores a1 as the search key it passes to the
+     * routine at `0x00105de8`.
+     *
+     * @param nBar The bar.
      * @ghidraAddress 0x00127478
      */
-    virtual int Slot17();
+    virtual int Slot17(int nBar);
 
     /**
-     * Slot 18. Returns zero.
+     * Slot 18. Returns zero, ignoring its argument.
      *
+     * Both overrides forward a1 to another slot of this table.
+     *
+     * @param nBar The bar.
      * @ghidraAddress 0x00127480
      */
-    virtual int Slot18();
+    virtual int Slot18(int nBar);
 
     /**
      * Report the index of the step at or before a position that has already been mapped.

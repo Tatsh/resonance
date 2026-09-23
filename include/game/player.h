@@ -273,6 +273,19 @@ public:
      */
     void SetJuice(int nJuice, int nMaxJuice);
 
+    /**
+     * Add juice, clamped to 0 through the ceiling, and announce a change.
+     *
+     * A change sends a JuiceAmountMsg through the MsgSource subobject and, when bNotify is set,
+     * an UpdateScorePacket with the amount. The script command that adds juice is the recovered
+     * caller. The title is inferred.
+     *
+     * @param nAmount The juice to add, which may be negative.
+     * @param bNotify Non-zero to also send the UpdateScorePacket.
+     * @ghidraAddress 0x0012f970
+     */
+    void AddJuice(int nAmount, int bNotify);
+
 private:
     int mUnknown2c; // +0x2c
     int mJuice;     // +0x30
