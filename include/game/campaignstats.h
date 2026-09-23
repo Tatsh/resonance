@@ -24,8 +24,8 @@
  * Five vectors of level indices follow at `+0x100`, one per stage. RecountStageCompleted() and
  * RecountStageScore() walk the vector of the stage they recount.
  *
- * Several members are understood but not yet written here. RebuildLevelList() at `0x00140908`
- * clears the level vector and rebuilds it from the global level list, MergeLevelList() at
+ * Several members are understood but not yet written here. RebuildLevelList() clears the level
+ * vector and rebuilds it from the global level list, MergeLevelList() at
  * `0x00142070` runs the same pass after a load, and PrintLevels() at `0x001451e0` streams the
  * vector under the label `levels[`. Further members at `0x00140b40`, `0x00140ef8`, `0x00141578`,
  * `0x00142288`, `0x00142610`, `0x00142d70`, `0x00144c38`, and `0x00145068` belong to this class or
@@ -56,6 +56,15 @@ public:
      * @ghidraAddress 0x00140768
      */
     virtual ~CampaignStats();
+
+    /**
+     * Clear the level vector and rebuild it from the global level list.
+     *
+     * MetFreqLoader runs it on each persona it parses. The body is not written.
+     *
+     * @ghidraAddress 0x00140908
+     */
+    void RebuildLevelList();
 
     /**
      * Write the whole campaign record.

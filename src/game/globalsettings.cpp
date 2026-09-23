@@ -75,7 +75,8 @@ void GlobalSettings::operator delete(void *pBlock) {
 
 // 0x00187d00
 GlobalSettings::GlobalSettings()
-    : mDefaultMacros(MetKeyboardScreen::GetDefaultMacros()), mTutorialComplete(0), mUnknown78(0) {
+    : mDefaultMacros(MetKeyboardScreen::GetDefaultMacros()), mTutorialComplete(0),
+      mTeamFreqUnlocked(0) {
     mNetAddress = kDefaultNetAddress;
     mNetPort = FormatString(kPortFormat, kDefaultNetPort);
 

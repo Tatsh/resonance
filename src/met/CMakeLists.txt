@@ -6,6 +6,7 @@ set(RESONANCE_MET_SRCS
     metarenasscreen.cpp
     metexpansionpakscreen.cpp
     metfade.cpp
+    metfreqloader.cpp
     metfreqmakerassetmanager.cpp
     metfreqmakerdirectionsscreen.cpp
     metfrontendstate.cpp

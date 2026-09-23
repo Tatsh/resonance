@@ -10,6 +10,7 @@
 #include "os/hxstr.h"
 
 class FreqPartTemplate;
+class MetFreqLoader;
 namespace Rnd {
 class Mesh;
 class Tex;
@@ -109,14 +110,10 @@ public:
     /**
      * Resolve the list of prefabricated identities the FreQ maker offers.
      *
-     * The body waits for the load through WaitForLoad() and then spins on two further asynchronous
-     * requests before returning one of the two element vectors, the one at `+0x74` or the one at
-     * `+0x68`. A word at `+0x78` of the object the accessor at `0x0018b9c8` vends selects between
-     * them. The title is inferred from the element type and from the one caller,
+     * The body waits for the load through WaitForLoad() and then spins on AreIdentitiesLoaded()
+     * before returning the team FreQ list when GlobalSettings::mTeamFreqUnlocked is set, and the
+     * pre-fab list otherwise. The title is inferred from the element type and from the one caller,
      * MetLoadNewFreqScreen::AcquireIdentityList().
-     *
-     * The body is not written. The selecting accessor and the two asynchronous requests are not
-     * recovered.
      *
      * @return One of the two lists. It is never null.
      * @ghidraAddress 0x00255090
@@ -131,12 +128,40 @@ public:
      * title is inferred from the one caller, CreditsRoll::Reset(), which searches every identity
      * by name.
      *
-     * The body is not written, because the request poll at `0x002a35a8` is not recovered.
-     *
      * @return The list. It is never null.
      * @ghidraAddress 0x00255100
      */
     std::vector<MetPersonaData *> *GetAllIdentities();
+
+    /**
+     * Queue the reads of both persona files.
+     *
+     * PollLoad() runs it. The title is inferred.
+     *
+     * @ghidraAddress 0x00254fd0
+     */
+    void StartIdentityLoads();
+
+    /**
+     * Pump the asynchronous layer and report whether both persona files are parsed.
+     *
+     * Both loaders are polled on every call. MetSonyScreen's slot 26 calls it, and
+     * GetIdentityList() and GetAllIdentities() expand the same body. The title is inferred.
+     *
+     * @return True once both lists are filled.
+     * @ghidraAddress 0x00255000
+     */
+    bool AreIdentitiesLoaded();
+
+    /**
+     * Report through both loaders whether the assets are resident.
+     *
+     * The image has no caller. The title is inferred.
+     *
+     * @return True when both loaders report the assets resident.
+     * @ghidraAddress 0x00255048
+     */
+    bool AreLoadersReady();
 
     /**
      * Report the part template with one identifier.
@@ -295,7 +320,10 @@ public:
 
 private:
     // The members the destructor walks, described in the class documentation above.
-    unsigned char mUnknown00[0x14];                               // +0x00
+    unsigned char mUnknown00[0x4];                                // +0x00
+    MetFreqLoader *mPrefabLoader;                                 // +0x04, owned
+    MetFreqLoader *mTeamFreqLoader;                               // +0x08, owned
+    unsigned char mUnknown0c[0x8];                                // +0x0c
     std::map<HxStr, FreqPartTemplate *> mPartsByName;             // +0x14
     std::vector<FreqPartTemplate *> mParts;                       // +0x20, by template identifier
     unsigned char mUnknown2c[0x4];                                // +0x2c
@@ -303,8 +331,9 @@ private:
     Rnd::Tex *mPaletteTex;                                        // +0x34, resolved by ColorAt()
     std::list<FreqPartTemplate *> mCategoryLists[kCategoryCount]; // +0x38, categories 1 to 11
     // Advanced by NextMeshName().
-    int mMeshCount;                 // +0x64
-    unsigned char mUnknown68[0x18]; // +0x68
+    int mMeshCount;                                    // +0x64
+    std::vector<MetPersonaData *> mPrefabIdentities;   // +0x68, filled by mPrefabLoader
+    std::vector<MetPersonaData *> mTeamFreqIdentities; // +0x74, filled by mTeamFreqLoader
 };
 
 /**

@@ -454,6 +454,7 @@ metcontrollerreading
 metexpansionpakscreen
 metfade
 metfreqendedmsg
+metfreqloader
 metfreqmakerassetmanager
 metfreqmakerdirectionsscreen
 metfrontendstate

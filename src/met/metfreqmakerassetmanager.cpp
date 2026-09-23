@@ -3,8 +3,10 @@
 #include <cstring>
 
 #include "game/freqparttemplate.h"
+#include "game/globalsettings.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
+#include "met/metfreqloader.h"
 #include "os/formatstring.h"
 #include "rnd/asyncloader.h"
 #include "rnd/manager.h"
@@ -83,6 +85,43 @@ void MetFreqMakerAssetManager::WaitForLoad() {
     while (!PollLoad()) {
         RndAsyncLoader::PollAsyncLoads();
     }
+}
+
+// 0x00255090
+std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetIdentityList() {
+    WaitForLoad();
+    while (!AreIdentitiesLoaded()) {
+    }
+    return GlobalSettings::shared()->mTeamFreqUnlocked != 0 ? &mTeamFreqIdentities :
+                                                              &mPrefabIdentities;
+}
+
+// 0x00255100
+std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetAllIdentities() {
+    WaitForLoad();
+    while (!AreIdentitiesLoaded()) {
+    }
+    return &mTeamFreqIdentities;
+}
+
+// 0x00254fd0
+void MetFreqMakerAssetManager::StartIdentityLoads() {
+    mPrefabLoader->Start();
+    mTeamFreqLoader->Start();
+}
+
+// 0x00255000
+bool MetFreqMakerAssetManager::AreIdentitiesLoaded() {
+    int nPrefabLoaded = mPrefabLoader->IsLoaded();
+    int nTeamFreqLoaded = mTeamFreqLoader->IsLoaded();
+    return nTeamFreqLoaded != 0 && nPrefabLoaded != 0;
+}
+
+// 0x00255048
+bool MetFreqMakerAssetManager::AreLoadersReady() {
+    bool bPrefabReady = mPrefabLoader->PollAssets();
+    bool bTeamFreqReady = mTeamFreqLoader->PollAssets();
+    return bTeamFreqReady && bPrefabReady;
 }
 
 // 0x00254990

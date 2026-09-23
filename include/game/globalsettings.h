@@ -174,5 +174,13 @@ public:
 private:
     int mUnknown70; // +0x70, starts at 60
     int mUnknown74; // +0x74, starts at 24
-    int mUnknown78; // +0x78, starts at 0
+
+public:
+    /**
+     * Non-zero to offer the team FreQ identities instead of the pre-fab ones. Starts at 0. +0x78
+     *
+     * Public because MetFreqMakerAssetManager::GetIdentityList() reads it directly, and the image
+     * has no accessor. The name is inferred from that one use.
+     */
+    int mTeamFreqUnlocked;
 };
