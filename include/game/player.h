@@ -9,6 +9,10 @@
 
 class FreqAppearance;
 class PhraseCapturedMsg;
+class UpdateScorePacket;
+
+/** What Player::Slot2() reports for a player with no input slot. */
+constexpr int kNoInputSlot = -1;
 
 /**
  * One participant in a session, local or remote.
@@ -213,7 +217,10 @@ public:
     /**
      * Receive one message.
      *
-     * The only `MsgSink` virtual this class overrides, at slot 3 of its `MsgSink` table.
+     * The only `MsgSink` virtual this class overrides, at slot 3 of its `MsgSink` table. An
+     * UpdateScorePacket naming this player adds its delta without notifying, and a
+     * PhraseCapturedMsg is awarded through AwardCapture() whichever player it names. Every other
+     * message is discarded.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x00133240
@@ -326,7 +333,67 @@ public:
      */
     void AwardCapture(PhraseCapturedMsg *pMsg);
 
+    /**
+     * Report whether the player has an input slot.
+     *
+     * Inline, and TrackSelector::HandleMessage() expands it. The address is its uncalled
+     * out-of-line copy. The title is inferred.
+     *
+     * @return Non-zero when Slot2() reports a value other than -1.
+     * @ghidraAddress 0x00132c30
+     */
+    int HasInputSlot() {
+        return Slot2() != kNoInputSlot;
+    }
+
+    /**
+     * Copy the player's colour name.
+     *
+     * Inline. The address is its uncalled out-of-line copy. The title is inferred.
+     *
+     * @return mColorName, by value.
+     * @ghidraAddress 0x00132c68
+     */
+    HxStr GetColorName();
+
+    /**
+     * Copy the username of the player's appearance.
+     *
+     * Inline. The address is its uncalled out-of-line copy. The title is inferred.
+     *
+     * @return FreqAppearance::mUnknown00 of mAppearance, by value.
+     * @ghidraAddress 0x001330a8
+     */
+    HxStr GetUsername();
+
+    /**
+     * Run Slot11() and report zero.
+     *
+     * Inline. The address is its uncalled out-of-line copy. The title records the call because
+     * the purpose is unrecovered.
+     *
+     * @return Always 0.
+     * @ghidraAddress 0x00132cd0
+     */
+    int CallSlot11();
+
+    /**
+     * Run Slot12() and report zero.
+     *
+     * Inline. The address is its uncalled out-of-line copy. The title records the call because
+     * the purpose is unrecovered.
+     *
+     * @return Always 0.
+     * @ghidraAddress 0x00132d00
+     */
+    int CallSlot12();
+
 private:
+    // 0x00133210
+    // Inline, and HandleMessage() expands it. Adds the packet's delta without notifying when the
+    // packet names this player.
+    void OnUpdateScore(UpdateScorePacket *pPacket);
+
     // The persona's appearance. GrooveWorld::AddLocalPlayer() passes MetPersonaData::mUnknown140.
     const FreqAppearance *mAppearance; // +0x2c
     int mJuice;                        // +0x30

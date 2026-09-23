@@ -8,9 +8,14 @@
 #include "mid/mbt.h"
 #include "sch/cmdid.h"
 
+class AxisYPowMsg;
+class ButtonPowMsg;
+class CaughtPowerbarMsg;
 class HxStr;
 class LoopToolMsg;
 class MultiplierMsg;
+class PhraseCapturedMsg;
+class PhraseMuffedMsg;
 class ToggleGhostMsg;
 class TrackSelectMsg;
 
@@ -225,6 +230,33 @@ private:
     // 0x0011eb20
     // Starts a multiplier bonus of 2 for eight bars from the message's bar.
     void OnMultiplier(MultiplierMsg *pMsg);
+
+    // The six handlers below are inline, and HandleMessage() expands each. The addresses are
+    // their uncalled out-of-line copies.
+
+    // 0x00122a20
+    // Moves the collection's selection when the message addresses this player.
+    void OnAxisYPow(AxisYPowMsg *pMsg);
+
+    // 0x00122ae0
+    // Toggles looping at the message's position when it addresses this player.
+    void OnLoopTool(LoopToolMsg *pMsg);
+
+    // 0x00122b38
+    // Updates the streak, multiplier, and capture counts, then awards the capture.
+    void OnPhraseCaptured(PhraseCapturedMsg *pMsg);
+
+    // 0x00122c20
+    // Counts a tried muff once per bar.
+    void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
+
+    // 0x001229d8
+    // Forwards a button press to the placer.
+    void OnButtonPow(ButtonPowMsg *pMsg);
+
+    // 0x00122a68
+    // Adds the caught powerup to the collection, plays its sounds, and passes the message on.
+    void OnCaughtPowerbar(CaughtPowerbarMsg *pMsg);
 
     Sch::TickClock *mClock;          // +0x48
     CmdID mCommand;                  // +0x4c

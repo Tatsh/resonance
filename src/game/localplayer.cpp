@@ -243,6 +243,105 @@ int LocalPlayer::Slot19() {
     return mGameMode;
 }
 
+// 0x001228a8
+int LocalPlayer::Slot9(int value) {
+    if (value < mUnknown70) {
+        return 0;
+    }
+    return value < mUnknown74;
+}
+
+// 0x00122ca0
+int LocalPlayer::Slot16(int value) {
+    if (mRunEndBar < value) {
+        return mBonus + 1;
+    }
+    return mMultiplier + (mBonus + 1);
+}
+
+// 0x00122c00
+int LocalPlayer::Slot20(int value) {
+    if (mUnknown78 < value) {
+        mUnknown78 = value;
+        return 1;
+    }
+    return 0;
+}
+
+// 0x00122a20, the out-of-line copy.
+inline void LocalPlayer::OnAxisYPow(AxisYPowMsg *pMsg) {
+    if (pMsg->mPlayer == this && mCollection != nullptr) {
+        mCollection->SelectRelative(pMsg->mValue);
+    }
+}
+
+// 0x00122ae0, the out-of-line copy.
+inline void LocalPlayer::OnLoopTool(LoopToolMsg *pMsg) {
+    if (pMsg->mPlayer == this) {
+        const Mid::MBT position = pMsg->mPosition;
+        ToggleLoop(position);
+    }
+}
+
+// 0x00122b38, the out-of-line copy.
+inline void LocalPlayer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
+    if (pMsg->mPlayer != this) {
+        return;
+    }
+
+    if (mRunEndBar < pMsg->mRunFirstBar) {
+        mStreak = 1;
+        mMultiplier = kMultiplierStart;
+    } else if (pMsg->mExtendsStreak != 0) {
+        ++mMultiplier;
+        ++mStreak;
+    }
+    if (mBestStreak < mStreak) {
+        mBestStreak = mStreak;
+    }
+    if (mMultiplier == kMultiplierCapExceeded) {
+        mMultiplier = kMultiplierMaximum;
+    }
+    ++mCaptures;
+    mRunEndBar = pMsg->mRunEndBar;
+    mLastCaughtBar = pMsg->mRunEndBar - 1;
+    AwardCapture(pMsg);
+}
+
+// 0x00122c20, the out-of-line copy.
+inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
+    if (pMsg->mPlayer != this || pMsg->mTried == 0) {
+        return;
+    }
+
+    const int nBar = pMsg->mPosition.mTick / Mid::MBT(kTicksPerBar).mTick;
+    if (mLastMuffedBar != nBar) {
+        mLastMuffedBar = nBar;
+        ++mMisses;
+    }
+}
+
+// 0x001229d8, the out-of-line copy.
+inline void LocalPlayer::OnButtonPow(ButtonPowMsg *pMsg) {
+    if (pMsg->mPlayer == this && mPlacer != nullptr) {
+        mPlacer->OnUnknownSlot8();
+    }
+}
+
+// 0x00122a68, the out-of-line copy.
+inline void LocalPlayer::OnCaughtPowerbar(CaughtPowerbarMsg *pMsg) {
+    if (pMsg->mPlayer != this) {
+        return;
+    }
+
+    if (mCollection != nullptr) {
+        mCollection->AddPowerup(pMsg->mKind);
+    }
+    PlaySoundByName(kCaughtPowerSound);
+    PlayPowerupSound(pMsg->mKind);
+    Send(pMsg);
+}
+
 // 0x0011ed98
 void LocalPlayer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
@@ -251,50 +350,13 @@ void LocalPlayer::HandleMessage(Message *pMsg) {
     } else if (nType == g_nAxisXPowMsgType) {
         return;
     } else if (nType == g_nAxisYPowMsgType) {
-        AxisYPowMsg *pAxis = static_cast<AxisYPowMsg *>(pMsg);
-        if (pAxis->mPlayer == this && mCollection != nullptr) {
-            mCollection->SelectRelative(pAxis->mValue);
-        }
+        OnAxisYPow(static_cast<AxisYPowMsg *>(pMsg));
     } else if (nType == g_nLoopToolMsgType) {
-        LoopToolMsg *pLoop = static_cast<LoopToolMsg *>(pMsg);
-        if (pLoop->mPlayer == this) {
-            const Mid::MBT position = pLoop->mPosition;
-            ToggleLoop(position);
-        }
+        OnLoopTool(static_cast<LoopToolMsg *>(pMsg));
     } else if (nType == g_nPhraseCapturedMsgType) {
-        PhraseCapturedMsg *pCapture = static_cast<PhraseCapturedMsg *>(pMsg);
-        if (pCapture->mPlayer != this) {
-            return;
-        }
-
-        if (mRunEndBar < pCapture->mRunFirstBar) {
-            mStreak = 1;
-            mMultiplier = kMultiplierStart;
-        } else if (pCapture->mExtendsStreak != 0) {
-            ++mMultiplier;
-            ++mStreak;
-        }
-        if (mBestStreak < mStreak) {
-            mBestStreak = mStreak;
-        }
-        if (mMultiplier == kMultiplierCapExceeded) {
-            mMultiplier = kMultiplierMaximum;
-        }
-        ++mCaptures;
-        mRunEndBar = pCapture->mRunEndBar;
-        mLastCaughtBar = pCapture->mRunEndBar - 1;
-        AwardCapture(pCapture);
+        OnPhraseCaptured(static_cast<PhraseCapturedMsg *>(pMsg));
     } else if (nType == g_nPhraseMuffedMsgType) {
-        PhraseMuffedMsg *pMuff = static_cast<PhraseMuffedMsg *>(pMsg);
-        if (pMuff->mPlayer != this || pMuff->mTried == 0) {
-            return;
-        }
-
-        const int nBar = pMuff->mPosition.mTick / Mid::MBT(kTicksPerBar).mTick;
-        if (mLastMuffedBar != nBar) {
-            mLastMuffedBar = nBar;
-            ++mMisses;
-        }
+        OnPhraseMuffed(static_cast<PhraseMuffedMsg *>(pMsg));
     } else if (nType == g_nCaughtBarMsgType) {
         CaughtBarMsg *pCaught = static_cast<CaughtBarMsg *>(pMsg);
         if (pCaught->mPlayer == this) {
@@ -305,22 +367,9 @@ void LocalPlayer::HandleMessage(Message *pMsg) {
     } else if (nType == g_nToggleGhostMsgType) {
         OnToggleGhost(static_cast<ToggleGhostMsg *>(pMsg));
     } else if (nType == g_nButtonPowMsgType) {
-        ButtonPowMsg *pButton = static_cast<ButtonPowMsg *>(pMsg);
-        if (pButton->mPlayer == this && mPlacer != nullptr) {
-            mPlacer->OnUnknownSlot8();
-        }
+        OnButtonPow(static_cast<ButtonPowMsg *>(pMsg));
     } else if (nType == g_nCaughtPowerbarMsgType) {
-        CaughtPowerbarMsg *pPowerbar = static_cast<CaughtPowerbarMsg *>(pMsg);
-        if (pPowerbar->mPlayer != this) {
-            return;
-        }
-
-        if (mCollection != nullptr) {
-            mCollection->AddPowerup(pPowerbar->mKind);
-        }
-        PlaySoundByName(kCaughtPowerSound);
-        PlayPowerupSound(pPowerbar->mKind);
-        Send(pMsg);
+        OnCaughtPowerbar(static_cast<CaughtPowerbarMsg *>(pMsg));
     } else {
         Player::HandleMessage(pMsg);
     }

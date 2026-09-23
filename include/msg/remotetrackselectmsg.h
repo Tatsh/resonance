@@ -16,8 +16,8 @@ class Player;
  * this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * recovered. NetPlayer builds the message field by field on the stack, and TrackSelector reads
+ * the fields back, so all four are public.
  *
  * The layout matches TrackSelectMsg's. Print() hands `+0x0c` to Mid::MBT::Print() and writes the
  * colour name of the player at `+0x10`, which types both.
@@ -70,11 +70,30 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown04;     // +0x04
-    int mUnknown08;     // +0x08
-    Mid::MBT mPosition; // +0x0c
-    Player *mPlayer;    // +0x10
+public:
+    /**
+     * The selected track. NetPlayer's packet handler at `0x00122f78` writes it from the packet's
+     * track, and TrackSelector::HandleMessage() reads it. +0x04
+     */
+    int mUnknown04;
+
+    /**
+     * The place on the track. NetPlayer's packet handler at `0x00122f78` writes it from the
+     * packet's place, and TrackSelector::HandleMessage() reads it. +0x08
+     */
+    int mUnknown08;
+
+    /**
+     * The song position of the selection. NetPlayer's packet handler at `0x00122f78` writes it,
+     * and TrackSelector::HandleMessage() reads it. +0x0c
+     */
+    Mid::MBT mPosition;
+
+    /**
+     * The player that selected. NetPlayer's packet handler at `0x00122f78` writes it, and
+     * TrackSelector::HandleMessage() reads it. +0x10
+     */
+    Player *mPlayer;
 };
 
 /**

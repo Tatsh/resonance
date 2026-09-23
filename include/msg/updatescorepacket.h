@@ -110,9 +110,12 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    int mPlayerId;   // +0x14
-    int mScoreDelta; // +0x18
+public:
+    /** The identifier of the scoring player. Player::HandleMessage() reads it. +0x14 */
+    int mPlayerId;
+
+    /** The points to add. Player::HandleMessage() reads it. +0x18 */
+    int mScoreDelta;
 };
 
 /**

@@ -112,11 +112,18 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    Mid::MBT mPosition;        // +0x14
-    IDablePtr<Player> mPlayer; // +0x18
-    int mTrack;                // +0x20
-    int mPlace;                // +0x24
+public:
+    /** The song position of the selection. NetPlayer's handler at `0x00122f78` reads it. +0x14 */
+    Mid::MBT mPosition;
+
+    /** The player that selected. NetPlayer's handler at `0x00122f78` resolves it. +0x18 */
+    IDablePtr<Player> mPlayer;
+
+    /** The selected track. NetPlayer's handler at `0x00122f78` reads it. +0x20 */
+    int mTrack;
+
+    /** The place on the track. NetPlayer's handler at `0x00122f78` reads it. +0x24 */
+    int mPlace;
 };
 
 /**

@@ -28,12 +28,48 @@
  * `0x0010baa0` while every hand-written member of the class sits in the `0x00133xxx` and
  * `0x00135xxx` runs, which places it in a different translation unit.
  *
- * mUnknown2c is the one member that none of Print(), Save(), or Load() touches.
+ * mUnknown2c is the one member that none of Print(), Save(), or Load() touches. Only the
+ * four-argument constructor writes it.
  *
  * Two network packets embed one of these, SCPlayerJoinedPacket and ToAllNetManagersPacket.
  */
 class PlayerInfo {
 public:
+    /**
+     * Construct an empty identity.
+     *
+     * Only the name, the appearance, and the vector are initialised. The integer members are left
+     * as the storage holds them.
+     *
+     * Inline. The address is its uncalled out-of-line copy.
+     *
+     * @ghidraAddress 0x00135d48
+     */
+    PlayerInfo() {
+    }
+
+    /**
+     * Construct an identity from its parts.
+     *
+     * mUnknown24 starts at 1 and mUnknown28 at 0, and mUnknown2c receives the same value as
+     * mUnknown00.
+     *
+     * Inline. The address is its uncalled out-of-line copy.
+     *
+     * @param nUnknown00 The value stored in mUnknown00 and mUnknown2c.
+     * @param unknown04 The name stored in mUnknown04.
+     * @param appearance The appearance to copy.
+     * @param nUnknown20 The value stored in mUnknown20.
+     * @ghidraAddress 0x00135dd0
+     */
+    PlayerInfo(unsigned nUnknown00,
+               const HxStr &unknown04,
+               const FreqAppearance &appearance,
+               int nUnknown20)
+        : mUnknown00(nUnknown00), mUnknown04(unknown04), mAppearance(appearance),
+          mUnknown20(nUnknown20), mUnknown24(1), mUnknown28(0), mUnknown2c(nUnknown00) {
+    }
+
     /**
      * Release the vector, the appearance, and the name.
      *

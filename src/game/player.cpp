@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "app/msgsource.h"
+#include "game/freqappearance.h"
 #include "msg/juiceamountmsg.h"
 #include "msg/phrasecapturedmsg.h"
 #include "msg/pointamountmsg.h"
@@ -195,5 +196,49 @@ void Player::AddJuice(int nAmount, int bNotify) {
     if (bNotify != 0) {
         UpdateScorePacket packet(mId20, nAmount);
         Send(&packet);
+    }
+}
+
+// 0x00132ae8
+Player::~Player() {
+}
+
+// 0x00132c68, the out-of-line copy.
+inline HxStr Player::GetColorName() {
+    return mColorName;
+}
+
+// 0x001330a8, the out-of-line copy.
+inline HxStr Player::GetUsername() {
+    return mAppearance->mUnknown00;
+}
+
+// 0x00132cd0, the out-of-line copy.
+inline int Player::CallSlot11() {
+    Slot11();
+    return 0;
+}
+
+// 0x00132d00, the out-of-line copy.
+inline int Player::CallSlot12() {
+    Slot12();
+    return 0;
+}
+
+// 0x00133210, the out-of-line copy.
+inline void Player::OnUpdateScore(UpdateScorePacket *pPacket) {
+    if (pPacket->mPlayerId == mId20) {
+        AddScore(pPacket->mScoreDelta, 0);
+    }
+}
+
+// 0x00133240
+void Player::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == g_nUpdateScorePacketType) {
+        OnUpdateScore(static_cast<UpdateScorePacket *>(pMsg));
+    } else if (nType == g_nPhraseCapturedMsgType) {
+        // Awarded whichever player the capture names.
+        AwardCapture(static_cast<PhraseCapturedMsg *>(pMsg));
     }
 }

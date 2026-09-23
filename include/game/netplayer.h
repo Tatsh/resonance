@@ -2,6 +2,8 @@
 
 #include "game/player.h"
 
+class TrackSelectPacket;
+
 /**
  * Player driven by a remote machine.
  *
@@ -61,11 +63,8 @@ public:
      *
      * Dispatches on `Message::Type()` against two identities, `TrackSelectPacket` and
      * `TrackSelectMsg`, so one handler covers track selection arriving locally and over the
-     * network. A `TrackSelectMsg` whose `+0x10` names this player updates the two cached words,
-     * and anything else falls through to the base.
-     *
-     * Not reconstructed. The packet branch calls the helper at `0x00122f78`, whose second half
-     * builds a further message and is not recovered.
+     * network. A packet goes to OnTrackSelectPacket(). A `TrackSelectMsg` whose `+0x10` names
+     * this player updates the two cached words, and anything else falls through to the base.
      *
      * @param message The message.
      * @ghidraAddress 0x00125f70
@@ -73,6 +72,10 @@ public:
     virtual void HandleMessage(Message *message);
 
 private:
+    // 0x00122f78
+    // Passes a selection packet naming this player on to the sinks as a RemoteTrackSelectMsg.
+    void OnTrackSelectPacket(TrackSelectPacket *pPacket);
+
     // The two payload words of a TrackSelectMsg addressed to this player, copied from the
     // message's +0x04 and +0x08 by HandleMessage and reported by Slot4 and Slot5. The base
     // returns -1 and 0 for the same two slots, so a remote player reports what a message
