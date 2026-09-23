@@ -22,15 +22,9 @@
  * class introduces no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12
  * from the base. The object is 0x54 bytes.
  *
- * Every object this class builds is allocated through the tagged allocator, and the constructor
- * builds nine of them. It also calls MuseSynth::CreateSustainer() on the base's synthesiser before
- * it builds anything of its own.
- *
- * The constructor's body is not written. It needs the clock the base's application reaches through
- * `GameManagerImpl::GetWorld()`, and GrooveWorld declares no accessor for the `Sch::TickClock *` at
- * its `+0x64`. The out-of-line copy of that inline accessor is at `0x001952a0` and the copy that
- * composes it with Application::shared() is at `0x00118e78`. The same gap blocks the other three
- * stage constructors.
+ * The constructor builds nine objects. The GsPeriodical goes through the plain allocator and the
+ * other eight through the tagged allocator. It also calls MuseSynth::CreateSustainer() on the
+ * base's synthesiser before it builds anything of its own.
  *
  * The member at `+0x34` is the one the constructor never writes. It is declared so that the two
  * members around it retain their offsets, and no reader for it was found.

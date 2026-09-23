@@ -22,17 +22,16 @@
  * only in play mode 2. Both members therefore start as null pointers and the destructor guards
  * each release.
  *
- * The constructor's body is not written, for the reason recorded on AxingSTG.
- *
- * Slot 2 and slot 3 are declared and not written. Each calls the base and one routine on the
- * producer's TickTask subobject, `0x0013a860` to post the task with the position kMBTInfinity and
- * `0x0013ae10` to withdraw it and reset the handle at TickTask `+0x0c` to -2. Neither routine is
- * declared on TickTask, and `app/ticktask.h` is outside the assignment this class was recovered
- * under.
+ * Slot 2 and slot 3 call the producer's TickTask::Start() and TickTask::Stop() without a null
+ * check, so a track of any other kind faults there.
  */
 class PitchingSTG : public ScoreTrackGraph {
 public:
     /**
+     * Build the producer for the track's kind and, in play mode 2, the jam effects manager.
+     *
+     * The jam effects manager is installed in the phrase player.
+     *
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x001c45b0
      */
@@ -50,8 +49,8 @@ public:
     /**
      * Start the stage.
      *
-     * Slot 2. The routine starts the base and then posts the producer's tick task. The body is
-     * not written, for the reason recorded in the class documentation.
+     * Slot 2. The routine starts the base and then posts the producer's tick task with the
+     * position kMBTInfinity.
      *
      * @ghidraAddress 0x001c4cf0
      */
@@ -60,8 +59,7 @@ public:
     /**
      * Stop the stage.
      *
-     * Slot 3. The routine withdraws the producer's tick task and then stops the base. The body is
-     * not written, for the reason recorded in the class documentation.
+     * Slot 3. The routine withdraws the producer's tick task and then stops the base.
      *
      * @ghidraAddress 0x001c4d28
      */

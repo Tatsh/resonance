@@ -2,6 +2,7 @@
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
+#include "mid/mbt.h"
 #include "synth/ps2hardsynth.h"
 
 namespace {
@@ -18,7 +19,27 @@ constexpr unsigned char kStageActiveController = 0x52;
 constexpr unsigned char kControllerOn = 0x7f;
 constexpr unsigned char kControllerOff = 0;
 
+// The period of the phrase maker's periodical post, one bar.
+constexpr int kBarTicks = 1920;
+
 } // namespace
+
+// 0x0019daf0
+AxingSTG::AxingSTG(const TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
+    mMuseSynth->CreateSustainer();
+
+    mAutoRiffer = new AutoRiffer(mApplication->GetSongClock(), mQuantizer, mTrackData);
+    mPitchPicker = new PitchPicker(mTrackData);
+    mAxisControl = new AxisControl(mTrackData);
+    mOldGemMaker = new AxeOldGemMaker(mTrackData);
+    mNewGemMaker = new AxeNewGemMaker(mTrackData);
+    mSustainer = new SynthSustainer();
+    mPhraseMaker =
+        new AxePhraseMaker(mPhraseMgr, mQuantizer, mTrackData, mApplication->GetSongClock());
+    mAxeSynth = new MuseSynth(mApplication->GetSongClock());
+    mPeriodical =
+        new GsPeriodical(mApplication->GetSongClock(), mPhraseMaker, Mid::MBT(kBarTicks).mTick);
+}
 
 // 0x0019de08
 AxingSTG::~AxingSTG() {

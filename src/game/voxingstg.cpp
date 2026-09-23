@@ -1,5 +1,35 @@
 #include "game/voxingstg.h"
 
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "mid/mbt.h"
+
+// 0x001da050
+VoxingSTG::VoxingSTG(const TrackData *pTrackData)
+    : ScoreTrackGraph(pTrackData), mVoxer(nullptr), mJamEffects(nullptr) {
+    mVoxer = new Voxer(mPhraseMgr, mQuantizer, mApplication->GetSongClock(), mTrackData);
+    mOldGemMaker = new AxeOldGemMaker(mTrackData);
+    mNewGemMaker = new AxeNewGemMaker(mTrackData);
+
+    if (mApplication->GetPlayMode() == kPlayModeJam) {
+        mJamEffects = new JamEffectsMgr(
+            mUnknown00, mTrackData->mChannel, mApplication->GetPlayMap(), mPhraseMgr, mMuseSynth);
+        mPhrasePlayer->SetJamEffectsMgr(mJamEffects);
+    }
+}
+
+// 0x001da7f8
+void VoxingSTG::Slot2() {
+    ScoreTrackGraph::Slot2();
+    mVoxer->Start(kMBTInfinity);
+}
+
+// 0x001da830
+void VoxingSTG::Slot3() {
+    mVoxer->Stop();
+    ScoreTrackGraph::Slot3();
+}
+
 // 0x001da730
 VoxingSTG::~VoxingSTG() {
     VoxingSTG::Slot3(); // The binary calls this class's own body rather than dispatching.

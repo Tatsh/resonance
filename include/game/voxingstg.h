@@ -20,13 +20,15 @@
  * The constructor builds the producer and both gem makers unconditionally, and the jam effects
  * manager only in play mode 2. The two members it clears first are the producer and the jam
  * effects manager, and the destructor guards the release of each.
- *
- * The constructor's body is not written, for the reason recorded on AxingSTG. Slot 2 and slot 3
- * are declared and not written, for the reason recorded on PitchingSTG.
  */
 class VoxingSTG : public ScoreTrackGraph {
 public:
     /**
+     * Build the producer, the old and then the new gem maker, and, in play mode 2, the jam effects
+     * manager.
+     *
+     * The jam effects manager is installed in the phrase player.
+     *
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x001da050
      */
@@ -45,8 +47,8 @@ public:
     /**
      * Start the stage.
      *
-     * Slot 2. The routine starts the base and then posts the producer's tick task. The body is
-     * not written, for the reason recorded in the class documentation.
+     * Slot 2. The routine starts the base and then posts the producer's tick task with the
+     * position kMBTInfinity.
      *
      * @ghidraAddress 0x001da7f8
      */
@@ -55,8 +57,7 @@ public:
     /**
      * Stop the stage.
      *
-     * Slot 3. The routine withdraws the producer's tick task and then stops the base. The body is
-     * not written, for the reason recorded in the class documentation.
+     * Slot 3. The routine withdraws the producer's tick task and then stops the base.
      *
      * @ghidraAddress 0x001da830
      */
