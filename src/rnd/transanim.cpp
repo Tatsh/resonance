@@ -409,6 +409,17 @@ void TransAnim::Copy(const Object *pSource, unsigned nFlags) {
     }
 }
 
+// 0x004fd000
+void TransAnim::SetTrans(Transformable *pTrans) {
+    if (mTrans != nullptr) {
+        mTrans->RemoveRef(this);
+    }
+    mTrans = pTrans;
+    if (pTrans != nullptr) {
+        pTrans->AddRef(this);
+    }
+}
+
 // 0x004fd2c8
 void TransAnim::SetFrameSelf(float flFrame) {
     if (mTrans == nullptr) {

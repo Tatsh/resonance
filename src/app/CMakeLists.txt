@@ -45,11 +45,23 @@ set(RESONANCE_APP_SRCS
     rendererbase.cpp
     scriptsink.cpp
     task.cpp
+    tnlarms.cpp
+    tnlboundary.cpp
+    tnlbumpfx.cpp
     tnlcatcher.cpp
+    tnlcripplefx.cpp
+    tnlemitter.cpp
+    tnlfirefx.cpp
+    tnllattice.cpp
+    tnlmultfx.cpp
+    tnlname.cpp
+    tnlnowring.cpp
+    tnlpanelfx.cpp
     tnlpendingtrigger.cpp
     tnlpointer.cpp
     tnlsabretrail.cpp
     tnlseekerfade.cpp
+    tnlsnake.cpp
     tnlutil.cpp
     tunnelcache.cpp)
 

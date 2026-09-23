@@ -213,6 +213,17 @@ public:
      */
     void EvalFrame(float flFrame, float *pXfm, int nApplyOffset);
 
+    /**
+     * Make a transformable the target this animation drives.
+     *
+     * Drops this object's reference on the previous target, records the new one, and takes a
+     * reference on it. A null target clears mTrans.
+     *
+     * @param pTrans The new target, or null.
+     * @ghidraAddress 0x004fd000
+     */
+    void SetTrans(Transformable *pTrans);
+
 protected:
     /**
      * Write the transform this frame evaluates to into mTrans.
