@@ -65,6 +65,9 @@ tools are unchanged:
   `sce` pattern.
 - An inline member defined in a header with its `// 0x...` marker (for example `Cam::ProjectToUnit`)
   counts as declared but not as a body, because the body count reads `src` only.
+- The `hx.*` script bindings (54 routines in `0x00150000..0x0016ffff`, the `HxScript__X` bodies
+  and their `HxScript__XEntry` wrappers) are titled and plated but have no source until the tree
+  has a `Python.h` of the era, and no exclusion pattern matches their titles.
 
 Before that, from the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
 reconstructable figure fell by 85. The template library category grew by 99, the duplicate category
