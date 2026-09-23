@@ -195,6 +195,49 @@ public:
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
+    /**
+     * Report a finished remix save. MemcardUser slot 8.
+     *
+     * Success on port 1 sets mUnknownd8 and queues a connect-state enquiry, which
+     * OnConnectState() then records as the first GlobalSettings::mCardSlots entry. Success
+     * anywhere else exits MetMsgScreen. A full card raises `save_fail_no_space`, or
+     * `copy_fail_no_space` for a copy with the space GlobalSettings::mMinimumFreeClusters requires,
+     * and any other status raises `save_fail_no_space` with the `save_fail_general` text.
+     *
+     * @param nPortSlot The packed port and slot, which is not read.
+     * @param nStatus The save status.
+     * @ghidraAddress 0x00374b58
+     */
+    virtual void OnRemixSaved(int nPortSlot, int nStatus);
+
+    /**
+     * Check the listing of the target card before saving. MemcardUser slot 11.
+     *
+     * A remix in mUnknowncc named mUnknownb8 raises `mem_remix_dupe` with NO and YES. Fifty or more
+     * remixes raise `mem_remix_2many` with RETRY and CONTINUE. Otherwise the remix is saved through
+     * MemcardManager::CreateSaveRemixTask(). Neither argument is read.
+     *
+     * @param nPortSlot The packed port and slot, which is not read.
+     * @param nStatus The listing status, which is not read.
+     * @ghidraAddress 0x00374208
+     */
+    virtual void OnRemixesListed(int nPortSlot, int nStatus);
+
+    /**
+     * Act on the answer to one of the save dialogues. Slot 15.
+     *
+     * A retry answer queues a new connect-state enquiry, and a give-up answer runs slot 40. The
+     * YES answer to `mem_format_check` queues a format and raises `mem_format_go`, and NO runs
+     * slot 39 with the recorded request. `mem_format_done` and the YES answer to `mem_remix_dupe`
+     * save the remix and raise the save dialogue, and NO to `mem_remix_dupe` runs slot 42. Any
+     * other dialogue runs slot 41.
+     *
+     * @param name The dialogue name.
+     * @param nChoice The index of the button chosen.
+     * @ghidraAddress 0x00375590
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
 private:
     // 0x00372760. Raises the `save_remix` dialogue, titled `save_title` with the `mem_save` text
     // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.

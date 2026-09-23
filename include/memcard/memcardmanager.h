@@ -210,7 +210,8 @@ public:
     /**
      * The receiver each new task reports to. Every task factory copies it into the task. +0x00
      *
-     * Public because MetRemixManager's remix loaders at `0x00361418` and `0x00361480` store
+     * Public because MetRemixManager's remix loaders at `0x00361418` and `0x00361480`, and
+     * MetSaveRemix::OnRemixSaved(), OnRemixesListed(), and OnMsgScreenDismissed(), store
      * themselves here directly before queueing a task, and the image has no setter for it.
      */
     MemcardUser *mUser;

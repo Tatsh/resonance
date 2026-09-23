@@ -50,7 +50,7 @@ int MetRemixLoadScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     // The catalogue pointer is not tested for null here, unlike in the two sound overrides.
     if (static_cast<unsigned>(nItem) < mUnknown90->size()) {
         MetRemixRecord record((*mUnknown90)[nItem]);
-        HxStr name(record.unknown08_);
+        HxStr name(record.name);
         pText->SetText(name);
         pText->SetFont(record.unknown34_ == GetAlbumJukeboxValue() ? mUnknowna0 : mUnknowna4);
     } else {

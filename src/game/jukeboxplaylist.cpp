@@ -58,8 +58,8 @@ void JukeboxPlayList::load(IBStream *pStream) {
 // 0x001e21b8
 void JukeboxPlayList::AddEntry(const MetRemixRecord &record) {
     JukeboxPlayListEntry *pEntry = new JukeboxPlayListEntry;
-    pEntry->factory = record.unknown24_;
-    pEntry->name = record.unknown08_;
+    pEntry->factory = record.factory;
+    pEntry->name = record.name;
     entries.push_back(pEntry);
 }
 

@@ -96,7 +96,7 @@ int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nCon
     if (nContext == kCatalogueContext) {
         if (static_cast<unsigned>(nItem) < mUnknowna0->size()) {
             const MetRemixRecord &record = (*mUnknowna0)[nItem];
-            pText->SetText(record.unknown08_);
+            pText->SetText(record.name);
             pText->SetFont(record.unknown34_ == GetAlbumJukeboxValue() ? mUnknownd8 : mUnknowndc);
         } else {
             pText->SetText(HxStr(kNoText));

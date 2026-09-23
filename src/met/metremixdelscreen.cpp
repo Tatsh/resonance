@@ -42,7 +42,7 @@ MetRemixDelScreen::~MetRemixDelScreen() {
 int MetRemixDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     if (static_cast<unsigned>(nItem) < mUnknownf0->size()) {
         MetRemixRecord record((*mUnknownf0)[nItem]);
-        pText->SetText(HxStr(record.unknown08_));
+        pText->SetText(HxStr(record.name));
     } else {
         pText->SetText(HxStr(kNoText));
     }

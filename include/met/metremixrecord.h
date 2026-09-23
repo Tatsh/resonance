@@ -34,18 +34,18 @@
  */
 struct MetRemixRecord {
     MetRemixRecord()
-        : unknown00_(""), unknown08_(""), unknown10_(""), unknown18_(""), unknown20_(true),
-          unknown24_(0), unknown34_(0) {
+        : unknown00_(""), name(""), unknown10_(""), unknown18_(""), unknown20_(true), factory(0),
+          unknown34_(0) {
     }
 
     /**
      * Build a record from its parts, taken by value.
      *
      * ListRemixesMCT::OnFileLoaded() at `0x0017ece0` is the only site, and no out-of-line copy
-     * exists. unknown24_ starts at zero.
+     * exists. factory starts at zero.
      *
      * @param unknown00 Copied into unknown00_.
-     * @param unknown08 Copied into unknown08_.
+     * @param nameIn Copied into name.
      * @param unknown10 Copied into unknown10_.
      * @param unknown18 Copied into unknown18_.
      * @param bUnknown20 Stored in unknown20_.
@@ -53,23 +53,27 @@ struct MetRemixRecord {
      * @param nUnknown34 Stored in unknown34_.
      */
     MetRemixRecord(HxStr unknown00,
-                   HxStr unknown08,
+                   HxStr nameIn,
                    HxStr unknown10,
                    HxStr unknown18,
                    bool bUnknown20,
                    std::vector<FreqAppearance> appearancesIn,
                    int nUnknown34)
-        : unknown00_(unknown00), unknown08_(unknown08), unknown10_(unknown10),
-          unknown18_(unknown18), unknown20_(bUnknown20), unknown24_(0), appearances(appearancesIn),
-          unknown34_(nUnknown34) {
+        : unknown00_(unknown00), name(nameIn), unknown10_(unknown10), unknown18_(unknown18),
+          unknown20_(bUnknown20), factory(0), appearances(appearancesIn), unknown34_(nUnknown34) {
     }
 
     HxStr unknown00_; /*!< Starts as a copy of the empty string. +0x00 */
-    HxStr unknown08_; /*!< Starts as a copy of the empty string. +0x08 */
+    /**
+     * The remix name, which JukeboxPlayList::AddEntry() copies into a playlist entry and
+     * MetSaveRemix::OnRemixesListed() compares against the name being saved. +0x08
+     */
+    HxStr name;
     HxStr unknown10_; /*!< Starts as a copy of the empty string. +0x10 */
     HxStr unknown18_; /*!< Starts as a copy of the empty string. +0x18 */
     bool unknown20_;  /*!< Starts true. +0x20 */
-    int unknown24_;   /*!< Starts at zero. +0x24 */
+    /** Non-zero for a factory remix. JukeboxPlayList::AddEntry() copies it. +0x24 */
+    int factory;
     /** Appearances of the players who recorded the remix. +0x28 */
     std::vector<FreqAppearance> appearances;
     int unknown34_; /*!< Starts at zero. +0x34 */

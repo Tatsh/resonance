@@ -217,10 +217,10 @@ MetRemixRecord *MetRemixManager::FindRecord(const HxStr &name) {
         std::vector<MetRemixRecord> &records = it->second;
         const int nRecords = records.size();
         for (int i = 0; i < nRecords; ++i) {
-            if (!(records[i].unknown08_ == name)) {
+            if (!(records[i].name == name)) {
                 continue;
             }
-            if (records[i].unknown24_ != 0) {
+            if (records[i].factory != 0) {
                 if (it->first == kFactorySlot) {
                     return &records[i];
                 }
@@ -747,7 +747,7 @@ void MetRemixManager::Done(int nHandle,
                               it->GameOK,
                               it->appearances,
                               it->AlbumNum);
-        record.unknown24_ = 1;
+        record.factory = 1;
         mRemixes[mUnknowne8].push_back(record);
     }
     MemFreeTagged(pBuffer, __FILE__, __LINE__);
@@ -770,7 +770,7 @@ inline void MetRemixManager::LoadRemix(const MetRemixRecord &record, int nFactor
         return;
     }
     MemcardManager::shared()->mUser = this;
-    MemcardManager::shared()->CreateLoadRemixTask(0, record.unknown08_);
+    MemcardManager::shared()->CreateLoadRemixTask(0, record.name);
 }
 
 // 0x00361480

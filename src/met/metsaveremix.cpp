@@ -22,6 +22,11 @@ static const char *const kMemCheckDialogue = "mem_check";
 static const char *const kFormatCheckDialogue = "mem_format_check";
 static const char *const kFormatDoneDialogue = "mem_format_done";
 static const char *const kFormatAlreadyDialogue = "mem_format_already";
+static const char *const kFormatGoDialogue = "mem_format_go";
+static const char *const kRemixDupeDialogue = "mem_remix_dupe";
+static const char *const kTooManyRemixesDialogue = "mem_remix_2many";
+static const char *const kSaveNoSpaceDialogue = "save_fail_no_space";
+static const char *const kCopyNoSpaceDialogue = "copy_fail_no_space";
 static const char *const kMsgScreen = "MetMsgScreen";
 
 // Dialogue titles, and the configuration keys of the two BeginSave() reads.
@@ -40,6 +45,12 @@ static const char *const kCopyFailNoCardText = "copy_fail_nocard";
 static const char *const kFormatSuccessText = "format_success";
 static const char *const kFormatAlreadyText = "format_already";
 static const char *const kFormatFailText = "format_fail";
+static const char *const kSaveNoSpaceText = "save_fail_nospace";
+static const char *const kCopyNoSpaceText = "copy_fail_nospace";
+static const char *const kSaveFailGeneralText = "save_fail_general";
+
+// The question appended to the `mem_remix_dupe` text, filled with the remix name.
+static const char *const kQuestionFormat = "%s?";
 
 // Button labels.
 static const char *const kNoButton = "NO";
@@ -57,6 +68,16 @@ constexpr int kTwoButtons = 2;
 // The format status FormatCardMCT reports for a card that was already formatted. The name is
 // inferred from the dialogue it raises.
 constexpr int kCardStatusAlreadyFormatted = 13;
+
+// The dialogue buttons OnMsgScreenDismissed() tests, counted from zero.
+constexpr int kChoiceFirst = 0;
+constexpr int kChoiceSecond = 1;
+
+// The packed port and slot of port 1, the card GlobalSettings::mCardSlots records.
+constexpr int kFirstCardPortSlot = 0;
+
+// The most remixes one card holds, which the `mem_remix_2many` text also receives.
+constexpr int kMaxRemixes = 50;
 
 inline const char *TextOrEmpty(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
@@ -189,6 +210,155 @@ void MetSaveRemix::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) 
         break;
     }
     }
+}
+
+// 0x00374b58
+void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
+    switch (nStatus) {
+    case kMemcardStatusOk:
+        if (mUnknown94.mPortSlot == kFirstCardPortSlot) {
+            mUnknownd8 = 1;
+            MemcardManager::shared()->mUser = this;
+            MemcardManager::shared()->CreateGetConnectStateTask(mUnknown94.mPortSlot);
+        } else {
+            ExitScreenByName(HxStr(kMsgScreen));
+        }
+        break;
+
+    case kMemcardStatusCardFull: {
+        std::vector<HxStr> buttons;
+        if (mUnknowndc != 0) {
+            buttons.push_back(HxStr(kRetryButton));
+            buttons.push_back(HxStr(kCancelButton));
+            const HxStr format(ConfigText(kCopyNoSpaceText));
+            const HxStr text(FormatString(TextOrEmpty(format),
+                                          TextOrEmpty(mUnknown94.mSlotName),
+                                          GlobalSettings::shared()->mMinimumFreeClusters));
+            MetMsgScreen::ShowActive(
+                HxStr(kCopyNoSpaceDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
+            MetMsgScreen::SetOwnerPad(mUnknownc8);
+        } else {
+            buttons.push_back(HxStr(kRetryButton));
+            buttons.push_back(HxStr(kContinueButton));
+            const HxStr format(ConfigText(kSaveNoSpaceText));
+            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown94.mSlotName)));
+            MetMsgScreen::ShowActive(
+                HxStr(kSaveNoSpaceDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
+            MetMsgScreen::SetOwnerPad(mUnknownc8);
+        }
+        break;
+    }
+
+    default: {
+        std::vector<HxStr> buttons;
+        buttons.push_back(HxStr(kContinueButton));
+        // Yes, the binary names this dialogue `save_fail_no_space` although its text is the
+        // general failure.
+        MetMsgScreen::ShowActive(HxStr(kSaveNoSpaceDialogue),
+                                 HxStr(kErrorTitle),
+                                 ConfigText(kSaveFailGeneralText),
+                                 kOneButton,
+                                 buttons,
+                                 this);
+        MetMsgScreen::SetOwnerPad(mUnknownc8);
+        break;
+    }
+    }
+}
+
+// 0x00374208
+void MetSaveRemix::OnRemixesListed([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
+    const int nCount = mUnknowncc.size();
+    bool bDuplicate = false;
+    for (int i = 0; i < nCount; ++i) {
+        if (mUnknowncc[i].name == mUnknownb8) {
+            bDuplicate = true;
+            break;
+        }
+    }
+
+    if (bDuplicate) {
+        std::vector<HxStr> buttons;
+        buttons.push_back(HxStr(kNoButton));
+        buttons.push_back(HxStr(kYesButton));
+        const HxStr question(FormatString(kQuestionFormat, TextOrEmpty(mUnknownb8)));
+        const HxStr text(ConfigText(kRemixDupeDialogue) + question);
+        MetMsgScreen::ShowActive(
+            HxStr(kRemixDupeDialogue), HxStr(kWarningTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::SetOwnerPad(mUnknownc8);
+    } else if (nCount >= kMaxRemixes) {
+        std::vector<HxStr> buttons;
+        buttons.push_back(HxStr(kRetryButton));
+        buttons.push_back(HxStr(kContinueButton));
+        const HxStr format(ConfigText(kTooManyRemixesDialogue));
+        const HxStr text(
+            FormatString(TextOrEmpty(format), kMaxRemixes, TextOrEmpty(mUnknown94.mSlotName)));
+        MetMsgScreen::ShowActive(
+            HxStr(kTooManyRemixesDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::SetOwnerPad(mUnknownc8);
+    } else {
+        MemcardManager::shared()->mUser = this;
+        MemcardManager::shared()->CreateSaveRemixTask(
+            mUnknown94.mPortSlot, mUnknownb8, mUnknownac, mUnknownc0, mUnknowne4);
+    }
+}
+
+// 0x00375590
+void MetSaveRemix::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
+    if (name == kMemCheckDialogue) {
+        if (nChoice == kChoiceSecond) {
+            OnUnknownSlot40();
+            return;
+        }
+    } else if (name == kFormatCheckDialogue) {
+        if (nChoice == kChoiceSecond) {
+            MemcardManager::shared()->CreateFormatTask(mUnknown94.mPortSlot);
+            const std::vector<HxStr> buttons;
+            const HxStr format(ConfigText(kFormatGoDialogue));
+            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown94.mSlotName)));
+            MetMsgScreen::Show(
+                HxStr(kFormatGoDialogue), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
+            MetMsgScreen::SetOwnerPad(mUnknownc8);
+        } else {
+            OnUnknownSlot39(mUnknown94, mUnknownc8, mUnknownb8, mUnknownc0, mUnknownac, mUnknowne4);
+        }
+        return;
+    } else if (name == kFormatDoneDialogue) {
+        MemcardManager::shared()->mUser = this;
+        MemcardManager::shared()->CreateSaveRemixTask(
+            mUnknown94.mPortSlot, mUnknownb8, mUnknownac, mUnknownc0, mUnknowne4);
+        BeginSave();
+        return;
+    } else if (name == kFormatAlreadyDialogue) {
+        // Falls through to the connect-state enquiry below.
+    } else if (name == kRemixDupeDialogue) {
+        if (nChoice == kChoiceSecond) {
+            MemcardManager::shared()->mUser = this;
+            MemcardManager::shared()->CreateSaveRemixTask(
+                mUnknown94.mPortSlot, mUnknownb8, mUnknownac, mUnknownc0, mUnknowne4);
+            BeginSave();
+            MetMsgScreen::SetOwnerPad(mUnknownc8); // Yes, BeginSave() has already done this.
+        } else {
+            OnUnknownSlot42();
+        }
+        return;
+    } else if (name == kTooManyRemixesDialogue) {
+        if (nChoice != kChoiceFirst) {
+            OnUnknownSlot40();
+            return;
+        }
+    } else if (name == kSaveNoSpaceDialogue || name == kCopyNoSpaceDialogue) {
+        if (nChoice != kChoiceFirst) {
+            OnUnknownSlot40();
+            return;
+        }
+    } else {
+        OnUnknownSlot41();
+        return;
+    }
+
+    MemcardManager::shared()->mUser = this;
+    MemcardManager::shared()->CreateGetConnectStateTask(mUnknown94.mPortSlot);
 }
 
 // 0x00372760
