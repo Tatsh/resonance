@@ -1,14 +1,21 @@
 #include "rnd/psenviron.h"
 
+#include <math.h>
+#include <string.h>
 #include <vector>
 
 #include "gfx/gfxdevice.h"
+#include "math/sphere.h"
+#include "math/transformops.h"
 #include "math/vector3.h"
 #include "os/hxstr.h"
 #include "rnd/drawverts.h"
 #include "rnd/environ.h"
 #include "rnd/light.h"
+#include "rnd/mat.h"
 #include "rnd/pscam.h"
+#include "rnd/psmat.h"
+#include "rnd/transformable.h"
 
 namespace Rnd {
 
@@ -27,7 +34,138 @@ constexpr int kFogColBlueShift = 16;
 constexpr int kXfmRowLightAxis = 1;
 constexpr int kXfmRowTranslation = 3;
 
+// VU1 microprogram entries SelectLightForVertex() chooses between.
+constexpr int kVu1EntryUnlit = 0x2ee;
+constexpr int kVu1EntryDirectional = 0x2f8;
+constexpr int kVu1EntryPoint = 0x35c;
+constexpr int kVu1EntryNoLight = 0x3d4;
+
+// The inverse of a rigid transform with the fourth word of every row preset, as the binary builds
+// it before XfmInvertRigid() writes only the other words.
+inline void InvertWithUnitW(const float *pXfm, float aflInverse[kXfmRowCount][kXfmRowFloatCount]) {
+    for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
+        aflInverse[nRow][kXfmRowFloatCount - 1] = 1.0f;
+    }
+    XfmInvertRigid(&aflInverse[0][0], pXfm);
+}
+
+// On VU0 as vmulax, vmadday, vmaddz. The fourth word is carried over from the source.
+inline Vector3 RotateByRows(const float aflRows[kXfmRowCount][kXfmRowFloatCount],
+                            const Vector3 &vec) {
+    Vector3 rotated = vec;
+    rotated.x = aflRows[0][0] * vec.x + aflRows[1][0] * vec.y + aflRows[2][0] * vec.z;
+    rotated.y = aflRows[0][1] * vec.x + aflRows[1][1] * vec.y + aflRows[2][1] * vec.z;
+    rotated.z = aflRows[0][2] * vec.x + aflRows[1][2] * vec.y + aflRows[2][2] * vec.z;
+    return rotated;
+}
+
+// On VU0 as vmulax, vmadday, vmaddaz, vmaddw. The fourth word is carried over from the source.
+inline Vector3 TransformByRows(const float aflRows[kXfmRowCount][kXfmRowFloatCount],
+                               const Vector3 &vec) {
+    Vector3 transformed = RotateByRows(aflRows, vec);
+    transformed.x += aflRows[kXfmRowTranslation][0];
+    transformed.y += aflRows[kXfmRowTranslation][1];
+    transformed.z += aflRows[kXfmRowTranslation][2];
+    return transformed;
+}
+
+// Whether a point light, already in the sphere's space, reaches a bounding sphere. A sphere with no
+// radius is always reached. The range is the fourth word of the transformed position, which the
+// transform carries over from the range in mPosition.
+inline bool LightReachesSphere(const PointLightRecord &light, const Sphere *pSphere) {
+    if (pSphere == nullptr || pSphere->mRadius == 0.0f) {
+        return true;
+    }
+    Vector3 offset;
+    offset.w = 1.0f;
+    Vec3Sub(&light.mTransformedPosition.x, &pSphere->mCenter.x, &offset.x);
+    const float flDistance = sqrtf(offset.x * offset.x + offset.y * offset.y + offset.z * offset.z);
+    return flDistance <= light.mTransformedPosition.w + pSphere->mRadius;
+}
+
+// Scale a packet colour by a light colour, or replace it when the material takes that term from
+// the vertex colours. The fourth word is untouched.
+inline void ApplyLightColor(GifQuadword *pQuad, const Color &light, int bFromVertex) {
+    Color color;
+    memcpy(&color, pQuad, sizeof(color));
+    if (bFromVertex == 0) {
+        color.r *= light.r;
+        color.g *= light.g;
+        color.b *= light.b;
+    } else {
+        color.r = light.r;
+        color.g = light.g;
+        color.b = light.b;
+    }
+    memcpy(pQuad, &color, sizeof(color));
+}
+
 } // namespace
+
+// 0x005af0c8
+int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
+                          DirectionalLightRecord *&pDirectionalEnd,
+                          PointLightRecord *&pPointBegin,
+                          PointLightRecord *&pPointEnd,
+                          const float *pXfm,
+                          const Sphere *pSphere) {
+    int nActive = 0;
+    pDirectionalBegin = g_directionalLightRecords.data();
+    pDirectionalEnd = g_directionalLightRecords.data() + g_directionalLightRecords.size();
+    pPointBegin = g_pointLightRecords.data();
+    pPointEnd = g_pointLightRecords.data() + g_pointLightRecords.size();
+
+    float aflInverse[kXfmRowCount][kXfmRowFloatCount];
+    InvertWithUnitW(pXfm, aflInverse);
+
+    for (DirectionalLightRecord *pLight = pDirectionalBegin; pLight != pDirectionalEnd; ++pLight) {
+        pLight->mTransformedDirection = RotateByRows(aflInverse, pLight->mDirection);
+        ++nActive;
+    }
+    for (PointLightRecord *pLight = pPointBegin; pLight != pPointEnd; ++pLight) {
+        pLight->mTransformedPosition = TransformByRows(aflInverse, pLight->mPosition);
+        pLight->mCulled = LightReachesSphere(*pLight, pSphere) ? 0 : 1;
+        nActive += pLight->mCulled ^ 1;
+    }
+    return nActive;
+}
+
+// 0x005af2c0
+int SelectLightForVertex(GifQuadword *pLight,
+                         GifQuadword *pAmbient,
+                         GifQuadword *pDiffuse,
+                         const float *pXfm,
+                         const Sphere *pSphere) {
+    if (g_nLightingEnabled == 0) {
+        return kVu1EntryUnlit;
+    }
+
+    float aflInverse[kXfmRowCount][kXfmRowFloatCount];
+    if (!g_directionalLightRecords.empty()) {
+        const DirectionalLightRecord &light = g_directionalLightRecords.front();
+        InvertWithUnitW(pXfm, aflInverse);
+        const Vector3 direction = RotateByRows(aflInverse, light.mDirection);
+        memcpy(pLight, &direction, sizeof(direction));
+        ApplyLightColor(pAmbient, light.mAmbient, g_pSelectedMat->mVertAmbient);
+        ApplyLightColor(pDiffuse, light.mDiffuse, g_pSelectedMat->mVertDiffuse);
+        return kVu1EntryDirectional;
+    }
+
+    if (g_pointLightRecords.empty()) {
+        return kVu1EntryNoLight;
+    }
+    InvertWithUnitW(pXfm, aflInverse);
+    for (PointLightRecord &light : g_pointLightRecords) {
+        light.mTransformedPosition = TransformByRows(aflInverse, light.mPosition);
+        if (LightReachesSphere(light, pSphere)) {
+            ApplyLightColor(pAmbient, light.mAmbient, g_pSelectedMat->mVertAmbient);
+            ApplyLightColor(pDiffuse, light.mDiffuse, g_pSelectedMat->mVertDiffuse);
+            memcpy(pLight, &light.mTransformedPosition, sizeof(light.mTransformedPosition));
+            return kVu1EntryPoint;
+        }
+    }
+    return kVu1EntryNoLight;
+}
 
 // 0x00776118
 int g_nFogEnabled;

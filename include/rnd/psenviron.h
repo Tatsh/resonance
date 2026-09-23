@@ -7,6 +7,8 @@
 #include "rnd/environ.h"
 
 class HxStr;
+struct GifQuadword;
+struct Sphere;
 namespace Rnd {
 class Light;
 }
@@ -20,10 +22,11 @@ namespace Rnd {
  * and is inferred. PsEnviron::DrawSelf() fills every member except mTransformedDirection.
  */
 struct DirectionalLightRecord {
-    Vector3 mDirection;            /*!< Negated second row of the light's world transform. */
-    Vector3 mTransformedDirection; /*!< Untouched by PsEnviron::DrawSelf(). Inferred. +0x10 */
-    Color mAmbient;                /*!< Copied from Rnd::Light::mAmbient. */
-    Color mDiffuse;                /*!< Copied from Rnd::Light::mDiffuse. */
+    Vector3 mDirection; /*!< Negated second row of the light's world transform. */
+    /** mDirection in the space of the transform TransformLightRecords() last took. +0x10 */
+    Vector3 mTransformedDirection;
+    Color mAmbient; /*!< Copied from Rnd::Light::mAmbient. */
+    Color mDiffuse; /*!< Copied from Rnd::Light::mDiffuse. */
 };
 
 /**
@@ -36,12 +39,70 @@ struct PointLightRecord {
     /*!< Translation row of the light's world transform, with Rnd::Light::mRange in the padding
          word. */
     Vector3 mPosition;
-    Vector3 mTransformedPosition; /*!< Untouched by PsEnviron::DrawSelf(). Inferred. +0x10 */
-    Color mAmbient;               /*!< Copied from Rnd::Light::mAmbient. */
-    Color mDiffuse;               /*!< Copied from Rnd::Light::mDiffuse. */
-    unsigned mUnknown40;          /*!< Written by the routine at `0x005af0c8`. +0x40 */
-    unsigned mUnknown44[3];       /*!< Pads the record to 0x50 bytes. +0x44 */
+    /**
+     * mPosition in the space of the transform TransformLightRecords() or SelectLightForVertex()
+     * last took. The fourth word carries the range over unchanged, and the reach test reads it
+     * from here. +0x10
+     */
+    Vector3 mTransformedPosition;
+    Color mAmbient; /*!< Copied from Rnd::Light::mAmbient. */
+    Color mDiffuse; /*!< Copied from Rnd::Light::mDiffuse. */
+    /** 1 when TransformLightRecords() found the light out of reach of the bounding sphere. +0x40 */
+    int mCulled;
+    unsigned mUnknown44[3]; /*!< Pads the record to 0x50 bytes. +0x44 */
 };
+
+/**
+ * Bring every light record into an object's space and cull the point lights against its bounds.
+ *
+ * Each directional record receives its direction rotated by the inverse of pXfm, and each point
+ * record its position transformed by it. A point light is culled when the distance from the sphere
+ * centre exceeds its range plus the sphere radius. A null sphere or one of zero radius culls
+ * nothing. TransformAndLightMeshVerts() is the one caller.
+ *
+ * The name is inferred.
+ *
+ * @param pDirectionalBegin Receives the first directional record.
+ * @param pDirectionalEnd Receives the end of the directional records.
+ * @param pPointBegin Receives the first point record.
+ * @param pPointEnd Receives the end of the point records.
+ * @param pXfm The object transform, four rows of four floats.
+ * @param pSphere The object bounds, or null.
+ * @return The directional lights plus the point lights not culled.
+ * @ghidraAddress 0x005af0c8
+ */
+int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
+                          DirectionalLightRecord *&pDirectionalEnd,
+                          PointLightRecord *&pPointBegin,
+                          PointLightRecord *&pPointEnd,
+                          const float *pXfm,
+                          const Sphere *pSphere);
+
+/**
+ * Choose the one light the VU1 face program applies to an object and write its parameters.
+ *
+ * With lighting off the unlit program is chosen and nothing is written. Otherwise the first
+ * directional light wins, and failing one the first point light that reaches the bounding sphere.
+ * The light's direction or position in object space goes to pLight, and its ambient and diffuse
+ * colours scale the material colours at pAmbient and pDiffuse, or replace them where the
+ * material takes that term from the vertex colours.
+ *
+ * The name is inferred.
+ *
+ * @param pLight Receives the light direction or position, one packet quadword.
+ * @param pAmbient The material ambient colour in the packet, updated in place.
+ * @param pDiffuse The material diffuse colour in the packet, updated in place.
+ * @param pXfm The object transform, four rows of four floats.
+ * @param pSphere The object bounds, or null.
+ * @return The VU1 program entry: 0x2ee unlit, 0x2f8 directional, 0x35c point, or 0x3d4 when lit
+ *         by no light.
+ * @ghidraAddress 0x005af2c0
+ */
+int SelectLightForVertex(GifQuadword *pLight,
+                         GifQuadword *pAmbient,
+                         GifQuadword *pDiffuse,
+                         const float *pXfm,
+                         const Sphere *pSphere);
 
 /**
  * Lighting and fog a subtree is drawn under, PlayStation 2.

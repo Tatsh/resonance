@@ -50,20 +50,15 @@ namespace Rnd {
  * of four either way, so the fourth quadword of Rnd::MeshVert is the texture coordinate and the
  * untextured path simply omits it.
  *
- * Neither path builds a GIFtag. The microprogram cannot store one: the whole `.vutext` section is
- * 1140 instruction pairs with exactly three literals, and all three are 255.0f, the vertex colour
- * scale. Nor can it assemble one integer-side, because a VU integer register is 16 bits and a
- * tag's PRIM field starts at bit 47. The primitive type therefore arrives in the parameter
- * quadword the EE unpacks to VU address 8 for edges and 0x12 for faces. Its four words are the
- * vertex count, the primitive count, a render-state word, and the clipping flag, and the
- * render-state word comes from `0x00583358` for faces and `0x005837d0` for edges. Both of those
- * read the whole cached material state, which is where the primitive type enters.
+ * Neither path builds a GIFtag itself, and the microprogram cannot store one: the whole `.vutext`
+ * section is 1140 instruction pairs with exactly three literals, all three 255.0f. The GIFtags
+ * travel in the setup block EmitFaceVu1Setup() or EmitEdgeVu1Setup() sends to VU address 0 ahead of
+ * the runs, built there from the cached material state. The parameter quadword the EE unpacks to VU
+ * address 8 for edges and 0x12 for faces holds the vertex count, the primitive count, the
+ * microprogram entry EmitFaceVu1Setup() chose for the lighting, and the clipping flag.
  *
  * Every member of the class is reconstructed. Sync() at `0x00600590` is 793 instructions, of
  * which the strip builder is the part that belongs here and the rest is inlined container work.
- * Two routines the VU1 paths depend on are not reconstructed and are not part of this class, the
- * per-pass setup emitters at `0x00583358` and `0x005837d0`, and what their returned word means is
- * undetermined.
  *
  * The routines between `0x00604da0` and `0x00606678`, along with `0x00607170` and `0x00607198`,
  * are `std::vector`, `std::list`, `std::fill_n`, and `std::find` instantiations over
@@ -99,6 +94,25 @@ public:
      * @ghidraAddress 0x00606d38
      */
     static void SelectDepthRegsForPass(const Mesh &mesh, int nPass);
+
+    /**
+     * Upload the first face run of mFacesOwner to VU1 once, for Rnd::PsMultiMesh to draw per
+     * instance.
+     *
+     * One UNPACK to VU address 0 carries the projection g_viewProjectXfm, the colour scale, the
+     * viewport scale and offset, the texture coordinate transform, a triangle GIFtag without fog,
+     * the material colours and vertex colour flags when lighting is on, the parameter quadword, and
+     * the run's vertices at four quadwords each. The packed index data follows under its own UNPACK
+     * V3-16. Only the first run is sent, whatever the mesh holds.
+     *
+     * The routine lies in the Rnd::PsCam unit beside the other VU1 setup emitters. The name is
+     * inferred.
+     *
+     * @return The VU address just past the index data, the vertex quadwords plus 16 plus the
+     *         triangle count.
+     * @ghidraAddress 0x00583ba0
+     */
+    int EmitMultiMeshFaceRun();
 
 protected:
     /**

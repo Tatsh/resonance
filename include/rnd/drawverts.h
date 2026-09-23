@@ -35,9 +35,13 @@ constexpr int kFrustumPlaneFloatCount = 4;
  * the fourth.
  */
 struct DrawVert {
-    float mS;       // +0x00
-    float mT;       // +0x04
-    int mUnknown08; // +0x08
+    float mS; // +0x00
+    float mT; // +0x04
+    /**
+     * Q, which the PACKED ST write passes on. TransformMeshVertsNoLight() multiplies S and T by
+     * it. +0x08
+     */
+    float mQ;
     /** Which frustum planes this vertex falls outside. +0x0c */
     int mClipFlags;
     /** RGBAQ, already scaled to the range the GS takes. +0x10 */
@@ -161,16 +165,20 @@ void ClipTriangleToFrustum(
     unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, DrawVert *pVerts, int *pnNextIndex);
 
 /**
- * Emit the VU1 parameter quadwords for a face pass and return its third word.
+ * Emit the VU1 parameter block for a face pass and return the microprogram entry to run.
  *
- * The routine writes quadwords into the packet buffer and advances the write pointer, making it an
- * emitter rather than a builder. It returns a word deliberately, one path yielding the literal
- * 0x2ee, and Rnd::PsMesh::DrawFacesVU1() stores the result in the third slot of the parameter
- * quadword. What the word means is undetermined.
+ * One UNPACK of 18 quadwords to VU address 0 carries the inverse guard band scale, the draw
+ * transform composed with the unscaled projection, the colour scale, the unscaled viewport scale
+ * and offset with the two fog terms, the selected texture coordinate transform, a triangle GIFtag
+ * and a fan GIFtag built from the material state, and a five-quadword lighting block. With
+ * lighting on the block is the light SelectLightForVertex() chooses, the material's emissive,
+ * ambient, and diffuse colours, and its four vertex colour flags. With lighting off the block is
+ * skipped, left as whatever the packet buffer held. Rnd::PsMesh::DrawFacesVU1() stores the result
+ * in the third slot of each run's parameter quadword.
  *
  * @param pXfm The draw transform.
  * @param sphere The mesh bounding sphere.
- * @return The third word of the parameter quadword.
+ * @return The VU1 program entry, 0x2ee for an unlit pass.
  * @ghidraAddress 0x00583358
  */
 int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere);

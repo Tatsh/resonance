@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "gfx/gfxdevice.h"
+#include "gfx/renderstats.h"
 #include "math/frustum.h"
 #include "math/plane.h"
 #include "math/transform.h"
@@ -13,6 +14,13 @@
 #include "os/hxstr.h"
 #include "rnd/cam.h"
 #include "rnd/drawverts.h"
+#include "rnd/mat.h"
+#include "rnd/meshvert.h"
+#include "rnd/particle.h"
+#include "rnd/particlesys.h"
+#include "rnd/psenviron.h"
+#include "rnd/psmat.h"
+#include "rnd/psmesh.h"
 #include "rnd/pstex.h"
 #include "rnd/tex.h"
 #include "rndartt/apalette.h"
@@ -103,7 +111,564 @@ constexpr float kDefaultCamDistance = -150.0f;
 // Row of a transform that stores the translation.
 constexpr int kXfmRowTranslation = 3;
 
+// The VIF code that opens each VU1 setup block. UNPACK V4-32 to VU address 0, relative to TOPS.
+constexpr unsigned kVifCmdUnpackV4_32 = 0x6c;
+constexpr int kVifCmdShift = 24;
+constexpr int kVifNumShift = 16;
+constexpr unsigned kVifUnpackFlg = 0x8000;
+constexpr int kEdgeSetupQuadwords = 8;
+constexpr int kParticleSetupQuadwords = 9;
+
+// GIFtag fields the setup blocks build. PRE enables the PRIM field, which starts at bit 47.
+constexpr unsigned long long kGifTagEop = 1ULL << 15;
+constexpr unsigned long long kGifTagPre = 1ULL << 46;
+constexpr int kGifTagPrimShift = 47;
+constexpr int kGifTagNRegShift = 60;
+
+// PRIM fields. The edge block draws antialiased lines, and the particle block Gouraud-shaded
+// sprites.
+constexpr unsigned long long kPrimLineAntialiased = 0x81;
+constexpr unsigned long long kPrimSpriteGouraud = 0xe;
+constexpr int kPrimTmeShift = 4;
+constexpr int kPrimFgeShift = 5;
+constexpr int kPrimAbeShift = 6;
+
+// Register lists. RGBAQ is 1, ST 2, XYZF2 4, and NOP 15.
+constexpr unsigned long long kEdgeTagRegs = 0x441;
+constexpr unsigned long long kEdgeTagNReg = 3;
+constexpr unsigned long long kParticleTagRegsTextured = 0x412412;
+constexpr unsigned long long kParticleTagRegsUntextured = 0x41f41f;
+constexpr unsigned long long kParticleTagNReg = 6;
+
+// Colour scales the setup blocks pass to the microprogram, and the byte scales of the edge colour.
+// A texture bound without doubling takes the half scale.
+constexpr float kColorScaleFull = 254.0f;
+constexpr float kColorScaleHalf = 127.0f;
+constexpr float kAlphaScale = 128.0f;
+constexpr float kColorByteScale = 255.0f;
+
+inline GifQuadword *TakeQuadword() {
+    GifQuadword *pQuad = g_gfxDevice.mpWrite;
+    g_gfxDevice.mpWrite = pQuad + 1;
+    return pQuad;
+}
+
+// The packet buffer is untyped quadwords, so each typed payload is copied in by value.
+inline void PushQuadword(const void *pPayload) {
+    memcpy(TakeQuadword(), pPayload, sizeof(GifQuadword));
+}
+
+inline void PushFloats(float fl0, float fl1, float fl2, float fl3) {
+    const float aflQuad[] = {fl0, fl1, fl2, fl3};
+    PushQuadword(aflQuad);
+}
+
+inline void PushWords(unsigned n0, unsigned n1, unsigned n2, unsigned n3) {
+    const unsigned anQuad[] = {n0, n1, n2, n3};
+    PushQuadword(anQuad);
+}
+
+inline void PushVifUnpack(int nQuadwords) {
+    PushWords(0,
+              0,
+              0,
+              (kVifCmdUnpackV4_32 << kVifCmdShift) |
+                  (static_cast<unsigned>(nQuadwords) << kVifNumShift) | kVifUnpackFlg);
+}
+
+inline void PushTransform(const Transform &xfm) {
+    PushQuadword(&xfm.mBasisX);
+    PushQuadword(&xfm.mBasisY);
+    PushQuadword(&xfm.mBasisZ);
+    PushQuadword(&xfm.mTranslation);
+}
+
+inline void
+PushGifTag(unsigned long long qwPrim, unsigned long long qwNReg, unsigned long long qwRegs) {
+    GifQuadword *pTag = TakeQuadword();
+    pTag->mLo =
+        (qwPrim << kGifTagPrimShift) | kGifTagPre | kGifTagEop | (qwNReg << kGifTagNRegShift);
+    pTag->mHi = qwRegs;
+}
+
+// Texture coordinate generation modes TransformMeshVertsNoLight() handles. Explicit takes the
+// vertex coordinates, and sphere mapping reflects the view axis off the normal.
+constexpr int kGenModeExplicit = 0;
+constexpr int kGenModeSphere = 1;
+constexpr int kSphereMapRows = 3;
+constexpr int kVectorComponents = 3;
+constexpr int kComponentW = 3;
+
+// The camera views along the second row of its world transform.
+constexpr int kCamViewAxisRow = 1;
+
+constexpr int kComponentX = 0;
+constexpr int kComponentY = 1;
+constexpr int kComponentZ = 2;
+constexpr float kHalf = 0.5f;
+
+// Colour scales PackParticleQuads() applies before converting to integers, and the alpha a line's
+// trailing end point is drawn at.
+constexpr Color kParticleColorScaleFull = {255.0f, 255.0f, 255.0f, 128.0f};
+constexpr Color kParticleColorScaleHalf = {128.0f, 128.0f, 128.0f, 128.0f};
+constexpr float kLineTailAlpha = 0.1f;
+constexpr int kVertsPerSprite = 2;
+
+// A GS coordinate carries four fractional bits.
+constexpr float kFixed4Scale = 16.0f;
+
+// Whether a clip-space position falls outside any of the six planes, as the vclipw flags report.
+inline bool IsOutsideClipVolume(const float aflClipPos[kXfmRowFloatCount]) {
+    const float flW = fabsf(aflClipPos[kComponentW]);
+    for (int j = 0; j < kVectorComponents; ++j) {
+        if (aflClipPos[j] > flW || aflClipPos[j] < -flW) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Write one packed vertex, the position converted to four fractional bits.
+inline void StoreDrawVert(DrawVert &vert,
+                          const float aflStq[kXfmRowFloatCount],
+                          const unsigned anColor[kXfmRowFloatCount],
+                          const float aflPosition[kXfmRowFloatCount]) {
+    // The first quadword is S, T, Q, and the word the clipper reuses for its flags.
+    memcpy(&vert, aflStq, sizeof(float) * kXfmRowFloatCount);
+    memcpy(&vert.mColor, anColor, sizeof(vert.mColor));
+    int anPosition[kXfmRowFloatCount];
+    for (int j = 0; j < kXfmRowFloatCount; ++j) {
+        anPosition[j] = static_cast<int>(aflPosition[j] * kFixed4Scale);
+    }
+    memcpy(&vert.mPos, anPosition, sizeof(vert.mPos));
+}
+
+// The face block. Triangles and fans take Gouraud shading unless the material is flat, and a
+// textured pass sends ST ahead of RGBAQ and XYZF2 for every vertex.
+constexpr int kFaceSetupQuadwords = 18;
+constexpr unsigned long long kPrimTriangle = 3;
+constexpr unsigned long long kPrimTriangleFan = 5;
+constexpr int kPrimIipShift = 3;
+constexpr unsigned long long kFaceTagNRegTextured = 9;
+constexpr unsigned long long kFaceTagNRegUntextured = 6;
+constexpr unsigned long long kFaceTagRegsTextured = 0x412412412ULL;
+constexpr unsigned long long kFaceTagRegsUntextured = 0x414141;
+constexpr unsigned long long kFanTagNReg = 3;
+constexpr unsigned long long kFanTagRegsTextured = 0x412;
+constexpr unsigned long long kFanTagRegsUntextured = 0x41f;
+constexpr unsigned long long kMultiMeshTagRegsUntextured = 0x41f41f41fULL;
+constexpr int kLightBlockQuadwords = 5;
+constexpr int kMultiMeshLightBlockQuadwords = 4;
+
+// The multi-mesh upload. Sixteen setup quadwords precede the vertices, four quadwords each, and
+// the packed triangle indices follow as UNPACK V3-16, eight halfwords to a quadword.
+constexpr int kMultiMeshSetupQuadwords = 16;
+constexpr int kVu1VertQuadwords = 4;
+constexpr int kFaceIndices = 3;
+constexpr unsigned kVifCmdUnpackV3_16 = 0x69;
+constexpr int kIndexHalfwordsPerQuadword = 8;
+constexpr int kIndexQuadwordShift = 3;
+
+// VU1 microprogram entries the face setup selects without a light.
+constexpr int kVu1EntryUnlit = 0x2ee;
+constexpr int kVu1EntryMultiMeshLit = 0x3d4;
+
+// PRIM shading bits every face tag shares. The multi-mesh upload leaves fog out.
+inline unsigned long long FaceShadingBits(bool bWithFog) {
+    unsigned long long qwBits =
+        (static_cast<unsigned long long>(g_nStageTextureBound) << kPrimTmeShift) |
+        (static_cast<unsigned long long>(g_nSelectedFlat ^ 1) << kPrimIipShift) |
+        (static_cast<unsigned long long>(g_nAlphaBlendEnabled) << kPrimAbeShift);
+    if (bWithFog) {
+        qwBits |= static_cast<unsigned long long>(g_nFogEnabled) << kPrimFgeShift;
+    }
+    return qwBits;
+}
+
+// The selected texture coordinate transform's first two rows and translation, or the identity
+// with no translation when none is selected.
+inline void PushUvXfm() {
+    const Transform *pUvXfm = g_pSelectedUvXfm;
+    if (pUvXfm != nullptr) {
+        PushQuadword(&pUvXfm->mBasisX);
+        PushQuadword(&pUvXfm->mBasisY);
+        PushQuadword(&pUvXfm->mTranslation);
+    } else {
+        PushFloats(1.0f, 0.0f, 0.0f, 0.0f);
+        PushFloats(0.0f, 1.0f, 0.0f, 0.0f);
+        PushFloats(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+}
+
+// The material's vertex colour flags, emissive first.
+inline void PushMaterialVertexFlags() {
+    const Mat *pMat = g_pSelectedMat;
+    PushWords(static_cast<unsigned>(pMat->mVertEmissive),
+              static_cast<unsigned>(pMat->mVertAmbient),
+              static_cast<unsigned>(pMat->mVertDiffuse),
+              static_cast<unsigned>(pMat->mVertAlpha));
+}
+
+// The colour scale the face and particle blocks share. It stays at full strength unless a texture
+// is bound without doubling.
+inline void PushColorScale() {
+    const float flScale = (g_nStageTextureBound == 0 || g_nStageBlendDoubles != 0) ?
+                              kColorScaleFull :
+                              kColorScaleHalf;
+    PushFloats(flScale, flScale, flScale, kAlphaScale);
+}
+
 } // namespace
+
+// 0x00583358
+int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere) {
+    PushVifUnpack(kFaceSetupQuadwords);
+    PushQuadword(&g_invGuardBandScale);
+
+    Transform clipXfm;
+    clipXfm.mTranslation.w = 1.0f;
+    clipXfm.mBasisX.w = 1.0f;
+    clipXfm.mBasisY.w = 1.0f;
+    clipXfm.mBasisZ.w = 1.0f;
+    Mat44Concat(&clipXfm.mBasisX.x, &g_viewProjectUnscaledXfm.mBasisX.x, pXfm);
+    PushTransform(clipXfm);
+
+    PushColorScale();
+    PushFloats(g_viewportUnscaledXfm.mBasisX.x,
+               g_viewportUnscaledXfm.mBasisY.y,
+               g_viewportUnscaledXfm.mBasisZ.z,
+               g_flFogScale);
+    PushFloats(g_viewportUnscaledXfm.mTranslation.x,
+               g_viewportUnscaledXfm.mTranslation.y,
+               g_viewportUnscaledXfm.mTranslation.z,
+               g_flFogOffset);
+    PushUvXfm();
+
+    const bool bTextured = g_nStageTextureBound != 0;
+    const unsigned long long qwShading = FaceShadingBits(true);
+    PushGifTag(kPrimTriangle | qwShading,
+               bTextured ? kFaceTagNRegTextured : kFaceTagNRegUntextured,
+               bTextured ? kFaceTagRegsTextured : kFaceTagRegsUntextured);
+    PushGifTag(kPrimTriangleFan | qwShading,
+               kFanTagNReg,
+               bTextured ? kFanTagRegsTextured : kFanTagRegsUntextured);
+
+    if (g_nLightingEnabled == 0) {
+        g_gfxDevice.mpWrite += kLightBlockQuadwords;
+        return kVu1EntryUnlit;
+    }
+    GifQuadword *pLight = TakeQuadword();
+    PushQuadword(&g_pSelectedMat->mEmissive);
+    GifQuadword *pAmbient = g_gfxDevice.mpWrite;
+    PushQuadword(&g_pSelectedMat->mAmbient);
+    GifQuadword *pDiffuse = g_gfxDevice.mpWrite;
+    PushQuadword(&g_pSelectedMat->mDiffuse);
+    const int nEntry = SelectLightForVertex(pLight, pAmbient, pDiffuse, pXfm, &sphere);
+    PushMaterialVertexFlags();
+    return nEntry;
+}
+
+// 0x00583ba0
+int PsMesh::EmitMultiMeshFaceRun() {
+    // The runs belong to whichever mesh owns the faces, a PsMesh on this target.
+    const PsMesh *pOwner = static_cast<const PsMesh *>(mFacesOwner);
+    const DrawRun &run = pOwner->mFaceRuns.front();
+    const int nVertCount = static_cast<int>(run.mVertIndices.size());
+    const int nIndexAddr = nVertCount * kVu1VertQuadwords + kMultiMeshSetupQuadwords;
+
+    PushVifUnpack(nIndexAddr);
+    PushTransform(g_viewProjectXfm);
+    PushColorScale();
+    PushFloats(g_viewportXfm.mBasisX.x, g_viewportXfm.mBasisY.y, g_viewportXfm.mBasisZ.z, 0.0f);
+    PushFloats(g_viewportXfm.mTranslation.x,
+               g_viewportXfm.mTranslation.y,
+               g_viewportXfm.mTranslation.z,
+               0.0f);
+    PushUvXfm();
+    PushGifTag(kPrimTriangle | FaceShadingBits(false),
+               kFaceTagNRegTextured,
+               g_nStageTextureBound != 0 ? kFaceTagRegsTextured : kMultiMeshTagRegsUntextured);
+
+    int nEntry;
+    if (g_nLightingEnabled != 0) {
+        PushQuadword(&g_pSelectedMat->mEmissive);
+        PushQuadword(&g_pSelectedMat->mAmbient);
+        PushQuadword(&g_pSelectedMat->mDiffuse);
+        PushMaterialVertexFlags();
+        nEntry = kVu1EntryMultiMeshLit;
+    } else {
+        g_gfxDevice.mpWrite += kMultiMeshLightBlockQuadwords;
+        nEntry = kVu1EntryUnlit;
+    }
+
+    const int nPrimCount = run.mIndexCount / kFaceIndices;
+    PushWords(static_cast<unsigned>(nVertCount),
+              static_cast<unsigned>(nPrimCount),
+              static_cast<unsigned>(nEntry),
+              static_cast<unsigned>(nVertCount * kVu1VertQuadwords + nPrimCount));
+
+    const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+    for (unsigned short nIndex : run.mVertIndices) {
+        memcpy(g_gfxDevice.mpWrite, &verts[nIndex], sizeof(MeshVert));
+        g_gfxDevice.mpWrite += kVu1VertQuadwords;
+    }
+
+    const int nIndexEnd = nIndexAddr + nPrimCount;
+    PushWords(0,
+              0,
+              0,
+              (kVifCmdUnpackV3_16 << kVifCmdShift) |
+                  (static_cast<unsigned>(nPrimCount) << kVifNumShift) | kVifUnpackFlg |
+                  static_cast<unsigned>(nIndexAddr));
+    const int nIndexQuadwords =
+        (run.mIndexCount + kIndexHalfwordsPerQuadword - 1) >> kIndexQuadwordShift;
+    for (int i = 0; i < nIndexQuadwords; ++i) {
+        memcpy(TakeQuadword(), &run.mIndices[i * kIndexHalfwordsPerQuadword], sizeof(GifQuadword));
+    }
+    return nIndexEnd;
+}
+
+// 0x005837d0
+void EmitEdgeVu1Setup(const float *pXfm, const Color &color) {
+    PushVifUnpack(kEdgeSetupQuadwords);
+
+    // The concatenation never writes the fourth word of a row, so the binary presets all four.
+    Transform clipXfm;
+    clipXfm.mTranslation.w = 1.0f;
+    clipXfm.mBasisX.w = 1.0f;
+    clipXfm.mBasisY.w = 1.0f;
+    clipXfm.mBasisZ.w = 1.0f;
+    Mat44Concat(&clipXfm.mBasisX.x, &g_viewProjectXfm.mBasisX.x, pXfm);
+    PushTransform(clipXfm);
+
+    PushGifTag(kPrimLineAntialiased |
+                   (static_cast<unsigned long long>(g_nFogEnabled) << kPrimFgeShift),
+               kEdgeTagNReg,
+               kEdgeTagRegs);
+    PushFloats(g_viewportBiasedXfm.mBasisX.x,
+               g_viewportBiasedXfm.mBasisY.y,
+               g_viewportBiasedXfm.mBasisZ.z,
+               g_flFogScale);
+    PushFloats(g_viewportBiasedXfm.mTranslation.x,
+               g_viewportBiasedXfm.mTranslation.y,
+               g_viewportBiasedXfm.mTranslation.z,
+               g_flFogOffset);
+    PushWords(static_cast<unsigned>(color.r * kColorByteScale),
+              static_cast<unsigned>(color.g * kColorByteScale),
+              static_cast<unsigned>(color.b * kColorByteScale),
+              static_cast<unsigned>(color.a * kAlphaScale));
+}
+
+// 0x00584980
+int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nLineLength) {
+    if (pFirst == nullptr) {
+        return 0;
+    }
+    const bool bFullColor = g_nStageTextureBound == 0 || g_nStageBlendDoubles != 0;
+
+    // The binary concatenates the projection with an identity whose rows carry a fourth word of
+    // 1.0.
+    const float aflIdentity[kXfmRowCount][kXfmRowFloatCount] = {
+        {1.0f, 0.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 0.0f, 1.0f},
+    };
+    float aflClip[kXfmRowCount][kXfmRowFloatCount];
+    Mat44Concat(&aflClip[0][0], &g_viewProjectXfm.mBasisX.x, &aflIdentity[0][0]);
+    const Color &colorScale = bFullColor ? kParticleColorScaleFull : kParticleColorScaleHalf;
+    const float aflViewScale[] = {
+        g_viewportXfm.mBasisX.x, g_viewportXfm.mBasisY.y, g_viewportXfm.mBasisZ.z, 0.0f};
+    const float aflViewOffset[] = {g_viewportXfm.mTranslation.x,
+                                   g_viewportXfm.mTranslation.y,
+                                   g_viewportXfm.mTranslation.z,
+                                   0.0f};
+
+    // Two vector registers are only ever partly written, so the lanes the routine does not write
+    // carry over from particle to particle. Their first values are whatever the registers held.
+    float aflStq[kXfmRowFloatCount] = {};
+    float aflHalfExtent[kXfmRowFloatCount] = {};
+
+    DrawVert *pOut = pOutVerts;
+    const Particle *pParticle = pFirst;
+    int nHistory = 0;
+    while (pParticle != nullptr) {
+        // A line's second end point is the history quadword nLineLength past the position, drawn
+        // at a tenth of the alpha.
+        Color color = pParticle->mCol;
+        const Vector3 *pPosition = &pParticle->mPos;
+        if (nHistory != 0) {
+            color.a *= kLineTailAlpha;
+            pPosition = &(&pParticle->mPos)[nHistory];
+        }
+
+        // On VU0 as vmulax, vmadday, vmaddaz, vmaddw, then vclipw against the w component.
+        float aflClipPos[kXfmRowFloatCount];
+        for (int j = 0; j < kXfmRowFloatCount; ++j) {
+            aflClipPos[j] = aflClip[0][j] * pPosition->x + aflClip[1][j] * pPosition->y +
+                            aflClip[2][j] * pPosition->z + aflClip[kXfmRowTranslation][j];
+        }
+        const unsigned anColor[] = {
+            static_cast<unsigned>(static_cast<int>(colorScale.r * color.r)),
+            static_cast<unsigned>(static_cast<int>(colorScale.g * color.g)),
+            static_cast<unsigned>(static_cast<int>(colorScale.b * color.b)),
+            static_cast<unsigned>(static_cast<int>(colorScale.a * color.a))};
+        const float flQ = 1.0f / aflClipPos[kComponentW];
+
+        if (IsOutsideClipVolume(aflClipPos)) {
+            // A line whose second end point is outside withdraws the first as well.
+            if (nMode == ParticleSys::kModeLine && nHistory != 0) {
+                --pOut;
+            }
+            pParticle = pParticle->mNext;
+            nHistory = 0;
+            continue;
+        }
+
+        aflStq[kComponentZ] = 1.0f;
+        float aflScreen[kXfmRowFloatCount];
+        for (int j = 0; j < kVectorComponents; ++j) {
+            aflStq[j] *= flQ;
+            aflClipPos[j] *= flQ;
+        }
+        for (int j = 0; j < kXfmRowFloatCount; ++j) {
+            aflScreen[j] = aflViewScale[j] * aflClipPos[j] + aflViewOffset[j];
+        }
+
+        if (nMode == ParticleSys::kModeSprite) {
+            const float flHalfSize = pParticle->mSize * kHalf;
+            aflHalfExtent[kComponentX] = g_particleScreenScale.x * flQ * flHalfSize;
+            aflHalfExtent[kComponentY] = g_particleScreenScale.y * flQ * flHalfSize;
+            float aflCorner[kXfmRowFloatCount];
+            for (int j = 0; j < kXfmRowFloatCount; ++j) {
+                aflCorner[j] = aflScreen[j] - aflHalfExtent[j];
+            }
+            const float aflNearStq[] = {0.0f, 0.0f, 0.0f, 1.0f};
+            StoreDrawVert(pOut[0], aflNearStq, anColor, aflCorner);
+            for (int j = 0; j < kXfmRowFloatCount; ++j) {
+                aflCorner[j] = aflScreen[j] + aflHalfExtent[j];
+            }
+            aflStq[kComponentY] = aflStq[kComponentZ];
+            aflStq[kComponentX] = aflStq[kComponentY];
+            StoreDrawVert(pOut[1], aflStq, anColor, aflCorner);
+            pOut += kVertsPerSprite;
+        } else {
+            StoreDrawVert(pOut[0], aflStq, anColor, aflScreen);
+            ++pOut;
+        }
+
+        if (nMode == ParticleSys::kModeLine && nHistory == 0) {
+            nHistory = nLineLength;
+            continue;
+        }
+        pParticle = pParticle->mNext;
+        nHistory = 0;
+    }
+
+    const int nVerts = static_cast<int>(pOut - pOutVerts);
+    g_renderStats.mnVertsTransformed += nVerts;
+    return nVerts;
+}
+
+// 0x00584700
+void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, const float *pXfm) {
+    const Transform *pUvXfm = g_pSelectedUvXfm;
+    const int nGenMode = g_nSelectedGenMode;
+    if (pUvXfm == nullptr || nCount == 0) {
+        return;
+    }
+    g_renderStats.mnVertsTransformed += nCount;
+
+    // Sphere mapping reflects the view axis, the negated second row of the camera's world
+    // transform, off each rotated normal. A stage transform is folded into both by its transpose.
+    Vector3 view;
+    float aflRotation[kSphereMapRows][kXfmRowFloatCount];
+    if (nGenMode == kGenModeSphere) {
+        Vector3 negated;
+        negated.w = 1.0f;
+        NegateVec3(g_pCurrentCam->mWorldXfm[kCamViewAxisRow], &negated.x);
+        view = negated;
+        memcpy(aflRotation, pXfm, sizeof(aflRotation));
+        const Transform *pStageXfm = g_pSelectedStageXfm;
+        if (pStageXfm != nullptr) {
+            const float aflTransposed[kSphereMapRows][kXfmRowFloatCount] = {
+                {pStageXfm->mBasisX.x, pStageXfm->mBasisY.x, pStageXfm->mBasisZ.x, 1.0f},
+                {pStageXfm->mBasisX.y, pStageXfm->mBasisY.y, pStageXfm->mBasisZ.y, 1.0f},
+                {pStageXfm->mBasisX.z, pStageXfm->mBasisY.z, pStageXfm->mBasisZ.z, 1.0f},
+            };
+            Vector3 stageView;
+            stageView.w = 1.0f;
+            TransformVec3ByMat3VU0(&view.x, &aflTransposed[0][0], &stageView.x);
+            view = stageView;
+            float aflStageRotation[kSphereMapRows][kXfmRowFloatCount];
+            aflStageRotation[0][kComponentW] = 1.0f;
+            aflStageRotation[1][kComponentW] = 1.0f;
+            aflStageRotation[2][kComponentW] = 1.0f;
+            MultiplyMat3VU0(&aflRotation[0][0], &aflTransposed[0][0], &aflStageRotation[0][0]);
+            memcpy(aflRotation, aflStageRotation, sizeof(aflRotation));
+        }
+    }
+
+    // A generation mode other than the two handled leaves the coordinates of the previous vertex,
+    // which for the first vertex is whatever the vector register held.
+    float flS = 0.0f;
+    float flT = 0.0f;
+    DrawVert *pOut = static_cast<DrawVert *>(pOutVerts);
+    for (int i = 0; i < nCount; ++i) {
+        const MeshVert &vert = pVerts[i];
+        if (nGenMode == kGenModeExplicit) {
+            flS = vert.mTex1.x;
+            flT = vert.mTex1.y;
+        } else if (nGenMode == kGenModeSphere) {
+            // On VU0 as vmulax, vmadday, vmaddz for the rotation, then the reflection and a
+            // reciprocal of the length through the Q register.
+            float aflNormal[kVectorComponents];
+            for (int j = 0; j < kVectorComponents; ++j) {
+                aflNormal[j] = aflRotation[0][j] * vert.mNorm.x + aflRotation[1][j] * vert.mNorm.y +
+                               aflRotation[2][j] * vert.mNorm.z;
+            }
+            const float flTwiceDot =
+                2.0f * (view.x * aflNormal[0] + view.y * aflNormal[1] + view.z * aflNormal[2]);
+            const float flReflectX = aflNormal[0] * flTwiceDot - view.x;
+            const float flReflectY = aflNormal[1] * flTwiceDot - view.y - 1.0f;
+            const float flReflectZ = aflNormal[2] * flTwiceDot - view.z;
+            const float flInverseLength =
+                1.0f /
+                sqrtf(flReflectX * flReflectX + flReflectY * flReflectY + flReflectZ * flReflectZ);
+            flS = flReflectX * flInverseLength;
+            flT = flReflectZ * flInverseLength;
+        }
+
+        DrawVert &out = pOut[i];
+        const float flU =
+            pUvXfm->mBasisX.x * flS + pUvXfm->mBasisY.x * flT + pUvXfm->mTranslation.x;
+        const float flV =
+            pUvXfm->mBasisX.y * flS + pUvXfm->mBasisY.y * flT + pUvXfm->mTranslation.y;
+        out.mS = flU * out.mQ;
+        out.mT = flV * out.mQ;
+    }
+}
+
+// 0x005839d0
+void EmitParticleVu1Setup() {
+    PushVifUnpack(kParticleSetupQuadwords);
+    PushTransform(g_viewProjectXfm);
+    PushColorScale();
+
+    const unsigned long long qwPrim =
+        (static_cast<unsigned long long>(g_nStageTextureBound) << kPrimTmeShift) |
+        (static_cast<unsigned long long>(g_nAlphaBlendEnabled) << kPrimAbeShift) |
+        kPrimSpriteGouraud;
+    PushGifTag(qwPrim,
+               kParticleTagNReg,
+               g_nStageTextureBound != 0 ? kParticleTagRegsTextured : kParticleTagRegsUntextured);
+    PushFloats(g_viewportXfm.mBasisX.x, g_viewportXfm.mBasisY.y, g_viewportXfm.mBasisZ.z, 0.0f);
+    PushFloats(g_viewportXfm.mTranslation.x,
+               g_viewportXfm.mTranslation.y,
+               g_viewportXfm.mTranslation.z,
+               0.0f);
+    PushQuadword(&g_particleProjectScale);
+}
 
 // 0x00768410
 PsCam *g_pDefaultCam;

@@ -322,23 +322,63 @@ public:
      */
     Color mEmissive;
 
-protected:
-    Color mAmbient; // +0x40 Defaults to white.
-    Color mDiffuse; // +0x50 Defaults to white.
+    /**
+     * Ambient colour. Defaults to white. +0x40
+     *
+     * Public because EmitFaceVu1Setup(), SelectLightForVertex(), and the PsMesh upload at
+     * `0x00583ba0` read it directly through Rnd::g_pSelectedMat, and the image has no accessor.
+     */
+    Color mAmbient;
+    /**
+     * Diffuse colour. Defaults to white. +0x50
+     *
+     * Public on the same evidence as mAmbient.
+     */
+    Color mDiffuse;
 
-public:
     // Both edge draw paths read this through a Rnd::Mat pointer from outside the hierarchy, and the
     // image supplies no accessor for it. That is the same evidence that makes mCull public.
     Color mSpecular; // +0x60 Defaults to black with full alpha.
 
 protected:
-    int mEnable;       // +0x70 Defaults to 1. Serialised as one byte.
-    int mVertAmbient;  // +0x74 Serialised as one byte.
-    int mVertDiffuse;  // +0x78 Serialised as one byte.
+    int mEnable; // +0x70 Defaults to 1. Serialised as one byte.
+
+public:
+    /**
+     * Non-zero when the vertex colour supplies the ambient term in place of mAmbient. Serialised as
+     * one byte. +0x74
+     *
+     * Public because EmitFaceVu1Setup(), SelectLightForVertex(), and the PsMesh upload at
+     * `0x00583ba0` read it directly through Rnd::g_pSelectedMat, and the image has no accessor.
+     */
+    int mVertAmbient;
+    /**
+     * Non-zero when the vertex colour supplies the diffuse term in place of mDiffuse. Serialised as
+     * one byte. +0x78
+     *
+     * Public on the same evidence as mVertAmbient.
+     */
+    int mVertDiffuse;
+
+protected:
     int mVertSpecular; // +0x7c Serialised as one byte.
-    int mVertEmissive; // +0x80 Serialised as one byte.
-    int mVertAlpha;    // +0x84 Serialised as one byte.
-    int mNormalize;    // +0x88 Serialised as one byte.
+
+public:
+    /**
+     * Vertex emissive flag. Serialised as one byte. +0x80
+     *
+     * Public on the same evidence as mVertAmbient.
+     */
+    int mVertEmissive;
+    /**
+     * Vertex alpha flag. Serialised as one byte. +0x84
+     *
+     * Public on the same evidence as mVertAmbient.
+     */
+    int mVertAlpha;
+
+protected:
+    int mNormalize; // +0x88 Serialised as one byte.
 
 public:
     /*!< Winding the rasteriser discards. Public because Rnd::Mesh::Collide() at 0x0047f950 reads
