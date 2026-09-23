@@ -1,5 +1,6 @@
 #include "game/gamemanagerimpl.h"
 
+#include <utility>
 #include <vector>
 
 #include "app/application.h"
@@ -13,11 +14,13 @@
 #include "msg/begingamelocalmsg.h"
 #include "msg/endgamemsg.h"
 #include "msg/gamemanagerdoplaybackmsg.h"
+#include "msg/metfreqendedmsg.h"
 #include "msg/metstartpausemsg.h"
 #include "msg/pausegamesystemmsg.h"
 #include "msg/unpausegamesystemmsg.h"
 #include "os/hxstr.h"
 #include "os/log.h"
+#include "os/r250.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
 #include "synth/ps2hardsynth.h"
@@ -285,6 +288,39 @@ void GameManagerImpl::OnEndGame(Message *pMsg) {
     EndGame(static_cast<EndGameMsg *>(pMsg)->mRestart);
 }
 
+// 0x00106c08
+void GameManagerImpl::EndGame(int bRestart) {
+    CheckState(); // Yes, the binary discards this call's result.
+    const int nUnknownb8 = mpWorld->mUnknownb8;
+    Application::shared()->GetWatchdog()->Snapshot();
+    mpPoller->DetachController(mpWorld);
+    delete mpWorld;
+    mpWorld = nullptr;
+    if (mpRecorder != nullptr) {
+        mpRecorder->ScheduleEnd();
+    }
+    if (mpPlayback != nullptr) {
+        delete mpPlayback;
+        mpPlayback = nullptr;
+        SetGameMode(kGameModeNone);
+        Application::shared()->GetWatchdog()->Snapshot();
+    }
+
+    if (bRestart != 0) {
+        mUnknown100 = 1;
+        BeginGameLocalMsg begin;
+        QueueMessage(&begin);
+    } else {
+        mpPoller->SetController(mpMetaWorld);
+        mpPoller->SetActive(1);
+        mUnknowna8 = 1;
+        MetFreqEndedMsg ended;
+        ended.mUnknownb8Clear = nUnknownb8 == 0;
+        mpMetaWorld->GetRenderer()->Handle(&ended);
+    }
+    CheckState(); // Yes, the binary discards this call's result.
+}
+
 // 0x00106af8
 void GameManagerImpl::OnUnpauseGameSystem(Message *) {
     if (mPaused == 0) {
@@ -326,6 +362,23 @@ void GameManagerImpl::OnUnknownSlot6() {
 // 0x0010c1f0
 void GameManagerImpl::AddPlayers() {
     AddPersonaPlayers();
+}
+
+// 0x00106ec0
+void GameManagerImpl::AddPersonaPlayers() {
+    const char *colors[] = {"green", "purple", "yellow", "red"};
+    const int nCount = mPersonas.size();
+    std::vector<int> order(nCount);
+    for (int i = 0; i < nCount; ++i) {
+        order[i] = i;
+    }
+    for (int i = nCount - 1; i > 0; --i) {
+        std::swap(order[i], order[RandomInt(0, i + 1)]);
+    }
+    for (auto it = mPersonas.begin(); it != mPersonas.end(); ++it) {
+        const int nIndex = it - mPersonas.begin();
+        mpWorld->AddLocalPlayer(nIndex, nIndex, order[nIndex], HxStr(colors[nIndex]), *it);
+    }
 }
 
 // 0x0010c420

@@ -18,6 +18,7 @@ class InputMap;
 class LevelBuilder;
 class LevelData;
 class Message;
+class MetPersonaData;
 class MsgJoiner;
 class MsgSource;
 class MuseSynth;
@@ -243,6 +244,23 @@ public:
      * @ghidraAddress 0x00194de8
      */
     void AddNetPlayer(int nId, int nUnused, const HxStr &name, int nUnknown2c);
+
+    /**
+     * Create a player this console drives and append it to mPlayers and mLocalPlayers.
+     *
+     * The track is nId, except in solo mode, where it is configuration code 0x3a6 minus 1. The
+     * player receives the persona's appearance (MetPersonaData::mUnknown140). Not written yet,
+     * because Player's constructor still types that argument as an int. The title is inferred.
+     *
+     * @param nId The player's identifier.
+     * @param nInputSlot The controller slot.
+     * @param nUnused Not read. GameManagerImpl::AddPersonaPlayers() passes the shuffled index.
+     * @param colorName The player's colour name.
+     * @param pPersona The persona the player plays as.
+     * @ghidraAddress 0x0018c600
+     */
+    void AddLocalPlayer(
+        int nId, int nInputSlot, int nUnused, const HxStr &colorName, MetPersonaData *pPersona);
 
     /**
      * Remove the first player with an identifier from mPlayers, without destroying it.

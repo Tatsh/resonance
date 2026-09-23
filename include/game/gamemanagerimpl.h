@@ -567,9 +567,9 @@ private:
     // 0x0010c1f0. Forwards to AddPersonaPlayers(). FinishWorldLoad() and Load() call it.
     void AddPlayers();
 
-    // 0x00106ec0. Deals the personas out in a shuffled order, each with one of the colour names
-    // at 0x007cd3b0, and adds a player for each through the GrooveWorld routine at 0x0018c600.
-    // Not written, because that routine and the random draw at 0x0052d098 are not declared.
+    // 0x00106ec0. Adds a local player for each persona through GrooveWorld::AddLocalPlayer(), in
+    // persona order, each with one of the colour names at 0x007cd3b0. It also shuffles the
+    // persona indices, but AddLocalPlayer() does not read the shuffled index.
     void AddPersonaPlayers();
 
     // 0x00106c08. The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
