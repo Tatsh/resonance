@@ -215,6 +215,7 @@ gamestats
 gemmsg
 gempacket
 genericcatcher
+genpath
 getallconnectstatesmct
 getargs
 getconnectstatemct
@@ -513,6 +514,7 @@ particlesys
 particlesysanim
 pathconf
 pausegamesystemmsg
+pbck
 pcremodule
 phello
 phrasecapturedmsg
@@ -521,6 +523,7 @@ phrasemaker
 phrasemgr
 phrasemsg
 phrasemuffedmsg
+phraseneutralizer
 phrasepacket
 pinkgrey
 pitchingstg
@@ -543,6 +546,7 @@ pointamountmsg
 popen
 posixmodule
 posixpath
+powb
 powerup
 powerupcollection
 powerupcollectioni
@@ -607,6 +611,7 @@ ripgreprc
 rndartt
 rndfile
 rndglobal
+rndmovie
 rndtex
 rodata
 rotleftmsg
@@ -806,6 +811,7 @@ vrsqrt
 vtable
 vtables
 vutext
+watchdogtimer
 wdelete
 werror
 wextra
