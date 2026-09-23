@@ -137,7 +137,11 @@ docstrings
 dsizeof
 dsubu
 dthe
+durgemcurve
 durgemmsg
+durgemrowstring
+durgemstrip
+durgemtrails
 eekernel
 egsw
 egwb

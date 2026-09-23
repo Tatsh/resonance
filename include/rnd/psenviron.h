@@ -117,8 +117,8 @@ int SelectLightForVertex(GifQuadword *pLight,
  * subobject vptr. DrawSelf() is the only entry that is not the base implementation.
  *
  * The routine at `0x005b2888` undoes what Init() installs. It destroys both default objects and
- * restores Rnd::g_pfnNewEnviron to the base Rnd::Environ factory, and the class-registration sweep
- * at `0x0049b0c4` is its one caller. Its title is undetermined.
+ * restores Rnd::g_pfnNewEnviron to the base Rnd::Environ factory, and GfxDevice::Terminate() at
+ * `0x0049b0c4` is its one caller. Its title is undetermined.
  */
 class PsEnviron : public Environ {
 public:

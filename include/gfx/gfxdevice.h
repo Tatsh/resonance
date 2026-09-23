@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "math/color.h"
 
 class GsDoubleBuffer;
@@ -53,6 +55,67 @@ public:
     };
 
     /**
+     * Construct the device with an empty packet and the default feedback and clear settings.
+     *
+     * mSavedPacket is sized to 0x200 zeroed quadwords, the size of one scratchpad half. The
+     * feedback rectangle covers the whole display at an alpha of 0.78, the clear colour is opaque
+     * black, and mAdTag becomes an A+D GIFtag with one register and no loops.
+     *
+     * @ghidraAddress 0x0049ac50
+     */
+    GfxDevice();
+
+    /**
+     * Undo what Init() installs.
+     *
+     * The unit's static initialiser runs Terminate() on g_gfxDevice and then destroys
+     * mSavedPacket, which identifies the destructor as inline around the call.
+     */
+    ~GfxDevice() {
+        Terminate();
+    }
+
+    /**
+     * Restore the base render class factories that Init() replaced.
+     *
+     * Every hook Init() pointed at a PlayStation 2 factory is pointed back at its base factory and
+     * the base class is registered again under the same key. Rnd::PsCam's teardown also destroys
+     * the default camera, and Rnd::PsEnviron's is called rather than inlined. The routine ends by
+     * calling g_vramTable's destructor explicitly. The name is inferred.
+     *
+     * @ghidraAddress 0x0049afe0
+     */
+    void Terminate();
+
+    /**
+     * Release every video memory record and save the packet under construction.
+     *
+     * MetSonyScreen calls it before handing the display to another renderer. The name is
+     * inferred.
+     *
+     * @ghidraAddress 0x0049fef0
+     */
+    void ResetVramAndSavePacket();
+
+    /**
+     * Wait for the GIF and VIF1 channels to stop, then copy the packet into mSavedPacket.
+     *
+     * The length copied is the whole quadwords between mpBuffer and mpWrite. The name is inferred.
+     *
+     * @ghidraAddress 0x0049ff28
+     */
+    void SavePacket();
+
+    /**
+     * Copy mSavedPacket back over the packet buffer, for the length SavePacket() used.
+     *
+     * InitDisplayMode() is the one caller. The name is inferred.
+     *
+     * @ghidraAddress 0x0049ff98
+     */
+    void RestorePacket();
+
+    /**
      * Bring up the display and the drawing subsystems.
      *
      * Registers the device profile timers ("setup", "vram", "billboard", "vert", "prim", "sync"),
@@ -74,6 +137,9 @@ public:
 
     /**
      * Finish a frame and show it.
+     *
+     * Draws the feedback effect when mFeedbackEnabled is set, submits the packet, and ends the
+     * video memory frame. A swap then runs SwapBuffers() and inverts mnDrawBuffer once more.
      *
      * @param nSwapBuffers Non-zero to flip the framebuffer.
      * @ghidraAddress 0x0049bac8
@@ -285,7 +351,8 @@ public:
     GifQuadword *mpSavedWrite;
     /** Start of the reserved region, or null when none is open. */
     GifQuadword *mpReservedRegion;
-    unsigned char mReserved10[0x0c];
+    /** Copy of the packet under construction, filled by SavePacket(). +0x10 */
+    std::vector<GifQuadword> mSavedPacket;
     /** GIFtag whose loop count is still to be filled in, or null when none is open. */
     GifQuadword *mpOpenTag;
     /** Display width in pixels, as Init() recorded it. Rnd::PsCam::ScreenToPixels() reads it. */
@@ -304,7 +371,11 @@ public:
     GifQuadword mAdTag;
     /** Last value written to each GS register, indexed by register number. +0x40 */
     unsigned long long mGsRegs[kGsRegisterCount];
-    unsigned char mReserved440[0x04];
+    /**
+     * Vertical blank count before which SwapBuffers() does not show the next frame.
+     * InitDisplayMode() and SwapBuffers() set it to one past the current count. +0x440
+     */
+    int mnSwapVblank;
     /** Half of the double buffer being drawn, which RestoreFrameBufferTarget() selects by. +0x444
      */
     int mnDrawBuffer;
@@ -326,6 +397,15 @@ public:
     GifQuadword *mpOpenVifDirect;
 
 private:
+    // Start the DMA transfer of the packet, on VIF1 when mnUseVu1 is set and on the GIF otherwise.
+    // FlushGifPacket() expands it inline, and the out-of-line copy at 0x004a00e8 has no caller.
+    void SendPacket();
+
+    // Wait for mnSwapVblank, show the drawn half, invert mnDrawBuffer, select the other half for
+    // drawing, and copy that half's context 1 registers into mGsRegs with PRIM invalidated.
+    // PresentFrame() expands it inline, and the out-of-line copy at 0x004a0238 has no caller.
+    void SwapBuffers();
+
     // Draw a string in the debug stroke font. Each glyph is a six-point line strip from the table
     // at 0x006f2f28, scaled to a cell of rect.w by rect.h from a pen at rect.x and rect.y, in GS
     // primitive pixels. Letters of either case share one glyph, and '.' through '9' follow them.
@@ -390,3 +470,14 @@ private:
  * @ghidraAddress 0x006f2a80
  */
 extern GfxDevice g_gfxDevice;
+
+/**
+ * Vertical blanks counted since start-up.
+ *
+ * The handler at `0x0049fea0`, which InitDisplayMode() installs through SetVsyncHandler(),
+ * increments it and returns through the kernel's ExitHandler() sequence. SwapBuffers() busy-waits
+ * on it, reloading it on every pass.
+ *
+ * @ghidraAddress 0x006f2f20
+ */
+extern volatile int g_nVblankCounter;

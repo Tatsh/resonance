@@ -404,8 +404,8 @@ public:
      * Destroy the table.
      *
      * The body is empty. The start-up glue's shutdown branch calls it for the file scope instance,
-     * which is what identifies it as the destructor. The routine at 0x0049afe0, which registers
-     * render classes, also calls it directly, and this reconstruction does not explain why.
+     * which is what identifies it as the destructor. GfxDevice::Terminate() also calls it
+     * explicitly on g_vramTable as its last step.
      *
      * @ghidraAddress 0x005149f0
      */

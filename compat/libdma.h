@@ -29,6 +29,10 @@ typedef struct {
 sceDmaChan *sceDmaGetChan(int nChannel);
 void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords);
 
+// With nMode 1 returns whether the channel is still running. Otherwise waits for it to stop, a
+// zero nTimeout selecting the default limit.
+int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout);
+
 // Resets every channel and returns the previous enable state.
 int sceDmaReset(int nMode);
 

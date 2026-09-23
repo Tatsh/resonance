@@ -36,7 +36,8 @@ typedef struct {
 
 // Eight A+D register and address pairs, 128 bytes. sceGsSetDefDrawEnv() returns 8, the pair
 // count. The game reads FRAME_1 from the first pair, writes ZBUF_1 into the second, and reads
-// XYOFFSET_1 from the third. The remaining pairs are not touched outside the SDK.
+// XYOFFSET_1 from the third. GfxDevice::SwapBuffers() copies every register word into its
+// register shadow, which fixes the order of the remaining five.
 typedef struct {
     unsigned long frame1;
     unsigned long frame1addr;
@@ -44,7 +45,16 @@ typedef struct {
     unsigned long zbuf1addr;
     unsigned long xyoffset1;
     unsigned long xyoffset1addr;
-    unsigned long mOtherPairs[10];
+    unsigned long scissor1;
+    unsigned long scissor1addr;
+    unsigned long prmodecont;
+    unsigned long prmodecontaddr;
+    unsigned long colclamp;
+    unsigned long colclampaddr;
+    unsigned long dthe;
+    unsigned long dtheaddr;
+    unsigned long test1;
+    unsigned long test1addr;
 } sceGsDrawEnv1;
 
 // Six A+D register and address pairs, 96 bytes. sceGsSetDefClear() returns 6, the pair count.

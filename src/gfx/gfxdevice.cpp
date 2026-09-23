@@ -1,6 +1,7 @@
 #include "gfx/gfxdevice.h"
 
 #include <cstdint>
+#include <cstring>
 #include <eekernel.h>
 #include <libdma.h>
 #include <libgraph.h>
@@ -264,7 +265,107 @@ constexpr int kFpsSampleFrames = 5;
 constexpr int kFpsReadoutRightOffset = 0x740;
 constexpr int kFpsReadoutTop = 0x80a;
 
+// The saved packet covers one scratchpad half.
+constexpr int kSavedPacketQuadwords = 0x200;
+
+constexpr float kDefaultFeedbackAlpha = 0.78f;
+
+// The context 1 registers SwapBuffers() copies from the draw environment, beside FRAME_1,
+// ZBUF_1, and XYOFFSET_1 above.
+constexpr int kGsRegPrModeCont = 0x1a;
+constexpr int kGsRegScissor1 = 0x40;
+constexpr int kGsRegDither = 0x45;
+constexpr int kGsRegColClamp = 0x46;
+
 } // namespace
+
+// 0x006f2a80
+GfxDevice g_gfxDevice;
+
+// 0x006f2f20
+volatile int g_nVblankCounter;
+
+// 0x0049ac50
+GfxDevice::GfxDevice()
+    : mpSavedWrite(nullptr), mpReservedRegion(nullptr),
+      mSavedPacket(kSavedPacketQuadwords, GifQuadword()), mpOpenTag(nullptr), mnSwapVblank(0),
+      mnDrawBuffer(0), mpDisplayBuffers(nullptr), mnUseVu1(0), mpOpenVifDirect(nullptr),
+      mnFpsCountdown(kFpsSampleFrames), mflFrameMsSum(0.0f), mnFps(0), mflSyncMsSum(0.0f),
+      mnSyncMsAverage(0), mFeedbackEnabled(0), mFeedbackRect{0.0f, 0.0f, 1.0f, 1.0f},
+      mFeedbackAlpha(kDefaultFeedbackAlpha), mFeedbackInset(0),
+      mClearColor{0.0f, 0.0f, 0.0f, 1.0f} {
+    mAdTag.mLo = 1ULL << kGifTagNRegShift;
+    mAdTag.mHi = kGifRegAd;
+}
+
+// 0x0049fef0
+void GfxDevice::ResetVramAndSavePacket() {
+    g_vramTable.Clear(1);
+    SavePacket();
+}
+
+// 0x0049ff28
+void GfxDevice::SavePacket() {
+    sceDmaSync(sceDmaGetChan(SCE_DMA_GIF), 0, 0);
+    sceDmaSync(sceDmaGetChan(SCE_DMA_VIF1), 0, 0);
+    std::memcpy(&mSavedPacket[0], mpBuffer, (mpWrite - mpBuffer) * sizeof(GifQuadword));
+}
+
+// 0x0049ff98
+void GfxDevice::RestorePacket() {
+    std::memcpy(mpBuffer, &mSavedPacket[0], (mpWrite - mpBuffer) * sizeof(GifQuadword));
+}
+
+// 0x004a00e8
+inline void GfxDevice::SendPacket() {
+    sceDmaChan *pChannel = sceDmaGetChan(mnUseVu1 != 0 ? SCE_DMA_VIF1 : SCE_DMA_GIF);
+    const std::uintptr_t nBuffer = reinterpret_cast<std::uintptr_t>(mpBuffer);
+    const std::uintptr_t nDmaAddress =
+        (nBuffer & kDmaAddressMask) | ((nBuffer & kScratchpadAddressBit) << 1);
+    // The DMA address is a bus address the processor cannot dereference, but sceDmaSendN() takes
+    // it as a pointer.
+    sceDmaSendN(
+        pChannel, reinterpret_cast<void *>(nDmaAddress), static_cast<int>(mpWrite - mpBuffer));
+}
+
+// 0x004a0238
+inline void GfxDevice::SwapBuffers() {
+    sceGsSyncPath(0, 0);
+    while (g_nVblankCounter < mnSwapVblank) {
+    }
+    mnSwapVblank = g_nVblankCounter + 1;
+    mpDisplayBuffers->PutDispEnv(mnDrawBuffer, 1);
+    sceGsSyncPath(0, 0);
+    mnDrawBuffer = mnDrawBuffer == 0;
+    mpDisplayBuffers->PutDrawEnv(mnDrawBuffer, 1);
+    sceGsSyncPath(0, 0);
+
+    const sceGsDrawEnv1 &draw =
+        mnDrawBuffer != 0 ? mpDisplayBuffers->mHalves[1].mDraw : mpDisplayBuffers->mHalves[0].mDraw;
+    mGsRegs[kGsRegFrame1] = draw.frame1;
+    mGsRegs[kGsRegZbuf1] = draw.zbuf1;
+    mGsRegs[kGsRegXyOffset1] = draw.xyoffset1;
+    mGsRegs[kGsRegScissor1] = draw.scissor1;
+    mGsRegs[kGsRegPrModeCont] = draw.prmodecont;
+    mGsRegs[kGsRegColClamp] = draw.colclamp;
+    mGsRegs[kGsRegDither] = draw.dthe;
+    mGsRegs[kGsRegTest1] = draw.test1;
+    // A shadow no register value matches, so the next PRIM write always reaches the GS.
+    mGsRegs[kGsRegPrim] = kAllBits;
+}
+
+// 0x0049bac8
+void GfxDevice::PresentFrame(int nSwapBuffers) {
+    if (mFeedbackEnabled != 0) {
+        SetupGsDrawContext();
+    }
+    FlushGifPacket(0, 0);
+    g_vramTable.EndFrame();
+    if (nSwapBuffers != 0) {
+        SwapBuffers();
+        mnDrawBuffer = mnDrawBuffer == 0; // Yes, the binary inverts it a second time here.
+    }
+}
 
 // 0x0049b478
 int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
@@ -282,14 +383,7 @@ int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
     }
     CloseGifTag(1);
 
-    sceDmaChan *pChannel = sceDmaGetChan(mnUseVu1 != 0 ? SCE_DMA_VIF1 : SCE_DMA_GIF);
-    const std::uintptr_t nBuffer = reinterpret_cast<std::uintptr_t>(mpBuffer);
-    const std::uintptr_t nDmaAddress =
-        (nBuffer & kDmaAddressMask) | ((nBuffer & kScratchpadAddressBit) << 1);
-    // The DMA address is a bus address the processor cannot dereference, but sceDmaSendN() takes
-    // it as a pointer.
-    sceDmaSendN(
-        pChannel, reinterpret_cast<void *>(nDmaAddress), static_cast<int>(mpWrite - mpBuffer));
+    SendPacket();
     g_vramTable.AdvanceLockCycle();
 
     if (reinterpret_cast<std::uintptr_t>(mpBuffer) != kGifBufferHalf0) {

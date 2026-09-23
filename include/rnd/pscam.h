@@ -31,7 +31,7 @@ namespace Rnd {
  * than an override. The base table has six entries and this one has seven.
  *
  * The routine at `0x00588428` is an unreferenced out-of-line emission of an inline routine whose
- * live copy is inlined into the class-registration sweep at `0x0049b01c`. That routine destroys
+ * live copy is inlined into GfxDevice::Terminate() at `0x0049b01c`. That routine destroys
  * g_pDefaultCam, restores Rnd::g_pfnNewCam to the base Rnd::Cam factory, clears
  * Rnd::g_pCurrentCam, and re-registers the "Cam" key, which undoes what Init() installs. Its
  * title is undetermined, because the only live copy is inlined and no call site records one.

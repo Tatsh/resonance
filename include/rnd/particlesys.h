@@ -437,8 +437,8 @@ extern HxStr g_particleSysClassName;
  * Point g_pfnNewParticleSys at NewParticleSys() and register the "ParticleSys" class.
  *
  * The routine is inline. It has an out-of-line copy in this unit and another in the
- * Rnd::PsParticleSys unit at `0x005ffa38`, neither with a caller, and the static initialiser of
- * the GfxDevice unit at `0x0049afe0` expands the same sequence. The name is inferred.
+ * Rnd::PsParticleSys unit at `0x005ffa38`, neither with a caller, and GfxDevice::Terminate()
+ * expands the same sequence. The name is inferred.
  *
  * @ghidraAddress 0x0052b380
  */
