@@ -16,8 +16,8 @@ constexpr int kMinimumSaveSpaceEnquirySlot = 0;
 MinimumSaveSpaceMCT::MinimumSaveSpaceMCT(MemcardUser *pUser,
                                          Memcard *pCard,
                                          int nPortSlot,
-                                         void *pCookie)
-    : MemcardTask(pUser, pCard, nPortSlot, pCookie) {
+                                         int nCookie)
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
 }
 
 // 0x00184c18

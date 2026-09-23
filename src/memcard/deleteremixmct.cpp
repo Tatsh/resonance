@@ -18,8 +18,8 @@ constexpr unsigned kListDirModeFresh = 0;
 } // namespace
 
 DeleteRemixMCT::DeleteRemixMCT(
-    MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie, const HxStr &remixName)
-    : MemcardTask(pUser, pCard, nPortSlot, pCookie), mRemixName(remixName),
+    MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName)
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie), mRemixName(remixName),
       mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
     // The load at 0x0017cee4 reads the member rather than dispatching through
     // IOBPreallocMemStream::Buffer(), which no call site in the image reaches.

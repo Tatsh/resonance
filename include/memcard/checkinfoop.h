@@ -17,10 +17,10 @@ public:
      *
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055e368
      */
-    CheckInfoOp(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie);
+    CheckInfoOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
     /** @ghidraAddress 0x0055d320 */
     virtual ~CheckInfoOp();

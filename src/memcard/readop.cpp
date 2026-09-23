@@ -5,8 +5,8 @@
 #include "memcard/memcardcbhandler.h"
 
 ReadOp::ReadOp(
-    MemcardCBHandler *pHandler, int nPortSlot, int nFile, void *pBuffer, int nLength, void *pCookie)
-    : MemcardOp(pHandler, nPortSlot, pCookie), mFile(nFile), mBuffer(pBuffer), mLength(nLength) {
+    MemcardCBHandler *pHandler, int nPortSlot, int nFile, void *pBuffer, int nLength, int nCookie)
+    : MemcardOp(pHandler, nPortSlot, nCookie), mFile(nFile), mBuffer(pBuffer), mLength(nLength) {
 }
 
 // 0x0055d9b8

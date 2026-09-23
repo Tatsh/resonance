@@ -4,8 +4,8 @@
 
 #include "memcard/memcardcbhandler.h"
 
-SeekOp::SeekOp(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, void *pCookie)
-    : MemcardOp(pHandler, pCookie), mFile(nFile), mOffset(nOffset), mOrigin(nOrigin) {
+SeekOp::SeekOp(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, int nCookie)
+    : MemcardOp(pHandler, nCookie), mFile(nFile), mOffset(nOffset), mOrigin(nOrigin) {
 }
 
 // 0x0055dba8

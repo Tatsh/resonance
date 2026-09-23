@@ -21,10 +21,10 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to measure.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055e418
      */
-    EntSpaceOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    EntSpaceOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /** @ghidraAddress 0x0055d418 */
     virtual ~EntSpaceOp();

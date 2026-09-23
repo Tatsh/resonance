@@ -36,9 +36,9 @@ public:
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot, which this task does not use.
-     * @param pCookie The tag that abandons exactly this task's operations.
+     * @param nCookie The tag that abandons exactly this task's operations.
      */
-    GetAllConnectStatesMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie);
+    GetAllConnectStatesMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
     /**
      * Release the task.

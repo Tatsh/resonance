@@ -7,8 +7,8 @@
 #include "memcard/openreadop.h"
 #include "memcard/readop.h"
 
-LoadFileMCT::LoadFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie)
-    : MemcardTask(pUser, pCard, nPortSlot, pCookie) {
+LoadFileMCT::LoadFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie)
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
 }
 
 // 0x001847e0

@@ -20,10 +20,10 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055ecc0
      */
-    OpenReadOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    OpenReadOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /** @ghidraAddress 0x0055ddd0 */
     virtual ~OpenReadOp();

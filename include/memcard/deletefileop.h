@@ -17,10 +17,10 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file or directory to delete.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055eed8
      */
-    DeleteFileOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    DeleteFileOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /** @ghidraAddress 0x0055dff8 */
     virtual ~DeleteFileOp();

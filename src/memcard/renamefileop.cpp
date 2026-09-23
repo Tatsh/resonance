@@ -8,8 +8,8 @@ RenameFileOp::RenameFileOp(MemcardCBHandler *pHandler,
                            int nPortSlot,
                            const HxStr &oldPath,
                            const HxStr &newPath,
-                           void *pCookie)
-    : MemcardOp(pHandler, nPortSlot, pCookie), mOldPath(oldPath), mNewPath(newPath) {
+                           int nCookie)
+    : MemcardOp(pHandler, nPortSlot, nCookie), mOldPath(oldPath), mNewPath(newPath) {
 }
 
 // 0x0055e128

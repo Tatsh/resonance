@@ -19,9 +19,9 @@ class MemcardOp;
  * serviced in order over the following frames. Ordering is what makes the queue rather than a set
  * of direct calls necessary, because libmc services one command at a time.
  *
- * Every entry point takes a `pCookie` tag, which the operation stores and Cancel() matches on.
- * Every MemcardTask passes its own cookie. Abandoning a task therefore abandons exactly the
- * operations that task queued, wherever they sit in the queue.
+ * Every entry point takes an `nCookie` ticket number, which the operation stores and Cancel()
+ * matches on. Every MemcardTask passes its own ticket. Abandoning a task therefore abandons exactly
+ * the operations that task queued, wherever they sit in the queue.
  *
  * One instance exists. It is a `MemcardPS2` built with `new` inside the constructor at
  * `0x001f2960`, which belongs to a singleton outside this subsystem.
@@ -61,10 +61,10 @@ public:
      *
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047e370
      */
-    void CheckInfo(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie);
+    void CheckInfo(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
     /**
      * Queue an enquiry about the free directory entries under one path.
@@ -74,30 +74,30 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to measure.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047e498
      */
-    void EntSpace(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    void EntSpace(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /**
      * Queue a format of the card in one slot.
      *
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047e5d0
      */
-    void Format(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie);
+    void Format(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
     /**
      * Queue an unformat of the card in one slot.
      *
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047e6f8
      */
-    void Unformat(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie);
+    void Unformat(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
     /**
      * Queue the creation of one directory.
@@ -105,10 +105,10 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to create.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047e820
      */
-    void CreateDir(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    void CreateDir(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /**
      * Queue a listing of one directory.
@@ -116,15 +116,12 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to list.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @param nMode The `sceMcGetDir()` mode.
      * @ghidraAddress 0x0047e990
      */
-    void ListDir(MemcardCBHandler *pHandler,
-                 int nPortSlot,
-                 const HxStr &path,
-                 void *pCookie,
-                 unsigned nMode);
+    void ListDir(
+        MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie, unsigned nMode);
 
     /**
      * Queue a read from an open descriptor.
@@ -134,7 +131,7 @@ public:
      * @param nFile The descriptor to read from.
      * @param pBuffer The destination.
      * @param nLength The number of bytes to read.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047ead8
      */
     void Read(MemcardCBHandler *pHandler,
@@ -142,7 +139,7 @@ public:
               int nFile,
               void *pBuffer,
               int nLength,
-              void *pCookie);
+              int nCookie);
 
     /**
      * Queue a write to an open descriptor.
@@ -152,7 +149,7 @@ public:
      * @param nFile The descriptor to write to.
      * @param pBuffer The source.
      * @param nLength The number of bytes to write.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047ec30
      */
     void Write(MemcardCBHandler *pHandler,
@@ -160,7 +157,7 @@ public:
                int nFile,
                const void *pBuffer,
                int nLength,
-               void *pCookie);
+               int nCookie);
 
     /**
      * Queue a move of the position of an open descriptor.
@@ -171,10 +168,10 @@ public:
      * @param nFile The descriptor to move.
      * @param nOffset The offset to move by.
      * @param nOrigin The origin the offset is measured from.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047ed88
      */
-    void Seek(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, void *pCookie);
+    void Seek(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, int nCookie);
 
     /**
      * Queue an open for writing.
@@ -182,10 +179,10 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047eed0
      */
-    void OpenWrite(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    void OpenWrite(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /**
      * Queue an open for reading.
@@ -193,20 +190,20 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047f008
      */
-    void OpenRead(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    void OpenRead(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /**
      * Queue a close of an open descriptor.
      *
      * @param pHandler The receiver the finished operation reports to.
      * @param nFile The descriptor to close.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047f140
      */
-    void Close(MemcardCBHandler *pHandler, int nFile, void *pCookie);
+    void Close(MemcardCBHandler *pHandler, int nFile, int nCookie);
 
     /**
      * Queue the deletion of one file or directory.
@@ -214,10 +211,10 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file or directory to delete.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047f268
      */
-    void DeleteFile(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie);
+    void DeleteFile(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
     /**
      * Queue a rename.
@@ -228,14 +225,14 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param oldPath The existing name.
      * @param newPath The replacement name.
-     * @param pCookie The tag Cancel() matches on.
+     * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047f3a0
      */
     void RenameFile(MemcardCBHandler *pHandler,
                     int nPortSlot,
                     const HxStr &oldPath,
                     const HxStr &newPath,
-                    void *pCookie);
+                    int nCookie);
 
     /**
      * Discard every queued operation that was queued with one tag.
@@ -243,10 +240,10 @@ public:
      * An operation already in flight is discarded along with the rest, and its libmc call is not
      * waited for.
      *
-     * @param pCookie The tag to match.
+     * @param nCookie The tag to match.
      * @ghidraAddress 0x0047f4e8
      */
-    void Cancel(void *pCookie);
+    void Cancel(int nCookie);
 
 protected:
     // Operations in the order they were queued. Update() services the front of it. +0x00

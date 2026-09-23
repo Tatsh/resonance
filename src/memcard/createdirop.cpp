@@ -4,11 +4,8 @@
 
 #include "memcard/memcardcbhandler.h"
 
-CreateDirOp::CreateDirOp(MemcardCBHandler *pHandler,
-                         int nPortSlot,
-                         const HxStr &path,
-                         void *pCookie)
-    : MemcardOp(pHandler, nPortSlot, pCookie), mPath(path) {
+CreateDirOp::CreateDirOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie)
+    : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
 
 // 0x0055d738

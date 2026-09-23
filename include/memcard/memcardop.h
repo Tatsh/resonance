@@ -72,9 +72,9 @@ public:
      *
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The port shifted up by kMemcardPortShift, with the slot in the low bits.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      */
-    MemcardOp(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie);
+    MemcardOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
     /**
      * Construct an operation against an open descriptor alone.
@@ -83,9 +83,9 @@ public:
      * and neither reads mPortSlot.
      *
      * @param pHandler The receiver Complete() reports to.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      */
-    MemcardOp(MemcardCBHandler *pHandler, void *pCookie);
+    MemcardOp(MemcardCBHandler *pHandler, int nCookie);
 
     /**
      * Release the operation.
@@ -125,15 +125,16 @@ public:
     virtual void InterpretResult();
 
     /**
-     * Tag Memcard::Cancel() matches on.
+     * Ticket number Memcard::Cancel() matches on.
      *
      * Public because Memcard::Cancel() compares this member against its argument directly, and the
-     * image exposes no accessor. Every MemcardTask passes its own cookie. Cancelling a task
-     * therefore abandons exactly the operations that task queued.
+     * image exposes no accessor. Every MemcardTask passes its own ticket, which MemcardManager's
+     * task factories draw by pre-incrementing MemcardManager::mTicket. Cancelling a task therefore
+     * abandons exactly the operations that task queued.
      *
      * +0x04
      */
-    void *mCookie;
+    int mCookie;
 
     /**
      * Zero until Issue() has run, then 1 while libmc is servicing the call.

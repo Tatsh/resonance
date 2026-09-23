@@ -21,7 +21,7 @@ public:
      * @param nFile The descriptor OpenWriteOp delivered.
      * @param pBuffer The source.
      * @param nLength The number of bytes to write.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055e9b8
      */
     WriteOp(MemcardCBHandler *pHandler,
@@ -29,7 +29,7 @@ public:
             int nFile,
             const void *pBuffer,
             int nLength,
-            void *pCookie);
+            int nCookie);
 
     /** @ghidraAddress 0x0055dab0 */
     virtual ~WriteOp();

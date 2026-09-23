@@ -18,10 +18,10 @@ public:
      *
      * @param pHandler The receiver Complete() reports to.
      * @param nFile The descriptor to close.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055ee28
      */
-    CloseOp(MemcardCBHandler *pHandler, int nFile, void *pCookie);
+    CloseOp(MemcardCBHandler *pHandler, int nFile, int nCookie);
 
     /** @ghidraAddress 0x0055df00 */
     virtual ~CloseOp();

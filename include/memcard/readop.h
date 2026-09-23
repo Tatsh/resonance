@@ -21,7 +21,7 @@ public:
      * @param nFile The descriptor OpenReadOp delivered.
      * @param pBuffer The destination.
      * @param nLength The number of bytes to read.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055e8e0
      */
     ReadOp(MemcardCBHandler *pHandler,
@@ -29,7 +29,7 @@ public:
            int nFile,
            void *pBuffer,
            int nLength,
-           void *pCookie);
+           int nCookie);
 
     /** @ghidraAddress 0x0055d9b8 */
     virtual ~ReadOp();

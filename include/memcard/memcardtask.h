@@ -47,9 +47,9 @@ public:
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag that abandons exactly this task's operations.
+     * @param nCookie The tag that abandons exactly this task's operations.
      */
-    MemcardTask(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie);
+    MemcardTask(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
     /**
      * Report the finished task to its user and record that it is done.
@@ -100,9 +100,10 @@ protected:
     // The queue this task submits operations to. +0x08
     Memcard *mCard;
 
-    // The tag every queued operation records. Memcard::Cancel() therefore abandons this task's
-    // work and nothing else. +0x0c
-    void *mCookie;
+    // The ticket number every queued operation records, drawn by MemcardManager's task factories
+    // from MemcardManager::mTicket. Memcard::Cancel() therefore abandons this task's work and
+    // nothing else. +0x0c
+    int mCookie;
 
     // The packed port and slot. +0x10
     int mPortSlot;

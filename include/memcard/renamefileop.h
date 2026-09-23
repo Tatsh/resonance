@@ -20,14 +20,14 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param oldPath The existing name.
      * @param newPath The replacement name.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055f030
      */
     RenameFileOp(MemcardCBHandler *pHandler,
                  int nPortSlot,
                  const HxStr &oldPath,
                  const HxStr &newPath,
-                 void *pCookie);
+                 int nCookie);
 
     /** @ghidraAddress 0x0055e128 */
     virtual ~RenameFileOp();

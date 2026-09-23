@@ -7,8 +7,8 @@
 sceMcTblGetDir g_aMemcardDirEntries[kListDirMaxEntries];
 
 ListDirOp::ListDirOp(
-    MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, void *pCookie, unsigned nMode)
-    : MemcardOp(pHandler, nPortSlot, pCookie), mPath(path), mMode(nMode) {
+    MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie, unsigned nMode)
+    : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path), mMode(nMode) {
 }
 
 // 0x0055d868

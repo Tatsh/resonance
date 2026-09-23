@@ -4,8 +4,8 @@
 
 #include "memcard/memcardcbhandler.h"
 
-UnformatOp::UnformatOp(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie)
-    : MemcardOp(pHandler, nPortSlot, pCookie) {
+UnformatOp::UnformatOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie)
+    : MemcardOp(pHandler, nPortSlot, nCookie) {
 }
 
 // 0x0055d640

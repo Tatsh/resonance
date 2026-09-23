@@ -19,10 +19,10 @@ public:
      *
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055e5a8
      */
-    UnformatOp(MemcardCBHandler *pHandler, int nPortSlot, void *pCookie);
+    UnformatOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
     /** @ghidraAddress 0x0055d640 */
     virtual ~UnformatOp();

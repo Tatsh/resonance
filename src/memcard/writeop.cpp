@@ -9,8 +9,8 @@ WriteOp::WriteOp(MemcardCBHandler *pHandler,
                  int nFile,
                  const void *pBuffer,
                  int nLength,
-                 void *pCookie)
-    : MemcardOp(pHandler, nPortSlot, pCookie), mFile(nFile), mBuffer(pBuffer), mLength(nLength) {
+                 int nCookie)
+    : MemcardOp(pHandler, nPortSlot, nCookie), mFile(nFile), mBuffer(pBuffer), mLength(nLength) {
 }
 
 // 0x0055dab0

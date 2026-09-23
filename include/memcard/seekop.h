@@ -21,10 +21,10 @@ public:
      * @param nFile The descriptor to move.
      * @param nOffset The offset to move by.
      * @param nOrigin The libmc origin, which uses the same three values as `lseek()`.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress 0x0055eaa8
      */
-    SeekOp(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, void *pCookie);
+    SeekOp(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, int nCookie);
 
     /** @ghidraAddress 0x0055dba8 */
     virtual ~SeekOp();

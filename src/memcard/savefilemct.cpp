@@ -46,8 +46,8 @@ const iconFVECTOR kIconLightAmbient = {0.5f, 0.5f, 0.5f, 0.0f};
 
 } // namespace
 
-SaveFileMCT::SaveFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie)
-    : MemcardTask(pUser, pCard, nPortSlot, pCookie), mSkipIconFiles(0) {
+SaveFileMCT::SaveFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie)
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie), mSkipIconFiles(0) {
 }
 
 // 0x00184658

@@ -25,16 +25,13 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to list.
-     * @param pCookie The tag Memcard::Cancel() matches on.
+     * @param nCookie The tag Memcard::Cancel() matches on.
      * @param nMode The `sceMcGetDir()` mode, which selects between a fresh listing and a
      *              continuation of the previous one.
      * @ghidraAddress 0x0055e778
      */
-    ListDirOp(MemcardCBHandler *pHandler,
-              int nPortSlot,
-              const HxStr &path,
-              void *pCookie,
-              unsigned nMode);
+    ListDirOp(
+        MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie, unsigned nMode);
 
     /** @ghidraAddress 0x0055d868 */
     virtual ~ListDirOp();

@@ -20,8 +20,8 @@ constexpr int kFirstMultiTapSlot = 2;
 GetConnectStateMCT::GetConnectStateMCT(MemcardUser *pUser,
                                        Memcard *pCard,
                                        int nPortSlot,
-                                       void *pCookie)
-    : MemcardTask(pUser, pCard, nPortSlot, pCookie) {
+                                       int nCookie)
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
     mConnectState.mPortSlot = kMemcardSlotUnknown;
     // The binary constructs the member from the literal in place rather than assigning to a
     // default-constructed one.

@@ -38,9 +38,9 @@ public:
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag that abandons exactly this task's operations.
+     * @param nCookie The tag that abandons exactly this task's operations.
      */
-    FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie);
+    FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
     /** @ghidraAddress 0x00184d68 */
     virtual ~FormatCardMCT();

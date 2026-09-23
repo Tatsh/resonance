@@ -45,12 +45,12 @@ public:
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
-     * @param pCookie The tag that abandons exactly this task's operations.
+     * @param nCookie The tag that abandons exactly this task's operations.
      * @param remixName The remix to remove.
      * @ghidraAddress 0x0017ce08
      */
     DeleteRemixMCT(
-        MemcardUser *pUser, Memcard *pCard, int nPortSlot, void *pCookie, const HxStr &remixName);
+        MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName);
 
     /** @ghidraAddress 0x001854e0 */
     virtual ~DeleteRemixMCT();
