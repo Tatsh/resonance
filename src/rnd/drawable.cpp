@@ -153,6 +153,11 @@ void Drawable::AddDraw(Drawable *pDraw) {
     AddDraw(pDraw, mDraws.empty() ? nullptr : mDraws.front());
 }
 
+// 0x00506528
+Drawable *Drawable::Find(const HxStr &name) {
+    return dynamic_cast<Drawable *>(g_manager.Find(name));
+}
+
 // 0x00503420
 void Drawable::ClearDraws() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end();) {

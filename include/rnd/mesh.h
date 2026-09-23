@@ -180,11 +180,10 @@ public:
     /**
      * Point the mesh at a material.
      *
-     * Drops the reference on the previous material and takes one on the new material. A null
-     * argument drops the previous material without storing the null, which is faithful to the
-     * binary.
+     * Drops the reference on the previous material, stores the argument, and takes a reference on
+     * a non-null material.
      *
-     * @param pMat The material, or null to release the previous material alone.
+     * @param pMat The material, or null.
      * @ghidraAddress 0x00493a78
      */
     void SetMaterial(Mat *pMat);
@@ -192,10 +191,10 @@ public:
     /**
      * Point the mesh at the transform it draws with.
      *
-     * Drops the reference on the previous owner and takes one on the new owner. A null argument
-     * drops the previous owner without storing the null, which is faithful to the binary.
+     * Drops the reference on the previous owner, stores the argument, and takes a reference on a
+     * non-null owner.
      *
-     * @param pOwner The transform, or null to release the previous owner alone.
+     * @param pOwner The transform, or null.
      * @ghidraAddress 0x00493c40
      */
     void SetTransOwner(Transformable *pOwner);
@@ -203,14 +202,14 @@ public:
     /**
      * Point the mesh at the next level of detail in its chain.
      *
-     * The same shape as SetMaterial() and SetTransOwner(), dropping the reference on the previous
-     * link and taking one on the new link, and storing nothing for a null argument.
+     * The same shape as SetMaterial() and SetTransOwner(). Both inlined copies store the argument
+     * whether or not it is null.
      *
      * No out-of-line body exists. The compiler inlined the setter at `0x004e8444` and again at
      * `0x004e84fc` inside Rnd::MultiMesh::DrawSelf(), its only call site, so the title is inferred
      * from the member it writes.
      *
-     * @param pNext The next mesh in the chain, or null to release the previous link alone.
+     * @param pNext The next mesh in the chain, or null.
      */
     void SetNext(Mesh *pNext);
 

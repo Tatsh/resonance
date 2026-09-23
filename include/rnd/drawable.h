@@ -137,6 +137,18 @@ public:
     }
 
     /**
+     * Resolve a registry key to a drawable.
+     *
+     * A key that resolves to an object of another class produces null. The program lists no
+     * caller.
+     *
+     * @param name The registry key to resolve.
+     * @return The drawable, or null.
+     * @ghidraAddress 0x00506528
+     */
+    static Drawable *Find(const HxStr &name);
+
+    /**
      * Report the child list.
      *
      * @return The list of drawables this object draws after itself.

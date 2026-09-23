@@ -806,9 +806,8 @@ void Mesh::SetMaterial(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
     }
-    // Yes, the binary stores the new material only when it is not null.
+    mMat = pMat;
     if (pMat != nullptr) {
-        mMat = pMat;
         pMat->AddRef(this);
     }
 }
@@ -818,9 +817,8 @@ void Mesh::SetTransOwner(Transformable *pOwner) {
     if (mTransOwner != nullptr) {
         mTransOwner->RemoveRef(this);
     }
-    // Yes, the binary stores the new owner only when it is not null.
+    mTransOwner = pOwner;
     if (pOwner != nullptr) {
-        mTransOwner = pOwner;
         pOwner->AddRef(this);
     }
 }
@@ -830,9 +828,8 @@ void Mesh::SetNext(Mesh *pNext) {
     if (mNext != nullptr) {
         mNext->RemoveRef(this);
     }
-    // Yes, the binary stores the new link only when it is not null.
+    mNext = pNext;
     if (pNext != nullptr) {
-        mNext = pNext;
         pNext->AddRef(this);
     }
 }
