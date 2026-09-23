@@ -5,6 +5,7 @@
 
 class Joypad;
 class RawController;
+struct BytePairStatic;
 
 /**
  * Reader of the physical controllers.
@@ -189,14 +190,6 @@ public:
     }
 
 private:
-    // Non-zero when the last Poll() sent a reading out. The reading routine at 0x001dfab0 clears
-    // it on entry and sets it at 0x001dfd5c and 0x001dfda8. +0x38
-    int mPressedThisPoll;
-
-    // Starts at 1. SetUnknown34() and ClearUnknown34() are the only recovered writers, and its
-    // purpose is unrecovered. +0x34
-    int mUnknown34;
-
     /**
      * Fill the control mask table and open the controllers.
      *
@@ -303,14 +296,19 @@ private:
     std::vector<int> mJoypadPlayers; // +0x0c, the player of each Joypad from 1, or 0 for none
     int mNextJoypadId;               // +0x18
     std::vector<Joypad *> mJoypads;  // +0x1c
-    // Set from the return of 0x00558d10, which is titled as a static-initialisation stub and
-    // cannot be one, because a stub does not return a value a caller stores.
-    int mUnknown28;            // +0x28
-    std::list<int> mUnknown2c; // +0x2c element type not recovered, 16-byte node
-    int mUnknown30;            // +0x30
-    int mActive;               // +0x3c starts at 1
-    int mMultitap0;            // +0x40, a multitap is on port 0
-    int mMultitap1;            // +0x44, a multitap is on port 1
+    // Set from BytePairStatic::shared() and never read again.
+    BytePairStatic *mUnknown28; // +0x28
+    std::list<int> mUnknown2c;  // +0x2c element type not recovered, 16-byte node
+    int mUnknown30;             // +0x30
+    // Starts at 1. SetUnknown34() and ClearUnknown34() are the only recovered writers, and its
+    // purpose is unrecovered.
+    int mUnknown34; // +0x34
+    // Non-zero when the last Poll() sent a reading out. ReadControllers() clears it on entry and
+    // sets it for each press it sends.
+    int mPressedThisPoll; // +0x38
+    int mActive;          // +0x3c starts at 1
+    int mMultitap0;       // +0x40, a multitap is on port 0
+    int mMultitap1;       // +0x44, a multitap is on port 1
     // Set by SetPaused() and by ReadControllers() when it pauses the game.
     int mPaused; // +0x48
     // Starts at 1. The reading routine at 0x001dfab0 tests it at 0x001dfb7c before it hands a

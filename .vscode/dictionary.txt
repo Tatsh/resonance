@@ -91,6 +91,7 @@ bumpmsg
 bumppacket
 bumppowerup
 buttonpowmsg
+bytepairstatic
 cacceler
 callbackxferbdtoiop
 callbackxferhdtoiop

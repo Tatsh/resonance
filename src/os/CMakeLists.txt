@@ -2,6 +2,7 @@ set(RESONANCE_OS_SRCS
     arkfile.cpp
     async.cpp
     asynccallback.cpp
+    bytepairstatic.cpp
     circbuff.cpp
     cycles.cpp
     datetime.cpp

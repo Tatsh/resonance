@@ -8,6 +8,7 @@
 #include "game/joypad.h"
 #include "game/rawcontroller.h"
 #include "msg/pausegamesystemmsg.h"
+#include "os/bytepairstatic.h"
 #include "os/hostmode.h"
 #include "sch/command.h"
 #include "script/scripthost.h"
@@ -129,6 +130,14 @@ public:
 };
 
 } // namespace
+
+// 0x001ded98
+InputPoller::InputPoller()
+    : mNextJoypadId(0), mUnknown28(BytePairStatic::shared()), mUnknown30(0), mUnknown34(1),
+      mPressedThisPoll(0), mActive(1), mMultitap0(0), mMultitap1(0), mPaused(0),
+      mGameInputEnabled(1), mUnknown50(0), mController(nullptr) {
+    Init();
+}
 
 // 0x001df080
 InputPoller::~InputPoller() {
