@@ -5,6 +5,7 @@
 #include "msg/message.h"
 
 class PhraseDatabase;
+class Player;
 class PlayMap;
 class TrackData;
 
@@ -42,7 +43,9 @@ class TickClock;
  * through slot 1 of each table, which is the destructor slot.
  */
 class PhraseMgr : public MsgSink, public MsgSource {
-    // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly.
+    // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly, and the Catcher
+    // constructor at 0x001aba30 copies mBarTicks.
+    friend class Catcher;
     friend class ScoreTrackGraph;
 
 public:
@@ -150,6 +153,30 @@ public:
      * @ghidraAddress 0x001ba928
      */
     void PostCaughtPhrasePacket(Message *pMsg);
+
+    /**
+     * Report the player who owns the phrase at a bar.
+     *
+     * @param nBar The bar, passed to PhraseDatabase::GetPhraseAt().
+     * @return The owner of the phrase the database reports, or g_nullPlayer when there is none.
+     * @ghidraAddress 0x001c0268
+     */
+    Player *GetPhraseOwner(int nBar);
+
+    /**
+     * Give the phrase at a bar a new owner.
+     *
+     * The body is not written. It maps the bar through slot 5 of mMap, exchanges the owner in
+     * mDatabase through the routines at `0x001b9130` and `0x001b9070`, calls TrackData::SetOwner()
+     * when the owner changed, and then sends a message built on the stack through the sink at
+     * mUnknown1c. The Catcher subclasses' slot 9, Catcher::SetPhraseOwners(), and
+     * NotePitcher::PostPhraseCapturedMsg() are the recovered callers.
+     *
+     * @param pPlayer The new owner.
+     * @param nBar The bar.
+     * @ghidraAddress 0x001bafa8
+     */
+    void SetPhraseOwner(Player *pPlayer, int nBar);
 
 protected:
     /**

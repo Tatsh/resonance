@@ -72,9 +72,9 @@ std::vector<int> g_scoreThresholds;
 // 0x0068ff34
 int g_bScoreTablesLoaded;
 
-// The clamp the inline Mid::MBT constructor applies to a computed position.
-inline int ClampPosition(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+// A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
+inline Mid::MBT MakePosition(int nTick) {
+    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
 }
 
 // 0x001d75a0
@@ -158,12 +158,10 @@ void TrackData::Bar::Print(std::ostream &stream) {
 // 0x001d35a8
 TrackData::TrackData(int nIndex, PlayMap *pMap)
     : mUnknown04(nIndex), mKind(kTrackModeRiff), mMap(pMap), mBars(pMap->mSteps.back()) {
-    (void)IsFiniteMBT(kBarLength); // Yes, the binary discards this call's result.
-    mBarLength = kBarLength;
+    mBarLength = Mid::MBT(kBarLength).mTick;
     mUnknown30 = kGemSearchBars;
     mCurrentRiffSet = nullptr;
-    (void)IsFiniteMBT(kNoRiffTick); // Yes, the binary discards this call's result.
-    mCurrentRiffTick = kNoRiffTick;
+    mCurrentRiffTick = Mid::MBT(kNoRiffTick).mTick;
 }
 
 // 0x001d3900
@@ -174,9 +172,8 @@ TrackData::~TrackData() {
 
 // 0x001d3b18
 void TrackData::AddRiff(int nTick, Riff *pRiff) {
-    const int nLength = ClampPosition(mBarLength * static_cast<int>(mBars.size()));
-    (void)IsFiniteMBT(nLength); // Yes, the binary discards this call's result.
-    if (!(nTick < nLength)) {
+    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    if (!(nTick < length.mTick)) {
         return;
     }
 
@@ -191,8 +188,7 @@ void TrackData::AddRiff(int nTick, Riff *pRiff) {
         SetAtTick(pBar->mRiffSets, mCurrentRiffSet, offset.mTick);
 
         for (auto it = mBars.begin() + (pBar - mBars.data()) + 1; it != mBars.end(); ++it) {
-            (void)IsFiniteMBT(0); // Yes, the binary discards this call's result.
-            SetAtTick(it->mRiffSets, mCurrentRiffSet, 0);
+            SetAtTick(it->mRiffSets, mCurrentRiffSet, Mid::MBT(0).mTick);
         }
     }
     mCurrentRiffSet->mRiffs[pRiff->mId] = pRiff;
@@ -200,9 +196,8 @@ void TrackData::AddRiff(int nTick, Riff *pRiff) {
 
 // 0x001d3d10
 void TrackData::AddHarmony(int nTick, const std::vector<char> &notes) {
-    const int nLength = ClampPosition(mBarLength * static_cast<int>(mBars.size()));
-    (void)IsFiniteMBT(nLength); // Yes, the binary discards this call's result.
-    if (!(nTick < nLength)) {
+    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    if (!(nTick < length.mTick)) {
         return;
     }
 
@@ -215,16 +210,14 @@ void TrackData::AddHarmony(int nTick, const std::vector<char> &notes) {
     SetAtTick(pBar->mHarmonies, pHarmony, offset.mTick);
 
     for (auto it = mBars.begin() + (pBar - mBars.data()) + 1; it != mBars.end(); ++it) {
-        (void)IsFiniteMBT(0); // Yes, the binary discards this call's result.
-        SetAtTick(it->mHarmonies, pHarmony, 0);
+        SetAtTick(it->mHarmonies, pHarmony, Mid::MBT(0).mTick);
     }
 }
 
 // 0x001d3ee0
 void TrackData::AddGem(int nTick, int nGem, Riff *pRiff) {
-    const int nLength = ClampPosition(mBarLength * static_cast<int>(mBars.size()));
-    (void)IsFiniteMBT(nLength); // Yes, the binary discards this call's result.
-    if (!(nTick < nLength)) {
+    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    if (!(nTick < length.mTick)) {
         return;
     }
 
@@ -273,11 +266,8 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
             return 0;
         }
 
-        const int nStart = ClampPosition(mBarLength * (nTick / mBarLength));
-        (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-        (void)IsFiniteMBT(1);      // Yes, the binary discards this call's result.
-        nTick = ClampPosition(nStart - 1);
-        (void)IsFiniteMBT(nTick); // Yes, the binary discards this call's result.
+        const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+        nTick = MakePosition(start.mTick - Mid::MBT(1).mTick).mTick;
 
         LocateMapped(nTick, pBar, offset);
         it = FindAtOrBefore(pBar->mGems, offset.mTick);
@@ -286,11 +276,8 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
         }
     }
 
-    const int nStart = ClampPosition(mBarLength * (nTick / mBarLength));
-    (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-    const int nGemTick = ClampPosition(it->mPosition.mTick + nStart);
-    (void)IsFiniteMBT(nGemTick); // Yes, the binary discards this call's result.
-    *pTick = nGemTick;
+    const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+    *pTick = MakePosition(it->mPosition.mTick + start.mTick).mTick;
     *pGem = it->mValue;
     return 1;
 }
@@ -304,21 +291,16 @@ int TrackData::FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const {
         if (pBar->mGems.size() != 0) {
             const auto it = FindAtOrAfter(pBar->mGems, offset.mTick);
             if (it != pBar->mGems.end()) {
-                const int nStart = ClampPosition(mBarLength * (nTick / mBarLength));
-                (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-                const int nGemTick = ClampPosition(it->mPosition.mTick + nStart);
-                (void)IsFiniteMBT(nGemTick); // Yes, the binary discards this call's result.
-                *pTick = nGemTick;
+                const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+                *pTick = MakePosition(it->mPosition.mTick + start.mTick).mTick;
                 *pGem = it->mValue;
                 return 1;
             }
         }
 
         ++nBarsSearched;
-        const int nStart = ClampPosition(mBarLength * (nTick / mBarLength));
-        (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-        nTick = ClampPosition(nStart + mBarLength);
-        (void)IsFiniteMBT(nTick); // Yes, the binary discards this call's result.
+        const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+        nTick = MakePosition(start.mTick + mBarLength).mTick;
     }
     return 0;
 }
@@ -354,11 +336,8 @@ void TrackData::Print(std::ostream &stream) {
 // 0x001d4b40
 void TrackData::Locate(int nTick, Bar *&pBar, Mid::MBT &offset) {
     const int nBar = nTick / mBarLength;
-    const int nStart = ClampPosition(mBarLength * nBar);
-    (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-    const int nOffset = ClampPosition(nTick - nStart);
-    (void)IsFiniteMBT(nOffset); // Yes, the binary discards this call's result.
-    offset.mTick = nOffset;
+    const Mid::MBT start = MakePosition(mBarLength * nBar);
+    offset = MakePosition(nTick - start.mTick);
     pBar = &mBars[nBar];
 }
 
@@ -366,11 +345,8 @@ void TrackData::Locate(int nTick, Bar *&pBar, Mid::MBT &offset) {
 void TrackData::LocateMapped(int nTick, const Bar *&pBar, Mid::MBT &offset) const {
     const int nBar = nTick / mBarLength;
     const int nMappedBar = mMap->Slot5(nBar);
-    const int nStart = ClampPosition(mBarLength * nBar);
-    (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-    const int nOffset = ClampPosition(nTick - nStart);
-    (void)IsFiniteMBT(nOffset); // Yes, the binary discards this call's result.
-    offset.mTick = nOffset;
+    const Mid::MBT start = MakePosition(mBarLength * nBar);
+    offset = MakePosition(nTick - start.mTick);
     pBar = &mBars[nMappedBar];
 }
 
@@ -386,12 +362,8 @@ void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
         }
 
         for (const auto &gem : pPhrase->mGems) {
-            (void)IsFiniteMBT(kBarLength); // Yes, the binary discards this call's result.
-            const int nStart = ClampPosition(i * kBarLength);
-            (void)IsFiniteMBT(nStart); // Yes, the binary discards this call's result.
-            const int nGemTick = ClampPosition(gem.mPosition.mTick + nStart);
-            (void)IsFiniteMBT(nGemTick); // Yes, the binary discards this call's result.
-            AddGem(nGemTick, gem.mGem, nullptr);
+            const Mid::MBT start = MakePosition(i * Mid::MBT(kBarLength).mTick);
+            AddGem(MakePosition(gem.mPosition.mTick + start.mTick).mTick, gem.mGem, nullptr);
         }
 
         mBars[i].mPoints = ScoreGems(mBars[i].mGems);
@@ -401,9 +373,8 @@ void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
 
 // 0x001d7688
 void TrackData::SetQuant(int nTick, int nQuant) {
-    const int nLength = ClampPosition(mBarLength * static_cast<int>(mBars.size()));
-    (void)IsFiniteMBT(nLength); // Yes, the binary discards this call's result.
-    if (!(nTick < nLength)) {
+    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    if (!(nTick < length.mTick)) {
         return;
     }
 
@@ -417,7 +388,7 @@ void TrackData::OnUnknown001d7758([[maybe_unused]] int nFirst, [[maybe_unused]] 
 }
 
 // 0x001d7760
-void TrackData::SetOwner(Player *pPlayer, int nBar) {
+void TrackData::SetOwner(Player *pPlayer, int nBar) const {
     mGamer->SetBarOwner(mUnknown04, nBar, pPlayer);
 }
 

@@ -224,8 +224,7 @@ void Phrase::LoadValues(IBStream &stream) {
         const float flValue = cValue / kValueScaleDouble;
 
         TickObj<float> value;
-        (void)IsFiniteMBT(nTick); // Yes, the binary discards this call's result.
-        value.mPosition.mTick = nTick;
+        value.mPosition = Mid::MBT(nTick);
         value.mValue = flValue;
         mValues.push_back(value);
     }
@@ -269,8 +268,7 @@ IBStream &operator>>(IBStream &stream, Phrase::Gem &gem) {
     stream.ReadBytes(&cGem, sizeof(cGem));
     stream.ReadBytes(&cTrans, sizeof(cTrans));
 
-    gem.mPosition.mTick = nTick;
-    (void)IsFiniteMBT(nTick); // Yes, the binary discards this call's result.
+    gem.mPosition = Mid::MBT(nTick);
     gem.mGem = cGem;
     gem.mTrans = cTrans;
     return stream;

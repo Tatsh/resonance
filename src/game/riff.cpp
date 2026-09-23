@@ -17,9 +17,7 @@ void Riff::operator delete(void *pBlock) {
 }
 
 // 0x001cebb0
-Riff::Riff(int nId) {
-    mUnknown18.mTick = 0;
-    (void)IsFiniteMBT(0); // Yes, the binary discards this call's result.
+Riff::Riff(int nId) : mUnknown18(0) {
     mId = nId;
 }
 

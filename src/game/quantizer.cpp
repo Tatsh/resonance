@@ -24,13 +24,11 @@ unsigned Quantizer::Quantize(int nTick) {
 
 // 0x001ce6b0
 int Quantizer::GetQuantum(int nTick) {
-    (void)IsFiniteMBT(kBarLength); // Yes, the binary discards this call's result.
-    return mTrackData->GetQuant(nTick / kBarLength);
+    return mTrackData->GetQuant(nTick / Mid::MBT(kBarLength).mTick);
 }
 
 // 0x001ce710
 unsigned Quantizer::Round(unsigned nTick, unsigned nQuantum) {
-    const unsigned nRounded = ((nTick - kRoundingBias + (nQuantum / 2)) / nQuantum) * nQuantum;
-    (void)IsFiniteMBT(nRounded); // Yes, the binary discards this call's result.
-    return nRounded;
+    const Mid::MBT rounded(((nTick - kRoundingBias + (nQuantum / 2)) / nQuantum) * nQuantum);
+    return rounded.mTick;
 }

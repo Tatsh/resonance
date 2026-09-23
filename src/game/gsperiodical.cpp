@@ -13,8 +13,7 @@ namespace {
 // The handle value of a command the clock has not queued yet.
 constexpr int kUnallocatedCommand = -2;
 
-// Clamp a song position to the finite range, which is what the inline position type does on
-// construction.
+// The clamp the inline Mid::MBT arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
     return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
 }
@@ -79,20 +78,17 @@ void GsPeriodical::PostAt(int nTick) {
 
 // 0x001b45d0
 void GsPeriodical::Run(int nTick) {
-    const int nOffset = ClampPosition(nTick - mOrigin);
-    (void)IsFiniteMBT(nOffset); // Yes, the binary discards this call's result.
-    mPhraseMaker->Slot4(nOffset / mPeriod);
+    const Mid::MBT offset(ClampPosition(nTick - mOrigin));
+    mPhraseMaker->Slot4(offset.mTick / mPeriod);
 
-    const int nNext = ClampPosition(nTick + mPeriod);
-    (void)IsFiniteMBT(nNext); // Yes, the binary discards this call's result.
-    PostAt(nNext);
+    const Mid::MBT next(ClampPosition(nTick + mPeriod));
+    PostAt(next.mTick);
 }
 
 // 0x001b4870
 void GsPeriodical::Post() {
-    const int nFirst = ClampPosition(mOrigin + mPeriod);
-    (void)IsFiniteMBT(nFirst); // Yes, the binary discards this call's result.
-    PostAt(nFirst);
+    const Mid::MBT first(ClampPosition(mOrigin + mPeriod));
+    PostAt(first.mTick);
 }
 
 // 0x001b48f8

@@ -20,6 +20,7 @@ animrange
 anims
 apalette
 apolygon
+apptnl
 apsz
 arect
 arkfile
@@ -55,6 +56,7 @@ bsky
 bsloadlevelpacket
 bufferobject
 buildsystems
+bumpfx
 bumpmsg
 bumppacket
 buttonpowmsg
@@ -171,6 +173,7 @@ fstat
 fsyntax
 funcobject
 funcs
+fx's
 fxwires
 gamebeginmsg
 gamechatpacket
@@ -236,7 +239,11 @@ hudtrack
 hudtracklabel
 hudutil
 hudwinmessage
+hxchunkname
 hxcons
+hxdatachunkid
+hxdatachunkreader
+hxidatachunk
 hxmemstream
 hxstr
 hxstream
@@ -386,6 +393,8 @@ metsolowinscreen
 metstartnetlaunchmsg
 metstartpausemsg
 metunlockstagesmsg
+mgen
+midifilereader
 minimumsavespacemct
 miptbp
 missingconfigvals
@@ -430,10 +439,13 @@ netplayer
 neut
 neutralizemsg
 newmodule
+nolattice
 noone
 notemsg
 notepitcher
 nowbarmsg
+nowmesh
+nowring
 ntpath
 nullplayer
 nullptr
@@ -462,6 +474,7 @@ phello
 phrasecapturedmsg
 phrasedatabase
 phrasemaker
+phrasemgr
 phrasemsg
 phrasemuffedmsg
 phrasepacket
@@ -586,6 +599,7 @@ slerp
 sliceobject
 smgs
 smpl
+smpte
 smrt
 snapcraft
 socketmodule
@@ -624,6 +638,7 @@ tickclock
 timedcommand
 tkinter
 tmpnam
+tnlstr
 toggleghostmsg
 toolstream
 trackdata

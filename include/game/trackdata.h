@@ -20,6 +20,8 @@ struct RiffSet;
 enum TrackMode {
     kTrackModeAxe = 1,   /*!< Printed as `axe`. */
     kTrackModeRiff = 2,  /*!< Printed as `riff`, the default the constructor sets. */
+    kTrackModeScratch = 3, /*!< Printed as `none`. Overlay's constructor labels it `SCRATCH`. */
+    kTrackModeVocal = 4,   /*!< Printed as `none`. Overlay's constructor labels it `VOCAL`. */
     kTrackModeCatch = 5, /*!< Printed as `catch`. */
 };
 
@@ -48,6 +50,9 @@ enum TrackMode {
  * through the const pointer.
  */
 class TrackData {
+    // Catcher::FindNextGemTick() at 0x001aca48 reads mUnknown30 directly.
+    friend class Catcher;
+
 public:
     /**
      * One bar of a track, with its scoring values and the sorted lists of what starts in it.
@@ -273,7 +278,7 @@ public:
      * @param nBar The bar.
      * @ghidraAddress 0x001d7760
      */
-    void SetOwner(Player *pPlayer, int nBar);
+    void SetOwner(Player *pPlayer, int nBar) const;
 
     /**
      * @param nTick The song position, in MIDI ticks.

@@ -28,12 +28,13 @@ class Player;
  * same three in the same order behind a version byte of 2.
  *
  * Every member is private. PhraseDatabase writes mPlayer and reads and writes mUnknown28 directly,
- * TrackData::AddPhrases() walks mGems directly, the image exposes no accessor, and friend
- * declarations model that access. Promoting the three members to public fits the image equally
- * well.
+ * PhraseMgr::GetPhraseOwner() reads mPlayer, TrackData::AddPhrases() walks mGems directly, the
+ * image exposes no accessor, and friend declarations model that access. Promoting the three members
+ * to public fits the image equally well.
  */
 class Phrase : public Attachment {
     friend class PhraseDatabase;
+    friend class PhraseMgr;
     friend class TrackData;
 
 public:
