@@ -260,8 +260,18 @@ private:
 
     // The world's song clock, read once by the constructor through Globals::GetSongClock().
     Sch::TickClock *mUnknown5c; // +0x5c
-    // The song tick OnUnknownSlot6() last sampled, in MIDI ticks.
-    float mUnknown60; // +0x60
+
+public:
+    /**
+     * The song tick OnUnknownSlot6() last sampled, in MIDI ticks. +0x60
+     *
+     * Public because Overlay's handlers at `0x0041fdd8` and `0x0042b068` and
+     * AppTunnel::OnBarChanged() read it directly through the renderer they record, and the image
+     * has no accessor for it.
+     */
+    float mUnknown60;
+
+private:
     // Draw the subsystem timing graph. Filled from configuration code 0x397.
     int mUnknown64; // +0x64
     // Draw the render-statistics overlay. Filled from configuration code 0x3a2.
@@ -346,12 +356,17 @@ extern RndAsyncLoader *g_pLevelLoader;
 /**
  * Arena name g_pArenaLoader was started for, empty when none.
  *
+ * The Ghidra program labels it `g_abArenaName`, the prefix its naming check requires for an
+ * aggregate.
+ *
  * @ghidraAddress 0x006e2528
  */
 extern HxStr g_arenaName;
 
 /**
  * Level name g_pLevelLoader was started for, empty when none.
+ *
+ * The Ghidra program labels it `g_abLevelName`, for the reason recorded on g_arenaName.
  *
  * @ghidraAddress 0x006e2530
  */

@@ -2,11 +2,17 @@ set(RESONANCE_APP_SRCS
     application.cpp
     attachment.cpp
     globals.cpp
+    hudbadge.cpp
+    hudfreq.cpp
+    hudscore.cpp
+    hudscorepulse.cpp
+    hudutil.cpp
     longop.cpp
     mainloop.cpp
     msgqueue.cpp
     msgsink.cpp
     msgsource.cpp
+    overlay.cpp
     renderer.cpp
     rendererbase.cpp
     scriptsink.cpp
