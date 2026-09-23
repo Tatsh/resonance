@@ -147,9 +147,10 @@ public:
      * measures it with `strlen`, which reads past the buffer.
      *
      * @param name The string to append the name to.
+     * @return This stream, which Rnd::Manager's reader at `0x0051b450` chains into a second read.
      * @ghidraAddress 0x0050f140
      */
-    void ReadString(HxStr &name);
+    Stream &ReadString(HxStr &name);
 };
 
 } // namespace Rnd

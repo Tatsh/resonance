@@ -20,7 +20,7 @@ Stream &Stream::Write(const void *pSrc, int nSize) {
 }
 
 // 0x0050f140
-void Stream::ReadString(HxStr &name) {
+Stream &Stream::ReadString(HxStr &name) {
     name.Clear();
 
     char *pCursor = g_szNameBuffer;
@@ -28,7 +28,7 @@ void Stream::ReadString(HxStr &name) {
         ReadBytes(pCursor, 1);
         if (*pCursor == 0) {
             name += HxStr(g_szNameBuffer);
-            return;
+            return *this;
         }
 
         ++pCursor;
