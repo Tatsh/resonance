@@ -2,6 +2,7 @@
 
 #include <list>
 
+#include "math/quaternion.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
 // Included for kXfmRowFloatCount, which this header uses by value, rather than for Transformable.
@@ -91,13 +92,7 @@ public:
         /**
          * Build the two Kochanek-Bartels tangents of this keyframe from its neighbours.
          *
-         * The body is not reconstructed, and the obstacle is a type rather than the algorithm. The
-         * routine works entirely through Rnd::QuatSlerp() at `0x004eec20`, which takes a
-         * quaternion pointer, while the four members below are float arrays that every other body
-         * in src/rnd/transanim.cpp indexes by axis. Retyping them would rewrite those bodies, so
-         * the decision belongs with whoever settles the quaternion type of this channel.
-         *
-         * The algebra is fully recovered. With both neighbours present, `toPrev` is the slerp of
+         * Every blend is a QuatSlerp(). With both neighbours present, `toPrev` is the slerp of
          * this key towards pPrev at `-(bias + 1) / 3` and `toNext` the slerp towards pNext at
          * `(1 - bias) / 3`. mTangentOut is then the slerp of this key towards the slerp of that
          * pair at `(1 - continuity) / 2`, weighted `1 - tension`, and mTangentIn the same with
@@ -115,11 +110,11 @@ public:
          */
         void ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext);
 
-        float mQuat[kXfmRowFloatCount];       /*!< x, y, z, and w. +0x00 */
-        float mTangentIn[kXfmRowFloatCount];  /*!< Tangent entering the key. +0x10 */
-        float mTangentOut[kXfmRowFloatCount]; /*!< Tangent leaving the key. +0x20 */
-        float mShape[kXfmRowFloatCount];      /*!< See ShapeComponent, then padding. +0x30 */
-        float mFrame;                         /*!< Frame this key lands on. +0x40 */
+        Quat mQuat;                      /*!< The rotation. +0x00 */
+        Quat mTangentIn;                 /*!< Tangent entering the key. +0x10 */
+        Quat mTangentOut;                /*!< Tangent leaving the key. +0x20 */
+        float mShape[kXfmRowFloatCount]; /*!< See ShapeComponent, then padding. +0x30 */
+        float mFrame;                    /*!< Frame this key lands on. +0x40 */
     };
 
     /**
@@ -224,6 +219,18 @@ public:
      */
     void SetTrans(Transformable *pTrans);
 
+    /**
+     * Report the object whose keyframes drive this one.
+     *
+     * The out-of-line copy has no callers. TnlBumpFX::Start() inlines it.
+     *
+     * @return mFramesOwner, which is this object when it owns its frames.
+     * @ghidraAddress 0x004fbf58
+     */
+    TransAnim *GetFramesOwner() const {
+        return mFramesOwner;
+    }
+
 protected:
     /**
      * Write the transform this frame evaluates to into mTrans.
@@ -241,10 +248,20 @@ private:
     // Declared in recovered offset order. The transformable this animation drives.
     Transformable *mTrans; // +0x2c
     // Interpolation mode per channel, one of the Interp values.
-    int mRotInterp;                 // +0x30
-    int mTransInterp;               // +0x34
-    int mScaleInterp;               // +0x38
-    std::list<RotKey> mRotKeys;     // +0x3c
+    int mRotInterp;   // +0x30
+    int mTransInterp; // +0x34
+    int mScaleInterp; // +0x38
+
+public:
+    /**
+     * The rotation keyframes, kept in frame order.
+     *
+     * Public because TnlBumpFX::Start() at `0x0043dea8` rewrites the first key of its path's frame
+     * owner, sorts the list, and rebuilds the tangents, and the image has no accessor. +0x3c
+     */
+    std::list<RotKey> mRotKeys;
+
+private:
     std::list<TransKey> mTransKeys; // +0x40
     std::list<TransKey> mScaleKeys; // +0x44
     // The object whose keyframes drive this one, which is this object when it owns its frames.

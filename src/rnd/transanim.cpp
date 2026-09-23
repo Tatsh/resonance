@@ -33,6 +33,23 @@ static const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
+// De-inlined from the three quaternion writes of the rotation keyframe writer, which emits the
+// four components in order.
+static inline void WriteQuat(Stream &stream, const Quat &quat) {
+    float flComponent = quat.x;
+    stream.Write(&flComponent, sizeof(flComponent));
+    flComponent = quat.y;
+    stream.Write(&flComponent, sizeof(flComponent));
+    flComponent = quat.z;
+    stream.Write(&flComponent, sizeof(flComponent));
+    flComponent = quat.w;
+    stream.Write(&flComponent, sizeof(flComponent));
+}
+
+// Divisor and half weight of the Kochanek-Bartels tangent terms.
+constexpr float kTangentThird = 3.0f;
+constexpr float kTangentHalf = 0.5f;
+
 // De-inlined from the two places DumpText() repeats it for its two targets. The binary tests both
 // the pointer and the virtual-base pointer it converts to, and the second test is what g++ 2.x
 // emits for an upcast to a virtual base of a pointer that may be null.
@@ -77,13 +94,13 @@ static FailSink &operator<<(FailSink &sink, const TransAnim::RotKey &key) {
     sink.Print(" value:");
     sink.Print("(q:");
     sink.Print("x:");
-    sink.Format(kFloatFormat, key.mQuat[0]);
+    sink.Format(kFloatFormat, key.mQuat.x);
     sink.Print(" y:");
-    sink.Format(kFloatFormat, key.mQuat[1]);
+    sink.Format(kFloatFormat, key.mQuat.y);
     sink.Print(" z:");
-    sink.Format(kFloatFormat, key.mQuat[2]);
+    sink.Format(kFloatFormat, key.mQuat.z);
     sink.Print(" w:");
-    sink.Format(kFloatFormat, key.mQuat[3]);
+    sink.Format(kFloatFormat, key.mQuat.w);
     sink.Print(" t:");
     sink.Format(kFloatFormat, key.mShape[TransAnim::kShapeTension]);
     sink.Print(" c:");
@@ -181,22 +198,13 @@ static Stream &operator<<(Stream &stream, const TransAnim::TransKey &key) {
 // 0x004f9a68. The rotation channel writes the fourth float of the quaternion and of both
 // tangents, which is the one difference from the vector channels.
 static Stream &operator<<(Stream &stream, const TransAnim::RotKey &key) {
-    for (int nAxis = 0; nAxis < kXfmRowFloatCount; ++nAxis) {
-        float flValue = key.mQuat[nAxis];
-        stream.Write(&flValue, sizeof(flValue));
-    }
+    WriteQuat(stream, key.mQuat);
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flShape = key.mShape[nAxis];
         stream.Write(&flShape, sizeof(flShape));
     }
-    for (int nAxis = 0; nAxis < kXfmRowFloatCount; ++nAxis) {
-        float flIn = key.mTangentIn[nAxis];
-        stream.Write(&flIn, sizeof(flIn));
-    }
-    for (int nAxis = 0; nAxis < kXfmRowFloatCount; ++nAxis) {
-        float flOut = key.mTangentOut[nAxis];
-        stream.Write(&flOut, sizeof(flOut));
-    }
+    WriteQuat(stream, key.mTangentIn);
+    WriteQuat(stream, key.mTangentOut);
 
     float flFrame = key.mFrame;
     stream.Write(&flFrame, sizeof(flFrame));
@@ -431,6 +439,34 @@ void TransAnim::SetFrameSelf(float flFrame) {
     EvalFrame(flFrame, aflXfm[0], 0);
     memcpy(mTrans->mLocalXfm, aflXfm, sizeof(aflXfm));
     mTrans->mDirty = 1;
+}
+
+// 0x00552588
+void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext) {
+    const float flTension = mShape[kShapeTension];
+    const float flContinuity = mShape[kShapeContinuity];
+    const float flBias = mShape[kShapeBias];
+    if (pPrev != nullptr && pNext != nullptr) {
+        Quat toPrev;
+        Quat toNext;
+        Quat mid;
+        QuatSlerp(mQuat, pPrev->mQuat, toPrev, -(flBias + 1.0f) / kTangentThird);
+        QuatSlerp(mQuat, pNext->mQuat, toNext, (1.0f - flBias) / kTangentThird);
+        QuatSlerp(toPrev, toNext, mid, kTangentHalf - flContinuity * kTangentHalf);
+        QuatSlerp(mQuat, mid, mTangentOut, -(flTension - 1.0f));
+        QuatSlerp(toPrev, toNext, mid, flContinuity * kTangentHalf + kTangentHalf);
+        QuatSlerp(mQuat, mid, mTangentIn, flTension - 1.0f);
+    } else if (pNext != nullptr) {
+        QuatSlerp(mQuat,
+                  pNext->mQuat,
+                  mTangentOut,
+                  (1.0f - flTension) * (flContinuity * flBias + 1.0f) / kTangentThird);
+    } else if (pPrev != nullptr) {
+        QuatSlerp(mQuat,
+                  pPrev->mQuat,
+                  mTangentIn,
+                  (1.0f - flTension) * (1.0f - flContinuity * flBias) / kTangentThird);
+    }
 }
 
 } // namespace Rnd
