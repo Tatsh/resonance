@@ -555,14 +555,22 @@ Arena *NewArena(const HxStr &name) {
 
 // 0x005bb8f0
 Arena *NewArenaThroughHook(const HxStr &name) {
-    return g_pfnNewArena(name);
+    try {
+        return g_pfnNewArena(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x005bba98
 // The null test in the body is the conversion of an Arena pointer to its virtual Rnd::Object base
 // rather than a check the source asks for.
 Object *CreateRegisteredArena(const HxStr &name) {
-    return g_pfnNewArena(name);
+    try {
+        return g_pfnNewArena(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x005bb8b0

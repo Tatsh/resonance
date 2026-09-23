@@ -368,14 +368,19 @@ Object *CreateRegisteredMovie(const HxStr &name);
  * Allocate and construct a movie, returning the Movie pointer itself.
  *
  * The out-of-line copy has no caller, and CreateRegisteredMovie() expands the body before
- * converting the result to its Rnd::Object subobject. The name is inferred.
+ * converting the result to its Rnd::Object subobject. The name is inferred. An exception from the
+ * constructor produces null, which is what the binary's handler returns.
  *
  * @param name The object name.
- * @return The new movie.
+ * @return The new movie, or null.
  * @ghidraAddress 0x005d1f28
  */
 inline Movie *NewMovie(const HxStr &name) {
-    return new Movie(name);
+    try {
+        return new Movie(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 /**

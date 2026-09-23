@@ -265,7 +265,11 @@ void LightAnim::Load(Stream &stream) {
 LightAnim *NewLightAnim(const HxStr &name) {
     // The allocation is untagged here, as it is for Rnd::ParticleSysAnim, and it is exactly 0x48
     // bytes rather than a rounded size.
-    return new LightAnim(name);
+    try {
+        return new LightAnim(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x005452d0

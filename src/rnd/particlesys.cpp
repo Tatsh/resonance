@@ -903,12 +903,20 @@ ParticleSys *NewParticleSys(const HxStr &name) {
 
 // 0x0052b3c0
 ParticleSys *NewParticleSysThroughHook(const HxStr &name) {
-    return g_pfnNewParticleSys(name);
+    try {
+        return g_pfnNewParticleSys(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x0052b6d8
 Object *CreateRegisteredParticleSys(const HxStr &name) {
-    return g_pfnNewParticleSys(name);
+    try {
+        return g_pfnNewParticleSys(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x0052c658

@@ -224,14 +224,19 @@ private:
  * Allocate and construct a particle system animation.
  *
  * The allocation is untagged, unlike every other renderer class, and exactly 0x4c bytes. The
- * out-of-line copy has no caller, and CreateRegisteredParticleSysAnim() expands the body.
+ * out-of-line copy has no caller, and CreateRegisteredParticleSysAnim() expands the body. An
+ * exception from the constructor produces null, which is what the binary's handler returns.
  *
  * @param name The object name.
- * @return The new animation.
+ * @return The new animation, or null.
  * @ghidraAddress 0x0052b8a8
  */
 inline ParticleSysAnim *NewParticleSysAnim(const HxStr &name) {
-    return new ParticleSysAnim(name);
+    try {
+        return new ParticleSysAnim(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 /**

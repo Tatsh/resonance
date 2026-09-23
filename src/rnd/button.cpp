@@ -410,12 +410,20 @@ Button *(*g_pfnNewButton)(const HxStr &name) = NewButton;
 
 // 0x00534538
 Button *NewButtonThroughHook(const HxStr &name) {
-    return g_pfnNewButton(name);
+    try {
+        return g_pfnNewButton(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x00534678
 Object *CreateRegisteredButton(const HxStr &name) {
-    return g_pfnNewButton(name);
+    try {
+        return g_pfnNewButton(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x005344f8

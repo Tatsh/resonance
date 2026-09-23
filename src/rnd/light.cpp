@@ -262,12 +262,20 @@ void Light::operator delete(void *pBlock) {
 
 // 0x00544490
 Light *NewLightThroughHook(const HxStr &name) {
-    return g_pfnNewLight(name);
+    try {
+        return g_pfnNewLight(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x00544828
 Object *CreateRegisteredLight(const HxStr &name) {
-    return g_pfnNewLight(name);
+    try {
+        return g_pfnNewLight(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x00544450

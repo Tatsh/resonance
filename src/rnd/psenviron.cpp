@@ -205,7 +205,15 @@ void PsEnviron::Init() {
     g_pDefaultEnviron->mInternal = 1;
     g_pDefaultCam->AddDraw(g_pDefaultEnviron, nullptr);
 
-    g_pDefaultLight = g_pfnNewLight(HxStr("[default light]"));
+    {
+        const HxStr lightName("[default light]");
+        // The binary's handler covers only the factory call and returns null.
+        try {
+            g_pDefaultLight = g_pfnNewLight(lightName);
+        } catch (...) {
+            g_pDefaultLight = nullptr;
+        }
+    }
     g_pDefaultLight->mInternal = 1;
     g_pDefaultEnviron->AddLight(g_pDefaultLight);
     g_pDefaultCam->AddTrans(g_pDefaultLight);

@@ -293,7 +293,20 @@ void Environ::RemoveLight(Light *pLight) {
 
 // 0x00518eb0
 Environ *NewEnvironThroughHook(const HxStr &name) {
-    return g_pfnNewEnviron(name);
+    try {
+        return g_pfnNewEnviron(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
+}
+
+// 0x00519278
+Object *CreateRegisteredEnviron(const HxStr &name) {
+    try {
+        return g_pfnNewEnviron(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 void Environ::ClearLights() {
