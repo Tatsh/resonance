@@ -28,44 +28,76 @@ constexpr char kArkHostRoot[] = "host0:";
 /** Path component of the archive header that fixes the mount point. */
 constexpr char kArkRunComponent[] = "run";
 
+/** Bytes of the lowercased path copy ArkFile::FindFileEntryByPath() builds on its stack. */
+constexpr int kArkPathBufferSize = 0x80;
+
+/** Bytes every caller of ArkFile::FindFileEntryByPath() reserves for the file name. */
+constexpr int kArkNameBufferSize = 0x80;
+
+/** Bytes every caller of ArkFile::FindFileEntryByPath() reserves for the relative path. */
+constexpr int kArkRelPathBufferSize = 0x100;
+
 /**
- * One entry of the archive's directory table.
+ * Archive index that asks ArkFile::FindFileEntryByPath() to search every mounted archive.
  *
- * Only the name offset has been recovered. Every entry's name offset is rebased at mount time from
- * an archive-relative offset to an offset inside the name pool.
+ * ArkFile::MapPathToArkIndex() never reports it, and the search is therefore unreachable.
  */
-struct ArkDirEntry {
-    int mUnknown00;  /*!< Undetermined. +0x00 */
-    int mNameOffset; /*!< Offset of the entry name inside the name pool. +0x04 */
-    int mUnknown08;  /*!< Undetermined. +0x08 */
-    int mUnknown0c;  /*!< Undetermined. +0x0c */
-    int mStoredSize; /*!< Bytes as stored, which a read position counts against. +0x10 */
-    int mSize;       /*!< Bytes after decompression. +0x14 */
-};
+constexpr int kArkIndexAny = 100;
 
 /**
  * One entry of the archive's file table.
  *
- * Only the name offset has been recovered, and it is rebased at mount time in the same way as a
- * directory entry.
+ * The member titles come from the labels ArkFile::DumpFiles() writes: "nameHash", "flags",
+ * "nameOffset", "relPathIndex", "sectorOffset", "sector", and "length". The dump does not write
+ * mSize, and its title comes from the one reader, the asynchronous loader, which takes it as the
+ * inflated size. The name offset is rebased at mount time from an archive-relative offset to an
+ * offset inside the string table.
  */
 struct ArkFileEntry {
-    int mUnknown00;  /*!< Undetermined. +0x00 */
-    int mNameOffset; /*!< Offset of the entry name inside the name pool. +0x04 */
+    unsigned short mNameHash;     /*!< ArkFile::HashName() of the file name. */
+    unsigned short mFlags;        /*!< Flags whose meaning is unrecovered. */
+    int mNameOffset;              /*!< Offset of the file name inside the string table. */
+    short mRelPathIndex;          /*!< Index of the directory in the relative path table. */
+    unsigned short mSectorOffset; /*!< Byte offset of the file inside its first sector. */
+    int mSector;                  /*!< Sector the file starts in. */
+    int mLength;                  /*!< Bytes as stored, which a read position counts against. */
+    int mSize;                    /*!< Bytes after decompression. */
 };
+
+/**
+ * One entry of the archive's relative path table, which lists the directories the files are in.
+ *
+ * The member titles come from the labels ArkFile::DumpRelativePaths() writes: "pathHash", "flags",
+ * and "pathOffset". The path offset is rebased at mount time in the same way as a file entry's
+ * name offset.
+ */
+struct ArkRelPath {
+    unsigned short mPathHash; /*!< ArkFile::HashName() of the path. */
+    unsigned short mFlags;    /*!< Flags whose meaning is unrecovered. */
+    int mPathOffset;          /*!< Offset of the path inside the string table. */
+};
+
+class ArkFile;
 
 /**
  * One open stream on a mounted archive.
  *
- * The record is 20 bytes, and only the two fields ArkFile::Close() reads have been recovered. A
- * handle with bit 0x4000 set identifies a stream inside an archive rather than a loose file.
+ * A handle with bit 0x4000 set identifies a stream inside an archive rather than a loose file.
  */
 struct ArkStream {
-    int mUnknown00; /*!< Undetermined. +0x00 */
-    int mUnknown04; /*!< Undetermined. +0x04 */
-    int mFile;      /*!< The archive's file, which is what ties a stream to its archive. +0x08 */
-    int mHandle;    /*!< The stream handle, with bit 0x4000 cleared. +0x0c */
-    ArkDirEntry *mEntry; /*!< The directory entry this stream reads. +0x10 */
+    /**
+     * Find the mounted archive this stream reads from.
+     *
+     * @return The archive whose file matches mFile, or null when none is mounted.
+     * @ghidraAddress 0x0055c1b8
+     */
+    ArkFile *FindArk() const;
+
+    int mArkPosition;     /*!< Read position as a byte offset into the whole archive. */
+    int mPosition;        /*!< Read position as a byte offset into the file. */
+    int mFile;            /*!< The archive's file, which is what ties a stream to its archive. */
+    int mHandle;          /*!< The stream handle, with bit 0x4000 cleared. */
+    ArkFileEntry *mEntry; /*!< The file entry this stream reads. */
 };
 
 /**
@@ -76,14 +108,14 @@ struct ArkStream {
  * vptr. Its name comes from the `ArkFile.cpp` allocation tag. The record is 424 bytes and begins
  * with an embedded HxStr, which is why the mount assigns a path through the record pointer itself.
  *
- * A mount copies the whole 256-byte header into the record, then allocates one block for the
- * directory table, the file table, and the name pool together, and rebases every name offset into
- * that block. The header's own path is lowercased in place and must include a `run` component,
- * which is what fixes the archive's mount point.
+ * A mount copies the whole 256-byte header into the record, then allocates one block for the file
+ * table, the relative path table, and the string table together, and rebases every string offset
+ * into that block. The header's own path is lowercased in place and must include a `run`
+ * component, which is what fixes the archive's mount point.
  *
- * Every data member is private. Only the two static entry points and the destructor touch them,
- * and access from another instance through g_apMountedArks proves nothing, because private access
- * permits it.
+ * The header member titles come from the labels DumpHeader() writes, and the debug strings of the
+ * dump routines call the record `OpenArkObject`. Every data member is private, and ArkStream is a
+ * friend for the one routine that matches a stream to its archive.
  */
 class ArkFile {
 public:
@@ -126,34 +158,162 @@ public:
      */
     ~ArkFile();
 
+    /**
+     * Find the entry of a file in whichever mounted archive the path maps to.
+     *
+     * The path is copied, with every backslash turned into a slash and every capital letter
+     * lowercased, before ArkFile::MapPathToArkIndex() splits it and selects the archive. The
+     * archive's file table is then searched for the name and relative path hashes, and the strings
+     * confirm a hash match.
+     *
+     * @param pszPath The path to find.
+     * @param pszName Receives the file name, at least kArkNameBufferSize bytes.
+     * @param pszRelPath Receives the path relative to the archive's mount point, at least
+     * kArkRelPathBufferSize bytes.
+     * @param pnArk Receives the index of the archive in g_apMountedArks, or -1 when the file was
+     * not found.
+     * @return The file entry, or null when the file was not found.
+     * @ghidraAddress 0x0055a6d0
+     */
+    static ArkFileEntry *
+    FindFileEntryByPath(const char *pszPath, char *pszName, char *pszRelPath, int *pnArk);
+
+    /**
+     * Open a stream on one file of this archive.
+     *
+     * The stream starts at the file's first byte, and its record is appended to g_aArkStreams.
+     *
+     * @param pEntry The file to read, one of this archive's file entries.
+     * @return The new stream handle, without kFileHandleArkStream.
+     * @ghidraAddress 0x0055c288
+     */
+    int OpenStream(ArkFileEntry *pEntry);
+
+    /**
+     * Write every field of the copied archive header to standard output.
+     *
+     * The shipped program does not call it.
+     *
+     * @ghidraAddress 0x0055aa38
+     */
+    void DumpHeader() const;
+
+    /**
+     * Write every entry of the relative path table to standard output.
+     *
+     * The shipped program does not call it.
+     *
+     * @ghidraAddress 0x0055ac30
+     */
+    void DumpRelativePaths() const;
+
+    /**
+     * Write every entry of the file table to standard output.
+     *
+     * The shipped program does not call it.
+     *
+     * @ghidraAddress 0x0055ada0
+     */
+    void DumpFiles() const;
+
+    /**
+     * Write every file name and every relative path to standard output.
+     *
+     * The shipped program does not call it.
+     *
+     * @ghidraAddress 0x0055afc8
+     */
+    void DumpStrings() const;
+
+    /**
+     * Write the header, the file table, the relative path table, and the strings, in that order.
+     *
+     * The shipped program does not call it.
+     *
+     * @ghidraAddress 0x0055c3a0
+     */
+    void Dump() const;
+
 private:
-    HxStr mPath;                             // +0x000
-    int mFile;                               // +0x008 negative when the open failed
-    int mHeaderUnknown0c;                    // +0x00c start of the copied header
-    int mVersion;                            // +0x010
-    int mTableOffset;                        // +0x014 archive offset of the directory table
-    int mDirCount;                           // +0x018
-    int mFileTableOffset;                    // +0x01c
-    int mFileCount;                          // +0x020
-    int mNameOffset;                         // +0x024 archive offset of the name pool
-    int mHeaderUnknown28;                    // +0x028
-    int mTableEnd;                           // +0x02c archive offset one past the name pool
-    int mHeaderUnknown30;                    // +0x030
-    int mOptimized;                          // +0x034 set when the optimized block is present
-    int mOptimizedOffset;                    // +0x038
-    int mOptimizedCount;                     // +0x03c entries, each two bytes
+    friend struct ArkStream;
+
+    /**
+     * Hash a file name or a relative path for the table searches.
+     *
+     * Each character is shifted left by one more place than the character before it, the shift
+     * wrapping from 7 back to 0, and combined into a 16-bit accumulator with exclusive or.
+     *
+     * @param pszName The string to hash.
+     * @return The hash.
+     * @ghidraAddress 0x0055c340
+     */
+    static short HashName(const char *pszName);
+
+    /**
+     * Split a path and select the mounted archive whose mount point starts its directory.
+     *
+     * A path starting with a slash maps to no archive, and one starting with a backslash or a full
+     * stop is fatal. The directory is the path up to its last slash, and the archives are tried
+     * from the most recently mounted back. A match strips the mount point, and the slash after it,
+     * from pszRelPath. The mount point is compared lowercased against the directory as it stands.
+     * The strip counts the whole mount point even when the directory only continues it (a mount
+     * point `a` matching the directory `ab`), and an archive whose mount point is empty matches
+     * every directory.
+     *
+     * @param pszPath The path to split.
+     * @param pszName Receives the file name.
+     * @param pszRelPath Receives the directory, and then the path relative to the mount point.
+     * @return The index of the archive in g_apMountedArks, or -1 when none matches.
+     * @ghidraAddress 0x0055a868
+     */
+    static int MapPathToArkIndex(const char *pszPath, char *pszName, char *pszRelPath);
+
+    /**
+     * Search this archive's file table for a name in a relative path.
+     *
+     * The hashes are compared before the strings. Each hash argument is a sign-extended `short`
+     * and each stored hash an `unsigned short`, which never matches a hash with its top bit set.
+     * HashName() cannot produce one for a string of 7-bit characters.
+     *
+     * @param nNameHash HashName() of pszName.
+     * @param nRelPathHash HashName() of pszRelPath.
+     * @param pszName The file name.
+     * @param pszRelPath The path relative to the mount point.
+     * @return The file entry, or null when this archive does not list the file.
+     * @ghidraAddress 0x0055c050
+     */
+    ArkFileEntry *FindFileEntry(short nNameHash,
+                                short nRelPathHash,
+                                const char *pszName,
+                                const char *pszRelPath) const;
+
+    HxStr mPath;
+    int mFile; // negative when the open failed
+    char mSig[4];
+    int mVersion;
+    int mDirOffset; // archive offset of the file table
+    int mNumFiles;
+    int mRelPathOffset; // archive offset of the relative path table
+    int mNumPaths;
+    int mStringTabOffset; // archive offset of the string table
+    int mNumStrings;
+    int mSizeHdrAndDir; // archive offset one past the string table
+    int mSectorSize;
+    int mOptimized; // set when the optimized block is present
+    int mOptimizedOffset;
+    int mOptimizedCount;                     // entries, each two bytes
     int mHeaderUnknown40;                    // +0x040
     int mHeaderUnknown44;                    // +0x044
     int mHeaderUnknown48;                    // +0x048
-    char mHeaderPath[kArkHeaderSize - 0x40]; // +0x04c lowercased in place by the mount
-    void *mTables;                           // +0x10c the one block the three tables live in
-    ArkDirEntry *mDirEntries;                // +0x110 mTables
-    ArkFileEntry *mFileEntries;              // +0x114 mTables plus the file table's offset
-    char *mNames;                            // +0x118 mTables plus the name pool's offset
-    int mDiscLsn;                            // +0x11c the archive's start sector on the disc
-    void *mOptimizedTable;                   // +0x120
-    int mOptimizedCursor;                    // +0x124 slot the next lookup tries first, or -1
-    char mMountPoint[kArkMountPointSize];    // +0x128 the header path after its `run` component
+    char mHeaderPath[kArkHeaderSize - 0x40]; // lowercased in place by the mount
+    void *mTables;                           // the one block the three tables live in
+    ArkFileEntry *mFiles;                    // mTables
+    ArkRelPath *mRelPaths;                   // mTables plus the relative path table's offset
+    char *mStrings;                          // mTables plus the string table's offset
+    int mDiscLsn;                            // the archive's start sector on the disc
+    void *mOptimizedTable;
+    int mOptimizedCursor;                 // slot the next lookup tries first, or -1
+    char mMountPoint[kArkMountPointSize]; // the header path after its `run` component
 };
 
 /**
@@ -178,9 +338,9 @@ int EraseArkStream(int nHandle);
 ArkStream *FindOpenArkStream(int nHandle);
 
 /**
- * Report the directory entry a stream reads.
+ * Report the file entry a stream reads.
  *
- * The entry is what gives a caller the stream's stored and inflated sizes without a directory
+ * The entry is what gives a caller the stream's stored and inflated sizes without a file table
  * search of its own. The search walks the stream vector here rather than through
  * FindOpenArkStream(), and it masks kFileHandleArkStream off the handle in the same way.
  *
@@ -188,7 +348,69 @@ ArkStream *FindOpenArkStream(int nHandle);
  * @return The entry, or null when no record has that handle.
  * @ghidraAddress 0x0055be80
  */
-ArkDirEntry *GetArkStreamDirEntry(int nHandle);
+ArkFileEntry *GetArkStreamFileEntry(int nHandle);
+
+/**
+ * Open a stream on a file inside a mounted archive.
+ *
+ * @param pszPath The path of the file.
+ * @return The stream handle, without kFileHandleArkStream, or -1 when no mounted archive lists the
+ * file.
+ * @ghidraAddress 0x0055bce8
+ */
+int LookupArkStreamForPath(const char *pszPath);
+
+/**
+ * Report the stored length of a file inside a mounted archive.
+ *
+ * The shipped program does not call it.
+ *
+ * @param pszPath The path of the file.
+ * @return The length in bytes, or -1 when no mounted archive lists the file.
+ * @ghidraAddress 0x0055bee0
+ */
+int GetArkFileLengthByPath(const char *pszPath);
+
+/**
+ * Read from an ark stream through the sector cache.
+ *
+ * The request is clamped to the bytes left in the file. Each 64 KiB chunk the read touches is
+ * taken from the cache, and a chunk the cache does not have is read into the least recently used
+ * row first, at the position ArkfileLogicalToPhysicalSector() maps it to. A cached chunk the
+ * current asynchronous operation is still filling waits for that operation through AsyncCheck().
+ *
+ * @param nHandle The stream handle.
+ * @param pBuffer The destination.
+ * @param nBytes The number of bytes requested.
+ * @return The number of bytes read, or -1 when no record has that handle or the stream is at the
+ * end of its file.
+ * @ghidraAddress 0x0055a280
+ */
+int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes);
+
+/**
+ * Forward a control request to sceIoctl().
+ *
+ * The shipped program does not call it.
+ *
+ * @param nFile The file descriptor.
+ * @param nRequest The request.
+ * @param pArg The request argument.
+ * @return The sceIoctl() result.
+ * @ghidraAddress 0x0055c3e0
+ */
+int IoctlFile(int nFile, int nRequest, void *pArg);
+
+/**
+ * Wait until no asynchronous operation is running on a file.
+ *
+ * The routine polls sceIoctl() with kSceFsExecuting and performs no other work between the polls.
+ * A negative descriptor returns at once. The shipped program does not call it.
+ *
+ * @param nFile The file descriptor.
+ * @ghidraAddress 0x0055c458
+ */
+void WaitForFileIdle(int nFile);
 
 /**
  * Report the archive a stream reads from.
@@ -282,3 +504,10 @@ extern std::vector<ArkFile *> g_apMountedArks;
  * @ghidraAddress 0x00725ea0
  */
 extern std::vector<ArkStream> g_aArkStreams;
+
+/**
+ * Handle ArkFile::OpenStream() gives the next stream, incremented after every open.
+ *
+ * @ghidraAddress 0x00725e88
+ */
+extern int g_nNextArkStreamHandle;

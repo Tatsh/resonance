@@ -1,11 +1,13 @@
 #include "os/arkfile.h"
 
 #include <ctype.h>
+#include <iostream>
 #include <string.h>
 #include <vector>
 
 #include "os/async.h"
 #include "os/cdsearch.h"
+#include "os/fileio.h"
 #include "os/hostmode.h"
 #include "os/loadfile.h"
 #include "os/log.h"
@@ -16,6 +18,12 @@ namespace {
 
 // Chunk of the archive the header is read out of.
 constexpr int kArkHeaderSector = 0;
+
+// ArkFile::HashName() shifts each character by one more place than the last, wrapping after 7.
+constexpr int kArkHashShiftMask = 7;
+
+// Line every dump closes with, one literal shared by all four.
+constexpr char kArkDumpRule[] = "===========================================================";
 
 // Set once the sector cache has been brought up, so that only the first mount does it.
 // 0x00725eb0
@@ -50,8 +58,7 @@ const char *FindRunComponent(const char *pszPath) {
 } // namespace
 
 ArkFile::ArkFile()
-    : mPath(nullptr), mTables(nullptr), mDirEntries(nullptr), mFileEntries(nullptr),
-      mNames(nullptr) {
+    : mPath(nullptr), mTables(nullptr), mFiles(nullptr), mRelPaths(nullptr), mStrings(nullptr) {
 }
 
 ArkFile::~ArkFile() {
@@ -63,6 +70,7 @@ ArkFile::~ArkFile() {
     }
 }
 
+// 0x00559858
 int ArkFile::Open(const char *pszPath) {
     HxStr strName(nullptr);
     HxStr strPath(pszPath);
@@ -119,7 +127,7 @@ int ArkFile::Open(const char *pszPath) {
     SectorCacheFind(pArk->mFile, kArkHeaderSector);
     SectorCacheRow *pRow = SectorCacheGetLru(pArk->mFile, kArkHeaderSector);
     ReadStreamChunk(pArk->mFile, kArkHeaderSector, pRow->mBuffer, kSectorCacheRowSize);
-    memcpy(&pArk->mHeaderUnknown0c, pRow->mBuffer, kArkHeaderSize);
+    memcpy(pArk->mSig, pRow->mBuffer, kArkHeaderSize);
 
     if (pArk->mVersion != kArkVersion) {
         LogPrintf("ERROR - ARKFILE VERSION INCORRECT - PLEASE REGENERATE!\n");
@@ -140,23 +148,24 @@ int ArkFile::Open(const char *pszPath) {
         pArk->mOptimizedTable = nullptr;
     }
 
-    unsigned nTables = pArk->mTableEnd - pArk->mTableOffset;
+    unsigned nTables = pArk->mSizeHdrAndDir - pArk->mDirOffset;
     pArk->mTables = MemAllocTagged(nTables, __FILE__, __LINE__);
-    memcpy(pArk->mTables, static_cast<char *>(pRow->mBuffer) + pArk->mTableOffset, nTables);
+    memcpy(pArk->mTables, static_cast<char *>(pRow->mBuffer) + pArk->mDirOffset, nTables);
 
-    // Each table's name offsets arrive relative to the archive and are rebased onto the name pool.
-    pArk->mDirEntries = static_cast<ArkDirEntry *>(pArk->mTables);
-    for (int i = 0; i < pArk->mDirCount; ++i) {
-        pArk->mDirEntries[i].mNameOffset -= pArk->mNameOffset;
+    // Each table's string offsets arrive relative to the archive and are rebased onto the string
+    // table.
+    pArk->mFiles = static_cast<ArkFileEntry *>(pArk->mTables);
+    for (int i = 0; i < pArk->mNumFiles; ++i) {
+        pArk->mFiles[i].mNameOffset -= pArk->mStringTabOffset;
     }
 
-    pArk->mFileEntries = reinterpret_cast<ArkFileEntry *>(
-        static_cast<char *>(pArk->mTables) + pArk->mFileTableOffset - pArk->mTableOffset);
-    for (int i = 0; i < pArk->mFileCount; ++i) {
-        pArk->mFileEntries[i].mNameOffset -= pArk->mNameOffset;
+    pArk->mRelPaths = reinterpret_cast<ArkRelPath *>(static_cast<char *>(pArk->mTables) +
+                                                     pArk->mRelPathOffset - pArk->mDirOffset);
+    for (int i = 0; i < pArk->mNumPaths; ++i) {
+        pArk->mRelPaths[i].mPathOffset -= pArk->mStringTabOffset;
     }
 
-    pArk->mNames = static_cast<char *>(pArk->mTables) + pArk->mNameOffset - pArk->mTableOffset;
+    pArk->mStrings = static_cast<char *>(pArk->mTables) + pArk->mStringTabOffset - pArk->mDirOffset;
 
     for (char *p = pArk->mHeaderPath; *p != '\0'; ++p) {
         *p = tolower(*p);
@@ -173,6 +182,7 @@ int ArkFile::Open(const char *pszPath) {
     return 1;
 }
 
+// 0x00559f70
 int ArkFile::Close(const char *pszPath) {
     unsigned nArk = 0;
     while (nArk < g_apMountedArks.size()) {
@@ -205,6 +215,7 @@ int ArkFile::Close(const char *pszPath) {
     return 1;
 }
 
+// 0x0055a1a0
 int EraseArkStream(int nHandle) {
     for (unsigned i = 0; i < g_aArkStreams.size(); ++i) {
         if (g_aArkStreams[i].mHandle == nHandle) {
@@ -213,6 +224,295 @@ int EraseArkStream(int nHandle) {
         }
     }
     return -1;
+}
+
+// 0x00725e88
+int g_nNextArkStreamHandle = 1;
+
+// 0x0055c340
+short ArkFile::HashName(const char *pszName) {
+    unsigned short nHash = 0;
+    int nShift = 0;
+    for (; *pszName != '\0'; ++pszName) {
+        nHash ^= static_cast<unsigned short>(*pszName) << nShift;
+        nShift = (nShift + 1) & kArkHashShiftMask;
+    }
+    return static_cast<short>(nHash);
+}
+
+// 0x0055c050
+ArkFileEntry *ArkFile::FindFileEntry(short nNameHash,
+                                     short nRelPathHash,
+                                     const char *pszName,
+                                     const char *pszRelPath) const {
+    ArkFileEntry *pEntry = mFiles;
+    for (int i = 0; i < mNumFiles; ++i, ++pEntry) {
+        const ArkRelPath &relPath = mRelPaths[pEntry->mRelPathIndex];
+        if (nNameHash == pEntry->mNameHash && nRelPathHash == relPath.mPathHash &&
+            strcmp(pszName, mStrings + pEntry->mNameOffset) == 0 &&
+            strcmp(pszRelPath, mStrings + relPath.mPathOffset) == 0) {
+            return pEntry;
+        }
+    }
+    return nullptr;
+}
+
+// 0x0055a868
+int ArkFile::MapPathToArkIndex(const char *pszPath, char *pszName, char *pszRelPath) {
+    if (pszPath[0] == '/') {
+        return -1;
+    }
+    if (pszPath[0] == '\\' || pszPath[0] == '.') {
+        Fatal("Arkfile crisis: Unexpected arkfile path: %s\n", pszPath);
+    }
+
+    const char *pszSlash = strrchr(pszPath, '/');
+    if (pszSlash == nullptr) {
+        strcpy(pszName, pszPath);
+        pszRelPath[0] = '\0';
+    } else {
+        const int nDirLength = pszSlash - pszPath;
+        if (nDirLength > 0) {
+            memcpy(pszRelPath, pszPath, nDirLength);
+        }
+        pszRelPath[nDirLength] = '\0';
+        strcpy(pszName, pszSlash + 1);
+    }
+
+    for (int i = g_apMountedArks.size() - 1; i >= 0; --i) {
+        const ArkFile *pArk = g_apMountedArks[i];
+        int nLength = strlen(pArk->mMountPoint);
+        int j = 0;
+        while (j < nLength && tolower(pArk->mMountPoint[j]) == pszRelPath[j]) {
+            ++j;
+        }
+        if (j != nLength) {
+            continue;
+        }
+        if (nLength > 0) {
+            if (pszRelPath[nLength] == '/') {
+                ++nLength;
+            }
+            memmove(pszRelPath, pszRelPath + nLength, strlen(pszRelPath) - nLength + 1);
+        }
+        return i;
+    }
+    return -1;
+}
+
+// 0x0055a6d0
+ArkFileEntry *
+ArkFile::FindFileEntryByPath(const char *pszPath, char *pszName, char *pszRelPath, int *pnArk) {
+    char szPath[kArkPathBufferSize];
+    (void)strlen(pszPath); // Yes, the binary discards this call's result.
+    strcpy(szPath, pszPath);
+    for (char *p = szPath; *p != '\0'; ++p) {
+        if (*p == '\\') {
+            *p = '/';
+        } else if (*p >= 'A' && *p <= 'Z') {
+            *p += 'a' - 'A';
+        }
+    }
+
+    *pnArk = MapPathToArkIndex(szPath, pszName, pszRelPath);
+    if (*pnArk < 0) {
+        return nullptr;
+    }
+    const short nNameHash = HashName(pszName);
+    const short nRelPathHash = HashName(pszRelPath);
+
+    ArkFileEntry *pEntry;
+    if (*pnArk == kArkIndexAny) {
+        // A hit here reports kArkIndexAny as the index rather than the archive it was found in.
+        const int nArks = g_apMountedArks.size();
+        for (int i = 0; i < nArks; ++i) {
+            if ((pEntry = g_apMountedArks[i]->FindFileEntry(
+                     nNameHash, nRelPathHash, pszName, pszRelPath)) != nullptr) {
+                return pEntry;
+            }
+        }
+    } else if ((pEntry = g_apMountedArks[*pnArk]->FindFileEntry(
+                    nNameHash, nRelPathHash, pszName, pszRelPath)) != nullptr) {
+        return pEntry;
+    }
+    *pnArk = -1;
+    return nullptr;
+}
+
+// 0x0055c288
+int ArkFile::OpenStream(ArkFileEntry *pEntry) {
+    ArkStream stream;
+    stream.mArkPosition = pEntry->mSector * mSectorSize + pEntry->mSectorOffset;
+    stream.mPosition = 0;
+    stream.mFile = mFile;
+    stream.mHandle = g_nNextArkStreamHandle++;
+    stream.mEntry = pEntry;
+    g_aArkStreams.push_back(stream);
+    return stream.mHandle;
+}
+
+// 0x0055c1b8
+ArkFile *ArkStream::FindArk() const {
+    const int nArks = g_apMountedArks.size();
+    for (int i = 0; i < nArks; ++i) {
+        if (g_apMountedArks[i]->mFile == mFile) {
+            return g_apMountedArks[i];
+        }
+    }
+    return nullptr;
+}
+
+// 0x0055bce8
+int LookupArkStreamForPath(const char *pszPath) {
+    char szName[kArkNameBufferSize];
+    char szRelPath[kArkRelPathBufferSize];
+    int nArk;
+    ArkFileEntry *pEntry = ArkFile::FindFileEntryByPath(pszPath, szName, szRelPath, &nArk);
+    if (pEntry == nullptr) {
+        return -1;
+    }
+    return g_apMountedArks[nArk]->OpenStream(pEntry);
+}
+
+// 0x0055bee0
+int GetArkFileLengthByPath(const char *pszPath) {
+    char szName[kArkNameBufferSize];
+    char szRelPath[kArkRelPathBufferSize];
+    int nArk;
+    ArkFileEntry *pEntry = ArkFile::FindFileEntryByPath(pszPath, szName, szRelPath, &nArk);
+    if (pEntry == nullptr) {
+        return -1;
+    }
+    return pEntry->mLength;
+}
+
+// 0x0055a280
+int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes) {
+    ArkStream *pStream = FindOpenArkStream(nHandle);
+    if (pStream == nullptr) {
+        return -1;
+    }
+    const int nRemaining = pStream->mEntry->mLength - pStream->mPosition;
+    if (nRemaining <= 0) {
+        return -1;
+    }
+    if (static_cast<unsigned>(nRemaining) < nBytes) {
+        nBytes = nRemaining;
+    }
+
+    char *pDest = static_cast<char *>(pBuffer);
+    int nChunk = pStream->mArkPosition / kSectorCacheRowSize;
+    int nChunkOffset = pStream->mArkPosition & (kSectorCacheRowSize - 1);
+    const int nFile = pStream->mFile;
+    for (int nLeft = nBytes; nLeft > 0;) {
+        SectorCacheRow *pRow = SectorCacheFind(nFile, nChunk);
+        if (pRow == nullptr) {
+            pRow = SectorCacheGetLru(nFile, nChunk);
+            AsyncCheck(1);
+            ReadStreamChunk(nFile,
+                            ArkfileLogicalToPhysicalSector(nFile, nChunk),
+                            pRow->mBuffer,
+                            kSectorCacheRowSize);
+        } else if (MatchesCurrentAsyncOp(nFile, nChunk) != 0) {
+            AsyncCheck(1);
+        }
+
+        int nCopy = kSectorCacheRowSize - nChunkOffset;
+        if (nLeft < nCopy) {
+            nCopy = nLeft;
+        }
+        memcpy(pDest, static_cast<char *>(pRow->mBuffer) + nChunkOffset, nCopy);
+        ++nChunk;
+        nLeft -= nCopy;
+        pDest += nCopy;
+        nChunkOffset = 0;
+    }
+
+    pStream->mArkPosition += nBytes;
+    pStream->mPosition += nBytes;
+    return nBytes;
+}
+
+// 0x0055aa38
+void ArkFile::DumpHeader() const {
+    std::cout << "================== OpenArkObject Header ===================" << std::endl
+              << " sig             " << mSig << std::endl
+              << " version         " << mVersion << std::endl
+              << " dirOffset       " << mDirOffset << std::endl
+              << " numFiles        " << mNumFiles << std::endl
+              << " relPathOffset   " << mRelPathOffset << std::endl
+              << " numPaths        " << mNumPaths << std::endl
+              << " stringTabOffset " << mStringTabOffset << std::endl
+              << " numStrings      " << mNumStrings << std::endl
+              << " sizeHdrAndDir   " << mSizeHdrAndDir << std::endl
+              << " sectorSize      " << mSectorSize << std::endl
+              << " path            " << mHeaderPath << std::endl
+              << kArkDumpRule << std::endl
+              << std::endl;
+}
+
+// 0x0055ac30
+void ArkFile::DumpRelativePaths() const {
+    std::cout << "============== OpenArkObject Relative Paths ===============" << std::endl;
+    for (int i = 0; i < mNumPaths; ++i) {
+        std::cout << "{ pathHash       " << mRelPaths[i].mPathHash << std::endl
+                  << "  flags          " << mRelPaths[i].mFlags << std::endl
+                  << "  pathOffset     " << mRelPaths[i].mPathOffset << " }" << std::endl;
+    }
+    std::cout << kArkDumpRule << std::endl << std::endl;
+}
+
+// 0x0055ada0
+void ArkFile::DumpFiles() const {
+    std::cout << "================== OpenArkObject Files ====================" << std::endl;
+    for (int i = 0; i < mNumFiles; ++i) {
+        std::cout << "{ nameHash        " << mFiles[i].mNameHash << std::endl
+                  << "  flags           " << mFiles[i].mFlags << std::endl
+                  << "  nameOffset      " << mFiles[i].mNameOffset << std::endl
+                  << "  relPathIndex    " << mFiles[i].mRelPathIndex << std::endl
+                  << "  sectorOffset    " << mFiles[i].mSectorOffset << std::endl
+                  << "  sector          " << mFiles[i].mSector << std::endl
+                  << "  length          " << mFiles[i].mLength << " }" << std::endl;
+    }
+    std::cout << kArkDumpRule << std::endl << std::endl;
+}
+
+// 0x0055afc8
+void ArkFile::DumpStrings() const {
+    std::cout << "================= OpenArkObject Strings ===================" << std::endl
+              << " Files: " << std::endl;
+    for (int i = 0; i < mNumFiles; ++i) {
+        std::cout << "   " << mStrings + mFiles[i].mNameOffset << std::endl;
+    }
+    std::cout << " Paths: " << std::endl;
+    for (int i = 0; i < mNumPaths; ++i) {
+        std::cout << "   " << mStrings + mRelPaths[i].mPathOffset << std::endl;
+    }
+    std::cout << kArkDumpRule << std::endl << std::endl;
+}
+
+// 0x0055c3a0
+void ArkFile::Dump() const {
+    DumpHeader();
+    DumpFiles();
+    DumpRelativePaths();
+    DumpStrings();
+}
+
+// 0x0055c3e0
+int IoctlFile(int nFile, int nRequest, void *pArg) {
+    return sceIoctl(nFile, nRequest, pArg);
+}
+
+// 0x0055c458
+void WaitForFileIdle(int nFile) {
+    if (nFile < 0) {
+        return;
+    }
+    int nExecuting;
+    do {
+        sceIoctl(nFile, kSceFsExecuting, &nExecuting);
+    } while (nExecuting != 0);
 }
 
 // 0x00702650

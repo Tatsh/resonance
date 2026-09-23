@@ -780,8 +780,8 @@ int AsyncLoadFileByPath(const char *pszPath,
     int nStoredLength;
     int nInflatedLength;
     if (bArkStream != 0) {
-        const ArkDirEntry *pEntry = GetArkStreamDirEntry(nFile & ~kFileHandleArkStream);
-        nStoredLength = pEntry->mStoredSize;
+        const ArkFileEntry *pEntry = GetArkStreamFileEntry(nFile & ~kFileHandleArkStream);
+        nStoredLength = pEntry->mLength;
         nInflatedLength = pEntry->mSize;
     } else {
         nStoredLength = FileSeek(nFile, 0, kFileSeekEnd);
