@@ -3,15 +3,28 @@
 #include <algorithm>
 #include <iostream>
 
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/jampowerbarmgr.h"
+#include "game/multipowerbarmgr.h"
 #include "game/nullplayer.h"
 #include "game/phrase.h"
 #include "game/phrasedatabase.h"
 #include "game/phraseplayer.h"
 #include "game/playmap.h"
+#include "game/solopowerbarmgr.h"
+#include "game/trackdata.h"
 #include "sch/command.h"
 #include "sch/tickclock.h"
+#include "script/configquery.h"
 
 namespace {
+
+// The handle value of a command the clock has not queued yet.
+constexpr int kUnallocatedCommand = -2;
+
+// A display-mode configuration flag. When it is set, every track gets a JamPowerbarMgr.
+constexpr int kDisplayModeQuery = 0x3a1;
 
 // The clamp the inline Mid::MBT arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
@@ -98,6 +111,46 @@ int ExportCmd::sCmdID;
 
 } // namespace
 
+// 0x001ba0d0
+PhraseMgr::PhraseMgr(
+    Sch::TickClock *pClock, int nBarTicks, PlayMap *pMap, int nConfig, const TrackData *pTrackData)
+    : mPhrasePlayer(nullptr), mUnknown1c(0), mTrackData(pTrackData), mMap(pMap),
+      mPowerbarMgr(nullptr), mUnknown30(pTrackData->mUnknown04), mBarTicks(nBarTicks),
+      mConfig(nConfig), mWindowStart(0), mWindowEnd(0), mRefreshing(0), mExportLead(0),
+      mClock(pClock), mTrackKind(pTrackData->mKind) {
+    mExportCommand.mValue = kUnallocatedCommand;
+    mCommand.mValue = kUnallocatedCommand;
+    mPlayMode = Application::shared()->GetPlayMode();
+    mDatabase = new PhraseDatabase(pMap);
+    CreatePowerbarMgr();
+}
+
+// 0x001ba2b8
+PhraseMgr::~PhraseMgr() {
+    WithdrawCommands();
+    delete mDatabase;
+    delete mPowerbarMgr;
+}
+
+// 0x001ba3d8
+void PhraseMgr::CreatePowerbarMgr() {
+    delete mPowerbarMgr;
+    mPowerbarMgr = nullptr;
+
+    const int nGameMode = Application::shared()->GetGameMode();
+    if (mPlayMode == kPlayModeGame &&
+        (mTrackKind == kTrackModeCatch || mTrackKind == kTrackModeRiff) &&
+        !QueryConfigFlag(kDisplayModeQuery)) {
+        if (nGameMode == kGameModeSolo) {
+            mPowerbarMgr = new SoloPowerbarMgr(mMap, mDatabase, mTrackData, mUnknown30);
+        } else {
+            mPowerbarMgr = new MultiPowerbarMgr(mMap, mDatabase, mTrackData, mUnknown30);
+        }
+        return;
+    }
+    mPowerbarMgr = new JamPowerbarMgr;
+}
+
 // 0x001bb6b8
 void PhraseMgr::OnCommand(int nBar) {
     mPhrasePlayer->PlayBar(nBar);
@@ -144,6 +197,11 @@ int PhraseMgr::BarToTick(int nBar) {
 // 0x001c01c8
 Phrase *PhraseMgr::GetPhraseAt(int nTick) {
     return mDatabase->GetPhraseAt(nTick);
+}
+
+// 0x001c01e8
+int PhraseMgr::GetPowerbar(int nBar) {
+    return mPowerbarMgr->GetPowerbar(mMap->Slot5(nBar));
 }
 
 // 0x001c0248

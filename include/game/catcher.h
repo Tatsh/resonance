@@ -96,7 +96,7 @@ public:
     /**
      * Schedule the catcher's two commands on the clock.
      *
-     * Slot 4. The post-gem command is always scheduled and the gem command only in game mode 3.
+     * Slot 4. The post-gem command is always scheduled and the gem command only in kGameModeNet.
      *
      * @ghidraAddress 0x001b15a8
      */
@@ -105,7 +105,7 @@ public:
     /**
      * Withdraw the catcher's two commands from the clock.
      *
-     * Slot 5. The two withdrawals mirror slot 4, the second being conditional on game mode 3 in
+     * Slot 5. The two withdrawals mirror slot 4, the second being conditional on kGameModeNet in
      * the same way.
      *
      * @ghidraAddress 0x001b1610

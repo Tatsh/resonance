@@ -12,6 +12,7 @@ class Phrase;
 class PhraseDatabase;
 class PhrasePlayer;
 class Player;
+class PowerbarMgr;
 class PlayMap;
 class TrackData;
 
@@ -45,7 +46,7 @@ class TickClock;
  *
  * The constructor fixes the member map from `+0x18` to the end. The MsgSource subobject occupies
  * `+0x04` through `+0x17`, so the region at `+0x10` the destructor tears down is that subobject's
- * vector rather than a member of this class. The destructor deletes mDatabase and mUnknown2c
+ * vector rather than a member of this class. The destructor deletes mDatabase and mPowerbarMgr
  * through slot 1 of each table, which is the destructor slot.
  */
 class PhraseMgr : public MsgSink, public MsgSource {
@@ -59,8 +60,8 @@ public:
      * Construct the manager of one track and its phrase database.
      *
      * The fifth argument arrives in `t1`. ScoreTrackGraph passes the song clock, 1920, the play
-     * map Globals reports, a configuration value, and its track description. The body is not
-     * written, because it ends in the routine at `0x001ba3d8`, which is not recovered.
+     * map Globals reports, a configuration value, and its track description. The constructor ends
+     * by creating the powerbar source through CreatePowerbarMgr().
      *
      * @param pClock The song clock.
      * @param nBarTicks The length of one bar in MIDI ticks.
@@ -77,13 +78,29 @@ public:
               const TrackData *pTrackData);
 
     /**
-     * Delete both owned objects.
-     *
-     * The body is not written. It runs the routine at `0x001c0450` first.
+     * Withdraw both commands through WithdrawCommands(), then delete both owned objects.
      *
      * @ghidraAddress 0x001ba2b8
      */
     virtual ~PhraseMgr();
+
+    /**
+     * Replace the powerbar source with the one the play mode and the track kind call for.
+     *
+     * kPlayModeGame on a riff or catch track, with configuration flag 0x3a1 clear, gets a
+     * SoloPowerbarMgr in kGameModeSolo and a MultiPowerbarMgr in any other game mode. Every other
+     * combination gets a JamPowerbarMgr. The constructor and CatchingSTG's slot 12 call it.
+     *
+     * @ghidraAddress 0x001ba3d8
+     */
+    void CreatePowerbarMgr();
+
+    /**
+     * @param nBar The bar, mapped through slot 5 of mMap.
+     * @return PowerbarMgr::GetPowerbar() on mPowerbarMgr for the mapped bar.
+     * @ghidraAddress 0x001c01e8
+     */
+    int GetPowerbar(int nBar);
 
     /**
      * Post a PhraseMsg for one phrase.
@@ -141,7 +158,7 @@ public:
      *
      * The body is not written, because it sends a ClearGemsMsg built on the stack when bClear is
      * non-zero. It then posts the bar's status through PostBarStatusMsg() and the bar's gems
-     * through the routine the track mode (mUnknown58) selects from the jump table at `0x007e2670`.
+     * through the routine mTrackKind selects from the jump table at `0x007e2670`.
      *
      * @param nBar The bar.
      * @param bClear Non-zero to clear the bar's gems first.
@@ -347,9 +364,8 @@ private:
     // PostPhraseMsg() and three HandleMessage() paths look a phrase up in.
     PhraseDatabase *mDatabase; // +0x24
     PlayMap *mMap;             // +0x28
-    // Cleared on construction and deleted by the destructor through slot 1 of the table at its
-    // `+0x10`, which is the MsgSource position. Its class is unrecovered.
-    MsgSource *mUnknown2c; // +0x2c
+    // Created by CreatePowerbarMgr() and deleted by the destructor.
+    PowerbarMgr *mPowerbarMgr; // +0x2c
     // Copied from the track description's `+0x04`. The track this manager serves. A PhrasePacket's
     // `+0x14` is matched against it, and PostPhraseMsg() copies it into the message's `+0x08`.
     int mUnknown30;         // +0x30
@@ -362,6 +378,6 @@ private:
     Sch::TickClock *mClock; // +0x4c
     CmdID mCommand;         // +0x50, the handle of the file-local Cmd
     CmdID mExportCommand;   // +0x54, the handle of the file-local ExportCmd
-    int mUnknown58;         // +0x58, copied from the track description's `+0x0c`
+    int mTrackKind;         // +0x58, a TrackMode copied from TrackData::mKind
     int mPlayMode;          // +0x5c, the play mode Globals reported at construction
 };

@@ -60,6 +60,7 @@ void LocalPlayer::Slot22(int value) {
     mUnknown64 = value;
 
     ToggleGhostMsg message;
+    message.mOn = value;
     message.mUnknown04 = this;
     Send(&message);
 }

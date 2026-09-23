@@ -4,14 +4,12 @@
 #include <iostream>
 
 #include "app/application.h"
+#include "game/gamemanagerimpl.h"
 #include "game/nullplayer.h"
 #include "mid/mbt.h"
 #include "sch/command.h"
 
 namespace {
-
-// The game mode that adds the second scheduled command.
-constexpr int kGameModeWithGemCommand = 3;
 
 // Slot 4 searches for the first gem from the position before the song starts.
 constexpr int kBeforeSongStart = -1;
@@ -298,7 +296,7 @@ void Catcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
 // 0x001b15a8
 void Catcher::Slot4() {
     SchedulePostGemCommand(Mid::MBT(kBeforeSongStart).mTick);
-    if (Application::shared()->GetGameMode() == kGameModeWithGemCommand) {
+    if (Application::shared()->GetGameMode() == kGameModeNet) {
         ScheduleGemCommand(Mid::MBT(kBeforeSongStart).mTick);
     }
 }
@@ -306,7 +304,7 @@ void Catcher::Slot4() {
 // 0x001b1610
 void Catcher::Slot5() {
     mClock->Withdraw(mPostGemCommand);
-    if (Application::shared()->GetGameMode() == kGameModeWithGemCommand) {
+    if (Application::shared()->GetGameMode() == kGameModeNet) {
         mClock->Withdraw(mGemCommand);
     }
 }

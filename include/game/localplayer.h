@@ -125,7 +125,7 @@ public:
      * Slot 22. Declared by this class rather than inherited.
      *
      * Returns at once unless mMode68 is 2. Otherwise it stores its argument in mUnknown64 and
-     * sends a `ToggleGhostMsg` naming this player.
+     * sends a `ToggleGhostMsg` naming this player with its argument as ToggleGhostMsg::mOn.
      *
      * @ghidraAddress 0x0011e908
      */

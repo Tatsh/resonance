@@ -9,6 +9,7 @@ set(RESONANCE_GAME_SRCS
     freqappearance.cpp
     gamemanagerimpl.cpp
     gameparams.cpp
+    gamepowerbarmgr.cpp
     gamepowerupplacer.cpp
     gamerconstructcmd.cpp
     gamestats.cpp
@@ -24,6 +25,7 @@ set(RESONANCE_GAME_SRCS
     localplayer.cpp
     msgjoiner.cpp
     multicatcher.cpp
+    multipowerbarmgr.cpp
     multiscreenanim.cpp
     netplayer.cpp
     nullplayer.cpp
@@ -47,6 +49,7 @@ set(RESONANCE_GAME_SRCS
     screenanim.cpp
     singlepowerupcollection.cpp
     skillstats.cpp
+    solopowerbarmgr.cpp
     soloscreenanim.cpp
     tnlarena.cpp
     trackdata.cpp
