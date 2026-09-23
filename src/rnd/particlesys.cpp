@@ -54,7 +54,7 @@ inline float RandomInRange(float flLow, float flHigh) {
 }
 
 // A full turn in radians, the float whose bit pattern is 0x40c90fda.
-constexpr float kTwoPi = 6.2831855f;
+constexpr float kTwoPi = 6.28318501f; // 0x40c90fda, one unit in the last place below 2 pi.
 
 // Move a point from local into world space. The binary open-codes this on VU0, accumulating the
 // three basis rows scaled by the components and then the translation row.

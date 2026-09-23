@@ -188,24 +188,24 @@ public:
  *
  * Rnd::Movie's chunk handler compares against the three video codes as well.
  *
- * @ghidraAddress 0x007578f0
+ * @ghidraAddress 0x007678f0
  */
 extern const unsigned int g_nMovsTag;
-/** @ghidraAddress 0x007578f8 */
+/** @ghidraAddress 0x007678f8 */
 extern const unsigned int g_nMovtTag;
-/** @ghidraAddress 0x00757900 */
+/** @ghidraAddress 0x00767900 */
 extern const unsigned int g_nPallTag;
-/** @ghidraAddress 0x00757908 */
+/** @ghidraAddress 0x00767908 */
 extern const unsigned int g_nFramTag;
-/** @ghidraAddress 0x00757910 */
+/** @ghidraAddress 0x00767910 */
 extern const unsigned int g_nBlakTag;
-/** @ghidraAddress 0x00757918 */
+/** @ghidraAddress 0x00767918 */
 extern const unsigned int g_nLoopTag;
-/** @ghidraAddress 0x00757920 */
+/** @ghidraAddress 0x00767920 */
 extern const unsigned int g_nSndhTag;
-/** @ghidraAddress 0x00757928 */
+/** @ghidraAddress 0x00767928 */
 extern const unsigned int g_nSndbTag;
-/** @ghidraAddress 0x00757930 */
+/** @ghidraAddress 0x00767930 */
 extern const unsigned int g_nSndpTag;
 
 /**

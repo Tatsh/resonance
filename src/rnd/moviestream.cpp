@@ -23,17 +23,22 @@ inline unsigned int FourCc(const char *pszCode) {
     return nCode;
 }
 
-// 0x00757938. Streams whose first read has not yet completed.
+// Streams whose first read has not yet completed.
+// 0x00767938
 std::list<Rnd::MovieStream *> g_pendingStreams;
 
-// 0x00757940 and 0x00757948.
+// 0x00767940
 MovieAsyncCallback g_movieAsyncCallback;
+
+// 0x00767948
 MovieStreamingAsyncCallback g_movieStreamingAsyncCallback;
 
-// 0x0075794c. Non-zero while a streaming read is outstanding; only one may be.
+// Non-zero while a streaming read is outstanding; only one may be.
+// 0x0076794c
 int g_nStreamingReadPending;
 
-// 0x007579a4. The stream the streaming callback commits to.
+// The stream the streaming callback commits to.
+// 0x007679a4
 Rnd::MovieStream *g_pStreamingMovie;
 
 // Sizes the stream reads with. A streaming file's first read and a rewind read 0x8000 bytes, a
@@ -64,7 +69,7 @@ constexpr int kAlphaShift = 24;
 namespace Rnd {
 
 // The chunk types, built by the unit's static initialiser from the literals at 0x0082eb90.
-// 0x007578f0 through 0x00757930.
+// 0x007678f0 through 0x00767930.
 const unsigned int g_nMovsTag = FourCc("MOVS");
 const unsigned int g_nMovtTag = FourCc("MOVT");
 const unsigned int g_nPallTag = FourCc("PALL");

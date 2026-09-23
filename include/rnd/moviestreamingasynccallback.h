@@ -6,7 +6,7 @@
  * Receiver of the reads that keep a streaming movie's ring buffer full.
  *
  * `27MovieStreamingAsyncCallback` in the RTTI, deriving publicly from AsyncCallback at offset 0.
- * One instance at `0x00757948` serves the one streaming Rnd::MovieStream the unit tracks. Its
+ * One instance at `0x00767948` serves the one streaming Rnd::MovieStream the unit tracks. Its
  * destructor at `0x005807b0` and its type accessor at `0x005807e0` are compiler-generated.
  */
 class MovieStreamingAsyncCallback : public AsyncCallback {
