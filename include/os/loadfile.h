@@ -44,8 +44,7 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
 /**
  * Open a file, whether it resolves to an ark stream or a loose file.
  *
- * The routine belongs to another agent's subsystem and is declared here so ArkFile::Open() can
- * call it.
+ * The CD drive is synchronised first, and the path is opened read-only through sceOpen().
  *
  * @param pszPath The path to open, device prefix included.
  * @return The handle, or a negative value on failure.
@@ -55,6 +54,10 @@ int OpenStreamByPath(const char *pszPath);
 
 /**
  * Read one chunk of a file into a buffer.
+ *
+ * The chunk index is mapped through ArkfileLogicalToPhysicalSector() before the seek, even though
+ * ReadArkStreamThroughCache(), the one caller, has already mapped it. An optimized archive is
+ * therefore read at a doubly mapped position.
  *
  * @param nFile The file to read.
  * @param nSector The chunk index.
@@ -80,11 +83,9 @@ void AppendPathComponent(const char *pszComponent, char *pszPath);
 /**
  * Close an open file, whether it is an ark stream or a loose file.
  *
- * The routine belongs to another agent's subsystem and is declared here so ArkFile::Close() can
- * call it. The whole body forwards to the SDK primitive at 0x0056af88 with the argument passed
- * through. The Ghidra program titles it ReleaseLoadFileHandle rather than this name, because the
- * bridge's naming policy rejects a title sharing every token of FileClose(). Its plate comment
- * records the pairing.
+ * The whole body forwards to the SDK primitive at 0x0056af88 with the argument passed through. The
+ * Ghidra program titles it ReleaseLoadFileHandle rather than this name, because the bridge's naming
+ * policy rejects a title sharing every token of FileClose(). Its plate comment records the pairing.
  *
  * @param nFile The file to close.
  * @ghidraAddress 0x0055c438

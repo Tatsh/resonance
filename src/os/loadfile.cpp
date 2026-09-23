@@ -1,25 +1,22 @@
 #include "os/loadfile.h"
 
-#include <fcntl.h>
 #include <string.h>
 #include <strings.h>
-#include <unistd.h>
 
+#include "os/arkfile.h"
 #include "os/async.h"
 #include "os/hostmode.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "os/zone.h"
 
-// The file primitives below are the PlayStation 2 file layer, which this tree does not
-// reconstruct. Their addresses are open at 0x0047c9c0, lseek at 0x0047e1c8, read at 0x0047e060,
-// close at 0x0047dfb0, and strcasecmp at 0x006004d8.
-
 namespace {
 
-// A handle with this bit set identifies a stream inside an ark archive. The size query for such a
-// stream receives the handle with the bit cleared.
-constexpr int kArkStreamHandleBit = 0x4000;
+// The mode every open in this file passes to FileOpen().
+constexpr int kFileOpenRead = 0;
+
+// The gzip trailer ends with the inflated size, one little-endian word.
+constexpr int kGzTrailerSizeOffset = -4;
 
 // Allocates a destination the way both loaders do, from the selected zone when there is one.
 void *AllocateLoadBuffer(unsigned nSize, const char *pszFile, int nLine) {
@@ -31,45 +28,47 @@ void *AllocateLoadBuffer(unsigned nSize, const char *pszFile, int nLine) {
 
 } // namespace
 
+// 0x00555538
 void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsigned *pnSize) {
     const char *pszExtension = pszPath + strlen(pszPath) - (sizeof(kGzExtension) - 1);
     if (strcasecmp(pszExtension, kGzExtension) == 0) {
         return LoadGzFile(pszPath, pBuffer, nBufferSize, pnSize);
     }
 
-    int nFile = open(pszPath, 0);
+    int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
         return nullptr;
     }
 
-    unsigned nSize = lseek(nFile, 0, SEEK_END);
-    lseek(nFile, 0, SEEK_SET);
+    unsigned nSize = FileSeek(nFile, 0, kFileSeekEnd);
+    FileSeek(nFile, 0, kFileSeekSet);
 
     if (pBuffer == nullptr) {
         pBuffer = AllocateLoadBuffer(nSize, __FILE__, __LINE__);
     } else if (nBufferSize < nSize) {
-        close(nFile);
+        FileClose(nFile);
         return nullptr;
     }
 
     if (pBuffer != nullptr) {
-        read(nFile, pBuffer, nSize);
+        FileRead(nFile, pBuffer, nSize);
     }
-    close(nFile);
+    FileClose(nFile);
     // The size is reported even when the allocation failed and nothing was read.
     *pnSize = nSize;
     return pBuffer;
 }
 
+// 0x00555678
 void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsigned *pnSize) {
-    int nFile = open(pszPath, 0);
+    int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
         return nullptr;
     }
 
     unsigned nSize;
     if (UsingArkFiles() != 0) {
-        nSize = GetArkStreamInflatedSize(nFile & ~kArkStreamHandleBit);
+        nSize = GetArkStreamInflatedSize(nFile & ~kFileHandleArkStream);
     } else {
         nSize = GetGzFileSize(nFile);
     }
@@ -77,7 +76,7 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
     if (pBuffer == nullptr) {
         pBuffer = AllocateLoadBuffer(nSize, __FILE__, __LINE__);
     } else if (nBufferSize < nSize) {
-        close(nFile);
+        FileClose(nFile);
         Fatal("  Not enough room to load: %s!\n", pszPath);
         return nullptr;
     }
@@ -92,7 +91,7 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
 
 // 0x00555790
 int GetStoredFileLength(const char *pszPath) {
-    const int nFile = FileOpen(pszPath, 0);
+    const int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
         return 0;
     }
@@ -100,4 +99,34 @@ int GetStoredFileLength(const char *pszPath) {
     FileSeek(nFile, 0, kFileSeekSet);
     FileClose(nFile);
     return nLength;
+}
+
+// 0x00555800
+int GetUncompressedFileLength(const char *pszPath) {
+    const int nFile = FileOpen(pszPath, kFileOpenRead);
+    if (nFile < 0) {
+        return 0;
+    }
+
+    int nStored;
+    int nSize;
+    if ((nFile & kFileHandleArkStream) != 0) {
+        const ArkFileEntry *pEntry = GetArkStreamFileEntry(nFile & ~kFileHandleArkStream);
+        nSize = pEntry->mSize;
+        nStored = pEntry->mLength;
+    } else {
+        nStored = FileSeek(nFile, 0, kFileSeekEnd);
+        // Unlike LoadWholeFile(), the extension test here is case-sensitive.
+        if (strcmp(pszPath + strlen(pszPath) - (sizeof(kGzExtension) - 1), kGzExtension) == 0) {
+            FileSeek(nFile, kGzTrailerSizeOffset, kFileSeekEnd);
+            FileRead(nFile, &nSize, sizeof(nSize));
+        } else {
+            nSize = nStored;
+        }
+        FileSeek(nFile, 0, kFileSeekSet);
+    }
+    FileClose(nFile);
+
+    // The larger of the two is reported, so a file that compressed badly reports its stored size.
+    return (nSize < nStored) ? nStored : nSize;
 }

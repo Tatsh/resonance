@@ -114,8 +114,9 @@ struct ArkStream {
  * component, which is what fixes the archive's mount point.
  *
  * The header member titles come from the labels DumpHeader() writes, and the debug strings of the
- * dump routines call the record `OpenArkObject`. Every data member is private, and ArkStream is a
- * friend for the one routine that matches a stream to its archive.
+ * dump routines call the record `OpenArkObject`. The data members are public because the stream
+ * and sector routines of this unit (ArkStream::FindArk(), SeekArkStream(), ArkfileGetBaseSector(),
+ * and ArkfileLogicalToPhysicalSector()) read them directly as free functions.
  */
 class ArkFile {
 public:
@@ -235,8 +236,6 @@ public:
     void Dump() const;
 
 private:
-    friend struct ArkStream;
-
     /**
      * Hash a file name or a relative path for the table searches.
      *
@@ -287,33 +286,34 @@ private:
                                 const char *pszName,
                                 const char *pszRelPath) const;
 
-    HxStr mPath;
-    int mFile; // negative when the open failed
-    char mSig[4];
-    int mVersion;
-    int mDirOffset; // archive offset of the file table
-    int mNumFiles;
-    int mRelPathOffset; // archive offset of the relative path table
-    int mNumPaths;
-    int mStringTabOffset; // archive offset of the string table
-    int mNumStrings;
-    int mSizeHdrAndDir; // archive offset one past the string table
-    int mSectorSize;
-    int mOptimized; // set when the optimized block is present
-    int mOptimizedOffset;
-    int mOptimizedCount;                     // entries, each two bytes
-    int mHeaderUnknown40;                    // +0x040
-    int mHeaderUnknown44;                    // +0x044
-    int mHeaderUnknown48;                    // +0x048
-    char mHeaderPath[kArkHeaderSize - 0x40]; // lowercased in place by the mount
-    void *mTables;                           // the one block the three tables live in
-    ArkFileEntry *mFiles;                    // mTables
-    ArkRelPath *mRelPaths;                   // mTables plus the relative path table's offset
-    char *mStrings;                          // mTables plus the string table's offset
-    int mDiscLsn;                            // the archive's start sector on the disc
-    void *mOptimizedTable;
-    int mOptimizedCursor;                 // slot the next lookup tries first, or -1
-    char mMountPoint[kArkMountPointSize]; // the header path after its `run` component
+public:
+    HxStr mPath;          /*!< The path the archive was mounted by. */
+    int mFile;            /*!< The archive's file, negative when the open failed. */
+    char mSig[4];         /*!< The header signature. */
+    int mVersion;         /*!< The header version, kArkVersion when accepted. */
+    int mDirOffset;       /*!< Archive offset of the file table. */
+    int mNumFiles;        /*!< Entries in the file table. */
+    int mRelPathOffset;   /*!< Archive offset of the relative path table. */
+    int mNumPaths;        /*!< Entries in the relative path table. */
+    int mStringTabOffset; /*!< Archive offset of the string table. */
+    int mNumStrings;      /*!< Entries in the string table. */
+    int mSizeHdrAndDir;   /*!< Archive offset one past the string table. */
+    int mSectorSize;      /*!< Bytes in one archive chunk. */
+    int mOptimized;       /*!< Set when the optimized block is present. */
+    int mOptimizedOffset; /*!< Archive offset of the optimized block. */
+    int mOptimizedCount;  /*!< Two-byte entries in the optimized block. */
+    int mHeaderUnknown40; // +0x040
+    int mHeaderUnknown44; // +0x044
+    int mHeaderUnknown48; // +0x048
+    char mHeaderPath[kArkHeaderSize - 0x40]; /*!< The header path, lowercased by the mount. */
+    void *mTables;                           /*!< The one block the three tables live in. */
+    ArkFileEntry *mFiles;                    /*!< The file table, at the start of mTables. */
+    ArkRelPath *mRelPaths;                   /*!< The relative path table inside mTables. */
+    char *mStrings;                          /*!< The string table inside mTables. */
+    int mDiscLsn;                            /*!< The archive's start sector on the disc. */
+    void *mOptimizedTable; /*!< The optimized block's logical chunk indices, or null. */
+    int mOptimizedCursor;  /*!< The slot the next lookup tries first, or -1. */
+    char mMountPoint[kArkMountPointSize]; /*!< The header path after its `run` component. */
 };
 
 /**
@@ -460,8 +460,8 @@ int ArkfileLogicalToPhysicalSector(int nFile, int nSector);
 /**
  * Mount the archives the game needs for the whole session.
  *
- * Performs no work when ark archives are not in use. On failure the offending path is reported
- * through the failure sink.
+ * Performs no work when ark archives are not in use. The first archive that fails to mount is
+ * reported on `cout`, and the archives after it are not tried.
  *
  * @return Non-zero when every archive was mounted.
  * @ghidraAddress 0x004dfb20

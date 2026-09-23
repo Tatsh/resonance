@@ -2,6 +2,8 @@
 
 #include <ctype.h>
 #include <iostream>
+#include <libcdvd.h>
+#include <sifdev.h>
 #include <string.h>
 #include <vector>
 
@@ -24,6 +26,26 @@ constexpr int kArkHashShiftMask = 7;
 
 // Line every dump closes with, one literal shared by all four.
 constexpr char kArkDumpRule[] = "===========================================================";
+
+// The report ArkfileGetBaseSector() writes to the log and then passes to Fatal().
+constexpr char kBaseSectorMissingFormat[] =
+    "ArkfileGetBaseSector: can't find arkfile with id: %d\n";
+
+// The sceOpen() mode OpenStreamByPath() passes, which opens for reading only.
+constexpr int kOpenReadOnly = 1;
+
+// The stream table search that FindOpenArkStream() is, and that the two entry accessors expand in
+// place.
+inline ArkStream *FindStreamRecord(int nHandle) {
+    nHandle &= ~kFileHandleArkStream;
+    const int nStreams = g_aArkStreams.size();
+    for (int i = 0; i < nStreams; ++i) {
+        if (g_aArkStreams[i].mHandle == nHandle) {
+            return &g_aArkStreams[i];
+        }
+    }
+    return nullptr;
+}
 
 // Set once the sector cache has been brought up, so that only the first mount does it.
 // 0x00725eb0
@@ -228,6 +250,156 @@ int EraseArkStream(int nHandle) {
 
 // 0x00725e88
 int g_nNextArkStreamHandle = 1;
+
+// 0x0055c158
+ArkStream *FindOpenArkStream(int nHandle) {
+    return FindStreamRecord(nHandle);
+}
+
+// 0x0055be80
+ArkFileEntry *GetArkStreamFileEntry(int nHandle) {
+    const ArkStream *pStream = FindStreamRecord(nHandle);
+    return (pStream != nullptr) ? pStream->mEntry : nullptr;
+}
+
+// 0x0055bf88
+int GetArkStreamInflatedSize(int nStream) {
+    const ArkStream *pStream = FindStreamRecord(nStream);
+    const ArkFileEntry *pEntry = (pStream != nullptr) ? pStream->mEntry : nullptr;
+    if (pEntry == nullptr) {
+        return -1;
+    }
+    return pEntry->mSize;
+}
+
+// 0x0055c000
+int GetArkStreamArkId(int nHandle) {
+    const ArkStream *pStream = FindOpenArkStream(nHandle);
+    if (pStream == nullptr) {
+        return -1;
+    }
+    return pStream->mFile;
+}
+
+// 0x0055c028
+int GetArkStreamPosition(int nStream) {
+    const ArkStream *pStream = FindOpenArkStream(nStream);
+    if (pStream == nullptr) {
+        return -1;
+    }
+    return pStream->mArkPosition;
+}
+
+// 0x0055bd38
+int SeekArkStream(int nStream, int nOffset, int nOrigin) {
+    ArkStream *pStream = FindOpenArkStream(nStream);
+    if (pStream == nullptr) {
+        return -1;
+    }
+    const ArkFile *pArk = pStream->FindArk();
+    if (pArk == nullptr) {
+        return -1;
+    }
+
+    const ArkFileEntry *pEntry = pStream->mEntry;
+    const int nStart = pEntry->mSector * pArk->mSectorSize + pEntry->mSectorOffset;
+    switch (nOrigin) {
+    case kFileSeekSet:
+        pStream->mPosition = nOffset;
+        pStream->mArkPosition = nStart + nOffset;
+        break;
+    case kFileSeekCur:
+        pStream->mArkPosition += nOffset;
+        pStream->mPosition += nOffset;
+        break;
+    case kFileSeekEnd:
+        pStream->mArkPosition = nStart + pEntry->mLength + nOffset;
+        pStream->mPosition = pEntry->mLength + nOffset;
+        break;
+    default:
+        return -1;
+    }
+
+    if (pStream->mPosition < 0) {
+        pStream->mArkPosition -= pStream->mPosition;
+        pStream->mPosition = 0;
+    }
+    return pStream->mPosition;
+}
+
+// 0x0055a590
+int ArkfileGetBaseSector(int nFile) {
+    const unsigned nArks = g_apMountedArks.size();
+    for (unsigned i = 0; i < nArks; ++i) {
+        if (g_apMountedArks[i]->mFile == nFile) {
+            return g_apMountedArks[i]->mDiscLsn;
+        }
+    }
+
+    LogPrintf(kBaseSectorMissingFormat, nFile);
+    LogPrintf("   (ark file table size: %d\n", g_apMountedArks.size());
+    for (unsigned i = 0; i < g_apMountedArks.size(); ++i) {
+        LogPrintf("   (ark id at index %d: %d\n", i, g_apMountedArks[i]->mFile);
+    }
+    Fatal(kBaseSectorMissingFormat, nFile);
+    return 0;
+}
+
+// 0x0055a410
+int ArkfileLogicalToPhysicalSector(int nFile, int nSector) {
+    for (unsigned i = 0; i < g_apMountedArks.size(); ++i) {
+        ArkFile *pArk = g_apMountedArks[i];
+        if (pArk->mFile != nFile) {
+            continue;
+        }
+        if (pArk->mOptimized == 0) {
+            return nSector;
+        }
+
+        const short *pTable = static_cast<const short *>(pArk->mOptimizedTable);
+        const int nCursor = pArk->mOptimizedCursor;
+        if (nCursor >= 0) {
+            if (pTable[nCursor] == nSector) {
+                pArk->mOptimizedCursor = nCursor + 1;
+                return nCursor;
+            }
+            if (nCursor < pArk->mOptimizedCount) {
+                LogPrintf("OPTIMIZED ARKFILE ORDERING FAILURE AT INDEX: %d\n", nCursor);
+            }
+            pArk->mOptimizedCursor = -1;
+        }
+
+        for (int nSlot = 0; nSlot < pArk->mOptimizedCount; ++nSlot) {
+            if (pTable[nSlot] == nSector) {
+                return nSlot;
+            }
+        }
+        Fatal("ArkfileLogicalToPhysicalSector: can't find sector: %d\n", nSector);
+    }
+
+    LogPrintf("HEY!!! ArkfileLogicalToPhysicalSector can't find arkId: %d\n", nFile);
+    return nSector;
+}
+
+// 0x0055c400
+int OpenStreamByPath(const char *pszPath) {
+    sceCdSync(SCECdBlock);
+    return sceOpen(pszPath, kOpenReadOnly);
+}
+
+// 0x0055c438
+void CloseLoadFile(int nFile) {
+    sceClose(nFile);
+}
+
+// 0x0055c498
+void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength) {
+    // Yes, the binary maps the chunk again although ReadArkStreamThroughCache() already has.
+    const int nPhysical = ArkfileLogicalToPhysicalSector(nFile, nSector);
+    sceCdSync(SCECdBlock);
+    sceLseek(nFile, nPhysical * kSectorCacheRowSize, SCE_SEEK_SET);
+    sceRead(nFile, pBuffer, nLength);
+}
 
 // 0x0055c340
 short ArkFile::HashName(const char *pszName) {
@@ -518,6 +690,21 @@ void WaitForFileIdle(int nFile) {
 // 0x00702650
 const char *const g_apSessionArkPaths[kSessionArkCount] = {
     "ark/root.ark", "ark/levels.ark", "ark/arenas.ark"};
+
+// 0x004dfb20
+int InitArk() {
+    if (UsingArkFiles() == 0) {
+        return 1;
+    }
+    for (int i = 0; i < kSessionArkCount; ++i) {
+        if (ArkFile::Open(g_apSessionArkPaths[i]) == 0) {
+            std::cout << " ERROR: InitArk() - Failed opening ark file: " << g_apSessionArkPaths[i]
+                      << "\n";
+            return 0;
+        }
+    }
+    return 1;
+}
 
 // 0x004dfbd8
 int CloseArk() {

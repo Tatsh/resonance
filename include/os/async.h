@@ -445,8 +445,8 @@ int FileIsatty(int nFile);
 /**
  * Report an ark stream's read position.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
- * The position is measured inside the stream rather than inside the archive.
+ * The position reported is ArkStream::mArkPosition, measured inside the whole archive rather than
+ * inside the stream's file.
  *
  * @param nStream The ark stream handle, kFileHandleArkStream included.
  * @return The position, or -1 when no stream record has that handle.
@@ -457,8 +457,8 @@ int GetArkStreamPosition(int nStream);
 /**
  * Move an ark stream's read position.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
- * A resulting position before the start of the stream is clamped back to the start.
+ * A resulting position before the start of the stream is clamped back to the start. A stream whose
+ * archive is no longer mounted, and an origin outside FileSeekOrigin, both report -1.
  *
  * @param nStream The ark stream handle, kFileHandleArkStream included.
  * @param nOffset The offset to move by.
