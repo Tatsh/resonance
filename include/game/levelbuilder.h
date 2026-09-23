@@ -53,10 +53,12 @@ public:
     /**
      * Construct an empty builder.
      *
-     * The body is not written. It creates the tempo map at mUnknown30 at 500000 microseconds per
-     * quarter note and the PlayMapLinear at mUnknown34, and it sizes the track collections by
-     * nTrackCount with unsigned comparisons. GrooveWorld::StartLoad() passes the configuration
-     * value the query at `0x00509110` reports for the identifier 0x384.
+     * It creates the tempo map at mUnknown30 at 500000 microseconds per quarter note and the
+     * PlayMapLinear at mUnknown34. The map takes its steps and labels from configuration codes
+     * 0x396 and 0x3a0 and its slot 20 values from code 0x39d. The builder then creates
+     * nTrackCount score tracks, and runs PlayMap slot 17 with 0xe when code 0x3a1 is set.
+     * GrooveWorld::StartLoad() passes the configuration value the query at `0x00509110` reports
+     * for the identifier 0x384.
      *
      * @param nTrackCount The number of tracks to prepare for.
      * @ghidraAddress 0x001ea838

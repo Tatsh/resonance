@@ -53,6 +53,7 @@ set(RESONANCE_GAME_SRCS
     jukeboxplaylist.cpp
     levelbuilder.cpp
     levelconverter.cpp
+    leveldata.cpp
     levelstats.cpp
     linearmap.cpp
     localjamenablemgr.cpp

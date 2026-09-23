@@ -387,6 +387,7 @@ labl
 leavegamemsg
 levelbuilder
 levelconverter
+leveldata
 levelstats
 libc
 libcdvd
@@ -459,6 +460,7 @@ memstream
 meshanim
 metagameworld
 metarenasscreen
+metbuttonlist
 metconfiggameoptionsscreen
 metcontrollerreading
 metexpansionpakscreen

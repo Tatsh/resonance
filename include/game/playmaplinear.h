@@ -23,6 +23,18 @@
  */
 class PlayMapLinear : public PlayMap {
 public:
+    /**
+     * Construct an empty linear map.
+     *
+     * The body is not written. It runs the PlayMap constructor, installs the table at
+     * `0x007d1060`, and initialises this class's members. A non-zero bRunUnknown128410 then runs
+     * the routine at `0x00128410` on the new object. LevelBuilder's constructor passes 1.
+     *
+     * @param bRunUnknown128410 Whether to run the routine at `0x00128410` last.
+     * @ghidraAddress 0x00127a80
+     */
+    explicit PlayMapLinear(int bRunUnknown128410);
+
     /** @ghidraAddress 0x0012a4d8 */
     virtual ~PlayMapLinear();
 
@@ -131,11 +143,15 @@ public:
     virtual void Slot19();
 
     /**
-     * Slot 20. Calls slot 8 through the table, then walks the span at `+0x48`.
+     * Slot 20. Calls slot 8 through the table and appends its result to the span at `+0x48`,
+     * then appends the pair of nValue and 1 to the vector at `+0x3c`.
      *
+     * LevelBuilder's constructor calls it once per value of configuration code 0x39d.
+     *
+     * @param nValue The first word of the appended pair.
      * @ghidraAddress 0x00128c38
      */
-    virtual void Slot20();
+    virtual void Slot20(int nValue);
 
 protected:
     /**

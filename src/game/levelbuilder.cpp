@@ -4,9 +4,11 @@
 
 #include "app/attachment.h"
 #include "game/playmap.h"
+#include "game/playmaplinear.h"
 #include "game/trackdata.h"
 #include "os/hxstr.h"
 #include "sch/tempomap.h"
+#include "script/configquery.h"
 
 namespace {
 
@@ -16,6 +18,21 @@ namespace {
 void DeleteTrackData(TrackData *pTrack) {
     delete pTrack;
 }
+
+// Configuration codes the constructor queries.
+constexpr int kPlayMapSlot17Query = 0x3a1;
+constexpr int kPlayMapStepsQuery = 0x396;
+constexpr int kPlayMapLabelsQuery = 0x3a0;
+constexpr int kPlayMapSlot20Query = 0x39d;
+
+// The tempo a level starts with, 120 beats per minute.
+constexpr int kDefaultMicrosecondsPerQuarter = 500000;
+
+// The argument the constructor passes to PlayMapLinear's constructor.
+constexpr int kPlayMapRunUnknown128410 = 1;
+
+// The argument the constructor passes to PlayMap::Slot17() when kPlayMapSlot17Query is set.
+constexpr int kPlayMapSlot17Argument = 0xe;
 
 // The index every track SelectTrack() creates is given.
 constexpr int kUnindexedTrack = -1;
@@ -45,6 +62,41 @@ PrintCollection(std::ostream &stream, const char *pszLabel, std::vector<TrackDat
 }
 
 } // namespace
+
+// 0x001ea838
+LevelBuilder::LevelBuilder(unsigned nTrackCount)
+    : mOwnTrack(nullptr), mCurrentTrack(nullptr), mUnknown30(nullptr) {
+    const int bSlot17 = QueryConfigFlag(kPlayMapSlot17Query);
+    mUnknown30 = new Sch::TempoMap(kDefaultMicrosecondsPerQuarter);
+    PlayMapLinear *pMap = new PlayMapLinear(kPlayMapRunUnknown128410);
+    mUnknown34 = pMap;
+
+    std::vector<int> steps;
+    QueryConfigVector(&steps, kPlayMapStepsQuery);
+    std::vector<HxStr> labels;
+    QueryConfigStrings(&labels, kPlayMapLabelsQuery);
+    for (unsigned i = 0; i < steps.size(); ++i) {
+        mUnknown34->Slot2(steps[i], labels[i]);
+    }
+
+    mTracks.resize(nTrackCount, nullptr);
+    for (unsigned i = 0; i < nTrackCount; ++i) {
+        mTracks[i] = new TrackData(i, mUnknown34);
+    }
+
+    {
+        std::vector<int> values;
+        QueryConfigVector(&values, kPlayMapSlot20Query);
+        for (auto it = values.begin(); it != values.end(); ++it) {
+            pMap->Slot20(*it);
+        }
+        pMap->Slot19();
+    }
+
+    if (bSlot17) {
+        mUnknown34->Slot17(kPlayMapSlot17Argument);
+    }
+}
 
 // 0x001eafe8
 // The table store, the three vector deallocations, and the object release are compiler
