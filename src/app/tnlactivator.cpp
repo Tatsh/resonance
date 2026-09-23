@@ -29,8 +29,8 @@ enum XfmRow { kBasisXRow = 0, kBasisYRow = 1, kBasisZRow = 2 };
 // Instrument kinds whose track shows the catcher.
 enum CatcherKind { kCatcherKindA = 2, kCatcherKindB = 5 };
 
-constexpr float kPi = 3.1415927f;
-constexpr float kTwoPi = 6.2831855f;
+constexpr float kPi = 3.1415925f;
+constexpr float kTwoPi = 6.283185f;
 constexpr float kTurnStep = 0.15f;
 constexpr float kTurnPerTrack = 0.125f;
 

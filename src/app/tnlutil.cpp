@@ -36,7 +36,7 @@ int g_nAppTunnelDisplayMode;
 float g_flTunnelBrightness;
 
 // 0x00437e60
-Color TnlColorFromName(HxStr name) {
+Color TnlColorFromName(const HxStr &name) {
     if (name == "green") {
         return MakeColor(0.0f, 1.0f, 0.0f);
     }

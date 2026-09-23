@@ -730,6 +730,16 @@ int AppTunnel::StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flF
     return 0;
 }
 
+int AppTunnel::StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset) {
+    for (auto it = mBumpFX.begin(); it != mBumpFX.end(); ++it) {
+        if ((*it)->IsIdle()) {
+            (*it)->Start(nStep, colorName, nForward, flPathOffset);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int AppTunnel::StartSnake(
     float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude) {
     for (auto it = mSnakes.begin(); it != mSnakes.end(); ++it) {

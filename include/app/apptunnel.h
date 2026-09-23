@@ -262,6 +262,10 @@ private:
     // Returns 1 when one launched. HandleMessage() inlines this. 0x00457758.
     int StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flFrame);
 
+    // Start the first idle TnlBumpFX. Returns 1 when one started. HandleMessage() inlines this.
+    // 0x00457828.
+    int StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
+
     // Start the first idle TnlSnake, through TnlSnake::Start() inlined. Returns 1 when one
     // started. HandleMessage() inlines this. 0x00457880.
     int StartSnake(float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude);

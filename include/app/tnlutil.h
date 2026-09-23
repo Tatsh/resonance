@@ -11,11 +11,14 @@
  * other name gives cyan. The alpha is always 1. The title is inferred from the five literals the
  * routine compares against.
  *
- * @param name The colour name, taken by value.
+ * The name is taken by reference. TnlBumpFX::Start() passes its parameter straight through with
+ * no copy, which a by-value parameter here would require.
+ *
+ * @param name The colour name.
  * @return The colour.
  * @ghidraAddress 0x00437e60
  */
-Color TnlColorFromName(HxStr name);
+Color TnlColorFromName(const HxStr &name);
 
 /**
  * Map a player colour name to a darker form of TnlColorFromName().

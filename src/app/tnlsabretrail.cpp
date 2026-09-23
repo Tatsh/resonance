@@ -42,7 +42,7 @@ constexpr double kAmplitudeScale = 0.4;
 constexpr float kFrequencyScale = 0.1f;
 constexpr float kFrequencyBase = 0.1f;
 constexpr float kWobbleFlip = -0.9f;
-constexpr float kTwoPi = 6.2831855f;
+constexpr float kTwoPi = 6.283185f;
 
 } // namespace
 

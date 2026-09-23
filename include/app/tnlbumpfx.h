@@ -1,5 +1,7 @@
 #pragma once
 
+#include "os/hxstr.h"
+
 namespace Rnd {
 class Generator;
 class Mat;
@@ -17,10 +19,6 @@ class TransAnim;
  * spawns with its authored rate while its path window follows the song, 800 frames long and
  * running forward or backward. The spawn rate then drops to one instance per 1e9 frames, and 1500
  * frames after the start the generator hides.
- *
- * The start routine at `0x0043dea8` is not reconstructed. It rewrites the first rotation key of
- * mTransAnim and the tangents of the whole rotation channel inline, and Rnd::TransAnim declares the
- * channel private.
  *
  * AppTunnel allocates these in a loop, 0x20 bytes each, with the loop index as nIndex.
  */
@@ -43,6 +41,35 @@ public:
      * @ghidraAddress 0x00456690
      */
     ~TnlBumpFX();
+
+    /**
+     * Start a burst that sweeps towards one lane in one player's colour.
+     *
+     * The generator gets its authored spawn rate back, and its spawn clock restarts. The first
+     * rotation key of the path's frame owner becomes a turn about Y of `(1 - nStep / 8)` turns,
+     * the rotation keys are sorted, and every rotation tangent is rebuilt. The material's emissive
+     * colour becomes the player's colour, and the generator shows.
+     *
+     * @param nStep The lane, in eighths of a turn.
+     * @param colorName The player's colour name. The callers pass a copy, and the name reaches
+     *                  TnlColorFromName() with no further copy.
+     * @param nForward Non-zero runs the path window forward.
+     * @param flPathOffset The distance from the song frame to the path window.
+     * @ghidraAddress 0x0043dea8
+     */
+    void Start(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
+
+    /**
+     * Report whether the burst waits for Start().
+     *
+     * AppTunnel's routine at `0x00457828` tests the state inline to find a free burst, and no
+     * out-of-line copy exists.
+     *
+     * @return True while idle.
+     */
+    bool IsIdle() const {
+        return mState == kStateIdle;
+    }
 
     /**
      * Advance the burst.

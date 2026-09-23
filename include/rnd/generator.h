@@ -625,11 +625,20 @@ private:
     MultiMesh *mMultiMesh;     // +0xfc
     ParticleSys *mParticleSys; // +0x100
     int mAnimateFromStart;     // +0x104
-    // Frame the next instance is spawned on. The constructor writes the sentinel -9999999.0, and
-    // the first SetFrameSelf() replaces it with the frame it receives. The dump omits it, so the
-    // title is inferred from SetFrameSelf().
-    float mNextSpawnFrame; // +0x108
-    int mBirthFrontOnly;   // +0x10c
+
+public:
+    /**
+     * Frame the next instance is spawned on.
+     *
+     * The constructor writes the sentinel -9999999.0, and the first SetFrameSelf() replaces it with
+     * the frame it receives. The dump omits it, so the title is inferred from SetFrameSelf().
+     * Public because TnlBumpFX::Start() at `0x0043dea8` zeroes it, and the image has no accessor.
+     * +0x108
+     */
+    float mNextSpawnFrame;
+
+private:
+    int mBirthFrontOnly; // +0x10c
     // +0x110 Whether SetFrameSelf() applies the mBirthSquareDist cull. The constructor zeroes it,
     // and neither the dump nor the serialiser touches it, so the title is inferred.
     int mBirthSquareDistCull;

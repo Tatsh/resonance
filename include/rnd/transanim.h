@@ -110,6 +110,19 @@ public:
          */
         void ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext);
 
+        /**
+         * Order keyframes by frame.
+         *
+         * The list sort at `0x00108a50`, which TnlBumpFX::Start() and the loader call, inlines it
+         * in its merge step at `0x001088e0`.
+         *
+         * @param other The keyframe to compare against.
+         * @return Whether this keyframe lands before other.
+         */
+        bool operator<(const RotKey &other) const {
+            return mFrame < other.mFrame;
+        }
+
         Quat mQuat;                      /*!< The rotation. +0x00 */
         Quat mTangentIn;                 /*!< Tangent entering the key. +0x10 */
         Quat mTangentOut;                /*!< Tangent leaving the key. +0x20 */
