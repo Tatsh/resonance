@@ -59,7 +59,8 @@ set(RESONANCE_MET_SRCS
     metstagefinishscreen.cpp
     mettoplogoscreen.cpp
     mettutorialscreen.cpp
-    scrollinglist.cpp)
+    scrollinglist.cpp
+    texturepairrecord.cpp)
 
 add_library(resonance_met STATIC ${RESONANCE_MET_SRCS})
 target_link_libraries(resonance_met PRIVATE resonance_common)

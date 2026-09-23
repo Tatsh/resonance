@@ -821,6 +821,7 @@ texa
 texburn
 texs
 textmsg
+texturepairrecord
 tickclock
 timedcommand
 timetask
