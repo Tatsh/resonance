@@ -22,10 +22,8 @@ constexpr int kAPaletteInverseEntryCount = 0x8000;
  * creates or releases a palette. The release operator has two out-of-line emissions, 0x005f9cf8 and
  * 0x0061d4a0, one for each translation unit that needed a copy.
  *
- * Two creation sites do not match the constructor below. The palette loader at 0x0061cde0 and
- * slot 3 of AGifFile at 0x0062aaf8 clear mpRgb15ToIndex and then call SetEntries() over a whole
- * table, with no store to mEnd before the call. A second constructor that fills the entries fits
- * both sites. It is not declared here, because neither site settles its parameter list.
+ * The default constructor also runs for the static palette AGifFile keeps, from the static
+ * initialiser at 0x0062b5a0, which also runs the destructor at exit.
  */
 class APalette {
 public:
@@ -58,6 +56,20 @@ public:
      * ABitmap::SetPaletteEntries() open-codes it at 0x005eb2d0.
      */
     APalette() : mpRgb15ToIndex(nullptr), mEnd(0) {
+    }
+
+    /**
+     * Construct a palette from a table of entries.
+     *
+     * Clears mpRgb15ToIndex and copies the entries in from index zero through SetEntries(), which
+     * also writes mEnd. ABmpFile::ReadPalette() open-codes it at 0x0061ce90 and
+     * AGifFile::ReadImage() at 0x0062acd8.
+     *
+     * @param pEntries The entries to copy in.
+     * @param nCount The number of entries.
+     */
+    APalette(const unsigned int *pEntries, int nCount) : mpRgb15ToIndex(nullptr) {
+        SetEntries(pEntries, 0, nCount);
     }
 
     /**

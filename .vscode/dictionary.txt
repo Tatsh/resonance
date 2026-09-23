@@ -1,4 +1,5 @@
 abitmap
+abmpfile
 acanvas
 acanvaslin
 acceler
@@ -6,6 +7,8 @@ addiu
 advancesectionmsg
 advancesectiontogglemsg
 afixed
+agfxfile
+agiffile
 allnotesoffmsg
 almodule
 analogr
@@ -23,6 +26,7 @@ arlereader
 arraymodule
 arrghghghgh
 asynccallback
+atgafile
 atten
 augm
 autobrief
@@ -85,7 +89,9 @@ contctrlmsg
 counta
 coveragerc
 cpprtti
+cpsm
 createdirop
+crip
 cripplemsg
 cripplepacket
 csclientstatuspacket
@@ -347,8 +353,10 @@ msgqueue
 msgsink
 msgsource
 msifrpc
+msnm
 mtap
 mtapman
+mtba
 multicatcher
 multimesh
 multimuse
@@ -365,6 +373,7 @@ myreadline
 nearesttrackmsg
 netflow
 netplayer
+neut
 neutralizemsg
 newmodule
 noone

@@ -102,7 +102,7 @@ private:
      * argument arrives in a register the decompiler does not bind, so the prototype read as taking
      * no arguments at all.
      *
-     * Three defects of the original account for every oddity in the body. The bulk loop packs two
+     * Three defects in the binary account for every oddity in the body. The bulk loop packs two
      * source bytes into one destination byte with a bitwise OR, while both per pixel paths combine
      * the masked destination byte and the index with a logical OR. Each per pixel store therefore
      * writes 0 or 1 over the whole byte. After the bulk loop the column and the remaining count
@@ -111,6 +111,10 @@ private:
      * plus two, past the end of the row. The per
      * pixel loop also advances the destination byte on the parity of the column alone, ignoring
      * mOddNibbleStart, where the nibble choice takes it into account.
+     *
+     * ABmpFile::ReadRlePixels() advances its column by the same exhausted counter after an
+     * identical pair loop. Two sites with one shape leave open whether the source or the
+     * compiler's handling of the loop counter produced the adjustment.
      *
      * @param pSource The source bitmap the row came from, read for its transparency fields.
      * @param pRow One byte per pixel, already expanded by the caller.

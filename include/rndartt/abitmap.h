@@ -127,6 +127,60 @@ struct ABitmap {
      */
     void SetPaletteEntries(const unsigned int *pEntries, int nFirst, int nCount);
 
+    /**
+     * Return the ABitmapFormat code for a pixel width in bits.
+     *
+     * 4, 8, 16, 24, and 32 give kABitmapFormatLinear4 through kABitmapFormatLinear32, and every
+     * other width gives kABitmapFormatLinear15.
+     *
+     * @param nBitsPerPixel The pixel width in bits.
+     * @return The format code.
+     * @ghidraAddress 0x00559310
+     */
+    static int FormatForBitsPerPixel(int nBitsPerPixel);
+
+    /**
+     * Return the size of a pixel rectangle in bytes, with rows packed at the format's own stride.
+     *
+     * The stride matches the one the constructor derives, `(nWidth + 2) / 2` for
+     * kABitmapFormatLinear4 and nWidth times the matching entry of g_abBitmapBytesPerPixel
+     * otherwise.
+     *
+     * @param nFormat The ABitmapFormat code.
+     * @param nWidth The width in pixels.
+     * @param nHeight The height in pixels.
+     * @return The size in bytes.
+     * @ghidraAddress 0x00559368
+     */
+    static int ComputeByteCount(int nFormat, int nWidth, int nHeight);
+
+    /**
+     * Exchange the red and blue fields of a run of 1555 pixels in place.
+     *
+     * @param pPixels The first pixel.
+     * @param nCount The number of pixels.
+     * @ghidraAddress 0x00559568
+     */
+    static void SwapRedBlue15(unsigned short *pPixels, int nCount);
+
+    /**
+     * Exchange the first and third byte of a run of three byte pixels in place.
+     *
+     * @param pPixels The first pixel.
+     * @param nCount The number of pixels.
+     * @ghidraAddress 0x005595c8
+     */
+    static void SwapRedBlue24(unsigned char *pPixels, int nCount);
+
+    /**
+     * Exchange the first and third byte of a run of four byte pixels in place.
+     *
+     * @param pPixels The first pixel.
+     * @param nCount The number of pixels.
+     * @ghidraAddress 0x00559600
+     */
+    static void SwapRedBlue32(unsigned char *pPixels, int nCount);
+
     void *mPixels; /*!< The pixel rectangle, null until allocated. +0x00 */
     unsigned short mHasTransparentColor : 8; /*!< Whether mTransparentColor applies. +0x04 */
     unsigned short mFormat : 4;              /*!< The ABitmapFormat code. +0x05 bits 0 to 3 */
