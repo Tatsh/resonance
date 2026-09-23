@@ -19,6 +19,10 @@ class Message;
  * The class is declared for GrooveWorld, which hands it every CripplePacket. The copy
  * constructor at `0x0040d060` is the implicit one and is not written. It stores
  * the MsgSink table, copies the MsgSource base, and then installs the two tables above.
+ *
+ * The unreferenced forwarder at `0x0040d0d0` in this unit, byte-identical to
+ * MsgSplitter::HandleMessage() at `0x001ab4a8`, has its unwind record at `0x006de75c` as its only
+ * reference and is recorded here rather than declared.
  */
 class Delayer : public MsgSink, public MsgSource {
 public:

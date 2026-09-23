@@ -17,6 +17,10 @@ class StdMidiMsg;
  *
  * While mEnabled is clear, HandleMessage() drops every NoteMsg and every StdMidiMsg whose status
  * is a note-off or a note-on, and forwards the rest.
+ *
+ * The unreferenced forwarder at `0x001a6ed8` in this unit, byte-identical to
+ * MsgJoiner::HandleMessage() at `0x00195b70`, has its unwind record at `0x006852d8` as its only
+ * reference and is recorded here rather than declared.
  */
 class MidiDisabler : public MsgSource, public MsgSink {
 public:
