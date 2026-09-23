@@ -194,6 +194,7 @@ gamemanagerdoplaybackmsg
 gamemanagerimpl
 gameovermsg
 gameparams
+gamepowerbarmgr
 gamepowerupplacer
 gamerconstructcmd
 gameskill
@@ -435,6 +436,7 @@ multimusemsg
 multimuseplayer
 multipliermsg
 multiplierstatemsg
+multipowerbarmgr
 multiscreenanim
 multitap
 musesynth
@@ -619,6 +621,7 @@ smpte
 smrt
 snapcraft
 socketmodule
+solopowerbarmgr
 soloremix
 soloscreenanim
 spjoinacceptpacket

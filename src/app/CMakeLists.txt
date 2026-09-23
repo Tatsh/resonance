@@ -1,5 +1,6 @@
 set(RESONANCE_APP_SRCS
     animrange.cpp
+    appactivefilter.cpp
     application.cpp
     attachment.cpp
     cutscene.c
