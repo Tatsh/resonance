@@ -1,13 +1,18 @@
 set(RESONANCE_GAME_SRCS
+    autocatchpowerup.cpp
     autoriffer.cpp
     axephrasemaker.cpp
     axingstg.cpp
+    bumppowerup.cpp
     campaignstats.cpp
     catcher.cpp
     catchingstg.cpp
     controllercmd.cpp
+    cripplepowerup.cpp
+    effectpowerup.cpp
     enablemgr.cpp
     forcefeedbackmgr.cpp
+    freestylepowerup.cpp
     freqappearance.cpp
     gameenablemgr.cpp
     gamemanagerimpl.cpp
@@ -18,6 +23,7 @@ set(RESONANCE_GAME_SRCS
     gamercmd.cpp
     gamestats.cpp
     genericcatcher.cpp
+    ghostnotespowerup.cpp
     grooveworld.cpp
     gsperiodical.cpp
     harmony.cpp
@@ -38,9 +44,11 @@ set(RESONANCE_GAME_SRCS
     msgjoiner.cpp
     multicatcher.cpp
     multipowerbarmgr.cpp
+    multiplierpowerup.cpp
     multiscreenanim.cpp
     netjamenablemgr.cpp
     netplayer.cpp
+    neutralizepowerup.cpp
     notefinder.cpp
     nullplayer.cpp
     phrase.cpp
@@ -56,6 +64,7 @@ set(RESONANCE_GAME_SRCS
     playmaplinear.cpp
     playmaprepeatring.cpp
     playmapring.cpp
+    powerup.cpp
     powerupcollection.cpp
     powerupcollectioni.cpp
     quantizer.cpp

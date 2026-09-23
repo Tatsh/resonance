@@ -40,6 +40,7 @@ autobrief
 autocatch
 autocatcher
 autocatchmsg
+autocatchpowerup
 autoriffer
 axebuttonmsg
 axephrasemaker
@@ -66,6 +67,7 @@ buildsystems
 bumpfx
 bumpmsg
 bumppacket
+bumppowerup
 buttonpowmsg
 cacceler
 callbackxferbdtoiop
@@ -118,6 +120,7 @@ crip
 cripfx
 cripplemsg
 cripplepacket
+cripplepowerup
 csclientstatuspacket
 csinitiateplaypacket
 cycl
@@ -151,6 +154,7 @@ durgemrowstring
 durgemstrip
 durgemtrails
 eekernel
+effectpowerup
 egsw
 egwb
 elif
@@ -192,6 +196,7 @@ fpathconf
 fram
 frameobject
 freestylefxmsg
+freestylepowerup
 freqappearance
 fstat
 fsyntax
@@ -227,6 +232,7 @@ getpid
 gfxdevice
 ghidra
 ghostnoteseffector
+ghostnotespowerup
 giftag
 gouraud
 graminit
@@ -472,6 +478,7 @@ multimuse
 multimusemsg
 multimuseplayer
 multipliermsg
+multiplierpowerup
 multiplierstatemsg
 multipowerbarmgr
 multiscreenanim
@@ -489,6 +496,7 @@ netjamenablemgr
 netplayer
 neut
 neutralizemsg
+neutralizepowerup
 newmodule
 njgb
 nolattice

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstddef>
+
+#include "os/mem.h"
+
 class Player;
 
 /**
@@ -14,13 +18,37 @@ class Player;
  * The two method names are inferred from the bodies of the subclasses and of the two collections
  * that use them. No method name survives anywhere in the image.
  *
- * The thirteen subclasses themselves are not reconstructed here. Seven have their own RTTI
- * descriptor, AutocatchPowerup, BumpPowerup, CripplePowerup, EffectPowerup, FreestylePowerup,
- * GhostNotesPowerup, MultiplierPowerup, and NeutralizePowerup among them, and the factory's jump
- * table at `0x007e3f70` sends six of its thirteen cases to one shared arm.
+ * Eight subclasses implement the thirteen kinds, which are the HudItemKind values. Seven kinds
+ * each have their own class (NeutralizePowerup, CripplePowerup, FreestylePowerup,
+ * AutocatchPowerup, BumpPowerup, GhostNotesPowerup, and MultiplierPowerup), and the factory's jump
+ * table at `0x007e3f70` sends the six effect kinds to one shared arm that builds an EffectPowerup
+ * recording its kind.
  */
 class Powerup {
 public:
+    /**
+     * Allocate a powerup from the tagged heap under the tag `Powerup`.
+     *
+     * No out-of-line body exists. CreateForType() expands the call in every arm.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     */
+    void *operator new(size_t nSize) {
+        return AllocateTaggedMemory(nSize, "Powerup");
+    }
+
+    /**
+     * Release a powerup to the tagged heap.
+     *
+     * No out-of-line body exists. Every deleting destructor expands the call.
+     *
+     * @param pBlock The block.
+     */
+    void operator delete(void *pBlock) {
+        FreeTaggedMemory(pBlock, "Powerup");
+    }
+
     /**
      * @ghidraAddress 0x001ca4c8
      */
@@ -61,13 +89,12 @@ public:
      * Produce one powerup of the requested kind on the heap.
      *
      * The body is a jump table over thirteen kinds at `0x007e3f70`. Each arm allocates against the
-     * `Powerup` tag and installs one subclass table. A kind of 13 or above returns a null pointer,
-     * and the two collections both store the result with no test.
+     * `Powerup` tag and installs one subclass table. A kind outside 0 through 12 (the unsigned
+     * comparison rejects a negative kind too) returns a null pointer, and the two collections
+     * both store the result with no test.
      *
-     * The body is not written yet, because the thirteen subclasses have no headers.
-     *
-     * @param nType The kind.
-     * @return The powerup, or a null pointer for a kind of 13 or above.
+     * @param nType The kind, a HudItemKind.
+     * @return The powerup, or a null pointer for a kind outside 0 through 12.
      * @ghidraAddress 0x001c65f0
      */
     static Powerup *CreateForType(int nType);
