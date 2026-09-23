@@ -58,6 +58,7 @@ T *FindObject(const char *pszName) {
 
 } // namespace
 
+// 0x0043b3d8
 TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
     : mIndex(nIndex), mRotView(FindObject<Rnd::View>(FormatString("activator rot%d", nIndex))),
       mMesh(FindObject<Rnd::Mesh>(FormatString("activator%d", nIndex))),
@@ -88,6 +89,7 @@ TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
     SetLeader(0);
 }
 
+// 0x0043baf8
 void TnlActivator::Update(float flFrame, float flScaledFrame) {
     int nSettled = 1;
     if (mTargetAngle != mAngle) {
@@ -157,10 +159,12 @@ void TnlActivator::Update(float flFrame, float flScaledFrame) {
     mPointer.Update(flScaledFrame);
 }
 
+// 0x00455ac8
 void TnlActivator::SetRotShowing(int nShowing) {
     mRotView->SetShowing(nShowing);
 }
 
+// 0x00455a40
 void TnlActivator::SetLeader(int nLeader) {
     if (nLeader) {
         mFxView->AddTrans(mLeader);
@@ -170,6 +174,7 @@ void TnlActivator::SetLeader(int nLeader) {
     mLeader->SetShowing(nLeader);
 }
 
+// 0x00455c98
 void TnlActivator::SetGhost(int nGhost) {
     mGhost = nGhost;
     if (mLevel) {
@@ -182,14 +187,16 @@ void TnlActivator::SetGhost(int nGhost) {
     }
 }
 
+// 0x00455af8
 void TnlActivator::SetSuppressed(int nSuppressed) {
-    SetRotShowing(!nSuppressed);
+    SetRotShowing(nSuppressed ^ 1); // Yes, the binary flips the low bit rather than testing zero.
     const int nGhost = mGhost;
     mSuppressed = nSuppressed;
     SetGhost(nSuppressed ? 0 : (nGhost != 0));
     mGhost = nGhost;
 }
 
+// 0x00455b70
 void TnlActivator::MoveToTrack(int nLevel, int nKind, float flTrack) {
     if (!mTurning && !mLevel && mGhost && !mSuppressed) {
         mOwner->mTunnel->HideTrackGhost(mTrack);

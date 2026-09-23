@@ -14,15 +14,18 @@ constexpr float kMaxAnimFrame = 8160.0f;
 
 } // namespace
 
+// 0x0043c598
 TnlLattice::TnlLattice() : mStartFrame(kNoFrame) {
     mMatAnim = dynamic_cast<Rnd::MatAnim *>(Rnd::g_manager.Find(HxStr("lattice.mnm")));
     mMatAnim->SetFrame(0.0f);
 }
 
+// 0x00456368
 TnlLattice::~TnlLattice() {
     mMatAnim->SetFrame(0.0f);
 }
 
+// 0x004563c0
 void TnlLattice::SetFrame(float flFrame) {
     if (flFrame < mStartFrame) {
         return;
