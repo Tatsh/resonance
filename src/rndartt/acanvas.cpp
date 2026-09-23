@@ -2,6 +2,12 @@
 
 #include <string.h>
 
+#include "os/mem.h"
+#include "rndartt/acanvaslin15.h"
+#include "rndartt/acanvaslin24.h"
+#include "rndartt/acanvaslin32.h"
+#include "rndartt/acanvaslin4.h"
+#include "rndartt/acanvaslin8.h"
 #include "rndartt/afont.h"
 #include "rndartt/apoint.h"
 #include "rndartt/arowspan.h"
@@ -17,6 +23,10 @@ constexpr int kNibbleBits = 4;
 constexpr unsigned int kNibbleMask = 0x0f;
 constexpr int kRGBByteCount = 3;
 constexpr char kNewline = '\n';
+
+// 0x00837d80, this translation unit's copy of the tag ABitmap::ABitmap() also uses.
+const char *const kBitmapAllocTag = "abitmap.h";
+constexpr int kBitmapAllocLine = 0x47;
 
 // One pointer to member per ABitmapFormat code. DrawGlyphNoClip() and DrawGlyph() index the first
 // two tables by the glyph format code, ReadRectNoClip() and ReadRect() the next two by the
@@ -76,6 +86,48 @@ ACanvas::ACanvas(const ABitmap &bitmap) : mBitmap(bitmap) {
     mClip.mTop = 0;
     mClip.mRight = bitmap.mWidth;
     mClip.mBottom = bitmap.mHeight;
+}
+
+// 0x005e8bc8
+ACanvas *ACanvas::CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels) {
+    ABitmap copy = bitmap;
+    if (bAllocatePixels) {
+        if (copy.mFormat == kABitmapFormatLinear4) {
+            copy.mBytesPerRow = static_cast<short>((copy.mWidth + 2) / 2);
+        } else {
+            copy.mBytesPerRow =
+                static_cast<short>(copy.mWidth * g_abBitmapBytesPerPixel[copy.mFormat]);
+        }
+        copy.mPixels = MemAllocTagged(
+            static_cast<long>(copy.mHeight) * copy.mBytesPerRow, kBitmapAllocTag, kBitmapAllocLine);
+        if (copy.mPixels == nullptr) {
+            return nullptr;
+        }
+    }
+    switch (bitmap.mFormat) {
+    case kABitmapFormatLinear4:
+        return new ACanvasLin4(copy);
+    case kABitmapFormatLinear8:
+    case kABitmapFormatRle8:
+        return new ACanvasLin8(copy);
+    case kABitmapFormatLinear15:
+        return new ACanvasLin15(copy);
+    case kABitmapFormatLinear24:
+        return new ACanvasLin24(copy);
+    case kABitmapFormatLinear32:
+        return new ACanvasLin32(copy);
+    default:
+        return nullptr;
+    }
+}
+
+// 0x005eb200
+ACanvas *ACanvas::CreateWithOwnedPixels(const ABitmap &bitmap) {
+    ABitmap copy = bitmap;
+    if (copy.mFormat == kABitmapFormatRle8) {
+        copy.mFormat = kABitmapFormatLinear8;
+    }
+    return CreateForBitmap(copy, true);
 }
 
 // 0x005ead68

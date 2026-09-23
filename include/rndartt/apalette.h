@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stddef.h>
+
+#include "os/mem.h"
+
 /** Entries a palette stores, one for every value an eight bit index can take. */
 constexpr int kAPaletteEntryCount = 256;
 
@@ -12,15 +16,61 @@ constexpr int kAPaletteInverseEntryCount = 0x8000;
  * The class is not polymorphic and has no RTTI. Its name comes from the allocation tag its blocks
  * are billed to, "APalette". The tagged allocator records that tag verbatim.
  *
- * The record is 0x408 bytes, the entry array followed by two words. The allocation site clears
- * both words, and SetEntries() writes one of them.
+ * The record is 0x408 bytes, the entry array followed by two words.
  *
- * The class also has a tagged `operator new` and `operator delete` pair, the release half at
- * 0x005f9cf8. The allocation macro every class in this tree uses generates both rather than a
- * programmer writing them out. Neither is declared here.
+ * The constructor, the destructor, and the allocation operator are open-coded at every site that
+ * creates or releases a palette. The release operator has two out-of-line emissions, 0x005f9cf8 and
+ * 0x0061d4a0, one for each translation unit that needed a copy.
+ *
+ * Two creation sites do not match the constructor below. The palette loader at 0x0061cde0 and
+ * slot 3 of AGifFile at 0x0062aaf8 clear mpRgb15ToIndex and then call SetEntries() over a whole
+ * table, with no store to mEnd before the call. A second constructor that fills the entries fits
+ * both sites. It is not declared here, because neither site settles its parameter list.
  */
 class APalette {
 public:
+    /**
+     * Allocate a palette under the tag `APalette`.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     */
+    static void *operator new(size_t nSize) {
+        return AllocateTaggedMemory(nSize, "APalette");
+    }
+
+    /**
+     * Release a palette under the tag `APalette`.
+     *
+     * The second emission of the same body is at 0x0061d4a0.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x005f9cf8
+     */
+    static void operator delete(void *pBlock) {
+        FreeTaggedMemory(pBlock, "APalette");
+    }
+
+    /**
+     * Construct a palette with no entries written.
+     *
+     * Clears mpRgb15ToIndex and mEnd and does not touch the entry table.
+     * ABitmap::SetPaletteEntries() open-codes it at 0x005eb2d0.
+     */
+    APalette() : mpRgb15ToIndex(nullptr), mEnd(0) {
+    }
+
+    /**
+     * Release the inverse lookup table.
+     *
+     * The release is the single-object path, MemFreeScalar(), rather than the array path. ABmpFile
+     * open-codes the destructor at 0x0061c9d0 and 0x0061ca28, testing the member against null
+     * before each release.
+     */
+    ~APalette() {
+        delete mpRgb15ToIndex;
+    }
+
     /**
      * Copy a run of entries into the table.
      *

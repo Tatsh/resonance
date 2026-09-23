@@ -116,9 +116,9 @@ struct ABitmap {
     /**
      * Set or replace a run of palette entries, allocating the palette on first use.
      *
-     * The palette is allocated with the tag "APalette". Its two trailing words are cleared before
-     * the allocation is tested against null. That order is harmless in practice.
-     * AllocateTaggedMemory() treats a failure as fatal and never returns null.
+     * The palette is constructed before the allocation is tested against null, and the path
+     * where mPalette was already set calls SetEntries() with no test. The order is harmless in
+     * practice. AllocateTaggedMemory() treats a failure as fatal and never returns null.
      *
      * @param pEntries The entries to copy in.
      * @param nFirst The first palette index to write.

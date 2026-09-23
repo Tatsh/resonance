@@ -7,12 +7,11 @@ constexpr int kARleReaderNoTransparentValue = -1;
  * Cursor over a run length encoded eight bit pixel stream.
  *
  * The record is not polymorphic and has no RTTI, and the image retains no title for it. The name
- * here is inferred from the two routines that consume it.
+ * here is inferred from the routines that consume it.
  *
- * The two routines sit at 0x0060da78 and 0x0060dc10, well outside the canvas cluster, and a third
- * caller named DecompressRlePixelsToBuffer at 0x0060dcb8 sits between them. 13 of their 15 callers
- * are ACanvas slots, so the routines are described here. Which source file they belong to is not
- * settled.
+ * The three routines sit at 0x0060da78, 0x0060dc10, and 0x0060dc98, well outside the canvas
+ * cluster. 13 of the 15 callers of the first two are ACanvas slots, and the third serves PsTex
+ * alone. Which source file they belong to is not settled.
  *
  * The encoding is one control byte followed by data. The low seven bits are the run length. A set
  * top bit introduces that many literal bytes, and a clear top bit introduces one byte repeated
@@ -35,6 +34,18 @@ struct ARleReader {
      * @ghidraAddress 0x0060da78
      */
     unsigned char *DecodeRow(unsigned char *pDest);
+
+    /**
+     * Decode rows into a buffer until the stream terminates.
+     *
+     * Tests for the terminator before the first row, so an empty stream writes nothing. Each row
+     * starts where DecodeRow() left the previous one, so the rows land contiguously at the width
+     * mWidth.
+     *
+     * @param pDest The first row to write.
+     * @ghidraAddress 0x0060dc98
+     */
+    void DecodeRows(unsigned char *pDest);
 
     /**
      * Advance past a number of rows without writing.

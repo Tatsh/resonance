@@ -69,6 +69,13 @@ unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
     return pDest;
 }
 
+// 0x0060dc98
+void ARleReader::DecodeRows(unsigned char *pDest) {
+    while (*mSource != kControlTerminator) {
+        pDest = DecodeRow(pDest);
+    }
+}
+
 // 0x0060dc10. mWidth is read once before the first row and re-derived from a register afterwards,
 // so a width written between rows would not be seen.
 void ARleReader::SkipRows(int nRows) {

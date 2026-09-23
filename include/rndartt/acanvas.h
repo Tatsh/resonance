@@ -73,18 +73,7 @@ enum ACanvasClipCode {
  * reader outside the hierarchy and would otherwise be protected, and it shares the public section
  * so that the recovered order of the two survives.
  *
- * Three further members are recovered but not written here.
- *
- * `CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels)` at 0x005e8bc8 copies the
- * description, and when asked to allocate derives the row stride from the format code. Code 0
- * gives `(mWidth + 2) / 2` and every other code multiplies mWidth by the byte width in the table
- * at 0x00725cc0, whose first six entries are 0, 1, 2, 3, 4, and 1. The pixel rectangle is then
- * allocated with the tag "abitmap.h" and line 0x47. The format code finally selects the subclass
- * to construct through the jump table at 0x00837d90, and a code of 6 or more yields null.
- *
- * `CreateWithOwnedPixels(const ABitmap &bitmap)` at 0x005eb200 rewrites a format code of
- * kABitmapFormatRle8 to kABitmapFormatLinear8 and then calls CreateForBitmap() with allocation
- * requested.
+ * One further member is recovered but not written here.
  *
  * `ClipBlitSpan` at 0x005eb418 clips one source row against the clip rectangle and writes the
  * start and end columns plus the destination row into three small output records. Its six
@@ -104,6 +93,38 @@ public:
      * @ghidraAddress 0x005eb1a0
      */
     explicit ACanvas(const ABitmap &bitmap);
+
+    /**
+     * Construct the linear canvas subclass that draws a bitmap's format.
+     *
+     * Copies the description. When asked to allocate, the copy gains a row stride derived from
+     * its format, `(mWidth + 2) / 2` for kABitmapFormatLinear4 and mWidth times the matching entry
+     * of g_abBitmapBytesPerPixel otherwise, and a pixel rectangle allocated with the tag
+     * "abitmap.h" and line 0x47. The copy's mByteCount is not updated. The format code then
+     * selects the subclass through the jump table at 0x00837d90.
+     *
+     * The byte count passed to the allocator is a 64-bit product of the height and the stride,
+     * computed through the helper at 0x00600270 and truncated to 32 bits.
+     *
+     * @param bitmap The description to copy.
+     * @param bAllocatePixels Whether to allocate a fresh pixel rectangle for the copy.
+     * @return The new canvas, or null for a format code of kABitmapFormatCount or more, or when
+     *         the allocation returns null.
+     * @ghidraAddress 0x005e8bc8
+     */
+    static ACanvas *CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels);
+
+    /**
+     * Construct a canvas over a fresh pixel rectangle shaped like a bitmap.
+     *
+     * Rewrites a format code of kABitmapFormatRle8 to kABitmapFormatLinear8 in a copy, then calls
+     * CreateForBitmap() with allocation requested. The program lists no caller.
+     *
+     * @param bitmap The description to copy.
+     * @return The new canvas, or null.
+     * @ghidraAddress 0x005eb200
+     */
+    static ACanvas *CreateWithOwnedPixels(const ABitmap &bitmap);
 
     /**
      * Release the canvas.

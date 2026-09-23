@@ -51,15 +51,9 @@ ABitmap::ABitmap(void *pPixels,
 // 0x005eb290
 void ABitmap::SetPaletteEntries(const unsigned int *pEntries, int nFirst, int nCount) {
     if (mPalette == nullptr) {
-        APalette *pPalette =
-            static_cast<APalette *>(AllocateTaggedMemory(sizeof(APalette), "APalette"));
-        // Yes, the binary writes through the block and stores it before testing it against null.
-        pPalette->mpRgb15ToIndex = nullptr;
-        pPalette->mEnd = 0;
-        mPalette = pPalette;
-        if (pPalette == nullptr) {
-            return;
-        }
+        mPalette = new APalette;
     }
-    mPalette->SetEntries(pEntries, nFirst, nCount);
+    if (mPalette != nullptr) {
+        mPalette->SetEntries(pEntries, nFirst, nCount);
+    }
 }
