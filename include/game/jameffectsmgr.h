@@ -69,7 +69,7 @@ public:
      * @param nMask The step's mask, one bit per effect type.
      * @ghidraAddress 0x001a56d8
      */
-    void ApplyStepMask(long nMask);
+    void ApplyStepMask(long long nMask);
 
 private:
     // For a message on this track, flips the effect's bit in the step value of the message's bar,

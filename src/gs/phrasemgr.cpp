@@ -470,7 +470,7 @@ void PhraseMgr::PostBarStatusMsg(int nBar) {
     const int nEnabled = mTrackData->QueryBar(nBar);
     (void)mTrackData->GetQuant(nBar); // Yes, the binary discards this result.
     const int nPowerup = nEnabled != 0 ? mPowerbarMgr->GetPowerbar(nStep) : kNoPowerbar;
-    const long *pEffects = mDatabase->GetStepValue(nBar);
+    const long long *pEffects = mDatabase->GetStepValue(nBar);
     Phrase *pPhrase = mDatabase->GetPhraseAt(nBar);
 
     BarStatusMsg msg;
@@ -729,7 +729,7 @@ int PhraseMgr::GetPowerbar(int nBar) {
 }
 
 // 0x001c0248
-long *PhraseMgr::GetStepValue(int nBar) {
+long long *PhraseMgr::GetStepValue(int nBar) {
     return mDatabase->GetStepValue(nBar);
 }
 

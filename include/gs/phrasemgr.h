@@ -229,7 +229,7 @@ public:
      * @return PhraseDatabase::GetStepValue() on mDatabase.
      * @ghidraAddress 0x001c0248
      */
-    long *GetStepValue(int nBar);
+    long long *GetStepValue(int nBar);
 
     /**
      * @param nBar The bar, mapped through slot 5 of mMap.

@@ -67,7 +67,7 @@ void PhraseDatabase::Save(OBStream &stream) {
     const int nValueCount = mUnknown20.size();
     stream.Write(&nValueCount, sizeof(nValueCount));
     for (unsigned i = 0; i < mUnknown20.size(); ++i) {
-        stream << mUnknown20[i];
+        stream << static_cast<long>(mUnknown20[i]); // The long overload writes the low word.
     }
 }
 
@@ -96,7 +96,7 @@ void PhraseDatabase::Load(IBStream &stream) {
 void PhraseDatabase::Clear() {
     std::for_each(mPhrases.begin(), mPhrases.end(), Attachment::ReleaseIfSet);
     std::fill(mPhrases.begin(), mPhrases.end(), static_cast<Phrase *>(nullptr));
-    std::fill(mUnknown20.begin(), mUnknown20.end(), 0L);
+    std::fill(mUnknown20.begin(), mUnknown20.end(), 0LL);
 }
 
 // 0x001b8dc8
@@ -189,7 +189,7 @@ unsigned char PhraseDatabase::GetPhraseByte(int nIndex) {
 }
 
 // 0x001b91a0
-long *PhraseDatabase::GetStepValue(int nBar) {
+long long *PhraseDatabase::GetStepValue(int nBar) {
     return &mUnknown20[mMap->FindStepIndex(mMap->Slot5(nBar))];
 }
 

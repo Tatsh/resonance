@@ -54,7 +54,7 @@ JamEffectsMgr::~JamEffectsMgr() {
 }
 
 // 0x001a56d8
-void JamEffectsMgr::ApplyStepMask(long nMask) {
+void JamEffectsMgr::ApplyStepMask(long long nMask) {
     std::bitset<kStepMaskBits> mask(nMask);
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
         Effector *pEffector = *it;
@@ -72,9 +72,9 @@ void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     const int nBar = pMsg->mBar;
     // The binary does not test the effector for null.
     Effector *pEffector = FindEffector(nEffect);
-    long *pStep = mPhraseMgr->GetStepValue(nBar);
+    long long *pStep = mPhraseMgr->GetStepValue(nBar);
     // The image flips and tests the bit through a std::bitset reference on the step word.
-    const long nBit = 1L << (nEffect & (kStepMaskBits - 1));
+    const long long nBit = 1LL << (nEffect & (kStepMaskBits - 1));
     *pStep ^= nBit;
     pEffector->Enable((*pStep & nBit) != 0);
 

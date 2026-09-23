@@ -198,7 +198,7 @@ public:
      * @return The value of the step at or before the bar PlayMap::Slot5() maps nBar to.
      * @ghidraAddress 0x001b91a0
      */
-    long *GetStepValue(int nBar);
+    long long *GetStepValue(int nBar);
 
     /**
      * Write every phrase to a diagnostic stream, eight to a line, with `[null] ` for an empty
@@ -210,7 +210,7 @@ public:
     void Print(std::ostream &stream);
 
 private:
-    std::vector<Phrase *> mPhrases; // +0x14, one per step, reference counted
-    std::vector<long> mUnknown20;   // +0x20, one per step boundary, four bytes on the wire
-    PlayMap *mMap;                  // +0x2c
+    std::vector<Phrase *> mPhrases;    // +0x14, one per step, reference counted
+    std::vector<long long> mUnknown20; // +0x20, one per step boundary, four bytes on the wire
+    PlayMap *mMap;                     // +0x2c
 };
