@@ -66,6 +66,8 @@ public:
      *
      * Inline. The configuration queries at `0x00509b78` and `0x0050a1a0` expand it as Object's
      * copy, Object's validate(), the store of this class's vptr, and this class's validate().
+     * MetNullRenderer::OnRawController() at `0x0030e4c0` expands it the same way, with the
+     * `0x007d0ff0` vptr.
      *
      * @param ob The object to wrap.
      */
@@ -169,18 +171,6 @@ public:
     }
 
     /**
-     * Take another handle's reference as a sequence.
-     *
-     * Inline. MetNullRenderer::OnRawController() at `0x0030e4c0` expands it as the Py::Object copy,
-     * its validate(), the `0x007d0ff0` vptr store, and a second validate().
-     *
-     * @param ob The handle to copy.
-     */
-    explicit SeqBase(const Object &ob) : Object(ob) {
-        validate();
-    }
-
-    /**
      * Number of elements, read without the table.
      *
      * Inline. Unlike size(), the call goes straight to `PySequence_Length()` at `0x004a53f0`, which
@@ -202,6 +192,88 @@ public:
      */
     seqref<T> operator[](int i) {
         return seqref<T>(*this, i);
+    }
+
+    /**
+     * Position within a sequence, as PyCXX's `SeqBase<T>::iterator` is laid out.
+     *
+     * The object is the pair of the sequence's address and an index. PlayMapLinear::LoadStepRings()
+     * at `0x00128410` expands every member it uses. Equality compares the two sequence addresses
+     * and the two indices, not the Python objects, and end() reads PySequence_Length() afresh each
+     * time the loop tests against it. Dereferencing builds a seqref<T>, which fetches the element
+     * through getItem(), the virtual at `+0x38`.
+     */
+    class iterator {
+    public:
+        /**
+         * Address one position.
+         *
+         * @param pSequence The sequence.
+         * @param nWhere The index.
+         */
+        iterator(SeqBase<T> *pSequence, int nWhere) : mSequence(pSequence), mCount(nWhere) {
+        }
+
+        /**
+         * Report whether two iterators address the same position of the same sequence.
+         *
+         * @param other The iterator to compare with.
+         * @return True when both the sequence and the index match.
+         */
+        bool operator==(const iterator &other) const {
+            return mSequence == other.mSequence && mCount == other.mCount;
+        }
+
+        /**
+         * Report whether two iterators address different positions.
+         *
+         * @param other The iterator to compare with.
+         * @return True when the sequence or the index differs.
+         */
+        bool operator!=(const iterator &other) const {
+            return mSequence != other.mSequence || mCount != other.mCount;
+        }
+
+        /**
+         * Address the element at this position.
+         *
+         * @return A proxy for the element.
+         */
+        seqref<T> operator*() {
+            return seqref<T>(*mSequence, mCount);
+        }
+
+        /**
+         * Step to the next position.
+         *
+         * @return This iterator.
+         */
+        iterator &operator++() {
+            ++mCount;
+            return *this;
+        }
+
+    private:
+        SeqBase<T> *mSequence;
+        int mCount;
+    };
+
+    /**
+     * Address the first element.
+     *
+     * @return An iterator at index 0.
+     */
+    iterator begin() {
+        return iterator(this, 0);
+    }
+
+    /**
+     * Address one past the last element.
+     *
+     * @return An iterator at length().
+     */
+    iterator end() {
+        return iterator(this, length());
     }
 };
 
