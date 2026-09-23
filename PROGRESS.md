@@ -17,32 +17,36 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                   | Count  |
 | ------------------------- | ------ |
 | Functions in the program  | 15,587 |
-| Excluded by rule          | 6,933  |
-| Reconstructable           | 8,654  |
-| Declared or defined       | 4,710  |
-| Share declared or defined | 54.43% |
-| Defined, with a body      | 2,742  |
-| Share implemented         | 31.68% |
-| Remaining, with a name    | 1,445  |
-| Remaining, unidentified   | 2,499  |
+| Excluded by rule          | 7,018  |
+| Reconstructable           | 8,569  |
+| Declared or defined       | 5,047  |
+| Share declared or defined | 58.90% |
+| Defined, with a body      | 3,220  |
+| Share implemented         | 37.58% |
+| Remaining, with a name    | 1,299  |
+| Remaining, unidentified   | 2,223  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,968 of
-the 4,710 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 2,742 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,827 of
+the 5,047 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 3,220 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 31.68% as the answer to
-"how much is reconstructed" and 54.43% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 37.58% as the answer to
+"how much is reconstructed" and 58.90% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `72f44cb`. Work written and checked but not yet committed
+The table measures the committed tree at `b7bc378`. Work written and checked but not yet committed
 is not included.
 
-Since the measurement at `27cc069` (27.78%), bodies rose by 255 and the reconstructable figure fell
-by 298. The fall comes from identification, not from source. Library routines (template
-instantiations, the embedded interpreter, the SDK, and the compiler runtimes) were titled by
-normalised body matches recorded under `.wiswa-ci/freq/`, which moved them into their exclusion
-categories.
+Since the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
+reconstructable figure fell by 85. The template library category grew by 99, the duplicate category
+shrank by 18, and the compiler-generated, SDK, and vendored categories moved by 4, 1, and -1.
+
+Before that, from the measurement at `27cc069` (27.78%), bodies rose by 255 and the
+reconstructable figure fell by 298. The fall came from identification, not from source. Library
+routines (template instantiations, the embedded interpreter, the SDK, and the compiler runtimes)
+were titled by normalised body matches recorded under `.wiswa-ci/freq/`, and the titles moved them
+into their exclusion categories.
 
 ### Correction to the figures published at `de1134b`
 
@@ -62,9 +66,9 @@ known instance; it has a body and counts as unaccounted.
 The implemented count above was taken from a fresh function list. `implemented_report.py` reads
 `functions-latest.txt`, a stored list, and so reports a different denominator (9,257 on the same
 day) until that list is refreshed. The body count intersects the body markers under `src` with the
-function list after the default exclusions, through `.wiswa-ci/freq/body_share.py`. That set is 80
+function list after the default exclusions, through `.wiswa-ci/freq/body_share.py`. That set is 77
 routines smaller than the audit's reconstructable figure, because the audit also bounds addresses.
-The implemented share is exact to within those 80.
+The implemented share is exact to within those 77.
 
 A pass that writes a header moves the larger share and not the smaller one, and a pass that writes
 bodies for an already-declared class moves the smaller share alone.
@@ -104,11 +108,11 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 866   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 1,880 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,001 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 1,327 | Container instantiations                                         |
-| Platform SDK                   | 389   | `sce` entry points and kernel syscalls                           |
+| Compiler-generated             | 870   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 1,879 | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 1,983 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 1,426 | Container instantiations                                         |
+| Platform SDK                   | 390   | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 205   | Exception, cast, and unwinding support                           |
 | C runtime                      | 265   | String and memory routines, and the floating-point library       |
 
