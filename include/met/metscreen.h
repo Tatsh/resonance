@@ -521,7 +521,7 @@ public:
      * 0, 1, and 2. MetExpansionPakScreen at `0x002193e8` matches `expansion_prepare`,
      * `expansion_check`, `expansion_done`, `expansion_load`, and `expansion_retry`, and
      * MetMemDetectScreen at `0x002d9e40` matches `mem_check`, `mem_format_check`, `mem_error`, and
-     * eight further keys. The second argument is which button the user chose, on the evidence that
+     * six further keys. The second argument is which button the user chose, on the evidence that
      * those screens build their dialogues with the button sets `CONTINUE`/`CANCEL`/`RETRY` and
      * `YES`/`NO` and then branch on 0, 1, and 2. The MetSaveRemix override at `0x00375590` reads
      * both arguments before writing either, passing the first to HxStr::MatchesLiteral and
