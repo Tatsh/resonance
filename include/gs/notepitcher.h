@@ -25,8 +25,8 @@ class TickClock;
  * It ignores an EraseOffMsg rather than forwarding it, which is the one message the three Pitcher
  * subclasses treat differently from each other.
  *
- * Only HandleMessage() and Tick() are written. The five routines they dispatch to and the
- * constructor are declared with their addresses and their bodies are not written. The five titles
+ * The constructor, HandleMessage(), and Tick() are written. The five routines the last two dispatch
+ * to are declared with their addresses and their bodies are not written. The five titles
  * come from the message each routine posts rather than from the message it receives, which is the
  * naming the program already had and is retained here.
  */
@@ -36,7 +36,7 @@ public:
      * Construct a note pitcher for one track.
      *
      * The seven arguments arrive in a1 through a3 and t0 through t3, which is the register
-     * convention this target uses for arguments five through eight. The body is not written.
+     * convention this target uses for arguments five through eight.
      *
      * @param pPhraseMgr The phrase manager for the track.
      * @param pQuantizer The quantiser for the track.
@@ -144,7 +144,7 @@ private:
     // `+0x08`, so it identifies the track this pitcher serves.
     int mUnknown40;      // +0x40
     Player *mUnknown44;  // +0x44, starts at g_nullPlayer
-    int mUnknown48;      // +0x48, starts at -1
+    Mid::MBT mUnknown48; // +0x48, MBT(-1), stored and then tested at 0x001b1e60
     Mid::MBT mUnknown4c; // +0x4c, starts at kMBTInfinity
     // Copied from the phrase manager's `+0x34` after an initial kMBTInfinity. Turns an elapsed
     // tick count into a bar index.

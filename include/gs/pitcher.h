@@ -34,7 +34,21 @@
 class Pitcher : public MsgSink, public MsgSource, public TickTask {
 public:
     /**
+     * Construct the three bases, the TickTask one to run every bar.
+     *
+     * Inline. Each subclass constructor expands it, starting with the finiteness test of the
+     * period.
+     *
+     * @param pClock The clock the task is posted against.
+     */
+    explicit Pitcher(Sch::TickClock *pClock) : TickTask(pClock, Mid::MBT(kBarPeriod).mTick, 0) {
+    }
+
+    /**
      * @ghidraAddress 0x001b3348
      */
     virtual ~Pitcher();
+
+    /** The TickTask period, one bar of 1920 ticks. */
+    static constexpr int kBarPeriod = 1920;
 };

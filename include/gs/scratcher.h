@@ -32,17 +32,15 @@ class TickClock;
  *
  * The constructor fixes the member map. It copies the bar length from the phrase manager's `+0x34`
  * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
- * both player references at the stand-in player, and sizes mUnknown74 to three zeroed words.
+ * both player references at the stand-in player, and sizes mUnknown74 to three zeroed elements.
  *
- * Only HandleMessage() is written. The five routines it dispatches to, Tick(), and the constructor
- * are declared with their addresses and their bodies are not written.
+ * The constructor and HandleMessage() are written. The five routines HandleMessage() dispatches
+ * to and Tick() are declared with their addresses and their bodies are not written.
  */
 class Scratcher : public Pitcher {
 public:
     /**
      * Construct a scratcher for one track.
-     *
-     * The body is not written.
      *
      * @param pPhraseMgr The phrase manager for the track.
      * @param pQuantizer The quantiser for the track.
@@ -161,15 +159,17 @@ private:
     int mUnknown58; // +0x58
     // Starts at g_nullPlayer. Matched against a PitchRiffMsg's `+0x08`, which msg/pitchriffmsg.h
     // types as an int.
-    Player *mUnknown5c;          // +0x5c
-    Mid::MBT mUnknown60;         // +0x60, starts at kMBTInfinity
-    Player *mUnknown64;          // +0x64, starts at g_nullPlayer
-    int mUnknown68;              // +0x68, result of the PitchRiffMsg handler
-    int mUnknown6c;              // +0x6c, starts at -1
-    int mUnknown70;              // +0x70
-    std::vector<int> mUnknown74; // +0x74, three zeroed words on construction
-    int mUnknown80;              // +0x80, not written by the constructor
-    int mUnknown84;              // +0x84
-    int mUnknown88;              // +0x88
-    int mUnknown8c;              // +0x8c
+    Player *mUnknown5c;  // +0x5c
+    Mid::MBT mUnknown60; // +0x60, starts at kMBTInfinity
+    Player *mUnknown64;  // +0x64, starts at g_nullPlayer
+    int mUnknown68;      // +0x68, result of the PitchRiffMsg handler
+    int mUnknown6c;      // +0x6c, starts at -1
+    int mUnknown70;      // +0x70
+    // +0x74. The constructor builds three elements from an int zero through the float fill
+    // instantiation at 0x001d1f90, which converts each with cvt.s.w.
+    std::vector<float> mUnknown74;
+    int mUnknown80;      // +0x80, not written by the constructor
+    Mid::MBT mUnknown84; // +0x84, MBT(0), stored and then tested at 0x001cfc20
+    int mUnknown88;      // +0x88
+    int mUnknown8c;      // +0x8c
 };

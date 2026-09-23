@@ -28,8 +28,8 @@ class TickClock;
  * ticks per quarter note. VoxingSTG's call at `0x001da0b0` passes its phrase manager, its
  * quantiser, the song clock, and its track description, which types all four.
  *
- * Only HandleMessage() is written. The five routines it dispatches to and the Tick() override are
- * declared with their addresses and their bodies are not written.
+ * The constructor and HandleMessage() are written. The five routines HandleMessage() dispatches to
+ * and the Tick() override are declared with their addresses and their bodies are not written.
  */
 class Voxer : public Pitcher {
 public:
