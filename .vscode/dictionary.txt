@@ -5,6 +5,7 @@ acceler
 addiu
 advancesectionmsg
 advancesectiontogglemsg
+afixed
 allnotesoffmsg
 almodule
 analogr
@@ -173,6 +174,7 @@ ghidra
 ghostnoteseffector
 graminit
 graphviz
+grooveworld
 grvscript
 gscripts
 handoff
@@ -253,6 +255,7 @@ longobject
 longop
 looptogglemsg
 looptoolmsg
+lsdmode
 lseek
 lvalues
 mainloop

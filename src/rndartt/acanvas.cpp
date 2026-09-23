@@ -1,5 +1,6 @@
 #include "rndartt/acanvas.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "os/mem.h"
@@ -8,6 +9,8 @@
 #include "rndartt/acanvaslin32.h"
 #include "rndartt/acanvaslin4.h"
 #include "rndartt/acanvaslin8.h"
+#include "rndartt/aclipspan.h"
+#include "rndartt/afixed.h"
 #include "rndartt/afont.h"
 #include "rndartt/apoint.h"
 #include "rndartt/arowspan.h"
@@ -23,6 +26,7 @@ constexpr int kNibbleBits = 4;
 constexpr unsigned int kNibbleMask = 0x0f;
 constexpr int kRGBByteCount = 3;
 constexpr char kNewline = '\n';
+constexpr int kFixedOne = 1 << kACanvasFractionBits;
 
 // 0x00837d80, this translation unit's copy of the tag ABitmap::ABitmap() also uses.
 const char *const kBitmapAllocTag = "abitmap.h";
@@ -135,8 +139,8 @@ ACanvas::~ACanvas() {
 }
 
 // 0x005eb3d0
-int ACanvas::ClipCodeForPoint(int nX, int nY) const {
-    int nCode = 0;
+unsigned char ACanvas::ClipCodeForPoint(int nX, int nY) const {
+    unsigned char nCode = 0;
     if (nX < mClip.mLeft) {
         nCode |= kACanvasClipLeft;
     }
@@ -150,6 +154,114 @@ int ACanvas::ClipCodeForPoint(int nX, int nY) const {
         nCode |= kACanvasClipBelow;
     }
     return nCode;
+}
+
+// 0x005eb418
+int ACanvas::ClipBlitSpan(
+    const ABitmap &source, int *pnX, int *pnY, ARleReader *pReader, AClipSpan *pSpan) const {
+    pSpan->mStopColumn = source.mWidth;
+    if (mClip.mRight < *pnX + source.mWidth) {
+        pSpan->mStopColumn = static_cast<short>(mClip.mRight - *pnX);
+    }
+    pSpan->mSkipLeft = 0;
+    if (*pnX < mClip.mLeft) {
+        pSpan->mSkipLeft = static_cast<short>(mClip.mLeft - *pnX);
+        *pnX = mClip.mLeft;
+    }
+    if (pSpan->mSkipLeft >= pSpan->mStopColumn) {
+        return 0;
+    }
+
+    pSpan->mStopRow = static_cast<short>(*pnY + source.mHeight);
+    if (mClip.mBottom < pSpan->mStopRow) {
+        pSpan->mStopRow = mClip.mBottom;
+    }
+    if (*pnY < mClip.mTop) {
+        pReader->SkipRows(mClip.mTop - *pnY);
+        *pnY = mClip.mTop;
+    }
+    return *pnY < pSpan->mStopRow;
+}
+
+// 0x005e8fd8
+int ACanvas::ClipLineToRect(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const {
+    unsigned char nCode0 =
+        ClipCodeForPoint(*pnX0 >> kACanvasFractionBits, *pnY0 >> kACanvasFractionBits);
+    for (;;) {
+        unsigned char nCode1 =
+            ClipCodeForPoint(*pnX1 >> kACanvasFractionBits, *pnY1 >> kACanvasFractionBits);
+        if (static_cast<unsigned char>(nCode0 | nCode1) == 0) {
+            return 1;
+        }
+        if (static_cast<unsigned char>(nCode0 & nCode1) != 0) {
+            return 0;
+        }
+        if (nCode1 == 0) {
+            const int nX = *pnX0;
+            *pnX0 = *pnX1;
+            *pnX1 = nX;
+            const int nY = *pnY0;
+            *pnY0 = *pnY1;
+            *pnY1 = nY;
+            nCode1 = nCode0;
+            nCode0 = 0;
+        }
+        if ((nCode1 & (kACanvasClipLeft | kACanvasClipRight)) != 0) {
+            const int nEdge = (nCode1 & kACanvasClipLeft) != 0 ?
+                                  mClip.mLeft << kACanvasFractionBits :
+                                  (mClip.mRight << kACanvasFractionBits) - g_nFixedEpsilon;
+            const int nSlope = ((*pnY1 - *pnY0) << kACanvasFractionBits) / (*pnX1 - *pnX0);
+            *pnY1 = *pnY0 + ((nSlope * (nEdge - *pnX0)) >> kACanvasFractionBits);
+            *pnX1 = nEdge;
+        } else {
+            const int nEdge = (nCode1 & kACanvasClipAbove) != 0 ?
+                                  mClip.mTop << kACanvasFractionBits :
+                                  (mClip.mBottom << kACanvasFractionBits) - g_nFixedEpsilon;
+            const int nSlope = ((*pnX1 - *pnX0) << kACanvasFractionBits) / (*pnY1 - *pnY0);
+            *pnX1 = *pnX0 + ((nSlope * (nEdge - *pnY0)) >> kACanvasFractionBits);
+            *pnY1 = nEdge;
+        }
+    }
+}
+
+// 0x005e91b8
+int ACanvas::ClipBlitToRect(ABitmap *pBitmap, int *pnX, int *pnY) const {
+    if (*pnY < mClip.mTop) {
+        pBitmap->mPixels = static_cast<unsigned char *>(pBitmap->mPixels) +
+                           (mClip.mTop - *pnY) * pBitmap->mBytesPerRow;
+        pBitmap->mHeight = static_cast<short>(pBitmap->mHeight - (mClip.mTop - *pnY));
+        *pnY = mClip.mTop;
+    }
+    if (mClip.mBottom < *pnY + pBitmap->mHeight) {
+        pBitmap->mHeight = static_cast<short>(mClip.mBottom - *pnY);
+    }
+
+    if (*pnX < mClip.mLeft) {
+        unsigned char *pPixels = static_cast<unsigned char *>(pBitmap->mPixels);
+        if (pBitmap->mFormat == kABitmapFormatLinear4) {
+            // Yes, the binary advances by half the destination column rather than by half the
+            // columns clipped away, and takes the new flag from this canvas's own bitmap.
+            if (((mClip.mLeft - *pnX) & 1) != 0) {
+                if (pBitmap->mOddNibbleStart != 0) {
+                    pPixels += (*pnX + 1) / 2;
+                } else {
+                    pPixels += *pnX / 2;
+                }
+                pBitmap->mOddNibbleStart = mBitmap.mOddNibbleStart ^ 1;
+            } else {
+                pPixels += *pnX / 2;
+            }
+        } else {
+            pPixels += (mClip.mLeft - *pnX) * g_abBitmapBytesPerPixel[pBitmap->mFormat];
+        }
+        pBitmap->mPixels = pPixels;
+        pBitmap->mWidth = static_cast<short>(pBitmap->mWidth - (mClip.mLeft - *pnX));
+        *pnX = mClip.mLeft;
+    }
+    if (mClip.mRight < *pnX + pBitmap->mWidth) {
+        pBitmap->mWidth = static_cast<short>(mClip.mRight - *pnX);
+    }
+    return pBitmap->mWidth > 0 && pBitmap->mHeight > 0;
 }
 
 // 0x005eb520
@@ -340,6 +452,28 @@ void ACanvas::DrawLine(int nX0, int nY0, int nX1, int nY1) {
     }
 }
 
+// 0x005e9508
+int ACanvas::SetupLineSteps(int nX0, int nY0, int nX1, int nY1, int *pnStepX, int *pnStepY) {
+    const int nDeltaX = nX1 - nX0;
+    const int nDeltaY = nY1 - nY0;
+    const int nLengthX = abs(nDeltaX);
+    const int nLengthY = abs(nDeltaY);
+    if (nLengthX == 0 && nLengthY == 0) {
+        return 0;
+    }
+    if (nLengthY < nLengthX) {
+        *pnStepX = nDeltaX >= 0 ? kFixedOne : -kFixedOne;
+        *pnStepY = (nDeltaY << kACanvasFractionBits) / nLengthX;
+        return (nLengthX >> kACanvasFractionBits) + 1;
+    }
+    if (nLengthY > 0) {
+        *pnStepX = (nDeltaX << kACanvasFractionBits) / nLengthY;
+        *pnStepY = nDeltaY >= 0 ? kFixedOne : -kFixedOne;
+        return (nLengthY >> kACanvasFractionBits) + 1;
+    }
+    return 0; // Yes, the binary tests the length again although this return is unreachable.
+}
+
 // 0x005ec050
 void ACanvas::TextureRowIndexed(int nY,
                                 int nLeft,
@@ -518,29 +652,8 @@ void ACanvas::BlitRle8(const ABitmap &source, int nX, int nY) {
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
-
-    short nSkipLeft = 0;
-    short nStopColumn = source.mWidth;
-    if (mClip.mRight < nX + source.mWidth) {
-        nStopColumn = static_cast<short>(mClip.mRight - nX);
-    }
-    if (nX < mClip.mLeft) {
-        nSkipLeft = static_cast<short>(mClip.mLeft - nX);
-        nX = mClip.mLeft;
-    }
-    if (nSkipLeft >= nStopColumn) {
-        return;
-    }
-
-    short nStopRow = static_cast<short>(nY + source.mHeight);
-    if (mClip.mBottom < nStopRow) {
-        nStopRow = mClip.mBottom;
-    }
-    if (nY < mClip.mTop) {
-        reader.SkipRows(mClip.mTop - nY);
-        nY = mClip.mTop;
-    }
-    if (nY >= nStopRow) {
+    AClipSpan clip;
+    if (ClipBlitSpan(source, &nX, &nY, &reader, &clip) == 0) {
         return;
     }
 
@@ -550,11 +663,11 @@ void ACanvas::BlitRle8(const ABitmap &source, int nX, int nY) {
                 source.mWidth,
                 1,
                 0);
-    row.mPixels = g_abCanvasRowScratch + nSkipLeft;
-    row.mWidth = static_cast<short>(nStopColumn - nSkipLeft);
+    row.mPixels = g_abCanvasRowScratch + clip.mSkipLeft;
+    row.mWidth = static_cast<short>(clip.mStopColumn - clip.mSkipLeft);
     row.mTransparentColor = source.mTransparentColor;
     row.mPalette = source.mPalette;
-    for (int y = nY; y < nStopRow; ++y) {
+    for (int y = nY; y < clip.mStopRow; ++y) {
         reader.DecodeRow(g_abCanvasRowScratch);
         Blit8NoClip(row, nX, y);
     }
@@ -1025,38 +1138,17 @@ void ACanvas::BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigne
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
-
-    short nStopColumn = source.mWidth;
-    if (mClip.mRight < nX + source.mWidth) {
-        nStopColumn = static_cast<short>(mClip.mRight - nX);
-    }
-    short nSkipLeft = 0;
-    if (nX < mClip.mLeft) {
-        nSkipLeft = static_cast<short>(mClip.mLeft - nX);
-        nX = mClip.mLeft;
-    }
-    if (nSkipLeft >= nStopColumn) {
-        return;
-    }
-
-    short nStopRow = static_cast<short>(nY + source.mHeight);
-    if (mClip.mBottom < nStopRow) {
-        nStopRow = mClip.mBottom;
-    }
-    if (nY < mClip.mTop) {
-        reader.SkipRows(mClip.mTop - nY);
-        nY = mClip.mTop;
-    }
-    if (nY >= nStopRow) {
+    AClipSpan clip;
+    if (ClipBlitSpan(source, &nX, &nY, &reader, &clip) == 0) {
         return;
     }
 
     ARowSpan span;
     span.mLeft = static_cast<short>(nX);
-    span.mRight = static_cast<short>(nX + (nStopColumn - nSkipLeft));
+    span.mRight = static_cast<short>(nX + (clip.mStopColumn - clip.mSkipLeft));
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch + nSkipLeft;
+    span.mSource = g_abCanvasRowScratch + clip.mSkipLeft;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
@@ -1064,7 +1156,7 @@ void ACanvas::BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigne
             span.mPalette = g_pDefaultPalette;
         }
     }
-    for (span.mY = static_cast<short>(nY); span.mY < nStopRow; ++span.mY) {
+    for (span.mY = static_cast<short>(nY); span.mY < clip.mStopRow; ++span.mY) {
         reader.DecodeRow(g_abCanvasRowScratch);
         RemapRowIndexed(span, pRemap);
     }
@@ -1155,38 +1247,17 @@ void ACanvas::BlitBlendRle8(const ABitmap &source,
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
-
-    short nStopColumn = source.mWidth;
-    if (mClip.mRight < nX + source.mWidth) {
-        nStopColumn = static_cast<short>(mClip.mRight - nX);
-    }
-    short nSkipLeft = 0;
-    if (nX < mClip.mLeft) {
-        nSkipLeft = static_cast<short>(mClip.mLeft - nX);
-        nX = mClip.mLeft;
-    }
-    if (nSkipLeft >= nStopColumn) {
-        return;
-    }
-
-    short nStopRow = static_cast<short>(nY + source.mHeight);
-    if (mClip.mBottom < nStopRow) {
-        nStopRow = mClip.mBottom;
-    }
-    if (nY < mClip.mTop) {
-        reader.SkipRows(mClip.mTop - nY);
-        nY = mClip.mTop;
-    }
-    if (nY >= nStopRow) {
+    AClipSpan clip;
+    if (ClipBlitSpan(source, &nX, &nY, &reader, &clip) == 0) {
         return;
     }
 
     ARowSpan span;
     span.mLeft = static_cast<short>(nX);
-    span.mRight = static_cast<short>(nX + (nStopColumn - nSkipLeft));
+    span.mRight = static_cast<short>(nX + (clip.mStopColumn - clip.mSkipLeft));
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch + nSkipLeft;
+    span.mSource = g_abCanvasRowScratch + clip.mSkipLeft;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
@@ -1194,7 +1265,7 @@ void ACanvas::BlitBlendRle8(const ABitmap &source,
             span.mPalette = g_pDefaultPalette;
         }
     }
-    for (span.mY = static_cast<short>(nY); span.mY < nStopRow; ++span.mY) {
+    for (span.mY = static_cast<short>(nY); span.mY < clip.mStopRow; ++span.mY) {
         reader.DecodeRow(g_abCanvasRowScratch);
         BlendRowIndexed(span, ppBlend);
     }

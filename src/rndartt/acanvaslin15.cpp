@@ -13,6 +13,16 @@ constexpr unsigned int kColor15Mask = 0x7fff;
 constexpr unsigned int kAlpha15Bit = 0x8000;
 constexpr int kBytesPerPixel = 2;
 
+// The top five bits of the red and green bytes of an 8888 colour, the 1555 blue field, and the
+// shift that moves each 8888 field into its 1555 position.
+constexpr unsigned int kRedHigh5Mask = 0x0000f8;
+constexpr unsigned int kGreenHigh5Mask = 0x00f800;
+constexpr unsigned int kBlue15Mask = 0x7c00;
+constexpr int kRedPackShift = 3;
+constexpr int kGreenPackShift = 6;
+constexpr int kBluePackShift = 9;
+constexpr int kAlphaPackShift = 16;
+
 // Two bytes are one pixel. The row offset is a byte count and the column is a pixel index, which
 // is how the binary computes it: the row is added as bytes and the column shifted left by one.
 inline unsigned short *RowAt(void *pPixels, int nBytesPerRow, int nY) {
@@ -51,6 +61,14 @@ inline const APalette *ResolvePalette(const ABitmap &source, const ABitmap &canv
 }
 
 } // namespace
+
+// 0x00618f38
+unsigned short APackRgb1555From8888(unsigned int nColor) {
+    return static_cast<unsigned short>(((nColor & kRedHigh5Mask) >> kRedPackShift) |
+                                       ((nColor & kGreenHigh5Mask) >> kGreenPackShift) |
+                                       ((nColor >> kBluePackShift) & kBlue15Mask) |
+                                       ((nColor >> kAlphaPackShift) & kAlpha15Bit));
+}
 
 // 0x00619008
 ACanvasLin15::ACanvasLin15(const ABitmap &bitmap) : ACanvas15(bitmap) {

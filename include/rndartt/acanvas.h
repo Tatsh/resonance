@@ -5,6 +5,7 @@
 #include "rndartt/arlereader.h"
 
 class APalette;
+struct AClipSpan;
 struct AFont;
 struct APoint;
 struct ARowSpan;
@@ -71,14 +72,7 @@ enum ACanvasClipCode {
  * mBitmap.mHeight from outside the hierarchy and the image supplies no accessor, so the access
  * rule gives public. A friend declaration for Rnd::Font fits the image equally well. mClip has no
  * reader outside the hierarchy and would otherwise be protected, and it shares the public section
- * so that the recovered order of the two survives.
- *
- * One further member is recovered but not written here.
- *
- * `ClipBlitSpan` at 0x005eb418 clips one source row against the clip rectangle and writes the
- * start and end columns plus the destination row into three small output records. Its six
- * arguments are recovered. The records they address are not, and the signature is therefore
- * unsettled.
+ * so that the recovered order of the two is preserved.
  */
 class ACanvas {
 public:
@@ -132,8 +126,10 @@ public:
      * The compiled body reinstalls this class's virtual function table before releasing. That is
      * what the toolchain emits for a base destructor. The pixel rectangle is not released here.
      *
-     * Every subclass destructor compiles to the same three instructions and adds no source, so no
-     * subclass declares one.
+     * Every subclass destructor compiles to the same body, which installs this class's table and
+     * releases the object when the deleting flag is set. ACanvas15, ACanvas32, and ACanvasLin32
+     * leave theirs implicit (0x0062fb40, 0x0062f710, and 0x006141a0), and the other subclasses
+     * declare one.
      *
      * @ghidraAddress 0x005ead68
      */
@@ -991,23 +987,55 @@ protected:
     /**
      * Classify a point against the clip rectangle.
      *
+     * The code is formed in eight bits, and ClipLineToRect() compares combinations of two codes
+     * in eight bits as well.
+     *
      * @param nX The horizontal coordinate.
      * @param nY The vertical coordinate.
      * @return The ACanvasClipCode bits, or zero when the point is inside.
      * @ghidraAddress 0x005eb3d0
      */
-    int ClipCodeForPoint(int nX, int nY) const;
+    unsigned char ClipCodeForPoint(int nX, int nY) const;
+
+    /**
+     * Clip a run length encoded copy against the clip rectangle.
+     *
+     * Records the decoded columns that remain and the destination row the copy stops at, and
+     * moves the destination position onto the clip rectangle. Rows above the clip rectangle are
+     * consumed through ARleReader::SkipRows(), so the reader then addresses the first row that
+     * remains. The row fields are not written when no column remains.
+     *
+     * The program lists no caller. BlitRle8(), BlitRemapRle8(), and BlitBlendRle8() each compile
+     * an inlined copy.
+     *
+     * @param source The source bitmap.
+     * @param pnX The destination column, moved right to the clip rectangle when it lies left of
+     *            it.
+     * @param pnY The destination row, moved down likewise.
+     * @param pReader The reader over the source, already at the first row.
+     * @param pSpan The record to fill.
+     * @return Zero when no column or no row remains.
+     * @ghidraAddress 0x005eb418
+     */
+    int ClipBlitSpan(
+        const ABitmap &source, int *pnX, int *pnY, ARleReader *pReader, AClipSpan *pSpan) const;
 
     /**
      * Clip a line against the clip rectangle, rewriting both endpoints in place.
      *
-     * Every coordinate is 24.8 fixed point.
+     * Every coordinate is 24.8 fixed point. The routine is a Cohen and Sutherland clip that only
+     * ever moves the second endpoint. When the second endpoint is inside and the first is not, the
+     * two are exchanged first, so the endpoints can return in the opposite order. An endpoint
+     * clipped to the right or bottom edge lands g_nFixedEpsilon inside the exclusive edge.
+     *
+     * The outcode of the first endpoint is computed once, before the loop, and after an exchange
+     * it is taken as zero rather than recomputed.
      *
      * @param pnX0 The first column.
      * @param pnY0 The first row.
      * @param pnX1 The last column.
      * @param pnY1 The last row.
-     * @return Zero when nothing survives.
+     * @return Zero when nothing remains, and one otherwise.
      * @ghidraAddress 0x005e8fd8
      */
     int ClipLineToRect(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const;
@@ -1018,10 +1046,15 @@ protected:
      * Advances the pixel pointer, shrinks the extent, and moves the destination position, all in
      * place. Every clipped copy and read slot calls this first.
      *
+     * The left clip of a kABitmapFormatLinear4 bitmap has two defects in the binary. The pixel
+     * pointer advances by half the destination column rather than by half the columns clipped
+     * away, and for an odd count the new mOddNibbleStart is the inverse of this canvas's own
+     * flag rather than of the bitmap's.
+     *
      * @param pBitmap The bitmap to clip.
      * @param pnX The destination column.
      * @param pnY The destination row.
-     * @return Zero when nothing survives.
+     * @return Zero when nothing remains.
      * @ghidraAddress 0x005e91b8
      */
     int ClipBlitToRect(ABitmap *pBitmap, int *pnX, int *pnY) const;
