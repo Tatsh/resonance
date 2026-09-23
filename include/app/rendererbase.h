@@ -8,14 +8,19 @@ class Message;
 /**
  * Base of every renderer, with a message queue and a router of its own.
  *
- * `12RendererBase` in the RTTI descriptor, with its own type function at `0x00139e88` and its
- * destructor at `0x00139e20`. The class itself is not recovered. Its table has entries at
- * `0x00139f28`, `0x00139f30`, `0x00139f38`, and `0x00139f40`, none of which is titled, so nothing
- * here declares them; a later pass owns that work.
+ * `12RendererBase` in the RTTI descriptor, deriving from MsgSink at offset 0, with its own type
+ * function at `0x00139e88`. Three classes derive from it: MetRenderer, MetNullRenderer, and
+ * Renderer. Each of their constructors calls this class's constructor directly.
  *
- * This declaration exists because Router is a nested class and C++ cannot express the nesting
- * without it. Adding a member to this class on anything short of recovered evidence would be
- * worse than the gap.
+ * The table at `0x007d2d20` runs eleven entries against MsgSink's four, so slots 4 through 10 are
+ * the seven virtuals this class introduces. Slots 3, 7, and 8 address the pure-virtual stub at
+ * `0x005381a8`, and the class is therefore abstract. Slot 3 is MsgSink::HandleMessage(), which this
+ * class leaves pure. Slot 2 overrides MsgSink::Handle().
+ *
+ * No verb is recovered for any of the seven, so each is declared under a placeholder that records
+ * its slot. The six MetRenderer overrides take no argument and return nothing, and Renderer's
+ * three overrides agree, which is what fixes the signatures. The base bodies of slots 4, 5, 9, and
+ * 10 are empty and read no argument register, so they reveal nothing on their own.
  */
 class RendererBase : public MsgSink {
 public:
@@ -26,15 +31,15 @@ public:
      * inheritance from MsgSink at offset 0. The object is eight bytes: the four-byte MsgSink
      * subobject, whose table pointer sits at offset 0, followed by the target at `+0x04`.
      *
-     * The class is the one counter-example to a claim MsgSink's own header used to make. 172
-     * tables in the image place the shared MsgSink::Handle() body at slot 2, and this class is the
-     * only one that overrides it.
+     * 172 tables in the image place the shared MsgSink::Handle() body at slot 2. This class and
+     * RendererBase are the two that override it, and the tables of RendererBase's subclasses
+     * inherit RendererBase's override.
+     *
+     * The destructor at `0x00139d70` is implicitly declared. It is byte-identical to MsgSink's,
+     * because a trivial derived destructor stores only the base table pointer.
      */
     class Router : public MsgSink {
     public:
-        /** @ghidraAddress 0x00139d70 */
-        virtual ~Router();
-
         /**
          * Forward the message to the target sink.
          *
@@ -64,12 +69,21 @@ public:
         /**
          * The sink every message is handed to. +0x04
          *
-         * Public because no accessor for it exists in the image and nothing recovered writes it
-         * either, so whatever installs the target is outside the part of the program recovered so
-         * far. A friend declaration fits equally well.
+         * Public because RendererBase's constructor writes it directly, and an enclosing class has
+         * no access to a nested class's private members. A friend declaration fits equally well.
          */
         MsgSink *mTarget;
     };
+
+    /**
+     * Start the queue with the router as its one sink.
+     *
+     * The router's target is this object, so every message the queue delivers arrives at this
+     * object's HandleMessage().
+     *
+     * @ghidraAddress 0x00139c10
+     */
+    RendererBase();
 
     /**
      * Release the queue and the router.
@@ -82,6 +96,61 @@ public:
      * @ghidraAddress 0x00139e20
      */
     virtual ~RendererBase();
+
+    /**
+     * Accept a message into the queue.
+     *
+     * Slot 2. The message is stored rather than acted on, and reaches HandleMessage() only when
+     * OnUnknownSlot6() drains the queue. MetRenderer and Renderer both inherit this body.
+     *
+     * @param pMsg The message to store.
+     * @ghidraAddress 0x00139f80
+     */
+    virtual void Handle(Message *pMsg);
+
+    /**
+     * Unrecovered. Slot 4, with an empty body in this class.
+     *
+     * @ghidraAddress 0x00139f28
+     */
+    virtual void OnUnknownSlot4();
+
+    /**
+     * Unrecovered. Slot 5, with an empty body in this class.
+     *
+     * @ghidraAddress 0x00139f30
+     */
+    virtual void OnUnknownSlot5();
+
+    /**
+     * Deliver every queued message. Slot 6, whose verb is unrecovered.
+     *
+     * The body drains the queue through MsgQueue::Poll(). MetRenderer inherits it, and Renderer's
+     * override calls it explicitly.
+     *
+     * @ghidraAddress 0x00139fb0
+     */
+    virtual void OnUnknownSlot6();
+
+    /** Unrecovered. Slot 7, pure in this class. */
+    virtual void OnUnknownSlot7() = 0;
+
+    /** Unrecovered. Slot 8, pure in this class. */
+    virtual void OnUnknownSlot8() = 0;
+
+    /**
+     * Unrecovered. Slot 9, with an empty body in this class.
+     *
+     * @ghidraAddress 0x00139f38
+     */
+    virtual void OnUnknownSlot9();
+
+    /**
+     * Unrecovered. Slot 10, with an empty body in this class.
+     *
+     * @ghidraAddress 0x00139f40
+     */
+    virtual void OnUnknownSlot10();
 
 private:
     // Destroyed by the destructor through MsgQueue::~MsgQueue() at 0x0054a7a0, which is what

@@ -66,10 +66,10 @@ public:
     /**
      * Accept a message.
      *
-     * The body dispatches table slot 3, HandleMessage(), through the object's own vptr. One
-     * override is recovered, RendererBase::Router at `0x00139f50`. That override forwards the
-     * message to the sink it stores. Every other MsgSink subobject table in the image places this
-     * body at slot 2, 172 tables in all.
+     * The body dispatches table slot 3, HandleMessage(), through the object's own vptr. Two
+     * overrides are recovered. RendererBase::Router at `0x00139f50` forwards the message to the
+     * sink it stores, and RendererBase at `0x00139f80` stores the message in its queue. Every other
+     * MsgSink subobject table in the image places this body at slot 2.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x00105158
@@ -79,7 +79,7 @@ public:
     /**
      * Act on a message.
      *
-     * Public rather than protected, and the counter-example is the one class that overrides
+     * Public rather than protected. The counter-example is one of the two classes that override
      * Handle(). RendererBase::Router at `0x00139f50` dispatches this member's slot on the separate
      * sink it stores at `+0x04`, which is an object of an unrelated class, so protected access
      * would not reach it. Every other dispatch in the image does come from Handle() on the same
