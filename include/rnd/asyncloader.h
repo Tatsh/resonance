@@ -28,6 +28,16 @@ class Object;
 class RndAsyncLoader {
 public:
     /**
+     * Prepare an empty request with no directory or file.
+     *
+     * The request starts pending, not started, and not finished, with the default priority of -1.
+     * The image lists no caller for the out-of-line body.
+     *
+     * @ghidraAddress 0x003f7e50
+     */
+    RndAsyncLoader();
+
+    /**
      * Prepare a load request.
      *
      * @param directory The directory to load from.
@@ -57,6 +67,19 @@ public:
      * @ghidraAddress 0x003f8030
      */
     void Cancel();
+
+    /**
+     * Abandon this request and point it at another file.
+     *
+     * Runs Cancel(), replaces the directory and the file, and marks the request pending, not
+     * started, and not finished. Unlike Unload() it releases nothing that was already loaded. The
+     * image lists no caller, and the title is inferred.
+     *
+     * @param directory The directory to load from.
+     * @param file The file to load.
+     * @ghidraAddress 0x003fc708
+     */
+    void Restart(const HxStr &directory, const HxStr &file);
 
     /**
      * Abandon this request and release everything it has loaded, leaving it ready to start again.

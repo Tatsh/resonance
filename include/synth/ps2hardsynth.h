@@ -13,8 +13,8 @@
  *
  * It answers ten of Synth's slots and inherits slots 7, 10, and 16 unchanged. The class is thin.
  * Every override reaches the driver at `0x00461a88` through `0x00465200`, which owns the voices and
- * the sound banks, and CreatePs2HardSynth() hands off to that driver's initialiser at `0x004647a8`
- * immediately after construction.
+ * the sound banks, and the constructor brings that driver up through its initialiser at
+ * `0x004647a8`.
  *
  * Slot 17 is the one member the class adds, and the three bank loaders are its only callers. It
  * prefixes both bank names with the device the host mode selects and hands the pair to
@@ -25,6 +25,17 @@
  */
 class Ps2HardSynth : public Synth {
 public:
+    /**
+     * Select the sound-effect bank and bring the synthesiser driver up.
+     *
+     * Sets mUseSfxBank and clears mAlternateBanksResident, then runs InitSynthDriver().
+     * CreatePs2HardSynth() expands the same body in place, and the image lists no caller for this
+     * out-of-line copy.
+     *
+     * @ghidraAddress 0x003f64e0
+     */
+    Ps2HardSynth();
+
     /**
      * @ghidraAddress 0x003f6670
      */
@@ -96,6 +107,18 @@ public:
      */
     virtual void LoadBankPair(const HxStr &bdName, const HxStr &hdName, int nTag, int nPlacement);
 
+    /**
+     * Program the sound-effect channel.
+     *
+     * Sends bank select 0 and then bank 15, or bank 0 when mUseSfxBank is clear, on channel 15,
+     * followed by program 16. LoadBankSet4(), LoadBankSet5(), and AllNotesOff() expand the same
+     * three messages in place, and the image lists no caller for this out-of-line copy. The title
+     * is inferred.
+     *
+     * @ghidraAddress 0x003f6540
+     */
+    void SelectSfxProgram();
+
 private:
     // Selects the bank the sound-effect channel is switched to. The constructor sets it, and each
     // of the three bank loaders sets it again. Bank 15 is used while it is non-zero and bank 0
@@ -110,8 +133,8 @@ private:
 /**
  * Create the hardware synthesiser.
  *
- * Takes 0xc bytes against the tag at `0x00814e90`, sets `+0x04` to 1 and clears `+0x08`, then
- * brings the driver up through InitSynthDriver().
+ * Takes 0xc bytes through MsgSink's allocation operator, under the tag `MsgSink` at `0x00814e90`,
+ * and expands the Ps2HardSynth constructor in place.
  *
  * @return The new synthesiser.
  * @ghidraAddress 0x003f4db8

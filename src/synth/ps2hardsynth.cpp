@@ -39,22 +39,25 @@ constexpr int kPlacementFixedSecond = 1;
 constexpr int kPlacementBuffer = 2;
 constexpr int kPlacementRotating = 3;
 
-// Restore the bank and program the two reserved channels hold.
-//
-// The three bank loaders and AllNotesOff() all end with this run, which is the only place channel
-// 14 and channel 15 are programmed.
-inline void
-SelectReservedPrograms(Ps2HardSynth *pSynth, int bUseSfxBank, bool bProgramMuseChannel) {
-    pSynth->SendMidi(kStatusControlChange | kSfxChannel, kControllerBankSelectMsb, 0);
-    pSynth->SendMidi(
-        kStatusControlChange | kSfxChannel, kControllerBankSelectLsb, bUseSfxBank ? kSfxBank : 0);
-    pSynth->SendMidi(kStatusProgramChange | kSfxChannel, kSfxProgram, 0);
-    if (bProgramMuseChannel) {
-        pSynth->SendMidi(kStatusProgramChange | kMuseChannel, kMuseProgram, 0);
-    }
+} // namespace
+
+// 0x003f64e0
+Ps2HardSynth::Ps2HardSynth() : mUseSfxBank(1), mAlternateBanksResident(0) {
+    InitSynthDriver();
 }
 
-} // namespace
+// 0x003f6540
+void Ps2HardSynth::SelectSfxProgram() {
+    SendMidi(kStatusControlChange | kSfxChannel, kControllerBankSelectMsb, 0);
+    SendMidi(
+        kStatusControlChange | kSfxChannel, kControllerBankSelectLsb, mUseSfxBank ? kSfxBank : 0);
+    SendMidi(kStatusProgramChange | kSfxChannel, kSfxProgram, 0);
+}
+
+// 0x003f4db8
+Ps2HardSynth *CreatePs2HardSynth() {
+    return new Ps2HardSynth;
+}
 
 // 0x003f6670
 Ps2HardSynth::~Ps2HardSynth() {
@@ -75,7 +78,7 @@ void Ps2HardSynth::LoadBankSet4() {
     ConfigureSpu2Effects(0);
     mAlternateBanksResident = 0;
     mUseSfxBank = 1;
-    SelectReservedPrograms(this, mUseSfxBank, false);
+    SelectSfxProgram();
 }
 
 // 0x003f4960
@@ -88,7 +91,7 @@ void Ps2HardSynth::LoadBankSet5() {
     QueryConfigString(&hdName, kBankSet5HdCode, GetHostMode());
     LoadBankPair(bdName, hdName, kTagAllChannels, kPlacementFixedSecond);
 
-    SelectReservedPrograms(this, mUseSfxBank, false);
+    SelectSfxProgram();
     WaitForBankTransfers();
     AllNotesOff();
 }
@@ -158,7 +161,8 @@ void Ps2HardSynth::AllNotesOff() {
     }
 
     SetChannelVolume(kDefaultVolume);
-    SelectReservedPrograms(this, mUseSfxBank, true);
+    SelectSfxProgram();
+    SendMidi(kStatusProgramChange | kMuseChannel, kMuseProgram, 0);
 }
 
 // 0x003f4590

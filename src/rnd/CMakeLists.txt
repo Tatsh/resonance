@@ -1,6 +1,7 @@
 set(RESONANCE_RND_SRCS
     animatable.cpp
     arena.cpp
+    asyncloader.cpp
     blur.cpp
     bufstream.cpp
     button.cpp
