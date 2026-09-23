@@ -565,6 +565,7 @@ neutralizepowerup
 newjam
 newmodule
 njgb
+nocard
 nolattice
 noone
 normalkey

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "met/metscreenmultisoundbank.h"
+#include "os/hxstr.h"
 
 /**
  * Dialogue that shows one message.
@@ -45,4 +48,51 @@ public:
      * @ghidraAddress 0x002ec450
      */
     virtual ~MetMsgScreen();
+
+    /**
+     * Fill the registered message screen and bring it up.
+     *
+     * The screen registered as `MetMsgScreen` receives the dialogue name at `+0xb0`, the title at
+     * `+0xc8`, the text at `+0xc0`, nUnknown at `+0xbc`, and the owner at `+0xb8`, and `+0xdc`
+     * becomes -1. A non-empty button list is installed through `0x002ec5d8`. A screen already
+     * showing, flagged at `+0xd8`, is refreshed through `0x002ecd10`. Otherwise MetSonyScreen
+     * pushes the message screen and makes it the active panel. The title is inferred. The body is
+     * not written yet.
+     *
+     * @param name The dialogue name, which the owner's OnMsgScreenShown() and
+     * OnMsgScreenDismissed() receive back.
+     * @param title The title line.
+     * @param text The message text.
+     * @param nUnknown Stored at `+0xbc`. Its meaning is not recovered.
+     * @param buttons The button labels, or an empty list for the default buttons.
+     * @param pOwner The screen the dialogue reports to.
+     * @ghidraAddress 0x002ebc98
+     */
+    static void Show(const HxStr &name,
+                     const HxStr &title,
+                     const HxStr &text,
+                     int nUnknown,
+                     const std::vector<HxStr> &buttons,
+                     MetScreen *pOwner);
+
+    /**
+     * Fill the registered message screen and make it the active panel.
+     *
+     * The same as Show(), except that a screen already showing is also made the active panel again
+     * after the refresh. The title is inferred. The body is not written yet.
+     *
+     * @param name The dialogue name.
+     * @param title The title line.
+     * @param text The message text.
+     * @param nUnknown Stored at `+0xbc`. Its meaning is not recovered.
+     * @param buttons The button labels, or an empty list for the default buttons.
+     * @param pOwner The screen the dialogue reports to.
+     * @ghidraAddress 0x002ebf40
+     */
+    static void ShowActive(const HxStr &name,
+                           const HxStr &title,
+                           const HxStr &text,
+                           int nUnknown,
+                           const std::vector<HxStr> &buttons,
+                           MetScreen *pOwner);
 };

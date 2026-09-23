@@ -11,6 +11,7 @@
 #include "os/hxstr.h"
 
 class MetRenderer;
+struct CardSlot;
 
 /**
  * Manager of the remix catalogue, which also presents itself as a dialogue screen.
@@ -207,6 +208,55 @@ public:
     void StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle);
 
     /**
+     * Save the playlist to the first memory-card slot.
+     *
+     * Records the caller's screens, raises the `mem_save` warning with the slot's name formatted
+     * into its text, and queues a SaveJukeboxPlayListMCT that reports to this manager.
+     * MetJukeboxEditPlaylistScreenDone slot 36 and OnMsgScreenDismissed() call it. The title is
+     * inferred.
+     *
+     * @param returnScreens The screens the caller wants restored.
+     * @ghidraAddress 0x00356508
+     */
+    void SavePlayList(const std::vector<HxStr> &returnScreens);
+
+    /**
+     * Raise the load warning and start loading one remix.
+     *
+     * The warning text names the factory set or the first memory-card slot, and its wording
+     * follows the play mode. mUnknownf4 is set to exit the dialogue once the load completes, both
+     * screen lists are replaced, and the load runs through LoadRemix().
+     * MetRemixLoadScreen::OnUnknownSlot36() is the caller. The title is inferred.
+     *
+     * @param returnScreens The screens mUnknownac receives.
+     * @param restoreScreens The screens mUnknownb8 receives.
+     * @param record The remix to load.
+     * @param nFactory Non-zero for a factory remix.
+     * @ghidraAddress 0x003548e8
+     */
+    void BeginRemixLoad(const std::vector<HxStr> &returnScreens,
+                        const std::vector<HxStr> &restoreScreens,
+                        const MetRemixRecord &record,
+                        int nFactory);
+
+    /**
+     * Rebuild the catalogue from the factory set and the given memory-card slots.
+     *
+     * Raises the `mem_load` warning naming the sources, empties both trees, starts the factory
+     * index read for the factory entry and a ListRemixesMCT for every card slot, empties the
+     * playlist without releasing its entries, and optionally queues a playlist load. The two
+     * remix screens, MetMemCardTypeScreen, and MetRemixDelScreen call it. The title is inferred.
+     *
+     * @param returnScreens The screens mUnknownac receives.
+     * @param slots The locations to list, the factory set having a port and slot of -1.
+     * @param bLoadPlayList Non-zero to also load the playlist from the first slot.
+     * @ghidraAddress 0x00353350
+     */
+    void ListRemixes(const std::vector<HxStr> &returnScreens,
+                     const std::vector<CardSlot> &slots,
+                     int bLoadPlayList);
+
+    /**
      * Clear the jukebox flag in the game parameters and rewind the playlist.
      *
      * The title is inferred.
@@ -231,11 +281,10 @@ public:
     /**
      * Act on the choice the user made in one of the manager's dialogues. Slot 15.
      *
-     * The body is not written. It compares the dialogue name against a chain of literals through
-     * HxStr::MatchesLiteral, among them `mem_load_remix_data`, `mem_load`, `mem_format_check`,
-     * `mem_format_go`, `mem_format_done`, `save_fail`, and `load_fail`, and branches each match on
-     * the choice. The chain runs for roughly 0x630 instructions and every branch drives memcard
-     * routines that are not identified.
+     * The dialogue name selects the reaction. Most dismissals restore the screens in mUnknownac. A
+     * failed or unformatted save retries the playlist save on the first choice, the format check
+     * queues a format on the second, a failed remix load abandons the jukebox game, and a finished
+     * format retries the save.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
@@ -246,10 +295,10 @@ public:
     /**
      * Act on the format the card reported. MemcardUser slot 5.
      *
-     * The body is not written. A zero status raises the `mem_format_done` dialogue and a status of
-     * 13 takes a second path from `0x00356c18`, and every other status returns. The port and slot
-     * argument is not read. The failure dialogues the routine can raise are `format_fail`,
-     * `format_success`, and `format_already`.
+     * A zero status and a status of 13 both raise the `mem_format_done` dialogue, with the
+     * `format_success` and `format_already` texts respectively, and make it the active panel. Any
+     * other status raises `format_fail` with retry and continue buttons. The port and slot argument
+     * is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success, and 13 for the one failure the second path covers.
@@ -260,9 +309,9 @@ public:
     /**
      * Act on the playlist save the card reported. MemcardUser slot 10.
      *
-     * The body is not written. It branches on the status against 1 and 2 and raises one of
-     * `playlist_save_failed` and `playlist_save_failed_tryagain`, and the port and slot argument is
-     * not read.
+     * A zero status exits `MetMsgScreen`. An unformatted card raises `mem_format_check`, a missing
+     * card or a full one raises `playlist_save_failed_tryagain`, and any other status raises
+     * `playlist_save_failed`. The port and slot argument is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success.
@@ -289,11 +338,10 @@ public:
      * The image names this method `LoadRemixCB`, and the class documentation records why the
      * declaration retains the base spelling.
      *
-     * The body is not written. It opens by writing the status to the log through the literal at
-     * `0x00807a88`, and a non-zero status then raises the `remix_load_failed` dialogue with the
-     * message `Failed to load remix from memory card slot %i.`. A zero status branches on the word
-     * at `+0xf4` against 0 and 1. The port and slot argument reaches the diagnostic message and
-     * nothing else.
+     * It opens by writing the status to the log through the literal at `0x00807a88`. A zero status
+     * starts the remix or exits `MetMsgScreen`, as mUnknownf4 selects. A non-zero status logs
+     * `Failed to load remix from memory card slot %i.` and raises the `remix_load_failed`
+     * dialogue. The port and slot argument reaches the diagnostic message and nothing else.
      *
      * @param nPortSlot Which card port and slot reported, which the failure message formats.
      * @param nStatus Zero on success.
@@ -352,9 +400,9 @@ private:
     // recorded appearances, steps the playlist, and brings up MetLoadGameScreen. Both remix-load
     // completions call it. The title is inferred.
     void StartLoadedRemix();
-    // Replaces mUnknownac with the caller's screens by clearing, resizing, and then assigning.
-    // StartPlayList() and the playlist save at 0x00356508 expand it identically.
-    inline void SetReturnScreens(const std::vector<HxStr> &screens);
+    // Saves the playlist again with a copy of mUnknownac as the return screens.
+    // OnMsgScreenDismissed() expands it at each retry.
+    inline void RetrySavePlayList();
     // 0x003613d8. Clamps into zero through the track count, which admits one past the end.
     void SetCurrentTrack(int nTrack);
     // 0x003610d0. Pushes every screen named in mUnknownb8 and activates the first.
