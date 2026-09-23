@@ -5,6 +5,7 @@
 
 #include "math/color.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 
 class FailSink;
 class HxStr;
@@ -251,6 +252,39 @@ private:
  * @ghidraAddress 0x00718d10
  */
 extern Environ *(*g_pfnNewEnviron)(const HxStr &name);
+
+/**
+ * Build an environment for the registered "Environ" class.
+ *
+ * Calls through g_pfnNewEnviron and converts the result to its Rnd::Object virtual base, reading
+ * the base pointer only when the environment is not null.
+ *
+ * @param name The object name.
+ * @return The new environment, as its Rnd::Object subobject.
+ * @ghidraAddress 0x00519278
+ */
+Object *CreateRegisteredEnviron(const HxStr &name);
+
+/**
+ * Registered class name of Rnd::Environ, the string "Environ".
+ *
+ * @ghidraAddress 0x00718d18
+ */
+extern HxStr g_environClassName;
+
+/**
+ * Point g_pfnNewEnviron at Environ::NewEnviron() and register the "Environ" class with
+ * Rnd::Manager.
+ *
+ * The out-of-line copy has no caller, and Rnd::PsEnviron::Terminate() expands the body. The name
+ * is inferred.
+ *
+ * @ghidraAddress 0x00518e70
+ */
+inline void RegisterEnvironClass() {
+    g_pfnNewEnviron = Environ::NewEnviron;
+    g_manager.RegisterClass(g_environClassName, CreateRegisteredEnviron);
+}
 
 /**
  * Environment the subtree being drawn is under.

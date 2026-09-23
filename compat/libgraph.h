@@ -129,6 +129,10 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
 int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest);
 int sceGsSyncPath(int nMode, unsigned short nTimeout);
 
+// Installs pfnHandler on the vertical blank start interrupt, replacing the previous handler, or
+// removes the handler when pfnHandler is null. Returns the previous handler.
+int (*sceGsSyncVCallback(int (*pfnHandler)(int)))(int);
+
 #ifdef __cplusplus
 }
 #endif

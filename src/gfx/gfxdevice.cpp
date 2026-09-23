@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <ee_regs.h>
 #include <eekernel.h>
 #include <libdma.h>
 #include <libgraph.h>
@@ -10,6 +11,7 @@
 #include "gfx/gsdoublebuffer.h"
 #include "gfx/renderstats.h"
 #include "gfx/vramtable.h"
+#include "os/failsink.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "profile/profiler.h"
@@ -19,6 +21,11 @@
 #include "rnd/particlesys.h"
 #include "rnd/pscam.h"
 #include "rnd/psenviron.h"
+#include "rnd/psmat.h"
+#include "rnd/psmesh.h"
+#include "rnd/psmultimesh.h"
+#include "rnd/psparticlesys.h"
+#include "rnd/pstex.h"
 #include "rnd/tex.h"
 
 namespace {
@@ -284,6 +291,63 @@ constexpr int kGsRegScissor1 = 0x40;
 constexpr int kGsRegDither = 0x45;
 constexpr int kGsRegColClamp = 0x46;
 
+// Init() titles six consecutive records of g_profileTimers for the device's own intervals.
+constexpr int kFirstDeviceTimer = 8;
+const char *const kapszDeviceTimerNames[] = {"setup", "vram", "billboard", "vert", "prim", "sync"};
+constexpr int kBitsPerPixelByte = 8;
+
+// The register shadow InitDisplayMode() seeds. Every byte starts all ones, and FOGCOL starts at 1.
+constexpr int kRegShadowFillByte = 0xff;
+constexpr int kGsRegFogCol = 0x3d;
+constexpr unsigned long long kFogColInitial = 1;
+
+// sceDmaReset() and sceGsResetGraph() arguments: enable DMA, and a full reset for NTSC interlaced
+// output in field mode.
+constexpr int kDmaResetEnable = 1;
+constexpr short kGsResetFull = 0;
+constexpr short kGsInterlace = 1;
+constexpr short kGsNtsc = 2;
+constexpr short kGsFieldMode = 0;
+
+// Pixel depths the display supports, and the frame and depth buffer formats each selects.
+constexpr int kDepth16 = 16;
+constexpr int kDepth24 = 24;
+constexpr int kDepth32 = 32;
+constexpr short kPsmCt32 = 0;
+constexpr short kPsmCt24 = 1;
+constexpr short kPsmCt16 = 2;
+constexpr short kPsmZ24 = 0x31;
+constexpr short kPsmZ16 = 0x32;
+constexpr short kPsmZ16S = 0x3a;
+constexpr int kZBufferBytes16 = 2;
+constexpr int kZBufferBytes24 = 3;
+constexpr int kFallbackPixelBytes = 4;
+// ZTST greater, and the clear flag SetDefaults() passes to both halves.
+constexpr short kZTestGreater = 3;
+constexpr short kClearOnSwap = 1;
+
+// KSEG1-style uncached alias of a main memory address.
+constexpr std::uintptr_t kUncachedAddressBit = 0x20000000;
+
+// CHCR.TTE, which makes the VIF channels pass each DMA tag through as data.
+constexpr unsigned int kChcrTransferTag = 0x40;
+
+// The VIF MSCAL code that starts VU1's initialisation program at 0x3c0.
+constexpr unsigned int kVifMscalInit = 0x140003c0;
+
+// A buffer address becomes a DMA address by keeping the low 28 bits and moving the scratchpad
+// selector up to bit 31.
+inline void *ToDmaAddress(const void *pAddress) {
+    const std::uintptr_t nAddress = reinterpret_cast<std::uintptr_t>(pAddress);
+    // The DMA address is a bus address the processor cannot dereference, but the DMA library
+    // takes it as a pointer.
+    return reinterpret_cast<void *>((nAddress & kDmaAddressMask) |
+                                    ((nAddress & kScratchpadAddressBit) << 1));
+}
+
+// 0x006f36c0
+GsDoubleBuffer g_displayBuffers;
+
 } // namespace
 
 // 0x006f2a80
@@ -338,13 +402,112 @@ void GfxDevice::RestorePacket() {
 // 0x004a00e8
 inline void GfxDevice::SendPacket() {
     sceDmaChan *pChannel = sceDmaGetChan(mnUseVu1 != 0 ? SCE_DMA_VIF1 : SCE_DMA_GIF);
-    const std::uintptr_t nBuffer = reinterpret_cast<std::uintptr_t>(mpBuffer);
-    const std::uintptr_t nDmaAddress =
-        (nBuffer & kDmaAddressMask) | ((nBuffer & kScratchpadAddressBit) << 1);
-    // The DMA address is a bus address the processor cannot dereference, but sceDmaSendN() takes
-    // it as a pointer.
-    sceDmaSendN(
-        pChannel, reinterpret_cast<void *>(nDmaAddress), static_cast<int>(mpWrite - mpBuffer));
+    sceDmaSendN(pChannel, ToDmaAddress(mpBuffer), static_cast<int>(mpWrite - mpBuffer));
+}
+
+// 0x004a0388
+void GfxDevice::FlipFrameBuffer() {
+    mpDisplayBuffers->PutDrawEnv(mnDrawBuffer, 1);
+    SwapBuffers();
+}
+
+// 0x0049ae20
+void GfxDevice::Init(int nWidth, int nHeight, int nBitDepth) {
+    int nTimer = kFirstDeviceTimer;
+    for (const char *pszName : kapszDeviceTimerNames) {
+        g_profileTimers[nTimer].mName = HxStr(pszName);
+        ++nTimer;
+    }
+    mnDisplayWidth = nWidth;
+    mnDisplayHeight = nHeight;
+    mnUseVu1 = 0;
+    mnPixelBytes = nBitDepth / kBitsPerPixelByte;
+    mpWrite = reinterpret_cast<GifQuadword *>(kGifBufferHalf0);
+    mpBuffer = mpWrite;
+    InitDisplayMode();
+
+    Rnd::g_pfnNewMesh = Rnd::NewPsMesh;
+    Rnd::PsCam::Init();
+    Rnd::PsMat::InstallCreator();
+    Rnd::PsTex::StaticInit();
+    Rnd::PsEnviron::Init();
+    Rnd::g_pfnNewParticleSys = Rnd::NewPsParticleSys;
+    Rnd::g_pfnNewMultiMesh = Rnd::NewPsMultiMesh;
+    g_vramTable.Init();
+}
+
+// 0x0049b138
+void GfxDevice::InitDisplayMode() {
+    std::memset(mGsRegs, kRegShadowFillByte, sizeof(mGsRegs));
+    mGsRegs[kGsRegFogCol] = kFogColInitial;
+    sceGsResetPath();
+    sceDmaReset(kDmaResetEnable);
+    sceGsSyncPath(0, 0);
+    sceGsSyncV(0);
+    sceGsResetGraph(kGsResetFull, kGsInterlace, kGsNtsc, kGsFieldMode);
+
+    short nPsm = kPsmCt32;
+    short nZPsm = kPsmZ24;
+    switch (mnPixelBytes * kBitsPerPixelByte) {
+    case kDepth24:
+        mnDepthBytes = kZBufferBytes16;
+        nPsm = kPsmCt24;
+        nZPsm = kPsmZ16S;
+        break;
+    case kDepth16:
+        mnDepthBytes = kZBufferBytes16;
+        nPsm = kPsmCt16;
+        nZPsm = kPsmZ16;
+        break;
+    case kDepth32:
+        mnDepthBytes = kZBufferBytes24;
+        break;
+    default:
+        g_failSink.Format("Unsupported video mode\n");
+        mnDepthBytes = kZBufferBytes24;
+        mnPixelBytes = kFallbackPixelBytes;
+        break;
+    }
+
+    mpDisplayBuffers = reinterpret_cast<GsDoubleBuffer *>(
+        reinterpret_cast<std::uintptr_t>(&g_displayBuffers) | kUncachedAddressBit);
+    mpDisplayBuffers->SetDefaults(static_cast<short>(mnDisplayWidth),
+                                  static_cast<short>(mnDisplayHeight),
+                                  nPsm,
+                                  kZTestGreater,
+                                  nZPsm,
+                                  kClearOnSwap);
+    SetClearColor(mClearColor);
+    mnSwapVblank = g_nVblankCounter + 1;
+    sceGsSyncVCallback(VblankHandler); // The previous handler it returns is discarded.
+    FlipFrameBuffer();
+    RestorePacket();
+
+    *R_EE_D0_CHCR |= kChcrTransferTag;
+    *R_EE_D1_CHCR |= kChcrTransferTag;
+    sceDmaSend(sceDmaGetChan(SCE_DMA_VIF0), ToDmaAddress(g_vu0MicrocodeChain));
+    sceDmaSend(sceDmaGetChan(SCE_DMA_VIF1), ToDmaAddress(g_vu1MicrocodeChain));
+
+    EnterVu1Path();
+    GifQuadword *pQuad = mpWrite;
+    mpWrite = pQuad + 1;
+    pQuad->mLo = kVifMscalInit;
+    pQuad->mHi = 0;
+    LeaveVu1Path();
+}
+
+// 0x0049b930
+void GfxDevice::BeginFrame() {
+    SwapBuffers();
+    std::memset(&g_renderStats, 0, sizeof(g_renderStats));
+    Rnd::g_pDefaultCam->Draw();
+    Rnd::PsMat::SelectDefault();
+    g_vramTable.BeginFrame();
+    g_lastFrameProfileTimers = g_profileTimers;
+    for (auto &timer : g_profileTimers) {
+        timer.mCycles = 0;
+        timer.mDepth = 0;
+    }
 }
 
 // 0x004a0238

@@ -211,6 +211,13 @@ void PsEnviron::Init() {
     g_pDefaultCam->AddTrans(g_pDefaultLight);
 }
 
+// 0x005b2888
+void PsEnviron::Terminate() {
+    delete g_pDefaultEnviron;
+    delete g_pDefaultLight;
+    RegisterEnvironClass();
+}
+
 // 0x005aecb8
 int PsEnviron::DrawSelf() {
     g_nFogEnabled = mFogMode != kFogModeNone;

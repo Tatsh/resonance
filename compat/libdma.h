@@ -9,7 +9,8 @@
 extern "C" {
 #endif
 
-// Channel numbers sceDmaGetChan() accepts, of which the reconstruction uses two.
+// Channel numbers sceDmaGetChan() accepts, of which the reconstruction uses three.
+#define SCE_DMA_VIF0 0
 #define SCE_DMA_VIF1 1
 #define SCE_DMA_GIF 2
 

@@ -118,7 +118,7 @@ public:
     /**
      * Count one vertical blank in g_nVblankCounter.
      *
-     * InitDisplayMode() installs it through SetVsyncHandler(). The body increments the counter,
+     * InitDisplayMode() installs it through sceGsSyncVCallback(). The body increments the counter,
      * runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. It has no
      * reconstructed body, because ExitHandler() is MIPS inline assembly that the host build cannot
      * assemble. The routine was an orphan in the analysis, and its name is inferred.
@@ -132,8 +132,11 @@ public:
     /**
      * Bring up the display and the drawing subsystems.
      *
-     * Registers the device profile timers ("setup", "vram", "billboard", "vert", "prim", "sync"),
-     * records the display geometry, and initialises the material, texture, and mesh backends.
+     * Titles g_profileTimers records 8 to 13 "setup", "vram", "billboard", "vert", "prim", and
+     * "sync", records the display geometry with mnPixelBytes as nBitDepth / 8, points the packet
+     * buffer at the first scratchpad half, and runs InitDisplayMode(). It then installs the
+     * PlayStation 2 creators for meshes, cameras, materials, textures, environments, particle
+     * systems, and multi-meshes, and initialises g_vramTable.
      *
      * @param nWidth The display width in pixels.
      * @param nHeight The display height in pixels.
@@ -144,6 +147,11 @@ public:
 
     /**
      * Start a frame.
+     *
+     * Runs SwapBuffers(), clears g_renderStats, draws Rnd::g_pDefaultCam, selects the default
+     * material, and starts the video memory frame. The timers of the frame just ended are copied
+     * into g_lastFrameProfileTimers, and every record of g_profileTimers then has its cycles and
+     * depth cleared.
      *
      * @ghidraAddress 0x0049b930
      */
@@ -162,6 +170,13 @@ public:
 
     /**
      * Program the GS display registers for the recorded geometry.
+     *
+     * Every register shadow is set to all ones (FOGCOL's to 1), and the GS, the DMA controller,
+     * and the display are reset for NTSC interlaced field output. The pixel depth selects the frame
+     * and depth buffer formats and mnDepthBytes; a depth other than 16, 24, or 32 bits reports
+     * "Unsupported video mode" and falls back to 32. The double buffer is then built and shown,
+     * the vertical blank handler installed, the saved packet restored, and the VU0 and VU1
+     * microcode sent before VU1 runs its program at 0x3c0.
      *
      * @ghidraAddress 0x0049b138
      */
@@ -373,7 +388,7 @@ public:
     int mnDisplayWidth;
     /** Display height in pixels. Read alongside the width by the same routine. */
     int mnDisplayHeight;
-    /** Framebuffer bytes per pixel, the Init() bit depth rounded up to whole bytes. +0x28 */
+    /** Framebuffer bytes per pixel, the Init() bit depth divided by 8. +0x28 */
     int mnPixelBytes;
     /**
      * Depth buffer bytes per sample, which InitDisplayMode() derives from mnPixelBytes.
@@ -419,6 +434,10 @@ private:
     // drawing, and copy that half's context 1 registers into mGsRegs with PRIM invalidated.
     // PresentFrame() expands it inline, and the out-of-line copy at 0x004a0238 has no caller.
     void SwapBuffers();
+
+    // Put the draw environment of the current half, then run SwapBuffers(). InitDisplayMode() is
+    // the one caller. 0x004a0388.
+    void FlipFrameBuffer();
 
     // Draw a string in the debug stroke font. Each glyph is a six-point line strip from the table
     // at 0x006f2f28, scaled to a cell of rect.w by rect.h from a pen at rect.x and rect.y, in GS
@@ -494,3 +513,25 @@ extern GfxDevice g_gfxDevice;
  * @ghidraAddress 0x006f2f20
  */
 extern volatile int g_nVblankCounter;
+
+extern "C" {
+
+/**
+ * DMA chain that uploads the VU1 microcode, the start of the `.vutext` section.
+ *
+ * The microcode is assembled rather than compiled, so the chain has no reconstructed source.
+ * InitDisplayMode() sends it on the VIF1 channel. The name is inferred.
+ *
+ * @ghidraAddress 0x00664ab0
+ */
+extern GifQuadword g_vu1MicrocodeChain[];
+
+/**
+ * DMA chain at the end of `.vutext` that uploads the VU0 microcode.
+ *
+ * InitDisplayMode() sends it on the VIF0 channel. The name is inferred.
+ *
+ * @ghidraAddress 0x00666de0
+ */
+extern GifQuadword g_vu0MicrocodeChain[];
+}
