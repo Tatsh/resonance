@@ -369,10 +369,12 @@ void GrooveWorld::StartPlay() {
     GameBeginMsg begin;
     mDelayer->Handle(&begin);
     mJoiner->Handle(&begin);
-    FadeGameMsg fade;
-    fade.mDuration = kStartFadeMs;
-    fade.mFadeIn = kStartFadeIn;
-    mDelayer->Handle(&fade);
+    {
+        FadeGameMsg fade;
+        fade.mDuration = kStartFadeMs;
+        fade.mFadeIn = kStartFadeIn;
+        mDelayer->Handle(&fade);
+    }
 
     mStats->Reset(mPlayers.size());
     std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallSlot11));
@@ -477,10 +479,12 @@ void GrooveWorld::Exit(int nMode, int nUnknownb8, int nUnknown88) {
     } else if (bFadeSynth != 0) {
         nFadeMs = kExitFadeLongMs;
     }
-    FadeGameMsg fade;
-    fade.mDuration = nFadeMs + kExitScreenFadeExtraMs;
-    fade.mFadeIn = kFadeOut;
-    mDelayer->Handle(&fade);
+    {
+        FadeGameMsg fade;
+        fade.mDuration = nFadeMs + kExitScreenFadeExtraMs;
+        fade.mFadeIn = kFadeOut;
+        mDelayer->Handle(&fade);
+    }
 
     if (bFadeSynth != 0) {
         Application::shared()->GetSynth()->FadeOut(nFadeMs);
