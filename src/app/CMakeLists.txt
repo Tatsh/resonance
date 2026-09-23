@@ -7,6 +7,7 @@ set(RESONANCE_APP_SRCS
     msgqueue.cpp
     msgsink.cpp
     msgsource.cpp
+    renderer.cpp
     rendererbase.cpp
     scriptsink.cpp
     task.cpp)
