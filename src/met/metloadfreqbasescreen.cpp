@@ -1,7 +1,11 @@
 #include "met/metloadfreqbasescreen.h"
 
+#include "app/application.h"
 #include "game/freqappearance.h"
+#include "game/gamemanagerimpl.h"
 #include "met/metfreqmakerassetmanager.h"
+#include "met/metfreqmakerbuttonsscreen.h"
+#include "met/metfreqmakercanvasscreen.h"
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "os/hxstr.h"
@@ -64,6 +68,11 @@ constexpr int kCreateButtonIndex = 2;
 // first and the alternation-finished hook writes the second.
 constexpr int kExitToMainMenu = 0;
 constexpr int kExitToButtonAction = 2;
+
+// The MetFreqMakerButtonsScreen::SetEditing() values, and the LoadPrefab() randomise flag.
+constexpr int kFreqMakerCreating = 0;
+constexpr int kFreqMakerEditing = 1;
+constexpr int kNoRandomize = 0;
 
 // Button state the two cycle arrows take while they are shown.
 constexpr int kArrowShownState = 1;
@@ -232,6 +241,34 @@ void MetLoadFreqBaseScreen::OnEditButton() {
     PushNamedScreen(HxStr(kFreqMakerCanvasScreen));
     PushNamedScreen(HxStr(kFreqMakerDirectionsScreen));
     PushNamedScreen(HxStr(kFreqMakerInventoryScreen));
+    ActivateNamedPanel(HxStr(kFreqMakerButtonsScreen));
+}
+
+// 0x00293028
+void MetLoadFreqBaseScreen::PrepareFreqMakerForSelection() {
+    MetFreqMakerCanvasScreen *pCanvas =
+        static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
+    MetFreqMakerButtonsScreen *pButtons =
+        static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
+    pCanvas->LoadPrefab((*mUnknown8c)[mUnknown94], kNoRandomize);
+    pButtons->SetEditing(kFreqMakerEditing);
+    pButtons->mNewPersona = 0;
+}
+
+// 0x002933b8
+void MetLoadFreqBaseScreen::OnCreateButton() {
+    MetFreqMakerCanvasScreen *pCanvas =
+        static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
+    MetFreqMakerButtonsScreen *pButtons =
+        static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
+    pCanvas->LoadPersona(nullptr);
+    pButtons->SetEditing(kFreqMakerCreating);
+    pButtons->mNewPersona = 1;
+    Application::shared()->GetGameManager()->ClearPersonas();
+    PushNamedScreen(HxStr(kFreqMakerCanvasScreen));
+    PushNamedScreen(HxStr(kFreqMakerDirectionsScreen));
+    PushNamedScreen(HxStr(kFreqMakerInventoryScreen));
+    PushNamedScreen(HxStr(kFreqMakerButtonsScreen));
     ActivateNamedPanel(HxStr(kFreqMakerButtonsScreen));
 }
 

@@ -11,6 +11,7 @@ set(RESONANCE_MET_SRCS
     metfade.cpp
     metfreqloader.cpp
     metfreqmakerassetmanager.cpp
+    metfreqmakerbuttonsscreen.cpp
     metfreqmakercanvasscreen.cpp
     metfreqmakerdirectionsscreen.cpp
     metfreqmakerinventoryscreen.cpp

@@ -32,11 +32,14 @@
  * opens the keyboard rather than committing a selection, which is the whole difference from
  * MetLoadFreqScreen.
  *
- * Four bodies are not written. OnNameButton() opens the keyboard through the MetKeyboardScreen
- * members at `0x0028cf18` and `0x00282468`, and the stack record it builds for the second is not
- * recovered. OnUnknownSlot2() continues past the name assignment into a larger body.
- * OnMsgScreenDismissed() and the two FreQ maker slots need members no header in this tree declares
- * yet.
+ * Four bodies are not written. OnNameButton() builds a MetKeyboardRequest and passes it to
+ * MetKeyboardScreen::Open(), which are both declared now. OnUnknownSlot2() continues past the
+ * name assignment into a larger body.
+ * OnMsgScreenDismissed() needs members no header in this tree declares yet. The two FreQ maker
+ * slots are not written either, although every routine they call is now declared.
+ * PrepareFreqMakerForSelection() calls MetFreqMakerCanvasScreen::LoadPrefab() and
+ * MetFreqMakerButtonsScreen::SetEditing(), and OnCreateButton() calls
+ * MetLoadFreqBaseScreen::OnCreateButton().
  */
 class MetLoadNewFreqScreen : public MetLoadFreqBaseScreen, public MetKBUser {
 public:
@@ -111,9 +114,9 @@ public:
     /**
      * Open the keyboard to type a name for the new identity.
      *
-     * Slot 40. The keyboard is opened through `0x0028cf18` with this screen's registry key, the
-     * prompt `FreQ name`, an empty initial text, a length limit of -1, and the MetKBUser subobject
-     * as the receiver. A second record is then built on the stack and passed to `0x00282468`.
+     * Slot 40. A MetKeyboardRequest is built with this screen's registry key, the prompt
+     * `FreQ name`, an empty initial text, -1 for any controller, and the MetKBUser subobject as the
+     * receiver, and is then passed to MetKeyboardScreen::Open().
      *
      * The body is not written, for the reason recorded in the class documentation.
      *
@@ -124,7 +127,7 @@ public:
     /**
      * Hand the selected identity to the FreQ maker.
      *
-     * Slot 41. The body is not written, for the reason recorded in the class documentation.
+     * Slot 41. The body is not written. The class documentation records what it calls.
      *
      * @ghidraAddress 0x002a3f80
      */
@@ -133,7 +136,7 @@ public:
     /**
      * Create a new identity in the FreQ maker.
      *
-     * Slot 43. The body is not written, for the reason recorded in the class documentation.
+     * Slot 43. The body is not written. The class documentation records what it calls.
      *
      * @ghidraAddress 0x002a8670
      */

@@ -54,11 +54,8 @@
  * three children, which is what proves they belong here. Those are slots 5, 19, 23, 24, 30, 36,
  * and 38.
  *
- * Two bodies are not written. OnCreateButton() and PrepareFreqMakerForSelection() both call
- * MetFreqMakerCanvasScreen and MetFreqMakerButtonsScreen members that no header in this tree
- * declares yet, at `0x002622b8`, `0x00262350`, and `0x0025e288`. RefreshSelection() calls
- * MetPersonaData::AttachToBurnSlot() and Rnd::Mat::Stage::SetTex(), and its body is not written
- * yet. Each declaration records what its body does.
+ * RefreshSelection() calls MetPersonaData::AttachToBurnSlot() and Rnd::Mat::Stage::SetTex(), and
+ * its body is not written yet. Its declaration records what the body does.
  */
 class MetLoadFreqBaseScreen : public MetScreen {
 public:
@@ -186,12 +183,11 @@ public:
      * Hand the selected identity to the FreQ maker.
      *
      * Slot 41. The body resolves `MetFreqMakerCanvasScreen` and `MetFreqMakerButtonsScreen`
-     * through MetScreen::FindScreenByName(), passes the selected MetPersonaData and a zero to the
-     * canvas member at `0x00262350`, runs the buttons member at `0x0025e288` with 1, and clears
-     * the buttons word at `+0x98`. OnCreateButton() performs the exact inverse of the last two
-     * steps, which is what separates editing an identity from creating one.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * through MetScreen::FindScreenByName(), passes the selected MetPersonaData to
+     * MetFreqMakerCanvasScreen::LoadPrefab() with no randomisation, selects the editing mode
+     * through MetFreqMakerButtonsScreen::SetEditing(), and clears
+     * MetFreqMakerButtonsScreen::mNewPersona. OnCreateButton() performs the exact inverse of the
+     * last two steps, which separates editing an identity from creating one.
      *
      * @ghidraAddress 0x00293028
      */
@@ -211,12 +207,10 @@ public:
     /**
      * Act on the third button, whose prompt is `id_create`.
      *
-     * Slot 43. The body passes a null persona to the canvas member at `0x002622b8`, runs the
-     * buttons member at `0x0025e288` with 0, sets the buttons word at `+0x98` to 1, clears the
-     * game manager's persona list, then pushes the same four screens with the buttons screen last
-     * and activates it.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 43. The body passes a null persona to MetFreqMakerCanvasScreen::LoadPersona(), selects
+     * the creating mode through MetFreqMakerButtonsScreen::SetEditing(), sets
+     * MetFreqMakerButtonsScreen::mNewPersona, clears the game manager's persona list, then pushes
+     * the same four screens with the buttons screen last and activates it.
      *
      * @ghidraAddress 0x002933b8
      */

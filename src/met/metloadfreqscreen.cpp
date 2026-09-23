@@ -3,6 +3,9 @@
 #include "app/application.h"
 #include "app/playsound.h"
 #include "game/gamemanagerimpl.h"
+#include "met/metfreqmakerbuttonsscreen.h"
+#include "met/metfreqmakercanvasscreen.h"
+#include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
@@ -42,6 +45,11 @@ static const char *const kHelpScreen = "MetHelpScreen";
 static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
 static const char *const kNetPortalScreen = "MetNetPortalScreen";
 static const char *const kModeScreen = "MetModeScreen";
+static const char *const kFreqMakerCanvasScreen = "MetFreqMakerCanvasScreen";
+static const char *const kFreqMakerButtonsScreen = "MetFreqMakerButtonsScreen";
+
+// The MetFreqMakerButtonsScreen::SetEditing() value PrepareFreqMakerForSelection() passes.
+constexpr int kFreqMakerEditing = 1;
 
 // The message screen OnCreateButton() shows and OnMsgScreenDismissed() responds to.
 static const char *const kFreqLimitMessage = "freq_limit";
@@ -121,6 +129,21 @@ void MetLoadFreqScreen::OnNameButton() {
         PushNamedScreen(HxStr(kModeScreen));
         ActivateNamedPanel(HxStr(kModeScreen));
     }
+}
+
+// 0x00297528
+void MetLoadFreqScreen::PrepareFreqMakerForSelection() {
+    MetFreqMakerCanvasScreen *pCanvas =
+        static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
+    MetFreqMakerButtonsScreen *pButtons =
+        static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
+    MetPersonaData *pPersona = (*mUnknown8c)[mUnknown94];
+    pCanvas->LoadPersona(pPersona);
+    pButtons->SetEditing(kFreqMakerEditing);
+    pButtons->mNewPersona = 0;
+    Application::shared()->GetGameManager()->ClearPersonas();
+    Application::shared()->GetGameManager()->AddPersona(*pPersona);
+    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadFreqScreen);
 }
 
 void MetLoadFreqScreen::AcquireIdentityList() {

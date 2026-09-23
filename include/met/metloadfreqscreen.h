@@ -26,11 +26,8 @@
  * `lf_edit` and `lf_create`, and UpdateNameLabel() then appends the selected username to the
  * `lf_edit` label so that the second button reads as an edit of a particular identity.
  *
- * Two bodies are not written. PrepareFreqMakerForSelection() calls MetFreqMakerCanvasScreen and
- * MetFreqMakerButtonsScreen members that no header in this tree declares yet, at `0x002622b8` and
- * `0x0025e288`, and it continues into a further unrecovered routine at `0x00217f30`.
- * OnCreateButton() builds a message screen, and the MetMsgScreen construction it needs is not
- * recovered.
+ * OnCreateButton() builds a message screen through a MetMsgScreen construction that is not
+ * recovered, and its body is not written.
  */
 class MetLoadFreqScreen : public MetLoadFreqBaseScreen, public MemcardUser {
 public:
@@ -106,12 +103,10 @@ public:
      * Hand the selected identity to the FreQ maker.
      *
      * Slot 41. The body resolves the canvas and buttons screens, passes the selected
-     * MetPersonaData to the canvas member at `0x002622b8`, runs the buttons member at `0x0025e288`
-     * with 1, clears the buttons word at `+0x98`, clears the game manager's persona list, adds the
-     * selected identity to it, and then continues through `0x00217f30` and pushes this screen
-     * again by name.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * MetPersonaData to MetFreqMakerCanvasScreen::LoadPersona(), selects the editing mode through
+     * MetFreqMakerButtonsScreen::SetEditing(), clears MetFreqMakerButtonsScreen::mNewPersona,
+     * replaces the game manager's persona list with the selected identity, and records
+     * `MetLoadFreqScreen` in MetFrontEndState::mUnknown24.
      *
      * @ghidraAddress 0x00297528
      */
