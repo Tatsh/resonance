@@ -36,4 +36,34 @@ public:
      * @ghidraAddress 0x0030df48
      */
     virtual ~MetMultiTips5Screen();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0030dfc8
+     */
+    static MetMultiTips5Screen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Return to the player-count screen on a select, and otherwise run the base slot.
+     *
+     * Slot 36. The last page has no next page to push.
+     *
+     * @ghidraAddress 0x0030a4d8
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views and fill the page's three texts from configuration code 0x258.
+     *
+     * Slot 38. The texts are not tested for null.
+     *
+     * @ghidraAddress 0x0030a170
+     */
+    virtual void ResolveContainerViews();
 };

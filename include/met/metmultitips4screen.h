@@ -36,4 +36,27 @@ public:
      * @ghidraAddress 0x0030ddb8
      */
     virtual ~MetMultiTips4Screen();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0030de38
+     */
+    static MetMultiTips4Screen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Resolve the container views and fill the page's thirteen texts from configuration code
+     * 0x258.
+     *
+     * Slot 38. The panel takes the `tp3_panel` text, as the image records. The texts are not
+     * tested for null.
+     *
+     * @ghidraAddress 0x003091e8
+     */
+    virtual void ResolveContainerViews();
 };

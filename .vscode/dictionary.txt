@@ -509,6 +509,8 @@ metmemdetectscreen
 metmemdetectstartup
 metmsgscreen
 metmultisaveremixscreen
+metmultitips
+metmultitipsbasescreen
 metpersonadata
 metpersonasaverscreen
 metremixdatascreen

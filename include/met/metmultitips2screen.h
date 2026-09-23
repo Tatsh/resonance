@@ -36,4 +36,25 @@ public:
      * @ghidraAddress 0x0030da98
      */
     virtual ~MetMultiTips2Screen();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0030db18
+     */
+    static MetMultiTips2Screen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Resolve the container views and fill the page's seven texts from configuration code 0x258.
+     *
+     * Slot 38. The texts are not tested for null.
+     *
+     * @ghidraAddress 0x00307f38
+     */
+    virtual void ResolveContainerViews();
 };
