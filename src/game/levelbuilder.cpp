@@ -10,6 +10,7 @@
 
 namespace {
 
+// 0x001ec328
 // Deleter the destructor runs over all three collections. The class is file-private and
 // non-polymorphic, so the name is inferred from the body.
 void DeleteTrackData(TrackData *pTrack) {

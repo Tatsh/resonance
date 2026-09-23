@@ -56,8 +56,8 @@ public:
     /**
      * Restart the slot's setup state machine.
      *
-     * Clears PadRecord::mPhase and PadRecord::mUnknown124. FindJoypadConnectionsCmd and the
-     * routine at `0x001e1a88` are the callers. The title is inferred.
+     * Clears PadRecord::mPhase and PadRecord::mUnknown124. InputPoller::ResetJoypads() is the
+     * caller, expanded inline in InputPoller::FindJoypadConnections(). The title is inferred.
      *
      * @ghidraAddress 0x004ecb30
      */
@@ -98,7 +98,7 @@ public:
     /**
      * Report whether a pad is present.
      *
-     * The routine at `0x001e1ad8` is the caller. The title is inferred.
+     * InputPoller::NumberConnectedJoypads() is the caller. The title is inferred.
      *
      * @return 1 unless scePadGetState() reports the slot disconnected or closed, else 0.
      * @ghidraAddress 0x004ecbf8

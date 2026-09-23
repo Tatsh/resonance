@@ -109,6 +109,10 @@ constexpr int kSecondPlayer = 2;
 // The Joypad on slot 0 of port 1, which Setup() opens after the four of port 0.
 constexpr int kPort1Joypad = kSlotsPerPort;
 
+// 0x0069245c
+// Counts the calls to InputPoller::SetVibration() that reach a Joypad. Nothing reads it.
+int g_nVibrationCount;
+
 /**
  * Scheduler command the controller scan runs.
  *
@@ -221,6 +225,39 @@ void InputPoller::Shutdown() {
     mEntries.clear();
 }
 
+// 0x001e1a88
+inline void InputPoller::ResetJoypads() {
+    for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
+        (*it)->Reset();
+    }
+}
+
+// 0x001e1ad8
+void InputPoller::NumberConnectedJoypads() {
+    int nPlayer = kFirstPlayer;
+    const int nJoypadCount = mJoypads.size();
+    for (int i = 0; i < nJoypadCount; ++i) {
+        Joypad *pJoypad = mJoypads[i];
+        if (pJoypad->IsConnected()) {
+            mJoypadPlayers[pJoypad->mId] = nPlayer;
+            ++nPlayer;
+        }
+    }
+}
+
+// 0x001e1b78
+void InputPoller::SetVibration(int nPort, int nSmallMotor, int nBigMotor) {
+    unsigned i = 0;
+    while (i < mJoypadPlayers.size() && mJoypadPlayers[i] != nPort) {
+        ++i;
+    }
+    if (i == mJoypadPlayers.size()) {
+        return;
+    }
+    ++g_nVibrationCount;
+    mJoypads[i]->SetVibration(nSmallMotor, nBigMotor);
+}
+
 // 0x001df798
 void InputPoller::FindJoypadConnections() {
     if (!mActive) {
@@ -230,9 +267,7 @@ void InputPoller::FindJoypadConnections() {
     const int nMultitap1 = sceMtapGetConnection(kPort1);
     // The stored flag is compared against the raw connection value, not against a flag.
     if (mMultitap1 != nMultitap1) {
-        for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
-            (*it)->Reset();
-        }
+        ResetJoypads();
     }
     mMultitap1 = nMultitap1 != 0;
 
@@ -245,17 +280,13 @@ void InputPoller::FindJoypadConnections() {
             mJoypadPlayers[i] = i + kFirstPlayer;
         }
         mJoypadPlayers[mJoypadPlayers.size() - 1] = kNoPlayer;
-        for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
-            (*it)->Reset();
-        }
+        ResetJoypads();
         return;
     }
 
     mJoypadPlayers[kPort1Joypad] = nMultitap1 == kMultitapConnected ? kNoPlayer : kSecondPlayer;
     if (mMultitap0) {
-        for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
-            (*it)->Reset();
-        }
+        ResetJoypads();
         mMultitap0 = 0;
         mJoypadPlayers[0] = kFirstPlayer;
         for (unsigned i = 1; i < mJoypadPlayers.size() - 1; ++i) {

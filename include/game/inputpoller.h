@@ -43,11 +43,10 @@ public:
     /**
      * Drive the vibration motors of the controller on one port.
      *
-     * The body is not written. It finds the port in the list at `+0x0c` and, when present, passes
-     * both levels to the pad record at `+0x1c`. ForceFeedbackMgr::ApplyMotors() is the recovered
-     * caller.
+     * The Joypad whose player is nPort receives both levels, and a player with no Joypad is
+     * ignored. ForceFeedbackMgr::ApplyMotors() is the recovered caller.
      *
-     * @param nPort The controller's port, from 1.
+     * @param nPort The player, from 1.
      * @param nSmallMotor The small motor's state, 0 or 1.
      * @param nBigMotor The big motor's level.
      * @ghidraAddress 0x001e1b78
@@ -263,6 +262,26 @@ private:
      * @ghidraAddress 0x001e1c58
      */
     void OnUnknown001e1c58();
+
+    /**
+     * Restart every Joypad's setup state machine.
+     *
+     * Inline. FindJoypadConnections() expands it three times, and the out-of-line copy has no
+     * caller. The title is inferred.
+     *
+     * @ghidraAddress 0x001e1a88
+     */
+    void ResetJoypads();
+
+    /**
+     * Number the connected Joypads as players 1 onward, in order.
+     *
+     * A Joypad that is not connected keeps its player. The routine has no caller. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x001e1ad8
+     */
+    void NumberConnectedJoypads();
 
     // The controls, in the order of the mask table the control numbers index.
     static constexpr int kControlCount = 16;
