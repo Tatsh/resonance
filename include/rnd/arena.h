@@ -56,9 +56,7 @@ namespace Rnd {
  * `TnlArena` is a different class. It derives from `MsgSink` and belongs to the game rather than
  * the renderer, and so does `MetArenasScreen`.
  *
- * DrawSelf() at `0x005bc020`, UpdateWorldXfm() at `0x005bbf80`, Collide() at `0x005bc090`,
- * SetFrameSelf() at `0x005bbeb0`, Copy() at `0x005bbbb0`, the destructor at `0x005b6600`, and the
- * constructor at `0x005b6c58` are not reconstructed.
+ * The destructor at `0x005b6600` and the constructor at `0x005b6c58` are not reconstructed.
  */
 class Arena : public Animatable, public Collideable, public Transformable, public Drawable {
 public:
@@ -105,23 +103,39 @@ public:
     };
 
     /**
-     * Element of mUnknown120.
+     * One entry of mDrawOrder.
      *
-     * The image supplies no name for the type or for either member. The record is 8 bytes, which
-     * the element size the list allocation passes to the node tagger establishes, and the first
-     * word is a pointer that Replace() follows through offset zero. That extra indirection proves
-     * the static type of the pointer is a class deriving virtually from Rnd::Object rather than
-     * Rnd::Object itself, and Section::mView is the only such pointer the class stores, which is
-     * the whole of the evidence for the type below.
+     * The image supplies no name for the type or for either member, so both are inferred from
+     * their use. The record is 8 bytes, which the element size the list allocation passes to the
+     * node tagger establishes. SetFrameSelf() writes each section's view and its sort key into the
+     * entry of the same index, sorts the list, and DrawSelf() then draws the views in list order.
      */
-    struct Unknown120Entry {
-        // The temporary the two hit-list helpers resize with has only its first word written, so
-        // the second member starts indeterminate and no routine in the image reads it.
-        Unknown120Entry() : mView(nullptr) {
+    struct DrawEntry {
+        /**
+         * Construct an entry with no view.
+         *
+         * The temporary the two hit-list helpers resize with has only its first word written, so
+         * mSortKey starts indeterminate until SetFrameSelf() fills it.
+         */
+        DrawEntry() : mView(nullptr) {
         }
 
-        View *mView;    // +0x00
-        int mUnknown04; // +0x04
+        /**
+         * Order entries by descending sort key.
+         *
+         * The list merge at `0x005babe0` splices an entry of the second run ahead of one of the
+         * first when the first run's key is the smaller. That is this comparison with the operands
+         * the merge passes, so the entry with the largest key is drawn first.
+         *
+         * @param other The entry to compare against.
+         * @return Whether this entry sorts before other.
+         */
+        bool operator<(const DrawEntry &other) const {
+            return mSortKey > other.mSortKey;
+        }
+
+        View *mView;    /*!< The section view to draw. +0x00 */
+        float mSortKey; /*!< The frame of the section's current loop. +0x04 */
     };
 
     /**
@@ -161,7 +175,7 @@ public:
      * Replace one object reference with another.
      *
      * A matching section takes the replacement through a narrowing cast, and a matching entry of
-     * mUnknown120 is cleared to null rather than pointed at pTo.
+     * mDrawOrder is cleared to null rather than pointed at pTo.
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
@@ -180,9 +194,11 @@ public:
     /**
      * Copy another loop over this one.
      *
-     * The body is not reconstructed.
+     * Runs the four base copies, drops the view references, takes mLoopDist, mLoopFrames, and
+     * mSections from the source, and registers the views again. The source is narrowed with a
+     * checked cast whose result is used without a null test.
      *
-     * @param pSource The source object, which has to be a loop for the copy to take effect.
+     * @param pSource The source object, which has to be a loop.
      * @param nFlags The copy flags.
      * @ghidraAddress 0x005bbbb0
      */
@@ -218,9 +234,9 @@ public:
     static void Init();
 
     /**
-     * Register this loop as a referrer of every section view and resize mUnknown120.
+     * Register this loop as a referrer of every section view and resize mDrawOrder.
      *
-     * Load() runs it once the sections are in place. mUnknown120 receives one null entry per
+     * Load() runs it once the sections are in place. mDrawOrder receives one null entry per
      * section.
      *
      * @ghidraAddress 0x005bbc98
@@ -228,7 +244,7 @@ public:
     void AddInstancesToHitList();
 
     /**
-     * Drop this loop's registration on every section view and empty mUnknown120.
+     * Drop this loop's registration on every section view and empty mDrawOrder.
      *
      * Load() runs it before reading the sections.
      *
@@ -267,7 +283,7 @@ public:
      *
      * Each section dropped from the end is moved back to loop zero and releases its reference on
      * its view. mSections then grows or shrinks to nCount, new sections taking the default
-     * constructor, and mUnknown120 is resized to match. The routine has no caller, and the title is
+     * constructor, and mDrawOrder is resized to match. The routine has no caller, and the title is
      * inferred.
      *
      * @param nCount The new section count.
@@ -318,19 +334,20 @@ public:
 
 protected:
     /**
-     * Draw every section.
+     * Draw the section views in mDrawOrder.
      *
-     * Rnd::Drawable vtable slot 3. The body is not reconstructed.
+     * Rnd::Drawable vtable slot 3. An entry whose view is null is skipped.
      *
-     * @return Non-zero when the children are to be drawn as well.
+     * @return Always 1, so the children are drawn as well.
      * @ghidraAddress 0x005bc020
      */
     virtual int DrawSelf();
 
     /**
-     * Recompute the world transform.
+     * Recompute the world transform, and then that of every showing section view.
      *
-     * Rnd::Transformable vtable slot 2. The body is not reconstructed.
+     * Rnd::Transformable vtable slot 2. Runs the base implementation, and passes its result to
+     * each section view that is showing as that view's nForce, with this loop as its parent.
      *
      * @param pParent The parent whose world transform this one composes with.
      * @param nForce Non-zero to recompute even while the dirty flag is clear.
@@ -342,7 +359,7 @@ protected:
     /**
      * Test a ray against the loop and append what it strikes to sink.
      *
-     * Rnd::Collideable vtable slot 1. The body is not reconstructed.
+     * Rnd::Collideable vtable slot 1. Forwards the ray to every section view that is showing.
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
@@ -351,11 +368,14 @@ protected:
     virtual void Collide(const Ray &ray, HitSink &sink);
 
     /**
-     * Advance the loop to a frame.
+     * Place every section and rebuild the draw order.
      *
-     * Rnd::Animatable vtable slot 3. The body is not reconstructed.
+     * Rnd::Animatable vtable slot 3. Runs UpdateSection() on each section, which reads
+     * mFilteredFrame rather than flFrame. The entry of mDrawOrder at the same index takes the
+     * section view and a sort key of mFrame plus mLoop trips of mLoopFrames, less mDelta when
+     * mSortStart is set, and the list is then sorted.
      *
-     * @param flFrame The filtered frame to animate to.
+     * @param flFrame The filtered frame, which the body does not read.
      * @ghidraAddress 0x005bbeb0
      */
     virtual void SetFrameSelf(float flFrame);
@@ -382,10 +402,11 @@ private:
     Vector3 mLoopDist;
     float mLoopFrames;              // +0x110
     std::vector<Section> mSections; // +0x114
-    // +0x120 A std::list the two hit-list helpers resize to the section count and empty again, and
-    // Replace() clears an entry of rather than repointing it. Neither dump writes it and the
-    // serialiser does not touch it, so no routine in the image titles it.
-    std::list<Unknown120Entry> mUnknown120;
+    // +0x120 The sections' views in drawing order. The two hit-list helpers resize it to the
+    // section count and empty it again, SetFrameSelf() refills and sorts it, DrawSelf() walks it,
+    // and Replace() clears an entry rather than repointing it. Neither dump writes it and the
+    // serialiser does not touch it, so the title is inferred.
+    std::list<DrawEntry> mDrawOrder;
 };
 
 /**

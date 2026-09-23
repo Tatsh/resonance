@@ -235,7 +235,7 @@ void Arena::DumpText(FailSink &sink) {
 
 // 0x005b60c0
 //
-// The base blocks are written in a different order from the one DumpText() uses, and mUnknown120
+// The base blocks are written in a different order from the one DumpText() uses, and mDrawOrder
 // is not written at all, because AddInstancesToHitList() rebuilds it from the section count.
 void Arena::Save(Stream &stream) {
     const int nRevision = kArenaRevision;
@@ -307,12 +307,26 @@ void Arena::Replace(Object *pFrom, Object *pTo) {
 
     // A matching entry is cleared rather than repointed at pTo, and no reference is dropped for
     // it. The section walk above already dropped the one reference this object stores.
-    for (std::list<Unknown120Entry>::iterator it = mUnknown120.begin(); it != mUnknown120.end();
-         ++it) {
+    for (std::list<DrawEntry>::iterator it = mDrawOrder.begin(); it != mDrawOrder.end(); ++it) {
         if (it->mView == pFrom) {
             it->mView = nullptr;
         }
     }
+}
+
+// 0x005bbbb0
+void Arena::Copy(const Object *pSource, unsigned nFlags) {
+    // Yes, the binary reads through the cast result without testing it for null.
+    const Arena *pArena = dynamic_cast<const Arena *>(pSource);
+    Animatable::Copy(pSource, nFlags);
+    Collideable::Copy(pSource, nFlags);
+    Drawable::Copy(pSource, nFlags);
+    Transformable::Copy(pSource, nFlags);
+    RemoveInstancesFromHitList();
+    mLoopDist = pArena->mLoopDist;
+    mLoopFrames = pArena->mLoopFrames;
+    mSections = pArena->mSections;
+    AddInstancesToHitList();
 }
 
 // 0x005bbc98
@@ -322,7 +336,7 @@ void Arena::AddInstancesToHitList() {
             it->mView->AddRef(this);
         }
     }
-    mUnknown120.resize(mSections.size(), Unknown120Entry());
+    mDrawOrder.resize(mSections.size(), DrawEntry());
 }
 
 // 0x005bbd30
@@ -332,7 +346,7 @@ void Arena::RemoveInstancesFromHitList() {
             it->mView->RemoveRef(this);
         }
     }
-    mUnknown120.clear();
+    mDrawOrder.clear();
 }
 
 // 0x005b64e0
@@ -391,7 +405,7 @@ void Arena::SetSectionCount(unsigned int nCount) {
         }
     }
     mSections.resize(nCount, Section());
-    mUnknown120.resize(nCount, Unknown120Entry());
+    mDrawOrder.resize(nCount, DrawEntry());
 }
 
 // 0x005b8020
@@ -439,6 +453,52 @@ void Arena::SetSectionLoop(Section &section, int nLoop) {
         pflTranslation[1] = position.y;
         pflTranslation[2] = position.z;
         section.mView->mDirty = 1;
+    }
+}
+
+// 0x005bbeb0
+void Arena::SetFrameSelf(float flFrame) {
+    (void)flFrame; // Yes, the binary places the sections from mFilteredFrame instead.
+    std::list<DrawEntry>::iterator entry = mDrawOrder.begin();
+    for (Section &section : mSections) {
+        UpdateSection(section);
+        entry->mView = section.mView;
+        entry->mSortKey = section.mFrame + (static_cast<float>(section.mLoop) * mLoopFrames);
+        if (section.mSortStart != 0) {
+            entry->mSortKey -= section.mDelta;
+        }
+        ++entry;
+    }
+    mDrawOrder.sort();
+}
+
+// 0x005bbf80
+int Arena::UpdateWorldXfm(Transformable *pParent, int nForce) {
+    const int nChanged = Transformable::UpdateWorldXfm(pParent, nForce);
+    for (Section &section : mSections) {
+        if ((section.mView != nullptr) && section.mView->GetShowing()) {
+            section.mView->UpdateWorldXfm(this, nChanged);
+        }
+    }
+    return nChanged;
+}
+
+// 0x005bc020
+int Arena::DrawSelf() {
+    for (DrawEntry &entry : mDrawOrder) {
+        if (entry.mView != nullptr) {
+            entry.mView->Draw();
+        }
+    }
+    return 1;
+}
+
+// 0x005bc090
+void Arena::Collide(const Ray &ray, HitSink &sink) {
+    for (Section &section : mSections) {
+        if ((section.mView != nullptr) && section.mView->GetShowing()) {
+            section.mView->Collide(ray, sink);
+        }
     }
 }
 
