@@ -149,7 +149,7 @@ public:
      *
      * Calls through the six entry table of pointers to member functions at 0x0077dcc8, the same
      * table DrawGlyph() uses, whose entries are Blit4() through Blit32() and then BlitRle8(). The
-     * one caller in the image is the routine at 0x005cf4c0, outside the art library.
+     * one caller in the image is Rnd::Movie::OnChunk() at 0x005cf4c0, outside the art library.
      *
      * @param source The source bitmap.
      * @param nX The destination column.

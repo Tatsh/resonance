@@ -340,6 +340,48 @@ void Button::SetMesh(Mesh *pMesh) {
     }
 }
 
+// 0x00534b48
+void Button::SetText(Text *pText) {
+    if (mText != nullptr) {
+        mText->RemoveRef(this);
+    }
+    mText = pText;
+    if (pText != nullptr) {
+        pText->AddRef(this);
+    }
+    if (pText != nullptr) {
+        pText->SetFont(mFonts[mState]);
+    }
+}
+
+// 0x00534bd0
+void Button::SetMat(int nState, Mat *pMat) {
+    if (mMats[nState] != nullptr) {
+        mMats[nState]->RemoveRef(this);
+    }
+    mMats[nState] = pMat;
+    if (mMats[nState] != nullptr) {
+        mMats[nState]->AddRef(this);
+    }
+    if (mMesh != nullptr && mState == nState) {
+        mMesh->SetMaterial(pMat);
+    }
+}
+
+// 0x00534c78
+void Button::SetFont(int nState, Font *pFont) {
+    if (mFonts[nState] != nullptr) {
+        mFonts[nState]->RemoveRef(this);
+    }
+    mFonts[nState] = pFont;
+    if (mFonts[nState] != nullptr) {
+        mFonts[nState]->AddRef(this);
+    }
+    if (mText != nullptr && mState == nState) {
+        mText->SetFont(pFont);
+    }
+}
+
 // 0x005346f8
 Button *NewButton(const HxStr &name) {
     return new Button(name);

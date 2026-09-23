@@ -161,6 +161,41 @@ public:
     void SetMesh(Mesh *pMesh);
 
     /**
+     * Replace mText, moving this object's reference to the new text.
+     *
+     * The new text also takes the font mState selects. The routine has no caller in the shipped
+     * build. The name is inferred from SetMesh().
+     *
+     * @param pText The new text, or null.
+     * @ghidraAddress 0x00534b48
+     */
+    void SetText(Text *pText);
+
+    /**
+     * Replace one entry of mMats, moving this object's reference to the new material.
+     *
+     * When nState is the current state, mMesh takes the new material at once. The index is not
+     * checked against the palette size. The name is inferred.
+     *
+     * @param nState The palette entry.
+     * @param pMat The new material, or null.
+     * @ghidraAddress 0x00534bd0
+     */
+    void SetMat(int nState, Mat *pMat);
+
+    /**
+     * Replace one entry of mFonts, moving this object's reference to the new font.
+     *
+     * When nState is the current state, mText takes the new font at once. The index is not checked
+     * against the palette size. The name is inferred.
+     *
+     * @param nState The palette entry.
+     * @param pFont The new font, or null.
+     * @ghidraAddress 0x00534c78
+     */
+    void SetFont(int nState, Font *pFont);
+
+    /**
      * Select one of mMats and one of mFonts.
      *
      * @param nState The state index. MetButtonList passes over an entry whose state is 3, which
