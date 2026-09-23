@@ -246,8 +246,11 @@ protected:
     // is protected. +0xac
     std::vector<FreqAppearance> mUnknownac;
 
+    // The remix name. MetSaveRemixScreen's slot 42 hands it to the keyboard, which is why it is
+    // protected. +0xb8
+    HxStr mUnknownb8;
+
 private:
-    HxStr mUnknownb8; // +0xb8
     HxStr mUnknownc0; // +0xc0
 
 protected:
@@ -259,9 +262,12 @@ protected:
 private:
     std::vector<MetRemixRecord> mUnknowncc; // +0xcc
     int mUnknownd8;                         // +0xd8
-    int mUnknowndc;                         // +0xdc
 
 protected:
+    // Non-zero for a copy rather than a save. MetSaveRemixScreen::EnterAndShow() clears it, which
+    // is why it is protected. +0xdc
+    int mUnknowndc;
+
     // Cleared by the MetSaveRemixScreen constructor, which is why it is protected. This class's own
     // constructor never writes it.
     int mUnknowne0; // +0xe0

@@ -6,6 +6,7 @@
 #include "os/hxstr.h"
 
 class MetButtonList;
+class MetPersonaData;
 class MetRemixSaver;
 
 namespace Rnd {
@@ -32,7 +33,7 @@ class Text;
  * The constructor at `0x0037ace0` takes only the renderer and the load priority. It runs the
  * MetSaveRemix constructor at `0x00372120` with `ers` for the screen name, `metagame/_Solo` for
  * the directory, and `save_remix` for the container, writes its own three vptrs, zeroes
- * mUnknowne8, mUnknownec, and mUnknown100, default-constructs mUnknown104, allocates a
+ * mUnknowne8, mPersona, and mUnknown100, default-constructs mUnknown104, allocates a
  * MetButtonList tagged `MetButtonList` into mUnknowne8, and pushes `remix_save` into the
  * container object-name vector MetScreen declares at `+0x38`. It then clears
  * MetScreen::mUnknown5c, which is why MetScreen::mUnknown5c is protected rather than private, and
@@ -91,7 +92,8 @@ public:
      * MetMultiSaveRemixScreen's slots 2 and 36 and MetSoloEndRemixScreen's routine at `0x00395058`
      * call it. The title is inferred.
      *
-     * @param nUnknownec Stored through SetUnknownec().
+     * @param pPersona The persona saving the remix, stored through SetPersona(). May be null, in
+     * which case EnterAndShow() takes the first persona.
      * @param nPad The controller that owns the save, stored through SetOwnerPad().
      * @param pSaver The screen to report back to, stored through SetSaver().
      * @param slot The memory-card location to save to.
@@ -99,7 +101,7 @@ public:
      * @param bClearName Non-zero to empty `+0x104` through SetUnknown104().
      * @ghidraAddress 0x0037a9e0
      */
-    static void Open(int nUnknownec,
+    static void Open(MetPersonaData *pPersona,
                      int nPad,
                      MetRemixSaver *pSaver,
                      const MemcardConnectState &slot,
@@ -107,12 +109,12 @@ public:
                      int bClearName);
 
     /**
-     * Store the word at `+0xec`.
+     * Store the persona saving the remix.
      *
-     * @param nUnknownec The value.
+     * @param pPersona The persona.
      * @ghidraAddress 0x00381910
      */
-    void SetUnknownec(int nUnknownec);
+    void SetPersona(MetPersonaData *pPersona);
 
     /**
      * Store the controller that owns the save in MetSaveRemix::mUnknownc8.
@@ -149,14 +151,17 @@ public:
     /**
      * Show the screen and fill it from the finished session. Slot 5.
      *
-     * The body is not written. It makes itself the renderer's active panel through
-     * MetRenderer::SetActivePanel(), runs the empty MetRenderer routine at `0x00390088`, resets the
-     * MetButtonList at mUnknowne8, and then formats several fields with FormatString() from
-     * data-array property lookups at `0x005096d0`, resolving `ers_player_pan.txt` and further
-     * objects by name and narrowing each with a dynamic_cast to Rnd::Text. It stores the result of
-     * the game-manager query at `0x002156b0` in mUnknownec, and ends by copying one MetRemixRecord
-     * out of the MetRemixManager. Neither the property lookup nor the manager routines are
-     * identified.
+     * It clears the two keyboard flags, becomes the renderer's active panel, runs
+     * MetRenderer::OnUnknown00390088(), and selects the first button. It then labels the player
+     * panel `remix_player` with the controller number, falls back to the first persona when none
+     * was given, labels mFreqNameText with the persona's name, and fills mInstructionsText from
+     * `save_remix_command` and the card slot's name.
+     *
+     * The remix name comes from the name typed last when there is one, from the MetRemixManager
+     * record when a saved game is loaded, and otherwise from the level's default name (code 0x325,
+     * or the shorter code 0x327 when that does not fit mRemixNameText's wrap width) with ` 01`
+     * appended. A name that still does not fit is a Fatal() error. It ends by setting the help text
+     * and the `remix_save_options` preset and running MetScreen::EnterAndShow().
      *
      * @ghidraAddress 0x0037b8e8
      */
@@ -191,10 +196,13 @@ public:
     /**
      * Act on a navigation command from the one controller that owns the screen. Slot 19.
      *
-     * The body is not written. A command whose pad index differs from MetSaveRemix::mUnknownc8 is
-     * discarded before anything else, which is the same test the sound override at slot 20 makes
-     * and is what fixes mUnknownc8 as the owning controller index. Of the codes that pass, 5 reads
-     * the Rnd::Text at mUnknownf8 and 7 runs from `0x0037b398`, and every other code returns.
+     * A command whose pad index differs from MetSaveRemix::mUnknownc8 is discarded before anything
+     * else, which is the same test the sound override at slot 20 makes and is what fixes
+     * mUnknownc8 as the owning controller index. Select with a name typed records the name,
+     * clears the active panel, starts the selection alternation, and plays the slide sound, and
+     * select with no name plays the error sound. Code 7 opens the keyboard on the typed name, and
+     * code 8 marks the save as declined, tells the saver through its slot 4 with 0, and exits.
+     * Every other code is ignored.
      *
      * @param pCommand The command the renderer translated from an input message.
      * @ghidraAddress 0x0037b258
@@ -263,9 +271,11 @@ public:
     /**
      * Act on the button the user chose once the exit animation has finished. Slot 36.
      *
-     * The body is not written. It returns at once unless mUnknown100 is set, clears it, and then
-     * resolves the game manager and branches for roughly 0x340 instructions on
-     * MetScreen::mUnknown18 and on the entry the button list reports.
+     * With mUnknown100 set it clears the flag and raises `discard_remix` with NO and YES, with the
+     * `discard_remix_changes` text for a loaded game. Otherwise a back exit (MetScreen::mUnknown18
+     * of 0) reports to the saver through its slot 2 with 0, and any other exit records the save
+     * through RecordPendingSave() with the typed name, the level name, the appearances, and the
+     * album number configuration code 0x514 reads.
      *
      * @ghidraAddress 0x0037c260
      */
@@ -303,11 +313,11 @@ public:
     /**
      * Request a remix name from the on-screen keyboard. Slot 42.
      *
-     * The body is not written. It sets MetSaveRemix::mUnknowne0 and then runs the six-argument
-     * keyboard entry point at `0x0028cf18` with this screen's own registry key as the screen to
-     * return to, `Remix name` as the prompt, and this object's own MetKBUser subobject as the
-     * receiver, exactly as the MetRemixDelScreen override does. That entry point belongs to
-     * MetKeyboardScreen and is neither titled nor declared.
+     * It sets MetSaveRemix::mUnknowne0 and then builds a MetKeyboardRequest with this screen's own
+     * registry key as the screen to return to, `Remix name` as the prompt, MetSaveRemix::mUnknownb8
+     * as the initial text, -1 for any controller, and this object's own MetKBUser subobject as the
+     * receiver, with a width of 228, a length of 32, and the save-remix ticker text, and passes it
+     * to MetKeyboardScreen::Open().
      *
      * @ghidraAddress 0x0037ccc8
      */
@@ -327,8 +337,9 @@ public:
 
 private:
     MetButtonList *mUnknowne8; // +0xe8
-    // Slot 5 stores the result of the game-manager query at `0x002156b0` here. +0xec
-    int mUnknownec;
+    // The persona saving the remix. Open() stores it, and EnterAndShow() falls back to
+    // MetFrontEndState::GetFirstPersona() when it is null. +0xec
+    MetPersonaData *mPersona;
     Rnd::Text *mFreqNameText;     // +0xf0, `ers_freqname_player.txt`
     Rnd::Text *mInstructionsText; // +0xf4, `ers_instructions.txt`
     // The text object the entered name is drawn into, `ers_remix_title_val.txt`. +0xf8
