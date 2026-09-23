@@ -4,7 +4,9 @@
 
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
+#include "rnd/manager.h"
 
+class FailSink;
 namespace Rnd {
 class Stream;
 class Tex;
@@ -98,6 +100,89 @@ public:
      * @ghidraAddress 0x005d22f8
      */
     virtual void Load(Stream &stream);
+
+    /**
+     * Write a description of this movie to sink.
+     *
+     * The Rnd::Animatable description is followed by mFilename through the file path printer at
+     * `0x004e7bc0` and the clip list through the printer at `0x005d15e0`.
+     *
+     * @param sink The text sink.
+     * @ghidraAddress 0x005d21e0
+     */
+    virtual void DumpText(FailSink &sink);
+
+    /**
+     * Serialise the movie.
+     *
+     * The Rnd::Animatable record is followed by mFilename through the file path writer at
+     * `0x004e7bf8` and the clip list through the writer at `0x005d1790`.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x005d2280
+     */
+    virtual void Save(Stream &stream);
+
+    /**
+     * Replace one object reference with another.
+     *
+     * Forwards to Rnd::Animatable, then retargets every clip whose target is pFrom, moving this
+     * object's reference, and finally notifies the stream reader.
+     *
+     * @param pFrom The object being replaced.
+     * @param pTo The object to point at, which may be null.
+     * @ghidraAddress 0x005ced80
+     */
+    virtual void Replace(Object *pFrom, Object *pTo);
+
+    /**
+     * Report the class key a `.rnd` file writes for a movie.
+     *
+     * @return g_movieClassName.
+     * @ghidraAddress 0x005d2078
+     */
+    virtual const HxStr &ClassName() const;
+
+    /**
+     * Copy another movie over this one.
+     *
+     * Narrows the source with a dynamic cast, runs the Rnd::Animatable copy, closes the file,
+     * copies mFilename and mClips, and opens the file again. The cast result is used without a
+     * null check, so a source that is not a movie faults.
+     *
+     * @param pSource The source object.
+     * @param nFlags The copy flags, passed to the base.
+     * @ghidraAddress 0x005d23c8
+     */
+    virtual void Copy(const Object *pSource, unsigned nFlags);
+
+    /**
+     * Allocate a movie under the tag "Rnd::Movie".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x005d1eb8
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a movie block under the same tag.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x005d1ed8
+     */
+    static void operator delete(void *pBlock);
+
+    /**
+     * Return the target of the first clip whose frame count equals nFrames.
+     *
+     * The routine has no caller in the shipped build, and its name is inferred.
+     *
+     * @param nFrames The frame count to match.
+     * @return The clip's texture, or null when no clip matches.
+     * @ghidraAddress 0x005d2480
+     */
+    Tex *FindClipTarget(int nFrames) const;
 
     /**
      * Advance the movie to a frame.
@@ -202,5 +287,38 @@ public:
  * @ghidraAddress 0x005d20b8
  */
 Object *CreateRegisteredMovie(const HxStr &name);
+
+/**
+ * Allocate and construct a movie, returning the Movie pointer itself.
+ *
+ * The out-of-line copy has no caller, and CreateRegisteredMovie() expands the body before
+ * converting the result to its Rnd::Object subobject. The name is inferred.
+ *
+ * @param name The object name.
+ * @return The new movie.
+ * @ghidraAddress 0x005d1f28
+ */
+inline Movie *NewMovie(const HxStr &name) {
+    return new Movie(name);
+}
+
+/**
+ * Registered class name of Rnd::Movie, the string "Movie".
+ *
+ * @ghidraAddress 0x0077a590
+ */
+extern HxStr g_movieClassName;
+
+/**
+ * Register the "Movie" class with Rnd::Manager.
+ *
+ * The class has no creator hook, so the body is the registration alone. The out-of-line copy has
+ * no caller, and Rnd::Manager::Init() registers the class itself. The name is inferred.
+ *
+ * @ghidraAddress 0x005d1ef8
+ */
+inline void RegisterMovieClass() {
+    g_manager.RegisterClass(g_movieClassName, CreateRegisteredMovie);
+}
 
 } // namespace Rnd
