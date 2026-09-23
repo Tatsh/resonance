@@ -275,6 +275,30 @@ public:
         return mLiveParticles;
     }
 
+    /**
+     * Replace the force every particle accelerates by.
+     *
+     * The out-of-line copy has no callers. TnlEmitter inlines it.
+     *
+     * @param force The force.
+     * @ghidraAddress 0x0052b690
+     */
+    void SetForce(const Vector3 &force) {
+        mForce = force;
+    }
+
+    /**
+     * Report the force every particle accelerates by.
+     *
+     * The out-of-line copy has no callers. TnlEmitter inlines it.
+     *
+     * @return The force.
+     * @ghidraAddress 0x0052b6a0
+     */
+    Vector3 &GetForce() {
+        return mForce;
+    }
+
 protected:
     /**
      * Advance the emission to a frame.
@@ -442,6 +466,18 @@ Object *CreateRegisteredParticleSys(const HxStr &name);
  * @ghidraAddress 0x0071aef8
  */
 extern ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name);
+
+/**
+ * Build a system through the creator hook, the same shape as Rnd::NewButtonThroughHook().
+ *
+ * The routine has no caller, and its address appears only in the exception range table at
+ * `0x0086c370`. The name follows the Rnd::Button counterpart and is inferred.
+ *
+ * @param name The object name.
+ * @return The new system.
+ * @ghidraAddress 0x0052b3c0
+ */
+ParticleSys *NewParticleSysThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::ParticleSys, the string "ParticleSys".

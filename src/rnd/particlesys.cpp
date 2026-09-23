@@ -887,6 +887,11 @@ ParticleSys *NewParticleSys(const HxStr &name) {
     return new ParticleSys(name);
 }
 
+// 0x0052b3c0
+ParticleSys *NewParticleSysThroughHook(const HxStr &name) {
+    return g_pfnNewParticleSys(name);
+}
+
 // 0x0052b6d8
 Object *CreateRegisteredParticleSys(const HxStr &name) {
     return g_pfnNewParticleSys(name);

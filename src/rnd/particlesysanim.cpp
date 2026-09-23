@@ -201,10 +201,8 @@ void ParticleSysAnim::Copy(const Object *pSource, unsigned nFlags) {
 }
 
 // 0x0052c180
-ParticleSysAnim *NewParticleSysAnim(const HxStr &name) {
-    // The allocation is untagged here, unlike every other renderer class, and it is exactly 0x4c
-    // bytes rather than a rounded size.
-    return new ParticleSysAnim(name);
+Object *CreateRegisteredParticleSysAnim(const HxStr &name) {
+    return NewParticleSysAnim(name);
 }
 
 } // namespace Rnd

@@ -5,6 +5,7 @@
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
+#include "rnd/manager.h"
 
 class FailSink;
 namespace Rnd {
@@ -190,14 +191,29 @@ private:
 /**
  * Allocate and construct a particle system animation.
  *
- * This is the creator the class registers with Rnd::Manager. Unlike Rnd::ParticleSys, the class
- * installs no creator hook, so there is one creator and no platform subclass.
+ * The allocation is untagged, unlike every other renderer class, and exactly 0x4c bytes. The
+ * out-of-line copy has no caller, and CreateRegisteredParticleSysAnim() expands the body.
  *
  * @param name The object name.
  * @return The new animation.
+ * @ghidraAddress 0x0052b8a8
+ */
+inline ParticleSysAnim *NewParticleSysAnim(const HxStr &name) {
+    return new ParticleSysAnim(name);
+}
+
+/**
+ * Build a particle system animation for the registered "ParticleSysAnim" class.
+ *
+ * Converts the result of NewParticleSysAnim() to its Rnd::Object virtual base. Unlike
+ * Rnd::ParticleSys, the class installs no creator hook, so there is one creator and no platform
+ * subclass.
+ *
+ * @param name The object name.
+ * @return The new animation, as its Rnd::Object subobject.
  * @ghidraAddress 0x0052c180
  */
-ParticleSysAnim *NewParticleSysAnim(const HxStr &name);
+Object *CreateRegisteredParticleSysAnim(const HxStr &name);
 
 /**
  * Registered class name of Rnd::ParticleSysAnim, the string "ParticleSysAnim".
@@ -205,5 +221,17 @@ ParticleSysAnim *NewParticleSysAnim(const HxStr &name);
  * @ghidraAddress 0x0071af00
  */
 extern HxStr g_particleSysAnimClassName;
+
+/**
+ * Register the "ParticleSysAnim" class with Rnd::Manager.
+ *
+ * The class has no creator hook to reset, so the body is the registration alone. The out-of-line
+ * copy has no caller. The name is inferred.
+ *
+ * @ghidraAddress 0x0052b878
+ */
+inline void RegisterParticleSysAnimClass() {
+    g_manager.RegisterClass(g_particleSysAnimClassName, CreateRegisteredParticleSysAnim);
+}
 
 } // namespace Rnd

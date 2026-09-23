@@ -57,6 +57,23 @@ public:
     virtual ~Button();
 
     /**
+     * Allocate a button under the tag "Rnd::Button".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x005344b8
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a button block under the same tag.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x005344d8
+     */
+    static void operator delete(void *pBlock);
+
+    /**
      * Write a description of this button to sink.
      *
      * @param sink The diagnostic sink to write to.
@@ -131,6 +148,17 @@ public:
      * @ghidraAddress 0x005349e0
      */
     void SetShowing(int nShowing);
+
+    /**
+     * Replace mMesh, moving this object's reference to the new mesh.
+     *
+     * The new mesh also takes the material mState selects. The routine has no caller in the
+     * shipped build.
+     *
+     * @param pMesh The new mesh, or null.
+     * @ghidraAddress 0x00534ad0
+     */
+    void SetMesh(Mesh *pMesh);
 
     /**
      * Select one of mMats and one of mFonts.

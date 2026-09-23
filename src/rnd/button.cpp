@@ -4,6 +4,7 @@
 
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/font.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
@@ -15,6 +16,8 @@
 namespace Rnd {
 
 namespace {
+
+const char *const kButtonTag = "Rnd::Button";
 
 constexpr int kSerialVersion = 0;
 constexpr char kNoObject[] = "no object";
@@ -287,6 +290,54 @@ void Button::Load(Stream &stream) {
     stream >> mFonts;
 
     AddObjectRefs();
+}
+
+// 0x005344b8
+void *Button::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kButtonTag);
+}
+
+// 0x005344d8
+void Button::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kButtonTag);
+}
+
+// 0x005349e0
+void Button::SetShowing(int nShowing) {
+    if (mMesh != nullptr) {
+        mMesh->SetShowing(nShowing);
+    }
+    if (mText != nullptr) {
+        mText->SetShowing(nShowing);
+    }
+}
+
+// 0x00534a48
+void Button::SetState(int nState) {
+    if (mState == nState) {
+        return;
+    }
+    mState = nState;
+    if (mMesh != nullptr) {
+        mMesh->SetMaterial(mMats[nState]);
+    }
+    if (mText != nullptr) {
+        mText->SetFont(mFonts[nState]);
+    }
+}
+
+// 0x00534ad0
+void Button::SetMesh(Mesh *pMesh) {
+    if (mMesh != nullptr) {
+        mMesh->RemoveRef(this);
+    }
+    mMesh = pMesh;
+    if (pMesh != nullptr) {
+        pMesh->AddRef(this);
+    }
+    if (pMesh != nullptr) {
+        pMesh->SetMaterial(mMats[mState]);
+    }
 }
 
 // 0x005346f8
