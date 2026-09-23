@@ -21,12 +21,12 @@ Overlay *g_pOverlay;
 HxStr g_hudLayoutName;
 
 void Overlay::OnBarChanged(int nTrack, int nBar, long long llValue) {
-    if (nBar != mUnknown4c) {
+    if (nBar != mCurrentBar) {
         return;
     }
 
-    for (std::vector<HudTrack *>::iterator it = mUnknown08.begin(); it != mUnknown08.end(); ++it) {
-        if ((*it)->mUnknowne4 == nTrack) {
+    for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
+        if ((*it)->mTrack == nTrack) {
             (*it)->mEffects.SetMask(llValue);
         }
     }
@@ -45,7 +45,7 @@ void Overlay::OnJamEffect() {
 }
 
 HudBadge *Overlay::FindBadge(Player *pPlayer) {
-    for (std::vector<HudBadge *>::iterator it = mUnknown14.begin(); it != mUnknown14.end(); ++it) {
+    for (std::vector<HudBadge *>::iterator it = mBadges.begin(); it != mBadges.end(); ++it) {
         if ((*it)->mPlayer == pPlayer) {
             return *it;
         }

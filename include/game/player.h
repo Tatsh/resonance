@@ -5,6 +5,7 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/idable.h"
+#include "os/hxstr.h"
 
 /**
  * One participant in a session, local or remote.
@@ -26,7 +27,7 @@
  * The base subobjects account for `+0x00` through `+0x1f`, which the destructor at `0x00132ae8`
  * confirms by restoring a vptr at `+0x04` for `IDable<Player>`, at `+0x08` for `MsgSink`, and at
  * `+0x1c` for `MsgSource`, whose own `mSinks` vector it tears down at `+0x10`. This class's own
- * members start at `+0x20`, and the only one the destructor releases is the pointer at `+0x28`.
+ * members start at `+0x20`, and the only one the destructor releases is the colour name at `+0x24`.
  *
  * A slot whose verb is unrecovered keeps its table index as its title, because the index is part
  * of the layout. The comment records the behaviour recovered instead.
@@ -217,10 +218,16 @@ public:
      */
     int mId20;
 
+    /**
+     * The player's colour name, such as `green` or `red`. +0x24
+     *
+     * ~Player releases its buffer at `+0x28` with the inlined HxStr destructor. HudScore, HudFreq,
+     * and HudScorePulse copy-construct it directly at `0x00419848`, `0x00419b40`, and `0x0041c2d0`
+     * from outside the hierarchy, and the image has no accessor for it.
+     */
+    HxStr mColorName;
+
 protected:
-    int mUnknown24; // +0x24
-    // Released by ~Player, so this member owns its allocation.
-    void *mUnknown28; // +0x28
     // Slot11 clamps this to kJuiceMaximum before announcing it.
     int mUnknown34; // +0x34
 };

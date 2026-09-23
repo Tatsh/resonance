@@ -9,7 +9,7 @@
 HudScorePulse::HudScorePulse() {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown00 = dynamic_cast<Rnd::Mesh *>(
+    mMesh = dynamic_cast<Rnd::Mesh *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s score pulse.mesh", pszLayout))));
-    mUnknown00->SetShowing(0);
+    mMesh->SetShowing(0);
 }

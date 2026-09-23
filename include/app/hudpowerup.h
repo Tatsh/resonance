@@ -38,11 +38,11 @@ public:
     void Show(int nKind);
 
 private:
-    Rnd::View *mUnknown00; // +0x00 `HUD pup auto<n>.view`
-    Rnd::View *mUnknown04; // +0x04 `HUD pup neut<n>.view`
-    Rnd::View *mUnknown08; // +0x08 `HUD pup bump<n>.view`
-    Rnd::View *mUnknown0c; // +0x0c `HUD pup crip<n>.view`
-    Rnd::View *mUnknown10; // +0x10 `HUD pup free<n>.view`
-    Rnd::View *mUnknown14; // +0x14 `HUD pup mult<n>.view`
-    Rnd::View *mUnknown18; // +0x18 The container, `<layout> pup<n>.view`.
+    Rnd::View *mAutocatcherView; // `HUD pup auto<n>.view`
+    Rnd::View *mNeutralizerView; // `HUD pup neut<n>.view`
+    Rnd::View *mBumperView;      // `HUD pup bump<n>.view`
+    Rnd::View *mCripplerView;    // `HUD pup crip<n>.view`
+    Rnd::View *mFreestylerView;  // `HUD pup free<n>.view`
+    Rnd::View *mMultiplierView;  // `HUD pup mult<n>.view`
+    Rnd::View *mContainer;       // `<layout> pup<n>.view`
 };

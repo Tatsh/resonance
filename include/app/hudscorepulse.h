@@ -39,5 +39,5 @@ public:
     void MoveTo(HudBadge *pBadge);
 
 private:
-    Rnd::Mesh *mUnknown00; // +0x00
+    Rnd::Mesh *mMesh; // `<layout> score pulse.mesh`
 };

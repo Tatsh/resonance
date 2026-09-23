@@ -32,47 +32,47 @@ constexpr unsigned kLargestCount = 9;
 } // namespace
 
 HudCountdown::HudCountdown(int nIndex, int nTargetBar)
-    : mUnknown00(nTargetBar), mUnknown04(kNoCount), mUnknown08(kNoFrame) {
+    : mTargetBar(nTargetBar), mShownCount(kNoCount), mChangeFrame(kNoFrame) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown0c = dynamic_cast<Rnd::TransAnim *>(
+    mAnim = dynamic_cast<Rnd::TransAnim *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s countdown%d.tnm", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown10 = dynamic_cast<Rnd::Text *>(
+    mText = dynamic_cast<Rnd::Text *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s countdown%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown14 = dynamic_cast<Rnd::Blur *>(
+    mBlur = dynamic_cast<Rnd::Blur *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s countdown%d.blur", pszLayout, nIndex))));
 
-    mUnknown14->SetShowing(0);
+    mBlur->SetShowing(0);
 
     if (Application::shared()->GetPlayMode() == kPlayModeGame &&
         QueryConfigFlag(kDisplayModeConfigCode) == 0) {
-        mUnknown18 = 0;
+        mDisabled = 0;
     } else {
-        mUnknown18 = 1;
+        mDisabled = 1;
     }
 }
 
 void HudCountdown::SetFrame(float flFrame) {
-    if (mUnknown18 != 0) {
+    if (mDisabled != 0) {
         return;
     }
 
-    const int nCount = mUnknown00 - static_cast<int>((flFrame + kBarLead) / kTicksPerBar);
+    const int nCount = mTargetBar - static_cast<int>((flFrame + kBarLead) / kTicksPerBar);
     // One unsigned comparison tests 1 through 9, and a count of 0 wraps to the largest value.
     const bool bShowing = static_cast<unsigned>(nCount - 1) < kLargestCount;
-    mUnknown14->SetShowing(bShowing);
+    mBlur->SetShowing(bShowing);
     if (!bShowing) {
         return;
     }
 
-    if (nCount != mUnknown04) {
-        mUnknown04 = nCount;
-        mUnknown10->SetText(HxStr(FormatString("%d", nCount)));
-        mUnknown08 = flFrame;
+    if (nCount != mShownCount) {
+        mShownCount = nCount;
+        mText->SetText(HxStr(FormatString("%d", nCount)));
+        mChangeFrame = flFrame;
     }
-    mUnknown0c->SetFrame(flFrame - mUnknown08);
+    mAnim->SetFrame(flFrame - mChangeFrame);
 }

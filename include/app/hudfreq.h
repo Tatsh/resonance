@@ -62,12 +62,12 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    Rnd::TransAnim *mUnknown00; // +0x00
-    Rnd::Mesh *mUnknown04;      // +0x04
-    Rnd::MatAnim *mUnknown08;   // +0x08
-    Rnd::Mat *mUnknown0c;       // +0x0c
+    Rnd::TransAnim *mAnim;    // `<layout> freq<p>.tnm`
+    Rnd::Mesh *mMesh;         // `<layout> freq<n>.mesh`
+    Rnd::MatAnim *mPulseAnim; // `HUD freq pulse.mnm`
+    Rnd::Mat *mMat;           // `HUD freq<p>.mat`
     // Non-zero while the icon pulses.
-    int mUnknown10; // +0x10
+    int mPulsing;
     // The pulse loop the frame is in. Starts at -100.
-    int mUnknown14; // +0x14
+    int mPulseLoop;
 };

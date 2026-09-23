@@ -75,10 +75,10 @@ public:
     void SetLit(int nKind, int nLit);
 
 private:
-    Rnd::Mesh *mUnknown00;        // +0x00 `<layout> fxwires<n>.mesh`
-    Rnd::Mat *mUnknown04;         // +0x04 `HUD fx_on.mat`
-    Rnd::Mat *mUnknown08;         // +0x08 `HUD fx_off.mat`
-    Rnd::Font *mUnknown0c;        // +0x0c `HUD fx_on.font`
-    Rnd::Font *mUnknown10;        // +0x10 `HUD fx_off.font`
-    std::vector<Lamp> mUnknown14; // +0x14
+    Rnd::Mesh *mWires;        // `<layout> fxwires<n>.mesh`
+    Rnd::Mat *mLitMat;        // `HUD fx_on.mat`
+    Rnd::Mat *mUnlitMat;      // `HUD fx_off.mat`
+    Rnd::Font *mSelectedFont; // `HUD fx_on.font`
+    Rnd::Font *mPlainFont;    // `HUD fx_off.font`
+    std::vector<Lamp> mLamps;
 };

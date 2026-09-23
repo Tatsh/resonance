@@ -11,17 +11,17 @@
 HudLoop::HudLoop(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown04 = dynamic_cast<Rnd::Mesh *>(
+    mWires = dynamic_cast<Rnd::Mesh *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s loopwires%d.mesh", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown00 = dynamic_cast<Rnd::Mesh *>(
+    mIndicator = dynamic_cast<Rnd::Mesh *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s loop%d.mesh", pszLayout, nIndex))));
 
-    mUnknown04->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
+    mWires->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
     SetShowing(1);
 }
 
 void HudLoop::SetShowing(int nShowing) {
-    mUnknown00->SetShowing(nShowing);
+    mIndicator->SetShowing(nShowing);
 }

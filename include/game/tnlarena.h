@@ -29,7 +29,7 @@ class Mesh;
  *
  * The arena shows the game on four screens, whose materials are `screen01.mat` to `screen04.mat`.
  * The constructor finds every Rnd::Mesh that uses each of the four and records the mesh with its
- * material in mUnknown10. It then builds one PlayerMaterial per world player, and one of three
+ * material in mScreenMeshes. It then builds one PlayerMaterial per world player, and one of three
  * ScreenAnim classes by mode. Configuration code 0x3a1 selects the plain ScreenAnim, game mode 1
  * selects SoloScreenAnim, and every other mode selects MultiScreenAnim.
  */
@@ -111,16 +111,16 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    std::vector<PlayerMaterial *> mUnknown04; // +0x04
-    std::vector<ScreenMesh> mUnknown10;       // +0x10
-    ScreenAnim *mUnknown1c;                   // +0x1c
+    std::vector<PlayerMaterial *> mPlayerMaterials;
+    std::vector<ScreenMesh> mScreenMeshes;
+    ScreenAnim *mScreenAnim;
     // Globals::GetGameMode() at construction.
-    int mUnknown20; // +0x20
+    int mGameMode;
     // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while it still is.
     int mUnknown24; // +0x24
     // The level last passed to slot 3 of the animation. Starts at 1, or at the play mode when that
     // is 2.
-    int mUnknown28; // +0x28
+    int mLevel;
 };
 
 /**

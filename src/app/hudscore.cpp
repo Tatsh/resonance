@@ -18,16 +18,16 @@ constexpr float kRedrawDelay = 600.0f;
 } // namespace
 
 void HudScore::Update(float flTime) {
-    if (mUnknown08 == kScoreDrawn) {
+    if (mChangeTime == kScoreDrawn) {
         return;
     }
 
-    if (mUnknown08 == kScoreChangeUntimed) {
-        mUnknown08 = flTime;
+    if (mChangeTime == kScoreChangeUntimed) {
+        mChangeTime = flTime;
     }
 
-    if (flTime - mUnknown08 > kRedrawDelay) {
-        mUnknown04->SetText(HxStr(FormatString("%d", mUnknown0c)));
-        mUnknown08 = kScoreDrawn;
+    if (flTime - mChangeTime > kRedrawDelay) {
+        mText->SetText(HxStr(FormatString("%d", mScore)));
+        mChangeTime = kScoreDrawn;
     }
 }

@@ -76,16 +76,16 @@ public:
     void SetFrame(float flTime);
 
 private:
-    Rnd::Blur *mUnknown00;      // +0x00
-    Rnd::Font *mUnknown04;      // +0x04 The text's font.
-    Rnd::Text *mUnknown08;      // +0x08
-    Rnd::TransAnim *mUnknown0c; // +0x0c
+    Rnd::Blur *mBlur;      // `<name>.blur`
+    Rnd::Font *mFont;      // The text's font.
+    Rnd::Text *mText;      // `<name>.txt`
+    Rnd::TransAnim *mAnim; // `<name>.tnm`
     // When the message started. 0 marks it idle and 1e9 marks a start not yet recorded.
-    float mUnknown10; // +0x10
+    float mStart;
     // The font size at construction, which the destructor restores.
-    float mUnknown14; // +0x14
+    float mFontSize;
     // How long the message stays between its fades.
-    float mUnknown18; // +0x18
+    float mHold;
 
 public:
     /**
@@ -95,5 +95,5 @@ public:
      * it. Overlay's handler at `0x0041e020` sets it directly after an inlined Show() whenever the
      * text reports itself showing, and the image has no accessor for it.
      */
-    int mUnknown1c;
+    int mActive;
 };

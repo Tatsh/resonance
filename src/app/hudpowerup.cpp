@@ -10,26 +10,26 @@
 #include "rnd/mesh.h"
 #include "rnd/view.h"
 
-HudPowerup::HudPowerup(int nIndex) : mUnknown18(nullptr) {
+HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     Rnd::Mesh *pMesh = dynamic_cast<Rnd::Mesh *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s pup%d.mesh", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown18 = dynamic_cast<Rnd::View *>(
+    mContainer = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s pup%d.view", pszLayout, nIndex))));
-    mUnknown00 = dynamic_cast<Rnd::View *>(
+    mAutocatcherView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD pup auto%d.view", nIndex))));
-    mUnknown04 = dynamic_cast<Rnd::View *>(
+    mNeutralizerView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD pup neut%d.view", nIndex))));
-    mUnknown08 = dynamic_cast<Rnd::View *>(
+    mBumperView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD pup bump%d.view", nIndex))));
-    mUnknown0c = dynamic_cast<Rnd::View *>(
+    mCripplerView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD pup crip%d.view", nIndex))));
-    mUnknown10 = dynamic_cast<Rnd::View *>(
+    mFreestylerView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD pup free%d.view", nIndex))));
-    mUnknown14 = dynamic_cast<Rnd::View *>(
+    mMultiplierView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD pup mult%d.view", nIndex))));
 
     pMesh->SetShowing(Application::shared()->GetPlayMode() == kPlayModeGame);
@@ -39,31 +39,31 @@ HudPowerup::HudPowerup(int nIndex) : mUnknown18(nullptr) {
 void HudPowerup::Show(int nKind) {
     Rnd::View *pView = nullptr;
 
-    mUnknown18->ClearDraws();
-    mUnknown18->ReleaseAnimsRefs();
-    mUnknown18->ClearTransList();
+    mContainer->ClearDraws();
+    mContainer->ReleaseAnimsRefs();
+    mContainer->ClearTransList();
 
     switch (nKind) {
     case kHudItemNone:
         pView = nullptr;
         break;
     case kHudItemNeutralizer:
-        pView = mUnknown04;
+        pView = mNeutralizerView;
         break;
     case kHudItemCrippler:
-        pView = mUnknown0c;
+        pView = mCripplerView;
         break;
     case kHudItemFreestyler:
-        pView = mUnknown10;
+        pView = mFreestylerView;
         break;
     case kHudItemAutocatcher:
-        pView = mUnknown00;
+        pView = mAutocatcherView;
         break;
     case kHudItemBumper:
-        pView = mUnknown08;
+        pView = mBumperView;
         break;
     case kHudItemMultiplier:
-        pView = mUnknown14;
+        pView = mMultiplierView;
         break;
     default:
         break;
@@ -71,8 +71,8 @@ void HudPowerup::Show(int nKind) {
 
     if (pView != nullptr) {
         pView->SetShowing(1);
-        mUnknown18->AddDraw(pView, nullptr);
-        mUnknown18->AddTrans(pView);
-        mUnknown18->AddAnim(pView);
+        mContainer->AddDraw(pView, nullptr);
+        mContainer->AddTrans(pView);
+        mContainer->AddAnim(pView);
     }
 }

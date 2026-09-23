@@ -80,11 +80,11 @@ public:
      * GetCell().
      */
     struct Cell {
-        Player *mUnknown00;   /*!< Player a BarStatusMsg with flag 1 reports. +0x00 */
+        Player *mPlayer;      /*!< Player a BarStatusMsg with flag 1 reports. +0x00 */
         int mUnknown04;       /*!< Word a BarStatusMsg with flag 2 reports. +0x04 */
         int mUnknown08;       /*!< Word a BarStatusMsg with flag 4 reports. +0x08 */
         long long mUnknown10; /*!< Value a BarStatusMsg with flag 8 reports. +0x10 */
-        int mUnknown18;       /*!< Bar the cell last recorded, or -1. +0x18 */
+        int mBar;             /*!< Bar the cell last recorded, or -1. +0x18 */
     };
 
     /**
@@ -127,7 +127,7 @@ public:
     /**
      * Sample the song clock, then deliver every queued message.
      *
-     * RendererBase slot 6. The tick is stored as a float in mUnknown60 before
+     * RendererBase slot 6. The tick is stored as a float in mSongTick before
      * RendererBase::OnUnknownSlot6() drains the queue.
      *
      * @ghidraAddress 0x00432460
@@ -150,7 +150,7 @@ public:
      * RendererBase slot 8, pure in the base. Draws `outer.view`, sets up an alternative GS draw
      * context while g_nLsdMode is set, draws each local tunnel view after
      * AppTunnel::PrepareLocalView() has placed it, draws `hud.view` and the overlay, and finally
-     * the two debug overlays under mUnknown64 and mUnknown68.
+     * the two debug overlays under mDrawTimingGraph and mDrawRenderStats.
      *
      * The body is not written, for the reason recorded in the class documentation.
      *
@@ -259,7 +259,7 @@ private:
     void OnPointAmount(Message *pMsg);
 
     // The world's song clock, read once by the constructor through Globals::GetSongClock().
-    Sch::TickClock *mUnknown5c; // +0x5c
+    Sch::TickClock *mSongClock; // +0x5c
 
 public:
     /**
@@ -269,32 +269,32 @@ public:
      * AppTunnel::OnBarChanged() read it directly through the renderer they record, and the image
      * has no accessor for it.
      */
-    float mUnknown60;
+    float mSongTick;
 
 private:
     // Draw the subsystem timing graph. Filled from configuration code 0x397.
-    int mUnknown64; // +0x64
+    int mDrawTimingGraph; // +0x64
     // Draw the render-statistics overlay. Filled from configuration code 0x3a2.
-    int mUnknown68; // +0x68
-    // The bar grid, mUnknown7c rows of mUnknown78 cells.
-    std::vector<Cell> mUnknown6c; // +0x6c
+    int mDrawRenderStats; // +0x68
+    // The bar grid, mRowCount rows of mCellsPerRow cells.
+    std::vector<Cell> mCells; // +0x6c
     // Cells per row, the `tunnel` object's slice count.
-    int mUnknown78; // +0x78
+    int mCellsPerRow; // +0x78
     // Row count, the `tunnel` object's ring count.
-    int mUnknown7c; // +0x7c
+    int mRowCount; // +0x7c
     // `outer.view`.
-    Rnd::View *mUnknown80; // +0x80
+    Rnd::View *mOuterView; // +0x80
     // `tnl.view`.
-    Rnd::View *mUnknown84; // +0x84
+    Rnd::View *mTunnelView; // +0x84
     // `hud.view`.
-    Rnd::View *mUnknown88; // +0x88
+    Rnd::View *mHudView; // +0x88
     // One `tnl local%d.view` per world player.
-    std::vector<Rnd::View *> mUnknown8c; // +0x8c
-    AppTunnel *mUnknown98;               // +0x98
-    Overlay *mUnknown9c;                 // +0x9c
-    TnlArena *mUnknowna0;                // +0xa0
+    std::vector<Rnd::View *> mLocalViews; // +0x8c
+    AppTunnel *mTunnel;                   // +0x98
+    Overlay *mOverlay;                    // +0x9c
+    TnlArena *mArena;                     // +0xa0
     // The player OnPointAmount() last reported as the leader, or null.
-    Player *mUnknowna4; // +0xa4
+    Player *mLeader; // +0xa4
 };
 
 /**

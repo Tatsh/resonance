@@ -87,25 +87,26 @@ public:
 
 private:
     // The flash, 1 at a change and falling by 0.2 each frame to 0.
-    float mUnknown00; // +0x00
-    // The pulse, falling by 0.05 each frame to mUnknown08.
-    float mUnknown04; // +0x04
-    float mUnknown08; // +0x08
+    float mFlash;
+    // The pulse, falling by 0.05 each frame to mPulseRest.
+    float mPulse;
+    float mPulseRest;
     // The multiplier SetMultiplier() last showed. Starts at 1.
-    int mUnknown0c; // +0x0c
+    int mMultiplier;
     // The points SetPoints() last showed.
-    int mUnknown10; // +0x10
+    int mPoints;
     // Non-zero while points are shown.
-    int mUnknown14; // +0x14
+    int mShowing;
     // Selects the hot material for the multiplier text.
-    int mUnknown18;        // +0x18
-    Rnd::View *mUnknown1c; // +0x1c `pts_exit<n>.view`
-    Rnd::Text *mUnknown20; // +0x20 `pts_exit<n>.txt`
-    Rnd::Blur *mUnknown24; // +0x24 `pts_exit<n>.blur`
-    Rnd::Text *mUnknown28; // +0x28 `pts<n>.txt`
-    Rnd::Text *mUnknown2c; // +0x2c `ptsmult<n>.txt`
-    Rnd::Mat *mUnknown30;  // +0x30 `HUD ptstmp.mat`
-    Rnd::Mat *mUnknown34;  // +0x34 `HUD ptstmphot.mat`
-    int mUnknown38;        // +0x38
-    AnimRange mUnknown3c;  // +0x3c The exit animation.
+    int mHot;
+    Rnd::View *mExitView;       // `pts_exit<n>.view`
+    Rnd::Text *mExitText;       // `pts_exit<n>.txt`
+    Rnd::Blur *mExitBlur;       // `pts_exit<n>.blur`
+    Rnd::Text *mPointsText;     // `pts<n>.txt`
+    Rnd::Text *mMultiplierText; // `ptsmult<n>.txt`
+    Rnd::Mat *mPlainMat;        // `HUD ptstmp.mat`
+    Rnd::Mat *mHotMat;          // `HUD ptstmphot.mat`
+    int mUnknown38;             // +0x38
+    // The exit animation.
+    AnimRange mExit;
 };

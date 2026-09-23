@@ -23,12 +23,12 @@ constexpr int kLampKindsConfigCode = 0x389;
 HudEffects::HudEffects(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown00 = dynamic_cast<Rnd::Mesh *>(
+    mWires = dynamic_cast<Rnd::Mesh *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s fxwires%d.mesh", pszLayout, nIndex))));
-    mUnknown04 = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD fx_on.mat")));
-    mUnknown08 = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD fx_off.mat")));
-    mUnknown0c = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr("HUD fx_on.font")));
-    mUnknown10 = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr("HUD fx_off.font")));
+    mLitMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD fx_on.mat")));
+    mUnlitMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD fx_off.mat")));
+    mSelectedFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr("HUD fx_on.font")));
+    mPlainFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr("HUD fx_off.font")));
 
     std::vector<int> kinds;
     QueryConfigVector(&kinds, kLampKindsConfigCode);
@@ -46,32 +46,32 @@ HudEffects::HudEffects(int nIndex) {
             Rnd::g_manager.Find(HxStr(FormatString("%s fx%d%d.txt", pszLayout, nIndex, nLamp))));
 
         lamp.mText->SetText(HudPowerupName(lamp.mKind));
-        mUnknown14.push_back(lamp);
+        mLamps.push_back(lamp);
         SetLit(lamp.mKind, 0);
     }
 
-    mUnknown00->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
+    mWires->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
 }
 
 void HudEffects::SetMask(long long llMask) {
-    for (std::vector<Lamp>::iterator it = mUnknown14.begin(); it != mUnknown14.end(); ++it) {
+    for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == kHudItemGuides) {
             continue;
         }
-        it->mMesh->SetMaterial((llMask & (1LL << it->mKind)) != 0 ? mUnknown04 : mUnknown08);
+        it->mMesh->SetMaterial((llMask & (1LL << it->mKind)) != 0 ? mLitMat : mUnlitMat);
     }
 }
 
 void HudEffects::Select(int nKind) {
-    for (std::vector<Lamp>::iterator it = mUnknown14.begin(); it != mUnknown14.end(); ++it) {
-        it->mText->SetFont(it->mKind == nKind ? mUnknown0c : mUnknown10);
+    for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
+        it->mText->SetFont(it->mKind == nKind ? mSelectedFont : mPlainFont);
     }
 }
 
 void HudEffects::SetLit(int nKind, int nLit) {
-    for (std::vector<Lamp>::iterator it = mUnknown14.begin(); it != mUnknown14.end(); ++it) {
+    for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == nKind) {
-            it->mMesh->SetMaterial(nLit != 0 ? mUnknown04 : mUnknown08);
+            it->mMesh->SetMaterial(nLit != 0 ? mLitMat : mUnlitMat);
         }
     }
 }

@@ -70,8 +70,8 @@ public:
      * Advance the display to one song position.
      *
      * Renderer::OnUnknownSlot7() is the caller. The bar is the position divided by 1920 ticks, and
-     * a change of bar is recorded in mUnknown4c. The title is inferred from the caller. The body is
-     * not written.
+     * a change of bar is recorded in mCurrentBar. The title is inferred from the caller. The body
+     * is not written.
      *
      * @param flFrame The song position, in MIDI ticks.
      * @ghidraAddress 0x0041dd20
@@ -91,8 +91,8 @@ public:
     /**
      * Update the track display for one bar whose state a BarStatusMsg changed.
      *
-     * Does nothing unless the bar is the current bar in mUnknown4c. Otherwise sets the effect lamps
-     * of every track display on that track from the value. The title is inferred.
+     * Does nothing unless the bar is the current bar in mCurrentBar. Otherwise sets the effect
+     * lamps of every track display on that track from the value. The title is inferred.
      *
      * @param nTrack The track.
      * @param nBar The bar.
@@ -209,23 +209,23 @@ private:
     // The 0x164-byte panel, deleted by the destructor. +0x04
     unsigned char mUnknown04[0x04];
     // One track display per world player that has a slot, deleted by the destructor.
-    std::vector<HudTrack *> mUnknown08; // +0x08
+    std::vector<HudTrack *> mTracks; // +0x08
     // One badge per world player.
-    std::vector<HudBadge *> mUnknown14; // +0x14
+    std::vector<HudBadge *> mBadges; // +0x14
     // One instrument name per track, which a TrackSelectMsg shows on the selecting player's label.
-    std::vector<HxStr> mUnknown20; // +0x20
+    std::vector<HxStr> mInstrumentNames; // +0x20
     // One word per track, read from the track description's `+0x0c`.
     std::vector<int> mUnknown2c; // +0x2c
-    Renderer *mUnknown38;        // +0x38
+    Renderer *mRenderer;         // +0x38
     // Globals::GetGameMode() at construction.
-    int mUnknown3c; // +0x3c
+    int mGameMode; // +0x3c
     // Globals::GetPlayMode() at construction.
-    int mUnknown40; // +0x40
+    int mPlayMode; // +0x40
     // Configuration code 0x3a1.
     int mUnknown44; // +0x44
     int mUnknown48; // +0x48
     // The bar SetFrame() last saw. The constructor starts it at -123123.
-    int mUnknown4c;                  // +0x4c
+    int mCurrentBar;                 // +0x4c
     float mUnknown50;                // +0x50
     int mUnknown54;                  // +0x54
     unsigned char mReserved58[0x04]; // +0x58

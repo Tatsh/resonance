@@ -24,7 +24,7 @@ class Player;
  * and ~HudTextMessage() and then the scalar free.
  *
  * Every member is public because Overlay's handlers access the parts directly. They look a
- * display up by mPlayer, set the track name through mTrackLabel, record the track in mUnknowne4,
+ * display up by mPlayer, set the track name through mTrackLabel, record the track in mTrack,
  * and drive mPoints, mEffects, and the words at `+0xe0` and `+0xec`.
  *
  * The constructor's body is not written. It needs the Globals accessor at `0x00118da0`, whose
@@ -62,7 +62,7 @@ public:
     HudPoints mPoints;           /*!< The points readout. +0x78 */
     HudCountdown mCountdown;     /*!< The bar countdown. +0xc4 */
     int mUnknowne0;              /*!< Word Overlay's handler at `0x0041fed8` counts. +0xe0 */
-    int mUnknowne4;              /*!< The track the player selected. +0xe4 */
+    int mTrack;                  /*!< The track the player selected. +0xe4 */
     int mUnknowne8;              /*!< The constructor does not write it. +0xe8 */
     int mUnknownec;              /*!< Word Overlay's handler at `0x0041eda8` writes. +0xec */
     Player *mPlayer;             /*!< The player the display shows. +0xf0 */

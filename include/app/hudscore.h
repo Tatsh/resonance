@@ -15,8 +15,8 @@ class Text;
  * of objects its constructor resolves. It occupies the first 0x10 bytes of HudBadge.
  *
  * The readout redraws once more than 600 units of Update()'s time have passed since a change.
- * mUnknown08 records when the change arrived, -1 marks a change whose time is not yet recorded, and
- * 1e9 marks the readout as up to date.
+ * mChangeTime records when the change arrived, -1 marks a change whose time is not yet recorded,
+ * and 1e9 marks the readout as up to date.
  *
  * The constructor's body is not written. It needs the Rnd::Font material setter at `0x004d0600`.
  */
@@ -52,10 +52,10 @@ public:
      * Public because HudScorePulse::MoveTo() reads its world position directly, and the image has
      * no accessor for it.
      */
-    Rnd::Mesh *mUnknown00;
+    Rnd::Mesh *mMesh;
 
 private:
-    Rnd::Text *mUnknown04; // +0x04
+    Rnd::Text *mText;
 
 public:
     /**
@@ -64,12 +64,12 @@ public:
      * Public because Overlay's PointAmountMsg handler at `0x0042aff0` writes -1 into it directly
      * when it records a new score, and the image has no accessor for it.
      */
-    float mUnknown08;
+    float mChangeTime;
 
     /**
      * The score the text shows once Update() redraws. +0x0c
      *
-     * Public on the same evidence as mUnknown08.
+     * Public on the same evidence as mChangeTime.
      */
-    int mUnknown0c;
+    int mScore;
 };

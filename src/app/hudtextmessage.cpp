@@ -17,31 +17,31 @@ constexpr float kFadeLength = 250.0f;
 } // namespace
 
 void HudTextMessage::Hide() {
-    mUnknown08->SetShowing(0);
-    mUnknown1c = 0;
+    mText->SetShowing(0);
+    mActive = 0;
 }
 
 void HudTextMessage::SetFrame(float flTime) {
-    if (mUnknown10 == kMessageIdle) {
+    if (mStart == kMessageIdle) {
         return;
     }
 
-    if (mUnknown10 == kMessageStartPending) {
-        mUnknown10 = flTime;
+    if (mStart == kMessageStartPending) {
+        mStart = flTime;
     }
 
-    const float flElapsed = flTime - mUnknown10;
+    const float flElapsed = flTime - mStart;
     if (flElapsed < kFadeLength) {
-        mUnknown0c->SetFrame(flElapsed);
-    } else if (flElapsed < mUnknown18) {
-        mUnknown0c->SetFrame(kFadeLength);
+        mAnim->SetFrame(flElapsed);
+    } else if (flElapsed < mHold) {
+        mAnim->SetFrame(kFadeLength);
     } else {
-        mUnknown0c->SetFrame(flElapsed - mUnknown18 + kFadeLength);
+        mAnim->SetFrame(flElapsed - mHold + kFadeLength);
     }
 
-    if (flElapsed - mUnknown18 > kFadeLength) {
-        mUnknown1c = 0;
-        mUnknown10 = kMessageIdle;
-        mUnknown08->SetShowing(0);
+    if (flElapsed - mHold > kFadeLength) {
+        mActive = 0;
+        mStart = kMessageIdle;
+        mText->SetShowing(0);
     }
 }

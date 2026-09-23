@@ -20,50 +20,50 @@ constexpr int kInitialMultiplier = 1;
 } // namespace
 
 HudPoints::HudPoints(int nIndex)
-    : mUnknown00(0.0f), mUnknown04(0.0f), mUnknown08(0.0f), mUnknown0c(kInitialMultiplier),
-      mUnknown10(0), mUnknown14(0), mUnknown18(0), mUnknown38(0) {
+    : mFlash(0.0f), mPulse(0.0f), mPulseRest(0.0f), mMultiplier(kInitialMultiplier), mPoints(0),
+      mShowing(0), mHot(0), mUnknown38(0) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown24 = dynamic_cast<Rnd::Blur *>(
+    mExitBlur = dynamic_cast<Rnd::Blur *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s pts_exit%d.blur", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown1c = dynamic_cast<Rnd::View *>(
+    mExitView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s pts_exit%d.view", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown20 = dynamic_cast<Rnd::Text *>(
+    mExitText = dynamic_cast<Rnd::Text *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s pts_exit%d.txt", pszLayout, nIndex))));
 
-    mUnknown3c.SetAnim(mUnknown1c);
-    mUnknown3c.Play(kExitRestFrame, kExitRestFrame);
+    mExit.SetAnim(mExitView);
+    mExit.Play(kExitRestFrame, kExitRestFrame);
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown28 = dynamic_cast<Rnd::Text *>(
+    mPointsText = dynamic_cast<Rnd::Text *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s pts%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mUnknown2c = dynamic_cast<Rnd::Text *>(
+    mMultiplierText = dynamic_cast<Rnd::Text *>(
         Rnd::g_manager.Find(HxStr(FormatString("%s ptsmult%d.txt", pszLayout, nIndex))));
 
-    mUnknown30 = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD ptstmp.mat")));
-    mUnknown34 = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD ptstmphot.mat")));
+    mPlainMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD ptstmp.mat")));
+    mHotMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD ptstmphot.mat")));
 
-    mUnknown28->SetShowing(0);
-    mUnknown2c->SetShowing(0);
+    mPointsText->SetShowing(0);
+    mMultiplierText->SetShowing(0);
 }
 
 void HudPoints::SetPoints(int nPoints) {
-    mUnknown10 = nPoints;
-    mUnknown28->SetText(HxStr(FormatString("%d", nPoints)));
-    mUnknown28->SetShowing(1);
-    mUnknown00 = 0.0f;
-    mUnknown14 = 1;
-    mUnknown08 = 0.0f;
+    mPoints = nPoints;
+    mPointsText->SetText(HxStr(FormatString("%d", nPoints)));
+    mPointsText->SetShowing(1);
+    mFlash = 0.0f;
+    mShowing = 1;
+    mPulseRest = 0.0f;
 }
 
 void HudPoints::SetMultiplier(int nMultiplier) {
-    mUnknown0c = nMultiplier;
-    mUnknown2c->SetText(HxStr(FormatString("x%d", nMultiplier)));
-    mUnknown2c->SetShowing(mUnknown0c > 1);
+    mMultiplier = nMultiplier;
+    mMultiplierText->SetText(HxStr(FormatString("x%d", nMultiplier)));
+    mMultiplierText->SetShowing(mMultiplier > 1);
 }

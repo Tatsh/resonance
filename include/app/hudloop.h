@@ -34,6 +34,6 @@ public:
     void SetShowing(int nShowing);
 
 private:
-    Rnd::Mesh *mUnknown00; // +0x00 `<layout> loop<n>.mesh`
-    Rnd::Mesh *mUnknown04; // +0x04 `<layout> loopwires<n>.mesh`
+    Rnd::Mesh *mIndicator; // `<layout> loop<n>.mesh`
+    Rnd::Mesh *mWires;     // `<layout> loopwires<n>.mesh`
 };

@@ -40,9 +40,9 @@ HxStr g_levelName("");
 
 Renderer::~Renderer() {
     g_pRenderer = nullptr;
-    delete mUnknowna0;
-    delete mUnknown9c;
-    delete mUnknown98;
+    delete mArena;
+    delete mOverlay;
+    delete mTunnel;
 }
 
 void Renderer::HandleMessage(Message *pMsg) {
@@ -59,28 +59,28 @@ void Renderer::HandleMessage(Message *pMsg) {
 }
 
 void Renderer::OnUnknownSlot6() {
-    mUnknown60 = static_cast<float>(mUnknown5c->SongTick());
+    mSongTick = static_cast<float>(mSongClock->SongTick());
     RendererBase::OnUnknownSlot6();
 }
 
 void Renderer::OnUnknownSlot7() {
-    mUnknown98->SetFrame(mUnknown60);
-    mUnknown9c->SetFrame(mUnknown60);
-    mUnknowna0->SetFrame(mUnknown60);
-    mUnknown80->SetFrame(mUnknown60);
-    mUnknown84->SetFrame(mUnknown60);
-    mUnknown88->SetFrame(mUnknown60);
-    mUnknown80->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
-    mUnknown84->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
-    mUnknown88->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
+    mTunnel->SetFrame(mSongTick);
+    mOverlay->SetFrame(mSongTick);
+    mArena->SetFrame(mSongTick);
+    mOuterView->SetFrame(mSongTick);
+    mTunnelView->SetFrame(mSongTick);
+    mHudView->SetFrame(mSongTick);
+    mOuterView->UpdateWorldXfm(nullptr, 0);  // Yes, the binary discards the result.
+    mTunnelView->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
+    mHudView->UpdateWorldXfm(nullptr, 0);    // Yes, the binary discards the result.
 }
 
 Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
-    int nSlice = nBar % mUnknown78;
+    int nSlice = nBar % mCellsPerRow;
     if (nSlice < 0) {
-        nSlice += mUnknown78;
+        nSlice += mCellsPerRow;
     }
-    return &mUnknown6c[nTrack * mUnknown78 + nSlice];
+    return &mCells[nTrack * mCellsPerRow + nSlice];
 }
 
 void Renderer::UnloadLevel() {

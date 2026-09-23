@@ -40,12 +40,14 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    int mUnknown00;             // +0x00 The target bar.
-    int mUnknown04;             // +0x04 The count last shown. Starts at -123.
-    float mUnknown08;           // +0x08 The frame the count last changed at. Starts at 1e9.
-    Rnd::TransAnim *mUnknown0c; // +0x0c
-    Rnd::Text *mUnknown10;      // +0x10
-    Rnd::Blur *mUnknown14;      // +0x14
+    int mTargetBar;
+    // The count last shown. Starts at -123.
+    int mShownCount;
+    // The frame the count last changed at. Starts at 1e9.
+    float mChangeFrame;
+    Rnd::TransAnim *mAnim; // `<layout> countdown<n>.tnm`
+    Rnd::Text *mText;      // `<layout> countdown<n>.txt`
+    Rnd::Blur *mBlur;      // `<layout> countdown<n>.blur`
     // Non-zero when the countdown never runs.
-    int mUnknown18; // +0x18
+    int mDisabled;
 };

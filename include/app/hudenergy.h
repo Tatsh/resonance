@@ -38,8 +38,8 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    Rnd::Animatable *mUnknown00; // +0x00 `HUD1 energy bar.msnm`
-    Rnd::Mesh *mUnknown04;       // +0x04 `HUD1 energy bar.mesh`
+    Rnd::Animatable *mAnim; // `HUD1 energy bar.msnm`
+    Rnd::Mesh *mBar;        // `HUD1 energy bar.mesh`
 
 public:
     /**
@@ -48,5 +48,5 @@ public:
      * Public because Overlay's JuiceAmountMsg handler at `0x0041f310` writes the juice amount into
      * it directly, and the image has no accessor for it.
      */
-    float mUnknown08;
+    float mLevel;
 };

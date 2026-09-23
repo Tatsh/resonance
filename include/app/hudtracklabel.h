@@ -34,6 +34,6 @@ public:
     void SetText(const HxStr &text);
 
 private:
-    Rnd::Mesh *mUnknown00; // +0x00
-    Rnd::Text *mUnknown04; // +0x04
+    Rnd::Mesh *mMesh; // `<layout> track<n>.mesh`
+    Rnd::Text *mText; // `<layout> track<n>.txt`
 };
