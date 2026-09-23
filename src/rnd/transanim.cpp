@@ -1,13 +1,18 @@
 #include "rnd/transanim.h"
 
 #include <algorithm>
+#include <iterator>
 #include <list>
 #include <string.h>
 
+#include "math/quaternion.h"
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
+#include "rnd/keychannel.h"
+#include "rnd/manager.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
 #include "rnd/transformable.h"
@@ -17,8 +22,19 @@ namespace Rnd {
 // The only revision this build writes, and the highest Load() accepts.
 constexpr int kTransAnimRevision = 2;
 
+// The revision from which a record stores the scale channel, and the one from which the rotation
+// and translation keys arrive in their current form along with the follow-path flag.
+constexpr int kScaleChannelRevision = 1;
+constexpr int kCurrentKeyRevision = 2;
+
 // Floats of a keyframe vector that reach a stream. The rotation channel writes all four instead.
 constexpr int kTransKeyStoredFloatCount = 3;
+
+// Index of the padding float that ends each vector of a keyframe.
+constexpr int kPaddingFloat = 3;
+
+// The weight a tangent at the end of a channel gives the one chord it has.
+constexpr float kEndTangentChordWeight = 1.5f;
 
 constexpr char kCountFormat[] = "%d";
 constexpr char kSizeFormat[] = "%u";
@@ -74,7 +90,181 @@ static inline Stream &WriteTargetName(Stream &stream, const Object *pTarget) {
     return stream;
 }
 
-// 0x004fd348. A mode outside the two below writes nothing rather than a fallback title.
+// Resolve a name read from the stream to an object of type T, or null.
+template <class T>
+static void ReadTargetName(Stream &stream, T *&refOut) {
+    HxStr name(nullptr);
+    stream.ReadString(name);
+    refOut = dynamic_cast<T *>(g_manager.Find(name));
+}
+
+// A rotation keyframe as a record below revision 2 stores it, a quaternion and a frame.
+struct LegacyRotKey {
+    Quat mValue;
+    float mFrame;
+};
+
+// 0x004f9f80
+static Stream &operator>>(Stream &stream, LegacyRotKey &key) {
+    stream.Read(&key.mValue.x, sizeof(float));
+    stream.Read(&key.mValue.y, sizeof(float));
+    stream.Read(&key.mValue.z, sizeof(float));
+    stream.Read(&key.mValue.w, sizeof(float));
+    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    return stream;
+}
+
+// 0x004fd6b8
+static Stream &operator>>(Stream &stream, std::list<LegacyRotKey> &keys) {
+    int nCount = 0;
+    stream.Read(&nCount, sizeof(nCount));
+    keys.resize(nCount);
+    for (auto &key : keys) {
+        stream >> key;
+    }
+    return stream;
+}
+
+// 0x004fa500
+// The same order the writer uses, with the padding float of each vector left as it was.
+static Stream &operator>>(Stream &stream, TransAnim::TransKey &key) {
+    for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
+        stream.Read(&key.mValue[nAxis], sizeof(float));
+    }
+    for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
+        stream.Read(&key.mShape[nAxis], sizeof(float));
+    }
+    for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
+        stream.Read(&key.mTangentIn[nAxis], sizeof(float));
+    }
+    for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
+        stream.Read(&key.mTangentOut[nAxis], sizeof(float));
+    }
+    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    return stream;
+}
+
+// De-inlined from the four quaternion reads of the rotation keyframe reader.
+static inline void ReadQuat(Stream &stream, Quat &quat) {
+    stream.Read(&quat.x, sizeof(float));
+    stream.Read(&quat.y, sizeof(float));
+    stream.Read(&quat.z, sizeof(float));
+    stream.Read(&quat.w, sizeof(float));
+}
+
+// 0x004fa948
+static Stream &operator>>(Stream &stream, TransAnim::RotKey &key) {
+    ReadQuat(stream, key.mQuat);
+    for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
+        stream.Read(&key.mShape[nAxis], sizeof(float));
+    }
+    ReadQuat(stream, key.mTangentIn);
+    ReadQuat(stream, key.mTangentOut);
+    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    return stream;
+}
+
+// 0x004fa6a8
+// Every new element starts from a keyframe whose three vectors have a padding float of 1.0.
+static Stream &operator>>(Stream &stream, std::list<TransAnim::TransKey> &keys) {
+    int nCount = 0;
+    stream.Read(&nCount, sizeof(nCount));
+    TransAnim::TransKey defaultKey = {};
+    defaultKey.mValue[kPaddingFloat] = 1.0f;
+    defaultKey.mTangentIn[kPaddingFloat] = 1.0f;
+    defaultKey.mTangentOut[kPaddingFloat] = 1.0f;
+    keys.resize(nCount, defaultKey);
+    for (auto &key : keys) {
+        stream >> key;
+    }
+    return stream;
+}
+
+// 0x004fab40
+static Stream &operator>>(Stream &stream, std::list<TransAnim::RotKey> &keys) {
+    int nCount = 0;
+    stream.Read(&nCount, sizeof(nCount));
+    keys.resize(nCount);
+    for (auto &key : keys) {
+        stream >> key;
+    }
+    return stream;
+}
+
+// Rebuild the tangents of a vector channel after a key is added. A channel of two keys takes the
+// chord between them, weighted by each key's tension, and a longer channel rebuilds every key from
+// its neighbours, the inner keys first. Load() inlines the body for both vector channels.
+static void RebuildTransTangents(std::list<TransAnim::TransKey> &keys) {
+    if (keys.size() == 1) {
+        return;
+    }
+    if (keys.size() == 2) {
+        TransAnim::TransKey &first = keys.front();
+        TransAnim::TransKey &last = keys.back();
+        float afChord[kXfmRowFloatCount];
+        Vec3Sub(last.mValue, first.mValue, afChord);
+        Vec3Scale(afChord, 1.0f - first.mShape[TransAnim::kShapeTension], first.mTangentOut);
+        first.mTangentOut[kPaddingFloat] = 1.0f;
+        Vec3Sub(last.mValue, first.mValue, afChord);
+        Vec3Scale(afChord, 1.0f - last.mShape[TransAnim::kShapeTension], last.mTangentIn);
+        last.mTangentIn[kPaddingFloat] = 1.0f;
+        return;
+    }
+    for (auto it = std::next(keys.begin()); it != std::prev(keys.end()); ++it) {
+        it->ComputeSplineTangents(&*std::prev(it), &*std::next(it));
+    }
+    keys.front().ComputeSplineTangents(nullptr, &*std::next(keys.begin()));
+    keys.back().ComputeSplineTangents(&*std::prev(std::prev(keys.end())), nullptr);
+}
+
+// The rotation counterpart of RebuildTransTangents(). A channel of two keys gives each key the
+// tangent it would take with the other as its one neighbour, which the binary writes out inline.
+static void RebuildRotTangents(std::list<TransAnim::RotKey> &keys) {
+    if (keys.size() == 1) {
+        return;
+    }
+    if (keys.size() == 2) {
+        keys.front().ComputeSplineTangents(nullptr, &keys.back());
+        keys.back().ComputeSplineTangents(&keys.front(), nullptr);
+        return;
+    }
+    for (auto it = std::next(keys.begin()); it != std::prev(keys.end()); ++it) {
+        it->ComputeSplineTangents(&*std::prev(it), &*std::next(it));
+    }
+    keys.front().ComputeSplineTangents(nullptr, &*std::next(keys.begin()));
+    keys.back().ComputeSplineTangents(&*std::prev(std::prev(keys.end())), nullptr);
+}
+
+// Add a key read in the form below revision 2 to a vector channel. The tangents take only their
+// padding floats, which the binary leaves as stack contents apart from that word, and the shape is
+// zeroed.
+static void AppendLegacyTransKey(std::list<TransAnim::TransKey> &keys, const Vector3Key &legacy) {
+    TransAnim::TransKey key = {};
+    key.mValue[0] = legacy.mValue.x;
+    key.mValue[1] = legacy.mValue.y;
+    key.mValue[2] = legacy.mValue.z;
+    key.mValue[kPaddingFloat] = legacy.mValue.w;
+    key.mTangentIn[kPaddingFloat] = 1.0f;
+    key.mTangentOut[kPaddingFloat] = 1.0f;
+    key.mFrame = legacy.mFrame;
+    keys.push_back(key);
+    keys.sort(); // Yes, the binary sorts the channel again after every key.
+    RebuildTransTangents(keys);
+}
+
+// The rotation counterpart of AppendLegacyTransKey(). The tangents are stack contents in the binary
+// and are zeroed here.
+static void AppendLegacyRotKey(std::list<TransAnim::RotKey> &keys, const LegacyRotKey &legacy) {
+    TransAnim::RotKey key = {};
+    key.mQuat = legacy.mValue;
+    key.mFrame = legacy.mFrame;
+    keys.push_back(key);
+    keys.sort(); // Yes, the binary sorts the channel again after every key.
+    RebuildRotTangents(keys);
+}
+
+// 0x004fd348
+// A mode outside the two below writes nothing rather than a fallback title.
 static FailSink &operator<<(FailSink &sink, TransAnim::Interp nInterp) {
     switch (nInterp) {
     case TransAnim::kInterpLinear:
@@ -170,8 +360,9 @@ static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::TransKey>
     return sink;
 }
 
-// 0x004f9788. The padding float of each vector is not written, and the shape triple is written
-// ahead of the two tangents rather than after them.
+// 0x004f9788
+// The padding float of each vector is not written, and the shape triple is written ahead of the
+// two tangents rather than after them.
 static Stream &operator<<(Stream &stream, const TransAnim::TransKey &key) {
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flValue = key.mValue[nAxis];
@@ -195,8 +386,9 @@ static Stream &operator<<(Stream &stream, const TransAnim::TransKey &key) {
     return stream;
 }
 
-// 0x004f9a68. The rotation channel writes the fourth float of the quaternion and of both
-// tangents, which is the one difference from the vector channels.
+// 0x004f9a68
+// Unlike the vector channels, the rotation channel writes the fourth float of the quaternion and
+// of both tangents.
 static Stream &operator<<(Stream &stream, const TransAnim::RotKey &key) {
     WriteQuat(stream, key.mQuat);
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
@@ -467,6 +659,208 @@ void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey 
                   mTangentIn,
                   (1.0f - flTension) * (1.0f - flContinuity * flBias) / kTangentThird);
     }
+}
+
+// 0x00552748
+void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const TransKey *pNext) {
+    const float flTension = mShape[kShapeTension];
+    const float flContinuity = mShape[kShapeContinuity];
+    const float flBias = mShape[kShapeBias];
+    float afTerm[kXfmRowFloatCount];
+    float afWeighted[kXfmRowFloatCount];
+    if (pPrev != nullptr && pNext != nullptr) {
+        float afToPrev[kXfmRowFloatCount];
+        float afToNext[kXfmRowFloatCount];
+        Vec3Sub(mValue, pPrev->mValue, afToPrev);
+        Vec3Scale(afToPrev, flBias + 1.0f, afToPrev);
+        Vec3Sub(pNext->mValue, mValue, afToNext);
+        Vec3Scale(afToNext, 1.0f - flBias, afToNext);
+
+        Vec3Sub(afToNext, afToPrev, afTerm);
+        Vec3Scale(afTerm, kTangentHalf - flContinuity * kTangentHalf, afTerm);
+        AddVec3(afToPrev, afTerm, afWeighted);
+        Vec3Scale(afWeighted, 1.0f - flTension, mTangentOut);
+        mTangentOut[kPaddingFloat] = 1.0f;
+
+        Vec3Sub(afToNext, afToPrev, afTerm);
+        Vec3Scale(afTerm, flContinuity * kTangentHalf + kTangentHalf, afTerm);
+        AddVec3(afToPrev, afTerm, afWeighted);
+        Vec3Scale(afWeighted, 1.0f - flTension, mTangentIn);
+        mTangentIn[kPaddingFloat] = 1.0f;
+    } else if (pNext != nullptr) {
+        Vec3Sub(pNext->mValue, mValue, afTerm);
+        Vec3Scale(afTerm, kEndTangentChordWeight, afTerm);
+        Vec3Scale(pNext->mTangentIn, kTangentHalf, afWeighted);
+        Vec3Scale(afWeighted, flBias + 1.0f, afWeighted);
+        Vec3Sub(afTerm, afWeighted, afWeighted);
+        Vec3Scale(afWeighted, 1.0f - flTension, mTangentOut);
+        mTangentOut[kPaddingFloat] = 1.0f;
+    } else if (pPrev != nullptr) {
+        Vec3Sub(mValue, pPrev->mValue, afTerm);
+        Vec3Scale(afTerm, kEndTangentChordWeight, afTerm);
+        Vec3Scale(pPrev->mTangentOut, kTangentHalf, afWeighted);
+        Vec3Scale(afWeighted, flBias + 1.0f, afWeighted);
+        Vec3Sub(afTerm, afWeighted, afWeighted);
+        Vec3Scale(afWeighted, 1.0f - flTension, mTangentIn);
+        mTangentIn[kPaddingFloat] = 1.0f;
+    }
+}
+
+// 0x004fc000
+TransAnim::TransAnim(const HxStr &name)
+    : Object(name), mTrans(nullptr), mRotInterp(kInterpLinear), mTransInterp(kInterpTCB),
+      mScaleInterp(kInterpLinear), mFramesOwner(this), mRepeatTrans(0), mFollowPath(0) {
+}
+
+// 0x004fbb78
+TransAnim::~TransAnim() {
+    RemoveObjectRefs();
+    ReleaseAllRefs();
+}
+
+// 0x004fbf60
+const HxStr &TransAnim::ClassName() const {
+    return g_transAnimClassName;
+}
+
+// 0x004fd058
+void TransAnim::ClearKeys() {
+    if (mFramesOwner == this) {
+        return;
+    }
+    mTransKeys.clear();
+    mRotKeys.clear();
+    mScaleKeys.clear();
+}
+
+// 0x004fd168
+void TransAnim::AddObjectRefs() {
+    if (mTrans != nullptr) {
+        mTrans->AddRef(this);
+    }
+    if (mFramesOwner != nullptr) {
+        mFramesOwner->AddRef(this);
+    }
+}
+
+// 0x004fd118
+void TransAnim::RemoveObjectRefs() {
+    if (mTrans != nullptr) {
+        mTrans->RemoveRef(this);
+    }
+    if (mFramesOwner != nullptr) {
+        mFramesOwner->RemoveRef(this);
+    }
+}
+
+// 0x004fd0a0
+void TransAnim::SetFramesOwner(TransAnim *pOwner) {
+    if (mFramesOwner != nullptr) {
+        mFramesOwner->RemoveRef(this);
+    }
+    mFramesOwner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+    ClearKeys();
+}
+
+// 0x00706828
+HxStr g_transAnimClassName("TransAnim");
+
+// 0x004fc740
+TransAnim *NewTransAnim(const HxStr &name) {
+    return new TransAnim(name);
+}
+
+// 0x00706820
+TransAnim *(*g_pfnNewTransAnim)(const HxStr &name) = NewTransAnim;
+
+// 0x004fba90
+TransAnim *NewTransAnimThroughHook(const HxStr &name) {
+    return g_pfnNewTransAnim(name);
+}
+
+// 0x004fbf70
+Object *CreateRegisteredTransAnim(const HxStr &name) {
+    return g_pfnNewTransAnim(name);
+}
+
+// 0x004fba50
+void RegisterTransAnimClass() {
+    g_pfnNewTransAnim = NewTransAnim;
+    g_manager.RegisterClass(g_transAnimClassName, CreateRegisteredTransAnim);
+}
+
+// 0x004f2f68
+void TransAnim::Load(Stream &stream) {
+    int nRevision = 0;
+    stream.Read(&nRevision, sizeof(nRevision));
+    if (nRevision > kTransAnimRevision) {
+        g_failSink.Report("Can't load new TransAnim\n");
+        return;
+    }
+
+    Animatable::Load(stream);
+    Drawable::Load(stream);
+    RemoveObjectRefs();
+    ReadTargetName(stream, mTrans);
+
+    std::list<LegacyRotKey> legacyRotKeys;
+    std::list<Vector3Key> legacyTransKeys;
+    std::list<Vector3Key> legacyScaleKeys;
+    if (nRevision < kCurrentKeyRevision) {
+        stream >> legacyRotKeys;
+        ReadVector3Keys(stream, legacyTransKeys);
+    }
+
+    ReadTargetName(stream, mFramesOwner);
+    stream >> mTransKeys;
+    stream >> mRotKeys;
+    stream.Read(&mRotInterp, sizeof(mRotInterp));
+    stream.Read(&mTransInterp, sizeof(mTransInterp));
+    char chRepeatTrans = '\0';
+    stream.ReadBytes(&chRepeatTrans, sizeof(chRepeatTrans));
+    mRepeatTrans = chRepeatTrans != '\0';
+
+    if (nRevision >= kScaleChannelRevision) {
+        if (nRevision < kCurrentKeyRevision) {
+            ReadVector3Keys(stream, legacyScaleKeys);
+        }
+        stream >> mScaleKeys;
+        stream.Read(&mScaleInterp, sizeof(mScaleInterp));
+    }
+
+    if (nRevision >= kCurrentKeyRevision) {
+        char chFollowPath = '\0';
+        stream.ReadBytes(&chFollowPath, sizeof(chFollowPath));
+        mFollowPath = chFollowPath != '\0';
+    } else {
+        if (mTransInterp == kInterpLinear) {
+            mTransKeys.clear();
+            for (const auto &legacy : legacyTransKeys) {
+                AppendLegacyTransKey(mTransKeys, legacy);
+            }
+        }
+        if (mRotInterp == kInterpLinear) {
+            mRotKeys.clear();
+            for (const auto &legacy : legacyRotKeys) {
+                AppendLegacyRotKey(mRotKeys, legacy);
+            }
+        }
+        if (mScaleInterp == kInterpLinear) {
+            mScaleKeys.clear();
+            for (const auto &legacy : legacyScaleKeys) {
+                AppendLegacyTransKey(mScaleKeys, legacy);
+            }
+        }
+        mFollowPath = mFramesOwner->mRotKeys.empty() && mFramesOwner->mTransKeys.size() >= 2;
+    }
+
+    if (nRevision <= kTransAnimRevision) { // Yes, the test cannot fail here.
+        ClearKeys();
+    }
+    AddObjectRefs();
 }
 
 } // namespace Rnd

@@ -74,6 +74,38 @@ public:
      * dumper writes in that order.
      */
     struct TransKey {
+        /**
+         * Build the two Kochanek-Bartels tangents of this keyframe from its neighbours.
+         *
+         * With both neighbours, `toPrev` is `(value - pPrev->value) * (bias + 1)` and `toNext` is
+         * `(pNext->value - value) * (1 - bias)`. mTangentOut is then
+         * `toPrev + (toNext - toPrev) * (0.5 - continuity / 2)` weighted `1 - tension`, and
+         * mTangentIn the same with `0.5 + continuity / 2`. A keyframe with no previous neighbour
+         * writes only mTangentOut, as
+         * `((pNext->value - value) * 1.5 - pNext->mTangentIn * 0.5 * (bias + 1)) * (1 - tension)`,
+         * and one with no next neighbour writes only mTangentIn, as
+         * `((value - pPrev->value) * 1.5 - pPrev->mTangentOut * 0.5 * (bias + 1)) * (1 - tension)`.
+         * Every tangent written ends in a padding float of 1.0. A keyframe with neither neighbour
+         * is unchanged.
+         *
+         * @param pPrev The preceding keyframe, or null at the start of the channel.
+         * @param pNext The following keyframe, or null at the end of the channel.
+         * @ghidraAddress 0x00552748
+         */
+        void ComputeSplineTangents(const TransKey *pPrev, const TransKey *pNext);
+
+        /**
+         * Order keyframes by frame.
+         *
+         * The list sort the loader calls inlines it in its merge step.
+         *
+         * @param other The keyframe to compare against.
+         * @return Whether this keyframe lands before other.
+         */
+        bool operator<(const TransKey &other) const {
+            return mFrame < other.mFrame;
+        }
+
         float mValue[kXfmRowFloatCount];      /*!< x, y, and z, then one padding float. +0x00 */
         float mTangentIn[kXfmRowFloatCount];  /*!< Tangent entering the key. +0x10 */
         float mTangentOut[kXfmRowFloatCount]; /*!< Tangent leaving the key. +0x20 */
@@ -131,6 +163,31 @@ public:
     };
 
     /**
+     * Construct an animation with no target and three empty channels that it owns.
+     *
+     * The translation channel starts as kInterpTCB and the other two as kInterpLinear.
+     *
+     * @param name The object name, passed to the Rnd::Object constructor.
+     * @ghidraAddress 0x004fc000
+     */
+    explicit TransAnim(const HxStr &name);
+
+    /**
+     * Drop this object's references and every reference held on it.
+     *
+     * @ghidraAddress 0x004fbb78
+     */
+    virtual ~TransAnim();
+
+    /**
+     * Report the registered class name, "TransAnim".
+     *
+     * @return The class name.
+     * @ghidraAddress 0x004fbf60
+     */
+    virtual const HxStr &ClassName() const;
+
+    /**
      * Report the last frame the frames owner's three channels animate to.
      *
      * Animatable vtable slot 1. Every channel is read off mFramesOwner rather than off this
@@ -177,7 +234,12 @@ public:
      * Replace this object's state from stream.
      *
      * A revision above the one this build writes produces the report "Can't load new TransAnim".
-     * Not reconstructed yet.
+     * Below revision 2 the rotation and translation keys arrive in an older form, a value and a
+     * frame each, and a channel whose interpolation reads as 0 is rebuilt from that form one key at
+     * a time, sorting the channel and rebuilding its tangents after every key. The scale channel
+     * arrives from revision 1, and the follow-path flag from revision 2. Below that the flag is
+     * derived as whether the frames owner has no rotation keys and at least two translation keys.
+     * An animation that does not own its frames then empties its own three channels.
      *
      * @param stream The stream to read from.
      * @ghidraAddress 0x004f2f68
@@ -233,6 +295,18 @@ public:
     void SetTrans(Transformable *pTrans);
 
     /**
+     * Make another animation the one whose keyframes drive this one.
+     *
+     * Moves this object's reference from the previous owner to the new one, and then empties this
+     * object's own channels unless it is its own owner. The routine has no caller in the shipped
+     * build. The name is inferred.
+     *
+     * @param pOwner The new frames owner, or null.
+     * @ghidraAddress 0x004fd0a0
+     */
+    void SetFramesOwner(TransAnim *pOwner);
+
+    /**
      * Report the object whose keyframes drive this one.
      *
      * The out-of-line copy has no callers. TnlBumpFX::Start() inlines it.
@@ -258,6 +332,18 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
+    // Empty the three channels unless this object owns its frames. The out-of-line copy has no
+    // caller, and SetFramesOwner() and Load() inline the same body. 0x004fd058.
+    void ClearKeys();
+
+    // Take a reference on the target and on the frames owner. Load() and Copy() inline the same
+    // body. 0x004fd168.
+    void AddObjectRefs();
+
+    // Drop the references AddObjectRefs() took. The destructor is the one out-of-line caller.
+    // 0x004fd118.
+    void RemoveObjectRefs();
+
     // Declared in recovered offset order. The transformable this animation drives.
     Transformable *mTrans; // +0x2c
     // Interpolation mode per channel, one of the Interp values.
@@ -282,5 +368,66 @@ private:
     int mRepeatTrans;        // +0x4c
     int mFollowPath;         // +0x50
 };
+
+/**
+ * Allocate and construct a transform animation, the base creator of the "TransAnim" class.
+ *
+ * The allocation is untagged and 0x70 bytes, the 0x54 of this class and the 0x1c of the shared
+ * Rnd::Object subobject, and the constructor is inlined into this body.
+ *
+ * @param name The object name.
+ * @return The new animation.
+ * @ghidraAddress 0x004fc740
+ */
+TransAnim *NewTransAnim(const HxStr &name);
+
+/**
+ * Creator the registered "TransAnim" class builds through.
+ *
+ * RegisterTransAnimClass() points it at NewTransAnim().
+ *
+ * @ghidraAddress 0x00706820
+ */
+extern TransAnim *(*g_pfnNewTransAnim)(const HxStr &name);
+
+/**
+ * Build a transform animation through the creator hook.
+ *
+ * No call site survives in the shipped program. The name is inferred from the Rnd::Button
+ * counterpart.
+ *
+ * @param name The object name.
+ * @return The new animation.
+ * @ghidraAddress 0x004fba90
+ */
+TransAnim *NewTransAnimThroughHook(const HxStr &name);
+
+/**
+ * Build a transform animation for the registered "TransAnim" class by calling through
+ * g_pfnNewTransAnim.
+ *
+ * Rnd::Manager::Init() registers it as well.
+ *
+ * @param name The object name.
+ * @return The new animation, as its Rnd::Object subobject.
+ * @ghidraAddress 0x004fbf70
+ */
+Object *CreateRegisteredTransAnim(const HxStr &name);
+
+/**
+ * Point g_pfnNewTransAnim at NewTransAnim() and register the "TransAnim" class with Rnd::Manager.
+ *
+ * No call site survives in the shipped program. The name is inferred.
+ *
+ * @ghidraAddress 0x004fba50
+ */
+void RegisterTransAnimClass();
+
+/**
+ * Registered class name of Rnd::TransAnim, the string "TransAnim".
+ *
+ * @ghidraAddress 0x00706828
+ */
+extern HxStr g_transAnimClassName;
 
 } // namespace Rnd
