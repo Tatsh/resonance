@@ -113,6 +113,7 @@ set(RESONANCE_MSG_SRCS
     trackselectmsg.cpp
     trackselectpacket.cpp
     tracksonmsg.cpp
+    transportaddress.cpp
     unpausegamesystemmsg.cpp
     updatescorepacket.cpp
     winmsg.cpp)

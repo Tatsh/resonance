@@ -37,6 +37,7 @@ autobrief
 autocatch
 autocatcher
 autocatchmsg
+autoriffer
 axebuttonmsg
 axephrasemaker
 axingstg
@@ -426,6 +427,7 @@ multimusemsg
 multimuseplayer
 multipliermsg
 multiplierstatemsg
+multiscreenanim
 multitap
 musesynth
 mvoll
@@ -443,6 +445,7 @@ nolattice
 noone
 notemsg
 notepitcher
+noteplayer
 nowbarmsg
 nowmesh
 nowring
@@ -574,6 +577,7 @@ scloadlevelpacket
 scoretrackgraph
 scplayerjoinedpacket
 scratchpad
+screenanim
 screendump
 scriptmsg
 scriptsink
@@ -604,6 +608,7 @@ smrt
 snapcraft
 socketmodule
 soloremix
+soloscreenanim
 spjoinacceptpacket
 spjoindenypacket
 srcs
@@ -638,6 +643,7 @@ tickclock
 timedcommand
 tkinter
 tmpnam
+tnlarena
 tnlstr
 toggleghostmsg
 toolstream
@@ -648,6 +654,7 @@ trackselectpacket
 tracksonmsg
 transanim
 transformops
+transportaddress
 treeview
 trmopn
 trxdir
