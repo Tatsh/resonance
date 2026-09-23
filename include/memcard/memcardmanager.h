@@ -1,7 +1,11 @@
 #pragma once
 
 #include <list>
+#include <vector>
 
+#include "memcard/memcardconnectstate.h"
+
+class HxStr;
 class Memcard;
 class MemcardTask;
 class MemcardUser;
@@ -13,7 +17,7 @@ class MemcardUser;
  * inferred, retained from the task factory at `0x001f37f8` that an earlier pass titled on the same
  * evidence. The one instance is the function-local static that shared() vends at `0x00891a80`.
  *
- * The routines between `0x001f2ae0` and `0x001f3f98` each build one MemcardTask subclass, stamp
+ * The fifteen routines from `0x001f2ae0` to `0x001f3b80` each build one MemcardTask subclass, stamp
  * it with mUser, mCard, and the next ticket, and append it to mTasks. Update() starts the task at
  * the front and retires it once it has finished.
  */
@@ -56,6 +60,66 @@ public:
      * @ghidraAddress 0x001f3cb0
      */
     void Update();
+
+    /**
+     * Queue a GetConnectStateMCT for one slot.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @ghidraAddress 0x001f2ae0
+     */
+    void CreateGetConnectStateTask(int nPortSlot);
+
+    /**
+     * Queue a GetAllConnectStatesMCT.
+     *
+     * @param pStates Where the answers are appended. Borrowed, not owned.
+     * @ghidraAddress 0x001f2c70
+     */
+    void CreateGetAllConnectStatesTask(std::vector<MemcardConnectState> *pStates);
+
+    /**
+     * Queue a MinimumSaveSpaceMCT for one slot.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @ghidraAddress 0x001f2d78
+     */
+    void CreateMinimumSaveSpaceTask(int nPortSlot);
+
+    /**
+     * Queue a FormatCardMCT that formats one slot.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @ghidraAddress 0x001f2e88
+     */
+    void CreateFormatTask(int nPortSlot);
+
+    /**
+     * Queue a FormatCardMCT that unformats one slot.
+     *
+     * Nothing in the image calls it.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @ghidraAddress 0x001f2f88
+     */
+    void CreateUnformatTask(int nPortSlot);
+
+    /**
+     * Queue a LoadRemixMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param remixName The remix to read.
+     * @ghidraAddress 0x001f36c8
+     */
+    void CreateLoadRemixTask(int nPortSlot, const HxStr &remixName);
+
+    /**
+     * Queue a DeleteRemixMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param remixName The remix to remove.
+     * @ghidraAddress 0x001f3b80
+     */
+    void CreateDeleteRemixTask(int nPortSlot, const HxStr &remixName);
 
 private:
     // The receiver each new task reports to. Every task factory copies it into the task. +0x00

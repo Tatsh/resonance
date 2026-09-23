@@ -31,16 +31,17 @@ public:
     /**
      * Construct an idle format task.
      *
-     * The constructor is inlined at every site and no address of its own survives. mUnformat is
-     * the one member, and the argument that writes it is not established, because no construction
-     * site has been located.
+     * The constructor is inlined at its two sites, MemcardManager::CreateFormatTask() at
+     * `0x001f2e88`, which passes 0, and MemcardManager::CreateUnformatTask() at `0x001f2f88`,
+     * which passes 1. No address of its own survives.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
+     * @param bUnformat Non-zero to unformat rather than format.
      */
-    FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
+    FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, int bUnformat);
 
     /** @ghidraAddress 0x00184d68 */
     virtual ~FormatCardMCT();

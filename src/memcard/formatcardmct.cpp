@@ -5,8 +5,9 @@
 #include "memcard/memcard.h"
 #include "memcard/memcarduser.h"
 
-FormatCardMCT::FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie)
-    : MemcardTask(pUser, pCard, nPortSlot, nCookie), mUnformat(0) {
+FormatCardMCT::FormatCardMCT(
+    MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, int bUnformat)
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie), mUnformat(bUnformat) {
 }
 
 // 0x00184d68

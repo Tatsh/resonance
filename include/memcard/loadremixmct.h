@@ -35,6 +35,22 @@
  */
 class LoadRemixMCT : public MemcardTask, public MemcardUser {
 public:
+    /**
+     * Construct an idle load of one remix.
+     *
+     * MemcardManager::CreateLoadRemixTask() at `0x001f36c8` is the one caller. Not written, for
+     * the reason recorded in the class documentation.
+     *
+     * @param pUser The receiver Finish() reports to.
+     * @param pCard The queue the task submits operations to.
+     * @param nPortSlot The packed port and slot.
+     * @param nCookie The tag that abandons exactly this task's operations.
+     * @param remixName The remix to read, copied into mRemixName.
+     * @ghidraAddress 0x0017be28
+     */
+    LoadRemixMCT(
+        MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName);
+
     /** @ghidraAddress 0x00185380 */
     virtual ~LoadRemixMCT();
 

@@ -52,6 +52,21 @@ public:
     MemcardTask(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
     /**
+     * Construct an idle task that addresses no one card slot.
+     *
+     * mPortSlot and mStatus are not written. The only copy is inlined into
+     * MemcardManager::CreateGetAllConnectStatesTask() at `0x001f2c70`, whose task enquires about
+     * every slot from its own tables.
+     *
+     * @param pUser The receiver Finish() reports to.
+     * @param pCard The queue the task submits operations to.
+     * @param nCookie The tag that abandons exactly this task's operations.
+     */
+    MemcardTask(MemcardUser *pUser, Memcard *pCard, int nCookie)
+        : mUser(pUser), mCard(pCard), mCookie(nCookie), mState(kMemcardTaskIdle) {
+    }
+
+    /**
      * Report the finished task to its user and record that it is done.
      *
      * Occupies vtable slot 16. Every subclass writes 2 to mState, or its own state member, and

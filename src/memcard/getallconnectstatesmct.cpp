@@ -16,9 +16,9 @@ constexpr int kPastLastPort1MultiTapSlot = 6;
 
 GetAllConnectStatesMCT::GetAllConnectStatesMCT(MemcardUser *pUser,
                                                Memcard *pCard,
-                                               int nPortSlot,
-                                               int nCookie)
-    : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
+                                               int nCookie,
+                                               std::vector<MemcardConnectState> *pStates)
+    : MemcardTask(pUser, pCard, nCookie), mExpected(0), mStates(pStates), mCompleted(0) {
 }
 
 // 0x00184b08

@@ -30,15 +30,19 @@ public:
     /**
      * Construct an idle enquiry.
      *
-     * The constructor is inlined at every site and no address of its own survives. The argument
-     * that supplies mStates is not established, because no construction site has been located.
+     * The constructor is inlined into MemcardManager::CreateGetAllConnectStatesTask() at
+     * `0x001f2c70`, its one site, and no address of its own survives. The site writes no port slot
+     * and clears mExpected and mCompleted.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
-     * @param nPortSlot The packed port and slot, which this task does not use.
      * @param nCookie The tag that abandons exactly this task's operations.
+     * @param pStates Where the answers are appended. Borrowed, not owned.
      */
-    GetAllConnectStatesMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
+    GetAllConnectStatesMCT(MemcardUser *pUser,
+                           Memcard *pCard,
+                           int nCookie,
+                           std::vector<MemcardConnectState> *pStates);
 
     /**
      * Release the task.

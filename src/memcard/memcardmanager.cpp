@@ -1,7 +1,21 @@
 #include "memcard/memcardmanager.h"
 
+#include "memcard/deleteremixmct.h"
+#include "memcard/formatcardmct.h"
+#include "memcard/getallconnectstatesmct.h"
+#include "memcard/getconnectstatemct.h"
+#include "memcard/loadremixmct.h"
 #include "memcard/memcardps2.h"
 #include "memcard/memcardtask.h"
+#include "memcard/minimumsavespacemct.h"
+
+namespace {
+
+// FormatCardMCT's last constructor argument.
+constexpr int kFormat = 0;
+constexpr int kUnformat = 1;
+
+} // namespace
 
 // 0x001f61b8
 MemcardManager *MemcardManager::shared() {
@@ -38,4 +52,39 @@ void MemcardManager::Update() {
         pTask->Execute();
     }
     mCard->Update();
+}
+
+// 0x001f2ae0
+void MemcardManager::CreateGetConnectStateTask(int nPortSlot) {
+    mTasks.push_back(new GetConnectStateMCT(mUser, mCard, nPortSlot, ++mTicket));
+}
+
+// 0x001f2c70
+void MemcardManager::CreateGetAllConnectStatesTask(std::vector<MemcardConnectState> *pStates) {
+    mTasks.push_back(new GetAllConnectStatesMCT(mUser, mCard, ++mTicket, pStates));
+}
+
+// 0x001f2d78
+void MemcardManager::CreateMinimumSaveSpaceTask(int nPortSlot) {
+    mTasks.push_back(new MinimumSaveSpaceMCT(mUser, mCard, nPortSlot, ++mTicket));
+}
+
+// 0x001f2e88
+void MemcardManager::CreateFormatTask(int nPortSlot) {
+    mTasks.push_back(new FormatCardMCT(mUser, mCard, nPortSlot, ++mTicket, kFormat));
+}
+
+// 0x001f2f88
+void MemcardManager::CreateUnformatTask(int nPortSlot) {
+    mTasks.push_back(new FormatCardMCT(mUser, mCard, nPortSlot, ++mTicket, kUnformat));
+}
+
+// 0x001f36c8
+void MemcardManager::CreateLoadRemixTask(int nPortSlot, const HxStr &remixName) {
+    mTasks.push_back(new LoadRemixMCT(mUser, mCard, nPortSlot, ++mTicket, remixName));
+}
+
+// 0x001f3b80
+void MemcardManager::CreateDeleteRemixTask(int nPortSlot, const HxStr &remixName) {
+    mTasks.push_back(new DeleteRemixMCT(mUser, mCard, nPortSlot, ++mTicket, remixName));
 }
