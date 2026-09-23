@@ -51,7 +51,7 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
 // through the Rnd::Object subobject, which costs nothing because both element classes derive from
 // Rnd::Object non-virtually at offset 0.
 
-// 0x005336b0 for the materials and 0x005337e8 for the fonts.
+// Dump a palette as its size and one indexed name per entry.
 template <class T>
 FailSink &operator<<(FailSink &sink, const std::vector<T *> &entries) {
     sink.Print("(size:");
@@ -67,7 +67,7 @@ FailSink &operator<<(FailSink &sink, const std::vector<T *> &entries) {
     return sink;
 }
 
-// 0x00533920 for the materials and 0x00533a10 for the fonts.
+// Write a palette as its count and one name per entry.
 template <class T>
 Stream &operator<<(Stream &stream, const std::vector<T *> &entries) {
     const int nCount = entries.size();
@@ -79,7 +79,7 @@ Stream &operator<<(Stream &stream, const std::vector<T *> &entries) {
     return stream;
 }
 
-// 0x00533e08 for the materials and 0x00534290 for the fonts.
+// Read a palette written by the writer above, resolving each name through Rnd::g_manager.
 template <class T>
 Stream &operator>>(Stream &stream, std::vector<T *> &entries) {
     int nCount = 0;
@@ -93,6 +93,24 @@ Stream &operator>>(Stream &stream, std::vector<T *> &entries) {
     }
     return stream;
 }
+
+// 0x005336b0
+template FailSink &operator<< <Mat>(FailSink &sink, const std::vector<Mat *> &entries);
+
+// 0x005337e8
+template FailSink &operator<< <Font>(FailSink &sink, const std::vector<Font *> &entries);
+
+// 0x00533920
+template Stream &operator<< <Mat>(Stream &stream, const std::vector<Mat *> &entries);
+
+// 0x00533a10
+template Stream &operator<< <Font>(Stream &stream, const std::vector<Font *> &entries);
+
+// 0x00533e08
+template Stream &operator>> <Mat>(Stream &stream, std::vector<Mat *> &entries);
+
+// 0x00534290
+template Stream &operator>> <Font>(Stream &stream, std::vector<Font *> &entries);
 
 } // namespace
 
