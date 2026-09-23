@@ -272,8 +272,8 @@ int PhraseMgr::BarToTick(int nBar) {
 }
 
 // 0x001c01c8
-Phrase *PhraseMgr::GetPhraseAt(int nTick) {
-    return mDatabase->GetPhraseAt(nTick);
+Phrase *PhraseMgr::GetPhraseAt(int nBar) {
+    return mDatabase->GetPhraseAt(nBar);
 }
 
 // 0x001c01e8
@@ -282,8 +282,8 @@ int PhraseMgr::GetPowerbar(int nBar) {
 }
 
 // 0x001c0248
-long *PhraseMgr::GetStepValue(int nTick) {
-    return mDatabase->GetStepValue(nTick);
+long *PhraseMgr::GetStepValue(int nBar) {
+    return mDatabase->GetStepValue(nBar);
 }
 
 // 0x001c0268

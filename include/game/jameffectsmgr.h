@@ -26,4 +26,18 @@ public:
      * @param pMsg The message.
      */
     virtual void HandleMessage(Message *pMsg);
+
+    /**
+     * Switch every effect on or off from one bit of a mask.
+     *
+     * PhrasePlayer::PlayBar() passes the step value of each bar. For each effect of the vector at
+     * `+0x28`, the effect's slot 4 reports a bit index, which is taken modulo 64, and the effect's
+     * slot 5 receives whether that bit of the mask is set. The bit test goes through a
+     * `std::bitset` reference built on the stack. The body is not written, and the title is
+     * inferred.
+     *
+     * @param nMask The step's mask, one bit per effect.
+     * @ghidraAddress 0x001a56d8
+     */
+    void ApplyStepMask(long nMask);
 };

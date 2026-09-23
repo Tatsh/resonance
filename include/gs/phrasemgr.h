@@ -50,9 +50,11 @@ class TickClock;
  * through slot 1 of each table, which is the destructor slot.
  */
 class PhraseMgr : public MsgSink, public MsgSource {
-    // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly, and the Catcher
-    // constructor at 0x001aba30 copies mBarTicks.
+    // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly, the Catcher
+    // constructor at 0x001aba30 copies mBarTicks, and PhrasePlayer maps a bar through mMap at
+    // 0x001c1a28.
     friend class Catcher;
+    friend class PhrasePlayer;
     friend class ScoreTrackGraph;
 
 public:
@@ -198,18 +200,18 @@ public:
     void OnExportCommand(int nBar);
 
     /**
-     * @param nTick The song position, in MIDI ticks.
+     * @param nBar The bar. PhrasePlayer passes the bar it plays.
      * @return PhraseDatabase::GetPhraseAt() on mDatabase.
      * @ghidraAddress 0x001c01c8
      */
-    Phrase *GetPhraseAt(int nTick);
+    Phrase *GetPhraseAt(int nBar);
 
     /**
-     * @param nTick The song position, in MIDI ticks.
+     * @param nBar The bar. PhrasePlayer passes the bar it plays.
      * @return PhraseDatabase::GetStepValue() on mDatabase.
      * @ghidraAddress 0x001c0248
      */
-    long *GetStepValue(int nTick);
+    long *GetStepValue(int nBar);
 
     /**
      * @param nBar The bar, mapped through slot 5 of mMap.

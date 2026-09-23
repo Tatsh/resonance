@@ -118,8 +118,8 @@ void PhraseDatabase::ClearOwners() {
 }
 
 // 0x001b8e50
-Phrase *PhraseDatabase::GetPhraseAt(int nTick) {
-    return mPhrases[mMap->Slot5(nTick)];
+Phrase *PhraseDatabase::GetPhraseAt(int nBar) {
+    return mPhrases[mMap->Slot5(nBar)];
 }
 
 // 0x001b8e98
@@ -196,8 +196,8 @@ unsigned char PhraseDatabase::GetPhraseByte(int nIndex) {
 }
 
 // 0x001b91a0
-long *PhraseDatabase::GetStepValue(int nTick) {
-    return &mUnknown20[mMap->FindStepIndex(mMap->Slot5(nTick))];
+long *PhraseDatabase::GetStepValue(int nBar) {
+    return &mUnknown20[mMap->FindStepIndex(mMap->Slot5(nBar))];
 }
 
 // 0x001b91f0

@@ -105,11 +105,11 @@ public:
     void ClearOwners();
 
     /**
-     * @param nTick The song position, in MIDI ticks.
-     * @return The phrase of the step the play map places nTick in, or null.
+     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @return The phrase of the mapped bar, or null.
      * @ghidraAddress 0x001b8e50
      */
-    Phrase *GetPhraseAt(int nTick);
+    Phrase *GetPhraseAt(int nBar);
 
     /**
      * @param nIndex The step.
@@ -194,11 +194,11 @@ public:
     unsigned char GetPhraseByte(int nIndex);
 
     /**
-     * @param nTick The song position, in MIDI ticks.
-     * @return The value of the step at or before the position PlayMap::Slot5() maps nTick to.
+     * @param nBar The bar.
+     * @return The value of the step at or before the bar PlayMap::Slot5() maps nBar to.
      * @ghidraAddress 0x001b91a0
      */
-    long *GetStepValue(int nTick);
+    long *GetStepValue(int nBar);
 
     /**
      * Write every phrase to a diagnostic stream, eight to a line, with `[null] ` for an empty
