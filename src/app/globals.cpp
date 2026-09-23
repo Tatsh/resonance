@@ -100,6 +100,16 @@ GrooveWorld *Globals::GetWorld() {
     return mGameManager->GetWorld();
 }
 
+// 0x00118d70
+MetaGameWorld *Globals::GetMetaWorld() {
+    return mGameManager->GetMetaWorld();
+}
+
+// 0x00118ec8
+int Globals::GetUnknown18() {
+    return mGameManager->GetUnknown18();
+}
+
 // 0x00118e78
 Sch::TickClock *Globals::GetSongClock() {
     return GetWorld()->GetSongClock();

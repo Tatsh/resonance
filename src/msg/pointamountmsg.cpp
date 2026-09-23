@@ -32,7 +32,7 @@ int PointAmountMsg::GetScore() {
 
 // 0x003e40f8
 float PointAmountMsg::GetScoreFraction() {
-    return static_cast<float>(mPlayer->GetScore()) / static_cast<float>(mUnknown08);
+    return static_cast<float>(mPlayer->GetScore()) / static_cast<float>(mMaxScore);
 }
 
 // 0x003e4138

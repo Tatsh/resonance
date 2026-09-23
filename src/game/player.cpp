@@ -5,6 +5,7 @@
 
 #include "app/msgsource.h"
 #include "msg/juiceamountmsg.h"
+#include "msg/pointamountmsg.h"
 #include "msg/updatescorepacket.h"
 
 namespace {
@@ -140,6 +141,26 @@ void Player::SetScore(int nScore, int nMaxScore) {
 void Player::SetJuice(int nJuice, int nMaxJuice) {
     mUnknown34 = nMaxJuice;
     mJuice = nJuice;
+}
+
+// 0x0012f808
+void Player::AddScore(int nDelta, int bNotify) {
+    const int nOldScore = mScore;
+    mScore = std::max(0, std::min(mScore + nDelta, mUnknown3c));
+    if (mScore == nOldScore) {
+        return;
+    }
+
+    PointAmountMsg message;
+    message.mPlayer = this;
+    // Yes, the binary caps the score ceiling at the juice maximum too.
+    message.mMaxScore = std::min(mUnknown3c, kJuiceMaximum);
+    Send(&message);
+
+    if (bNotify != 0) {
+        UpdateScorePacket packet(mId20, nDelta);
+        Send(&packet);
+    }
 }
 
 // 0x0012f970

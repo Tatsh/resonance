@@ -5,6 +5,7 @@ class GrooveWorld;
 class IOBPreallocMemStream;
 class LevelData;
 class MainLoop;
+class MetaGameWorld;
 class PlayMap;
 class Ps2HardSynth;
 class ScriptSink;
@@ -138,6 +139,27 @@ public:
      * @ghidraAddress 0x00118d40
      */
     GrooveWorld *GetWorld();
+
+    /**
+     * Report the game manager's front-end world.
+     *
+     * Reads mGameManager directly rather than through GetGameManager(). Two script commands call
+     * it.
+     *
+     * @return GameManagerImpl::GetMetaWorld().
+     * @ghidraAddress 0x00118d70
+     */
+    MetaGameWorld *GetMetaWorld();
+
+    /**
+     * Forward GameManagerImpl::GetUnknown18(), whose meaning is unrecovered.
+     *
+     * Reads mGameManager directly. The image records no caller.
+     *
+     * @return GameManagerImpl::GetUnknown18().
+     * @ghidraAddress 0x00118ec8
+     */
+    int GetUnknown18();
 
     /**
      * Report the game manager's play mode.

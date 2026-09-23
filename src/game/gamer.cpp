@@ -6,6 +6,7 @@
 #include "app/playsound.h"
 #include "game/bgtrackgraph.h"
 #include "game/enablemgr.h"
+#include "game/forcefeedbackmgr.h"
 #include "game/gameenablemgr.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gamercmd.h"
@@ -20,10 +21,17 @@
 #include "game/playmap.h"
 #include "game/scoretrackgraph.h"
 #include "game/trackdata.h"
+#include "msg/advancesectionmsg.h"
 #include "msg/advancesectiontogglemsg.h"
+#include "msg/cripplemsg.h"
+#include "msg/cripplepacket.h"
+#include "msg/enablefreestylemsg.h"
 #include "msg/freestylefxmsg.h"
 #include "msg/invalidateseekermsg.h"
 #include "msg/invalidatetrackmsg.h"
+#include "msg/phrasecapturedmsg.h"
+#include "msg/playbackmodemsg.h"
+#include "msg/playbacktogglemsg.h"
 #include "msg/tracksonmsg.h"
 #include "msg/winmsg.h"
 #include "os/log.h"
@@ -78,6 +86,12 @@ constexpr int kSynthStreamLeadBars = 3;
 
 // Configuration code of the background tracks' enable policy.
 constexpr int kBackTrackConfigCode = 0x386;
+
+// The length of the freestyle span OnEnableFreestyle() grants.
+constexpr int kFreestyleBars = 8;
+
+// The victims OnCripple() reserves room for.
+constexpr unsigned kCrippleVictimCapacity = 3;
 
 // The score ceiling EndWithScore() sets.
 constexpr int kEndScoreCeiling = 10000;
@@ -149,6 +163,119 @@ Gamer::~Gamer() {
 void Gamer::Withdraw() {
     const CmdID command = mCommand;
     mGlobals->GetSongClock()->Withdraw(command);
+}
+
+void Gamer::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == g_nAdvanceSectionMsgType) {
+        OnAdvanceSection(static_cast<AdvanceSectionMsg *>(pMsg));
+    } else if (nType == g_nPhraseCapturedMsgType) {
+        OnPhraseCaptured(static_cast<PhraseCapturedMsg *>(pMsg));
+    } else if (nType == g_nEnableFreestyleMsgType) {
+        OnEnableFreestyle(static_cast<EnableFreestyleMsg *>(pMsg));
+    } else if (nType == g_nPlaybackModeMsgType) {
+        OnPlaybackMode(static_cast<PlaybackModeMsg *>(pMsg));
+    } else if (nType == g_nCrippleMsgType) {
+        OnCripple(static_cast<CrippleMsg *>(pMsg));
+    }
+}
+
+void Gamer::OnAdvanceSection(AdvanceSectionMsg *pMsg) {
+    const bool bJamAdvance = mPlayMode == kPlayModeJam && mGameMode != kGameModeNet;
+    if (!bJamAdvance && mTutorial == 0) {
+        return;
+    }
+    if (pMsg->mPlayer->Slot2() != 0) {
+        return;
+    }
+    AdvanceAt(pMsg->mPosition);
+}
+
+void Gamer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
+    if (mPlayMode == kPlayModeJam || mEndState != kEndStateNone) {
+        return;
+    }
+    pMsg->mPlayer->Handle(pMsg);
+    if (mTutorial == 0 && mGameMode == kGameModeSolo) {
+        FreeTracksAfterCapture(pMsg->mFirstBar); // Yes, the binary discards this call's result.
+    }
+}
+
+void Gamer::OnEnableFreestyle(EnableFreestyleMsg *pMsg) {
+    const int nTick = mGlobals->GetSongClock()->SongTick();
+    Player *pPlayer = pMsg->mPlayer;
+    const int nTrack = pPlayer->Slot4();
+    if (!IsNonCatchTrack(nTrack)) {
+        return;
+    }
+
+    const int nBar = pMsg->mBar;
+    const int nEndBar = nBar + kFreestyleBars;
+    pPlayer->Slot8(nBar, nEndBar);
+    mEnableMgr->SetFreeUntil(nTrack, nBar, nEndBar);
+
+    InvalidateSeekerMsg invalidateSeeker(nTick / mBarLength.mTick, nTrack);
+    mTrackSources[nTrack].Send(&invalidateSeeker);
+    mUnknown84 = nEndBar;
+    pMsg->mUnknown04 = 1;
+
+    FreestyleFXMsg freestyle(nTrack, nBar, nEndBar);
+    Send(&freestyle);
+}
+
+void Gamer::OnPlaybackMode(PlaybackModeMsg *pMsg) {
+    if (mPlayMode != kPlayModeJam) {
+        return;
+    }
+    if (pMsg->mPlayer->Slot2() != 0) {
+        return;
+    }
+
+    const int nBar = std::max(pMsg->mPosition.mTick / mBarLength.mTick, 0);
+    InputMap *pInputMap = InputMap::shared();
+    mPlaybackOn ^= 1;
+    if (mPlaybackOn != 0) {
+        pInputMap->StopAllRiffs();
+        pInputMap->DisableEntries();
+        pInputMap->SetEnabled(kJukeboxSlot, InputMap::kActionPlayback, 1);
+        pInputMap->SetEnabled(kJukeboxSlot, InputMap::kActionRotateLeft, 1);
+        pInputMap->SetEnabled(kJukeboxSlot, InputMap::kActionRotateRight, 1);
+        mUnknown50 = mPlayMap->Slot14(nBar);
+        mPlayMap->Slot16(nBar); // Yes, the binary discards this call's result.
+    } else {
+        pInputMap->EnableEntries();
+        mUnknown50 = 1;
+        mPlayMap->Slot17(nBar); // Yes, the binary discards this call's result.
+    }
+
+    ForceFeedbackMgr *pForceFeedback = mGlobals->GetWorld()->mForceFeedback;
+    pForceFeedback->SetJukeboxMode(mPlaybackOn);
+    pForceFeedback->StartMetronome(Mid::MBT(0));
+
+    PlaybackToggleMsg toggle(mPlaybackOn);
+    Send(&toggle);
+    AdvanceTo(nBar, mPlayMap->Slot14(nBar) ^ 1);
+}
+
+void Gamer::OnCripple(CrippleMsg *pMsg) {
+    std::vector<Player *> victims;
+    victims.reserve(kCrippleVictimCapacity);
+
+    bool bFound = false;
+    Player *pAttacker = pMsg->mPlayer;
+    const int nTrack = pMsg->mTrack;
+    for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        if (*it != pAttacker && (*it)->Slot4() == nTrack) {
+            bFound = true;
+            victims.push_back(*it);
+        }
+    }
+
+    if (bFound) {
+        pMsg->mUnknown04 = 1;
+        CripplePacket packet(pAttacker, victims);
+        Send(&packet);
+    }
 }
 
 void Gamer::CreateEnableMgr(std::vector<ScoreTrackGraph *> *pGraphs) {

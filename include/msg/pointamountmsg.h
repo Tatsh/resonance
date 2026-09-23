@@ -15,9 +15,10 @@ class Player;
  * type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() dispatches
- * Player::Print() through the word at `+0x04`, which types it. The purpose of the word at `+0x08`
- * is not recovered. mPlayer is public because Overlay::OnPointAmount() at `0x0042aff0` reads it
- * directly with no accessor in the image, comparing it with HudBadge::mPlayer.
+ * Player::Print() through the word at `+0x04`, which types it. Player::AddScore() fills the word
+ * at `+0x08` with the capped score ceiling. mPlayer is public because Overlay::OnPointAmount() at
+ * `0x0042aff0` reads it directly with no accessor in the image, comparing it with
+ * HudBadge::mPlayer.
  *
  * The destructor at `0x003e0958` is compiler-generated and has no declaration here.
  */
@@ -78,20 +79,25 @@ public:
     int GetScore();
 
     /**
-     * Report the player's score as a fraction of the word at `+0x08`.
+     * Report the player's score as a fraction of mMaxScore.
      *
      * Both values are converted to float before the division. The image lists no caller. The name
      * is inferred.
      *
-     * @return The score divided by the word at `+0x08`.
+     * @return The score divided by mMaxScore.
      * @ghidraAddress 0x003e40f8
      */
     float GetScoreFraction();
 
     Player *mPlayer; /*!< The player whose score changed. +0x04 */
 
-private:
-    int mUnknown08; // +0x08
+    /**
+     * The score ceiling, capped at 800.
+     *
+     * Public because Player::AddScore() writes it directly at `0x0012f89c`, and the image has no
+     * accessor. +0x08
+     */
+    int mMaxScore;
 };
 
 /**

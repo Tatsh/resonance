@@ -286,6 +286,19 @@ public:
      */
     void AddJuice(int nAmount, int bNotify);
 
+    /**
+     * Add to the score, clamped to 0 through the ceiling, and announce a change.
+     *
+     * The score counterpart of AddJuice(). A change sends a PointAmountMsg with the ceiling capped
+     * at 800 and, when bNotify is set, an UpdateScorePacket with the delta. PhraseNeutralizer is a
+     * recovered caller. The title is inferred.
+     *
+     * @param nDelta The points to add, which may be negative.
+     * @param bNotify Non-zero to also send the UpdateScorePacket.
+     * @ghidraAddress 0x0012f808
+     */
+    void AddScore(int nDelta, int bNotify);
+
 private:
     int mUnknown2c; // +0x2c
     int mJuice;     // +0x30

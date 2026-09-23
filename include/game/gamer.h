@@ -7,12 +7,17 @@
 #include "mid/mbt.h"
 #include "sch/cmdid.h"
 
+class AdvanceSectionMsg;
 class BGTrackGraph;
+class CrippleMsg;
+class EnableFreestyleMsg;
 class EnableMgr;
 class GameStats;
 class Globals;
 class Message;
+class PhraseCapturedMsg;
 class PhraseDatabase;
+class PlaybackModeMsg;
 class PlayMap;
 class Player;
 class ScoreTrackGraph;
@@ -74,8 +79,9 @@ public:
     /**
      * Receive one message.
      *
-     * Not reconstructed. It dispatches on `Message::Type()` down a chain beginning with the
-     * identity at `0x006d0184`, and gates on the members at `+0x2c`, `+0x30`, and `+0x18`.
+     * Dispatches AdvanceSectionMsg, PhraseCapturedMsg, EnableFreestyleMsg, PlaybackModeMsg, and
+     * CrippleMsg to their handlers, in that order of test, and ignores every other message. The
+     * first two handlers are expanded inline here.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x00112978
@@ -217,6 +223,27 @@ public:
     void EndWithScore(int nScore);
 
 private:
+    // 0x00116920. Outside jam or in a network game, and outside the tutorial, ignores the
+    // message. Otherwise advances at the message's position unless the player's Slot2() is set.
+    void OnAdvanceSection(AdvanceSectionMsg *pMsg);
+
+    // 0x001169a8. Outside jam and before the game ends, passes the message to the capturing
+    // player, then in a solo game outside the tutorial runs FreeTracksAfterCapture().
+    void OnPhraseCaptured(PhraseCapturedMsg *pMsg);
+
+    // 0x00111080. For a non-catch track, gives the player an eight-bar freestyle span, frees the
+    // track for it, invalidates the track's seeker, marks the message handled, and sends a
+    // FreestyleFXMsg.
+    void OnEnableFreestyle(EnableFreestyleMsg *pMsg);
+
+    // 0x00110e60. In jam, toggles playback at the message's bar, switching the input bindings
+    // and the play map, and announces the change in a PlaybackToggleMsg.
+    void OnPlaybackMode(PlaybackModeMsg *pMsg);
+
+    // 0x00111230. Sends a CripplePacket naming every other player on the message's track, and
+    // marks the message handled when there is one.
+    void OnCripple(CrippleMsg *pMsg);
+
     // 0x00112838. Posts a GamerCmd for the bar on the song clock under mCommand, one tick before
     // the bar starts unless the bar starts at zero. The title is inferred.
     void ScheduleBar(int nBar);

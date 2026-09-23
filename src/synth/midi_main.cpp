@@ -203,6 +203,7 @@ char *FourCcToString(const void *pFourCc) {
     return g_szFourCc;
 }
 
+// 0x00464ba0
 void SetSynthStreamBar(int nBar) {
     if (g_pSynthStream != nullptr) {
         g_nSynthStreamFrame = nBar * kSynthStreamFramesPerBar;
