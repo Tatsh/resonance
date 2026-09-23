@@ -166,7 +166,40 @@ public:
      */
     virtual void OnUnknownSlot2(const HxStr &text);
 
+    /**
+     * Act on the state of the card the save targets. MemcardUser slot 2.
+     *
+     * A failed enquiry raises `mem_check` with RETRY and CONTINUE, or RETRY and CANCEL when
+     * mUnknowndc marks a copy. An unformatted card raises `mem_format_check` with NO and YES. A
+     * formatted card either records the state as the first GlobalSettings::mCardSlots entry and
+     * exits MetMsgScreen when mUnknownd8 is set, or empties mUnknowncc, queues a listing of the
+     * target card into it, and raises the save dialogue. Every dialogue is limited to the
+     * controller mUnknownc8 names.
+     *
+     * @param state The card's state, passed by value and destroyed on return.
+     * @param nStatus The enquiry status, kMemcardStatusOk on success.
+     * @ghidraAddress 0x00372c10
+     */
+    virtual void OnConnectState(MemcardConnectState state, int nStatus);
+
+    /**
+     * Report a finished format. MemcardUser slot 5.
+     *
+     * Success raises `mem_format_done` and status 13 raises `mem_format_already`, each with one
+     * CONTINUE button and made the active panel. Any other status raises `mem_check` with RETRY
+     * and BACK. The port and slot are not read.
+     *
+     * @param nPortSlot The packed port and slot, which is not read.
+     * @param nStatus The format status.
+     * @ghidraAddress 0x00373808
+     */
+    virtual void OnCardFormatted(int nPortSlot, int nStatus);
+
 private:
+    // 0x00372760. Raises the `save_remix` dialogue, titled `save_title` with the `mem_save` text
+    // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.
+    void BeginSave();
+
     MemcardConnectState mUnknown94;         // +0x94
     std::vector<FreqAppearance> mUnknownac; // +0xac
     HxStr mUnknownb8;                       // +0xb8
