@@ -194,17 +194,20 @@ String::Point::Point() {
     mCamPos.w = 1.0f;
 }
 
+// 0x004ba898
 String::String(const HxStr &name)
     : Object(name), mpMat(nullptr), mWidth(1.0f), mHasCaps(1), mLinePairs(0),
       mFoldAngle(kDefaultFoldAngle) {
     CreateMesh();
 }
 
+// 0x004beee8
 String::~String() {
     DeleteMesh();
     ReleaseAllRefs();
 }
 
+// 0x004b9a68
 void String::ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot) {
     std::vector<MeshVert> &verts = mpMesh->mVertsOwner->mVerts;
 
@@ -237,6 +240,7 @@ void String::ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot) {
     slot.mpVert = &verts[(nIndex + 1) * kVertsPerRung];
 }
 
+// 0x004b9b30
 void String::SetNumPoints(int nCount) {
     mPoints.resize(nCount);
     if (nCount <= 0) {
@@ -316,18 +320,22 @@ void String::SetNumPoints(int nCount) {
     mpMesh->Sync();
 }
 
+// 0x004bf3c0
 int String::GetNumPoints() const {
     return static_cast<int>(mPoints.size());
 }
 
+// 0x004bf738
 void String::SetPointPos(int nIndex, const Vector3 &pos) {
     mPoints[nIndex].mPos = pos;
 }
 
+// 0x004bf400
 Vector3 *String::GetPointPos(int nIndex) {
     return &mPoints[nIndex].mPos;
 }
 
+// 0x004bf758
 void String::SetPointColor(int nIndex, const Color &color) {
     mPoints[nIndex].mColor = color;
 
@@ -347,53 +355,65 @@ void String::SetPointColor(int nIndex, const Color &color) {
     mpMesh->SyncChanged(Mesh::kSyncColors);
 }
 
+// 0x004bf418
 Color *String::GetPointColor(int nIndex) {
     return &mPoints[nIndex].mColor;
 }
 
+// 0x004bf668
 void String::SetMat(Mat *pMat) {
     mpMesh->SetMaterial(pMat);
 }
 
+// 0x004bf500
 Mat *String::GetMat() const {
     return mpMesh->mMat;
 }
 
+// 0x004bf3e0
 float String::GetWidth() const {
     return mWidth;
 }
 
+// 0x004bf708
 void String::SetFoldAngle(float flAngle) {
     mFoldAngle = flAngle;
-    mFoldSin = sinf(flAngle);
+    mFoldCos = cosf(flAngle);
 }
 
+// 0x004bf3f8
 float String::GetFoldAngle() const {
     return mFoldAngle;
 }
 
+// 0x004bf688
 void String::SetHasCaps(int nHasCaps) {
     mHasCaps = nHasCaps;
     SetNumPoints(GetNumPoints());
 }
 
+// 0x004bf3e8
 int String::GetHasCaps() const {
     return mHasCaps;
 }
 
+// 0x004bf6c8
 void String::SetLinePairs(int nLinePairs) {
     mLinePairs = nLinePairs;
     SetNumPoints(GetNumPoints());
 }
 
+// 0x004bf3f0
 int String::GetLinePairs() const {
     return mLinePairs;
 }
 
+// 0x004bf638
 void String::SetHighlight(int nHighlight) {
     mpMesh->SetHighlight(nHighlight);
 }
 
+// 0x004bf570
 void String::Collide(const Ray &ray, HitSink &sink) {
     if (mShowing == 0) {
         return;
@@ -414,6 +434,7 @@ void String::Collide(const Ray &ray, HitSink &sink) {
     Collideable::Collide(ray, sink);
 }
 
+// 0x004ba038
 void String::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -448,6 +469,7 @@ void String::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
+// 0x004ba258
 void String::Save(Stream &stream) {
     const int nVersion = kStringVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -467,16 +489,19 @@ void String::Save(Stream &stream) {
     stream.WriteBytes(&cLinePairs, sizeof(cLinePairs));
 }
 
+// 0x004bf510
 void String::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
     Collideable::Replace(pFrom, pTo);
     Transformable::Replace(pFrom, pTo);
 }
 
+// 0x004bf430
 const HxStr &String::ClassName() const {
     return g_stringClassName;
 }
 
+// 0x004bf858
 void String::Copy(const Object *pSource, unsigned nFlags) {
     const String *pSourceString = dynamic_cast<const String *>(pSource);
 
@@ -496,6 +521,7 @@ void String::Copy(const Object *pSource, unsigned nFlags) {
     CreateMesh();
 }
 
+// 0x004ba678
 void String::Load(Stream &stream) {
     int nVersion = 0;
     stream.Read(&nVersion, sizeof(nVersion));
@@ -533,23 +559,18 @@ void String::Load(Stream &stream) {
     CreateMesh();
 }
 
+// 0x004ba3d0
 void String::CreateMesh() {
-    // The binary builds the name through two HxStr operator+ calls, each of which copies its left
-    // operand, appends to the copy, and returns it. hxstr.h declares neither overload yet. The
-    // same three steps therefore appear here against one local.
-    HxStr meshName("[");
-    meshName += mName;
-    meshName += "_mesh]";
-
-    mpMesh = g_pfnNewMesh(meshName);
+    mpMesh = g_pfnNewMesh(HxStr("[") + mName + "_mesh]");
     mpMesh->mInternal = 1;
     mpMesh->SetMaterial(mpMat);
     mpMesh->mZMode = Mesh::kZModeZReadOnly;
     mpMesh->mZFunc = Mesh::kZFuncLess;
-    mFoldSin = sinf(mFoldAngle);
+    mFoldCos = cosf(mFoldAngle);
     SetNumPoints(GetNumPoints());
 }
 
+// 0x004bf810
 void String::DeleteMesh() {
     if (mpMesh != nullptr) {
         delete mpMesh;
@@ -566,6 +587,7 @@ String *String::NewString(const HxStr &name) {
     }
 }
 
+// 0x004bed98
 void String::Init() {
     g_manager.RegisterClass(g_stringClassName, NewStringObject);
 }

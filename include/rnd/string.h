@@ -224,7 +224,7 @@ public:
     }
 
     /**
-     * Set the bend the ribbon folds at and cache its sine.
+     * Set the bend the ribbon folds at and cache its cosine.
      *
      * @param flAngle The angle in radians.
      * @ghidraAddress 0x004bf708
@@ -428,7 +428,7 @@ private:
 
     // 0x004ba3d0
     // Builds the owned mesh, applies the stored material and the depth state to it,
-    // caches the sine of the fold angle, and sizes the geometry to the current point count. The
+    // caches the cosine of the fold angle, and sizes the geometry to the current point count. The
     // constructor, Load(), and Copy() are the callers. The binary has a catch-all handler inside it
     // that returns null.
     void CreateMesh();
@@ -441,7 +441,7 @@ private:
     // 0x004b9008
     // Builds the screen direction and the perpendicular of every point in the closed
     // range, widens each by mWidth, and folds the ribbon wherever the turn between two segments
-    // passes mFoldSin. DrawSelf() is the only caller, and the body is not reconstructed for the
+    // passes mFoldCos. DrawSelf() is the only caller, and the body is not reconstructed for the
     // same reason DrawSelf() is not.
     void EmitRibbonVerts(Point *pFirst, Point *pLast);
 
@@ -458,8 +458,9 @@ private:
     int mHasCaps;     // +0xf8
     int mLinePairs;   // +0xfc
     float mFoldAngle; // +0x100
-    // Sine of mFoldAngle, refreshed by SetFoldAngle() and by CreateMesh().
-    float mFoldSin; // +0x104
+    // Cosine of mFoldAngle, refreshed by SetFoldAngle() and by CreateMesh(). Both call the cosine
+    // routine at 0x00559638, whose small-angle path runs the cosine kernel.
+    float mFoldCos; // +0x104
     // +0x108 through +0x10f is alignment padding ahead of the Rnd::Object virtual base at +0x110.
 };
 
