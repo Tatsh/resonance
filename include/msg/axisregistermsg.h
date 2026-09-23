@@ -93,9 +93,12 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    // PitchPicker::HandleMessage() at 0x001c3220 reads the two members below directly with no
+    // accessor in the image, comparing mPlayer with its own player and scaling mValue by 1024.
+    Player *mPlayer; /*!< The player the controller belongs to. +0x04 */
+    float mValue;    /*!< The axis value. +0x08 */
+
 private:
-    Player *mPlayer;    // +0x04
-    float mValue;       // +0x08
     Mid::MBT mPosition; // +0x0c
     int mTrack;         // +0x10
 };

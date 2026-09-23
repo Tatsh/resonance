@@ -14,8 +14,10 @@ class Player;
  *
  * NeutralizePowerup builds the message at `0x001c9c64` from the three arguments of its slot 2,
  * storing the second at `+0x08`, the first at `+0x0c`, and the player at `+0x10`. Print() writes
- * only that player's colour name. Readers of the fields have not been traced, so they are private
- * by default.
+ * only that player's colour name. All three members are public because
+ * PhraseNeutralizer::PostTrackNeutralizedMsg() at `0x001c0980` reads them directly with no accessor
+ * in the image. It compares mTrack with its own track, neutralises the four bars after mBar
+ * (mBar + 1 through mBar + 4), and copies mPlayer into the DeployedPowerupMsg it sends.
  *
  * The destructor at `0x003e0288` is compiler-generated and has no declaration here.
  */
@@ -63,10 +65,9 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown08;  // +0x08
-    int mUnknown0c;  // +0x0c
-    Player *mPlayer; // +0x10
+    int mBar;        /*!< The bar the four neutralised bars follow. +0x08 */
+    int mTrack;      /*!< The track to neutralise. +0x0c */
+    Player *mPlayer; /*!< The player who deployed the neutraliser. +0x10 */
 };
 
 /**

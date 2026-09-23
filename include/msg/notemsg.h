@@ -97,7 +97,17 @@ public:
 
 private:
     unsigned char mUnknown08; // +0x08
-    unsigned char mUnknown09; // +0x09
+
+public:
+    /**
+     * The note number. +0x09
+     *
+     * Public because RiffRangeFinder::HandleMessage() at `0x001c4574` reads it directly with `lbu`,
+     * with no accessor in the image, widening its range of notes to include it.
+     */
+    unsigned char mNote;
+
+private:
     unsigned char mUnknown0a; // +0x0a
 
 public:

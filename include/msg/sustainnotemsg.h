@@ -28,6 +28,27 @@ class OBStream;
 class SustainNoteMsg : public MuseMsg {
 public:
     /**
+     * Construct a message with the song position at kMBTInfinity and the byte unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    SustainNoteMsg() {
+    }
+
+    /**
+     * Report a sustained note at a song position.
+     *
+     * Inline, with no address of its own. PitchPicker expands it on its stack at `0x001c2d70`,
+     * storing the position and then the byte its routine at `0x001c3060` returns.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param nNote The byte at `+0x08`.
+     */
+    SustainNoteMsg(int nTick, unsigned char nNote) : MuseMsg(nTick), mUnknown08(nNote) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. Only the song position is

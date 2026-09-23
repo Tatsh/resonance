@@ -115,8 +115,13 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    MultiMuse *mMuse; // +0x08
+    /**
+     * The sequence. +0x08
+     *
+     * Public because PitchPicker::FindRiffRange() at `0x001c2c84` reads it directly with no
+     * accessor in the image.
+     */
+    MultiMuse *mMuse;
 };
 
 /**
