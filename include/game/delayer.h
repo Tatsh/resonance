@@ -17,7 +17,8 @@ class Message;
  * class's own.
  *
  * The class is declared for GrooveWorld, which hands it every CripplePacket. Neither body is
- * written.
+ * written. The copy constructor at `0x0040d060` is the implicit one and is not written. It stores
+ * the MsgSink table, copies the MsgSource base, and then installs the two tables above.
  */
 class Delayer : public MsgSink, public MsgSource {
 public:

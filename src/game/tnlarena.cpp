@@ -25,8 +25,9 @@ namespace {
 // The level the constructor starts at and the destructor passes before deleting the animation.
 constexpr int kNeutralLevel = 1;
 
-// mUnknown24 at construction.
+// mUnknown24 at construction, and the value LockLevel() stores.
 constexpr int kNoJuiceLock = -1;
+constexpr int kJuiceLocked = 1;
 
 // Configuration code whose flag selects the plain ScreenAnim.
 constexpr int kDisplayModeConfigCode = 0x3a1;
@@ -120,28 +121,49 @@ TnlArena::~TnlArena() {
 void TnlArena::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPointAmountMsgType) {
-        mScreenAnim->UpdateLeaders();
+        OnPointAmount(static_cast<PointAmountMsg *>(pMsg));
     } else if (nType == g_nJuiceAmountMsgType) {
-        if (mUnknown24 != kNoJuiceLock) {
-            return;
-        }
-        if (mGameMode != kGameModeSolo || Application::shared()->GetPlayMode() != kPlayModeGame) {
-            return;
-        }
-
-        const float flJuice = static_cast<JuiceAmountMsg *>(pMsg)->GetJuiceFraction();
-        mLevel = kNeutralLevel;
-        if (flJuice > kHighJuice) {
-            mLevel = kHighLevel;
-        } else if (flJuice < kLowJuice) {
-            mLevel = kLowLevel;
-        }
-        mScreenAnim->SetLevel(mLevel);
+        OnJuiceAmount(static_cast<JuiceAmountMsg *>(pMsg));
     } else if (nType == g_nWinMsgType) {
-        if (mGameMode == kGameModeSolo && static_cast<WinMsg *>(pMsg)->mWinners.size() != 0) {
-            mScreenAnim->SetLevel(mLevel + 1);
-        }
+        OnWin(static_cast<WinMsg *>(pMsg));
     }
+}
+
+// 0x0040caf8
+inline void TnlArena::OnPointAmount([[maybe_unused]] PointAmountMsg *pMsg) {
+    mScreenAnim->UpdateLeaders();
+}
+
+// 0x0040ca00
+inline void TnlArena::OnJuiceAmount(JuiceAmountMsg *pMsg) {
+    if (mUnknown24 != kNoJuiceLock) {
+        return;
+    }
+    if (mGameMode != kGameModeSolo || Application::shared()->GetPlayMode() != kPlayModeGame) {
+        return;
+    }
+
+    const float flJuice = pMsg->GetJuiceFraction();
+    mLevel = kNeutralLevel;
+    if (flJuice > kHighJuice) {
+        mLevel = kHighLevel;
+    } else if (flJuice < kLowJuice) {
+        mLevel = kLowLevel;
+    }
+    mScreenAnim->SetLevel(mLevel);
+}
+
+// 0x0040cb28
+inline void TnlArena::OnWin(WinMsg *pMsg) {
+    if (mGameMode == kGameModeSolo && pMsg->mWinners.size() != 0) {
+        mScreenAnim->SetLevel(mLevel + 1);
+    }
+}
+
+// 0x0040c988
+void TnlArena::LockLevel() {
+    mUnknown24 = kJuiceLocked;
+    mScreenAnim->SetLevel(kNeutralLevel);
 }
 
 void TnlArena::SetFrame(float flFrame) {

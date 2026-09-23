@@ -5,10 +5,13 @@
 #include "app/msgsink.h"
 #include "rnd/mesh.h"
 
+class JuiceAmountMsg;
 class Message;
 class Player;
+class PointAmountMsg;
 class Renderer;
 class ScreenAnim;
+class WinMsg;
 
 namespace Rnd {
 class Mat;
@@ -45,7 +48,10 @@ public:
          * Put the recorded material back on the mesh.
          *
          * Every copy runs it, so the temporary TnlArena's constructor pushes re-applies the
-         * mesh's material, and destroying mScreenMeshes restores every screen.
+         * mesh's material, and destroying mScreenMeshes restores every screen. The out-of-line
+         * copy is the deleting form and has no caller.
+         *
+         * @ghidraAddress 0x0040c8e8
          */
         ~ScreenMesh() {
             mMesh->SetMaterial(mMat);
@@ -130,6 +136,22 @@ public:
     void SetFrame(float flFrame);
 
 private:
+    // PointAmountMsg: refresh the leaders. HandleMessage() inlines this, and the out-of-line copy
+    // has no caller.
+    void OnPointAmount(PointAmountMsg *pMsg);
+
+    // JuiceAmountMsg: pick the level from a solo player's juice, comparing in double precision.
+    // HandleMessage() inlines this, and the out-of-line copy has no caller.
+    void OnJuiceAmount(JuiceAmountMsg *pMsg);
+
+    // WinMsg: raise the level by one for a solo winner. HandleMessage() inlines this, and the
+    // out-of-line copy has no caller.
+    void OnWin(WinMsg *pMsg);
+
+    // Set mUnknown24 to 1, which stops HandleMessage() acting on a JuiceAmountMsg, and pass the
+    // neutral level. Nothing calls it or inlines it, and the title is inferred.
+    void LockLevel();
+
     std::vector<PlayerMaterial *> mPlayerMaterials;
     std::vector<ScreenMesh> mScreenMeshes;
     ScreenAnim *mScreenAnim;

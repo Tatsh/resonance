@@ -1,5 +1,7 @@
 #pragma once
 
+class HxStr;
+
 /**
  * Origin an HxStream::Seek() offset is measured from.
  *
@@ -126,6 +128,58 @@ public:
     HxStream &ReadSwapped(void *pDest, int nSize);
 
     /**
+     * Move nSize bytes out of pSrc, reversing their order when the stream swaps bytes.
+     *
+     * The writing counterpart of ReadSwapped(). With mSwapBytes clear, or for a single byte, this
+     * is one Write(). Otherwise it writes one byte at a time from the last position of pSrc to the
+     * first. The shipped program calls it only from WriteVarLen(). The title is inferred.
+     *
+     * @param pSrc The source buffer.
+     * @param nSize The number of bytes to move.
+     * @return This stream.
+     * @ghidraAddress 0x00405958
+     */
+    HxStream &WriteSwapped(const void *pSrc, int nSize);
+
+    /**
+     * Read a string with a variable-length size prefix into a fixed buffer.
+     *
+     * The length comes from ReadVarLen(). A string shorter than nDestSize is read whole and
+     * terminated. A longer one is cut to `nDestSize - 1` bytes and terminated, and the read
+     * position then skips the rest of the string. The shipped program does not call it. The title
+     * is inferred.
+     *
+     * @param pszDest The destination buffer.
+     * @param nDestSize The size of pszDest in bytes, terminator included.
+     * @return This stream.
+     * @ghidraAddress 0x004057c8
+     */
+    HxStream &ReadString(char *pszDest, int nDestSize);
+
+    /**
+     * Read a string with a variable-length size prefix into an HxStr.
+     *
+     * The bytes are read into a temporary untagged block one byte longer than the string, which
+     * is terminated, assigned to str, and released. The shipped program does not call it. The
+     * title is inferred.
+     *
+     * @param str Receives the string.
+     * @return This stream.
+     * @ghidraAddress 0x004058a8
+     */
+    HxStream &ReadString(HxStr &str);
+
+    /**
+     * Follow Unknown7() from this stream until a stream reports none, and report that stream.
+     *
+     * The shipped program does not call it. The title is inferred.
+     *
+     * @return The innermost stream, which is this stream when it reads through no other.
+     * @ghidraAddress 0x00405a98
+     */
+    HxStream *BaseStream();
+
+    /**
      * Status value of a stream with nothing wrong.
      *
      * HxIDataChunk loads the four status values from memory rather than as immediates. That places
@@ -198,3 +252,18 @@ protected:
  * @ghidraAddress 0x00405b70
  */
 HxStream &ReadVarLen(int &nValue, HxStream &stream);
+
+/**
+ * Write a variable-length quantity, seven bits per byte, most significant group first.
+ *
+ * The encoding ReadVarLen() reads. The groups are packed into one word, lowest group in the lowest
+ * byte and every higher group marked with the continuation bit, and the word's bytes are written
+ * lowest first through HxStream::WriteSwapped(). The value is shifted arithmetically, so a
+ * negative value never terminates. The shipped program does not call it. The title is inferred.
+ *
+ * @param nValue The quantity.
+ * @param stream The stream to write to.
+ * @return The stream.
+ * @ghidraAddress 0x00405ad8
+ */
+HxStream &WriteVarLen(const int &nValue, HxStream &stream);
