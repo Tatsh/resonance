@@ -180,6 +180,7 @@ View *View::NewView(const HxStr &name) {
     }
 }
 
+// 0x004dff48
 void View::Init() {
     g_manager.RegisterClass(g_viewClassName, NewViewObject);
     g_manager.RegisterClass(HxStr("Animatable"), NewAnimatableView);

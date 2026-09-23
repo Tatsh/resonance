@@ -354,9 +354,11 @@ public:
     /**
      * Report where one glyph of the laid-out text sits.
      *
-     * A text with no glyph mesh or no font reports the origin. An index past the last glyph
-     * reports the position after the last glyph, which is how MetHelpScreen::FillTexts() at
-     * `0x00313208` measures a whole line. The body is not written, and the name is inferred.
+     * A text with no glyph mesh or no font reports the origin. A glyph's position is the first
+     * vertex of its quad. An index past the last glyph reports the last vertex advanced by the
+     * font's tracking, which is how MetHelpScreen::FillTexts() at `0x00313208` measures a whole
+     * line. kTextAlignMiddle and kTextAlignBottom then lower the result by half or all of the
+     * font's cell size. The name is inferred.
      *
      * @param nIndex The glyph.
      * @return The position.
@@ -530,7 +532,8 @@ extern Text *(*g_pfnNewText)(const HxStr &name);
  * Build a text run through the creator hook.
  *
  * The one recovered reference to this routine is the data word at `0x00869c28`, and nothing in the
- * image calls it, so what consumed it did not ship.
+ * image calls it, so what consumed it did not ship. The binary also expands this inline at its
+ * callers.
  *
  * @param name The object name.
  * @return The new text run.

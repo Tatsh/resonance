@@ -45,6 +45,7 @@ constexpr int kLowLevel = 0;
 
 TnlArena *g_pTnlArena;
 
+// 0x00406010
 void Rnd::Mat::GetMeshReferrers(std::vector<Mesh *> &meshes) {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         if ((*it)->ClassName() == "Mesh") {

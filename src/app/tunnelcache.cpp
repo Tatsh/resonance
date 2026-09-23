@@ -36,6 +36,7 @@ Rnd::Tunnel *GetCachedTunnelObject() {
 
 namespace Rnd {
 
+// 0x0040d2b0
 void Animatable::SetRate(float flRate) {
     ScaleOffset *pStage = nullptr;
     if (mFilters.size() != 0) {
@@ -50,6 +51,7 @@ void Animatable::SetRate(float flRate) {
     pStage->mOffset = flOutput - mFrame * flRate;
 }
 
+// 0x0040d3d0
 void Animatable::SetOffset(float flOffset) {
     ScaleOffset *pStage = nullptr;
     if (mFilters.size() != 0) {
@@ -62,6 +64,7 @@ void Animatable::SetOffset(float flOffset) {
     pStage->mOffset = flOffset;
 }
 
+// 0x0040d4a8
 void Animatable::SetLoopRange(float flMin, float flMax) {
     MinMaxLoop *pStage = nullptr;
     if (mFilters.size() != 0) {
@@ -75,12 +78,14 @@ void Animatable::SetLoopRange(float flMin, float flMax) {
     pStage->mMin = flMin;
 }
 
+// 0x0040f660
 void View::AddView(View *pChild) {
     AddDraw(pChild, nullptr);
     AddAnim(pChild);
     AddTrans(pChild);
 }
 
+// 0x0040f5f8
 void View::RemoveView(View *pChild) {
     RemoveDraw(pChild);
     RemoveAnim(pChild);

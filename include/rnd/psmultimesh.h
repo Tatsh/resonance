@@ -49,7 +49,11 @@ protected:
     /**
      * Submit the GIF packets for every instance of the current material pass.
      *
-     * The body is not reconstructed.
+     * Adds the instance count times the face count to the triangle statistic, closes the open GIF
+     * tag, sends the mesh's face run through Rnd::PsMesh::EmitMultiMeshFaceRun(), and then sends
+     * the transforms in batches. Each batch holds as many transforms as fit in the VU1 data memory
+     * the face run leaves, unpacked behind a count quadword. The first batch calls the instanced
+     * microprogram and every later one continues it.
      *
      * @ghidraAddress 0x005b2c60
      */

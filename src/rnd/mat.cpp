@@ -469,6 +469,11 @@ Mat *NewMatThroughHook(const HxStr &name) {
     }
 }
 
+// 0x004dbd00
+Mat *NewMat(const HxStr &name) {
+    return new Mat(name);
+}
+
 // 0x004dbc80
 Object *CreateRegisteredMat(const HxStr &name) {
     try {
@@ -715,6 +720,18 @@ void Mat::Load(Stream &stream) {
 
 // 0x004db958
 void Mat::SyncMat([[maybe_unused]] int nUnknown) {
+}
+
+// 0x004dcd88
+void Mat::Refresh() {
+    int nStage = 0;
+    for (std::vector<Stage>::iterator it = mStages.begin(); it != mStages.end(); ++it) {
+        it->mMat = this;
+        if (it->mTex != nullptr) {
+            it->mTex->AddRef(this);
+        }
+        SyncMat(nStage++);
+    }
 }
 
 // 0x004db970

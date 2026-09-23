@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "math/color.h"
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -800,6 +801,34 @@ void Text::BuildGlyphMesh() {
     mMesh->SyncAll();
     mMesh->Sync();
     mMesh->UpdateWorldXfm(this, 1);
+}
+
+// 0x004c9e98
+Vector3 Text::CharPosition(int nIndex) {
+    if (mMesh == nullptr || mFont == nullptr || mMesh->mVertsOwner->mVerts.empty()) {
+        return Vector3{0.0f, 0.0f, 0.0f, 1.0f};
+    }
+
+    const std::vector<MeshVert> &verts = mMesh->mVertsOwner->mVerts;
+    Vector3 pos;
+    if (static_cast<unsigned>(nIndex) < mMesh->mFacesOwner->mFaces.size() / kFacesPerGlyph) {
+        pos = verts[nIndex * kVertsPerGlyph].mPoint;
+    } else {
+        const Vector3 advance{mFont->mSpace, 0.0f, 0.0f, 1.0f};
+        Vector3 end;
+        end.w = 1.0f;
+        AddVec3(&verts.back().mPoint.x, &advance.x, &end.x);
+        pos = end;
+    }
+
+    if ((mAlign & kTextAlignMiddle) != 0) {
+        const Vector3 shift{0.0f, 0.0f, -mFont->mSize * 0.5f, 1.0f};
+        AddVec3(&pos.x, &shift.x, &pos.x);
+    } else if ((mAlign & kTextAlignBottom) != 0) {
+        const Vector3 shift{0.0f, 0.0f, -mFont->mSize, 1.0f};
+        AddVec3(&pos.x, &shift.x, &pos.x);
+    }
+    return pos;
 }
 
 // 0x004cf150
