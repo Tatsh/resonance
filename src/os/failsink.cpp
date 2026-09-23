@@ -62,10 +62,12 @@ void FailSink::OpenLog(const HxStr &path) {
     }
 }
 
+// 0x004ddf90
 void FailSink::SetReportHandler(FailReportProc pfnReport) {
     mReportProc = (pfnReport != nullptr) ? pfnReport : DefaultFailReport;
 }
 
+// 0x004dde28
 void FailSink::Report(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -75,6 +77,7 @@ void FailSink::Report(const char *pszFormat, ...) {
     mReportProc(g_szFailMessage);
 }
 
+// 0x004dde98
 FailSink *FailSink::Format(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -84,6 +87,7 @@ FailSink *FailSink::Format(const char *pszFormat, ...) {
     return this;
 }
 
+// 0x004ddfb0
 FailSink *FailSink::Print([[maybe_unused]] const char *pszText) {
     return this;
 }

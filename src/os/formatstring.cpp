@@ -21,6 +21,7 @@ char g_szFormatStringBuffer[kFormatStringBufferSize];
 
 } // namespace
 
+// 0x0054f688
 const char *FormatString(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);

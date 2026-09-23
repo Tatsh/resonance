@@ -85,6 +85,7 @@ int g_nDebugConsole;
 // 0x008e4f30
 sceGsDBuff g_debugDoubleBuffer;
 
+// 0x005e5d08
 int InitDebugGs() {
     sceGifTag adTag;
     adTag.mWords[0] = kAdGifTagLo;
@@ -145,6 +146,7 @@ int InitDebugGs() {
 void ShowScreenMessage([[maybe_unused]] const char *pszText, [[maybe_unused]] int nDuration) {
 }
 
+// 0x005e5ed8
 void OpenDebugConsole() {
     sceDevConsInit();
     g_nDebugConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
@@ -159,6 +161,7 @@ void InitDebugConsole() {
     sceDevConsClear(g_nDebugConsole);
 }
 
+// 0x005e5f60
 void ClearDebugConsole() {
     sceDevConsClear(g_nDebugConsole);
 }

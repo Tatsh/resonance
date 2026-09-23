@@ -114,6 +114,7 @@ void Heap::ReplaceFreeNode(HeapNode *pFrom, HeapNode *pTo) {
     }
 }
 
+// 0x00552040
 Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
     if (pBlock == nullptr) {
         // Yes, the binary discards this call's result and then builds the heap at address zero.
@@ -149,12 +150,14 @@ Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
     return pHeap;
 }
 
+// 0x00552108
 void Heap::Destroy() {
     if ((mFlags & kHeapFlagOwnsBlock) != 0) {
         MemFreeTagged(this, __FILE__, __LINE__);
     }
 }
 
+// 0x00551780
 void *
 Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
@@ -227,6 +230,7 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
     return NodePayload(pChosen);
 }
 
+// 0x00551d28
 void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     if (pBlock == nullptr) {
@@ -284,6 +288,7 @@ void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unus
     AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
 }
 
+// 0x005519d0
 void *Heap::Realloc(void *pBlock,
                     unsigned nSize,
                     [[maybe_unused]] const char *pszFile,
@@ -364,6 +369,7 @@ void *Heap::Realloc(void *pBlock,
     return pMoved;
 }
 
+// 0x00552138
 int Heap::Shrink(unsigned nSize) {
     if (nSize >= mLength) {
         return 0;
@@ -394,6 +400,7 @@ int Heap::Shrink(unsigned nSize) {
     return 1;
 }
 
+// 0x00551ec8
 void Heap::DumpToFile(const char *pszPath) {
     FILE *pFile = fopen(pszPath, "w");
     if (pFile == nullptr) {
@@ -435,6 +442,7 @@ void Heap::DumpToFile(const char *pszPath) {
     fclose(pFile);
 }
 
+// 0x00552218
 void Heap::DumpStats() {
     char szLine[0xa0];
     sprintf(szLine,
