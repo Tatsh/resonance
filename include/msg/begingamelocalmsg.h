@@ -15,6 +15,9 @@
  *
  * This class adds no field of its own, and the size is exactly the size of the base, which is what
  * fixes the size of the base.
+ *
+ * The destructor at `0x0010b998` is compiler-generated and has no declaration here. The routine
+ * at `0x0010b9d0` is a further emission of the type-information accessor.
  */
 class BeginGameLocalMsg : public Message {
 public:

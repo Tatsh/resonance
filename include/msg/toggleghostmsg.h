@@ -13,6 +13,9 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). Both members are public, the
  * player because LocalPlayer::Slot22() writes it and the flag because Overlay reads it.
+ *
+ * The destructor at `0x0011d710` is compiler-generated and has no declaration here. The routine
+ * at `0x0011d748` is a further emission of the type-information accessor.
  */
 class ToggleGhostMsg : public Message {
 public:

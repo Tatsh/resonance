@@ -22,6 +22,10 @@ class Player;
  * the image. Overlay::OnWin() at `0x0041e020` searches it for HudTrack::mPlayer with std::find at
  * `0x0041e1d0`. That search types the elements as players. TnlArena::HandleMessage() tests the
  * vector for emptiness.
+ *
+ * The destructors at `0x00116238` and `0x003e0c00` are compiler-generated, release mWinners, and
+ * have no declaration here. The routine at `0x001162f0` is a further emission of the
+ * type-information accessor.
  */
 class WinMsg : public Message {
 public:

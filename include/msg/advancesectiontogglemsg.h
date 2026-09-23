@@ -13,6 +13,9 @@
  * Overlay::OnAdvanceSectionToggle() at `0x0041f440` reads it directly with no accessor in the
  * image, showing `ADVANCE TO NEXT SECTION` when it is non-zero and `REPEAT SECTION` otherwise. The
  * purpose of the word at `+0x08` is not recovered.
+ *
+ * The destructor at `0x00115ee0` is compiler-generated and has no declaration here. The routine
+ * at `0x00115f18` is a further emission of the type-information accessor.
  */
 class AdvanceSectionToggleMsg : public Message {
 public:

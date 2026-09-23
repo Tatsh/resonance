@@ -12,6 +12,9 @@
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
+ *
+ * The destructor at `0x0011d4c8` is compiler-generated and has no declaration here. The routine
+ * at `0x0011d500` is a further emission of the type-information accessor.
  */
 class PlaybackModeMsg : public Message {
 public:

@@ -13,6 +13,9 @@
  * Overlay::OnPlaybackToggle() at `0x0041f9a8` reads it directly with no accessor in the image. It
  * copies the flag into its own state and, when the flag is set, shows `Press the SELECT button to
  * edit`.
+ *
+ * The destructor at `0x00116120` is compiler-generated and has no declaration here. The routine
+ * at `0x00116158` is a further emission of the type-information accessor.
  */
 class PlaybackToggleMsg : public Message {
 public:
