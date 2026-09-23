@@ -16,29 +16,36 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                   | Count  |
 | ------------------------- | ------ |
-| Functions in the program  | 15,594 |
-| Excluded by rule          | 7,442  |
-| Reconstructable           | 8,152  |
-| Declared or defined       | 5,386  |
-| Share declared or defined | 66.07% |
-| Defined, with a body      | 3,651  |
-| Share implemented         | 44.79% |
-| Remaining, with a name    | 1,199  |
-| Remaining, unidentified   | 1,567  |
+| Functions in the program  | 15,598 |
+| Excluded by rule          | 7,647  |
+| Reconstructable           | 7,951  |
+| Declared or defined       | 5,539  |
+| Share declared or defined | 69.66% |
+| Defined, with a body      | 3,845  |
+| Share implemented         | 48.36% |
+| Remaining, with a name    | 1,114  |
+| Remaining, unidentified   | 1,298  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,735 of
-the 5,386 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 3,651 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,694 of
+the 5,539 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 3,845 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 44.79% as the answer to
-"how much is reconstructed" and 66.07% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 48.36% as the answer to
+"how much is reconstructed" and 69.66% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `c715051`. Work written and checked but not yet committed
+The table measures the committed tree at `7b43c85`. Work written and checked but not yet committed
 is not included.
 
-Since the measurement at `b7bc378` (37.58%), bodies rose by 431 over 67 commits and the
+Since the measurement at `c715051` (44.79%), bodies rose by 194 over 30 commits and the
+reconstructable figure fell by 201. The template library category grew by 197 as the front end
+screens' container instantiations were titled against normalised body matches, the duplicate
+category by 8, the compiler-generated category by 2, and the vendored interpreter by 1, while the
+C++ runtime and C runtime categories fell by 2 and 1 as mis-titled routines were corrected. Four
+functions were created for code the program had not yet defined.
+
+Before that, from the measurement at `b7bc378` (37.58%), bodies rose by 431 over 67 commits and the
 reconstructable figure fell by 417. Titling moved routines into their exclusion categories: the
 template library grew by 376, the vendored interpreter by 65, the compiler-generated category by
 17, the C++ runtime by 14, the C runtime by 11, and the SDK by 10, while the duplicate category
@@ -129,13 +136,13 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 887   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 1,944 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 1,914 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 1,802 | Container instantiations                                         |
+| Compiler-generated             | 889   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 1,945 | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 1,922 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 1,999 | Container instantiations                                         |
 | Platform SDK                   | 400   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 219   | Exception, cast, and unwinding support                           |
-| C runtime                      | 276   | String and memory routines, and the floating-point library       |
+| C++ runtime                    | 217   | Exception, cast, and unwinding support                           |
+| C runtime                      | 275   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
