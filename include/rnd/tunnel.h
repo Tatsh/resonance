@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <stddef.h>
 #include <vector>
 
 #include "math/transform.h"
@@ -65,10 +66,6 @@ namespace Rnd {
  * column of every slice mesh per step, and DrawSelf() draws the slices of the visible window.
  * The seekers add "[<name>_seek<index>.<section>]" meshes over the lanes they highlight.
  *
- * The routine at `0x0046b830` has no callers and is not reconstructed. It rebuilds the slice grid
- * with one chain per cell instead of one per slice and appears to be an earlier form of
- * BuildSliceMeshes().
- *
  * The record the vector at `+0xdc` stores is Rnd::TunnelSeeker. The routines at `0x00477830` and
  * `0x0046e830` are members of the seeker and of its strip rather than of this class, and the three
  * seek records read private members of this class directly.
@@ -88,6 +85,23 @@ public:
 
     /** @ghidraAddress 0x004676b0 */
     virtual ~Tunnel();
+
+    /**
+     * Allocate a tunnel under the tag "Rnd::Tunnel".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x00476218
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a tunnel under the tag "Rnd::Tunnel".
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x00476238
+     */
+    static void operator delete(void *pBlock);
 
     /**
      * Write the tunnel to the engine text sink.
@@ -202,6 +216,22 @@ public:
      * @ghidraAddress 0x00477538
      */
     void LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight);
+
+    /**
+     * Build the frame of a point on one ring at a path frame.
+     *
+     * Without a path the output is the identity, with the padding words of the three basis rows
+     * unwritten. Otherwise the basis rows are those of the ring transform, the translation is
+     * blended towards the next ring by LerpRingSectionTangent(), and the result is concatenated
+     * with the path transform at flFrame.
+     *
+     * @param nRing The ring.
+     * @param pOut The transform to write.
+     * @param flFrame The path frame.
+     * @param flBlend The weight of the next ring's translation.
+     * @ghidraAddress 0x0046da40
+     */
+    void GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend);
 
     /**
      * Bring every slice of the current window up to the advanced slice.
@@ -457,6 +487,11 @@ private:
     // 6 * (mSliceSteps + 1) + 8 vertices per ring. The triangles are built on
     // the chain of slice 0 and shared by the others. 0x0046adc0.
     void BuildSliceMeshes();
+
+    // Build one chain per lane of each slice, "[<name>_lat<lane>]", holding one flat grid of four
+    // rows and two end caps, with the triangles built on the first chain and shared. The program
+    // lists no caller, and BuildMesh() calls BuildSliceMeshes() instead. 0x0046b830.
+    void BuildLaneMeshes();
 
     // Build one chain per cell, "[<name>_pan<cell>]", with two rows of mSliceSteps + 1 vertices.
     // The triangles are built on the chain of cell 0 and shared by the others. 0x0046c0e8.

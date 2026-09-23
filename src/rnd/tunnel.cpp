@@ -13,6 +13,7 @@
 #include "os/failsink.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
@@ -22,6 +23,7 @@
 #include "rnd/object.h"
 #include "rnd/stream.h"
 #include "rnd/transanim.h"
+#include "rnd/tunnelsortentry.h"
 
 namespace {
 
@@ -61,6 +63,16 @@ enum LanePanel {
     kLanePanelFloor = 1,     // mPoints[1] to mPoints[2]
     kLanePanelRightWall = 2, // mPoints[2] to mPoints[3]
 };
+
+// BuildLaneMeshes() gives each lane one flat grid of four rows instead of three panels, and its
+// end caps these texture ranges.
+constexpr int kFlatLaneRows = 4;
+constexpr float kFlatLaneCapFirstU = 0.666f;
+constexpr float kFlatLaneCapStepU = 0.334f;
+constexpr float kFlatLaneCap2FirstU = 0.333f;
+constexpr float kFlatLaneCap2StepU = 0.333f;
+
+const char *const kTunnelTag = "Rnd::Tunnel";
 
 const char kSliceNameFormat[] = "%s_lat%03d";
 const char kCellNameFormat[] = "%s_pan%03d";
@@ -215,12 +227,13 @@ inline void SetPaddingWords(Transform &xfm) {
     xfm.mTranslation.w = 1.0f;
 }
 
-// Give the two rows of a lane panel their texture coordinates. The horizontal coordinate is the
-// row and the vertical one runs from 0 to 1 along the row.
-inline void SetPanelTexCoords(std::vector<MeshVert> &verts, int nFirst, int nColumns) {
+// Give rows of vertices their texture coordinates. The horizontal coordinate steps by flRowStep
+// from row to row, and the vertical one runs from 0 to 1 along each row.
+inline void SetGridTexCoords(
+    std::vector<MeshVert> &verts, int nFirst, int nRows, int nColumns, float flRowStep) {
     const float flStep = 1.0f / (nColumns - 1);
     float flU = 0.0f;
-    for (int nRow = 0; nRow < kPanelRows; ++nRow) {
+    for (int nRow = 0; nRow < nRows; ++nRow) {
         float flV = 0.0f;
         for (int nColumn = 0; nColumn < nColumns; ++nColumn) {
             MeshVert &vert = verts[nFirst + nRow * nColumns + nColumn];
@@ -228,20 +241,22 @@ inline void SetPanelTexCoords(std::vector<MeshVert> &verts, int nFirst, int nCol
             vert.mTex1.x = flU;
             flV += flStep;
         }
-        flU += 1.0f;
+        flU += flRowStep;
     }
 }
 
-// Give the four vertices of a lane end cap the corners of the texture.
-inline void SetCapTexCoords(std::vector<MeshVert> &verts, int nFirst) {
+// Give the four vertices of a lane end cap their texture coordinates. The horizontal coordinate
+// runs from flFirstU by flStepU across a row, and the vertical one is the row.
+inline void
+SetCapTexCoords(std::vector<MeshVert> &verts, int nFirst, float flFirstU, float flStepU) {
     float flV = 0.0f;
     for (int nRow = 0; nRow < kCapRows; ++nRow) {
-        float flU = 0.0f;
+        float flU = flFirstU;
         for (int nColumn = 0; nColumn < kCapColumns; ++nColumn) {
             MeshVert &vert = verts[nFirst + nRow * kCapColumns + nColumn];
             vert.mTex1.x = flU;
             vert.mTex1.y = flV;
-            flU += 1.0f;
+            flU += flStepU;
         }
         flV += 1.0f;
     }
@@ -562,6 +577,46 @@ Tunnel::~Tunnel() {
     ReleaseAllRefs();
 }
 
+// 0x00476218
+void *Tunnel::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kTunnelTag);
+}
+
+// 0x00476238
+void Tunnel::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kTunnelTag);
+}
+
+// 0x0046da40
+void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend) {
+    if (mPath == nullptr) {
+        pOut->mBasisX.x = 1.0f;
+        pOut->mBasisX.y = 0.0f;
+        pOut->mBasisX.z = 0.0f;
+        pOut->mBasisY.x = 0.0f;
+        pOut->mBasisY.y = 1.0f;
+        pOut->mBasisY.z = 0.0f;
+        pOut->mBasisZ.x = 0.0f;
+        pOut->mBasisZ.y = 0.0f;
+        pOut->mBasisZ.z = 1.0f;
+        pOut->mTranslation.x = 0.0f;
+        pOut->mTranslation.y = 0.0f;
+        pOut->mTranslation.z = 0.0f;
+        pOut->mTranslation.w = 1.0f;
+        return;
+    }
+    const Transform &ring = mUnknownc0[nRing];
+    pOut->mBasisX = ring.mBasisX;
+    pOut->mBasisY = ring.mBasisY;
+    pOut->mBasisZ = ring.mBasisZ;
+    LerpRingSectionTangent(nRing, &pOut->mTranslation, flBlend);
+    Transform anim;
+    SetPaddingWords(anim);
+    mPath->EvalFrame(flFrame, &anim.mBasisX.x, 1);
+    // Yes, the output is also the first input.
+    XfmConcat(&pOut->mBasisX.x, &anim.mBasisX.x, &pOut->mBasisX.x);
+}
+
 // 0x00468850
 int Tunnel::DrawSelf() {
     const int nEnd = mUnknownbc + mSliceCount - mUnknown60;
@@ -786,11 +841,11 @@ void Tunnel::BuildSliceMeshes() {
         std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
         for (int nRing = 0; nRing < mRingCount; ++nRing) {
             const int nBase = nRing * nBlockVerts;
-            SetPanelTexCoords(verts, nBase + kLanePanelLeftWall * nPanelVerts, nColumns);
-            SetPanelTexCoords(verts, nBase + kLanePanelFloor * nPanelVerts, nColumns);
-            SetPanelTexCoords(verts, nBase + kLanePanelRightWall * nPanelVerts, nColumns);
-            SetCapTexCoords(verts, nBase + nCapStart);
-            SetCapTexCoords(verts, nBase + nCapStart + kCapVerts);
+            for (int nPanel = 0; nPanel < kLaneSegmentCount; ++nPanel) {
+                SetGridTexCoords(verts, nBase + nPanel * nPanelVerts, kPanelRows, nColumns, 1.0f);
+            }
+            SetCapTexCoords(verts, nBase + nCapStart, 0.0f, 1.0f);
+            SetCapTexCoords(verts, nBase + nCapStart + kCapVerts, 0.0f, 1.0f);
         }
         pMesh->SetVertexColor(white);
     }
@@ -829,6 +884,54 @@ void Tunnel::BuildSliceMeshes() {
     }
 }
 
+// 0x0046b830
+void Tunnel::BuildLaneMeshes() {
+    mUnknownb0.resize(mRingCount * mSliceCount, TunnelMeshChain());
+    if (mUnknownb0.empty()) {
+        return;
+    }
+
+    const int nColumns = mSliceSteps + 1;
+    const int nCapStart = kFlatLaneRows * nColumns;
+    const int nBlockVerts = nCapStart + 2 * kCapVerts;
+    const Color white{1.0f, 1.0f, 1.0f, 1.0f};
+    for (unsigned nLane = 0; nLane < mUnknownb0.size(); ++nLane) {
+        TunnelMeshChain &chain = mUnknownb0[nLane];
+        chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nLane)), mLodCount, true);
+        chain.SetVertexCount(nBlockVerts);
+        Mesh *pMesh = chain.front();
+        std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
+        SetGridTexCoords(verts, 0, kFlatLaneRows, nColumns, 1.0f / (kFlatLaneRows - 1));
+        SetCapTexCoords(verts, nCapStart, kFlatLaneCapFirstU, kFlatLaneCapStepU);
+        SetCapTexCoords(verts, nCapStart + kCapVerts, kFlatLaneCap2FirstU, kFlatLaneCap2StepU);
+        pMesh->SetVertexColor(white);
+    }
+
+    TunnelMeshChain &first = mUnknownb0.front();
+    for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
+        const int nStep = 1 << nLevel;
+        Mesh *pMesh = first[nLevel];
+        if (nLevel == first.size() - 1) {
+            pMesh->AddQuadStrip(0, (kFlatLaneRows - 1) * nColumns, nColumns, nStep);
+        } else {
+            for (int nRow = 0; nRow < kFlatLaneRows - 1; ++nRow) {
+                pMesh->AddQuadStrip(nRow * nColumns, (nRow + 1) * nColumns, nColumns, nStep);
+            }
+        }
+        pMesh->AddQuad(nCapStart, nCapStart + 1, nCapStart + 2, nCapStart + 3);
+        pMesh->AddQuad(nCapStart + kCapVerts,
+                       nCapStart + kCapVerts + 1,
+                       nCapStart + kCapVerts + 2,
+                       nCapStart + kCapVerts + 3);
+    }
+    first.Sync();
+    for (unsigned nLane = 1; nLane < mUnknownb0.size(); ++nLane) {
+        mUnknownb0[nLane].ShareFaces(first);
+        // Yes, the binary synchronises every level a second time.
+        mUnknownb0[nLane].Sync();
+    }
+}
+
 // 0x0046c0e8
 void Tunnel::BuildCellMeshes() {
     mUnknowna4.resize(mRingCount * mSliceCount, TunnelMeshChain());
@@ -844,7 +947,7 @@ void Tunnel::BuildCellMeshes() {
         chain.Build(HxStr(FormatString(kCellNameFormat, NameText(this), nCell)), mLodCount, true);
         chain.SetVertexCount(kPanelRows * nColumns);
         Mesh *pMesh = chain.front();
-        SetPanelTexCoords(pMesh->mVertsOwner->mVerts, 0, nColumns);
+        SetGridTexCoords(pMesh->mVertsOwner->mVerts, 0, kPanelRows, nColumns, 1.0f);
         pMesh->SetVertexColor(white);
     }
 
@@ -1199,7 +1302,6 @@ void Tunnel::ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int
 
 // 0x00476288
 Tunnel *NewTunnel(const HxStr &name) {
-    // The binary bills the allocation to the tag "Rnd::Tunnel" and the object is 0x104 bytes.
     return new Tunnel(name);
 }
 
