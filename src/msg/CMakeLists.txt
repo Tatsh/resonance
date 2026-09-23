@@ -64,6 +64,7 @@ set(RESONANCE_MSG_SRCS
     multimusemsg.cpp
     multipliermsg.cpp
     multiplierstatemsg.cpp
+    musemsg.cpp
     nearesttrackmsg.cpp
     neutralizemsg.cpp
     notemsg.cpp

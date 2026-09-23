@@ -1,6 +1,8 @@
 set(RESONANCE_SCH_SRCS
+    barsequencer.cpp
     cmdid.cpp
     command.cpp
+    sequencercmd.cpp
     tempomap.cpp
     tick.cpp
     tickclock.cpp

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "os/hxstr.h"
 
 /**
@@ -56,12 +58,14 @@ HxStr *QueryConfigString(HxStr *pResult, int nEventCode, ...);
 /**
  * Fill a vector from one configuration value through the embedded interpreter.
  *
- * Mixer's constructor reads its per-track table this way under code 0x39f.
+ * Mixer's constructor reads its per-track table this way under code 0x39f. The trailing arguments
+ * are substituted into the property lookup, and GameEnableMgr passes a one-based track number
+ * there.
  *
  * The body is not reconstructed.
  *
- * @param pResult The vector the values are written to, as its three raw words.
+ * @param pResult The vector the values are written to.
  * @param nEventCode The configuration code.
  * @ghidraAddress 0x0050a1a0
  */
-void QueryConfigVector(void *pResult, int nEventCode);
+void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...);

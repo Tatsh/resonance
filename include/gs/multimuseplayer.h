@@ -86,16 +86,3 @@ private:
     // Whether the player is running. Start() sets it, Stop() and PlayerFinished() clear it.
     int mRunning; // +0x4c
 };
-
-/**
- * Withdraw one scheduler command from the clock it was posted against.
- *
- * The routine's one argument is the sequencer rather than the player, which is what makes it a
- * helper of the translation unit rather than a member of MultiMusePlayer. It reads the clock out
- * of the sequencer's `+0x0c` and the handle out of its `+0x04`, and hands the handle to
- * Sch::TickClock::Withdraw(). MultiMusePlayer::Stop() is the one caller.
- *
- * @param pSequencer The sequencer to withdraw.
- * @ghidraAddress 0x001aa418
- */
-void WithdrawSchedulerCommand(GenericSequencer *pSequencer);

@@ -31,7 +31,7 @@ void MultiMusePlayer::Start(MsgSink *pSink) {
     // the template library this toolchain shipped, which is the two words the body loads.
     const TickObj<MuseMsg *> *pBegin = mMuse->mEntries.data();
     mSequencer = new Sequencer<const TickObj<MuseMsg *> *>(pBegin, pBegin + mMuse->mEntries.size());
-    PostSequencer(mSequencer, mClock, this);
+    mSequencer->Post(mClock, this);
 }
 
 // 0x001aa1b8
@@ -40,7 +40,7 @@ void MultiMusePlayer::Stop() {
         return;
     }
     ReleaseAllPlayers();
-    WithdrawSchedulerCommand(mSequencer);
+    mSequencer->Withdraw();
     mRunning = 0;
 }
 
@@ -76,11 +76,4 @@ void MultiMusePlayer::PlayerFinished(MusePlayer *pPlayer) {
 
     mRunning = 0;
     mParent->PlayerFinished(this);
-}
-
-// 0x001aa418
-void WithdrawSchedulerCommand(GenericSequencer *pSequencer) {
-    CmdID id;
-    id.mValue = pSequencer->mCmdId;
-    pSequencer->mClock->Withdraw(id);
 }

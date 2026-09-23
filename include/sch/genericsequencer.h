@@ -1,75 +1,82 @@
 #pragma once
 
+#include "mid/mbt.h"
+#include "sch/cmdid.h"
 #include "sch/tickclock.h"
 
+class MsgSink;
+class SequencerCmd;
+
 /**
- * Base of the template that dispatches a range of timed objects.
+ * Base of the template that dispatches a range of timed messages against a clock.
  *
  * `16GenericSequencer` in the RTTI descriptor at `0x0086f708`, with no base list. It is the base
  * the one Sequencer instantiation in the image derives from at offset 0.
  *
  * Its shape comes from the instantiation's table at `0x007cc7e8`, which runs three entries: the
- * type function, one virtual, and the destructor. The destructor is therefore declared second,
+ * type function, Dispatch(), and the destructor. The destructor is therefore declared second,
  * which MultiMusePlayer's destructor confirms by releasing its sequencer through slot 2 rather
  * than slot 1.
  *
- * The base is 0x24 bytes. Sequencer adds its two range pointers above that, which the 0x2c-byte
- * allocation in MultiMusePlayer::Start() measures. No accessor of the class is recovered, so every
- * field stays a placeholder.
- *
- * The verb of slot 1 is unrecovered. No routine in the image calls it directly.
+ * The base is 0x1c bytes. Sequencer adds its cursor, the tick of the next message, and its range
+ * above that, which the 0x2c-byte allocations in MultiMusePlayer::Start() and BarSequencer::Tick()
+ * measure. The member order is the recovered offset order.
  */
 class GenericSequencer {
 public:
     /**
-     * Slot 1, verb unrecovered.
+     * Prepare a sequencer before any post.
      *
-     * @ghidraAddress 0x00100e70
+     * Inline, and expanded into both allocations. The handle starts unallocated, the command
+     * absent, the start tick at kMBTInfinity, and the offset at zero.
      */
-    virtual void Slot1() = 0;
+    GenericSequencer() : mCommand(nullptr), mOffset(0) {
+        mCmdId.mValue = kUnallocatedCommand;
+    }
 
     /**
-     * @ghidraAddress 0x00100df8
+     * Send the message at the cursor and schedule the next one.
+     *
+     * Slot 1, pure. SequencerCmd::Execute() runs it. The title is inferred.
      */
-    virtual ~GenericSequencer();
+    virtual void Dispatch() = 0;
 
     /**
-     * Handle the sequencer is queued under, set to -2 by every recovered construction.
+     * Release the sequencer.
      *
-     * Public because WithdrawSchedulerCommand() reads it from outside the class and the image
-     * exposes no accessor. A friend declaration fits equally well. +0x04
+     * Slot 2. The one recovered body is the instantiation's at `0x00100df8`.
      */
-    int mCmdId;
+    virtual ~GenericSequencer() {
+    }
 
-private:
-    int mUnknown08; // +0x08 cleared on construction
-
-public:
     /**
-     * The clock the sequencer is posted against, written by PostSequencer().
+     * Withdraw every command queued under the handle.
      *
-     * Public for the same reason as mCmdId. The type comes from
-     * WithdrawSchedulerCommand() calling Sch::TickClock::Withdraw() on it. +0x0c
+     * Inline. The out-of-line copy at `0x001aa418` sits in the MultiMusePlayer unit, and the
+     * instantiation's destructor expands the body. The title is inferred.
+     *
+     * @ghidraAddress 0x001aa418
      */
+    void Withdraw() {
+        const CmdID id = mCmdId;
+        mClock->Withdraw(id);
+    }
+
+protected:
+    // The handle value of a command the clock has not queued yet.
+    enum { kUnallocatedCommand = -2 };
+
+    // The handle SequencerCmd is queued under.
+    CmdID mCmdId;
+    // The command that runs Dispatch(), created by the first post.
+    SequencerCmd *mCommand;
+    // The clock Post() queues against.
     Sch::TickClock *mClock;
-
-private:
-    // Defaults to Mid::MBT's positive infinity sentinel.
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14 cleared on construction
-    int mUnknown18; // +0x18 never written by a recovered routine
-
-public:
-    /**
-     * Cursor into the range, written by PostSequencer() and advanced as the range is dispatched.
-     *
-     * Public because MultiMusePlayer::PlayerFinished() compares it against the range's finish from
-     * outside the hierarchy and the image exposes no accessor. A friend declaration fits equally
-     * well. +0x1c
-     */
-    void *mCursor;
-
-private:
-    // Defaults to the same sentinel as mUnknown10.
-    int mUnknown20; // +0x20
+    // The clock's song position when Post() ran.
+    Mid::MBT mStartTick;
+    // Subtracted from every message's position. The constructor builds it from zero through the
+    // checking MBT constructor.
+    Mid::MBT mOffset;
+    // The sink every dispatched message goes to.
+    MsgSink *mSink;
 };

@@ -54,6 +54,18 @@ public:
     }
 
     /**
+     * Copy this message and move the copy to a song position.
+     *
+     * The copy comes from Clone(), and the caller owns it. Sequencer::Dispatch() is the caller.
+     * The title is inferred.
+     *
+     * @param nTick The song position of the copy, in MIDI ticks.
+     * @return The copy.
+     * @ghidraAddress 0x003e3620
+     */
+    MuseMsg *CloneAt(int nTick);
+
+    /**
      * The song position, in MIDI ticks. +0x04
      *
      * Public because NoteFinder::HandleMessage() at `0x001023b0` reads it directly from a NoteMsg
