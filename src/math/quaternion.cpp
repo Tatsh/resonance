@@ -17,6 +17,31 @@ constexpr int kNextAxis[] = {1, 2, 0};
 // angle underflows.
 constexpr float kSlerpLinearEpsilon = 1e-5f;
 
+// Row indices of a rotation matrix, the components of a row, and the Euler angle slots.
+enum Mat3Row { kRowX = 0, kRowY = 1, kRowZ = 2 };
+enum Component { kX = 0, kY = 1, kZ = 2 };
+constexpr int kComponentCount = 3;
+
+// A quarter turn, reported as the X angle at the gimbal lock limit, and the Y row Z component
+// beyond which the Y and Z angles cannot be separated.
+constexpr float kQuarterTurn = 1.570796251f;
+constexpr float kGimbalLockLimit = 0.9999998808f;
+
+// Pi and two pi as the image stores them, one unit in the last place below the nearest float.
+constexpr float kHalfTurn = 3.1415925f;
+constexpr float kFullTurn = 6.28318501f;
+
+inline float MatAt(const float *pMat3Rows, int nRow, int nComponent) {
+    return pMat3Rows[(nRow * kMat3RowStride) + nComponent];
+}
+
+inline float RowLength(const float *pMat3Rows, int nRow) {
+    const float flX = MatAt(pMat3Rows, nRow, kX);
+    const float flY = MatAt(pMat3Rows, nRow, kY);
+    const float flZ = MatAt(pMat3Rows, nRow, kZ);
+    return sqrtf((flX * flX) + (flY * flY) + (flZ * flZ));
+}
+
 } // namespace
 
 Quat AxisAngleToQuat(const float *pAxis, float flAngle) {
@@ -215,4 +240,49 @@ void QuatToMat33(const Quat &quat, float *pMat3Rows) {
     pMat3Rows[8] = flXz + flWy;
     pMat3Rows[9] = flYz - flWx;
     pMat3Rows[10] = 1.0f - flXx - flYy;
+}
+
+void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles) {
+    const float flYRowZ = MatAt(pMat3Rows, kRowY, kZ);
+    if (fabsf(flYRowZ) > kGimbalLockLimit) {
+        pAngles[kX] = (flYRowZ > 0.0f) ? kQuarterTurn : -kQuarterTurn;
+        pAngles[kZ] = atan2f(MatAt(pMat3Rows, kRowX, kY), MatAt(pMat3Rows, kRowX, kX));
+        pAngles[kY] = 0.0f;
+        return;
+    }
+
+    pAngles[kZ] = atan2f(-MatAt(pMat3Rows, kRowY, kX), MatAt(pMat3Rows, kRowY, kY));
+    pAngles[kX] = asinf(flYRowZ);
+    pAngles[kY] = atan2f(-MatAt(pMat3Rows, kRowX, kZ), MatAt(pMat3Rows, kRowZ, kZ));
+}
+
+void Mat33ExtractScale(const float *pMat3Rows, float *pScale) {
+    const float flLenZ = RowLength(pMat3Rows, kRowZ);
+    const float flLenX = RowLength(pMat3Rows, kRowX);
+    const float flLenY = RowLength(pMat3Rows, kRowY);
+
+    // The cross product is an inline vopmula and vopmsub pair rather than a call.
+    const float flCrossX = (MatAt(pMat3Rows, kRowX, kY) * MatAt(pMat3Rows, kRowY, kZ)) -
+                           (MatAt(pMat3Rows, kRowX, kZ) * MatAt(pMat3Rows, kRowY, kY));
+    const float flCrossY = (MatAt(pMat3Rows, kRowX, kZ) * MatAt(pMat3Rows, kRowY, kX)) -
+                           (MatAt(pMat3Rows, kRowX, kX) * MatAt(pMat3Rows, kRowY, kZ));
+    const float flCrossZ = (MatAt(pMat3Rows, kRowX, kX) * MatAt(pMat3Rows, kRowY, kY)) -
+                           (MatAt(pMat3Rows, kRowX, kY) * MatAt(pMat3Rows, kRowY, kX));
+    const float flHandedness = (flCrossX * MatAt(pMat3Rows, kRowZ, kX)) +
+                               (flCrossY * MatAt(pMat3Rows, kRowZ, kY)) +
+                               (flCrossZ * MatAt(pMat3Rows, kRowZ, kZ));
+
+    pScale[kZ] = (flHandedness > 0.0f) ? flLenZ : -flLenZ;
+    pScale[kX] = flLenX;
+    pScale[kY] = flLenY;
+}
+
+void LerpEulerAngles(const float *pFrom, const float *pTo, float *pOut, float flT) {
+    for (int i = 0; i < kComponentCount; ++i) {
+        float flDelta = fmodf((pTo[i] - pFrom[i]) + kHalfTurn, kFullTurn);
+        if (flDelta < 0.0f) {
+            flDelta += kFullTurn;
+        }
+        pOut[i] = ((flDelta - kHalfTurn) * flT) + pFrom[i];
+    }
 }

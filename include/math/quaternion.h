@@ -132,3 +132,46 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT);
  * @ghidraAddress 0x004f0600
  */
 void QuatToMat33(const Quat &quat, float *pMat3Rows);
+
+/**
+ * Extract Euler angles from a rotation matrix, inverting EulerAnglesToMatrix3x3().
+ *
+ * The rows are taken as a pure rotation and are not normalised. When the Z component of the Y
+ * row is beyond the gimbal lock limit, the X angle is a quarter turn with that component's sign,
+ * the Y angle is zero, and the whole remaining rotation goes to the Z angle.
+ * Mat34DecomposeEulerScale() performs the same extraction inline, and no call site of this copy
+ * survives in the shipped program.
+ *
+ * @param pMat3Rows The rotation, three rows of four floats.
+ * @param pAngles Receives the three angles in radians, ordered X, Y, and Z.
+ * @ghidraAddress 0x004efe08
+ */
+void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles);
+
+/**
+ * Report the scale each basis row carries.
+ *
+ * Each scale is the length of its row. The Z scale is negated unless the dot product of the Z row
+ * with the cross product of the X and Y rows is positive. Rnd::Transformable::GetDrawXfm() and the
+ * routine at `0x00483030` call it.
+ *
+ * @param pMat3Rows The basis, three rows of four floats.
+ * @param pScale Receives the three scales.
+ * @ghidraAddress 0x004efed8
+ */
+void Mat33ExtractScale(const float *pMat3Rows, float *pScale);
+
+/**
+ * Interpolate between two sets of Euler angles the shorter way round each axis.
+ *
+ * Each component's difference is wrapped into the half-open range from minus one half turn to one
+ * half turn with fmodf(), scaled by flT, and added to the starting angle. No call site survives in
+ * the shipped program.
+ *
+ * @param pFrom The angles at a parameter of zero, three floats.
+ * @param pTo The angles at a parameter of one, three floats.
+ * @param pOut Receives the interpolated angles, three floats.
+ * @param flT The interpolation parameter.
+ * @ghidraAddress 0x004effe0
+ */
+void LerpEulerAngles(const float *pFrom, const float *pTo, float *pOut, float flT);
