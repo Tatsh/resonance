@@ -68,6 +68,16 @@ public:
      */
     void operator delete(void *pBlock);
 
+    /**
+     * Construct an empty map whose first step is at zero.
+     *
+     * Reserves eight elements in mSteps and appends the zero step, then reserves eight in
+     * mSectionLengths. Every subclass constructor runs it first.
+     *
+     * @ghidraAddress 0x001263c0
+     */
+    PlayMap();
+
     /** @ghidraAddress 0x00127158 */
     virtual ~PlayMap();
 

@@ -21,6 +21,16 @@
  */
 class PlayMapRepeatRing : public PlayMap {
 public:
+    /**
+     * Construct a map whose run holds one span from zero to the terminator.
+     *
+     * Runs the PlayMap constructor, reserves 32 elements in mUnknown3c, and appends 0 and then
+     * 10000000, the same state Slot4() resets it to.
+     *
+     * @ghidraAddress 0x0012b660
+     */
+    PlayMapRepeatRing();
+
     /** @ghidraAddress 0x0012d1b8 */
     virtual ~PlayMapRepeatRing();
 
@@ -53,7 +63,9 @@ public:
     /**
      * Maps the position into one turn of the repeating ring.
      *
-     * The body is not reconstructed.
+     * The span the position falls in selects a section by its index modulo the section count, and
+     * the result is that section's first step plus the position's distance into the span, wrapped
+     * to the section's length.
      *
      * @param nValue The position to map.
      * @return The mapped position.
@@ -62,9 +74,11 @@ public:
     virtual int Slot5(int nValue);
 
     /**
-     * Collects every position of one span into mUnknown2c.
+     * Collects every position between two bounds that plays the same step offset as a position.
      *
-     * The body is not reconstructed.
+     * The walk starts at the span at or before nMin and stops at the first span that starts after
+     * nEnd, which the terminator guarantees. Within each span whose wrapped section matches the
+     * position's step, it steps by that section's length while below nEnd.
      *
      * @param nStart The first position.
      * @param nMin The lowest position to collect.
@@ -87,19 +101,55 @@ public:
      */
     virtual void Slot15(int nValue);
 
-    /** @ghidraAddress 0x0012bd00 */
+    /**
+     * Close the open span a bar falls in after the number of passes that reaches the bar.
+     *
+     * @param nBar The bar.
+     * @return 1 when the span after the bar's span was the terminator and has been closed, and 0
+     *         otherwise.
+     * @ghidraAddress 0x0012bd00
+     */
     virtual int Slot16(int nBar);
 
-    /** @ghidraAddress 0x0012bdd8 */
+    /**
+     * Reopen the span a bar falls in by making it the last one.
+     *
+     * The element after the bar's span becomes the terminator and the final element is dropped.
+     *
+     * @param nBar The bar.
+     * @return 0 when the span was already open, and 1 otherwise.
+     * @ghidraAddress 0x0012bdd8
+     */
     virtual int Slot17(int nBar);
 
-    /** @ghidraAddress 0x0012d5d0 */
+    /**
+     * Toggle the span a bar falls in between open and closed.
+     *
+     * @param nBar The bar.
+     * @return 1 when a span was closed, and 0 otherwise.
+     * @ghidraAddress 0x0012d5d0
+     */
     virtual int Slot18(int nBar);
 
-    /** @ghidraAddress 0x0012d4b0 */
-    virtual void Slot19();
+    /**
+     * Append a step with an empty label, through PlayMap::Slot2() called directly.
+     *
+     * @param nValue The step position.
+     * @ghidraAddress 0x0012d4b0
+     */
+    virtual void Slot19(int nValue);
 
 protected:
+    /**
+     * Report the index of the span a position falls in.
+     *
+     * Inline. Slots 16 and 17 expand it, and Slot5() calls the out-of-line copy at `0x0012d588`.
+     *
+     * @param nValue The position.
+     * @return The index of the last element of mUnknown3c at or before the position.
+     */
+    int SpanIndex(int nValue);
+
     // Positions in ascending order, terminated by the literal 10000000. Slot 4 resets it to 0 and
     // that terminator, slot 3 pads it with -1, and slot 15 closes its last span. The element type
     // is int from the four-byte stride of every access.

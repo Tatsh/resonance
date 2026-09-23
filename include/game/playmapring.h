@@ -13,7 +13,9 @@
  * implementation, which is the narrowest override set of the three subclasses.
  *
  * No member is recovered, so none is declared, and the class adds no data to the 0x3c bytes of the
- * base.
+ * base. The constructor at `0x0012daa0` is implicit for the same reason the destructor below is.
+ * It runs the PlayMap constructor and installs the table at `0x007d1598`, and no routine in the
+ * image calls it.
  *
  * The destructor at `0x0012e178` is declared nowhere here. Its body restores the base table
  * pointer, tears down the four base vectors inline, and releases through the base allocation tag
@@ -54,12 +56,7 @@ public:
     /**
      * Scales one turn of the ring by a repeat count.
      *
-     * The body is not written. It multiplies mSteps.back() by the result of a variadic routine at
-     * `0x00509110` called with the single argument 901, and that routine is not identified. Its
-     * prologue spills a1 through t3 and f12 through f18 into one stack area and hands the area to
-     * `0x00466438`, which is the shape of a va_list being built, and it returns an int for an int
-     * key. Naming it from that alone would be a guess, so the multiplication is recorded here
-     * rather than written with an invented callee.
+     * The repeat count is configuration code 0x385, read through QueryConfigValue().
      *
      * @return One turn scaled by the repeat count.
      * @ghidraAddress 0x0012e430

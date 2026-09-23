@@ -5,45 +5,45 @@
 #include "game/playmap.h"
 
 /**
- * Traversal that runs the sequence once from start to end.
+ * Traversal that runs the sequence once from start to end, repeating each section a set number of
+ * times.
  *
  * `PlayMapLinear` in the RTTI descriptor at `0x008f2a20`, with `PlayMap` as its only base at
  * offset 0. It overrides the widest set of the three subclasses, slots 1, 5 through 14, and 16
  * through 19, and supplies slot 20, which no other subclass does.
  *
  * The object is 0x74 bytes, which the tagged allocation in the LevelBuilder constructor at
- * `0x001ea8f0` measures. Its own members follow the base at `+0x3c`. The first four are recovered
- * from the helper at `0x00129150`, which is the only routine that reads all four and the reason
- * three of this class's slots could not be written before it was decoded. That helper advances a
- * window forward over the source span and records how far it has advanced. The constructor at
- * `0x00127a80` and the destructor add the last two.
+ * `0x001ea8f0` measures. Its own members follow the base at `+0x3c`.
  *
- * The earlier note that the members start at `+0x2c` was wrong. The base occupies 0x3c bytes, and
- * `+0x2c` is the base's fourth vector rather than anything of this class.
+ * The map plays a list of sections, each an index into the base's steps paired with a repeat count.
+ * Slot20() appends one section, and Slot19() records the list as the pattern GrowPastLimit()
+ * appends again whenever a position runs past the end. A repeat count of kRepeatForever marks a
+ * section that loops until Slot16() ends it at a bar, and Slot17() sets a section looping again.
+ *
+ * The unit registers SelfTest() with TestRegistry under the name `PlayMapLinear`.
  */
 class PlayMapLinear : public PlayMap {
 public:
     /**
      * Construct an empty linear map.
      *
-     * The body is not written. It runs the PlayMap constructor, installs the table at
-     * `0x007d1060`, and initialises this class's members. A non-zero bRunUnknown128410 then runs
-     * the routine at `0x00128410` on the new object. LevelBuilder's constructor passes 1.
+     * Runs the PlayMap constructor, sizes mUnknown68 to kSetCount empty tables, and reserves eight
+     * elements in mUnknown3c and mUnknown48. A non-zero bLoadStepRings then runs LoadStepRings().
+     * LevelBuilder's constructor passes 1, and SelfTest() passes 0.
      *
-     * @param bRunUnknown128410 Whether to run the routine at `0x00128410` last.
+     * @param bLoadStepRings Whether to fill the partner tables from the script.
      * @ghidraAddress 0x00127a80
      */
-    explicit PlayMapLinear(int bRunUnknown128410);
+    explicit PlayMapLinear(int bLoadStepRings);
 
     /** @ghidraAddress 0x0012a4d8 */
     virtual ~PlayMapLinear();
 
     /**
-     * Maps the position through the linear sequence.
+     * Map a position to its offset within the base's steps.
      *
-     * The body is not reconstructed. It calls two helpers at `0x00129150` and `0x0012ade8`, indexes
-     * three of the object's tables with the result, and finishes with a remainder, so the mapping
-     * is table-driven rather than the single wrap PlayMapRing performs.
+     * Finds the window entry the position falls in and returns that section's first step plus the
+     * position's distance into the entry, wrapped to the section's length.
      *
      * @param nValue The position to map.
      * @return The mapped position.
@@ -52,9 +52,13 @@ public:
     virtual int Slot5(int nValue);
 
     /**
-     * Collects every position of one span into mUnknown2c.
+     * Collect every position between two bounds that plays the same step offset as a position.
      *
-     * @param nStart The first position.
+     * The walk starts at the window entry at or before nMin and runs until an entry starts at or
+     * after nEnd. It does not test for the end of the window, and relies on GrowPastLimit() having
+     * grown the window past nEnd.
+     *
+     * @param nStart The position whose section and offset are matched.
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
      * @return mUnknown2c.
@@ -63,12 +67,10 @@ public:
     virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd);
 
     /**
-     * Carries a position from its step to the partner step the table for one set records.
+     * Carry a position from its step to the partner step the table for one set records.
      *
-     * The body is not written. It finds the position's step through PlayMap::FindStepIndex(),
-     * scans the eight-byte records of mUnknown68[nSet] for one whose first word is that step, and
-     * returns the position moved by the distance between the two steps. Without such a record the
-     * position comes back unchanged.
+     * The position's step comes from PlayMap::FindStepIndex(). Without a record for that step in
+     * mUnknown68[nSet] the position comes back unchanged.
      *
      * @param nValue The position to map.
      * @param nSet The index into mUnknown68.
@@ -77,126 +79,215 @@ public:
      */
     virtual int Slot7(int nValue, int nSet);
 
-    /** @ghidraAddress 0x0012ae38 */
+    /**
+     * Report the position at which the window ends.
+     *
+     * @return The start of the last window entry plus its section's length times its repeat count,
+     *         or zero when the window is empty.
+     * @ghidraAddress 0x0012ae38
+     */
     virtual int Slot8();
 
-    /** @ghidraAddress 0x0012aa60 */
+    /**
+     * @return The window end Slot19() recorded.
+     * @ghidraAddress 0x0012aa60
+     */
     virtual int Slot9();
 
-    /** @ghidraAddress 0x0012aa68 */
+    /**
+     * @return The number of sections in the recorded pattern.
+     * @ghidraAddress 0x0012aa68
+     */
     virtual int Slot10();
 
-    /** @ghidraAddress 0x0012aa80 */
+    /**
+     * @param nValue The index into the recorded pattern.
+     * @return The section at that index.
+     * @ghidraAddress 0x0012aa80
+     */
     virtual int Slot11(int nValue);
 
     /**
-     * Reports a step index for the mapped position.
+     * Report the index within the recorded pattern of the window entry a position falls in.
      *
-     * Declared void and nil-ary until the base's own signature was recovered, which made this a
-     * new virtual rather than an override: a differing parameter list compiles, extends the table,
-     * and silently detaches. The body proves both halves of the real signature, reading a1 into a
-     * saved register as its first act and returning a shifted difference.
-     *
-     * The body is not written. It passes its argument through the helper at `0x00129150` twice,
-     * upper-bounds a vector of its own at `+0x48`, and then combines that result with two further
-     * members, none of which is recovered.
-     *
-     * @param nValue The position to map.
-     * @return The step index.
+     * @param nValue The position.
+     * @return The window index modulo the pattern length.
      * @ghidraAddress 0x0012af30
      */
     virtual int Slot12(int nValue);
 
     /**
-     * Reports the same index against a different member.
+     * Report the absolute index of the window entry a position falls in.
      *
-     * Declared void and nil-ary for the same reason as slot 12, and detached in the same way. The
-     * body performs the same argument-through-helper and upper-bound sequence and then reads the
-     * member at `+0x54` rather than the pair slot 12 reads.
-     *
-     * The body is not written, for the same reason.
-     *
-     * @param nValue The position to map.
-     * @return The step index.
+     * @param nValue The position.
+     * @return The window index plus the count of entries the trim has dropped.
      * @ghidraAddress 0x0012afb8
      */
     virtual int Slot13(int nValue);
 
     /**
      * @param nValue The position.
-     * @return 1 when the second word of the `+0x3c` record for the last step at or before the
-     *         position is 10000, and 0 otherwise.
+     * @return 1 when the window entry the position falls in repeats forever, and 0 otherwise.
      * @ghidraAddress 0x0012b028
      */
     virtual int Slot14(int nValue);
 
-    /** @ghidraAddress 0x00128ed8 */
+    /**
+     * End the looping section at a bar.
+     *
+     * When the window entry the bar falls in repeats forever, its repeat count becomes the number
+     * of whole passes up to and including the bar, and every later entry is moved to follow it.
+     *
+     * @param nBar The bar.
+     * @return 1 when the entry was looping, and 0 otherwise.
+     * @ghidraAddress 0x00128ed8
+     */
     virtual int Slot16(int nBar);
 
-    /** @ghidraAddress 0x00129038 */
+    /**
+     * Set the section a bar falls in looping forever, and move every later entry to follow it.
+     *
+     * @param nBar The bar.
+     * @return Always 1.
+     * @ghidraAddress 0x00129038
+     */
     virtual int Slot17(int nBar);
 
-    /** @ghidraAddress 0x0012b0a8 */
+    /**
+     * Toggle the loop on the section a bar falls in.
+     *
+     * @param nBar The bar.
+     * @return 1 when a loop was ended, and 0 when one was started.
+     * @ghidraAddress 0x0012b0a8
+     */
     virtual int Slot18(int nBar);
 
-    /** @ghidraAddress 0x0012aa18 */
+    /**
+     * Record the sections appended so far as the pattern, and the window end with it.
+     *
+     * @ghidraAddress 0x0012aa18
+     */
     virtual void Slot19();
 
     /**
-     * Slot 20. Calls slot 8 through the table and appends its result to the span at `+0x48`,
-     * then appends the pair of nValue and 1 to the vector at `+0x3c`.
+     * Slot 20. Append one section, played once, at the end of the window.
      *
      * LevelBuilder's constructor calls it once per value of configuration code 0x39d.
      *
-     * @param nValue The first word of the appended pair.
+     * @param nSection The index of the section's first step.
      * @ghidraAddress 0x00128c38
      */
-    virtual void Slot20(int nValue);
+    virtual void Slot20(int nSection);
+
+    /**
+     * Exercise the map on four steps and seven sections.
+     *
+     * The routine maps seven positions and toggles two loops, and discards every result. Nothing in
+     * the shipped game calls it apart from the test registry.
+     *
+     * @return Always 1.
+     * @ghidraAddress 0x001293b0
+     */
+    static int SelfTest();
+
+    /**
+     * Run SelfTest() in the shape TestRegistry::TestFunc requires, discarding its result.
+     *
+     * The unit's static initialiser registers it.
+     *
+     * @ghidraAddress 0x0012b110
+     */
+    static void RunSelfTest();
 
 protected:
-    /**
-     * One element of the window, a value from the source span paired with a flag.
-     *
-     * Eight bytes. The helper builds each one from a word of mUnknown58 and sets the flag to 1,
-     * and nothing recovered so far sets it to anything else or reads it back, so the flag's
-     * purpose is unrecovered and only its initial value is known.
-     */
+    /** The number of partner tables in mUnknown68. */
+    static constexpr int kSetCount = 8;
+
+    /** The repeat count that marks a section looping until Slot16() ends it. */
+    static constexpr int kRepeatForever = 10000;
+
+    /** One section of the window, a step index paired with its repeat count. Eight bytes. */
     struct Entry {
-        int mValue;
-        int mFlag;
+        int mSection; /*!< The index into mSteps and mSectionLengths. */
+        int mRepeats; /*!< The number of passes, or kRepeatForever. */
     };
+
+    /**
+     * One partner record, a step paired with the step Slot7() carries it to. Eight bytes.
+     *
+     * A type distinct from Entry, because the two vectors grow through separate insertion routines
+     * (`0x0012a238` for Entry and `0x00129d68` for this record).
+     */
+    struct StepPair {
+        int mStep;    /*!< The step a position starts in. */
+        int mPartner; /*!< The step the position is carried to. */
+    };
+
+    /**
+     * Fill mUnknown68 from the script.
+     *
+     * Each of the kSetCount tables evaluates the script template 0x3a3 through EvalScriptTemplate()
+     * with its index, which yields a sequence of step rings. Each ring pairs every step with the
+     * one after it, and the last with the first. A step is read through Py::Int.
+     *
+     * The body is not written. It walks both sequences with PyCXX's sequence iterator and converts
+     * each step with Py::Int's converting constructor and its conversion to long, none of which
+     * `script/cxx` declares yet, and the file would then need the interpreter headers the host
+     * build cannot include.
+     *
+     * @ghidraAddress 0x00128410
+     */
+    void LoadStepRings();
 
     /**
      * Advance the window until slot 8 passes the limit, then drop what it has passed.
      *
-     * Non-virtual, and every one of slots 5, 12, and 13 calls it twice with its own argument before
-     * doing anything else. The growth half appends one element to mUnknown48 from slot 8's result
-     * and one Entry to mUnknown3c per element of mUnknown58, and the test is at the top of the loop
-     * so the body can run zero times. Slot 8 is dispatched through the table rather than called
-     * directly, so a further subclass would change what the loop grows towards.
+     * Every one of slots 5, 6, 12, 13, 14, 16, and 17 calls it with its own argument before doing
+     * anything else. The growth half appends one start to mUnknown48 from slot 8's result and one
+     * Entry to mUnknown3c per section of the pattern, and the test is at the top of the loop so the
+     * body can run zero times. Slot 8 is dispatched through the table rather than called directly.
      *
-     * The trim half drops as many leading elements from mUnknown3c and mUnknown48 as mUnknown58
-     * holds, and adds that count to mUnknown54. Its guard compares a byte offset against an
-     * element count, which both the disassembly and the decompiler agree on, so the trim fires
-     * only once mUnknown3c is more than eight times the length of mUnknown58.
+     * The trim half drops as many leading elements from mUnknown3c and mUnknown48 as the pattern
+     * holds, and adds that count to mUnknown54. Its guard compares a byte offset against an element
+     * count, which both the disassembly and the decompiler agree on, so the trim fires only once
+     * mUnknown3c is more than eight times the length of the pattern.
      *
      * @param nLimit The value slot 8 must exceed for the growth to stop.
      * @ghidraAddress 0x00129150
      */
     void GrowPastLimit(int nLimit);
 
-    // Declared in recovered offset order. The helper above reads the first four.
+    /**
+     * Grow the window past a position and report the index of the entry it falls in.
+     *
+     * Inline. Slots 12, 13, 14, 16, and 17 expand it, and Slot5() and SelfTest() call the
+     * out-of-line copy at `0x0012ade8`.
+     *
+     * @param nValue The position.
+     * @return The index of the last window entry starting at or before the position.
+     */
+    int WindowIndex(int nValue);
+
+    /**
+     * Recompute the start of every window entry from an index onward.
+     *
+     * Inline, and expanded in Slot16() and Slot17(). Each start is the previous start plus the
+     * previous section's length times its repeat count.
+     *
+     * @param nFirst The first index to recompute.
+     */
+    void RestartFrom(std::vector<int>::size_type nFirst);
+
+    // The window, one entry per section played.
     std::vector<Entry> mUnknown3c; // +0x3c
-    std::vector<int> mUnknown48;   // +0x48
+    // The start position of each window entry.
+    std::vector<int> mUnknown48; // +0x48
     // Running count of elements the trim has dropped from the front of the two vectors above.
     int mUnknown54; // +0x54
-    // The source the window is built from. Its element is eight bytes and only the first word is
-    // read, so the second word's purpose is unrecovered.
+    // The pattern Slot19() records and GrowPastLimit() appends again.
     std::vector<Entry> mUnknown58; // +0x58
-    // Cleared by the constructor at 0x00127a80. No reader is recovered.
+    // The window end Slot19() records.
     int mUnknown64; // +0x64
-    // The constructor reserves eight elements of twelve bytes, and the destructor frees each
-    // element's own eight-byte-stride buffer before freeing this one, so every element is a
-    // vector of Entry.
-    std::vector<std::vector<Entry> > mUnknown68; // +0x68
+    // One partner table per set.
+    std::vector<std::vector<StepPair> > mUnknown68; // +0x68
 };

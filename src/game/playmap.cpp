@@ -7,6 +7,13 @@
 #include "os/hxstr.h"
 #include "os/mem.h"
 
+namespace {
+
+// The capacity the constructor reserves in mSteps and mSectionLengths.
+constexpr std::vector<int>::size_type kInitialCapacity = 8;
+
+} // namespace
+
 // 0x00127118
 void *PlayMap::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, "PlayMap");
@@ -15,6 +22,13 @@ void *PlayMap::operator new(size_t nSize) {
 // 0x00127138
 void PlayMap::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, "PlayMap");
+}
+
+// 0x001263c0
+PlayMap::PlayMap() : mBarCount(0), mUnknown28(0) {
+    mSteps.reserve(kInitialCapacity);
+    mSteps.push_back(0);
+    mSectionLengths.reserve(kInitialCapacity);
 }
 
 // 0x00127158

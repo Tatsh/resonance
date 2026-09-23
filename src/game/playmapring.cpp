@@ -2,6 +2,15 @@
 
 #include <vector>
 
+#include "script/configquery.h"
+
+namespace {
+
+// The configuration code for the number of turns Slot8() scales one turn by.
+constexpr int kRepeatCountConfigCode = 0x385;
+
+} // namespace
+
 // 0x0012e408
 int PlayMapRing::Slot5(int nValue) {
     return (nValue + mBarCount) % mSteps.back();
@@ -16,4 +25,9 @@ std::vector<int> &PlayMapRing::Slot6(int nStart, int nMin, int nEnd) {
         }
     }
     return mUnknown2c;
+}
+
+// 0x0012e430
+int PlayMapRing::Slot8() {
+    return mSteps.back() * QueryConfigValue(kRepeatCountConfigCode);
 }
