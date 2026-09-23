@@ -1,21 +1,40 @@
 #pragma once
 
+#include <iostream>
+
+#include "game/idableptr.h"
 #include "msg/toallothergamesystemspacket.h"
+
+class IBStream;
+class OBStream;
+class Player;
 
 /**
  * Network packet the game sends between game systems.
  *
  * `10BumpPacket` in the RTTI descriptor at `0x008ef700`, with ToAllOtherGameSystemsPacket as its
  * one base. The object is 0x28 bytes and its vtable is at `0x008144a0`. The payload comes from
- * the copy constructor at `0x003f3b58`, which Clone() delegates to, so the offsets and widths are
- * recovered but the purpose of each field is not. The four words Packet owns are declared there
- * rather than here.
+ * the copy constructor at `0x003f3b58`, which Clone() delegates to. The four words Packet
+ * provides are declared there rather than here.
  *
- * The class overrides Message::Print() at `0x003f26d8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Print() labels `+0x1c` as a bar and `+0x20` as a track. The word at `+0x24` is zeroed by New()
+ * and is neither transferred nor printed.
+ *
+ * The destructor at `0x003f0e08` is compiler-generated and has no declaration here.
  */
 class BumpPacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Produce a default-constructed packet on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nBumpPacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e5410
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -40,11 +59,38 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the player's address, ` bar `, the bar, ` track `, and the track to a diagnostic
+     * stream.
+     *
+     * The player is written through the pointer inserter, so the output is its address.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f26d8
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the Packet words, the player's identifier, the bar, and the track to a stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e7d88
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the Packet words, the player's identifier, the bar, and the track back in place.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e7eb0
+     */
+    virtual void Load(IBStream &stream);
+
 private:
-    long long mUnknown14; // +0x14
-    int mUnknown1c;       // +0x1c
-    int mUnknown20;       // +0x20
-    int mUnknown24;       // +0x24
+    IDablePtr<Player> mPlayer; // +0x14
+    int mBar;                  // +0x1c
+    int mTrack;                // +0x20
+    int mUnknown24 = 0;        // +0x24
 };
 
 /**

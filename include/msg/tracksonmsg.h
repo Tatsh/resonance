@@ -14,11 +14,22 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e4408`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Print() labels `+0x04` as a bar and `+0x08` as tracks.
+ *
+ * The destructor at `0x003de820` is compiler-generated and has no declaration here.
  */
 class TracksOnMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7360
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +53,15 @@ public:
      * @ghidraAddress 0x003de970
      */
     virtual const char *Name();
+
+    /**
+     * Write `bar `, the word at `+0x04`, ` tracks `, and the word at `+0x08` to a diagnostic
+     * stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e4408
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     int mUnknown04; // +0x04

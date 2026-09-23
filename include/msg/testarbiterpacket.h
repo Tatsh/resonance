@@ -1,7 +1,12 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/toarbiterpacket.h"
 #include "os/hxstr.h"
+
+class IBStream;
+class OBStream;
 
 /**
  * Network packet the game sends between game systems.
@@ -11,11 +16,25 @@
  * copy constructor at `0x003f3e58`, which Clone() delegates to, and it accounts for the
  * allocation exactly. The four words Packet owns are declared there rather than here.
  *
- * The class overrides Message::Print() at `0x003f2ab8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The layout matches GameChatPacket's, and Save() and Load() here are byte-identical to that
+ * class's. The program had titled both as copies of GameChatPacket's, but slots 6 and 7 of this
+ * class's table address them, so they are this class's members.
+ *
+ * The destructor at `0x003f1b40` is compiler-generated and has no declaration here.
  */
 class TestArbiterPacket : public ToArbiterPacket {
 public:
+    /**
+     * Produce a packet with two empty strings on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nTestArbiterPacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e54d8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -39,6 +58,30 @@ public:
      * @ghidraAddress 0x003f1c80
      */
     virtual const char *Name();
+
+    /**
+     * Write both strings to a diagnostic stream, with nothing between them.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2ab8
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the Packet words and then both strings to a stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e8720
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the Packet words and then both strings back from a stream.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e8890
+     */
+    virtual void Load(IBStream &stream);
 
 private:
     HxStr mUnknown14; // +0x14

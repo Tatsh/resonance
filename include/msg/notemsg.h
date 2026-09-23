@@ -30,13 +30,6 @@ class OBStream;
 class NoteMsg : public MuseMsg {
 public:
     /**
-     * Start the second position at kMBTInfinity.
-     *
-     * No address attaches to the constructor on its own. New() expands it in place.
-     */
-    NoteMsg();
-
-    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory.

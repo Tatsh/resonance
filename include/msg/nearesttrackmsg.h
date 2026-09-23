@@ -14,11 +14,20 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e3d50`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dd6d0` is compiler-generated and has no declaration here.
  */
 class NearestTrackMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d70a8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +51,14 @@ public:
      * @ghidraAddress 0x003dd818
      */
     virtual const char *Name();
+
+    /**
+     * Write the word to a diagnostic stream, or `reset` when it is -1.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3d50
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     int mUnknown04; // +0x04

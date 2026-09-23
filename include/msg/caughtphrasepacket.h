@@ -1,21 +1,43 @@
 #pragma once
 
+#include <iostream>
+
+#include "game/idableptr.h"
 #include "msg/toallothergamesystemspacket.h"
+
+class IBStream;
+class OBStream;
+class Player;
 
 /**
  * Network packet the game sends between game systems.
  *
  * `18CaughtPhrasePacket` in the RTTI descriptor at `0x009021b0`, with ToAllOtherGameSystemsPacket
  * as its one base. The object is 0x24 bytes and its vtable is at `0x00814608`. The payload comes
- * from the copy constructor at `0x003f37b8`, which Clone() delegates to, so the offsets and
- * widths are recovered but the purpose of each field is not. The four words Packet owns are
- * declared there rather than here.
+ * from the copy constructor at `0x003f37b8`, which Clone() delegates to. The four words Packet
+ * provides are declared there rather than here.
  *
- * The class overrides Message::Print() at `0x003f24a8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Print() labels `+0x1c` as `tr` and `+0x20` as `b`, and writes the first through the unsigned
+ * integer inserter. The player reference at `+0x14` is transferred but not printed.
+ *
+ * Save() writes the Packet word at `+0x0c` a second time after the payload, and Load() reads it a
+ * second time to match, as GemPacket does.
+ *
+ * The destructor at `0x003f0440` is compiler-generated and has no declaration here.
  */
 class CaughtPhrasePacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Produce a default-constructed packet on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nCaughtPhrasePacketType. Only the player reference is initialised beyond the Packet words.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e5200
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -40,10 +62,35 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write ` tr:`, the track, ` b:`, the bar, and a space to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f24a8
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the Packet words, the player's identifier, the track, the bar, and the Packet word at
+     * `+0x0c` again to a stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e6db0
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the fields back in place in the order Save() wrote them.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e6f00
+     */
+    virtual void Load(IBStream &stream);
+
 private:
-    long long mUnknown14; // +0x14
-    int mUnknown1c;       // +0x1c
-    int mUnknown20;       // +0x20
+    IDablePtr<Player> mPlayer; // +0x14
+    unsigned int mTr;          // +0x1c
+    int mB;                    // +0x20
 };
 
 /**

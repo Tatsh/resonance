@@ -6,16 +6,9 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e5148 allocates 0x2c bytes against the `MSG` tag and expands this constructor into the
-// allocation. The four words ahead of the payload take 2, 3, -1, and -1 there, which the Packet
-// prefix supplies rather than this class.
-GemPacket::GemPacket() {
-    mFields.mLoc.mTick = kMBTInfinity;
-}
-
 // 0x003e5148. Registered against g_nGemPacketType by the translation unit at 0x003ed2e0.
 Message *GemPacket::New() {
-    return new GemPacket();
+    return new GemPacket;
 }
 
 // 0x003f1750. Clone allocates and hands off to the copy constructor at 0x003f3d18, which is the

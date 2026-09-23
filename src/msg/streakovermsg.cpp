@@ -1,5 +1,10 @@
 #include "msg/streakovermsg.h"
 
+// 0x003d6cd0
+Message *StreakOverMsg::New() {
+    return new StreakOverMsg;
+}
+
 // 0x003dbcf8. The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *StreakOverMsg::Clone() {

@@ -5,11 +5,6 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// Expanded into New() at 0x003d6d80.
-NoteMsg::NoteMsg() {
-    mUnknown0c.mTick = kMBTInfinity;
-}
-
 // 0x003d6d80
 Message *NoteMsg::New() {
     return new NoteMsg;

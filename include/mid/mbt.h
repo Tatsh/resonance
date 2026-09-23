@@ -64,10 +64,10 @@ namespace Mid {
  * Sch::CmdID and Sch::Tick are both distinct from this class and are easy to confuse with it,
  * because all three transfer one four-byte lvalue through one Write() or one Read(). The three
  * Print() bodies separate them. CmdID::Print writes ` {cmdID `, Sch::Tick::Print divides by
- * 1000000000.0 and appends `s`, and this class writes the three-part form above. Two headers
- * elsewhere in this tree, `msg/catchprogresspacket.h` and `msg/trackselectpacket.h`, model a
- * member streamed through the emission at `0x004acf28` as a CmdID on the strength of the transfer
- * alone. The transfer cannot separate the three types.
+ * 1000000000.0 and appends `s`, and this class writes the three-part form above. The transfer
+ * alone cannot separate the three types. CatchProgressPacket and TrackSelectPacket each stream a
+ * member through the emission at `0x004acf28` and print the same member through Print() here,
+ * which settles both members as this class.
  *
  * The bodies are not written yet. The three addresses below are the emission the scheduler
  * translation unit uses, and a second emission of Save() exists elsewhere, which is the shape of
@@ -78,6 +78,17 @@ namespace Mid {
  */
 class MBT {
 public:
+    /**
+     * Start the position at kMBTInfinity.
+     *
+     * Inline, and expanded wherever an object holding a position is constructed. Every New()
+     * factory whose class has a member of this type stores `0x2aaaaaab` into that member and into
+     * no other field. NoteMsg::New() at `0x003d6d80`, EraseMsg::New() at `0x003d6b28`, and
+     * SeekerMsg::New() at `0x003d6f10` are three of them, at three different member offsets.
+     */
+    MBT() : mTick(kMBTInfinity) {
+    }
+
     /**
      * Write the position.
      *

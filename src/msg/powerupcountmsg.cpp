@@ -1,5 +1,12 @@
 #include "msg/powerupcountmsg.h"
 
+#include <iostream>
+
+// 0x003d6fc8
+Message *PowerupCountMsg::New() {
+    return new PowerupCountMsg;
+}
+
 // No address of its own. PowerupCollection expands it into three call sites.
 PowerupCountMsg::PowerupCountMsg(int nIndex, int nCount, Player *pOwner)
     : mIndex(nIndex), mCount(nCount), mOwner(pOwner) {
@@ -19,4 +26,9 @@ int PowerupCountMsg::Type() {
 // 0x003dd2d8
 const char *PowerupCountMsg::Name() {
     return "PowerupCountMsg";
+}
+
+// 0x003e3d08
+void PowerupCountMsg::Print(std::ostream &stream) {
+    stream << mIndex << "/" << mCount;
 }

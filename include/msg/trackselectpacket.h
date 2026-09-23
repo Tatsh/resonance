@@ -1,22 +1,43 @@
 #pragma once
 
+#include <iostream>
+
+#include "game/idableptr.h"
+#include "mid/mbt.h"
 #include "msg/toallothergamesystemspacket.h"
-#include "sch/cmdid.h"
+
+class IBStream;
+class OBStream;
+class Player;
 
 /**
  * Network packet the game sends between game systems.
  *
  * `17TrackSelectPacket` in the RTTI descriptor at `0x008ef620`, with ToAllOtherGameSystemsPacket
  * as its one base. The object is 0x28 bytes and its vtable is at `0x00814578`. The payload comes
- * from the copy constructor at `0x003f3868`, which Clone() delegates to, so the offsets and
- * widths are recovered but the purpose of each field is not. The four words Packet owns are
- * declared there rather than here.
+ * from the copy constructor at `0x003f3868`, which Clone() delegates to. The four words Packet
+ * provides are declared there rather than here.
  *
- * The class overrides Message::Print() at `0x003f2568`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The member at `+0x14` is a Mid::MBT. Print() hands it to Mid::MBT::Print(), and New()
+ * initialises it to kMBTInfinity. The transfer through the emission at `0x004acf28` alone could
+ * not distinguish it from a CmdID. Print() writes the player at `+0x18` through Player::Print()
+ * and labels `+0x20` as `track` and `+0x24` as `place`.
+ *
+ * The destructor at `0x003f07d0` is compiler-generated and has no declaration here.
  */
 class TrackSelectPacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Produce a default-constructed packet on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nTrackSelectPacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e52c0
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -41,13 +62,37 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the position, a space, the player, ` track:`, the track, ` place:`, and the place to a
+     * diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2568
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the Packet words, the position, the player's identifier, the track, and the place to a
+     * stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e71f8
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the fields back in place in the order Save() wrote them.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e7330
+     */
+    virtual void Load(IBStream &stream);
+
 private:
-    // Save() hands the address of this member to CmdID::Save(), which the inline re-emission at
-    // 0x004acf28 establishes, so the member is a CmdID rather than a plain word.
-    CmdID mUnknown14;     // +0x14
-    long long mUnknown18; // +0x18
-    int mUnknown20;       // +0x20
-    int mUnknown24;       // +0x24
+    Mid::MBT mPosition;        // +0x14
+    IDablePtr<Player> mPlayer; // +0x18
+    int mTrack;                // +0x20
+    int mPlace;                // +0x24
 };
 
 /**

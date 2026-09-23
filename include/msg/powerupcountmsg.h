@@ -16,11 +16,29 @@ class Player;
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e3d08`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dd180` is compiler-generated and has no declaration here.
  */
 class PowerupCountMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it and stores only the vtable pointer. A declaration is required
+     * because the class declares a second constructor.
+     */
+    PowerupCountMsg() {
+    }
+
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6fc8
+     */
+    static Message *New();
+
     /**
      * Report a new stored count for one entry of a player's collection.
      *
@@ -58,6 +76,14 @@ public:
      * @ghidraAddress 0x003dd2d8
      */
     virtual const char *Name();
+
+    /**
+     * Write the entry and the count to a diagnostic stream, separated by `/`.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3d08
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     // The three names come from PowerupCollection, the one producer of the message, which writes

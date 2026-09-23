@@ -1,7 +1,12 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/tosinglenetmanagerpacket.h"
 #include "os/hxstr.h"
+
+class IBStream;
+class OBStream;
 
 /**
  * Network packet the game sends between game systems.
@@ -15,11 +20,41 @@
  * This class shares its RTTI accessor and vtable with ToSingleNetManagerPacket, its own base,
  * which has no implementation of its own. The vtable belongs to this class.
  *
- * The class overrides Message::Print() at `0x003f2000`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003ef4b8` is compiler-generated and has no declaration here.
  */
 class SPJoinDenyPacket : public ToSingleNetManagerPacket {
 public:
+    /**
+     * Construct a packet with an empty string.
+     *
+     * Inline. New() expands it, zeroing only the string, and no out-of-line copy exists. A
+     * declaration is required because the class declares a second constructor.
+     */
+    SPJoinDenyPacket() {
+    }
+
+    /**
+     * Construct a packet from a word and a string, which is copied.
+     *
+     * The image lists no caller for the out-of-line body.
+     *
+     * @param nUnknown14 The word stored at `+0x14`.
+     * @param unknown18 The string copied into `+0x18`.
+     * @ghidraAddress 0x003ef628
+     */
+    SPJoinDenyPacket(int nUnknown14, const HxStr &unknown18);
+
+    /**
+     * Produce a packet with an empty string on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nSPJoinDenyPacketType. The word at `+0x14` is left unset.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e4ca0
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -43,6 +78,30 @@ public:
      * @ghidraAddress 0x003ef5e0
      */
     virtual const char *Name();
+
+    /**
+     * Write the word as a number, a space, and the string to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f2000
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the Packet words, the word, and the string to a stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e5d58
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the Packet words, the word, and the string back from a stream.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e5e98
+     */
+    virtual void Load(IBStream &stream);
 
 private:
     int mUnknown14;   // +0x14

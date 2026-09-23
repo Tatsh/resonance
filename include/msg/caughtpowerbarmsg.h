@@ -14,11 +14,20 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e3cb8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dce20` is compiler-generated and has no declaration here.
  */
 class CaughtPowerbarMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6f58
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +51,14 @@ public:
      * @ghidraAddress 0x003dcf70
      */
     virtual const char *Name();
+
+    /**
+     * Write the word at `+0x04` to a diagnostic stream as a number.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3cb8
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     int mUnknown04; // +0x04

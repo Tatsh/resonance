@@ -1,8 +1,14 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 
+#include "game/idableptr.h"
 #include "msg/toallothergamesystemspacket.h"
+
+class IBStream;
+class OBStream;
+class Player;
 
 /**
  * Network packet the game sends between game systems.
@@ -10,17 +16,28 @@
  * `13CripplePacket` in the RTTI descriptor at `0x008f0940`, with ToAllOtherGameSystemsPacket as
  * its one base. The object is 0x28 bytes and its vtable is at `0x008144e8`. The payload comes
  * from the copy constructor at `0x003f3938`, which Clone() delegates to, and it accounts for the
- * allocation exactly. The four words Packet owns are declared there rather than here.
+ * allocation exactly. The four words Packet provides are declared there rather than here.
  *
- * The vector at `+0x1c` is deep-copied, so the class owns its elements. The element stride is 0x8
- * bytes, taken from the divide the copy uses to count them, but the element type is not
- * recovered, so it is declared as a record of that size.
+ * The packet carries one player reference and a vector of further references. Load() resizes the
+ * vector with a default reference of a null pointer and -1 as the fill value, which is the same
+ * pair New() stores in the single reference and what identifies the element type. Print() writes
+ * the players' addresses, not their identifiers.
  *
- * The class overrides Message::Print() at `0x003e7c38`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003ee2d8` is compiler-generated and has no declaration here.
  */
 class CripplePacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Produce a packet with no references on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nCripplePacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e53a0
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -45,15 +62,36 @@ public:
      */
     virtual const char *Name();
 
-private:
-    // Element of the vector at +0x1c. Only its size is recovered.
-    struct Entry1c {
-        int mUnknown00;
-        int mUnknown04;
-    };
+    /**
+     * Write the first player's address and then every other player's address in parentheses,
+     * each followed by a space, to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e7c38
+     */
+    virtual void Print(std::ostream &stream);
 
-    long long mUnknown14;            // +0x14
-    std::vector<Entry1c> mUnknown1c; // +0x1c
+    /**
+     * Write the Packet words, the first player's identifier, the vector's count, and every other
+     * player's identifier to a stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e7938
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the Packet words, the first identifier, and the count, resize the vector, and read every
+     * other identifier in place.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e7aa0
+     */
+    virtual void Load(IBStream &stream);
+
+private:
+    IDablePtr<Player> mUnknown14;               // +0x14
+    std::vector<IDablePtr<Player> > mUnknown1c; // +0x1c
 };
 
 /**

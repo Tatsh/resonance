@@ -91,14 +91,6 @@ public:
     };
 
     /**
-     * Initialise the position to kMBTInfinity.
-     *
-     * No address attaches to the constructor on its own. The one caller expands it into the
-     * allocation at `0x003e5148`.
-     */
-    GemPacket();
-
-    /**
      * Produce a default-constructed packet on the heap.
      *
      * The registry the translation unit at `0x003ed2e0` builds stores this address against

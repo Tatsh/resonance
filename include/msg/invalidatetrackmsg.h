@@ -14,11 +14,22 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e3d90`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Print() labels `+0x0c` as a track number and `+0x04` through `+0x08` as a range of song bars.
+ *
+ * The destructor at `0x003de360` is compiler-generated and has no declaration here.
  */
 class InvalidateTrackMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d72b8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +53,15 @@ public:
      * @ghidraAddress 0x003de4b8
      */
     virtual const char *Name();
+
+    /**
+     * Write `tr#`, the word at `+0x0c`, ` song-bars `, and the two words at `+0x04` and `+0x08`
+     * joined by `-` to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3d90
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     int mUnknown04; // +0x04
