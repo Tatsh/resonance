@@ -786,7 +786,8 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
-    // 0x0038bd60. Resolves the two animation views from the screen name and records the enter
+    // 0x0038bd60
+    // Resolves the two animation views from the screen name and records the enter
     // animation's end frame. Slot 38 is its one caller, and the title is inferred from the two
     // members it writes.
     void ResolveAnimationViews();

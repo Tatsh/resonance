@@ -5,7 +5,8 @@ Message *BeginPhraseCatchMsg::New() {
     return new BeginPhraseCatchMsg;
 }
 
-// 0x0019d7e8. The field copies are the compiler expanding the implicit copy
+// 0x0019d7e8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *BeginPhraseCatchMsg::Clone() {
     return new BeginPhraseCatchMsg(*this);

@@ -7,7 +7,8 @@ Message *TracksOnMsg::New() {
     return new TracksOnMsg;
 }
 
-// 0x003de910. The field copies are the compiler expanding the implicit copy
+// 0x003de910
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *TracksOnMsg::Clone() {
     return new TracksOnMsg(*this);

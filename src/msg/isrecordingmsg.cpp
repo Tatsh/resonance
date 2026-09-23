@@ -7,7 +7,8 @@ Message *IsRecordingMsg::New() {
     return new IsRecordingMsg;
 }
 
-// 0x003e2c20. The field copies are the compiler expanding the implicit copy
+// 0x003e2c20
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *IsRecordingMsg::Clone() {
     return new IsRecordingMsg(*this);

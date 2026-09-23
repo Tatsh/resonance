@@ -59,11 +59,13 @@ public:
     void Disable();
 
 private:
-    // 0x001a6e60. Forwards the message unless notes are stopped and its status is a note-off or a
+    // 0x001a6e60
+    // Forwards the message unless notes are stopped and its status is a note-off or a
     // note-on.
     void PassStdMidi(StdMidiMsg *pMsg);
 
-    // 0x001a6eb0. Forwards the message unless notes are stopped.
+    // 0x001a6eb0
+    // Forwards the message unless notes are stopped.
     void PassNote(NoteMsg *pMsg);
 
     int mEnabled; // +0x18

@@ -10,7 +10,8 @@ Message *SCAllPlayersInfoPacket::New() {
     return new SCAllPlayersInfoPacket;
 }
 
-// 0x003eff60. Clone allocates and hands off to the copy constructor at 0x003f34e8, which is
+// 0x003eff60
+// Clone allocates and hands off to the copy constructor at 0x003f34e8, which is
 // the compiler expanding the implicit one.
 Message *SCAllPlayersInfoPacket::Clone() {
     return new SCAllPlayersInfoPacket(*this);

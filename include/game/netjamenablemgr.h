@@ -79,10 +79,12 @@ private:
     // The owner identifier of a track nobody owns.
     enum { kNoOwner = -2 };
 
-    // 0x00105a98. Reports whether the local player may catch nTrack in nSection.
+    // 0x00105a98
+    // Reports whether the local player may catch nTrack in nSection.
     int IsTrackAvailable(int nTrack, int nSection);
 
-    // 0x00105b08. Reports the play-map section a bar lies in.
+    // 0x00105b08
+    // Reports the play-map section a bar lies in.
     int FindSection(int nBar);
 
     PlayMap *mPlayMap;

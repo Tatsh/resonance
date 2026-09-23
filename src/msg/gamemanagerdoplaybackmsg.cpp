@@ -5,7 +5,8 @@ Message *GameManagerDoPlaybackMsg::New() {
     return new GameManagerDoPlaybackMsg;
 }
 
-// 0x00291970. The field copies are the compiler expanding the implicit copy
+// 0x00291970
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *GameManagerDoPlaybackMsg::Clone() {
     return new GameManagerDoPlaybackMsg(*this);

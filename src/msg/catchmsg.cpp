@@ -5,7 +5,8 @@ Message *CatchMsg::New() {
     return new CatchMsg;
 }
 
-// 0x001b1068. The field copies are the compiler expanding the implicit copy
+// 0x001b1068
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *CatchMsg::Clone() {
     return new CatchMsg(*this);

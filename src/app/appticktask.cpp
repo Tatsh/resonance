@@ -30,7 +30,8 @@ public:
         }
     }
 
-    // 0x0013ad80. Nothing registers the factory, and it produces nothing.
+    // 0x0013ad80
+    // Nothing registers the factory, and it produces nothing.
     static Sch::Command *New() {
         return nullptr;
     }

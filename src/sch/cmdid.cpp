@@ -14,7 +14,8 @@ int g_nNextCmdIdValue = 1;
 // 0x008e4f08. Handle values a replayed recording has reserved.
 std::set<int> g_reservedCmdIdValues;
 
-// 0x008e4f18. The first reserved value the counter has not yet passed.
+// 0x008e4f18
+// The first reserved value the counter has not yet passed.
 std::set<int>::iterator g_itNextReservedCmdIdValue = g_reservedCmdIdValues.end();
 
 } // namespace

@@ -11,7 +11,8 @@ Message *TrackSelectPacket::New() {
     return new TrackSelectPacket;
 }
 
-// 0x003f0848. Clone allocates and hands off to the copy constructor at 0x003f3868, which is
+// 0x003f0848
+// Clone allocates and hands off to the copy constructor at 0x003f3868, which is
 // the compiler expanding the implicit one.
 Message *TrackSelectPacket::Clone() {
     return new TrackSelectPacket(*this);
@@ -35,7 +36,8 @@ void TrackSelectPacket::Print(std::ostream &stream) {
     rest << " track:" << mTrack << " place:" << mPlace;
 }
 
-// 0x003e71f8. The stream Mid::MBT::Save() returns is not used.
+// 0x003e71f8
+// The stream Mid::MBT::Save() returns is not used.
 void TrackSelectPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mPosition.Save(stream);

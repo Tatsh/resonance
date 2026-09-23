@@ -5,7 +5,8 @@ Message *AllNotesOffMsg::New() {
     return new AllNotesOffMsg;
 }
 
-// 0x0019a618. The field copies are the compiler expanding the implicit copy
+// 0x0019a618
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *AllNotesOffMsg::Clone() {
     return new AllNotesOffMsg(*this);

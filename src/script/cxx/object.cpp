@@ -5,7 +5,8 @@
 
 namespace Py {
 
-// 0x0055c980. Released PyCXX defines this member at the bottom of the same header, after
+// 0x0055c980
+// Released PyCXX defines this member at the bottom of the same header, after
 // Py::String becomes complete. Every class here has a header of its own, so the definition moves
 // out of line instead.
 String Object::str() const {

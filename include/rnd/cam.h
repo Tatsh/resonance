@@ -471,11 +471,13 @@ protected:
     virtual int DrawSelf();
 
 private:
-    // 0x004b27a8. Registers this camera as a referrer of the render target and then runs
+    // 0x004b27a8
+    // Registers this camera as a referrer of the render target and then runs
     // UpdateTargetAspect(). The constructor, SetTargetTex(), Copy(), and Load() are the callers.
     void AcquireTargetTex();
 
-    // 0x004b2778. Drops this camera's registration on the render target. The destructor, Copy(),
+    // 0x004b2778
+    // Drops this camera's registration on the render target. The destructor, Copy(),
     // and Load() are the callers.
     void ReleaseTargetTex();
 

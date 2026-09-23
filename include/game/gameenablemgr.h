@@ -134,16 +134,19 @@ private:
     // The requirement entry that disables a track.
     enum { kNeverEnabled = -1 };
 
-    // 0x00101f10. Clears the requirement lists, sizes them to mTrackCount, and fills each from
+    // 0x00101f10
+    // Clears the requirement lists, sizes them to mTrackCount, and fills each from
     // nConfigCode with the one-based track number as the lookup argument, storing each value less
     // one. The title is inferred.
     void Init(int nConfigCode);
 
-    // 0x00105498. Sets pOwned[i] for each of the kOwnedTrackCount tracks to whether the track has
+    // 0x00105498
+    // Sets pOwned[i] for each of the kOwnedTrackCount tracks to whether the track has
     // an owner at nBar.
     void FindOwnedTracks(int *pOwned, int nBar);
 
-    // 0x00105530. Reports whether every requirement of nTrack is owned in pOwned.
+    // 0x00105530
+    // Reports whether every requirement of nTrack is owned in pOwned.
     int IsTrackEnabled(int nTrack, const int *pOwned);
 
     int mTrackCount;

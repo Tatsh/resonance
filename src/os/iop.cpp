@@ -39,7 +39,8 @@ constexpr int kLoadFailureStatus = 1;
 // records.
 constexpr int kIopModuleCount = 10;
 
-// 0x00702660. Labelled g_abIopModules in the program, because the naming policy there has no prefix
+// 0x00702660
+// Labelled g_abIopModules in the program, because the naming policy there has no prefix
 // for a typed aggregate. The table sits in .data rather than in .rodata, so the original declared
 // it without const.
 IopModule g_iopModules[kIopModuleCount] = {{"sio2man", 0, nullptr},
@@ -53,7 +54,8 @@ IopModule g_iopModules[kIopModuleCount] = {{"sio2man", 0, nullptr},
                                            {"sdrdrv", 0, nullptr},
                                            {"ezmidi", 0, nullptr}};
 
-// 0x004dfc40. An unreferenced out-of-line copy sits at that address while the only call site is
+// 0x004dfc40
+// An unreferenced out-of-line copy sits at that address while the only call site is
 // inlined, which is what establishes an inline function rather than a block the caller open-codes.
 // The same applies to every helper below.
 inline void LoadModuleFromHost(const char *pszPath, int nArgLength, const char *pArgs) {
@@ -73,7 +75,8 @@ inline void LoadModuleFromCd(const char *pszPath, int nArgLength, const char *pA
     sceCdSync(SCECdBlock);
 }
 
-// 0x004dfd80. The host mode is read again here rather than passed in, so InitIop() and this helper
+// 0x004dfd80
+// The host mode is read again here rather than passed in, so InitIop() and this helper
 // each call GetHostMode() once.
 inline void RebootIopWithImage() {
     sceSifInitRpc(0);
@@ -97,7 +100,8 @@ inline void RebootIopWithImage() {
     sceCdMmode(SCECdMmodeCd);
 }
 
-// 0x004dfcc8. Named WalkIopModuleTable in the program, whose naming guard refuses this spelling as
+// 0x004dfcc8
+// Named WalkIopModuleTable in the program, whose naming guard refuses this spelling as
 // a token superset of LoadIopModules.
 inline void LoadAllIopModules(unsigned nSources) {
     AsyncCheck(1);
@@ -108,7 +112,8 @@ inline void LoadAllIopModules(unsigned nSources) {
     }
 }
 
-// 0x004dfd28. The console exposes two controller ports, and a third is opened regardless.
+// 0x004dfd28
+// The console exposes two controller ports, and a third is opened regardless.
 inline void InitMultitapPorts() {
     sceMtapInit();
     sceMtapPortOpen(0);

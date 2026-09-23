@@ -5,7 +5,8 @@ Message *PlaybackToggleMsg::New() {
     return new PlaybackToggleMsg;
 }
 
-// 0x001161d0. The field copies are the compiler expanding the implicit copy
+// 0x001161d0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PlaybackToggleMsg::Clone() {
     return new PlaybackToggleMsg(*this);

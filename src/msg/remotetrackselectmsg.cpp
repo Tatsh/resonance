@@ -10,7 +10,8 @@ Message *RemoteTrackSelectMsg::New() {
     return new RemoteTrackSelectMsg;
 }
 
-// 0x003dcb08. The field copies are the compiler expanding the implicit copy
+// 0x003dcb08
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *RemoteTrackSelectMsg::Clone() {
     return new RemoteTrackSelectMsg(*this);
@@ -26,7 +27,8 @@ const char *RemoteTrackSelectMsg::Name() {
     return "RemoteTrackSelectMsg";
 }
 
-// 0x003e3bd0. The colour name is copied into a temporary before it is written.
+// 0x003e3bd0
+// The colour name is copied into a temporary before it is written.
 void RemoteTrackSelectMsg::Print(std::ostream &stream) {
     mPosition.Print(stream << HxStr(mPlayer->mColorName) << " tr#" << mUnknown04 << "/"
                            << mUnknown08 << " ");

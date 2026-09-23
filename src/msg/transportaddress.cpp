@@ -12,7 +12,8 @@ TransportAddress::TransportAddress(const HxStr &unknown00,
     : mUnknown00(unknown00), mUnknown08(unknown08), mUnknown10(unknown10), mUnknown18(nUnknown18) {
 }
 
-// 0x003f4478. The body is the three member destructors, which the compiler expands.
+// 0x003f4478
+// The body is the three member destructors, which the compiler expands.
 TransportAddress::~TransportAddress() {
 }
 

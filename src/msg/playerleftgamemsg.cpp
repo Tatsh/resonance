@@ -7,7 +7,8 @@ Message *PlayerLeftGameMsg::New() {
     return new PlayerLeftGameMsg;
 }
 
-// 0x003e1e88. The field copies are the compiler expanding the implicit copy
+// 0x003e1e88
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PlayerLeftGameMsg::Clone() {
     return new PlayerLeftGameMsg(*this);

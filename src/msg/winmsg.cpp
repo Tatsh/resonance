@@ -5,7 +5,8 @@ Message *WinMsg::New() {
     return new WinMsg;
 }
 
-// 0x00116368. The field copies are the compiler expanding the implicit copy
+// 0x00116368
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *WinMsg::Clone() {
     return new WinMsg(*this);

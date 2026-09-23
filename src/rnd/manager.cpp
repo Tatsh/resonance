@@ -13,7 +13,8 @@ namespace {
 // Dump level at which the objects the renderer created itself are written as well.
 constexpr int kInternalObjectDumpLevel = 2;
 
-// 0x0051f798. Writes the class registry as its entry count and then one indented line per entry.
+// 0x0051f798
+// Writes the class registry as its entry count and then one indented line per entry.
 // The factory is reported as a truth value rather than as an address, which is what the two
 // literals "true" and "false" at 0x00826e20 and 0x00826e28 are for. Only DumpText() calls it.
 FailSink *DumpRegisteredClasses(FailSink *pSink, const std::map<HxStr, ClassFactory> &classes) {

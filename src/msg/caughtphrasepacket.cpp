@@ -10,7 +10,8 @@ Message *CaughtPhrasePacket::New() {
     return new CaughtPhrasePacket;
 }
 
-// 0x003f04b8. Clone allocates and hands off to the copy constructor at 0x003f37b8, which is
+// 0x003f04b8
+// Clone allocates and hands off to the copy constructor at 0x003f37b8, which is
 // the compiler expanding the implicit one.
 Message *CaughtPhrasePacket::Clone() {
     return new CaughtPhrasePacket(*this);
@@ -31,7 +32,8 @@ void CaughtPhrasePacket::Print(std::ostream &stream) {
     stream << " tr:" << mTr << " b:" << mB << " ";
 }
 
-// 0x003e6db0. The word at +0x0c crosses the wire twice.
+// 0x003e6db0
+// The word at +0x0c crosses the wire twice.
 void CaughtPhrasePacket::Save(OBStream &stream) {
     Packet::Save(stream);
 

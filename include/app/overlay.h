@@ -127,103 +127,127 @@ private:
     // act on the track display of the message's player, which FindTrack() looks up, and show text
     // through HudTextMessage::Show() at scale 1 for 1500 unless noted.
 
-    // 0x0041fdd8. TrackSelectMsg. Shows the track's instrument name on the selecting player's
+    // 0x0041fdd8
+    // TrackSelectMsg. Shows the track's instrument name on the selecting player's
     // label, records the track, lights the effect lamps from the renderer's cell for the current
     // bar, and banks the player's points unless mUnknown44 is set.
     void OnTrackSelect(Message *pMsg);
 
-    // 0x0042aec8, inlined. GameOverMsg. Runs script template 1001 when mUnknown44 is set.
+    // 0x0042aec8
+    // inlined. GameOverMsg. Runs script template 1001 when mUnknown44 is set.
     void OnGameOver();
 
-    // 0x0041e020. WinMsg. Resets every multiplier to 1. With the win sequence enabled in
+    // 0x0041e020
+    // WinMsg. Resets every multiplier to 1. With the win sequence enabled in
     // kGameModeSolo and a winner, starts the win message. Otherwise shows `YOU WIN`, `GAME OVER`,
     // or `YOU LOSE` on each track display at scale 2 for 3000, over two lines when there are two
     // or more displays, with the freestyle prompt for a solo winner.
     void OnWin(Message *pMsg);
 
-    // 0x0041e9b8. ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
+    // 0x0041e9b8
+    // ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
     // kPlayModeGame, and selects its effect lamp name otherwise. Runs script template 1016 when
     // mUnknown44 is set.
     void OnChoosePowerup(Message *pMsg);
 
-    // 0x0041eba0. CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's text message for
+    // 0x0041eba0
+    // CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's text message for
     // 1500. HandleMessage() ignores a PowerupCountMsg outright.
     void OnCaughtPowerbar(Message *pMsg);
 
-    // 0x0041eda8. DeployedPowerupMsg. In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the
+    // 0x0041eda8
+    // DeployedPowerupMsg. In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the
     // display's mUnknownec, and shows `YOU GOT\nBUMPED!` on the target's display for a bumper.
     void OnDeployedPowerup(Message *pMsg);
 
-    // 0x0042aff0, inlined. PointAmountMsg. Records the new score in the player's badge, pending an
+    // 0x0042aff0
+    // inlined. PointAmountMsg. Records the new score in the player's badge, pending an
     // untimed redraw.
     void OnPointAmount(Message *pMsg);
 
-    // 0x0041f310. JuiceAmountMsg. In kGameModeSolo and kPlayModeGame, sets the player's energy
+    // 0x0041f310
+    // JuiceAmountMsg. In kGameModeSolo and kPlayModeGame, sets the player's energy
     // level to the juice amount and pulses the player's icon while the juice is above 0.85.
     void OnJuiceAmount(Message *pMsg);
 
-    // 0x0042b068, inlined. PhraseCapturedMsg. Runs script template 1005 when mUnknown44 is set.
+    // 0x0042b068
+    // inlined. PhraseCapturedMsg. Runs script template 1005 when mUnknown44 is set.
     // Otherwise, in kPlayModeGame before the bar in mLastBar, shows the capturing player's
     // points leaving.
     void OnPhraseCaptured(Message *pMsg);
 
-    // 0x0041f5e8. TextMsg. Shows the message's text in the first track display's text message.
+    // 0x0041f5e8
+    // TextMsg. Shows the message's text in the first track display's text message.
     void OnText(Message *pMsg);
 
-    // 0x0041f708. LoopToggleMsg. Outside kPlayModeGame, shows the player's loop indicator and,
+    // 0x0041f708
+    // LoopToggleMsg. Outside kPlayModeGame, shows the player's loop indicator and,
     // once the song is under way, `LOOP ON` or `LOOP OFF`. Runs script template 1011 when
     // mUnknown44 is set.
     void OnLoopToggle(Message *pMsg);
 
-    // 0x0041f440. AdvanceSectionToggleMsg. Without mUnknown44, restyles the section blocks and,
+    // 0x0041f440
+    // AdvanceSectionToggleMsg. Without mUnknown44, restyles the section blocks and,
     // outside playback, shows `ADVANCE TO\nNEXT SECTION` or `REPEAT\nSECTION` on every display.
     void OnAdvanceSectionToggle(Message *pMsg);
 
-    // 0x0041fba0. ShowEraseEffectMsg. Shows `BAR ERASED` for a range under two bars and
+    // 0x0041fba0
+    // ShowEraseEffectMsg. Shows `BAR ERASED` for a range under two bars and
     // `TRACK ERASED` otherwise.
     void OnShowEraseEffect(Message *pMsg);
 
-    // 0x0041f9a8. PlaybackToggleMsg. Records the state in mPlaybackOn, shows or hides the edit
+    // 0x0041f9a8
+    // PlaybackToggleMsg. Records the state in mPlaybackOn, shows or hides the edit
     // prompt, runs the assembly and letterbox animations the matching way, hides the FreQ icons
     // during playback, and hides every text message.
     void OnPlaybackToggle(Message *pMsg);
 
-    // 0x0042aef8, inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
+    // 0x0042aef8
+    // inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
     // kHudItemGuides lamp. Runs script template 1021 when mUnknown44 is set.
     void OnToggleGhost(Message *pMsg);
 
-    // 0x0042b130, inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mUnknown44
+    // 0x0042b130
+    // inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mUnknown44
     // is set. The message is not read.
     void OnJamEffect();
 
-    // 0x0041fed8. CatchMsg. In kPlayModeGame before the last bar, pulses the points readout to
+    // 0x0041fed8
+    // CatchMsg. In kPlayModeGame before the last bar, pulses the points readout to
     // the share of the phrase caught. In an easy solo game without mUnknown44, counts catches on
     // bars that cannot be captured and shows `ROTATE TO\nNEW TRACK` at the third.
     void OnCatch(Message *pMsg);
 
-    // 0x0042b178, inlined. PhraseMuffedMsg. In kPlayModeGame without mUnknown44, banks the
+    // 0x0042b178
+    // inlined. PhraseMuffedMsg. In kPlayModeGame without mUnknown44, banks the
     // player's points.
     void OnPhraseMuffed(Message *pMsg);
 
-    // 0x004201c0. BeginPhraseCatchMsg. In kPlayModeGame before the last bar and without
+    // 0x004201c0
+    // BeginPhraseCatchMsg. In kPlayModeGame before the last bar and without
     // mUnknown44, shows the phrase's points and multiplier on the player's readout.
     void OnBeginPhraseCatch(Message *pMsg);
 
-    // 0x0042b1f8, inlined. FadeGameMsg. Starts the screen flash over the message's duration, and
+    // 0x0042b1f8
+    // inlined. FadeGameMsg. Starts the screen flash over the message's duration, and
     // hides the win message's prompt when the game fades out.
     void OnFadeGame(Message *pMsg);
 
-    // 0x00420588. PlayersTrackNeutralizedMsg. Shows `NEUTRALIZED!\n<points> POINTS`.
+    // 0x00420588
+    // PlayersTrackNeutralizedMsg. Shows `NEUTRALIZED!\n<points> POINTS`.
     void OnPlayersTrackNeutralized(Message *pMsg);
 
-    // 0x00420408. MultiplierStateMsg. Without mUnknown44 and before the last bar, shows the base
+    // 0x00420408
+    // MultiplierStateMsg. Without mUnknown44 and before the last bar, shows the base
     // plus the bonus multiplier and selects the hot material while a bonus applies.
     void OnMultiplierState(Message *pMsg);
 
-    // 0x0041f138. PowerupFailedMsg. Shows the failure text for the powerup kind at scale 0.8.
+    // 0x0041f138
+    // PowerupFailedMsg. Shows the failure text for the powerup kind at scale 0.8.
     void OnPowerupFailed(Message *pMsg);
 
-    // 0x0042ae88. The badge whose mPlayer is pPlayer, or null.
+    // 0x0042ae88
+    // The badge whose mPlayer is pPlayer, or null.
     HudBadge *FindBadge(Player *pPlayer);
 
     // The track display whose mPlayer is pPlayer, or null. Every handler inlines the search, and

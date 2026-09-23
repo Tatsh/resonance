@@ -5,7 +5,8 @@ Message *FreestyleFXMsg::New() {
     return new FreestyleFXMsg;
 }
 
-// 0x00116500. The field copies are the compiler expanding the implicit copy
+// 0x00116500
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *FreestyleFXMsg::Clone() {
     return new FreestyleFXMsg(*this);

@@ -5,7 +5,8 @@ Message *DeployedPowerupMsg::New() {
     return new DeployedPowerupMsg;
 }
 
-// 0x00122290. The field copies are the compiler expanding the implicit copy
+// 0x00122290
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *DeployedPowerupMsg::Clone() {
     return new DeployedPowerupMsg(*this);

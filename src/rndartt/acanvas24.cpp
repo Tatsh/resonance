@@ -107,7 +107,8 @@ void ACanvas24::SetColorRGB(const unsigned char *pRGB) {
     mColorChannels[kBlueChannel] = pRGB[kBlueChannel];
 }
 
-// 0x00630380. Byte for byte the same store as SetColorNative(), in a separate slot: for this
+// 0x00630380
+// Byte for byte the same store as SetColorNative(), in a separate slot: for this
 // format an 8888 colour and the native word are the same thing.
 void ACanvas24::SetColor32(unsigned int nColor) {
     mColorNative = nColor;
@@ -139,7 +140,8 @@ void ACanvas24::GetColorRGB(unsigned char *pRGB) {
     pRGB[kBlueChannel] = mColorChannels[kBlueChannel];
 }
 
-// 0x006303e8. Byte for byte the same load as GetColorNative(), in a separate slot.
+// 0x006303e8
+// Byte for byte the same load as GetColorNative(), in a separate slot.
 unsigned int ACanvas24::GetColor32() {
     return mColorNative;
 }
@@ -174,7 +176,8 @@ void ACanvas24::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelRGBNoClip(nX, nY, rgb);
 }
 
-// 0x006303f8. For this format the native word is an 8888 colour, so the store forwards to the
+// 0x006303f8
+// For this format the native word is an 8888 colour, so the store forwards to the
 // colourless slot through the table rather than converting.
 void ACanvas24::PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelNoClip(nX, nY, nColor);
@@ -205,7 +208,8 @@ unsigned int ACanvas24::GetPixelNoClip(int nX, int nY) {
     return Rgb8888FromChannels(rgb);
 }
 
-// 0x00630420. The read counterpart of PutPixelNativeNoClip().
+// 0x00630420
+// The read counterpart of PutPixelNativeNoClip().
 unsigned int ACanvas24::GetPixelNativeNoClip(int nX, int nY) {
     return GetPixelNoClip(nX, nY);
 }

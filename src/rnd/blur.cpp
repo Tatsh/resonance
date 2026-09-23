@@ -67,7 +67,8 @@ int g_nRndBlurLoadRevision;
 
 Blur *(*g_pfnNewBlur)(const HxStr &name);
 
-// 0x004c34e0. The thunk the class registry stores. The null test is the conversion of a Blur
+// 0x004c34e0
+// The thunk the class registry stores. The null test is the conversion of a Blur
 // pointer to its virtual Rnd::Object base rather than a check the source asks for.
 static Object *NewBlurObject(const HxStr &name) {
     return g_pfnNewBlur(name);

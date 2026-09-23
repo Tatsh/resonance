@@ -10,14 +10,16 @@ constexpr unsigned char kTrackNameMetaType = 3;
 
 } // namespace
 
-// 0x001e6278. The three HxStr members and the six collections are default-constructed by the
+// 0x001e6278
+// The three HxStr members and the six collections are default-constructed by the
 // expansions the compiler places ahead of and around these stores.
 LevelConverter::LevelConverter()
     : mUnknown5c(kMBTInfinity), mUnknown60(kMBTInfinity), mUnknown88(kMBTInfinity), mUnknown90(0),
       mUnknown94(0) {
 }
 
-// 0x001e9ee0. Every statement in the body is the compiler expanding the destructor of a member,
+// 0x001e9ee0
+// Every statement in the body is the compiler expanding the destructor of a member,
 // the three span collections and the name map first, then the pending-event collection, then the
 // three strings in reverse declaration order.
 LevelConverter::~LevelConverter() {

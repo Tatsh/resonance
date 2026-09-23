@@ -87,7 +87,8 @@ public:
     static void StartSave(const std::vector<HxStr> &screens);
 
 private:
-    // 0x00282048. Replace mUnknown90 with the screens to return to.
+    // 0x00282048
+    // Replace mUnknown90 with the screens to return to.
     void SetReturnScreens(const std::vector<HxStr> &screens);
 
     // The registry keys of the screens to return to after the save. +0x90

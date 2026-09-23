@@ -10,7 +10,8 @@ Message *PlayersTrackNeutralizedMsg::New() {
     return new PlayersTrackNeutralizedMsg;
 }
 
-// 0x003e05b0. The field copies are the compiler expanding the implicit copy
+// 0x003e05b0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PlayersTrackNeutralizedMsg::Clone() {
     return new PlayersTrackNeutralizedMsg(*this);
@@ -26,7 +27,8 @@ const char *PlayersTrackNeutralizedMsg::Name() {
     return "PlayersTrackNeutralizedMsg";
 }
 
-// 0x003e3f30. The colour name is copied into a temporary before it is written.
+// 0x003e3f30
+// The colour name is copied into a temporary before it is written.
 void PlayersTrackNeutralizedMsg::Print(std::ostream &stream) {
     stream << HxStr(mPlayer->mColorName);
 }

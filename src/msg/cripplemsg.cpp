@@ -9,7 +9,8 @@ Message *CrippleMsg::New() {
     return new CrippleMsg;
 }
 
-// 0x003e2788. The field copies are the compiler expanding the implicit copy
+// 0x003e2788
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *CrippleMsg::Clone() {
     return new CrippleMsg(*this);

@@ -19,7 +19,8 @@ Message *CripplePacket::New() {
     return new CripplePacket;
 }
 
-// 0x003f0c60. Clone allocates and hands off to the copy constructor at 0x003f3938, which is
+// 0x003f0c60
+// Clone allocates and hands off to the copy constructor at 0x003f3938, which is
 // the compiler expanding the implicit one.
 Message *CripplePacket::Clone() {
     return new CripplePacket(*this);

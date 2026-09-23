@@ -15,7 +15,8 @@ Message *DisplayPointerMsg::New() {
     return new DisplayPointerMsg;
 }
 
-// 0x003dd980. The field copies are the compiler expanding the implicit copy
+// 0x003dd980
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *DisplayPointerMsg::Clone() {
     return new DisplayPointerMsg(*this);
@@ -31,7 +32,8 @@ const char *DisplayPointerMsg::Name() {
     return "DisplayPointerMsg";
 }
 
-// 0x003d8358. The colour name is copied into a temporary before it is written.
+// 0x003d8358
+// The colour name is copied into a temporary before it is written.
 void DisplayPointerMsg::Print(std::ostream &stream) {
     if (mPlayerValue == -1) {
         stream << "remove";

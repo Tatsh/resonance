@@ -146,7 +146,8 @@ public:
     virtual void OnUnknownSlot4(int nFlag);
 
 private:
-    // 0x00395a20. Hands the session result to the renderer and then returns to the title screen.
+    // 0x00395a20
+    // Hands the session result to the renderer and then returns to the title screen.
     // Slots 2 and 36 are its two callers. The body is not written: it runs the MetRenderer routine
     // at 0x0036a9e0 with a second argument of zero and then the two empty MetRenderer routines at
     // 0x00390088 and 0x00390090, none of which is identified, and only then pushes

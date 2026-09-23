@@ -53,7 +53,8 @@ PowerupCollection::PowerupCollection(LocalPlayer *pOwner, int bUnlimited)
     }
 }
 
-// 0x001cb090. The vector release and the base destructor after it are both compiler expansions.
+// 0x001cb090
+// The vector release and the base destructor after it are both compiler expansions.
 PowerupCollection::~PowerupCollection() {
     for (std::vector<Entry>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         delete it->mPowerup;
@@ -108,7 +109,8 @@ void PowerupCollection::SelectRelative(int nDelta) {
     Send(&msg);
 }
 
-// 0x001cb450. The index is stored before it is used, and an index outside the vector is not
+// 0x001cb450
+// The index is stored before it is used, and an index outside the vector is not
 // tested for.
 void PowerupCollection::Select(int nIndex) {
     mSelected = nIndex;
@@ -120,7 +122,8 @@ void PowerupCollection::Select(int nIndex) {
     Send(&msg);
 }
 
-// 0x001cb500. The selected entry is read with no test against -1.
+// 0x001cb500
+// The selected entry is read with no test against -1.
 void PowerupCollection::Deploy(int nTrack, int nBar) {
     if (mEntries[mSelected].mPowerup->Deploy(nTrack, nBar, mOwner, kDeployUnused) == 0) {
         return;

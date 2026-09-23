@@ -228,7 +228,8 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x0028cd00. Replaces the shared ticker text with the argument and reposts it at the
+    // 0x0028cd00
+    // Replaces the shared ticker text with the argument and reposts it at the
     // renderer's current time, doing nothing when the text has not changed. The text itself is a
     // function-local static HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0, initialised to
     // the empty string. The body is not written. The repost runs through 0x00317368 and that

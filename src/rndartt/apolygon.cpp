@@ -42,7 +42,8 @@ void APolygon::SetupEdge(APolygonEdge *pEdge, short nFrom, int nDirection) const
     }
 }
 
-// 0x005e9bd8. The texture coordinates are indexed by the edge's vertex positions directly, where
+// 0x005e9bd8
+// The texture coordinates are indexed by the edge's vertex positions directly, where
 // the vertex positions go through mIndices. Both match the binary.
 void APolygon::SetupTexturedEdge(APolygonEdge *pEdge,
                                  short nFrom,

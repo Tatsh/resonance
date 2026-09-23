@@ -93,7 +93,8 @@ constexpr int kXfmTranslationRow = 3;
 // Row of the world transform a camera looks along.
 constexpr int kXfmForwardRow = 1;
 
-// 0x004b1dd0. A point carried through a transform, the basis rows weighted by its components plus
+// 0x004b1dd0
+// A point carried through a transform, the basis rows weighted by its components plus
 // the translation, with out.w taken from the input. A VU0 multiply and accumulate in the image,
 // whose one out-of-line copy has no caller.
 inline void XfmPoint(const Vector3 &in, const Vector3 *pXfm, Vector3 &out) {

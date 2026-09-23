@@ -19,7 +19,8 @@ Message *BSLoadLevelPacket::New() {
     return new BSLoadLevelPacket;
 }
 
-// 0x003f1118. Clone allocates and hands off to the copy constructor at 0x003f3bc0, which is
+// 0x003f1118
+// Clone allocates and hands off to the copy constructor at 0x003f3bc0, which is
 // the compiler expanding the implicit one.
 Message *BSLoadLevelPacket::Clone() {
     return new BSLoadLevelPacket(*this);
@@ -40,7 +41,8 @@ void BSLoadLevelPacket::Print(std::ostream &stream) {
     mUnknown14.Print(stream);
 }
 
-// 0x003e7fa0. The word at +0x0c crosses the wire twice.
+// 0x003e7fa0
+// The word at +0x0c crosses the wire twice.
 void BSLoadLevelPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mUnknown14.Save(&stream);

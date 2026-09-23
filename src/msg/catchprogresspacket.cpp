@@ -10,7 +10,8 @@ Message *CatchProgressPacket::New() {
     return new CatchProgressPacket;
 }
 
-// 0x003f0a70. Clone allocates and hands off to the copy constructor at 0x003f38d0, which is
+// 0x003f0a70
+// Clone allocates and hands off to the copy constructor at 0x003f38d0, which is
 // the compiler expanding the implicit one.
 Message *CatchProgressPacket::Clone() {
     return new CatchProgressPacket(*this);
@@ -33,7 +34,8 @@ void CatchProgressPacket::Print(std::ostream &stream) {
     rest << " track:" << mTrack << " succ:" << mSucc;
 }
 
-// 0x003e7430. The stream Mid::MBT::Save() returns is not used.
+// 0x003e7430
+// The stream Mid::MBT::Save() returns is not used.
 void CatchProgressPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 

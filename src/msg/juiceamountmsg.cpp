@@ -9,7 +9,8 @@ Message *JuiceAmountMsg::New() {
     return new JuiceAmountMsg;
 }
 
-// 0x003e08a8. The field copies are the compiler expanding the implicit copy
+// 0x003e08a8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *JuiceAmountMsg::Clone() {
     return new JuiceAmountMsg(*this);

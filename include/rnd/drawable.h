@@ -211,7 +211,8 @@ protected:
     int mShowing; // +0x04
 
 private:
-    // 0x00506c18. Only Copy() and Load() invoke this.
+    // 0x00506c18
+    // Only Copy() and Load() invoke this.
     void AcquireDrawsRefs();
 
     int mHighlight;               // +0x08

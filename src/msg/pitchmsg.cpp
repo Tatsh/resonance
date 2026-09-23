@@ -5,7 +5,8 @@ Message *PitchMsg::New() {
     return new PitchMsg;
 }
 
-// 0x001b3940. The field copies are the compiler expanding the implicit copy
+// 0x001b3940
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PitchMsg::Clone() {
     return new PitchMsg(*this);

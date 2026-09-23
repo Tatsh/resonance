@@ -97,7 +97,8 @@ void WriteObjectName(Stream &stream, const Object *pObject) {
     }
 }
 
-// 0x004be168. Writes the point count and then one line per point, its index, its position, and
+// 0x004be168
+// Writes the point count and then one line per point, its index, its position, and
 // its colour.
 FailSink &DumpPointVector(FailSink &sink, const std::vector<String::Point> &points) {
     sink.Print("(size:");
@@ -129,7 +130,8 @@ FailSink &DumpPointVector(FailSink &sink, const std::vector<String::Point> &poin
     return sink;
 }
 
-// 0x004be408. Writes the point count and then seven floats per point. The padding word of the
+// 0x004be408
+// Writes the point count and then seven floats per point. The padding word of the
 // position never arrives at a file.
 Stream &WritePointVector(Stream &stream, const std::vector<String::Point> &points) {
     const int nCount = static_cast<int>(points.size());
@@ -146,7 +148,8 @@ Stream &WritePointVector(Stream &stream, const std::vector<String::Point> &point
     return stream;
 }
 
-// 0x004be5a8. The reader counterpart of WritePointVector(). The resize fills every new element
+// 0x004be5a8
+// The reader counterpart of WritePointVector(). The resize fills every new element
 // with a default-constructed point before the seven floats overwrite its first two members.
 Stream &ReadPointVector(Stream &stream, std::vector<String::Point> &points) {
     int nCount = 0;
@@ -169,7 +172,8 @@ Stream &ReadPointVector(Stream &stream, std::vector<String::Point> &points) {
 // 0x006fc348
 HxStr g_stringClassName("String");
 
-// 0x004bf440. The creator the class registry stores. NewString() is inlined into it, and the null
+// 0x004bf440
+// The creator the class registry stores. NewString() is inlined into it, and the null
 // test the compiler emits there is the conversion of a Rnd::String pointer to its Rnd::Object
 // virtual base rather than a check the source requests.
 static Object *NewStringObject(const HxStr &name) {

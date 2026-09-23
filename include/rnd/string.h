@@ -422,19 +422,23 @@ private:
     // A point that is neither end of a run governs two vertices, and a cap point governs four.
     enum { kVertexSlotBody = 0, kVertexSlotStartCap = 1, kVertexSlotEndCap = 2 };
 
-    // 0x004b9a68. Reports the mode of point nIndex and the first mesh vertex it governs.
+    // 0x004b9a68
+    // Reports the mode of point nIndex and the first mesh vertex it governs.
     void ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot);
 
-    // 0x004ba3d0. Builds the owned mesh, applies the stored material and the depth state to it,
+    // 0x004ba3d0
+    // Builds the owned mesh, applies the stored material and the depth state to it,
     // caches the sine of the fold angle, and sizes the geometry to the current point count. The
     // constructor, Load(), and Copy() are the callers.
     void CreateMesh();
 
-    // 0x004bf810. Releases the owned mesh and clears the pointer. The destructor is the only
+    // 0x004bf810
+    // Releases the owned mesh and clears the pointer. The destructor is the only
     // out-of-line caller, and Load() and Copy() inline the same body.
     void DeleteMesh();
 
-    // 0x004b9008. Builds the screen direction and the perpendicular of every point in the closed
+    // 0x004b9008
+    // Builds the screen direction and the perpendicular of every point in the closed
     // range, widens each by mWidth, and folds the ribbon wherever the turn between two segments
     // passes mFoldSin. DrawSelf() is the only caller, and the body is not reconstructed for the
     // same reason DrawSelf() is not.

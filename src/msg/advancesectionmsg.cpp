@@ -5,7 +5,8 @@ Message *AdvanceSectionMsg::New() {
     return new AdvanceSectionMsg;
 }
 
-// 0x0011d698. The field copies are the compiler expanding the implicit copy
+// 0x0011d698
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *AdvanceSectionMsg::Clone() {
     return new AdvanceSectionMsg(*this);

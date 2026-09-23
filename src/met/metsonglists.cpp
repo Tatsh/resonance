@@ -39,7 +39,8 @@ std::vector<ArenaListEntry> g_localArenaList;
 // 0x006ce630
 std::vector<ArenaListEntry> g_soloArenaList;
 
-// 0x003cc748. The static's guard is at 0x006ce608 and the list at 0x00892360.
+// 0x003cc748
+// The static's guard is at 0x006ce608 and the list at 0x00892360.
 std::vector<HxStr> &LevelNameStorage() {
     static std::vector<HxStr> names;
     return names;

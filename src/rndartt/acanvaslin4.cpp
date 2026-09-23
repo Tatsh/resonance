@@ -56,7 +56,8 @@ int ACanvasLin4::GetPixelIndexedNoClip(int nX, int nY) {
     return *pByte & kNibbleMask;
 }
 
-// 0x00627e88. Five conditions must all hold for the block copy: the source has no transparent
+// 0x00627e88
+// Five conditions must all hold for the block copy: the source has no transparent
 // colour, neither bitmap starts on an odd nibble, and the destination column and the source width
 // are both even. Any one of them failing drops to unpacking each row into the shared scratch row
 // and writing it back a pixel at a time.
@@ -82,7 +83,8 @@ void ACanvasLin4::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00628248. The destination row advances by two per source row, which covers every other row of
+// 0x00628248
+// The destination row advances by two per source row, which covers every other row of
 // the destination and consumes half the source height. The run length encoded sibling advances by
 // one. Both behaviours match the binary.
 void ACanvasLin4::Blit8NoClip(const ABitmap &source, int nX, int nY) {
@@ -93,7 +95,8 @@ void ACanvasLin4::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x006282e0. Each row is decoded into the shared scratch row and written from there, so the
+// 0x006282e0
+// Each row is decoded into the shared scratch row and written from there, so the
 // compressed stream is consumed in order without this routine tracking it.
 void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
     ARleReader reader;
@@ -108,7 +111,8 @@ void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00627cf8. The bulk loop packs with a bitwise OR, and both per pixel paths store a logical OR in
+// 0x00627cf8
+// The bulk loop packs with a bitwise OR, and both per pixel paths store a logical OR in
 // the same position, so each of those stores writes 0 or 1 over the whole byte. That reading
 // accounts for both destination meanings the binary shows.
 void ACanvasLin4::WriteIndexedRow(const ABitmap *pSource,

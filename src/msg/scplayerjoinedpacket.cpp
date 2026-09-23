@@ -14,7 +14,8 @@ Message *SCPlayerJoinedPacket::New() {
     return new SCPlayerJoinedPacket;
 }
 
-// 0x003ef718. Clone allocates and hands off to the copy constructor at 0x003f31c8, which is
+// 0x003ef718
+// Clone allocates and hands off to the copy constructor at 0x003f31c8, which is
 // the compiler expanding the implicit one.
 Message *SCPlayerJoinedPacket::Clone() {
     return new SCPlayerJoinedPacket(*this);

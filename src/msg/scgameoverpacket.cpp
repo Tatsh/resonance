@@ -10,7 +10,8 @@ Message *SCGameOverPacket::New() {
     return new SCGameOverPacket;
 }
 
-// 0x003f15d0. Clone allocates and hands off to the copy constructor at 0x003f3cd0, which is
+// 0x003f15d0
+// Clone allocates and hands off to the copy constructor at 0x003f3cd0, which is
 // the compiler expanding the implicit one.
 Message *SCGameOverPacket::Clone() {
     return new SCGameOverPacket(*this);

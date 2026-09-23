@@ -5,7 +5,8 @@ Message *LoopToggleMsg::New() {
     return new LoopToggleMsg;
 }
 
-// 0x001224f0. The field copies are the compiler expanding the implicit copy
+// 0x001224f0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *LoopToggleMsg::Clone() {
     return new LoopToggleMsg(*this);

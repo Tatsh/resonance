@@ -10,7 +10,8 @@ Message *AxisYPowMsg::New() {
     return new AxisYPowMsg;
 }
 
-// 0x003daea0. The field copies are the compiler expanding the implicit copy
+// 0x003daea0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *AxisYPowMsg::Clone() {
     return new AxisYPowMsg(*this);
@@ -26,7 +27,8 @@ const char *AxisYPowMsg::Name() {
     return "AxisYPowMsg";
 }
 
-// 0x003e3480. The colour name is copied into a temporary before it is written.
+// 0x003e3480
+// The colour name is copied into a temporary before it is written.
 void AxisYPowMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " " << mValue;

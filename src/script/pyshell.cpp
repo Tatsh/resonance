@@ -61,7 +61,8 @@ PyShell::PyShell() {
     }
 }
 
-// 0x0050d480. The binary runs Py_Finalize() after the dictionary is released rather than before,
+// 0x0050d480
+// The binary runs Py_Finalize() after the dictionary is released rather than before,
 // which is where a member or a base subobject at +0x00 would run and not where a destructor body
 // runs. The four bytes at +0x00 are therefore probably a guard object holding the interpreter
 // open, and the call is written here because nothing in the image establishes that class.

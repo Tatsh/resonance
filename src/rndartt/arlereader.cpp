@@ -8,7 +8,8 @@ constexpr unsigned char kControlLiteralFlag = 0x80;
 
 } // namespace
 
-// 0x0060da78. The keyed and the opaque walks are separate code in the binary rather than one walk
+// 0x0060da78
+// The keyed and the opaque walks are separate code in the binary rather than one walk
 // with the comparison inside it, and the shape here reproduces that.
 unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
     if (*mSource == kControlTerminator) {
@@ -76,7 +77,8 @@ void ARleReader::DecodeRows(unsigned char *pDest) {
     }
 }
 
-// 0x0060dc10. mWidth is read once before the first row and re-derived from a register afterwards,
+// 0x0060dc10
+// mWidth is read once before the first row and re-derived from a register afterwards,
 // so a width written between rows would not be seen.
 void ARleReader::SkipRows(int nRows) {
     if (*mSource == kControlTerminator) {

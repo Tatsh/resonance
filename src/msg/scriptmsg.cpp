@@ -5,7 +5,8 @@ Message *ScriptMsg::New() {
     return new ScriptMsg;
 }
 
-// 0x0015a6c8. The string copy is the compiler expanding the implicit copy constructor.
+// 0x0015a6c8
+// The string copy is the compiler expanding the implicit copy constructor.
 Message *ScriptMsg::Clone() {
     return new ScriptMsg(*this);
 }

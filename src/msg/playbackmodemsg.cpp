@@ -5,7 +5,8 @@ Message *PlaybackModeMsg::New() {
     return new PlaybackModeMsg;
 }
 
-// 0x0011d578. The field copies are the compiler expanding the implicit copy
+// 0x0011d578
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PlaybackModeMsg::Clone() {
     return new PlaybackModeMsg(*this);

@@ -5,7 +5,8 @@ Message *EnableFreestyleMsg::New() {
     return new EnableFreestyleMsg;
 }
 
-// 0x001ca8c8. The field copies are the compiler expanding the implicit copy
+// 0x001ca8c8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *EnableFreestyleMsg::Clone() {
     return new EnableFreestyleMsg(*this);

@@ -114,11 +114,13 @@ public:
     void PrintConnections(std::ostream &stream);
 
 private:
-    // 0x004b3898. Builds a channel. `off` and `debug` discard their output, `console` writes to
+    // 0x004b3898
+    // Builds a channel. `off` and `debug` discard their output, `console` writes to
     // cout, and any other name opens a file for writing. The receiver is unread.
     Channel *NewChannel(const HxStr &name);
 
-    // 0x004b3448. Flushes and deletes every channel's stream, deletes the channels, and empties
+    // 0x004b3448
+    // Flushes and deletes every channel's stream, deletes the channels, and empties
     // mChannels. The destructor is the one caller.
     void CloseChannels();
 

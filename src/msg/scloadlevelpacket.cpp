@@ -18,7 +18,8 @@ Message *SCLoadLevelPacket::New() {
     return new SCLoadLevelPacket;
 }
 
-// 0x003f13a0. Clone allocates and hands off to the copy constructor at 0x003f3c48, which is
+// 0x003f13a0
+// Clone allocates and hands off to the copy constructor at 0x003f3c48, which is
 // the compiler expanding the implicit one.
 Message *SCLoadLevelPacket::Clone() {
     return new SCLoadLevelPacket(*this);

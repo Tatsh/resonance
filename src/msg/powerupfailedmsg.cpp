@@ -5,7 +5,8 @@ Message *PowerupFailedMsg::New() {
     return new PowerupFailedMsg;
 }
 
-// 0x001ca778. The field copies are the compiler expanding the implicit copy
+// 0x001ca778
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PowerupFailedMsg::Clone() {
     return new PowerupFailedMsg(*this);

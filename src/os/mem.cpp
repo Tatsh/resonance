@@ -122,7 +122,8 @@ char g_szMemLogPath[kMemLogPathSize];
 // 0x00894d78. Path MemOpenLog() was given, which each reopened report is named after.
 char g_szMemLogBaseName[kMemLogPathSize];
 
-// 0x004a9360, an out-of-line copy with no caller. Reduces a tag to the text after its last path
+// 0x004a9360
+// an out-of-line copy with no caller. Reduces a tag to the text after its last path
 // separator. Both separators are tried, so a tag recorded on a Windows build host still logs as a
 // basename.
 inline const char *TagBasename(const char *pszTag) {
@@ -176,7 +177,8 @@ inline MemLogBlock *FindTrackedBlock(const void *pBlock) {
     return nullptr;
 }
 
-// 0x004a9620, an out-of-line copy with no caller; MemLogSourceTrackRealloc() expands it. Records
+// 0x004a9620
+// an out-of-line copy with no caller; MemLogSourceTrackRealloc() expands it. Records
 // a block against its source. The new entry is linked only when the chain it joins has a second
 // entry, which is what the binary does.
 inline void TrackBlock(const char *pszSource, void *pBlock, int nSize) {

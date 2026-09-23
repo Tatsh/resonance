@@ -10,7 +10,8 @@ Message *SCAllClientsStatusPacket::New() {
     return new SCAllClientsStatusPacket;
 }
 
-// 0x003efaa8. Clone allocates and hands off to the copy constructor at 0x003f3298, which is
+// 0x003efaa8
+// Clone allocates and hands off to the copy constructor at 0x003f3298, which is
 // the compiler expanding the implicit one.
 Message *SCAllClientsStatusPacket::Clone() {
     return new SCAllClientsStatusPacket(*this);

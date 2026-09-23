@@ -5,7 +5,8 @@ Message *LoopToolMsg::New() {
     return new LoopToolMsg;
 }
 
-// 0x0011d8e0. The field copies are the compiler expanding the implicit copy
+// 0x0011d8e0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *LoopToolMsg::Clone() {
     return new LoopToolMsg(*this);

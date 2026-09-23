@@ -10,7 +10,8 @@ Message *ButtonPowMsg::New() {
     return new ButtonPowMsg;
 }
 
-// 0x003db220. The field copies are the compiler expanding the implicit copy
+// 0x003db220
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *ButtonPowMsg::Clone() {
     return new ButtonPowMsg(*this);
@@ -26,7 +27,8 @@ const char *ButtonPowMsg::Name() {
     return "ButtonPowMsg";
 }
 
-// 0x003d7df0. The colour name is copied into a temporary before it is written.
+// 0x003d7df0
+// The colour name is copied into a temporary before it is written.
 void ButtonPowMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " " << mUnknown08;

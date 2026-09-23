@@ -7,7 +7,8 @@ Message *PhraseMsg::New() {
     return new PhraseMsg;
 }
 
-// 0x003e11e8. The field copies are the compiler expanding the implicit copy
+// 0x003e11e8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PhraseMsg::Clone() {
     return new PhraseMsg(*this);

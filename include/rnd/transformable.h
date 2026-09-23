@@ -289,7 +289,8 @@ protected:
     int mBillboard; // +0xa4
 
 private:
-    // 0x004fcf88. Marks this object dirty and registers it as a referrer of every mTransList
+    // 0x004fcf88
+    // Marks this object dirty and registers it as a referrer of every mTransList
     // entry. Copy() invokes it and Load() inlines the same body.
     void AcquireTransRefs();
 

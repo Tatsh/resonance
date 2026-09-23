@@ -10,7 +10,8 @@ Message *GemMsg::New() {
     return new GemMsg;
 }
 
-// 0x003df540. The field copies are the compiler expanding the implicit copy
+// 0x003df540
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *GemMsg::Clone() {
     return new GemMsg(*this);
@@ -26,7 +27,8 @@ const char *GemMsg::Name() {
     return "GemMsg";
 }
 
-// 0x003d8830. The colour name is copied into a temporary before it is written.
+// 0x003d8830
+// The colour name is copied into a temporary before it is written.
 void GemMsg::Print(std::ostream &stream) {
     std::ostream &rest = stream << mTrack << " ";
     mPosition.Print(rest);

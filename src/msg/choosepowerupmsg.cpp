@@ -12,7 +12,8 @@ Message *ChoosePowerupMsg::New() {
     return new ChoosePowerupMsg;
 }
 
-// 0x003dd0b8. The field copies are the compiler expanding the implicit copy
+// 0x003dd0b8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *ChoosePowerupMsg::Clone() {
     return new ChoosePowerupMsg(*this);

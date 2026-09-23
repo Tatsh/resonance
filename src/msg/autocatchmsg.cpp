@@ -9,7 +9,8 @@ Message *AutoCatchMsg::New() {
     return new AutoCatchMsg;
 }
 
-// 0x003e2580. The field copies are the compiler expanding the implicit copy
+// 0x003e2580
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *AutoCatchMsg::Clone() {
     return new AutoCatchMsg(*this);

@@ -101,11 +101,13 @@ public:
     virtual void OnFileSaved(int nStatus);
 
 private:
-    // 0x0017a928. Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream,
+    // 0x0017a928
+    // Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream,
     // and reads `<dir>/index` into the stream buffer through a fresh inner LoadFileMCT. Not
     // written, for the reason recorded in the class documentation. The title is inferred.
     void ReadNextIndex();
-    // 0x0017ab50. Writes the remix payload into the chosen directory through a fresh inner
+    // 0x0017ab50
+    // Writes the remix payload into the chosen directory through a fresh inner
     // SaveFileMCT, and advances mStep to 2. Not written, for the same reason. The title is
     // inferred.
     void WritePayload();

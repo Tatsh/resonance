@@ -7,7 +7,8 @@ Message *ContCtrlMsg::New() {
     return new ContCtrlMsg;
 }
 
-// 0x003dfc28. The field copies are the compiler expanding the implicit copy
+// 0x003dfc28
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *ContCtrlMsg::Clone() {
     return new ContCtrlMsg(*this);

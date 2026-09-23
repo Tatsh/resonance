@@ -7,7 +7,8 @@ Message *GameConnectSuccessMsg::New() {
     return new GameConnectSuccessMsg;
 }
 
-// 0x003e15a8. The field copies are the compiler expanding the implicit copy
+// 0x003e15a8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *GameConnectSuccessMsg::Clone() {
     return new GameConnectSuccessMsg(*this);

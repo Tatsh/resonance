@@ -11,7 +11,8 @@ Message *GameChatPacket::New() {
     return new GameChatPacket;
 }
 
-// 0x003f1950. Clone allocates and hands off to the copy constructor at 0x003f3d88, which is
+// 0x003f1950
+// Clone allocates and hands off to the copy constructor at 0x003f3d88, which is
 // the compiler expanding the implicit one.
 Message *GameChatPacket::Clone() {
     return new GameChatPacket(*this);

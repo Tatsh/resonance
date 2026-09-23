@@ -4,7 +4,8 @@
 #include "sch/sequencer.h"
 #include "sch/tickclock.h"
 
-// 0x001a9fb8. mSequencer is not initialised here. Every path that reads it runs after Start(),
+// 0x001a9fb8
+// mSequencer is not initialised here. Every path that reads it runs after Start(),
 // which is what makes that faithful rather than a gap.
 MultiMusePlayer::MultiMusePlayer(MultiMuse *pMuse, MuseParent *pParent, Sch::TickClock *pClock)
     : MuseSynth(pClock), mMuse(pMuse), mParent(pParent), mClock(pClock), mParentToldToRetain(0),

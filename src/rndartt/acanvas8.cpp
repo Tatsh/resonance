@@ -76,7 +76,8 @@ void ACanvas8::SetColorIndex(int nIndex) {
     mColor = static_cast<unsigned char>(nIndex);
 }
 
-// 0x00635c00. Byte for byte the same store as SetColorIndex(), in a separate slot.
+// 0x00635c00
+// Byte for byte the same store as SetColorIndex(), in a separate slot.
 void ACanvas8::SetColorNative(unsigned int nColor) {
     mColor = static_cast<unsigned char>(nColor);
 }
@@ -86,7 +87,8 @@ int ACanvas8::GetColorIndex() {
     return mColor;
 }
 
-// 0x00635c10. Byte for byte the same load as GetColorIndex(), in a separate slot.
+// 0x00635c10
+// Byte for byte the same load as GetColorIndex(), in a separate slot.
 unsigned int ACanvas8::GetColorNative() {
     return mColor;
 }
@@ -163,7 +165,8 @@ unsigned int ACanvas8::GetColor32() {
     return pPalette->mEntries[mColor];
 }
 
-// 0x006362d0. The only slot with no fallback to the default palette: a canvas with no palette of
+// 0x006362d0
+// The only slot with no fallback to the default palette: a canvas with no palette of
 // its own does nothing here. It also re-reads the palette pointer and the entry count on every
 // iteration rather than caching either.
 void ACanvas8::BuildAlphaFromColorKey(unsigned int nColorKey) {
@@ -178,7 +181,8 @@ void ACanvas8::BuildAlphaFromColorKey(unsigned int nColorKey) {
     }
 }
 
-// 0x00635c18. Native is the palette index for this format, so the store narrows and forwards.
+// 0x00635c18
+// Native is the palette index for this format, so the store narrows and forwards.
 void ACanvas8::PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelIndexedNoClip(nX, nY, static_cast<int>(nColor & kChannelMask));
 }
@@ -230,7 +234,8 @@ void ACanvas8::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelIndexedNoClip(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// 0x00635c48. Native is the palette index for this format, so the read forwards unchanged.
+// 0x00635c48
+// Native is the palette index for this format, so the read forwards unchanged.
 unsigned int ACanvas8::GetPixelNativeNoClip(int nX, int nY) {
     return static_cast<unsigned int>(GetPixelIndexedNoClip(nX, nY));
 }

@@ -60,7 +60,8 @@ ACanvasLin24::ACanvasLin24(const ABitmap &bitmap) : ACanvas24(bitmap) {
 ACanvasLin24::~ACanvasLin24() {
 }
 
-// 0x006184a8. Empty in the binary, and the slot exists only because ACanvas24 declares it pure.
+// 0x006184a8
+// Empty in the binary, and the slot exists only because ACanvas24 declares it pure.
 void ACanvasLin24::BuildAlphaFromColorKey(unsigned int nColorKey) {
     (void)nColorKey;
 }
@@ -89,7 +90,8 @@ void ACanvasLin24::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
     pRGB[2] = pPixel[2];
 }
 
-// 0x00618568. The three colour bytes are re-read from the object on every iteration rather than
+// 0x00618568
+// The three colour bytes are re-read from the object on every iteration rather than
 // hoisted, and the destination advances one byte at a time rather than three at once.
 void ACanvasLin24::FillRowNoClip(int nY, int nLeft, int nRight) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
@@ -103,7 +105,8 @@ void ACanvasLin24::FillRowNoClip(int nY, int nLeft, int nRight) {
     }
 }
 
-// 0x006185d0. The row pitch is re-read from the bitmap on every iteration.
+// 0x006185d0
+// The row pitch is re-read from the bitmap on every iteration.
 void ACanvasLin24::FillColumnNoClip(int nX, int nTop, int nBottom) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nTop);
     for (int nCount = nBottom - nTop; nCount != 0; --nCount) {
@@ -155,7 +158,8 @@ void ACanvasLin24::TextureRowIndexed(int nY,
     }
 }
 
-// 0x006186f8. The key is compared against the low byte of the transparent colour, and the flag is
+// 0x006186f8
+// The key is compared against the low byte of the transparent colour, and the flag is
 // re-read for every pixel.
 void ACanvasLin24::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
@@ -178,7 +182,8 @@ void ACanvasLin24::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00618270. Unlike the eight and 1555 layouts there is no whole-rectangle copy tier. A keyed row
+// 0x00618270
+// Unlike the eight and 1555 layouts there is no whole-rectangle copy tier. A keyed row
 // compares the pixel's three bytes, widened with a zero, against the whole transparent colour.
 void ACanvasLin24::Blit24NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceByte = static_cast<const unsigned char *>(source.mPixels);
@@ -205,7 +210,8 @@ void ACanvasLin24::Blit24NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00618800. The key is compared against the low byte of the transparent colour.
+// 0x00618800
+// The key is compared against the low byte of the transparent colour.
 void ACanvasLin24::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;

@@ -11,7 +11,8 @@ Message *PhrasePacket::New() {
     return new PhrasePacket;
 }
 
-// 0x003f0320. Clone allocates and hands off to the copy constructor at 0x003f3760, which is
+// 0x003f0320
+// Clone allocates and hands off to the copy constructor at 0x003f3760, which is
 // the compiler expanding the implicit one.
 Message *PhrasePacket::Clone() {
     return new PhrasePacket(*this);
@@ -37,7 +38,8 @@ void PhrasePacket::Print(std::ostream &stream) {
     }
 }
 
-// 0x003e6b70. The word at +0x0c crosses the wire twice.
+// 0x003e6b70
+// The word at +0x0c crosses the wire twice.
 void PhrasePacket::Save(OBStream &stream) {
     Packet::Save(stream);
 

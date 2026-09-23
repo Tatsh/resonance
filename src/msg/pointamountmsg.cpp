@@ -9,7 +9,8 @@ Message *PointAmountMsg::New() {
     return new PointAmountMsg;
 }
 
-// 0x003e0a48. The field copies are the compiler expanding the implicit copy
+// 0x003e0a48
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PointAmountMsg::Clone() {
     return new PointAmountMsg(*this);

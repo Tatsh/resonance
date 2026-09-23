@@ -5,7 +5,8 @@ Message *RotLeftMsg::New() {
     return new RotLeftMsg;
 }
 
-// 0x0011d338. The field copies are the compiler expanding the implicit copy
+// 0x0011d338
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *RotLeftMsg::Clone() {
     return new RotLeftMsg(*this);

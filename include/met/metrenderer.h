@@ -308,27 +308,33 @@ public:
     int mUnknown80;
 
 private:
-    // 0x0036a680. Resolves the three scene views and the fade, and is reached only from
+    // 0x0036a680
+    // Resolves the three scene views and the fade, and is reached only from
     // OnUnknownSlot7()'s boot phase. The title is inferred from the three fields it writes.
     void ResolveSceneViews();
 
-    // 0x0036a9e0. Resolves `Metagame_arena.view` and attaches it to the background scene. A
+    // 0x0036a9e0
+    // Resolves `Metagame_arena.view` and attaches it to the background scene. A
     // non-zero argument skips the resolve and attaches nothing, because the view pointer then
     // stays null. The title is inferred from the literal.
     void ResolveArenaView(int nSkipResolve);
 
-    // 0x003719a0. Releases the animatable, drawable, and transformable lists of the screen scene
+    // 0x003719a0
+    // Releases the animatable, drawable, and transformable lists of the screen scene
     // at mUnknowna0. OnUnknownSlot5() is its one caller. The title is inferred.
     void ClearScreenScene();
 
-    // 0x00371960. Releases the same three lists of the background scene at mUnknowna4.
+    // 0x00371960
+    // Releases the same three lists of the background scene at mUnknowna4.
     // OnUnknownSlot5() is its one caller. The title is inferred.
     void ClearBackgroundScene();
 
-    // 0x0036b938. Handles a MetStartPauseMsg. The body is not written.
+    // 0x0036b938
+    // Handles a MetStartPauseMsg. The body is not written.
     void OnStartPause(Message *pMsg);
 
-    // 0x0036bcb8. Handles a MetFreqEndedMsg. The body is not written.
+    // 0x0036bcb8
+    // Handles a MetFreqEndedMsg. The body is not written.
     void OnFreqEnded(Message *pMsg);
 
     // +0x60. Zeroed by the constructor. MetaGameWorld::OnUnknownQuery003d48c0() reads it.

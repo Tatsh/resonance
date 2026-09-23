@@ -92,7 +92,8 @@ BmpFileHeader s_writeFileHeader;
 // 0x008e6928
 BmpInfoHeader s_writeInfoHeader;
 
-// 0x007a5768, the zero bytes each written row is padded with.
+// 0x007a5768
+// the zero bytes each written row is padded with.
 const unsigned char kRowPadding[kRowAlignment] = {0, 0, 0, 0};
 
 inline unsigned char SwapNibbles(unsigned char nByte) {

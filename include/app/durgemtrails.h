@@ -146,10 +146,12 @@ public:
     static HxStr NewStringName();
 
 private:
-    // 0x00437af8. The row string of lane nLane in slice row nRow, the row taken modulo mRowCount.
+    // 0x00437af8
+    // The row string of lane nLane in slice row nRow, the row taken modulo mRowCount.
     DurGemRowString *GetRowString(int nLane, int nRow);
 
-    // 0x00433530. Place the midpoint of pPoints[nFirst] and pPoints[nLast] and recurse into both
+    // 0x00433530
+    // Place the midpoint of pPoints[nFirst] and pPoints[nLast] and recurse into both
     // halves while it lies off the chord.
     static void SubdivideSegment(int nLane,
                                  Vector3 *pPoints,
@@ -160,7 +162,8 @@ private:
                                  float flEndFrame,
                                  float flEndBlend);
 
-    // 0x004378e0. Report the midpoint frame, blend, and position of a segment, and whether the
+    // 0x004378e0
+    // Report the midpoint frame, blend, and position of a segment, and whether the
     // position lies off the chord of first and last. SubdivideSegment() inlines the body.
     static bool NeedsSubdivision(int nLane,
                                  const Vector3 &first,
@@ -173,7 +176,8 @@ private:
                                  float flEndFrame,
                                  float flEndBlend);
 
-    // 0x00436e88. The first curve of row nRow or later. AddSegment() and EndTrail() inline the
+    // 0x00436e88
+    // The first curve of row nRow or later. AddSegment() and EndTrail() inline the
     // body.
     static std::list<DurGemCurve>::iterator FindFirstCurve(std::list<DurGemCurve> &curves,
                                                            int nRow);

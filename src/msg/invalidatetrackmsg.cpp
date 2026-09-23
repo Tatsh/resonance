@@ -7,7 +7,8 @@ Message *InvalidateTrackMsg::New() {
     return new InvalidateTrackMsg;
 }
 
-// 0x003de450. The field copies are the compiler expanding the implicit copy
+// 0x003de450
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *InvalidateTrackMsg::Clone() {
     return new InvalidateTrackMsg(*this);

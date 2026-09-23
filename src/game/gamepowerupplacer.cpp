@@ -16,7 +16,8 @@ constexpr int kTicksPerBeat = 480;
 
 } // namespace
 
-// 0x001cd9b0. Both table stores and the TickTask and MsgSource teardown after them are compiler
+// 0x001cd9b0
+// Both table stores and the TickTask and MsgSource teardown after them are compiler
 // expansions.
 GamePowerupPlacer::~GamePowerupPlacer() {
 }

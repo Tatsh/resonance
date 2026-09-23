@@ -177,20 +177,25 @@ private:
         Rnd::Mesh *mMesh;
     };
 
-    // 0x003fdec0. Clone the template into the row view for one index.
+    // 0x003fdec0
+    // Clone the template into the row view for one index.
     Rnd::View *makeRow(int nIndex);
 
-    // 0x003fd858. Record the Text and Mesh children of one row view as its cells, and every Text
+    // 0x003fd858
+    // Record the Text and Mesh children of one row view as its cells, and every Text
     // child in mTextCells as well.
     void buildRowCells(Rnd::View *pRow);
 
-    // 0x00401030. Place the highlight mesh on the cursor row.
+    // 0x00401030
+    // Place the highlight mesh on the cursor row.
     void updateHighlight();
 
-    // 0x00401270. Show each arrow when items lie beyond that end of the page.
+    // 0x00401270
+    // Show each arrow when items lie beyond that end of the page.
     void updateArrows();
 
-    // 0x003fcf20, 0x003fd038, 0x003fd150, and 0x003fd268. Append every descendant along one
+    // 0x003fcf20
+    // 0x003fd038, 0x003fd150, and 0x003fd268. Append every descendant along one
     // relation, depth first, each object before its own descendants. A null start appends
     // nothing.
     static void collectChildren(std::list<Rnd::Object *> &objects, Rnd::Animatable *pAnimatable);

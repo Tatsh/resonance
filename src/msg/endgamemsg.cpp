@@ -5,7 +5,8 @@ Message *EndGameMsg::New() {
     return new EndGameMsg;
 }
 
-// 0x001939b8. The field copies are the compiler expanding the implicit copy
+// 0x001939b8
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *EndGameMsg::Clone() {
     return new EndGameMsg(*this);

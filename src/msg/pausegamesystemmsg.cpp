@@ -5,7 +5,8 @@ Message *PauseGameSystemMsg::New() {
     return new PauseGameSystemMsg;
 }
 
-// 0x00193ce0. The field copies are the compiler expanding the implicit copy
+// 0x00193ce0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PauseGameSystemMsg::Clone() {
     return new PauseGameSystemMsg(*this);

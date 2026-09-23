@@ -586,29 +586,35 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // 0x0045e528. Drops the reference on every object member and empties mInstances. The
+    // 0x0045e528
+    // Drops the reference on every object member and empties mInstances. The
     // destructor and Copy() invoke it, and the title is inferred.
     void ReleaseRefs();
 
-    // 0x0045e5e0. Takes a reference on every object member and then calls Regenerate(). Copy()
+    // 0x0045e5e0
+    // Takes a reference on every object member and then calls Regenerate(). Copy()
     // invokes it, and the title is inferred.
     void AcquireRefs();
 
     // The four draw paths DrawSelf() selects from the table at 0x0081c448. Each receives the
     // composed transform of one instance and the age of that instance in frames.
 
-    // 0x0045ea70. Installs the transform as the local transform of mView, drives mView to the age
+    // 0x0045ea70
+    // Installs the transform as the local transform of mView, drives mView to the age
     // when mAnimateFromStart is set, recomposes, and draws.
     void DrawInstanceView(const Transform &xfm, float flAge);
 
-    // 0x0045eb00. Installs the transform as the local transform of mMesh, recomposes, and draws.
+    // 0x0045eb00
+    // Installs the transform as the local transform of mMesh, recomposes, and draws.
     void DrawInstanceMesh(const Transform &xfm, float flAge);
 
-    // 0x0045eb78. Stores the transform in the entry of the transform list of mMultiMesh that
+    // 0x0045eb78
+    // Stores the transform in the entry of the transform list of mMultiMesh that
     // mMultiMeshCursor addresses and advances the cursor.
     void DrawInstanceMultiMesh(const Transform &xfm, float flAge);
 
-    // 0x0045ebb8. Moves the particle mParticleCursor addresses to the translation of the
+    // 0x0045ebb8
+    // Moves the particle mParticleCursor addresses to the translation of the
     // transform and advances the cursor, and does nothing once the cursor is null.
     void DrawInstanceParticle(const Transform &xfm, float flAge);
 

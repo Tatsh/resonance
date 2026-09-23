@@ -185,7 +185,8 @@ private:
         kRiffCount = 3,
     };
 
-    // 0x00119518. Turns one reading into the message its binding's action identifies, for the
+    // 0x00119518
+    // Turns one reading into the message its binding's action identifies, for the
     // player whose Slot2() matches the binding's slot. An axis binding first quantises the value
     // to a step of -1, 0, or 1 and drops the reading unless the step changed.
     void OnControllerReading(RawControllerMsg *pMsg);
@@ -193,14 +194,17 @@ private:
     // 0x0011da68.
     void SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
-    // 0x0011d9b0. Sends a PitchRiffMsg after a Player::Slot2() call whose result it discards.
+    // 0x0011d9b0
+    // Sends a PitchRiffMsg after a Player::Slot2() call whose result it discards.
     void SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
-    // 0x00119f58. The binding equal to binding in slot, action, and argument, appended with a
+    // 0x00119f58
+    // The binding equal to binding in slot, action, and argument, appended with a
     // fresh axis state for an axis action when none exists.
     std::list<Binding>::iterator FindOrAddBinding(const Binding &binding);
 
-    // 0x0011d1a0. Empties mBindingMap. The title is inferred.
+    // 0x0011d1a0
+    // Empties mBindingMap. The title is inferred.
     void ClearBindingMap();
 
     Globals *mGlobals;

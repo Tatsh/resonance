@@ -16,12 +16,14 @@ SinglePowerupCollection::SinglePowerupCollection(LocalPlayer *pOwner)
     : mType(-1), mPowerup(nullptr), mOwner(pOwner) {
 }
 
-// 0x001cb7b0. The base destructor after the release is a compiler expansion.
+// 0x001cb7b0
+// The base destructor after the release is a compiler expansion.
 SinglePowerupCollection::~SinglePowerupCollection() {
     delete mPowerup;
 }
 
-// 0x001cb890. The kind is stored before the powerup is built, and the message reports an index of
+// 0x001cb890
+// The kind is stored before the powerup is built, and the message reports an index of
 // 0 because the store holds one.
 void SinglePowerupCollection::AddPowerup(int nType) {
     delete mPowerup;

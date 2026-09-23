@@ -10,7 +10,8 @@ Message *UpdateScorePacket::New() {
     return new UpdateScorePacket;
 }
 
-// 0x003f06c0. Clone allocates and hands off to the copy constructor at 0x003f3818, which is
+// 0x003f06c0
+// Clone allocates and hands off to the copy constructor at 0x003f3818, which is
 // the compiler expanding the implicit one.
 Message *UpdateScorePacket::Clone() {
     return new UpdateScorePacket(*this);

@@ -270,15 +270,18 @@ protected:
     virtual int DrawSelf();
 
 private:
-    // 0x004c36b0. Registers this object as a referrer of both subjects and discards the recorded
+    // 0x004c36b0
+    // Registers this object as a referrer of both subjects and discards the recorded
     // transforms. The constructor, Copy(), and Load() are the callers.
     void AcquireObjectRefs();
 
-    // 0x004c3708. Drops this object's registration on both subjects. Copy() and Load() are the
+    // 0x004c3708
+    // Drops this object's registration on both subjects. Copy() and Load() are the
     // callers.
     void ReleaseObjectRefs();
 
-    // 0x004c34c0. Discards the recorded transforms. The out-of-line copy has no caller, and the
+    // 0x004c34c0
+    // Discards the recorded transforms. The out-of-line copy has no caller, and the
     // setters clear mXfms directly. The name is inferred.
     void ClearXfms() {
         mXfms.clear();

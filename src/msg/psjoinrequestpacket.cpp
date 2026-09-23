@@ -16,7 +16,8 @@ void PSJoinRequestPacket::Print(std::ostream &stream) {
     mUnknown14.Print(stream);
 }
 
-// 0x003eeeb8. Clone allocates and hands off to the copy constructor at 0x003f2dc0, which is
+// 0x003eeeb8
+// Clone allocates and hands off to the copy constructor at 0x003f2dc0, which is
 // the compiler expanding the implicit one.
 Message *PSJoinRequestPacket::Clone() {
     return new PSJoinRequestPacket(*this);

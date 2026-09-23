@@ -16,7 +16,8 @@ Message *SPJoinDenyPacket::New() {
     return new SPJoinDenyPacket;
 }
 
-// 0x003ef558. Clone allocates and hands off to the copy constructor at 0x003f3130, which is
+// 0x003ef558
+// Clone allocates and hands off to the copy constructor at 0x003f3130, which is
 // the compiler expanding the implicit one.
 Message *SPJoinDenyPacket::Clone() {
     return new SPJoinDenyPacket(*this);

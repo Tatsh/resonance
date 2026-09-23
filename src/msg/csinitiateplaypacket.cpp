@@ -5,7 +5,8 @@ Message *CSInitiatePlayPacket::New() {
     return new CSInitiatePlayPacket;
 }
 
-// 0x003efca8. Clone allocates and hands off to the copy constructor at 0x003f34a8, which is
+// 0x003efca8
+// Clone allocates and hands off to the copy constructor at 0x003f34a8, which is
 // the compiler expanding the implicit one.
 Message *CSInitiatePlayPacket::Clone() {
     return new CSInitiatePlayPacket(*this);

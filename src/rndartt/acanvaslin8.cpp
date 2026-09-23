@@ -50,7 +50,8 @@ void ACanvasLin8::FillRowNoClip(int nY, int nLeft, int nRight) {
            static_cast<unsigned int>(nRight - nLeft));
 }
 
-// 0x006286d0. The colour and the row pitch are both re-read on every iteration rather than
+// 0x006286d0
+// The colour and the row pitch are both re-read on every iteration rather than
 // hoisted, which is what the binary does.
 void ACanvasLin8::FillColumnNoClip(int nX, int nTop, int nBottom) {
     if (nTop >= nBottom) {
@@ -63,7 +64,8 @@ void ACanvasLin8::FillColumnNoClip(int nX, int nTop, int nBottom) {
     }
 }
 
-// 0x00628718. One memset per row, with the rectangle's own bounds re-read each time round.
+// 0x00628718
+// One memset per row, with the rectangle's own bounds re-read each time round.
 void ACanvasLin8::FillRectNoClip(ARect rect) {
     unsigned char *pRow = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, rect.mLeft, rect.mTop);
     for (int nRow = rect.mTop; nRow < rect.mBottom; ++nRow) {
@@ -72,7 +74,8 @@ void ACanvasLin8::FillRectNoClip(ARect rect) {
     }
 }
 
-// 0x006287b8. The row advance subtracts the column span whether or not the span was walked, so a
+// 0x006287b8
+// The row advance subtracts the column span whether or not the span was walked, so a
 // rectangle whose right edge is left of its left edge advances by more than the pitch.
 void ACanvasLin8::RemapRectIndices(ARect rect, const unsigned char *pRemap) {
     const int nColumns = rect.mRight - rect.mLeft;
@@ -86,7 +89,8 @@ void ACanvasLin8::RemapRectIndices(ARect rect, const unsigned char *pRemap) {
     }
 }
 
-// 0x00628848. The nibble phase starts from the source's odd-start flag and alternates per pixel,
+// 0x00628848
+// The nibble phase starts from the source's odd-start flag and alternates per pixel,
 // and the low nibble of a byte is the earlier pixel.
 void ACanvasLin8::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
@@ -114,7 +118,8 @@ void ACanvasLin8::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00628918. Three tiers, widest first: a source with no transparent colour whose pitch matches
+// 0x00628918
+// Three tiers, widest first: a source with no transparent colour whose pitch matches
 // this canvas's is one memcpy of the whole rectangle, a source with no transparent colour is one
 // memcpy per row, and a keyed source is walked a byte at a time. The transparency test is repeated
 // inside the row loop even though the flag cannot change between rows.
@@ -145,7 +150,8 @@ void ACanvasLin8::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00628a48. The reader is built on the stack and the row decoder advances its cursor, so the
+// 0x00628a48
+// The reader is built on the stack and the row decoder advances its cursor, so the
 // rows are consumed in order without this routine tracking the compressed stream.
 void ACanvasLin8::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
     ARleReader reader;
@@ -161,7 +167,8 @@ void ACanvasLin8::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00628db0. The source position is advanced in place, so the caller sees where the row ended.
+// 0x00628db0
+// The source position is advanced in place, so the caller sees where the row ended.
 void ACanvasLin8::TextureRowIndexed(int nY,
                                     int nLeft,
                                     int nRight,
@@ -180,7 +187,8 @@ void ACanvasLin8::TextureRowIndexed(int nY,
     }
 }
 
-// 0x00628ae8. The keyed and the opaque walks are separate loops in the binary.
+// 0x00628ae8
+// The keyed and the opaque walks are separate loops in the binary.
 void ACanvasLin8::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     const unsigned char *pSourceByte = span.mSource;
@@ -202,7 +210,8 @@ void ACanvasLin8::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRe
     }
 }
 
-// 0x00628ba8. Unlike ACanvas::BlendRowIndexed(), the key here is the span transparent colour
+// 0x00628ba8
+// Unlike ACanvas::BlendRowIndexed(), the key here is the span transparent colour
 // rather than index zero.
 void ACanvasLin8::BlendRowIndexed(const ARowSpan &span, const unsigned char *const *ppBlend) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
@@ -225,7 +234,8 @@ void ACanvasLin8::BlendRowIndexed(const ARowSpan &span, const unsigned char *con
     }
 }
 
-// 0x006284a0. The keyed loop runs until its counter passes zero exactly, where the opaque loop
+// 0x006284a0
+// The keyed loop runs until its counter passes zero exactly, where the opaque loop
 // stops at any count of zero or less, so a reversed span walks far past the row only when keyed.
 void ACanvasLin8::StretchRowIndexed(const AStretchSpan &span) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
@@ -249,7 +259,8 @@ void ACanvasLin8::StretchRowIndexed(const AStretchSpan &span) {
     }
 }
 
-// 0x00628c80. The transparency flag is re-read for every pixel.
+// 0x00628c80
+// The transparency flag is re-read for every pixel.
 void ACanvasLin8::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     int nPosition = span.mSourcePosition;

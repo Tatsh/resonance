@@ -1,6 +1,7 @@
 #include "mid/receiver.h"
 
-// 0x001ea248. Everything in the body is compiler-generated, so nothing of the class's own appears
+// 0x001ea248
+// Everything in the body is compiler-generated, so nothing of the class's own appears
 // here.
 Mid::Receiver::~Receiver() {
 }

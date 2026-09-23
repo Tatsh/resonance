@@ -29,7 +29,8 @@ std::vector<int> g_albumLevelValues(kAlbumLevelCount *kDifficultyCount, kNotCach
 // 0x006db5ac
 int g_nAlbumJukeboxValue = kNotCached;
 
-// 0x003f6760. The one caller is GetAlbumLevelStage().
+// 0x003f6760
+// The one caller is GetAlbumLevelStage().
 int &LevelStageEntry(const HxStr &name) {
     std::map<HxStr, int>::iterator it = g_albumLevelStages.find(name);
     if (it == g_albumLevelStages.end()) {

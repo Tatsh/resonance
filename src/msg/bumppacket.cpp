@@ -11,7 +11,8 @@ Message *BumpPacket::New() {
     return new BumpPacket;
 }
 
-// 0x003f0e80. Clone allocates and hands off to the copy constructor at 0x003f3b58, which is
+// 0x003f0e80
+// Clone allocates and hands off to the copy constructor at 0x003f3b58, which is
 // the compiler expanding the implicit one.
 Message *BumpPacket::Clone() {
     return new BumpPacket(*this);

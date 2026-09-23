@@ -912,13 +912,16 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // 0x00494cb0. Drops this object's reference on every mAnims entry, deletes every filter, and
+    // 0x00494cb0
+    // Drops this object's reference on every mAnims entry, deletes every filter, and
     // then empties mFilters. The destructor, Copy(), and Load() all invoke it. That shared use is
     // what makes it a member rather than the destructor body alone. The title is inferred.
     void ReleaseAnimsAndFilters();
-    // 0x0049a7c0. Only SetFrame() invokes this.
+    // 0x0049a7c0
+    // Only SetFrame() invokes this.
     float ApplyFilters(float flValue);
-    // 0x0049a750. Only Copy() and Load() invoke this, and both inline it.
+    // 0x0049a750
+    // Only Copy() and Load() invoke this, and both inline it.
     void AcquireAnimsRefs();
 
     // Declared in recovered offset order. The animatables this one drives, each of which

@@ -5,7 +5,8 @@ Message *DurGemMsg::New() {
     return new DurGemMsg;
 }
 
-// 0x001a4388. The field copies are the compiler expanding the implicit copy
+// 0x001a4388
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *DurGemMsg::Clone() {
     return new DurGemMsg(*this);

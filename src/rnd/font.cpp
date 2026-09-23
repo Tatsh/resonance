@@ -537,7 +537,8 @@ Font *NewFont(const HxStr &name) {
     return new Font(name);
 }
 
-// 0x006fecb8. Null in the image until RegisterFontClass() or Rnd::Manager::Init() fills it,
+// 0x006fecb8
+// Null in the image until RegisterFontClass() or Rnd::Manager::Init() fills it,
 // unlike g_pfnNewText.
 Font *(*g_pfnNewFont)(const HxStr &name);
 

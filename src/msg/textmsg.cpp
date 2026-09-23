@@ -5,7 +5,8 @@ Message *TextMsg::New() {
     return new TextMsg;
 }
 
-// 0x00193e10. The field copies are the compiler expanding the implicit copy
+// 0x00193e10
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *TextMsg::Clone() {
     return new TextMsg(*this);

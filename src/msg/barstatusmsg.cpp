@@ -1,6 +1,7 @@
 #include "msg/barstatusmsg.h"
 
-// 0x003defd0. The field copies are the compiler expanding the implicit copy
+// 0x003defd0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *BarStatusMsg::Clone() {
     return new BarStatusMsg(*this);

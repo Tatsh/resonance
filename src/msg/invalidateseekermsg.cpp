@@ -5,7 +5,8 @@ Message *InvalidateSeekerMsg::New() {
     return new InvalidateSeekerMsg;
 }
 
-// 0x001160b0. The field copies are the compiler expanding the implicit copy
+// 0x001160b0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *InvalidateSeekerMsg::Clone() {
     return new InvalidateSeekerMsg(*this);

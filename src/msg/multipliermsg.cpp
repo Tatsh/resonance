@@ -5,7 +5,8 @@ Message *MultiplierMsg::New() {
     return new MultiplierMsg;
 }
 
-// 0x001cab30. The field copies are the compiler expanding the implicit copy
+// 0x001cab30
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *MultiplierMsg::Clone() {
     return new MultiplierMsg(*this);

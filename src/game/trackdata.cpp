@@ -56,7 +56,8 @@ struct ScoreRule {
     int mWeight;
 };
 
-// 0x0068fef8. The weights are overwritten from the configuration on first use.
+// 0x0068fef8
+// The weights are overwritten from the configuration on first use.
 ScoreRule g_aScoreRules[kScoreDivisorCount] = {
     {1920, 15},
     {960, 25},

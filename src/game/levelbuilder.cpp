@@ -16,7 +16,8 @@ void DeleteTrackData(TrackData *pTrack) {
 
 } // namespace
 
-// 0x001eafe8. The table store, the three vector deallocations, and the object release are compiler
+// 0x001eafe8
+// The table store, the three vector deallocations, and the object release are compiler
 // expansions.
 LevelBuilder::~LevelBuilder() {
     std::for_each(mTracks.begin(), mTracks.end(), DeleteTrackData);
@@ -46,12 +47,14 @@ TrackData *LevelBuilder::OwnTrack() {
     return mOwnTrack;
 }
 
-// 0x001ec6f0. The index is not tested against the collection.
+// 0x001ec6f0
+// The index is not tested against the collection.
 TrackData *LevelBuilder::TrackAt(int nIndex) {
     return mTracks[nIndex];
 }
 
-// 0x001ec708. The index is not tested against the collection.
+// 0x001ec708
+// The index is not tested against the collection.
 TrackData *LevelBuilder::UnknownAt(int nIndex) {
     return mUnknown10[nIndex];
 }

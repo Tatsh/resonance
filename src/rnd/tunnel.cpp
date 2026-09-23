@@ -1195,7 +1195,8 @@ Mesh *Tunnel::GetRingSection(int nRing, int nSlice) {
         .front();
 }
 
-// 0x00477538. A VU0 multiply and accumulate in the image, vmulax then vmaddx over xyz.
+// 0x00477538
+// A VU0 multiply and accumulate in the image, vmulax then vmaddx over xyz.
 void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
     const Vector3 &next = mUnknownc0[WrapIndex(nRing + 1, mRingCount)].mTranslation;
     const Vector3 &current = mUnknownc0[nRing].mTranslation;

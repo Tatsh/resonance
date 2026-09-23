@@ -1302,7 +1302,8 @@ void ACanvas::UnpackNibbleRow(const unsigned char *pSource,
     }
 }
 
-// 0x005ed6a8. A format the chain does not test draws nothing at all, rather than falling back to a
+// 0x005ed6a8
+// A format the chain does not test draws nothing at all, rather than falling back to a
 // generic path.
 void ACanvas::BlitRemapNoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
     switch (source.mFormat) {
@@ -1320,7 +1321,8 @@ void ACanvas::BlitRemapNoClip(const ABitmap &source, int nX, int nY, const unsig
     }
 }
 
-// 0x005ed718. The description is copied before clipping, because ClipBlitToRect() rewrites the one
+// 0x005ed718
+// The description is copied before clipping, because ClipBlitToRect() rewrites the one
 // it is given.
 void ACanvas::BlitRemap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
     ABitmap clipped = source;
@@ -1372,7 +1374,8 @@ void ACanvas::BlitRemapRle8NoClip(const ABitmap &source,
     }
 }
 
-// 0x005ea280. The clipping matches BlitRle8(), without its test for a source wholly inside the
+// 0x005ea280
+// The clipping matches BlitRle8(), without its test for a source wholly inside the
 // clip rectangle.
 void ACanvas::BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
     ARleReader reader;
@@ -1447,7 +1450,8 @@ void ACanvas::BlitBlend(const ABitmap &source,
     }
 }
 
-// 0x005ee370. Instruction for instruction BlitRemapRle8NoClip() with the blend slot called in
+// 0x005ee370
+// Instruction for instruction BlitRemapRle8NoClip() with the blend slot called in
 // place of the remap slot.
 void ACanvas::BlitBlendRle8NoClip(const ABitmap &source,
                                   int nX,
@@ -1478,7 +1482,8 @@ void ACanvas::BlitBlendRle8NoClip(const ABitmap &source,
     }
 }
 
-// 0x005ea460. Instruction for instruction BlitRemapRle8() with the blend slot called in place of
+// 0x005ea460
+// Instruction for instruction BlitRemapRle8() with the blend slot called in place of
 // the remap slot.
 void ACanvas::BlitBlendRle8(const ABitmap &source,
                             int nX,

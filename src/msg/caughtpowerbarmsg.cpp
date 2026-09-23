@@ -7,7 +7,8 @@ Message *CaughtPowerbarMsg::New() {
     return new CaughtPowerbarMsg;
 }
 
-// 0x003dcf10. The field copies are the compiler expanding the implicit copy
+// 0x003dcf10
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *CaughtPowerbarMsg::Clone() {
     return new CaughtPowerbarMsg(*this);

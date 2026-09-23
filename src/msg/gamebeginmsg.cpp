@@ -5,7 +5,8 @@ Message *GameBeginMsg::New() {
     return new GameBeginMsg;
 }
 
-// 0x00193ad0. The field copies are the compiler expanding the implicit copy
+// 0x00193ad0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *GameBeginMsg::Clone() {
     return new GameBeginMsg(*this);

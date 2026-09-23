@@ -16,7 +16,8 @@ void GetPythonScriptHost() {
     g_pPyShell = pHost;
 }
 
-// 0x0050d608. The destructor is inlined rather than called, which is why the interpreter teardown
+// 0x0050d608
+// The destructor is inlined rather than called, which is why the interpreter teardown
 // reads as part of this body in the disassembly.
 void DestroyPythonScriptHost() {
     delete g_pPyShell;

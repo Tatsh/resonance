@@ -10,7 +10,8 @@ Message *SectionCapturedMsg::New() {
     return new SectionCapturedMsg;
 }
 
-// 0x003dee18. The field copies are the compiler expanding the implicit copy
+// 0x003dee18
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *SectionCapturedMsg::Clone() {
     return new SectionCapturedMsg(*this);
@@ -26,7 +27,8 @@ const char *SectionCapturedMsg::Name() {
     return "SectionCapturedMsg";
 }
 
-// 0x003d8578. The colour name is copied into a temporary before it is written.
+// 0x003d8578
+// The colour name is copied into a temporary before it is written.
 void SectionCapturedMsg::Print(std::ostream &stream) {
     stream << "b " << mFirstBar << "--" << mEndBar << " tr# " << mTrack;
     stream << " " << HxStr(mPlayer->mColorName);

@@ -5,7 +5,8 @@ Message *RemixFXMsg::New() {
     return new RemixFXMsg;
 }
 
-// 0x001a6250. The field copies are the compiler expanding the implicit copy
+// 0x001a6250
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *RemixFXMsg::Clone() {
     return new RemixFXMsg(*this);

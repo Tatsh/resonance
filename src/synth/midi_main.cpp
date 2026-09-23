@@ -340,7 +340,8 @@ void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int n
     g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
 }
 
-// 0x00464ad0. The command number stays in its second argument register from entry so that the
+// 0x00464ad0
+// The command number stays in its second argument register from entry so that the
 // report below can print it.
 void SynthCommand(int nCommand) {
     switch (nCommand) {
@@ -558,7 +559,8 @@ struct SndbChunk : Rnd::MovieStream::ChunkHeader {
     unsigned char mData[1];       // +0x20
 };
 
-// 0x004646e8. The body OnSoundBankMovieChunk() expands for an SNDB chunk. The out-of-line copy
+// 0x004646e8
+// The body OnSoundBankMovieChunk() expands for an SNDB chunk. The out-of-line copy
 // has no caller.
 inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
     g_chunkCommand.mStagingAddress = g_anIopStagingAddress[g_nIopStagingIndex];
@@ -573,7 +575,8 @@ inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
     return 0;
 }
 
-// 0x00462770. The handler reads its chunk through the header rather than the payload argument.
+// 0x00462770
+// The handler reads its chunk through the header rather than the payload argument.
 void OnSoundBankMovieChunk(Rnd::MovieStream::ChunkHeader *pHeader,
                            [[maybe_unused]] void *pPayload,
                            [[maybe_unused]] void *pData) {

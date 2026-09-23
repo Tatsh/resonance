@@ -88,7 +88,8 @@ GifGraphicControl s_graphicControl;
 // 0x008e8590
 GifScreenDescriptor s_screen;
 
-// 0x007b35e8, the low n bits for each code size n.
+// 0x007b35e8
+// the low n bits for each code size n.
 const unsigned short kCodeMasks[] = {0x0000,
                                      0x0001,
                                      0x0003,

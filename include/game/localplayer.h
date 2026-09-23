@@ -213,14 +213,17 @@ public:
     void ToggleLoop(const Mid::MBT &position);
 
 private:
-    // 0x0011e980. Records a selection of this player's track and place, and tells the other game
+    // 0x0011e980
+    // Records a selection of this player's track and place, and tells the other game
     // systems unless the player stayed on the same track and dropped back.
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // 0x0011eaa8. Toggles the ghost display of this player and announces it.
+    // 0x0011eaa8
+    // Toggles the ghost display of this player and announces it.
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
-    // 0x0011eb20. Starts a multiplier bonus of 2 for eight bars from the message's bar.
+    // 0x0011eb20
+    // Starts a multiplier bonus of 2 for eight bars from the message's bar.
     void OnMultiplier(MultiplierMsg *pMsg);
 
     Sch::TickClock *mClock;          // +0x48

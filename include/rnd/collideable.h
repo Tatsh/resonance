@@ -219,7 +219,8 @@ protected:
     void ReleaseCollidesRefs();
 
 private:
-    // 0x005029b8. Only Copy() and Load() invoke this, and both inline it.
+    // 0x005029b8
+    // Only Copy() and Load() invoke this, and both inline it.
     void AcquireCollidesRefs();
 
     // The collideables this one hit-tests after itself, each of which registers this object as a

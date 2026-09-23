@@ -549,30 +549,36 @@ protected:
     virtual void OnDoPlayback(Message *pMsg);
 
 private:
-    // 0x0010bec8. Reads mState and returns 1 on both paths, so the branch on the state has no
+    // 0x0010bec8
+    // Reads mState and returns 1 on both paths, so the branch on the state has no
     // effect. The constructor, the destructor, SetParams(), and OnBeginGameLocal() all run it and
     // all discard the result.
     int CheckState();
 
-    // 0x001068a0. Creates the game world with the application and this manager's tally, publishes
+    // 0x001068a0
+    // Creates the game world with the application and this manager's tally, publishes
     // two of the settings under script symbols 0x277 and 0x27b, and hands the world the container
     // name from script symbol 0x38e. Load() and OnBeginGameLocal() are its two callers.
     void CreateWorld();
 
-    // 0x0010c0c0. Sets mUnknownfc, spins on the world's load report at 0x00194ca0 until it
+    // 0x0010c0c0
+    // Sets mUnknownfc, spins on the world's load report at 0x00194ca0 until it
     // finishes, completes the load, adds the players, prepares the level, and reconnects the
     // poller. Load() inlines the same sequence rather than calling this.
     void FinishWorldLoad();
 
-    // 0x0010c1f0. Forwards to AddPersonaPlayers(). FinishWorldLoad() and Load() call it.
+    // 0x0010c1f0
+    // Forwards to AddPersonaPlayers(). FinishWorldLoad() and Load() call it.
     void AddPlayers();
 
-    // 0x00106ec0. Adds a local player for each persona through GrooveWorld::AddLocalPlayer(), in
+    // 0x00106ec0
+    // Adds a local player for each persona through GrooveWorld::AddLocalPlayer(), in
     // persona order, each with one of the colour names at 0x007cd3b0. It also shuffles the
     // persona indices, but AddLocalPlayer() does not read the shuffled index.
     void AddPersonaPlayers();
 
-    // 0x00106c08. The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
+    // 0x00106c08
+    // The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
     // and a playback, and then either queues a BeginGameLocalMsg or returns to the front end.
     void EndGame(int bRestart);
 

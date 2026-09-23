@@ -5,7 +5,8 @@ Message *ToggleGhostMsg::New() {
     return new ToggleGhostMsg;
 }
 
-// 0x0011d7c0. The field copies are the compiler expanding the implicit copy
+// 0x0011d7c0
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *ToggleGhostMsg::Clone() {
     return new ToggleGhostMsg(*this);

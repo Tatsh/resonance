@@ -5,7 +5,8 @@ Message *AxeButtonMsg::New() {
     return new AxeButtonMsg;
 }
 
-// 0x0019a748. The field copies are the compiler expanding the implicit copy
+// 0x0019a748
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *AxeButtonMsg::Clone() {
     return new AxeButtonMsg(*this);

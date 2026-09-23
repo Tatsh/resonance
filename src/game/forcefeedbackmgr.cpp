@@ -98,7 +98,8 @@ public:
     virtual void Load([[maybe_unused]] IBStream &stream) {
     }
 
-    // 0x00170140. The factory the unit's static initialiser registers under identifier zero.
+    // 0x00170140
+    // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
     }
@@ -140,7 +141,8 @@ public:
     virtual void Load([[maybe_unused]] IBStream &stream) {
     }
 
-    // 0x00170250. The factory the unit's static initialiser registers under identifier zero.
+    // 0x00170250
+    // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
     }
@@ -172,7 +174,8 @@ public:
         g_pForceFeedbackMgr->SetPowerup(mPlayerSlot, mPowerup);
     }
 
-    // 0x00170310. The factory the unit's static initialiser registers under identifier zero.
+    // 0x00170310
+    // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
     }
@@ -208,7 +211,8 @@ public:
         g_pForceFeedbackMgr->SetSmallMotor(mPlayerSlot, mState);
     }
 
-    // 0x001703d0. The factory the unit's static initialiser registers under identifier zero.
+    // 0x001703d0
+    // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
     }
@@ -245,7 +249,8 @@ public:
         g_pForceFeedbackMgr->SetBothMotors(mPlayerSlot, mSmallState, mBigLevel);
     }
 
-    // 0x00170498. The factory the unit's static initialiser registers under identifier zero.
+    // 0x00170498
+    // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
     }

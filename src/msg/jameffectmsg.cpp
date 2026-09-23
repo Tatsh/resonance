@@ -5,7 +5,8 @@ Message *JamEffectMsg::New() {
     return new JamEffectMsg;
 }
 
-// 0x001caa00. The field copies are the compiler expanding the implicit copy
+// 0x001caa00
+// The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *JamEffectMsg::Clone() {
     return new JamEffectMsg(*this);

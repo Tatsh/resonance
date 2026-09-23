@@ -79,7 +79,8 @@ ACanvasLin15::ACanvasLin15(const ABitmap &bitmap) : ACanvas15(bitmap) {
 ACanvasLin15::~ACanvasLin15() {
 }
 
-// 0x00619040. The width, the height, and the row pitch are all re-read inside the loops rather
+// 0x00619040
+// The width, the height, and the row pitch are all re-read inside the loops rather
 // than hoisted, which is what the binary does.
 void ACanvasLin15::BuildAlphaFromColorKey(unsigned int nColorKey) {
     const unsigned int nKey = nColorKey & 0xffff;
@@ -112,7 +113,8 @@ unsigned short ACanvasLin15::GetPixel15NoClip(int nX, int nY) {
     return *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
 }
 
-// 0x00619128. A halfword store per pixel rather than a memset, and the colour is re-read on every
+// 0x00619128
+// A halfword store per pixel rather than a memset, and the colour is re-read on every
 // iteration.
 void ACanvasLin15::FillRowNoClip(int nY, int nLeft, int nRight) {
     unsigned short *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
@@ -122,7 +124,8 @@ void ACanvasLin15::FillRowNoClip(int nY, int nLeft, int nRight) {
     }
 }
 
-// 0x00619170. The colour and the row pitch are both re-read on every iteration, which recomputing
+// 0x00619170
+// The colour and the row pitch are both re-read on every iteration, which recomputing
 // the address per row reproduces.
 void ACanvasLin15::FillColumnNoClip(int nX, int nTop, int nBottom) {
     for (int nY = nTop; nY < nBottom; ++nY) {
@@ -169,7 +172,8 @@ void ACanvasLin15::TextureRowIndexed(int nY,
     }
 }
 
-// 0x00618b00. Each row is unpacked into g_abCanvasRowScratch first, and the key is compared against
+// 0x00618b00
+// Each row is unpacked into g_abCanvasRowScratch first, and the key is compared against
 // the low byte of the transparent colour.
 void ACanvasLin15::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
@@ -194,7 +198,8 @@ void ACanvasLin15::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00618c78. The transparency flag is tested once per row, choosing between a keyed and an
+// 0x00618c78
+// The transparency flag is tested once per row, choosing between a keyed and an
 // opaque walk.
 void ACanvasLin15::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
@@ -224,7 +229,8 @@ void ACanvasLin15::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00618e00. Three tiers, as in ACanvasLin8::Blit8NoClip().
+// 0x00618e00
+// Three tiers, as in ACanvasLin8::Blit8NoClip().
 void ACanvasLin15::Blit15NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceByte = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestByte = static_cast<unsigned char *>(
@@ -256,7 +262,8 @@ void ACanvasLin15::Blit15NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00619280. The key is compared against the low byte of the transparent colour.
+// 0x00619280
+// The key is compared against the low byte of the transparent colour.
 void ACanvasLin15::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
@@ -273,7 +280,8 @@ void ACanvasLin15::RemapRowIndexed(const ARowSpan &span, const unsigned char *pR
     }
 }
 
-// 0x00619360. The key comparison here is against the whole transparent colour word, where
+// 0x00619360
+// The key comparison here is against the whole transparent colour word, where
 // StretchRowRemap() compares its low byte.
 void ACanvasLin15::StretchRowIndexed(const AStretchSpan &span) {
     if (span.mPalette == nullptr) {

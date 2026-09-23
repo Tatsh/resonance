@@ -920,7 +920,8 @@ constexpr int kClipVertCapacity = 9;
 constexpr float kFogFixed4Max = 4080.0f;
 constexpr float kFixed4Inverse = 1.0f / kFixed4Scale;
 
-// 0x008e4010. The unit's static initialiser builds it with nine zeroed vertices.
+// 0x008e4010
+// The unit's static initialiser builds it with nine zeroed vertices.
 std::vector<DrawVert> g_clipVerts(kClipVertCapacity);
 
 // The scissor edges a vertex falls outside.

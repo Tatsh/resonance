@@ -72,7 +72,8 @@ static FailSink &operator<<(FailSink &sink, const std::list<Animatable *> &anims
     return sink;
 }
 
-// 0x0049a8a8. No call site survives in the shipped build, and the five literals below are the only
+// 0x0049a8a8
+// No call site survives in the shipped build, and the five literals below are the only
 // record of the FilterType names. The routine is not static: an out-of-line copy with no caller is
 // what external linkage produces, where internal linkage would have let the compiler discard it.
 FailSink &operator<<(FailSink &sink, Animatable::FilterType nType) {
@@ -133,7 +134,8 @@ static Stream &operator<<(Stream &stream, const std::list<Animatable *> &anims) 
     return stream;
 }
 
-// 0x0049a838. The list reader below inlines this body rather than calling it.
+// 0x0049a838
+// The list reader below inlines this body rather than calling it.
 static Stream &operator>>(Stream &stream, Animatable::Filter *&pFilter) {
     int nType = 0;
     stream.Read(&nType, sizeof(nType));
@@ -213,7 +215,8 @@ int Animatable::ScaleOffset::Type() {
     return kFilterScaleOffset;
 }
 
-// 0x00499098. Compiled as a block copy of all twelve bytes, the vtable pointer included.
+// 0x00499098
+// Compiled as a block copy of all twelve bytes, the vtable pointer included.
 void Animatable::ScaleOffset::Copy(const Filter *pSource) {
     *this = *static_cast<const ScaleOffset *>(pSource);
 }
@@ -268,7 +271,8 @@ int Animatable::MinMaxLoop::Type() {
     return kFilterMinMaxLoop;
 }
 
-// 0x004992e8. Compiled as a block copy of all sixteen bytes, the vtable pointer included.
+// 0x004992e8
+// Compiled as a block copy of all sixteen bytes, the vtable pointer included.
 void Animatable::MinMaxLoop::Copy(const Filter *pSource) {
     *this = *static_cast<const MinMaxLoop *>(pSource);
 }
@@ -325,7 +329,8 @@ int Animatable::ZeroOrder::Type() {
     return kFilterZeroOrder;
 }
 
-// 0x004994c0. Compiled as a block copy of all twelve bytes, the vtable pointer included.
+// 0x004994c0
+// Compiled as a block copy of all twelve bytes, the vtable pointer included.
 void Animatable::ZeroOrder::Copy(const Filter *pSource) {
     *this = *static_cast<const ZeroOrder *>(pSource);
 }
@@ -369,7 +374,8 @@ int Animatable::FirstOrder::Type() {
     return kFilterFirstOrder;
 }
 
-// 0x004996a0. Compiled as a block copy of all twelve bytes, the vtable pointer included.
+// 0x004996a0
+// Compiled as a block copy of all twelve bytes, the vtable pointer included.
 void Animatable::FirstOrder::Copy(const Filter *pSource) {
     *this = *static_cast<const FirstOrder *>(pSource);
 }
@@ -423,7 +429,8 @@ int Animatable::SecondOrder::Type() {
     return kFilterSecondOrder;
 }
 
-// 0x00499910. Compiled as a block copy of all twenty bytes, the vtable pointer included.
+// 0x00499910
+// Compiled as a block copy of all twenty bytes, the vtable pointer included.
 void Animatable::SecondOrder::Copy(const Filter *pSource) {
     *this = *static_cast<const SecondOrder *>(pSource);
 }

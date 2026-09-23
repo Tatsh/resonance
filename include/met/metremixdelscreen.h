@@ -321,7 +321,8 @@ public:
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
 private:
-    // 0x003440b8. Shows one catalogue row on the data screen. Slot 33 and four branches of slot 19
+    // 0x003440b8
+    // Shows one catalogue row on the data screen. Slot 33 and four branches of slot 19
     // are its callers. The body is not written: it resolves the screen registered under
     // `MetRemixDataScreen`, and then runs the routine at `0x003455a8` on that screen with the
     // address of the indexed row, or the one at `0x00345ba0` with a null argument when mUnknownf0

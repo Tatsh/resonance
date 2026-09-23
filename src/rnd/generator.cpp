@@ -547,7 +547,8 @@ void Generator::SetFrameSelf(float flFrame) {
 
 // 0x0045b040
 int Generator::DrawSelf() {
-    // 0x0081c448, the four draw paths in DrawPath order.
+    // 0x0081c448
+    // the four draw paths in DrawPath order.
     static void (Generator::*const kDrawPaths[])(const Transform &, float) = {
         &Generator::DrawInstanceView,
         &Generator::DrawInstanceMesh,

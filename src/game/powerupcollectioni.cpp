@@ -1,11 +1,13 @@
 #include "game/powerupcollectioni.h"
 
-// 0x001cc7d0. The body adds nothing to the MsgSource construction the compiler expands ahead of
+// 0x001cc7d0
+// The body adds nothing to the MsgSource construction the compiler expands ahead of
 // the table store.
 PowerupCollectionI::PowerupCollectionI() {
 }
 
-// 0x001cca90. Everything left in the body is the expansion of the MsgSource destructor.
+// 0x001cca90
+// Everything left in the body is the expansion of the MsgSource destructor.
 PowerupCollectionI::~PowerupCollectionI() {
 }
 

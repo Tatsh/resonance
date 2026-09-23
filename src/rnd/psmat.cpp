@@ -63,7 +63,8 @@ constexpr unsigned long long kClampModeMask = 0x0f;
 // mMultiPass value that makes a later stage modulate rather than replace.
 constexpr int kMultiPassModulate = 2;
 
-// 0x0076d688. Rnd::Mat::BlendMode to GS TEX0.TFX, where 0 is MODULATE, 1 DECAL, 2 HIGHLIGHT, and
+// 0x0076d688
+// Rnd::Mat::BlendMode to GS TEX0.TFX, where 0 is MODULATE, 1 DECAL, 2 HIGHLIGHT, and
 // 3 HIGHLIGHT2. Every mode this table does not distinguish modulates.
 int g_anStageBlendTexFunc[] = {0, 1, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0};
 

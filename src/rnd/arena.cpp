@@ -334,7 +334,8 @@ Arena *NewArena(const HxStr &name) {
     return new Arena(name);
 }
 
-// 0x005bb8f0. The thunk the class registry stores. The null test in the body is the conversion of
+// 0x005bb8f0
+// The thunk the class registry stores. The null test in the body is the conversion of
 // an Arena pointer to its virtual Rnd::Object base rather than a check the source asks for.
 static Object *NewArenaObject(const HxStr &name) {
     return g_pfnNewArena(name);
