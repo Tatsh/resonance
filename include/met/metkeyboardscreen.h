@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "math/vector3.h"
 #include "met/metscreen.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
@@ -9,6 +10,10 @@
 
 class MetKBUser;
 struct MetKeyboardRequest;
+
+namespace Rnd {
+class Button;
+} // namespace Rnd
 
 /**
  * On-screen keyboard.
@@ -24,13 +29,10 @@ struct MetKeyboardRequest;
  * screen registers under the literal `MetKeyboardScreen` at `0x007f5128`, which slot 30 uses to
  * make itself the active panel again.
  *
- * The object is at least 0x128 bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the highest store the constructor makes plus its
- * width. An earlier reading recorded 0xd8 and described the constructor as writing only two runs,
- * `+0x8c` to `+0xb0` and `+0xbc` to `+0xd4`. The constructor also builds an HxStr in place at
- * `+0xb4`, writes 1.0 into `+0xec` and `+0xfc`, clears `+0x100` to `+0x118`, writes 1 into `+0x11c`
- * and 5 into `+0x124`, overwrites two members of its own base at `+0x58` and `+0x5c`, and then runs
- * GetDefaultMacros(), discarding the result.
+ * The object is 0x130 bytes, the size New() requests. The constructor builds an HxStr in place at
+ * `+0xb4`, writes 1.0 into the padding word of both offsets at `+0xe0` and `+0xf0`, clears `+0x100`
+ * to `+0x118`, writes 1 into `+0x11c` and 5 into `+0x124`, overwrites two members of its own base
+ * at `+0x58` and `+0x5c`, and then runs GetDefaultMacros(), discarding the result.
  *
  * Slot 38 resolves seven container objects by name and runs each through the runtime cast helper at
  * `0x005570e0`, with `Rnd::View` and `Rnd::Text` as the two target names the translation unit
@@ -44,21 +46,15 @@ struct MetKeyboardRequest;
  * `0x0028c470`, 24 `0x0028c4a8`, 26 `0x0028c708`, 28 `0x0028c5e0`, 30 `0x00283968`, 33
  * `0x0028c808`, 36 `0x00283aa0`, 38 `0x00282948`.
  *
- * Slot 19 is the input-command handler and it is the routine that settles what the sound slots
- * take. It receives one pointer to a 16-byte controller-command record, reads a selector from
- * `+0x00` and a second value from `+0x04`, returns at once unless mSelector is -1 or equals that
- * second value, and then switches the selector over 21 cases through the table at `0x007f5230`. The
- * record has no descriptor, no embedded file path, and no method name anywhere in the image. It is
- * embedded in a ControllerCmd at `+0x0c`, which ControllerCmd::Execute at `0x00194560` proves by
- * passing `this + 0x0c` on to `0x0018f078`. It is not titled here, and slot 19 is therefore
- * documented rather than declared. An earlier reading described the field at `+0x04` as a sequence
- * number; this class compares it against its own selector, so it is the same kind of value as
- * mSelector.
+ * The keys are named by the HxStr globals the unit's static initialiser at `0x0028a088` builds
+ * from `0x00891b20` onward. Each key's button in the container is `key_<name>.but`, or
+ * `key_<name>_cap.but` and `key_<name>_low.but` for a letter. Three layouts of six rows of sixteen
+ * names, the regular, shifted, and caps layouts at `0x006a7c98`, `0x006a7cb0`, and `0x006a7cc8`,
+ * place the names on the grid mRow and mColumn walk. A key wider than one cell repeats its name in
+ * every cell it covers, which is why the movers step until the name changes.
  *
- * Six slots are documented rather than written. Slot 5 and slot 38 both drive members of Rnd::Text
- * whose signatures are not settled, and slots 26, 28, 30, and 36 run the class's own key-name
- * dispatcher at `0x00282ef0`, which resolves 24 HxStr globals from `0x00891b30` onward to their
- * handlers and has no recovered titles for them.
+ * The constructor and slot 38 are not written. Slot 38 drives members of Rnd::Text whose
+ * signatures are not settled.
  *
  * Every member is private. Nothing outside the class touches one directly.
  */
@@ -79,6 +75,28 @@ public:
      * @ghidraAddress 0x00282e30
      */
     virtual ~MetKeyboardScreen();
+
+    /**
+     * Produce a keyboard on the heap.
+     *
+     * The front end's screen factory at `0x00385180` is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The screen.
+     * @ghidraAddress 0x0028c358
+     */
+    static MetScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Record the screen the registered keyboard departs to.
+     *
+     * No call site exists. The title is inferred.
+     *
+     * @param returnScreen The registry key of the screen.
+     * @ghidraAddress 0x0028c2c0
+     */
+    static void SetKeyboardReturnScreen(const HxStr &returnScreen);
 
     /**
      * Report the twelve default keyboard macros, filling the list on first use.
@@ -121,13 +139,11 @@ public:
     static void Open(const MetKeyboardRequest &request);
 
     /**
-     * Put every one of the twelve named keys back in state 3.
+     * Disable the twelve function keys.
      *
-     * Sets mUnknown11c to 1, then resolves `key_<name>.but` as a Rnd::Button for each of the
-     * twelve names in the array at `0x00891be0` and calls Rnd::Button::SetState() with 3.
-     * ResolveContainerViews() and MetFreqMakerButtonsScreen::HandleCommand() call it. The body is
-     * not written, because it waits on the keyboard static initialiser that builds the array at
-     * `0x00891be0`. The title is inferred.
+     * Sets mMacrosDisabled and puts the button of each of the twelve function keys in state 3.
+     * ResolveContainerViews() and MetFreqMakerButtonsScreen::HandleCommand() call it. The title is
+     * inferred.
      *
      * @ghidraAddress 0x00283c10
      */
@@ -136,12 +152,10 @@ public:
     /**
      * Show the keyboard and start its enter animation.
      *
-     * Slot 5. Hands the two panel captions to the title bar and the text entry window, copies the
-     * entered text's length into mUnknownd4, clears the text entry window, measures the caret
-     * position through `0x004c9e98`, moves the cursor there, records 3 in mUnknown110 and 13 in
-     * mUnknown114, resets the key-repeat clock to 1.0, and runs MetScreen::EnterAndShow().
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 5. Hands the prompt to the title bar and the entered text to the text entry window,
+     * puts the caret at the end of the text, selects row 3 column 13, toggles the shift key twice
+     * to restore the regular layout and the highlight, starts the caret blink, and runs
+     * MetScreen::EnterAndShow().
      *
      * @ghidraAddress 0x00283868
      */
@@ -156,6 +170,20 @@ public:
      * @ghidraAddress 0x0028c550
      */
     virtual void BeginExit();
+
+    /**
+     * Act on one navigation command.
+     *
+     * Slot 19. Ignores a command from a controller other than mSelector unless mSelector is -1.
+     * Every accepted command first clears the pending key. The four directions play the slide
+     * sound and move the selection, select presses the selected key, back departs without
+     * committing, and codes 7, 8, 11, 12, and 13 press ENTER, SPACE, the left arrow, BACKSPACE,
+     * and the right arrow. Codes 20 and 21 act on SHIFT and CAPS at once rather than pressing them.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x00283268
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * Play the key sound that accompanies sliding.
@@ -199,15 +227,11 @@ public:
     virtual void PlayCycleRightSound(int nSelector);
 
     /**
-     * Repeat the current key once the repeat interval has elapsed.
+     * Blink the caret.
      *
-     * Slot 26. Returns at once while the repeat clock is zero, and otherwise waits until the time
-     * has passed the clock plus 240. The clock then advances by 240 from the time rather than from
-     * its previous value, so the interval is measured from the call that fired it. The cursor's
-     * slot 1 runs with 0 when the cursor reports a set field at `+0x04` and with 1 otherwise, which
-     * is what makes the caret blink.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 26. Returns at once while mBlinkTime is zero, and otherwise waits until the time has
+     * passed mBlinkTime plus 240. The caret then toggles, and mBlinkTime advances by 240 from the
+     * time rather than from its previous value.
      *
      * @param flTime The current renderer time.
      * @ghidraAddress 0x0028c708
@@ -215,15 +239,11 @@ public:
     virtual void OnUnknownSlot26(float flTime);
 
     /**
-     * Apply the pending key command and then start the base's alternation.
+     * Apply the pending key and then start the base's alternation.
      *
-     * Slot 28. Resets the caret through the helper at `0x0028c7c0`, returns at once when the
-     * pending command name is empty, and otherwise dispatches the name through the class's key-name
-     * dispatcher. It then switches mUnknown124 over seven cases through the table at `0x007f5980`,
-     * runs one of slots 25, 20, 22, 23, and 24 with its own selector, records 6, and finally runs
-     * MetScreen::StartRepeatingSound() with the arguments it received.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 28. Hides the caret, returns at once when no key is pending, and otherwise dispatches
+     * the pending key. The sound mLastAction selects then plays, mLastAction becomes idle, and
+     * MetScreen::StartRepeatingSound() runs with the arguments received.
      *
      * @param flStartTime The time the first step runs at.
      * @param flInterval The interval between steps.
@@ -235,33 +255,17 @@ public:
     StartRepeatingSound(float flStartTime, float flInterval, Rnd::Button *pButton, int nCycles);
 
     /**
-     * Commit the pending key command.
+     * Restore the key buttons once a press has finished alternating.
      *
-     * Slot 30. Returns at once when the pending command name is empty. Otherwise it applies the
-     * name, applies a second name the helper at `0x0028c870` resolves, runs the class's own
-     * `0x00283f38`, clears the pending name, and makes itself the renderer's active panel again
-     * under the literal `MetKeyboardScreen`. The argument the base passes is ignored.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 30. Returns at once when no key is pending. Otherwise it restores the pending key's
+     * button and the selected key's button, highlights the selected key again, clears the pending
+     * key, and makes itself the renderer's active panel again under the literal
+     * `MetKeyboardScreen`. The argument the base passes is ignored.
      *
      * @param pButton The button slot 29 finished with, ignored.
      * @ghidraAddress 0x00283968
      */
     virtual void OnUnknownSlot30(Rnd::Button *pButton);
-
-    /**
-     * Report the entered text and depart.
-     *
-     * Slot 36. Clears the repeat clock, applies the name the helper at `0x0028c870` resolves, and
-     * then, when MetScreen::mUnknown18 is set, strips every trailing space from the entered text
-     * before handing it to the object at `+0x104`. It resolves the screen recorded in mUnknownac,
-     * runs slot 11 on it, activates it, runs the class's `0x0028c828`, and clears mUnknown118.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
-     *
-     * @ghidraAddress 0x00283aa0
-     */
-    virtual void OnUnknownSlot36();
 
     /**
      * Set the ticker from the recorded text.
@@ -273,11 +277,23 @@ public:
     virtual void OnUnknownSlot33();
 
     /**
+     * Report the entered text and depart.
+     *
+     * Slot 36. Stops the caret blink and restores the selected key's button. When
+     * MetScreen::mUnknown18 is set, every trailing space is stripped from the entered text and the
+     * text goes to mUser. The screen recorded in mReturnScreen is then told the keyboard was
+     * dismissed and made the active panel, and the shift state returns to regular.
+     *
+     * @ghidraAddress 0x00283aa0
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
      * Resolve the three key panels and the four text objects.
      *
      * Slot 38. Runs MetScreen::ResolveContainerViews() first and then resolves each of the seven
-     * container objects by name, casting three to Rnd::View and four to Rnd::Text. It ends by
-     * recording four values in mUnknown108 through mUnknown114 and running `0x00283c10`.
+     * container objects by name, casting three to Rnd::View and four to Rnd::Text. It records the
+     * two caption offsets, selects the regular layout and panel, and runs ResetKeyStates().
      *
      * The body is not written, for the reason recorded in the class documentation.
      *
@@ -286,13 +302,146 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x0028cd00
-    // Replaces the shared ticker text with the argument and reposts it at the
-    // renderer's current time, doing nothing when the text has not changed. The text itself is a
-    // function-local static HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0, initialised to
-    // the empty string. The body is not written. The repost runs through 0x00317368 and that
-    // routine has no recovered title.
+    // 0x00282ef0
+    // Apply one key by name. The named keys go to their handlers, the twelve function keys insert
+    // their macro, and every other name is typed as its first character.
+    void DispatchKeyName(const HxStr &name);
+
+    // 0x00283f38
+    // Highlight the selected key's button and show its macro when it is a function key. Nothing
+    // happens on a function key while macros are disabled.
+    void HighlightCurrentKey();
+
+    // 0x00284788
+    // Step the selection right until the key name changes, wrapping within the row.
+    void MoveRight();
+
+    // 0x002848e0
+    // Step the selection left until the key name changes, wrapping within the row.
+    void MoveLeft();
+
+    // 0x00284a30
+    // Step the selection down until the key name changes, wrapping within the column, and past
+    // the function keys while macros are disabled.
+    void MoveDown();
+
+    // 0x00284bb0
+    // Step the selection up, as MoveDown() steps it down.
+    void MoveUp();
+
+    // 0x00284ec0
+    // Show the macro of a function key beside the caret, or report that it does not fit.
+    void ShowMacro(const HxStr &key);
+
+    // 0x002850b8
+    // Append the default macro of one function key to the text when it fits.
+    void InsertMacro(int nIndex);
+
+    // 0x00285378. Inline, with this out-of-line copy.
+    // Find the button of a key. A single letter uses its case-specific button.
+    Rnd::Button *FindKeyButton(const HxStr &key);
+
+    // 0x00285b08
+    // Toggle shift, which caps also releases.
+    void OnShift();
+
+    // 0x00285e28
+    // Delete the character before the caret.
+    void OnBackspace();
+
+    // 0x00285fa0
+    // Move the caret left.
+    void OnCaretLeft();
+
+    // 0x00286120
+    // Move the caret right.
+    void OnCaretRight();
+
+    // 0x002862b0
+    // Toggle caps lock, which also releases shift.
+    void OnCaps();
+
+    // 0x002865a0
+    // Insert three spaces when they fit.
+    void OnTab();
+
+    // 0x00286850
+    // Insert one space when it fits.
+    void OnSpace();
+
+    // 0x00286ab0
+    // Delete the character at the caret.
+    void OnDelete();
+
+    // 0x00286c10
+    // Insert the first character of a key name when it fits.
+    void OnCharacter(const HxStr &key);
+
+    // 0x0028c3e8. Inline, with this out-of-line copy.
+    // Show the caret beside the character it precedes.
+    void UpdateCursor();
+
+    // 0x0028c7c0
+    // Hide the caret and restart its blink.
+    void ResetCaret();
+
+    // 0x0028c828
+    // Empty in the image. Slot 36 calls it last. The title is inferred.
+    void OnDeparted();
+
+    // 0x0028c870. Inline, with this out-of-line copy.
+    // The name of the selected key.
+    HxStr *CurrentKey();
+
+    // 0x0028c898. Inline, with this out-of-line copy.
+    // Put a key's button back in its resting state, latched for an active shift or caps key.
+    void UnhighlightKey(const HxStr &key);
+
+    // 0x0028c9c8. Inline, with this out-of-line copy and no call site.
+    // Remove one character of the text.
+    void RemoveChar(int nIndex);
+
+    // 0x0028c9e8. Inline, with this out-of-line copy and no call site.
+    // Append to the text.
+    void AppendText(const HxStr &text);
+
+    // 0x0028ca08. Inline, with this out-of-line copy and no call site.
+    // Insert into the text at a position, or append past its end.
+    void InsertText(const HxStr &text, unsigned nPos);
+
+    // 0x0028ca58. Inline, with this out-of-line copy.
+    // The horizontal position the end of the text is laid out at, truncated.
+    int TextEndX();
+
+    // 0x0028caf8. Inline, with this out-of-line copy.
+    // Clear the macro caption.
+    void HideMacro();
+
+    // 0x0028cc50
+    // Whether a key is one of the twelve function keys.
+    bool IsMacroKey(const HxStr &key);
+
+    // 0x0028ccb8
+    // Record the key a press is applying.
+    void SetPendingCommand(const HxStr &key);
+
+    // 0x0028cd00. Inline, with this out-of-line copy.
+    // Replace the shared ticker text with the argument and repost it at the renderer's current
+    // time, doing nothing when the text has not changed. The text is a function-local static
+    // HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0, and 0x0028ccd8 is its destructor.
     void SetTickerText(const HxStr &text);
+
+    // 0x0028cda8
+    // Commit the text and depart.
+    void OnEnter();
+
+    // Press a key as the controller's shortcut commands do. Inline at each of HandleCommand()'s
+    // five sites, with no out-of-line copy.
+    void PressKey(const HxStr &key);
+
+    // 0x0028ce70
+    // Insert the macro of one function key and move the caret past it.
+    void OnMacro(int nIndex);
 
     // 0x0028c830. Assigns the entered text. Open() is the one caller.
     void SetText(const HxStr &text);
@@ -309,8 +458,7 @@ private:
     // 0x0028cad8. Assigns the ticker text slot 33 posts. Open() is the one caller.
     void SetTicker(const HxStr &ticker);
 
-    // 0x0028cab0. Assigns the registry key of the screen slot 36 departs to. Open() is the one
-    // caller.
+    // 0x0028cab0. Assigns the registry key of the screen slot 36 departs to.
     void SetReturnScreen(const HxStr &returnScreen);
 
     // The macro list the keyboard offers. Open() stores the request's list here, or the default
@@ -323,37 +471,40 @@ private:
     Rnd::Text *mpTextEntryWindow; // +0xa0, `text entry window.txt`
     Rnd::Text *mpTitleBar;        // +0xa4, `title bar.txt`
     Rnd::Text *mpMacroDisplay;    // +0xa8, `macro_display.txt`
-    // Registry key of the screen slot 36 departs to.
-    HxStr mUnknownac; // +0xac
-    // The entered text. Slot 36 strips its trailing spaces.
-    HxStr mUnknownb4; // +0xb4
+    // Registry key of the screen slot 36 departs to. +0xac
+    HxStr mReturnScreen;
+    // The entered text. +0xb4
+    HxStr mText;
     // The prompt SetPrompt() assigns. +0xbc
     HxStr mPrompt;
-    // The ticker text slot 33 posts.
-    HxStr mUnknownc4; // +0xc4
-    // The pending key command name. Slots 28, 30, and 36 all test it for emptiness first.
-    HxStr mUnknowncc; // +0xcc
-    int mUnknownd4;   // +0xd4
+    // The ticker text slot 33 posts. +0xc4
+    HxStr mTicker;
+    // The key a press is applying, empty while no press is pending. +0xcc
+    HxStr mPendingKey;
+    // The number of characters before the caret. +0xd4
+    int mCaret;
     // Not written by the constructor.
-    unsigned char mUnknownd8[0x14]; // +0xd8
-    float mUnknownec;               // +0xec, starts at 1.0f
-    // Not written by the constructor.
-    unsigned char mUnknownf0[0xc]; // +0xf0
-    float mUnknownfc;              // +0xfc, starts at 1.0f
-    // Deadline of the key repeat, or zero while no key repeats. Slot 26 advances it by 240 a step.
-    float mUnknown100; // +0x100
+    unsigned char mUnknownd8[0x08]; // +0xd8
+    // Offset of the caret from the character it precedes. +0xe0
+    Vector3 mCursorOffset;
+    // Offset of the macro caption from the character it follows. +0xf0
+    Vector3 mMacroOffset;
+    // When the caret next toggles, or zero while it does not blink. +0x100
+    float mBlinkTime;
     // The receiver of the committed text, which SetUser() records. +0x104
     MetKBUser *mUser;
-    int mUnknown108; // +0x108
-    int mUnknown10c; // +0x10c
-    int mUnknown110; // +0x110
-    int mUnknown114; // +0x114
-    int mUnknown118; // +0x118
-    int mUnknown11c; // +0x11c, starts at 1
+    // The rows of the active layout. +0x108
+    HxStr **mRows;
+    // The visible key panel. +0x10c
+    Rnd::View *mPanel;
+    int mRow;            // +0x110
+    int mColumn;         // +0x114
+    int mShiftState;     // +0x118, a KeyboardShiftState
+    int mMacrosDisabled; // +0x11c, starts at 1
     // The selector the four sound slots and slot 19 compare their argument against. A screen that
     // records -1 accepts every value. SetSelector() is the one writer, and the constructor does not
     // clear it.
     int mSelector; // +0x120
-    // Index of the last key action, switched over seven cases by slot 28. Starts at 5.
-    int mUnknown124; // +0x124
+    // What the last key did, a KeyboardAction that slot 28 turns into a sound. Starts at 5.
+    int mLastAction; // +0x124
 };
