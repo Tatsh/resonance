@@ -9,6 +9,21 @@ MultiMuseMsg *MultiMuseMsg::New() {
     return new MultiMuseMsg(nullptr);
 }
 
+// 0x003dc590
+Message *MultiMuseMsg::Clone() {
+    return new MultiMuseMsg(*this);
+}
+
+// 0x003dc608
+int MultiMuseMsg::Type() {
+    return g_dwMultiMuseMsgType;
+}
+
+// 0x003dc618
+const char *MultiMuseMsg::Name() {
+    return "MultiMuseMsg";
+}
+
 // 0x003e38e8
 MultiMuseMsg::MultiMuseMsg(MultiMuse *pMuse) : mMuse(pMuse) {
     if (pMuse != nullptr) {
