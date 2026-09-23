@@ -413,6 +413,36 @@ int FileSeek(int nFile, int nOffset, int nOrigin);
 void FileClose(int nFile);
 
 /**
+ * Write to a file.
+ *
+ * The routine belongs to the same file layer as FileRead() and is not reconstructed. An ark
+ * stream, kFileHandleArkStream, cannot be written and reports -1. A handle with bit 0x2000 set
+ * goes to the host file service with that bit cleared, and any other handle goes to the C
+ * library. The C library's write path and the embedded interpreter's `posix.write` call it.
+ *
+ * @param nFile The file to write.
+ * @param pBuffer The source.
+ * @param nLength The number of bytes to write.
+ * @return The number of bytes transferred, or -1 on failure.
+ * @ghidraAddress 0x0047e178
+ */
+int FileWrite(int nFile, const void *pBuffer, int nLength);
+
+/**
+ * Report whether a file is an interactive terminal.
+ *
+ * The routine belongs to the same file layer as FileRead() and is not reconstructed. An ark stream
+ * or a host file is never a terminal, and any other handle is tested by the C library. The
+ * embedded interpreter's `raw_input` and its interactive-input test call it. The title is inferred
+ * from those callers.
+ *
+ * @param nFile The file to test.
+ * @return Non-zero for a terminal.
+ * @ghidraAddress 0x0047e2f0
+ */
+int FileIsatty(int nFile);
+
+/**
  * Report an ark stream's read position.
  *
  * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
