@@ -94,7 +94,7 @@ LevelBuilder::LevelBuilder(unsigned nTrackCount)
     }
 
     if (bSlot17) {
-        mUnknown34->Slot17(kPlayMapSlot17Argument);
+        mUnknown34->Slot17(kPlayMapSlot17Argument); // Yes, the binary discards the result.
     }
 }
 
