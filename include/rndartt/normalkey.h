@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math.h>
 #include <vector>
 
 struct Color;
@@ -41,6 +42,18 @@ struct NormalKey {
      * @ghidraAddress 0x00557858
      */
     static void InsertUniqueNormalKey(std::vector<NormalKey> &keys, const Color &color);
+
+    /**
+     * Sum of the absolute differences between this key's ratios and another's.
+     *
+     * InsertUniqueNormalKey() and ACanvas::QuantizeToRamps() open-code it. The name is inferred.
+     *
+     * @param other The key to compare with.
+     * @return The summed difference, red and green added first.
+     */
+    float RatioDistance(const NormalKey &other) const {
+        return fabsf(mRed - other.mRed) + fabsf(mGreen - other.mGreen) + fabsf(mBlue - other.mBlue);
+    }
 
     float mScale; /*!< The brightest channel. */
     float mRed;   /*!< Red divided by mScale. */

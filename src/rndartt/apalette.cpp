@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include "rndartt/normalkey.h"
+
 namespace {
 
 // Larger than the largest sum of three squared byte differences, 0x2fa43, so the first entry of
@@ -14,7 +16,45 @@ constexpr int kBlueShift = 16;
 constexpr unsigned int kAlphaOpaque = 0xff000000;
 constexpr int kRGBByteCount = 3;
 
+// BuildRampPalette() writes sixteen shades per key at steps of 1/17, scaled to byte channels, with
+// the GS full alpha. Entry 16 then becomes black at that alpha and entry 0 clear.
+constexpr int kRampLength = 16;
+constexpr float kRampStep = 1.0f / 17.0f;
+constexpr float kRampChannelScale = 255.0f;
+constexpr unsigned int kRampAlpha = 0x80000000;
+constexpr int kRampBlackEntry = 16;
+constexpr int kRampClearEntry = 0;
+constexpr int kRampMinimumEnd = 17;
+
 } // namespace
+
+// 0x00557970
+void APalette::BuildRampPalette(const std::vector<NormalKey> &keys, APalette &palette) {
+    palette.mEnd = static_cast<int>(keys.size()) * kRampLength;
+    unsigned int *pEntry = palette.mEntries;
+    for (const auto &key : keys) {
+        const float flRed = key.mScale * key.mRed;
+        const float flGreen = key.mScale * key.mGreen;
+        const float flBlue = key.mScale * key.mBlue;
+        float flShade = 0.0f;
+        // Yes, more than kRampLength keys write past mEntries.
+        for (int i = kRampLength; i != 0; --i) {
+            const unsigned int nBlue =
+                static_cast<unsigned int>(flBlue * flShade * kRampChannelScale);
+            const unsigned int nGreen =
+                static_cast<unsigned int>(flGreen * flShade * kRampChannelScale);
+            const unsigned int nRed =
+                static_cast<unsigned int>(flRed * flShade * kRampChannelScale);
+            flShade += kRampStep;
+            *pEntry++ = (nBlue << kBlueShift) | (nGreen << kGreenShift) | kRampAlpha | nRed;
+        }
+    }
+    palette.mEntries[kRampBlackEntry] = kRampAlpha;
+    palette.mEntries[kRampClearEntry] = 0;
+    if (palette.mEnd < kRampMinimumEnd) {
+        palette.mEnd = kRampMinimumEnd;
+    }
+}
 
 // 0x00613df8
 void APalette::SetEntries(const unsigned int *pEntries, int nFirst, int nCount) {

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <stddef.h>
+#include <vector>
 
 #include "os/mem.h"
+
+struct NormalKey;
 
 /** Entries a palette stores, one for every value an eight bit index can take. */
 constexpr int kAPaletteEntryCount = 256;
@@ -126,6 +129,24 @@ public:
      * @ghidraAddress 0x00613f10
      */
     int FindNearestEntry(unsigned int nColor, int nFirst, int nLast) const;
+
+    /**
+     * Fill the table with a ramp of sixteen shades for every key, from black towards the key's
+     * colour.
+     *
+     * mEnd becomes sixteen times the key count. Shade i of a key is entry 16 times the key's
+     * position plus i, with each channel `(unsigned)(channel * t * 255)` at t = i / 17 and alpha
+     * 0x80, where a channel is the key's mScale times its ratio. Entry 16 is then set to
+     * 0x80000000, entry 0 to zero, and mEnd is raised to 17 when lower. More than sixteen keys
+     * write past the table. The quantiser at `0x00557af8` is the one caller. The keys arrive in the
+     * first argument register and the palette in the second, so the routine is static rather than
+     * an instance method. The name is inferred.
+     *
+     * @param keys The keys, in the order the quantiser indexes them.
+     * @param palette The palette to fill.
+     * @ghidraAddress 0x00557970
+     */
+    static void BuildRampPalette(const std::vector<NormalKey> &keys, APalette &palette);
 
     unsigned int mEntries[kAPaletteEntryCount]; /*!< The colour table. +0x000 */
     /**

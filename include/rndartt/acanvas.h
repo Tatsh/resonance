@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "rndartt/abitmap.h"
 #include "rndartt/arect.h"
 #include "rndartt/arlereader.h"
@@ -12,6 +14,7 @@ struct APolygon;
 struct ARowSpan;
 struct AStretchBlit;
 struct AStretchSpan;
+struct Color;
 
 /** Fractional bits in the coordinates DrawLine() and TextureRowIndexed() take. */
 constexpr int kACanvasFractionBits = 8;
@@ -120,6 +123,26 @@ public:
      * @ghidraAddress 0x005eb200
      */
     static ACanvas *CreateWithOwnedPixels(const ABitmap &bitmap);
+
+    /**
+     * Reduce this canvas's 32 bit pixels to palette indices over ramps of the given colours.
+     *
+     * One NormalKey per distinct hue is collected from colors through
+     * NormalKey::InsertUniqueNormalKey(), and the static APalette::BuildRampPalette() writes their
+     * ramps into dest's palette. Every source pixel then writes one byte to dest. A pixel with zero
+     * alpha becomes index 0. Any other pixel is matched to the key whose ratios have the least
+     * summed absolute difference from its own, the first such key winning a tie. Its shade is
+     * `(int)(pixel scale / key scale / 17 + 0.5)`, and a shade of 0 becomes index 16 while any
+     * other becomes 16 times the key's position plus the shade, capped at 15. With no colours,
+     * dest's first width times height bytes are cleared. The pixel count is this canvas's width
+     * times height, and dest is assumed to be as large. MetRenderer's routine at `0x001716d0` is
+     * the one caller, passing the locked canvases of two textures. The name is inferred.
+     *
+     * @param dest The eight bit canvas whose pixels and palette are written.
+     * @param colors The colours whose hues the palette covers. Their alpha is not read.
+     * @ghidraAddress 0x00557af8
+     */
+    void QuantizeToRamps(ACanvas &dest, const std::vector<const Color *> &colors) const;
 
     /**
      * Copy a source bitmap, clipped, choosing the slot by source format.

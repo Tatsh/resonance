@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "math/color.h"
 #include "os/mem.h"
 #include "rndartt/acanvaslin15.h"
 #include "rndartt/acanvaslin24.h"
@@ -12,12 +13,14 @@
 #include "rndartt/aclipspan.h"
 #include "rndartt/afixed.h"
 #include "rndartt/afont.h"
+#include "rndartt/apalette.h"
 #include "rndartt/apoint.h"
 #include "rndartt/apolygon.h"
 #include "rndartt/apolygonedge.h"
 #include "rndartt/arowspan.h"
 #include "rndartt/astretchblit.h"
 #include "rndartt/astretchspan.h"
+#include "rndartt/normalkey.h"
 
 namespace {
 
@@ -79,6 +82,17 @@ inline const ABitmap *GlyphForCode(const AFont *pFont, int nCharCode) {
     return nullptr;
 }
 
+// QuantizeToRamps() reserves room for this many keys. Each key owns a ramp of kRampLength palette
+// entries, a shade of zero maps to the shared black entry, and a pixel with zero alpha to entry 0.
+constexpr int kQuantizeReservedKeys = 16;
+constexpr int kRampLength = 16;
+constexpr int kRampLastShade = kRampLength - 1;
+constexpr unsigned char kRampBlackIndex = 16;
+constexpr unsigned char kTransparentIndex = 0;
+constexpr unsigned int kAlphaMask = 0xff000000;
+constexpr float kShadeScale = 1.0f / 17.0f;
+constexpr float kRoundHalf = 0.5f;
+
 // Advance a stretched copy by one destination row and return the source row it then samples.
 inline int AdvanceStretchRow(AStretchBlit *pBlit) {
     pBlit->mSourcePositionY += pBlit->mSourceStepY;
@@ -89,6 +103,51 @@ inline int AdvanceStretchRow(AStretchBlit *pBlit) {
 
 // 0x0086f6f0
 APalette *g_pDefaultPalette = nullptr;
+
+// 0x00557af8
+void ACanvas::QuantizeToRamps(ACanvas &dest, const std::vector<const Color *> &colors) const {
+    std::vector<NormalKey> keys;
+    keys.reserve(kQuantizeReservedKeys);
+    for (const auto pColor : colors) {
+        NormalKey::InsertUniqueNormalKey(keys, *pColor);
+    }
+    APalette::BuildRampPalette(keys, *dest.mBitmap.mPalette);
+
+    int nPixels = mBitmap.mWidth * mBitmap.mHeight;
+    unsigned char *pOut = DestRow(dest.mBitmap);
+    const unsigned int *pIn = static_cast<const unsigned int *>(mBitmap.mPixels);
+    if (keys.empty()) {
+        memset(pOut, 0, nPixels);
+        return;
+    }
+    for (; nPixels != 0; --nPixels) {
+        const unsigned int nPixel = *pIn++;
+        if ((nPixel & kAlphaMask) == 0) {
+            *pOut++ = kTransparentIndex;
+            continue;
+        }
+        const NormalKey key(static_cast<float>(nPixel & kChannelMask),
+                            static_cast<float>((nPixel >> kGreenShift) & kChannelMask),
+                            static_cast<float>((nPixel >> kBlueShift) & kChannelMask));
+        auto nearest = keys.cbegin();
+        float flBest = nearest->RatioDistance(key);
+        for (auto it = nearest + 1; it != keys.cend(); ++it) {
+            const float flDistance = it->RatioDistance(key);
+            if (flDistance < flBest) {
+                flBest = flDistance;
+                nearest = it;
+            }
+        }
+        const int nShade =
+            static_cast<int>(key.mScale / nearest->mScale * kShadeScale + kRoundHalf);
+        const int nRampBase = static_cast<int>(nearest - keys.cbegin()) * kRampLength;
+        if (nShade == 0) {
+            *pOut++ = kRampBlackIndex;
+        } else {
+            *pOut++ = nRampBase + (nShade < kRampLength ? nShade : kRampLastShade);
+        }
+    }
+}
 
 // 0x005eb1a0
 ACanvas::ACanvas(const ABitmap &bitmap) : mBitmap(bitmap) {

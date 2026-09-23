@@ -1,7 +1,5 @@
 #include "rndartt/normalkey.h"
 
-#include <math.h>
-
 #include "math/color.h"
 
 namespace {
@@ -49,10 +47,7 @@ NormalKey::NormalKey(float flRed, float flGreen, float flBlue) {
 void NormalKey::InsertUniqueNormalKey(std::vector<NormalKey> &keys, const Color &color) {
     const NormalKey key(color.r, color.g, color.b);
     for (auto &existing : keys) {
-        const float flDistance = fabsf(existing.mRed - key.mRed) +
-                                 fabsf(existing.mGreen - key.mGreen) +
-                                 fabsf(existing.mBlue - key.mBlue);
-        if (flDistance < kMatchTolerance) {
+        if (existing.RatioDistance(key) < kMatchTolerance) {
             if (existing.mScale < key.mScale) {
                 existing = key;
             }
