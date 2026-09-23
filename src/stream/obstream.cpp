@@ -16,3 +16,9 @@ OBStream &operator<<(OBStream &stream, long nValue) {
     const int nLow = static_cast<int>(nValue);
     return stream.Write(&nLow, sizeof(nLow));
 }
+
+// 0x004edcf8
+OBStream &operator<<(OBStream &stream, unsigned long nValue) {
+    const int nLow = static_cast<int>(nValue);
+    return stream.Write(&nLow, sizeof(nLow));
+}

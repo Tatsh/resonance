@@ -91,8 +91,7 @@ OBStream &operator<<(OBStream &stream, int bValue);
  * Write a 64-bit integer as its low four bytes.
  *
  * The routine truncates the register to 32 bits with a sign extension and moves four bytes through
- * Write(). A second emission at `0x004edcf8` is byte-identical, and PhraseDatabase::Save() calls
- * that copy.
+ * Write(). No call site survives in the shipped program.
  *
  * @param stream The stream to write to.
  * @param nValue The value, of which only the low four bytes reach the stream.
@@ -100,3 +99,19 @@ OBStream &operator<<(OBStream &stream, int bValue);
  * @ghidraAddress 0x004edcb8
  */
 OBStream &operator<<(OBStream &stream, long nValue);
+
+/**
+ * Write an unsigned 64-bit integer as its low four bytes.
+ *
+ * The body is byte-identical to the `long` writer, because narrowing either signedness to 32 bits
+ * compiles the same way. The unsigned identity is inferred from the reader pairing. IBStream has a
+ * `long` reader and an `unsigned long` reader side by side, and this routine follows the `long`
+ * writer in the same unit, where a second emission of one non-inline routine cannot occur.
+ * PhraseDatabase::Save() is the one caller.
+ *
+ * @param stream The stream to write to.
+ * @param nValue The value, of which only the low four bytes reach the stream.
+ * @return The stream.
+ * @ghidraAddress 0x004edcf8
+ */
+OBStream &operator<<(OBStream &stream, unsigned long nValue);

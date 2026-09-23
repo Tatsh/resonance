@@ -67,7 +67,8 @@ void PhraseDatabase::Save(OBStream &stream) {
     const int nValueCount = mUnknown20.size();
     stream.Write(&nValueCount, sizeof(nValueCount));
     for (unsigned i = 0; i < mUnknown20.size(); ++i) {
-        stream << static_cast<long>(mUnknown20[i]); // The long overload writes the low word.
+        // The unsigned long overload writes the low word.
+        stream << static_cast<unsigned long>(mUnknown20[i]);
     }
 }
 
