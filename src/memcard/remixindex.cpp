@@ -91,7 +91,8 @@ void RemixIndex::ReadFromStream(IBStream &stream) {
     stream.Read(&nCount, sizeof(nCount));
     elements.clear();
     for (int nIndex = 0; nIndex < nCount; ++nIndex) {
-        // Yes, the binary copies the fresh element's uninitialised names before Load() fills them.
+        // Yes, the binary copies the fresh element's uninitialised names, GameOK, and Version
+        // before Load() fills them.
         elements.push_back(RemixIndexElement());
         elements[nIndex].Load(stream);
     }
