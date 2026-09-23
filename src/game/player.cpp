@@ -203,29 +203,34 @@ void Player::AddJuice(int nAmount, int bNotify) {
 Player::~Player() {
 }
 
-// 0x00132c68, the out-of-line copy.
+// 0x00132c68
+// The out-of-line copy.
 inline HxStr Player::GetColorName() {
     return mColorName;
 }
 
-// 0x001330a8, the out-of-line copy.
+// 0x001330a8
+// The out-of-line copy.
 inline HxStr Player::GetUsername() {
     return mAppearance->mUnknown00;
 }
 
-// 0x00132cd0, the out-of-line copy.
+// 0x00132cd0
+// The out-of-line copy.
 inline int Player::CallSlot11() {
     Slot11();
     return 0;
 }
 
-// 0x00132d00, the out-of-line copy.
+// 0x00132d00
+// The out-of-line copy.
 inline int Player::CallSlot12() {
     Slot12();
     return 0;
 }
 
-// 0x00133210, the out-of-line copy.
+// 0x00133210
+// The out-of-line copy.
 inline void Player::OnUpdateScore(UpdateScorePacket *pPacket) {
     if (pPacket->mPlayerId == mId20) {
         AddScore(pPacket->mScoreDelta, 0);

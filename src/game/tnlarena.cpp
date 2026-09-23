@@ -54,6 +54,7 @@ void Rnd::Mat::GetMeshReferrers(std::vector<Mesh *> &meshes) {
     }
 }
 
+// 0x004067e8
 TnlArena::TnlArena(Renderer *) {
     mGameMode = Application::shared()->GetGameMode();
     mLevel = kNeutralLevel;
@@ -94,15 +95,18 @@ TnlArena::TnlArena(Renderer *) {
     mScreenAnim->SetLevel(mLevel);
 }
 
+// 0x00406120
 TnlArena::PlayerMaterial::PlayerMaterial(Player *pPlayer) : mPlayer(pPlayer) {
     mMat = dynamic_cast<Rnd::Mat *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mId20))));
 }
 
+// 0x0040c938
 void TnlArena::ScreenMesh::SetMaterial(Rnd::Mat *pMat) const {
     mMesh->SetMaterial(pMat);
 }
 
+// 0x00406de0
 TnlArena::~TnlArena() {
     mScreenAnim->SetLevel(kNeutralLevel);
     g_pTnlArena = nullptr;
@@ -119,6 +123,7 @@ TnlArena::~TnlArena() {
     }
 }
 
+// 0x00406ff0
 void TnlArena::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPointAmountMsgType) {
@@ -167,6 +172,7 @@ void TnlArena::LockLevel() {
     mScreenAnim->SetLevel(kNeutralLevel);
 }
 
+// 0x0040c958
 void TnlArena::SetFrame(float flFrame) {
     mScreenAnim->SetFrame(flFrame);
 }
