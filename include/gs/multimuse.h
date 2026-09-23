@@ -26,9 +26,6 @@
  *
  * MultiMuseMsg carries one of these and is how a sequence moves between a MsgSource and a
  * MsgSink, and MultiMusePlayer is what turns one into messages over time.
- *
- * LoadFields(), the destructor, and Print() are recorded with their addresses and their bodies
- * are not written.
  */
 class MultiMuse : public Attachment {
 public:
@@ -52,6 +49,8 @@ public:
     void operator delete(void *pBlock);
 
     /**
+     * Delete every stored message, then release the vector.
+     *
      * @ghidraAddress 0x001a8448
      */
     virtual ~MultiMuse();
@@ -59,7 +58,10 @@ public:
     /**
      * Write the sequence to a diagnostic stream.
      *
-     * Table slot 3. The body is not written. MultiMuseMsg::Print() is the one recovered caller.
+     * Table slot 3. MultiMuseMsg::Print() is the one recovered caller. An empty sequence prints
+     * `[empty]`. Otherwise the entries print through PrintMuseEntry() inside one pair of brackets,
+     * one per line. When the stream's buffer is an nlfilebuf, each continuation line is padded with
+     * spaces to the column at which the previous entry began.
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x001a8580
@@ -81,8 +83,9 @@ public:
     /**
      * Read the sequence back from an input stream.
      *
-     * The body is not written. MultiMuseMsg::Load() is the one recovered caller, and it creates a
-     * fresh sequence for every read.
+     * Empties the sequence, reads the entry count as one four-byte transfer, and reads each entry
+     * as a position and a message pointer. MultiMuseMsg::Load() is the one recovered caller, and it
+     * creates a fresh sequence for every read.
      *
      * @param stream The stream to read from.
      * @ghidraAddress 0x001a8a88
@@ -141,8 +144,8 @@ public:
  * Write one scheduled message to a diagnostic stream as `[position: message]`.
  *
  * The position arrives by value in a1 and the message in a2, which is how TrackData's bar printer
- * at `0x001d31d8` passes the two halves of one entry. The message is printed through the routine at
- * `0x00556290`. The body is not written, because that routine is not declared.
+ * at `0x001d31d8` passes the two halves of one entry. The message is printed through
+ * Message::PrintBraced(), whose result is discarded.
  *
  * @param stream The stream to write to.
  * @param position The song position.

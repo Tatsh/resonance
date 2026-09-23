@@ -642,6 +642,7 @@ neutralizepowerup
 newjam
 newmodule
 njgb
+nlfilebuf
 nocard
 nolattice
 nomemcard
