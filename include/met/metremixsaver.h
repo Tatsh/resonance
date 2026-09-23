@@ -35,11 +35,13 @@ public:
      *
      * The MetSoloEndRemixScreen override at `0x003998c8` tests one member and dispatches through
      * the primary table, and the MetMultiSaveRemixScreen override at `0x002facc0` runs for several
-     * hundred instructions. Neither reads an argument register.
+     * hundred instructions. Neither reads an argument register, but MetSaveRemixScreen's slots 40
+     * and 41 pass 0 and 1 in a1, so the slot takes one integer that both overrides ignore.
      *
+     * @param nUnknown Passed by the caller and read by neither override.
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot2() = 0;
+    virtual void OnUnknownSlot2(int nUnknown) = 0;
 
     /**
      * Unrecovered. Slot 3.

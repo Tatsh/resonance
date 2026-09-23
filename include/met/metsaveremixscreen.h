@@ -283,20 +283,18 @@ public:
     virtual void ResolveContainerViews();
 
     /**
-     * Dispatch slot 2 of the object at `+0xfc` with a zero argument. Slot 40.
+     * Report to the saver through MetRemixSaver::OnUnknownSlot2() with a zero argument. Slot 40.
      *
-     * A null word at `+0xfc` does nothing. The body is not written, because MetRemixSaver declares
-     * slot 2 without the integer argument this dispatch passes in a1.
+     * A null saver does nothing.
      *
      * @ghidraAddress 0x003819f0
      */
     virtual void OnUnknownSlot40();
 
     /**
-     * Dispatch slot 2 of the object at `+0xfc` with an argument of one. Slot 41.
+     * Report to the saver through MetRemixSaver::OnUnknownSlot2() with an argument of one. Slot 41.
      *
-     * The body differs from slot 40's in that one immediate and nothing else, and is not written
-     * for the same reason.
+     * The body differs from slot 40's in that one immediate and nothing else.
      *
      * @ghidraAddress 0x00381a28
      */

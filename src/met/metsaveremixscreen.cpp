@@ -27,6 +27,11 @@ static const char *const kSaveRemixScreen = "MetSaveRemixScreen";
 static const char *const kLoadGameScreen = "MetLoadGameScreen";
 static const char *const kEmptyText = "";
 
+// The arguments slots 40 and 41 pass to MetRemixSaver::OnUnknownSlot2(), which neither override
+// reads.
+constexpr int kSlot40SaverArgument = 0;
+constexpr int kSlot41SaverArgument = 1;
+
 } // namespace
 
 // 0x0037ace0
@@ -105,5 +110,19 @@ void MetSaveRemixScreen::OnUnknownSlot2(const HxStr &text) {
     if (mUnknowne0 != 0) {
         MetSaveRemix::OnUnknownSlot2(text);
         mUnknowne0 = 0;
+    }
+}
+
+// 0x003819f0
+void MetSaveRemixScreen::OnUnknownSlot40() {
+    if (mUnknownfc != nullptr) {
+        mUnknownfc->OnUnknownSlot2(kSlot40SaverArgument);
+    }
+}
+
+// 0x00381a28
+void MetSaveRemixScreen::OnUnknownSlot41() {
+    if (mUnknownfc != nullptr) {
+        mUnknownfc->OnUnknownSlot2(kSlot41SaverArgument);
     }
 }

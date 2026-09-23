@@ -120,9 +120,10 @@ public:
      * MetRemixSaver slot 2. A clear mUnknownb8 starts the exit animation and lets slot 36 run the
      * sequence once the animation has finished. A set mUnknownb8 runs the sequence at once.
      *
+     * @param nUnknown Not read.
      * @ghidraAddress 0x003998c8
      */
-    virtual void OnUnknownSlot2();
+    virtual void OnUnknownSlot2(int nUnknown);
 
     /**
      * Record that the departure sequence has been requested and start the exit animation.

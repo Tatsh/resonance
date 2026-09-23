@@ -42,7 +42,7 @@ void MetSoloEndRemixScreen::OnUnknownSlot36() {
     }
 }
 
-void MetSoloEndRemixScreen::OnUnknownSlot2() {
+void MetSoloEndRemixScreen::OnUnknownSlot2([[maybe_unused]] int nUnknown) {
     if (mUnknownb8 == 0) {
         BeginExit();
     } else {
