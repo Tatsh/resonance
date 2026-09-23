@@ -330,6 +330,8 @@ extern HxStr g_environClassName;
  * The out-of-line copy has no caller, and Rnd::PsEnviron::Terminate() expands the body. The name
  * is inferred.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x00518e70
  */
 inline void RegisterEnvironClass() {

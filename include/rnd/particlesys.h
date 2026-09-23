@@ -506,6 +506,8 @@ extern HxStr g_particleSysClassName;
  * Rnd::PsParticleSys unit at `0x005ffa38`, neither with a caller, and GfxDevice::Terminate()
  * expands the same sequence. The name is inferred.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x0052b380
  */
 inline void RegisterParticleSysClass() {

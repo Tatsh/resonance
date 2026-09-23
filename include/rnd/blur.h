@@ -259,6 +259,8 @@ public:
     /**
      * Install the trail factory and register the class key with Rnd::g_manager.
      *
+     * Rnd::Manager::Init() also expands this inline.
+     *
      * @ghidraAddress 0x004c3358
      */
     static void Init();

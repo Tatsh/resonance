@@ -470,6 +470,8 @@ Object *CreateRegisteredTex(const HxStr &name);
  * Neither out-of-line copy has a caller. The second, at `0x0059a518`, lies in the Rnd::PsTex unit,
  * and GfxDevice::Terminate() expands the body.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004e7408
  */
 inline void RegisterTexClass() {

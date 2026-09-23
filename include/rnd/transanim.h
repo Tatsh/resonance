@@ -524,6 +524,8 @@ Object *CreateRegisteredTransAnim(const HxStr &name);
  *
  * No call site survives in the shipped program. The name is inferred.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004fba50
  */
 void RegisterTransAnimClass();

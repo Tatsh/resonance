@@ -556,6 +556,8 @@ Object *CreateRegisteredText(const HxStr &name);
 /**
  * Point g_pfnNewText at NewText() and register the "Text" class with Rnd::Manager.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004cf190
  */
 void RegisterTextClass();

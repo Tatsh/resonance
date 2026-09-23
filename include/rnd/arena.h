@@ -235,6 +235,8 @@ public:
     /**
      * Install the creator hook and register the class with Rnd::g_manager under the key "Arena".
      *
+     * Rnd::Manager::Init() also expands this inline.
+     *
      * @ghidraAddress 0x005bb8b0
      */
     static void Init();

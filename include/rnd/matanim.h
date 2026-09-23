@@ -450,6 +450,8 @@ MatAnim *NewMatAnim(const HxStr &name);
  *
  * No call site survives in the shipped program.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004dbf80
  */
 void RegisterMatAnimClass();

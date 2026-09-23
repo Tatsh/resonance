@@ -450,6 +450,8 @@ Object *CreateRegisteredFont(const HxStr &name);
  *
  * The image has no caller. The name is inferred from RegisterTextClass().
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004ced00
  */
 void RegisterFontClass();

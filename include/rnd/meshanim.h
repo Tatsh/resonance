@@ -305,6 +305,8 @@ extern HxStr g_meshAnimClassName;
  * An inline function, in the shape of Rnd::RegisterMeshClass(). The out-of-line copy has no
  * caller.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x00493140
  */
 inline void RegisterMeshAnimClass() {

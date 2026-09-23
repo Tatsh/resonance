@@ -217,6 +217,8 @@ public:
      * The class installs no creator hook, unlike Rnd::Blur and Rnd::Tex, so the thunk the registry
      * stores calls the constructor directly.
      *
+     * Rnd::Manager::Init() also expands this inline.
+     *
      * @ghidraAddress 0x0045dcc0
      */
     static void Init();

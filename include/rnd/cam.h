@@ -582,6 +582,8 @@ extern HxStr g_camClassName;
  * The out-of-line copy has no caller. Rnd::PsCam::Terminate() expands the body after destroying
  * the default camera. The name is inferred.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004b1ed0
  */
 inline void RegisterCamClass() {

@@ -561,6 +561,8 @@ Object *CreateRegisteredMat(const HxStr &name);
  * The out-of-line copy has no caller, and GfxDevice::Terminate() expands the body. The name is
  * inferred.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004db9e8
  */
 inline void RegisterMatClass() {

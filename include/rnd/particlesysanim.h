@@ -265,6 +265,8 @@ extern HxStr g_particleSysAnimClassName;
  * The class has no creator hook to reset, so the body is the registration alone. The out-of-line
  * copy has no caller. The name is inferred.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x0052b878
  */
 inline void RegisterParticleSysAnimClass() {

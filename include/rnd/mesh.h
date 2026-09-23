@@ -737,6 +737,8 @@ extern HxStr g_meshClassName;
  * An inline function. The image has two identical out-of-line copies without callers (the second
  * at 0x006068c8), and the static initialiser at 0x0049afe0 inlines the body.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004926b0
  */
 inline void RegisterMeshClass() {

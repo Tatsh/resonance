@@ -265,6 +265,8 @@ extern HxStr g_multiMeshClassName;
  * Rnd::PsMultiMesh. GfxDevice::Terminate() expands the body. Every copy installs the portable
  * creator rather than the PlayStation 2 one.
  *
+ * Rnd::Manager::Init() also expands this inline.
+ *
  * @ghidraAddress 0x004eb958
  */
 inline void RegisterMultiMeshClass() {
