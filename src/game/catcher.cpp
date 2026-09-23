@@ -1,12 +1,19 @@
 #include "game/catcher.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
 
 #include "app/application.h"
+#include "app/playsound.h"
 #include "game/gamemanagerimpl.h"
 #include "game/nullplayer.h"
+#include "game/riff.h"
 #include "mid/mbt.h"
+#include "msg/catchmsg.h"
+#include "msg/gemmsg.h"
+#include "msg/multimusemsg.h"
+#include "msg/seekermsg.h"
 #include "sch/command.h"
 
 namespace {
@@ -35,6 +42,27 @@ constexpr int kBeatTicks = 480;
 
 // The bars UpdateSeeker() scans for a free bar.
 constexpr int kSeekerScanBars = 32;
+
+// The seeker states PostSeekerRangeMsg() records and sends.
+constexpr int kSeekerOn = 1;
+
+// OnAutoCatch() plays its bar through slot 9 with both flags set, and marks the message handled.
+constexpr int kAutoCatchFlag = 1;
+constexpr int kMessageHandled = 1;
+
+// SimulateRemoteGem() compares rand() modulo this against the remote success rate times this.
+constexpr int kRandomScale = 256;
+
+// The words a CatchMsg carries for a hit or a miss, and for no progress through the phrase.
+constexpr int kCatchMiss = 0;
+constexpr int kCatchHit = 1;
+constexpr int kNoProgress = 0;
+
+// The four player slots Player::Slot2() reports, each with its own miss sound.
+constexpr int kPlayerSlot1 = 0;
+constexpr int kPlayerSlot2 = 1;
+constexpr int kPlayerSlot3 = 2;
+constexpr int kPlayerSlot4 = 3;
 
 // A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
 inline Mid::MBT MakePosition(int nTick) {
@@ -144,6 +172,39 @@ Catcher::~Catcher() {
     Slot5();
 }
 
+// 0x001abe50
+void Catcher::Slot7(int nTick, int nGem) {
+    switch (mPlayer->Slot2()) {
+    case kPlayerSlot1:
+        PlaySoundByName("SND_MISS_PLAYER1");
+        break;
+    case kPlayerSlot2:
+        PlaySoundByName("SND_MISS_PLAYER2");
+        break;
+    case kPlayerSlot3:
+        PlaySoundByName("SND_MISS_PLAYER3");
+        break;
+    case kPlayerSlot4:
+        PlaySoundByName("SND_MISS_PLAYER4");
+        break;
+    default:
+        break;
+    }
+
+    CatchMsg msg(nTick, mTrack, nGem, kCatchMiss, mPlayer, kNoProgress, kNoProgress);
+    Send(&msg);
+
+    const int nBar = nTick / mTicksPerBar.mTick;
+    if (nBar == mUnknown5c || mUnknown60 > 0) {
+        // The tick is stored without the finiteness check.
+        mUnknown48.mTick = nTick;
+        mUnknown60 = 0;
+        ++mUnknown54;
+        PostPhraseMuffedMsg(nBar, nTick);
+        UpdateSeeker(nBar);
+    }
+}
+
 // 0x001abcf8
 int Catcher::SnapToNearestGem(int nTick) {
     Mid::MBT before(kMBTMinimum);
@@ -163,6 +224,59 @@ int Catcher::SnapToNearestGem(int nTick) {
         return after.mTick;
     }
     return nTick;
+}
+
+// 0x001ac550
+void Catcher::OnTrackSelect(TrackSelectMsg *pMsg) {
+    if (pMsg->mUnknown04 != mTrack) {
+        return;
+    }
+    if (pMsg->mUnknown08 != 0) {
+        return;
+    }
+
+    const int nBar = pMsg->mPosition.mTick / mTicksPerBar.mTick;
+    Player *pNewPlayer = pMsg->mUnknown10;
+    if (!mPlayer->IsNull() && mPlayer != pNewPlayer && mPlayer->Slot2() != kNoPlayerSlot) {
+        PostSeekerMsg();
+    }
+    mPlayer = pNewPlayer;
+    mUnknown44 = Mid::MBT(kNoPosition);
+    mUnknown60 = 0;
+    mUnknown58 += mUnknown50;
+
+    if (!mPlayer->IsNull()) {
+        mUnknown50 = 0;
+        UpdateSeeker(nBar);
+        return;
+    }
+    if (mUnknown50 > 0 || nBar < mUnknown5c) {
+        mUnknown64 = nBar;
+    }
+}
+
+// 0x001ac688
+void Catcher::OnAutoCatch(AutoCatchMsg *pMsg) {
+    if (pMsg->mTrack != mTrack) {
+        return;
+    }
+    const int nBar = pMsg->mBar;
+    if (!IsBarFree(nBar)) {
+        return;
+    }
+
+    Player *pSavedPlayer = mPlayer;
+    mPlayer = pMsg->mPlayer;
+    Slot9(nBar, kAutoCatchFlag, kAutoCatchFlag);
+    mPlayer = pSavedPlayer;
+    pMsg->mUnknown04 = kMessageHandled;
+    UpdateSeeker(nBar);
+
+    const int nNow = Application::shared()->GetSongClock()->SongTick();
+    if (nBar == nNow / Mid::MBT(kBarTicks).mTick) {
+        const Mid::MBT offset(nNow % Mid::MBT(kBarTicks).mTick);
+        mPhraseMgr->ReplayBar(nBar, offset.mTick);
+    }
 }
 
 // 0x001ac958
@@ -234,6 +348,37 @@ int Catcher::PostGemDelay(int nTick) {
     return delay.mTick;
 }
 
+// 0x001ace78
+void Catcher::SimulateRemoteGem(int nTick) {
+    if (mRemotePlayer != &g_nullPlayer && mRemotePlayer->Slot2() == kNoPlayerSlot) {
+        const Mid::MBT window = MakePosition(mRemotePosition.mTick + Mid::MBT(kBarTicks).mTick);
+        if (!(window.mTick < nTick) &&
+            static_cast<float>(std::rand() % kRandomScale) < mRemoteSuccess * kRandomScale) {
+            Mid::MBT gemTick;
+            int nGem;
+            mTrackData->FindGemAtOrAfter(nTick, &gemTick.mTick, &nGem);
+
+            // The gem value selects the riff level. That is what the binary passes.
+            Riff *pRiff = mTrackData->GetRiff(nTick, nGem);
+            if (pRiff != nullptr) {
+                MultiMuseMsg riffMsg(pRiff);
+                Send(&riffMsg);
+            }
+
+            CatchMsg catchMsg(
+                nTick, mTrack, nGem, kCatchHit, mRemotePlayer, kNoProgress, kNoProgress);
+            Send(&catchMsg);
+
+            // The position is stored without the finiteness check.
+            Mid::MBT position;
+            position.mTick = nTick;
+            GemMsg gemMsg(position, mTrack, nGem, mRemotePlayer);
+            Send(&gemMsg);
+        }
+    }
+    ScheduleGemCommand(nTick);
+}
+
 // 0x001ad0e8
 void Catcher::UpdateSeeker(int nBar) {
     if (mPlayer->IsNull()) {
@@ -273,6 +418,22 @@ void Catcher::UpdateSeeker(int nBar) {
         }
     }
     PostSeekerMsg();
+}
+
+// 0x001ad4e0
+void Catcher::PostSeekerMsg() {
+    SeekerMsg msg(mPlayer);
+    Send(&msg);
+    mSeekerEnabled = 0;
+}
+
+// 0x001ad560
+void Catcher::PostSeekerRangeMsg(int nFirstBar, int nBarCount) {
+    SeekerMsg msg(mPlayer, nFirstBar, nBarCount, mTrack, kSeekerOn, Mid::MBT(0));
+    Send(&msg);
+    mSeekerEndBar = nFirstBar + nBarCount;
+    mSeekerEnabled = kSeekerOn;
+    mSeekerFirstBar = nFirstBar;
 }
 
 // 0x001b1488

@@ -70,4 +70,32 @@ public:
      * @ghidraAddress 0x0019d438
      */
     virtual int Slot5();
+
+    /**
+     * Report whether a bar can be played.
+     *
+     * The body is not written. It returns non-zero when TrackData::QueryBar() on the track at
+     * `+0x44` accepts the bar and slot 9 of the Player at `+0x30` reports non-zero for it.
+     * AutoRiffer is the recovered caller.
+     *
+     * @param nBar The bar.
+     * @return Non-zero when the bar can be played.
+     * @ghidraAddress 0x0019da58
+     */
+    int IsBarPlayable(int nBar);
+
+    /**
+     * Erase a player's phrase at a song position.
+     *
+     * The body is not written. It divides the position by the bar length at `+0x40`, and with
+     * bWholeStep set it erases every bar from TrackData::StepStartBar() up to
+     * TrackData::FollowingStepBar() through PhraseMgr::ClearPhrase(). AutoRiffer::OnErase() is the
+     * recovered caller.
+     *
+     * @param pPlayer The player the erase is for.
+     * @param nTick The song position, in MIDI ticks.
+     * @param bWholeStep Non-zero to erase the whole step around the position.
+     * @ghidraAddress 0x0019bf80
+     */
+    void Erase(Player *pPlayer, int nTick, int bWholeStep);
 };

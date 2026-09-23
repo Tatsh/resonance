@@ -20,9 +20,8 @@
  * runs OnCommand(), which sends the note-off and reports the player finished to its parent. Stop()
  * sends the note-off early and withdraws the command.
  *
- * The note-on and note-off are StdMidiMsg objects built on the stack. StdMidiMsg declares its
- * payload private with no constructor that takes it, so PostStdMidiMsg(), Stop(), and OnCommand()
- * are not written. Each is described where it is declared.
+ * The note-on and note-off are StdMidiMsg objects built on the stack and delivered through
+ * MsgSink::Handle() on mSink.
  */
 class NotePlayer : public MusePlayer {
 public:
@@ -64,9 +63,8 @@ public:
     /**
      * Send the note-off now and withdraw the scheduled command, when the note is sounding.
      *
-     * The body is not written, for the reason recorded in the class documentation. It sends a
-     * StdMidiMsg with status 0x80 ORed with mChannel, mNote, and velocity 0 at the current song
-     * position, withdraws mCommand, and clears mSink.
+     * The note-off is a StdMidiMsg with status 0x80 ORed with mChannel, mNote, and velocity 0 at
+     * the current song position. mSink is cleared whether or not the note was sounding.
      *
      * @ghidraAddress 0x001b3ee0
      */
@@ -81,8 +79,7 @@ public:
     /**
      * Send the note-off at a song position and report the player finished to mParent.
      *
-     * The file-local Cmd runs it. The body is not written, for the reason recorded in the class
-     * documentation. mSink is cleared between the two steps.
+     * The file-local Cmd runs it. mSink is cleared between the two steps.
      *
      * @param nTick The song position the command was scheduled for.
      * @ghidraAddress 0x001b4040
@@ -91,7 +88,7 @@ public:
 
 private:
     // Sends the note-on (status 0x90 ORed with mChannel, mNote, mVelocity) at a song position to
-    // mSink. Not written, for the reason recorded in the class documentation.
+    // mSink.
     // 0x001b3fb8
     void PostStdMidiMsg(int nTick);
 

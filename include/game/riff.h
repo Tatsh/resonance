@@ -99,5 +99,9 @@ public:
     int mId; /*!< The difficulty level, 0 through 3. +0x14 */
 
 private:
-    Mid::MBT mUnknown18; // +0x18, zero on construction
+    // AutoRiffer::PlayRiff() at 0x00199758 reads mLength directly.
+    friend class AutoRiffer;
+
+    // The length the riff repeats over. Zero on construction.
+    Mid::MBT mLength; // +0x18
 };

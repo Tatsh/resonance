@@ -34,10 +34,8 @@
  *
  * HandleMessage() dispatches five identities. A PitchRiffMsg goes to OnPitchRiff(), an EraseMsg
  * to OnErase(), a StopRiffMsg to OnStopRiff(), and a GameOverMsg to StopRiff() at position 0. A
- * TrackSelectMsg runs the inline copy of OnTrackSelect(). Most handlers send an AllNotesOffMsg,
- * an AxeButtonMsg, or a MultiMuseMsg built on the stack, and those classes declare their payload
- * private with no constructor that takes it, so their bodies are not written. Each is described
- * where it is declared.
+ * TrackSelectMsg runs the inline copy of OnTrackSelect(). OnStopRiff() is not written, because
+ * StopRiffMsg declares its payload private.
  *
  * The file-local command class `Cmd`, in the anonymous namespace of `GsAutoRiffer.cpp`, runs
  * OnCommand() at the position PlayRiff() schedules.
@@ -60,9 +58,6 @@ public:
     /**
      * Act on a message.
      *
-     * The body is not written, because its TrackSelectMsg branch reads the message's private
-     * position at `+0x0c`.
-     *
      * @param pMsg The message.
      * @ghidraAddress 0x00199910
      */
@@ -71,10 +66,9 @@ public:
     /**
      * Repeat the current riff at a song position, or release the buttons.
      *
-     * The file-local Cmd runs it. When the routine at `0x0019da58` on mPhraseMaker reports 1 for
-     * the bar of the position, it plays the current riff again through PlayRiff(). Otherwise it
-     * sends an AxeButtonMsg for mPlayer that releases every button. The body is not written, for
-     * the reason recorded in the class documentation.
+     * The file-local Cmd runs it. When AxePhraseMaker::IsBarPlayable() reports 1 for the bar of
+     * the position, it plays the current riff again through PlayRiff(). Otherwise it sends an
+     * AxeButtonMsg for mPlayer that releases every button.
      *
      * @param nTick The song position the command was scheduled for.
      * @ghidraAddress 0x00199688
@@ -93,34 +87,30 @@ public:
 
 private:
     // Starts the riff of the message's level at its quantised position for this track's player.
-    // A position inside a phrase bar plays SND_INACTIVE instead. Not written, for the reason
-    // recorded in the class documentation.
+    // A bar AxePhraseMaker::IsBarPlayable() rejects plays SND_INACTIVE instead.
     // 0x00199160
     void OnPitchRiff(PitchRiffMsg *pMsg);
 
     // Clears the held flag of the message's level and switches to another held level's riff, or
-    // stops when none is held. Not written, for the same reason.
+    // stops when none is held. Not written, for the reason recorded in the class documentation.
     // 0x001992e0
     void OnStopRiff(StopRiffMsg *pMsg);
 
-    // Stops the riff and hands the erase to mPhraseMaker through the routine at 0x0019bf80 when
-    // the bar is a phrase bar. Not written, for the same reason.
+    // Stops the riff and hands the erase to AxePhraseMaker::Erase() when the bar is playable.
     // 0x00199480
     void OnErase(EraseMsg *pMsg);
 
     // When a riff is playing, clears every held flag, sends an AllNotesOffMsg, withdraws
-    // mCommand, and releases every button with an AxeButtonMsg. Not written, for the same reason.
+    // mCommand, and releases every button with an AxeButtonMsg.
     // 0x00199590
     void StopRiff(int nTick);
 
     // Sends an AllNotesOffMsg to mSynth and the current riff as a MultiMuseMsg, then schedules
-    // the file-local Cmd at the end of the riff after the rounded position. Not written, for the
-    // same reason.
+    // the file-local Cmd at the end of the riff after the rounded position.
     // 0x00199758
     void PlayRiff(int nTick);
 
-    // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline. Not
-    // written, because it reads the message's private position at `+0x0c`.
+    // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline.
     // 0x0019a898
     void OnTrackSelect(TrackSelectMsg *pMsg);
 

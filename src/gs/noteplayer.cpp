@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "mid/mbt.h"
+#include "msg/stdmidimsg.h"
 #include "sch/command.h"
 
 namespace {
@@ -17,6 +18,11 @@ constexpr unsigned char kChannelMask = 0xf;
 // The constructor ends each note this many ticks early, and never shorter than one tick.
 constexpr int kReleaseTicks = 2;
 constexpr int kMinimumDuration = 1;
+
+// The MIDI status nibbles and the note-off velocity.
+constexpr unsigned char kNoteOffStatus = 0x80;
+constexpr unsigned char kNoteOnStatus = 0x90;
+constexpr unsigned char kReleaseVelocity = 0;
 
 // The clamp the inline Mid::MBT arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
@@ -98,6 +104,30 @@ void NotePlayer::Start(MsgSink *pSink) {
     if (pCommand != nullptr) {
         pCommand->Release();
     }
+}
+
+// 0x001b3ee0
+void NotePlayer::Stop() {
+    if (mSink != nullptr) {
+        StdMidiMsg msg(mClock->SongTick(), kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
+        mSink->Handle(&msg);
+        mClock->Withdraw(mCommand);
+    }
+    mSink = nullptr;
+}
+
+// 0x001b3fb8
+void NotePlayer::PostStdMidiMsg(int nTick) {
+    StdMidiMsg msg(nTick, kNoteOnStatus | mChannel, mNote, mVelocity);
+    mSink->Handle(&msg);
+}
+
+// 0x001b4040
+void NotePlayer::OnCommand(int nTick) {
+    StdMidiMsg msg(nTick, kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
+    mSink->Handle(&msg);
+    mSink = nullptr;
+    mParent->PlayerFinished(this);
 }
 
 // 0x001b41c0

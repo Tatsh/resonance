@@ -39,9 +39,9 @@
  * That is recorded here as measured rather than explained, and it belongs with the note in
  * `sch/tick.h` that two measurements of that type's member count disagree.
  *
- * Every body that builds a message on the stack or reads a private message field is not written.
- * The message classes involved declare their payload private with no constructor that takes it.
- * Each such routine is described where it is declared, with what the disassembly establishes.
+ * A few bodies are not written yet. PostPhraseMuffedMsg() and PostCaughtBarMsg() build messages
+ * whose classes have no constructor that takes a payload, and HandleMessage() reads a
+ * CatchProgressPacket's private members. Each such routine is described where it is declared.
  * HandleMessage() dispatches a PitchRiffMsg to PostCatchMsg(), a TrackSelectMsg to
  * OnTrackSelect(), an AutoCatchMsg to OnAutoCatch(), and an InvalidateSeekerMsg to the inline
  * copy of OnInvalidateSeeker(). A CatchProgressPacket for this track stores its player, success
@@ -83,10 +83,9 @@ public:
     /**
      * Act on a message.
      *
-     * Slot 3. The routine dispatches on the message's registered identity over five identities: a
-     * CatchMsg and two further messages arrive at their own handlers, one message is acted on only
-     * when its player matches this catcher's, and every other message is discarded. The body is
-     * not written, for the reason recorded in the class documentation.
+     * Slot 3. The routine dispatches on the message's registered identity over the five
+     * identities the class documentation lists, and every other message is discarded. The body
+     * is not written, for the reason recorded in the class documentation.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001adb78
@@ -127,25 +126,24 @@ public:
      *
      * Slot 7. The routine plays the miss sound for the player's own slot, `SND_MISS_PLAYER1`
      * through `SND_MISS_PLAYER4` by Player::Slot2(), and plays nothing for any other slot. It then
-     * sends a CatchMsg whose payload is the tick, mTrack, the second argument, zero,
-     * this catcher's player, zero, and zero. When the tick's bar matches the bar at `+0x5c`, or
-     * the counter at `+0x60` is positive, it records the tick, increments the counter at `+0x54`,
-     * clears the counter at `+0x60`, and reports the muffed phrase. The body is not written, for
-     * the reason recorded in the class documentation.
+     * sends a missed CatchMsg for the gem. When the tick's bar matches the bar at `+0x5c`, or the
+     * counter at `+0x60` is positive, it records the tick in mUnknown48, increments the counter
+     * at `+0x54`, clears the counter at `+0x60`, reports the muffed phrase, and refreshes the
+     * seeker from the bar.
      *
      * @param nTick The scheduler time of the miss.
-     * @param nValue A word the CatchMsg payload includes.
+     * @param nGem The gem the CatchMsg reports.
      * @ghidraAddress 0x001abe50
      */
-    virtual void Slot7(int nTick, int nValue);
+    virtual void Slot7(int nTick, int nGem);
 
     /**
      * Advance the catcher to a tick.
      *
      * Slot 8. The routine records the tick, increments the counter at `+0x50`, resolves the tick's
      * bar, sends a GemMsg and then two further messages, and finally posts the caught-bar message
-     * when the bar changed. The body is not written, for the reason recorded in the class
-     * documentation.
+     * when the bar changed. The body is not written yet. The further messages are a
+     * MultiMuseMsg for the riff and the 0x10-byte message whose table is at `0x007ddb08`.
      *
      * @param nTick The scheduler time to advance to.
      * @param nValue A word the payloads include.
@@ -184,12 +182,11 @@ public:
     /**
      * Play the remote player's gem at a song position, then schedule the next gem command.
      *
-     * The GemCmd the class schedules calls it. The body is not written, because it sends a
-     * MultiMuseMsg, a GemMsg, and a CatchMsg built on the stack, and those classes declare their
-     * payload private with no constructor that takes it. A gem is played only when mRemotePlayer
-     * is not the stand-in, reports -1 from Player::Slot2(), is within one bar of mRemotePosition,
-     * and a draw from the random generator at `0x0053aa78` modulo 256 falls below mRemoteSuccess
-     * times 256.
+     * The GemCmd the class schedules calls it. A gem is played only when mRemotePlayer is not the
+     * stand-in, reports -1 from Player::Slot2(), is within one bar of mRemotePosition, and a draw
+     * from the C library's rand() modulo 256 falls below mRemoteSuccess times 256. Playing it sends
+     * the riff of the gem as a MultiMuseMsg when TrackData::GetRiff() reports one, then a caught
+     * CatchMsg and a GemMsg for mRemotePlayer.
      *
      * @param nTick The song position the command was scheduled for.
      * @ghidraAddress 0x001ace78
@@ -219,15 +216,13 @@ protected:
     // 0x001abcf8
     int SnapToNearestGem(int nTick);
 
-    // Takes the track for the player a TrackSelectMsg names. The body is not written, because it
-    // reads the message's private position at `+0x0c`.
+    // Takes the track for the player a TrackSelectMsg names.
     // 0x001ac550
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
     // Plays a free bar for the player an AutoCatchMsg names through slot 9, marks the message
-    // handled by writing 1 to its `+0x04`, and reports the current bar's offset to the phrase
-    // manager's routine at 0x001bb798. The body is not written, because every field it reads is
-    // private to AutoCatchMsg.
+    // handled through CmdMsg::mUnknown04, and replays the bar from the current offset through
+    // PhraseMgr::ReplayBar() when the song is inside it.
     // 0x001ac688
     void OnAutoCatch(AutoCatchMsg *pMsg);
 
@@ -262,14 +257,12 @@ protected:
     // 0x001ad0e8
     void UpdateSeeker(int nBar);
 
-    // Sends a SeekerMsg that turns the seeker off and clears mSeekerEnabled. The body is not
-    // written, because SeekerMsg declares its payload private.
+    // Sends a SeekerMsg that turns the seeker off and clears mSeekerEnabled.
     // 0x001ad4e0
     void PostSeekerMsg();
 
     // Sends a SeekerMsg for nBarCount bars from nFirstBar at position 0, and records the
-    // range in mSeekerFirstBar, mSeekerEndBar, and mSeekerEnabled. The body is not written, for
-    // the reason recorded on PostSeekerMsg().
+    // range in mSeekerFirstBar, mSeekerEndBar, and mSeekerEnabled.
     // 0x001ad560
     void PostSeekerRangeMsg(int nFirstBar, int nBarCount);
 

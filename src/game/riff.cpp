@@ -17,7 +17,7 @@ void Riff::operator delete(void *pBlock) {
 }
 
 // 0x001cebb0
-Riff::Riff(int nId) : mUnknown18(0) {
+Riff::Riff(int nId) : mLength(0) {
     mId = nId;
 }
 
