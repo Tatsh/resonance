@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "met/metscreen.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
@@ -25,7 +27,7 @@
  * `+0x8c` to `+0xb0` and `+0xbc` to `+0xd4`. The constructor also builds an HxStr in place at
  * `+0xb4`, writes 1.0 into `+0xec` and `+0xfc`, clears `+0x100` to `+0x118`, writes 1 into `+0x11c`
  * and 5 into `+0x124`, overwrites two members of its own base at `+0x58` and `+0x5c`, and then runs
- * the further initialiser at `0x00284d30`.
+ * GetDefaultMacros(), discarding the result.
  *
  * Slot 38 resolves seven container objects by name and runs each through the runtime cast helper at
  * `0x005570e0`, with `Rnd::View` and `Rnd::Text` as the two target names the translation unit
@@ -74,6 +76,30 @@ public:
      * @ghidraAddress 0x00282e30
      */
     virtual ~MetKeyboardScreen();
+
+    /**
+     * Report the twelve default keyboard macros, filling the list on first use.
+     *
+     * The list is a namespace-scope object of the translation unit at `0x006a7c80`. While it does
+     * not have exactly twelve entries, it is resized to twelve and each entry is replaced with
+     * DefaultMacro() for its index. The constructor and GlobalSettings' constructor both run it.
+     *
+     * @return The list.
+     * @ghidraAddress 0x00284d30
+     */
+    static std::vector<HxStr> *GetDefaultMacros();
+
+    /**
+     * Read one default keyboard macro from the configuration.
+     *
+     * The key is `kb_macro_f` followed by the one-based index, read under configuration code
+     * 0x258.
+     *
+     * @param nIndex The zero-based macro index.
+     * @return The macro text.
+     * @ghidraAddress 0x0028cbb8
+     */
+    static HxStr DefaultMacro(int nIndex);
 
     /**
      * Show the keyboard and start its enter animation.
@@ -271,8 +297,8 @@ private:
     int mUnknown118;   // +0x118
     int mUnknown11c;   // +0x11c, starts at 1
     // The selector the four sound slots and slot 19 compare their argument against. A screen that
-    // records -1 accepts every value. Nothing in this class writes it, and neither the constructor
-    // nor the initialiser at 0x00284d30 clears it, so the writer is not recovered.
+    // records -1 accepts every value. Nothing in this class writes it, and the constructor does not
+    // clear it. The writer is not recovered.
     int mSelector; // +0x120
     // Index of the last key action, switched over seven cases by slot 28. Starts at 5.
     int mUnknown124; // +0x124

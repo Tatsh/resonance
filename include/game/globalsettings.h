@@ -51,8 +51,8 @@ public:
     void operator delete(void *pBlock);
 
     /**
-     * Start with the default mappings, options, and names, the address `127.0.0.2`, the port
-     * `2000`, and one memory-card location, `1`.
+     * Start with the default mappings, options, and keyboard macros, the address `127.0.0.2`, the
+     * port `2000`, and one memory-card location, `1`.
      *
      * @ghidraAddress 0x00187d00
      */
@@ -67,7 +67,7 @@ public:
      * Write the settings.
      *
      * Slot 2. The record version 4 comes first, then the address, the port, the four mappings,
-     * the options, the name count and the names, and the tutorial flag.
+     * the options, the macro count and the keyboard macros, and the tutorial flag.
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x001885d0
@@ -79,7 +79,7 @@ public:
      *
      * Slot 3. A record older than version 2 has another string where the port belongs, which is
      * discarded in favour of the default port. A version 0 record has one mapping. A record older
-     * than version 3 has an older name list, which SkipLegacyNames() discards. Only a version 4
+     * than version 3 has an older macro list, which SkipLegacyMacros() discards. Only a version 4
      * record has the tutorial flag.
      *
      * @param stream The stream to read from.
@@ -110,15 +110,15 @@ public:
     static void Destroy();
 
     /**
-     * Replace the names with a list.
+     * Replace the keyboard macros with a list.
      *
-     * The list arrives by value. Only as many names as the list has are replaced. The image has
+     * The list arrives by value. Only as many macros as the list has are replaced. The image has
      * no caller.
      *
-     * @param names The names.
+     * @param macros The macros.
      * @ghidraAddress 0x00188cc0
      */
-    void SetNames(std::vector<HxStr> names);
+    void SetMacros(std::vector<HxStr> macros);
 
     /**
      * Write the address, the port, the four mapping labels, and the tutorial flag to a stream.
@@ -133,7 +133,7 @@ public:
     /**
      * Copy another instance's settings, except the memory-card locations.
      *
-     * Exactly twelve names are copied, whatever either list holds, and the routine returns
+     * Exactly twelve macros are copied, whatever either list holds, and the routine returns
      * nothing. The image has no caller.
      *
      * @param other The settings to copy.
@@ -147,14 +147,14 @@ public:
     GameOptions mGameOptions;
 
 private:
-    // 0x00188b90. Read and discard the name list of a record older than version 3. The body does
+    // 0x00188b90. Read and discard the macro list of a record older than version 3. The body does
     // not read this object.
-    void SkipLegacyNames(IBStream &stream);
+    void SkipLegacyMacros(IBStream &stream);
 
-    // The default names, which the constructor copies into mNames. +0x3c
-    std::vector<HxStr> *mDefaultNames;
-    // The names Save() writes. +0x40
-    std::vector<HxStr> mNames;
+    // MetKeyboardScreen's default macros, which the constructor copies into mMacros. +0x3c
+    std::vector<HxStr> *mDefaultMacros;
+    // The keyboard macros Save() writes. +0x40
+    std::vector<HxStr> mMacros;
     // The network address, labelled `Net IP Address` by Print(). +0x4c
     HxStr mNetAddress;
     // The network port as text, labelled `Net Port` by Print(). +0x54

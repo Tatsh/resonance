@@ -254,6 +254,7 @@ ghidra
 ghostnoteseffector
 ghostnotespowerup
 giftag
+globalsettings
 gouraud
 graminit
 graphviz

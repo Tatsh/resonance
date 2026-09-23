@@ -32,6 +32,7 @@ set(RESONANCE_GAME_SRCS
     gamestats.cpp
     genericcatcher.cpp
     ghostnotespowerup.cpp
+    globalsettings.cpp
     grooveworld.cpp
     gsperiodical.cpp
     harmony.cpp

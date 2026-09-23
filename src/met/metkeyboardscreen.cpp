@@ -1,9 +1,19 @@
 #include "met/metkeyboardscreen.h"
 
 #include "app/playsound.h"
+#include "os/formatstring.h"
 #include "os/hxstr.h"
+#include "script/configquery.h"
 
 namespace {
+
+// 0x006a7c80
+std::vector<HxStr> g_defaultMacros;
+
+// The number of default macros, one for each function key.
+constexpr int kDefaultMacroCount = 12;
+static const char *const kMacroKeyFormat = "kb_macro_f%i";
+constexpr int kMacroConfigCode = 0x258;
 
 // Posted to the ticker when the keyboard departs.
 static const char *const kClearTickerTemplate = "keyboard_clear_ticker";
@@ -47,4 +57,20 @@ void MetKeyboardScreen::PlayCycleRightSound(int nSelector) {
 
 void MetKeyboardScreen::OnUnknownSlot33() {
     SetTickerText(mUnknownc4);
+}
+
+std::vector<HxStr> *MetKeyboardScreen::GetDefaultMacros() {
+    if (g_defaultMacros.size() != kDefaultMacroCount) {
+        g_defaultMacros.resize(kDefaultMacroCount);
+        for (int i = 0; i < kDefaultMacroCount; ++i) {
+            g_defaultMacros[i] = DefaultMacro(i);
+        }
+    }
+    return &g_defaultMacros;
+}
+
+HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
+    HxStr text;
+    QueryConfigString(&text, kMacroConfigCode, FormatString(kMacroKeyFormat, nIndex + 1));
+    return text;
 }
