@@ -45,10 +45,10 @@ within those 52.
 A pass that writes a header moves the larger share and not the smaller one, and a pass that writes
 bodies for an already-declared class moves the smaller share alone.
 
-Do not measure the implemented share by grepping for address literals. A `.cpp` mentions an address in ordinary
-commentary as well as at a body marker, and that method returned 1,956 where the marker scanner
-returns 1,605, of which 1,573 fall inside the reconstructable set and 32 belong to excluded
-routines.
+Do not measure the implemented share by grepping for address literals. A `.cpp` mentions an
+address in ordinary commentary as well as at a body marker, and that method returned 1,956 where
+the marker scanner returned 1,605, of which 1,573 fell inside the reconstructable set and 32
+belonged to excluded routines.
 
 The identified remainder rises as well as falls, because identifying a routine moves it out of the
 unidentified column before any source accounts for it. A rise there is progress rather than
