@@ -134,6 +134,7 @@ inline Rnd::View *FindView(const HxStr &name) {
 
 } // namespace
 
+// 0x003bdbb8
 MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mUnknowna8(0), mUnknownac(0), mUnknownb0(0.0f), mUnknownb4(0) {
@@ -141,10 +142,12 @@ MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority
     mUnknown60 = 0;
 }
 
+// 0x003bded8
 MetStageFinishScreen::~MetStageFinishScreen() {
     delete mUnknowna4;
 }
 
+// 0x003be068
 void MetStageFinishScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -163,6 +166,7 @@ void MetStageFinishScreen::ResolveContainerViews() {
     }
 }
 
+// 0x003be2a8
 void MetStageFinishScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     if (mUnknowna8 == 0 && !params.mLoadingGame) {
@@ -238,6 +242,7 @@ void MetStageFinishScreen::EnterAndShow() {
     }
 }
 
+// 0x003bf788
 void MetStageFinishScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (mUnknownb0 != 0.0f || pCommand->mCommand != kMetScreenCommandSelect) {
         return;
@@ -265,6 +270,7 @@ void MetStageFinishScreen::PlayCycleRightSound(int) {
 void MetStageFinishScreen::PlayErrorSound(int) {
 }
 
+// 0x003bf5e8
 void MetStageFinishScreen::OnUnknownSlot26(float flTime) {
     if (mUnknownb0 == 0.0f || !(mUnknownb0 + kMessageInterval < flTime)) {
         return;
@@ -295,6 +301,7 @@ void MetStageFinishScreen::OnUnknownSlot33() {
     ActivateNamedPanel(HxStr(kNoName));
 }
 
+// 0x003bf8e8
 void MetStageFinishScreen::AddHighScoreMessage(int nPreviousScore, int nScore) {
     if (nPreviousScore == 0 || nPreviousScore >= nScore) {
         return;
@@ -304,6 +311,7 @@ void MetStageFinishScreen::AddHighScoreMessage(int nPreviousScore, int nScore) {
     mUnknown8c.push_back(message);
 }
 
+// 0x003bf9b8
 void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int nCompleted) {
     if (nPreviousCompleted >= nCompleted) {
         return;
@@ -317,6 +325,7 @@ void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int n
     mUnknown8c.push_back(message);
 }
 
+// 0x003bfc48
 void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComplete) {
     if (nIsComplete == 0 || nWasComplete != 0) {
         return;
@@ -360,6 +369,7 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
     }
 }
 
+// 0x003bef98
 void MetStageFinishScreen::ShowMessages() {
     if (mUnknown8c.size() == 0) {
         BeginExit();
@@ -409,6 +419,7 @@ void MetStageFinishScreen::OnUnknownSlot36() {
     }
 }
 
+// 0x003bfb78
 void MetStageFinishScreen::AddStageScoreBeatMessage(int nWasBeaten, int nIsBeaten) {
     if (nIsBeaten == 0 || nWasBeaten != 0) {
         return;

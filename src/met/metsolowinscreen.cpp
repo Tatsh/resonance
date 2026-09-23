@@ -58,15 +58,18 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
+// 0x003b55a8
 MetSoloWinScreen::MetSoloWinScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mUnknown90(new MetButtonList()), mDifficultyUnlocked(0) {
 }
 
+// 0x003b9ce8
 MetSoloWinScreen::~MetSoloWinScreen() {
     delete mUnknown90;
 }
 
+// 0x003b5968
 void MetSoloWinScreen::EnterAndShow() {
     mUnknown90->Clear();
 
@@ -100,6 +103,7 @@ void MetSoloWinScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
+// 0x003b57a0
 void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -126,15 +130,19 @@ void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
+// 0x003b9b90
 void MetSoloWinScreen::PlayLeaveSound(int) {
 }
 
+// 0x003b9b80
 void MetSoloWinScreen::PlayCycleLeftSound(int) {
 }
 
+// 0x003b9b88
 void MetSoloWinScreen::PlayCycleRightSound(int) {
 }
 
+// 0x003b5f88
 void MetSoloWinScreen::OnUnknownSlot30(Rnd::Object *) {
     ExitScreenByName(HxStr(kSoloStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
@@ -143,11 +151,13 @@ void MetSoloWinScreen::OnUnknownSlot30(Rnd::Object *) {
     BeginExit();
 }
 
+// 0x003b9d80
 void MetSoloWinScreen::OnUnknownSlot33() {
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
     MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
 }
 
+// 0x003b9c20
 void MetSoloWinScreen::SetDifficultyUnlocked(int nUnlocked) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
     MetSoloWinScreen *pWinScreen =
