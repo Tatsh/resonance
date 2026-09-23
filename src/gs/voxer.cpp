@@ -285,6 +285,10 @@ void Voxer::HandleMessage(Message *pMsg) {
     }
 }
 
+// 0x001d9dd0
+Voxer::~Voxer() {
+}
+
 // 0x001d9e40
 void Voxer::OnEraseMsg(EraseMsg *pMsg) {
     if (pMsg->mUnknown0c != mUnknown44) {

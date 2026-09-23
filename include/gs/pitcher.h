@@ -45,9 +45,13 @@ public:
     }
 
     /**
+     * Inline. Identical copies sit at `0x001b3348`, `0x001d10b8`, and `0x001d9798`, one in each
+     * deriving translation unit, and the deriving destructors all call the first.
+     *
      * @ghidraAddress 0x001b3348
      */
-    virtual ~Pitcher();
+    virtual ~Pitcher() {
+    }
 
     /** The TickTask period, one bar of 1920 ticks. */
     static constexpr int kBarPeriod = 1920;
