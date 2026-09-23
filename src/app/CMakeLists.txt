@@ -3,6 +3,10 @@ set(RESONANCE_APP_SRCS
     application.cpp
     attachment.cpp
     cutscene.c
+    durgemcurve.cpp
+    durgemrowstring.cpp
+    durgemstrip.cpp
+    durgemtrails.cpp
     globals.cpp
     hudanalogstick.cpp
     hudanimramp.cpp

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "math/vector3.h"
+
 /**
  * Plane equation, padded to a PlayStation 2 quadword.
  *
@@ -28,3 +30,17 @@ struct Plane {
  * @ghidraAddress 0x00550fa8
  */
 Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm);
+
+/**
+ * Find where a segment crosses a plane.
+ *
+ * The parameter is the signed distance of the start divided by the difference between the signed
+ * distances of the start and the end. It is stored whether or not the segment crosses the plane.
+ *
+ * @param segment The start and the end of the segment.
+ * @param plane The plane.
+ * @param pT Receives the crossing as a fraction of the way from the start to the end.
+ * @return Whether the fraction lies in `[0, 1]`.
+ * @ghidraAddress 0x00551218
+ */
+bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, float *pT);

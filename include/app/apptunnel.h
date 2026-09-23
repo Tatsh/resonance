@@ -5,6 +5,7 @@
 class Message;
 class Player;
 class Renderer;
+struct Vector3;
 
 /**
  * Game-side driver of the tunnel the in-game renderer draws.
@@ -88,8 +89,8 @@ public:
      * @param nBar The bar.
      * @param nUnknown The word at `+0x14` of the BarStatusMsg.
      * @param pPlayer The cell's player.
-     * @param nUnknown08 The cell's `mUnknown08`.
-     * @param nUnknown04 The cell's `mUnknown04`.
+     * @param nUnknown08 The cell's `mPowerup`.
+     * @param nUnknown04 The cell's `mEnabled`.
      * @ghidraAddress 0x004465a0
      */
     void OnBarChanged(
@@ -106,6 +107,19 @@ public:
      * @ghidraAddress 0x00457bd0
      */
     void PrepareLocalView(int nView, float flFrame);
+
+    /**
+     * Move the first unplaced particle of "string flare.ps" to a point.
+     *
+     * A particle counts as unplaced while its colour alpha differs from 1. The routine sets the
+     * alpha to 1 as it places the particle, and a system whose live particles are all placed is not
+     * changed. The title is inferred from the particle system and its DurGemTrails callers. The
+     * body is not written.
+     *
+     * @param pos The point, in the space of the tunnel strings.
+     * @ghidraAddress 0x00457a98
+     */
+    void PlaceStringFlare(const Vector3 &pos);
 
 private:
     Renderer *mUnknown04; // +0x04

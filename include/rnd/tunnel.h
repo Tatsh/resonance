@@ -234,6 +234,25 @@ public:
     void GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend);
 
     /**
+     * Build the frame of a point on one ring at a path frame, with the ring pushed outwards.
+     *
+     * A null mPath writes the identity. Otherwise the three basis rows of the ring transform are
+     * copied through, the translation row is the blend of that ring's translation and its wrapped
+     * successor's, each scaled by flTangentScale, and the result is concatenated with the path
+     * transform at flAnimFrame. The AppTunnel helpers (the gem trails, the sabre trail, and the
+     * grid markers) call it.
+     *
+     * @param nRing The ring.
+     * @param pOut The transform to write.
+     * @param flAnimFrame The path frame.
+     * @param flRingBlend The weight of the next ring's translation.
+     * @param flTangentScale The scale applied to both translations.
+     * @ghidraAddress 0x0046db80
+     */
+    void ProjectSectionToCameraSpace(
+        int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale);
+
+    /**
      * Bring every slice of the current window up to the advanced slice.
      *
      * Walks the mSliceCount slices starting at mUnknownbc and calls AdvanceRing() for each one
@@ -496,14 +515,6 @@ private:
     // Build one chain per cell, "[<name>_pan<cell>]", with two rows of mSliceSteps + 1 vertices.
     // The triangles are built on the chain of cell 0 and shared by the others. 0x0046c0e8.
     void BuildCellMeshes();
-
-    // Project one ring into camera space. 0x0046db80. A null mPath writes the identity into
-    // pOut and returns. Otherwise the three basis rows of mUnknownc0[nRing] are copied through,
-    // the translation row is the blend of that entry and its wrapped successor each scaled by
-    // flTangentScale, and the result is concatenated through XfmConcat() with what mPath
-    // evaluates to at flAnimFrame.
-    void ProjectSectionToCameraSpace(
-        int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale);
 
     // Empty the per-material section lists. 0x0046acf0.
     void ClearMaterialSectionLists();

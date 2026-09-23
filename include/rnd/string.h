@@ -206,12 +206,22 @@ public:
     /**
      * Report the width of the ribbon in screen units.
      *
-     * The image exposes no setter. The width therefore arrives only from a load or a copy.
-     *
      * @return The width.
      * @ghidraAddress 0x004bf3e0
      */
     float GetWidth() const;
+
+    /**
+     * Set the width of the ribbon in screen units.
+     *
+     * Only the stored width changes. The ribbon is not rebuilt.
+     *
+     * @param flWidth The width.
+     * @ghidraAddress 0x004bee78
+     */
+    void SetWidth(float flWidth) {
+        mWidth = flWidth;
+    }
 
     /**
      * Set the bend the ribbon folds at and cache its sine.
