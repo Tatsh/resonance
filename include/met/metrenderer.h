@@ -233,6 +233,20 @@ public:
     void OnUnknown00390090();
 
     /**
+     * Resolve `Metagame_arena.view` and attach it to the background scene.
+     *
+     * A non-zero argument skips the resolve and attaches nothing, because the view pointer then
+     * stays null. The title is inferred from the literal. Public because the screens that return
+     * to the title call it directly: MetMultiEndScreen's slot 36, the routine at `0x002fb350`,
+     * MetSoloEndRemixScreen::ReturnToTitle(), and the slot 36 of MetSoloLoseScreen and
+     * MetSoloWinScreen. The image has no accessor to route those calls through.
+     *
+     * @param nSkipResolve Non-zero to attach nothing.
+     * @ghidraAddress 0x0036a9e0
+     */
+    void ResolveArenaView(int nSkipResolve);
+
+    /**
      * Attach the three animatable, drawable, and transformable subobjects of one view to the
      * screen scene at mUnknowna0.
      *
@@ -429,12 +443,6 @@ private:
     // OnUnknownSlot7()'s boot phase. The title is inferred from the three fields it writes.
     void ResolveSceneViews();
 
-    // 0x0036a9e0
-    // Resolves `Metagame_arena.view` and attaches it to the background scene. A
-    // non-zero argument skips the resolve and attaches nothing, because the view pointer then
-    // stays null. The title is inferred from the literal.
-    void ResolveArenaView(int nSkipResolve);
-
     // 0x003719a0
     // Releases the animatable, drawable, and transformable lists of the screen scene
     // at mUnknowna0. OnUnknownSlot5() is its one caller. The title is inferred.
@@ -490,8 +498,15 @@ private:
     // 0x006c3610
     static RndAsyncLoader *sArenaLoader;
 
-    // +0x60. Zeroed by the constructor. MetaGameWorld::OnUnknownQuery003d48c0() reads it.
+public:
+    /**
+     * Zeroed by the constructor. MetaGameWorld::OnUnknownQuery003d48c0() reads it. Public because
+     * MetLogoScreen writes it directly, 1 in slot 33 at `0x002bae40` and 0 in slot 19 at
+     * `0x002be4d8`, and the image has no accessor for it. +0x60
+     */
     int mUnknown60;
+
+private:
     // Rate the animation frame advances at, in frames per second. The constructor sets 500.0f, and
     // both frame routines compute `mUnknown68 += mUnknown64 * elapsedMilliseconds / 1000.0f`.
     float mUnknown64; // +0x64
