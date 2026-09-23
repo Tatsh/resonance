@@ -39,6 +39,51 @@ public:
     virtual ~MetJukeboxEditPlaylistScreenLowerLeft();
 
     /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0023aa68
+     */
+    static MetJukeboxEditPlaylistScreenLowerLeft *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Ignore every command.
+     *
+     * Slot 19, overridden empty.
+     *
+     * @param pCommand The command, which the body does not read.
+     * @ghidraAddress 0x0023ab68
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Slot 33, overridden empty.
+     *
+     * @ghidraAddress 0x0023ab70
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Slot 36, overridden empty.
+     *
+     * @ghidraAddress 0x0023ab78
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views.
+     *
+     * Slot 38. Forwards to the MetScreen body and adds no behaviour.
+     *
+     * @ghidraAddress 0x0023aaf0
+     */
+    virtual void ResolveContainerViews();
+
+    /**
      * @param nSelector The value the override compares against its own recorded selector.
      * @ghidraAddress 0x0023aa40
      */
