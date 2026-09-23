@@ -3,7 +3,8 @@
 # rather than including its headers.
 set(RESONANCE_SCRIPT_SRCS
     scriptsink.cpp
-    scripttemplatemap.cpp)
+    scripttemplatemap.cpp
+    testregistry.cpp)
 
 add_library(resonance_script STATIC ${RESONANCE_SCRIPT_SRCS})
 target_link_libraries(resonance_script PRIVATE resonance_common)

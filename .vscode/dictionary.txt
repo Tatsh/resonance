@@ -746,6 +746,7 @@ tatsh
 teardowns
 tempomap
 testarbiterpacket
+testregistry
 texa
 texburn
 texs
