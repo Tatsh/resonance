@@ -1,5 +1,7 @@
 #pragma once
 
+#include "os/hxstr.h"
+
 namespace Rnd {
 class Mat;
 }
@@ -22,9 +24,17 @@ public:
     short mId;
 
 private:
-    unsigned char mUnknown02[0xa]; // +0x02
+    unsigned char mUnknown02[0x2]; // +0x02
 
 public:
+    /**
+     * The name MetFreqMakerAssetManager::FindPart() looks the template up by. +0x04
+     *
+     * Public because FreqAppearanceDetail::save() writes it directly, and the image has no
+     * accessor.
+     */
+    HxStr mName;
+
     /**
      * The material a mesh of this kind is drawn with. +0x0c
      *

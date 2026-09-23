@@ -65,13 +65,19 @@ public:
     /**
      * Write the avatar to a stream.
      *
+     * The part count comes first. Each part follows as its template name (a length word and the
+     * bytes), its palette x and y, its mirrored flag as one byte, and its placement x and z.
+     *
      * @param stream The stream to write to.
      * @ghidraAddress 0x0024b160
      */
     void save(OBStream &stream);
 
     /**
-     * Read the avatar back from a stream.
+     * Append the parts save() wrote.
+     *
+     * Each part is rebuilt from its template name as unpack() rebuilds a packed part. The name is
+     * also looked up in Rnd::g_manager as a texture, and that result is discarded.
      *
      * @param stream The stream to read from.
      * @ghidraAddress 0x0024b340
@@ -319,6 +325,11 @@ public:
     void detachFrom(Rnd::View *pParent);
 
 private:
+    // Give a newly read part a mesh with its template's material and scale, hang it from mView,
+    // colour it from the palette, append it, and reset the placement state. load() and unpack()
+    // expand the same body.
+    void addLoadedPart(FreqPart *pPart);
+
     // Report the part at one position, or the last part when the list is shorter. Four routines
     // expand the same walk.
     FreqPart *partAt(int nIndex);

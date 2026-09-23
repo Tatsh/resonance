@@ -9,7 +9,9 @@
 #include "os/hxstr.h"
 #include "os/r250.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 #include "rnd/mesh.h"
+#include "rnd/tex.h"
 #include "rnd/view.h"
 
 namespace {
@@ -28,6 +30,9 @@ constexpr float kPlacedHeight = 0.1f;
 
 // The flag unpack() compares FreqPart::mMirrored against.
 constexpr int kMirrored = 1;
+
+// The literal save() compares each template name against.
+static const char *const kNoName = "";
 
 // An avatar has at most this many parts.
 constexpr unsigned kMaxParts = 16;
@@ -129,31 +134,84 @@ void FreqAppearanceDetail::unpack(const FreqPart::Packed *pRecords, int nCount) 
     for (int i = 0; i < nCount; ++i) {
         FreqPart *pPart = new FreqPart();
         pPart->Unpack(pRecords[i]);
-
-        Rnd::Mesh *pMesh = MetFreqMakerAssetManager::shared()->CloneMesh(
-            MetFreqMakerAssetManager::shared()->NextMeshName());
-        pMesh->SetMaterial(pPart->mTemplate->mMaterial);
-        MetFreqMakerAssetManager::shared()->ApplyPartScale(
-            pMesh, pPart->mTemplate, &mScaleX, &mScaleZ, kPlacedScaleFactor, kPlacedScaleFactor);
-        pPart->mPosition.y = kPlacedHeight;
-        PlaceMesh(pMesh, pPart->mPosition);
-        mView->AddDraw(pMesh, nullptr);
-        mView->AddTrans(pMesh);
-        pMesh->SetShowing(1);
-        if (pPart->mMirrored == kMirrored) {
-            pMesh->MirrorX();
-        }
-
-        pPart->SetMesh(pMesh);
-        pPart->SetColor(*MetFreqMakerAssetManager::shared()->ColorAt(pPart->mPalettePosition));
-        pPart->GetColor(); // Yes, the binary discards this call's result.
-
-        mPlacing = 1;
-        mScaleStepX = static_cast<int>(mScaleX * kPlacedScaleFactor);
-        mScaleStepZ = static_cast<int>(mScaleZ * kPlacedScaleFactor);
-        mParts.push_back(pPart);
-        resetCursor();
+        addLoadedPart(pPart);
     }
+}
+
+// 0x0024b160
+void FreqAppearanceDetail::save(OBStream &stream) {
+    int nCount = mParts.size();
+    stream.Write(&nCount, sizeof(nCount));
+    for (std::list<FreqPart *>::iterator it = mParts.begin(); it != mParts.end(); ++it) {
+        FreqPart *pPart = *it;
+        pPart->GetColor();                          // Yes, the binary discards this call's result.
+        (void)(pPart->mTemplate->mName != kNoName); // Yes, the binary discards this test.
+
+        const HxStr &name = pPart->mTemplate->mName;
+        unsigned nLength = name.mLen;
+        stream.Write(&nLength, sizeof(nLength));
+        OBStream &out =
+            stream.WriteBytes(name.mStr != nullptr ? name.mStr : g_szEmptyString, nLength);
+        float flPaletteX = pPart->mPalettePosition.x;
+        float flPaletteY = pPart->mPalettePosition.y;
+        float flX = pPart->mPosition.x;
+        float flZ = pPart->mPosition.z;
+        (out.Write(&flPaletteX, sizeof(flPaletteX)).Write(&flPaletteY, sizeof(flPaletteY))
+         << pPart->mMirrored)
+            .Write(&flX, sizeof(flX))
+            .Write(&flZ, sizeof(flZ));
+    }
+}
+
+// 0x0024b340
+void FreqAppearanceDetail::load(IBStream &stream) {
+    MetFreqMakerAssetManager::shared()->PollLoad(); // Yes, the binary discards the result.
+    int nCount;
+    stream.Read(&nCount, sizeof(nCount));
+    for (int i = 0; i < nCount; ++i) {
+        HxStr name;
+        unsigned nLength;
+        stream.Read(&nLength, sizeof(nLength));
+        name.Alloc(nLength);
+        stream.ReadBytes(name.mStr != nullptr ? name.mStr : const_cast<char *>(g_szEmptyString),
+                         nLength);
+        // Yes, the binary looks the name up as a texture and discards the result.
+        (void)dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(name));
+
+        FreqPart *pPart = new FreqPart(MetFreqMakerAssetManager::shared()->FindPart(name));
+        stream.Read(&pPart->mPalettePosition.x, sizeof(pPart->mPalettePosition.x));
+        stream.Read(&pPart->mPalettePosition.y, sizeof(pPart->mPalettePosition.y));
+        stream >> pPart->mMirrored;
+        stream.Read(&pPart->mPosition.x, sizeof(pPart->mPosition.x));
+        stream.Read(&pPart->mPosition.z, sizeof(pPart->mPosition.z));
+        addLoadedPart(pPart);
+    }
+}
+
+inline void FreqAppearanceDetail::addLoadedPart(FreqPart *pPart) {
+    Rnd::Mesh *pMesh = MetFreqMakerAssetManager::shared()->CloneMesh(
+        MetFreqMakerAssetManager::shared()->NextMeshName());
+    pMesh->SetMaterial(pPart->mTemplate->mMaterial);
+    MetFreqMakerAssetManager::shared()->ApplyPartScale(
+        pMesh, pPart->mTemplate, &mScaleX, &mScaleZ, kPlacedScaleFactor, kPlacedScaleFactor);
+    pPart->mPosition.y = kPlacedHeight;
+    PlaceMesh(pMesh, pPart->mPosition);
+    mView->AddDraw(pMesh, nullptr);
+    mView->AddTrans(pMesh);
+    pMesh->SetShowing(1);
+    if (pPart->mMirrored == kMirrored) {
+        pMesh->MirrorX();
+    }
+
+    pPart->SetMesh(pMesh);
+    pPart->SetColor(*MetFreqMakerAssetManager::shared()->ColorAt(pPart->mPalettePosition));
+    pPart->GetColor(); // Yes, the binary discards this call's result.
+
+    mPlacing = 1;
+    mScaleStepX = static_cast<int>(mScaleX * kPlacedScaleFactor);
+    mScaleStepZ = static_cast<int>(mScaleZ * kPlacedScaleFactor);
+    mParts.push_back(pPart);
+    resetCursor();
 }
 
 // 0x0024c398
