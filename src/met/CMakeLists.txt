@@ -8,6 +8,7 @@ set(RESONANCE_MET_SRCS
     metfade.cpp
     metfreqloader.cpp
     metfreqmakerassetmanager.cpp
+    metfreqmakercanvasscreen.cpp
     metfreqmakerdirectionsscreen.cpp
     metfrontendstate.cpp
     metglobalsettingssaverscreen.cpp

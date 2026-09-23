@@ -29,8 +29,8 @@ class Tex;
  *
  * The layout comes from the copy constructor and the destructor together. The copy constructor
  * takes 0xb0 bytes from the allocator for the detail object and stores the pointer at `+0x08`, and
- * the destructor releases the detail object and the string buffer. Every member is private, because
- * the only readers outside the class are the two transfer members and Print().
+ * the destructor releases the detail object and the string buffer. The username and the detail
+ * object are public for the readers their documentation lists, and the skill status is private.
  *
  * PSJoinRequestPacket::Save() and PlayerInfo::Save() both delegate an embedded FreqAppearance to
  * slot 2 of this table, and their Load() counterparts to slot 3, which is what establishes the two
@@ -262,6 +262,15 @@ private:
     // caller, and the name is inferred.
     static void EncodeNonZeroBytes(const unsigned char *pSource, unsigned char *pDest);
 
-    FreqAppearanceDetail *mDetail; // +0x08 owned, 0xb0 bytes
-    int mUnknown0c;                // +0x0c the skill status
+public:
+    /**
+     * The avatar, owned, 0xb0 bytes. +0x08
+     *
+     * Public because MetFreqMakerCanvasScreen::CommitPersona(), LoadPersona(), and LoadPrefab()
+     * copy the avatar in and out of it directly, and the image has no accessor.
+     */
+    FreqAppearanceDetail *mDetail;
+
+private:
+    int mUnknown0c; // +0x0c the skill status
 };

@@ -459,6 +459,7 @@ metfade
 metfreqendedmsg
 metfreqloader
 metfreqmakerassetmanager
+metfreqmakercanvasscreen
 metfreqmakerdirectionsscreen
 metfrontendstate
 metglobalsettingssaverscreen
