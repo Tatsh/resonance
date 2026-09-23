@@ -122,10 +122,9 @@ Gamer::Gamer(int nTrackCount, int nEndBar, GameStats *pStats)
     : mUnknown1c(0), mEndState(kEndStateNone), mJukeboxMode(0), mUnknown38(0),
       mTrackCount(nTrackCount), mUnknown44(kInitialUnknown44), mUnknown48(0), mPlaybackOn(0),
       mGlobals(Application::shared()), mStats(pStats), mBarLength(kTicksPerBar),
-      mPlayers(mGlobals->GetWorld()->mPlayers), mBackGraphs(nullptr), mGraphs(nullptr),
-      mTrackSources(nTrackCount, MsgSource()), mUnknown84(0), mEnableMgr(nullptr),
+      mPlayers(mGlobals->GetWorld()->mPlayers), mCommand{kUnallocatedCommand}, mBackGraphs(nullptr),
+      mGraphs(nullptr), mTrackSources(nTrackCount, MsgSource()), mUnknown84(0), mEnableMgr(nullptr),
       mBackEnableMgr(nullptr), mUnknown98(0) {
-    mCommand.mValue = kUnallocatedCommand;
     mFreeEndBar = kInitialFreeEndBar;
     mPlayMap = mGlobals->GetPlayMap();
     mEndBar = nEndBar;
@@ -212,7 +211,7 @@ void Gamer::OnEnableFreestyle(EnableFreestyleMsg *pMsg) {
     const int nTick = mGlobals->GetSongClock()->SongTick();
     Player *pPlayer = pMsg->mPlayer;
     const int nTrack = pPlayer->Slot4();
-    if (!IsNonCatchTrack(nTrack)) {
+    if (GetTrack(nTrack)->mKind == kTrackModeCatch) {
         return;
     }
 
@@ -407,7 +406,7 @@ bool Gamer::FreeTracksAfterCapture(int nBar) {
 
     int nFreeEndBar = mFreeEndBar;
     for (int i = 0; i < mTrackCount; ++i) {
-        if (!IsNonCatchTrack(i) || mFreeEndBar >= nNextBar) {
+        if (GetTrack(i)->mKind == kTrackModeCatch || mFreeEndBar >= nNextBar) {
             continue;
         }
 
@@ -484,16 +483,20 @@ void Gamer::OnBar(int nBar) {
                 mEndState = kEndStateWon;
                 pPlayer->Slot8(nBar, nBar + kWonBarSpan);
 
-                WinMsg win;
-                win.AddWinner(pPlayer);
-                Send(&win);
+                {
+                    WinMsg win;
+                    win.AddWinner(pPlayer);
+                    Send(&win);
+                }
                 PlaySoundByName(kWinSound);
                 RecordSoloStats(1, nBar);
 
-                TracksOnMsg tracksOn(nBar, 0);
-                Send(&tracksOn);
+                {
+                    TracksOnMsg tracksOn(nBar, 0);
+                    Send(&tracksOn);
+                }
                 for (int i = 0; i < mTrackCount; ++i) {
-                    if (IsNonCatchTrack(i)) {
+                    if (GetTrack(i)->mKind != kTrackModeCatch) {
                         mEnableMgr->SetFreeUntil(i, 0, kFreeForever);
                     } else if ((*mGraphs)[i]->Slot11() != 0) {
                         (*mGraphs)[i]->Slot10(nBar, pPlayer);
@@ -513,8 +516,10 @@ void Gamer::OnBar(int nBar) {
                     }
 
                     if (bExhausted) {
-                        WinMsg lose;
-                        Send(&lose);
+                        {
+                            WinMsg lose;
+                            Send(&lose);
+                        }
                         mEndState = kEndStateOver;
                         if (mUnknown1c == 0) {
                             pPlayer->AddJuice(kBarJuiceCost, 1);
