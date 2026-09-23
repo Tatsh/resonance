@@ -3,6 +3,7 @@
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/mesh.h"
+#include "rnd/meshvert.h"
 
 namespace Rnd {
 
@@ -97,6 +98,28 @@ void TunnelMeshChain::Collide(const Ray &ray, Collideable::HitSink &sink) {
     for (Mesh *pMesh : *this) {
         pMesh->Collide(ray, sink);
     }
+}
+
+// 0x004698e8
+void TunnelMeshChain::SetVertexCount(unsigned nCount) {
+    MeshVert blank;
+    blank.mPoint.x = 0.0f;
+    blank.mPoint.y = 0.0f;
+    blank.mPoint.z = 0.0f;
+    blank.mPoint.w = 1.0f;
+    blank.mNorm.x = 0.0f;
+    blank.mNorm.y = 0.0f;
+    blank.mNorm.z = 0.0f;
+    blank.mNorm.w = 1.0f;
+    blank.mColor.r = 1.0f;
+    blank.mColor.g = 1.0f;
+    blank.mColor.b = 1.0f;
+    blank.mColor.a = 1.0f;
+    blank.mTex1.x = 0.0f;
+    blank.mTex1.y = 0.0f;
+    blank.mTex2.x = 0.0f;
+    blank.mTex2.y = 0.0f;
+    front()->mVertsOwner->mVerts.resize(nCount, blank);
 }
 
 // 0x00476bc8

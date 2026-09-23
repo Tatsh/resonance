@@ -51,48 +51,23 @@ namespace Rnd {
  * DumpText() is a stub the original author never finished. It emits the three base dumps and then
  * the two literals "[Tunnel]\n" and "TODO\n", and writes no member at all. **No member of this
  * class has a name anywhere in the image**, because the text dump is the only routine that would
- * have supplied one. Every member below is therefore titled by its offset. The ones with a
- * recovered initial value record it, and that value is the only evidence about them.
+ * have supplied one. Members are titled by the role their routines give them, or by their offset
+ * where no role is recovered.
  *
  * Load() accepts a bounded version range rather than an upper bound alone, which is the only class
  * in the renderer that does. It reports "Can't load new Tunnel" above the range and "Can't load
  * old Tunnel" below it.
  *
- * The class builds child objects with generated titles as it generates geometry, through the
- * formats "%s.%d",
- * "[%s.%d]", "%s_lat%03d", "%s_pan%03d", and "[%s_seek%d.%d]". The lateral and pan names suggest
- * one child mesh per axis per section and the seek name a per-section marker, although no routine
- * that consumes them is reconstructed yet.
+ * The geometry is a ring of mRingCount lanes, each a three-segment trough (LaneProfile), swept
+ * along the path mPath one slice of mSliceFrames frames at a time. Each slice owns one chain of
+ * lane meshes, "[<name>_lat<slice>.<level>]", and each lane of each slice one chain of cell meshes,
+ * "[<name>_pan<cell>.<level>]", that fill the gap to the next lane. The ring advance places one
+ * column of every slice mesh per step, and DrawSelf() draws the slices of the visible window.
+ * The seekers add "[<name>_seek<index>.<section>]" meshes over the lanes they highlight.
  *
- * Recovery is partial, and this header is the structural pass. Nothing that walks the geometry is
- * reconstructed. The members below are now measured rather than only counted, because six small
- * routines index them and their strides and moduli pin the shape of each container. Those six are
- * the ring section lookups at `0x00477388` and `0x004773e8`, the tangent interpolation at
- * `0x00477538`, the section setter at `0x00477830`, the scroll at `0x00476f48`, and the ring
- * advance at `0x00476fe0`. The mesh list clear at `0x0046acf0` confirms the element type of the two
- * grids.
- *
- * Still unreconstructed and still owned by this class are the constructor at `0x00466620`, the
- * destructor at `0x004676b0`, DrawSelf() at `0x00468850`, SetFrameSelf() at `0x00469180`, the mesh
- * build at `0x004699c0`, the face strip build at `0x0046adc0`, the routine at `0x0046b830`, the VU1
- * upload at `0x0046c0e8`, the section frame setter at `0x0046c638`, and the two grid colour setters
- * at `0x0046d788` and `0x0046d8e8`. The constructor and destructor wait on the element of the
- * vector at `+0xcc`.
- *
- * Nine addresses a worklist grouped under this class belong elsewhere, and each one is recorded
- * here so the grouping is not repeated. `0x00466528` and `0x00476598` append triangles to the face
- * vector a `Rnd::Mesh` addresses through its own mFacesOwner at `+0x134`, which is past the end of
- * this class, so both are Rnd::Mesh members. `0x00493b60` and `0x00493bd0` set mVertsOwner and
- * mFacesOwner of a `Rnd::Mesh` at those same offsets, and `0x00494048` writes a quadword into each
- * 0x40-byte element of a range the object at `+0x130` owns, so all three are Rnd::Mesh members too.
- * `0x00473538` and `0x00474990` measure their range with an arithmetic shift of six, which is a
- * `std::vector` of 0x40-byte elements rather than anything of this class. `0x00476190` is the
- * default constructor of a `std::vector`, and `0x00476a80`, `0x00476b28`, and `0x00476e48` are
- * members of Rnd::TunnelMeshChain. `0x00472488` is `std::vector<float>::operator=`, which six
- * routines of this class and one of another share, and an earlier reading had it as a drawable
- * index table rebuild of this class. `0x004698e8` resizes `std::vector<Rnd::MeshVert>` through the
- * mVertsOwner of the first mesh of a mesh list, and an earlier reading had it as a bounding box
- * resize of this class.
+ * The routine at `0x0046b830` has no callers and is not reconstructed. It rebuilds the slice grid
+ * with one chain per cell instead of one per slice and appears to be an earlier form of
+ * BuildSliceMeshes().
  *
  * The record the vector at `+0xdc` stores is Rnd::TunnelSeeker. The routines at `0x00477830` and
  * `0x0046e830` are members of the seeker and of its strip rather than of this class, and the three
@@ -389,7 +364,7 @@ public:
      * @param flUnknown38 The value of mUnknown38.
      * @param nRingCount The ring count.
      * @param nSliceCount The slice count.
-     * @param nUnknown44 The value of mUnknown44.
+     * @param nLodCount The value of mLodCount.
      * @param flUnknown48 The value of mUnknown48.
      * @param flUnknown4c The value of mUnknown4c.
      * @param flUnknown50 The value of mUnknown50.
@@ -399,7 +374,7 @@ public:
     void Configure(float flUnknown38,
                    int nRingCount,
                    int nSliceCount,
-                   int nUnknown44,
+                   int nLodCount,
                    float flUnknown48,
                    float flUnknown4c,
                    float flUnknown50,
@@ -408,13 +383,34 @@ public:
     /**
      * Convert a frame to a slice.
      *
-     * The frame is scaled by mUnknown98 and rounded down. The program lists no caller.
+     * The frame is scaled by mSlicesPerFrame and rounded down. The program lists no caller.
      *
      * @param flFrame The frame.
      * @return The slice.
      * @ghidraAddress 0x00476540
      */
     int FrameToSlice(float flFrame);
+
+    /**
+     * Colour the wall between one lane and the next on one slice.
+     *
+     * Colours the right wall of the lane, the left wall of the following lane, and the first end
+     * cap of the lane, then reports the colour change. Both indices wrap.
+     *
+     * @param nRing The lane.
+     * @param nSlice The slice.
+     * @param color The colour.
+     * @ghidraAddress 0x0046d788
+     */
+    void SetLaneDividerColor(int nRing, int nSlice, const Color &color);
+
+    /**
+     * Colour the floor and the second end cap of every lane on every slice.
+     *
+     * @param color The colour.
+     * @ghidraAddress 0x0046d8e8
+     */
+    void SetLaneFloorColor(const Color &color);
 
 protected:
     /**
@@ -451,11 +447,20 @@ private:
     // current grid rather than the stream, and before revision 37 the slice count does. 0x00468da0.
     void LoadSectionMaterials(Stream &stream);
 
-    // Upload the generated geometry to VU1. 0x0046c0e8.
-    void UploadToVU1();
-
-    // Build the mesh of the current ring set. 0x004699c0.
+    // Rebuild every generated mesh. The material and first vertex colour of each chain are kept
+    // across the rebuild. The ring transforms and lane profiles are regenerated from mUnknown38 and
+    // the four lane parameters, and mSliceSteps becomes 2 to the power of one less than mLodCount.
+    // 0x004699c0.
     void BuildMesh();
+
+    // Build one chain per slice, "[<name>_lat<slice>]", whose finest level holds a block of
+    // 6 * (mSliceSteps + 1) + 8 vertices per ring. The triangles are built on
+    // the chain of slice 0 and shared by the others. 0x0046adc0.
+    void BuildSliceMeshes();
+
+    // Build one chain per cell, "[<name>_pan<cell>]", with two rows of mSliceSteps + 1 vertices.
+    // The triangles are built on the chain of cell 0 and shared by the others. 0x0046c0e8.
+    void BuildCellMeshes();
 
     // Project one ring into camera space. 0x0046db80. A null mPath writes the identity into
     // pOut and returns. Otherwise the three basis rows of mUnknownc0[nRing] are copied through,
@@ -468,7 +473,11 @@ private:
     // Empty the per-material section lists. 0x0046acf0.
     void ClearMaterialSectionLists();
 
-    // Set the frame of every section of one ring. 0x0046c638.
+    // Place column mUnknown84 of the slice mUnknown7c. The path is evaluated at mUnknown80, every
+    // lane profile is carried through it into the slice mesh, and the edges of the neighbouring
+    // cells follow. The first and last columns also close the ends of each lane block. Column zero,
+    // the last one written, resynchronises the slice mesh and every cell mesh of the slice.
+    // 0x0046c638.
     void SetRingSectionFrames();
 
     // A signed remainder moved into [0, nCount), the form every ring and slice lookup uses.
@@ -477,14 +486,24 @@ private:
         return nRemainder > -1 ? nRemainder : nRemainder + nCount;
     }
 
+    // The cross-section of one lane in the ring frame, a trough of three segments. mPoints[0] and
+    // mPoints[3] are the lane edges, drawn from the ring translations towards the neighbouring
+    // rings by mUnknown4c. mPoints[1] and mPoints[2] blend each edge by mUnknown50 with the ring
+    // translation pulled towards the axis by mUnknown48. mNormals[i] is the unit normal of the
+    // segment from mPoints[i] to mPoints[i + 1] in the plane of the ring. The record is 0x70 bytes.
+    struct LaneProfile {
+        Vector3 mPoints[4];
+        Vector3 mNormals[3];
+    };
+
     // No class derives from Rnd::Tunnel. The three seek records read its members as friends, and
     // Renderer reads the two public counts. The order below is the recovered offset order.
     // Every unknown title is the offset itself, because DumpText() is a stub. The initial value
-    // each member receives from the constructor is the whole of the evidence about it. A member
-    // with no recorded value is one the constructor does not write, or one it fills through a
-    // container allocation.
+    // each member receives from the constructor is part of the evidence about it. A member with no
+    // recorded value is one the constructor does not write, or one it fills through a container
+    // allocation.
 
-    float mUnknown38; // +0x38 Starts at 1.0f. Save() and Load() carry it, and Configure() sets it.
+    float mUnknown38; // +0x38 Starts at 1.0f. The ring radius BuildMesh() places the rings at.
 
 public:
     /*!< The ring count, 3 at construction. It is the modulus of the inner index of mUnknowna4, the
@@ -497,12 +516,12 @@ public:
     int mSliceCount;
 
 private:
-    // +0x44 Starts at 2. The constructor sizes mUnknown68 to it.
-    int mUnknown44;
-    float mUnknown48; // +0x48 Starts at 0.1f.
-    float mUnknown4c; // +0x4c Starts at 0.1f.
-    float mUnknown50; // +0x50 Starts at 0.25f.
-    float mUnknown54; // +0x54 Starts at 0.01f.
+    // +0x44 Starts at 2. The level count of every generated chain and the length of mUnknown68.
+    int mLodCount;
+    float mUnknown48; // +0x48 Starts at 0.1f. The inward pull of the lane floor.
+    float mUnknown4c; // +0x4c Starts at 0.1f. The gap each lane edge keeps from the ring boundary.
+    float mUnknown50; // +0x50 Starts at 0.25f. The weight of the edge in the floor points.
+    float mUnknown54; // +0x54 Starts at 0.01f. The cell edge blend per slice step.
     // +0x58 Starts at 0. The path the tunnel follows, which the camera space projection at
     // 0x0046db80 and GetPathXfm() evaluate through Rnd::TransAnim::EvalFrame(). A null path makes
     // both write the identity.
@@ -512,11 +531,9 @@ private:
     // +0x64 Starts at 480.0f. The tunnel frames a seeker takes to move one ring, which
     // TunnelSeeker::UpdateLane() divides the elapsed frames by.
     float mLaneChangeFrames;
-    // +0x68 One level of detail threshold per ring, each written into the mMinScreen of the mesh at
-    // the matching position of its list. Three routines pin the shape. Copy() at 0x00476814 assigns
-    // it from the source tunnel through `std::vector<float>::operator=`, the setter at 0x0046d180
-    // assigns it from its argument through the same operator, and the same setter reads an element
-    // with `lwc1`, which is what fixes the element as a float rather than a word.
+    // +0x68 One level of detail threshold per chain level, each written into the mMinScreen of the
+    // mesh at the matching position of its chain. Copy() assigns it through
+    // `std::vector<float>::operator=`, and the setter at 0x0046d180 reads an element with `lwc1`.
     std::vector<float> mUnknown68;
     int mUnknown74; // +0x74 Starts at 1. DrawSelf() tests it.
     int mUnknown78; // +0x78 Starts at 1. DrawSelf() tests it.
@@ -525,20 +542,25 @@ private:
     // the requested slice against it and writes the same sentinel into the mUnknown88 entry of the
     // slice it retires.
     int mUnknown7c;
-    // +0x80 Starts at 0. A float the ring advance accumulates mUnknown9c divided by mUnknowna0 into
-    // once per step, and reloads with the requested slice scaled by mUnknown9c on a fresh slice.
+    // +0x80 Starts at 0. The path frame of the column being placed. The ring advance reloads it
+    // with the slice scaled by mSliceFrames and adds mSliceFrames / mSliceSteps per column.
     float mUnknown80;
-    // +0x84 Starts at 0. The step counter the ring advance reloads from mUnknowna0 and counts down.
+    // +0x84 Starts at 0. The column being placed, which the ring advance counts down from
+    // mSliceSteps.
     int mUnknown84;
     // +0x88 One slice identifier per slice, which the scroll at 0x00476f48 reads, the ring advance
     // writes, and SetPath() fills with the 99999999 sentinel.
     std::vector<int> mUnknown88;
-    float mUnknown94; // +0x94 Written by BuildMesh().
-    // +0x98 Starts at 0. A float scale FrameToSlice() multiplies a frame by, which BuildMesh()
-    // writes.
-    float mUnknown98;
-    float mUnknown9c; // +0x9c Starts at 0. The numerator of the per-step increment.
-    int mUnknowna0;   // +0xa0 Unrecovered. The divisor of the per-step increment.
+    // +0x94 mUnknown54 times mSliceSteps, set by BuildMesh(). SetRingSectionFrames() blends the
+    // end vertices of each cell towards their neighbours by it.
+    float mCellEdgeBlend;
+    // +0x98 Starts at 0, and BuildMesh() sets it to the reciprocal of mSliceFrames.
+    float mSlicesPerFrame;
+    // +0x9c Starts at 0, and BuildMesh() sets it to 1920. The frames one slice spans.
+    float mSliceFrames;
+    // +0xa0 The columns of a slice less one, which BuildMesh() sets to 2 to the power of one less
+    // than mLodCount. The ring advance places one column per step.
+    int mSliceSteps;
     // +0xa4 The mesh grid, one chain per cell, addressed as `slice * mRingCount + ring` by the
     // lookup at 0x00477388, which then returns the finest level of the chain. The 0xc-byte stride
     // and the clear at 0x0046acf0 destroying each slot through the chain destructor at 0x00476a80
@@ -553,10 +575,8 @@ private:
     // +0xc0 One transform per ring. The tangent interpolation at 0x00477538 reads the translation
     // row of entry `i` and entry `(i + 1) % mRingCount` and blends the two on the vector unit.
     std::vector<Transform> mUnknownc0;
-    // +0xcc A std::vector of 0x70-byte records, which the constructor zeroes, BuildMesh() and
-    // SetRingSectionFrames() index, and the destructor frees without an element destructor. The
-    // element is recovered with those two routines.
-    unsigned char mUnknowncc[0x0c];
+    // +0xcc One lane profile per ring, generated by BuildMesh().
+    std::vector<LaneProfile> mLaneProfiles;
     // +0xd8 Drawables scheduled by frame, kept in ascending frame order by AddEvent(). Update()
     // walks it taking a reference on every entry, and Copy() assigns it through the list assignment
     // operator at 0x004727b0.

@@ -66,8 +66,8 @@ void TunnelSeekStrip::Build(Tunnel *pTunnel, TunnelSeeker *pOwner, int nIndex) {
                            pTunnel->mUnknowna4.front());
         mSections[i].mMeshes.front()->SetMaterialChain(mMat);
     }
-    mStepNumerator = static_cast<int>(pTunnel->mUnknown9c);
-    mStepCount = pTunnel->mUnknowna0;
+    mStepNumerator = static_cast<int>(pTunnel->mSliceFrames);
+    mStepCount = pTunnel->mSliceSteps;
     mStepSize = mStepNumerator / mStepCount;
     if (mMat != nullptr) {
         mMat->AddRef(mTunnel);

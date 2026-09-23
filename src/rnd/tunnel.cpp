@@ -5,17 +5,20 @@
 #include <math.h>
 #include <vector>
 
+#include "app/longop.h"
 #include "math/color.h"
 #include "math/transform.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
 #include "os/failsink.h"
+#include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
 #include "rnd/mesh.h"
+#include "rnd/meshvert.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
 #include "rnd/transanim.h"
@@ -38,11 +41,39 @@ constexpr int kUnknown60Revision = 35;
 constexpr int kCellCountRevision = 36;
 constexpr int kSliceCountRevision = 37;
 
+// The frames one slice spans.
+constexpr float kSliceFrames = 1920.0f;
+// The value of pi the image uses, one unit in the last place below the nearest float.
+constexpr float kPi = 3.1415925f;
+// The capacity the constructor reserves for the seeker vector.
+constexpr int kInitialSeekerCapacity = 4;
+
+// A lane block of a slice mesh holds, per ring, three panels of two rows of mSliceSteps + 1
+// vertices, one for each segment of the lane profile, followed by two end caps of two rows of two.
+constexpr int kLaneSegmentCount = 3;
+constexpr int kPanelRows = 2;
+constexpr int kCapRows = 2;
+constexpr int kCapColumns = 2;
+constexpr int kCapVerts = kCapRows * kCapColumns;
+// The panels of a block, in the order the profile segments run.
+enum LanePanel {
+    kLanePanelLeftWall = 0,  // mPoints[0] to mPoints[1]
+    kLanePanelFloor = 1,     // mPoints[1] to mPoints[2]
+    kLanePanelRightWall = 2, // mPoints[2] to mPoints[3]
+};
+
+const char kSliceNameFormat[] = "%s_lat%03d";
+const char kCellNameFormat[] = "%s_pan%03d";
+
 } // namespace
 
 namespace Rnd {
 
 namespace {
+
+const char *NameText(const Object *pObject) {
+    return pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString;
+}
 
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
@@ -50,8 +81,7 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
         stream.WriteBytes(&chTerminator, 1);
         return;
     }
-    const char *pszName = pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString;
-    stream.WriteBytes(pszName, pObject->mName.mLen + 1);
+    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 template <class T>
@@ -133,6 +163,94 @@ void SaveChainMaterial(Stream &stream, const TunnelMeshChain &chain) {
         .Write(&color.g, sizeof(color.g))
         .Write(&color.b, sizeof(color.b))
         .Write(&color.a, sizeof(color.a));
+}
+
+// out.xyz = a.xyz * flA + b.xyz * flB, with out.w taken from a. A VU0 multiply and accumulate in
+// the image. out may alias either input.
+inline void BlendVector(const Vector3 &a, float flA, const Vector3 &b, float flB, Vector3 &out) {
+    const float flX = a.x * flA + b.x * flB;
+    const float flY = a.y * flA + b.y * flB;
+    const float flZ = a.z * flA + b.z * flB;
+    const float flW = a.w;
+    out.x = flX;
+    out.y = flY;
+    out.z = flZ;
+    out.w = flW;
+}
+
+// A point carried through a transform, the basis rows weighted by its components plus the
+// translation, with out.w taken from the input. A VU0 multiply and accumulate in the image.
+inline void XfmPoint(const Transform &xfm, const Vector3 &in, Vector3 &out) {
+    const float flX =
+        xfm.mBasisX.x * in.x + xfm.mBasisY.x * in.y + xfm.mBasisZ.x * in.z + xfm.mTranslation.x;
+    const float flY =
+        xfm.mBasisX.y * in.x + xfm.mBasisY.y * in.y + xfm.mBasisZ.y * in.z + xfm.mTranslation.y;
+    const float flZ =
+        xfm.mBasisX.z * in.x + xfm.mBasisY.z * in.y + xfm.mBasisZ.z * in.z + xfm.mTranslation.z;
+    const float flW = in.w;
+    out.x = flX;
+    out.y = flY;
+    out.z = flZ;
+    out.w = flW;
+}
+
+// A direction carried through the basis rows alone, with out.w taken from the input.
+inline void XfmVector(const Transform &xfm, const Vector3 &in, Vector3 &out) {
+    const float flX = xfm.mBasisX.x * in.x + xfm.mBasisY.x * in.y + xfm.mBasisZ.x * in.z;
+    const float flY = xfm.mBasisX.y * in.x + xfm.mBasisY.y * in.y + xfm.mBasisZ.y * in.z;
+    const float flZ = xfm.mBasisX.z * in.x + xfm.mBasisY.z * in.y + xfm.mBasisZ.z * in.z;
+    const float flW = in.w;
+    out.x = flX;
+    out.y = flY;
+    out.z = flZ;
+    out.w = flW;
+}
+
+// Every transform and vector the geometry routines build on the stack starts with its padding
+// words at 1.0 and nothing else written.
+inline void SetPaddingWords(Transform &xfm) {
+    xfm.mBasisX.w = 1.0f;
+    xfm.mBasisY.w = 1.0f;
+    xfm.mBasisZ.w = 1.0f;
+    xfm.mTranslation.w = 1.0f;
+}
+
+// Give the two rows of a lane panel their texture coordinates. The horizontal coordinate is the
+// row and the vertical one runs from 0 to 1 along the row.
+inline void SetPanelTexCoords(std::vector<MeshVert> &verts, int nFirst, int nColumns) {
+    const float flStep = 1.0f / (nColumns - 1);
+    float flU = 0.0f;
+    for (int nRow = 0; nRow < kPanelRows; ++nRow) {
+        float flV = 0.0f;
+        for (int nColumn = 0; nColumn < nColumns; ++nColumn) {
+            MeshVert &vert = verts[nFirst + nRow * nColumns + nColumn];
+            vert.mTex1.y = flV;
+            vert.mTex1.x = flU;
+            flV += flStep;
+        }
+        flU += 1.0f;
+    }
+}
+
+// Give the four vertices of a lane end cap the corners of the texture.
+inline void SetCapTexCoords(std::vector<MeshVert> &verts, int nFirst) {
+    float flV = 0.0f;
+    for (int nRow = 0; nRow < kCapRows; ++nRow) {
+        float flU = 0.0f;
+        for (int nColumn = 0; nColumn < kCapColumns; ++nColumn) {
+            MeshVert &vert = verts[nFirst + nRow * kCapColumns + nColumn];
+            vert.mTex1.x = flU;
+            vert.mTex1.y = flV;
+            flU += 1.0f;
+        }
+        flV += 1.0f;
+    }
+}
+
+inline void FillColor(std::vector<MeshVert> &verts, int nFirst, int nCount, const Color &color) {
+    for (int i = nFirst; i < nFirst + nCount; ++i) {
+        verts[i].mColor = color;
+    }
 }
 
 // Read nCount records of SaveChainMaterial() and apply each one to the chain of the same index.
@@ -231,7 +349,7 @@ void Tunnel::Save(Stream &stream) {
     stream.Write(&mUnknown38, sizeof(mUnknown38));
     stream.Write(&mRingCount, sizeof(mRingCount));
     stream.Write(&mSliceCount, sizeof(mSliceCount));
-    stream.Write(&mUnknown44, sizeof(mUnknown44));
+    stream.Write(&mLodCount, sizeof(mLodCount));
     stream.Write(&mUnknown48, sizeof(mUnknown48));
     stream.Write(&mUnknown4c, sizeof(mUnknown4c));
     stream.Write(&mUnknown50, sizeof(mUnknown50));
@@ -263,7 +381,7 @@ void Tunnel::Load(Stream &stream) {
     stream.Read(&mUnknown38, sizeof(mUnknown38));
     stream.Read(&mRingCount, sizeof(mRingCount));
     stream.Read(&mSliceCount, sizeof(mSliceCount));
-    stream.Read(&mUnknown44, sizeof(mUnknown44));
+    stream.Read(&mLodCount, sizeof(mLodCount));
     stream.Read(&mUnknown48, sizeof(mUnknown48));
     stream.Read(&mUnknown4c, sizeof(mUnknown4c));
     stream.Read(&mUnknown50, sizeof(mUnknown50));
@@ -323,7 +441,7 @@ void Tunnel::Copy(const Object *pSource, unsigned nFlags) {
     mUnknown38 = pTunnel->mUnknown38;
     mRingCount = pTunnel->mRingCount;
     mSliceCount = pTunnel->mSliceCount;
-    mUnknown44 = pTunnel->mUnknown44;
+    mLodCount = pTunnel->mLodCount;
     mUnknown48 = pTunnel->mUnknown48;
     mUnknown4c = pTunnel->mUnknown4c;
     mUnknown50 = pTunnel->mUnknown50;
@@ -399,7 +517,7 @@ void Tunnel::ResizeSeekers(unsigned nCount) {
 void Tunnel::Configure(float flUnknown38,
                        int nRingCount,
                        int nSliceCount,
-                       int nUnknown44,
+                       int nLodCount,
                        float flUnknown48,
                        float flUnknown4c,
                        float flUnknown50,
@@ -407,7 +525,7 @@ void Tunnel::Configure(float flUnknown38,
     mUnknown38 = flUnknown38;
     mRingCount = nRingCount;
     mSliceCount = nSliceCount;
-    mUnknown44 = nUnknown44;
+    mLodCount = nLodCount;
     mUnknown48 = flUnknown48;
     mUnknown4c = flUnknown4c;
     mUnknown50 = flUnknown50;
@@ -423,7 +541,453 @@ void Tunnel::Configure(float flUnknown38,
 
 // 0x00476540
 int Tunnel::FrameToSlice(float flFrame) {
-    return static_cast<int>(floorf(flFrame * mUnknown98));
+    return static_cast<int>(floorf(flFrame * mSlicesPerFrame));
+}
+
+// 0x00466620
+Tunnel::Tunnel(const HxStr &name)
+    : Object(name), mUnknown38(1.0f), mRingCount(3), mSliceCount(0), mLodCount(2), mUnknown48(0.1f),
+      mUnknown4c(0.1f), mUnknown50(0.25f), mUnknown54(0.01f), mPath(nullptr), mUnknown5c(0),
+      mUnknown60(0), mLaneChangeFrames(480.0f), mUnknown74(1), mUnknown78(1), mUnknown7c(kNoSlice),
+      mUnknown80(0.0f), mUnknown84(0), mSlicesPerFrame(0.0f), mSliceFrames(0.0f), mUnknownbc(0) {
+    mSeekers.reserve(kInitialSeekerCapacity);
+    mUnknown68.resize(mLodCount, 0.0f);
+    std::fill(mUnknown68.begin(), mUnknown68.end(), 0);
+    Update();
+}
+
+// 0x004676b0
+Tunnel::~Tunnel() {
+    ReleaseRefs();
+    ReleaseAllRefs();
+}
+
+// 0x00468850
+int Tunnel::DrawSelf() {
+    const int nEnd = mUnknownbc + mSliceCount - mUnknown60;
+    if (mUnknown74 != 0) {
+        for (int nSlice = nEnd - 1; nSlice >= mUnknownbc; --nSlice) {
+            const int nIndex = nSlice % mSliceCount;
+            if (mUnknown88[nIndex] != kNoSlice) {
+                mUnknownb0[nIndex].Draw(nSlice * mSliceFrames - mFilteredFrame);
+            }
+        }
+    }
+    if (mUnknown78 != 0) {
+        for (int nSlice = nEnd - 1; nSlice >= mUnknownbc; --nSlice) {
+            const float flDistance = nSlice * mSliceFrames - mFilteredFrame;
+            const int nIndex = nSlice % mSliceCount;
+            if (mUnknown88[nIndex] == nSlice) {
+                for (int nRing = 0; nRing < mRingCount; ++nRing) {
+                    mUnknowna4[nIndex * mRingCount + nRing].Draw(flDistance);
+                }
+                for (TunnelSeeker &seeker : mSeekers) {
+                    seeker.DrawSection(nSlice, flDistance);
+                }
+            }
+        }
+    }
+    for (TunnelSeeker &seeker : mSeekers) {
+        seeker.DrawMesh();
+    }
+    return 1;
+}
+
+// 0x00469180
+void Tunnel::SetFrameSelf(float flFrame) {
+    float flEarliestOffset = 0.0f;
+    for (const TunnelSeeker &seeker : mSeekers) {
+        flEarliestOffset = std::min(flEarliestOffset, seeker.mTransFrameOffset);
+    }
+    mUnknownbc = static_cast<int>(floorf((flFrame + flEarliestOffset) * mSlicesPerFrame));
+    if (mUnknownbc < 0) {
+        mUnknownbc = 0;
+    }
+    ScrollRings();
+    if (mPath == nullptr) {
+        return;
+    }
+
+    for (TunnelSeeker &seeker : mSeekers) {
+        Transform trans;
+        SetPaddingWords(trans);
+        Transform look;
+        SetPaddingWords(look);
+        Transform meshXfm;
+        SetPaddingWords(meshXfm);
+        mPath->EvalFrame(flFrame + seeker.mTransFrameOffset, &trans.mBasisX.x, 1);
+        mPath->EvalFrame(flFrame + seeker.mLookFrameOffset, &look.mBasisX.x, 1);
+
+        // Turn the look frame about its vertical axis to the seeker's lane and aim the
+        // transformable from its own path point at the lane, mUnknown38 out from the axis.
+        Transform aim;
+        SetPaddingWords(aim);
+        const float flAngle = -seeker.UpdateLane() * 2.0f * kPi / mRingCount;
+        const float flCos = cosf(flAngle);
+        const float flSin = sinf(flAngle);
+        aim.mBasisZ.x = flSin;
+        aim.mBasisZ.z = flCos;
+        aim.mBasisX.x = flCos;
+        aim.mBasisX.z = -flSin;
+        aim.mBasisX.y = 0.0f;
+        aim.mBasisY.x = 0.0f;
+        aim.mBasisY.y = 1.0f;
+        aim.mBasisY.z = 0.0f;
+        aim.mBasisZ.y = 0.0f;
+        aim.mTranslation.x = 0.0f;
+        aim.mTranslation.y = 0.0f;
+        aim.mTranslation.z = 0.0f;
+        aim.mTranslation.w = 1.0f;
+        Mat44Multiply(&aim.mBasisX.x, &look.mBasisX.x, &aim.mBasisX.x);
+
+        Vector3 lanePoint;
+        lanePoint.x = 0.0f;
+        lanePoint.y = 0.0f;
+        lanePoint.z = -mUnknown38;
+        lanePoint.w = 1.0f;
+        XfmPoint(aim, lanePoint, aim.mTranslation);
+        Vector3 direction;
+        direction.w = 1.0f;
+        Vec3Sub(&aim.mTranslation.x, &trans.mTranslation.x, &direction.x);
+        Mat33BuildOrthonormal(&direction.x, &aim.mBasisZ.x, &aim.mBasisX.x);
+        aim.mTranslation = trans.mTranslation;
+        seeker.SetTransXfm(aim);
+
+        mPath->EvalFrame(flFrame + seeker.mMeshFrameOffset, &meshXfm.mBasisX.x, 1);
+        seeker.SetMeshXfm(meshXfm);
+    }
+}
+
+// 0x004699c0
+void Tunnel::BuildMesh() {
+    std::vector<Mat *> cellMats(mUnknowna4.size(), nullptr);
+    std::vector<Color> cellColors(mUnknowna4.size());
+    for (unsigned i = 0; i < mUnknowna4.size(); ++i) {
+        cellMats[i] = mUnknowna4[i].front()->mMat;
+        cellColors[i] = mUnknowna4[i].front()->mVertsOwner->mVerts.front().mColor;
+    }
+    std::vector<Mat *> sliceMats(mUnknownb0.size(), nullptr);
+    std::vector<Color> sliceColors(mUnknownb0.size());
+    for (unsigned i = 0; i < mUnknownb0.size(); ++i) {
+        sliceMats[i] = mUnknownb0[i].front()->mMat;
+        sliceColors[i] = mUnknownb0[i].front()->mVertsOwner->mVerts.front().mColor;
+    }
+    ClearMaterialSectionLists();
+
+    mSliceFrames = kSliceFrames;
+    mSlicesPerFrame = 1.0f / kSliceFrames;
+    mUnknown88.resize(mSliceCount, 0);
+    std::fill(mUnknown88.begin(), mUnknown88.end(), kNoSlice);
+
+    // Yes, the binary fills the new elements from blanks with only their padding words written.
+    // The loops below overwrite everything else.
+    Transform blankXfm;
+    SetPaddingWords(blankXfm);
+    mUnknownc0.resize(mRingCount, blankXfm);
+    LaneProfile blankProfile;
+    for (Vector3 &point : blankProfile.mPoints) {
+        point.w = 1.0f;
+    }
+    for (Vector3 &normal : blankProfile.mNormals) {
+        normal.w = 1.0f;
+    }
+    mLaneProfiles.resize(mRingCount, blankProfile);
+
+    // Each ring faces its own angle, with its translation half a ring back around the axis.
+    const float flHalfRing = kPi / mRingCount;
+    float flAngle = 0.0f;
+    for (int nRing = 0; nRing < mRingCount; ++nRing) {
+        Transform &xfm = mUnknownc0[nRing];
+        const float flCos = cosf(flAngle);
+        const float flSin = sinf(flAngle);
+        xfm.mBasisX.x = flCos;
+        xfm.mBasisX.z = flSin;
+        xfm.mBasisX.y = 0.0f;
+        xfm.mBasisY.x = 0.0f;
+        xfm.mBasisY.z = 0.0f;
+        xfm.mBasisY.y = 1.0f;
+        xfm.mBasisZ.x = -xfm.mBasisX.z;
+        xfm.mBasisZ.z = xfm.mBasisX.x;
+        xfm.mBasisZ.y = 0.0f;
+        flAngle -= flHalfRing;
+        xfm.mTranslation.x = mUnknown38 * sinf(flAngle);
+        xfm.mTranslation.y = 0.0f;
+        xfm.mTranslation.z = -mUnknown38 * cosf(flAngle);
+        flAngle += flHalfRing * 3.0f;
+    }
+
+    for (int nRing = 0; nRing < mRingCount; ++nRing) {
+        LaneProfile &profile = mLaneProfiles[nRing];
+        LerpRingSectionTangent(
+            WrapIndex(nRing - 1, mRingCount), &profile.mPoints[0], 1.0f - mUnknown4c);
+        LerpRingSectionTangent(nRing, &profile.mPoints[3], mUnknown4c);
+        Vector3 center;
+        center.w = 1.0f;
+        LerpRingSectionTangent(nRing, &center, 0.0f);
+        Vector3 floorCenter;
+        floorCenter.w = 1.0f;
+        Vec3Scale(&center.x, 1.0f - mUnknown48, &floorCenter.x);
+        BlendVector(
+            profile.mPoints[0], mUnknown50, floorCenter, 1.0f - mUnknown50, profile.mPoints[1]);
+        BlendVector(
+            profile.mPoints[3], mUnknown50, floorCenter, 1.0f - mUnknown50, profile.mPoints[2]);
+        for (int nSegment = 0; nSegment < kLaneSegmentCount; ++nSegment) {
+            Vector3 delta;
+            delta.w = 1.0f;
+            Vec3Sub(&profile.mPoints[nSegment + 1].x, &profile.mPoints[nSegment].x, &delta.x);
+            Vector3 &normal = profile.mNormals[nSegment];
+            normal.x = -delta.z;
+            normal.y = 0.0f;
+            normal.z = delta.x;
+            normal.w = 1.0f;
+            Vec3Normalize(&normal.x, &normal.x);
+        }
+    }
+
+    mSliceSteps = 1 << (mLodCount - 1);
+    mCellEdgeBlend = mUnknown54 * mSliceSteps;
+    BuildSliceMeshes();
+    BuildCellMeshes();
+    // Yes, the binary passes the member to its own setter, which assigns it to itself.
+    ApplyMeshLodScreenSizes(mUnknown68);
+
+    for (unsigned i = 0; i < mUnknowna4.size(); ++i) {
+        if (i < cellMats.size()) {
+            mUnknowna4[i].front()->SetMaterialChain(cellMats[i]);
+            mUnknowna4[i].front()->SetVertexColor(cellColors[i]);
+        }
+    }
+    for (unsigned i = 0; i < mUnknownb0.size(); ++i) {
+        if (i < sliceMats.size()) {
+            mUnknownb0[i].front()->SetMaterialChain(sliceMats[i]);
+            mUnknownb0[i].front()->SetVertexColor(sliceColors[i]);
+        }
+    }
+}
+
+// 0x0046adc0
+void Tunnel::BuildSliceMeshes() {
+    mUnknownb0.resize(mSliceCount, TunnelMeshChain());
+    if (mUnknownb0.empty()) {
+        return;
+    }
+
+    const int nColumns = mSliceSteps + 1;
+    const int nPanelVerts = kPanelRows * nColumns;
+    const int nCapStart = kLaneSegmentCount * nPanelVerts;
+    const int nBlockVerts = nCapStart + 2 * kCapVerts;
+    const Color white{1.0f, 1.0f, 1.0f, 1.0f};
+    for (unsigned nSlice = 0; nSlice < mUnknownb0.size(); ++nSlice) {
+        RunLongOperationDrawProc();
+        TunnelMeshChain &chain = mUnknownb0[nSlice];
+        chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nSlice)), mLodCount, true);
+        chain.SetVertexCount(nBlockVerts * mRingCount);
+        Mesh *pMesh = chain.front();
+        std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
+        for (int nRing = 0; nRing < mRingCount; ++nRing) {
+            const int nBase = nRing * nBlockVerts;
+            SetPanelTexCoords(verts, nBase + kLanePanelLeftWall * nPanelVerts, nColumns);
+            SetPanelTexCoords(verts, nBase + kLanePanelFloor * nPanelVerts, nColumns);
+            SetPanelTexCoords(verts, nBase + kLanePanelRightWall * nPanelVerts, nColumns);
+            SetCapTexCoords(verts, nBase + nCapStart);
+            SetCapTexCoords(verts, nBase + nCapStart + kCapVerts);
+        }
+        pMesh->SetVertexColor(white);
+    }
+
+    // The triangles are built once, on the chain of the first slice.
+    TunnelMeshChain &first = mUnknownb0.front();
+    for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
+        RunLongOperationDrawProc();
+        const int nStep = 1 << nLevel;
+        Mesh *pMesh = first[nLevel];
+        for (int nRing = 0; nRing < mRingCount; ++nRing) {
+            const int nBase = nRing * nBlockVerts;
+            if (nLevel == first.size() - 1) {
+                // The coarsest level spans the lane with one strip, from the first row of the left
+                // wall to the second row of the right wall.
+                const int nRightWall = nBase + kLanePanelRightWall * nPanelVerts;
+                pMesh->AddQuadStrip(nBase, nRightWall + nColumns, nColumns, nStep);
+            } else {
+                for (int nPanel = 0; nPanel < kLaneSegmentCount; ++nPanel) {
+                    const int nPanelStart = nBase + nPanel * nPanelVerts;
+                    pMesh->AddQuadStrip(nPanelStart, nPanelStart + nColumns, nColumns, nStep);
+                }
+            }
+            const int nCap = nBase + nCapStart;
+            pMesh->AddQuad(nCap, nCap + 1, nCap + 2, nCap + 3);
+            pMesh->AddQuad(
+                nCap + kCapVerts, nCap + kCapVerts + 1, nCap + kCapVerts + 2, nCap + kCapVerts + 3);
+        }
+    }
+    first.Sync();
+    for (unsigned nSlice = 1; nSlice < mUnknownb0.size(); ++nSlice) {
+        RunLongOperationDrawProc();
+        mUnknownb0[nSlice].ShareFaces(first);
+        // Yes, the binary synchronises every level a second time.
+        mUnknownb0[nSlice].Sync();
+    }
+}
+
+// 0x0046c0e8
+void Tunnel::BuildCellMeshes() {
+    mUnknowna4.resize(mRingCount * mSliceCount, TunnelMeshChain());
+    if (mUnknowna4.empty()) {
+        return;
+    }
+
+    const int nColumns = mSliceSteps + 1;
+    const Color white{1.0f, 1.0f, 1.0f, 1.0f};
+    for (unsigned nCell = 0; nCell < mUnknowna4.size(); ++nCell) {
+        RunLongOperationDrawProc();
+        TunnelMeshChain &chain = mUnknowna4[nCell];
+        chain.Build(HxStr(FormatString(kCellNameFormat, NameText(this), nCell)), mLodCount, true);
+        chain.SetVertexCount(kPanelRows * nColumns);
+        Mesh *pMesh = chain.front();
+        SetPanelTexCoords(pMesh->mVertsOwner->mVerts, 0, nColumns);
+        pMesh->SetVertexColor(white);
+    }
+
+    // The triangles are built once, on the chain of the first cell.
+    TunnelMeshChain &first = mUnknowna4.front();
+    for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
+        RunLongOperationDrawProc();
+        first[nLevel]->AddQuadStrip(0, nColumns, nColumns, 1 << nLevel);
+    }
+    for (unsigned nCell = 1; nCell < mUnknowna4.size(); ++nCell) {
+        RunLongOperationDrawProc();
+        mUnknowna4[nCell].ShareFaces(first);
+    }
+}
+
+// 0x0046c638
+void Tunnel::SetRingSectionFrames() {
+    Transform xfm;
+    SetPaddingWords(xfm);
+    GetPathXfm(&xfm, mUnknown80);
+
+    const int nColumns = mSliceSteps + 1;
+    const int nPanelVerts = kPanelRows * nColumns;
+    const int nCapStart = kLaneSegmentCount * nPanelVerts;
+    const int nBlockVerts = nCapStart + 2 * kCapVerts;
+    for (int nRing = 0; nRing < mRingCount; ++nRing) {
+        const int nBase = nRing * nBlockVerts;
+        Mesh *pSlice = GetRingSection(mUnknown7c);
+        std::vector<MeshVert> &verts = pSlice->mVertsOwner->mVerts;
+        const LaneProfile &profile = mLaneProfiles[nRing];
+
+        // Column mUnknown84 of the two rows of each panel.
+        const int nLeft = nBase + kLanePanelLeftWall * nPanelVerts + mUnknown84;
+        const int nFloor = nBase + kLanePanelFloor * nPanelVerts + mUnknown84;
+        const int nRight = nBase + kLanePanelRightWall * nPanelVerts + mUnknown84;
+        XfmPoint(xfm, profile.mPoints[0], verts[nLeft].mPoint);
+        XfmPoint(xfm, profile.mPoints[1], verts[nLeft + nColumns].mPoint);
+        XfmPoint(xfm, profile.mPoints[2], verts[nRight].mPoint);
+        XfmPoint(xfm, profile.mPoints[3], verts[nRight + nColumns].mPoint);
+        verts[nFloor + nColumns].mPoint = verts[nRight].mPoint;
+        verts[nFloor].mPoint = verts[nLeft + nColumns].mPoint;
+        XfmVector(xfm, profile.mNormals[0], verts[nLeft].mNorm);
+        XfmVector(xfm, profile.mNormals[1], verts[nFloor].mNorm);
+        XfmVector(xfm, profile.mNormals[2], verts[nRight].mNorm);
+        verts[nLeft + nColumns].mNorm = verts[nLeft].mNorm;
+        verts[nFloor + nColumns].mNorm = verts[nFloor].mNorm;
+        verts[nRight + nColumns].mNorm = verts[nRight].mNorm;
+
+        // The cell to the right of the lane starts at its right edge, and the cell to its left
+        // ends at its left edge.
+        Mesh *pCell = GetRingSection(nRing, mUnknown7c);
+        Mesh *pPreviousCell = GetRingSection(WrapIndex(nRing - 1, mRingCount), mUnknown7c);
+        std::vector<MeshVert> &cellVerts = pCell->mVertsOwner->mVerts;
+        std::vector<MeshVert> &previousVerts = pPreviousCell->mVertsOwner->mVerts;
+        cellVerts[mUnknown84].mPoint = verts[nRight + nColumns].mPoint;
+        previousVerts[mUnknown84 + nColumns].mPoint = verts[nLeft].mPoint;
+
+        const Vector3 &floorNormal = verts[nFloor].mNorm;
+        const int nCap = nBase + nCapStart;
+        const int nPreviousCap = WrapIndex(nBase - nBlockVerts, verts.size()) + nCapStart;
+        if (mUnknown84 == 0) {
+            verts[nCap].mPoint = verts[nRight + nColumns].mPoint;
+            verts[nPreviousCap + 2].mPoint = verts[nLeft].mPoint;
+            BlendVector(cellVerts[1].mPoint,
+                        mCellEdgeBlend,
+                        cellVerts[0].mPoint,
+                        1.0f - mCellEdgeBlend,
+                        cellVerts[0].mPoint);
+            BlendVector(previousVerts[nColumns + 1].mPoint,
+                        mCellEdgeBlend,
+                        previousVerts[nColumns].mPoint,
+                        1.0f - mCellEdgeBlend,
+                        previousVerts[nColumns].mPoint);
+            verts[nCap + 1].mPoint = cellVerts[0].mPoint;
+            verts[nPreviousCap + 3].mPoint = previousVerts[nColumns].mPoint;
+            BlendVector(cellVerts[mSliceSteps - 1].mPoint,
+                        mCellEdgeBlend,
+                        cellVerts[mSliceSteps].mPoint,
+                        1.0f - mCellEdgeBlend,
+                        cellVerts[mSliceSteps].mPoint);
+            BlendVector(previousVerts[nPanelVerts - 2].mPoint,
+                        mCellEdgeBlend,
+                        previousVerts[nPanelVerts - 1].mPoint,
+                        1.0f - mCellEdgeBlend,
+                        previousVerts[nPanelVerts - 1].mPoint);
+            verts[nCap + kCapVerts].mPoint = cellVerts[mSliceSteps].mPoint;
+            verts[nPreviousCap + kCapVerts + 2].mPoint = previousVerts[nPanelVerts - 1].mPoint;
+            verts[nCap].mNorm = floorNormal;
+            verts[nCap + 1].mNorm = floorNormal;
+            verts[nPreviousCap + 2].mNorm = floorNormal;
+            verts[nPreviousCap + 3].mNorm = floorNormal;
+        } else if (mUnknown84 == mSliceSteps) {
+            verts[nCap + kCapVerts + 1].mPoint = verts[nRight + nColumns].mPoint;
+            verts[nPreviousCap + kCapVerts + 3].mPoint = verts[nLeft].mPoint;
+            verts[nCap + kCapVerts].mNorm = floorNormal;
+            verts[nCap + kCapVerts + 1].mNorm = floorNormal;
+            verts[nPreviousCap + kCapVerts + 2].mNorm = floorNormal;
+            verts[nPreviousCap + kCapVerts + 3].mNorm = floorNormal;
+        }
+    }
+
+    if (mUnknown84 == 0) {
+        GetRingSection(mUnknown7c)->SyncAll();
+        for (int nRing = 0; nRing < mRingCount; ++nRing) {
+            GetRingSection(nRing, mUnknown7c)->SyncAll();
+        }
+    }
+}
+
+// 0x0046d788
+void Tunnel::SetLaneDividerColor(int nRing, int nSlice, const Color &color) {
+    const int nColumns = mSliceSteps + 1;
+    const int nPanelVerts = kPanelRows * nColumns;
+    const int nCapStart = kLaneSegmentCount * nPanelVerts;
+    const int nBlockVerts = nCapStart + 2 * kCapVerts;
+    const int nBase = WrapIndex(nRing, mRingCount) * nBlockVerts;
+    const int nNextBase = WrapIndex(nBase + nBlockVerts, nBlockVerts * mRingCount);
+    Mesh *pMesh = mUnknownb0[WrapIndex(nSlice, mSliceCount)].front();
+    std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
+    FillColor(verts, nBase + kLanePanelRightWall * nPanelVerts, nPanelVerts, color);
+    FillColor(verts, nNextBase + kLanePanelLeftWall * nPanelVerts, nPanelVerts, color);
+    FillColor(verts, nBase + nCapStart, kCapVerts, color);
+    pMesh->SyncChanged(Mesh::kSyncColors);
+}
+
+// 0x0046d8e8
+void Tunnel::SetLaneFloorColor(const Color &color) {
+    const int nColumns = mSliceSteps + 1;
+    const int nPanelVerts = kPanelRows * nColumns;
+    const int nCapStart = kLaneSegmentCount * nPanelVerts;
+    const int nBlockVerts = nCapStart + 2 * kCapVerts;
+    for (int nSlice = 0; nSlice < mSliceCount; ++nSlice) {
+        Mesh *pMesh = mUnknownb0[nSlice].front();
+        std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
+        for (int nRing = 0; nRing < mRingCount; ++nRing) {
+            // The image also tests nBlockVerts * mRingCount for zero with a divide trap here, and
+            // uses no quotient.
+            const int nBase = nRing * nBlockVerts;
+            FillColor(verts, nBase + kLanePanelFloor * nPanelVerts, nPanelVerts, color);
+            FillColor(verts, nBase + nCapStart + kCapVerts, kCapVerts, color);
+        }
+        pMesh->SyncChanged(Mesh::kSyncColors);
+    }
 }
 
 // 0x006eab10
@@ -554,8 +1118,8 @@ void Tunnel::AdvanceRing(int nSlice) {
     if (nSlice != mUnknown7c) {
         mUnknown88[nIndex] = kNoSlice;
         mUnknown7c = nSlice;
-        mUnknown84 = mUnknowna0;
-        mUnknown80 = nSlice * mUnknown9c;
+        mUnknown84 = mSliceSteps;
+        mUnknown80 = nSlice * mSliceFrames;
     }
     SetRingSectionFrames();
     if (mUnknown84 == 0) {
@@ -563,7 +1127,7 @@ void Tunnel::AdvanceRing(int nSlice) {
         mUnknown7c = kNoSlice;
     } else {
         --mUnknown84;
-        mUnknown80 += mUnknown9c / mUnknowna0;
+        mUnknown80 += mSliceFrames / mSliceSteps;
     }
 }
 

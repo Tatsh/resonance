@@ -124,6 +124,17 @@ public:
     void Collide(const Ray &ray, Collideable::HitSink &sink);
 
     /**
+     * Resize the vertices of the finest level, which every level draws.
+     *
+     * A new vertex sits at the origin with a zero normal, a white colour, and zero texture
+     * coordinates.
+     *
+     * @param nCount The vertex count.
+     * @ghidraAddress 0x004698e8
+     */
+    void SetVertexCount(unsigned nCount);
+
+    /**
      * Draw the level of detail a screen size selects.
      *
      * Draws nothing when the chain is empty or its finest mesh is not showing. Otherwise the walk

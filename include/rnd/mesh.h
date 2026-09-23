@@ -261,6 +261,44 @@ public:
     void SetVertexColor(const Color &color);
 
     /**
+     * Append the two triangles of a quad to the faces of mFacesOwner.
+     *
+     * The triangles are (nV0, nV1, nV2) and (nV2, nV1, nV3). The only out-of-line copy sits in the
+     * Rnd::Tunnel unit, and every caller is a Rnd::Tunnel routine.
+     *
+     * @param nV0 The first corner.
+     * @param nV1 The corner after nV0 along the first row.
+     * @param nV2 The corner of the second row beside nV0.
+     * @param nV3 The corner of the second row beside nV1.
+     * @ghidraAddress 0x00466528
+     */
+    void AddQuad(unsigned short nV0, unsigned short nV1, unsigned short nV2, unsigned short nV3) {
+        std::vector<MeshFace> &faces = mFacesOwner->mFaces;
+        faces.push_back(MeshFace{nV0, nV1, nV2});
+        faces.push_back(MeshFace{nV2, nV1, nV3});
+    }
+
+    /**
+     * Append the quads between two rows of vertices with AddQuad().
+     *
+     * Each row holds nCount vertices, and a quad spans nStep of them. The only out-of-line copy
+     * sits in the Rnd::Tunnel unit.
+     *
+     * @param nRowA The first vertex of the first row.
+     * @param nRowB The first vertex of the second row.
+     * @param nCount The vertices in each row.
+     * @param nStep The vertices a quad spans.
+     * @ghidraAddress 0x00476598
+     */
+    void AddQuadStrip(int nRowA, int nRowB, int nCount, int nStep) {
+        for (int i = 0; i < nCount - 1; i += nStep) {
+            AddQuad(nRowA, nRowA + nStep, nRowB, nRowB + nStep);
+            nRowA += nStep;
+            nRowB += nStep;
+        }
+    }
+
+    /**
      * Decide whether this mesh draws, and yield its world bounding sphere.
      *
      * A mesh with neither faces nor edges is rejected. A sphere of zero radius is accepted without
