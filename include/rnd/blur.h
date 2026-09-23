@@ -278,6 +278,12 @@ private:
     // callers.
     void ReleaseObjectRefs();
 
+    // 0x004c34c0. Discards the recorded transforms. The out-of-line copy has no caller, and the
+    // setters clear mXfms directly. The name is inferred.
+    void ClearXfms() {
+        mXfms.clear();
+    }
+
     // Declared in recovered offset order. Every member but mXfms is private because the image
     // supplies an accessor for each of the others that anything outside the class reads.
 

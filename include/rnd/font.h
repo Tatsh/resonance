@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <map>
 
 #include "os/hxstr.h"
@@ -67,6 +68,23 @@ enum FontFamily {
  */
 class Font : public Object {
 public:
+    /**
+     * Allocate a font under the tag "Rnd::Font".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x004cecc0
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a font to the tagged heap.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004cece0
+     */
+    static void operator delete(void *pBlock);
+
     /**
      * Measured metrics of one glyph.
      *
@@ -371,6 +389,50 @@ private:
  * @ghidraAddress 0x004cf060
  */
 Font *NewFont(const HxStr &name);
+
+/**
+ * Creator the registered "Font" class builds through.
+ *
+ * RegisterFontClass() points it at NewFont(), and Rnd::Manager::Init() writes it a second time at
+ * `0x00519d44`.
+ *
+ * @ghidraAddress 0x006fecb8
+ */
+extern Font *(*g_pfnNewFont)(const HxStr &name);
+
+/**
+ * Build a font through g_pfnNewFont.
+ *
+ * The one recovered reference to this routine is its entry in the exception range table, and
+ * nothing in the image calls it. The title follows NewTextThroughHook(), its counterpart in the
+ * Text half of the unit.
+ *
+ * @param name The object name.
+ * @return The new font.
+ * @ghidraAddress 0x004ced40
+ */
+Font *NewFontThroughHook(const HxStr &name);
+
+/**
+ * Build a font for the registered "Font" class.
+ *
+ * Calls through g_pfnNewFont. Rnd::Object is the non-virtual base at offset 0, so the result
+ * needs no adjustment.
+ *
+ * @param name The object name.
+ * @return The new font, as its Rnd::Object base.
+ * @ghidraAddress 0x004cefe0
+ */
+Object *CreateRegisteredFont(const HxStr &name);
+
+/**
+ * Point g_pfnNewFont at NewFont() and register the "Font" class with Rnd::Manager.
+ *
+ * The image has no caller. The name is inferred from RegisterTextClass().
+ *
+ * @ghidraAddress 0x004ced00
+ */
+void RegisterFontClass();
 
 /**
  * Registered class name of Rnd::Font, the string "Font".

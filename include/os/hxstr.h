@@ -84,11 +84,17 @@ public:
      * which is what establishes that the overload exists rather than callers converting and
      * reaching the HxStr overload. The temporary is released before returning.
      *
+     * The body is inline. Units that use it emit their own identical out-of-line copy, at
+     * `0x00183a70`, `0x00254870`, `0x0028c198`, `0x0030d618`, `0x0038fc58`, `0x003fc688`,
+     * `0x00429500`, `0x00431c30`, `0x00453d88`, `0x004beb98`, `0x004dfaa0`, and `0x0050cc00`.
+     *
      * @param pszText The text to append.
      * @return This string.
      * @ghidraAddress 0x0010edb0
      */
-    HxStr &operator+=(const char *pszText);
+    HxStr &operator+=(const char *pszText) {
+        return *this += HxStr(pszText);
+    }
 
     /**
      * Append one character.
@@ -350,6 +356,18 @@ public:
      * @ghidraAddress 0x004b8cd8
      */
     HxStr &Insert(unsigned pos, const HxStr &other);
+
+    /**
+     * Write this string to a stream.
+     *
+     * The same write as operator<<(), with the string as the receiver, and likewise without a null
+     * check. The image has no caller. The title is inferred.
+     *
+     * @param stream The stream to write to.
+     * @return The stream.
+     * @ghidraAddress 0x004b8e00
+     */
+    std::ostream &Print(std::ostream &stream) const;
 
     /**
      * Length excluding the terminator.

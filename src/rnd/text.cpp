@@ -8,6 +8,7 @@
 #include "os/failsink.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
 #include "rnd/font.h"
@@ -25,6 +26,7 @@ namespace {
 
 constexpr int kSerialVersion = 6;
 constexpr char kNoObject[] = "no object";
+constexpr char kTextTag[] = "Rnd::Text";
 
 /** Alignment word the constructor starts with. */
 constexpr int kDefaultAlign = kTextAlignTop | kTextAlignLeft;
@@ -747,6 +749,16 @@ void Text::BuildGlyphMesh() {
     mMesh->SyncAll();
     mMesh->Sync();
     mMesh->UpdateWorldXfm(this, 1);
+}
+
+// 0x004cf150
+void *Text::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kTextTag);
+}
+
+// 0x004cf170
+void Text::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kTextTag);
 }
 
 // 0x004cf800

@@ -131,6 +131,61 @@ public:
     void UpdateWorldProject();
 
     /**
+     * Build the segment under a point of the screen rectangle.
+     *
+     * The point is moved into the unit square of mScreenRect, then onto the far side of the
+     * projection through mInvWorldProject. A perspective camera starts the segment at its world
+     * position and runs it flLength along the direction to that far point. An orthographic camera
+     * starts the segment at the far point itself and runs it flLength along its world y axis.
+     *
+     * The image has no caller. The title is inferred.
+     *
+     * @param ptScreen The point, in the coordinates the screen rectangle is expressed in.
+     * @param flLength The length of the segment.
+     * @return The segment.
+     * @ghidraAddress 0x004afe00
+     */
+    Ray ScreenToRay(const Vector2 &ptScreen, float flLength);
+
+    /**
+     * Place a world point in the unit square of the projected image.
+     *
+     * The point is carried through mWorldProject, divided by its depth, and mapped from -1..1 onto
+     * 0..1. A point at zero depth skips the division, which leaves the result indeterminate.
+     *
+     * The image has no caller. The title is inferred.
+     *
+     * @param pt The world point.
+     * @return The point in the unit square.
+     * @ghidraAddress 0x004b2008
+     */
+    Vector2 ProjectToUnit(const Vector3 &pt);
+
+    /**
+     * Carry a point of the unit square of the projected image onto the far side of the projection.
+     *
+     * The point is mapped from 0..1 onto -1..1 with a depth of one and carried through
+     * mInvWorldProject. The screen rectangle is not applied.
+     *
+     * The image has no caller. The title is inferred.
+     *
+     * @param ptUnit The point in the unit square.
+     * @return The world point.
+     * @ghidraAddress 0x004b2118
+     */
+    Vector3 UnprojectFar(const Vector2 &ptUnit);
+
+    /**
+     * Replace mScreenRect and rebuild the projection.
+     *
+     * The image has no caller. The title is inferred.
+     *
+     * @param rect The fraction of the render target the projected image is placed in.
+     * @ghidraAddress 0x004b2190
+     */
+    void SetScreenRect(const Rect &rect);
+
+    /**
      * Set the clip distances and the field of view, then rebuild the projection.
      *
      * The near distance is raised to a thousandth of the far distance when it is smaller.
@@ -458,6 +513,18 @@ extern Cam *(*g_pfnNewCam)(const HxStr &name);
  * @ghidraAddress 0x004b23e0
  */
 Object *CreateRegisteredCam(const HxStr &name);
+
+/**
+ * Build a camera through g_pfnNewCam, without the narrowing CreateRegisteredCam() performs.
+ *
+ * The one recovered reference to this routine is its entry in the exception range table at
+ * `0x00868e64`, and nothing in the image calls it. The title follows Rnd::NewTextThroughHook().
+ *
+ * @param name The object name.
+ * @return The new camera.
+ * @ghidraAddress 0x004b1f20
+ */
+Cam *NewCamThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Cam, the string "Cam".

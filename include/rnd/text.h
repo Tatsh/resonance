@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "math/color.h"
 #include "os/hxstr.h"
 #include "rnd/collideable.h"
@@ -69,6 +71,23 @@ enum TextAlign {
  */
 class Text : public Drawable, public Collideable, public Transformable {
 public:
+    /**
+     * Allocate a text run under the tag "Rnd::Text".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x004cf150
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a text run to the tagged heap.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004cf170
+     */
+    static void operator delete(void *pBlock);
+
     /**
      * Construct an empty white text run.
      *

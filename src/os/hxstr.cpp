@@ -371,6 +371,10 @@ bool HxStr::operator<(const HxStr &right) const {
     return strcmp(mStr, right.mStr) < 0;
 }
 
+std::ostream &HxStr::Print(std::ostream &stream) const {
+    return stream << mStr;
+}
+
 std::ostream &operator<<(std::ostream &stream, const HxStr &text) {
     stream << text.mStr;
     return stream;

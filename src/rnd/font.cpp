@@ -5,6 +5,7 @@
 #include "math/vector2.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
 #include "rnd/object.h"
@@ -19,6 +20,7 @@ namespace {
 
 constexpr int kSerialVersion = 2;
 constexpr char kNoObject[] = "no object";
+constexpr char kFontTag[] = "Rnd::Font";
 
 // Bits of a canvas pixel that store its alpha.
 constexpr unsigned kPixelAlphaMask = 0xff000000;
@@ -502,10 +504,40 @@ void Font::GetCharUV(char ch, Vector2 &uv0, Vector2 &uv1) {
     uv1.y = it->second.mV1;
 }
 
+// 0x004cecc0
+void *Font::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kFontTag);
+}
+
+// 0x004cece0
+void Font::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kFontTag);
+}
+
 // 0x004cf060
 Font *NewFont(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Font" and requests exactly 0x60 bytes.
     return new Font(name);
+}
+
+// 0x006fecb8. Null in the image until RegisterFontClass() or Rnd::Manager::Init() fills it,
+// unlike g_pfnNewText.
+Font *(*g_pfnNewFont)(const HxStr &name);
+
+// 0x004ced40
+Font *NewFontThroughHook(const HxStr &name) {
+    return g_pfnNewFont(name);
+}
+
+// 0x004cefe0
+Object *CreateRegisteredFont(const HxStr &name) {
+    return g_pfnNewFont(name);
+}
+
+// 0x004ced00
+void RegisterFontClass() {
+    g_pfnNewFont = NewFont;
+    g_manager.RegisterClass(g_fontClassName, CreateRegisteredFont);
 }
 
 // 0x006fecb0

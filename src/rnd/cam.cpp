@@ -9,6 +9,7 @@
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
@@ -47,12 +48,60 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
+constexpr char kCamTag[] = "Rnd::Cam";
+
+// Row of a transform that holds the translation.
+constexpr int kXfmTranslationRow = 3;
+
+// Row of the world transform a camera looks along.
+constexpr int kXfmForwardRow = 1;
+
+// 0x004b1dd0. A point carried through a transform, the basis rows weighted by its components plus
+// the translation, with out.w taken from the input. A VU0 multiply and accumulate in the image,
+// whose one out-of-line copy has no caller.
+inline void XfmPoint(const Vector3 &in, const Vector3 *pXfm, Vector3 &out) {
+    const float flX = pXfm[0].x * in.x + pXfm[1].x * in.y + pXfm[2].x * in.z + pXfm[3].x;
+    const float flY = pXfm[0].y * in.x + pXfm[1].y * in.y + pXfm[2].y * in.z + pXfm[3].y;
+    const float flZ = pXfm[0].z * in.x + pXfm[1].z * in.y + pXfm[2].z * in.z + pXfm[3].z;
+    const float flW = in.w;
+    out.x = flX;
+    out.y = flY;
+    out.z = flZ;
+    out.w = flW;
+}
+
+// A point of the unit square mapped onto -1..1 at a depth of one, which is the far side of the
+// projection.
+inline Vector3 UnitToFarNdc(float flX, float flY) {
+    return Vector3{flX + flX - 1.0f, flY + flY - 1.0f, 1.0f, 1.0f};
+}
+
 } // namespace
 
 Cam *g_pCurrentCam;
 
 // 0x006f958c
 Cam *(*g_pfnNewCam)(const HxStr &name) = Cam::NewCam;
+
+// 0x004b1e90
+void *Cam::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kCamTag);
+}
+
+// 0x004b1eb0
+void Cam::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kCamTag);
+}
+
+// 0x004b1f20
+Cam *NewCamThroughHook(const HxStr &name) {
+    return g_pfnNewCam(name);
+}
+
+// 0x004b23e0
+Object *CreateRegisteredCam(const HxStr &name) {
+    return g_pfnNewCam(name);
+}
 
 int Cam::DrawSelf() {
     g_pCurrentCam = this;
@@ -235,6 +284,58 @@ void Cam::UpdateWorldProject() {
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         mInvWorldProject[nRow] = aResult[nRow];
     }
+}
+
+Ray Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
+    Ray ray;
+    ray.mStart[3] = 1.0f;
+    ray.mEnd[3] = 1.0f;
+    const Vector3 ptNdc = UnitToFarNdc((ptScreen.x - mScreenRect.x) / mScreenRect.w,
+                                       (ptScreen.y - mScreenRect.y) / mScreenRect.h);
+    Vector3 ptFar;
+    XfmPoint(ptNdc, mInvWorldProject, ptFar);
+    Vector3 extent;
+    if (mFov != 0.0f) {
+        std::copy(mWorldXfm[kXfmTranslationRow], mWorldXfm[kXfmTranslationRow] + 4, ray.mStart);
+        Vector3 direction;
+        Vec3Sub(&ptFar.x, ray.mStart, &direction.x);
+        Vec3Normalize(&direction.x, &direction.x);
+        Vec3Scale(&direction.x, flLength, &extent.x);
+        AddVec3(&extent.x, ray.mStart, ray.mEnd);
+    } else {
+        std::copy(&ptFar.x, &ptFar.x + 4, ray.mStart);
+        Vec3Scale(mWorldXfm[kXfmForwardRow], flLength, &extent.x);
+        AddVec3(ray.mStart, &extent.x, ray.mEnd);
+    }
+    return ray;
+}
+
+Vector2 Cam::ProjectToUnit(const Vector3 &pt) {
+    Vector3 ptProjected;
+    XfmPoint(pt, mWorldProject, ptProjected);
+    Vector2 ptNdc; // Yes, the binary leaves this unset for a point at zero depth.
+    if (ptProjected.z != 0.0f) {
+        const float flInvDepth = 1.0f / ptProjected.z;
+        ptNdc.x = ptProjected.x * flInvDepth;
+        ptNdc.y = ptProjected.y * flInvDepth;
+    }
+    const Vector2 one{1.0f, 1.0f};
+    Vector2 ptShifted;
+    AddVec2(&ptNdc.x, &one.x, &ptShifted.x);
+    Vector2 ptUnit;
+    ScaleVec2(&ptShifted.x, 0.5f, &ptUnit.x);
+    return ptUnit;
+}
+
+Vector3 Cam::UnprojectFar(const Vector2 &ptUnit) {
+    Vector3 pt;
+    XfmPoint(UnitToFarNdc(ptUnit.x, ptUnit.y), mInvWorldProject, pt);
+    return pt;
+}
+
+void Cam::SetScreenRect(const Rect &rect) {
+    mScreenRect = rect;
+    UpdateProjection();
 }
 
 void Cam::SetFrustum(float flNear, float flFar, float flFov) {
