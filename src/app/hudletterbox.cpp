@@ -19,16 +19,19 @@ HudLetterbox::HudLetterbox() {
     mRamp.SetRange(kRestFrame, kFullFrame, kRampDuration);
 }
 
+// 0x0042a608
 void HudLetterbox::SetFrame(float flTime) {
     mRamp.Update(flTime); // Yes, the binary discards this result.
     mView->SetFrame(mRamp.Value());
     mView->SetShowing(mRamp.Value() != kRestFrame);
 }
 
+// 0x0042a698
 void HudLetterbox::SetTarget(float flTarget) {
     mRamp.SetTarget(flTarget);
 }
 
+// 0x0042a6b8
 void HudLetterbox::Jump(float flTarget) {
     mRamp.Jump(flTarget);
 }

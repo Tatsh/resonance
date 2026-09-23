@@ -124,6 +124,7 @@ void HudPoints::Bank() {
     mPulseRest = 0.0f;
 }
 
+// 0x00429fe0
 void HudPoints::SetPoints(int nPoints) {
     mPoints = nPoints;
     mPointsText->SetText(HxStr(FormatString("%d", nPoints)));
@@ -133,6 +134,7 @@ void HudPoints::SetPoints(int nPoints) {
     mPulseRest = 0.0f;
 }
 
+// 0x0042a0c8
 void HudPoints::SetMultiplier(int nMultiplier) {
     mMultiplier = nMultiplier;
     mMultiplierText->SetText(HxStr(FormatString("x%d", nMultiplier)));

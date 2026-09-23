@@ -57,10 +57,12 @@ HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulse
     SetPulsing(0);
 }
 
+// 0x0042a348
 void HudFreq::SetPulsing(int nPulsing) {
     mPulsing = nPulsing;
 }
 
+// 0x0042a350
 void HudFreq::SetFrame(float flFrame) {
     if (flFrame < kIconAnimLength) {
         mAnim->SetFrame(flFrame);

@@ -20,6 +20,7 @@ HudTrackLabel::HudTrackLabel(int nIndex) {
     mMesh->SetShowing(1);
 }
 
+// 0x00429e68
 void HudTrackLabel::SetText(const HxStr &text) {
     mText->SetText(text);
 }

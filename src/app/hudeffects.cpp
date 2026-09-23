@@ -62,12 +62,14 @@ void HudEffects::SetMask(BarStatusMsg::Effects effects) {
     }
 }
 
+// 0x00429e98
 void HudEffects::Select(int nKind) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         it->mText->SetFont(it->mKind == nKind ? mSelectedFont : mPlainFont);
     }
 }
 
+// 0x00429f28
 void HudEffects::SetLit(int nKind, int nLit) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == nKind) {

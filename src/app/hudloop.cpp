@@ -22,6 +22,7 @@ HudLoop::HudLoop(int nIndex) {
     SetShowing(1);
 }
 
+// 0x00429e38
 void HudLoop::SetShowing(int nShowing) {
     mIndicator->SetShowing(nShowing);
 }

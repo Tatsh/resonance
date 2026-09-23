@@ -139,6 +139,7 @@ void HudHighlight::SetFrame(float flTime) {
     mLastTime = flTime;
 }
 
+// 0x00429d30
 void HudHighlight::SetShowing(int nShowing) {
     mMesh->SetShowing(nShowing);
 }

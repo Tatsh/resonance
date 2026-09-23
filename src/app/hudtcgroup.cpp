@@ -9,6 +9,7 @@ HudTcGroup::HudTcGroup() {
     SetShowing(0);
 }
 
+// 0x00429e08
 void HudTcGroup::SetShowing(int nShowing) {
     mView->SetShowing(nShowing);
 }

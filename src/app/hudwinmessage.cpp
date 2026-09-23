@@ -95,10 +95,12 @@ void HudWinMessage::SetFrame(float flTime) {
     }
 }
 
+// 0x0042a800
 void HudWinMessage::HidePrompt() {
     mPrompt.Hide();
 }
 
+// 0x0042a830
 void HudWinMessage::Draw() {
     if (mState == kStateIdle) {
         return;

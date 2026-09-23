@@ -72,6 +72,7 @@ RndAsyncLoader *g_pLevelLoader;
 HxStr g_arenaName("");
 HxStr g_levelName("");
 
+// 0x0042c2e0
 Renderer::Renderer()
     : mSongClock(Application::shared()->GetSongClock()), mSongTick(0.0f), mDrawTimingGraph(0),
       mDrawRenderStats(0), mCellsPerRow(0), mRowCount(0), mTunnel(nullptr), mOverlay(nullptr),
@@ -149,6 +150,7 @@ Renderer::~Renderer() {
     delete mTunnel;
 }
 
+// 0x0042d3b8
 void Renderer::HandleMessage(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nGameBeginMsgType) {
@@ -179,6 +181,7 @@ void Renderer::OnUnknownSlot7() {
     mHudView->UpdateWorldXfm(nullptr, 0);    // Yes, the binary discards the result.
 }
 
+// 0x0042d258
 void Renderer::OnUnknownSlot8() {
     mOuterView->Draw();
 
@@ -216,6 +219,7 @@ Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
     return &mCells[nTrack * mCellsPerRow + nSlice];
 }
 
+// 0x0042b7a0
 void Renderer::LoadCommon() {
     if (g_pTunnelLoader != nullptr) {
         return;
@@ -231,6 +235,7 @@ void Renderer::LoadCommon() {
     g_pHudLoader->Enqueue();
 }
 
+// 0x0042bb38
 void Renderer::UnloadCommon() {
     UnloadLevel();
 
@@ -251,6 +256,7 @@ void Renderer::UnloadCommon() {
     }
 }
 
+// 0x0042bbe8
 void Renderer::LoadLevel(const GameParams &params) {
     HxStr level(params.mLevelName);
     HxStr arena(params.mArenaName);
@@ -334,6 +340,7 @@ int Renderer::IsLevelLoaded(const HxStr &arena, const HxStr &level) {
     return nArenaDone != 0 && nLevelDone != 0;
 }
 
+// 0x0042d068
 void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     bool bOverlayChanged = false;
     bool bTunnelChanged = false;

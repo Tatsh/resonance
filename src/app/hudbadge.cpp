@@ -1,5 +1,6 @@
 #include "app/hudbadge.h"
 
+// 0x0042ac58
 HudBadge::HudBadge(Player *pPlayer, int nIndex)
     : mScore(pPlayer, nIndex), mFreq(pPlayer, nIndex), mPlayer(pPlayer) {
 }

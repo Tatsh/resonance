@@ -89,9 +89,9 @@ public:
     /**
      * Hide the ribbon without discarding the segments.
      *
-     * The shipped program does not call it. A routine with the same body at `0x0042a9e8`, in the
-     * head-up display unit, remains unplaced, because nothing there identifies the class it belongs
-     * to. The title is inferred.
+     * The shipped program does not call it. The byte-identical routine at `0x0042a9e8`, in the
+     * head-up display unit, is recorded as a copy of this one, because nothing there identifies
+     * another class it could belong to. The title is inferred.
      *
      * @ghidraAddress 0x00437180
      */

@@ -298,6 +298,7 @@ void Overlay::SetFrame(float flFrame) {
     }
 }
 
+// 0x0042ad10
 void Overlay::OnBarChanged(int nTrack, int nBar, BarStatusMsg::Effects effects) {
     if (nBar != mCurrentBar) {
         return;
@@ -319,6 +320,7 @@ inline HudTrack *Overlay::FindTrack(Player *pPlayer) {
     return nullptr;
 }
 
+// 0x004206e0
 void Overlay::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
@@ -474,6 +476,7 @@ void Overlay::OnDeployedPowerup(Message *pMsg) {
     }
 }
 
+// 0x0042aff0
 void Overlay::OnPointAmount(Message *pMsg) {
     PointAmountMsg *pPoints = static_cast<PointAmountMsg *>(pMsg);
     HudBadge *pBadge = FindBadge(pPoints->mPlayer);
@@ -503,6 +506,7 @@ void Overlay::OnJuiceAmount(Message *pMsg) {
     FindBadge(pJuice->mUnknown04)->mFreq.SetPulsing(pJuice->GetJuiceFraction() > kPulseJuice);
 }
 
+// 0x0042b068
 void Overlay::OnPhraseCaptured(Message *pMsg) {
     PhraseCapturedMsg *pCaptured = static_cast<PhraseCapturedMsg *>(pMsg);
     if (mUnknown44 != 0) {
@@ -615,6 +619,7 @@ void Overlay::OnPlaybackToggle(Message *pMsg) {
     }
 }
 
+// 0x0042aef8
 void Overlay::OnToggleGhost(Message *pMsg) {
     ToggleGhostMsg *pGhost = static_cast<ToggleGhostMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pGhost->mUnknown04);
@@ -667,6 +672,7 @@ void Overlay::OnCatch(Message *pMsg) {
     pTrack->mUnknowne0 = 0;
 }
 
+// 0x0042b178
 void Overlay::OnPhraseMuffed(Message *pMsg) {
     if (mPlayMode != kPlayModeGame || mUnknown44 != 0) {
         return;
@@ -678,6 +684,7 @@ void Overlay::OnPhraseMuffed(Message *pMsg) {
     }
 }
 
+// 0x004201c0
 void Overlay::OnBeginPhraseCatch(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -699,6 +706,7 @@ void Overlay::OnBeginPhraseCatch(Message *pMsg) {
     pTrack->mPoints.SetMultiplier(pBegin->mMultiplier);
 }
 
+// 0x0042b1f8
 void Overlay::OnFadeGame(Message *pMsg) {
     FadeGameMsg *pFade = static_cast<FadeGameMsg *>(pMsg);
     mPanel->mScreenFlash.Start(static_cast<float>(pFade->mDuration), pFade->mFadeIn);
@@ -707,6 +715,7 @@ void Overlay::OnFadeGame(Message *pMsg) {
     }
 }
 
+// 0x00420588
 void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
     PlayersTrackNeutralizedMsg *pNeutralized = static_cast<PlayersTrackNeutralizedMsg *>(pMsg);
     // Yes, the binary does not test the display for null.
@@ -716,6 +725,7 @@ void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
                             kMessageHold);
 }
 
+// 0x00420408
 void Overlay::OnMultiplierState(Message *pMsg) {
     if (mUnknown44 != 0) {
         return;
@@ -764,22 +774,26 @@ void Overlay::OnPowerupFailed(Message *pMsg) {
     pTrack->mTextMessage.Show(text, kFailureScale, kMessageHold);
 }
 
+// 0x0042aec8
 void Overlay::OnGameOver() {
     if (mUnknown44 != 0) {
         CallScriptTemplate(kGameOverScriptTemplate);
     }
 }
 
+// 0x0042b130
 void Overlay::OnJamEffect() {
     if (mUnknown44 != 0 && Application::shared()->GetPlayMode() == kPlayModeJam) {
         CallScriptTemplate(kJamEffectScriptTemplate);
     }
 }
 
+// 0x0042acb8
 void Overlay::Draw() {
     mPanel->mWinMessage.Draw();
 }
 
+// 0x0042ad98
 void Overlay::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
     if (pNewLeader == nullptr) {
         mPanel->mScorePulse.Hide();
@@ -794,6 +808,7 @@ void Overlay::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
     }
 }
 
+// 0x0042ae88
 HudBadge *Overlay::FindBadge(Player *pPlayer) {
     for (std::vector<HudBadge *>::iterator it = mBadges.begin(); it != mBadges.end(); ++it) {
         if ((*it)->mPlayer == pPlayer) {

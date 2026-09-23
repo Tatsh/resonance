@@ -26,6 +26,7 @@ HudScreenFlash::HudScreenFlash() : mStart(kNoFade), mRate(1.0f) {
     mScale = kScaleNumerator / static_cast<float>(GetMillisecondsPerSecond());
 }
 
+// 0x0042a548
 void HudScreenFlash::Start(float flDuration, int nFadeIn) {
     mStart = static_cast<float>(GetElapsedMilliseconds()) * mScale;
     if (flDuration < kShortestFade) {

@@ -17,6 +17,7 @@ HudTrack::HudTrack(Player *pPlayer, int nIndex)
       mUnknownec(0), mPlayer(pPlayer) {
 }
 
+// 0x0042ab08
 void HudTrack::SetFrame(float flFrame, float flTime) {
     mEnergy.SetFrame(flFrame);
     mTextMessage.SetFrame(flTime);

@@ -12,6 +12,7 @@ HudAnalogStick::HudAnalogStick() {
     SetShowing(0);
 }
 
+// 0x00429d60
 void HudAnalogStick::SetMotion(const HxStr &motion) {
     if (motion == "in_out") {
         mMesh->SetMaterial(mInOutMat);
@@ -20,6 +21,7 @@ void HudAnalogStick::SetMotion(const HxStr &motion) {
     }
 }
 
+// 0x00429dd8
 void HudAnalogStick::SetShowing(int nShowing) {
     mMesh->SetShowing(nShowing);
 }

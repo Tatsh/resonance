@@ -36,6 +36,7 @@ HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
     Show(kHudItemNone);
 }
 
+// 0x004299a0
 void HudPowerup::Show(int nKind) {
     Rnd::View *pView = nullptr;
 

@@ -51,6 +51,7 @@ HudScore::HudScore(Player *pPlayer, int nIndex) : mText(nullptr) {
     mChangeTime = kScoreChangeLongAgo;
 }
 
+// 0x0042a220
 void HudScore::Update(float flTime) {
     if (mChangeTime == kScoreDrawn) {
         return;

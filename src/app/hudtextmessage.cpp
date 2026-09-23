@@ -34,6 +34,7 @@ HudTextMessage::HudTextMessage(const HxStr &name)
     }
 }
 
+// 0x00429b58
 void HudTextMessage::Show(const HxStr &text, float flScale, float flHold) {
     if (mActive != 0) {
         return;
@@ -50,11 +51,13 @@ void HudTextMessage::Show(const HxStr &text, float flScale, float flHold) {
     mAnim->SetFrame(0.0f);
 }
 
+// 0x00429af8
 void HudTextMessage::Hide() {
     mText->SetShowing(0);
     mActive = 0;
 }
 
+// 0x00429c20
 void HudTextMessage::SetFrame(float flTime) {
     if (mStart == kMessageIdle) {
         return;
