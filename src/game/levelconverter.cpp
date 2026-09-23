@@ -24,9 +24,9 @@ LevelConverter::~LevelConverter() {
 }
 
 // 0x001ea570
-void LevelConverter::AllDone(int nUnknown, void *pUnknown) {
-    mBuilder->Finish(nUnknown, pUnknown);
-    mFinished = 1;
+void LevelConverter::Tempo(int nTick, int nMicrosecondsPerQuarter) {
+    mBuilder->SetTempo(nTick, nMicrosecondsPerQuarter);
+    mHasTempo = 1;
 }
 
 // 0x001ea5a0

@@ -1,4 +1,5 @@
 set(RESONANCE_MID_SRCS
+    midifilereader.cpp
     receiver.cpp)
 
 add_library(resonance_mid STATIC ${RESONANCE_MID_SRCS})

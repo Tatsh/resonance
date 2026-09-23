@@ -15,7 +15,7 @@
  *
  * LevelConverter drives it. LevelConverter::Convert() stores the builder at its own `+0x50`, each
  * MIDI event handler forwards to AddEvent() with the status byte for the event, and
- * Mid::Receiver::AllDone() forwards to Finish().
+ * LevelConverter::Tempo() forwards to SetTempo().
  *
  * The object is at least 0x38 bytes. Three vectors of pointers occupy `+0x04` through `+0x27`, and
  * the destructor clears each one with a std::for_each over the deleting function at `0x001ec328`,
@@ -131,20 +131,17 @@ public:
     void OnUnknownForwarder001ec580(int nFirst, int nSecond);
 
     /**
-     * Replace the object at `+0x30` once the whole file has been delivered.
+     * Replace the tempo map at `+0x30` with one built from a tempo meta event.
      *
-     * The body releases the object already there, allocates 0x28 bytes, constructs the replacement
-     * through the routine at `0x0052d118` with the second parameter, and stores it.
+     * The body releases the map already there, allocates 0x28 bytes, and constructs a
+     * Sch::TempoMap from the tempo. The one caller, LevelConverter::Tempo() at `0x001ea570`, passes
+     * its own two arguments through in the registers they arrive in. The body is not written yet.
      *
-     * The one caller, LevelConverter::AllDone() at `0x001ea570`, sets only the object register, so
-     * the second parameter arrives with whatever the caller happened to leave in that register.
-     * That is faithful rather than a reconstruction slip. The body is not written yet.
-     *
-     * @param nUnused The first parameter. No instruction in the body reads it.
-     * @param pSource The value the replacement is constructed from.
+     * @param nTick The event position. No instruction in the body reads it.
+     * @param nMicrosecondsPerQuarter The tempo the map is constructed from.
      * @ghidraAddress 0x001ec5f8
      */
-    void Finish(int nUnused, void *pSource);
+    void SetTempo(int nTick, int nMicrosecondsPerQuarter);
 
     /**
      * Apply the routine at `0x001d4308` to every track in the collection.
@@ -169,7 +166,7 @@ private:
     TrackData *mOwnTrack; // +0x28
     // The track the forwarding members append to. The destructor does not release it.
     TrackData *mCurrentTrack; // +0x2c
-    // Released by the destructor through Attachment::Release(). Finish() replaces it.
+    // Released by the destructor through Attachment::Release(). SetTempo() replaces it.
     Sch::TempoMap *mUnknown30; // +0x30
     // Deleted by the destructor through its own table slot 1.
     PlayMap *mUnknown34; // +0x34

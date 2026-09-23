@@ -11,16 +11,17 @@ namespace Mid {
  * fourteen virtuals below is a two-instruction `jr ra` default, so an unoverridden slot does
  * nothing.
  *
- * LevelConverter is the one subclass in the image, and it overrides slots 2 through 10. That is
- * also the whole of the evidence about these signatures. Slots 3 through 7 are certain, because
- * each override forwards its arguments to LevelBuilder with a MIDI status byte, 0x90, 0x80, 0xb0,
- * 0xc0, and 0xe0 in slot order, and those five bytes are note on, note off, controller, program
- * change, and pitch bend. Slots 2, 8, 9, and 10 are inferred from what the override does rather
- * than from a status byte.
+ * LevelConverter is the one subclass in the image, and it overrides slots 2 through 10.
+ * Mid::FileReader is the one caller, and its call sites fix slots 2 through 11. Slots 3 through 7
+ * each receive one channel event, and LevelConverter forwards each to LevelBuilder with a MIDI
+ * status byte (0x90 note on, 0x80 note off, 0xb0 controller, 0xc0 program change, and 0xe0 pitch
+ * bend, in slot order). The reader calls slot 8 for a tempo meta event, slot
+ * 9 for a text meta event, slot 10 at the end of each track, and slot 11 at the end of the file.
  *
- * Slots 11 through 15 have no override anywhere, so an empty body is the whole of what the image
- * records. Their names, parameter lists, and return types are all unrecovered, and each is
- * declared below with its index because a gap in the sequence would describe a different class.
+ * Slots 12 through 15 have no override and no caller anywhere. An empty body is the whole of what
+ * the image records for each. Their names, parameter lists, and return types are all unrecovered,
+ * and each is declared below with its index because a gap in the sequence would describe a
+ * different class.
  *
  * Every method name here is inferred. RTTI in this image yields class names only.
  */
@@ -109,22 +110,18 @@ public:
     PitchBend(int nTick, unsigned char nLow, unsigned char nHigh, unsigned char nChannel);
 
     /**
-     * Report that the whole file has been delivered.
+     * Receive a tempo meta event.
      *
-     * Slot 8. LevelConverter's override closes the builder and sets its own finished flag, which is
-     * what the name comes from. Its position ahead of TextEvent() is the declaration order the
-     * table records.
+     * Slot 8. Mid::FileReader::ReadMeta() calls it only for meta type 0x51, with the event
+     * position and the event's 24-bit value. That value is the MIDI tempo in microseconds per
+     * quarter note. LevelConverter's override passes both to LevelBuilder::SetTempo(). SetTempo()
+     * builds its tempo map from the second.
      *
-     * The arity comes from the override rather than from the default. LevelConverter's override at
-     * `0x001ea570` sets only the object register before calling LevelBuilder::Finish(), and
-     * Finish() reads its own third register, so the second and third registers pass straight
-     * through from this slot's parameter list.
-     *
-     * @param nUnknown The first parameter, which LevelBuilder::Finish() does not read.
-     * @param pUnknown The second parameter, which LevelBuilder::Finish() constructs from.
+     * @param nTick The event position, in MIDI ticks.
+     * @param nMicrosecondsPerQuarter The tempo.
      * @ghidraAddress 0x001ea2a8
      */
-    virtual void AllDone(int nUnknown, void *pUnknown);
+    virtual void Tempo(int nTick, int nMicrosecondsPerQuarter);
 
     /**
      * Receive one text meta event.
@@ -149,15 +146,15 @@ public:
     virtual void EndTrack();
 
     /**
-     * Unrecovered. Slot 11, and an empty default.
+     * Report that the whole file has been delivered.
      *
-     * LevelConverter's table points at a two-instruction body of its own at `0x001ea360`, which is
-     * this default re-emitted rather than an override. The parameter list and return type are both
-     * unrecovered.
+     * Slot 11. Mid::FileReader::EndOfFile() calls it with no argument once the chunk reader has
+     * no chunk left. LevelConverter's table points at a two-instruction body of its own at
+     * `0x001ea360`. That body is this default re-emitted rather than an override.
      *
      * @ghidraAddress 0x001ea2c0
      */
-    virtual void OnUnknownSlot11();
+    virtual void AllDone();
 
     /**
      * Unrecovered. Slot 12, and an empty default with no override anywhere.

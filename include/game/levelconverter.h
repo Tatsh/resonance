@@ -192,16 +192,15 @@ public:
     PitchBend(int nTick, unsigned char nLow, unsigned char nHigh, unsigned char nChannel);
 
     /**
-     * Close the builder and mark the conversion finished.
+     * Hand a tempo meta event to the builder and record that the file has a tempo.
      *
-     * Both parameters pass through to LevelBuilder::Finish() in the registers they arrive in, so
-     * neither appears as a named use in the body.
+     * Both parameters pass through to LevelBuilder::SetTempo() in the registers they arrive in.
      *
-     * @param nUnknown The first parameter, forwarded.
-     * @param pUnknown The second parameter, forwarded.
+     * @param nTick The event position, in MIDI ticks.
+     * @param nMicrosecondsPerQuarter The tempo.
      * @ghidraAddress 0x001ea570
      */
-    virtual void AllDone(int nUnknown, void *pUnknown);
+    virtual void Tempo(int nTick, int nMicrosecondsPerQuarter);
 
     /**
      * Parse a track name, and ignore every other text event.
@@ -277,7 +276,7 @@ private:
     // destructor. EndTrack hands it to the builder.
     std::vector<char> mNameMap; // +0x7c
     int mUnknown88; // +0x88, Mid::kMBTInfinity at construction, -1 at the start of each track
-    int mFinished;  // +0x8c, cleared by Convert and set to 1 by AllDone
+    int mHasTempo;  // +0x8c, cleared by Convert and set to 1 by Tempo
     int mUnknown90; // +0x90
     int mUnknown94; // +0x94
     std::vector<Span> mUnknown98; // +0x98

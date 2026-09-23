@@ -30,7 +30,7 @@ void Mid::Receiver::PitchBend(int, unsigned char, unsigned char, unsigned char) 
 }
 
 // 0x001ea2a8
-void Mid::Receiver::AllDone(int, void *) {
+void Mid::Receiver::Tempo(int, int) {
 }
 
 // 0x001ea2b0
@@ -42,7 +42,7 @@ void Mid::Receiver::EndTrack() {
 }
 
 // 0x001ea2c0
-void Mid::Receiver::OnUnknownSlot11() {
+void Mid::Receiver::AllDone() {
 }
 
 // 0x001ea2c8
