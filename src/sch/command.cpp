@@ -5,15 +5,13 @@
 #include <vector>
 
 #include "os/log.h"
+#include "sch/commandfactory.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
 namespace Sch {
 
 namespace {
-
-// Produces one command of a registered class.
-typedef Command *(*CommandFactoryProc)();
 
 // One entry of the factory list. The title is inferred from the diagnostic
 // "Cannot find ID %ld in Command Factory List". The comparison at 0x0053a0b0 tests mCmdID alone,
@@ -36,6 +34,52 @@ CommandFactoryTable &CommandFactoryList() {
 }
 
 } // namespace
+
+// 0x00538208
+CommandFactory::CommandFactory(int nCmdID, CommandFactoryProc pfnCreate) {
+    CommandFactoryEntry wanted;
+    wanted.mCmdID = nCmdID; // Yes, the binary never writes the other field of the search key.
+    CommandFactoryTable::iterator position =
+        std::lower_bound(CommandFactoryList().begin(), CommandFactoryList().end(), wanted);
+    if (nCmdID == 0) {
+        return;
+    }
+    CommandFactoryEntry entry;
+    entry.mCmdID = nCmdID;
+    entry.mpfnCreate = pfnCreate;
+    (void)CommandFactoryList(); // Yes, the binary discards this call's result.
+    CommandFactoryList().insert(position, entry);
+}
+
+// 0x005382e8
+OBStream &operator<<(OBStream &stream, Command &command) {
+    if (command.CmdID() == 0) {
+        char cAbsent = '0';
+        stream.WriteBytes(&cAbsent, sizeof(cAbsent));
+        return stream;
+    }
+    char cPresent = '1';
+    OBStream &written = stream.WriteBytes(&cPresent, sizeof(cPresent));
+    int nCmdID = command.CmdID(); // Yes, the binary dispatches this slot twice.
+    written.Write(&nCmdID, sizeof(nCmdID));
+    command.Save(stream);
+    return stream;
+}
+
+// 0x005383d8
+IBStream &operator>>(IBStream &stream, Command &command) {
+    char cPresent;
+    int nCmdID;
+    stream.ReadBytes(&cPresent, sizeof(cPresent)).Read(&nCmdID, sizeof(nCmdID));
+    if (cPresent != '1') {
+        Fatal("Stream error while reading in a Command object.");
+    }
+    if (command.CmdID() != nCmdID) {
+        Fatal("Streamed Command ID %ld does not match expected id %ld.", nCmdID, command.CmdID());
+    }
+    command.Load(stream);
+    return stream;
+}
 
 // 0x00539ef8
 Command::~Command() {

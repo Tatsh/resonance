@@ -54,11 +54,10 @@ namespace Sch {
  * Execute() and Print() are inferred from their bodies alone, and no string in the image
  * identifies either.
  *
- * Nothing registers a factory in the shipped build. The registrar constructor at `0x00538208`
- * receives a literal zero for the identifier at all twenty-seven of its call sites, and it returns
- * without touching the list whenever the identifier is zero. The factory list is therefore
- * permanently empty and every path behind it is unreachable. That registrar is not reconstructed
- * here, because the image records no title for its class and no RTTI descriptor exists for it.
+ * Nothing registers a factory in the shipped build. The Sch::CommandFactory constructor receives a
+ * literal zero for the identifier at all twenty-seven of its call sites, and it returns without
+ * touching the list whenever the identifier is zero. The factory list is therefore permanently
+ * empty and every path behind it is unreachable.
  */
 class Command : public Attachment {
 public:
@@ -185,5 +184,32 @@ OBStream &operator<<(OBStream &stream, Command *pCommand);
  * @ghidraAddress 0x005385f0
  */
 IBStream &operator>>(IBStream &stream, Command *&pCommand);
+
+/**
+ * Write a command that is known to exist through the stream, preceded by a presence byte.
+ *
+ * The same layout as the pointer overload. A command whose CmdID() is zero produces the single
+ * byte `0` here rather than a fatal report. The shipped program does not call it.
+ *
+ * @param stream The stream to write to.
+ * @param command The command to write.
+ * @return The stream, allowing calls to be chained.
+ * @ghidraAddress 0x005382e8
+ */
+OBStream &operator<<(OBStream &stream, Command &command);
+
+/**
+ * Read a command's payload back into an existing command.
+ *
+ * The presence byte and the identifier are read together. A presence byte other than `1` and an
+ * identifier other than the command's own CmdID() are each reported through Fatal(). The shipped
+ * program does not call it.
+ *
+ * @param stream The stream to read from.
+ * @param command The command to fill.
+ * @return The stream, allowing calls to be chained.
+ * @ghidraAddress 0x005383d8
+ */
+IBStream &operator>>(IBStream &stream, Command &command);
 
 } // namespace Sch
