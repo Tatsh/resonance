@@ -6,6 +6,7 @@
 #include "os/hxstr.h"
 
 class IBStream;
+class OBStream;
 
 /** Characters of a level name a RemixIndexElement stores, terminator included. */
 constexpr int kRemixIndexLevelNameSize = 32;
@@ -79,6 +80,17 @@ struct RemixIndex {
      * @ghidraAddress 0x001366e0
      */
     void ReadFromStream(IBStream &stream);
+
+    /**
+     * Write the index to a stream in the form ReadFromStream() reads.
+     *
+     * Writes version, the element count, and then each element through `0x00136278`. Not
+     * reconstructed yet.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00139858
+     */
+    void WriteToStream(OBStream &stream);
 
     int version;                             /*!< First word of the file. +0x00 */
     std::vector<RemixIndexElement> elements; /*!< +0x04 */

@@ -5,6 +5,7 @@
 #include "memcard/loadfilemct.h"
 #include "memcard/memcardtask.h"
 #include "memcard/memcarduser.h"
+#include "memcard/savefilemct.h"
 #include "os/hxstr.h"
 #include "stream/iobpreallocmemstream.h"
 
@@ -25,11 +26,8 @@
  * `MemcardUser`, which is why it derives from both interfaces and is the only one of the four
  * remix tasks that overrides OnFileSaved().
  *
- * Three routines are recovered and not written. `OnListDir()` at `0x0017d248` collects the listed
- * directory names, `OnFileLoaded()` at `0x0017d690` parses one index, and `DeleteNextFile()` at
- * `0x0017dc68` drives the deletion and the index rewrite. All three walk the `RemixIndex` record
- * whose class cannot be titled from the image. The constructor at `0x0017ce08` is written, because
- * every field it touches has a recovered type.
+ * mStep is 1 while indexes are read, 2 once the remix is found, 3 once the shortened index is
+ * saved, and 4 once the payload file is deleted.
  *
  * The method titles ListRemixDir(), DeleteNextFile(), Execute(), and Finish() are inferred. No
  * string in the image identifies any of them.
@@ -64,8 +62,28 @@ public:
      */
     void ListRemixDir();
 
-    /** @ghidraAddress 0x0017dc68 */
+    /**
+     * Run the deletion step mStep selects.
+     *
+     * A failed step reports at once. In step 2 the index in mStream is parsed, the element whose
+     * FileName matches mFileName is erased (a missing one reports kMemcardStatusNoFile), the
+     * shortened index is written back into mStream, and a fresh SaveFileMCT saves it as
+     * `<dir>/index` under g_remixIconTitle plus the directory number, moving to step 3. In step 3
+     * the payload `<dir>/<mFileName>` is deleted, moving to step 4. Step 4 reports.
+     *
+     * @ghidraAddress 0x0017dc68
+     */
     void DeleteNextFile();
+
+    /**
+     * Collect the listed directories and read the first one's index.
+     *
+     * The body is LoadRemixMCT::OnListDir()'s, except that mStream is rewound before the read.
+     *
+     * @param pOp The finished listing.
+     * @ghidraAddress 0x0017d248
+     */
+    virtual void OnListDir(ListDirOp *pOp);
 
     /**
      * Start the listing unless the card reported that it cannot be read.
@@ -100,7 +118,18 @@ public:
      */
     virtual void Execute();
 
-    /** @ghidraAddress 0x0017d690 */
+    /**
+     * Search one index for the remix.
+     *
+     * A failed read abandons the task, and the body then carries on all the same. mStep becomes 1
+     * and the index is parsed from mStream. The first element whose RemixName matches mRemixName
+     * records its FileName in mFileName, rewinds mStream for DeleteNextFile(), and moves to step 2.
+     * With no match the next directory's index is read, and with none left the task reports
+     * kMemcardStatusNoFile.
+     *
+     * @param nStatus The inner read's status.
+     * @ghidraAddress 0x0017d690
+     */
     virtual void OnFileLoaded(int nStatus);
 
     /**
@@ -122,8 +151,8 @@ private:
     // Every remix save directory the listing found, consumed one per step. +0x2c
     std::vector<HxStr> mDirNames;
 
-    // +0x38
-    HxStr mUnknown38;
+    // The payload file of the remix, copied from its index element by OnFileLoaded(). +0x38
+    HxStr mFileName;
 
     // The remix to remove, as the constructor received it. +0x40
     HxStr mRemixName;
@@ -131,13 +160,11 @@ private:
     // +0x48
     HxStr mUnknown48;
 
-    // The inner read task. Recorded as a reserved word rather than as a pointer, because the
-    // destructor releases it through a virtual slot and no step body that would fix its class is
-    // written. +0x50
-    unsigned char mReserved50[4];
+    // The inner read of each index. The destructor deletes it. +0x50
+    LoadFileMCT *mLoadTask;
 
-    // The inner save task that rewrites the index, recorded for the same reason. +0x54
-    unsigned char mReserved54[4];
+    // The inner save that rewrites the shortened index. The destructor deletes it. +0x54
+    SaveFileMCT *mSaveTask;
 
     // One index or payload file passes through this stream's buffer at a time. +0x58
     IOBPreallocMemStream mStream;
