@@ -91,6 +91,23 @@ public:
     virtual ~ParticleSys();
 
     /**
+     * Allocate a particle system under the tag "Rnd::ParticleSys".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x0052b340
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a particle system block under the same tag.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x0052b360
+     */
+    static void operator delete(void *pBlock);
+
+    /**
      * Write the system to the engine text sink.
      *
      * @param sink The text sink.

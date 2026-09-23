@@ -10,6 +10,7 @@
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "os/random.h"
 #include "rnd/animatable.h"
 #include "rnd/manager.h"
@@ -21,6 +22,8 @@
 namespace Rnd {
 
 namespace {
+
+const char *const kParticleSysTag = "Rnd::ParticleSys";
 
 // Value mLastFrame starts at, which makes the first SetFrameSelf() record the frame without
 // emitting anything. Written as nine nines in the source rather than computed, because the bit
@@ -868,9 +871,19 @@ void ParticleSys::RemoveObjectRefs() {
     mParticlesOwner->mSharers.remove(this);
 }
 
+// 0x0052b340
+void *ParticleSys::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kParticleSysTag);
+}
+
+// 0x0052b360
+void ParticleSys::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kParticleSysTag);
+}
+
 // 0x0052b768
 ParticleSys *NewParticleSys(const HxStr &name) {
-    // The binary bills the allocation to the tag "Rnd::ParticleSys" and the object is 0x220 bytes.
+    // The object is 0x220 bytes.
     return new ParticleSys(name);
 }
 
