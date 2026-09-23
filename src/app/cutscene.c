@@ -383,6 +383,7 @@ static void free_all(void) {
     MemFreeTagged(g_cutscene_memory, kSourceFile, kFreeLine);
 }
 
+// 0x00511010
 void play_cutscene(const char *name, int with_audio) {
     const char *path = strchr(name, ':');
     if (path != NULL) {

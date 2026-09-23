@@ -2,6 +2,7 @@
 
 #include "os/formatstring.h"
 
+// 0x006e42ac
 int g_nAppTunnelNameCounter;
 
 // 0x00454650

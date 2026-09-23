@@ -9,6 +9,7 @@ constexpr float kPurpleRed = 0.65f;
 
 } // namespace
 
+// 0x006dfde8
 int g_nHudNameCounter;
 
 // 0x00415ed8

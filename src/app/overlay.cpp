@@ -141,7 +141,9 @@ constexpr float kScoreChangedNow = -1.0f;
 
 } // namespace
 
+// 0x006dfdf8
 Overlay *g_pOverlay;
+// 0x006dfdf0
 HxStr g_hudLayoutName;
 
 // 0x0041c940

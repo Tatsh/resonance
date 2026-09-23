@@ -62,14 +62,23 @@ constexpr int kNoPowerup = -1;
 
 } // namespace
 
+// 0x006e253c
 Renderer *g_pRenderer;
+// 0x006e2538
 int g_nLsdMode;
+// 0x006e2510
 RndAsyncLoader *g_pTunnelLoader;
+// 0x006e2514
 RndAsyncLoader *g_pLaunchLoader;
+// 0x006e2518
 RndAsyncLoader *g_pHudLoader;
+// 0x006e251c
 RndAsyncLoader *g_pArenaLoader;
+// 0x006e2520
 RndAsyncLoader *g_pLevelLoader;
+// 0x006e2528
 HxStr g_arenaName("");
+// 0x006e2530
 HxStr g_levelName("");
 
 // 0x0042c2e0

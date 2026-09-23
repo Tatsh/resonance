@@ -258,6 +258,7 @@ constexpr float kMultiplierRun = 15360.0f;
 
 } // namespace
 
+// 0x006e42a0
 AppTunnel *g_pAppTunnel;
 
 // 0x00456cd0
