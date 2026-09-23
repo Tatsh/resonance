@@ -197,6 +197,7 @@ gamechatpacket
 gameconnectfailuremsg
 gameconnectionlostmsg
 gameconnectsuccessmsg
+gameenablemgr
 gamemanagerdoplaybackmsg
 gamemanagerimpl
 gameovermsg
@@ -470,6 +471,7 @@ newmodule
 njgb
 nolattice
 noone
+notefinder
 notemsg
 notepitcher
 noteplayer
@@ -681,6 +683,7 @@ tnlarms
 tnlarrow
 tnlboundary
 tnlbumpfx
+tnlcamerarig
 tnlcatcher
 tnlcripplefx
 tnlemitter
@@ -688,6 +691,7 @@ tnlfirefx
 tnlgem
 tnlgemeffectkind
 tnlgemmanager
+tnlgemmeshkind
 tnlgridmarkers
 tnllattice
 tnlmesh
