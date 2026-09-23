@@ -6,6 +6,9 @@
 #include "game/harmony.h"
 #include "game/linearmap.h"
 #include "game/nullplayer.h"
+#include "game/riffrangefinder.h"
+#include "msg/axisregistermsg.h"
+#include "msg/trackselectmsg.h"
 
 namespace {
 
@@ -15,6 +18,9 @@ constexpr int kAxisCenter = 512;
 // The input range PickPitch() maps the axis position from.
 constexpr int kAxisMinimum = 0;
 constexpr int kAxisMaximum = 1023;
+
+// An AxisRegisterMsg's value, between 0 and 1, is scaled onto 0..1024.
+constexpr float kAxisScale = 1024.0f;
 
 // The riff range the constructor assumes until a MultiMuseMsg arrives, middle C at both ends.
 constexpr int kMiddleC = 60;
@@ -45,6 +51,18 @@ inline PitchPicker::NoteMapping MakeMapping(unsigned char nNote, unsigned char n
 PitchPicker::PitchPicker(const TrackData *pTrackData)
     : mTrackData(pTrackData), mAxis(kAxisCenter), mSustainTick(kNoSustainTick), mRiffLow(kMiddleC),
       mRiffHigh(kMiddleC), mTrack(pTrackData->mUnknown04), mPlayer(&g_nullPlayer) {
+}
+
+// 0x001c2c60
+void PitchPicker::FindRiffRange(MultiMuseMsg *pMsg) {
+    RiffRangeFinder finder(pMsg->mMuse, &mRiffLow, &mRiffHigh);
+}
+
+// 0x001c2d40
+void PitchPicker::PostSustainNoteMsg(SustainNoteMsg *pMsg) {
+    mSustainTick.mTick = pMsg->mTick; // The tick is stored without the finiteness check.
+    SustainNoteMsg sustain(pMsg->mTick, GetSustainPitch(pMsg->mTick, pMsg->mUnknown08));
+    Send(&sustain);
 }
 
 // 0x001c2dd0
@@ -88,6 +106,28 @@ unsigned char PitchPicker::GetSustainPitch(int nTick, unsigned char nNote) {
     const unsigned char nPitch = PickPitch(nTick, nNote);
     mSustainNotes.push_back(MakeMapping(nNote, nPitch));
     return nPitch;
+}
+
+// 0x001c3130
+void PitchPicker::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == static_cast<int>(g_dwMultiMuseMsgType)) {
+        FindRiffRange(static_cast<MultiMuseMsg *>(pMsg));
+    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+        OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
+    } else if (nType == static_cast<int>(g_dwSustainNoteMsgType)) {
+        PostSustainNoteMsg(static_cast<SustainNoteMsg *>(pMsg));
+    } else if (nType == g_nAxisRegisterMsgType) {
+        AxisRegisterMsg *pAxis = static_cast<AxisRegisterMsg *>(pMsg);
+        if (pAxis->mPlayer == mPlayer) {
+            mAxis = static_cast<int>(pAxis->mValue * kAxisScale);
+        }
+    } else if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
+        TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
+        if (pSelect->mUnknown04 == mTrack && pSelect->mUnknown08 == 0) {
+            mPlayer = pSelect->mUnknown10;
+        }
+    }
 }
 
 // 0x001c43b0

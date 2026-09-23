@@ -90,6 +90,7 @@ set(RESONANCE_GAME_SRCS
     quantizer.cpp
     rawcontroller.cpp
     riff.cpp
+    riffrangefinder.cpp
     riffset.cpp
     scoretrackgraph.cpp
     screenanim.cpp

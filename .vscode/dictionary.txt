@@ -693,6 +693,7 @@ reserveda
 reservedfc
 rgbaq
 riffer
+riffrangefinder
 riffset
 ripgreprc
 rndartt

@@ -9,6 +9,10 @@
 #include "msg/message.h"
 #include "sch/tickclock.h"
 
+class StdMidiMsg;
+class SustainNoteMsg;
+class SynthSustainer;
+
 /**
  * Owner of the players that are sounding, and the sink that starts them.
  *
@@ -60,7 +64,7 @@ public:
      *
      * The routine allocates a SynthSustainer under the tag `MsgSink`, stores it at both `+0x24`
      * and `+0x28`, and points its downstream sink at this object's `+0x0c`. AxingSTG is the only
-     * caller. The title is inferred from that body. The body is not written.
+     * caller. The title is inferred from that body.
      *
      * @ghidraAddress 0x001aafb0
      */
@@ -90,8 +94,7 @@ protected:
      * Creates a 0x20-byte NotePlayer from the message's three payload bytes and its word at
      * `+0x0c`, stores it, and starts it against mOutput.
      *
-     * The body is not written. The NotePlayer constructor at `0x001b4328` takes seven arguments,
-     * which places its recovery with `GsNotePlayer.cpp` rather than here.
+     * The body is not written, because NoteMsg's channel, velocity, and length are private.
      *
      * @param pMsg The NoteMsg.
      * @ghidraAddress 0x001aa690
@@ -126,12 +129,21 @@ protected:
     // 0x001ab0b8
     void OnAllNotesOff();
 
+    // The out-of-line copy of the StdMidiMsg branch HandleMessage() expands inline.
+    // 0x001ab058
+    void OnStdMidi(StdMidiMsg *pMsg);
+
+    // The out-of-line copy of the SustainNoteMsg branch HandleMessage() expands inline. Its body
+    // compiles to the same bytes as OnStdMidi().
+    // 0x001ab088
+    void OnSustainNote(SustainNoteMsg *pMsg);
+
     // The clock every player is scheduled against.
     Sch::TickClock *mClock; // +0x08
     // Every player this object created reports back to it and sends through it.
     MsgSplitter mSplitter; // +0x0c
-    // Set to zero by the constructor. CreateSustainer() stores the new SynthSustainer here.
-    int mUnknown24; // +0x24
+    // Null until CreateSustainer() stores the new SynthSustainer here.
+    SynthSustainer *mSustainer; // +0x24
     // The sink every player is started against. It addresses mSplitter until CreateSustainer()
     // points it at the sustainer, whose own output is mSplitter.
     MsgSink *mOutput; // +0x28

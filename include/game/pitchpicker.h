@@ -27,10 +27,6 @@ class Player;
  *
  * The destructor at `0x001c3e10` is implicitly declared. It restores the base tables, destroys the
  * two note vectors and MsgSource's vector, and releases the object under MsgSink's tag.
- *
- * Three routines are declared but not written, because each reads a message member that is not
- * public yet: HandleMessage() (AxisRegisterMsg's player and value), FindRiffRange() (MultiMuseMsg's
- * sequence), and PostSustainNoteMsg() (SustainNoteMsg has no payload constructor).
  */
 class PitchPicker : public MsgSink, public MsgSource {
 public:
