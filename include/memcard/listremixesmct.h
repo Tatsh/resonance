@@ -26,13 +26,8 @@ struct MetRemixRecord;
  * inner task's report as a `MemcardUser`. That arrangement is why the class derives from both
  * interfaces.
  *
- * Three routines are recovered and not written. `OnListDir()` at `0x0017e8b8` collects the listed
- * directory names into mDirNames, and `OnFileLoaded()` at `0x0017ece0` parses one index and steps
- * to the next directory. Both walk the record the string `********** RemixIndex element **********`
- * at `0x007d2b18` titles, whose six fields are `LevelName`, `RemixName`, `FileName`, `GameOK`,
- * `Version`, and `AlbumNum`, and that record's class cannot be titled from the image. The
- * constructor at `0x0017e528` is not written for the same reason, because its last argument is a
- * pointer to the collection the parse fills.
+ * Each index is parsed as a RemixIndex, and every RemixIndexElement becomes one MetRemixRecord
+ * appended to mRecords. The element's Version is not carried over.
  *
  * The method titles ListRemixDir(), Execute(), and Finish() are inferred. No string in the image
  * identifies any of them.
@@ -42,7 +37,7 @@ public:
     /**
      * Construct an idle listing.
      *
-     * MemcardManager::CreateListRemixesTask() at `0x001f3598` is the one caller. Not written yet.
+     * MemcardManager::CreateListRemixesTask() at `0x001f3598` is the one caller.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
@@ -75,6 +70,19 @@ public:
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
     /**
+     * Collect the listed directories and read the first one's index.
+     *
+     * A failed listing abandons the task. Otherwise every entry's name, prefixed with `/`, is
+     * appended to mDirNames, and an empty listing reports at once. The first name then moves into
+     * mCurrentDir, and a fresh LoadFileMCT reads `<dir>/index` into mBuffer, reporting back through
+     * this object's MemcardUser part.
+     *
+     * @param pOp The finished listing.
+     * @ghidraAddress 0x0017e8b8
+     */
+    virtual void OnListDir(ListDirOp *pOp);
+
+    /**
      * Report the finished listing through MemcardUser::OnRemixesListed().
      *
      * @ghidraAddress 0x00186ea8
@@ -88,7 +96,16 @@ public:
      */
     virtual void Execute();
 
-    /** @ghidraAddress 0x0017ece0 */
+    /**
+     * Collect the records of one directory's index and read the next directory's.
+     *
+     * A failed read abandons the task. Otherwise the index is parsed from mStream and each element
+     * appended to mRecords. With no directory left the task reports. Otherwise the next name moves
+     * into mCurrentDir, mStream is rewound, and a fresh LoadFileMCT replaces the previous one.
+     *
+     * @param nStatus The inner read's status.
+     * @ghidraAddress 0x0017ece0
+     */
     virtual void OnFileLoaded(int nStatus);
 
 private:
@@ -96,8 +113,9 @@ private:
     // constructor does not write it. +0x20
     int mStep;
 
-    // +0x24
-    int mUnknown24;
+    // The inner read of the current directory's index. OnListDir() and OnFileLoaded() delete the
+    // previous one before creating the next, and the destructor does not release it. +0x24
+    LoadFileMCT *mLoadTask;
 
     // The directory the index is being read out of. +0x28
     HxStr mCurrentDir;

@@ -6,6 +6,7 @@
 #include "memcard/loadfilemct.h"
 #include "memcard/memcardtask.h"
 #include "memcard/memcarduser.h"
+#include "memcard/remixdirinfo.h"
 #include "os/hxstr.h"
 #include "stream/iobpreallocmemstream.h"
 
@@ -150,10 +151,8 @@ private:
     // Every remix save directory the listing found, consumed one per step. +0x30
     std::vector<HxStr> mDirNames;
 
-    // The parsed index of every directory the listing found, as a `std::vector` of the 20-byte
-    // record `{ HxStr; int; int; int }` whose class cannot be titled. Recorded as a reserved span
-    // rather than declared, for that reason. +0x3c
-    unsigned char mReserved3c[0xc];
+    // A summary of every directory the listing found, built one entry per directory. +0x3c
+    std::vector<RemixDirInfo> mDirInfos;
 
     // The directory the remix lands in, chosen by the index walk. +0x48
     HxStr mTargetDir;

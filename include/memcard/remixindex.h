@@ -2,7 +2,10 @@
 
 #include <vector>
 
+#include "game/freqappearance.h"
 #include "os/hxstr.h"
+
+class IBStream;
 
 /** Characters of a level name a RemixIndexElement stores, terminator included. */
 constexpr int kRemixIndexLevelNameSize = 32;
@@ -31,10 +34,9 @@ constexpr int kRemixIndexFileNameSize = 8;
  *
  * The destructor at `0x00139410` is the authoritative member list. It releases the `std::vector`
  * at `+0x5c` by destroying each element through the element's own virtual slot, returns the buffer
- * to the pool, and then releases unknown54. The element of that vector is 20 bytes with a virtual
- * function table pointer at `+0x10` and sixteen bytes of data before it. Its class is not
- * recovered, so the vector is recorded as a reserved span rather than declared. The same element
- * type appears in the vector SaveRemixMCT stores at `+0x68`.
+ * to the pool, and then releases unknown54. The element of that vector is FreqAppearance, 20 bytes
+ * with its vptr at `+0x10`, the element MetRemixRecord::appearances and SaveRemixMCT's vector at
+ * `+0x68` store.
  *
  * The record is a plain data aggregate, so it is a `struct` with public members.
  */
@@ -47,11 +49,8 @@ struct RemixIndexElement {
     int Version;     /*!< +0x4c */
     int AlbumNum;    /*!< +0x50 */
     HxStr unknown54; /*!< Released by the destructor. Purpose not recovered. +0x54 */
-    /**
-     * A `std::vector` of the 20-byte polymorphic element described in the class documentation.
-     * Recorded as a reserved span, because the element class is not recovered. +0x5c
-     */
-    unsigned char reserved5c[0xc];
+    /** Appearances of the players who recorded the remix. +0x5c */
+    std::vector<FreqAppearance> appearances;
 };
 
 /**
@@ -65,8 +64,22 @@ struct RemixIndexElement {
  * Neither the class name nor either member name is attested. The class name follows the dump label
  * of its element, and the first member is recorded as a version because it is a single word that
  * precedes the count in the file.
+ *
+ * The implicit constructor survives out of line at `0x00183ed0`, clearing the vector and leaving
+ * version unwritten, and the implicit destructor at `0x00360df8`. The four remix tasks and
+ * MetRemixManager construct the record on the stack.
  */
 struct RemixIndex {
+    /**
+     * Read the index back from a stream.
+     *
+     * Not reconstructed yet.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x001366e0
+     */
+    void ReadFromStream(IBStream &stream);
+
     int version;                             /*!< First word of the file. +0x00 */
     std::vector<RemixIndexElement> elements; /*!< +0x04 */
 };

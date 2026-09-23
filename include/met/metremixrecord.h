@@ -38,6 +38,32 @@ struct MetRemixRecord {
           unknown24_(0), unknown34_(0) {
     }
 
+    /**
+     * Build a record from its parts, taken by value.
+     *
+     * ListRemixesMCT::OnFileLoaded() at `0x0017ece0` is the only site, and no out-of-line copy
+     * exists. unknown24_ starts at zero.
+     *
+     * @param unknown00 Copied into unknown00_.
+     * @param unknown08 Copied into unknown08_.
+     * @param unknown10 Copied into unknown10_.
+     * @param unknown18 Copied into unknown18_.
+     * @param bUnknown20 Stored in unknown20_.
+     * @param appearancesIn Copied into appearances.
+     * @param nUnknown34 Stored in unknown34_.
+     */
+    MetRemixRecord(HxStr unknown00,
+                   HxStr unknown08,
+                   HxStr unknown10,
+                   HxStr unknown18,
+                   bool bUnknown20,
+                   std::vector<FreqAppearance> appearancesIn,
+                   int nUnknown34)
+        : unknown00_(unknown00), unknown08_(unknown08), unknown10_(unknown10),
+          unknown18_(unknown18), unknown20_(bUnknown20), unknown24_(0), appearances(appearancesIn),
+          unknown34_(nUnknown34) {
+    }
+
     HxStr unknown00_; /*!< Starts as a copy of the empty string. +0x00 */
     HxStr unknown08_; /*!< Starts as a copy of the empty string. +0x08 */
     HxStr unknown10_; /*!< Starts as a copy of the empty string. +0x10 */
