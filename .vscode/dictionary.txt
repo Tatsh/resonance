@@ -542,6 +542,7 @@ metsaveremixscreen
 metscreen
 metscreenmultisoundbank
 metscreens
+metscreentitlescreen
 metsoloendremixscreen
 metsololosescreen
 metsolostatsscreen

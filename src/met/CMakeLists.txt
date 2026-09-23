@@ -77,6 +77,7 @@ set(RESONANCE_MET_SRCS
     metsaveremixscreen.cpp
     metscreen.cpp
     metscreenmultisoundbank.cpp
+    metscreentitlescreen.cpp
     metsoloendremixscreen.cpp
     metsololosescreen.cpp
     metsolostatsscreen.cpp
