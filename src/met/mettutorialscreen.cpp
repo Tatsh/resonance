@@ -1,11 +1,20 @@
 #include "met/mettutorialscreen.h"
 
+#include <vector>
+
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/gameparams.h"
 #include "met/metbuttonlist.h"
+#include "met/metfreqmakerassetmanager.h"
 #include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
+#include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metsonglists.h"
 #include "os/hxstr.h"
+#include "os/r250.h"
 #include "script/configquery.h"
 
 namespace {
@@ -30,6 +39,22 @@ static const char *const kSecondPrompt = "tut_r";
 static const char *const kTitleScreen = "MetScreenTitleScreen";
 static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
 static const char *const kHelpScreen = "MetHelpScreen";
+
+// Screens OnUnknownSlot36() pushes.
+static const char *const kLeftGizmoSmallScreen = "MetLeftGizmoSmallScreen";
+static const char *const kTopLogoScreen = "MetTopLogoScreen";
+static const char *const kMainScreen = "MetMainScreen";
+static const char *const kLoadGameScreen = "MetLoadGameScreen";
+// The registry key OnUnknownSlot36() records as the screen to return to.
+static const char *const kTutorialScreen = "MetTutorialScreen";
+
+// The level each button starts, matching the button order.
+static const char *const kFirstButtonLevel = "tutorial";
+static const char *const kSecondButtonLevel = "tutorialrmx";
+
+// The difficulty and the burn slot the tutorial game uses.
+constexpr int kTutorialDifficulty = 0;
+constexpr int kTutorialBurnSlot = 0;
 
 // The empty literal that clears the panel and the prompt.
 static const char *const kNoName = "";
@@ -153,4 +178,38 @@ void MetTutorialScreen::OnUnknownSlot30(Rnd::Object *) {
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));
     BeginExit();
+}
+
+void MetTutorialScreen::OnUnknownSlot36() {
+    if (mUnknown18 == kExitBack) {
+        PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
+        PushNamedScreen(HxStr(kTopLogoScreen));
+        PushNamedScreen(HxStr(kMainScreen));
+        ActivateNamedPanel(HxStr(kMainScreen));
+        return;
+    }
+
+    Application::shared()->GetGameManager()->SetGameMode(kGameModeSolo);
+    GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    if (mUnknown8c->mSelected == kFirstButtonIndex) {
+        params.mUnknown1c = kPlayModeGame;
+        params.mLevelName = kFirstButtonLevel;
+    } else {
+        params.mUnknown1c = kPlayModeJam;
+        params.mLevelName = kSecondButtonLevel;
+    }
+    params.mArenaName = (*GetArenaList())[0].mName;
+    params.mDifficulty = kTutorialDifficulty;
+    Application::shared()->GetGameManager()->SetParams(params);
+
+    std::vector<MetPersonaData *> identities(
+        *MetFreqMakerAssetManager::shared()->GetIdentityList());
+    MetPersonaData *pIdentity = identities[RandomInt(0, identities.size())];
+    pIdentity->AttachToBurnSlot(kTutorialBurnSlot);
+    Application::shared()->GetGameManager()->ClearPersonas();
+    Application::shared()->GetGameManager()->AddPersona(*pIdentity);
+
+    MetFrontEndState::shared()->mUnknown24 = HxStr(kTutorialScreen);
+    PushNamedScreen(HxStr(kLoadGameScreen));
+    ActivateNamedPanel(HxStr(kLoadGameScreen));
 }

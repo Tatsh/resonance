@@ -94,8 +94,18 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    Player *mPlayer;    // +0x04
-    float mValue;       // +0x08
+    Player *mPlayer; // +0x04
+
+public:
+    /**
+     * The axis value. +0x08
+     *
+     * Public because AxeFX::HandleMessage() at `0x0019b538` and AxeFX::OnAxisFX() at `0x0019b498`
+     * read it directly, and the image has no accessor.
+     */
+    float mValue;
+
+private:
     Mid::MBT mPosition; // +0x0c
     int mTrack;         // +0x10
 };

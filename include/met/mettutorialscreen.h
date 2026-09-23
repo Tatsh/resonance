@@ -31,10 +31,6 @@ class Object;
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
  * are 5 `0x003c82a0`, 19 `0x003c7f10`, 23 `0x003cc198`, 24 `0x003cc1a0`, 30 `0x003c84d8`, 36
  * `0x003c8678`, 38 `0x003c7d78`.
- *
- * Slot 36 at `0x003c8678` is not written. It picks a random identity through the MetPersonaData
- * member at `0x0032e488`, which forwards to the undeclared FreqAppearance routine at
- * `0x00171138`.
  */
 class MetTutorialScreen : public MetScreen {
 public:
@@ -106,6 +102,21 @@ public:
      * @ghidraAddress 0x003c84d8
      */
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
+
+    /**
+     * Act on the exit recorded in MetScreen::mUnknown18 once the exit animation has finished.
+     * Slot 36.
+     *
+     * After the back command, the body pushes `MetLeftGizmoSmallScreen`, `MetTopLogoScreen`, and
+     * `MetMainScreen` and activates the main screen. After a button action, it starts a solo game
+     * on the first arena at the easiest difficulty, as the `tutorial` level in game mode for the
+     * first button and as `tutorialrmx` in jam mode for the second. It hangs a random FreQ maker
+     * identity in burn slot 0, makes that identity the one persona, records this screen as
+     * MetFrontEndState::mUnknown24, and pushes and activates `MetLoadGameScreen`.
+     *
+     * @ghidraAddress 0x003c8678
+     */
+    virtual void OnUnknownSlot36();
 
     /**
      * Resolve the base views and add the two buttons. Slot 38.

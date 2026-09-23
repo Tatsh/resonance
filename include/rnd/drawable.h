@@ -115,6 +115,23 @@ public:
     virtual void SetShowing(int nShowing);
 
     /**
+     * Set whether this object and every drawable beneath it in mDraws draw at all.
+     *
+     * Runs SetShowing() on this object and then recurses over mDraws. Defined in the header. The
+     * one out-of-line copy is emitted in FreqAppearance's translation unit, where
+     * FreqAppearance::AttachToBurnSlot() expands the first level of the recursion.
+     *
+     * @param nShowing Non-zero to draw.
+     * @ghidraAddress 0x00174480
+     */
+    void SetShowingRecursive(int nShowing) {
+        SetShowing(nShowing);
+        for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end(); ++it) {
+            (*it)->SetShowingRecursive(nShowing);
+        }
+    }
+
+    /**
      * Set whether this object draws with its highlight treatment.
      *
      * Drawable vtable slot 2.

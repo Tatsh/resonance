@@ -266,6 +266,8 @@ gscripts
 gsdoublebuffer
 gsperiodical
 handoff
+hangpoint
+hangpoints
 hardsynth
 harmonix
 hblkhd
@@ -823,6 +825,7 @@ tunnelseeker
 tunnelseeksection
 tunnelseekstrip
 tupleobject
+tutorialrmx
 tvel
 typeobject
 ucnhash

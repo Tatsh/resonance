@@ -139,6 +139,17 @@ public:
     void UpdateSkillStatus();
 
     /**
+     * Hang this persona's avatar in one of the four persona burn slots.
+     *
+     * Forwards to FreqAppearance::AttachToBurnSlot() on the embedded appearance.
+     * MetTutorialScreen::OnUnknownSlot36() is a caller.
+     *
+     * @param nSlot The burn slot, 0 through 3.
+     * @ghidraAddress 0x0032e488
+     */
+    void AttachToBurnSlot(int nSlot);
+
+    /**
      * Campaign progress of this persona. +0x00
      *
      * Public because MetStageFinishScreen slot 5 records and queries the finished stage through it

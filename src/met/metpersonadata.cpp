@@ -32,3 +32,8 @@ void MetPersonaData::UpdateSkillStatus() {
     }
     mUnknown140.SetSkillStatus(nStatus);
 }
+
+// 0x0032e488
+void MetPersonaData::AttachToBurnSlot(int nSlot) {
+    mUnknown140.AttachToBurnSlot(nSlot);
+}

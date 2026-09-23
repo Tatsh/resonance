@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,12 +11,35 @@
  * object is 0x10 bytes and its vtable is at `0x007e44e0`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(), and the stack build in
+ * MultiplierPowerup::Deploy() fixes the meaning of the first two words. LocalPlayer's handler reads
+ * only mBar, so the other two words are private.
  */
 class MultiplierMsg : public Message {
 public:
+    /**
+     * Construct a message with every payload word indeterminate.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    MultiplierMsg() {
+    }
+
+    /**
+     * Report a multiplier powerup deployed by a player.
+     *
+     * Inline, with no address of its own. MultiplierPowerup::Deploy() expands it on its stack at
+     * `0x001ca238`, passing 4 as nUnknown0c.
+     *
+     * @param pPlayer The player who deployed the powerup.
+     * @param nBar The bar the multiplier bonus starts at.
+     * @param nUnknown0c A value whose purpose is not recovered.
+     */
+    MultiplierMsg(Player *pPlayer, int nBar, int nUnknown0c)
+        : mPlayer(pPlayer), mBar(nBar), mUnknown0c(nUnknown0c) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -50,7 +75,7 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
+    Player *mPlayer; // +0x04, the player who deployed the powerup
 
 public:
     /**

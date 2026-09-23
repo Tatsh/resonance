@@ -111,6 +111,32 @@ public:
     void operator=(const FreqAppearance &other);
 
     /**
+     * Hang this appearance's avatar view in one of the four persona burn slots and show it.
+     *
+     * Runs InitBurnSlots() first and records the detail object as the slot's occupant. The slot's
+     * hangpoint view (`<slot>_freq_hangpoint.view`) then loses its draws and transforms, takes the
+     * avatar view as its one child for both, recomposes the avatar's world transform under it, and
+     * is shown with everything beneath it. The slot's camera
+     * (`persona_texburn_<slot + 1>.cam`) is shown last. MetPersonaData::AttachToBurnSlot() and the
+     * routines at `0x003455a8` and `0x0035abf8` call it, and the name is inferred.
+     *
+     * @param nSlot The burn slot, 0 through 3.
+     * @ghidraAddress 0x00171138
+     */
+    void AttachToBurnSlot(int nSlot);
+
+    /**
+     * Resolve the four burn cameras and hangpoint views once.
+     *
+     * Does nothing after the first call. Otherwise it polls the FreQ maker asset load once, sizes
+     * both lists to four, resolves each camera and hides it, and resolves each hangpoint view and
+     * shows it. The name is inferred.
+     *
+     * @ghidraAddress 0x00171398
+     */
+    static void InitBurnSlots();
+
+    /**
      * Record the skill status.
      *
      * Defined in the header. The one out-of-line copy is never called, and

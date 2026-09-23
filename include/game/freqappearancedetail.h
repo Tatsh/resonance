@@ -3,6 +3,10 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
+namespace Rnd {
+class View;
+}
+
 /**
  * Avatar an appearance stores apart from its username.
  *
@@ -14,9 +18,8 @@
  * FreqAppearance::Print writes where this object would appear.
  *
  * The object is 0xb0 bytes with a std::list at `+0xa0` and a Rnd::View of 0x120 bytes at `+0xa4`.
- * Only the six members below are recovered, and each is the entry point FreqAppearance reaches it
- * through. The layout is not declared, because nothing in FreqAppearance's own code touches a field
- * of this class directly.
+ * The six routines below are the entry points FreqAppearance reaches it through, and mView is the
+ * one field FreqAppearance reads directly. The rest of the layout is not recovered.
  *
  * No identifier here is attested by the image, so every member takes the required style rather than
  * the CamelCase the classes around it use. That divergence is deliberate.
@@ -77,4 +80,21 @@ public:
      * @ghidraAddress 0x0024a088
      */
     void copyFrom(const FreqAppearanceDetail &other);
+
+private:
+    // Built by the routine at 0x0024f300 at the start of the constructor, followed by the std::list
+    // at +0xa0, whose element type is not recovered.
+    unsigned char mUnknown00[0xa4]; // +0x00
+
+public:
+    /**
+     * The avatar view the constructor allocates, 0x120 bytes. +0xa4
+     *
+     * Public because FreqAppearance::AttachToBurnSlot() reads it directly, and the image has no
+     * accessor for it.
+     */
+    Rnd::View *mView;
+
+private:
+    unsigned char mUnknowna8[0x8]; // +0xa8
 };
