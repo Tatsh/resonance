@@ -26,6 +26,7 @@
 #include "msg/invalidatetrackmsg.h"
 #include "msg/tracksonmsg.h"
 #include "msg/winmsg.h"
+#include "os/log.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
@@ -40,7 +41,7 @@ constexpr int kSoloRequirementsConfigCode = 0x387;
 constexpr int kUnknown3cConfigCode = 0x2be;
 constexpr int kSoloJuiceConfigCode = 0x38c;
 constexpr int kSoloMaxJuiceConfigCode = 0x394;
-constexpr int kDisplayModeConfigCode = 0x3a1;
+constexpr int kTutorialConfigCode = 0x3a1;
 
 // MIDI ticks in one bar.
 constexpr int kTicksPerBar = 1920;
@@ -75,6 +76,15 @@ constexpr int kBarJuiceCost = -1;
 // Bars the streamed audio runs behind the update.
 constexpr int kSynthStreamLeadBars = 3;
 
+// Configuration code of the background tracks' enable policy.
+constexpr int kBackTrackConfigCode = 0x386;
+
+// The score ceiling EndWithScore() sets.
+constexpr int kEndScoreCeiling = 10000;
+
+constexpr char kFreestyleOutsideTutorial[] =
+    " Only call Gamer::EnablePlayerFreestyle() from tutorial.";
+
 // The progress a completed solo song records.
 constexpr float kCompleteProgress = 1.0f;
 
@@ -93,17 +103,17 @@ constexpr unsigned kSharedTrackPlayerCount = 2;
 
 } // namespace
 
-Gamer::Gamer(int nTrackCount, int nUnknown24, GameStats *pStats)
+Gamer::Gamer(int nTrackCount, int nEndBar, GameStats *pStats)
     : mUnknown1c(0), mEndState(kEndStateNone), mJukeboxMode(0), mUnknown38(0),
       mTrackCount(nTrackCount), mUnknown44(kInitialUnknown44), mUnknown48(0), mPlaybackOn(0),
       mGlobals(Application::shared()), mStats(pStats), mBarLength(kTicksPerBar),
       mPlayers(mGlobals->GetWorld()->mPlayers), mBackGraphs(nullptr), mGraphs(nullptr),
       mTrackSources(nTrackCount, MsgSource()), mUnknown84(0), mEnableMgr(nullptr),
-      mUnknown94(nullptr), mUnknown98(0) {
+      mBackEnableMgr(nullptr), mUnknown98(0) {
     mCommand.mValue = kUnallocatedCommand;
     mFreeEndBar = kInitialFreeEndBar;
     mPlayMap = mGlobals->GetPlayMap();
-    mUnknown24 = nUnknown24;
+    mEndBar = nEndBar;
     mUnknown3c = QueryConfigValue(kUnknown3cConfigCode);
     mGameMode = mGlobals->GetGameMode();
     mPlayMode = mGlobals->GetPlayMode();
@@ -115,7 +125,7 @@ Gamer::Gamer(int nTrackCount, int nUnknown24, GameStats *pStats)
         nJuice = QueryConfigValue(kSoloJuiceConfigCode);
         nMaxJuice = QueryConfigValue(kSoloMaxJuiceConfigCode);
     }
-    mUnknown18 = QueryConfigFlag(kDisplayModeConfigCode);
+    mTutorial = QueryConfigFlag(kTutorialConfigCode);
     for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         (*it)->SetScore(kInitialScore, kMaxScore);
         (*it)->SetJuice(nJuice, nMaxJuice);
@@ -133,7 +143,7 @@ Gamer::Gamer(int nTrackCount, int nUnknown24, GameStats *pStats)
 Gamer::~Gamer() {
     Withdraw();
     delete mEnableMgr;
-    delete mUnknown94;
+    delete mBackEnableMgr;
 }
 
 void Gamer::Withdraw() {
@@ -303,25 +313,25 @@ void Gamer::OnBar(int nBar) {
     mPlayMap->Slot5(nBar); // Yes, the binary discards this call's result.
     mUnknown38 = nBar;
     for (unsigned i = 0; i < mBackGraphs->size(); ++i) {
-        if (mUnknown94->QueryBar(i, nBar) != 0) {
+        if (mBackEnableMgr->QueryBar(i, nBar) != 0) {
             (*mBackGraphs)[i]->DisableMidi();
         } else {
             (*mBackGraphs)[i]->EnableMidi();
         }
     }
 
-    if (mPlayMode == kPlayModeGame && mUnknown18 == 0) {
+    if (mPlayMode == kPlayModeGame && mTutorial == 0) {
         if (mGameMode != kGameModeSolo) {
-            if (nBar == mUnknown24 && mEndState == kEndStateNone) {
+            if (nBar == mEndBar && mEndState == kEndStateNone) {
                 DeclareWinners();
             }
-            if (nBar == mUnknown24 + kExitDelayBars && mEndState == kEndStateOver) {
+            if (nBar == mEndBar + kExitDelayBars && mEndState == kEndStateOver) {
                 mGlobals->GetWorld()->PostExitMode1();
             }
         } else {
             Player *pPlayer = mPlayers[0];
             pPlayer->Slot2(); // Yes, the binary discards this call's result.
-            if (nBar >= mUnknown24 && mEndState == kEndStateNone) {
+            if (nBar >= mEndBar && mEndState == kEndStateNone) {
                 mEndState = kEndStateWon;
                 pPlayer->Slot8(nBar, nBar + kWonBarSpan);
 
@@ -372,27 +382,27 @@ void Gamer::OnBar(int nBar) {
         }
     }
 
-    if ((mPlayMode == kPlayModeJam || mUnknown18 != 0) && mPlayMap->IsStepStart(nBar) != 0) {
+    if ((mPlayMode == kPlayModeJam || mTutorial != 0) && mPlayMap->IsStepStart(nBar) != 0) {
         // Yes, the binary discards both calls' results.
-        if (mPlaybackOn != 0 && mUnknown18 == 0) {
+        if (mPlaybackOn != 0 && mTutorial == 0) {
             mPlayMap->Slot16(nBar);
         } else {
             mPlayMap->Slot17(nBar);
         }
     }
 
-    if (mGlobals->IsJukeboxMode() && nBar >= mUnknown24 && mEndState == kEndStateNone) {
+    if (mGlobals->IsJukeboxMode() && nBar >= mEndBar && mEndState == kEndStateNone) {
         mEndState = kEndStateOver;
         mGlobals->GetWorld()->PostExitMode1();
     }
 
-    if (mUnknown18 != 0 && mUnknown1c == 0) {
+    if (mTutorial != 0 && mUnknown1c == 0) {
         Player *pPlayer = mPlayers[0];
         pPlayer->Slot2(); // Yes, the binary discards this call's result.
         pPlayer->AddJuice(kBarJuiceCost, 1);
     }
     const int nStreamBar = nBar - kSynthStreamLeadBars;
-    if (mUnknown18 == 0 && nStreamBar >= 0) {
+    if (mTutorial == 0 && nStreamBar >= 0) {
         SetSynthStreamBar(mPlayMap->Slot13(nStreamBar) + 1);
     }
 
@@ -401,6 +411,30 @@ void Gamer::OnBar(int nBar) {
 
 void Gamer::Start() {
     ScheduleBar(0);
+}
+
+void Gamer::SetBackGraphs(std::vector<BGTrackGraph *> *pGraphs) {
+    mBackGraphs = pGraphs;
+    mBackEnableMgr = GameEnableMgr::CreateReleasing(
+        kBackTrackConfigCode, static_cast<int>(pGraphs->size()), this);
+}
+
+void Gamer::EnablePlayerFreestyle(int nStartBar, int nEndBar) {
+    if (mTutorial == 0) {
+        Fatal(kFreestyleOutsideTutorial);
+    }
+    mPlayers[0]->Slot8(nStartBar, nEndBar);
+}
+
+void Gamer::AddJuice(int nAmount) {
+    mPlayers[0]->AddJuice(nAmount, 1);
+}
+
+void Gamer::EndWithScore(int nScore) {
+    mEndBar = 0;
+    if (nScore != 0) {
+        mPlayers[0]->SetScore(nScore, kEndScoreCeiling);
+    }
 }
 
 void Gamer::ScheduleBar(int nBar) {

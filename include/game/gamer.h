@@ -49,11 +49,11 @@ public:
      * playback with every input binding off except the first slot's two rotations.
      *
      * @param nTrackCount The level's track count.
-     * @param nUnknown24 The level's slot-9 value, recorded at `+0x24`.
+     * @param nEndBar The level's last bar, from its slot 9.
      * @param pStats The session statistics.
      * @ghidraAddress 0x00110138
      */
-    Gamer(int nTrackCount, int nUnknown24, GameStats *pStats);
+    Gamer(int nTrackCount, int nEndBar, GameStats *pStats);
 
     /**
      * Withdraw the queued command and delete both enable policies.
@@ -152,8 +152,8 @@ public:
     /**
      * Run the update of one bar and schedule the next.
      *
-     * Switches each background track's MIDI by mUnknown94, ends a solo or multiplayer game when
-     * its conditions are met, steps jam playback, ends a jukebox song at mUnknown24, moves the
+     * Switches each background track's MIDI by mBackEnableMgr, ends a solo or multiplayer game when
+     * its conditions are met, steps jam playback, ends a jukebox song at mEndBar, moves the
      * streamed audio, and finally schedules bar nBar + 1. GamerCmd::Execute() is the caller. The
      * title is inferred.
      *
@@ -170,6 +170,51 @@ public:
      * @ghidraAddress 0x00116c20
      */
     void Start();
+
+    /**
+     * Record the background tracks and build the enable policy for them.
+     *
+     * The policy is GameEnableMgr::CreateReleasing() over configuration code 0x386, one track per
+     * graph. RndWorld's draw pass is the caller. The title is inferred.
+     *
+     * @param pGraphs The background tracks' graphs.
+     * @ghidraAddress 0x001167e0
+     */
+    void SetBackGraphs(std::vector<BGTrackGraph *> *pGraphs);
+
+    /**
+     * Give the first player a freestyle span.
+     *
+     * Calls Fatal() with `Only call Gamer::EnablePlayerFreestyle() from tutorial.` outside the
+     * tutorial, which is what attests the title.
+     *
+     * @param nStartBar The first bar, passed to Player::Slot8().
+     * @param nEndBar The end bar, passed to Player::Slot8().
+     * @ghidraAddress 0x00116a98
+     */
+    void EnablePlayerFreestyle(int nStartBar, int nEndBar);
+
+    /**
+     * Add juice to the first player and announce it.
+     *
+     * The `add_juice` script command is the caller. The title is inferred.
+     *
+     * @param nAmount The juice to add.
+     * @ghidraAddress 0x00116ae8
+     */
+    void AddJuice(int nAmount);
+
+    /**
+     * End the game at the next bar, optionally with a score for the first player.
+     *
+     * Sets mEndBar to 0. A non-zero score becomes the first player's score with a ceiling of
+     * 10000. The listen-mode script command and the win-with-points cheat are the callers. The
+     * title is inferred.
+     *
+     * @param nScore The score, or 0 to leave the score unchanged.
+     * @ghidraAddress 0x00116b18
+     */
+    void EndWithScore(int nScore);
 
 private:
     // 0x00112838. Posts a GamerCmd for the bar on the song clock under mCommand, one tick before
@@ -209,10 +254,10 @@ private:
         kEndStateOver = 2,
     };
 
-    int mUnknown18;                           // +0x18
+    int mTutorial;                            // +0x18 set in the tutorial
     int mUnknown1c;                           // +0x1c
     int mUnknown20;                           // +0x20
-    int mUnknown24;                           // +0x24
+    int mEndBar;                              // +0x24 the bar the game ends at
     int mEndState;                            // +0x28 an EndState
     int mPlayMode;                            // +0x2c
     int mGameMode;                            // +0x30
@@ -242,10 +287,10 @@ public:
     std::vector<MsgSource> mTrackSources;
 
 private:
-    int mUnknown84;        // +0x84
-    int mFreeEndBar;       // +0x88 the end bar non-catch tracks are free until
-    PlayMap *mPlayMap;     // +0x8c
-    EnableMgr *mEnableMgr; // +0x90
-    EnableMgr *mUnknown94; // +0x94
-    int mUnknown98;        // +0x98
+    int mUnknown84;            // +0x84
+    int mFreeEndBar;           // +0x88 the end bar non-catch tracks are free until
+    PlayMap *mPlayMap;         // +0x8c
+    EnableMgr *mEnableMgr;     // +0x90
+    EnableMgr *mBackEnableMgr; // +0x94
+    int mUnknown98;            // +0x98
 };
