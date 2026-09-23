@@ -8,6 +8,8 @@
 #include "os/hxstr.h"
 #include "stream/iobpreallocmemstream.h"
 
+struct MetRemixRecord;
+
 /**
  * Enumerate every remix saved on one card.
  *
@@ -37,6 +39,24 @@
  */
 class ListRemixesMCT : public MemcardTask, public MemcardUser {
 public:
+    /**
+     * Construct an idle listing.
+     *
+     * MemcardManager::CreateListRemixesTask() at `0x001f3598` is the one caller. Not written yet.
+     *
+     * @param pUser The receiver Finish() reports to.
+     * @param pCard The queue the task submits operations to.
+     * @param nPortSlot The packed port and slot.
+     * @param nCookie The tag that abandons exactly this task's operations.
+     * @param pRecords The collection the parse fills, stored in mRecords.
+     * @ghidraAddress 0x0017e528
+     */
+    ListRemixesMCT(MemcardUser *pUser,
+                   Memcard *pCard,
+                   int nPortSlot,
+                   int nCookie,
+                   std::vector<MetRemixRecord> *pRecords);
+
     /** @ghidraAddress 0x001856a8 */
     virtual ~ListRemixesMCT();
 
@@ -85,10 +105,10 @@ private:
     // Every remix save directory the listing found, consumed one per step. +0x30
     std::vector<HxStr> mDirNames;
 
-    // Addresses the collection the parse fills, whose element class cannot be titled. The
-    // constructor receives it as its last argument. Recorded as a reserved word rather than as a
-    // pointer, because the type it points at is not recovered. +0x3c
-    unsigned char mReserved3c[4];
+    // The collection the parse fills, received as the constructor's last argument. OnFileLoaded()
+    // copy-constructs each element through MetRemixRecord's copy constructor at 0x00184130 and
+    // steps by 0x38, MetRemixRecord's size. Borrowed, not owned. +0x3c
+    std::vector<MetRemixRecord> *mRecords;
 
     // One index file is read into this stream's buffer at a time. +0x40
     IOBPreallocMemStream mStream;

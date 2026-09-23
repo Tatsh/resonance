@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "game/freqappearance.h"
 #include "memcard/loadfilemct.h"
 #include "memcard/memcardtask.h"
 #include "memcard/memcarduser.h"
@@ -44,6 +45,31 @@ constexpr int kRemixSaveMinimumFreeClusters = 60;
  */
 class SaveRemixMCT : public MemcardTask, public MemcardUser {
 public:
+    /**
+     * Construct an idle remix save.
+     *
+     * MemcardManager::CreateSaveRemixTask() at `0x001f31c8` is the one caller. Not written, for the
+     * reason recorded in the class documentation.
+     *
+     * @param pUser The receiver Finish() reports to.
+     * @param pCard The queue the task submits operations to.
+     * @param nPortSlot The packed port and slot.
+     * @param nCookie The tag that abandons exactly this task's operations.
+     * @param unknown60 Copied into mUnknown60.
+     * @param appearances The players' appearances, copied into the vector at `+0x68`.
+     * @param unknown74 Copied into mUnknown74.
+     * @param nUnknown58 Stored in mUnknown58.
+     * @ghidraAddress 0x00179ec0
+     */
+    SaveRemixMCT(MemcardUser *pUser,
+                 Memcard *pCard,
+                 int nPortSlot,
+                 int nCookie,
+                 const HxStr &unknown60,
+                 const std::vector<FreqAppearance> &appearances,
+                 const HxStr &unknown74,
+                 int nUnknown58);
+
     /** @ghidraAddress 0x001850a8 */
     virtual ~SaveRemixMCT();
 
@@ -144,10 +170,9 @@ private:
     // +0x60, from the constructor's fifth register argument
     HxStr mUnknown60;
 
-    // A `std::vector` copy of the constructor's sixth argument, whose 20-byte element has a vptr
-    // at `+0x10` and sixteen bytes of data before it. The element's class cannot be titled, so the
-    // member is recorded as a reserved span. +0x68
-    unsigned char mReserved68[0xc];
+    // A copy of the constructor's sixth argument. The 20-byte element with its vptr at +0x10 is
+    // FreqAppearance, the element of MetRemixRecord::appearances. +0x68
+    std::vector<FreqAppearance> mAppearances;
 
     // +0x74, from the constructor's seventh register argument
     HxStr mUnknown74;

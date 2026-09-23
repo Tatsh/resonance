@@ -4,6 +4,7 @@
 #include "memcard/formatcardmct.h"
 #include "memcard/getallconnectstatesmct.h"
 #include "memcard/getconnectstatemct.h"
+#include "memcard/listremixesmct.h"
 #include "memcard/loadglobalsettingsmct.h"
 #include "memcard/loadjukeboxplaylistmct.h"
 #include "memcard/loadpersonasmct.h"
@@ -14,6 +15,7 @@
 #include "memcard/saveglobalsettingsmct.h"
 #include "memcard/savejukeboxplaylistmct.h"
 #include "memcard/savepersonasmct.h"
+#include "memcard/saveremixmct.h"
 
 namespace {
 
@@ -120,6 +122,21 @@ void MemcardManager::CreateLoadJukeboxPlayListTask(int nPortSlot,
                                                    int nIndex) {
     mTasks.push_back(
         new LoadJukeboxPlayListMCT(mUser, mCard, nPortSlot, ++mTicket, pPlayList, nIndex));
+}
+
+// 0x001f31c8
+void MemcardManager::CreateSaveRemixTask(int nPortSlot,
+                                         const HxStr &unknown60,
+                                         const std::vector<FreqAppearance> &appearances,
+                                         const HxStr &unknown74,
+                                         int nUnknown58) {
+    mTasks.push_back(new SaveRemixMCT(
+        mUser, mCard, nPortSlot, ++mTicket, unknown60, appearances, unknown74, nUnknown58));
+}
+
+// 0x001f3598
+void MemcardManager::CreateListRemixesTask(int nPortSlot, std::vector<MetRemixRecord> *pRecords) {
+    mTasks.push_back(new ListRemixesMCT(mUser, mCard, nPortSlot, ++mTicket, pRecords));
 }
 
 // 0x001f36c8

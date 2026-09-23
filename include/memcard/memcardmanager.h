@@ -5,6 +5,7 @@
 
 #include "memcard/memcardconnectstate.h"
 
+class FreqAppearance;
 class GlobalSettings;
 class HxStr;
 class JukeboxPlayList;
@@ -12,6 +13,7 @@ class Memcard;
 class MemcardTask;
 class MemcardUser;
 class MetPersonaData;
+struct MetRemixRecord;
 
 /**
  * Game-wide owner of the memory-card queue and of the tasks that drive it.
@@ -161,6 +163,31 @@ public:
      * @ghidraAddress 0x001f3a40
      */
     void CreateLoadJukeboxPlayListTask(int nPortSlot, JukeboxPlayList *pPlayList, int nIndex);
+
+    /**
+     * Queue a SaveRemixMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param unknown60 Passed through to the task.
+     * @param appearances The players' appearances.
+     * @param unknown74 Passed through to the task.
+     * @param nUnknown58 Passed through to the task.
+     * @ghidraAddress 0x001f31c8
+     */
+    void CreateSaveRemixTask(int nPortSlot,
+                             const HxStr &unknown60,
+                             const std::vector<FreqAppearance> &appearances,
+                             const HxStr &unknown74,
+                             int nUnknown58);
+
+    /**
+     * Queue a ListRemixesMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param pRecords The collection the listing fills.
+     * @ghidraAddress 0x001f3598
+     */
+    void CreateListRemixesTask(int nPortSlot, std::vector<MetRemixRecord> *pRecords);
 
     /**
      * Queue a LoadRemixMCT.
