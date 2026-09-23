@@ -22,6 +22,8 @@ set(RESONANCE_GAME_SRCS
     forcefeedbackmgr.cpp
     freestylepowerup.cpp
     freqappearance.cpp
+    freqappearancedetail.cpp
+    freqpart.cpp
     gameenablemgr.cpp
     gamemanagerimpl.cpp
     gameparams.cpp

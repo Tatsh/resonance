@@ -1,5 +1,8 @@
 #pragma once
 
+#include <list>
+
+#include "game/freqpart.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -18,8 +21,9 @@ class View;
  * FreqAppearance::Print writes where this object would appear.
  *
  * The object is 0xb0 bytes with a std::list at `+0xa0` and a Rnd::View of 0x120 bytes at `+0xa4`.
- * The six routines below are the entry points FreqAppearance reaches it through, and mView is the
- * one field FreqAppearance reads directly. The rest of the layout is not recovered.
+ * The routines below are the entry points FreqAppearance reaches it through, and mView is the one
+ * field FreqAppearance reads directly. The part list is at `+0xa0`, and the rest of the layout is
+ * not recovered.
  *
  * No identifier here is attested by the image, so every member takes the required style rather than
  * the CamelCase the classes around it use. That divergence is deliberate.
@@ -81,10 +85,49 @@ public:
      */
     void copyFrom(const FreqAppearanceDetail &other);
 
+    /**
+     * Report the parts the avatar is built from.
+     *
+     * Defined in the header. The out-of-line copy is called by FreqAppearance::RenderBurnTextures()
+     * and by the routine at `0x00262270`.
+     *
+     * @return The part list.
+     * @ghidraAddress 0x0024f230
+     */
+    std::list<FreqPart *> &parts() {
+        return mParts;
+    }
+
+    /**
+     * Pack every part into consecutive 8-byte records.
+     *
+     * The part list is also counted a second time and that count is discarded.
+     * FreqAppearance::Pack() is the one caller.
+     *
+     * @param pOut The first record to write.
+     * @param pCount Receives the number of parts written.
+     * @ghidraAddress 0x0024c398
+     */
+    void pack(FreqPart::Packed *pOut, int *pCount);
+
+    /**
+     * Append parts unpacked from consecutive 8-byte records.
+     *
+     * For each record the body allocates a FreqPart, unpacks it, clones a mesh for it through the
+     * FreQ maker asset manager, hangs the mesh from mView, colours the part, and resets the
+     * placement state of this object. FreqAppearance::Unpack() is the one caller. The body is not
+     * written.
+     *
+     * @param pRecords The first record to read.
+     * @param nCount The number of records.
+     * @ghidraAddress 0x0024b898
+     */
+    void unpack(const FreqPart::Packed *pRecords, int nCount);
+
 private:
-    // Built by the routine at 0x0024f300 at the start of the constructor, followed by the std::list
-    // at +0xa0, whose element type is not recovered.
-    unsigned char mUnknown00[0xa4]; // +0x00
+    // Built by the routine at 0x0024f300 at the start of the constructor.
+    unsigned char mUnknown00[0xa0]; // +0x00
+    std::list<FreqPart *> mParts;   // +0xa0
 
 public:
     /**

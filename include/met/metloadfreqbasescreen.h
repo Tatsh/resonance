@@ -56,9 +56,9 @@
  *
  * Two bodies are not written. OnCreateButton() and PrepareFreqMakerForSelection() both call
  * MetFreqMakerCanvasScreen and MetFreqMakerButtonsScreen members that no header in this tree
- * declares yet, at `0x002622b8`, `0x00262350`, and `0x0025e288`. RefreshSelection() calls a
- * MetPersonaData member at `0x0032e488` and a Rnd::Mat stage member at `0x004dd0a0` that are
- * undeclared for the same reason. Each declaration records what its body does.
+ * declares yet, at `0x002622b8`, `0x00262350`, and `0x0025e288`. RefreshSelection() calls
+ * MetPersonaData::AttachToBurnSlot() and Rnd::Mat::Stage::SetTex(), and its body is not written
+ * yet. Each declaration records what its body does.
  */
 class MetLoadFreqBaseScreen : public MetScreen {
 public:
@@ -259,12 +259,12 @@ protected:
     /**
      * Reapply the selected identity to the preview and the label.
      *
-     * The body resolves `cid_char.mat` out of Rnd::g_manager and casts it to Rnd::Mat, runs the
-     * MetPersonaData member at `0x0032e488` on the selected identity with a zero, assigns
-     * mBurnTexture into that material's stage through `0x004dd0a0`, and finishes with
+     * The body resolves `cid_char.mat` out of Rnd::g_manager and casts it to Rnd::Mat, runs
+     * MetPersonaData::AttachToBurnSlot() on the selected identity with slot 0, assigns
+     * mBurnTexture into that material's stage through Rnd::Mat::Stage::SetTex(), and finishes with
      * UpdateNameLabel(). The title is inferred from those three steps.
      *
-     * The body is not written, for the reason recorded in the class documentation.
+     * The body is not written.
      *
      * @ghidraAddress 0x00292508
      */

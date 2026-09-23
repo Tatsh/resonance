@@ -1,6 +1,6 @@
 #include "met/metloadfreqbasescreen.h"
 
-#include "game/personatexture.h"
+#include "game/freqappearance.h"
 #include "met/metfreqmakerassetmanager.h"
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
@@ -83,7 +83,7 @@ MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriori
     // Yes, the binary polls once more after the wait has already run the load to completion, and
     // discards the result.
     MetFreqMakerAssetManager::shared()->PollLoad();
-    mBurnTexture = findPersonaBurnTexture(kBurnTextureIndex);
+    mBurnTexture = FreqAppearance::FindPersonaBurnTexture(kBurnTextureIndex);
 }
 
 MetLoadFreqBaseScreen::~MetLoadFreqBaseScreen() {

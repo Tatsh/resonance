@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "game/personatexture.h"
+#include "game/freqappearance.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
 #include "met/metfreqmakerassetmanager.h"
@@ -90,7 +90,8 @@ int CreditsRoll::Update() {
                 if (name.mLen != 0 && !burned_[nIndex]) {
                     // Yes, the binary attaches through a null persona when the name is not found.
                     FindPersona(name, *identities_)->AttachToBurnSlot(burnSlot_);
-                    pPicture->mMat->mStages[kBurnStage].SetTex(findPersonaBurnTexture(burnSlot_));
+                    pPicture->mMat->mStages[kBurnStage].SetTex(
+                        FreqAppearance::FindPersonaBurnTexture(burnSlot_));
                     burned_[nIndex] = true;
                     if (++burnSlot_ >= kBurnSlotCount) {
                         burnSlot_ = 0;

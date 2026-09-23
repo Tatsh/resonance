@@ -2,7 +2,14 @@
 
 #include <vector>
 
+#include "math/color.h"
 #include "met/metpersonadata.h"
+#include "os/hxstr.h"
+
+class FreqPartTemplate;
+namespace Rnd {
+class Mesh;
+}
 
 /**
  * Owner of the art and sound assets the FreQ maker works from.
@@ -22,11 +29,13 @@
  *  - A second vector of 4-byte elements at `+0x68` is deallocated.
  *  - A run of `std::list` members descending from `+0x60` through `+0x58` and below is cleared
  *    through the routine at `0x00255658`, and each dummy node is returned to the pool.
+ *  - The part template vector at `+0x20` is deallocated.
  *
  * The constructor at `0x00250b18` writes the vptr, zeroes `+0x00` through `+0x14`, and then runs
  * on for another 0x400 bytes of asset registration that is not recovered here. The classes of the
- * two owned objects and the element types of the two vectors and the lists are all undetermined,
- * so the whole span is recorded as reserved rather than typed.
+ * two owned objects and the element types of the lists are undetermined. Only the members that
+ * GetPart(), NextMeshName(), and CloneMesh() read are typed, and the rest of the span is recorded
+ * as reserved.
  *
  * The one instance is created by the routine at `0x00255158`, which allocates exactly 0x84 bytes,
  * runs the constructor, and records the result in the global at `0x006a0f30` that shared() reads.
@@ -105,8 +114,57 @@ public:
      */
     std::vector<MetPersonaData *> *GetAllIdentities();
 
+    /**
+     * Report the part template with one identifier.
+     *
+     * Runs PollLoad() first and discards its result. The identifier is not range-checked. The
+     * title is inferred.
+     *
+     * @param nId The template identifier.
+     * @return The template.
+     * @ghidraAddress 0x00254a18
+     */
+    FreqPartTemplate *GetPart(int nId);
+
+    /**
+     * Generate a fresh object name, `autogen_obj_` followed by the value of a counter the call
+     * then advances.
+     *
+     * The title is inferred.
+     *
+     * @return The name.
+     * @ghidraAddress 0x00254e50
+     */
+    HxStr NextMeshName();
+
+    /**
+     * Create a mesh under one name as a copy of the template mesh, in the default colour.
+     *
+     * Runs PollLoad() first and discards its result, creates the mesh through Rnd::g_pfnNewMesh,
+     * copies mMeshTemplate into it with no flags, and applies g_freqMakerDefaultColor. The title
+     * is inferred.
+     *
+     * @param name The name of the new mesh.
+     * @return The mesh.
+     * @ghidraAddress 0x00254a58
+     */
+    Rnd::Mesh *CloneMesh(const HxStr &name);
+
 private:
-    // The 0x80-byte span the destructor walks. Its members are described in the class
-    // documentation above and are not individually typed.
-    unsigned char mUnknown00[0x80]; // +0x00
+    // The members the destructor walks, described in the class documentation above.
+    unsigned char mUnknown00[0x20];         // +0x00
+    std::vector<FreqPartTemplate *> mParts; // +0x20, indexed by template identifier
+    unsigned char mUnknown2c[0x4];          // +0x2c
+    Rnd::Mesh *mMeshTemplate;               // +0x30, the mesh CloneMesh() copies
+    unsigned char mUnknown34[0x30];         // +0x34
+    int mMeshCount;                         // +0x64, the counter NextMeshName() advances
+    unsigned char mUnknown68[0x18];         // +0x68
 };
+
+/**
+ * Colour a freshly cloned FreQ maker mesh and a reset FreqPart start with, an opaque grey of
+ * 0.75 in each channel.
+ *
+ * @ghidraAddress 0x006a0f40
+ */
+extern Color g_freqMakerDefaultColor;

@@ -3,7 +3,7 @@
 #include "app/application.h"
 #include "app/hudutil.h"
 #include "app/overlay.h"
-#include "game/personatexture.h"
+#include "game/freqappearance.h"
 #include "game/player.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -31,7 +31,7 @@ constexpr int kBurnStage = 1;
 } // namespace
 
 HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulseLoop) {
-    Rnd::Tex *pBurn = findPersonaBurnTexture(nIndex);
+    Rnd::Tex *pBurn = FreqAppearance::FindPersonaBurnTexture(nIndex);
 
     mPulseAnim = dynamic_cast<Rnd::MatAnim *>(Rnd::g_manager.Find(HxStr("HUD freq pulse.mnm")));
 

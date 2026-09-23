@@ -1,3 +1,4 @@
+Colorable
 Dfan
 Eran
 Kasson
@@ -223,6 +224,8 @@ frameobject
 freestylefxmsg
 freestylepowerup
 freqappearance
+freqappearancedetail
+freqpart
 frustrum
 fsmblks
 fstat
@@ -439,6 +442,7 @@ metcontrollerreading
 metexpansionpakscreen
 metfade
 metfreqendedmsg
+metfreqmakerassetmanager
 metfreqmakerdirectionsscreen
 metfrontendstate
 metglobalsettingssaverscreen

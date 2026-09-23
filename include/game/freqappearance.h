@@ -3,9 +3,14 @@
 #include <iostream>
 
 #include "game/freqappearancedetail.h"
+#include "game/freqpart.h"
 #include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
+
+namespace Rnd {
+class Tex;
+}
 
 /**
  * Appearance of a player's avatar.
@@ -33,6 +38,24 @@
  */
 class FreqAppearance {
 public:
+    /** The longest username a Record stores, without its terminator. */
+    static constexpr int kRecordNameLength = 12;
+
+    /**
+     * Compact form of an appearance that Pack() fills and Unpack() reads.
+     *
+     * The record has no RTTI and no name in the image, so the title is inferred. Its length
+     * follows from the part count, and no routine in the image fixes the largest count. mParts is
+     * declared with one entry, and a record runs past it by the remaining parts.
+     */
+    struct Record {
+        bool mValid;                       /*!< Set by Pack(). Unpack() ignores a clear record. */
+        char mName[kRecordNameLength + 1]; /*!< The username, cut to 12 characters. */
+        unsigned char mSkillStatus;        /*!< The skill status. */
+        int mPartCount;                    /*!< The number of entries in mParts. */
+        FreqPart::Packed mParts[1];        /*!< The packed parts, mPartCount of them. */
+    };
+
     /**
      * Construct the appearance a new player starts with.
      *
@@ -137,6 +160,67 @@ public:
     static void InitBurnSlots();
 
     /**
+     * Render each shown burn camera into its slot's persona burn texture.
+     *
+     * Does nothing before InitBurnSlots() has run. For each slot whose camera is shown, the camera
+     * recomposes its world transform and draws twice around a GS path sync, and the camera's
+     * render target is read back and quantised into the slot's burn texture with one ramp for
+     * each part colour of the avatar hung in that slot. The burn texture's palette is then reset,
+     * and the camera is hidden. MetRenderer::DrawFrontEnd() is the one caller, and the name is
+     * inferred.
+     *
+     * @ghidraAddress 0x001716d0
+     */
+    static void RenderBurnTextures();
+
+    /**
+     * Resolve one numbered persona burn texture out of the render manager.
+     *
+     * The name is formatted as `persona_texburn_texture_%d.tex` from one past the index, so index
+     * zero resolves `persona_texburn_texture_1.tex`. A name the manager does not recognise produces
+     * a null result, as does an object that is not a Rnd::Tex. RenderBurnTextures() expands it
+     * inline. The name is inferred.
+     *
+     * @param nIndex Zero-based texture index.
+     * @return The texture, or null when the manager has no such object.
+     * @ghidraAddress 0x001712c0
+     */
+    static Rnd::Tex *FindPersonaBurnTexture(int nIndex);
+
+    /**
+     * Copy another appearance through operator=().
+     *
+     * The image has no caller. The name is inferred.
+     *
+     * @param other The appearance to copy.
+     * @ghidraAddress 0x00174458
+     */
+    void CopyFrom(const FreqAppearance &other);
+
+    /**
+     * Fill a compact record from this appearance.
+     *
+     * The record is marked valid and takes the skill status, the username cut to 12 characters,
+     * and the packed parts of the detail object. Only the low byte of the part count survives. The
+     * image has no caller, and the name is inferred.
+     *
+     * @param pRecord The record to fill.
+     * @ghidraAddress 0x00174930
+     */
+    void Pack(Record *pRecord);
+
+    /**
+     * Replace this appearance from a compact record.
+     *
+     * A record that is not marked valid changes nothing. The image has no caller, and the name is
+     * inferred.
+     *
+     * @param record The record to read.
+     * @ghidraAddress 0x001749e8
+     */
+    void Unpack(const Record &record);
+
+    /**
      * Record the skill status.
      *
      * Defined in the header. The one out-of-line copy is never called, and
@@ -147,6 +231,19 @@ public:
      */
     void SetSkillStatus(int nStatus) {
         mUnknown0c = nStatus;
+    }
+
+    /**
+     * Report the skill status.
+     *
+     * Defined in the header. The out-of-line copy's one caller is the uncalled MetPersonaData
+     * forwarder at `0x0032e258`.
+     *
+     * @return The status, 0 through 4.
+     * @ghidraAddress 0x001747a0
+     */
+    int GetSkillStatus() const {
+        return mUnknown0c;
     }
 
 public:
@@ -160,6 +257,11 @@ public:
     HxStr mUnknown00;
 
 private:
+    // 0x001744f8. Fill bytes 7 through 14 of pDest with 0x80, copy seven source bytes with each
+    // zero replaced by 0xff, and set bit n of byte 7 for each zero at position n. The image has no
+    // caller, and the name is inferred.
+    static void EncodeNonZeroBytes(const unsigned char *pSource, unsigned char *pDest);
+
     FreqAppearanceDetail *mDetail; // +0x08 owned, 0xb0 bytes
     int mUnknown0c;                // +0x0c the skill status
 };

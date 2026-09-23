@@ -150,6 +150,17 @@ public:
     void AttachToBurnSlot(int nSlot);
 
     /**
+     * Report the skill status recorded in the appearance.
+     *
+     * Forwards to FreqAppearance::GetSkillStatus() on the embedded appearance. The image has no
+     * caller.
+     *
+     * @return The status, 0 through 4.
+     * @ghidraAddress 0x0032e258
+     */
+    int GetSkillStatus();
+
+    /**
      * Campaign progress of this persona. +0x00
      *
      * Public because MetStageFinishScreen slot 5 records and queries the finished stage through it
