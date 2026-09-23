@@ -85,6 +85,19 @@ public:
     void SetEntries(const unsigned int *pEntries, int nFirst, int nCount);
 
     /**
+     * Copy a run of three byte red, green, blue entries into the table with full alpha.
+     *
+     * Records the index one past the run in mEnd, as SetEntries() does. AGifFile reads its colour
+     * tables through it.
+     *
+     * @param pRGB The entries to copy in, three bytes each in red, green, blue order.
+     * @param nFirst The first palette index to write.
+     * @param nCount The number of entries to write.
+     * @ghidraAddress 0x00613e48
+     */
+    void SetEntriesRGB(const unsigned char *pRGB, int nFirst, int nCount);
+
+    /**
      * Search an inclusive index range for the entry nearest a colour.
      *
      * Compares by the sum of the squared differences of the red, green, and blue bytes. The first

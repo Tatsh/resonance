@@ -38,7 +38,7 @@ inline APalette *ResolvePalette(const ABitmap &source, const ABitmap &canvas) {
 
 } // namespace
 
-// The constructor runs the ACanvas32 constructor and installs the ACanvasLin32 table.
+// 0x00614240
 ACanvasLin32::ACanvasLin32(const ABitmap &bitmap) : ACanvas32(bitmap) {
 }
 

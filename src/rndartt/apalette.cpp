@@ -11,12 +11,24 @@ constexpr long kNoMatchDistance = 0x30000;
 constexpr unsigned int kChannelMask = 0xff;
 constexpr int kGreenShift = 8;
 constexpr int kBlueShift = 16;
+constexpr unsigned int kAlphaOpaque = 0xff000000;
+constexpr int kRGBByteCount = 3;
 
 } // namespace
 
 // 0x00613df8
 void APalette::SetEntries(const unsigned int *pEntries, int nFirst, int nCount) {
     memcpy(&mEntries[nFirst], pEntries, nCount * sizeof(unsigned int));
+    mEnd = nFirst + nCount;
+}
+
+// 0x00613e48
+void APalette::SetEntriesRGB(const unsigned char *pRGB, int nFirst, int nCount) {
+    unsigned int *pEntry = &mEntries[nFirst];
+    for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
+        *pEntry++ = pRGB[0] | (pRGB[1] << kGreenShift) | (pRGB[2] << kBlueShift) | kAlphaOpaque;
+        pRGB += kRGBByteCount;
+    }
     mEnd = nFirst + nCount;
 }
 

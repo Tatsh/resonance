@@ -24,7 +24,11 @@ public:
     /**
      * Adopt a pixel description.
      *
+     * The out-of-line copy calls ACanvas's constructor directly, installs this class's table, and
+     * clears mColor. ACanvas::CreateForBitmap() compiles the same sequence inline.
+     *
      * @param bitmap The description to adopt.
+     * @ghidraAddress 0x00614240
      */
     explicit ACanvasLin32(const ABitmap &bitmap);
 
