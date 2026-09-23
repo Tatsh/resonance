@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <list>
 #include <vector>
 
@@ -61,6 +62,23 @@ namespace Rnd {
  */
 class Arena : public Animatable, public Collideable, public Transformable, public Drawable {
 public:
+    /**
+     * Allocate a loop from the tagged heap under the tag "Rnd::Arena".
+     *
+     * @param nSize The object size, which the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x005bb870
+     */
+    void *operator new(size_t nSize);
+
+    /**
+     * Release a loop to the tagged heap.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x005bb890
+     */
+    void operator delete(void *pBlock);
+
     /**
      * One view in the loop.
      *
@@ -218,6 +236,86 @@ public:
      */
     void RemoveInstancesFromHitList();
 
+    /**
+     * Set the displacement one trip round the loop applies.
+     *
+     * Does nothing when every component already matches. Otherwise every section is first moved
+     * back to loop zero, the displacement is stored, and SetFrameSelf() reruns at the current
+     * filtered frame to place the sections again. The routine has no caller, and the title is
+     * inferred from the member it writes.
+     *
+     * @param loopDist The new displacement.
+     * @ghidraAddress 0x005b7a90
+     */
+    void SetLoopDist(const Vector3 &loopDist);
+
+    /**
+     * Set the number of frames one trip round the loop takes.
+     *
+     * Zero is refused with "Can't set frames = 0". An unchanged value does nothing. Otherwise every
+     * section is first moved back to loop zero, the value is stored, and SetFrameSelf() reruns at
+     * the current filtered frame. The routine has no caller, and the title is inferred from the
+     * member it writes.
+     *
+     * @param flLoopFrames The new frame count.
+     * @ghidraAddress 0x005b7c48
+     */
+    void SetLoopFrames(float flLoopFrames);
+
+    /**
+     * Resize the loop to a number of sections.
+     *
+     * Each section dropped from the end is moved back to loop zero and releases its reference on
+     * its view. mSections then grows or shrinks to nCount, new sections taking the default
+     * constructor, and mUnknown120 is resized to match. The routine has no caller, and the title is
+     * inferred.
+     *
+     * @param nCount The new section count.
+     * @ghidraAddress 0x005b7de0
+     */
+    void SetSectionCount(unsigned int nCount);
+
+    /**
+     * Point one section at a view.
+     *
+     * The section is moved back to loop zero and releases its old view, takes a reference on the
+     * new one, and is then placed for the current filtered frame. The routine has no caller, and
+     * the title is inferred.
+     *
+     * @param nIndex The section.
+     * @param pView The view to draw, or null.
+     * @ghidraAddress 0x005b8020
+     */
+    void SetSectionView(int nIndex, View *pView);
+
+    /**
+     * Set the frames one section is shown for.
+     *
+     * The section is moved back to loop zero, mFrame takes flEndFrame and mDelta the length of the
+     * range, and the section is then placed for the current filtered frame. The routine has no
+     * caller, and the title is inferred.
+     *
+     * @param nIndex The section.
+     * @param flStartFrame The first frame the section is shown.
+     * @param flEndFrame The frame the section is hidden again.
+     * @ghidraAddress 0x005b8170
+     */
+    void SetSectionRange(int nIndex, float flStartFrame, float flEndFrame);
+
+    /**
+     * Set whether one section moves its view as the loop advances.
+     *
+     * When the flag changes and the section has a view, the view's translation is moved by mLoop
+     * trips of mLoopDist, forward when the flag is being set and back when it is being cleared, and
+     * the view is marked dirty. The routine has no caller, and the title is inferred from the
+     * member it writes.
+     *
+     * @param nIndex The section.
+     * @param nTeleport Non-zero to move the view with the loop.
+     * @ghidraAddress 0x005bc128
+     */
+    void SetSectionTeleport(int nIndex, int nTeleport);
+
 protected:
     /**
      * Draw every section.
@@ -263,6 +361,20 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
+    // Move a section's view from its current loop to nLoop, shifting its translation by whole
+    // trips of mLoopDist, and record nLoop in the section. The view is written and marked dirty
+    // only when mTeleport is set. Does nothing without a view or when the loop is unchanged.
+    // UpdateSection() calls it, and the setters above expand it inline with nLoop zero.
+    // 0x005bbda8.
+    void SetSectionLoop(Section &section, int nLoop);
+
+    // Place a section for the current filtered frame. The loop count is the number of whole
+    // mLoopFrames the frame lies past the section's mFrame, plus one. The view is animated to the
+    // frame within its own loop and shown while that frame falls in [mFrame - mDelta, mFrame), and
+    // is otherwise hidden and restarted if it was showing. SetFrameSelf() and the section setters
+    // call it. 0x005b64e0.
+    void UpdateSection(Section &section);
+
     // No class derives from Rnd::Arena and nothing outside it accesses a member directly. Every
     // member is therefore private. The order below is the recovered offset order.
 
@@ -287,6 +399,30 @@ private:
  * @ghidraAddress 0x005bbb28
  */
 Arena *NewArena(const HxStr &name);
+
+/**
+ * Build a loop for the registered "Arena" class.
+ *
+ * Calls through g_pfnNewArena and converts the result to its Rnd::Object virtual base, reading the
+ * base pointer only when the loop is not null. Init() registers it.
+ *
+ * @param name The object name.
+ * @return The new loop, as its Rnd::Object subobject.
+ * @ghidraAddress 0x005bba98
+ */
+Object *CreateRegisteredArena(const HxStr &name);
+
+/**
+ * Build a loop through g_pfnNewArena, without the narrowing CreateRegisteredArena() performs.
+ *
+ * The one recovered reference to this routine is its entry in the exception range table at
+ * `0x0086ea58`, and nothing in the image calls it. The title follows Rnd::NewCamThroughHook().
+ *
+ * @param name The object name.
+ * @return The new loop.
+ * @ghidraAddress 0x005bb8f0
+ */
+Arena *NewArenaThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Arena, the string "Arena".

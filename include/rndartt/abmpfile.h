@@ -16,6 +16,10 @@ class APalette;
  * kABitmapFormatLinear32 bitmap with full alpha. A 16 or 24 bit row has its red and blue fields
  * exchanged, and a 4 bit row has the two nibbles of each byte exchanged, which gives the nibble
  * order ACanvasLin4 uses.
+ *
+ * The destructor in slot 4 at `0x0061d4c8` is compiler-generated. It is AGfxFile's inline
+ * destructor expanded in place (restoring AGfxFile's table at 0x0083d218 and closing mFile when
+ * it is open), followed by the free when the deleting flag is set.
  */
 class ABmpFile : public AGfxFile {
 public:

@@ -18,6 +18,10 @@
  *
  * The address of a pixel is `mBitmap.mPixels + mBitmap.mBytesPerRow * nY + 4 * nX` in every
  * override.
+ *
+ * The destructor in slot 1 at `0x006141a0` is compiler-generated. It restores ACanvas's table at
+ * 0x00837dc8, which is all the inlined base destructors do, and frees the object when the
+ * deleting flag is set.
  */
 class ACanvasLin32 : public ACanvas32 {
 public:
