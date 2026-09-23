@@ -27,7 +27,8 @@ class Player;
  * labels three of the members `gems: `, `pl: `, and `X: `, and Save() and Load() transfer the
  * same three in the same order behind a version byte of 2.
  *
- * Every member is private. AxePhraseMaker::StartPhrase() writes mPlayer at `0x0019bd7c`.
+ * Every member is private. AxePhraseMaker::StartPhrase() and Voxer::StartPhrase() write mPlayer
+ * at `0x0019bd7c` and `0x001d8aa8`.
  * PhraseDatabase writes mPlayer and reads and writes mUnknown28 directly,
  * PhraseMgr::GetPhraseOwner() reads mPlayer, TrackData::AddPhrases() walks mGems directly,
  * PhrasePlayer reads mPlayer, mGems, and mMuse when it plays a bar, the image exposes no accessor,
@@ -40,6 +41,7 @@ class Phrase : public Attachment {
     friend class PhraseMgr;
     friend class PhrasePlayer;
     friend class TrackData;
+    friend class Voxer;
 
 public:
     /**
