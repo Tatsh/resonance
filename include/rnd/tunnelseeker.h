@@ -1,9 +1,8 @@
 #pragma once
 
+#include "math/color.h"
 #include "math/transform.h"
 #include "rnd/tunnelseekstrip.h"
-
-struct Color;
 
 namespace Rnd {
 
@@ -133,6 +132,58 @@ struct TunnelSeeker {
      * @ghidraAddress 0x00477b88
      */
     void SetMat(Mat *pMat);
+
+    // The five accessors below are inline. Each has an out-of-line copy without callers.
+
+    /**
+     * Report the first slice of the strip.
+     *
+     * @return The first slice.
+     * @ghidraAddress 0x00477ba8
+     */
+    int GetFirstSlice() const {
+        return mStrip.mFirstSlice;
+    }
+
+    /**
+     * Report the slice count of the strip.
+     *
+     * @return The number of slices.
+     * @ghidraAddress 0x00477bb0
+     */
+    int GetSliceCount() const {
+        return mStrip.mSliceCount;
+    }
+
+    /**
+     * Report the ring of the strip.
+     *
+     * @return The ring.
+     * @ghidraAddress 0x00477bb8
+     */
+    int GetRing() const {
+        return mStrip.mRing;
+    }
+
+    /**
+     * Report the colour of the strip.
+     *
+     * @return The colour, by value.
+     * @ghidraAddress 0x00477bc0
+     */
+    Color GetColor() const {
+        return mStrip.mColor;
+    }
+
+    /**
+     * Report the material of the strip.
+     *
+     * @return The material, or null.
+     * @ghidraAddress 0x00477bd0
+     */
+    Mat *GetMat() const {
+        return mStrip.mMat;
+    }
 
     /**
      * Draw the strip section placed on one slice.

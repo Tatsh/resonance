@@ -49,7 +49,8 @@ public:
      * The existing meshes are deleted first. The meshes are created from the last level down,
      * each through g_pfnNewMesh(), titled "[<name>.<level>]" when bInternal is set and
      * "<name>.<level>" otherwise, and each one takes the previously created mesh as its mNext.
-     * Every mesh draws with kZModeZReadWrite and kZFuncLess and has no screen size threshold.
+     * Every mesh draws with kZModeZReadWrite and kZFuncLess, and every mesh with a coarser link
+     * has its screen size threshold cleared.
      * Every level after the first then takes element zero as its vertex owner, and every level
      * takes element zero as its transform owner.
      *
@@ -79,6 +80,18 @@ public:
      * @ghidraAddress 0x00469820
      */
     void CopyScreenSizes(const TunnelMeshChain &source);
+
+    /**
+     * Draw the level of detail a screen size selects.
+     *
+     * Draws nothing when the chain is empty or its finest mesh is not showing. Otherwise the walk
+     * starts at the finest level and moves to the next while that level is not the last and its
+     * Mesh::mMinScreen is below flScreenSize, and the level it stops on is drawn.
+     *
+     * @param flScreenSize The projected screen size.
+     * @ghidraAddress 0x00476bc8
+     */
+    void Draw(float flScreenSize);
 };
 
 } // namespace Rnd

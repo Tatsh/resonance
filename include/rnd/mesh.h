@@ -6,6 +6,7 @@
 #include "os/hxstr.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 #include "rnd/meshedge.h"
 #include "rnd/meshface.h"
 #include "rnd/meshvert.h"
@@ -214,6 +215,53 @@ public:
     void SetNext(Mesh *pNext);
 
     /**
+     * Point the mesh at the mesh whose vertices it draws.
+     *
+     * Drops the reference on the previous owner, stores the argument even when it is null, takes a
+     * reference on a non-null owner, empties the vectors now shared through ClearSharedGeometry(),
+     * and calls SyncAll().
+     *
+     * @param pOwner The owner, or null.
+     * @ghidraAddress 0x00493b60
+     */
+    void SetVertsOwner(Mesh *pOwner);
+
+    /**
+     * Point the mesh at the mesh whose triangles and edges it draws.
+     *
+     * The same shape as SetVertsOwner(), ending with Sync() instead of SyncAll().
+     *
+     * @param pOwner The owner, or null.
+     * @ghidraAddress 0x00493bd0
+     */
+    void SetFacesOwner(Mesh *pOwner);
+
+    /**
+     * Set the material of this mesh and of every coarser level of its mNext chain.
+     *
+     * @param pMat The material, or null.
+     * @ghidraAddress 0x00493ac8
+     */
+    void SetMaterialChain(Mat *pMat);
+
+    /**
+     * Set the depth mode and comparison of this mesh and of every coarser level of its mNext chain.
+     *
+     * @param zMode The depth buffer read and write mode.
+     * @param zFunc The depth comparison.
+     * @ghidraAddress 0x00493b30
+     */
+    void SetDepthChain(ZMode zMode, ZFunc zFunc);
+
+    /**
+     * Give every vertex of mVertsOwner one colour and report the change through SyncChanged().
+     *
+     * @param color The colour.
+     * @ghidraAddress 0x00494048
+     */
+    void SetVertexColor(const Color &color);
+
+    /**
      * Decide whether this mesh draws, and yield its world bounding sphere.
      *
      * A mesh with neither faces nor edges is rejected. A sphere of zero radius is accepted without
@@ -417,22 +465,24 @@ extern Mesh *(*g_pfnNewMesh)(const HxStr &name);
 Object *CreateRegisteredMesh(const HxStr &name);
 
 /**
- * Point g_pfnNewMesh at NewMesh() and register the "Mesh" class with Rnd::Manager.
- *
- * No call site survives in the shipped program. Rnd::Manager::Init() performs the registration
- * itself, and the static initialiser of g_pfnNewMesh performs the assignment, so the routine is
- * dead code in the original rather than an unfinished analysis.
- *
- * @ghidraAddress 0x004926b0
- */
-void RegisterMeshClass();
-
-/**
  * Registered class name of Rnd::Mesh, the string "Mesh".
  *
  * @ghidraAddress 0x006eed68
  */
 extern HxStr g_meshClassName;
+
+/**
+ * Point g_pfnNewMesh at NewMesh() and register the "Mesh" class with Rnd::Manager.
+ *
+ * An inline function. The image has two identical out-of-line copies without callers (the second
+ * at 0x006068c8), and the static initialiser at 0x0049afe0 inlines the body.
+ *
+ * @ghidraAddress 0x004926b0
+ */
+inline void RegisterMeshClass() {
+    g_pfnNewMesh = NewMesh;
+    g_manager.RegisterClass(g_meshClassName, CreateRegisteredMesh);
+}
 
 /**
  * Serial version of the mesh record currently being read.

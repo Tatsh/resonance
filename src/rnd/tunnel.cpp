@@ -18,12 +18,6 @@ namespace {
 // The unset slice value, a hand-written sentinel.
 constexpr int kNoSlice = 99999999;
 
-// A signed remainder moved into [0, nCount), the form every ring and slice lookup uses.
-inline int WrapIndex(int nIndex, int nCount) {
-    const int nRemainder = nIndex % nCount;
-    return nRemainder > -1 ? nRemainder : nRemainder + nCount;
-}
-
 } // namespace
 
 namespace Rnd {
@@ -132,7 +126,7 @@ void Tunnel::ProjectSectionToCameraSpace(
     Vector3 next;
     next.w = 1.0f;
     Vec3Scale(
-        &mUnknownc0[WrapIndex(nRing + 1, mUnknown3c)].mTranslation.x, flTangentScale, &next.x);
+        &mUnknownc0[WrapIndex(nRing + 1, mRingCount)].mTranslation.x, flTangentScale, &next.x);
     // A VU0 multiply and accumulate in the image, as in LerpRingSectionTangent().
     const float flComplement = 1.0f - flRingBlend;
     pOut->mTranslation.x = next.x * flRingBlend + current.x * flComplement;
@@ -152,18 +146,18 @@ void Tunnel::ProjectSectionToCameraSpace(
 
 // 0x004773e8
 Mesh *Tunnel::GetRingSection(int nSlice) {
-    return mUnknownb0[WrapIndex(nSlice, mUnknown40)].front();
+    return mUnknownb0[WrapIndex(nSlice, mSliceCount)].front();
 }
 
 // 0x00477388
 Mesh *Tunnel::GetRingSection(int nRing, int nSlice) {
-    return mUnknowna4[WrapIndex(nSlice, mUnknown40) * mUnknown3c + WrapIndex(nRing, mUnknown3c)]
+    return mUnknowna4[WrapIndex(nSlice, mSliceCount) * mRingCount + WrapIndex(nRing, mRingCount)]
         .front();
 }
 
 // 0x00477538. A VU0 multiply and accumulate in the image, vmulax then vmaddx over xyz.
 void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
-    const Vector3 &next = mUnknownc0[WrapIndex(nRing + 1, mUnknown3c)].mTranslation;
+    const Vector3 &next = mUnknownc0[WrapIndex(nRing + 1, mRingCount)].mTranslation;
     const Vector3 &current = mUnknownc0[nRing].mTranslation;
     const float flComplement = 1.0f - flWeight;
     pOut->x = next.x * flWeight + current.x * flComplement;
@@ -174,8 +168,8 @@ void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
 
 // 0x00476f48
 void Tunnel::ScrollRings() {
-    for (int nSlice = mUnknownbc; nSlice < mUnknownbc + mUnknown40; ++nSlice) {
-        if (mUnknown88[WrapIndex(nSlice, mUnknown40)] != nSlice) {
+    for (int nSlice = mUnknownbc; nSlice < mUnknownbc + mSliceCount; ++nSlice) {
+        if (mUnknown88[WrapIndex(nSlice, mSliceCount)] != nSlice) {
             AdvanceRing(nSlice);
             return;
         }
@@ -184,7 +178,7 @@ void Tunnel::ScrollRings() {
 
 // 0x00476fe0
 void Tunnel::AdvanceRing(int nSlice) {
-    const int nIndex = WrapIndex(nSlice, mUnknown40);
+    const int nIndex = WrapIndex(nSlice, mSliceCount);
     if (nSlice != mUnknown7c) {
         mUnknown88[nIndex] = kNoSlice;
         mUnknown7c = nSlice;

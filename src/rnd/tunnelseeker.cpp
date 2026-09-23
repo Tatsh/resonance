@@ -120,7 +120,7 @@ void TunnelSeeker::DrawMesh() {
 float TunnelSeeker::UpdateLane() {
     const float flTarget = static_cast<float>(mTargetRing);
     if (mLane != flTarget) {
-        const float flHalfRings = static_cast<float>(mTunnel->mUnknown3c) * 0.5f;
+        const float flHalfRings = static_cast<float>(mTunnel->mRingCount) * 0.5f;
         const float flLow = -flHalfRings;
         const float flSpan = flHalfRings - flLow;
         float flWrapped = fmodf(flTarget - mLane - flLow, flSpan);

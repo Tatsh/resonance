@@ -125,6 +125,18 @@ public:
     }
 
     /**
+     * Report the showing flag.
+     *
+     * The out-of-line copy has no callers. Rnd::TunnelMeshChain::Draw() inlines it.
+     *
+     * @return Non-zero when this object draws at all.
+     * @ghidraAddress 0x00506520
+     */
+    int GetShowing() const {
+        return mShowing;
+    }
+
+    /**
      * Report the child list.
      *
      * @return The list of drawables this object draws after itself.

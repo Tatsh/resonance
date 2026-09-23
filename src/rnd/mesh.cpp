@@ -376,12 +376,6 @@ Object *CreateRegisteredMesh(const HxStr &name) {
     return g_pfnNewMesh(name);
 }
 
-// 0x004926b0
-void RegisterMeshClass() {
-    g_pfnNewMesh = NewMesh;
-    g_manager.RegisterClass(g_meshClassName, CreateRegisteredMesh);
-}
-
 // 0x006eed68
 HxStr g_meshClassName("Mesh");
 
@@ -841,6 +835,63 @@ void Mesh::SetNext(Mesh *pNext) {
         mNext = pNext;
         pNext->AddRef(this);
     }
+}
+
+// 0x00493b60
+void Mesh::SetVertsOwner(Mesh *pOwner) {
+    if (mVertsOwner != nullptr) {
+        mVertsOwner->RemoveRef(this);
+    }
+    mVertsOwner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+    ClearSharedGeometry();
+    SyncAll();
+}
+
+// 0x00493bd0
+void Mesh::SetFacesOwner(Mesh *pOwner) {
+    if (mFacesOwner != nullptr) {
+        mFacesOwner->RemoveRef(this);
+    }
+    mFacesOwner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+    ClearSharedGeometry();
+    Sync();
+}
+
+// 0x00493ac8
+void Mesh::SetMaterialChain(Mat *pMat) {
+    if (mMat != nullptr) {
+        mMat->RemoveRef(this);
+    }
+    mMat = pMat;
+    if (pMat != nullptr) {
+        pMat->AddRef(this);
+    }
+    if (mNext != nullptr) {
+        mNext->SetMaterialChain(pMat);
+    }
+}
+
+// 0x00493b30
+void Mesh::SetDepthChain(ZMode zMode, ZFunc zFunc) {
+    mZMode = zMode;
+    mZFunc = zFunc;
+    if (mNext != nullptr) {
+        mNext->SetDepthChain(zMode, zFunc);
+    }
+}
+
+// 0x00494048
+void Mesh::SetVertexColor(const Color &color) {
+    for (MeshVert &vert : mVertsOwner->mVerts) {
+        vert.mColor = color;
+    }
+    SyncChanged(kSyncColors);
 }
 
 // Inlined as the first half of 0x00493e10.

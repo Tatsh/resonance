@@ -188,10 +188,10 @@ public:
     /**
      * Report the first mesh of one slice.
      *
-     * The slice index wraps through a signed remainder against mUnknown40, so a negative index
+     * The slice index wraps through a signed remainder against mSliceCount, so a negative index
      * addresses from the end.
      *
-     * @param nSlice The slice index, taken modulo mUnknown40.
+     * @param nSlice The slice index, taken modulo mSliceCount.
      * @return The first mesh of the slice.
      * @ghidraAddress 0x004773e8
      */
@@ -200,11 +200,11 @@ public:
     /**
      * Report the first mesh of one ring of one slice.
      *
-     * Both indices wrap through a signed remainder, the ring against mUnknown3c and the slice
-     * against mUnknown40.
+     * Both indices wrap through a signed remainder, the ring against mRingCount and the slice
+     * against mSliceCount.
      *
-     * @param nRing The ring index, taken modulo mUnknown3c.
-     * @param nSlice The slice index, taken modulo mUnknown40.
+     * @param nRing The ring index, taken modulo mRingCount.
+     * @param nSlice The slice index, taken modulo mSliceCount.
      * @return The first mesh of the ring.
      * @ghidraAddress 0x00477388
      */
@@ -213,7 +213,7 @@ public:
     /**
      * Blend the translation of one ring transform towards the next.
      *
-     * The successor wraps through a signed remainder against mUnknown3c. Only the three components
+     * The successor wraps through a signed remainder against mRingCount. Only the three components
      * are blended. The whole quadword is stored, so the padding word of the output receives the
      * padding word of the successor's translation.
      *
@@ -227,8 +227,8 @@ public:
     /**
      * Bring every slice of the current window up to the advanced slice.
      *
-     * Walks the mUnknown40 slices starting at mUnknownbc and calls AdvanceRing() for each one whose
-     * mUnknown88 entry differs from its own index.
+     * Walks the mSliceCount slices starting at mUnknownbc and calls AdvanceRing() for each one
+     * whose mUnknown88 entry differs from its own index.
      *
      * @ghidraAddress 0x00476f48
      */
@@ -367,20 +367,32 @@ private:
     // Set the frame of every section of one ring. 0x0046c638.
     void SetRingSectionFrames();
 
-    // No class derives from Rnd::Tunnel and only the three seek records, as friends, read its
-    // members. The order below is the recovered offset order. Every title is the offset
-    // itself, because DumpText() is a stub and no other routine in the image identifies a member
-    // by name. The initial value each one receives from the constructor is the whole of the
-    // evidence about it. A member with no recorded value is one the constructor does not write, or
-    // one it fills through a container allocation.
+    // A signed remainder moved into [0, nCount), the form every ring and slice lookup uses.
+    static int WrapIndex(int nIndex, int nCount) {
+        const int nRemainder = nIndex % nCount;
+        return nRemainder > -1 ? nRemainder : nRemainder + nCount;
+    }
+
+    // No class derives from Rnd::Tunnel. The three seek records read its members as friends, and
+    // Renderer reads the two public counts. The order below is the recovered offset order.
+    // Every unknown title is the offset itself, because DumpText() is a stub. The initial value
+    // each member receives from the constructor is the whole of the evidence about it. A member
+    // with no recorded value is one the constructor does not write, or one it fills through a
+    // container allocation.
 
     float mUnknown38; // +0x38 Starts at 1.0f.
-    // +0x3c Starts at 3. The ring count. It is the modulus of the inner index of mUnknowna4, the
-    // modulus of the index of mUnknownc0, and the row stride of mUnknowna4.
-    int mUnknown3c;
-    // +0x40 Starts at 0. The slice count. It is the modulus of the index of mUnknownb0, the
-    // modulus of the outer index of mUnknowna4, and the length of the array mUnknown88 addresses.
-    int mUnknown40;
+
+public:
+    /*!< The ring count, 3 at construction. It is the modulus of the inner index of mUnknowna4, the
+         modulus of the index of mUnknownc0, and the row stride of mUnknowna4. Public because the
+         Renderer constructor reads it at `0x0042c9c8` and the image has no accessor. */
+    int mRingCount;
+    /*!< The slice count, 0 at construction. It is the modulus of the index of mUnknownb0, the
+         modulus of the outer index of mUnknowna4, and the length of the array mUnknown88
+         addresses. Public on the same evidence, read at `0x0042c9d4`. */
+    int mSliceCount;
+
+private:
     int mUnknown44;   // +0x44 Starts at 2.
     float mUnknown48; // +0x48 Starts at 0.099609375f.
     float mUnknown4c; // +0x4c Starts at 0.099609375f.
@@ -411,26 +423,26 @@ private:
     float mUnknown80;
     // +0x84 Starts at 0. The step counter the ring advance reloads from mUnknowna0 and counts down.
     int mUnknown84;
-    // +0x88 Starts at 0. A word array of mUnknown40 entries, one slice identifier per slice, which
+    // +0x88 Starts at 0. A word array of mSliceCount entries, one slice identifier per slice, which
     // the scroll at 0x00476f48 reads and the ring advance writes.
     int *mUnknown88;
     unsigned char mUnknown8c[0x0c]; // +0x8c Unrecovered.
     int mUnknown98;                 // +0x98 Starts at 0.
     float mUnknown9c;               // +0x9c Starts at 0. The numerator of the per-step increment.
     int mUnknowna0;                 // +0xa0 Unrecovered. The divisor of the per-step increment.
-    // +0xa4 The mesh grid, one chain per cell, addressed as `slice * mUnknown3c + ring` by the
+    // +0xa4 The mesh grid, one chain per cell, addressed as `slice * mRingCount + ring` by the
     // lookup at 0x00477388, which then returns the finest level of the chain. The 0xc-byte stride
     // and the clear at 0x0046acf0 destroying each slot through the chain destructor at 0x00476a80
     // are what establish the element type.
     std::vector<TunnelMeshChain> mUnknowna4;
-    // +0xb0 One chain per slice, addressed as `[slice % mUnknown40]` by the lookup at 0x004773e8
+    // +0xb0 One chain per slice, addressed as `[slice % mSliceCount]` by the lookup at 0x004773e8
     // on the same evidence as mUnknowna4.
     std::vector<TunnelMeshChain> mUnknownb0;
     // +0xbc Starts at 0. The first slice of the window the scroll at 0x00476f48 walks, which runs
-    // mUnknown40 slices from here.
+    // mSliceCount slices from here.
     int mUnknownbc;
     // +0xc0 One transform per ring. The tangent interpolation at 0x00477538 reads the translation
-    // row of entry `i` and entry `(i + 1) % mUnknown3c` and blends the two on the vector unit.
+    // row of entry `i` and entry `(i + 1) % mRingCount` and blends the two on the vector unit.
     std::vector<Transform> mUnknownc0;
     int mUnknowncc;                 // +0xcc Starts at 0.
     unsigned char mUnknownd0[0x08]; // +0xd0 Unrecovered.
