@@ -13,8 +13,7 @@ class Player;
  * type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * recovered but the purpose of each field is not.
  *
  * Print() labels mPlayerValue as a track number, `tr# `, and writes `remove` in its place when it
  * is -1.
@@ -46,9 +45,10 @@ public:
      * Report where a player's powerup pointer rests.
      *
      * No address attaches to the constructor. GamePowerupPlacer builds the message on its own
-     * stack at `0x001ccd64`, `0x001ccdac`, `0x001cce04`, `0x001ccec8`, `0x001ccfc0`, and
-     * `0x001cd0ec` and hands the address to MsgSource::Send(). The compiler expands the
-     * constructor into each of the six sites. The three arguments are the three members in
+     * stack at six sites and hands the address to MsgSource::Send(). Four of them, at
+     * `0x001ccd64`, `0x001cce04`, `0x001ccec8`, and `0x001cd0ec`, expand this constructor. The
+     * two remove sites, at `0x001ccdac` and `0x001ccfc0`, store only mPlayerValue and mPlayer
+     * into a default-constructed message. The three arguments are the three members in
      * declaration order.
      *
      * @param nBar The bar the pointer rests on.
@@ -90,12 +90,13 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
     // The three names come from GamePowerupPlacer, the one producer of the message, which writes
-    // the bar its cursor rests on, whatever Player::Slot4() reports, and the player itself.
-    int mBar;         // +0x04
-    int mPlayerValue; // +0x08
-    Player *mPlayer;  // +0x0c
+    // the bar its cursor rests on, whatever Player::Slot4() reports, and the player itself. The
+    // members are public because its two remove sites, 0x001ccdb8 in OnUnknownSlot6() and
+    // 0x001ccfcc in OnUnknownSlot8(), store mPlayerValue and mPlayer directly and leave mBar unset.
+    int mBar;         /*!< The bar the pointer rests on. +0x04 */
+    int mPlayerValue; /*!< Whatever Player::Slot4() reports, or -1 to remove the pointer. +0x08 */
+    Player *mPlayer;  /*!< The player whose pointer moved. +0x0c */
 };
 
 /**

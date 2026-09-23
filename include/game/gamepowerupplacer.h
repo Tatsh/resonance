@@ -25,9 +25,8 @@ class PowerupCollectionI;
  * PowerupPlacer siblings, JamPowerupPlacer and SimplifiedGamePowerupPlacer, are both constructed
  * and share the deployment shape below.
  *
- * Slots 6 and 8 are not written. Each takes the cursor off the map with a DisplayPointerMsg that
- * sets only the player value (-1, which Print() reports as `remove`) and the player, leaving the
- * bar unset, and the message class declares no constructor of that form.
+ * Slots 6 and 8 take the cursor off the map with a DisplayPointerMsg that sets only the player
+ * value (-1, which Print() reports as `remove`) and the player, leaving the bar unset.
  *
  * The two slots this class overrides on the PowerupPlacer side retain the base spelling,
  * OnUnknownSlot4() and OnUnknownSlot5(), even though the bodies recover the verbs. The base
@@ -65,8 +64,7 @@ public:
      * and the cursor jumps to the current bar. A cursor already on the map moves by the step. A
      * cursor that falls behind the current bar leaves the map with a `remove` message, one more
      * than four bars ahead of it steps back one bar without a message, and any other position is
-     * announced with a DisplayPointerMsg. The body is not written, for the reason recorded in
-     * the class documentation.
+     * announced with a DisplayPointerMsg.
      *
      * @param nStep The step, which the body negates.
      * @ghidraAddress 0x001cccb0
@@ -88,7 +86,7 @@ public:
      * A cursor of -1 returns. The cursor must also lie before the bar PlayMap::Slot9() of
      * Globals::GetPlayMap() reports. The deployment dispatches PowerupCollectionI::Deploy() with
      * Player::Slot4() and the cursor bar, then sends a `remove` DisplayPointerMsg and sets the
-     * cursor to -1. The body is not written, for the reason recorded in the class documentation.
+     * cursor to -1.
      *
      * @ghidraAddress 0x001ccf30
      */

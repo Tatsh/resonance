@@ -4,6 +4,8 @@
 
 #include "app/application.h"
 #include "game/localplayer.h"
+#include "game/playmap.h"
+#include "game/powerupcollectioni.h"
 #include "mid/mbt.h"
 #include "msg/displaypointermsg.h"
 
@@ -17,6 +19,9 @@ constexpr int kTicksPerBeat = 480;
 
 // The cursor bar that marks a cursor off the map.
 constexpr int kNoCursor = -1;
+
+// A cursor moved more than this many bars ahead of the current bar steps back by one.
+constexpr int kMaxCursorLead = 4;
 
 } // namespace
 
@@ -34,6 +39,43 @@ GamePowerupPlacer::GamePowerupPlacer(LocalPlayer *pOwner,
 GamePowerupPlacer::~GamePowerupPlacer() {
 }
 
+// 0x001cccb0
+void GamePowerupPlacer::OnUnknownSlot6(int nStep) {
+    if (nStep == 0) {
+        return;
+    }
+    const int nMove = -nStep;
+    const int nBar = mApplication->GetSongClock()->SongTick() / Mid::MBT(kTicksPerBar).mTick;
+    const int nPlayerValue = mOwner->Slot4();
+
+    if (mCursorBar == kNoCursor) {
+        if (nMove != 1 || mCollection->HasSelection() == 0) {
+            return;
+        }
+        mCursorBar = nBar;
+        DisplayPointerMsg msg(nBar, nPlayerValue, mOwner);
+        Send(&msg);
+        return;
+    }
+
+    const int nNewBar = mCursorBar + nMove;
+    mCursorBar = nNewBar;
+    if (nNewBar < nBar) {
+        DisplayPointerMsg remove;
+        remove.mPlayerValue = kNoCursor;
+        remove.mPlayer = mOwner;
+        mCursorBar = kNoCursor;
+        Send(&remove);
+        return;
+    }
+    if (nBar + kMaxCursorLead < nNewBar) {
+        mCursorBar = nNewBar - 1;
+        return;
+    }
+    DisplayPointerMsg msg(nNewBar, nPlayerValue, mOwner);
+    Send(&msg);
+}
+
 // 0x001cce90
 void GamePowerupPlacer::OnUnknownSlot7() {
     if (mCursorBar == -1) {
@@ -41,6 +83,23 @@ void GamePowerupPlacer::OnUnknownSlot7() {
     }
     DisplayPointerMsg msg(mCursorBar, mOwner->Slot4(), mOwner);
     Send(&msg);
+}
+
+// 0x001ccf30
+void GamePowerupPlacer::OnUnknownSlot8() {
+    if (mCursorBar == kNoCursor) {
+        return;
+    }
+    if (mCursorBar >= Application::shared()->GetPlayMap()->Slot9()) {
+        return;
+    }
+    mCollection->Deploy(mOwner->Slot4(), mCursorBar);
+
+    DisplayPointerMsg remove;
+    remove.mPlayerValue = kNoCursor;
+    remove.mPlayer = mOwner;
+    mCursorBar = kNoCursor;
+    Send(&remove);
 }
 
 // 0x001cd028
