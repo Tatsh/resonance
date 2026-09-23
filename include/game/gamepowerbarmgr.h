@@ -29,13 +29,12 @@ public:
     /**
      * Size mBars to the last step of the play map and deal the powerbars.
      *
-     * The body is not written, because it draws from the R250 generator at `0x0052cfd0` through
-     * the two helpers at `0x0052d098` (an integer in a half-open range) and `0x0052d0e0` (a float
-     * in [0, 1)), which the tree does not declare yet. Starting at a bar drawn from [0, 10), it
-     * visits bars at gaps drawn from [nMinGap, nMaxGap). A visited bar that has gems and whose
-     * next bar is not a step start gets a powerbar. With bRandomKind set the powerbar is 3 or 12
-     * with even odds. Otherwise the bar's position through the track selects a row of the
-     * weighted table at `0x0068c790`, and a second draw selects the powerbar within that row.
+     * Every draw comes from the R250 generator through RandomInt() and RandomFloat(). Starting at a
+     * bar drawn from [0, 10), the constructor visits bars at gaps drawn from [nMinGap, nMaxGap). A
+     * visited bar that has gems and whose next bar is not a step start gets a powerbar. With
+     * bRandomKind set the powerbar is 3 or 12 with even odds. Otherwise the bar's position through
+     * the track selects a row of the weighted table at `0x0068c790`, and a second draw selects the
+     * powerbar within that row.
      *
      * @param pMap The play map.
      * @param pDatabase The phrase database of the track.

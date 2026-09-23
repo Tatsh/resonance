@@ -108,6 +108,7 @@ cppv
 cpsm
 createdirop
 crip
+cripfx
 cripplemsg
 cripplepacket
 csclientstatuspacket
@@ -147,6 +148,7 @@ egsw
 egwb
 elif
 enablefreestylemsg
+enablemgr
 endforeach
 endgamemsg
 endx
@@ -167,9 +169,12 @@ fbmsk
 fbrst
 fileobject
 filetab
+firefs
+firemult
 floatobject
 flusha
 fogcol
+fogcol's
 fopen
 formatcardmct
 formatop
@@ -288,12 +293,14 @@ juiceamountmsg
 juke
 jukeboxmode
 jukeboxplaylist
+kapsz
 keychannel
 keyframed
 keypanel
 khgb
 kochanek
 kscope
+kseg
 kuhgb
 labl
 leavegamemsg
@@ -329,6 +336,7 @@ loadgame
 loadinggame
 loadremixmct
 lobbyconnectionlostmsg
+localjamenablemgr
 localplayer
 longobject
 longop
@@ -429,6 +437,8 @@ mtapman
 mtba
 mthd
 mtrk
+multfx
+multfxa
 multicatcher
 multimesh
 multimuse
@@ -660,6 +670,7 @@ tkinter
 tmpnam
 tnlarena
 tnlcatcher
+tnlmesh
 tnlpendingtrigger
 tnlpointer
 tnlsabretrail

@@ -260,6 +260,73 @@ public:
     int BarToTick(int nBar);
 
     /**
+     * Report whether the phrases at two bars carry the same gems.
+     *
+     * Two equal bars match at once. Otherwise both bars are mapped through slot 5 of mMap, two
+     * missing phrases match, one missing phrase does not, and two phrases match when their gem
+     * lists are equal element by element. NotePitcher::PostPhraseCapturedMsg() is the recovered
+     * caller.
+     *
+     * @param nFirstBar The first bar.
+     * @param nSecondBar The second bar.
+     * @return Non-zero when the phrases match.
+     * @ghidraAddress 0x001bb558
+     */
+    int PhrasesMatch(int nFirstBar, int nSecondBar);
+
+    /**
+     * Have mPhrasePlayer play a bar again from an offset, at the song position it has reached.
+     *
+     * Catcher::OnAutoCatch() and NotePitcher::PostPhraseCapturedMsg() are the recovered callers.
+     *
+     * @param nBar The bar.
+     * @param nOffset The offset within the bar, in MIDI ticks.
+     * @ghidraAddress 0x001bb798
+     */
+    void ReplayBar(int nBar, int nOffset);
+
+    /**
+     * Install a phrase at a bar, report the owner change, and optionally post the bar again.
+     *
+     * The body is not written, because it sends a message built on the stack through the sink at
+     * mUnknown1c. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
+     * at `0x00195378` and discards both results. AxePhraseMaker and Voxer are the recovered
+     * callers.
+     *
+     * @param pPhrase The phrase.
+     * @param nBar The bar, mapped through slot 5 of mMap.
+     * @param bRefresh Non-zero to post the bar through RefreshBar() afterwards.
+     * @ghidraAddress 0x001bb1a0
+     */
+    void InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh);
+
+    /**
+     * Clear the phrase at a bar and at every bar slot 7 of mMap chains it to, and post the
+     * affected window bars again.
+     *
+     * The body is not written, because it sends a message built on the stack through the sink at
+     * mUnknown1c for each cleared bar. The chain is followed only in kPlayModeGame with bAll set.
+     * AxePhraseMaker, NotePitcher, and PhraseNeutralizer are the recovered callers.
+     *
+     * @param nBar The bar, mapped through slot 5 of mMap.
+     * @param bAll Non-zero to clear every chained bar as well.
+     * @ghidraAddress 0x001bb328
+     */
+    void ClearPhrase(int nBar, int bAll);
+
+    /**
+     * Give the phrase of a CaughtPhrasePacket for this track to the player the packet identifies,
+     * or clear it, and post the chained window bars again.
+     *
+     * The body is not written, because CaughtPhrasePacket declares its payload private.
+     * HandleMessage() is the recovered caller.
+     *
+     * @param pMsg The packet.
+     * @ghidraAddress 0x001ba540
+     */
+    void OnCaughtPhrasePacket(Message *pMsg);
+
+    /**
      * Withdraw both scheduled commands. The destructor calls it first.
      *
      * @ghidraAddress 0x001c0450

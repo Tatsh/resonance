@@ -42,4 +42,16 @@ public:
      * @ghidraAddress 0x001c1860
      */
     void PlayBar(int nBar);
+
+    /**
+     * Play a bar again from an offset, already some ticks under way.
+     *
+     * PhraseMgr::ReplayBar() is the recovered caller. The body is not written.
+     *
+     * @param nBar The bar.
+     * @param nOffset The offset within the bar, in MIDI ticks.
+     * @param nElapsed The ticks since the bar started.
+     * @ghidraAddress 0x001c2818
+     */
+    void PlayBarAt(int nBar, int nOffset, int nElapsed);
 };

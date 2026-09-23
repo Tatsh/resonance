@@ -23,6 +23,9 @@ namespace {
 // The handle value of a command the clock has not queued yet.
 constexpr int kUnallocatedCommand = -2;
 
+// One bar at 480 ticks per quarter note. ReplayBar() uses it rather than mBarTicks.
+constexpr int kBarTicks = 1920;
+
 // A display-mode configuration flag. When it is set, every track gets a JamPowerbarMgr.
 constexpr int kDisplayModeQuery = 0x3a1;
 
@@ -149,6 +152,33 @@ void PhraseMgr::CreatePowerbarMgr() {
         return;
     }
     mPowerbarMgr = new JamPowerbarMgr;
+}
+
+// 0x001bb558
+int PhraseMgr::PhrasesMatch(int nFirstBar, int nSecondBar) {
+    if (nFirstBar == nSecondBar) {
+        return 1;
+    }
+
+    const int nFirstStep = mMap->Slot5(nFirstBar);
+    const int nSecondStep = mMap->Slot5(nSecondBar);
+    Phrase *pFirst = mDatabase->GetPhrase(nFirstStep);
+    Phrase *pSecond = mDatabase->GetPhrase(nSecondStep);
+    if (pFirst == nullptr) {
+        return pSecond == nullptr;
+    }
+    if (pSecond == nullptr) {
+        return 0;
+    }
+    return pFirst->mGems == pSecond->mGems;
+}
+
+// 0x001bb798
+void PhraseMgr::ReplayBar(int nBar, int nOffset) {
+    const int nNow = mClock->SongTick();
+    const Mid::MBT start(ClampPosition(nBar * Mid::MBT(kBarTicks).mTick));
+    const Mid::MBT elapsed(ClampPosition(nNow - start.mTick));
+    mPhrasePlayer->PlayBarAt(nBar, nOffset, elapsed.mTick);
 }
 
 // 0x001bb6b8

@@ -65,3 +65,11 @@ Sch::TempoMap *LevelBuilder::OnUnknownSlot7() {
 PlayMap *LevelBuilder::OnUnknownSlot8() {
     return mUnknown34;
 }
+
+// 0x001ec5f8
+void LevelBuilder::SetTempo([[maybe_unused]] int nTick, int nMicrosecondsPerQuarter) {
+    if (mUnknown30 != nullptr) {
+        mUnknown30->Release();
+    }
+    mUnknown30 = new Sch::TempoMap(nMicrosecondsPerQuarter);
+}

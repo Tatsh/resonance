@@ -135,7 +135,7 @@ public:
      *
      * The body releases the map already there, allocates 0x28 bytes, and constructs a
      * Sch::TempoMap from the tempo. The one caller, LevelConverter::Tempo() at `0x001ea570`, passes
-     * its own two arguments through in the registers they arrive in. The body is not written yet.
+     * its own two arguments through in the registers they arrive in.
      *
      * @param nTick The event position. No instruction in the body reads it.
      * @param nMicrosecondsPerQuarter The tempo the map is constructed from.

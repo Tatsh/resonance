@@ -64,6 +64,19 @@ public:
             return mPosition.mTick < other.mPosition.mTick;
         }
 
+        /**
+         * Compare two gems member by member, in declaration order.
+         *
+         * Recovered from its expansion in PhraseMgr::PhrasesMatch().
+         *
+         * @param other The gem to compare against.
+         * @return Whether all three members are equal.
+         */
+        bool operator==(const Gem &other) const {
+            return mPosition.mTick == other.mPosition.mTick && mGem == other.mGem &&
+                   mTrans == other.mTrans;
+        }
+
         Mid::MBT mPosition; /*!< Song position of the gem. +0x00 */
         int mGem;           /*!< Which gem. +0x04 */
         int mTrans;         /*!< Transposition of the gem. +0x08 */
