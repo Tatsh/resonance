@@ -11,10 +11,12 @@
  * offset 0. It overrides the widest set of the three subclasses, slots 1, 5 through 14, and 16
  * through 19, and supplies slot 20, which no other subclass does.
  *
- * The object is 0x64 bytes. Its own members follow the base at `+0x3c` and are recovered from the
- * helper at `0x00129150`, which is the only routine that reads all four and the reason three of
- * this class's slots could not be written before it was decoded. That helper advances a window
- * forward over the source span and records how far it has advanced.
+ * The object is 0x74 bytes, which the tagged allocation in the LevelBuilder constructor at
+ * `0x001ea8f0` measures. Its own members follow the base at `+0x3c`. The first four are recovered
+ * from the helper at `0x00129150`, which is the only routine that reads all four and the reason
+ * three of this class's slots could not be written before it was decoded. That helper advances a
+ * window forward over the source span and records how far it has advanced. The constructor at
+ * `0x00127a80` and the destructor add the last two.
  *
  * The earlier note that the members start at `+0x2c` was wrong. The base occupies 0x3c bytes, and
  * `+0x2c` is the base's fourth vector rather than anything of this class.
@@ -96,8 +98,13 @@ public:
      */
     virtual int Slot13(int nValue);
 
-    /** @ghidraAddress 0x0012b028 */
-    virtual int Slot14();
+    /**
+     * @param nValue The position.
+     * @return 1 when the second word of the `+0x3c` record for the last step at or before the
+     *         position is 10000, and 0 otherwise.
+     * @ghidraAddress 0x0012b028
+     */
+    virtual int Slot14(int nValue);
 
     /** @ghidraAddress 0x00128ed8 */
     virtual int Slot16();
@@ -150,7 +157,7 @@ protected:
      */
     void GrowPastLimit(int nLimit);
 
-    // Declared in recovered offset order, all four from the helper above.
+    // Declared in recovered offset order. The helper above reads the first four.
     std::vector<Entry> mUnknown3c; // +0x3c
     std::vector<int> mUnknown48;   // +0x48
     // Running count of elements the trim has dropped from the front of the two vectors above.
@@ -158,4 +165,10 @@ protected:
     // The source the window is built from. Its element is eight bytes and only the first word is
     // read, so the second word's purpose is unrecovered.
     std::vector<Entry> mUnknown58; // +0x58
+    // Cleared by the constructor at 0x00127a80. No reader is recovered.
+    int mUnknown64; // +0x64
+    // The constructor reserves eight elements of twelve bytes, and the destructor frees each
+    // element's own eight-byte-stride buffer before freeing this one, so every element is a
+    // vector of Entry.
+    std::vector<std::vector<Entry> > mUnknown68; // +0x68
 };

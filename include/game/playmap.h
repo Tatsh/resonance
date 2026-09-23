@@ -74,14 +74,14 @@ public:
     /**
      * Slot 2. Appends one step, its distance from the previous step, and a label.
      *
-     * The body appends `nValue - mSteps.back()` to mUnknown10, then nValue to mSteps, then the
-     * label to mUnknown1c, so mUnknown10 stores the gap between consecutive steps and is always
+     * The body appends `nValue - mSteps.back()` to mSectionLengths, then nValue to mSteps, then the
+     * label to mSectionNames, so mSectionLengths stores the gap between consecutive steps and is
      * one element behind mSteps until this call completes. Reading mSteps.back() is unconditional,
      * so the first call requires a step to already be present.
      *
-     * The second parameter is passed by value. The body copy-constructs it into mUnknown1c through
-     * HxStr::HxStr(const HxStr &) at `0x004b7b50` and then releases the parameter's own buffer,
-     * which is this toolchain destroying a by-value class parameter in the callee.
+     * The second parameter is passed by value. The body copy-constructs it into mSectionNames
+     * through HxStr::HxStr(const HxStr &) at `0x004b7b50` and then releases the parameter's own
+     * buffer, which is this toolchain destroying a by-value class parameter in the callee.
      *
      * @param nValue The step position.
      * @param strLabel The label, passed by value.
@@ -199,11 +199,16 @@ public:
     virtual int Slot13(int nValue);
 
     /**
-     * Slot 14. Returns zero.
+     * Slot 14. Returns zero, ignoring its argument.
      *
+     * The parameter is proven by HudPosition's update at `0x0041b060`, which passes the current
+     * bar in a1, and by `PlayMapLinear::Slot14`, which reads it.
+     *
+     * @param nValue The position.
+     * @return Zero here.
      * @ghidraAddress 0x00127460
      */
-    virtual int Slot14();
+    virtual int Slot14(int nValue);
 
     /**
      * Slot 15. Empty in this class, and it takes an argument the empty body cannot reveal.
@@ -266,9 +271,24 @@ public:
      */
     std::vector<int> mSteps;
 
+    /**
+     * Length of each section, the gap between one step and the previous one. +0x10
+     *
+     * Slot2() appends to it. Public because HudPosition's constructor at `0x00419f88` reads it
+     * directly, indexed by Slot11(), to size each section of the position display, and the image
+     * has no accessor for it.
+     */
+    std::vector<int> mSectionLengths;
+
+    /**
+     * Label of each section, the one Slot2() receives with the step. +0x1c
+     *
+     * Public because HudPosition's constructor reads it directly, indexed by Slot11(), for the
+     * section labels of the position display, and the image has no accessor for it.
+     */
+    std::vector<HxStr> mSectionNames;
+
 protected:
-    std::vector<int> mUnknown10;   // +0x10
-    std::vector<HxStr> mUnknown1c; // +0x1c
-    int mUnknown28;                // +0x28
-    std::vector<int> mUnknown2c;   // +0x2c
+    int mUnknown28;              // +0x28
+    std::vector<int> mUnknown2c; // +0x2c
 };

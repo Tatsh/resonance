@@ -23,9 +23,9 @@ PlayMap::~PlayMap() {
 
 // 0x001268b0
 void PlayMap::Slot2(int nValue, HxStr strLabel) {
-    mUnknown10.push_back(nValue - mSteps.back()); // Unguarded on the first call.
+    mSectionLengths.push_back(nValue - mSteps.back()); // Unguarded on the first call.
     mSteps.push_back(nValue);
-    mUnknown1c.push_back(strLabel);
+    mSectionNames.push_back(strLabel);
 }
 
 // 0x00127488
@@ -86,7 +86,7 @@ int PlayMap::Slot13(int nValue) {
 }
 
 // 0x00127460
-int PlayMap::Slot14() {
+int PlayMap::Slot14(int) {
     return 0;
 }
 

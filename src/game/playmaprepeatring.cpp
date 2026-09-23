@@ -35,7 +35,7 @@ void PlayMapRepeatRing::Slot15(int nValue) {
     // rather than being narrowed to int.
     const std::vector<int>::size_type nLast = mUnknown3c.size() - 1;
     const std::vector<int>::size_type nPrevious = nLast - 1;
-    const int nGap = mUnknown10[nPrevious % mUnknown10.size()];
+    const int nGap = mSectionLengths[nPrevious % mSectionLengths.size()];
     mUnknown3c[nLast] = mUnknown3c[nPrevious] + (nValue * nGap);
     mUnknown3c.push_back(kSpanTerminator);
 }
