@@ -46,6 +46,7 @@ constexpr float kTwoPi = 6.283185f;
 
 } // namespace
 
+// 0x00438518
 TnlSabreTrail::TnlSabreTrail(int nIndex, HxStr colorName)
     : mString(nullptr), mIndex(nIndex), mStartFrame(0.0f), mAmplitude(0.0f), mStrength(0.0f),
       mPulseFrame(0.0f), mPhase(0.0f), mGlowFloor(0.0f), mGlowSize(0.0f), mGlow(nullptr) {
@@ -57,14 +58,17 @@ TnlSabreTrail::TnlSabreTrail(int nIndex, HxStr colorName)
     Clear();
 }
 
+// 0x00454c50
 TnlSabreTrail::~TnlSabreTrail() {
     Clear();
 }
 
+// 0x00454d30
 void TnlSabreTrail::SetShowing(int nShowing) {
     mString->SetShowing(nShowing);
 }
 
+// 0x00454dc8
 void TnlSabreTrail::Clear() {
     mGlow->FreeAllParticles();
     mPoints.clear();
@@ -76,6 +80,7 @@ void TnlSabreTrail::Clear() {
     mTrack = 0;
 }
 
+// 0x00454d60
 void TnlSabreTrail::Rebuild() {
     const int nBarCount = mBarCount;
     if (nBarCount == 0) {
@@ -87,6 +92,7 @@ void TnlSabreTrail::Rebuild() {
     Build(nTrack, nFirstBar, nBarCount);
 }
 
+// 0x004387b0
 void TnlSabreTrail::Build(int nTrack, int nFirstBar, int nBarCount) {
     if (nTrack == mTrack && nFirstBar == mFirstBar && nBarCount == mBarCount && !mPoints.empty()) {
         return;
@@ -147,6 +153,7 @@ void TnlSabreTrail::AddSegmentPoint(float flFrame, float flLane) {
     AddPoint(flFrame, flLane, 1);
 }
 
+// 0x00438ad0
 void TnlSabreTrail::Pulse(float flFrame, int nStrength, [[maybe_unused]] int nTotal) {
     if (mPoints.size() < 2) {
         return;
@@ -169,6 +176,7 @@ void TnlSabreTrail::Pulse(float flFrame, int nStrength, [[maybe_unused]] int nTo
     mGlowSize = mGlowFloor + kGlowStep;
 }
 
+// 0x00438c20
 void TnlSabreTrail::Update(float flFrame) {
     if (mPoints.size() < 2) {
         return;
