@@ -98,6 +98,20 @@ MetScreen *MetScreen::FindScreenByName(const HxStr &name) {
     return pScreen;
 }
 
+// 0x00390000
+MetScreen *MetScreen::FindEndScreen([[maybe_unused]] MetRenderer *pRenderer, const HxStr &name) {
+    MetScreen *pScreen = nullptr;
+    std::map<HxStr, MetScreen *>::iterator it = ScreenRegistry().find(name);
+    if (it != ScreenRegistry().end()) {
+        pScreen = (*it).second;
+    }
+    if (pScreen == nullptr) {
+        Fatal("PROBLEM end screen is not found!\n");
+        return nullptr; // Yes, the binary keeps a return after the call that does not return.
+    }
+    return pScreen;
+}
+
 void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] const HxStr &file) {
     HxStr dir = directory + kPathSeparator;
     if (ContainerLoaderMap()[mUnknown28] == nullptr) {
@@ -175,6 +189,7 @@ void MetScreen::SetShowing(int nShowing) {
     }
 }
 
+// 0x00390200
 void MetScreen::PushNamedScreen(const HxStr &name) {
     MetScreen *pScreen = FindScreenByName(name);
     mUnknown10->AddScreen(pScreen);
@@ -186,6 +201,7 @@ void MetScreen::PushNamedScreen(const HxStr &name) {
     }
 }
 
+// 0x003900a8
 void MetScreen::EnterAndShow() {
     SetShowing(1);
     StartEnterAnimation(mUnknown10->mUnknown68);
@@ -206,6 +222,7 @@ void MetScreen::ActivateNamedPanel(const HxStr &name) {
     }
 }
 
+// 0x003902d0
 void MetScreen::ExitScreenByName(const HxStr &name) {
     MemLogWrite(
         FormatString("Exiting screen: %s\n", name.mStr != nullptr ? name.mStr : g_szEmptyString));
@@ -213,10 +230,12 @@ void MetScreen::ExitScreenByName(const HxStr &name) {
     FindScreenByName(name)->BeginExit();
 }
 
+// 0x00390100
 void MetScreen::BeginExit() {
     StartExitAnimation(mUnknown10->mUnknown68);
 }
 
+// 0x003905c0
 void MetScreen::StartEnterAnimation(float flTime) {
     mUnknown08 = flTime;
     mUnknown0c = 0.0f;
@@ -225,6 +244,7 @@ void MetScreen::StartEnterAnimation(float flTime) {
     }
 }
 
+// 0x003905f0
 void MetScreen::UpdateEnterAnimation(float flTime) {
     if (mUnknown7c != 0) {
         mUnknown7c = 0;
@@ -246,15 +266,18 @@ void MetScreen::UpdateEnterAnimation(float flTime) {
 void MetScreen::OnUnknownSlot7() {
 }
 
+// 0x00390130
 void MetScreen::OnUnknownSlot10() {
 }
 
+// 0x00390138
 void MetScreen::OnKeyboardDismissed() {
 }
 
 void MetScreen::OnDrawPass() {
 }
 
+// 0x003900a0
 void MetScreen::OnDestroying() {
 }
 
@@ -283,29 +306,36 @@ void MetScreen::OnUnknownSlot33() {
 void MetScreen::OnUnknownSlot36() {
 }
 
+// 0x003907a8
 void MetScreen::HandleMessage([[maybe_unused]] Message *pMsg) {
 }
 
+// 0x00390140
 void MetScreen::PlaySlideSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kSlideSound);
 }
 
+// 0x00390160
 void MetScreen::PlayLeaveSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kLeaveSound);
 }
 
+// 0x003901c0
 void MetScreen::PlayHighSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kHighSound);
 }
 
+// 0x00390180
 void MetScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kCycleLeftSound);
 }
 
+// 0x003901a0
 void MetScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kCycleRightSound);
 }
 
+// 0x003901e0
 void MetScreen::PlayErrorSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kErrorSound);
 }
@@ -339,16 +369,19 @@ void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
     HandleCommand(pCommand);
 }
 
+// 0x00390788
 void MetScreen::Draw() {
     mUnknown14->Drawable::Draw();
 }
 
+// 0x003906a0
 void MetScreen::StartExitAnimation(float flTime) {
     mUnknown0c = flTime;
     mUnknown1c = 0;
     mUnknown08 = 0.0f;
 }
 
+// 0x00390380
 void MetScreen::UpdateAnimationFrame(float flTime) {
     if (mUnknown4c != 0) {
         return;
@@ -408,6 +441,7 @@ void MetScreen::UpdateFrame(float flTime) {
     UpdateExitAnimation(flTime);
 }
 
+// 0x003906b0
 void MetScreen::UpdateExitAnimation(float flTime) {
     if (mUnknown78 != 0) {
         mUnknown0c = 0.0f;

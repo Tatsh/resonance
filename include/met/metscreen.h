@@ -264,8 +264,9 @@ public:
     /**
      * Resolve one end-of-game screen by its registry key, failing fatally when it is absent.
      *
-     * The failure message is `PROBLEM end screen is not found!`. Every caller passes the renderer,
-     * which the body does not read. The title is inferred. The body is not written.
+     * The lookup is FindScreenByName() expanded inline. The failure message is
+     * `PROBLEM end screen is not found!`. Every caller passes the renderer, which the body does not
+     * read. The title is inferred.
      *
      * @param pRenderer The front-end renderer, which is not read.
      * @param name The registry key.

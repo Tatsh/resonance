@@ -17,9 +17,9 @@
  * writes its own vptr. The destructor at `0x0038fe60` runs the MetScreen destructor and has no
  * body of its own.
  *
- * Every override tests the predicate at `0x003908f0`, which reports whether the multiplayer
- * in-game bank applies, and plays one of two named sounds through the player at `0x0012f470`. The
- * predicate has no recovered name, so it is recorded rather than declared. Four slots pick
+ * Every override tests the file-local predicate at `0x003908f0`, which reports whether a game
+ * world exists and so whether the in-game bank applies, and plays one of two named sounds through
+ * PlaySoundByName(). Four slots pick
  * `SND_MET_MULTI_INGAME_ACTION` or `SND_MET_MULTI_INGAME_NAVIGATION` as the alternative, and the
  * error sound at slot 25 is the one of the six that stays as MetScreen defined it.
  *

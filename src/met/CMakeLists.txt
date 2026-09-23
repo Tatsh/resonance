@@ -74,6 +74,7 @@ set(RESONANCE_MET_SRCS
     metsaveremix.cpp
     metsaveremixscreen.cpp
     metscreen.cpp
+    metscreenmultisoundbank.cpp
     metsoloendremixscreen.cpp
     metsolowinscreen.cpp
     metsonglists.cpp
