@@ -664,6 +664,7 @@ smpte
 smrt
 snapcraft
 sndb
+sndbank
 sndh
 socketmodule
 solopowerbarmgr

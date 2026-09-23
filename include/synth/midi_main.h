@@ -198,6 +198,28 @@ void RegisterBankSlot(int nTag, int nDest, int nIopAddress);
 void ReleaseBankSlotAt(int nDest);
 
 /**
+ * Release every bank and empty g_bankSlots.
+ *
+ * Each slot that claims sound memory has its tag submitted under selector 0x8130. The slots are
+ * not reset one by one, because the vector is emptied straight afterwards. ReleaseSoundBanks() is
+ * the one caller.
+ *
+ * @ghidraAddress 0x00461bb8
+ */
+void ReleaseAllBankSlots();
+
+/**
+ * Report whether a bank transfer is still moving.
+ *
+ * An HD transfer counts whenever g_nHdXferInFlight is set. A BD transfer counts while g_pBdXfer
+ * exists and has bytes left to move. MetRenderer's front-end poll is the one caller.
+ *
+ * @return 1 while either transfer is moving, otherwise 0.
+ * @ghidraAddress 0x00464628
+ */
+int IsBankXferBusy();
+
+/**
  * Load a BD and HD bank pair and record the claim.
  *
  * Performs no work when both paths already match what is loaded. The placement argument selects
@@ -618,6 +640,54 @@ void SubmitDriverSelector100(int nValue);
  * @ghidraAddress 0x004648a8
  */
 void SubmitDriverSelectorF0(int nValue);
+
+/**
+ * Submit sound-driver selector 0xc0 with no command block.
+ *
+ * The meaning of the selector is unrecovered. ReleaseSoundBanks() is the one caller.
+ *
+ * @ghidraAddress 0x004649d8
+ */
+void SubmitDriverSelectorC0();
+
+/**
+ * Bind the MIDI stream input of Sony's component sound library.
+ *
+ * Builds the library context at `0x00894760` with two buffer groups, the second holding one
+ * 0x400-byte MIDI stream buffer, and passes it to `sceMSIn_Init()`. A failure logs
+ * `sceMSIn_Init Error`. Otherwise the routine puts the message 0xc0 on port 0 through
+ * `sceMSIn_PutMsg()`. InitSynthDriver() is the one caller.
+ *
+ * The body is not reconstructed. The library header that declares the context types is not in the
+ * SDK this tree builds against.
+ *
+ * @ghidraAddress 0x00462290
+ */
+void InitSynthStreamInput();
+
+/**
+ * Open the sound-bank movie and start feeding its chunks to the driver.
+ *
+ * A movie already open is destroyed first, and the stream frame returns to zero. The new movie is
+ * streamed, and a failure to open it logs `Problem starting sndbank movie` with the error code
+ * and continues with the movie as constructed. Track 15 receives the bank chunks. The movie's loop
+ * offset, and the word at `0x006e9dc4`, both take the current song tick.
+ *
+ * The title is inferred from the failure message.
+ *
+ * @param pszPath The movie file.
+ * @ghidraAddress 0x00462908
+ */
+void StartSoundBankMovie(const char *pszPath);
+
+/**
+ * Destroy the sound-bank movie, if one is open, and clear the pointer.
+ *
+ * The title is inferred as the counterpart of StartSoundBankMovie().
+ *
+ * @ghidraAddress 0x00464b68
+ */
+void StopSoundBankMovie();
 
 /**
  * Take the voice and bank driver down.

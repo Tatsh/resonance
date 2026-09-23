@@ -5,11 +5,14 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "app/application.h"
 #include "os/async.h"
+#include "os/cycles.h"
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "rnd/moviestream.h"
+#include "sch/tickclock.h"
 #include "synth/callbackxferhdtoiop.h"
 
 // The tag both allocations below bill to. It is the module's original file rather than this one,
@@ -120,6 +123,9 @@ Rnd::MovieStream *g_pSynthStream;
 // 0x006e9c5c. The frame PollSynthStream() passes to g_pSynthStream.
 int g_nSynthStreamFrame;
 
+// 0x006e9dc4. The song tick StartSoundBankMovie() opened the movie at. Nothing reads it.
+int g_nSoundBankMovieTick;
+
 // 0x00464378
 void SetBankLoadProgressHook(void (*pfnProgress)()) {
     g_pfnBankLoadProgress = pfnProgress;
@@ -175,6 +181,16 @@ void ReleaseBankSlotAt(int nDest) {
             return;
         }
     }
+}
+
+// 0x00461bb8
+void ReleaseAllBankSlots() {
+    for (const auto &slot : g_bankSlots) {
+        if (slot.mIopAddress != 0) {
+            SubmitSoundDriverRequest(kSoundSelectorReleaseBank, static_cast<uintptr_t>(slot.mTag));
+        }
+    }
+    g_bankSlots.clear();
 }
 
 // Scratch the four-character code is copied into. The second word is never written and terminates
@@ -392,4 +408,97 @@ void InitSpu2Cores() {
         sceSdRemote(kSdRemoteBlocking, rSdSetAddr, SD_ADDR_EEA | nCore, nEffectEnd);
         nEffectEnd -= kSpu2EffectAreaSize;
     }
+}
+
+// Selector ReleaseSoundBanks() submits through SubmitDriverSelectorC0(). Its effect is
+// unrecovered.
+constexpr int kSoundSelectorUnknownC0 = 0xc0;
+
+// 0x004649d8
+void SubmitDriverSelectorC0() {
+    SubmitSoundDriverRequest(kSoundSelectorUnknownC0, 0);
+}
+
+// 0x00464b68
+void StopSoundBankMovie() {
+    if (g_pSynthStream != nullptr) {
+        delete g_pSynthStream;
+        g_pSynthStream = nullptr;
+    }
+}
+
+// Selector that hands one chunk to the driver.
+constexpr int kSoundSelectorXferChunk = 0x1070;
+
+// Track of the sound-bank movie whose chunks reach the driver.
+constexpr int kSoundBankMovieTrack = 15;
+
+// Payload of an SNDH chunk, a whole bank already in memory.
+struct SndhChunk : Rnd::MovieStream::ChunkHeader {
+    int mLength;                  // +0x10
+    int mTag;                     // +0x14 becomes g_nSynthXferTag
+    unsigned char mReserved18[8]; // +0x18
+    unsigned char mData[1];       // +0x20
+};
+
+// Payload of an SNDB chunk, one piece of a bank at an offset into the destination.
+struct SndbChunk : Rnd::MovieStream::ChunkHeader {
+    int mOffset;                  // +0x10 bytes past g_nBankDestAddress
+    int mLength;                  // +0x14
+    unsigned char mReserved18[8]; // +0x18
+    unsigned char mData[1];       // +0x20
+};
+
+// 0x004646e8. The body OnSoundBankMovieChunk() expands for an SNDB chunk. The out-of-line copy
+// has no caller.
+inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
+    g_chunkCommand.mStagingAddress = g_anIopStagingAddress[g_nIopStagingIndex];
+    g_nIopStagingIndex = (g_nIopStagingIndex + 1) & (kIopStagingBufferCount - 1);
+    g_chunkCommand.mBankAddress = 0;
+    g_chunkCommand.mDest = g_nBankDestAddress + nOffset;
+    g_chunkCommand.mLength = nLength;
+    memset(g_chunkCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
+    g_chunkCommand.mTag = g_nSynthXferTag;
+    XferToIop(g_chunkCommand.mStagingAddress, pData, nLength);
+    SubmitSoundDriverRequest(kSoundSelectorXferChunk, reinterpret_cast<uintptr_t>(&g_chunkCommand));
+    return 0;
+}
+
+// 0x00462770. The handler reads its chunk through the header rather than the payload argument.
+void OnSoundBankMovieChunk(Rnd::MovieStream::ChunkHeader *pHeader,
+                           [[maybe_unused]] void *pPayload,
+                           [[maybe_unused]] void *pData) {
+    (void)GetElapsedMilliseconds(); // Yes, the binary discards the time it reads.
+    if (pHeader->mTag == Rnd::g_nSndhTag) {
+        const SndhChunk *pChunk = static_cast<const SndhChunk *>(pHeader);
+        g_nSynthXferTag = pChunk->mTag;
+        XferBankFromMemory(pChunk->mData, pChunk->mLength);
+    } else if (pHeader->mTag == Rnd::g_nSndbTag) {
+        const SndbChunk *pChunk = static_cast<const SndbChunk *>(pHeader);
+        XferBankChunk(pChunk->mData, pChunk->mLength, pChunk->mOffset);
+    } else if (pHeader->mTag == Rnd::g_nSndpTag) {
+        g_nBankDestIndex = (g_nBankDestIndex + 1) & (kBankDestBufferCount - 1);
+        g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
+    } else {
+        LogPrintf("BAD CHUNK HANDED OFF TO SNDBANK MOVIE HANDLER: %s\n", FourCcToString(pHeader));
+    }
+}
+
+// 0x00462908
+void StartSoundBankMovie(const char *pszPath) {
+    // The binary expands StopSoundBankMovie() here rather than calling it.
+    if (g_pSynthStream != nullptr) {
+        delete g_pSynthStream;
+        g_pSynthStream = nullptr;
+    }
+    g_nSynthStreamFrame = 0;
+    int nError;
+    g_pSynthStream = new Rnd::MovieStream(pszPath, 1, &nError);
+    if (nError != 0) {
+        LogPrintf("Problem starting sndbank movie: %s (errcode: %d)\n", pszPath, nError);
+    }
+    g_pSynthStream->SetTrackHandler(kSoundBankMovieTrack, OnSoundBankMovieChunk, nullptr);
+    const int nTick = Application::shared()->GetSongClock()->SongTick();
+    g_nSoundBankMovieTick = nTick;
+    g_pSynthStream->mLoopTicks = nTick;
 }
