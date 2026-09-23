@@ -13,10 +13,8 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The fields through `+0x0f` belong to CmdMsg and are declared there.
- *
- * This class adds no field of its own, and the size is exactly the size of the base, which is what
- * fixes the size of the base.
+ * The word at `+0x04` belongs to CmdMsg, which New() zeroes. The two words after it belong to this
+ * class, for the reason CmdMsg records.
  */
 class EnableFreestyleMsg : public CmdMsg {
 public:
@@ -53,6 +51,10 @@ public:
      * @ghidraAddress 0x001ca940
      */
     virtual const char *Name();
+
+private:
+    int mUnknown08; // +0x08
+    int mUnknown0c; // +0x0c
 };
 
 /**

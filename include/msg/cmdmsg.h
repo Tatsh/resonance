@@ -21,14 +21,32 @@
  * unreliable-accessor defect recorded for MsgSink and MsgQueue, so the table rather than the
  * harvest is the authority here.
  *
- * The payload is inferred from the derived classes rather than from any routine of its own,
- * because Clone() in a derived class copies the whole object. Every one of the five derived
- * classes copies these three fields, and PlayersTrackNeutralizedMsg is exactly 0x10 bytes and
- * adds nothing, which fixes the size of this base.
+ * The one member is the word at `+0x04`. Every New() of the five derived classes and every stack
+ * construction in the image zeroes it, and CripplePowerup reads it back after MsgSource::Send()
+ * at `0x001c9878` to learn whether a receiver acted, so it is a result the receiver fills in.
+ *
+ * The words at `+0x08` and `+0x0c` belong to the derived classes, because their types differ
+ * between them. CrippleMsg's Print() dereferences `+0x08` as a player and writes `+0x0c` as a
+ * track number, while PhraseNeutralizer builds a PlayersTrackNeutralizedMsg at `0x001c0b2c` with
+ * a player at `+0x0c`. No single declaration here could type both.
  */
 class CmdMsg : public Message {
-protected:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+public:
+    /**
+     * Clear the result word.
+     *
+     * Inline. Every construction of a derived class stores zero at `+0x04`.
+     */
+    CmdMsg() : mUnknown04(0) {
+    }
+
+    /**
+     * Result a receiver writes back, zero until one does.
+     *
+     * Public because CripplePowerup reads it at `0x001c9878` from outside the hierarchy after the
+     * message is sent, and the image exposes no accessor.
+     *
+     * +0x04
+     */
+    int mUnknown04;
 };

@@ -1,24 +1,34 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/cmdmsg.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `7BumpMsg` in the RTTI descriptor at `0x008ef350`, with CmdMsg as its one base. The object is
- * 0x14 bytes and its vtable is at `0x00811fa0`. The members below are the whole of the class:
- * everything recovered comes from them, and no other routine in the image refers to this type by
- * anything but its vtable. The fields through `+0x0f` belong to CmdMsg and are declared there.
+ * 0x14 bytes and its vtable is at `0x00811fa0`. The word at `+0x04` belongs to CmdMsg.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * Print() writes the colour name of the player at `+0x10`, which types that word. The words at
+ * `+0x08` and `+0x0c` are not printed, and no producer of the message has been traced.
  *
- * The class overrides Message::Print() at `0x003e3fb8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e12b0` is compiler-generated and has no declaration here.
  */
 class BumpMsg : public CmdMsg {
 public:
+    /**
+     * Produce a message with a zero result on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d79e8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,8 +53,18 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the player's colour name to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3fb8
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown10; // +0x10
+    int mUnknown08;  // +0x08
+    int mUnknown0c;  // +0x0c
+    Player *mPlayer; // +0x10
 };
 
 /**

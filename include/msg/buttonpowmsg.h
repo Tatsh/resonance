@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream>
+
+#include "mid/mbt.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -10,15 +15,25 @@
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
+ * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
+ * purpose of the word at `+0x08` is not recovered.
  *
- * The class overrides Message::Print() at `0x003d7df0`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003db130` is compiler-generated and has no declaration here.
  */
 class ButtonPowMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the position is
+     * initialised.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6ae8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,10 +58,19 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the position, the player's colour name, and the word at `+0x08`, separated by
+     * spaces, to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003d7df0
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    Player *mPlayer;    // +0x04
+    int mUnknown08;     // +0x08
+    Mid::MBT mPosition; // +0x0c
 };
 
 /**

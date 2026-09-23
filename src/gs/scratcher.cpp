@@ -18,12 +18,10 @@ void Scratcher::HandleMessage(Message *pMsg) {
         if (pRiff->mUnknown10 != mUnknown44) {
             return;
         }
-        // The cast records a disagreement rather than a conversion. PitchRiffMsg types its `+0x08`
-        // as an int while this class stores a player pointer that starts at g_nullPlayer.
-        if (mUnknown5c != reinterpret_cast<Player *>(pRiff->mUnknown08)) {
+        if (mUnknown5c != pRiff->mUnknown08) {
             return;
         }
-        mUnknown68 = OnPitchRiff(pRiff->mUnknown04, 0, pRiff->mUnknown0c);
+        mUnknown68 = OnPitchRiff(pRiff->mUnknown04, 0, pRiff->mUnknown0c.mTick);
         return;
     }
     if (nType == static_cast<int>(g_nEraseMsgType)) {

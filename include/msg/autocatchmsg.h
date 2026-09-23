@@ -1,25 +1,34 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/cmdmsg.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `12AutoCatchMsg` in the RTTI descriptor at `0x008f0010`, with CmdMsg as its one base. The
- * object is 0x14 bytes and its vtable is at `0x00811c88`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable. The fields through `+0x0f` belong to CmdMsg and are declared
- * there.
+ * object is 0x14 bytes and its vtable is at `0x00811c88`. The word at `+0x04` belongs to CmdMsg.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * Print() labels `+0x0c` as a track number and writes the identifier of the player at `+0x10`
+ * after ` p#`, which types that word, followed by the word at `+0x08`.
  *
- * The class overrides Message::Print() at `0x003e4208`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e2460` is compiler-generated and has no declaration here.
  */
 class AutoCatchMsg : public CmdMsg {
 public:
+    /**
+     * Produce a message with a zero result on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7c68
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -44,8 +53,19 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write `tr#`, the track, ` p#`, the player's identifier, a space, and the word at `+0x08` to
+     * a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e4208
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown10; // +0x10
+    int mUnknown08;  // +0x08
+    int mTrack;      // +0x0c
+    Player *mPlayer; // +0x10
 };
 
 /**

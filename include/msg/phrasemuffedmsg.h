@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream>
+
+#include "mid/mbt.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -10,15 +15,26 @@
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Print() labels `+0x04` as a
+ * track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
+ * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. Readers of the
+ * fields have not been traced, so they are private by default.
  *
- * The class overrides Message::Print() at `0x003e4350`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dff48` is compiler-generated and has no declaration here.
  */
 class PhraseMuffedMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the position is
+     * initialised.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d76f0
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,11 +59,20 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write `tr#`, the track, a space, the player, a space, the position, ` tried:`, and the word
+     * at `+0x10` to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e4350
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    int mTrack;         // +0x04
+    Player *mPlayer;    // +0x08
+    Mid::MBT mPosition; // +0x0c
+    int mTried;         // +0x10
 };
 
 /**

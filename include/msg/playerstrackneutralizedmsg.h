@@ -1,28 +1,36 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/cmdmsg.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `26PlayersTrackNeutralizedMsg` in the RTTI descriptor at `0x008eed28`, with CmdMsg as its one
- * base. The object is 0x10 bytes and its vtable is at `0x00812270`. The members below are the
- * whole of the class: everything recovered comes from them, and no other routine in the image
- * refers to this type by anything but its vtable. The fields through `+0x0f` belong to CmdMsg and
- * are declared there.
+ * base. The object is 0x10 bytes and its vtable is at `0x00812270`. The word at `+0x04` belongs
+ * to CmdMsg.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * PhraseNeutralizer::PostTrackNeutralizedMsg() builds the message at `0x001c0b2c`, once per
+ * affected player, with a per-player total at `+0x08` and the player at `+0x0c`. Print() writes
+ * only that player's colour name. New() zeroes both words.
  *
- * Clone() copies only as far as `0x4` of the 0x10 bytes it allocates, so the remaining 12 are
- * either alignment padding or a field the copy omits.
- *
- * The class overrides Message::Print() at `0x003e3f30`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e0490` is compiler-generated and has no declaration here.
  */
 class PlayersTrackNeutralizedMsg : public CmdMsg {
 public:
+    /**
+     * Produce a message with every word zeroed on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d77a0
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -46,6 +54,18 @@ public:
      * @ghidraAddress 0x003e0628
      */
     virtual const char *Name();
+
+    /**
+     * Write the player's colour name to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3f30
+     */
+    virtual void Print(std::ostream &stream);
+
+private:
+    int mUnknown08 = 0;        // +0x08
+    Player *mPlayer = nullptr; // +0x0c
 };
 
 /**

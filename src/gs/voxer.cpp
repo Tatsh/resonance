@@ -22,13 +22,10 @@ void Voxer::HandleMessage(Message *pMsg) {
         if (pErase->mUnknown0c != mUnknown44) {
             return;
         }
-        // The cast records a disagreement rather than a conversion. EraseMsg types its `+0x04`
-        // as an int while this class stores the same object pointer there, and the same value
-        // reaches Mixer::mSelection from a TrackSelectMsg.
-        if (mUnknown50 != reinterpret_cast<Player *>(pErase->mUnknown04)) {
+        if (mUnknown50 != pErase->mUnknown04) {
             return;
         }
-        OnErase(pErase->mUnknown08 / mUnknown48, pErase->mUnknown10, 1);
+        OnErase(pErase->mUnknown08.mTick / mUnknown48, pErase->mUnknown10, 1);
         return;
     }
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {

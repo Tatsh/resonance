@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 /**
@@ -10,15 +13,25 @@
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). New() initialises `+0x04` to
+ * kMBTInfinity, the one store it makes, which marks that word as a position. Print() writes only
+ * the word at `+0x0c`. Readers of the fields have not been traced, so they are private by default.
  *
- * The class overrides Message::Print() at `0x003e3e80`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dfb38` is compiler-generated and has no declaration here.
  */
 class ContCtrlMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the position is
+     * initialised.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7640
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,10 +56,18 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the word at `+0x0c` to a diagnostic stream as a number.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3e80
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    Mid::MBT mUnknown04; // +0x04
+    int mUnknown08;      // +0x08
+    int mUnknown0c;      // +0x0c
 };
 
 /**

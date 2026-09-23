@@ -1,5 +1,14 @@
 #include "msg/juiceamountmsg.h"
 
+#include <iostream>
+
+#include "game/player.h"
+
+// 0x003d7818
+Message *JuiceAmountMsg::New() {
+    return new JuiceAmountMsg;
+}
+
 // 0x003e08a8. The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *JuiceAmountMsg::Clone() {
@@ -14,4 +23,9 @@ int JuiceAmountMsg::Type() {
 // 0x003e0908
 const char *JuiceAmountMsg::Name() {
     return "JuiceAmountMsg";
+}
+
+// 0x003e41d8
+void JuiceAmountMsg::Print(std::ostream &stream) {
+    mUnknown04->Print(stream);
 }

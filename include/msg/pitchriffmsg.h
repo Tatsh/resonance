@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream>
+
+#include "mid/mbt.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -14,11 +19,24 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e2fd0`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Print() hands `+0x0c` to Mid::MBT::Print(), writes the colour name of the player at `+0x08`,
+ * and labels `+0x04` as `b#`. New() initialises the position to kMBTInfinity.
+ *
+ * The destructor at `0x003da530` is compiler-generated and has no declaration here.
  */
 class PitchRiffMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the position is
+     * initialised.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6928
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,14 +61,23 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the position, a space, the player's colour name, ` b#`, and the word at `+0x04` to a
+     * diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e2fd0
+     */
+    virtual void Print(std::ostream &stream);
+
 public:
     // Public because Scratcher::HandleMessage() reads these directly, through a PitchRiffMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
     // fits equally well.
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    int mUnknown04;      // +0x04
+    Player *mUnknown08;  // +0x08
+    Mid::MBT mUnknown0c; // +0x0c
+    int mUnknown10;      // +0x10
 };
 
 /**

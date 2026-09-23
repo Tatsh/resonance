@@ -1,6 +1,10 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/message.h"
+
+class Phrase;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -10,15 +14,25 @@
  * everything recovered comes from them, and no other routine in the image refers to this type by
  * anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). PhraseMgr::PostPhraseMsg()
+ * fills the three words with its argument, a manager word, and the phrase it looked up, which
+ * types `+0x0c`. Print() writes that phrase as an address followed by the word at `+0x04` in
+ * brackets. Readers of the fields have not been traced, so they are private by default.
  *
- * The class overrides Message::Print() at `0x003e42f8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e10f8` is compiler-generated and has no declaration here.
  */
 class PhraseMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d79b0
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,10 +57,18 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the phrase's address, ` [`, the word at `+0x04`, and `]` to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e42f8
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    int mUnknown04;  // +0x04
+    int mUnknown08;  // +0x08
+    Phrase *mPhrase; // +0x0c
 };
 
 /**

@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream>
+
+#include "mid/mbt.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -10,15 +15,26 @@
  * everything recovered comes from them, and no other routine in the image refers to this type by
  * anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(), and Print() labels most of
+ * it. It writes the colour name of the player at `+0x04`, then either ` (off)` when the word at
+ * `+0x14` is zero, or a range of bars from `+0x08` spanning `+0x0c` bars, the track at `+0x10`,
+ * and the bar of the position at `+0x18`. New() sets the player to null and the position to
+ * kMBTInfinity.
  *
- * The class overrides Message::Print() at `0x003d81f0`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dcbf0` is compiler-generated and has no declaration here.
  */
 class SeekerMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6f10
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,13 +59,25 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the player's colour name and then either ` (off)` or the bar range, the track, and
+     * the bar of the position to a diagnostic stream.
+     *
+     * The bar of the position is its tick divided by 1920, so an unset position prints the bar of
+     * kMBTInfinity.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003d81f0
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14
-    int mUnknown18; // +0x18
+    Player *mPlayer = nullptr; // +0x04
+    int mFirstBar;             // +0x08, labelled `bars[`
+    int mBarCount;             // +0x0c, added to mFirstBar for the end of the range
+    int mTrack;                // +0x10, labelled `tr#`
+    int mEnabled;              // +0x14, zero prints ` (off)`
+    Mid::MBT mWhen;            // +0x18, labelled `when:`
 };
 
 /**

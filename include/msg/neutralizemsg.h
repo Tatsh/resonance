@@ -1,25 +1,36 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/cmdmsg.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `13NeutralizeMsg` in the RTTI descriptor at `0x008eecb8`, with CmdMsg as its one base. The
- * object is 0x14 bytes and its vtable is at `0x008122b8`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable. The fields through `+0x0f` belong to CmdMsg and are declared
- * there.
+ * object is 0x14 bytes and its vtable is at `0x008122b8`. The word at `+0x04` belongs to CmdMsg.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * NeutralizePowerup builds the message at `0x001c9c64` from the three arguments of its slot 2,
+ * storing the second at `+0x08`, the first at `+0x0c`, and the player at `+0x10`. Print() writes
+ * only that player's colour name. Readers of the fields have not been traced, so they are private
+ * by default.
  *
- * The class overrides Message::Print() at `0x003e3ea8`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e0288` is compiler-generated and has no declaration here.
  */
 class NeutralizeMsg : public CmdMsg {
 public:
+    /**
+     * Produce a message with a zero result on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7768
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -44,8 +55,18 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Write the player's colour name to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3ea8
+     */
+    virtual void Print(std::ostream &stream);
+
 private:
-    int mUnknown10; // +0x10
+    int mUnknown08;  // +0x08
+    int mUnknown0c;  // +0x0c
+    Player *mPlayer; // +0x10
 };
 
 /**

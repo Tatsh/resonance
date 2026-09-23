@@ -16,11 +16,32 @@ class Player;
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003d8358`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Print() labels mPlayerValue as a track number, `tr# `, and writes `remove` in its place when it
+ * is -1.
+ *
+ * The destructor at `0x003dd890` is compiler-generated and has no declaration here.
  */
 class DisplayPointerMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it and stores only the vtable pointer. A declaration is required
+     * because the class declares a second constructor.
+     */
+    DisplayPointerMsg() {
+    }
+
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d70e0
+     */
+    static Message *New();
+
     /**
      * Report where a player's powerup pointer rests.
      *
@@ -59,6 +80,15 @@ public:
      * @ghidraAddress 0x003dd9e8
      */
     virtual const char *Name();
+
+    /**
+     * Write `remove` when mPlayerValue is -1, and otherwise `tr# `, mPlayerValue, `:`, the bar, a
+     * space, and the player's colour name, to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003d8358
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     // The three names come from GamePowerupPlacer, the one producer of the message, which writes
