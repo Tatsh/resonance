@@ -352,6 +352,7 @@ iobpreallocmemstream
 iobstream
 ioprp
 isatty
+isce
 isdir
 isrecordingmsg
 iwyu
@@ -910,6 +911,7 @@ vmixer
 vmixl
 vmixr
 vmulax
+vobuf
 volumeeffector
 vopmsub
 vopmula

@@ -16,29 +16,50 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                   | Count  |
 | ------------------------- | ------ |
-| Functions in the program  | 15,587 |
-| Excluded by rule          | 7,018  |
-| Reconstructable           | 8,569  |
-| Declared or defined       | 5,047  |
-| Share declared or defined | 58.90% |
-| Defined, with a body      | 3,220  |
-| Share implemented         | 37.58% |
-| Remaining, with a name    | 1,299  |
-| Remaining, unidentified   | 2,223  |
+| Functions in the program  | 15,594 |
+| Excluded by rule          | 7,442  |
+| Reconstructable           | 8,152  |
+| Declared or defined       | 5,386  |
+| Share declared or defined | 66.07% |
+| Defined, with a body      | 3,651  |
+| Share implemented         | 44.79% |
+| Remaining, with a name    | 1,199  |
+| Remaining, unidentified   | 1,567  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,827 of
-the 5,047 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 3,220 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,735 of
+the 5,386 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 3,651 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 37.58% as the answer to
-"how much is reconstructed" and 58.90% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 44.79% as the answer to
+"how much is reconstructed" and 66.07% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `b7bc378`. Work written and checked but not yet committed
+The table measures the committed tree at `c715051`. Work written and checked but not yet committed
 is not included.
 
-Since the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
+Since the measurement at `b7bc378` (37.58%), bodies rose by 431 over 67 commits and the
+reconstructable figure fell by 417. Titling moved routines into their exclusion categories: the
+template library grew by 376, the vendored interpreter by 65, the compiler-generated category by
+17, the C++ runtime by 14, the C runtime by 11, and the SDK by 10, while the duplicate category
+shrank by 69 as copy titles on distinct routines were corrected. Seven functions were created for
+code the program had not yet defined.
+
+### Known gaps in the measurement
+
+These routines are counted as remaining although the tree handles them by rule, and the scoring
+tools are unchanged:
+
+- An implicit destructor or copy constructor of a project class is titled `<Class>__Destruct` or
+  `__ConstructCopy` and has no source, because the compiler generates it. No exclusion pattern
+  matches those titles.
+- The ezmpeg sample units (the display and vobuf units at `0x005d0000`) are linked as shipped and
+  are not reconstructed, and the interrupt-context SDK entry points titled `isce…` fall outside the
+  `sce` pattern.
+- An inline member defined in a header with its `// 0x...` marker (for example `Cam::ProjectToUnit`)
+  counts as declared but not as a body, because the body count reads `src` only.
+
+Before that, from the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
 reconstructable figure fell by 85. The template library category grew by 99, the duplicate category
 shrank by 18, and the compiler-generated, SDK, and vendored categories moved by 4, 1, and -1.
 
@@ -66,9 +87,9 @@ known instance; it has a body and counts as unaccounted.
 The implemented count above was taken from a fresh function list. `implemented_report.py` reads
 `functions-latest.txt`, a stored list, and so reports a different denominator (9,257 on the same
 day) until that list is refreshed. The body count intersects the body markers under `src` with the
-function list after the default exclusions, through `.wiswa-ci/freq/body_share.py`. That set is 77
+function list after the default exclusions, through `.wiswa-ci/freq/body_share.py`. That set is 78
 routines smaller than the audit's reconstructable figure, because the audit also bounds addresses.
-The implemented share is exact to within those 77.
+The implemented share is exact to within those 78.
 
 A pass that writes a header moves the larger share and not the smaller one, and a pass that writes
 bodies for an already-declared class moves the smaller share alone.
@@ -108,13 +129,13 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 870   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 1,879 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 1,983 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 1,426 | Container instantiations                                         |
-| Platform SDK                   | 390   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 205   | Exception, cast, and unwinding support                           |
-| C runtime                      | 265   | String and memory routines, and the floating-point library       |
+| Compiler-generated             | 887   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 1,944 | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 1,914 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 1,802 | Container instantiations                                         |
+| Platform SDK                   | 400   | `sce` entry points and kernel syscalls                           |
+| C++ runtime                    | 219   | Exception, cast, and unwinding support                           |
+| C runtime                      | 276   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
