@@ -9,6 +9,7 @@
 class Application;
 class BGTrackGraph;
 class Delayer;
+class ForceFeedbackMgr;
 class GameStats;
 class Gamer;
 class IBStream;
@@ -281,7 +282,7 @@ public:
      * Tear the world down ahead of destruction.
      *
      * The body is not written. It runs `0x0018ec90` when mState is 6 and `0x0018c778` always,
-     * deletes the level, the song clock, the cheat detector, and the object at `+0x34`, and then
+     * deletes the level, the song clock, the cheat detector, and mForceFeedback, and then
      * runs `0x0012f400` and `0x0012f428`, which release a global at `0x0066f538`. The destructor is
      * the recovered caller.
      *
@@ -348,9 +349,18 @@ private:
     Renderer *mRenderer; // +0x28
     Gamer *mGamer;       // +0x2c
     GameStats *mStats;   // +0x30
-    // A pointer to a 0x48-byte object built by 0x0016dae0 and deleted through 0x0016dca8, whose
-    // class is unrecovered.
-    unsigned char mUnknown34[0x04];              // +0x34
+
+public:
+    /**
+     * Vibration driver of the controllers. +0x34
+     *
+     * Built by the constructor at `0x0016dae0` and deleted by Shutdown(). Public because
+     * TnlCrippleFX's frame routine at `0x0043e500` reads it through Globals::GetWorld() with no
+     * accessor in the image.
+     */
+    ForceFeedbackMgr *mForceFeedback;
+
+private:
     std::vector<ScoreTrackGraph *> mTrackGraphs; // +0x38
     std::vector<BGTrackGraph *> mUnknown44;      // +0x44
     // Four-byte elements of an unrecovered type.

@@ -10,6 +10,7 @@
 #include "game/nullplayer.h"
 #include "game/riff.h"
 #include "mid/mbt.h"
+#include "msg/beginphrasecatchmsg.h"
 #include "msg/catchmsg.h"
 #include "msg/gemmsg.h"
 #include "msg/multimusemsg.h"
@@ -202,6 +203,58 @@ void Catcher::Slot7(int nTick, int nGem) {
         ++mUnknown54;
         PostPhraseMuffedMsg(nBar, nTick);
         UpdateSeeker(nBar);
+    }
+}
+
+// 0x001abfd8
+void Catcher::Slot8(int nTick, int nGem) {
+    // The tick is stored without the finiteness check.
+    mUnknown44.mTick = nTick;
+    ++mUnknown50;
+
+    const int nBar = nTick / mTicksPerBar.mTick;
+    const Mid::MBT barStart = MakePosition(mTicksPerBar.mTick * nBar);
+    if (mUnknown48.mTick < barStart.mTick) {
+        mUnknown54 = 0;
+    }
+
+    MultiMuseMsg riffMsg(mTrackData->GetRiff(nTick, nGem));
+    Send(&riffMsg);
+
+    int nPoints = 0;
+    int nCaught = 0;
+    int nTotal = 0;
+    if (mUnknown54 == 0 && mUnknown58 == 0) {
+        const int nEndBar = mSeekerEndBar;
+        nCaught = mUnknown50;
+        if (!(mTrackData->FollowingStepBar(nBar) < nEndBar)) {
+            for (int nPhraseBar = nBar - mUnknown60; nPhraseBar < nEndBar; ++nPhraseBar) {
+                const int nGems = static_cast<int>(mTrackData->GetGems(nPhraseBar)->size());
+                nPoints += mTrackData->GetPoints(nPhraseBar);
+                nTotal += nGems;
+                nCaught += (nPhraseBar < nBar) * nGems;
+            }
+            if (nCaught == 1) {
+                BeginPhraseCatchMsg beginMsg(mPlayer, nPoints, mPlayer->Slot16(nBar));
+                Send(&beginMsg);
+            }
+        }
+    }
+
+    CatchMsg catchMsg(nTick, mTrack, nGem, kCatchHit, mPlayer, nCaught - 1, nTotal);
+    Send(&catchMsg);
+
+    // The position is stored without the finiteness check.
+    Mid::MBT position;
+    position.mTick = nTick;
+    GemMsg gemMsg(position, mTrack, nGem, mPlayer);
+    Send(&gemMsg);
+
+    mPlayer->Slot14(); // Yes, the binary discards this call's result.
+
+    const int nNextBar = FindNextGemTick(nTick) / mTicksPerBar.mTick;
+    if (nNextBar != nBar) {
+        PostCaughtBarMsg(nBar, nNextBar);
     }
 }
 

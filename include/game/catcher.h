@@ -138,18 +138,21 @@ public:
     virtual void Slot7(int nTick, int nGem);
 
     /**
-     * Advance the catcher to a tick.
+     * Record a caught gem.
      *
-     * Slot 8. The routine records the tick, increments the counter at `+0x50`, resolves the tick's
-     * bar, sends a GemMsg and then two further messages, and finally posts the caught-bar message
-     * when the bar changed. The body is not written yet. The further messages are a
-     * MultiMuseMsg for the riff and the 0x10-byte message whose table is at `0x007ddb08`.
+     * Slot 8. The routine records the tick in mUnknown44, counts the gem in mUnknown50, and sends
+     * the gem's riff as a MultiMuseMsg. While no gem of the phrase was missed or muffed, it totals
+     * the gems and points of the bars from the phrase's first bar up to mSeekerEndBar, and the
+     * first caught gem of a phrase sends a BeginPhraseCatchMsg with the points and the multiplier
+     * Player::Slot16() reports. It then sends a caught CatchMsg with the progress through the
+     * phrase and a GemMsg, calls Player::Slot14() and discards the result, and posts the
+     * caught-bar message when the next gem lies in another bar.
      *
-     * @param nTick The scheduler time to advance to.
-     * @param nValue A word the payloads include.
+     * @param nTick The scheduler time of the gem.
+     * @param nGem The gem.
      * @ghidraAddress 0x001abfd8
      */
-    virtual void Slot8(int nTick, int nValue);
+    virtual void Slot8(int nTick, int nGem);
 
     /**
      * Slot 9, pure. MultiCatcher scores a range of bars and SingleCatcher scores one.
@@ -209,7 +212,7 @@ protected:
     // Report a caught bar.
     // The body is not written, for the reason recorded in the class documentation.
     // 0x001ac7e8
-    void PostCaughtBarMsg(int nBar, int nValue);
+    void PostCaughtBarMsg(int nBar, int nNextBar);
 
     // Returns the gem on either side of nTick nearer to it when that gem lies within
     // mCatchWindow, and nTick otherwise. PostCatchMsg() is the caller.
