@@ -243,7 +243,7 @@ GameManagerImpl::GameManagerImpl()
       mUnknown100(0), mPaused(0), mDrawSuppressed(1) {
     mQueue.AddSink(this);
     mpPoller = new InputPoller;
-    mpPoller->mUnknown34 = 0;
+    mpPoller->ClearUnknown34();
     CheckState(); // Yes, the binary discards this call's result.
 }
 
@@ -425,7 +425,7 @@ void GameManagerImpl::PollPlayback() {
     mpPoller->Poll();
     Application::shared()->GetWatchdog(); // Yes, the binary discards this call's result.
     GetElapsedMilliseconds();             // Yes, the binary discards the reading.
-    if (mpPoller->mPressedThisPoll != 0 && mpPlayback != nullptr && mpWorld != nullptr) {
+    if (mpPoller->GetPressedThisPoll() != 0 && mpPlayback != nullptr && mpWorld != nullptr) {
         mpWorld->PostExitMode1();
     }
 }

@@ -125,24 +125,62 @@ public:
     }
 
     /**
-     * Non-zero when the last Poll() sent a reading out.
+     * Set mUnknown34 to 1, the value the constructor starts it at.
      *
-     * The reading routine at `0x001dfab0` clears it on entry and sets it at `0x001dfd5c` and
-     * `0x001dfda8`. Public because GameManagerImpl::PollPlayback() reads it directly and the image
-     * has no accessor for it. The title is inferred. +0x38
+     * The body is inline. The one out-of-line copy has no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x001e1958
      */
-    int mPressedThisPoll;
+    void SetUnknown34() {
+        mUnknown34 = 1;
+    }
 
     /**
-     * The word at `+0x34`, which the constructor starts at 1.
+     * Clear mUnknown34.
      *
-     * Public because GameManagerImpl's constructor clears it directly at `0x00106024`, and the
-     * image has no accessor. Its purpose is unrecovered: the one other access found, in the
-     * routine at `0x001dfab0`, cannot be tied to this object with confidence.
+     * The body is inline. GameManagerImpl's constructor expands it at `0x00106024`, and the one
+     * out-of-line copy has no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x001e1968
      */
-    int mUnknown34;
+    void ClearUnknown34() {
+        mUnknown34 = 0;
+    }
+
+    /**
+     * Report mUnknown50.
+     *
+     * The body is inline, and the one out-of-line copy has no caller. The title is inferred.
+     *
+     * @return The word at `+0x50`.
+     * @ghidraAddress 0x001e1980
+     */
+    int GetUnknown50() {
+        return mUnknown50;
+    }
+
+    /**
+     * Report whether the last Poll() sent a reading out.
+     *
+     * The body is inline. GameManagerImpl::PollPlayback() expands it, and the one out-of-line copy
+     * has no caller. The title is inferred.
+     *
+     * @return mPressedThisPoll.
+     * @ghidraAddress 0x001e1988
+     */
+    int GetPressedThisPoll() {
+        return mPressedThisPoll;
+    }
 
 private:
+    // Non-zero when the last Poll() sent a reading out. The reading routine at 0x001dfab0 clears
+    // it on entry and sets it at 0x001dfd5c and 0x001dfda8. +0x38
+    int mPressedThisPoll;
+
+    // Starts at 1. SetUnknown34() and ClearUnknown34() are the only recovered writers, and its
+    // purpose is unrecovered. +0x34
+    int mUnknown34;
+
     // Words per Entry. The setup routine at 0x001df248 zeroes exactly this many with a word loop,
     // and the table of controller bit masks that 0x001e19b8 builds at 0x008efb60 has the same
     // count, which is what suggests one word per control. The correspondence is an inference.
