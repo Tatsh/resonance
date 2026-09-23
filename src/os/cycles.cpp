@@ -18,3 +18,17 @@ long long g_llTotalCycles;
 unsigned g_nLastCycleCount;
 
 unsigned g_nLastCycleDelta;
+
+float g_flMillisecondsPerCycle;
+
+int g_nUnknownCycleWord;
+
+// 0x004fefb0
+void ResetCycleCounter() {
+    g_flMillisecondsPerCycle = 1.0f / kCyclesPerMillisecond;
+    (void)ReadCycleCount(); // Yes, the binary discards this reading.
+    g_nLastCycleDelta = 0;
+    g_nLastCycleCount = ReadCycleCount();
+    g_nUnknownCycleWord = 0;
+    g_llTotalCycles = 0;
+}

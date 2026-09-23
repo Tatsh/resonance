@@ -46,6 +46,35 @@ extern unsigned g_nLastCycleCount;
 extern unsigned g_nLastCycleDelta;
 
 /**
+ * Milliseconds per EE cycle, the reciprocal of kCyclesPerMillisecond.
+ *
+ * ResetCycleCounter() writes it and no routine in the image reads it.
+ *
+ * @ghidraAddress 0x007082b4
+ */
+extern float g_flMillisecondsPerCycle;
+
+/**
+ * Word ResetCycleCounter() clears beside the cycle state. No routine in the image reads it, and its
+ * purpose is undetermined.
+ *
+ * @ghidraAddress 0x007082b8
+ */
+extern int g_nUnknownCycleWord;
+
+/**
+ * Start the cycle state from the current counter reading.
+ *
+ * The total and the last difference become zero and the last reading becomes the counter. The
+ * counter is read twice and the first reading is discarded. The static initialiser at `0x004662d0`,
+ * in the unit that defines the out-of-line GetElapsedMilliseconds(), is the one caller. The name is
+ * inferred.
+ *
+ * @ghidraAddress 0x004fefb0
+ */
+void ResetCycleCounter();
+
+/**
  * Report the milliseconds elapsed since the machine started.
  *
  * The body is here rather than in a source file because around thirty routines across the engine

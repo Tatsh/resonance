@@ -1,5 +1,10 @@
 #pragma once
 
+class HxStr;
+namespace Rnd {
+class Stream;
+} // namespace Rnd
+
 /** Receives one fully formatted failure message. */
 typedef void (*FailReportProc)(const char *pszMessage);
 
@@ -18,9 +23,48 @@ typedef void (*FailAbortProc)();
  * `DumpText` among them, so a reconstructed `DumpText` produces no output on this target. The
  * string literals it passes survive in `.rodata` regardless, which is where many recovered member
  * names come from. Reconstruct those calls as written rather than omitting them.
+ *
+ * The sink can also own a log file, opened by OpenLog(). No routine in the shipped image calls
+ * OpenLog(), and neither Report() nor Format() writes to the log.
  */
 class FailSink {
 public:
+    /**
+     * Install the built-in report handler with no log open and a dump level of zero.
+     *
+     * mUnknown08 starts at 1, and mAbortProc is not written. The body is inlined into the unit's
+     * static initialiser at `0x004ddef8`.
+     */
+    FailSink();
+
+    /**
+     * Delete the log stream, without flushing it first.
+     *
+     * The body is inlined into the static initialiser at `0x004ddef8`.
+     */
+    ~FailSink();
+
+    /**
+     * Replace the log with a file opened for writing.
+     *
+     * The previous log is closed first. A file that fails to open is reported as
+     * "Couldn't open log %s" and leaves no log open. No call site survives in the shipped
+     * program, and the name is inferred from the report text.
+     *
+     * @param path The file to write the log to.
+     * @ghidraAddress 0x004ddfb8
+     */
+    void OpenLog(const HxStr &path);
+
+    /**
+     * Flush and delete the log stream, if one is open.
+     *
+     * OpenLog() is the one caller. The name is inferred.
+     *
+     * @ghidraAddress 0x004de0a0
+     */
+    void CloseLog();
+
     /**
      * Install the handler that receives formatted failure text.
      *
@@ -85,6 +129,9 @@ public:
      * +0x0c
      */
     int mDumpLevel;
+
+private:
+    Rnd::Stream *mLogStream; // +0x10
 };
 
 /**

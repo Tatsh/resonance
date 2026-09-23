@@ -4,6 +4,7 @@ set(RESONANCE_OS_SRCS
     asynccallback.cpp
     circbuff.cpp
     cycles.cpp
+    datetime.cpp
     devconsole.cpp
     failsink.cpp
     formatstring.cpp
