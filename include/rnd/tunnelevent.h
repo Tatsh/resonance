@@ -15,6 +15,12 @@ class Stream;
  * The record is 0x10 bytes, the value of a 0x18-byte list node. The loader at 0x0046de48 settles
  * the type of mObject, because it resolves the stored name through `dynamic_cast` to
  * Rnd::Drawable.
+ *
+ * An inline member that draws the event through a filter has an out-of-line copy at 0x004776f8 and
+ * no caller. While mUser is set and a filter object is passed, it runs slot 2 of the filter with
+ * its second argument and mUser and draws mObject through Rnd::Drawable::Draw() only when the slot
+ * reports non-zero. Otherwise it draws mObject at once. The filter's class is not recovered,
+ * because no call site passes one, so the member is not declared.
  */
 struct TunnelEvent {
     /**
@@ -34,7 +40,7 @@ struct TunnelEvent {
      * @param pObject The drawable.
      * @param flFrame The frame the event is ordered by.
      * @param nId The identifier the lookups match on.
-     * @param nUser A word the tunnel stores and passes back unread.
+     * @param nUser The key a filtered draw passes to its filter.
      * @ghidraAddress 0x00477618
      */
     TunnelEvent(Drawable *pObject, float flFrame, int nId, int nUser)
@@ -75,7 +81,7 @@ struct TunnelEvent {
     Drawable *mObject; /*!< The drawable, referenced by the owning tunnel. +0x00 */
     float mFrame;      /*!< The frame the list is ordered by. +0x04 */
     int mId;           /*!< The identifier the lookups match on. +0x08 */
-    int mUser;         /*!< A word no reader was located for. +0x0c */
+    int mUser;         /*!< The key the filtered draw at 0x004776f8 passes to its filter. +0x0c */
 };
 
 } // namespace Rnd

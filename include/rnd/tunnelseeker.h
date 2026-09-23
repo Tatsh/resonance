@@ -21,9 +21,10 @@ class Tunnel;
  * towards mTargetRing on every frame.
  *
  * The record is 0x80 bytes, the element size of the seeker vector of Rnd::Tunnel. Its destructor is
- * the implicit one at 0x00477cc0, and the copy constructors at 0x004720c0, 0x00471e90, and
- * 0x00471e28 are compiler-generated. The tunnel holds every reference the record takes, so each
- * reference is released on behalf of mTunnel.
+ * the implicit one at 0x00477cc0, and the copy constructor at 0x004720c0 is compiler-generated. It
+ * runs the implicit copy constructor of mStrip at 0x00471e90 and then copies the remaining words.
+ * The tunnel holds every reference the record takes, so each reference is released on behalf of
+ * mTunnel.
  *
  * Every frame Rnd::Tunnel::SetFrameSelf() evaluates the tunnel path at three offsets from the
  * current frame. The position and look offsets orient the transform handed to SetTransXfm(), and

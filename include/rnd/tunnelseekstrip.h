@@ -22,6 +22,10 @@ struct TunnelSeeker;
  * The record is 0x50 bytes and is the first member of Rnd::TunnelSeeker. The sections form a ring
  * buffer of three, indexed by slice modulo the section count, so the strip never shows more than
  * three slices at once.
+ *
+ * The copy constructor is the implicit one, emitted at 0x00471e90. It copies the leading members
+ * word by word, mColor as one quadword, and then mSections element by element through the implicit
+ * copy constructor of Rnd::TunnelSeekSection.
  */
 struct TunnelSeekStrip {
     /**

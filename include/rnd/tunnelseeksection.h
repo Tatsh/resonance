@@ -21,7 +21,8 @@ constexpr int kTunnelSeekNoSlice = -9999;
  *
  * The record is 0x20 bytes, the element size of the section vector of Rnd::TunnelSeekStrip. Its
  * destructor is the implicit one, emitted at 0x00478018, which deletes the meshes through
- * Rnd::TunnelMeshChain.
+ * Rnd::TunnelMeshChain. Its copy constructor is the implicit one, emitted at 0x00471e28. It copies
+ * the three leading words, mMeshes, and the two trailing words.
  *
  * mDirty defers the geometry copy. Set() only records the slice, and Update() copies the vertices
  * of the matching tunnel cell the next time the section is drawn.
