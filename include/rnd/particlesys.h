@@ -312,6 +312,19 @@ protected:
      */
     virtual void SetFrameSelf(float flFrame);
 
+    /**
+     * Resize the particle owner's pool, the count the dump titles "numParticles:".
+     *
+     * The owner's references are dropped around the resize and taken again, which rethreads the
+     * pool onto the free list and empties every sharer's live list. New records are copies of one
+     * whose vector padding words are 1.0. No call site survives in the shipped program, and the
+     * name is inferred from the dump label.
+     *
+     * @param nCount The new pool size.
+     * @ghidraAddress 0x00521c58
+     */
+    void SetNumParticles(int nCount);
+
 private:
     // Integrate every live particle over a span of frames and release the ones whose death frame
     // has passed. 0x00524b70.

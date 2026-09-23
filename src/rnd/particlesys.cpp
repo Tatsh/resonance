@@ -698,6 +698,20 @@ void ParticleSys::StartAnim() {
     Animatable::StartAnim();
 }
 
+// 0x00521c58
+void ParticleSys::SetNumParticles(int nCount) {
+    mParticlesOwner->RemoveObjectRefs();
+    // Only the vector padding words are written in the image. The rest of the record is stack
+    // contents and is zeroed here.
+    Particle fill = {};
+    fill.mPos.w = 1.0f;
+    fill.mPrevPos.w = 1.0f;
+    fill.mVel.w = 1.0f;
+    fill.mBubbleSize.w = 1.0f;
+    mParticlesOwner->mParticles.resize(nCount, fill);
+    mParticlesOwner->AddObjectRefs();
+}
+
 // 0x0052c4c0
 void ParticleSys::SetFrameSelf(float flFrame) {
     if (mLastFrame != kUnsetFrame) {
