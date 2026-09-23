@@ -810,6 +810,7 @@ scplayerjoinedpacket
 scratchpad
 screenanim
 screendump
+scriptcalltemplates
 scriptmsg
 scriptsink
 scripttemplatemap
@@ -821,6 +822,8 @@ seccache
 sectioncapturedmsg
 seekermsg
 seekop
+seermusic
+seerplayer
 selectarena
 selectnumplayer
 selectremix
@@ -857,6 +860,7 @@ solopowerbarmgr
 soloremix
 soloscreenanim
 songtitle
+soundbank
 spewregistrar
 spjoinacceptpacket
 spjoindenypacket

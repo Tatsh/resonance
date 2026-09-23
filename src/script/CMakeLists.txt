@@ -3,6 +3,7 @@
 # rather than including its headers.
 set(RESONANCE_SCRIPT_SRCS
     cmdpostscript.cpp
+    scriptcalltemplates.cpp
     scripttemplatemap.cpp
     testregistry.cpp)
 

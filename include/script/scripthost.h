@@ -11,10 +11,9 @@ constexpr int kScriptTemplateAutoexec = 0xc9;
 /**
  * Register every script call template.
  *
- * The routine registers around two hundred templates against integer identifiers, among them
- * `autoexec()`, `get_screen_config()[0]`, and `level_list['%s'].stage`, plus the two exception
- * templates that title Application::Run() and Application::ExitInstance(). The registry itself is
- * not reconstructed.
+ * The routine registers 132 templates against integer identifiers, among them `autoexec()`,
+ * `get_screen_config()[0]`, and `level_list['%s'].stage`, plus the two exception messages for
+ * Application::Run() and Application::ExitInstance().
  *
  * @ghidraAddress 0x004016c8
  */
