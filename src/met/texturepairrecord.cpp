@@ -66,6 +66,11 @@ void TexturePairRecord::Load(const HxStr &path) {
     ZoneSetCurrent(nZone);
 }
 
+// 0x00249800
+void TexturePairRecord::CancelLoad() {
+    mLoading = 0;
+}
+
 // 0x00249808
 Rnd::Tex *TexturePairRecord::Current() {
     if (mInvalid) {

@@ -62,6 +62,16 @@ public:
     void invalidate();
 
     /**
+     * Forget a pending load, so Advance() does not swap it in.
+     *
+     * Clears mLoading and does nothing else. MetRemixDataScreen::ShowRecord() runs it before
+     * invalidate() when a record cannot be shown. The name is inferred.
+     *
+     * @ghidraAddress 0x00249800
+     */
+    void CancelLoad();
+
+    /**
      * Resolve both textures by name, once.
      *
      * The title is inferred.

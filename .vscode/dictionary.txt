@@ -743,6 +743,7 @@ remixfx
 remixfxmsg
 remixindex
 remixtype
+remixunavail
 remotetrackselectmsg
 renamefileop
 rendererbase
@@ -825,6 +826,7 @@ solomulti
 solopowerbarmgr
 soloremix
 soloscreenanim
+songtitle
 spewregistrar
 spjoinacceptpacket
 spjoindenypacket

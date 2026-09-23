@@ -4,7 +4,13 @@
 
 #include "met/metscreen.h"
 #include "met/texturepairrecord.h"
-#include "rnd/object.h"
+
+struct MetRemixRecord;
+namespace Rnd {
+class Mat;
+class Mesh;
+class Text;
+} // namespace Rnd
 
 /**
  * Panel that shows the stored data of one remix.
@@ -14,27 +20,18 @@
  * `0x00806a38`, the same length as the MetScreen table, so the class declares no virtual of its
  * own.
  *
- * The constructor at `0x00344740` takes only the renderer and the load priority, and supplies
- * `mcdat` for the screen name, `metagame/Shared` for the directory, and `memcard_remix_data` for
- * the container. It empties the three vectors below and builds the two records at `+0xcc` and
- * `+0xfc` from the texture pairs `gSongLogo1.tex` with `gSongLogo2.tex` and `gSongLabel1.tex`
- * with `gSongLabel2.tex`.
- *
- * The two 0x30-byte records among its members are TexturePairRecord instances, each built by the
- * constructor at `0x00246de0` from a pair of texture names.
- *
- * The destructor at `0x00344bd0` runs the TexturePairRecord destructor at `0x001fc568` on
- * mLabelTextures and then on mLogoTextures, tears down the three vectors, runs the MetScreen
- * destructor, and releases the object with the tag `MsgSink`. Every part of that teardown is
- * compiler-generated member destruction, so no destructor body is reconstructed.
- *
- * Five slots differ from the MetScreen table, and only the destructor has a recovered name. The
- * rest are 5 `0x00349a20`, 26 `0x00345de8`, 36 `0x00349ab8`, and 38 `0x00344d70`.
+ * The panel shows the song name, the recording date, the song's logo and picture, and up to four
+ * player rows of a name, a persona picture, and a mesh. MetRemixDelScreen and MetRemixLoadScreen
+ * fill it through ShowRecord() and hide it through SetRecordShowing().
  */
 class MetRemixDataScreen : public MetScreen {
 public:
     /**
      * Construct the screen.
+     *
+     * The screen name is `mcdat`, the directory `metagame/Shared`, and the container
+     * `memcard_remix_data`. The logo textures are `gSongLogo1.tex` and `gSongLogo2.tex`, and the
+     * picture textures `gSongLabel1.tex` and `gSongLabel2.tex`.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -47,14 +44,92 @@ public:
      */
     virtual ~MetRemixDataScreen();
 
+    /**
+     * Build the screen on the heap.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x00349998
+     */
+    static MetRemixDataScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Fill the panel from one remix record.
+     *
+     * Nothing happens before the views are resolved. The panel is shown first. A record made on
+     * this disc (its unknown34_ equal to GetAlbumJukeboxValue()) shows the song name from
+     * configuration code 0x325, or the shorter code 0x327 when the name is wider than the text
+     * wraps at, and starts loading the song's logo and picture. Any other record shows
+     * `remix_unavail_disc` from code 0x258 instead and hides both textures. The date comes from
+     * unknown18_, and one row per appearance takes the name and the persona burn texture, with
+     * the remaining rows hidden and emptied. No view is tested for null.
+     *
+     * @param pRecord The record to show.
+     * @ghidraAddress 0x003455a8
+     */
+    void ShowRecord(MetRemixRecord *pRecord);
+
+    /**
+     * Show or hide the song name, the date, the two meshes, and the four player rows.
+     *
+     * The two meshes are looked up by name again rather than read from the members. The name is
+     * inferred.
+     *
+     * @param nShowing Non-zero to show.
+     * @ghidraAddress 0x00345ba0
+     */
+    void SetRecordShowing(int nShowing);
+
+    /**
+     * Hide the panel and the unavailable notice, invalidate both textures, then enter.
+     *
+     * Slot 5.
+     *
+     * @ghidraAddress 0x00349a20
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Swap in each texture whose load has finished, showing its mesh only while it has one.
+     *
+     * Slot 26.
+     *
+     * @param flTime The renderer time, which the body does not read.
+     * @ghidraAddress 0x00345de8
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Hide the unavailable notice.
+     *
+     * Slot 36.
+     *
+     * @ghidraAddress 0x00349ab8
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views, the seven single views, and the four player rows.
+     *
+     * Slot 38. The unavailable notice is hidden, and each row's `mcrl_name_0N.txt` is emptied.
+     * No view is tested for null.
+     *
+     * @ghidraAddress 0x00344d70
+     */
+    virtual void ResolveContainerViews();
+
 private:
-    std::vector<Rnd::Object *> mUnknown8c; // +0x8c
-    std::vector<Rnd::Object *> mUnknown98; // +0x98
-    std::vector<Rnd::Object *> mUnknowna4; // +0xa4
-    // Never written by the constructor and not recovered.
-    unsigned char mUnknownb0[0x1c]; // +0xb0
-    // Built from `gSongLogo1.tex` with `gSongLogo2.tex`. +0xcc
+    std::vector<Rnd::Text *> mUnknown8c; // The player names, `mcrl_name_0N.txt`.
+    std::vector<Rnd::Mat *> mUnknown98;  // The persona pictures, `mcrl_playerN.mat`.
+    std::vector<Rnd::Mesh *> mUnknowna4; // The player meshes, `mcrl_freq_0N.mesh`.
+    Rnd::Text *mUnknownb0;               // `mcrl_songtitle.txt`
+    Rnd::Text *mUnknownb4;               // `mcrl_dob.txt`
+    Rnd::Mat *mUnknownb8;                // `mcrl_photo.mat`, which takes the picture
+    Rnd::Mat *mUnknownbc;                // `mcrl_logo.mat`, which takes the logo
+    Rnd::Text *mUnknownc0;               // `mcrl_remixunavail.txt`
+    Rnd::Mesh *mUnknownc4;               // `mcrl_label.mesh`, shown with the picture
+    Rnd::Mesh *mUnknownc8;               // `mcrl_logo.mesh`, shown with the logo
     TexturePairRecord mLogoTextures;
-    // Built from `gSongLabel1.tex` with `gSongLabel2.tex`. +0xfc
     TexturePairRecord mLabelTextures;
 };
