@@ -32,7 +32,7 @@ constexpr int kSceCreate = 0x200;
 constexpr int kSceTruncate = 0x400;
 
 // A request with any of these bits goes to the host rather than to an archive or the disc.
-constexpr int kSceWriteRequest = kSceWriteOnly | kSceCreate | kSceTruncate;
+constexpr int kSceWriteRequest = kSceWriteOnly | kSceAppend | kSceCreate;
 
 constexpr char kHostDevice[] = "host0:";
 constexpr char kDiscDevice[] = "cdrom0:";
