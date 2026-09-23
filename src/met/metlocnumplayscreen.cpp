@@ -62,6 +62,7 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
+// 0x002ad7e8
 MetLocNumPlayScreen::MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
@@ -192,6 +193,7 @@ MetLocNumPlayScreen *MetLocNumPlayScreen::New(MetRenderer *pRenderer, int nPrior
     return new MetLocNumPlayScreen(pRenderer, nPriority);
 }
 
+// 0x002b1008
 MetLocNumPlayScreen::~MetLocNumPlayScreen() {
     delete mButtonList;
 }

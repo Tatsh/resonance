@@ -90,6 +90,7 @@ inline HxStr Caption(const char *pszKey) {
 
 } // namespace
 
+// 0x0028d2c8
 MetLoadGameScreen::MetLoadGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mPolling(0), mWaiting(0), mUnknown9c(0), mDeadlineNs(0), mFade(nullptr) {
@@ -229,6 +230,7 @@ MetScreen *MetLoadGameScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadGameScreen(pRenderer, nPriority);
 }
 
+// 0x00291a50
 MetLoadGameScreen::~MetLoadGameScreen() {
     delete mFade;
 }

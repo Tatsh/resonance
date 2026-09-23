@@ -73,6 +73,7 @@ constexpr int kOneButton = 1;
 
 } // namespace
 
+// 0x002a8a58
 MetLoadPreFabScreen::MetLoadPreFabScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
