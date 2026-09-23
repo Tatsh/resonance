@@ -298,4 +298,14 @@ private:
     int mScore; // +0x38
     // The ceiling the routine at 0x0012f808 clamps mScore to.
     int mUnknown3c; // +0x3c
+
+public:
+    /**
+     * Watchdog time of this player's last erase press, in nanoseconds.
+     *
+     * The constructor at `0x0012f5c0` zeroes it. InputMap::OnControllerReading() reads and writes
+     * it directly at `0x00119a6c` and `0x00119adc` to detect a double tap, and the image has no
+     * accessor for it. +0x40
+     */
+    long long mLastEraseTime;
 };

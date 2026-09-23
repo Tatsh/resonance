@@ -6,10 +6,12 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
+#include "mid/mbt.h"
 
 class Globals;
 class Message;
 class Player;
+class RawControllerMsg;
 
 /**
  * Translator from controller readings to the players of one game world.
@@ -31,6 +33,7 @@ public:
     enum Action {
         kActionRotateLeft = 0x726f744c,  /*!< `rotL`, which sends RotLeftMsg. */
         kActionRotateRight = 0x726f7452, /*!< `rotR`, which sends RotRightMsg. */
+        kActionPlayback = 0x7062636b,    /*!< `pbck`, which sends PlaybackModeMsg. */
     };
 
     /**
@@ -161,10 +164,19 @@ public:
     void StopAllRiffs();
 
 private:
-    // The two axis actions, `powx` and `powy`, whose bindings keep an axis state.
+    // The two axis actions, `powx` and `powy`, whose bindings retain an axis state, and the
+    // actions only OnControllerReading() reads.
     enum {
         kActionAxisX = 0x706f7778,
         kActionAxisY = 0x706f7779,
+        kActionAdvance = 0x6164766e,
+        kActionAxisFX = 0x61786678,
+        kActionAxisRegister = 0x72656769,
+        kActionButtonPow = 0x706f7762,
+        kActionErase = 0x65726173,
+        kActionGhost = 0x67686f73,
+        kActionLoop = 0x6c6f6f70,
+        kActionPitchRiff = 0x72706368,
     };
 
     // The player slots and the riffs per slot mUnknown30 covers.
@@ -173,16 +185,16 @@ private:
         kRiffCount = 3,
     };
 
-    // 0x00119518. Turns one reading into the message its binding's action names. Not written,
-    // because most of those messages have no constructor yet.
-    void OnControllerReading(Message *pMsg);
+    // 0x00119518. Turns one reading into the message its binding's action identifies, for the
+    // player whose Slot2() matches the binding's slot. An axis binding first quantises the value
+    // to a step of -1, 0, or 1 and drops the reading unless the step changed.
+    void OnControllerReading(RawControllerMsg *pMsg);
 
-    // 0x0011da68. Sends a StopRiffMsg. Not written, for the same reason.
-    void SendStopRiff(int nArg1, Player *pPlayer, int nArg3, int nArg4);
+    // 0x0011da68.
+    void SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
     // 0x0011d9b0. Sends a PitchRiffMsg after a Player::Slot2() call whose result it discards.
-    // Not written, for the same reason.
-    void SendPitchRiff(int nArg1, Player *pPlayer, int nArg3, int nArg4);
+    void SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
     // 0x00119f58. The binding equal to binding in slot, action, and argument, appended with a
     // fresh axis state for an axis action when none exists.

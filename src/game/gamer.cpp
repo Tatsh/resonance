@@ -1,5 +1,7 @@
 #include "game/gamer.h"
 
+#include <algorithm>
+
 #include "app/application.h"
 #include "game/enablemgr.h"
 #include "game/gameenablemgr.h"
@@ -9,11 +11,19 @@
 #include "game/leveldata.h"
 #include "game/localjamenablemgr.h"
 #include "game/netjamenablemgr.h"
+#include "game/phrasedatabase.h"
 #include "game/player.h"
+#include "game/playmap.h"
 #include "game/scoretrackgraph.h"
 #include "game/trackdata.h"
+#include "msg/advancesectiontogglemsg.h"
+#include "msg/freestylefxmsg.h"
+#include "msg/invalidateseekermsg.h"
+#include "msg/invalidatetrackmsg.h"
+#include "msg/tracksonmsg.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
+#include "script/scripthost.h"
 
 namespace {
 
@@ -31,8 +41,11 @@ constexpr int kTicksPerBar = 1920;
 
 // The values the constructor starts its words at.
 constexpr int kInitialUnknown44 = 2;
-constexpr int kInitialUnknown88 = -1;
+constexpr int kInitialFreeEndBar = -1;
 constexpr int kUnallocatedCommand = -2;
+
+// The script template AdvanceTo() runs.
+constexpr int kAdvanceScriptTemplate = 1013;
 
 // The score and ceiling every player starts with.
 constexpr int kInitialScore = 0;
@@ -56,7 +69,7 @@ Gamer::Gamer(int nTrackCount, int nUnknown24, GameStats *pStats)
       mBackGraphs(nullptr), mGraphs(nullptr), mTrackSources(nTrackCount, MsgSource()),
       mUnknown84(0), mEnableMgr(nullptr), mUnknown94(nullptr), mUnknown98(0) {
     mCommand.mValue = kUnallocatedCommand;
-    mUnknown88 = kInitialUnknown88;
+    mFreeEndBar = kInitialFreeEndBar;
     mPlayMap = mGlobals->GetPlayMap();
     mUnknown24 = nUnknown24;
     mUnknown3c = QueryConfigValue(kUnknown3cConfigCode);
@@ -147,4 +160,75 @@ PhraseDatabase *Gamer::GetPhraseDatabase(int nTrack) {
 
 TrackData *Gamer::GetTrack(int nTrack) {
     return mGlobals->GetLevel()->TrackAt(nTrack);
+}
+
+void Gamer::AdvanceTo(int nBar, int nAdvance) {
+    const Mid::MBT position(
+        std::min(std::max(nBar * Mid::MBT(kTicksPerBar).mTick, kMBTMinimum), kMBTMaximum));
+    AdvanceSectionToggleMsg toggle(nAdvance, position);
+    Send(&toggle);
+
+    const int nStart = mPlayMap->Slot5(mPlayMap->FollowingStepBar(nBar));
+    const int nEnd = nStart + mUnknown3c;
+    for (int i = 0; i < mTrackCount; ++i) {
+        InvalidateTrackMsg invalidateTrack(nStart, nEnd, i);
+        mTrackSources[i].Send(&invalidateTrack);
+        InvalidateSeekerMsg invalidateSeeker(nBar, i);
+        mTrackSources[i].Send(&invalidateSeeker);
+    }
+
+    CallScriptTemplate(kAdvanceScriptTemplate);
+}
+
+void Gamer::AdvanceAt(Mid::MBT position) {
+    const int nBar = position.mTick / mBarLength.mTick;
+    AdvanceTo(nBar, mPlayMap->Slot18(nBar));
+}
+
+bool Gamer::SendTracksOn(int nBar) {
+    int nOwnedTracks = 0;
+    int nOpenTracks = 0;
+    const int nStep = mPlayMap->Slot5(nBar);
+    for (int i = 0; i < mTrackCount; ++i) {
+        TrackData *pTrack = GetTrack(i);
+        if (pTrack->mKind != kTrackModeCatch) {
+            continue;
+        }
+
+        if (GetPhraseDatabase(i)->GetOwner(nStep)->IsNull() == 0) {
+            ++nOwnedTracks;
+        } else if (!pTrack->GetGemsInBar(nStep)->empty() && mEnableMgr->QueryBar(i, nBar) != 0) {
+            ++nOpenTracks;
+        }
+    }
+
+    TracksOnMsg msg(nBar, nOwnedTracks);
+    Send(&msg);
+    return nOpenTracks == 0;
+}
+
+bool Gamer::FreeTracksAfterCapture(int nBar) {
+    const bool bComplete = SendTracksOn(nBar);
+    if (!bComplete) {
+        return bComplete;
+    }
+
+    const int nNextBar = mPlayMap->FollowingStepBar(nBar);
+    mPlayers[0]->Slot8(nBar, nNextBar);
+    mUnknown84 = nBar + 1;
+
+    int nFreeEndBar = mFreeEndBar;
+    for (int i = 0; i < mTrackCount; ++i) {
+        if (!IsNonCatchTrack(i) || mFreeEndBar >= nNextBar) {
+            continue;
+        }
+
+        const int nStartBar = std::max(nBar, mFreeEndBar);
+        mEnableMgr->SetFreeUntil(i, nStartBar, nNextBar);
+        FreestyleFXMsg msg(i, nStartBar, nNextBar);
+        Send(&msg);
+        nFreeEndBar = nNextBar;
+    }
+    mFreeEndBar = nFreeEndBar;
+    return bComplete;
 }

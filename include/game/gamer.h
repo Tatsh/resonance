@@ -150,6 +150,24 @@ public:
     TrackData *GetTrack(int nTrack);
 
 private:
+    // 0x001116c8. Sends an AdvanceSectionToggleMsg for the bar, then an InvalidateTrackMsg from
+    // the following step's mapped position through mUnknown3c further and an InvalidateSeekerMsg
+    // through each track's source, and runs script template 1013. The title is inferred.
+    void AdvanceTo(int nBar, int nAdvance);
+
+    // 0x00116a30. AdvanceTo() the bar of position, with PlayMap::Slot18() of that bar as the
+    // advance. The title is inferred.
+    void AdvanceAt(Mid::MBT position);
+
+    // 0x00111c90. Sends a TracksOnMsg with the count of catch tracks whose phrase at the bar has
+    // an owner. Returns true when no enabled catch track has an unowned phrase with gems there.
+    // The title is inferred.
+    bool SendTracksOn(int nBar);
+
+    // 0x00111e30. When SendTracksOn() returns true, frees every non-catch track from mFreeEndBar
+    // to the following step bar and sends a FreestyleFXMsg for each. The title is inferred.
+    bool FreeTracksAfterCapture(int nBar);
+
     int mUnknown18;                           // +0x18
     int mUnknown1c;                           // +0x1c
     int mUnknown20;                           // +0x20
@@ -184,7 +202,7 @@ public:
 
 private:
     int mUnknown84;        // +0x84
-    int mUnknown88;        // +0x88
+    int mFreeEndBar;       // +0x88 the end bar non-catch tracks are free until
     PlayMap *mPlayMap;     // +0x8c
     EnableMgr *mEnableMgr; // +0x90
     EnableMgr *mUnknown94; // +0x94

@@ -75,7 +75,8 @@ set(RESONANCE_APP_SRCS
     tnlseekerfade.cpp
     tnlsnake.cpp
     tnlutil.cpp
-    tunnelcache.cpp)
+    tunnelcache.cpp
+    watchdogtimer.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})
 target_link_libraries(resonance_app PRIVATE resonance_common)

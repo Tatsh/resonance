@@ -74,6 +74,9 @@ public:
     WatchdogClock mClock;
 
 private:
+    // WatchdogTimer::Now() reads mNowNs.
+    friend class WatchdogTimer;
+
     int mUnknown00;   // +0x00 the red-black tree of Sch::TimedCommand pointers, one pointer
     int mUnknown04;   // +0x04
     int mUnknown08;   // +0x08

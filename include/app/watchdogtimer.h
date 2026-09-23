@@ -33,6 +33,17 @@ public:
      */
     void SetOrigin(long long nNanoseconds);
 
+    /**
+     * Report the current time.
+     *
+     * Before an origin is set the reading is mUnknown08. Afterwards it is the monitor's
+     * most recent due tick relative to the origin.
+     *
+     * @return The time in nanoseconds.
+     * @ghidraAddress 0x004a77c0
+     */
+    long long Now();
+
 private:
     long long mNegatedOrigin; // +0x00
     long long mUnknown08;     // +0x08
