@@ -24,6 +24,23 @@
  */
 class NetPlayer : public Player {
 public:
+    /**
+     * Construct a player that a remote machine drives.
+     *
+     * The body is not written, because it runs the Player constructor at `0x0012f5c0`, which is
+     * not declared. That constructor receives nId, name, and nUnknown2c, copies name into the
+     * player's `+0x24`, and stores nUnknown2c at `+0x2c`. This constructor then stores nUnknown48
+     * in mUnknown48 and clears mUnknown4c. GrooveWorld::AddNetPlayer() is the recovered caller,
+     * and it passes its own identifier as both nId and nUnknown48.
+     *
+     * @param nId The player's identifier.
+     * @param nUnknown48 The value Slot4() reports until a message replaces it.
+     * @param name The player's name.
+     * @param nUnknown2c The value the base constructor stores at `+0x2c`.
+     * @ghidraAddress 0x00122f10
+     */
+    NetPlayer(int nId, int nUnknown48, const HxStr &name, int nUnknown2c);
+
     /** @ghidraAddress 0x00125a98 */
     virtual ~NetPlayer();
 

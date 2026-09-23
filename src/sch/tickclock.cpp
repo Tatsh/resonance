@@ -31,4 +31,16 @@ TickClock::~TickClock() {
     }
 }
 
+// 0x004a7be0
+void TickClock::SetTempoMap(TempoMap *pTempoMap) {
+    TempoMap *pPrevious = mTempoMap;
+    mTempoMap = pTempoMap;
+    if (pTempoMap != nullptr) {
+        ++pTempoMap->mRefs;
+    }
+    if (pPrevious != nullptr) {
+        pPrevious->Release();
+    }
+}
+
 } // namespace Sch

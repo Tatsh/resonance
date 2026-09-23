@@ -3,6 +3,7 @@ set(RESONANCE_GAME_SRCS
     campaignstats.cpp
     catcher.cpp
     catchingstg.cpp
+    controllercmd.cpp
     freqappearance.cpp
     gamemanagerimpl.cpp
     gameparams.cpp
@@ -10,6 +11,7 @@ set(RESONANCE_GAME_SRCS
     gamerconstructcmd.cpp
     gamestats.cpp
     genericcatcher.cpp
+    grooveworld.cpp
     idablebase.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp

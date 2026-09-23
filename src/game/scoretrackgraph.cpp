@@ -29,3 +29,8 @@ int ScoreTrackGraph::Slot11() {
 // 0x001cf778
 void ScoreTrackGraph::Slot12() {
 }
+
+// 0x001cf978
+PhraseDatabase *ScoreTrackGraph::GetPhraseDatabase() {
+    return mPhraseMgr->mDatabase;
+}

@@ -32,6 +32,19 @@
 class LevelBuilder : public LevelData {
 public:
     /**
+     * Construct an empty builder.
+     *
+     * The body is not written. It creates the tempo map at mUnknown30 at 500000 microseconds per
+     * quarter note and the PlayMapLinear at mUnknown34, and it sizes the track collections by
+     * nTrackCount with unsigned comparisons. GrooveWorld::StartLoad() passes the configuration
+     * value the query at `0x00509110` reports for the identifier 0x384.
+     *
+     * @param nTrackCount The number of tracks to prepare for.
+     * @ghidraAddress 0x001ea838
+     */
+    explicit LevelBuilder(unsigned nTrackCount);
+
+    /**
      * @ghidraAddress 0x001eafe8
      */
     virtual ~LevelBuilder();
@@ -64,7 +77,7 @@ public:
     /**
      * @ghidraAddress 0x001ec478
      */
-    virtual Attachment *OnUnknownSlot7();
+    virtual Sch::TempoMap *OnUnknownSlot7();
 
     /**
      * @ghidraAddress 0x001ec480
@@ -156,9 +169,8 @@ private:
     TrackData *mOwnTrack; // +0x28
     // The track the forwarding members append to. The destructor does not release it.
     TrackData *mCurrentTrack; // +0x2c
-    // Released by the destructor through Attachment::Release(), which is what types it. Finish()
-    // replaces it. Which subclass it is remains unrecovered.
-    Attachment *mUnknown30; // +0x30
-    // Deleted by the destructor through its own table slot 1. Its vptr sits at its own +0x38.
+    // Released by the destructor through Attachment::Release(). Finish() replaces it.
+    Sch::TempoMap *mUnknown30; // +0x30
+    // Deleted by the destructor through its own table slot 1.
     PlayMap *mUnknown34; // +0x34
 };

@@ -48,6 +48,9 @@ class LevelBuilder;
  * Every method name below that is not a Mid::Receiver override is inferred from its body.
  */
 class LevelConverter : public Mid::Receiver {
+    // GrooveWorld::FinishLoad() at 0x00194d00 sets mUnknown90 on its local converter directly.
+    friend class GrooveWorld;
+
 public:
     /**
      * Eight-byte record the collection at `+0x70` stores.
@@ -90,12 +93,13 @@ public:
      * The body is not written yet.
      *
      * @param pszPath The file to read.
-     * @param nUnknown2 The third argument, forwarded to the file object at `0x00405cf8`.
-     * @param nUnknown3 The fourth argument, forwarded to the same object.
+     * @param pBuffer The file's contents, forwarded to the file object at `0x00405cf8`.
+     *                GrooveWorld::FinishLoad() passes the buffer its asynchronous read filled.
+     * @param nLength The length of pBuffer in bytes, forwarded to the same object.
      * @param pBuilder The builder the events are appended to.
      * @ghidraAddress 0x001e65e0
      */
-    void Convert(const char *pszPath, int nUnknown2, int nUnknown3, LevelBuilder *pBuilder);
+    void Convert(const char *pszPath, void *pBuffer, int nLength, LevelBuilder *pBuilder);
 
     /**
      * Reset the per-track state and begin one track.

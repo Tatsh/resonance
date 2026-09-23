@@ -46,16 +46,11 @@ public:
      * On the wire the position travels as two bytes, mGem as one unsigned byte, and mTrans as one
      * signed byte.
      *
-     * Both inline members are recovered from their expansions. The fill value Load() hands to
-     * `resize()` sets the position alone, and the gem search in AddGem() compares positions
-     * inline.
+     * The fill value Load() hands to `resize()` sets the position alone, which is Mid::MBT's
+     * default constructor at work. The inline comparison is recovered from its expansion in the
+     * gem search AddGem() performs.
      */
     struct Gem {
-        /** Start the position at kMBTInfinity, leaving the other two members unset. */
-        Gem() {
-            mPosition.mTick = kMBTInfinity;
-        }
-
         /**
          * Order two gems by position.
          *

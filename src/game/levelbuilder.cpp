@@ -4,6 +4,7 @@
 
 #include "app/attachment.h"
 #include "game/trackdata.h"
+#include "sch/tempomap.h"
 
 namespace {
 
@@ -56,7 +57,7 @@ TrackData *LevelBuilder::UnknownAt(int nIndex) {
 }
 
 // 0x001ec478
-Attachment *LevelBuilder::OnUnknownSlot7() {
+Sch::TempoMap *LevelBuilder::OnUnknownSlot7() {
     return mUnknown30;
 }
 

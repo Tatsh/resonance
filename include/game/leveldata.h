@@ -1,8 +1,11 @@
 #pragma once
 
-class Attachment;
 class PlayMap;
 class TrackData;
+
+namespace Sch {
+class TempoMap;
+} // namespace Sch
 
 /**
  * Read-only interface the game reads one converted level through.
@@ -80,15 +83,16 @@ public:
     virtual TrackData *UnknownAt(int nIndex) = 0;
 
     /**
-     * Unrecovered. Slot 7, and pure.
+     * Report the level's tempo map. Slot 7, and pure.
      *
-     * LevelBuilder returns the word at its own `+0x30`, which its destructor releases through
-     * Attachment::Release(). The type is therefore an Attachment subclass and the purpose is
-     * unrecovered.
+     * LevelBuilder returns the word at its own `+0x30`. Its constructor fills that word with a
+     * 0x28-byte object built by `0x0052d118` with 500000 microseconds per quarter note, which is
+     * the Sch::TempoMap constructor, and GrooveWorld::FinishLoad() hands the result to
+     * Sch::TickClock::SetTempoMap(). The verb remains unrecovered.
      *
-     * @return The object.
+     * @return The tempo map.
      */
-    virtual Attachment *OnUnknownSlot7() = 0;
+    virtual Sch::TempoMap *OnUnknownSlot7() = 0;
 
     /**
      * Report the level's play map. Slot 8, and pure.

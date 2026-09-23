@@ -10,6 +10,8 @@
 #include "gs/phrasemgr.h"
 #include "synth/musesynth.h"
 
+class PhraseDatabase;
+
 /**
  * Shared base of the four per-instrument gameplay stages.
  *
@@ -53,6 +55,16 @@ public:
      * @ghidraAddress 0x001cf840
      */
     virtual ~ScoreTrackGraph();
+
+    /**
+     * Report the phrase database of this stage's phrase manager.
+     *
+     * GrooveWorld's phrase save and load paths call it for every stage.
+     *
+     * @return The phrase manager's database.
+     * @ghidraAddress 0x001cf978
+     */
+    PhraseDatabase *GetPhraseDatabase();
 
     /**
      * Start the stage.

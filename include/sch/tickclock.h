@@ -70,6 +70,18 @@ public:
     ~TickClock();
 
     /**
+     * Share a different tempo map, giving back the reference to the current one.
+     *
+     * The new map's reference count is incremented before the old map is released, and a null
+     * map is stored without a reference. GrooveWorld::FinishLoad() is the recovered caller, with
+     * the tempo map a converted level reports.
+     *
+     * @param pTempoMap The tempo map to share, or null.
+     * @ghidraAddress 0x004a7be0
+     */
+    void SetTempoMap(TempoMap *pTempoMap);
+
+    /**
      * Report the song position the clock has arrived at.
      *
      * The body divides the current time, biased by TempoMap::mCeilingBias, by

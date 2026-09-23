@@ -21,10 +21,13 @@
  *
  * Each vector has a four-byte element, which the destructor proves by dividing the byte span by
  * four to recover the count. The element type itself is not recovered, and `int` stands in for it.
- * Every member is private. Nothing outside the class reads one directly, and the purpose of each is
- * unrecovered.
+ * Every member is private, and the purpose of each is unrecovered. GrooveWorld writes mUnknown14
+ * directly, which a friend declaration models; a public member fits the image equally well.
  */
 class GameStats {
+    // GrooveWorld::MarkStatsFlag() at 0x00195378 writes mUnknown14 directly.
+    friend class GrooveWorld;
+
 public:
     /**
      * Start with every counter clear and all three vectors empty.

@@ -1,14 +1,45 @@
 #pragma once
 
+#include <vector>
+
 #include "app/msgsink.h"
 #include "game/rawcontroller.h"
+#include "os/hxstr.h"
+
+class Application;
+class BGTrackGraph;
+class Delayer;
+class GameStats;
+class Gamer;
+class IBStream;
+class InputCheatDetectorGS;
+class InputMap;
+class LevelBuilder;
+class LevelData;
+class Message;
+class MsgJoiner;
+class MsgSource;
+class MuseSynth;
+class OBStream;
+class PlayMap;
+class Player;
+class Renderer;
+class ScoreTrackGraph;
+class TrackSelector;
+struct MetControllerReading;
+
+namespace Sch {
+class TickClock;
+} // namespace Sch
 
 /**
  * Owner of the world a game session runs in.
  *
  * `11GrooveWorld` in the RTTI descriptor at `0x008eff70`, with MsgSink as a public base at offset 0
  * and RawController as a public base at `+0x04`. The object is 0xbc bytes, which the allocation in
- * GameManagerImpl::CreateWorld() fixes.
+ * GameManagerImpl::CreateWorld() fixes. The translation unit is `GrooveWorld.cpp`, which the
+ * tagged release at `0x00194d5c` records with line 302, and ControllerCmd and the file-local
+ * FuncCmd and ExitCmd share it.
  *
  * Two vtables belong to the class, and the secondary one precedes the primary one in memory. The
  * RawController subobject addresses `0x007dc628`, whose three entries each adjust `this` by `-4`,
@@ -18,47 +49,41 @@
  * below. The secondary table has three entries and a zero terminator at index 3, the same type
  * function and destructor followed by the RawController override below.
  *
- * With both overrides present the class is concrete, which agrees with GameManagerImpl creating
- * one.
+ * The member map comes from the constructor, the destructor, and the setup routine at
+ * `0x0018cce8`, which creates the input map, the track selector, the message joiner, the delayer,
+ * the gamer, the synthesiser, and the score track graphs, and resolves each type through the
+ * table its constructor installs. mState steps through 1 while the level file loads, 2 once it is
+ * converted, 4 while the world accepts controller readings, and 6 on one shutdown path.
  *
- * Recovery of the bodies has barely started, and neither override is defined. Each needs members
- * this header does not declare.
- *
- * The constructor at `0x0018bef0` takes the application and the game manager's GameStats. It
- * records the first in `+0x08` and the second in `+0x30`, then clears the run from `+0x0c` to
- * `+0x2c`. The constructor is documented rather than declared. Declaring it would make this header
- * include the application header. That include closes a cycle through the application's own
- * reference to the game manager.
- *
- * GameManagerImpl reads `+0x0c` from three of its handlers, writes `+0x8c` from its load path and
- * its begin-game handler, and reads `+0x90` from its unpause handler. The accessor at `0x001952e0`
- * returns `&mUnknown28->mUnknown14` for a non-null `+0x28` and a null pointer otherwise, and
- * GameManagerImpl::DrawFrame() uses it to decide whether the world has anything to draw.
- *
- * Five further members are recorded by address instead of being declared. `0x00194ca0` reports
- * whether an asynchronous load has finished, `0x00194d00` completes it, `0x0018dc88` and
- * `0x0018de38` both run once the world is ready, and `0x00195170` advances the world during
- * playback.
+ * GameManagerImpl reads mInputMap from three of its handlers, writes mUnknown8c from its load path
+ * and its begin-game handler, and reads mUnknown90 from its unpause handler. `0x0018dc88` and
+ * `0x0018de38` both run once the world is ready.
  */
 class GrooveWorld : public MsgSink, public RawController {
 public:
+    /**
+     * Construct an empty world.
+     *
+     * The body is not written. It clears every member, sets mUnknownb8 to 1, and creates the song
+     * clock and the cheat detector.
+     *
+     * @param pApp The application.
+     * @param pStats The game manager's statistics.
+     * @ghidraAddress 0x0018bef0
+     */
+    GrooveWorld(Application *pApp, GameStats *pStats);
+
     /**
      * @ghidraAddress 0x0018c368
      */
     virtual ~GrooveWorld();
 
     /**
-     * Route a message to one of two owned sinks.
+     * Route a CripplePacket to the delayer and a BumpPacket to the track selector.
      *
-     * Slot 3 of the primary table. The body reads the message's identity through Message::Type()
-     * and compares it against the CripplePacket identity at `0x006d73fc` and then against the
-     * BumpPacket identity at `0x006d7404`, forwarding to slot 2 of the object at `+0x24` on the
-     * first match and to slot 2 of the object at `+0x10` on the second. Each identity is confirmed
-     * by the Type() slot that returns it, CripplePacket::Type() at `0x003f0cd8` and
-     * BumpPacket::Type() at `0x003f0ef8`, and by the class-name literal the adjacent Name() slot
-     * returns. A message matching neither is discarded. Neither owned object's
-     * class is recovered, and slot 2 of a MsgSink is Handle() rather than HandleMessage(), so
-     * neither is a MsgSink.
+     * Slot 3 of the primary table. Each identity is confirmed by the Type() slot that returns it,
+     * CripplePacket::Type() at `0x003f0cd8` and BumpPacket::Type() at `0x003f0ef8`. A message
+     * matching neither is discarded. The two forwarders below are expanded inline here.
      *
      * @param pMsg The message to route.
      * @ghidraAddress 0x00195388
@@ -68,7 +93,7 @@ public:
     /**
      * Report a controller reading. Slot 2 of the secondary table.
      *
-     * The body reads `+0x98` and returns at once unless it holds 4, which is what makes the world
+     * The body reads mState and returns at once unless it holds 4, which is what makes the world
      * respond to a controller only in one of its states.
      *
      * @param nUnknown1 The first word of the reading.
@@ -78,4 +103,294 @@ public:
      * @ghidraAddress 0x0018ed98
      */
     virtual void OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4);
+
+    /**
+     * Hand one recorded controller reading to the input map.
+     *
+     * The body is not written. It returns at once unless the input map exists and mState is 4,
+     * and otherwise builds a RawControllerMsg from the reading and the song clock's position on
+     * the stack and passes it to InputMap's MsgSink half. ControllerCmd::Execute() is the
+     * recovered caller.
+     *
+     * @param pReading The reading.
+     * @ghidraAddress 0x0018f078
+     */
+    void ReplayControllerReading(const MetControllerReading *pReading);
+
+    /**
+     * Queue an ExitCmd built from three values.
+     *
+     * The body is not written. PostExitMode1(), PostExitMode2(), and PostExitMode3() are the
+     * recovered callers.
+     *
+     * @param nMode The value Exit() stores in mUnknown94.
+     * @param nUnknownb8 The value Exit() stores in mUnknownb8.
+     * @param nUnknown88 The value Exit() stores in mUnknown88.
+     * @ghidraAddress 0x0018e368
+     */
+    void PostExit(int nMode, int nUnknownb8, int nUnknown88);
+
+    /**
+     * Leave the game in one of three modes.
+     *
+     * The body is not written. It stores nMode in mUnknown94, nUnknownb8 in mUnknownb8, and
+     * nUnknown88 in mUnknown88, disables the input map, picks a delay of 1000, 3000, or 5000
+     * milliseconds from the game manager's state, and queues a FuncCmd. ExitCmd::Execute() is the
+     * recovered caller.
+     *
+     * @param nMode The exit mode.
+     * @param nUnknownb8 Stored in mUnknownb8.
+     * @param nUnknown88 Stored in mUnknown88.
+     * @ghidraAddress 0x0018e478
+     */
+    void Exit(int nMode, int nUnknownb8, int nUnknown88);
+
+    /**
+     * Hand a CripplePacket to the delayer.
+     *
+     * HandleMessage() expands this body inline, and a second out-of-line copy sits at
+     * `0x00194b20`.
+     *
+     * @param pMsg The packet.
+     * @ghidraAddress 0x00195348
+     */
+    void OnCripplePacket(Message *pMsg);
+
+    /**
+     * Hand a BumpPacket to the track selector.
+     *
+     * HandleMessage() expands this body inline.
+     *
+     * @param pMsg The packet.
+     * @ghidraAddress 0x00194b50
+     */
+    void OnBumpPacket(Message *pMsg);
+
+    /**
+     * Install the sink and the source the gamer is wired to.
+     *
+     * The source is retained only in game mode 3, and a null pointer is stored otherwise.
+     *
+     * @param pSink The sink stored in mUnknown20.
+     * @param pSource The source stored in mUnknown1c in game mode 3.
+     * @ghidraAddress 0x00194b80
+     */
+    void SetUnknown20And1c(MsgSink *pSink, MsgSource *pSource);
+
+    /**
+     * Create the level and begin reading its MIDI file asynchronously.
+     *
+     * The read is submitted with no zone current, and mState becomes 1.
+     *
+     * @param path The file to read. An empty path reads g_szEmptyString.
+     * @ghidraAddress 0x00194bc8
+     */
+    void StartLoad(const HxStr &path);
+
+    /**
+     * Report whether the MIDI file read has completed.
+     *
+     * A failed read is reported through Fatal().
+     *
+     * @return Non-zero once the read is complete.
+     * @ghidraAddress 0x00194ca0
+     */
+    int IsLoadDone();
+
+    /**
+     * Convert the MIDI file into the level and adopt the level's tempo map.
+     *
+     * The buffer the read filled is released, and mState becomes 2.
+     *
+     * @ghidraAddress 0x00194d00
+     */
+    void FinishLoad();
+
+    /**
+     * Create a remote player and append it to mPlayers.
+     *
+     * @param nId The player's identifier, passed to NetPlayer twice.
+     * @param nUnused Not read.
+     * @param name The player's name.
+     * @param nUnknown2c Passed through to the Player constructor.
+     * @ghidraAddress 0x00194de8
+     */
+    void AddNetPlayer(int nId, int nUnused, const HxStr &name, int nUnknown2c);
+
+    /**
+     * Remove the first player with an identifier from mPlayers, without destroying it.
+     *
+     * @param nId The identifier to match against Player::mId20.
+     * @ghidraAddress 0x00194ef0
+     */
+    void RemovePlayer(int nId);
+
+    /**
+     * Detach the renderer from every source that feeds it and delete it.
+     *
+     * @ghidraAddress 0x00194f88
+     */
+    void DestroyRenderer();
+
+    /**
+     * Write the phrase database of every score track graph.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00195058
+     */
+    void SavePhrases(OBStream &stream);
+
+    /**
+     * Read the phrase database of every score track graph back.
+     *
+     * @param stream The stream to read from.
+     * @param bClearOwners Non-zero to return every loaded phrase to the stand-in player.
+     * @ghidraAddress 0x001950c0
+     */
+    void LoadPhrases(IBStream &stream, int bClearOwners);
+
+    /**
+     * Enable every entry of the input map.
+     *
+     * @ghidraAddress 0x00195150
+     */
+    void EnableInput();
+
+    /**
+     * Queue exit mode 1 with the current mUnknownb8.
+     *
+     * @ghidraAddress 0x00195170
+     */
+    void PostExitMode1();
+
+    /**
+     * Queue exit mode 2.
+     *
+     * @ghidraAddress 0x00195198
+     */
+    void PostExitMode2();
+
+    /**
+     * Queue exit mode 3 with a final argument of 1.
+     *
+     * @ghidraAddress 0x001951c0
+     */
+    void PostExitMode3();
+
+    /**
+     * Tear the world down ahead of destruction.
+     *
+     * The body is not written. It runs `0x0018ec90` when mState is 6 and `0x0018c778` always,
+     * deletes the level, the song clock, the cheat detector, and the object at `+0x34`, and then
+     * runs `0x0012f400` and `0x0012f428`, which release a global at `0x0066f538`. The destructor is
+     * the recovered caller.
+     *
+     * @ghidraAddress 0x001951e8
+     */
+    void Shutdown();
+
+    /**
+     * Report the world's song clock.
+     *
+     * Globals::GetSongClock() is the out-of-line caller, and the constructor creates the clock.
+     *
+     * @return The clock.
+     * @ghidraAddress 0x001952a0
+     */
+    Sch::TickClock *GetSongClock();
+
+    /**
+     * Report the level's play map.
+     *
+     * Globals' accessor at `0x00118da0` is the recovered caller.
+     *
+     * @return The play map.
+     * @ghidraAddress 0x001952a8
+     */
+    PlayMap *GetPlayMap();
+
+    /**
+     * @return The level.
+     * @ghidraAddress 0x001952d8
+     */
+    LevelData *GetLevel();
+
+    /**
+     * Report the renderer's MsgSink half.
+     *
+     * GameManagerImpl::DrawFrame() uses it to decide whether the world has anything to draw.
+     *
+     * @return The renderer as a sink, or null when no renderer exists.
+     * @ghidraAddress 0x001952e0
+     */
+    MsgSink *GetRendererSink();
+
+    /**
+     * Set the statistics word at `+0x14` of mStats to 1.
+     *
+     * @ghidraAddress 0x00195378
+     */
+    void MarkStatsFlag();
+
+private:
+    Application *mApp;             // +0x08
+    InputMap *mInputMap;           // +0x0c
+    TrackSelector *mTrackSelector; // +0x10
+    MsgJoiner *mJoiner;            // +0x14
+    // The MIDI level. The draw path at 0x0018cce8 halts with `MIDI level file has not been
+    // loaded.` while it is null.
+    LevelBuilder *mLevel; // +0x18
+    // Registered with in game mode 3 only.
+    MsgSource *mUnknown1c; // +0x1c
+    MsgSink *mUnknown20;   // +0x20
+    Delayer *mDelayer;     // +0x24
+    // The in-game renderer, which the routine at 0x0018caa8 creates.
+    Renderer *mRenderer; // +0x28
+    Gamer *mGamer;       // +0x2c
+    GameStats *mStats;   // +0x30
+    // A pointer to a 0x48-byte object built by 0x0016dae0 and deleted through 0x0016dca8, whose
+    // class is unrecovered.
+    unsigned char mUnknown34[0x04];              // +0x34
+    std::vector<ScoreTrackGraph *> mTrackGraphs; // +0x38
+    std::vector<BGTrackGraph *> mUnknown44;      // +0x44
+    // Four-byte elements of an unrecovered type.
+    std::vector<int> mUnknown50; // +0x50
+    BGTrackGraph *mUnknown5c;    // +0x5c
+    MuseSynth *mMuseSynth;       // +0x60
+    Sch::TickClock *mSongClock;  // +0x64
+
+public:
+    /**
+     * Every player in the world, in slot order. +0x68
+     *
+     * Public because Renderer and Overlay walk it directly, and the image has no accessor for it.
+     */
+    std::vector<Player *> mPlayers;
+
+    /**
+     * The players this console drives. +0x74
+     *
+     * The element type is proven by the routine at `0x00102790`, which reads the identifier at
+     * `+0x20` of the first element. The role is inferred from Renderer, which resolves one
+     * `tnl local%d.view` per element. Public because Renderer and AppTunnel read it directly, and
+     * the image has no accessor for it.
+     */
+    std::vector<Player *> mLocalPlayers;
+
+private:
+    InputCheatDetectorGS *mCheatDetector; // +0x80
+    int mUnknown84;                       // +0x84
+    int mUnknown88;                       // +0x88
+    int mUnknown8c;                       // +0x8c
+    int mUnknown90;                       // +0x90
+    int mUnknown94;                       // +0x94, the exit mode
+    int mState;                           // +0x98
+    HxStr mLevelPath;                     // +0x9c
+    void *mLoadBuffer;                    // +0xa4, the raw MIDI file
+    int mLoadSize;                        // +0xa8
+    int mLoadHandle;                      // +0xac
+    int mUnknownb0;                       // +0xb0
+    // A block the destructor releases through MemFree().
+    void *mUnknownb4; // +0xb4
+    int mUnknownb8;   // +0xb8, starts at 1
 };

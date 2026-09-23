@@ -1,0 +1,105 @@
+#pragma once
+
+#include <iostream>
+
+#include "met/metcommandmap.h"
+#include "sch/command.h"
+
+class IBStream;
+class OBStream;
+
+/**
+ * Scheduler command that replays one controller reading into the game world.
+ *
+ * `13ControllerCmd` in the RTTI descriptor, with Sch::Command as its one base. Its vtable at
+ * `0x007dc3c0` runs eight entries and overrides every slot the base declares apart from
+ * Attachment::Destroy(). The allocation at `0x0018be70` measures the object at 0x1c bytes, which
+ * is the 0x0c-byte base followed by one sixteen-byte reading.
+ *
+ * The static member sCmdID is attested by the RTTI, which records it as the first global of the
+ * translation unit in the anonymous-namespace markers of ExitCmd and FuncCmd. Those two classes
+ * share the unit with this one and with GrooveWorld, whose routines create all three.
+ *
+ * Save() frames the reading between the tags `CM[` and `]CM`, one byte per character, and Load()
+ * reads six bytes around the reading without checking them.
+ *
+ * The destructor at `0x001944e8` is implicitly declared. It stores the base table pointer and runs
+ * Attachment's destructor, which is what the compiler generates.
+ *
+ * The member is private. Only this class's routines address it.
+ */
+class ControllerCmd : public Sch::Command {
+public:
+    /**
+     * Report the identifier this class streams itself under.
+     *
+     * @return sCmdID.
+     * @ghidraAddress 0x00194598
+     */
+    virtual int CmdID();
+
+    /**
+     * Hand the reading to the world of the running game.
+     *
+     * @ghidraAddress 0x00194560
+     */
+    virtual void Execute();
+
+    /**
+     * Write `{ControllerCmd}` to a diagnostic stream.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00194790
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the reading between the tags `CM[` and `]CM`.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x001945a8
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the reading back, discarding the three tag bytes on each side.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x001946b8
+     */
+    virtual void Load(IBStream &stream);
+
+    /**
+     * Identifier the class streams itself under. The word at `0x0067f238` starts as 2.
+     *
+     * @ghidraAddress 0x0067f238
+     */
+    static int sCmdID;
+
+private:
+    MetControllerReading mReading; // +0x0c
+};
+
+/**
+ * Write a controller reading as four four-byte transfers in member order.
+ *
+ * The routine belongs with the reading record. The body is not written.
+ *
+ * @param stream The stream to write to.
+ * @param reading The reading.
+ * @return The stream.
+ * @ghidraAddress 0x00101060
+ */
+OBStream &operator<<(OBStream &stream, const MetControllerReading &reading);
+
+/**
+ * Read a controller reading back as four four-byte transfers in member order.
+ *
+ * The body is not written.
+ *
+ * @param stream The stream to read from.
+ * @param reading The reading to fill.
+ * @return The stream.
+ * @ghidraAddress 0x00101120
+ */
+IBStream &operator>>(IBStream &stream, MetControllerReading &reading);

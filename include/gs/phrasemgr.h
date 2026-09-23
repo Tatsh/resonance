@@ -42,6 +42,9 @@ class TickClock;
  * through slot 1 of each table, which is the destructor slot.
  */
 class PhraseMgr : public MsgSink, public MsgSource {
+    // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly.
+    friend class ScoreTrackGraph;
+
 public:
     /**
      * Construct the manager of one track and its phrase database.
