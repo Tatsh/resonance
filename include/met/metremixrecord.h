@@ -28,13 +28,14 @@
  * need releasing and nothing else, so it is recorded here rather than declared. The constructor is
  * not compiler-generated, because an implicit one would not write 1 into the byte at `+0x20`.
  *
- * The byte at `+0x20` is stored with `sb` and its one recovered value is 1, which is why it is a
- * `bool`. No member name is attested anywhere in the image, so every identifier below follows the
- * required style.
+ * The byte at `+0x20` is a `char`, not a `bool`. ListRemixesMCT::OnFileLoaded() loads the GameOK
+ * byte with `lb` at `0x0017ef30` and stores it unchanged with `sb` at `0x0017ef78`, with no
+ * normalisation to 0 or 1 in between. No member name is attested anywhere in the image, so every
+ * identifier below follows the required style.
  */
 struct MetRemixRecord {
     MetRemixRecord()
-        : unknown00_(""), name(""), unknown10_(""), unknown18_(""), unknown20_(true), factory(0),
+        : unknown00_(""), name(""), unknown10_(""), unknown18_(""), unknown20_(1), factory(0),
           unknown34_(0) {
     }
 
@@ -48,7 +49,7 @@ struct MetRemixRecord {
      * @param nameIn Copied into name.
      * @param unknown10 Copied into unknown10_.
      * @param unknown18 Copied into unknown18_.
-     * @param bUnknown20 Stored in unknown20_.
+     * @param cUnknown20 Stored in unknown20_.
      * @param appearancesIn Copied into appearances.
      * @param nUnknown34 Stored in unknown34_.
      */
@@ -56,11 +57,11 @@ struct MetRemixRecord {
                    HxStr nameIn,
                    HxStr unknown10,
                    HxStr unknown18,
-                   bool bUnknown20,
+                   char cUnknown20,
                    std::vector<FreqAppearance> appearancesIn,
                    int nUnknown34)
         : unknown00_(unknown00), name(nameIn), unknown10_(unknown10), unknown18_(unknown18),
-          unknown20_(bUnknown20), factory(0), appearances(appearancesIn), unknown34_(nUnknown34) {
+          unknown20_(cUnknown20), factory(0), appearances(appearancesIn), unknown34_(nUnknown34) {
     }
 
     HxStr unknown00_; /*!< Starts as a copy of the empty string. +0x00 */
@@ -71,7 +72,7 @@ struct MetRemixRecord {
     HxStr name;
     HxStr unknown10_; /*!< Starts as a copy of the empty string. +0x10 */
     HxStr unknown18_; /*!< Starts as a copy of the empty string. +0x18 */
-    bool unknown20_;  /*!< Starts true. +0x20 */
+    char unknown20_;  /*!< Starts as 1. +0x20 */
     /** Non-zero for a factory remix. JukeboxPlayList::AddEntry() copies it. +0x24 */
     int factory;
     /** Appearances of the players who recorded the remix. +0x28 */
