@@ -4,6 +4,7 @@
 
 #include "os/async.h"
 #include "os/hxstr.h"
+#include "rnd/filepath.h"
 #include "rnd/manager.h"
 #include "rnd/object.h"
 
@@ -35,13 +36,9 @@ namespace Rnd {
  * Recovery is partial. The three configuration words the loader passes to SetBitmapConfig() are
  * not yet identified, so they are recorded by offset.
  *
- * Two routines that look like members are not. `0x004e4bd8` and `0x004e7b70` both take the address
- * of the mBitmapPath member rather than the texture, and `0x004e4d88`, which both of them finish
- * with, takes the same string and lowercases a copy of it. They belong to the art library that
- * owns the bitmap file rather than to this class, which is also where
- * `C:/FREQ/src/rndartt/abitmap.h` and the `ABmpFile` descriptor point. SetBitmapConfig() reaches
- * them to install the path, choosing `0x004e7b70` for a verbatim path and `0x004e4bd8` to prefix
- * the texture directory stored at `0x007033b8`.
+ * mBitmapPath is a Rnd::FilePath, whose routines sit in this unit and take the path's address
+ * rather than the texture's. SetBitmapConfig() installs the path through FilePath::Set() for a
+ * verbatim path and through FilePath::SetFromRoot() to prefix FilePath::sRoot.
  */
 class Tex : public Object {
 public:
@@ -260,7 +257,7 @@ protected:
     std::vector<int> mMipHandles;  // +0x2c
     unsigned char mPendingMipMask; // +0x38 One bit per mip level still loading.
     int mMipSelect;                // +0x3c Starts at -0x80.
-    HxStr mBitmapPath;             // +0x40
+    FilePath mBitmapPath;          // +0x40
     int mGsHandle;                 // +0x48 Starts at -1, which stands for no residency.
     std::vector<ABitmap *> mLoadedBitmaps;
 };
