@@ -342,7 +342,7 @@ int Blur::DrawSelf() {
     }
 
     // Each recorded transform is compared with the one before it, the first with the current one.
-    const float (*pPrevious)[kXfmRowFloatCount] = savedWorld.m;
+    const auto *pPrevious = savedWorld.m;
     for (auto it = mXfms.begin(); it != mXfms.end(); ++it) {
         if (!SameXfm(it->m, pPrevious)) {
             pMat->SetAlpha(flAlpha);
