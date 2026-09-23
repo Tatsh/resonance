@@ -3,6 +3,7 @@ set(RESONANCE_GAME_SRCS
     autoriffer.cpp
     axephrasemaker.cpp
     axingstg.cpp
+    axiscontrol.cpp
     bgtrackgraph.cpp
     bumppowerup.cpp
     campaignstats.cpp

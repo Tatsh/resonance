@@ -6,7 +6,9 @@
 #include "mid/mbt.h"
 #include "msg/message.h"
 
+class InvalidateSeekerMsg;
 class PhraseMgr;
+class PitchRiffMsg;
 class Player;
 class Quantizer;
 class TrackData;
@@ -128,6 +130,19 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
+    // The out-of-line copy of the PitchRiffMsg branch HandleMessage() expands inline.
+    // 0x001d1cc8
+    void OnPitchRiffMsg(PitchRiffMsg *pMsg);
+
+    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // 0x001d1d18
+    void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
+
+    // Returns TrackData::QueryBar() for the bar on mTrackData. OnPitchRiff() calls it at
+    // 0x001d03dc.
+    // 0x001d1d48
+    int QueryBar(int nBar);
+
     PhraseMgr *mPhraseMgr;       // +0x38
     Quantizer *mQuantizer;       // +0x3c
     const TrackData *mTrackData; // +0x40, the object Tick() tests the current bar against

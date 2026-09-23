@@ -45,6 +45,7 @@ autoriffer
 axebuttonmsg
 axephrasemaker
 axingstg
+axiscontrol
 axisfxmsg
 axisregistermsg
 axisxpowmsg

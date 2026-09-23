@@ -1,5 +1,6 @@
 #include "gs/scratcher.h"
 
+#include "game/trackdata.h"
 #include "msg/axisregistermsg.h"
 #include "msg/erasemsg.h"
 #include "msg/invalidateseekermsg.h"
@@ -42,4 +43,27 @@ void Scratcher::HandleMessage(Message *pMsg) {
     if (nType == static_cast<int>(g_nAxisRegisterMsgType)) {
         PostNowBarMsg(pMsg);
     }
+}
+
+// 0x001d1cc8
+void Scratcher::OnPitchRiffMsg(PitchRiffMsg *pMsg) {
+    if (pMsg->mUnknown10 != mUnknown44) {
+        return;
+    }
+    if (mUnknown5c != pMsg->mUnknown08) {
+        return;
+    }
+    mUnknown68 = OnPitchRiff(pMsg->mUnknown04, 0, pMsg->mUnknown0c.mTick);
+}
+
+// 0x001d1d18
+void Scratcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
+    if (pMsg->mUnknown08 == mUnknown44) {
+        SendSeekerMsg(pMsg->mUnknown04);
+    }
+}
+
+// 0x001d1d48
+int Scratcher::QueryBar(int nBar) {
+    return mTrackData->QueryBar(nBar);
 }
