@@ -94,6 +94,7 @@ set(RESONANCE_MSG_SRCS
     scgameoverpacket.cpp
     scloadlevelpacket.cpp
     scplayerjoinedpacket.cpp
+    scriptmsg.cpp
     scstartplayingpacket.cpp
     sectioncapturedmsg.cpp
     seekermsg.cpp

@@ -62,6 +62,29 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    /**
+     * Report the player's juice.
+     *
+     * Forwards to Player::GetJuice(). Overlay::OnJuiceAmount() calls it at `0x0041f3ac`. The name
+     * is inferred from the accessor it forwards to.
+     *
+     * @return The juice.
+     * @ghidraAddress 0x003e4178
+     */
+    int GetJuice();
+
+    /**
+     * Report the player's juice as a fraction of mUnknown08.
+     *
+     * Both values are converted to float before the division. Six sites call it, among them
+     * Overlay::OnJuiceAmount() twice, TnlArena::HandleMessage(), and AppTunnel::HandleMessage().
+     * The name is inferred.
+     *
+     * @return The juice divided by mUnknown08.
+     * @ghidraAddress 0x003e4198
+     */
+    float GetJuiceFraction();
+
 public:
     /**
      * Player the message is about.

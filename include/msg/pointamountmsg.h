@@ -64,6 +64,29 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    /**
+     * Report the player's score.
+     *
+     * Forwards to Player::GetScore(). Overlay::HandleMessage() at `0x00420848` and
+     * Overlay::OnPointAmount() at `0x0042b040` call it. The name is inferred from the accessor it
+     * forwards to.
+     *
+     * @return The score.
+     * @ghidraAddress 0x003e40d8
+     */
+    int GetScore();
+
+    /**
+     * Report the player's score as a fraction of the word at `+0x08`.
+     *
+     * Both values are converted to float before the division. The image lists no caller. The name
+     * is inferred.
+     *
+     * @return The score divided by the word at `+0x08`.
+     * @ghidraAddress 0x003e40f8
+     */
+    float GetScoreFraction();
+
 private:
     Player *mPlayer; // +0x04
     int mUnknown08;  // +0x08

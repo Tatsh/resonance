@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "os/mem.h"
+
 class IBStream;
 class OBStream;
 
@@ -40,6 +42,33 @@ class OBStream;
  */
 class Message {
 public:
+    /**
+     * Allocate a message from the tagged heap under the tag `MSG`.
+     *
+     * Defined in the class, because 69 byte-identical copies exist, one in every translation unit
+     * that allocates a message, and no call to any of them remains outside those units. The address
+     * below is the first copy, and the program marks the rest as copies of it.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x003da1c0
+     */
+    void *operator new(size_t nSize) {
+        return AllocateTaggedMemory(nSize, "MSG");
+    }
+
+    /**
+     * Release a message to the tagged heap under the tag `MSG`.
+     *
+     * Defined in the class for the same reason as operator new(), with 69 copies.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x003da1e0
+     */
+    void operator delete(void *pBlock) {
+        FreeTaggedMemory(pBlock, "MSG");
+    }
+
     /**
      * Vtable slot 1. The body is empty.
      *

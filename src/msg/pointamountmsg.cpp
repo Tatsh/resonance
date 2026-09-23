@@ -25,6 +25,16 @@ const char *PointAmountMsg::Name() {
     return "PointAmountMsg";
 }
 
+// 0x003e40d8
+int PointAmountMsg::GetScore() {
+    return mPlayer->GetScore();
+}
+
+// 0x003e40f8
+float PointAmountMsg::GetScoreFraction() {
+    return static_cast<float>(mPlayer->GetScore()) / static_cast<float>(mUnknown08);
+}
+
 // 0x003e4138
 void PointAmountMsg::Print(std::ostream &stream) {
     mPlayer->Print(stream);

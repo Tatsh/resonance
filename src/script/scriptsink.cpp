@@ -15,5 +15,5 @@ void ScriptSink::HandleMessage(Message *pMsg) {
     }
 
     const ScriptMsg *pScriptMsg = static_cast<const ScriptMsg *>(pMsg);
-    RunScript(HxStr(pScriptMsg->mScript != nullptr ? pScriptMsg->mScript : ""));
+    RunScript(HxStr(pScriptMsg->mScript.mStr != nullptr ? pScriptMsg->mScript.mStr : ""));
 }

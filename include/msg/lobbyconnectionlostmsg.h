@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/message.h"
 #include "os/hxstr.h"
 
@@ -12,11 +14,42 @@
  * than delegating, and the cleanup block that follows is the compiler unwinding that copy if it
  * throws.
  *
- * The class overrides Message::Print() at `0x003e4098`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * Unlike its two siblings, Print() writes nothing, although the class carries the same string.
+ *
+ * The destructor at `0x003e1b18` is compiler-generated and has no declaration here. So is the
+ * string copy at `0x003e1d68`, the same shape as GameConnectFailureMsg's at `0x003e1868`.
  */
 class LobbyConnectionLostMsg : public Message {
 public:
+    /**
+     * Construct a message with an empty string.
+     *
+     * Inline. New() expands it, zeroing the string. A declaration is required because the class
+     * declares a second constructor.
+     */
+    LobbyConnectionLostMsg() {
+    }
+
+    /**
+     * Construct a message carrying a copy of a string.
+     *
+     * The image lists no caller for the out-of-line body.
+     *
+     * @param unknown04 The string copied into `+0x04`.
+     * @ghidraAddress 0x003e1d10
+     */
+    LobbyConnectionLostMsg(const HxStr &unknown04);
+
+    /**
+     * Produce a message with an empty string on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7ad8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -40,6 +73,18 @@ public:
      * @ghidraAddress 0x003e1ce0
      */
     virtual const char *Name();
+
+    /**
+     * Write nothing.
+     *
+     * Slot 5. The empty body lies among the other message Print() bodies, directly after
+     * GameConnectionLostMsg's, rather than after this class's destructor, so the override is this
+     * class's own.
+     *
+     * @param stream The stream, which is not written.
+     * @ghidraAddress 0x003e4098
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     HxStr mUnknown04; // +0x04

@@ -13,9 +13,23 @@
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
+ *
+ * The destructor at `0x003e0ed0` is compiler-generated and has no declaration here.
  */
 class LeaveGameMsg : public Message {
 public:
+    /**
+     * Produce a message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The body is byte-identical to
+     * Clone(), because the class has no payload, and the program had titled it as a copy of
+     * Clone() until the registration identified it.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7940
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *

@@ -14,11 +14,21 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e4488`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e29d0` is compiler-generated and has no declaration here.
  */
 class MetStartPauseMsg : public Message {
 public:
+    /**
+     * Produce a message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The program had titled it as a
+     * copy of Clone() until the registration identified it.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7d10
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +52,17 @@ public:
      * @ghidraAddress 0x003e2b08
      */
     virtual const char *Name();
+
+    /**
+     * Write the literal `MetStartPauseMsg` to a diagnostic stream.
+     *
+     * The body was not claimed as a routine by the disassembler until this reconstruction, because
+     * only the vtable reaches it.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e4488
+     */
+    virtual void Print(std::ostream &stream);
 };
 
 /**

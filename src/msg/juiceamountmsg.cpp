@@ -25,6 +25,16 @@ const char *JuiceAmountMsg::Name() {
     return "JuiceAmountMsg";
 }
 
+// 0x003e4178
+int JuiceAmountMsg::GetJuice() {
+    return mUnknown04->GetJuice();
+}
+
+// 0x003e4198
+float JuiceAmountMsg::GetJuiceFraction() {
+    return static_cast<float>(mUnknown04->GetJuice()) / static_cast<float>(mUnknown08);
+}
+
 // 0x003e41d8
 void JuiceAmountMsg::Print(std::ostream &stream) {
     mUnknown04->Print(stream);

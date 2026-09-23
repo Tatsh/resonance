@@ -14,11 +14,22 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e4530`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e2e50` is compiler-generated and has no declaration here.
  */
 class MetUnlockStagesMsg : public Message {
 public:
+    /**
+     * Produce a message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The body is byte-identical to
+     * Clone(), because the class has no payload, and the program had titled it as a copy of
+     * Clone() until the registration identified it.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7db8
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +53,19 @@ public:
      * @ghidraAddress 0x003e2f88
      */
     virtual const char *Name();
+
+    /**
+     * Write the literal `MetFreqEndedMsg ` to a diagnostic stream.
+     *
+     * The literal belongs to a different class, MetFreqEndedMsg, whose own Print() writes the same
+     * text at `0x003e44f0` before its word. The image has no `MetUnlockStagesMsg ` literal, so this
+     * is faithful rather than a reconstruction error. The body was not claimed as a routine by the
+     * disassembler until this reconstruction, because only the vtable reaches it.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e4530
+     */
+    virtual void Print(std::ostream &stream);
 };
 
 /**

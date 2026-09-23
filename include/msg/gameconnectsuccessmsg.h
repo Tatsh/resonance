@@ -14,11 +14,22 @@
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * The class overrides Message::Print() at `0x003e4040`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003e14b8` is compiler-generated and has no declaration here.
  */
 class GameConnectSuccessMsg : public Message {
 public:
+    /**
+     * Produce a message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. The body is byte-identical to
+     * Clone(), because the class has no payload, and the program had titled it as a copy of
+     * Clone() until the registration identified it.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d7a20
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -42,6 +53,18 @@ public:
      * @ghidraAddress 0x003e15f0
      */
     virtual const char *Name();
+
+    /**
+     * Write nothing.
+     *
+     * Slot 5. The empty body lies among the other message Print() bodies at `0x003e2fb0` through
+     * `0x003e4500` rather than after this class's destructor, where the re-emitted
+     * Message::Print() stub of each translation unit sits, so the override is this class's own.
+     *
+     * @param stream The stream, which is not written.
+     * @ghidraAddress 0x003e4040
+     */
+    virtual void Print(std::ostream &stream);
 };
 
 /**

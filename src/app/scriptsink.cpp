@@ -13,7 +13,7 @@ ScriptSink::~ScriptSink() {
 
 // 0x00118ad0. The receiver is unused, which is why the body reads only the message.
 void ScriptSink::RunMessageScript(Message *pMsg) {
-    const char *pszScript = static_cast<ScriptMsg *>(pMsg)->mScript;
+    const char *pszScript = static_cast<ScriptMsg *>(pMsg)->mScript.mStr;
     if (pszScript == nullptr) {
         pszScript = g_szEmptyString;
     }
