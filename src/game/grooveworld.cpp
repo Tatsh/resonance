@@ -410,8 +410,10 @@ void GrooveWorld::OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, fl
             mStats->mCompleted != 0) {
             PostExit(kExitMode1, mUnknownb8, 0);
         } else {
-            PauseGameSystemMsg pause;
-            mApp->GetGameManager()->QueueMessage(&pause);
+            {
+                PauseGameSystemMsg pause;
+                mApp->GetGameManager()->QueueMessage(&pause);
+            }
             mInputMap->StopAllRiffs();
         }
         return;
