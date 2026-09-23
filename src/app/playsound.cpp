@@ -111,6 +111,7 @@ class NoteDestroyer : public TickTask {
 public:
     /**
      * @param pGlobals The globals whose song clock and synthesiser the task uses.
+     * @ghidraAddress 0x0012f1e0
      */
     explicit NoteDestroyer(Globals *pGlobals)
         : TickTask(

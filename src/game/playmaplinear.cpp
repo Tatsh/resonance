@@ -73,7 +73,7 @@ void PlayMapLinear::GrowPastLimit(int nLimit) {
     }
 }
 
-// 0x0012ade8, the out-of-line copy.
+// 0x0012ade8
 inline int PlayMapLinear::WindowIndex(int nValue) {
     GrowPastLimit(nValue);
     const std::vector<int>::iterator it =

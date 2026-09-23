@@ -30,7 +30,7 @@ PlayMapRepeatRing::PlayMapRepeatRing() {
 PlayMapRepeatRing::~PlayMapRepeatRing() {
 }
 
-// 0x0012d588, the out-of-line copy.
+// 0x0012d588
 inline int PlayMapRepeatRing::SpanIndex(int nValue) {
     const std::vector<int>::iterator it =
         std::upper_bound(mUnknown3c.begin(), mUnknown3c.end(), nValue) - 1;

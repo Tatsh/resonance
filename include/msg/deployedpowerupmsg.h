@@ -19,6 +19,8 @@ class Player;
  * words are public because AppTunnel's powerup handler at `0x00448d58` reads them directly. It
  * scales mFirstBar by the 1920 ticks of a bar, walks mBarCount bars from it, and matches mTrack
  * against each tunnel item's track.
+ *
+ * The destructor at `0x001221e0` is compiler-generated and has no declaration here.
  */
 class DeployedPowerupMsg : public Message {
 public:

@@ -14,6 +14,8 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Both members are public
  * because Overlay::OnLoopToggle() at `0x0041f708` reads them directly with no accessor in the
  * image. It compares mPlayer with HudTrack::mPlayer and picks the displayed text on mOn.
+ *
+ * The destructor at `0x00122440` is compiler-generated and has no declaration here.
  */
 class LoopToggleMsg : public Message {
 public:

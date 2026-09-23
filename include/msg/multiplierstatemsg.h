@@ -17,6 +17,8 @@ class Player;
  * Every member is public because Overlay::OnMultiplierState() at `0x00420408` reads it directly
  * with no accessor in the image. It compares mPlayer with HudTrack::mPlayer, shows the sum of
  * mMultiplier and mBonus, and selects the hot material when mBonus is non-zero.
+ *
+ * The destructor at `0x00122560` is compiler-generated and has no declaration here.
  */
 class MultiplierStateMsg : public Message {
 public:
