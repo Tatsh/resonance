@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055e5a8
 UnformatOp::UnformatOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie) {
 }

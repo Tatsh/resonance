@@ -95,11 +95,8 @@ public:
     /**
      * Build both paths, seed the measurement, and run the first step.
      *
-     * Understood but not written. The body seeds mSpace from a game-wide singleton vended by
-     * `0x0018b9c8`, which returns the pointer stored at `0x0067ea38` and reads a count at its
-     * `+0x6c` before subtracting 100. That singleton belongs to no reconstructed subsystem yet, so
-     * its type is unavailable and the body waits on it. Everything else the body does is recovered
-     * and recorded in the class documentation above.
+     * The body seeds mSpace from GlobalSettings::mUnknown6c less 100, builds both paths, clears
+     * mStep, and runs RunStep().
      *
      * @ghidraAddress 0x00178328
      */

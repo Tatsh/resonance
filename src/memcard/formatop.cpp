@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055e528
 FormatOp::FormatOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie) {
 }

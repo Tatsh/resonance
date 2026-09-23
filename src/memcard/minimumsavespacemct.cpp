@@ -1,11 +1,16 @@
 #include "memcard/minimumsavespacemct.h"
 
+#include "game/globalsettings.h"
 #include "memcard/closeop.h"
 #include "memcard/memcard.h"
+#include "memcard/memcardsavepaths.h"
 #include "memcard/memcarduser.h"
 #include "memcard/openreadop.h"
 
 namespace {
+
+// Execute() seeds the estimate with the global settings count less this many clusters.
+constexpr int kMinimumSaveSpaceSettingsAllowance = 100;
 
 // The enquiry the first step queues addresses port 1 slot 1 rather than the slot the task was
 // constructed for, which every later step does use.
@@ -22,6 +27,16 @@ MinimumSaveSpaceMCT::MinimumSaveSpaceMCT(MemcardUser *pUser,
 
 // 0x00184c18
 MinimumSaveSpaceMCT::~MinimumSaveSpaceMCT() {
+}
+
+// 0x00178328
+void MinimumSaveSpaceMCT::Execute() {
+    mState = kMemcardTaskRunning;
+    mSpace = GlobalSettings::shared()->mUnknown6c - kMinimumSaveSpaceSettingsAllowance;
+    mPersonaPath = g_saveDirBase + g_personasDirSuffix + g_personasFileName;
+    mSettingsPath = g_saveDirBase + g_globalSettingsDirSuffix + g_globalSettingsFileName;
+    mStep = kMinimumSaveSpaceStepCheckInfo;
+    RunStep();
 }
 
 // 0x00178660

@@ -32,6 +32,7 @@ set(RESONANCE_MEMCARD_SRCS
     renamefileop.cpp
     savefilemct.cpp
     saveglobalsettingsmct.cpp
+    saveicon.cpp
     savejukeboxplaylistmct.cpp
     savepersonasmct.cpp
     saveremixmct.cpp

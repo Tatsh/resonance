@@ -126,13 +126,13 @@ HxStr SaveRemixMCT::ChooseTargetDir(const std::vector<RemixDirInfo> &infos) {
     return g_remixDirBase + HxStr(szNumber);
 }
 
+// 0x0017a778
 void SaveRemixMCT::ListRemixDir() {
-    HxStr pattern(g_saveDirBase);
-    pattern += g_remixDirSuffix;
-    pattern += kAnyDirectory;
+    HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
+// 0x00186a40
 void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -292,6 +292,7 @@ void SaveRemixMCT::WriteIndex() {
                     kWriteIconFiles);
 }
 
+// 0x00186ad8
 void SaveRemixMCT::OnFileSaved(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk) {
@@ -307,11 +308,13 @@ void SaveRemixMCT::OnFileSaved(int nStatus) {
     Finish();
 }
 
+// 0x00186b60
 void SaveRemixMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnRemixSaved(mPortSlot, mStatus);
 }
 
+// 0x00186a08
 void SaveRemixMCT::Execute() {
     mState = kMemcardTaskRunning;
     mStep = 0;

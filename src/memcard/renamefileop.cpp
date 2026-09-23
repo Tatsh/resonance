@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055f030
 RenameFileOp::RenameFileOp(MemcardCBHandler *pHandler,
                            int nPortSlot,
                            const HxStr &oldPath,

@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055e9b8
 WriteOp::WriteOp(MemcardCBHandler *pHandler,
                  int nPortSlot,
                  int nFile,

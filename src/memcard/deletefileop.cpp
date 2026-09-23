@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055eed8
 DeleteFileOp::DeleteFileOp(MemcardCBHandler *pHandler,
                            int nPortSlot,
                            const HxStr &path,

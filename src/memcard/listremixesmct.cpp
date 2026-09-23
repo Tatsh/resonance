@@ -39,17 +39,18 @@ ListRemixesMCT::ListRemixesMCT(MemcardUser *pUser,
     mBuffer = mStream.mBuffer;
 }
 
+// 0x001856a8
 ListRemixesMCT::~ListRemixesMCT() {
 }
 
+// 0x0017e708
 void ListRemixesMCT::ListRemixDir() {
     mStep = 0;
-    HxStr pattern(g_saveDirBase);
-    pattern += g_remixDirSuffix;
-    pattern += kAnyDirectory;
+    HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
+// 0x00186e28
 void ListRemixesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -126,11 +127,13 @@ void ListRemixesMCT::OnFileLoaded(int nStatus) {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mBuffer, mStream.Capacity());
 }
 
+// 0x00186ea8
 void ListRemixesMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnRemixesListed(mPortSlot, mStatus);
 }
 
+// 0x00186df8
 void ListRemixesMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);

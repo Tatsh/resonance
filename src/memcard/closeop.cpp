@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055ee28
 CloseOp::CloseOp(MemcardCBHandler *pHandler, int nFile, int nCookie)
     : MemcardOp(pHandler, nCookie), mFile(nFile) {
 }

@@ -43,6 +43,7 @@ constexpr int kWriteIconFiles = 0;
 
 } // namespace
 
+// 0x0017ce08
 DeleteRemixMCT::DeleteRemixMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mRemixName(remixName), mLoadTask(nullptr),
@@ -58,12 +59,14 @@ DeleteRemixMCT::~DeleteRemixMCT() {
     delete mSaveTask;
 }
 
+// 0x0017d098
 void DeleteRemixMCT::ListRemixDir() {
     mStep = 0;
     HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
+// 0x00186cc0
 void DeleteRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -190,6 +193,7 @@ void DeleteRemixMCT::DeleteNextFile() {
     mStep = nStep;
 }
 
+// 0x00186d40
 void DeleteRemixMCT::OnDeleteFile(DeleteFileOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusOk) {
@@ -200,16 +204,19 @@ void DeleteRemixMCT::OnDeleteFile(DeleteFileOp *pOp) {
     DeleteNextFile();
 }
 
+// 0x00186d98
 void DeleteRemixMCT::OnFileSaved(int nStatus) {
     mStatus = nStatus;
     DeleteNextFile();
 }
 
+// 0x00186db8
 void DeleteRemixMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnRemixDeleted(mPortSlot, mStatus);
 }
 
+// 0x00186c90
 void DeleteRemixMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);

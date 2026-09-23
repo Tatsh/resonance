@@ -789,6 +789,7 @@ rpch
 rtti
 savefilemct
 saveglobalsettingsmct
+saveicon
 savejukeboxplaylistmct
 savepersonasmct
 saveremixmct

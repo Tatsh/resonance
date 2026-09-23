@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055e368
 CheckInfoOp::CheckInfoOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie) {
 }

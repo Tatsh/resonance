@@ -4,6 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
+// 0x0055eb58
 OpenWriteOp::OpenWriteOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
