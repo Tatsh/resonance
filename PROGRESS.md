@@ -16,24 +16,33 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                   | Count  |
 | ------------------------- | ------ |
-| Functions in the program  | 15,532 |
-| Excluded by rule          | 6,453  |
-| Reconstructable           | 9,079  |
-| Declared or defined       | 3,445  |
-| Share declared or defined | 37.94% |
-| Defined, with a body      | 1,848  |
-| Share implemented         | 20.35% |
-| Remaining, with a name    | 1,543  |
-| Remaining, unidentified   | 4,091  |
+| Functions in the program  | 15,572 |
+| Excluded by rule          | 6,509  |
+| Reconstructable           | 9,063  |
+| Declared or defined       | 3,942  |
+| Share declared or defined | 43.50% |
+| Defined, with a body      | 2,215  |
+| Share implemented         | 24.44% |
+| Remaining, with a name    | 1,374  |
+| Remaining, unidentified   | 3,747  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,597 of
-the 3,445 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 1,848 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,727 of
+the 3,942 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 2,215 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 20.35% as the answer to
-"how much is reconstructed" and 37.94% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 24.44% as the answer to
+"how much is reconstructed" and 43.50% as the answer to "how much is accounted for".
+
+The table measures the working tree. The committed tree at the same moment measured 42.38%
+accounted and 23.75% implemented, because work that has been written and checked but not yet
+committed is included above.
+
+One known undercount remains in the scanner. A routine whose definition clang-format breaks after
+`inline bool` on its own line is not recognised as a body marker, because the scanner requires a
+parenthesis or a brace on the first line after the marker. `CheckPalEqual` at `0x0059a908` is the
+known instance; it has a body and counts as unaccounted.
 
 The implemented count above was taken from a fresh function list. `implemented_report.py` reads
 `functions-latest.txt`, a stored list, and so reports a different denominator (9,257 on the same
@@ -80,13 +89,13 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 832   | Type functions, their unfolded per-unit copies, static-init glue |
+| Compiler-generated             | 835   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 1,712 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,362 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 789   | Container instantiations                                         |
-| Platform SDK                   | 355   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 183   | Exception, cast, and unwinding support                           |
-| C runtime                      | 220   | String and memory routines, and the floating-point library       |
+| Per-translation-unit duplicate | 2,356 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 850   | Container instantiations                                         |
+| Platform SDK                   | 358   | `sce` entry points and kernel syscalls                           |
+| C++ runtime                    | 184   | Exception, cast, and unwinding support                           |
+| C runtime                      | 214   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
@@ -96,8 +105,8 @@ subsystem, with no warnings. Nothing is linked yet, because the reconstruction i
 
 | Check                                 | Status       |
 | ------------------------------------- | ------------ |
-| Headers compiling standalone          | 525/550      |
-| Sources compiling                     | 363/369      |
+| Headers compiling standalone          | 546/571      |
+| Sources compiling                     | 397/403      |
 | Address annotations with no function  | 0            |
 | Lines over 100 characters             | 0            |
 | `clang-format` differences            | 0            |
@@ -182,17 +191,20 @@ from the SDK is reconstructed.
 | Art library                   | Every canvas class, the polygon fills, the stretch and clip routines, `APalette`, `ARleReader`, and the BMP, TGA, and GIF readers. Only compiler-generated emissions remain in its ranges                      |
 | Texture, PlayStation 2        | `Rnd::PsTex` in full, including surface restore, the upload and bind path, and render-target binding                                                                                                           |
 | Particles                     | `Rnd::ParticleSys` in full, including the simulation, the text dump, and revisions 0 to 6 of its file format                                                                                                   |
+| Cutscene player               | `cutscene.c`, the game's C unit around Sony's MPEG sample. The sample itself is identified and titled as SDK code                                                                                              |
+| Debug console                 | The development console bring-up in `devconsole.cpp`                                                                                                                                                           |
 | Exception runtime             | Identified rather than reconstructed. The scheme is DWARF, and the unwinding driver, the frame-state builder, the handler-chain accessor, the terminate path, and the `dynamic_cast` entry point are all named |
 
 ### Partial
 
 | Area                   | What remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Graphics device        | Packet submission is written. The game-side double-buffer descriptor and its four setters, the clear colour, and the timing and statistics overlays remain                                                                                                                                                                                                                                                                                                                                                                               |
-| Camera and environment | `PsCam` and `PsEnviron` draw paths are written. A handful of light-record and frustum helpers remain                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Tunnel                 | `Rnd::Generator` is written, and `Rnd::Tunnel` has its event list, ring lookup, collision, and mesh chains. Its section records, update, draw, and file format remain, then `AppTunnel` and its effect classes                                                                                                                                                                                                                                                                                                                           |
-| Gameplay display       | `Renderer`, the per-track HUD and its parts, and the badge classes. The HUD panel, the remaining `Overlay` bodies, `TnlArena`, and the screen animations remain                                                                                                                                                                                                                                                                                                                                                                          |
-| Phrases                | `Phrase` and `PhraseDatabase` are written. The gameplay commands, riffs, and note playback around them remain                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Graphics device        | Packet submission, the game-side `GsDoubleBuffer`, the clear colour, the feedback draw context, and the debug overlays are written. The VU1 setup routines of the draw path remain                                                                                                                                                                                                                                                                                                                                                       |
+| Camera and environment | `PsCam` and `PsEnviron` draw paths are written. The light selection for vertex lighting remains                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Tunnel                 | `Rnd::Tunnel` with its seek records, events, mesh chains, geometry, and file format, and `Rnd::Generator`, are written apart from one uncalled routine. `AppTunnel` and its effect classes remain                                                                                                                                                                                                                                                                                                                                        |
+| Gameplay display       | `Renderer`, the HUD panel and per-track display with every component, and `Overlay`'s destructor, frame update, and draw are written. `Overlay`'s constructor and message handlers, `TnlArena`, and the screen animations remain                                                                                                                                                                                                                                                                                                         |
+| Gameplay world         | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `GsPeriodical`, and the pitcher classes are written. The gameplay commands, riffs, and note playback remain                                                                                                                                                                                                                                                                                                                                                                                   |
+| Messages and packets   | Every factory, printer, and serializer of the join, level, status, and gameplay packets and of most messages is written. The MIDI file reader, the chunk reader, and a few helpers remain                                                                                                                                                                                                                                                                                                                                                |
 | Sound                  | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` has its whole bank path: the load entry point, both transfer starters, both transfer classes, the claim table, the command dispatcher, the driver submit, the core and voice report, and the SPU2 bring-up. There is no voice table, because the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array query at `0x00509110`, and 27 routines remain |
 
 ### Not started
