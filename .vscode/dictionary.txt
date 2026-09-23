@@ -105,6 +105,7 @@ collideable
 collideables
 color
 confstr
+congrat
 contctrlmsg
 controllercmd
 counta
@@ -426,6 +427,7 @@ metscreens
 metsoloendremixscreen
 metsolowinscreen
 metsonglists
+metstagefinishscreen
 metstartnetlaunchmsg
 metstartpausemsg
 metunlockstagesmsg
