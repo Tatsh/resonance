@@ -142,6 +142,11 @@ MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority
     mUnknown60 = 0;
 }
 
+// 0x003c4250
+MetStageFinishScreen *MetStageFinishScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetStageFinishScreen(pRenderer, nPriority);
+}
+
 // 0x003bded8
 MetStageFinishScreen::~MetStageFinishScreen() {
     delete mUnknowna4;

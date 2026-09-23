@@ -22,9 +22,7 @@ class Object;
  * container. It allocates the two-button ring and pushes the prompts `tut_g` and `tut_r` into
  * MetScreen::mUnknown38, one per button.
  *
- * The object is 0x90 bytes, which the allocation at `0x003cc1a8` fixes. That routine allocates
- * under the tag `MsgSink`, runs the constructor, and returns the object. Its one caller is the
- * routine at `0x00385180` that creates every front-end screen, and it is not declared.
+ * The object is 0x90 bytes, which the allocation in New() fixes.
  *
  * The destructor is at `0x003cc230`.
  *
@@ -42,6 +40,19 @@ public:
      * @ghidraAddress 0x003c7a88
      */
     MetTutorialScreen(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The object is allocated with the tag `MsgSink`. MetScreen::CreateFrontEndScreens() is the
+     * one caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x003cc1a8
+     */
+    static MetTutorialScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * @ghidraAddress 0x003cc230

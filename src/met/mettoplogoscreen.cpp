@@ -31,6 +31,10 @@ MetTopLogoScreen::MetTopLogoScreen(MetRenderer *pRenderer, int nPriority)
     mUnknown60 = 0;
 }
 
+MetTopLogoScreen *MetTopLogoScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetTopLogoScreen(pRenderer, nPriority);
+}
+
 MetTopLogoScreen::~MetTopLogoScreen() {
 }
 

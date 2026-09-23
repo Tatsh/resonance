@@ -752,7 +752,7 @@ void MetScreen::CreateMainMenuScreens(MetRenderer *pRenderer) {
     int nZone = FindZoneByName(kGlobalZone);
     ScreenRegistry()[HxStr(kMainScreenKey)] = MetScreenEntry(MetMainScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kTopLogoScreenKey)] =
-        MetScreenEntry(new MetTopLogoScreen(pRenderer, nZone));
+        MetScreenEntry(MetTopLogoScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kLeftGizmoSmallScreenKey)] =
         MetScreenEntry(MetLeftGizmoSmallScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kLeftGizmoScreenKey)] =
@@ -797,7 +797,7 @@ void MetScreen::CreateFrontEndScreens(MetRenderer *pRenderer) {
     ScreenRegistry()[HxStr(kFreqMakerInventoryScreenKey)] =
         MetScreenEntry(MetFreqMakerInventoryScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kLocNumPlayersScreenKey)] =
-        MetScreenEntry(new MetLocNumPlayScreen(pRenderer, nZone));
+        MetScreenEntry(MetLocNumPlayScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kLocPickCharScreenKey)] =
         MetScreenEntry(MetLocPickCharScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kPersonaSaverScreenKey)] =
@@ -817,7 +817,7 @@ void MetScreen::CreateFrontEndScreens(MetRenderer *pRenderer) {
     ScreenRegistry()[HxStr(kRightGizmoScreenKey)] =
         MetScreenEntry(MetRightGizmoScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kTutorialScreenKey)] =
-        MetScreenEntry(new MetTutorialScreen(pRenderer, nZone));
+        MetScreenEntry(MetTutorialScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kMemCardLoadScreenKey)] =
         MetScreenEntry(MetMemCardLoadScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kMemCardTypeScreenKey)] =
@@ -879,7 +879,7 @@ void MetScreen::CreateFrontEndScreens(MetRenderer *pRenderer) {
     ScreenRegistry()[HxStr(kSoloStatsScreenKey)] =
         MetScreenEntry(MetSoloStatsScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kStageFinishScreenKey)] =
-        MetScreenEntry(new MetStageFinishScreen(pRenderer, nZone));
+        MetScreenEntry(MetStageFinishScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kMultiStatsScreenKey)] =
         MetScreenEntry(MetMultiStatsScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kSaveRemixScreenKey)] =

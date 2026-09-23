@@ -187,6 +187,11 @@ void MetLocNumPlayScreen::PlayCycleLeftSound(int) {
 void MetLocNumPlayScreen::PlayCycleRightSound(int) {
 }
 
+// 0x002b0f80
+MetLocNumPlayScreen *MetLocNumPlayScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetLocNumPlayScreen(pRenderer, nPriority);
+}
+
 MetLocNumPlayScreen::~MetLocNumPlayScreen() {
     delete mButtonList;
 }

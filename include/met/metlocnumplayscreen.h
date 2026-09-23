@@ -22,9 +22,7 @@ class MetButtonList;
  * `MetLocNumPlayersScreen`, which differs from the class name by three letters, and the five
  * MetMultiTips screens use that literal at both ends of their ring.
  *
- * The object is at least 0x90 bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the lower bound the constructor's highest store
- * gives.
+ * The object is 0x90 bytes, which the allocation in New() fixes.
  *
  * The destructor is at `0x002b1008`.
  *
@@ -42,6 +40,19 @@ public:
      * @ghidraAddress 0x002ad7e8
      */
     MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The object is allocated with the tag `MsgSink`. MetScreen::CreateFrontEndScreens() is the
+     * one caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x002b0f80
+     */
+    static MetLocNumPlayScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * @ghidraAddress 0x002b1008

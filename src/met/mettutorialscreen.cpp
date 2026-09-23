@@ -88,6 +88,10 @@ MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     mUnknown38.push_back(HxStr(kSecondPrompt));
 }
 
+MetTutorialScreen *MetTutorialScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetTutorialScreen(pRenderer, nPriority);
+}
+
 MetTutorialScreen::~MetTutorialScreen() {
     delete mUnknown8c;
 }

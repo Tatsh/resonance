@@ -25,10 +25,7 @@ class Object;
  * `egc` for the screen name, `metagame/_Solo` for the directory, and `end_game_congrats` for the
  * container.
  *
- * The object is 0xb8 bytes, which the allocation at `0x003c4250` fixes. That routine allocates
- * under the tag `MsgSink`, runs the constructor, and returns the object, which is what a `new`
- * expression compiles to. Like the one at `0x003b9b98` for MetSoloWinScreen, its one caller is
- * the routine at `0x00385180` that creates every front-end screen, and it is not declared.
+ * The object is 0xb8 bytes, which the allocation in New() fixes.
  *
  * The destructor is at `0x003bded8`.
  *
@@ -40,9 +37,6 @@ class Object;
  * Slot 5 compares the campaign statistics before and after recording the finished stage, and
  * queues one message for each change through the private builders. Slot 26 then shows the queued
  * messages one at a time, 360 frames apart, and shows the continue button after the last.
- *
- * The allocation at `0x003c4250` has one caller, the routine at `0x00385180` that creates every
- * front-end screen.
  */
 class MetStageFinishScreen : public MetScreen {
 public:
@@ -54,6 +48,19 @@ public:
      * @ghidraAddress 0x003bdbb8
      */
     MetStageFinishScreen(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The object is allocated with the tag `MsgSink`. MetScreen::CreateFrontEndScreens() is the
+     * one caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x003c4250
+     */
+    static MetStageFinishScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * @ghidraAddress 0x003bded8

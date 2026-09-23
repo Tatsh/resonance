@@ -21,9 +21,7 @@ class View;
  * same container as MetLogoScreen under the screen name `lp` rather than `fl`, and it is one of
  * only three classes that inherit slot 5 unchanged.
  *
- * The object is 0x90 bytes, which the allocation at `0x003c7710` fixes. That routine allocates
- * under the tag `MsgSink`, runs the constructor, and returns the object. Its one caller is the
- * routine at `0x00385180` that creates every front-end screen, and it is not declared.
+ * The object is 0x90 bytes, which the allocation in New() fixes.
  *
  * The destructor is at `0x003c7798`.
  *
@@ -40,6 +38,19 @@ public:
      * @ghidraAddress 0x003c46f8
      */
     MetTopLogoScreen(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The object is allocated with the tag `MsgSink`. MetScreen::CreateMainMenuScreens() is the
+     * one caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x003c7710
+     */
+    static MetTopLogoScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * @ghidraAddress 0x003c7798
