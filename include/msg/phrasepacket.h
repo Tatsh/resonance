@@ -90,10 +90,26 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    unsigned int mTr; // +0x14
-    Phrase *mPhrase;  // +0x18
-    int mB;           // +0x1c
+    /**
+     * The track, labelled `tr` by Print(). +0x14
+     *
+     * PhraseMgr::OnPhrasePacket() at `0x001c0010` compares it with the track the manager serves.
+     */
+    unsigned int mTr;
+
+    /**
+     * The phrase, or null to clear the step. +0x18
+     *
+     * PhraseMgr::OnPhrasePacket() installs it.
+     */
+    Phrase *mPhrase;
+
+    /**
+     * The phrase step, labelled `b` by Print(). +0x1c
+     *
+     * PhraseMgr::OnPhrasePacket() installs the phrase at it.
+     */
+    int mB;
 };
 
 /**

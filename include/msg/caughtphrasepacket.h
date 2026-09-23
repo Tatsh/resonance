@@ -110,10 +110,26 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    IDablePtr<Player> mPlayer; // +0x14
-    unsigned int mTr;          // +0x1c
-    int mB;                    // +0x20
+    /**
+     * The player the phrase goes to. +0x14
+     *
+     * PhraseMgr::OnCaughtPhrasePacket() at `0x001ba540` resolves it directly.
+     */
+    IDablePtr<Player> mPlayer;
+
+    /**
+     * The track, labelled `tr` by Print(). +0x1c
+     *
+     * PhraseMgr::OnCaughtPhrasePacket() compares it with the track the manager serves.
+     */
+    unsigned int mTr;
+
+    /**
+     * The phrase step, labelled `b` by Print(). +0x20
+     *
+     * PhraseMgr::OnCaughtPhrasePacket() starts its walk of the chained steps there.
+     */
+    int mB;
 };
 
 /**

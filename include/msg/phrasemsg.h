@@ -17,7 +17,8 @@ class Phrase;
  * The payload layout comes from the run of field copies in Clone(). PhraseMgr::PostPhraseMsg()
  * fills the three words with its argument, a manager word, and the phrase it looked up, which
  * types `+0x0c`. Print() writes that phrase as an address followed by the word at `+0x04` in
- * brackets. Readers of the fields have not been traced, so they are private by default.
+ * brackets. Every member is public because the stack build and the readers named on each member
+ * access them directly.
  *
  * The destructor at `0x003e10f8` is compiler-generated and has no declaration here.
  */
@@ -72,10 +73,14 @@ public:
      */
     int mBar;
 
-private:
-    int mUnknown08; // +0x08
+    /**
+     * The track. +0x08
+     *
+     * PhraseMgr::PostPhraseMsg() at `0x001bc468` writes the track the manager serves on its stack
+     * build.
+     */
+    int mTrack;
 
-public:
     /**
      * The phrase. +0x0c
      *

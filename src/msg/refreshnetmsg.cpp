@@ -26,5 +26,5 @@ const char *RefreshNetMsg::Name() {
 
 // 0x003e3e08
 void RefreshNetMsg::Print(std::ostream &stream) {
-    stream << "tr#" << mUnknown0c << " bars " << mUnknown04 << " - " << mUnknown08;
+    stream << "tr#" << mTrack << " bars " << mFirstBar << " - " << mEndBar;
 }

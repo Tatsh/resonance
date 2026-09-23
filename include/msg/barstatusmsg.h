@@ -179,19 +179,38 @@ public:
     int mBar;   /*!< The bar the status describes. +0x04 */
     int mTrack; /*!< The track the status describes. +0x08 */
 
-private:
-    Player *mPlayer; // +0x0c
-    int mEnabled;    // +0x10
+    /**
+     * The player whose track the bar belongs to. +0x0c
+     *
+     * PhraseMgr::PostBarStatusMsg() at `0x001bb9f8` writes it on its stack build. GetPlayer() is
+     * the reader.
+     */
+    Player *mPlayer;
 
-public:
+    /**
+     * Non-zero when the bar is enabled. +0x10
+     *
+     * PhraseMgr::PostBarStatusMsg() writes it on its stack build. GetEnabled() is the reader.
+     */
+    int mEnabled;
+
     /** Word Renderer::OnBarStatus() passes to AppTunnel::OnBarChanged(). +0x14 */
     int mUnknown14;
 
-private:
-    int mPowerup;     // +0x18
-    Effects mEffects; // +0x20
+    /**
+     * The powerup kind on the bar. +0x18
+     *
+     * PhraseMgr::PostBarStatusMsg() writes it on its stack build. GetPowerup() is the reader.
+     */
+    int mPowerup;
 
-public:
+    /**
+     * One bit per effect kind. +0x20
+     *
+     * PhraseMgr::PostBarStatusMsg() writes it on its stack build. GetEffects() is the reader.
+     */
+    Effects mEffects;
+
     int mFlags; /*!< The Field bits of the fields that are set. +0x28 */
 };
 

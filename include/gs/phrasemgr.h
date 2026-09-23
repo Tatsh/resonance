@@ -122,9 +122,12 @@ public:
     void PostPhraseMsg(int nPhrase);
 
     /**
-     * Post a GemMsg. The body is not written.
+     * Add the gem a GemPacket for this track carries to the phrase at its step and every step
+     * chained to it, and post the gem for the first window bar mapped to each step.
      *
-     * The GemPacket path of HandleMessage() is the one recovered caller.
+     * A step with no phrase is first given to the packet's player, and TrackData::SetOwner()
+     * receives g_nullPlayer as the previous owner. The GemPacket path of HandleMessage() is the
+     * one recovered caller.
      *
      * @param pMsg The packet the gem is read out of.
      * @ghidraAddress 0x001ba6d0
@@ -132,9 +135,9 @@ public:
     void PostGemMsg(Message *pMsg);
 
     /**
-     * Post the gems of one bar as GemMsg objects. The body is not written.
+     * Post each gem of the phrase at a bar as a GemMsg, in the phrase owner's name.
      *
-     * RefreshBar() calls it for track modes 2 and 3.
+     * RefreshBar() calls it for a riff track.
      *
      * @param nBar The bar.
      * @ghidraAddress 0x001bc0f0
@@ -142,20 +145,25 @@ public:
     void PostGemMsgSecond(int nBar);
 
     /**
-     * Post the gems of one bar as GemMsg objects, in the form RefreshBar() uses for track modes 1
-     * and 5. The body is not written.
+     * Post each gem the track description lists for a bar as a GemMsg, when the bar is enabled.
+     *
+     * A ghost gem is posted in g_nullPlayer's name, and any other in the name of the phrase owner
+     * at the bar. RefreshBar() posts ghosts on a riff track outside jukebox mode and plain gems on
+     * a catch track.
      *
      * @param nBar The bar.
-     * @param nFlag A word RefreshBar() passes as 1.
+     * @param bGhost Non-zero to post ghost gems.
      * @ghidraAddress 0x001bc290
      */
-    void PostGemMsgThird(int nBar, int nFlag);
+    void PostGemMsgThird(int nBar, int bGhost);
 
     /**
-     * Post the gems of one bar as DurGemMsg objects. The body is not written.
+     * Post the gems of the phrase at a bar as DurGemMsg objects, with a GemMsg at the head of each
+     * run.
      *
-     * RefreshBar() calls it for track mode 4. At 0x2ac bytes it is the largest routine of the
-     * class.
+     * A gem is joined to the next when the next lies within 480 ticks and its transposition has
+     * the opposite sign. A gem with a transposition of 0 posts no DurGemMsg. RefreshBar() calls it
+     * for a scratch track.
      *
      * @param nBar The bar.
      * @ghidraAddress 0x001bbcf0
@@ -165,9 +173,11 @@ public:
     /**
      * Post one bar again when it lies in the window from mWindowStart up to mWindowEnd.
      *
-     * The body is not written, because it sends a ClearGemsMsg built on the stack when bClear is
-     * non-zero. It then posts the bar's status through PostBarStatusMsg() and the bar's gems
-     * through the routine mTrackKind selects from the jump table at `0x007e2670`.
+     * A ClearGemsMsg goes first when bClear is non-zero. The bar's status then goes through
+     * PostBarStatusMsg(), and the bar's gems through the routine mTrackKind selects from the jump
+     * table at `0x007e2670`. An axe track posts a PhraseMsg, a riff track posts ghosts and gems, a
+     * scratch track posts DurGemMsg runs, a vocal track posts a PhraseMsg through a byte-identical
+     * copy of PostPhraseMsg() at `0x001bc4f8`, and a catch track posts gems.
      *
      * @param nBar The bar.
      * @param bClear Non-zero to clear the bar's gems first.
@@ -176,9 +186,10 @@ public:
     void RefreshBar(int nBar, int bClear);
 
     /**
-     * Post a BarStatusMsg for one bar. The body is not written.
+     * Post a BarStatusMsg for one bar with every field set.
      *
-     * RefreshBar() is the recovered caller.
+     * The powerup is -1 for a bar the track description does not enable, and the manager's
+     * mRefreshing goes out in the message's `+0x14`. RefreshBar() is the recovered caller.
      *
      * @param nBar The bar.
      * @ghidraAddress 0x001bb9f8
@@ -297,10 +308,9 @@ public:
     /**
      * Install a phrase at a bar, report the owner change, and optionally post the bar again.
      *
-     * The body is not written, because it sends a message built on the stack through the sink at
-     * mNetSink. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
-     * at `0x00195378` and discards both results. AxePhraseMaker and Voxer are the recovered
-     * callers.
+     * It first marks the world's statistics through GrooveWorld::MarkStatsFlag(). A
+     * CaughtPhrasePacket for the step goes to mNetSink when one is installed. AxePhraseMaker and
+     * Voxer are the recovered callers.
      *
      * @param pPhrase The phrase.
      * @param nBar The bar, mapped through slot 5 of mMap.
@@ -313,9 +323,10 @@ public:
      * Clear the phrase at a bar and at every bar slot 7 of mMap chains it to, and post the
      * affected window bars again.
      *
-     * The body is not written, because it sends a message built on the stack through the sink at
-     * mNetSink for each cleared bar. The chain is followed only in kPlayModeGame with bAll set.
-     * AxePhraseMaker, NotePitcher, and PhraseNeutralizer are the recovered callers.
+     * It first marks the world's statistics through GrooveWorld::MarkStatsFlag(). A
+     * CaughtPhrasePacket naming g_nullPlayer goes to mNetSink for each cleared step when one is
+     * installed. The chain is followed only in kPlayModeGame with bAll set. AxePhraseMaker,
+     * NotePitcher, and PhraseNeutralizer are the recovered callers.
      *
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @param bAll Non-zero to clear every chained bar as well.
@@ -327,8 +338,9 @@ public:
      * Give the phrase of a CaughtPhrasePacket for this track to the player the packet identifies,
      * or clear it, and post the chained window bars again.
      *
-     * The body is not written, because CaughtPhrasePacket declares its payload private.
-     * HandleMessage() is the recovered caller.
+     * The phrase is cleared rather than given when the packet's player is a stand-in, and the
+     * first window bar mapped to each step is posted again. HandleMessage() is the recovered
+     * caller.
      *
      * @param pMsg The packet.
      * @ghidraAddress 0x001ba540
@@ -348,21 +360,25 @@ public:
     /**
      * Add a gem to the phrase at a bar, creating the phrase for an owner when the bar has none.
      *
-     * The body is not written, because it sends a message built on the stack through the sink at
-     * mNetSink. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
-     * at `0x00195378` and discards both results, gives a bar without a phrase to pOwner through
-     * SetPhraseOwner(), and adds the gem through Phrase::AddGem(). NotePitcher and Scratcher are
-     * the recovered callers.
+     * It first marks the world's statistics through GrooveWorld::MarkStatsFlag(), gives a bar
+     * without a phrase to pOwner through SetPhraseOwner(), and adds the gem through
+     * Phrase::AddGem(). A GemPacket goes to mNetSink when one is installed, with its
+     * transposition left unset. When bPost is non-zero, each window bar slot 6 of mMap reports for
+     * the step gets a ClearGemMsg for the gem the addition replaced, if any, and then a GemMsg for
+     * the new gem. On a riff track a replaced gem also reposts, as a ghost, the first other gem the
+     * track description lists at the same position. NotePitcher and Scratcher are the recovered
+     * callers.
      *
      * @param nGem The gem.
      * @param nTrans The transposition.
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @param nTick The song position within the phrase, in MIDI ticks.
      * @param pOwner The player a new phrase is given to.
-     * @param nUnknown A word the rest of the body uses. Both NotePitcher calls pass a member.
+     * @param bPost Non-zero to post the gem to the window bars. Both NotePitcher calls pass a
+     *              member.
      * @ghidraAddress 0x001baa98
      */
-    void AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner, int nUnknown);
+    void AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner, int bPost);
 
     /**
      * Withdraw both scheduled commands. The destructor calls it first.
@@ -375,9 +391,9 @@ public:
      * Install the phrase a PhrasePacket for this track carries at its step, or clear the step when
      * the packet has none, and post the window bar mapped to that step again.
      *
-     * The body is not written, because PhrasePacket declares `+0x14` and `+0x1c` private. When the
-     * owner changes, TrackData::SetOwner() receives the owner PhraseDatabase::GetOwner() reported
-     * before the change, which is what the binary passes. No caller is recovered.
+     * When the owner changes, TrackData::SetOwner() receives the owner PhraseDatabase::GetOwner()
+     * reported before the change, which is what the binary passes. HandleMessage() expands the
+     * body inline, and the out-of-line copy has no caller.
      *
      * @param pPacket The packet.
      * @ghidraAddress 0x001c0010
@@ -388,8 +404,7 @@ public:
      * Clear and post again every window bar whose mapped bar lies in the range an
      * InvalidateTrackMsg for this track names.
      *
-     * The body is not written, because InvalidateTrackMsg declares its payload private. No caller
-     * is recovered.
+     * HandleMessage() expands the body inline, and the out-of-line copy has no caller.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001c0110
@@ -397,14 +412,17 @@ public:
     void OnInvalidateTrack(InvalidateTrackMsg *pMsg);
 
     /**
-     * Post a CaughtPhrasePacket. The body is not written.
+     * Send mNetSink a CaughtPhrasePacket for the step of each bar a RefreshNetMsg for this track
+     * names.
      *
-     * The CaughtPhrasePacket path of HandleMessage() is the one recovered caller.
+     * Each packet names the owner of the phrase at its step, or g_nullPlayer. Nothing is sent
+     * while no sink is installed. The RefreshNetMsg path of HandleMessage() is the one recovered
+     * caller.
      *
-     * @param pMsg The packet.
+     * @param pMsg The RefreshNetMsg.
      * @ghidraAddress 0x001ba928
      */
-    void PostCaughtPhrasePacket(Message *pMsg);
+    void OnRefreshNet(Message *pMsg);
 
     /**
      * Report the player who owns the phrase at a bar.
@@ -435,7 +453,10 @@ protected:
     /**
      * Act on a message.
      *
-     * Primary table slot 3. The body is not written.
+     * Primary table slot 3. A PhrasePacket runs OnPhrasePacket(), a CaughtPhrasePacket runs
+     * OnCaughtPhrasePacket(), a GemPacket runs PostGemMsg(), an InvalidateTrackMsg runs
+     * OnInvalidateTrack(), a RefreshNetMsg runs OnRefreshNet(), and a GameBeginMsg runs
+     * RefreshAllBars(). The two On routines and RefreshAllBars() are expanded inline.
      *
      * @param pMsg The message or packet.
      * @ghidraAddress 0x001bc718
@@ -466,6 +487,10 @@ public:
     MsgSink *mNetSink;
 
 private:
+    // Post again, with its gems cleared, the first window bar that mMap maps to a step.
+    // OnCaughtPhrasePacket() and OnPhrasePacket() expand it.
+    void RefreshWindowBarOfStep(int nStep);
+
     const TrackData *mTrackData; // +0x20
     // Created by the constructor over mMap, deleted by the destructor, and the object
     // PostPhraseMsg() and three HandleMessage() paths look a phrase up in.

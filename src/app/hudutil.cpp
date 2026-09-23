@@ -63,6 +63,7 @@ Color HudColorFromName(HxStr name) {
     return Color{0.0f, 1.0f, 1.0f, 1.0f};
 }
 
+// 0x004298e8
 HxStr NextHudName() {
     return HxStr(FormatString("<hud%04d>", ++g_nHudNameCounter));
 }

@@ -176,10 +176,19 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    Fields mFields; // +0x14
-    // Labelled ` tr:` by Print(), which is the only recovered evidence of its purpose.
-    int mTr; // +0x28
+    /**
+     * The gem. +0x14
+     *
+     * PhraseMgr::PostGemMsg() at `0x001ba6d0` reads it directly.
+     */
+    Fields mFields;
+
+    /**
+     * The track, labelled ` tr:` by Print(). +0x28
+     *
+     * PhraseMgr::PostGemMsg() compares it with the track the manager serves.
+     */
+    int mTr;
 };
 
 /**
