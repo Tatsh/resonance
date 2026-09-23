@@ -16,6 +16,7 @@ constexpr int kFullInset = 75;
 
 } // namespace
 
+// 0x0041bc50
 void HudFeedback::SetFrame(float flFrame) {
     if (0.0f < flFrame) {
         return;

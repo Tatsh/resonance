@@ -20,6 +20,7 @@ constexpr int kXfmRowTranslation = 3;
 
 } // namespace
 
+// 0x0041bdb8
 HudScorePulse::HudScorePulse() {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -28,6 +29,7 @@ HudScorePulse::HudScorePulse() {
     mMesh->SetShowing(0);
 }
 
+// 0x0041c2b0
 void HudScorePulse::MoveTo(HudBadge *pBadge) {
     mMesh->mMat->SetEmissive(HudColorFromName(pBadge->mPlayer->mColorName));
 

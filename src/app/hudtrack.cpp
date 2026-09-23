@@ -6,6 +6,7 @@
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 
+// 0x0041bec8
 HudTrack::HudTrack(Player *pPlayer, int nIndex)
     : mEnergy(nIndex), mPowerup(nIndex),
       mTextMessage(HxStr(
