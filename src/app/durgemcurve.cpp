@@ -35,7 +35,7 @@ void DurGemCurve::Init(Rnd::View *pView,
                        float flWidth) {
     mLane = nLane;
     mRow = nRow;
-    mString = new Rnd::String(DurGemTrails::NewStringName());
+    mString = Rnd::String::NewString(DurGemTrails::NewStringName());
     mString->SetLinePairs(0);
     mString->SetWidth(flWidth);
     mString->SetMat(pMat);
