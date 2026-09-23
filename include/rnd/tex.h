@@ -146,16 +146,6 @@ public:
      */
     virtual void ReloadBitmaps();
 
-    /**
-     * Release every loaded bitmap and cancel the outstanding reads.
-     *
-     * Vtable slot 13. A bitmap already resident in GS memory belongs to its slot, so only a copy
-     * that never arrived there is released, and the release is billed to `rndtex.cpp` line 610.
-     *
-     * @ghidraAddress 0x004e7aa8
-     */
-    virtual void FreeLoadedBitmaps();
-
     /** Texture function, the GS `TEX0.TFX` field, which decides how a texel meets the vertex. */
     enum TexFunc {
         kTexFuncModulate = 0,  /*!< Texel times vertex colour. */
@@ -212,6 +202,16 @@ public:
      */
     virtual void SetGsPageInUse(bool bInUse);
 
+    /**
+     * Release every loaded bitmap and cancel the outstanding reads.
+     *
+     * Vtable slot 13. A bitmap already resident in GS memory belongs to its slot, so only a copy
+     * that never arrived there is released, and the release is billed to `rndtex.cpp` line 610.
+     *
+     * @ghidraAddress 0x004e7aa8
+     */
+    virtual void FreeLoadedBitmaps();
+
 protected:
     /**
      * Block until every requested mip level has arrived, pumping the asynchronous reads meanwhile.
@@ -230,18 +230,6 @@ protected:
     }
 
     /**
-     * Take delivery of one mip level whose read has just finished.
-     *
-     * Vtable slot 15. Empty in Rnd::Tex. Rnd::PsTex uploads the level to GS memory here. The name
-     * is inferred from the position of the call inside PollAsyncMips().
-     *
-     * @param nMip The level that arrived, which both implementations use to index the loaded
-     * bitmaps.
-     * @ghidraAddress 0x004e5928
-     */
-    virtual void OnMipLoaded(int nMip);
-
-    /**
      * Rebuild whatever the texture keeps in GS memory.
      *
      * Vtable slot 14. The name is the routine's own: the PlayStation 2 override reports
@@ -251,6 +239,26 @@ protected:
      * @ghidraAddress 0x004e4598
      */
     virtual void RestoreSurfaces();
+
+    /**
+     * Take delivery of one mip level whose read has just finished.
+     *
+     * Vtable slot 15. The level's block is a bitmap header followed by a palette and the pixels.
+     * An indexed format (4 bit, 8 bit, or run length 8 bit) points the bitmap at both. A direct
+     * colour format has no palette, and its pixels start where the palette would. Red and blue are
+     * then swapped unless g_nSkipColorSwap is set. Flag 0x10 of mUnknown28 runs
+     * ABitmap::SetPaletteAlphaFromLowByte(0), or else flag 0x20 runs it with 1, and
+     * ABitmap::ApplyColorKey() receives mUnknown28 whole. A level whose width or height is not a
+     * power of two is reported to g_failSink. A level above zero whose size is not mWidth and
+     * mHeight shifted right by nMip is reported as well. Neither report stops the load. Rnd::PsTex
+     * runs this body first and then uploads the level to GS memory. The name is inferred from the
+     * position of the call inside PollAsyncMips().
+     *
+     * @param nMip The level that arrived, which both implementations use to index the loaded
+     * bitmaps.
+     * @ghidraAddress 0x004e5928
+     */
+    virtual void OnMipLoaded(int nMip);
 
 protected:
 public:

@@ -24,6 +24,8 @@ constexpr unsigned int kAlpha15Bit = 0x8000;
 constexpr int kBlue15Shift = 10;
 constexpr unsigned int kWhite15 = 0x7fff;
 constexpr unsigned int kColorChannelsMask = 0xffffff;
+constexpr unsigned int kLowByteMask = 0xff;
+constexpr int kAlphaShift = 24;
 
 } // namespace
 
@@ -201,6 +203,18 @@ void ABitmap::ApplyColorKey(int nFlags) {
         ACanvas *pCanvas = ACanvas::CreateForBitmap(*this, false);
         pCanvas->BuildAlphaFromColorKey(mTransparentColor);
         delete pCanvas;
+    }
+}
+
+// 0x004e7d48
+void ABitmap::SetPaletteAlphaFromLowByte(int bWhiten) {
+    if (mPalette == nullptr) {
+        return;
+    }
+    for (int i = 0; i < mPalette->mEnd; ++i) {
+        const unsigned int nEntry = mPalette->mEntries[i];
+        const unsigned int nColor = bWhiten != 0 ? kColorChannelsMask : nEntry & kColorChannelsMask;
+        mPalette->mEntries[i] = ((nEntry & kLowByteMask) << kAlphaShift) | nColor;
     }
 }
 

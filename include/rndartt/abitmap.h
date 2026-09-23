@@ -231,6 +231,20 @@ struct ABitmap {
      */
     void SwapRedBlue();
 
+    /**
+     * Copy the low byte of every palette entry into its alpha byte.
+     *
+     * The first mPalette->mEnd entries are rewritten, and a bitmap without a palette is not
+     * changed. With bWhiten set, the three colour bytes of each entry also become 0xff, leaving a
+     * white palette whose alpha carries the former low channel. Rnd::Tex::OnMipLoaded() is the one
+     * caller, passing zero for texture flag 0x10 and one for flag 0x20. The out-of-line copy sits
+     * in the Rnd::Tex translation unit. The name is inferred.
+     *
+     * @param bWhiten Non-zero to set the colour bytes to white as well.
+     * @ghidraAddress 0x004e7d48
+     */
+    void SetPaletteAlphaFromLowByte(int bWhiten);
+
     void *mPixels; /*!< The pixel rectangle, null until allocated. +0x00 */
     unsigned short mHasTransparentColor : 8; /*!< Whether mTransparentColor applies. +0x04 */
     unsigned short mFormat : 4;              /*!< The ABitmapFormat code. +0x05 bits 0 to 3 */

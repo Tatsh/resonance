@@ -10,6 +10,7 @@
 #include "rnd/filepath.h"
 #include "rnd/stream.h"
 #include "rnd/tex.h"
+#include "rndartt/abitmap.h"
 #include "rndartt/apalette.h"
 
 namespace Rnd {
@@ -32,6 +33,38 @@ constexpr char kParentDirectory[] = "..";
 // The text of a string, or the shared empty string when the buffer is null.
 inline const char *TextOf(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
+}
+
+// Texture flag bits OnMipLoaded() tests before ABitmap::SetPaletteAlphaFromLowByte(). Flag 0x10
+// wins when both are set.
+constexpr int kTexFlagPaletteAlpha = 0x10;
+constexpr int kTexFlagPaletteAlphaWhite = 0x20;
+
+// A loaded mip block. The bitmap header is followed by a palette and then the pixels of an indexed
+// format. A direct colour format's pixels begin where the palette would.
+struct ABitmapImage : ABitmap {
+    APalette mImagePalette;
+    unsigned char mIndexedPixels[1];
+};
+
+// -1 unless n is a power of two, 0 for one, and 1 for a larger power of two. OnMipLoaded() tests
+// only the sign.
+inline int ClassifyPowerOfTwo(int n) {
+    if (n <= 0) {
+        return -1;
+    }
+    if (n == 1) {
+        return 0;
+    }
+    while (true) {
+        if ((n & 1) != 0) {
+            return -1;
+        }
+        n >>= 1;
+        if (n == 1) {
+            return 1;
+        }
+    }
 }
 
 } // namespace
@@ -81,6 +114,60 @@ bool Tex::PollAsyncMips() {
     }
     RestoreSurfaces();
     return true;
+}
+
+// 0x004e5928
+void Tex::OnMipLoaded(int nMip) {
+    if (mLoadedBitmaps.empty()) {
+        return;
+    }
+    ABitmap *pBitmap = mLoadedBitmaps[nMip];
+    if (pBitmap == nullptr) {
+        return;
+    }
+
+    auto *pImage = static_cast<ABitmapImage *>(pBitmap);
+    if (pBitmap->mFormat == kABitmapFormatLinear4 || pBitmap->mFormat == kABitmapFormatLinear8 ||
+        pBitmap->mFormat == kABitmapFormatRle8) {
+        pBitmap->mPalette = &pImage->mImagePalette;
+        pBitmap->mPixels = pImage->mIndexedPixels;
+    } else {
+        pBitmap->mPalette = nullptr;
+        pBitmap->mPixels = &pImage->mImagePalette;
+    }
+
+    if (g_nSkipColorSwap == 0) {
+        pBitmap->SwapRedBlue();
+    }
+    if ((mUnknown28 & kTexFlagPaletteAlpha) != 0) {
+        pBitmap->SetPaletteAlphaFromLowByte(0);
+    } else if ((mUnknown28 & kTexFlagPaletteAlphaWhite) != 0) {
+        pBitmap->SetPaletteAlphaFromLowByte(1);
+    }
+    pBitmap->ApplyColorKey(mUnknown28);
+
+    if (ClassifyPowerOfTwo(pBitmap->mWidth) < 0 || ClassifyPowerOfTwo(pBitmap->mHeight) < 0) {
+        g_failSink.Report("%s (mipmap %d) is not power of 2 in width and height (%d x %d)\n",
+                          TextOf(mBitmapPath.RelativeToRoot()),
+                          nMip,
+                          pBitmap->mWidth,
+                          pBitmap->mHeight);
+    }
+    if (nMip <= 0) {
+        return;
+    }
+    const int nExpectedWidth = mWidth >> nMip;
+    const int nExpectedHeight = mHeight >> nMip;
+    if (pBitmap->mWidth != nExpectedWidth || pBitmap->mHeight != nExpectedHeight) {
+        g_failSink.Report(
+            "%s (mipmap %d) is not expected width/height (got %dx%d, expected %dx%d)\n",
+            TextOf(mBitmapPath.RelativeToRoot()),
+            nMip,
+            pBitmap->mWidth,
+            pBitmap->mHeight,
+            nExpectedWidth,
+            nExpectedHeight);
+    }
 }
 
 // 0x004e73c8
