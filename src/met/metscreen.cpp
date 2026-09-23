@@ -833,7 +833,7 @@ void MetScreen::CreateFrontEndScreens(MetRenderer *pRenderer) {
     ScreenRegistry()[HxStr(kCreditsScreenKey)] =
         MetScreenEntry(MetCreditsScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kJukeboxTopButtonsScreenKey)] =
-        MetScreenEntry(new MetJukeboxTopButtonsScreen(pRenderer, nZone));
+        MetScreenEntry(MetJukeboxTopButtonsScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kJukeboxCustomRemixesScreenKey)] =
         MetScreenEntry(MetJukeboxCustomRemixesScreen::New(pRenderer, nZone));
     ScreenRegistry()[HxStr(kJukeboxFactoryRemixesScreenKey)] =
