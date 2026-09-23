@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,10 @@
  * 0x1c bytes and its vtable is at `0x008124f8`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Every member is public because
+ * AppTunnel::HandleMessage() at `0x0044987c` reads them directly with no accessor in the image. It
+ * copies the colour name of mPlayer, stops the strip mStripId when mStop is set, and otherwise
+ * extends it on mLane to mFrame and mBlend.
  */
 class SusGemMsg : public Message {
 public:
@@ -49,13 +52,12 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04;   // +0x04
-    int mUnknown08;   // +0x08
-    int mUnknown0c;   // +0x0c
-    int mUnknown10;   // +0x10
-    float mUnknown14; // +0x14
-    int mUnknown18;   // +0x18
+    int mStripId;    /*!< The sustain strip. +0x04 */
+    int mStop;       /*!< Non-zero to stop the strip. +0x08 */
+    int mLane;       /*!< The lane. +0x0c */
+    int mFrame;      /*!< The frame the strip extends to. +0x10 */
+    float mBlend;    /*!< The blend at that frame. +0x14 */
+    Player *mPlayer; /*!< The player the strip belongs to. +0x18 */
 };
 
 /**

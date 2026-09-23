@@ -17,8 +17,9 @@ class Player;
  *
  * mPlayer, mFirstBar, and mEndBar are public because Overlay::OnShowEraseEffect() at `0x0041fba0`
  * reads them directly with no accessor in the image. It compares mPlayer with HudTrack::mPlayer
- * and shows `BAR ERASED` when `mEndBar - mFirstBar < 2`, `TRACK ERASED` otherwise. The purpose of
- * the words at `+0x08` and `+0x14` is not recovered.
+ * and shows `BAR ERASED` when `mEndBar - mFirstBar < 2`, `TRACK ERASED` otherwise. mTrack is
+ * public because AppTunnel's erase handler at `0x004481d0` reads it directly. Scratcher stores its
+ * own track there. The purpose of the word at `+0x14` is not recovered.
  */
 class ShowEraseEffectMsg : public Message {
 public:
@@ -57,13 +58,9 @@ public:
     virtual const char *Name();
 
     Player *mPlayer; /*!< The player who erased the range. +0x04 */
-
-private:
-    int mUnknown08; // +0x08
-
-public:
-    int mFirstBar; /*!< The first erased bar. +0x0c */
-    int mEndBar;   /*!< The bar one past the last erased bar. +0x10 */
+    int mTrack;      /*!< The erased track. +0x08 */
+    int mFirstBar;   /*!< The first erased bar. +0x0c */
+    int mEndBar;     /*!< The bar one past the last erased bar. +0x10 */
 
 private:
     int mUnknown14; // +0x14

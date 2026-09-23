@@ -16,8 +16,9 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). Print() labels a bar range at
  * `+0x04` and `+0x08` and the track at `+0x0c`, and it writes the colour name of the player at
- * `+0x10`. The word at `+0x14` is not printed. Readers of the fields have not been traced, so
- * they are private by default.
+ * `+0x10`. The word at `+0x14` is not printed. The last four members are public because
+ * AppTunnel's section handler at `0x00448530` reads them directly with no accessor in the image.
+ * It scales mEndBar by the 1920 ticks of a bar.
  *
  * The destructor at `0x003ded28` is compiler-generated and has no declaration here.
  */
@@ -67,11 +68,13 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    int mUnknown04;  // +0x04
-    int mUnknown08;  // +0x08
-    int mTrack;      // +0x0c
-    Player *mPlayer; // +0x10
-    int mUnknown14;  // +0x14
+    int mFirstBar; // +0x04
+
+public:
+    int mEndBar;     /*!< The end of the bar range. +0x08 */
+    int mTrack;      /*!< The track. +0x0c */
+    Player *mPlayer; /*!< The capturing player. +0x10 */
+    int mUnknown14;  /*!< A flag AppTunnel reduces to 0 or 1. Purpose unrecovered. +0x14 */
 };
 
 /**

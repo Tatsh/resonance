@@ -21,6 +21,10 @@ class Player;
  * names come from Catcher::SimulateRemoteGem() at `0x001ace78`, which stores the catcher's track
  * and the gem TrackData::FindGemAtOrAfter() reports.
  *
+ * Every member is public because AppTunnel's gem handler at `0x00447638` reads all five directly
+ * with no accessor in the image. A non-zero mGhost selects the ghost gem there, and every stack
+ * build clears it.
+ *
  * The destructor at `0x003df450` is compiler-generated and has no declaration here.
  */
 class GemMsg : public Message {
@@ -37,8 +41,8 @@ public:
     /**
      * Report a gem played on a track.
      *
-     * Inline, with no address of its own. Every stack build in the image expands it and clears the
-     * word at `+0x14` (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::Slot8() at
+     * Inline, with no address of its own. Every stack build in the image expands it and clears
+     * mGhost (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::Slot8() at
      * `0x001ac25c`, and PhraseMgr::PostGemMsg() at `0x001ba86c`, among others).
      *
      * @param position The song position of the gem.
@@ -47,7 +51,7 @@ public:
      * @param pPlayer The player who played it.
      */
     GemMsg(Mid::MBT position, int nTrack, int nGem, Player *pPlayer)
-        : mPosition(position), mTrack(nTrack), mGem(nGem), mPlayer(pPlayer), mUnknown14(0) {
+        : mPosition(position), mTrack(nTrack), mGem(nGem), mPlayer(pPlayer), mGhost(0) {
     }
 
     /**
@@ -94,12 +98,11 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    Mid::MBT mPosition; // +0x04
-    int mTrack;         // +0x08
-    int mGem;           // +0x0c
-    Player *mPlayer;    // +0x10
-    int mUnknown14;     // +0x14
+    Mid::MBT mPosition; /*!< The song position of the gem. +0x04 */
+    int mTrack;         /*!< The track the gem lies on. +0x08 */
+    int mGem;           /*!< The gem, which AppTunnel uses as the lane. +0x0c */
+    Player *mPlayer;    /*!< The player who played it. +0x10 */
+    int mGhost;         /*!< Non-zero for a ghost gem. +0x14 */
 };
 
 /**

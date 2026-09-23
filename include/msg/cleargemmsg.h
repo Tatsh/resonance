@@ -9,9 +9,10 @@
  * is 0x10 bytes and its vtable is at `0x007e2818`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Every member is public because
+ * AppTunnel::HandleMessage() at `0x00449790` reads them directly with no accessor in the image. It
+ * converts mFrame and mGem to floats and loads mTrack with `lb`, which reads only the low byte of
+ * the word.
  */
 class ClearGemMsg : public Message {
 public:
@@ -49,10 +50,9 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    int mFrame; /*!< The frame of the gem to clear. +0x04 */
+    int mTrack; /*!< The track. +0x08 */
+    int mGem;   /*!< The gem. +0x0c */
 };
 
 /**

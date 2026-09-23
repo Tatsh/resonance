@@ -19,7 +19,8 @@ class Player;
  * track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
  * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. mPlayer is public
  * because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly with no accessor in the
- * image, comparing it with HudTrack::mPlayer.
+ * image, comparing it with HudTrack::mPlayer. The other three are public because AppTunnel's
+ * muffed-phrase handler at `0x00447ba8` reads them directly.
  *
  * The destructor at `0x003dff48` is compiler-generated and has no declaration here.
  */
@@ -95,15 +96,10 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mTrack; // +0x04
-
-public:
-    Player *mPlayer; /*!< The player who muffed the phrase. +0x08 */
-
-private:
-    Mid::MBT mPosition; // +0x0c
-    int mTried;         // +0x10
+    int mTrack;         /*!< The track. +0x04 */
+    Player *mPlayer;    /*!< The player who muffed the phrase. +0x08 */
+    Mid::MBT mPosition; /*!< The song position of the miss. +0x0c */
+    int mTried;         /*!< Non-zero when the player had attempted the phrase. +0x10 */
 };
 
 /**

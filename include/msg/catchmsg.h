@@ -11,9 +11,10 @@ class Player;
  * 0x20 bytes and its vtable is at `0x007e0a28`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(). Every member but mGem is
- * public because Overlay::OnCatch() at `0x0041fed8` reads it directly with no accessor in the
- * image. It compares mPlayer with HudTrack::mPlayer, draws the catch progress from mCaught over
+ * The payload layout comes from the run of field copies in Clone(). Every member is public because
+ * code outside the class reads it directly with no accessor in the image. AppTunnel's catch
+ * handler at `0x00447938` reads mGem and mPlayer, and Overlay::OnCatch() at `0x0041fed8` reads the
+ * rest. Overlay compares mPlayer with HudTrack::mPlayer, draws the catch progress from mCaught over
  * mTotal, converts mTick to a bar by the 1920 ticks of a bar before looking mTrack up, and resets
  * its miss count when mHit is set.
  *
@@ -85,13 +86,9 @@ public:
      */
     virtual const char *Name();
 
-    int mTick;  /*!< The scheduler time of the gem. +0x04 */
-    int mTrack; /*!< The track the gem lies on. +0x08 */
-
-private:
-    int mGem; // +0x0c
-
-public:
+    int mTick;       /*!< The scheduler time of the gem. +0x04 */
+    int mTrack;      /*!< The track the gem lies on. +0x08 */
+    int mGem;        /*!< The gem, which AppTunnel uses as the lane. +0x0c */
     int mHit;        /*!< Non-zero for a caught gem, zero for a miss. +0x10 */
     Player *mPlayer; /*!< The catching player. +0x14 */
     int mCaught;     /*!< The gems caught so far in the phrase. +0x18 */

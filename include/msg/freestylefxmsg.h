@@ -11,7 +11,7 @@
  *
  * The payload layout comes from the run of field copies in Clone(). The names come from Gamer's
  * two builds, which store a track, a first bar, and an end bar (the first bar plus 8 at
- * `0x001111b8`). Readers of the fields have not been traced, so they are private by default.
+ * `0x001111b8`). Only mTrack has a traced reader outside the class.
  *
  * The destructor at `0x00116450` is compiler-generated and has no declaration here. The routine
  * at `0x00116488` is a further emission of the type-information accessor.
@@ -75,8 +75,15 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * The track. +0x04
+     *
+     * Public because AppTunnel's freestyle handler at `0x00448a08` reads it directly with no
+     * accessor in the image.
+     */
+    int mTrack;
+
 private:
-    int mTrack;  // +0x04
     int mBar;    // +0x08
     int mEndBar; // +0x0c
 };

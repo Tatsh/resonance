@@ -31,7 +31,7 @@ const char *CripplePacket::Name() {
 void CripplePacket::Print(std::ostream &stream) {
     std::ostream &rest = stream << static_cast<void *>(static_cast<Player *>(mUnknown14)) << " ";
     rest << "(";
-    for (auto &player : mUnknown1c) {
+    for (auto &player : mTargets) {
         rest << static_cast<void *>(static_cast<Player *>(player)) << " ";
     }
     rest << ")";
@@ -44,9 +44,9 @@ void CripplePacket::Save(OBStream &stream) {
     int id = mUnknown14.mId;
     OBStream &rest = stream.Write(&id, sizeof(id));
 
-    int count = static_cast<int>(mUnknown1c.size());
+    int count = static_cast<int>(mTargets.size());
     rest.Write(&count, sizeof(count));
-    for (const auto &player : mUnknown1c) {
+    for (const auto &player : mTargets) {
         int playerId = player.mId;
         rest.Write(&playerId, sizeof(playerId));
     }
@@ -60,8 +60,8 @@ void CripplePacket::Load(IBStream &stream) {
 
     int count;
     rest.Read(&count, sizeof(count));
-    mUnknown1c.resize(count);
-    for (auto &player : mUnknown1c) {
+    mTargets.resize(count);
+    for (auto &player : mTargets) {
         rest.Read(&player.mId, sizeof(player.mId));
     }
 }

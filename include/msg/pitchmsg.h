@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,9 @@
  * 0x14 bytes and its vtable is at `0x007e5560`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The last three words are
+ * public because AppTunnel's pitch handler at `0x00447cc0` reads them directly with no accessor in
+ * the image. It compares `+0x10` with the player each tunnel item stores, which types it.
  *
  * The destructor at `0x001b3890` is compiler-generated and has no declaration here.
  */
@@ -53,9 +55,11 @@ public:
 
 private:
     int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+
+public:
+    int mUnknown08;     /*!< Purpose unrecovered. AppTunnel passes it on to a lookup. +0x08 */
+    int mUnknown0c;     /*!< Purpose unrecovered. AppTunnel converts it to a float. +0x0c */
+    Player *mUnknown10; /*!< The player. +0x10 */
 };
 
 /**

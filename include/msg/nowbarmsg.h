@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,10 @@
  * 0x10 bytes and its vtable is at `0x007e5680`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). mPlayer and mLane are public
+ * because AppTunnel::HandleMessage() at `0x004496e8` reads them directly with no accessor in the
+ * image. It compares mPlayer with the player each tunnel item stores, which types it, and eases
+ * the item toward mLane. The purpose of the word at `+0x04` is not recovered.
  */
 class NowBarMsg : public Message {
 public:
@@ -50,9 +53,11 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04;   // +0x04
-    int mUnknown08;   // +0x08
-    float mUnknown0c; // +0x0c
+    int mUnknown04; // +0x04
+
+public:
+    Player *mPlayer; /*!< The player the now bar belongs to. +0x08 */
+    float mLane;     /*!< The lane AppTunnel eases the item toward. +0x0c */
 };
 
 /**

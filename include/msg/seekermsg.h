@@ -111,13 +111,16 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    // AppTunnel's seeker handler at 0x00447eb0 reads the five members below directly with no
+    // accessor in the image.
+    Player *mPlayer = nullptr; /*!< The player the seeker belongs to. +0x04 */
+    int mFirstBar;             /*!< The first bar, labelled `bars[`. +0x08 */
+    int mBarCount;             /*!< The number of bars in the range. +0x0c */
+    int mTrack;                /*!< The track, labelled `tr#`. +0x10 */
+    int mEnabled;              /*!< Zero for a seeker that is off. +0x14 */
+
 private:
-    Player *mPlayer = nullptr; // +0x04
-    int mFirstBar;             // +0x08, labelled `bars[`
-    int mBarCount;             // +0x0c, added to mFirstBar for the end of the range
-    int mTrack;                // +0x10, labelled `tr#`
-    int mEnabled;              // +0x14, zero prints ` (off)`
-    Mid::MBT mWhen;            // +0x18, labelled `when:`
+    Mid::MBT mWhen; // +0x18, labelled `when:`
 };
 
 /**

@@ -90,8 +90,16 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    IDablePtr<Player> mUnknown14;               // +0x14
-    std::vector<IDablePtr<Player> > mUnknown1c; // +0x1c
+    IDablePtr<Player> mUnknown14; // +0x14
+
+public:
+    /**
+     * The players the crippler strikes. +0x1c
+     *
+     * Public because AppTunnel's crippler handler at `0x004486f8` walks it directly with no
+     * accessor in the image.
+     */
+    std::vector<IDablePtr<Player> > mTargets;
 };
 
 /**

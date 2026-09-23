@@ -15,8 +15,10 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). The first three words are
  * public because Overlay::OnDeployedPowerup() at `0x0041eda8` reads them directly with no accessor
  * in the image. It passes mKind to HudPowerupName(), compares mPlayer with HudTrack::mPlayer, and,
- * when mKind is kHudItemBumper, compares mTarget with HudTrack::mPlayer as well. The purpose of the
- * last three words is not recovered.
+ * when mKind is kHudItemBumper, compares mTarget with HudTrack::mPlayer as well. The last three
+ * words are public because AppTunnel's powerup handler at `0x00448d58` reads them directly. It
+ * scales mFirstBar by the 1920 ticks of a bar, walks mBarCount bars from it, and matches mTrack
+ * against each tunnel item's track.
  */
 class DeployedPowerupMsg : public Message {
 public:
@@ -57,11 +59,9 @@ public:
     HudItemKind mKind; /*!< The deployed powerup. +0x04 */
     Player *mPlayer;   /*!< The deploying player. +0x08 */
     Player *mTarget;   /*!< The player a bumper strikes. +0x0c */
-
-private:
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14
-    int mUnknown18; // +0x18
+    int mFirstBar;     /*!< The first bar the powerup covers. +0x10 */
+    int mBarCount;     /*!< The number of bars it covers. +0x14 */
+    int mTrack;        /*!< The track it acts on. +0x18 */
 };
 
 /**

@@ -28,6 +28,6 @@ const char *SectionCapturedMsg::Name() {
 
 // 0x003d8578. The colour name is copied into a temporary before it is written.
 void SectionCapturedMsg::Print(std::ostream &stream) {
-    stream << "b " << mUnknown04 << "--" << mUnknown08 << " tr# " << mTrack;
+    stream << "b " << mFirstBar << "--" << mEndBar << " tr# " << mTrack;
     stream << " " << HxStr(mPlayer->mColorName);
 }
