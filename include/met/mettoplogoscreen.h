@@ -2,6 +2,10 @@
 
 #include "met/metscreen.h"
 
+namespace Rnd {
+class View;
+} // namespace Rnd
+
 /**
  * Logo panel drawn along the top of the front end.
  *
@@ -13,20 +17,18 @@
  *
  * The constructor at `0x003c46f8` takes only the renderer and the load priority, and supplies `lp`
  * for the screen name, `metagame/Shared` for the directory, and `freq_logo_panel` for the
- * container. It writes nothing beyond its own vptr.
- *
- * The class declares no data member. It loads the same container as MetLogoScreen,
- * `metagame/Shared/freq_logo_panel`, under the screen name `lp` rather than `fl`, and it is one of
+ * container. It clears MetScreen::mUnknown60 and does not write mUnknown8c. The screen loads the
+ * same container as MetLogoScreen under the screen name `lp` rather than `fl`, and it is one of
  * only three classes that inherit slot 5 unchanged.
  *
- * The object is at least 0x8c bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the lower bound the constructor's highest store
- * gives.
+ * The object is 0x90 bytes, which the allocation at `0x003c7710` fixes. That routine allocates
+ * under the tag `MsgSink`, runs the constructor, and returns the object. Its one caller is the
+ * routine at `0x00385180` that creates every front-end screen, and it is not declared.
  *
  * The destructor is at `0x003c7798`.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
- * are 26 `0x003c77f0`, 38 `0x003c4868`.
+ * are 26 `0x003c77f0` and 38 `0x003c4868`.
  */
 class MetTopLogoScreen : public MetScreen {
 public:
@@ -43,4 +45,27 @@ public:
      * @ghidraAddress 0x003c7798
      */
     virtual ~MetTopLogoScreen();
+
+    /**
+     * Advance the wave animation to the current frame. Slot 26.
+     *
+     * @param flTime The current frame position.
+     * @ghidraAddress 0x003c77f0
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Resolve the logo panel and the wave animation. Slot 38.
+     *
+     * The body does not run MetScreen::ResolveContainerViews(). It resolves the animation views,
+     * resolves `logo_panel.view` into MetScreen::mUnknown14 and releases its animation references
+     * without a null test, clears MetScreen::mUnknown48, and resolves `wave.view` into mUnknown8c.
+     *
+     * @ghidraAddress 0x003c4868
+     */
+    virtual void ResolveContainerViews();
+
+private:
+    // The wave animation slot 26 advances. Not written by the constructor. +0x8c
+    Rnd::View *mUnknown8c;
 };

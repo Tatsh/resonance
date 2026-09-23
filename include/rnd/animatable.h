@@ -5,7 +5,6 @@
 #include "rnd/object.h"
 
 class FailSink;
-class ScrollingList;
 namespace Rnd {
 class Stream;
 }
@@ -41,8 +40,9 @@ namespace Rnd {
  * the children, and InverseFilters() maps a child frame back the other way.
  */
 class Animatable : public virtual Object {
-    // ScrollingList's destructor walks mAnims directly, and the image has no accessor for it.
-    friend class ::ScrollingList;
+    // CollectChildren() in rnd/collectchildren.h walks mAnims directly, and the image has no
+    // accessor for it.
+    friend void CollectChildren(std::list<Object *> &objects, Animatable *pAnimatable);
 
 public:
     /**

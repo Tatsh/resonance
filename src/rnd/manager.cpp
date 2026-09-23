@@ -1,9 +1,11 @@
 #include "rnd/manager.h"
 
+#include <list>
 #include <map>
 
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "rnd/collectchildren.h"
 #include "rnd/object.h"
 
 namespace Rnd {
@@ -57,6 +59,91 @@ void Manager::DumpText(FailSink &sink) {
             sink.Print("\n");
         }
     }
+}
+
+// 0x0051a428
+Object *Manager::ResolveAndLinkObject(
+    Object *pSource, const HxStr &prefix, unsigned nFlags, int bRecurse, int bLink) {
+    const HxStr &className = pSource->ClassName();
+    Object *pClone;
+    {
+        HxStr name = prefix + pSource->mName;
+        pClone = Create(className, name);
+    }
+    if (pClone == nullptr) {
+        return nullptr;
+    }
+    pClone->Copy(pSource, nFlags);
+    mLoaded.clear();
+    mLoaded.push_back(pClone);
+    if (bRecurse == 0 && bLink == 0) {
+        return pClone;
+    }
+
+    Animatable *pAnimatable = dynamic_cast<Animatable *>(pSource);
+    Collideable *pCollideable = dynamic_cast<Collideable *>(pSource);
+    Drawable *pDrawable = dynamic_cast<Drawable *>(pSource);
+    Transformable *pTransformable = dynamic_cast<Transformable *>(pSource);
+
+    if (bRecurse != 0) {
+        std::list<Object *> sources;
+        CollectChildren(sources, pAnimatable);
+        CollectChildren(sources, pCollideable);
+        CollectChildren(sources, pDrawable);
+        CollectChildren(sources, pTransformable);
+        sources.sort();
+        sources.unique();
+
+        std::list<Object *> clones;
+        for (std::list<Object *>::iterator it = sources.begin(); it != sources.end(); ++it) {
+            clones.push_back(g_manager.ResolveAndLinkObject(*it, prefix, nFlags, 0, 0));
+        }
+        sources.push_back(pSource);
+        clones.push_back(pClone);
+
+        // Every clone's references to a source object are redirected to that object's clone.
+        std::list<Object *>::iterator clone = clones.begin();
+        for (std::list<Object *>::iterator source = sources.begin(); source != sources.end();
+             ++source, ++clone) {
+            for (std::list<Object *>::iterator other = clones.begin(); other != clones.end();
+                 ++other) {
+                if (other != clone) {
+                    (*other)->Replace(*source, *clone);
+                }
+            }
+        }
+
+        mLoaded.clear();
+        mLoaded.splice(mLoaded.end(), clones);
+    }
+
+    if (bLink != 0) {
+        if (pTransformable != nullptr) {
+            Transformable *pParent = pTransformable->Parent();
+            if (pParent != nullptr) {
+                pParent->AddTrans(dynamic_cast<Transformable *>(pClone));
+            }
+        }
+        if (pCollideable != nullptr) {
+            Collideable *pParent = pCollideable->Parent();
+            if (pParent != nullptr) {
+                pParent->AddCollide(dynamic_cast<Collideable *>(pClone));
+            }
+        }
+        if (pDrawable != nullptr) {
+            Drawable *pParent = pDrawable->Parent();
+            if (pParent != nullptr) {
+                pParent->AddDraw(dynamic_cast<Drawable *>(pClone), nullptr);
+            }
+        }
+        if (pAnimatable != nullptr) {
+            Animatable *pParent = pAnimatable->Parent();
+            if (pParent != nullptr) {
+                pParent->AddAnim(dynamic_cast<Animatable *>(pClone));
+            }
+        }
+    }
+    return pClone;
 }
 
 // 0x0051bf70

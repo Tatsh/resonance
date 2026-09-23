@@ -41,6 +41,7 @@ set(RESONANCE_MET_SRCS
     metsolowinscreen.cpp
     metsonglists.cpp
     metstagefinishscreen.cpp
+    mettoplogoscreen.cpp
     mettutorialscreen.cpp
     scrollinglist.cpp)
 

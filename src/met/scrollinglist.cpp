@@ -5,8 +5,7 @@
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "os/zone.h"
-#include "rnd/animatable.h"
-#include "rnd/collideable.h"
+#include "rnd/collectchildren.h"
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
@@ -18,6 +17,9 @@ namespace {
 
 // The prefix each row clone's name takes before the template's name.
 static const char *const kRowNameFormat = "v_%02d_";
+
+// The copy flags makeRow() clones the template with.
+constexpr unsigned kRowCloneFlags = 0x200;
 
 // The class names buildRowCells() sorts a row's children by.
 static const char *const kTextClassName = "Text";
@@ -87,10 +89,10 @@ ScrollingList::~ScrollingList() {
         Rnd::View *pRow = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 
         std::list<Rnd::Object *> objects;
-        collectChildren(objects, static_cast<Rnd::Animatable *>(pRow));
-        collectChildren(objects, static_cast<Rnd::Collideable *>(pRow));
-        collectChildren(objects, static_cast<Rnd::Drawable *>(pRow));
-        collectChildren(objects, static_cast<Rnd::Transformable *>(pRow));
+        Rnd::CollectChildren(objects, static_cast<Rnd::Animatable *>(pRow));
+        Rnd::CollectChildren(objects, static_cast<Rnd::Collideable *>(pRow));
+        Rnd::CollectChildren(objects, static_cast<Rnd::Drawable *>(pRow));
+        Rnd::CollectChildren(objects, static_cast<Rnd::Transformable *>(pRow));
         objects.sort();
         objects.unique();
         for (std::list<Rnd::Object *>::iterator it = objects.begin(); it != objects.end(); ++it) {
@@ -98,6 +100,13 @@ ScrollingList::~ScrollingList() {
         }
         delete static_cast<Rnd::Object *>(pRow);
     }
+}
+
+Rnd::View *ScrollingList::makeRow(int nIndex) {
+    HxStr prefix(FormatString(kRowNameFormat, nIndex));
+    Rnd::Object *pObject =
+        Rnd::g_manager.ResolveAndLinkObject(mTemplate, prefix, kRowCloneFlags, 1, 1);
+    return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 
 void ScrollingList::buildRowCells(Rnd::View *pRow) {
@@ -138,56 +147,6 @@ void ScrollingList::refresh() {
         ++nRow;
     }
     updateArrows();
-}
-
-void ScrollingList::collectChildren(std::list<Rnd::Object *> &objects,
-                                    Rnd::Animatable *pAnimatable) {
-    if (pAnimatable == nullptr) {
-        return;
-    }
-    for (std::list<Rnd::Animatable *>::iterator it = pAnimatable->mAnims.begin();
-         it != pAnimatable->mAnims.end();
-         ++it) {
-        objects.push_back(*it);
-        collectChildren(objects, *it);
-    }
-}
-
-void ScrollingList::collectChildren(std::list<Rnd::Object *> &objects,
-                                    Rnd::Collideable *pCollideable) {
-    if (pCollideable == nullptr) {
-        return;
-    }
-    for (std::list<Rnd::Collideable *>::iterator it = pCollideable->mCollides.begin();
-         it != pCollideable->mCollides.end();
-         ++it) {
-        objects.push_back(*it);
-        collectChildren(objects, *it);
-    }
-}
-
-void ScrollingList::collectChildren(std::list<Rnd::Object *> &objects, Rnd::Drawable *pDrawable) {
-    if (pDrawable == nullptr) {
-        return;
-    }
-    std::list<Rnd::Drawable *> &draws = pDrawable->GetDraws();
-    for (std::list<Rnd::Drawable *>::iterator it = draws.begin(); it != draws.end(); ++it) {
-        objects.push_back(*it);
-        collectChildren(objects, *it);
-    }
-}
-
-void ScrollingList::collectChildren(std::list<Rnd::Object *> &objects,
-                                    Rnd::Transformable *pTransformable) {
-    if (pTransformable == nullptr) {
-        return;
-    }
-    for (std::list<Rnd::Transformable *>::iterator it = pTransformable->mTransList.begin();
-         it != pTransformable->mTransList.end();
-         ++it) {
-        objects.push_back(*it);
-        collectChildren(objects, *it);
-    }
 }
 
 void ScrollingList::scrollUp() {

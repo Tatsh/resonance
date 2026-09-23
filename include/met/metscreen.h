@@ -785,13 +785,14 @@ protected:
      */
     virtual void HandleMessage(Message *pMsg);
 
-private:
+protected:
     // 0x0038bd60
     // Resolves the two animation views from the screen name and records the enter
-    // animation's end frame. Slot 38 is its one caller, and the title is inferred from the two
-    // members it writes.
+    // animation's end frame. Slot 38 and MetTopLogoScreen's slot 38 call it, which is why it is
+    // protected. The title is inferred from the two members it writes.
     void ResolveAnimationViews();
 
+private:
     // End frame of the enter animation, read from mUnknown30 by the helper at 0x0038bd60. Not
     // written by the constructor.
     float mUnknown04; // +0x04
@@ -805,10 +806,10 @@ protected:
     // through it in slots 5, 19, and 39, which is why it is protected.
     MetRenderer *mUnknown10; // +0x10
 
-private:
+    // The container's root view. MetTopLogoScreen's slot 38 resolves it itself, which is why it is
+    // protected.
     Rnd::View *mUnknown14; // +0x14
 
-protected:
     // MetLoadFreqBaseScreen writes 2 in its slot 30 and 0 in its slot 19, and reads it in its slot
     // 36 to choose between the gizmo panels and the three button actions, which is why it is
     // protected.

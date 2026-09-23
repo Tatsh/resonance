@@ -116,6 +116,29 @@ public:
     Object *Create(const HxStr &className, const HxStr &objectName);
 
     /**
+     * Clone an object under a prefixed name, optionally with its descendants and its parents.
+     *
+     * The clone is created from the source's class, named with prefix followed by the source's
+     * name, and copied from the source with nFlags. mLoaded is then left holding the clone alone.
+     * With bRecurse set, every animation, collision, draw, and transform descendant of the source
+     * is cloned the same way, without recursing further, every clone's references to a source
+     * object are redirected to that object's clone, and mLoaded is left holding the source's clone
+     * followed by every descendant's. With bLink set, the clone joins each of the source's
+     * parents in the relation the parent has with the source. ScrollingList clones its rows
+     * through it.
+     *
+     * @param pSource The object to clone.
+     * @param prefix The prefix for the clone's name and every descendant clone's.
+     * @param nFlags The copy flags.
+     * @param bRecurse Non-zero to clone the descendants.
+     * @param bLink Non-zero to attach the clone to the source's parents.
+     * @return The clone, or null when the source's class cannot be created.
+     * @ghidraAddress 0x0051a428
+     */
+    Object *ResolveAndLinkObject(
+        Object *pSource, const HxStr &prefix, unsigned nFlags, int bRecurse, int bLink);
+
+    /**
      * Rewrite a type name that a file older than version 3 wrote.
      *
      * Seven names were rewritten across four format revisions, and each rewrite applies only to a
@@ -258,11 +281,7 @@ public:
                                              destructor, and the image exposes no accessor that
                                              hands the tree out. +0x00 */
 
-    // Read() empties mLoaded but never appends to it. The append is the one at 0x0051a578, inside
-    // the resolve-and-link routine at 0x0051a428, which is confirmed rather than supposed: that
-    // routine loads this object from its first argument, clears the list through the same
-    // std::list clear the destructor uses, and then allocates one 0x10-byte node under the
-    // "stl_list" tag with an element size of 4. It is not yet reconstructed.
+    // Read() empties mLoaded but never appends to it. ResolveAndLinkObject() is what appends.
     std::list<Object *> mLoaded; /*!< Objects the last file load produced. Public because
                                       RndAsyncLoader::HarvestLoadedObjects() at `0x003f8460` copies
                                       it wholesale into its own request list and then classifies

@@ -110,6 +110,7 @@ codecsmodule
 codeop
 colclamp
 colclampaddr
+collectchildren
 collideable
 collideables
 color
@@ -461,6 +462,7 @@ metsonglists
 metstagefinishscreen
 metstartnetlaunchmsg
 metstartpausemsg
+mettoplogoscreen
 mettutorialscreen
 metunlockstagesmsg
 mgen

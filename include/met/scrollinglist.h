@@ -7,8 +7,6 @@
 #include "rnd/transformable.h"
 
 namespace Rnd {
-class Animatable;
-class Collideable;
 class Drawable;
 class Mesh;
 class Object;
@@ -193,16 +191,6 @@ private:
     // 0x00401270
     // Show each arrow when items lie beyond that end of the page.
     void updateArrows();
-
-    // 0x003fcf20
-    // 0x003fd038, 0x003fd150, and 0x003fd268. Append every descendant along one
-    // relation, depth first, each object before its own descendants. A null start appends
-    // nothing.
-    static void collectChildren(std::list<Rnd::Object *> &objects, Rnd::Animatable *pAnimatable);
-    static void collectChildren(std::list<Rnd::Object *> &objects, Rnd::Collideable *pCollideable);
-    static void collectChildren(std::list<Rnd::Object *> &objects, Rnd::Drawable *pDrawable);
-    static void collectChildren(std::list<Rnd::Object *> &objects,
-                                Rnd::Transformable *pTransformable);
 
     ListDataProvider *mProvider;
     int mUnknown04; // +0x04, cleared by the constructor and read nowhere
