@@ -110,11 +110,11 @@ void TnlActivator::Update(float flFrame, float flScaledFrame) {
         const Vector3 basisX{flCos, 0.0f, -flSin, 1.0f};
         const Vector3 basisY{0.0f, 1.0f, 0.0f, 1.0f};
         const Vector3 basisZ{flSin, 0.0f, flCos, 1.0f};
-        Rnd::Transformable *pTrans = mRotView;
-        std::memcpy(pTrans->mLocalXfm[kBasisXRow], &basisX, sizeof(basisX));
-        std::memcpy(pTrans->mLocalXfm[kBasisYRow], &basisY, sizeof(basisY));
-        std::memcpy(pTrans->mLocalXfm[kBasisZRow], &basisZ, sizeof(basisZ));
-        pTrans->mDirty = 1;
+        Rnd::Transformable &trans = *mRotView;
+        std::memcpy(trans.mLocalXfm[kBasisXRow], &basisX, sizeof(basisX));
+        std::memcpy(trans.mLocalXfm[kBasisYRow], &basisY, sizeof(basisY));
+        std::memcpy(trans.mLocalXfm[kBasisZRow], &basisZ, sizeof(basisZ));
+        trans.mDirty = 1;
     }
     if (mOffsetRamp.Update(flFrame)) {
         nSettled = 0;

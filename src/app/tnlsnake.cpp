@@ -132,11 +132,11 @@ void TnlSnake::Update(float flFrame) {
         }
     }
 
-    Rnd::Transformable *pTrans = mHead;
-    std::memcpy(pTrans->mLocalXfm[kXfmRowTranslation],
+    Rnd::Transformable &trans = *mHead;
+    std::memcpy(trans.mLocalXfm[kXfmRowTranslation],
                 mString->GetPointPos(0),
-                sizeof(pTrans->mLocalXfm[kXfmRowTranslation]));
-    pTrans->mDirty = 1;
+                sizeof(trans.mLocalXfm[kXfmRowTranslation]));
+    trans.mDirty = 1;
     mHead->UpdateWorldXfm(nullptr, 0);
 
     if (RandomFloat() < kPulseChance) {

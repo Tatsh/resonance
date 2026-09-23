@@ -134,9 +134,9 @@ void TnlPointer::Update(float flTime) {
         Reset();
     }
     const Vector3 position{mOffsetX, 0.0f, mDip.Value(), 1.0f};
-    Rnd::Transformable *pTrans = mSpinView;
-    std::memcpy(pTrans->mLocalXfm[kTranslationRow], &position, sizeof(position));
-    pTrans->mDirty = 1;
+    Rnd::Transformable &trans = *mSpinView;
+    std::memcpy(trans.mLocalXfm[kTranslationRow], &position, sizeof(position));
+    trans.mDirty = 1;
     const float flElapsed = flTime - mLastTime;
     mLastTime = flTime;
     if (mSpinning) {
