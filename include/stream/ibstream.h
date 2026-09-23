@@ -134,3 +134,29 @@ public:
  * @ghidraAddress 0x004edb78
  */
 IBStream &operator>>(IBStream &stream, int &bValue);
+
+/**
+ * Read a 64-bit integer from four bytes, extending the sign.
+ *
+ * Four bytes arrive through Read() and the full 64-bit register is stored. This is the reader for
+ * the `operator<<(OBStream &, long)` counterpart in `stream/obstream.h`. No call site survives in
+ * the shipped program.
+ *
+ * @param stream The stream to read from.
+ * @param nValue Receives the value.
+ * @return The stream.
+ * @ghidraAddress 0x004edbd0
+ */
+IBStream &operator>>(IBStream &stream, long &nValue);
+
+/**
+ * Read an unsigned 64-bit integer from four bytes, extending with zeros.
+ *
+ * The unsigned twin of the `long` reader. No call site survives in the shipped program.
+ *
+ * @param stream The stream to read from.
+ * @param nValue Receives the value.
+ * @return The stream.
+ * @ghidraAddress 0x004edc28
+ */
+IBStream &operator>>(IBStream &stream, unsigned long &nValue);

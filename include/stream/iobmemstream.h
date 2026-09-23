@@ -117,6 +117,17 @@ public:
      */
     virtual char *Buffer();
 
+    /**
+     * Drop the bytes already read from the front of the buffer and rewind the cursor.
+     *
+     * The unread tail moves to the start of the buffer, and the buffer shrinks by the old cursor
+     * position. The routine is absent from the vtable, and no call site survives in the shipped
+     * program. The name is inferred.
+     *
+     * @ghidraAddress 0x004ee1f0
+     */
+    void DiscardReadBytes();
+
     /** @ghidraAddress 0x004ed068 */
     virtual OBStream &WriteBytes(const void *pSrc, int nSize);
 

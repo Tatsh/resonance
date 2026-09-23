@@ -102,6 +102,12 @@ char *IOBMemStream::Buffer() {
     return mBuffer.data();
 }
 
+// 0x004ee1f0
+void IOBMemStream::DiscardReadBytes() {
+    mBuffer.erase(mBuffer.begin(), mBuffer.begin() + mPos);
+    mPos = 0;
+}
+
 // 0x004ed068
 OBStream &IOBMemStream::WriteBytes(const void *pSrc, int nSize) {
     if (static_cast<int>(mBuffer.capacity()) < (mPos + nSize)) {

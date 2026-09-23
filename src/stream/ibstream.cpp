@@ -12,3 +12,19 @@ IBStream &operator>>(IBStream &stream, int &bValue) {
     bValue = (cValue != 0) ? 1 : 0;
     return stream;
 }
+
+// 0x004edbd0
+IBStream &operator>>(IBStream &stream, long &nValue) {
+    int nStored;
+    stream.Read(&nStored, sizeof(nStored));
+    nValue = nStored;
+    return stream;
+}
+
+// 0x004edc28
+IBStream &operator>>(IBStream &stream, unsigned long &nValue) {
+    unsigned nStored;
+    stream.Read(&nStored, sizeof(nStored));
+    nValue = nStored;
+    return stream;
+}
