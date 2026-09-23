@@ -30,7 +30,7 @@ void PlayMap::Slot2(int nValue, HxStr strLabel) {
 
 // 0x00127488
 void PlayMap::Slot3(int nValue) {
-    mUnknown00 = nValue;
+    mBarCount = nValue;
 }
 
 // 0x00127398

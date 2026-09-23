@@ -3,6 +3,7 @@ set(RESONANCE_GAME_SRCS
     autoriffer.cpp
     axephrasemaker.cpp
     axingstg.cpp
+    bgtrackgraph.cpp
     bumppowerup.cpp
     campaignstats.cpp
     catcher.cpp
@@ -41,6 +42,8 @@ set(RESONANCE_GAME_SRCS
     localplayer.cpp
     localplayercmd.cpp
     metagameworld.cpp
+    middisabler.cpp
+    midichase.cpp
     msgjoiner.cpp
     multicatcher.cpp
     multipowerbarmgr.cpp

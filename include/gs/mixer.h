@@ -166,10 +166,16 @@ protected:
      */
     virtual void HandleMessage(Message *pMsg);
 
+public:
+    /**
+     * The sink every message this mixer emits is sent to.
+     *
+     * The constructor does not write it. Public because BGTrackGraph::AttachMixerToSynth() stores
+     * it directly at `0x001404c4`, and the image has no accessor. +0x04
+     */
+    MsgSink *mOutput;
+
 private:
-    // The sink every message this mixer emits is sent to. The constructor does not write it, so
-    // whichever code creates the mixer assigns it afterwards and no writer is recovered yet.
-    MsgSink *mOutput;       // +0x04
     unsigned char mChannel; // +0x08
     int mTrack;             // +0x0c the constructor's first argument
     // Read from configuration code 0x399 as one byte. No recovered routine reads it back.

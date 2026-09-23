@@ -4,7 +4,7 @@
 
 // 0x0012e408
 int PlayMapRing::Slot5(int nValue) {
-    return (nValue + mUnknown00) % mSteps.back();
+    return (nValue + mBarCount) % mSteps.back();
 }
 
 // 0x0012dad8

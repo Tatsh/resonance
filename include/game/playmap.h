@@ -90,7 +90,7 @@ public:
     virtual void Slot2(int nValue, HxStr strLabel);
 
     /**
-     * Slot 3. Stores its argument in mUnknown00 and does nothing else.
+     * Slot 3. Stores its argument in mBarCount and does nothing else.
      *
      * @ghidraAddress 0x00127488
      */
@@ -108,7 +108,7 @@ public:
      *
      * The signature is recovered from both sides. Slots 12 and 13 forward their own argument
      * without touching a1 and then consume the result in v0, and each override reads that argument
-     * and returns a value. PlayMapRing at `0x0012e408` returns `(nValue + mUnknown00) %
+     * and returns a value. PlayMapRing at `0x0012e408` returns `(nValue + mBarCount) %
      * mSteps.back()`, which is the wrap its name implies.
      *
      * Slots 12 and 13 take the delta for this dispatch into a0 rather than a1, which is what
@@ -311,9 +311,14 @@ public:
      */
     int FollowingStepBar(int nBar);
 
-protected:
-    // Declared in recovered offset order. Written by Slot3 and read nowhere yet recovered.
-    int mUnknown00; // +0x00
+    /**
+     * The number of bars, which Slot3() stores.
+     *
+     * Public because BGTrackGraph::BuildSequencer() reads it directly at `0x0013fc7c` as the bound
+     * of its walk over the track's bars, and the image has no accessor. PlayMapRing adds it to a
+     * position as the offset its ring starts at. +0x00
+     */
+    int mBarCount;
 
 public:
     /**

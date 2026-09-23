@@ -65,6 +65,21 @@ public:
      */
     virtual int Tick(int nElapsedTicks) = 0;
 
+    /**
+     * Post the task on its clock.
+     *
+     * Reads the song position into mNextTick and measures mEpoch from it, then either posts a
+     * command that runs the task at the next multiple of mPeriod or, for a task with mUnknown1c
+     * clear, hands over to the routine at `0x0013aa38`. Not reconstructed, because that routine
+     * and the command class whose table is at `0x007d3080` are unrecovered. The title is
+     * inferred.
+     *
+     * @param nEpochOffset Ticks the epoch lies before the current position, or Mid::MBT's
+     *                     infinity sentinel for an epoch at zero.
+     * @ghidraAddress 0x0013a860
+     */
+    void Start(int nEpochOffset);
+
 private:
     Sch::TickClock *mClock; // +0x08 the clock the task is posted against
     // Set to -2 by the constructor and never written again by any recovered routine.

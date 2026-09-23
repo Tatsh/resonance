@@ -55,6 +55,7 @@ bartels
 bascus
 begingamelocalmsg
 beginphrasecatchmsg
+bgtrackgraph
 bitbltbuf
 blak
 blit
@@ -442,6 +443,8 @@ metstartpausemsg
 mettutorialscreen
 metunlockstagesmsg
 mgen
+middisabler
+midichase
 midifilereader
 midionoffeffector
 minimumsavespacemct

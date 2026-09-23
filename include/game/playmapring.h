@@ -28,8 +28,8 @@ public:
     /**
      * Wraps the position into one turn of the ring.
      *
-     * The body returns `(nValue + mUnknown00) % mSteps.back()`, so mSteps.back() is the length of
-     * one turn and mUnknown00 is the offset the ring starts at.
+     * The body returns `(nValue + mBarCount) % mSteps.back()`, so mSteps.back() is the length of
+     * one turn and mBarCount is the offset the ring starts at.
      *
      * @param nValue The position to wrap.
      * @return The wrapped position.

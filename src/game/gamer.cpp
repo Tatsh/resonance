@@ -441,9 +441,9 @@ void Gamer::OnBar(int nBar) {
     mUnknown38 = nBar;
     for (unsigned i = 0; i < mBackGraphs->size(); ++i) {
         if (mBackEnableMgr->QueryBar(i, nBar) != 0) {
-            (*mBackGraphs)[i]->DisableMidi();
-        } else {
             (*mBackGraphs)[i]->EnableMidi();
+        } else {
+            (*mBackGraphs)[i]->DisableMidi();
         }
     }
 
