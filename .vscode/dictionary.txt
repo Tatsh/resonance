@@ -1,3 +1,4 @@
+NODISC
 abitmap
 abmpfile
 acanvas
@@ -153,6 +154,7 @@ devirtualised
 dhave
 dictobject
 dimx
+discswap
 dispfb
 displaypointermsg
 docstrings

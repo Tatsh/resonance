@@ -247,6 +247,29 @@ int ArkfileLogicalToPhysicalSector(int nFile, int nSector);
 int InitArk();
 
 /**
+ * Unmount the archives InitArk() mounted.
+ *
+ * Each archive is closed through ArkFile::Close() even when an earlier one was refused. The result
+ * counts the unmounts, so it is zero after a successful teardown. It is non-zero only when ark
+ * archives are not in use or when none of the three was still mounted.
+ *
+ * @return Non-zero when no archive was unmounted.
+ * @ghidraAddress 0x004dfbd8
+ */
+int CloseArk();
+
+/** The number of archives in g_apSessionArkPaths. */
+constexpr int kSessionArkCount = 3;
+
+/**
+ * The archives InitArk() mounts for the session and CloseArk() unmounts: `ark/root.ark`,
+ * `ark/levels.ark`, and `ark/arenas.ark`.
+ *
+ * @ghidraAddress 0x00702650
+ */
+extern const char *const g_apSessionArkPaths[kSessionArkCount];
+
+/**
  * Every archive mounted right now.
  *
  * @ghidraAddress 0x00725e90

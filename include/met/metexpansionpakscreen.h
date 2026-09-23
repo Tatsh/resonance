@@ -1,5 +1,6 @@
 #pragma once
 
+#include "met/discswap.h"
 #include "met/fadeuser.h"
 #include "met/metfade.h"
 #include "met/metscreen.h"
@@ -41,9 +42,7 @@
  * mUnknownb0 in OnMsgScreenShown().
  *
  * Four bodies are not written. EnterAndShow(), BeginExit(), OnMsgScreenDismissed(), and
- * OnUnknownSlot26() all drive the fade through the routines at `0x0016a048`, `0x0016a098`,
- * `0x0016a168`, `0x0016a608`, `0x00169e50`, `0x0016d710`, and `0x0016d750`, and no header in this
- * tree declares one of them yet.
+ * OnUnknownSlot26() drive the screen through MetFade and DiscSwap.
  */
 class MetExpansionPakScreen : public MetScreen, public FadeUser {
 public:
@@ -160,11 +159,9 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // A record of 0x18 bytes whose class is unrecovered. EnterAndShow() resets it through
-    // `0x0016a048`, and OnUnknownSlot26() advances it through `0x0016a098`, `0x0016a168`, and
-    // `0x00169e50`. Its width is the span between the FadeUser vptr above it and mUnknowna8 below
-    // it. +0x90
-    unsigned char mUnknown90[0x18];
+    // The disc exchange. EnterAndShow() resets it, and OnUnknownSlot26() drives it and stores
+    // each result as mUnknowna8. +0x90
+    DiscSwap mUnknown90;
     // State of the dialogue. EnterAndShow() clears it and OnUnknownSlot26() advances it through
     // the values 1, 2, and 4. +0xa8
     int mUnknowna8;

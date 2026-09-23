@@ -214,3 +214,18 @@ int EraseArkStream(int nHandle) {
     }
     return -1;
 }
+
+// 0x00702650
+const char *const g_apSessionArkPaths[kSessionArkCount] = {
+    "ark/root.ark", "ark/levels.ark", "ark/arenas.ark"};
+
+// 0x004dfbd8
+int CloseArk() {
+    int nClosed = 0;
+    if (UsingArkFiles()) {
+        for (int i = 0; i < kSessionArkCount; ++i) {
+            nClosed += ArkFile::Close(g_apSessionArkPaths[i]);
+        }
+    }
+    return nClosed == 0;
+}
