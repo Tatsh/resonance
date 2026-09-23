@@ -133,3 +133,8 @@ void CatchingSTG::Slot10(int nTick, Player *pPlayer) {
 int CatchingSTG::Slot11() {
     return 1;
 }
+
+// 0x001a0720
+void CatchingSTG::Slot12() {
+    mPhraseMgr->CreatePowerbarMgr();
+}

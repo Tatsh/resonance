@@ -18,9 +18,6 @@
  * The constructor builds a PhraseNeutralizer and then one catcher, a SingleCatcher in game mode 1
  * and a MultiCatcher in every other mode. The catch window it hands the catcher is configuration
  * code 0x39c, in milliseconds, converted to MIDI ticks through the song clock's tempo map.
- *
- * Slot 12's body is not written. Its whole body is one call to an unidentified PhraseMgr routine
- * at `0x001ba3d8`.
  */
 class CatchingSTG : public ScoreTrackGraph {
 public:
@@ -149,8 +146,9 @@ public:
     virtual int Slot11();
 
     /**
-     * Slot 12. The whole body is one call on the phrase manager. The body is not written, for the
-     * reason recorded in the class documentation.
+     * Rebuild the phrase manager's powerbar source.
+     *
+     * Slot 12. The whole body is PhraseMgr::CreatePowerbarMgr().
      *
      * @ghidraAddress 0x001a0720
      */
