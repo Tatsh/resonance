@@ -1,7 +1,53 @@
 #include "game/catchingstg.h"
 
 #include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/multicatcher.h"
 #include "game/singlecatcher.h"
+#include "mid/mbt.h"
+#include "sch/tempomap.h"
+#include "script/configquery.h"
+
+namespace {
+
+// The configuration code the catch window comes from, in milliseconds.
+constexpr int kCatchWindowConfigCode = 0x39c;
+
+constexpr long long kNanosecondsPerMillisecond = 1000000;
+
+// The phrase manager's export lead grows by this many ticks for each track index.
+constexpr int kExportLeadStep = 120;
+
+} // namespace
+
+// 0x0019fb80
+CatchingSTG::CatchingSTG(const TrackData *pTrackData)
+    : ScoreTrackGraph(pTrackData), mNeutralizer(nullptr), mCatcher(nullptr) {
+    mNeutralizer = new PhraseNeutralizer(mTrackData, mPhraseMgr);
+
+    const long long nWindowNs =
+        QueryConfigValue(kCatchWindowConfigCode) * kNanosecondsPerMillisecond;
+    const Sch::TempoMap *pTempo = mApplication->GetSongClock()->mTempoMap;
+    const Mid::MBT window(
+        static_cast<int>((nWindowNs + pTempo->mCeilingBias) / pTempo->mNanosecondsPerTick));
+
+    // The window is in MIDI ticks, and the binary passes it sign-extended as the Sch::Tick count.
+    if (mApplication->GetGameMode() == kGameModeSolo) {
+        mCatcher = new SingleCatcher(mPhraseMgr,
+                                     mQuantizer,
+                                     mTrackData,
+                                     mApplication->GetSongClock(),
+                                     Sch::Tick{window.mTick});
+    } else {
+        mCatcher = new MultiCatcher(mPhraseMgr,
+                                    mQuantizer,
+                                    mTrackData,
+                                    mApplication->GetSongClock(),
+                                    Sch::Tick{window.mTick});
+    }
+
+    mPhraseMgr->mExportLead = Mid::MBT((mUnknown00 * kExportLeadStep) + kExportLeadStep);
+}
 
 // 0x001a0450
 CatchingSTG::~CatchingSTG() {

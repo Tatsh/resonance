@@ -16,12 +16,8 @@
  * the other three inherit are all replaced here. The object is 0x34 bytes.
  *
  * The constructor builds a PhraseNeutralizer and then one catcher, a SingleCatcher in game mode 1
- * and a MultiCatcher in every other mode. It also computes the scheduler time it hands the catcher
- * from a configured value and the clock's rate.
- *
- * The constructor's body is not written. It needs the clock the base's application reaches through
- * `GameManagerImpl::GetWorld()`, as recorded on AxingSTG, and it also needs the configured value
- * the routine at `0x00509110` reports for the identifier 0x39c, which is not identified.
+ * and a MultiCatcher in every other mode. The catch window it hands the catcher is configuration
+ * code 0x39c, in milliseconds, converted to MIDI ticks through the song clock's tempo map.
  *
  * Slot 12's body is not written. Its whole body is one call to an unidentified PhraseMgr routine
  * at `0x001ba3d8`.
@@ -29,6 +25,10 @@
 class CatchingSTG : public ScoreTrackGraph {
 public:
     /**
+     * Build the neutraliser and the catcher, and set the phrase manager's export lead.
+     *
+     * The export lead is 120 ticks for each track index plus 120.
+     *
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x0019fb80
      */
