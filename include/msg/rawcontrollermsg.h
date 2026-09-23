@@ -1,24 +1,39 @@
 #pragma once
 
+#include <iostream>
+
+#include "mid/mbt.h"
 #include "msg/message.h"
+#include "msg/metcontrollerreading.h"
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `16RawControllerMsg` in the RTTI descriptor at `0x008efce0`, with Message as its one base. The
- * object is 0x18 bytes and its vtable is at `0x00813478`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * object is 0x18 bytes and its vtable is at `0x00813478`.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload is one controller reading at `+0x04` and a song position at `+0x14`. Clone() copies
+ * the reading as two eight-byte pairs and the position as one word, Print() hands the reading to
+ * MetControllerReading::Print(), and New() initialises only the position, to kMBTInfinity.
+ * MetaGameWorld builds the message on its stack from the four arguments of its RawController
+ * slot, and MetRenderer reads the reading in place. Both are outside the hierarchy, and the image
+ * exposes no accessor, so both members are public.
  *
- * The class overrides Message::Print() at `0x003e2fb0`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003da110` is compiler-generated and has no declaration here.
  */
 class RawControllerMsg : public Message {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the position is
+     * initialised.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6868
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -43,8 +58,16 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown14; // +0x14
+    /**
+     * Write the reading to a diagnostic stream through MetControllerReading::Print().
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e2fb0
+     */
+    virtual void Print(std::ostream &stream);
+
+    MetControllerReading mReading; /*!< The reading. +0x04 */
+    Mid::MBT mPosition;            /*!< Song position, kMBTInfinity until set. +0x14 */
 };
 
 /**

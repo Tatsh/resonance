@@ -56,6 +56,7 @@ set(RESONANCE_MSG_SRCS
     looptogglemsg.cpp
     looptoolmsg.cpp
     message.cpp
+    metcontrollerreading.cpp
     metfreqendedmsg.cpp
     metstartnetlaunchmsg.cpp
     metstartpausemsg.cpp

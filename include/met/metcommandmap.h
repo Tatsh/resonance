@@ -1,25 +1,7 @@
 #pragma once
 
 #include "met/metscreen.h"
-
-/**
- * One controller reading, as RawControllerMsg carries it.
- *
- * The four fields are recovered rather than inferred. RawControllerMsg::Clone() at `0x003da200`
- * copies them, RawController's one virtual at `0x005381a8` receives them as three ints followed by
- * a float in this order, and MetRenderer::HandleMessage() passes the address of the first of them
- * to MetCommandMap::Translate(). The record sits at `+0x04` of the message, so the three words
- * MetRenderer reads at message offsets 4, 8, and 0x0c are mTag, mPadIndex, and mButton.
- *
- * The name is inferred. The record belongs with RawControllerMsg rather than here, and it is
- * declared here because msg/rawcontrollermsg.h does not declare the payload yet.
- */
-struct MetControllerReading {
-    int mTag;      /*!< Four characters, either `joy ` or `key `. +0x00 */
-    int mPadIndex; /*!< Which controller produced the reading. +0x04 */
-    int mButton;   /*!< Raw button identifier, which the jump table indexes by less one. +0x08 */
-    float mValue;  /*!< Reading value. A button is pressed while the value is above zero. +0x0c */
-};
+#include "msg/metcontrollerreading.h"
 
 /**
  * Translator from one raw controller reading to one front-end command.

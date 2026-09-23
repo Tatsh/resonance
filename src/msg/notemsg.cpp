@@ -57,6 +57,5 @@ void NoteMsg::Load(IBStream &stream) {
         .ReadBytes(&mUnknown09, sizeof(mUnknown09))
         .ReadBytes(&mUnknown0a, sizeof(mUnknown0a))
         .Read(&position, sizeof(position));
-    mUnknown0c.mTick = position;
-    IsFiniteMBT(position); // Discarded, the shape of an assertion compiled without its report.
+    mUnknown0c = Mid::MBT(position);
 }

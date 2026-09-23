@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "met/metcommandmap.h"
+#include "msg/metcontrollerreading.h"
 #include "sch/command.h"
 
 class IBStream;
@@ -79,27 +79,3 @@ public:
 private:
     MetControllerReading mReading; // +0x0c
 };
-
-/**
- * Write a controller reading as four four-byte transfers in member order.
- *
- * The routine belongs with the reading record. The body is not written.
- *
- * @param stream The stream to write to.
- * @param reading The reading.
- * @return The stream.
- * @ghidraAddress 0x00101060
- */
-OBStream &operator<<(OBStream &stream, const MetControllerReading &reading);
-
-/**
- * Read a controller reading back as four four-byte transfers in member order.
- *
- * The body is not written.
- *
- * @param stream The stream to read from.
- * @param reading The reading to fill.
- * @return The stream.
- * @ghidraAddress 0x00101120
- */
-IBStream &operator>>(IBStream &stream, MetControllerReading &reading);

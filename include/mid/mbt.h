@@ -90,6 +90,21 @@ public:
     }
 
     /**
+     * Wrap a tick count, checking that it is finite.
+     *
+     * Inline. The check is an IsFiniteMBT() call whose result is discarded, the shape of an
+     * assertion compiled without its report, and it sits beside the store of the same value at
+     * every site that builds a position from a plain count. NoteMsg::Load() at `0x003e3890` is one,
+     * and the gameplay classes Phrase, GsPeriodical, TrackData, Catcher, and PhraseMaker show the
+     * same pairing.
+     *
+     * @param nTick The position, in MIDI ticks.
+     */
+    explicit MBT(int nTick) : mTick(nTick) {
+        IsFiniteMBT(nTick);
+    }
+
+    /**
      * Write the position.
      *
      * @param stream The stream to write to.
