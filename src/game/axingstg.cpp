@@ -25,7 +25,7 @@ constexpr int kBarTicks = 1920;
 } // namespace
 
 // 0x0019daf0
-AxingSTG::AxingSTG(const TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
+AxingSTG::AxingSTG(TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
     mMuseSynth->CreateSustainer();
 
     mAutoRiffer = new AutoRiffer(mApplication->GetSongClock(), mQuantizer, mTrackData);

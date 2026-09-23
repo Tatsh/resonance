@@ -127,6 +127,16 @@ public:
      */
     static void PumpTimers();
 
+    /**
+     * Redraw the display during a long operation.
+     *
+     * Refreshes the display at most once every eighteen milliseconds of the profiler clock. Public
+     * because GrooveWorld::EndLevel() at `0x0018eb70` installs it as the bank-load progress hook.
+     *
+     * @ghidraAddress 0x001ec8c0
+     */
+    static void KeepAliveDraw();
+
 private:
     // Rearm the timer and poll the game manager. The routine it dispatches ticks the input
     // poller, accumulates a profile timer, and advances the game world when the world and the
@@ -140,10 +150,6 @@ private:
 
     // Runs after the frame is drawn, with an empty body. 0x001ef410
     void PostDraw();
-
-    // Long-operation redraw callback. It refreshes the display at most once every eighteen
-    // milliseconds of the profiler clock. 0x001ec8c0
-    static void KeepAliveDraw();
 
     int mRunning;                  // +0x0c
     long long mNextBankPollNs;     // +0x10

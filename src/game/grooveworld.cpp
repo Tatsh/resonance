@@ -1,37 +1,64 @@
 #include "game/grooveworld.h"
 
+#include <algorithm>
+#include <functional>
 #include <iostream>
+#include <string.h>
 #include <vector>
 
 #include "app/application.h"
+#include "app/mainloop.h"
 #include "app/renderer.h"
+#include "app/watchdogtimer.h"
+#include "game/axingstg.h"
+#include "game/bgtrackgraph.h"
+#include "game/catchingstg.h"
 #include "game/delayer.h"
 #include "game/gamemanagerimpl.h"
+#include "game/gamer.h"
 #include "game/gamestats.h"
 #include "game/inputmap.h"
 #include "game/levelbuilder.h"
 #include "game/levelconverter.h"
 #include "game/leveldata.h"
 #include "game/localplayer.h"
+#include "game/msgjoiner.h"
 #include "game/netplayer.h"
 #include "game/phrasedatabase.h"
+#include "game/pitchingstg.h"
 #include "game/player.h"
 #include "game/scoretrackgraph.h"
+#include "game/trackdata.h"
 #include "game/trackselector.h"
+#include "game/voxingstg.h"
+#include "gfx/gfxdevice.h"
+#include "gs/musesynth.h"
+#include "math/color.h"
 #include "met/metpersonadata.h"
+#include "met/metremixrecord.h"
+#include "mid/mbt.h"
 #include "msg/bumppacket.h"
 #include "msg/cripplepacket.h"
+#include "msg/endgamemsg.h"
 #include "msg/message.h"
+#include "msg/seekermsg.h"
+#include "msg/textmsg.h"
+#include "msg/trackselectmsg.h"
 #include "os/async.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "os/zone.h"
 #include "sch/command.h"
+#include "sch/tick.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
+#include "script/scripthost.h"
 #include "stream/ibstream.h"
+#include "stream/iobpreallocmemstream.h"
 #include "stream/obstream.h"
+#include "synth/midi_main.h"
+#include "synth/ps2hardsynth.h"
 
 namespace {
 
@@ -41,9 +68,42 @@ constexpr int kLevelConverterOptionQuery = 0x39a;
 // One more than the track a solo player takes.
 constexpr int kSoloTrackConfigCode = 0x3a6;
 
+// Set while the level plays streamed audio. FinishSong() then stops the sound-bank movie.
+constexpr int kStreamedAudioQuery = 0x3a4;
+// The level name FinishSong() records in the log.
+constexpr int kLevelNameQuery = 0x278;
+
 // mState values.
 constexpr int kStateLoading = 1;
 constexpr int kStateLoaded = 2;
+constexpr int kStateEnded = 6;
+
+// The Slot13() argument FinishSong() passes to the synthesiser.
+constexpr int kSynthSlot13Off = 0;
+
+// Player::Slot2() while the player has no seeker.
+constexpr int kNoSeeker = -1;
+
+// Bytes of each text field of the log record FinishSong() writes and BuildGraphs() reads.
+constexpr int kLogTextLength = 32;
+// The byte written on each side of the two text fields.
+constexpr char kLogMarker = 1;
+
+// The script template BuildGraphs() runs with the player count.
+constexpr int kPlayerCountTemplate = 0x266;
+
+// BGTrackGraph's second constructor argument for a backing and for an intro track.
+constexpr int kBackingTrackGraph = 0;
+constexpr int kIntroTrackGraph = 1;
+
+// IBStream::Seek() origin that measures from the start of the buffer.
+constexpr int kSeekFromStart = 0;
+
+// The delay before exit mode 2 runs EndLevel(), in nanoseconds.
+constexpr long long kEndLevelDelayNs = 500000000;
+
+// The clear colour exit mode 3 leaves on the display.
+constexpr float kOpaque = 1.0f;
 
 // AsyncPollComplete() results.
 constexpr int kAsyncComplete = 0;
@@ -153,6 +213,13 @@ public:
         stream >> mUnknown14;
     }
 
+    // 0x0018beb0
+    // The factory the unit's static initialiser registers. The expanded default constructor sets
+    // the reference count to 1 and leaves the three members unwritten.
+    static Sch::Command *NewCmd() {
+        return new ExitCmd;
+    }
+
     // The word at 0x0067f24c, which the image initialises to 7.
     static int sCmdID;
 
@@ -244,6 +311,336 @@ void GrooveWorld::FinishLoad() {
     mState = kStateLoaded;
     mLoadBuffer = nullptr;
     mLoadSize = 0;
+}
+
+// 0x0018c828
+void GrooveWorld::ConnectPlayers() {
+    for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        Player *pPlayer = *it;
+        mInputMap->AddSink(pPlayer);
+        mTrackSelector->AddSink(pPlayer);
+        if (mUnknown1c != nullptr) {
+            mUnknown1c->AddSink(pPlayer);
+        }
+        pPlayer->AddSink(mJoiner);
+        pPlayer->AddSink(mGamer);
+        pPlayer->AddSink(mTrackSelector);
+        if (mUnknown20 != nullptr) {
+            pPlayer->AddSink(mUnknown20);
+        }
+    }
+}
+
+// 0x0018c960
+void GrooveWorld::DisconnectPlayers() {
+    for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        Player *pPlayer = *it;
+        if (mUnknown20 != nullptr) {
+            pPlayer->RemoveSink(mUnknown20);
+        }
+        pPlayer->RemoveSink(mGamer);
+        pPlayer->RemoveSink(mJoiner);
+        pPlayer->RemoveSink(mTrackSelector);
+        if (mUnknown1c != nullptr) {
+            mUnknown1c->RemoveSink(pPlayer);
+        }
+        mTrackSelector->RemoveSink(pPlayer);
+        mInputMap->RemoveSink(pPlayer);
+    }
+}
+
+// 0x0018c778
+void GrooveWorld::DeletePlayers() {
+    std::for_each(mPlayers.begin(), mPlayers.end(), Player::Delete);
+    mPlayers.clear();
+    mLocalPlayers.clear();
+}
+
+// 0x0018cce8
+void GrooveWorld::BuildGraphs() {
+    CallScriptTemplate(kPlayerCountTemplate, mPlayers.size());
+    if (mLevel == nullptr) {
+        Fatal("MIDI level file has not been loaded.");
+    }
+    mLevel->SetBarCount(0);
+
+    mDelayer = new Delayer;
+    mJoiner = new MsgJoiner;
+    mInputMap = new InputMap(mApp, &mPlayers);
+    mInputMap->mUnknown00 = 1;
+    mInputMap->Rebuild();
+    mInputMap->AddSink(mJoiner);
+
+    mTrackSelector = new TrackSelector(mPlayers);
+    mInputMap->AddSink(mTrackSelector);
+    mTrackSelector->AddSink(mJoiner);
+    mTrackSelector->AddSink(mDelayer);
+
+    mMuseSynth = new MuseSynth(mSongClock);
+    mMuseSynth->AddSink(mApp->GetSynth());
+    if (mUnknown1c != nullptr) {
+        mUnknown1c->AddSink(this);
+    }
+
+    if (mLevel->OwnTrack() != nullptr) {
+        mUnknown5c = new BGTrackGraph(0, 0);
+        mUnknown5c->CreateMixer(mLevel->OwnTrack());
+        mUnknown5c->AddSynthSink(mDelayer);
+    }
+
+    mGamer = new Gamer(mLevel->TrackCount(), mLevel->OnUnknownSlot9(), mStats);
+    mGamer->AddSink(mDelayer);
+    if (mApp->GetGameMode() == kGameModeNet) {
+        mGamer->AddSink(mUnknown20);
+    }
+    mInputMap->AddSink(mGamer);
+
+    for (unsigned int i = 0; i < static_cast<unsigned int>(mLevel->BackingTrackCount()); ++i) {
+        BGTrackGraph *pGraph = new BGTrackGraph(i, kBackingTrackGraph);
+        mUnknown44.push_back(pGraph);
+        pGraph->CreateMixer(mLevel->BackingTrackAt(i));
+        pGraph->AttachMixerToSynth(mApp->GetSynth());
+        pGraph->AttachMixerToSource(mGamer);
+    }
+    mGamer->SetBackGraphs(&mUnknown44);
+
+    for (unsigned int i = 0; i < mLevel->mIntroTracks.size(); ++i) {
+        BGTrackGraph *pGraph = new BGTrackGraph(i, kIntroTrackGraph);
+        mUnknown50.push_back(pGraph);
+        pGraph->CreateMixer(mLevel->IntroTrackAt(i));
+        pGraph->AttachMixerToSynth(mApp->GetSynth());
+    }
+
+    for (unsigned int i = 0; i < static_cast<unsigned int>(mLevel->TrackCount()); ++i) {
+        TrackData *pTrack = mLevel->GetTrack(i);
+        pTrack->mGamer = mGamer;
+        ScoreTrackGraph *pGraph;
+        if (pTrack->mKind == kTrackModeCatch ||
+            (Application::shared()->GetPlayMode() == kPlayModeGame &&
+             pTrack->mKind == kTrackModeRiff &&
+             Application::shared()->GetGameManager()->GetParams()->mLoadingGame != 0)) {
+            pTrack->mKind = kTrackModeCatch;
+            pGraph = new CatchingSTG(pTrack);
+        } else if (pTrack->mKind == kTrackModeRiff) {
+            pGraph = new PitchingSTG(pTrack);
+        } else if (pTrack->mKind == kTrackModeScratch) {
+            pGraph = new PitchingSTG(pTrack);
+        } else if (pTrack->mKind == kTrackModeAxe) {
+            pGraph = new AxingSTG(pTrack);
+        } else if (pTrack->mKind == kTrackModeVocal) {
+            pGraph = new VoxingSTG(pTrack);
+        } else {
+            Fatal("Unsupported STG for track %d", pTrack->mUnknown04);
+        }
+        mTrackGraphs.push_back(pGraph);
+        pGraph->Slot4(mJoiner, mUnknown1c, &mGamer->mTrackSources[i]);
+        pGraph->Slot5(mGamer);
+        pGraph->Slot7(mDelayer);
+        pGraph->Slot7(mGamer);
+        pGraph->Slot7(mTrackSelector);
+        pGraph->Slot6(mApp->GetSynth());
+        if (mApp->GetGameMode() == kGameModeNet) {
+            pGraph->Slot8(mUnknown20);
+        }
+    }
+
+    if (Application::shared()->GetGameManager()->GetParams()->mLoadingGame != 0) {
+        std::vector<MetRemixRecord> records; // Yes, the binary builds and frees an unused vector.
+        char szTitle[kLogTextLength];
+        memset(szTitle, 0, sizeof(szTitle));
+        char szLevel[kLogTextLength];
+        memset(szLevel, 0, sizeof(szLevel));
+
+        IOBPreallocMemStream *pLog = Application::shared()->GetLog();
+        pLog->Seek(0, kSeekFromStart);
+        int nSize;
+        char bLeading;
+        char bTrailing;
+        pLog->Read(&nSize, sizeof(nSize)).ReadBytes(&bLeading, sizeof(bLeading));
+        pLog->ReadBytes(szLevel, sizeof(szLevel));
+        pLog->ReadBytes(szTitle, sizeof(szTitle));
+        pLog->ReadBytes(&bTrailing, sizeof(bTrailing));
+        mSongName = HxStr(szTitle);
+        LoadPhrases(*pLog, 0);
+
+        if (Application::shared()->GetPlayMode() == kPlayModeGame) {
+            for (unsigned int i = 0; i < mTrackGraphs.size(); ++i) {
+                ScoreTrackGraph *pGraph = mTrackGraphs[i];
+                if (mLevel->GetTrack(i)->mKind == kTrackModeCatch) {
+                    pGraph->mTrackData->AddPhrases(pGraph->GetPhraseDatabase());
+                    pGraph->Slot12();
+                }
+                pGraph->GetPhraseDatabase()->Clear();
+            }
+        }
+    }
+    mGamer->CreateEnableMgr(&mTrackGraphs);
+}
+
+// 0x0018caa8
+void GrooveWorld::CreateRenderer() {
+    mRenderer = new Renderer;
+    mDelayer->AddSink(mRenderer);
+    for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        (*it)->AddSink(mRenderer);
+
+        TrackSelectMsg select;
+        select.mUnknown04 = (*it)->Slot4();
+        select.mUnknown08 = 0;
+        select.mPosition = Mid::MBT(0);
+        select.mUnknown10 = *it;
+        mRenderer->Handle(&select);
+
+        if ((*it)->Slot2() == kNoSeeker) {
+            SeekerMsg seeker(*it);
+            mRenderer->Handle(&seeker);
+        }
+    }
+}
+
+// 0x0018da60
+void GrooveWorld::DestroyGraphs() {
+    std::for_each(mTrackGraphs.begin(), mTrackGraphs.end(), ScoreTrackGraph::Delete);
+    std::for_each(mUnknown44.begin(), mUnknown44.end(), BGTrackGraph::Delete);
+    std::for_each(mUnknown50.begin(), mUnknown50.end(), BGTrackGraph::Delete);
+    mTrackGraphs.clear();
+    mUnknown44.clear();
+    mUnknown50.clear();
+
+    mInputMap->RemoveSink(mJoiner);
+    delete mMuseSynth;
+    mMuseSynth = nullptr;
+    delete mTrackSelector;
+    mTrackSelector = nullptr;
+    delete mInputMap;
+    mInputMap = nullptr;
+    delete mJoiner;
+    mJoiner = nullptr;
+    delete mDelayer;
+    mDelayer = nullptr;
+    delete mGamer;
+    mGamer = nullptr;
+    delete mUnknown5c;
+    mUnknown5c = nullptr;
+    if (mUnknown1c != nullptr) {
+        mUnknown1c->ClearSinks();
+    }
+}
+
+// 0x0018e238
+void GrooveWorld::StartSequencers() {
+    std::for_each(
+        mUnknown50.begin(), mUnknown50.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
+    std::for_each(
+        mUnknown44.begin(), mUnknown44.end(), std::mem_fn(&BGTrackGraph::CallBuildSequencer));
+    std::for_each(
+        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallSlot2));
+    if (mUnknown5c != nullptr) {
+        mUnknown5c->BuildSequencer();
+    }
+    mGamer->Start();
+}
+
+// 0x0018e6f0
+void GrooveWorld::FinishSong() {
+    if (QueryConfigFlag(kStreamedAudioQuery) != 0) {
+        StopSoundBankMovie();
+    }
+    Application::shared()->GetSynth()->Slot13(kSynthSlot13Off);
+    mGamer->Withdraw();
+
+    if (Application::shared()->GetPlayMode() == kPlayModeJam) {
+        IOBPreallocMemStream *pLog = Application::shared()->GetResetLog();
+        int nSize = 0;
+        char szTitle[kLogTextLength];
+        memset(szTitle, 0, sizeof(szTitle));
+        char szLevel[kLogTextLength];
+        memset(szLevel, 0, sizeof(szLevel));
+        {
+            HxStr level;
+            QueryConfigString(&level, kLevelNameQuery);
+            strcpy(szLevel, level.mStr != nullptr ? level.mStr : g_szEmptyString);
+        }
+
+        // The length word is written as a placeholder and patched once the phrases are in.
+        const int nPlaceholder = nSize;
+        const char bLeading = kLogMarker;
+        pLog->Write(&nPlaceholder, sizeof(nPlaceholder)).WriteBytes(&bLeading, sizeof(bLeading));
+        pLog->WriteBytes(szLevel, sizeof(szLevel));
+        pLog->WriteBytes(szTitle, sizeof(szTitle));
+        const char bTrailing = kLogMarker;
+        pLog->WriteBytes(&bTrailing, sizeof(bTrailing));
+        for (std::vector<ScoreTrackGraph *>::iterator it = mTrackGraphs.begin();
+             it != mTrackGraphs.end();
+             ++it) {
+            (*it)->GetPhraseDatabase()->Save(*pLog);
+        }
+        nSize = pLog->Size();
+        memcpy(pLog->Buffer(), &nSize, sizeof(nSize));
+    }
+
+    std::for_each(
+        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallSlot3));
+    std::for_each(
+        mUnknown44.begin(), mUnknown44.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
+    std::for_each(
+        mUnknown50.begin(), mUnknown50.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
+    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallSlot12));
+    if (mUnknown5c != nullptr) {
+        mUnknown5c->DeleteSequencer();
+    }
+
+    if (mUnknown94 == kExitMode2) {
+        FuncCmd *pCommand = new FuncCmd(this, &GrooveWorld::EndLevel);
+        mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{kEndLevelDelayNs});
+        Attachment::ReleaseIfSet(pCommand);
+    } else {
+        EndLevel();
+    }
+}
+
+// 0x0018eb70
+void GrooveWorld::EndLevel() {
+    if (mUnknown94 == kExitMode3) {
+        const Color black{0.0f, 0.0f, 0.0f, kOpaque};
+        g_gfxDevice.SetClearColor(black);
+    }
+    mState = kStateEnded;
+
+    EndGameMsg msg;
+    msg.mRestart = mUnknown88;
+    mApp->GetGameManager()->QueueMessage(&msg);
+
+    if ((mUnknown94 == kExitMode1 || mUnknown94 == kExitMode2) &&
+        (!mApp->IsJukeboxMode() || mUnknownb8 == 0)) {
+        SetBankLoadProgressHook(MainLoop::KeepAliveDraw);
+        Application::shared()->GetSynth()->LoadBankSet4();
+    }
+}
+
+// 0x0018ec90
+void GrooveWorld::StopLevel() {
+    DisconnectPlayers();
+    if (mDelayer != nullptr) {
+        mDelayer->RemoveSink(mRenderer);
+    }
+    for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        (*it)->RemoveSink(mRenderer);
+    }
+    delete mRenderer;
+    mRenderer = nullptr;
+    DestroyGraphs();
+    mSongClock->Pause();
+    mSongClock->SetSongTick(Mid::MBT(0));
+    mState = kStateLoaded;
+}
+
+// 0x0018f140
+void GrooveWorld::DisplayText(const HxStr &text) {
+    if (mDelayer != nullptr) {
+        TextMsg msg(text);
+        mDelayer->Handle(&msg);
+    }
 }
 
 // 0x00194de8

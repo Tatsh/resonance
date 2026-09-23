@@ -83,11 +83,6 @@ char *IOBPreallocMemStream::Buffer() {
     return mBuffer;
 }
 
-// 0x004edb68
-int IOBPreallocMemStream::Size() {
-    return mWritePos;
-}
-
 // 0x004edb70
 int IOBPreallocMemStream::Capacity() {
     return mCapacity;

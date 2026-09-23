@@ -107,10 +107,13 @@ public:
     virtual PlayMap *OnUnknownSlot8() = 0;
 
     /**
-     * Unrecovered. Slot 9, and pure.
+     * Slot 9, and pure. The verb is unrecovered.
      *
-     * LevelBuilder forwards to slot 8 of the object slot 8 returns and hands back whatever that
-     * reports. Both the verb and the return type are therefore unrecovered.
+     * LevelBuilder returns what slot 8 of its play map reports, the last element of the play
+     * map's steps. GrooveWorld::BuildGraphs() at `0x0018cce8` passes the result to Gamer's
+     * constructor as the end bar.
+     *
+     * @return The play map's slot 8 value.
      */
-    virtual void OnUnknownSlot9() = 0;
+    virtual int OnUnknownSlot9() = 0;
 };

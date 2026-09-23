@@ -40,7 +40,7 @@ public:
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x0019daf0
      */
-    AxingSTG(const TrackData *pTrackData);
+    AxingSTG(TrackData *pTrackData);
 
     /**
      * Stop the stage and release everything the constructor built.

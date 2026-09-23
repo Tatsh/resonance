@@ -53,10 +53,10 @@ class TickClock;
  * below. The secondary table has three entries and a zero terminator at index 3, the same type
  * function and destructor followed by the RawController override below.
  *
- * The member map comes from the constructor, the destructor, and the setup routine at
- * `0x0018cce8`, which creates the input map, the track selector, the message joiner, the delayer,
- * the gamer, the synthesiser, and the score track graphs, and resolves each type through the
- * table its constructor installs. mState steps through 1 while the level file loads, 2 once it is
+ * The member map comes from the constructor, the destructor, and BuildGraphs(). BuildGraphs()
+ * creates the input map, the track selector, the message joiner, the delayer, the gamer, the
+ * synthesiser, and the score track graphs, and each type is resolved through the table its
+ * constructor installs. mState steps through 1 while the level file loads, 2 once it is
  * converted, 4 while the world accepts controller readings, and 6 on one shutdown path.
  *
  * GameManagerImpl reads mInputMap from three of its handlers, writes mUnknown8c from its load path
@@ -217,11 +217,10 @@ public:
      * Prepare the loaded level for play.
      *
      * Resets the synthesiser through its slots 5 and 6, sets its jam flag from the play mode,
-     * builds the draw passes through `0x0018cce8`, `0x0018caa8`, and `0x0018c828`, starts the
-     * streamed audio named by configuration code 0x3a5 when code 0x3a4 is set, and reads the
-     * start offset from code 0x38d. GameManagerImpl's FinishWorldLoad() and Load() call it after
-     * FinishLoad(). Not reconstructed yet, because most of the routines it runs are unrecovered.
-     * The title is inferred.
+     * runs BuildGraphs(), CreateRenderer(), and ConnectPlayers(), starts the streamed audio named
+     * by configuration code 0x3a5 when code 0x3a4 is set, and reads the start offset from code
+     * 0x38d. GameManagerImpl's FinishWorldLoad() and Load() call it after FinishLoad(). Not
+     * reconstructed yet. The title is inferred.
      *
      * @ghidraAddress 0x0018dc88
      */
@@ -330,7 +329,7 @@ public:
     /**
      * Tear the world down ahead of destruction.
      *
-     * The body is not written. It runs `0x0018ec90` when mState is 6 and `0x0018c778` always,
+     * The body is not written. It runs StopLevel() when mState is 6 and DeletePlayers() always,
      * deletes the level, the song clock, the cheat detector, and mForceFeedback, and then
      * runs `0x0012f400` and `0x0012f428`, which release a global at `0x0066f538`. The destructor is
      * the recovered caller.
@@ -384,6 +383,127 @@ public:
     void MarkStatsFlag();
 
 private:
+    /**
+     * Wire every player into the world's message graph.
+     *
+     * Each player becomes a sink of mInputMap, mTrackSelector, and mUnknown1c when set, and
+     * mJoiner, mGamer, mTrackSelector, and mUnknown20 when set become sinks of the player.
+     * PrepareLevel() is the caller. The title is inferred.
+     *
+     * @ghidraAddress 0x0018c828
+     */
+    void ConnectPlayers();
+
+    /**
+     * Undo ConnectPlayers().
+     *
+     * The player's own sinks are removed first, mGamer ahead of mJoiner, and the player is then
+     * removed from mUnknown1c, mTrackSelector, and mInputMap in that order. The title is inferred.
+     *
+     * @ghidraAddress 0x0018c960
+     */
+    void DisconnectPlayers();
+
+    /**
+     * Delete every player and empty both player lists.
+     *
+     * Shutdown() is the caller. The title is inferred.
+     *
+     * @ghidraAddress 0x0018c778
+     */
+    void DeletePlayers();
+
+    /**
+     * Create the in-game renderer and introduce every player to it.
+     *
+     * The renderer becomes a sink of mDelayer and of each player. Each player then sends it a
+     * TrackSelectMsg, and a SeekerMsg as well while the player's Slot2() reports -1.
+     * PrepareLevel() is the caller.
+     *
+     * @ghidraAddress 0x0018caa8
+     */
+    void CreateRenderer();
+
+    /**
+     * Build the message graph and the per-track graphs of the loaded level.
+     *
+     * Creates the delayer, the joiner, the input map, the track selector, the synthesiser, the
+     * gamer, one BGTrackGraph per backing and intro track, and one ScoreTrackGraph per gameplay
+     * track, and wires them together. While a saved game is loading, the song title and the
+     * phrases are read back from the log FinishSong() wrote. PrepareLevel() is the caller. The
+     * title is inferred.
+     *
+     * @ghidraAddress 0x0018cce8
+     */
+    void BuildGraphs();
+
+    /**
+     * Delete everything BuildGraphs() created.
+     *
+     * StopLevel() is the caller. The title is inferred.
+     *
+     * @ghidraAddress 0x0018da60
+     */
+    void DestroyGraphs();
+
+    /**
+     * Start the backing sequencers and every gameplay stage.
+     *
+     * The intro tracks' sequencers are deleted first. The world queues it as a FuncCmd, through
+     * the pointer to member at `0x007dc280`. The title is inferred.
+     *
+     * @ghidraAddress 0x0018e238
+     */
+    void StartSequencers();
+
+    /**
+     * Stop every stage and sequencer at the end of the song and schedule EndLevel().
+     *
+     * In jam mode the song name and every stage's phrases are first written to the reset log,
+     * behind a length word patched in last. Exit mode 2 posts EndLevel() half a second later,
+     * and every other mode runs it at once. The world queues it as a FuncCmd, through the pointer
+     * to member at `0x007dc2a0`. The title is inferred.
+     *
+     * @ghidraAddress 0x0018e6f0
+     */
+    void FinishSong();
+
+    /**
+     * Report the end of the game to the game manager.
+     *
+     * Clears the display to black in exit mode 3, sets mState to 6, and queues an EndGameMsg that
+     * carries mUnknown88. Exit modes 1 and 2 then install the bank-load progress hook and run the
+     * synthesiser's LoadBankSet4(), except in a jukebox session with mUnknownb8 set. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x0018eb70
+     */
+    void EndLevel();
+
+    /**
+     * Take the level down after EndLevel().
+     *
+     * Disconnects the players, deletes the renderer and the graphs, pauses the song clock at
+     * tick zero, and sets mState back to 2. Shutdown() runs it while mState is 6. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x0018ec90
+     */
+    void StopLevel();
+
+public:
+    /**
+     * Show a line of text on the track displays.
+     *
+     * Sends a TextMsg through mDelayer, and does nothing before mDelayer exists. The script
+     * binding at `0x00153464` is the caller.
+     *
+     * @param text The text.
+     * @ghidraAddress 0x0018f140
+     */
+    void DisplayText(const HxStr &text);
+
+private:
     Application *mApp; // +0x08
 
 public:
@@ -398,14 +518,14 @@ public:
 private:
     TrackSelector *mTrackSelector; // +0x10
     MsgJoiner *mJoiner;            // +0x14
-    // The MIDI level. The draw path at 0x0018cce8 halts with `MIDI level file has not been
-    // loaded.` while it is null.
+    // The MIDI level. BuildGraphs() halts with `MIDI level file has not been loaded.` while it is
+    // null.
     LevelBuilder *mLevel; // +0x18
     // Registered with in game mode 3 only.
     MsgSource *mUnknown1c; // +0x1c
     MsgSink *mUnknown20;   // +0x20
     Delayer *mDelayer;     // +0x24
-    // The in-game renderer, which the routine at 0x0018caa8 creates.
+    // The in-game renderer. CreateRenderer() creates it.
     Renderer *mRenderer; // +0x28
     Gamer *mGamer;       // +0x2c
     GameStats *mStats;   // +0x30
@@ -423,11 +543,12 @@ public:
 private:
     std::vector<ScoreTrackGraph *> mTrackGraphs; // +0x38
     std::vector<BGTrackGraph *> mUnknown44;      // +0x44
-    // Four-byte elements of an unrecovered type.
-    std::vector<int> mUnknown50; // +0x50
-    BGTrackGraph *mUnknown5c;    // +0x5c
-    MuseSynth *mMuseSynth;       // +0x60
-    Sch::TickClock *mSongClock;  // +0x64
+    // The element type is fixed by DestroyGraphs() and StartSequencers(). Both run one
+    // std::for_each instantiation over this vector and mUnknown44.
+    std::vector<BGTrackGraph *> mUnknown50; // +0x50
+    BGTrackGraph *mUnknown5c;               // +0x5c
+    MuseSynth *mMuseSynth;                  // +0x60
+    Sch::TickClock *mSongClock;             // +0x64
 
 public:
     /**

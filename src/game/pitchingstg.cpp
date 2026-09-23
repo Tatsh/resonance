@@ -5,7 +5,7 @@
 #include "mid/mbt.h"
 
 // 0x001c45b0
-PitchingSTG::PitchingSTG(const TrackData *pTrackData)
+PitchingSTG::PitchingSTG(TrackData *pTrackData)
     : ScoreTrackGraph(pTrackData), mPitcher(nullptr), mJamEffects(nullptr) {
     if (mTrackData->mKind == kTrackModeRiff) {
         mPitcher = new NotePitcher(mPhraseMgr,

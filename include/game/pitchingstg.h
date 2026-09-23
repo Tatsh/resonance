@@ -35,7 +35,7 @@ public:
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x001c45b0
      */
-    PitchingSTG(const TrackData *pTrackData);
+    PitchingSTG(TrackData *pTrackData);
 
     /**
      * Stop the stage and release the producer and the jam effects manager.

@@ -8,3 +8,11 @@ long long WatchdogTimer::Now() {
     }
     return mWatchdog->mNowNs + mNegatedOrigin;
 }
+
+// 0x004a7878
+void WatchdogTimer::Pause() {
+    if (mHasOrigin != 0) {
+        mHasOrigin = 0;
+        mUnknown08 = mNegatedOrigin + mWatchdog->mNowNs;
+    }
+}

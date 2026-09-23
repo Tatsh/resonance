@@ -21,7 +21,7 @@ constexpr int kExportLeadStep = 120;
 } // namespace
 
 // 0x0019fb80
-CatchingSTG::CatchingSTG(const TrackData *pTrackData)
+CatchingSTG::CatchingSTG(TrackData *pTrackData)
     : ScoreTrackGraph(pTrackData), mNeutralizer(nullptr), mCatcher(nullptr) {
     mNeutralizer = new PhraseNeutralizer(mTrackData, mPhraseMgr);
 

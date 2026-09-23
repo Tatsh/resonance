@@ -16,8 +16,8 @@ class MsgSink;
  *
  * The vector is three pointers, measured from the destructor and from both accessors: `+0x04`
  * start, `+0x08` finish, `+0x0c` end of storage. Every operation on it is inlined apart from the
- * reallocating half of push_back() at `0x00549e08`. Both members are private, because the only
- * code that reads either is a member of this class.
+ * reallocating half of push_back() at `0x00549e08`. The vector is private. Only members of this
+ * class address it.
  */
 class MsgSource {
 public:
@@ -62,7 +62,24 @@ public:
      */
     void Send(Message *pMsg);
 
+    /**
+     * Unregister every sink.
+     *
+     * GrooveWorld::DestroyGraphs() at `0x0018da60` calls it. An identical copy sits at
+     * `0x001fedb0`.
+     *
+     * @ghidraAddress 0x0054a218
+     */
+    void ClearSinks();
+
+    /**
+     * A word no member of this class reads. +0x00
+     *
+     * Public because GrooveWorld::BuildGraphs() stores 1 into it on the new InputMap at
+     * `0x0018ce18`, and the image has no accessor.
+     */
+    int mUnknown00;
+
 private:
-    int mUnknown00;                // +0x00
     std::vector<MsgSink *> mSinks; // +0x04
 };

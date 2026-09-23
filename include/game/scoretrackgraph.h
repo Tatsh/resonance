@@ -46,8 +46,8 @@ class Player;
  * sends the same controller with value zero, and every other pairing in the four classes is
  * symmetric in the same way.
  *
- * Every data member is protected. The four derived classes read seven of the ten directly and no
- * accessor for any of them exists in the image.
+ * Every data member apart from mTrackData is protected. The four derived classes read seven of
+ * the ten directly and no accessor for any of them exists in the image.
  */
 class ScoreTrackGraph {
 public:
@@ -60,7 +60,7 @@ public:
      * @param pTrackData The track description.
      * @ghidraAddress 0x001cee50
      */
-    explicit ScoreTrackGraph(const TrackData *pTrackData);
+    explicit ScoreTrackGraph(TrackData *pTrackData);
 
     /**
      * @ghidraAddress 0x001cf840
@@ -194,9 +194,51 @@ public:
      */
     virtual void Slot12();
 
+    /**
+     * Run Slot2() and report zero.
+     *
+     * Inline. GrooveWorld::StartSequencers() reaches it through a pointer to member, and the
+     * address is its uncalled out-of-line copy.
+     *
+     * @return Always 0.
+     * @ghidraAddress 0x001cf6b8
+     */
+    int CallSlot2();
+
+    /**
+     * Run Slot3() and report zero.
+     *
+     * Inline. GrooveWorld::FinishSong() reaches it through a pointer to member, and the address is
+     * its uncalled out-of-line copy.
+     *
+     * @return Always 0.
+     * @ghidraAddress 0x001cf6e8
+     */
+    int CallSlot3();
+
+    /**
+     * Delete a stage, which may be null.
+     *
+     * Inline. GrooveWorld::DestroyGraphs() passes it to std::for_each.
+     *
+     * @param pGraph The stage.
+     * @ghidraAddress 0x001cf718
+     */
+    static void Delete(ScoreTrackGraph *pGraph);
+
 protected:
-    int mUnknown00;              // +0x00, copied from TrackData::mUnknown04
-    const TrackData *mTrackData; // +0x04, the constructor's argument
+    int mUnknown00; // +0x00, copied from TrackData::mUnknown04
+
+public:
+    /**
+     * The track description, the constructor's argument. +0x04
+     *
+     * Public because GrooveWorld::BuildGraphs() loads it directly at `0x0018d730` and passes it
+     * to TrackData::AddPhrases(), and the image has no accessor.
+     */
+    TrackData *mTrackData;
+
+protected:
     PhraseMgr *mPhraseMgr;       // +0x08, 0x60 bytes, built at 0x001ba0d0
     PhrasePlayer *mPhrasePlayer; // +0x0c, 0x30 bytes, built at 0x001c17d8
     Quantizer *mQuantizer;       // +0x10, four bytes, built at 0x001ce670
@@ -206,3 +248,20 @@ protected:
     Application *mApplication;   // +0x20, from Application::shared()
     int mUnknown24;              // +0x24
 };
+
+// 0x001cf6b8, the out-of-line copy.
+inline int ScoreTrackGraph::CallSlot2() {
+    Slot2();
+    return 0;
+}
+
+// 0x001cf6e8, the out-of-line copy.
+inline int ScoreTrackGraph::CallSlot3() {
+    Slot3();
+    return 0;
+}
+
+// 0x001cf718, the out-of-line copy.
+inline void ScoreTrackGraph::Delete(ScoreTrackGraph *pGraph) {
+    delete pGraph;
+}

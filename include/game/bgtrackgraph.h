@@ -26,7 +26,7 @@ public:
     /**
      * Allocate a graph from the tagged heap under the tag "BGTrackGraph".
      *
-     * No out-of-line body exists. RndWorld's draw pass inlines the call.
+     * No out-of-line body exists. GrooveWorld::BuildGraphs() at `0x0018cce8` inlines the call.
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
@@ -129,6 +129,39 @@ public:
      */
     void DisableMidi();
 
+    /**
+     * Run BuildSequencer() and report zero.
+     *
+     * Inline. GrooveWorld::StartSequencers() reaches it through a pointer to member, and the
+     * address is its uncalled out-of-line copy in the GrooveWorld unit.
+     *
+     * @return Always 0.
+     * @ghidraAddress 0x00193ff8
+     */
+    int CallBuildSequencer();
+
+    /**
+     * Run DeleteSequencer() and report zero.
+     *
+     * Inline. GrooveWorld::StartSequencers() and FinishSong() reach it through a pointer to member,
+     * and the address is its uncalled out-of-line copy in the GrooveWorld unit.
+     *
+     * @return Always 0.
+     * @ghidraAddress 0x00194018
+     */
+    int CallDeleteSequencer();
+
+    /**
+     * Delete a graph, which may be null.
+     *
+     * Inline. GrooveWorld::DestroyGraphs() passes it to std::for_each, and the out-of-line copy
+     * sits in the GrooveWorld unit.
+     *
+     * @param pGraph The graph.
+     * @ghidraAddress 0x00194038
+     */
+    static void Delete(BGTrackGraph *pGraph);
+
 private:
     BarSequencer *mSequencer; // +0x00
     unsigned char mUnknown04; // +0x04 0xff at construction
@@ -141,3 +174,20 @@ private:
     MidiDisabler *mDisabler;  // +0x1c
     Mixer *mMixer;            // +0x20
 };
+
+// 0x00193ff8, the out-of-line copy.
+inline int BGTrackGraph::CallBuildSequencer() {
+    BuildSequencer();
+    return 0;
+}
+
+// 0x00194018, the out-of-line copy.
+inline int BGTrackGraph::CallDeleteSequencer() {
+    DeleteSequencer();
+    return 0;
+}
+
+// 0x00194038, the out-of-line copy.
+inline void BGTrackGraph::Delete(BGTrackGraph *pGraph) {
+    delete pGraph;
+}

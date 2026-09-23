@@ -70,6 +70,17 @@ public:
     virtual void Load(IBStream &stream);
 
     /**
+     * Produce a command with the reading unset, for the stream to load into.
+     *
+     * The factory the GrooveWorld unit's static initialiser registers. The expanded default
+     * constructor writes only the base's words.
+     *
+     * @return The command.
+     * @ghidraAddress 0x0018be70
+     */
+    static Sch::Command *NewCmd();
+
+    /**
      * Identifier the class streams itself under. The word at `0x0067f238` starts as 2.
      *
      * @ghidraAddress 0x0067f238

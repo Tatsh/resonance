@@ -20,6 +20,25 @@
 class TextMsg : public Message {
 public:
     /**
+     * Construct a message with empty text.
+     *
+     * Inline. New() expands it, and it does not write the word at `+0x0c`.
+     */
+    TextMsg() {
+    }
+
+    /**
+     * Construct a message showing a string.
+     *
+     * Inline. GrooveWorld::DisplayText() at `0x0018f140` expands it on its stack, copy-constructing
+     * the text and clearing the word at `+0x0c`.
+     *
+     * @param text The text to show.
+     */
+    explicit TextMsg(const HxStr &text) : mText(text), mUnknown0c(0) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 311.

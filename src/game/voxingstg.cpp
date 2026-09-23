@@ -5,7 +5,7 @@
 #include "mid/mbt.h"
 
 // 0x001da050
-VoxingSTG::VoxingSTG(const TrackData *pTrackData)
+VoxingSTG::VoxingSTG(TrackData *pTrackData)
     : ScoreTrackGraph(pTrackData), mVoxer(nullptr), mJamEffects(nullptr) {
     mVoxer = new Voxer(mPhraseMgr, mQuantizer, mApplication->GetSongClock(), mTrackData);
     mOldGemMaker = new AxeOldGemMaker(mTrackData);

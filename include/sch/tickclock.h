@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/watchdogtimer.h"
+#include "mid/mbt.h"
 #include "sch/tick.h"
 
 class CmdID;
@@ -104,10 +105,14 @@ public:
      * paused reading, but only when it differs from the current reading. The body is not
      * reconstructed, for the reason recorded on SongTick().
      *
-     * @param nTick The song position, in MIDI ticks at 480 per quarter note.
+     * The position is a Mid::MBT passed by value in one register. Both callers, GrooveWorld's
+     * PrepareLevel() at `0x0018ddd8` and StopLevel() at `0x0018ed6c`, construct it through
+     * Mid::MBT(int) immediately before the call.
+     *
+     * @param tick The song position.
      * @ghidraAddress 0x004a7b60
      */
-    void SetSongTick(long long nTick);
+    void SetSongTick(Mid::MBT tick);
 
     /**
      * Queue a command, choosing between the absolute and the delta path.

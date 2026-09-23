@@ -25,6 +25,11 @@ constexpr int kControllerCmdId = 2;
 // 0x0067f238
 int ControllerCmd::sCmdID = kControllerCmdId;
 
+// 0x0018be70
+Sch::Command *ControllerCmd::NewCmd() {
+    return new ControllerCmd;
+}
+
 // 0x00194598
 int ControllerCmd::CmdID() {
     return sCmdID;

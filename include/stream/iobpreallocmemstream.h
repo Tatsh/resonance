@@ -91,9 +91,9 @@ public:
     /**
      * Report the caller-owned buffer.
      *
-     * IBStream vtable slot 10, the second virtual this class adds. No call site exists. Every
-     * reader of mBuffer in the image loads the member instead, and Ghidra reports no reference to
-     * the routine at all beyond the vtable entry.
+     * IBStream vtable slot 10, the second virtual this class adds. GrooveWorld::FinishSong()
+     * dispatches it at `0x0018e91c` to write the log's length back into its first word. Ghidra
+     * reports no reference beyond the vtable entry, because the one call is through the table.
      *
      * @return The buffer passed to the constructor.
      * @ghidraAddress 0x004edb60
@@ -103,8 +103,8 @@ public:
     /**
      * Report how many bytes have been written.
      *
-     * Not virtual. An out-of-line copy exists at the address below with no call site remaining, so
-     * every caller inlined it.
+     * Not virtual, and inline. The out-of-line copy at the address below has no call site.
+     * GrooveWorld::FinishSong() at `0x0018e90c` expands it.
      *
      * @return The write position.
      * @ghidraAddress 0x004edb68
@@ -151,3 +151,8 @@ private:
     int mEof;
     int mFail;
 };
+
+// 0x004edb68, the out-of-line copy.
+inline int IOBPreallocMemStream::Size() {
+    return mWritePos;
+}

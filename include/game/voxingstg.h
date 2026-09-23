@@ -32,7 +32,7 @@ public:
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x001da050
      */
-    VoxingSTG(const TrackData *pTrackData);
+    VoxingSTG(TrackData *pTrackData);
 
     /**
      * Stop the stage and release the four objects the constructor built.

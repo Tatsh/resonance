@@ -69,9 +69,18 @@ public:
     virtual void Print(std::ostream &stream);
 
 public:
-    /** Copied into NetPlayer `+0x48` by its handler at `0x00125f70`. +0x04 */
+    /**
+     * Copied into NetPlayer `+0x48` by its handler at `0x00125f70`. +0x04
+     *
+     * GrooveWorld::CreateRenderer() at `0x0018caa8` writes the player's Slot4() result here.
+     */
     int mUnknown04;
-    /** Copied into NetPlayer `+0x4c` by the same handler. +0x08 */
+
+    /**
+     * Copied into NetPlayer `+0x4c` by the same handler. +0x08
+     *
+     * GrooveWorld::CreateRenderer() writes zero here, and the song position and player below.
+     */
     int mUnknown08;
 
     /**

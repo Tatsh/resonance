@@ -135,6 +135,11 @@ TrackData *LevelBuilder::TrackAt(int nIndex) {
     return mTracks[nIndex];
 }
 
+// 0x001ec6d8
+TrackData *LevelBuilder::GetTrack(int nIndex) {
+    return mTracks[nIndex];
+}
+
 // 0x001ec708
 // The index is not tested against the collection.
 TrackData *LevelBuilder::BackingTrackAt(int nIndex) {
@@ -158,8 +163,8 @@ PlayMap *LevelBuilder::OnUnknownSlot8() {
 }
 
 // 0x001ec738
-void LevelBuilder::OnUnknownSlot9() {
-    mUnknown34->Slot8(); // Yes, the binary discards the result.
+int LevelBuilder::OnUnknownSlot9() {
+    return mUnknown34->Slot8();
 }
 
 // 0x001eb200

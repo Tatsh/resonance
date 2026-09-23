@@ -52,6 +52,17 @@ public:
     long long Now();
 
     /**
+     * Stop the time base at its current reading.
+     *
+     * Clears mHasOrigin and stores the reading Now() would have reported in mUnknown08. Now()
+     * reports mUnknown08 from then on. Does nothing while mHasOrigin is already clear.
+     * GrooveWorld::StopLevel() at `0x0018ec90` calls it on the song clock. The title is inferred.
+     *
+     * @ghidraAddress 0x004a7878
+     */
+    void Pause();
+
+    /**
      * Queue a command a distance from now, under a handle the caller retains.
      *
      * The body reads only mWatchdog, which is what places it on this class rather than on

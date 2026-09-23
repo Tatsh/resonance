@@ -106,11 +106,24 @@ public:
     virtual PlayMap *OnUnknownSlot8();
 
     /**
-     * Call the play map's slot 8 and discard the result.
+     * Report the play map's slot 8 value.
      *
+     * @return The value.
      * @ghidraAddress 0x001ec738
      */
-    virtual void OnUnknownSlot9();
+    virtual int OnUnknownSlot9();
+
+    /**
+     * Return one gameplay track, without dispatch.
+     *
+     * The body is the same as TrackAt(), but the member is not virtual. GrooveWorld calls it
+     * directly at `0x0018d284`, `0x0018d714`, and `0x0018df64`. The title is inferred.
+     *
+     * @param nIndex The position in mTracks.
+     * @return The track.
+     * @ghidraAddress 0x001ec6d8
+     */
+    TrackData *GetTrack(int nIndex);
 
     /**
      * Make one track the current track, creating it on first use.
@@ -139,7 +152,7 @@ public:
     /**
      * Forward a bar count to the play map through its slot 3.
      *
-     * GrooveWorld's draw pass at `0x0018cd44` passes zero. The title is inferred.
+     * GrooveWorld::BuildGraphs() at `0x0018cd44` passes zero. The title is inferred.
      *
      * @param nBarCount The value stored in the play map's bar count.
      * @ghidraAddress 0x001ec498
@@ -149,8 +162,8 @@ public:
     /**
      * Return one intro track.
      *
-     * The index is not tested against the collection. GrooveWorld's draw pass at `0x0018d22c` is
-     * the caller. The title is inferred.
+     * The index is not tested against the collection. GrooveWorld::BuildGraphs() at `0x0018d22c`
+     * is the caller. The title is inferred.
      *
      * @param nIndex The position in mIntroTracks.
      * @return The track, or null for a slot SelectTrack() passed over.
@@ -297,8 +310,17 @@ private:
     // over the deleting function at 0x001ec328.
     std::vector<TrackData *> mTracks;        // +0x04
     std::vector<TrackData *> mBackingTracks; // +0x10
-    // No slot of LevelData reads this collection.
-    std::vector<TrackData *> mIntroTracks; // +0x1c
+
+public:
+    /**
+     * The intro tracks. +0x1c
+     *
+     * No slot of LevelData reads this collection. Public because GrooveWorld::BuildGraphs() reads
+     * its size directly as a loop bound at `0x0018d198`, and the image has no accessor.
+     */
+    std::vector<TrackData *> mIntroTracks;
+
+private:
     // Deleted by the destructor through TrackData's own destructor at 0x001d3900.
     TrackData *mOwnTrack; // +0x28
     // The track the forwarding members append to. The destructor does not release it.

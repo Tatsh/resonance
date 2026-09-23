@@ -29,7 +29,7 @@ public:
      * @param pTrackData The track description the base retains.
      * @ghidraAddress 0x0019fb80
      */
-    CatchingSTG(const TrackData *pTrackData);
+    CatchingSTG(TrackData *pTrackData);
 
     /**
      * Stop the stage and release the catcher and the neutraliser.

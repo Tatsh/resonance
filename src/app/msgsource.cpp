@@ -15,6 +15,11 @@ int g_nMsgSendDepth;
 MsgSource::~MsgSource() {
 }
 
+// 0x0054a218
+void MsgSource::ClearSinks() {
+    mSinks.clear();
+}
+
 // 0x0054a270
 void MsgSource::AddSink(MsgSink *pSink) {
     for (std::vector<MsgSink *>::iterator it = mSinks.begin(); it != mSinks.end(); ++it) {

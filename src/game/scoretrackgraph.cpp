@@ -15,7 +15,7 @@ constexpr int kPhraseMgrConfigCode = 0x2be;
 } // namespace
 
 // 0x001cee50
-ScoreTrackGraph::ScoreTrackGraph(const TrackData *pTrackData)
+ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
     : mUnknown00(pTrackData->mUnknown04), mTrackData(pTrackData), mPhraseMgr(nullptr),
       mPhrasePlayer(nullptr), mQuantizer(nullptr), mMuseSynth(nullptr), mUnknown18(0),
       mMixer(nullptr), mApplication(Application::shared()), mUnknown24(0) {
