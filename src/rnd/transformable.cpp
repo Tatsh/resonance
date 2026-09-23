@@ -341,6 +341,67 @@ float *Transformable::GetDrawXfm() {
     return g_drawXfm[0];
 }
 
+// A point carried through a transform, the VU0 multiply and accumulate the image inlines. The three
+// components are written and the fourth is taken from the input.
+static inline void TransformRow(const float (&aflXfm)[kXfmRowCount][kXfmRowFloatCount],
+                                const float *pIn,
+                                float *pOut) {
+    float afOut[kXfmRowFloatCount];
+    for (int i = 0; i < kXfmPaddingFloat; ++i) {
+        afOut[i] = (aflXfm[0][i] * pIn[0]) + (aflXfm[1][i] * pIn[1]) + (aflXfm[2][i] * pIn[2]) +
+                   aflXfm[kXfmTranslationRow][i];
+    }
+    afOut[kXfmPaddingFloat] = pIn[kXfmPaddingFloat];
+    std::copy(std::begin(afOut), std::end(afOut), pOut);
+}
+
+// 0x004f0770
+Transformable *Transformable::Parent() {
+    for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
+        Transformable *pCandidate = dynamic_cast<Transformable *>(*it);
+        if (pCandidate == nullptr) {
+            continue;
+        }
+        if (std::find(pCandidate->mTransList.begin(), pCandidate->mTransList.end(), this) !=
+            pCandidate->mTransList.end()) {
+            return pCandidate;
+        }
+    }
+    return nullptr;
+}
+
+// 0x004f0b18
+int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
+    if (nForce != 0 || mDirty != 0 || (pParent != nullptr && pParent->mDirty != 0)) {
+        if (pParent == nullptr) {
+            memcpy(mWorldXfm, mLocalXfm, sizeof(mWorldXfm));
+        } else if (mBillboard == kBillboardLocalRotate) {
+            TransformRow(
+                pParent->mWorldXfm, mLocalXfm[kXfmTranslationRow], mWorldXfm[kXfmTranslationRow]);
+            memcpy(mWorldXfm, mLocalXfm, sizeof(mWorldXfm[0]) * kXfmBasisRowCount);
+        } else {
+            sceVu0Sub005e7ab0(mWorldXfm[0], pParent->mWorldXfm[0], mLocalXfm[0]);
+        }
+
+        if (mBillboard == kBillboardNone) {
+            float afOffset[kXfmRowFloatCount];
+            afOffset[kXfmPaddingFloat] = 1.0f;
+            NegateVec3(mOrigin, afOffset);
+            TransformRow(mWorldXfm, afOffset, mWorldXfm[kXfmTranslationRow]);
+        }
+        mDirty = 1;
+    }
+
+    for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();
+         ++it) {
+        (*it)->UpdateWorldXfm(this, 0);
+    }
+
+    const int nRecomposed = mDirty;
+    mDirty = 0;
+    return nRecomposed;
+}
+
 // 0x004f0838
 void Transformable::AddTrans(Transformable *pTrans) {
     if (std::find(mTransList.begin(), mTransList.end(), pTrans) != mTransList.end()) {
@@ -353,6 +414,29 @@ void Transformable::AddTrans(Transformable *pTrans) {
     }
     mTransList.push_back(pTrans);
     pTrans->mDirty = 1; // Yes, the binary dereferences pTrans here with no null test.
+}
+
+// 0x004f09c0
+void Transformable::RemoveTrans(Transformable *pTrans) {
+    if (std::find(mTransList.begin(), mTransList.end(), pTrans) == mTransList.end()) {
+        return;
+    }
+    if (pTrans != nullptr) {
+        pTrans->RemoveRef(this);
+    }
+    mTransList.remove(pTrans);
+}
+
+// 0x004fce08
+void Transformable::SetBillboard(int nBillboard) {
+    mBillboard = nBillboard;
+    mDirty = 1;
+}
+
+// 0x004fce18
+void Transformable::SetOrigin(const float *pOrigin) {
+    std::copy(pOrigin, pOrigin + kXfmRowFloatCount, mOrigin);
+    mDirty = 1;
 }
 
 // 0x004f0a80

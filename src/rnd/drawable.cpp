@@ -158,6 +158,17 @@ Drawable *Drawable::Find(const HxStr &name) {
     return dynamic_cast<Drawable *>(g_manager.Find(name));
 }
 
+// 0x00503360
+void Drawable::RemoveDraw(Drawable *pDraw) {
+    if (std::find(mDraws.begin(), mDraws.end(), pDraw) == mDraws.end()) {
+        return;
+    }
+    if (pDraw != nullptr) {
+        pDraw->RemoveRef(this);
+    }
+    mDraws.remove(pDraw);
+}
+
 // 0x00503420
 void Drawable::ClearDraws() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end();) {
