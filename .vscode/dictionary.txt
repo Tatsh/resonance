@@ -627,6 +627,7 @@ mvoll
 mvolr
 mypy
 myreadline
+namenogood
 nearesttrackmsg
 netflow
 netgame

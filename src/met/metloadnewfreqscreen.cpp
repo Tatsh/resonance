@@ -1,11 +1,21 @@
 #include "met/metloadnewfreqscreen.h"
 
+#include <vector>
+
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/globalsettings.h"
 #include "met/metfreqmakerassetmanager.h"
 #include "met/metfreqmakerbuttonsscreen.h"
 #include "met/metfreqmakercanvasscreen.h"
 #include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
+#include "met/metkeyboardrequest.h"
+#include "met/metkeyboardscreen.h"
+#include "met/metpersonadata.h"
+#include "met/metpersonasaverscreen.h"
 #include "met/metscreentitlescreen.h"
+#include "os/datetime.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
 #include "script/configquery.h"
@@ -46,6 +56,29 @@ constexpr int kNoRandomize = 0;
 // Ring index of the button BuildButtonList() selects and UpdateNameLabel() labels.
 constexpr int kNameButtonIndex = 0;
 
+// The keyboard request OnNameButton() builds for the new identity's name.
+static const char *const kKeyboardPrompt = "FreQ name";
+static const char *const kKeyboardInitialText = "";
+static const char *const kKeyboardTicker = "name_new_freq_ticker";
+constexpr int kKeyboardMaxWidth = 176;
+constexpr int kKeyboardMaxLength = 12;
+constexpr int kAnyPad = -1;
+
+// The screens OnUnknownSlot2() hands to the persona saver to return to, and their order.
+static const char *const kNetPortalScreen = "MetNetPortalScreen";
+static const char *const kModeScreen = "MetModeScreen";
+static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
+constexpr int kSaveReturnScreenCount = 3;
+constexpr int kSaveReturnFirst = 0;
+constexpr int kSaveReturnGizmo = 1;
+constexpr int kSaveReturnHelp = 2;
+// The two values OnUnknownSlot2() passes MetPersonaSaverScreen::StartSave() last.
+constexpr int kSaveUnknown9c = 1;
+constexpr int kSaveUnknown98 = 0;
+
+// The dialogue OnMsgScreenDismissed() answers, which reports a rejected name.
+static const char *const kNameRejectedDialogue = "namenogood";
+
 } // namespace
 
 // 0x002a8418
@@ -53,9 +86,36 @@ MetLoadNewFreqScreen::MetLoadNewFreqScreen(MetRenderer *pRenderer, int nPriority
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
+// 0x002a8458
+MetLoadNewFreqScreen::~MetLoadNewFreqScreen() {
+}
+
 // 0x002a8390
 MetScreen *MetLoadNewFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadNewFreqScreen(pRenderer, nPriority);
+}
+
+// 0x002a4108
+void MetLoadNewFreqScreen::OnNameButton() {
+    MetKeyboardRequest request(HxStr(kLoadNewFreqScreen),
+                               HxStr(kKeyboardPrompt),
+                               HxStr(kKeyboardInitialText),
+                               kAnyPad,
+                               this);
+    request.mMaxWidth = kKeyboardMaxWidth;
+    request.mMaxLength = kKeyboardMaxLength;
+    request.mTicker = kKeyboardTicker;
+    MetKeyboardScreen::Open(request);
+}
+
+// 0x002a4910
+void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
+    if (!(name == kNameRejectedDialogue)) {
+        return;
+    }
+    PushNamedScreen(HxStr(kHelpScreen));
+    PushNamedScreen(HxStr(kLoadNewFreqScreen));
+    ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
 }
 
 // 0x002a3890
@@ -88,6 +148,51 @@ void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     PushNamedScreen(HxStr(kHelpScreen));
     PushNamedScreen(HxStr(kLoadNewFreqScreen));
     ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
+}
+
+// 0x002a4340
+void MetLoadNewFreqScreen::OnUnknownSlot2(const HxStr &text) {
+    mUnknowna8 = 1;
+    HxStr name(text);
+    if (name.mLen == 0) {
+        name = (*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00;
+    }
+    MetPersonaData *pIdentity = (*mUnknown8c)[mUnknown94];
+    pIdentity->mUnknown140.mUnknown00 = name;
+    HxStr birthday;
+    if (FormatCurrentDateTime(birthday)) {
+        pIdentity->mUnknown154 = birthday;
+    }
+
+    GameManagerImpl *pManager = Application::shared()->GetGameManager();
+    pManager->ClearPersonas();
+    Application::shared()->GetGameManager()->AddPersona(*pIdentity);
+    MetPersonaData *pPersona = (*Application::shared()->GetGameManager()->GetPersonas())[0];
+    GlobalSettings::shared(); // Yes, the binary discards this call's result.
+
+    if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeNet) {
+        std::vector<HxStr> screens;
+        screens.resize(kSaveReturnScreenCount);
+        screens[kSaveReturnFirst] = kNetPortalScreen;
+        screens[kSaveReturnGizmo] = kLeftGizmoScreen;
+        screens[kSaveReturnHelp] = kHelpScreen;
+        MetPersonaSaverScreen::StartSave(screens,
+                                         pPersona,
+                                         GlobalSettings::shared()->mCardSlots[0],
+                                         kSaveUnknown9c,
+                                         kSaveUnknown98);
+    } else {
+        std::vector<HxStr> screens;
+        screens.resize(kSaveReturnScreenCount);
+        screens[kSaveReturnFirst] = kModeScreen;
+        screens[kSaveReturnGizmo] = kLeftGizmoScreen;
+        screens[kSaveReturnHelp] = kHelpScreen;
+        MetPersonaSaverScreen::StartSave(screens,
+                                         pPersona,
+                                         GlobalSettings::shared()->mCardSlots[0],
+                                         kSaveUnknown9c,
+                                         kSaveUnknown98);
+    }
 }
 
 // 0x002a85c0

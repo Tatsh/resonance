@@ -31,11 +31,6 @@
  * `nf_edit`, and `nf_create`, and none of the three shows the selected username. The first button
  * opens the keyboard rather than committing a selection, which is the whole difference from
  * MetLoadFreqScreen.
- *
- * Three bodies are not written. OnNameButton() builds a MetKeyboardRequest and passes it to
- * MetKeyboardScreen::Open(), which are both declared now. OnUnknownSlot2() continues past the
- * name assignment into a larger body. OnMsgScreenDismissed() needs members no header in this tree
- * declares yet.
  */
 class MetLoadNewFreqScreen : public MetLoadFreqBaseScreen, public MetKBUser {
 public:
@@ -101,7 +96,8 @@ public:
     /**
      * Restore this screen after a message screen is dismissed.
      *
-     * Slot 15. The body is not written, for the reason recorded in the class documentation.
+     * Slot 15. Only `namenogood`, the rejected-name dialogue, is answered: the help screen and this
+     * screen are pushed again and this screen is activated.
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The response.
@@ -124,9 +120,8 @@ public:
      *
      * Slot 40. A MetKeyboardRequest is built with this screen's registry key, the prompt
      * `FreQ name`, an empty initial text, -1 for any controller, and the MetKBUser subobject as the
-     * receiver, and is then passed to MetKeyboardScreen::Open().
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * receiver. The width is 176, the length 12, and the ticker `name_new_freq_ticker`, and the
+     * request is then passed to MetKeyboardScreen::Open().
      *
      * @ghidraAddress 0x002a4108
      */
@@ -183,8 +178,11 @@ public:
      * username the identity already had by assigning it over the empty text first. mUnknowna8 is
      * set to 1 before either assignment, which is what OnKeyboardDismissed() reads.
      *
-     * The body is not written past the name assignment, for the reason recorded in the class
-     * documentation.
+     * A current date from FormatCurrentDateTime() replaces the identity's birthday at `+0x154`.
+     * The game manager's personas are then replaced by a copy of the identity, and the first of
+     * them goes to MetPersonaSaverScreen::StartSave() with the first card slot of GlobalSettings,
+     * 1, and 0. The screens to return to are MetNetPortalScreen in a network game and
+     * MetModeScreen otherwise, each followed by MetLeftGizmoScreen and MetHelpScreen.
      *
      * @param text The text the user entered.
      * @ghidraAddress 0x002a4340

@@ -78,6 +78,11 @@ MetLoadPreFabScreen::MetLoadPreFabScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
+// 0x002ad450
+// Everything in the body is the teardown of mIdentities and the base.
+MetLoadPreFabScreen::~MetLoadPreFabScreen() {
+}
+
 // 0x002a8aa0
 void MetLoadPreFabScreen::EnterAndShow() {
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
