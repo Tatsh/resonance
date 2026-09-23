@@ -144,7 +144,7 @@ inline int ClassifyPowerOfTwo(int n) {
 
 // 0x004e3dc8
 Tex::Tex(const HxStr &name)
-    : Object(name), mWidth(0), mHeight(0), mBitsPerPixel(0), mUnknown28(0), mPendingMipMask(0),
+    : Object(name), mWidth(0), mHeight(0), mBitsPerPixel(0), mFlags(0), mPendingMipMask(0),
       mMipSelect(-0x80), mBitmapPath(nullptr), mZone(-1) {
 }
 
@@ -173,11 +173,11 @@ void Tex::DumpText(FailSink &sink) {
     sink.Print(" file:");
     mBitmapPath.Print(sink);
     sink.Print(" flags:");
-    if (mUnknown28 == 0) {
+    if (mFlags == 0) {
         sink.Print("None");
     } else {
         for (const auto &flag : kTexFlagNames) {
-            if ((mUnknown28 & flag.nBit) != 0) {
+            if ((mFlags & flag.nBit) != 0) {
                 sink.Print(flag.pszName);
             }
         }
@@ -193,7 +193,7 @@ void Tex::Save(Stream &stream) {
     stream.Write(&mHeight, sizeof(mHeight));
     stream.Write(&mBitsPerPixel, sizeof(mBitsPerPixel));
     mBitmapPath.Save(stream);
-    stream.Write(&mUnknown28, sizeof(mUnknown28));
+    stream.Write(&mFlags, sizeof(mFlags));
     stream.Write(&mMipSelect, sizeof(mMipSelect));
 }
 
@@ -215,7 +215,7 @@ void Tex::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     mBitsPerPixel = pTex->mBitsPerPixel;
     mBitmapPath = pTex->mBitmapPath;
     mMipSelect = pTex->mMipSelect;
-    mUnknown28 = pTex->mUnknown28;
+    mFlags = pTex->mFlags;
     AllocateBitmapFromStream();
 }
 
@@ -242,7 +242,7 @@ void Tex::Load(Stream &stream) {
     }
     stream.Read(&mBitsPerPixel, sizeof(mBitsPerPixel));
     mBitmapPath.Load(stream);
-    stream.Read(&mUnknown28, sizeof(mUnknown28));
+    stream.Read(&mFlags, sizeof(mFlags));
     if (nRevision >= kShortSizeRevision && nRevision <= kLastRevisionWithSpareByte) {
         char cSpare = 0;
         stream.ReadBytes(&cSpare, sizeof(cSpare)); // Read and then discarded, as in the binary.
@@ -274,12 +274,12 @@ void Tex::SetGsPageInUse([[maybe_unused]] bool bInUse) {
 
 // 0x004e7908
 void Tex::SetBitmapConfig(
-    int nWidth, int nHeight, int nBitsPerPixel, const HxStr &path, int nMipSelect, int nUnknown28) {
+    int nWidth, int nHeight, int nBitsPerPixel, const HxStr &path, int nMipSelect, int nFlags) {
     mWidth = nWidth;
     mHeight = nHeight;
     mBitsPerPixel = nBitsPerPixel;
     mMipSelect = nMipSelect;
-    mUnknown28 = nUnknown28;
+    mFlags = nFlags;
     if (FilePath::IsAbsolute(path)) {
         mBitmapPath.Set(path);
     } else {
@@ -367,7 +367,7 @@ void Tex::AllocateBitmapFromStream() {
 
     int nWidth = mWidth;
     int nHeight = mHeight;
-    if ((mUnknown28 & kTexFlagCubeMap) != 0) {
+    if ((mFlags & kTexFlagCubeMap) != 0) {
         nWidth *= kCubeMapWidthFactor;
         nHeight *= kCubeMapHeightFactor;
     }
@@ -407,7 +407,7 @@ bool Tex::LoadMipFiles() {
     char szBase[kMaxPathLength];
     strcpy(szBase, TextOf(mBitmapPath));
 
-    if ((mUnknown28 & kTexFlagMipChain) == 0) {
+    if ((mFlags & kTexFlagMipChain) == 0) {
         return QueueMipRead(szBase) != 0;
     }
 
@@ -501,12 +501,12 @@ void Tex::OnMipLoaded(int nMip) {
     if (g_nSkipColorSwap == 0) {
         pBitmap->SwapRedBlue();
     }
-    if ((mUnknown28 & kTexFlagPaletteAlpha) != 0) {
+    if ((mFlags & kTexFlagPaletteAlpha) != 0) {
         pBitmap->SetPaletteAlphaFromLowByte(0);
-    } else if ((mUnknown28 & kTexFlagPaletteAlphaWhite) != 0) {
+    } else if ((mFlags & kTexFlagPaletteAlphaWhite) != 0) {
         pBitmap->SetPaletteAlphaFromLowByte(1);
     }
-    pBitmap->ApplyColorKey(mUnknown28);
+    pBitmap->ApplyColorKey(mFlags);
 
     if (ClassifyPowerOfTwo(pBitmap->mWidth) < 0 || ClassifyPowerOfTwo(pBitmap->mHeight) < 0) {
         g_failSink.Report("%s (mipmap %d) is not power of 2 in width and height (%d x %d)\n",

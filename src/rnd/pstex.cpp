@@ -143,8 +143,8 @@ constexpr int kNoPackedMip = 9999;
 // The eight-bit formats, which are the only ones whose small levels are packed.
 constexpr int kPackedMipBitsPerPixel = 8;
 
-// Bit of Rnd::Tex::mUnknown28 under which the size check divides the width by three and the height
-// by two. What the bit stands for is unrecovered.
+// Bit of Rnd::Tex::mFlags under which the size check divides the width by three and the height
+// by two. Rnd::Tex::DumpText() names the bit "CubeMap", and the three by two grid is the six faces.
 constexpr int kTexSplitSizeCheck = 0x40;
 constexpr int kSplitSizeColumns = 3;
 constexpr int kSplitSizeRows = 2;
@@ -369,7 +369,7 @@ void PsTex::RestoreSurfaces() {
 
         int nCheckWidth = pBitmap->mWidth;
         int nCheckHeight = pBitmap->mHeight;
-        if ((mUnknown28 & kTexSplitSizeCheck) != 0) {
+        if ((mFlags & kTexSplitSizeCheck) != 0) {
             nCheckWidth /= kSplitSizeColumns;
             nCheckHeight /= kSplitSizeRows;
         }

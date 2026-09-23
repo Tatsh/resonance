@@ -71,12 +71,8 @@ MatchTextureToTrack(Tex *pTex, const MovieStream::Track &track, const char *pszM
     }
     LogPrintf(
         pszMessage, pTex->mWidth, pTex->mHeight, pTex->mBitsPerPixel, track.mWidth, track.mHeight);
-    pTex->SetBitmapConfig(track.mWidth,
-                          track.mHeight,
-                          kMovieBitsPerPixel,
-                          HxStr(""),
-                          pTex->mMipSelect,
-                          pTex->mUnknown28);
+    pTex->SetBitmapConfig(
+        track.mWidth, track.mHeight, kMovieBitsPerPixel, HxStr(""), pTex->mMipSelect, pTex->mFlags);
     pTex->ReloadBitmaps();
 }
 

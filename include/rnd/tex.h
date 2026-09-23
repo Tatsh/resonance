@@ -34,8 +34,7 @@ namespace Rnd {
  * of Rnd::Object. Slots 8 through 15 are ReloadBitmaps(), LockMipBitmap(), UnlockMipBitmap(),
  * SetPalette(), SetGsPageInUse(), FreeLoadedBitmaps(), RestoreSurfaces(), and OnMipLoaded().
  *
- * Recovery is partial. mUnknown28 is the flag word DumpText() labels " flags:", and its bits are
- * the ones DumpText() lists by name.
+ * mFlags is the flag word DumpText() labels " flags:", and DumpText() lists its bits by name.
  *
  * mBitmapPath is a Rnd::FilePath, whose routines sit in this unit and take the path's address
  * rather than the texture's. SetBitmapConfig() installs the path through FilePath::Set() for a
@@ -123,7 +122,7 @@ public:
     virtual void DumpText(FailSink &sink);
 
     /**
-     * Write revision 4, the three dimensions, the path, mUnknown28, and mMipSelect.
+     * Write revision 4, the three dimensions, the path, mFlags, and mMipSelect.
      *
      * Rnd::Object::Save() is not called.
      *
@@ -195,15 +194,11 @@ public:
      * @param nBitsPerPixel The bitmap depth.
      * @param path The bitmap path.
      * @param nMipSelect The mip selector, which starts at -0x80.
-     * @param nUnknown28 The fourth configuration word.
+     * @param nFlags The flag word, recorded in mFlags.
      * @ghidraAddress 0x004e7908
      */
-    void SetBitmapConfig(int nWidth,
-                         int nHeight,
-                         int nBitsPerPixel,
-                         const HxStr &path,
-                         int nMipSelect,
-                         int nUnknown28);
+    void SetBitmapConfig(
+        int nWidth, int nHeight, int nBitsPerPixel, const HxStr &path, int nMipSelect, int nFlags);
 
     /**
      * Advance the asynchronous mip loads and report whether any level is still outstanding.
@@ -226,7 +221,7 @@ public:
      * zeroes the dimensions and the depth before RestoreSurfaces() runs. Without a path one blank
      * level is allocated in a single block, from the tagged heap when mZone is -1 and from the
      * zone otherwise. The block holds the bitmap header, then a palette for a depth of 8 bits or
-     * fewer, then the pixels on a 16-byte boundary. Flag 0x40 of mUnknown28 triples the width and
+     * fewer, then the pixels on a 16-byte boundary. Flag 0x40 of mFlags triples the width and
      * doubles the height of that level. The level is recorded as loaded and RestoreSurfaces()
      * runs.
      *
@@ -357,9 +352,9 @@ protected:
      * Vtable slot 15. The level's block is a bitmap header followed by a palette and the pixels.
      * An indexed format (4 bit, 8 bit, or run length 8 bit) points the bitmap at both. A direct
      * colour format has no palette, and its pixels start where the palette would. Red and blue are
-     * then swapped unless g_nSkipColorSwap is set. Flag 0x10 of mUnknown28 runs
+     * then swapped unless g_nSkipColorSwap is set. Flag 0x10 of mFlags runs
      * ABitmap::SetPaletteAlphaFromLowByte(0), or else flag 0x20 runs it with 1, and
-     * ABitmap::ApplyColorKey() receives mUnknown28 whole. A level whose width or height is not a
+     * ABitmap::ApplyColorKey() receives mFlags whole. A level whose width or height is not a
      * power of two is reported to g_failSink. A level above zero whose size is not mWidth and
      * mHeight shifted right by nMip is reported as well. Neither report stops the load. Rnd::PsTex
      * runs this body first and then uploads the level to GS memory. The name is inferred from the
@@ -387,13 +382,13 @@ protected:
     // outside the hierarchy is recovered for any of them. The order is the recovered offset order.
 public:
     /**
-     * The fourth configuration word SetBitmapConfig() records. Public because Rnd::Movie's
-     * SetFrameSelf() reads it to pass it back unchanged. +0x28
+     * Flag word SetBitmapConfig() records and DumpText() labels " flags:". Public because
+     * Rnd::Movie's SetFrameSelf() reads it to pass it back unchanged. +0x28
      */
-    int mUnknown28;
+    int mFlags;
 
 private:
-    // Queue the base file and, when mUnknown28 has bit 0x4, every numbered mip file ("_m1", "_m2",
+    // Queue the base file and, when mFlags has bit 0x4, every numbered mip file ("_m1", "_m2",
     // and on) that exists, stopping at the first one missing. Reports false only when a queued
     // read fails, which QueueMipRead() never reports.
     bool LoadMipFiles();
