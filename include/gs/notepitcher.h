@@ -4,11 +4,14 @@
 #include "mid/mbt.h"
 #include "msg/message.h"
 
+class EraseMsg;
 class InvalidateSeekerMsg;
 class PhraseMgr;
+class PitchRiffMsg;
 class Player;
 class Quantizer;
 class TrackData;
+class TrackSelectMsg;
 
 namespace Sch {
 class TickClock;
@@ -25,10 +28,9 @@ class TickClock;
  * It ignores an EraseOffMsg rather than forwarding it, which is the one message the three Pitcher
  * subclasses treat differently from each other.
  *
- * The constructor, HandleMessage(), and Tick() are written. The five routines the last two dispatch
- * to are declared with their addresses and their bodies are not written. The five titles
- * come from the message each routine posts rather than from the message it receives, which is the
- * naming the program already had and is retained here.
+ * The titles of the routines HandleMessage() and Tick() dispatch to come from the message each
+ * routine posts rather than from the message it receives. That is the naming the program already
+ * had, and it is retained here. PostPitchMsg() is the one routine not written.
  */
 class NotePitcher : public Pitcher {
 public:
@@ -74,50 +76,72 @@ public:
 
 protected:
     /**
-     * React to a PitchRiffMsg. The body is not written.
+     * React to a PitchRiffMsg for this track and player.
+     *
+     * The message's position is quantised. A bar CanPlayBar() rejects plays `SND_INACTIVE`.
+     * Otherwise, at a new position, the riff TrackData::GetRiff() reports goes out as a
+     * MultiMuseMsg, PostPhraseCapturedMsg() records the gem, a PitchMsg follows, and the position
+     * is stored in mUnknown4c. The body is not written, because PitchMsg's word at `+0x04` is
+     * private and the class has no payload constructor.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001b1f10
      */
-    void PostPitchMsg(Message *pMsg);
+    void PostPitchMsg(PitchRiffMsg *pMsg);
 
     /**
-     * React to an EraseMsg. The body is not written.
+     * Erase this player's phrases at an EraseMsg's position, outside play mode 1.
+     *
+     * The bar, or with the message's last word set every bar of its step, is cleared wherever
+     * mUnknown44 owns it, and clearing the message's own bar also sends an AllNotesOffMsg. When
+     * anything was cleared, `SND_ERASE_SECTION` or `SND_ERASE` plays, a ShowEraseEffectMsg goes
+     * out, and the seeker is posted again. The position is stored in mUnknown48 either way.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001b20b0
      */
-    void PostAllNotesOffMsg(Message *pMsg);
+    void PostAllNotesOffMsg(EraseMsg *pMsg);
 
     /**
-     * React to a TrackSelectMsg. The body is not written.
+     * Install the player a TrackSelectMsg for this track selects.
+     *
+     * A null player first turns the previous player's seeker off. A real player has its seeker
+     * posted at the message's bar with the force flag set.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001b22f0
      */
-    void PostSeekerMsg(Message *pMsg);
+    void PostSeekerMsg(TrackSelectMsg *pMsg);
 
     /**
-     * Post the phrase-captured message. The body is not written.
+     * Record a caught gem.
      *
-     * No caller is recovered. It is declared because the program already titles it and the address
-     * belongs to this class.
+     * A new bar becomes mUnknown54 and is announced with a PhraseCapturedMsg worth the bar's
+     * points. In play mode 1 a phrase another player owns there is cleared first. Unless
+     * Player::Slot10() reports non-zero, the gem goes to PhraseMgr::AddGem() for mUnknown54 alone.
+     * Otherwise it goes to every bar of the step that CanPlayBar() accepts and whose phrase
+     * PhraseMgr::PhrasesMatch() pairs with mUnknown54, and then to mUnknown54 itself. The bar is
+     * then replayed from one tick after the gem.
      *
+     * @param nGem The gem, the PitchRiffMsg's first word.
+     * @param nTick The quantised song position.
      * @ghidraAddress 0x001b2400
      */
-    void PostPhraseCapturedMsg();
+    void PostPhraseCapturedMsg(int nGem, int nTick);
 
     /**
-     * Post the seeker message for one bar. The body is not written.
+     * Post the seeker for mUnknown44 at the first playable bar of the eight from nBar.
      *
-     * Both an InvalidateSeekerMsg and Tick() reach it, the first with the message's `+0x04` and
-     * the second with the bar it computed. The second argument is zero at both call sites.
+     * Nothing is sent for the stand-in player. Without bForce, a player whose Player::Slot5()
+     * reports non-zero has its seeker turned off. Outside play mode 1, a player whose
+     * Player::Slot10() reports zero, or a search that finds no bar CanPlayBar() accepts, also
+     * turns the seeker off. A found bar posts a seeker over the mUnknown5c bars of its step.
      *
-     * @param nBar The bar.
-     * @param bUnknown Zero at both recovered call sites.
+     * @param nBar The bar to search from, clamped to zero.
+     * @param bForce Non-zero to skip the Player::Slot5() test.
      * @ghidraAddress 0x001b2710
      */
-    void PostSeekerMsgSecond(int nBar, int bUnknown);
+    void PostSeekerMsgSecond(int nBar, int bForce);
 
     /**
      * Act on a message.
@@ -137,6 +161,14 @@ private:
     // Returns non-zero when nTick differs from mUnknown4c. PostPitchMsg() calls it at 0x001b1fa4.
     // 0x001b3b88
     int IsOtherTick(int nTick);
+
+    // Reports whether mUnknown44 may play nBar. In play mode 1 that is TrackData::QueryBar() and
+    // Player::Slot9(). Otherwise the bar needs TrackData::QueryBar() and, unless mUnknown60 is set,
+    // no owner or nCurrentBar equal to nBar. An owned bar must also belong to mUnknown44.
+    // PostSeekerMsgSecond() expands it inline, and PostPitchMsg() and PostPhraseCapturedMsg() call
+    // the out-of-line copy. The title is inferred.
+    // 0x001b3a68
+    int CanPlayBar(int nBar, int nCurrentBar);
 
     PhraseMgr *mPhraseMgr; // +0x38
     Quantizer *mQuantizer; // +0x3c
