@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 #include "math/box.h"
@@ -17,6 +18,7 @@
 class FailSink;
 namespace Rnd {
 class Mat;
+class MeshAnim;
 class Stream;
 } // namespace Rnd
 
@@ -70,12 +72,13 @@ public:
     /**
      * Bits of the changed-parts mask SyncChanged() receives.
      *
-     * Three of the seven bits of kSyncAllMask are recovered, each from the channel of
-     * Rnd::MeshAnim::SetFrameSelf() that reports it after writing into the vertex vector. The
-     * remaining four bits have no recovered producer.
+     * Four of the seven bits of kSyncAllMask are recovered. Three come from the channels of
+     * Rnd::MeshAnim::SetFrameSelf() that report them after writing into the vertex vector, and
+     * kSyncNorms comes from ComputeNormals(). The remaining three bits have no recovered producer.
      */
     enum {
         kSyncPoints = 0x01, /*!< The vertex positions changed. */
+        kSyncNorms = 0x08,  /*!< The vertex normals changed. */
         kSyncColors = 0x10, /*!< The vertex colours changed. */
         kSyncTexs = 0x20    /*!< The first texture coordinate of each vertex changed. */
     };
@@ -223,18 +226,19 @@ public:
     void SetTransOwner(Transformable *pOwner);
 
     /**
-     * Point the mesh at the next level of detail in its chain.
+     * Set the smallest screen size to draw at, and the mesh to draw in its place below it.
      *
-     * The same shape as SetMaterial() and SetTransOwner(). Both inlined copies store the argument
-     * whether or not it is null.
-     *
-     * No out-of-line body exists. The compiler inlined the setter at `0x004e8444` and again at
-     * `0x004e84fc` inside Rnd::MultiMesh::DrawSelf(), its only call site, so the title is inferred
-     * from the member it writes.
+     * Stores flMinScreen into mMinScreen, then swaps the reference on mNext the same way as
+     * SetMaterial() and SetTransOwner(), storing pNext whether or not it is null. The pointer
+     * arrives in $a1 and the float in $f12, so the order of the two parameters in the source
+     * cannot be recovered. Rnd::MultiMesh::DrawSelf() and Rnd::TunnelMeshChain inline it, and the
+     * out-of-line copy has no caller. The title is inferred from the members it writes.
      *
      * @param pNext The next mesh in the chain, or null.
+     * @param flMinScreen The smallest screen size to draw this mesh at, or zero to always draw it.
+     * @ghidraAddress 0x004925d8
      */
-    void SetNext(Mesh *pNext);
+    void SetNext(Mesh *pNext, float flMinScreen);
 
     /**
      * Point the mesh at its second transform owner.
@@ -300,6 +304,58 @@ public:
      * @ghidraAddress 0x00493fb8
      */
     Box BoundingBox();
+
+    /**
+     * Replace the geometry with an axis-aligned cube.
+     *
+     * The eight vertices sit at plus or minus flHalfSize on each axis with white colour and zero
+     * normals and texture coordinates. Twelve triangles and the twelve cube edges follow, and the
+     * mesh then runs SyncAll() and Sync(). The routine has no caller, and the title is inferred.
+     *
+     * @param flHalfSize Half the length of a side.
+     * @ghidraAddress 0x00485978
+     */
+    void MakeCube(float flHalfSize);
+
+    /**
+     * Recompute the vertex normals of mVertsOwner from the faces of mFacesOwner.
+     *
+     * With a flat material, each face writes its unit normal into its first vertex only, and the
+     * routine returns without reporting a change. Otherwise each vertex is welded to the first
+     * earlier vertex at the same position (and, unless bPositionOnly, of the same colour), and
+     * takes the normalised sum of the unit normals of every face corner welded to it, each
+     * weighted by the corner angle in radians. The smooth path then reports kSyncNorms through
+     * SyncChanged().
+     *
+     * A world transform whose axes form a left-handed basis negates the results. The flat path
+     * negates only one normal, read through the face past the end of the face vector.
+     *
+     * The routine has no caller, and the title is inferred.
+     *
+     * @param bPositionOnly Weld vertices by position alone, ignoring colour.
+     * @ghidraAddress 0x00485ef0
+     */
+    void ComputeNormals(bool bPositionOnly);
+
+    /**
+     * Merge duplicate vertices and remove the faces and edges the merge makes redundant.
+     *
+     * A vertex used by a face or an edge absorbs every later vertex at the same position. With a
+     * textured material the first texture coordinates must match as well, and without a flat
+     * material a later vertex used by a face must also match in colour. Surviving vertices move
+     * down over the removed ones, and every animation that references this mesh and owns its keys
+     * moves and trims its keyframes to match. Degenerate and repeated faces and edges are then
+     * erased, and an animation channel whose keyframes all match is emptied.
+     *
+     * With a flat material, each face first records its colour (the colour of its first vertex,
+     * or with bAverageColors the mean of its three), then AssignFlatVerts() runs, and each face's
+     * new first vertex takes the recorded colour. SyncAll() and Sync() follow. The routine has no
+     * caller, and the title is inferred.
+     *
+     * @param bAverageColors Give each flat face the mean colour of its vertices.
+     * @ghidraAddress 0x00483e70
+     */
+    void WeldVerts(bool bAverageColors);
 
     /**
      * Point the mesh at the mesh whose vertices it draws.
@@ -513,6 +569,36 @@ private:
     // mFacesOwner is another mesh. Load() and Copy() are its callers. 0x0047fe68.
     void ClearSharedGeometry();
 
+    // One face in AssignFlatVerts(). A face that joins a coplanar neighbour's fan records that
+    // neighbour in mPrimaryFace. A face that heads a fan counts the joined edges in mSharedEdges
+    // and records the vertex every joined edge passes through in mPivot, with mPivotOther the other
+    // end of the only joined edge while there is exactly one, and -1 otherwise.
+    struct FlatFace {
+        int mFace;
+        union {
+            int mSharedEdges;
+            int mPrimaryFace;
+        };
+        int mPivot;
+        int mPivotOther;
+        Vector3 mNormal;
+    };
+
+    // Add face to the fan that primary heads when the two share a vertex, their normals are within
+    // two degrees, and the shared vertices keep one pivot for the whole fan. Records primary in
+    // face.mPrimaryFace whether or not it joins. AssignFlatVerts() is the only caller. 0x004832d0.
+    bool JoinFlatFace(FlatFace &primary, FlatFace &face);
+
+    // Give every face a first vertex of its own for flat shading, which reads the colour and the
+    // normal of the first vertex only. Coplanar neighbours join one fan and share its vertex. A
+    // bipartite matching of fans to vertices picks each fan's vertex, and a fan left unmatched
+    // splits a vertex, appending a copy to the keys of every animation in anims. Each face is then
+    // rotated to start at its vertex, and Sync() follows. WeldVerts() is the only caller. The
+    // matcher at 0x00569bf0 is upstream code from the vendored netflow package (its diagnostics
+    // read "Inconsistent matching between %d(U) and %d(V)"), and it is not reconstructed.
+    // 0x00483438.
+    void AssignFlatVerts(std::list<MeshAnim *> &anims);
+
     // Data members follow the recovered offset order, and the access specifiers interleave.
 
 public:
@@ -573,9 +659,9 @@ protected:
 
 public:
     /*!< Projected size below which this mesh yields to a coarser link of the mNext chain. Zero
-         disables the substitution. Public because Rnd::MultiMesh::DrawSelf() at `0x004e83f4` saves
-         it, zeroes it for the run of instances, and restores it afterwards, and the image has no
-         accessor for it. +0x148 */
+         disables the substitution. SetNext() writes it. Public because Rnd::MultiMesh::DrawSelf()
+         at `0x004e83f4` and Rnd::TunnelMeshChain read it directly, and the image has no accessor
+         for it. +0x148 */
     float mMinScreen;
     /*!< Next coarser level of detail, or null at the end of the chain. Public on the same
          evidence: the same routine reads it at `0x004e8444` to hand it back to SetNext(). +0x14c */

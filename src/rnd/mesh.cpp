@@ -2,15 +2,21 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
+#include <list>
 #include <vector>
 
 #include "math/box.h"
+#include "math/color.h"
 #include "math/quaternion.h"
+#include "math/vector2.h"
 #include "math/vector3.h"
+#include "netflow/netflow.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
+#include "rnd/meshanim.h"
 #include "rnd/raytest.h"
 #include "rnd/stream.h"
 #include "rnd/transformable.h"
@@ -29,6 +35,56 @@ constexpr int kFaceNormalLastVersion = 0;
 // BoundingSphere() places the centre halfway between the box corners.
 constexpr float kHalf = 0.5f;
 
+// One corner of the cube MakeCube() builds, each axis at the high or the low extent.
+struct CubeCorner {
+    bool mHighX;
+    bool mHighY;
+    bool mHighZ;
+};
+
+// The corners in the binary's vertex order.
+constexpr CubeCorner kCubeCorners[] = {
+    {false, true, false},
+    {false, false, false},
+    {true, false, false},
+    {true, true, false},
+    {false, true, true},
+    {false, false, true},
+    {true, false, true},
+    {true, true, true},
+};
+
+// The cube's triangles and drawn edges, as indices into kCubeCorners.
+constexpr MeshFace kCubeFaces[] = {
+    {0, 3, 1},
+    {1, 3, 2},
+    {4, 5, 7},
+    {5, 6, 7},
+    {0, 5, 4},
+    {0, 1, 5},
+    {1, 6, 5},
+    {1, 2, 6},
+    {7, 6, 2},
+    {7, 2, 3},
+    {4, 7, 0},
+    {0, 7, 3},
+};
+
+constexpr MeshEdge kCubeEdges[] = {
+    {0, 1},
+    {1, 2},
+    {2, 3},
+    {3, 0},
+    {4, 5},
+    {5, 6},
+    {6, 7},
+    {7, 4},
+    {0, 4},
+    {1, 5},
+    {2, 6},
+    {3, 7},
+};
+
 // The tag every mesh allocation is billed to.
 constexpr char kMeshAllocationTag[] = "Rnd::Mesh";
 
@@ -39,6 +95,148 @@ enum XfmRow {
     kXfmRowZ = 2,
     kXfmRowTranslation = 3,
 };
+
+constexpr int kFaceCornerCount = 3;
+
+inline float DotVec3(const float *pA, const float *pB) {
+    return (pA[0] * pB[0]) + (pA[1] * pB[1]) + (pA[2] * pB[2]);
+}
+
+// The inlined VU0 normalise, one rsqrt of the squared length scaling the three components.
+inline void NormalizeVec3Inline(const Vector3 &source, Vector3 &result) {
+    const float flInverseLength = 1.0f / std::sqrt(DotVec3(&source.x, &source.x));
+    result.x = source.x * flInverseLength;
+    result.y = source.y * flInverseLength;
+    result.z = source.z * flInverseLength;
+}
+
+// Rotate a face so that it starts at nVert, keeping its winding. A face without nVert at its
+// second or third corner is not changed.
+inline void RotateFaceToStart(MeshFace &face, unsigned short nVert) {
+    const MeshFace old = face;
+    if (face.mV2 == nVert) {
+        face = MeshFace{nVert, old.mV3, old.mV1};
+    } else if (face.mV3 == nVert) {
+        face = MeshFace{nVert, old.mV1, old.mV2};
+    }
+}
+
+// Point every corner of a face that uses nFrom at nTo instead.
+inline void ReplaceCorner(MeshFace &face, int nFrom, int nTo) {
+    if (face.mV1 == nFrom) {
+        face.mV1 = nTo;
+    }
+    if (face.mV2 == nFrom) {
+        face.mV2 = nTo;
+    }
+    if (face.mV3 == nFrom) {
+        face.mV3 = nTo;
+    }
+}
+
+inline unsigned short FaceCorner(const MeshFace &face, int nCorner) {
+    switch (nCorner) {
+    case 0:
+        return face.mV1;
+    case 1:
+        return face.mV2;
+    default:
+        return face.mV3;
+    }
+}
+
+inline bool SameVec3(const Vector3 &a, const Vector3 &b) {
+    return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
+}
+
+inline bool SameColor(const Color &a, const Color &b) {
+    return (a.r == b.r) && (a.g == b.g) && (a.b == b.b) && (a.a == b.a);
+}
+
+inline bool SameVec2(const Vector2 &a, const Vector2 &b) {
+    return (a.x == b.x) && (a.y == b.y);
+}
+
+// The vertex MakeCube() and WeldVerts() fill with. The position and normal are the origin with a
+// 1.0 fourth word, the colour is opaque white, and both texture coordinates are zero.
+inline MeshVert DefaultVert() {
+    MeshVert vert;
+    vert.mPoint = Vector3{0.0f, 0.0f, 0.0f, 1.0f};
+    vert.mNorm = vert.mPoint;
+    vert.mColor = Color{1.0f, 1.0f, 1.0f, 1.0f};
+    vert.mTex1 = Vector2{0.0f, 0.0f};
+    vert.mTex2 = vert.mTex1;
+    return vert;
+}
+
+// Bits WeldVerts() sets for each vertex a face or an edge uses. A later duplicate's entry is
+// replaced with the negated index of the vertex it merges into.
+enum VertUse {
+    kVertInEdge = 1,
+    kVertInFace = 2,
+};
+
+// A face whose normal is within two degrees of a neighbour's joins that neighbour's flat fan.
+constexpr float kCoplanarCosine = 0.99939f;
+
+// No vertex, in a FlatFace pivot.
+constexpr int kNoVert = -1;
+
+constexpr float kOneThird = 1.0f / 3.0f;
+
+// Whether two faces use the same three vertices in any order.
+inline bool SameCorners(const MeshFace &a, const MeshFace &b) {
+    if (a.mV1 == b.mV1) {
+        if ((a.mV2 == b.mV2) && (a.mV3 == b.mV3)) {
+            return true;
+        }
+        if ((a.mV2 == b.mV3) && (a.mV3 == b.mV2)) {
+            return true;
+        }
+    }
+    if (a.mV1 == b.mV2) {
+        if ((a.mV2 == b.mV3) && (a.mV3 == b.mV1)) {
+            return true;
+        }
+        if ((a.mV2 == b.mV1) && (a.mV3 == b.mV3)) {
+            return true;
+        }
+    }
+    if (a.mV1 == b.mV3) {
+        if ((a.mV2 == b.mV2) && (a.mV3 == b.mV1)) {
+            return true;
+        }
+        if ((a.mV2 == b.mV1) && (a.mV3 == b.mV2)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Whether every key of a channel matches the first key, value for value.
+template <typename Key, typename Same>
+bool AllKeysMatchFirst(const std::list<Key> &keys, Same same) {
+    for (const Key &key : keys) {
+        const Key &first = keys.front();
+        if (key.mValues.size() != first.mValues.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < key.mValues.size(); ++i) {
+            if (!same(key.mValues[i], first.mValues[i])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Shrink or grow the value vector of every key in a channel by nRemoved values.
+template <typename Key, typename Value>
+void TrimKeys(std::list<Key> &keys, int nRemoved, const Value &fill) {
+    for (Key &key : keys) {
+        key.mValues.resize(key.mValues.size() - nRemoved, fill);
+    }
+}
 
 // 0x00493f00
 FailSink &PrintZMode(FailSink &sink, Mesh::ZMode nZMode) {
@@ -949,6 +1147,438 @@ Sphere Mesh::BoundingSphere() {
     return sphere;
 }
 
+// 0x004832d0
+bool Mesh::JoinFlatFace(FlatFace &primary, FlatFace &face) {
+    face.mPrimaryFace = primary.mFace;
+    const MeshFace &faceCorners = mFacesOwner->mFaces[face.mFace];
+    const MeshFace &primaryCorners = mFacesOwner->mFaces[primary.mFace];
+    int nShared = kNoVert;
+    int nSharedBefore = kNoVert;
+    for (int nCorner = 0; nCorner < kFaceCornerCount; ++nCorner) {
+        const int nVert = FaceCorner(primaryCorners, nCorner);
+        if ((nVert == faceCorners.mV1) || (nVert == faceCorners.mV2) ||
+            (nVert == faceCorners.mV3)) {
+            nSharedBefore = nShared;
+            nShared = nVert;
+        }
+    }
+    if (nShared == kNoVert) {
+        return false;
+    }
+    if (DotVec3(&primary.mNormal.x, &face.mNormal.x) < kCoplanarCosine) {
+        return false;
+    }
+
+    if (primary.mSharedEdges == 0) {
+        primary.mPivotOther = nSharedBefore;
+        primary.mSharedEdges = 1;
+        primary.mPivot = nShared;
+        return true;
+    }
+    if ((primary.mPivot == nShared) || (primary.mPivot == nSharedBefore)) {
+        primary.mPivotOther = kNoVert;
+        ++primary.mSharedEdges;
+        return true;
+    }
+    if ((primary.mSharedEdges == 1) &&
+        ((primary.mPivotOther == nShared) || (primary.mPivotOther == nSharedBefore))) {
+        primary.mPivot = primary.mPivotOther;
+        primary.mPivotOther = kNoVert;
+        primary.mSharedEdges = 2;
+        return true;
+    }
+    return false;
+}
+
+// 0x00483438
+void Mesh::AssignFlatVerts(std::list<MeshAnim *> &anims) {
+    std::vector<MeshFace> &faces = mFacesOwner->mFaces;
+    std::list<FlatFace> heads;
+    std::list<FlatFace> joined;
+    for (unsigned nFace = 0; nFace < faces.size(); ++nFace) {
+        FlatFace face{};
+        face.mFace = nFace;
+        joined.push_back(face);
+
+        const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+        Vector3 edge1{};
+        Vector3 edge2{};
+        Vec3Sub(&verts[faces[nFace].mV2].mPoint.x, &verts[faces[nFace].mV1].mPoint.x, &edge1.x);
+        Vec3Sub(&verts[faces[nFace].mV3].mPoint.x, &verts[faces[nFace].mV1].mPoint.x, &edge2.x);
+        Vector3 normal{};
+        CrossVec3(&edge1.x, &edge2.x, &normal.x);
+        NormalizeVec3Inline(normal, joined.back().mNormal);
+
+        std::list<FlatFace>::iterator it = heads.begin();
+        for (; it != heads.end(); ++it) {
+            if (JoinFlatFace(*it, joined.back())) {
+                break;
+            }
+        }
+        if (it == heads.end()) {
+            FlatFace head{};
+            head.mFace = nFace;
+            head.mSharedEdges = 0;
+            heads.push_back(head);
+            heads.back().mNormal = joined.back().mNormal;
+            joined.pop_back();
+        }
+    }
+
+    netflow_graph graph;
+    netflow_graph_init(&graph);
+    netflow_v_side side;
+    netflow_v_side_init(&side);
+    graph.u_count = static_cast<int>(heads.size());
+    side.v_count = static_cast<int>(mVertsOwner->mVerts.size());
+    graph.edge_count = static_cast<int>(heads.size()) * kFaceCornerCount;
+    // Both vertex sets number from 1.
+    int nU = 1;
+    for (const FlatFace &head : heads) {
+        const MeshFace &corners = faces[head.mFace];
+        if (head.mSharedEdges == 0) {
+            netflow_add_edge(nU, corners.mV1 + 1, &graph, &side);
+            netflow_add_edge(nU, corners.mV2 + 1, &graph, &side);
+            netflow_add_edge(nU, corners.mV3 + 1, &graph, &side);
+        } else {
+            netflow_add_edge(nU, head.mPivot + 1, &graph, &side);
+            if (head.mPivotOther != kNoVert) {
+                netflow_add_edge(nU, head.mPivotOther + 1, &graph, &side);
+            }
+        }
+        ++nU;
+    }
+    netflow_build_matching(&graph, &side);
+
+    nU = 1;
+    for (const FlatFace &head : heads) {
+        MeshFace &corners = faces[head.mFace];
+        int nVert = graph.u[nU].mate - 1;
+        if (nVert < 0) {
+            // Unmatched, so the fan splits a vertex of its own.
+            nVert = (head.mSharedEdges != 0) ? head.mPivot : corners.mV1;
+            mVertsOwner->mVerts.push_back(mVertsOwner->mVerts[nVert]);
+            for (MeshAnim *pAnim : anims) {
+                pAnim->AppendVertKeys(nVert);
+            }
+            nVert = static_cast<int>(mVertsOwner->mVerts.size()) - 1;
+            if (head.mSharedEdges != 0) {
+                ReplaceCorner(corners, head.mPivot, nVert);
+                for (const FlatFace &face : joined) {
+                    if (face.mPrimaryFace == head.mFace) {
+                        ReplaceCorner(faces[face.mFace], head.mPivot, nVert);
+                    }
+                }
+            } else {
+                corners.mV1 = nVert;
+            }
+        }
+        RotateFaceToStart(corners, nVert);
+        ++nU;
+    }
+    for (const FlatFace &face : joined) {
+        RotateFaceToStart(faces[face.mFace], faces[face.mPrimaryFace].mV1);
+    }
+    Sync();
+}
+
+// 0x00483e70
+void Mesh::WeldVerts(bool bAverageColors) {
+    if (mVertsOwner->mVerts.empty()) {
+        return;
+    }
+
+    std::list<MeshAnim *> anims;
+    for (Object *pRef : mRefs) {
+        MeshAnim *pAnim = dynamic_cast<MeshAnim *>(pRef);
+        if ((pAnim != nullptr) && (pAnim->mKeysOwner == pAnim)) {
+            anims.push_back(pAnim);
+        }
+    }
+
+    // Each entry starts as a set of VertUse bits. A merged vertex's entry becomes the negated
+    // index of the vertex it merges into, and the compaction below rewrites every entry as the
+    // count of vertices removed up to and including that one.
+    std::vector<int> vertState(mVertsOwner->mVerts.size(), 0);
+    const bool bFlat = (mMat != nullptr) && mMat->mFlat;
+    const bool bTextured = (mMat != nullptr) && !mMat->mStages.empty();
+    for (const MeshFace &face : mFacesOwner->mFaces) {
+        vertState[face.mV1] |= kVertInFace;
+        vertState[face.mV2] |= kVertInFace;
+        vertState[face.mV3] |= kVertInFace;
+    }
+    for (const MeshEdge &edge : mFacesOwner->mEdges) {
+        vertState[edge.mV1] |= kVertInEdge;
+        vertState[edge.mV2] |= kVertInEdge;
+    }
+
+    for (unsigned i = 0; i < mVertsOwner->mVerts.size(); ++i) {
+        if (vertState[i] <= 0) {
+            continue;
+        }
+        for (unsigned j = i + 1; j < mVertsOwner->mVerts.size(); ++j) {
+            if (vertState[j] <= 0) {
+                continue;
+            }
+            const MeshVert &kept = mVertsOwner->mVerts[i];
+            const MeshVert &later = mVertsOwner->mVerts[j];
+            if (!SameVec3(later.mPoint, kept.mPoint)) {
+                continue;
+            }
+            if (bTextured && !SameVec2(later.mTex1, kept.mTex1)) {
+                continue;
+            }
+            if (!bFlat && (vertState[j] & kVertInFace) && !SameColor(later.mColor, kept.mColor)) {
+                continue;
+            }
+            vertState[j] = -static_cast<int>(i);
+        }
+    }
+
+    std::vector<Color> faceColors(mFacesOwner->mFaces.size());
+    if (bFlat) {
+        for (unsigned i = 0; i < mFacesOwner->mFaces.size(); ++i) {
+            const MeshFace &face = mFacesOwner->mFaces[i];
+            const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+            if (bAverageColors) {
+                faceColors[i] = verts[face.mV1].mColor;
+                AddColor(faceColors[i], verts[face.mV2].mColor, faceColors[i]);
+                AddColor(faceColors[i], verts[face.mV3].mColor, faceColors[i]);
+                ScaleColor(faceColors[i], kOneThird, faceColors[i]);
+            } else {
+                faceColors[i] = verts[face.mV1].mColor;
+            }
+        }
+    }
+
+    // A merged vertex's entry is zero or a negated index, so negating it gives the survivor. An
+    // unused vertex is not referenced.
+    for (MeshFace &face : mFacesOwner->mFaces) {
+        if (vertState[face.mV1] <= 0) {
+            face.mV1 = static_cast<unsigned short>(-vertState[face.mV1]);
+        }
+        if (vertState[face.mV2] <= 0) {
+            face.mV2 = static_cast<unsigned short>(-vertState[face.mV2]);
+        }
+        if (vertState[face.mV3] <= 0) {
+            face.mV3 = static_cast<unsigned short>(-vertState[face.mV3]);
+        }
+    }
+    for (MeshEdge &edge : mFacesOwner->mEdges) {
+        if (vertState[edge.mV1] <= 0) {
+            edge.mV1 = static_cast<unsigned short>(-vertState[edge.mV1]);
+        }
+        if (vertState[edge.mV2] <= 0) {
+            edge.mV2 = static_cast<unsigned short>(-vertState[edge.mV2]);
+        }
+    }
+
+    for (unsigned i = 0; i < vertState.size(); ++i) {
+        const int nRemovedHere = vertState[i] < 1;
+        vertState[i] = (i == 0) ? nRemovedHere : (vertState[i - 1] + nRemovedHere);
+        if (nRemovedHere == 0) {
+            const int nTo = i - vertState[i];
+            mVertsOwner->mVerts[nTo] = mVertsOwner->mVerts[i];
+            for (MeshAnim *pAnim : anims) {
+                pAnim->CopyVertKeys(i, nTo);
+            }
+        }
+    }
+    const int nRemoved = vertState.back();
+    mVertsOwner->mVerts.resize(mVertsOwner->mVerts.size() - nRemoved, DefaultVert());
+    for (MeshAnim *pAnim : anims) {
+        MeshAnim *pKeys = pAnim->mKeysOwner;
+        TrimKeys(pKeys->mVertPointsKeys, nRemoved, Vector3{0.0f, 0.0f, 0.0f, 1.0f});
+        TrimKeys(pKeys->mVertTexsKeys, nRemoved, Vector2{0.0f, 0.0f});
+        TrimKeys(pKeys->mVertColorsKeys, nRemoved, Color{0.0f, 0.0f, 0.0f, 1.0f});
+    }
+
+    std::vector<MeshFace> &faces = mFacesOwner->mFaces;
+    for (std::vector<MeshFace>::iterator it = faces.begin(); it != faces.end();) {
+        it->mV1 -= vertState[it->mV1];
+        it->mV2 -= vertState[it->mV2];
+        it->mV3 -= vertState[it->mV3];
+        if ((it->mV1 == it->mV2) || (it->mV2 == it->mV3) || (it->mV3 == it->mV1)) {
+            if (!faceColors.empty()) {
+                faceColors.erase(faceColors.begin() + (it - faces.begin()));
+            }
+            it = faces.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    std::vector<MeshEdge> &edges = mFacesOwner->mEdges;
+    for (std::vector<MeshEdge>::iterator it = edges.begin(); it != edges.end();) {
+        it->mV1 -= vertState[it->mV1];
+        it->mV2 -= vertState[it->mV2];
+        if (it->mV1 == it->mV2) {
+            it = edges.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    if (faces.size() >= 2) {
+        for (std::vector<MeshFace>::iterator it = faces.begin(); it != faces.end(); ++it) {
+            for (std::vector<MeshFace>::iterator later = it + 1; later != faces.end();) {
+                if (SameCorners(*later, *it)) {
+                    if (!faceColors.empty()) {
+                        faceColors.erase(faceColors.begin() + (later - faces.begin()));
+                    }
+                    later = faces.erase(later);
+                } else {
+                    ++later;
+                }
+            }
+        }
+    }
+    if (edges.size() >= 2) {
+        for (std::vector<MeshEdge>::iterator it = edges.begin(); it != edges.end(); ++it) {
+            for (std::vector<MeshEdge>::iterator later = it + 1; later != edges.end();) {
+                if (((later->mV1 == it->mV1) && (later->mV2 == it->mV2)) ||
+                    ((later->mV1 == it->mV2) && (later->mV2 == it->mV1))) {
+                    later = edges.erase(later);
+                } else {
+                    ++later;
+                }
+            }
+        }
+    }
+
+    for (MeshAnim *pAnim : anims) {
+        if (AllKeysMatchFirst(pAnim->mKeysOwner->mVertPointsKeys, SameVec3)) {
+            pAnim->mKeysOwner->mVertPointsKeys.clear();
+        }
+        if (AllKeysMatchFirst(pAnim->mKeysOwner->mVertTexsKeys, SameVec2)) {
+            pAnim->mKeysOwner->mVertTexsKeys.clear();
+        }
+        if (AllKeysMatchFirst(pAnim->mKeysOwner->mVertColorsKeys, SameColor)) {
+            pAnim->mKeysOwner->mVertColorsKeys.clear();
+        }
+    }
+
+    if (bFlat) {
+        AssignFlatVerts(anims);
+        for (unsigned i = 0; i < faces.size(); ++i) {
+            mVertsOwner->mVerts[faces[i].mV1].mColor = faceColors[i];
+        }
+    }
+    SyncAll();
+    Sync();
+}
+
+// 0x00485978
+void Mesh::MakeCube(float flHalfSize) {
+    const float flLow = -flHalfSize;
+    const float flHigh = flHalfSize;
+
+    mVertsOwner->mVerts.clear();
+    mVertsOwner->mVerts.resize(std::size(kCubeCorners), DefaultVert());
+    for (size_t i = 0; i < std::size(kCubeCorners); ++i) {
+        Vector3 &point = mVertsOwner->mVerts[i].mPoint;
+        point.x = kCubeCorners[i].mHighX ? flHigh : flLow;
+        point.y = kCubeCorners[i].mHighY ? flHigh : flLow;
+        point.z = kCubeCorners[i].mHighZ ? flHigh : flLow;
+    }
+    SyncAll();
+
+    // The binary clears, fill-resizes, and then stores each record, rather than assigning.
+    const MeshFace emptyFace{0, 0, 0};
+    mFacesOwner->mFaces.clear();
+    mFacesOwner->mFaces.resize(std::size(kCubeFaces), emptyFace);
+    std::copy(std::begin(kCubeFaces), std::end(kCubeFaces), mFacesOwner->mFaces.begin());
+
+    const MeshEdge emptyEdge{0, 0};
+    mFacesOwner->mEdges.clear();
+    mFacesOwner->mEdges.resize(std::size(kCubeEdges), emptyEdge);
+    std::copy(std::begin(kCubeEdges), std::end(kCubeEdges), mFacesOwner->mEdges.begin());
+    Sync();
+}
+
+// 0x00485ef0
+void Mesh::ComputeNormals(bool bPositionOnly) {
+    Vector3 axisCross{};
+    CrossVec3(mWorldXfm[kXfmRowX], mWorldXfm[kXfmRowY], &axisCross.x);
+    const bool bMirrored = DotVec3(&axisCross.x, mWorldXfm[kXfmRowZ]) < 0.0f;
+
+    if ((mMat != nullptr) && mMat->mFlat) {
+        std::vector<MeshFace>::iterator it = mFacesOwner->mFaces.begin();
+        for (; it != mFacesOwner->mFaces.end(); ++it) {
+            std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+            Vector3 edge1{};
+            Vector3 edge2{};
+            Vec3Sub(&verts[it->mV2].mPoint.x, &verts[it->mV1].mPoint.x, &edge1.x);
+            Vec3Sub(&verts[it->mV3].mPoint.x, &verts[it->mV1].mPoint.x, &edge2.x);
+            Vector3 normal{};
+            CrossVec3(&edge1.x, &edge2.x, &normal.x);
+            NormalizeVec3Inline(normal, mVertsOwner->mVerts[it->mV1].mNorm);
+        }
+        if (bMirrored) {
+            // Yes, the binary negates once after the loop, through the face at end().
+            Vector3 &norm = mVertsOwner->mVerts[it->mV1].mNorm;
+            NegateVec3(&norm.x, &norm.x);
+        }
+        return;
+    }
+
+    // Each vertex maps to the first earlier vertex it duplicates, or to itself.
+    std::vector<int> canonical(mVertsOwner->mVerts.size(), 0);
+    for (unsigned i = 0; i < mVertsOwner->mVerts.size(); ++i) {
+        const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+        int j = 0;
+        for (; j < static_cast<int>(i); ++j) {
+            if (SameVec3(verts[j].mPoint, verts[i].mPoint) &&
+                (bPositionOnly || SameColor(verts[j].mColor, verts[i].mColor))) {
+                break;
+            }
+        }
+        canonical[i] = j;
+    }
+
+    // Each vertex takes the angle-weighted sum of the face normals at every corner welded to it.
+    for (unsigned i = 0; i < mVertsOwner->mVerts.size(); ++i) {
+        Vector3 &norm = mVertsOwner->mVerts[i].mNorm;
+        norm.x = 0.0f;
+        norm.z = 0.0f;
+        norm.y = 0.0f;
+        for (unsigned nFace = 0; nFace < mFacesOwner->mFaces.size(); ++nFace) {
+            const MeshFace &face = mFacesOwner->mFaces[nFace];
+            int nCorner = 0;
+            for (; nCorner < kFaceCornerCount; ++nCorner) {
+                if (canonical[FaceCorner(face, nCorner)] == canonical[i]) {
+                    break;
+                }
+            }
+            if (nCorner == kFaceCornerCount) {
+                continue;
+            }
+            const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+            const Vector3 &corner = verts[FaceCorner(face, nCorner)].mPoint;
+            const Vector3 &next = verts[FaceCorner(face, (nCorner + 1) % kFaceCornerCount)].mPoint;
+            const Vector3 &prev = verts[FaceCorner(face, (nCorner + 2) % kFaceCornerCount)].mPoint;
+            Vector3 edge1{};
+            Vector3 edge2{};
+            Vec3Sub(&next.x, &corner.x, &edge1.x);
+            Vec3Sub(&prev.x, &corner.x, &edge2.x);
+            Vector3 faceNormal{};
+            CrossVec3(&edge1.x, &edge2.x, &faceNormal.x);
+            Vec3Normalize(&faceNormal.x, &faceNormal.x);
+            Vec3Normalize(&edge1.x, &edge1.x);
+            Vec3Normalize(&edge2.x, &edge2.x);
+            Vector3 weighted{};
+            Vec3Scale(&faceNormal.x, std::acos(DotVec3(&edge1.x, &edge2.x)), &weighted.x);
+            Vector3 &target = mVertsOwner->mVerts[i].mNorm;
+            AddVec3(&target.x, &weighted.x, &target.x);
+        }
+        Vector3 &target = mVertsOwner->mVerts[i].mNorm;
+        Vec3Normalize(&target.x, &target.x);
+        if (bMirrored) {
+            NegateVec3(&target.x, &target.x);
+        }
+    }
+    SyncChanged(kSyncNorms);
+}
+
 // 0x00493fb8
 Box Mesh::BoundingBox() {
     const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
@@ -972,8 +1602,9 @@ void Mesh::SetTransOwner(Transformable *pOwner) {
     }
 }
 
-// Inlined at both of its call sites inside Rnd::MultiMesh::DrawSelf.
-void Mesh::SetNext(Mesh *pNext) {
+// 0x004925d8
+void Mesh::SetNext(Mesh *pNext, float flMinScreen) {
+    mMinScreen = flMinScreen;
     if (mNext != nullptr) {
         mNext->RemoveRef(this);
     }

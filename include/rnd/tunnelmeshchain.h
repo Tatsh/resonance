@@ -76,8 +76,8 @@ public:
      * Copy the screen size threshold of each level from another chain.
      *
      * Walks this chain and reads the same index of source, which has to be at least as long. Each
-     * level then passes its own mNext back to Mesh::SetNext(), which drops and retakes the same
-     * reference.
+     * level passes its own mNext back to Mesh::SetNext() with the copied threshold, which drops and
+     * retakes the same reference.
      *
      * @param source The chain to copy from.
      * @ghidraAddress 0x00469820
@@ -87,8 +87,9 @@ public:
     /**
      * Give each level the screen size threshold of the same index.
      *
-     * A level past the end of screenSizes is skipped. Each level then passes its own mNext back to
-     * Mesh::SetNext(). The out-of-line copy has no callers, and Rnd::Tunnel inlines the body.
+     * A level past the end of screenSizes is skipped. Each level passes its own mNext back to
+     * Mesh::SetNext() with its threshold. The out-of-line copy has no callers, and Rnd::Tunnel
+     * inlines the body.
      *
      * @param screenSizes The thresholds, finest level first.
      * @ghidraAddress 0x00476c50

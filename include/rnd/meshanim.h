@@ -172,17 +172,8 @@ public:
     /**
      * Copy one vertex slot over another in every keyframe of all three channels.
      *
-     * The channels read and written belong to mKeysOwner. The welding pass at `0x00483e70` is the
-     * only caller, which is why the method is public.
-     *
-     * A warning for whoever reconstructs that welding pass. Its seam-normal helper at `0x00483438`
-     * calls `0x00569bf0`, and that routine is not Harmonix code; it is the bipartite matching of
-     * Setubal's netflow package, vendored into the image, which its own diagnostics
-     * `"Inconsistent matching between %d(U) and %d(V)"` and `"matching NOT maximum; augm. path:"`
-     * establish, along with the package data path the image stores at `0x0083c160`. The game code
-     * is the part that builds the vertex graph and reads the matching back. The matcher itself is
-     * upstream and is not to be reconstructed, so it wants an external declaration rather than a
-     * body.
+     * The channels read and written belong to mKeysOwner. Rnd::Mesh::WeldVerts() is the only
+     * caller, which is why the method is public.
      *
      * @param nFromVert The vertex slot to copy from.
      * @param nToVert The vertex slot to copy over.
@@ -193,8 +184,8 @@ public:
     /**
      * Append a copy of one vertex slot to every keyframe of all three channels.
      *
-     * The channels written belong to mKeysOwner. The seam-normal builder at `0x00483438` calls it
-     * on each animation of a mesh after it splits a vertex. The title is inferred.
+     * The channels written belong to mKeysOwner. Rnd::Mesh::AssignFlatVerts() calls it on each
+     * animation of a mesh after it splits a vertex. The title is inferred.
      *
      * @param nVert The vertex slot to copy.
      * @ghidraAddress 0x00486900
@@ -257,14 +248,23 @@ private:
     // The mesh whose vertices this animation drives. The dump titles it "light:"; see the class
     // documentation for why the label is wrong.
     Mesh *mMesh; // +0x18
-    std::list<PointsKey> mVertPointsKeys;
-    std::list<TexsKey> mVertTexsKeys;
-    std::list<ColorsKey> mVertColorsKeys;
 
 public:
+    /**
+     * Position keyframes.
+     *
+     * The three channels are public because Rnd::Mesh::WeldVerts() resizes the vector of each key
+     * and empties a channel whose keys all match, and the image has no accessor for either.
+     */
+    std::list<PointsKey> mVertPointsKeys;
+    /** Texture coordinate keyframes. */
+    std::list<TexsKey> mVertTexsKeys;
+    /** Colour keyframes. */
+    std::list<ColorsKey> mVertColorsKeys;
+
     /*!< Animation whose channels this one reads, itself for an animation that owns its keys.
-         Public because the welding pass at `0x00483f88` reads it to decide whether an animation
-         may be rebuilt, and the image has no accessor for it. +0x28 */
+         Public because Rnd::Mesh::WeldVerts() reads it at `0x00483f88` to decide whether an
+         animation may be rebuilt, and the image has no accessor for it. +0x28 */
     MeshAnim *mKeysOwner;
 };
 

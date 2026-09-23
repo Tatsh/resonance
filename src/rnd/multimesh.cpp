@@ -315,10 +315,9 @@ int MultiMesh::DrawSelf() {
 
     // The level of detail substitution would replace the mesh part way through the run. It is
     // disabled for the duration.
-    mMesh->mMinScreen = 0.0f;
     // Yes, the binary re-points mNext at its current value, which drops and retakes the same
     // reference and changes nothing.
-    mMesh->SetNext(mMesh->mNext);
+    mMesh->SetNext(mMesh->mNext, 0.0f);
 
     for (const auto &xfm : mTransforms) {
         CopyTransformToXfm(xfm, mMesh->mLocalXfm);
@@ -327,8 +326,7 @@ int MultiMesh::DrawSelf() {
         mMesh->Draw();
     }
 
-    mMesh->mMinScreen = flSavedMinScreen;
-    mMesh->SetNext(mMesh->mNext);
+    mMesh->SetNext(mMesh->mNext, flSavedMinScreen);
 
     // The saved world transform goes back through the local slot and one recomposition, which
     // restores the world transform the mesh had before the run. The true local transform follows,

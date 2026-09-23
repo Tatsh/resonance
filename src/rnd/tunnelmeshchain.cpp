@@ -39,8 +39,7 @@ void TunnelMeshChain::Build(const HxStr &name, int nCount, bool bInternal) {
         pMesh->mZMode = Mesh::kZModeZReadWrite;
         pMesh->mZFunc = Mesh::kZFuncLess;
         if (pCoarser != nullptr) {
-            pMesh->mMinScreen = 0.0f;
-            pMesh->SetNext(pCoarser);
+            pMesh->SetNext(pCoarser, 0.0f);
         }
         pCoarser = pMesh;
     }
@@ -61,8 +60,7 @@ void TunnelMeshChain::SetTransOwner(Mesh *pOwner) {
 void TunnelMeshChain::CopyScreenSizes(const TunnelMeshChain &source) {
     for (unsigned i = 0; i < size(); ++i) {
         Mesh *pMesh = (*this)[i];
-        pMesh->mMinScreen = source[i]->mMinScreen;
-        pMesh->SetNext(pMesh->mNext);
+        pMesh->SetNext(pMesh->mNext, source[i]->mMinScreen);
     }
 }
 
@@ -71,9 +69,8 @@ void TunnelMeshChain::SetScreenSizes(const std::vector<float> &screenSizes) {
     for (unsigned i = 0; i < size(); ++i) {
         if (i < screenSizes.size()) {
             Mesh *pMesh = (*this)[i];
-            pMesh->mMinScreen = screenSizes[i];
             // Yes, the binary releases and immediately re-takes the reference on the same link.
-            pMesh->SetNext(pMesh->mNext);
+            pMesh->SetNext(pMesh->mNext, screenSizes[i]);
         }
     }
 }

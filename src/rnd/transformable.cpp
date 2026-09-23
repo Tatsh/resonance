@@ -237,17 +237,6 @@ static void ReciprocalVec3(const float *pSrc, float *pOut) {
     pOut[1] = 1.0f / pSrc[1];
 }
 
-// The VU0 cross product, whose fourth word comes from pA.
-static inline void CrossVec3(const float *pA, const float *pB, float *pOut) {
-    const float flX = (pA[1] * pB[2]) - (pA[2] * pB[1]);
-    const float flY = (pA[2] * pB[0]) - (pA[0] * pB[2]);
-    const float flZ = (pA[0] * pB[1]) - (pA[1] * pB[0]);
-    pOut[kXfmPaddingFloat] = pA[kXfmPaddingFloat];
-    pOut[0] = flX;
-    pOut[1] = flY;
-    pOut[2] = flZ;
-}
-
 // The direction from the camera to the draw translation, with a padding float of 1.0.
 static inline void CameraToDrawTranslation(const Cam &cam, float *pOut) {
     pOut[kXfmPaddingFloat] = 1.0f;

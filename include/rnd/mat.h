@@ -488,7 +488,13 @@ public:
 
 protected:
     int mMultiPass; // +0x90
-    int mFlat;      // +0x94 Serialised as one byte.
+
+public:
+    /*!< Non-zero for flat shading. Serialised as one byte. Public because
+         Rnd::Mesh::ComputeNormals() at `0x00485ef0` and Rnd::Mesh::WeldVerts() at `0x00483e70`
+         read it directly, which is access from outside the hierarchy, and the image has no
+         accessor for it. +0x94 */
+    int mFlat;
 };
 
 /**

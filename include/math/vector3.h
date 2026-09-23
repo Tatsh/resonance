@@ -82,3 +82,27 @@ void NegateVec3(const float *pSrc, float *pOut);
  * @ghidraAddress 0x00476140
  */
 void Vec3Normalize(const float *pSrc, float *pOut);
+
+/** Index of the padding float that follows the three components of a quadword vector. */
+constexpr int kVec3PaddingFloat = 3;
+
+/**
+ * Take the cross product of two three-component vectors.
+ *
+ * The image has no out-of-line copy. Every caller inlines the VU0 `vopmula.xyz` and
+ * `vopmsub.xyz` pair, which writes only the three components and therefore leaves the fourth
+ * word of pA in the result.
+ *
+ * @param pA The first vector.
+ * @param pB The second vector.
+ * @param pOut Receives pA cross pB, and may alias either input.
+ */
+inline void CrossVec3(const float *pA, const float *pB, float *pOut) {
+    const float flX = (pA[1] * pB[2]) - (pA[2] * pB[1]);
+    const float flY = (pA[2] * pB[0]) - (pA[0] * pB[2]);
+    const float flZ = (pA[0] * pB[1]) - (pA[1] * pB[0]);
+    pOut[kVec3PaddingFloat] = pA[kVec3PaddingFloat];
+    pOut[0] = flX;
+    pOut[1] = flY;
+    pOut[2] = flZ;
+}
