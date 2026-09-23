@@ -92,8 +92,9 @@ public:
 
     // The three names come from GamePowerupPlacer, the one producer of the message, which writes
     // the bar its cursor rests on, whatever Player::Slot4() reports, and the player itself. The
-    // members are public because its two remove sites, 0x001ccdb8 in OnUnknownSlot6() and
-    // 0x001ccfcc in OnUnknownSlot8(), store mPlayerValue and mPlayer directly and leave mBar unset.
+    // members are public because its two remove sites, 0x001ccdb8 in OnUnknownSlot6() and the
+    // one at 0x001ccfcc in OnUnknownSlot8(), store mPlayerValue and mPlayer directly and leave
+    // mBar unset.
     int mBar;         /*!< The bar the pointer rests on. +0x04 */
     int mPlayerValue; /*!< Whatever Player::Slot4() reports, or -1 to remove the pointer. +0x08 */
     Player *mPlayer;  /*!< The player whose pointer moved. +0x0c */

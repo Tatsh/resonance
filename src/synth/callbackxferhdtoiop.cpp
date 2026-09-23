@@ -11,8 +11,8 @@ constexpr char kMidiMainFileName[] = "midi_main.cpp";
 // Line 382 of midi_main.cpp, which the release of the read buffer passes to the tagged free.
 constexpr int kFreeReadBufferLine = 0x17e;
 
-// 0x006e9bc8. The compiler generated the initialiser and destructor pair at 0x00464170 for this
-// definition.
+// The compiler generated the initialiser and destructor pair at 0x00464170 for this definition.
+// 0x006e9bc8
 CallbackXferHdToIop g_hdXfer;
 
 // 0x00464d10

@@ -111,22 +111,28 @@ constexpr int kSynthStreamReadSize = 0x4000;
 // 0x008e5bc0
 SifRpcClientData_t g_soundDriverClient;
 
-// 0x00780878. Set while a request sent without waiting is still running on the driver.
+// Set while a request sent without waiting is still running on the driver.
+// 0x00780878
 int g_bSoundRequestPending;
 
-// 0x008e5b80. The driver's reply, whose first word SubmitSoundDriverRequest() reports.
+// The driver's reply, whose first word SubmitSoundDriverRequest() reports.
+// 0x008e5b80
 unsigned int g_anSoundDriverReply[kSoundDriverReplyWords];
 
-// 0x008e5be8. The descriptor XferToIop() hands to the SIF DMA.
+// The descriptor XferToIop() hands to the SIF DMA.
+// 0x008e5be8
 SifDmaTransfer_t g_xferToIopDma;
 
-// 0x006e9b88. Set once InitSynthDriver() has brought the driver up.
+// Set once InitSynthDriver() has brought the driver up.
+// 0x006e9b88
 int g_bSynthDriverReady;
 
-// 0x006e9dc0. The IOP address of the driver's event buffers, from InitSynthDriver().
+// The IOP address of the driver's event buffers, from InitSynthDriver().
+// 0x006e9dc0
 int g_nMidiEventIopAddress;
 
-// 0x006e9bd0. The event buffer PollSynthEvents() writes next.
+// The event buffer PollSynthEvents() writes next.
+// 0x006e9bd0
 int g_nMidiEventBufferIndex;
 
 // 0x00894cc0
@@ -189,13 +195,16 @@ char g_szHdBankPath[kHdBankPathSize];
 // 0x006e9bb8
 std::vector<BankSlot> g_bankSlots;
 
-// 0x006e9c58. The streamed audio, or null while none plays.
+// The streamed audio, or null while none plays.
+// 0x006e9c58
 Rnd::MovieStream *g_pSynthStream;
 
-// 0x006e9c5c. The frame PollSynthStream() passes to g_pSynthStream.
+// The frame PollSynthStream() passes to g_pSynthStream.
+// 0x006e9c5c
 int g_nSynthStreamFrame;
 
-// 0x006e9dc4. The song tick StartSoundBankMovie() opened the movie at. Nothing reads it.
+// The song tick StartSoundBankMovie() opened the movie at. Nothing reads it.
+// 0x006e9dc4
 int g_nSoundBankMovieTick;
 
 // 0x00464378
@@ -622,10 +631,12 @@ sceCslBuffCtx g_midiInputBuffer;
 // 0x008947c0
 MidiStreamBuffer g_midiStreamBuffer;
 
-// 0x006e9bd8. The program each channel last received.
+// The program each channel last received.
+// 0x006e9bd8
 int g_anChannelProgram[kMidiChannelCount];
 
-// 0x006e9c18. The bank each channel last received.
+// The bank each channel last received.
+// 0x006e9c18
 int g_anChannelBank[kMidiChannelCount];
 
 // 0x00462290

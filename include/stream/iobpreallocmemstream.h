@@ -152,7 +152,8 @@ private:
     int mFail;
 };
 
-// 0x004edb68, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x004edb68
 inline int IOBPreallocMemStream::Size() {
     return mWritePos;
 }

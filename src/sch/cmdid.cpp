@@ -8,10 +8,12 @@
 
 namespace {
 
-// 0x0077d2e8. The next handle value to hand out, which starts at one so that no handle is zero.
+// The next handle value to hand out, which starts at one so that no handle is zero.
+// 0x0077d2e8
 int g_nNextCmdIdValue = 1;
 
-// 0x008e4f08. Handle values a replayed recording has reserved.
+// Handle values a replayed recording has reserved.
+// 0x008e4f08
 std::set<int> g_reservedCmdIdValues;
 
 // 0x008e4f18
