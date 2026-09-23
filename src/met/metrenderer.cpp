@@ -173,6 +173,32 @@ void MetRenderer::AddScreen(MetScreen *pScreen) {
     mUnknown98 = 1;
 }
 
+// 0x003717b0
+void MetRenderer::AddScreenView(Rnd::View *pView) {
+    if (!ContainsRef(mUnknowna0->GetDraws(), pView)) {
+        mUnknowna0->AddDraw(pView, nullptr);
+    }
+    if (!ContainsRef(mUnknowna0->mTransList, pView)) {
+        mUnknowna0->AddTrans(pView);
+    }
+    if (!ContainsRef(mUnknowna0->mAnims, pView)) {
+        mUnknowna0->AddAnim(pView);
+    }
+}
+
+// 0x003718b8
+void MetRenderer::AddBackgroundView(Rnd::View *pView) {
+    if (!ContainsRef(mUnknowna4->GetDraws(), pView)) {
+        mUnknowna4->AddDraw(pView, nullptr);
+    }
+    if (!ContainsRef(mUnknowna4->mTransList, pView)) {
+        mUnknowna4->AddTrans(pView);
+    }
+    if (!ContainsRef(mUnknowna4->mAnims, pView)) {
+        mUnknowna4->AddAnim(pView);
+    }
+}
+
 // 0x00371858
 void MetRenderer::RemoveScreenView(Rnd::View *pView) {
     mUnknowna0->RemoveTrans(pView);

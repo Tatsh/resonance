@@ -60,20 +60,18 @@ class MetFade;
  * supplies none. Each is documented under the placeholder the base declares it as, and what the
  * override does is recorded on the declaration.
  *
- * Three routines in the class's translation unit are not declared here. `0x00369e50` takes no
- * argument at all and the poll routine is its one caller, `0x00390088` and `0x00390090` are empty
- * bodies that take the renderer and are re-emitted into the translation unit of every screen that
- * runs them, and none of the three has a recovered name.
+ * Two routines in the class's translation unit are not declared here. `0x00390088` and
+ * `0x00390090` are empty bodies that take the renderer and are re-emitted into the translation
+ * unit of every screen that runs them, and neither has a recovered name.
  *
- * Six bodies are written. They are OnFadeOutDone(), OnFadeInDone(), OnUnknownSlot4(),
- * OnUnknownSlot9(), SetActivePanel(), and AddScreen(), together with the two scene-clearing
- * helpers. Every other body is understood and not written, because each needs a routine that no
+ * The bodies listed below are understood and not written, because each needs a routine that no
  * header in this tree declares yet. The blocking dependency of each is recorded below so that the
  * body can be written once the owning subsystem declares it.
  *
  * - The constructor and the destructor both need the asynchronous-request release at `0x003f8240`
  *   and the four no-argument shutdown helpers at `0x00217fa0`, `0x0018ba48`, `0x00383700`, and
- *   `0x00254970`.
+ *   MetFreqMakerAssetManager::Destroy() at `0x002551b8`, reached through its out-of-line forwarder
+ *   at `0x00254970`.
  * - HandleMessage() needs RawControllerMsg to declare its four-word payload, which
  *   msg/rawcontrollermsg.h records as recovered from Clone() and does not declare. The payload
  *   record is declared as MetControllerReading in msg/metcontrollerreading.h until it does.
@@ -88,10 +86,6 @@ class MetFade;
  * - RemoveScreen() needs Rnd::Transformable::RemoveTrans() at `0x004f09c0` and
  *   Rnd::Drawable::RemoveDraw() at `0x00503360`, and it reads MetScreen::mUnknown14, which
  *   metscreen.h declares private.
- * - AddScreenView() and AddBackgroundView() both need the membership test over a scene's
- *   drawable, transformable, and animatable lists, at `0x00370ab8`, `0x00370b08`, and
- *   `0x00370b58`. All three are inline algorithm emissions rather than named routines, and which
- *   list each searches is not settled.
  * - ResolveSceneViews() needs the fade constructor's sibling at `0x00384300`, and
  *   ResolveArenaView() needs AddBackgroundView().
  */

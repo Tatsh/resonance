@@ -4,6 +4,8 @@
 
 #include "rnd/object.h"
 
+class MetRenderer;
+
 namespace Rnd {
 
 /** Rows in one transform. Three store the basis and the fourth stores the translation. */
@@ -38,6 +40,9 @@ class Transformable : public virtual Object {
     // CollectChildren() in rnd/collectchildren.h walks mTransList directly, and the image has no
     // accessor for it.
     friend void CollectChildren(std::list<Object *> &objects, Transformable *pTransformable);
+    // MetRenderer::AddScreenView() and AddBackgroundView() search mTransList directly before
+    // AddTrans(), and the image has no accessor for it.
+    friend class ::MetRenderer;
 
 public:
     /**

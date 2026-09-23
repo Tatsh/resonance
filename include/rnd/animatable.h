@@ -5,6 +5,7 @@
 #include "rnd/object.h"
 
 class FailSink;
+class MetRenderer;
 namespace Rnd {
 class Stream;
 }
@@ -43,6 +44,9 @@ class Animatable : public virtual Object {
     // CollectChildren() in rnd/collectchildren.h walks mAnims directly, and the image has no
     // accessor for it.
     friend void CollectChildren(std::list<Object *> &objects, Animatable *pAnimatable);
+    // MetRenderer::AddScreenView() and AddBackgroundView() search mAnims directly before
+    // AddAnim(), and the image has no accessor for it.
+    friend class ::MetRenderer;
 
 public:
     /**

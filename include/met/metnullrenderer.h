@@ -19,7 +19,8 @@ class Message;
  *
  * The constructor runs RendererBase's, constructs the GameParams at `+0x48`, clears `+0x80`, and
  * then calls a run of front-end set-up routines ending in the stage-list rebuild at `0x003cc7a0`.
- * The destructor calls `0x00254970`, destroys the GameParams, and runs RendererBase's teardown.
+ * The destructor calls MetFreqMakerAssetManager::Destroy() at `0x002551b8` through its out-of-line
+ * forwarder at `0x00254970`, destroys the GameParams, and runs RendererBase's teardown.
  *
  * Only the declarations are written.
  */
