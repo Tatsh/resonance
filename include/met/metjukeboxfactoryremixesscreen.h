@@ -43,15 +43,35 @@ public:
     /**
      * Report the number of factory remixes.
      *
-     * Slot 39. Divides the byte span of the vector mUnknowna0 addresses by the 0x38-byte record
-     * size. The vector is dereferenced without a null check.
-     *
-     * The body is not written, for the reason recorded on
-     * MetJukeboxCustomRemixesScreen::GetItemCount(). The two bodies coincide byte for byte, and
-     * the vtable slot each occupies is what separates them.
+     * Slot 39. The size of the catalogue mUnknowna0 addresses, read without a null check. The
+     * body coincides byte for byte with MetJukeboxCustomRemixesScreen::GetItemCount(), and the
+     * vtable slot each occupies is what separates them.
      *
      * @return The row count.
      * @ghidraAddress 0x00240840
      */
     virtual int GetItemCount();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x00240868
+     */
+    static MetJukeboxFactoryRemixesScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Resolve the base views, build both scrolling lists, and resolve every detail object.
+     *
+     * Slot 38. The same layout as MetJukeboxCustomRemixesScreen::ResolveContainerViews() over the
+     * `jbf_` objects, except that the catalogue row view is also shown, and the playlist caption
+     * is resolved from `dbf_CREATE PLAYLIST.txt`, the name the image records.
+     *
+     * @ghidraAddress 0x0023afd8
+     */
+    virtual void ResolveContainerViews();
 };
