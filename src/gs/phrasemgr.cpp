@@ -14,6 +14,7 @@
 #include "game/playmap.h"
 #include "game/solopowerbarmgr.h"
 #include "game/trackdata.h"
+#include "msg/caughtphrasepacket.h"
 #include "sch/command.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
@@ -156,6 +157,30 @@ void PhraseMgr::CreatePowerbarMgr() {
         return;
     }
     mPowerbarMgr = new JamPowerbarMgr;
+}
+
+// 0x001bafa8
+void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
+    const int nFirstStep = mMap->Slot5(nBar);
+    int nStep = nFirstStep;
+    do {
+        Player *pPrevious = mDatabase->GetOwner(nStep);
+        mDatabase->SetOwner(pPlayer, nStep);
+        if (pPrevious != pPlayer) {
+            // The previous owner, not the new one. That is what the binary passes.
+            mTrackData->SetOwner(pPrevious, nStep);
+        }
+        if (mNetSink != nullptr) {
+            CaughtPhrasePacket packet(pPlayer, mUnknown30, nStep);
+            mNetSink->Handle(&packet);
+        }
+
+        const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
+        for (const int nWindowBar : bars) {
+            RefreshBar(nWindowBar, 0);
+        }
+        nStep = mMap->Slot7(nStep, mUnknown30);
+    } while (mPlayMode == kPlayModeGame && nStep != nFirstStep);
 }
 
 // 0x001bb558

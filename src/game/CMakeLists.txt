@@ -18,6 +18,7 @@ set(RESONANCE_GAME_SRCS
     gsperiodical.cpp
     harmony.cpp
     idablebase.cpp
+    inputcheatdetector.cpp
     inputcheatdetectormet.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp

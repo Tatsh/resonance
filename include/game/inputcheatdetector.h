@@ -20,7 +20,8 @@
  * The destructor at `0x001deb00` stores RawController's table and releases the object, which is
  * the implicitly declared destructor, so this class owes no definition.
  *
- * Only the declarations are written. The bodies sit in the gameplay range.
+ * The four per-controller input histories, the registered flag, and the 0.75-second timeout are
+ * file-local to the detector's translation unit.
  */
 class InputCheatDetector : public RawController {
 public:
@@ -53,13 +54,18 @@ public:
     /**
      * Match one controller reading against the table. Slot 2.
      *
-     * @param nUnknown1 The first word of the reading.
-     * @param nUnknown2 The second word of the reading.
-     * @param nUnknown3 The third word of the reading.
-     * @param flUnknown4 The float of the reading.
+     * Only a joystick press counts (type `'joy '`, a button number below 100, and a value of at
+     * least 0.1). The press joins the slot's history, which restarts when more than 0.75 seconds
+     * passed since the previous press. Every cheat whose sequence the history now includes clears
+     * the history and runs script template 0xce with the cheat's name and the zero-based slot.
+     *
+     * @param nType The reading's device type, a four-character code.
+     * @param nSlot The controller's slot, from 1.
+     * @param nButton The button number.
+     * @param flValue The reading's value.
      * @ghidraAddress 0x001dc658
      */
-    virtual void OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4);
+    virtual void OnUnknownSlot2(int nType, int nSlot, int nButton, float flValue);
 
     /**
      * Unrecovered. Slot 3, pure in this class.
@@ -70,6 +76,11 @@ public:
     virtual void OnUnknownSlot3() = 0;
 
 private:
+    // Fills g_metCheatSequences and g_gameCheatSequences and sets the registered flag. Not written
+    // yet. At 0x1a90 bytes it is a long run of name and button-sequence appends.
+    // 0x001dabc8
+    void RegisterCheats();
+
     // The table the constructor stores. +0x04
     std::vector<CheatSequence> *mCheats;
 };
@@ -78,8 +89,7 @@ private:
  * Cheats the front end detects.
  *
  * MetaGameWorld's constructor passes the address to the InputCheatDetectorMet it builds. The name
- * follows that one user. The definition belongs to the detector's translation unit and is not
- * written.
+ * follows that one user.
  *
  * @ghidraAddress 0x00691e18
  */
@@ -89,7 +99,7 @@ extern std::vector<InputCheatDetector::CheatSequence> g_metCheatSequences;
  * Cheats a game session detects.
  *
  * GrooveWorld's constructor passes the address to the detector it builds. The name follows that
- * one user. The definition belongs to the detector's translation unit and is not written.
+ * one user.
  *
  * @ghidraAddress 0x00691e28
  */

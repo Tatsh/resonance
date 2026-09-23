@@ -275,6 +275,7 @@ ifndef
 immediates
 ingame
 inittab
+inputcheatdetector
 inputcheatdetectormet
 intobject
 invalidateseekermsg
@@ -464,6 +465,7 @@ myreadline
 nearesttrackmsg
 netflow
 netgame
+netjamenablemgr
 netplayer
 neut
 neutralizemsg
@@ -780,6 +782,7 @@ vmulax
 vopmsub
 vopmula
 voxer
+voxer's
 voxing
 voxingstg
 voxstring

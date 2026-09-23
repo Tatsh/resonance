@@ -409,11 +409,12 @@ public:
     /**
      * Give the phrase at a bar a new owner.
      *
-     * The body is not written. It maps the bar through slot 5 of mMap, exchanges the owner in
-     * mDatabase through the routines at `0x001b9130` and `0x001b9070`, calls TrackData::SetOwner()
-     * when the owner changed, and then sends a message built on the stack through the sink at
-     * mNetSink. The Catcher subclasses' slot 9, Catcher::SetPhraseOwners(), and
-     * NotePitcher::PostPhraseCapturedMsg() are the recovered callers.
+     * The bar is mapped through slot 5 of mMap. For that step, and in kPlayModeGame for every step
+     * slot 7 chains it to, the owner is exchanged in mDatabase, TrackData::SetOwner() receives the
+     * previous owner when it changed, a CaughtPhrasePacket goes to mNetSink when one is installed,
+     * and the window bars slot 6 reports for the step are posted again. The Catcher subclasses'
+     * slot 9, Catcher::SetPhraseOwners(), and NotePitcher::PostPhraseCapturedMsg() are the
+     * recovered callers.
      *
      * @param pPlayer The new owner.
      * @param nBar The bar.
