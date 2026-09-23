@@ -57,11 +57,6 @@ enum Instrument {
     kInstrumentFx = 5,
 };
 
-// TrackData::mKind values whose label replaces the instrument name. TrackMode does not list the
-// last two.
-constexpr int kScratchTrackMode = 3;
-constexpr int kVocalTrackMode = 4;
-
 // Configuration code of the jukebox caption for a level.
 constexpr int kJukeboxCaptionConfigCode = 0x320;
 
@@ -153,9 +148,9 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
         }
         if (nKind == kTrackModeAxe) {
             name = "AXE";
-        } else if (nKind == kScratchTrackMode) {
+        } else if (nKind == kTrackModeScratch) {
             name = "SCRATCH";
-        } else if (nKind == kVocalTrackMode) {
+        } else if (nKind == kTrackModeVocal) {
             name = "VOCAL";
         }
         mInstrumentNames.push_back(name);
