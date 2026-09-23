@@ -14,29 +14,35 @@ constexpr double kJumpShortfall = 1.0e-6;
 
 } // namespace
 
+// 0x00411878
 LinearRamp::LinearRamp() : mLastTime(kNoTime), mTarget(0.0f), mCurrent(0.0f) {
     SetRange(mTarget, kDefaultTo, kDefaultDuration);
 }
 
+// 0x004118d0
 void LinearRamp::SetRange(float flFrom, float flTo, float flDuration) {
     mScale = flTo - flFrom;
     mRate = 1.0f / flDuration;
     mOffset = flFrom - mScale * 0.0f; // Yes, the binary multiplies by zero here.
 }
 
+// 0x00411900
 void LinearRamp::SetTarget(float flTarget) {
     mTarget = flTarget;
 }
 
+// 0x00411908
 void LinearRamp::Jump(float flTarget) {
     mTarget = flTarget;
     mCurrent = static_cast<float>(flTarget - kJumpShortfall);
 }
 
+// 0x00411958
 float LinearRamp::Value() {
     return mCurrent * mScale + mOffset;
 }
 
+// 0x00411970
 int LinearRamp::Update(float flTime) {
     if (mCurrent == mTarget) {
         mLastTime = flTime;

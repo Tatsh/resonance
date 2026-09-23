@@ -24,10 +24,12 @@ const char *NameText(const Rnd::Object *pObject) {
 
 Rnd::Tunnel *g_pTunnel;
 
+// 0x0040d1e8
 void CacheTunnelObjectByName() {
     g_pTunnel = dynamic_cast<Rnd::Tunnel *>(Rnd::g_manager.Find(HxStr(kTunnelObjectName)));
 }
 
+// 0x0040f6c0
 Rnd::Tunnel *GetCachedTunnelObject() {
     return g_pTunnel;
 }

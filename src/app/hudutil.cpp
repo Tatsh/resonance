@@ -11,6 +11,7 @@ constexpr float kPurpleRed = 0.65f;
 
 int g_nHudNameCounter;
 
+// 0x00415ed8
 HxStr HudPowerupName(int nKind) {
     switch (nKind) {
     case kHudItemNeutralizer:
@@ -44,6 +45,7 @@ HxStr HudPowerupName(int nKind) {
     }
 }
 
+// 0x00416068
 Color HudColorFromName(HxStr name) {
     if (name == "green") {
         return Color{0.0f, 1.0f, 0.0f, 1.0f};
