@@ -1,11 +1,14 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 
 #include "game/levelstats.h"
 #include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
+
+class GameParams;
 
 /**
  * Persisted progress across the whole campaign.
@@ -24,12 +27,9 @@
  * Five vectors of level indices follow at `+0x100`, one per stage. RecountStageCompleted() and
  * RecountStageScore() walk the vector of the stage they recount.
  *
- * Several members are understood but not yet written here. RebuildLevelList() clears the level
- * vector and rebuilds it from the global level list, MergeLevelList() at
- * `0x00142070` runs the same pass after a load, and PrintLevels() at `0x001451e0` streams the
- * vector under the label `levels[`. Further members at `0x00140b40`, `0x00140ef8`, `0x00141578`,
- * `0x00142288`, `0x00142610`, `0x00142d70`, `0x00144c38`, and `0x00145068` belong to this class or
- * to LevelStats and are not yet apportioned between the two.
+ * RecountAll() files each album level's index under its stage through RebuildStageLevels(), and
+ * then recounts every stage at every difficulty and the unlock level. ResetCounters(), Assign(),
+ * and MergeLevelList() end with it, the last two with it expanded inline.
  */
 class CampaignStats {
 public:
@@ -60,7 +60,8 @@ public:
     /**
      * Clear the level vector and rebuild it from the global level list.
      *
-     * MetFreqLoader runs it on each persona it parses. The body is not written.
+     * One stack LevelStats is reset, named, and staged for each album level and appended. The
+     * counters are not recounted. MetFreqLoader runs it on each persona it parses.
      *
      * @ghidraAddress 0x00140908
      */
@@ -224,7 +225,71 @@ public:
      */
     int IsSuperSecretUnlocked();
 
+    /**
+     * Report whether a stage is complete at any difficulty that plays it as a main stage.
+     *
+     * Stages 1 and 2 test every difficulty, stage 3 tests normal and expert, stages 4 and 5 test
+     * expert, and any other stage reports zero. That is the same set of difficulties
+     * UpdateUnlockLevel() tests. Every test is IsStageComplete() expanded inline. The two callers
+     * sit in the routine at `0x003a7f38`. The title is inferred.
+     *
+     * @param nStage The stage, counted from 1.
+     * @return Non-zero when one of those difficulties has completed the stage.
+     * @ghidraAddress 0x00140ef8
+     */
+    int IsStageCompleteAtAnyDifficulty(int nStage);
+
+    /**
+     * Report whether a session's level is the one level left unbeaten at its difficulty.
+     *
+     * A level already beaten at the difficulty reports zero. Otherwise the completed counts and
+     * the level counts of stages 1 through `difficulty + 3` are totalled, and the result is
+     * whether the completed total is one short of the level total. MetLoadGameScreen's slot 5 is
+     * the caller. The title is inferred.
+     *
+     * @param params The session, whose level name and difficulty are read.
+     * @return Non-zero when the level is the last one left.
+     * @ghidraAddress 0x00141578
+     */
+    int IsLastLevelRemaining(const GameParams &params);
+
+    /**
+     * Copy another record's levels into this one and recount everything.
+     *
+     * The level vector is emptied, resized to the other's length, and assigned level by level
+     * through LevelStats::Assign(). RecountAll() then follows, expanded inline. MetPersonaData's
+     * assignment operator is the caller. The routine writes no
+     * return value. The title is inferred.
+     *
+     * @param other The record to copy.
+     * @ghidraAddress 0x00142288
+     */
+    void Assign(const CampaignStats &other);
+
+    /**
+     * Write every level to a text stream, one line each as `levels[<i>]` and the level's own
+     * text.
+     *
+     * LevelStats::Print() writes nothing, so each line carries only the label. The routine at
+     * `0x0032e380` is the caller.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x001451e0
+     */
+    void PrintLevels(std::ostream &stream);
+
 private:
+    // File each listed album level's index in mLevels under its stage, after emptying the five
+    // stage vectors. A level whose stage is outside 1 through 5 is not filed.
+    void RebuildStageLevels();
+
+    // Report whether name is in the global level list. The body does not read this object.
+    int IsLevelListed(const HxStr &name);
+
+    // Run RebuildStageLevels(), recount stages 1 through 5 at every difficulty, completion before
+    // score, and then recompute the unlock level.
+    void RecountAll();
+
     // 0x00141b90. Recount the beaten levels of one stage at one difficulty into
     // mStageCompleted. Each level's name is copied and discarded, which matches the binary.
     void RecountStageCompleted(int nDifficulty, int nStage);
@@ -237,16 +302,18 @@ private:
     // 0x00141cb8. Recompute mUnlockLevel from stage completion and return it.
     int UpdateUnlockLevel();
 
-    // Zeroes the ten counter arrays, then counts the levels of the global level list into the
-    // first of them. The body at 0x00140a68 consults the global level list and a further member
-    // at 0x00145068, neither of which is identified, so it is declared here and not yet written.
+    // Zeroes the ten counter arrays, counts each stage's album levels in the global level list into
+    // the first of them, and then runs RecountAll().
     void ResetCounters();
 
 public:
     /**
      * Rebuild the level vector from the global level list after a load.
      *
-     * The body shares that pass with RebuildLevelList() and is not yet written. Public because
+     * Each name in the global level list either updates the stage of the level with that name or,
+     * when no level has it, appends a new level through a stack LevelStats reset for it. Unlike
+     * RebuildLevelList() the pass does not test IsAlbumLevel(). RecountAll() then follows, expanded
+     * inline. Public because
      * MetExpansionPakScreen::OnUnknownSlot26() calls it on every persona once the expansion disc
      * is mounted.
      *

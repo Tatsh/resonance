@@ -19,6 +19,9 @@
  *
  * Both members are public, because CampaignStats reads and writes them directly and the image has
  * no accessor for either.
+ *
+ * The assignment at `0x001453e0` copies the two members and not the vptr. It is the implicit one
+ * and is not written. LevelStats::Assign() uses it.
  */
 class SkillStats {
 public:
@@ -61,6 +64,16 @@ public:
      * @ghidraAddress 0x00142f88
      */
     virtual void Load(IBStream &stream);
+
+    /**
+     * Zero both members, the high score first.
+     *
+     * LevelStats::Reset() runs it on each of the three records it appends, after the inline
+     * constructor has stored only the vtable pointer. The title is inferred.
+     *
+     * @ghidraAddress 0x00145328
+     */
+    void Clear();
 
     /**
      * Non-zero once the level is beaten at this difficulty. CampaignStats::RecordLevelBeaten()

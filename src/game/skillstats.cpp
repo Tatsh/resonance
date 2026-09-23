@@ -49,3 +49,9 @@ void SkillStats::Load(IBStream &stream) {
         mHighScore = nHighScore;
     }
 }
+
+// 0x00145328
+void SkillStats::Clear() {
+    mHighScore = 0;
+    mBeaten = 0;
+}

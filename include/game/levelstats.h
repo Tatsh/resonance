@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 
 #include "game/skillstats.h"
@@ -26,7 +27,7 @@ public:
      * Construct an empty record.
      *
      * The out-of-line body zeroes the name and the vector and stores the vtable pointer, all of
-     * which the compiler generates, so the written body is empty. mUnknown08 is not among the
+     * which the compiler generates, so the written body is empty. mStage is not among the
      * members it initialises.
      *
      * @ghidraAddress 0x001448b8
@@ -54,8 +55,8 @@ public:
      * Read this record.
      *
      * Vtable slot 3. The branch is on g_nStatsRecordVersion. Version 1 reads a leading word that
-     * it discards, then the name, then mUnknown08 as a full word, then a skill count it resizes
-     * the vector to. Version 2 reads a version byte, the name, mUnknown08 as a single byte, and
+     * it discards, then the name, then mStage as a full word, then a skill count it resizes
+     * the vector to. Version 2 reads a version byte, the name, mStage as a single byte, and
      * then exactly three skill records into a cleared vector. A version other than 1 or 2 reads
      * nothing.
      *
@@ -63,6 +64,39 @@ public:
      * @ghidraAddress 0x00142880
      */
     virtual void Load(IBStream &stream);
+
+    /**
+     * Empty the name, clear mStage, and replace the skills with three cleared records.
+     *
+     * CampaignStats::RebuildLevelList() and MergeLevelList() run it on the record they append.
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x00142610
+     */
+    void Reset();
+
+    /**
+     * Copy another record's name, stage, and skills into this one.
+     *
+     * The skill vector is emptied, resized to the other's length with default records, and then
+     * assigned element by element. CampaignStats::Assign() is the one caller. The routine writes no
+     * return value, so it is not an assignment operator. The title is inferred.
+     *
+     * @param other The record to copy.
+     * @ghidraAddress 0x00142d70
+     */
+    void Assign(const LevelStats &other);
+
+    /**
+     * Write this record to a text stream.
+     *
+     * The body is empty. CampaignStats::PrintLevels() calls it for each level. The title is
+     * inferred.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x001452f0
+     */
+    void Print(std::ostream &stream) const;
 
     /**
      * Identity of the level this record belongs to.
@@ -74,13 +108,17 @@ public:
      */
     HxStr mName; /*!< The level's name. +0x00 */
 
-private:
-    // Written by Save() as a single byte and read back as a byte under record version 2 and as a
-    // word under version 1. The constructor does not initialise it and its purpose is not
-    // recovered.
-    int mUnknown08;
+    /**
+     * The album stage the level belongs to, counted from 1. +0x08
+     *
+     * CampaignStats::RebuildStageLevels() subtracts 1 and files the level's index under that
+     * stage, and RebuildLevelList() and MergeLevelList() store GetAlbumLevelStage() of the name
+     * here. Save() writes it as a single byte, and Load() reads it back as a byte under record
+     * version 2 and as a word under version 1. The constructor does not initialise it. Public
+     * because CampaignStats reads and writes it directly and the image has no accessor.
+     */
+    int mStage;
 
-public:
     /**
      * One result per difficulty, exactly three once a record has been read. +0x0c
      *

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "game/gameparams.h"
 #include "met/albumcache.h"
 #include "met/metsonglists.h"
 
@@ -277,4 +278,154 @@ int CampaignStats::UpdateUnlockLevel() {
     }
     mUnlockLevel = nLevel;
     return nLevel;
+}
+
+// 0x00140a68
+void CampaignStats::ResetCounters() {
+    for (int i = 0; i < kStageCount; ++i) {
+        mStageLevelCounts[i] = 0;
+        for (int nDifficulty = 0; nDifficulty < kDifficultyCount; ++nDifficulty) {
+            mStageCompleted[nDifficulty][i] = 0;
+            mStageScoreBeaten[nDifficulty][i] = 0;
+            mStageScores[nDifficulty][i] = 0;
+        }
+    }
+
+    // Yes, the binary fetches the global level list once for each end of the walk.
+    std::vector<HxStr>::iterator end = GetLevelNames().end();
+    for (std::vector<HxStr>::iterator it = GetLevelNames().begin(); it != end; ++it) {
+        if (IsAlbumLevel(*it)) {
+            ++mStageLevelCounts[GetAlbumLevelStage(*it) - kFirstStage];
+        }
+    }
+    RecountAll();
+}
+
+// 0x00145068
+void CampaignStats::RecountAll() {
+    RebuildStageLevels();
+    for (int nStage = kFirstStage; nStage <= kLastRegularStage; ++nStage) {
+        RecountStageCompleted(kDifficultyEasy, nStage);
+        RecountStageCompleted(kDifficultyNormal, nStage);
+        RecountStageCompleted(kDifficultyExpert, nStage);
+        RecountStageScore(kDifficultyEasy, nStage);
+        RecountStageScore(kDifficultyNormal, nStage);
+        RecountStageScore(kDifficultyExpert, nStage);
+    }
+    UpdateUnlockLevel();
+}
+
+// 0x00140b40
+void CampaignStats::RebuildStageLevels() {
+    for (int i = 0; i < kIndexedStageCount; ++i) {
+        mStageLevels[i].erase(mStageLevels[i].begin(), mStageLevels[i].end());
+    }
+
+    for (unsigned i = 0; i < mLevels.size(); ++i) {
+        HxStr name(mLevels[i].mName);
+        const int bAlbum = IsLevelListed(name) ? IsAlbumLevel(name) : 0;
+        const int nStageIndex = mLevels[i].mStage - kFirstStage;
+        // Yes, the binary tests the global level list a second time.
+        if (bAlbum && IsLevelListed(name) && nStageIndex < kIndexedStageCount) {
+            mStageLevels[nStageIndex].push_back(static_cast<int>(i));
+        }
+    }
+}
+
+// 0x00144c38
+int CampaignStats::IsLevelListed(const HxStr &name) {
+    std::vector<HxStr>::iterator end = GetLevelNames().end();
+    for (std::vector<HxStr>::iterator it = GetLevelNames().begin(); it != end; ++it) {
+        if (*it == name) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// 0x00140908
+void CampaignStats::RebuildLevelList() {
+    mLevels.clear();
+    LevelStats level;
+    std::vector<HxStr>::iterator end = GetLevelNames().end();
+    for (std::vector<HxStr>::iterator it = GetLevelNames().begin(); it != end; ++it) {
+        if (IsAlbumLevel(*it)) {
+            level.Reset();
+            level.mName = *it;
+            level.mStage = GetAlbumLevelStage(*it);
+            mLevels.push_back(level);
+        }
+    }
+}
+
+// 0x00142070
+void CampaignStats::MergeLevelList() {
+    std::vector<HxStr>::iterator end = GetLevelNames().end();
+    for (std::vector<HxStr>::iterator it = GetLevelNames().begin(); it != end; ++it) {
+        unsigned nIndex = 0;
+        while (nIndex < mLevels.size() && !(mLevels[nIndex].mName == *it)) {
+            ++nIndex;
+        }
+        if (nIndex < mLevels.size()) {
+            mLevels[nIndex].mStage = GetAlbumLevelStage(*it);
+        } else {
+            LevelStats level;
+            level.Reset();
+            level.mName = *it;
+            level.mStage = GetAlbumLevelStage(*it);
+            mLevels.push_back(level);
+        }
+    }
+    RecountAll();
+}
+
+// 0x00140ef8
+int CampaignStats::IsStageCompleteAtAnyDifficulty(int nStage) {
+    if (nStage < kThirdStage) {
+        return IsStageComplete(kDifficultyEasy, nStage) ||
+               IsStageComplete(kDifficultyNormal, nStage) ||
+               IsStageComplete(kDifficultyExpert, nStage);
+    }
+    if (nStage == kThirdStage) {
+        return IsStageComplete(kDifficultyNormal, nStage) ||
+               IsStageComplete(kDifficultyExpert, nStage);
+    }
+    if (nStage <= kLastRegularStage) {
+        return IsStageComplete(kDifficultyExpert, nStage);
+    }
+    return 0;
+}
+
+// 0x00141578
+int CampaignStats::IsLastLevelRemaining(const GameParams &params) {
+    const int nDifficulty = params.mDifficulty;
+    if (mLevels[FindLevelIndex(params.mLevelName)].mSkills[nDifficulty].mBeaten != 0) {
+        return 0;
+    }
+    int nLevels = 0;
+    int nCompleted = 0;
+    for (int i = 0; i < nDifficulty + kEasyLastStage; ++i) {
+        nLevels += mStageLevelCounts[i];
+        nCompleted += mStageCompleted[nDifficulty][i];
+    }
+    return nCompleted == nLevels - 1;
+}
+
+// 0x00142288
+void CampaignStats::Assign(const CampaignStats &other) {
+    mLevels.clear();
+    mLevels.resize(other.mLevels.size(), LevelStats());
+    for (unsigned i = 0; i < mLevels.size(); ++i) {
+        mLevels[i].Assign(other.mLevels[i]);
+    }
+    RecountAll();
+}
+
+// 0x001451e0
+void CampaignStats::PrintLevels(std::ostream &stream) {
+    for (unsigned i = 0; i < mLevels.size(); ++i) {
+        std::ostream &line = stream << "levels[" << static_cast<int>(i) << "]";
+        mLevels[i].Print(line);
+        line << std::endl;
+    }
 }

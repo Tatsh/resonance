@@ -7,6 +7,12 @@ constexpr char kRecordVersion = 2;
 constexpr int kFirstRecordVersion = 1;
 constexpr int kSecondRecordVersion = 2;
 
+// The skill records Reset() appends, one per difficulty.
+constexpr int kSkillCount = 3;
+
+// The name Reset() assigns.
+const char *const kEmptyName = "";
+
 } // namespace
 
 // 0x001448b8
@@ -28,8 +34,8 @@ void LevelStats::Save(OBStream &stream) {
     // null pointer.
     stream.WriteBytes(mName.mStr != nullptr ? mName.mStr : g_szEmptyString, mName.mLen);
 
-    char bUnknown08 = mUnknown08;
-    stream.WriteBytes(&bUnknown08, sizeof(bUnknown08));
+    char nStage = mStage;
+    stream.WriteBytes(&nStage, sizeof(nStage));
 
     mSkills[0].Save(stream);
     mSkills[1].Save(stream);
@@ -50,7 +56,7 @@ void LevelStats::Load(IBStream &stream) {
         stream.ReadBytes(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
                          nLength);
 
-        stream.Read(&mUnknown08, sizeof(mUnknown08));
+        stream.Read(&mStage, sizeof(mStage));
 
         int nSkillCount;
         stream.Read(&nSkillCount, sizeof(nSkillCount));
@@ -68,9 +74,9 @@ void LevelStats::Load(IBStream &stream) {
         stream.ReadBytes(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
                          nLength);
 
-        char bUnknown08;
-        stream.ReadBytes(&bUnknown08, sizeof(bUnknown08));
-        mUnknown08 = bUnknown08;
+        char nStage;
+        stream.ReadBytes(&nStage, sizeof(nStage));
+        mStage = nStage;
 
         mSkills.clear();
 
@@ -88,4 +94,31 @@ void LevelStats::Load(IBStream &stream) {
         third.Load(stream);
         mSkills.push_back(third);
     }
+}
+
+// 0x00142610
+void LevelStats::Reset() {
+    mName = kEmptyName;
+    mStage = 0;
+    mSkills.clear();
+    for (int i = 0; i < kSkillCount; ++i) {
+        SkillStats skill;
+        skill.Clear();
+        mSkills.push_back(skill);
+    }
+}
+
+// 0x00142d70
+void LevelStats::Assign(const LevelStats &other) {
+    mName = other.mName;
+    mStage = other.mStage;
+    mSkills.clear();
+    mSkills.resize(other.mSkills.size(), SkillStats());
+    for (unsigned i = 0; i < mSkills.size(); ++i) {
+        mSkills[i] = other.mSkills[i];
+    }
+}
+
+// 0x001452f0
+void LevelStats::Print([[maybe_unused]] std::ostream &stream) const {
 }
