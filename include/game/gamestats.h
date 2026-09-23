@@ -112,10 +112,14 @@ public:
      */
     void SetTally(int nPlayer, int nTally);
 
-private:
-    int mPlayerCount; // +0x00
+    /**
+     * The number of players the session records.
+     *
+     * Public because MetMultiStatsScreen::EnterAndShow() reads it directly, and the image has no
+     * accessor. +0x00
+     */
+    int mPlayerCount;
 
-public:
     /**
      * Non-zero when the solo song was completed.
      *

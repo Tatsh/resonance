@@ -516,6 +516,7 @@ metmemdetectscreen
 metmemdetectstartup
 metmsgscreen
 metmultisaveremixscreen
+metmultistatsscreen
 metmultitips
 metmultitipsbasescreen
 metpausebasescreen
@@ -536,6 +537,7 @@ metrightgizmoscreen
 metsaveremix
 metsaveremixscreen
 metscreen
+metscreenmultisoundbank
 metscreens
 metsoloendremixscreen
 metsolowinscreen
