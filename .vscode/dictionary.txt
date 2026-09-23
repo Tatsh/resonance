@@ -54,6 +54,7 @@ bascus
 begingamelocalmsg
 beginphrasecatchmsg
 bitbltbuf
+blak
 blit
 bltinmodule
 bsky
@@ -180,11 +181,13 @@ flusha
 fogcol
 fogcol's
 fopen
+forcefeedbackmgr
 formatcardmct
 formatop
 formatstring
 foxundermoon
 fpathconf
+fram
 frameobject
 freestylefxmsg
 freqappearance
@@ -279,6 +282,7 @@ ingame
 inittab
 inputcheatdetector
 inputcheatdetectormet
+inputmap
 intobject
 invalidateseekermsg
 invalidatetrackmsg
@@ -433,6 +437,7 @@ mmix
 modsupport
 moduleobject
 mous
+movt
 mpfn
 mscal
 mscnt
@@ -542,6 +547,8 @@ powerupcollection
 powerupcollectioni
 powerupcountmsg
 powerupfailedmsg
+powx
+powy
 preapproved
 prmodecont
 prmodecontaddr
@@ -644,6 +651,8 @@ smpl
 smpte
 smrt
 snapcraft
+sndb
+sndh
 socketmodule
 solopowerbarmgr
 soloremix
