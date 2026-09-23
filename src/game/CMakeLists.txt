@@ -42,6 +42,7 @@ set(RESONANCE_GAME_SRCS
     inputmap.cpp
     inputpollerps2.cpp
     jameffectsmgr.cpp
+    joypad.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
     levelconverter.cpp
@@ -63,6 +64,7 @@ set(RESONANCE_GAME_SRCS
     neutralizepowerup.cpp
     notefinder.cpp
     nullplayer.cpp
+    padrecord.cpp
     phrase.cpp
     phrasedatabase.cpp
     phraseeraser.cpp

@@ -13,6 +13,21 @@ extern "C" {
 // when a report was copied. Bytes 2 and 3 of a report are the button bits, active low.
 int scePadRead(int nPort, int nSlot, unsigned char *pData);
 
+// Starts the pad library. PadRecord::Open() passes 0, once per run.
+int scePadInit(int nMode);
+
+// Opens the pad at nPort and nSlot with pDmaArea as its 256-byte, 64-byte-aligned DMA area.
+int scePadPortOpen(int nPort, int nSlot, void *pDmaArea);
+
+// Closes the pad at nPort and nSlot.
+int scePadPortClose(int nPort, int nSlot);
+
+// Reports the pad's state. 0 is disconnected, 5 is busy, 6 is stable, and 99 is closed.
+int scePadGetState(int nPort, int nSlot);
+
+// Sends the six actuator bytes in pData to the pad at nPort and nSlot.
+int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData);
+
 #ifdef __cplusplus
 }
 #endif

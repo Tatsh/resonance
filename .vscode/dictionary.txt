@@ -336,6 +336,7 @@ jameffectsmgr
 jbed
 jbep
 jinja
+joypad
 jsonnet
 jsonschema
 juiceamountmsg
@@ -560,6 +561,7 @@ ordblks
 overcutting
 pabe
 padman
+padrecord
 paletted
 pangame
 parsermodule
