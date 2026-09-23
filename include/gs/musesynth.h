@@ -81,6 +81,16 @@ public:
     virtual void PlayerFinished(MusePlayer *pPlayer);
 
     /**
+     * Report whether any player is sounding.
+     *
+     * The body counts the nodes of mPlayers. The image has no caller. The title is inferred.
+     *
+     * @return Non-zero while mPlayers is not empty.
+     * @ghidraAddress 0x001aaf68
+     */
+    int HasPlayers();
+
+    /**
      * Stop and release every player.
      *
      * @ghidraAddress 0x001ab0d8

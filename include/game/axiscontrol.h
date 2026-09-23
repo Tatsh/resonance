@@ -10,6 +10,7 @@
 
 class AllNotesOffMsg;
 class Player;
+class StdMidiMsg;
 
 /**
  * Translator of analogue stick movement into track control.
@@ -69,6 +70,13 @@ private:
     // is zero.
     // 0x0019ecf0
     void SendPitchBend(int nTick, int nValue);
+
+    // The out-of-line copy of the StdMidiMsg branch HandleMessage() expands inline. A note-on at
+    // mSustainTick starts a bend from the stick position, snapped to the centre within 50, and
+    // any other note-on ends a bend in progress with a centred pitch bend. The image has no
+    // caller of this copy.
+    // 0x0019fab0
+    void OnStdMidi(StdMidiMsg *pMsg);
 
     // The out-of-line copy of the AllNotesOffMsg branch HandleMessage() expands inline. A bend in
     // progress ends with a centred pitch bend at the message's tick.

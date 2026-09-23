@@ -25,6 +25,11 @@ void MuseSynth::CreateSustainer() {
     mSustainer->mSink = &mSplitter;
 }
 
+// 0x001aaf68
+int MuseSynth::HasPlayers() {
+    return mPlayers.size() != 0;
+}
+
 // 0x001ab038
 void MuseSynth::AddSink(MsgSink *pSink) {
     mSplitter.MsgSource::AddSink(pSink);

@@ -68,34 +68,33 @@ void AxisControl::HandleMessage(Message *pMsg) {
         return;
     }
 
-    int nTick;
     if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
-        StdMidiMsg *pMidi = static_cast<StdMidiMsg *>(pMsg);
-        if ((pMidi->mUnknown08 & kStatusKindMask) != kStatusNoteOn) {
-            return;
-        }
-        nTick = pMidi->mTick;
-        if (mSustainTick.mTick == nTick) {
-            if (mBending != 0) {
-                return;
-            }
-            mBendOrigin = mAxis;
-            if (std::abs(mAxis - kAxisCenter) < kAxisSnapRange) {
-                mBendOrigin = kAxisCenter;
-            }
-            mBending = 1;
-            return;
-        }
+        OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
     } else if (nType == static_cast<int>(g_dwAllNotesOffMsgType)) {
-        nTick = static_cast<AllNotesOffMsg *>(pMsg)->mTick;
-    } else {
+        OnAllNotesOff(static_cast<AllNotesOffMsg *>(pMsg));
+    }
+}
+
+// 0x0019fab0
+void AxisControl::OnStdMidi(StdMidiMsg *pMsg) {
+    if ((pMsg->mUnknown08 & kStatusKindMask) != kStatusNoteOn) {
         return;
     }
-
+    if (mSustainTick.mTick == pMsg->mTick) {
+        if (mBending != 0) {
+            return;
+        }
+        mBendOrigin = mAxis;
+        if (std::abs(mAxis - kAxisCenter) < kAxisSnapRange) {
+            mBendOrigin = kAxisCenter;
+        }
+        mBending = 1;
+        return;
+    }
     if (mBending == 0) {
         return;
     }
-    SendPitchBend(nTick, kNoBend);
+    SendPitchBend(pMsg->mTick, kNoBend);
     mBending = 0;
 }
 
