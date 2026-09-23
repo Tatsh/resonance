@@ -51,9 +51,10 @@ class TickClock;
  */
 class PhraseMgr : public MsgSink, public MsgSource {
     // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly, the Catcher
-    // constructor at 0x001aba30 copies mBarTicks, and PhrasePlayer maps a bar through mMap at
-    // 0x001c1a28.
+    // constructor at 0x001aba30 copies mBarTicks, PhrasePlayer maps a bar through mMap at
+    // 0x001c1a28, and PhraseEraser divides by mBarTicks at 0x001b9a8c.
     friend class Catcher;
+    friend class PhraseEraser;
     friend class PhrasePlayer;
     friend class ScoreTrackGraph;
 

@@ -557,6 +557,7 @@ pcremodule
 phello
 phrasecapturedmsg
 phrasedatabase
+phraseeraser
 phrasemaker
 phrasemgr
 phrasemsg

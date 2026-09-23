@@ -62,6 +62,7 @@ set(RESONANCE_GAME_SRCS
     nullplayer.cpp
     phrase.cpp
     phrasedatabase.cpp
+    phraseeraser.cpp
     phrasemaker.cpp
     phraseneutralizer.cpp
     phraseplayer.cpp
