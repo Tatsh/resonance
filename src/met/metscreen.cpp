@@ -203,6 +203,7 @@ static const char *const kEndGameGizmoScreenKey = "MetEndGameGizmoScreen";
 
 } // namespace
 
+// 0x0038a450
 MetScreen::MetScreen(MetRenderer *pRenderer,
                      int nPriority,
                      const HxStr &name,
@@ -222,22 +223,26 @@ MetScreen::MetScreen(MetRenderer *pRenderer,
     }
 }
 
+// 0x0038a848
 MetScreen::~MetScreen() {
     mUnknown10->RemoveScreen(this);
     OnDestroying();
     mUnknown10->RemoveSink(this);
 }
 
+// 0x00381e10
 std::map<HxStr, MetContainerLoad *> &MetScreen::ContainerLoaderMap() {
     static std::map<HxStr, MetContainerLoad *> theMap;
     return theMap;
 }
 
+// 0x003821e0
 std::map<HxStr, MetScreenEntry> &MetScreen::ScreenRegistry() {
     static std::map<HxStr, MetScreenEntry> theMap;
     return theMap;
 }
 
+// 0x0038ff90
 MetScreen *MetScreen::FindScreenByName(const HxStr &name) {
     MetScreen *pScreen = nullptr;
     std::map<HxStr, MetScreenEntry>::iterator it = ScreenRegistry().find(name);
@@ -261,6 +266,7 @@ MetScreen *MetScreen::FindEndScreen([[maybe_unused]] MetRenderer *pRenderer, con
     return pScreen;
 }
 
+// 0x0038aa00
 void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] const HxStr &file) {
     HxStr dir = directory + kPathSeparator;
     if (ContainerLoaderMap()[mUnknown28] == nullptr) {
@@ -279,6 +285,7 @@ void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] cons
     }
 }
 
+// 0x0038b338
 int MetScreen::PollContainerLoad() {
     MetContainerLoad *pLoad = ContainerLoaderMap()[mUnknown28];
     if (pLoad->mLoader == nullptr) {
@@ -310,6 +317,7 @@ void MetScreen::ResolveAnimationViews() {
     mUnknown04 = mUnknown30 != nullptr ? mUnknown30->EndFrame() : 0.0f;
 }
 
+// 0x0038b1b0
 void MetScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     HxStr name = mUnknown80 + kViewSuffix;
@@ -325,6 +333,7 @@ void MetScreen::ResolveContainerViews() {
     mUnknown48 = 0;
 }
 
+// 0x0038b490
 void MetScreen::SetShowing(int nShowing) {
     // Yes, the view is dereferenced without a null check, and ResolveContainerViews() calls this
     // straight after a failed resolution leaves it null.
@@ -356,6 +365,7 @@ void MetScreen::EnterAndShow() {
     StartEnterAnimation(mUnknown10->mUnknown68);
 }
 
+// 0x0038b828
 void MetScreen::ActivateNamedPanel(const HxStr &name) {
     if (name == "") {
         mUnknown10->mUnknown80 = 0;
@@ -412,6 +422,7 @@ void MetScreen::UpdateEnterAnimation(float flTime) {
     }
 }
 
+// 0x0038fdf8
 void MetScreen::OnUnknownSlot7() {
 }
 
@@ -423,6 +434,7 @@ void MetScreen::OnUnknownSlot10() {
 void MetScreen::OnKeyboardDismissed() {
 }
 
+// 0x0038fe00
 void MetScreen::OnDrawPass() {
 }
 
@@ -430,19 +442,24 @@ void MetScreen::OnDrawPass() {
 void MetScreen::OnDestroying() {
 }
 
+// 0x0038fe20
 void MetScreen::OnMsgScreenDismissed([[maybe_unused]] const HxStr &name,
                                      [[maybe_unused]] int nChoice) {
 }
 
+// 0x0038fe28
 void MetScreen::OnMsgScreenShown([[maybe_unused]] const HxStr &name) {
 }
 
+// 0x0038fe30
 void MetScreen::HandleCommand([[maybe_unused]] const MetScreenCommand *pCommand) {
 }
 
+// 0x0038fe38
 void MetScreen::OnUnknownSlot26([[maybe_unused]] float flTime) {
 }
 
+// 0x0038fe40
 void MetScreen::UpdateIdleAnimation([[maybe_unused]] float flTime) {
 }
 
@@ -483,12 +500,15 @@ void MetScreen::UpdateRepeatingSound(float flTime) {
     mUnknown6c = 0;
 }
 
+// 0x0038fe48
 void MetScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
 }
 
+// 0x0038fe50
 void MetScreen::OnUnknownSlot33() {
 }
 
+// 0x0038fe58
 void MetScreen::OnUnknownSlot36() {
 }
 
@@ -526,6 +546,7 @@ void MetScreen::PlayErrorSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kErrorSound);
 }
 
+// 0x0038b730
 void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
     if (mUnknown1c == 0) {
         return;
@@ -593,6 +614,7 @@ void MetScreen::UpdateAnimationFrame(float flTime) {
     }
 }
 
+// 0x0038b918
 void MetScreen::UpdateFrame(float flTime) {
     if (mUnknown4c != 0) {
         if (ContainerLoaderMap()[mUnknown28]->mUnknown04 != 0) {

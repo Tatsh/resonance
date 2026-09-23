@@ -90,6 +90,7 @@ constexpr float kArrowAlternateInterval = 30.0f;
 
 } // namespace
 
+// 0x00291e00
 MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
@@ -102,6 +103,7 @@ MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriori
     mBurnTexture = FreqAppearance::FindPersonaBurnTexture(kBurnTextureIndex);
 }
 
+// 0x00296ae0
 MetLoadFreqBaseScreen::~MetLoadFreqBaseScreen() {
     delete mUnknown90;
 }
@@ -111,6 +113,7 @@ MetScreen *MetLoadFreqBaseScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadFreqBaseScreen(pRenderer, nPriority);
 }
 
+// 0x002926d8
 void MetLoadFreqBaseScreen::EnterAndShow() {
     AcquireIdentityList();
     BuildButtonList();
@@ -126,6 +129,7 @@ void MetLoadFreqBaseScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
+// 0x00292178
 void MetLoadFreqBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -178,6 +182,7 @@ void MetLoadFreqBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
+// 0x00296b60
 void MetLoadFreqBaseScreen::PlayCycleLeftSound(int nSelector) {
     if (mUnknown90->mSelected == kCarouselSelected &&
         mUnknown8c->size() >= kMinimumCyclableEntries) {
@@ -185,6 +190,7 @@ void MetLoadFreqBaseScreen::PlayCycleLeftSound(int nSelector) {
     }
 }
 
+// 0x00296bb0
 void MetLoadFreqBaseScreen::PlayCycleRightSound(int nSelector) {
     if (mUnknown90->mSelected == kCarouselSelected &&
         mUnknown8c->size() >= kMinimumCyclableEntries) {
@@ -192,6 +198,7 @@ void MetLoadFreqBaseScreen::PlayCycleRightSound(int nSelector) {
     }
 }
 
+// 0x00292c60
 void MetLoadFreqBaseScreen::OnUnknownSlot30(Rnd::Button *pButton) {
     if (pButton == mUnknown98 || pButton == mUnknown9c) {
         return;
@@ -203,6 +210,7 @@ void MetLoadFreqBaseScreen::OnUnknownSlot30(Rnd::Button *pButton) {
     BeginExit();
 }
 
+// 0x00292da8
 void MetLoadFreqBaseScreen::OnUnknownSlot36() {
     if (mUnknown18 == kExitToMainMenu) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
@@ -229,6 +237,7 @@ void MetLoadFreqBaseScreen::OnUnknownSlot36() {
     mUnknown90->SetSelected(-1);
 }
 
+// 0x00292000
 void MetLoadFreqBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -239,14 +248,17 @@ void MetLoadFreqBaseScreen::ResolveContainerViews() {
     mUnknown9c = pRight != nullptr ? dynamic_cast<Rnd::Button *>(pRight) : nullptr;
 }
 
+// 0x00292620
 void MetLoadFreqBaseScreen::UpdateNameLabel() {
     HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
     mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 }
 
+// 0x00296a50
 void MetLoadFreqBaseScreen::OnNameButton() {
 }
 
+// 0x00293148
 void MetLoadFreqBaseScreen::OnEditButton() {
     PrepareFreqMakerForSelection();
     PushNamedScreen(HxStr(kFreqMakerButtonsScreen));
@@ -284,9 +296,11 @@ void MetLoadFreqBaseScreen::OnCreateButton() {
     ActivateNamedPanel(HxStr(kFreqMakerButtonsScreen));
 }
 
+// 0x00296d08
 void MetLoadFreqBaseScreen::AcquireIdentityList() {
 }
 
+// 0x00292810
 void MetLoadFreqBaseScreen::BuildButtonList() {
     mUnknown90->Clear();
     mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoName));
@@ -301,6 +315,7 @@ void MetLoadFreqBaseScreen::BuildButtonList() {
     mUnknown90->SetSelected(kNameButtonIndex);
 }
 
+// 0x00296c88
 void MetLoadFreqBaseScreen::UpdateCycleArrows() {
     const int nShowing = mUnknown8c->size() >= kMinimumCyclableEntries ? 1 : 0;
 
@@ -321,6 +336,7 @@ void MetLoadFreqBaseScreen::RefreshSelection() {
     UpdateNameLabel();
 }
 
+// 0x00296c00
 void MetLoadFreqBaseScreen::StepSelection(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandLeft) {
         int nIndex = mUnknown94 - 1;
