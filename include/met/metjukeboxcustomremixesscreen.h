@@ -15,6 +15,7 @@
  * The constructor at `0x00224f40` takes only the renderer and the load priority. It runs the
  * MetJukeboxBaseScreen constructor at `0x0021dcc0` with `jbs` for the screen name,
  * `metagame/Shared` for the directory, and `juke_saved` for the container, and clears mUnknownc8.
+ *
  * The destructor at `0x0022a850` releases the object with the tag `MsgSink` and does nothing of
  * its own.
  *
@@ -40,15 +41,32 @@ public:
     virtual ~MetJukeboxCustomRemixesScreen();
 
     /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0022a938
+     */
+    static MetJukeboxCustomRemixesScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Resolve the base views, build both scrolling lists, and resolve every detail object.
+     *
+     * Slot 38. The catalogue list clones `jbs_remix_factory_01.view` with the highlight and both
+     * arrows, and the playlist list clones `jbs_remix_playlist_01.view` five rows deep with none
+     * of the three. The warning text takes the `remix_unavail_disc` prompt.
+     *
+     * @ghidraAddress 0x002250c0
+     */
+    virtual void ResolveContainerViews();
+
+    /**
      * Report the number of saved remixes.
      *
-     * Slot 39. Divides the byte span of the vector mUnknowna0 addresses by the 0x38-byte record
-     * size. The vector is dereferenced without a null check.
-     *
-     * The body is not written. The record class emits no RTTI, no allocation tag identifies it,
-     * and every instance in the image is a by-value member or vector element, so the vector cannot
-     * be declared with its real element type and the division cannot be expressed as a size query.
-     * MetScreen::StartRepeatingSound() records a gap of the same shape.
+     * Slot 39. The size of the catalogue mUnknowna0 addresses, read without a null check.
      *
      * @return The row count.
      * @ghidraAddress 0x0022a910
