@@ -99,6 +99,43 @@ void AlertScriptTemplate(int nTemplate, ...);
 HxStr FormatMessage(const HxStr &format, va_list args, int nUnknown);
 
 /**
+ * Format a message, passing zero as the word FormatMessage() does not read.
+ *
+ * QueryConfigVector() and PythonEvt::QueryOption() format their reports through it. The title is
+ * inferred.
+ *
+ * @param format The format string.
+ * @param args The arguments for it.
+ * @return The formatted message.
+ * @ghidraAddress 0x005e4148
+ */
+HxStr FormatMessage(const HxStr &format, va_list args);
+
+/**
+ * Format a message from a C string and a variable argument list.
+ *
+ * The format is copied into a temporary HxStr before FormatMessage() runs. The shipped program
+ * does not call it, and the title is inferred.
+ *
+ * @param pszFormat A printf-style format string.
+ * @return The formatted message.
+ * @ghidraAddress 0x005e2c80
+ */
+HxStr FormatHxStr(const char *pszFormat, ...);
+
+/**
+ * Format a registered script template with a variable argument list.
+ *
+ * The template text is fetched with GetScriptTemplate() and formatted through FormatMessage(). The
+ * shipped program does not call it, and the title is inferred.
+ *
+ * @param nTemplate The template identifier.
+ * @return The formatted message.
+ * @ghidraAddress 0x005e2d38
+ */
+HxStr FormatScriptTemplate(int nTemplate, ...);
+
+/**
  * Show a message and write it to the report stream.
  *
  * The routine belongs to another translation unit and is declared here so log.cpp can call it. The

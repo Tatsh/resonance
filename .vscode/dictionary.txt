@@ -228,6 +228,7 @@ fopen
 forcefeedbackmgr
 fordblks
 formatcardmct
+formatmessage
 formatop
 formatstring
 foxundermoon
