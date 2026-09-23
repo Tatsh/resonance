@@ -29,11 +29,9 @@ void LevelConverter::AllDone(int nUnknown, void *pUnknown) {
     mFinished = 1;
 }
 
-// 0x001ea5a0. The discarded IsFiniteMBT(0) is the shape of an assertion compiled without its
-// report.
+// 0x001ea5a0
 void LevelConverter::TextEvent(int nTick, const char *pText, unsigned char nType) {
-    IsFiniteMBT(0);
-    if (nTick == 0 && nType == kTrackNameMetaType) {
+    if (nTick == Mid::MBT(0).mTick && nType == kTrackNameMetaType) {
         ParseTrackTypeString(pText);
     }
 }

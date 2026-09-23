@@ -30,14 +30,11 @@ void GamePowerupPlacer::OnUnknownSlot7() {
     Send(&msg);
 }
 
-// 0x001cd028. The two discarded IsFiniteMBT() calls are the shape of an assertion compiled
-// without its report.
+// 0x001cd028
 int GamePowerupPlacer::Tick(int nElapsedTicks) {
-    IsFiniteMBT(kTicksPerBeat);
-    const int nTick = std::min(std::max(nElapsedTicks + kTicksPerBeat, kMBTMinimum), kMBTMaximum);
-    IsFiniteMBT(nTick);
-    IsFiniteMBT(kTicksPerBar);
-    const int nBar = nTick / kTicksPerBar;
+    const int nBeat = Mid::MBT(kTicksPerBeat).mTick;
+    const Mid::MBT tick(std::min(std::max(nElapsedTicks + nBeat, kMBTMinimum), kMBTMaximum));
+    const int nBar = tick.mTick / Mid::MBT(kTicksPerBar).mTick;
     if (mCursorBar != -1 && mCursorBar < nBar) {
         mCursorBar = nBar;
         DisplayPointerMsg msg(mCursorBar, mOwner->Slot4(), mOwner);

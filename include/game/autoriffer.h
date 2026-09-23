@@ -5,8 +5,14 @@
 #include "game/axephrasemaker.h"
 #include "game/player.h"
 #include "game/quantizer.h"
+#include "game/riff.h"
 #include "game/trackdata.h"
+#include "msg/erasemsg.h"
 #include "msg/message.h"
+#include "msg/pitchriffmsg.h"
+#include "msg/stopriffmsg.h"
+#include "msg/trackselectmsg.h"
+#include "sch/cmdid.h"
 #include "sch/tickclock.h"
 #include "synth/musesynth.h"
 
@@ -23,12 +29,18 @@
  * accessor at `0x0019a490`, which guards on the descriptor at `0x008eef38`, and that is what
  * settles the name.
  *
- * The source at `+0x30` is a data member rather than a base, which the constructor proves by
- * constructing it at that offset and which every caller confirms by calling MsgSource::AddSink()
- * on it directly rather than through a vptr.
+ * The source at `+0x30` is a data member rather than a base. The constructor constructs it at that
+ * offset, and every caller calls MsgSource::AddSink() on it directly rather than through a vptr.
  *
- * The class is not reconstructed. Only the surface AxingSTG uses is declared, so that it compiles
- * against the real type.
+ * HandleMessage() dispatches five identities. A PitchRiffMsg goes to OnPitchRiff(), an EraseMsg
+ * to OnErase(), a StopRiffMsg to OnStopRiff(), and a GameOverMsg to StopRiff() at position 0. A
+ * TrackSelectMsg runs the inline copy of OnTrackSelect(). Most handlers send an AllNotesOffMsg,
+ * an AxeButtonMsg, or a MultiMuseMsg built on the stack, and those classes declare their payload
+ * private with no constructor that takes it, so their bodies are not written. Each is described
+ * where it is declared.
+ *
+ * The file-local command class `Cmd`, in the anonymous namespace of `GsAutoRiffer.cpp`, runs
+ * OnCommand() at the position PlayRiff() schedules.
  */
 class AutoRiffer : public MsgSink {
 public:
@@ -48,19 +60,77 @@ public:
     /**
      * Act on a message.
      *
+     * The body is not written, because its TrackSelectMsg branch reads the message's private
+     * position at `+0x0c`.
+     *
      * @param pMsg The message.
      * @ghidraAddress 0x00199910
      */
     virtual void HandleMessage(Message *pMsg);
 
+    /**
+     * Repeat the current riff at a song position, or release the buttons.
+     *
+     * The file-local Cmd runs it. When the routine at `0x0019da58` on mPhraseMaker reports 1 for
+     * the bar of the position, it plays the current riff again through PlayRiff(). Otherwise it
+     * sends an AxeButtonMsg for mPlayer that releases every button. The body is not written, for
+     * the reason recorded in the class documentation.
+     *
+     * @param nTick The song position the command was scheduled for.
+     * @ghidraAddress 0x00199688
+     */
+    void OnCommand(int nTick);
+
+    /**
+     * Add a sink to mSource.
+     *
+     * The image has no caller. AxingSTG calls MsgSource::AddSink() on mSource directly.
+     *
+     * @param pSink The sink.
+     * @ghidraAddress 0x0019a508
+     */
+    void AddSink(MsgSink *pSink);
+
 private:
-    int mUnknown04;              // +0x04, copied from TrackData::mUnknown04
-    Sch::TickClock *mClock;      // +0x08
-    Quantizer *mQuantizer;       // +0x0c
-    int mUnknown10;              // +0x10
-    int mUnknown14[4];           // +0x14, a sixteen-byte run the constructor clears
-    const TrackData *mTrackData; // +0x24
-    int mUnknown28;              // +0x28, starts -2
+    // Starts the riff of the message's level at its quantised position for this track's player.
+    // A position inside a phrase bar plays SND_INACTIVE instead. Not written, for the reason
+    // recorded in the class documentation.
+    // 0x00199160
+    void OnPitchRiff(PitchRiffMsg *pMsg);
+
+    // Clears the held flag of the message's level and switches to another held level's riff, or
+    // stops when none is held. Not written, for the same reason.
+    // 0x001992e0
+    void OnStopRiff(StopRiffMsg *pMsg);
+
+    // Stops the riff and hands the erase to mPhraseMaker through the routine at 0x0019bf80 when
+    // the bar is a phrase bar. Not written, for the same reason.
+    // 0x00199480
+    void OnErase(EraseMsg *pMsg);
+
+    // When a riff is playing, clears every held flag, sends an AllNotesOffMsg, withdraws
+    // mCommand, and releases every button with an AxeButtonMsg. Not written, for the same reason.
+    // 0x00199590
+    void StopRiff(int nTick);
+
+    // Sends an AllNotesOffMsg to mSynth and the current riff as a MultiMuseMsg, then schedules
+    // the file-local Cmd at the end of the riff after the rounded position. Not written, for the
+    // same reason.
+    // 0x00199758
+    void PlayRiff(int nTick);
+
+    // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline. Not
+    // written, because it reads the message's private position at `+0x0c`.
+    // 0x0019a898
+    void OnTrackSelect(TrackSelectMsg *pMsg);
+
+    int mTrack;                  // +0x04, copied from TrackData::mUnknown04
+    Quantizer *mQuantizer;       // +0x08
+    const TrackData *mTrackData; // +0x0c
+    Riff *mCurrentRiff;          // +0x10
+    int mLevelHeld[4];           // +0x14, one flag per difficulty level, cleared with memset
+    Sch::TickClock *mClock;      // +0x24
+    CmdID mCommand;              // +0x28, the handle the file-local Cmd is queued under
 
 public:
     /**
@@ -81,5 +151,5 @@ public:
     AxePhraseMaker *mPhraseMaker;
 
 private:
-    Player *mUnknown48; // +0x48, the file-scope NullPlayer until one is assigned
+    Player *mPlayer; // +0x48, the file-scope NullPlayer until a TrackSelectMsg assigns one
 };

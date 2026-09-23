@@ -1,4 +1,5 @@
 set(RESONANCE_GAME_SRCS
+    autoriffer.cpp
     axephrasemaker.cpp
     axingstg.cpp
     campaignstats.cpp
