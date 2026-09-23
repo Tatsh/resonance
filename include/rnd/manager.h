@@ -40,15 +40,12 @@ typedef Object *(*ClassFactory)(const HxStr &name);
  * constructor makes is the comparator byte of mClasses at `+0x1c`, and the four-member layout is
  * what fills the rest.
  *
- * Both the default constructor at `0x005200c0` and the destructor at `0x00520348` are
- * compiler-generated and therefore absent from this tree. The constructor default-constructs the
- * four members and nothing else, and the destructor destroys them in reverse declaration order,
- * mClasses, mMergeObjects, mLoaded, and then mObjects, before the tagged free. That order is the
- * evidence for the member order declared below.
+ * The destructor destroys the members in reverse declaration order, mClasses, mMergeObjects,
+ * mLoaded, and then mObjects, before the tagged free. That order is the evidence for the member
+ * order declared below.
  *
- * Two further routines are library code rather than source. `0x0051fe58` is
- * `mClasses.find()`, which Read() calls twice and Create() calls once, and `0x0051f798` is the
- * printer DumpText() hands the class registry to.
+ * `0x0051fe58` is library code rather than source. It is `mClasses.find()`, which Read() calls
+ * twice and Create() calls once.
  *
  * Every Rnd::Object registers itself in mObjects on construction and erases that entry on
  * destruction, so Find() resolves any live object by name.
@@ -80,6 +77,37 @@ typedef Object *(*ClassFactory)(const HxStr &name);
  */
 class Manager {
 public:
+    /**
+     * Construct an empty registry.
+     *
+     * The body default-constructs the four members and nothing else.
+     *
+     * @ghidraAddress 0x005200c0
+     */
+    Manager();
+
+    /**
+     * Destroy the registry.
+     *
+     * The members are destroyed in reverse declaration order. The deleting variant then frees the
+     * storage under the tag "Rnd::Manager".
+     *
+     * @ghidraAddress 0x00520348
+     */
+    ~Manager();
+
+    /**
+     * Report whether an object is registered, by identity rather than by name.
+     *
+     * Walks mObjects in key order and compares each value with pObject. No call site survives in
+     * the shipped program, and the name is inferred.
+     *
+     * @param pObject The object to look for.
+     * @return True when some entry holds pObject.
+     * @ghidraAddress 0x005199d8
+     */
+    bool Contains(const Object *pObject);
+
     /**
      * Register the profile timers and the loadable renderer classes.
      *
@@ -216,7 +244,8 @@ public:
      *
      * The header is the version word 6, which is the highest Read() accepts, followed by the
      * object count. Each entry is then the object's class name and its own name, each written with
-     * its terminator. The second pass that writes the object bodies is not reconstructed.
+     * its terminator, and one byte of its merge flag. A second pass then has every object Save()
+     * its record and follows each record with the marker `0xdeaddead`.
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x0051aff8
@@ -233,6 +262,18 @@ public:
      * @ghidraAddress 0x00520648
      */
     void LoadFile(const HxStr &path);
+
+    /**
+     * Write the object table to a `.rnd` file by path.
+     *
+     * A path that fails to open for writing reports "Could not open file: %s" and writes nothing.
+     * The stream is a Rnd::FileStream built on the stack. The script command that saves a scene
+     * is the one caller. The name is inferred from LoadFile().
+     *
+     * @param path The file to write.
+     * @ghidraAddress 0x005204e8
+     */
+    void SaveFile(const HxStr &path);
 
     /**
      * Resolve a loaded object by name.

@@ -187,6 +187,9 @@ public:
                         Both are outside this hierarchy and the image has no accessor. +0x0c */
 
 private:
+    // Rnd::Manager::Read() sets mMerge and Rnd::Manager::Write() saves it.
+    friend class Manager;
+
     int mMerge; // +0x10
     // Set for the whole of ReleaseAllRefs() so that a referrer notified through Replace() cannot
     // erase an mRefs entry the walk is still standing on.
