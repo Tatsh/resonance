@@ -59,6 +59,13 @@ constexpr unsigned kSpu2EffectAreaSize = 0x20000;
 // Stream frames in one bar, which SetSynthStreamBar() scales a bar by.
 constexpr int kSynthStreamFramesPerBar = 19200;
 
+// The game's own IOP sound driver, and the spin BindSoundDriverRpc() waits between binds.
+constexpr int kSoundDriverRpcServer = 0x12346;
+constexpr int kSoundDriverBindSpin = 9999;
+
+// 0x008e5bc0
+SifRpcClientData_t g_soundDriverClient;
+
 // 0x00894cc0
 SoundDriverCommand g_chunkCommand;
 
@@ -613,4 +620,20 @@ void StartSoundBankMovie(const char *pszPath) {
     const int nTick = Application::shared()->GetSongClock()->SongTick();
     g_nSoundBankMovieTick = nTick;
     g_pSynthStream->mLoopTicks = nTick;
+}
+
+// 0x005f9638
+int BindSoundDriverRpc() {
+    sceSifInitRpc(0);
+    do {
+        if (sceSifBindRpc(&g_soundDriverClient, kSoundDriverRpcServer, 0) < 0) {
+            LogPrintf("error: sceSifBindRpc \n");
+            while (true) {
+            }
+        }
+        int nSpin = kSoundDriverBindSpin;
+        while (nSpin-- != 0) {
+        }
+    } while (g_soundDriverClient.server == nullptr);
+    return 1;
 }

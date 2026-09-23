@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libsdr.h>
+#include <sifrpc.h>
 #include <stdint.h>
 #include <vector>
 
@@ -43,6 +44,28 @@
  * @ghidraAddress 0x00464ad0
  */
 void SynthCommand(int nCommand);
+
+/**
+ * Client of the game's sound driver on the IOP, bound by BindSoundDriverRpc().
+ *
+ * SubmitSoundDriverRequest() calls through it.
+ *
+ * @ghidraAddress 0x008e5bc0
+ */
+extern SifRpcClientData_t g_soundDriverClient;
+
+/**
+ * Bind g_soundDriverClient to the sound driver's RPC server.
+ *
+ * Initialises the SIF RPC layer, then binds server 0x12346 until the server reports ready, spinning
+ * 9999 iterations between attempts. A failed bind reports `error: sceSifBindRpc` and hangs. The
+ * server is the game's own IOP driver rather than libsdr's. InitSynthDriver() is the one caller,
+ * and the title is inferred.
+ *
+ * @return Always 1. The caller discards it.
+ * @ghidraAddress 0x005f9638
+ */
+int BindSoundDriverRpc();
 
 /**
  * Submit one command to the sound driver.

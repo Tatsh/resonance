@@ -307,11 +307,13 @@ hardsynth
 harmonix
 hblkhd
 hblks
+heff
 hialloc
 hibytes
 hilite
 hisquare
 hostmode
+hsyn
 hudanalogstick
 hudanimramp
 hudbadge

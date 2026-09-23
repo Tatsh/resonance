@@ -134,10 +134,10 @@ void InitBootConfig();
 /**
  * Register the hard-effect script commands.
  *
- * The routine belongs to another translation unit and is declared here so that iop.cpp can call it.
- * It registers command identifiers 0x2710 through 0x271b against the script expressions
- * `current_level.ps2_use_hard_effect(%d)`, `current_level.ps2_hard_effect_id(%d)`, and
- * `current_level.ps2_hard_effect_volumes(%d)[%d]`, among others.
+ * The image emits the routine far from the rest of this module, after `tanf()`. It registers script
+ * templates 10000 through 10011 against the `current_level` expressions for the hard effect, its
+ * chorus, and the hard synth error file, with `current_level_exists()` taking 10010 out of sequence
+ * between the fifth and the sixth.
  *
  * The name is inferred from those expressions. Nothing in the image attests it, and
  * LoadIopModules() is the only caller.
