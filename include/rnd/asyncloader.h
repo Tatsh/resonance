@@ -21,7 +21,7 @@ class Object;
  * and `+0x08`, each of which takes a 0x10-byte sentinel; that bounds their element at 8 bytes or
  * less, so all three are lists of pointers rather than of records. The list at `+0x00` stores the
  * objects the request has produced so far, which is what Poll() counts and what
- * RndAsyncLoader::HarvestLoadedObjects() walks. Everything from `+0x0c` on is declared
+ * RndAsyncLoader::HarvestLoadedObjects() fills. Everything from `+0x0c` on is declared
  * below. The three flag titles are inferred from their initial values and from the order Poll()
  * tests them in.
  */
@@ -138,7 +138,7 @@ public:
     /**
      * The objects the request has produced so far. +0x00
      *
-     * Poll() counts it and RndAsyncLoader::HarvestLoadedObjects() walks it. Public because
+     * Poll() counts it and RndAsyncLoader::HarvestLoadedObjects() fills it. Public because
      * MetFreqMakerAssetManager::GetLoadedObjects() and MetFreqMakerAssetManager::PollLoad() copy it
      * directly, and the image has no accessor.
      */
@@ -156,8 +156,12 @@ public:
     std::list<Rnd::Drawable *> mDrawables;
 
 private:
-    // The element type is unrecovered. Rnd::Object is the conservative base, and the 0x10-byte
-    // sentinel the constructor builds bounds the element at 8 bytes or less either way.
+    // 0x003f8460. Copy Rnd::g_manager.mLoaded into mUnknown08, then append every `Tex` in mLoaded
+    // and then in mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is
+    // the one caller, and the name is inferred.
+    void HarvestLoadedObjects();
+
+    // Every object the request loaded, copied from Rnd::g_manager.mLoaded.
     std::list<Rnd::Object *> mUnknown08; // +0x08
     HxStr mDirectory;                    // +0x0c
     HxStr mFile;                         // +0x14

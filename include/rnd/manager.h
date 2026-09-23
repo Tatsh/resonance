@@ -326,13 +326,17 @@ public:
     std::list<Object *> mLoaded; /*!< Objects the last file load produced. Public because
                                       RndAsyncLoader::HarvestLoadedObjects() at `0x003f8460` copies
                                       it wholesale into its own request list and then classifies
-                                      each entry, and the image exposes no accessor. It is the only
-                                      reader of either list outside this class. Read() and
-                                      LoadFile() empty it before a load. +0x0c */
+                                      each entry, and the image exposes no accessor. That routine
+                                      is the only reader of mLoaded and mMergeObjects outside this
+                                      class. Read() and LoadFile() empty it before a load. +0x0c */
+
+    std::list<Object *> mMergeObjects; /*!< Objects whose mMerge is set, appended by Read() as it
+                                            resolves the object table. Public because
+                                            RndAsyncLoader::HarvestLoadedObjects() classifies each
+                                            entry after mLoaded, and the image exposes no
+                                            accessor. +0x10 */
 
 private:
-    // Objects whose mMerge is set, appended by Read() as it resolves the object table.
-    std::list<Object *> mMergeObjects;      // +0x10
     std::map<HxStr, ClassFactory> mClasses; // +0x14
 };
 

@@ -25,7 +25,8 @@ class Receiver;
  *
  * Only format 1 and format 2 files have their tracks read. A format 0 file delivers no event.
  *
- * The destructor at `0x003d6450` is compiler-generated and destroys mPending.
+ * The destructor at `0x003d6450` is compiler-generated and destroys mPending. The uncalled routine
+ * at `0x003d67f0` in the same unit writes three integers as `[a:b:c]` and is left unidentified.
  *
  * Every member is public, because LevelConverter stores mCompare directly and the image exposes no
  * accessor.
