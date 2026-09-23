@@ -12,6 +12,7 @@ set(RESONANCE_MET_SRCS
     metendgamegizmoscreen.cpp
     metexpansionpakscreen.cpp
     metfade.cpp
+    metfreqcreatescreen.cpp
     metfreqloader.cpp
     metfreqmakerassetmanager.cpp
     metfreqmakerbuttonsscreen.cpp

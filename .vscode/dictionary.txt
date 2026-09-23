@@ -472,6 +472,7 @@ metcreditsscreen
 metendgamegizmoscreen
 metexpansionpakscreen
 metfade
+metfreqcreatescreen
 metfreqendedmsg
 metfreqloader
 metfreqmakerassetmanager
