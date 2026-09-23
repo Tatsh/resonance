@@ -60,15 +60,10 @@ enum LevelConverterTrackType {
  * runs. The comparator ranks each event by its status class (note off first, note on last).
  *
  * The five event handlers all follow one shape. They report through ReportError() on the error
- * paths, call the per-channel routine at `0x001e8120`, and then forward to one of two sinks. With
+ * paths, check the channel through CheckChannel(), and then forward to one of two sinks. With
  * mRiffTrack clear the event goes to LevelBuilder::AddEvent(). With it set the event goes to
  * Riff::AddMidiMsg() on mRiff instead, with the position rebased against mRiffStart and saturated
  * to Mid::MBT's bounds.
- *
- * Nine bodies here are not written yet. The comparator at `0x001e6450` and the routine at
- * `0x001e8af0` block Convert(). The per-channel routine at `0x001e8120` blocks the five event
- * handlers. The vector assignment at `0x001e9440` blocks NewTrack(), and ParseTrackTypeString()
- * blocks TextEvent()'s one callee.
  *
  * Every method name below that is not a Mid::Receiver override is inferred from its body.
  */
@@ -78,16 +73,15 @@ class LevelConverter : public Mid::Receiver {
 
 public:
     /**
-     * Eight-byte record the collection at `+0x70` stores.
+     * One note on waiting for its note off.
      *
-     * `PendingEvent` is a placeholder for the name. The size comes from the stride the destructor
-     * and NewTrack() step the collection by. NewTrack() empties it and EndTrack() reports an error
-     * when it is not empty by the end of a track, which is what makes it a set of events still
-     * waiting for their partner.
+     * `PendingEvent` is a placeholder for the name. NoteOn() zeroes the eight bytes and fills the
+     * three fields, and NoteOff() pairs the first entry with the same note and erases it.
      */
     struct PendingEvent {
-        int mUnknown00; // +0x00
-        int mUnknown04; // +0x04
+        unsigned char mNote;     /*!< The note number. */
+        unsigned char mVelocity; /*!< The note-on velocity. */
+        int mTick;               /*!< The note-on position, in MIDI ticks. */
     };
 
     /**
@@ -116,7 +110,10 @@ public:
     /**
      * Read one Standard MIDI File and fill a builder from it.
      *
-     * The body is not written yet.
+     * The error log path is the file's base name with `.err` appended. The file is read through
+     * an HxMemStream with byte swapping on, an HxDataChunkReader, and a Mid::FileReader whose
+     * events of one position are ordered by status class (note off first, note on last).
+     * LevelBuilder::PrepareTracks() and FinishErrorLog() run after the file is read.
      *
      * @param pszPath The file to read.
      * @param pBuffer The file's contents, forwarded to the HxMemStream constructor.
@@ -130,11 +127,8 @@ public:
     /**
      * Reset the per-track state and begin one track.
      *
-     * The body is not written yet. It stores the track index at `+0x10`, clears the four words
-     * from `+0x3c` to `+0x48`, empties the pending-event collection at `+0x70`, sets `+0x14` and
-     * `+0x64` to 0xff, clears `+0x0c`, `+0x54`, `+0x58`, and `+0x6c`, sets `+0x5c`, `+0x88`, and
-     * `+0xc4` to -1, and replaces the name map at `+0x7c` with an empty one through the vector
-     * assignment at `0x001e9440`.
+     * The track type, the routing flags, the pending notes, the riff, the channel, the program,
+     * and the harmony all return to their unset values.
      *
      * @param nTrack The track index.
      * @ghidraAddress 0x001e6880
@@ -144,9 +138,8 @@ public:
     /**
      * Receive a note on and forward it under MIDI status 0x90.
      *
-     * The body is not written yet. Beyond the shared shape, a set flag at `+0x44` sends the event
-     * to the routine at `0x001e7ac0` instead of to either sink, and one path reports an error
-     * through the reporter with the literal at `0x007e7268`.
+     * A harmony track adds the note to the harmony through AddHarmonyNote(). A track that pairs
+     * notes stores the note on in mPending instead of forwarding it.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nNote The note number.
@@ -160,8 +153,9 @@ public:
     /**
      * Receive a note off and forward it under MIDI status 0x80.
      *
-     * The body is not written yet. The forwarded call passes zero where the note-on path passes a
-     * velocity, because this slot receives none.
+     * A harmony track ignores it. A track that pairs notes hands the first pending note on with
+     * the same note to AddNote() with the duration between the two, and reports a note off with no
+     * partner. Otherwise the forwarded call passes zero where the note-on path passes a velocity.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nNote The note number.
@@ -173,9 +167,11 @@ public:
     /**
      * Receive a controller change and forward it under MIDI status 0xb0.
      *
-     * The body is not written yet. It has eight separate calls to the error reporter, more than
-     * any other handler, so most of its length is validation of the controller number against the
-     * state the track has reached.
+     * Harmony and gem-span tracks reject it. On a riff track, controller 0x66 sets the bar
+     * quantisation (1, 2, 4, 8, or 16) unless mUnknown90 is set, controller 7 (volume) is
+     * rejected, and controller 0x6a forwards whether its value is non-zero through
+     * LevelBuilder::OnUnknownForwarder001ec580(). Controller 0x6a is rejected on every other
+     * track, and controllers 0x68, 0x69, 0x6b, and 11 (expression) are rejected everywhere.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nController The controller number.
@@ -189,9 +185,8 @@ public:
     /**
      * Receive a program change and forward it under MIDI status 0xc0.
      *
-     * The body is not written yet. With the flag at `+0x40` clear it stores the program at `+0x64`
-     * and sends nothing, which is the one handler that withholds an event rather than forwarding
-     * it to the second sink.
+     * Harmony and gem-span tracks reject it. A riff track stores the program in mProgram and sends
+     * nothing, and EmitRiffProgram() sends it with each riff instead.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nProgram The program number.
@@ -203,9 +198,7 @@ public:
     /**
      * Receive a pitch bend and forward it under MIDI status 0xe0.
      *
-     * The body is not written yet. On the riff path it first calls SyncRiff(), reports an error
-     * when mRiff is null, then rebases the position against mRiffStart and saturates the
-     * difference to Mid::MBT's bounds before forwarding.
+     * Harmony and gem-span tracks reject it. Otherwise it takes the shared shape.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nLow The low seven bits of the bend.
@@ -244,12 +237,10 @@ public:
     /**
      * Finish the track NewTrack() began.
      *
-     * The body is not written yet. A recovered `+0x88` hands the name map to the builder through
-     * the forwarder at `0x001ec560`. A set flag at `+0x40` with `+0x6c` clear calls the second
-     * forwarder at `0x001ec580` with two zeroes. A `+0x54` present with `+0x0c` equal to 2 and the
-     * word at `+0x54` plus 0x18 clear reports an error with the literal at `0x007e6fd0`. A
-     * pending-event collection that is not empty reports an error with the literal at
-     * `0x007e6ff8`, and an empty one instead empties the three span collections.
+     * A harmony that was started goes to the builder. A riff track that opened no riff forwards
+     * two zeroes through LevelBuilder::OnUnknownForwarder001ec580(). An axe riff with no length and
+     * a note on with no note off are both reported, and otherwise a riff track empties the three
+     * span collections.
      *
      * @ghidraAddress 0x001e6a30
      */
@@ -259,9 +250,12 @@ private:
     /**
      * Read a track name and set the track's kind from it.
      *
-     * The body is not written yet. It is 463 instructions and the largest routine of the class,
-     * and its one caller is TextEvent(). It sets mTrackType, and it ends by calling
-     * ApplyTrackType().
+     * Track 0 is the tempo track whatever its name. Otherwise the lowered name is matched against
+     * `control`, `intro`, and the `bg_` prefix, and then read as `t`, a score track number from 1,
+     * and a type (`pitch`, `scratch`, `axe`, `catch`, `vocal`, `data`, `harmony`, or `ghost`), or
+     * as an instrument letter (`d`, `b`, `s`, `g`, `v`, or `f`), a colon, and a display name. A
+     * second name, an unknown letter, and a name that does not begin with `t` are reported. Every
+     * path but a second name and a bad track number ends in ApplyTrackType().
      *
      * @param pText The track name.
      * @ghidraAddress 0x001e8318
@@ -272,8 +266,8 @@ private:
      * Select the builder's current track and the event routing for mTrackType.
      *
      * The three score kinds that play riffs (axe, pitch, and scratch) route events into riffs.
-     * Vocal and catch tracks take the kind and the instrument without the riff routing, a catch
-     * track first reading the gem difficulty from configuration code 0x38a. A background or an
+     * A catch track does too, after reading the gem difficulty from configuration code 0x38a. A
+     * vocal track takes the kind and the instrument without the riff routing. A background or an
      * intro track takes the next slot of its collection, and a control track the builder's own
      * track. The data and harmony tracks write to the score track without a kind, and the two
      * gem-span kinds empty the three span collections. Every path but an out-of-range difficulty
@@ -369,6 +363,42 @@ private:
     void SyncRiff(int nTick);
 
     /**
+     * Check an event's channel against the track's.
+     *
+     * A track with no type is reported. A gem-span track does not check. The first event of a
+     * track sets mChannel and the builder's channel, and a later event on another channel is
+     * reported. The title is inferred.
+     *
+     * @param nChannel The event's channel.
+     * @param nTick The event position, in MIDI ticks.
+     * @ghidraAddress 0x001e8120
+     */
+    void CheckChannel(unsigned char nChannel, int nTick);
+
+    /**
+     * Add one note to the harmony at a song position.
+     *
+     * A position other than mHarmonyStart first hands the harmony built so far to the builder,
+     * unless none was started, and begins an empty one there. The title is inferred.
+     *
+     * @param nTick The note's song position, in MIDI ticks.
+     * @param nNote The note number.
+     * @ghidraAddress 0x001e7ac0
+     */
+    void AddHarmonyNote(int nTick, unsigned char nNote);
+
+    /**
+     * Finish the conversion's error log.
+     *
+     * A file with no tempo event is reported. Otherwise a conversion that reported nothing writes
+     * a line that the file is free of errors to a freshly opened log, and one that reported writes
+     * a line that it has errors, and the log is closed. The title is inferred.
+     *
+     * @ghidraAddress 0x001e8af0
+     */
+    void FinishErrorLog();
+
+    /**
      * Append one line to the conversion's error log.
      *
      * Inline. The first report of a conversion opens the log, the file whose path Convert() builds
@@ -398,7 +428,8 @@ private:
     int mBackingTrackCount; // +0x30, cleared by Convert
     int mIntroTrackCount;   // +0x34, cleared by Convert
     int mUnknown38;         // +0x38, cleared by Convert
-    int mUnknown3c;         // +0x3c, set for every track type that produces output
+    // Set, a note on waits in mPending for its note off and the pair goes to AddNote().
+    int mPairNotes; // +0x3c
     // Set, a track's events go into the current riff. Clear, they go to the builder.
     int mRiffTrack;         // +0x40
     int mHarmonyTrack;      // +0x44
@@ -412,15 +443,15 @@ private:
     Mid::MBT mRiffSetStart;             // +0x60
     unsigned char mProgram;             // +0x64, the withheld program number, 0xff at track start
     int mProgramSent;                   // +0x68
-    int mUnknown6c;                     // +0x6c, set when a riff opens
+    int mRiffOpened;                    // +0x6c, set when a riff opens
     std::vector<PendingEvent> mPending; // +0x70
     // The harmony the converter builds note by note through Harmony::AddNote() (0x001e7b90) and
     // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04). The constructor, NewTrack(),
     // and 0x001e7ac0 call its implicit default constructor, emitted at 0x001ea1e8.
-    Harmony mHarmony;    // +0x7c
-    Mid::MBT mUnknown88; // +0x88, -1 at the start of each track
-    int mHasTempo;       // +0x8c, cleared by Convert and set to 1 by Tempo
-    int mUnknown90;      // +0x90
+    Harmony mHarmony;       // +0x7c
+    Mid::MBT mHarmonyStart; // +0x88, the position mHarmony starts at, -1 before the first note
+    int mHasTempo;          // +0x8c, cleared by Convert and set to 1 by Tempo
+    int mUnknown90;         // +0x90
     // The gem difficulty, from configuration code 0x38a on a catch track.
     int mDifficulty;                            // +0x94
     std::vector<Span> mSpans[kDifficultyCount]; // +0x98

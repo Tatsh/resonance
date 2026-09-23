@@ -4,6 +4,7 @@ Eran
 Kasson
 NODISC
 Orthonormalize
+Pitchbend
 Randomizable
 Recolor
 Vron

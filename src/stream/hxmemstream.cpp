@@ -13,7 +13,7 @@ static const char kNoWriteMessage[] =
 static const char kEndOfBufferMessage[] = "End Of buffset %s reached";
 
 // 0x00405cf8
-HxMemStream::HxMemStream(const HxStr &name, char *pData, int nSize) : mName(name) {
+HxMemStream::HxMemStream(const char *pszName, char *pData, int nSize) : mName(pszName) {
     mEnd = &pData[nSize];
     mCur = pData;
     mStatus = 0;

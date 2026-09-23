@@ -22,13 +22,13 @@ public:
     /**
      * Open a stream over a caller-owned byte range.
      *
-     * @param name The stream title, which appears in the diagnostic Read() produces at the end of
-     * the data. A copy is stored.
+     * @param pszName The stream title, which appears in the diagnostic Read() produces at the end
+     * of the data. A copy is stored.
      * @param pData The first byte of the range. The stream does not take ownership.
      * @param nSize The range length in bytes.
      * @ghidraAddress 0x00405cf8
      */
-    HxMemStream(const HxStr &name, char *pData, int nSize);
+    HxMemStream(const char *pszName, char *pData, int nSize);
 
     /**
      * Close the stream and release the title.
