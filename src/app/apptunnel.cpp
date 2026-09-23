@@ -93,10 +93,10 @@ constexpr int kFourLocalPlayers = 4;
 constexpr float kSingleScreenFirstLod = 2000.0f;
 constexpr float kSplitScreenFirstLod = -5000.0f;
 
-// Value AppTunnel writes into Rnd::Tunnel::mUnknown60, by local player count.
-constexpr int kSingleScreenTunnelUnknown60 = 2;
-constexpr int kTwoPlayerTunnelUnknown60 = 3;
-constexpr int kSplitScreenTunnelUnknown60 = 4;
+// Far slices the tunnel skips drawing, by local player count.
+constexpr int kSingleScreenCulledFarSlices = 2;
+constexpr int kTwoPlayerCulledFarSlices = 3;
+constexpr int kSplitScreenCulledFarSlices = 4;
 
 // Lane floor brightness alone and split, and the floor colour before the brightness applies.
 constexpr float kSingleScreenBrightness = 1.0f;
@@ -186,7 +186,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
       mPlayMode(Application::shared()->GetPlayMode()), mBoundary(nullptr), mCameraRig(nullptr),
       mJukebox(0), mUnknowncc(0),
       mUnknownd0(static_cast<float>(Application::shared()->GetTempo()) / kTempoToRate),
-      mUnknown114(0), mPlayMap(nullptr), mTrackCount(kTrackCount), mUnknown140(0), mUnknown148(0) {
+      mShowCrates(0), mPlayMap(nullptr), mTrackCount(kTrackCount), mUnknown140(0), mUnknown148(0) {
     g_pAppTunnel = this;
     g_nAppTunnelDisplayMode = QueryConfigFlag(kDisplayModeConfigCode);
     CacheTunnelObjectByName();
@@ -266,7 +266,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
 
     int nTrailPoints = kSinglePlayerTrailPoints;
     int nOuterShowing = 1;
-    int nTunnelUnknown60 = kSingleScreenTunnelUnknown60;
+    int nCulledFarSlices = kSingleScreenCulledFarSlices;
     int nSplitScreen = 0;
     float flGemCost = kSinglePlayerGemCost;
     float flHexGemLod = 0.0f;
@@ -281,7 +281,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         screenSizes[0] = kSplitScreenFirstLod;
         flHexGemLod = kTwoPlayerHexGemLod;
         flPowerupGemLod = 0.0f;
-        nTunnelUnknown60 = kTwoPlayerTunnelUnknown60;
+        nCulledFarSlices = kTwoPlayerCulledFarSlices;
     } else if (nLocalPlayers == kThreeLocalPlayers) {
         flHexGemLod = kSplitScreenGemLod;
         nOuterShowing = 0;
@@ -290,14 +290,14 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         nTrailPoints = kThreePlayerTrailPoints;
         flGemCost = kSplitScreenGemCost;
         flPowerupGemLod = flHexGemLod;
-        nTunnelUnknown60 = kSplitScreenTunnelUnknown60;
+        nCulledFarSlices = kSplitScreenCulledFarSlices;
     } else if (nLocalPlayers == kFourLocalPlayers) {
         nOuterShowing = 0;
         screenSizes[0] = kSplitScreenFirstLod;
         nSplitScreen = 1;
         flHexGemLod = kSplitScreenGemLod;
         nTrailPoints = kFourPlayerTrailPoints;
-        nTunnelUnknown60 = kSplitScreenTunnelUnknown60;
+        nCulledFarSlices = kSplitScreenCulledFarSlices;
         flGemCost = kSplitScreenGemCost;
         flPowerupGemLod = flHexGemLod;
     }
@@ -305,7 +305,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
     mLatLight = FindObject<Rnd::Light>("lat light1");
     FindObject<Rnd::View>("outer.view")->SetShowing(nOuterShowing);
     pTunnel->ApplyMeshLodScreenSizes(screenSizes);
-    pTunnel->mUnknown60 = nTunnelUnknown60;
+    pTunnel->mCulledFarSlices = nCulledFarSlices;
     pTunnel->SetPath(pTunnel->mPath);
     FindObject<Rnd::Environ>("tunnel.env")->ClearLights();
     if (nSplitScreen) {

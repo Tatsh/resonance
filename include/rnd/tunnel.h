@@ -580,10 +580,10 @@ private:
     int mUnknown5c; // +0x5c Starts at 0. Copy() carries it.
 
 public:
-    /*!< Starts at 0, and Save(), Load(), and Copy() carry it. No routine of this class reads it
-         otherwise. Public because AppTunnel's constructor writes 2, 3, or 4 there by local player
-         count at `0x004433a0`, and the image has no accessor. +0x60 */
-    int mUnknown60;
+    /*!< The slices at the far end of the window that DrawSelf() skips, 0 at construction. Save(),
+         Load(), and Copy() carry it. Public because AppTunnel's constructor writes 2, 3, or 4
+         there by local player count at `0x004433a0`, and the image has no accessor. +0x60 */
+    int mCulledFarSlices;
 
 private:
     // +0x64 Starts at 480.0f. The tunnel frames a seeker takes to move one ring, which
@@ -599,8 +599,12 @@ public:
     std::vector<float> mLodScreenSizes;
 
 private:
-    int mUnknown74; // +0x74 Starts at 1. DrawSelf() tests it.
-    int mUnknown78; // +0x78 Starts at 1. DrawSelf() tests it.
+    // +0x74 Starts at 1. DrawSelf() draws the "_lat" slice meshes only while it is set. The
+    // hx.nolattice script command at 0x0044a080 cycles it with mDrawPanels.
+    int mDrawLattice;
+    // +0x78 Starts at 1. DrawSelf() draws the "_pan" cell meshes and the seeker sections only
+    // while it is set.
+    int mDrawPanels;
     // +0x7c Starts at 99999999, which is a hand-written sentinel in the same style as the
     // -9999999.0f Rnd::ParticleSys uses for an unset frame. The ring advance at 0x00476fe0 compares
     // the requested slice against it and writes the same sentinel into the mUnknown88 entry of the

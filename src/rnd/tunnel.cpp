@@ -37,7 +37,7 @@ constexpr int kTunnelRejectedRevision = 38;
 constexpr int kTunnelOldestRevision = 33;
 // Before this revision a discarded word follows the path name.
 constexpr int kPathWordDroppedRevision = 34;
-// The first revision that stores mUnknown60.
+// The first revision that stores mCulledFarSlices.
 constexpr int kUnknown60Revision = 35;
 // The first revisions that store the counts of the cell grid and the slice grid.
 constexpr int kCellCountRevision = 36;
@@ -375,7 +375,7 @@ void Tunnel::Save(Stream &stream) {
     WriteEventList(stream, mEvents);
     WriteSeekerVector(stream, mSeekers);
     stream.Write(&mUnknownbc, sizeof(mUnknownbc));
-    stream.Write(&mUnknown60, sizeof(mUnknown60));
+    stream.Write(&mCulledFarSlices, sizeof(mCulledFarSlices));
     SaveSectionMaterials(stream);
 }
 
@@ -412,7 +412,7 @@ void Tunnel::Load(Stream &stream) {
     ReadSeekerVector(stream, mSeekers);
     stream.Read(&mUnknownbc, sizeof(mUnknownbc));
     if (g_nTunnelLoadVersion >= kUnknown60Revision) {
-        stream.Read(&mUnknown60, sizeof(mUnknown60));
+        stream.Read(&mCulledFarSlices, sizeof(mCulledFarSlices));
     }
     Update();
     LoadSectionMaterials(stream);
@@ -467,7 +467,7 @@ void Tunnel::Copy(const Object *pSource, unsigned nFlags) {
     mEvents = pTunnel->mEvents;
     mSeekers = pTunnel->mSeekers;
     mUnknown5c = pTunnel->mUnknown5c;
-    mUnknown60 = pTunnel->mUnknown60;
+    mCulledFarSlices = pTunnel->mCulledFarSlices;
     Update();
 }
 
@@ -563,8 +563,9 @@ int Tunnel::FrameToSlice(float flFrame) {
 Tunnel::Tunnel(const HxStr &name)
     : Object(name), mUnknown38(1.0f), mRingCount(3), mSliceCount(0), mLodCount(2), mUnknown48(0.1f),
       mUnknown4c(0.1f), mUnknown50(0.25f), mUnknown54(0.01f), mPath(nullptr), mUnknown5c(0),
-      mUnknown60(0), mLaneChangeFrames(480.0f), mUnknown74(1), mUnknown78(1), mUnknown7c(kNoSlice),
-      mUnknown80(0.0f), mUnknown84(0), mSlicesPerFrame(0.0f), mSliceFrames(0.0f), mUnknownbc(0) {
+      mCulledFarSlices(0), mLaneChangeFrames(480.0f), mDrawLattice(1), mDrawPanels(1),
+      mUnknown7c(kNoSlice), mUnknown80(0.0f), mUnknown84(0), mSlicesPerFrame(0.0f),
+      mSliceFrames(0.0f), mUnknownbc(0) {
     mSeekers.reserve(kInitialSeekerCapacity);
     mLodScreenSizes.resize(mLodCount, 0.0f);
     std::fill(mLodScreenSizes.begin(), mLodScreenSizes.end(), 0);
@@ -619,8 +620,8 @@ void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend
 
 // 0x00468850
 int Tunnel::DrawSelf() {
-    const int nEnd = mUnknownbc + mSliceCount - mUnknown60;
-    if (mUnknown74 != 0) {
+    const int nEnd = mUnknownbc + mSliceCount - mCulledFarSlices;
+    if (mDrawLattice != 0) {
         for (int nSlice = nEnd - 1; nSlice >= mUnknownbc; --nSlice) {
             const int nIndex = nSlice % mSliceCount;
             if (mUnknown88[nIndex] != kNoSlice) {
@@ -628,7 +629,7 @@ int Tunnel::DrawSelf() {
             }
         }
     }
-    if (mUnknown78 != 0) {
+    if (mDrawPanels != 0) {
         for (int nSlice = nEnd - 1; nSlice >= mUnknownbc; --nSlice) {
             const float flDistance = nSlice * mSliceFrames - mFilteredFrame;
             const int nIndex = nSlice % mSliceCount;
