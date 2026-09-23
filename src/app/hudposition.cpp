@@ -62,6 +62,7 @@ inline void ScaleBlock(Rnd::Mesh *pBlock, float flScale) {
 
 } // namespace
 
+// 0x00419f88
 HudPosition::HudPosition(PlayMap *pPlayMap)
     : mPlayMap(pPlayMap), mCurrentSection(kNoSection), mBar(kNoBar), mUnknown3c(0) {
     const char *pszLayout =
@@ -97,7 +98,7 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
         const int nIndex = mPlayMap->Slot11(i);
         const int nBarCount = mPlayMap->mSectionLengths[nIndex];
 
-        Rnd::Mesh *pBlock = Rnd::g_pfnNewMesh(NextHudName());
+        Rnd::Mesh *pBlock = Rnd::NewMeshThroughHook(NextHudName());
         pBlock->Copy(pBlockTemplate, 0);
         mAnim->SetMesh(pBlock);
         mAnim->SetFrame(flFrame);
@@ -106,7 +107,7 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
         mView->AddDraw(pBlock);
         mView->AddTrans(pBlock);
 
-        Rnd::Text *pLabel = Rnd::g_pfnNewText(NextHudName());
+        Rnd::Text *pLabel = Rnd::NewTextThroughHook(NextHudName());
         pLabel->Copy(pLabelTemplate, 0);
         pLabel->SetText(mPlayMap->mSectionNames[nIndex]);
         SetTranslation(pLabel, Vector3{0.0f, flX + flBlockWidth * kLabelPlacement, 0.0f, 1.0f});
@@ -128,6 +129,7 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
     mView->AddTrans(mRepeatView);
 }
 
+// 0x0041ac18
 HudPosition::~HudPosition() {
     for (std::vector<Section>::iterator it = mSections.begin(); it != mSections.end(); ++it) {
         delete it->mBlock;
@@ -137,6 +139,7 @@ HudPosition::~HudPosition() {
     mView->SetOrigin(&origin.x);
 }
 
+// 0x0041ad88
 void HudPosition::Update() {
     int nCurrent = kNoSection;
     if (mBar >= 0) {

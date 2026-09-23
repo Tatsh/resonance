@@ -342,7 +342,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         Rnd::Cam *pCam = FindObject<Rnd::Cam>(FormatString("tnl cam%d", nView));
         Rnd::Cam *pZoomCam = FindObject<Rnd::Cam>(FormatString("tnl cam%dz", nView));
         Rnd::View *pLocalView = FindObject<Rnd::View>(FormatString("tnl local%d.view", nView));
-        Rnd::Cam *pSavedCam = Rnd::g_pfnNewCam(HxStr(FormatString("saved tnl cam%d", nView)));
+        Rnd::Cam *pSavedCam = Rnd::NewCamThroughHook(HxStr(FormatString("saved tnl cam%d", nView)));
         pSavedCam->Copy(pCam, Rnd::kCopyChildLists);
         mSavedCams.push_back(pSavedCam);
         if (pCam != pMainCam) {

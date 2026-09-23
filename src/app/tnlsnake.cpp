@@ -58,11 +58,11 @@ constexpr int kXfmRowTranslation = 3;
 
 } // namespace
 
-TnlSnake::TnlSnake() : mStartFrame(kNoFrame) {
-    mString = new Rnd::String(NextAppTunnelName());
-    mHead = Rnd::g_pfnNewMesh(NextAppTunnelName());
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl transparent")));
-
+// 0x0043e6a0
+TnlSnake::TnlSnake()
+    : mStartFrame(kNoFrame), mString(Rnd::String::NewString(NextAppTunnelName())),
+      mHead(Rnd::NewMeshThroughHook(NextAppTunnelName())),
+      mView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl transparent")))) {
     mString->SetMat(dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("snake.mat"))));
     mString->SetNumPoints(kPointCount);
     mString->SetWidth(kRibbonWidth);

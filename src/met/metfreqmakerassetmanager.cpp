@@ -280,7 +280,7 @@ FreqPartTemplate *MetFreqMakerAssetManager::RegisterPart(Rnd::Object *pObject) {
     name = pObject->mName;
     materialName = name + kMaterialSuffix;
 
-    Rnd::Mat *pMaterial = Rnd::g_pfnNewMat(materialName);
+    Rnd::Mat *pMaterial = Rnd::NewMatThroughHook(materialName);
     pMaterial->Copy(mMaterialTemplate, kMaterialCopyFlags);
     Rnd::Tex *pTexture = static_cast<Rnd::Tex *>(pObject);
     pMaterial->mStages[0].SetTex(pTexture);
@@ -441,7 +441,7 @@ HxStr MetFreqMakerAssetManager::NextMeshName() {
 // 0x00254a58
 Rnd::Mesh *MetFreqMakerAssetManager::CloneMesh(const HxStr &name) {
     PollLoad(); // Yes, the binary discards the result.
-    Rnd::Mesh *pMesh = Rnd::g_pfnNewMesh(name);
+    Rnd::Mesh *pMesh = Rnd::NewMeshThroughHook(name);
     pMesh->Copy(mMeshTemplate, kCloneCopyFlags);
     pMesh->SetVertexColor(g_freqMakerDefaultColor);
     return pMesh;

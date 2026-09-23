@@ -42,8 +42,9 @@ public:
         /**
          * Create a copy of a mesh and add it to a drawable.
          *
-         * The copy is a new mesh from g_pfnNewMesh() under a NextAppTunnelName() name. A null
-         * pSource sets mMesh to null and does nothing else.
+         * The copy is a new mesh from Rnd::NewMeshThroughHook() under a NextAppTunnelName() name,
+         * and it shares the face owner of pSource. A null pSource sets mMesh to null and does
+         * nothing else.
          *
          * @param pSource The mesh to copy, or null.
          * @param pParent The drawable the copy is added to.

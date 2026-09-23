@@ -46,14 +46,12 @@ inline Vector3 Scaled(const Vector3 &vector, float flScale) {
 
 } // namespace
 
-TnlPanelFX::TnlPanelFX(int nIndex)
-    : mStateFrame(kNoFrame), mState(kStateIdle), mIndex(nIndex), mMat(nullptr) {
+// 0x0043c688
+TnlPanelFX::TnlPanelFX(int nIndex) : mStateFrame(kNoFrame), mState(kStateIdle), mIndex(nIndex) {
     mOffset.w = 1.0f;
 
-    HxStr meshName("pnl");
-    meshName += NextAppTunnelName();
-    mMesh = Rnd::g_pfnNewMesh(meshName);
-
+    mMesh = Rnd::NewMeshThroughHook(HxStr("pnl") + NextAppTunnelName());
+    mMat = nullptr;
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl transparent")));
     mMesh->mZFunc = Rnd::Mesh::kZFuncLess;
     mMesh->mZMode = Rnd::Mesh::kZModeZReadOnly;
@@ -64,7 +62,7 @@ TnlPanelFX::TnlPanelFX(int nIndex)
     mMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(matName));
     if (mMat == nullptr) {
         Rnd::Mat *pTemplate = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("tunnel erase0")));
-        mMat = Rnd::g_pfnNewMat(matName);
+        mMat = Rnd::NewMatThroughHook(matName);
         mMat->Copy(pTemplate, 0);
     }
 }

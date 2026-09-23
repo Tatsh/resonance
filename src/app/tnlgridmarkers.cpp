@@ -49,14 +49,14 @@ TnlGridMarkers::Marker::~Marker() {
     DeleteMesh(mMesh);
 }
 
+// 0x00438fe0
 void TnlGridMarkers::Marker::Init(Rnd::Mesh *pSource, Rnd::Drawable *pParent) {
     if (!pSource) {
         mMesh = nullptr;
         return;
     }
-    mMesh = Rnd::g_pfnNewMesh(NextAppTunnelName());
-    // The binary does not set the flags argument. The 0 written here is not recovered.
-    static_cast<Rnd::Object *>(mMesh)->Copy(pSource, 0);
+    mMesh = Rnd::NewMeshThroughHook(NextAppTunnelName());
+    static_cast<Rnd::Object *>(mMesh)->Copy(pSource, Rnd::Mesh::kCopyShareFaces);
     pParent->AddDraw(mMesh, nullptr);
 }
 

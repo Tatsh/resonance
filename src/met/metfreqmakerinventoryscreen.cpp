@@ -892,7 +892,7 @@ void MetFreqMakerInventoryScreen::ShowEditPage() {
     int nIndex = 0;
     for (std::list<FreqPart *>::iterator it = parts.begin(); it != parts.end(); ++it) {
         FreqPart *pPart = *it;
-        Rnd::Mesh *pMesh = Rnd::g_pfnNewMesh(HxStr(FormatString(kEditMeshFormat, nIndex)));
+        Rnd::Mesh *pMesh = Rnd::NewMeshThroughHook(HxStr(FormatString(kEditMeshFormat, nIndex)));
         pMesh->Copy(pPart->GetMesh(), kCopyNothing);
         float flScaleX;
         float flScaleZ;
