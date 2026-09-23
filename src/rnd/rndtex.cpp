@@ -83,6 +83,12 @@ bool Tex::PollAsyncMips() {
     return true;
 }
 
+// 0x004e73c8
+void Tex::ReloadBitmaps() {
+    FreeLoadedBitmaps();
+    AllocateBitmapFromStream();
+}
+
 // 0x004e7aa8
 void Tex::FreeLoadedBitmaps() {
     CancelPendingMips();

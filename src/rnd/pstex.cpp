@@ -793,7 +793,7 @@ void PsTex::UnlockMipBitmap() {
 }
 
 // 0x0059ab78
-void PsTex::SetPalette(APalette *pPalette) {
+void PsTex::SetPalette(APalette *pPalette, [[maybe_unused]] int nUnknown) {
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
         return;
     }

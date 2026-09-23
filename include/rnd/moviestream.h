@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rndartt/abitmap.h"
+
 class CircBuff;
 
 namespace Rnd {
@@ -35,15 +37,39 @@ public:
     /**
      * Track description a MOVT chunk supplies, 0x2c bytes.
      *
-     * ParseHeader() copies the payload whole and nothing in the recovered image reads a field, so
-     * the layout is not recovered. The empty constructor matches the loop the stream's constructor
-     * runs over the array without storing anything.
+     * ParseHeader() copies the payload whole. Rnd::Movie reads the frame size and nothing else, so
+     * the rest of the layout is not recovered. The empty constructor matches the loop the stream's
+     * constructor runs over the array without storing anything.
      */
     struct Track {
         Track() {
         }
 
-        unsigned char mUnknown00[0x2c]; // +0x00
+        unsigned char mUnknown00[4];    // +0x00
+        short mWidth;                   /*!< Frame width in pixels. +0x04 */
+        short mHeight;                  /*!< Frame height in pixels. +0x06 */
+        unsigned char mUnknown08[0x24]; // +0x08
+    };
+
+    /** Payload of a PALL chunk. */
+    struct PaletteChunk {
+        int mCount;               /*!< Entries that follow. */
+        int mFlags;               /*!< Bit 0 records that Update() has swapped the entries. */
+        unsigned int mEntries[1]; /*!< The entries, mCount of them. */
+    };
+
+    /** Payload of a FRAM chunk, followed by the frame's pixels. */
+    struct FrameChunk {
+        short mX;        /*!< Column the frame is copied to. */
+        short mY;        /*!< Row the frame is copied to. */
+        int mUnknown04;  // +0x04
+        int mFlags;      /*!< Bit 0 records that Update() has swapped the colours. */
+        ABitmap mBitmap; /*!< Description of the pixels that follow. */
+    };
+
+    /** Payload of a BLAK chunk. */
+    struct BlankChunk {
+        unsigned int mColor; /*!< Colour the whole frame is filled with. */
     };
 
     /**
@@ -156,5 +182,41 @@ public:
     int mAsyncHandle;              /*!< Identifier of the outstanding read, or 0. +0x378 */
     int mSoundHold;                /*!< Updates left before another sound chunk may play. +0x37c */
 };
+
+/**
+ * Chunk type codes, four characters read as a word, built by the unit's static initialiser.
+ *
+ * Rnd::Movie's chunk handler compares against the three video codes as well.
+ *
+ * @ghidraAddress 0x007578f0
+ */
+extern const unsigned int g_nMovsTag;
+/** @ghidraAddress 0x007578f8 */
+extern const unsigned int g_nMovtTag;
+/** @ghidraAddress 0x00757900 */
+extern const unsigned int g_nPallTag;
+/** @ghidraAddress 0x00757908 */
+extern const unsigned int g_nFramTag;
+/** @ghidraAddress 0x00757910 */
+extern const unsigned int g_nBlakTag;
+/** @ghidraAddress 0x00757918 */
+extern const unsigned int g_nLoopTag;
+/** @ghidraAddress 0x00757920 */
+extern const unsigned int g_nSndhTag;
+/** @ghidraAddress 0x00757928 */
+extern const unsigned int g_nSndbTag;
+/** @ghidraAddress 0x00757930 */
+extern const unsigned int g_nSndpTag;
+
+/**
+ * Text for each error a MovieStream reports, indexed by the negated error code.
+ *
+ * "NO ERROR", "Out of memory", "Can't open file", "Read error", "Write error", "Invalid filename or
+ * extension", "File/data format is bad", and "Missing driver". Rnd::Movie::OpenMovieFile() is the
+ * one reader.
+ *
+ * @ghidraAddress 0x007a8400
+ */
+extern const char *const g_apszMovieStreamErrors[];
 
 } // namespace Rnd

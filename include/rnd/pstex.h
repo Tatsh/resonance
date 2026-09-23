@@ -108,9 +108,10 @@ public:
      * staging palette from the entries already present.
      *
      * @param pPalette The replacement palette, or null to rebuild from the current entries.
+     * @param nUnknown Not read.
      * @ghidraAddress 0x0059ab78
      */
-    virtual void SetPalette(APalette *pPalette);
+    virtual void SetPalette(APalette *pPalette, int nUnknown);
 
     /**
      * Pin the video memory block of mip 0 against eviction, or release the pin.

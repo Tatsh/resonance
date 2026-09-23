@@ -136,6 +136,17 @@ public:
     void CancelPendingMips();
 
     /**
+     * Release the loaded bitmaps and start loading from the configured path again.
+     *
+     * Vtable slot 8. The body is FreeLoadedBitmaps() followed by AllocateBitmapFromStream().
+     * Rnd::PsTex's table addresses a byte-identical per-unit copy at `0x0059a8c8`. Rnd::Movie's
+     * SetFrameSelf() calls it after SetBitmapConfig(). The name is the analysis program's.
+     *
+     * @ghidraAddress 0x004e73c8
+     */
+    virtual void ReloadBitmaps();
+
+    /**
      * Release every loaded bitmap and cancel the outstanding reads.
      *
      * Vtable slot 13. A bitmap already resident in GS memory belongs to its slot, so only a copy
@@ -184,9 +195,11 @@ public:
      * Vtable slot 11. Empty in Rnd::Tex. The name is inferred as above.
      *
      * @param pPalette The replacement palette.
+     * @param nUnknown A second word no recovered implementation reads. Rnd::Movie's palette chunk
+     *                 handler passes -1 explicitly at `0x005cf55c`.
      * @ghidraAddress 0x004e7600
      */
-    virtual void SetPalette(APalette *pPalette);
+    virtual void SetPalette(APalette *pPalette, int nUnknown);
 
     /**
      * Mark the texture's GS page as in use or free.
@@ -253,12 +266,27 @@ protected:
     // Every member below is protected rather than private, because Rnd::PsTex reads the mip
     // handles, the pending mask, and the bitmap path while it uploads to GS memory. No access from
     // outside the hierarchy is recovered for any of them. The order is the recovered offset order.
-    int mUnknown28;                // +0x28
+public:
+    /**
+     * The fourth configuration word SetBitmapConfig() records. Public because Rnd::Movie's
+     * SetFrameSelf() reads it to pass it back unchanged. +0x28
+     */
+    int mUnknown28;
+
+protected:
     std::vector<int> mMipHandles;  // +0x2c
     unsigned char mPendingMipMask; // +0x38 One bit per mip level still loading.
-    int mMipSelect;                // +0x3c Starts at -0x80.
-    FilePath mBitmapPath;          // +0x40
-    int mGsHandle;                 // +0x48 Starts at -1, which stands for no residency.
+
+public:
+    /**
+     * Mip selector SetBitmapConfig() records, starting at -0x80. Public because Rnd::Movie's
+     * SetFrameSelf() reads it to pass it back unchanged. +0x3c
+     */
+    int mMipSelect;
+
+protected:
+    FilePath mBitmapPath; // +0x40
+    int mGsHandle;        // +0x48 Starts at -1, which stands for no residency.
     std::vector<ABitmap *> mLoadedBitmaps;
 };
 

@@ -23,18 +23,6 @@ inline unsigned int FourCc(const char *pszCode) {
     return nCode;
 }
 
-// The chunk types, built by the unit's static initialiser from the literals at 0x0082eb90.
-// 0x007578f0 through 0x00757930.
-const unsigned int g_nMovsTag = FourCc("MOVS");
-const unsigned int g_nMovtTag = FourCc("MOVT");
-const unsigned int g_nPallTag = FourCc("PALL");
-const unsigned int g_nFramTag = FourCc("FRAM");
-const unsigned int g_nBlakTag = FourCc("BLAK");
-const unsigned int g_nLoopTag = FourCc("LOOP");
-const unsigned int g_nSndhTag = FourCc("SNDH");
-const unsigned int g_nSndbTag = FourCc("SNDB");
-const unsigned int g_nSndpTag = FourCc("SNDP");
-
 // 0x00757938. Streams whose first read has not yet completed.
 std::list<Rnd::MovieStream *> g_pendingStreams;
 
@@ -71,23 +59,31 @@ constexpr int kChunkSwapped = 1;
 constexpr unsigned int kColorMask = 0x00ffffff;
 constexpr int kAlphaShift = 24;
 
-// The payload of a PALL chunk: an entry count, a flags word, and the entries.
-struct PaletteChunk {
-    int mCount;
-    int mFlags;
-    unsigned int mEntries[1];
-};
-
-// The payload of a FRAM chunk: two words, a flags word, and the frame's bitmap.
-struct FrameChunk {
-    int mUnknown00[2];
-    int mFlags;
-    ABitmap mBitmap;
-};
-
 } // namespace
 
 namespace Rnd {
+
+// The chunk types, built by the unit's static initialiser from the literals at 0x0082eb90.
+// 0x007578f0 through 0x00757930.
+const unsigned int g_nMovsTag = FourCc("MOVS");
+const unsigned int g_nMovtTag = FourCc("MOVT");
+const unsigned int g_nPallTag = FourCc("PALL");
+const unsigned int g_nFramTag = FourCc("FRAM");
+const unsigned int g_nBlakTag = FourCc("BLAK");
+const unsigned int g_nLoopTag = FourCc("LOOP");
+const unsigned int g_nSndhTag = FourCc("SNDH");
+const unsigned int g_nSndbTag = FourCc("SNDB");
+const unsigned int g_nSndpTag = FourCc("SNDP");
+
+// 0x007a8400
+const char *const g_apszMovieStreamErrors[] = {"NO ERROR",
+                                               "Out of memory",
+                                               "Can't open file",
+                                               "Read error",
+                                               "Write error",
+                                               "Invalid filename or extension",
+                                               "File/data format is bad",
+                                               "Missing driver"};
 
 // 0x0057f7b8
 MovieStream::MovieStream(const char *pszPath, int bStreaming, int *pnError) {

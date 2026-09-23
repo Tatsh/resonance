@@ -7,6 +7,7 @@ set(RESONANCE_OS_SRCS
     devconsole.cpp
     failsink.cpp
     formatstring.cpp
+    genpath.cpp
     heap.cpp
     hostmode.cpp
     hxstr.cpp

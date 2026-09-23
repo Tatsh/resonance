@@ -6,6 +6,8 @@
 #include "rnd/animatable.h"
 #include "rnd/filepath.h"
 #include "rnd/manager.h"
+#include "rnd/moviestream.h"
+#include "rndartt/apalette.h"
 
 class FailSink;
 namespace Rnd {
@@ -37,23 +39,9 @@ namespace Rnd {
  * the second table's terminator as a slot would have run it into the literal pool that follows it,
  * where the bytes decode as further plausible-looking entries.
  *
- * A movie owns one stream reader, a separately allocated object of 0x380 bytes whose constructor is
- * at `0x0057f7b8`, whose destructor is at `0x00580858`, whose per-frame pump is at `0x0057fac8`,
- * and whose advance hook is at `0x005808d0`. The class of that object has no recoverable title.
- * It emits no RTTI descriptor, it is allocated through the untagged MemAllocScalar() rather than
- * under a tag, its own error text is generic ("Out of memory", "Can't open file", "Read error"),
- * and the image holds no embedded source path for it. Its member is therefore absent from the
- * declarations below rather than declared under an invented type. The two companion descriptors
- * `MovieAsyncCallback` at `0x009022c0` and `MovieStreamingAsyncCallback` at `0x008ef680` belong to
- * the same cluster and are the likeliest route to a title.
- *
- * Four further members sit between mFilename and mTrackTextures and are recovered by behaviour
- * only. The stream reader occupies `+0x20`, owned outright and deleted by CloseMovieFile(). `+0x24`
- * becomes 1 when the file opened without error. `+0x28` is cleared on a successful open. `+0x2c`
- * receives ZoneGetCurrent() at the moment of the open and starts at -1. A 0x408-byte region follows
- * mTrackTextures, at `+0x34` through `+0x43b`, which the constructor clears with one memset() and
- * never otherwise touches. The unreferenced literal "movieStreamBuff" at `0x0081c9b0` is a
- * candidate title for it and nothing ties the two together, so the region stays undeclared as well.
+ * A movie plays its file through one Rnd::MovieStream, which it owns and deletes in
+ * CloseMovieFile(). Each track of the file is attached to the texture mTrackTextures names for
+ * it, and the stream passes that track's video chunks to OnChunk() as SetFrameSelf() advances it.
  */
 class Movie : public Animatable {
 public:
@@ -252,14 +240,70 @@ public:
     void CloseMovieFile();
 
     /**
-     * Drive the stream reader forward by one step.
+     * Route one track's chunks to this movie.
      *
-     * Does nothing when no file is open. The reader's advance hook at `0x005808d0` receives the
-     * callback at `0x005d2530`, which Ghidra has not claimed as a routine.
+     * Installs ChunkHandler() with this movie as its data. Does nothing when no file is open.
      *
+     * @param nTrackId The track.
      * @ghidraAddress 0x005d24d8
      */
-    void UpdateSubObject(Stream &stream);
+    void AttachTrack(int nTrackId);
+
+    /**
+     * Stop routing one track's chunks anywhere. Does nothing when no file is open.
+     *
+     * @param nTrackId The track.
+     * @ghidraAddress 0x005d2508
+     */
+    void DetachTrack(int nTrackId);
+
+    /**
+     * Play a track into a texture, replacing any texture the track played into before.
+     *
+     * The texture takes a reference from this movie and is appended to mTrackTextures. With a file
+     * open, a texture whose size or depth differs from the track's frame is logged and reconfigured
+     * as an 8 bit bitmap of the frame's size. The track is then attached. A null texture only
+     * removes the track. The routine has no caller in the shipped build, and its name is inferred.
+     *
+     * @param nTrackId The track.
+     * @param pTex The texture, or null.
+     * @ghidraAddress 0x005cf1f8
+     */
+    void SetTrackTexture(int nTrackId, Tex *pTex);
+
+    /**
+     * Drop the first entry of mTrackTextures that plays nTrackId, releasing its texture, and detach
+     * the track. The name is inferred.
+     *
+     * @param nTrackId The track.
+     * @ghidraAddress 0x005cf3f8
+     */
+    void RemoveTrackTexture(int nTrackId);
+
+    /**
+     * Draw one video chunk into the texture its track plays into.
+     *
+     * A palette chunk is copied into mPalette and handed to the texture. A frame chunk's bitmap
+     * takes mPalette and is copied onto the locked mip 0 at the chunk's position. A blank chunk
+     * fills mip 0 with its colour. A track with no texture is ignored. The name is inferred.
+     *
+     * @param pHeader The chunk.
+     * @param pPayload The chunk's payload.
+     * @ghidraAddress 0x005cf4c0
+     */
+    void OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload);
+
+    /**
+     * The MovieStream handler AttachTrack() installs, which passes the chunk to pData's OnChunk().
+     *
+     * The routine was an orphan in the analysis, and its name is inferred.
+     *
+     * @param pHeader The chunk.
+     * @param pPayload The chunk's payload.
+     * @param pData The movie.
+     * @ghidraAddress 0x005d2530
+     */
+    static void ChunkHandler(MovieStream::ChunkHeader *pHeader, void *pPayload, void *pData);
 
     /**
      * Read a track texture list from stream.
@@ -284,12 +328,28 @@ public:
      */
     FilePath mFilename;
 
+private:
+    MovieStream *mStream; // +0x20 The open file, or null.
+    // +0x24 Set by a successful open. The next SetFrameSelf() starts the stream's loop ticks at
+    // the current tick and clears it.
+    int mStartPending;
+    // +0x28 Set once SetFrameSelf() has matched every track texture to its frame, and cleared by a
+    // successful open.
+    int mTexturesMatched;
+    int mZone; // +0x2c The zone current when the file was opened, -1 before.
+
+public:
     /**
      * Textures the file's tracks play into. Public because ReadTrackTextures() receives its
      * address from Load() and fills it from outside the class, and the image exposes no accessor.
      * +0x30
      */
     std::list<TrackTexture> mTrackTextures;
+
+private:
+    // +0x34 Palette the PALL chunks fill and every frame chunk's bitmap draws through. The
+    // constructor also clears it with memset() after constructing it.
+    APalette mPalette;
 };
 
 /**
