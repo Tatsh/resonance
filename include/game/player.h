@@ -347,6 +347,19 @@ public:
     }
 
     /**
+     * Delete a player through its virtual destructor, doing nothing for null.
+     *
+     * Inline. GrooveWorld::DeletePlayers() passes it to `std::for_each`, which is what gives it
+     * the out-of-line copy at this address. The title is inferred.
+     *
+     * @param pPlayer The player to delete, or null.
+     * @ghidraAddress 0x00132d38
+     */
+    static void Delete(Player *pPlayer) {
+        delete pPlayer;
+    }
+
+    /**
      * Copy the player's colour name.
      *
      * Inline. The address is its uncalled out-of-line copy. The title is inferred.
