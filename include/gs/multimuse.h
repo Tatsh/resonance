@@ -99,6 +99,32 @@ public:
     void PrintFields(std::ostream &stream);
 
     /**
+     * Schedule a copy of a message at a song position.
+     *
+     * The sequence stores the message's Clone() rather than the message itself. Both insertion
+     * paths keep the entries sorted by position; a non-zero bCheckLast first compares against the
+     * last entry and appends when the new position does not precede it, and zero always searches.
+     * The body is not written, because neither insertion routine is written yet.
+     *
+     * @param pMsg The message to copy.
+     * @param nTick The song position, in MIDI ticks.
+     * @param bCheckLast Whether to try appending before searching.
+     * @ghidraAddress 0x001a9650
+     */
+    void Add(MuseMsg *pMsg, int nTick, int bCheckLast);
+
+    /**
+     * Find the message scheduled at exactly a song position.
+     *
+     * The body is not written, because the search routine it calls is not written yet.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @return The stored message, or null when no entry sits at nTick.
+     * @ghidraAddress 0x001a96c8
+     */
+    MuseMsg *Find(int nTick);
+
+    /**
      * Every message of the sequence, in ascending song position.
      *
      * Public because MultiMusePlayer::Start() reads the start and the finish directly, through a

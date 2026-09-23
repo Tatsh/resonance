@@ -238,13 +238,35 @@ public:
      */
     virtual int Slot18();
 
+    /**
+     * Report the index of the step at or before a position that has already been mapped.
+     *
+     * Slot12() performs the same search on the result of Slot5(). This routine receives the
+     * mapped position directly. PhraseDatabase::GetStepValue() is the recovered caller.
+     *
+     * @param nPosition The mapped position.
+     * @return The index of the last step at or before nPosition, or -1 when every step follows it.
+     * @ghidraAddress 0x00127490
+     */
+    int FindStepIndex(int nPosition);
+
 protected:
     // Declared in recovered offset order. Written by Slot3 and read nowhere yet recovered.
     int mUnknown00; // +0x00
-    // Slots 8, 10, 12, and 13 read the last element, the count, and an upper bound over this one,
-    // and slot 2 appends to it, so it stores an ascending sequence of positions. The element type
-    // is int, from the four-byte stride of every access.
-    std::vector<int> mSteps;       // +0x04
+
+public:
+    /**
+     * Ascending sequence of positions.
+     *
+     * Slots 8, 10, 12, and 13 read the last element, the count, and an upper bound over this
+     * vector, and slot 2 appends to it. The element type is int, from the four-byte stride of every
+     * access. Public because the PhraseDatabase constructor at `0x001b72d8` reads its last element
+     * and its count directly and the image exposes no accessor. A friend declaration fits the image
+     * equally well. +0x04
+     */
+    std::vector<int> mSteps;
+
+protected:
     std::vector<int> mUnknown10;   // +0x10
     std::vector<HxStr> mUnknown1c; // +0x1c
     int mUnknown28;                // +0x28

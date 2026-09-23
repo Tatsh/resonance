@@ -19,6 +19,8 @@ set(RESONANCE_GAME_SRCS
     multicatcher.cpp
     netplayer.cpp
     nullplayer.cpp
+    phrase.cpp
+    phrasedatabase.cpp
     pitchingstg.cpp
     player.cpp
     playerinfo.cpp

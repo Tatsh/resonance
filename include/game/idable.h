@@ -23,8 +23,7 @@
  *
  * Modelling the table as a static member of the template rather than as a file-scope global is an
  * inference from the one-per-instantiation shape. Four Player destructors and eight unrelated
- * readers index the same vector, and a protected static member and a global fit both equally
- * well.
+ * readers index the same vector, and a public static member and a global fit both equally well.
  */
 template <typename T>
 class IDable : public IDableBase {
@@ -38,9 +37,13 @@ public:
      */
     virtual ~IDable();
 
-protected:
-    // Indexed by mId. A cleared slot is a null pointer rather than a removed element, so the
-    // vector never shrinks.
+    /**
+     * Every registered object, indexed by mId.
+     *
+     * A cleared slot is a null pointer rather than a removed element, and the vector never shrinks.
+     * Public because readers outside the hierarchy index it directly, among them Phrase::Load() at
+     * `0x001b540c`, and the image exposes no accessor.
+     */
     static std::vector<T *> sObjects;
 };
 

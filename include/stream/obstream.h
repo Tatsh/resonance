@@ -86,3 +86,17 @@ public:
  * @ghidraAddress 0x004edc80
  */
 OBStream &operator<<(OBStream &stream, int bValue);
+
+/**
+ * Write a 64-bit integer as its low four bytes.
+ *
+ * The routine truncates the register to 32 bits with a sign extension and moves four bytes through
+ * Write(). A second emission at `0x004edcf8` is byte-identical, and PhraseDatabase::Save() calls
+ * that copy. The body is not written.
+ *
+ * @param stream The stream to write to.
+ * @param nValue The value, of which only the low four bytes reach the stream.
+ * @return The stream.
+ * @ghidraAddress 0x004edcb8
+ */
+OBStream &operator<<(OBStream &stream, long nValue);

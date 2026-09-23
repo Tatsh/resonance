@@ -69,6 +69,12 @@ int PlayMap::Slot12(int nValue) {
     return static_cast<int>(it - mSteps.begin()) - 1;
 }
 
+// 0x00127490
+int PlayMap::FindStepIndex(int nPosition) {
+    const std::vector<int>::iterator it = std::upper_bound(mSteps.begin(), mSteps.end(), nPosition);
+    return static_cast<int>(it - mSteps.begin()) - 1;
+}
+
 // 0x00127700
 int PlayMap::Slot13(int nValue) {
     const std::vector<int>::iterator it =

@@ -9,20 +9,6 @@
 #include "msg/bumppacket.h"
 #include "msg/message.h"
 
-/**
- * Stand-in every unoccupied grid slot stores.
- *
- * The object is at `0x0066f930` and the Player translation unit's static initialiser at
- * `0x00132618` builds it, alongside the `IDable<Player>` table at `0x0066f920`. Its 27 readers
- * across the image include this class, Catcher, PhraseMgr, PitchPicker, and AxeNewGemMaker, none
- * of which is in the unit that builds it.
- *
- * The declaration belongs with NullPlayer rather than here. It sits in this header because
- * `game/nullplayer.h` declares no instance and that header is outside the assignment this class
- * was recovered under.
- */
-extern NullPlayer g_nullPlayer;
-
 /** Channels the selector tracks. The constructor writes this count into the object. */
 constexpr int kTrackSelectorChannelCount = 8;
 

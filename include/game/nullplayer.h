@@ -40,3 +40,13 @@ public:
     /** @ghidraAddress 0x00133528 */
     virtual void HandleMessage(Message *message);
 };
+
+/**
+ * Stand-in every unoccupied player reference stores.
+ *
+ * The object is at `0x0066f930` and the Player translation unit's static initialiser at
+ * `0x00132618` builds it, alongside the `IDable<Player>` table at `0x0066f920`. Its 27 readers
+ * across the image include TrackSelector, Catcher, PhraseMgr, PitchPicker, Phrase, and
+ * AxeNewGemMaker, none of which is in the unit that builds it.
+ */
+extern NullPlayer g_nullPlayer;
