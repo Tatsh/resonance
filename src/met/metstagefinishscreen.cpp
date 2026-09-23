@@ -260,18 +260,23 @@ void MetStageFinishScreen::HandleCommand(const MetScreenCommand *pCommand) {
     MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
 }
 
+// 0x003c4228
 void MetStageFinishScreen::PlayLeaveSound(int) {
 }
 
+// 0x003c4230
 void MetStageFinishScreen::PlayHighSound(int) {
 }
 
+// 0x003c4238
 void MetStageFinishScreen::PlayCycleLeftSound(int) {
 }
 
+// 0x003c4240
 void MetStageFinishScreen::PlayCycleRightSound(int) {
 }
 
+// 0x003c4248
 void MetStageFinishScreen::PlayErrorSound(int) {
 }
 
@@ -296,10 +301,12 @@ void MetStageFinishScreen::OnUnknownSlot26(float flTime) {
     }
 }
 
+// 0x003c4390
 void MetStageFinishScreen::OnUnknownSlot30(Rnd::Button *) {
     BeginExit();
 }
 
+// 0x003c42d8
 void MetStageFinishScreen::OnUnknownSlot33() {
     mUnknowna4->SetSelected(kNoButton);
     mUnknownb0 = mUnknown10->mUnknown68;
@@ -355,6 +362,7 @@ void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComp
     }
 }
 
+// 0x003c0008
 void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     mUnknownb4 = 0;
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
@@ -412,6 +420,7 @@ void MetStageFinishScreen::ShowMessages() {
     MetScreen::EnterAndShow();
 }
 
+// 0x003c0530
 void MetStageFinishScreen::OnUnknownSlot36() {
     mUnknowna8 = 0;
     MetSoloWinScreen::SetDifficultyUnlocked(mUnknownb4);
@@ -434,6 +443,7 @@ void MetStageFinishScreen::AddStageScoreBeatMessage(int nWasBeaten, int nIsBeate
     mUnknown8c.push_back(message);
 }
 
+// 0x003c02c0
 void MetStageFinishScreen::AddSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
@@ -443,6 +453,7 @@ void MetStageFinishScreen::AddSecretUnlockMessage(int nWasUnlocked, int nIsUnloc
     mUnknown8c.push_back(message);
 }
 
+// 0x003c0390
 void MetStageFinishScreen::AddSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
@@ -452,6 +463,7 @@ void MetStageFinishScreen::AddSuperSecretUnlockMessage(int nWasUnlocked, int nIs
     mUnknown8c.push_back(message);
 }
 
+// 0x003c0460
 void MetStageFinishScreen::AddEndSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;

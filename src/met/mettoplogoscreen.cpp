@@ -25,23 +25,28 @@ inline Rnd::View *FindView(const HxStr &name) {
 
 } // namespace
 
+// 0x003c46f8
 MetTopLogoScreen::MetTopLogoScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
     mUnknown60 = 0;
 }
 
+// 0x003c7710
 MetTopLogoScreen *MetTopLogoScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetTopLogoScreen(pRenderer, nPriority);
 }
 
+// 0x003c7798
 MetTopLogoScreen::~MetTopLogoScreen() {
 }
 
+// 0x003c77f0
 void MetTopLogoScreen::OnUnknownSlot26(float flTime) {
     mUnknown8c->SetFrame(flTime);
 }
 
+// 0x003c4868
 void MetTopLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mUnknown14 = FindView(HxStr(kPanelView));

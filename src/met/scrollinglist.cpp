@@ -31,6 +31,7 @@ constexpr int kRowAxis = 2;
 
 } // namespace
 
+// 0x003fcb00
 ScrollingList::ScrollingList(ListDataProvider *pProvider,
                              int nRowPitch,
                              int nRowCount,
@@ -77,6 +78,7 @@ ScrollingList::ScrollingList(ListDataProvider *pProvider,
     ZoneSetCurrent(nZone);
 }
 
+// 0x003fd380
 ScrollingList::~ScrollingList() {
     HxStr templateName(mTemplate->mName);
     mCursorRow = 0;
@@ -124,6 +126,7 @@ void ScrollingList::buildRowCells(Rnd::View *pRow) {
     mRowCells.push_back(cells);
 }
 
+// 0x003fdd18
 void ScrollingList::refresh() {
     int nItem = mSelected - mCursorRow > -1 ? mSelected - mCursorRow : 0;
     int nRow = 0;
@@ -149,6 +152,7 @@ void ScrollingList::refresh() {
     updateArrows();
 }
 
+// 0x00400ec8
 void ScrollingList::scrollUp() {
     if (mItemCount == 0) {
         if (mHighlight != nullptr) {
@@ -169,6 +173,7 @@ void ScrollingList::scrollUp() {
     refresh();
 }
 
+// 0x00400f78
 void ScrollingList::scrollDown() {
     // Unlike scrollUp(), the highlight is neither tested for null nor masked with mShowing.
     if (mItemCount == 0) {
@@ -197,6 +202,7 @@ void ScrollingList::updateHighlight() {
     mHighlight->mDirty = 1;
 }
 
+// 0x00401088
 void ScrollingList::setItemCount(int nItemCount) {
     mItemCount = nItemCount;
     if (nItemCount <= 0) {
@@ -214,10 +220,12 @@ void ScrollingList::setItemCount(int nItemCount) {
     updateHighlight();
 }
 
+// 0x00401160
 int ScrollingList::getSelected() {
     return mSelected;
 }
 
+// 0x00401168
 void ScrollingList::setSelected(int nSelected) {
     if (mItemCount == 0) {
         mSelected = 0;
@@ -243,6 +251,7 @@ void ScrollingList::updateArrows() {
     }
 }
 
+// 0x00401300
 void ScrollingList::setShowing(int nShowing) {
     mShowing = nShowing;
     if (mHighlight == nullptr) {
@@ -251,6 +260,7 @@ void ScrollingList::setShowing(int nShowing) {
     mHighlight->SetShowing(mItemCount == 0 ? 0 : nShowing & 1);
 }
 
+// 0x00401360
 void ScrollingList::setEntriesShowing(int nShowing) {
     for (std::vector<Rnd::Drawable *>::iterator it = mTextCells.begin(); it != mTextCells.end();
          ++it) {

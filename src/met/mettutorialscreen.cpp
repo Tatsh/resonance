@@ -80,6 +80,7 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
+// 0x003c7a88
 MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mUnknown8c(nullptr) {
@@ -88,14 +89,17 @@ MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     mUnknown38.push_back(HxStr(kSecondPrompt));
 }
 
+// 0x003cc1a8
 MetTutorialScreen *MetTutorialScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetTutorialScreen(pRenderer, nPriority);
 }
 
+// 0x003cc230
 MetTutorialScreen::~MetTutorialScreen() {
     delete mUnknown8c;
 }
 
+// 0x003c82a0
 void MetTutorialScreen::EnterAndShow() {
     if (MetFrontEndState::shared()->mUnknown18 != 0) {
         MetFrontEndState::shared()->mUnknown24 = HxStr(kNoName);
@@ -118,6 +122,7 @@ void MetTutorialScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
+// 0x003c7d78
 void MetTutorialScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -135,6 +140,7 @@ void MetTutorialScreen::ResolveContainerViews() {
     }
 }
 
+// 0x003c7f10
 void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -170,12 +176,15 @@ void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
+// 0x003cc198
 void MetTutorialScreen::PlayCycleLeftSound(int) {
 }
 
+// 0x003cc1a0
 void MetTutorialScreen::PlayCycleRightSound(int) {
 }
 
+// 0x003c84d8
 void MetTutorialScreen::OnUnknownSlot30(Rnd::Button *) {
     mUnknown18 = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -184,6 +193,7 @@ void MetTutorialScreen::OnUnknownSlot30(Rnd::Button *) {
     BeginExit();
 }
 
+// 0x003c8678
 void MetTutorialScreen::OnUnknownSlot36() {
     if (mUnknown18 == kExitBack) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
