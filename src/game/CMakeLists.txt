@@ -2,6 +2,8 @@ set(RESONANCE_GAME_SRCS
     autocatchpowerup.cpp
     autoriffer.cpp
     axefx.cpp
+    axenewgemmaker.cpp
+    axeoldgemmaker.cpp
     axephrasemaker.cpp
     axingstg.cpp
     axiscontrol.cpp
