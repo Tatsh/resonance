@@ -4,6 +4,7 @@
 
 #include "gfx/gfxdevice.h"
 #include "gfx/vramtable.h"
+#include "os/failsink.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "os/zone.h"
@@ -74,7 +75,6 @@ constexpr int kClut16Height = 2;
 constexpr int kClut256Width = 16;
 constexpr int kClut256Height = 16;
 constexpr int kClutBitsPerEntry = 32;
-constexpr int kGsPsmCt32 = 0;
 
 // A 256-entry CLUT moves in 32 groups of eight entries.
 constexpr int kClutGroupCount = 32;
@@ -95,7 +95,153 @@ enum MipTbpLevel {
     kMipTbpLevel6 = 6
 };
 
+// TEX0 fields RestoreSurfaces() assembles. TBP0 and CBP are left for the upload paths, and TFX for
+// BindToGsSlot().
+constexpr int kTex0TwShift = 26;
+constexpr int kTex0ThShift = 30;
+constexpr int kTex0TccShift = 34;
+constexpr unsigned long long kFourBitField = 0xf;
+constexpr unsigned long long kTex0TccBit = 1ULL << kTex0TccShift;
+constexpr unsigned long long kTex0CpsmCsmCsaMask = 0x3ffULL << 51;
+constexpr int kTex0CldShift = 61;
+constexpr unsigned long long kTex0CldMask = 7ULL << kTex0CldShift;
+constexpr unsigned long long kTex0CldLoadAlways = 1ULL << kTex0CldShift;
+
+// TEX1 fields RestoreSurfaces() assembles, and the filters it chooses.
+constexpr unsigned long long kTex1Lcm = 1;
+constexpr int kTex1MxlShift = 2;
+constexpr unsigned long long kTex1MxlMask = 7ULL << kTex1MxlShift;
+constexpr unsigned long long kTex1MmagLinear = 1ULL << 5;
+constexpr int kTex1MminShift = 6;
+constexpr unsigned long long kTex1MminMask = 7ULL << kTex1MminShift;
+constexpr unsigned long long kTex1MminLinear = 1;
+constexpr unsigned long long kTex1MminLinearMipmapNearest = 4;
+constexpr unsigned long long kTex1Mtba = 1ULL << 9;
+constexpr unsigned long long kTex1LMask = 3ULL << 19;
+constexpr int kTex1KShift = 32;
+constexpr unsigned long long kTex1KMask = 0xfff;
+
+// Where each MIPTBP register keeps the buffer width of its three levels.
+constexpr int kMipTbpFirstTbwShift = 14;
+constexpr int kMipTbpSecondTbwShift = 34;
+constexpr int kMipTbpThirdTbwShift = 54;
+
+// Texels one TBW unit covers, and the rounding the four-bit and eight-bit formats need, whose
+// buffer width has to be even.
+constexpr int kTexelsPerTbwUnit = 64;
+constexpr int kEvenTbwMask = 0xfffe;
+
+// Mip levels smaller than this on their larger side share the page of the level before them.
+constexpr short kPackedMipMaxSide = 32;
+
+// Dimensions below this are rejected, as is any that is not a power of two.
+constexpr int kMinMipSide = 8;
+
+// The sentinel mFirstPackedMip stores while no level shares a page.
+constexpr int kNoPackedMip = 9999;
+
+// The eight-bit formats, which are the only ones whose small levels are packed.
+constexpr int kPackedMipBitsPerPixel = 8;
+
+// Bit of Rnd::Tex::mUnknown28 under which the size check divides the width by three and the height
+// by two. What the bit stands for is unrecovered.
+constexpr int kTexSplitSizeCheck = 0x40;
+constexpr int kSplitSizeColumns = 3;
+constexpr int kSplitSizeRows = 2;
+
+// The alpha byte of an 8888 colour, and how far it sits up the word.
+constexpr int kAlphaShift = 24;
+constexpr unsigned int kColorWithoutAlpha = 0x00ffffff;
+
+// Map 0 to 255 source alpha onto the GS range of 0 to 128, rounding up. OnMipLoaded() open-codes
+// the same expression in both of its loops.
+inline unsigned int HalveAlpha(unsigned int nColor) {
+    const unsigned int nAlpha = ((nColor >> kAlphaShift) + 1) >> 1;
+    return (nColor & kColorWithoutAlpha) | (nAlpha << kAlphaShift);
+}
+
+// Report whether a dimension is a power of two of at least kMinMipSide.
+inline bool IsValidMipSide(int nSide) {
+    if (nSide < kMinMipSide) {
+        return false;
+    }
+    while ((nSide & 1) == 0) {
+        nSide >>= 1;
+    }
+    return nSide == 1;
+}
+
+// The exponent of the smallest power of two not below a dimension, which is what TEX0 TW and TH
+// take.
+inline int SideExponent(int nSide) {
+    int nExponent = 0;
+    for (int nPower = 1; nPower < nSide; nPower <<= 1) {
+        ++nExponent;
+    }
+    return nExponent;
+}
+
+// The TBW of a bitmap, its width in 64-texel units, made even for the formats that need it.
+inline int BufferWidthUnits(const ABitmap &bitmap) {
+    int nUnits = (bitmap.mWidth + kTexelsPerTbwUnit - 1) / kTexelsPerTbwUnit;
+    if (bitmap.mFormat == kABitmapFormatLinear4 || bitmap.mFormat == kABitmapFormatLinear8 ||
+        bitmap.mFormat == kABitmapFormatRle8) {
+        nUnits = (nUnits + 1) & kEvenTbwMask;
+    }
+    return nUnits;
+}
+
+// 0x0059a908
+// Compare the palette of one level against that of level 0 entry by entry.
+inline bool
+CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *pszName, int nMip) {
+    if (pPalMip0 == nullptr) {
+        if (pPalMip != nullptr) {
+            LogPrintf("CheckPalEqual(%s): Mipmap 0 has NULL palette!\n", pszName);
+            return false;
+        }
+        return true;
+    }
+    if (pPalMip == nullptr) {
+        LogPrintf("CheckPalEqual(%s): mipmap %d has NULL palette!\n", pszName, nMip);
+        return false;
+    }
+    if (pPalMip0->mEnd != pPalMip->mEnd) {
+        LogPrintf("CheckPalEqual(%s): Mipmap 0 pal is %d entries, mipmap %d is %d entries\n",
+                  pszName,
+                  pPalMip0->mEnd,
+                  nMip,
+                  pPalMip->mEnd);
+        return false;
+    }
+    for (int nEntry = 0; nEntry < pPalMip0->mEnd; ++nEntry) {
+        if (pPalMip0->mEntries[nEntry] != pPalMip->mEntries[nEntry]) {
+            LogPrintf("CheckPalEqual(%s): mipmap 0 and %d unequal starting at index: %d\n",
+                      pszName,
+                      nMip,
+                      nEntry);
+            return false;
+        }
+    }
+    return true;
+}
+
+// 0x0059a9e8
+// Blank a level that failed validation, leaving a run-length level untouched.
+inline void ClearBitmapPixels(ABitmap *pBitmap) {
+    if (pBitmap->mFormat == kABitmapFormatRle8) {
+        return;
+    }
+    if (pBitmap->mPalette != nullptr) {
+        pBitmap->mPalette->SetEntries(&g_dwDefaultClutEntry, 0, 1);
+    }
+    memset(pBitmap->mPixels, 0, pBitmap->mByteCount);
+}
+
 } // namespace
+
+// 0x0076f360
+const unsigned int g_dwDefaultClutEntry = 0xff8080ff;
 
 // 0x0076f368
 const int g_anClutSwizzleBlocks[4] = {0, 2, 1, 3};
@@ -140,6 +286,168 @@ void PsTex::OnMipLoaded(int nMip) {
             pTexel[nColumn] = HalveAlpha(pTexel[nColumn]);
         }
     }
+}
+
+// 0x00597210
+void PsTex::RestoreSurfaces() {
+    if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
+        Tex::RestoreSurfaces();
+        return;
+    }
+    if (mLoadedBitmaps[0]->mPalette != nullptr) {
+        mDirtyMips |= kDirtyClut;
+        RebuildClut();
+        AllocPaletteVram();
+    }
+
+    mGsMips.resize(mLoadedBitmaps.size());
+
+    const int nMips = static_cast<int>(mLoadedBitmaps.size());
+    const ABitmap *pBase = mLoadedBitmaps[0];
+    mBitsPerPixel = g_anBitsPerPixelTable[pBase->mFormat];
+    mGsPsm = g_anGsPixelStorageModes[pBase->mFormat];
+    mFirstPackedMip = kNoPackedMip;
+    if (mBitsPerPixel == kPackedMipBitsPerPixel) {
+        for (unsigned nMip = 1; nMip < mLoadedBitmaps.size(); ++nMip) {
+            const ABitmap *pBitmap = mLoadedBitmaps[nMip];
+            if (pBitmap == nullptr) {
+                continue;
+            }
+            const short nLargerSide =
+                pBitmap->mHeight < pBitmap->mWidth ? pBitmap->mWidth : pBitmap->mHeight;
+            if (nLargerSide <= kPackedMipMaxSide) {
+                mFirstPackedMip = static_cast<int>(nMip);
+                break;
+            }
+        }
+    }
+
+    // The binary computes the unrounded TBW first and rounds it in place.
+    mTex0 = (mTex0 & ~(kSixBitField << kTex0TbwShift)) |
+            ((static_cast<unsigned long long>(BufferWidthUnits(*pBase)) & kSixBitField)
+             << kTex0TbwShift);
+    mTex0 =
+        (mTex0 & ~(kSixBitField << kTex0PsmShift)) |
+        ((static_cast<unsigned long long>(g_anGsPixelStorageModes[pBase->mFormat]) & kSixBitField)
+         << kTex0PsmShift);
+    mTex0 = (mTex0 & ~(kFourBitField << kTex0TwShift)) |
+            ((static_cast<unsigned long long>(SideExponent(pBase->mWidth)) & kFourBitField)
+             << kTex0TwShift);
+    mTex0 = (mTex0 & ~(kFourBitField << kTex0ThShift)) |
+            ((static_cast<unsigned long long>(SideExponent(pBase->mHeight)) & kFourBitField)
+             << kTex0ThShift);
+
+    unsigned long long qwTex1 = mTex1 & ~kTex1Lcm & ~kTex1MxlMask;
+    qwTex1 |= (static_cast<unsigned long long>(nMips - 1) << kTex1MxlShift) & kTex1MxlMask;
+    qwTex1 |= kTex1MmagLinear;
+    qwTex1 &= ~kTex1MminMask;
+    qwTex1 |= (nMips < 2 ? kTex1MminLinear : kTex1MminLinearMipmapNearest) << kTex1MminShift;
+    qwTex1 &= ~kTex1Mtba & ~kTex1LMask;
+    qwTex1 = (qwTex1 & ~(kTex1KMask << kTex1KShift)) |
+             ((static_cast<unsigned long long>(mMipSelect) & kTex1KMask) << kTex1KShift);
+
+    // A 24-bit format has no alpha to use, and CLD 1 reloads the CLUT on every TEX0 write.
+    unsigned long long qwTex0 = mTex0 & ~kTex0TccBit;
+    if (pBase->mFormat != kABitmapFormatLinear24) {
+        qwTex0 |= kTex0TccBit;
+    }
+    qwTex0 &= ~(kTex0TfxMask << kTex0TfxShift) & ~kTex0CpsmCsmCsaMask & ~kTex0CldMask;
+    mTex0 = qwTex0 | kTex0CldLoadAlways;
+    mTex1 = qwTex1;
+
+    const char *pszName = mName.mStr != nullptr ? mName.mStr : g_szEmptyString;
+    for (int nMip = 0; nMip < nMips; ++nMip) {
+        GsMip &mip = mGsMips[nMip];
+        mip.mVramBitmap = nullptr;
+        mip.mPage = nullptr;
+
+        ABitmap *pBitmap = mLoadedBitmaps[nMip];
+        if (pBitmap == nullptr) {
+            LogPrintf("ERROR - RestoreSurfaces(%s), mipmap %d has no bm!\n", pszName, nMip);
+            continue;
+        }
+
+        int nCheckWidth = pBitmap->mWidth;
+        int nCheckHeight = pBitmap->mHeight;
+        if ((mUnknown28 & kTexSplitSizeCheck) != 0) {
+            nCheckWidth /= kSplitSizeColumns;
+            nCheckHeight /= kSplitSizeRows;
+        }
+        bool bValid = true;
+        if (!IsValidMipSide(nCheckWidth) || !IsValidMipSide(nCheckHeight)) {
+            const char *pszWhy = "not power-of-2";
+            if (pBitmap->mWidth < kMinMipSide || pBitmap->mHeight < kMinMipSide) {
+                pszWhy = "less than 8";
+            }
+            g_failSink.Report("bad: %s (mipmap %d) dimensions are %s (%d x %d)\n",
+                              pszName,
+                              nMip,
+                              pszWhy,
+                              pBitmap->mWidth,
+                              pBitmap->mHeight);
+            ClearBitmapPixels(pBitmap);
+            bValid = false;
+        }
+
+        const char *pszPath = mBitmapPath.mStr != nullptr ? mBitmapPath.mStr : g_szEmptyString;
+        if (nMip != 0 && bValid && mLoadedBitmaps[0]->mFormat != pBitmap->mFormat) {
+            g_failSink.Report(
+                "%s (file: %s, mipmap %d) doesn't have same bitmap format as original\n",
+                pszName,
+                pszPath,
+                nMip);
+            ClearBitmapPixels(pBitmap);
+            bValid = false;
+        }
+        if (nMip != 0 && bValid &&
+            !CheckPalEqual(mLoadedBitmaps[0]->mPalette, pBitmap->mPalette, pszName, nMip)) {
+            g_failSink.Report("%s (file: %s, mipmap %d) doesn't have same pal as original\n",
+                              pszName,
+                              pszPath,
+                              nMip);
+            ClearBitmapPixels(pBitmap);
+        }
+
+        const unsigned long long qwTbw =
+            static_cast<unsigned long long>(BufferWidthUnits(*pBitmap)) & kSixBitField;
+        switch (nMip) {
+        case kMipTbpLevel1:
+            mMipTbp1 = (mMipTbp1 & ~(kSixBitField << kMipTbpFirstTbwShift)) |
+                       (qwTbw << kMipTbpFirstTbwShift);
+            break;
+        case kMipTbpLevel2:
+            mMipTbp1 = (mMipTbp1 & ~(kSixBitField << kMipTbpSecondTbwShift)) |
+                       (qwTbw << kMipTbpSecondTbwShift);
+            break;
+        case kMipTbpLevel3:
+            mMipTbp1 = (mMipTbp1 & ~(kSixBitField << kMipTbpThirdTbwShift)) |
+                       (qwTbw << kMipTbpThirdTbwShift);
+            break;
+        case kMipTbpLevel4:
+            mMipTbp2 = (mMipTbp2 & ~(kSixBitField << kMipTbpFirstTbwShift)) |
+                       (qwTbw << kMipTbpFirstTbwShift);
+            break;
+        case kMipTbpLevel5:
+            mMipTbp2 = (mMipTbp2 & ~(kSixBitField << kMipTbpSecondTbwShift)) |
+                       (qwTbw << kMipTbpSecondTbwShift);
+            break;
+        case kMipTbpLevel6:
+            mMipTbp2 = (mMipTbp2 & ~(kSixBitField << kMipTbpThirdTbwShift)) |
+                       (qwTbw << kMipTbpThirdTbwShift);
+            break;
+        default:
+            break;
+        }
+
+        mDirtyMips |= 1u << nMip;
+        mip.mVramBitmap = ACanvas::CreateForBitmap(*pBitmap, false);
+        mip.mVramBitmap->mBitmap.mPixels = pBitmap->mPixels;
+        mip.mVramBitmap->mBitmap.mPalette = pBitmap->mPalette;
+        mip.mPage = g_vramTable.AllocEntry();
+        mip.mPage->SetupSurface(
+            pBitmap->mWidth, pBitmap->mHeight, mBitsPerPixel, mGsPsm, kVramBlockKindTexture);
+    }
+    Tex::RestoreSurfaces();
 }
 
 // 0x00597130
@@ -440,6 +748,12 @@ void PsTex::FreeLoadedBitmaps() {
 void PsTex::SetGsPageInUse(bool bInUse) {
     WaitForMipsLoaded();
     mGsMips[0].mPage->SetPinned(bInUse);
+}
+
+// 0x0059a770
+Tex *NewPsTex(const HxStr &name) {
+    // The binary bills the 0x4b0-byte allocation to the tag "Rnd::Tex".
+    return new PsTex(name);
 }
 
 // 0x0059a888

@@ -5,6 +5,14 @@
 
 #include "gfx/gfxdevice.h"
 #include "os/log.h"
+#include "rndartt/abitmap.h"
+
+// 0x0070d3d0
+const int g_anGsPixelStorageModes[kABitmapFormatCount] = {
+    kGsPsmT4, kGsPsmT8, kGsPsmCt16, kGsPsmCt24, kGsPsmCt32, kGsPsmT8};
+
+// 0x0070d3e8
+const int g_anBitsPerPixelTable[kABitmapFormatCount] = {4, 8, 16, 24, 32, 8};
 
 // 0x005149f0
 VramTable::~VramTable() {

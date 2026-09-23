@@ -38,8 +38,9 @@ namespace Rnd {
  * and the buffer width of levels 1 through 6. BindToGsSlot() programs all four through
  * GfxDevice::SetGsReg().
  *
- * Small levels share a GS page. RestoreSurfaces() records in mFirstPackedMip the first level whose
- * larger side is 32 pixels or less, and UploadMipAndBuildMipTbp() places every level from there on
+ * Small levels of an eight-bit texture share a GS page. RestoreSurfaces() records in
+ * mFirstPackedMip the first level whose larger side is 32 pixels or less, and
+ * UploadMipAndBuildMipTbp() places every level from there on
  * inside the page of the level before it at the offsets in g_anPackedMipPageOffsets. Levels below
  * that point each have a page.
  *
@@ -136,11 +137,13 @@ public:
      * Rebuild the GS state of the whole texture from the loaded bitmaps.
      *
      * Vtable slot 14. Falls back to the Rnd::Tex body while mip 0 has not arrived. Otherwise it
-     * sizes the residency vector to one entry per level, records mGsPsm and mBitsPerPixel from the
-     * bitmap format, finds mFirstPackedMip, assembles TEX0 and TEX1, and then for every level
-     * validates the dimensions against a power of two of at least 8, validates the format and the
-     * palette against level 0, claims the GS page, marks the level dirty, and records the level's
-     * buffer width in MIPTBP1 or MIPTBP2.
+     * rebuilds and claims the CLUT for a paletted texture, sizes the residency vector to one entry
+     * per level, records mGsPsm and mBitsPerPixel from the bitmap format, finds mFirstPackedMip
+     * for an eight-bit format, assembles TEX0 and TEX1, and then for every level validates the
+     * dimensions against a power of two of at least 8, validates the format and the palette
+     * against level 0, records the level's buffer width in MIPTBP1 or MIPTBP2, marks the level
+     * dirty, builds its canvas, and claims its GS block. A level that fails validation is blanked
+     * but still made resident. The Rnd::Tex body runs last.
      *
      * @ghidraAddress 0x00597210
      */
@@ -341,6 +344,13 @@ private:
  * @ghidraAddress 0x0059a770
  */
 Tex *NewPsTex(const HxStr &name);
+
+/**
+ * The palette entry a level that fails validation is left with, an opaque 8888 colour.
+ *
+ * @ghidraAddress 0x0076f360
+ */
+extern const unsigned int g_dwDefaultClutEntry;
 
 /**
  * Block groups of a 256-entry CLUT in the order the CSM1 layout stores them, {0, 2, 1, 3}.

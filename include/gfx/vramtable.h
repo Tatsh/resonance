@@ -2,7 +2,7 @@
 
 #include <libgraph.h>
 
-struct ABitmap;
+#include "rndartt/abitmap.h"
 
 /** Bytes in one GS video memory block, the unit every address and size in this unit uses. */
 constexpr int kVramBlockBytes = 256;
@@ -83,12 +83,15 @@ constexpr int kGsTexelsPerTbwUnit = 64;
 /**
  * GS pixel storage modes this unit distinguishes.
  *
- * Only the three that select a page shape other than the default appear here. The remaining modes
- * take the 64 by 32 texel page VramTableEntry::BlocksForImage() falls back to, and the jump table
- * the routine dispatches through routes PSMCT16S to that fallback rather than to the 64 by 64 page
- * the hardware gives it.
+ * Three of these select a page shape other than the default. The remaining modes take the 64 by 32
+ * texel page VramTableEntry::BlocksForImage() falls back to, and the jump table the routine
+ * dispatches through routes PSMCT16S to that fallback rather than to the 64 by 64 page the hardware
+ * gives it. The two 32-bit and 24-bit modes appear because g_anGsPixelStorageModes maps bitmap
+ * formats onto them.
  */
 enum GsPixelStorageMode {
+    kGsPsmCt32 = 0, /*!< Thirty-two bits per texel, direct colour. */
+    kGsPsmCt24 = 1, /*!< Twenty-four bits per texel, direct colour. */
     kGsPsmCt16 = 2, /*!< Sixteen bits per texel, direct colour. */
     kGsPsmT8 = 19,  /*!< Eight bits per texel, indexed. */
     kGsPsmT4 = 20   /*!< Four bits per texel, indexed. */
@@ -628,6 +631,22 @@ public:
     /** Generation, from one to kVramLockGenerations, that a lookup locks into. */
     unsigned char mLockGeneration;
 };
+
+/**
+ * GS storage mode of each ABitmapFormat, indexed by the format code.
+ *
+ * The run-length format maps to PSMT8, the form it is decompressed into before upload.
+ *
+ * @ghidraAddress 0x0070d3d0
+ */
+extern const int g_anGsPixelStorageModes[kABitmapFormatCount];
+
+/**
+ * Bits per texel of each ABitmapFormat once it reaches GS memory, indexed by the format code.
+ *
+ * @ghidraAddress 0x0070d3e8
+ */
+extern const int g_anBitsPerPixelTable[kABitmapFormatCount];
 
 /**
  * The video memory cache.
