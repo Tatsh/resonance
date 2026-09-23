@@ -1,4 +1,5 @@
 set(RESONANCE_MET_SRCS
+    albumcache.cpp
     metarenasscreen.cpp
     metexpansionpakscreen.cpp
     metglobalsettingssaverscreen.cpp

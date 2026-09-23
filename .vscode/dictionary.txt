@@ -10,6 +10,7 @@ advancesectiontogglemsg
 afixed
 agfxfile
 agiffile
+albumcache
 allnotesoffmsg
 almodule
 analogr
@@ -647,6 +648,7 @@ shoemake
 showeraseeffectmsg
 sifdev
 signalmodule
+singlecatcher
 singlepowerupcollection
 skillstats
 skillz
