@@ -36,3 +36,23 @@ void NormalizeVec2(const float *pSrc, float *pOut) {
 float Vec2Length(const float *pSrc) {
     return sqrtf(pSrc[0] * pSrc[0] + pSrc[1] * pSrc[1]);
 }
+
+Vector2 IntersectLines(const Vector2 first[2], const Vector2 second[2]) {
+    const Vector2 &firstPoint = first[0];
+    const Vector2 &firstDirection = first[1];
+    const Vector2 &secondPoint = second[0];
+    const Vector2 &secondDirection = second[1];
+
+    const float flDenominator =
+        (secondDirection.x * firstDirection.y) - (firstDirection.x * secondDirection.y);
+    if (flDenominator == 0.0f) {
+        return firstPoint;
+    }
+    const float flT = ((firstDirection.y * (firstPoint.x - secondPoint.x)) +
+                       (firstDirection.x * (secondPoint.y - firstPoint.y))) /
+                      flDenominator;
+    Vector2 crossing;
+    crossing.y = secondPoint.y + (flT * secondDirection.y);
+    crossing.x = secondPoint.x + (flT * secondDirection.x);
+    return crossing;
+}

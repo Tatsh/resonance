@@ -58,3 +58,45 @@ void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, fl
  * @ghidraAddress 0x00551218
  */
 bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, float *pT);
+
+/**
+ * Two points that fix a line or a segment.
+ *
+ * The routines that return one move it as two quadwords through a hidden result pointer. The name
+ * is inferred.
+ */
+struct Segment {
+    Vector3 mEnds[2]; /*!< The start, then the end. */
+};
+
+/**
+ * Find the line two planes meet along.
+ *
+ * The direction is the cross product of the two normals, and the result is a point and that point
+ * plus the direction. The point comes from a segment test against pSecond whose start is the
+ * first normal scaled by the negated first distance and whose end is the cross product of the
+ * direction with the first normal. That end is a direction treated as a position. The point
+ * therefore lies on the second plane, and on the first only when the first distance is zero. The
+ * title is inferred.
+ *
+ * @param first The first plane.
+ * @param second The second plane.
+ * @return The point, then the point plus the direction.
+ * @ghidraAddress 0x0054fcf8
+ */
+Segment IntersectPlanes(const Plane &first, const Plane &second);
+
+/**
+ * Find the point three planes meet at.
+ *
+ * The line of the first two planes from IntersectPlanes() is tested against the third, and the
+ * point is the one the segment test places at its fraction along that line. The shipped program
+ * does not call it. The title is inferred.
+ *
+ * @param first The first plane.
+ * @param second The second plane.
+ * @param third The third plane.
+ * @return The point.
+ * @ghidraAddress 0x005510e0
+ */
+Vector3 IntersectPlanes(const Plane &first, const Plane &second, const Plane &third);

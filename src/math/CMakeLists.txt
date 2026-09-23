@@ -1,8 +1,10 @@
 set(RESONANCE_MATH_SRCS
+    box.cpp
     color.cpp
     frustum.cpp
     plane.cpp
     quaternion.cpp
+    sphere.cpp
     transformops.cpp
     vector2.cpp
     vector3.cpp)

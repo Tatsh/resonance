@@ -84,3 +84,16 @@ void NormalizeVec2(const float *pSrc, float *pOut);
  * @ghidraAddress 0x004bfcc0
  */
 float Vec2Length(const float *pSrc);
+
+/**
+ * Find where two lines in a plane cross.
+ *
+ * Each line is a point followed by a direction. Parallel lines report the point of the first line.
+ * Rnd::String::EmitRibbonVerts() is the one caller. The name is inferred.
+ *
+ * @param first The point and the direction of the first line.
+ * @param second The point and the direction of the second line.
+ * @return The crossing point.
+ * @ghidraAddress 0x00551190
+ */
+Vector2 IntersectLines(const Vector2 first[2], const Vector2 second[2]);

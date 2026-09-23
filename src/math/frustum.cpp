@@ -1,5 +1,6 @@
 #include "math/frustum.h"
 
+#include "math/sphere.h"
 #include "os/failsink.h"
 
 namespace {
@@ -28,4 +29,24 @@ FailSink &operator<<(FailSink &sink, const Frustum &frustum) {
     PrintPlane(sink, "\n\ttop:", frustum.mTop);
     PrintPlane(sink, "\n\tbottom:", frustum.mBottom);
     return sink;
+}
+
+int IsSphereOutsideFrustum(const Sphere &sphere, const Frustum &frustum) {
+    const Plane *const apPlanes[] = {&frustum.mFront,
+                                     &frustum.mBack,
+                                     &frustum.mLeft,
+                                     &frustum.mRight,
+                                     &frustum.mTop,
+                                     &frustum.mBottom};
+    const Vector3 &center = sphere.mCenter;
+    int nStatus = 0;
+    for (const Plane *pPlane : apPlanes) {
+        const float flDistance =
+            (((pPlane->a * center.x) + (pPlane->b * center.y)) + (pPlane->c * center.z)) +
+            pPlane->d;
+        if (flDistance + sphere.mRadius < 0.0f) {
+            nStatus = kVu0StatusStickySign;
+        }
+    }
+    return nStatus;
 }

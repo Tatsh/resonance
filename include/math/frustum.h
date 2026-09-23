@@ -3,6 +3,7 @@
 #include "math/plane.h"
 
 class FailSink;
+struct Sphere;
 
 /**
  * Six-plane view volume.
@@ -49,3 +50,21 @@ void BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, floa
  * @ghidraAddress 0x0054f798
  */
 FailSink &operator<<(FailSink &sink, const Frustum &frustum);
+
+/** Bit of the VU0 status flag IsSphereOutsideFrustum() reports, the sticky sign flag. */
+constexpr int kVu0StatusStickySign = 0x80;
+
+/**
+ * Report whether a sphere lies wholly outside at least one plane of a view volume.
+ *
+ * Each plane is dotted with the centre and the radius added, on VU0 in macro mode, and the sticky
+ * sign bit of the status flag collects a negative sum from every plane. The bit is returned as it
+ * stands rather than as a truth value. Rnd::Mesh::PrepareDraw() is the one caller, and it passes
+ * the world frustum of the camera.
+ *
+ * @param sphere The sphere, in the space the planes are expressed in.
+ * @param frustum The view volume.
+ * @return kVu0StatusStickySign when the whole sphere is behind some plane, and zero otherwise.
+ * @ghidraAddress 0x005513a8
+ */
+int IsSphereOutsideFrustum(const Sphere &sphere, const Frustum &frustum);
