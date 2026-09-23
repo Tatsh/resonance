@@ -158,6 +158,9 @@ public:
     void SetKindShowing(char nKind, int nShowing);
 
 private:
+    // AppTunnel's PlaybackToggleMsg handler walks mGems to reassign each gem's kind.
+    friend class AppTunnel;
+
     // Find the first gem whose mFrame is at or after flFrame. 0x00415e78.
     static std::list<TnlGem>::iterator FindFirstAt(std::list<TnlGem> &gems, float flFrame);
 

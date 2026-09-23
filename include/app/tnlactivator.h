@@ -103,6 +103,9 @@ public:
     void MoveToTrack(int nLevel, int nKind, float flTrack);
 
 private:
+    // AppTunnel's message handlers reach the pointer, the catcher, mRotView, and mBlink.
+    friend class AppTunnel;
+
     int mIndex;
     Rnd::View *mRotView;   // "activator rot%d".
     Rnd::Mesh *mMesh;      // "activator%d", the seeker mesh.

@@ -21,6 +21,7 @@
 #include "app/tnlsnake.h"
 #include "app/tnlutil.h"
 #include "app/tunnelcache.h"
+#include "game/forcefeedbackmgr.h"
 #include "game/gamemanagerimpl.h"
 #include "game/grooveworld.h"
 #include "game/leveldata.h"
@@ -29,6 +30,15 @@
 #include "math/color.h"
 #include "math/transform.h"
 #include "math/vector3.h"
+#include "msg/axebuttonmsg.h"
+#include "msg/juiceamountmsg.h"
+#include "msg/multiplierstatemsg.h"
+#include "msg/playbacktogglemsg.h"
+#include "msg/playerstrackneutralizedmsg.h"
+#include "msg/powerupfailedmsg.h"
+#include "msg/toggleghostmsg.h"
+#include "msg/trackselectmsg.h"
+#include "msg/winmsg.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
@@ -170,6 +180,16 @@ constexpr float kBarChangeLateFrames = 480.0f;
 
 // A new panel starts this fraction of the way from the song tick to the start of its bar.
 constexpr float kPanelLeadFraction = 0.25f;
+
+// Script templates the track selection and the axe button run in display mode.
+constexpr int kTrackSelectScriptTemplate = 0x3ef;
+constexpr int kAxeButtonScriptTemplate = 0x3f7;
+
+// Scaled frames a freestyler arrow stays up after a failed freestyler.
+constexpr float kArrowShowFrames = 2000.0f;
+
+// Juice fraction below which a solo player's activator blinks.
+constexpr float kLowJuiceFraction = 0.2f;
 
 } // namespace
 
@@ -556,6 +576,125 @@ void AppTunnel::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
 void AppTunnel::AddPanel(TnlPanel *pPanel, float flStartFrame) {
     mPanels.push_back(pPanel);
     pPanel->SetStartFrame(flStartFrame);
+}
+
+void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown10);
+    if (pPlayer == nullptr) {
+        return;
+    }
+    const int nTrack = pMsg->mUnknown04;
+    const int nLevel = pMsg->mUnknown08;
+    GetCachedTunnelObject()->GetSeeker(pPlayer->mIndex)->SetTargetRing(nTrack);
+    pPlayer->mActivator.MoveToTrack(nLevel, mTrackModes[nTrack], static_cast<float>(nTrack));
+    pPlayer->mGridMarkers.SetTrack(nTrack);
+    if (g_nAppTunnelDisplayMode) {
+        CallScriptTemplate(kTrackSelectScriptTemplate, pMsg->mUnknown04);
+    }
+    mNowRing->SetPlayerMesh(pPlayer->mIndex, nTrack);
+}
+
+void AppTunnel::OnAdvanceSectionToggle() {
+    mBoundary->UpdateText();
+    mUnknown140 = mPlayMap->FollowingStepBar(
+        static_cast<int>(mRenderer->mSongTick / static_cast<float>(kFramesPerBar)));
+    for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        (*it)->mSabreTrail.Rebuild();
+    }
+    const int nBar = static_cast<int>(mRenderer->mSongTick / static_cast<float>(kFramesPerBar));
+    const int nEndBar = nBar + GetCachedTunnelObject()->mSliceCount;
+    for (int nCellBar = (nBar > -1) ? nBar : 0; nCellBar < nEndBar; ++nCellBar) {
+        for (int nTrack = 0; nTrack < mTrackCount; ++nTrack) {
+            Renderer::Cell *pCell = mRenderer->GetCell(nTrack, nCellBar);
+            OnBarChanged(nTrack, nCellBar, 1, pCell->mPlayer, pCell->mPowerup, pCell->mEnabled);
+        }
+    }
+}
+
+void AppTunnel::OnPlaybackToggle(PlaybackToggleMsg *pMsg) {
+    if (pMsg->mOn) {
+        mCameraRig->ZoomIn();
+    } else {
+        mCameraRig->ZoomOut();
+    }
+    mJukebox = pMsg->mOn;
+    std::list<TnlGem> &gems = mGemManager->mGems;
+    for (auto it = gems.begin(); it != gems.end(); ++it) {
+        it->Release();
+        const int nTrack = it->mTrack;
+        if (mJukebox) {
+            if (it->mKind != mGhostGemKinds[nTrack]) {
+                it->mKind = mTrackEffectKinds[nTrack];
+            }
+        } else if ((it->mKind == mTrackEffectKinds[nTrack]) &&
+                   (mTrackModes[nTrack] != kTrackModeScratch)) {
+            it->mKind = mShowCrates ? mCrateGemKind : mHexGemKinds[it->mColor];
+        }
+    }
+    for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        (*it)->mActivator.SetSuppressed(mJukebox);
+    }
+    mNowRing->mView->SetShowing(!mJukebox);
+}
+
+void AppTunnel::OnWin(WinMsg *pMsg) {
+    if (pMsg->mWinners.size() == 0) {
+        return;
+    }
+    for (auto it = pMsg->mWinners.begin(); it != pMsg->mWinners.end(); ++it) {
+        FindTnlPlayer(*it)->mLocalView->AddDraw(mArms->mView, GetCachedTunnelObject());
+    }
+    mArms->Start(mRenderer->mSongTick);
+    if (mGameMode == kGameModeSolo) {
+        FindTnlPlayer(pMsg->mWinners[0])->mActivator.mBlink = 0;
+        mLattice->Start(mRenderer->mSongTick);
+    }
+}
+
+void AppTunnel::OnMultiplierState(MultiplierStateMsg *pMsg) {
+    FindTnlPlayer(pMsg->mPlayer)->mActivator.mCatcher.SetMultiplied(pMsg->mBonus > 0);
+}
+
+void AppTunnel::OnPowerupFailed(PowerupFailedMsg *pMsg) {
+    const float flScaledTick = mRenderer->mSongTick * mUnknown144;
+    if (pMsg->mKind != kHudItemFreestyler) {
+        return;
+    }
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
+    for (int nTrack = 0; nTrack < kTrackCount; ++nTrack) {
+        const TrackMode mode = mTrackModes[nTrack];
+        if ((mode == kTrackModeAxe) || (mode == kTrackModeScratch) || (mode == kTrackModeVocal)) {
+            mArrows[nTrack]->Show(pPlayer, flScaledTick + kArrowShowFrames);
+        }
+    }
+}
+
+inline void AppTunnel::OnAxeButton(AxeButtonMsg *pMsg) {
+    TnlPointer &pointer = FindTnlPlayer(pMsg->mPlayer)->mActivator.mPointer;
+    if (pMsg->mPressed) {
+        pointer.Spin(pMsg->mUnknown08);
+    } else {
+        pointer.Reset();
+    }
+    if (g_nAppTunnelDisplayMode) {
+        CallScriptTemplate(kAxeButtonScriptTemplate);
+    }
+}
+
+inline void AppTunnel::OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg) {
+    Application::shared()->GetWorld()->mForceFeedback->PlayEffect3(pMsg->mPlayer);
+}
+
+inline void AppTunnel::OnToggleGhost(ToggleGhostMsg *pMsg) {
+    FindTnlPlayer(pMsg->mUnknown04)->mActivator.SetGhost(pMsg->mOn);
+}
+
+inline void AppTunnel::OnJuiceAmount(JuiceAmountMsg *pMsg) {
+    if ((mGameMode != kGameModeSolo) || (mPlayMode != kPlayModeGame)) {
+        return;
+    }
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown04);
+    pPlayer->mActivator.mBlink = (pMsg->GetJuiceFraction() < kLowJuiceFraction);
 }
 
 void AppTunnel::UpdateGhostFades() {

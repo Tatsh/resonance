@@ -7,11 +7,17 @@
 #include "app/tnlpendingtrigger.h"
 #include "game/trackdata.h"
 
+class AxeButtonMsg;
 class DurGemTrails;
 class HxStr;
+class JuiceAmountMsg;
 class Message;
+class MultiplierStateMsg;
 class PlayMap;
+class PlaybackToggleMsg;
 class Player;
+class PlayersTrackNeutralizedMsg;
+class PowerupFailedMsg;
 class Renderer;
 class TnlArms;
 class TnlArrow;
@@ -29,6 +35,9 @@ class TnlPanelFX;
 class TnlPlayer;
 class TnlSnake;
 class TnlTrigger;
+class ToggleGhostMsg;
+class TrackSelectMsg;
+class WinMsg;
 struct Color;
 struct Vector3;
 namespace Rnd {
@@ -280,6 +289,46 @@ private:
     // Append a panel to mPanels and set the frame it starts from. OnBarChanged() is the caller.
     // 0x00447268.
     void AddPanel(TnlPanel *pPanel, float flStartFrame);
+
+    // TrackSelectMsg: turn the player's seeker, activator, grid markers, and now-ring slot to the
+    // selected track. 0x00447328.
+    void OnTrackSelect(TrackSelectMsg *pMsg);
+
+    // AdvanceSectionToggleMsg: rewrite the boundary text, move mUnknown140 to the next step,
+    // rebuild every sabre trail, and replay OnBarChanged() over the window. The message is not
+    // read. 0x00448048.
+    void OnAdvanceSectionToggle();
+
+    // PlaybackToggleMsg: zoom the camera rig, record the jukebox flag, reassign the gem kinds, and
+    // suppress or restore every activator and the now ring. 0x00448330.
+    void OnPlaybackToggle(PlaybackToggleMsg *pMsg);
+
+    // WinMsg: draw the arms in each winner's view and start them, and in kGameModeSolo stop the
+    // first winner's blink and start the lattice. 0x00449240.
+    void OnWin(WinMsg *pMsg);
+
+    // MultiplierStateMsg: switch the player's catcher to the multiplier texture while a bonus
+    // applies. 0x00449450.
+    void OnMultiplierState(MultiplierStateMsg *pMsg);
+
+    // PowerupFailedMsg: after a failed freestyler, show the player's arrow over every axe,
+    // scratch, and vocal track for 2000 scaled frames. 0x00449500.
+    void OnPowerupFailed(PowerupFailedMsg *pMsg);
+
+    // AxeButtonMsg: spin or reset the player's pointer. HandleMessage() inlines this. 0x00457ff0.
+    void OnAxeButton(AxeButtonMsg *pMsg);
+
+    // PlayersTrackNeutralizedMsg: rumble the player's controller. HandleMessage() inlines this.
+    // 0x004580e8.
+    void OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg);
+
+    // ToggleGhostMsg: show or hide the player's track ghost. HandleMessage() inlines this.
+    // 0x00458120.
+    void OnToggleGhost(ToggleGhostMsg *pMsg);
+
+    // JuiceAmountMsg: in a solo game, blink the player's activator while the juice is low.
+    // HandleMessage() inlines this. 0x004581b8.
+    void OnJuiceAmount(JuiceAmountMsg *pMsg);
 
     // Find the TnlPlayer of a game player, or null. The search is inlined wherever a handler
     // needs it, and the image has no out-of-line copy.

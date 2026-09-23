@@ -54,6 +54,9 @@ public:
     void SetFrame(float flFrame);
 
 private:
+    // AppTunnel's WinMsg handler draws mView in each winner's local view.
+    friend class AppTunnel;
+
     float mStartFrame; // Trigger frame, 1e9 when idle.
     Rnd::View *mView;  // "arms.view".
     std::vector<TnlEmitter> mEmitters;
