@@ -1,6 +1,7 @@
 #include "met/metfreqmakerinventoryscreen.h"
 
 #include <algorithm>
+#include <map>
 
 #include "app/playsound.h"
 #include "game/freqpart.h"
@@ -10,7 +11,10 @@
 #include "met/metfreqmakerassetmanager.h"
 #include "met/metfreqmakercanvasscreen.h"
 #include "rnd/animatable.h"
+#include "rnd/collideable.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
+#include "rnd/mat.h"
 #include "rnd/mesh.h"
 #include "rnd/object.h"
 #include "rnd/text.h"
@@ -32,7 +36,26 @@ static const char *const kLogosViewName = "LogosView";
 static const char *const kEditViewName = "EditView";
 
 static const char *const kDirectionsScreenName = "MetFreqMakerDirectionsScreen";
+static const char *const kCanvasScreenName = "MetFreqMakerCanvasScreen";
 static const char *const kPanelName = "MetFreqMakerInventoryScreen";
+
+static const char *const kMeshSuffix = ".mesh";
+static const char *const kGridViewName = "fm_grid.view";
+static const char *const kWire16Name = "fm_wire_16.mesh";
+static const char *const kWire30Name = "fm_wire_30.mesh";
+static const char *const kLimitTextName = "fminv_limit.txt";
+static const char *const kCrossOriginName = "fm_cross_origin.view";
+static const char *const kSpectrumViewName = "fm_spectrum.view";
+static const char *const kColorTextName = "COLOR.txt";
+static const char *const kHighlightMeshName = "fm_inventory_hisquare.mesh";
+static const char *const kHeadingItemName = "HEADING_ITEM.txt";
+static const char *const kHeadingNameName = "HEADING_NAME.txt";
+static const char *const kCanvasMeshName = "canvas_2.mesh";
+static const char *const kInventoryMeshName = "fm_inventory.mesh";
+static const char *const kCanvasHighlightMaterial = "fm_canvas_hi.mat";
+static const char *const kCanvasLiveMaterial = "fm_canvas_live.mat";
+static const char *const kInventoryMaterial = "fm_inventory.mat";
+static const char *const kInventoryHighlightMaterial = "fm_inventory_hi.mat";
 
 static const char *const kToggleSound = "SND_MET_FM_TOGGLE";
 static const char *const kDeleteSound = "SND_MET_FM_DELETE";
@@ -75,6 +98,14 @@ constexpr int kPaletteStartRow = 4;
 constexpr float kPaletteCentre = 0.5f;
 constexpr float kUnsetPalettePosition = -1.0f;
 
+// The further factors slot 38 scales a part's x and z rows by, and the pitch and height of the
+// part grid.
+constexpr float kPartWidthFactor = 38.65f;
+constexpr float kPartDepthFactor = 38.5f;
+constexpr float kGridPitchX = 46.65f;
+constexpr float kGridPitchZ = -46.5f;
+constexpr float kGridHeight = -4.0f;
+
 // The mapping from a palette position to the translation of `fm_cross_origin.view`.
 constexpr int kXfmTranslationRow = 3;
 constexpr float kCrossOriginWidth = 375.0f;
@@ -101,6 +132,40 @@ GridCell g_gridTopLeft(0, 0);
 GridCell g_gridBottomLeft(0, 2);
 GridCell g_gridTopRight(7, 0);
 GridCell g_gridBottomRight(7, 2);
+
+// 0x00272268. Negate a value unless it is already negative. The product is taken in double
+// precision. The routine is never called.
+inline void ForceNonPositive(float &flValue) {
+    if (!(flValue < 0.0f)) {
+        flValue = static_cast<float>(static_cast<double>(flValue) * -1.0);
+    }
+}
+
+// 0x002722c8. Negate a value when it is negative. The product is taken in double precision. The
+// routine is never called.
+inline void ForceNonNegative(float &flValue) {
+    if (flValue < 0.0f) {
+        flValue = static_cast<float>(static_cast<double>(flValue) * -1.0);
+    }
+}
+
+// The rows a page of nParts parts needs, never fewer than the visible rows.
+inline int PageRowCount(int nParts) {
+    int nRows = static_cast<int>(static_cast<float>(nParts) * (1.0f / kGridColumnCount));
+    if (nParts % kGridColumnCount > 0) {
+        ++nRows;
+    }
+    if (nRows < kMinimumRowCount) {
+        nRows = kMinimumRowCount;
+    }
+    return nRows;
+}
+
+// Resolve one named object of the renderer as T.
+template <class T>
+inline T *FindObject(const char *pszName) {
+    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+}
 
 // Hang pChild from pParent in front of every drawable already hung there.
 inline void PrependView(Rnd::View *pParent, Rnd::View *pChild) {
@@ -259,6 +324,114 @@ void MetFreqMakerInventoryScreen::OnUnknownSlot30(Rnd::Object *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 
+// 0x0026b518
+void MetFreqMakerInventoryScreen::ResolveContainerViews() {
+    MetScreen::ResolveContainerViews();
+    std::map<HxStr, FreqPartTemplate *> parts(
+        *MetFreqMakerAssetManager::shared()->GetPartsByName());
+    HxStr name;
+    float flScale = kUnknownPartScale;
+    for (std::map<HxStr, FreqPartTemplate *>::iterator it = parts.begin(); it != parts.end();
+         ++it) {
+        FreqPartTemplate *pTemplate = it->second;
+        name = pTemplate->mName + kMeshSuffix;
+        Rnd::Mesh *pMesh = MetFreqMakerAssetManager::shared()->CloneMesh(name);
+        mPartMeshes.push_back(pMesh);
+        pMesh->SetMaterial(pTemplate->mMaterial);
+        float flScaleX;
+        float flScaleZ;
+        MetFreqMakerAssetManager::shared()->ApplyPartScale(
+            pMesh, pTemplate, &flScaleX, &flScaleZ, kPartWidthFactor, kPartDepthFactor);
+
+        Rnd::View *pView = nullptr;
+        std::vector<HxStr> *pNames = nullptr;
+        // Yes, the counts restart for every template, so every page receives the minimum rows.
+        int nHeadParts = 0;
+        int nBodyParts = 0;
+        int nFaceParts = 0;
+        int nDetailsParts = 0;
+        int nLogosParts = 0;
+        switch (pTemplate->mCategory) {
+        case kPartCategoryBody:
+            pView = mBodyView;
+            pNames = &mBodyNames;
+            flScale = kSmallPartScale;
+            ++nBodyParts;
+            break;
+        case kPartCategoryHead:
+            pView = mHeadView;
+            pNames = &mHeadNames;
+            flScale = kSmallPartScale;
+            ++nHeadParts;
+            break;
+        case kPartCategoryFaceFirst:
+        case kPartCategoryFaceSecond:
+        case kPartCategoryFaceThird:
+            pView = mFaceView;
+            pNames = &mFaceNames;
+            flScale = kLargePartScale;
+            ++nFaceParts;
+            break;
+        case kPartCategoryDetails:
+        case kPartCategoryDetailsSecond:
+        case kPartCategoryDetailsThird:
+        case kPartCategoryDetailsFourth:
+        case kPartCategoryDetailsFifth:
+            pView = mDetailsView;
+            pNames = &mDetailsNames;
+            flScale = kSmallPartScale;
+            ++nDetailsParts;
+            break;
+        case kPartCategoryLogos:
+            pView = mLogosView;
+            pNames = &mLogosNames;
+            flScale = kLargePartScale;
+            ++nLogosParts;
+            break;
+        default:
+            break;
+        }
+        mHeadRowCount = PageRowCount(nHeadParts);
+        mLogosRowCount = PageRowCount(nLogosParts);
+        mBodyRowCount = PageRowCount(nBodyParts);
+        mDetailsRowCount = PageRowCount(nDetailsParts);
+        mFaceRowCount = PageRowCount(nFaceParts);
+
+        int nIndex = pView->GetDraws().size();
+        pNames->push_back(pTemplate->mName);
+        const float translation[] = {(nIndex % kGridColumnCount) * kGridPitchX,
+                                     kGridHeight,
+                                     (nIndex / kGridColumnCount) * kGridPitchZ,
+                                     kXfmTranslationW};
+        std::copy(translation,
+                  translation + Rnd::kXfmRowFloatCount,
+                  pMesh->mLocalXfm[kXfmTranslationRow]);
+        pMesh->mDirty = 1;
+        pMesh->ScaleUniform(flScale);
+        pView->AddDraw(pMesh, nullptr);
+        pView->AddTrans(pMesh);
+        pView->AddCollide(pMesh);
+    }
+
+    Rnd::View *pGrid = FindObject<Rnd::View>(kGridViewName);
+    pGrid->AddTrans(mMainInventoryView);
+    pGrid->AddCollide(mMainInventoryView);
+    pGrid->AddDraw(mMainInventoryView, nullptr);
+    mMainInventoryView->SetShowing(1);
+    mViewsResolved = 1;
+    mCanvas = static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreenName)));
+    mWire16 = FindObject<Rnd::Mesh>(kWire16Name);
+    mWire30 = FindObject<Rnd::Mesh>(kWire30Name);
+    mLimitText = FindObject<Rnd::Text>(kLimitTextName);
+    mCrossOrigin = FindObject<Rnd::View>(kCrossOriginName);
+    ShowPalette(0);
+    ShowInventory(0);
+    SetHighlight(kHighlightNone);
+    mPaletteColumn = 0;
+    mPaletteRow = 0;
+    UpdateCrossOrigin();
+}
+
 // 0x00272cc8
 void MetFreqMakerInventoryScreen::PlayMoveSound() {
     if (mMode == kModeColor) {
@@ -287,6 +460,71 @@ void MetFreqMakerInventoryScreen::PlayToggleSound() {
 // 0x00272b58
 void MetFreqMakerInventoryScreen::PlayDeleteSound() {
     PlaySoundByName(kDeleteSound);
+}
+
+// 0x0026e9e0
+void MetFreqMakerInventoryScreen::ShowPalette(int nShowing) {
+    Rnd::View *pSpectrum = FindObject<Rnd::View>(kSpectrumViewName);
+    Rnd::Text *pColorText = FindObject<Rnd::Text>(kColorTextName);
+    pSpectrum->SetShowing(nShowing);
+    mCrossOrigin->SetShowing(nShowing);
+    pColorText->SetShowing(nShowing);
+}
+
+// 0x0026e690
+void MetFreqMakerInventoryScreen::ShowInventory(int nShowing) {
+    mLimitText->SetShowing(0);
+    mWire16->SetShowing(0);
+    mWire30->SetShowing(0);
+    if (nShowing != 0) {
+        if (mCurrentView == mEditView) {
+            mLimitText->SetShowing(1);
+            mWire16->SetShowing(1);
+        } else {
+            mWire30->SetShowing(1);
+        }
+    }
+    Rnd::Mesh *pHighlightMesh = FindObject<Rnd::Mesh>(kHighlightMeshName);
+    Rnd::Text *pHeadingItem = FindObject<Rnd::Text>(kHeadingItemName);
+    Rnd::Text *pHeadingName = FindObject<Rnd::Text>(kHeadingNameName);
+    pHighlightMesh->SetShowing(nShowing);
+    pHeadingItem->SetShowing(nShowing);
+    pHeadingName->SetShowing(nShowing);
+    mMainInventoryView->SetShowing(nShowing);
+}
+
+// 0x0026ebb8
+void MetFreqMakerInventoryScreen::SetHighlight(int nHighlight) {
+    Rnd::Mesh *pCanvasMesh = FindObject<Rnd::Mesh>(kCanvasMeshName);
+    HxStr canvasMaterialName("");
+    Rnd::Mat *pCanvasMaterial = nullptr;
+    Rnd::Mesh *pInventoryMesh = FindObject<Rnd::Mesh>(kInventoryMeshName);
+    HxStr inventoryMaterialName("");
+    Rnd::Mat *pInventoryMaterial = nullptr;
+    switch (nHighlight) {
+    case kHighlightCanvas:
+        canvasMaterialName = kCanvasHighlightMaterial;
+        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(canvasMaterialName));
+        inventoryMaterialName = kInventoryMaterial;
+        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(inventoryMaterialName));
+        break;
+    case kHighlightInventory:
+        canvasMaterialName = kCanvasLiveMaterial;
+        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(canvasMaterialName));
+        inventoryMaterialName = kInventoryHighlightMaterial;
+        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(inventoryMaterialName));
+        break;
+    case kHighlightNone:
+        canvasMaterialName = kCanvasLiveMaterial;
+        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(canvasMaterialName));
+        inventoryMaterialName = kInventoryMaterial;
+        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(inventoryMaterialName));
+        break;
+    default:
+        break;
+    }
+    pCanvasMesh->SetMaterial(pCanvasMaterial);
+    pInventoryMesh->SetMaterial(pInventoryMaterial);
 }
 
 // 0x00272868

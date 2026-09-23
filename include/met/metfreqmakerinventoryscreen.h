@@ -34,13 +34,12 @@ class View;
  * The translation unit spans `0x0026a3b0` to `0x00273140`. Besides the members below, it has the
  * static initialiser at `0x00272030` for four grid cells, and template library emissions. It also
  * has unreferenced out-of-line copies of inline routines. These are HxStr::operator+=(const char *)
- * at `0x002720b8`, Rnd::Mesh::MirrorX() at `0x00272328`, a uniform scale of a mesh's three basis
- * rows at `0x002723a0`, and two float sign helpers at `0x00272268` (negate unless negative) and
- * `0x002722c8` (negate when negative).
+ * at `0x002720b8`, Rnd::Mesh::MirrorX() at `0x00272328`, Rnd::Mesh::ScaleUniform() at
+ * `0x002723a0`, and two file-local float sign helpers at `0x00272268` and `0x002722c8`.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
- * are 5, 7 `0x00272600`, 14, 19 `0x0026c928`, 20 through 24, 30, 33 `0x00272a98`, 38
- * `0x0026b518`, and 39 through 43.
+ * are 5, 7 `0x00272600`, 14, 19 `0x0026c928`, 20 through 24, 30, 33 `0x00272a98`, 38, and 39
+ * through 43.
  */
 class MetFreqMakerInventoryScreen : public MetScreen {
 public:
@@ -158,6 +157,20 @@ public:
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
 
     /**
+     * Resolve the base views, list every part template on its page, and resolve the screen's own
+     * objects.
+     *
+     * Slot 38. Each template is cloned as `<name>.mesh` into mPartMeshes, given the template's
+     * material and scale, and placed on the page of its category at the next cell of an
+     * eight-column grid, and its name is appended to that page's name list. The main view is hung
+     * from `fm_grid.view` and shown, mCanvas is resolved, the palette, the inventory decorations,
+     * and both panel highlights are turned off, and the palette cursor moves to column 0 and row 0.
+     *
+     * @ghidraAddress 0x0026b518
+     */
+    virtual void ResolveContainerViews();
+
+    /**
      * Play `SND_MET_FM_COLOR_MOVE` in the colour mode or `SND_MET_FM_PART_MOVE` in the part mode.
      *
      * Slot 39. The title is inferred.
@@ -205,6 +218,21 @@ public:
 private:
     // The editing mode selects the sounds the slots play. The names are inferred.
     enum Mode { kModeNone = 0, kModeColor = 1, kModePart = 2, kModeInventory = 3 };
+
+    // The panel SetHighlight() draws with its highlight material. The names are inferred.
+    enum Highlight { kHighlightCanvas = 0, kHighlightInventory = 1, kHighlightNone = 2 };
+
+    // 0x0026e9e0. Show or hide `fm_spectrum.view`, mCrossOrigin, and `COLOR.txt`.
+    void ShowPalette(int nShowing);
+
+    // 0x0026e690. Show or hide the inventory decorations and the main view. The wires and the
+    // limit text are hidden first, and when shown, the edit page shows mLimitText and mWire16 and
+    // every other page shows mWire30.
+    void ShowInventory(int nShowing);
+
+    // 0x0026ebb8. Choose the materials of `canvas_2.mesh` and `fm_inventory.mesh`. A value outside
+    // Highlight clears both materials.
+    void SetHighlight(int nHighlight);
 
     // 0x00272868. The palette position at the centre of the palette cursor's cell.
     void GetPalettePosition(Vector2 &position);

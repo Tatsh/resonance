@@ -277,6 +277,19 @@ public:
     }
 
     /**
+     * Scale the three basis rows of the local transform by one factor, and mark the transform
+     * dirty.
+     *
+     * Defined below the class. The one out-of-line copy is emitted in MetFreqMakerInventoryScreen's
+     * translation unit and has no caller, and that screen's slot 38 expands the body. The title is
+     * inferred.
+     *
+     * @param flScale The factor.
+     * @ghidraAddress 0x002723a0
+     */
+    void ScaleUniform(float flScale);
+
+    /**
      * Append the two triangles of a quad to the faces of mFacesOwner.
      *
      * The triangles are (nV0, nV1, nV2) and (nV2, nV1, nV3). The only out-of-line copy sits in the
@@ -481,6 +494,14 @@ public:
          evidence: the same routine reads it at `0x004e8444` to hand it back to SetNext(). +0x14c */
     Mesh *mNext;
 };
+
+// 0x002723a0
+inline void Mesh::ScaleUniform(float flScale) {
+    Vec3Scale(mLocalXfm[0], flScale, mLocalXfm[0]);
+    Vec3Scale(mLocalXfm[1], flScale, mLocalXfm[1]);
+    Vec3Scale(mLocalXfm[2], flScale, mLocalXfm[2]);
+    mDirty = 1;
+}
 
 /**
  * Allocate and construct a mesh.
