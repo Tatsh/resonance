@@ -353,8 +353,7 @@ public:
      * Report a copy of the objects the asset load produced, once PollLoad() has run and its result
      * is discarded.
      *
-     * The image has no caller, and PollLoad() expands the same copy. The body is not written,
-     * because it reads the private object list of RndAsyncLoader. The title is inferred.
+     * The image has no caller, and PollLoad() expands the same copy. The title is inferred.
      *
      * @return The objects.
      * @ghidraAddress 0x00250540

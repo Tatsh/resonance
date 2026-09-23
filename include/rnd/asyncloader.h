@@ -135,20 +135,23 @@ public:
      */
     static void PollAsyncLoads();
 
-private:
-    // The objects the request has produced so far. Poll() counts it and
-    // RndAsyncLoader::HarvestLoadedObjects() walks it.
-    std::list<Rnd::Object *> mObjects; // +0x00
+    /**
+     * The objects the request has produced so far. +0x00
+     *
+     * Poll() counts it and RndAsyncLoader::HarvestLoadedObjects() walks it. Public because
+     * MetFreqMakerAssetManager::GetLoadedObjects() and MetFreqMakerAssetManager::PollLoad() copy it
+     * directly, and the image has no accessor.
+     */
+    std::list<Rnd::Object *> mObjects;
 
-public:
     /**
      * Drawables the container load produced.
      *
      * MetScreen::SetShowing() copies the list and shows or hides every entry, which is what fixes
      * the element as a drawable rather than a bare object. Public because that read comes from
      * outside the hierarchy and the image has no accessor to route it through. A friend declaration
-     * fits the image equally well. The member is declared between the two private lists so that the
-     * recovered order, and therefore the recovered layout, is preserved. +0x04
+     * fits the image equally well. The member is declared between mObjects and the private list
+     * after it so that the recovered order, and therefore the recovered layout, is preserved. +0x04
      */
     std::list<Rnd::Drawable *> mDrawables;
 

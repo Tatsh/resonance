@@ -255,6 +255,12 @@ void MetFreqMakerAssetManager::StartAssetLoad() {
     mAssetLoader->Enqueue();
 }
 
+// 0x00250540
+std::list<Rnd::Object *> MetFreqMakerAssetManager::GetLoadedObjects() {
+    PollLoad(); // Yes, the binary discards the result.
+    return mAssetLoader->mObjects;
+}
+
 // 0x0024fe58
 void MetFreqMakerAssetManager::ReleaseParts() {
     for (std::map<HxStr, FreqPartTemplate *>::iterator it = mPartsByName.begin();
