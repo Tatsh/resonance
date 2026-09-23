@@ -45,6 +45,7 @@ autocatchmsg
 autocatchpowerup
 autoriffer
 axebuttonmsg
+axefx
 axephrasemaker
 axingstg
 axiscontrol
