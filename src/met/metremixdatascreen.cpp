@@ -116,12 +116,10 @@ void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
 
     if (pRecord->unknown34_ == GetAlbumJukeboxValue()) {
         HxStr level(pRecord->unknown00_);
-        HxStr songName;
-        QueryConfigString(&songName, kSongNameConfigCode, TextOrEmpty(level));
+        HxStr songName = QueryConfigString(kSongNameConfigCode, TextOrEmpty(level));
         const float flWrapWidth = mUnknownb0->mWrapWidth;
         if (flWrapWidth < mUnknownb0->MeasureText(TextOrEmpty(songName), songName.mLen)) {
-            HxStr shorter;
-            QueryConfigString(&shorter, kShortSongNameConfigCode, TextOrEmpty(level));
+            HxStr shorter = QueryConfigString(kShortSongNameConfigCode, TextOrEmpty(level));
             songName = shorter;
         }
         mUnknownb0->SetText(songName);
@@ -130,8 +128,7 @@ void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
         mUnknownc0->SetShowing(0);
     } else {
         mUnknownc0->SetShowing(1);
-        HxStr notice;
-        QueryConfigString(&notice, kPromptConfigCode, kUnavailableKey);
+        HxStr notice = QueryConfigString(kPromptConfigCode, kUnavailableKey);
         mUnknownc0->SetText(notice);
         mUnknownb0->SetText(HxStr(kNoText));
         mUnknownc4->SetShowing(0);

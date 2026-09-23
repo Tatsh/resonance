@@ -113,8 +113,7 @@ void MetTutorialScreen::EnterAndShow() {
     mUnknown8c->SetSelected(kFirstButtonIndex);
 
     {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
 
@@ -128,14 +127,12 @@ void MetTutorialScreen::ResolveContainerViews() {
 
     {
         HxStr objectName(kFirstButtonObject);
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kFirstPrompt);
+        HxStr label = QueryConfigString(kPromptConfigCode, kFirstPrompt);
         mUnknown8c->Add(objectName, label);
     }
     {
         HxStr objectName(kSecondButtonObject);
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kSecondPrompt);
+        HxStr label = QueryConfigString(kPromptConfigCode, kSecondPrompt);
         mUnknown8c->Add(objectName, label);
     }
 }

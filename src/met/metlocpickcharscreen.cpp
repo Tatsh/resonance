@@ -121,8 +121,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 // A configuration value read by value.
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, nCode, pszKey);
+    HxStr value = QueryConfigString(nCode, pszKey);
     return value;
 }
 

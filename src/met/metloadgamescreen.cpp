@@ -83,8 +83,7 @@ inline long long WatchdogNowNs() {
 
 // A caption read from the configuration.
 inline HxStr Caption(const char *pszKey) {
-    HxStr caption;
-    QueryConfigString(&caption, kCaptionConfigCode, pszKey);
+    HxStr caption = QueryConfigString(kCaptionConfigCode, pszKey);
     return caption;
 }
 

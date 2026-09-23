@@ -68,8 +68,7 @@ constexpr int kRetainView = 1;
 constexpr int kReleaseView = 0;
 
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text;
-    QueryConfigString(&text, nCode, pszKey);
+    HxStr text = QueryConfigString(nCode, pszKey);
     return text;
 }
 
@@ -178,8 +177,7 @@ void MetExpansionPakScreen::OnUnknownSlot26(float flTime) {
     MergeLevelLists(personas);
 
     HxStr before = ConfigText(kPromptConfigCode, kDoneTextBefore);
-    HxStr title;
-    QueryConfigString(&title, kExpansionTitleConfigCode);
+    HxStr title = QueryConfigString(kExpansionTitleConfigCode);
     HxStr after = ConfigText(kPromptConfigCode, kDoneTextAfter);
     HxStr text(
         FormatString(kDoneTextFormat, TextOrEmpty(before), TextOrEmpty(title), TextOrEmpty(after)));

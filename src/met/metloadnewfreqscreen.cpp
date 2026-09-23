@@ -120,8 +120,7 @@ void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
 
 // 0x002a3890
 void MetLoadNewFreqScreen::EnterAndShow() {
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
     mUnknowna8 = 0;
 
@@ -199,8 +198,7 @@ void MetLoadNewFreqScreen::OnUnknownSlot2(const HxStr &text) {
 void MetLoadNewFreqScreen::UpdateNameLabel() {
     Rnd::Text *pLabel = mUnknown90->ButtonAt(kNameButtonIndex)->mText;
 
-    HxStr label;
-    QueryConfigString(&label, kLabelConfigCode, kNameLabelKey);
+    HxStr label = QueryConfigString(kLabelConfigCode, kNameLabelKey);
     pLabel->SetText(label);
 }
 
@@ -231,16 +229,13 @@ void MetLoadNewFreqScreen::AcquireIdentityList() {
 void MetLoadNewFreqScreen::BuildButtonList() {
     mUnknown90->Clear();
 
-    HxStr nameLabel;
-    QueryConfigString(&nameLabel, kLabelConfigCode, kNameLabelKey);
+    HxStr nameLabel = QueryConfigString(kLabelConfigCode, kNameLabelKey);
     mUnknown90->Add(HxStr(kNameButtonObject), nameLabel);
 
-    HxStr editLabel;
-    QueryConfigString(&editLabel, kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     mUnknown90->Add(HxStr(kEditButtonObject), editLabel);
 
-    HxStr createLabel;
-    QueryConfigString(&createLabel, kLabelConfigCode, kCreateLabelKey);
+    HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
     mUnknown90->Add(HxStr(kCreateButtonObject), createLabel);
 
     UpdateNameLabel();

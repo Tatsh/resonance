@@ -1232,8 +1232,7 @@ void MetKeyboardScreen::OnDeparted() {
 
 // 0x0028cbb8
 HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
-    HxStr text;
-    QueryConfigString(&text, kMacroConfigCode, FormatString(kMacroKeyFormat, nIndex + 1));
+    HxStr text = QueryConfigString(kMacroConfigCode, FormatString(kMacroKeyFormat, nIndex + 1));
     return text;
 }
 

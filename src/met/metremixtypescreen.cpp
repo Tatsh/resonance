@@ -163,8 +163,7 @@ void MetRemixTypeScreen::EnterAndShow() {
     HxStr mode;
     if (Application::shared()->GetGameMode() == kGameModeSolo) {
         {
-            HxStr key;
-            QueryConfigString(&key, kTitleConfigCode, kSoloTitleKey);
+            HxStr key = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
             mode = key;
         }
         mThreeButtonView->SetShowing(1);
@@ -175,26 +174,22 @@ void MetRemixTypeScreen::EnterAndShow() {
         mUnknown8c->Clear();
         {
             HxStr objectName(kNewButton);
-            HxStr label;
-            QueryConfigString(&label, kPromptConfigCode, kNewPrompt);
+            HxStr label = QueryConfigString(kPromptConfigCode, kNewPrompt);
             mUnknown8c->Add(objectName, label);
         }
         {
             HxStr objectName(kLoadButton);
-            HxStr label;
-            QueryConfigString(&label, kPromptConfigCode, kLoadPrompt);
+            HxStr label = QueryConfigString(kPromptConfigCode, kLoadPrompt);
             mUnknown8c->Add(objectName, label);
         }
         {
             HxStr objectName(kJukeboxButton);
-            HxStr label;
-            QueryConfigString(&label, kPromptConfigCode, kJukeboxPrompt);
+            HxStr label = QueryConfigString(kPromptConfigCode, kJukeboxPrompt);
             mUnknown8c->Add(objectName, label);
         }
     } else {
         {
-            HxStr key;
-            QueryConfigString(&key, kTitleConfigCode, kMultiTitleKey);
+            HxStr key = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
             mode = key;
         }
         mTwoButtonView->SetShowing(1);
@@ -205,14 +200,12 @@ void MetRemixTypeScreen::EnterAndShow() {
         mUnknown8c->Clear();
         {
             HxStr objectName(kNewButton);
-            HxStr label;
-            QueryConfigString(&label, kPromptConfigCode, kNewPrompt);
+            HxStr label = QueryConfigString(kPromptConfigCode, kNewPrompt);
             mUnknown8c->Add(objectName, label);
         }
         {
             HxStr objectName(kLoadButton);
-            HxStr label;
-            QueryConfigString(&label, kPromptConfigCode, kLoadPrompt);
+            HxStr label = QueryConfigString(kPromptConfigCode, kLoadPrompt);
             mUnknown8c->Add(objectName, label);
         }
     }
@@ -220,8 +213,7 @@ void MetRemixTypeScreen::EnterAndShow() {
     mUnknown14->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
     mUnknown8c->SetSelected(kFirstButtonIndex);
     {
-        HxStr body;
-        QueryConfigString(&body, kTitleConfigCode, kTitleKey);
+        HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);
     }
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
@@ -310,8 +302,7 @@ void MetRemixTypeScreen::OnUnknownSlot36() {
                 buttons.push_back(HxStr(kContinueButton));
                 const HxStr dialogue(kNoSpaceDialogue);
                 const HxStr title(kWarningTitle);
-                HxStr text;
-                QueryConfigString(&text, kPromptConfigCode, kNoSpaceDialogue);
+                HxStr text = QueryConfigString(kPromptConfigCode, kNoSpaceDialogue);
                 MetMsgScreen::Show(dialogue, title, text, kTwoButtons, buttons, this);
                 break;
             }

@@ -37,17 +37,15 @@ int QueryConfigValue(int nEventCode, ...);
 /**
  * Read one configuration value as a string through the embedded interpreter.
  *
- * The same evaluation as QueryConfigFlag(), converting the result through Py::String. The binary
- * returns the string by value into the caller's slot, which this declaration spells as pResult.
- * A failed conversion yields an empty string. Ps2HardSynth's three bank loaders each read a pair
- * of bank paths this way, passing GetHostMode() as the one substituted argument.
+ * The same evaluation as QueryConfigFlag(), converting the result through Py::String. A failed
+ * conversion yields an empty string. Ps2HardSynth's three bank loaders each read a pair of bank
+ * paths this way, passing GetHostMode() as the one substituted argument.
  *
- * @param pResult The string the value is written to.
  * @param nEventCode The template identifier.
- * @return pResult.
+ * @return The value.
  * @ghidraAddress 0x005096d0
  */
-HxStr *QueryConfigString(HxStr *pResult, int nEventCode, ...);
+HxStr QueryConfigString(int nEventCode, ...);
 
 /**
  * Fill a vector of integers from one configuration value through the embedded interpreter.

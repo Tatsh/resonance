@@ -25,8 +25,7 @@ static const char *const kTexts[][2] = {
 // Yes, the binary does not test the text for null.
 inline void FillText(const char *pszText, const char *pszKey) {
     Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszText)));
-    HxStr text;
-    QueryConfigString(&text, kPromptConfigCode, pszKey);
+    HxStr text = QueryConfigString(kPromptConfigCode, pszKey);
     pText->SetText(text);
 }
 

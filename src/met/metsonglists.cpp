@@ -55,20 +55,17 @@ HxStr DifficultyName(int nDifficulty) {
     HxStr name("");
     switch (nDifficulty) {
     case kDifficultyEasy: {
-        HxStr text;
-        QueryConfigString(&text, kStringConfigCode, "ms_easy");
+        HxStr text = QueryConfigString(kStringConfigCode, "ms_easy");
         name = text;
         break;
     }
     case kDifficultyNormal: {
-        HxStr text;
-        QueryConfigString(&text, kStringConfigCode, "ms_normal");
+        HxStr text = QueryConfigString(kStringConfigCode, "ms_normal");
         name = text;
         break;
     }
     case kDifficultyExpert: {
-        HxStr text;
-        QueryConfigString(&text, kStringConfigCode, "ms_expert");
+        HxStr text = QueryConfigString(kStringConfigCode, "ms_expert");
         name = text;
         break;
     }

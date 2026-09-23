@@ -87,8 +87,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 // A dialogue text read by value from configuration.
 inline HxStr ConfigText(const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, kLabelConfigCode, pszKey);
+    HxStr value = QueryConfigString(kLabelConfigCode, pszKey);
     return value;
 }
 
@@ -144,8 +143,7 @@ MetScreen *MetLoadFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
 
 // 0x00297448
 void MetLoadFreqScreen::EnterAndShow() {
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
@@ -159,8 +157,7 @@ void MetLoadFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
         return;
     }
 
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     PushNamedScreen(HxStr(kLoadFreqScreen));
@@ -179,8 +176,7 @@ void MetLoadFreqScreen::UpdateNameLabel() {
     HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
     mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 
-    HxStr editLabel;
-    QueryConfigString(&editLabel, kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
     mUnknown90->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
@@ -229,12 +225,10 @@ void MetLoadFreqScreen::BuildButtonList() {
     mUnknown90->Clear();
     mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
 
-    HxStr editLabel;
-    QueryConfigString(&editLabel, kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     mUnknown90->Add(HxStr(kEditButtonObject), editLabel);
 
-    HxStr createLabel;
-    QueryConfigString(&createLabel, kLabelConfigCode, kCreateLabelKey);
+    HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
     mUnknown90->Add(HxStr(kCreateButtonObject), createLabel);
 
     mUnknown38.erase(mUnknown38.begin(), mUnknown38.end());

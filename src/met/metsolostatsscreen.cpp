@@ -86,8 +86,7 @@ T *FindObject(const char *pszName) {
 // Labels one heading text from configuration code 0x258. The lookup is not tested for null.
 inline void LabelHeading(const char *pszTextName, const char *pszLabelKey) {
     Rnd::Text *pText = FindObject<Rnd::Text>(pszTextName);
-    HxStr label;
-    QueryConfigString(&label, kLabelConfigCode, pszLabelKey);
+    HxStr label = QueryConfigString(kLabelConfigCode, pszLabelKey);
     pText->SetText(label);
 }
 
@@ -151,14 +150,12 @@ void MetSoloStatsScreen::EnterAndShow() {
         MetRemixRecord record(*MetRemixManager::shared()->GetRecord());
         song = record.name;
     } else {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, TextOf(params.mLevelName));
+        HxStr title = QueryConfigString(kTitleConfigCode, TextOf(params.mLevelName));
         song = title;
     }
     const float flWrapWidth = mSongText->mWrapWidth;
     if (flWrapWidth < mSongText->MeasureText(TextOf(song), song.mLen)) {
-        HxStr shorter;
-        QueryConfigString(&shorter, kShortTitleConfigCode, TextOf(params.mLevelName));
+        HxStr shorter = QueryConfigString(kShortTitleConfigCode, TextOf(params.mLevelName));
         song = shorter;
     }
     mSongText->SetText(song);

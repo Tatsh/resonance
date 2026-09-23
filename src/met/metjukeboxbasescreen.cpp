@@ -224,10 +224,8 @@ void MetJukeboxBaseScreen::ShowRemixDetails() {
     } else {
         mUnknowne0.Load(TexturePairRecord::LogoPath(record.unknown00_));
         mUnknown110.Load(TexturePairRecord::PicturePath(record.unknown00_));
-        HxStr first;
-        QueryConfigString(&first, kDetailConfigCode1, TextOrEmpty(record.unknown00_));
-        HxStr second;
-        QueryConfigString(&second, kDetailConfigCode2, TextOrEmpty(record.unknown00_));
+        HxStr first = QueryConfigString(kDetailConfigCode1, TextOrEmpty(record.unknown00_));
+        HxStr second = QueryConfigString(kDetailConfigCode2, TextOrEmpty(record.unknown00_));
         mUnknowna4->SetText(HxStr(TextOrEmpty(first)));
         second += HxStr(kTempoSuffix);
         mUnknowna8->SetText(HxStr(TextOrEmpty(second)));
@@ -241,12 +239,11 @@ void MetJukeboxBaseScreen::ShowRemixDetails() {
     }
 
     if (!bOtherAlbum) {
-        HxStr third;
-        QueryConfigString(&third, kDetailConfigCode3, TextOrEmpty(record.unknown00_));
+        HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(record.unknown00_));
         const float flWrapWidth = mUnknownac->mWrapWidth;
         if (flWrapWidth < mUnknownac->MeasureText(TextOrEmpty(third), third.mLen)) {
-            HxStr shorter;
-            QueryConfigString(&shorter, kDetailConfigCode3Short, TextOrEmpty(record.unknown00_));
+            HxStr shorter =
+                QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(record.unknown00_));
             third = shorter;
         }
         mUnknownac->SetText(third);

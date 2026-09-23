@@ -74,8 +74,7 @@ inline Rnd::Text *FindText(const char *pszName) {
 // Yes, the binary does not test the text for null.
 inline void FillText(const char *pszText, const char *pszKey) {
     Rnd::Text *pText = FindText(pszText);
-    HxStr text;
-    QueryConfigString(&text, kPromptConfigCode, pszKey);
+    HxStr text = QueryConfigString(kPromptConfigCode, pszKey);
     pText->SetText(text);
 }
 
@@ -136,13 +135,12 @@ void MetMultiStatsScreen::EnterAndShow() {
         MetRemixRecord record(*MetRemixManager::shared()->GetRecord());
         songName = record.name;
     } else {
-        HxStr text;
-        QueryConfigString(&text, kSongNameConfigCode, TextOrEmpty(params.mLevelName));
+        HxStr text = QueryConfigString(kSongNameConfigCode, TextOrEmpty(params.mLevelName));
         songName = text;
         const float flWrapWidth = mUnknown8c->mWrapWidth;
         if (flWrapWidth < mUnknown8c->MeasureText(TextOrEmpty(songName), songName.mLen)) {
-            HxStr shorter;
-            QueryConfigString(&shorter, kShortSongNameConfigCode, TextOrEmpty(params.mLevelName));
+            HxStr shorter =
+                QueryConfigString(kShortSongNameConfigCode, TextOrEmpty(params.mLevelName));
             songName = shorter;
         }
     }

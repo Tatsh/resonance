@@ -132,8 +132,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 // A configuration string read by value, with one substituted argument.
 inline HxStr ConfigText(int nCode, const char *pszArgument) {
-    HxStr value;
-    QueryConfigString(&value, nCode, pszArgument);
+    HxStr value = QueryConfigString(nCode, pszArgument);
     return value;
 }
 

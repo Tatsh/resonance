@@ -22,8 +22,7 @@ constexpr int kTitleConfigCode = 0x269;
 constexpr int kCommandQuit = 8;
 
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text;
-    QueryConfigString(&text, nCode, pszKey);
+    HxStr text = QueryConfigString(nCode, pszKey);
     return text;
 }
 

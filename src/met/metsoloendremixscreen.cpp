@@ -114,8 +114,7 @@ void MetSoloEndRemixScreen::ResolveContainerViews() {
 
     Rnd::Text *pPanelText = FindObject<Rnd::Text>(kRemixPanelText);
     {
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kRemixPanelLabel);
+        HxStr label = QueryConfigString(kPromptConfigCode, kRemixPanelLabel);
         pPanelText->SetText(label); // The binary does not test the lookup for null.
     }
 
@@ -163,24 +162,19 @@ void MetSoloEndRemixScreen::ShowResults() {
     mUnknownbc.Load(TexturePairRecord::LogoPath(params.mLevelName));
     mUnknownec.Load(TexturePairRecord::PicturePath(params.mLevelName));
 
-    HxStr genre;
-    QueryConfigString(&genre, kGenreConfigCode, TextOf(params.mLevelName));
-    HxStr bpm;
-    QueryConfigString(&bpm, kBpmConfigCode, TextOf(params.mLevelName));
+    HxStr genre = QueryConfigString(kGenreConfigCode, TextOf(params.mLevelName));
+    HxStr bpm = QueryConfigString(kBpmConfigCode, TextOf(params.mLevelName));
     bpm += HxStr(kBpmSuffix);
     mBpmText->SetText(HxStr(TextOf(bpm)));
     mGenreText->SetText(HxStr(TextOf(genre)));
 
-    HxStr artist;
-    QueryConfigString(&artist, kArtistConfigCode, TextOf(params.mLevelName));
+    HxStr artist = QueryConfigString(kArtistConfigCode, TextOf(params.mLevelName));
     mArtistText->SetText(artist);
 
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, TextOf(params.mLevelName));
+    HxStr title = QueryConfigString(kTitleConfigCode, TextOf(params.mLevelName));
     const float flWrapWidth = mTitleText->mWrapWidth;
     if (flWrapWidth < mTitleText->MeasureText(TextOf(title), title.mLen)) {
-        HxStr shorter;
-        QueryConfigString(&shorter, kShortTitleConfigCode, TextOf(params.mLevelName));
+        HxStr shorter = QueryConfigString(kShortTitleConfigCode, TextOf(params.mLevelName));
         title = shorter;
     }
     mTitleText->SetText(title);
@@ -199,8 +193,7 @@ void MetSoloEndRemixScreen::ShowResults() {
     std::vector<FreqAppearance> appearances;
     appearances.push_back(pPersona->mUnknown140);
     {
-        HxStr caption;
-        QueryConfigString(&caption, kCaptionConfigCode, kCaptionKey);
+        HxStr caption = QueryConfigString(kCaptionConfigCode, kCaptionKey);
         MetScreenTitleScreen::SetTitle(caption);
     }
     PushNamedScreen(HxStr(kHelpScreenName));

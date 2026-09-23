@@ -135,8 +135,7 @@ inline const char *PathOrEmpty(const HxStr &path) {
 
 // A dialogue text read by value from configuration.
 inline HxStr ConfigText(const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, kDialogueConfigCode, pszKey);
+    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
     return value;
 }
 
@@ -435,8 +434,7 @@ void MetRemixManager::OnRemixLoaded(int nPortSlot, int nStatus) {
     buttons.push_back(HxStr(kOkButton));
     const HxStr name(kRemixLoadFailedDialogue);
     const HxStr title(kWarningTitle);
-    HxStr text;
-    QueryConfigString(&text, kDialogueConfigCode, kLoadFailText);
+    HxStr text = QueryConfigString(kDialogueConfigCode, kLoadFailText);
     MetMsgScreen::Show(name, title, text, 1, buttons, this);
 }
 
@@ -594,8 +592,7 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
 void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
     ReplaceScreens(mUnknownac, returnScreens);
     const std::vector<HxStr> buttons;
-    HxStr format;
-    QueryConfigString(&format, kDialogueConfigCode, kMemSaveDialogue);
+    HxStr format = QueryConfigString(kDialogueConfigCode, kMemSaveDialogue);
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     const HxStr text(FormatString(PathOrEmpty(format), FirstCardSlotText()));
     MetMsgScreen::Show(HxStr(kMemSaveDialogue), HxStr(kWarningTitle), text, 0, buttons, this);

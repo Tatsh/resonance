@@ -99,13 +99,11 @@ void MetMultiEndScreen::EnterAndShow() {
     mUnknown8c->Clear();
 
     const HxStr againButton(kAgainButtonObject);
-    HxStr againLabel;
-    QueryConfigString(&againLabel, kPromptConfigCode, kAgainPrompt);
+    HxStr againLabel = QueryConfigString(kPromptConfigCode, kAgainPrompt);
     mUnknown8c->Add(againButton, againLabel);
 
     const HxStr newButton(kNewButtonObject);
-    HxStr newLabel;
-    QueryConfigString(&newLabel, kPromptConfigCode, kNewPrompt);
+    HxStr newLabel = QueryConfigString(kPromptConfigCode, kNewPrompt);
     mUnknown8c->Add(newButton, newLabel);
 
     mUnknown38.clear();
@@ -113,8 +111,7 @@ void MetMultiEndScreen::EnterAndShow() {
     mUnknown38.push_back(HxStr(kNewPrompt));
 
     {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));

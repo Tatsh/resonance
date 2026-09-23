@@ -56,8 +56,7 @@ void MetPauseMultiRemixScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
-    HxStr heading;
-    QueryConfigString(&heading, kPromptConfigCode, kHeadingKey);
+    HxStr heading = QueryConfigString(kPromptConfigCode, kHeadingKey);
     pPaused->SetText(heading);
 
     mUnknown90.clear();

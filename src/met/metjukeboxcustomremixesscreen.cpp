@@ -109,8 +109,7 @@ void MetJukeboxCustomRemixesScreen::ResolveContainerViews() {
     mUnknown140 = dynamic_cast<Rnd::Mesh *>(Find(kPictureMesh));
     mUnknown144 = dynamic_cast<Rnd::Mesh *>(Find(kLogoMesh));
     mUnknown148 = dynamic_cast<Rnd::Text *>(Find(kWarningText));
-    HxStr warning;
-    QueryConfigString(&warning, kPromptConfigCode, kWarningPrompt);
+    HxStr warning = QueryConfigString(kPromptConfigCode, kWarningPrompt);
     mUnknown148->SetText(warning);
     mUnknownb8 = dynamic_cast<Rnd::Text *>(Find(kPlayListCaption));
 }

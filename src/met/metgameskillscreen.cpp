@@ -82,8 +82,7 @@ void MetGameSkillScreen::EnterAndShow() {
     mUnknown38.clear();
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
         {
-            HxStr key;
-            QueryConfigString(&key, kTitleConfigCode, kSoloTitleKey);
+            HxStr key = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
             mode = key;
         }
         mUnknown38.push_back(HxStr(kSoloEasyHelp));
@@ -91,8 +90,7 @@ void MetGameSkillScreen::EnterAndShow() {
         mUnknown38.push_back(HxStr(kSoloExpertHelp));
     } else {
         {
-            HxStr key;
-            QueryConfigString(&key, kTitleConfigCode, kMultiTitleKey);
+            HxStr key = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
             mode = key;
         }
         mUnknown38.push_back(HxStr(kMultiEasyHelp));
@@ -100,8 +98,7 @@ void MetGameSkillScreen::EnterAndShow() {
         mUnknown38.push_back(HxStr(kMultiExpertHelp));
     }
     {
-        HxStr body;
-        QueryConfigString(&body, kTitleConfigCode, kTitleKey);
+        HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);
     }
     MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
@@ -177,20 +174,17 @@ void MetGameSkillScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     {
         HxStr objectName(kEasyButton);
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kEasyPrompt);
+        HxStr label = QueryConfigString(kPromptConfigCode, kEasyPrompt);
         mButtonList->Add(objectName, label);
     }
     {
         HxStr objectName(kNormalButton);
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kNormalPrompt);
+        HxStr label = QueryConfigString(kPromptConfigCode, kNormalPrompt);
         mButtonList->Add(objectName, label);
     }
     {
         HxStr objectName(kExpertButton);
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kExpertPrompt);
+        HxStr label = QueryConfigString(kPromptConfigCode, kExpertPrompt);
         mButtonList->Add(objectName, label);
     }
 }

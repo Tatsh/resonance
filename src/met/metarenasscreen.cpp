@@ -149,22 +149,19 @@ void MetArenasScreen::EnterAndShow() {
     GameParams params(*pManager->GetParams());
 
     {
-        HxStr value;
         const bool bSolo = Application::shared()->GetGameManager()->GetGameMode() == kSoloGameMode;
-        QueryConfigString(&value, kTitleQuery, bSolo ? kSoloKey : kMultiKey);
+        HxStr value = QueryConfigString(kTitleQuery, bSolo ? kSoloKey : kMultiKey);
         mode = value;
     }
     {
-        HxStr value;
-        QueryConfigString(
-            &value, kTitleQuery, params.mUnknown1c == kGamePlayMode ? kGameKey : kRemixKey);
+        HxStr value = QueryConfigString(kTitleQuery,
+                                        params.mUnknown1c == kGamePlayMode ? kGameKey : kRemixKey);
         kind = value;
     }
 
     const HxStr modeSpaced = Concatenate(mode, ' ');
     const HxStr modeKind = modeSpaced + kind;
-    HxStr arenas;
-    QueryConfigString(&arenas, kTitleQuery, kArenasKey);
+    HxStr arenas = QueryConfigString(kTitleQuery, kArenasKey);
     MetScreenTitleScreen::SetTitle(modeKind + arenas);
 
     mUnknown90->invalidate();
@@ -220,9 +217,8 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
         const bool bArena = i < nArenaCount;
         if (bArena) {
             const HxStr &arena = (*GetArenaList())[i].mName;
-            HxStr value;
-            QueryConfigString(
-                &value, kArenaNameQuery, arena.mStr != nullptr ? arena.mStr : g_szEmptyString);
+            HxStr value = QueryConfigString(kArenaNameQuery,
+                                            arena.mStr != nullptr ? arena.mStr : g_szEmptyString);
             label = value;
         } else {
             label = kNoName;
@@ -242,8 +238,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     Rnd::Button *pNone = mUnknown8c->ButtonAt(mUnknown94);
     pNone->SetState(kButtonStateNormal);
     {
-        HxStr text;
-        QueryConfigString(&text, kArenaNoneQuery, kArenaNoneKey);
+        HxStr text = QueryConfigString(kArenaNoneQuery, kArenaNoneKey);
         pNone->mText->SetText(text);
     }
 

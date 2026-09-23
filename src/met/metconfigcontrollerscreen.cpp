@@ -152,8 +152,7 @@ HxStr g_abRightStickName("right analog stick");
 HxStr g_abUnassignedName("o");
 
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text;
-    QueryConfigString(&text, nCode, pszKey);
+    HxStr text = QueryConfigString(nCode, pszKey);
     return text;
 }
 

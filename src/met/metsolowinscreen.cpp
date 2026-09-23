@@ -125,16 +125,13 @@ void MetSoloWinScreen::OnUnknownSlot36() {
 void MetSoloWinScreen::EnterAndShow() {
     mUnknown90->Clear();
 
-    HxStr continueLabel;
-    QueryConfigString(&continueLabel, kPromptConfigCode, kContinuePrompt);
+    HxStr continueLabel = QueryConfigString(kPromptConfigCode, kContinuePrompt);
     mUnknown90->Add(HxStr(kContinueButtonObject), continueLabel);
 
-    HxStr exitLabel;
-    QueryConfigString(&exitLabel, kPromptConfigCode, kExitPrompt);
+    HxStr exitLabel = QueryConfigString(kPromptConfigCode, kExitPrompt);
     mUnknown90->Add(HxStr(kExitButtonObject), exitLabel);
 
-    HxStr restartLabel;
-    QueryConfigString(&restartLabel, kPromptConfigCode, kRestartPrompt);
+    HxStr restartLabel = QueryConfigString(kPromptConfigCode, kRestartPrompt);
     mUnknown90->Add(HxStr(kRestartButtonObject), restartLabel);
 
     mUnknown90->SetSelected(kContinueButtonIndex);
@@ -144,8 +141,7 @@ void MetSoloWinScreen::EnterAndShow() {
     mUnknown38.push_back(HxStr(kExitPrompt));
     mUnknown38.push_back(HxStr(kRestartPrompt));
 
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     PushNamedScreen(HxStr(kHelpScreen));

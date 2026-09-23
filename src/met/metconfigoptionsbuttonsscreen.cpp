@@ -64,8 +64,7 @@ static const char *const kCreditsScreen = "MetCreditsScreen";
 static const char *const kExpansionPakScreen = "MetExpansionPakScreen";
 
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text;
-    QueryConfigString(&text, nCode, pszKey);
+    HxStr text = QueryConfigString(nCode, pszKey);
     return text;
 }
 

@@ -86,8 +86,6 @@ Renderer::Renderer()
     : mSongClock(Application::shared()->GetSongClock()), mSongTick(0.0f), mDrawTimingGraph(0),
       mDrawRenderStats(0), mCellsPerRow(0), mRowCount(0), mTunnel(nullptr), mOverlay(nullptr),
       mArena(nullptr), mLeader(nullptr) {
-    HxStr arena;
-    HxStr level;
     float flProgress;
 
     g_nLsdMode = 0;
@@ -98,8 +96,8 @@ Renderer::Renderer()
     } while (PollCommon(&flProgress) == 0);
     PollCommon(&flProgress); // Yes, the binary polls once more and discards the result.
 
-    QueryConfigString(&arena, kArenaNameConfigCode);
-    QueryConfigString(&level, kLevelNameConfigCode);
+    HxStr arena = QueryConfigString(kArenaNameConfigCode);
+    HxStr level = QueryConfigString(kLevelNameConfigCode);
     int nLoaded;
     do {
         RndAsyncLoader::PollAsyncLoads();

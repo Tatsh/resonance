@@ -66,8 +66,7 @@ void MetPauseGameScreen::EnterAndShow() {
     } else {
         pszHeadingKey = kGameHeadingKey;
     }
-    HxStr heading;
-    QueryConfigString(&heading, kPromptConfigCode, pszHeadingKey);
+    HxStr heading = QueryConfigString(kPromptConfigCode, pszHeadingKey);
     pPaused->SetText(heading);
 
     mUnknown90.clear();

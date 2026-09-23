@@ -304,8 +304,7 @@ void GameManagerImpl::CreateWorld() {
     CallScriptTemplate(kScriptTemplateArenaName,
                        arena.mStr != nullptr ? arena.mStr : g_szEmptyString);
 
-    HxStr container;
-    QueryConfigString(&container, kContainerConfigCode);
+    HxStr container = QueryConfigString(kContainerConfigCode);
     mpWorld->StartLoad(container);
 }
 
@@ -597,7 +596,6 @@ void GameManagerImpl::QueueMessage(Message *pMsg) {
 
 // 0x0010bf10
 void GameManagerImpl::OnDoPlayback(Message *) {
-    HxStr file;
-    QueryConfigString(&file, kPlaybackFileConfigCode);
+    HxStr file = QueryConfigString(kPlaybackFileConfigCode);
     StartPlayback(file, 0);
 }

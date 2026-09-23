@@ -160,8 +160,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 // Add one button labelled from configuration. Slot 38 expands it for each button.
 inline void AddButton(MetButtonList *pList, const char *pszObjectName, const char *pszPrompt) {
     HxStr objectName(pszObjectName);
-    HxStr label;
-    QueryConfigString(&label, kPromptConfigCode, pszPrompt);
+    HxStr label = QueryConfigString(kPromptConfigCode, pszPrompt);
     pList->Add(objectName, label);
 }
 
@@ -189,12 +188,10 @@ MetFreqMakerButtonsScreen *MetFreqMakerButtonsScreen::New(MetRenderer *pRenderer
 void MetFreqMakerButtonsScreen::EnterAndShow() {
     mButtonList->SetSelected(kFirstButtonIndex);
     if (mEditing == kCreating) {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, kCreateTitleKey);
+        HxStr title = QueryConfigString(kTitleConfigCode, kCreateTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     } else if (mEditing == kEditing) {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, kEditTitleKey);
+        HxStr title = QueryConfigString(kTitleConfigCode, kEditTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
     Rnd::Button *pSave = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kSaveButton)));

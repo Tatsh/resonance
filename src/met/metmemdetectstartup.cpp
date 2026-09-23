@@ -46,8 +46,7 @@ constexpr int kReleaseView = 0;
 
 // A configuration value read by value.
 inline HxStr ConfigText(const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, kDialogueConfigCode, pszKey);
+    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
     return value;
 }
 

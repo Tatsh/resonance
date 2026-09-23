@@ -87,8 +87,7 @@ MetLoadPreFabScreen::~MetLoadPreFabScreen() {
 void MetLoadPreFabScreen::EnterAndShow() {
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
 
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     MetLoadFreqBaseScreen::EnterAndShow();
@@ -99,12 +98,10 @@ void MetLoadPreFabScreen::BuildButtonList() {
     mUnknown90->Clear();
     mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
 
-    HxStr editLabel;
-    QueryConfigString(&editLabel, kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     mUnknown90->Add(HxStr(kEditButtonObject), editLabel);
 
-    HxStr createLabel;
-    QueryConfigString(&createLabel, kLabelConfigCode, kCreateLabelKey);
+    HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
     mUnknown90->Add(HxStr(kCreateButtonObject), createLabel);
 
     mUnknown38.erase(mUnknown38.begin(), mUnknown38.end());
@@ -120,8 +117,7 @@ void MetLoadPreFabScreen::UpdateNameLabel() {
     HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
     mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 
-    HxStr editLabel;
-    QueryConfigString(&editLabel, kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
     mUnknown90->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
@@ -178,8 +174,7 @@ void MetLoadPreFabScreen::OnCreateButton() {
         ExitScreenByName(HxStr(kHelpScreen));
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kOkButton));
-        HxStr text;
-        QueryConfigString(&text, kLabelConfigCode, kFreqLimitTextKey);
+        HxStr text = QueryConfigString(kLabelConfigCode, kFreqLimitTextKey);
         MetMsgScreen::Show(
             HxStr(kFreqLimitMessage), HxStr(kFreqLimitTitle), text, kOneButton, buttons, this);
     } else {
@@ -194,8 +189,7 @@ void MetLoadPreFabScreen::OnMsgScreenDismissed(const HxStr &name, int) {
         return;
     }
 
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     PushNamedScreen(HxStr(kHelpScreen));

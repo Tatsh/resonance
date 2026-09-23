@@ -154,8 +154,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 // A dialogue text read by value from configuration.
 inline HxStr ConfigText(const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, kPromptConfigCode, pszKey);
+    HxStr value = QueryConfigString(kPromptConfigCode, pszKey);
     return value;
 }
 
@@ -227,8 +226,7 @@ void MetRemixDelScreen::EnterAndShow() {
     PushNamedScreen(HxStr(kHelpScreen));
     MetHelpScreen::SelectPreset(HxStr(kOnlyBackPreset));
     MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
-    HxStr format;
-    QueryConfigString(&format, kTitleConfigCode, kTitleKey);
+    HxStr format = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(
         HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown108.mSlotName))));
     PushNamedScreen(HxStr(kDataScreen));
@@ -239,8 +237,7 @@ void MetRemixDelScreen::EnterAndShow() {
 void MetRemixDelScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     Rnd::Text *pTitle = FindText(kListTitleObject); // Yes, the binary does not test it for null.
-    HxStr title;
-    QueryConfigString(&title, kPromptConfigCode, kListTitleKey);
+    HxStr title = QueryConfigString(kPromptConfigCode, kListTitleKey);
     pTitle->SetText(title);
     pTitle->SetShowing(1);
     mUnknown138 = FindFont(kRowFont);

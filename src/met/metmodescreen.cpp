@@ -82,13 +82,11 @@ void MetModeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     const HxStr gameButton(kGameButtonObject);
-    HxStr gameLabel;
-    QueryConfigString(&gameLabel, kLabelConfigCode, kGameLabelKey);
+    HxStr gameLabel = QueryConfigString(kLabelConfigCode, kGameLabelKey);
     mUnknown8c->Add(gameButton, gameLabel);
 
     const HxStr jamButton(kJamButtonObject);
-    HxStr jamLabel;
-    QueryConfigString(&jamLabel, kLabelConfigCode, kJamLabelKey);
+    HxStr jamLabel = QueryConfigString(kLabelConfigCode, kJamLabelKey);
     mUnknown8c->Add(jamButton, jamLabel);
 }
 
@@ -136,14 +134,12 @@ void MetModeScreen::EnterAndShow() {
 
     mUnknown38.clear();
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
-        HxStr solo;
-        QueryConfigString(&solo, kTitleConfigCode, kSoloTitleKey);
+        HxStr solo = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
         prefix = solo;
         mUnknown38.push_back(HxStr(kSoloGamePrompt));
         mUnknown38.push_back(HxStr(kSoloJamPrompt));
     } else {
-        HxStr multi;
-        QueryConfigString(&multi, kTitleConfigCode, kMultiTitleKey);
+        HxStr multi = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
         prefix = multi;
         mUnknown38.push_back(HxStr(kMultiGamePrompt));
         mUnknown38.push_back(HxStr(kMultiJamPrompt));
@@ -151,8 +147,7 @@ void MetModeScreen::EnterAndShow() {
     MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
 
-    HxStr mode;
-    QueryConfigString(&mode, kTitleConfigCode, kModeTitleKey);
+    HxStr mode = QueryConfigString(kTitleConfigCode, kModeTitleKey);
     MetScreenTitleScreen::SetTitle(prefix + mode);
 
     MetScreen::EnterAndShow();

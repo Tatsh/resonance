@@ -94,8 +94,7 @@ void MetMultiEndRemixScreen::ResolveContainerViews() {
 
     Rnd::Text *pPanelText = FindObject<Rnd::Text>(kRemixPanelText);
     {
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kRemixPanelLabel);
+        HxStr label = QueryConfigString(kPromptConfigCode, kRemixPanelLabel);
         pPanelText->SetText(label); // The binary does not test the lookup for null.
     }
 
@@ -124,10 +123,8 @@ void MetMultiEndRemixScreen::EnterAndShow() {
     mLogoTextures.Load(TexturePairRecord::LogoPath(params.mLevelName));
     mLabelTextures.Load(TexturePairRecord::PicturePath(params.mLevelName));
 
-    HxStr genre;
-    QueryConfigString(&genre, kGenreConfigCode, TextOf(params.mLevelName));
-    HxStr bpm;
-    QueryConfigString(&bpm, kBpmConfigCode, TextOf(params.mLevelName));
+    HxStr genre = QueryConfigString(kGenreConfigCode, TextOf(params.mLevelName));
+    HxStr bpm = QueryConfigString(kBpmConfigCode, TextOf(params.mLevelName));
     mGenreText->SetText(HxStr(FormatString(kGenreFormat, TextOf(genre))));
     mBpmText->SetText(HxStr(FormatString(kBpmFormat, TextOf(bpm))));
 
@@ -146,8 +143,7 @@ void MetMultiEndRemixScreen::EnterAndShow() {
     }
 
     {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));

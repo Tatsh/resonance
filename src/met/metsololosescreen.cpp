@@ -86,12 +86,10 @@ void MetSoloLoseScreen::EnterAndShow() {
     SetShowing(0);
     mUnknown8c->Clear();
 
-    HxStr retryLabel;
-    QueryConfigString(&retryLabel, kPromptConfigCode, kRetryPrompt);
+    HxStr retryLabel = QueryConfigString(kPromptConfigCode, kRetryPrompt);
     mUnknown8c->Add(HxStr(kRetryButtonObject), retryLabel);
 
-    HxStr levelsLabel;
-    QueryConfigString(&levelsLabel, kPromptConfigCode, kLevelsPrompt);
+    HxStr levelsLabel = QueryConfigString(kPromptConfigCode, kLevelsPrompt);
     mUnknown8c->Add(HxStr(kLevelsButtonObject), levelsLabel);
 
     mUnknown38.clear();
@@ -177,8 +175,7 @@ void MetSoloLoseScreen::OnUnknownSlot36() {
 // 0x0039a4e8
 void MetSoloLoseScreen::ShowButtons() {
     {
-        HxStr caption;
-        QueryConfigString(&caption, kCaptionConfigCode, kCaptionKey);
+        HxStr caption = QueryConfigString(kCaptionConfigCode, kCaptionKey);
         MetScreenTitleScreen::SetTitle(caption);
     }
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));

@@ -122,8 +122,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 // A dialogue text read by value from configuration.
 inline HxStr ConfigText(const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, kDialogueConfigCode, pszKey);
+    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
     return value;
 }
 
@@ -133,16 +132,14 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy) {
     if (nCopy == 0) {
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kContinueButton));
-        HxStr format;
-        QueryConfigString(&format, kDialogueConfigCode, kSaveNoSpaceText);
+        HxStr format = QueryConfigString(kDialogueConfigCode, kSaveNoSpaceText);
         HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
         MetMsgScreen::ShowActive(
             HxStr(kSaveNoSpaceDialogue), HxStr(kWarningTitle), text, kTwoButtons, buttons, pOwner);
     } else {
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kCancelButton));
-        HxStr format;
-        QueryConfigString(&format, kDialogueConfigCode, kCopyNoSpaceText);
+        HxStr format = QueryConfigString(kDialogueConfigCode, kCopyNoSpaceText);
         HxStr text(FormatString(
             TextOrEmpty(format), TextOrEmpty(slotName), GlobalSettings::shared()->mUnknown74));
         MetMsgScreen::ShowActive(
@@ -167,8 +164,7 @@ inline void ShowNoCard(MetScreen *pOwner, const HxStr &slotName, int nDelete, in
         buttons.push_back(HxStr(kCancelButton));
         pszKey = kCopyFailNoCardText;
     }
-    HxStr format;
-    QueryConfigString(&format, kDialogueConfigCode, pszKey);
+    HxStr format = QueryConfigString(kDialogueConfigCode, pszKey);
     HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
     MetMsgScreen::Show(
         HxStr(kMemCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, pOwner);
@@ -346,10 +342,8 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
         MetMsgScreen::Show(HxStr(kSaveDialogue), title, text, kNoButtons, buttons, this);
     } else if (mUnknown94 != 0) {
         std::vector<HxStr> noButtons;
-        HxStr first;
-        QueryConfigString(&first, kDialogueConfigCode, kDeleteFirstText);
-        HxStr second;
-        QueryConfigString(&second, kDialogueConfigCode, kDeleteSecondText);
+        HxStr first = QueryConfigString(kDialogueConfigCode, kDeleteFirstText);
+        HxStr second = QueryConfigString(kDialogueConfigCode, kDeleteSecondText);
         HxStr deleting(FormatString(kDeleteFormat,
                                     TextOrEmpty(first),
                                     TextOrEmpty(mUnknownc0.mSlotName),
@@ -373,10 +367,9 @@ void MetPersonaSaverScreen::OnCardFormatted(int, int nStatus) {
     case kMemcardStatusOk:
     case kMemcardStatusAlreadyFormatted: {
         buttons.push_back(HxStr(kContinueButton));
-        HxStr format;
-        QueryConfigString(&format,
-                          kDialogueConfigCode,
-                          nStatus == kMemcardStatusOk ? kFormatSuccessText : kFormatAlreadyText);
+        HxStr format = QueryConfigString(kDialogueConfigCode,
+                                         nStatus == kMemcardStatusOk ? kFormatSuccessText :
+                                                                       kFormatAlreadyText);
         HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
         MetMsgScreen::ShowActive(
             HxStr(kFormatDoneDialogue), HxStr(kWarningTitle), text, kOneButton, buttons, this);
@@ -387,8 +380,7 @@ void MetPersonaSaverScreen::OnCardFormatted(int, int nStatus) {
         buttons.push_back(HxStr(kBackButton));
         HxStr name(kFormatFailDialogue);
         HxStr title(kErrorTitle);
-        HxStr text;
-        QueryConfigString(&text, kDialogueConfigCode, kFormatFailText);
+        HxStr text = QueryConfigString(kDialogueConfigCode, kFormatFailText);
         MetMsgScreen::Show(name, title, text, kTwoButtons, buttons, this);
         break;
     }
@@ -403,8 +395,7 @@ int MetPersonaSaverScreen::CheckPersonaLimit() {
 
     std::vector<HxStr> buttons;
     buttons.push_back(HxStr(kOkButton));
-    HxStr format;
-    QueryConfigString(&format, kDialogueConfigCode, kLimitText);
+    HxStr format = QueryConfigString(kDialogueConfigCode, kLimitText);
     HxStr text(FormatString(TextOrEmpty(format), kMaxPersonas, TextOrEmpty(mUnknownc0.mSlotName)));
     MetMsgScreen::Show(HxStr(kLimitDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
     return 0;
@@ -425,8 +416,7 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
     if (pPersona->mUnknown140.mUnknown00 == kNoText) {
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kOkButton));
-        HxStr text;
-        QueryConfigString(&text, kDialogueConfigCode, kNoNameText);
+        HxStr text = QueryConfigString(kDialogueConfigCode, kNoNameText);
         MetMsgScreen::Show(
             HxStr(kNameRequiredDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
         return;
@@ -459,8 +449,7 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kRetryButton));
             buttons.push_back(HxStr(kContinueButton));
-            HxStr format;
-            QueryConfigString(&format, kDialogueConfigCode, kDeleteNotFoundText);
+            HxStr format = QueryConfigString(kDialogueConfigCode, kDeleteNotFoundText);
             HxStr text(FormatString(TextOrEmpty(format),
                                     TextOrEmpty(mUnknownb8->mUnknown140.mUnknown00),
                                     TextOrEmpty(mUnknownc0.mSlotName)));
@@ -476,8 +465,7 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
         if (nNameIndex != kNotFound) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kOkButton));
-            HxStr format;
-            QueryConfigString(&format, kDialogueConfigCode, kNewNameText);
+            HxStr format = QueryConfigString(kDialogueConfigCode, kNewNameText);
             HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
             MetMsgScreen::Show(
                 HxStr(kNameRequiredDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
@@ -548,8 +536,7 @@ void MetPersonaSaverScreen::OnPersonasSaved(int nPortSlot, int nStatus) {
         buttons.push_back(HxStr(kContinueButton));
         HxStr name(kSaveNoSpaceDialogue);
         HxStr title(kWarningTitle);
-        HxStr text;
-        QueryConfigString(&text, kDialogueConfigCode, kSaveFailGeneralText);
+        HxStr text = QueryConfigString(kDialogueConfigCode, kSaveFailGeneralText);
         MetMsgScreen::ShowActive(name, title, text, kTwoButtons, buttons, this);
         break;
     }
@@ -570,8 +557,7 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
             return;
         }
         MemcardManager::shared()->CreateFormatTask(mUnknownc0.mPortSlot);
-        HxStr format;
-        QueryConfigString(&format, kDialogueConfigCode, kFormatGoText);
+        HxStr format = QueryConfigString(kDialogueConfigCode, kFormatGoText);
         HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
         std::vector<HxStr> noButtons;
         MetMsgScreen::Show(
@@ -587,8 +573,7 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
         buttons.push_back(HxStr(kContinueButton));
         HxStr warnName(kNoSaveWarnDialogue);
         HxStr title(kWarningTitle);
-        HxStr text;
-        QueryConfigString(&text, kDialogueConfigCode, kNoSaveWarnText);
+        HxStr text = QueryConfigString(kDialogueConfigCode, kNoSaveWarnText);
         MetMsgScreen::ShowActive(warnName, title, text, kOneButton, buttons, this);
     } else if (name == kSaveNoSpaceDialogue || name == kCopyNoSpaceDialogue) {
         if (nChoice == kChoiceFirst) {
@@ -614,8 +599,7 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
 
 // 0x003350f8
 void MetPersonaSaverScreen::AskToReplace() {
-    HxStr format;
-    QueryConfigString(&format, kDialogueConfigCode, kReplaceText);
+    HxStr format = QueryConfigString(kDialogueConfigCode, kReplaceText);
     HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
     std::vector<HxStr> buttons;
     buttons.push_back(HxStr(kNoButton));

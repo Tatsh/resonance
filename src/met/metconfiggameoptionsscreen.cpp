@@ -75,8 +75,7 @@ static const char *const kRightGizmoScreen = "MetRightGizmoScreen";
 static const char *const kOptionsButtonsScreen = "MetConfigOptionsButtonsScreen";
 
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text;
-    QueryConfigString(&text, nCode, pszKey);
+    HxStr text = QueryConfigString(nCode, pszKey);
     return text;
 }
 

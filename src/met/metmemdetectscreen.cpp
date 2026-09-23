@@ -86,8 +86,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 // A dialogue text read by value from configuration.
 inline HxStr ConfigText(const char *pszKey) {
-    HxStr value;
-    QueryConfigString(&value, kDialogueConfigCode, pszKey);
+    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
     return value;
 }
 

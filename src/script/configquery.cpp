@@ -55,20 +55,19 @@ int QueryConfigFlag(int nEventCode, ...) {
 }
 
 // 0x005096d0
-HxStr *QueryConfigString(HxStr *pResult, int nEventCode, ...) {
+HxStr QueryConfigString(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
     const HxStr expression = FormatMessage(GetScriptTemplate(nEventCode), args);
     va_end(args);
 
     try {
-        *pResult = static_cast<HxStr>(Py::String(EvalScriptExpression(expression)));
+        return static_cast<HxStr>(Py::String(EvalScriptExpression(expression)));
     } catch (Py::Exception &) {
         Fatal("%s does not evaluate to a HxStr", ExpressionText(expression));
         PyErr_Clear();
-        *pResult = "";
+        return HxStr("");
     }
-    return pResult;
 }
 
 // 0x00509b78

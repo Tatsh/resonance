@@ -95,10 +95,8 @@ void MetPauseSoloGameScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
-    HxStr heading;
-    QueryConfigString(&heading,
-                      kPromptConfigCode,
-                      params.mUnknown1c == kPlayModeJam ? kRemixHeadingKey : kGameHeadingKey);
+    HxStr heading = QueryConfigString(
+        kPromptConfigCode, params.mUnknown1c == kPlayModeJam ? kRemixHeadingKey : kGameHeadingKey);
     pPaused->SetText(heading);
 
     mUnknown90.clear();

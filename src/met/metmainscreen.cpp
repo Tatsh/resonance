@@ -82,8 +82,7 @@ constexpr int kSaveReturnScreenCount = 1;
 // Add one button labelled from configuration. Slot 38 expands it for each button.
 inline void AddButton(MetButtonList *pList, const char *pszObjectName, const char *pszLabelKey) {
     HxStr objectName(pszObjectName);
-    HxStr label;
-    QueryConfigString(&label, kLabelConfigCode, pszLabelKey);
+    HxStr label = QueryConfigString(kLabelConfigCode, pszLabelKey);
     pList->Add(objectName, label);
 }
 

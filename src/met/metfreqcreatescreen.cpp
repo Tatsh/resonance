@@ -80,8 +80,7 @@ constexpr int kNoRandomize = 0;
 
 // A dialogue text read by value from configuration.
 inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text;
-    QueryConfigString(&text, nCode, pszKey);
+    HxStr text = QueryConfigString(nCode, pszKey);
     return text;
 }
 
@@ -117,8 +116,7 @@ void MetFreqCreateScreen::EnterAndShow() {
     RefreshSelection();
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
     {
-        HxStr title;
-        QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
     PushNamedScreen(HxStr(kLeftGizmoScreen));

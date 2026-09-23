@@ -240,10 +240,9 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
 
         HxStr songName(Application::shared()->GetWorld()->mSongName);
         const HxStr &levelName = Application::shared()->GetGameManager()->GetParams()->mLevelName;
-        HxStr caption;
-        QueryConfigString(&caption,
-                          kJukeboxCaptionConfigCode,
-                          levelName.mStr != nullptr ? levelName.mStr : g_szEmptyString);
+        HxStr caption =
+            QueryConfigString(kJukeboxCaptionConfigCode,
+                              levelName.mStr != nullptr ? levelName.mStr : g_szEmptyString);
         Rnd::Text *pLine = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("HUD juke1.txt")));
         pLine->SetText(songName);
         pLine->SetShowing(1);

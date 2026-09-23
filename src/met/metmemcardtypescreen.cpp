@@ -67,8 +67,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 // Add one button labelled from configuration. Slot 38 expands it for each button.
 inline void AddButton(MetButtonList *pList, const char *pszObjectName, const char *pszLabelKey) {
     HxStr objectName(pszObjectName);
-    HxStr label;
-    QueryConfigString(&label, kLabelConfigCode, pszLabelKey);
+    HxStr label = QueryConfigString(kLabelConfigCode, pszLabelKey);
     pList->Add(objectName, label);
 }
 
@@ -102,8 +101,7 @@ void MetMemCardTypeScreen::EnterAndShow() {
     if (mButtonList->mSelected == kNoSelection) {
         mButtonList->SetSelected(kRemixButtonIndex);
     }
-    HxStr format;
-    QueryConfigString(&format, kTitleConfigCode, kTitleFormatKey);
+    HxStr format = QueryConfigString(kTitleConfigCode, kTitleFormatKey);
     const HxStr title(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     MetScreenTitleScreen::SetTitle(title);
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));

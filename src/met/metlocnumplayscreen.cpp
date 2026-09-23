@@ -77,20 +77,16 @@ MetLocNumPlayScreen::MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority)
 void MetLocNumPlayScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
-    HxStr twoLabel;
-    QueryConfigString(&twoLabel, kLabelConfigCode, kTwoPlayerKey);
+    HxStr twoLabel = QueryConfigString(kLabelConfigCode, kTwoPlayerKey);
     mButtonList->Add(HxStr(kTwoPlayerButton), twoLabel);
 
-    HxStr threeLabel;
-    QueryConfigString(&threeLabel, kLabelConfigCode, kThreePlayerKey);
+    HxStr threeLabel = QueryConfigString(kLabelConfigCode, kThreePlayerKey);
     mButtonList->Add(HxStr(kThreePlayerButton), threeLabel);
 
-    HxStr fourLabel;
-    QueryConfigString(&fourLabel, kLabelConfigCode, kFourPlayerKey);
+    HxStr fourLabel = QueryConfigString(kLabelConfigCode, kFourPlayerKey);
     mButtonList->Add(HxStr(kFourPlayerButton), fourLabel);
 
-    HxStr tipsLabel;
-    QueryConfigString(&tipsLabel, kLabelConfigCode, kTipsKey);
+    HxStr tipsLabel = QueryConfigString(kLabelConfigCode, kTipsKey);
     mButtonList->Add(HxStr(kTipsButton), tipsLabel);
 }
 
@@ -131,8 +127,7 @@ void MetLocNumPlayScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x002ae218
 void MetLocNumPlayScreen::EnterAndShow() {
-    HxStr title;
-    QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     mUnknown10->mUnknownd4 = kMaxControllers;

@@ -158,15 +158,13 @@ void MetStageFinishScreen::ResolveContainerViews() {
 
     {
         HxStr objectName(kContinueButtonObject);
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kContinuePrompt);
+        HxStr label = QueryConfigString(kPromptConfigCode, kContinuePrompt);
         mUnknowna4->Add(objectName, label);
     }
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
         Rnd::Text *pText = FindText(HxStr(FormatString(kCongratulationTextFormat, i)));
-        HxStr text;
-        QueryConfigString(&text, kPromptConfigCode, kContainerName);
+        HxStr text = QueryConfigString(kPromptConfigCode, kContainerName);
         pText->SetText(text); // The binary does not test the lookup for null.
     }
 }
@@ -318,8 +316,7 @@ void MetStageFinishScreen::AddHighScoreMessage(int nPreviousScore, int nScore) {
     if (nPreviousScore == 0 || nPreviousScore >= nScore) {
         return;
     }
-    HxStr message;
-    QueryConfigString(&message, kPromptConfigCode, kHighScoreKey);
+    HxStr message = QueryConfigString(kPromptConfigCode, kHighScoreKey);
     mUnknown8c.push_back(message);
 }
 
@@ -328,11 +325,9 @@ void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int n
     if (nPreviousCompleted >= nCompleted) {
         return;
     }
-    HxStr format;
-    QueryConfigString(&format, kPromptConfigCode, kArenaCompleteKey);
+    HxStr format = QueryConfigString(kPromptConfigCode, kArenaCompleteKey);
     const ArenaListEntry &arena = (*GetArenaList())[nCompleted - 1];
-    HxStr arenaName;
-    QueryConfigString(&arenaName, kArenaNameConfigCode, TextOf(arena.mName));
+    HxStr arenaName = QueryConfigString(kArenaNameConfigCode, TextOf(arena.mName));
     HxStr message(FormatString(TextOf(format), TextOf(arenaName)));
     mUnknown8c.push_back(message);
 }
@@ -350,13 +345,11 @@ void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComp
         (nStage == kNormalLastStage && nDifficulty == kDifficultyNormal) ||
         (nStage == kExpertLastStage && nDifficulty == kDifficultyExpert)) {
         HxStr difficultyName = DifficultyName(nDifficulty);
-        HxStr format;
-        QueryConfigString(&format, kPromptConfigCode, kLastStageKey);
+        HxStr format = QueryConfigString(kPromptConfigCode, kLastStageKey);
         HxStr message(FormatString(TextOf(format), TextOf(difficultyName)));
         mUnknown8c.push_back(message);
     } else {
-        HxStr format;
-        QueryConfigString(&format, kPromptConfigCode, kStageKey);
+        HxStr format = QueryConfigString(kPromptConfigCode, kStageKey);
         HxStr message(FormatString(TextOf(format), nStage + 1));
         mUnknown8c.push_back(message);
     }
@@ -373,8 +366,7 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
     QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
     HxStr message;
     if (params.mDifficulty != kDifficultyExpert) {
-        HxStr format;
-        QueryConfigString(&format, kPromptConfigCode, kDifficultyUnlockKey);
+        HxStr format = QueryConfigString(kPromptConfigCode, kDifficultyUnlockKey);
         HxStr difficultyName = DifficultyName(params.mDifficulty + 1);
         message = FormatString(TextOf(format), TextOf(difficultyName));
         mUnknown8c.push_back(message);
@@ -438,8 +430,7 @@ void MetStageFinishScreen::AddStageScoreBeatMessage(int nWasBeaten, int nIsBeate
     if (nIsBeaten == 0 || nWasBeaten != 0) {
         return;
     }
-    HxStr message;
-    QueryConfigString(&message, kPromptConfigCode, kStageScoreBeatKey);
+    HxStr message = QueryConfigString(kPromptConfigCode, kStageScoreBeatKey);
     mUnknown8c.push_back(message);
 }
 
@@ -448,8 +439,7 @@ void MetStageFinishScreen::AddSecretUnlockMessage(int nWasUnlocked, int nIsUnloc
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
-    HxStr message;
-    QueryConfigString(&message, kPromptConfigCode, kSecretKey);
+    HxStr message = QueryConfigString(kPromptConfigCode, kSecretKey);
     mUnknown8c.push_back(message);
 }
 
@@ -458,8 +448,7 @@ void MetStageFinishScreen::AddSuperSecretUnlockMessage(int nWasUnlocked, int nIs
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
-    HxStr message;
-    QueryConfigString(&message, kPromptConfigCode, kSuperSecretKey);
+    HxStr message = QueryConfigString(kPromptConfigCode, kSuperSecretKey);
     mUnknown8c.push_back(message);
 }
 
@@ -468,7 +457,6 @@ void MetStageFinishScreen::AddEndSuperSecretUnlockMessage(int nWasUnlocked, int 
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
-    HxStr message;
-    QueryConfigString(&message, kPromptConfigCode, kEndSuperSecretKey);
+    HxStr message = QueryConfigString(kPromptConfigCode, kEndSuperSecretKey);
     mUnknown8c.push_back(message);
 }

@@ -69,10 +69,8 @@ Ps2HardSynth::~Ps2HardSynth() {
 void Ps2HardSynth::LoadBankSet4() {
     UnloadBanks();
 
-    HxStr bdName;
-    QueryConfigString(&bdName, kBankSet4BdCode, GetHostMode());
-    HxStr hdName;
-    QueryConfigString(&hdName, kBankSet4HdCode, GetHostMode());
+    HxStr bdName = QueryConfigString(kBankSet4BdCode, GetHostMode());
+    HxStr hdName = QueryConfigString(kBankSet4HdCode, GetHostMode());
     LoadBankPair(bdName, hdName, kTagAllChannels, kPlacementFixed);
 
     ConfigureSpu2Effects(0);
@@ -85,10 +83,8 @@ void Ps2HardSynth::LoadBankSet4() {
 void Ps2HardSynth::LoadBankSet5() {
     mUseSfxBank = 1;
 
-    HxStr bdName;
-    QueryConfigString(&bdName, kBankSet5BdCode, GetHostMode());
-    HxStr hdName;
-    QueryConfigString(&hdName, kBankSet5HdCode, GetHostMode());
+    HxStr bdName = QueryConfigString(kBankSet5BdCode, GetHostMode());
+    HxStr hdName = QueryConfigString(kBankSet5HdCode, GetHostMode());
     LoadBankPair(bdName, hdName, kTagAllChannels, kPlacementFixedSecond);
 
     SelectSfxProgram();
@@ -100,10 +96,8 @@ void Ps2HardSynth::LoadBankSet5() {
 void Ps2HardSynth::LoadBankSet6() {
     mAlternateBanksResident = QueryConfigFlag(kAlternateBanksCode);
 
-    HxStr bdName;
-    QueryConfigString(&bdName, kBankSet6BdCode, mAlternateBanksResident, GetHostMode());
-    HxStr hdName;
-    QueryConfigString(&hdName, kBankSet6HdCode, mAlternateBanksResident, GetHostMode());
+    HxStr bdName = QueryConfigString(kBankSet6BdCode, mAlternateBanksResident, GetHostMode());
+    HxStr hdName = QueryConfigString(kBankSet6HdCode, mAlternateBanksResident, GetHostMode());
     LoadBankPair(
         bdName, hdName, kTagNone, mAlternateBanksResident ? kPlacementRotating : kPlacementBuffer);
 

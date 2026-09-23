@@ -330,8 +330,7 @@ void GrooveWorld::PrepareLevel() {
     CreateRenderer();
     ConnectPlayers();
     if (QueryConfigFlag(kSoundBankMovieFlagCode) != 0) {
-        HxStr path;
-        QueryConfigString(&path, kSoundBankMoviePathCode);
+        HxStr path = QueryConfigString(kSoundBankMoviePathCode);
         StartSoundBankMovie(path.mStr != nullptr ? path.mStr : g_szEmptyString);
     }
     const Mid::MBT offset(QueryConfigValue(kStartOffsetCode));
@@ -818,8 +817,7 @@ void GrooveWorld::FinishSong() {
         char szLevel[kLogTextLength];
         memset(szLevel, 0, sizeof(szLevel));
         {
-            HxStr level;
-            QueryConfigString(&level, kLevelNameQuery);
+            HxStr level = QueryConfigString(kLevelNameQuery);
             strcpy(szLevel, level.mStr != nullptr ? level.mStr : g_szEmptyString);
         }
 

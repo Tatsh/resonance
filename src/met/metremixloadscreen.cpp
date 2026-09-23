@@ -99,20 +99,17 @@ inline std::vector<MetRemixRecord> *Catalogue(int nKey) {
 }
 
 inline HxStr FactoryTitle(const GameParams &params) {
-    HxStr title;
-    QueryConfigString(&title,
-                      kTitleConfigCode,
-                      params.mUnknown1c == kPlayModeJam ? kFactoryRemixTitleKey :
-                                                          kFactoryCustomTitleKey);
+    HxStr title = QueryConfigString(kTitleConfigCode,
+                                    params.mUnknown1c == kPlayModeJam ? kFactoryRemixTitleKey :
+                                                                        kFactoryCustomTitleKey);
     return title;
 }
 
 inline HxStr CardTitle(const GameParams &params) {
     HxStr slotName = FirstCardSlotName();
-    HxStr format;
-    QueryConfigString(&format,
-                      kTitleConfigCode,
-                      params.mUnknown1c == kPlayModeJam ? kCardRemixTitleKey : kCardCustomTitleKey);
+    HxStr format = QueryConfigString(kTitleConfigCode,
+                                     params.mUnknown1c == kPlayModeJam ? kCardRemixTitleKey :
+                                                                         kCardCustomTitleKey);
     return HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
 }
 
@@ -131,13 +128,11 @@ void MetRemixLoadScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mUnknowna8->Clear();
     {
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kSavedLabelKey);
+        HxStr label = QueryConfigString(kPromptConfigCode, kSavedLabelKey);
         mUnknowna8->Add(HxStr(kSavedButton), label);
     }
     {
-        HxStr label;
-        QueryConfigString(&label, kPromptConfigCode, kFactoryLabelKey);
+        HxStr label = QueryConfigString(kPromptConfigCode, kFactoryLabelKey);
         mUnknowna8->Add(HxStr(kFactoryButton), label);
     }
     mUnknowna0 = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kMatchingFont)));
