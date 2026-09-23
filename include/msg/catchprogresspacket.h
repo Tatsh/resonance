@@ -23,6 +23,9 @@ class Player;
  * alone could not distinguish it from a CmdID. Print() labels `+0x20` as `track` and `+0x24` as
  * `succ`. The player reference at `+0x14` is transferred but not printed.
  *
+ * Every member is public because Catcher::HandleMessage() at `0x001adbec` reads the payload
+ * directly with no accessor in the image.
+ *
  * The destructor at `0x003f09f8` is compiler-generated and has no declaration here.
  */
 class CatchProgressPacket : public ToAllOtherGameSystemsPacket {
@@ -88,11 +91,10 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    IDablePtr<Player> mPlayer; // +0x14
-    Mid::MBT mPosition;        // +0x1c
-    int mTrack;                // +0x20
-    float mSucc;               // +0x24
+    IDablePtr<Player> mPlayer; /*!< The catching player. +0x14 */
+    Mid::MBT mPosition;        /*!< The song position, printed after ` @`. +0x1c */
+    int mTrack;                /*!< Labelled `track` by Print(). +0x20 */
+    float mSucc;               /*!< Labelled `succ` by Print(). +0x24 */
 };
 
 /**

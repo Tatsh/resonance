@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,14 +11,35 @@
  * object is 0xc bytes and its vtable is at `0x007e09e0`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The two names come from
+ * Catcher::PostCaughtBarMsg(), the one builder, which stores the catcher's player and the caught
+ * bar. Readers of the fields have not been traced, so they are private by default.
  *
  * The destructor at `0x001b1100` is compiler-generated and has no declaration here.
  */
 class CaughtBarMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    CaughtBarMsg() {
+    }
+
+    /**
+     * Report a bar a player caught.
+     *
+     * Inline, with no address of its own. Catcher::PostCaughtBarMsg() at `0x001ac83c` expands it
+     * on its stack and delivers it to the player's own sink.
+     *
+     * @param pPlayer The player.
+     * @param nBar The caught bar.
+     */
+    CaughtBarMsg(Player *pPlayer, int nBar) : mPlayer(pPlayer), mBar(nBar) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -52,8 +75,8 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    Player *mPlayer; // +0x04
+    int mBar;        // +0x08
 };
 
 /**

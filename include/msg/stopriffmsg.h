@@ -19,6 +19,10 @@ class Player;
  * Mid::MBT::Print(), writes the colour name of the player at `+0x08`, and labels `+0x04` as `b#`.
  * The word at `+0x10` is not printed.
  *
+ * Every member is public because the handlers AutoRiffer dispatches to at `0x001992e0` and Voxer's
+ * slot 3 at `0x001d90a4` read the payload with no accessor in the image, and the two stack builds
+ * at `0x00119e74` and `0x0011da7c` write all four words.
+ *
  * The destructor at `0x003da708` is compiler-generated and has no declaration here.
  */
 class StopRiffMsg : public Message {
@@ -67,11 +71,10 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown04;     // +0x04
-    Player *mPlayer;    // +0x08
-    Mid::MBT mPosition; // +0x0c
-    int mUnknown10;     // +0x10
+    int mUnknown04;     /*!< Labelled `b#` by Print(). +0x04 */
+    Player *mPlayer;    /*!< The player whose riff stops. +0x08 */
+    Mid::MBT mPosition; /*!< The song position of the stop. +0x0c */
+    int mUnknown10;     /*!< Purpose unrecovered. +0x10 */
 };
 
 /**

@@ -26,6 +26,32 @@ class Player;
 class PhraseMuffedMsg : public Message {
 public:
     /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    PhraseMuffedMsg() {
+    }
+
+    /**
+     * Report a muffed phrase.
+     *
+     * Inline, with no address of its own. Catcher::PostPhraseMuffedMsg() at `0x001ad470` expands
+     * it on its stack with the catcher's track and player. The builder stores the position
+     * straight from its argument register with no IsFiniteMBT() call, so the position arrives
+     * already a Mid::MBT. The four arguments are the four members in declaration order.
+     *
+     * @param nTrack The track.
+     * @param pPlayer The player who muffed the phrase.
+     * @param position The song position of the miss.
+     * @param nTried Non-zero when the player had attempted the phrase.
+     */
+    PhraseMuffedMsg(int nTrack, Player *pPlayer, Mid::MBT position, int nTried)
+        : mTrack(nTrack), mPlayer(pPlayer), mPosition(position), mTried(nTried) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. Only the position is

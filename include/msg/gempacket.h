@@ -88,6 +88,28 @@ public:
     };
 
     /**
+     * Construct a packet with the payload unset beyond the Packet words and the position.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    GemPacket() {
+    }
+
+    /**
+     * Report one gem event.
+     *
+     * Inline, with no address of its own. PhraseMgr::AddGem() at `0x001bab84` expands it on its
+     * stack. That routine fills a local Fields with mGem, mBar, mLoc, and mPlayer, leaving mTrans
+     * unset, copies the whole subobject in, and passes the manager's word at `+0x30` as the track.
+     *
+     * @param fields The gem event.
+     * @param nTr The track.
+     */
+    GemPacket(const Fields &fields, int nTr) : mFields(fields), mTr(nTr) {
+    }
+
+    /**
      * Produce a default-constructed packet on the heap.
      *
      * The registry the translation unit at `0x003ed2e0` builds stores this address against
