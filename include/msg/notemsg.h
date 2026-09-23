@@ -21,9 +21,9 @@ class OBStream;
  * they are private by default.
  *
  * Print() writes the byte at `+0x08` after the label ` n`, the label StdMidiMsg::Print() places
- * ahead of its channel. The byte is probably a channel. The word at `+0x0c` is a second song
- * position, handed to Mid::MBT::Print() in place and initialised to kMBTInfinity by New(). Save()
- * and Load() move only its low sixteen bits.
+ * ahead of its channel. The byte is probably a channel. mLength at `+0x0c` is a tick count, handed
+ * to Mid::MBT::Print() in place and initialised to kMBTInfinity by New(). Save() and Load() move
+ * only its low sixteen bits.
  *
  * The destructor at `0x003dc0e8` is compiler-generated and has no declaration here.
  */
@@ -99,7 +99,15 @@ private:
     unsigned char mUnknown08; // +0x08
     unsigned char mUnknown09; // +0x09
     unsigned char mUnknown0a; // +0x0a
-    Mid::MBT mUnknown0c;      // +0x0c
+
+public:
+    /**
+     * The length of the note, in MIDI ticks. +0x0c
+     *
+     * Public because NoteFinder::HandleMessage() at `0x001023b0` reads it directly with no
+     * accessor in the image, adding it to the inherited mTick to find where the note ends.
+     */
+    Mid::MBT mLength;
 };
 
 /**

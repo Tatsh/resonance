@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,12 +11,42 @@
  * object is 0x10 bytes and its vtable is at `0x007dd3f0`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The stack builds fix the
+ * player at `+0x0c`. Scratcher's build at `0x001d07f4` stores the same scratcher word that its
+ * ShowEraseEffectMsg build stores as the player, and Overlay compares that word with
+ * HudTrack::mPlayer. AutoRiffer stores 1 at `+0x04` when a riff starts and 0 when it stops. The
+ * purpose of the word at `+0x08` is not recovered. Every member is public because
+ * AppTunnel::HandleMessage() at `0x004499c4` reads all three directly with no accessor in the
+ * image.
+ *
+ * The destructor at `0x0019a698` is compiler-generated and has no declaration here.
  */
 class AxeButtonMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    AxeButtonMsg() {
+    }
+
+    /**
+     * Report a button change for a player.
+     *
+     * Inline, with no address of its own. AutoRiffer::OnPitchRiff() at `0x00199278`,
+     * AutoRiffer::OnStopRiff() at `0x00199414`, and the Voxer and Scratcher members expand it on
+     * their stacks. The three arguments are the three members in declaration order.
+     *
+     * @param nPressed Non-zero when the button goes down.
+     * @param nUnknown08 The word at `+0x08`, 1 from Scratcher and 0 from every other builder.
+     * @param pPlayer The player.
+     */
+    AxeButtonMsg(int nPressed, int nUnknown08, Player *pPlayer)
+        : mPressed(nPressed), mUnknown08(nUnknown08), mPlayer(pPlayer) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -49,10 +81,9 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    int mPressed;    /*!< Non-zero when the button goes down. +0x04 */
+    int mUnknown08;  /*!< Purpose unrecovered. +0x08 */
+    Player *mPlayer; /*!< The player. +0x0c */
 };
 
 /**

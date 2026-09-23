@@ -11,15 +11,46 @@ class Player;
  * 0x20 bytes and its vtable is at `0x007e0a28`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(). Every member but the word at
- * `+0x0c` is public because Overlay::OnCatch() at `0x0041fed8` reads it directly with no accessor
- * in the image. It compares mPlayer with HudTrack::mPlayer, draws the catch progress from mCaught
- * over mTotal, converts mTick to a bar by the 1920 ticks of a bar before looking mTrack up, and
- * resets its miss count when mHit is set. Catcher::Slot7() at `0x001abe50` sends the message for
- * a missed gem with mHit clear.
+ * The payload layout comes from the run of field copies in Clone(). Every member but mGem is
+ * public because Overlay::OnCatch() at `0x0041fed8` reads it directly with no accessor in the
+ * image. It compares mPlayer with HudTrack::mPlayer, draws the catch progress from mCaught over
+ * mTotal, converts mTick to a bar by the 1920 ticks of a bar before looking mTrack up, and resets
+ * its miss count when mHit is set.
+ *
+ * The destructor at `0x001b0fb8` is compiler-generated and has no declaration here.
  */
 class CatchMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    CatchMsg() {
+    }
+
+    /**
+     * Report a caught or missed gem.
+     *
+     * Inline, with no address of its own. Catcher expands it on its stack for a miss in Slot7() at
+     * `0x001abf08` and PostCatchMsg() at `0x001ac470`, and for a catch in Slot8() at `0x001ac208`
+     * and SimulateRemoteGem() at `0x001ad004`. The seven arguments are the seven members in
+     * declaration order.
+     *
+     * @param nTick The scheduler time of the gem.
+     * @param nTrack The track the gem lies on.
+     * @param nGem The gem.
+     * @param nHit Non-zero for a caught gem, zero for a miss.
+     * @param pPlayer The catching player.
+     * @param nCaught The gems caught so far in the phrase, or zero.
+     * @param nTotal The gems the phrase requires, or zero.
+     */
+    CatchMsg(int nTick, int nTrack, int nGem, int nHit, Player *pPlayer, int nCaught, int nTotal)
+        : mTick(nTick), mTrack(nTrack), mGem(nGem), mHit(nHit), mPlayer(pPlayer), mCaught(nCaught),
+          mTotal(nTotal) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -58,7 +89,7 @@ public:
     int mTrack; /*!< The track the gem lies on. +0x08 */
 
 private:
-    int mUnknown0c; // +0x0c
+    int mGem; // +0x0c
 
 public:
     int mHit;        /*!< Non-zero for a caught gem, zero for a miss. +0x10 */

@@ -26,6 +26,46 @@ class Player;
 class SeekerMsg : public Message {
 public:
     /**
+     * Construct a message with the player unset and the position at kMBTInfinity.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares further
+     * constructors.
+     */
+    SeekerMsg() {
+    }
+
+    /**
+     * Report that a player's seeker is off.
+     *
+     * Inline, with no address of its own. Catcher::PostSeekerMsg() at `0x001ad4e0` expands it on
+     * its stack, storing the player, a clear mEnabled, and kMBTInfinity. The bar range and the
+     * track are left unset.
+     *
+     * @param pPlayer The player whose seeker is off.
+     */
+    explicit SeekerMsg(Player *pPlayer) : mPlayer(pPlayer), mEnabled(0) {
+    }
+
+    /**
+     * Report a player's seeker over a range of bars on a track.
+     *
+     * Inline, with no address of its own. Catcher::PostSeekerRangeMsg() at `0x001ad560` expands it
+     * on its stack with an mEnabled of 1 and a position of Mid::MBT(0).
+     *
+     * @param pPlayer The player the seeker belongs to.
+     * @param nFirstBar The first bar of the range.
+     * @param nBarCount The number of bars in the range.
+     * @param nTrack The track.
+     * @param nEnabled Non-zero for a seeker that is on.
+     * @param when The position of the seeker.
+     */
+    SeekerMsg(
+        Player *pPlayer, int nFirstBar, int nBarCount, int nTrack, int nEnabled, Mid::MBT when)
+        : mPlayer(pPlayer), mFirstBar(nFirstBar), mBarCount(nBarCount), mTrack(nTrack),
+          mEnabled(nEnabled), mWhen(when) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory.

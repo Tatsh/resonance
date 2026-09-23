@@ -10,16 +10,41 @@
  * the class: everything recovered comes from them, and no other routine in the image refers to
  * this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Print() labels mTrack as a
+ * track number and mFirstBar through mEndBar as a range of song bars. The end is one past the
+ * last bar, because the stack build at `0x00101e6c` invalidates a single bar as that bar and the
+ * bar after it.
  *
- * Print() labels `+0x0c` as a track number and `+0x04` through `+0x08` as a range of song bars.
+ * Every member is public because PhraseMgr::OnInvalidateTrack() at `0x001c0110` reads all three
+ * directly with no accessor in the image.
  *
  * The destructor at `0x003de360` is compiler-generated and has no declaration here.
  */
 class InvalidateTrackMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    InvalidateTrackMsg() {
+    }
+
+    /**
+     * Invalidate a range of song bars on a track.
+     *
+     * Inline, with no address of its own. The two stack builds at `0x00101ce0` and `0x00101e6c`
+     * expand it. The three arguments are the three members in declaration order.
+     *
+     * @param nFirstBar The first song bar of the range.
+     * @param nEndBar The song bar one past the last of the range.
+     * @param nTrack The track.
+     */
+    InvalidateTrackMsg(int nFirstBar, int nEndBar, int nTrack)
+        : mFirstBar(nFirstBar), mEndBar(nEndBar), mTrack(nTrack) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -63,10 +88,9 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    int mFirstBar; /*!< The first song bar of the range. +0x04 */
+    int mEndBar;   /*!< The song bar one past the last of the range. +0x08 */
+    int mTrack;    /*!< The track. +0x0c */
 };
 
 /**

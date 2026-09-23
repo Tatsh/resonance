@@ -25,5 +25,5 @@ const char *InvalidateTrackMsg::Name() {
 
 // 0x003e3d90
 void InvalidateTrackMsg::Print(std::ostream &stream) {
-    stream << "tr#" << mUnknown0c << " song-bars " << mUnknown04 << "-" << mUnknown08;
+    stream << "tr#" << mTrack << " song-bars " << mFirstBar << "-" << mEndBar;
 }

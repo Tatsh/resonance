@@ -30,7 +30,7 @@ const char *SustainNoteMsg::Name() {
 // 0x003e3a18
 void SustainNoteMsg::Print(std::ostream &stream) {
     Mid::MBT position;
-    position.mTick = mUnknown04;
+    position.mTick = mTick;
     position.Print(stream);
     stream << ' ';
     stream << static_cast<char>(mUnknown08);

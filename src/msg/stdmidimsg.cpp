@@ -75,7 +75,7 @@ void StdMidiMsg::Print(std::ostream &stream) {
     }
 
     Mid::MBT position;
-    position.mTick = mUnknown04;
+    position.mTick = mTick;
     position.Print(stream);
     stream << ' ' << kind << ' ' << static_cast<int>(mUnknown09) << ' '
            << static_cast<int>(mUnknown0a) << " n" << (mUnknown08 & kStatusChannelMask);

@@ -20,3 +20,8 @@ int AllNotesOffMsg::Type() {
 const char *AllNotesOffMsg::Name() {
     return "AllNotesOffMsg";
 }
+
+// 0x0019a690
+int AllNotesOffMsg::OnUnknownSlot8() {
+    return 1;
+}

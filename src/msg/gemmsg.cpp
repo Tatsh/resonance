@@ -28,7 +28,7 @@ const char *GemMsg::Name() {
 
 // 0x003d8830. The colour name is copied into a temporary before it is written.
 void GemMsg::Print(std::ostream &stream) {
-    std::ostream &rest = stream << mUnknown08 << " ";
+    std::ostream &rest = stream << mTrack << " ";
     mPosition.Print(rest);
-    rest << " " << mUnknown0c << " " << HxStr(mPlayer->mColorName);
+    rest << " " << mGem << " " << HxStr(mPlayer->mColorName);
 }

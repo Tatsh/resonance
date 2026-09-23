@@ -15,11 +15,10 @@ class Player;
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Every member is public, and
+ * each member's documentation identifies the reader outside the class that accesses it directly.
  *
- * Print() hands `+0x0c` to Mid::MBT::Print(), and New() initialises it to kMBTInfinity.
+ * Print() hands mPosition to Mid::MBT::Print(), and New() initialises it to kMBTInfinity.
  *
  * The destructor at `0x003dc840` is compiler-generated and has no declaration here.
  */
@@ -75,10 +74,14 @@ public:
     /** Copied into NetPlayer `+0x4c` by the same handler. +0x08 */
     int mUnknown08;
 
-private:
-    Mid::MBT mUnknown0c; // +0x0c
+    /**
+     * The song position of the selection. +0x0c
+     *
+     * Catcher::OnTrackSelect() at `0x001ac550` reads it directly with no accessor in the image,
+     * dividing its tick by the catcher's ticks per bar to find the selected bar.
+     */
+    Mid::MBT mPosition;
 
-public:
     /**
      * Player the message is addressed to.
      *

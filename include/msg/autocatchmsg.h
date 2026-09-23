@@ -13,7 +13,12 @@ class Player;
  * object is 0x14 bytes and its vtable is at `0x00811c88`. The word at `+0x04` belongs to CmdMsg.
  *
  * Print() labels `+0x0c` as a track number and writes the identifier of the player at `+0x10`
- * after ` p#`, which types that word, followed by the word at `+0x08`.
+ * after ` p#`, followed by the bar at `+0x08`.
+ *
+ * The three members are public because code outside the class accesses them directly with no
+ * accessor in the image. AutocatchPowerup::Slot2() at `0x001c9628` writes all three into a stack
+ * message. Catcher::OnAutoCatch() at `0x001ac688` compares mTrack with its own track, plays mBar
+ * for mPlayer, and sets CmdMsg::mUnknown04 to mark the message handled.
  *
  * The destructor at `0x003e2460` is compiler-generated and has no declaration here.
  */
@@ -62,10 +67,9 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown08;  // +0x08
-    int mTrack;      // +0x0c
-    Player *mPlayer; // +0x10
+    int mBar;        /*!< The bar to catch automatically. +0x08 */
+    int mTrack;      /*!< The track the bar lies on. +0x0c */
+    Player *mPlayer; /*!< The player the catch is for. +0x10 */
 };
 
 /**

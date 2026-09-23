@@ -35,7 +35,7 @@ void MultiMuseMsg::Print(std::ostream &stream) {
     // MuseMsg's member is a Mid::MBT rather than a plain int, which this body proves by handing
     // it to Mid::MBT::Print(). Its header still types it as an int.
     Mid::MBT position;
-    position.mTick = mUnknown04;
+    position.mTick = mTick;
     position.Print(stream);
     mMuse->Print(stream << " ");
 }

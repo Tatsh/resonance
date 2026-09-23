@@ -8,8 +8,13 @@ class Player;
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `19BeginPhraseCatchMsg` in the RTTI descriptor at `0x008f09b0`, with Message as its one base.
- * The object is 0x10 bytes and its vtable is at `0x007e0a70`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * The object is 0x10 bytes. New(), Clone(), and every stack build install the vtable at
+ * `0x007ddb08`. An identical table at `0x007e0a70` has no reference in the image. The allocation in
+ * New() and the allocation in Clone() report the same size, which measures the class twice.
+ *
+ * The destructor at `0x0019d738` is compiler-generated and has no declaration here. The routines
+ * at `0x001b0f40`, `0x001d1b78`, and `0x003de7a8` are further emissions of Clone() in other
+ * translation units, each allocating 0x10 bytes under the `MSG` tag and installing the same table.
  *
  * The payload layout comes from the run of field copies in Clone(). Every member is public because
  * Overlay::OnBeginPhraseCatch() at `0x004201c0` reads it directly with no accessor in the image.
@@ -18,6 +23,30 @@ class Player;
  */
 class BeginPhraseCatchMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    BeginPhraseCatchMsg() {
+    }
+
+    /**
+     * Report the start of a phrase catch.
+     *
+     * Inline, with no address of its own. Catcher::Slot8() at `0x001ac1c0` and the Scratcher member
+     * at `0x001d0530` expand it on their stacks. The three arguments are the three members in
+     * declaration order.
+     *
+     * @param pPlayer The player starting the phrase.
+     * @param nPoints The points the phrase is worth.
+     * @param nMultiplier The multiplier the phrase is caught under.
+     */
+    BeginPhraseCatchMsg(Player *pPlayer, int nPoints, int nMultiplier)
+        : mPlayer(pPlayer), mPoints(nPoints), mMultiplier(nMultiplier) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *

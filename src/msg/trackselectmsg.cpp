@@ -28,6 +28,6 @@ const char *TrackSelectMsg::Name() {
 
 // 0x003e3ae8. The colour name is copied into a temporary before it is written.
 void TrackSelectMsg::Print(std::ostream &stream) {
-    mUnknown0c.Print(stream << HxStr(mUnknown10->mColorName) << " tr#" << mUnknown04 << "/"
-                            << mUnknown08 << " ");
+    mPosition.Print(stream << HxStr(mUnknown10->mColorName) << " tr#" << mUnknown04 << "/"
+                           << mUnknown08 << " ");
 }

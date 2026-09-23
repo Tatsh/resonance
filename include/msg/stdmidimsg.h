@@ -27,6 +27,30 @@ class OBStream;
 class StdMidiMsg : public MuseMsg {
 public:
     /**
+     * Construct a message with the song position at kMBTInfinity and the three bytes unset.
+     *
+     * Inline. New() and the Mixer's stack builds expand it. A declaration is required because the
+     * class declares a second constructor.
+     */
+    StdMidiMsg() {
+    }
+
+    /**
+     * Construct one channel message at a song position.
+     *
+     * Inline, with no address of its own. NotePlayer::PostStdMidiMsg() at `0x001b3fb8` expands it
+     * on its stack, storing the position and then the three bytes in order.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param nStatus The status byte.
+     * @param nData1 The first data byte.
+     * @param nData2 The second data byte.
+     */
+    StdMidiMsg(int nTick, unsigned char nStatus, unsigned char nData1, unsigned char nData2)
+        : MuseMsg(nTick), mUnknown08(nStatus), mUnknown09(nData1), mUnknown0a(nData2) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. Only the song position is

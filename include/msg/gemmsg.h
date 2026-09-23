@@ -16,14 +16,40 @@ class Player;
  * anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x04` to
- * Mid::MBT::Print() and writes the colour name of the player at `+0x10`, which types both. The
- * words at `+0x08` and `+0x0c` are printed without labels and the word at `+0x14` is not printed.
- * Readers of the fields have not been traced, so they are private by default.
+ * Mid::MBT::Print() and writes the colour name of the player at `+0x10`. The track at `+0x08` and
+ * the gem at `+0x0c` are printed without labels, and the word at `+0x14` is not printed. The two
+ * names come from Catcher::SimulateRemoteGem() at `0x001ace78`, which stores the catcher's track
+ * and the gem TrackData::FindGemAtOrAfter() reports.
  *
  * The destructor at `0x003df450` is compiler-generated and has no declaration here.
  */
 class GemMsg : public Message {
 public:
+    /**
+     * Construct a message with only the position set, to kMBTInfinity.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    GemMsg() {
+    }
+
+    /**
+     * Report a gem played on a track.
+     *
+     * Inline, with no address of its own. Every stack build in the image expands it and clears the
+     * word at `+0x14` (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::Slot8() at
+     * `0x001ac25c`, and PhraseMgr::PostGemMsg() at `0x001ba86c`, among others).
+     *
+     * @param position The song position of the gem.
+     * @param nTrack The track the gem lies on.
+     * @param nGem The gem.
+     * @param pPlayer The player who played it.
+     */
+    GemMsg(Mid::MBT position, int nTrack, int nGem, Player *pPlayer)
+        : mPosition(position), mTrack(nTrack), mGem(nGem), mPlayer(pPlayer), mUnknown14(0) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -60,8 +86,8 @@ public:
     virtual const char *Name();
 
     /**
-     * Write the word at `+0x08`, the position, the word at `+0x0c`, and the player's colour name,
-     * separated by spaces, to a diagnostic stream.
+     * Write the track, the position, the gem, and the player's colour name, separated by spaces,
+     * to a diagnostic stream.
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x003d8830
@@ -70,8 +96,8 @@ public:
 
 private:
     Mid::MBT mPosition; // +0x04
-    int mUnknown08;     // +0x08
-    int mUnknown0c;     // +0x0c
+    int mTrack;         // +0x08
+    int mGem;           // +0x0c
     Player *mPlayer;    // +0x10
     int mUnknown14;     // +0x14
 };

@@ -38,9 +38,26 @@ public:
      * `0x003d6d40`, NoteMsg at `0x003d6d80`, and SustainNoteMsg at `0x003d6e50`, and the
      * StdMidiMsg Mixer builds on its stack at `0x001a7340`.
      */
-    MuseMsg() : mUnknown04(kMBTInfinity) {
+    MuseMsg() : mTick(kMBTInfinity) {
     }
 
-protected:
-    int mUnknown04; // +0x04
+    /**
+     * Start the song position at a tick.
+     *
+     * Inline, with no address of its own. The stack builds of StdMidiMsg in NotePlayer at
+     * `0x001b3fb8` and of AllNotesOffMsg in AutoRiffer at `0x001993c4` store the position directly
+     * at `+0x04`.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     */
+    explicit MuseMsg(int nTick) : mTick(nTick) {
+    }
+
+    /**
+     * The song position, in MIDI ticks. +0x04
+     *
+     * Public because NoteFinder::HandleMessage() at `0x001023b0` reads it directly from a NoteMsg
+     * with no accessor in the image.
+     */
+    int mTick;
 };
