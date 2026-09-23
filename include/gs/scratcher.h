@@ -6,12 +6,15 @@
 #include "mid/mbt.h"
 #include "msg/message.h"
 
+class AxisRegisterMsg;
+class EraseMsg;
 class InvalidateSeekerMsg;
 class PhraseMgr;
 class PitchRiffMsg;
 class Player;
 class Quantizer;
 class TrackData;
+class TrackSelectMsg;
 
 namespace Sch {
 class TickClock;
@@ -34,8 +37,8 @@ class TickClock;
  * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
  * both player references at the stand-in player, and sizes mUnknown74 to three zeroed elements.
  *
- * The constructor and HandleMessage() are written. The five routines HandleMessage() dispatches
- * to and Tick() are declared with their addresses and their bodies are not written.
+ * PostNowBarMsg(), OnTrackSelect(), and OnPitchRiff() are declared and not written, for the
+ * message access each one records.
  */
 class Scratcher : public Pitcher {
 public:
@@ -62,10 +65,8 @@ public:
      * Advance to the bar the elapsed tick count falls in.
      *
      * Divides the elapsed count by mBarDivisor and sends that bar through SendSeekerMsg(). While
-     * mUnknown54 is set and the test at `0x001d79d0` accepts the bar, it then dispatches slot 0 of
-     * whatever Globals::GetSynth() returns, with mUnknown58 as one argument. That second half
-     * reads three routines whose verbs are unrecovered, which is why the body records the shape
-     * rather than the work.
+     * mUnknown54 is set and the bar starts a step, it then selects the synthesiser bank of that
+     * step for the channel in mUnknown58, as AxePhraseMaker::Slot4() does.
      *
      * @param nElapsedTicks Ticks since the epoch.
      * @return 1 always.
@@ -75,44 +76,61 @@ public:
 
 protected:
     /**
-     * React to an AxisRegisterMsg. The body is not written.
+     * Turn an axis reading for this track and player into scratches.
+     *
+     * The routine sends a NowBarMsg at lane one minus the value, then tracks the reading's
+     * movement against the ring of past readings in mUnknown74 and replays the last gem through
+     * OnPitchRiff() at a step of up to 3 in either direction. The body is not written, because
+     * NowBarMsg's word at `+0x04` is private and the class has no payload constructor.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001cfd20
      */
-    void PostNowBarMsg(Message *pMsg);
+    void PostNowBarMsg(AxisRegisterMsg *pMsg);
 
     /**
-     * React to an EraseMsg. The body is not written.
+     * Erase a player's phrases at an EraseMsg's position for this track.
+     *
+     * The bar, or with the message's last word set every bar of its step, is cleared wherever the
+     * message's player owns it, and clearing the message's own bar also sends an AllNotesOffMsg.
+     * When anything was cleared, `SND_ERASE_SECTION` or `SND_ERASE` plays, a ShowEraseEffectMsg
+     * naming mUnknown5c goes out, and SendSeekerMsg() runs for the bar.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001d0038
      */
-    void EraseGemRange(Message *pMsg);
+    void EraseGemRange(EraseMsg *pMsg);
 
     /**
-     * React to a TrackSelectMsg. The body is not written.
+     * Install the player a TrackSelectMsg for this track selects.
+     *
+     * A real new player first gets a NowBarMsg at lane 0.5. A message with a zero second word
+     * installs the player, and a real player then has SendSeekerMsg() run for the message's bar.
+     * The body is not written, for the reason recorded on PostNowBarMsg().
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001d0248
      */
-    void OnTrackSelect(Message *pMsg);
+    void OnTrackSelect(TrackSelectMsg *pMsg);
 
     /**
-     * React to a PitchRiffMsg. The body is not written.
+     * Play a gem at a pitch step.
      *
-     * @param nUnknown The message's `+0x04`.
-     * @param bUnknown Always zero at the one recovered call site.
-     * @param nUnknown2 The message's `+0x0c`.
-     * @return The value HandleMessage() stores in mUnknown68.
+     * The routine checks the bar, sends the riff transposed by nStep, records the gem, and
+     * announces it with several messages, among them a DurGemMsg and a PitchMsg. The body is not
+     * written, because DurGemMsg's word at `+0x18` and PitchMsg's word at `+0x04` are private.
+     *
+     * @param nGem The gem, a PitchRiffMsg's first word.
+     * @param nStep The pitch step, zero from a PitchRiffMsg and -3 to 3 from PostNowBarMsg().
+     * @param nTick The song position.
      * @ghidraAddress 0x001d0358
      */
-    int OnPitchRiff(int nUnknown, int bUnknown, int nUnknown2);
+    void OnPitchRiff(int nGem, int nStep, int nTick);
 
     /**
-     * Send the seeker message for one bar. The body is not written.
+     * Turn mUnknown5c's seeker off, unless mUnknown5c is the stand-in.
      *
-     * @param nBar The bar.
+     * @param nBar Not read.
      * @ghidraAddress 0x001d08e0
      */
     void SendSeekerMsg(int nBar);
@@ -162,7 +180,7 @@ private:
     Player *mUnknown5c;  // +0x5c
     Mid::MBT mUnknown60; // +0x60, starts at kMBTInfinity
     Player *mUnknown64;  // +0x64, starts at g_nullPlayer
-    int mUnknown68;      // +0x68, result of the PitchRiffMsg handler
+    int mUnknown68;      // +0x68, the gem of the last PitchRiffMsg, which PostNowBarMsg() replays
     int mUnknown6c;      // +0x6c, starts at -1
     int mUnknown70;      // +0x70
     // +0x74. The constructor builds three elements from an int zero through the float fill
