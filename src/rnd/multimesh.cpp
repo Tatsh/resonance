@@ -172,12 +172,6 @@ Object *CreateRegisteredMultiMesh(const HxStr &name) {
     return g_pfnNewMultiMesh(name);
 }
 
-// 0x004eb958
-void RegisterMultiMeshClass() {
-    g_pfnNewMultiMesh = NewMultiMesh;
-    g_manager.RegisterClass(g_multiMeshClassName, CreateRegisteredMultiMesh);
-}
-
 // 0x004e8830
 MultiMesh::MultiMesh(const HxStr &name) : Object(name), mMesh(nullptr) {
     // The constructor acquires the mesh reference even though the mesh it has just set is null.

@@ -116,6 +116,20 @@ public:
     void RestorePacket();
 
     /**
+     * Count one vertical blank in g_nVblankCounter.
+     *
+     * InitDisplayMode() installs it through SetVsyncHandler(). The body increments the counter,
+     * runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. It has no
+     * reconstructed body, because ExitHandler() is MIPS inline assembly that the host build cannot
+     * assemble. The routine was an orphan in the analysis, and its name is inferred.
+     *
+     * @param nCause The interrupt cause the kernel passes, unused.
+     * @return 0.
+     * @ghidraAddress 0x0049fea0
+     */
+    static int VblankHandler(int nCause);
+
+    /**
      * Bring up the display and the drawing subsystems.
      *
      * Registers the device profile timers ("setup", "vram", "billboard", "vert", "prim", "sync"),
@@ -474,9 +488,8 @@ extern GfxDevice g_gfxDevice;
 /**
  * Vertical blanks counted since start-up.
  *
- * The handler at `0x0049fea0`, which InitDisplayMode() installs through SetVsyncHandler(),
- * increments it and returns through the kernel's ExitHandler() sequence. SwapBuffers() busy-waits
- * on it, reloading it on every pass.
+ * GfxDevice::VblankHandler() increments it. SwapBuffers() busy-waits on it, reloading it on every
+ * pass.
  *
  * @ghidraAddress 0x006f2f20
  */

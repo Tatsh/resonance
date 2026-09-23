@@ -115,10 +115,6 @@ int SelectLightForVertex(GifQuadword *pLight,
  * Two vtables belong to the class. The four-entry table at `0x00833968` is addressed by the
  * `Rnd::Drawable` vptr at `0x10`, and the eight-entry table at `0x00833920` by the `Rnd::Object`
  * subobject vptr. DrawSelf() is the only entry that is not the base implementation.
- *
- * The routine at `0x005b2888` undoes what Init() installs. It destroys both default objects and
- * restores Rnd::g_pfnNewEnviron to the base Rnd::Environ factory, and GfxDevice::Terminate() at
- * `0x0049b0c4` is its one caller. Its title is undetermined.
  */
 class PsEnviron : public Environ {
 public:
@@ -163,6 +159,18 @@ public:
      * @ghidraAddress 0x005aea68
      */
     static void Init();
+
+    /**
+     * Undo what Init() installs.
+     *
+     * Destroys g_pDefaultEnviron and then g_pDefaultLight through their virtual destructors,
+     * without clearing either pointer, and then expands the "Environ" class registration, whose
+     * out-of-line copy is at `0x00518e70`. GfxDevice::Terminate() is the one caller. The name is
+     * inferred from GfxDevice::Terminate().
+     *
+     * @ghidraAddress 0x005b2888
+     */
+    static void Terminate();
 
 protected:
     /**

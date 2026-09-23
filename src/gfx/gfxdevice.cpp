@@ -13,6 +13,13 @@
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "profile/profiler.h"
+#include "rnd/mat.h"
+#include "rnd/mesh.h"
+#include "rnd/multimesh.h"
+#include "rnd/particlesys.h"
+#include "rnd/pscam.h"
+#include "rnd/psenviron.h"
+#include "rnd/tex.h"
 
 namespace {
 
@@ -296,6 +303,18 @@ GfxDevice::GfxDevice()
       mClearColor{0.0f, 0.0f, 0.0f, 1.0f} {
     mAdTag.mLo = 1ULL << kGifTagNRegShift;
     mAdTag.mHi = kGifRegAd;
+}
+
+// 0x0049afe0
+void GfxDevice::Terminate() {
+    Rnd::RegisterMeshClass();
+    Rnd::PsCam::Terminate();
+    Rnd::RegisterMatClass();
+    Rnd::RegisterTexClass();
+    Rnd::PsEnviron::Terminate();
+    Rnd::RegisterParticleSysClass();
+    Rnd::RegisterMultiMeshClass();
+    g_vramTable.~VramTable(); // Yes, the binary calls the destructor on the global directly.
 }
 
 // 0x0049fef0

@@ -6,6 +6,7 @@
 #include "math/transform.h"
 #include "math/vector3.h"
 #include "os/hxstr.h"
+#include "rnd/manager.h"
 #include "rnd/object.h"
 
 class FailSink;
@@ -432,6 +433,37 @@ extern int g_nRndMatLoadVersion;
  * @ghidraAddress 0x00700418
  */
 extern Mat *(*g_pfnNewMat)(const HxStr &name);
+
+/**
+ * Allocate and construct a material, the base creator of the "Mat" class.
+ *
+ * @param name The object name.
+ * @return The new material.
+ * @ghidraAddress 0x004dbd00
+ */
+Mat *NewMat(const HxStr &name);
+
+/**
+ * Build a material for the registered "Mat" class by calling through g_pfnNewMat.
+ *
+ * @param name The object name.
+ * @return The new material, as its Rnd::Object subobject.
+ * @ghidraAddress 0x004dbc80
+ */
+Object *CreateRegisteredMat(const HxStr &name);
+
+/**
+ * Point g_pfnNewMat at NewMat() and register the "Mat" class with Rnd::Manager.
+ *
+ * The out-of-line copy has no caller, and GfxDevice::Terminate() expands the body. The name is
+ * inferred.
+ *
+ * @ghidraAddress 0x004db9e8
+ */
+inline void RegisterMatClass() {
+    g_pfnNewMat = NewMat;
+    g_manager.RegisterClass(g_matClassName, CreateRegisteredMat);
+}
 
 /**
  * Material that Rnd::Mat::SelectMaterial() last applied, or null when the applied state is stale.

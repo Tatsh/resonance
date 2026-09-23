@@ -5,6 +5,7 @@
 #include "math/transform.h"
 #include "os/hxstr.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 
 class FailSink;
 namespace Rnd {
@@ -195,19 +196,6 @@ MultiMesh *NewMultiMesh(const HxStr &name);
 Object *CreateRegisteredMultiMesh(const HxStr &name);
 
 /**
- * Point g_pfnNewMultiMesh at NewMultiMesh() and register the "MultiMesh" class with Rnd::Manager.
- *
- * No call site survives in the shipped program, because Rnd::Manager::Init() performs both steps
- * itself. The routine is dead code in the original rather than an unfinished analysis, and the
- * image has a second byte-identical copy at `0x005b5be8` from the Rnd::PsMultiMesh translation
- * unit. Ghidra attributes the second copy to Rnd::PsMultiMesh, which is wrong. Both copies install
- * the portable creator rather than the PlayStation 2 one.
- *
- * @ghidraAddress 0x004eb958
- */
-void RegisterMultiMeshClass();
-
-/**
  * Creator the registered "MultiMesh" class builds through.
  *
  * GfxDevice::Init() overwrites the hook at `0x0049af88` with Rnd::NewPsMultiMesh, so a multi-mesh
@@ -223,6 +211,21 @@ extern MultiMesh *(*g_pfnNewMultiMesh)(const HxStr &name);
  * @ghidraAddress 0x00704068
  */
 extern HxStr g_multiMeshClassName;
+
+/**
+ * Point g_pfnNewMultiMesh at NewMultiMesh() and register the "MultiMesh" class with Rnd::Manager.
+ *
+ * An inline function. Neither out-of-line copy has a caller. The second, byte-identical copy at
+ * `0x005b5be8` lies in the Rnd::PsMultiMesh translation unit, and Ghidra wrongly attributes it to
+ * Rnd::PsMultiMesh. GfxDevice::Terminate() expands the body. Every copy installs the portable
+ * creator rather than the PlayStation 2 one.
+ *
+ * @ghidraAddress 0x004eb958
+ */
+inline void RegisterMultiMeshClass() {
+    g_pfnNewMultiMesh = NewMultiMesh;
+    g_manager.RegisterClass(g_multiMeshClassName, CreateRegisteredMultiMesh);
+}
 
 /**
  * Serial version of the multi-mesh record currently being read.

@@ -4,6 +4,7 @@
 
 #include "os/async.h"
 #include "os/hxstr.h"
+#include "rnd/manager.h"
 #include "rnd/object.h"
 
 class ACanvas;
@@ -280,5 +281,36 @@ extern Tex *(*g_pfnNewTex)(const HxStr &name);
  * @ghidraAddress 0x007033b0
  */
 extern HxStr g_texClassName;
+
+/**
+ * Allocate and construct a texture, the base creator of the "Tex" class.
+ *
+ * @param name The object name.
+ * @return The new texture.
+ * @ghidraAddress 0x004e77f0
+ */
+Tex *NewTex(const HxStr &name);
+
+/**
+ * Build a texture for the registered "Tex" class by calling through g_pfnNewTex.
+ *
+ * @param name The object name.
+ * @return The new texture, as its Rnd::Object subobject.
+ * @ghidraAddress 0x004e7770
+ */
+Object *CreateRegisteredTex(const HxStr &name);
+
+/**
+ * Point g_pfnNewTex at NewTex() and register the "Tex" class with Rnd::Manager.
+ *
+ * Neither out-of-line copy has a caller. The second, at `0x0059a518`, lies in the Rnd::PsTex unit,
+ * and GfxDevice::Terminate() expands the body.
+ *
+ * @ghidraAddress 0x004e7408
+ */
+inline void RegisterTexClass() {
+    g_pfnNewTex = NewTex;
+    g_manager.RegisterClass(g_texClassName, CreateRegisteredTex);
+}
 
 } // namespace Rnd

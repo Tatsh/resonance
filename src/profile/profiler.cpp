@@ -1,9 +1,14 @@
 #include "profile/profiler.h"
 
+#include "os/cycles.h"
+
 namespace {
 
 // Records in each timer table.
 constexpr int kProfileTimerCount = 20;
+
+// The EE runs at 294.912 MHz.
+constexpr float kMillisecondsPerCycle = 1.0f / 294912.0f;
 
 } // namespace
 
@@ -16,5 +21,24 @@ std::vector<ProfileTimer> g_profileTimers(kProfileTimerCount);
 std::vector<ProfileTimer> g_lastFrameProfileTimers(kProfileTimerCount);
 
 // 0x00720394
-// Zero until the frame timer reset at 0x0053dcf8 stores the conversion factor.
+// Zero until ResetFrameTimer() stores the conversion factor.
 float g_flCyclesToMilliseconds;
+
+// 0x00720398
+long long g_llFrameTimerCycles;
+
+// 0x007203a0
+// The static initialiser zeroes every word except mStartCycles.
+ProfileTimer g_frameTimer;
+
+// 0x0053dcf8
+void ResetFrameTimer() {
+    g_flCyclesToMilliseconds = kMillisecondsPerCycle;
+    if (--g_frameTimer.mDepth == 0) {
+        g_frameTimer.mCycles += ReadCycleCount() - g_frameTimer.mStartCycles;
+    }
+    g_frameTimer.mCycles = 0; // Yes, the binary discards the sum it just made.
+    g_frameTimer.mDepth = 1;
+    g_frameTimer.mStartCycles = ReadCycleCount();
+    g_llFrameTimerCycles = 0;
+}

@@ -7,6 +7,7 @@
 #include "math/vector3.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 #include "rnd/transformable.h"
 
 class FailSink;
@@ -395,5 +396,39 @@ extern Cam *g_pCurrentCam;
  * @ghidraAddress 0x006f958c
  */
 extern Cam *(*g_pfnNewCam)(const HxStr &name);
+
+/**
+ * Build a camera for the registered "Cam" class.
+ *
+ * Calls through g_pfnNewCam and converts the result to its Rnd::Object virtual base, reading the
+ * base pointer only when the camera is not null.
+ *
+ * @param name The object name.
+ * @return The new camera, as its Rnd::Object subobject.
+ * @ghidraAddress 0x004b23e0
+ */
+Object *CreateRegisteredCam(const HxStr &name);
+
+/**
+ * Registered class name of Rnd::Cam, the string "Cam".
+ *
+ * @ghidraAddress 0x006f9590
+ */
+extern HxStr g_camClassName;
+
+/**
+ * Point g_pfnNewCam at Cam::NewCam(), clear g_pCurrentCam, and register the "Cam" class with
+ * Rnd::Manager.
+ *
+ * The out-of-line copy has no caller. Rnd::PsCam::Terminate() expands the body after destroying
+ * the default camera. The name is inferred.
+ *
+ * @ghidraAddress 0x004b1ed0
+ */
+inline void RegisterCamClass() {
+    g_pfnNewCam = Cam::NewCam;
+    g_pCurrentCam = nullptr;
+    g_manager.RegisterClass(g_camClassName, CreateRegisteredCam);
+}
 
 } // namespace Rnd

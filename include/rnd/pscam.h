@@ -29,12 +29,6 @@ namespace Rnd {
  *
  * The seventh entry of the first table proves SetTargetTex() is a virtual declared here rather
  * than an override. The base table has six entries and this one has seven.
- *
- * The routine at `0x00588428` is an unreferenced out-of-line emission of an inline routine whose
- * live copy is inlined into GfxDevice::Terminate() at `0x0049b01c`. That routine destroys
- * g_pDefaultCam, restores Rnd::g_pfnNewCam to the base Rnd::Cam factory, clears
- * Rnd::g_pCurrentCam, and re-registers the "Cam" key, which undoes what Init() installs. Its
- * title is undetermined, because the only live copy is inlined and no call site records one.
  */
 class PsCam : public Cam {
 public:
@@ -126,6 +120,18 @@ public:
      * @ghidraAddress 0x00582430
      */
     static void Init();
+
+    /**
+     * Undo what Init() installs.
+     *
+     * Destroys g_pDefaultCam through its virtual destructor, without clearing the pointer, and
+     * then runs Rnd::RegisterCamClass(). The out-of-line copy has no caller, and
+     * GfxDevice::Terminate() expands the body at `0x0049b01c`. The name is inferred from
+     * GfxDevice::Terminate().
+     *
+     * @ghidraAddress 0x00588428
+     */
+    static void Terminate();
 };
 
 /**
@@ -137,6 +143,11 @@ public:
  * @ghidraAddress 0x00768410
  */
 extern PsCam *g_pDefaultCam;
+
+inline void PsCam::Terminate() {
+    delete g_pDefaultCam;
+    RegisterCamClass();
+}
 
 // The globals below are the draw state PsCam::DrawSelf() leaves for the software and VU1 paths.
 // Every title is inferred from the computation that fills the global, because the image
