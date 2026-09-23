@@ -69,6 +69,7 @@ constexpr int kNetworkGameMode = 3;
 
 } // namespace
 
+// 0x0029bcf0
 MetLoadFreqScreen::MetLoadFreqScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
     mUnknowna8 = kInitialUnknowna8;
@@ -79,6 +80,7 @@ MetScreen *MetLoadFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadFreqScreen(pRenderer, nPriority);
 }
 
+// 0x00297448
 void MetLoadFreqScreen::EnterAndShow() {
     HxStr title;
     QueryConfigString(&title, kTitleConfigCode, kTitleKey);
@@ -89,6 +91,7 @@ void MetLoadFreqScreen::EnterAndShow() {
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
+// 0x00298510
 void MetLoadFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     if (!(name == kFreqLimitMessage)) {
         return;
@@ -104,10 +107,12 @@ void MetLoadFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     ActivateNamedPanel(HxStr(kLoadFreqScreen));
 }
 
+// 0x0029bdc8
 void MetLoadFreqScreen::OnUnknownSlot33() {
     PlaySoundByName(kSelectFreqSound);
 }
 
+// 0x002976f8
 void MetLoadFreqScreen::UpdateNameLabel() {
     HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
     mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
@@ -119,18 +124,19 @@ void MetLoadFreqScreen::UpdateNameLabel() {
     mUnknown90->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
+// 0x002978d0
 void MetLoadFreqScreen::OnNameButton() {
     MetPersonaData *pPersona = (*mUnknown8c)[mUnknown94];
 
     Application::shared()->GetGameManager()->ClearPersonas();
     Application::shared()->GetGameManager()->AddPersona(*pPersona);
 
-    PushNamedScreen(HxStr(kLeftGizmoScreen));
-
     if (Application::shared()->GetGameManager()->GetGameMode() == kNetworkGameMode) {
+        PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kNetPortalScreen));
         ActivateNamedPanel(HxStr(kNetPortalScreen));
     } else {
+        PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kModeScreen));
         ActivateNamedPanel(HxStr(kModeScreen));
     }
@@ -151,10 +157,12 @@ void MetLoadFreqScreen::PrepareFreqMakerForSelection() {
     MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadFreqScreen);
 }
 
+// 0x0029bda0
 void MetLoadFreqScreen::AcquireIdentityList() {
     mUnknown8c = MetPersonaData::loadList();
 }
 
+// 0x00296fe8
 void MetLoadFreqScreen::BuildButtonList() {
     mUnknown90->Clear();
     mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));

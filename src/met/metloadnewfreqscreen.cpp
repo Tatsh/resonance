@@ -48,6 +48,7 @@ constexpr int kNameButtonIndex = 0;
 
 } // namespace
 
+// 0x002a8418
 MetLoadNewFreqScreen::MetLoadNewFreqScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
@@ -57,6 +58,7 @@ MetScreen *MetLoadNewFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadNewFreqScreen(pRenderer, nPriority);
 }
 
+// 0x002a3890
 void MetLoadNewFreqScreen::EnterAndShow() {
     HxStr title;
     QueryConfigString(&title, kTitleConfigCode, kTitleKey);
@@ -68,6 +70,7 @@ void MetLoadNewFreqScreen::EnterAndShow() {
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
+// 0x002a84c0
 void MetLoadNewFreqScreen::BeginExit() {
     if (mUnknown18 != 0 && mUnknown90->mSelected == kNameButtonIndex) {
         ExitScreenByName(HxStr(kHelpScreen));
@@ -76,6 +79,7 @@ void MetLoadNewFreqScreen::BeginExit() {
     MetScreen::BeginExit();
 }
 
+// 0x002a3978
 void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     if (mUnknowna8 != 0) {
         return;
@@ -86,6 +90,7 @@ void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
 }
 
+// 0x002a85c0
 void MetLoadNewFreqScreen::UpdateNameLabel() {
     Rnd::Text *pLabel = mUnknown90->ButtonAt(kNameButtonIndex)->mText;
 
@@ -112,10 +117,12 @@ void MetLoadNewFreqScreen::OnCreateButton() {
     MetLoadFreqBaseScreen::OnCreateButton();
 }
 
+// 0x002a8590
 void MetLoadNewFreqScreen::AcquireIdentityList() {
     mUnknown8c = MetFreqMakerAssetManager::shared()->GetIdentityList();
 }
 
+// 0x002a3b08
 void MetLoadNewFreqScreen::BuildButtonList() {
     mUnknown90->Clear();
 
