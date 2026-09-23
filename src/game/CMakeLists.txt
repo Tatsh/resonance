@@ -1,4 +1,5 @@
 set(RESONANCE_GAME_SRCS
+    axephrasemaker.cpp
     axingstg.cpp
     campaignstats.cpp
     catcher.cpp
@@ -12,17 +13,20 @@ set(RESONANCE_GAME_SRCS
     gamestats.cpp
     genericcatcher.cpp
     grooveworld.cpp
+    gsperiodical.cpp
     idablebase.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
     levelconverter.cpp
     levelstats.cpp
     localplayer.cpp
+    msgjoiner.cpp
     multicatcher.cpp
     netplayer.cpp
     nullplayer.cpp
     phrase.cpp
     phrasedatabase.cpp
+    phrasemaker.cpp
     pitchingstg.cpp
     player.cpp
     playerinfo.cpp

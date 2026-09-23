@@ -49,4 +49,25 @@ public:
      * @ghidraAddress 0x0019c408
      */
     virtual void HandleMessage(Message *pMsg);
+
+    /**
+     * Act on a period that has elapsed. Slot 4.
+     *
+     * The body is not written. It runs the routine at `0x0019c118` when the period follows the one
+     * recorded at `+0x2c`, runs `0x0019c368` with the period, and then, when `+0x48` is set and
+     * the track description's test at `0x001d79d0` accepts the period, dispatches slot 11 of the
+     * synthesiser Globals::GetSynth() reports with the MIDI channel at `+0x24`.
+     *
+     * @param nPeriod The index of the period.
+     * @ghidraAddress 0x0019d990
+     */
+    virtual void Slot4(int nPeriod);
+
+    /**
+     * Report the song position periods are counted from. Slot 5.
+     *
+     * @return 6 always, after a discarded finiteness test on the same value.
+     * @ghidraAddress 0x0019d438
+     */
+    virtual int Slot5();
 };
