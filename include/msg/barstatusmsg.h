@@ -54,6 +54,21 @@ public:
     };
 
     /**
+     * Report a bar's player, with no other optional field set.
+     *
+     * Inline, with no address of its own. AxePhraseMaker::StartPhrase() expands it on its stack at
+     * `0x0019bdc4`. mUnknown14 and the effect mask start clear, and mEnabled and mPowerup are
+     * left unset.
+     *
+     * @param nBar The bar.
+     * @param nTrack The track.
+     * @param pPlayer The player whose track the bar belongs to.
+     */
+    BarStatusMsg(int nBar, int nTrack, Player *pPlayer)
+        : mBar(nBar), mTrack(nTrack), mPlayer(pPlayer), mUnknown14(0), mFlags(kFieldPlayer) {
+    }
+
+    /**
      * Produce a heap copy of this message.
      *
      * @return The copy.

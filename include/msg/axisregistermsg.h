@@ -100,7 +100,15 @@ public:
 
 private:
     Mid::MBT mPosition; // +0x0c
-    int mTrack;         // +0x10
+
+public:
+    /**
+     * The player's track. +0x10
+     *
+     * Public because AxePhraseMaker::HandleMessage() at `0x0019c448` compares it with its own track
+     * directly, and the image has no accessor.
+     */
+    int mTrack;
 };
 
 /**

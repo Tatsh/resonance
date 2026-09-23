@@ -34,16 +34,16 @@ void NoteMsg::Print(std::ostream &stream) {
     position.Print(stream);
 
     std::ostream &rest = stream << ' ' << static_cast<int>(mNote) << ' '
-                                << static_cast<int>(mUnknown0a) << ' ';
+                                << static_cast<int>(mVelocity) << ' ';
     mLength.Print(rest);
-    rest << " n" << static_cast<int>(mUnknown08);
+    rest << " n" << static_cast<int>(mChannel);
 }
 
 // 0x003d80c0
 void NoteMsg::Save(OBStream &stream) {
-    unsigned char byte08 = mUnknown08;
+    unsigned char byte08 = mChannel;
     unsigned char byte09 = mNote;
-    unsigned char byte0a = mUnknown0a;
+    unsigned char byte0a = mVelocity;
     unsigned short length = static_cast<unsigned short>(mLength.mTick);
     stream.WriteBytes(&byte08, sizeof(byte08))
         .WriteBytes(&byte09, sizeof(byte09))
@@ -54,9 +54,9 @@ void NoteMsg::Save(OBStream &stream) {
 // 0x003e3808
 void NoteMsg::Load(IBStream &stream) {
     unsigned short length;
-    stream.ReadBytes(&mUnknown08, sizeof(mUnknown08))
+    stream.ReadBytes(&mChannel, sizeof(mChannel))
         .ReadBytes(&mNote, sizeof(mNote))
-        .ReadBytes(&mUnknown0a, sizeof(mUnknown0a))
+        .ReadBytes(&mVelocity, sizeof(mVelocity))
         .Read(&length, sizeof(length));
     mLength = Mid::MBT(length);
 }

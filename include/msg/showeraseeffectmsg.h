@@ -24,6 +24,32 @@ class Player;
 class ShowEraseEffectMsg : public Message {
 public:
     /**
+     * Construct a message with every field unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    ShowEraseEffectMsg() {
+    }
+
+    /**
+     * Report one erased range.
+     *
+     * Inline, with no address of its own. AxePhraseMaker::Erase() expands it on its stack at
+     * `0x0019c074` with 1 in the word at `+0x14`.
+     *
+     * @param pPlayer The player who erased the range.
+     * @param nTrack The erased track.
+     * @param nFirstBar The first erased bar.
+     * @param nEndBar The bar one past the last erased bar.
+     * @param nUnknown14 Stored in the word at `+0x14`, whose purpose is not recovered.
+     */
+    ShowEraseEffectMsg(Player *pPlayer, int nTrack, int nFirstBar, int nEndBar, int nUnknown14)
+        : mPlayer(pPlayer), mTrack(nTrack), mFirstBar(nFirstBar), mEndBar(nEndBar),
+          mUnknown14(nUnknown14) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 315.
