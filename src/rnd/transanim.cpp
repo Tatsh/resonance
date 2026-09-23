@@ -6,6 +6,7 @@
 #include <iterator>
 #include <list>
 #include <string.h>
+#include <vector>
 
 #include "math/quaternion.h"
 #include "math/transformops.h"
@@ -238,6 +239,14 @@ static void RebuildRotTangents(std::list<TransAnim::RotKey> &keys) {
     keys.back().ComputeSplineTangents(&*std::prev(std::prev(keys.end())), nullptr);
 }
 
+// Add a key to a vector channel, sort it, and rebuild its tangents.
+static inline void AppendSortedTransKey(std::list<TransAnim::TransKey> &keys,
+                                        const TransAnim::TransKey &key) {
+    keys.push_back(key);
+    keys.sort(); // Yes, the binary sorts the channel again after every key.
+    RebuildTransTangents(keys);
+}
+
 // Add a key read in the form below revision 2 to a vector channel. The tangents take only their
 // padding floats, which the binary leaves as stack contents apart from that word, and the shape is
 // zeroed.
@@ -250,9 +259,7 @@ static void AppendLegacyTransKey(std::list<TransAnim::TransKey> &keys, const Vec
     key.mTangentIn[kPaddingFloat] = 1.0f;
     key.mTangentOut[kPaddingFloat] = 1.0f;
     key.mFrame = legacy.mFrame;
-    keys.push_back(key);
-    keys.sort(); // Yes, the binary sorts the channel again after every key.
-    RebuildTransTangents(keys);
+    AppendSortedTransKey(keys, key);
 }
 
 // The rotation counterpart of AppendLegacyTransKey(). The tangents are stack contents in the binary
@@ -952,6 +959,11 @@ Vector3 TransAnim::TransKey::EvaluateSplineDerivative(const TransKey *pNext, flo
 // Parameter step of the sum in SplineLength(), and the weight of each sample.
 constexpr float kSplineLengthStep = 0.005f;
 
+// The length of the first three floats, which VU0 takes with vsqrt.
+static inline float KeyVectorLength(const float *pVec) {
+    return std::sqrt((pVec[0] * pVec[0]) + (pVec[1] * pVec[1]) + (pVec[2] * pVec[2]));
+}
+
 // 0x00554d90
 float TransAnim::TransKey::SplineLength(const TransKey *pNext) const {
     float flLength = 0.0f;
@@ -959,9 +971,7 @@ float TransAnim::TransKey::SplineLength(const TransKey *pNext) const {
     do {
         const Vector3 derivative = EvaluateSplineDerivative(pNext, flT);
         flT += kSplineLengthStep;
-        flLength += std::sqrt(derivative.x * derivative.x + derivative.y * derivative.y +
-                              derivative.z * derivative.z) *
-                    kSplineLengthStep;
+        flLength += KeyVectorLength(&derivative.x) * kSplineLengthStep;
     } while (flT < 1.0f);
     return flLength;
 }
@@ -987,6 +997,115 @@ void TransAnim::RotKey::EvaluateSpline(const RotKey *pNext, Quat &out, float flT
     QuatSlerp(outgoing, middle, first, flT);
     QuatSlerp(middle, incoming, second, flT);
     QuatSlerp(first, second, out, flT);
+}
+
+// The fewest translation keys Normalize() redistributes.
+constexpr std::size_t kMinNormalizeKeys = 3;
+
+// Spread the frames of a straight-line channel in proportion to the distance covered, between the
+// first and last frames the channel already has.
+static inline void SpreadFramesByChordLength(std::list<TransAnim::TransKey> &keys) {
+    std::vector<float> lengths;
+    lengths.reserve(keys.size());
+    lengths.push_back(0.0f);
+    auto prev = keys.begin();
+    for (auto it = std::next(prev); it != keys.end(); ++it) {
+        float afChord[kXfmRowFloatCount];
+        afChord[kPaddingFloat] = 1.0f;
+        Vec3Sub(it->mValue, prev->mValue, afChord);
+        lengths.push_back(lengths.back() + KeyVectorLength(afChord));
+        prev = it;
+    }
+
+    const float flFirstFrame = keys.front().mFrame;
+    const float flLastFrame = keys.size() != 0 ? keys.back().mFrame : 0.0f;
+    auto length = lengths.begin();
+    for (auto &key : keys) {
+        key.mFrame = ((flLastFrame - flFirstFrame) * (*length / lengths.back())) + flFirstFrame;
+        ++length;
+    }
+}
+
+// 0x004f4c48
+void TransAnim::Normalize() {
+    std::list<TransKey> &keys = mFramesOwner->mTransKeys;
+    if (keys.size() < kMinNormalizeKeys) {
+        return;
+    }
+    if (mTransInterp == kInterpLinear) {
+        SpreadFramesByChordLength(keys);
+        return;
+    }
+
+    float flTotalLength = 0.0f;
+    auto prev = keys.begin();
+    for (auto it = std::next(prev); it != keys.end(); ++it) {
+        flTotalLength += prev->SplineLength(&*it);
+        prev = it;
+    }
+
+    std::list<TransKey> evenKeys;
+    const int nKeyCount = static_cast<int>(keys.size());
+    const int nSegmentCount = nKeyCount - 1;
+    const float flSpacing = flTotalLength / nSegmentCount;
+    const float flLastFrame = keys.size() != 0 ? keys.back().mFrame : 0.0f;
+    const float flFrameStep = (flLastFrame - keys.front().mFrame) / nSegmentCount;
+    float flTarget = flSpacing;
+    float flWalked = 0.0f;
+    float flFrame = flFrameStep; // Yes, the binary does not start from the first key's frame.
+    bool bOvershot = false;
+
+    AppendSortedTransKey(evenKeys, keys.front());
+    prev = keys.begin();
+    for (auto next = std::next(prev); next != keys.end(); ++next) {
+        float flT = 0.0f;
+        do {
+            const Vector3 derivative = prev->EvaluateSplineDerivative(&*next, flT);
+            flWalked += KeyVectorLength(&derivative.x) * kSplineLengthStep;
+            if (flTarget <= flWalked) {
+                if ((flSpacing * kSplineLengthStep) < (flWalked - flTarget)) {
+                    bOvershot = true;
+                }
+                // The tangents and the shape's padding float are stack contents in the binary.
+                // The rebuild overwrites every tangent except the outer two of the channel.
+                TransKey key = {};
+                LerpKeyVector(prev->mValue, next->mValue, flT, key.mValue);
+                key.mTangentIn[kPaddingFloat] = 1.0f;
+                key.mTangentOut[kPaddingFloat] = 1.0f;
+                std::copy(std::begin(prev->mShape), &prev->mShape[kPaddingFloat], key.mShape);
+                key.mFrame = flFrame;
+                flTarget += flSpacing;
+                flFrame += flFrameStep;
+                AppendSortedTransKey(evenKeys, key);
+            }
+            flT += kSplineLengthStep;
+        } while (flT < 1.0f);
+        prev = next;
+    }
+
+    const int nEvenKeyCount = static_cast<int>(evenKeys.size());
+    if (nEvenKeyCount == nSegmentCount) {
+        AppendSortedTransKey(evenKeys, *prev);
+    } else if (nEvenKeyCount != nKeyCount) {
+        g_failSink.Report("Couldn't normalize\n");
+        return;
+    } else {
+        evenKeys.back() = *prev;
+    }
+    mFramesOwner->mTransKeys = evenKeys;
+    if (bOvershot) {
+        Normalize();
+    }
+}
+
+// 0x004fb7e0
+void TransAnim::SetRepeatTrans(int nRepeat) {
+    mRepeatTrans = nRepeat;
+    if (nRepeat == 0) {
+        std::list<TransKey> &keys = mFramesOwner->mTransKeys;
+        keys.sort();
+        RebuildTransTangents(keys);
+    }
 }
 
 // 0x004fc000

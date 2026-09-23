@@ -351,6 +351,44 @@ public:
     void EvalFrame(float flFrame, float *pXfm, int nResetEmpty);
 
     /**
+     * Redistribute the frames owner's translation keys to an even speed.
+     *
+     * A channel of fewer than three keys is not changed. A linear channel retains its values, and
+     * each frame is set in proportion to the chord distance covered, between the first and last
+     * frames.
+     *
+     * A spline channel is rebuilt. Its arc length is walked in parameter steps of 0.005, and a key
+     * is emitted each time another total length divided by one less than the key count has been
+     * covered. The emitted value is the straight-line blend of the two bracketing keys at the
+     * step's parameter rather than the curve position, and its shape comes from the earlier key.
+     * The emitted frames advance from one frame step rather than from the first key's frame. Each
+     * insertion sorts the new channel again and rebuilds its tangents. A walk one key short
+     * appends a copy of the last key, and a walk that arrives at the full count replaces its last
+     * key with the original last key. Any other count reports "Couldn't normalize" and does not
+     * change the channel. When an emission overshoots its target by more than 0.005 of the
+     * spacing, the routine runs again on the result.
+     *
+     * No call site outside the routine itself survives in the shipped program. The name is
+     * inferred from the report text.
+     *
+     * @ghidraAddress 0x004f4c48
+     */
+    void Normalize();
+
+    /**
+     * Set whether the translation channel repeats.
+     *
+     * Turning repetition off sorts the frames owner's translation keys and rebuilds their
+     * tangents. The rebuild restores the incoming tangent of the last key. EvalFrame() overwrites
+     * that tangent while repetition is on. No call site survives in the shipped program, and the
+     * name is inferred from the member it sets.
+     *
+     * @param nRepeat Non-zero to repeat.
+     * @ghidraAddress 0x004fb7e0
+     */
+    void SetRepeatTrans(int nRepeat);
+
+    /**
      * Make a transformable the target this animation drives.
      *
      * Drops this object's reference on the previous target, records the new one, and takes a
