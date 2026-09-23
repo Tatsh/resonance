@@ -49,22 +49,7 @@ enum EffectorType {
  * also 0x48 bytes, and its second tuning value arrives as a two-element property vector. The
  * factory rejects that vector with `Need 2 stutter parameters` at any other length.
  *
- * Five further routines of the three classes above are recovered and not written here. Each one
- * needs a declaration that belongs to a header outside this subsystem.
- *
- * - `0x001a0df0` is the factory, declared below as CreateForType() with its body not written.
- * - `0x001a1a10` is VolumeEffector's constructor and `0x001a07c0` is its Enable(). The object is
- *   0x20 bytes: an unsigned char MIDI channel at `+0x14`, an int control value at `+0x18`, and the
- *   enabled flag at `+0x1c`. Enable() sends controller 0x2f with the stored value while enabled and
- *   with 0x7f while disabled.
- * - `0x001a1bc0` is MidiOnOffEffector's constructor and `0x001a0860` is its Enable(). The object is
- *   0x24 bytes: the EffectorType at `+0x14`, an unsigned char MIDI channel at `+0x18`, the enabled
- *   flag at `+0x1c`, and an unsigned char controller number at `+0x20`. Enable() sends the stored
- *   controller with 0x7f while enabled and with zero while disabled.
- *
- * Both Enable() bodies build a StdMidiMsg on the stack from a status byte, a controller number, and
- * a value, and then pass it to MsgSource::Send(). Neither the three-argument StdMidiMsg constructor
- * nor MsgSource::Send() is declared in this tree yet.
+ * The factory at `0x001a0df0` is declared below as CreateForType() with its body not written.
  */
 class Effector : public MsgSource {
 public:

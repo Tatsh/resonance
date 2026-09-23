@@ -434,6 +434,7 @@ mettutorialscreen
 metunlockstagesmsg
 mgen
 midifilereader
+midionoffeffector
 minimumsavespacemct
 miptbp
 missingconfigvals
@@ -809,6 +810,7 @@ vmixer
 vmixl
 vmixr
 vmulax
+volumeeffector
 vopmsub
 vopmula
 voxer

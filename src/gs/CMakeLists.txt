@@ -1,6 +1,7 @@
 set(RESONANCE_GS_SRCS
     effector.cpp
     ghostnoteseffector.cpp
+    midionoffeffector.cpp
     mixer.cpp
     multimuse.cpp
     multimuseplayer.cpp
@@ -9,6 +10,7 @@ set(RESONANCE_GS_SRCS
     noteplayer.cpp
     phrasemgr.cpp
     scratcher.cpp
+    volumeeffector.cpp
     voxer.cpp)
 
 add_library(resonance_gs STATIC ${RESONANCE_GS_SRCS})
