@@ -82,6 +82,7 @@ set(RESONANCE_APP_SRCS
     watchdog.cpp
     watchdogclock.cpp
     watchdogplayback.cpp
+    watchdogrecorder.cpp
     watchdogtimer.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})

@@ -20,11 +20,10 @@ class OBStream;
  *
  * A caller hands the scheduler a pointer to one of these. The three queueing paths at
  * `0x004ac644`, `0x004ac720`, and `0x004ac85c` treat -2 as "not yet allocated", replace it with a
- * fresh value from the allocator at `0x005e4dc8`, and copy the result into the wrapper they queue.
- * Several commands queued through the same handle therefore share one value, and the cancellation
- * path at `0x004a79d0` withdraws every wrapper with a matching value in one call. That allocator
- * maintains a counter at `0x0077d2e8` and a container at `0x008e4f08` outside this class, so it is
- * not reconstructed here.
+ * fresh value from AllocateValue(), and copy the result into the wrapper they queue. Several
+ * commands queued through the same handle therefore share one value. The cancellation path at
+ * `0x004a79d0` withdraws only the first queued wrapper with a matching value, because
+ * Watchdog::WithdrawByCmdID() stops at the first match.
  *
  * The one member is public, because the queueing paths assign it directly and the image exposes no
  * accessor.
@@ -59,6 +58,32 @@ public:
      * @ghidraAddress 0x005e5958
      */
     void Print(std::ostream &stream);
+
+    /**
+     * Produce the next handle value that no replayed recording has reserved.
+     *
+     * The counter at `0x0077d2e8` advances past every reserved value it meets. The reserved values
+     * are the set at `0x008e4f08`, which a replayed recording fills and whose cursor at
+     * `0x008e4f18` walks forward alongside the counter. The title is retained from an earlier
+     * pass.
+     *
+     * @return The value.
+     * @ghidraAddress 0x005e4dc8
+     */
+    static int AllocateValue();
+
+    /**
+     * Reserve a handle value so that AllocateValue() does not hand it out.
+     *
+     * The value joins the reserved set, and the set's cursor returns to its first entry.
+     * WatchdogPlayback::Load() calls this for every wrapper it reads back, which keeps the handles
+     * of a replayed recording unique. The handle arrives by value, as a copy the caller builds.
+     * The title is inferred.
+     *
+     * @param id The handle to reserve.
+     * @ghidraAddress 0x005e5908
+     */
+    static void Reserve(CmdID id);
 
     /**
      * The value, or -2 while no value has been allocated.

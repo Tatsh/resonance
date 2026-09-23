@@ -7,7 +7,9 @@
 #include "sch/timedcommand.h"
 
 class IBStream;
+class OBStream;
 class WatchdogPlayback;
+class WatchdogRecorder;
 
 /**
  * Scheduler that runs queued commands when their due time arrives.
@@ -30,8 +32,8 @@ class WatchdogPlayback;
  * reading exceeds it, the clock is marked forward and re-read, which stops the loop from running
  * six seconds of arrears in one burst.
  *
- * The member at `+0x0c` is a stream mode, one for recording and two for playback, and `+0x10` is a
- * one-word box for the stream that `0x004ac8c0` installs. The member at `+0x48` blocks every
+ * The member at `+0x0c` is a stream mode, one for recording and two for playback, and `+0x10` is
+ * the WatchdogRecorder that BeginRecording() installs. The member at `+0x48` blocks every
  * queueing path while it is set.
  *
  * mClock is public because MainLoop::Poll() reads its origin directly and the image has no
@@ -68,6 +70,73 @@ public:
      * @ghidraAddress 0x004a9858
      */
     Watchdog();
+
+    /**
+     * Block queueing, release every queued wrapper, and release the recorder and the playback.
+     *
+     * @ghidraAddress 0x004a9980
+     */
+    ~Watchdog();
+
+    /**
+     * Start recording every recordable command queued from now on.
+     *
+     * Installs a WatchdogRecorder over the stream, sets mStreamMode to 1, and resets the clock and
+     * the current time to zero. GameRecorder is the caller. The title is retained from an earlier
+     * pass.
+     *
+     * @param stream The stream the recording is written to.
+     * @ghidraAddress 0x004ac8c0
+     */
+    void BeginRecording(OBStream &stream);
+
+    /**
+     * Queue a wrapper at an absolute scheduler time.
+     *
+     * Performs no work while queueing is blocked. Otherwise the wrapper takes the order and the
+     * due tick, the handle is allocated when it still reads -2 and copied into the wrapper, and the
+     * wrapper is queued with a reference of the queue's own. The recordable flag is not read on
+     * this path. Every Sch::TickClock post that resolves an absolute time is a caller.
+     *
+     * @param pCommand The wrapper.
+     * @param nTick The due time in nanoseconds.
+     * @param id The handle, allocated in place when it reads -2.
+     * @param bRecordable Unread.
+     * @param nOrder The order among wrappers due at the same time.
+     * @ghidraAddress 0x004ac608
+     */
+    void QueueAbsolute(
+        Sch::TimedCommand *pCommand, long long nTick, CmdID &id, int bRecordable, int nOrder);
+
+    /**
+     * Queue a wrapper at a distance from the current time.
+     *
+     * A recordable command is dropped during playback, because the recording supplies it. The due
+     * time is the later of the current time and the clock reading, plus nDelta, and queueing then
+     * proceeds as in QueueAbsolute(), except that the command is marked queued and, while
+     * recording, a recordable wrapper is written to the recording.
+     *
+     * @param pCommand The wrapper.
+     * @param nDelta The distance from now in nanoseconds.
+     * @param id The handle, allocated in place when it reads -2.
+     * @param bRecordable Non-zero for a command the recording carries.
+     * @param nOrder The order among wrappers due at the same time.
+     * @ghidraAddress 0x004ac698
+     */
+    void QueueDelta(
+        Sch::TimedCommand *pCommand, long long nDelta, CmdID &id, int bRecordable, int nOrder);
+
+    /**
+     * Build a wrapper for a command while recording, and discard it.
+     *
+     * While recording, a wrapper is built on the stack with the current time and a fresh handle,
+     * and then destroyed without being queued or recorded. The image has no caller. The title is
+     * retained from an earlier pass.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x004ac808
+     */
+    void PostUnreferenced(Sch::Command *pCommand);
 
     /**
      * Queue a command the playback reader supplies.
@@ -115,7 +184,9 @@ public:
     void RestartClock();
 
     /**
-     * Release the monitor's buffers.
+     * Release the recorder and the playback and leave both stream modes.
+     *
+     * GameRecorder's end of recording and GamePlayback's destructor are the callers.
      *
      * @ghidraAddress 0x004ac9e8
      */
@@ -175,12 +246,17 @@ private:
     // WatchdogTimer::Now() reads mNowNs.
     friend class WatchdogTimer;
 
+    // The tail both queueing paths expand: allocate the handle while it still reads -2, copy it
+    // into the wrapper, and queue the wrapper with a reference of the queue's own.
+    void Enqueue(Sch::TimedCommand *pCommand, CmdID &id);
+
     // Every queued wrapper, each holding one reference the queue gives back when it runs or is
     // withdrawn.
     std::multiset<Sch::TimedCommand *, QueueOrder> mQueue; // +0x00
     // +0x0c 1 while recording, 2 while playing back; released by Close().
     int mStreamMode;
-    int mUnknown10; // +0x10 the one-word box for the installed stream; released by Close()
+    // The recording BeginRecording() installs, released by Close().
+    WatchdogRecorder *mRecorder; // +0x10
     // The replay StartPlayback() installs, released by Close().
     WatchdogPlayback *mPlayback; // +0x14
     long long mNowNs;            // +0x18 the due tick of the command most recently run

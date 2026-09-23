@@ -19,13 +19,6 @@ constexpr char kSaveVersion = 1;
 // Print() starts a new line before every eighth phrase.
 constexpr unsigned kPhrasesPerLine = 8;
 
-// 0x001b8d40
-void ReleasePhrase(Phrase *pPhrase) {
-    if (pPhrase != nullptr) {
-        pPhrase->Release();
-    }
-}
-
 } // namespace
 
 // 0x001b8cc8
@@ -101,7 +94,7 @@ void PhraseDatabase::Load(IBStream &stream) {
 
 // 0x001b8d60
 void PhraseDatabase::Clear() {
-    std::for_each(mPhrases.begin(), mPhrases.end(), ReleasePhrase);
+    std::for_each(mPhrases.begin(), mPhrases.end(), Attachment::ReleaseIfSet);
     std::fill(mPhrases.begin(), mPhrases.end(), static_cast<Phrase *>(nullptr));
     std::fill(mUnknown20.begin(), mUnknown20.end(), 0L);
 }

@@ -49,5 +49,21 @@ public:
      */
     virtual void Destroy();
 
+    /**
+     * Give back one reference to an object that may be null.
+     *
+     * Passed as a function to std::for_each by the command scheduler, the phrase database, and the
+     * playback reader. The body is inline. Its units emit identical copies, at `0x001b8d40` and
+     * `0x004ac5e8`. The title is inferred.
+     *
+     * @param pAttachment The object, or null.
+     * @ghidraAddress 0x001b8d40
+     */
+    static void ReleaseIfSet(Attachment *pAttachment) {
+        if (pAttachment != nullptr) {
+            pAttachment->Release();
+        }
+    }
+
     int mRefs; // +0x00
 };
