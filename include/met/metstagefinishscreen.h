@@ -71,4 +71,55 @@ public:
      * @ghidraAddress 0x003c4248
      */
     virtual void PlayErrorSound(int nSelector);
+
+private:
+    /**
+     * Queue the message for a difficulty unlocked by this stage.
+     *
+     * Slot 5 at `0x003be4ac` is the one caller. The body clears the word at `+0xb4`, and acts only
+     * when the unlock is new: it reads the game manager's GameParams, the level's stage
+     * (configuration code 0x25d), and the difficulty name from DifficultyName(), and queues the
+     * matching configuration string (code 0x258, keys such as `end_game_easy_normal`) on the vector
+     * of messages at `+0x8c`. The body is not written, because the class declares no members yet.
+     *
+     * @param nWasUnlocked Non-zero when the difficulty was already unlocked.
+     * @param nIsUnlocked Non-zero when the difficulty is unlocked now.
+     * @ghidraAddress 0x003c0008
+     */
+    void AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked);
+
+    /**
+     * Queue `end_game_secret` when the secret unlock is new.
+     *
+     * Appends configuration string 0x258 for the key to the vector of messages at `+0x8c` when
+     * nIsUnlocked is set and nWasUnlocked is clear. Slot 5 at `0x003be4c4` is the one caller. The
+     * body is not written, for the reason AddDifficultyUnlockMessage() gives.
+     *
+     * @param nWasUnlocked Non-zero when the unlock already existed.
+     * @param nIsUnlocked Non-zero when it exists now.
+     * @ghidraAddress 0x003c02c0
+     */
+    void AddSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
+
+    /**
+     * Queue `end_game_super_secret` when that unlock is new.
+     *
+     * The same shape as AddSecretUnlockMessage(). Slot 5 at `0x003be4dc` is the one caller.
+     *
+     * @param nWasUnlocked Non-zero when the unlock already existed.
+     * @param nIsUnlocked Non-zero when it exists now.
+     * @ghidraAddress 0x003c0390
+     */
+    void AddSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
+
+    /**
+     * Queue `end_game_end_super_secret` when that unlock is new.
+     *
+     * The same shape as AddSecretUnlockMessage(). Slot 5 at `0x003be700` is the one caller.
+     *
+     * @param nWasUnlocked Non-zero when the unlock already existed.
+     * @param nIsUnlocked Non-zero when it exists now.
+     * @ghidraAddress 0x003c0460
+     */
+    void AddEndSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
 };
