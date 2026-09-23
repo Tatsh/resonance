@@ -20,7 +20,8 @@ void PlayMapLinear::LoadStepRings() {
             int nFirst = kNoStep;
             int nPrevious = kNoStep;
             for (Py::Sequence::iterator step = ring.begin(); step != ring.end(); ++step) {
-                const int nStep = static_cast<long>(Py::Int(*step));
+                Py::Int value(*step);
+                const int nStep = static_cast<long>(value);
                 if (nPrevious != kNoStep) {
                     mUnknown68[nSet].push_back(StepPair{nPrevious, nStep});
                 } else {
