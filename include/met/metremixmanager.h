@@ -379,10 +379,15 @@ public:
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 
-private:
-    // The key of the factory remixes in mRemixes. Card slots use their own port-and-slot keys.
+    /**
+     * The key of the factory remixes in mRemixes. Card slots use their own port-and-slot keys.
+     *
+     * Public because MetRemixLoadScreen indexes mRemixes with it when the factory catalogue is
+     * chosen.
+     */
     static constexpr int kFactorySlot = -1;
 
+private:
     // 0x003610a8
     static MetRemixManager *ResolveSharedInstance();
     // 0x00361210

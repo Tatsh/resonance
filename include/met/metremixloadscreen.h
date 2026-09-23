@@ -14,40 +14,28 @@ class Font;
 }
 
 /**
- * Screen that lists the remixes on a memory card for loading.
+ * Screen that lists the remixes on a memory card or the factory remixes for loading.
  *
  * `18MetRemixLoadScreen` in the RTTI descriptor at `0x00901c10`, with two public non-virtual bases
  * at fixed offsets, MetScreen at `+0x00` and ListDataProvider at `+140`. The object is 0xac bytes,
- * which the factory at `0x00352590` confirms by requesting exactly that many with the tag
- * `MsgSink`.
+ * which New() confirms by requesting exactly that many with the tag `MsgSink`.
+ *
  * The 39-entry primary vtable is at `0x00807300`, the same length as the MetScreen table, so the
  * class declares no virtual of its own, and the four-entry ListDataProvider table at `0x008072d8`
  * adjusts `this` by `-140` in every entry.
  *
- * The constructor at `0x00349dc0` takes only the renderer and the load priority, and supplies
- * `mcrl` for the screen name, `metagame/Shared` for the directory, and `memcard_remix_load` for
- * the container. It then clears MetScreen::mUnknown60, which is why that member is protected
- * rather than private, and allocates a MetButtonList tagged `MetButtonList` into mUnknowna8. The
- * words at `+0x90`, `+0x98`, and `+0x9c` are never written.
- *
- * The destructor at `0x00352618` restores both vptrs, deletes mUnknown94 and then clears it,
- * deletes mUnknowna8, restores the ListDataProvider vptr to `0x007ec830`, runs the MetScreen
- * destructor, and releases the object with the tag `MsgSink`. mUnknown94 is released through slot
- * 1 of a table at `+0x94` of the object itself, which is where ScrollingList places its vptr.
- *
- * Nine entries of the primary table differ from the MetScreen table, which a diff of the two
- * tables settles rather than the title each routine carries. They are 0 `0x00352508`, the
- * compiler-generated GetTypeInfo, 1 `0x00352618` the destructor, 5 `0x0034b568`, 19 `0x0034a2a8`,
- * 20 `0x003526d0`, 22 `0x00352720`, 33 `0x00352770`, 36 `0x0034cbd0`, and 38 `0x00349fc8`. All
- * seven behaviour slots are declared below.
- *
- * Both pure virtuals of the four-entry ListDataProvider table are supplied here, ProvideText() at
- * `0x0034d8b0` and ProvideMesh() at `0x00352588`.
+ * Two buttons choose the catalogue, `mcrl_SAVED.but` for the remixes on the first card slot and
+ * `mcrl_FACTORY.but` for the factory remixes, and a ScrollingList shows the chosen catalogue. The
+ * selected row is shown on MetRemixDataScreen.
  */
 class MetRemixLoadScreen : public MetScreen, public ListDataProvider {
 public:
     /**
      * Construct the screen.
+     *
+     * The screen name is `mcrl`, the directory `metagame/Shared`, and the container
+     * `memcard_remix_load`. MetScreen::mUnknown60 is cleared, and a MetButtonList is allocated
+     * into mUnknowna8. The words at `+0x90`, `+0x98`, and `+0x9c` are not written.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -56,56 +44,48 @@ public:
     MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
+     * Delete the list and the button list.
+     *
      * @ghidraAddress 0x00352618
      */
     virtual ~MetRemixLoadScreen();
 
     /**
-     * Show the screen and build the list of remixes. Slot 5.
+     * Build the screen on the heap.
      *
-     * The body is not written. It runs for roughly 0x580 instructions, requesting the remix
-     * catalogue from the memcard layer, building the ScrollingList at mUnknown94 over this
-     * screen's own ListDataProvider subobject, and filling the two button entries. Most of the
-     * routines it drives belong to the memcard and data-array layers and none of them is
-     * identified.
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x00352590
+     */
+    static MetRemixLoadScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Choose the catalogue, set the title, build or show the list, then enter.
+     *
+     * Slot 5. The help line becomes `mem_load_remix` in jam mode and `mem_load_custom` otherwise,
+     * and both buttons are shown. With a card present (MetFrontEndState::mUnknown0c) the card
+     * catalogue is chosen, unless it is empty. The factory catalogue is chosen otherwise. The
+     * title is the configuration code 0x269 text `mem_load_remix` or `mem_load_custom` formatted
+     * with the first card slot's name for the card, and `fact_load_remix` or `fact_load_custom`
+     * for the factory. The list is built on the first entry from `mcrl_line.view`,
+     * `mcrl_hilite.mesh`, `mcrl_up.mesh`, and `mcrl_down.mesh`, and shown again on later entries.
      *
      * @ghidraAddress 0x0034b568
      */
     virtual void EnterAndShow();
 
     /**
-     * Act on a navigation command. Slot 19.
+     * Act on a navigation command.
      *
-     * The body is not written and every part of it is recovered. A six-entry jump table at
-     * `0x00807130` indexed by the command code less one selects the branch, and a code outside one
-     * through six returns at once.
+     * Slot 19, through a six-entry jump table at `0x00807130`. Previous and next move the list
+     * within the catalogue and show the new row. Left and right walk the button ring and then run
+     * OnButtonRingMoved(). A select on a row made on this disc empties the help text, records 2
+     * in MetScreen::mUnknown18, exits the title, help, and data screens, and begins the exit, and
+     * a select on any other row plays the error sound. A back empties the help text, clears
+     * MetScreen::mUnknown18, exits the title and data screens, and begins the exit.
      *
-     * Codes 1 and 2 walk the list. Each returns unless mUnknown90 is set, then reads the selected
-     * row index through the ScrollingList accessor at `0x00401160`, and code 1 requires that index
-     * to be above zero while code 2 requires it below one less than mUnknown90's element count.
-     * The move itself runs through `0x00400ec8` for code 1 and `0x00400f78` for code 2, and both
-     * branches end by reading the index again and handing it to the private data-screen helper.
-     *
-     * Codes 3 and 4 dispatch slots 2 and 3 of the MetButtonList at mUnknowna8, the two virtuals
-     * that walk the button ring in opposite directions, and both end by running the private
-     * helper at `0x0034a838`.
-     *
-     * Code 5 acts on the selection. It returns unless mUnknown90 is set and non-empty, reads the
-     * selected row, and compares that row's unknown34_ against the cached value the routine at
-     * `0x003f7ad8` vends. A row that does not match plays the error sound with the command's own
-     * pad index and nothing else. A row that matches clears the shared ticker text through
-     * `0x00317368`, records 2 in MetScreen::mUnknown18, exits `MetScreenTitleScreen`,
-     * `MetHelpScreen`, and `MetRemixDataScreen` in that order, and then starts its own exit.
-     *
-     * Code 6 departs. It clears the ticker text the same way, clears MetScreen::mUnknown18, exits
-     * `MetScreenTitleScreen` and `MetRemixDataScreen`, and then starts its own exit.
-     *
-     * What blocks the body is three declarations that do not exist. ScrollingList declares neither
-     * its selected-row accessor nor either of its two move methods, MetButtonList declares neither
-     * of the two ring virtuals, and the shared ticker routine at `0x00317368` has no title and no
-     * declaration in the MetHelpScreen header it belongs to.
-     *
-     * @param pCommand The command the renderer translated from an input message.
+     * @param pCommand The command.
      * @ghidraAddress 0x0034a2a8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
@@ -133,44 +113,38 @@ public:
     virtual void PlayHighSound(int nSelector);
 
     /**
-     * Show the load options on the help screen once the enter animation has finished. Slot 33.
+     * Show the first row on the data screen and the load options on the help screen.
      *
-     * The body is not written. It runs the private data-screen helper with a row index of zero,
-     * posts `remix_load_opt` to the shared help screen through the routine at `0x00317298`, and
-     * then posts the first element of MetScreen::mUnknown38 as ticker text at the renderer's
-     * current time through `0x00317368`. The constructor of this class appends nothing to
-     * mUnknown38, so that read takes the first element of an empty vector. Neither help-screen
-     * routine has a title or a declaration.
+     * Slot 33. The help layout is `remix_load_opt`, and the help text is the first line of
+     * MetScreen::mUnknown38 at the renderer time.
      *
      * @ghidraAddress 0x00352770
      */
     virtual void OnUnknownSlot33();
 
     /**
-     * Act on the button the user chose once the exit animation has finished. Slot 36.
+     * Act on the command once the exit has finished.
      *
-     * The body is not written. It hides both MetButtonList entries through `0x001fef40` and
-     * `0x005349e0`, resolves the game manager, and then branches on MetScreen::mUnknown18 and on
-     * the entry the button list reports, pushing `MetLeftGizmoScreen` among others. Neither button
-     * routine is identified and MetScreen::mUnknown18 is read rather than written here.
+     * Slot 36. Both buttons are hidden. After a back, jam mode returns through
+     * `MetLeftGizmoScreen` to `MetRemixTypeScreen`, and any other mode to `MetSoloStagesScreen`.
+     * After a select, the selected record becomes the loading game's level, script template 0x267
+     * runs with `1`, and the record goes to MetRemixManager. With three or more personas the last
+     * arena is taken and the load continues on `MetLoadGameScreen`. Otherwise
+     * MetFrontEndState::mUnknown24 records this screen and the load continues on
+     * `MetArenasScreen` with `MetHelpScreen`. MetRemixManager::BeginRemixLoad() then runs with
+     * this screen, the title, data, and help screens to restore, and whether the factory
+     * catalogue was chosen. The list entries are hidden last.
      *
      * @ghidraAddress 0x0034cbd0
      */
     virtual void OnUnknownSlot36();
 
     /**
-     * Resolve the two buttons and the two row fonts. Slot 38.
+     * Resolve the two buttons and the two row fonts.
      *
-     * The body is not written and every part of it is recovered. It runs the MetScreen slot 38
-     * body, resets the MetButtonList at mUnknowna8 through `0x001fedb0`, and adds two entries to it
-     * through `0x001fcb28`, the first named `mcrl_SAVED.but` and the second `mcrl_FACTORY.but`.
-     * Each entry's label comes from the data-array property lookup at `0x005096d0`, called with
-     * the symbol 600 and the keys `rl_saved` and `rl_factory`. It then resolves `font1_pink_2` into
-     * mUnknowna0 and `font1_pinkgrey_2` into mUnknowna4, each through Rnd::Manager::Find() followed
-     * by a dynamic_cast to Rnd::Font, which is what types both members.
-     *
-     * What blocks the body is the two MetButtonList routines and the property lookup, none of which
-     * is declared.
+     * Slot 38. The button list is emptied, and `mcrl_SAVED.but` and `mcrl_FACTORY.but` are added
+     * with the configuration code 0x258 labels `rl_saved` and `rl_factory`. `font1_pink_2` and
+     * `font1_pinkgrey_2` are resolved into mUnknowna0 and mUnknowna4.
      *
      * @ghidraAddress 0x00349fc8
      */
@@ -205,15 +179,35 @@ public:
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
 private:
-    // The row catalogue the ListDataProvider override at `0x0034d8b0` indexes. Never written by any
-    // routine of this class, so it is filled from outside. +0x90
+    /**
+     * Show one row of the catalogue on MetRemixDataScreen, or hide the data past the end.
+     *
+     * The data screen is taken from the registry without a cast check or a null test.
+     *
+     * @param nIndex The row.
+     * @ghidraAddress 0x0034a748
+     */
+    void ShowRowOnDataScreen(unsigned nIndex);
+
+    /**
+     * Switch the catalogue to the button the ring now selects.
+     *
+     * The first button chooses the card catalogue and the second the factory catalogue, with the
+     * same titles as EnterAndShow(), set through MetScreenTitleScreen::ReplaceTitle(). The list is
+     * refilled, moved to the first row, and that row is shown.
+     *
+     * @ghidraAddress 0x0034a838
+     */
+    void OnButtonRingMoved();
+
+    // The chosen catalogue, an entry of MetRemixManager::mRemixes. +0x90
     std::vector<MetRemixRecord> *mUnknown90;
-    // Deleted and then cleared by the destructor. +0x94
+    // Built by the first EnterAndShow(), and deleted and then cleared by the destructor. +0x94
     ScrollingList *mUnknown94;
-    int mUnknown98; // +0x98, not written by the constructor
-    int mUnknown9c; // +0x9c, not written by the constructor
-    // The font a row draws in when its record matches the cached value from `0x003f7ad8`, and the
-    // font every other row draws in. Slot 38 resolves both.
+    int mUnknown98; // +0x98, not written by any routine of this class
+    int mUnknown9c; // +0x9c, not written by any routine of this class
+    // The font a row draws in when its record was made on this disc, and the font every other row
+    // draws in. Slot 38 resolves both.
     Rnd::Font *mUnknowna0;     // +0xa0
     Rnd::Font *mUnknowna4;     // +0xa4
     MetButtonList *mUnknowna8; // +0xa8

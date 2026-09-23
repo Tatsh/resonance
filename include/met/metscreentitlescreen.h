@@ -64,4 +64,29 @@ public:
      * @ghidraAddress 0x00394010
      */
     void ApplyTitle(const HxStr &title);
+
+    /**
+     * Replace the shared screen title without showing the panel again.
+     *
+     * The same lookup and cast as SetTitle(), forwarding to ReplaceTitleText() instead.
+     * MetRemixLoadScreen calls it when the button ring changes the catalogue. The body is not
+     * written, and the name is inferred.
+     *
+     * @param title The title to display.
+     * @ghidraAddress 0x00393ed0
+     */
+    static void ReplaceTitle(const HxStr &title);
+
+    /**
+     * Record one title and set it on the title text.
+     *
+     * The title is copied to `+0x90` and set on the Rnd::Text at `+0x8c` through its slot 6.
+     * Unlike ApplyTitle(), the panel is not activated again. The two offsets lie past the 0x8c
+     * bytes the constructor accounts for, so both are members this header does not declare yet.
+     * The body is not written, and the name is inferred.
+     *
+     * @param title The title to display.
+     * @ghidraAddress 0x00394130
+     */
+    void ReplaceTitleText(const HxStr &title);
 };
