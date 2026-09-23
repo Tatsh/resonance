@@ -1,6 +1,8 @@
 #include "app/longop.h"
 
+// 0x00719858
 LongOperationProc g_pfnLongOperationPollProc;
+// 0x0071985c
 LongOperationProc g_pfnLongOperationDrawProc;
 
 // 0x00520428

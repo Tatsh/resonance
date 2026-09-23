@@ -2,6 +2,7 @@
 
 #include "os/log.h"
 
+// 0x006fba4c
 Task::Node *g_pRunningTasks;
 
 // 0x004b6270

@@ -13,6 +13,7 @@
 #include "stream/iobpreallocmemstream.h"
 #include "synth/ps2hardsynth.h"
 
+// 0x0086f7d0
 char g_abLogBuffer[kLogBufferSize];
 
 // 0x00118c40

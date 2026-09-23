@@ -61,6 +61,7 @@ inline long long FrameClockNs(Watchdog *pWatchdog) {
 
 } // namespace
 
+// 0x00694740
 MainLoop *g_pMainLoop;
 
 // 0x001ec998

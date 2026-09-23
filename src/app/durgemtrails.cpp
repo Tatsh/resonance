@@ -49,6 +49,7 @@ inline void SetPaddingWords(Transform &xfm) {
 
 } // namespace
 
+// 0x006e3440
 int g_nDurGemStringCount;
 
 // 0x00432f60
