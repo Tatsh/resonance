@@ -369,3 +369,14 @@ void HeapFree(void *pBlock);
  * @return The block, which differs from pBlock only when it moved.
  */
 void *HeapRealloc(void *pBlock, size_t nSize);
+
+/**
+ * Log how much of the backing allocator is free, then give it all back.
+ *
+ * Blocks of 2048 bytes are taken through HeapAlloc() until a request fails, the count and the
+ * total are logged, and every block is released through HeapFree(). The name is inferred. The
+ * binary places the routine at the head of the TexturePairRecord unit, and it has no caller.
+ *
+ * @ghidraAddress 0x00246c18
+ */
+void ReportHeapCapacity();

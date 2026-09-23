@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #include "os/log.h"
 #include "os/zone.h"
@@ -84,6 +85,9 @@ constexpr char kScalarTag[] = "UNK";
 
 // The tag the STL allocator hook is rewound to after every tagged allocation.
 constexpr char kStlUnknownTag[] = "stl_unk";
+
+// The block size ReportHeapCapacity() probes with.
+constexpr int kHeapProbeBlockSize = 0x800;
 
 // 0x006f57d0
 int g_bMemLogging;
@@ -602,3 +606,21 @@ void MemLogCloseAndContinue() {
 // HeapAlloc(), HeapFree(), and HeapRealloc() have no bodies here. Each is two instructions that
 // load the toolchain allocator's state from 0x007819cc and tail-call it, and the allocator itself
 // is toolchain code that this tree does not reconstruct.
+
+// 0x00246c18
+void ReportHeapCapacity() {
+    std::vector<void *> blocks;
+    int nBlocks = 0;
+    void *pBlock;
+    while ((pBlock = HeapAlloc(kHeapProbeBlockSize)) != nullptr) {
+        blocks.push_back(pBlock);
+        ++nBlocks;
+    }
+    LogPrintf("Able to allocate %d blocks of size %d (%d bytes total)\n",
+              nBlocks,
+              kHeapProbeBlockSize,
+              nBlocks * kHeapProbeBlockSize);
+    for (void *pAllocated : blocks) {
+        HeapFree(pAllocated);
+    }
+}

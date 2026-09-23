@@ -27,9 +27,20 @@
  *
  * Nothing frees the button list, so it is never released.
  *
- * Nine slots differ from the MetScreen table, and only the destructor has a recovered name. The
- * rest are 5 `0x00241b08`, 9 `0x00242140`, 19 `0x002467e8`, 26 `0x002468d8`, 33 `0x002468b8`,
- * 36 `0x00241120`, and 38 `0x00240e28`.
+ * The four buttons each show one or two of five sub-screens (custom remixes, factory remixes, the
+ * playlist editor, its lower-left panel, and its done panel), and mUnknown8c records the one that
+ * receives the commands this screen does not consume.
+ *
+ * Nine slots differ from the MetScreen table.
+ *
+ *  - 1 `0x00246778` the destructor.
+ *  - 5 `0x00241b08` EnterAndShow().
+ *  - 9 `0x00242140` BeginExit().
+ *  - 19 `0x002467e8` HandleCommand().
+ *  - 26 `0x002468d8` OnUnknownSlot26(), overridden empty.
+ *  - 33 `0x002468b8` OnUnknownSlot33().
+ *  - 36 `0x00241120` OnUnknownSlot36().
+ *  - 38 `0x00240e28` ResolveContainerViews().
  */
 class MetJukeboxTopButtonsScreen : public MetScreen {
 public:
@@ -47,7 +58,90 @@ public:
      */
     virtual ~MetJukeboxTopButtonsScreen();
 
+    /**
+     * Build the screen on the heap.
+     *
+     * The object is allocated with the tag `MsgSink`.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x002466f0
+     */
+    static MetJukeboxTopButtonsScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Enter, wait for the five sub-screens to load, push them, and show the first button's panel.
+     *
+     * The title is the `met_jukebox_title` title. When MetFrontEndState::mUnknown18 is set, the
+     * value moves to MetFrontEndState::mUnknown1c, the help screen takes the `standard_title`
+     * layout and is pushed, and this screen becomes the renderer's active panel. The load wait
+     * pumps the asynchronous loaders until every sub-screen reports its container loaded, and
+     * MetRemixManager::PrunePlayList() runs before the sub-screens are pushed.
+     *
+     * @ghidraAddress 0x00241b08
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Begin the exit and exit all five sub-screens.
+     *
+     * @ghidraAddress 0x00242140
+     */
+    virtual void BeginExit();
+
+    /**
+     * Act on a command.
+     *
+     * Left and right step the button ring and show the new button's panel. Back records 0 in
+     * MetScreen::mUnknown18 and begins the exit. Every other command goes to the sub-screen that
+     * mUnknown8c records.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x002467e8
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Do nothing.
+     *
+     * @param flTime Not read.
+     * @ghidraAddress 0x002468d8
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Show the selected button's panel.
+     *
+     * @ghidraAddress 0x002468b8
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Return to the remix type screen after a cancel.
+     *
+     * When MetScreen::mUnknown18 is 0, the left gizmo, title, and remix type screens are pushed
+     * and the remix type screen is activated. Any other value does nothing.
+     *
+     * @ghidraAddress 0x00241120
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views and add the four buttons.
+     *
+     * The buttons are saved remixes, factory remixes, edit playlist, and done, in that order, and
+     * the first is selected.
+     *
+     * @ghidraAddress 0x00240e28
+     */
+    virtual void ResolveContainerViews();
+
 private:
+    // Hide the five sub-screens, show the ones the selected button owns, record the sub-screen
+    // that receives commands in mUnknown8c, and replace the title. 0x00241320
+    void ShowSelectedPanel();
+
     HxStr mUnknown8c;          // +0x8c
     MetButtonList *mUnknown94; // +0x94
     int mUnknown98;            // +0x98
