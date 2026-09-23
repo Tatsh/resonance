@@ -103,9 +103,9 @@ int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nCon
         }
     } else if (nContext == kPlayListContext) {
         // Yes, the binary copies the whole entry vector to read one entry.
-        std::vector<HxStr *> entries(mUnknownc4->entries);
+        std::vector<JukeboxPlayListEntry *> entries(mUnknownc4->entries);
         if (static_cast<unsigned>(nItem) < entries.size()) {
-            pText->SetText(*entries[nItem]);
+            pText->SetText(entries[nItem]->name);
         } else {
             pText->SetText(HxStr(kNoText));
         }

@@ -207,10 +207,15 @@ public:
      */
     void CreateDeleteRemixTask(int nPortSlot, const HxStr &remixName);
 
-private:
-    // The receiver each new task reports to. Every task factory copies it into the task. +0x00
+    /**
+     * The receiver each new task reports to. Every task factory copies it into the task. +0x00
+     *
+     * Public because MetRemixManager's remix loaders at `0x00361418` and `0x00361480` store
+     * themselves here directly before queueing a task, and the image has no setter for it.
+     */
     MemcardUser *mUser;
 
+private:
     // The last ticket handed out. Each task factory pre-increments it and uses the result as the
     // task's cookie. +0x04
     int mTicket;

@@ -1,10 +1,16 @@
 #pragma once
 
+#include <map>
+#include <vector>
+
+#include "game/jukeboxplaylist.h"
 #include "memcard/memcarduser.h"
+#include "met/metremixrecord.h"
 #include "met/metscreen.h"
 #include "os/asynccallback.h"
+#include "os/hxstr.h"
 
-class HxStr;
+class MetRenderer;
 
 /**
  * Manager of the remix catalogue, which also presents itself as a dialogue screen.
@@ -19,13 +25,9 @@ class HxStr;
  * member ends at `+0x14b`. The tag is MsgSink's rather than this class's, because MsgSink is the
  * base that declares `operator new`.
  *
- * The rest of the game resolves the one instance through the accessor at `0x00361000`, which
- * forwards to `0x003610a8`, which runs the lazy initialiser at `0x00361210` and then returns the
- * cached pointer at `0x006c1110`. The initialiser resolves the instance by handing the registry
- * key `MetRemixManager`, at `0x00807a78`, to MetScreen::FindScreenByName(), so the manager is a
- * registered screen rather than a separately constructed singleton. The accessor is not declared
- * below, because the split across three routines does not resolve into one static member without
- * guessing which of the three the programmer wrote.
+ * The rest of the game resolves the one instance through shared(), which resolves it lazily by
+ * handing the registry key `MetRemixManager` to MetScreen::FindScreenByName(). The manager is a
+ * registered screen rather than a separately constructed singleton.
  *
  * Three vtables belong to the class, the 39-entry primary at `0x00807de0`, the 21-entry
  * MemcardUser table at `0x00807d30` that adjusts `this` by `-140`, and the three-entry
@@ -53,38 +55,12 @@ class HxStr;
  * and correcting the base is a change to MemcardUser and to every other class that overrides the
  * slot.
  *
- * This declaration is deliberately partial and declares no data member. The constructor at
- * `0x00352b80` runs for roughly 300 instructions, and everything after the three vptr writes is
- * member initialisation. The recovered map follows. A red-black tree header occupies `+0x94`
- * through `+0x9c`, built by taking a 0x20-byte node from the STL pool and self-linking it, and a
- * second occupies `+0xa0` through `+0xa8` over a 0x18-byte node. A 0x20-byte node is a 0x10-byte
- * tree-node base plus a 0x10-byte value, and a 0x18-byte node is the same base plus an 8-byte
- * value, which is the width of one `HxStr`. An earlier reading placed the first tree at `+0x98`.
- * Vectors follow at `+0xac` and `+0xb8`. A nested object occupies `+0xc4` through `+0xd3`, with a
- * vector at its own `+0x00` and, following the g++ 2.x layout for a class with no base, its vptr
- * at `+0x0c`, set to `0x007e6d90`; the constructor then runs the routine at `0x001e2248` on it.
- * Words at `+0xd4`, `+0xd8`, `+0xe0`, `+0xe4`, `+0xec`, `+0xf0`, and `+0xf4` start at zero,
- * `+0xdc` starts at one, and `+0xe8` starts at -1. Two further vectors follow at `+0xf8` and
- * `+0x104`, neither of whose first word the constructor writes. A 0x38-byte record occupies
- * `+0x114` through `+0x14b`, the same record MetSaveRemix stores a vector of, with four `HxStr`
- * members built from the empty string at `0x008077d8`, a byte at `+0x134` set to one, and words at
- * `+0x138` and `+0x148`. A vector at `+0x13c` completes it.
- *
- * Four of those words are read by the slots declared below. The AsyncCallback slot compares its
- * first argument against `+0xe4`, the two playlist slots write `+0xdc` and compare `+0xd4` against
- * `+0xd8`, and the remix-loaded slot branches on `+0xf4` against 0 and 1. The second tree at
- * `+0xa0` is the one the remixes-listed slot looks a port and slot up in.
- *
- * The constructor body is not written. The element classes of the two trees, of the five vectors,
- * of the nested object at `+0xc4`, and of the 0x38-byte record are all unidentified, so no member
- * can be declared with a type that reproduces its initialisation.
- *
- * The destructor at `0x00355070` destroys the 0x38-byte record at `+0x114`, then the vectors at
- * `+0xf8` and `+0x104`, then the nested object at `+0xc4`, then the vectors at `+0xb8` and
- * `+0xac`, then the two trees, restores the AsyncCallback vptr to `0x007f7e78` and the MemcardUser
- * vptr to `0x007daf78`, runs the MetScreen destructor, and releases the object with the tag
- * `MsgSink`. Every step is compiler-generated member destruction or a vptr restore, so the
- * definition is empty.
+ * The constructor at `0x00352b80` is member initialisation after the three vptr writes, and the
+ * destructor at `0x00355070` is compiler-generated member destruction in reverse order, so the
+ * member list below reproduces both. The vector at `+0xf8` is the g++ 2.x `bit_vector`, whose two
+ * iterators each carry an empty base word, which is why it spans 0x1c bytes. The first tree's
+ * teardown at `0x0035ef90` releases a vector of MetRemixRecord in each node, and the second's at
+ * `0x003619a0` releases nothing, which fixes their value types.
  */
 class MetRemixManager : public MetScreen, public MemcardUser, public AsyncCallback {
 public:
@@ -92,7 +68,7 @@ public:
      * Construct the manager.
      *
      * Supplies `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for
-     * the container. The body is not written, for the reason recorded in the class documentation.
+     * the container.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -104,6 +80,126 @@ public:
      * @ghidraAddress 0x00355070
      */
     virtual ~MetRemixManager();
+
+    /**
+     * Build the manager on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new manager.
+     * @ghidraAddress 0x00361020
+     */
+    static MetRemixManager *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Return the one instance, resolving it through the screen registry on first use.
+     *
+     * @return The registered manager, or null before it is registered.
+     * @ghidraAddress 0x00361000
+     */
+    static MetRemixManager *shared();
+
+    /**
+     * Report the current remix record.
+     *
+     * The stats screens and MetSaveRemixScreen read it. The title is inferred.
+     *
+     * @return The record at `+0x114`.
+     * @ghidraAddress 0x00361558
+     */
+    MetRemixRecord *GetRecord();
+
+    /**
+     * Replace the current remix record.
+     *
+     * MetRemixLoadScreen::OnUnknownSlot36() is the caller. The title is inferred.
+     *
+     * @param record The record to copy.
+     * @ghidraAddress 0x00361560
+     */
+    void SetRecord(const MetRemixRecord &record);
+
+    /**
+     * Look a remix up by name in the catalogue.
+     *
+     * A record whose word at `+0x24` is non-zero matches only in the factory set, keyed -1, and a
+     * record whose word is zero matches only in a card slot's set. The title is inferred.
+     *
+     * @param name The name compared against each record's second string.
+     * @return The first matching record, or null.
+     * @ghidraAddress 0x00359230
+     */
+    MetRemixRecord *FindRecord(const HxStr &name);
+
+    /**
+     * Look a remix up by name for the playlist editor.
+     *
+     * The body is FindRecord() alone. MetJukeboxEditPlaylistScreen is the caller. The title is
+     * inferred.
+     *
+     * @param name The remix name.
+     * @return The matching record, or null.
+     * @ghidraAddress 0x003612c0
+     */
+    MetRemixRecord *LookupRemix(const HxStr &name);
+
+    /**
+     * Drop the playlist entries the catalogue no longer knows.
+     *
+     * MetJukeboxTopButtonsScreen is the caller. The title is inferred.
+     *
+     * @ghidraAddress 0x003612a0
+     */
+    void PrunePlayList();
+
+    /**
+     * Start loading the current playlist track.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x003612e0
+     */
+    void PlayCurrentTrack();
+
+    /**
+     * Step to the previous playlist track, or to a random one in shuffle mode.
+     *
+     * The step stops at the first track. The image records no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00361300
+     */
+    void PreviousTrack();
+
+    /**
+     * Step to the next playlist track, or to a random one in shuffle mode.
+     *
+     * The step wraps from the last track to the first. The image records no caller. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x00361358
+     */
+    void NextTrack();
+
+    /**
+     * Pick a random track that has not played since the last reset.
+     *
+     * Every track is marked unplayed again once all have played. The title and the member it
+     * sets are attested by the log line the routine writes.
+     *
+     * @ghidraAddress 0x0035a7e0
+     */
+    void RandomTrack();
+
+    /**
+     * Clear the jukebox flag in the game parameters and rewind the playlist.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x0035a6b0
+     */
+    void LeaveJukeboxMode();
 
     /**
      * Hide the dialogue view instead of showing it. Slot 5.
@@ -225,4 +321,48 @@ public:
      * @ghidraAddress 0x00358310
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
+
+private:
+    // The key of the factory remixes in mRemixes. Card slots use their own port-and-slot keys.
+    static constexpr int kFactorySlot = -1;
+
+    // 0x003610a8
+    static MetRemixManager *ResolveSharedInstance();
+    // 0x00361210
+    static void CacheSharedInstance();
+    // 0x00357f80. Starts reading the remix index file, recording the request in mIndexRequest.
+    void LoadIndex();
+    // 0x003580f0. Starts reading one remix file, recording the request in mRemixRequest.
+    void LoadRemixFile(const HxStr &fileName);
+    // 0x00361418. A factory remix is read from its file and any other through the memory card.
+    // LoadCurrentTrack() expands it inline.
+    inline void LoadRemix(const MetRemixRecord &record, int nFactory);
+    // 0x00361480
+    void LoadCurrentTrack();
+    // 0x003613d8. Clamps into zero through the track count, which admits one past the end.
+    void SetCurrentTrack(int nTrack);
+    // 0x003610d0. Pushes every screen named in mUnknownb8 and activates the first.
+    void PushUnknownb8Screens();
+    // 0x00361170. Pushes every screen named in mUnknownac and activates the first.
+    void PushUnknownacScreens();
+
+    // 0x006c1110
+    static MetRemixManager *sInstance;
+
+    std::map<int, std::vector<MetRemixRecord>> mRemixes; // +0x94, keyed by card slot
+    std::map<int, int> mUnknowna0;                       // +0xa0
+    std::vector<HxStr> mUnknownac;                       // +0xac
+    std::vector<HxStr> mUnknownb8;                       // +0xb8
+    JukeboxPlayList mPlayList;                           // +0xc4
+    int mUnknownd4;                                      // +0xd4
+    int mUnknownd8;                                      // +0xd8
+    int mUnknowndc;                                      // +0xdc, starts at one
+    int mIndexRequest;                                   // +0xe0
+    int mRemixRequest;                                   // +0xe4, matched by Done()
+    int mUnknowne8;                                      // +0xe8, starts at -1
+    int mCurrentPlaylistTrack;                           // +0xec
+    int mShuffle;                                        // +0xf0, RandomTrack() steps when set
+    int mUnknownf4;                                      // +0xf4
+    std::vector<bool> mPlayedTracks;                     // +0xf8, one per playlist entry
+    MetRemixRecord mRecord;                              // +0x114
 };

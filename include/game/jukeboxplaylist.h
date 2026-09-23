@@ -7,6 +7,19 @@
 #include "stream/obstream.h"
 
 /**
+ * One queued remix.
+ *
+ * load() allocates each entry as 0x0c bytes, reads the name into `+0x00`, and reads the flag into
+ * `+0x08` through `operator>>(IBStream &, int &)`. MetRemixManager loads a remix whose flag is set
+ * from the factory files and one whose flag is clear from the memory card, which is the evidence
+ * for the flag's name. The struct and both member names are inferred.
+ */
+struct JukeboxPlayListEntry {
+    HxStr name;  /*!< The remix name. +0x00 */
+    int factory; /*!< Non-zero for a factory remix. +0x08 */
+};
+
+/**
  * Ordered list of the remixes queued in the jukebox.
  *
  * `15JukeboxPlayList` in the RTTI descriptor at `0x0086f7a0`, a leaf class with no base. The class
@@ -15,15 +28,13 @@
  * the whole of its state. The four-entry vtable at `0x007e6d90` runs the compiler-generated
  * GetTypeInfo at `0x001e5ca8`, the destructor, and the two stream members.
  *
- * MetRemixManager embeds one at `+0xc4` and runs clear() on it from its own constructor.
+ * MetRemixManager embeds one at `+0xc4`, and its constructor expands the inline constructor below.
  * MetJukeboxEditPlaylistScreen addresses that embedded instance through its own `+0xc4` and counts
  * its rows from it. Two memcard tasks persist it, LoadJukeboxPlayListMCT and
  * SaveJukeboxPlayListMCT.
  *
  * The list owns its entries. clear() releases each one with a delete expression before emptying
- * the vector, which is what establishes the element as an owned `HxStr *` rather than a borrowed
- * pointer. save() writes a record version of 1, then the entry count, then each entry as its
- * length followed by its buffer, so an entry is a remix name rather than an index.
+ * the vector, which is what establishes the element as owned rather than borrowed.
  *
  * No member name is attested anywhere in the image, so every identifier below follows the required
  * style. The member is public because MetJukeboxEditPlaylistScreen::GetItemCount() reads the
@@ -32,6 +43,16 @@
  */
 class JukeboxPlayList {
 public:
+    /**
+     * Construct an empty list.
+     *
+     * Inline. The image has no out-of-line copy; MetRemixManager's constructor expands it, writing
+     * the vptr and the empty vector and then running clear().
+     */
+    JukeboxPlayList() {
+        clear();
+    }
+
     /**
      * Release every entry and the vector.
      *
@@ -75,6 +96,27 @@ public:
      */
     void clear();
 
-    /** The queued remix names, owned by the list. +0x00 */
-    std::vector<HxStr *> entries;
+    /**
+     * Drop every entry the remix catalogue no longer knows.
+     *
+     * Each entry is looked up through MetRemixManager::FindRecord(), and an entry with no record is
+     * erased from the vector without being released. The title is inferred.
+     *
+     * @ghidraAddress 0x001e5f10
+     */
+    void RemoveUnknownEntries();
+
+    /**
+     * Return one entry by position.
+     *
+     * The position is found by walking the vector from its start. The title is inferred.
+     *
+     * @param nIndex The position, counted from zero.
+     * @return The entry, or null for an empty list or a position past the end.
+     * @ghidraAddress 0x001e5ec0
+     */
+    JukeboxPlayListEntry *GetEntry(int nIndex);
+
+    /** The queued remixes, owned by the list. +0x00 */
+    std::vector<JukeboxPlayListEntry *> entries;
 };
