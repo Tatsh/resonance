@@ -3,6 +3,9 @@
 /** Quadwords of the packet buffer a caller may fill before it has to be submitted. */
 constexpr int kGifBufferQuadwords = 0x1e0;
 
+/** GS registers the device shadows, the whole register address space. */
+constexpr int kGsRegisterCount = 128;
+
 /**
  * One quadword of a packet stream.
  *
@@ -68,8 +71,8 @@ public:
      *
      * VramTable::Init() divides the result by the words in a block to find where the palette
      * region begins, which puts every cached texture above the buffers. The body is not
-     * reconstructed. It reads three members of the recorded geometry and a page count out of a
-     * structure at `+0x448` whose layout is unrecovered.
+     * reconstructed. It reads three members of the recorded geometry and a page count out of the
+     * double buffer descriptor mpDisplayBuffers addresses, whose layout is unrecovered.
      *
      * @return Words in use, at four bytes each.
      * @ghidraAddress 0x0049fec0
@@ -83,6 +86,11 @@ public:
      * and compares the masked incoming value against the shadow before emitting anything. A write
      * that would not change the masked bits is dropped. Callers therefore pass a mask covering only
      * the field they mean to set rather than the whole register.
+     *
+     * A write that does change the register opens an A+D GIFtag from mAdTag unless the open tag is
+     * already one, and then submits the buffer if it has filled. Setting PRIM to a line strip, a
+     * triangle strip, or a triangle fan leaves the shadow's primitive type at 7, a value no caller
+     * sets. The next PRIM write therefore always reaches the GS and starts a new strip.
      *
      * @param nReg The GS register number.
      * @param qwValue The value to set, of which only the masked bits are used.
@@ -136,6 +144,8 @@ public:
      * for all three formats. A packed loop spends one quadword per register, a register list spends
      * one per two, and an image loop spends one per four.
      *
+     * Ending the packet on the VU1 path also fills in the count of the open VIF DIRECT code.
+     *
      * @param bEndOfPacket Non-zero to set the tag's end-of-packet bit.
      * @ghidraAddress 0x004a0158
      */
@@ -143,6 +153,9 @@ public:
 
     /**
      * Start a GIFtag at the write pointer.
+     *
+     * The open tag is closed first without the end-of-packet bit. On the VU1 path a VIF DIRECT
+     * code goes ahead of the tag unless one is already open.
      *
      * @param pTag The tag to write, whose loop count CloseGifTag() fills in later.
      * @ghidraAddress 0x0049b5a8
@@ -156,8 +169,8 @@ public:
      * selected and the GIF otherwise. An empty buffer is not sent. Retaining the open tag reopens
      * it in the new half, letting a caller submit in the middle of a primitive.
      *
-     * The body is not reconstructed. It calls VramTable::AdvanceLockCycle(), which moves the video
-     * memory cache to its next lock generation.
+     * Every submission advances the video memory cache to its next lock generation and then runs
+     * the long operation poll callback through RunLongOperationPollProc().
      *
      * @param bRetainOpenTag Non-zero to reopen the current tag in the new buffer half.
      * @param bOnlyWhenFull Non-zero to submit only once the buffer is full.
@@ -165,6 +178,27 @@ public:
      * @ghidraAddress 0x0049b478
      */
     int FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull);
+
+    /**
+     * Route later packets through VIF1 and VU1 rather than straight to the GIF.
+     *
+     * Does nothing when the VU1 path is already selected. Otherwise it submits whatever the
+     * buffer has before switching, because a packet built for one path cannot be sent down the
+     * other.
+     *
+     * @ghidraAddress 0x004a0348
+     */
+    void EnterVu1Path();
+
+    /**
+     * Return to sending packets straight to the GIF.
+     *
+     * Does nothing unless the VU1 path is selected. Otherwise it ends the open tag, submits the
+     * buffer, and waits for the GS paths to drain before switching.
+     *
+     * @ghidraAddress 0x0049b838
+     */
+    void LeaveVu1Path();
 
     // The layout is recovered only where the packet routines read it. A reserved run records a span
     // that has not been recovered and is not a field.
@@ -184,11 +218,29 @@ public:
     int mnDisplayWidth;
     /** Display height in pixels. Read alongside the width by the same routine. */
     int mnDisplayHeight;
-    unsigned char mReserved28[0x424];
+    unsigned char mReserved28[0x08];
+    /** A+D GIFtag SetGsReg() opens when the open tag is not already an A+D tag. +0x30 */
+    GifQuadword mAdTag;
+    /** Last value written to each GS register, indexed by register number. +0x40 */
+    unsigned long long mGsRegs[kGsRegisterCount];
+    unsigned char mReserved440[0x08];
+    /**
+     * Double buffer descriptor InitDisplayMode() builds through the SDK, at its uncached address.
+     *
+     * The descriptor is the SDK's rather than the game's, and its layout is unrecovered.
+     * GetReservedVramWords() reads a page count from it. +0x448
+     */
+    void *mpDisplayBuffers;
     /** Non-zero while geometry is submitted through VU1 rather than the software path. +0x44c */
     int mnUseVu1;
-    /** End of the region the end-of-packet path measures against. +0x450 */
-    GifQuadword *mpBufferEnd;
+    /**
+     * First quadword after the VIF DIRECT code that WriteGifTag() opened, or null.
+     *
+     * On the VU1 path every run of GIF data travels inside a DIRECT code, whose immediate is the
+     * quadword count that follows it. WriteGifTag() writes the code with a count of zero, and
+     * CloseGifTag() with the end-of-packet bit fills the count in from this pointer. +0x450
+     */
+    GifQuadword *mpOpenVifDirect;
 };
 
 /**

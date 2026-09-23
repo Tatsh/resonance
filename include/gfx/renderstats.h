@@ -3,9 +3,8 @@
 /**
  * Per-frame counters the renderer maintains and the debug overlay reports.
  *
- * Only the three counters below are recovered, each from the routine that increments it, so the
- * gaps are placeholders rather than settled fields and the total size is unrecovered. The overlay
- * that reads the block is at `0x0049c0c0`.
+ * Each counter is recovered from the routine that increments it. mUnknown0c has no recovered
+ * writer, and the total size is unrecovered. The overlay that reads the block is at `0x0049c0c0`.
  */
 struct RenderStats {
     /** Point particles submitted, advanced by the point path by the whole vertex count. */
@@ -27,8 +26,9 @@ struct RenderStats {
     int mnSpritesDrawn;
     /** Vertices transformed, advanced by both vertex transform passes by the run length. */
     int mnVertsTransformed;
-    int mUnknown28;
-    /** GIF packets submitted. */
+    /** GIF tags opened, incremented by GfxDevice::WriteGifTag(). */
+    int mnGifTags;
+    /** GIF packets submitted, incremented by GfxDevice::FlushGifPacket(). */
     int mnGifPackets;
     /** Materials applied, incremented by each of the Rnd::PsMat select entry points. */
     int mnMatSelects;
