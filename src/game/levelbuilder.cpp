@@ -171,12 +171,9 @@ void LevelBuilder::AddEvent(int nTick,
 }
 
 // 0x001ec4f8
-void LevelBuilder::AddNoteMsg(int nTick,
-                              unsigned char nUnknown09,
-                              unsigned char nUnknown0a,
-                              int nUnknown0c,
-                              unsigned char nUnknown08) {
-    mCurrentTrack->AddNoteMsg(nTick, nUnknown09, nUnknown0a, nUnknown0c, nUnknown08);
+void LevelBuilder::AddNoteMsg(
+    int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
+    mCurrentTrack->AddNoteMsg(nTick, nNote, nVelocity, nLength, nChannel);
 }
 
 // 0x001ec520

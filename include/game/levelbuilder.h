@@ -204,17 +204,17 @@ public:
      * Forward to TrackData::AddNoteMsg() on the current track.
      *
      * @param nTick The song position, in MIDI ticks.
-     * @param nUnknown09 The byte stored at the message's `+0x09`.
-     * @param nUnknown0a The byte stored at the message's `+0x0a`.
-     * @param nUnknown0c The word stored at the message's `+0x0c`.
-     * @param nUnknown08 The byte stored at the message's `+0x08`.
+     * @param nNote The note number.
+     * @param nVelocity The note-on velocity.
+     * @param nLength The length of the note, in MIDI ticks.
+     * @param nChannel The MIDI channel.
      * @ghidraAddress 0x001ec4f8
      */
     void AddNoteMsg(int nTick,
-                    unsigned char nUnknown09,
-                    unsigned char nUnknown0a,
-                    int nUnknown0c,
-                    unsigned char nUnknown08);
+                    unsigned char nNote,
+                    unsigned char nVelocity,
+                    int nLength,
+                    unsigned char nChannel);
 
     /**
      * Forward to TrackData::SetQuant() on the current track.

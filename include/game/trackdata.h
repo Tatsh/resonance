@@ -179,8 +179,8 @@ public:
     /**
      * Add a StdMidiMsg built from three bytes to the bar at a song position.
      *
-     * The body is not written, because StdMidiMsg declares its payload private and no constructor
-     * that takes it. The message is allocated under the message tag and inserted into Bar::mMidi.
+     * The message is allocated under the message tag and inserted into Bar::mMidi at its offset
+     * in the bar. A position at or past the end of the track is ignored.
      *
      * @param nTick The song position, in MIDI ticks.
      * @param nStatus The status byte.
@@ -193,20 +193,20 @@ public:
     /**
      * Add a NoteMsg built from four values to the bar at a song position.
      *
-     * The body is not written, for the reason recorded on AddMidiMsg().
+     * Placed the same way as AddMidiMsg().
      *
      * @param nTick The song position, in MIDI ticks.
-     * @param nUnknown09 The byte stored at the message's `+0x09`.
-     * @param nUnknown0a The byte stored at the message's `+0x0a`.
-     * @param nUnknown0c The word stored at the message's `+0x0c`.
-     * @param nUnknown08 The byte stored at the message's `+0x08`.
+     * @param nNote The note number.
+     * @param nVelocity The note-on velocity.
+     * @param nLength The length of the note, in MIDI ticks.
+     * @param nChannel The MIDI channel.
      * @ghidraAddress 0x001d41c0
      */
     void AddNoteMsg(int nTick,
-                    unsigned char nUnknown09,
-                    unsigned char nUnknown0a,
-                    int nUnknown0c,
-                    unsigned char nUnknown08);
+                    unsigned char nNote,
+                    unsigned char nVelocity,
+                    int nLength,
+                    unsigned char nChannel);
 
     /**
      * Give every bar its point value and its configured word.

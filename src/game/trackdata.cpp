@@ -16,6 +16,8 @@
 #include "gs/multimuse.h"
 #include "mid/mbt.h"
 #include "msg/musemsg.h"
+#include "msg/notemsg.h"
+#include "msg/stdmidimsg.h"
 #include "script/configquery.h"
 
 namespace {
@@ -233,6 +235,40 @@ void TrackData::AddGem(int nTick, int nGem, Riff *pRiff) {
         pRiffSet->mRiffs[pRiff->mId] = pRiff;
         InsertAtTick(pBar->mRiffSets, pRiffSet, offset.mTick);
     }
+}
+
+// 0x001d4088
+void TrackData::AddMidiMsg(int nTick,
+                           unsigned char nStatus,
+                           unsigned char nData1,
+                           unsigned char nData2) {
+    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    if (!(nTick < length.mTick)) {
+        return;
+    }
+
+    Bar *pBar;
+    Mid::MBT offset;
+    Locate(nTick, pBar, offset);
+    MuseMsg *pMsg = new StdMidiMsg(offset.mTick, nStatus, nData1, nData2);
+    InsertAtTick(pBar->mMidi, pMsg, offset.mTick);
+}
+
+// 0x001d41c0
+void TrackData::AddNoteMsg(
+    int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
+    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    if (!(nTick < length.mTick)) {
+        return;
+    }
+
+    Bar *pBar;
+    Mid::MBT offset;
+    Locate(nTick, pBar, offset);
+    Mid::MBT noteLength; // The length is stored without the finiteness check.
+    noteLength.mTick = nLength;
+    MuseMsg *pMsg = new NoteMsg(offset.mTick, nChannel, nNote, nVelocity, noteLength);
+    InsertAtTick(pBar->mMidi, pMsg, offset.mTick);
 }
 
 // 0x001d4308
