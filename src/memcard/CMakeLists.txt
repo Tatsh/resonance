@@ -28,6 +28,7 @@ set(RESONANCE_MEMCARD_SRCS
     openreadop.cpp
     openwriteop.cpp
     readop.cpp
+    remixindex.cpp
     renamefileop.cpp
     savefilemct.cpp
     saveglobalsettingsmct.cpp

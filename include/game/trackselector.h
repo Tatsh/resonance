@@ -9,6 +9,11 @@
 #include "msg/bumppacket.h"
 #include "msg/message.h"
 
+class PhraseMuffedMsg;
+class RemoteTrackSelectMsg;
+class RotLeftMsg;
+class RotRightMsg;
+
 /** Channels the selector tracks. The constructor writes this count into the object. */
 constexpr int kTrackSelectorChannelCount = 8;
 
@@ -47,11 +52,11 @@ constexpr int kTrackSelectorSlotCount = 4;
  * descriptor at `0x008ef688`, which is what settles the name. The three private helpers below
  * retain the titles that pass gave them, because a rename would break every reference to them.
  *
- * Three bodies are not written here. RemoveLightFromColumn(), InsertLightForDrawable(), and
- * RebuildChannelGrid() each build a message as a local object and send it, with both the
- * constructor and the destructor inlined into this class. Writing either needs a constructor
- * declared on the message class, and neither `TrackSelectMsg` nor `DeployedPowerupMsg` declares
- * one. Each is described below with the payload the disassembly writes, in field order.
+ * RemoveLightFromColumn(), InsertLightForDrawable(), and RebuildChannelGrid() each build a message
+ * field by field on the stack and send it, so the message classes carry public fields rather than
+ * a constructor.
+ *
+ * The unit registers SelfTest() with TestRegistry under the name `TrackSelector`.
  *
  * Every data member is private. The five message paths and the three rebinding helpers are the
  * only code in the image that reads one, and each is a member of this class.
@@ -91,42 +96,64 @@ public:
     /**
      * Exercise the grid against four stand-in players.
      *
-     * The routine builds four NullPlayer objects, registers the selector with each, constructs a
-     * grid over them, and then runs a fixed sequence of rebinds and channel queries before tearing
-     * everything down. Nothing in the shipped game calls it.
-     *
-     * The body is not written. It depends on NullPlayer's constructor at `0x0011e000`, which takes
-     * seven arguments and is not recovered.
+     * The routine builds four LocalPlayer objects with the colour name `null`, constructs a grid
+     * over them, registers the selector with each, and then runs a fixed sequence of rebinds and
+     * channel queries whose results it discards. It destroys the grid and the roster vector but
+     * not the players. Nothing in the shipped game calls it apart from the test registry.
      *
      * @return Always 1.
      * @ghidraAddress 0x0013ba08
      */
     static int SelfTest();
 
+    /**
+     * Run SelfTest() in the shape TestRegistry::TestFunc requires, discarding its result.
+     *
+     * The unit's static initialiser registers it.
+     *
+     * @ghidraAddress 0x0013f8e8
+     */
+    static void RunSelfTest();
+
 private:
     // Close the gap one player occupies in a channel's column by shifting every slot above it
     // down, filling the last with the NullPlayer, and announcing each move with a TrackSelectMsg
     // whose payload is the channel, the slot moved into, nPayload, and the player moved in. A
-    // channel of -1 is ignored. The body is not written, for the reason recorded in the class
-    // documentation.
+    // channel of -1 is ignored.
     // 0x0013b480
     void RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPayload);
 
     // Store a player in the first slot of a channel's column that still holds the NullPlayer and
     // announce it with a TrackSelectMsg whose payload is the channel, that slot, nPayload, and the
-    // player. A full column is ignored. The body is not written, for the reason recorded in the
-    // class documentation.
+    // player. A full column is ignored.
     // 0x0013b5e8
     void InsertLightForDrawable(Player *pPlayer, int nChannel, int nPayload);
 
-    // Rebind a column from a BumpPacket. The routine resolves the packet's player reference
-    // through the IDable<Player> table, scales the packet's tick word by 0x780, and then, while
-    // the player's Player::Slot5() keeps reporting a step, rebinds the head of the column. It
-    // announces the walk with a DeployedPowerupMsg whose payload is 4, the player, the column
-    // head, zero, zero, and the channel, and marks the packet handled on the way out. The body is
-    // not written, for the reason recorded in the class documentation.
+    // Rebind a column from a BumpPacket. When the packet's player reports a step through
+    // Player::Slot5(), announce a bumper with a DeployedPowerupMsg, rebind the head of the column
+    // for as long as the player keeps reporting one, and mark the packet handled. The position is
+    // the packet's bar in ticks, clamped to the finite range.
     // 0x0013b6a8
     int RebuildChannelGrid(BumpPacket *pPacket);
+
+    // The four handlers below are inline, and HandleMessage() expands each. The addresses are
+    // their uncalled out-of-line copies.
+
+    // 0x0013f5a0
+    // Moves the addressed player one channel down when it has an input slot.
+    void OnRotLeft(RotLeftMsg *pMsg);
+
+    // 0x0013f608
+    // Moves the addressed player one channel up when it has an input slot.
+    void OnRotRight(RotRightMsg *pMsg);
+
+    // 0x0013f670
+    // Passes a muff to the player's own sink when the player has an input slot.
+    void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
+
+    // 0x0013f6d8
+    // Moves the player from its own channel to the one the message selects.
+    void OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg);
 
     // Move a player from one channel to another.
     // 0x0013f748

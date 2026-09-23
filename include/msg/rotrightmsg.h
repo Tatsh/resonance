@@ -14,8 +14,8 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). The types come from
  * InputMap::OnControllerReading(), the one builder, which stores the resolved player and the
- * controller reading's position. Readers of the fields have not been traced, so they are private
- * by default.
+ * controller reading's position. TrackSelector::HandleMessage() reads both fields directly, so
+ * they are public.
  *
  * The destructor at `0x0011d3a8` is compiler-generated and has no declaration here. The routine
  * at `0x0011d3e0` is a further emission of the type-information accessor.
@@ -77,9 +77,15 @@ public:
      */
     virtual const char *Name();
 
-private:
-    Player *mPlayer;    // +0x04
-    Mid::MBT mPosition; // +0x08
+public:
+    /** The player to rotate. TrackSelector::HandleMessage() reads it at `0x0013b8f8`. +0x04 */
+    Player *mPlayer;
+
+    /**
+     * The song position of the rotation. TrackSelector::HandleMessage() reads it as the payload
+     * of the rebind. +0x08
+     */
+    Mid::MBT mPosition;
 };
 
 /**

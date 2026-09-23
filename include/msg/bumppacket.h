@@ -109,12 +109,16 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    IDablePtr<Player> mPlayer; // +0x14
-    int mBar;                  // +0x1c
-    int mTrack;                // +0x20
-
 public:
+    /** The bumping player. TrackSelector::RebuildChannelGrid() resolves it. +0x14 */
+    IDablePtr<Player> mPlayer;
+
+    /** The bar of the bump. TrackSelector::RebuildChannelGrid() scales it to ticks. +0x1c */
+    int mBar;
+
+    /** The track the bump strikes. TrackSelector::RebuildChannelGrid() reads it. +0x20 */
+    int mTrack;
+
     /**
      * Non-zero once a receiver has acted on the packet. +0x24
      *

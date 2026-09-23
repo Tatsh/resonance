@@ -17,6 +17,9 @@ constexpr int kRemixIndexRemixNameSize = 32;
 /** Characters of a remix file name a RemixIndexElement stores, terminator included. */
 constexpr int kRemixIndexFileNameSize = 8;
 
+/** The version word RemixIndexElement::Save() writes and RemixIndexElement::Reset() stores. */
+constexpr int kRemixIndexElementFormat = 2;
+
 /**
  * One remix described by the index file of a remix save directory.
  *
@@ -54,11 +57,43 @@ struct RemixIndexElement {
     /**
      * Clear the three names, clear GameOK, set Version to 2, and set dateTime to the empty string.
      *
-     * Not reconstructed yet.
-     *
      * @ghidraAddress 0x001397f0
      */
     void Reset();
+
+    /**
+     * Print the record to the debug console under its banner, one labelled field per line.
+     *
+     * RemixIndex::DumpElements() is the caller.
+     *
+     * @ghidraAddress 0x00136150
+     */
+    void Dump();
+
+    /**
+     * Write the record in the form Load() reads.
+     *
+     * The version word written is always kRemixIndexElementFormat, whatever Version stores. The
+     * names follow as their full fixed-size arrays, then GameOK as one byte, dateTime as a length
+     * and its text, the appearance count and each appearance, and AlbumNum. RemixIndex::
+     * WriteToStream() is the caller. The title is inferred.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00136278
+     */
+    void Save(OBStream &stream);
+
+    /**
+     * Read the record back from a stream.
+     *
+     * Version is read first. A version above zero reads the names, GameOK, dateTime, and the
+     * appearances, and a version of 2 or more reads AlbumNum as well. RemixIndex::
+     * ReadFromStream() is the caller. The title is inferred.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x00136448
+     */
+    void Load(IBStream &stream);
 
     char LevelName[kRemixIndexLevelNameSize]; /*!< Level the remix was built over. +0x00 */
     char RemixName[kRemixIndexRemixNameSize]; /*!< Name the player gave the remix. +0x20 */
@@ -96,7 +131,8 @@ struct RemixIndex {
     /**
      * Read the index back from a stream.
      *
-     * Not reconstructed yet.
+     * Reads version and the element count, empties elements, and then appends a fresh element for
+     * each and loads it through RemixIndexElement::Load().
      *
      * @param stream The stream to read from.
      * @ghidraAddress 0x001366e0
@@ -106,8 +142,7 @@ struct RemixIndex {
     /**
      * Write the index to a stream in the form ReadFromStream() reads.
      *
-     * Writes version, the element count, and then each element through `0x00136278`. Not
-     * reconstructed yet.
+     * Writes version, the element count, and then each element through RemixIndexElement::Save().
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x00139858
@@ -115,9 +150,7 @@ struct RemixIndex {
     void WriteToStream(OBStream &stream);
 
     /**
-     * Print every element to the debug console.
-     *
-     * Not reconstructed yet.
+     * Print every element to the debug console through RemixIndexElement::Dump().
      *
      * @ghidraAddress 0x00139920
      */

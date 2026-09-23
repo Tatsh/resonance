@@ -736,6 +736,7 @@ regi
 releaseable
 remixfx
 remixfxmsg
+remixindex
 remixtype
 remotetrackselectmsg
 renamefileop
