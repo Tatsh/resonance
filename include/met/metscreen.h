@@ -128,8 +128,8 @@ enum MetScreenCommandCode {
  *
  * Slot 14 polls the RndAsyncLoader until the load completes and then runs slot 38, which resolves
  * the view by appending `.view` to the container name and resolves the two animation views by
- * formatting `%s_EE.anim` and `%s_BF.anim` from the screen name. A screen with no view trips the
- * diagnostic `the screen %s doesn't have a valid view!`.
+ * formatting `%s_EE.anim` and `%s_BF.anim` from the screen name. A screen with no view stops the
+ * machine through Fatal() with `the screen %s doesn't have a valid view!`.
  *
  * Every float this class passes or receives for an animation is a frame position rather than a time
  * in seconds. MetRenderer advances the field at its own `+0x68` by a rate at `+0x64` that defaults
@@ -905,8 +905,8 @@ public:
      * Resolve the three views the container produced and hide the screen.
      *
      * Slot 38. The scene root is the object named by mUnknown80 with `.view` appended. A container
-     * with no such object trips the diagnostic `the screen %s doesn't have a valid view!` and
-     * leaves mUnknown14 null.
+     * with no such object stops the machine through Fatal() with
+     * `the screen %s doesn't have a valid view!`.
      *
      * @ghidraAddress 0x0038b1b0
      */

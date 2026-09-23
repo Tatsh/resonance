@@ -326,8 +326,8 @@ void MetScreen::ResolveContainerViews() {
     if (mUnknown14 != nullptr) {
         mUnknown14->ReleaseAnimsRefs();
     } else {
-        LogPrintf(" the screen %s doesn't have a valid view!\n",
-                  mUnknown80.mStr != nullptr ? mUnknown80.mStr : g_szEmptyString);
+        Fatal(" the screen %s doesn't have a valid view!\n",
+              mUnknown80.mStr != nullptr ? mUnknown80.mStr : g_szEmptyString);
     }
     SetShowing(0);
     mUnknown48 = 0;
@@ -335,9 +335,8 @@ void MetScreen::ResolveContainerViews() {
 
 // 0x0038b490
 void MetScreen::SetShowing(int nShowing) {
-    // Yes, the view is dereferenced without a null check, and ResolveContainerViews() calls this
-    // straight after a failed resolution leaves it null.
-    mUnknown14->Drawable::SetShowing(nShowing);
+    // Yes, the binary dereferences the view without a null check.
+    static_cast<Rnd::Drawable *>(mUnknown14)->SetShowing(nShowing);
     if (mUnknown60 == 0) {
         return;
     }
