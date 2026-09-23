@@ -18,7 +18,8 @@
  *
  * The destructor at `0x0019d2a0` is implicitly declared. It restores the base tables, frees
  * MsgSource's vector, and releases the object under MsgSink's tag, which is what the compiler
- * generates for a class with no member of its own.
+ * generates for a class with no member of its own. The implicit default constructor is emitted
+ * out of line at `0x0019d1b0`, where AxePhraseMaker's constructor calls it.
  */
 class PhraseMaker : public MsgSink, public MsgSource {
 public:
