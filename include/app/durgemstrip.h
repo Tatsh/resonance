@@ -33,7 +33,12 @@ public:
     /**
      * Delete the ribbon.
      *
-     * The binary has no out-of-line copy. The destructor of DurGemTrails inlines it.
+     * The destructor of DurGemTrails inlines it. The out-of-line copy is the deleting form, which
+     * frees the object only when bit 0 of the flag is set, and it has no caller. Its place at the
+     * head of this unit, ahead of Start(), is what assigns it to this class rather than to
+     * DurGemRowString, whose destructor has the same body.
+     *
+     * @ghidraAddress 0x004372d8
      */
     ~DurGemStrip();
 

@@ -75,7 +75,7 @@ private:
     friend class AppTunnel;
 
     // Place point nIndex at the lane position of frame nFrame. A frame another point already
-    // shows is copied from that point. 0x0043f218.
+    // shows is copied from that point.
     void SetPointFrame(int nFrame, int nIndex);
 
     float mStartFrame; // 1e9 while idle.

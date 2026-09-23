@@ -119,15 +119,14 @@ public:
 
 private:
     // Place one point on the track and append it, allocating a glow particle for a gem point.
-    // 0x004389a8.
     void AddPoint(float flFrame, float flLane, int nGem);
 
     // Append a gem point, first filling the gap from the last point with a filler point every 60
-    // frames on the straight line between the two. 0x00454e48.
+    // frames on the straight line between the two.
     void AddSegmentPoint(float flFrame, float flLane);
 
     // Decay the amplitude and move every revealed filler point past mPulseFrame. The argument is
-    // passed and never read. 0x00438e00.
+    // passed and never read.
     void Wobble(float flFrame);
 
     std::vector<Point> mPoints;

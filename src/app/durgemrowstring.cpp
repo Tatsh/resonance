@@ -53,6 +53,7 @@ DurGemRowString::DurGemRowString(int nLane, Rnd::Mat *pMat, Rnd::View *pView, fl
     pView->AddDraw(mString);
 }
 
+// 0x00436ee0
 DurGemRowString::~DurGemRowString() {
     delete mString;
 }
@@ -99,6 +100,11 @@ int DurGemRowString::Show(int nRow) {
     }
     mString->SetShowing(0);
     return 0;
+}
+
+// 0x00437180
+void DurGemRowString::Hide() {
+    mString->SetShowing(0);
 }
 
 // 0x004371b0

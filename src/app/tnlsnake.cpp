@@ -145,6 +145,7 @@ void TnlSnake::Update(float flFrame) {
     }
 }
 
+// 0x0043f218
 void TnlSnake::SetPointFrame(int nFrame, int nIndex) {
     if (mPointFrames[nIndex] == nFrame) {
         return;

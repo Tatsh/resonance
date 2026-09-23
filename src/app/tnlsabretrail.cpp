@@ -109,6 +109,7 @@ void TnlSabreTrail::Build(int nTrack, int nFirstBar, int nBarCount) {
     mStartFrame = kUnsetFrame;
 }
 
+// 0x004389a8
 void TnlSabreTrail::AddPoint(float flFrame, float flLane, int nGem) {
     Transform xfm;
     PadTransformRows(xfm);
@@ -130,6 +131,7 @@ void TnlSabreTrail::AddPoint(float flFrame, float flLane, int nGem) {
     mPoints.push_back(point);
 }
 
+// 0x00454e48
 void TnlSabreTrail::AddSegmentPoint(float flFrame, float flLane) {
     if (mPoints.empty()) {
         AddPoint(flFrame, flLane, 1);
@@ -197,6 +199,7 @@ void TnlSabreTrail::Update(float flFrame) {
     mGlowSize = (flShrunk < mGlowFloor) ? mGlowFloor : flShrunk;
 }
 
+// 0x00438e00
 void TnlSabreTrail::Wobble(float) {
     if (mAmplitude == 0.0f) {
         return;

@@ -38,7 +38,12 @@ public:
     /**
      * Delete the ribbon.
      *
-     * The binary has no out-of-line copy. The destructor of DurGemTrails inlines it.
+     * The destructor of DurGemTrails inlines it. The out-of-line copy is the deleting form, which
+     * frees the object only when bit 0 of the flag is set, and it has no caller. Its place at the
+     * head of this unit, ahead of AddLine(), is what assigns it to this class rather than to
+     * DurGemStrip, whose destructor has the same body.
+     *
+     * @ghidraAddress 0x00436ee0
      */
     ~DurGemRowString();
 
@@ -80,6 +85,17 @@ public:
      * @ghidraAddress 0x004370f8
      */
     int Show(int nRow);
+
+    /**
+     * Hide the ribbon without discarding the segments.
+     *
+     * The shipped program does not call it. A routine with the same body at `0x0042a9e8`, in the
+     * head-up display unit, remains unplaced, because nothing there identifies the class it belongs
+     * to. The title is inferred.
+     *
+     * @ghidraAddress 0x00437180
+     */
+    void Hide();
 
     /**
      * Find where a segment crosses plane.

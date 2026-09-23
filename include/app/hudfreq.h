@@ -49,10 +49,12 @@ public:
     /**
      * Show or hide the icon.
      *
-     * Overlay's PlaybackToggleMsg handler at `0x0041f9a8` inlines the body, and no out-of-line
-     * copy is recovered. The title is inferred.
+     * Overlay's PlaybackToggleMsg handler at `0x0041f9a8` inlines the body, and the out-of-line
+     * copy has no caller. The mesh is reached through its Rnd::Drawable subobject, whose vptr is
+     * at `+0x10`. The title is inferred.
      *
      * @param nShowing Non-zero to show the icon.
+     * @ghidraAddress 0x0042a3f0
      */
     void SetShowing(int nShowing) {
         mMesh->SetShowing(nShowing);

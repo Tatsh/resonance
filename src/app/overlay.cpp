@@ -803,6 +803,7 @@ HudBadge *Overlay::FindBadge(Player *pPlayer) {
     return nullptr;
 }
 
+// 0x00429938
 void Overlay::SetLayoutName(int nLayout) {
     g_hudLayoutName = FormatString("HUD%d", nLayout);
 }

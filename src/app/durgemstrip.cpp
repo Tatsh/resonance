@@ -43,6 +43,7 @@ DurGemStrip::DurGemStrip(Rnd::View *pView) : mId(kFreeId) {
     pView->AddDraw(mString);
 }
 
+// 0x004372d8
 DurGemStrip::~DurGemStrip() {
     delete mString;
 }

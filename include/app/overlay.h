@@ -255,7 +255,7 @@ private:
     HudTrack *FindTrack(Player *pPlayer);
 
     // Sets the layout prefix g_hudLayoutName to `HUD<n>`. The constructor inlines the body, and
-    // this copy at 0x00429938 has no caller.
+    // the out-of-line copy has no caller.
     static void SetLayoutName(int nLayout);
 
     // The parts that belong to the whole screen, deleted by the destructor.
