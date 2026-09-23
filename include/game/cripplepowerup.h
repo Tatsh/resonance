@@ -17,7 +17,7 @@ public:
      * A CrippleMsg (player at `+0x08`, track at `+0x0c`, bar at `+0x10`) goes out through the
      * player's MsgSource. A handled message is followed by a DeployedPowerupMsg with no bar range
      * and a track of -1, and `SND_DEPLOY_CRIPPLER` plays. An unhandled one is followed by a
-     * PowerupFailedMsg. The body is not written, because CrippleMsg's bar at `+0x10` is private.
+     * PowerupFailedMsg.
      *
      * @param nTrack The track.
      * @param nBar The bar.

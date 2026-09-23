@@ -16,8 +16,7 @@ public:
      *
      * A NeutralizeMsg (bar at `+0x08`, track at `+0x0c`, player at `+0x10`) goes out through the
      * player's MsgSource. A handled message plays `SND_DEPLOY_NEUTRALIZER`, and an unhandled one is
-     * followed by a PowerupFailedMsg. The body is not written, because NeutralizeMsg's payload is
-     * private.
+     * followed by a PowerupFailedMsg.
      *
      * @param nTrack The track to neutralise.
      * @param nBar The bar the neutralised bars follow.

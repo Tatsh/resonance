@@ -16,8 +16,7 @@ public:
      *
      * The packet carries the player, the bar at `+0x1c`, the track at `+0x20`, and a result at
      * `+0x24` that starts at zero. It goes out through the player's MsgSource. A non-zero result
-     * plays `SND_DEPLOY_BUMPER`, and a zero one is followed by a PowerupFailedMsg. The body is not
-     * written, because BumpPacket has no payload constructor and its result word is unnamed.
+     * plays `SND_DEPLOY_BUMPER`, and a zero one is followed by a PowerupFailedMsg.
      *
      * @param nTrack The track.
      * @param nBar The bar.

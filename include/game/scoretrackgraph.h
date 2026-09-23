@@ -10,6 +10,7 @@
 #include "gs/musesynth.h"
 #include "gs/phrasemgr.h"
 
+class BarSequencer;
 class PhraseDatabase;
 class Player;
 
@@ -80,7 +81,9 @@ public:
     /**
      * Start the stage.
      *
-     * Slot 2. The body is not written here, for the reason recorded in the class documentation.
+     * Slot 2. Starts the phrase manager's commands, chases the MIDI of every bar of the play map
+     * into the synthesiser so controllers and programs are current, and then builds and starts a
+     * BarSequencer at the song start that plays the track into the synthesiser.
      *
      * @ghidraAddress 0x001cf088
      */
@@ -89,7 +92,7 @@ public:
     /**
      * Stop the stage.
      *
-     * Slot 3. The body is not written here, for the reason recorded in the class documentation.
+     * Slot 3. Withdraws the phrase manager's commands and deletes the sequencer Slot2() built.
      *
      * @ghidraAddress 0x001cf918
      */
@@ -246,7 +249,7 @@ protected:
     int mUnknown18;              // +0x18
     Mixer *mMixer;               // +0x1c, 0x58 bytes, built at 0x001a7110
     Application *mApplication;   // +0x20, from Application::shared()
-    int mUnknown24;              // +0x24
+    BarSequencer *mSequencer;    // +0x24, built by Slot2() and deleted by Slot3()
 };
 
 // 0x001cf6b8, the out-of-line copy.

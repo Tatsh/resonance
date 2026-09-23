@@ -15,8 +15,7 @@ public:
      * Start the multiplier bonus.
      *
      * A MultiplierMsg (player at `+0x04`, bar at `+0x08`, and 4 at `+0x0c`) is delivered straight
-     * to the player's sink, and `SND_DEPLOY_MULTIPLIER` plays. The body is not written, because
-     * MultiplierMsg's words at `+0x04` and `+0x0c` are private.
+     * to the player's sink, and `SND_DEPLOY_MULTIPLIER` plays.
      *
      * @param nTrack Not read.
      * @param nBar The bar the bonus starts at.

@@ -1,7 +1,12 @@
 #include "game/scoretrackgraph.h"
 
+#include <vector>
+
 #include "app/msgsource.h"
+#include "game/midichase.h"
+#include "game/playmap.h"
 #include "mid/mbt.h"
+#include "sch/barsequencer.h"
 #include "script/configquery.h"
 
 namespace {
@@ -12,13 +17,16 @@ constexpr int kBarTicks = 1920;
 // The configuration code the phrase manager's configuration word comes from.
 constexpr int kPhraseMgrConfigCode = 0x2be;
 
+// The BarSequencer unmapped argument Slot2() passes, where BGTrackGraph passes its own flag.
+constexpr int kMapped = 0;
+
 } // namespace
 
 // 0x001cee50
 ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
     : mUnknown00(pTrackData->mUnknown04), mTrackData(pTrackData), mPhraseMgr(nullptr),
       mPhrasePlayer(nullptr), mQuantizer(nullptr), mMuseSynth(nullptr), mUnknown18(0),
-      mMixer(nullptr), mApplication(Application::shared()), mUnknown24(0) {
+      mMixer(nullptr), mApplication(Application::shared()), mSequencer(nullptr) {
     mQuantizer = new Quantizer(mTrackData);
     mPhraseMgr = new PhraseMgr(mApplication->GetSongClock(),
                                Mid::MBT(kBarTicks).mTick,
@@ -29,6 +37,37 @@ ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
     mMixer = new Mixer(mUnknown00, mTrackData->mChannel);
     mMuseSynth = new MuseSynth(mApplication->GetSongClock());
     mPhraseMgr->mPhrasePlayer = mPhrasePlayer;
+}
+
+// 0x001cf840
+ScoreTrackGraph::~ScoreTrackGraph() {
+    delete mMuseSynth;
+    delete mMixer;
+    delete mPhrasePlayer;
+    delete mPhraseMgr;
+    delete mQuantizer;
+}
+
+// 0x001cf088
+void ScoreTrackGraph::Slot2() {
+    mPhraseMgr->StartCommands();
+    MidiChase chase;
+    const int nBarCount = mApplication->GetPlayMap()->mBarCount;
+    for (int i = 0; i < nBarCount; ++i) {
+        const std::vector<TickObj<MuseMsg *> > *pMidi = mTrackData->GetMidiInBar(i);
+        chase.HandleRange(pMidi->data(), pMidi->data() + pMidi->size());
+    }
+    chase.Replay(mMuseSynth);
+
+    mSequencer = new BarSequencer(mApplication->GetSongClock(), mTrackData, mMuseSynth, kMapped);
+    mSequencer->Start(Mid::MBT(0).mTick);
+}
+
+// 0x001cf918
+void ScoreTrackGraph::Slot3() {
+    mPhraseMgr->WithdrawCommands();
+    delete mSequencer;
+    mSequencer = nullptr;
 }
 
 // 0x001cf750
