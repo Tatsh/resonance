@@ -18,6 +18,11 @@ class MsgSink;
  * start, `+0x08` finish, `+0x0c` end of storage. Every operation on it is inlined apart from the
  * reallocating half of push_back() at `0x00549e08`. The vector is private. Only members of this
  * class address it.
+ *
+ * The class declares no constructor, and the two the compiler generates are emitted once each, in
+ * the Gamer unit. The default constructor at `0x00115cc0` empties the vector and writes the vptr,
+ * and AutoRiffer, AxeFX, and the other derived constructors call it. The copy constructor at
+ * `0x00115860` copies the word at `+0x00` and the vector.
  */
 class MsgSource {
 public:
