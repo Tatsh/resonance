@@ -36,11 +36,6 @@
  *
  * The destructor at `0x0019b7f0` is implicitly declared. It destroys mHeldNotes and MsgSource's
  * vector and releases the object under MsgSink's tag.
- *
- * Five routines are declared but not written, because each builds or reads a message whose
- * payload is not public yet: HandleMessage() (AxisRegisterMsg), OnStdMidi() and FinishPhrase()
- * (NoteMsg), StartPhrase() (ClearGemsMsg, BarStatusMsg, and PhraseCapturedMsg), and Erase()
- * (ShowEraseEffectMsg).
  */
 class AxePhraseMaker : public PhraseMaker {
 public:
@@ -107,8 +102,9 @@ public:
      * The bar of the position, or with bWholeStep set every bar of its step, is cleared through
      * PhraseMgr::ClearPhrase() wherever pPlayer owns it. When anything was cleared, or a phrase is
      * in progress, one of two sounds plays and a ShowEraseEffectMsg goes out. The phrase in
-     * progress is discarded either way. AutoRiffer::OnErase() is the recovered caller. The body is
-     * not written.
+     * progress is discarded either way. The sound is `SND_ERASE_SECTION` for a whole step and
+     * `SND_ERASE` otherwise, and the message names mPlayer rather than pPlayer.
+     * AutoRiffer::OnErase() is the recovered caller.
      *
      * @param pPlayer The player the erase is for.
      * @param nTick The song position, in MIDI ticks.
