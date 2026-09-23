@@ -6,6 +6,7 @@ Kasson
 NODISC
 Orthonormalize
 Pitchbend
+RNDASYNCLOAD
 Randomizable
 Recolor
 Vron

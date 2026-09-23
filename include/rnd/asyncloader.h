@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <vector>
 
 #include "os/hxstr.h"
 #include "os/mem.h"
@@ -30,7 +31,8 @@ public:
     /**
      * Prepare an empty request with no directory or file.
      *
-     * The request starts pending, not started, and not finished, with the default priority of -1.
+     * The request starts pending, with its file not read and its textures not finished, and with
+     * no zone.
      * The image lists no caller for the out-of-line body.
      *
      * @ghidraAddress 0x003f7e50
@@ -42,10 +44,10 @@ public:
      *
      * @param directory The directory to load from.
      * @param file The file to load.
-     * @param nPriority The queue priority, or -1 for the default.
+     * @param nZone The zone PollAsyncLoads() selects while it reads the objects, or kNoZone.
      * @ghidraAddress 0x003f7c00
      */
-    RndAsyncLoader(const HxStr &directory, const HxStr &file, int nPriority);
+    RndAsyncLoader(const HxStr &directory, const HxStr &file, int nZone);
 
     /**
      * Release the request and any partially loaded data.
@@ -57,12 +59,20 @@ public:
     /**
      * Add this request to the load queue.
      *
+     * A request already in either queue logs an internal error with its directory and file and is
+     * not added again. The first request resolves g_nRndLoaderZone from the zone "rndfile". The
+     * request is then marked not pending, not read, and not finished, and appended to
+     * g_pendingLoads.
+     *
      * @ghidraAddress 0x003f8308
      */
     void Enqueue();
 
     /**
      * Abandon this request.
+     *
+     * A request whose file has been read is not affected. Otherwise its read is cancelled and its
+     * entry removed from g_activeLoads, and it is removed from g_pendingLoads.
      *
      * @ghidraAddress 0x003f8030
      */
@@ -72,7 +82,7 @@ public:
      * Abandon this request and point it at another file.
      *
      * Runs Cancel(), replaces the directory and the file, and marks the request pending, not
-     * started, and not finished. Unlike Unload() it releases nothing that was already loaded. The
+     * read, and not finished. Unlike Unload() it releases nothing that was already loaded. The
      * image lists no caller, and the title is inferred.
      *
      * @param directory The directory to load from.
@@ -86,7 +96,7 @@ public:
      *
      * Runs Cancel(), then, unless the request is still pending, deletes every object in mUnknown08
      * through its destructor, clears the three lists, and marks the request pending, not
-     * started, and not finished. The destructor runs it first, and Renderer::UnloadCommon() runs it
+     * read, and not finished. The destructor runs it first, and Renderer::UnloadCommon() runs it
      * before each delete as well. The title is inferred.
      *
      * @ghidraAddress 0x003f8240
@@ -119,8 +129,10 @@ public:
     /**
      * Test whether this request has finished and report how far it has advanced.
      *
-     * The fraction is the proportion of the produced objects that have finished loading. A request
-     * that failed reports 0 and a request already marked finished reports 1.
+     * The fraction is the proportion of the textures in mObjects whose mip levels have all
+     * arrived, each polled once through Rnd::Tex::PollAsyncMips(). A request still pending, or one
+     * whose file has not been read, reports 0. A request already marked finished reports 1, and
+     * one whose textures are all loaded is marked finished.
      *
      * @param pfProgress Receives a fraction between 0 and 1.
      * @return Non-zero once the request is complete.
@@ -130,6 +142,17 @@ public:
 
     /**
      * Advance every queued load request.
+     *
+     * Runs with g_nRndLoaderZone selected and restores the previous zone on return. The zone is
+     * reset when requests are waiting and no read is in flight. Each waiting request then has
+     * `gen/<file>.gz` under its directory read into a block of that zone and moves to
+     * g_activeLoads, until a file does not fit. A file of length 0 raises
+     * "RndAsyncLoader::Poll(): couldn't find: %s".
+     *
+     * The reads are then collected in issue order. The first one still in flight stops the
+     * collection. A failed read logs "ERROR reading RND file async: %s:%s!!" and is dropped. A
+     * finished read selects the request's zone, loads the objects through Rnd::g_manager, marks
+     * the file read, and ends the collection. Only one file is loaded per call.
      *
      * @ghidraAddress 0x003f8930
      */
@@ -176,7 +199,43 @@ public:
     int mPending;
 
 private:
-    int mStarted;  // +0x20
+    // Set once PollAsyncLoads() has read the file and loaded its objects.
+    int mFileRead; // +0x20
+    // Set once Poll() finds every texture in mObjects loaded.
     int mFinished; // +0x24
-    int mPriority; // +0x28
+    // Zone PollAsyncLoads() selects while it loads the objects.
+    int mZone; // +0x28
 };
+
+/**
+ * One file read in flight, 0x10 bytes.
+ *
+ * The record has no RTTI, and its title is inferred.
+ */
+struct RndActiveLoadEntry {
+    RndAsyncLoader *mRequest; /*!< Request the read belongs to. */
+    int mHandle;              /*!< Identifier AsyncLoadFileByPath() returned. */
+    void *mBuffer;            /*!< Zone block the file is read into. */
+    int mLength;              /*!< Uncompressed length of the file. */
+};
+
+/**
+ * Zone the file reads are allocated from, kNoZone until the first Enqueue().
+ *
+ * @ghidraAddress 0x006dba38
+ */
+extern int g_nRndLoaderZone;
+
+/**
+ * Requests waiting for their file read to be issued, in queue order.
+ *
+ * @ghidraAddress 0x006dba40
+ */
+extern std::vector<RndAsyncLoader *> g_pendingLoads;
+
+/**
+ * File reads issued and not yet collected, in issue order.
+ *
+ * @ghidraAddress 0x006dba50
+ */
+extern std::vector<RndActiveLoadEntry> g_activeLoads;
