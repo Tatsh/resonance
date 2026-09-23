@@ -1,8 +1,12 @@
 #include "game/singlecatcher.h"
 
 #include "app/application.h"
+#include "game/player.h"
 #include "game/playmap.h"
+#include "game/trackdata.h"
 #include "msg/caughtpowerbarmsg.h"
+#include "msg/phrasecapturedmsg.h"
+#include "msg/sectioncapturedmsg.h"
 
 namespace {
 
@@ -26,6 +30,34 @@ SingleCatcher::SingleCatcher(PhraseMgr *pPhraseMgr,
 
 // 0x001b0d30
 SingleCatcher::~SingleCatcher() {
+}
+
+// 0x001ad630
+void SingleCatcher::Slot9(int nBar, int nRun, int nAutoCatch) {
+    const int nRunEnd = nBar + 1;
+    const int nStepStart = mTrackData->StepStartBar(nBar);
+    const int nStepEnd = mTrackData->FollowingStepBar(nBar);
+    const int nRunStart = nBar - (nRun - 1);
+    SetPhraseOwners(nStepStart, nStepEnd, mPlayer);
+
+    const int nMultiplier = mPlayer->Slot16(nRunStart);
+    int nPoints = 0;
+    for (int nRunBar = nRunStart; nRunBar < nRunEnd; ++nRunBar) {
+        nPoints += mTrackData->GetPoints(nRunBar);
+    }
+    PhraseCapturedMsg captured(nStepStart,
+                               nStepEnd,
+                               nRunStart,
+                               nRunEnd,
+                               mTrack,
+                               mPlayer,
+                               nPoints * nMultiplier,
+                               mTrackData->GetUnknown08(nStepStart),
+                               nAutoCatch ^ 1);
+    Send(&captured);
+
+    SectionCapturedMsg section(nStepStart, nStepEnd, mTrack, mPlayer, nAutoCatch);
+    Send(&section);
 }
 
 // 0x001ad840

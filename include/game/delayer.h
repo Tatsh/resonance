@@ -16,8 +16,8 @@ class Message;
  * creates the one instance with a 0x18-byte allocation, which leaves no room for a member of the
  * class's own.
  *
- * The class is declared for GrooveWorld, which hands it every CripplePacket. Neither body is
- * written. The copy constructor at `0x0040d060` is the implicit one and is not written. It stores
+ * The class is declared for GrooveWorld, which hands it every CripplePacket. The copy
+ * constructor at `0x0040d060` is the implicit one and is not written. It stores
  * the MsgSink table, copies the MsgSource base, and then installs the two tables above.
  */
 class Delayer : public MsgSink, public MsgSource {

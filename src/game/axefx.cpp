@@ -2,7 +2,9 @@
 
 #include "app/globals.h"
 #include "game/trackdata.h"
+#include "msg/allnotesoffmsg.h"
 #include "msg/axisfxmsg.h"
+#include "msg/multimusemsg.h"
 #include "msg/stdmidimsg.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
@@ -64,5 +66,17 @@ void AxeFX::OnFilterValue(float flValue) {
     mValue = nValue;
     if (mPlaying != 0) {
         SendController();
+    }
+}
+
+// 0x0019b538
+void AxeFX::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == g_nAxisFXMsgType) {
+        OnAxisFX(static_cast<AxisFXMsg *>(pMsg));
+    } else if (nType == static_cast<int>(g_dwMultiMuseMsgType)) {
+        OnMultiMuse();
+    } else if (nType == static_cast<int>(g_dwAllNotesOffMsgType)) {
+        mPlaying = 0;
     }
 }

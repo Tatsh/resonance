@@ -15,6 +15,7 @@ set(RESONANCE_GAME_SRCS
     controllercmd.cpp
     controllerconfig.cpp
     cripplepowerup.cpp
+    delayer.cpp
     dogamesystemplaycmd.cpp
     effectpowerup.cpp
     enablemgr.cpp

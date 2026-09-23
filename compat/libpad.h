@@ -28,6 +28,30 @@ int scePadGetState(int nPort, int nSlot);
 // Sends the six actuator bytes in pData to the pad at nPort and nSlot.
 int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData);
 
+// Reports one mode fact of the pad. PadRecord::Read() asks for the current identifier (1) and the
+// extended identifier (2).
+int scePadInfoMode(int nPort, int nSlot, int nTerm, int nOffset);
+
+// Requests a main mode and a lock state. PadRecord::Read() asks for analog mode, locked.
+int scePadSetMainMode(int nPort, int nSlot, int nOffset, int nLock);
+
+// Reports the progress of the last request: 0 complete, 1 failed, 2 busy.
+int scePadGetReqState(int nPort, int nSlot);
+
+// Reports actuator facts. An actuator of -1 asks for the actuator count.
+int scePadInfoAct(int nPort, int nSlot, int nActuator, int nTerm);
+
+// Assigns each of the six actuators a byte of the direct actuator buffer.
+int scePadSetActAlign(int nPort, int nSlot, const unsigned char *pAlign);
+
+// Reports whether the pad supports pressure-sensitive buttons. The image leaves both entry points
+// untitled at 0x0059d000 and 0x0059d060, and the names are Sony's, inferred from how
+// PadRecord::Read() uses them.
+int scePadInfoPressMode(int nPort, int nSlot);
+
+// Switches the pad into pressure-sensitive mode.
+int scePadEnterPressMode(int nPort, int nSlot);
+
 #ifdef __cplusplus
 }
 #endif

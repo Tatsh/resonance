@@ -15,9 +15,6 @@
  * `0x007e0b88` with four. The table is the same length as the base's, so the class introduces no
  * virtual and overrides only the destructor and the base's two pure slots. The object is 0x84
  * bytes against the base's 0x80, so it adds one word, mLastStep.
- *
- * Slot 9 is declared but not written. It sends a PhraseCapturedMsg and a SectionCapturedMsg built
- * on the stack, and neither class has a constructor that takes the payload yet.
  */
 class SingleCatcher : public Catcher {
 public:

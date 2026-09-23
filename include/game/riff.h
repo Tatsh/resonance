@@ -58,30 +58,30 @@ public:
     virtual void Print(std::ostream &stream);
 
     /**
-     * Schedule a NoteMsg built from four values.
+     * Schedule a NoteMsg.
      *
-     * The body is not written, because NoteMsg declares its payload private and no constructor
-     * that takes it. The position is clamped to zero below 3 and moved one tick later above 30,
-     * and the message is added through MultiMuse::Add() with appending allowed.
+     * A position at or before tick 2 moves to 0, and one after tick 30 moves one tick later,
+     * clamped to the finite range. The message is added through MultiMuse::Add() with appending
+     * allowed.
      *
      * @param nTick The song position, in MIDI ticks.
-     * @param nUnknown09 The byte stored at the message's `+0x09`.
-     * @param nUnknown0a The byte stored at the message's `+0x0a`.
-     * @param nUnknown0c The word stored at the message's `+0x0c`.
-     * @param nUnknown08 The byte stored at the message's `+0x08`.
+     * @param nNote The note number.
+     * @param nVelocity The note-on velocity.
+     * @param nLength The length of the note, in MIDI ticks.
+     * @param nChannel The MIDI channel.
      * @ghidraAddress 0x001ce778
      */
     void AddNoteMsg(int nTick,
-                    unsigned char nUnknown09,
-                    unsigned char nUnknown0a,
-                    int nUnknown0c,
-                    unsigned char nUnknown08);
+                    unsigned char nNote,
+                    unsigned char nVelocity,
+                    int nLength,
+                    unsigned char nChannel);
 
     /**
      * Schedule a StdMidiMsg built from a status byte and two data bytes.
      *
-     * The body is not written, for the reason recorded on AddNoteMsg(). The position is clamped
-     * the same way, and the status is the bitwise or of the second and the fifth arguments.
+     * The position is adjusted as AddNoteMsg() adjusts it, and the status is the bitwise or of the
+     * second and the fifth arguments.
      *
      * @param nTick The song position, in MIDI ticks.
      * @param nStatus The status byte without its channel.

@@ -46,9 +46,11 @@ public:
     /**
      * Advance the pad's setup state machine and decode the latest report.
      *
-     * mPhase indexes a 78-entry jump table at `0x00834430` that walks the pad through mode and
-     * actuator setup. Each non-null output receives one value of the decoded report. Not
-     * reconstructed yet. The title is inferred.
+     * mPhase indexes a 78-entry jump table at `0x00834430` that walks the pad through analog
+     * mode, actuator alignment, and pressure-sensitive mode, and mUnknown124 records how far it
+     * has got. Each non-null output receives one value of the decoded report, the analog values
+     * centred on zero and zeroed inside the mUnknown128 dead zone. A pad that is not stable
+     * reports only mButtons and zero axes. The title is inferred.
      *
      * @param pButtons Receives the button word at mButtons, or null.
      * @param pAxis0 Receives the first analog byte, or null.
@@ -57,7 +59,8 @@ public:
      * @param pAxis3 Receives the fourth analog byte, or null.
      * @param pPressures Receives the pressure bytes, or null.
      * @param pPressureDeltas Receives each pressure less its baseline, or null.
-     * @return Non-zero when a report was decoded.
+     * @return mUnknown124, from 0 (no report) to 3 (pressure-sensitive), or 0 when the pad is not
+     *         stable or the read fails.
      * @ghidraAddress 0x005bc998
      */
     int Read(unsigned int *pButtons,
@@ -127,6 +130,10 @@ public:
     unsigned char mActAlign[kActuatorByteCount];
 
 private:
+    // Run the setup step mPhase selects, given the state scePadGetState() reported. Read()
+    // expands it inline, and it has no address of its own.
+    void AdvancePhase(int nState);
+
     // Non-zero once any record has started libpad. It lives at 0x00777fbc.
     static int sPadLibraryStarted;
 };

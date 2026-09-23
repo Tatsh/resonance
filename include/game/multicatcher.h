@@ -45,19 +45,17 @@ public:
     virtual ~MultiCatcher();
 
     /**
-     * Score a range of bars.
+     * Capture the phrase of one bar.
      *
-     * Slot 9. The routine records the first argument, decrements the second into a bar count,
-     * queries the track for the range, posts a caught-phrase packet for every bar in it, and then
-     * sends two messages whose payloads include the range, the bar count, and the player. A third
-     * argument of zero replaces the first step with a query on the player instead.
+     * Slot 9. The bar's points, times Player::Slot16() for the bar (or 1 for an automatic
+     * catch), become its score. The bar is given to mPlayer, a PhraseCapturedMsg whose run starts
+     * nSecond - 1 bars earlier and a SectionCapturedMsg are sent, and the score is stored as the
+     * bar's phrase byte. A bar with a power bar also sends a CaughtPowerbarMsg, to the sinks and
+     * to mPlayer, unless the catch was automatic.
      *
-     * The body is not written. It depends on seven routines in the 0x001d7xxx range that are not
-     * identified, and on two message classes whose payload words their headers declare private.
-     *
-     * @param nFirst The first bar of the range.
-     * @param nSecond One past the last bar of the range.
-     * @param nThird Zero selects the player query rather than the track query.
+     * @param nFirst The bar.
+     * @param nSecond The bars the run spans.
+     * @param nThird Non-zero for an automatic catch.
      * @ghidraAddress 0x001ad8e8
      */
     virtual void Slot9(int nFirst, int nSecond, int nThird);

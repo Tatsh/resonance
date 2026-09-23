@@ -53,8 +53,7 @@ public:
      * Act on a message.
      *
      * Slot 3. An AxisFXMsg sets the filter's target to its value, a MultiMuseMsg starts a riff
-     * (mPlaying set and the controller sent), and an AllNotesOffMsg ends it. The body is not
-     * written, because AxisFXMsg's value is private.
+     * (mPlaying set and the controller sent), and an AllNotesOffMsg ends it.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x0019b538
