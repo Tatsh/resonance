@@ -101,6 +101,15 @@ int GetStoredFileLength(const char *pszPath) {
     return nLength;
 }
 
+// 0x005638c8
+unsigned GetGzFileSize(int nFile) {
+    FileSeek(nFile, kGzTrailerSizeOffset, kFileSeekEnd);
+    unsigned nSize;
+    FileRead(nFile, &nSize, sizeof(nSize));
+    FileSeek(nFile, 0, kFileSeekSet);
+    return nSize;
+}
+
 // 0x00555800
 int GetUncompressedFileLength(const char *pszPath) {
     const int nFile = FileOpen(pszPath, kFileOpenRead);
