@@ -93,21 +93,6 @@ constexpr int kXfmTranslationRow = 3;
 // Row of the world transform a camera looks along.
 constexpr int kXfmForwardRow = 1;
 
-// 0x004b1dd0
-// A point carried through a transform, the basis rows weighted by its components plus
-// the translation, with out.w taken from the input. A VU0 multiply and accumulate in the image,
-// whose one out-of-line copy has no caller.
-inline void XfmPoint(const Vector3 &in, const Vector3 *pXfm, Vector3 &out) {
-    const float flX = pXfm[0].x * in.x + pXfm[1].x * in.y + pXfm[2].x * in.z + pXfm[3].x;
-    const float flY = pXfm[0].y * in.x + pXfm[1].y * in.y + pXfm[2].y * in.z + pXfm[3].y;
-    const float flZ = pXfm[0].z * in.x + pXfm[1].z * in.y + pXfm[2].z * in.z + pXfm[3].z;
-    const float flW = in.w;
-    out.x = flX;
-    out.y = flY;
-    out.z = flZ;
-    out.w = flW;
-}
-
 // A point of the unit square mapped onto -1..1 at a depth of one, which is the far side of the
 // projection.
 inline Vector3 UnitToFarNdc(float flX, float flY) {
@@ -504,23 +489,6 @@ Ray Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
         AddVec3(ray.mStart, &extent.x, ray.mEnd);
     }
     return ray;
-}
-
-Vector2 Cam::ProjectToUnit(const Vector3 &pt) {
-    Vector3 ptProjected;
-    XfmPoint(pt, mWorldProject, ptProjected);
-    Vector2 ptNdc; // Yes, the binary leaves this unset for a point at zero depth.
-    if (ptProjected.z != 0.0f) {
-        const float flInvDepth = 1.0f / ptProjected.z;
-        ptNdc.x = ptProjected.x * flInvDepth;
-        ptNdc.y = ptProjected.y * flInvDepth;
-    }
-    const Vector2 one{1.0f, 1.0f};
-    Vector2 ptShifted;
-    AddVec2(&ptNdc.x, &one.x, &ptShifted.x);
-    Vector2 ptUnit;
-    ScaleVec2(&ptShifted.x, 0.5f, &ptUnit.x);
-    return ptUnit;
 }
 
 Vector3 Cam::UnprojectFar(const Vector2 &ptUnit) {

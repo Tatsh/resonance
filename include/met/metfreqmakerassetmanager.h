@@ -90,6 +90,21 @@ public:
      */
     std::vector<MetPersonaData *> *GetIdentityList();
 
+    /**
+     * Resolve the full list of identities, the one at `+0x74`.
+     *
+     * The body waits for the load through WaitForLoad() and spins on the same two asynchronous
+     * requests as GetIdentityList(), and then returns the `+0x74` vector without a selector. The
+     * title is inferred from the one caller, CreditsRoll::Reset(), which searches every identity
+     * by name.
+     *
+     * The body is not written, because the request poll at `0x002a35a8` is not recovered.
+     *
+     * @return The list. It is never null.
+     * @ghidraAddress 0x00255100
+     */
+    std::vector<MetPersonaData *> *GetAllIdentities();
+
 private:
     // The 0x80-byte span the destructor walks. Its members are described in the class
     // documentation above and are not individually typed.

@@ -153,7 +153,8 @@ public:
      * The point is carried through mWorldProject, divided by its depth, and mapped from -1..1 onto
      * 0..1. A point at zero depth skips the division, which leaves the result indeterminate.
      *
-     * The image has no caller. The title is inferred.
+     * Inline. CreditsRoll's two classifiers expand it, and the out-of-line copy in the camera's
+     * translation unit has no caller. The title is inferred.
      *
      * @param pt The world point.
      * @return The point in the unit square.
@@ -481,11 +482,46 @@ private:
     // and Load() are the callers.
     void ReleaseTargetTex();
 
+    // A point carried through a transform, the basis rows weighted by its components plus the
+    // translation, with out.w taken from the input. A VU0 multiply and accumulate in the image,
+    // whose one out-of-line copy has no caller.
+    static void XfmPoint(const Vector3 &in, const Vector3 *pXfm, Vector3 &out);
+
     // Neither written by the constructor nor read anywhere in the image. A reserved run records a
     // span that has not been recovered and is not a field. This one is either such a field or the
     // alignment the virtual base subobject at 0x310 is placed on.
     unsigned char mReserved30c[0x04];
 };
+
+// 0x004b1dd0
+inline void Cam::XfmPoint(const Vector3 &in, const Vector3 *pXfm, Vector3 &out) {
+    const float flX = pXfm[0].x * in.x + pXfm[1].x * in.y + pXfm[2].x * in.z + pXfm[3].x;
+    const float flY = pXfm[0].y * in.x + pXfm[1].y * in.y + pXfm[2].y * in.z + pXfm[3].y;
+    const float flZ = pXfm[0].z * in.x + pXfm[1].z * in.y + pXfm[2].z * in.z + pXfm[3].z;
+    const float flW = in.w;
+    out.x = flX;
+    out.y = flY;
+    out.z = flZ;
+    out.w = flW;
+}
+
+// 0x004b2008
+inline Vector2 Cam::ProjectToUnit(const Vector3 &pt) {
+    Vector3 ptProjected;
+    XfmPoint(pt, mWorldProject, ptProjected);
+    Vector2 ptNdc; // Yes, the binary leaves this unset for a point at zero depth.
+    if (ptProjected.z != 0.0f) {
+        const float flInvDepth = 1.0f / ptProjected.z;
+        ptNdc.x = ptProjected.x * flInvDepth;
+        ptNdc.y = ptProjected.y * flInvDepth;
+    }
+    const Vector2 one{1.0f, 1.0f};
+    Vector2 ptShifted;
+    AddVec2(&ptNdc.x, &one.x, &ptShifted.x);
+    Vector2 ptUnit;
+    ScaleVec2(&ptShifted.x, 0.5f, &ptUnit.x);
+    return ptUnit;
+}
 
 /**
  * Camera the frame is being drawn through.

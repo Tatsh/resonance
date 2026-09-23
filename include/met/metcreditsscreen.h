@@ -1,5 +1,6 @@
 #pragma once
 
+#include "met/creditsroll.h"
 #include "met/metscreen.h"
 
 /**
@@ -64,4 +65,8 @@ public:
      * @ghidraAddress 0x00214d70
      */
     virtual void PlayCycleRightSound(int nSelector);
+
+private:
+    // The scroller slot 38 builds. +0x8c
+    CreditsRoll *mUnknown8c;
 };

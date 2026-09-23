@@ -1,4 +1,8 @@
+Dfan
+Eran
+Kasson
 NODISC
+Vron
 abitmap
 abmpfile
 acanvas
@@ -124,10 +128,12 @@ controllercmd
 controllerconfig
 counta
 coveragerc
+cpic
 cpprtti
 cppv
 cpsm
 createdirop
+creditsroll
 crip
 cripfx
 cripplemsg
@@ -676,6 +682,7 @@ rndfile
 rndglobal
 rndmovie
 rndtex
+robotkid
 rodata
 rotleftmsg
 rotrightmsg

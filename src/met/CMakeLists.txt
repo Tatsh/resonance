@@ -1,5 +1,6 @@
 set(RESONANCE_MET_SRCS
     albumcache.cpp
+    creditsroll.cpp
     discswap.cpp
     gameoptions.cpp
     metarenasscreen.cpp
