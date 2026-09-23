@@ -10,6 +10,8 @@
 #include "math/vector2.h"
 #include "met/metfreqmakerassetmanager.h"
 #include "met/metfreqmakercanvasscreen.h"
+#include "met/metfreqmakerdirectionsscreen.h"
+#include "os/formatstring.h"
 #include "rnd/animatable.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
@@ -38,6 +40,15 @@ static const char *const kEditViewName = "EditView";
 static const char *const kDirectionsScreenName = "MetFreqMakerDirectionsScreen";
 static const char *const kCanvasScreenName = "MetFreqMakerCanvasScreen";
 static const char *const kPanelName = "MetFreqMakerInventoryScreen";
+static const char *const kButtonsScreenName = "MetFreqMakerButtonsScreen";
+
+static const char *const kHeadHeading = "HEAD";
+static const char *const kFaceHeading = "FACE";
+static const char *const kBodyHeading = "BODY";
+static const char *const kDetailsHeading = "DETAILS";
+static const char *const kLogosHeading = "LOGOS";
+static const char *const kEditHeading = "FreQ";
+static const char *const kEditMeshFormat = "editableMesh%i";
 
 static const char *const kMeshSuffix = ".mesh";
 static const char *const kGridViewName = "fm_grid.view";
@@ -116,6 +127,40 @@ constexpr float kXfmTranslationW = 1.0f;
 // MetScreen::mUnknown58 in each state of the screen.
 constexpr float kConstructedUnknown58 = 3.0f;
 constexpr float kIdleUnknown58 = 1.0f;
+constexpr float kBrowsingUnknown58 = 0.5f;
+constexpr float kPlacingUnknown58 = 0.02f;
+
+// The commands slot 19 handles beyond the MetScreenCommandCode values. The codes are named
+// nowhere in the image, and the names are inferred from the canvas command each forwards.
+enum InventoryCommand {
+    kInventoryCommandToggleMode = 7,
+    kInventoryCommandDelete = 8,
+    kInventoryCommandRecentre = 12,
+    kInventoryCommandBringForward = 13,
+    kInventoryCommandSendBackward = 14,
+    kInventoryCommandLeft = 16,
+    kInventoryCommandRight = 17,
+    kInventoryCommandDown = 18,
+    kInventoryCommandUp = 19,
+    kInventoryCommandMirror = 21
+};
+
+// The MetFreqMakerDirectionsScreen pages the inventory shows.
+enum DirectionsPage {
+    kDirectionsSelectStamp = 0,
+    kDirectionsCanvas = 1,
+    kDirectionsColorPanelShort = 2,
+    kDirectionsColorPanel = 3,
+    kDirectionsFreqFull = 15
+};
+
+// The most parts the canvas accepts.
+constexpr int kMaxParts = 16;
+// The rows of the grid that show at once, on the edit page and on the other pages.
+constexpr int kEditVisibleRowCount = 2;
+constexpr int kVisibleRowCount = 3;
+// The Rnd::Object::Copy() flags ShowEditPage() copies a part's mesh with.
+constexpr unsigned kCopyNothing = 0;
 
 // One cell of the part grid.
 struct GridCell {
@@ -220,7 +265,7 @@ MetFreqMakerInventoryScreen::MetFreqMakerInventoryScreen(MetRenderer *pRenderer,
     mMainInventoryView->AddAnim(mLogosView);
     mMainInventoryView->AddAnim(mEditView);
 
-    mUnknownC8 = kMinimumRowCount;
+    mEditRowCount = kMinimumRowCount;
     mBodyRowCount = kMinimumRowCount;
     mFaceRowCount = kMinimumRowCount;
     mHeadRowCount = kMinimumRowCount;
@@ -345,7 +390,7 @@ void MetFreqMakerInventoryScreen::ResolveContainerViews() {
 
         Rnd::View *pView = nullptr;
         std::vector<HxStr> *pNames = nullptr;
-        // Yes, the counts restart for every template, so every page receives the minimum rows.
+        // Yes, the counts restart for every template. Every page receives the minimum rows.
         int nHeadParts = 0;
         int nBodyParts = 0;
         int nFaceParts = 0;
@@ -460,6 +505,515 @@ void MetFreqMakerInventoryScreen::PlayToggleSound() {
 // 0x00272b58
 void MetFreqMakerInventoryScreen::PlayDeleteSound() {
     PlaySoundByName(kDeleteSound);
+}
+
+// 0x00272600
+void MetFreqMakerInventoryScreen::OnUnknownSlot7() {
+    mMode = kModeInventory;
+    mUnknown58 = kBrowsingUnknown58;
+    ShowPalette(0);
+    ShowInventory(1);
+    SetHighlight(kHighlightInventory);
+    mGridRow = 0;
+    mGridColumn = 0;
+    UpdateGridCursor();
+    if (mCurrentView == mEditView) {
+        FreqPart *pPart = SelectCurrentPart();
+        if (pPart != nullptr) {
+            SetPaletteFromPart(pPart);
+        }
+        ShowDirections(kDirectionsSelectStamp);
+    } else {
+        Vector2 position{0, 0};
+        GetPalettePosition(position);
+        Color color = *PaletteColorAt(position);
+        mCanvas->SetColor(color, position);
+        PreviewCurrentTemplate();
+        ShowDirections(kDirectionsSelectStamp);
+    }
+}
+
+// Expanded into slot 19 for each palette move.
+inline void MetFreqMakerInventoryScreen::ApplyPaletteToCurrentMesh() {
+    Color color;
+    ApplyPaletteColor(color);
+    UpdateCrossOrigin();
+    if (mCurrentView == mEditView) {
+        int nIndex = mGridRow * kGridColumnCount + mGridColumn;
+        if (nIndex >= 0 && static_cast<unsigned>(nIndex) < mEditMeshes.size()) {
+            mEditMeshes[nIndex]->SetVertexColor(color);
+        }
+    }
+}
+
+// 0x0026c928
+void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand) {
+    switch (pCommand->mCommand) {
+    case kMetScreenCommandPrevious:
+        if (mMode == kModeColor || mMode == kModePart) {
+            return;
+        }
+        if (mGridRow == 0) {
+            OnGridTopReached();
+            return;
+        }
+        --mGridRow;
+        UpdateGridCursor();
+        break;
+    case kMetScreenCommandNext:
+        if (mMode == kModeColor || mMode == kModePart) {
+            return;
+        }
+        if (mGridRow < mCurrentRowCount) {
+            int nVisibleRows =
+                (mCurrentView == mEditView) ? kEditVisibleRowCount : kVisibleRowCount;
+            if (mGridRow == nVisibleRows - 1) {
+                OnGridBottomReached();
+                return;
+            }
+            ++mGridRow;
+            UpdateGridCursor();
+        }
+        break;
+    case kMetScreenCommandLeft:
+        if (mMode == kModeColor || mMode == kModePart) {
+            return;
+        }
+        if (mGridColumn > 0) {
+            --mGridColumn;
+            UpdateGridCursor();
+        }
+        break;
+    case kMetScreenCommandRight:
+        if (mMode == kModeColor || mMode == kModePart) {
+            return;
+        }
+        if (mGridColumn < kGridColumnCount - 1) {
+            ++mGridColumn;
+            UpdateGridCursor();
+        }
+        break;
+    case kMetScreenCommandSelect:
+        if (mMode <= kModeNone) {
+            return;
+        }
+        if (mMode < kModeInventory) {
+            mCanvas->PlaceCursor();
+            mMode = kModeNone;
+            mUnknown58 = kIdleUnknown58;
+            ShowPalette(0);
+            ShowInventory(1);
+            SetHighlight(kHighlightNone);
+            HideGridCursor();
+            mGridRow = 0;
+            mGridColumn = 0;
+            mCanvas->ResetCursor();
+            ActivateNamedPanel(HxStr(kButtonsScreenName));
+            return;
+        }
+        if (mMode != kModeInventory || !IsCurrentCellFilled()) {
+            return;
+        }
+        if (mCurrentView != mEditView &&
+            static_cast<int>(mCanvas->GetParts().size()) >= kMaxParts) {
+            PlayErrorSound(pCommand->mPadIndex);
+            return;
+        }
+        mMode = kModePart;
+        mUnknown58 = kPlacingUnknown58;
+        SetHighlight(kHighlightCanvas);
+        ShowDirections((mCurrentView == mEditView) ? kDirectionsColorPanel :
+                                                     kDirectionsColorPanelShort);
+        return;
+    case kMetScreenCommandBack:
+        if (mMode <= kModeNone) {
+            return;
+        }
+        if (mMode < kModeInventory) {
+            mMode = kModeInventory;
+            mUnknown58 = kBrowsingUnknown58;
+            if (mCurrentView == mEditView) {
+                mCanvas->RevertSelection();
+                ShowEditPage();
+            }
+            ShowPalette(0);
+            ShowInventory(1);
+            SetHighlight(kHighlightInventory);
+            mCanvas->ResetCursor();
+            ShowDirections(kDirectionsSelectStamp);
+            break;
+        }
+        if (mMode != kModeInventory) {
+            return;
+        }
+        ActivateNamedPanel(HxStr(kButtonsScreenName));
+        mMode = kModePart; // Yes, leaving the inventory enters the part mode.
+        mUnknown58 = kPlacingUnknown58;
+        ShowPalette(0);
+        ShowInventory(1);
+        SetHighlight(kHighlightNone);
+        HideGridCursor();
+        mGridRow = 0;
+        mGridColumn = 0;
+        mCanvas->ResetCursor();
+        return;
+    case kInventoryCommandToggleMode:
+        if (mMode == kModeInventory) {
+            return;
+        }
+        mMode = (mMode != kModeColor) ? kModeColor : kModePart;
+        PlayModeToggleSound();
+        if (mMode == kModePart) {
+            ShowPalette(0);
+            ShowInventory(1);
+            SetHighlight(kHighlightCanvas);
+            mUnknown58 = kBrowsingUnknown58;
+            ShowDirections((mCurrentView == mEditView) ? kDirectionsColorPanel :
+                                                         kDirectionsColorPanelShort);
+        } else if (mMode == kModeColor) {
+            ShowPalette(1);
+            ShowInventory(0);
+            SetHighlight(kHighlightInventory);
+            mUnknown58 = kBrowsingUnknown58;
+            ShowDirections(kDirectionsCanvas);
+        }
+        return;
+    case kInventoryCommandDelete:
+        if (mMode != kModePart || mCurrentView != mEditView) {
+            return;
+        }
+        DeleteCurrentPart();
+        ShowEditPage();
+        UpdateGridCursor();
+        mMode = kModeInventory;
+        mUnknown58 = kBrowsingUnknown58;
+        SetHighlight(kHighlightInventory);
+        ShowDirections(kDirectionsSelectStamp);
+        PlayDeleteSound();
+        return;
+    case kInventoryCommandRecentre:
+        if (mMode == kModePart && mCurrentView == mEditView) {
+            int nIndex = mGridRow * kGridColumnCount + mGridColumn;
+            if (nIndex >= 0 && static_cast<unsigned>(nIndex) < mEditMeshes.size()) {
+                mCanvas->RecentrePart(nIndex);
+                PlayToggleSound();
+            }
+        }
+        return;
+    case kInventoryCommandBringForward:
+    case kInventoryCommandSendBackward:
+        if (mMode == kModePart) {
+            mCanvas->HandleCanvasCommand(pCommand);
+            PlayFlipSound();
+        }
+        return;
+    case kInventoryCommandLeft:
+        if (mMode == kModeInventory) {
+            return;
+        }
+        if (mMode == kModePart) {
+            mCanvas->HandleCanvasCommand(pCommand);
+            PlayMoveSound();
+            return;
+        }
+        if (mMode != kModeColor) {
+            return;
+        }
+        if (mPaletteColumn > 0) {
+            --mPaletteColumn;
+            PlayMoveSound();
+        }
+        ApplyPaletteToCurrentMesh();
+        return;
+    case kInventoryCommandRight:
+        if (mMode == kModeInventory) {
+            return;
+        }
+        if (mMode == kModePart) {
+            mCanvas->HandleCanvasCommand(pCommand);
+            PlayMoveSound();
+            return;
+        }
+        if (mMode != kModeColor) {
+            return;
+        }
+        if (mPaletteColumn < kPaletteColumnCount - 1) {
+            ++mPaletteColumn;
+            PlayMoveSound();
+        }
+        ApplyPaletteToCurrentMesh();
+        return;
+    case kInventoryCommandDown:
+        if (mMode == kModeInventory) {
+            return;
+        }
+        if (mMode == kModePart) {
+            mCanvas->HandleCanvasCommand(pCommand);
+            PlayMoveSound();
+            return;
+        }
+        if (mMode != kModeColor) {
+            return;
+        }
+        if (mPaletteRow < kPaletteRowCount - 1) {
+            ++mPaletteRow;
+            PlayMoveSound();
+        }
+        ApplyPaletteToCurrentMesh();
+        return;
+    case kInventoryCommandUp:
+        if (mMode == kModeInventory) {
+            return;
+        }
+        if (mMode == kModePart) {
+            mCanvas->HandleCanvasCommand(pCommand);
+            PlayMoveSound();
+            return;
+        }
+        if (mMode != kModeColor) {
+            return;
+        }
+        if (mPaletteRow > 0) {
+            --mPaletteRow;
+            PlayMoveSound();
+        }
+        ApplyPaletteToCurrentMesh();
+        return;
+    case kInventoryCommandMirror:
+        if (mMode != kModePart) {
+            return;
+        }
+        mCanvas->HandleCanvasCommand(pCommand);
+        PlayFlipSound();
+        if (mCurrentView == mEditView) {
+            int nIndex = mGridRow * kGridColumnCount + mGridColumn;
+            if (nIndex >= 0 && static_cast<unsigned>(nIndex) < mEditMeshes.size()) {
+                mEditMeshes[nIndex]->MirrorX();
+            }
+        }
+        return;
+    default:
+        return;
+    }
+    if (mCurrentView == mEditView) {
+        FreqPart *pPart = SelectCurrentPart();
+        if (pPart != nullptr) {
+            SetPaletteFromPart(pPart);
+        }
+    } else {
+        PreviewCurrentTemplate();
+    }
+}
+
+// 0x00272a98
+void MetFreqMakerInventoryScreen::OnUnknownSlot33() {
+    ShowPalette(0);
+    ShowInventory(0);
+    mPaletteRow = kPaletteStartRow;
+    mPaletteColumn = kPaletteStartColumn;
+    Vector2 position{0, 0};
+    GetPalettePosition(position);
+    Color color = *PaletteColorAt(position);
+    mCanvas->SetColor(color, position);
+    Vector2 cursor{0, 0};
+    GetPalettePosition(cursor);
+    MoveCrossOrigin(cursor);
+}
+
+// Expanded into each of the five part page routines.
+inline void
+MetFreqMakerInventoryScreen::ShowPartPage(Rnd::View *pView, int nRowCount, const char *pszHeading) {
+    HidePages();
+    pView->SetShowing(1);
+    mCurrentView = pView;
+    mCurrentRowCount = nRowCount;
+    FindObject<Rnd::Text>(kHeadingNameName)->SetText(HxStr(pszHeading));
+    ShowInventory(1);
+    ShowPalette(0);
+    HideGridCursor();
+    SetHighlight(kHighlightNone);
+}
+
+// 0x0026d318
+void MetFreqMakerInventoryScreen::ShowHeadPage() {
+    ShowPartPage(mHeadView, mHeadRowCount, kHeadHeading);
+}
+
+// 0x0026d4c8
+void MetFreqMakerInventoryScreen::ShowFacePage() {
+    ShowPartPage(mFaceView, mFaceRowCount, kFaceHeading);
+}
+
+// 0x0026d678
+void MetFreqMakerInventoryScreen::ShowBodyPage() {
+    ShowPartPage(mBodyView, mBodyRowCount, kBodyHeading);
+}
+
+// 0x0026d828
+void MetFreqMakerInventoryScreen::ShowDetailsPage() {
+    ShowPartPage(mDetailsView, mDetailsRowCount, kDetailsHeading);
+}
+
+// 0x0026d9d8
+void MetFreqMakerInventoryScreen::ShowLogosPage() {
+    ShowPartPage(mLogosView, mLogosRowCount, kLogosHeading);
+}
+
+// 0x0026db88
+void MetFreqMakerInventoryScreen::HidePages() {
+    mHeadView->SetShowing(0);
+    mFaceView->SetShowing(0);
+    mBodyView->SetShowing(0);
+    mDetailsView->SetShowing(0);
+    mLogosView->SetShowing(0);
+    mEditView->SetShowing(0);
+    mCurrentView = nullptr;
+    mCurrentRowCount = -1;
+    FindObject<Rnd::Text>(kHeadingNameName)->SetText(HxStr(""));
+    ShowInventory(0);
+    ShowPalette(0);
+    SetHighlight(kHighlightNone);
+}
+
+// 0x0026ddc8
+void MetFreqMakerInventoryScreen::ShowEditPage() {
+    HidePages();
+    int nMeshCount = mEditMeshes.size();
+    for (int i = 0; i < nMeshCount; ++i) {
+        delete mEditMeshes[i];
+    }
+    mEditMeshes.clear();
+    mEditMeshes.resize(0); // Yes, the binary resizes the vector it has just emptied.
+
+    std::list<FreqPart *> &parts = mCanvas->GetParts();
+    int nPartCount = parts.size();
+    int nIndex = 0;
+    for (std::list<FreqPart *>::iterator it = parts.begin(); it != parts.end(); ++it) {
+        FreqPart *pPart = *it;
+        Rnd::Mesh *pMesh = Rnd::g_pfnNewMesh(HxStr(FormatString(kEditMeshFormat, nIndex)));
+        pMesh->Copy(pPart->GetMesh(), kCopyNothing);
+        float flScaleX;
+        float flScaleZ;
+        MetFreqMakerAssetManager::shared()->ApplyPartScale(
+            pMesh, pPart->mTemplate, &flScaleX, &flScaleZ, kPartWidthFactor, kPartDepthFactor);
+        if (pPart->mMirrored == 1) {
+            pMesh->MirrorX();
+        }
+        pMesh->ScaleUniform(PartScale(pPart));
+        const float translation[] = {(nIndex % kGridColumnCount) * kGridPitchX,
+                                     kGridHeight,
+                                     (nIndex / kGridColumnCount) * kGridPitchZ,
+                                     kXfmTranslationW};
+        std::copy(translation,
+                  translation + Rnd::kXfmRowFloatCount,
+                  pMesh->mLocalXfm[kXfmTranslationRow]);
+        pMesh->mDirty = 1;
+        mEditMeshes.push_back(pMesh);
+        mEditView->AddDraw(pMesh, nullptr);
+        mEditView->AddTrans(pMesh);
+        pMesh->SetShowing(1);
+        ++nIndex;
+    }
+
+    mEditRowCount = static_cast<int>(static_cast<float>(nPartCount) * (1.0f / kGridColumnCount));
+    if (nPartCount % kGridColumnCount > 0) {
+        ++mEditRowCount;
+    }
+    if (mEditRowCount < kVisibleRowCount) {
+        mEditRowCount = kEditVisibleRowCount; // Yes, the test and the value differ.
+    }
+    mEditView->SetShowing(1);
+    mCurrentView = mEditView;
+    mCurrentRowCount = mEditRowCount;
+    ShowInventory(1);
+    ShowPalette(0);
+    HideGridCursor();
+    SetHighlight(kHighlightNone);
+    FindObject<Rnd::Text>(kHeadingNameName)->SetText(HxStr(kEditHeading));
+}
+
+// 0x0026e448
+void MetFreqMakerInventoryScreen::HideGridCursor() {
+    FindObject<Rnd::Mesh>(kHighlightMeshName)->SetShowing(0);
+}
+
+// 0x0026e528
+void MetFreqMakerInventoryScreen::UpdateGridCursor() {
+    Rnd::Mesh *pCursor = FindObject<Rnd::Mesh>(kHighlightMeshName);
+    const float translation[] = {
+        mGridColumn * kGridPitchX, kGridHeight, mGridRow * kGridPitchZ, kXfmTranslationW};
+    std::copy(
+        translation, translation + Rnd::kXfmRowFloatCount, pCursor->mLocalXfm[kXfmTranslationRow]);
+    pCursor->mDirty = 1;
+    pCursor->SetShowing(1);
+}
+
+// 0x0026eff0
+void MetFreqMakerInventoryScreen::ShowDirections(int nPage) {
+    MetFreqMakerDirectionsScreen *pDirections =
+        static_cast<MetFreqMakerDirectionsScreen *>(FindScreenByName(HxStr(kDirectionsScreenName)));
+    int nShown = nPage;
+    if (nPage == kDirectionsSelectStamp) {
+        if (static_cast<int>(mCanvas->GetParts().size()) >= kMaxParts) {
+            nShown = (mCurrentView == mEditView) ? nPage : kDirectionsFreqFull;
+        }
+    }
+    pDirections->ShowPage(nShown);
+}
+
+// 0x0026f100
+bool MetFreqMakerInventoryScreen::IsCurrentCellFilled() {
+    int nIndex = mGridRow * kGridColumnCount + mGridColumn;
+    std::vector<HxStr> *pNames = nullptr;
+    if (mCurrentView == mBodyView) {
+        pNames = &mBodyNames;
+    } else if (mCurrentView == mDetailsView) {
+        pNames = &mDetailsNames;
+    } else if (mCurrentView == mFaceView) {
+        pNames = &mFaceNames;
+    } else if (mCurrentView == mHeadView) {
+        pNames = &mHeadNames;
+    } else if (mCurrentView == mLogosView) {
+        pNames = &mLogosNames;
+    } else if (mCurrentView == mEditView) {
+        return mCanvas->SelectPart(nIndex) != nullptr;
+    }
+    // Yes, with no page shown the binary reads the null list.
+    return static_cast<unsigned>(nIndex) < pNames->size();
+}
+
+// 0x0026f1b0
+std::vector<HxStr> *MetFreqMakerInventoryScreen::GetCurrentPageNames() {
+    int nIndex = mGridRow * kGridColumnCount + mGridColumn;
+    std::vector<HxStr> *pNames;
+    if (mCurrentView == mBodyView) {
+        pNames = &mBodyNames;
+    } else if (mCurrentView == mDetailsView) {
+        pNames = &mDetailsNames;
+    } else if (mCurrentView == mFaceView) {
+        pNames = &mFaceNames;
+    } else if (mCurrentView == mHeadView) {
+        pNames = &mHeadNames;
+    } else {
+        pNames = (mCurrentView == mLogosView) ? &mLogosNames : nullptr;
+    }
+    // Yes, on the edit page the binary reads the null list.
+    return (static_cast<unsigned>(nIndex) < pNames->size()) ? pNames : nullptr;
+}
+
+// 0x002726e8
+void MetFreqMakerInventoryScreen::PreviewCurrentTemplate() {
+    mCanvas->ResetCursor();
+    int nIndex = mGridRow * kGridColumnCount + mGridColumn;
+    std::vector<HxStr> *pNames = GetCurrentPageNames();
+    if (pNames != nullptr) {
+        const HxStr &name = (*pNames)[nIndex];
+        Vector2 position{0, 0};
+        GetPalettePosition(position);
+        Color color = *PaletteColorAt(position);
+        mCanvas->SetColor(color, position);
+        mCanvas->SelectTemplate(name);
+    }
 }
 
 // 0x0026e9e0

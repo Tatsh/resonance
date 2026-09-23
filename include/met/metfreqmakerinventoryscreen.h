@@ -38,8 +38,7 @@ class View;
  * `0x002723a0`, and two file-local float sign helpers at `0x00272268` and `0x002722c8`.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
- * are 5, 7 `0x00272600`, 14, 19 `0x0026c928`, 20 through 24, 30, 33 `0x00272a98`, 38, and 39
- * through 43.
+ * are 5, 7, 14, 19 through 24, 30, 33, 38, and 39 through 43.
  */
 class MetFreqMakerInventoryScreen : public MetScreen {
 public:
@@ -86,6 +85,18 @@ public:
     virtual void EnterAndShow();
 
     /**
+     * Start browsing the inventory.
+     *
+     * Slot 7. The grid cursor returns to the first cell, the inventory panel is highlighted, and
+     * the directions return to the select page. On the edit page the palette cursor follows the
+     * part under the grid cursor, and on every other page the palette colour is applied and the
+     * template under the grid cursor is previewed.
+     *
+     * @ghidraAddress 0x00272600
+     */
+    virtual void OnUnknownSlot7();
+
+    /**
      * Report the container load finished once the FreQ maker assets and the directions screen's
      * container are both resident.
      *
@@ -95,6 +106,22 @@ public:
      * @ghidraAddress 0x0026a3b0
      */
     virtual int PollContainerLoad();
+
+    /**
+     * Apply one command to the grid, the palette, or the part under edit, by editing mode.
+     *
+     * Slot 19. Commands 1 through 4 move the grid cursor while no part is placed. Select picks the
+     * template or part under the grid cursor, or places the part under edit and returns to the
+     * buttons screen. Back abandons the edit, or returns to the buttons screen. Command 7 switches
+     * between the colour and the part modes. Commands 16 through 19 move the palette cursor in the
+     * colour mode and the part in the part mode. Command 8 deletes, 12 recentres, 13 and 14
+     * reorder, and 21 mirrors the part under edit. The command codes above 6 are named nowhere in
+     * the image.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x0026c928
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * Play the base slide sound while an editing mode is active.
@@ -157,7 +184,7 @@ public:
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
 
     /**
-     * Resolve the base views, list every part template on its page, and resolve the screen's own
+     * Resolve the base views, list every part template on its page, and resolve the screen's
      * objects.
      *
      * Slot 38. Each template is cloned as `<name>.mesh` into mPartMeshes, given the template's
@@ -169,6 +196,78 @@ public:
      * @ghidraAddress 0x0026b518
      */
     virtual void ResolveContainerViews();
+
+    /**
+     * Hide the palette and the inventory, and return the palette cursor to its starting cell and
+     * colour.
+     *
+     * Slot 33.
+     *
+     * @ghidraAddress 0x00272a98
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Show the head page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
+     * is inferred.
+     *
+     * @ghidraAddress 0x0026d318
+     */
+    void ShowHeadPage();
+
+    /**
+     * Show the face page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
+     * is inferred.
+     *
+     * @ghidraAddress 0x0026d4c8
+     */
+    void ShowFacePage();
+
+    /**
+     * Show the body page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
+     * is inferred.
+     *
+     * @ghidraAddress 0x0026d678
+     */
+    void ShowBodyPage();
+
+    /**
+     * Show the details page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The
+     * title is inferred.
+     *
+     * @ghidraAddress 0x0026d828
+     */
+    void ShowDetailsPage();
+
+    /**
+     * Show the logos page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
+     * is inferred.
+     *
+     * @ghidraAddress 0x0026d9d8
+     */
+    void ShowLogosPage();
+
+    /**
+     * Hide every page, the palette, and the inventory decorations, and clear the heading.
+     *
+     * mCurrentView becomes null and mCurrentRowCount -1. MetFreqMakerButtonsScreen's routine at
+     * `0x0025a3e0` and its slot 36 call it. The title is inferred.
+     *
+     * @ghidraAddress 0x0026db88
+     */
+    void HidePages();
+
+    /**
+     * Rebuild the edit page from the canvas's parts and show it.
+     *
+     * The previous edit meshes are deleted, and each part is copied into a new mesh named
+     * `editableMesh<n>`, scaled and mirrored like the part, and placed at cell n. The heading
+     * becomes `FreQ`. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` and slot 19 call it. The
+     * title is inferred.
+     *
+     * @ghidraAddress 0x0026ddc8
+     */
+    void ShowEditPage();
 
     /**
      * Play `SND_MET_FM_COLOR_MOVE` in the colour mode or `SND_MET_FM_PART_MOVE` in the part mode.
@@ -234,6 +333,32 @@ private:
     // Highlight clears both materials.
     void SetHighlight(int nHighlight);
 
+    // Show one part page with its row count and heading. The five page routines expand it.
+    void ShowPartPage(Rnd::View *pView, int nRowCount, const char *pszHeading);
+
+    // Apply the palette colour on the canvas, move the cross to it, and on the edit page colour the
+    // mesh under the grid cursor. Slot 19 expands it for each palette move.
+    void ApplyPaletteToCurrentMesh();
+
+    // 0x0026e448. Hide `fm_inventory_hisquare.mesh`.
+    void HideGridCursor();
+
+    // 0x0026e528. Move `fm_inventory_hisquare.mesh` to the grid cursor and show it.
+    void UpdateGridCursor();
+
+    // 0x0026eff0. Show one directions page, or the full page for the select page once the canvas
+    // has its maximum of parts and the edit page is not shown.
+    void ShowDirections(int nPage);
+
+    // 0x0026f100. Report whether the grid cursor is on a template, or on the edit page on a part.
+    bool IsCurrentCellFilled();
+
+    // 0x0026f1b0. The name list of the page shown, or null when the grid cursor is past its end.
+    std::vector<HxStr> *GetCurrentPageNames();
+
+    // 0x002726e8. Apply the palette colour and preview the template under the grid cursor.
+    void PreviewCurrentTemplate();
+
     // 0x00272868. The palette position at the centre of the palette cursor's cell.
     void GetPalettePosition(Vector2 &position);
 
@@ -286,7 +411,7 @@ private:
     int mDetailsRowCount;                 // +0xbc
     int mLogosRowCount;                   // +0xc0
     int mCurrentRowCount;                 // +0xc4, the bound slot 19 moves mGridRow within
-    int mUnknownC8;                       // +0xc8
+    int mEditRowCount;                    // +0xc8
     Rnd::Mesh *mWire16;                   // +0xcc, `fm_wire_16.mesh`
     Rnd::Mesh *mWire30;                   // +0xd0, `fm_wire_30.mesh`
     Rnd::Text *mLimitText;                // +0xd4, `fminv_limit.txt`
