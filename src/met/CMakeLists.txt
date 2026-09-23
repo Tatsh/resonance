@@ -40,6 +40,7 @@ set(RESONANCE_MET_SRCS
     metloadnewfreqscreen.cpp
     metloadprefabscreen.cpp
     metlogoscreen.cpp
+    metmainscreen.cpp
     metmcfreqdelscreen.cpp
     metmemcardloadscreen.cpp
     metmemcardtypescreen.cpp

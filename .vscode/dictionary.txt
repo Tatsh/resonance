@@ -502,6 +502,7 @@ metloadgamescreen
 metloadnewfreqscreen
 metloadprefabscreen
 metlogoscreen
+metmainscreen
 metmcfreqdelscreen
 metmemcardloadscreen
 metmemcardtypescreen

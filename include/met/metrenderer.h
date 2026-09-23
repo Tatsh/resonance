@@ -556,7 +556,12 @@ private:
     // Set while a fade is running. Both the poll routine and the fade-finished override return
     // early on it rather than promoting a panel.
     int mUnknownd0; // +0xd0
-    // Highest pad index HandleMessage() accepts a RawControllerMsg from. The constructor sets 4,
-    // and the test is `mUnknownd4 < padIndex`, so index 4 is accepted and index 5 is not.
-    int mUnknownd4; // +0xd4
+
+public:
+    /**
+     * Highest pad index HandleMessage() accepts a RawControllerMsg from. The constructor sets 4.
+     * The test is `mUnknownd4 < padIndex`, and index 4 is accepted while index 5 is not.
+     * MetMainScreen writes it at `0x002c6dc0` (slot 5) and `0x002c7520`. +0xd4
+     */
+    int mUnknownd4;
 };
