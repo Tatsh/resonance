@@ -60,7 +60,7 @@ static const char *const kPersonaNameFormat = "freq player%d";
 MetNullRenderer::MetNullRenderer() : mUnknown80(0) {
     SeedR250(kRandomSeed);
     MetFreqMakerAssetManager::Create();
-    MetFreqMakerAssetManager::shared()->StartAssetLoad();
+    MetFreqMakerAssetManager::Instance()->StartAssetLoad();
     GlobalSettings::Create();
     Application::shared()->GetGameManager()->SetDrawEnabled(1);
     RebuildStageLists();

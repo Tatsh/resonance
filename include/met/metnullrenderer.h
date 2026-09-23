@@ -36,7 +36,7 @@ public:
     MetNullRenderer();
 
     /**
-     * Destroy MetFreqMakerAssetManager through its out-of-line forwarder at `0x00254970`.
+     * Destroy MetFreqMakerAssetManager through MetFreqMakerAssetManager::Destroy().
      *
      * @ghidraAddress 0x0030e400
      */

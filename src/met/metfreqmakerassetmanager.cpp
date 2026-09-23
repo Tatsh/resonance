@@ -36,7 +36,7 @@ constexpr int kBasisZRow = 2;
 constexpr int kFirstCategory = 1;
 
 // 0x006a0f30
-// The instance Create() allocates.
+// The instance CreateInstance() allocates.
 MetFreqMakerAssetManager *g_pFreqMakerAssetManager = nullptr;
 
 // 0x006a0f70
@@ -315,19 +315,19 @@ FreqPartTemplate *MetFreqMakerAssetManager::RegisterPart(Rnd::Object *pObject) {
     return pTemplate;
 }
 
-// 0x002551f0
-MetFreqMakerAssetManager *MetFreqMakerAssetManager::shared() {
-    return g_pFreqMakerAssetManager;
-}
-
 // 0x00255158
-void MetFreqMakerAssetManager::Create() {
+void MetFreqMakerAssetManager::CreateInstance() {
     g_pFreqMakerAssetManager = new MetFreqMakerAssetManager();
 }
 
 // 0x002551b8
-void MetFreqMakerAssetManager::Destroy() {
+void MetFreqMakerAssetManager::DestroyInstance() {
     delete g_pFreqMakerAssetManager; // Yes, the binary does not clear the pointer.
+}
+
+// 0x002551f0
+MetFreqMakerAssetManager *MetFreqMakerAssetManager::Instance() {
+    return g_pFreqMakerAssetManager;
 }
 
 // 0x00255200
@@ -372,6 +372,21 @@ bool MetFreqMakerAssetManager::AreLoadersReady() {
     bool bPrefabReady = mPrefabLoader->PollAssets();
     bool bTeamFreqReady = mTeamFreqLoader->PollAssets();
     return bTeamFreqReady && bPrefabReady;
+}
+
+// 0x00254930
+void MetFreqMakerAssetManager::Create() {
+    CreateInstance();
+}
+
+// 0x00254950
+MetFreqMakerAssetManager *MetFreqMakerAssetManager::shared() {
+    return Instance();
+}
+
+// 0x00254970
+void MetFreqMakerAssetManager::Destroy() {
+    DestroyInstance();
 }
 
 // 0x00254990

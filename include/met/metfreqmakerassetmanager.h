@@ -34,45 +34,75 @@ class Tex;
  *
  * The translation unit spans `0x0024f798` to `0x00255790`.
  *
- * The one instance is created by Create(), which allocates exactly 0x84 bytes, runs the
- * constructor, and records the result in the global at `0x006a0f30` that shared() reads.
- * Creation and access are separate routines, so shared() does not construct on first use.
+ * The one instance is created by CreateInstance(), which allocates exactly 0x84 bytes, runs the
+ * constructor, and records the result in the global at `0x006a0f30` that Instance() reads.
+ * Creation and access are separate routines, so neither accessor constructs on first use.
  *
- * The titles shared(), PollLoad(), and WaitForLoad() are inferred. No string in the image
- * identifies any of them.
+ * The public Create(), shared(), and Destroy() are one-call forwarders defined at the start of the
+ * unit, and the bodies they reach are defined near its end. Every caller outside the unit goes
+ * through a forwarder except MetNullRenderer's constructor, which reads Instance() directly.
+ *
+ * The titles shared(), PollLoad(), and WaitForLoad() are inferred, and so are the three body
+ * titles CreateInstance(), Instance(), and DestroyInstance(). No string in the image identifies
+ * any of them.
  */
 class MetFreqMakerAssetManager {
 public:
     /**
-     * Return the one instance, or null before Create() has created it.
+     * Allocate the one instance through CreateInstance().
      *
-     * The compiler also emitted an out-of-line copy of this accessor at `0x00254950`.
+     * MetRenderer's and MetNullRenderer's constructors are the callers. The title is inferred.
      *
-     * @return The instance.
-     * @ghidraAddress 0x002551f0
-     */
-    static MetFreqMakerAssetManager *shared();
-
-    /**
-     * Allocate the one instance and record it for shared().
-     *
-     * MetRenderer's and MetNullRenderer's constructors reach it through an out-of-line forwarder at
-     * `0x00254930`. The title is inferred.
-     *
-     * @ghidraAddress 0x00255158
+     * @ghidraAddress 0x00254930
      */
     static void Create();
 
     /**
+     * Return the one instance through Instance().
+     *
+     * Fifty call sites across ten classes reach the instance this way.
+     *
+     * @return The instance, or null before Create().
+     * @ghidraAddress 0x00254950
+     */
+    static MetFreqMakerAssetManager *shared();
+
+    /**
+     * Delete the one instance through DestroyInstance().
+     *
+     * MetRenderer's and MetNullRenderer's destructors are the callers. The title is inferred.
+     *
+     * @ghidraAddress 0x00254970
+     */
+    static void Destroy();
+
+    /**
+     * Allocate the one instance and record it for Instance().
+     *
+     * Create() is the only caller.
+     *
+     * @ghidraAddress 0x00255158
+     */
+    static void CreateInstance();
+
+    /**
      * Delete the one instance through its virtual destructor.
      *
-     * The pointer shared() reports is not cleared. MetRenderer's and MetNullRenderer's
-     * destructors reach it through an out-of-line forwarder at `0x00254970`. The title is
-     * inferred.
+     * The pointer Instance() reports is not cleared. Destroy() is the only caller.
      *
      * @ghidraAddress 0x002551b8
      */
-    static void Destroy();
+    static void DestroyInstance();
+
+    /**
+     * Return the one instance, or null before CreateInstance() has created it.
+     *
+     * shared() and MetNullRenderer's constructor are the callers.
+     *
+     * @return The instance.
+     * @ghidraAddress 0x002551f0
+     */
+    static MetFreqMakerAssetManager *Instance();
 
     /**
      * Start with no assets, no loaded templates, and two persona loaders.
