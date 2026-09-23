@@ -181,6 +181,7 @@ dispfb
 displaypointermsg
 docstrings
 dogamesystemplaycmd
+drawverts
 dsizeof
 dsubu
 dthe
@@ -746,6 +747,7 @@ randu
 rangeobject
 rawcontroller
 rawcontrollermsg
+raytest
 rdparty
 readop
 recomputation

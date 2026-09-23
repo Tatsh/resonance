@@ -8,6 +8,7 @@ set(RESONANCE_RND_SRCS
     cam.cpp
     collideable.cpp
     drawable.cpp
+    drawverts.cpp
     environ.cpp
     filestream.cpp
     font.cpp
@@ -34,6 +35,7 @@ set(RESONANCE_RND_SRCS
     psmultimesh.cpp
     psparticlesys.cpp
     pstex.cpp
+    raytest.cpp
     rndtex.cpp
     stream.cpp
     string.cpp
