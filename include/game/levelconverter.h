@@ -3,11 +3,37 @@
 #include <vector>
 
 #include "game/harmony.h"
+#include "mid/mbt.h"
 #include "mid/receiver.h"
 #include "os/hxstr.h"
 
 class Application;
 class LevelBuilder;
+class Riff;
+
+/**
+ * Kind of a MIDI track, as LevelConverter's track-name parser reports it.
+ *
+ * The values are the cases of the jump table at `0x007e7050`. Every name below is the track-name
+ * text the parser matches. The two exceptions are the tempo track (track 0, whatever its name) and
+ * the instrument track (a name with a colon as its second character).
+ */
+enum LevelConverterTrackType {
+    kTrackTypeUnknown = 0,     /*!< A name the parser rejected. */
+    kTrackTypeTempo = 1,       /*!< Track 0. */
+    kTrackTypeAxe = 2,         /*!< `axe`. */
+    kTrackTypePitch = 3,       /*!< `pitch`. */
+    kTrackTypeScratch = 4,     /*!< `scratch`. */
+    kTrackTypeVocal = 5,       /*!< `vocal`, outside play mode 1. */
+    kTrackTypeData = 6,        /*!< `data`. */
+    kTrackTypeHarmony = 7,     /*!< `harmony`. */
+    kTrackTypeCatch = 8,       /*!< `catch`, and `vocal` in play mode 1. */
+    kTrackTypeBackground = 9,  /*!< A name beginning `bg_`. */
+    kTrackTypeIntro = 10,      /*!< `intro`. */
+    kTrackTypeControl = 11,    /*!< `control`. */
+    kTrackTypeInstrument = 12, /*!< A letter, a colon, and a display name. */
+    kTrackTypeGhost = 13,      /*!< `ghost`. */
+};
 
 /**
  * Converter that reads a Standard MIDI File and fills a LevelBuilder from its events.
@@ -22,9 +48,8 @@ class LevelBuilder;
  * empty body into every translation unit that needs one, so a unique address for an empty body is
  * no evidence of an override. The slot is recorded as inherited and nothing is declared for it.
  *
- * The object is at least 0xcc bytes and much of it is unrecovered. What the constructor, the
- * destructor, Convert(), and NewTrack() establish is written below; every member whose purpose is
- * undetermined retains its offset.
+ * The object is at least 0xcc bytes, and several members are unrecovered. Every member whose
+ * purpose is undetermined retains its offset.
  *
  * Convert() is the entry point. It stores the builder, extracts the file's base name into a global
  * buffer at `0x00891a38`, reads two display-configuration codes, builds three stack objects for
@@ -34,18 +59,16 @@ class LevelBuilder;
  * comparator at `0x001e6450` is stored in Mid::FileReader::mCompare before Mid::FileReader::Read()
  * runs. The comparator ranks each event by its status class (note off first, note on last).
  *
- * The five event handlers all follow one shape. They report an error through the reporter at
- * `0x001ea6e0` when either error flag is set, call the per-channel routine at `0x001e8120`, and
- * then forward to one of two sinks. With the flag at `+0x40` clear the event goes to
- * LevelBuilder::AddEvent() on the builder at `+0x50`; with it set the event goes to the routine at
- * `0x001ce8d0` on the object at `+0x54` instead, with the position rebased against `+0x5c` and
- * saturated to Mid::MBT's bounds. The two paths are what the flag at `+0x40` selects between.
+ * The five event handlers all follow one shape. They report through ReportError() on the error
+ * paths, call the per-channel routine at `0x001e8120`, and then forward to one of two sinks. With
+ * mRiffTrack clear the event goes to LevelBuilder::AddEvent(). With it set the event goes to
+ * Riff::AddMidiMsg() on mRiff instead, with the position rebased against mRiffStart and saturated
+ * to Mid::MBT's bounds.
  *
- * Eleven bodies here are not written yet. Every one is blocked on a routine that has no recovered
- * body: the comparator at `0x001e6450` and the routine at `0x001e8af0` for Convert(); the
- * per-channel routine at `0x001e8120`, the error reporter at `0x001ea6e0`, and the second sink at
- * `0x001ce8d0` for the five event handlers; the vector assignment at `0x001e9440` for NewTrack();
- * and the name-map forwarders on LevelBuilder for EndTrack().
+ * Nine bodies here are not written yet. The comparator at `0x001e6450` and the routine at
+ * `0x001e8af0` block Convert(). The per-channel routine at `0x001e8120` blocks the five event
+ * handlers. The vector assignment at `0x001e9440` blocks NewTrack(), and ParseTrackTypeString()
+ * blocks TextEvent()'s one callee.
  *
  * Every method name below that is not a Mid::Receiver override is inferred from its body.
  */
@@ -68,15 +91,16 @@ public:
     };
 
     /**
-     * Twelve-byte record the three collections from `+0x98` to `+0xbb` store.
+     * One gem of a gem track, as the three span collections store it.
      *
      * `Span` is a placeholder for the name. The size comes from the stride the destructor steps
-     * each of the three by, and from the division by twelve it uses to recover each count.
+     * each collection by. AddGemSpan() appends one per note of a gem track, and NextRiff() opens a
+     * riff for each in turn.
      */
     struct Span {
-        int mUnknown00; // +0x00
-        int mUnknown04; // +0x04
-        int mUnknown08; // +0x08
+        Mid::MBT mStart;  /*!< The gem's song position. */
+        int mGem;         /*!< The gem, 0 through 2, from a C, an E, or a G. */
+        Mid::MBT mLength; /*!< The note's duration, which becomes the riff's length. */
     };
 
     /**
@@ -179,9 +203,9 @@ public:
     /**
      * Receive a pitch bend and forward it under MIDI status 0xe0.
      *
-     * The body is not written yet. On the second-sink path it first calls the routine at
-     * `0x001ea618`, reports an error when `+0x54` is null, then rebases the position against
-     * `+0x5c` and saturates the difference to Mid::MBT's bounds before forwarding.
+     * The body is not written yet. On the riff path it first calls SyncRiff(), reports an error
+     * when mRiff is null, then rebases the position against mRiffStart and saturates the
+     * difference to Mid::MBT's bounds before forwarding.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nLow The low seven bits of the bend.
@@ -236,57 +260,174 @@ private:
      * Read a track name and set the track's kind from it.
      *
      * The body is not written yet. It is 463 instructions and the largest routine of the class,
-     * and its one caller is TextEvent().
+     * and its one caller is TextEvent(). It sets mTrackType, and it ends by calling
+     * ApplyTrackType().
      *
      * @param pText The track name.
      * @ghidraAddress 0x001e8318
      */
     void ParseTrackTypeString(const char *pText);
 
-    HxStr mPath;              // +0x04, assigned from Convert's path argument
-    int mUnknown0c;           // +0x0c, compared against 2 by EndTrack
-    int mTrack;               // +0x10, the track index, set to -1 by Convert
-    unsigned char mUnknown14; // +0x14, set to 0xff by NewTrack
-    HxStr mUnknown18;         // +0x18
-    HxStr mUnknown24;         // +0x24
-    int mUnknown2c;           // +0x2c, cleared by Convert
-    int mUnknown30;           // +0x30, cleared by Convert
-    int mUnknown34;           // +0x34, cleared by Convert
-    int mUnknown38;           // +0x38, cleared by Convert
-    int mUnknown3c;           // +0x3c, cleared by NewTrack
-    // Selects which sink an event goes to. Clear sends it to the builder at +0x50, set sends it to
-    // the object at +0x54.
-    int mUnknown40; // +0x40
-    // Either error flag set makes every event handler report and return.
-    int mUnknown44;         // +0x44
-    int mUnknown48;         // +0x48
-    int mUnknown4c;         // +0x4c
+    /**
+     * Select the builder's current track and the event routing for mTrackType.
+     *
+     * The three score kinds that play riffs (axe, pitch, and scratch) route events into riffs.
+     * Vocal and catch tracks take the kind and the instrument without the riff routing, a catch
+     * track first reading the gem difficulty from configuration code 0x38a. A background or an
+     * intro track takes the next slot of its collection, and a control track the builder's own
+     * track. The data and harmony tracks write to the score track without a kind, and the two
+     * gem-span kinds empty the three span collections. Every path but an out-of-range difficulty
+     * finishes by pointing mNextSpan at the start of the difficulty's collection. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x001e6bd0
+     */
+    void ApplyTrackType();
+
+    /**
+     * Receive one complete note, from its note on to its note off.
+     *
+     * A gem-span track records the note through AddGemSpan(). A riff track adds the note to the
+     * current riff, rebased against the riff's start, after SyncRiff() and EmitRiffProgram(). An
+     * axe note of a bar or longer is instead added at the riff's start as a SustainNoteMsg and a
+     * note one tick longer than its duration. Any other track sends the note to the builder, first
+     * sending a bank select for the bar when configuration code 0x3a4 enabled one and the bar has
+     * changed. The title is inferred.
+     *
+     * @param nTick The note's song position, in MIDI ticks.
+     * @param nNote The note number.
+     * @param nVelocity The velocity.
+     * @param nDuration The note's duration, in MIDI ticks.
+     * @param nChannel The channel.
+     * @ghidraAddress 0x001e7420
+     */
+    void AddNote(int nTick,
+                 unsigned char nNote,
+                 unsigned char nVelocity,
+                 int nDuration,
+                 unsigned char nChannel);
+
+    /**
+     * Record one gem of a gem-span track.
+     *
+     * The note's octave, counted from 5, selects the difficulty, and its pitch class selects the
+     * gem (C, E, or G). A gem that does not start after the difficulty's last gem is rejected. A
+     * ghost track at the third difficulty also sends the gem straight to the builder without a
+     * riff. The title is inferred.
+     *
+     * @param nTick The gem's song position, in MIDI ticks.
+     * @param nNote The note number.
+     * @param nDuration The note's duration, in MIDI ticks.
+     * @ghidraAddress 0x001e7c20
+     */
+    void AddGemSpan(int nTick, unsigned char nNote, int nDuration);
+
+    /**
+     * Place a song position against the current riff.
+     *
+     * The title is inferred.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @return 1 with no riff open or before the riff's start, -1 at or after the next gem, and 0
+     *         inside the riff.
+     * @ghidraAddress 0x001e7e00
+     */
+    int CheckRiffPosition(int nTick);
+
+    /**
+     * Open a riff for the next gem of the selected difficulty and hand it to the builder.
+     *
+     * A riff of an axe, pitch, or scratch track joins the riff set the last gem 0 began, at the
+     * next index of that set, and more than three riffs in one set are reported. Any other track
+     * opens a riff per gem through LevelBuilder::AddGem(). The title is inferred.
+     *
+     * @ghidraAddress 0x001e7eb0
+     */
+    void NextRiff();
+
+    /**
+     * Send the track's program change to the current riff once per riff.
+     *
+     * A bank select for the bar precedes it when configuration code 0x3a4 enabled one, except on
+     * an axe or a scratch track. A track with no program change is reported instead. The title is
+     * inferred.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @ghidraAddress 0x001e8cb8
+     */
+    void EmitRiffProgram(int nTick);
+
+    /**
+     * Advance to the riff a song position falls in.
+     *
+     * A riff that was opened and passed without receiving an event is reported, and so is a
+     * position that falls before the riff it arrives at. The title is inferred.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @ghidraAddress 0x001ea618
+     */
+    void SyncRiff(int nTick);
+
+    /**
+     * Append one line to the conversion's error log.
+     *
+     * Inline. The first report of a conversion opens the log, the file whose path Convert() builds
+     * from the MIDI file's base name. Each report writes the track index, the track name, the
+     * position as bar, beat, and tick, and the message. Both steps are skipped unless
+     * MidiErrorLogEnabled() reports the boot option set. The retail configuration clears it. The
+     * out-of-line copy is the address below.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param pszMessage The message.
+     * @ghidraAddress 0x001ea6e0
+     */
+    void ReportError(int nTick, const char *pszMessage);
+
+    /** The number of gem difficulties, one span collection each. */
+    static constexpr int kDifficultyCount = 3;
+
+    HxStr mPath; // +0x04, assigned from Convert's path argument
+    // A LevelConverterTrackType, set by ParseTrackTypeString().
+    int mTrackType;         // +0x0c
+    int mTrack;             // +0x10, the track index, set to -1 by Convert
+    unsigned char mChannel; // +0x14, the MIDI channel events are sent on, 0xff at track start
+    HxStr mTrackName;       // +0x18, the name ReportError() writes
+    int mInstrument;        // +0x20
+    HxStr mDisplayName;     // +0x24, the name LevelBuilder::SetInstrument() receives
+    int mScoreTrack;        // +0x2c, the score track a named track writes to
+    int mBackingTrackCount; // +0x30, cleared by Convert
+    int mIntroTrackCount;   // +0x34, cleared by Convert
+    int mUnknown38;         // +0x38, cleared by Convert
+    int mUnknown3c;         // +0x3c, set for every track type that produces output
+    // Set, a track's events go into the current riff. Clear, they go to the builder.
+    int mRiffTrack;         // +0x40
+    int mHarmonyTrack;      // +0x44
+    int mGemSpanTrack;      // +0x48
+    int mGhostGems;         // +0x4c, a ghost track whose third-difficulty gems go to the builder
     LevelBuilder *mBuilder; // +0x50
-    // The second sink, whose appender is at 0x001ce8d0. Its class is unrecovered.
-    void *mUnknown54; // +0x54
-    int mUnknown58;   // +0x58
-    // The position the second sink's events are rebased against. Mid::kMBTInfinity at
-    // construction, and -1 at the start of each track.
-    int mUnknown5c; // +0x5c
-    int mUnknown60; // +0x60, Mid::kMBTInfinity at construction
-    int mUnknown64; // +0x64, the withheld program number, 0xff at the start of each track
-    int mUnknown68; // +0x68
-    int mUnknown6c; // +0x6c, cleared by NewTrack
+    Riff *mRiff;            // +0x54
+    int mRiffIndex;         // +0x58, the current riff's index in its riff set
+    // The position riff events are rebased against. -1 at the start of each track.
+    Mid::MBT mRiffStart;                // +0x5c
+    Mid::MBT mRiffSetStart;             // +0x60
+    unsigned char mProgram;             // +0x64, the withheld program number, 0xff at track start
+    int mProgramSent;                   // +0x68
+    int mUnknown6c;                     // +0x6c, set when a riff opens
     std::vector<PendingEvent> mPending; // +0x70
     // The harmony the converter builds note by note through Harmony::AddNote() (0x001e7b90) and
-    // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04).
-    Harmony mHarmony; // +0x7c
-    int mUnknown88;   // +0x88, Mid::kMBTInfinity at construction, -1 at the start of each track
-    int mHasTempo;    // +0x8c, cleared by Convert and set to 1 by Tempo
-    int mUnknown90;   // +0x90
-    int mUnknown94;   // +0x94
-    std::vector<Span> mUnknown98; // +0x98
-    std::vector<Span> mUnknowna4; // +0xa4
-    std::vector<Span> mUnknownb0; // +0xb0
-    int mUnknownbc;               // +0xbc
+    // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04). The constructor, NewTrack(),
+    // and 0x001e7ac0 call its implicit default constructor, emitted at 0x001ea1e8.
+    Harmony mHarmony;    // +0x7c
+    Mid::MBT mUnknown88; // +0x88, -1 at the start of each track
+    int mHasTempo;       // +0x8c, cleared by Convert and set to 1 by Tempo
+    int mUnknown90;      // +0x90
+    // The gem difficulty, from configuration code 0x38a on a catch track.
+    int mDifficulty;                            // +0x94
+    std::vector<Span> mSpans[kDifficultyCount]; // +0x98
+    std::vector<Span>::iterator mNextSpan;      // +0xbc
     // Set by Convert from configuration code 0x3a4, and to zero when code 0x3a1 reports non-zero.
-    int mUnknownc0; // +0xc0
-    int mUnknownc4; // +0xc4, set to -1 by NewTrack
-    // Set by Convert from the accessor at 0x00118dd8 applied to Application::shared().
-    void *mUnknownc8; // +0xc8
+    int mBankSelect;  // +0xc0
+    int mLastBankBar; // +0xc4, set to -1 by NewTrack
+    // Set by Convert from Globals::GetPlayMode() (0x00118dd8).
+    int mPlayMode; // +0xc8
 };

@@ -101,6 +101,8 @@ public:
 private:
     // AutoRiffer::PlayRiff() at 0x00199758 reads mLength directly.
     friend class AutoRiffer;
+    // LevelConverter::NextRiff() at 0x001e7eb0 writes mLength directly.
+    friend class LevelConverter;
 
     // The length the riff repeats over. Zero on construction.
     Mid::MBT mLength; // +0x18

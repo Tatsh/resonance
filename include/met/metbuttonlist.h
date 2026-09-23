@@ -5,6 +5,7 @@
 
 #include "os/hxstr.h"
 #include "rnd/button.h"
+#include "rnd/text.h"
 
 /**
  * Ring of front-end buttons with one of them selected.
@@ -41,6 +42,16 @@ public:
      * @ghidraAddress 0x001fecc8
      */
     void *operator new(size_t nSize);
+
+    /**
+     * Release an instance to the tagged heap under the same tag.
+     *
+     * The out-of-line copy has no caller.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x001fece8
+     */
+    void operator delete(void *pBlock);
 
     /**
      * Release every button reference and the vector.
@@ -99,8 +110,8 @@ public:
      *
      * The object is resolved through Rnd::Manager::Find() on Rnd::g_manager and cast to
      * Rnd::Button. A name that resolves to nothing reports through `0x0053dde0` and the null is
-     * appended regardless, which is why every reader tests an entry before using it. A label whose
-     * buffer is null is not applied, and every MetLoadFreqBaseScreen call site passes the empty
+     * appended regardless, which is why every reader tests an entry before using it. A label of
+     * length zero is not applied, and every MetLoadFreqBaseScreen call site passes the empty
      * literal so that the label is set later by
      * MetLoadFreqBaseScreen::UpdateNameLabel() instead.
      *
@@ -109,6 +120,23 @@ public:
      * @ghidraAddress 0x001fcb28
      */
     void Add(const HxStr &objectName, const HxStr &labelText);
+
+    /**
+     * Append one resolved button and apply its label.
+     *
+     * Inline. Add() expands it after resolving the button, and the out-of-line copy has no
+     * caller. A label of length zero is not applied. The title is inferred.
+     *
+     * @param pButton The button, or null.
+     * @param labelText The text for the button's label child, or the empty string for none.
+     * @ghidraAddress 0x001fed30
+     */
+    void Append(Rnd::Button *pButton, const HxStr &labelText) {
+        mButtons.push_back(pButton);
+        if (labelText.mLen != 0) {
+            pButton->mText->SetText(labelText);
+        }
+    }
 
     /**
      * Move the selection to one index.
