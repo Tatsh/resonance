@@ -379,6 +379,7 @@ void Overlay::HandleMessage(Message *pMsg) {
     }
 }
 
+// 0x0041fdd8
 void Overlay::OnTrackSelect(Message *pMsg) {
     TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pSelect->mUnknown10);
@@ -396,6 +397,7 @@ void Overlay::OnTrackSelect(Message *pMsg) {
     }
 }
 
+// 0x0041e020
 void Overlay::OnWin(Message *pMsg) {
     WinMsg *pWin = static_cast<WinMsg *>(pMsg);
     for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
@@ -431,6 +433,7 @@ void Overlay::OnWin(Message *pMsg) {
     }
 }
 
+// 0x0041e9b8
 void Overlay::OnChoosePowerup(Message *pMsg) {
     ChoosePowerupMsg *pChoose = static_cast<ChoosePowerupMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pChoose->mOwner);
@@ -448,6 +451,7 @@ void Overlay::OnChoosePowerup(Message *pMsg) {
     }
 }
 
+// 0x0041eba0
 void Overlay::OnCaughtPowerbar(Message *pMsg) {
     CaughtPowerbarMsg *pCaught = static_cast<CaughtPowerbarMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pCaught->mPlayer);
@@ -459,6 +463,7 @@ void Overlay::OnCaughtPowerbar(Message *pMsg) {
     pTrack->mTextMessage.Show(text, kMessageScale, kMessageHold);
 }
 
+// 0x0041eda8
 void Overlay::OnDeployedPowerup(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -493,6 +498,7 @@ void Overlay::OnPointAmount(Message *pMsg) {
     pBadge->mScore.mChangeTime = kScoreChangedNow;
 }
 
+// 0x0041f310
 void Overlay::OnJuiceAmount(Message *pMsg) {
     if (mGameMode != kGameModeSolo || mPlayMode != kPlayModeGame) {
         return;
@@ -531,6 +537,7 @@ void Overlay::OnPhraseCaptured(Message *pMsg) {
     }
 }
 
+// 0x0041f5e8
 void Overlay::OnText(Message *pMsg) {
     // Yes, the binary reads the first display without testing for an empty vector.
     HudTrack *pTrack = mTracks[0];
@@ -542,6 +549,7 @@ void Overlay::OnText(Message *pMsg) {
         HxStr(static_cast<TextMsg *>(pMsg)->mText), kMessageScale, kMessageHold);
 }
 
+// 0x0041f708
 void Overlay::OnLoopToggle(Message *pMsg) {
     if (mPlayMode == kPlayModeGame) {
         return;
@@ -568,6 +576,7 @@ void Overlay::OnLoopToggle(Message *pMsg) {
     }
 }
 
+// 0x0041f440
 void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
     if (mUnknown44 != 0) {
         return;
@@ -589,6 +598,7 @@ void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
     }
 }
 
+// 0x0041fba0
 void Overlay::OnShowEraseEffect(Message *pMsg) {
     ShowEraseEffectMsg *pErase = static_cast<ShowEraseEffectMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pErase->mPlayer);
@@ -603,6 +613,7 @@ void Overlay::OnShowEraseEffect(Message *pMsg) {
     }
 }
 
+// 0x0041f9a8
 void Overlay::OnPlaybackToggle(Message *pMsg) {
     PlaybackToggleMsg *pPlayback = static_cast<PlaybackToggleMsg *>(pMsg);
     mPlaybackOn = pPlayback->mOn;
@@ -638,6 +649,7 @@ void Overlay::OnToggleGhost(Message *pMsg) {
     }
 }
 
+// 0x0041fed8
 void Overlay::OnCatch(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -749,6 +761,7 @@ void Overlay::OnMultiplierState(Message *pMsg) {
     pTrack->mPoints.mHot = pState->mBonus != 0;
 }
 
+// 0x0041f138
 void Overlay::OnPowerupFailed(Message *pMsg) {
     PowerupFailedMsg *pFailed = static_cast<PowerupFailedMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pFailed->mPlayer);

@@ -22,6 +22,7 @@ const char *NameText(const Rnd::Object *pObject) {
 
 } // namespace
 
+// 0x006de808
 Rnd::Tunnel *g_pTunnel;
 
 // 0x0040d1e8

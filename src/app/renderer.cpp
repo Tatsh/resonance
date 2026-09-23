@@ -403,6 +403,7 @@ void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     }
 }
 
+// 0x00432318
 void Renderer::OnPointAmount(Message *pMsg) {
     Send(pMsg);
 
@@ -433,6 +434,7 @@ void Renderer::OnPointAmount(Message *pMsg) {
     mLeader = pLeader;
 }
 
+// 0x004322f8
 void Renderer::OnGameBegin() {
     CallScriptTemplate(kGameBeginScriptTemplate);
 }
