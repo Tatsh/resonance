@@ -32,38 +32,55 @@ struct MemTagTotal {
 constexpr int kMemStlTagSize = 128;
 #endif
 
+#ifdef __cplusplus
 /**
- * Allocate a block.
+ * Allocate a block for an array, the game's replacement global `operator new[]`.
  *
  * The request is raised to one byte when it is zero. The allocation is billed
- * to the tag `UNK[]`, and a failure is fatal. This is the array form, and
- * MemAllocScalar() is the single-object form.
- *
- * This is the game's replacement `operator new[](size_t)`. Its exception tables carry the
- * `throw(std::bad_alloc)` specification, and `UNK[]` is the array tag.
+ * to the tag `UNK[]`, and a failure is fatal. Its exception tables carry the
+ * `throw(std::bad_alloc)` specification. The program titles it `MemAlloc`.
  *
  * @param nSize The block size in bytes.
  * @return The block.
  * @ghidraAddress 0x004a8380
  */
-void *MemAlloc(size_t nSize);
+void *operator new[](size_t nSize);
 
 /**
- * Allocate a block for a single object.
+ * Allocate a block for a single object, the game's replacement global `operator new`.
  *
  * The request is raised to one byte when it is zero. The allocation is billed
  * to the tag `UNK`, and a failure is fatal. The log line and the failure
  * message both omit a tag, and the message reads
- * `NEW ALLOCATION FAILURE, size: %d`.
- *
- * This is the game's replacement `operator new(size_t)`. Its exception tables carry the
- * `throw(std::bad_alloc)` specification, and `UNK` is the single-object tag.
+ * `NEW ALLOCATION FAILURE, size: %d`. Its exception tables carry the
+ * `throw(std::bad_alloc)` specification. The program titles it `MemAllocScalar`.
  *
  * @param nSize The block size in bytes.
  * @return The block.
  * @ghidraAddress 0x004a81e0
  */
-void *MemAllocScalar(size_t nSize);
+void *operator new(size_t nSize);
+
+/**
+ * Forward to the global `operator new[]`, for callers not yet written as new[] expressions.
+ *
+ * @param nSize The block size in bytes.
+ * @return The block.
+ */
+inline void *MemAlloc(size_t nSize) {
+    return ::operator new[](nSize);
+}
+
+/**
+ * Forward to the global `operator new`, for callers not yet written as new expressions.
+ *
+ * @param nSize The block size in bytes.
+ * @return The block.
+ */
+inline void *MemAllocScalar(size_t nSize) {
+    return ::operator new(nSize);
+}
+#endif
 
 /**
  * Allocate a block for one object of a named class.
@@ -142,33 +159,48 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine);
 }
 #endif
 
+#ifdef __cplusplus
 /**
- * Release a block.
+ * Release an array block, the game's replacement global `operator delete[]`.
  *
- * This is the array release path, which the log line identifies as
- * `del(UNK[],%p)`.
- *
- * This is the game's replacement `operator delete[](void *)`. Its exception tables carry the
- * empty `throw()` specification, and `UNK[]` is the array tag.
+ * The log line identifies the path as `del(UNK[],%p)`. Its exception tables carry the empty
+ * `throw()` specification. The program titles it `MemFree`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a92c8
  */
-void MemFree(void *pBlock);
+void operator delete[](void *pBlock) noexcept;
 
 /**
- * Release a single object rather than an array.
+ * Release a single object, the game's replacement global `operator delete`.
  *
  * The log line identifies the path as `del(UNK,%p)`. HxStr::Alloc() is the one
- * caller inside the string class.
- *
- * This is the game's replacement `operator delete(void *)`. Its exception tables carry the empty
- * `throw()` specification, and `UNK` is the single-object tag.
+ * caller inside the string class. Its exception tables carry the empty `throw()` specification.
+ * The program titles it `MemFreeScalar`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a9230
  */
-void MemFreeScalar(void *pBlock);
+void operator delete(void *pBlock) noexcept;
+
+/**
+ * Forward to the global `operator delete[]`, for callers not yet written as delete[] expressions.
+ *
+ * @param pBlock The block to release.
+ */
+inline void MemFree(void *pBlock) {
+    ::operator delete[](pBlock);
+}
+
+/**
+ * Forward to the global `operator delete`, for callers not yet written as delete expressions.
+ *
+ * @param pBlock The block to release.
+ */
+inline void MemFreeScalar(void *pBlock) {
+    ::operator delete(pBlock);
+}
+#endif
 
 /**
  * Release a block and record the release against a tag.

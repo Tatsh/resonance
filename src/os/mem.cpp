@@ -103,14 +103,16 @@ constexpr int kProbeBlockOverhead = 16;
 // Bytes of the path DumpHeapMemoryLog() formats each file name into.
 constexpr int kHeapLogPathSize = 0x40;
 
-// 0x0089e200. The blocks one counting pass of DumpHeapMemoryLog() holds before releasing them.
+// The blocks one counting pass of DumpHeapMemoryLog() holds before releasing them.
+// 0x0089e200
 void *g_apProbeBlocks[kProbeBlockLimit];
 
 // 0x006f57d0
 int g_bMemLogging;
 
-// 0x006f57d8. The rewind to kStlUnknownTag compiles to one doubleword store. The array bound
-// comes from the distance to the next global rather than from any single access.
+// The rewind to kStlUnknownTag compiles to one doubleword store. The array bound comes from the
+// distance to the next global rather than from any single access.
+// 0x006f57d8
 char g_szStlAllocTag[kMemStlTagSize];
 
 // 0x006f5858
@@ -125,22 +127,27 @@ MemTagTotal g_aMemTagTotals[kMemTagCount];
 // 0x006f6460
 MemLogSource g_aMemLogSources[kMemLogSourceCount];
 
-// 0x006f8460. Null until MemLogSourceInit() runs, which disables the tracking routines.
+// Null until MemLogSourceInit() runs, which disables the tracking routines.
+// 0x006f8460
 MemLogBlock *g_pMemLogBlocks;
 
-// 0x006f57c8. Set once MemOpenLog() has painted the stack.
+// Set once MemOpenLog() has painted the stack.
+// 0x006f57c8
 int g_bMemStackPainted;
 
-// 0x006f57cc. Reports MemLogCloseAndContinue() has started since MemOpenLog().
+// Reports MemLogCloseAndContinue() has started since MemOpenLog().
+// 0x006f57cc
 int g_nMemLogReopenCount;
 
 // 0x00894d70
 FILE *g_pMemLogFile;
 
-// 0x00894db8. Path of the report being written.
+// Path of the report being written.
+// 0x00894db8
 char g_szMemLogPath[kMemLogPathSize];
 
-// 0x00894d78. Path MemOpenLog() was given, which each reopened report is named after.
+// Path MemOpenLog() was given, which each reopened report is named after.
+// 0x00894d78
 char g_szMemLogBaseName[kMemLogPathSize];
 
 // 0x004a9360
@@ -278,7 +285,7 @@ inline void LogStackUse() {
 } // namespace
 
 // 0x004a8380
-void *MemAlloc(size_t nSize) {
+void *operator new[](size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
 
@@ -313,7 +320,7 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
 }
 
 // 0x004a81e0
-void *MemAllocScalar(size_t nSize) {
+void *operator new(size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
 
@@ -347,7 +354,7 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
 }
 
 // 0x004a92c8
-void MemFree(void *pBlock) {
+void operator delete[](void *pBlock) noexcept {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK[],%p)\n", pBlock);
     }
@@ -355,7 +362,7 @@ void MemFree(void *pBlock) {
 }
 
 // 0x004a9230
-void MemFreeScalar(void *pBlock) {
+void operator delete(void *pBlock) noexcept {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK,%p)\n", pBlock);
     }
