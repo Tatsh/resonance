@@ -516,6 +516,7 @@ metmemcardloadscreen
 metmemcardtypescreen
 metmemdetectscreen
 metmemdetectstartup
+metmodescreen
 metmsgscreen
 metmultisaveremixscreen
 metmultistatsscreen
