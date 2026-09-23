@@ -683,6 +683,10 @@ void MetRemixManager::EnterAndShow() {
     mUnknown14->SetShowing(0);
 }
 
+// 0x00361550
+void MetRemixManager::OnUnknownSlot36() {
+}
+
 // 0x003553e8
 void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
     mListStatus[nPortSlot] = nStatus;

@@ -39,9 +39,8 @@ struct MemcardConnectState;
  * tables settles rather than the title each routine carries. They are 0 `0x00360788`, the
  * compiler-generated GetTypeInfo, 1 `0x00355070` the destructor, 5 `0x00361518`, 15 `0x003555c0`,
  * and 36 `0x00361550`. Slot 36 is a two-instruction bare return at an address the base table does
- * not hold, which is indistinguishable from the base's own empty body re-emitted into this
- * translation unit, so no override is declared for it. An earlier reading counted five while
- * listing three.
+ * not hold. The base's empty stubs are out-of-line definitions that every derived table shares, so
+ * a separate address is this class's own empty override, which is declared below.
  *
  * The MemcardUser table overrides five slots at `0x003569d0`, `0x003573e8`, `0x003553e8`,
  * `0x00355ff0`, and `0x003563e0`, and the AsyncCallback table overrides its one slot at
@@ -277,6 +276,13 @@ public:
      * @ghidraAddress 0x00361518
      */
     virtual void EnterAndShow();
+
+    /**
+     * Slot 36, overridden empty.
+     *
+     * @ghidraAddress 0x00361550
+     */
+    virtual void OnUnknownSlot36();
 
     /**
      * Act on the choice the user made in one of the manager's dialogues. Slot 15.

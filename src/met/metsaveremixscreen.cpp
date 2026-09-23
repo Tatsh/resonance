@@ -150,6 +150,11 @@ MetSaveRemixScreen::MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     mUnknowne0 = 0;
 }
 
+// 0x003817e0
+MetSaveRemixScreen *MetSaveRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetSaveRemixScreen(pRenderer, nPriority);
+}
+
 // 0x00381868
 MetSaveRemixScreen::~MetSaveRemixScreen() {
     delete mUnknowne8;

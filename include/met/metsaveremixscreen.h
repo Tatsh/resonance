@@ -83,6 +83,16 @@ public:
     virtual ~MetSaveRemixScreen();
 
     /**
+     * Build the screen on the heap.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x003817e0
+     */
+    static MetSaveRemixScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
      * Fill the registered save screen with a save request and bring it up over MetLoadGameScreen.
      *
      * The screen registered as `MetSaveRemixScreen` receives each argument through the setters
