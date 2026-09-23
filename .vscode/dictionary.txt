@@ -471,6 +471,8 @@ messageio
 metagameworld
 metarenasscreen
 metbuttonlist
+metcommandmap
+metcommandrepeater
 metconfigcontrollerscreen
 metconfiggameoptionsscreen
 metconfigoptionsbuttonsscreen
@@ -509,6 +511,7 @@ metloadfreqscreen
 metloadgamescreen
 metloadnewfreqscreen
 metloadprefabscreen
+metlocnumplayscreen
 metlocpickcharscreen
 metlogoscreen
 metmainscreen

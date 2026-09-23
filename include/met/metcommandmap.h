@@ -1,5 +1,8 @@
 #pragma once
 
+#include <map>
+#include <vector>
+
 #include "met/metscreen.h"
 #include "msg/metcontrollerreading.h"
 
@@ -14,12 +17,10 @@
  * identifies a file or a function. The name here is therefore inferred from what the class does and
  * is not attested anywhere in the image.
  *
- * The object is twelve bytes and its one member is a `std::vector` of twelve-byte records, which
- * the destructor at `0x00371138` fixes by dividing the byte span by twelve. MetRenderer's
- * constructor sizes the vector at six. Each record is a `std::list` at `+0x00` over twenty-four
- * byte nodes, a count at `+0x04`, and a byte flag at `+0x08`, which the prototype the constructor
- * copies fixes. The element type of the list is not recovered, so the member is recorded here
- * rather than declared.
+ * The object is twelve bytes and its one member is a `std::vector` of five `std::map<int, int>`
+ * records, one per controller index, which remember which analogue directions are held so that a
+ * held stick yields one command rather than one per reading. The map's twenty-four byte nodes and
+ * the `stl_maptree` tag the constructor sets fix the record.
  *
  * The destructor is emitted into MetRenderer's translation unit rather than the class's own, which
  * is what an inline destructor compiles to.
@@ -27,11 +28,7 @@
 class MetCommandMap {
 public:
     /**
-     * Build the six mapping records.
-     *
-     * The body is not written. It zeroes the vector, sets the allocation tag `stl_maptree` for an
-     * eight-byte element, builds one prototype record with an empty list, and resizes the vector to
-     * six copies of it.
+     * Build the five empty held-direction records.
      *
      * @ghidraAddress 0x002e33f0
      */
@@ -40,25 +37,37 @@ public:
     /**
      * Release every record and the vector.
      *
-     * The body is not written. It unlinks each record's list and returns every node to the pool.
+     * Inline. The address is its out-of-line copy in MetRenderer's translation unit.
      *
      * @ghidraAddress 0x00371138
      */
-    ~MetCommandMap();
+    ~MetCommandMap() {
+    }
 
     /**
      * Translate one controller reading into one front-end command.
      *
-     * The body is not written. It copies the reading's mPadIndex into the command's mPadIndex,
-     * responds to a `key ` reading with command 0x0f whenever mValue is above zero, and dispatches
-     * a `joy ` reading through a 103-entry jump table at `0x007fd8a0` indexed by mButton less one.
-     * Each arm of that table compares mValue against zero and yields one command code. A reading of
-     * any other tag produces no command and the command's mCommand retains whatever it held.
+     * The command's mPadIndex takes the reading's. A `key ` reading whose mValue is above zero
+     * yields command 15 with the reading's mButton. A `joy ` reading dispatches on mButton through
+     * a 103-entry table. Buttons 1 through 16 yield a fixed code while pressed and 0 when released,
+     * buttons 100 through 103 are the four analogue directions and go through AxisCommand(), and
+     * every other button yields -1 and sets mPadIndex to 1. A reading of any other tag leaves
+     * mCommand as it was.
      *
      * @param pReading The reading, which is the RawControllerMsg payload rather than the message.
      * @param pCommand The command the reading translates to.
-     * @return Non-zero when a command was produced.
+     * @return Non-zero unless the command is -1.
      * @ghidraAddress 0x002e3738
      */
     int Translate(const MetControllerReading *pReading, MetScreenCommand *pCommand);
+
+private:
+    // 0x002e3ac0
+    // Translates one analogue reading. A value below 0.1 yields nNegative and one above 0.9 yields
+    // nPositive, each only once until the stick returns to the centre, where the direction is
+    // released and 0 is returned. A direction already held returns -1.
+    int AxisCommand(int nButton, int nPadIndex, float flValue, int nNegative, int nPositive);
+
+    // Which directions each controller holds, by button. +0x00
+    std::vector<std::map<int, int> > mHeld;
 };

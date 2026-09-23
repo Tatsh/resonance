@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "met/metscreen.h"
 
 /**
@@ -9,22 +11,15 @@
  * MetCommandMap, and it shares that translation unit. The name here is inferred from what the class
  * does and is not attested anywhere in the image.
  *
- * The object is twelve bytes and its one member is a `std::vector` of twenty-four-byte records,
- * which the destructor at `0x002e71c0` fixes by dividing the byte span by twenty-four.
- * MetRenderer's constructor sizes the vector at four, and MetRenderer::mUnknownd4 accepts pad
- * indices up to four on the same evidence. Each record stores a countdown at `+0x00`, a value the
- * command's mButton is filled from at `+0x04`, the pending command code at `+0x08`, and the
- * sixty-four-bit time the record was last serviced at `+0x10`. Reset() clears `+0x08` of all four,
- * which is what makes that field the armed flag. The three remaining words of the record are not
- * recovered, so the member is recorded here rather than declared.
+ * The object is twelve bytes and its one member is a `std::vector` of four twenty-four-byte
+ * records, one per controller from pad 1 to pad 4. A held navigation command arms its controller's
+ * record, which then waits an initial three seconds before re-delivering the command at the
+ * interval the active panel's MetScreen::mUnknown58 sets.
  */
 class MetCommandRepeater {
 public:
     /**
      * Build four empty records.
-     *
-     * The body is not written. It zeroes the vector and resizes it to four copies of a zeroed
-     * prototype.
      *
      * @ghidraAddress 0x002e54b0
      */
@@ -33,8 +28,6 @@ public:
     /**
      * Release the vector.
      *
-     * The body is not written.
-     *
      * @ghidraAddress 0x002e71c0
      */
     ~MetCommandRepeater();
@@ -42,10 +35,9 @@ public:
     /**
      * Disarm every record.
      *
-     * Writes zero to `+0x08` of all four records and nothing else, which is a four-iteration loop
-     * over a stride of twenty-four with no bound read from the vector. The count is therefore the
-     * literal four rather than the vector's size, and a vector of any other length would not
-     * agree.
+     * Writes zero to the command of all four records and nothing else, which is a four-iteration
+     * loop with no bound read from the vector. The count is therefore the literal four rather than
+     * the vector's size.
      *
      * @ghidraAddress 0x002e7298
      */
@@ -54,13 +46,15 @@ public:
     /**
      * Arm one record from a command that has just been delivered.
      *
-     * The body is not written. MetRenderer::HandleMessage() is the one caller, and it runs the
-     * routine only for a `joy ` reading whose command is one of 0, 1, 2, 3, 4, 0x10, 0x11, 0x12,
-     * or 0x13.
+     * The record of pad nPadIndex is rearmed when the command is not 0 or when the record already
+     * belongs to nButton. It then takes the button and the command, starts the three-second
+     * initial delay, and records the current time. MetRenderer::HandleMessage() is the one caller,
+     * and it runs the routine only for a `joy ` reading whose command is one of 0, 1, 2, 3, 4,
+     * 0x10, 0x11, 0x12, or 0x13.
      *
      * @param pCommand The command that was delivered.
      * @param nButton The reading's mButton.
-     * @param nPadIndex The reading's mPadIndex.
+     * @param nPadIndex The reading's mPadIndex, counted from one.
      * @ghidraAddress 0x002e5790
      */
     void Arm(const MetScreenCommand *pCommand, int nButton, int nPadIndex);
@@ -68,15 +62,31 @@ public:
     /**
      * Re-deliver every armed command whose interval has elapsed.
      *
-     * The body is not written. The interval is MetScreen::mUnknown58 multiplied by 50, in
-     * milliseconds, read from the panel the routine is given rather than stored per record. A
-     * record whose countdown at `+0x00` is positive has the elapsed milliseconds subtracted from it
-     * instead of firing, which is the initial delay before the repeat starts. A null panel is
-     * rejected at once.
+     * The interval is MetScreen::mUnknown58 multiplied by 50, in milliseconds, read from the panel
+     * the routine is given rather than stored per record. A record whose initial delay is still
+     * positive has the milliseconds since it was last serviced subtracted from it instead of
+     * firing. A null panel is rejected at once.
      *
      * @param pPanel The screen the repeated commands are delivered to.
      * @param pNowNanoseconds The current time, which the caller has already computed.
      * @ghidraAddress 0x002e55b0
      */
     void Update(MetScreen *pPanel, const long long *pNowNanoseconds);
+
+private:
+    // One controller's repeat state. Twenty-four bytes.
+    struct Record {
+        // Only the delay and the time are initialised, which is what the constructor's prototype
+        // record writes.
+        Record() : mDelayMs(0), mLastNs(0) {
+        }
+
+        int mDelayMs;      // +0x00 the initial delay still to run
+        int mButton;       // +0x04
+        int mCommand;      // +0x08 zero while disarmed
+        int mUnknown0c;    // +0x0c padding before the eight-byte time
+        long long mLastNs; // +0x10 when the record was last serviced
+    };
+
+    std::vector<Record> mRecords; // +0x00
 };

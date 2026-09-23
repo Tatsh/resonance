@@ -7,6 +7,8 @@ set(RESONANCE_MET_SRCS
     gameoptions.cpp
     metarenasscreen.cpp
     metbuttonlist.cpp
+    metcommandmap.cpp
+    metcommandrepeater.cpp
     metconfigcontrollerscreen.cpp
     metconfiggameoptionsscreen.cpp
     metconfigoptionsbuttonsscreen.cpp
