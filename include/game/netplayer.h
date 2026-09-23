@@ -27,17 +27,17 @@ public:
     /**
      * Construct a player that a remote machine drives.
      *
-     * Runs Player's constructor with nId, name, and nUnknown2c, then stores nUnknown48 in
+     * Runs Player's constructor with nId, name, and pAppearance, then stores nUnknown48 in
      * mUnknown48 and clears mUnknown4c. GrooveWorld::AddNetPlayer() is the recovered caller,
      * and it passes its own identifier as both nId and nUnknown48.
      *
      * @param nId The player's identifier.
      * @param nUnknown48 The value Slot4() reports until a message replaces it.
      * @param name The player's name.
-     * @param nUnknown2c The value the base constructor stores at `+0x2c`.
+     * @param pAppearance The appearance the player is drawn with.
      * @ghidraAddress 0x00122f10
      */
-    NetPlayer(int nId, int nUnknown48, const HxStr &name, int nUnknown2c);
+    NetPlayer(int nId, int nUnknown48, const HxStr &name, const FreqAppearance *pAppearance);
 
     /** @ghidraAddress 0x00125a98 */
     virtual ~NetPlayer();

@@ -13,7 +13,7 @@ int g_nDoWinSequence;
 GameParams::GameParams() {
     mUnknown10 = 0;
     mUnknown1c = 0;
-    mUnknown20 = 0;
+    mDifficulty = 0;
     mUnknown24 = false;
     mUnknown28 = false;
     mLoadingGame = false;
@@ -42,8 +42,8 @@ void GameParams::Save(OBStream *pStream) {
     int unknown1c = mUnknown1c;
     pStream->Write(&unknown1c, sizeof(unknown1c));
 
-    int unknown20 = mUnknown20;
-    pStream->Write(&unknown20, sizeof(unknown20));
+    int difficulty = mDifficulty;
+    pStream->Write(&difficulty, sizeof(difficulty));
 
     int unknown24 = mUnknown24;
     pStream->Write(&unknown24, sizeof(unknown24));
@@ -77,11 +77,11 @@ void GameParams::Load(IBStream *pStream) {
     pStream->Read(&mUnknown10, sizeof(mUnknown10));
 
     // mUnknown1c arrives in a local and is copied across afterwards, where mUnknown10 and
-    // mUnknown20 are filled in place. Both are plain words, and the asymmetry matches the binary.
+    // mDifficulty are filled in place. Both are plain words, and the asymmetry matches the binary.
     int unknown1c;
     pStream->Read(&unknown1c, sizeof(unknown1c));
 
-    pStream->Read(&mUnknown20, sizeof(mUnknown20));
+    pStream->Read(&mDifficulty, sizeof(mDifficulty));
 
     int unknown24;
     pStream->Read(&unknown24, sizeof(unknown24));
@@ -106,7 +106,7 @@ void GameParams::Load(IBStream *pStream) {
 void GameParams::Print(std::ostream &stream) {
     stream << "GameParams:" << " level=" << mLevelName << " arena=" << mArenaName
            << " friends=" << mUnknown10 << " " << (mUnknown1c == 1 ? " game" : " jam")
-           << " difficulty=" << mUnknown20 << " " << (mUnknown24 ? " constrain-jam" : "")
+           << " difficulty=" << mDifficulty << " " << (mUnknown24 ? " constrain-jam" : "")
            << "netgame=" << mUnknown28 << "loadinggame=" << mLoadingGame
            << "jukeboxmode=" << mJukeboxMode << std::endl;
 }
@@ -117,7 +117,7 @@ GameParams &GameParams::operator=(const GameParams &other) {
     mArenaName = other.mArenaName;
     mUnknown10 = other.mUnknown10;
     mUnknown1c = other.mUnknown1c;
-    mUnknown20 = other.mUnknown20;
+    mDifficulty = other.mDifficulty;
     mUnknown24 = other.mUnknown24;
     mUnknown28 = other.mUnknown28;
     mLoadingGame = other.mLoadingGame;

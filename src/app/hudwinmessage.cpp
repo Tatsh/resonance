@@ -15,7 +15,7 @@ constexpr float kNoStart = 1.0e9f;
 constexpr float kFeedbackAlpha = 0.9f;
 constexpr int kFeedbackInset = 100;
 
-// Difficulties GameManagerImpl::GetUnknown88() reports, the settings field GameParams::Print()
+// Difficulties GameManagerImpl::GetDifficulty() reports, the settings field GameParams::Print()
 // labels `difficulty=`. Each selects one congratulation.
 constexpr int kDifficultyTrue = 0;
 constexpr int kDifficultySuper = 1;
@@ -53,7 +53,7 @@ void HudWinMessage::SetFrame(float flTime) {
         g_gfxDevice.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
 
         const char *pszCongrats;
-        switch (Application::shared()->GetGameManager()->GetUnknown88()) {
+        switch (Application::shared()->GetGameManager()->GetDifficulty()) {
         case kDifficultyTrue:
             pszCongrats = "CONGRATULATIONS!\n\nYOU ARE NOW A\nTRUE FREQ";
             break;

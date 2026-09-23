@@ -410,6 +410,7 @@ mcserv
 mdfile
 memcard
 memcardcbhandler
+memcardmanager
 memcardop
 memcardps
 memcardsavepaths

@@ -10,6 +10,7 @@ class Application;
 class BGTrackGraph;
 class Delayer;
 class ForceFeedbackMgr;
+class FreqAppearance;
 class GameStats;
 class Gamer;
 class IBStream;
@@ -26,6 +27,7 @@ class OBStream;
 class PlayMap;
 class Player;
 class Renderer;
+class RendererBase;
 class ScoreTrackGraph;
 class TrackSelector;
 struct MetControllerReading;
@@ -240,17 +242,17 @@ public:
      * @param nId The player's identifier, passed to NetPlayer twice.
      * @param nUnused Not read.
      * @param name The player's name.
-     * @param nUnknown2c Passed through to the Player constructor.
+     * @param pAppearance The appearance the player is drawn with.
      * @ghidraAddress 0x00194de8
      */
-    void AddNetPlayer(int nId, int nUnused, const HxStr &name, int nUnknown2c);
+    void AddNetPlayer(int nId, int nUnused, const HxStr &name, const FreqAppearance *pAppearance);
 
     /**
      * Create a player this console drives and append it to mPlayers and mLocalPlayers.
      *
      * The track is nId, except in solo mode, where it is configuration code 0x3a6 minus 1. The
-     * player receives the persona's appearance (MetPersonaData::mUnknown140). Not written yet,
-     * because Player's constructor still types that argument as an int. The title is inferred.
+     * player receives the persona's appearance (MetPersonaData::mUnknown140). The title is
+     * inferred.
      *
      * @param nId The player's identifier.
      * @param nInputSlot The controller slot.
@@ -361,14 +363,15 @@ public:
     LevelData *GetLevel();
 
     /**
-     * Report the renderer's MsgSink half.
+     * Report the renderer's RendererBase half.
      *
-     * GameManagerImpl::DrawFrame() uses it to decide whether the world has anything to draw.
+     * GameManagerImpl::DrawFrame() runs RendererBase slots 6, 7, and 8 through it, and skips the
+     * world when it is null.
      *
-     * @return The renderer as a sink, or null when no renderer exists.
+     * @return The renderer, or null when no renderer exists.
      * @ghidraAddress 0x001952e0
      */
-    MsgSink *GetRendererSink();
+    RendererBase *GetRendererSink();
 
     /**
      * Set the statistics word at `+0x14` of mStats to 1.
@@ -445,9 +448,15 @@ private:
     InputCheatDetectorGS *mCheatDetector; // +0x80
     int mUnknown84;                       // +0x84
     int mUnknown88;                       // +0x88
-    int mUnknown8c;                       // +0x8c
 
 public:
+    /**
+     * A word GameManagerImpl::OnBeginGameLocal() clears at `0x001067c4` and
+     * GameManagerImpl::Load() sets at `0x001074b8`. Public because both write it directly, and
+     * the image has no accessor for it. No reader is recovered. +0x8c
+     */
+    int mUnknown8c;
+
     /**
      * A word GameManagerImpl::OnUnpauseGameSystem() reads directly at `0x00106b54`. It rebuilds
      * mInputMap only while the word is zero. The image has no accessor for it. +0x90

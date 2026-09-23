@@ -170,7 +170,7 @@ void MetStageFinishScreen::EnterAndShow() {
         CampaignStats *pStats = &pPersona->mStats;
         GameStats *pGameStats = Application::shared()->GetGameManager()->GetStats();
         int nStage = QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName));
-        int nDifficulty = params.mUnknown20;
+        int nDifficulty = params.mDifficulty;
 
         int nWasBeaten = pStats->GetLevelBeaten(nDifficulty, params.mLevelName);
         int nOldHighScore = pStats->GetLevelHighScore(nDifficulty, params.mLevelName);
@@ -324,7 +324,7 @@ void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComp
     MetFrontEndState::shared()->GetFirstPersona(); // Yes, the binary discards the persona.
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     int nStage = QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName));
-    int nDifficulty = params.mUnknown20;
+    int nDifficulty = params.mDifficulty;
     if ((nStage == kEasyLastStage && nDifficulty == kDifficultyEasy) ||
         (nStage == kNormalLastStage && nDifficulty == kDifficultyNormal) ||
         (nStage == kExpertLastStage && nDifficulty == kDifficultyExpert)) {
@@ -350,10 +350,10 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
     HxStr message;
-    if (params.mUnknown20 != kDifficultyExpert) {
+    if (params.mDifficulty != kDifficultyExpert) {
         HxStr format;
         QueryConfigString(&format, kPromptConfigCode, kDifficultyUnlockKey);
-        HxStr difficultyName = DifficultyName(params.mUnknown20 + 1);
+        HxStr difficultyName = DifficultyName(params.mDifficulty + 1);
         message = FormatString(TextOf(format), TextOf(difficultyName));
         mUnknown8c.push_back(message);
         mUnknownb4 = 1;

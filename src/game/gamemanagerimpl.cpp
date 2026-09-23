@@ -4,23 +4,32 @@
 #include <vector>
 
 #include "app/application.h"
+#include "app/renderer.h"
 #include "app/rendererbase.h"
 #include "app/watchdog.h"
+#include "app/watchdogtimer.h"
+#include "game/dogamesystemplaycmd.h"
 #include "game/forcefeedbackmgr.h"
 #include "game/gameplayback.h"
 #include "game/gamerecorder.h"
 #include "game/inputmap.h"
+#include "gfx/gfxdevice.h"
+#include "memcard/memcardmanager.h"
 #include "met/metpersonadata.h"
 #include "msg/begingamelocalmsg.h"
 #include "msg/endgamemsg.h"
 #include "msg/gamemanagerdoplaybackmsg.h"
+#include "msg/isrecordingmsg.h"
 #include "msg/metfreqendedmsg.h"
 #include "msg/metstartpausemsg.h"
 #include "msg/pausegamesystemmsg.h"
 #include "msg/unpausegamesystemmsg.h"
+#include "os/cycles.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "os/r250.h"
+#include "sch/cmdid.h"
+#include "sch/tick.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
 #include "synth/ps2hardsynth.h"
@@ -30,7 +39,7 @@ namespace {
 // Script templates the manager publishes its settings through.
 constexpr int kScriptTemplateGameMode = 0x262;
 constexpr int kScriptTemplatePlayMode = 0x263;
-constexpr int kScriptTemplateUnknown88 = 0x264;
+constexpr int kScriptTemplateDifficulty = 0x264;
 constexpr int kScriptTemplateLevelName = 0x277;
 constexpr int kScriptTemplateArenaName = 0x27b;
 
@@ -49,6 +58,18 @@ constexpr unsigned char kControllerAllNotesOff = 123;
 
 // Configuration code of the recording OnDoPlayback() replays.
 constexpr int kPlaybackFileConfigCode = 0x26a;
+
+// DrawFrame() draws the game world's renderer and the front end's, at most one of each.
+constexpr int kMaxDrawRoots = 2;
+
+// PresentFrame() argument that presents without flipping the framebuffer.
+constexpr int kNoBufferSwap = 0;
+
+// The handle a post starts with, before the scheduler allocates one.
+constexpr int kUnallocatedCommand = -2;
+
+// The command that starts play is itself recorded.
+constexpr int kRecordable = 1;
 
 } // namespace
 
@@ -154,15 +175,15 @@ void GameManagerImpl::SetParams(const GameParams &params) {
     mParams = params;
     // The two modes are republished from the settings just copied in, not from the argument.
     SetPlayMode(mParams.mUnknown1c);
-    SetUnknown88(mParams.mUnknown20);
+    SetDifficulty(mParams.mDifficulty);
     ++mChangeCount;
     CheckState(); // Yes, the binary discards this call's result.
 }
 
-void GameManagerImpl::SetUnknown88(int nValue) {
-    mParams.mUnknown20 = nValue;
+void GameManagerImpl::SetDifficulty(int nDifficulty) {
+    mParams.mDifficulty = nDifficulty;
     // No literal maps the value, and the raw word goes out as the template argument.
-    CallScriptTemplate(kScriptTemplateUnknown88, nValue);
+    CallScriptTemplate(kScriptTemplateDifficulty, nDifficulty);
     ++mChangeCount;
 }
 
@@ -184,8 +205,8 @@ void GameManagerImpl::SetPlayMode(int nMode) {
     ++mChangeCount;
 }
 
-int GameManagerImpl::GetUnknown88() {
-    return mParams.mUnknown20;
+int GameManagerImpl::GetDifficulty() {
+    return mParams.mDifficulty;
 }
 
 int GameManagerImpl::GetPlayMode() {
@@ -352,6 +373,130 @@ void GameManagerImpl::FinishWorldLoad() {
     AddPlayers();
     mpWorld->PrepareLevel();
     mpPoller->SetController(mpWorld);
+}
+
+// 0x001065a8
+void GameManagerImpl::DrawFrame() {
+    mQueue.Poll();
+
+    RendererBase *roots[kMaxDrawRoots];
+    int nRootCount = 0;
+    if (mpWorld != nullptr && mpWorld->GetRendererSink() != nullptr) {
+        roots[nRootCount++] = mpWorld->GetRendererSink();
+    }
+    if (mpMetaWorld != nullptr) {
+        roots[nRootCount++] = mpMetaWorld->GetRenderer();
+    }
+    for (int i = 0; i < nRootCount; ++i) {
+        roots[i]->OnUnknownSlot6();
+        roots[i]->OnUnknownSlot7();
+    }
+    if (mUnknowna8 != 0) {
+        MemcardManager::shared()->Update();
+    }
+    if (mDrawSuppressed != 0) {
+        return;
+    }
+
+    g_gfxDevice.BeginFrame();
+    g_gfxDevice.EnterVu1Path();
+    for (int i = 0; i < nRootCount; ++i) {
+        roots[i]->OnUnknownSlot8();
+    }
+    g_gfxDevice.LeaveVu1Path();
+    g_gfxDevice.PresentFrame(kNoBufferSwap);
+}
+
+// 0x0010bfa0
+void GameManagerImpl::DrawFrameSimple() {
+    if (mpMetaWorld == nullptr || mpWorld != nullptr || mDrawSuppressed != 0) {
+        return;
+    }
+    mpMetaWorld->GetRenderer()->OnUnknownSlot9();
+    g_gfxDevice.BeginFrame();
+    g_gfxDevice.EnterVu1Path();
+    mpMetaWorld->GetRenderer()->OnUnknownSlot10();
+    g_gfxDevice.LeaveVu1Path();
+    g_gfxDevice.PresentFrame(kNoBufferSwap);
+}
+
+// 0x00106e28
+void GameManagerImpl::PollPlayback() {
+    mpPoller->Poll();
+    Application::shared()->GetWatchdog(); // Yes, the binary discards this call's result.
+    GetElapsedMilliseconds();             // Yes, the binary discards the reading.
+    if (mpPoller->mPressedThisPoll != 0 && mpPlayback != nullptr && mpWorld != nullptr) {
+        mpWorld->PostExitMode1();
+    }
+}
+
+// 0x00106720
+void GameManagerImpl::OnBeginGameLocal(Message *) {
+    CheckState(); // Yes, the binary discards this call's result.
+    if (mUnknown100 != 0) {
+        mUnknown100 = 0;
+    } else {
+        mpMetaWorld->OnUnknownForwarder003d4890();
+    }
+    mpPoller->SetActive(0);
+    mUnknowna8 = 0;
+    {
+        IsRecordingMsg recording;
+        recording.mIsRecording = 0;
+        mpMetaWorld->GetRenderer()->Handle(&recording);
+    }
+
+    CreateWorld();
+    FinishWorldLoad();
+    mpWorld->mUnknown8c = 0;
+    mpPoller->SetGameInputEnabled(!Application::shared()->IsJukeboxMode());
+    if (mpRecorder != nullptr) {
+        mpRecorder->BeginRecording(mGameMode, mParams);
+    }
+    Application::shared()->GetWatchdog()->Flush();
+
+    DoGameSystemPlayCmd *pCommand = new DoGameSystemPlayCmd;
+    CmdID id;
+    id.mValue = kUnallocatedCommand;
+    const Sch::Tick now{0};
+    Application::shared()->GetWatchdogTimer()->PostIn(pCommand, now, id, kRecordable);
+    if (pCommand != nullptr) {
+        pCommand->Release();
+    }
+    CheckState(); // Yes, the binary discards this call's result.
+}
+
+// 0x001072b0
+void GameManagerImpl::Load(IBStream *pStream) {
+    int nState;
+    pStream->Read(&nState, sizeof(nState));
+    int nUnknown08;
+    pStream->Read(&nUnknown08, sizeof(nUnknown08));
+    int nGameMode;
+    pStream->Read(&nGameMode, sizeof(nGameMode));
+    mParams.Load(pStream);
+    mState = nState;
+    mUnknown08 = nUnknown08;
+    mGameMode = nGameMode;
+    SetGameMode(nGameMode);
+    SetPlayMode(mParams.mUnknown1c);
+    SetDifficulty(mParams.mDifficulty);
+
+    ClearPersonas();
+    MetPersonaData persona;
+    persona.mUnknown140.mUnknown00 = HxStr("freq player 1");
+    AddPersona(persona);
+    {
+        IsRecordingMsg recording;
+        recording.mIsRecording = 1;
+        mpMetaWorld->GetRenderer()->Handle(&recording);
+    }
+
+    Renderer::LoadLevel(mParams);
+    CreateWorld();
+    FinishWorldLoad(); // The binary expands this body inline here.
+    mpWorld->mUnknown8c = 1;
+    mpPoller->SetGameInputEnabled(0);
 }
 
 // 0x0010c128

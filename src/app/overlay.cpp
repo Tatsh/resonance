@@ -251,7 +251,7 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
         mPanel->mAssembly.SetTarget(1.0f);
     }
 
-    mDifficulty = Application::shared()->GetGameManager()->GetUnknown88();
+    mDifficulty = Application::shared()->GetGameManager()->GetDifficulty();
     mPanel->mLabelSwap.Jump(0.0f);
     if (mPlayMode == kPlayModeJam) {
         for (std::vector<HudBadge *>::iterator it = mBadges.begin(); it != mBadges.end(); ++it) {

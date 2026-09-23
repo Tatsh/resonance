@@ -7,6 +7,7 @@
 #include "game/idable.h"
 #include "os/hxstr.h"
 
+class FreqAppearance;
 class PhraseCapturedMsg;
 
 /**
@@ -44,10 +45,10 @@ public:
      *
      * @param nId The identifier, also recorded in mId20.
      * @param colorName The player's colour name.
-     * @param nUnknown2c The value recorded at `+0x2c`.
+     * @param pAppearance The appearance the player is drawn with.
      * @ghidraAddress 0x0012f5c0
      */
-    Player(int nId, const HxStr &colorName, int nUnknown2c);
+    Player(int nId, const HxStr &colorName, const FreqAppearance *pAppearance);
 
     /** @ghidraAddress 0x00132ae8 */
     virtual ~Player();
@@ -326,8 +327,9 @@ public:
     void AwardCapture(PhraseCapturedMsg *pMsg);
 
 private:
-    int mUnknown2c; // +0x2c
-    int mJuice;     // +0x30
+    // The persona's appearance. GrooveWorld::AddLocalPlayer() passes MetPersonaData::mUnknown140.
+    const FreqAppearance *mAppearance; // +0x2c
+    int mJuice;                        // +0x30
 
 protected:
     // Slot11 clamps this to kJuiceMaximum before announcing it.

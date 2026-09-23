@@ -1,8 +1,8 @@
 #include "game/netplayer.h"
 
 // 0x00122f10
-NetPlayer::NetPlayer(int nId, int nUnknown48, const HxStr &name, int nUnknown2c)
-    : Player(nId, name, nUnknown2c), mUnknown48(nUnknown48), mUnknown4c(0) {
+NetPlayer::NetPlayer(int nId, int nUnknown48, const HxStr &name, const FreqAppearance *pAppearance)
+    : Player(nId, name, pAppearance), mUnknown48(nUnknown48), mUnknown4c(0) {
 }
 
 // 0x00125a98

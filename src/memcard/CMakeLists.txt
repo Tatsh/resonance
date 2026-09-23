@@ -15,6 +15,7 @@ set(RESONANCE_MEMCARD_SRCS
     loadremixmct.cpp
     memcard.cpp
     memcardcbhandler.cpp
+    memcardmanager.cpp
     memcardop.cpp
     memcardps2.cpp
     memcardsavepaths.cpp

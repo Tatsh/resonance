@@ -32,7 +32,7 @@ public:
      *
      * Opens `rec.bin` through MakeFreqPath() as an OBFileStream and writes three length-prefixed
      * strings: `PS2 application.`, a description built from the level name, the game mode, the
-     * play mode, and the GameParams word at `+0x20` (0 easy, 1 medium, otherwise hard), and
+     * play mode, and GameParams::mDifficulty (0 easy, 1 medium, otherwise hard), and
      * `no autoexec`. The manager then saves itself into the stream, and the watchdog records from
      * there on. GameManagerImpl::OnBeginGameLocal() is the caller. The title is inferred.
      *

@@ -67,10 +67,10 @@ constexpr char kCaughtPowerSound[] = "SND_CAUGHT_POWER";
 LocalPlayer::LocalPlayer(int nId,
                          int nInputSlot,
                          const HxStr &colorName,
-                         int nUnknown2c,
+                         const FreqAppearance *pAppearance,
                          Sch::TickClock *pClock,
                          int nTrack)
-    : Player(nId, colorName, nUnknown2c), mClock(pClock), mInputSlot(nInputSlot), mTrack(nTrack),
+    : Player(nId, colorName, pAppearance), mClock(pClock), mInputSlot(nInputSlot), mTrack(nTrack),
       mPlace(0), mLooping(0), mGhost(0) {
     mCommand.mValue = kUnallocatedCommand;
     mPlayMode = Application::shared()->GetPlayMode();

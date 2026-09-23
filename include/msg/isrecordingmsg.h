@@ -7,12 +7,9 @@
  *
  * `14IsRecordingMsg` in the RTTI descriptor at `0x008eed38`, with Message as its one base. The
  * object is 0x8 bytes and its vtable is at `0x00811b68`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * class: everything recovered comes from them.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone().
  *
  * The destructor at `0x003e2b30` is compiler-generated and has no declaration here.
  */
@@ -60,8 +57,13 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown04; // +0x04
+    /**
+     * Non-zero when the game is being restored from a recording.
+     *
+     * GameManagerImpl::Load() sends 1 and GameManagerImpl::OnBeginGameLocal() sends 0, each to
+     * the front end's renderer. Public because both write it directly. +0x04
+     */
+    int mIsRecording;
 };
 
 /**

@@ -12,11 +12,13 @@
 #include "game/levelbuilder.h"
 #include "game/levelconverter.h"
 #include "game/leveldata.h"
+#include "game/localplayer.h"
 #include "game/netplayer.h"
 #include "game/phrasedatabase.h"
 #include "game/player.h"
 #include "game/scoretrackgraph.h"
 #include "game/trackselector.h"
+#include "met/metpersonadata.h"
 #include "msg/bumppacket.h"
 #include "msg/cripplepacket.h"
 #include "msg/message.h"
@@ -36,6 +38,8 @@ namespace {
 // Configuration identifiers the load path queries.
 constexpr int kTrackCountQuery = 0x384;
 constexpr int kLevelConverterOptionQuery = 0x39a;
+// One more than the track a solo player takes.
+constexpr int kSoloTrackConfigCode = 0x3a6;
 
 // mState values.
 constexpr int kStateLoading = 1;
@@ -246,10 +250,27 @@ void GrooveWorld::FinishLoad() {
 void GrooveWorld::AddNetPlayer(int nId,
                                [[maybe_unused]] int nUnused,
                                const HxStr &name,
-                               int nUnknown2c) {
+                               const FreqAppearance *pAppearance) {
     (void)(name != ""); // Yes, the binary discards this comparison's result.
-    Player *pPlayer = new NetPlayer(nId, nId, name, nUnknown2c);
+    Player *pPlayer = new NetPlayer(nId, nId, name, pAppearance);
     mPlayers.push_back(pPlayer);
+}
+
+// 0x0018c600
+void GrooveWorld::AddLocalPlayer(int nId,
+                                 int nInputSlot,
+                                 [[maybe_unused]] int nUnused,
+                                 const HxStr &colorName,
+                                 MetPersonaData *pPersona) {
+    (void)(colorName != ""); // Yes, the binary discards this comparison's result.
+    int nTrack = nId;
+    if (Application::shared()->GetGameMode() == kGameModeSolo) {
+        nTrack = QueryConfigValue(kSoloTrackConfigCode) - 1;
+    }
+    Player *pPlayer =
+        new LocalPlayer(nId, nInputSlot, colorName, &pPersona->mUnknown140, mSongClock, nTrack);
+    mPlayers.push_back(pPlayer);
+    mLocalPlayers.push_back(pPlayer);
 }
 
 // 0x00194ef0
@@ -332,7 +353,7 @@ LevelData *GrooveWorld::GetLevel() {
 }
 
 // 0x001952e0
-MsgSink *GrooveWorld::GetRendererSink() {
+RendererBase *GrooveWorld::GetRendererSink() {
     return mRenderer;
 }
 

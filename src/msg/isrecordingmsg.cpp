@@ -26,5 +26,5 @@ const char *IsRecordingMsg::Name() {
 
 // 0x003e44b0
 void IsRecordingMsg::Print(std::ostream &stream) {
-    stream << "IsRecordingMsg " << mUnknown04;
+    stream << "IsRecordingMsg " << mIsRecording;
 }

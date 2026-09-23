@@ -20,7 +20,7 @@ constexpr int kUnallocatedCommand = -2;
 // The end of a recording is itself recorded.
 constexpr int kRecordable = 1;
 
-// Values of the GameParams word at +0x20 that BeginRecording() describes by name.
+// Values of GameParams::mDifficulty that BeginRecording() describes by name.
 constexpr int kDifficultyEasy = 0;
 constexpr int kDifficultyMedium = 1;
 
@@ -56,7 +56,7 @@ void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
     }
     const char *pszPlay = params.mUnknown1c == kPlayModeGame ? "game " : "jam ";
     HxStr difficulty;
-    switch (params.mUnknown20) {
+    switch (params.mDifficulty) {
     case kDifficultyEasy:
         difficulty = "easy)\n";
         break;

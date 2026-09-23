@@ -137,8 +137,8 @@ private:
     HxStr mUnknown14; // +0x14
 
 public:
-    int mUnknown1c; /*!< Driven by GameManagerImpl slots 29 and 31, the play mode. +0x1c */
-    int mUnknown20; /*!< Driven by GameManagerImpl slots 28 and 30. +0x20 */
+    int mUnknown1c;  /*!< Driven by GameManagerImpl slots 29 and 31, the play mode. +0x1c */
+    int mDifficulty; /*!< Driven by GameManagerImpl slots 28 and 30, the difficulty. +0x20 */
 
 private:
     // Load() normalises the transferred word to 0 or 1 before the store, which is what types this

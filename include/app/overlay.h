@@ -284,7 +284,7 @@ private:
     float mMsPerTick;
     // The last bar of the level, PlayMap::Slot9().
     int mLastBar;
-    // The session difficulty, GameManagerImpl::GetUnknown88() at construction.
+    // The session difficulty, GameManagerImpl::GetDifficulty() at construction.
     int mDifficulty;
 };
 

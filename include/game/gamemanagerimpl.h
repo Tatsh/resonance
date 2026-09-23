@@ -77,9 +77,9 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  *  - 25 `0x0010b8d0` GetParams().
  *  - 26 `0x0010b8d8` GetChangeCount().
  *  - 27 `0x0010c210` SetParams().
- *  - 28 `0x0010c3e0` SetUnknown88().
+ *  - 28 `0x0010c3e0` SetDifficulty().
  *  - 29 `0x0010c348` SetPlayMode().
- *  - 30 `0x0010b8e0` GetUnknown88().
+ *  - 30 `0x0010b8e0` GetDifficulty().
  *  - 31 `0x0010b8e8` GetPlayMode().
  *  - 32 `0x0010bee0` QueueMessage().
  *  - 33 `0x0010b878` SetDrawEnabled().
@@ -103,8 +103,8 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  *
  * Four slots read or write the embedded settings rather than a member of this class. The offsets
  * `+0x84`, `+0x88`, and `+0x90` all fall inside the 0x38-byte GameParams subobject at `+0x68`, so
- * SetPlayMode() and GetPlayMode() drive `GameParams::mUnknown1c`, SetUnknown88() and
- * GetUnknown88() drive `GameParams::mUnknown20`, and SetGameMode() writes
+ * SetPlayMode() and GetPlayMode() drive `GameParams::mUnknown1c`, SetDifficulty() and
+ * GetDifficulty() drive `GameParams::mDifficulty`, and SetGameMode() writes
  * `GameParams::mUnknown28`. Those three settings members are public for that reason, and a friend
  * declaration on GameParams would fit the image equally well.
  *
@@ -139,13 +139,11 @@ public:
     /**
      * Draw one frame.
      *
-     * Slot 4. The queue is drained first. The routine then collects up to two drawable roots, the
-     * game world's when it has one and the front-end world's when one exists, runs two virtuals on
-     * each, and submits the frame between the display device's frame pair. A suppressed manager
-     * collects the roots and runs the two virtuals but submits nothing.
-     *
-     * The body is not written. Both roots are resolved through members of GrooveWorld and
-     * MetaGameWorld whose signatures are not settled.
+     * Slot 4. The queue is drained first. The routine then collects up to two renderers, the game
+     * world's when it has one and the front-end world's when one exists, and runs RendererBase
+     * slots 6 and 7 on each. While mUnknowna8 is set, MemcardManager::Update() runs next. Unless
+     * drawing is suppressed, slot 8 then runs on each renderer between the display device's frame
+     * pair, inside the VU1 path.
      *
      * @ghidraAddress 0x001065a8
      */
@@ -156,9 +154,8 @@ public:
      *
      * Slot 5. The routine returns at once without a front-end world, with a game world, or while
      * drawing is suppressed, so it runs only in the front end. MainLoop uses it to refresh the
-     * screen during a long operation.
-     *
-     * The body is not written, for the reason recorded on DrawFrame().
+     * screen during a long operation. RendererBase slot 9 runs before the frame pair and slot 10
+     * inside it.
      *
      * @ghidraAddress 0x0010bfa0
      */
@@ -252,15 +249,13 @@ public:
     virtual void Start();
 
     /**
-     * Advance the game world while a playback runs.
+     * Poll the controllers, and end a playback when a button is pressed.
      *
-     * Slot 14. The routine ticks the poller, reads the EE cycle counter into the profile timer at
-     * `0x007082c8`, and advances the game world only when the poller's field at `+0x38`, the
-     * playback, and the world are all present. MainLoop drives it from one of its two periodic
+     * Slot 14. The routine runs InputPoller::Poll(), resolves the watchdog and discards it, and
+     * reads the elapsed time through GetElapsedMilliseconds() and discards that too. When the poll
+     * sent a reading out while a playback runs in a game world, the world queues its first exit
+     * mode through GrooveWorld::PostExitMode1(). MainLoop drives it from one of its two periodic
      * timers.
-     *
-     * An earlier reading titled the slot for advancing the sound banks. Nothing in the body
-     * supports that, and the three-way guard is what the title records instead.
      *
      * @ghidraAddress 0x00106e28
      */
@@ -333,14 +328,10 @@ public:
      *
      * Slot 21. The three words come back in the order Save() wrote them and the settings read
      * themselves through their own slot 3. The three setters then run on the restored values, the
-     * roster is emptied and given one persona titled `freq player 1`, and the world is created and
-     * waited on.
-     *
-     * The wait is a spin. The routine calls `0x00194ca0` on the game world in a loop with no yield
-     * until it reports the load finished.
-     *
-     * The body is not written. The persona copy, the world load, and the front-end notification all
-     * run through members whose signatures are not settled.
+     * roster is emptied and given one persona titled `freq player 1`, and the front end receives
+     * IsRecordingMsg(1). The level is loaded through Renderer::LoadLevel(), and the world is
+     * created and finished as FinishWorldLoad() does, whose body the binary expands here. The world
+     * then has mUnknown8c set, and the poller stops handing readings to it.
      *
      * @param pStream The stream to read from.
      * @ghidraAddress 0x001072b0
@@ -393,8 +384,8 @@ public:
     /**
      * Report how many times the settings have changed.
      *
-     * Slot 26. SetGameMode(), SetParams(), SetUnknown88(), and SetPlayMode() each advance the count
-     * by one, and nothing resets it.
+     * Slot 26. SetGameMode(), SetParams(), SetDifficulty(), and SetPlayMode() each advance the
+     * count by one, and nothing resets it.
      *
      * @return The count.
      * @ghidraAddress 0x0010b8d8
@@ -413,15 +404,16 @@ public:
     virtual void SetParams(const GameParams &params);
 
     /**
-     * Unrecovered. Slot 28.
+     * Record the difficulty and publish it to the script layer.
      *
-     * Records the settings field mUnknown20 and publishes the raw value under script symbol 0x264.
-     * No literal maps the value, so its meaning is unrecovered. The change counter advances.
+     * Slot 28. The value lands in GameParams::mDifficulty and is published raw under script
+     * symbol 0x264. GameParams::Print() labels the field `difficulty=`. The change counter
+     * advances.
      *
-     * @param nValue The value to record.
+     * @param nDifficulty The difficulty.
      * @ghidraAddress 0x0010c3e0
      */
-    virtual void SetUnknown88(int nValue);
+    virtual void SetDifficulty(int nDifficulty);
 
     /**
      * Record the play mode and publish it to the script layer.
@@ -437,14 +429,14 @@ public:
     virtual void SetPlayMode(int nMode);
 
     /**
-     * Unrecovered. Slot 30.
+     * Report the difficulty.
      *
-     * Returns the settings field mUnknown20.
+     * Slot 30.
      *
-     * @return The value SetUnknown88() recorded.
+     * @return GameParams::mDifficulty.
      * @ghidraAddress 0x0010b8e0
      */
-    virtual int GetUnknown88();
+    virtual int GetDifficulty();
 
     /**
      * Resolve the play mode.
@@ -490,12 +482,12 @@ protected:
     /**
      * Enter a local game.
      *
-     * Slot 34. Creates the world, releases the front-end world's game, clears mUnknowna8, hands the
-     * poller a cleared flag, and posts a command built on a 12-byte record. The message itself is
+     * Slot 34. Clears mUnknown100, or runs the front-end world's forwarder when it was clear,
+     * deactivates the poller, clears mUnknowna8, and sends the front end IsRecordingMsg(0). The
+     * world is then created and finished, its mUnknown8c cleared, and the poller hands it readings
+     * outside jukebox mode. A recorder starts recording, the watchdog is flushed, and a
+     * DoGameSystemPlayCmd is posted on the watchdog timer to start play. The message itself is
      * ignored, and HandleMessage() passes it all the same.
-     *
-     * The body is not written. The command post runs through five members whose signatures are not
-     * settled.
      *
      * @param pMsg The message, ignored.
      * @ghidraAddress 0x00106720
@@ -598,8 +590,9 @@ private:
     // The connectivity mode, one of the four values SetGameMode() publishes.
     int mGameMode;    // +0xa0
     int mChangeCount; // +0xa4
-    // Set by Start() and cleared by OnBeginGameLocal(). DrawFrame() runs one extra pass while it is
-    // set, so it distinguishes the front end from a game session.
+    // Set by Start() and by EndGame() on a return to the front end, and cleared by
+    // OnBeginGameLocal(). DrawFrame() runs MemcardManager::Update() while it is set, so memory-card
+    // work advances only in the front end.
     int mUnknowna8;           // +0xa8
     GameRecorder *mpRecorder; // +0xac the recorder StartRecording() installs
     GamePlayback *mpPlayback; // +0xb0 the playback StartPlayback() installs
@@ -613,7 +606,8 @@ private:
     MsgQueue mQueue; // +0xc0
     // Set by FinishWorldLoad() and by Load(), and never cleared. GetUnknownfc() is its one reader.
     int mUnknownfc; // +0xfc
-    // Cleared by OnBeginGameLocal(). Nothing recovered sets it.
+    // Set by EndGame() on a restart. OnBeginGameLocal() clears it, and while it is set, skips the
+    // front-end world's forwarder.
     int mUnknown100; // +0x100
     // Set by OnPauseGameSystem() and cleared by OnUnpauseGameSystem(), each of which returns early
     // on the value it would write.

@@ -23,8 +23,8 @@ constexpr char kOpenText[] = "{player ";
 } // namespace
 
 // 0x0012f5c0
-Player::Player(int nId, const HxStr &colorName, int nUnknown2c)
-    : IDable<Player>(nId), mId20(nId), mColorName(colorName), mUnknown2c(nUnknown2c), mJuice(0),
+Player::Player(int nId, const HxStr &colorName, const FreqAppearance *pAppearance)
+    : IDable<Player>(nId), mId20(nId), mColorName(colorName), mAppearance(pAppearance), mJuice(0),
       mUnknown34(kInitialCeiling), mScore(0), mUnknown3c(kInitialCeiling), mLastEraseTime(0) {
 }
 

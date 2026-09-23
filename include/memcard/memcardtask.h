@@ -78,6 +78,9 @@ public:
      */
     virtual void OnUnknown18();
 
+    // MemcardManager::Update() reads mState to start an idle task and retire a finished one.
+    friend class MemcardManager;
+
 protected:
     /**
      * Abandon the task when the last operation reported a failure.

@@ -51,7 +51,7 @@ public:
      * @param nId The player's identifier.
      * @param nInputSlot The controller slot Slot2() reports.
      * @param colorName The player's colour name.
-     * @param nUnknown2c The value Player's constructor records at `+0x2c`.
+     * @param pAppearance The appearance the player is drawn with.
      * @param pClock The clock the per-bar command is posted on.
      * @param nTrack The track Slot4() reports.
      * @ghidraAddress 0x0011e000
@@ -59,7 +59,7 @@ public:
     LocalPlayer(int nId,
                 int nInputSlot,
                 const HxStr &colorName,
-                int nUnknown2c,
+                const FreqAppearance *pAppearance,
                 Sch::TickClock *pClock,
                 int nTrack);
 

@@ -23,15 +23,7 @@ class RawController;
  *
  * The member map comes from the constructor at `0x001ded98`, the destructor, and the setup routine
  * at `0x001df248` together, and it accounts for every byte up to the vptr. The purpose of each
- * member is unrecovered, so all of them are private.
- *
- * Two further members GameManagerImpl drives are recorded by address instead of being declared.
- * Neither signature is settled.
- *
- *  - `0x001e1c20` receives the poller and one flag.
- *  - `0x001e1c28` receives the poller alone, from GameManagerImpl::PollPlayback().
- *
- * PollPlayback() reads mUnknown38 as the first of its three conditions, which construction clears.
+ * member is mostly unrecovered, so those members are private.
  *
  * Two further routines the constructor and destructor call are unrecovered, `0x001e19b8` on the way
  * in and `0x001df9d8` on the way out. The first is not a member: it ignores the pointer it receives
@@ -108,6 +100,40 @@ public:
     void DetachController(RawController *pController);
 
     /**
+     * Read the controllers once.
+     *
+     * Runs the reading routine at `0x001dfab0`, which clears mPressedThisPoll and sets it again
+     * when a reading goes out, and then an empty member at `0x001e1c58`.
+     * GameManagerImpl::PollPlayback() is the caller. Not reconstructed yet, because the reading
+     * routine is unrecovered. The title is inferred.
+     *
+     * @ghidraAddress 0x001e1c28
+     */
+    void Poll();
+
+    /**
+     * Set mGameInputEnabled.
+     *
+     * GameManagerImpl::OnBeginGameLocal() passes 1 outside jukebox mode, and
+     * GameManagerImpl::Load() passes 0. The title is inferred.
+     *
+     * @param bEnabled The flag.
+     * @ghidraAddress 0x001e1c20
+     */
+    void SetGameInputEnabled(int bEnabled) {
+        mGameInputEnabled = bEnabled;
+    }
+
+    /**
+     * Non-zero when the last Poll() sent a reading out.
+     *
+     * The reading routine at `0x001dfab0` clears it on entry and sets it at `0x001dfd5c` and
+     * `0x001dfda8`. Public because GameManagerImpl::PollPlayback() reads it directly and the image
+     * has no accessor for it. The title is inferred. +0x38
+     */
+    int mPressedThisPoll;
+
+    /**
      * The word at `+0x34`, which the constructor starts at 1.
      *
      * Public because GameManagerImpl's constructor clears it directly at `0x00106024`, and the
@@ -149,13 +175,14 @@ private:
     int mUnknown28;            // +0x28
     std::list<int> mUnknown2c; // +0x2c element type not recovered, 16-byte node
     int mUnknown30;            // +0x30
-    int mUnknown38;            // +0x38
     int mActive;               // +0x3c starts at 1
     int mUnknown40;            // +0x40
     int mUnknown44;            // +0x44
     int mPaused;               // +0x48
-    int mUnknown4c;            // +0x4c starts at 1
-    int mUnknown50;            // +0x50
+    // Starts at 1. The reading routine at 0x001dfab0 tests it at 0x001dfb7c before it hands a
+    // reading to a game world. +0x4c
+    int mGameInputEnabled;
+    int mUnknown50; // +0x50
     // The receiver of the readings, which SetController() installs.
     RawController *mController; // +0x54
 };
