@@ -54,6 +54,15 @@ public:
      */
     void HidePrompt();
 
+    /**
+     * Draw the two messages over the frame feedback while the sequence runs.
+     *
+     * Overlay::Draw() inlines the body, and this copy has no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x0042a830
+     */
+    void Draw();
+
 private:
     // When the current step started. Starts at 1e9.
     float mStart;

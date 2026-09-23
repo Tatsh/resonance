@@ -78,9 +78,19 @@ public:
     void SetFrame(float flTime);
 
 private:
-    Rnd::Blur *mBlur;      // `<name>.blur`
-    Rnd::Font *mFont;      // The text's font.
-    Rnd::Text *mText;      // `<name>.txt`
+    Rnd::Blur *mBlur; // `<name>.blur`
+    Rnd::Font *mFont; // The text's font.
+
+public:
+    /**
+     * The text, `<name>.txt`. +0x08
+     *
+     * Public because HudWinMessage::Draw() at `0x0042a830` draws it directly, and the image has no
+     * accessor for it.
+     */
+    Rnd::Text *mText;
+
+private:
     Rnd::TransAnim *mAnim; // `<name>.tnm`
     // When the message started. 0 marks it idle and 1e9 marks a start not yet recorded.
     float mStart;

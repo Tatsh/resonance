@@ -303,12 +303,14 @@ public:
         return mFont;
     }
 
-protected:
     /**
      * Draw the glyph mesh.
      *
      * Rnd::Drawable vtable slot 3. Always reports that the children are still to be drawn, even
      * when there is no mesh.
+     *
+     * Public because HudWinMessage::Draw() at `0x0042a830`, which Overlay::Draw() inlines, calls it
+     * directly on a text from outside the hierarchy.
      *
      * @return Non-zero, always.
      * @ghidraAddress 0x004d02f8

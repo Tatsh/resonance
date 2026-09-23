@@ -1,10 +1,8 @@
 #pragma once
 
-class HudBadge;
+#include "rnd/mesh.h"
 
-namespace Rnd {
-class Mesh;
-} // namespace Rnd
+class HudBadge;
 
 /**
  * Pulse drawn over the leader's score on the head-up display.
@@ -34,6 +32,16 @@ public:
      * @ghidraAddress 0x0041c2b0
      */
     void MoveTo(HudBadge *pBadge);
+
+    /**
+     * Hide the pulse.
+     *
+     * Overlay::OnLeaderChanged() inlines the body when no player leads, and no out-of-line copy
+     * exists.
+     */
+    void Hide() {
+        mMesh->SetShowing(0);
+    }
 
 private:
     Rnd::Mesh *mMesh; // `<layout> score pulse.mesh`

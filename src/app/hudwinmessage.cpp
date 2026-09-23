@@ -4,6 +4,7 @@
 #include "game/gamemanagerimpl.h"
 #include "gfx/gfxdevice.h"
 #include "os/hxstr.h"
+#include "rnd/text.h"
 
 namespace {
 
@@ -96,4 +97,13 @@ void HudWinMessage::SetFrame(float flTime) {
 
 void HudWinMessage::HidePrompt() {
     mPrompt.Hide();
+}
+
+void HudWinMessage::Draw() {
+    if (mState == kStateIdle) {
+        return;
+    }
+    g_gfxDevice.SetupGsDrawContext();
+    mMessage.mText->DrawSelf(); // Yes, the binary discards this result.
+    mPrompt.mText->Draw();
 }

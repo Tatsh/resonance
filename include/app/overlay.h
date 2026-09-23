@@ -7,6 +7,7 @@
 #include "os/hxstr.h"
 
 class HudBadge;
+class HudPanel;
 class HudTrack;
 class Message;
 class Player;
@@ -26,11 +27,9 @@ class Renderer;
  * HandleMessage() at slot 3, and inherits MsgSink::Handle() at slot 2.
  *
  * The object is 0x5c bytes, the size Renderer's constructor requests under the MsgSink tag at
- * `0x0042c8cc`. The destructor releases the display object at `+0x04` (0x164 bytes, torn down
- * through `0x0041ac18` and then the scalar free), deletes every element of the vector at `+0x08`
- * through `0x0042aa18`, frees every element of the vector at `+0x14` with the scalar free, and
- * releases the string vector at `+0x20` and the vector at `+0x2c`. The panel class is not declared
- * yet, and the panel pointer is recorded by size.
+ * `0x0042c8cc`. The destructor frees every badge with the scalar free and deletes every track
+ * display, then deletes the HudPanel (its implicit destructor inlined, then the scalar free),
+ * clears GfxDevice::mFeedbackEnabled, and releases the name and kind vectors.
  */
 class Overlay : public MsgSink {
 public:
@@ -49,7 +48,8 @@ public:
     /**
      * Release every display object and clear g_pOverlay.
      *
-     * The body is not written. It needs the destructors at `0x0041ac18` and `0x0042aa18`.
+     * Each track display goes through its deleting destructor at `0x0042aa18`, and the panel's
+     * implicit destructor is inlined.
      *
      * @ghidraAddress 0x0041da00
      */
@@ -71,8 +71,10 @@ public:
      * Advance the display to one song position.
      *
      * Renderer::OnUnknownSlot7() is the caller. The bar is the position divided by 1920 ticks, and
-     * a change of bar is recorded in mCurrentBar. The title is inferred from the caller. The body
-     * is not written.
+     * a change of bar is recorded in mCurrentBar and relights every track display's effect lamps
+     * from the renderer's cell for the new bar. The time the text animations run against is the
+     * position scaled by mMsPerTick. While the game manager plays a recording back, the panel
+     * message shows the demo prompt. The title is inferred from the caller.
      *
      * @param flFrame The song position, in MIDI ticks.
      * @ghidraAddress 0x0041dd20
@@ -82,8 +84,8 @@ public:
     /**
      * Draw the display.
      *
-     * Does nothing until the display object at `+0x04` reports itself ready. The title is
-     * inferred. The body is not written.
+     * Draws the win message over the frame feedback while its sequence runs, and does nothing
+     * otherwise. The title is inferred.
      *
      * @ghidraAddress 0x0042acb8
      */
@@ -105,7 +107,8 @@ public:
     /**
      * Move the leader marker from one player to another.
      *
-     * The title is inferred. The body is not written.
+     * The score pulse moves to the new leader's badge, or hides when no player leads, and the new
+     * leader's FreQ icon pulses in place of the old leader's. The title is inferred.
      *
      * @param pOldLeader The previous leader, or null.
      * @param pNewLeader The new leader, or null.
@@ -150,7 +153,7 @@ private:
     void OnJuiceAmount(Message *pMsg);
 
     // 0x0042b068, inlined. PhraseCapturedMsg. Runs script template 1005 when mUnknown44 is set.
-    // Otherwise, in kPlayModeGame before the bar in mUnknown54, shows the capturing player's
+    // Otherwise, in kPlayModeGame before the bar in mLastBar, shows the capturing player's
     // points leaving.
     void OnPhraseCaptured(Message *pMsg);
 
@@ -207,29 +210,33 @@ private:
     // this copy at 0x00429938 has no caller.
     static void SetLayoutName(int nLayout);
 
-    // The 0x164-byte panel, deleted by the destructor. +0x04
-    unsigned char mUnknown04[0x04];
+    // The parts that belong to the whole screen, deleted by the destructor.
+    HudPanel *mPanel;
     // One track display per world player that has a slot, deleted by the destructor.
-    std::vector<HudTrack *> mTracks; // +0x08
+    std::vector<HudTrack *> mTracks;
     // One badge per world player.
-    std::vector<HudBadge *> mBadges; // +0x14
+    std::vector<HudBadge *> mBadges;
     // One instrument name per track, which a TrackSelectMsg shows on the selecting player's label.
-    std::vector<HxStr> mInstrumentNames; // +0x20
-    // One word per track, read from the track description's `+0x0c`.
-    std::vector<int> mUnknown2c; // +0x2c
-    Renderer *mRenderer;         // +0x38
+    std::vector<HxStr> mInstrumentNames;
+    // One TrackData::mKind per track.
+    std::vector<int> mTrackKinds;
+    Renderer *mRenderer;
     // Globals::GetGameMode() at construction.
-    int mGameMode; // +0x3c
+    int mGameMode;
     // Globals::GetPlayMode() at construction.
-    int mPlayMode; // +0x40
+    int mPlayMode;
     // Configuration code 0x3a1.
     int mUnknown44; // +0x44
     int mUnknown48; // +0x48
     // The bar SetFrame() last saw. The constructor starts it at -123123.
-    int mCurrentBar;                 // +0x4c
-    float mUnknown50;                // +0x50
-    int mUnknown54;                  // +0x54
-    unsigned char mReserved58[0x04]; // +0x58
+    int mCurrentBar;
+    // Milliseconds per MIDI tick at the tempo in force at construction. SetFrame() times the text
+    // animations with it.
+    float mMsPerTick;
+    // The last bar of the level, PlayMap::Slot9().
+    int mLastBar;
+    // The session difficulty, GameManagerImpl::GetUnknown88() at construction.
+    int mDifficulty;
 };
 
 /**
