@@ -221,9 +221,14 @@ public:
     /**
      * Build the transform this object draws with and return it.
      *
-     * With mBillboard clear the four mWorldXfm rows are copied out unchanged. With it set a
-     * camera-facing orientation is built instead. Either way the result is the one shared scratch
-     * buffer g_drawXfm, so it is valid only until the next call.
+     * With mBillboard clear, or with no current camera, the four mWorldXfm rows are copied out
+     * unchanged. Otherwise the basis rows are rebuilt to face g_pCurrentCam about the axes the mode
+     * selects, and kBillboardSimpleXYZ takes the camera's basis outright. A scaling mode divides
+     * the world scale out first and multiplies it back afterwards. The translation then moves by
+     * mOrigin, negated and transformed by the new basis. Modes outside the six named axis sets,
+     * kBillboardLocalRotate among them, retain the world basis and take only the origin.
+     *
+     * The result is the one shared scratch buffer g_drawXfm. It is valid only until the next call.
      *
      * @return The shared draw transform, four rows of four floats.
      * @ghidraAddress 0x004f0cc0

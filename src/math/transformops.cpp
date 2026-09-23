@@ -65,6 +65,23 @@ void Mat33BuildOrthonormal(const float *pAxisY, const float *pReference, float *
     pMat3Rows[11] = pMat3Rows[3];
 }
 
+void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst) {
+    Vec3Normalize(&pSrc[4], &pDst[4]);
+
+    // The cross products are an inline vopmula and vopmsub pair rather than a call.
+    Vector3 axisX;
+    axisX.x = (pDst[5] * pSrc[10]) - (pDst[6] * pSrc[9]);
+    axisX.y = (pDst[6] * pSrc[8]) - (pDst[4] * pSrc[10]);
+    axisX.z = (pDst[4] * pSrc[9]) - (pDst[5] * pSrc[8]);
+    axisX.w = pDst[7];
+    Vec3Normalize(&axisX.x, &pDst[0]);
+
+    pDst[8] = (pDst[1] * pDst[6]) - (pDst[2] * pDst[5]);
+    pDst[9] = (pDst[2] * pDst[4]) - (pDst[0] * pDst[6]);
+    pDst[10] = (pDst[0] * pDst[5]) - (pDst[1] * pDst[4]);
+    pDst[11] = pDst[3];
+}
+
 void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pScale) {
     const float flLenZ = sqrtf((pMat3Rows[8] * pMat3Rows[8]) + (pMat3Rows[9] * pMat3Rows[9]) +
                                (pMat3Rows[10] * pMat3Rows[10]));

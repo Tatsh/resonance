@@ -5,8 +5,12 @@
 #include <list>
 #include <string.h>
 
+#include "math/quaternion.h"
+#include "math/transformops.h"
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "rnd/cam.h"
 #include "rnd/manager.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
@@ -214,6 +218,138 @@ Transformable::Transformable() : mDirty(1), mBillboard(kBillboardNone) {
 // 0x004fb2a8
 Transformable::~Transformable() {
     ReleaseTransRefs();
+}
+
+// The mBillboard bit that selects the scaling variant of a mode.
+constexpr int kBillboardScaleBit = 0x80;
+
+// 0x007067e0
+float g_drawXfm[kXfmRowCount][kXfmRowFloatCount];
+
+// 0x004faf48
+// Take the reciprocal of each of three components. A zero component writes nothing at all.
+static void ReciprocalVec3(const float *pSrc, float *pOut) {
+    if (pSrc[0] == 0.0f || pSrc[1] == 0.0f || pSrc[2] == 0.0f) {
+        return;
+    }
+    pOut[2] = 1.0f / pSrc[2];
+    pOut[0] = 1.0f / pSrc[0];
+    pOut[1] = 1.0f / pSrc[1];
+}
+
+// The VU0 cross product, whose fourth word comes from pA.
+static inline void CrossVec3(const float *pA, const float *pB, float *pOut) {
+    const float flX = (pA[1] * pB[2]) - (pA[2] * pB[1]);
+    const float flY = (pA[2] * pB[0]) - (pA[0] * pB[2]);
+    const float flZ = (pA[0] * pB[1]) - (pA[1] * pB[0]);
+    pOut[kXfmPaddingFloat] = pA[kXfmPaddingFloat];
+    pOut[0] = flX;
+    pOut[1] = flY;
+    pOut[2] = flZ;
+}
+
+// The direction from the camera to the draw translation, with a padding float of 1.0.
+static inline void CameraToDrawTranslation(const Cam &cam, float *pOut) {
+    pOut[kXfmPaddingFloat] = 1.0f;
+    Vec3Sub(g_drawXfm[kXfmTranslationRow], cam.mWorldXfm[kXfmTranslationRow], pOut);
+}
+
+// 0x004f0cc0
+float *Transformable::GetDrawXfm() {
+    if (mBillboard == kBillboardNone || g_pCurrentCam == nullptr) {
+        memcpy(g_drawXfm, mWorldXfm, sizeof(g_drawXfm));
+        return g_drawXfm[0];
+    }
+    const Cam &cam = *g_pCurrentCam;
+
+    Vector3 scale;
+    scale.w = 1.0f;
+    if ((mBillboard & kBillboardScaleBit) != 0) {
+        Mat33ExtractScale(mWorldXfm[0], &scale.x);
+    }
+    if ((mBillboard & kBillboardSimpleXYZ) != 0) {
+        std::copy(std::begin(mWorldXfm[kXfmTranslationRow]),
+                  std::end(mWorldXfm[kXfmTranslationRow]),
+                  g_drawXfm[kXfmTranslationRow]);
+    } else if ((mBillboard & kBillboardScaleBit) != 0) {
+        // The image leaves the reciprocal as stack contents when a scale is zero.
+        Vector3 inverse{0.0f, 0.0f, 0.0f, 1.0f};
+        ReciprocalVec3(&scale.x, &inverse.x);
+        const float afInverse[] = {inverse.x, inverse.y, inverse.z};
+        for (int nRow = 0; nRow < kXfmBasisRowCount; ++nRow) {
+            for (int i = 0; i < kXfmPaddingFloat; ++i) {
+                g_drawXfm[nRow][i] = mWorldXfm[nRow][i] * afInverse[nRow];
+            }
+        }
+        std::copy(std::begin(mWorldXfm[kXfmTranslationRow]),
+                  std::end(mWorldXfm[kXfmTranslationRow]),
+                  g_drawXfm[kXfmTranslationRow]);
+    } else {
+        memcpy(g_drawXfm, mWorldXfm, sizeof(g_drawXfm));
+    }
+
+    float afToObject[kXfmRowFloatCount];
+    float afCross[kXfmRowFloatCount];
+    switch (mBillboard & ~kBillboardScaleBit) {
+    case kBillboardSimpleXYZ:
+        for (int nRow = 0; nRow < kXfmBasisRowCount; ++nRow) {
+            std::copy(
+                std::begin(cam.mWorldXfm[nRow]), std::end(cam.mWorldXfm[nRow]), g_drawXfm[nRow]);
+        }
+        break;
+    case kBillboardXYZ:
+        CameraToDrawTranslation(cam, afToObject);
+        std::copy(std::begin(afToObject), std::end(afToObject), g_drawXfm[1]);
+        std::copy(std::begin(cam.mWorldXfm[2]), std::end(cam.mWorldXfm[2]), g_drawXfm[2]);
+        Mat33OrthonormalizeAroundY(g_drawXfm[0], g_drawXfm[0]);
+        break;
+    case kBillboardZ:
+        CameraToDrawTranslation(cam, afToObject);
+        std::copy(std::begin(afToObject), std::end(afToObject), g_drawXfm[1]);
+        CrossVec3(g_drawXfm[1], g_drawXfm[2], afCross);
+        Vec3Normalize(afCross, g_drawXfm[0]);
+        CrossVec3(g_drawXfm[2], g_drawXfm[0], g_drawXfm[1]);
+        break;
+    case kBillboardX:
+        CameraToDrawTranslation(cam, afToObject);
+        std::copy(std::begin(afToObject), std::end(afToObject), g_drawXfm[1]);
+        CrossVec3(g_drawXfm[0], g_drawXfm[1], afCross);
+        Vec3Normalize(afCross, g_drawXfm[2]);
+        CrossVec3(g_drawXfm[2], g_drawXfm[0], g_drawXfm[1]);
+        break;
+    case kBillboardY:
+        CameraToDrawTranslation(cam, afToObject);
+        CrossVec3(cam.mWorldXfm[0], afToObject, g_drawXfm[2]);
+        CrossVec3(g_drawXfm[1], g_drawXfm[2], afCross);
+        Vec3Normalize(afCross, g_drawXfm[0]);
+        CrossVec3(g_drawXfm[0], g_drawXfm[1], g_drawXfm[2]);
+        break;
+    case kBillboardXZ:
+        CameraToDrawTranslation(cam, afToObject);
+        Vec3Normalize(afToObject, g_drawXfm[1]);
+        CrossVec3(g_drawXfm[1], g_drawXfm[2], afCross);
+        Vec3Normalize(afCross, g_drawXfm[0]);
+        CrossVec3(g_drawXfm[0], g_drawXfm[1], g_drawXfm[2]);
+        break;
+    default:
+        // kBillboardLocalRotate lands here and takes only the origin below.
+        break;
+    }
+
+    if ((mBillboard & kBillboardScaleBit) != 0) {
+        ScaleRows3x3(&scale.x, g_drawXfm[0], g_drawXfm[0]);
+    }
+
+    float afOffset[kXfmRowFloatCount];
+    afOffset[kXfmPaddingFloat] = 1.0f;
+    NegateVec3(mOrigin, afOffset);
+    float *const pTranslation = g_drawXfm[kXfmTranslationRow];
+    for (int i = 0; i < kXfmPaddingFloat; ++i) {
+        pTranslation[i] = (g_drawXfm[0][i] * afOffset[0]) + (g_drawXfm[1][i] * afOffset[1]) +
+                          (g_drawXfm[2][i] * afOffset[2]) + pTranslation[i];
+    }
+    pTranslation[kXfmPaddingFloat] = afOffset[kXfmPaddingFloat];
+    return g_drawXfm[0];
 }
 
 // 0x004f0838

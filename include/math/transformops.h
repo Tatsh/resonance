@@ -78,6 +78,22 @@ void EulerAnglesToMatrix3x3(const float *pAngles, float *pMat3Rows);
 void Mat33BuildOrthonormal(const float *pAxisY, const float *pReference, float *pMat3Rows);
 
 /**
+ * Rebuild a basis as orthonormal around its Y row.
+ *
+ * The Y row is normalised. The X row becomes that Y row crossed with the source Z row, normalised,
+ * and the Z row becomes X crossed with Y. Each row is written as a whole quadword, and the cross
+ * products propagate the fourth word of the source Y row into the other two rows. pDst may be pSrc.
+ * The source Z row is read before the destination Z row is written.
+ * Rnd::Transformable::GetDrawXfm() rebuilds its camera-facing basis in place with it, and the
+ * routines at `0x00254b30` and `0x00254c20` also call it.
+ *
+ * @param pSrc The basis to rebuild, three rows of four floats.
+ * @param pDst Receives the orthonormal basis, three rows of four floats.
+ * @ghidraAddress 0x002556c8
+ */
+void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst);
+
+/**
  * Split a basis into Euler angles and per-axis scales.
  *
  * Each scale is the length of the matching row. The Z scale is negated when the three rows are
