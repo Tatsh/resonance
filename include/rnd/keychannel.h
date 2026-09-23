@@ -104,7 +104,9 @@ FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys);
 /**
  * Read a channel of colour keyframes from a `.rnd` stream.
  *
- * Reads the keyframe count, resizes the channel to it, and then reads one element per node.
+ * Reads the keyframe count, resizes the channel to it, and then reads one element per node. A
+ * second emission at `0x0052cde0`, in the Rnd::ParticleSysAnim unit, differs only in its branch
+ * targets and has no caller.
  *
  * @param stream The stream to read from.
  * @param keys The channel to fill.

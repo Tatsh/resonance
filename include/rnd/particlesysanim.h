@@ -42,8 +42,6 @@ namespace Rnd {
  * Both EndFrame() and SetFrameSelf() read the channels of mFramesOwner rather than their own, so
  * an animation whose frames belong to another animation reads that object's keys.
  *
- * Recovery is partial. Load() at `0x00526ce8`, Replace() at `0x005267a8`, the constructor at
- * `0x0052bca0`, and the destructor at `0x0052b9c0` are understood and not yet written.
  * SetFrameSelf() is blocked rather than unrecovered; see its own documentation.
  */
 class ParticleSysAnim : public Animatable {
@@ -61,9 +59,9 @@ public:
     enum { kCopyShareKeys = 0x80 };
 
     /**
-     * Construct an animation with no channels and no system.
+     * Construct an animation with no channels and no system that owns its own frames.
      *
-     * The body is not reconstructed. Rnd::NewParticleSysAnim() is the only construction site.
+     * mEmitRateRatio starts at zero. Rnd::NewParticleSysAnim() is the only construction site.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x0052bca0
@@ -169,7 +167,41 @@ protected:
      */
     virtual void SetFrameSelf(float flFrame);
 
+    /**
+     * Make a particle system the one this animation drives.
+     *
+     * Moves this object's reference from the previous system to the new one. No call site
+     * survives in the shipped program, and the name is inferred.
+     *
+     * @param pParticleSys The new system, or null.
+     * @ghidraAddress 0x0052c700
+     */
+    void SetParticleSys(ParticleSys *pParticleSys);
+
+    /**
+     * Make another animation the one whose keyframes drive this one.
+     *
+     * Moves this object's reference from the previous owner to the new one, and then empties this
+     * object's own channels unless it is its own owner. No call site survives in the shipped
+     * program, and the name follows the Rnd::TransAnim counterpart.
+     *
+     * @param pOwner The new frames owner, or null.
+     * @ghidraAddress 0x0052c7a0
+     */
+    void SetFramesOwner(ParticleSysAnim *pOwner);
+
 private:
+    // Empty the three channels unless this animation owns its frames. Load() and SetFramesOwner()
+    // inline it. 0x0052c758.
+    void ClearKeys();
+
+    // Register this animation as a referrer of mParticleSys and mFramesOwner. Load() inlines it.
+    // 0x0052c868.
+    void AddObjectRefs();
+
+    // Drop the references AddObjectRefs() took. The destructor calls it. 0x0052c818.
+    void RemoveObjectRefs();
+
     // No class derives from Rnd::ParticleSysAnim and no access from outside it is recovered, so
     // every member is private. The order below is the recovered offset order, and each member is
     // pinned by the text dump, which reads all six.

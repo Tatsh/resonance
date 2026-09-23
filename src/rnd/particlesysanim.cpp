@@ -8,6 +8,7 @@
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
+#include "rnd/manager.h"
 #include "rnd/object.h"
 #include "rnd/particlesys.h"
 #include "rnd/stream.h"
@@ -15,6 +16,19 @@
 namespace Rnd {
 
 namespace {
+
+// The revision from which a record stores mEmitRateRatio, and the one from which Load() would
+// retain the channels of an animation that borrows another's frames.
+constexpr int kFirstRevisionWithEmitRateRatio = 1;
+constexpr int kFirstRevisionKeepingBorrowedKeys = 2;
+
+// Resolve an object name read from a stream to an object of class T, or null.
+template <class T>
+void ReadTargetName(Stream &stream, T *&refOut) {
+    HxStr name(nullptr);
+    stream.ReadString(name);
+    refOut = dynamic_cast<T *>(g_manager.Find(name));
+}
 
 // The text dump writes an absent object reference as this literal, and a present one as its
 // quoted name. src/rnd/mesh.cpp declares the same pair file-locally for the same reason.
@@ -192,6 +206,134 @@ void ParticleSysAnim::Copy(const Object *pSource, unsigned nFlags) {
         mEmitRateKeys = pSourceAnim->mEmitRateKeys;
     }
 
+    if (mParticleSys != nullptr) {
+        mParticleSys->AddRef(this);
+    }
+    if (mFramesOwner != nullptr) {
+        mFramesOwner->AddRef(this);
+    }
+}
+
+// 0x0052bca0
+ParticleSysAnim::ParticleSysAnim(const HxStr &name)
+    : Object(name), mParticleSys(nullptr), mFramesOwner(this), mEmitRateRatio(0.0f) {
+}
+
+// 0x0052b9c0
+ParticleSysAnim::~ParticleSysAnim() {
+    RemoveObjectRefs();
+    ReleaseAllRefs();
+}
+
+// 0x005267a8
+void ParticleSysAnim::Replace(Object *pFrom, Object *pTo) {
+    Animatable::Replace(pFrom, pTo);
+
+    if (mParticleSys == pFrom) {
+        if (pFrom != nullptr) {
+            pFrom->RemoveRef(this);
+        }
+        if (mParticleSys != nullptr) {
+            mParticleSys = dynamic_cast<ParticleSys *>(pTo);
+        }
+        if (mParticleSys != nullptr) {
+            mParticleSys->AddRef(this);
+        }
+    }
+
+    if (mFramesOwner != pFrom) {
+        return;
+    }
+
+    if (pTo != nullptr) {
+        if (pFrom != nullptr) {
+            pFrom->RemoveRef(this);
+        }
+        if (mFramesOwner != nullptr) {
+            mFramesOwner = dynamic_cast<ParticleSysAnim *>(pTo);
+        }
+        if (mFramesOwner != nullptr) {
+            mFramesOwner->AddRef(this);
+        }
+        return;
+    }
+
+    // The owner is going away, so its channels are taken over rather than dropped.
+    mStartColorKeys = mFramesOwner->mStartColorKeys;
+    mEndColorKeys = mFramesOwner->mEndColorKeys;
+    mEmitRateKeys = mFramesOwner->mEmitRateKeys;
+    mFramesOwner = this;
+}
+
+// 0x00526ce8
+void ParticleSysAnim::Load(Stream &stream) {
+    int nRevision = 0;
+    stream.Read(&nRevision, sizeof(nRevision));
+    if (nRevision > kSerialVersion) {
+        g_failSink.Report("Can't load new ParticleSysAnim");
+        return;
+    }
+
+    Animatable::Load(stream);
+    RemoveObjectRefs();
+    ReadTargetName(stream, mParticleSys);
+    ReadFloatKeys(ReadColorKeys(ReadColorKeys(stream, mStartColorKeys), mEndColorKeys),
+                  mEmitRateKeys);
+    ReadTargetName(stream, mFramesOwner);
+    if (nRevision >= kFirstRevisionWithEmitRateRatio) {
+        stream.Read(&mEmitRateRatio, sizeof(mEmitRateRatio));
+    }
+    if (nRevision < kFirstRevisionKeepingBorrowedKeys) {
+        ClearKeys(); // Yes, every revision Load() accepts passes this test.
+    }
+    AddObjectRefs();
+}
+
+// 0x0052c700
+void ParticleSysAnim::SetParticleSys(ParticleSys *pParticleSys) {
+    if (mParticleSys != nullptr) {
+        mParticleSys->RemoveRef(this);
+    }
+    mParticleSys = pParticleSys;
+    if (pParticleSys != nullptr) {
+        pParticleSys->AddRef(this);
+    }
+}
+
+// 0x0052c758
+void ParticleSysAnim::ClearKeys() {
+    if (mFramesOwner == this) {
+        return;
+    }
+    mStartColorKeys.clear();
+    mEndColorKeys.clear();
+    mEmitRateKeys.clear();
+}
+
+// 0x0052c7a0
+void ParticleSysAnim::SetFramesOwner(ParticleSysAnim *pOwner) {
+    if (mFramesOwner != nullptr) {
+        mFramesOwner->RemoveRef(this);
+    }
+    mFramesOwner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+    ClearKeys();
+}
+
+// 0x0052c818
+void ParticleSysAnim::RemoveObjectRefs() {
+    if (mParticleSys != nullptr) {
+        mParticleSys->RemoveRef(this);
+    }
+    if (mFramesOwner != nullptr) {
+        mFramesOwner->RemoveRef(this);
+    }
+}
+
+// 0x0052c868
+void ParticleSysAnim::AddObjectRefs() {
     if (mParticleSys != nullptr) {
         mParticleSys->AddRef(this);
     }
