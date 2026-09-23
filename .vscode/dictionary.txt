@@ -53,6 +53,7 @@ asynccallback
 asyncloader
 atgafile
 atten
+audiodec
 augm
 autobrief
 autocatch
@@ -472,6 +473,7 @@ memcardps
 memcardsavepaths
 memcardtask
 memcarduser
+memcpy
 memorycard
 memstream
 meshanim
@@ -749,6 +751,7 @@ rawcontroller
 rawcontrollermsg
 raytest
 rdparty
+readbuf
 readop
 recomputation
 recon
@@ -863,7 +866,9 @@ stopriffmsg
 strcmp
 streakovermsg
 strerror
+strfile
 stringobject
+strncpy
 stropmodule
 structmember
 structmodule
@@ -983,6 +988,8 @@ vars
 vclipw
 vendored
 venv
+vibuf
+videodec
 vmadday
 vmaddaz
 vmaddw
