@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "os/async.h"
+#include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "synth/callbackxferhdtoiop.h"

@@ -5,6 +5,7 @@
 #include <strings.h>
 #include <unistd.h>
 
+#include "os/async.h"
 #include "os/hostmode.h"
 #include "os/log.h"
 #include "os/mem.h"
@@ -87,4 +88,16 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
     // The file is not closed here, unlike in LoadWholeFile().
     *pnSize = nSize;
     return pBuffer;
+}
+
+// 0x00555790
+int GetStoredFileLength(const char *pszPath) {
+    const int nFile = FileOpen(pszPath, 0);
+    if (nFile < 0) {
+        return 0;
+    }
+    const int nLength = FileSeek(nFile, 0, kFileSeekEnd);
+    FileSeek(nFile, 0, kFileSeekSet);
+    FileClose(nFile);
+    return nLength;
 }

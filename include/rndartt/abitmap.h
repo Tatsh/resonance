@@ -56,6 +56,17 @@ extern const unsigned char g_abBitmapBytesPerPixel[kABitmapFormatCount];
 extern const unsigned char g_abBitmapBitsPerPixel[kABitmapFormatCount];
 
 /**
+ * Non-zero to leave bitmap colours in file order rather than swapping red and blue.
+ *
+ * Every caller of ABitmap::SwapRedBlue() tests it first: Rnd::MovieStream::Update(),
+ * Rnd::Tex::OnMipLoaded(), VramTable::Screendump(), and the routines at `0x00250638` and
+ * `0x00254cf8`. Nothing in the image writes it, so it stays zero. The name is inferred.
+ *
+ * @ghidraAddress 0x00725cd0
+ */
+extern int g_nSkipColorSwap;
+
+/**
  * Description of a pixel rectangle, its layout, and its palette.
  *
  * The record is not polymorphic and has no RTTI. Its name is inferred from the header its
@@ -207,6 +218,18 @@ struct ABitmap {
      * @ghidraAddress 0x004e5b78
      */
     void ApplyColorKey(int nFlags);
+
+    /**
+     * Exchange red and blue throughout the bitmap, or throughout its palette.
+     *
+     * An indexed format swaps the first mPalette->mEnd palette entries, and does nothing without a
+     * palette. A direct colour format swaps every pixel of every row, stepping by mBytesPerRow.
+     * The four row loops inline SwapRedBlue15(), SwapRedBlue24(), and SwapRedBlue32(). Callers
+     * skip the call while g_nSkipColorSwap is non-zero.
+     *
+     * @ghidraAddress 0x00559140
+     */
+    void SwapRedBlue();
 
     void *mPixels; /*!< The pixel rectangle, null until allocated. +0x00 */
     unsigned short mHasTransparentColor : 8; /*!< Whether mTransparentColor applies. +0x04 */

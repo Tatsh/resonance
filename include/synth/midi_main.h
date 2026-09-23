@@ -243,20 +243,6 @@ int FileOpen(char *pszPath, int nFlags);
 extern CallbackXferBdToIop *g_pBdXfer;
 
 /**
- * Report the uncompressed length of a file.
- *
- * The routine belongs to the file layer and is declared here so both bank starters can call it. It
- * opens the path, measures it from the ark directory record, the gzip trailer, or the file size,
- * and reports the length without reporting the handle, which is why a caller that needs the file
- * opens it again.
- *
- * @param pszPath The file to measure.
- * @return The uncompressed length, or zero or less when the file could not be opened.
- * @ghidraAddress 0x00555800
- */
-int GetUncompressedFileLength(const char *pszPath);
-
-/**
  * Copy a four-character code into a buffer it can be printed from.
  *
  * The scratch buffer is eight bytes and only the first four are ever written, so the second word

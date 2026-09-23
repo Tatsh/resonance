@@ -437,6 +437,7 @@ mmix
 modsupport
 moduleobject
 mous
+moviestream
 movt
 mpfn
 mscal

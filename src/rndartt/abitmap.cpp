@@ -123,6 +123,43 @@ void ABitmap::SwapRedBlue32(unsigned char *pPixels, int nCount) {
     }
 }
 
+// 0x00725cd0
+int g_nSkipColorSwap;
+
+// 0x00559140
+void ABitmap::SwapRedBlue() {
+    unsigned char *pRow = static_cast<unsigned char *>(mPixels);
+    switch (mFormat) {
+    case kABitmapFormatLinear4:
+    case kABitmapFormatLinear8:
+    case kABitmapFormatRle8:
+        if (mPalette != nullptr) {
+            SwapRedBlue32(reinterpret_cast<unsigned char *>(mPalette->mEntries), mPalette->mEnd);
+        }
+        break;
+    case kABitmapFormatLinear15:
+        for (int nRow = 0; nRow < mHeight; ++nRow) {
+            SwapRedBlue15(reinterpret_cast<unsigned short *>(pRow), mWidth);
+            pRow += mBytesPerRow;
+        }
+        break;
+    case kABitmapFormatLinear24:
+        for (int nRow = 0; nRow < mHeight; ++nRow) {
+            SwapRedBlue24(pRow, mWidth);
+            pRow += mBytesPerRow;
+        }
+        break;
+    case kABitmapFormatLinear32:
+        for (int nRow = 0; nRow < mHeight; ++nRow) {
+            SwapRedBlue32(pRow, mWidth);
+            pRow += mBytesPerRow;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 // 0x004e5b78
 void ABitmap::ApplyColorKey(int nFlags) {
     if (nFlags != 0) {

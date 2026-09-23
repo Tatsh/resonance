@@ -22,6 +22,7 @@ set(RESONANCE_RND_SRCS
     mesh.cpp
     meshanim.cpp
     movie.cpp
+    moviestream.cpp
     multimesh.cpp
     object.cpp
     particlesys.cpp

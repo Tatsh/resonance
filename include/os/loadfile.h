@@ -141,3 +141,28 @@ void InflateGzFileWhole(int nFile, void *pBuffer);
  * @ghidraAddress 0x005636a0
  */
 int InflateGzBuffer(const void *pSource, int nSourceLength, void *pDest);
+
+/**
+ * Report the stored length of a file.
+ *
+ * The path is opened, measured by seeking to its end, rewound, and closed. A gzip file reports its
+ * compressed size, unlike GetUncompressedFileLength(). The name is inferred.
+ *
+ * @param pszPath The file to measure.
+ * @return The length in bytes, or 0 when the file could not be opened.
+ * @ghidraAddress 0x00555790
+ */
+int GetStoredFileLength(const char *pszPath);
+
+/**
+ * Report the uncompressed length of a file.
+ *
+ * It opens the path, measures it from the ark directory record, the gzip trailer, or the file size,
+ * and reports the length without reporting the handle, which is why a caller that needs the file
+ * opens it again.
+ *
+ * @param pszPath The file to measure.
+ * @return The uncompressed length, or zero or less when the file could not be opened.
+ * @ghidraAddress 0x00555800
+ */
+int GetUncompressedFileLength(const char *pszPath);
