@@ -2,6 +2,7 @@
 # interpreter's own Python 2 headers. This tree records that interpreter's differences
 # rather than including its headers.
 set(RESONANCE_SCRIPT_SRCS
+    cmdpostscript.cpp
     scriptsink.cpp
     scripttemplatemap.cpp
     testregistry.cpp)

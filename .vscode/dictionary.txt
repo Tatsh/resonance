@@ -105,6 +105,7 @@ clocki
 closeop
 clut
 cmdid
+cmdpostscript
 cobject
 codecsmodule
 codeop

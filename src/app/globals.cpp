@@ -96,6 +96,11 @@ WatchdogTimer *Globals::GetWatchdogTimer() {
     return mWatchdogTimer;
 }
 
+// 0x00118ef8
+ScriptSink *Globals::GetScriptSink() {
+    return mScriptSink;
+}
+
 // 0x00118d40
 GrooveWorld *Globals::GetWorld() {
     return mGameManager->GetWorld();

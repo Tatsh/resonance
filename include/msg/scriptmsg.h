@@ -18,6 +18,19 @@
  */
 class ScriptMsg : public Message {
 public:
+    /** Wrap an empty script. */
+    ScriptMsg() = default;
+
+    /**
+     * Wrap a line of script text.
+     *
+     * Inline. ScriptCmd's Execute() at `0x0015a408` expands it on the stack.
+     *
+     * @param script The text.
+     */
+    explicit ScriptMsg(const HxStr &script) : mScript(script) {
+    }
+
     /**
      * Produce a message with an empty script on the heap.
      *

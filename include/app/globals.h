@@ -131,6 +131,12 @@ public:
     WatchdogTimer *GetWatchdogTimer();
 
     /**
+     * @return The sink that runs posted script text.
+     * @ghidraAddress 0x00118ef8
+     */
+    ScriptSink *GetScriptSink();
+
+    /**
      * Report the game manager's world.
      *
      * Reads mGameManager directly rather than through GetGameManager().
