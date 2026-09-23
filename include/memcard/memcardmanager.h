@@ -5,10 +5,13 @@
 
 #include "memcard/memcardconnectstate.h"
 
+class GlobalSettings;
 class HxStr;
+class JukeboxPlayList;
 class Memcard;
 class MemcardTask;
 class MemcardUser;
+class MetPersonaData;
 
 /**
  * Game-wide owner of the memory-card queue and of the tasks that drive it.
@@ -102,6 +105,62 @@ public:
      * @ghidraAddress 0x001f2f88
      */
     void CreateUnformatTask(int nPortSlot);
+
+    /**
+     * Queue a SavePersonasMCT, which serialises the roster at once.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param roster The personas to save.
+     * @ghidraAddress 0x001f3090
+     */
+    void CreateSavePersonasTask(int nPortSlot, const std::vector<MetPersonaData *> &roster);
+
+    /**
+     * Queue a SaveGlobalSettingsMCT, which serialises the settings at once.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param pSettings The settings to save.
+     * @ghidraAddress 0x001f3328
+     */
+    void CreateSaveGlobalSettingsTask(int nPortSlot, GlobalSettings *pSettings);
+
+    /**
+     * Queue a SaveJukeboxPlayListMCT, which serialises the playlist at once.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param pPlayList The playlist to save.
+     * @param nIndex The playlist number the file name carries.
+     * @ghidraAddress 0x001f3458
+     */
+    void CreateSaveJukeboxPlayListTask(int nPortSlot, JukeboxPlayList *pPlayList, int nIndex);
+
+    /**
+     * Queue a LoadPersonasMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param pRoster Where the loaded personas are appended.
+     * @ghidraAddress 0x001f37f8
+     */
+    void CreateLoadPersonasTask(int nPortSlot, std::vector<MetPersonaData *> *pRoster);
+
+    /**
+     * Queue a LoadGlobalSettingsMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param pSettings The settings to fill.
+     * @ghidraAddress 0x001f3910
+     */
+    void CreateLoadGlobalSettingsTask(int nPortSlot, GlobalSettings *pSettings);
+
+    /**
+     * Queue a LoadJukeboxPlayListMCT.
+     *
+     * @param nPortSlot The packed port and slot.
+     * @param pPlayList The playlist to fill.
+     * @param nIndex The playlist number the file name carries.
+     * @ghidraAddress 0x001f3a40
+     */
+    void CreateLoadJukeboxPlayListTask(int nPortSlot, JukeboxPlayList *pPlayList, int nIndex);
 
     /**
      * Queue a LoadRemixMCT.

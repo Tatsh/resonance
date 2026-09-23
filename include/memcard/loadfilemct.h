@@ -112,7 +112,7 @@ public:
      */
     int mBytesRead;
 
-private:
+protected:
     // One of LoadFileState. +0x1c
     int mState;
 

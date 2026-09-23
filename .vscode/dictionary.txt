@@ -398,7 +398,10 @@ listpan
 listremixesmct
 loadfilemct
 loadgame
+loadglobalsettingsmct
 loadinggame
+loadjukeboxplaylistmct
+loadpersonasmct
 loadremixmct
 lobbyconnectionlostmsg
 localjamenablemgr
@@ -695,6 +698,9 @@ rotrightmsg
 rpch
 rtti
 savefilemct
+saveglobalsettingsmct
+savejukeboxplaylistmct
+savepersonasmct
 saveremixmct
 scallclientsstatuspacket
 scallplayersinfopacket

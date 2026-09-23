@@ -4,10 +4,16 @@
 #include "memcard/formatcardmct.h"
 #include "memcard/getallconnectstatesmct.h"
 #include "memcard/getconnectstatemct.h"
+#include "memcard/loadglobalsettingsmct.h"
+#include "memcard/loadjukeboxplaylistmct.h"
+#include "memcard/loadpersonasmct.h"
 #include "memcard/loadremixmct.h"
 #include "memcard/memcardps2.h"
 #include "memcard/memcardtask.h"
 #include "memcard/minimumsavespacemct.h"
+#include "memcard/saveglobalsettingsmct.h"
+#include "memcard/savejukeboxplaylistmct.h"
+#include "memcard/savepersonasmct.h"
 
 namespace {
 
@@ -77,6 +83,43 @@ void MemcardManager::CreateFormatTask(int nPortSlot) {
 // 0x001f2f88
 void MemcardManager::CreateUnformatTask(int nPortSlot) {
     mTasks.push_back(new FormatCardMCT(mUser, mCard, nPortSlot, ++mTicket, kUnformat));
+}
+
+// 0x001f3090
+void MemcardManager::CreateSavePersonasTask(int nPortSlot,
+                                            const std::vector<MetPersonaData *> &roster) {
+    mTasks.push_back(new SavePersonasMCT(mUser, mCard, nPortSlot, ++mTicket, roster));
+}
+
+// 0x001f3328
+void MemcardManager::CreateSaveGlobalSettingsTask(int nPortSlot, GlobalSettings *pSettings) {
+    mTasks.push_back(new SaveGlobalSettingsMCT(mUser, mCard, nPortSlot, ++mTicket, pSettings));
+}
+
+// 0x001f3458
+void MemcardManager::CreateSaveJukeboxPlayListTask(int nPortSlot,
+                                                   JukeboxPlayList *pPlayList,
+                                                   int nIndex) {
+    mTasks.push_back(
+        new SaveJukeboxPlayListMCT(mUser, mCard, nPortSlot, ++mTicket, pPlayList, nIndex));
+}
+
+// 0x001f37f8
+void MemcardManager::CreateLoadPersonasTask(int nPortSlot, std::vector<MetPersonaData *> *pRoster) {
+    mTasks.push_back(new LoadPersonasMCT(mUser, mCard, nPortSlot, ++mTicket, pRoster));
+}
+
+// 0x001f3910
+void MemcardManager::CreateLoadGlobalSettingsTask(int nPortSlot, GlobalSettings *pSettings) {
+    mTasks.push_back(new LoadGlobalSettingsMCT(mUser, mCard, nPortSlot, ++mTicket, pSettings));
+}
+
+// 0x001f3a40
+void MemcardManager::CreateLoadJukeboxPlayListTask(int nPortSlot,
+                                                   JukeboxPlayList *pPlayList,
+                                                   int nIndex) {
+    mTasks.push_back(
+        new LoadJukeboxPlayListMCT(mUser, mCard, nPortSlot, ++mTicket, pPlayList, nIndex));
 }
 
 // 0x001f36c8

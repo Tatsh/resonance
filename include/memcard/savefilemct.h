@@ -29,6 +29,12 @@ enum SaveFileStep {
     kSaveFileStepDone = 10           /*!< Terminal. The body only releases its temporary. */
 };
 
+/**
+ * Free clusters SavePersonasMCT, SaveGlobalSettingsMCT, and SaveJukeboxPlayListMCT require before
+ * they save.
+ */
+constexpr int kSaveFileMinimumFreeClusters = 60;
+
 /** Bytes the Shift-JIS title buffer reserves, which is the stack run BuildIconSys() fills. */
 constexpr int kIconTitleBufferSize = 64;
 
@@ -139,7 +145,7 @@ public:
     /** @ghidraAddress 0x00185ac0 */
     virtual void Execute();
 
-private:
+protected:
     // The descriptor the current step writes through. +0x1c
     int mFile;
 

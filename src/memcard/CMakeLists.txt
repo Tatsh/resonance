@@ -12,6 +12,9 @@ set(RESONANCE_MEMCARD_SRCS
     listdirop.cpp
     listremixesmct.cpp
     loadfilemct.cpp
+    loadglobalsettingsmct.cpp
+    loadjukeboxplaylistmct.cpp
+    loadpersonasmct.cpp
     loadremixmct.cpp
     memcard.cpp
     memcardcbhandler.cpp
@@ -27,6 +30,9 @@ set(RESONANCE_MEMCARD_SRCS
     readop.cpp
     renamefileop.cpp
     savefilemct.cpp
+    saveglobalsettingsmct.cpp
+    savejukeboxplaylistmct.cpp
+    savepersonasmct.cpp
     saveremixmct.cpp
     seekop.cpp
     unformatop.cpp
