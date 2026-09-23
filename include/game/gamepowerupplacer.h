@@ -25,12 +25,9 @@ class PowerupCollectionI;
  * PowerupPlacer siblings, JamPowerupPlacer and SimplifiedGamePowerupPlacer, are both constructed
  * and share the deployment shape below.
  *
- * Three bodies here are not written yet, and each one is blocked on a routine outside this family
- * that has no recovered name. The constructor and slot 6 both need the accessor at `0x00118e78`,
- * which turns an Application into the Sch::TickClock the task is posted against. Slot 8 needs the
- * accessor at `0x00118da0` and slot 9 of the object it returns, which reports the last bar a
- * placement is allowed in. Slots 4 and 5 both need a TickTask member that `app/ticktask.h` does
- * not declare, the scheduling call at `0x0013a860` and the withdrawal at `0x0013ae10`.
+ * Slots 6 and 8 are not written. Each takes the cursor off the map with a DisplayPointerMsg that
+ * sets only the player value (-1, which Print() reports as `remove`) and the player, leaving the
+ * bar unset, and the message class declares no constructor of that form.
  *
  * The two slots this class overrides on the PowerupPlacer side retain the base spelling,
  * OnUnknownSlot4() and OnUnknownSlot5(), even though the bodies recover the verbs. The base
@@ -42,11 +39,8 @@ public:
     /**
      * Post a task against the song clock and start with the cursor off the map.
      *
-     * The body is not written yet. It constructs the PowerupPlacer base, constructs the TickTask
-     * subobject against the clock the accessor at `0x00118e78` returns for pApplication with a
-     * period of 480 ticks and a third argument of zero, installs both tables, stores the three
-     * arguments, and sets the cursor to -1. It also calls IsFiniteMBT(480) and discards the
-     * result, which is the shape of an assertion compiled without its report.
+     * The TickTask subobject runs against the application's song clock with a period of 480 ticks
+     * and is not aligned.
      *
      * @param pOwner The player whose placer this is.
      * @param pApplication The application the song clock is reached through.
@@ -65,13 +59,14 @@ public:
     /**
      * Move the cursor by the negation of the argument and announce where it rests.
      *
-     * The body is not written yet. It negates the argument, reads the song tick through the clock
-     * the accessor at `0x00118e78` returns, divides by 1920 for the current bar, and reads
-     * Player::Slot4() for the message. A cursor of -1 accepts a step of 1 only, and then only when
-     * the store reports a selection through PowerupCollectionI::HasSelection(), and the cursor
-     * jumps to the current bar. A cursor already on the map moves by the step, clamped so that it
-     * never falls behind the current bar and never runs more than one bar past it. Every accepted
-     * move sends a DisplayPointerMsg.
+     * A zero argument does nothing. Otherwise the routine negates the argument, reads the current
+     * bar from the song clock, and reads Player::Slot4() for the message. A cursor of -1 accepts a
+     * step of 1 only, and then only when PowerupCollectionI::HasSelection() reports a selection,
+     * and the cursor jumps to the current bar. A cursor already on the map moves by the step. A
+     * cursor that falls behind the current bar leaves the map with a `remove` message, one more
+     * than four bars ahead of it steps back one bar without a message, and any other position is
+     * announced with a DisplayPointerMsg. The body is not written, for the reason recorded in
+     * the class documentation.
      *
      * @param nStep The step, which the body negates.
      * @ghidraAddress 0x001cccb0
@@ -90,10 +85,10 @@ public:
     /**
      * Deploy the selected powerup at the bar the cursor rests on, then take the cursor off the map.
      *
-     * The body is not written yet. A cursor of -1 returns. The cursor must also lie at or before
-     * the bar slot 9 of the object the accessor at `0x00118da0` returns reports. The deployment
-     * dispatches PowerupCollectionI::Deploy() with Player::Slot4() and the cursor bar, then sends
-     * a DisplayPointerMsg with a bar of -1 and sets the cursor to -1.
+     * A cursor of -1 returns. The cursor must also lie before the bar PlayMap::Slot9() of
+     * Globals::GetPlayMap() reports. The deployment dispatches PowerupCollectionI::Deploy() with
+     * Player::Slot4() and the cursor bar, then sends a `remove` DisplayPointerMsg and sets the
+     * cursor to -1. The body is not written, for the reason recorded in the class documentation.
      *
      * @ghidraAddress 0x001ccf30
      */
@@ -102,8 +97,7 @@ public:
     /**
      * Take the cursor off the map, on the PowerupPlacer side.
      *
-     * The body is not written yet. It schedules the TickTask subobject at kMBTInfinity
-     * through the call at `0x0013a860`.
+     * The routine starts the TickTask subobject with the epoch offset kMBTInfinity.
      *
      * @ghidraAddress 0x001cde18
      */
@@ -112,8 +106,8 @@ public:
     /**
      * Withdraw the task from the clock, on the PowerupPlacer side.
      *
-     * The body is not written yet. It calls the withdrawal at `0x0013ae10` on the TickTask
-     * subobject, which cancels the queued command and resets the handle to -2.
+     * The routine stops the TickTask subobject, which cancels the queued command and resets the
+     * handle to -2.
      *
      * @ghidraAddress 0x001cde40
      */

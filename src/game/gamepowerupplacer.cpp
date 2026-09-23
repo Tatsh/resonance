@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "app/application.h"
 #include "game/localplayer.h"
 #include "mid/mbt.h"
 #include "msg/displaypointermsg.h"
@@ -14,7 +15,18 @@ constexpr int kTicksPerBar = 1920;
 // The task's period, and the amount this class adds before rounding down to a bar.
 constexpr int kTicksPerBeat = 480;
 
+// The cursor bar that marks a cursor off the map.
+constexpr int kNoCursor = -1;
+
 } // namespace
+
+// 0x001ccb70
+GamePowerupPlacer::GamePowerupPlacer(LocalPlayer *pOwner,
+                                     Application *pApplication,
+                                     PowerupCollectionI *pCollection)
+    : PowerupPlacer(), TickTask(pApplication->GetSongClock(), Mid::MBT(kTicksPerBeat).mTick, 0),
+      mOwner(pOwner), mApplication(pApplication), mCollection(pCollection), mCursorBar(kNoCursor) {
+}
 
 // 0x001cd9b0
 // Both table stores and the TickTask and MsgSource teardown after them are compiler
@@ -42,4 +54,14 @@ int GamePowerupPlacer::Tick(int nElapsedTicks) {
         Send(&msg);
     }
     return 1;
+}
+
+// 0x001cde18
+void GamePowerupPlacer::OnUnknownSlot4() {
+    Start(kMBTInfinity);
+}
+
+// 0x001cde40
+void GamePowerupPlacer::OnUnknownSlot5() {
+    Stop();
 }
