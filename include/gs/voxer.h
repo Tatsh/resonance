@@ -3,6 +3,8 @@
 #include "gs/pitcher.h"
 #include "msg/message.h"
 
+class EraseMsg;
+class InvalidateSeekerMsg;
 class PhraseMgr;
 class Player;
 class Quantizer;
@@ -108,6 +110,18 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
+    // The out-of-line copy of the EraseMsg branch HandleMessage() expands inline.
+    // 0x001d9e40
+    void OnEraseMsg(EraseMsg *pMsg);
+
+    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // 0x001d9e98
+    void OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg);
+
+    // Returns TrackData::QueryBar() for the bar on mTrackData. The routine at 0x001d8508 calls it.
+    // 0x001d9ec8
+    int QueryBar(int nBar);
+
     PhraseMgr *mPhraseMgr;       // +0x38
     Quantizer *mQuantizer;       // +0x3c
     const TrackData *mTrackData; // +0x40

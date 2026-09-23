@@ -1,5 +1,6 @@
 #include "gs/voxer.h"
 
+#include "game/trackdata.h"
 #include "msg/erasemsg.h"
 #include "msg/invalidateseekermsg.h"
 #include "msg/pitchriffmsg.h"
@@ -38,4 +39,27 @@ void Voxer::HandleMessage(Message *pMsg) {
             OnInvalidateSeeker(pInvalidate->mUnknown04);
         }
     }
+}
+
+// 0x001d9e40
+void Voxer::OnEraseMsg(EraseMsg *pMsg) {
+    if (pMsg->mUnknown0c != mUnknown44) {
+        return;
+    }
+    if (mUnknown50 != pMsg->mUnknown04) {
+        return;
+    }
+    OnErase(pMsg->mUnknown08.mTick / mUnknown48, pMsg->mUnknown10, 1);
+}
+
+// 0x001d9e98
+void Voxer::OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg) {
+    if (pMsg->mUnknown08 == mUnknown44) {
+        OnInvalidateSeeker(pMsg->mUnknown04);
+    }
+}
+
+// 0x001d9ec8
+int Voxer::QueryBar(int nBar) {
+    return mTrackData->QueryBar(nBar);
 }
