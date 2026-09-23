@@ -107,3 +107,52 @@ void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
         WriteIndexedRow(&source, g_abCanvasRowScratch, nX, nRow);
     }
 }
+
+// 0x00627cf8. The bulk loop packs with a bitwise OR, and both per pixel paths store a logical OR in
+// the same position, so each of those stores writes 0 or 1 over the whole byte. That reading
+// accounts for both destination meanings the binary shows.
+void ACanvasLin4::WriteIndexedRow(const ABitmap *pSource,
+                                  const unsigned char *pRow,
+                                  int nX,
+                                  int nY) {
+    unsigned char *pDest = static_cast<unsigned char *>(mBitmap.mPixels) +
+                           (nY * mBitmap.mBytesPerRow) +
+                           ((nX + mBitmap.mOddNibbleStart) / kPixelsPerByte);
+    int nCount = pSource->mWidth;
+    if (((nX ^ mBitmap.mOddNibbleStart) & 1) != 0) {
+        const unsigned char nIndex = *pRow++;
+        if (pSource->mHasTransparentColor == 0 || nIndex != pSource->mTransparentColor) {
+            *pDest = (*pDest & kNibbleMask) || nIndex; // Yes, a logical OR, as in the binary.
+        }
+        ++pDest;
+        ++nX;
+        --nCount;
+    }
+    if (pSource->mHasTransparentColor == 0 && nCount > 0) {
+        int nPairs = nCount / kPixelsPerByte;
+        while (nPairs-- != 0) {
+            const unsigned char nLow = *pRow++;
+            const unsigned char nHigh = *pRow++;
+            *pDest++ = static_cast<unsigned char>(nLow | (nHigh << kNibbleShift));
+        }
+        // Yes, the binary advances by the exhausted counter, which is -1 here. nX moves back by two
+        // and nCount grows by two, so the loop below reads and writes past the end of the row.
+        nX += nPairs * kPixelsPerByte;
+        nCount -= nPairs * kPixelsPerByte;
+    }
+    while (nCount-- != 0) {
+        const unsigned char nIndex = *pRow++;
+        if (pSource->mHasTransparentColor == 0 || nIndex != pSource->mTransparentColor) {
+            // Yes, a logical OR in both arms, as in the binary.
+            if (((nX ^ mBitmap.mOddNibbleStart) & 1) != 0) {
+                *pDest = (*pDest & kNibbleMask) || nIndex;
+            } else {
+                *pDest = (*pDest & (kNibbleMask << kNibbleShift)) || nIndex;
+            }
+        }
+        ++nX;
+        if ((nX & 1) == 0) {
+            ++pDest;
+        }
+    }
+}

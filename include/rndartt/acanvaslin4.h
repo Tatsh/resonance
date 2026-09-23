@@ -89,7 +89,7 @@ public:
 
 private:
     /**
-     * Write one row of indices into this canvas at four bits per pixel. Body not yet written.
+     * Write one row of indices into this canvas at four bits per pixel.
      *
      * Non-virtual, and it fills no slot of any table in this family, which was checked against all
      * 85 entries of ACanvas, ACanvas8, ACanvasLin4, and ACanvasLin8. Its three callers are this
@@ -102,14 +102,15 @@ private:
      * argument arrives in a register the decompiler does not bind, so the prototype read as taking
      * no arguments at all.
      *
-     * THE BODY IS UNRESOLVED, not merely unwritten. Its bulk loop packs two source bytes into one
-     * destination byte, which is the expected conversion. Its leading and trailing per-pixel paths
-     * instead store a literal 0 or 1 as a whole byte, which was confirmed by decoding the raw
-     * instruction words rather than by reading a listing. Those two destination meanings cannot
-     * both describe the same buffer. The per-pixel paths also read the destination byte and mask it
-     * by nibble phase, preserving the neighbouring nibble, and then discard the result by storing a
-     * constant. The phase-zero mask can never match when the byte only ever stores 0 or 1, so that
-     * test is dead.
+     * Three defects of the original account for every oddity in the body. The bulk loop packs two
+     * source bytes into one destination byte with a bitwise OR, while both per pixel paths combine
+     * the masked destination byte and the index with a logical OR. Each per pixel store therefore
+     * writes 0 or 1 over the whole byte. After the bulk loop the column and the remaining count
+     * advance by twice the exhausted pair counter, which is -1, so for an opaque source the column
+     * moves back by two and the per pixel loop runs over the count the bulk loop already consumed,
+     * plus two, past the end of the row. The per
+     * pixel loop also advances the destination byte on the parity of the column alone, ignoring
+     * mOddNibbleStart, where the nibble choice takes it into account.
      *
      * @param pSource The source bitmap the row came from, read for its transparency fields.
      * @param pRow One byte per pixel, already expanded by the caller.
