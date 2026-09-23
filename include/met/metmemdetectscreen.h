@@ -16,21 +16,21 @@
  *
  * Two vtables belong to the class, the 44-entry primary at `0x007fccb8` and the 21-entry
  * MemcardUser table at `0x007fcc08` that adjusts `this` by `-140` in every entry. The primary is
- * five entries longer than the MetScreen table, so the class declares five virtuals of its own at
- * slots 39 through 43, at `0x002d8b80`, `0x002db328`, `0x002deaa8`, `0x002deab0`, and
- * `0x002debc0`. The middle two sit eight bytes apart and are two-instruction `jr ra` stubs. None
- * of the five has a recovered name, so all five are recorded rather than declared.
+ * five entries longer than the MetScreen table. The five new virtuals at slots 39 through 43 are
+ * declared below in slot order.
  *
- * The constructor at `0x002deab8` takes the renderer, the load priority, and the three names, and
- * forwards all five to MetScreen. It supplies no literal of its own, which is why all three
- * children pass their own names through it. It writes both vptrs and zeroes the four words below.
+ * The probe runs as a chain of memory-card tasks. StartDetect() lists the connected cards,
+ * OnAllConnectStates() loads the global settings from the card in port 1 or offers to format it,
+ * OnGlobalSettingsLoaded() starts StartLoadPersonas(), OnPersonasLoaded() starts
+ * StartSaveSpaceCheck(), and OnMinimumSaveSpace() either warns about the free space or shows the
+ * autosave notice. Each dialogue returns through OnMsgScreenDismissed(). That routine retries
+ * through StartDetect() or ends the probe through OnDetectFinished(). MetFrontEndState::mUnknown0c
+ * records whether the probe settled on a card, 1 when it did and 0 when the player continued
+ * without one.
  *
- * The destructor at `0x002deb08` restores the primary vptr, restores the MemcardUser vptr to
- * `0x007daf78`, runs the MetScreen destructor, and releases the object with the tag `MsgSink`.
- *
- * Two inherited slots differ from the MetScreen table, 15 at `0x002d9e40` and 26 at `0x002dec10`.
- * The body at `0x002d9e40` is shared by all three children as well, and the body at `0x002db328`
- * fills slot 40 for two of them, so both belong to this class rather than to any child.
+ * The translation unit spans `0x002d89c8` to `0x002df058`. Besides the members below, it has the
+ * type function at `0x002dea28`, per-unit copies of MsgSink and MemcardUser routines, and template
+ * library emissions.
  */
 class MetMemDetectScreen : public MetScreen, public MemcardUser {
 public:
@@ -55,9 +55,149 @@ public:
      */
     virtual ~MetMemDetectScreen();
 
+    /**
+     * Build a detector on the heap with an empty screen name, directory, and container name.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x002d89c8
+     */
+    static MetMemDetectScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Act on the player's response to one of the probe's dialogues.
+     *
+     * Slot 15. A retry runs StartDetect(), and continuing ends the probe through
+     * OnDetectFinished(). Confirming `mem_format_check` formats the card in port 1. Dismissing
+     * `format_success` records the formatted card's free space and shows the autosave notice. A
+     * dialogue the screen does not recognise ends the probe.
+     *
+     * @param name The message screen that was dismissed.
+     * @param nChoice The chosen button, counted from zero.
+     * @ghidraAddress 0x002d9e40
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
+     * Close the autosave notice once it has been up for 480 units of renderer time.
+     *
+     * Slot 26.
+     *
+     * @param flTime The renderer's current animation frame position.
+     * @ghidraAddress 0x002dec10
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Load the global settings from the card in port 1, or offer to format it.
+     *
+     * MemcardUser slot 3. OnNoCard() runs instead when no card is listed or the first card listed
+     * is not in port 1.
+     *
+     * @ghidraAddress 0x002d8e98
+     */
+    virtual void OnAllConnectStates();
+
+    /**
+     * Warn when the card in port 1 has less free space than a save needs, or show the autosave
+     * notice.
+     *
+     * MemcardUser slot 4.
+     *
+     * @param nPortSlot The card the check ran on. The body does not read it.
+     * @param nSpace The free clusters a save needs.
+     * @ghidraAddress 0x002da868
+     */
+    virtual void OnMinimumSaveSpace(int nPortSlot, int nSpace);
+
+    /**
+     * Report the result of formatting the card in port 1.
+     *
+     * MemcardUser slot 5.
+     *
+     * @param nPortSlot The card that was formatted. The body does not read it.
+     * @param nStatus The result, 0 on success and 13 when the card was already formatted.
+     * @ghidraAddress 0x002d9628
+     */
+    virtual void OnCardFormatted(int nPortSlot, int nStatus);
+
+    /**
+     * Run StartSaveSpaceCheck().
+     *
+     * MemcardUser slot 13.
+     *
+     * @param nPortSlot The card the personas came from. The body does not read it.
+     * @param nStatus The result. The body does not read it.
+     * @ghidraAddress 0x002deb98
+     */
+    virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
+
+    /**
+     * Run StartLoadPersonas().
+     *
+     * MemcardUser slot 14.
+     *
+     * @param nPortSlot The card the settings came from. The body does not read it.
+     * @param nStatus The result. The body does not read it.
+     * @ghidraAddress 0x002deb70
+     */
+    virtual void OnGlobalSettingsLoaded(int nPortSlot, int nStatus);
+
+    /**
+     * Show the detection notice and list the connected cards.
+     *
+     * Slot 39. Clears mAutosaveNoticeTime and GlobalSettings::mCardSlots, and queues the listing
+     * with this screen as the receiver. The title is inferred.
+     *
+     * @ghidraAddress 0x002d8b80
+     */
+    virtual void StartDetect();
+
+    /**
+     * Show the loading notice and load the personas from the card in port 1.
+     *
+     * Slot 40. Sets mUnknown98 and empties MetPersonaData::loadList() before the load fills it.
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x002db328
+     */
+    virtual void StartLoadPersonas();
+
+    /**
+     * Respond to finding no usable card in port 1.
+     *
+     * Slot 41. The body is empty. The title is inferred from the `mem_check` dialogue that
+     * MetLocPickCharScreen raises in its override.
+     *
+     * @ghidraAddress 0x002deaa8
+     */
+    virtual void OnNoCard() {
+    }
+
+    /**
+     * Respond to the probe ending.
+     *
+     * Slot 42. The body is empty. The title is inferred.
+     *
+     * @ghidraAddress 0x002deab0
+     */
+    virtual void OnDetectFinished() {
+    }
+
+    /**
+     * Check the free space on the card in port 1.
+     *
+     * Slot 43. Queues the check with this screen as the receiver. The title is inferred.
+     *
+     * @ghidraAddress 0x002debc0
+     */
+    virtual void StartSaveSpaceCheck();
+
 private:
     int mUnknown90; // +0x90
     int mUnknown94; // +0x94
     int mUnknown98; // +0x98
-    int mUnknown9c; // +0x9c
+    // The renderer time the autosave notice went up, or 0 while it is not showing.
+    float mAutosaveNoticeTime;
 };
