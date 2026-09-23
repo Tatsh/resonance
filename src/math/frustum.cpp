@@ -31,6 +31,7 @@ FailSink &operator<<(FailSink &sink, const Frustum &frustum) {
     return sink;
 }
 
+// 0x005513a8
 int IsSphereOutsideFrustum(const Sphere &sphere, const Frustum &frustum) {
     const Plane *const apPlanes[] = {&frustum.mFront,
                                      &frustum.mBack,

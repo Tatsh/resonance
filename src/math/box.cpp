@@ -13,6 +13,7 @@ inline void GrowAxisToContain(float flValue, float &flMin, float &flMax) {
 
 } // namespace
 
+// 0x00551020
 void Box::GrowToContain(const Vector3 &point) {
     GrowAxisToContain(point.x, mMin.x, mMax.x);
     GrowAxisToContain(point.y, mMin.y, mMax.y);

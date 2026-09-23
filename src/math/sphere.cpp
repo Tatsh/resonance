@@ -66,6 +66,7 @@ inline Sphere SphereAtPlanes(const Plane &first,
 
 } // namespace
 
+// 0x00550330
 Sphere &Sphere::GrowToContain(const Sphere &other) {
     if (other.mRadius == 0.0f) {
         return *this;
@@ -102,6 +103,7 @@ Sphere &Sphere::GrowToContain(const Sphere &other) {
     return *this;
 }
 
+// 0x005512b8
 Sphere Sphere::Circumscribe(const Vector3 &first, const Vector3 &second) {
     Sphere sphere;
     sphere.mCenter = ConstructVector3();
@@ -113,6 +115,7 @@ Sphere Sphere::Circumscribe(const Vector3 &first, const Vector3 &second) {
     return sphere;
 }
 
+// 0x00550510
 Sphere Sphere::Circumscribe(const Vector3 &first, const Vector3 &second, const Vector3 &third) {
     Vector3 firstEdge = ConstructVector3();
     Vec3Sub(&second.x, &first.x, &firstEdge.x);
@@ -128,6 +131,7 @@ Sphere Sphere::Circumscribe(const Vector3 &first, const Vector3 &second, const V
     return SphereAtPlanes(triangle, bisector, repeatedBisector, first);
 }
 
+// 0x00550850
 Sphere Sphere::Circumscribe(const Vector3 &first,
                             const Vector3 &second,
                             const Vector3 &third,

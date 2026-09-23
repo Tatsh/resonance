@@ -56,6 +56,7 @@ bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, flo
     return (0.0f <= *pT) && (*pT <= 1.0f);
 }
 
+// 0x0054fcf8
 Segment IntersectPlanes(const Plane &first, const Plane &second) {
     Vector3 direction = ConstructVector3();
     Vec3Cross(&first.a, &second.a, &direction.x);
@@ -78,6 +79,7 @@ Segment IntersectPlanes(const Plane &first, const Plane &second) {
     return line;
 }
 
+// 0x005510e0
 Vector3 IntersectPlanes(const Plane &first, const Plane &second, const Plane &third) {
     const Segment line = IntersectPlanes(first, second);
     float flT;
