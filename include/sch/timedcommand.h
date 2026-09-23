@@ -67,6 +67,15 @@ public:
     TimedCommand(Command *pCommand, Tick tick, int bDelta);
 
     /**
+     * Construct an empty wrapper for Load() to fill.
+     *
+     * The image has no out-of-line copy. WatchdogPlayback::Load() expands it at `0x00594ad8`,
+     * zeroing both ticks and writing -1 to mCmdID. mCommand, mOrder, and mDelta are not written.
+     */
+    TimedCommand() : mDueTick{0}, mLocalTick{0}, mCmdID{-1} {
+    }
+
+    /**
      * Give back the reference to the command and release the wrapper.
      *
      * @ghidraAddress 0x005d33e8

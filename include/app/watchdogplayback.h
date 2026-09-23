@@ -26,13 +26,19 @@ public:
     explicit WatchdogPlayback(Watchdog *pWatchdog);
 
     /**
+     * Release every loaded wrapper through Attachment::ReleaseIfSet() and empty mCommands.
+     *
+     * @ghidraAddress 0x00594988
+     */
+    ~WatchdogPlayback();
+
+    /**
      * Read the recorded wrappers from a stream.
      *
-     * Empties mCommands, then reads one Sch::TimedCommand after another until the stream fails or
-     * a wrapper holds a command whose CmdID() is 6, the identifier of EndRecordingCmd. Each
-     * wrapper kept has its handle reserved through `0x005e5908`. mCursor is left at the first
-     * wrapper. Not reconstructed, because Sch::TimedCommand has no default constructor declared
-     * and the handle reservation is unrecovered. The title is inferred.
+     * Empties mCommands, then reads one Sch::TimedCommand after another until the stream reaches
+     * its end or a wrapper holds a command whose CmdID() is 6, the identifier of EndRecordingCmd.
+     * The wrapper that stops the loop is deleted. Each wrapper kept has its handle reserved
+     * through Sch::CmdID::Reserve(). mCursor is left at the first wrapper. The title is inferred.
      *
      * @param stream The recording.
      * @ghidraAddress 0x00594a78
