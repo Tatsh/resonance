@@ -216,7 +216,8 @@ public:
      * Blend the translation of one ring transform towards the next.
      *
      * The successor wraps through a signed remainder against mUnknown3c. Only the three components
-     * are blended; the padding word of the output is not written.
+     * are blended. The whole quadword is stored, so the padding word of the output receives the
+     * padding word of the successor's translation.
      *
      * @param nRing The ring index.
      * @param pOut The vector to write the blend into.
@@ -293,13 +294,11 @@ private:
     // Build the mesh of the current ring set. 0x004699c0.
     void BuildMesh();
 
-    // Project one ring into camera space. 0x0046db80. The signature is recovered and the body is
-    // not. A null mUnknown58 writes the identity into pOut and returns. Otherwise the three basis
-    // rows of mUnknownc0[nRing] are copied through, the translation row is the blend of that entry
-    // and its wrapped successor each scaled by flTangentScale, and the result is concatenated with
-    // whatever mUnknown58 evaluates to at flAnimFrame. The concatenation runs through the vector
-    // unit routine at 0x005e7ab0, which no header of this tree declares yet, and that is what
-    // blocks the body.
+    // Project one ring into camera space. 0x0046db80. A null mUnknown58 writes the identity into
+    // pOut and returns. Otherwise the three basis rows of mUnknownc0[nRing] are copied through,
+    // the translation row is the blend of that entry and its wrapped successor each scaled by
+    // flTangentScale, and the result is concatenated through XfmConcat() with what mUnknown58
+    // evaluates to at flAnimFrame.
     void ProjectSectionToCameraSpace(
         int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale);
 

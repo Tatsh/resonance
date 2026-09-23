@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <stddef.h>
 
 #include "math/transform.h"
 #include "os/hxstr.h"
@@ -57,9 +58,8 @@ constexpr int kPathVarAxisCount = 3;
  * The base offsets also pin the three base subobjects. Animatable uses 0x18 bytes, and the eight
  * bytes after it are the padding that puts the 16-byte-aligned Transformable subobject on `+0x20`.
  * Transformable uses 0xac and its size rounds to 0xb0 on its own 16-byte alignment, and Drawable
- * uses 0x14. The four bytes past the last member are the same rounding applied to the non-virtual
- * part of this class before the virtual base subobject is placed, which `Rnd::Arena` confirms
- * independently.
+ * uses 0x14. The last member, mMultiMeshCursor at `+0x13c`, ends exactly on the virtual base
+ * subobject, so the non-virtual part needs no padding.
  *
  * Four vtables belong to the class, each identified by a GetTypeInfo slot addressing `0x0045db10`
  * and by an adjustment matching its subobject offset. The Drawable table at `0x0081c508` adjusts
@@ -87,7 +87,17 @@ constexpr int kPathVarAxisCount = 3;
  * not passed the current one, culling against mBirthCam and mBirthSquareDist first and giving each
  * instance a random rotation drawn from mPathVarMax and a random uniform scale drawn from
  * mScaleGenLow and mScaleGenHigh. DrawSelf() at `0x0045b040` selects one of four draw paths from
- * `0x0081c448` according to which of mMesh, mMultiMesh, and mParticleSys are set.
+ * the table of pointers to member functions at `0x0081c448`, DrawInstanceView(),
+ * DrawInstanceMesh(), DrawInstanceMultiMesh(), and DrawInstanceParticle(), preferring mView, then
+ * mMesh, then mMultiMesh, then mParticleSys.
+ *
+ * Three bodies are blocked on other headers rather than on the analysis. SetFrameSelf() and
+ * DrawSelf() both read the head of the live list of mParticleSys, `Rnd::ParticleSys` `+0xf4`,
+ * which particlesys.h declares protected, and DrawSelf() also walks the transform list of
+ * mMultiMesh, which multimesh.h declares protected. The path setter at `0x0045e920`, which takes
+ * the path and its start and end frames and which AppTunnel calls, calls slot 4 of the Animatable
+ * table of `Rnd::TransAnim`, `0x004f4188`, which returns the frame of the first keyframe and which
+ * transanim.h does not declare.
  */
 class Generator : public Animatable, public Transformable, public Drawable {
 public:
@@ -163,7 +173,9 @@ public:
     /**
      * Copy another emitter over this one.
      *
-     * @param pSource The source object, which has to be an emitter for the copy to take effect.
+     * The narrowing cast is not tested, so a source that is not an emitter is read through null.
+     *
+     * @param pSource The source object, which has to be an emitter.
      * @param nFlags The copy flags.
      * @ghidraAddress 0x0045e3d8
      */
@@ -215,6 +227,86 @@ public:
      */
     static void Init();
 
+    /**
+     * Allocate an emitter under the tag "Rnd::Generator".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x0045db78
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release an emitter under the tag "Rnd::Generator".
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x0045db98
+     */
+    static void operator delete(void *pBlock);
+
+    /**
+     * Count the live instances.
+     *
+     * The program lists no caller.
+     *
+     * @return The length of the instance list.
+     * @ghidraAddress 0x0045e2a8
+     */
+    int NumInstances();
+
+    /**
+     * Make a mesh the drawn subject.
+     *
+     * Releases the reference on the previous mesh, takes one on the new one, and clears mView,
+     * mMultiMesh, and mParticleSys, releasing each. The program lists no caller, and the title is
+     * inferred.
+     *
+     * @param pMesh The mesh, which may be null.
+     * @ghidraAddress 0x0045e698
+     */
+    void SetMesh(Mesh *pMesh);
+
+    /**
+     * Make a view the drawn subject, clearing mMesh, mMultiMesh, and mParticleSys.
+     *
+     * The program lists no caller, and the title is inferred.
+     *
+     * @param pView The view, which may be null.
+     * @ghidraAddress 0x0045e738
+     */
+    void SetView(View *pView);
+
+    /**
+     * Make a multi-mesh the drawn subject, clearing mMesh, mView, and mParticleSys.
+     *
+     * The program lists no caller, and the title is inferred.
+     *
+     * @param pMultiMesh The multi-mesh, which may be null.
+     * @ghidraAddress 0x0045e7d8
+     */
+    void SetMultiMesh(MultiMesh *pMultiMesh);
+
+    /**
+     * Make a particle system the drawn subject, clearing mMesh, mView, and mMultiMesh.
+     *
+     * Calls Regenerate() afterwards, so every live instance gains a particle. The program lists
+     * no caller, and the title is inferred.
+     *
+     * @param pParticleSys The particle system, which may be null.
+     * @ghidraAddress 0x0045e878
+     */
+    void SetParticleSys(ParticleSys *pParticleSys);
+
+    /**
+     * Set the camera the birth culling measures against.
+     *
+     * The program lists no caller, and the title is inferred.
+     *
+     * @param pCam The camera, which may be null.
+     * @ghidraAddress 0x0045ea18
+     */
+    void SetBirthCam(Cam *pCam);
+
 protected:
     /**
      * Draw every live instance.
@@ -237,6 +329,32 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
+    // 0x0045e528. Drops the reference on every object member and empties mInstances. The
+    // destructor and Copy() invoke it, and the title is inferred.
+    void ReleaseRefs();
+
+    // 0x0045e5e0. Takes a reference on every object member and then calls Regenerate(). Copy()
+    // invokes it, and the title is inferred.
+    void AcquireRefs();
+
+    // The four draw paths DrawSelf() selects from the table at 0x0081c448. Each receives the
+    // composed transform of one instance and the age of that instance in frames.
+
+    // 0x0045ea70. Installs the transform as the local transform of mView, drives mView to the age
+    // when mAnimateFromStart is set, recomposes, and draws.
+    void DrawInstanceView(const Transform &xfm, float flAge);
+
+    // 0x0045eb00. Installs the transform as the local transform of mMesh, recomposes, and draws.
+    void DrawInstanceMesh(const Transform &xfm, float flAge);
+
+    // 0x0045eb78. Stores the transform in the entry of the transform list of mMultiMesh that
+    // mMultiMeshCursor addresses and advances the cursor.
+    void DrawInstanceMultiMesh(const Transform &xfm, float flAge);
+
+    // 0x0045ebb8. Moves the particle mParticleCursor addresses to the translation of the
+    // transform and advances the cursor, and does nothing once the cursor is null.
+    void DrawInstanceParticle(const Transform &xfm, float flAge);
+
     // No class derives from Rnd::Generator and nothing outside it accesses a member directly.
     // Every member is therefore private. The order below is the recovered offset order.
 
@@ -269,6 +387,10 @@ private:
     // allocated and SetFrameSelf() advances it through Rnd::Particle::mNext. The dump omits it, so
     // the title is inferred from those two routines.
     Particle *mParticleCursor; // +0x138
+    // Entry of the transform list of mMultiMesh the multi-mesh draw path writes next. DrawSelf()
+    // rewinds it to the head of the list, and only the multi-mesh draw path reads it. The title is
+    // inferred.
+    std::list<Transform>::iterator mMultiMeshCursor; // +0x13c
 };
 
 /**

@@ -6,6 +6,7 @@
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/animatable.h"
 #include "rnd/cam.h"
 #include "rnd/drawable.h"
@@ -13,6 +14,7 @@
 #include "rnd/mesh.h"
 #include "rnd/multimesh.h"
 #include "rnd/object.h"
+#include "rnd/particle.h"
 #include "rnd/particlesys.h"
 #include "rnd/stream.h"
 #include "rnd/transanim.h"
@@ -113,6 +115,63 @@ int ReadBool(Stream &stream) {
     return chFlag != 0 ? 1 : 0;
 }
 
+// 0x0081c1d8, the tag the allocation operators bill to.
+const char *const kGeneratorTag = "Rnd::Generator";
+
+// The next spawn frame the constructor starts from, a hand-written sentinel whose bit pattern is
+// 0xcb18967f.
+constexpr float kUnsetFrame = -9999999.0f;
+
+constexpr float kDefaultRateGen = 100.0f;
+
+// The reference handling each object member repeats. Every call site in the image open-codes it.
+template <typename T>
+void ReleaseObjectRef(Object *pOwner, T *pRef) {
+    if (pRef != nullptr) {
+        pRef->RemoveRef(pOwner);
+    }
+}
+
+template <typename T>
+void AcquireObjectRef(Object *pOwner, T *pRef) {
+    if (pRef != nullptr) {
+        pRef->AddRef(pOwner);
+    }
+}
+
+// The shape Rnd::Button::Replace() also has. The assignment is skipped when the member was null,
+// which the image does for every member.
+template <typename T>
+void ReplaceObjectRef(Object *pOwner, T **ppRef, Object *pFrom, Object *pTo) {
+    if (*ppRef != pFrom) {
+        return;
+    }
+    if (pFrom != nullptr) {
+        pFrom->RemoveRef(pOwner);
+    }
+    if (*ppRef != nullptr) {
+        *ppRef = pTo != nullptr ? dynamic_cast<T *>(pTo) : nullptr;
+    }
+    AcquireObjectRef(pOwner, *ppRef);
+}
+
+void CopyRow(float *pRow, const Vector3 &row) {
+    pRow[0] = row.x;
+    pRow[1] = row.y;
+    pRow[2] = row.z;
+    pRow[3] = row.w;
+}
+
+// Install a transform as the local transform of a drawn subject and mark it dirty.
+template <typename T>
+void InstallLocalXfm(T *pTarget, const Transform &xfm) {
+    CopyRow(pTarget->mLocalXfm[0], xfm.mBasisX);
+    CopyRow(pTarget->mLocalXfm[1], xfm.mBasisY);
+    CopyRow(pTarget->mLocalXfm[2], xfm.mBasisZ);
+    CopyRow(pTarget->mLocalXfm[3], xfm.mTranslation);
+    pTarget->mDirty = 1;
+}
+
 // Resolve one serialised reference through the object registry. The reader is the same in all six
 // places Load() uses it, and the narrowing cast is what the binary performs.
 template <typename T>
@@ -157,6 +216,194 @@ static FailSink &operator<<(FailSink &sink, const std::list<Generator::Instance>
         ++nIndex;
     }
     return sink;
+}
+
+// 0x00458748
+Generator::Generator(const HxStr &name)
+    : Object(name), mPath(nullptr), mPathStartFrame(0.0f), mPathEndFrame(0.0f), mMesh(nullptr),
+      mView(nullptr), mMultiMesh(nullptr), mParticleSys(nullptr), mAnimateFromStart(1),
+      mNextSpawnFrame(kUnsetFrame), mBirthFrontOnly(0), mUnknown110(0), mBirthSquareDist(0.0f),
+      mBirthCam(nullptr), mRateGenLow(kDefaultRateGen), mRateGenHigh(kDefaultRateGen),
+      mScaleGenLow(1.0f), mScaleGenHigh(1.0f) {
+    mPathVarMax[0] = 0.0f;
+    mPathVarMax[1] = 0.0f;
+    mPathVarMax[2] = 0.0f;
+}
+
+// 0x0045de20
+Generator::~Generator() {
+    ReleaseRefs();
+    ReleaseAllRefs();
+}
+
+// 0x00459220
+void Generator::Replace(Object *pFrom, Object *pTo) {
+    Transformable::Replace(pFrom, pTo);
+    Drawable::Replace(pFrom, pTo);
+    Animatable::Replace(pFrom, pTo);
+    ReplaceObjectRef(this, &mMesh, pFrom, pTo);
+    ReplaceObjectRef(this, &mPath, pFrom, pTo);
+    ReplaceObjectRef(this, &mBirthCam, pFrom, pTo);
+    ReplaceObjectRef(this, &mView, pFrom, pTo);
+    ReplaceObjectRef(this, &mMultiMesh, pFrom, pTo);
+    ReplaceObjectRef(this, &mParticleSys, pFrom, pTo);
+}
+
+// 0x0045e3d8
+void Generator::Copy(const Object *pSource, unsigned nFlags) {
+    // Yes, the result is used without a null test, so a source that is not an emitter is read
+    // through null.
+    const Generator *pGenerator = dynamic_cast<const Generator *>(pSource);
+    Transformable::Copy(pSource, nFlags);
+    Drawable::Copy(pSource, nFlags);
+    Animatable::Copy(pSource, nFlags);
+    ReleaseRefs();
+    mMesh = pGenerator->mMesh;
+    mPath = pGenerator->mPath;
+    mBirthFrontOnly = pGenerator->mBirthFrontOnly;
+    mBirthSquareDist = pGenerator->mBirthSquareDist;
+    mBirthCam = pGenerator->mBirthCam;
+    mRateGenLow = pGenerator->mRateGenLow;
+    mRateGenHigh = pGenerator->mRateGenHigh;
+    mScaleGenLow = pGenerator->mScaleGenLow;
+    mScaleGenHigh = pGenerator->mScaleGenHigh;
+    mPathVarMax[0] = pGenerator->mPathVarMax[0];
+    mPathVarMax[1] = pGenerator->mPathVarMax[1];
+    mPathVarMax[2] = pGenerator->mPathVarMax[2];
+    mView = pGenerator->mView;
+    mAnimateFromStart = pGenerator->mAnimateFromStart;
+    mPathEndFrame = pGenerator->mPathEndFrame;
+    mPathStartFrame = pGenerator->mPathStartFrame;
+    mMultiMesh = pGenerator->mMultiMesh;
+    mParticleSys = pGenerator->mParticleSys;
+    AcquireRefs();
+}
+
+// 0x0045db78
+void *Generator::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kGeneratorTag);
+}
+
+// 0x0045db98
+void Generator::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kGeneratorTag);
+}
+
+// 0x0045e2a8
+int Generator::NumInstances() {
+    return mInstances.size();
+}
+
+// 0x0045e528
+void Generator::ReleaseRefs() {
+    ReleaseObjectRef(this, mMesh);
+    ReleaseObjectRef(this, mPath);
+    ReleaseObjectRef(this, mBirthCam);
+    ReleaseObjectRef(this, mView);
+    ReleaseObjectRef(this, mMultiMesh);
+    ReleaseObjectRef(this, mParticleSys);
+    mInstances.clear();
+}
+
+// 0x0045e5e0
+void Generator::AcquireRefs() {
+    AcquireObjectRef(this, mMesh);
+    AcquireObjectRef(this, mPath);
+    AcquireObjectRef(this, mBirthCam);
+    AcquireObjectRef(this, mView);
+    AcquireObjectRef(this, mMultiMesh);
+    AcquireObjectRef(this, mParticleSys);
+    Regenerate();
+}
+
+// 0x0045e698
+void Generator::SetMesh(Mesh *pMesh) {
+    ReleaseObjectRef(this, mMesh);
+    mMesh = pMesh;
+    AcquireObjectRef(this, mMesh);
+    ReleaseObjectRef(this, mView);
+    mView = nullptr;
+    ReleaseObjectRef(this, mMultiMesh);
+    mMultiMesh = nullptr;
+    ReleaseObjectRef(this, mParticleSys);
+    mParticleSys = nullptr;
+}
+
+// 0x0045e738
+void Generator::SetView(View *pView) {
+    ReleaseObjectRef(this, mMesh);
+    mMesh = nullptr;
+    ReleaseObjectRef(this, mView);
+    mView = pView;
+    AcquireObjectRef(this, mView);
+    ReleaseObjectRef(this, mMultiMesh);
+    mMultiMesh = nullptr;
+    ReleaseObjectRef(this, mParticleSys);
+    mParticleSys = nullptr;
+}
+
+// 0x0045e7d8
+void Generator::SetMultiMesh(MultiMesh *pMultiMesh) {
+    ReleaseObjectRef(this, mMesh);
+    mMesh = nullptr;
+    ReleaseObjectRef(this, mView);
+    mView = nullptr;
+    ReleaseObjectRef(this, mMultiMesh);
+    mMultiMesh = pMultiMesh;
+    AcquireObjectRef(this, mMultiMesh);
+    ReleaseObjectRef(this, mParticleSys);
+    mParticleSys = nullptr;
+}
+
+// 0x0045e878
+void Generator::SetParticleSys(ParticleSys *pParticleSys) {
+    ReleaseObjectRef(this, mMesh);
+    mMesh = nullptr;
+    ReleaseObjectRef(this, mView);
+    mView = nullptr;
+    ReleaseObjectRef(this, mMultiMesh);
+    mMultiMesh = nullptr;
+    ReleaseObjectRef(this, mParticleSys);
+    mParticleSys = pParticleSys;
+    AcquireObjectRef(this, mParticleSys);
+    Regenerate();
+}
+
+// 0x0045ea18
+void Generator::SetBirthCam(Cam *pCam) {
+    ReleaseObjectRef(this, mBirthCam);
+    mBirthCam = pCam;
+    AcquireObjectRef(this, mBirthCam);
+}
+
+// 0x0045ea70
+void Generator::DrawInstanceView(const Transform &xfm, float flAge) {
+    InstallLocalXfm(mView, xfm);
+    if (mAnimateFromStart != 0) {
+        mView->SetFrame(flAge);
+    }
+    mView->UpdateWorldXfm(nullptr, 0);
+    mView->Draw();
+}
+
+// 0x0045eb00
+void Generator::DrawInstanceMesh(const Transform &xfm, [[maybe_unused]] float flAge) {
+    InstallLocalXfm(mMesh, xfm);
+    mMesh->UpdateWorldXfm(nullptr, 0);
+    mMesh->Draw();
+}
+
+// 0x0045eb78
+void Generator::DrawInstanceMultiMesh(const Transform &xfm, [[maybe_unused]] float flAge) {
+    *mMultiMeshCursor++ = xfm;
+}
+
+// 0x0045ebb8
+void Generator::DrawInstanceParticle(const Transform &xfm, [[maybe_unused]] float flAge) {
+    if (mParticleCursor != nullptr) {
+        mParticleCursor->mPos = xfm.mTranslation;
+        mParticleCursor = mParticleCursor->mNext;
+    }
 }
 
 // 0x0045e2e8
@@ -419,8 +666,9 @@ Generator *NewGenerator(const HxStr &name) {
     return new Generator(name);
 }
 
-// 0x0045e300. The thunk the class registry stores. The null test in the body is the conversion of
-// a Generator pointer to its virtual Rnd::Object base rather than a check the source asks for.
+// 0x0045e300
+// The thunk the class registry stores. The null test in the body is the conversion of a Generator
+// pointer to its virtual Rnd::Object base rather than a check the source asks for.
 static Object *NewGeneratorObject(const HxStr &name) {
     return NewGenerator(name);
 }
