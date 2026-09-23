@@ -303,12 +303,21 @@ private:
     // Starts at 1. SetUnknown34() and ClearUnknown34() are the only recovered writers, and its
     // purpose is unrecovered.
     int mUnknown34; // +0x34
-    // Non-zero when the last Poll() sent a reading out. ReadControllers() clears it on entry and
-    // sets it for each press it sends.
-    int mPressedThisPoll; // +0x38
-    int mActive;          // +0x3c starts at 1
-    int mMultitap0;       // +0x40, a multitap is on port 0
-    int mMultitap1;       // +0x44, a multitap is on port 1
+
+public:
+    /**
+     * Non-zero when the last Poll() sent a reading out.
+     *
+     * ReadControllers() clears it on entry and sets it for each press it sends. Public because
+     * MetLogoScreen's slot 26 at `0x002bac40` reads it directly to restart the attract-mode idle
+     * count. +0x38
+     */
+    int mPressedThisPoll;
+
+private:
+    int mActive;    // +0x3c starts at 1
+    int mMultitap0; // +0x40, a multitap is on port 0
+    int mMultitap1; // +0x44, a multitap is on port 1
     // Set by SetPaused() and by ReadControllers() when it pauses the game.
     int mPaused; // +0x48
     // Starts at 1. The reading routine at 0x001dfab0 tests it at 0x001dfb7c before it hands a

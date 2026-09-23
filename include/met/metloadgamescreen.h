@@ -99,7 +99,15 @@ private:
     int mUnknown90; // +0x90, not written by the constructor
     int mUnknown94; // +0x94
     int mUnknown98; // +0x98
-    int mUnknown9c; // +0x9c
+
+public:
+    /**
+     * Written 1 by MetLogoScreen's slot 36 at `0x002baf20` before it pushes this screen for the
+     * attract mode. Public because that write goes through the screen pointer directly. +0x9c
+     */
+    int mUnknown9c;
+
+private:
     // Zeroed together in one 8-byte store. +0xa0 and +0xa4
     int mUnknowna0;
     int mUnknowna4;
