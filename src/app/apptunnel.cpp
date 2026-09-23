@@ -1,5 +1,7 @@
 #include "app/apptunnel.h"
 
+#include <algorithm>
+
 #include "app/application.h"
 #include "app/durgemtrails.h"
 #include "app/hudutil.h"
@@ -17,6 +19,7 @@
 #include "app/tnlnowring.h"
 #include "app/tnlpanel.h"
 #include "app/tnlpanelfx.h"
+#include "app/tnlpanelfxdelay.h"
 #include "app/tnlplayer.h"
 #include "app/tnlsnake.h"
 #include "app/tnlutil.h"
@@ -25,17 +28,38 @@
 #include "game/gamemanagerimpl.h"
 #include "game/grooveworld.h"
 #include "game/leveldata.h"
+#include "game/nullplayer.h"
 #include "game/player.h"
 #include "game/playmap.h"
 #include "math/color.h"
 #include "math/transform.h"
 #include "math/vector3.h"
+#include "mid/mbt.h"
+#include "msg/advancesectiontogglemsg.h"
 #include "msg/axebuttonmsg.h"
+#include "msg/catchmsg.h"
+#include "msg/choosepowerupmsg.h"
+#include "msg/cleargemmsg.h"
+#include "msg/cleargemsmsg.h"
+#include "msg/cripplepacket.h"
+#include "msg/deployedpowerupmsg.h"
+#include "msg/displaypointermsg.h"
+#include "msg/durgemmsg.h"
+#include "msg/freestylefxmsg.h"
+#include "msg/gemmsg.h"
 #include "msg/juiceamountmsg.h"
 #include "msg/multiplierstatemsg.h"
+#include "msg/nowbarmsg.h"
+#include "msg/phrasemuffedmsg.h"
+#include "msg/pitchmsg.h"
 #include "msg/playbacktogglemsg.h"
 #include "msg/playerstrackneutralizedmsg.h"
 #include "msg/powerupfailedmsg.h"
+#include "msg/sectioncapturedmsg.h"
+#include "msg/seekermsg.h"
+#include "msg/showeraseeffectmsg.h"
+#include "msg/stdmidimsg.h"
+#include "msg/susgemmsg.h"
 #include "msg/toggleghostmsg.h"
 #include "msg/trackselectmsg.h"
 #include "msg/winmsg.h"
@@ -190,6 +214,47 @@ constexpr float kArrowShowFrames = 2000.0f;
 
 // Juice fraction below which a solo player's activator blinks.
 constexpr float kLowJuiceFraction = 0.2f;
+
+// A gem's lane blend is its gem index times the scale plus the base.
+constexpr float kGemLaneScale = 0.315f;
+constexpr float kGemLaneBase = 0.185f;
+
+// A real player's gem further ahead than this in a game draws as the track's effect gem.
+constexpr float kFarGemFrames = 100.0f;
+
+// Frame from which a miss gem is drawn, before the song starts.
+constexpr float kMissGemAppearFrame = -1000.0f;
+
+// Script templates the catch, the miss, the pitch, and the erase run in display mode.
+constexpr int kCatchScriptTemplate = 0x3ea;
+constexpr int kMissScriptTemplate = 0x3eb;
+constexpr int kPitchScriptTemplate = 0x3fc;
+constexpr int kEraseScriptTemplate = 0x3f4;
+
+// An erase panel starts a sixth of the way to its bar, unless the bar is this far behind.
+constexpr float kErasePanelDivisor = 6.0f;
+constexpr float kErasePanelCutoff = -1900.0f;
+
+// A section capture's fire starts a quarter bar earlier in a local game.
+constexpr float kLocalCaptureLead = 480.0f;
+
+// Frames ahead of the song tick a crippler is launched.
+constexpr float kCrippleLaunchLead = 120.0f;
+
+// A freestyler's snakes run this long, and its fire starts this much earlier.
+constexpr float kFreestyleFrames = 11520.0f;
+constexpr float kFreestyleFireLead = 1200.0f;
+constexpr float kFreestyleShade = 0.3f;
+constexpr float kFreestyleSecondPhase = 3.1415925f;
+
+// A bumper's path offset for the attacker, and the base and per-level step for the target.
+constexpr float kBumperAttackerOffset = 50.0f;
+constexpr int kBumperTargetOffset = -50;
+constexpr int kBumperTargetLevelStep = 75;
+
+// A multiplier's effect runs from this long before the song tick to this long after it.
+constexpr float kMultiplierLead = 500.0f;
+constexpr float kMultiplierRun = 15360.0f;
 
 } // namespace
 
@@ -600,6 +665,325 @@ void AppTunnel::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
 void AppTunnel::AddPanel(TnlPanel *pPanel, float flStartFrame) {
     mPanels.push_back(pPanel);
     pPanel->SetStartFrame(flStartFrame);
+}
+
+void AppTunnel::OnGem(GemMsg *pMsg) {
+    const float flFrame = static_cast<float>(pMsg->mPosition.mTick);
+    const float flBlend = static_cast<float>(pMsg->mGem) * kGemLaneScale + kGemLaneBase;
+    const int nTrack = pMsg->mTrack;
+    Player *pPlayer = pMsg->mPlayer;
+    const float flTick = mRenderer->mSongTick;
+    const int nPowerup =
+        mRenderer->GetCell(nTrack, static_cast<int>(flFrame / static_cast<float>(kFramesPerBar)))
+            ->mPowerup;
+    if (kBarChangeLateFrames < flTick - flFrame) {
+        return;
+    }
+    float flAppearFrame = flTick;
+    bool bFlash = !pPlayer->IsNull();
+    const int nColor = TnlColorIndexFromName(pPlayer->mColorName);
+    char nKind;
+    if (pMsg->mGhost) {
+        nKind = mGhostGemKinds[nTrack];
+    } else if ((mTrackModes[nTrack] == kTrackModeScratch) ||
+               ((mPlayMode == kPlayModeGame) && !pPlayer->IsNull() &&
+                (kFarGemFrames < flFrame - flTick)) ||
+               mJukebox) {
+        nKind = mTrackEffectKinds[nTrack];
+        bFlash = true;
+        if (mUnknowncc) {
+            flAppearFrame = flTick + ((flFrame - flTick) * kPanelLeadFraction);
+        }
+    } else if (nPowerup != -1) {
+        nKind = mPowerupGemKinds[nPowerup];
+    } else {
+        nKind = mShowCrates ? mCrateGemKind : mHexGemKinds[nColor];
+    }
+    mGemManager->Add(TnlGem(nKind, nTrack, nColor, bFlash, flFrame, flBlend, flAppearFrame));
+}
+
+void AppTunnel::OnCatch(CatchMsg *pMsg) {
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
+    const int nGem = pMsg->mGem;
+    const float flFrame = static_cast<float>(pMsg->mTick);
+    const float flBlend = static_cast<float>(nGem) * kGemLaneScale + kGemLaneBase;
+    const int nTrack = pMsg->mTrack;
+    pPlayer->mActivator.mCatcher.Hit(nGem);
+    if (pMsg->mHit) {
+        Transform xfm;
+        PadTransformRows(xfm);
+        GetCachedTunnelObject()->GetRingXfm(nTrack, &xfm, flFrame, flBlend);
+        StartGemFlash(xfm.mTranslation);
+        pPlayer->mSabreTrail.Pulse(flFrame, pMsg->mCaught, pMsg->mTotal);
+        if (g_nAppTunnelDisplayMode) {
+            CallScriptTemplate(kCatchScriptTemplate);
+        }
+    } else {
+        mGemManager->Add(
+            TnlGem(mMissGemKind, nTrack, 0, false, flFrame, flBlend, kMissGemAppearFrame));
+        if (g_nAppTunnelDisplayMode) {
+            CallScriptTemplate(kMissScriptTemplate);
+        }
+    }
+}
+
+void AppTunnel::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
+    if (!pMsg->mTried) {
+        return;
+    }
+    const int nTrack = pMsg->mTrack;
+    const int nBar = pMsg->mPosition.mTick / Mid::MBT(kFramesPerBar).mTick;
+    if (mRenderer->GetCell(nTrack, nBar)->mPowerup == -1) {
+        return;
+    }
+    const int nStep = mPlayMap->FindStepIndex(mPlayMap->Slot5(nBar));
+    TnlPanel panel(nTrack, nBar, &g_nullPlayer, -1, TnlPanel::kKindLane, 1, nStep);
+    panel.Apply();
+}
+
+void AppTunnel::OnPitch(PitchMsg *pMsg) {
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown10);
+    const int nGem = pMsg->mUnknown0c;
+    const float flBlend = static_cast<float>(nGem) * kGemLaneScale + kGemLaneBase;
+    Transform xfm;
+    PadTransformRows(xfm);
+    GetCachedTunnelObject()->GetRingXfm(pMsg->mUnknown08, &xfm, mRenderer->mSongTick, flBlend);
+    StartGemFlash(xfm.mTranslation);
+    pPlayer->mActivator.mCatcher.Hit(nGem);
+    if (g_nAppTunnelDisplayMode) {
+        CallScriptTemplate(kPitchScriptTemplate);
+    }
+}
+
+void AppTunnel::OnSeeker(SeekerMsg *pMsg) {
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
+    // Yes, the binary converts both bar words to float and back.
+    const float flFirstBar = static_cast<float>(pMsg->mFirstBar);
+    const float flBarCount = static_cast<float>(pMsg->mBarCount);
+    const int nTrack = pMsg->mTrack;
+    if (!pMsg->mEnabled) {
+        pPlayer->mSeekerFade.ClearRange();
+        pPlayer->mSabreTrail.Clear();
+        return;
+    }
+    pPlayer->mSeekerFade.SetRange(
+        static_cast<int>(flFirstBar), static_cast<int>(flBarCount), nTrack);
+    if ((mPlayMode == kPlayModeGame) && (mTrackModes[nTrack] == kTrackModeCatch)) {
+        pPlayer->mSabreTrail.Build(
+            nTrack, static_cast<int>(flFirstBar), static_cast<int>(flBarCount));
+    }
+}
+
+void AppTunnel::OnShowEraseEffect(ShowEraseEffectMsg *pMsg) {
+    const float flTick = mRenderer->mSongTick;
+    for (int nBar = pMsg->mFirstBar; nBar < pMsg->mEndBar; ++nBar) {
+        const float flAhead = static_cast<float>(nBar * kFramesPerBar) - flTick;
+        if (kErasePanelCutoff < flAhead) {
+            AddPendingTrigger(new TnlPanelFXDelay(this, pMsg->mTrack, nBar, 1),
+                              flTick + flAhead / kErasePanelDivisor);
+        }
+    }
+    if (g_nAppTunnelDisplayMode) {
+        CallScriptTemplate(kEraseScriptTemplate);
+    }
+}
+
+void AppTunnel::OnSectionCaptured(SectionCapturedMsg *pMsg) {
+    if ((mGameMode != kGameModeSolo) && pMsg->mAutoCatch) {
+        return;
+    }
+    const float flPathEnd = static_cast<float>(pMsg->mEndBar * kFramesPerBar);
+    float flPathStart = mRenderer->mSongTick;
+    int nIndex = -1;
+    if (mGameMode == kGameModeLocal) {
+        nIndex = pMsg->mPlayer->Slot2();
+        flPathStart -= kLocalCaptureLead;
+    }
+    // The binary copies the name before the lookup.
+    const Color playerColor = TnlColorFromName(HxStr(pMsg->mPlayer->mColorName));
+    const Color color = pMsg->mAutoCatch ? Color{0.0f, 0.0f, 1.0f, 1.0f} : playerColor;
+    StartFireFX(flPathStart, nIndex, pMsg->mTrack, color, playerColor, flPathEnd);
+}
+
+void AppTunnel::OnCripple(CripplePacket *pPacket) {
+    std::vector<TnlPlayer *> targets;
+    for (unsigned i = 0; i < pPacket->mTargets.size(); ++i) {
+        targets.push_back(FindTnlPlayer(pPacket->mTargets[i]));
+    }
+    (void)StartCrippleFX(targets, mRenderer->mSongTick + kCrippleLaunchLead);
+}
+
+void AppTunnel::OnFreestyleFX(FreestyleFXMsg *pMsg) {
+    const float flTick = mRenderer->mSongTick;
+    const float flEnd = flTick + kFreestyleFrames;
+    (void)StartSnake(
+        flTick, pMsg->mTrack, Color{kFreestyleShade, kFreestyleShade, 1.0f, 1.0f}, 0.0f, 1.0f);
+    (void)StartSnake(flTick,
+                     pMsg->mTrack,
+                     Color{kFreestyleShade, 1.0f, kFreestyleShade, 1.0f},
+                     kFreestyleSecondPhase,
+                     -1.0f);
+    const Color blue{0.0f, 0.0f, 1.0f, 1.0f};
+    StartFireFX(flTick - kFreestyleFireLead,
+                kFireFsIndex,
+                pMsg->mTrack,
+                blue,
+                blue,
+                flEnd - kFreestyleFireLead);
+}
+
+void AppTunnel::OnDeployedPowerup(DeployedPowerupMsg *pMsg) {
+    switch (pMsg->mKind) {
+    case kHudItemNeutralizer: {
+        const float flTick = mRenderer->mSongTick;
+        for (int nBar = pMsg->mFirstBar; nBar < pMsg->mFirstBar + pMsg->mBarCount; ++nBar) {
+            const float flFrame =
+                flTick + ((static_cast<float>(nBar * kFramesPerBar) - flTick) * kPanelLeadFraction);
+            AddPendingTrigger(new TnlPanelFXDelay(this, pMsg->mTrack, nBar, 1), flFrame);
+        }
+        break;
+    }
+    case kHudItemAutocatcher: {
+        if (mGameMode == kGameModeSolo) {
+            break;
+        }
+        const float flPathEnd =
+            static_cast<float>((pMsg->mFirstBar + pMsg->mBarCount) * kFramesPerBar);
+        const float flPathStart = mRenderer->mSongTick;
+        const Color blue{0.0f, 0.0f, 1.0f, 1.0f};
+        // The binary copies the name before the lookup.
+        const Color playerColor = TnlColorFromName(HxStr(pMsg->mPlayer->mColorName));
+        StartFireFX(flPathStart, kFireIndex, pMsg->mTrack, blue, playerColor, flPathEnd);
+        if (Application::shared()->GetWorld() != nullptr) {
+            Application::shared()->GetWorld()->mForceFeedback->PlayEffect0(pMsg->mPlayer);
+        }
+        break;
+    }
+    case kHudItemBumper: {
+        int nMaxLevel = 0;
+        for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+            if ((*it)->mActivator.mTrack == pMsg->mTrack) {
+                nMaxLevel = std::max(nMaxLevel, (*it)->mActivator.mLevel);
+            }
+        }
+        (void)StartBumpFX(pMsg->mTrack, HxStr(pMsg->mPlayer->mColorName), 1, kBumperAttackerOffset);
+        const float flTargetOffset =
+            static_cast<float>(kBumperTargetOffset - nMaxLevel * kBumperTargetLevelStep);
+        (void)StartBumpFX(pMsg->mTrack, HxStr(pMsg->mTarget->mColorName), 0, flTargetOffset);
+        if (Application::shared()->GetWorld() != nullptr) {
+            Application::shared()->GetWorld()->mForceFeedback->PlayEffect1(pMsg->mTarget);
+        }
+        break;
+    }
+    case kHudItemMultiplier: {
+        const float flTick = mRenderer->mSongTick;
+        mMultFX->Start(flTick - kMultiplierLead, flTick + kMultiplierRun);
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+inline void AppTunnel::OnNowBar(NowBarMsg *pMsg) {
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
+    if (pPlayer != nullptr) {
+        pPlayer->mActivator.mPointer.SetLane(pMsg->mLane);
+    }
+}
+
+inline void AppTunnel::OnClearGem(ClearGemMsg *pMsg) {
+    mGemManager->Remove(pMsg->mTrack,
+                        static_cast<float>(pMsg->mPosition.mTick),
+                        static_cast<float>(pMsg->mGem) * kGemLaneScale + kGemLaneBase);
+}
+
+inline void AppTunnel::OnClearGems(ClearGemsMsg *pMsg) {
+    const float flStart = static_cast<float>(pMsg->mBar) * static_cast<float>(kFramesPerBar);
+    mGemManager->RemoveRange(pMsg->mTrack, flStart, flStart + static_cast<float>(kFramesPerBar));
+    mGemTrails->EndTrail(pMsg->mTrack, pMsg->mBar);
+}
+
+inline void AppTunnel::OnSusGem(SusGemMsg *pMsg) {
+    const float flFrame = static_cast<float>(pMsg->mFrame);
+    const float flBlend = pMsg->mBlend;
+    // The binary copies the name before the lookup.
+    const Color color = TnlColorFromName(HxStr(pMsg->mPlayer->mColorName));
+    if (!pMsg->mStop) {
+        mGemTrails->StartStrip(pMsg->mLane, color, pMsg->mStripId, flFrame, flBlend);
+    } else {
+        mGemTrails->StopStrip(pMsg->mStripId, flFrame);
+    }
+}
+
+inline void AppTunnel::OnDurGem(DurGemMsg *pMsg) {
+    // The binary copies the name before the lookup.
+    const Color color = TnlColorFromName(HxStr(pMsg->mPlayer->mColorName));
+    mGemTrails->AddSegment(pMsg->mLane,
+                           color,
+                           static_cast<float>(pMsg->mStartFrame),
+                           pMsg->mStartBlend,
+                           static_cast<float>(pMsg->mEndFrame),
+                           pMsg->mEndBlend);
+}
+
+void AppTunnel::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
+        OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
+    } else if (nType == g_nNowBarMsgType) {
+        OnNowBar(static_cast<NowBarMsg *>(pMsg));
+    } else if (nType == g_nGemMsgType) {
+        OnGem(static_cast<GemMsg *>(pMsg));
+    } else if (nType == g_nClearGemMsgType) {
+        OnClearGem(static_cast<ClearGemMsg *>(pMsg));
+    } else if (nType == g_nDurGemMsgType) {
+        OnDurGem(static_cast<DurGemMsg *>(pMsg));
+    } else if (nType == g_nSusGemMsgType) {
+        OnSusGem(static_cast<SusGemMsg *>(pMsg));
+    } else if (nType == g_nClearGemsMsgType) {
+        OnClearGems(static_cast<ClearGemsMsg *>(pMsg));
+    } else if (nType == g_nCatchMsgType) {
+        OnCatch(static_cast<CatchMsg *>(pMsg));
+    } else if (nType == g_nPitchMsgType) {
+        OnPitch(static_cast<PitchMsg *>(pMsg));
+    } else if (nType == g_nAxeButtonMsgType) {
+        OnAxeButton(static_cast<AxeButtonMsg *>(pMsg));
+    } else if (nType == g_nSeekerMsgType) {
+        OnSeeker(static_cast<SeekerMsg *>(pMsg));
+    } else if ((nType == g_nDisplayPointerMsgType) || (nType == g_nChoosePowerupMsgType)) {
+        // Both are ignored.
+    } else if (nType == g_nAdvanceSectionToggleMsgType) {
+        OnAdvanceSectionToggle();
+    } else if (nType == g_nPlayersTrackNeutralizedMsgType) {
+        OnPlayersTrackNeutralized(static_cast<PlayersTrackNeutralizedMsg *>(pMsg));
+    } else if (nType == g_nShowEraseEffectMsgType) {
+        OnShowEraseEffect(static_cast<ShowEraseEffectMsg *>(pMsg));
+    } else if (nType == g_nPlaybackToggleMsgType) {
+        OnPlaybackToggle(static_cast<PlaybackToggleMsg *>(pMsg));
+    } else if (nType == g_nPhraseMuffedMsgType) {
+        OnPhraseMuffed(static_cast<PhraseMuffedMsg *>(pMsg));
+    } else if (nType == g_nSectionCapturedMsgType) {
+        OnSectionCaptured(static_cast<SectionCapturedMsg *>(pMsg));
+    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+        // Ignored.
+    } else if (nType == g_nToggleGhostMsgType) {
+        OnToggleGhost(static_cast<ToggleGhostMsg *>(pMsg));
+    } else if (nType == g_nDeployedPowerupMsgType) {
+        OnDeployedPowerup(static_cast<DeployedPowerupMsg *>(pMsg));
+    } else if (nType == g_nCripplePacketType) {
+        OnCripple(static_cast<CripplePacket *>(pMsg));
+    } else if (nType == g_nFreestyleFXMsgType) {
+        OnFreestyleFX(static_cast<FreestyleFXMsg *>(pMsg));
+    } else if (nType == g_nWinMsgType) {
+        OnWin(static_cast<WinMsg *>(pMsg));
+    } else if (nType == g_nJuiceAmountMsgType) {
+        OnJuiceAmount(static_cast<JuiceAmountMsg *>(pMsg));
+    } else if (nType == g_nMultiplierStateMsgType) {
+        OnMultiplierState(static_cast<MultiplierStateMsg *>(pMsg));
+    } else if (nType == g_nPowerupFailedMsgType) {
+        OnPowerupFailed(static_cast<PowerupFailedMsg *>(pMsg));
+    }
 }
 
 void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {

@@ -8,17 +8,32 @@
 #include "game/trackdata.h"
 
 class AxeButtonMsg;
+class CatchMsg;
+class ClearGemMsg;
+class ClearGemsMsg;
+class CripplePacket;
+class DeployedPowerupMsg;
+class DurGemMsg;
 class DurGemTrails;
+class FreestyleFXMsg;
+class GemMsg;
 class HxStr;
 class JuiceAmountMsg;
 class Message;
 class MultiplierStateMsg;
+class NowBarMsg;
+class PhraseMuffedMsg;
+class PitchMsg;
 class PlayMap;
 class PlaybackToggleMsg;
 class Player;
 class PlayersTrackNeutralizedMsg;
 class PowerupFailedMsg;
 class Renderer;
+class SectionCapturedMsg;
+class SeekerMsg;
+class ShowEraseEffectMsg;
+class SusGemMsg;
 class TnlArms;
 class TnlArrow;
 class TnlBoundary;
@@ -96,7 +111,10 @@ public:
     virtual ~AppTunnel();
 
     /**
-     * Act on one message the renderer sends on. The body is not written.
+     * Act on one message the renderer sends on.
+     *
+     * The message type selects one handler. DisplayPointerMsg, ChoosePowerupMsg, StdMidiMsg, and
+     * every other type are ignored, and nothing is passed on to MsgSink.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x00449688
@@ -297,6 +315,56 @@ private:
     // Append a panel to mPanels and set the frame it starts from. OnBarChanged() is the caller.
     // 0x00447268.
     void AddPanel(TnlPanel *pPanel, float flStartFrame);
+
+    // GemMsg: queue a gem of the kind the track, the powerup, the ghost flag, and the jukebox
+    // select. 0x00447638.
+    void OnGem(GemMsg *pMsg);
+
+    // CatchMsg: mark the catcher target, and flash and pulse on a hit or queue a miss gem.
+    // 0x00447938.
+    void OnCatch(CatchMsg *pMsg);
+
+    // PhraseMuffedMsg: redraw the bar's panel when the player tried the phrase. 0x00447ba8.
+    void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
+
+    // PitchMsg: flash at the pitched gem and mark the catcher target. 0x00447cc0.
+    void OnPitch(PitchMsg *pMsg);
+
+    // SeekerMsg: move or clear the player's seeker range and sabre trail. 0x00447eb0.
+    void OnSeeker(SeekerMsg *pMsg);
+
+    // ShowEraseEffectMsg: schedule a panel effect for every erased bar still ahead. 0x004481d0.
+    void OnShowEraseEffect(ShowEraseEffectMsg *pMsg);
+
+    // SectionCapturedMsg: run a fire along the captured track. 0x00448530.
+    void OnSectionCaptured(SectionCapturedMsg *pMsg);
+
+    // CripplePacket: launch a crippler at the target players. 0x004486f8.
+    void OnCripple(CripplePacket *pPacket);
+
+    // FreestyleFXMsg: two snakes and a full-screen fire along the track. 0x00448a08.
+    void OnFreestyleFX(FreestyleFXMsg *pMsg);
+
+    // DeployedPowerupMsg: the effect of a neutralizer, autocatcher, bumper, or multiplier.
+    // 0x00448d58.
+    void OnDeployedPowerup(DeployedPowerupMsg *pMsg);
+
+    // NowBarMsg: ease the player's pointer toward a lane. HandleMessage() inlines this.
+    // 0x00457cf0.
+    void OnNowBar(NowBarMsg *pMsg);
+
+    // ClearGemMsg: remove one gem. HandleMessage() inlines this. 0x00457d88.
+    void OnClearGem(ClearGemMsg *pMsg);
+
+    // ClearGemsMsg: remove one bar's gems and end its trail. HandleMessage() inlines this.
+    // 0x00457dd8.
+    void OnClearGems(ClearGemsMsg *pMsg);
+
+    // SusGemMsg: start or stop a sustain strip. HandleMessage() inlines this. 0x00457e48.
+    void OnSusGem(SusGemMsg *pMsg);
+
+    // DurGemMsg: add a duration gem segment. HandleMessage() inlines this. 0x00457f38.
+    void OnDurGem(DurGemMsg *pMsg);
 
     // TrackSelectMsg: turn the player's seeker, activator, grid markers, and now-ring slot to the
     // selected track. 0x00447328.

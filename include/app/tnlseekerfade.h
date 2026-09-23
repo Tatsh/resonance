@@ -50,7 +50,42 @@ public:
      */
     void Update();
 
+    /**
+     * Record a new seeker range and fade the seeker out so that Update() brings it back there.
+     *
+     * Nothing changes when the range is the one already recorded. AppTunnel's SeekerMsg handler
+     * inlines the body, and the image has no out-of-line copy.
+     *
+     * @param nFirstSlice The first slice of the range.
+     * @param nSliceCount The slices in the range.
+     * @param nRing The ring of the range.
+     */
+    void SetRange(int nFirstSlice, int nSliceCount, int nRing) {
+        if ((nFirstSlice != mFirstSlice) || (nSliceCount != mSliceCount) || (nRing != mRing)) {
+            mFirstSlice = nFirstSlice;
+            mFadeRate = kFadeOutRate;
+            mSliceCount = nSliceCount;
+            mRing = nRing;
+        }
+    }
+
+    /**
+     * Drop the recorded range and fade the seeker out.
+     *
+     * Nothing changes when no range is recorded. AppTunnel's SeekerMsg handler inlines the body,
+     * and the image has no out-of-line copy.
+     */
+    void ClearRange() {
+        if (mSliceCount != 0) {
+            mSliceCount = 0;
+            mFadeRate = kFadeOutRate;
+        }
+    }
+
 private:
+    // Alpha removed per update while the seeker fades out for a range change.
+    static constexpr float kFadeOutRate = -0.2f;
+
     int mActive;
     int mFirstSlice;
     int mSliceCount;

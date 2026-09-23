@@ -145,7 +145,7 @@ void TnlSabreTrail::AddSegmentPoint(float flFrame, float flLane) {
     AddPoint(flFrame, flLane, 1);
 }
 
-void TnlSabreTrail::Pulse(float flFrame, int nStrength) {
+void TnlSabreTrail::Pulse(float flFrame, int nStrength, [[maybe_unused]] int nTotal) {
     if (mPoints.size() < 2) {
         return;
     }

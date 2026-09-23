@@ -100,10 +100,12 @@ public:
      * and the glow size.
      *
      * @param flFrame The song position the oscillation starts at.
-     * @param nStrength The strength.
+     * @param nStrength The strength, the gems caught so far in the phrase.
+     * @param nTotal The gems the phrase requires. AppTunnel's CatchMsg handler loads it into $a2
+     *               at `0x00447af4`, and the body does not read it.
      * @ghidraAddress 0x00438ad0
      */
-    void Pulse(float flFrame, int nStrength);
+    void Pulse(float flFrame, int nStrength, int nTotal);
 
     /**
      * Reveal points, advance the oscillation, and shrink the glows toward their floor.
