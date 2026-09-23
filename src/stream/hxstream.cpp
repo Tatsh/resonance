@@ -1,8 +1,21 @@
 #include "stream/hxstream.h"
 
+namespace {
+
+constexpr int kVarLenBits = 7;
+constexpr unsigned char kVarLenValueMask = 0x7f;
+constexpr unsigned char kVarLenContinue = 0x80;
+
+} // namespace
+
+const int HxStream::kStatusOk = 0;
+const int HxStream::kStatusEnd = 1;
+const int HxStream::kStatusRange = 2;
+const int HxStream::kStatusFailed = 4;
+
 // 0x004057a8
 HxStream::HxStream() {
-    mUnknown00 = 0;
+    mSwapBytes = 0;
     mStatus = 0;
     mFatalOnEnd = 0;
 }
@@ -36,6 +49,31 @@ HxStream &HxStream::Read([[maybe_unused]] void *pDest, [[maybe_unused]] int nSiz
 }
 
 // 0x00145f40
-int HxStream::Unknown7() {
-    return 0;
+HxStream *HxStream::Unknown7() {
+    return nullptr;
+}
+
+// 0x004059f8
+HxStream &HxStream::ReadSwapped(void *pDest, int nSize) {
+    if (mSwapBytes == 0 || nSize == 1) {
+        return Read(pDest, nSize);
+    }
+
+    unsigned char *pBytes = static_cast<unsigned char *>(pDest);
+    while (nSize != 0) {
+        --nSize;
+        Read(&pBytes[nSize], 1);
+    }
+    return *this;
+}
+
+// 0x00405b70
+HxStream &ReadVarLen(int &nValue, HxStream &stream) {
+    nValue = 0;
+    unsigned char byte;
+    do {
+        stream.ReadSwapped(&byte, sizeof(byte));
+        nValue = (nValue << kVarLenBits) + (byte & kVarLenValueMask);
+    } while ((byte & kVarLenContinue) != 0);
+    return stream;
 }

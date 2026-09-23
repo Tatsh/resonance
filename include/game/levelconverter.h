@@ -28,8 +28,10 @@ class LevelBuilder;
  * Convert() is the entry point. It stores the builder, extracts the file's base name into a global
  * buffer at `0x00891a38`, reads two display-configuration codes, builds three stack objects for
  * the file, the byte stream, and the Standard MIDI File reader, hands itself to the reader as the
- * event sink, and runs it. The reader is built at `0x003d4a68` and run at `0x003d6528`, and the
- * routine at `0x001e6450` is installed into the reader at its own `+0x30` as a callback.
+ * event sink, and runs it. The three stack objects are an HxMemStream with HxStream::mSwapBytes set
+ * to 1, an HxDataChunkReader over the whole stream, and a Mid::FileReader. The file-static
+ * comparator at `0x001e6450` is stored in Mid::FileReader::mCompare before Mid::FileReader::Read()
+ * runs. The comparator ranks each event by its status class (note off first, note on last).
  *
  * The five event handlers all follow one shape. They report an error through the reporter at
  * `0x001ea6e0` when either error flag is set, call the per-channel routine at `0x001e8120`, and
@@ -38,12 +40,11 @@ class LevelBuilder;
  * `0x001ce8d0` on the object at `+0x54` instead, with the position rebased against `+0x5c` and
  * saturated to Mid::MBT's bounds. The two paths are what the flag at `+0x40` selects between.
  *
- * Eleven bodies here are not written yet. Every one is blocked on a routine outside this class
- * that has no recovered name: the file, stream, and reader classes at `0x00405cf8`, `0x00145c40`,
- * and `0x003d4a68` for Convert(); the per-channel routine at `0x001e8120`, the error reporter at
- * `0x001ea6e0`, and the second sink at `0x001ce8d0` for the five event handlers; the vector
- * assignment at `0x001e9440` for NewTrack(); and the name-map forwarders on LevelBuilder for
- * EndTrack().
+ * Eleven bodies here are not written yet. Every one is blocked on a routine that has no recovered
+ * body: the comparator at `0x001e6450` and the routine at `0x001e8af0` for Convert(); the
+ * per-channel routine at `0x001e8120`, the error reporter at `0x001ea6e0`, and the second sink at
+ * `0x001ce8d0` for the five event handlers; the vector assignment at `0x001e9440` for NewTrack();
+ * and the name-map forwarders on LevelBuilder for EndTrack().
  *
  * Every method name below that is not a Mid::Receiver override is inferred from its body.
  */
@@ -93,7 +94,7 @@ public:
      * The body is not written yet.
      *
      * @param pszPath The file to read.
-     * @param pBuffer The file's contents, forwarded to the file object at `0x00405cf8`.
+     * @param pBuffer The file's contents, forwarded to the HxMemStream constructor.
      *                GrooveWorld::FinishLoad() passes the buffer its asynchronous read filled.
      * @param nLength The length of pBuffer in bytes, forwarded to the same object.
      * @param pBuilder The builder the events are appended to.

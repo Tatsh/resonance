@@ -26,8 +26,9 @@ enum HxStreamSeekOrigin {
  * HxMemStream and HxIDataChunk. HxIDataChunk is a RIFF chunk reader and belongs to a different
  * subsystem.
  *
- * Nothing in the image writes mFatalOnEnd, so the diagnostic HxMemStream::Read() guards on it is
- * unreachable in the shipped build.
+ * Only HxIDataChunk's two constructors write mFatalOnEnd, each setting it on the chunk itself. No
+ * HxMemStream ever has it set, so the diagnostic HxMemStream::Read() guards on it is unreachable
+ * in the shipped build.
  */
 class HxStream {
 public:
@@ -98,16 +99,73 @@ public:
     virtual HxStream &Read(void *pDest, int nSize);
 
     /**
-     * Report an integer whose meaning is undetermined.
+     * Report the stream this one reads through, if any.
      *
-     * Vtable slot 7. The default reports 0 and HxMemStream retains it. HxIDataChunk overrides it
-     * at `0x00145fd8` and reports a stored word, which is the only evidence of what the slot is
-     * for, and it is not enough to title it.
+     * Vtable slot 7. The default reports null and HxMemStream retains it. HxIDataChunk overrides
+     * it at `0x00145fd8` and reports the stream its chunk lies in. That override types the result
+     * but is not enough to title the slot.
      *
-     * @return The stored value, or 0 by default.
+     * @return The underlying stream, or null by default.
      * @ghidraAddress 0x00145f40
      */
-    virtual int Unknown7();
+    virtual HxStream *Unknown7();
+
+    /**
+     * Move nSize bytes into pDest, reversing their order when the stream swaps bytes.
+     *
+     * With mSwapBytes clear, or for a single byte, this is one Read(). Otherwise it reads one byte
+     * at a time from the last position of pDest to the first. Mid::FileReader reads every header
+     * and track field through it, and HxDataChunkId reads chunk sizes through it. The title is
+     * inferred.
+     *
+     * @param pDest The destination buffer.
+     * @param nSize The number of bytes to move.
+     * @return This stream.
+     * @ghidraAddress 0x004059f8
+     */
+    HxStream &ReadSwapped(void *pDest, int nSize);
+
+    /**
+     * Status value of a stream with nothing wrong.
+     *
+     * HxIDataChunk loads the four status values from memory rather than as immediates. That places
+     * them as class constants defined in this class's translation unit. HxMemStream writes the same
+     * two values, 0 and 1, as immediates. The names of all four are inferred.
+     *
+     * @ghidraAddress 0x00816d40
+     */
+    static const int kStatusOk;
+
+    /**
+     * Status value of a stream whose read position arrived at the end of its data.
+     *
+     * @ghidraAddress 0x00816d44
+     */
+    static const int kStatusEnd;
+
+    /**
+     * Status bit a seek outside a chunk's bounds would set. Tell() reports -1 while it is set.
+     *
+     * @ghidraAddress 0x00816d48
+     */
+    static const int kStatusRange;
+
+    /**
+     * Second status bit Tell() and Seek() of HxIDataChunk test. No writer is recovered.
+     *
+     * @ghidraAddress 0x00816d4c
+     */
+    static const int kStatusFailed;
+
+    /**
+     * Non-zero when multi-byte values on the stream are in the opposite byte order.
+     *
+     * ReadSwapped() tests it and the constructor clears it. Public because HxIDataChunk copies it
+     * from another stream object and the image exposes no accessor.
+     *
+     * +0x00
+     */
+    int mSwapBytes;
 
 protected:
     /**
@@ -117,11 +175,26 @@ protected:
      */
     HxStream();
 
-    int mUnknown00; // +0x00, zeroed by the constructor and read nowhere in the image
     // Status word. HxMemStream stores 1 once the read position arrives at the end of the data and
     // 0 when a seek clamps to the start.
     int mStatus;
-    // When non-zero, HxMemStream::Read() reports a fatal error rather than a short read. Nothing
-    // in the image sets it.
+    // When non-zero, HxMemStream::Read() reports a fatal error rather than a short read. Only
+    // HxIDataChunk's constructors set it.
     int mFatalOnEnd;
 };
+
+/**
+ * Read a variable-length quantity, seven bits per byte, most significant group first.
+ *
+ * The value is cleared and each byte read through HxStream::ReadSwapped() adds its low seven bits
+ * after a seven-bit shift, until a byte with its top bit clear ends the quantity. That is the
+ * Standard MIDI File encoding. Mid::FileReader reads delta times and meta lengths through it, and
+ * the two string readers in HxStream's translation unit read their length prefixes through it.
+ * The title is inferred.
+ *
+ * @param nValue Receives the quantity.
+ * @param stream The stream to read from.
+ * @return The stream.
+ * @ghidraAddress 0x00405b70
+ */
+HxStream &ReadVarLen(int &nValue, HxStream &stream);
