@@ -15,6 +15,11 @@ constexpr int kIDableUnregistered = -2;
  * why this base has an identifier and no behaviour to go with it.
  */
 class IDableBase {
+    // IDablePtr's constructor from an object reads mId inline, and no accessor exists in the
+    // image. PhraseMgr::SetPhraseOwner() at 0x001bafa8 is the recovered expansion.
+    template <typename T>
+    friend class IDablePtr;
+
 public:
     /** @ghidraAddress 0x00121c68 */
     virtual ~IDableBase();

@@ -28,6 +28,29 @@ class Player;
 class CaughtPhrasePacket : public ToAllOtherGameSystemsPacket {
 public:
     /**
+     * Construct a packet with only the player reference and the Packet words set.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    CaughtPhrasePacket() {
+    }
+
+    /**
+     * Report a phrase caught by a player.
+     *
+     * Inline, with no address of its own. PhraseMgr::SetPhraseOwner() at `0x001bafa8` expands it
+     * on its stack with the manager's word at `+0x30` as the track and the mapped bar.
+     *
+     * @param pPlayer The player who caught the phrase, or null.
+     * @param nTr The track.
+     * @param nB The bar.
+     */
+    CaughtPhrasePacket(Player *pPlayer, unsigned int nTr, int nB)
+        : mPlayer(pPlayer), mTr(nTr), mB(nB) {
+    }
+
+    /**
      * Produce a default-constructed packet on the heap.
      *
      * The registry the translation unit at `0x003ed2e0` builds stores this address against

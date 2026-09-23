@@ -33,6 +33,18 @@ public:
     }
 
     /**
+     * Refer to an object, already resolved.
+     *
+     * Inline, with no address of its own. PhraseMgr::SetPhraseOwner() at `0x001bafa8` expands it
+     * for a CaughtPhrasePacket on its stack, caching the object and copying its identifier, or -1
+     * for a null object.
+     *
+     * @param pObject The object, or null.
+     */
+    explicit IDablePtr(T *pObject) : mCached(pObject), mId(pObject != nullptr ? pObject->mId : -1) {
+    }
+
+    /**
      * Resolve the identifier to an object, caching the result.
      *
      * An identifier of -1 is not tested for, so an unresolved pair with no identifier indexes the
