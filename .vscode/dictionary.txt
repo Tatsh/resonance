@@ -216,6 +216,7 @@ firefs
 firemult
 floatobject
 flusha
+fminv
 fogcol
 fogcol's
 fopen
@@ -462,6 +463,7 @@ metfreqloader
 metfreqmakerassetmanager
 metfreqmakercanvasscreen
 metfreqmakerdirectionsscreen
+metfreqmakerinventoryscreen
 metfrontendstate
 metglobalsettingssaverscreen
 methodobject

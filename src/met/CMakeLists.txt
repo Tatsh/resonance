@@ -10,6 +10,7 @@ set(RESONANCE_MET_SRCS
     metfreqmakerassetmanager.cpp
     metfreqmakercanvasscreen.cpp
     metfreqmakerdirectionsscreen.cpp
+    metfreqmakerinventoryscreen.cpp
     metfrontendstate.cpp
     metglobalsettingssaverscreen.cpp
     metjukeboxbasescreen.cpp
