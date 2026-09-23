@@ -490,6 +490,8 @@ void GrooveWorld::Exit(int nMode, int nUnknownb8, int nUnknown88) {
     mForceFeedback->StopAll(Mid::MBT(0));
 
     FuncCmd *pFinish = new FuncCmd(this, &GrooveWorld::FinishSong);
+    [[maybe_unused]] CmdID id;
+    id.mValue = kUnallocatedCommand; // Yes, the binary prepares this handle and never passes it.
     mApp->GetWatchdogTimer()->PostIn(
         pFinish, Sch::Tick{static_cast<long long>(nFadeMs + kExitFinishDelayMs) * kNsPerMs});
     Attachment::ReleaseIfSet(pFinish);
