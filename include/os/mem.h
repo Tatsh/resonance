@@ -347,10 +347,10 @@ void DumpHeapMemoryLog(int nIndex);
 /**
  * Take a block from the backing allocator.
  *
- * The allocator underneath is the toolchain's own, whose state lives at 0x007819cc and whose
- * allocate and release routines are at 0x0059b528 and 0x005da3b0. It is not the Heap class in
- * `os/heap.h`, which is the arena the embedded Python allocates from. Both wrappers here are two
- * instructions that load the allocator state and tail-call it.
+ * The routine is newlib's `malloc`, toolchain C library linked as shipped, with no body in this
+ * tree. It loads the reentrancy structure at 0x007819cc and calls `_malloc_r` at 0x0059b528. It is
+ * not the Heap class in `os/heap.h`, which is the arena the embedded Python allocates from. The
+ * program's label is `LibcMalloc`.
  *
  * @param nSize The block size in bytes.
  * @return The block, or null when the request cannot be met.
@@ -360,6 +360,10 @@ void *HeapAlloc(size_t nSize);
 
 /**
  * Give a block back to the backing allocator.
+ *
+ * The routine is newlib's `free`, toolchain C library linked as shipped, with no body in this tree.
+ * It loads the same reentrancy structure and tail-calls `_free_r` at 0x005da3b0. The program's
+ * label is `LibcFreeBlock`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004bfd70

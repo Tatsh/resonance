@@ -3,8 +3,9 @@
 /**
  * Report a failed check and stop the machine.
  *
- * The routine is newlib's own `__assert`, and this declaration exists because the game calls it.
- * Nothing here is reconstruction. Its report goes to `stderr`, taken from the reentrancy structure
+ * The routine is newlib's own `__assert`, toolchain C library linked as shipped, with no body in
+ * this tree. This declaration exists because the game calls it, and the program's label is
+ * `LibcAssert`. Its report goes to `stderr`, taken from the reentrancy structure
  * at 0x007819cc, through the format `assertion "%s" failed: file "%s", line %d`, which is that
  * library's text verbatim. It then tail-calls abort, which raises signal 6, calls exit, and spins
  * forever.
