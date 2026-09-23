@@ -64,6 +64,21 @@ public:
         kBillboardScaleSimpleXYZ = 160 /*!< kBillboardSimpleXYZ with the scale preserved. */
     };
 
+    /**
+     * Construct a dirty transformable with identity transforms and no children.
+     *
+     * Both transforms become the identity, mOrigin becomes `(0, 0, 0, 1)`, and mBillboard
+     * becomes kBillboardNone. Every row is first built with a padding float of 1.0.
+     *
+     * @ghidraAddress 0x004fb3f8
+     */
+    Transformable();
+
+    /**
+     * Drop this object's references on its children.
+     *
+     * @ghidraAddress 0x004fb2a8
+     */
     virtual ~Transformable();
 
     /**

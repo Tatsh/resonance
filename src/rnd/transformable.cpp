@@ -1,6 +1,7 @@
 #include "rnd/transformable.h"
 
 #include <algorithm>
+#include <iterator>
 #include <list>
 #include <string.h>
 
@@ -62,8 +63,9 @@ static FailSink &operator<<(FailSink &sink, const std::list<Transformable *> &tr
     return sink;
 }
 
-// 0x004f26f0. Only Transformable::DumpText() invokes this. A mode outside the set below writes
-// nothing rather than a fallback title.
+// 0x004f26f0
+// Only Transformable::DumpText() invokes this. A mode outside the set below writes nothing rather
+// than a fallback title.
 static FailSink &operator<<(FailSink &sink, Transformable::Billboard nBillboard) {
     switch (nBillboard) {
     case Transformable::kBillboardNone:
@@ -172,6 +174,46 @@ void Transformable::AdoptXfmFrom(const Transformable &owner) {
     SetBillboard(owner.mBillboard);
     SetOrigin(owner.mOrigin);
     UpdateWorldXfm(nullptr, 0);
+}
+
+// Rows of a transform that store the basis, the row that stores the translation, and the index
+// of the padding float in each row.
+constexpr int kXfmBasisRowCount = 3;
+constexpr int kXfmTranslationRow = 3;
+constexpr int kXfmPaddingFloat = 3;
+
+// VU0's vf0, the translation row of an identity transform and the origin of a new transformable.
+constexpr float kIdentityTranslation[] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+// Write the identity into the three basis rows without touching their padding floats, and vf0
+// into the translation row.
+static inline void SetIdentityXfm(float (&aflXfm)[kXfmRowCount][kXfmRowFloatCount]) {
+    for (int nRow = 0; nRow < kXfmBasisRowCount; ++nRow) {
+        for (int i = 0; i < kXfmPaddingFloat; ++i) {
+            aflXfm[nRow][i] = (i == nRow) ? 1.0f : 0.0f;
+        }
+    }
+    std::copy(std::begin(kIdentityTranslation),
+              std::end(kIdentityTranslation),
+              aflXfm[kXfmTranslationRow]);
+}
+
+// 0x004fb3f8
+Transformable::Transformable() : mDirty(1), mBillboard(kBillboardNone) {
+    for (auto &aflRow : mLocalXfm) {
+        aflRow[kXfmPaddingFloat] = 1.0f;
+    }
+    for (auto &aflRow : mWorldXfm) {
+        aflRow[kXfmPaddingFloat] = 1.0f;
+    }
+    SetIdentityXfm(mLocalXfm);
+    SetIdentityXfm(mWorldXfm);
+    std::copy(std::begin(kIdentityTranslation), std::end(kIdentityTranslation), mOrigin);
+}
+
+// 0x004fb2a8
+Transformable::~Transformable() {
+    ReleaseTransRefs();
 }
 
 // 0x004f0838
