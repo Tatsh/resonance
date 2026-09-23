@@ -14,6 +14,8 @@
  * AppTunnel::HandleMessage() at `0x00449790` reads them directly with no accessor in the image. It
  * converts mPosition's tick and mGem to floats and loads mTrack with `lb`, which reads only the low
  * byte of the word.
+ *
+ * The destructor at `0x001bf830` is compiler-generated and has no declaration here.
  */
 class ClearGemMsg : public Message {
 public:
