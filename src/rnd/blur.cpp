@@ -1,5 +1,6 @@
 #include "rnd/blur.h"
 
+#include <algorithm>
 #include <list>
 
 #include "os/failsink.h"
@@ -32,17 +33,17 @@ constexpr char kCountFormat[] = "%d";
 constexpr char kFalloffFormat[] = "%.2f";
 constexpr char kQuotedTextFormat[] = "\"%s\"";
 
-// An empty HxStr stores a null buffer, and the binary substitutes the program-wide empty-string
-// pointer at 0x006fbd10 rather than passing null to the formatter.
 const char *NameText(const Object *pObject) {
-    return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
+    return pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString;
 }
 
-void PrintObjectName(FailSink &sink, const Object *pObject) {
+// DumpText() continues on the sink the preceding label returned and discards the result of the
+// name print.
+void PrintObjectName(FailSink *pSink, const Object *pObject) {
     if (pObject != nullptr) {
-        sink.Format(kQuotedTextFormat, NameText(pObject));
+        pSink->Format(kQuotedTextFormat, NameText(pObject));
     } else {
-        sink.Print("no object");
+        pSink->Print("no object");
     }
 }
 
@@ -87,17 +88,20 @@ Blur *Blur::NewFromHook(const HxStr &name) {
     }
 }
 
+// 0x004c0e70
 Blur::Blur(const HxStr &name)
     : Object(name), mpMesh(nullptr), mpText(nullptr), mLength(0), mRate(1), mFalloff(1.0f),
       mCountdown(mRate) {
     AcquireObjectRefs();
 }
 
+// 0x004c0be8
 Blur::~Blur() {
     ReleaseObjectRefs();
     ReleaseAllRefs();
 }
 
+// 0x004c36b0
 void Blur::AcquireObjectRefs() {
     if (mpMesh != nullptr) {
         mpMesh->AddRef(this);
@@ -108,6 +112,7 @@ void Blur::AcquireObjectRefs() {
     mXfms.clear();
 }
 
+// 0x004c3708
 void Blur::ReleaseObjectRefs() {
     if (mpMesh != nullptr) {
         mpMesh->RemoveRef(this);
@@ -117,6 +122,7 @@ void Blur::ReleaseObjectRefs() {
     }
 }
 
+// 0x004c3758
 void Blur::SetMesh(Mesh *pMesh) {
     if (mpMesh != nullptr) {
         mpMesh->RemoveRef(this);
@@ -128,6 +134,7 @@ void Blur::SetMesh(Mesh *pMesh) {
     mXfms.clear();
 }
 
+// 0x004c37b8
 void Blur::SetText(Text *pText) {
     if (mpText != nullptr) {
         mpText->RemoveRef(this);
@@ -139,44 +146,54 @@ void Blur::SetText(Text *pText) {
     mXfms.clear();
 }
 
+// 0x004c3818
 void Blur::SetLength(int nLength) {
-    mLength = nLength >= 0 ? nLength : 0;
+    mLength = std::max(nLength, 0);
     mXfms.clear();
 }
 
+// 0x004c3858
 void Blur::SetRate(int nRate) {
-    mRate = nRate >= 1 ? nRate : 1;
+    mRate = std::max(nRate, 1);
     mXfms.clear();
 }
 
+// 0x004c34b0
 void Blur::SetFalloff(float flFalloff) {
     mFalloff = flFalloff;
 }
 
+// 0x004c3490
 Mesh *Blur::GetMesh() const {
     return mpMesh;
 }
 
+// 0x004c3498
 Text *Blur::GetText() const {
     return mpText;
 }
 
+// 0x004c34a0
 int Blur::GetLength() const {
     return mLength;
 }
 
+// 0x004c34a8
 int Blur::GetRate() const {
     return mRate;
 }
 
+// 0x004c34b8
 float Blur::GetFalloff() const {
     return mFalloff;
 }
 
+// 0x004c3480
 const HxStr &Blur::ClassName() const {
     return g_blurClassName;
 }
 
+// 0x004bfee0
 void Blur::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -186,20 +203,19 @@ void Blur::DumpText(FailSink &sink) {
     }
 
     sink.Print("[Blur]\n");
-    sink.Print("mesh:");
-    PrintObjectName(sink, mpMesh);
-    sink.Print(" length:");
-    sink.Format(kCountFormat, mLength);
-    sink.Print(" rate:");
-    sink.Format(kCountFormat, mRate);
-    sink.Print("\n");
-    sink.Print("falloff:");
-    sink.Format(kFalloffFormat, mFalloff);
-    sink.Print(" text:");
-    PrintObjectName(sink, mpText);
-    sink.Print("\n");
+    FailSink *pLine = sink.Print("mesh:");
+    PrintObjectName(pLine, mpMesh);
+    pLine->Print(" length:")
+        ->Format(kCountFormat, mLength)
+        ->Print(" rate:")
+        ->Format(kCountFormat, mRate)
+        ->Print("\n");
+    pLine = sink.Print("falloff:")->Format(kFalloffFormat, mFalloff)->Print(" text:");
+    PrintObjectName(pLine, mpText);
+    pLine->Print("\n");
 }
 
+// 0x004c00b0
 void Blur::Save(Stream &stream) {
     const int nRevision = kBlurRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -207,12 +223,13 @@ void Blur::Save(Stream &stream) {
     Drawable::Save(stream);
 
     WriteObjectName(stream, mpMesh);
-    stream.Write(&mLength, sizeof(mLength));
-    stream.Write(&mRate, sizeof(mRate));
-    stream.Write(&mFalloff, sizeof(mFalloff));
-    WriteObjectName(stream, mpText);
+    Stream &tail = stream.Write(&mLength, sizeof(mLength))
+                       .Write(&mRate, sizeof(mRate))
+                       .Write(&mFalloff, sizeof(mFalloff));
+    WriteObjectName(tail, mpText);
 }
 
+// 0x004c0258
 void Blur::Load(Stream &stream) {
     stream.Read(&g_nRndBlurLoadRevision, sizeof(g_nRndBlurLoadRevision));
     if (g_nRndBlurLoadRevision >= kBlurRejectedRevision) {
@@ -227,8 +244,7 @@ void Blur::Load(Stream &stream) {
     stream.ReadString(meshName);
     mpMesh = dynamic_cast<Mesh *>(g_manager.Find(meshName));
 
-    stream.Read(&mLength, sizeof(mLength));
-    stream.Read(&mRate, sizeof(mRate));
+    stream.Read(&mLength, sizeof(mLength)).Read(&mRate, sizeof(mRate));
     if (g_nRndBlurLoadRevision >= kBlurFalloffRevision) {
         stream.Read(&mFalloff, sizeof(mFalloff));
     }
@@ -242,6 +258,7 @@ void Blur::Load(Stream &stream) {
     AcquireObjectRefs();
 }
 
+// 0x004c35e8
 void Blur::Copy(const Object *pSource, unsigned nFlags) {
     const Blur *pSourceBlur = dynamic_cast<const Blur *>(pSource);
 
@@ -257,6 +274,7 @@ void Blur::Copy(const Object *pSource, unsigned nFlags) {
     AcquireObjectRefs();
 }
 
+// 0x004c04c0
 void Blur::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
 
@@ -285,14 +303,17 @@ void Blur::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
+// 0x004c3570
 Blur *Blur::NewBlur(const HxStr &name) {
     return new Blur(name);
 }
 
+// 0x004c3418
 Blur *Blur::Find(const HxStr &name) {
     return dynamic_cast<Blur *>(g_manager.Find(name));
 }
 
+// 0x004c3358
 void Blur::Init() {
     g_pfnNewBlur = NewBlur;
     g_manager.RegisterClass(g_blurClassName, NewBlurObject);

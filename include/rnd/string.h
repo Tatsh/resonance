@@ -400,7 +400,7 @@ protected:
      * receives Rnd::Mesh::kSyncPoints, the camera transform, and a draw.
      *
      * The body is not reconstructed. It reads the current camera through a global this header does
-     * not own, and it reads two camera fields that `cam.h` does not declare.
+     * not declare, and it reads two camera fields that `cam.h` does not declare.
      *
      * @return Non-zero. The children are drawn as well.
      * @ghidraAddress 0x004b95f8
