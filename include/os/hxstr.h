@@ -91,6 +91,7 @@ public:
      * @param pszText The text to append.
      * @return This string.
      * @ghidraAddress 0x0010edb0
+     * @ghidraAddress 0x00183a70
      */
     HxStr &operator+=(const char *pszText) {
         return *this += HxStr(pszText);

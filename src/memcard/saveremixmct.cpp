@@ -1,5 +1,6 @@
 #include "memcard/saveremixmct.h"
 
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +28,6 @@ static const char *const kPathSeparator = "/";
 
 // The index file inside each remix save directory.
 static const char *const kIndexFileName = "/index";
-
-// The payload file name of the first remix in a fresh directory.
-static const char *const kFirstPayloadFileName = "1";
 
 // dateTime when the clock cannot be read.
 static const char *const kDefaultDateTime = "FIXME: default date";
@@ -62,20 +60,6 @@ constexpr int kNumberTextSize = 16;
 // The text of an HxStr, with the shared empty string standing in for a null buffer.
 inline const char *TextOf(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
-}
-
-// The payload file name the remix takes in the directory ChooseTargetDir() picks: one past the
-// highest file number of the first directory with room, or kFirstPayloadFileName when none has
-// room. The binary expands it in OnListDir() and OnFileLoaded().
-inline HxStr NextPayloadFileName(const std::vector<RemixDirInfo> &infos) {
-    for (auto it = infos.begin(); it != infos.end(); ++it) {
-        if (it->entryCount < kMaxRemixesPerDirectory) {
-            char szNumber[kNumberTextSize];
-            sprintf(szNumber, "%d", it->highestFileNumber + 1);
-            return HxStr(szNumber);
-        }
-    }
-    return HxStr(kFirstPayloadFileName);
 }
 
 // Fills one index element from the task's remix. The binary expands it at both WriteIndex() sites.
@@ -125,24 +109,17 @@ SaveRemixMCT::~SaveRemixMCT() {
 void SaveRemixMCT::AppendDirInfo(std::vector<RemixDirInfo> &infos,
                                  const HxStr &name,
                                  int nEntryCount) {
-    RemixDirInfo info;
-    info.name = name;
-    info.entryCount = nEntryCount;
-    info.highestFileNumber = 0;
-    info.dirNumber = atoi(TextOf(name) + kRemixDirNumberOffset);
-    infos.push_back(info);
+    infos.push_back(RemixDirInfo(name, nEntryCount));
 }
 
 // 0x00179d60
 HxStr SaveRemixMCT::ChooseTargetDir(const std::vector<RemixDirInfo> &infos) {
-    int nHighest = 0;
+    unsigned int nHighest = 0;
     for (auto it = infos.begin(); it != infos.end(); ++it) {
         if (it->entryCount < kMaxRemixesPerDirectory) {
             return it->name;
         }
-        if (nHighest < it->dirNumber) {
-            nHighest = it->dirNumber;
-        }
+        nHighest = std::max(nHighest, it->dirNumber);
     }
     char szNumber[kNumberTextSize];
     sprintf(szNumber, "%02d", nHighest + 1);
@@ -189,7 +166,7 @@ void SaveRemixMCT::OnListDir(ListDirOp *pOp) {
         return;
     }
     mTargetDir = ChooseTargetDir(mDirInfos);
-    mPayloadFileName = NextPayloadFileName(mDirInfos);
+    mPayloadFileName = RemixDirInfo::NextPayloadFileName(mDirInfos);
     mStep = kStepReadTargetIndex;
     ReadTargetIndex();
 }
@@ -241,15 +218,7 @@ void SaveRemixMCT::OnFileLoaded(int nStatus) {
     index.ReadFromStream(mStream);
     AppendDirInfo(mDirInfos, mCurrentDir, index.elements.size());
     for (auto it = index.elements.begin(); it != index.elements.end(); ++it) {
-        const int nFileNumber = atoi(it->FileName);
-        for (auto info = mDirInfos.begin(); info != mDirInfos.end(); ++info) {
-            if (info->name == mCurrentDir) {
-                if (info->highestFileNumber < nFileNumber) {
-                    info->highestFileNumber = nFileNumber;
-                }
-                break;
-            }
-        }
+        RemixDirInfo::RaiseHighestFileNumber(mDirInfos, mCurrentDir, atoi(it->FileName));
         if (HxStr(it->RemixName) == mRemixName) {
             mTargetDir = mCurrentDir;
             mPayloadFileName = it->FileName;
@@ -265,7 +234,7 @@ void SaveRemixMCT::OnFileLoaded(int nStatus) {
         return;
     }
     mTargetDir = ChooseTargetDir(mDirInfos);
-    mPayloadFileName = NextPayloadFileName(mDirInfos);
+    mPayloadFileName = RemixDirInfo::NextPayloadFileName(mDirInfos);
     mStep = kStepReadTargetIndex;
     ReadTargetIndex();
 }
