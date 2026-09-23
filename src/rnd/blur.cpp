@@ -240,7 +240,7 @@ void Blur::Load(Stream &stream) {
     Drawable::Load(stream);
     ReleaseObjectRefs();
 
-    HxStr meshName(nullptr);
+    HxStr meshName;
     stream.ReadString(meshName);
     mpMesh = dynamic_cast<Mesh *>(g_manager.Find(meshName));
 
@@ -250,7 +250,7 @@ void Blur::Load(Stream &stream) {
     }
 
     if (g_nRndBlurLoadRevision >= kBlurTextRevision) {
-        HxStr textName(nullptr);
+        HxStr textName;
         stream.ReadString(textName);
         mpText = dynamic_cast<Text *>(g_manager.Find(textName));
     }

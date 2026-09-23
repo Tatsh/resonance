@@ -170,7 +170,7 @@ public:
      * Rewrite a type name that a file older than version 3 wrote.
      *
      * Seven names were rewritten across four format revisions, and each rewrite applies only to a
-     * file below the revision that introduced it. The version comes from the global at `0x0089df90`
+     * file below the revision that introduced it. The version comes from g_nRndManagerFileVersion
      * rather than from an argument.
      *
      * | Below version | Old name        | New name        |
@@ -199,35 +199,35 @@ public:
     /**
      * Read a `.rnd` file's object table from stream.
      *
-     * The first word is the file version, which lands in the global at `0x0089df90` so that every
-     * class reached during the load can consult it. A version of 7 or above reports "Can't load
-     * new Manager" and abandons the load. The second word is the object count, and the two lists
-     * at `+0x0c` and `+0x10` are emptied before the entries are read.
+     * The first word is the file version, which lands in g_nRndManagerFileVersion for every class
+     * reached during the load to consult. A version of 7 or above reports "Can't load new
+     * Manager" and abandons the load. The second word is the object count, and mLoaded and
+     * mMergeObjects are emptied before the entries are read.
      *
-     * Each entry is a class name and an object name, both NUL-terminated.
-     * RemapLegacyClassName() rewrites the class name, then an existing object of that name is
-     * reused when one exists and a new one is built through the registry otherwise. A file at
-     * version 1 or above precedes each entry with one flag byte. Every eighth entry drives the
-     * progress callback at `0x0071985c` through the counter at `0x00719888`.
+     * Each entry is a class name and an object name, both NUL-terminated, followed from file
+     * version 1 by one flag byte. RemapLegacyClassName() rewrites the class name. Every eighth
+     * entry calls g_pfnLongOperationDrawProc, counted in g_nRndManagerLoadFrameCounter.
      *
-     * An object found by name is reused only when its own class name matches the incoming one or
-     * is one of the five structural titles "View", "Animatable", "Transformable", "Drawable", and
-     * "Collideable", which are the titles a file writes to refer to an object it does not own. An
-     * object with mInternal set is always accepted. A rejection reports "Can't merge object %s"
-     * and abandons the load, and a class name absent from the registry reports "Could not create
-     * object %s of class %s". Each object whose mMerge is set is appended to the list at `+0x10`.
+     * An existing object of the incoming name is reused. Otherwise Create() builds one and it is
+     * appended to mLoaded. A class name absent from the registry reports "Failed to create object
+     * %s of class %s", runs the abort handler, and skips the entry.
      *
-     * A second pass then reads each object's own record in the order the table listed them. From
-     * file version 2 onward each record is bracketed by the four-byte marker `0xdeaddead`, which
-     * the pass scans forward to before and after the record, so one malformed record cannot
-     * desynchronise the rest of the file. A file below version 2 has no marker, so the pass
-     * instead builds a throwaway object of the same class under the name "__temp__", reads the
-     * record into that to consume the right number of bytes, and destroys it.
+     * A reused object with mInternal set is rejected. Otherwise it is accepted when its class name
+     * matches the incoming one, or when its class name is "View" and the incoming one is
+     * "Animatable", "Transformable", "Drawable", or "Collideable". A rejection reports "Can't merge
+     * object %s" and abandons the load. An accepted object whose mMerge is set is appended to
+     * mMergeObjects.
      *
-     * The per-entry flag byte lands in the object's mMerge, and the second pass then invokes
-     * Load() on an object whose saved flag is set and skips the record of one whose flag is clear.
-     * That is the merge mechanism: an entry may appear in a file without overwriting the object
-     * already registered under its name.
+     * Each object is recorded with its mMerge as the table pass found it. An object whose mMerge
+     * was set then takes the entry's flag byte, and one whose mMerge was clear is not changed.
+     *
+     * A second pass visits the recorded objects in table order and calls
+     * g_pfnLongOperationDrawProc before each. An object recorded with mMerge set runs Load() on its
+     * record, and the record of one recorded with mMerge clear is skipped. From file version 2
+     * each record ends with the marker `0xdeaddead`, and after each record, loaded or skipped, the
+     * pass reads forward through the next marker. A file below version 2 has no marker. The pass
+     * skips such a record by building a throwaway object of the same class under the name
+     * "__temp__", loading the record into it, and destroying it.
      *
      * @param stream The stream to read from.
      * @ghidraAddress 0x0051b450
@@ -322,7 +322,7 @@ public:
                                              destructor, and the image exposes no accessor that
                                              hands the tree out. +0x00 */
 
-    // Read() empties mLoaded but never appends to it. ResolveAndLinkObject() is what appends.
+    // Read() appends each object it creates, and ResolveAndLinkObject() appends each clone.
     std::list<Object *> mLoaded; /*!< Objects the last file load produced. Public because
                                       RndAsyncLoader::HarvestLoadedObjects() at `0x003f8460` copies
                                       it wholesale into its own request list and then classifies
@@ -346,5 +346,23 @@ private:
  * @ghidraAddress 0x00719868
  */
 extern Manager g_manager;
+
+/**
+ * Version word of the `.rnd` file Manager::Read() is loading.
+ *
+ * Manager::Read() stores it before anything else, and Manager::RemapLegacyClassName() tests it.
+ *
+ * @ghidraAddress 0x0089df90
+ */
+extern int g_nRndManagerFileVersion;
+
+/**
+ * Table entries Manager::Read() has passed since it last called g_pfnLongOperationDrawProc.
+ *
+ * Counts to 8 and resets to 0. Manager::Read() does not reset it between loads.
+ *
+ * @ghidraAddress 0x00719888
+ */
+extern int g_nRndManagerLoadFrameCounter;
 
 } // namespace Rnd
