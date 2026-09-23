@@ -56,10 +56,10 @@ public:
     enum { kCopyShareKeys = 0x02 };
 
     /**
-     * Construct an animation with three empty channels and no light.
+     * Construct an animation with three empty channels and no light, owning its keys.
      *
-     * The body is not reconstructed. NewLightAnim() is the one construction site and allocates
-     * 0x48 untagged bytes before invoking it.
+     * NewLightAnim() is the one construction site and allocates 0x48 untagged bytes before
+     * invoking it.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x00544df0

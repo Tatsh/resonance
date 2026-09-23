@@ -38,11 +38,47 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
+// DumpText() expands this for both colours, one Print and Format pair per component.
+inline void PrintColor(FailSink &sink, const Color &color) {
+    sink.Print("(r:");
+    sink.Format("%.2f", color.r);
+    sink.Print(" g:");
+    sink.Format("%.2f", color.g);
+    sink.Print(" b:");
+    sink.Format("%.2f", color.b);
+    sink.Print(" a:");
+    sink.Format("%.2f", color.a);
+    sink.Print(")");
+}
+
 } // namespace
+
+// 0x00718d18
+HxStr g_environClassName("Environ");
 
 Environ *g_pCurrentEnviron;
 
 Environ *(*g_pfnNewEnviron)(const HxStr &name);
+
+// 0x00515890
+Environ::Environ(const HxStr &name)
+    : Object(name), mAmbient{0.0f, 0.0f, 0.0f, 0.0f}, mFogStart(0.0f), mFogEnd(1.0f),
+      mFogDensity(1.0f), mFogColor{1.0f, 1.0f, 1.0f, 1.0f}, mFogMode(kFogModeNone) {
+}
+
+// 0x00518fe0
+Environ::~Environ() {
+    if (g_pCurrentEnviron == this) {
+        g_pCurrentEnviron = nullptr;
+    }
+    ReleaseLightsRefs();
+    ReleaseAllRefs();
+}
+
+// 0x00519258
+const HxStr &Environ::ClassName() const {
+    return g_environClassName;
+}
 
 // 0x00519470
 //
@@ -122,6 +158,36 @@ static Stream &operator>>(Stream &stream, std::list<Light *> &lights) {
     return stream;
 }
 
+// 0x00515ce0
+void Environ::DumpText(FailSink &sink) {
+    Object::DumpText(sink);
+    Drawable::DumpText(sink);
+    if (sink.mDumpLevel <= 0) {
+        return;
+    }
+
+    sink.Print("[Environ]\n");
+    sink.Print("lights:");
+    sink << mLights;
+    sink.Print("\n");
+    sink.Print("ambient:");
+    PrintColor(sink, mAmbient);
+    sink.Print(" fogStart:");
+    sink.Format("%.2f", mFogStart);
+    sink.Print("\n");
+    sink.Print("fogEnd:");
+    sink.Format("%.2f", mFogEnd);
+    sink.Print(" fogDensity:");
+    sink.Format("%.2f", mFogDensity);
+    sink.Print("\n");
+    sink.Print("fogColor:");
+    PrintColor(sink, mFogColor);
+    sink.Print(" fogMode:");
+    sink << mFogMode;
+    sink.Print("\n");
+}
+
+// 0x00518e60
 int Environ::DrawSelf() {
     g_pCurrentEnviron = this;
     return 1;
@@ -147,6 +213,7 @@ void Environ::ReleaseLightsRefs() {
     }
 }
 
+// 0x00516028
 void Environ::Save(Stream &stream) {
     const int nRevision = kEnvironRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -171,6 +238,7 @@ void Environ::Save(Stream &stream) {
     stream.Write(&mFogMode, sizeof(mFogMode));
 }
 
+// 0x00516260
 void Environ::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -205,6 +273,7 @@ void Environ::Load(Stream &stream) {
     AcquireLightsRefs();
 }
 
+// 0x00516560
 void Environ::Copy(const Object *pSource, unsigned nFlags) {
     const Environ *pSourceEnviron = dynamic_cast<const Environ *>(pSource);
 
@@ -225,6 +294,7 @@ void Environ::Copy(const Object *pSource, unsigned nFlags) {
     AcquireLightsRefs();
 }
 
+// 0x005156b0
 void Environ::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
 
@@ -253,6 +323,7 @@ void Environ::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
+// 0x00519308
 Environ *Environ::NewEnviron(const HxStr &name) {
     return new Environ(name);
 }
@@ -309,6 +380,7 @@ Object *CreateRegisteredEnviron(const HxStr &name) {
     }
 }
 
+// 0x00519568
 void Environ::ClearLights() {
     ReleaseLightsRefs();
     mLights.clear();

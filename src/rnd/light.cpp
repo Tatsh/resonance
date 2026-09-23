@@ -22,6 +22,13 @@ constexpr int kLightTypeRevision = 1;
 // The allocation tag every light block is billed to.
 constexpr char kLightTag[] = "Rnd::Light";
 
+// Defaults the constructor gives the cone and the reach. The angle is one ulp short of pi / 4.
+constexpr float kDefaultConeAngle = 0.785398126f;
+constexpr float kDefaultRange = 1000.0f;
+
+// Grey level of the default ambient colour.
+constexpr float kDefaultAmbientLevel = 0.1f;
+
 // src/rnd/mat.cpp declares a helper of the same title file-locally for the same reason. Every
 // component is a separate Print and Format pair, which is why the two literals "(r:" and "%.2f"
 // survive apart in the read-only data.
@@ -63,34 +70,55 @@ const HxStr &Light::ClassName() const {
     return g_lightClassName;
 }
 
+// 0x0053ffd8
+Light::Light(const HxStr &name)
+    : Object(name), mDiffuse{1.0f, 1.0f, 1.0f, 1.0f},
+      mAmbient{kDefaultAmbientLevel, kDefaultAmbientLevel, kDefaultAmbientLevel, 1.0f},
+      mSpecular{0.0f, 0.0f, 0.0f, 1.0f}, mInnerAngle(kDefaultConeAngle),
+      mOuterAngle(kDefaultConeAngle), mRange(kDefaultRange), mConstantAtten(1.0f),
+      mLinearAtten(0.0f), mQuadraticAtten(0.0f), mType(kLightTypeDirectional) {
+}
+
+// 0x005445d8
+Light::~Light() {
+    ReleaseAllRefs();
+}
+
+// 0x00544400
 void Light::SetColors(const Color &ambient, const Color &diffuse, const Color &specular) {
     mAmbient = ambient;
     mDiffuse = diffuse;
     mSpecular = specular;
 }
 
+// 0x00544420
 void Light::SetType(LightType type) {
     mType = type;
 }
 
+// 0x00544428
 void Light::SetRange(float flRange) {
     mRange = flRange;
 }
 
+// 0x00544430
 void Light::SetAngles(float flInner, float flOuter) {
     mOuterAngle = flOuter;
     mInnerAngle = flInner;
 }
 
+// 0x00544440
 void Light::SetAttenuation(float flConstant, float flLinear, float flQuadratic) {
     mQuadraticAtten = flQuadratic;
     mConstantAtten = flConstant;
     mLinearAtten = flLinear;
 }
 
+// 0x00544818
 void Light::ApplyUnknown() {
 }
 
+// 0x00540420
 void Light::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
@@ -127,6 +155,7 @@ void Light::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
+// 0x005408b8
 void Light::Save(Stream &stream) {
     const int nRevision = kLightRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -180,6 +209,7 @@ void Light::Save(Stream &stream) {
     stream.Write(&nType, sizeof(nType));
 }
 
+// 0x00540be8
 void Light::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -219,10 +249,12 @@ void Light::Load(Stream &stream) {
     ApplyUnknown();
 }
 
+// 0x00545480
 void Light::Replace(Object *pFrom, Object *pTo) {
     Transformable::Replace(pFrom, pTo);
 }
 
+// 0x00545390
 void Light::Copy(const Object *pSource, unsigned nFlags) {
     const Light *pSourceLight = dynamic_cast<const Light *>(pSource);
 

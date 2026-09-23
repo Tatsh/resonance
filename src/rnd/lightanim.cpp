@@ -69,6 +69,23 @@ void BlendChannelColor(const std::list<ColorKey> &keys, float flFrame, Color &re
 // 0x00720bd8
 HxStr g_lightAnimClassName("LightAnim");
 
+// 0x00544df0
+LightAnim::LightAnim(const HxStr &name) : Object(name), mLight(nullptr), mKeysOwner(this) {
+}
+
+// 0x00544b10
+LightAnim::~LightAnim() {
+    // The binary drops these two references through an out-of-line copy of the pair Copy() and
+    // Load() expand, at 0x00545630.
+    if (mLight != nullptr) {
+        mLight->RemoveRef(this);
+    }
+    if (mKeysOwner != nullptr) {
+        mKeysOwner->RemoveRef(this);
+    }
+    ReleaseAllRefs();
+}
+
 // 0x00544de0
 const HxStr &LightAnim::ClassName() const {
     return g_lightAnimClassName;
