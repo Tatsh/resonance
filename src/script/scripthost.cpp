@@ -1,5 +1,6 @@
 #include "script/scripthost.h"
 
+#include <exception>
 #include <stdarg.h>
 
 #include "os/log.h"
@@ -31,6 +32,16 @@ void DestroyPythonScriptHost() {
 // 0x0050d698
 void InvokeMasterInitScript() {
     g_pPyShell->RunMasterInitScript();
+}
+
+// 0x00508f30
+HxStr GetPythonErrorText() {
+    try {
+        g_pPyShell->ReportError(HxStr(""), 1);
+    } catch (std::exception &error) {
+        return HxStr("python error: ") + error.what();
+    }
+    return HxStr("no python exception found");
 }
 
 // 0x00509b00

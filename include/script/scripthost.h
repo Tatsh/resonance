@@ -83,11 +83,10 @@ void RunScript(const HxStr &script);
  *
  * The routine reports the error through PyShell::ReportError() with an empty context, which halts
  * the machine, so the text it returns is unreachable on the normal path. The plain return is
- * `no python exception found`, and a handler inside it prefixes `python error: ` to a message it
- * recovers from the caught object.
- *
- * Not reconstructed. The caught type has a virtual accessor at its third slot and the type is not
- * identified, so the handler cannot be written faithfully.
+ * `no python exception found`. A std::exception escaping the report is caught and its what() text
+ * returned after the prefix `python error: `. The handler matches the type_info that
+ * `0x004ad6b8` builds from `9exception`, and it calls the vtable entry at `+0x10`, which is
+ * what() in the g++ 2.9x layout.
  *
  * @return The text.
  * @ghidraAddress 0x00508f30
