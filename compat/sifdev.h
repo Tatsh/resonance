@@ -16,8 +16,9 @@
 #define SCE_SEEK_CUR 1
 #define SCE_SEEK_END 2
 
-// ps2sdk declares these four under Sif* names with identical signatures. They are forwarded rather
+// ps2sdk declares these five under Sif* names with identical signatures. They are forwarded rather
 // than redeclared.
+#define sceSifAllocIopHeap SifAllocIopHeap
 #define sceSifInitIopHeap SifInitIopHeap
 #define sceSifLoadModule SifLoadModule
 #define sceSifRebootIop SifIopReboot

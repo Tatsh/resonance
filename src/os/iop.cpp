@@ -34,20 +34,6 @@ constexpr char kCdOnlyModeName[] = " CD_ONLY";
 constexpr char kHostOnlyModeName[] = " HOST_ONLY";
 constexpr char kModeBannerTail[] = " mode being used for IOP initialization.\n";
 
-// The script templates RegisterHardEffectCommands() registers, in the order it registers them.
-constexpr int kTemplateUseHardEffect = 10000;
-constexpr int kTemplateHardEffectId = 10001;
-constexpr int kTemplateHardEffectVolumes = 10002;
-constexpr int kTemplateHardDelayTime = 10003;
-constexpr int kTemplateHardFeedback = 10004;
-constexpr int kTemplateLevelExists = 10010;
-constexpr int kTemplateHardEffectStt = 10005;
-constexpr int kTemplateNoPauseChannels = 10006;
-constexpr int kTemplateChorusRate = 10007;
-constexpr int kTemplateChorusDepth = 10008;
-constexpr int kTemplateChorusShape = 10009;
-constexpr int kTemplateHardSynthErrorFile = 10011;
-
 constexpr char kUseHardEffectExpression[] = "current_level.ps2_use_hard_effect(%d)";
 constexpr char kHardEffectIdExpression[] = "current_level.ps2_hard_effect_id(%d)";
 constexpr char kHardEffectVolumesExpression[] = "current_level.ps2_hard_effect_volumes(%d)[%d]";

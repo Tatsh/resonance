@@ -1,5 +1,7 @@
 Colorable
 Dfan
+EVOLL
+EVOLR
 Eran
 Invers
 Kasson

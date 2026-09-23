@@ -4,17 +4,21 @@
 #include <eekernel.h>
 #include <libsdr.h>
 #include <msin.h>
+#include <sifdev.h>
+#include <sifdma.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "app/application.h"
 #include "os/async.h"
 #include "os/cycles.h"
+#include "os/iop.h"
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "rnd/moviestream.h"
 #include "sch/tickclock.h"
+#include "script/configquery.h"
 #include "synth/callbackxferhdtoiop.h"
 
 // The tag both allocations below bill to. It is the module's original file rather than this one,
@@ -63,8 +67,67 @@ constexpr int kSynthStreamFramesPerBar = 19200;
 constexpr int kSoundDriverRpcServer = 0x12346;
 constexpr int kSoundDriverBindSpin = 9999;
 
+// Selector bits SubmitSoundDriverRequest() tests. The synchronous bit waits for a reply and skips
+// the pending flag, and the block bit ships a whole SoundDriverCommand from the argument.
+constexpr int kSoundSelectorSynchronous = 0x8000;
+constexpr int kSoundSelectorCommandBlock = 0x1000;
+
+// The request a selector without the block bit sends, the argument in its first word.
+constexpr int kSoundDriverRequestSize = 0x10;
+
+// sceSifCallRpc() blocks in mode zero, and sceSifCheckStatRpc() reports 1 while a call runs.
+constexpr int kSifRpcModeWait = 0;
+constexpr int kSifRpcStillRunning = 1;
+
+// The words the driver replies with, and the request a value-carrying selector sends from.
+constexpr int kSoundDriverReplyWords = 16;
+
+// Selectors InitSynthDriver() and the three forwarders submit. Their effects are unrecovered, and
+// InitSynthDriver() keeps the reply to the first as the IOP address PollSynthEvents() writes to.
+constexpr int kSoundSelectorAllocEventBuffer = 0x8010;
+constexpr int kSoundSelectorUnknown110 = 0x110;
+constexpr int kSoundSelectorUnknown100 = 0x100;
+constexpr int kSoundSelectorUnknownF0 = 0xf0;
+
+// The argument InitSynthDriver() passes with kSoundSelectorAllocEventBuffer.
+constexpr uintptr_t kMidiEventBufferRequest = 0x4000;
+
+// Bytes of each staging buffer and each bank buffer InitSynthDriver() takes from the IOP heap.
+constexpr int kIopStagingBufferSize = 0x2000;
+constexpr int kBankIopBufferSize = 0x10000;
+
+// The bank address index InitSynthDriver() leaves selected. The first address is used once.
+constexpr int kBankIopIndexAfterInit = 1;
+
+// PollSynthEvents() alternates between two driver event buffers of this many bytes, and ships the
+// stream buffer's two header words with its payload.
+constexpr int kMidiEventBufferCount = 2;
+constexpr int kMidiEventBufferSize = 0x400;
+constexpr int kMidiStreamHeaderSize = 2 * sizeof(unsigned int);
+
+// The frame size PollSynthStream() asks the synth movie to read.
+constexpr int kSynthStreamReadSize = 0x4000;
+
 // 0x008e5bc0
 SifRpcClientData_t g_soundDriverClient;
+
+// 0x00780878. Set while a request sent without waiting is still running on the driver.
+int g_bSoundRequestPending;
+
+// 0x008e5b80. The driver's reply, whose first word SubmitSoundDriverRequest() reports.
+unsigned int g_anSoundDriverReply[kSoundDriverReplyWords];
+
+// 0x008e5be8. The descriptor XferToIop() hands to the SIF DMA.
+SifDmaTransfer_t g_xferToIopDma;
+
+// 0x006e9b88. Set once InitSynthDriver() has brought the driver up.
+int g_bSynthDriverReady;
+
+// 0x006e9dc0. The IOP address of the driver's event buffers, from InitSynthDriver().
+int g_nMidiEventIopAddress;
+
+// 0x006e9bd0. The event buffer PollSynthEvents() writes next.
+int g_nMidiEventBufferIndex;
 
 // 0x00894cc0
 SoundDriverCommand g_chunkCommand;
@@ -416,6 +479,87 @@ void DumpSynthVoices(int bActiveOnly) {
     LogPrintf("Using %d voices total\n", nActive);
 }
 
+// Selector ConfigureSpu2Effects() submits its chorus block under.
+constexpr int kSoundSelectorHardEffect = 0x10e0;
+
+// Indices into the two-element template arguments ConfigureSpu2Effects() reads.
+enum Spu2EffectSide {
+    kSpu2EffectLeft,
+    kSpu2EffectRight,
+};
+
+// The four `ps2_heff_stt()` entries, stored in two word and two byte fields.
+enum HardEffectSttEntry {
+    kHardEffectStt0,
+    kHardEffectStt1,
+    kHardEffectStt2,
+    kHardEffectStt3,
+};
+
+// The effect depths are the configured value shifted into the high byte of a 16-bit depth.
+constexpr int kSpu2EffectDepthShift = 8;
+
+// The command block ConfigureSpu2Effects() fills and submits under kSoundSelectorHardEffect. The
+// driver reads the whole 0x80-byte block. The fields are titled from the template each is read
+// from, and their meaning to the driver is unrecovered.
+struct HardEffectCommand {
+    short mSttWords[2];            // +0x00 stt entries 0 and 2
+    unsigned char mSttBytes[2];    // +0x04 stt entries 1 and 3
+    unsigned char mReserved06[2];  // +0x06
+    int mChorusRate[2];            // +0x08
+    int mChorusDepth[2];           // +0x10
+    unsigned char mChorusShape[2]; // +0x18
+    unsigned char mReserved1a[6];  // +0x1a
+    short mNoPauseChannels;        // +0x20
+    unsigned char mReserved22[0x5e];
+};
+
+// 0x00894d40
+HardEffectCommand g_hardEffectCommand;
+
+// 0x00462340
+void ConfigureSpu2Effects(int bEnable) {
+    for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
+        if (bEnable != 0 && QueryConfigFlag(kTemplateUseHardEffect, nCore) != 0) {
+            sceSdEffectAttr attr; // Yes, the binary never sets the core field.
+            attr.mode = QueryConfigValue(kTemplateHardEffectId, nCore) | SD_EFFECT_MODE_CLEAR;
+            attr.depth_L = QueryConfigValue(kTemplateHardEffectVolumes, nCore, kSpu2EffectLeft)
+                           << kSpu2EffectDepthShift;
+            attr.depth_R = QueryConfigValue(kTemplateHardEffectVolumes, nCore, kSpu2EffectRight)
+                           << kSpu2EffectDepthShift;
+            attr.delay = QueryConfigValue(kTemplateHardDelayTime, nCore);
+            attr.feedback = QueryConfigValue(kTemplateHardFeedback, nCore);
+            sceSdRemote(kSdRemoteBlocking, rSdSetEffectAttr, nCore, &attr);
+            sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_CORE_EFFECT_ENABLE | nCore, 1);
+        } else {
+            sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_CORE_EFFECT_ENABLE | nCore, 0);
+            sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_EVOLL | nCore, 0);
+            sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_EVOLR | nCore, 0);
+        }
+        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MVOLL | nCore, kSpu2MaxVolume);
+        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MVOLR | nCore, kSpu2MaxVolume);
+    }
+
+    if (bEnable == 0) {
+        return;
+    }
+    HardEffectCommand &command = g_hardEffectCommand;
+    command.mSttWords[0] = QueryConfigValue(kTemplateHardEffectStt, kHardEffectStt0);
+    command.mSttBytes[0] = QueryConfigValue(kTemplateHardEffectStt, kHardEffectStt1);
+    command.mSttWords[1] = QueryConfigValue(kTemplateHardEffectStt, kHardEffectStt2);
+    command.mSttBytes[1] = QueryConfigValue(kTemplateHardEffectStt, kHardEffectStt3);
+    command.mChorusRate[kSpu2EffectLeft] = QueryConfigValue(kTemplateChorusRate, kSpu2EffectLeft);
+    command.mChorusRate[kSpu2EffectRight] = QueryConfigValue(kTemplateChorusRate, kSpu2EffectRight);
+    command.mChorusDepth[kSpu2EffectLeft] = QueryConfigValue(kTemplateChorusDepth, kSpu2EffectLeft);
+    command.mChorusDepth[kSpu2EffectRight] =
+        QueryConfigValue(kTemplateChorusDepth, kSpu2EffectRight);
+    command.mChorusShape[kSpu2EffectLeft] = QueryConfigValue(kTemplateChorusShape, kSpu2EffectLeft);
+    command.mChorusShape[kSpu2EffectRight] =
+        QueryConfigValue(kTemplateChorusShape, kSpu2EffectRight);
+    command.mNoPauseChannels = QueryConfigValue(kTemplateNoPauseChannels);
+    SubmitSoundDriverRequest(kSoundSelectorHardEffect, reinterpret_cast<uintptr_t>(&command));
+}
+
 // 0x004649f8
 void InitSpu2Cores() {
     sceSdRemoteInit(); // Yes, the binary discards this call's result.
@@ -536,6 +680,87 @@ void SubmitDriverSelectorC0() {
     SubmitSoundDriverRequest(kSoundSelectorUnknownC0, 0);
 }
 
+// 0x00464868
+void SubmitDriverSelector110(int nValue) {
+    SubmitSoundDriverRequest(kSoundSelectorUnknown110, nValue);
+}
+
+// 0x00464888
+void SubmitDriverSelector100(int nValue) {
+    SubmitSoundDriverRequest(kSoundSelectorUnknown100, nValue);
+}
+
+// 0x004648a8
+void SubmitDriverSelectorF0(int nValue) {
+    SubmitSoundDriverRequest(kSoundSelectorUnknownF0, nValue);
+}
+
+// 0x004648c8
+void PollSynthEvents() {
+    if (g_midiStreamBuffer.mValidSize == 0) {
+        return;
+    }
+    const int nBuffer = g_nMidiEventBufferIndex;
+    g_nMidiEventBufferIndex = (nBuffer + 1) & (kMidiEventBufferCount - 1);
+    XferToIop(g_nMidiEventIopAddress + nBuffer * kMidiEventBufferSize,
+              &g_midiStreamBuffer,
+              g_midiStreamBuffer.mValidSize + kMidiStreamHeaderSize);
+    g_midiStreamBuffer.mValidSize = 0;
+}
+
+// 0x004645c8
+void WaitForBankTransfers() {
+    while (IsBankXferBusy() != 0) {
+        AsyncPumpCompletedRequests();
+    }
+}
+
+// 0x00464660
+void ReleaseSoundBanks() {
+    SubmitDriverSelectorC0();
+    ReleaseAllBankSlots();
+    delete g_pBdXfer;
+    g_pBdXfer = nullptr;
+    g_hdXfer.mpBdXfer = nullptr;
+    g_bdBankName = "";
+    g_hdBankName = "";
+}
+
+// 0x004647a8
+void InitSynthDriver() {
+    if (g_bSynthDriverReady != 0) {
+        return;
+    }
+    BindSoundDriverRpc(); // Yes, the binary discards the result.
+    InitSpu2Cores();
+    g_nMidiEventIopAddress =
+        SubmitSoundDriverRequest(kSoundSelectorAllocEventBuffer, kMidiEventBufferRequest);
+    InitSynthStreamInput();
+    if (g_anIopStagingAddress[0] == 0) {
+        for (int &nAddress : g_anIopStagingAddress) {
+            nAddress = static_cast<int>(
+                reinterpret_cast<uintptr_t>(sceSifAllocIopHeap(kIopStagingBufferSize)));
+        }
+    }
+    for (int &nAddress : g_anBankIopAddress) {
+        nAddress =
+            static_cast<int>(reinterpret_cast<uintptr_t>(sceSifAllocIopHeap(kBankIopBufferSize)));
+    }
+    g_bSynthDriverReady = 1;
+    g_nBankIopIndex = kBankIopIndexAfterInit;
+}
+
+// 0x00464b48
+void ShutdownSynthDriver() {
+}
+
+// 0x00464bc8
+void PollSynthStream() {
+    if (g_pSynthStream != nullptr) {
+        g_pSynthStream->Update(g_nSynthStreamFrame, kSynthStreamReadSize);
+    }
+}
+
 // 0x00464b68
 void StopSoundBankMovie() {
     if (g_pSynthStream != nullptr) {
@@ -636,4 +861,60 @@ int BindSoundDriverRpc() {
         }
     } while (g_soundDriverClient.server == nullptr);
     return 1;
+}
+
+// 0x005f96c8
+int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
+    if (g_bSoundRequestPending != 0) {
+        while (sceSifCheckStatRpc(&g_soundDriverClient) == kSifRpcStillRunning) {
+        }
+        g_bSoundRequestPending = 0;
+    }
+
+    int nMode;
+    int nReplySize = 0;
+    if ((nSelector & kSoundSelectorSynchronous) != 0) {
+        nMode = kSifRpcModeWait;
+        nReplySize = sizeof(g_anSoundDriverReply);
+    } else {
+        nMode = SIF_RPC_M_NOWAIT;
+        g_bSoundRequestPending = 1;
+    }
+
+    if ((nSelector & kSoundSelectorCommandBlock) != 0) {
+        sceSifCallRpc(&g_soundDriverClient,
+                      nSelector,
+                      nMode,
+                      reinterpret_cast<void *>(nArgument),
+                      sizeof(SoundDriverCommand),
+                      g_anSoundDriverReply,
+                      nReplySize,
+                      nullptr,
+                      nullptr);
+    } else {
+        g_anSoundDriverReply[0] = static_cast<unsigned int>(nArgument);
+        sceSifCallRpc(&g_soundDriverClient,
+                      nSelector,
+                      nMode,
+                      g_anSoundDriverReply,
+                      kSoundDriverRequestSize,
+                      g_anSoundDriverReply,
+                      nReplySize,
+                      nullptr,
+                      nullptr);
+    }
+    return g_anSoundDriverReply[0];
+}
+
+// 0x005f97d0
+int XferToIop(int nIopAddress, const void *pSource, int nLength) {
+    g_xferToIopDma.src = const_cast<void *>(pSource);
+    g_xferToIopDma.dest = reinterpret_cast<void *>(static_cast<uintptr_t>(nIopAddress));
+    g_xferToIopDma.size = nLength;
+    g_xferToIopDma.attr = 0;
+    FlushCache(WRITEBACK_DCACHE);
+    const int nTransfer = sceSifSetDma(&g_xferToIopDma, 1);
+    while (sceSifDmaStat(nTransfer) >= 0) {
+    }
+    return (nTransfer != 0) ? 0 : -1;
 }

@@ -115,6 +115,22 @@ void InitDebugConsole();
  */
 void InitBootConfig();
 
+/** The script templates RegisterHardEffectCommands() registers for ConfigureSpu2Effects(). */
+enum HardEffectTemplate {
+    kTemplateUseHardEffect = 10000,      /*!< `current_level.ps2_use_hard_effect(%d)`. */
+    kTemplateHardEffectId = 10001,       /*!< `current_level.ps2_hard_effect_id(%d)`. */
+    kTemplateHardEffectVolumes = 10002,  /*!< `current_level.ps2_hard_effect_volumes(%d)[%d]`. */
+    kTemplateHardDelayTime = 10003,      /*!< `current_level.ps2_hard_delay_time(%d)`. */
+    kTemplateHardFeedback = 10004,       /*!< `current_level.ps2_hard_feedback(%d)`. */
+    kTemplateHardEffectStt = 10005,      /*!< `current_level.ps2_heff_stt()[%d]`. */
+    kTemplateNoPauseChannels = 10006,    /*!< `current_level.ps2_heff_nopause_channels()`. */
+    kTemplateChorusRate = 10007,         /*!< `current_level.ps2_heff_chorus_rate()[%d]`. */
+    kTemplateChorusDepth = 10008,        /*!< `current_level.ps2_heff_chorus_depth()[%d]`. */
+    kTemplateChorusShape = 10009,        /*!< `current_level.ps2_heff_chorus_shape()[%d]`. */
+    kTemplateLevelExists = 10010,        /*!< `current_level_exists()`. */
+    kTemplateHardSynthErrorFile = 10011, /*!< `current_level.ps2_hsyn_error_file()`. */
+};
+
 /**
  * Register the hard-effect script commands.
  *

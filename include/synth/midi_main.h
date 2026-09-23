@@ -533,10 +533,8 @@ void InitSpu2Cores();
  * mode, and both depths are the configured value shifted left by eight.
  *
  * Enabling also submits a further command block to the sound driver under selector 0x10e0, built
- * from eleven more configuration values.
- *
- * The body is not reconstructed. It reads every value through the two variadic configuration
- * queries at `0x00509110` and `0x005093e0`, whose signatures belong to the data-array layer.
+ * from eleven more configuration values. Every value is read through QueryConfigFlag() and
+ * QueryConfigValue() from the templates RegisterHardEffectCommands() registers.
  *
  * @param bEnable Zero to force the effect off on both cores.
  * @ghidraAddress 0x00462340
@@ -587,10 +585,8 @@ void PollSynthEvents();
 /**
  * Wait until no bank transfer is outstanding.
  *
- * Pumps the async completion queue while the pending-transfer count at `0x006f9dc8` is non-zero,
- * and then again while the streaming voice at `0x006f9dd4` reports work at its `+0x18`.
- *
- * The body is not reconstructed.
+ * Pumps the async completion queue for as long as IsBankXferBusy() reports a transfer, which it
+ * expands inline.
  *
  * @ghidraAddress 0x004645c8
  */
@@ -599,11 +595,9 @@ void WaitForBankTransfers();
 /**
  * Release every loaded bank.
  *
- * Waits for the transfers in flight, releases the streaming voice through its own deleting
- * destructor, clears the voice pointer, and assigns the empty string to both stored bank paths so
- * that the next LoadSoundBank() cannot match what was resident.
- *
- * The body is not reconstructed.
+ * Submits selector 0xc0, releases every bank slot, deletes the BD transfer, clears both references
+ * to it, and assigns the empty string to both stored bank paths so that the next LoadSoundBank()
+ * cannot match what was resident. It does not wait for the transfers in flight.
  *
  * @ghidraAddress 0x00464660
  */
