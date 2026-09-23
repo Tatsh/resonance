@@ -24,6 +24,7 @@ set(RESONANCE_GAME_SRCS
     idablebase.cpp
     inputcheatdetector.cpp
     inputcheatdetectormet.cpp
+    inputmap.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
     levelconverter.cpp

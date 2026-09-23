@@ -127,3 +127,15 @@ int Player::GetScore() {
 int Player::GetJuice() {
     return mJuice;
 }
+
+// 0x001330e8
+void Player::SetScore(int nScore, int nMaxScore) {
+    mUnknown3c = nMaxScore;
+    mScore = nScore;
+}
+
+// 0x00133100
+void Player::SetJuice(int nJuice, int nMaxJuice) {
+    mUnknown34 = nMaxJuice;
+    mJuice = nJuice;
+}

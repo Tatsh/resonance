@@ -4,6 +4,7 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
+#include "mid/mbt.h"
 #include "sch/cmdid.h"
 
 class BGTrackGraph;
@@ -43,7 +44,9 @@ public:
     /**
      * Build the participant's view for a level.
      *
-     * The body is not written.
+     * Copies the world's players, gives every player a score of 0 with a ceiling of 100000 and,
+     * in kGameModeSolo, the configured juice and juice ceiling. A jukebox session starts in
+     * playback with every input binding off except the first slot's two rotations.
      *
      * @param nTrackCount The level's track count.
      * @param nUnknown24 The level's slot-9 value, recorded at `+0x24`.
@@ -52,8 +55,21 @@ public:
      */
     Gamer(int nTrackCount, int nUnknown24, GameStats *pStats);
 
-    /** @ghidraAddress 0x00110930 */
+    /**
+     * Withdraw the queued command and delete both enable policies.
+     *
+     * @ghidraAddress 0x00110930
+     */
     virtual ~Gamer();
+
+    /**
+     * Withdraw every command queued under mCommand from the song clock.
+     *
+     * GrooveWorld calls it at `0x0018e6f0`. The title is inferred.
+     *
+     * @ghidraAddress 0x00116c40
+     */
+    void Withdraw();
 
     /**
      * Receive one message.
@@ -147,11 +163,11 @@ private:
     int mTrackCount;                          // +0x40
     int mUnknown44;                           // +0x44
     int mUnknown48;                           // +0x48
-    int mUnknown4c;                           // +0x4c
+    int mPlaybackOn;                          // +0x4c
     int mUnknown50;                           // +0x50
     Globals *mGlobals;                        // +0x54
     GameStats *mStats;                        // +0x58
-    int mTicksPerBar;                         // +0x5c
+    Mid::MBT mBarLength;                      // +0x5c
     std::vector<Player *> mPlayers;           // +0x60
     CmdID mCommand;                           // +0x6c
     std::vector<BGTrackGraph *> *mBackGraphs; // +0x70

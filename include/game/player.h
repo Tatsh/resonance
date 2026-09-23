@@ -250,6 +250,29 @@ public:
      */
     int GetScore();
 
+    /**
+     * Set the score and the ceiling it is clamped to.
+     *
+     * Gamer's constructor sets every player to 0 with a ceiling of 100000. The title is inferred.
+     *
+     * @param nScore The score.
+     * @param nMaxScore The ceiling.
+     * @ghidraAddress 0x001330e8
+     */
+    void SetScore(int nScore, int nMaxScore);
+
+    /**
+     * Set the juice and the ceiling it is clamped to.
+     *
+     * Gamer's constructor passes two configuration values in kGameModeSolo and zeros otherwise.
+     * The title is inferred.
+     *
+     * @param nJuice The juice.
+     * @param nMaxJuice The ceiling.
+     * @ghidraAddress 0x00133100
+     */
+    void SetJuice(int nJuice, int nMaxJuice);
+
 private:
     int mUnknown2c; // +0x2c
     int mJuice;     // +0x30
