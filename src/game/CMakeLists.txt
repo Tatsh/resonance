@@ -6,11 +6,14 @@ set(RESONANCE_GAME_SRCS
     catcher.cpp
     catchingstg.cpp
     controllercmd.cpp
+    enablemgr.cpp
     freqappearance.cpp
+    gameenablemgr.cpp
     gamemanagerimpl.cpp
     gameparams.cpp
     gamepowerbarmgr.cpp
     gamepowerupplacer.cpp
+    gamer.cpp
     gamerconstructcmd.cpp
     gamestats.cpp
     genericcatcher.cpp
@@ -24,13 +27,16 @@ set(RESONANCE_GAME_SRCS
     levelbuilder.cpp
     levelconverter.cpp
     levelstats.cpp
+    localjamenablemgr.cpp
     localplayer.cpp
     metagameworld.cpp
     msgjoiner.cpp
     multicatcher.cpp
     multipowerbarmgr.cpp
     multiscreenanim.cpp
+    netjamenablemgr.cpp
     netplayer.cpp
+    notefinder.cpp
     nullplayer.cpp
     phrase.cpp
     phrasedatabase.cpp
