@@ -190,8 +190,9 @@ public:
     /**
      * Map between song position and scheduler time.
      *
-     * Public because the `clock tempo` script command reads it directly at `0x001511ec` and the
-     * image exposes no accessor.
+     * Public because the `clock tempo` script command reads it directly at `0x001511ec`,
+     * the undeclared Globals accessor at `0x00118ce8` reads it inline, and the image has no
+     * out-of-line accessor.
      *
      * +0x18
      */

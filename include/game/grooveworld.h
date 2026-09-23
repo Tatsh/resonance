@@ -389,8 +389,17 @@ private:
     void *mLoadBuffer;                    // +0xa4, the raw MIDI file
     int mLoadSize;                        // +0xa8
     int mLoadHandle;                      // +0xac
-    int mUnknownb0;                       // +0xb0
-    // A block the destructor releases through MemFree().
-    void *mUnknownb4; // +0xb4
-    int mUnknownb8;   // +0xb8, starts at 1
+
+public:
+    /**
+     * Song title shown in jukebox mode. +0xb0
+     *
+     * The constructor zeroes both words and the destructor frees the text through the inline
+     * ~HxStr(). Overlay's constructor copy-constructs it at `0x0041d358` and displays it. Public
+     * because Overlay reads it directly, and the image has no accessor for it.
+     */
+    HxStr mSongName;
+
+private:
+    int mUnknownb8; // +0xb8, starts at 1
 };
