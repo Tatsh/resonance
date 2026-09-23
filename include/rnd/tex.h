@@ -2,9 +2,11 @@
 
 #include <vector>
 
+#include "os/async.h"
 #include "os/hxstr.h"
 #include "rnd/object.h"
 
+class ACanvas;
 class APalette;
 namespace Rnd {
 class Stream;
@@ -154,25 +156,6 @@ public:
     };
 
     /**
-     * Make the texture current on the GS, with the given texture function.
-     *
-     * Waits for the outstanding mip reads, then reports false when no mip 0 bitmap or no residency
-     * entry exists. Otherwise it flushes the pending uploads, merges the texture function into
-     * TEX0, refreshes the CLUT base page and uploads the CLUT when a palette slot exists, refreshes
-     * TBP0, and programs TEX0_1 and TEX1_1. MIPTBP1_1 follows when the texture has more than one
-     * level and MIPTBP2_1 when it has more than four.
-     *
-     * The method is not virtual, and it appears in no vtable. Only the platform translation unit
-     * supplies a body, which is why a call through a Rnd::Tex pointer resolves here rather than to
-     * anything the subclass declares.
-     *
-     * @param nTexFunc The texture function, of which the low two bits reach TEX0.
-     * @return True once the texture is resident and bound.
-     * @ghidraAddress 0x00598000
-     */
-    bool BindToGsSlot(unsigned nTexFunc);
-
-    /**
      * Lock the bitmap of one mip level for direct access.
      *
      * Vtable slot 9. Rnd::Tex returns null without doing anything. Rnd::PsTex records the level so
@@ -183,10 +166,10 @@ public:
      * @param nMip The mip level.
      * @param nUnknown The second parameter, which no recovered implementation reads.
      * @param nFlags Bit 1 requests a read-back from GS memory.
-     * @return The bitmap, or null when the class holds none.
+     * @return The canvas over the level, or null when the class has none.
      * @ghidraAddress 0x004e75a0
      */
-    virtual void *LockMipBitmap(int nMip, int nUnknown, int nFlags);
+    virtual ACanvas *LockMipBitmap(int nMip, int nUnknown, int nFlags);
 
     /**
      * Release the mip level that LockMipBitmap() locked.
@@ -210,9 +193,8 @@ public:
     /**
      * Mark the texture's GS page as in use or free.
      *
-     * Vtable slot 12. Empty in Rnd::Tex. The PlayStation 2 override sets or clears one bit of the
-     * page's membership mask, and which condition that bit stands for is unrecovered, so both the
-     * name and the parameter are inferred.
+     * Vtable slot 12. Empty in Rnd::Tex. The PlayStation 2 override pins the video memory block of
+     * mip 0 against eviction, or releases the pin. The name is inferred.
      *
      * @param bInUse Whether the page is in use.
      * @ghidraAddress 0x004e7608
@@ -220,6 +202,22 @@ public:
     virtual void SetGsPageInUse(bool bInUse);
 
 protected:
+    /**
+     * Block until every requested mip level has arrived, pumping the asynchronous reads meanwhile.
+     *
+     * Rnd::PsTex open-codes the body in BindToGsSlot(), LockMipBitmap(), SetGsPageInUse(), and the
+     * routine at `0x00596d68`. The out-of-line copy has no caller.
+     *
+     * @ghidraAddress 0x004e75a8
+     */
+    void WaitForMipsLoaded() {
+        if (!IsLoadComplete()) {
+            while (!PollAsyncMips()) {
+                AsyncPumpCompletedRequests();
+            }
+        }
+    }
+
     /**
      * Take delivery of one mip level whose read has just finished.
      *

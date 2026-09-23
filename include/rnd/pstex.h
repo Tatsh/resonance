@@ -3,18 +3,14 @@
 #include <vector>
 
 #include "rnd/tex.h"
+#include "rndartt/apalette.h"
 
+class ACanvas;
 class HxStr;
+class VramPalEntry;
+class VramTableEntry;
 
 namespace Rnd {
-
-/**
- * Entries in the GS CLUT staging buffer of a PlayStation 2 texture.
- *
- * A 256-entry palette is the largest the GS addresses through CSM1, and the buffer is sized for
- * one regardless of how many entries the bitmap supplies.
- */
-constexpr int kPsTexClutEntryCount = 256;
 
 /**
  * PlayStation 2 texture, owner of the GS residency of its mip levels.
@@ -44,8 +40,8 @@ constexpr int kPsTexClutEntryCount = 256;
  *
  * Small levels share a GS page. RestoreSurfaces() records in mFirstPackedMip the first level whose
  * larger side is 32 pixels or less, and UploadMipAndBuildMipTbp() places every level from there on
- * inside the page of the level before it at the offsets in `g_anPackedMipPageOffsets`
- * (`0x0076f378`). Levels below that point each own a page.
+ * inside the page of the level before it at the offsets in g_anPackedMipPageOffsets. Levels below
+ * that point each have a page.
  *
  * Two routines have their original names from their own diagnostics rather than from inference.
  * RestoreSurfaces() takes its name from the report "ERROR - RestoreSurfaces(%s), mipmap %d has no
@@ -53,29 +49,17 @@ constexpr int kPsTexClutEntryCount = 256;
  * four "CheckPalEqual(%s)" reports from `0x008315a0` onwards, and its out-of-line copy is at
  * `0x0059a908`.
  *
- * Recovery is partial in two respects. First, the art library that owns the mip bitmaps and their
- * palettes has no header in this tree yet, and neither does the PlayStation 2 texture VRAM manager
- * whose singleton is at `0x0070d400`. The two pointers of GsMip and the palette slot therefore stay
- * opaque, and every routine that reads a bitmap field remains declared rather than written.
- * Second, mUnknown4a0 and mUnknown4a4 have no writer in the recovered set. The constructor clears
- * both and the destructor releases mUnknown4a0, and nothing else touches either. That release is
- * therefore dead code on this build unless a writer exists outside the routines recovered so far.
- *
- * Three Rnd::Tex declarations this class overrides disagree with `rnd/tex.h` as it stands. Slot 14
- * appears there as OnAllMipsLoaded(), and the string at `0x00831690` establishes the real name as
- * RestoreSurfaces(). Slot 15 appears there as OnMipLoaded() with no parameter, and both
- * `0x004e5928` and `0x00596fd8` read a mip index out of the second argument register. Slots 9
- * through 12 are not declared there at all. Until those three are corrected the members below
- * introduce new virtuals instead of overriding the base ones.
+ * Every data member is private. BindToGsSlot() is public because Rnd::PsMat calls it through a
+ * Rnd::Tex pointer it has downcast.
  */
 class PsTex : public Tex {
 public:
     /**
      * Construct a texture with no GS residency.
      *
-     * Only the residency vector, mUnknown4a0, mUnknown4a4, and mPaletteVram are initialised. The
-     * four GS register images, the CLUT staging buffer, and mLockedMip start indeterminate, and
-     * RestoreSurfaces() fills them once mip 0 has arrived.
+     * Only the residency vector, the CLUT staging palette, and mPaletteVram are initialised. The
+     * four GS register images and mLockedMip start indeterminate, and RestoreSurfaces() fills them
+     * once mip 0 has arrived.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x00596f80
@@ -92,26 +76,22 @@ public:
     virtual ~PsTex();
 
     /**
-     * Give the caller a mip level's bitmap to draw into.
+     * Give the caller the canvas over a mip level to draw into.
      *
-     * Vtable slot 9, and the Rnd::Tex body returns null. Waits for the outstanding mip reads, then
-     * yields null unless the level is in range and loaded. Bit 1 of nFlags reads the current GS
-     * contents back over the loaded bitmap first, making the lock read-modify-write. The level is
-     * recorded for UnlockMipBitmap().
-     *
-     * The return type is the art library's bitmap class, and that class has no header in this tree
-     * yet. The name is inferred from the pairing with slot 10; the image supplies no string for it.
+     * Vtable slot 9. Waits for the outstanding mip reads, then yields null unless the level is in
+     * range and loaded. Bit 1 of nFlags reads the current GS contents back over the loaded bitmap
+     * first, making the lock read-modify-write. The level is recorded for UnlockMipBitmap().
      *
      * @param nMip The mip level.
      * @param nUnknown The second parameter. This override does not read it.
      * @param nFlags Bit 1 requests the read-back.
-     * @return The bitmap to draw into, or null.
+     * @return The canvas to draw into, or null.
      * @ghidraAddress 0x0059aa48
      */
-    virtual void *LockMipBitmap(int nMip, int nUnknown, int nFlags);
+    virtual ACanvas *LockMipBitmap(int nMip, int nUnknown, int nFlags);
 
     /**
-     * Take back the bitmap LockMipBitmap() handed out.
+     * Take back the canvas LockMipBitmap() handed out.
      *
      * Vtable slot 10, empty in Rnd::Tex. Marks the recorded level dirty. The next bind uploads
      * that level again.
@@ -124,10 +104,8 @@ public:
      * Replace the palette of the texture.
      *
      * Vtable slot 11, empty in Rnd::Tex. Copies the incoming entries over the mip 0 palette,
-     * rebuilds the CLUT staging buffer, and sets the dirty-CLUT bit. A null palette rebuilds the
-     * buffer from the entries already present.
-     *
-     * The parameter type is the art library's APalette, identified by the tag at `0x00831560`.
+     * rebuilds the CLUT staging palette, and sets the dirty-CLUT bit. A null palette rebuilds the
+     * staging palette from the entries already present.
      *
      * @param pPalette The replacement palette, or null to rebuild from the current entries.
      * @ghidraAddress 0x0059ab78
@@ -135,13 +113,12 @@ public:
     virtual void SetPalette(APalette *pPalette);
 
     /**
-     * Mark the page of mip 0 as in use, or release that mark.
+     * Pin the video memory block of mip 0 against eviction, or release the pin.
      *
-     * Vtable slot 12, empty in Rnd::Tex. Waits for the outstanding mip reads, then sets or clears
-     * bit 3 of the usage byte of the GS page through the VRAM manager. The name is inferred from
-     * that single effect, and the meaning of bit 3 is not recovered.
+     * Vtable slot 12, empty in Rnd::Tex. Waits for the outstanding mip reads first. The name is
+     * inferred.
      *
-     * @param bInUse True to set the mark, false to clear it.
+     * @param bInUse True to pin the block, false to release it.
      * @ghidraAddress 0x0059a818
      */
     virtual void SetGsPageInUse(bool bInUse);
@@ -170,53 +147,59 @@ public:
     virtual void RestoreSurfaces();
 
     /**
-     * Bind the texture to a sampler slot.
+     * Make the texture current on the GS, with the given texture function.
      *
      * Waits for the outstanding mip reads, then reports false when no mip 0 bitmap or no residency
-     * entry exists. Otherwise it flushes the pending uploads, merges the low two bits of nSlot into
-     * the TEX0 TFX field, refreshes the CLUT base page and uploads the CLUT when a palette slot
-     * exists, refreshes TBP0, and programs TEX0 and TEX1. MIPTBP1 follows when the texture has more
-     * than one level and MIPTBP2 when it has more than four.
+     * entry exists. Otherwise it uploads the pending levels, merges the texture function into TEX0,
+     * refreshes the CLUT base page when a palette slot exists, and refreshes TBP0. A CLUT or a mip
+     * 0 block found evicted is uploaded again. TEX0_1 and TEX1_1 are then programmed, every further
+     * level is made resident, and MIPTBP1_1 follows when the texture has more than one level and
+     * MIPTBP2_1 when it has more than four.
      *
-     * @param nSlot The sampler slot, of which the low two bits select the GS sampler.
+     * The method is not virtual. Rnd::PsMat reaches it by downcasting a Rnd::Tex pointer.
+     *
+     * @param nTexFunc The Rnd::Tex::TexFunc, of which the low two bits reach TEX0.
      * @return True once the texture is resident and bound.
      * @ghidraAddress 0x00598000
      */
-    bool BindToGsSlot(unsigned nSlot);
+    bool BindToGsSlot(unsigned nTexFunc);
 
     /**
-     * Upload one mip level to its GS page.
+     * Upload one mip level into the video memory block of its level.
      *
-     * A level of the run-length format is decompressed into a temporary zone buffer and uploaded as
-     * PSMT8 at 8 bits per pixel. Every other level is uploaded from its own pixels using mGsPsm and
+     * A level of the run-length format is decompressed into the temporary zone buffer and uploaded
+     * as PSMT8 at 8 bits per pixel. Every other level is uploaded from its pixels using mGsPsm and
      * mBitsPerPixel.
      *
      * @param nMip The mip level.
+     * @return The first block of the level in video memory.
      * @ghidraAddress 0x00597d50
      */
-    void UploadBitmapMipToGs(int nMip);
+    int UploadBitmapMipToGs(int nMip);
 
     /**
-     * Resolve one mip level's GS page address and record it in the register images.
+     * Resolve one mip level's GS block address, uploading the level when needed.
      *
-     * A level at or beyond mFirstPackedMip takes its address from the page of the level before that
-     * point plus the packed offset for its distance past it, and every packed level is uploaded
-     * into the shared page. A level below that point has its own page registered, and an unresident
-     * page is uploaded. The address then goes into TEX0, MIPTBP1, or MIPTBP2 for that level.
+     * A level at or beyond mFirstPackedMip takes its address from the block of the level before
+     * that point plus the packed offset for its distance past it, and uploads nothing. Any other
+     * level is uploaded unless bSkipIfResident is set and its block is still resident. Uploading
+     * the level just below mFirstPackedMip also uploads every packed level into its block. The
+     * address then goes into TEX0, MIPTBP1, or MIPTBP2 for levels 0 through 6.
      *
      * @param nMip The mip level.
-     * @param bForceUpload True to register the page even when the level is already resident.
-     * @return The GS page address of the level.
+     * @param bSkipIfResident True to upload only a level whose block was evicted.
+     * @return The first block of the level, or zero when the texture has no residency.
      * @ghidraAddress 0x005982a0
      */
-    unsigned UploadMipAndBuildMipTbp(unsigned nMip, bool bForceUpload);
+    int UploadMipAndBuildMipTbp(int nMip, bool bSkipIfResident);
 
     /**
      * Upload every level whose dirty bit is set, then clear the mask.
      *
-     * Returns at once while mDirtyMips is clear. A dirty CLUT reloads the palette slot and merges
-     * the new base page into TEX0, and a dirty CLUT with no palette slot reports "Dirty Palette
-     * bit, but no pPaletteVram.. rgba %p" instead.
+     * Returns at once while mDirtyMips is clear or mip 0 is missing. A dirty CLUT is uploaded again
+     * and its block merged into TEX0, and a dirty CLUT with no palette slot reports "Dirty Palette
+     * bit, but no pPaletteVram.. rgba %p" instead. A clean CLUT has its block refreshed and is
+     * uploaded again only when found evicted.
      *
      * @ghidraAddress 0x00597e38
      */
@@ -225,8 +208,8 @@ public:
     /**
      * Install this class as the texture the renderer builds and program the default filtering.
      *
-     * Writes NewPsTex() into Rnd::g_pfnNewTex, then programs GS TEX1_1 with a linear magnification
-     * filter and a nearest minification filter. GfxDevice::Init() is the one caller.
+     * Writes NewPsTex() into Rnd::g_pfnNewTex, then programs the MXL, MMAG, and MMIN fields of GS
+     * TEX1_1. GfxDevice::Init() is the one caller.
      *
      * @ghidraAddress 0x0059a888
      */
@@ -246,16 +229,15 @@ protected:
     virtual void OnMipLoaded(int nMip);
 
 private:
-    // One mip level's residency in GS memory. Both pointers address classes with no header in this
-    // tree yet, the VRAM manager's page record and the art library's bitmap. They therefore stay
-    // opaque here rather than being given a type the image does not support.
+    // One mip level's residency, its video memory block and the canvas LockMipBitmap() hands out.
+    // FreeGsSurfaces() deletes the canvas through its virtual destructor.
     struct GsMip {
-        void *mPage;       // +0x00
-        void *mVramBitmap; // +0x04
+        VramTableEntry *mPage;
+        ACanvas *mVramBitmap;
     };
 
     /**
-     * Release the CLUT slot, every GS page, and every VRAM-backed bitmap.
+     * Release the CLUT slot, every GS page, and every canvas.
      *
      * Empties the residency vector without releasing its storage. The destructor and
      * FreeLoadedBitmaps() are the callers.
@@ -265,10 +247,11 @@ private:
     void FreeGsSurfaces();
 
     /**
-     * Copy the mip 0 palette into the CLUT staging buffer.
+     * Copy the mip 0 palette into the CLUT staging palette.
      *
-     * A 16-entry palette is copied straight through. A 256-entry palette is copied in 32-byte
-     * groups permuted by `g_anClutSwizzleBlocks` (`0x0076f368`). The result is the GS CSM1 layout.
+     * A four-bit level copies the palette straight through with APalette::SetEntries(). Every
+     * other format copies all 256 entries in 32-byte groups permuted by g_anClutSwizzleBlocks,
+     * which gives the GS CSM1 layout.
      *
      * @ghidraAddress 0x00597c68
      */
@@ -277,33 +260,56 @@ private:
     /**
      * Claim the GS CLUT slot for this texture.
      *
-     * Does nothing once a slot exists. Reports "Got NULL Palette in RestoreSurfaces" when the
-     * manager has none to give. RestoreSurfaces() is the one caller.
+     * Does nothing once a slot exists or while mip 0 is missing. Reports "Got NULL Palette in
+     * RestoreSurfaces" when the manager has none to give. RestoreSurfaces() is the one caller.
      *
      * @ghidraAddress 0x0059abe8
      */
     void AllocPaletteVram();
 
+    /**
+     * Upload the CLUT staging palette into the palette slot.
+     *
+     * A four-bit level uploads 16 entries as an 8 by 2 image, and every other format 256 entries as
+     * a 16 by 16 image, both in PSMCT32. UploadPendingMips() and BindToGsSlot() open-code the body,
+     * and the out-of-line copy has no caller.
+     *
+     * @return The first block of the slot.
+     * @ghidraAddress 0x0059ac68
+     */
+    int UploadPaletteClut();
+
+    /**
+     * Upload one mip level into another level's block at a block offset.
+     *
+     * The run-length and direct paths match UploadBitmapMipToGs(). UploadMipAndBuildMipTbp()
+     * open-codes the body for the packed levels, and the out-of-line copy has no caller.
+     *
+     * @param pPage The block to upload into.
+     * @param nMip The mip level to upload.
+     * @param nBlockOffset The blocks past the start of pPage to write at.
+     * @ghidraAddress 0x0059acc0
+     */
+    void UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, int nBlockOffset);
+
     // Declared in recovered offset order. Every member is private, because no access from outside
     // this class is recovered.
 
-    std::vector<GsMip> mGsMips;  // +0x58 One entry per loaded mip level.
-    unsigned long long mTex0;    // +0x68 GS TEX0_1 image.
-    unsigned long long mTex1;    // +0x70 GS TEX1_1 image.
-    unsigned long long mMipTbp1; // +0x78 GS MIPTBP1_1 image, levels 1 through 3.
-    unsigned long long mMipTbp2; // +0x80 GS MIPTBP2_1 image, levels 4 through 6.
-    int mGsPsm;                  // +0x88 From g_anGsPixelStorageModes.
-    int mBitsPerPixel;           // +0x8c From g_anBitsPerPixelTable.
+    std::vector<GsMip> mGsMips;  // One entry per loaded mip level.
+    unsigned long long mTex0;    // GS TEX0_1 image.
+    unsigned long long mTex1;    // GS TEX1_1 image.
+    unsigned long long mMipTbp1; // GS MIPTBP1_1 image, levels 1 through 3.
+    unsigned long long mMipTbp2; // GS MIPTBP2_1 image, levels 4 through 6.
+    int mGsPsm;                  // From g_anGsPixelStorageModes.
+    int mBitsPerPixel;           // From g_anBitsPerPixelTable.
     // First level that shares the page of the level before it, or 9999 while none does.
-    int mFirstPackedMip; // +0x90
+    int mFirstPackedMip;
     // One bit per level awaiting upload, with the sign bit standing for a dirty CLUT.
-    unsigned mDirtyMips;                  // +0x94
-    unsigned long long mUnknown98;        // +0x98 Inferred from the alignment of mClut.
-    unsigned mClut[kPsTexClutEntryCount]; // +0xa0
-    void *mUnknown4a0;                    // +0x4a0 Released by the destructor, never written.
-    int mUnknown4a4;                      // +0x4a4
-    void *mPaletteVram;                   // +0x4a8 The manager's CLUT slot, or null.
-    int mLockedMip;                       // +0x4ac Level recorded by LockMipBitmap().
+    unsigned mDirtyMips;
+    unsigned long long mUnknown98; // +0x98 Inferred from the alignment of mClut.
+    APalette mClut;                // CLUT staging palette, in the GS CSM1 order.
+    VramPalEntry *mPaletteVram;    // The manager's CLUT slot, or null.
+    int mLockedMip;                // Level recorded by LockMipBitmap().
 };
 
 /**
@@ -314,13 +320,30 @@ private:
  * The gap between `0x0059a7a8` and `0x0059a7d4` is the exception cleanup that releases the block
  * when the constructor throws.
  *
- * The body is not written yet, because Rnd::Tex declares none of the Rnd::Object virtuals in
- * vtable slots 2 through 7 and so remains abstract in this tree.
- *
  * @param name The object name.
  * @return The new texture.
  * @ghidraAddress 0x0059a770
  */
 Tex *NewPsTex(const HxStr &name);
+
+/**
+ * Block groups of a 256-entry CLUT in the order the CSM1 layout stores them, {0, 2, 1, 3}.
+ *
+ * RebuildClut() permutes each run of four 32-byte groups by it.
+ *
+ * @ghidraAddress 0x0076f368
+ */
+extern const int g_anClutSwizzleBlocks[4];
+
+/**
+ * Block offset of each packed mip level inside the page of the level before mFirstPackedMip.
+ *
+ * Indexed by the level's distance past mFirstPackedMip. The six values are 16, 20, 21, 22, 23,
+ * and 24. The words after them are zero and have no recovered reader, so the length is a lower
+ * bound.
+ *
+ * @ghidraAddress 0x0076f378
+ */
+extern const int g_anPackedMipPageOffsets[6];
 
 } // namespace Rnd

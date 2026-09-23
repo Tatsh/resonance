@@ -7,6 +7,7 @@
 #include "math/vector3.h"
 #include "os/hxstr.h"
 #include "rnd/mat.h"
+#include "rnd/pstex.h"
 #include "rnd/tex.h"
 #include "rndartt/apalette.h"
 
@@ -314,7 +315,7 @@ void PsMat::BindStageTexture() {
     if (g_nSelectedStage != 0) {
         nTexBlend = mMultiPass == kMultiPassModulate ? kBlendModeMultiply : kBlendModeSrc;
     }
-    if (!stage.mTex->BindToGsSlot(g_anStageBlendTexFunc[nTexBlend])) {
+    if (!static_cast<PsTex *>(stage.mTex)->BindToGsSlot(g_anStageBlendTexFunc[nTexBlend])) {
         g_nStageTextureBound = 0;
         return;
     }

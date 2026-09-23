@@ -379,8 +379,7 @@ void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
     if (mMat != nullptr && !mMat->mStages.empty()) {
         pTex = mMat->mStages[kAtlasStage].mTex;
         if (pTex != nullptr) {
-            pCanvas = static_cast<ACanvas *>(
-                pTex->LockMipBitmap(kGlyphMipLevel, kGlyphMipLockUnknown, kGlyphMipLockFlags));
+            pCanvas = pTex->LockMipBitmap(kGlyphMipLevel, kGlyphMipLockUnknown, kGlyphMipLockFlags);
         }
     }
 
