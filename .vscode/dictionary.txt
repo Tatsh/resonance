@@ -338,6 +338,7 @@ libsdr's
 libsonnet
 libvifpk
 lightanim
+linearmap
 linearramp
 linecache
 listdir
@@ -826,7 +827,6 @@ wnonnull
 worklist
 worklists
 worktree
-wreturn
 writable
 writeop
 xdecref

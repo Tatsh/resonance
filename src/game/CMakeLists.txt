@@ -29,6 +29,7 @@ set(RESONANCE_GAME_SRCS
     levelbuilder.cpp
     levelconverter.cpp
     levelstats.cpp
+    linearmap.cpp
     localjamenablemgr.cpp
     localplayer.cpp
     metagameworld.cpp
