@@ -39,19 +39,6 @@ constexpr int kSaveFileMinimumFreeClusters = 60;
 constexpr int kIconTitleBufferSize = 64;
 
 /**
- * Convert ASCII text to the Shift-JIS bytes `icon.sys` stores a title as.
- *
- * A code the table does not cover is reported through the log as `bad ASCII code 0x%x`. The routine
- * is declared here because `SaveFileMCT::BuildIconSys()` is its only caller in the image, and the
- * name is inferred from that use and from the `.Kanji.` table the body indexes.
- *
- * @param pszAscii The text to convert.
- * @param pszDest The destination, of at least kIconTitleBufferSize bytes.
- * @ghidraAddress 0x00556a20
- */
-void AsciiToShiftJis(const char *pszAscii, char *pszDest);
-
-/**
  * Write one payload to a card, together with the save directory and its browser icon.
  *
  * `11SaveFileMCT` in the RTTI descriptor at `0x008ef590`, single inheritance from `MemcardTask` at

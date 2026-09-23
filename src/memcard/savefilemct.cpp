@@ -8,6 +8,7 @@
 #include "memcard/memcarduser.h"
 #include "memcard/openwriteop.h"
 #include "memcard/saveicon.h"
+#include "memcard/shiftjis.h"
 #include "memcard/writeop.h"
 
 namespace {

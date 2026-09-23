@@ -458,6 +458,7 @@ memcarduser
 memorycard
 memstream
 meshanim
+messageio
 metagameworld
 metarenasscreen
 metbuttonlist
@@ -763,6 +764,7 @@ serialiser
 setubal's
 shellcheck
 shellformat
+shiftjis
 shoemake
 showeraseeffectmsg
 sifdev

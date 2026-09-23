@@ -35,6 +35,7 @@ set(RESONANCE_MEMCARD_SRCS
     savepersonasmct.cpp
     saveremixmct.cpp
     seekop.cpp
+    shiftjis.cpp
     unformatop.cpp
     writeop.cpp)
 
