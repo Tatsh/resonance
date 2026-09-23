@@ -216,7 +216,7 @@ inline void AppendDrawVert(const DrawVert &vert, int nFirstQuadword, int nQuadwo
 // Submit one triangle of transformed vertices, clipping it first when asked.
 //
 // Rnd::PsMesh::DrawFacesSoftware() inlines one level of this and the recursion uses the body here.
-// A triangle no plane crosses goes straight out. One that any vertex places behind the near plane
+// A triangle no plane crosses goes straight out. One that any vertex places beyond the far plane
 // is dropped, as is one whose three vertices share a plane, because that puts the whole triangle
 // outside it. Anything else is clipped into the scratch above the vertex cap and the result fans
 // out as triangles, each submitted on its own so that a full buffer is sent mid-fan.
@@ -226,7 +226,7 @@ void EmitTriangle(unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, int bClip) {
                            g_aDrawVerts[nIdx2].mClipFlags;
         if ((nFlags & kDrawVertClipAnyPlane) != 0) {
             ++g_renderStats.mnFacesClipped;
-            if ((nFlags & kDrawVertClipNearPlane) != 0) {
+            if ((nFlags & kDrawVertClipFarPlane) != 0) {
                 return;
             }
             const int nShared = g_aDrawVerts[nIdx0].mClipFlags & g_aDrawVerts[nIdx1].mClipFlags &

@@ -2,7 +2,9 @@
 
 #include <math.h>
 #include <string.h>
+#include <vector>
 
+#include "app/longop.h"
 #include "gfx/gfxdevice.h"
 #include "gfx/renderstats.h"
 #include "math/frustum.h"
@@ -217,15 +219,110 @@ constexpr int kVertsPerSprite = 2;
 // A GS coordinate carries four fractional bits.
 constexpr float kFixed4Scale = 16.0f;
 
-// Whether a clip-space position falls outside any of the six planes, as the vclipw flags report.
-inline bool IsOutsideClipVolume(const float aflClipPos[kXfmRowFloatCount]) {
+// The vclipw judgements take two bits per axis, the positive side below the negative, from x up.
+constexpr int kClipPositiveBit = 1;
+constexpr int kClipNegativeBit = 2;
+constexpr int kClipBitsPerAxis = 2;
+
+// The six vclipw judgements of a clip-space position against its w component.
+inline int ClipFlags(const float aflClipPos[kXfmRowFloatCount]) {
     const float flW = fabsf(aflClipPos[kComponentW]);
+    int nFlags = 0;
     for (int j = 0; j < kVectorComponents; ++j) {
-        if (aflClipPos[j] > flW || aflClipPos[j] < -flW) {
-            return true;
+        if (aflClipPos[j] > flW) {
+            nFlags |= kClipPositiveBit << (j * kClipBitsPerAxis);
+        }
+        if (aflClipPos[j] < -flW) {
+            nFlags |= kClipNegativeBit << (j * kClipBitsPerAxis);
         }
     }
-    return false;
+    return nFlags;
+}
+
+// Whether a clip-space position falls outside any of the six planes.
+inline bool IsOutsideClipVolume(const float aflClipPos[kXfmRowFloatCount]) {
+    return ClipFlags(aflClipPos) != 0;
+}
+
+inline float Dot3(const Vector3 &a, const Vector3 &b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+// Sphere mapping reflects the view axis, the negated second row of the camera's world transform,
+// off each rotated normal. A stage transform is folded into both by its transpose.
+inline void BuildSphereMapBasis(const float *pXfm,
+                                Vector3 &view,
+                                float aflRotation[kSphereMapRows][kXfmRowFloatCount]) {
+    Vector3 negated;
+    negated.w = 1.0f;
+    NegateVec3(g_pCurrentCam->mWorldXfm[kCamViewAxisRow], &negated.x);
+    view = negated;
+    memcpy(aflRotation, pXfm, sizeof(float) * kSphereMapRows * kXfmRowFloatCount);
+    const Transform *pStageXfm = g_pSelectedStageXfm;
+    if (pStageXfm == nullptr) {
+        return;
+    }
+    const float aflTransposed[kSphereMapRows][kXfmRowFloatCount] = {
+        {pStageXfm->mBasisX.x, pStageXfm->mBasisY.x, pStageXfm->mBasisZ.x, 1.0f},
+        {pStageXfm->mBasisX.y, pStageXfm->mBasisY.y, pStageXfm->mBasisZ.y, 1.0f},
+        {pStageXfm->mBasisX.z, pStageXfm->mBasisY.z, pStageXfm->mBasisZ.z, 1.0f},
+    };
+    Vector3 stageView;
+    stageView.w = 1.0f;
+    TransformVec3ByMat3VU0(&view.x, &aflTransposed[0][0], &stageView.x);
+    view = stageView;
+    float aflStageRotation[kSphereMapRows][kXfmRowFloatCount];
+    aflStageRotation[0][kComponentW] = 1.0f;
+    aflStageRotation[1][kComponentW] = 1.0f;
+    aflStageRotation[2][kComponentW] = 1.0f;
+    MultiplyMat3VU0(&aflRotation[0][0], &aflTransposed[0][0], &aflStageRotation[0][0]);
+    memcpy(aflRotation, aflStageRotation, sizeof(aflStageRotation));
+}
+
+// On VU0 as vmulax, vmadday, vmaddz for the rotation, then the reflection and a reciprocal of the
+// length through the Q register.
+inline void SphereMapCoordinates(const MeshVert &vert,
+                                 const Vector3 &view,
+                                 const float aflRotation[kSphereMapRows][kXfmRowFloatCount],
+                                 float &flS,
+                                 float &flT) {
+    float aflNormal[kVectorComponents];
+    for (int j = 0; j < kVectorComponents; ++j) {
+        aflNormal[j] = aflRotation[0][j] * vert.mNorm.x + aflRotation[1][j] * vert.mNorm.y +
+                       aflRotation[2][j] * vert.mNorm.z;
+    }
+    const float flTwiceDot =
+        2.0f * (view.x * aflNormal[0] + view.y * aflNormal[1] + view.z * aflNormal[2]);
+    const float flReflectX = aflNormal[0] * flTwiceDot - view.x;
+    const float flReflectY = aflNormal[1] * flTwiceDot - view.y - 1.0f;
+    const float flReflectZ = aflNormal[2] * flTwiceDot - view.z;
+    const float flInverseLength =
+        1.0f / sqrtf(flReflectX * flReflectX + flReflectY * flReflectY + flReflectZ * flReflectZ);
+    flS = flReflectX * flInverseLength;
+    flT = flReflectZ * flInverseLength;
+}
+
+// Vertices TransformAndLightMeshVerts() processes between polls of the long operation callback.
+constexpr int kLightBatchVerts = 400;
+
+// Upper bound of the fog term, the byte range of the GS fog register.
+constexpr float kFogByteMax = 255.0f;
+
+// Add one light to a vertex colour. The diffuse term is scaled by the clamped cosine, and both
+// terms by the falloff and the material colours.
+inline void AccumulateLight(Color &color,
+                            const Color &lightAmbient,
+                            const Color &lightDiffuse,
+                            float flCosine,
+                            float flFalloff,
+                            const Color &ambient,
+                            const Color &diffuse) {
+    color.r += lightDiffuse.r * flCosine * flFalloff * diffuse.r;
+    color.g += lightDiffuse.g * flCosine * flFalloff * diffuse.g;
+    color.b += lightDiffuse.b * flCosine * flFalloff * diffuse.b;
+    color.r += lightAmbient.r * flFalloff * ambient.r;
+    color.g += lightAmbient.g * flFalloff * ambient.g;
+    color.b += lightAmbient.b * flFalloff * ambient.b;
 }
 
 // Write one packed vertex, the position converted to four fractional bits.
@@ -459,6 +556,200 @@ void EmitEdgeVu1Setup(const float *pXfm, const Color &color) {
               static_cast<unsigned>(color.a * kAlphaScale));
 }
 
+// 0x00584040
+void TransformAndLightMeshVerts(void *pOutVerts,
+                                const float *pXfm,
+                                MeshVert *pVerts,
+                                int nCount,
+                                int bWriteClipFlags,
+                                const Sphere &sphere) {
+    if (nCount == 0) {
+        return;
+    }
+    const Transform *pUvXfm = g_pSelectedUvXfm;
+    g_renderStats.mnVertsTransformed += nCount;
+    const bool bFullColor = g_nStageTextureBound == 0 || g_nStageBlendDoubles != 0;
+    const int bLighting = g_nLightingEnabled;
+    const int bFog = g_nFogEnabled;
+    const int nGenMode = g_nSelectedGenMode;
+
+    int bVertEmissive = 0;
+    int bVertAmbient = 0;
+    int bVertDiffuse = 0;
+    int bVertAlpha = 0;
+    int nLights = 0;
+    DirectionalLightRecord *pDirectionalBegin = nullptr;
+    DirectionalLightRecord *pDirectionalEnd = nullptr;
+    PointLightRecord *pPointBegin = nullptr;
+    PointLightRecord *pPointEnd = nullptr;
+    Color emissive = {};
+    Color ambient = {};
+    Color diffuse = {};
+    Color environAmbient = {};
+    if (bLighting != 0) {
+        const Mat *pMat = g_pSelectedMat;
+        bVertAlpha = pMat->mVertAlpha;
+        bVertEmissive = pMat->mVertEmissive;
+        bVertAmbient = pMat->mVertAmbient;
+        bVertDiffuse = pMat->mVertDiffuse;
+        nLights = TransformLightRecords(
+            pDirectionalBegin, pDirectionalEnd, pPointBegin, pPointEnd, pXfm, &sphere);
+        g_renderStats.mnLitVerts += nCount * nLights;
+        emissive = pMat->mEmissive;
+        ambient = pMat->mAmbient;
+        diffuse = pMat->mDiffuse;
+        environAmbient = g_pCurrentEnviron->mAmbient;
+    }
+
+    Vector3 view;
+    float aflRotation[kSphereMapRows][kXfmRowFloatCount];
+    if (nGenMode == kGenModeSphere) {
+        BuildSphereMapBasis(pXfm, view, aflRotation);
+    }
+
+    float aflClip[kXfmRowCount][kXfmRowFloatCount];
+    Mat44Concat(&aflClip[0][0], &g_viewProjectXfm.mBasisX.x, pXfm);
+    const Color &colorScale = bFullColor ? kParticleColorScaleFull : kParticleColorScaleHalf;
+    const float aflViewScale[] = {
+        g_viewportXfm.mBasisX.x, g_viewportXfm.mBasisY.y, g_viewportXfm.mBasisZ.z, g_flFogScale};
+    const float aflViewOffset[] = {g_viewportXfm.mTranslation.x,
+                                   g_viewportXfm.mTranslation.y,
+                                   g_viewportXfm.mTranslation.z,
+                                   g_flFogOffset};
+
+    // The coordinate register is loaded whole from the two texture coordinates in the explicit mode
+    // and only partly written otherwise, so its lanes carry over between vertices. The fourth
+    // lane reaches the output unless clip flags replace it.
+    float aflStq[kXfmRowFloatCount] = {};
+    DrawVert *pOut = static_cast<DrawVert *>(pOutVerts);
+    MeshVert *pVert = pVerts;
+    int nRemaining = nCount;
+    for (;;) {
+        const int nBatch = nRemaining > kLightBatchVerts ? kLightBatchVerts : nRemaining;
+        nRemaining -= nBatch;
+        for (int i = 0; i < nBatch; ++i, ++pVert, ++pOut) {
+            const MeshVert &vert = *pVert;
+            Color color = vert.mColor;
+            if (nGenMode == kGenModeExplicit) {
+                aflStq[kComponentX] = vert.mTex1.x;
+                aflStq[kComponentY] = vert.mTex1.y;
+                aflStq[kComponentZ] = vert.mTex2.x;
+                aflStq[kComponentW] = vert.mTex2.y;
+            } else if (nGenMode == kGenModeSphere) {
+                SphereMapCoordinates(
+                    vert, view, aflRotation, aflStq[kComponentX], aflStq[kComponentY]);
+            }
+
+            if (bLighting != 0) {
+                if (bVertAmbient != 0) {
+                    ambient = color;
+                }
+                if (bVertDiffuse != 0) {
+                    diffuse.r = color.r;
+                    diffuse.g = color.g;
+                    diffuse.b = color.b;
+                }
+                if (bVertEmissive == 0) {
+                    color.r = emissive.r;
+                    color.g = emissive.g;
+                    color.b = emissive.b;
+                }
+                if (bVertAlpha == 0) {
+                    color.a = diffuse.a;
+                }
+                color.r += environAmbient.r * ambient.r;
+                color.g += environAmbient.g * ambient.g;
+                color.b += environAmbient.b * ambient.b;
+                if (nLights != 0) {
+                    for (const DirectionalLightRecord *pLight = pDirectionalBegin;
+                         pLight != pDirectionalEnd;
+                         ++pLight) {
+                        const float flCosine =
+                            fmaxf(Dot3(vert.mNorm, pLight->mTransformedDirection), 0.0f);
+                        AccumulateLight(color,
+                                        pLight->mAmbient,
+                                        pLight->mDiffuse,
+                                        flCosine,
+                                        1.0f,
+                                        ambient,
+                                        diffuse);
+                    }
+                    for (const PointLightRecord *pLight = pPointBegin; pLight != pPointEnd;
+                         ++pLight) {
+                        if (pLight->mCulled != 0) {
+                            continue;
+                        }
+                        Vector3 toLight;
+                        toLight.x = pLight->mTransformedPosition.x - vert.mPoint.x;
+                        toLight.y = pLight->mTransformedPosition.y - vert.mPoint.y;
+                        toLight.z = pLight->mTransformedPosition.z - vert.mPoint.z;
+                        const float flDistance = sqrtf(Dot3(toLight, toLight));
+                        const float flInverse = 1.0f / flDistance;
+                        toLight.x *= flInverse;
+                        toLight.y *= flInverse;
+                        toLight.z *= flInverse;
+                        const float flCosine = fmaxf(Dot3(vert.mNorm, toLight), 0.0f);
+                        const float flFalloff =
+                            fmaxf(1.0f - flDistance / pLight->mTransformedPosition.w, 0.0f);
+                        AccumulateLight(color,
+                                        pLight->mAmbient,
+                                        pLight->mDiffuse,
+                                        flCosine,
+                                        flFalloff,
+                                        ambient,
+                                        diffuse);
+                    }
+                }
+                color.r = ClampToUnit(color.r);
+                color.g = ClampToUnit(color.g);
+                color.b = ClampToUnit(color.b);
+                color.a = ClampToUnit(color.a);
+            }
+
+            float aflClipPos[kXfmRowFloatCount];
+            for (int j = 0; j < kXfmRowFloatCount; ++j) {
+                aflClipPos[j] = aflClip[0][j] * vert.mPoint.x + aflClip[1][j] * vert.mPoint.y +
+                                aflClip[2][j] * vert.mPoint.z + aflClip[kXfmRowTranslation][j];
+            }
+            const unsigned anColor[] = {
+                static_cast<unsigned>(static_cast<int>(colorScale.r * color.r)),
+                static_cast<unsigned>(static_cast<int>(colorScale.g * color.g)),
+                static_cast<unsigned>(static_cast<int>(colorScale.b * color.b)),
+                static_cast<unsigned>(static_cast<int>(colorScale.a * color.a))};
+            const int nClipFlags = ClipFlags(aflClipPos);
+            const float flQ = 1.0f / aflClipPos[kComponentW];
+            if (pUvXfm != nullptr) {
+                const float flU = pUvXfm->mBasisX.x * aflStq[kComponentX] +
+                                  pUvXfm->mBasisY.x * aflStq[kComponentY] + pUvXfm->mTranslation.x;
+                const float flV = pUvXfm->mBasisX.y * aflStq[kComponentX] +
+                                  pUvXfm->mBasisY.y * aflStq[kComponentY] + pUvXfm->mTranslation.y;
+                aflStq[kComponentX] = flU;
+                aflStq[kComponentY] = flV;
+            }
+            aflStq[kComponentZ] = 1.0f;
+            float aflScreen[kXfmRowFloatCount];
+            for (int j = 0; j < kVectorComponents; ++j) {
+                aflStq[j] *= flQ;
+                aflClipPos[j] *= flQ;
+            }
+            for (int j = 0; j < kXfmRowFloatCount; ++j) {
+                aflScreen[j] = aflViewScale[j] * aflClipPos[j] + aflViewOffset[j];
+            }
+            if (bFog != 0) {
+                aflScreen[kComponentW] = fmaxf(fminf(aflScreen[kComponentW], kFogByteMax), 0.0f);
+            }
+            StoreDrawVert(*pOut, aflStq, anColor, aflScreen);
+            if (bWriteClipFlags != 0) {
+                pOut->mClipFlags = nClipFlags;
+            }
+        }
+        if (nRemaining == 0) {
+            break;
+        }
+        RunLongOperationPollProc();
+    }
+}
+
 // 0x00584980
 int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nLineLength) {
     if (pFirst == nullptr) {
@@ -579,34 +870,10 @@ void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, co
     }
     g_renderStats.mnVertsTransformed += nCount;
 
-    // Sphere mapping reflects the view axis, the negated second row of the camera's world
-    // transform, off each rotated normal. A stage transform is folded into both by its transpose.
     Vector3 view;
     float aflRotation[kSphereMapRows][kXfmRowFloatCount];
     if (nGenMode == kGenModeSphere) {
-        Vector3 negated;
-        negated.w = 1.0f;
-        NegateVec3(g_pCurrentCam->mWorldXfm[kCamViewAxisRow], &negated.x);
-        view = negated;
-        memcpy(aflRotation, pXfm, sizeof(aflRotation));
-        const Transform *pStageXfm = g_pSelectedStageXfm;
-        if (pStageXfm != nullptr) {
-            const float aflTransposed[kSphereMapRows][kXfmRowFloatCount] = {
-                {pStageXfm->mBasisX.x, pStageXfm->mBasisY.x, pStageXfm->mBasisZ.x, 1.0f},
-                {pStageXfm->mBasisX.y, pStageXfm->mBasisY.y, pStageXfm->mBasisZ.y, 1.0f},
-                {pStageXfm->mBasisX.z, pStageXfm->mBasisY.z, pStageXfm->mBasisZ.z, 1.0f},
-            };
-            Vector3 stageView;
-            stageView.w = 1.0f;
-            TransformVec3ByMat3VU0(&view.x, &aflTransposed[0][0], &stageView.x);
-            view = stageView;
-            float aflStageRotation[kSphereMapRows][kXfmRowFloatCount];
-            aflStageRotation[0][kComponentW] = 1.0f;
-            aflStageRotation[1][kComponentW] = 1.0f;
-            aflStageRotation[2][kComponentW] = 1.0f;
-            MultiplyMat3VU0(&aflRotation[0][0], &aflTransposed[0][0], &aflStageRotation[0][0]);
-            memcpy(aflRotation, aflStageRotation, sizeof(aflRotation));
-        }
+        BuildSphereMapBasis(pXfm, view, aflRotation);
     }
 
     // A generation mode other than the two handled leaves the coordinates of the previous vertex,
@@ -620,23 +887,7 @@ void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, co
             flS = vert.mTex1.x;
             flT = vert.mTex1.y;
         } else if (nGenMode == kGenModeSphere) {
-            // On VU0 as vmulax, vmadday, vmaddz for the rotation, then the reflection and a
-            // reciprocal of the length through the Q register.
-            float aflNormal[kVectorComponents];
-            for (int j = 0; j < kVectorComponents; ++j) {
-                aflNormal[j] = aflRotation[0][j] * vert.mNorm.x + aflRotation[1][j] * vert.mNorm.y +
-                               aflRotation[2][j] * vert.mNorm.z;
-            }
-            const float flTwiceDot =
-                2.0f * (view.x * aflNormal[0] + view.y * aflNormal[1] + view.z * aflNormal[2]);
-            const float flReflectX = aflNormal[0] * flTwiceDot - view.x;
-            const float flReflectY = aflNormal[1] * flTwiceDot - view.y - 1.0f;
-            const float flReflectZ = aflNormal[2] * flTwiceDot - view.z;
-            const float flInverseLength =
-                1.0f /
-                sqrtf(flReflectX * flReflectX + flReflectY * flReflectY + flReflectZ * flReflectZ);
-            flS = flReflectX * flInverseLength;
-            flT = flReflectZ * flInverseLength;
+            SphereMapCoordinates(vert, view, aflRotation, flS, flT);
         }
 
         DrawVert &out = pOut[i];
@@ -646,6 +897,217 @@ void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, co
             pUvXfm->mBasisX.y * flS + pUvXfm->mBasisY.y * flT + pUvXfm->mTranslation.y;
         out.mS = flU * out.mQ;
         out.mT = flV * out.mQ;
+    }
+}
+
+namespace {
+
+// Planes ClipTriangleToFrustum() clips against, in order. The near plane is the vclipw judgement
+// z < -w, and the four scissor edges are the bits above the six judgements.
+constexpr int kClipFlagNearPlane = 0x20;
+constexpr int kClipFlagScissorLeft = 0x40;
+constexpr int kClipFlagScissorRight = 0x80;
+constexpr int kClipFlagScissorTop = 0x100;
+constexpr int kClipFlagLastPlane = 0x200;
+
+constexpr int kTriangleVerts = 3;
+
+// Five planes add at most five vertices to a triangle, and the polygon is closed by repeating its
+// first vertex.
+constexpr int kClipVertCapacity = 9;
+
+// Largest fog term, 255 with four fractional bits.
+constexpr float kFogFixed4Max = 4080.0f;
+constexpr float kFixed4Inverse = 1.0f / kFixed4Scale;
+
+// 0x008e4010. The unit's static initialiser builds it with nine zeroed vertices.
+std::vector<DrawVert> g_clipVerts(kClipVertCapacity);
+
+// The scissor edges a vertex falls outside.
+inline int ScissorFlags(const DrawVert &vert) {
+    const int nX = vert.mPos[kDrawVertPosX];
+    const int nY = vert.mPos[kDrawVertPosY];
+    int nFlags = 0;
+    if (nX < g_nScissorX0) {
+        nFlags |= kClipFlagScissorLeft;
+    }
+    if (nX > g_nScissorX1) {
+        nFlags |= kClipFlagScissorRight;
+    }
+    if (nY < g_nScissorY0) {
+        nFlags |= kClipFlagScissorTop;
+    }
+    if (nY > g_nScissorY1) {
+        nFlags |= kClipFlagLastPlane;
+    }
+    return nFlags;
+}
+
+// Interpolate one integer lane through floating point, truncating as cvt.w.s does.
+inline int LerpLane(int nFrom, int nTo, float flT) {
+    const float flFrom = static_cast<float>(nFrom);
+    return static_cast<int>((static_cast<float>(nTo) - flFrom) * flT + flFrom);
+}
+
+inline float LerpFloat(float flFrom, float flTo, float flT) {
+    return (flTo - flFrom) * flT + flFrom;
+}
+
+inline void LerpColor(DrawVert &out, const DrawVert &from, const DrawVert &to, float flT) {
+    for (int j = 0; j < kDrawVertLanes; ++j) {
+        out.mColor[j] = LerpLane(from.mColor[j], to.mColor[j], flT);
+    }
+}
+
+// Where an edge crosses one scissor edge, as a fraction of the edge from its first vertex.
+inline float ScissorCrossing(int nPlane, const DrawVert &from, const DrawVert &to) {
+    int nLane = kDrawVertPosX;
+    int nBound = g_nScissorX0;
+    if (nPlane == kClipFlagScissorRight) {
+        nBound = g_nScissorX1;
+    } else if (nPlane == kClipFlagScissorTop) {
+        nLane = kDrawVertPosY;
+        nBound = g_nScissorY0;
+    } else if (nPlane == kClipFlagLastPlane) {
+        nLane = kDrawVertPosY;
+        nBound = g_nScissorY1;
+    }
+    return static_cast<float>(nBound - from.mPos[nLane]) /
+           static_cast<float>(to.mPos[nLane] - from.mPos[nLane]);
+}
+
+// The vertex where an edge crosses a scissor edge. Every lane interpolates linearly in screen
+// space.
+inline void
+ScissorIntersection(DrawVert &out, const DrawVert &from, const DrawVert &to, float flT) {
+    out.mS = LerpFloat(from.mS, to.mS, flT);
+    out.mT = LerpFloat(from.mT, to.mT, flT);
+    out.mQ = LerpFloat(from.mQ, to.mQ, flT);
+    out.mClipFlags = 0;
+    LerpColor(out, from, to, flT);
+    for (int j = 0; j < kDrawVertLanes; ++j) {
+        out.mPos[j] = LerpLane(from.mPos[j], to.mPos[j], flT);
+    }
+}
+
+// The vertex where an edge crosses the near plane. The screen position is taken back through the
+// viewport transform to clip space, where w is 1/Q, interpolated to w equal to the camera near
+// distance, and projected again. Texture coordinates and colours take the perspective-corrected
+// fraction, the colours after it is clamped to the unit range and the coordinates before.
+inline void NearPlaneIntersection(DrawVert &out, const DrawVert &from, const DrawVert &to) {
+    const Transform &viewport = g_viewportXfm;
+    const float flFromW = 1.0f / from.mQ;
+    const float flToW = 1.0f / to.mQ;
+    const float flFromX =
+        (static_cast<float>(from.mPos[kDrawVertPosX]) * kFixed4Inverse - viewport.mTranslation.x) /
+        viewport.mBasisX.x * flFromW;
+    const float flToX =
+        (static_cast<float>(to.mPos[kDrawVertPosX]) * kFixed4Inverse - viewport.mTranslation.x) /
+        viewport.mBasisX.x * flToW;
+    const float flFromY =
+        (static_cast<float>(from.mPos[kDrawVertPosY]) * kFixed4Inverse - viewport.mTranslation.y) /
+        viewport.mBasisY.y * flFromW;
+    const float flToY =
+        (static_cast<float>(to.mPos[kDrawVertPosY]) * kFixed4Inverse - viewport.mTranslation.y) /
+        viewport.mBasisY.y * flToW;
+    const float flNear = g_flCamNear;
+    const float flT = (flNear - flFromW) / (flToW - flFromW);
+
+    out.mPos[kDrawVertPosX] = static_cast<int>(
+        (LerpFloat(flFromX, flToX, flT) * viewport.mBasisX.x / flNear + viewport.mTranslation.x) *
+        kFixed4Scale);
+    out.mPos[kDrawVertPosY] = static_cast<int>(
+        (LerpFloat(flFromY, flToY, flT) * viewport.mBasisY.y / flNear + viewport.mTranslation.y) *
+        kFixed4Scale);
+    out.mPos[kDrawVertPosZ] =
+        static_cast<int>((-viewport.mBasisZ.z + viewport.mTranslation.z) * kFixed4Scale);
+    const int nFog = static_cast<int>(flNear * g_flFogScale + g_flFogOffset) << kGsSubpixelShift;
+    float flFog = static_cast<float>(nFog);
+    if (kFogFixed4Max < flFog) {
+        flFog = kFogFixed4Max;
+    } else if (flFog < 0.0f) {
+        flFog = 0.0f;
+    }
+    out.mPos[kDrawVertPosFog] = static_cast<int>(flFog);
+
+    const float flPerspective = flT / ((1.0f - flT) * (flFromW / flToW) + flT);
+    out.mS = LerpFloat(from.mS, to.mS, flPerspective);
+    out.mT = LerpFloat(from.mT, to.mT, flPerspective);
+    out.mQ = 1.0f / flNear;
+    out.mClipFlags = 0;
+    LerpColor(out, from, to, ClampToUnit(flPerspective));
+}
+
+} // namespace
+
+// 0x00584cc8
+void ClipTriangleToFrustum(
+    unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, DrawVert *pVerts, int *pnNextIndex) {
+    DrawVert &vert0 = pVerts[nIdx0];
+    vert0.mClipFlags |= ScissorFlags(vert0);
+    DrawVert &vert1 = pVerts[nIdx1];
+    vert1.mClipFlags |= ScissorFlags(vert1);
+    DrawVert &vert2 = pVerts[nIdx2];
+    vert2.mClipFlags |= ScissorFlags(vert2);
+    if ((vert0.mClipFlags & vert1.mClipFlags & vert2.mClipFlags) != 0) {
+        return;
+    }
+    ++g_renderStats.mnSplitTriangles;
+
+    std::vector<DrawVert> &poly = g_clipVerts;
+    poly[0] = vert0;
+    poly[1] = vert1;
+    poly[2] = vert2;
+    poly[kTriangleVerts] = vert0;
+    int nUnion = vert0.mClipFlags | vert1.mClipFlags | vert2.mClipFlags;
+    if (g_nSelectedFlat != 0) {
+        memcpy(poly[1].mColor, poly[0].mColor, sizeof(poly[0].mColor));
+        memcpy(poly[2].mColor, poly[0].mColor, sizeof(poly[0].mColor));
+    }
+
+    // The polygon is clipped in place, so an emitted vertex can replace one the edge loop has yet
+    // to read. The binary does the same.
+    int nCount = kTriangleVerts;
+    for (int nPlane = kClipFlagNearPlane; nPlane <= kClipFlagLastPlane; nPlane <<= 1) {
+        if ((nUnion & nPlane) == 0) {
+            continue;
+        }
+        nUnion = 0;
+        int nOut = 0;
+        for (int i = 0; i < nCount; ++i) {
+            const bool bFromOutside = (poly[i].mClipFlags & nPlane) != 0;
+            const bool bToOutside = (poly[i + 1].mClipFlags & nPlane) != 0;
+            if (bFromOutside != bToOutside) {
+                DrawVert crossing;
+                if (nPlane == kClipFlagNearPlane) {
+                    NearPlaneIntersection(crossing, poly[i], poly[i + 1]);
+                } else {
+                    ScissorIntersection(crossing,
+                                        poly[i],
+                                        poly[i + 1],
+                                        ScissorCrossing(nPlane, poly[i], poly[i + 1]));
+                }
+                crossing.mClipFlags |= ScissorFlags(crossing);
+                poly[nOut] = crossing;
+                ++nOut;
+                nUnion |= crossing.mClipFlags;
+            }
+            if (!bToOutside) {
+                poly[nOut] = poly[i + 1];
+                ++nOut;
+                nUnion |= poly[i + 1].mClipFlags;
+            }
+        }
+        nCount = nOut;
+        if (nCount == 0) {
+            return;
+        }
+        poly[nCount] = poly[0];
+    }
+
+    for (int i = 0; i < nCount; ++i) {
+        pVerts[*pnNextIndex] = poly[i];
+        ++*pnNextIndex;
     }
 }
 

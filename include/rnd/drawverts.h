@@ -42,19 +42,35 @@ struct DrawVert {
      * it. +0x08
      */
     float mQ;
-    /** Which frustum planes this vertex falls outside. +0x0c */
+    /** Which frustum planes and scissor edges this vertex falls outside. +0x0c */
     int mClipFlags;
-    /** RGBAQ, already scaled to the range the GS takes. +0x10 */
-    GifQuadword mColor;
-    /** XYZF2. +0x20 */
-    GifQuadword mPos;
+    /** RGBAQ as four integers, already scaled to the range the GS takes. +0x10 */
+    int mColor[4];
+    /** XYZF2 as four integers, indexed by DrawVertPosLane. +0x20 */
+    int mPos[4];
 };
+
+/** Lanes of DrawVert::mPos. */
+enum DrawVertPosLane {
+    kDrawVertPosX = 0,   /*!< Horizontal GS coordinate with four fractional bits. */
+    kDrawVertPosY = 1,   /*!< Vertical GS coordinate with four fractional bits. */
+    kDrawVertPosZ = 2,   /*!< Depth. */
+    kDrawVertPosFog = 3, /*!< Fog term with four fractional bits. */
+};
+
+/** Integer lanes in DrawVert::mColor and DrawVert::mPos. */
+constexpr int kDrawVertLanes = 4;
 
 /** Every plane of the six-plane frustum. */
 constexpr int kDrawVertClipAnyPlane = 0x3f;
 
-/** Near plane, which drops a triangle outright rather than clipping it. */
-constexpr int kDrawVertClipNearPlane = 0x10;
+/**
+ * Far plane, the vclipw judgement z > w, which drops a triangle outright rather than clipping it.
+ *
+ * ClipTriangleToFrustum() clips against the opposite judgement at the camera near distance, which
+ * identifies this one as the far plane.
+ */
+constexpr int kDrawVertClipFarPlane = 0x10;
 
 /** The five planes a triangle is rejected against only when all its vertices fail one. */
 constexpr int kDrawVertClipOtherPlanes = 0x2f;
@@ -113,16 +129,25 @@ inline int IsSphereInDrawFrustum(const Sphere &sphere) {
 /**
  * Transform and light a run of vertices into the shared draw buffer.
  *
- * The final argument exists in the prototype and the body never reads it. Two independent call
- * sites materialise the mesh bounding sphere into its register, which the compiler emits only for
- * a declared parameter, and the register is caller-saved, so nothing downstream reads it either.
+ * With lighting on, the lights are first brought into object space and culled against the sphere
+ * through TransformLightRecords(). Each vertex colour then starts from the material emissive
+ * colour and the environment ambient light, unless the material takes a term from the vertex
+ * colour, and gains every directional light by the clamped cosine and every point light not culled
+ * by the cosine and a linear falloff over its range, before the sum is clamped to the unit range.
+ * Texture coordinates come from the vertex or from sphere mapping as in
+ * TransformMeshVertsNoLight(), and positions are projected, scaled to the viewport, and given the
+ * fog term. The vertices are processed 400 at a time with the long operation poll between
+ * batches.
+ *
+ * The sphere arrives in the sixth argument register and passes through to
+ * TransformLightRecords() untouched.
  *
  * @param pOutVerts Destination, normally g_aDrawVerts.
  * @param pXfm The transform, four rows of four floats.
  * @param pVerts The source vertices.
  * @param nCount How many vertices to transform.
  * @param bWriteClipFlags Non-zero to record per-vertex clip flags.
- * @param sphereUnused Passed by every caller and read by none.
+ * @param sphere The bounds the point lights are culled against.
  * @ghidraAddress 0x00584040
  */
 void TransformAndLightMeshVerts(void *pOutVerts,
@@ -130,7 +155,7 @@ void TransformAndLightMeshVerts(void *pOutVerts,
                                 MeshVert *pVerts,
                                 int nCount,
                                 int bWriteClipFlags,
-                                const Sphere &sphereUnused);
+                                const Sphere &sphere);
 
 /**
  * Transform a run of vertices without lighting them.
@@ -147,11 +172,21 @@ void TransformAndLightMeshVerts(void *pOutVerts,
 void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, const float *pXfm);
 
 /**
- * Clip one triangle against the frustum and append the pieces to the vertex buffer.
+ * Clip one triangle against the near plane and the scissor rectangle and append the polygon to the
+ * vertex buffer.
  *
- * The new vertices go above the index the fifth argument points at, and that index is advanced in
- * place. The routine returns nothing: the value left in the return register at the single exit is
- * the advanced index, but it is there as a by-product of storing it through the pointer, and
+ * The three vertices first gain the scissor edge flags (0x40 left, 0x80 right, 0x100 top, 0x200
+ * bottom) against g_nScissorX0 through g_nScissorY1, and a triangle whose vertices share a flag is
+ * dropped. Otherwise g_renderStats.mnSplitTriangles is incremented and the polygon is clipped in a
+ * nine-vertex scratch vector, one plane at a time and only against the planes some vertex falls
+ * outside. The near plane is clipped where w equals g_flCamNear, with the texture coordinates and
+ * colours interpolated by the perspective-corrected fraction, and the scissor edges linearly in
+ * screen space. A flat-shaded material first gives the second and third vertices the colour of the
+ * first.
+ *
+ * The polygon vertices go above the index the fifth argument points at, and that index is advanced
+ * in place. The routine returns nothing: the value left in the return register at the single exit
+ * is the advanced index, but it is there as a by-product of storing it through the pointer, and
  * neither caller reads the register.
  *
  * @param nIdx0 First vertex of the triangle.

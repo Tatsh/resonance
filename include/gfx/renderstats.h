@@ -4,8 +4,8 @@
  * Per-frame counters the renderer maintains and the debug overlay reports.
  *
  * Each counter is recovered from the routine that increments it, and the labels
- * GfxDevice::DrawRenderStatsOverlay() prints for every word confirm the list. mnSplitTriangles
- * has no recovered writer, and the total size is unrecovered.
+ * GfxDevice::DrawRenderStatsOverlay() prints for every word confirm the list. The total size is
+ * unrecovered.
  */
 struct RenderStats {
     /** Point particles submitted, advanced by the point path by the whole vertex count. */
@@ -14,7 +14,10 @@ struct RenderStats {
     int mnMeshDraws;
     /** Triangles with at least one vertex outside a plane, counted before the drop tests. */
     int mnFacesClipped;
-    /** Triangles split by the clipper, printed as "splittris". */
+    /**
+     * Triangles Rnd::ClipTriangleToFrustum() splits, counted once the shared-plane reject passes.
+     * Printed as "splittris".
+     */
     int mnSplitTriangles;
     /** Triangles submitted, advanced by Rnd::PsMesh::DrawFacesVU1() by the face count. */
     int mnTriangles;

@@ -141,14 +141,12 @@ inline void WritePackedGifTag(int nRegCount, unsigned long long qwRegs) {
 // Screen-space reject for one sprite. The near corner must not fall below the origin and the far
 // corner must not pass the coordinate ceiling.
 inline bool IsSpriteOffScreen(const DrawVert &nearCorner, const DrawVert &farCorner) {
-    const int nNearX = static_cast<int>(nearCorner.mPos.mLo);
-    const int nNearY = static_cast<int>(nearCorner.mPos.mLo >> 32);
-    if (nNearX < kSpriteMinCoord || nNearY < kSpriteMinCoord) {
+    if (nearCorner.mPos[kDrawVertPosX] < kSpriteMinCoord ||
+        nearCorner.mPos[kDrawVertPosY] < kSpriteMinCoord) {
         return true;
     }
-    const int nFarX = static_cast<int>(farCorner.mPos.mLo);
-    const int nFarY = static_cast<int>(farCorner.mPos.mLo >> 32);
-    return nFarX > kSpriteMaxCoord || nFarY > kSpriteMaxCoord;
+    return farCorner.mPos[kDrawVertPosX] > kSpriteMaxCoord ||
+           farCorner.mPos[kDrawVertPosY] > kSpriteMaxCoord;
 }
 
 } // namespace
