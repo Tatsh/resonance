@@ -49,6 +49,40 @@ struct MetScreenCommand {
     int mButton;   /*!< Raw button identifier the translator mapped. +0x08 */
 };
 
+class MetScreen;
+
+/**
+ * One value of MetScreen::ScreenRegistry(), a screen and the category it was registered under.
+ *
+ * The record is eight bytes and is not polymorphic, so the name is inferred. The registry's
+ * `operator[]` at `0x0038f318` default-constructs a missing value as no screen in category 3, and
+ * every recovered registration stores category 0. The three category walkers at `0x003822c8`,
+ * `0x00382978`, and `0x00383020` read mCategory.
+ */
+struct MetScreenEntry {
+    /** Record no screen, in category 3. */
+    MetScreenEntry() : mScreen(nullptr), mCategory(kUnsetCategory) {
+    }
+
+    /**
+     * Record a screen in a category.
+     *
+     * @param pScreen The screen.
+     * @param nCategory The category, 0 for every recovered registration.
+     */
+    explicit MetScreenEntry(MetScreen *pScreen, int nCategory = kDefaultCategory)
+        : mScreen(pScreen), mCategory(nCategory) {
+    }
+
+    /** The category every recovered registration stores. */
+    static constexpr int kDefaultCategory = 0;
+    /** The category a missing entry is created with. */
+    static constexpr int kUnsetCategory = 3;
+
+    MetScreen *mScreen; /*!< The screen. +0x00 */
+    int mCategory;      /*!< The category the walkers select screens by. +0x04 */
+};
+
 /**
  * What a navigation command requests.
  *
@@ -249,12 +283,13 @@ public:
      * The key is the screen class name as a literal, and the literal is authoritative rather than
      * derivable from the class, because at least one screen registers under a spelling that
      * differs from its class name. The table is a function-local static behind the guard flag at
-     * `0x006c64dc`, with a 16-byte value and a 0x20-byte header node.
+     * `0x006c64dc`, with a 16-byte key and value pair and a 0x20-byte node. Its atexit destructor
+     * is at `0x00382168`.
      *
      * @return The table.
      * @ghidraAddress 0x003821e0
      */
-    static std::map<HxStr, MetScreen *> &ScreenRegistry();
+    static std::map<HxStr, MetScreenEntry> &ScreenRegistry();
 
     /**
      * Resolve one screen by its registry key.
@@ -280,11 +315,12 @@ public:
     static MetScreen *FindEndScreen(MetRenderer *pRenderer, const HxStr &name);
 
     /**
-     * Create the main-menu screens that are not registered yet.
+     * Create the main-menu screens.
      *
      * The set is MetMainScreen, MetTopLogoScreen, MetLeftGizmoSmallScreen, MetLeftGizmoScreen,
-     * MetHelpScreen, and MetScreenTitleScreen, each built on the renderer. The arena loader is the
-     * one caller. The title is inferred. The body is not written.
+     * MetHelpScreen, and MetScreenTitleScreen, each built on the renderer with the `rndglobal`
+     * zone and registered in category 0. An existing entry is overwritten. The arena loader is the
+     * one caller. The title is inferred.
      *
      * @param pRenderer The renderer the screens register on.
      * @ghidraAddress 0x003848e0
@@ -314,6 +350,49 @@ public:
      * @ghidraAddress 0x00384300
      */
     static void CreateStartupScreens(MetRenderer *pRenderer);
+
+    /**
+     * Create every remaining front-end screen, once.
+     *
+     * Nothing happens when `MetLoadGameScreen` is already registered. Otherwise 59 screens, from
+     * MetLoadPreFabScreen to MetEndGameGizmoScreen, are built on the renderer with the
+     * `rndglobal` zone and registered in category 0. MetSonyScreen::OnFadeOutDone() is the one
+     * caller. The title is inferred.
+     *
+     * @param pRenderer The renderer the screens register on.
+     * @ghidraAddress 0x00385180
+     */
+    static void CreateFrontEndScreens(MetRenderer *pRenderer);
+
+    /**
+     * Delete and unregister every screen in category 2.
+     *
+     * The image has no caller, and no recovered registration uses the category. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x003822c8
+     */
+    static void DestroyCategory2Screens();
+
+    /**
+     * Delete and unregister every screen in category 1.
+     *
+     * The image has no caller, and no recovered registration uses the category. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x00382978
+     */
+    static void DestroyCategory1Screens();
+
+    /**
+     * Delete and unregister every screen outside category 0, then rewind the `rndMetLocAndNet`
+     * zone.
+     *
+     * The image has no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00383020
+     */
+    static void DestroyNonDefaultScreens();
 
     /**
      * Poll every container load that has not finished, and hide the drawables of each that does.
