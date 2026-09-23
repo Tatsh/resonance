@@ -298,6 +298,7 @@ isdir
 isrecordingmsg
 iwyu
 jameffectmsg
+jameffectsmgr
 jbed
 jbep
 jinja

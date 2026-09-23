@@ -52,11 +52,7 @@ enum EffectorType {
  * Five further routines of the three classes above are recovered and not written here. Each one
  * needs a declaration that belongs to a header outside this subsystem.
  *
- * - `0x001a0df0` is the factory. It takes the EffectorType, the MIDI channel in the low byte of its
- *   second argument, and a context pointer that it forwards to the property lookup at `0x00509110`
- *   for the two time-varying effects. It allocates the class the type selects, reads that class's
- *   tuning values from properties 0x38f through 0x392, and returns the Effector subobject. The
- *   returned object's Type() is called once and the result is discarded.
+ * - `0x001a0df0` is the factory, declared below as CreateForType() with its body not written.
  * - `0x001a1a10` is VolumeEffector's constructor and `0x001a07c0` is its Enable(). The object is
  *   0x20 bytes: an unsigned char MIDI channel at `+0x14`, an int control value at `+0x18`, and the
  *   enabled flag at `+0x1c`. Enable() sends controller 0x2f with the stored value while enabled and
@@ -100,4 +96,22 @@ public:
      * @ghidraAddress 0x001a2558
      */
     virtual void Enable(int bEnabled);
+
+    /**
+     * Build the effect one type selects.
+     *
+     * The routine allocates the class the type selects, reads that class's tuning values from
+     * configuration codes 0x38f through 0x392 (the time-varying effects substitute nTrack into the
+     * lookup), and returns the Effector subobject. The returned object's Type() is called once and
+     * the result is discarded. JamEffectsMgr's constructor is the recovered caller. The body is not
+     * written.
+     *
+     * @param nType An EffectorType. Any other value leaves the result null, and the Type() call
+     *              then dereferences it.
+     * @param nChannel The MIDI channel the effect sends on.
+     * @param nTrack The track, substituted into the property lookups.
+     * @return The new effect.
+     * @ghidraAddress 0x001a0df0
+     */
+    static Effector *CreateForType(int nType, unsigned char nChannel, int nTrack);
 };
