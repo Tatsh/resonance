@@ -70,9 +70,10 @@ namespace Mid {
  * member through the emission at `0x004acf28` and print the same member through Print() here,
  * which settles both members as this class.
  *
- * The bodies are not written yet. The three addresses below are the emission the scheduler
- * translation unit uses, and a second emission of Save() exists elsewhere, which is the shape of
- * an inline member rather than of an ordinary out-of-line one.
+ * The three addresses below are the emission the scheduler translation unit uses, and a second
+ * emission of Save() exists elsewhere, which is the shape of an inline member rather than of an
+ * ordinary out-of-line one. The bodies are defined out of line here, keeping the two stream
+ * classes forward-declared for the many headers that include this one.
  *
  * The one member is public, because the readers of a position apply arithmetic to it directly and
  * the image exposes no accessor.
