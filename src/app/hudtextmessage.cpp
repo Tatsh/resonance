@@ -1,5 +1,9 @@
 #include "app/hudtextmessage.h"
 
+#include "os/hxstr.h"
+#include "rnd/blur.h"
+#include "rnd/font.h"
+#include "rnd/manager.h"
 #include "rnd/text.h"
 #include "rnd/transanim.h"
 
@@ -15,6 +19,36 @@ constexpr float kMessageStartPending = 1.0e9f;
 constexpr float kFadeLength = 250.0f;
 
 } // namespace
+
+HudTextMessage::HudTextMessage(const HxStr &name)
+    : mText(nullptr), mStart(kMessageIdle), mActive(0) {
+    mBlur = dynamic_cast<Rnd::Blur *>(Rnd::g_manager.Find(name + ".blur"));
+    mText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(name + ".txt"));
+    mAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(name + ".tnm"));
+
+    mFont = mText->GetFont();
+    mFontSize = mFont->mSize;
+    mText->SetShowing(0);
+    if (mBlur != nullptr) {
+        mBlur->SetShowing(1);
+    }
+}
+
+void HudTextMessage::Show(const HxStr &text, float flScale, float flHold) {
+    if (mActive != 0) {
+        return;
+    }
+
+    if (mBlur != nullptr) {
+        mBlur->mXfms.clear();
+    }
+    mFont->SetSize(mFontSize * flScale);
+    mText->SetText(text);
+    mText->SetShowing(1);
+    mHold = flHold;
+    mStart = kMessageStartPending;
+    mAnim->SetFrame(0.0f);
+}
 
 void HudTextMessage::Hide() {
     mText->SetShowing(0);

@@ -8,7 +8,7 @@ GameParams::GameParams() {
     mUnknown24 = false;
     mUnknown28 = false;
     mUnknown2c = false;
-    mUnknown30 = false;
+    mJukeboxMode = false;
 }
 
 // 0x00187940
@@ -17,15 +17,15 @@ GameParams::~GameParams() {
 
 // 0x001871b8
 void GameParams::Save(OBStream *pStream) {
-    unsigned length00 = mUnknown00.mLen;
+    unsigned length00 = mLevelName.mLen;
     pStream->Write(&length00, sizeof(length00));
     // An empty string has no buffer, and the stream receives the shared empty string in place of a
     // null pointer.
-    pStream->WriteBytes(mUnknown00.mStr != nullptr ? mUnknown00.mStr : g_szEmptyString, length00);
+    pStream->WriteBytes(mLevelName.mStr != nullptr ? mLevelName.mStr : g_szEmptyString, length00);
 
-    unsigned length08 = mUnknown08.mLen;
+    unsigned length08 = mArenaName.mLen;
     pStream->Write(&length08, sizeof(length08));
-    pStream->WriteBytes(mUnknown08.mStr != nullptr ? mUnknown08.mStr : g_szEmptyString, length08);
+    pStream->WriteBytes(mArenaName.mStr != nullptr ? mArenaName.mStr : g_szEmptyString, length08);
 
     int unknown10 = mUnknown10;
     pStream->Write(&unknown10, sizeof(unknown10));
@@ -45,7 +45,7 @@ void GameParams::Save(OBStream *pStream) {
     int unknown2c = mUnknown2c;
     pStream->Write(&unknown2c, sizeof(unknown2c));
 
-    int unknown30 = mUnknown30;
+    int unknown30 = mJukeboxMode;
     pStream->Write(&unknown30, sizeof(unknown30));
 }
 
@@ -53,15 +53,15 @@ void GameParams::Save(OBStream *pStream) {
 void GameParams::Load(IBStream *pStream) {
     unsigned length00;
     pStream->Read(&length00, sizeof(length00));
-    mUnknown00.Alloc(length00);
-    pStream->ReadBytes(mUnknown00.mStr != nullptr ? mUnknown00.mStr :
+    mLevelName.Alloc(length00);
+    pStream->ReadBytes(mLevelName.mStr != nullptr ? mLevelName.mStr :
                                                     const_cast<char *>(g_szEmptyString),
                        length00);
 
     unsigned length08;
     pStream->Read(&length08, sizeof(length08));
-    mUnknown08.Alloc(length08);
-    pStream->ReadBytes(mUnknown08.mStr != nullptr ? mUnknown08.mStr :
+    mArenaName.Alloc(length08);
+    pStream->ReadBytes(mArenaName.mStr != nullptr ? mArenaName.mStr :
                                                     const_cast<char *>(g_szEmptyString),
                        length08);
 
@@ -90,19 +90,19 @@ void GameParams::Load(IBStream *pStream) {
     mUnknown24 = unknown24 != 0;
     mUnknown28 = unknown28 != 0;
     mUnknown2c = unknown2c != 0;
-    mUnknown30 = unknown30 != 0;
+    mJukeboxMode = unknown30 != 0;
 }
 
 // 0x00187be8
 GameParams &GameParams::operator=(const GameParams &other) {
-    mUnknown00 = other.mUnknown00;
-    mUnknown08 = other.mUnknown08;
+    mLevelName = other.mLevelName;
+    mArenaName = other.mArenaName;
     mUnknown10 = other.mUnknown10;
     mUnknown1c = other.mUnknown1c;
     mUnknown20 = other.mUnknown20;
     mUnknown24 = other.mUnknown24;
     mUnknown28 = other.mUnknown28;
     mUnknown2c = other.mUnknown2c;
-    mUnknown30 = other.mUnknown30;
+    mJukeboxMode = other.mJukeboxMode;
     return *this;
 }

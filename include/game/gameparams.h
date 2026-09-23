@@ -25,10 +25,11 @@
  * run, which places it in the translation unit that copies a GameParams rather than in the one that
  * defines the class.
  *
- * The purpose of each member is not recovered. Three of the ten are public because GameManagerImpl
- * reads and writes them directly with no accessor in the image. A friend declaration on this class
- * would fit the image equally well as the promotion. The other seven have no traced reader and stay
- * private.
+ * The purpose of most members is not recovered. Three of the ten are public because
+ * GameManagerImpl reads and writes them directly with no accessor in the image, and the two names
+ * are public because Renderer::LoadLevel() reads them directly, as is the jukebox flag, which
+ * Globals::IsJukeboxMode() reads. A friend declaration on this class would fit the image equally
+ * well as the promotion. The other four have no traced reader and stay private.
  *
  * mUnknown14 is the one member that neither Save(), Load(), nor operator=() touches, and the
  * compiler-generated copy constructor is the only routine in the image that copies it.
@@ -99,9 +100,22 @@ public:
      */
     GameParams &operator=(const GameParams &other);
 
+    /**
+     * The level the session plays. +0x00
+     *
+     * Public because Renderer::LoadLevel() copies it directly to build the level's load path, and
+     * the image has no accessor for it.
+     */
+    HxStr mLevelName;
+
+    /**
+     * The arena the session plays in. +0x08
+     *
+     * Public on the same evidence as mLevelName.
+     */
+    HxStr mArenaName;
+
 private:
-    HxStr mUnknown00; // +0x00
-    HxStr mUnknown08; // +0x08
     int mUnknown10;   // +0x10
     HxStr mUnknown14; // +0x14
 
@@ -120,5 +134,14 @@ public:
 
 private:
     bool mUnknown2c; // +0x2c
-    bool mUnknown30; // +0x30
+
+public:
+    /**
+     * Set for a jukebox session. +0x30
+     *
+     * Overlay's constructor shows `Jukebox Mode` while it is set, and HudFreq hides its icon.
+     * Public because Globals::IsJukeboxMode() reads it directly, and the image has no GameParams
+     * accessor for it.
+     */
+    bool mJukeboxMode;
 };

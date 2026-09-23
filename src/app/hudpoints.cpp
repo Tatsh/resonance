@@ -1,6 +1,10 @@
 #include "app/hudpoints.h"
 
+#include <cstring>
+
 #include "app/overlay.h"
+#include "math/color.h"
+#include "math/vector3.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/blur.h"
@@ -16,6 +20,19 @@ constexpr float kExitRestFrame = 100.0f;
 
 // Multiplier the constructor starts with.
 constexpr int kInitialMultiplier = 1;
+
+// The pulse and the flash each map 0 through 1 onto half through full.
+constexpr float kHalf = 0.5f;
+
+// How far the flash and the pulse fall each frame.
+constexpr float kFlashDecay = 0.2f;
+constexpr float kPulseDecay = 0.05f;
+
+// Frames of the exit animation that ShowExit() and Bank() play.
+constexpr float kShowExitFrom = 0.0f;
+constexpr float kShowExitTo = 100.0f;
+constexpr float kBankFrom = 200.0f;
+constexpr float kBankTo = 300.0f;
 
 } // namespace
 
@@ -51,6 +68,60 @@ HudPoints::HudPoints(int nIndex)
 
     mPointsText->SetShowing(0);
     mMultiplierText->SetShowing(0);
+}
+
+void HudPoints::SetFrame(float flTime) {
+    mExitView->SetShowing(mExit.Update(flTime));
+
+    // The points text is scaled across and in depth by the pulse. Only the three basis rows are
+    // replaced, and the translation row is left as it was.
+    const float flScale = mPulse * kHalf + kHalf;
+    const Vector3 basis[] = {
+        {flScale, 0.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, flScale, 1.0f},
+    };
+    std::memcpy(mPointsText->mLocalXfm, basis, sizeof(basis));
+    mPointsText->mDirty = 1;
+
+    const float flBrightness = mFlash * kHalf + kHalf;
+    mPointsText->SetColor(Color{flBrightness, flBrightness, flBrightness, 1.0f});
+
+    mMultiplierText->SetColor(mHot != 0 ? mHotMat->mEmissive : mPlainMat->mEmissive);
+
+    mFlash -= kFlashDecay;
+    if (mFlash < 0.0f) {
+        mFlash = 0.0f;
+    }
+    mPulse -= kPulseDecay;
+    if (mPulse < mPulseRest) {
+        mPulse = mPulseRest;
+    }
+}
+
+void HudPoints::ShowExit(int nPoints) {
+    mPointsText->SetShowing(0);
+    mShowing = 0;
+    mFlash = 1.0f;
+    mPulseRest = 0.0f;
+    mExitText->SetText(HxStr(FormatString("%d", nPoints)));
+    mExit.Play(kShowExitFrom, kShowExitTo);
+    if (mExitBlur != nullptr) {
+        mExitBlur->mXfms.clear();
+    }
+}
+
+void HudPoints::Bank() {
+    if (mShowing != 0) {
+        mExitText->SetText(HxStr(FormatString("%d", mPoints)));
+        mExit.Play(kBankFrom, kBankTo);
+        if (mExitBlur != nullptr) {
+            mExitBlur->mXfms.clear();
+        }
+    }
+    mPointsText->SetShowing(0);
+    mShowing = 0;
+    mPulseRest = 0.0f;
 }
 
 void HudPoints::SetPoints(int nPoints) {

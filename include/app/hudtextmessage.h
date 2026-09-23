@@ -1,10 +1,11 @@
 #pragma once
 
+#include "rnd/font.h"
+
 class HxStr;
 
 namespace Rnd {
 class Blur;
-class Font;
 class Text;
 class TransAnim;
 } // namespace Rnd
@@ -20,9 +21,6 @@ class TransAnim;
  * A message fades in over 250 units of SetFrame()'s time, stays for the time Show() gives it, and
  * fades out over 250 more. Show() scales the text's font from its size at construction, and the
  * destructor restores that size.
- *
- * Three bodies are not written. The constructor, the destructor, and Show() all need the Rnd::Font
- * size setter at `0x004d0648`, and Show() also clears a list Rnd::Blur declares private.
  */
 class HudTextMessage {
 public:
@@ -40,10 +38,14 @@ public:
     /**
      * Restore the font's size.
      *
-     * HudTrack's destructor and Overlay's destructor inline the body, and the out-of-line copy at
-     * `0x00429aa8` has no caller.
+     * HudTrack's destructor and Overlay's destructor inline the body, and the out-of-line copy has
+     * no caller.
+     *
+     * @ghidraAddress 0x00429aa8
      */
-    ~HudTextMessage();
+    ~HudTextMessage() {
+        mFont->SetSize(mFontSize);
+    }
 
     /**
      * Start showing one text unless a message is already active.
@@ -82,7 +84,7 @@ private:
     Rnd::TransAnim *mAnim; // `<name>.tnm`
     // When the message started. 0 marks it idle and 1e9 marks a start not yet recorded.
     float mStart;
-    // The font size at construction, which the destructor restores.
+    // The font size at construction. The destructor restores it.
     float mFontSize;
     // How long the message stays between its fades.
     float mHold;

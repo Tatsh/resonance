@@ -12,9 +12,6 @@ class Mesh;
  * The class is not polymorphic and emits no RTTI. It occupies `+0x114` of HudPanel, whose
  * constructor runs the constructor. No descriptor, tag, or file path identifies the class, and its
  * name is inferred from the one object it resolves.
- *
- * MoveTo() is not written. It needs the player's colour name at Player `+0x24`, which game/player.h
- * declares as an int, and the material and local transform members of Rnd::Mesh.
  */
 class HudScorePulse {
 public:
@@ -28,10 +25,10 @@ public:
     /**
      * Show the pulse over one badge's score, in its player's colour.
      *
-     * Tints the mesh's material with HudColorFromName() of the player's colour name, copies the
-     * world position of the badge's score mesh into the pulse mesh's local position, marks the
-     * transform dirty, and shows the mesh. Overlay::OnLeaderChanged() is the caller. The title is
-     * inferred.
+     * Sets the emissive colour of the mesh's material to HudColorFromName() of the player's colour
+     * name, copies the translation row of the score mesh's local transform into the pulse mesh's,
+     * marks the transform dirty, and shows the mesh. Overlay::OnLeaderChanged() is the caller. The
+     * title is inferred.
      *
      * @param pBadge The leader's badge.
      * @ghidraAddress 0x0041c2b0

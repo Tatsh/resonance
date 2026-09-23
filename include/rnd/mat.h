@@ -89,6 +89,17 @@ public:
         WrapMode mWrap;   // +0x54 Defaults to kWrapModeRepeat.
         Tex *mTex;        // +0x58
         Mat *mMat;        // +0x5c
+
+        /**
+         * Replace the stage's texture.
+         *
+         * Drops mMat's registration on the previous texture, records the new one, and registers
+         * mMat on it. The head-up display's FreQ icon is one caller. The title is inferred.
+         *
+         * @param pTex The new texture, or null.
+         * @ghidraAddress 0x004dd0a0
+         */
+        void SetTex(Tex *pTex);
     };
 
     /** Serial version this build writes, and the highest version it loads. */
@@ -301,9 +312,19 @@ protected:
     // its setter overrides, and the material selection path in the same file reads the whole
     // surface to build the GS register writes. The order below is the recovered offset order.
     BlendMode mBlend; // +0x28 Defaults to kBlendModeSrcAlpha.
-    Color mEmissive;  // +0x30 Defaults to black with full alpha.
-    Color mAmbient;   // +0x40 Defaults to white.
-    Color mDiffuse;   // +0x50 Defaults to white.
+
+public:
+    /**
+     * Colour the surface emits. Defaults to black with full alpha. +0x30
+     *
+     * Public because HudPoints::SetFrame() at `0x00418de8` copies it directly through a Rnd::Mat
+     * pointer from outside the hierarchy to colour a text, and the image has no accessor for it.
+     */
+    Color mEmissive;
+
+protected:
+    Color mAmbient; // +0x40 Defaults to white.
+    Color mDiffuse; // +0x50 Defaults to white.
 
 public:
     // Both edge draw paths read this through a Rnd::Mat pointer from outside the hierarchy, and the

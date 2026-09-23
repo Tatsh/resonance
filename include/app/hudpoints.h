@@ -18,9 +18,6 @@ class View;
  * The readout shows the points a phrase is building, a multiplier beside them, and an exit
  * animation that moves banked points away. The text pulses and flashes on each change and
  * settles back over the following frames.
- *
- * Three bodies are not written. SetFrame() reads Rnd::Mat::mEmissive, which rnd/mat.h declares
- * protected, and ShowExit() and Bank() clear a list Rnd::Blur declares private.
  */
 class HudPoints {
 public:

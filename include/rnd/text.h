@@ -291,6 +291,18 @@ public:
      */
     virtual void SetHighlight(int nHighlight);
 
+    /**
+     * Report the font the text is set in.
+     *
+     * HudTextMessage's constructor inlines the load, and the out-of-line copy has no caller.
+     *
+     * @return The font, or null.
+     * @ghidraAddress 0x004cf740
+     */
+    Font *GetFont() {
+        return mFont;
+    }
+
 protected:
     /**
      * Draw the glyph mesh.

@@ -227,7 +227,39 @@ public:
      */
     HxStr mColorName;
 
+    /**
+     * Report the juice the player has banked.
+     *
+     * The routine at `0x0012f970` clamps the value to 0 through mUnknown34, the maximum
+     * JuiceAmountMsg announces, and the message accessor at `0x003e4198` divides it by that
+     * announced maximum.
+     *
+     * @return The juice.
+     * @ghidraAddress 0x001330f8
+     */
+    int GetJuice();
+
+    /**
+     * Report the player's score.
+     *
+     * The routine at `0x0012f808` clamps the value to 0 through mUnknown3c. Renderer compares the
+     * scores of every world player through this accessor to find the leader.
+     *
+     * @return The score.
+     * @ghidraAddress 0x001330e0
+     */
+    int GetScore();
+
+private:
+    int mUnknown2c; // +0x2c
+    int mJuice;     // +0x30
+
 protected:
     // Slot11 clamps this to kJuiceMaximum before announcing it.
     int mUnknown34; // +0x34
+
+private:
+    int mScore; // +0x38
+    // The ceiling the routine at 0x0012f808 clamps mScore to.
+    int mUnknown3c; // +0x3c
 };

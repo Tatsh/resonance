@@ -15,10 +15,6 @@ class TransAnim;
  * The class is not polymorphic, emits no RTTI, and is never allocated on its own. No descriptor,
  * allocation tag, or file path identifies it, and its name is inferred from the `%s freq%d` family
  * of objects its constructor resolves. It occupies `+0x10` to `+0x27` of HudBadge.
- *
- * The constructor's body is not written. It needs the material texture setter at `0x004dd0a0`,
- * Rnd::Mat's colour slot 11, and the Globals accessor at `0x00118e38`. SetFrame() is not written,
- * because it needs the Rnd::MatAnim material setter at `0x004dd2d8`.
  */
 class HudFreq {
 public:
@@ -26,10 +22,10 @@ public:
      * Resolve the icon's objects for one player.
      *
      * Resolves `<layout> freq<p>.tnm`, `HUD freq pulse.mnm`, `HUD freq<p>.mat`, and
-     * `<layout> freq<n>.mesh`, where `<p>` is the player's word at `+0x20`. Tints the material with
-     * HudColorFromName() of the player's colour name, gives it the persona burn texture for the
-     * badge number, and puts it on the mesh. The mesh is shown unless the Globals accessor at
-     * `0x00118e38` reports non-zero. The icon starts without its pulse.
+     * `<layout> freq<n>.mesh`, where `<p>` is the player's identifier. Sets the material's emissive
+     * colour to HudColorFromName() of the player's colour name, gives its second stage the persona
+     * burn texture for the badge number, and puts it on the mesh. The mesh is shown except in a
+     * jukebox session. The icon starts without its pulse.
      *
      * @param pPlayer The player the icon shows.
      * @param nIndex The badge number that fills `<n>` and selects the persona burn texture.

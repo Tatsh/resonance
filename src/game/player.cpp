@@ -117,3 +117,13 @@ int Player::Slot19() {
 int Player::Slot20(int) {
     return 1;
 }
+
+// 0x001330e0
+int Player::GetScore() {
+    return mScore;
+}
+
+// 0x001330f8
+int Player::GetJuice() {
+    return mJuice;
+}

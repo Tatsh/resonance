@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -10,18 +12,34 @@
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The purpose of each field comes
+ * from the Print() override at `0x003d8670`, which streams `b#<bar> tr#<track>` and then one
+ * labelled part per flag set in mFlags: the player's colour name for kFieldPlayer, ` enabled` or
+ * ` disabled` for kFieldEnabled, ` pow:<n>` for kFieldPowerup, and ` effect:<names>` for
+ * kFieldEffects. That override is recorded here rather than declared, because its body is not
+ * recovered.
+ *
+ * A flagged field is read through an inline getter that runs Has() for its flag and discards the
+ * result before the load, which is what Renderer::OnBarStatus() at `0x0042d068` and Print() both
+ * show at every read. Has() is the out-of-line member the getters call. The bar, the track,
+ * mUnknown14, and mFlags are read with no call at all, and the image has no accessor for them,
+ * which is what makes those four public.
  *
  * Clone() copies only as far as `0x2c` of the 0x30 bytes it allocates, so the remaining 4 are
  * either alignment padding or a field the copy omits.
- *
- * The class overrides Message::Print() at `0x003d8670`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
  */
 class BarStatusMsg : public Message {
 public:
+    /**
+     * Bits of mFlags, one per optional field.
+     */
+    enum Field {
+        kFieldPlayer = 1,  /*!< The player field is set. */
+        kFieldEnabled = 2, /*!< The enabled field is set. */
+        kFieldPowerup = 4, /*!< The powerup field is set. */
+        kFieldEffects = 8, /*!< The effect mask is set. */
+    };
+
     /**
      * Produce a heap copy of this message.
      *
@@ -46,15 +64,72 @@ public:
      */
     virtual const char *Name();
 
+    /**
+     * Report whether one optional field is set.
+     *
+     * @param nField The Field bit to test.
+     * @return 1 when the bit is set in mFlags, and 0 otherwise.
+     * @ghidraAddress 0x003df1f8
+     */
+    int Has(int nField);
+
+    /**
+     * Report the player field.
+     *
+     * @return The player whose track the bar belongs to.
+     */
+    Player *GetPlayer() {
+        Has(kFieldPlayer); // Yes, the binary discards this result.
+        return mPlayer;
+    }
+
+    /**
+     * Report the enabled field.
+     *
+     * @return Non-zero when the bar is enabled.
+     */
+    int GetEnabled() {
+        Has(kFieldEnabled); // Yes, the binary discards this result.
+        return mEnabled;
+    }
+
+    /**
+     * Report the powerup field.
+     *
+     * @return The powerup kind on the bar.
+     */
+    int GetPowerup() {
+        Has(kFieldPowerup); // Yes, the binary discards this result.
+        return mPowerup;
+    }
+
+    /**
+     * Report the effect mask.
+     *
+     * @return One bit per effect kind.
+     */
+    long long GetEffects() {
+        Has(kFieldEffects); // Yes, the binary discards this result.
+        return mEffects;
+    }
+
+    int mBar;   /*!< The bar the status describes. +0x04 */
+    int mTrack; /*!< The track the status describes. +0x08 */
+
 private:
-    int mUnknown04;       // +0x04
-    int mUnknown08;       // +0x08
-    int mUnknown0c;       // +0x0c
-    int mUnknown10;       // +0x10
-    int mUnknown14;       // +0x14
-    int mUnknown18;       // +0x18
-    long long mUnknown20; // +0x20
-    int mUnknown28;       // +0x28
+    Player *mPlayer; // +0x0c
+    int mEnabled;    // +0x10
+
+public:
+    /** Word Renderer::OnBarStatus() passes to AppTunnel::OnBarChanged(). +0x14 */
+    int mUnknown14;
+
+private:
+    int mPowerup;       // +0x18
+    long long mEffects; // +0x20
+
+public:
+    int mFlags; /*!< The Field bits of the fields that are set. +0x28 */
 };
 
 /**

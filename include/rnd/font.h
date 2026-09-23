@@ -257,7 +257,35 @@ public:
      */
     void BuildCharMap();
 
+    /**
+     * Replace the glyph atlas material.
+     *
+     * Drops the reference on the previous material, records the new one, and then runs
+     * OnChanged(), which takes the new reference and discards the measured metrics. The title is
+     * inferred.
+     *
+     * @param pMat The new material, or null.
+     * @ghidraAddress 0x004d0600
+     */
+    void SetMat(Mat *pMat);
+
+    /**
+     * Change the height one cell occupies.
+     *
+     * Follows the same sequence as SetMat(), dropping and retaking the material reference around
+     * the store and discarding the measured metrics. The title is inferred.
+     *
+     * @param flSize The new mSize.
+     * @ghidraAddress 0x004d0648
+     */
+    void SetSize(float flSize);
+
 private:
+    // Take this object's reference on mMat and empty mCharMap, so the metrics are measured again
+    // on the next lookup. SetMat(), SetSize(), and the setter at 0x004d0530 are the callers. The
+    // title is inferred. 0x004d0768.
+    void OnChanged();
+
     /**
      * Measure the glyph occupying one cell of the atlas.
      *

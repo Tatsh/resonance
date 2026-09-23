@@ -216,6 +216,18 @@ public:
      */
     virtual float EndFrame();
 
+    /**
+     * Change the material this animation drives.
+     *
+     * Drops this object's reference on the previous material, records the new one, and takes a
+     * reference on it. The head-up display's FreQ icon points one shared pulse animation at its
+     * own material this way before every frame. The title is inferred.
+     *
+     * @param pMat The new material, or null.
+     * @ghidraAddress 0x004dd2d8
+     */
+    void SetMat(Mat *pMat);
+
 protected:
     /**
      * Apply the animation at a frame.

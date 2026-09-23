@@ -3,6 +3,7 @@
 #include <list>
 
 #include "os/hxstr.h"
+#include "os/mem.h"
 
 namespace Rnd {
 class Drawable;
@@ -56,6 +57,41 @@ public:
      * @ghidraAddress 0x003f8030
      */
     void Cancel();
+
+    /**
+     * Abandon this request and release everything it has loaded, leaving it ready to start again.
+     *
+     * Runs Cancel(), then, unless the request is still pending, deletes every object in mUnknown08
+     * through its destructor, clears the three lists, and marks the request pending, not
+     * started, and not finished. The destructor runs it first, and Renderer::UnloadCommon() runs it
+     * before each delete as well. The title is inferred.
+     *
+     * @ghidraAddress 0x003f8240
+     */
+    void Unload();
+
+    /**
+     * Allocate a request under the tag `RndAsyncLoader`.
+     *
+     * Every new-expression open-codes the call.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     */
+    static void *operator new(size_t nSize) {
+        return AllocateTaggedMemory(nSize, "RndAsyncLoader");
+    }
+
+    /**
+     * Release a request under the tag `RndAsyncLoader`.
+     *
+     * The deleting branch of the destructor open-codes the call.
+     *
+     * @param pBlock The block.
+     */
+    static void operator delete(void *pBlock) {
+        FreeTaggedMemory(pBlock, "RndAsyncLoader");
+    }
 
     /**
      * Test whether this request has finished and report how far it has advanced.

@@ -278,15 +278,27 @@ private:
     // callers.
     void ReleaseObjectRefs();
 
-    // Declared in recovered offset order. Every member is private because the image supplies an
-    // accessor for each of the five that anything outside the class reads.
+    // Declared in recovered offset order. Every member but mXfms is private because the image
+    // supplies an accessor for each of the others that anything outside the class reads.
 
-    Mesh *mpMesh;         // +0x14
-    Text *mpText;         // +0x18
-    int mLength;          // +0x1c
-    int mRate;            // +0x20
-    float mFalloff;       // +0x24
-    std::list<Xfm> mXfms; // +0x28
+    Mesh *mpMesh;   // +0x14
+    Text *mpText;   // +0x18
+    int mLength;    // +0x1c
+    int mRate;      // +0x20
+    float mFalloff; // +0x24
+
+public:
+    /**
+     * The transforms recorded for the trail. +0x28
+     *
+     * Public because the head-up display empties it directly through the list's clear() at
+     * `0x00415de8` whenever it restarts a trail, from HudPoints, HudTextMessage, ten of Overlay's
+     * handlers, and three further routines at `0x00412628`, `0x004158c0`, and `0x0041b658`, and
+     * the image has no accessor for it.
+     */
+    std::list<Xfm> mXfms;
+
+private:
     // Frames still to pass before the next transform is recorded. DrawSelf() counts it down and
     // reloads it from mRate.
     int mCountdown; // +0x2c

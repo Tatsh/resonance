@@ -15,3 +15,8 @@ int BarStatusMsg::Type() {
 const char *BarStatusMsg::Name() {
     return "BarStatusMsg";
 }
+
+// 0x003df1f8
+int BarStatusMsg::Has(int nField) {
+    return (mFlags & nField) != 0;
+}

@@ -379,6 +379,17 @@ void Mat::RemoveStageTexRefs() {
     }
 }
 
+// 0x004dd0a0
+void Mat::Stage::SetTex(Tex *pTex) {
+    if (mTex != nullptr) {
+        mTex->RemoveRef(mMat);
+    }
+    mTex = pTex;
+    if (pTex != nullptr) {
+        pTex->AddRef(mMat);
+    }
+}
+
 // 0x004dbb10
 Mat::~Mat() {
     // The stage textures are the only references a material takes.

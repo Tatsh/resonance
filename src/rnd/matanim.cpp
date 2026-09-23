@@ -99,6 +99,17 @@ void MatAnim::Save(Stream &stream) {
     WriteFloatKeys(stream, mAlphaKeys);
 }
 
+// 0x004dd2d8
+void MatAnim::SetMat(Mat *pMat) {
+    if (mMat != nullptr) {
+        mMat->RemoveRef(this);
+    }
+    mMat = pMat;
+    if (pMat != nullptr) {
+        pMat->AddRef(this);
+    }
+}
+
 // 0x004dd388
 void MatAnim::Copy(const Object *pSource, unsigned nFlags) {
     const MatAnim *pSourceAnim = dynamic_cast<const MatAnim *>(pSource);

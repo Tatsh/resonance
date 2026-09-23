@@ -449,6 +449,28 @@ void Font::BuildCharMap() {
     }
 }
 
+// 0x004d0600
+void Font::SetMat(Mat *pMat) {
+    RemoveMatRef();
+    mMat = pMat;
+    OnChanged();
+}
+
+// 0x004d0648
+void Font::SetSize(float flSize) {
+    RemoveMatRef();
+    mSize = flSize;
+    OnChanged();
+}
+
+// 0x004d0768
+void Font::OnChanged() {
+    if (mMat != nullptr) {
+        mMat->AddRef(this);
+    }
+    mCharMap.clear();
+}
+
 // 0x004d0988
 float Font::GetCharAdvance(char ch) {
     if (mCharMap.empty()) {

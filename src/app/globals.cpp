@@ -5,6 +5,8 @@
 #include "app/watchdog.h"
 #include "app/watchdogtimer.h"
 #include "game/gamemanagerimpl.h"
+#include "game/gameparams.h"
+#include "game/grooveworld.h"
 #include "stream/iobpreallocmemstream.h"
 #include "synth/ps2hardsynth.h"
 
@@ -93,6 +95,16 @@ WatchdogTimer *Globals::GetWatchdogTimer() {
 // 0x00118d40
 GrooveWorld *Globals::GetWorld() {
     return mGameManager->GetWorld();
+}
+
+// 0x00118e78
+Sch::TickClock *Globals::GetSongClock() {
+    return GetWorld()->GetSongClock();
+}
+
+// 0x00118e38
+bool Globals::IsJukeboxMode() {
+    return GetGameManager()->GetParams()->mJukeboxMode;
 }
 
 // 0x00118dd8

@@ -38,9 +38,10 @@ constexpr int kLogBufferSize = 0x19000;
  * reads one either. The accessors are themselves the out-of-line copies of inline members, and
  * dozens of call sites inlined their own copy.
  *
- * Six further accessors forward into the game manager and return an object whose owning class
- * belongs to the renderer rather than here. None of the six is identified yet: `0x00118ce8`,
- * `0x00118d18`, `0x00118d70`, `0x00118da0`, `0x00118e38`, and `0x00118ec8`.
+ * Five further accessors forward into the game manager and are not declared yet: `0x00118ce8`,
+ * `0x00118d18`, `0x00118d70`, `0x00118da0`, and `0x00118ec8`. `0x00118da0` returns slot 8 of the
+ * world's MIDI level through the GrooveWorld accessor at `0x001952a8`, an object whose class is
+ * unrecovered.
  */
 class Globals {
 public:
@@ -157,13 +158,20 @@ public:
     /**
      * Report the song clock of the game manager's world.
      *
-     * The body composes GetWorld() with the GrooveWorld accessor at `0x001952a0`, which returns the
-     * world's `+0x64`. It is not written, because grooveworld.h does not declare that accessor.
+     * The body composes GetWorld() with GrooveWorld::GetSongClock().
      *
      * @return The world's song clock.
      * @ghidraAddress 0x00118e78
      */
     Sch::TickClock *GetSongClock();
+
+    /**
+     * Report whether the session is a jukebox session.
+     *
+     * @return GameParams::mJukeboxMode of GameManagerImpl::GetParams().
+     * @ghidraAddress 0x00118e38
+     */
+    bool IsJukeboxMode();
 
 private:
     GameManagerImpl *mGameManager; // +0x00

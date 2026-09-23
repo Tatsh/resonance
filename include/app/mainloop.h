@@ -116,6 +116,17 @@ protected:
      */
     virtual int Poll();
 
+public:
+    /**
+     * Drive the two periodic timers while the frame loop is blocked.
+     *
+     * The long-operation poll callback. Renderer's constructor also calls it directly, at
+     * `0x0042c3bc`, before it waits for the common loads.
+     *
+     * @ghidraAddress 0x001ec7d0
+     */
+    static void PumpTimers();
+
 private:
     // Rearm the timer and poll the game manager. The routine it dispatches ticks the input
     // poller, accumulates a profile timer, and advances the game world when the world and the
@@ -129,10 +140,6 @@ private:
 
     // Runs after the frame is drawn, with an empty body. 0x001ef410
     void PostDraw();
-
-    // Long-operation poll callback, which drives the two periodic timers while the frame loop is
-    // blocked. 0x001ec7d0
-    static void PumpTimers();
 
     // Long-operation redraw callback. It refreshes the display at most once every eighteen
     // milliseconds of the profiler clock. 0x001ec8c0
