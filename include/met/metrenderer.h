@@ -10,6 +10,8 @@
 // MetScreen stores its renderer and the renderer stores its screens, so one of the two
 // declarations has to be incomplete. MemcardOp declares MemcardCBHandler the same way.
 class MetScreen;
+class RawControllerMsg;
+class RndAsyncLoader;
 class MetCommandMap;
 class MetCommandRepeater;
 class MetFade;
@@ -296,6 +298,116 @@ public:
     void RemoveScreen(MetScreen *pScreen);
 
     /**
+     * Make one screen the active panel and start it entering.
+     *
+     * The same promotion OnFadeOutDone() performs on the pending panel. The image records no
+     * caller. The title is inferred.
+     *
+     * @param pScreen The screen to promote.
+     * @ghidraAddress 0x003714f8
+     */
+    void ActivatePanel(MetScreen *pScreen);
+
+    /**
+     * Move a screen view to the front of the screen scene's draw order.
+     *
+     * A view the scene does not draw yet is attached through AddScreenView() instead. The image
+     * records no caller. The title is inferred.
+     *
+     * @param pView The view to raise.
+     * @ghidraAddress 0x00371730
+     */
+    void MoveScreenViewToFront(Rnd::View *pView);
+
+    /**
+     * Send a MetUnlockStagesMsg to the active panel, when there is one.
+     *
+     * The `ActivateAllAccessMode` script command is the caller. The title is inferred.
+     *
+     * @ghidraAddress 0x0036b8c8
+     */
+    void UnlockAllStages();
+
+    /**
+     * Report whether the active panel is a MetLogoScreen.
+     *
+     * The three cheat script commands test it. The title is inferred.
+     *
+     * @return Non-zero when the active panel is a MetLogoScreen.
+     * @ghidraAddress 0x00371b58
+     */
+    int IsLogoScreenActive();
+
+    /**
+     * Hand a message to the active panel, when there is one.
+     *
+     * The image records no caller. The title is inferred.
+     *
+     * @param pMsg The message.
+     * @ghidraAddress 0x00371cb0
+     */
+    void ForwardToPanel(Message *pMsg);
+
+    /**
+     * Hand a message to the active panel without testing for one.
+     *
+     * The image records no caller. The title is inferred.
+     *
+     * @param pMsg The message.
+     * @ghidraAddress 0x00371cf0
+     */
+    void ForwardToPanelUnchecked(Message *pMsg);
+
+    /**
+     * Report how far the arena container load has advanced.
+     *
+     * MetSonyScreen slot 26 is the caller. The title is inferred.
+     *
+     * @param pfProgress Receives the load's progress, between 0 and 1.
+     * @return Non-zero once the load is complete.
+     * @ghidraAddress 0x003713f0
+     */
+    static int PollArenaLoader(float *pfProgress);
+
+    /**
+     * Report how far the three common container loads have advanced together.
+     *
+     * The image records no caller. The title is inferred.
+     *
+     * @param pfProgress Receives the mean of the three loads' progress.
+     * @return Non-zero once all three are complete.
+     * @ghidraAddress 0x00371338
+     */
+    static int PollCommonLoaders(float *pfProgress);
+
+    /**
+     * Enqueue each common container load that is still pending.
+     *
+     * The image records no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00371270
+     */
+    static void EnqueueCommonLoaders();
+
+    /**
+     * Unload the three common containers.
+     *
+     * The image records no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x003712f8
+     */
+    static void UnloadCommonLoaders();
+
+    /**
+     * Unload the arena container.
+     *
+     * The image records no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00371490
+     */
+    static void UnloadArenaLoader();
+
+    /**
      * Current animation frame position of the front end.
      *
      * MetScreen reads this field and passes it straight to its own enter and exit animation
@@ -348,6 +460,41 @@ private:
     // 0x0036bcb8
     // Handles a MetFreqEndedMsg. The body is not written.
     void OnFreqEnded(Message *pMsg);
+
+    // 0x0036aae0
+    // Chooses the end-of-game screen from the game parameters, the game mode, and the solo
+    // result. OnFreqEnded() is the caller. The title is inferred.
+    MetScreen *SelectEndScreen();
+
+    // 0x00371ba8
+    // Translates a raw controller reading into a command, arms its auto-repeat, and delivers it
+    // to the active panel. HandleMessage() expands it inline.
+    inline void OnRawController(RawControllerMsg *pMsg);
+
+    // 0x00369b08
+    // Creates the metagame, fonts, and shared-texture loaders. The constructor is the caller.
+    static void CreateCommonLoaders();
+
+    // 0x00369e50
+    // Creates the arena loader, builds the main-menu screens, and starts the arena load.
+    static void CreateArenaLoader();
+
+    // 0x003712d8
+    static void StartArenaLoad();
+
+    // 0x00371438. Enqueues the arena loader while it is pending.
+    static void EnqueueArenaLoader();
+
+    // 0x006c3598. The constructor records the renderer here and the destructor clears it.
+    static MetRenderer *sInstance;
+    // 0x006c3600
+    static RndAsyncLoader *sMetagameLoader;
+    // 0x006c3608
+    static RndAsyncLoader *sFontsLoader;
+    // 0x006c360c
+    static RndAsyncLoader *sSharedTexLoader;
+    // 0x006c3610
+    static RndAsyncLoader *sArenaLoader;
 
     // +0x60. Zeroed by the constructor. MetaGameWorld::OnUnknownQuery003d48c0() reads it.
     int mUnknown60;

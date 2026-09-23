@@ -158,8 +158,17 @@ private:
     std::list<Rnd::Object *> mUnknown08; // +0x08
     HxStr mDirectory;                    // +0x0c
     HxStr mFile;                         // +0x14
-    // Starts set and reports no progress while it stays set.
-    int mPending;  // +0x1c
+
+public:
+    /**
+     * Starts set and reports no progress while it stays set. +0x1c
+     *
+     * Public because MetRenderer's loader routines at `0x00371270` and `0x00371438` read it
+     * directly before Enqueue(), and the image has no accessor for it.
+     */
+    int mPending;
+
+private:
     int mStarted;  // +0x20
     int mFinished; // +0x24
     int mPriority; // +0x28

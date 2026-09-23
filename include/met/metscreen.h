@@ -266,6 +266,31 @@ public:
     static MetScreen *FindScreenByName(const HxStr &name);
 
     /**
+     * Resolve one end-of-game screen by its registry key, failing fatally when it is absent.
+     *
+     * The failure message is `PROBLEM end screen is not found!`. Every caller passes the renderer,
+     * which the body does not read. The title is inferred. The body is not written.
+     *
+     * @param pRenderer The front-end renderer, which is not read.
+     * @param name The registry key.
+     * @return The screen.
+     * @ghidraAddress 0x00390000
+     */
+    static MetScreen *FindEndScreen(MetRenderer *pRenderer, const HxStr &name);
+
+    /**
+     * Create the main-menu screens that are not registered yet.
+     *
+     * The set is MetMainScreen, MetTopLogoScreen, MetLeftGizmoSmallScreen, MetLeftGizmoScreen,
+     * MetHelpScreen, and MetScreenTitleScreen, each built on the renderer. The arena loader is the
+     * one caller. The title is inferred. The body is not written.
+     *
+     * @param pRenderer The renderer the screens register on.
+     * @ghidraAddress 0x003848e0
+     */
+    static void CreateMainMenuScreens(MetRenderer *pRenderer);
+
+    /**
      * Play the sound one navigation command calls for and then act on the command.
      *
      * Not a vtable slot. MetRenderer::HandleMessage at `0x0036c6e8` and three further routines
