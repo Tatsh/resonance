@@ -55,8 +55,8 @@
  * `0x002c5b60` is the out-of-line emission of the `new` expression that builds one, which is
  * compiler-generated glue rather than a member and is therefore not declared.
  *
- * Neither ListDataProvider virtual nor either overridden MemcardUser virtual is declared here,
- * because neither base declares the slot by a recovered name.
+ * Neither overridden MemcardUser virtual is declared here, because MemcardUser does not declare
+ * either slot by a recovered name. The two ListDataProvider overrides are declared below.
  */
 class MetMCFreqDelScreen :
     public MetScreen,
@@ -165,4 +165,32 @@ public:
      * @ghidraAddress 0x002bee90
      */
     virtual void ResolveContainerViews();
+
+    /**
+     * Show the name of one entry of the vector at `+0xd8`.
+     *
+     * Each element is a pointer to a record whose name is the HxStr at `+0x140`. An index past
+     * the end empties the text instead. The body is not written, because neither the vector nor
+     * the record class is declared yet.
+     *
+     * @param nItem The entry.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pText The cell.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 1.
+     * @ghidraAddress 0x002c5c28
+     */
+    virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
+
+    /**
+     * Leave the cell as it is.
+     *
+     * @param nItem The row, which the body does not read.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pMesh The cell, which the body does not read.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 1.
+     * @ghidraAddress 0x002c5b40
+     */
+    virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 };

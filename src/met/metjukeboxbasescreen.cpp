@@ -1,9 +1,11 @@
 #include "met/metjukeboxbasescreen.h"
 
+#include "met/albumcache.h"
 #include "met/scrollinglist.h"
 #include "met/texturepairrecord.h"
 #include "os/hxstr.h"
 #include "rnd/drawable.h"
+#include "rnd/text.h"
 
 namespace {
 
@@ -14,10 +16,17 @@ static const char *const kSongLogoTexture2 = "gSongLogo2.tex";
 static const char *const kSongLabelTexture1 = "gSongLabel1.tex";
 static const char *const kSongLabelTexture2 = "gSongLabel2.tex";
 
-// The second and third arguments the child slot 38 hands to the ScrollingList constructor. What
-// each measures is not recovered, so both names record the position rather than a meaning.
-constexpr int kScrollingListArgument2 = 16;
-constexpr int kScrollingListArgument3 = 10;
+// The row pitch and the visible row count the child slot 38 hands to the ScrollingList
+// constructor.
+constexpr int kScrollingListRowPitch = 16;
+constexpr int kScrollingListRowCount = 10;
+
+// The two list contexts ProvideText() distinguishes.
+constexpr int kCatalogueContext = 0;
+constexpr int kPlayListContext = 1;
+
+// The text a row past the end of its list shows.
+static const char *const kNoText = "";
 
 } // namespace
 
@@ -26,8 +35,8 @@ MetJukeboxBaseScreen::MetJukeboxBaseScreen(MetRenderer *pRenderer,
                                            const HxStr &name,
                                            const HxStr &directory,
                                            const HxStr &file)
-    : MetScreen(pRenderer, nPriority, name, directory, file), mUnknown90(kScrollingListArgument2),
-      mUnknown94(kScrollingListArgument3), mUnknown98(nullptr), mUnknown9c(nullptr),
+    : MetScreen(pRenderer, nPriority, name, directory, file), mUnknown90(kScrollingListRowPitch),
+      mUnknown94(kScrollingListRowCount), mUnknown98(nullptr), mUnknown9c(nullptr),
       mUnknowna0(nullptr), mUnknowna4(nullptr), mUnknowna8(nullptr), mUnknownac(nullptr),
       mUnknownb0(nullptr), mUnknownb4(nullptr), mUnknownb8(nullptr), mUnknownbc(0), mUnknownc0(0),
       mUnknownc4(nullptr), mUnknownc8(0), mUnknownd8(nullptr), mUnknowndc(nullptr),
@@ -81,4 +90,29 @@ void MetJukeboxBaseScreen::PlayCycleLeftSound(int) {
 }
 
 void MetJukeboxBaseScreen::PlayCycleRightSound(int) {
+}
+
+int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nContext) {
+    if (nContext == kCatalogueContext) {
+        if (static_cast<unsigned>(nItem) < mUnknowna0->size()) {
+            const MetRemixRecord &record = (*mUnknowna0)[nItem];
+            pText->SetText(record.unknown08_);
+            pText->SetFont(record.unknown34_ == GetAlbumJukeboxValue() ? mUnknownd8 : mUnknowndc);
+        } else {
+            pText->SetText(HxStr(kNoText));
+        }
+    } else if (nContext == kPlayListContext) {
+        // Yes, the binary copies the whole entry vector to read one entry.
+        std::vector<HxStr *> entries(mUnknownc4->entries);
+        if (static_cast<unsigned>(nItem) < entries.size()) {
+            pText->SetText(*entries[nItem]);
+        } else {
+            pText->SetText(HxStr(kNoText));
+        }
+    }
+    return 1;
+}
+
+int MetJukeboxBaseScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
+    return 0;
 }

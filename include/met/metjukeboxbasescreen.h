@@ -11,6 +11,10 @@
 #include "rnd/drawable.h"
 #include "rnd/object.h"
 
+namespace Rnd {
+class Font;
+} // namespace Rnd
+
 /**
  * Base of the three jukebox screens.
  *
@@ -201,8 +205,39 @@ public:
      */
     virtual void OnUnknownSlot42();
 
+    /**
+     * Show one row of whichever list the context selects.
+     *
+     * Context 0 is the remix catalogue at mUnknowna0. Its row shows the record's second string, in
+     * mUnknownd8 when the record's unknown34_ matches GetAlbumJukeboxValue() and in mUnknowndc
+     * otherwise. Context 1 is the playlist at mUnknownc4. The body copies the whole entry vector
+     * first and shows the indexed name from the copy. An index past the end empties the text in
+     * both contexts, and any other context leaves the cell as it is. The column is not read.
+     *
+     * @param nItem The row.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pText The cell.
+     * @param nContext 0 for the catalogue and 1 for the playlist.
+     * @return Always 1.
+     * @ghidraAddress 0x0021ef30
+     */
+    virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
+
+    /**
+     * Leave the cell as it is.
+     *
+     * @param nItem The row, which the body does not read.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pMesh The cell, which the body does not read.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 0.
+     * @ghidraAddress 0x00224ae8
+     */
+    virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
+
 protected:
-    // The second and third arguments the child slot 38 hands to the ScrollingList constructor.
+    // The row pitch and the visible row count the child slot 38 hands to the ScrollingList
+    // constructor.
     int mUnknown90; // +0x90, starts at 16
     int mUnknown94; // +0x94, starts at 10
     // The two lists the child slot 38 allocates, the first over the 0x38-byte records mUnknowna0
@@ -227,11 +262,10 @@ protected:
     // factory screen. Each of the three children writes it in its own constructor.
     int mUnknownc8;                        // +0xc8
     std::vector<Rnd::Object *> mUnknowncc; // +0xcc
-    // The two fonts slot 38 resolves, `font1_pink_2` and `font1_pinkgrey_2`. The class each
-    // dynamic_cast targets is not identified, so both are recorded as the Rnd::Object the registry
-    // returns.
-    Rnd::Object *mUnknownd8;       // +0xd8
-    Rnd::Object *mUnknowndc;       // +0xdc
+    // The two fonts slot 38 resolves, `font1_pink_2` and `font1_pinkgrey_2`. ProvideText() hands
+    // them to Rnd::Text::SetFont(), which is what types both.
+    Rnd::Font *mUnknownd8;         // +0xd8
+    Rnd::Font *mUnknowndc;         // +0xdc
     TexturePairRecord mUnknowne0;  // +0xe0, the song logo pair
     TexturePairRecord mUnknown110; // +0x110, the song label pair
     int mUnknown140;               // +0x140, written by the child slot 38

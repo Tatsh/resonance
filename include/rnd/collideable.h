@@ -5,6 +5,7 @@
 #include "rnd/object.h"
 
 class FailSink;
+class ScrollingList;
 namespace Rnd {
 class Stream;
 }
@@ -46,6 +47,9 @@ struct Ray {
  * its mDraws list.
  */
 class Collideable : public virtual Object {
+    // ScrollingList's destructor walks mCollides directly, and the image has no accessor for it.
+    friend class ::ScrollingList;
+
 public:
     /**
      * One recorded intersection.

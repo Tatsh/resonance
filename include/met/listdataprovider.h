@@ -1,5 +1,10 @@
 #pragma once
 
+namespace Rnd {
+class Mesh;
+class Text;
+} // namespace Rnd
+
 /**
  * Mix-in for an object that supplies the rows of a scrolling list to the screen that draws it.
  *
@@ -13,12 +18,10 @@
  * MetRemixDelScreen at `+232`.
  *
  * The four-entry vtable at `0x007ec830` runs GetTypeInfo, the destructor, then two entries that
- * both store the `__pure_virtual` handler at `0x005381a8`. Both declared virtuals are therefore
- * pure and the original class is abstract. MetJukeboxBaseScreen supplies the two at `0x0021ef30`
- * and `0x00224ae8` through the secondary vtable at `0x007ec6a8`, whose every entry adjusts `this`
- * by `-140` back to the start of the screen. Neither virtual has a recovered name or signature, so
- * the two are recorded here rather than declared, and this declaration is consequently
- * instantiable where the original was not.
+ * both store the `__pure_virtual` handler at `0x005381a8`, which is why ProvideText() and
+ * ProvideMesh() are pure. ScrollingList is the one caller of both. It walks the cells of each
+ * visible row and passes a Text cell to ProvideText() and a Mesh cell to ProvideMesh(), and
+ * discards the result of both. The two method names are inferred from that use.
  *
  * The destructor at `0x002247f0` restores the vptr and releases the object through the scalar
  * release path at `0x004a9230` when its `__in_chrg` argument is odd, which is the whole of its
@@ -30,4 +33,28 @@ public:
      * @ghidraAddress 0x002247f0
      */
     virtual ~ListDataProvider();
+
+    /**
+     * Fill one Text cell of a visible row. Slot 2.
+     *
+     * @param nItem The index of the item the row shows.
+     * @param nColumn The index of the cell within its row.
+     * @param pText The cell.
+     * @param nContext The value the ScrollingList was constructed with.
+     * @return A status, which ScrollingList discards. Every override returns 1.
+     */
+    virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext) = 0;
+
+    /**
+     * Fill one Mesh cell of a visible row. Slot 3.
+     *
+     * Every override in the image is empty and returns either 0 or 1.
+     *
+     * @param nItem The index of the item the row shows.
+     * @param nColumn The index of the cell within its row.
+     * @param pMesh The cell.
+     * @param nContext The value the ScrollingList was constructed with.
+     * @return A status, which ScrollingList discards.
+     */
+    virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext) = 0;
 };

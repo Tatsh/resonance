@@ -1,7 +1,9 @@
 #include "met/metremixdelscreen.h"
 
+#include "met/metremixrecord.h"
 #include "met/scrollinglist.h"
 #include "os/hxstr.h"
+#include "rnd/text.h"
 
 namespace {
 
@@ -19,6 +21,9 @@ static const char *const kDeleteObjectName = "mem_del_remix";
 static const char *const kOwnScreenName = "MetRemixDelScreen";
 static const char *const kMsgScreenName = "MetMsgScreen";
 
+// The text a row past the end of the catalogue shows.
+static const char *const kNoText = "";
+
 } // namespace
 
 MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
@@ -32,6 +37,20 @@ MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
 
 MetRemixDelScreen::~MetRemixDelScreen() {
     delete mUnknownf4;
+}
+
+int MetRemixDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
+    if (static_cast<unsigned>(nItem) < mUnknownf0->size()) {
+        MetRemixRecord record((*mUnknownf0)[nItem]);
+        pText->SetText(HxStr(record.unknown08_));
+    } else {
+        pText->SetText(HxStr(kNoText));
+    }
+    return 1;
+}
+
+int MetRemixDelScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
+    return 1;
 }
 
 void MetRemixDelScreen::OnUnknownSlot7() {

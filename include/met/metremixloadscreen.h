@@ -41,20 +41,8 @@ class Font;
  * 20 `0x003526d0`, 22 `0x00352720`, 33 `0x00352770`, 36 `0x0034cbd0`, and 38 `0x00349fc8`. All
  * seven behaviour slots are declared below.
  *
- * Both pure virtuals of the four-entry ListDataProvider table are supplied here rather than
- * inherited, at `0x0034d8b0` and `0x00352588`. Neither is declared below, because ListDataProvider
- * declares neither, and a derived declaration with no base declaration behind it would add a
- * virtual to the table rather than override one.
- *
- * Slot 2's signature is now recovered from this override and it takes three parameters. The first
- * is the row index, which the body bounds-checks against mUnknown90's element count. The second is
- * never read. The third is the Rnd::Text the row draws through, which the body proves by
- * dispatching slots 6 and 7 of the Drawable-primary table on it, the slots Rnd::Text::SetText()
- * and Rnd::Text::SetFont() occupy. The body copy-constructs one MetRemixRecord out of mUnknown90,
- * hands the second of its four strings to SetText(), and then hands one of mUnknowna0 and
- * mUnknowna4 to SetFont() depending on whether the record's unknown34_ equals the cached value the
- * routine at `0x003f7ad8` vends. Slot 3 at `0x00352588` is a two-instruction body returning the
- * constant 1.
+ * Both pure virtuals of the four-entry ListDataProvider table are supplied here, ProvideText() at
+ * `0x0034d8b0` and ProvideMesh() at `0x00352588`.
  */
 class MetRemixLoadScreen : public MetScreen, public ListDataProvider {
 public:
@@ -187,6 +175,34 @@ public:
      * @ghidraAddress 0x00349fc8
      */
     virtual void ResolveContainerViews();
+
+    /**
+     * Show the second string of one row of mUnknown90, in mUnknowna0 when the row's unknown34_
+     * matches GetAlbumJukeboxValue() and in mUnknowna4 otherwise.
+     *
+     * An index past the end of mUnknown90 empties the text instead. The column and the context are
+     * not read.
+     *
+     * @param nItem The row of mUnknown90.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pText The cell.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 1.
+     * @ghidraAddress 0x0034d8b0
+     */
+    virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
+
+    /**
+     * Leave the cell as it is.
+     *
+     * @param nItem The row, which the body does not read.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pMesh The cell, which the body does not read.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 1.
+     * @ghidraAddress 0x00352588
+     */
+    virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
 private:
     // The row catalogue the ListDataProvider override at `0x0034d8b0` indexes. Never written by any

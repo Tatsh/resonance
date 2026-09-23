@@ -66,13 +66,8 @@ struct MetRemixRecord;
  * overrides its one slot at `0x00344240`. All three are declared below with the spelling their base
  * gives them.
  *
- * Both pure virtuals of the four-entry ListDataProvider table are supplied here rather than
- * inherited, at `0x0033cc78` and `0x00343f10`. Neither is declared below, because ListDataProvider
- * declares neither, and a derived declaration with no base declaration behind it would add a
- * virtual to the table rather than override one. Slot 2 bounds-checks its first argument against
- * mUnknownf0's element count and copy-constructs one MetRemixRecord, and slot 3 is a
- * two-instruction body returning the constant 1. Both coincide in shape with the
- * MetRemixLoadScreen pair, whose header records the recovered three-parameter signature.
+ * Both pure virtuals of the four-entry ListDataProvider table are supplied here, ProvideText() at
+ * `0x0033cc78` and ProvideMesh() at `0x00343f10`.
  *
  * Slot 5 writes MetSaveRemix::mUnknowndc, which that class still declares private. The member
  * belongs in the protected section on the same reasoning that already moved mUnknowne0 there.
@@ -297,6 +292,33 @@ public:
      * @ghidraAddress 0x00344240
      */
     virtual void OnUnknownSlot2(const HxStr &text);
+
+    /**
+     * Show the second string of one row of mUnknownf0.
+     *
+     * An index past the end of mUnknownf0 empties the text instead. The column and the context are
+     * not read.
+     *
+     * @param nItem The row of mUnknownf0.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pText The cell.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 1.
+     * @ghidraAddress 0x0033cc78
+     */
+    virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
+
+    /**
+     * Leave the cell as it is.
+     *
+     * @param nItem The row, which the body does not read.
+     * @param nColumn The cell index, which the body does not read.
+     * @param pMesh The cell, which the body does not read.
+     * @param nContext The list context, which the body does not read.
+     * @return Always 1.
+     * @ghidraAddress 0x00343f10
+     */
+    virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
 private:
     // 0x003440b8. Shows one catalogue row on the data screen. Slot 33 and four branches of slot 19

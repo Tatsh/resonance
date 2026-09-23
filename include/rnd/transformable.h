@@ -4,6 +4,8 @@
 
 #include "rnd/object.h"
 
+class ScrollingList;
+
 namespace Rnd {
 
 /** Rows in one transform. Three store the basis and the fourth stores the translation. */
@@ -35,6 +37,9 @@ constexpr int kXfmRowFloatCount = 4;
  * occupy rounds up to 0xb0 under the 16-byte alignment the transform rows impose.
  */
 class Transformable : public virtual Object {
+    // ScrollingList's destructor walks mTransList directly, and the image has no accessor for it.
+    friend class ::ScrollingList;
+
 public:
     /**
      * Mode mBillboard selects, recovered from the name dumper at `0x004f26f0`.

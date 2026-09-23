@@ -392,6 +392,7 @@ metcontrollerreading
 metexpansionpakscreen
 metfade
 metfreqendedmsg
+metfreqmakerdirectionsscreen
 metglobalsettingssaverscreen
 methodobject
 metjukeboxbasescreen
@@ -407,6 +408,7 @@ metloadfreqscreen
 metloadgamescreen
 metloadnewfreqscreen
 metloadprefabscreen
+metmcfreqdelscreen
 metmemcardloadscreen
 metmemcardtypescreen
 metmemdetectscreen
@@ -642,6 +644,7 @@ screendump
 scriptmsg
 scriptsink
 scripttemplatemap
+scrollinglist
 scstartplayingpacket
 scus
 sdrdrv

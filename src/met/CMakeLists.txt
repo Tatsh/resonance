@@ -2,6 +2,7 @@ set(RESONANCE_MET_SRCS
     albumcache.cpp
     metarenasscreen.cpp
     metexpansionpakscreen.cpp
+    metfreqmakerdirectionsscreen.cpp
     metglobalsettingssaverscreen.cpp
     metjukeboxbasescreen.cpp
     metjukeboxcustomremixesscreen.cpp
@@ -16,6 +17,7 @@ set(RESONANCE_MET_SRCS
     metloadgamescreen.cpp
     metloadnewfreqscreen.cpp
     metloadprefabscreen.cpp
+    metmcfreqdelscreen.cpp
     metmemcardloadscreen.cpp
     metmemcardtypescreen.cpp
     metmemdetectscreen.cpp
@@ -36,7 +38,8 @@ set(RESONANCE_MET_SRCS
     metsolowinscreen.cpp
     metsonglists.cpp
     metstagefinishscreen.cpp
-    mettutorialscreen.cpp)
+    mettutorialscreen.cpp
+    scrollinglist.cpp)
 
 add_library(resonance_met STATIC ${RESONANCE_MET_SRCS})
 target_link_libraries(resonance_met PRIVATE resonance_common)
