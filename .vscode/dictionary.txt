@@ -469,6 +469,7 @@ metfreqmakercanvasscreen
 metfreqmakerdirectionsscreen
 metfreqmakerinventoryscreen
 metfrontendstate
+metgameskillscreen
 metglobalsettingssaverscreen
 methodobject
 metjukeboxbasescreen

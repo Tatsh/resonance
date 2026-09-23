@@ -12,6 +12,7 @@ set(RESONANCE_MET_SRCS
     metfreqmakerdirectionsscreen.cpp
     metfreqmakerinventoryscreen.cpp
     metfrontendstate.cpp
+    metgameskillscreen.cpp
     metglobalsettingssaverscreen.cpp
     metjukeboxbasescreen.cpp
     metjukeboxcustomremixesscreen.cpp
