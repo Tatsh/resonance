@@ -186,16 +186,18 @@ void EmitParticleVu1Setup();
 /**
  * Pack a run of live particles into the shared draw buffer.
  *
- * Walks the linked live set from pFirst rather than the pool, and stops at nMaxParticles.
+ * Walks the linked live set from pFirst rather than the pool. The line mode passes over each
+ * particle twice, first from Particle::mPos and then from the quadword nLineLength past it, with
+ * the colour alpha scaled by 0.1 on the second pass.
  *
  * @param pOutVerts Destination, normally g_aDrawVerts.
  * @param nMode The point, line, or sprite mode of the emitting system.
  * @param pFirst Head of the live particle list.
- * @param nMaxParticles Population ceiling of the emitting system.
+ * @param nLineLength Rnd::ParticleSys::mLineLength of the emitting system.
  * @return Vertices packed, one per point particle and two per line or sprite particle.
  * @ghidraAddress 0x00584980
  */
-int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nMaxParticles);
+int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nLineLength);
 
 /**
  * Non-zero while fog is enabled.

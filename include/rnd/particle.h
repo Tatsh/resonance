@@ -11,13 +11,14 @@ namespace Rnd {
  * The structure is not polymorphic and emits no RTTI descriptor. Its member names come from the
  * labels its own dump writes at `0x00526308`, "\n\tpos:", "\n\tprevPos:", "\n\tvel:", "\n\tcol:",
  * "\n\tcolVel:", "size:", " deathFrame:", and " birthFrame:". The offsets below are the ones that
- * dump reads, so every named member is measured rather than inferred.
+ * dump reads, so every named member except mPrev is measured rather than inferred.
  *
- * A particle is 0x80 bytes, which the pool vector stride in Rnd::ParticleSys confirms. Three runs
- * inside it are unrecovered, because the dump reads none of them.
+ * A particle is 0x80 bytes, which the pool vector stride in Rnd::ParticleSys confirms. Two runs
+ * inside it are unrecovered, because no recovered routine reads either of them.
  *
- * Live particles form a singly linked list through mNext rather than occupying the pool vector in
- * order. Rnd::PsParticleSys::DrawSpritesDmaKicked() walks that list, and
+ * Live particles form a doubly linked list through mNext and mPrev rather than occupying the pool
+ * vector in order, and free particles a singly linked list through mNext.
+ * Rnd::PsParticleSys::DrawSpritesDmaKicked() walks the live list, and
  * Rnd::ParticleSys::FreeAllParticles() releases it.
  *
  * The first two quadwords are the pair the vector unit path uploads, which is why the colour
@@ -46,7 +47,12 @@ struct Particle {
     float mDeathFrame;
     /** Frame this particle was allocated on. +0x70 */
     float mBirthFrame;
-    int mUnknown74; // +0x74
+    /**
+     * Previous live particle, the particle itself at the head of the live list, or null while the
+     * particle is free. The particle dump does not read it. The pool routines of Rnd::ParticleSys
+     * establish it. +0x74
+     */
+    Particle *mPrev;
     /** Next live particle, or null at the end of the list. +0x78 */
     Particle *mNext;
     int mUnknown7c; // +0x7c

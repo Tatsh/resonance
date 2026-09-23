@@ -207,7 +207,7 @@ int PsParticleSys::DrawSelf() {
         }
     }
 
-    const int nVertCount = PackParticleQuads(g_aDrawVerts, mMode, mLiveParticles, mMaxParticles);
+    const int nVertCount = PackParticleQuads(g_aDrawVerts, mMode, mLiveParticles, mLineLength);
     if (mMode == kModePoint) {
         g_renderStats.mnPoints += nVertCount;
         g_gfxDevice.SetGsReg(kGsRegPrim, kGsPrimPoint | kGsPrimAbe, kGsPrimFieldMask);

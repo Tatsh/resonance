@@ -4,6 +4,9 @@
 #include <vector>
 
 #include "math/color.h"
+#include "math/plane.h"
+#include "math/vector2.h"
+#include "math/vector3.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
@@ -37,23 +40,22 @@ namespace Rnd {
  * DrawSelf() at `0x005066f0`, which draws nothing. Drawing belongs to Rnd::PsParticleSys.
  *
  * Particles live in two places at once. The pool is a vector of 0x80-byte records that the
- * constructor sizes to ten, and the live set is a linked list threaded through Particle::mNext
- * from mLiveParticles. Allocation at `0x0052c378` and release at `0x0052c3c0` are members of this
- * class rather than shared helpers, which the fields they touch establish: each one receives a
- * system in $a0 and reads mParticlesOwner, mLiveParticles, and the pool of the owner through it.
- * An earlier reading placed both outside the class. Releasing a particle that the pool does not
- * own reports "Tried to refree particle from ".
+ * constructor sizes to ten. The live set is a doubly linked list threaded through Particle::mNext
+ * and Particle::mPrev from mLiveParticles, and the unused records of the pool form a free list
+ * threaded through Particle::mNext from mFreeParticles of the owning system. AllocParticle() and
+ * FreeParticle() move one record between the two lists, and each receives a system in $a0 and
+ * reads mParticlesOwner, mLiveParticles, and the free list of the owner through it. Releasing a
+ * particle that is already free reports "Tried to refree particle from ".
  *
  * Geometry is shared rather than copied, in the same arrangement Rnd::Mesh uses. A system whose
  * mParticlesOwner is another system draws that system's particles.
  *
- * Recovery is partial. The parameter block between `+0x108` and `+0x1df` is where the spawn ranges
- * live, and only the members below are pinned, each by a routine that reads it. The remaining
- * labels the text dump writes, "life:", " posLow:", " posHigh:", "speed:", " pitch:", " yaw:",
- * "emitRate:", " size:", "startColorLow:", "startColorHigh:", "endColorLow:", "endColorHigh:",
- * " collide:", " collidePlane:", "force:", " lineLength:", "bubblePeriod:", " bubbleSize:",
- * "bubble:", and " readZ:", identify that block without pinning an offset to each. The
- * serialisation trio is not reconstructed either; DumpText() alone is 0xe20 bytes.
+ * The parameter block from `+0x108` to `+0x1f3` is named from the text dump at `0x00521f40`, which
+ * reads each member under its label in the order "life:", " posLow:", " posHigh:", "speed:",
+ * " pitch:", " yaw:", "emitRate:", " size:", the four colours, " collide:", " collidePlane:",
+ * "force:", " mat:", " mode:", "numParticles:", " lineLength:", "bubblePeriod:", " bubbleSize:",
+ * "bubble:", and " readZ:". The dump reads "numParticles:" from the size of the pool. Save() and
+ * Load() are not reconstructed, and neither is DumpText(), which is 0xe20 bytes.
  */
 class ParticleSys : public Animatable, public Transformable, public Drawable {
 public:
@@ -71,11 +73,14 @@ public:
         kModeSprite = 2, /*!< One GS sprite per particle. */
     };
 
+    /** Copy() flag that shares the source's particles rather than copying its pool. */
+    static constexpr unsigned kCopyShareParticles = 0x400;
+
     /**
      * Construct an empty system that owns its own particles.
      *
-     * Sizes the pool to ten particles, points mParticlesOwner at this system, and writes the
-     * default spawn ranges.
+     * Sizes the pool to ten particles, points mParticlesOwner at this system, writes the default
+     * parameters, and then threads the free list through AddObjectRefs().
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x005254a0
@@ -104,6 +109,9 @@ public:
     /**
      * Replace one object reference with another.
      *
+     * Forwards to the three bases, then retargets mMat and mParticlesOwner. Losing the particle
+     * owner to a null replacement copies the owner's pool and makes this system its own owner.
+     *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
      * @ghidraAddress 0x00524318
@@ -121,10 +129,14 @@ public:
     /**
      * Copy another system over this one.
      *
-     * Forwards to the three bases, releases this system's object references, and then copies the
-     * parameter block from `+0x118` through `+0x1f0` as quadwords.
+     * Forwards to the three bases, releases this system's object references, and copies every
+     * parameter except mLineLength. Without kCopyShareParticles a source that owns its particles
+     * gives this system a copy of the pool. Otherwise this system shares the source's owner, and
+     * its own pool is emptied unless that owner is this system. The references are then taken
+     * again.
      *
-     * @param pSource The source object, which has to be a system for the copy to have any effect.
+     * @param pSource The source object. The binary dereferences the cast result without a null
+     * check, so a source that is not a system faults.
      * @param nFlags The copy flags.
      * @ghidraAddress 0x00521d38
      */
@@ -183,6 +195,19 @@ public:
     Particle *AllocParticle();
 
     /**
+     * Unlink one live particle and push it onto the free list of the owner.
+     *
+     * A null particle yields null. A particle whose mPrev is null is already free, which reports
+     * "Tried to refree particle from " with the name of the system and yields null. The routine
+     * was previously titled as a Rnd::Generator member, and a Generator is one of its callers.
+     *
+     * @param pParticle The particle to release, or null.
+     * @return The live particle that followed it, which lets a caller release while walking.
+     * @ghidraAddress 0x0052c3c0
+     */
+    Particle *FreeParticle(Particle *pParticle);
+
+    /**
      * Draw a random spawn colour and size for one particle.
      *
      * Each of the five values is an independent draw from the 31-bit generator at `0x0054f770`,
@@ -219,11 +244,18 @@ private:
     void SpawnParticles(float flDeltaFrames);
 
     // Drop the reference on the material and on the particle owner, and remove this system from
-    // the owner's sharer list. Copy() is its only caller. 0x0052c318.
+    // the owner's sharer list. Copy() calls it, and the destructor and Replace() open-code it.
+    // 0x0052c318.
     void RemoveObjectRefs();
 
-    // Data members follow the recovered offset order. Only the members below are pinned, each by a
-    // routine that reads it, and the gaps record what is not.
+    // Take the references RemoveObjectRefs() drops. A system that owns its particles also threads
+    // the whole pool onto its free list and empties the live list of every sharer, and any other
+    // system joins the sharer list of its owner. Either way this system's live list starts empty
+    // and mUnknown100 is cleared. The constructor, Copy(), Replace(), and Load() call it.
+    // 0x005241a8.
+    void AddObjectRefs();
+
+    // Data members follow the recovered offset order.
 
 protected:
     // The first three are protected rather than private because Rnd::PsParticleSys::DrawSelf()
@@ -244,25 +276,28 @@ public:
 protected:
     // Head of the live list, threaded through Particle::mNext. Rnd::PsParticleSys::DrawSelf()
     // treats a null head as nothing to draw.
-    Particle *mLiveParticles; // +0xf4
+    Particle *mLiveParticles;
 
 private:
-    int mUnknownf8; // +0xf8
+    // Head of the free list, threaded through Particle::mNext and ending at the finish pointer of
+    // mParticles. Only the owning system's list is used.
+    Particle *mFreeParticles;
     // Frame SetFrameSelf() last ran for. It starts at the sentinel -0.9997e7, whose bit pattern is
     // 0xcb18967f, and a frame equal to it makes SetFrameSelf() return without emitting.
-    float mLastFrame; // +0xfc
-    int mUnknown100;  // +0x100
+    float mLastFrame;
+    int mUnknown100; // +0x100 Cleared by AddObjectRefs().
     // Systems that share this one's particles. RemoveObjectRefs() removes this system from the
     // list of whichever system owns its particles.
-    std::list<ParticleSys *> mSharers; // +0x104
-    // The spawn parameter block. See the class note. Eight of its fields are recovered, six
-    // because Rnd::ParticleSysAnim::SetFrameSelf() writes them and the size range because
-    // RandomizeColorAndSize() draws from it. The dump of this block writes every other
-    // range it has as a "…Low:" and "…High:" pair, "posLow:" against "posHigh:" and
-    // "startColorLow:" against "startColorHigh:", and the animation shifts the high member of each
-    // range by however far it moved the low member, which preserves the spread. The two emission
-    // rates take their titles from that pattern rather than from a label of their own.
-    unsigned char mUnknown108[0x50]; // +0x108
+    std::list<ParticleSys *> mSharers;
+    // The range pairs below print as "(x: y:)" and hold the low end in x and the high end in y.
+    Vector2 mBubblePeriod;
+    Vector2 mBubbleSize;
+    Vector2 mLife;
+    Vector3 mPosLow;
+    Vector3 mPosHigh;
+    Vector2 mSpeed;
+    Vector2 mPitch;
+    Vector2 mYaw;
 
 public:
     /*!< Low end of the emission rate range. Public because
@@ -292,7 +327,10 @@ public:
     Color mEndColorHigh;
 
 private:
-    unsigned char mUnknown1b0[0x30]; // +0x1b0
+    int mCollide;                   // Non-zero to collide with mCollidePlane.
+    unsigned char mUnknown1b4[0xc]; // +0x1b4 Never read or written by a recovered routine.
+    Plane mCollidePlane;
+    Vector3 mForce;
 
 public:
     /*!< Material every particle draws with, or null for the default surface. Public because
@@ -304,15 +342,16 @@ public:
     Mode mMode;
 
 private:
-    int mUnknown1e8; // +0x1e8
+    int mBubble; // Non-zero to apply mBubblePeriod and mBubbleSize.
 
 public:
     /*!< Non-zero to depth test the particles. The draw path programs TEST_1.ZTST from it, GREATER
          when set and ALWAYS when clear. +0x1ec */
     int mReadZ;
-    /*!< Ceiling on the live population, which the text dump writes as "numParticles:". The draw
-         path passes it to PackParticleQuads(). +0x1f0 */
-    int mMaxParticles;
+    /*!< The dump label " lineLength:" names it. The draw path passes it to PackParticleQuads(),
+         whose line mode takes the second end point of each line from the quadword this many past
+         Particle::mPos. +0x1f0 */
+    int mLineLength;
 };
 
 /**
