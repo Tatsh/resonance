@@ -8,6 +8,9 @@ constexpr int kAsyncJobCount = 512;
 /** Bit of a file handle that identifies a stream inside a mounted ark rather than a loose file. */
 constexpr int kFileHandleArkStream = 0x4000;
 
+/** Bit of a file handle that identifies a file the host or disc file service opened. */
+constexpr int kFileHandleSceFile = 0x2000;
+
 /** Origins FileSeek() and SeekArkStream() accept. */
 enum FileSeekOrigin {
     kFileSeekSet = 0, /*!< Measure the offset from the start. */
@@ -364,22 +367,36 @@ void AsyncReleaseJobChain(AsyncJob *pChain);
 /**
  * Open a file by path.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
- * A path inside a mounted archive resolves to an ark stream handle, with kFileHandleArkStream set.
+ * The game's replacement for the C library's `open()`, which its trace line `open(%s) at t:%f`
+ * names. The newlib access mode and the append, create, and truncate bits are translated to the
+ * file service's `SCE_*` flags.
+ *
+ * A request to write goes to `host0:`. On a CD-only boot, a write to a `.py`, `.pyc`, or `.gz`
+ * path is refused with -1 instead.
+ *
+ * A read first tries a mounted archive when UsingArkFiles() reports ark use, which yields an ark
+ * stream with kFileHandleArkStream set. Otherwise, and on a CD-only boot for a path that is not
+ * `.py`, `.pyc`, or `.gz`, the path is opened on the disc as `cdrom0:` plus
+ * AppendPathComponent() for either CD boot mode, or on `host0:` for a host-only boot. A disc open
+ * that fails falls back to `host0:` when the boot mode permits both media. A file-service handle
+ * has kFileHandleSceFile set.
+ *
+ * Each open other than the log's own is traced to the file log with the handle it produced.
  *
  * @param pszPath The file to open.
- * @param nMode Zero at every call site in this subsystem.
+ * @param nFlags The newlib open flags.
  * @return The file. A negative result reports that the open failed.
  * @ghidraAddress 0x0047c9c0
  */
-int FileOpen(const char *pszPath, int nMode);
+int FileOpen(const char *pszPath, int nFlags, ...);
 
 /**
  * Read one run of bytes from a file.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
- * It dispatches on the handle, to the ark reader for an ark stream and to the host or disc reader
- * otherwise.
+ * The game's replacement for the C library's `read()`, which its trace line names. An ark stream
+ * goes to ReadArkStreamThroughCache(). A file-service handle waits for the async layer and the
+ * drive and goes to `sceRead()` with kFileHandleSceFile cleared. Any other handle goes to the
+ * console reader. Every read is traced to the file log.
  *
  * @param nFile The file to read.
  * @param pBuffer The destination.
@@ -392,7 +409,9 @@ int FileRead(int nFile, void *pBuffer, int nLength);
 /**
  * Move a file's read position.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * The game's replacement for the C library's `lseek()`, which its trace line names. It dispatches
+ * on the handle in the same way as FileRead(), to SeekArkStream(), to `sceLseek()`, or to the
+ * console stub, which reports -1. Every seek is traced to the file log.
  *
  * @param nFile The file to move.
  * @param nOffset The offset to move by.
@@ -405,20 +424,23 @@ int FileSeek(int nFile, int nOffset, int nOrigin);
 /**
  * Close a file.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
+ * The game's replacement for the C library's `close()`, which its trace line names. The close is
+ * traced to the file log first. An ark stream's record is erased, a file-service handle goes to
+ * `sceClose()`, and any other handle goes to the console stub, which reports -1.
  *
  * @param nFile The file to close.
+ * @return The result of the close.
  * @ghidraAddress 0x0047dfb0
  */
-void FileClose(int nFile);
+int FileClose(int nFile);
 
 /**
  * Write to a file.
  *
- * The routine belongs to the same file layer as FileRead() and is not reconstructed. An ark
- * stream, kFileHandleArkStream, cannot be written and reports -1. A handle with bit 0x2000 set
- * goes to the host file service with that bit cleared, and any other handle goes to the C
- * library. The C library's write path and the embedded interpreter's `posix.write` call it.
+ * The game's replacement for the C library's `write()`. An ark stream, kFileHandleArkStream,
+ * cannot be written and reports -1. A file-service handle goes to `sceWrite()` with
+ * kFileHandleSceFile cleared, and any other handle goes to the console writer. Writes are not
+ * traced. The C library's write path and the embedded interpreter's `posix.write` call it.
  *
  * @param nFile The file to write.
  * @param pBuffer The source.
@@ -431,10 +453,10 @@ int FileWrite(int nFile, const void *pBuffer, int nLength);
 /**
  * Report whether a file is an interactive terminal.
  *
- * The routine belongs to the same file layer as FileRead() and is not reconstructed. An ark stream
- * or a host file is never a terminal, and any other handle is tested by the C library. The
- * embedded interpreter's `raw_input` and its interactive-input test call it. The title is inferred
- * from those callers.
+ * The game's replacement for the C library's `isatty()`. An ark stream or a file-service handle is
+ * never a terminal, and any other handle goes to the console stub, which reports 1. The embedded
+ * interpreter's `raw_input` and its interactive-input test call it. The title is inferred from
+ * those callers.
  *
  * @param nFile The file to test.
  * @return Non-zero for a terminal.

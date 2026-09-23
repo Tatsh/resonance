@@ -266,18 +266,6 @@ void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int n
 constexpr int kBankBufferAlignment = 0x40;
 
 /**
- * Open a file, whether it resolves to an ark stream or a loose file.
- *
- * The routine belongs to the file layer and is declared here so StartBdBankXfer() can call it.
- *
- * @param pszPath The path to open, device prefix removed.
- * @param nFlags The open flags, which both bank starters pass as zero.
- * @return The handle.
- * @ghidraAddress 0x0047c9c0
- */
-int FileOpen(char *pszPath, int nFlags);
-
-/**
  * Transfer currently streaming a BD bank, or null.
  *
  * StartBdBankXfer() stores the object here and then reads it back to register it with g_hdXfer,
