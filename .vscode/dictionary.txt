@@ -531,6 +531,7 @@ phrasepacket
 pinkgrey
 pitchingstg
 pitchmsg
+pitchpicker
 pitchriffmsg
 playbackmodemsg
 playbacktogglemsg

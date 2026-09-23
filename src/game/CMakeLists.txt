@@ -46,6 +46,7 @@ set(RESONANCE_GAME_SRCS
     phrasemaker.cpp
     phraseneutralizer.cpp
     pitchingstg.cpp
+    pitchpicker.cpp
     player.cpp
     playerinfo.cpp
     playmap.cpp
