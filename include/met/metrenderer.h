@@ -247,6 +247,18 @@ public:
     void ResolveArenaView(int nSkipResolve);
 
     /**
+     * Release the animatable, drawable, and transformable lists of the background scene at
+     * mUnknowna4.
+     *
+     * The title is inferred. OnUnknownSlot5() calls it, and so does MetSonyScreen's finishing
+     * routine at `0x003ba620` from outside the class, which is why it is public. The image has no
+     * accessor to route that call through.
+     *
+     * @ghidraAddress 0x00371960
+     */
+    void ClearBackgroundScene();
+
+    /**
      * Attach the three animatable, drawable, and transformable subobjects of one view to the
      * screen scene at mUnknowna0.
      *
@@ -447,11 +459,6 @@ private:
     // Releases the animatable, drawable, and transformable lists of the screen scene
     // at mUnknowna0. OnUnknownSlot5() is its one caller. The title is inferred.
     void ClearScreenScene();
-
-    // 0x00371960
-    // Releases the same three lists of the background scene at mUnknowna4.
-    // OnUnknownSlot5() is its one caller. The title is inferred.
-    void ClearBackgroundScene();
 
     // 0x0036b938
     // Handles a MetStartPauseMsg by activating the pause screen the game mode and play mode call
