@@ -3,6 +3,7 @@
 #include <list>
 
 #include "math/color.h"
+#include "math/vector3.h"
 #include "os/failsink.h"
 #include "rnd/stream.h"
 
@@ -48,6 +49,22 @@ Stream &WriteColorKey(Stream &stream, const ColorKey &key) {
     stream.Write(&key.mValue.a, sizeof(float));
     stream.Write(&key.mFrame, sizeof(key.mFrame));
     return stream;
+}
+
+// 0x004da880
+FailSink &DumpVector3Key(FailSink &sink, const Vector3Key &key) {
+    sink.Print("(frame:");
+    sink.Format("%.2f", key.mFrame);
+    sink.Print(" value:");
+    sink.Print("(x:");
+    sink.Format("%.2f", key.mValue.x);
+    sink.Print(" y:");
+    sink.Format("%.2f", key.mValue.y);
+    sink.Print(" z:");
+    sink.Format("%.2f", key.mValue.z);
+    sink.Print(")");
+    sink.Print(")");
+    return sink;
 }
 
 } // namespace
@@ -117,6 +134,62 @@ Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
     stream.Write(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
         stream.Write(&key.mValue, sizeof(key.mValue));
+        stream.Write(&key.mFrame, sizeof(key.mFrame));
+    }
+    return stream;
+}
+
+// 0x004d98d8
+Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
+    int nCount = 0;
+    stream.Read(&nCount, sizeof(nCount));
+    keys.resize(nCount);
+    for (auto &key : keys) {
+        stream.Read(&key.mValue, sizeof(key.mValue));
+        stream.Read(&key.mFrame, sizeof(key.mFrame));
+    }
+    return stream;
+}
+
+// 0x004da9b0
+FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys) {
+    sink.Print("(size:");
+    sink.Format("%u", keys.size());
+    sink.Print(")");
+
+    unsigned nIndex = 0;
+    for (const auto &key : keys) {
+        sink.Print("\n");
+        sink.Format("%d", nIndex);
+        sink.Print("\t");
+        ++nIndex;
+        DumpVector3Key(sink, key);
+    }
+    return sink;
+}
+
+// 0x004db3d0
+Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys) {
+    int nCount = 0;
+    stream.Read(&nCount, sizeof(nCount));
+    keys.resize(nCount);
+    for (auto &key : keys) {
+        stream.Read(&key.mValue.x, sizeof(float));
+        stream.Read(&key.mValue.y, sizeof(float));
+        stream.Read(&key.mValue.z, sizeof(float));
+        stream.Read(&key.mFrame, sizeof(key.mFrame));
+    }
+    return stream;
+}
+
+// 0x004dac80
+Stream &WriteVector3Keys(Stream &stream, const std::list<Vector3Key> &keys) {
+    const int nCount = keys.size();
+    stream.Write(&nCount, sizeof(nCount));
+    for (const auto &key : keys) {
+        stream.Write(&key.mValue.x, sizeof(float));
+        stream.Write(&key.mValue.y, sizeof(float));
+        stream.Write(&key.mValue.z, sizeof(float));
         stream.Write(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;

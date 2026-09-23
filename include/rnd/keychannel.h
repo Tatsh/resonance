@@ -3,6 +3,7 @@
 #include <list>
 
 #include "math/color.h"
+#include "math/vector3.h"
 
 class FailSink;
 namespace Rnd {
@@ -47,6 +48,29 @@ struct ColorKey {
 struct FloatKey {
     float mValue; /*!< Value the frame interpolates towards. +0x00 */
     float mFrame; /*!< Frame the value applies at. +0x04 */
+};
+
+/**
+ * One keyframe of a three-component vector channel.
+ *
+ * The record is the same 0x20 bytes as Rnd::ColorKey, with the frame at `+0x10`, but the writer at
+ * `0x004dac80` and the reader at `0x004db3d0` move three components and then the frame, and the
+ * element dump at `0x004da880` titles them "(x:", " y:", and " z:". The fourth word of the value is
+ * the Vector3 padding. The title is inferred on the same basis as Rnd::ColorKey.
+ */
+struct Vector3Key {
+    /**
+     * Construct a key whose value has only its padding word set.
+     *
+     * The reader resizes the channel with a default key whose one written word is the 1.0 at
+     * `+0x0c`, which is the Vector3 construction convention.
+     */
+    Vector3Key() {
+        mValue.w = 1.0f;
+    }
+
+    Vector3 mValue; /*!< Vector the frame interpolates towards. +0x00 */
+    float mFrame;   /*!< Frame the vector applies at. +0x10 */
 };
 
 /**
@@ -110,6 +134,57 @@ Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys);
  * @ghidraAddress 0x004d9238
  */
 Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys);
+
+/**
+ * Read a channel of scalar keyframes from a `.rnd` stream.
+ *
+ * Reads the keyframe count, resizes the channel to it, and then reads the value and the frame of
+ * each element, in the layout WriteFloatKeys() writes.
+ *
+ * @param stream The stream to read from.
+ * @param keys The channel to fill.
+ * @return The stream.
+ * @ghidraAddress 0x004d98d8
+ */
+Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys);
+
+/**
+ * Write a channel of vector keyframes to the engine text sink.
+ *
+ * The same layout as DumpColorKeys(), with three components per value. Rnd::MatAnim dumps its
+ * stage channels through it.
+ *
+ * @param sink The text sink.
+ * @param keys The channel.
+ * @return The sink.
+ * @ghidraAddress 0x004da9b0
+ */
+FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys);
+
+/**
+ * Read a channel of vector keyframes from a `.rnd` stream.
+ *
+ * Reads the keyframe count, resizes the channel with default keys, and then reads three components
+ * and the frame of each element.
+ *
+ * @param stream The stream to read from.
+ * @param keys The channel to fill.
+ * @return The stream.
+ * @ghidraAddress 0x004db3d0
+ */
+Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys);
+
+/**
+ * Write a channel of vector keyframes to a `.rnd` stream.
+ *
+ * Writes the keyframe count and then three components and the frame of each element.
+ *
+ * @param stream The stream to write to.
+ * @param keys The channel.
+ * @return The stream.
+ * @ghidraAddress 0x004dac80
+ */
+Stream &WriteVector3Keys(Stream &stream, const std::list<Vector3Key> &keys);
 
 /**
  * Report the frame of the last keyframe of a channel, and zero for an empty channel.

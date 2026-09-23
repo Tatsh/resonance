@@ -67,11 +67,10 @@ public:
      *
      * The record is 0x14 bytes, which the stride of every walk over the vector pins, and the
      * walk in SetFrameSelf() runs it against `mMat->mStages` with the material's stage count as
-     * the bound. The three vector channels blend three components rather than four, through
-     * `vmulax.xyz` instead of `vmulax.xyzw`, while their keyframe record is the same 0x20 bytes
-     * with its frame at `+0x10` that Rnd::ColorKey has. Whether the element is Rnd::ColorKey or a
-     * distinct three-component record is therefore undetermined, and Rnd::ColorKey is used here
-     * because every measurable property agrees with it.
+     * the bound. The three vector channels are Rnd::Vector3Key records. Their writer, reader, and
+     * dump move three components and the frame, and SetFrameSelf() blends them through
+     * `vmulax.xyz` rather than `vmulax.xyzw`. The dump titles the channels " transKeys:",
+     * " scaleKeys:", " rotKeys:", " texKeys:", and " matAnim:" in offset order.
      *
      * The record has behaviour, so it is a class with private members rather than a plain data
      * record. Rnd::MatAnim is the only code that touches the four channels, through the nested
@@ -88,31 +87,140 @@ public:
          * Rnd::ColorKey.
          */
         struct TexKey {
+            /**
+             * Order two keys by frame, which is what `std::list::sort()` compares.
+             *
+             * The merge at `0x004da2e8` loads the frame at node `+0x0c` of both keys. The body is
+             * inlined into it.
+             *
+             * @param other The key to compare with.
+             * @return True when this key comes first.
+             */
+            bool operator<(const TexKey &other) const {
+                return mFrame < other.mFrame;
+            }
+
             Tex *mValue;  /*!< Texture the frame switches to. +0x00 */
             float mFrame; /*!< Frame the texture applies at. +0x04 */
         };
 
         /**
+         * Construct a stage animation with four empty channels.
+         *
+         * The compiler generates the body. mOwner is left as it was, and Rnd::MatAnim writes it
+         * after every resize.
+         *
+         * @ghidraAddress 0x004dbe38
+         */
+        StageAnim() = default;
+
+        /**
+         * Copy the four channels and the owner of another stage animation.
+         *
+         * The compiler generates the body, which copies the three vector channels through
+         * `0x004d84f8` and the texture channel through `0x004d85e8`.
+         *
+         * @param other The stage animation to copy.
+         * @ghidraAddress 0x004d86d8
+         */
+        StageAnim(const StageAnim &other) = default;
+
+        /**
+         * Release the four channels.
+         *
+         * The compiler generates the body, which destroys the channels in reverse order and frees
+         * the record when the in-charge flag asks it to. The textures keep their references.
+         *
+         * @ghidraAddress 0x004dbd88
+         */
+        ~StageAnim() = default;
+
+        /**
+         * Copy the four channels and the owner of another stage animation over this one.
+         *
+         * @param other The stage animation to copy.
+         * @return This stage animation.
+         */
+        StageAnim &operator=(const StageAnim &other) = default;
+
+        /**
          * Serialise the stage animation.
          *
-         * The body is not reconstructed. Rnd::MatAnim::Save() writes the vector through this one,
-         * once per element, and the call passes the stage as the object and the stream as the one
-         * argument.
+         * Writes the translation, scale, and rotation channels through WriteVector3Keys() and
+         * then the texture channel, each texture as its name.
          *
          * @param stream The stream to write to.
          * @ghidraAddress 0x004dd500
          */
         void Save(Stream &stream);
 
+        /**
+         * Load the stage animation.
+         *
+         * The shared material revision decides the layout. Below revision 2 the texture channel
+         * arrives as a bare list of textures, which becomes one key per texture at frames 0, 1,
+         * 2, and so on, and the channel is sorted again after every key. From revision 1 the
+         * three vector channels follow. From revision 2 the texture channel follows as keys.
+         *
+         * @param stream The stream to read from.
+         * @ghidraAddress 0x004d4068
+         */
+        void Load(Stream &stream);
+
+        /**
+         * Write the four channels and the owner to the engine text sink.
+         *
+         * @param sink The text sink.
+         * @ghidraAddress 0x004d3f70
+         */
+        void Dump(FailSink &sink);
+
+        /**
+         * Add a texture key and sort the channel by frame.
+         *
+         * The texture takes a reference for the owning animation, or for no object while the
+         * stage has no owner. The routine has no caller in the shipped build. The name is
+         * inferred.
+         *
+         * @param pTex The texture, or null.
+         * @param flFrame The frame of the new key.
+         * @ghidraAddress 0x004d3d30
+         */
+        void AddTexKey(Tex *pTex, float flFrame);
+
+        /**
+         * Remove the texture key at a position and sort the channel by frame.
+         *
+         * The texture drops the reference of the owning animation. The index is not checked. The
+         * routine has no caller in the shipped build. The name is inferred.
+         *
+         * @param nIndex The position of the key.
+         * @ghidraAddress 0x004d3e30
+         */
+        void RemoveTexKey(int nIndex);
+
+        /**
+         * Move the texture key at a position to a new frame and sort the channel by frame.
+         *
+         * The index is not checked. The routine has no caller in the shipped build. The name is
+         * inferred.
+         *
+         * @param nIndex The position of the key.
+         * @param flFrame The new frame.
+         * @ghidraAddress 0x004dd4a0
+         */
+        void SetTexKeyFrame(int nIndex, float flFrame);
+
     private:
         friend class MatAnim;
 
         // Channel blended into the last row of the stage transform, which is its translation.
-        std::list<ColorKey> mTranslateKeys; // +0x00
-        // Channel blended and then applied to the stage transform through `0x0045da58`.
-        std::list<ColorKey> mXfmKeys; // +0x04
-        // Channel blended and then applied to the stage transform through `0x004f0430`.
-        std::list<ColorKey> mRotateKeys; // +0x08
+        std::list<Vector3Key> mTranslateKeys; // +0x00
+        // Channel blended and then scaled into the stage transform through ScaleRows3x3().
+        std::list<Vector3Key> mScaleKeys; // +0x04
+        // Channel of Euler angles blended and then built into the stage transform through
+        // EulerAnglesToMatrix3x3().
+        std::list<Vector3Key> mRotateKeys; // +0x08
         // Channel of texture references. Its element is 8 bytes, a texture at `+0x00` and the
         // frame at `+0x04`, which the reference walk at `0x004d3750` pins by taking a reference on
         // list node `+0x08` and the end-frame walk at `0x004d42f0` by reading the frame at node
@@ -126,22 +234,26 @@ public:
     /**
      * Construct an animation with five empty channels, no stages, and no material.
      *
-     * The body is not reconstructed. Rnd::CreateRegisteredMatAnim() is the one construction site.
+     * The animation owns its keys from the start, so mKeysOwner is this object.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x004dc4f0
      */
     MatAnim(const HxStr &name);
 
-    /** @ghidraAddress 0x004dc0c8 */
+    /**
+     * Drop every reference this animation holds and every reference held on it.
+     *
+     * @ghidraAddress 0x004dc0c8
+     */
     virtual ~MatAnim();
 
     /**
      * Write the animation to the engine text sink.
      *
-     * The body is not reconstructed. Emits the Rnd::Object and Rnd::Animatable dumps, then the
-     * "[MatAnim]" block. The block is suppressed while the dump level of the sink is not positive.
-     * Writing the stage block needs the stage vector dump at `0x004d8b78`.
+     * Emits the Rnd::Object and Rnd::Animatable dumps, then the "[MatAnim]" block with the
+     * material, the stage vector, the keys owner, and the five channels. The block is suppressed
+     * while the dump level of the sink is not positive.
      *
      * @param sink The text sink.
      * @ghidraAddress 0x004d33b8
@@ -162,7 +274,10 @@ public:
     /**
      * Replace one object reference with another.
      *
-     * The body is not reconstructed.
+     * The material, the keys owner, and every stage texture that is pFrom move to pTo. A null
+     * pTo for the keys owner copies the owner's stage vector and makes this animation its own
+     * owner, but the five colour and alpha channels are not copied. A stage texture key left null
+     * is erased.
      *
      * @param pFrom The object being replaced.
      * @param pTo The replacement, which may be null.
@@ -195,7 +310,9 @@ public:
     /**
      * Load the animation.
      *
-     * The body is not reconstructed.
+     * The revision is read into Rnd::g_nRndMatLoadVersion, the material's global, and the stage
+     * records consult it there. A revision above kSerialVersion is reported to the failure sink
+     * and nothing more is read. The five channels are present from revision 2.
      *
      * @param stream The stream to read from.
      * @ghidraAddress 0x004d38e8
@@ -228,21 +345,44 @@ public:
      */
     void SetMat(Mat *pMat);
 
+    /**
+     * Change the animation whose channels this one reads.
+     *
+     * Moves this object's reference from the previous owner to the new one and then empties this
+     * animation's own channels unless it is its own owner. The routine has no caller in the
+     * shipped build. The name is inferred.
+     *
+     * @param pOwner The new keys owner, or null.
+     * @ghidraAddress 0x004dd328
+     */
+    void SetKeysOwner(MatAnim *pOwner);
+
+    /**
+     * Resize the stage vector of the keys owner.
+     *
+     * Every texture of a stage past the new count drops this animation's reference first. After
+     * the resize every stage records this animation as its owner. The routine has no caller in
+     * the shipped build. The name is inferred.
+     *
+     * @param nCount The new stage count.
+     * @ghidraAddress 0x004d3b58
+     */
+    void SetNumStages(int nCount);
+
 protected:
     /**
      * Apply the animation at a frame.
      *
-     * Rnd::Animatable vtable slot 3. The body is unrecovered. The stage half walks `mMat->mStages`
-     * and writes the stage transform through the two helpers at `0x0045da58` and `0x004f0430`,
-     * neither of which is recovered.
+     * Rnd::Animatable vtable slot 3. Nothing happens without a material. The stage half walks the
+     * stages of mKeysOwner against `mMat->mStages`, bounded by both counts. Per stage, the
+     * translation writes the last transform row, the rotation rebuilds the basis through
+     * EulerAnglesToMatrix3x3(), the scale folds into it through ScaleRows3x3(), and the texture
+     * channel replaces the stage texture. The vector blends write three components and take the
+     * fourth word from the later key.
      *
-     * The colour half is no longer blocked. Rnd::Mat::SetDiffuse() and Rnd::Mat::SetSpecular() now
-     * take a Color, which the four quadword blends of this routine settled against the three
-     * three-component blends of its stage half.
-     *
-     * Everything else about it is recovered. The specular call passes an alpha of zero, which
-     * `clear f12` at `0x004d54ec` proves, and the alpha channel interpolates linearly rather than
-     * on VU0.
+     * The colour half hands each blended colour to the material through its setters. The specular
+     * call passes an alpha of zero, which `clear f12` at `0x004d54ec` proves, and the alpha channel
+     * interpolates linearly rather than on VU0. Any empty channel leaves its target as it was.
      *
      * @param flFrame The frame to apply.
      * @ghidraAddress 0x004d4820
@@ -293,6 +433,26 @@ private:
  * @ghidraAddress 0x004dcb00
  */
 Object *CreateRegisteredMatAnim(const HxStr &name);
+
+/**
+ * Allocate and construct a material animation.
+ *
+ * The allocation is untagged and 0x5c bytes. No call site survives in the shipped program.
+ *
+ * @param name The object name.
+ * @return The new animation.
+ * @ghidraAddress 0x004dbfb0
+ */
+MatAnim *NewMatAnim(const HxStr &name);
+
+/**
+ * Register the "MatAnim" class with Rnd::Manager, created through Rnd::CreateRegisteredMatAnim().
+ *
+ * No call site survives in the shipped program.
+ *
+ * @ghidraAddress 0x004dbf80
+ */
+void RegisterMatAnimClass();
 
 /**
  * Registered class name of Rnd::MatAnim, the string "MatAnim".
