@@ -24,7 +24,7 @@ HxStr::HxStr(const char *pszText) {
         return;
     }
     mLen = strlen(pszText);
-    mStr = static_cast<char *>(MemAlloc(mLen + 1));
+    mStr = new char[mLen + 1];
     HX_ASSERT(mStr != 0)
     strcpy(mStr, pszText);
 }
@@ -37,7 +37,7 @@ HxStr::HxStr(const HxStr &other) {
         return;
     }
     mLen = other.mLen;
-    mStr = static_cast<char *>(MemAlloc(mLen + 1));
+    mStr = new char[mLen + 1];
     HX_ASSERT(mStr != 0)
     strcpy(mStr, other.mStr);
 }
@@ -45,7 +45,7 @@ HxStr::HxStr(const HxStr &other) {
 // 0x004b7bd0
 HxStr::HxStr(unsigned nCount, char ch) {
     mLen = nCount;
-    mStr = static_cast<char *>(MemAlloc(nCount + 1));
+    mStr = new char[nCount + 1];
     HX_ASSERT(mStr != 0)
     for (unsigned i = 0; i < nCount; ++i) {
         mStr[i] = ch;
@@ -56,13 +56,13 @@ HxStr::HxStr(unsigned nCount, char ch) {
 // 0x004b7c68
 HxStr &HxStr::operator+=(const HxStr &other) {
     mLen += other.mLen;
-    char *pNew = static_cast<char *>(MemAlloc(mLen + 1));
+    char *pNew = new char[mLen + 1];
     HX_ASSERT(pNew != 0)
     if (mStr == nullptr) {
         *pNew = '\0';
     } else {
         strcpy(pNew, mStr);
-        MemFree(mStr);
+        delete[] mStr;
     }
     if (other.mStr != nullptr) {
         strcat(pNew, other.mStr);
@@ -73,12 +73,12 @@ HxStr &HxStr::operator+=(const HxStr &other) {
 
 // 0x004b7d28
 HxStr &HxStr::operator+=(char ch) {
-    char *pNew = static_cast<char *>(MemAlloc(mLen + 2));
+    char *pNew = new char[mLen + 2];
     ++mLen;
     HX_ASSERT(pNew != 0)
     if (mStr != nullptr) {
         strcpy(pNew, mStr);
-        MemFree(mStr);
+        delete[] mStr;
     }
     mStr = pNew;
     mStr[mLen - 1] = ch;
@@ -92,7 +92,7 @@ HxStr &HxStr::operator=(const char *pszText) {
         return *this;
     }
     if (mStr != nullptr) {
-        MemFree(mStr);
+        delete[] mStr;
     }
     if (pszText == nullptr) {
         mLen = 0;
@@ -100,7 +100,7 @@ HxStr &HxStr::operator=(const char *pszText) {
         return *this;
     }
     mLen = strlen(pszText);
-    mStr = static_cast<char *>(MemAlloc(mLen + 1));
+    mStr = new char[mLen + 1];
     HX_ASSERT(mStr != 0)
     strcpy(mStr, pszText);
     return *this;
@@ -112,7 +112,7 @@ HxStr &HxStr::operator=(const HxStr &other) {
         return *this;
     }
     if (mStr != nullptr) {
-        MemFree(mStr);
+        delete[] mStr;
     }
     if (other.mStr == nullptr) {
         mLen = 0;
@@ -121,7 +121,7 @@ HxStr &HxStr::operator=(const HxStr &other) {
     }
     // The length is measured again rather than copied from other.mLen.
     mLen = strlen(other.mStr);
-    mStr = static_cast<char *>(MemAlloc(mLen + 1));
+    mStr = new char[mLen + 1];
     HX_ASSERT(mStr != 0)
     strcpy(mStr, other.mStr);
     return *this;
@@ -137,10 +137,10 @@ char HxStr::operator[](unsigned i) const {
 // 0x004b8230
 void HxStr::Alloc(unsigned nLen) {
     if (mStr != nullptr) {
-        MemFreeScalar(mStr);
+        delete mStr; // Yes, the binary releases the array through the single-object delete.
     }
     mLen = nLen;
-    mStr = static_cast<char *>(MemAlloc(nLen + 1));
+    mStr = new char[nLen + 1];
     memset(mStr, 0, mLen + 1);
     HX_ASSERT(mStr != 0) // Yes, the binary checks the allocation only after writing through it.
 }
@@ -236,7 +236,7 @@ HxStr HxStr::Mid(unsigned pos, unsigned len) const {
     if (pos + len >= mLen) {
         return Mid(pos);
     }
-    char *pBuf = static_cast<char *>(MemAlloc(len + 1));
+    char *pBuf = new char[len + 1];
     strncpy(pBuf, mStr + pos, len);
     pBuf[len] = '\0';
     // The binary copy-constructs the result from this adopting temporary and then frees it.
@@ -261,13 +261,13 @@ HxStr &HxStr::Replace(unsigned pos, unsigned len, const HxStr &other) {
         len = mLen - pos;
     }
     unsigned nTotal = mLen + other.mLen - len;
-    char *pNew = static_cast<char *>(MemAlloc(nTotal + 1));
+    char *pNew = new char[nTotal + 1];
     strncpy(pNew, mStr, pos);
     strcpy(pNew + pos, other.mStr);
     strcpy(pNew + pos + other.mLen, mStr + pos + len);
     mLen = nTotal;
     if (mStr != nullptr) {
-        MemFree(mStr);
+        delete[] mStr;
     }
     mStr = pNew;
     return *this;
@@ -312,21 +312,21 @@ HxStr &HxStr::Insert(unsigned pos, unsigned nCount, char ch) {
     if (mStr == nullptr) {
         // An insertion into an empty string writes one character whatever nCount
         // requests.
-        mStr = static_cast<char *>(MemAlloc(2));
+        mStr = new char[2];
         mLen = 1;
         mStr[0] = ch;
         mStr[1] = '\0';
         return *this;
     }
     unsigned nTotal = mLen + nCount;
-    char *pNew = static_cast<char *>(MemAlloc(nTotal + 1));
+    char *pNew = new char[nTotal + 1];
     strncpy(pNew, mStr, pos);
     for (unsigned i = pos; i < pos + nCount; ++i) {
         pNew[i] = ch;
     }
     strcpy(pNew + pos + nCount, mStr + pos);
     mLen = nTotal;
-    MemFree(mStr);
+    delete[] mStr;
     mStr = pNew;
     return *this;
 }
@@ -337,12 +337,12 @@ HxStr &HxStr::Insert(unsigned pos, const HxStr &other) {
         return *this = other;
     }
     unsigned nTotal = mLen + other.mLen;
-    char *pNew = static_cast<char *>(MemAlloc(nTotal + 1));
+    char *pNew = new char[nTotal + 1];
     strncpy(pNew, mStr, pos);
     strcpy(pNew + pos, other.mStr);
     strcpy(pNew + pos + other.mLen, mStr + pos);
     mLen = nTotal;
-    MemFree(mStr);
+    delete[] mStr;
     mStr = pNew;
     return *this;
 }

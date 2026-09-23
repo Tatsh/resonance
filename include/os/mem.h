@@ -38,7 +38,7 @@ constexpr int kMemStlTagSize = 128;
  *
  * The request is raised to one byte when it is zero. The allocation is billed
  * to the tag `UNK[]`, and a failure is fatal. Its exception tables carry the
- * `throw(std::bad_alloc)` specification. The program titles it `MemAlloc`.
+ * `throw(std::bad_alloc)` specification. The program's label is `MemAlloc`.
  *
  * @param nSize The block size in bytes.
  * @return The block.
@@ -53,33 +53,13 @@ void *operator new[](size_t nSize);
  * to the tag `UNK`, and a failure is fatal. The log line and the failure
  * message both omit a tag, and the message reads
  * `NEW ALLOCATION FAILURE, size: %d`. Its exception tables carry the
- * `throw(std::bad_alloc)` specification. The program titles it `MemAllocScalar`.
+ * `throw(std::bad_alloc)` specification. The program's label is `MemAllocScalar`.
  *
  * @param nSize The block size in bytes.
  * @return The block.
  * @ghidraAddress 0x004a81e0
  */
 void *operator new(size_t nSize);
-
-/**
- * Forward to the global `operator new[]`, for callers not yet written as new[] expressions.
- *
- * @param nSize The block size in bytes.
- * @return The block.
- */
-inline void *MemAlloc(size_t nSize) {
-    return ::operator new[](nSize);
-}
-
-/**
- * Forward to the global `operator new`, for callers not yet written as new expressions.
- *
- * @param nSize The block size in bytes.
- * @return The block.
- */
-inline void *MemAllocScalar(size_t nSize) {
-    return ::operator new(nSize);
-}
 #endif
 
 /**
@@ -164,7 +144,7 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine);
  * Release an array block, the game's replacement global `operator delete[]`.
  *
  * The log line identifies the path as `del(UNK[],%p)`. Its exception tables carry the empty
- * `throw()` specification. The program titles it `MemFree`.
+ * `throw()` specification. The program's label is `MemFree`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a92c8
@@ -176,30 +156,12 @@ void operator delete[](void *pBlock) noexcept;
  *
  * The log line identifies the path as `del(UNK,%p)`. HxStr::Alloc() is the one
  * caller inside the string class. Its exception tables carry the empty `throw()` specification.
- * The program titles it `MemFreeScalar`.
+ * The program's label is `MemFreeScalar`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a9230
  */
 void operator delete(void *pBlock) noexcept;
-
-/**
- * Forward to the global `operator delete[]`, for callers not yet written as delete[] expressions.
- *
- * @param pBlock The block to release.
- */
-inline void MemFree(void *pBlock) {
-    ::operator delete[](pBlock);
-}
-
-/**
- * Forward to the global `operator delete`, for callers not yet written as delete expressions.
- *
- * @param pBlock The block to release.
- */
-inline void MemFreeScalar(void *pBlock) {
-    ::operator delete(pBlock);
-}
 #endif
 
 /**

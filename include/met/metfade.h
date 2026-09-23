@@ -13,10 +13,10 @@ class FadeUser;
  * The name here is inferred from the two literals its constructor and its fade routines use,
  * `metfade.rect` at `0x007d8dd0` and `met_fade.view` at `0x007d8de0`.
  *
- * The object is 0x2c bytes, which the `MemAllocScalar(0x2c)` at both of its two allocation sites
- * fixes. MetLoadGameScreen and MetMemDetectStartup each build one and each release it through the
- * scalar deallocator with no null test, which is what a delete expression compiles to for a class
- * with no destructor.
+ * The object is 0x2c bytes, which the global `operator new(0x2c)` at both of its two allocation
+ * sites fixes. MetLoadGameScreen and MetMemDetectStartup each build one and each release it through
+ * the scalar deallocator with no null test, which is what a delete expression compiles to for a
+ * class with no destructor.
  *
  * A fade runs from a start frame to an end frame. While one runs, the fade view is attached to the
  * renderer's screen scene and the rectangle's vertex alpha follows a linear ramp over the span.

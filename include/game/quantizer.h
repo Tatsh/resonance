@@ -10,7 +10,7 @@
  * `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, where `P9Quantizer`
  * is the second parameter.
  *
- * The object is four bytes. `ScoreTrackGraph` builds one with `MemAllocScalar(4)`, and the
+ * The object is four bytes. `ScoreTrackGraph` builds one with the global `operator new(4)`, and the
  * constructor at `0x001ce670` stores its argument and returns.
  */
 class Quantizer {

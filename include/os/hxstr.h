@@ -64,7 +64,7 @@ public:
 
     ~HxStr() {
         if (mStr != nullptr) {
-            MemFree(mStr);
+            delete[] mStr;
         }
     }
 
@@ -187,9 +187,9 @@ public:
     /**
      * Discard the text and reserve a zero-filled buffer.
      *
-     * The previous buffer is released through MemFreeScalar() rather than through MemFree(), which
-     * is the one place in HxStr that uses the scalar release path. The new length is recorded
-     * before the allocation is checked.
+     * The previous buffer is released through the single-object operator delete rather than
+     * through operator delete[]. It is the one place in HxStr that uses the scalar release path.
+     * The new length is recorded before the allocation is checked.
      *
      * @param nLen The new length, excluding the terminator.
      * @ghidraAddress 0x004b8230

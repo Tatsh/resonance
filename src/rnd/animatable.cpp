@@ -449,10 +449,10 @@ void Animatable::ReleaseAnimsAndFilters() {
     ReleaseAnimsRefs();
     for (std::list<Filter *>::iterator it = mFilters.begin(); it != mFilters.end(); ++it) {
         // Filter declares no destructor, so every subclass is released through a base pointer
-        // without one being run. 0x00494d2c calls MemFreeScalar on the pointer directly, with no
-        // vptr load and no dispatch, which confirms the original has the same defect rather than
-        // this being a reconstruction error. The diagnostic is suppressed at the two sites that
-        // reproduce it instead of over the file.
+        // without one being run. 0x00494d2c calls the global operator delete on the pointer
+        // directly, with no vptr load and no dispatch, which confirms the original has the same
+        // defect rather than this being a reconstruction error. The diagnostic is suppressed at the
+        // two sites that reproduce it instead of over the file.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
         delete *it;

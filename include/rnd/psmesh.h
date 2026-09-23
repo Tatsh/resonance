@@ -168,8 +168,8 @@ private:
      *
      * The structure is 0x14 bytes inside a 0x1c-byte list node, which the constructor draws from
      * the 0x20-byte allocator bucket. The node destructor at `0x006056f8` releases mIndices
-     * through MemFree() and then the vector, and it zeroes mIndices and mIndexCount between the
-     * two.
+     * through the global operator delete[] and then the vector, and it zeroes mIndices and
+     * mIndexCount between the two.
      */
     struct DrawRun {
         /** Packed VIF index data, in halfwords. +0x00 */

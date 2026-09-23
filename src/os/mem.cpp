@@ -151,8 +151,8 @@ char g_szMemLogPath[kMemLogPathSize];
 char g_szMemLogBaseName[kMemLogPathSize];
 
 // 0x004a9360
-// an out-of-line copy with no caller. Reduces a tag to the text after its last path
-// separator. Both separators are tried, so a tag recorded on a Windows build host still logs as a
+// The address is an out-of-line copy with no caller. Reduces a tag to the text after its last path
+// separator. Both separators are tried, and a tag recorded on a Windows build host still logs as a
 // basename.
 inline const char *TagBasename(const char *pszTag) {
     const char *pName = strrchr(pszTag, '/');
@@ -354,6 +354,7 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
 }
 
 // 0x004a92c8
+// The image, built as C++98, has no sized overload to pair with this one.
 void operator delete[](void *pBlock) noexcept {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK[],%p)\n", pBlock);
@@ -362,6 +363,7 @@ void operator delete[](void *pBlock) noexcept {
 }
 
 // 0x004a9230
+// The image, built as C++98, has no sized overload to pair with this one.
 void operator delete(void *pBlock) noexcept {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK,%p)\n", pBlock);

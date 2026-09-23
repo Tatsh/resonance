@@ -73,8 +73,8 @@ struct HeapNode {
  * ZoneGetAvail() for the space left in it with a 2 MiB fallback, takes all of it in one
  * ZoneAlloc(), and builds the heap over that block with kHeapFlagFirstFit and
  * kHeapFlagFatalWhenFull, which is why exhaustion reports `Python heap is out of memory!` and
- * stops. The game itself does not allocate through this class. MemAlloc() and its relatives go to
- * the toolchain allocator instead.
+ * stops. The game itself does not allocate through this class. The global `operator new` and its
+ * relatives go to the toolchain allocator instead.
  *
  * A heap therefore sits inside a zone rather than beside one. The chain runs from the toolchain
  * allocator, through the tagged block ZoneCreate() takes for the `python` zone, through the single

@@ -16,9 +16,9 @@ class TickClock;
  * the translation unit as `GsPeriodical.cpp` and a file-local command class as `PeriodicalCmd`.
  * The class title is therefore inferred from the file name rather than attested by a descriptor.
  *
- * The object is 0x14 bytes and AxingSTG builds one with `MemAllocScalar(0x14)`. The constructor
- * writes kMBTInfinity to mOrigin, then overwrites it with the origin the phrase maker's slot 5
- * reports, which is the constant 6 for AxePhraseMaker.
+ * The object is 0x14 bytes and AxingSTG builds one with the global `operator new(0x14)`. The
+ * constructor writes kMBTInfinity to mOrigin, then overwrites it with the origin the phrase maker's
+ * slot 5 reports, which is the constant 6 for AxePhraseMaker.
  *
  * Every song position the class computes is clamped to the finite range and passed through the
  * discarded finiteness test, which is the expansion of an inline position type rather than

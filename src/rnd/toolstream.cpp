@@ -18,8 +18,7 @@ constexpr size_t kToolStreamBufferSize = 0x4000;
 
 // 0x00510238
 ToolStream::ToolStream()
-    : mCursor(0), mBuffer(static_cast<char *>(MemAlloc(kToolStreamBufferSize))), mFill(0),
-      mArrived(0), mConsumed(0) {
+    : mCursor(0), mBuffer(new char[kToolStreamBufferSize]), mFill(0), mArrived(0), mConsumed(0) {
 }
 
 // 0x00510480
@@ -31,7 +30,7 @@ void ToolStream::Connect() {
 // 0x00510288
 ToolStream::~ToolStream() {
     if (mBuffer != nullptr) {
-        MemFree(mBuffer);
+        delete[] mBuffer;
     }
 }
 

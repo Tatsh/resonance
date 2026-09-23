@@ -674,10 +674,9 @@ inline void PsMesh::DrawRun::ReserveIndices(int nIndexCount) {
     if (mIndexCount < nQuadwords) {
         mIndexCount = nIndexCount;
         if (mIndices != nullptr) {
-            MemFree(mIndices);
+            delete[] mIndices;
         }
-        mIndices = static_cast<unsigned short *>(
-            MemAlloc(static_cast<size_t>(nQuadwords) * sizeof(GifQuadword)));
+        mIndices = new unsigned short[nQuadwords * kIndexHalfwordsPerQuadword];
     }
 }
 
