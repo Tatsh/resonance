@@ -823,9 +823,12 @@ protected:
     // protected.
     float mUnknown04; // +0x04
 
-private:
+protected:
     // Time the enter animation started, or zero while no enter animation runs.
+    // MetCreditsScreen::EnterAndShow() at 0x00214e70 clears it, which is why it is protected.
     float mUnknown08; // +0x08
+
+private:
     // Time the exit animation started, or zero while no exit animation runs.
     float mUnknown0c; // +0x0c
 
@@ -843,8 +846,11 @@ protected:
     // protected.
     int mUnknown18; // +0x18, starts at 2
 
+protected:
+    // MetCreditsScreen::EnterAndShow() at 0x00214e70 writes 1, which is why it is protected.
+    int mUnknown1c; // +0x1c
+
 private:
-    int mUnknown1c;   // +0x1c
     HxStr mUnknown20; // +0x20, the screen name
     HxStr mUnknown28; // +0x28, mUnknown80 with `.rnd` appended
 

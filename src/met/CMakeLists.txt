@@ -8,6 +8,7 @@ set(RESONANCE_MET_SRCS
     metconfigcontrollerscreen.cpp
     metconfiggameoptionsscreen.cpp
     metconfigoptionsbuttonsscreen.cpp
+    metcreditsscreen.cpp
     metendgamegizmoscreen.cpp
     metexpansionpakscreen.cpp
     metfade.cpp
