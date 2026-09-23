@@ -15,10 +15,10 @@
  * both store the `__pure_virtual` handler at `0x005381a8`. Both declared virtuals are therefore
  * pure and the original class is abstract.
  *
- * Neither declared virtual has a recovered name, because no caller of either slot is identified.
- * Both signatures are recovered, from MetRenderer's overrides at `0x003715e0` and `0x003715d8`
- * rather than from the base stubs, which reveal nothing. Each override reads only `a0` and returns
- * nothing.
+ * MetFade is the caller of both slots. It runs slot 2 when a fade out finishes and slot 3 when a
+ * fade in finishes, and the two titles follow from that. Both signatures are recovered from
+ * MetRenderer's overrides at `0x003715e0` and `0x003715d8`, each of which reads only `a0` and
+ * returns nothing.
  *
  * The destructor at `0x0021d760` restores the vptr and releases the object through the scalar
  * release path at `0x004a9230` when its `__in_chrg` argument is odd, which is the whole of its
@@ -33,23 +33,16 @@ public:
     virtual ~FadeUser();
 
     /**
-     * Respond to a fade having finished. Slot 2.
-     *
-     * The verb is unrecovered. MetRenderer's override at `0x003715e0` promotes its pending panel
-     * to the active panel and starts that panel entering, which is the whole of the evidence for
-     * the verb, and one witness is too few to name the slot from.
+     * Respond to a MetFade fade out having finished. Slot 2.
      *
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot2() = 0;
+    virtual void OnFadeOutDone() = 0;
 
     /**
-     * Unrecovered. Slot 3.
-     *
-     * MetRenderer's override at `0x003715d8` is an empty body, which supplies a signature and no
-     * verb.
+     * Respond to a MetFade fade in having finished. Slot 3.
      *
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot3() = 0;
+    virtual void OnFadeInDone() = 0;
 };

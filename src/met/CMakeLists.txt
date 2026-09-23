@@ -3,6 +3,7 @@ set(RESONANCE_MET_SRCS
     gameoptions.cpp
     metarenasscreen.cpp
     metexpansionpakscreen.cpp
+    metfade.cpp
     metfreqmakerdirectionsscreen.cpp
     metfrontendstate.cpp
     metglobalsettingssaverscreen.cpp

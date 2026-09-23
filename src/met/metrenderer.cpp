@@ -83,7 +83,7 @@ void MetRenderer::OnUnknownSlot9() {
     mUnknown9c->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
-void MetRenderer::OnUnknownSlot2() {
+void MetRenderer::OnFadeOutDone() {
     mUnknownd0 = 0;
 
     if (mUnknownc8 != 0) {
@@ -104,7 +104,7 @@ void MetRenderer::OnUnknownSlot2() {
     mUnknown7c->mUnknown50 = 1;
 }
 
-void MetRenderer::OnUnknownSlot3() {
+void MetRenderer::OnFadeInDone() {
 }
 
 void MetRenderer::SetActivePanel(MetScreen *pScreen) {
@@ -122,6 +122,12 @@ void MetRenderer::AddScreen(MetScreen *pScreen) {
 
     mUnknown84.push_back(pScreen);
     mUnknown98 = 1;
+}
+
+void MetRenderer::RemoveScreenView(Rnd::View *pView) {
+    mUnknowna0->RemoveTrans(pView);
+    mUnknowna0->RemoveDraw(pView);
+    mUnknowna0->RemoveAnim(pView);
 }
 
 void MetRenderer::ClearScreenScene() {

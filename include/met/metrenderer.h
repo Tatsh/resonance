@@ -63,7 +63,7 @@ class MetFade;
  * bodies that take the renderer and are re-emitted into the translation unit of every screen that
  * runs them, and none of the three has a recovered name.
  *
- * Six bodies are written. They are OnUnknownSlot2(), OnUnknownSlot3(), OnUnknownSlot4(),
+ * Six bodies are written. They are OnFadeOutDone(), OnFadeInDone(), OnUnknownSlot4(),
  * OnUnknownSlot9(), SetActivePanel(), and AddScreen(), together with the two scene-clearing
  * helpers. Every other body is understood and not written, because each needs a routine that no
  * header in this tree declares yet. The blocking dependency of each is recorded below so that the
@@ -209,15 +209,15 @@ public:
     /**
      * Promote the pending panel and start it entering.
      *
-     * FadeUser slot 2, where FadeUser stores the `__pure_virtual` stub. Does nothing while
-     * mUnknownc8 is set. The same five-step promotion appears twice more inside OnUnknownSlot7().
+     * FadeUser slot 2. Does nothing while mUnknownc8 is set. The same five-step promotion appears
+     * twice more inside OnUnknownSlot7().
      *
      * @ghidraAddress 0x003715e0
      */
-    virtual void OnUnknownSlot2();
+    virtual void OnFadeOutDone();
 
     /**
-     * Unrecovered. FadeUser slot 3, where FadeUser stores the `__pure_virtual` stub.
+     * Do nothing when a fade in finishes. FadeUser slot 3.
      *
      * The body is empty. It is a genuine override rather than an inherited empty body, because a
      * class cannot be concrete while a slot points at that stub, so this empty body is what makes
@@ -225,7 +225,7 @@ public:
      *
      * @ghidraAddress 0x003715d8
      */
-    virtual void OnUnknownSlot3();
+    virtual void OnFadeInDone();
 
     /**
      * Record one screen as the active panel.
@@ -261,6 +261,18 @@ public:
      * @ghidraAddress 0x003718b8
      */
     void AddBackgroundView(Rnd::View *pView);
+
+    /**
+     * Detach one view from the screen scene at mUnknowna0.
+     *
+     * The counterpart of AddScreenView(). The transformable, drawable, and animatable subobjects
+     * are removed in that order, and a null view is passed through to all three as null. The title
+     * is inferred.
+     *
+     * @param pView The view to detach.
+     * @ghidraAddress 0x00371858
+     */
+    void RemoveScreenView(Rnd::View *pView);
 
     /**
      * Append one screen to the screen stack.
