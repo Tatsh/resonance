@@ -65,10 +65,23 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    /**
+     * The bar of the phrase. +0x04
+     *
+     * AxeOldGemMaker::OnPhrase() at `0x001a3600` multiplies it by the 1920 ticks of a bar.
+     */
+    int mBar;
+
 private:
-    int mUnknown04;  // +0x04
-    int mUnknown08;  // +0x08
-    Phrase *mPhrase; // +0x0c
+    int mUnknown08; // +0x08
+
+public:
+    /**
+     * The phrase. +0x0c
+     *
+     * AxeOldGemMaker::OnPhrase() at `0x001a3600` replays its sequence.
+     */
+    Phrase *mPhrase;
 };
 
 /**

@@ -28,14 +28,15 @@ class Player;
  * same three in the same order behind a version byte of 2.
  *
  * Every member is private. AxePhraseMaker::StartPhrase() and Voxer::StartPhrase() write mPlayer
- * at `0x0019bd7c` and `0x001d8aa8`.
- * PhraseDatabase writes mPlayer and reads and writes mUnknown28 directly,
+ * at `0x0019bd7c` and `0x001d8aa8`, and AxeOldGemMaker reads mPlayer and mMuse at `0x001a3420`
+ * and `0x001a3698`. PhraseDatabase writes mPlayer and reads and writes mUnknown28 directly,
  * PhraseMgr::GetPhraseOwner() reads mPlayer, TrackData::AddPhrases() walks mGems directly,
  * PhrasePlayer reads mPlayer, mGems, and mMuse when it plays a bar, the image exposes no accessor,
  * and friend declarations model that access. Promoting the members to public fits the image equally
  * well.
  */
 class Phrase : public Attachment {
+    friend class AxeOldGemMaker;
     friend class AxePhraseMaker;
     friend class PhraseDatabase;
     friend class PhraseMgr;

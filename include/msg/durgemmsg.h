@@ -58,10 +58,14 @@ public:
     int mEndFrame;     /*!< The frame the gem ends at. +0x10 */
     float mEndBlend;   /*!< The blend at the end. +0x14 */
 
-private:
-    int mUnknown18; // +0x18
+    /**
+     * Purpose unrecovered. +0x18
+     *
+     * AxeNewGemMaker::PostGemMessages() at `0x001a2f18` stores 1, and AxeOldGemMaker's
+     * PostDurGemMsg() at `0x001a32f0` and OnStdMidi() at `0x001a34e8` store zero.
+     */
+    int mUnknown18;
 
-public:
     Player *mPlayer; /*!< The player the gem belongs to. +0x1c */
 };
 

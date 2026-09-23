@@ -11,6 +11,9 @@ class Player;
  * 0x1c bytes and its vtable is at `0x008124f8`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
+ * A second, identical vtable at `0x007decf0` is emitted in the gem makers' unit, and
+ * AxeNewGemMaker::PostGemMessages() stores it at `0x001a3094` and `0x001a3110`.
+ *
  * The payload layout comes from the run of field copies in Clone(). Every member is public because
  * AppTunnel::HandleMessage() at `0x0044987c` reads them directly with no accessor in the image. It
  * copies the colour name of mPlayer, stops the strip mStripId when mStop is set, and otherwise

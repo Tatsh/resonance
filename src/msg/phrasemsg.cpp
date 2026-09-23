@@ -26,5 +26,5 @@ const char *PhraseMsg::Name() {
 
 // 0x003e42f8
 void PhraseMsg::Print(std::ostream &stream) {
-    stream << static_cast<void *>(mPhrase) << " [" << mUnknown04 << "]";
+    stream << static_cast<void *>(mPhrase) << " [" << mBar << "]";
 }

@@ -21,9 +21,6 @@ class StdMidiMsg;
  *
  * The destructor at `0x001a2e48` is implicitly declared. It destroys MsgSource's vector and
  * releases the object under MsgSink's tag.
- *
- * PostGemMessages() is declared and not written, because it sets DurGemMsg's private word at
- * `+0x18`.
  */
 class AxeNewGemMaker : public MsgSink, public MsgSource {
 public:

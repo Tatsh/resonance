@@ -38,9 +38,6 @@ extern int g_nNextStripId;
  *
  * The destructor at `0x001a3f90` is implicitly declared. It destroys MsgSource's vector and
  * releases the object under MsgSink's tag.
- *
- * PostDurGemMsg(), OnStdMidi(), and OnPhrase() are declared and not written. The first two set
- * DurGemMsg's private word at `+0x18`, and OnPhrase() reads PhraseMsg's private members.
  */
 class AxeOldGemMaker : public MsgSink, public MsgSource {
 public:
