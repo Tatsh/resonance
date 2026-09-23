@@ -308,6 +308,7 @@ int Cam::DrawSelf() {
     return 1;
 }
 
+// 0x004b27a8
 void Cam::AcquireTargetTex() {
     if (mpTargetTex != nullptr) {
         mpTargetTex->AddRef(this);
@@ -315,6 +316,7 @@ void Cam::AcquireTargetTex() {
     UpdateTargetAspect();
 }
 
+// 0x004b2778
 void Cam::ReleaseTargetTex() {
     if (mpTargetTex != nullptr) {
         mpTargetTex->RemoveRef(this);
