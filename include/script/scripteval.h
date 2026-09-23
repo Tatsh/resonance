@@ -4,6 +4,9 @@
 
 class HxStr;
 class PyShell;
+namespace Py {
+class Tuple;
+} // namespace Py
 
 /**
  * @file
@@ -48,3 +51,18 @@ Py::Object EvalScriptTemplate(int nTemplate, ...);
  * @ghidraAddress 0x0050d6c0
  */
 Py::Object EvalScriptExpression(const HxStr &expression);
+
+/**
+ * Call a function the scripts define at module level, by name.
+ *
+ * The name is looked up in PyShell::mDict. A name the dictionary does not have leaves the callee
+ * `None`, and the call then raises inside the interpreter. The lookup and the item fetch are
+ * released PyCXX's inline `hasKey()` and `getItem()`, expanded in place. No call site survives in
+ * the shipped program, and the name is inferred.
+ *
+ * @param name The function name.
+ * @param args The positional arguments, taken by value.
+ * @return A handle on the call's result.
+ * @ghidraAddress 0x0050a868
+ */
+Py::Object CallScriptFunction(const HxStr &name, Py::Tuple args);
