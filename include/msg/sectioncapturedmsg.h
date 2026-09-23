@@ -25,6 +25,32 @@ class Player;
 class SectionCapturedMsg : public Message {
 public:
     /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    SectionCapturedMsg() {
+    }
+
+    /**
+     * Report a captured section.
+     *
+     * Inline, with no address of its own. SingleCatcher::Slot9() expands it on its stack at
+     * `0x001ad79c`. The five arguments are the five members in declaration order.
+     *
+     * @param nFirstBar The first bar of the section.
+     * @param nEndBar The end of the section.
+     * @param nTrack The track.
+     * @param pPlayer The capturing player.
+     * @param nAutoCatch Non-zero when the section was caught automatically.
+     */
+    SectionCapturedMsg(int nFirstBar, int nEndBar, int nTrack, Player *pPlayer, int nAutoCatch)
+        : mFirstBar(nFirstBar), mEndBar(nEndBar), mTrack(nTrack), mPlayer(pPlayer),
+          mAutoCatch(nAutoCatch) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
@@ -74,7 +100,7 @@ public:
     int mEndBar;     /*!< The end of the bar range. +0x08 */
     int mTrack;      /*!< The track. +0x0c */
     Player *mPlayer; /*!< The capturing player. +0x10 */
-    int mUnknown14;  /*!< A flag AppTunnel reduces to 0 or 1. Purpose unrecovered. +0x14 */
+    int mAutoCatch;  /*!< Non-zero for an automatic catch. AppTunnel reduces it to 0 or 1. +0x14 */
 };
 
 /**

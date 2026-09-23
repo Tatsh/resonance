@@ -28,6 +28,45 @@ class Player;
 class PhraseCapturedMsg : public Message {
 public:
     /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    PhraseCapturedMsg() {
+    }
+
+    /**
+     * Report a captured phrase.
+     *
+     * Inline, with no address of its own. SingleCatcher::Slot9() expands it on its stack at
+     * `0x001ad750`. The nine arguments are the nine members in declaration order.
+     *
+     * @param nFirstBar The first bar of the phrase.
+     * @param nEndBar The end of the phrase.
+     * @param nRunFirstBar The first bar of the caught run.
+     * @param nRunEndBar One past the last bar of the run.
+     * @param nTrack The track.
+     * @param pPlayer The capturing player.
+     * @param nScore The score the capture earned.
+     * @param nJuice The value SingleCatcher reads from its TrackData.
+     * @param nUnknown24 The flag at `+0x24`.
+     */
+    PhraseCapturedMsg(int nFirstBar,
+                      int nEndBar,
+                      int nRunFirstBar,
+                      int nRunEndBar,
+                      int nTrack,
+                      Player *pPlayer,
+                      int nScore,
+                      int nJuice,
+                      int nUnknown24)
+        : mFirstBar(nFirstBar), mEndBar(nEndBar), mRunFirstBar(nRunFirstBar),
+          mRunEndBar(nRunEndBar), mTrack(nTrack), mPlayer(pPlayer), mScore(nScore), mJuice(nJuice),
+          mUnknown24(nUnknown24) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
@@ -79,9 +118,9 @@ public:
     int mFirstBar;
 
 private:
-    int mEndBar;    // +0x08, written after `--` by Print()
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    int mEndBar;      // +0x08, written after `--` by Print()
+    int mRunFirstBar; // +0x0c, the first bar of the caught run
+    int mRunEndBar;   // +0x10, one past the last bar of the run
 
 public:
     int mTrack;      /*!< The track the phrase lies on. +0x14 */
@@ -89,8 +128,8 @@ public:
     int mScore;      /*!< The score the capture earned. +0x1c */
 
 private:
-    int mJuice;     // +0x20
-    int mUnknown24; // +0x24
+    int mJuice;     // +0x20, a value SingleCatcher reads from its TrackData
+    int mUnknown24; // +0x24, a flag, the inverse of SingleCatcher::Slot9's argument
 };
 
 /**
