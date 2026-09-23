@@ -168,8 +168,9 @@ ACanvas *ACanvas::CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels) {
             copy.mBytesPerRow =
                 static_cast<short>(copy.mWidth * g_abBitmapBytesPerPixel[copy.mFormat]);
         }
-        copy.mPixels = MemAllocTagged(
-            static_cast<long>(copy.mHeight) * copy.mBytesPerRow, kBitmapAllocTag, kBitmapAllocLine);
+        copy.mPixels = MemAllocTagged(static_cast<long long>(copy.mHeight) * copy.mBytesPerRow,
+                                      kBitmapAllocTag,
+                                      kBitmapAllocLine);
         if (copy.mPixels == nullptr) {
             return nullptr;
         }

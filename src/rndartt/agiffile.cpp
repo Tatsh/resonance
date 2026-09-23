@@ -392,8 +392,9 @@ int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
             nColumn = static_cast<short>(nColumn + 1);
             if (nColumn >= s_image.mWidth) {
                 if (nRow < s_image.mHeight) {
-                    memcpy(
-                        pDest + static_cast<long>(nRow) * s_image.mWidth, s_abLine, s_image.mWidth);
+                    memcpy(pDest + static_cast<long long>(nRow) * s_image.mWidth,
+                           s_abLine,
+                           s_image.mWidth);
                 }
                 nColumn = 0;
                 if ((s_image.mFlags & kInterlaceFlag) != 0) {

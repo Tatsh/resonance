@@ -391,8 +391,8 @@ int ABmpFile::ReadRlePixels(ABitmap *pImage) {
                 pDest += abDelta[0];
                 nColumn += abDelta[0];
                 y += abDelta[1] * mRowStep;
-                pRow += static_cast<long>(abDelta[1]) * nStride;
-                pDest += static_cast<long>(abDelta[1]) * nStride;
+                pRow += static_cast<long long>(abDelta[1]) * nStride;
+                pDest += static_cast<long long>(abDelta[1]) * nStride;
             } else if (mBitCount == kBitCount8) {
                 fread(pDest, 1, abPair[1], mFile);
                 pDest += abPair[1];
