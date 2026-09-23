@@ -73,7 +73,8 @@ int BindSoundDriverRpc();
  * Every routine in the module funnels through this, twenty call sites in all, each passing a
  * selector word and either a command block or nothing. Observed selectors are 0xd0 from
  * SynthCommand() and from the tail of DumpSynthVoices(), 0x1070 and 0x1050 from a bank transfer,
- * 0x10e0 from ConfigureSpu2Effects(), and 0x8130 from `0x004642c8`.
+ * 0x10e0 from ConfigureSpu2Effects(), 0x8010 from InitSynthDriver(), and 0x8130 from
+ * `0x004642c8`.
  *
  * Two bits of the selector steer the send. Bit 0x1000 ships a whole 0x80-byte SoundDriverCommand
  * from the caller's argument, read as an address; without it the argument travels as the single
@@ -87,8 +88,8 @@ int BindSoundDriverRpc();
  *                  set takes the address of a SoundDriverCommand, 0x8130 takes a bank's tag, and
  *                  0xd0 takes nothing and is passed zero. The parameter is a word rather than a
  *                  pointer because only half its callers pass one.
- * @return The first word of the reply buffer at `0x008e5b80`. Every call site in the module
- *         discards it.
+ * @return The first word of the reply buffer at `0x008e5b80`. InitSynthDriver() retains the reply
+ *         to 0x8010 as the event-buffer address, and the other callers discard it.
  * @ghidraAddress 0x005f96c8
  */
 int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument);
