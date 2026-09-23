@@ -2,6 +2,7 @@ set(RESONANCE_APP_SRCS
     application.cpp
     attachment.cpp
     globals.cpp
+    longop.cpp
     mainloop.cpp
     msgqueue.cpp
     msgsink.cpp
