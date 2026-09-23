@@ -4,6 +4,7 @@ set(RESONANCE_MET_SRCS
     discswap.cpp
     gameoptions.cpp
     metarenasscreen.cpp
+    metconfiggameoptionsscreen.cpp
     metexpansionpakscreen.cpp
     metfade.cpp
     metfreqloader.cpp

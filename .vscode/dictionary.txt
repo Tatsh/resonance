@@ -459,6 +459,7 @@ memstream
 meshanim
 metagameworld
 metarenasscreen
+metconfiggameoptionsscreen
 metcontrollerreading
 metexpansionpakscreen
 metfade
