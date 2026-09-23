@@ -18,11 +18,11 @@ struct RiffSet;
 
 /** The play modes of a track, as TrackData::Print() writes them. */
 enum TrackMode {
-    kTrackModeAxe = 1,   /*!< Printed as `axe`. */
-    kTrackModeRiff = 2,  /*!< Printed as `riff`, the default the constructor sets. */
+    kTrackModeAxe = 1,     /*!< Printed as `axe`. */
+    kTrackModeRiff = 2,    /*!< Printed as `riff`, the default the constructor sets. */
     kTrackModeScratch = 3, /*!< Printed as `none`. Overlay's constructor labels it `SCRATCH`. */
     kTrackModeVocal = 4,   /*!< Printed as `none`. Overlay's constructor labels it `VOCAL`. */
-    kTrackModeCatch = 5, /*!< Printed as `catch`. */
+    kTrackModeCatch = 5,   /*!< Printed as `catch`. */
 };
 
 /**
