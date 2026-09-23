@@ -12,12 +12,12 @@ namespace Rnd {
  *
  * The stream reads a source that arrives in instalments. ReadBytes() spins on Eof() until data is
  * present, copies what the buffer already holds, then calls Flush() to refill and spins again,
- * repeating until the request is satisfied. Eof() compares mUnknown10 with mUnknown14, and the
+ * repeating until the request is satisfied. Eof() compares mArrived with mConsumed, and the
  * destructor releases mBuffer.
  *
- * Flush() resets mCursor and copies mArrived into mConsumed, which makes Eof() true again, so the
+ * Flush() resets mCursor and copies mArrived into mConsumed, which makes Eof() true again. The
  * pair is a delivery counter the transport advances and the snapshot of it taken at the last
- * refill. The object is at least 0x18 bytes; nothing past `+0x14` is recovered.
+ * refill. The constructor's highest store is `+0x14`, so the object is 0x18 bytes.
  *
  * The stream is read-only in the shipped build. WriteBytes() reports
  * "Can't write to a PS ToolStream" and stops the machine, and both Tell() and Fail() always
@@ -25,6 +25,24 @@ namespace Rnd {
  */
 class ToolStream : public Stream {
 public:
+    /**
+     * Construct an empty stream over a 0x4000-byte buffer from the untagged heap.
+     *
+     * @ghidraAddress 0x00510238
+     */
+    ToolStream();
+
+    /**
+     * Report to the debug console where the transport should deliver.
+     *
+     * Prints "ToolStream connect:" followed by the addresses of mFill, mArrived, and mConsumed
+     * and of the buffer, so the host tool can write into them. No call site survives in the
+     * shipped program, and the name is inferred from the text.
+     *
+     * @ghidraAddress 0x00510480
+     */
+    void Connect();
+
     /** @ghidraAddress 0x00510288 */
     virtual ~ToolStream();
 

@@ -16,6 +16,18 @@ namespace Rnd {
  */
 class BufStream : public Stream {
 public:
+    /**
+     * Construct a stream over nSize bytes at pBuffer, positioned at the start.
+     *
+     * A null buffer starts the stream failed. RndAsyncLoader::PollAsyncLoads() builds one over
+     * each completed read.
+     *
+     * @param pBuffer The buffer, which the caller retains.
+     * @param nSize The buffer size in bytes.
+     * @ghidraAddress 0x005104b8
+     */
+    BufStream(char *pBuffer, int nSize);
+
     /** @ghidraAddress 0x005104e0 */
     virtual Stream &ReadBytes(void *pDest, int nSize);
 

@@ -82,4 +82,10 @@ int MemStream::Fail() {
     return mFail;
 }
 
+// 0x005101c8
+void MemStream::DiscardReadBytes() {
+    mBuffer.erase(mBuffer.begin(), mBuffer.begin() + mPos);
+    mPos = 0;
+}
+
 } // namespace Rnd

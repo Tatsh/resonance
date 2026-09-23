@@ -6,6 +6,11 @@
 
 namespace Rnd {
 
+// 0x005104b8
+BufStream::BufStream(char *pBuffer, int nSize)
+    : mBuffer(pBuffer), mFail(pBuffer == nullptr), mPos(0), mSize(nSize) {
+}
+
 // 0x005104e0
 Stream &BufStream::ReadBytes(void *pDest, int nSize) {
     if (mSize < mPos + nSize) {

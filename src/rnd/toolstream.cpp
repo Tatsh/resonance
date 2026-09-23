@@ -3,10 +3,30 @@
 #include <string.h>
 
 #include "os/failsink.h"
+#include "os/log.h"
 #include "os/mem.h"
 #include "rnd/stream.h"
 
 namespace Rnd {
+
+namespace {
+
+// The buffer the constructor allocates.
+constexpr size_t kToolStreamBufferSize = 0x4000;
+
+} // namespace
+
+// 0x00510238
+ToolStream::ToolStream()
+    : mCursor(0), mBuffer(static_cast<char *>(MemAlloc(kToolStreamBufferSize))), mFill(0),
+      mArrived(0), mConsumed(0) {
+}
+
+// 0x00510480
+void ToolStream::Connect() {
+    // Yes, the binary prints the four addresses through %u; they are 32 bits on the target.
+    LogPrintf("ToolStream connect: %u %u %u %u\n", &mFill, &mArrived, &mConsumed, mBuffer);
+}
 
 // 0x00510288
 ToolStream::~ToolStream() {

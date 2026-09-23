@@ -49,6 +49,17 @@ public:
     /** @ghidraAddress 0x0050fd60 */
     virtual int Fail();
 
+    /**
+     * Drop the bytes already read from the front of the buffer and rewind the cursor.
+     *
+     * The unread tail moves to the start of the buffer, and the buffer shrinks by the old cursor
+     * position. No call site survives in the shipped program. The name follows the
+     * IOBMemStream counterpart.
+     *
+     * @ghidraAddress 0x005101c8
+     */
+    void DiscardReadBytes();
+
 private:
     int mEof;                  // +0x04
     int mFail;                 // +0x08
