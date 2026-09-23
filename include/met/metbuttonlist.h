@@ -54,6 +54,16 @@ public:
     void operator delete(void *pBlock);
 
     /**
+     * Construct an empty list with nothing selected.
+     *
+     * Inline. MetArenasScreen's constructor calls the out-of-line copy.
+     *
+     * @ghidraAddress 0x001fc9f8
+     */
+    MetButtonList() : mUnknown00(nullptr), mSelected(-1) {
+    }
+
+    /**
      * Release every button reference and the vector.
      *
      * @ghidraAddress 0x001fca30

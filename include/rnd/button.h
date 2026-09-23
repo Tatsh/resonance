@@ -213,10 +213,19 @@ private:
     // Copy() are its callers. 0x00534900.
     void RemoveObjectRefs();
 
-    // Declared in recovered offset order. Every member but mText is private, because nothing in
-    // the recovered part of the image touches one of these and the class exposes no accessor.
+    // Declared in recovered offset order.
 
-    int mState;  // +0x1c
+public:
+    /**
+     * The palette entry SetState() last selected.
+     *
+     * Public rather than private, because MetButtonList::OnUnknownSlot2() at `0x001fcc40` and
+     * MetButtonList::OnUnknownSlot3() at `0x001fcd10` read it directly to pass over a disabled
+     * button, and the image has no accessor to route that read through. +0x1c
+     */
+    int mState;
+
+private:
     Mesh *mMesh; // +0x20
 
 public:
@@ -230,15 +239,25 @@ public:
      */
     Text *mText;
 
-private:
-    // Materials the state selects among, for mMesh. The assignment operator this class uses is
-    // instantiated out of line at 0x00533260.
-    std::vector<Mat *> mMats; // +0x28
-    // Fonts the state selects among, for mText. Three of its operations are instantiated out of
-    // line, the assignment operator at 0x00533488, the grow-and-fill that insert() and resize()
-    // share at 0x00533f88, and the uninitialised fill that grow-and-fill calls at 0x00534fd0.
-    // All four addresses are library code, so no body for any of them appears in this tree.
-    std::vector<Font *> mFonts; // +0x34
+    /**
+     * Materials the state selects among, for mMesh.
+     *
+     * The assignment operator this class uses is instantiated out of line at `0x00533260`. Public
+     * rather than private, because MetArenasScreen::ResolveContainerViews() at `0x001f6a08` reads
+     * its elements directly. +0x28
+     */
+    std::vector<Mat *> mMats;
+
+    /**
+     * Fonts the state selects among, for mText.
+     *
+     * Three of its operations are instantiated out of line, the assignment operator at
+     * `0x00533488`, the grow-and-fill that insert() and resize() share at `0x00533f88`, and the
+     * uninitialised fill that grow-and-fill calls at `0x00534fd0`. Public rather than private,
+     * because MetArenasScreen::ResolveContainerViews() at `0x001f6a08` reads its elements
+     * directly. +0x34
+     */
+    std::vector<Font *> mFonts;
 };
 
 /**
