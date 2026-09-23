@@ -7,6 +7,9 @@
 #include "msg/stdmidimsg.h"
 
 class MsgSource;
+class Player;
+class TrackSelectMsg;
+class TracksOnMsg;
 
 /**
  * Per-track MIDI mixer that sits between a track graph and the synthesiser.
@@ -29,28 +32,18 @@ class MsgSource;
  * emitter, the gain setter, and the gain recomputation. The name comes from the RTTI descriptor
  * and is not the invented `Rnd::MidiLight` that the type-function harvest recorded for the
  * accessor.
- *
- * The two setters, the pan emitter, the control-change filter, the message dispatcher, and the
- * destructor are written. The constructor and the three routines that recompute the gain from the
- * game state are recorded with their addresses and described in prose, because each reads
- * something whose class or verb is not yet recovered.
  */
 class Mixer : public MsgSink {
 public:
     /**
      * Construct a mixer on one channel.
      *
-     * The body is not written. It reads mOwnsPan from configuration code 0x398, mUnknown10 from
-     * code 0x399, and mTrackLevels from code 0x39f, sets mLevel and all four gain factors to 127,
-     * mUnknown50 to -1, and mSelection to the static instance at `0x0066f930`, and zeroes
-     * mUnknown28 twice over. It also dispatches slot 9 of whatever the Globals accessor at
-     * `0x00118da0` returns and stores the result in mUnknown54. Neither that accessor nor the slot
-     * is identified, and the static instance has no recovered class, which is what stops the body
-     * short of being written.
+     * The routine reads mOwnsPan from configuration code 0x398, mUnknown10 from code 0x399, and
+     * mTrackLevels from code 0x39f, sets mLevel and all four gain factors to 127, mUnknown50 to
+     * -1, and mSelection to g_nullPlayer, and zeroes mUnknown28 twice over. mUnknown54 takes
+     * PlayMap::Slot9() of Globals::GetPlayMap(). It does not write mOutput.
      *
-     * It does not write mOutput.
-     *
-     * @param nTrack The track this mixer serves, which both recovered callers pass as -1.
+     * @param nTrack The track this mixer serves. BGTrackGraph passes -1, which matches no track.
      * @param nChannel The MIDI channel every message it emits is sent on.
      * @ghidraAddress 0x001a7110
      */
@@ -120,37 +113,34 @@ protected:
     /**
      * React to a TrackSelectMsg.
      *
-     * Stores the message's `+0x10` as mSelection when the message's track matches mTrack,
-     * recomputes the gain, and sends the pan when mOwnsPan is set.
-     *
-     * The body is not written.
+     * A message for mTrack installs its player as mSelection and recomputes the gain. Then, for
+     * any track, a selection whose Player::Slot2() reports zero takes the message's track as
+     * mLastSection and, when mOwnsPan is set, sends the pan.
      *
      * @param pMsg The TrackSelectMsg.
      * @ghidraAddress 0x001a75d8
      */
-    void OnTrackSelect(Message *pMsg);
+    void OnTrackSelect(TrackSelectMsg *pMsg);
 
     /**
      * React to a TracksOnMsg.
      *
-     * Stores the message's two words and recomputes the gain.
-     *
-     * The body is not written.
+     * Stores the message's bar in mUnknown50 and its track count in mLevelIndex, and recomputes
+     * the gain.
      *
      * @param pMsg The TracksOnMsg.
      * @ghidraAddress 0x001a76d0
      */
-    void OnTracksOn(Message *pMsg);
+    void OnTracksOn(TracksOnMsg *pMsg);
 
     /**
-     * Recompute the gain from the game state and send it.
+     * Recompute the gain from the game state and send it as gain factor 3.
      *
-     * Reads slot 19 of the game manager, and when the manager's `+0x04` is clear it asks mSelection
-     * whether it is active. An inactive selection sends 127 and an active one sends 127 less the
-     * byte at mTrackLevels[mLevelIndex]. Either way the result goes through SetGainFactor() with
-     * index 3.
+     * While GameStats::mCompleted is set the factor is 115. Otherwise a real mSelection gets
+     * 127, and the stand-in gets 127 less the low byte of mTrackLevels[mLevelIndex].
      *
-     * The body is not written.
+     * Inline. OnTrackSelect() and OnTracksOn() expand it, and the image keeps this out-of-line
+     * copy.
      *
      * @ghidraAddress 0x001a82f0
      */
@@ -186,10 +176,8 @@ private:
     int mOwnsPan; // +0x14
     // Section the pan index is measured against.
     int mLastSection; // +0x18
-    // Object the gain recomputation asks whether it is active, defaulted to the static instance at
-    // `0x0066f930`. Its vptr sits at its own `+0x04`, which makes it Attachment-derived, and
-    // OnTrackSelect() replaces it with a TrackSelectMsg's `+0x10`.
-    void *mSelection; // +0x1c
+    // The player of the selected track, g_nullPlayer until OnTrackSelect() installs one.
+    Player *mSelection; // +0x1c
     // Combined gain most recently sent as controller 11. The constructor sets it to 127.
     unsigned char mLevel; // +0x20
     // Sixteen bytes the constructor zeroes twice over, once before the configuration reads and
@@ -203,9 +191,9 @@ private:
     unsigned char mGainFactors[4]; // +0x3c
     int mLevelIndex;               // +0x40 index into mTrackLevels, taken from a TracksOnMsg
     // Per-track levels, read from configuration code 0x39f by the constructor.
-    std::vector<unsigned char> mTrackLevels; // +0x44
-    int mUnknown50;                          // +0x50 set to -1 by the constructor
-    // Result of the unidentified Globals accessor's slot 9, read once by the constructor. No
-    // recovered routine reads it back.
+    std::vector<int> mTrackLevels; // +0x44
+    int mUnknown50;                // +0x50 set to -1 by the constructor, then a TracksOnMsg's bar
+    // PlayMap::Slot9() of the play map, read once by the constructor. No recovered routine reads
+    // it back.
     int mUnknown54; // +0x54
 };

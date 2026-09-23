@@ -1,8 +1,16 @@
 #include "gs/mixer.h"
 
+#include <algorithm>
+
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/gamestats.h"
+#include "game/nullplayer.h"
+#include "game/playmap.h"
 #include "msg/stdmidimsg.h"
 #include "msg/trackselectmsg.h"
 #include "msg/tracksonmsg.h"
+#include "script/configquery.h"
 
 namespace {
 
@@ -21,7 +29,33 @@ constexpr int kGainDivisor = 0x1f417f;
 // table and send zero.
 constexpr unsigned char kSectionPan[] = {0, 0, 0x20, 0x40, 0x60, kMaxLevel};
 
+// The three configuration codes the constructor reads.
+constexpr int kOwnsPanConfigCode = 0x398;
+constexpr int kUnknown10ConfigCode = 0x399;
+constexpr int kTrackLevelsConfigCode = 0x39f;
+
+// The value the constructor gives mUnknown50.
+constexpr int kNoValue = -1;
+
+// The gain factor RecomputeGain() drives, and the factor it uses once the song is completed.
+constexpr int kStateGainFactor = 3;
+constexpr unsigned char kCompletedGain = 115;
+
 } // namespace
+
+// 0x001a7110
+Mixer::Mixer(int nTrack, unsigned char nChannel)
+    : mChannel(nChannel), mTrack(nTrack), mLastSection(0), mSelection(&g_nullPlayer), mUnknown28(),
+      mLevelIndex(0), mUnknown50(kNoValue) {
+    mOwnsPan = QueryConfigFlag(kOwnsPanConfigCode);
+    mUnknown10 = static_cast<unsigned char>(QueryConfigValue(kUnknown10ConfigCode));
+    mUnknown54 = Application::shared()->GetPlayMap()->Slot9();
+    mMuted = 0;
+    std::fill(mUnknown28, mUnknown28 + sizeof(mUnknown28), 0); // Yes, the binary zeroes it again.
+    mLevel = kMaxLevel;
+    std::fill(mGainFactors, mGainFactors + sizeof(mGainFactors), kMaxLevel);
+    QueryConfigVector(&mTrackLevels, kTrackLevelsConfigCode);
+}
 
 // 0x001a8130
 Mixer::~Mixer() {
@@ -89,6 +123,41 @@ void Mixer::SetMuted(int bMuted) {
     mOutput->Handle(&msg);
 }
 
+// 0x001a75d8
+void Mixer::OnTrackSelect(TrackSelectMsg *pMsg) {
+    if (pMsg->mUnknown04 == mTrack) {
+        mSelection = pMsg->mUnknown10;
+        RecomputeGain();
+    }
+    if (mSelection->Slot2() != 0) {
+        return;
+    }
+    mLastSection = pMsg->mUnknown04;
+    if (mOwnsPan != 0) {
+        SendPan();
+    }
+}
+
+// 0x001a76d0
+void Mixer::OnTracksOn(TracksOnMsg *pMsg) {
+    mUnknown50 = pMsg->mBar;
+    mLevelIndex = pMsg->mTracks;
+    RecomputeGain();
+}
+
+// 0x001a82f0
+void Mixer::RecomputeGain() {
+    unsigned char nGain;
+    if (Application::shared()->GetGameManager()->GetStats()->mCompleted != 0) {
+        nGain = kCompletedGain;
+    } else if (mSelection->IsNull() == 0) {
+        nGain = kMaxLevel;
+    } else {
+        nGain = static_cast<unsigned char>(kMaxLevel - mTrackLevels[mLevelIndex]);
+    }
+    SetGainFactor(kStateGainFactor, nGain);
+}
+
 // 0x001a8390
 void Mixer::ApplyControlChange(StdMidiMsg *pMsg) {
     const unsigned char nController = pMsg->mUnknown09;
@@ -122,10 +191,10 @@ void Mixer::HandleMessage(Message *pMsg) {
         return;
     }
     if (nType == static_cast<int>(g_dwTracksOnMsgType)) {
-        OnTracksOn(pMsg);
+        OnTracksOn(static_cast<TracksOnMsg *>(pMsg));
         return;
     }
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
-        OnTrackSelect(pMsg);
+        OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
     }
 }
