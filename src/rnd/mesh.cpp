@@ -886,7 +886,7 @@ void Mesh::SetTrans2Owner(Transformable *pOwner) {
 
 // 0x00492e98
 Sphere Mesh::WorldSphere() {
-    const float (*xfm)[kXfmRowFloatCount] = mTransOwner->mWorldXfm;
+    const auto &xfm = mTransOwner->mWorldXfm;
     const Vector3 &center = mSphere.mCenter;
     Sphere sphere;
     sphere.mCenter.x = xfm[kXfmRowX][0] * center.x + xfm[kXfmRowY][0] * center.y +
