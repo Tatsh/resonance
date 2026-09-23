@@ -410,6 +410,7 @@ loadfilemct
 loadgame
 loadglobalsettingsmct
 loadinggame
+loadjam
 loadjukeboxplaylistmct
 loadpersonasmct
 loadremixmct
@@ -560,6 +561,7 @@ netplayer
 neut
 neutralizemsg
 neutralizepowerup
+newjam
 newmodule
 njgb
 nolattice

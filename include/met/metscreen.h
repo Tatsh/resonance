@@ -817,10 +817,13 @@ protected:
     // protected. The title is inferred from the two members it writes.
     void ResolveAnimationViews();
 
-private:
+protected:
     // End frame of the enter animation, read from mUnknown30 by the helper at 0x0038bd60. Not
-    // written by the constructor.
+    // written by the constructor. MetRemixTypeScreen's slot 5 reads it, which is why it is
+    // protected.
     float mUnknown04; // +0x04
+
+private:
     // Time the enter animation started, or zero while no enter animation runs.
     float mUnknown08; // +0x08
     // Time the exit animation started, or zero while no exit animation runs.
@@ -841,11 +844,18 @@ protected:
     int mUnknown18; // +0x18, starts at 2
 
 private:
-    int mUnknown1c;        // +0x1c
-    HxStr mUnknown20;      // +0x20, the screen name
-    HxStr mUnknown28;      // +0x28, mUnknown80 with `.rnd` appended
-    Rnd::View *mUnknown30; // +0x30, the view named `<screen>_EE.anim`
+    int mUnknown1c;   // +0x1c
+    HxStr mUnknown20; // +0x20, the screen name
+    HxStr mUnknown28; // +0x28, mUnknown80 with `.rnd` appended
+
+protected:
+    // The view named `<screen>_EE.anim`. MetRemixTypeScreen's slot 5 swaps its animation, which
+    // is why it is protected.
+    Rnd::View *mUnknown30; // +0x30
+
+private:
     Rnd::View *mUnknown34; // +0x34, the view named `<screen>_BF.anim`
+
 protected:
     // Extra container object names a screen wants resolved. MetMemCardLoadScreen,
     // MetMemCardTypeScreen, MetRemixTypeScreen, and MetRemixDelScreen each append one in their

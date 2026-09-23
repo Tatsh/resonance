@@ -3,11 +3,17 @@
 #include "met/metbuttonlist.h"
 #include "met/metscreen.h"
 
+namespace Rnd {
+class TransAnim;
+class View;
+} // namespace Rnd
+
 /**
  * Screen that chooses what kind of remix to work on.
  *
  * `18MetRemixTypeScreen` in the RTTI descriptor at `0x00901c20`, with MetScreen as its one public
- * non-virtual base at offset 0. The object is 0x90 bytes and the 39-entry vtable is at
+ * non-virtual base at offset 0. The object is 0xa0 bytes, which the factory at `0x00369638` fixes
+ * by requesting exactly that many, and the 39-entry vtable is at
  * `0x00808760`, the same length as the MetScreen table, so the class declares no virtual of its
  * own.
  *
@@ -43,6 +49,60 @@ public:
     virtual ~MetRemixTypeScreen();
 
     /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x00369638
+     */
+    static MetRemixTypeScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Show the screen with the buttons the game mode offers.
+     *
+     * Slot 5. A solo game offers the new, load, and jukebox buttons over the three-button view,
+     * and any other mode offers the first two over the two-button view. A pending front-end
+     * transition first brings up the gizmo and help screens and clears the loading flag in the
+     * game parameters.
+     *
+     * @ghidraAddress 0x00362600
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Act on one navigation command.
+     *
+     * Slot 19. The two ring steps move the selection and refresh the help text, select starts the
+     * selection alternation, and back exits toward the title screen.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x00362348
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Leave for the chosen button once the selection alternation finishes.
+     *
+     * Slot 30. The help screen is exited only when a button other than the first is selected.
+     *
+     * @param pObject The object whose alternation finished, which is not read.
+     * @ghidraAddress 0x00362fa0
+     */
+    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+
+    /**
+     * Resolve the container views and the two button-layout views and animations.
+     *
+     * Slot 38.
+     *
+     * @ghidraAddress 0x00362098
+     */
+    virtual void ResolveContainerViews();
+
+    /**
      * Silence the cycle-left sound.
      *
      * Both overrides are two-instruction stubs, so each was written inline with an empty body.
@@ -61,5 +121,9 @@ public:
     }
 
 private:
-    MetButtonList *mUnknown8c; // +0x8c
+    MetButtonList *mUnknown8c;        // +0x8c
+    Rnd::View *mTwoButtonView;        // +0x90, `smrt_2but.view`
+    Rnd::View *mThreeButtonView;      // +0x94, `smrt_3but.view`
+    Rnd::TransAnim *mTwoButtonAnim;   // +0x98, `smrt_2but.tnm`
+    Rnd::TransAnim *mThreeButtonAnim; // +0x9c, `smrt_3but.tnm`
 };
