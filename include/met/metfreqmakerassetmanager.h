@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+#include <map>
 #include <vector>
 
 #include "math/color.h"
@@ -29,15 +31,14 @@ class Tex;
  *  - A vector of 4-byte elements at `+0x74`, with its finish at `+0x78` and its end of storage at
  *    `+0x7c`, is deallocated.
  *  - A second vector of 4-byte elements at `+0x68` is deallocated.
- *  - A run of `std::list` members descending from `+0x60` through `+0x58` and below is cleared
- *    through the routine at `0x00255658`, and each dummy node is returned to the pool.
+ *  - The eleven category lists descending from `+0x60` to `+0x38` are cleared through the routine
+ *    at `0x00255658`, and each dummy node is returned to the pool.
  *  - The part template vector at `+0x20` is deallocated.
  *
  * The constructor at `0x00250b18` writes the vptr, zeroes `+0x00` through `+0x14`, and then runs
  * on for another 0x400 bytes of asset registration that is not recovered here. The classes of the
- * two owned objects and the element types of the lists are undetermined. Only the members that
- * GetPart(), NextMeshName(), and CloneMesh() read are typed, and the rest of the span is recorded
- * as reserved.
+ * two owned objects are undetermined. Only the members the recovered routines read are typed, and
+ * the rest of the span is recorded as reserved.
  *
  * The one instance is created by the routine at `0x00255158`, which allocates exactly 0x84 bytes,
  * runs the constructor, and records the result in the global at `0x006a0f30` that shared() reads.
@@ -202,16 +203,43 @@ public:
      */
     Color *SampleTexture(Rnd::Tex *pTex, float flU, float flV);
 
+    /**
+     * Report the part template registered under one name.
+     *
+     * Runs PollLoad() first and discards its result. The title is inferred.
+     *
+     * @param name The template name.
+     * @return The template, or null when no template has the name.
+     * @ghidraAddress 0x002549b8
+     */
+    FreqPartTemplate *FindPart(const HxStr &name);
+
+    /** The number of part categories, which count from 1. */
+    static constexpr int kCategoryCount = 11;
+
+    /**
+     * Report the templates of one category.
+     *
+     * A category outside 1 through 11 reports the list of category 11. The title is inferred.
+     *
+     * @param nCategory The category.
+     * @return The list.
+     * @ghidraAddress 0x00254ea0
+     */
+    std::list<FreqPartTemplate *> *TemplatesInCategory(int nCategory);
+
 private:
     // The members the destructor walks, described in the class documentation above.
-    unsigned char mUnknown00[0x20];         // +0x00
-    std::vector<FreqPartTemplate *> mParts; // +0x20, indexed by template identifier
-    unsigned char mUnknown2c[0x4];          // +0x2c
-    Rnd::Mesh *mMeshTemplate;               // +0x30, the mesh CloneMesh() copies
-    Rnd::Tex *mPaletteTex;                  // +0x34, resolved by ColorAt()
-    unsigned char mUnknown38[0x2c];         // +0x38
-    int mMeshCount;                         // +0x64, the counter NextMeshName() advances
-    unsigned char mUnknown68[0x18];         // +0x68
+    unsigned char mUnknown00[0x14];                               // +0x00
+    std::map<HxStr, FreqPartTemplate *> mPartsByName;             // +0x14
+    std::vector<FreqPartTemplate *> mParts;                       // +0x20, by template identifier
+    unsigned char mUnknown2c[0x4];                                // +0x2c
+    Rnd::Mesh *mMeshTemplate;                                     // +0x30, copied by CloneMesh()
+    Rnd::Tex *mPaletteTex;                                        // +0x34, resolved by ColorAt()
+    std::list<FreqPartTemplate *> mCategoryLists[kCategoryCount]; // +0x38, categories 1 to 11
+    // Advanced by NextMeshName().
+    int mMeshCount;                 // +0x64
+    unsigned char mUnknown68[0x18]; // +0x68
 };
 
 /**

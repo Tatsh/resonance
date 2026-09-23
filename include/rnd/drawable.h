@@ -105,6 +105,19 @@ public:
     void ClearDraws();
 
     /**
+     * Move pDraw nSteps places later in mDraws, or earlier for a negative count.
+     *
+     * The move stops at either end of the list, and a pDraw absent from mDraws does nothing. No
+     * reference changes hands. FreqAppearanceDetail reorders the parts of an avatar with it. The
+     * title is inferred.
+     *
+     * @param pDraw The drawable to move.
+     * @param nSteps The number of places to move it.
+     * @ghidraAddress 0x005034b8
+     */
+    void MoveDraw(Drawable *pDraw, int nSteps);
+
+    /**
      * Set whether this object draws at all.
      *
      * Drawable vtable slot 1.

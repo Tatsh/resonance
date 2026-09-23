@@ -22,6 +22,9 @@ constexpr int kBasisRowCount = 3;
 constexpr int kBasisXRow = 0;
 constexpr int kBasisZRow = 2;
 
+// Part categories count from 1.
+constexpr int kFirstCategory = 1;
+
 // The flags CloneMesh() copies the template mesh with.
 constexpr unsigned kCloneCopyFlags = 0;
 
@@ -78,4 +81,20 @@ Color *MetFreqMakerAssetManager::ColorAt(const Vector2 &position) {
         mPaletteTex = dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(g_spectrumTextureName));
     }
     return SampleTexture(mPaletteTex, position.x, position.y);
+}
+
+// 0x002549b8
+FreqPartTemplate *MetFreqMakerAssetManager::FindPart(const HxStr &name) {
+    PollLoad(); // Yes, the binary discards the result.
+    std::map<HxStr, FreqPartTemplate *>::iterator it = mPartsByName.find(name);
+    return it != mPartsByName.end() ? it->second : nullptr;
+}
+
+// 0x00254ea0
+std::list<FreqPartTemplate *> *MetFreqMakerAssetManager::TemplatesInCategory(int nCategory) {
+    // The binary dispatches through a jump table with one entry for each category.
+    if (nCategory < kFirstCategory || nCategory > kCategoryCount) {
+        return &mCategoryLists[kCategoryCount - 1];
+    }
+    return &mCategoryLists[nCategory - kFirstCategory];
 }

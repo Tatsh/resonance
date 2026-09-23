@@ -14,9 +14,9 @@ constexpr float kNoPalettePosition = -1.0f;
 
 // 0x0024f300
 FreqMakerCursor::FreqMakerCursor()
-    : mUnknown00(0), mUnknown04(0), mUnknown20(0), mUnknown70(0), mTemplate(nullptr), mUnknown78(1),
-      mScaleX(kUnsetScale), mScaleZ(kUnsetScale), mScaleStepX(kUnsetScaleStep),
-      mScaleStepZ(kUnsetScaleStep), mUnknown8c(0), mPalettePosition(), mCursorMesh(nullptr) {
+    : mCursorX(0), mCursorZ(0), mSelected(nullptr), mSelectedDrawIndex(0), mTemplate(nullptr),
+      mPlacing(1), mScaleX(kUnsetScale), mScaleZ(kUnsetScale), mScaleStepX(kUnsetScaleStep),
+      mScaleStepZ(kUnsetScaleStep), mCursorMirrored(0), mPalettePosition(), mCursorMesh(nullptr) {
     mColor = g_freqMakerDefaultColor;
     mPalettePosition.y = kNoPalettePosition;
     mPalettePosition.x = kNoPalettePosition;
@@ -26,4 +26,11 @@ FreqMakerCursor::FreqMakerCursor()
 FreqMakerCursor::~FreqMakerCursor() {
     delete mCursorMesh;
     mCursorMesh = nullptr;
+}
+
+// 0x0024f2e8
+void FreqMakerCursor::deselect() {
+    if (mSelected != nullptr) {
+        mSelected = nullptr;
+    }
 }

@@ -4,6 +4,8 @@ Eran
 Kasson
 NODISC
 Orthonormalize
+Randomizable
+Recolor
 Vron
 abitmap
 abmpfile

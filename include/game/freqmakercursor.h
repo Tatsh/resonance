@@ -35,22 +35,32 @@ public:
      */
     ~FreqMakerCursor();
 
+    /**
+     * Forget the selected part without restoring it.
+     *
+     * FreqAppearanceDetail::placeCursor() runs it when the cursor is editing. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x0024f2e8
+     */
+    void deselect();
+
 protected:
-    int mUnknown00;                // +0x00
-    int mUnknown04;                // +0x04
+    int mCursorX;                  // +0x00, the cursor position in whole units
+    int mCursorZ;                  // +0x04
     unsigned char mUnknown08[0x8]; // +0x08
     Color mColor;                  // +0x10, starts as g_freqMakerDefaultColor
-    int mUnknown20;                // +0x20
+    FreqPart *mSelected;           // +0x20, the part being edited, or null
     unsigned char mUnknown24[0xc]; // +0x24
-    FreqPart mPart;                // +0x30
-    int mUnknown70;                // +0x70
+    FreqPart mSelectedBackup;      // +0x30, the selected part as it was when selected
+    int mSelectedDrawIndex;        // +0x70, its draw position when selected
     FreqPartTemplate *mTemplate;   // +0x74, the template being placed, or null
-    int mUnknown78;                // +0x78, starts at 1
+    int mPlacing;                  // +0x78, 1 while placing a template and 0 while editing
     float mScaleX;                 // +0x7c, the template's x scale, 1000 while unset
     float mScaleZ;                 // +0x80, the template's z scale, 1000 while unset
     int mScaleStepX;               // +0x84, mScaleX in 1/110 steps, -1 while unset
     int mScaleStepZ;               // +0x88, mScaleZ in 1/110 steps, -1 while unset
-    int mUnknown8c;                // +0x8c
+    int mCursorMirrored;           // +0x8c
     Vector2 mPalettePosition;      // +0x90, starts at (-1, -1)
     Rnd::Mesh *mCursorMesh;        // +0x98, the preview mesh, owned
 };

@@ -4,6 +4,9 @@
 
 #include "game/freqmakercursor.h"
 #include "game/freqpart.h"
+#include "math/color.h"
+#include "math/vector2.h"
+#include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -158,7 +161,172 @@ public:
      */
     void resetCursor();
 
+    /**
+     * Start placing a new part of one template.
+     *
+     * The placement state is reset, and with fewer than 16 parts the named template is shown on
+     * the preview mesh with its material, scale, and the current colour, and the preview mesh is
+     * moved to the end of the view's lists. The title is inferred.
+     *
+     * @param name The template name.
+     * @ghidraAddress 0x0024a5f0
+     */
+    void selectTemplate(const HxStr &name);
+
+    /**
+     * Place the previewed part, or stop editing the selected one.
+     *
+     * While placing, a copy of the preview mesh becomes a new part at the cursor, drawn just
+     * before the preview mesh, with the current colour and mirroring, and the placement state is
+     * reset. While editing, the selection is dropped and placing resumes. The title is inferred.
+     *
+     * @ghidraAddress 0x0024a770
+     */
+    void placeCursor();
+
+    /**
+     * Move the cursor one unit, moving the preview mesh or the selected part along with it.
+     *
+     * Each axis moves only while the part's edges stay inside -55 to 55, and a part of category 1
+     * does not rise above zero. Nothing moves while placing with 16 parts. The title is inferred.
+     *
+     * @param nStepX -1, 0, or 1 along x.
+     * @param nStepZ -1, 0, or 1 along z.
+     * @ghidraAddress 0x0024a9e8
+     */
+    void nudgeCursor(int nStepX, int nStepZ);
+
+    /**
+     * Start editing one part, retaining a copy to revert to.
+     *
+     * The title is inferred.
+     *
+     * @param nIndex The part's position in the part list.
+     * @return The part, or null for an index outside the list.
+     * @ghidraAddress 0x0024ae20
+     */
+    FreqPart *selectPart(int nIndex);
+
+    /**
+     * Reset the placement state and delete one part.
+     *
+     * The title is inferred.
+     *
+     * @param nIndex The part's position in the part list. An index outside the list deletes
+     *               nothing.
+     * @ghidraAddress 0x0024bc50
+     */
+    void deletePart(int nIndex);
+
+    /**
+     * Restore the selected part's colour, mirroring, draw position, and placement from the copy
+     * selectPart() retained, and drop the selection.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x0024be00
+     */
+    void revertSelection();
+
+    /**
+     * Give each part that may be randomised a random change.
+     *
+     * With a chance of a third a part takes a random palette colour, and with another third a
+     * random template of its category, unless the category is 1, 2, or 8. The title is inferred.
+     *
+     * @ghidraAddress 0x0024bfc8
+     */
+    void randomize();
+
+    /**
+     * Move one part and the cursor to the origin and bring the part to the front.
+     *
+     * The title is inferred.
+     *
+     * @param nIndex The part's position in the part list.
+     * @ghidraAddress 0x0024c218
+     */
+    void recentrePart(int nIndex);
+
+    /**
+     * Move the previewed or selected mesh one step earlier in the draw order.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x0024ef08
+     */
+    void sendBackward();
+
+    /**
+     * Move the previewed or selected mesh one step later in the draw order.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x0024ef80
+     */
+    void bringForward();
+
+    /**
+     * Report where a part's mesh sits in the view's draw order.
+     *
+     * revertSelection() and selectPart() expand the same body. The out-of-line copy has no
+     * caller. The title is inferred.
+     *
+     * @param pPart The part.
+     * @return The position, or the number of drawables when the mesh is not drawn.
+     * @ghidraAddress 0x0024eff8
+     */
+    int drawIndexOf(FreqPart *pPart);
+
+    /**
+     * Mirror the previewed or selected part.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x0024f060
+     */
+    void toggleMirror();
+
+    /**
+     * Record the current colour and apply it to the previewed or selected part.
+     *
+     * The title is inferred.
+     *
+     * @param color The colour.
+     * @param palettePosition The palette position the colour came from.
+     * @ghidraAddress 0x0024f178
+     */
+    void setColor(const Color &color, const Vector2 &palettePosition);
+
+    /**
+     * Hang mView from a parent view.
+     *
+     * The title is inferred.
+     *
+     * @param pParent The parent view.
+     * @ghidraAddress 0x0024f238
+     */
+    void attachTo(Rnd::View *pParent);
+
+    /**
+     * Unhang mView from a parent view.
+     *
+     * The title is inferred.
+     *
+     * @param pParent The parent view.
+     * @ghidraAddress 0x0024f290
+     */
+    void detachFrom(Rnd::View *pParent);
+
 private:
+    // Report the part at one position, or the last part when the list is shorter. Four routines
+    // expand the same walk.
+    FreqPart *partAt(int nIndex);
+
+    // Move the previewed or selected mesh through the draw order. sendBackward() and
+    // bringForward() expand the same body with opposite steps.
+    void moveCursorDraw(int nSteps);
+
     std::list<FreqPart *> mParts; // +0xa0
 
 public:

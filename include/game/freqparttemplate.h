@@ -40,10 +40,22 @@ public:
      */
     int mColorable;
 
-private:
-    unsigned char mUnknown14[0x8]; // +0x14
+    /**
+     * Non-zero when FreqAppearanceDetail::randomize() may change a part of this kind. +0x14
+     *
+     * Public because FreqAppearanceDetail::randomize() reads it directly, and the image has no
+     * accessor.
+     */
+    int mRandomizable;
 
-public:
+    /**
+     * The category the template is listed under, 1 through 11. +0x18
+     *
+     * Public because FreqAppearanceDetail reads it directly, and the image has no accessor.
+     * FreqAppearanceDetail::nudgeCursor() also writes it.
+     */
+    int mCategory;
+
     /**
      * The x and z scale of a mesh of this kind, in 1/128 units. +0x1c and +0x20
      *

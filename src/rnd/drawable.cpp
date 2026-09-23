@@ -168,6 +168,27 @@ void Drawable::ClearDraws() {
     }
 }
 
+// 0x005034b8
+void Drawable::MoveDraw(Drawable *pDraw, int nSteps) {
+    std::list<Drawable *>::iterator it = std::find(mDraws.begin(), mDraws.end(), pDraw);
+    if (it == mDraws.end()) {
+        return;
+    }
+
+    std::list<Drawable *>::iterator pos = it;
+    if (nSteps > 0) {
+        ++pos;
+        while (pos != mDraws.end() && --nSteps != -1) {
+            ++pos;
+        }
+    } else {
+        while (pos != mDraws.begin() && ++nSteps != 1) {
+            --pos;
+        }
+    }
+    mDraws.splice(pos, mDraws, it);
+}
+
 // 0x00506ba8
 void Drawable::ReleaseDrawsRefs() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end(); ++it) {
