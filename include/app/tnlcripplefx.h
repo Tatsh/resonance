@@ -52,6 +52,17 @@ public:
      */
     void Start(const std::vector<TnlPlayer *> &targets, float flFrame);
 
+    /**
+     * Advance the crippler through its launch, return, and hit phases.
+     *
+     * AppTunnel::SetFrame() calls it for every crippler. The body is not written, because it calls
+     * a method of the unrecovered GrooveWorld member at `+0x34`.
+     *
+     * @param flFrame The current frame.
+     * @ghidraAddress 0x0043e500
+     */
+    void SetFrame(float flFrame);
+
 private:
     // AppTunnel::StartCrippleFX() reads mState to find an idle crippler.
     friend class AppTunnel;

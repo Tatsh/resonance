@@ -58,7 +58,8 @@ public:
      *
      * The basis rows of the view's local transform become a rotation of `-nStep * 45` degrees, and
      * the translation row is unchanged. The degrees convert through a pi slightly below the float
-     * nearest pi. SetFrame() inlines the call with nStep 0, and the out-of-line copy has no caller.
+     * nearest pi. SetFrame() inlines the call with nStep 0, and AppTunnel::PrepareLocalView()
+     * inlines it with the view index. The out-of-line copy has no caller.
      *
      * @param nStep The number of eighths of a turn.
      * @ghidraAddress 0x00456028
@@ -73,7 +74,7 @@ public:
     void RefreshMeshes();
 
 private:
-    // AppTunnel::PrepareLocalView() turns mRotView while mResetPending is set.
+    // AppTunnel's constructor hides mView in jukebox mode.
     friend class AppTunnel;
 
     std::vector<int> mPlayerMeshes; // Index into mMeshes of the mesh each player slot hides.

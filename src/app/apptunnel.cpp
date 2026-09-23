@@ -1,8 +1,5 @@
 #include "app/apptunnel.h"
 
-#include <cmath>
-#include <cstring>
-
 #include "app/application.h"
 #include "app/durgemtrails.h"
 #include "app/hudutil.h"
@@ -28,6 +25,7 @@
 #include "game/grooveworld.h"
 #include "game/leveldata.h"
 #include "game/player.h"
+#include "game/playmap.h"
 #include "math/color.h"
 #include "math/transform.h"
 #include "math/vector3.h"
@@ -158,10 +156,20 @@ constexpr float kIdleSnakeFrame = 1e9f;
 // Push of a string flare placed on a ring, as the tangent scale of the ring transform.
 constexpr float kStringFlareRingScale = 0.97f;
 
-// Turn of the now ring per local view, applied negated, and the conversion from degrees.
-constexpr float kLocalViewTurnDegrees = 45.0f;
-constexpr float kPi = 3.1415925f;
-constexpr float kDegreesPerHalfTurn = 180.0f;
+// Alpha SetFrame() takes from each live string flare particle per call.
+constexpr float kStringFlareFade = 0.15f;
+
+// Size SetFrame() takes from each gem flash per call.
+constexpr float kGemFlashShrink = 0.1f;
+
+// Song frames per bar.
+constexpr int kFramesPerBar = 1920;
+
+// OnBarChanged() ignores a bar that ended more than this many frames, a quarter bar, ago.
+constexpr float kBarChangeLateFrames = 480.0f;
+
+// A new panel starts this fraction of the way from the song tick to the start of its bar.
+constexpr float kPanelLeadFraction = 0.25f;
 
 } // namespace
 
@@ -487,6 +495,159 @@ AppTunnel::~AppTunnel() {
     mSavedCams.clear();
 }
 
+inline TnlPlayer *AppTunnel::FindTnlPlayer(Player *pPlayer) {
+    for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        if ((*it)->mPlayer == pPlayer) {
+            return *it;
+        }
+    }
+    return nullptr;
+}
+
+void AppTunnel::OnBarChanged(
+    int nTrack, int nBar, int nUnknown, Player *pPlayer, int nPowerup, int nEnabled) {
+    int nNewPanel = 0;
+    if (mUnknowncc) {
+        nNewPanel = (nUnknown == 0);
+    }
+    const float flTick = mRenderer->mSongTick;
+    if (flTick < 0.0f) {
+        nNewPanel = 0;
+    }
+    if (kBarChangeLateFrames < flTick - static_cast<float>((nBar + 1) * kFramesPerBar)) {
+        return;
+    }
+    const float flStartFrame =
+        flTick + ((static_cast<float>(nBar * kFramesPerBar) - flTick) * kPanelLeadFraction);
+    if (mJukebox) {
+        nEnabled = 0;
+    }
+    TnlPanel::Kind kind;
+    const TrackMode mode = mTrackModes[nTrack];
+    if (mode == kTrackModeAxe) {
+        kind = TnlPanel::kKindAxe;
+    } else if (mode == kTrackModeScratch) {
+        kind = TnlPanel::kKindScratch;
+    } else {
+        kind = (mode == kTrackModeVocal) ? TnlPanel::kKindVox : TnlPanel::kKindLane;
+    }
+    const int nStep = mPlayMap->FindStepIndex(mPlayMap->Slot5(nBar));
+    if (nNewPanel) {
+        AddPanel(new TnlPanel(nTrack, nBar, pPlayer, nPowerup, kind, nEnabled, nStep),
+                 flStartFrame);
+    } else {
+        TnlPanel panel(nTrack, nBar, pPlayer, nPowerup, kind, nEnabled, nStep);
+        panel.Apply();
+    }
+}
+
+void AppTunnel::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
+    if (mGameMode == kGameModeSolo) {
+        return;
+    }
+    if (pOldLeader != nullptr) {
+        FindTnlPlayer(pOldLeader)->mActivator.SetLeader(0);
+    }
+    if (pNewLeader != nullptr) {
+        FindTnlPlayer(pNewLeader)->mActivator.SetLeader(1);
+    }
+}
+
+void AppTunnel::AddPanel(TnlPanel *pPanel, float flStartFrame) {
+    mPanels.push_back(pPanel);
+    pPanel->SetStartFrame(flStartFrame);
+}
+
+void AppTunnel::UpdateGhostFades() {
+    for (unsigned i = 0; i < mGhostFadeRates.size(); ++i) {
+        Rnd::Mat *pMat = GetGhostMat(i);
+        if (mGhostFadeRates[i] == 0.0f) {
+            continue;
+        }
+        float flAlpha = pMat->mDiffuse.a + mGhostFadeRates[i];
+        if (flAlpha < 0.0f) {
+            flAlpha = 0.0f;
+            mGhostFadeRates[i] = 0.0f;
+            mGemManager->SetKindShowing(mGhostGemKinds[i], 0);
+        } else if (1.0f < flAlpha) {
+            mGhostFadeRates[i] = 0.0f;
+            flAlpha = 1.0f;
+        }
+        pMat->SetAlpha(flAlpha);
+    }
+}
+
+void AppTunnel::SetFrame(float flFrame) {
+    const float flScaledFrame = flFrame * mUnknown144;
+    for (Rnd::Particle *pParticle = mStringFlare->GetLiveParticles(); pParticle != nullptr;
+         pParticle = pParticle->mNext) {
+        pParticle->mCol.a -= kStringFlareFade;
+        if (pParticle->mCol.a < 0.0f) {
+            pParticle->mCol.a = 0.0f;
+        }
+    }
+    mGemManager->Update(flFrame);
+    mGemTrails->Update(flFrame);
+    for (auto it = mPanels.begin(); it != mPanels.end();) {
+        if ((*it)->Update(flFrame, this)) {
+            ++it;
+        } else {
+            delete *it;
+            it = mPanels.erase(it);
+        }
+    }
+    for (auto it = mPendingTriggers.begin(); it != mPendingTriggers.end();) {
+        if (it->Update(flFrame)) {
+            ++it;
+        } else {
+            it = mPendingTriggers.erase(it);
+        }
+    }
+    for (auto it = mGemFlashes.begin(); it != mGemFlashes.end(); ++it) {
+        GemFlash *pFlash = *it;
+        if (pFlash->mParticle == nullptr) {
+            continue;
+        }
+        if (pFlash->mParticle->mSize <= 0.0f) {
+            pFlash->mSystem->FreeParticle(pFlash->mParticle);
+            pFlash->mParticle = nullptr;
+        } else {
+            pFlash->mParticle->mSize -= kGemFlashShrink;
+        }
+    }
+    for (auto it = mPanelFX.begin(); it != mPanelFX.end(); ++it) {
+        (*it)->Update(flFrame);
+    }
+    for (auto it = mFireFX.begin(); it != mFireFX.end(); ++it) {
+        (*it)->SetFrame(flFrame, flScaledFrame);
+    }
+    for (auto it = mCrippleFX.begin(); it != mCrippleFX.end(); ++it) {
+        (*it)->SetFrame(flFrame);
+    }
+    for (auto it = mBumpFX.begin(); it != mBumpFX.end(); ++it) {
+        (*it)->SetFrame(flFrame);
+    }
+    for (auto it = mSnakes.begin(); it != mSnakes.end(); ++it) {
+        (*it)->Update(flFrame);
+    }
+    for (auto it = mArrows.begin(); it != mArrows.end(); ++it) {
+        (*it)->SetFrame(flScaledFrame);
+    }
+    mBoundary->SetFrame(flFrame);
+    mNowRing->SetFrame(flFrame);
+    mArms->SetFrame(flFrame);
+    mMultFX->SetFrame(flFrame);
+    mLattice->SetFrame(flFrame);
+    mCameraRig->SetFrame(flFrame);
+    for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
+        (*it)->Update(flFrame, flScaledFrame);
+    }
+    if (static_cast<float>(mUnknown140 * kFramesPerBar) < flFrame) {
+        mUnknown140 = mPlayMap->FollowingStepBar(mUnknown140);
+    }
+    UpdateGhostFades();
+}
+
 int AppTunnel::IsTrackBarLocked(int nTrack, int nBar) {
     // The binary compares the track mode against mPlayMode itself, which is kPlayModeJam here.
     if ((mPlayMode == kPlayModeJam) && (mTrackModes[nTrack] == kTrackModeRiff)) {
@@ -611,19 +772,5 @@ void AppTunnel::PlaceStringFlareOnRing(int nRing, float flBlend) {
 }
 
 void AppTunnel::PrepareLocalView(int nView, [[maybe_unused]] float flFrame) {
-    TnlNowRing *pNowRing = mNowRing;
-    if (!pNowRing->mResetPending) {
-        return;
-    }
-    const float flAngle =
-        ((static_cast<float>(-nView) * kLocalViewTurnDegrees) * kPi) / kDegreesPerHalfTurn;
-    const float flCos = std::cos(flAngle);
-    const float flSin = std::sin(flAngle);
-    const Vector3 basis[] = {
-        {flCos, 0.0f, -flSin, 1.0f},
-        {0.0f, 1.0f, 0.0f, 1.0f},
-        {flSin, 0.0f, flCos, 1.0f},
-    };
-    std::memcpy(pNowRing->mRotView->mLocalXfm, basis, sizeof(basis));
-    pNowRing->mRotView->mDirty = 1;
+    mNowRing->SetRotation(nView);
 }

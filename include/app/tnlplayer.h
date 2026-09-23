@@ -55,6 +55,19 @@ public:
      */
     void Update(float flFrame, float flScaledFrame);
 
+    /**
+     * Start the two crippler paths from a frame.
+     *
+     * TnlCrippleFX::SetFrame() calls it for each player the crippler hits. The out-of-line copy is
+     * emitted in AppTunnel's translation unit.
+     *
+     * @param flFrame The frame the paths start from.
+     * @ghidraAddress 0x00457008
+     */
+    void SetCrippleFrame(float flFrame) {
+        mCrippleFrame = flFrame;
+    }
+
 private:
     friend class AppTunnel;
     friend class TnlActivator;

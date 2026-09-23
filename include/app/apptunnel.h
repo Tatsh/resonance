@@ -97,8 +97,11 @@ public:
     /**
      * Advance the tunnel to one song position.
      *
-     * Renderer::OnUnknownSlot7() is the caller. The title is inferred from that caller, which hands
-     * the same value to Rnd::Animatable::SetFrame() on its three views. The body is not written.
+     * Fades the string flares, shrinks the gem flashes, retires finished panels and fired
+     * triggers, and advances every helper and effect. The arrows and the players also receive the
+     * position scaled by the tempo rate. Renderer::OnUnknownSlot7() is the caller. The title is
+     * inferred from that caller, which hands the same value to Rnd::Animatable::SetFrame() on its
+     * three views.
      *
      * @param flFrame The song position, in MIDI ticks.
      * @ghidraAddress 0x00446960
@@ -106,10 +109,10 @@ public:
     void SetFrame(float flFrame);
 
     /**
-     * Move the leader marker from one player's tunnel section to another's.
+     * Move the leader marker from one player's activator to another's.
      *
-     * Does nothing in game mode 1. A null player on either side is skipped. The title is
-     * inferred. The body is not written.
+     * Does nothing in kGameModeSolo. A null player on either side is skipped. The body is
+     * TnlActivator::SetLeader() inlined for each side. The title is inferred.
      *
      * @param pOldLeader The previous leader, or null.
      * @param pNewLeader The new leader, or null.
@@ -118,27 +121,29 @@ public:
     void OnLeaderChanged(Player *pOldLeader, Player *pNewLeader);
 
     /**
-     * Update the tunnel for one bar whose state a BarStatusMsg changed.
+     * Update the tunnel section of one bar whose state a BarStatusMsg changed.
      *
-     * The last three arguments are the cell's three words in the order the call passes them. The
-     * title is inferred. The body is not written.
+     * Nothing happens once the renderer's song tick is more than a quarter bar past the end of
+     * the bar. In kPlayModeGame, with nUnknown zero and a song tick that is not negative, a new
+     * TnlPanel starts a quarter of the way from the song tick to the start of the bar. Otherwise
+     * a TnlPanel is built on the stack and applied at once. A jukebox game always passes 0 as the
+     * panel's showing flag. The title is inferred.
      *
      * @param nTrack The track.
      * @param nBar The bar.
      * @param nUnknown The word at `+0x14` of the BarStatusMsg.
      * @param pPlayer The cell's player.
-     * @param nUnknown08 The cell's `mPowerup`.
-     * @param nUnknown04 The cell's `mEnabled`.
+     * @param nPowerup The cell's `mPowerup`.
+     * @param nEnabled The cell's `mEnabled`.
      * @ghidraAddress 0x004465a0
      */
-    void OnBarChanged(
-        int nTrack, int nBar, int nUnknown, Player *pPlayer, int nUnknown08, int nUnknown04);
+    void
+    OnBarChanged(int nTrack, int nBar, int nUnknown, Player *pPlayer, int nPowerup, int nEnabled);
 
     /**
      * Turn the now ring for one local view before the renderer draws it.
      *
-     * Only while the now ring's mResetPending is set, the basis of its "nowring rot.view" becomes
-     * a turn of the view index times -45 degrees about Y, and the view is marked dirty.
+     * The body is TnlNowRing::SetRotation() with the view index as the step, inlined.
      * Renderer::OnUnknownSlot8() is the caller. The title is inferred.
      *
      * @param nView The index of the local view.
@@ -267,6 +272,19 @@ private:
     // Move the first unplaced particle of "string flare.ps" onto one ring at the renderer's song
     // tick, pushed outwards by 0.97. Nothing calls the out-of-line copy. 0x00457ae0.
     void PlaceStringFlareOnRing(int nRing, float flBlend);
+
+    // Append a panel to mPanels and set the frame it starts from. OnBarChanged() is the caller.
+    // 0x00447268.
+    void AddPanel(TnlPanel *pPanel, float flStartFrame);
+
+    // Find the TnlPlayer of a game player, or null. The search is inlined wherever a handler
+    // needs it, and the image has no out-of-line copy.
+    TnlPlayer *FindTnlPlayer(Player *pPlayer);
+
+    // Move each ghost material's alpha by its fade rate. A ghost that fades out completely hides
+    // its gem kind, and either end of the range stops the fade. SetFrame() is the caller.
+    // 0x00446460.
+    void UpdateGhostFades();
 
     Renderer *mRenderer; // +0x04
     // Globals::GetGameMode() at construction.
