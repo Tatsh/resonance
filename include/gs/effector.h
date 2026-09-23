@@ -39,17 +39,6 @@ enum EffectorType {
  * Five classes derive from this one. VolumeEffector, MidiOnOffEffector, and GhostNotesEffector
  * derive from it alone. WahEffector and StutterEffector derive from TickTask as well, placing their
  * Effector subobject at `+0x20`. Both of those vary their control value over time.
- *
- * WahEffector and StutterEffector are recovered and not written here. TickTask has no declaration
- * in this tree yet, and its constructor at `0x0013ad88` lies outside this subsystem. WahEffector is
- * 0x48 bytes with an unsigned char MIDI channel at `+0x34`, an int depth at `+0x38`, an oscillator
- * pointer at `+0x3c`, the enabled flag at `+0x40`, and a pending flag at `+0x44`. Its tick routine
- * at `0x001a0a10` multiplies the depth by the oscillator's current value and sends controller 0x4a,
- * and its Enable() at `0x001a08f8` sends controller 0x51 with 0x7f or with zero. StutterEffector is
- * also 0x48 bytes, and its second tuning value arrives as a two-element property vector. The
- * factory rejects that vector with `Need 2 stutter parameters` at any other length.
- *
- * The factory at `0x001a0df0` is declared below as CreateForType() with its body not written.
  */
 class Effector : public MsgSource {
 public:
@@ -86,10 +75,11 @@ public:
      * Build the effect one type selects.
      *
      * The routine allocates the class the type selects, reads that class's tuning values from
-     * configuration codes 0x38f through 0x392 (the time-varying effects substitute nTrack into the
-     * lookup), and returns the Effector subobject. The returned object's Type() is called once and
-     * the result is discarded. JamEffectsMgr's constructor is the recovered caller. The body is not
-     * written.
+     * configuration codes 0x38f through 0x392 (the wah substitutes nTrack into both lookups), and
+     * returns the Effector subobject. The stutter's code 0x391 must hold exactly two values, and
+     * any other count stops the game with `Need 2 stutter parameters`. The returned object's Type()
+     * is called once and the result is discarded. JamEffectsMgr's constructor is the recovered
+     * caller.
      *
      * @param nType An EffectorType. Any other value leaves the result null, and the Type() call
      *              then dereferences it.

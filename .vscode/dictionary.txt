@@ -787,6 +787,7 @@ stringobject
 stropmodule
 structmember
 structmodule
+stuttereffector
 susgemmsg
 sustainnotemsg
 synthsustainer
@@ -928,6 +929,7 @@ vrsqrt
 vtable
 vtables
 vutext
+waheffector
 watchdogclock
 watchdogplayback
 watchdogrecorder
