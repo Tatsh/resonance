@@ -41,9 +41,8 @@ namespace Rnd {
  * "Drawable", and "Transformable" against four factories that each set one. A file naming a bare
  * mix-in therefore loads a View that remembers which mix-in was asked for.
  *
- * One member is recovered and not declared. The routine at `0x004e2730` is two instructions that
- * return, and the destructor calls it on this object immediately before ReleaseAllRefs(). Its
- * title and its purpose are both undetermined, because an empty body records neither.
+ * The destructor follows the engine pattern of dropping this object's own references and then
+ * ReleaseAllRefs(). A view holds no reference of its own, so the first step is an empty body.
  */
 class View : public Animatable, public Drawable, public Transformable, public Collideable {
 public:
@@ -139,6 +138,13 @@ public:
      */
     void RemoveView(View *pChild);
 
+private:
+    // Drop the references this view holds, of which there are none, so the body is empty. The
+    // destructor calls it immediately before ReleaseAllRefs(), where every sibling class drops its
+    // own references. The name follows that pattern and is inferred. 0x004e2730.
+    void RemoveObjectRefs();
+
+public:
     // Declared in recovered offset order. Each flag is titled from the class key of the factory
     // that sets it. Every writer is one of those factories and no reader was located, so the four
     // are public because nothing in the image constrains them further.
