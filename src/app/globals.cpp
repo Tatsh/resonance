@@ -101,6 +101,12 @@ ScriptSink *Globals::GetScriptSink() {
     return mScriptSink;
 }
 
+// 0x00118f08
+IOBPreallocMemStream *Globals::GetResetLog() {
+    mLog->Reset();
+    return mLog;
+}
+
 // 0x00118d40
 GrooveWorld *Globals::GetWorld() {
     return mGameManager->GetWorld();

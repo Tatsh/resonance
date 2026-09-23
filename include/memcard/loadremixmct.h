@@ -24,11 +24,8 @@
  * receives that inner task's report as a `MemcardUser`, which is why it derives from both
  * interfaces.
  *
- * Three routines are recovered and not written. `OnListDir()` at `0x0017c210` collects the listed
- * directory names, and `OnFileLoaded()` at `0x0017c650` parses one index and either reads the
- * remix payload or steps to the next directory. Both walk the `RemixIndex` record whose class
- * cannot be titled from the image. The constructor at `0x0017be28` is not written, because the
- * field at `+0x64` it fills from the application object has no recovered type.
+ * mStep is 1 while indexes are being read and 2 once the payload read is under way. The payload
+ * lands in the shared log stream that Globals::GetResetLog() rewinds, not in mStream.
  *
  * The method titles ListRemixDir(), Execute(), and Finish() are inferred. No string in the image
  * identifies any of them.
@@ -88,7 +85,30 @@ public:
      */
     virtual void Execute();
 
-    /** @ghidraAddress 0x0017c650 */
+    /**
+     * Collect the listed directories and read the first one's index.
+     *
+     * A failed listing abandons the task, and the body then carries on over the entries all the
+     * same. An empty listing reports kMemcardStatusNoFile. Otherwise the first name moves into
+     * mCurrentDir and a fresh LoadFileMCT reads `<dir>/index` into mBuffer.
+     *
+     * @param pOp The finished listing.
+     * @ghidraAddress 0x0017c210
+     */
+    virtual void OnListDir(ListDirOp *pOp);
+
+    /**
+     * Search one index for the remix, or finish the payload read.
+     *
+     * A failed read abandons the task, and the body then carries on all the same. In step 1 the
+     * index is parsed from mStream. The first element whose RemixName matches mRemixName starts
+     * the payload read of `<dir>/<FileName>` into mPayload and moves to step 2. With no match the
+     * next directory's index is read, and with none left the task reports kMemcardStatusNoFile. In
+     * step 2 mPayload's size is set from the read and the task reports.
+     *
+     * @param nStatus The inner read's status.
+     * @ghidraAddress 0x0017c650
+     */
     virtual void OnFileLoaded(int nStatus);
 
 private:
@@ -105,16 +125,15 @@ private:
     // Every remix save directory the listing found, consumed one per step. +0x34
     std::vector<HxStr> mDirNames;
 
-    // The inner read task, created and released by the two step bodies. Recorded as a reserved
-    // word rather than as a pointer, because the destructor does not release it and no step body
-    // that would fix its type is written. +0x40
-    unsigned char mReserved40[4];
+    // The inner read, of an index or of the payload. OnListDir() and OnFileLoaded() delete the
+    // previous one before creating the next, and the destructor does not release it. +0x40
+    LoadFileMCT *mLoadTask;
 
-    // One index or payload file is read into this stream's buffer at a time. +0x44
+    // One index file is read into this stream's buffer at a time. +0x44
     IOBPreallocMemStream mStream;
 
-    // Filled from the application object at `0x00118f08`, whose type is not recovered. +0x64
-    unsigned char mReserved64[4];
+    // The stream the payload lands in, Globals::GetResetLog() at construction. +0x64
+    IOBPreallocMemStream *mPayload;
 
     // mStream.mBuffer, cached by the constructor. +0x68
     char *mBuffer;

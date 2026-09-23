@@ -137,6 +137,17 @@ public:
     ScriptSink *GetScriptSink();
 
     /**
+     * Rewind the shared log stream and report it.
+     *
+     * LoadRemixMCT's constructor and MetRemixManager::AsyncCallbackDone() use the rewound stream
+     * as the destination of a remix payload. The title is inferred.
+     *
+     * @return The log stream, rewound through Reset().
+     * @ghidraAddress 0x00118f08
+     */
+    IOBPreallocMemStream *GetResetLog();
+
+    /**
      * Report the game manager's world.
      *
      * Reads mGameManager directly rather than through GetGameManager().
