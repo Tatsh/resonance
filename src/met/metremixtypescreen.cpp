@@ -1,13 +1,19 @@
 #include "met/metremixtypescreen.h"
 
+#include <vector>
+
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
+#include "game/globalsettings.h"
 #include "met/metbuttonlist.h"
 #include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
+#include "met/metmsgscreen.h"
+#include "met/metremixmanager.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metsonglists.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/manager.h"
@@ -67,6 +73,45 @@ static const char *const kTransitionArgument = "0";
 
 // Index EnterAndShow() selects, which is the first button.
 constexpr int kFirstButtonIndex = 0;
+
+// The three buttons in the order EnterAndShow() adds them.
+constexpr int kNewButtonIndex = 0;
+constexpr int kLoadButtonIndex = 1;
+constexpr int kJukeboxButtonIndex = 2;
+
+// Screens the selected button leads to, and the screens ListRemixes() returns to.
+static const char *const kModeScreen = "MetModeScreen";
+static const char *const kSoloStagesScreen = "MetSoloStagesScreen";
+static const char *const kRemixTypeScreen = "MetRemixTypeScreen";
+static const char *const kRemixLoadScreen = "MetRemixLoadScreen";
+static const char *const kRemixDataScreen = "MetRemixDataScreen";
+static const char *const kJukeboxTopButtonsScreen = "MetJukeboxTopButtonsScreen";
+constexpr int kLoadReturnScreenCount = 4;
+constexpr int kJukeboxReturnScreenCount = 2;
+
+// The disc entry ListRemixes() lists after the memory card.
+static const char *const kDiscSlotName = "disc";
+constexpr int kDiscSlot = -1;
+
+// The low-space warning, its buttons, and the choice that backs out of it.
+static const char *const kNoSpaceDialogue = "warn_remix_no_space";
+static const char *const kWarningTitle = "WARNING";
+static const char *const kBackButton = "BACK";
+static const char *const kContinueButton = "CONTINUE";
+constexpr int kTwoButtons = 2;
+constexpr int kChoiceBack = 0;
+
+// Values of the ListRemixes() playlist flag.
+constexpr int kSkipPlayList = 0;
+constexpr int kLoadPlayList = 1;
+
+// Adds the first memory-card slot when a card is in use.
+inline void AddCardSlot(std::vector<CardSlot> &slots) {
+    if (MetFrontEndState::shared()->mUnknown0c != 0) {
+        GlobalSettings::shared(); // Yes, the binary discards this call's result.
+        slots.push_back(GlobalSettings::shared()->mCardSlots[0]);
+    }
+}
 
 // What MetScreen::mUnknown18 records for the exit hook to act on.
 constexpr int kExitBack = 0;
@@ -184,6 +229,21 @@ void MetRemixTypeScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
+// 0x00364478
+void MetRemixTypeScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
+    if (!(name == kNoSpaceDialogue)) {
+        return;
+    }
+    if (nChoice == kChoiceBack) {
+        PushNamedScreen(HxStr(kHelpScreen));
+        PushNamedScreen(HxStr(kLeftGizmoScreen));
+        PushNamedScreen(HxStr(kRemixTypeScreen));
+        ActivateNamedPanel(HxStr(kRemixTypeScreen));
+    } else {
+        OpenSelectedButton();
+    }
+}
+
 // 0x00362348
 void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
@@ -229,6 +289,56 @@ void MetRemixTypeScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Object *pObject) 
     BeginExit();
 }
 
+// 0x00363920
+void MetRemixTypeScreen::OnUnknownSlot36() {
+    if (mUnknown18 == kExitBack) {
+        PushNamedScreen(HxStr(kModeScreen));
+        ActivateNamedPanel(HxStr(kModeScreen));
+        return;
+    }
+
+    switch (mUnknown8c->mSelected) {
+    case kNewButtonIndex:
+    case kLoadButtonIndex:
+        if (MetFrontEndState::shared()->mUnknown0c != 0 &&
+            Application::shared()->GetGameMode() == kGameModeSolo) {
+            GlobalSettings::shared(); // Yes, the binary discards this call's result.
+            if (GlobalSettings::shared()->mCardSlots[0].mUnknown0c <
+                GlobalSettings::shared()->mMinimumFreeClusters) {
+                std::vector<HxStr> buttons;
+                buttons.push_back(HxStr(kBackButton));
+                buttons.push_back(HxStr(kContinueButton));
+                const HxStr dialogue(kNoSpaceDialogue);
+                const HxStr title(kWarningTitle);
+                HxStr text;
+                QueryConfigString(&text, kPromptConfigCode, kNoSpaceDialogue);
+                MetMsgScreen::Show(dialogue, title, text, kTwoButtons, buttons, this);
+                break;
+            }
+        }
+        OpenSelectedButton();
+        break;
+
+    case kJukeboxButtonIndex: {
+        std::vector<HxStr> screens;
+        screens.resize(kJukeboxReturnScreenCount);
+        screens[0] = kJukeboxTopButtonsScreen;
+        screens[1] = kHelpScreen;
+        std::vector<CardSlot> slots;
+        AddCardSlot(slots);
+        CardSlot disc;
+        disc.mName = kDiscSlotName;
+        disc.mPortSlot = kDiscSlot;
+        slots.push_back(disc);
+        MetRemixManager::shared()->ListRemixes(screens, slots, kLoadPlayList);
+        break;
+    }
+
+    default:
+        break;
+    }
+}
+
 // 0x00362098
 void MetRemixTypeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
@@ -236,4 +346,34 @@ void MetRemixTypeScreen::ResolveContainerViews() {
     mThreeButtonView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kThreeButtonView)));
     mTwoButtonAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kTwoButtonAnim)));
     mThreeButtonAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kThreeButtonAnim)));
+}
+
+// 0x00363148
+void MetRemixTypeScreen::OpenSelectedButton() {
+    switch (mUnknown8c->mSelected) {
+    case kNewButtonIndex:
+        PushNamedScreen(HxStr(kSoloStagesScreen));
+        ActivateNamedPanel(HxStr(kSoloStagesScreen));
+        break;
+
+    case kLoadButtonIndex: {
+        std::vector<HxStr> screens;
+        screens.resize(kLoadReturnScreenCount);
+        screens[0] = kRemixLoadScreen;
+        screens[1] = kTitleScreen;
+        screens[2] = kRemixDataScreen;
+        screens[3] = kHelpScreen;
+        std::vector<CardSlot> slots;
+        AddCardSlot(slots);
+        CardSlot disc;
+        disc.mName = kDiscSlotName;
+        disc.mPortSlot = kDiscSlot;
+        slots.push_back(disc);
+        MetRemixManager::shared()->ListRemixes(screens, slots, kSkipPlayList);
+        break;
+    }
+
+    default:
+        break;
+    }
 }

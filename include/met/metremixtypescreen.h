@@ -28,9 +28,9 @@ class View;
  * releases the object with the tag `MsgSink`.
  *
  * Nine slots differ from the MetScreen table. Slots 23 and 24 sit eight bytes apart at
- * `0x00369628` and `0x00369630` and are two-instruction `jr ra` stubs. Of the rest only the
- * destructor has a recovered name, and the others are 5 `0x00362600`, 15 `0x00364478`,
- * 19 `0x00362348`, 30 `0x00362fa0`, 36 `0x00363920`, and 38 `0x00362098`.
+ * `0x00369628` and `0x00369630` and are two-instruction `jr ra` stubs. The others are the
+ * destructor, 5 `0x00362600`, 15 `0x00364478`, 19 `0x00362348`, 30 `0x00362fa0`, 36
+ * `0x00363920`, and 38 `0x00362098`.
  */
 class MetRemixTypeScreen : public MetScreen {
 public:
@@ -73,6 +73,19 @@ public:
     virtual void EnterAndShow();
 
     /**
+     * Act on the answer to the low-space warning.
+     *
+     * Slot 15. Only the `warn_remix_no_space` dialogue is handled. Its first button, `BACK`,
+     * brings the help, gizmo, and remix-type screens back and makes this screen the active panel,
+     * and any other choice proceeds with the selected button.
+     *
+     * @param name The dialogue name.
+     * @param nChoice The index of the button chosen.
+     * @ghidraAddress 0x00364478
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
      * Act on one navigation command.
      *
      * Slot 19. The two ring steps move the selection and refresh the help text, select starts the
@@ -92,6 +105,20 @@ public:
      * @ghidraAddress 0x00362fa0
      */
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
+
+    /**
+     * Move on once the screen has exited.
+     *
+     * Slot 36. After a back command the mode screen is brought up. The new and load buttons raise
+     * the `warn_remix_no_space` dialogue when a memory card is in use in a solo game and the first
+     * card slot's GlobalSettings::mCardSlots entry reports less than
+     * GlobalSettings::mMinimumFreeClusters, and otherwise proceed with the selected button. The
+     * jukebox button lists the remixes on the card and the disc with MetJukeboxTopButtonsScreen
+     * and MetHelpScreen as the screens to return to, and also loads the playlist.
+     *
+     * @ghidraAddress 0x00363920
+     */
+    virtual void OnUnknownSlot36();
 
     /**
      * Resolve the container views and the two button-layout views and animations.
@@ -121,6 +148,10 @@ public:
     }
 
 private:
+    // 0x00363148. Brings up the solo stages screen for the new button, or lists the remixes on
+    // the card and the disc for the load button. Other selections do nothing.
+    void OpenSelectedButton();
+
     MetButtonList *mUnknown8c;        // +0x8c
     Rnd::View *mTwoButtonView;        // +0x90, `smrt_2but.view`
     Rnd::View *mThreeButtonView;      // +0x94, `smrt_3but.view`

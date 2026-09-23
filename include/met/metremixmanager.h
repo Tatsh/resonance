@@ -253,7 +253,7 @@ public:
      * @ghidraAddress 0x00353350
      */
     void ListRemixes(const std::vector<HxStr> &returnScreens,
-                     const std::vector<CardSlot> &slots,
+                     std::vector<CardSlot> slots,
                      int bLoadPlayList);
 
     /**

@@ -170,9 +170,15 @@ public:
     std::vector<CardSlot> mCardSlots;
     /** Starts at 256. MinimumSaveSpaceMCT reads it. +0x6c */
     int mUnknown6c;
+    /**
+     * The free space a remix save needs. Starts at 60. MetRemixTypeScreen::OnUnknownSlot36()
+     * (`0x00363920`) raises `warn_remix_no_space` when the first card slot's CardSlot::mUnknown0c
+     * is below it. The name is inferred from that comparison and from the matching
+     * kSaveFileMinimumFreeClusters. +0x70
+     */
+    int mMinimumFreeClusters;
 
 private:
-    int mUnknown70; // +0x70, starts at 60
     int mUnknown74; // +0x74, starts at 24
 
 public:

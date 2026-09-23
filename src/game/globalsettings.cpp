@@ -95,7 +95,7 @@ GlobalSettings::GlobalSettings()
     mCardSlots.push_back(slot);
 
     mUnknown6c = kDefaultUnknown6c;
-    mUnknown70 = kDefaultUnknown70;
+    mMinimumFreeClusters = kDefaultUnknown70;
     mUnknown74 = kDefaultUnknown74;
 }
 
