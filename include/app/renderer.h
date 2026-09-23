@@ -49,6 +49,10 @@ class TickClock;
  *
  * The translation unit also defines seven static routines over five async loaders and two cached
  * names, all file-scope globals. The front end starts the loads and the constructor waits for them.
+ *
+ * The unreferenced forwarder at `0x00432440` in this unit, byte-identical to
+ * MsgJoiner::HandleMessage() at `0x00195b70`, has its unwind record at `0x006e32b8` as its only
+ * reference and is recorded here rather than declared.
  */
 class Renderer : public MsgSource, public RendererBase {
 public:
