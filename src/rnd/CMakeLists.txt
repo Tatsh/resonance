@@ -40,6 +40,7 @@ set(RESONANCE_RND_SRCS
     transanim.cpp
     transformable.cpp
     tunnel.cpp
+    tunnelevent.cpp
     tunnelmeshchain.cpp
     tunnelseeker.cpp
     tunnelseeksection.cpp

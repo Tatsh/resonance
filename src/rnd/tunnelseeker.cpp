@@ -4,7 +4,11 @@
 #include <math.h>
 #include <string.h>
 
+#include "os/hxstr.h"
+#include "rnd/manager.h"
+#include "rnd/mat.h"
 #include "rnd/mesh.h"
+#include "rnd/stream.h"
 #include "rnd/transformable.h"
 #include "rnd/tunnel.h"
 
@@ -13,6 +17,26 @@ namespace Rnd {
 namespace {
 
 constexpr float kDefaultTransFrameOffset = -500.0f;
+
+// The first stream revision that stores the three frame offsets.
+constexpr int kFrameOffsetRevision = 34;
+
+void WriteObjectRef(Stream &stream, const Object *pObject) {
+    if (pObject == nullptr) {
+        const char chTerminator = '\0';
+        stream.WriteBytes(&chTerminator, 1);
+        return;
+    }
+    const char *pszName = pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString;
+    stream.WriteBytes(pszName, pObject->mName.mLen + 1);
+}
+
+template <class T>
+void ReadObjectRef(Stream &stream, T *&refOut) {
+    HxStr name(nullptr);
+    stream.ReadString(name);
+    refOut = dynamic_cast<T *>(g_manager.Find(name));
+}
 
 } // namespace
 
@@ -129,7 +153,7 @@ float TunnelSeeker::UpdateLane() {
         }
         const float flDistance = flLow + flWrapped;
         const float flAbsDistance = fabsf(flDistance);
-        const float flStep = fabsf(mTunnel->mFilteredFrame - mFrame) / mTunnel->mUnknown64 *
+        const float flStep = fabsf(mTunnel->mFilteredFrame - mFrame) / mTunnel->mLaneChangeFrames *
                              std::max(flAbsDistance, 1.0f);
         if (flAbsDistance < flStep) {
             mLane = static_cast<float>(mTargetRing);
@@ -177,6 +201,51 @@ void TunnelSeeker::Replace(Object *pFrom, Object *pTo, Object *pReferrer) {
         }
     }
     mStrip.Replace(pFrom, pTo, pReferrer);
+}
+
+// 0x0046df88
+void TunnelSeeker::Save(Stream &stream) const {
+    WriteObjectRef(stream, mTrans);
+    stream.Write(&mTargetRing, sizeof(mTargetRing));
+    WriteObjectRef(stream, mMesh);
+    const char chUnknown54 = mUnknown54;
+    stream.WriteBytes(&chUnknown54, 1)
+        .Write(&mLane, sizeof(mLane))
+        .Write(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
+        .Write(&mTransFrameOffset, sizeof(mTransFrameOffset))
+        .Write(&mLookFrameOffset, sizeof(mLookFrameOffset));
+    stream.Write(&mStrip.mFirstSlice, sizeof(mStrip.mFirstSlice))
+        .Write(&mStrip.mSliceCount, sizeof(mStrip.mSliceCount))
+        .Write(&mStrip.mRing, sizeof(mStrip.mRing));
+    WriteObjectRef(stream, mStrip.mMat);
+    stream.Write(&mStrip.mColor.r, sizeof(mStrip.mColor.r))
+        .Write(&mStrip.mColor.g, sizeof(mStrip.mColor.g))
+        .Write(&mStrip.mColor.b, sizeof(mStrip.mColor.b))
+        .Write(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
+}
+
+// 0x0046e2d8
+void TunnelSeeker::Load(Stream &stream) {
+    ReadObjectRef(stream, mTrans);
+    stream.Read(&mTargetRing, sizeof(mTargetRing));
+    ReadObjectRef(stream, mMesh);
+    unsigned char chUnknown54;
+    stream.ReadBytes(&chUnknown54, 1);
+    mUnknown54 = chUnknown54 != 0;
+    stream.Read(&mLane, sizeof(mLane));
+    if (g_nTunnelLoadVersion >= kFrameOffsetRevision) {
+        stream.Read(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
+            .Read(&mTransFrameOffset, sizeof(mTransFrameOffset))
+            .Read(&mLookFrameOffset, sizeof(mLookFrameOffset));
+    }
+    stream.Read(&mStrip.mFirstSlice, sizeof(mStrip.mFirstSlice))
+        .Read(&mStrip.mSliceCount, sizeof(mStrip.mSliceCount))
+        .Read(&mStrip.mRing, sizeof(mStrip.mRing));
+    ReadObjectRef(stream, mStrip.mMat);
+    stream.Read(&mStrip.mColor.r, sizeof(mStrip.mColor.r))
+        .Read(&mStrip.mColor.g, sizeof(mStrip.mColor.g))
+        .Read(&mStrip.mColor.b, sizeof(mStrip.mColor.b))
+        .Read(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
 }
 
 } // namespace Rnd

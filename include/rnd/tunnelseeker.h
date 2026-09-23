@@ -9,6 +9,7 @@ namespace Rnd {
 class Mat;
 class Mesh;
 class Object;
+class Stream;
 class Transformable;
 class Tunnel;
 
@@ -205,7 +206,7 @@ struct TunnelSeeker {
      * Move the lane towards the target ring and return it.
      *
      * The ring distance is wrapped into half the tunnel ring count either way. The step is the
-     * number of tunnel frames since the last call, divided by the tunnel member at `+0x64` and
+     * number of tunnel frames since the last call, divided by Rnd::Tunnel::mLaneChangeFrames and
      * scaled by the ring distance when the distance exceeds one. A lane within one step of the
      * target snaps onto it.
      *
@@ -240,9 +241,31 @@ struct TunnelSeeker {
      */
     void Replace(Object *pFrom, Object *pTo, Object *pReferrer);
 
+    /**
+     * Write the seeker.
+     *
+     * The order is mTrans by name, mTargetRing, mMesh by name, mUnknown54 as one byte, mLane, the
+     * three frame offsets, the strip run, the strip material by name, and the strip colour.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x0046df88
+     */
+    void Save(Stream &stream) const;
+
+    /**
+     * Read the seeker in the order Save() writes it.
+     *
+     * The frame offsets are read only from a Rnd::Tunnel stream revision of 34 or later. No
+     * reference is taken on the objects read by name.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x0046e2d8
+     */
+    void Load(Stream &stream);
+
     TunnelSeekStrip mStrip;  /*!< The highlighted run of slices. */
     Transformable *mTrans;   /*!< The transformable the seeker drives. */
-    int mUnknown54;          /*!< Unrecovered. +0x54 */
+    int mUnknown54;          /*!< A flag, stored as one byte. No reader is located. +0x54 */
     int mTargetRing;         /*!< The ring the lane moves towards. */
     float mMeshFrameOffset;  /*!< The path frame offset of the mesh. */
     float mTransFrameOffset; /*!< The path frame offset of the transformable. */

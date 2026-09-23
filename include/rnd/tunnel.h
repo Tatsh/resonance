@@ -8,6 +8,7 @@
 #include "rnd/animatable.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 #include "rnd/raytest.h"
 #include "rnd/tunnelevent.h"
 #include "rnd/tunnelmeshchain.h"
@@ -72,8 +73,11 @@ namespace Rnd {
  * grids.
  *
  * Still unreconstructed and still owned by this class are the constructor at `0x00466620`, the
- * update at `0x00467f48`, the mesh build at `0x004699c0`, the face strip build at `0x0046adc0`, the
- * VU1 upload at `0x0046c0e8`, and the section frame setter at `0x0046c638`.
+ * destructor at `0x004676b0`, DrawSelf() at `0x00468850`, SetFrameSelf() at `0x00469180`, the mesh
+ * build at `0x004699c0`, the face strip build at `0x0046adc0`, the routine at `0x0046b830`, the VU1
+ * upload at `0x0046c0e8`, the section frame setter at `0x0046c638`, and the two grid colour setters
+ * at `0x0046d788` and `0x0046d8e8`. The constructor and destructor wait on the element of the
+ * vector at `+0xcc`.
  *
  * Nine addresses a worklist grouped under this class belong elsewhere, and each one is recorded
  * here so the grouping is not repeated. `0x00466528` and `0x00476598` append triangles to the face
@@ -325,6 +329,93 @@ public:
     void ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int nId, void *pUser),
                       void *pUser);
 
+    /**
+     * Replace the path the tunnel follows.
+     *
+     * Moves the reference from the previous path to the new one, calls EndFrame() on a non-null
+     * path and discards the result, and fills mUnknown88 with the 99999999 sentinel so that every
+     * slice is rebuilt.
+     *
+     * @param pPath The path, or null.
+     * @ghidraAddress 0x004770d0
+     */
+    void SetPath(TransAnim *pPath);
+
+    /**
+     * Evaluate the path at a frame.
+     *
+     * Without a path the three basis rows receive the identity with their padding words unwritten,
+     * and the translation row receives (0, 0, 0, 1).
+     *
+     * @param pOut The transform to write.
+     * @param flFrame The path frame.
+     * @ghidraAddress 0x004775b0
+     */
+    void GetPathXfm(Transform *pOut, float flFrame);
+
+    /**
+     * Set mLaneChangeFrames.
+     *
+     * @param flFrames The tunnel frames a seeker takes to move one ring.
+     * @ghidraAddress 0x004772c8
+     */
+    void SetLaneChangeFrames(float flFrames);
+
+    /**
+     * Report one seeker.
+     *
+     * @param nIndex The seeker index.
+     * @return The seeker, or null when nIndex is out of range.
+     * @ghidraAddress 0x00477298
+     */
+    TunnelSeeker *GetSeeker(unsigned nIndex);
+
+    /**
+     * Set the number of seekers and attach each one to this tunnel.
+     *
+     * Every existing seeker releases its references first. New seekers are default constructed.
+     *
+     * @param nCount The seeker count.
+     * @ghidraAddress 0x0046cfd8
+     */
+    void ResizeSeekers(unsigned nCount);
+
+    /**
+     * Set the shape parameters and rebuild the geometry.
+     *
+     * Every seeker releases its references, BuildMesh() runs, and every seeker is attached again.
+     * The program lists no caller.
+     *
+     * @param flUnknown38 The value of mUnknown38.
+     * @param nRingCount The ring count.
+     * @param nSliceCount The slice count.
+     * @param nUnknown44 The value of mUnknown44.
+     * @param flUnknown48 The value of mUnknown48.
+     * @param flUnknown4c The value of mUnknown4c.
+     * @param flUnknown50 The value of mUnknown50.
+     * @param flUnknown54 The value of mUnknown54.
+     * @ghidraAddress 0x00477160
+     */
+    void Configure(float flUnknown38,
+                   int nRingCount,
+                   int nSliceCount,
+                   int nUnknown44,
+                   float flUnknown48,
+                   float flUnknown4c,
+                   float flUnknown50,
+                   float flUnknown54);
+
+    /**
+     * Convert a frame to a slice.
+     *
+     * The frame is scaled by mUnknown98 and rounded down. The program lists no caller.
+     *
+     * @param flFrame The frame.
+     * @return The slice.
+     * @ghidraAddress 0x00476540
+     */
+    int FrameToSlice(float flFrame);
+
 protected:
     /**
      * Draw the tunnel.
@@ -347,16 +438,29 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
+    // Drop every reference Update() takes (the path, each event drawable, and each seeker's
+    // objects) and delete the generated meshes. The destructor, Load(), and Copy() call it.
+    // 0x00468020.
+    void ReleaseRefs();
+
+    // Write the material and the first vertex colour of every chain of both grids. 0x00468a78.
+    void SaveSectionMaterials(Stream &stream);
+
+    // Read what SaveSectionMaterials() writes and apply each entry to the chain of the same index,
+    // skipping entries past the end of the grid. Before revision 36 the cell count comes from the
+    // current grid rather than the stream, and before revision 37 the slice count does. 0x00468da0.
+    void LoadSectionMaterials(Stream &stream);
+
     // Upload the generated geometry to VU1. 0x0046c0e8.
     void UploadToVU1();
 
     // Build the mesh of the current ring set. 0x004699c0.
     void BuildMesh();
 
-    // Project one ring into camera space. 0x0046db80. A null mUnknown58 writes the identity into
+    // Project one ring into camera space. 0x0046db80. A null mPath writes the identity into
     // pOut and returns. Otherwise the three basis rows of mUnknownc0[nRing] are copied through,
     // the translation row is the blend of that entry and its wrapped successor each scaled by
-    // flTangentScale, and the result is concatenated through XfmConcat() with what mUnknown58
+    // flTangentScale, and the result is concatenated through XfmConcat() with what mPath
     // evaluates to at flAnimFrame.
     void ProjectSectionToCameraSpace(
         int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale);
@@ -380,7 +484,7 @@ private:
     // with no recorded value is one the constructor does not write, or one it fills through a
     // container allocation.
 
-    float mUnknown38; // +0x38 Starts at 1.0f.
+    float mUnknown38; // +0x38 Starts at 1.0f. Save() and Load() carry it, and Configure() sets it.
 
 public:
     /*!< The ring count, 3 at construction. It is the modulus of the inner index of mUnknowna4, the
@@ -393,26 +497,29 @@ public:
     int mSliceCount;
 
 private:
-    int mUnknown44;   // +0x44 Starts at 2.
-    float mUnknown48; // +0x48 Starts at 0.099609375f.
-    float mUnknown4c; // +0x4c Starts at 0.099609375f.
+    // +0x44 Starts at 2. The constructor sizes mUnknown68 to it.
+    int mUnknown44;
+    float mUnknown48; // +0x48 Starts at 0.1f.
+    float mUnknown4c; // +0x4c Starts at 0.1f.
     float mUnknown50; // +0x50 Starts at 0.25f.
     float mUnknown54; // +0x54 Starts at 0.01f.
-    // +0x58 Starts at 0. The transform animation the camera space projection at 0x0046db80
-    // evaluates through Rnd::TransAnim::EvalFrame(), and the object Update() takes a reference on
-    // before it rebuilds. A null one makes the projection write the identity.
-    TransAnim *mUnknown58;
-    int mUnknown5c;   // +0x5c Starts at 0.
-    int mUnknown60;   // +0x60 Starts at 0.
-    float mUnknown64; // +0x64 Starts at 480.0f, which is the display height.
+    // +0x58 Starts at 0. The path the tunnel follows, which the camera space projection at
+    // 0x0046db80 and GetPathXfm() evaluate through Rnd::TransAnim::EvalFrame(). A null path makes
+    // both write the identity.
+    TransAnim *mPath;
+    int mUnknown5c; // +0x5c Starts at 0. Copy() carries it.
+    int mUnknown60; // +0x60 Starts at 0. Save() and Load() carry it.
+    // +0x64 Starts at 480.0f. The tunnel frames a seeker takes to move one ring, which
+    // TunnelSeeker::UpdateLane() divides the elapsed frames by.
+    float mLaneChangeFrames;
     // +0x68 One level of detail threshold per ring, each written into the mMinScreen of the mesh at
     // the matching position of its list. Three routines pin the shape. Copy() at 0x00476814 assigns
     // it from the source tunnel through `std::vector<float>::operator=`, the setter at 0x0046d180
     // assigns it from its argument through the same operator, and the same setter reads an element
     // with `lwc1`, which is what fixes the element as a float rather than a word.
     std::vector<float> mUnknown68;
-    float mUnknown74; // +0x74 Starts at 1.
-    int mUnknown78;   // +0x78 Starts at 1.
+    int mUnknown74; // +0x74 Starts at 1. DrawSelf() tests it.
+    int mUnknown78; // +0x78 Starts at 1. DrawSelf() tests it.
     // +0x7c Starts at 99999999, which is a hand-written sentinel in the same style as the
     // -9999999.0f Rnd::ParticleSys uses for an unset frame. The ring advance at 0x00476fe0 compares
     // the requested slice against it and writes the same sentinel into the mUnknown88 entry of the
@@ -423,13 +530,15 @@ private:
     float mUnknown80;
     // +0x84 Starts at 0. The step counter the ring advance reloads from mUnknowna0 and counts down.
     int mUnknown84;
-    // +0x88 Starts at 0. A word array of mSliceCount entries, one slice identifier per slice, which
-    // the scroll at 0x00476f48 reads and the ring advance writes.
-    int *mUnknown88;
-    unsigned char mUnknown8c[0x0c]; // +0x8c Unrecovered.
-    int mUnknown98;                 // +0x98 Starts at 0.
-    float mUnknown9c;               // +0x9c Starts at 0. The numerator of the per-step increment.
-    int mUnknowna0;                 // +0xa0 Unrecovered. The divisor of the per-step increment.
+    // +0x88 One slice identifier per slice, which the scroll at 0x00476f48 reads, the ring advance
+    // writes, and SetPath() fills with the 99999999 sentinel.
+    std::vector<int> mUnknown88;
+    float mUnknown94; // +0x94 Written by BuildMesh().
+    // +0x98 Starts at 0. A float scale FrameToSlice() multiplies a frame by, which BuildMesh()
+    // writes.
+    float mUnknown98;
+    float mUnknown9c; // +0x9c Starts at 0. The numerator of the per-step increment.
+    int mUnknowna0;   // +0xa0 Unrecovered. The divisor of the per-step increment.
     // +0xa4 The mesh grid, one chain per cell, addressed as `slice * mRingCount + ring` by the
     // lookup at 0x00477388, which then returns the finest level of the chain. The 0xc-byte stride
     // and the clear at 0x0046acf0 destroying each slot through the chain destructor at 0x00476a80
@@ -444,8 +553,10 @@ private:
     // +0xc0 One transform per ring. The tangent interpolation at 0x00477538 reads the translation
     // row of entry `i` and entry `(i + 1) % mRingCount` and blends the two on the vector unit.
     std::vector<Transform> mUnknownc0;
-    int mUnknowncc;                 // +0xcc Starts at 0.
-    unsigned char mUnknownd0[0x08]; // +0xd0 Unrecovered.
+    // +0xcc A std::vector of 0x70-byte records, which the constructor zeroes, BuildMesh() and
+    // SetRingSectionFrames() index, and the destructor frees without an element destructor. The
+    // element is recovered with those two routines.
+    unsigned char mUnknowncc[0x0c];
     // +0xd8 Drawables scheduled by frame, kept in ascending frame order by AddEvent(). Update()
     // walks it taking a reference on every entry, and Copy() assigns it through the list assignment
     // operator at 0x004727b0.
@@ -472,10 +583,44 @@ private:
 Tunnel *NewTunnel(const HxStr &name);
 
 /**
+ * Build a tunnel for the registered "Tunnel" class.
+ *
+ * The body is that of NewTunnel(), with the result narrowed to its Rnd::Object subobject.
+ * Rnd::Manager::Init() registers this factory.
+ *
+ * @param name The object name.
+ * @return The new tunnel, as its Rnd::Object subobject.
+ * @ghidraAddress 0x00476468
+ */
+Object *CreateRegisteredTunnel(const HxStr &name);
+
+/**
  * Registered class name of Rnd::Tunnel, the string "Tunnel".
  *
  * @ghidraAddress 0x006eab10
  */
 extern HxStr g_tunnelClassName;
+
+/**
+ * Register the "Tunnel" class with Rnd::Manager.
+ *
+ * An inline function. The out-of-line copy has no callers, and Rnd::Manager::Init() performs the
+ * same registration itself.
+ *
+ * @ghidraAddress 0x00476258
+ */
+inline void RegisterTunnelClass() {
+    g_manager.RegisterClass(g_tunnelClassName, CreateRegisteredTunnel);
+}
+
+/**
+ * Stream revision of the tunnel currently being read.
+ *
+ * Load() stores the revision here, and the element loaders of Rnd::TunnelEvent and
+ * Rnd::TunnelSeeker test it.
+ *
+ * @ghidraAddress 0x00894d64
+ */
+extern int g_nTunnelLoadVersion;
 
 } // namespace Rnd

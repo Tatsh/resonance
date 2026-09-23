@@ -65,6 +65,40 @@ void TunnelMeshChain::CopyScreenSizes(const TunnelMeshChain &source) {
     }
 }
 
+// 0x00476c50
+void TunnelMeshChain::SetScreenSizes(const std::vector<float> &screenSizes) {
+    for (unsigned i = 0; i < size(); ++i) {
+        if (i < screenSizes.size()) {
+            Mesh *pMesh = (*this)[i];
+            pMesh->mMinScreen = screenSizes[i];
+            // Yes, the binary releases and immediately re-takes the reference on the same link.
+            pMesh->SetNext(pMesh->mNext);
+        }
+    }
+}
+
+// 0x00476d28
+void TunnelMeshChain::ShareFaces(const TunnelMeshChain &templates) {
+    for (unsigned i = 0; i < size(); ++i) {
+        (*this)[i]->SetFacesOwner(templates[i]->mFacesOwner);
+        (*this)[i]->Sync();
+    }
+}
+
+// 0x00476de8
+void TunnelMeshChain::Sync() {
+    for (Mesh *pMesh : *this) {
+        pMesh->Sync();
+    }
+}
+
+// 0x00476ec0
+void TunnelMeshChain::Collide(const Ray &ray, Collideable::HitSink &sink) {
+    for (Mesh *pMesh : *this) {
+        pMesh->Collide(ray, sink);
+    }
+}
+
 // 0x00476bc8
 void TunnelMeshChain::Draw(float flScreenSize) {
     if (empty() || !front()->GetShowing()) {

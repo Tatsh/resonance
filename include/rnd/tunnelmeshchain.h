@@ -2,6 +2,9 @@
 
 #include <vector>
 
+#include "rnd/collideable.h"
+#include "rnd/raytest.h"
+
 class HxStr;
 
 namespace Rnd {
@@ -80,6 +83,45 @@ public:
      * @ghidraAddress 0x00469820
      */
     void CopyScreenSizes(const TunnelMeshChain &source);
+
+    /**
+     * Give each level the screen size threshold of the same index.
+     *
+     * A level past the end of screenSizes is skipped. Each level then passes its own mNext back to
+     * Mesh::SetNext(). The out-of-line copy has no callers, and Rnd::Tunnel inlines the body.
+     *
+     * @param screenSizes The thresholds, finest level first.
+     * @ghidraAddress 0x00476c50
+     */
+    void SetScreenSizes(const std::vector<float> &screenSizes);
+
+    /**
+     * Point each level at the triangles of the same level of another chain, then Sync() it.
+     *
+     * The out-of-line copy has no callers, and Rnd::TunnelSeekSection::Build() inlines the body.
+     *
+     * @param templates The chain whose triangles to share, at least as long as this one.
+     * @ghidraAddress 0x00476d28
+     */
+    void ShareFaces(const TunnelMeshChain &templates);
+
+    /**
+     * Call Mesh::Sync() on every level.
+     *
+     * The out-of-line copy has no callers.
+     *
+     * @ghidraAddress 0x00476de8
+     */
+    void Sync();
+
+    /**
+     * Test a ray against every level of the chain.
+     *
+     * @param ray The segment to test along.
+     * @param sink The collector to append intersections to.
+     * @ghidraAddress 0x00476ec0
+     */
+    void Collide(const Ray &ray, Collideable::HitSink &sink);
 
     /**
      * Draw the level of detail a screen size selects.

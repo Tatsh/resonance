@@ -41,10 +41,7 @@ void TunnelSeekSection::Invalidate() {
 // 0x0046ed78
 void TunnelSeekSection::Build(const HxStr &name, const TunnelMeshChain &templates) {
     mMeshes.Build(name, templates.size(), true);
-    for (unsigned i = 0; i < mMeshes.size(); ++i) {
-        mMeshes[i]->SetFacesOwner(templates[i]->mFacesOwner);
-        mMeshes[i]->Sync();
-    }
+    mMeshes.ShareFaces(templates);
     mMeshes.CopyScreenSizes(templates);
     mMeshes.front()->SetDepthChain(Mesh::kZModeZReadOnly, Mesh::kZFuncEqual);
 }
