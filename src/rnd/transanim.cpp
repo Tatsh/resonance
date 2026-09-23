@@ -1,11 +1,14 @@
 #include "rnd/transanim.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <iterator>
 #include <list>
 #include <string.h>
 
 #include "math/quaternion.h"
+#include "math/transformops.h"
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
@@ -633,6 +636,198 @@ void TransAnim::SetFrameSelf(float flFrame) {
     mTrans->mDirty = 1;
 }
 
+// Rows of the transform EvalFrame() writes.
+enum XfmRow { kXfmRowBasisX = 0, kXfmRowBasisY = 1, kXfmRowBasisZ = 2, kXfmRowTranslation = 3 };
+
+// The fewest translation keys a follow path orients along.
+constexpr std::size_t kMinFollowPathKeys = 2;
+
+// VU0's vf0, the translation row an empty channel is reset to.
+constexpr float kIdentityTranslation[] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+static inline float *XfmRowOf(float *pXfm, int nRow) {
+    return &pXfm[nRow * kXfmRowFloatCount];
+}
+
+// Write the identity into the three basis rows. The padding floats are not written.
+static inline void SetIdentityBasis(float *pXfm) {
+    for (int nRow = kXfmRowBasisX; nRow <= kXfmRowBasisZ; ++nRow) {
+        float *const pRow = XfmRowOf(pXfm, nRow);
+        for (int i = 0; i < kPaddingFloat; ++i) {
+            pRow[i] = (i == nRow) ? 1.0f : 0.0f;
+        }
+    }
+}
+
+// The linear blend EvalFrame() runs on VU0. The padding float comes from pTo.
+static inline void LerpKeyVector(const float *pFrom, const float *pTo, float flT, float *pOut) {
+    for (int i = 0; i < kPaddingFloat; ++i) {
+        pOut[i] = pTo[i] * flT + pFrom[i] * (1.0f - flT);
+    }
+    pOut[kPaddingFloat] = pTo[kPaddingFloat];
+}
+
+// Find the keys of a channel on either side of flFrame and the parameter between them. A frame at
+// or before the first key, or at or after the last, yields that key twice. An empty channel writes
+// nothing. EvalFrame() inlines this once per channel.
+template <class Key>
+static inline void FindBracketingKeys(
+    const std::list<Key> &keys, float flFrame, const Key *&pPrev, const Key *&pNext, float &flT) {
+    if (keys.empty()) {
+        return;
+    }
+    if (flFrame <= keys.front().mFrame) {
+        pPrev = &keys.front();
+        pNext = pPrev;
+        flT = 0.0f;
+        return;
+    }
+    if (keys.back().mFrame <= flFrame) {
+        pPrev = &keys.back();
+        pNext = pPrev;
+        flT = 1.0f;
+        return;
+    }
+    auto prev = keys.begin();
+    for (auto it = std::next(prev); it != keys.end(); ++it) {
+        if (flFrame <= it->mFrame) {
+            pPrev = &*prev;
+            pNext = &*it;
+            flT = (flFrame - prev->mFrame) / (it->mFrame - prev->mFrame);
+            return;
+        }
+        prev = it;
+    }
+}
+
+// Orient the basis rows along the translation curve at flFrame, against a +z reference. Returns
+// false where EvalFrame() writes the identity instead.
+static inline bool BuildFollowPathBasis(const std::list<TransAnim::TransKey> &path,
+                                        int nInterp,
+                                        float flFrame,
+                                        float *pXfm) {
+    if (path.size() < kMinFollowPathKeys) {
+        return false;
+    }
+    const TransAnim::TransKey *pPrev = nullptr;
+    const TransAnim::TransKey *pNext = nullptr;
+    float flT = 0.0f;
+    FindBracketingKeys(path, flFrame, pPrev, pNext, flT);
+
+    const Vector3 reference{0.0f, 0.0f, 1.0f, 1.0f};
+    if (nInterp == TransAnim::kInterpTCB) {
+        const Vector3 direction = pPrev->EvaluateSplineDerivative(pNext, flT);
+        Mat33BuildOrthonormal(&direction.x, &reference.x, pXfm);
+        return true;
+    }
+    if (pPrev == pNext) {
+        return false;
+    }
+    Vector3 direction;
+    direction.w = 1.0f;
+    Vec3Sub(pNext->mValue, pPrev->mValue, &direction.x);
+    Mat33BuildOrthonormal(&direction.x, &reference.x, pXfm);
+    return true;
+}
+
+// 0x004f42f0
+void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
+    float *const pTranslation = XfmRowOf(pXfm, kXfmRowTranslation);
+    if (!mFramesOwner->mTransKeys.empty()) {
+        std::list<TransKey> &keys = mFramesOwner->mTransKeys;
+        Vector3 offset;
+        offset.w = 1.0f;
+        if (mRepeatTrans) {
+            if (flFrame < 0.0f && mTransInterp == kInterpTCB) {
+                const TransKey &first = keys.front();
+                // Yes, a channel of one key divides by the frame of the list head here.
+                const TransKey &second = *std::next(keys.begin());
+                const float flScale = flFrame / (second.mFrame - first.mFrame);
+                flFrame = 0.0f;
+                offset.x = first.mTangentOut[0] * flScale;
+                offset.y = first.mTangentOut[1] * flScale;
+                offset.z = first.mTangentOut[2] * flScale;
+            } else {
+                const TransKey &first = keys.front();
+                const TransKey &last = keys.back();
+                flFrame -= first.mFrame;
+                const float flSpan = last.mFrame - first.mFrame;
+                const float flWraps =
+                    static_cast<float>(static_cast<int>(std::floor(flFrame / flSpan)));
+                flFrame -= flWraps * flSpan;
+                float afChord[kXfmRowFloatCount];
+                afChord[kPaddingFloat] = 1.0f;
+                Vec3Sub(last.mValue, first.mValue, afChord);
+                offset.x = afChord[0] * flWraps;
+                offset.y = afChord[1] * flWraps;
+                offset.z = afChord[2] * flWraps;
+            }
+            if (mTransInterp == kInterpTCB) {
+                std::copy(std::begin(keys.front().mTangentOut),
+                          std::end(keys.front().mTangentOut),
+                          keys.back().mTangentIn);
+            }
+        }
+
+        const TransKey *pPrev = nullptr;
+        const TransKey *pNext = nullptr;
+        float flT = 0.0f;
+        FindBracketingKeys<TransKey>(keys, flFrame, pPrev, pNext, flT);
+        if (mTransInterp == kInterpTCB) {
+            pPrev->EvaluateSpline(pNext, pTranslation, flT);
+        } else {
+            LerpKeyVector(pPrev->mValue, pNext->mValue, flT, pTranslation);
+        }
+        if (mRepeatTrans) {
+            AddVec3(pTranslation, &offset.x, pTranslation);
+        }
+    } else if (nResetEmpty) {
+        std::copy(std::begin(kIdentityTranslation), std::end(kIdentityTranslation), pTranslation);
+    }
+
+    if (mFollowPath) {
+        if (!BuildFollowPathBasis(mFramesOwner->mTransKeys, mTransInterp, flFrame, pXfm)) {
+            SetIdentityBasis(pXfm);
+        }
+    } else if (!mFramesOwner->mRotKeys.empty()) {
+        const RotKey *pPrev = nullptr;
+        const RotKey *pNext = nullptr;
+        float flT = 0.0f;
+        FindBracketingKeys<RotKey>(mFramesOwner->mRotKeys, flFrame, pPrev, pNext, flT);
+        Quat rotation;
+        if (mRotInterp == kInterpTCB) {
+            pPrev->EvaluateSpline(pNext, rotation, flT);
+        } else {
+            QuatSlerp(pPrev->mQuat, pNext->mQuat, rotation, flT);
+        }
+        QuatToMat33(rotation, pXfm);
+    } else if (nResetEmpty) {
+        SetIdentityBasis(pXfm);
+    }
+
+    const std::list<TransKey> &scaleKeys = mFramesOwner->mScaleKeys;
+    if (scaleKeys.empty()) {
+        return;
+    }
+    Vector3 scale;
+    scale.w = 1.0f;
+    const TransKey *pPrev = nullptr;
+    const TransKey *pNext = nullptr;
+    float flT = 0.0f;
+    FindBracketingKeys(scaleKeys, flFrame, pPrev, pNext, flT);
+    if (mScaleInterp == kInterpTCB) {
+        pPrev->EvaluateSpline(pNext, &scale.x, flT);
+    } else {
+        LerpKeyVector(pPrev->mValue, pNext->mValue, flT, &scale.x);
+    }
+    float *const pBasisX = XfmRowOf(pXfm, kXfmRowBasisX);
+    float *const pBasisY = XfmRowOf(pXfm, kXfmRowBasisY);
+    float *const pBasisZ = XfmRowOf(pXfm, kXfmRowBasisZ);
+    Vec3Scale(pBasisX, scale.x, pBasisX);
+    Vec3Scale(pBasisY, scale.y, pBasisY);
+    Vec3Scale(pBasisZ, scale.z, pBasisZ);
+}
+
 // 0x00552588
 void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext) {
     const float flTension = mShape[kShapeTension];
@@ -704,6 +899,94 @@ void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const Tra
         Vec3Scale(afWeighted, 1.0f - flTension, mTangentIn);
         mTangentIn[kPaddingFloat] = 1.0f;
     }
+}
+
+// The coefficients below are those of the cubic Hermite basis and of its derivative.
+
+// 0x00552af8
+void TransAnim::TransKey::EvaluateSpline(const TransKey *pNext, float *pOut, float flT) const {
+    if (flT == 0.0f) {
+        std::copy(std::begin(mValue), std::end(mValue), pOut);
+        return;
+    }
+    if (flT == 1.0f) {
+        std::copy(std::begin(pNext->mValue), std::end(pNext->mValue), pOut);
+        return;
+    }
+    const float flT2 = flT * flT;
+    const float flT3 = flT2 * flT;
+    const float flThreeT2 = flT2 * 3.0f;
+    float afSum[kXfmRowFloatCount];
+    float afTerm[kXfmRowFloatCount];
+    afSum[kPaddingFloat] = 1.0f;
+    afTerm[kPaddingFloat] = 1.0f;
+    Vec3Scale(mValue, flT3 + flT3 - flThreeT2 + 1.0f, afSum);
+    Vec3Scale(mTangentOut, flT3 - (flT2 + flT2) + flT, afTerm);
+    AddVec3(afSum, afTerm, afSum);
+    Vec3Scale(pNext->mValue, flT3 * -2.0f + flThreeT2, afTerm);
+    AddVec3(afSum, afTerm, afSum);
+    Vec3Scale(pNext->mTangentIn, flT3 - flT2, afTerm);
+    AddVec3(afSum, afTerm, afSum);
+    std::copy(std::begin(afSum), std::end(afSum), pOut);
+}
+
+// 0x00552cb8
+Vector3 TransAnim::TransKey::EvaluateSplineDerivative(const TransKey *pNext, float flT) const {
+    const float flT2 = flT * flT;
+    const float flSixT = flT * 6.0f;
+    const float flThreeT2 = flT2 * 3.0f;
+    Vector3 sum;
+    Vector3 term;
+    sum.w = 1.0f;
+    term.w = 1.0f;
+    Vec3Scale(mValue, flT2 * 6.0f - flSixT, &sum.x);
+    Vec3Scale(mTangentOut, flThreeT2 - flT * 4.0f + 1.0f, &term.x);
+    AddVec3(&sum.x, &term.x, &sum.x);
+    Vec3Scale(pNext->mValue, flT2 * -6.0f + flSixT, &term.x);
+    AddVec3(&sum.x, &term.x, &sum.x);
+    Vec3Scale(pNext->mTangentIn, flThreeT2 - (flT + flT), &term.x);
+    AddVec3(&sum.x, &term.x, &sum.x);
+    return sum;
+}
+
+// Parameter step of the sum in SplineLength(), and the weight of each sample.
+constexpr float kSplineLengthStep = 0.005f;
+
+// 0x00554d90
+float TransAnim::TransKey::SplineLength(const TransKey *pNext) const {
+    float flLength = 0.0f;
+    float flT = 0.0f;
+    do {
+        const Vector3 derivative = EvaluateSplineDerivative(pNext, flT);
+        flT += kSplineLengthStep;
+        flLength += std::sqrt(derivative.x * derivative.x + derivative.y * derivative.y +
+                              derivative.z * derivative.z) *
+                    kSplineLengthStep;
+    } while (flT < 1.0f);
+    return flLength;
+}
+
+// 0x00554c68
+void TransAnim::RotKey::EvaluateSpline(const RotKey *pNext, Quat &out, float flT) const {
+    if (flT == 0.0f) {
+        out = mQuat;
+        return;
+    }
+    if (flT == 1.0f) {
+        out = pNext->mQuat;
+        return;
+    }
+    Quat outgoing;
+    Quat middle;
+    Quat incoming;
+    QuatSlerp(mQuat, mTangentOut, outgoing, flT);
+    QuatSlerp(mTangentOut, pNext->mTangentIn, middle, flT);
+    QuatSlerp(pNext->mTangentIn, pNext->mQuat, incoming, flT);
+    Quat first;
+    Quat second;
+    QuatSlerp(outgoing, middle, first, flT);
+    QuatSlerp(middle, incoming, second, flT);
+    QuatSlerp(first, second, out, flT);
 }
 
 // 0x004fc000

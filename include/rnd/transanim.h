@@ -9,6 +9,7 @@
 #include "rnd/transformable.h"
 
 class FailSink;
+struct Vector3;
 namespace Rnd {
 class Object;
 class Stream;
@@ -95,6 +96,45 @@ public:
         void ComputeSplineTangents(const TransKey *pPrev, const TransKey *pNext);
 
         /**
+         * Evaluate the cubic Hermite segment from this keyframe to pNext.
+         *
+         * The segment leaves mValue along mTangentOut and arrives at `pNext->mValue` along
+         * `pNext->mTangentIn`. A parameter of exactly zero or exactly one copies the matching value
+         * quadword, padding float included. Any other parameter writes a padding float of 1.0.
+         *
+         * @param pNext The keyframe that ends the segment.
+         * @param pOut Receives the position, four floats.
+         * @param flT The segment parameter, zero at this keyframe and one at pNext.
+         * @ghidraAddress 0x00552af8
+         */
+        void EvaluateSpline(const TransKey *pNext, float *pOut, float flT) const;
+
+        /**
+         * Evaluate the derivative of the segment EvaluateSpline() traces.
+         *
+         * Neither end of the segment is special cased. The result returns through the hidden
+         * pointer in a0, ahead of this object in a1, and its padding float is 1.0.
+         *
+         * @param pNext The keyframe that ends the segment.
+         * @param flT The segment parameter, zero at this keyframe and one at pNext.
+         * @return The derivative with respect to the segment parameter.
+         * @ghidraAddress 0x00552cb8
+         */
+        Vector3 EvaluateSplineDerivative(const TransKey *pNext, float flT) const;
+
+        /**
+         * Approximate the arc length of the segment EvaluateSpline() traces.
+         *
+         * A left Riemann sum of the derivative's length in parameter steps of 0.005, stopping once
+         * the accumulated parameter arrives at one.
+         *
+         * @param pNext The keyframe that ends the segment.
+         * @return The approximate length.
+         * @ghidraAddress 0x00554d90
+         */
+        float SplineLength(const TransKey *pNext) const;
+
+        /**
          * Order keyframes by frame.
          *
          * The list sort the loader calls inlines it in its merge step.
@@ -141,6 +181,21 @@ public:
          * @ghidraAddress 0x00552588
          */
         void ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext);
+
+        /**
+         * Evaluate the spherical Bezier segment from this keyframe to pNext.
+         *
+         * The control points are mQuat, mTangentOut, `pNext->mTangentIn`, and `pNext->mQuat`. Three
+         * rounds of QuatSlerp() at the one parameter reduce the four points to three, then two,
+         * then the result. A parameter
+         * of exactly zero or exactly one copies the matching end quaternion.
+         *
+         * @param pNext The keyframe that ends the segment.
+         * @param out Receives the rotation.
+         * @param flT The segment parameter, zero at this keyframe and one at pNext.
+         * @ghidraAddress 0x00554c68
+         */
+        void EvaluateSpline(const RotKey *pNext, Quat &out, float flT) const;
 
         /**
          * Order keyframes by frame.
@@ -272,16 +327,28 @@ public:
     /**
      * Evaluate the three channels at a frame into a transform.
      *
-     * Not reconstructed yet. The signature is established by the one call site that is fully
-     * recovered, SetFrameSelf() at `0x004fd2c8`, which passes a sixteen-float scratch transform in
-     * a1 and zero in a2 while the frame arrives in f12.
+     * The keys come from mFramesOwner and the interpolation modes and flags from this object.
+     * The translation channel writes the fourth row. Outside the key range a channel clamps to
+     * its end value. With mRepeatTrans set, the frame is wrapped by the span of the translation
+     * keys and each wrap adds the chord from the first key to the last. A negative frame on a
+     * spline translation channel instead extrapolates along the first key's outgoing tangent.
+     * The wrapped frame is relative to the first key but is compared against absolute key
+     * frames. A channel whose first key is not at frame zero therefore samples a shifted
+     * segment. A repeating spline translation channel also copies the first key's outgoing
+     * tangent over the last key's incoming tangent on every call.
+     *
+     * The basis rows come from the rotation channel, or with mFollowPath set from the direction
+     * of the translation curve against a +z reference. A follow path of fewer than two keys
+     * writes the identity basis. The scale channel then scales each basis row by one component.
      *
      * @param flFrame The frame to evaluate at.
-     * @param pXfm Four rows of four floats, read for the starting value and overwritten.
-     * @param nApplyOffset Non-zero to extrapolate rather than clamp outside the key range.
+     * @param pXfm Four rows of four floats, updated in place. A channel with no keys writes
+     * nothing to its rows unless nResetEmpty is set.
+     * @param nResetEmpty Non-zero to reset the rows of an empty translation or rotation channel to
+     * the identity.
      * @ghidraAddress 0x004f42f0
      */
-    void EvalFrame(float flFrame, float *pXfm, int nApplyOffset);
+    void EvalFrame(float flFrame, float *pXfm, int nResetEmpty);
 
     /**
      * Make a transformable the target this animation drives.
