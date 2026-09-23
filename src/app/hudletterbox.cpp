@@ -13,6 +13,7 @@ constexpr float kRampDuration = 480.0f;
 
 } // namespace
 
+// 0x0041b3b0
 HudLetterbox::HudLetterbox() {
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("HUD letterbox.view")));
     mView->SetShowing(0);

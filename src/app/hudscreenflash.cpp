@@ -19,6 +19,7 @@ constexpr float kScaleNumerator = 1000.0f;
 
 } // namespace
 
+// 0x0041b150
 HudScreenFlash::HudScreenFlash() : mStart(kNoFade), mRate(1.0f) {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD screen rect")));
     mMesh->SetShowing(1);
@@ -36,6 +37,7 @@ void HudScreenFlash::Start(float flDuration, int nFadeIn) {
     mRate = 1.0f / flDuration;
 }
 
+// 0x0041b2a0
 void HudScreenFlash::SetFrame() {
     const float flNow = static_cast<float>(GetElapsedMilliseconds()) * mScale;
     if (flNow < mStart) {

@@ -33,11 +33,13 @@ constexpr float kPromptDelay = 8000.0f;
 
 } // namespace
 
+// 0x0041b4c8
 HudWinMessage::HudWinMessage()
     : mStart(kNoStart), mState(kStateIdle), mMessage(HxStr("HUD winmsg")),
       mPrompt(HxStr("HUD genmsg.txt")) {
 }
 
+// 0x0041b658
 void HudWinMessage::SetFrame(float flTime) {
     if (mState == kStateIdle) {
         return;
