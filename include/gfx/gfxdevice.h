@@ -1,5 +1,7 @@
 #pragma once
 
+class GsDoubleBuffer;
+
 /** Quadwords of the packet buffer a caller may fill before it has to be submitted. */
 constexpr int kGifBufferQuadwords = 0x1e0;
 
@@ -70,9 +72,8 @@ public:
      * Words of video memory the display and depth buffers occupy.
      *
      * VramTable::Init() divides the result by the words in a block to find where the palette
-     * region begins, which puts every cached texture above the buffers. The body is not
-     * reconstructed. It reads three members of the recorded geometry and a page count out of the
-     * double buffer descriptor mpDisplayBuffers addresses, whose layout is unrecovered.
+     * region begins. The depth buffer page, at 2048 words a page, locates the end of both frame
+     * buffers, and the display geometry at mnDepthBytes a pixel adds the depth buffer itself.
      *
      * @return Words in use, at four bytes each.
      * @ghidraAddress 0x0049fec0
@@ -204,9 +205,8 @@ public:
      * Point FRAME_1 and XYOFFSET_1 back at the display buffer being drawn.
      *
      * Rnd::PsCam::DrawSelf() calls it when the previous camera drew into a texture. Both values
-     * come from the draw environment of the current half of the double buffer descriptor that
-     * mpDisplayBuffers addresses, and each goes through the body of SetGsReg() open-coded. The body
-     * is not reconstructed, because the descriptor's layout is unrecovered.
+     * come from the draw environment of the half mnDrawBuffer selects, and the binary open-codes
+     * the body of SetGsReg() for each.
      *
      * @ghidraAddress 0x0049b6b8
      */
@@ -247,12 +247,11 @@ public:
      */
     int mnDrawBuffer;
     /**
-     * Double buffer descriptor InitDisplayMode() builds through the SDK, at its uncached address.
+     * Double buffer InitDisplayMode() builds at `0x006f36c0`, addressed through its uncached alias.
      *
-     * The descriptor is the SDK's rather than the game's, and its layout is unrecovered.
-     * GetReservedVramWords() reads a page count from it. +0x448
+     * GetReservedVramWords() reads the depth buffer page from it. +0x448
      */
-    void *mpDisplayBuffers;
+    GsDoubleBuffer *mpDisplayBuffers;
     /** Non-zero while geometry is submitted through VU1 rather than the software path. +0x44c */
     int mnUseVu1;
     /**

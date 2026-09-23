@@ -360,8 +360,9 @@ void PsMat::SetupUvXfm() {
     g_pSelectedUvXfm = &g_stageUvXfm;
 }
 
-// 0x005911d8. The compiler inlined this into BindStageTexture(), and nothing calls the out-of-line
-// body, so it is dead in the shipped image. Its own receiver is unused, which is what identifies
+// 0x005911d8
+// The compiler inlined this into BindStageTexture(), and nothing calls the out-of-line body, so it
+// is dead in the shipped image. Its own receiver is unused, which is what identifies
 // it as an instance method rather than a free function.
 void PsMat::SelectStageClamp(const Stage &stage) {
     if (stage.mWrap == Stage::kWrapModeClamp) {

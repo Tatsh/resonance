@@ -5,6 +5,7 @@
 #include <libgraph.h>
 
 #include "app/longop.h"
+#include "gfx/gsdoublebuffer.h"
 #include "gfx/renderstats.h"
 #include "gfx/vramtable.h"
 
@@ -46,6 +47,17 @@ constexpr unsigned long long kGsPrimTypeMask = 7;
 constexpr unsigned long long kGsPrimLineStrip = 2;
 constexpr unsigned long long kGsPrimTriStrip = 4;
 constexpr unsigned long long kGsPrimTriFan = 5;
+
+// The context 1 registers RestoreFrameBufferTarget() restores, and the fields it sets. FRAME_1
+// takes FBP, FBW, and PSM without FBMSK, and XYOFFSET_1 takes both offsets.
+constexpr int kGsRegFrame1 = 0x4c;
+constexpr int kGsRegXyOffset1 = 0x18;
+constexpr unsigned long long kGsFrameMask = 0x3f3f01ff;
+constexpr unsigned long long kGsXyOffsetMask = 0x0000ffff0000ffffULL;
+
+// A GS page is 2048 words, and a word is four bytes.
+constexpr int kGsPageWordShift = 11;
+constexpr int kBytesPerWordShift = 2;
 
 // Arguments to sceGsSyncPath() that wait for every path without a timeout.
 constexpr int kGsSyncPathWait = 0;
@@ -241,4 +253,18 @@ void GfxDevice::CloseGifTag(int bEndOfPacket) {
         static_cast<unsigned long long>(mpWrite - mpOpenVifDirect);
     mpOpenVifDirect[-1].mHi |= qwDirectCount << kVifCodeHighWordShift;
     mpOpenVifDirect = nullptr;
+}
+
+// 0x0049b6b8
+void GfxDevice::RestoreFrameBufferTarget() {
+    const sceGsDrawEnv1 &draw =
+        mnDrawBuffer != 0 ? mpDisplayBuffers->mHalves[1].mDraw : mpDisplayBuffers->mHalves[0].mDraw;
+    SetGsReg(kGsRegFrame1, draw.frame1, kGsFrameMask);
+    SetGsReg(kGsRegXyOffset1, draw.xyoffset1, kGsXyOffsetMask);
+}
+
+// 0x0049fec0
+int GfxDevice::GetReservedVramWords() const {
+    return (mpDisplayBuffers->mZbp << kGsPageWordShift) +
+           ((mnDisplayWidth * mnDisplayHeight * mnDepthBytes) >> kBytesPerWordShift);
 }

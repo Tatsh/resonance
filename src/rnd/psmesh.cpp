@@ -212,7 +212,8 @@ inline void AppendDrawVert(const DrawVert &vert, int nFirstQuadword, int nQuadwo
     }
 }
 
-// Submit one triangle of transformed vertices, clipping it first when asked. 0x00606a60.
+// 0x00606a60
+// Submit one triangle of transformed vertices, clipping it first when asked.
 //
 // Rnd::PsMesh::DrawFacesSoftware() inlines one level of this and the recursion uses the body here.
 // A triangle no plane crosses goes straight out. One that any vertex places behind the near plane

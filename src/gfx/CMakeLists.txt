@@ -1,5 +1,6 @@
 set(RESONANCE_GFX_SRCS
     gfxdevice.cpp
+    gsdoublebuffer.cpp
     vramtable.cpp)
 
 add_library(resonance_gfx STATIC ${RESONANCE_GFX_SRCS})
