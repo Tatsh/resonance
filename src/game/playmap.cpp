@@ -38,7 +38,7 @@ void PlayMap::Slot4() {
 }
 
 // 0x001273b8
-int PlayMap::Slot7(int nValue) {
+int PlayMap::Slot7(int nValue, [[maybe_unused]] int nSet) {
     return nValue;
 }
 

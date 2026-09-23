@@ -50,8 +50,20 @@ public:
      */
     virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd);
 
-    /** @ghidraAddress 0x0012ae88 */
-    virtual int Slot7(int nValue);
+    /**
+     * Carries a position from its step to the partner step the table for one set records.
+     *
+     * The body is not written. It finds the position's step through PlayMap::FindStepIndex(),
+     * scans the eight-byte records of mUnknown68[nSet] for one whose first word is that step, and
+     * returns the position moved by the distance between the two steps. Without such a record the
+     * position comes back unchanged.
+     *
+     * @param nValue The position to map.
+     * @param nSet The index into mUnknown68.
+     * @return The mapped position.
+     * @ghidraAddress 0x0012ae88
+     */
+    virtual int Slot7(int nValue, int nSet);
 
     /** @ghidraAddress 0x0012ae38 */
     virtual int Slot8();

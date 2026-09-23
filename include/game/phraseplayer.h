@@ -29,4 +29,17 @@ public:
      * @ghidraAddress 0x001c2928
      */
     virtual void HandleMessage(Message *pMsg);
+
+    /**
+     * Play the phrase of one bar.
+     *
+     * PhraseMgr::OnCommand() calls it once a bar. The body is not written. It forwards the step
+     * value PhraseMgr::GetStepValue() reports to the object at `+0x28` when there is one, and for
+     * a bar past `+0x2c` with a phrase it dispatches on the track mode at `+0x24` through the jump
+     * table at `0x007e3070`.
+     *
+     * @param nBar The bar.
+     * @ghidraAddress 0x001c1860
+     */
+    void PlayBar(int nBar);
 };

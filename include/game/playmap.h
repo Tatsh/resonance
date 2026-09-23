@@ -135,11 +135,17 @@ public:
     virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd) = 0;
 
     /**
-     * Slot 7. Returns its argument unchanged.
+     * Slot 7. Returns its first argument unchanged.
      *
+     * The second parameter is proven by PlayMapLinear::Slot7(), which indexes its per-set table
+     * with it, and by PhraseMgr's routine at `0x001c0298`, which passes its track there.
+     *
+     * @param nValue The position to map.
+     * @param nSet The set PlayMapLinear selects its table with. Not read here.
+     * @return nValue.
      * @ghidraAddress 0x001273b8
      */
-    virtual int Slot7(int nValue);
+    virtual int Slot7(int nValue, int nSet);
 
     /**
      * Slot 8. Returns the last element of mSteps.

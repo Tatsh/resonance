@@ -2,9 +2,15 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
+#include "mid/mbt.h"
+#include "msg/invalidatetrackmsg.h"
 #include "msg/message.h"
+#include "msg/phrasepacket.h"
+#include "sch/cmdid.h"
 
+class Phrase;
 class PhraseDatabase;
+class PhrasePlayer;
 class Player;
 class PlayMap;
 class TrackData;
@@ -34,7 +40,7 @@ class TickClock;
  * HandleMessage() dispatches six identities, three of them packets rather than messages. A
  * PhrasePacket, a CaughtPhrasePacket, and a GemPacket arrive from the network, and an
  * InvalidateTrackMsg, a RefreshNetMsg, and a GameBeginMsg arrive locally. The PhrasePacket and the
- * InvalidateTrackMsg paths both loop, clearing gems through PostClearGemsMsg() as they go, and the
+ * InvalidateTrackMsg paths both loop, clearing and posting bars through RefreshBar(), and the
  * PhrasePacket path is guarded on the packet's `+0x14` matching mUnknown30.
  *
  * The constructor fixes the member map from `+0x18` to the end. The MsgSource subobject occupies
@@ -100,49 +106,173 @@ public:
     void PostGemMsg(Message *pMsg);
 
     /**
-     * Post a second form of GemMsg. The body is not written.
+     * Post the gems of one bar as GemMsg objects. The body is not written.
      *
-     * No caller is recovered. The address belongs to this class and the program already titles it.
+     * RefreshBar() calls it for track modes 2 and 3.
      *
+     * @param nBar The bar.
      * @ghidraAddress 0x001bc0f0
      */
-    void PostGemMsgSecond();
+    void PostGemMsgSecond(int nBar);
 
     /**
-     * Post a third form of GemMsg. The body is not written.
+     * Post the gems of one bar as GemMsg objects, in the form RefreshBar() uses for track modes 1
+     * and 5. The body is not written.
      *
-     * No caller is recovered.
-     *
+     * @param nBar The bar.
+     * @param nFlag A word RefreshBar() passes as 1.
      * @ghidraAddress 0x001bc290
      */
-    void PostGemMsgThird();
+    void PostGemMsgThird(int nBar, int nFlag);
 
     /**
-     * Post a DurGemMsg. The body is not written.
+     * Post the gems of one bar as DurGemMsg objects. The body is not written.
      *
-     * No caller is recovered. At 0x2ac bytes it is the largest routine of the class.
+     * RefreshBar() calls it for track mode 4. At 0x2ac bytes it is the largest routine of the
+     * class.
      *
+     * @param nBar The bar.
      * @ghidraAddress 0x001bbcf0
      */
-    void PostDurGemMsg();
+    void PostDurGemMsg(int nBar);
 
     /**
-     * Post a ClearGemsMsg. The body is not written.
+     * Post one bar again when it lies in the window from mWindowStart up to mWindowEnd.
      *
-     * Three loops inside HandleMessage() reach it.
+     * The body is not written, because it sends a ClearGemsMsg built on the stack when bClear is
+     * non-zero. It then posts the bar's status through PostBarStatusMsg() and the bar's gems
+     * through the routine the track mode (mUnknown58) selects from the jump table at `0x007e2670`.
      *
+     * @param nBar The bar.
+     * @param bClear Non-zero to clear the bar's gems first.
      * @ghidraAddress 0x001bbb90
      */
-    void PostClearGemsMsg();
+    void RefreshBar(int nBar, int bClear);
 
     /**
-     * Post a BarStatusMsg. The body is not written.
+     * Post a BarStatusMsg for one bar. The body is not written.
      *
-     * No caller is recovered.
+     * RefreshBar() is the recovered caller.
      *
+     * @param nBar The bar.
      * @ghidraAddress 0x001bb9f8
      */
-    void PostBarStatusMsg();
+    void PostBarStatusMsg(int nBar);
+
+    /**
+     * Play one bar through mPhrasePlayer and schedule the file-local Cmd for the next bar.
+     *
+     * The file-local Cmd runs it.
+     *
+     * @param nBar The bar to play.
+     * @ghidraAddress 0x001bb6b8
+     */
+    void OnCommand(int nBar);
+
+    /**
+     * Move the window to start before a bar, post the bar entering it, and schedule the file-local
+     * ExportCmd for the next bar, mExportLead ticks after that bar starts.
+     *
+     * The file-local ExportCmd runs it.
+     *
+     * @param nBar The bar.
+     * @ghidraAddress 0x001bb8a0
+     */
+    void OnExportCommand(int nBar);
+
+    /**
+     * @param nTick The song position, in MIDI ticks.
+     * @return PhraseDatabase::GetPhraseAt() on mDatabase.
+     * @ghidraAddress 0x001c01c8
+     */
+    Phrase *GetPhraseAt(int nTick);
+
+    /**
+     * @param nTick The song position, in MIDI ticks.
+     * @return PhraseDatabase::GetStepValue() on mDatabase.
+     * @ghidraAddress 0x001c0248
+     */
+    long *GetStepValue(int nTick);
+
+    /**
+     * @param nBar The bar, mapped through slot 5 of mMap.
+     * @return The byte at `+0x28` of the phrase at the mapped bar.
+     * @ghidraAddress 0x001c0338
+     */
+    unsigned char GetPhraseByte(int nBar);
+
+    /**
+     * Set the byte at `+0x28` of the phrase at a bar and at every bar slot 7 of mMap chains it to
+     * for this track.
+     *
+     * @param nBar The bar, mapped through slot 5 of mMap.
+     * @param cValue The byte.
+     * @ghidraAddress 0x001c0298
+     */
+    void SetPhraseByte(int nBar, char cValue);
+
+    /**
+     * Return every phrase to one owner and clear and post every bar of the window again.
+     *
+     * @param pPlayer The owner.
+     * @ghidraAddress 0x001c0380
+     */
+    void ResetOwners(Player *pPlayer);
+
+    /**
+     * Widen the window to the first mConfig + 1 bars and post each of them again.
+     *
+     * mRefreshing is set while the bars are posted.
+     *
+     * @ghidraAddress 0x001c03e0
+     */
+    void RefreshAllBars();
+
+    /**
+     * @param nTick The song position, in MIDI ticks.
+     * @return The bar the position falls in. The start of that bar is computed and discarded.
+     * @ghidraAddress 0x001bf6c0
+     */
+    int TickToBar(int nTick);
+
+    /**
+     * @param nBar The bar.
+     * @return The song position the bar starts at.
+     * @ghidraAddress 0x001bf738
+     */
+    int BarToTick(int nBar);
+
+    /**
+     * Withdraw both scheduled commands. The destructor calls it first.
+     *
+     * @ghidraAddress 0x001c0450
+     */
+    void WithdrawCommands();
+
+    /**
+     * Install the phrase a PhrasePacket for this track carries at its step, or clear the step when
+     * the packet has none, and post the window bar mapped to that step again.
+     *
+     * The body is not written, because PhrasePacket declares `+0x14` and `+0x1c` private. When the
+     * owner changes, TrackData::SetOwner() receives the owner PhraseDatabase::GetOwner() reported
+     * before the change, which is what the binary passes. No caller is recovered.
+     *
+     * @param pPacket The packet.
+     * @ghidraAddress 0x001c0010
+     */
+    void OnPhrasePacket(PhrasePacket *pPacket);
+
+    /**
+     * Clear and post again every window bar whose mapped bar lies in the range an
+     * InvalidateTrackMsg for this track names.
+     *
+     * The body is not written, because InvalidateTrackMsg declares its payload private. No caller
+     * is recovered.
+     *
+     * @param pMsg The message.
+     * @ghidraAddress 0x001c0110
+     */
+    void OnInvalidateTrack(InvalidateTrackMsg *pMsg);
 
     /**
      * Post a CaughtPhrasePacket. The body is not written.
@@ -189,10 +319,17 @@ protected:
      */
     virtual void HandleMessage(Message *pMsg);
 
-private:
-    int mUnknown18; // +0x18, cleared on construction
-
 public:
+    /**
+     * Player of this track's phrases.
+     *
+     * The constructor clears it and ScoreTrackGraph's constructor stores its own PhrasePlayer here
+     * at `0x001cefec` from outside the class. OnCommand() plays each bar through it.
+     *
+     * +0x18
+     */
+    PhrasePlayer *mPhrasePlayer;
+
     /**
      * Word the stage classes install through their table slot 8.
      *
@@ -218,13 +355,13 @@ private:
     int mUnknown30;         // +0x30
     int mBarTicks;          // +0x34
     int mConfig;            // +0x38
-    int mUnknown3c;         // +0x3c
-    int mUnknown40;         // +0x40
-    int mUnknown44;         // +0x44
-    int mUnknown48;         // +0x48
+    int mWindowStart;       // +0x3c, the first bar RefreshBar() posts
+    int mWindowEnd;         // +0x40, the bar RefreshBar() stops before
+    int mRefreshing;        // +0x44, set while RefreshAllBars() and OnExportCommand() post bars
+    Mid::MBT mExportLead;   // +0x48, from the start of a bar to its ExportCmd
     Sch::TickClock *mClock; // +0x4c
-    int mUnknown50;         // +0x50, starts at kIDableUnregistered
-    int mUnknown54;         // +0x54, starts at kIDableUnregistered
+    CmdID mCommand;         // +0x50, the handle of the file-local Cmd
+    CmdID mExportCommand;   // +0x54, the handle of the file-local ExportCmd
     int mUnknown58;         // +0x58, copied from the track description's `+0x0c`
     int mPlayMode;          // +0x5c, the play mode Globals reported at construction
 };
