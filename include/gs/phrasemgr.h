@@ -327,6 +327,35 @@ public:
     void OnCaughtPhrasePacket(Message *pMsg);
 
     /**
+     * Schedule the file-local Cmd for bar 0 at position 0 and the file-local ExportCmd for bar 1,
+     * mExportLead ticks after that bar starts.
+     *
+     * ScoreTrackGraph's slot 2 is the recovered caller.
+     *
+     * @ghidraAddress 0x001bc588
+     */
+    void StartCommands();
+
+    /**
+     * Add a gem to the phrase at a bar, creating the phrase for an owner when the bar has none.
+     *
+     * The body is not written, because it sends a message built on the stack through the sink at
+     * mUnknown1c. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
+     * at `0x00195378` and discards both results, gives a bar without a phrase to pOwner through
+     * SetPhraseOwner(), and adds the gem through Phrase::AddGem(). NotePitcher and Scratcher are
+     * the recovered callers.
+     *
+     * @param nGem The gem.
+     * @param nTrans The transposition.
+     * @param nBar The bar, mapped through slot 5 of mMap.
+     * @param nTick The song position within the phrase, in MIDI ticks.
+     * @param pOwner The player a new phrase is given to.
+     * @param nUnknown A word the rest of the body uses. Both NotePitcher calls pass a member.
+     * @ghidraAddress 0x001baa98
+     */
+    void AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner, int nUnknown);
+
+    /**
      * Withdraw both scheduled commands. The destructor calls it first.
      *
      * @ghidraAddress 0x001c0450

@@ -26,6 +26,10 @@ constexpr int kUnallocatedCommand = -2;
 // One bar at 480 ticks per quarter note. ReplayBar() uses it rather than mBarTicks.
 constexpr int kBarTicks = 1920;
 
+// The bars StartCommands() schedules the two commands for.
+constexpr int kFirstBar = 0;
+constexpr int kFirstExportBar = 1;
+
 // A display-mode configuration flag. When it is set, every track gets a JamPowerbarMgr.
 constexpr int kDisplayModeQuery = 0x3a1;
 
@@ -209,6 +213,24 @@ void PhraseMgr::OnExportCommand(int nBar) {
     mClock->PostAtSongTick(pCommand, when.mTick, mExportCommand);
     if (pCommand != nullptr) {
         pCommand->Release();
+    }
+}
+
+// 0x001bc588
+void PhraseMgr::StartCommands() {
+    Cmd *pCommand = new Cmd(this, kFirstBar);
+    const Mid::MBT when(ClampPosition(mBarTicks * kFirstBar));
+    mClock->PostAtSongTick(pCommand, when.mTick, mCommand);
+    if (pCommand != nullptr) {
+        pCommand->Release();
+    }
+
+    ExportCmd *pExportCommand = new ExportCmd(this, kFirstExportBar);
+    const Mid::MBT start(ClampPosition(mBarTicks * kFirstExportBar));
+    const Mid::MBT exportWhen(ClampPosition(start.mTick + mExportLead.mTick));
+    mClock->PostAtSongTick(pExportCommand, exportWhen.mTick, mExportCommand);
+    if (pExportCommand != nullptr) {
+        pExportCommand->Release();
     }
 }
 
