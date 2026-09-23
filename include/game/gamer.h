@@ -149,7 +149,33 @@ public:
      */
     TrackData *GetTrack(int nTrack);
 
+    /**
+     * Run the update of one bar and schedule the next.
+     *
+     * Switches each background track's MIDI by mUnknown94, ends a solo or multiplayer game when
+     * its conditions are met, steps jam playback, ends a jukebox song at mUnknown24, moves the
+     * streamed audio, and finally schedules bar nBar + 1. GamerCmd::Execute() is the caller. The
+     * title is inferred.
+     *
+     * @param nBar The bar.
+     * @ghidraAddress 0x00111fa8
+     */
+    void OnBar(int nBar);
+
+    /**
+     * Schedule the first bar's update.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x00116c20
+     */
+    void Start();
+
 private:
+    // 0x00112838. Posts a GamerCmd for the bar on the song clock under mCommand, one tick before
+    // the bar starts unless the bar starts at zero. The title is inferred.
+    void ScheduleBar(int nBar);
+
     // 0x001116c8. Sends an AdvanceSectionToggleMsg for the bar, then an InvalidateTrackMsg from
     // the following step's mapped position through mUnknown3c further and an InvalidateSeekerMsg
     // through each track's source, and runs script template 1013. The title is inferred.

@@ -15,7 +15,7 @@ set(RESONANCE_GAME_SRCS
     gamepowerbarmgr.cpp
     gamepowerupplacer.cpp
     gamer.cpp
-    gamerconstructcmd.cpp
+    gamercmd.cpp
     gamestats.cpp
     genericcatcher.cpp
     grooveworld.cpp

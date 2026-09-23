@@ -4,9 +4,11 @@
 
 #include "app/application.h"
 #include "app/playsound.h"
+#include "game/bgtrackgraph.h"
 #include "game/enablemgr.h"
 #include "game/gameenablemgr.h"
 #include "game/gamemanagerimpl.h"
+#include "game/gamercmd.h"
 #include "game/gamestats.h"
 #include "game/grooveworld.h"
 #include "game/inputmap.h"
@@ -27,6 +29,7 @@
 #include "sch/tickclock.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
+#include "synth/midi_main.h"
 
 namespace {
 
@@ -50,8 +53,27 @@ constexpr int kUnallocatedCommand = -2;
 // The script template AdvanceTo() runs.
 constexpr int kAdvanceScriptTemplate = 1013;
 
-// The sound DeclareWinners() plays.
+// The sounds a game's end plays.
 constexpr char kWinSound[] = "SND_WIN";
+constexpr char kLoseSound[] = "SND_LOSE";
+
+// Bars after the last one at which a finished multiplayer game exits.
+constexpr int kExitDelayBars = 4;
+
+// The span a solo win passes to Player::Slot8().
+constexpr int kWonBarSpan = 100000;
+
+// SetFreeUntil()'s end bar that frees a track for good.
+constexpr int kFreeForever = -1;
+
+// A solo player below this juice cannot continue.
+constexpr int kMinimumJuice = 2;
+
+// The juice a bar costs.
+constexpr int kBarJuiceCost = -1;
+
+// Bars the streamed audio runs behind the update.
+constexpr int kSynthStreamLeadBars = 3;
 
 // The progress a completed solo song records.
 constexpr float kCompleteProgress = 1.0f;
@@ -275,4 +297,121 @@ void Gamer::RecordSoloStats(int bCompleted, int nBar) {
     }
     mStats->SetTally(0, mPlayers[0]->Slot17());
     mStats->SetRatio(0, mPlayers[0]->Slot18());
+}
+
+void Gamer::OnBar(int nBar) {
+    mPlayMap->Slot5(nBar); // Yes, the binary discards this call's result.
+    mUnknown38 = nBar;
+    for (unsigned i = 0; i < mBackGraphs->size(); ++i) {
+        if (mUnknown94->QueryBar(i, nBar) != 0) {
+            (*mBackGraphs)[i]->DisableMidi();
+        } else {
+            (*mBackGraphs)[i]->EnableMidi();
+        }
+    }
+
+    if (mPlayMode == kPlayModeGame && mUnknown18 == 0) {
+        if (mGameMode != kGameModeSolo) {
+            if (nBar == mUnknown24 && mEndState == kEndStateNone) {
+                DeclareWinners();
+            }
+            if (nBar == mUnknown24 + kExitDelayBars && mEndState == kEndStateOver) {
+                mGlobals->GetWorld()->PostExitMode1();
+            }
+        } else {
+            Player *pPlayer = mPlayers[0];
+            pPlayer->Slot2(); // Yes, the binary discards this call's result.
+            if (nBar >= mUnknown24 && mEndState == kEndStateNone) {
+                mEndState = kEndStateWon;
+                pPlayer->Slot8(nBar, nBar + kWonBarSpan);
+
+                WinMsg win;
+                win.AddWinner(pPlayer);
+                Send(&win);
+                PlaySoundByName(kWinSound);
+                RecordSoloStats(1, nBar);
+
+                TracksOnMsg tracksOn(nBar, 0);
+                Send(&tracksOn);
+                for (int i = 0; i < mTrackCount; ++i) {
+                    if (IsNonCatchTrack(i)) {
+                        mEnableMgr->SetFreeUntil(i, 0, kFreeForever);
+                    } else if ((*mGraphs)[i]->Slot11() != 0) {
+                        (*mGraphs)[i]->Slot10(nBar, pPlayer);
+                    }
+                }
+            } else if (pPlayer->GetJuice() < kMinimumJuice) {
+                if (mEndState != kEndStateNone) {
+                    InputMap::shared()->EnableEntries();
+                    mGlobals->GetWorld()->PostExitMode1();
+                } else {
+                    bool bExhausted = true;
+                    for (int i = 0; i < mTrackCount; ++i) {
+                        if ((*mGraphs)[i]->Slot9() == 0) {
+                            bExhausted = false;
+                            break;
+                        }
+                    }
+
+                    if (bExhausted) {
+                        WinMsg lose;
+                        Send(&lose);
+                        mEndState = kEndStateOver;
+                        if (mUnknown1c == 0) {
+                            pPlayer->AddJuice(kBarJuiceCost, 1);
+                        }
+                        PlaySoundByName(kLoseSound);
+                        RecordSoloStats(0, nBar);
+                        InputMap::shared()->DisableEntries();
+                    }
+                }
+            } else if (mEndState == kEndStateNone && !FreeTracksAfterCapture(nBar) &&
+                       mUnknown1c == 0) {
+                pPlayer->AddJuice(kBarJuiceCost, 1);
+            }
+        }
+    }
+
+    if ((mPlayMode == kPlayModeJam || mUnknown18 != 0) && mPlayMap->IsStepStart(nBar) != 0) {
+        // Yes, the binary discards both calls' results.
+        if (mPlaybackOn != 0 && mUnknown18 == 0) {
+            mPlayMap->Slot16(nBar);
+        } else {
+            mPlayMap->Slot17(nBar);
+        }
+    }
+
+    if (mGlobals->IsJukeboxMode() && nBar >= mUnknown24 && mEndState == kEndStateNone) {
+        mEndState = kEndStateOver;
+        mGlobals->GetWorld()->PostExitMode1();
+    }
+
+    if (mUnknown18 != 0 && mUnknown1c == 0) {
+        Player *pPlayer = mPlayers[0];
+        pPlayer->Slot2(); // Yes, the binary discards this call's result.
+        pPlayer->AddJuice(kBarJuiceCost, 1);
+    }
+    const int nStreamBar = nBar - kSynthStreamLeadBars;
+    if (mUnknown18 == 0 && nStreamBar >= 0) {
+        SetSynthStreamBar(mPlayMap->Slot13(nStreamBar) + 1);
+    }
+
+    ScheduleBar(nBar + 1);
+}
+
+void Gamer::Start() {
+    ScheduleBar(0);
+}
+
+void Gamer::ScheduleBar(int nBar) {
+    Mid::MBT when(std::min(std::max(mBarLength.mTick * nBar, kMBTMinimum), kMBTMaximum));
+    if (when.mTick != Mid::MBT(0).mTick) {
+        when.mTick = std::min(std::max(when.mTick - Mid::MBT(1).mTick, kMBTMinimum), kMBTMaximum);
+    }
+
+    GamerCmd *pCommand = new GamerCmd(this, nBar);
+    mGlobals->GetSongClock()->PostAtSongTick(pCommand, when.mTick, mCommand);
+    if (pCommand != nullptr) {
+        pCommand->Release();
+    }
 }

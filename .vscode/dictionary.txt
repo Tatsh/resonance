@@ -210,6 +210,7 @@ gameovermsg
 gameparams
 gamepowerbarmgr
 gamepowerupplacer
+gamercmd
 gamerconstructcmd
 gameskill
 gamestats

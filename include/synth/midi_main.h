@@ -511,12 +511,24 @@ void InitSynthDriver();
 /**
  * Advance the streaming voice buffers.
  *
- * Performs no work while the stream at `0x006f9c58` is absent. MainLoop::Poll() drives this once
+ * Performs no work while the stream at `0x006e9c58` is absent. MainLoop::Poll() drives this once
  * per frame.
  *
  * @ghidraAddress 0x00464bc8
  */
 void PollSynthStream();
+
+/**
+ * Move the streamed audio to the start of a bar.
+ *
+ * Stores the bar scaled by 19200 as the frame PollSynthStream() passes to the stream, and does
+ * nothing while the stream at `0x006e9c58` is absent. Gamer's per-bar update is one caller and
+ * the routine at `0x00157578` the other. The title is inferred.
+ *
+ * @param nBar The bar.
+ * @ghidraAddress 0x00464ba0
+ */
+void SetSynthStreamBar(int nBar);
 
 /**
  * Advance the driver's pending events.

@@ -9,6 +9,7 @@
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
+#include "rnd/moviestream.h"
 #include "synth/callbackxferhdtoiop.h"
 
 // The tag both allocations below bill to. It is the module's original file rather than this one,
@@ -49,6 +50,9 @@ constexpr int kSpu2MaxVolume = 0x3fff;
 // block below the previous one.
 constexpr unsigned kSpu2EffectAreaTop = 0x1fffff;
 constexpr unsigned kSpu2EffectAreaSize = 0x20000;
+
+// Stream frames in one bar, which SetSynthStreamBar() scales a bar by.
+constexpr int kSynthStreamFramesPerBar = 19200;
 
 // 0x00894cc0
 SoundDriverCommand g_chunkCommand;
@@ -109,6 +113,12 @@ char g_szHdBankPath[kHdBankPathSize];
 
 // 0x006e9bb8
 std::vector<BankSlot> g_bankSlots;
+
+// 0x006e9c58. The streamed audio, or null while none plays.
+Rnd::MovieStream *g_pSynthStream;
+
+// 0x006e9c5c. The frame PollSynthStream() passes to g_pSynthStream.
+int g_nSynthStreamFrame;
 
 // 0x00464378
 void SetBankLoadProgressHook(void (*pfnProgress)()) {
@@ -175,6 +185,12 @@ char g_szFourCc[2 * sizeof(int)];
 char *FourCcToString(const void *pFourCc) {
     *reinterpret_cast<int *>(g_szFourCc) = *static_cast<const int *>(pFourCc);
     return g_szFourCc;
+}
+
+void SetSynthStreamBar(int nBar) {
+    if (g_pSynthStream != nullptr) {
+        g_nSynthStreamFrame = nBar * kSynthStreamFramesPerBar;
+    }
 }
 
 // The rotation StartHdBankXfer() and XferBankFromMemory() share. The wrap returns to the

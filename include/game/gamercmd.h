@@ -6,10 +6,11 @@
 #include "sch/command.h"
 
 /**
- * Scheduler command that builds a gamer.
+ * Scheduler command that runs a gamer's per-bar update.
  *
- * `GamerConstructCmd` is attested by its own type-info accessor at `0x00116b70`, which the RTTI
- * harvest has no entry for, and by the literal `{Gamer}` at `0x007ce588` that its Print() writes.
+ * The class has its own type-info accessor at `0x00116b70`, which the RTTI harvest has no entry
+ * for, so the name is inferred from what Execute() does. Print() writes the literal `{Gamer}` at
+ * `0x007ce588`.
  *
  * Its table at `0x007ce600` has eight entries. This class supplies the destructor and slots 3, 4,
  * and 5, and inherits slots 2, 6, and 7, the last two being `Sch::Command::Save` at `0x00539f20`
@@ -21,10 +22,21 @@
  * result as marking the command unstreamable. So this command is never saved or loaded despite
  * inheriting both routines.
  */
-class GamerConstructCmd : public Sch::Command {
+class GamerCmd : public Sch::Command {
 public:
+    /**
+     * Prepare the update of one bar.
+     *
+     * Inline. Gamer::ScheduleBar() expands it after allocating the command at `0x001128f8`.
+     *
+     * @param pGamer The gamer to update.
+     * @param nBar The bar.
+     */
+    GamerCmd(Gamer *pGamer, int nBar) : mGamer(pGamer), mBar(nBar) {
+    }
+
     /** @ghidraAddress 0x00116b48 */
-    virtual ~GamerConstructCmd();
+    virtual ~GamerCmd();
 
     /**
      * Report the identifier this class streams itself under.
@@ -35,10 +47,7 @@ public:
     virtual int CmdID();
 
     /**
-     * Build the gamer.
-     *
-     * Not reconstructed. It passes mArgument to the routine at `0x00111fa8` with mGamer as the
-     * receiver, and that routine is an unnamed member of `Gamer` in the same band.
+     * Run Gamer::OnBar() for the bar.
      *
      * @ghidraAddress 0x00116bd0
      */
@@ -47,8 +56,7 @@ public:
     /**
      * Write this command's description to stream.
      *
-     * Writes the single literal `{Gamer}` and nothing else, so the description names the class it
-     * builds rather than any of its own state.
+     * Writes the single literal `{Gamer}` and nothing else.
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x00116bf0
@@ -56,13 +64,13 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    Gamer *mGamer; // +0x0c the receiver Execute calls
-    int mArgument; // +0x10 the value Execute passes
+    Gamer *mGamer; // +0x0c
+    int mBar;      // +0x10
 };
 
 /**
- * Identifier GamerConstructCmd::CmdID() reports, which is zero.
+ * Identifier GamerCmd::CmdID() reports, which is zero.
  *
  * @ghidraAddress 0x00669cb8
  */
-extern int g_nGamerConstructCmdID;
+extern int g_nGamerCmdID;
