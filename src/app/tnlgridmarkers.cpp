@@ -1,7 +1,6 @@
 #include "app/tnlgridmarkers.h"
 
 #include <cmath>
-#include <cstring>
 
 #include "app/apptunnel.h"
 #include "app/tnlname.h"
@@ -37,7 +36,6 @@ constexpr float kRecycleDistance = 480.0f;
 constexpr float kMaxAlpha = 0.8f;
 
 constexpr float kCentreLane = 0.5f;
-constexpr float kTangentScale = 0.97f;
 
 } // namespace
 
@@ -60,15 +58,8 @@ void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
     if (!mMesh) {
         return;
     }
-    Rnd::Transformable *pTrans = mMesh;
     const float flFrame = static_cast<float>(nFrame);
-    Transform xfm;
-    PadTransformRows(xfm);
-    GetCachedTunnelObject()->ProjectSectionToCameraSpace(
-        nTrack, &xfm, flFrame, kCentreLane, kTangentScale);
-    std::memcpy(pTrans->mLocalXfm, &xfm, sizeof(pTrans->mLocalXfm));
-    pTrans->mDirty = 1;
-    pTrans->UpdateWorldXfm(nullptr, 0);
+    PlaceOnRing(*mMesh, nTrack, flFrame, kCentreLane);
     mFrame = flFrame;
 }
 

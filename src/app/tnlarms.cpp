@@ -1,9 +1,11 @@
 #include "app/tnlarms.h"
 
+#include "app/tunnelcache.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/particlesys.h"
+#include "rnd/tunnel.h"
 #include "rnd/view.h"
 
 namespace {
@@ -63,4 +65,8 @@ void TnlArms::SetFrame(float flFrame) {
         mStartFrame = kNoFrame;
         mView->SetShowing(0);
     }
+}
+
+void TnlArms::AttachTo(Rnd::Drawable *pParent) {
+    pParent->AddDraw(mView, GetCachedTunnelObject());
 }

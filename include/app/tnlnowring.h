@@ -73,10 +73,18 @@ public:
      */
     void RefreshMeshes();
 
-private:
-    // AppTunnel's constructor hides mView in jukebox mode.
-    friend class AppTunnel;
+    /**
+     * Show or hide "nowring.view".
+     *
+     * AppTunnel inlines this in its constructor and its PlaybackToggleMsg handler, and the
+     * out-of-line copy has no caller.
+     *
+     * @param nShowing Non-zero to show.
+     * @ghidraAddress 0x00455ff8
+     */
+    void SetShowing(int nShowing);
 
+private:
     std::vector<int> mPlayerMeshes; // Index into mMeshes of the mesh each player slot hides.
     std::vector<Rnd::Mesh *> mMeshes;
     Rnd::View *mView;    // "nowring.view".

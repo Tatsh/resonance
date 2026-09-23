@@ -5,6 +5,7 @@
 #include "app/tnlemitter.h"
 
 namespace Rnd {
+class Drawable;
 class View;
 } // namespace Rnd
 
@@ -53,10 +54,18 @@ public:
      */
     void SetFrame(float flFrame);
 
-private:
-    // AppTunnel's WinMsg handler draws mView in each winner's local view.
-    friend class AppTunnel;
+    /**
+     * Draw the arms in a view, ahead of the tunnel.
+     *
+     * AppTunnel's WinMsg handler inlines this for each winner's local view, and the out-of-line
+     * copy has no caller.
+     *
+     * @param pParent The drawable to add the arms view to.
+     * @ghidraAddress 0x00456a88
+     */
+    void AttachTo(Rnd::Drawable *pParent);
 
+private:
     float mStartFrame; // Trigger frame, 1e9 when idle.
     Rnd::View *mView;  // "arms.view".
     std::vector<TnlEmitter> mEmitters;

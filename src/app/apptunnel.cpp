@@ -201,6 +201,30 @@ inline AppTunnel::GemFlash::~GemFlash() {
     }
 }
 
+inline int AppTunnel::GemFlash::Start(const Vector3 &pos) {
+    if (mParticle != nullptr) {
+        return 0;
+    }
+    // The binary does not test the new particle for null.
+    mParticle = mSystem->AllocParticle();
+    mParticle->mCol = Color{1.0f, 1.0f, 1.0f, 1.0f};
+    mParticle->mSize = 1.0f;
+    mParticle->mPos = pos;
+    return 1;
+}
+
+inline void AppTunnel::GemFlash::Update() {
+    if (mParticle == nullptr) {
+        return;
+    }
+    if (mParticle->mSize <= 0.0f) {
+        mSystem->FreeParticle(mParticle);
+        mParticle = nullptr;
+    } else {
+        mParticle->mSize -= kGemFlashShrink;
+    }
+}
+
 AppTunnel::AppTunnel(Renderer *pRenderer)
     : mRenderer(pRenderer), mGameMode(Application::shared()->GetGameMode()),
       mPlayMode(Application::shared()->GetPlayMode()), mBoundary(nullptr), mCameraRig(nullptr),
@@ -465,7 +489,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
             (*it)->mActivator.SetSuppressed(1);
         }
-        mNowRing->mView->SetShowing(0);
+        mNowRing->SetShowing(0);
     }
 }
 
@@ -634,7 +658,7 @@ void AppTunnel::OnPlaybackToggle(PlaybackToggleMsg *pMsg) {
     for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         (*it)->mActivator.SetSuppressed(mJukebox);
     }
-    mNowRing->mView->SetShowing(!mJukebox);
+    mNowRing->SetShowing(!mJukebox);
 }
 
 void AppTunnel::OnWin(WinMsg *pMsg) {
@@ -642,7 +666,7 @@ void AppTunnel::OnWin(WinMsg *pMsg) {
         return;
     }
     for (auto it = pMsg->mWinners.begin(); it != pMsg->mWinners.end(); ++it) {
-        FindTnlPlayer(*it)->mLocalView->AddDraw(mArms->mView, GetCachedTunnelObject());
+        mArms->AttachTo(FindTnlPlayer(*it)->mLocalView);
     }
     mArms->Start(mRenderer->mSongTick);
     if (mGameMode == kGameModeSolo) {
@@ -743,16 +767,7 @@ void AppTunnel::SetFrame(float flFrame) {
         }
     }
     for (auto it = mGemFlashes.begin(); it != mGemFlashes.end(); ++it) {
-        GemFlash *pFlash = *it;
-        if (pFlash->mParticle == nullptr) {
-            continue;
-        }
-        if (pFlash->mParticle->mSize <= 0.0f) {
-            pFlash->mSystem->FreeParticle(pFlash->mParticle);
-            pFlash->mParticle = nullptr;
-        } else {
-            pFlash->mParticle->mSize -= kGemFlashShrink;
-        }
+        (*it)->Update();
     }
     for (auto it = mPanelFX.begin(); it != mPanelFX.end(); ++it) {
         (*it)->Update(flFrame);
@@ -824,13 +839,7 @@ Rnd::Mat *AppTunnel::GetGhostMat(int nTrack) {
 
 void AppTunnel::StartGemFlash(const Vector3 &pos) {
     for (auto it = mGemFlashes.begin(); it != mGemFlashes.end(); ++it) {
-        GemFlash *pFlash = *it;
-        if (pFlash->mParticle == nullptr) {
-            // The binary does not test the new particle for null.
-            pFlash->mParticle = pFlash->mSystem->AllocParticle();
-            pFlash->mParticle->mCol = Color{1.0f, 1.0f, 1.0f, 1.0f};
-            pFlash->mParticle->mSize = 1.0f;
-            pFlash->mParticle->mPos = pos;
+        if ((*it)->Start(pos)) {
             return;
         }
     }

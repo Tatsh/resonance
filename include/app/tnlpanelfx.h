@@ -40,7 +40,9 @@ public:
     /**
      * Take the mesh out of "tnl transparent" and delete it.
      *
-     * AppTunnel's destructor inlines the body, and no out-of-line copy exists.
+     * AppTunnel's destructor inlines the body. The deleting copy at `0x00456418` has no caller.
+     *
+     * @ghidraAddress 0x00456418
      */
     ~TnlPanelFX() {
         mView->RemoveDraw(mMesh);

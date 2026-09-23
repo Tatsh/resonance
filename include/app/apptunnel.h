@@ -250,9 +250,17 @@ private:
 
     // Gem flash record, the element of mGemFlashes. The name is inferred.
     struct GemFlash {
-        // Release the flash particle. The destructor inlines the body, and no out-of-line copy
-        // exists.
+        // Release the flash particle. The destructor inlines the body. The deleting copy at
+        // 0x00456cd0 has no callers.
         ~GemFlash();
+
+        // Take a white particle of size 1 at pos when the record is free, reporting 1, else
+        // report 0. StartGemFlash() inlines it. 0x00456d28.
+        int Start(const Vector3 &pos);
+
+        // Shrink the flash by 0.1, and release it once its size is not positive. SetFrame()
+        // inlines it. 0x00456db0.
+        void Update();
 
         Rnd::ParticleSys *mSystem; // "gem_flash.ps", shared by every record.
         Rnd::Particle *mParticle;  // The flash, or null while the record is free.

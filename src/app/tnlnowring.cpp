@@ -77,3 +77,7 @@ void TnlNowRing::RefreshMeshes() {
         mMeshes[*it]->SetShowing(0);
     }
 }
+
+void TnlNowRing::SetShowing(int nShowing) {
+    mView->SetShowing(nShowing);
+}

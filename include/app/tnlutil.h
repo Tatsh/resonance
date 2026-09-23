@@ -1,8 +1,13 @@
 #pragma once
 
+#include <cstring>
+
+#include "app/tunnelcache.h"
 #include "math/color.h"
 #include "math/transform.h"
 #include "os/hxstr.h"
+#include "rnd/transformable.h"
+#include "rnd/tunnel.h"
 
 /**
  * Map a player colour name to the colour the tunnel draws that player in.
@@ -69,6 +74,49 @@ inline void PadTransformRows(Transform &xfm) {
     xfm.mBasisY.w = 1.0f;
     xfm.mBasisZ.w = 1.0f;
     xfm.mTranslation.w = 1.0f;
+}
+
+/**
+ * Move a transformable to the tunnel path transform at one frame.
+ *
+ * The local transform takes the path transform with its rows padded, the object is marked dirty,
+ * and its world transform is recomposed at once. TnlBoundary inlines it. The out-of-line copy
+ * has no callers.
+ *
+ * @param trans The object to move.
+ * @param flFrame The path frame.
+ * @ghidraAddress 0x004548d0
+ */
+inline void PlaceOnPath(Rnd::Transformable &trans, float flFrame) {
+    Transform xfm;
+    PadTransformRows(xfm);
+    GetCachedTunnelObject()->GetPathXfm(&xfm, flFrame);
+    std::memcpy(trans.mLocalXfm, &xfm, sizeof(trans.mLocalXfm));
+    trans.mDirty = 1;
+    trans.UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
+}
+
+/**
+ * Move a transformable onto one ring of the tunnel at one frame, pushed outwards by 0.97.
+ *
+ * The same sequence as PlaceOnPath() over Rnd::Tunnel::ProjectSectionToCameraSpace().
+ * TnlGridMarkers inlines it. The out-of-line copy has no callers.
+ *
+ * @param trans The object to move.
+ * @param nRing The ring.
+ * @param flFrame The path frame.
+ * @param flBlend The weight of the next ring's translation.
+ * @ghidraAddress 0x00454808
+ */
+inline void PlaceOnRing(Rnd::Transformable &trans, int nRing, float flFrame, float flBlend) {
+    constexpr float kRingTangentScale = 0.97f;
+    Transform xfm;
+    PadTransformRows(xfm);
+    GetCachedTunnelObject()->ProjectSectionToCameraSpace(
+        nRing, &xfm, flFrame, flBlend, kRingTangentScale);
+    std::memcpy(trans.mLocalXfm, &xfm, sizeof(trans.mLocalXfm));
+    trans.mDirty = 1;
+    trans.UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
 /**
