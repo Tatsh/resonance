@@ -1,9 +1,15 @@
 #include "met/metfreqmakerdirectionsscreen.h"
 
+#include "met/metfreqmakerassetmanager.h"
+#include "met/methelpscreen.h"
+#include "met/metrenderer.h"
 #include "met/metsonglists.h"
+#include "met/scrollinglist.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
+#include "rnd/manager.h"
 #include "rnd/text.h"
+#include "rnd/view.h"
 
 namespace {
 
@@ -158,8 +164,8 @@ HxStr g_acceptPage[kPageRowCount][kPageColumnCount] = {
     {"", ""},
 };
 
-// The FreQ maker mode names, built after the pages at 0x006a4150. Nothing in the image reads the
-// array.
+// The FreQ maker mode names, built after the pages at 0x006a4150. ShowPage() posts the one for the
+// page it shows to the help screen.
 HxStr g_freqMakerModeNames[] = {
     "fqmak_choosing_mode",
     "fqmak_coloring_mode",
@@ -203,6 +209,24 @@ enum {
 // The row of the save page that receives the card slot name.
 constexpr int kSaveSlotRow = 1;
 
+// The screen name, the directory, and the container the constructor supplies.
+static const char *const kScreenName = "fm_directions";
+static const char *const kDirectory = "metagame/persona";
+static const char *const kContainerName = "freq_maker_directions";
+
+// The registry key slot 30 activates.
+static const char *const kPanelName = "MetFreqMakerDirectionsScreen";
+
+// The row view the list clones, the pitch between rows, and the context the list passes on.
+static const char *const kRowTemplate = "fmd_help_line_prototype.view";
+constexpr int kRowPitch = 22;
+constexpr int kListContext = 0;
+
+// The help presets ShowPage() selects.
+static const char *const kSavePreset = "freq_maker_save_button";
+static const char *const kBackOnlyPreset = "only_back_title";
+static const char *const kStandardPreset = "standard_title";
+
 // The text the blank page shows.
 static const char *const kNoText = "";
 
@@ -213,11 +237,85 @@ inline const char *TextOf(const HxStr &text) {
 
 } // namespace
 
+// 0x00262810
+MetFreqMakerDirectionsScreen::MetFreqMakerDirectionsScreen(MetRenderer *pRenderer, int nPriority)
+    : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
+      mPage(kBlankPage) {
+    mUnknown60 = 0;
+}
+
+// 0x00269e68
+MetFreqMakerDirectionsScreen::~MetFreqMakerDirectionsScreen() {
+}
+
+// 0x00269de0
+MetFreqMakerDirectionsScreen *MetFreqMakerDirectionsScreen::New(MetRenderer *pRenderer,
+                                                                int nPriority) {
+    return new MetFreqMakerDirectionsScreen(pRenderer, nPriority);
+}
+
+// 0x00269ed0
+void MetFreqMakerDirectionsScreen::EnterAndShow() {
+    MetScreen::EnterAndShow();
+    mList->setEntriesShowing(1);
+}
+
+// 0x00269fc0
+int MetFreqMakerDirectionsScreen::PollContainerLoad() {
+    if (!MetFreqMakerAssetManager::shared()->PollLoad()) {
+        return 0;
+    }
+    return MetScreen::PollContainerLoad();
+}
+
+// 0x00269dd0
+void MetFreqMakerDirectionsScreen::PlayCycleLeftSound(int) {
+}
+
+// 0x00269dd8
+void MetFreqMakerDirectionsScreen::PlayCycleRightSound(int) {
+}
+
+// 0x00269f00
+void MetFreqMakerDirectionsScreen::OnUnknownSlot30(Rnd::Object *) {
+    ActivateNamedPanel(HxStr(kPanelName));
+}
+
+// 0x00269fa0
+void MetFreqMakerDirectionsScreen::OnUnknownSlot36() {
+    mList->setEntriesShowing(0);
+}
+
+// 0x00262998
+void MetFreqMakerDirectionsScreen::ResolveContainerViews() {
+    MetScreen::ResolveContainerViews();
+    mRowTemplate = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kRowTemplate)));
+    mList = new ScrollingList(
+        this, kRowPitch, kPageRowCount, mRowTemplate, nullptr, nullptr, nullptr, kListContext);
+    mList->setItemCount(kPageRowCount);
+}
+
+// 0x00262ad8
+void MetFreqMakerDirectionsScreen::ShowPage(int nPage) {
+    mPage = nPage;
+    mList->refresh();
+    MetHelpScreen::SetText(g_freqMakerModeNames[nPage], mUnknown10->mUnknown68);
+    if (nPage == kSavePage) {
+        MetHelpScreen::SelectPreset(HxStr(kSavePreset));
+    } else if (nPage == kFreqFullPage) {
+        MetHelpScreen::SelectPreset(HxStr(kBackOnlyPreset));
+    } else {
+        MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
+    }
+}
+
+// 0x0026a008
 const HxStr &
 MetFreqMakerDirectionsScreen::PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]) {
     return pTable[nRow][nColumn];
 }
 
+// 0x00262c28
 int MetFreqMakerDirectionsScreen::ProvideText(int nItem, int nColumn, Rnd::Text *pText, int) {
     switch (mPage) {
     case kSelectStampPage:
@@ -284,6 +382,7 @@ int MetFreqMakerDirectionsScreen::ProvideText(int nItem, int nColumn, Rnd::Text 
     return 1;
 }
 
+// 0x0026a020
 int MetFreqMakerDirectionsScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 0;
 }
