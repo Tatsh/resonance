@@ -7,6 +7,9 @@
 #include "rnd/text.h"
 #include "rnd/view.h"
 
+class MetKBUser;
+struct MetKeyboardRequest;
+
 /**
  * On-screen keyboard.
  *
@@ -100,6 +103,22 @@ public:
      * @ghidraAddress 0x0028cbb8
      */
     static HxStr DefaultMacro(int nIndex);
+
+    /**
+     * Fill the registered keyboard from a request and bring it up over the requesting screen.
+     *
+     * The screen registered as `MetKeyboardScreen` receives the text, the prompt, the receiver, the
+     * controller, the ticker text, and the return screen through its setters. The two limits go to
+     * the namespace-scope globals at `0x006a7c8c` and `0x006a7c90`, which the key handlers read,
+     * and the macro list falls back to the default list when the request has none. The return
+     * screen then pushes the keyboard and makes it the active panel. Neither screen lookup is
+     * checked for null. MetSaveRemixScreen, MetRemixDelScreen, and MetLoadNewFreqScreen call it.
+     * The title is inferred.
+     *
+     * @param request The request.
+     * @ghidraAddress 0x00282468
+     */
+    static void Open(const MetKeyboardRequest &request);
 
     /**
      * Show the keyboard and start its enter animation.
@@ -262,7 +281,28 @@ private:
     // routine has no recovered title.
     void SetTickerText(const HxStr &text);
 
-    int mUnknown8c;               // +0x8c
+    // 0x0028c830. Assigns the entered text. Open() is the one caller.
+    void SetText(const HxStr &text);
+
+    // 0x0028c850. Assigns the prompt. Open() is the one caller.
+    void SetPrompt(const HxStr &prompt);
+
+    // 0x0028cad0. Records the receiver of the committed text. Open() is the one caller.
+    void SetUser(MetKBUser *pUser);
+
+    // 0x0028c3e0. Records the one controller the keyboard accepts. Open() is the one caller.
+    void SetSelector(int nSelector);
+
+    // 0x0028cad8. Assigns the ticker text slot 33 posts. Open() is the one caller.
+    void SetTicker(const HxStr &ticker);
+
+    // 0x0028cab0. Assigns the registry key of the screen slot 36 departs to. Open() is the one
+    // caller.
+    void SetReturnScreen(const HxStr &returnScreen);
+
+    // The macro list the keyboard offers. Open() stores the request's list here, or the default
+    // list when the request has none. +0x8c
+    std::vector<HxStr> *mMacros;
     Rnd::View *mpKeypanelRegular; // +0x90, `keypanel_regular.view`
     Rnd::View *mpKeypanelShift;   // +0x94, `keypanel_shift.view`
     Rnd::View *mpKeypanelCaps;    // +0x98, `keypanel_caps.view`
@@ -274,8 +314,8 @@ private:
     HxStr mUnknownac; // +0xac
     // The entered text. Slot 36 strips its trailing spaces.
     HxStr mUnknownb4; // +0xb4
-    int mUnknownbc;   // +0xbc
-    int mUnknownc0;   // +0xc0
+    // The prompt SetPrompt() assigns. +0xbc
+    HxStr mPrompt;
     // The ticker text slot 33 posts.
     HxStr mUnknownc4; // +0xc4
     // The pending key command name. Slots 28, 30, and 36 all test it for emptiness first.
@@ -289,16 +329,17 @@ private:
     float mUnknownfc;              // +0xfc, starts at 1.0f
     // Deadline of the key repeat, or zero while no key repeats. Slot 26 advances it by 240 a step.
     float mUnknown100; // +0x100
-    int mUnknown104;   // +0x104
-    int mUnknown108;   // +0x108
-    int mUnknown10c;   // +0x10c
-    int mUnknown110;   // +0x110
-    int mUnknown114;   // +0x114
-    int mUnknown118;   // +0x118
-    int mUnknown11c;   // +0x11c, starts at 1
+    // The receiver of the committed text, which SetUser() records. +0x104
+    MetKBUser *mUser;
+    int mUnknown108; // +0x108
+    int mUnknown10c; // +0x10c
+    int mUnknown110; // +0x110
+    int mUnknown114; // +0x114
+    int mUnknown118; // +0x118
+    int mUnknown11c; // +0x11c, starts at 1
     // The selector the four sound slots and slot 19 compare their argument against. A screen that
-    // records -1 accepts every value. Nothing in this class writes it, and the constructor does not
-    // clear it. The writer is not recovered.
+    // records -1 accepts every value. SetSelector() is the one writer, and the constructor does not
+    // clear it.
     int mSelector; // +0x120
     // Index of the last key action, switched over seven cases by slot 28. Starts at 5.
     int mUnknown124; // +0x124

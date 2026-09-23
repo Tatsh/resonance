@@ -242,11 +242,10 @@ public:
      * Request a remix name from the on-screen keyboard. Slot 42.
      *
      * The body is not written. It sets MetSaveRemix::mUnknowne0 so that slot 7 runs slot 40 once
-     * the keyboard has finished, and then runs the six-argument keyboard entry point at
-     * `0x0028cf18` with this screen's own registry key as the screen to return to, `Remix name` as
-     * the prompt, MetSaveRemix::mUnknownb8 as the initial text, -1, and this object's own MetKBUser
-     * subobject as the receiver. That entry point belongs to MetKeyboardScreen and is neither
-     * titled nor declared.
+     * the keyboard has finished, and then builds a MetKeyboardRequest with this screen's own
+     * registry key as the screen to return to, `Remix name` as the prompt,
+     * MetSaveRemix::mUnknownb8 as the initial text, -1 for any controller, and this object's own
+     * MetKBUser subobject as the receiver, and passes it to MetKeyboardScreen::Open().
      *
      * This override replaces the MetSaveRemix body, which is an alias for the empty slot 40 rather
      * than a stub.

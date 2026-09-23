@@ -470,6 +470,7 @@ metfade
 metfreqendedmsg
 metfreqloader
 metfreqmakerassetmanager
+metfreqmakerbuttonsscreen
 metfreqmakercanvasscreen
 metfreqmakerdirectionsscreen
 metfreqmakerinventoryscreen
@@ -485,6 +486,7 @@ metjukeboxeditplaylistscreendone
 metjukeboxeditplaylistscreenlowerleft
 metjukeboxfactoryremixesscreen
 metjukeboxtopbuttonsscreen
+metkeyboardrequest
 metkeyboardscreen
 metleftgizmoscreen
 metleftgizmosmallscreen

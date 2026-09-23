@@ -25,6 +25,7 @@ set(RESONANCE_MET_SRCS
     metjukeboxeditplaylistscreenlowerleft.cpp
     metjukeboxfactoryremixesscreen.cpp
     metjukeboxtopbuttonsscreen.cpp
+    metkeyboardrequest.cpp
     metkeyboardscreen.cpp
     metleftgizmoscreen.cpp
     metleftgizmosmallscreen.cpp
