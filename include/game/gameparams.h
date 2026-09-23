@@ -141,13 +141,13 @@ public:
     int mDifficulty; /*!< Driven by GameManagerImpl slots 28 and 30, the difficulty. +0x20 */
 
 private:
-    // Load() normalises the transferred word to 0 or 1 before the store, which is what types this
-    // member and the three below as truth values rather than as counts.
-    bool mUnknown24; // +0x24
+    // A flag word. Load() normalises the transferred word to 0 or 1, and every access to this
+    // member and the three below, the constructor's clears included, is a full word (sw/lw). +0x24
+    int mUnknown24;
 
 public:
-    /** Written by GameManagerImpl::SetGameMode() as the test for `net`. +0x28 */
-    bool mUnknown28;
+    /** Written by GameManagerImpl::SetGameMode() as the test for `net`, 0 or 1. +0x28 */
+    int mUnknown28;
 
     /**
      * Set while a saved game is loading, labelled `loadinggame=` by Print(). +0x2c
@@ -155,7 +155,7 @@ public:
      * Public because MetStageFinishScreen::EnterAndShow() reads it directly, and the image has no
      * GameParams accessor for it.
      */
-    bool mLoadingGame;
+    int mLoadingGame;
 
     /**
      * Set for a jukebox session. +0x30
@@ -164,7 +164,7 @@ public:
      * Public because Globals::IsJukeboxMode() reads it directly, and the image has no GameParams
      * accessor for it.
      */
-    bool mJukeboxMode;
+    int mJukeboxMode;
 };
 
 /**

@@ -14,10 +14,10 @@ GameParams::GameParams() {
     mUnknown10 = 0;
     mUnknown1c = 0;
     mDifficulty = 0;
-    mUnknown24 = false;
-    mUnknown28 = false;
-    mLoadingGame = false;
-    mJukeboxMode = false;
+    mUnknown24 = 0;
+    mUnknown28 = 0;
+    mLoadingGame = 0;
+    mJukeboxMode = 0;
 }
 
 // 0x00187940
