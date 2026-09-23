@@ -16,6 +16,7 @@ inline bool IsBlank(const char *pszText) {
 
 } // namespace
 
+// 0x004b7ad0
 HxStr::HxStr(const char *pszText) {
     if (pszText == nullptr) {
         mLen = 0;
@@ -28,6 +29,7 @@ HxStr::HxStr(const char *pszText) {
     strcpy(mStr, pszText);
 }
 
+// 0x004b7b50
 HxStr::HxStr(const HxStr &other) {
     if (other.mStr == nullptr) {
         mLen = 0;
@@ -40,6 +42,7 @@ HxStr::HxStr(const HxStr &other) {
     strcpy(mStr, other.mStr);
 }
 
+// 0x004b7bd0
 HxStr::HxStr(unsigned nCount, char ch) {
     mLen = nCount;
     mStr = static_cast<char *>(MemAlloc(nCount + 1));
@@ -50,6 +53,7 @@ HxStr::HxStr(unsigned nCount, char ch) {
     mStr[nCount] = '\0';
 }
 
+// 0x004b7c68
 HxStr &HxStr::operator+=(const HxStr &other) {
     mLen += other.mLen;
     char *pNew = static_cast<char *>(MemAlloc(mLen + 1));
@@ -67,6 +71,7 @@ HxStr &HxStr::operator+=(const HxStr &other) {
     return *this;
 }
 
+// 0x004b7d28
 HxStr &HxStr::operator+=(char ch) {
     char *pNew = static_cast<char *>(MemAlloc(mLen + 2));
     ++mLen;
@@ -81,6 +86,7 @@ HxStr &HxStr::operator+=(char ch) {
     return *this;
 }
 
+// 0x004b7dd8
 HxStr &HxStr::operator=(const char *pszText) {
     if (pszText == mStr) {
         return *this;
@@ -100,6 +106,7 @@ HxStr &HxStr::operator=(const char *pszText) {
     return *this;
 }
 
+// 0x004b7e78
 HxStr &HxStr::operator=(const HxStr &other) {
     if (&other == this) {
         return *this;
@@ -120,12 +127,14 @@ HxStr &HxStr::operator=(const HxStr &other) {
     return *this;
 }
 
+// 0x004b7f18
 char HxStr::operator[](unsigned i) const {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(i <= mLen)
     return mStr[i];
 }
 
+// 0x004b8230
 void HxStr::Alloc(unsigned nLen) {
     if (mStr != nullptr) {
         MemFreeScalar(mStr);
@@ -136,6 +145,7 @@ void HxStr::Alloc(unsigned nLen) {
     HX_ASSERT(mStr != 0) // Yes, the binary checks the allocation only after writing through it.
 }
 
+// 0x004b82b8
 int HxStr::Find(char ch) const {
     HX_ASSERT(mStr != 0)
     const char *pFound = mStr;
@@ -148,6 +158,7 @@ int HxStr::Find(char ch) const {
     return pFound - mStr;
 }
 
+// 0x004b8350
 int HxStr::Find(char ch, unsigned nStart) const {
     HX_ASSERT(mStr != 0)
     if (nStart >= mLen) {
@@ -163,6 +174,7 @@ int HxStr::Find(char ch, unsigned nStart) const {
     return pFound - mStr;
 }
 
+// 0x004b83f0
 int HxStr::Find(const char *pszText) const {
     HX_ASSERT(mStr != 0)
     unsigned nNeedle = strlen(pszText);
@@ -174,6 +186,7 @@ int HxStr::Find(const char *pszText) const {
     return -1;
 }
 
+// 0x004b84b0
 int HxStr::ReverseFind(char ch) const {
     HX_ASSERT(mStr != 0)
     const char *pFound = mStr + mLen - 1;
@@ -186,6 +199,7 @@ int HxStr::ReverseFind(char ch) const {
     return pFound - mStr;
 }
 
+// 0x004b8550
 int HxStr::ReverseFindOneOf(const char *pszChars) const {
     if (pszChars == nullptr) {
         return -1;
@@ -200,6 +214,7 @@ int HxStr::ReverseFindOneOf(const char *pszChars) const {
     return nBest;
 }
 
+// 0x004b8678
 int HxStr::Compare(unsigned pos, unsigned len, const char *str) const {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(str != 0)
@@ -207,12 +222,14 @@ int HxStr::Compare(unsigned pos, unsigned len, const char *str) const {
     return strncmp(mStr + pos, str, len);
 }
 
+// 0x004b8738
 HxStr HxStr::Mid(unsigned pos) const {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(pos <= mLen)
     return HxStr(mStr + pos);
 }
 
+// 0x004b78b8
 HxStr HxStr::Mid(unsigned pos, unsigned len) const {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(pos <= mLen)
@@ -220,11 +237,14 @@ HxStr HxStr::Mid(unsigned pos, unsigned len) const {
         return Mid(pos);
     }
     char *pBuf = static_cast<char *>(MemAlloc(len + 1));
-    memcpy(pBuf, mStr + pos, len);
+    strncpy(pBuf, mStr + pos, len);
     pBuf[len] = '\0';
-    return HxStr(pBuf, len);
+    // The binary copy-constructs the result from this adopting temporary and then frees it.
+    HxStr part(pBuf, len);
+    return part;
 }
 
+// 0x004b8818
 HxStr &HxStr::Replace(unsigned pos, unsigned len, char ch) {
     HX_ASSERT(len == 1)
     HX_ASSERT(mStr != 0)
@@ -233,6 +253,7 @@ HxStr &HxStr::Replace(unsigned pos, unsigned len, char ch) {
     return *this;
 }
 
+// 0x004b88d0
 HxStr &HxStr::Replace(unsigned pos, unsigned len, const HxStr &other) {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(pos <= mLen)
@@ -241,7 +262,7 @@ HxStr &HxStr::Replace(unsigned pos, unsigned len, const HxStr &other) {
     }
     unsigned nTotal = mLen + other.mLen - len;
     char *pNew = static_cast<char *>(MemAlloc(nTotal + 1));
-    memcpy(pNew, mStr, pos);
+    strncpy(pNew, mStr, pos);
     strcpy(pNew + pos, other.mStr);
     strcpy(pNew + pos + other.mLen, mStr + pos + len);
     mLen = nTotal;
@@ -252,6 +273,7 @@ HxStr &HxStr::Replace(unsigned pos, unsigned len, const HxStr &other) {
     return *this;
 }
 
+// 0x004b89f0
 HxStr &HxStr::Clear() {
     if (mStr != nullptr) {
         mLen = 0;
@@ -260,6 +282,7 @@ HxStr &HxStr::Clear() {
     return *this;
 }
 
+// 0x004b8a10
 HxStr &HxStr::Truncate(unsigned pos) {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(pos <= mLen)
@@ -268,6 +291,7 @@ HxStr &HxStr::Truncate(unsigned pos) {
     return *this;
 }
 
+// 0x004b8a98
 HxStr &HxStr::Erase(unsigned pos, unsigned len) {
     HX_ASSERT(mStr != 0)
     HX_ASSERT(pos <= mLen)
@@ -283,6 +307,7 @@ HxStr &HxStr::Erase(unsigned pos, unsigned len) {
     return *this;
 }
 
+// 0x004b8bd8
 HxStr &HxStr::Insert(unsigned pos, unsigned nCount, char ch) {
     if (mStr == nullptr) {
         // An insertion into an empty string writes one character whatever nCount
@@ -295,7 +320,7 @@ HxStr &HxStr::Insert(unsigned pos, unsigned nCount, char ch) {
     }
     unsigned nTotal = mLen + nCount;
     char *pNew = static_cast<char *>(MemAlloc(nTotal + 1));
-    memcpy(pNew, mStr, pos);
+    strncpy(pNew, mStr, pos);
     for (unsigned i = pos; i < pos + nCount; ++i) {
         pNew[i] = ch;
     }
@@ -306,13 +331,14 @@ HxStr &HxStr::Insert(unsigned pos, unsigned nCount, char ch) {
     return *this;
 }
 
+// 0x004b8cd8
 HxStr &HxStr::Insert(unsigned pos, const HxStr &other) {
     if (mStr == nullptr) {
         return *this = other;
     }
     unsigned nTotal = mLen + other.mLen;
     char *pNew = static_cast<char *>(MemAlloc(nTotal + 1));
-    memcpy(pNew, mStr, pos);
+    strncpy(pNew, mStr, pos);
     strcpy(pNew + pos, other.mStr);
     strcpy(pNew + pos + other.mLen, mStr + pos);
     mLen = nTotal;
@@ -321,6 +347,7 @@ HxStr &HxStr::Insert(unsigned pos, const HxStr &other) {
     return *this;
 }
 
+// 0x004b7f98
 bool HxStr::operator!=(const char *pszRight) const {
     if (IsBlank(mStr) && IsBlank(pszRight)) {
         return false;
@@ -331,6 +358,7 @@ bool HxStr::operator!=(const char *pszRight) const {
     return strcmp(pszRight, mStr) != 0;
 }
 
+// 0x004b8018
 bool HxStr::operator!=(const HxStr &right) const {
     if (IsBlank(mStr) && IsBlank(right.mStr)) {
         return false;
@@ -341,6 +369,7 @@ bool HxStr::operator!=(const HxStr &right) const {
     return strcmp(right.mStr, mStr) != 0;
 }
 
+// 0x004b80a0
 bool HxStr::operator==(const char *pszRight) const {
     if (IsBlank(mStr) && IsBlank(pszRight)) {
         return true;
@@ -351,6 +380,7 @@ bool HxStr::operator==(const char *pszRight) const {
     return strcmp(pszRight, mStr) == 0;
 }
 
+// 0x004b8120
 bool HxStr::operator==(const HxStr &right) const {
     if (IsBlank(mStr) && IsBlank(right.mStr)) {
         return true;
@@ -361,6 +391,7 @@ bool HxStr::operator==(const HxStr &right) const {
     return strcmp(right.mStr, mStr) == 0;
 }
 
+// 0x004b81a8
 bool HxStr::operator<(const HxStr &right) const {
     if (IsBlank(mStr)) {
         return !IsBlank(right.mStr);
@@ -371,10 +402,12 @@ bool HxStr::operator<(const HxStr &right) const {
     return strcmp(mStr, right.mStr) < 0;
 }
 
+// 0x004b8e00
 std::ostream &HxStr::Print(std::ostream &stream) const {
     return stream << mStr;
 }
 
+// 0x004b8e28
 std::ostream &operator<<(std::ostream &stream, const HxStr &text) {
     stream << text.mStr;
     return stream;
