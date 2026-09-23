@@ -55,8 +55,6 @@ namespace Rnd {
  *
  * `TnlArena` is a different class. It derives from `MsgSink` and belongs to the game rather than
  * the renderer, and so does `MetArenasScreen`.
- *
- * The destructor at `0x005b6600` and the constructor at `0x005b6c58` are not reconstructed.
  */
 class Arena : public Animatable, public Collideable, public Transformable, public Drawable {
 public:
@@ -142,14 +140,22 @@ public:
      * Construct an empty loop.
      *
      * mLoopDist starts at the zero vector, mLoopFrames at 1000.0, and both containers empty. The
-     * body is not reconstructed.
+     * body then runs AddInstancesToHitList(), which the binary expands inline and which does
+     * nothing more than size mDrawOrder to the empty section list.
      *
      * @param name The registry key for this object.
      * @ghidraAddress 0x005b6c58
      */
     explicit Arena(const HxStr &name);
 
-    /** @ghidraAddress 0x005b6600 */
+    /**
+     * Release the section views and every referrer.
+     *
+     * Runs RemoveInstancesFromHitList(), which the binary expands inline, and then
+     * ReleaseAllRefs().
+     *
+     * @ghidraAddress 0x005b6600
+     */
     virtual ~Arena();
 
     /**

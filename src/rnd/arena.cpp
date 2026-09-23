@@ -41,6 +41,8 @@ constexpr int kArenaSortStartRevision = 4;
 
 constexpr char kArenaTag[] = "Rnd::Arena";
 
+constexpr float kDefaultLoopFrames = 1000.0f;
+
 // The row of a transform that stores the translation.
 constexpr int kXfmTranslationRow = 3;
 
@@ -198,6 +200,18 @@ static Stream &operator>>(Stream &stream, std::vector<Arena::Section> &sections)
         stream >> *it;
     }
     return stream;
+}
+
+// 0x005b6600
+Arena::~Arena() {
+    RemoveInstancesFromHitList();
+    ReleaseAllRefs();
+}
+
+// 0x005b6c58
+Arena::Arena(const HxStr &name)
+    : Object(name), mLoopDist{0.0f, 0.0f, 0.0f, 1.0f}, mLoopFrames(kDefaultLoopFrames) {
+    AddInstancesToHitList();
 }
 
 // 0x005bb9d8

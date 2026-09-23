@@ -28,8 +28,8 @@ constexpr int kPlayMapSlot20Query = 0x39d;
 // The tempo a level starts with, 120 beats per minute.
 constexpr int kDefaultMicrosecondsPerQuarter = 500000;
 
-// The argument the constructor passes to PlayMapLinear's constructor.
-constexpr int kPlayMapRunUnknown128410 = 1;
+// The constructor has PlayMapLinear's constructor run LoadStepRings().
+constexpr int kPlayMapLoadStepRings = 1;
 
 // The argument the constructor passes to PlayMap::Slot17() when kPlayMapSlot17Query is set.
 constexpr int kPlayMapSlot17Argument = 0xe;
@@ -68,7 +68,7 @@ LevelBuilder::LevelBuilder(unsigned nTrackCount)
     : mOwnTrack(nullptr), mCurrentTrack(nullptr), mUnknown30(nullptr) {
     const int bSlot17 = QueryConfigFlag(kPlayMapSlot17Query);
     mUnknown30 = new Sch::TempoMap(kDefaultMicrosecondsPerQuarter);
-    PlayMapLinear *pMap = new PlayMapLinear(kPlayMapRunUnknown128410);
+    PlayMapLinear *pMap = new PlayMapLinear(kPlayMapLoadStepRings);
     mUnknown34 = pMap;
 
     std::vector<int> steps;
