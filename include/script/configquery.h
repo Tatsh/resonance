@@ -69,3 +69,18 @@ HxStr *QueryConfigString(HxStr *pResult, int nEventCode, ...);
  * @ghidraAddress 0x0050a1a0
  */
 void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...);
+
+/**
+ * Fill a vector of strings from one configuration value through the embedded interpreter.
+ *
+ * The same evaluation as QueryConfigVector() with each element coerced to a string. The trailing
+ * arguments are substituted into the property lookup. The front end's song lists read their names
+ * this way under codes 0x276 and 0x27a. The title is inferred.
+ *
+ * The body is not reconstructed.
+ *
+ * @param pResult The vector the values are written to.
+ * @param nEventCode The configuration code.
+ * @ghidraAddress 0x00509b78
+ */
+void QueryConfigStrings(std::vector<HxStr> *pResult, int nEventCode, ...);
