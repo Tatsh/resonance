@@ -167,15 +167,45 @@ public:
     static Environ *NewEnviron(const HxStr &name);
 
     /**
+     * Allocate an environment block under the tag "Rnd::Environ".
+     *
+     * @param nSize The block size.
+     * @return The block.
+     * @ghidraAddress 0x00518df0
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a block operator new() allocated.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x00518e10
+     */
+    static void operator delete(void *pBlock);
+
+    /**
      * Append a light to mLights.
      *
-     * The list is searched for the light first, so the same light cannot be added twice. The body
-     * is not reconstructed.
+     * A light already in the list is reported to g_failSink as "<light> already in <environment>"
+     * and is not added again. Otherwise this environment registers as a referrer of the light,
+     * when it is not null, and the light is appended.
      *
      * @param pLight The light to add.
      * @ghidraAddress 0x005166d0
      */
     void AddLight(Light *pLight);
+
+    /**
+     * Remove a light from mLights.
+     *
+     * The first matching entry is erased, and this environment's reference on the light is dropped
+     * when the light is not null. A light not in the list is ignored. No call site survives in the
+     * shipped program, and the name is inferred from AddLight().
+     *
+     * @param pLight The light to remove.
+     * @ghidraAddress 0x00516850
+     */
+    void RemoveLight(Light *pLight);
 
     /**
      * Drop this environment's reference on every light and empty mLights.
@@ -241,13 +271,13 @@ protected:
     virtual int DrawSelf();
 
 private:
-    // Registers this environment as a referrer of every mLights entry. Inlined at all three call
-    // sites, in Load(), Copy(), and the tail of Replace(), with no out-of-line copy anywhere in
-    // the image.
+    // Registers this environment as a referrer of every mLights entry. Inlined in Load(), Copy(),
+    // and the tail of Replace(). The out-of-line copy at 0x00519400 has no caller.
     void AcquireLightsRefs();
 
-    // Drops this environment's registration on every mLights entry. Inlined the same way, in
-    // Load() and Copy().
+    // Drops this environment's registration on every mLights entry. Inlined in Load() and
+    // Copy(). The destructors of this class and Rnd::PsEnviron call the out-of-line copy at
+    // 0x00519390.
     void ReleaseLightsRefs();
 };
 
@@ -273,6 +303,18 @@ extern Environ *(*g_pfnNewEnviron)(const HxStr &name);
  * @ghidraAddress 0x00519278
  */
 Object *CreateRegisteredEnviron(const HxStr &name);
+
+/**
+ * Build an environment through the creator hook.
+ *
+ * No call site survives in the shipped program. The name is inferred from the Rnd::Tex
+ * counterpart.
+ *
+ * @param name The object name.
+ * @return The new environment.
+ * @ghidraAddress 0x00518eb0
+ */
+Environ *NewEnvironThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Environ, the string "Environ".

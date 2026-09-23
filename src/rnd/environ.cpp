@@ -1,10 +1,12 @@
 #include "rnd/environ.h"
 
+#include <algorithm>
 #include <list>
 
 #include "math/color.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/drawable.h"
 #include "rnd/light.h"
 #include "rnd/manager.h"
@@ -23,6 +25,9 @@ constexpr int kEnvironRevision = 0;
 constexpr unsigned kCopyNoLights = 0x1;
 
 constexpr char kAlreadyInFormat[] = "%s already in %s\n";
+
+// The allocation tag every environment block is billed to.
+constexpr char kEnvironTag[] = "Rnd::Environ";
 constexpr char kCountFormat[] = "%d";
 constexpr char kSizeFormat[] = "%u";
 constexpr char kQuotedTextFormat[] = "\"%s\"";
@@ -122,6 +127,7 @@ int Environ::DrawSelf() {
     return 1;
 }
 
+// 0x00519400
 void Environ::AcquireLightsRefs() {
     for (std::list<Light *>::iterator it = mLights.begin(); it != mLights.end(); ++it) {
         Object *pObject = *it;
@@ -131,6 +137,7 @@ void Environ::AcquireLightsRefs() {
     }
 }
 
+// 0x00519390
 void Environ::ReleaseLightsRefs() {
     for (std::list<Light *>::iterator it = mLights.begin(); it != mLights.end(); ++it) {
         Object *pObject = *it;
@@ -248,6 +255,45 @@ void Environ::Replace(Object *pFrom, Object *pTo) {
 
 Environ *Environ::NewEnviron(const HxStr &name) {
     return new Environ(name);
+}
+
+// 0x00518df0
+void *Environ::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kEnvironTag);
+}
+
+// 0x00518e10
+void Environ::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kEnvironTag);
+}
+
+// 0x005166d0
+void Environ::AddLight(Light *pLight) {
+    if (std::find(mLights.begin(), mLights.end(), pLight) != mLights.end()) {
+        g_failSink.Report(kAlreadyInFormat, NameText(pLight), NameText(this));
+        return;
+    }
+    if (pLight != nullptr) {
+        pLight->AddRef(this);
+    }
+    mLights.push_back(pLight);
+}
+
+// 0x00516850
+void Environ::RemoveLight(Light *pLight) {
+    const auto it = std::find(mLights.begin(), mLights.end(), pLight);
+    if (it == mLights.end()) {
+        return;
+    }
+    if (pLight != nullptr) {
+        pLight->RemoveRef(this);
+    }
+    mLights.erase(it);
+}
+
+// 0x00518eb0
+Environ *NewEnvironThroughHook(const HxStr &name) {
+    return g_pfnNewEnviron(name);
 }
 
 void Environ::ClearLights() {
