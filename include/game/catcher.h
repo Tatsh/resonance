@@ -9,6 +9,7 @@
 #include "msg/autocatchmsg.h"
 #include "msg/invalidateseekermsg.h"
 #include "msg/message.h"
+#include "msg/pitchriffmsg.h"
 #include "msg/trackselectmsg.h"
 #include "sch/cmdid.h"
 #include "sch/tick.h"
@@ -39,9 +40,6 @@
  * That is recorded here as measured rather than explained, and it belongs with the note in
  * `sch/tick.h` that two measurements of that type's member count disagree.
  *
- * A few bodies are not written yet. PostPhraseMuffedMsg() and PostCaughtBarMsg() build messages
- * whose classes have no constructor that takes a payload, and HandleMessage() reads a
- * CatchProgressPacket's private members. Each such routine is described where it is declared.
  * HandleMessage() dispatches a PitchRiffMsg to PostCatchMsg(), a TrackSelectMsg to
  * OnTrackSelect(), an AutoCatchMsg to OnAutoCatch(), and an InvalidateSeekerMsg to the inline
  * copy of OnInvalidateSeeker(). A CatchProgressPacket for this track stores its player, success
@@ -84,8 +82,7 @@ public:
      * Act on a message.
      *
      * Slot 3. The routine dispatches on the message's registered identity over the five
-     * identities the class documentation lists, and every other message is discarded. The body
-     * is not written, for the reason recorded in the class documentation.
+     * identities the class documentation lists, and every other message is discarded.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001adb78
@@ -166,8 +163,10 @@ public:
     /**
      * Slot 10, pure. MultiCatcher's override is empty and SingleCatcher's sends a
      * CaughtPowerbarMsg to its player when the phrase manager reports a value other than -1.
+     *
+     * @param nBar The caught bar. PostCaughtBarMsg() passes it and neither override reads it.
      */
-    virtual void Slot10() = 0;
+    virtual void Slot10(int nBar) = 0;
 
     /**
      * Run the post-gem command at a song position.
@@ -197,20 +196,22 @@ public:
     void SimulateRemoteGem(int nTick);
 
 protected:
-    // Report a muffed phrase.
-    // The body is not written, for the reason recorded in the class documentation.
+    // Sends a PhraseMuffedMsg for a bar once, recording the bar in mUnknown64. The message
+    // reports the phrase as tried when the bar is free and a gem of it was caught or missed.
     // 0x001ad3b0
-    void PostPhraseMuffedMsg(int nBar, int nTick);
+    void PostPhraseMuffedMsg(int nBar, Mid::MBT position);
 
-    // Report a caught gem.
-    // HandleMessage() calls it for a PitchRiffMsg (the identity at 0x006d0134). The routine
-    // ignores the call unless the two counters at `+0x54` and `+0x58` are both zero. The body is
-    // not written, for the reason recorded in the class documentation.
+    // Scores a PitchRiffMsg for this track. A riff from another player queries that player's
+    // slot 5 and plays SND_INACTIVE. A riff snapped into a bar that is not free plays SND_INACTIVE
+    // and sends a missed CatchMsg. Otherwise a riff on the gem at the snapped position, other
+    // than the last one caught, goes to slot 8, and every other riff to slot 7.
     // 0x001ac370
-    void PostCatchMsg(Message *pMsg);
+    void PostCatchMsg(PitchRiffMsg *pMsg);
 
-    // Report a caught bar.
-    // The body is not written, for the reason recorded in the class documentation.
+    // Does nothing once a gem of the phrase was missed or muffed. Otherwise it delivers a
+    // CaughtBarMsg to the player, extends the phrase run in mUnknown60 towards nNextBar (bounded
+    // by the next step and mSeekerBarCount), and scores the run through slot 9 when it ends the
+    // seeker range.
     // 0x001ac7e8
     void PostCaughtBarMsg(int nBar, int nNextBar);
 
@@ -270,7 +271,8 @@ protected:
     void PostSeekerRangeMsg(int nFirstBar, int nBarCount);
 
     // Returns whether a bar is non-negative, playable according to TrackData::QueryBar(), and
-    // owned by no player. UpdateSeeker() and OnAutoCatch() expand the same test inline.
+    // owned by no player. UpdateSeeker(), OnAutoCatch(), PostCatchMsg(), and
+    // PostPhraseMuffedMsg() expand the same test inline.
     // 0x001b1488
     int IsBarFree(int nBar);
 

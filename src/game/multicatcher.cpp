@@ -21,5 +21,5 @@ MultiCatcher::~MultiCatcher() {
 }
 
 // 0x001b0e00
-void MultiCatcher::Slot10() {
+void MultiCatcher::Slot10(int) {
 }

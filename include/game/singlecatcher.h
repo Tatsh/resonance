@@ -59,9 +59,10 @@ public:
      * CaughtPowerbarMsg carrying that answer and the player, then delivers the same message to the
      * player directly through MsgSink::Handle().
      *
+     * @param nBar The caught bar, unread.
      * @ghidraAddress 0x001ad840
      */
-    virtual void Slot10();
+    virtual void Slot10(int nBar);
 
     /**
      * Score two words against this catcher.

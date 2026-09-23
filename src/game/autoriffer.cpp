@@ -21,8 +21,12 @@ constexpr int kUnallocatedCommand = -2;
 // One bar at 480 ticks per quarter note.
 constexpr int kBarTicks = 1920;
 
+// The difficulty levels mLevelHeld records.
+constexpr int kLevelCount = 4;
+
 // The flag a held difficulty level carries, and the button states AxeButtonMsg reports.
 constexpr int kHeld = 1;
+constexpr int kNotHeld = 0;
 constexpr int kPressed = 1;
 constexpr int kReleased = 0;
 
@@ -112,6 +116,39 @@ void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
 
     AxeButtonMsg press(kPressed, 0, pMsg->mUnknown08);
     mSource.Send(&press);
+}
+
+// 0x001992e0
+void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
+    if (pMsg->mUnknown10 != mTrack) {
+        return;
+    }
+    if (pMsg->mPlayer != mPlayer) {
+        return;
+    }
+    if (mCurrentRiff == nullptr) {
+        return;
+    }
+
+    const int nTick = pMsg->mPosition.mTick;
+    const int nQuantized = static_cast<int>(mQuantizer->Quantize(nTick));
+    mLevelHeld[pMsg->mUnknown04] = kNotHeld;
+    for (int nLevel = 0; nLevel < kLevelCount; ++nLevel) {
+        if (mLevelHeld[nLevel] != kNotHeld) {
+            mCurrentRiff = mTrackData->GetRiff(nQuantized, nLevel);
+            mClock->Withdraw(mCommand);
+            PlayRiff(nTick);
+            return;
+        }
+    }
+
+    AllNotesOffMsg notesOff(nTick);
+    mSource.Send(&notesOff);
+    mClock->Withdraw(mCommand);
+    mCurrentRiff = nullptr;
+
+    AxeButtonMsg release(kReleased, 0, pMsg->mPlayer);
+    mSource.Send(&release);
 }
 
 // 0x00199480

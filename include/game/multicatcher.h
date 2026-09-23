@@ -66,7 +66,8 @@ public:
      * Slot 10. The body is empty. The base declares the slot pure, so the empty body is a real
      * override rather than an inherited default, and it is what makes this class concrete.
      *
+     * @param nBar The caught bar, unread.
      * @ghidraAddress 0x001b0e00
      */
-    virtual void Slot10();
+    virtual void Slot10(int nBar);
 };

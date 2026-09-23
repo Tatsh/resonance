@@ -34,8 +34,7 @@
  *
  * HandleMessage() dispatches five identities. A PitchRiffMsg goes to OnPitchRiff(), an EraseMsg
  * to OnErase(), a StopRiffMsg to OnStopRiff(), and a GameOverMsg to StopRiff() at position 0. A
- * TrackSelectMsg runs the inline copy of OnTrackSelect(). OnStopRiff() is not written, because
- * StopRiffMsg declares its payload private.
+ * TrackSelectMsg runs the inline copy of OnTrackSelect().
  *
  * The file-local command class `Cmd`, in the anonymous namespace of `GsAutoRiffer.cpp`, runs
  * OnCommand() at the position PlayRiff() schedules.
@@ -91,8 +90,9 @@ private:
     // 0x00199160
     void OnPitchRiff(PitchRiffMsg *pMsg);
 
-    // Clears the held flag of the message's level and switches to another held level's riff, or
-    // stops when none is held. Not written, for the reason recorded in the class documentation.
+    // Clears the held flag of the message's level and switches to the lowest held level's riff at
+    // the quantised position. With no level held it sends an AllNotesOffMsg, withdraws mCommand,
+    // and releases the button, without the flag reset StopRiff() performs.
     // 0x001992e0
     void OnStopRiff(StopRiffMsg *pMsg);
 
