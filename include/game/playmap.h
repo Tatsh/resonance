@@ -255,6 +255,45 @@ public:
      */
     int FindStepIndex(int nPosition);
 
+    /**
+     * Report whether a bar maps exactly onto a step.
+     *
+     * @param nBar The bar.
+     * @return Non-zero when Slot5() of the bar is an element of mSteps. A negative bar reports
+     *         zero.
+     * @ghidraAddress 0x001274d8
+     */
+    int IsStepStart(int nBar);
+
+    /**
+     * Report the bar at which the step containing a bar began.
+     *
+     * @param nBar The bar.
+     * @return nBar less its distance past the last step at or before its mapped position.
+     * @ghidraAddress 0x00127548
+     */
+    int StepStartBar(int nBar);
+
+    /**
+     * Report the bar at which the first step at or after a bar begins.
+     *
+     * @param nBar The bar.
+     * @return nBar plus its distance to the lower bound of its mapped position in mSteps. A
+     *         negative bar reports zero.
+     * @ghidraAddress 0x001275b0
+     */
+    int NextStepBar(int nBar);
+
+    /**
+     * Report the bar at which the first step strictly after a bar begins.
+     *
+     * @param nBar The bar.
+     * @return nBar plus its distance to the upper bound of its mapped position in mSteps. A
+     *         negative bar reports zero.
+     * @ghidraAddress 0x00127628
+     */
+    int FollowingStepBar(int nBar);
+
 protected:
     // Declared in recovered offset order. Written by Slot3 and read nowhere yet recovered.
     int mUnknown00; // +0x00

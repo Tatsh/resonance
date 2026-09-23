@@ -3,6 +3,9 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 
+class Message;
+class Player;
+
 /**
  * One participant's view of a session, driven by messages.
  *
@@ -39,4 +42,31 @@ public:
      * @ghidraAddress 0x00112978
      */
     virtual void HandleMessage(Message *pMsg);
+
+    /**
+     * Record a player against one bar of one track.
+     *
+     * The body is not written. It forwards all three arguments to slot 2 of the owned object at
+     * `+0x90`, whose class is unrecovered. TrackData::SetOwner() is the recovered caller.
+     *
+     * @param nTrack The track's index.
+     * @param nBar The bar.
+     * @param pPlayer The player.
+     * @ghidraAddress 0x00116828
+     */
+    void SetBarOwner(int nTrack, int nBar, Player *pPlayer);
+
+    /**
+     * Ask about one bar of one track.
+     *
+     * The body is not written. It forwards both arguments to slot 5 of the owned object at `+0x90`
+     * and returns its answer. TrackData::QueryBar() is the recovered caller, and Catcher treats a
+     * zero answer as a bar that cannot be caught.
+     *
+     * @param nTrack The track's index.
+     * @param nBar The bar.
+     * @return The answer of the owned object.
+     * @ghidraAddress 0x00116858
+     */
+    int QueryBar(int nTrack, int nBar);
 };

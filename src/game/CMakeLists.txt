@@ -14,6 +14,7 @@ set(RESONANCE_GAME_SRCS
     genericcatcher.cpp
     grooveworld.cpp
     gsperiodical.cpp
+    harmony.cpp
     idablebase.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
@@ -36,10 +37,14 @@ set(RESONANCE_GAME_SRCS
     playmapring.cpp
     powerupcollection.cpp
     powerupcollectioni.cpp
+    quantizer.cpp
     rawcontroller.cpp
+    riff.cpp
+    riffset.cpp
     scoretrackgraph.cpp
     singlepowerupcollection.cpp
     skillstats.cpp
+    trackdata.cpp
     trackselector.cpp
     voxingstg.cpp)
 

@@ -27,19 +27,19 @@
  * MultiMuseMsg carries one of these and is how a sequence moves between a MsgSource and a
  * MsgSink, and MultiMusePlayer is what turns one into messages over time.
  *
- * Only SaveFields() is written here. LoadFields(), PrintFields(), the destructor, and Print() are
- * recorded with their addresses.
+ * LoadFields(), the destructor, and Print() are recorded with their addresses and their bodies
+ * are not written.
  */
 class MultiMuse : public Attachment {
 public:
     /**
      * Allocate a sequence from the tagged heap under the tag "MultiMuse".
      *
-     * No out-of-line body exists. MultiMuseMsg::Load() inlines the call, and it is the one
-     * allocation of the class recovered so far.
+     * MultiMuseMsg::Load() and Phrase inline the call.
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
+     * @ghidraAddress 0x001a9490
      */
     void *operator new(size_t nSize);
 
@@ -47,6 +47,7 @@ public:
      * Release a sequence to the tagged heap.
      *
      * @param pBlock The block.
+     * @ghidraAddress 0x001a94b0
      */
     void operator delete(void *pBlock);
 
@@ -89,22 +90,12 @@ public:
     void LoadFields(IBStream &stream);
 
     /**
-     * Write the sequence to a diagnostic stream without the surrounding braces.
-     *
-     * The body is not written.
-     *
-     * @param stream The stream to write to.
-     * @ghidraAddress 0x001a97e8
-     */
-    void PrintFields(std::ostream &stream);
-
-    /**
      * Schedule a copy of a message at a song position.
      *
      * The sequence stores the message's Clone() rather than the message itself. Both insertion
      * paths keep the entries sorted by position; a non-zero bCheckLast first compares against the
      * last entry and appends when the new position does not precede it, and zero always searches.
-     * The body is not written, because neither insertion routine is written yet.
+     * The two insertion paths are InsertSorted() and InsertAtUpperBound().
      *
      * @param pMsg The message to copy.
      * @param nTick The song position, in MIDI ticks.
@@ -116,7 +107,7 @@ public:
     /**
      * Find the message scheduled at exactly a song position.
      *
-     * The body is not written, because the search routine it calls is not written yet.
+     * The search is std::lower_bound() through TickObjAfter(), called out of line at `0x001a9aa0`.
      *
      * @param nTick The song position, in MIDI ticks.
      * @return The stored message, or null when no entry sits at nTick.
@@ -133,3 +124,18 @@ public:
      */
     std::vector<TickObj<MuseMsg *> > mEntries;
 };
+
+/**
+ * Write one scheduled message to a diagnostic stream as `[position: message]`.
+ *
+ * The position arrives by value in a1 and the message in a2, which is how TrackData's bar printer
+ * at `0x001d31d8` passes the two halves of one entry. The message is printed through the routine at
+ * `0x00556290`. The body is not written, because that routine is not declared.
+ *
+ * @param stream The stream to write to.
+ * @param position The song position.
+ * @param pMsg The message.
+ * @return The stream.
+ * @ghidraAddress 0x001a97e8
+ */
+std::ostream &PrintMuseEntry(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg);

@@ -75,6 +75,42 @@ int PlayMap::FindStepIndex(int nPosition) {
     return static_cast<int>(it - mSteps.begin()) - 1;
 }
 
+// 0x001274d8
+int PlayMap::IsStepStart(int nBar) {
+    if (nBar < 0) {
+        return 0;
+    }
+    const int nPosition = Slot5(nBar);
+    return std::find(mSteps.begin(), mSteps.end(), nPosition) != mSteps.end();
+}
+
+// 0x00127548
+int PlayMap::StepStartBar(int nBar) {
+    const int nPosition = Slot5(nBar);
+    const std::vector<int>::iterator it = std::upper_bound(mSteps.begin(), mSteps.end(), nPosition);
+    return nBar - (nPosition - *(it - 1));
+}
+
+// 0x001275b0
+int PlayMap::NextStepBar(int nBar) {
+    if (nBar < 0) {
+        return 0;
+    }
+    const int nPosition = Slot5(nBar);
+    const std::vector<int>::iterator it = std::lower_bound(mSteps.begin(), mSteps.end(), nPosition);
+    return nBar - (nPosition - *it);
+}
+
+// 0x00127628
+int PlayMap::FollowingStepBar(int nBar) {
+    if (nBar < 0) {
+        return 0;
+    }
+    const int nPosition = Slot5(nBar);
+    const std::vector<int>::iterator it = std::upper_bound(mSteps.begin(), mSteps.end(), nPosition);
+    return nBar - (nPosition - *it);
+}
+
 // 0x00127700
 int PlayMap::Slot13(int nValue) {
     const std::vector<int>::iterator it =

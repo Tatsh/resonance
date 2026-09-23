@@ -4,6 +4,7 @@ acanvas
 acanvaslin
 acceler
 addiu
+adtl
 advancesectionmsg
 advancesectiontogglemsg
 afixed
@@ -276,6 +277,7 @@ khgb
 kochanek
 kscope
 kuhgb
+labl
 leavegamemsg
 levelbuilder
 levelconverter
@@ -316,6 +318,7 @@ looptogglemsg
 looptoolmsg
 lsdmode
 lseek
+ltxt
 lvalues
 mainloop
 mainpage
@@ -405,6 +408,8 @@ msnm
 mtap
 mtapman
 mtba
+mthd
+mtrk
 multicatcher
 multimesh
 multimuse
@@ -580,6 +585,7 @@ skillz
 slerp
 sliceobject
 smgs
+smpl
 smrt
 snapcraft
 socketmodule
@@ -632,6 +638,7 @@ trmopn
 trxdir
 trxpos
 trxreg
+tunnelcache
 tunnelevent
 tunnelmeshchain
 tunnelseeker
@@ -670,6 +677,7 @@ updateworldxfm
 usbd
 utime
 vars
+vclipw
 vendored
 venv
 vmadday

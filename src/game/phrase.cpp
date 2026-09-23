@@ -8,6 +8,7 @@
 #include "game/idable.h"
 #include "game/nullplayer.h"
 #include "game/player.h"
+#include "game/tickobjvector.h"
 #include "gs/multimuse.h"
 #include "mid/mbt.h"
 #include "mid/tickobj.h"
@@ -33,74 +34,6 @@ constexpr double kValueScaleDouble = 255.0;
 
 // The player identifier that resolves to no player at all.
 constexpr int kNoPlayer = -1;
-
-// 0x001b7068. The comparison the sorted insertion below passes by address.
-bool PositionLess(TickObj<float> first, TickObj<float> second) {
-    return first.mPosition.mTick < second.mPosition.mTick;
-}
-
-// 0x001b70e0. The same comparison against a bare position.
-bool PositionBefore(int nTick, TickObj<float> entry) {
-    return nTick < entry.mPosition.mTick;
-}
-
-// 0x001b5b40. The first entry that value strictly precedes, through PositionLess().
-std::vector<TickObj<float> >::iterator UpperBoundByEntry(std::vector<TickObj<float> > &values,
-                                                         const TickObj<float> &value) {
-    std::vector<TickObj<float> >::iterator first = values.begin();
-    int nLength = values.end() - values.begin();
-    while (nLength > 0) {
-        const int nHalf = nLength >> 1;
-        std::vector<TickObj<float> >::iterator middle = first + nHalf;
-        if (PositionLess(value, *middle)) {
-            nLength = nHalf;
-        } else {
-            first = middle + 1;
-            nLength = nLength - nHalf - 1;
-        }
-    }
-    return first;
-}
-
-// 0x001b6278. The first entry that nTick strictly precedes, through PositionBefore().
-std::vector<TickObj<float> >::iterator UpperBoundByPosition(std::vector<TickObj<float> > &values,
-                                                            int nTick) {
-    std::vector<TickObj<float> >::iterator first = values.begin();
-    int nLength = values.end() - values.begin();
-    while (nLength > 0) {
-        const int nHalf = nLength >> 1;
-        std::vector<TickObj<float> >::iterator middle = first + nHalf;
-        if (PositionBefore(nTick, *middle)) {
-            nLength = nHalf;
-        } else {
-            first = middle + 1;
-            nLength = nLength - nHalf - 1;
-        }
-    }
-    return first;
-}
-
-// 0x001b5e80. Equal positions retain their insertion order.
-void InsertSorted(std::vector<TickObj<float> > &values, const TickObj<float> &value) {
-    if (values.size() != 0 && !(value.mPosition.mTick < values.back().mPosition.mTick)) {
-        values.push_back(value);
-        return;
-    }
-    values.insert(UpperBoundByEntry(values, value), value);
-}
-
-// 0x001b7290. The last entry at or before nTick, or the end when none exists.
-std::vector<TickObj<float> >::iterator FindAtOrBefore(std::vector<TickObj<float> > &values,
-                                                      int nTick) {
-    if (values.begin() == values.end()) {
-        return values.end();
-    }
-    std::vector<TickObj<float> >::iterator upper = UpperBoundByPosition(values, nTick);
-    if (upper == values.begin()) {
-        return values.end();
-    }
-    return upper - 1;
-}
 
 } // namespace
 
@@ -308,7 +241,7 @@ void Phrase::AddValue(int nTick, float flValue) {
 
 // 0x001b6db0
 float Phrase::GetValue(int nTick) {
-    std::vector<TickObj<float> >::iterator it = FindAtOrBefore(mValues, nTick);
+    const auto it = FindAtOrBefore(mValues, nTick);
     float flValue = kDefaultValue;
     if (it != mValues.end()) {
         flValue = it->mValue;
