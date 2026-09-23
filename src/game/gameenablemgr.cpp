@@ -26,6 +26,7 @@ constexpr int kReleaseUntilBar = -1;
 
 } // namespace
 
+// 0x001011c8
 GameEnableMgr::GameEnableMgr(int nConfigCode, int nTrackCount, Gamer *pGamer, int nReleaseWhenMet)
     : mTrackCount(nTrackCount), mOwnedTrackCount(kOwnedTrackCount),
       mFreeUntil(nTrackCount, kNoFreeBar) {
@@ -35,6 +36,7 @@ GameEnableMgr::GameEnableMgr(int nConfigCode, int nTrackCount, Gamer *pGamer, in
     Init(nConfigCode);
 }
 
+// 0x00101588
 GameEnableMgr::GameEnableMgr(int nTrackCount, Gamer *pGamer, int nReleaseWhenMet)
     : mTrackCount(nTrackCount), mOwnedTrackCount(kOwnedTrackCount),
       mFreeUntil(nTrackCount, kNoFreeBar) {
@@ -57,6 +59,7 @@ GameEnableMgr *GameEnableMgr::CreateUnrestricted(int nTrackCount, Gamer *pGamer)
     return new GameEnableMgr(nTrackCount, pGamer, 0);
 }
 
+// 0x00101f10
 void GameEnableMgr::Init(int nConfigCode) {
     mRequirements.clear();
     mRequirements.resize(mTrackCount, std::vector<int>());
@@ -71,12 +74,14 @@ void GameEnableMgr::Init(int nConfigCode) {
     }
 }
 
+// 0x00105498
 void GameEnableMgr::FindOwnedTracks(int *pOwned, int nBar) {
     for (int i = 0; i < mOwnedTrackCount; ++i) {
         pOwned[i] = mGamer->GetPhraseDatabase(i)->GetOwner(nBar)->IsNull() ^ 1;
     }
 }
 
+// 0x00105530
 int GameEnableMgr::IsTrackEnabled(int nTrack, const int *pOwned) {
     const std::vector<int> &requirements = mRequirements[nTrack];
     for (std::vector<int>::const_iterator it = requirements.begin(); it != requirements.end();
@@ -88,6 +93,7 @@ int GameEnableMgr::IsTrackEnabled(int nTrack, const int *pOwned) {
     return 1;
 }
 
+// 0x00101d70
 void GameEnableMgr::SetBarOwner(int nTrack, int nBar, Player *pPlayer) {
     int owned[kOwnedTrackCount];
     FindOwnedTracks(owned, nBar);
@@ -112,6 +118,7 @@ void GameEnableMgr::SetBarOwner(int nTrack, int nBar, Player *pPlayer) {
     }
 }
 
+// 0x00101c68
 void GameEnableMgr::SetFreeUntil(int nTrack, int nBar, int nUntilBar) {
     if (nUntilBar < nBar) {
         mRequirements[nTrack].clear();
@@ -123,11 +130,13 @@ void GameEnableMgr::SetFreeUntil(int nTrack, int nBar, int nUntilBar) {
     mGamer->mTrackSources[nTrack].Send(&msg);
 }
 
+// 0x00101bb0
 void GameEnableMgr::DisableTrack(int nTrack) {
     mRequirements[nTrack].clear();
     mRequirements[nTrack].push_back(kNeverEnabled);
 }
 
+// 0x00105408
 int GameEnableMgr::QueryBar(int nTrack, int nBar) {
     if (nBar < mFreeUntil[nTrack]) {
         return 1;

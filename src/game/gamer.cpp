@@ -117,6 +117,7 @@ constexpr unsigned kSharedTrackPlayerCount = 2;
 
 } // namespace
 
+// 0x00110138
 Gamer::Gamer(int nTrackCount, int nEndBar, GameStats *pStats)
     : mUnknown1c(0), mEndState(kEndStateNone), mJukeboxMode(0), mUnknown38(0),
       mTrackCount(nTrackCount), mUnknown44(kInitialUnknown44), mUnknown48(0), mPlaybackOn(0),
@@ -154,17 +155,20 @@ Gamer::Gamer(int nTrackCount, int nEndBar, GameStats *pStats)
     }
 }
 
+// 0x00110930
 Gamer::~Gamer() {
     Withdraw();
     delete mEnableMgr;
     delete mBackEnableMgr;
 }
 
+// 0x00116c40
 void Gamer::Withdraw() {
     const CmdID command = mCommand;
     mGlobals->GetSongClock()->Withdraw(command);
 }
 
+// 0x00112978
 void Gamer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAdvanceSectionMsgType) {
@@ -180,6 +184,7 @@ void Gamer::HandleMessage(Message *pMsg) {
     }
 }
 
+// 0x00116920
 void Gamer::OnAdvanceSection(AdvanceSectionMsg *pMsg) {
     const bool bJamAdvance = mPlayMode == kPlayModeJam && mGameMode != kGameModeNet;
     if (!bJamAdvance && mTutorial == 0) {
@@ -191,6 +196,7 @@ void Gamer::OnAdvanceSection(AdvanceSectionMsg *pMsg) {
     AdvanceAt(pMsg->mPosition);
 }
 
+// 0x001169a8
 void Gamer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     if (mPlayMode == kPlayModeJam || mEndState != kEndStateNone) {
         return;
@@ -201,6 +207,7 @@ void Gamer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     }
 }
 
+// 0x00111080
 void Gamer::OnEnableFreestyle(EnableFreestyleMsg *pMsg) {
     const int nTick = mGlobals->GetSongClock()->SongTick();
     Player *pPlayer = pMsg->mPlayer;
@@ -223,6 +230,7 @@ void Gamer::OnEnableFreestyle(EnableFreestyleMsg *pMsg) {
     Send(&freestyle);
 }
 
+// 0x00110e60
 void Gamer::OnPlaybackMode(PlaybackModeMsg *pMsg) {
     if (mPlayMode != kPlayModeJam) {
         return;
@@ -257,6 +265,7 @@ void Gamer::OnPlaybackMode(PlaybackModeMsg *pMsg) {
     AdvanceTo(nBar, mPlayMap->Slot14(nBar) ^ 1);
 }
 
+// 0x00111230
 void Gamer::OnCripple(CrippleMsg *pMsg) {
     std::vector<Player *> victims;
     victims.reserve(kCrippleVictimCapacity);
@@ -278,6 +287,7 @@ void Gamer::OnCripple(CrippleMsg *pMsg) {
     }
 }
 
+// 0x00110ba0
 void Gamer::CreateEnableMgr(std::vector<ScoreTrackGraph *> *pGraphs) {
     mGraphs = pGraphs;
     if (mPlayMode == kPlayModeGame) {
@@ -311,14 +321,17 @@ void Gamer::CreateEnableMgr(std::vector<ScoreTrackGraph *> *pGraphs) {
     }
 }
 
+// 0x00116828
 void Gamer::SetBarOwner(int nTrack, int nBar, Player *pPlayer) {
     mEnableMgr->SetBarOwner(nTrack, nBar, pPlayer);
 }
 
+// 0x00116858
 int Gamer::QueryBar(int nTrack, int nBar) {
     return mEnableMgr->QueryBar(nTrack, nBar);
 }
 
+// 0x00116888
 bool Gamer::IsNonCatchTrack(int nTrack) {
     return GetTrack(nTrack)->mKind != kTrackModeCatch;
 }
@@ -331,6 +344,7 @@ TrackData *Gamer::GetTrack(int nTrack) {
     return mGlobals->GetLevel()->TrackAt(nTrack);
 }
 
+// 0x001116c8
 void Gamer::AdvanceTo(int nBar, int nAdvance) {
     const Mid::MBT position(
         std::min(std::max(nBar * Mid::MBT(kTicksPerBar).mTick, kMBTMinimum), kMBTMaximum));
@@ -349,11 +363,13 @@ void Gamer::AdvanceTo(int nBar, int nAdvance) {
     CallScriptTemplate(kAdvanceScriptTemplate);
 }
 
+// 0x00116a30
 void Gamer::AdvanceAt(Mid::MBT position) {
     const int nBar = position.mTick / mBarLength.mTick;
     AdvanceTo(nBar, mPlayMap->Slot18(nBar));
 }
 
+// 0x00111c90
 bool Gamer::SendTracksOn(int nBar) {
     int nOwnedTracks = 0;
     int nOpenTracks = 0;
@@ -376,6 +392,7 @@ bool Gamer::SendTracksOn(int nBar) {
     return nOpenTracks == 0;
 }
 
+// 0x00111e30
 bool Gamer::FreeTracksAfterCapture(int nBar) {
     const bool bComplete = SendTracksOn(nBar);
     if (!bComplete) {
@@ -402,6 +419,7 @@ bool Gamer::FreeTracksAfterCapture(int nBar) {
     return bComplete;
 }
 
+// 0x001118c0
 void Gamer::DeclareWinners() {
     int nBestScore = 0;
     for (unsigned i = 0; i < mPlayers.size(); ++i) {
@@ -423,6 +441,7 @@ void Gamer::DeclareWinners() {
     mEndState = kEndStateOver;
 }
 
+// 0x00111b78
 void Gamer::RecordSoloStats(int bCompleted, int nBar) {
     mStats->mCompleted = bCompleted;
     mStats->mUnknown08 = mUnknown98;
@@ -436,6 +455,7 @@ void Gamer::RecordSoloStats(int bCompleted, int nBar) {
     mStats->SetRatio(0, mPlayers[0]->Slot18());
 }
 
+// 0x00111fa8
 void Gamer::OnBar(int nBar) {
     mPlayMap->Slot5(nBar); // Yes, the binary discards this call's result.
     mUnknown38 = nBar;
@@ -536,16 +556,19 @@ void Gamer::OnBar(int nBar) {
     ScheduleBar(nBar + 1);
 }
 
+// 0x00116c20
 void Gamer::Start() {
     ScheduleBar(0);
 }
 
+// 0x001167e0
 void Gamer::SetBackGraphs(std::vector<BGTrackGraph *> *pGraphs) {
     mBackGraphs = pGraphs;
     mBackEnableMgr = GameEnableMgr::CreateReleasing(
         kBackTrackConfigCode, static_cast<int>(pGraphs->size()), this);
 }
 
+// 0x00116a98
 void Gamer::EnablePlayerFreestyle(int nStartBar, int nEndBar) {
     if (mTutorial == 0) {
         Fatal(kFreestyleOutsideTutorial);
@@ -553,10 +576,12 @@ void Gamer::EnablePlayerFreestyle(int nStartBar, int nEndBar) {
     mPlayers[0]->Slot8(nStartBar, nEndBar);
 }
 
+// 0x00116ae8
 void Gamer::AddJuice(int nAmount) {
     mPlayers[0]->AddJuice(nAmount, 1);
 }
 
+// 0x00116b18
 void Gamer::EndWithScore(int nScore) {
     mEndBar = 0;
     if (nScore != 0) {
@@ -564,6 +589,7 @@ void Gamer::EndWithScore(int nScore) {
     }
 }
 
+// 0x00112838
 void Gamer::ScheduleBar(int nBar) {
     Mid::MBT when(std::min(std::max(mBarLength.mTick * nBar, kMBTMinimum), kMBTMaximum));
     if (when.mTick != Mid::MBT(0).mTick) {

@@ -11,6 +11,7 @@ GameStats::GameStats() {
 GameStats::~GameStats() {
 }
 
+// 0x0010f1a8
 void GameStats::Reset(int nPlayers) {
     mCompleted = 0;
     mUnknown08 = 0;
@@ -29,34 +30,42 @@ void GameStats::Reset(int nPlayers) {
     }
 }
 
+// 0x0010ff20
 int GameStats::GetScore(int nPlayer) {
     return mScores[nPlayer];
 }
 
+// 0x0010ff38
 void GameStats::SetScore(int nPlayer, int nScore) {
     mScores[nPlayer] = nScore;
 }
 
+// 0x0010ff50
 float GameStats::GetProgress() {
     return mProgress;
 }
 
+// 0x0010ff58
 void GameStats::SetProgress(float flProgress) {
     mProgress = flProgress;
 }
 
+// 0x0010ff60
 float GameStats::GetRatio(int nPlayer) {
     return mRatios[nPlayer];
 }
 
+// 0x0010ff78
 void GameStats::SetRatio(int nPlayer, float flRatio) {
     mRatios[nPlayer] = flRatio;
 }
 
+// 0x0010ff90
 int GameStats::GetTally(int nPlayer) {
     return mTallies[nPlayer];
 }
 
+// 0x0010ffa8
 void GameStats::SetTally(int nPlayer, int nTally) {
     mTallies[nPlayer] = nTally;
 }

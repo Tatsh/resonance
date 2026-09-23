@@ -17,6 +17,7 @@ constexpr int kTicksPerBar = 1920;
 
 } // namespace
 
+// 0x00105838
 LocalJamEnableMgr::LocalJamEnableMgr() {
     for (int i = 0; i < kTrackCount; ++i) {
         mTracks[i] = Application::shared()->GetLevel()->TrackAt(i);
@@ -31,9 +32,11 @@ LocalJamEnableMgr *LocalJamEnableMgr::CreateLocal() {
     return new LocalJamEnableMgr;
 }
 
+// 0x00105830
 void LocalJamEnableMgr::SetBarOwner(int, int, Player *) {
 }
 
+// 0x00102488
 int LocalJamEnableMgr::QueryBar(int nTrack, int nBar) {
     TrackData *pTrack = mTracks[nTrack];
     if (pTrack->mKind != kTrackModeVocal) {
