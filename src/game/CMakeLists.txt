@@ -1,3 +1,5 @@
+# playmaplinearsteprings.cpp is not built. It includes the embedded interpreter's Python 2
+# headers through PyCXX.
 set(RESONANCE_GAME_SRCS
     autocatchpowerup.cpp
     autoriffer.cpp

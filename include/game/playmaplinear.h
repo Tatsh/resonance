@@ -230,11 +230,6 @@ protected:
      * with its index, which yields a sequence of step rings. Each ring pairs every step with the
      * one after it, and the last with the first. A step is read through Py::Int.
      *
-     * The body is not written. It walks both sequences with PyCXX's sequence iterator and converts
-     * each step with Py::Int's converting constructor and its conversion to long, none of which
-     * `script/cxx` declares yet, and the file would then need the interpreter headers the host
-     * build cannot include.
-     *
      * @ghidraAddress 0x00128410
      */
     void LoadStepRings();

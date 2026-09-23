@@ -708,6 +708,7 @@ playerleftgamemsg
 playerstrackneutralizedmsg
 playmap
 playmaplinear
+playmaplinearsteprings
 playmaprepeatring
 playmapring
 playsound
