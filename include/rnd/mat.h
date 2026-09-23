@@ -208,9 +208,10 @@ public:
      * No subclass in the shipped build overrides it, so its purpose is undetermined. It fills the
      * ninth vtable slot.
      *
+     * @param nUnknown Ignored by the body. TnlCatcher::SetMultiplied() passes 0 (`0x004552ac`).
      * @ghidraAddress 0x004db958
      */
-    virtual void SyncMat();
+    virtual void SyncMat(int nUnknown);
 
     /**
      * Set the ambient colour.

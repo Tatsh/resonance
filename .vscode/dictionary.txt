@@ -656,7 +656,13 @@ timedcommand
 tkinter
 tmpnam
 tnlarena
+tnlcatcher
+tnlpendingtrigger
+tnlpointer
+tnlsabretrail
+tnlseekerfade
 tnlstr
+tnlutil
 toggleghostmsg
 toolstream
 trackdata

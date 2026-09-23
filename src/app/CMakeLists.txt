@@ -44,6 +44,12 @@ set(RESONANCE_APP_SRCS
     rendererbase.cpp
     scriptsink.cpp
     task.cpp
+    tnlcatcher.cpp
+    tnlpendingtrigger.cpp
+    tnlpointer.cpp
+    tnlsabretrail.cpp
+    tnlseekerfade.cpp
+    tnlutil.cpp
     tunnelcache.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})

@@ -626,7 +626,7 @@ void Mat::Load(Stream &stream) {
 }
 
 // 0x004db958
-void Mat::SyncMat() {
+void Mat::SyncMat([[maybe_unused]] int nUnknown) {
 }
 
 // 0x004db970
