@@ -11,6 +11,10 @@ class HxStr;
 class ScrollingList;
 struct MetRemixRecord;
 
+namespace Rnd {
+class Font;
+} // namespace Rnd
+
 /**
  * Screen that deletes a remix from a memory card.
  *
@@ -104,10 +108,17 @@ public:
     /**
      * Hide the screen and request the remix catalogue. Slot 5.
      *
-     * The body is not written. It hides itself through slot 17 with a zero argument, clears
-     * MetSaveRemix::mUnknowne0 and mUnknown104, writes one into MetSaveRemix::mUnknowndc, and then
-     * resolves the MetRemixManager through the accessor at `0x00361000` and drives it for roughly
-     * 0x400 further instructions. None of the manager routines it reaches is identified.
+     * It hides itself through slot 17 with a zero argument, clears MetSaveRemix::mUnknowne0 and
+     * mUnknown104, writes one into MetSaveRemix::mUnknowndc, and points mUnknownf0 at the
+     * MetRemixManager catalogue for mUnknown108.
+     *
+     * Returning from a confirmation, with mUnknownfc or mUnknown100 set, it reselects the first
+     * row of the existing list. Otherwise it raises the one-button `no_remix` dialogue when the
+     * card's listing status is 15 or the catalogue is empty, and creates a new ScrollingList when
+     * it is not, without deleting any list an earlier entry left. It then clears both flags,
+     * refills and redraws the list, pushes the help screen with the `only_back_title` preset and
+     * the first prompt of MetScreen::mUnknown38, sets the title to `mem_del_type` formatted with
+     * the slot name, pushes the data screen, and runs the MetScreen body.
      *
      * @ghidraAddress 0x0033a098
      */
@@ -125,12 +136,16 @@ public:
     virtual void OnUnknownSlot7();
 
     /**
-     * Act on the delete confirmation. Slot 15.
+     * Act on whichever of the screen's dialogues was dismissed. Slot 15.
      *
-     * The body is not written. It compares the dialogue name against `del_remix_ask` through
-     * HxStr::MatchesLiteral and returns at once when it differs, then branches on the choice
-     * against 1. The accepting branch builds a memcard delete request and runs for roughly 0x2e0
-     * instructions through routines of the memcard layer, none of which is identified.
+     * The name is compared against each dialogue in turn. YES on `del_remix_ask` and RETRY on
+     * `del_fail_nocard` raise the button-less `del_remix` progress dialogue and queue the delete
+     * of the selected row. YES on `remix_copy_ask` records the selected row in mUnknown104 and the
+     * next card in mUnknown120 and queues the load of the row for a copy. `del_remix` refills the
+     * list and asks MetRemixManager to list mUnknown108 again. `no_remix` removes this screen from
+     * the renderer and returns to the card-type screen. Every other answer of this screen's
+     * dialogues returns to the list, and a name this screen did not raise goes to the
+     * MetSaveRemix body.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
@@ -151,18 +166,17 @@ public:
     /**
      * Act on a navigation command. Slot 19.
      *
-     * The body is not written. An eight-entry jump table at `0x00805e00` indexed by the command
-     * code less one selects the branch, and a code outside one through eight returns at once. Codes
-     * 3, 4, and 5 route to the same return the out-of-range path uses, so the screen discards the
-     * two cycle commands and the select command. Codes 7 and 8 are two of the codes above six that
-     * the input translator at `0x002e3738` produces and that MetScreen::DeliverCommand() passes
-     * through unchanged, and this screen is one of the few that acts on them.
+     * An eight-entry jump table at `0x00805e00` indexed by the command code less one selects the
+     * branch, and a code outside one through eight returns at once. Codes 3, 4, and 5 route to the
+     * same return the out-of-range path uses, so the screen discards the two cycle commands and the
+     * select command. Codes 7 and 8 are two of the codes above six that the input translator at
+     * `0x002e3738` produces and that MetScreen::DeliverCommand() passes through unchanged, and this
+     * screen is one of the few that acts on them.
      *
-     * Codes 1 and 2 walk the list at mUnknownf4 through the same ScrollingList accessor and move
-     * methods MetRemixLoadScreen uses, at `0x00401160`, `0x00400ec8`, and `0x00400f78`. Code 6
-     * departs the screen, code 7 runs from `0x00339ddc`, and code 8 from `0x00339c84`.
-     *
-     * What blocks the body is the three ScrollingList methods, none of which that class declares.
+     * Codes 1 and 2 move along the list at mUnknownf4 and show the new row on the data screen,
+     * without testing mUnknownf0 for null. Code 6 departs the screen. Codes 7 and 8 do nothing
+     * with an empty catalogue, and otherwise play the toggle sound, set mUnknown100 or mUnknownfc
+     * respectively, clear the help text, and depart the screen.
      *
      * @param pCommand The command the renderer translated from an input message.
      * @ghidraAddress 0x00339b30
@@ -208,10 +222,11 @@ public:
     /**
      * Release the list and depart once the exit animation has finished. Slot 36.
      *
-     * The body is not written. It returns at once while either mUnknownfc or mUnknown100 is set,
-     * then deletes the ScrollingList at mUnknownf4 and runs for roughly 0x300 further instructions
-     * choosing which screen to return to. Several of the routines it reaches belong to the memcard
-     * layer and are not identified.
+     * With neither mUnknownfc nor mUnknown100 set, it deletes the ScrollingList at mUnknownf4,
+     * pushes `MetLeftGizmoScreen` and `MetMemCardTypeScreen`, and activates the latter. With
+     * mUnknown100 set, it raises the `remix_copy_ask` confirmation, formatted with the slot name
+     * NextCardSlot() gives for mUnknown108. With only mUnknownfc set, it raises the `del_remix_ask`
+     * confirmation. Both confirmations offer `NO` and `YES`.
      *
      * @ghidraAddress 0x0033ce00
      */
@@ -220,9 +235,10 @@ public:
     /**
      * Resolve the list title and the rest of the container objects. Slot 38.
      *
-     * The body is not written. It runs the MetSaveRemix slot 38 body, which is MetScreen's, and
-     * then resolves `mcrd_listpan_title.txt` and several further objects by name through
-     * Rnd::Manager::Find(), narrowing each with a dynamic_cast to Rnd::Text.
+     * It runs the MetSaveRemix slot 38 body, which is MetScreen's, resolves the Rnd::Text
+     * `mcrd_listpan_title.txt`, sets it to the configuration string `mcrf_remix`, and shows it.
+     * It then resolves the Rnd::Font objects `font1_pink_2` into mUnknown138 and
+     * `font1_pinkgrey_2` into mUnknown13c. The title is not tested for null.
      *
      * @ghidraAddress 0x00339880
      */
@@ -251,7 +267,7 @@ public:
     /**
      * Request a remix name from the on-screen keyboard. Slot 42.
      *
-     * The body is not written. It sets MetSaveRemix::mUnknowne0 so that slot 7 runs slot 40 once
+     * It sets MetSaveRemix::mUnknowne0 so that slot 7 runs slot 40 once
      * the keyboard has finished, and then builds a MetKeyboardRequest with this screen's own
      * registry key as the screen to return to, `Remix name` as the prompt,
      * MetSaveRemix::mUnknownb8 as the initial text, -1 for any controller, and this object's own
@@ -267,10 +283,12 @@ public:
     /**
      * Fill the catalogue from the card. MemcardUser slot 12.
      *
-     * The body is not written. A non-zero status returns through a separate error path at
-     * `0x0033e208`. The success path builds the row records, assigning each row's strings from the
-     * container through `0x004b7dd8`, and runs for roughly 0x340 instructions. The port and slot
-     * argument is not read.
+     * A non-zero status raises the one-button `remix_copy_fail` dialogue with the
+     * `copy_fail_general` text. A zero status makes this screen MemcardManager::mUser and hands the
+     * row at mUnknown104 to MetSaveRemix::RecordPendingSave() with mUnknown120 as the target and
+     * -1 as the selector, passing the row's name, its first string, its appearances, and its last
+     * word. It also builds a two-entry list of this screen's registry key and `MetHelpScreen` that
+     * nothing reads. The port and slot argument is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success.
@@ -281,9 +299,10 @@ public:
     /**
      * Act on the delete the card reported. MemcardUser slot 16.
      *
-     * The body is not written. A zero status exits `MetMsgScreen` and does nothing else. A status
-     * of 15 raises a dialogue whose button set includes `RETRY`. Every other status returns
-     * through a third path at `0x0033da58`. The port and slot argument is not read.
+     * A zero status exits `MetMsgScreen` and does nothing else. A status of 15 raises the
+     * `del_fail_nocard` dialogue with `RETRY` and `CANCEL`, its text formatted with the slot name
+     * of mUnknown108. Every other status raises the one-button `del_remix` dialogue with the
+     * `del_fail` text. The port and slot argument is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success, and 15 for the failure the retry dialogue covers.
@@ -340,12 +359,15 @@ public:
     void SetCardSlot(MemcardConnectState slot);
 
 private:
+    // Raise the delete progress dialogue and queue the delete of the selected row. Slot 15
+    // expands this sequence twice, for the YES of `del_remix_ask` and the RETRY of
+    // `del_fail_nocard`, and it has no address of its own.
+    inline void StartDelete();
+
     // 0x003440b8
-    // Shows one catalogue row on the data screen. Slot 33 and four branches of slot 19
-    // are its callers. The body is not written: it resolves the screen registered under
-    // `MetRemixDataScreen`, and then runs the routine at `0x003455a8` on that screen with the
-    // address of the indexed row, or the one at `0x00345ba0` with a null argument when mUnknownf0
-    // is null or the index is out of range. Neither MetRemixDataScreen routine is declared.
+    // Shows one catalogue row on the data screen. Slot 33 and the shared tail of codes 1 and 2 in
+    // slot 19 are its callers. An index past the end hides the record instead, and mUnknownf0 is
+    // not tested for null.
     void ShowRowOnDataScreen(int nIndex);
 
     // The row catalogue the ListDataProvider override at `0x0033cc78` indexes. Never written by any
@@ -356,10 +378,11 @@ private:
     int mUnknownf8;  // +0xf8, not written by the constructor
     int mUnknownfc;  // +0xfc
     int mUnknown100; // +0x100
-    int mUnknown104; // +0x104
+    // The catalogue row MemcardUser slot 12 hands to RecordPendingSave(). +0x104
+    MetRemixRecord *mUnknown104;
     // Two memory-card locations the screen tracks. +0x108 and +0x120
     MemcardConnectState mUnknown108;
     MemcardConnectState mUnknown120;
-    int mUnknown138; // +0x138
-    int mUnknown13c; // +0x13c
+    Rnd::Font *mUnknown138; // +0x138, `font1_pink_2`, resolved by slot 38
+    Rnd::Font *mUnknown13c; // +0x13c, `font1_pinkgrey_2`, resolved by slot 38
 };

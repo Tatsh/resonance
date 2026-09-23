@@ -433,10 +433,17 @@ public:
      */
     std::map<int, std::vector<MetRemixRecord>> mRemixes;
 
+    /**
+     * The listing status of each card, keyed by port and slot.
+     *
+     * Public because MetRemixDelScreen::EnterAndShow() indexes it directly through an inline
+     * operator[], and the image has no accessor. +0xa0
+     */
+    std::map<int, int> mListStatus;
+
 private:
-    std::map<int, int> mListStatus; // +0xa0, by port and slot
-    std::vector<HxStr> mUnknownac;  // +0xac
-    std::vector<HxStr> mUnknownb8;  // +0xb8
+    std::vector<HxStr> mUnknownac; // +0xac
+    std::vector<HxStr> mUnknownb8; // +0xb8
 
 public:
     /**
