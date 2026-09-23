@@ -18,7 +18,8 @@ set(RESONANCE_RNDARTT_SRCS
     apolygon.cpp
     arect.cpp
     arlereader.cpp
-    atgafile.cpp)
+    atgafile.cpp
+    normalkey.cpp)
 
 add_library(resonance_rndartt STATIC ${RESONANCE_RNDARTT_SRCS})
 target_link_libraries(resonance_rndartt PRIVATE resonance_common)

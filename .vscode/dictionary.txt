@@ -485,6 +485,7 @@ newmodule
 njgb
 nolattice
 noone
+normalkey
 notefinder
 notemsg
 notepitcher
