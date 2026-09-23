@@ -76,10 +76,10 @@ MainLoop::MainLoop(Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
     g_pMainLoop = this;
     SetLongOperationPollProc(PumpTimers);
     SetLongOperationDrawProc(KeepAliveDraw);
-    g_pProfiler->mTimers[kAppTimerPreDraw].mName = HxStr("    app predraw");
-    g_pProfiler->mTimers[kAppTimerDraw].mName = HxStr("    app draw");
-    g_pProfiler->mTimers[kAppTimerAsync].mName = HxStr("    app async");
-    g_pProfiler->mTimers[kAppTimerBank].mName = HxStr("    app bank");
+    g_profileTimers[kAppTimerPreDraw].mName = HxStr("    app predraw");
+    g_profileTimers[kAppTimerDraw].mName = HxStr("    app draw");
+    g_profileTimers[kAppTimerAsync].mName = HxStr("    app async");
+    g_profileTimers[kAppTimerBank].mName = HxStr("    app bank");
     UpdateNextDeadline();
 }
 

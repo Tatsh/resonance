@@ -36,6 +36,23 @@ struct GifQuadword {
 class GfxDevice {
 public:
     /**
+     * Rectangle of four floats.
+     *
+     * SetupGsDrawContext() measures one in fractions of the display, and the debug overlay in GS
+     * primitive pixels. The name and the fields are inferred. The type is four floats aligned to a
+     * word rather than a Color. Renderer::OnUnknownSlot8() copies one into mFeedbackRect with
+     * unaligned doubleword loads and stores (ldl, sdl), whereas SetClearColor() copies its Color
+     * with quadword loads and stores (lq, sq). The compiler emits a quadword access only for a
+     * 16-byte aligned type.
+     */
+    struct Rect {
+        float x; /*!< Left edge. */
+        float y; /*!< Top edge. */
+        float w; /*!< Width. */
+        float h; /*!< Height. */
+    };
+
+    /**
      * Bring up the display and the drawing subsystems.
      *
      * Registers the device profile timers ("setup", "vram", "billboard", "vert", "prim", "sync"),
@@ -309,23 +326,38 @@ public:
     GifQuadword *mpOpenVifDirect;
 
 private:
-    // Frame-rate sampling, read and written only by the overlay routines. The overlay averages two
-    // profiler timers over a five-frame window, counted down here.
-    int mnStatsCountdown;     // +0x454
-    float mflFrameMsSum;      // +0x458
-    int mnFps;                // +0x45c
-    float mflSubsystemMsSum;  // +0x460
-    int mnSubsystemMsAverage; // +0x464
-    int mUnknown468;          // +0x468
+    // Draw a string in the debug stroke font. Each glyph is a six-point line strip from the table
+    // at 0x006f2f28, scaled to a cell of rect.w by rect.h from a pen at rect.x and rect.y, in GS
+    // primitive pixels. Letters of either case share one glyph, and '.' through '9' follow them.
+    // Any other character draws nothing and advances the pen two cells, and a glyph advances it
+    // one and a half. The caller opens a REGLIST tag of PRIM, RGBAQ, and six XYZ2 first. The
+    // routine writes through g_gfxDevice rather than a receiver. 0x0049bc20.
+    static void DrawDebugText(const char *pszText, const Rect &rect, const Color &color);
+
+    // Draw one flat sprite over rect, in GS primitive pixels. The caller opens a REGLIST tag of
+    // PRIM, RGBAQ, and two XYZ2 first. The routine writes through g_gfxDevice rather than a
+    // receiver. 0x0049c630.
+    static void DrawTimingBar(const Rect &rect, const Color &color);
+
+    // Average the frame time and the sync time over five frames and print "fps %d sync %d" near the
+    // top right corner. No caller survives. 0x0049c388.
+    void DrawFpsReadout();
+
+    // Frame-rate sampling for DrawFpsReadout().
+    int mnFpsCountdown;  // +0x454
+    float mflFrameMsSum; // +0x458
+    int mnFps;           // +0x45c
+    float mflSyncMsSum;  // +0x460
+    int mnSyncMsAverage; // +0x464
+    int mUnknown468;     // +0x468
 
 public:
     /**
      * Rectangle SetupGsDrawContext() draws and samples, in fractions of the display.
      *
-     * The components are read as x (r), y (g), width (b), and height (a).
      * Renderer::OnUnknownSlot8() writes it directly, with no accessor, before each call. +0x46c
      */
-    Color mFeedbackRect;
+    Rect mFeedbackRect;
     /**
      * Blend factor SetupGsDrawContext() writes into ALPHA_1 FIX after scaling it by 128.
      *

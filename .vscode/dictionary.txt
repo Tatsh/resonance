@@ -75,6 +75,9 @@ chrg
 classobject
 cleargemmsg
 cleargemsmsg
+clippedlines
+clippedsprites
+clippedtris
 clocki
 closeop
 clut
@@ -87,6 +90,7 @@ collideables
 color
 confstr
 contctrlmsg
+controllercmd
 counta
 coveragerc
 cpprtti
@@ -591,6 +595,7 @@ trmopn
 trxdir
 trxpos
 trxreg
+tunnelevent
 tunnelmeshchain
 tunnelseeker
 tunnelseeksection
@@ -646,6 +651,7 @@ voxer
 voxing
 voxingstg
 vptr
+vramk
 vramtable
 vrsqrt
 vtable

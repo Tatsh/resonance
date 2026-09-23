@@ -1,47 +1,55 @@
 #pragma once
 
+#include <vector>
+
 #include "os/hxstr.h"
 
 /**
- * One titled interval the profiler accumulates.
+ * One titled interval the profiler accumulates, 0x14 bytes.
  *
- * The class is not polymorphic and has no RTTI, so its title is inferred. Recovery has barely
- * started. The title occupies `+0x00` and the record is 0x14 bytes, both measured from the four
- * assignments in MainLoop's constructor.
+ * The class is not polymorphic and has no RTTI, so its title is inferred. The static initialiser
+ * at `0x0053d700` builds each record by copying a temporary whose first word it never writes, so
+ * mStartCycles begins undefined. GfxDevice::DrawSubsystemTimingGraph() reports each record's name
+ * and mCycles, and the frame timer reset at `0x0053dcf8` writes all three counters of its own
+ * record.
  */
 struct ProfileTimer {
-    /** Title the profiler reports this interval under. `+0x00` */
+    /** EE `Count` when the interval was last entered. `+0x00` */
+    unsigned int mStartCycles;
+    /** Cycles accumulated across the frame. `+0x04` */
+    unsigned int mCycles;
+    /** Title the profiler reports this interval under. `+0x08` */
     HxStr mName;
-
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    /** Nesting depth of the interval, which the reset returns to 1. `+0x10` */
+    int mDepth;
 };
 
 /**
- * Accumulator for the game's named intervals.
+ * The timers the game accumulates into during a frame, twenty records.
  *
- * The class is not polymorphic and has no RTTI, so its title is inferred from what its one caller
- * does. Recovery has barely started. The timer array starts at `+0x08`, measured from MainLoop's
- * constructor, which titles the first four records; the two words ahead of it are unrecovered and
- * the array length is unknown. The subsystem that owns the object lives around `0x0049c860`.
- *
- * This declaration exists to satisfy the references from MainLoop, which titles four timer records
- * in its constructor and samples the clock three times in its frame path.
- */
-class Profiler {
-public:
-    int mUnknown00;          // +0x00
-    int mUnknown04;          // +0x04
-    ProfileTimer mTimers[4]; // +0x08
-};
-
-/**
- * The one profiler the game accumulates into.
+ * MainLoop titles the first four, and GfxDevice::DrawSubsystemTimingGraph() draws one bar per
+ * record.
  *
  * @ghidraAddress 0x00720378
  */
-extern Profiler *g_pProfiler;
+extern std::vector<ProfileTimer> g_profileTimers;
+
+/**
+ * The previous frame's copy of the timers, twenty records.
+ *
+ * GfxDevice::BeginFrame() passes it by address, and the frame-rate readouts take the frame time
+ * from record 19 and a second interval from record 18.
+ *
+ * @ghidraAddress 0x00720388
+ */
+extern std::vector<ProfileTimer> g_lastFrameProfileTimers;
+
+/**
+ * Milliseconds per EE cycle, `1.0f / 294912.0f`, which the frame timer reset stores.
+ *
+ * @ghidraAddress 0x00720394
+ */
+extern float g_flCyclesToMilliseconds;
 
 /**
  * Sample the wall clock the profiler counts against.

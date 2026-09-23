@@ -9,6 +9,9 @@
 #include "gfx/gsdoublebuffer.h"
 #include "gfx/renderstats.h"
 #include "gfx/vramtable.h"
+#include "os/formatstring.h"
+#include "os/hxstr.h"
+#include "profile/profiler.h"
 
 namespace {
 
@@ -151,6 +154,115 @@ inline unsigned long long PackRgbaq(const Color &color) {
 inline unsigned long long PackCoordinates(int nX, int nY) {
     return static_cast<unsigned long long>(nX) | (static_cast<unsigned long long>(nY) << kGsYShift);
 }
+
+// The debug overlay draws at depth 0xffff, with coordinates in sixteenths of a pixel.
+constexpr unsigned long long kDebugZ = 0xffffULL << 32;
+constexpr float kSubpixelsPerPixel = 16.0f;
+constexpr unsigned long long kGsPrimSpriteValue = 6;
+
+// REGLIST tags the overlay opens. Text sends PRIM, RGBAQ, and six XYZ2 per glyph, and a bar sends
+// PRIM, RGBAQ, and two XYZ2.
+constexpr unsigned long long kTextTagLo = 0x8400000000000000ULL;
+constexpr unsigned long long kTextTagHi = 0x55555510;
+constexpr unsigned long long kBarTagLo = 0x4400000000000000ULL;
+constexpr unsigned long long kBarTagHi = 0x5510;
+
+// The stroke font. Letters of either case map to the first 26 glyphs and '.' through '9' to the
+// last 12. A glyph is six points of a line strip, x then y, in units of the cell.
+constexpr int kDebugGlyphLetters = 26;
+constexpr int kDebugGlyphPunctuationAndDigits = 12;
+constexpr int kDebugGlyphCount = kDebugGlyphLetters + kDebugGlyphPunctuationAndDigits;
+constexpr int kDebugGlyphSegments = 3;
+constexpr int kFloatsPerSegment = 4;
+constexpr int kDebugGlyphFloats = kDebugGlyphSegments * kFloatsPerSegment;
+constexpr int kBlankAdvanceCells = 2;
+constexpr double kGlyphAdvanceCells = 1.5;
+
+// 0x006f2f28
+const float g_aafDebugGlyphStrokes[kDebugGlyphCount][kDebugGlyphFloats] = {
+    {0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f},
+    {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f},
+    {1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+    {1.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f},
+    {0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f},
+    {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
+    {1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f},
+    {1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.0f, 0.5f, 0.0f},
+    {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f},
+    {0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {0.5f, 0.5f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f},
+    {0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+    {0.5f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f, 1.0f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+    {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+    {1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f, 0.5f},
+};
+
+// Which glyph draws a character, or -1 for a character that only advances the pen.
+inline int DebugGlyphIndex(char chText) {
+    if (static_cast<unsigned>(chText - 'A') < kDebugGlyphLetters) {
+        return chText - 'A';
+    }
+    if (static_cast<unsigned>(chText - 'a') < kDebugGlyphLetters) {
+        return chText - 'a';
+    }
+    if (static_cast<unsigned>(chText - '.') < kDebugGlyphPunctuationAndDigits) {
+        return chText - '.' + kDebugGlyphLetters;
+    }
+    return -1;
+}
+
+// Profiler records the overlay reads from the previous frame's copy.
+constexpr int kProfileTimerSync = 18;
+constexpr int kProfileTimerFrame = 19;
+
+inline float TimerMilliseconds(const ProfileTimer &timer) {
+    return static_cast<float>(timer.mCycles) * g_flCyclesToMilliseconds;
+}
+
+// Text and bars start 30 pixels in from the top left corner of the display, each line 20 pixels
+// below the last, with 8-pixel text cells and 10-pixel bars.
+constexpr int kOverlayOrigin = 0x81e;
+constexpr int kOverlayLinePixels = 20;
+constexpr float kOverlayLineSpacing = kOverlayLinePixels;
+constexpr float kOverlayTextCell = 8.0f;
+constexpr float kTimingBarHeight = 10.0f;
+constexpr float kTimingBarWidthShare = 0.95f;
+constexpr int kTimingTickMs = 5;
+constexpr float kTimingTickWidth = 1.0f;
+constexpr float kTimingBarGrey = 0.5f;
+constexpr float kTimingTickGrey = 0.25f;
+constexpr float kTimingLabelMinimumMs = 0.05f;
+constexpr float kMillisecondsPerSecond = 1000.0f;
+constexpr Color kOverlayWhite = {1.0f, 1.0f, 1.0f, 1.0f};
+
+// The frame-rate readout averages over five frames and sits 192 pixels in from the right edge and
+// 10 below the top.
+constexpr int kFpsSampleFrames = 5;
+constexpr int kFpsReadoutRightOffset = 0x740;
+constexpr int kFpsReadoutTop = 0x80a;
 
 } // namespace
 
@@ -402,17 +514,17 @@ void GfxDevice::SetupGsDrawContext() {
     const int nLeft = kGsCoordinateCentre - (mnDisplayWidth << kHalfSizeToSubpixelShift);
     const int nTop = kGsCoordinateCentre - (mnDisplayHeight << kHalfSizeToSubpixelShift);
 
-    const int nNearY = static_cast<int>(mFeedbackRect.g * flHeight) << kGsSubpixelShift;
-    const int nNearX = static_cast<int>(mFeedbackRect.r * flWidth) << kGsSubpixelShift;
+    const int nNearY = static_cast<int>(mFeedbackRect.y * flHeight) << kGsSubpixelShift;
+    const int nNearX = static_cast<int>(mFeedbackRect.x * flWidth) << kGsSubpixelShift;
     GifQuadword *pNear = mpWrite;
     mpWrite = pNear + 1;
     pNear->mLo = PackCoordinates(nNearX + mFeedbackInset + kTexelCentre,
                                  nNearY + mFeedbackInset + kTexelCentre);
     pNear->mHi = PackCoordinates(nLeft + nNearX, nTop + nNearY) | kFeedbackZ;
 
-    const int nFarY = static_cast<int>((mFeedbackRect.g + mFeedbackRect.a) * flHeight)
+    const int nFarY = static_cast<int>((mFeedbackRect.y + mFeedbackRect.h) * flHeight)
                       << kGsSubpixelShift;
-    const int nFarX = static_cast<int>((mFeedbackRect.r + mFeedbackRect.b) * flWidth)
+    const int nFarX = static_cast<int>((mFeedbackRect.x + mFeedbackRect.w) * flWidth)
                       << kGsSubpixelShift;
     GifQuadword *pFar = mpWrite;
     mpWrite = pFar + 1;
@@ -420,6 +532,207 @@ void GfxDevice::SetupGsDrawContext() {
     pFar->mLo = PackCoordinates(nFarX - mFeedbackInset + kTexelCentre,
                                 nFarY - mFeedbackInset + kTexelCentre);
     FlushGifPacket(0, 1);
+}
+
+// 0x0049bc20
+void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color &color) {
+    GifQuadword primAndColor;
+    primAndColor.mLo = kGsPrimLineStrip;
+    primAndColor.mHi = PackRgbaq(color);
+    const int nCellWidth = static_cast<int>(rect.w * kSubpixelsPerPixel);
+    const int nCellHeight = static_cast<int>(rect.h * kSubpixelsPerPixel);
+    const int nPenY = static_cast<int>(rect.y * kSubpixelsPerPixel);
+    int nPenX = static_cast<int>(rect.x * kSubpixelsPerPixel);
+
+    for (const char *pchText = pszText; *pchText != '\0'; ++pchText) {
+        const int nGlyph = DebugGlyphIndex(*pchText);
+        if (nGlyph < 0) {
+            nPenX += nCellWidth * kBlankAdvanceCells;
+            continue;
+        }
+
+        GifQuadword *pHeader = g_gfxDevice.mpWrite;
+        *pHeader = primAndColor;
+        g_gfxDevice.mpWrite = pHeader + 1;
+        const float flCellWidth = static_cast<float>(nCellWidth);
+        const float flCellHeight = static_cast<float>(nCellHeight);
+        const float *pflStroke = g_aafDebugGlyphStrokes[nGlyph];
+        for (int i = 0; i < kDebugGlyphSegments; ++i) {
+            GifQuadword *pPoints = g_gfxDevice.mpWrite;
+            g_gfxDevice.mpWrite = pPoints + 1;
+            pPoints->mLo = PackCoordinates(nPenX + static_cast<int>(pflStroke[0] * flCellWidth),
+                                           nPenY + static_cast<int>(pflStroke[1] * flCellHeight)) |
+                           kDebugZ;
+            pPoints->mHi = PackCoordinates(nPenX + static_cast<int>(pflStroke[2] * flCellWidth),
+                                           nPenY + static_cast<int>(pflStroke[3] * flCellHeight)) |
+                           kDebugZ;
+            pflStroke += kFloatsPerSegment;
+        }
+        nPenX += static_cast<int>(nCellWidth * kGlyphAdvanceCells);
+        g_gfxDevice.FlushGifPacket(1, 1);
+    }
+}
+
+// 0x0049c630
+void GfxDevice::DrawTimingBar(const Rect &rect, const Color &color) {
+    GifQuadword *pHeader = g_gfxDevice.mpWrite;
+    g_gfxDevice.mpWrite = pHeader + 1;
+    pHeader->mLo = kGsPrimSpriteValue;
+    pHeader->mHi = PackRgbaq(color);
+
+    GifQuadword *pCorners = g_gfxDevice.mpWrite;
+    g_gfxDevice.mpWrite = pCorners + 1;
+    pCorners->mLo = PackCoordinates(static_cast<int>(rect.x * kSubpixelsPerPixel),
+                                    static_cast<int>(rect.y * kSubpixelsPerPixel)) |
+                    kDebugZ;
+    pCorners->mHi = PackCoordinates(static_cast<int>((rect.x + rect.w) * kSubpixelsPerPixel),
+                                    static_cast<int>((rect.y + rect.h) * kSubpixelsPerPixel)) |
+                    kDebugZ;
+    g_gfxDevice.FlushGifPacket(1, 1);
+}
+
+// 0x0049bec8
+void GfxDevice::DrawRenderStatsOverlay() {
+    SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
+    GifQuadword tag;
+    tag.mLo = kTextTagLo;
+    tag.mHi = kTextTagHi;
+    WriteGifTag(&tag);
+
+    Rect rect;
+    rect.x = static_cast<float>(kOverlayOrigin - mnDisplayWidth / 2);
+    rect.y = static_cast<float>(kOverlayOrigin - mnDisplayHeight / 2);
+    rect.w = kOverlayTextCell;
+    rect.h = kOverlayTextCell;
+    const Color white = kOverlayWhite;
+
+    const float flFrameMs = TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerFrame]);
+    const int nFps = flFrameMs == 0.0f ? 0 : static_cast<int>(kMillisecondsPerSecond / flFrameMs);
+    DrawDebugText(FormatString("fps %d", nFps), rect, white);
+
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("points %d", g_renderStats.mnPoints), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("draws %d", g_renderStats.mnMeshDraws), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("clippedtris %d", g_renderStats.mnFacesClipped), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("tris %d", g_renderStats.mnTriangles), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("splittris %d", g_renderStats.mnSplitTriangles), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("clippedlines %d", g_renderStats.mnEdgesClipped), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("lines %d", g_renderStats.mnLines), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("clippedsprites %d", g_renderStats.mnSpritesCulled), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("sprites %d", g_renderStats.mnSpritesDrawn), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("verts %d", g_renderStats.mnVertsTransformed), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("tags %d", g_renderStats.mnGifTags), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("packets %d", g_renderStats.mnGifPackets), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("mats %d", g_renderStats.mnMatSelects), rect, white);
+    rect.y += kOverlayLineSpacing;
+    DrawDebugText(FormatString("litverts %d", g_renderStats.mnLitVerts), rect, white);
+
+    int nLoads;
+    int nBlocks;
+    rect.y += kOverlayLineSpacing;
+    g_vramTable.GetLastFrameLoads(&nLoads, &nBlocks);
+    DrawDebugText(FormatString("vramk %d", nBlocks >> 2), rect, white);
+}
+
+// 0x0049c388
+void GfxDevice::DrawFpsReadout() {
+    mflFrameMsSum += TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerFrame]);
+    mflSyncMsSum += TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerSync]);
+    if (--mnFpsCountdown == 0) {
+        const int nFps =
+            mflFrameMsSum == 0.0f ?
+                0 :
+                static_cast<int>(kMillisecondsPerSecond * kFpsSampleFrames / mflFrameMsSum);
+        mnFpsCountdown = kFpsSampleFrames;
+        mnFps = nFps;
+        mnSyncMsAverage = static_cast<int>(mflSyncMsSum / kFpsSampleFrames);
+        mflFrameMsSum = 0.0f;
+        mflSyncMsSum = 0.0f;
+    }
+
+    SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
+    GifQuadword tag;
+    tag.mLo = kTextTagLo;
+    tag.mHi = kTextTagHi;
+    WriteGifTag(&tag);
+
+    Rect rect;
+    rect.x = static_cast<float>(mnDisplayWidth / 2 + kFpsReadoutRightOffset);
+    rect.y = static_cast<float>(kFpsReadoutTop - mnDisplayHeight / 2);
+    rect.w = kOverlayTextCell;
+    rect.h = kOverlayTextCell;
+    const Color white = kOverlayWhite;
+    DrawDebugText(FormatString("fps %d sync %d", mnFps, mnSyncMsAverage), rect, white);
+}
+
+// 0x0049c778
+void GfxDevice::DrawSubsystemTimingGraph(int nFullScaleMs) {
+    SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
+    GifQuadword barTag;
+    barTag.mLo = kBarTagLo;
+    barTag.mHi = kBarTagHi;
+    WriteGifTag(&barTag);
+
+    const int nTop = kOverlayOrigin - mnDisplayHeight / 2;
+    const int nLeft = kOverlayOrigin - mnDisplayWidth / 2;
+    const float flPixelsPerMs = static_cast<float>(mnDisplayWidth) * kTimingBarWidthShare /
+                                static_cast<float>(nFullScaleMs);
+    Color barColor = {kTimingBarGrey, kTimingBarGrey, kTimingBarGrey, 1.0f};
+    Rect rect;
+    rect.x = static_cast<float>(nLeft);
+    rect.y = static_cast<float>(nTop);
+    rect.w = 0.0f;
+    rect.h = kTimingBarHeight;
+    for (int i = 0; i < static_cast<int>(g_profileTimers.size()); ++i) {
+        rect.w = TimerMilliseconds(g_lastFrameProfileTimers[i]) * flPixelsPerMs;
+        DrawTimingBar(rect, barColor);
+        rect.y += kOverlayLineSpacing;
+    }
+
+    // One thin line every five milliseconds, spanning every bar.
+    rect.y = static_cast<float>(nTop);
+    barColor.b = kTimingTickGrey;
+    barColor.r = kTimingTickGrey;
+    barColor.g = kTimingTickGrey;
+    rect.w = kTimingTickWidth;
+    rect.h = static_cast<float>(static_cast<int>(g_profileTimers.size()) * kOverlayLinePixels);
+    for (int nMs = 0; nMs < nFullScaleMs; nMs += kTimingTickMs) {
+        DrawTimingBar(rect, barColor);
+        rect.x += flPixelsPerMs * kTimingTickMs;
+    }
+
+    GifQuadword textTag;
+    textTag.mLo = kTextTagLo;
+    textTag.mHi = kTextTagHi;
+    WriteGifTag(&textTag);
+    const Color white = kOverlayWhite;
+    rect.x = static_cast<float>(nLeft + 1);
+    rect.y = static_cast<float>(nTop + 1);
+    rect.w = kOverlayTextCell;
+    rect.h = kOverlayTextCell;
+    for (int i = 0; i < static_cast<int>(g_profileTimers.size()); ++i) {
+        const float flMs = TimerMilliseconds(g_lastFrameProfileTimers[i]);
+        const HxStr &name = g_profileTimers[i].mName;
+        const char *pszName = name.mStr != nullptr ? name.mStr : g_szEmptyString;
+        if (kTimingLabelMinimumMs <= flMs) {
+            DrawDebugText(FormatString("%s %.1f", pszName, flMs), rect, white);
+        } else {
+            DrawDebugText(pszName, rect, white);
+        }
+        rect.y += kOverlayLineSpacing;
+    }
 }
 
 // 0x0049fec0
