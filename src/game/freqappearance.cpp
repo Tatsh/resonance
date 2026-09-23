@@ -27,13 +27,17 @@ constexpr int kBurnSlotCount = 4;
 static const char *const kBurnCamFormat = "persona_texburn_%i.cam";
 static const char *const kHangpointFormat = "%i_freq_hangpoint.view";
 
-// 0x0067af30. The camera of each burn slot.
+// 0x0067af30
+// The camera of each burn slot.
 std::vector<Rnd::Cam *> g_burnCams;
-// 0x0067af3c. Non-zero once InitBurnSlots() has resolved both lists.
+// 0x0067af3c
+// Non-zero once InitBurnSlots() has resolved both lists.
 int g_nBurnSlotsReady = 0;
-// 0x0067af40. The view each burn slot hangs its avatar from.
+// 0x0067af40
+// The view each burn slot hangs its avatar from.
 std::vector<Rnd::View *> g_hangpoints;
-// 0x008efc80. The detail object AttachToBurnSlot() last hung in each slot.
+// 0x008efc80
+// The detail object AttachToBurnSlot() last hung in each slot.
 FreqAppearanceDetail *g_apBurnSlotDetails[kBurnSlotCount];
 
 static const char *const kBurnTextureFormat = "persona_texburn_texture_%d.tex";

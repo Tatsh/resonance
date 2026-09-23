@@ -55,7 +55,8 @@ constexpr int kSmallMotorOn = 1;
 constexpr int kPowerupRunning = 1;
 constexpr int kPowerupDone = 0;
 
-// 0x0067a3f0. The instance the commands run against, set by the constructor.
+// 0x0067a3f0
+// The instance the commands run against, set by the constructor.
 ForceFeedbackMgr *g_pForceFeedbackMgr;
 
 // The clamp the inline Mid::MBT arithmetic applies to a computed position.

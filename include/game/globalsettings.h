@@ -147,8 +147,9 @@ public:
     GameOptions mGameOptions;
 
 private:
-    // 0x00188b90. Read and discard the macro list of a record older than version 3. The body does
-    // not read this object.
+    // 0x00188b90
+    // Read and discard the macro list of a record older than version 3. The body does not read
+    // this object.
     void SkipLegacyMacros(IBStream &stream);
 
     // MetKeyboardScreen's default macros, which the constructor copies into mMacros. +0x3c

@@ -290,16 +290,19 @@ private:
     // score, and then recompute the unlock level.
     void RecountAll();
 
-    // 0x00141b90. Recount the beaten levels of one stage at one difficulty into
-    // mStageCompleted. Each level's name is copied and discarded, which matches the binary.
+    // 0x00141b90
+    // Recount the beaten levels of one stage at one difficulty into mStageCompleted. Each level's
+    // name is copied and discarded, which matches the binary.
     void RecountStageCompleted(int nDifficulty, int nStage);
 
-    // 0x00141898. Recount the total high score of the beaten levels of one stage at one
-    // difficulty into mStageScores, and set mStageScoreBeaten when the stage is complete and the
-    // total reaches the stage's album value.
+    // 0x00141898
+    // Recount the total high score of the beaten levels of one stage at one difficulty into
+    // mStageScores, and set mStageScoreBeaten when the stage is complete and the total reaches the
+    // stage's album value.
     void RecountStageScore(int nDifficulty, int nStage);
 
-    // 0x00141cb8. Recompute mUnlockLevel from stage completion and return it.
+    // 0x00141cb8
+    // Recompute mUnlockLevel from stage completion and return it.
     int UpdateUnlockLevel();
 
     // Zeroes the ten counter arrays, counts each stage's album levels in the global level list into

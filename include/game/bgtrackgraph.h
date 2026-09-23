@@ -175,19 +175,22 @@ private:
     Mixer *mMixer;            // +0x20
 };
 
-// 0x00193ff8, the out-of-line copy.
+// 0x00193ff8
+// The out-of-line copy.
 inline int BGTrackGraph::CallBuildSequencer() {
     BuildSequencer();
     return 0;
 }
 
-// 0x00194018, the out-of-line copy.
+// 0x00194018
+// The out-of-line copy.
 inline int BGTrackGraph::CallDeleteSequencer() {
     DeleteSequencer();
     return 0;
 }
 
-// 0x00194038, the out-of-line copy.
+// 0x00194038
+// The out-of-line copy.
 inline void BGTrackGraph::Delete(BGTrackGraph *pGraph) {
     delete pGraph;
 }

@@ -191,7 +191,7 @@ private:
     // to a step of -1, 0, or 1 and drops the reading unless the step changed.
     void OnControllerReading(RawControllerMsg *pMsg);
 
-    // 0x0011da68.
+    // 0x0011da68
     void SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
     // 0x0011d9b0

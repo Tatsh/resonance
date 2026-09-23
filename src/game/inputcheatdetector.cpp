@@ -66,13 +66,15 @@ struct InputHistory {
     std::vector<int> mInputs; // +0x08
 };
 
-// 0x00691db0. Set once RegisterCheats() has filled both tables.
+// 0x00691db0
+// Set once RegisterCheats() has filled both tables.
 int g_bCheatsRegistered;
 
 // 0x00691db8
 InputHistory g_aInputHistories[kPlayerSlotCount];
 
-// 0x00891a30. A press further apart than this from the previous one starts a new sequence.
+// 0x00891a30
+// A press further apart than this from the previous one starts a new sequence.
 long long g_llCheatTimeoutNs = 750000000;
 
 } // namespace

@@ -119,8 +119,8 @@ public:
     int mId;
 
 private:
-    // One bit per slot, set while a handle holds the slot. The unit's static initialiser at
-    // 0x004ec7d0 builds it at 0x00704b40 with every bit clear.
+    // One bit per slot, set while a handle holds the slot. The unit's static initialiser (at
+    // `0x004ec7d0`) builds it at 0x00704b40 with every bit clear.
     static std::vector<bool> sSlotsInUse;
 
     // One record per slot, at 0x00704bc0.

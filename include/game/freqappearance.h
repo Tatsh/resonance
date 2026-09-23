@@ -287,9 +287,10 @@ public:
     HxStr mUnknown00;
 
 private:
-    // 0x001744f8. Fill bytes 7 through 14 of pDest with 0x80, copy seven source bytes with each
-    // zero replaced by 0xff, and set bit n of byte 7 for each zero at position n. The image has no
-    // caller, and the name is inferred.
+    // 0x001744f8
+    // Fill bytes 7 through 14 of pDest with 0x80, copy seven source bytes with each zero replaced
+    // by 0xff, and set bit n of byte 7 for each zero at position n. The image has no caller, and
+    // the name is inferred.
     static void EncodeNonZeroBytes(const unsigned char *pSource, unsigned char *pDest);
 
 public:
