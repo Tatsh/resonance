@@ -17,26 +17,35 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                   | Count  |
 | ------------------------- | ------ |
 | Functions in the program  | 15,598 |
-| Excluded by rule          | 8,267  |
-| Reconstructable           | 7,331  |
-| Declared or defined       | 6,093  |
-| Share declared or defined | 83.11% |
-| Defined, with a body      | 4,706  |
-| Share implemented         | 64.19% |
-| Remaining, with a name    | 723    |
-| Remaining, unidentified   | 515    |
+| Excluded by rule          | 8,639  |
+| Reconstructable           | 6,959  |
+| Declared or defined       | 6,315  |
+| Share declared or defined | 90.75% |
+| Defined, with a body      | 5,107  |
+| Share implemented         | 73.39% |
+| Remaining, with a name    | 559    |
+| Remaining, unidentified   | 85     |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,387 of
-the 6,093 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 4,706 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,208 of
+the 6,315 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 5,107 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 64.19% as the answer to
-"how much is reconstructed" and 83.11% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 73.39% as the answer to
+"how much is reconstructed" and 90.75% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `c35fd29`. Work written and checked but not yet committed
+The table measures the committed tree at `d7e688b`. Work written and checked but not yet committed
 is not included.
+
+Since the measurement at `c35fd29` (64.19%), bodies rose by 401 over 34 commits and the
+reconstructable figure fell by 372. The template library category grew by 308 as the remaining
+front end, tunnel, and message units' container instantiations were titled against normalised body
+matches, the SDK by 11, the duplicate category by 24, the vendored interpreter by 17, the C runtime
+by 8, and the compiler-generated category by 4. Unidentified routines fell from 515 to 85. Most of
+the new bodies are the front end screens (the keyboard, the load, stage select, jukebox, and
+multiplayer end screens, and the screen registry's factory), the front end command map and
+repeater, and the message and packet accessors.
 
 Since the measurement at `7b43c85` (48.36%), bodies rose by 861 over 80 commits and the
 reconstructable figure fell by 620. The template library category grew by 543 as each front end
@@ -64,9 +73,9 @@ code the program had not yet defined.
 These routines are counted as remaining although the tree handles them by rule, and the scoring
 tools are unchanged:
 
-- An implicit destructor or copy constructor of a project class is titled `<Class>__Destruct` or
-  `__ConstructCopy` and has no source, because the compiler generates it. No exclusion pattern
-  matches those titles.
+- An implicit destructor, copy constructor, or assignment of a project class is titled
+  `<Class>__Destruct`, `__ConstructCopy`, or `__AssignImplicit` and has no source, because the
+  compiler generates it. No exclusion pattern matches those titles.
 - The ezmpeg sample units (the display and vobuf units at `0x005d0000`) are linked as shipped and
   are not reconstructed, and the interrupt-context SDK entry points titled `isce…` fall outside the
   `sce` pattern.
@@ -146,13 +155,13 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 895   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 1,960 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 1,925 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 2,542 | Container instantiations                                         |
-| Platform SDK                   | 420   | `sce` entry points and kernel syscalls                           |
+| Compiler-generated             | 899   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 1,977 | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 1,949 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 2,850 | Container instantiations                                         |
+| Platform SDK                   | 431   | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 217   | Exception, cast, and unwinding support                           |
-| C runtime                      | 308   | String and memory routines, and the floating-point library       |
+| C runtime                      | 316   | String and memory routines, and the floating-point library       |
 
 ## Verification
 

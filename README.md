@@ -32,8 +32,8 @@ the original program does, and every routine records the address it was recovere
 ## Status
 
 This is an active, partial reconstruction. It does not build a playable game yet, and it is not a
-port. Around four fifths of the game's own routines are accounted for and nearly two thirds have a
-body, with the current figures and how they are measured in [PROGRESS.md](PROGRESS.md).
+port. About nine tenths of the game's own routines are accounted for and nearly three quarters have
+a body, with the current figures and how they are measured in [PROGRESS.md](PROGRESS.md).
 
 | Area                               | State                                        |
 | ---------------------------------- | -------------------------------------------- |
