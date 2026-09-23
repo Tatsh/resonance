@@ -7,6 +7,7 @@
 #include "app/tnlpendingtrigger.h"
 #include "game/trackdata.h"
 
+class AdvanceSectionToggleMsg;
 class AxeButtonMsg;
 class CatchMsg;
 class ClearGemMsg;
@@ -373,7 +374,7 @@ private:
     // AdvanceSectionToggleMsg: rewrite the boundary text, move mUnknown140 to the next step,
     // rebuild every sabre trail, and replay OnBarChanged() over the window. The message is not
     // read. 0x00448048.
-    void OnAdvanceSectionToggle();
+    void OnAdvanceSectionToggle(AdvanceSectionToggleMsg *pMsg);
 
     // PlaybackToggleMsg: zoom the camera rig, record the jukebox flag, reassign the gem kinds, and
     // suppress or restore every activator and the now ring. 0x00448330.

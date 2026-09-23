@@ -30,11 +30,12 @@ public:
      * Start an idle panel effect on the recorded section.
      *
      * The result of AppTunnel::StartPanelFX() is discarded, so a run with no idle panel drops the
-     * effect.
+     * effect. The frame is not read.
      *
+     * @param flFrame The frame the trigger fires on.
      * @ghidraAddress 0x004571f8
      */
-    virtual void Fire();
+    virtual void Fire(float flFrame);
 
 private:
     int mRing;          // +0x04

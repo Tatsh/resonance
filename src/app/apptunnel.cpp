@@ -293,6 +293,7 @@ inline void AppTunnel::GemFlash::Update() {
     }
 }
 
+// 0x00442020
 AppTunnel::AppTunnel(Renderer *pRenderer)
     : mRenderer(pRenderer), mGameMode(Application::shared()->GetGameMode()),
       mPlayMode(Application::shared()->GetPlayMode()), mBoundary(nullptr), mCameraRig(nullptr),
@@ -561,6 +562,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
     }
 }
 
+// 0x00445740
 AppTunnel::~AppTunnel() {
     g_pAppTunnel = nullptr;
     delete mGemManager;
@@ -616,6 +618,7 @@ inline TnlPlayer *AppTunnel::FindTnlPlayer(Player *pPlayer) {
     return nullptr;
 }
 
+// 0x004465a0
 void AppTunnel::OnBarChanged(
     int nTrack, int nBar, int nUnknown, Player *pPlayer, int nPowerup, int nEnabled) {
     int nNewPanel = 0;
@@ -653,6 +656,7 @@ void AppTunnel::OnBarChanged(
     }
 }
 
+// 0x00446838
 void AppTunnel::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
     if (mGameMode == kGameModeSolo) {
         return;
@@ -946,6 +950,7 @@ inline void AppTunnel::OnDurGem(DurGemMsg *pMsg) {
                            pMsg->mEndBlend);
 }
 
+// 0x00449688
 void AppTunnel::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
@@ -973,7 +978,7 @@ void AppTunnel::HandleMessage(Message *pMsg) {
     } else if ((nType == g_nDisplayPointerMsgType) || (nType == g_nChoosePowerupMsgType)) {
         // Both are ignored.
     } else if (nType == g_nAdvanceSectionToggleMsgType) {
-        OnAdvanceSectionToggle();
+        OnAdvanceSectionToggle(static_cast<AdvanceSectionToggleMsg *>(pMsg));
     } else if (nType == g_nPlayersTrackNeutralizedMsgType) {
         OnPlayersTrackNeutralized(static_cast<PlayersTrackNeutralizedMsg *>(pMsg));
     } else if (nType == g_nShowEraseEffectMsgType) {
@@ -1023,7 +1028,7 @@ void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {
 }
 
 // 0x00448048
-void AppTunnel::OnAdvanceSectionToggle() {
+void AppTunnel::OnAdvanceSectionToggle([[maybe_unused]] AdvanceSectionToggleMsg *pMsg) {
     mBoundary->UpdateText();
     mUnknown140 = mPlayMap->FollowingStepBar(
         static_cast<int>(mRenderer->mSongTick / static_cast<float>(kFramesPerBar)));
@@ -1154,6 +1159,7 @@ void AppTunnel::UpdateGhostFades() {
     }
 }
 
+// 0x00446960
 void AppTunnel::SetFrame(float flFrame) {
     const float flScaledFrame = flFrame * mUnknown144;
     for (Rnd::Particle *pParticle = mStringFlare->GetLiveParticles(); pParticle != nullptr;
@@ -1216,6 +1222,7 @@ void AppTunnel::SetFrame(float flFrame) {
     UpdateGhostFades();
 }
 
+// 0x00457338
 int AppTunnel::IsTrackBarLocked(int nTrack, int nBar) {
     // The binary compares the track mode against mPlayMode itself, which is kPlayModeJam here.
     if ((mPlayMode == kPlayModeJam) && (mTrackModes[nTrack] == kTrackModeRiff)) {
@@ -1234,6 +1241,7 @@ int AppTunnel::IsTrackBarLocked(int nTrack, int nBar) {
     return 1;
 }
 
+// 0x00457418
 void AppTunnel::ShowTrackGhost(int nTrack, Rnd::Drawable *pGhost) {
     pGhost->ClearDraws();
     mGemManager->AddKindDraws(mGhostGemKinds[nTrack], pGhost);
@@ -1242,15 +1250,18 @@ void AppTunnel::ShowTrackGhost(int nTrack, Rnd::Drawable *pGhost) {
     mGhostFadeRates[nTrack] = kGhostFadeRate;
 }
 
+// 0x004574c8
 void AppTunnel::HideTrackGhost(int nTrack) {
     GetGhostMat(nTrack)->SetAlpha(1.0f);
     mGhostFadeRates[nTrack] = -kGhostFadeRate;
 }
 
+// 0x00457570
 Rnd::Mat *AppTunnel::GetGhostMat(int nTrack) {
     return mGhostMats[nTrack];
 }
 
+// 0x00457588
 void AppTunnel::StartGemFlash(const Vector3 &pos) {
     for (auto it = mGemFlashes.begin(); it != mGemFlashes.end(); ++it) {
         if ((*it)->Start(pos)) {
@@ -1259,6 +1270,7 @@ void AppTunnel::StartGemFlash(const Vector3 &pos) {
     }
 }
 
+// 0x00457648
 int AppTunnel::StartPanelFX(int nRing, int nSlice, int nForward) {
     for (auto it = mPanelFX.begin(); it != mPanelFX.end(); ++it) {
         if ((*it)->IsIdle()) {
@@ -1322,6 +1334,7 @@ void AppTunnel::AddPendingTrigger(TnlTrigger *pTrigger, float flFrame) {
     mPendingTriggers.push_back(TnlPendingTrigger{pTrigger, flFrame});
 }
 
+// 0x00457a98
 void AppTunnel::PlaceStringFlare(const Vector3 &pos) {
     for (Rnd::Particle *pParticle = mStringFlare->GetLiveParticles(); pParticle != nullptr;
          pParticle = pParticle->mNext) {
@@ -1349,6 +1362,7 @@ void AppTunnel::PlaceStringFlareOnRing(int nRing, float flBlend) {
     }
 }
 
+// 0x00457bd0
 void AppTunnel::PrepareLocalView(int nView, [[maybe_unused]] float flFrame) {
     mNowRing->SetRotation(nView);
 }

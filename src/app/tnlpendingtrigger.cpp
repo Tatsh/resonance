@@ -5,7 +5,7 @@
 // 0x004572c8
 int TnlPendingTrigger::Update(float flFrame) {
     if (mFrame <= flFrame) {
-        mTrigger->Fire();
+        mTrigger->Fire(flFrame);
         delete mTrigger;
         return 0;
     }

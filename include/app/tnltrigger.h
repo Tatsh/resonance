@@ -23,6 +23,10 @@ public:
     virtual ~TnlTrigger() {
     }
 
-    /** Perform the scheduled action. */
-    virtual void Fire() = 0;
+    /**
+     * Perform the scheduled action.
+     *
+     * @param flFrame The frame TnlPendingTrigger::Update() was given.
+     */
+    virtual void Fire(float flFrame) = 0;
 };
