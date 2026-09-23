@@ -235,6 +235,7 @@ freqappearance
 freqappearancedetail
 freqmakercursor
 freqpart
+freqparttemplate
 frustrum
 fsmblks
 fstat
@@ -787,6 +788,7 @@ sysmodule
 tagfile
 tamtypes
 tatsh
+teamfreq
 teardowns
 tempomap
 testarbiterpacket

@@ -113,9 +113,9 @@ void FreqPart::Reset() {
 
 // 0x001771f8
 void FreqPart::Pack(Packed *pOut) {
-    pOut->mId = mTemplate->mId;
+    pOut->mId = static_cast<short>(mTemplate->mId);
     if (mMirrored != 0) {
-        pOut->mId = -mTemplate->mId;
+        pOut->mId = -pOut->mId;
     }
     pOut->mX = static_cast<short>(mPosition.x);
     pOut->mZ = static_cast<short>(mPosition.z);

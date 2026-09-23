@@ -11,8 +11,11 @@
 
 class FreqPartTemplate;
 class MetFreqLoader;
+class RndAsyncLoader;
 namespace Rnd {
+class Mat;
 class Mesh;
+class Object;
 class Tex;
 } // namespace Rnd
 
@@ -24,22 +27,12 @@ class Tex;
  * `+0x80`, so the object is 0x84 bytes. The two-entry vtable is at `0x007f0908`, which makes the
  * destructor the one virtual the class declares.
  *
- * This declaration is deliberately partial. The recovered layout is the shape of the teardown in
- * the destructor at `0x00250808`, which runs in this order.
+ * The manager loads `MetaGame/persona/freq_maker_inventory_assets.rnd` in the background. Once the
+ * load completes, PollLoad() builds one FreqPartTemplate for each part texture it produced, and the
+ * two MetFreqLoader objects read the pre-fab personas. The destructor deletes the two loaders and
+ * leaves the templates, the asset load, and the two prototypes in place.
  *
- *  - Two owned objects at `+0x04` and `+0x08` are released through slot 1 of each object's own
- *    vtable with an `__in_chrg` argument of 3, which is the deleting form.
- *  - A vector of 4-byte elements at `+0x74`, with its finish at `+0x78` and its end of storage at
- *    `+0x7c`, is deallocated.
- *  - A second vector of 4-byte elements at `+0x68` is deallocated.
- *  - The eleven category lists descending from `+0x60` to `+0x38` are cleared through the routine
- *    at `0x00255658`, and each dummy node is returned to the pool.
- *  - The part template vector at `+0x20` is deallocated.
- *
- * The constructor at `0x00250b18` writes the vptr, zeroes `+0x00` through `+0x14`, and then runs
- * on for another 0x400 bytes of asset registration that is not recovered here. The classes of the
- * two owned objects are undetermined. Only the members the recovered routines read are typed, and
- * the rest of the span is recorded as reserved.
+ * The translation unit spans `0x0024f798` to `0x00255790`.
  *
  * The one instance is created by Create(), which allocates exactly 0x84 bytes, runs the
  * constructor, and records the result in the global at `0x006a0f30` that shared() reads.
@@ -82,7 +75,19 @@ public:
     static void Destroy();
 
     /**
-     * Release the owned assets, the two vectors, and the list run.
+     * Start with no assets, no loaded templates, and two persona loaders.
+     *
+     * The loaders read `pers_PS2.dat` and `teamfreq_pers_PS2.dat` under the pre-fab persona
+     * directory of GetFreqRoot() into mPrefabIdentities and mTeamFreqIdentities.
+     *
+     * @ghidraAddress 0x00250b18
+     */
+    MetFreqMakerAssetManager();
+
+    /**
+     * Delete the two persona loaders.
+     *
+     * The templates, the asset load, and the prototypes are not released.
      *
      * @ghidraAddress 0x00250808
      */
@@ -91,8 +96,12 @@ public:
     /**
      * Advance the asset load by one step and report whether it has finished.
      *
-     * A load already marked finished at `+0x10` reports success without doing work. Otherwise the
-     * routine polls the loader at `+0x0c` and returns false while that loader is still running.
+     * A completed load reports success without doing work. Otherwise the routine starts the asset
+     * load if needed, pumps the asynchronous loads, and returns false while the asset load is
+     * still running. On completion it resolves the prototype material and mesh, rebuilds the part
+     * templates from every loaded texture other than the spectrum, the burn prototype, the frame,
+     * and the four burn textures, numbers them in load order, marks the load complete, and starts
+     * the persona loads.
      *
      * @return True once every asset is resident.
      * @ghidraAddress 0x0024f798
@@ -318,17 +327,57 @@ public:
      */
     std::list<FreqPartTemplate *> *TemplatesInCategory(int nCategory);
 
+    /**
+     * Create and queue the load of the FreQ maker asset file once.
+     *
+     * Nothing happens once the load request exists. Otherwise the request for
+     * `MetaGame/persona/freq_maker_inventory_assets.rnd` is created with the index of the zone
+     * `rndglobal` as its priority and enqueued. MetRenderer's and MetNullRenderer's constructors
+     * and PollLoad() call it. The title is inferred.
+     *
+     * @ghidraAddress 0x0024fce8
+     */
+    void StartAssetLoad();
+
+    /**
+     * Delete every part template and forget them, so the next PollLoad() reloads.
+     *
+     * Only the name map is emptied. The identifier vector and the category lists retain their
+     * pointers. The image has no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x0024fe58
+     */
+    void ReleaseParts();
+
+    /**
+     * Report a copy of the objects the asset load produced, once PollLoad() has run and its result
+     * is discarded.
+     *
+     * The image has no caller, and PollLoad() expands the same copy. The body is not written,
+     * because it reads the private object list of RndAsyncLoader. The title is inferred.
+     *
+     * @return The objects.
+     * @ghidraAddress 0x00250540
+     */
+    std::list<Rnd::Object *> GetLoadedObjects();
+
 private:
-    // The members the destructor walks, described in the class documentation above.
-    unsigned char mUnknown00[0x4];                                // +0x00
-    MetFreqLoader *mPrefabLoader;                                 // +0x04, owned
-    MetFreqLoader *mTeamFreqLoader;                               // +0x08, owned
-    unsigned char mUnknown0c[0x8];                                // +0x0c
-    std::map<HxStr, FreqPartTemplate *> mPartsByName;             // +0x14
-    std::vector<FreqPartTemplate *> mParts;                       // +0x20, by template identifier
-    unsigned char mUnknown2c[0x4];                                // +0x2c
-    Rnd::Mesh *mMeshTemplate;                                     // +0x30, copied by CloneMesh()
-    Rnd::Tex *mPaletteTex;                                        // +0x34, resolved by ColorAt()
+    // 0x0024ff80. Build a part template over one loaded texture: a material named after it with
+    // `.mat` appended, copied from mMaterialTemplate with the texture on its first stage, the
+    // texture's bitmap size as its scale, the category the seventh character from the end of the
+    // name selects, and the colour and randomisation flags the next two characters set.
+    FreqPartTemplate *RegisterPart(Rnd::Object *pObject);
+
+    int mUnknown00;                                   // +0x00, starts at 0
+    MetFreqLoader *mPrefabLoader;                     // +0x04, owned
+    MetFreqLoader *mTeamFreqLoader;                   // +0x08, owned
+    RndAsyncLoader *mAssetLoader;                     // +0x0c, created by StartAssetLoad()
+    int mLoaded;                                      // +0x10, set once PollLoad() completes
+    std::map<HxStr, FreqPartTemplate *> mPartsByName; // +0x14
+    std::vector<FreqPartTemplate *> mParts;           // +0x20, by template identifier
+    Rnd::Mat *mMaterialTemplate;                      // +0x2c, copied by RegisterPart()
+    Rnd::Mesh *mMeshTemplate;                         // +0x30, copied by CloneMesh()
+    Rnd::Tex *mPaletteTex;                            // +0x34, resolved by ColorAt()
     std::list<FreqPartTemplate *> mCategoryLists[kCategoryCount]; // +0x38, categories 1 to 11
     // Advanced by NextMeshName().
     int mMeshCount;                                    // +0x64

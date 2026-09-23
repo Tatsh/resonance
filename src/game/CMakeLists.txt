@@ -25,6 +25,7 @@ set(RESONANCE_GAME_SRCS
     freqappearancedetail.cpp
     freqmakercursor.cpp
     freqpart.cpp
+    freqparttemplate.cpp
     gameenablemgr.cpp
     gamemanagerimpl.cpp
     gameparams.cpp
