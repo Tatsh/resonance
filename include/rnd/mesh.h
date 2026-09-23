@@ -340,12 +340,12 @@ public:
     /**
      * Merge duplicate vertices and remove the faces and edges the merge makes redundant.
      *
-     * A vertex used by a face or an edge absorbs every later vertex at the same position. With a
-     * textured material the first texture coordinates must match as well, and without a flat
-     * material a later vertex used by a face must also match in colour. Surviving vertices move
-     * down over the removed ones, and every animation that references this mesh and owns its keys
-     * moves and trims its keyframes to match. Degenerate and repeated faces and edges are then
-     * erased, and an animation channel whose keyframes all match is emptied.
+     * A vertex used by a face or an edge absorbs every later vertex still in use at the same
+     * position. With a textured material the first texture coordinates must match as well, and
+     * without a flat material a later vertex used by a face must also match in colour. Surviving
+     * vertices move down over the removed ones, and every animation that references this mesh and
+     * owns its keys moves and trims its keyframes to match. Degenerate and repeated faces and edges
+     * are then erased, and an animation channel whose keyframes all match is emptied.
      *
      * With a flat material, each face first records its colour (the colour of its first vertex,
      * or with bAverageColors the mean of its three), then AssignFlatVerts() runs, and each face's

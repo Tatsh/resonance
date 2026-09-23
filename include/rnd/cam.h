@@ -291,9 +291,9 @@ public:
      *
      * The three base descriptions come first. The near plane, the far plane, the field of view,
      * the screen rectangle, the depth range, and the render target name follow at any positive
-     * dump level, and the vertical ratio, both local matrices, both frustums, and the inverse
-     * world projection only from level two. A camera with no render target writes "no object" in
-     * place of the target's quoted name.
+     * dump level, and the vertical ratio, the local and world projections, both frustums, and the
+     * inverse world projection only from level two. A camera with no render target writes
+     * "no object" in place of the target's quoted name.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress 0x004ad980
