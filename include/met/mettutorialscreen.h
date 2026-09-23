@@ -32,8 +32,9 @@ class Object;
  * are 5 `0x003c82a0`, 19 `0x003c7f10`, 23 `0x003cc198`, 24 `0x003cc1a0`, 30 `0x003c84d8`, 36
  * `0x003c8678`, 38 `0x003c7d78`.
  *
- * Slots 5 and 36 are not written. Both read the object the unrecovered singleton getter at
- * `0x00217f30` vends, which this tree does not declare.
+ * Slot 36 at `0x003c8678` is not written. It picks a random identity through the MetPersonaData
+ * member at `0x0032e488`, which forwards to the undeclared FreqAppearance routine at
+ * `0x00171138`.
  */
 class MetTutorialScreen : public MetScreen {
 public:
@@ -50,6 +51,19 @@ public:
      * @ghidraAddress 0x003cc230
      */
     virtual ~MetTutorialScreen();
+
+    /**
+     * Push the companion screens on a first entry, select the first button, and enter. Slot 5.
+     *
+     * When MetFrontEndState::mUnknown18 is set, the body empties the return screen name, moves
+     * the flag into mUnknown1c, pushes `MetLeftGizmoScreen` and `MetHelpScreen`, and records this
+     * screen as the renderer's active panel. Every entry then selects the first button, titles the
+     * screen from configuration code 0x269 under `tutorial`, and posts the selected button's
+     * prompt.
+     *
+     * @ghidraAddress 0x003c82a0
+     */
+    virtual void EnterAndShow();
 
     /**
      * Route one command to the button ring, the selection, or the exit. Slot 19.

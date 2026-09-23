@@ -1,8 +1,10 @@
 #include "met/mettutorialscreen.h"
 
 #include "met/metbuttonlist.h"
+#include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
+#include "met/metscreentitlescreen.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
 
@@ -32,8 +34,15 @@ static const char *const kHelpScreen = "MetHelpScreen";
 // The empty literal that clears the panel and the prompt.
 static const char *const kNoName = "";
 
-// Configuration code the button labels are read under.
+// Configuration codes the button labels and the screen title are read under.
 constexpr int kPromptConfigCode = 0x258;
+constexpr int kTitleConfigCode = 0x269;
+
+// The key the screen title is looked up under.
+static const char *const kTitleKey = "tutorial";
+
+// Index EnterAndShow() selects, which is the first button.
+constexpr int kFirstButtonIndex = 0;
 
 // What MetScreen::mUnknown18 records for the exit hook to act on. The back command writes the
 // first and the alternation-finished hook writes the second.
@@ -56,6 +65,28 @@ MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
 
 MetTutorialScreen::~MetTutorialScreen() {
     delete mUnknown8c;
+}
+
+void MetTutorialScreen::EnterAndShow() {
+    if (MetFrontEndState::shared()->mUnknown18 != 0) {
+        MetFrontEndState::shared()->mUnknown24 = HxStr(kNoName);
+        MetFrontEndState *pState = MetFrontEndState::shared();
+        pState->mUnknown1c = pState->mUnknown18;
+        pState->mUnknown18 = 0;
+        PushNamedScreen(HxStr(kLeftGizmoScreen));
+        PushNamedScreen(HxStr(kHelpScreen));
+        mUnknown10->SetActivePanel(this);
+    }
+    mUnknown8c->SetSelected(kFirstButtonIndex);
+
+    {
+        HxStr title;
+        QueryConfigString(&title, kTitleConfigCode, kTitleKey);
+        MetScreenTitleScreen::SetTitle(title);
+    }
+
+    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    MetScreen::EnterAndShow();
 }
 
 void MetTutorialScreen::ResolveContainerViews() {

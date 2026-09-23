@@ -41,9 +41,9 @@ class Object;
  * queues one message for each change through the private builders. Slot 26 then shows the queued
  * messages one at a time, 360 frames apart, and shows the continue button after the last.
  *
- * Slot 5, slot 36, the message layout routine at `0x003bef98`, the stage-complete builder at
- * `0x003bfc48`, and AddDifficultyUnlockMessage() are not written yet. Each reads the object the
- * unrecovered singleton getter at `0x00217f30` vends.
+ * Slot 5 at `0x003be2a8` is not written yet. It saves the persona through
+ * MetPersonaSaverScreen::StartSave() to the first memory-card location GlobalSettings records, and
+ * GlobalSettings is not declared in this tree.
  */
 class MetStageFinishScreen : public MetScreen {
 public:
@@ -146,6 +146,18 @@ public:
     virtual void OnUnknownSlot33();
 
     /**
+     * Hand over to the solo win screen. Slot 36.
+     *
+     * MetScreen slot 35 runs the slot once the exit animation has finished. The body clears
+     * mUnknowna8, passes mUnknownb4 to MetSoloWinScreen::SetDifficultyUnlocked(), pushes and
+     * activates `MetSoloWinScreen`, selects no button, empties the messages, and hides the four
+     * congratulation texts.
+     *
+     * @ghidraAddress 0x003c0530
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
      * Resolve the base views, add the continue button, and fill the four congratulation texts.
      * Slot 38.
      *
@@ -193,19 +205,46 @@ private:
     void AddStageScoreBeatMessage(int nWasBeaten, int nIsBeaten);
 
     /**
-     * Queue the message for a difficulty unlocked by this stage.
+     * Queue `end_game_stage` or `end_game_last_stage` when the stage is complete for the first
+     * time.
+     *
+     * The stage comes from configuration code 0x25d for the game's level. Stage 3 on easy, 4 on
+     * normal, and 5 on expert are each difficulty's last stage, and their message receives the
+     * difficulty's display name. Any other stage's message receives the next stage's number. Slot
+     * 5 at `0x003be490` is the one caller.
+     *
+     * @param nWasComplete Non-zero when the stage was already complete.
+     * @param nIsComplete Non-zero when the stage is complete now.
+     * @ghidraAddress 0x003bfc48
+     */
+    void AddStageCompleteMessage(int nWasComplete, int nIsComplete);
+
+    /**
+     * Queue `end_game_easy_normal` when this stage unlocks the next difficulty.
      *
      * Slot 5 at `0x003be4ac` is the one caller. The body clears mUnknownb4, and acts only when the
-     * unlock is new. It reads the game manager's GameParams, the level's stage (configuration code
-     * 0x25d), and the difficulty name from DifficultyName(), and queues the matching configuration
-     * string (code 0x258, keys such as `end_game_easy_normal`) on mUnknown8c. The body is not
-     * written, for the reason the class documentation records.
+     * unlock is new and the game's difficulty is below expert. The message receives the display
+     * name of the next difficulty, and mUnknownb4 is then set. The stage configuration code 0x25d
+     * is read for the game's level and the result discarded.
      *
      * @param nWasUnlocked Non-zero when the difficulty was already unlocked.
      * @param nIsUnlocked Non-zero when the difficulty is unlocked now.
      * @ghidraAddress 0x003c0008
      */
     void AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked);
+
+    /**
+     * Lay the queued messages out and enter the screen, or exit when there are none.
+     *
+     * The body attaches `egc_<count>lines.view` beneath `egc_lines.view`, shows the four
+     * congratulation texts, and writes each message into `egc_congrats_<count>lines_0<n>.txt`,
+     * hidden, appending each text to mUnknown98 for slot 26 to reveal. The continue button is
+     * hidden and disabled, and MetScreen::EnterAndShow() runs last. Slot 5 at `0x003bec68` is the
+     * one caller.
+     *
+     * @ghidraAddress 0x003bef98
+     */
+    void ShowMessages();
 
     /**
      * Queue `end_game_secret` when the secret unlock is new.

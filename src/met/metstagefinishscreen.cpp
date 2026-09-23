@@ -1,14 +1,20 @@
 #include "met/metstagefinishscreen.h"
 
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/gameparams.h"
 #include "met/metbuttonlist.h"
+#include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
+#include "met/metsolowinscreen.h"
 #include "met/metsonglists.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
+#include "rnd/view.h"
 #include "script/configquery.h"
 
 namespace {
@@ -61,6 +67,51 @@ constexpr int kButtonNormalState = 0;
 constexpr float kSelectAlternateInterval = 30.0f;
 constexpr int kSelectAlternateCycles = 2;
 
+// Rnd::Button state for a disabled button, which MetButtonList passes over.
+constexpr int kButtonDisabledState = 3;
+
+// The keys and formats of the stage and difficulty messages.
+static const char *const kLastStageKey = "end_game_last_stage";
+static const char *const kStageKey = "end_game_stage";
+static const char *const kDifficultyUnlockKey = "end_game_easy_normal";
+
+// The configuration code a level's stage is read under.
+constexpr int kStageConfigCode = 0x25d;
+
+// The difficulties, and the last stage each plays.
+constexpr int kDifficultyEasy = 0;
+constexpr int kDifficultyNormal = 1;
+constexpr int kDifficultyExpert = 2;
+constexpr int kEasyLastStage = 3;
+constexpr int kNormalLastStage = 4;
+constexpr int kExpertLastStage = 5;
+
+// The views and texts ShowMessages() lays the messages out in.
+static const char *const kLinesViewFormat = "egc_%dlines.view";
+static const char *const kLinesView = "egc_lines.view";
+static const char *const kMessageTextPrefixFormat = "egc_congrats_%dlines_0";
+static const char *const kMessageTextFormat = "%s%d.txt";
+
+// The screen slot 36 hands over to.
+static const char *const kSoloWinScreen = "MetSoloWinScreen";
+
+// Reports the text of a string, or the shared empty string when it has no buffer.
+inline const char *TextOf(const HxStr &text) {
+    return text.mStr != nullptr ? text.mStr : g_szEmptyString;
+}
+
+// Resolves a registry key to a Rnd::Text, or null.
+inline Rnd::Text *FindText(const HxStr &name) {
+    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    return pObject != nullptr ? dynamic_cast<Rnd::Text *>(pObject) : nullptr;
+}
+
+// Resolves a registry key to a Rnd::View, or null.
+inline Rnd::View *FindView(const HxStr &name) {
+    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
+}
+
 } // namespace
 
 MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority)
@@ -85,12 +136,7 @@ void MetStageFinishScreen::ResolveContainerViews() {
     }
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
-        Rnd::Text *pText;
-        {
-            HxStr name(FormatString(kCongratulationTextFormat, i));
-            Rnd::Object *pObject = Rnd::g_manager.Find(name);
-            pText = pObject != nullptr ? dynamic_cast<Rnd::Text *>(pObject) : nullptr;
-        }
+        Rnd::Text *pText = FindText(HxStr(FormatString(kCongratulationTextFormat, i)));
         HxStr text;
         QueryConfigString(&text, kPromptConfigCode, kContainerName);
         pText->SetText(text); // The binary does not test the lookup for null.
@@ -171,12 +217,101 @@ void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int n
     QueryConfigString(&format, kPromptConfigCode, kArenaCompleteKey);
     const ArenaListEntry &arena = (*GetArenaList())[nCompleted - 1];
     HxStr arenaName;
-    QueryConfigString(&arenaName,
-                      kArenaNameConfigCode,
-                      arena.mName.mStr != nullptr ? arena.mName.mStr : g_szEmptyString);
-    HxStr message(FormatString(format.mStr != nullptr ? format.mStr : g_szEmptyString,
-                               arenaName.mStr != nullptr ? arenaName.mStr : g_szEmptyString));
+    QueryConfigString(&arenaName, kArenaNameConfigCode, TextOf(arena.mName));
+    HxStr message(FormatString(TextOf(format), TextOf(arenaName)));
     mUnknown8c.push_back(message);
+}
+
+void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComplete) {
+    if (nIsComplete == 0 || nWasComplete != 0) {
+        return;
+    }
+    MetFrontEndState::shared()->GetFirstPersona(); // Yes, the binary discards the persona.
+    GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    int nStage = QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName));
+    int nDifficulty = params.mUnknown20;
+    if ((nStage == kEasyLastStage && nDifficulty == kDifficultyEasy) ||
+        (nStage == kNormalLastStage && nDifficulty == kDifficultyNormal) ||
+        (nStage == kExpertLastStage && nDifficulty == kDifficultyExpert)) {
+        HxStr difficultyName = DifficultyName(nDifficulty);
+        HxStr format;
+        QueryConfigString(&format, kPromptConfigCode, kLastStageKey);
+        HxStr message(FormatString(TextOf(format), TextOf(difficultyName)));
+        mUnknown8c.push_back(message);
+    } else {
+        HxStr format;
+        QueryConfigString(&format, kPromptConfigCode, kStageKey);
+        HxStr message(FormatString(TextOf(format), nStage + 1));
+        mUnknown8c.push_back(message);
+    }
+}
+
+void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
+    mUnknownb4 = 0;
+    if (nIsUnlocked == 0 || nWasUnlocked != 0) {
+        return;
+    }
+    MetFrontEndState::shared()->GetFirstPersona(); // Yes, the binary discards the persona.
+    GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
+    HxStr message;
+    if (params.mUnknown20 != kDifficultyExpert) {
+        HxStr format;
+        QueryConfigString(&format, kPromptConfigCode, kDifficultyUnlockKey);
+        HxStr difficultyName = DifficultyName(params.mUnknown20 + 1);
+        message = FormatString(TextOf(format), TextOf(difficultyName));
+        mUnknown8c.push_back(message);
+        mUnknownb4 = 1;
+    }
+}
+
+void MetStageFinishScreen::ShowMessages() {
+    if (mUnknown8c.size() == 0) {
+        BeginExit();
+        return;
+    }
+    MetFrontEndState::shared()->GetFirstPersona(); // Yes, the binary discards the persona.
+    GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
+
+    HxStr linesName(FormatString(kLinesViewFormat, mUnknown8c.size()));
+    Rnd::View *pCountLines = FindView(linesName);
+    Rnd::View *pLines = FindView(HxStr(kLinesView));
+    // The binary does not test the container view for null.
+    pLines->ClearDraws();
+    pLines->AddDraw(pCountLines, nullptr);
+
+    for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
+        FindText(HxStr(FormatString(kCongratulationTextFormat, i)))->SetShowing(1);
+    }
+
+    mUnknown98.clear();
+    HxStr prefix(FormatString(kMessageTextPrefixFormat, mUnknown8c.size()));
+    for (unsigned i = 0; i < mUnknown8c.size(); ++i) {
+        HxStr name(FormatString(kMessageTextFormat, TextOf(prefix), i + 1));
+        Rnd::Text *pText = FindText(name);
+        pText->SetText(mUnknown8c[i]);
+        pText->SetShowing(0);
+        mUnknown98.push_back(pText);
+    }
+
+    mUnknowna4->ButtonAt(kContinueButtonIndex)->SetShowing(0);
+    mUnknowna4->ButtonAt(kContinueButtonIndex)->SetState(kButtonDisabledState);
+    mUnknowna4->SetSelected(kContinueButtonIndex);
+    mUnknownac = 0;
+    MetScreen::EnterAndShow();
+}
+
+void MetStageFinishScreen::OnUnknownSlot36() {
+    mUnknowna8 = 0;
+    MetSoloWinScreen::SetDifficultyUnlocked(mUnknownb4);
+    PushNamedScreen(HxStr(kSoloWinScreen));
+    ActivateNamedPanel(HxStr(kSoloWinScreen));
+    mUnknowna4->SetSelected(kNoButton);
+    mUnknown8c.clear();
+    for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
+        FindText(HxStr(FormatString(kCongratulationTextFormat, i)))->SetShowing(0);
+    }
 }
 
 void MetStageFinishScreen::AddStageScoreBeatMessage(int nWasBeaten, int nIsBeaten) {
