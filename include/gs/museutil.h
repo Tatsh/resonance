@@ -13,7 +13,7 @@ class MultiMuse;
  * A stack Shifter visits every entry. A NoteMsg, and a StdMidiMsg with a note-on or note-off
  * status, is copied with its note number raised by nTrans (wrapping at 256). Any other message
  * whose identity lies in the MuseMsg range is copied unchanged. Each copy is added at the entry's
- * position. The body is not written, because the NoteMsg note byte is private.
+ * position.
  *
  * @param pMuse The sequence to copy.
  * @param nTrans The semitones to add to every note.

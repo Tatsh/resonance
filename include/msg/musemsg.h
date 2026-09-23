@@ -73,3 +73,22 @@ public:
      */
     int mTick;
 };
+
+/**
+ * First identity in the range the MuseMsg classes register, 200.
+ *
+ * The GsMuseUtil Shifter at `0x001ab9e4` copies any message whose identity lies from this word up
+ * to g_nEndMuseMsgType.
+ *
+ * @ghidraAddress 0x006d01bc
+ */
+extern int g_nFirstMuseMsgType;
+
+/**
+ * Identity one past the MuseMsg range, 206.
+ *
+ * The GsMuseUtil Shifter at `0x001ab9f8` reads it as the end of the range.
+ *
+ * @ghidraAddress 0x006d01c0
+ */
+extern int g_nEndMuseMsgType;
