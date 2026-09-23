@@ -33,20 +33,24 @@ constexpr double kLaneToOffset = -0.5;
 
 } // namespace
 
+// 0x00455508
 void TnlPointer::MeshPair::Init(const HxStr &iconName, const HxStr &baseName) {
     mIcon = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(iconName));
     mBase = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(baseName));
 }
 
+// 0x004555e0
 void TnlPointer::MeshPair::SetShowing(int nShowing) {
     mIcon->SetShowing(nShowing);
     mBase->SetShowing(nShowing);
 }
 
+// 0x00455640
 void TnlPointer::MeshPair::SetAlpha(float flAlpha) {
     mIcon->mMat->SetAlpha(flAlpha);
 }
 
+// 0x0043a810
 TnlPointer::TnlPointer(const HxStr &colorName)
     : mView(nullptr), mSpinView(nullptr), mLastTime(0.0f), mSpinFrame(0.0f), mSpinning(0),
       mOffsetX(kCentreOffset), mUnknown3c(kCentreOffset), mSpinStart(kUnsetTime) {
@@ -62,6 +66,7 @@ TnlPointer::TnlPointer(const HxStr &colorName)
     Reset();
 }
 
+// 0x0043b248
 void TnlPointer::SetKind(int nKind) {
     for (unsigned i = 0; i < mPairs.size(); ++i) {
         mPairs[i].SetShowing(0);
@@ -82,12 +87,14 @@ void TnlPointer::SetKind(int nKind) {
     Reset();
 }
 
+// 0x004557d0
 void TnlPointer::Reset() {
     mDip.SetTarget(0.0f);
     mSpinning = 0;
     mSpinStart = kUnsetTime;
 }
 
+// 0x00455768
 void TnlPointer::Spin(int nRestart) {
     if (!mView->GetShowing()) {
         return;
@@ -99,21 +106,25 @@ void TnlPointer::Spin(int nRestart) {
     mSpinning = 1;
 }
 
+// 0x00455810
 void TnlPointer::SetLane(float flLane) {
     mOffsetX = static_cast<float>((flLane - kLaneCentre) * kLaneToOffset);
 }
 
+// 0x004556c8
 void TnlPointer::SetAlpha(float flAlpha) {
     for (unsigned i = 0; i < mPairs.size(); ++i) {
         mPairs[i].SetAlpha(flAlpha);
     }
 }
 
+// 0x00455670
 void TnlPointer::AttachTo(Rnd::View *pParent) {
     pParent->AddTrans(mView);
     pParent->AddDraw(mView, nullptr);
 }
 
+// 0x00455860
 void TnlPointer::Update(float flTime) {
     mDip.Update(flTime);
     if (mSpinStart == kRestartPending) {

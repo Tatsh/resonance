@@ -60,6 +60,7 @@ void TnlGridMarkers::Marker::Init(Rnd::Mesh *pSource, Rnd::Drawable *pParent) {
     pParent->AddDraw(mMesh, nullptr);
 }
 
+// 0x00454fb0
 void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
     if (!mMesh) {
         return;
@@ -69,6 +70,7 @@ void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
     mFrame = flFrame;
 }
 
+// 0x00439150
 TnlGridMarkers::TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum) : mTrack(0), mTunnel(pTunnel) {
     Rnd::View *pView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("grid%d.view", nPlayerNum))));
@@ -90,6 +92,7 @@ TnlGridMarkers::TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum) : mTrack(0), 
     }
 }
 
+// 0x004550c8
 void TnlGridMarkers::SetTrack(int nTrack) {
     for (auto it = mMarkers.begin(); it != mMarkers.end(); ++it) {
         it->Place(nTrack, static_cast<int>(it->mFrame));
@@ -97,6 +100,7 @@ void TnlGridMarkers::SetTrack(int nTrack) {
     mTrack = nTrack;
 }
 
+// 0x00439718
 void TnlGridMarkers::Update(float flFrame) {
     for (auto it = mMarkers.begin(); it != mMarkers.end(); ++it) {
         if (kRecycleDistance < flFrame - it->mFrame) {
