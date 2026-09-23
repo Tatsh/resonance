@@ -13,3 +13,16 @@
  * @ghidraAddress 0x0054f688
  */
 const char *FormatString(const char *pszFormat, ...);
+
+/**
+ * Copy a path into one shared buffer and cut it at its last separator.
+ *
+ * The last slash ends the directory, or the last backslash when the path has no slash. A path with
+ * neither yields an empty string. The buffer is the 0x100-byte static array at `0x008de290`, and
+ * the result is valid only until the next call. The shipped program does not call it.
+ *
+ * @param pszPath The path.
+ * @return The shared buffer, holding the directory.
+ * @ghidraAddress 0x0054f6f0
+ */
+const char *GetDirectoryFromPath(const char *pszPath);
