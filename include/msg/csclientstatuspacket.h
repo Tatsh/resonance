@@ -21,6 +21,8 @@
  * own member. Six of the twenty do that, and each of the six gives the repeat its own stack slot
  * rather than reusing the one from the prefix, which is what establishes it as two expressions in
  * the original rather than one.
+ *
+ * The destructor at `0x003ef8f8` is compiler-generated and has no declaration here.
  */
 class CSClientStatusPacket : public ToHostPacket {
 public:

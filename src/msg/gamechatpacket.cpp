@@ -44,3 +44,18 @@ void GameChatPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     LoadHxStr(LoadHxStr(stream, mUnknown14), mUnknown1c);
 }
+
+// 0x003f1a28
+GameChatPacket::GameChatPacket(const HxStr &first, const HxStr &second)
+    : mUnknown14(first), mUnknown1c(second) {
+}
+
+// 0x003f1ae0
+HxStr GameChatPacket::GetUnknown14() {
+    return mUnknown14;
+}
+
+// 0x003f1b10
+HxStr GameChatPacket::GetUnknown1c() {
+    return mUnknown1c;
+}

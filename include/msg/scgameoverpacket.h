@@ -20,6 +20,8 @@
  * overrides rather than the inherited ones. Both transfer members open by expanding the Packet pair
  * inline rather than calling it, which every one of the twenty overriding packet classes does
  * identically.
+ *
+ * The destructor at `0x003f1558` is compiler-generated and has no declaration here.
  */
 class SCGameOverPacket : public ToAllGameControllersPacket {
 public:

@@ -24,6 +24,25 @@ class OBStream;
 class GameChatPacket : public ToAllOtherNetManagersPacket {
 public:
     /**
+     * Construct a packet with two empty strings.
+     *
+     * Inline, with no address of its own. New() expands it.
+     */
+    GameChatPacket() {
+    }
+
+    /**
+     * Construct a packet carrying two strings.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @param first The string for mUnknown14.
+     * @param second The string for mUnknown1c.
+     * @ghidraAddress 0x003f1a28
+     */
+    GameChatPacket(const HxStr &first, const HxStr &second);
+
+    /**
      * Produce a packet with two empty strings on the heap.
      *
      * The registry the translation unit at `0x003ed2e0` builds stores this address against
@@ -83,6 +102,26 @@ public:
      * @ghidraAddress 0x003e85c8
      */
     virtual void Load(IBStream &stream);
+
+    /**
+     * Report the first string.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of mUnknown14.
+     * @ghidraAddress 0x003f1ae0
+     */
+    HxStr GetUnknown14();
+
+    /**
+     * Report the second string.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of mUnknown1c.
+     * @ghidraAddress 0x003f1b10
+     */
+    HxStr GetUnknown1c();
 
 private:
     HxStr mUnknown14; // +0x14

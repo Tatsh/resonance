@@ -44,3 +44,18 @@ void TestArbiterPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     LoadHxStr(LoadHxStr(stream, mUnknown14), mUnknown1c);
 }
+
+// 0x003f1cd0
+TestArbiterPacket::TestArbiterPacket(const HxStr &first, const HxStr &second)
+    : mUnknown14(first), mUnknown1c(second) {
+}
+
+// 0x003f1d88
+HxStr TestArbiterPacket::GetUnknown14() {
+    return mUnknown14;
+}
+
+// 0x003f1db8
+HxStr TestArbiterPacket::GetUnknown1c() {
+    return mUnknown1c;
+}

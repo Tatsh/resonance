@@ -51,3 +51,8 @@ void SCLoadLevelPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mUnknown14.Load(&stream);
 }
+
+// 0x003f1528
+GameParams SCLoadLevelPacket::GetParams() {
+    return mUnknown14;
+}

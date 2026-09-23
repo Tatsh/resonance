@@ -75,3 +75,28 @@ void SPJoinAcceptPacket::Load(IBStream &stream) {
         info.Load(tail);
     }
 }
+
+// 0x003ef390
+HxStr SPJoinAcceptPacket::GetUsername() {
+    return mUnknown5c.mUnknown00;
+}
+
+// 0x003ef3c0
+GameParams SPJoinAcceptPacket::GetParams() {
+    return mUnknown1c;
+}
+
+// 0x003ef3f0
+HxStr SPJoinAcceptPacket::GetColorName() {
+    return mColorName;
+}
+
+// 0x003ef420
+FreqAppearance SPJoinAcceptPacket::GetAppearance() {
+    return mUnknown5c;
+}
+
+// 0x003ef450
+void SPJoinAcceptPacket::AddPlayer(const PlayerInfo &player) {
+    mUnknown70.push_back(player);
+}

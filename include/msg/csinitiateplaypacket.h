@@ -13,6 +13,8 @@
  *
  * The class adds no payload. Its allocation is exactly the 0x14 bytes Packet occupies, which is
  * what measures Packet.
+ *
+ * The destructor at `0x003efc70` is compiler-generated and has no declaration here.
  */
 class CSInitiatePlayPacket : public ToHostPacket {
 public:

@@ -20,6 +20,8 @@
  * Print() labels the two members `pid:` and ` score-delta:`. The builds in two Player routines at
  * `0x0012f904` and `0x0012fa6c` store the player's identifier from its `+0x20` and the amount
  * added, which settles both names.
+ *
+ * The destructor at `0x003f0648` is compiler-generated and has no declaration here.
  */
 class UpdateScorePacket : public ToAllOtherGameSystemsPacket {
 public:

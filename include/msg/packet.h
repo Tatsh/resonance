@@ -29,6 +29,8 @@
  * class's own code. Three unrelated routing families give the identical shared prefix
  * independently, and two packets, CSInitiatePlayPacket and SCStartPlayingPacket, are exactly 0x14
  * bytes and add nothing to it.
+ *
+ * The destructor at `0x003eedc8` is compiler-generated and has no declaration here.
  */
 class Packet : public Message {
 public:

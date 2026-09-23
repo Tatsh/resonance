@@ -18,14 +18,16 @@ class Player;
  * from the Print() override at `0x003d8670`, which streams `b#<bar> tr#<track>` and then one
  * labelled part per flag set in mFlags: the player's colour name for kFieldPlayer, ` enabled` or
  * ` disabled` for kFieldEnabled, ` pow:<n>` for kFieldPowerup, and ` effect:<names>` for
- * kFieldEffects. That override is recorded here rather than declared, because its body is not
- * recovered.
+ * kFieldEffects.
  *
  * A flagged field is read through an inline getter that runs Has() for its flag and discards the
- * result before the load, which is what Renderer::OnBarStatus() at `0x0042d068` and Print() both
- * show at every read. Has() is the out-of-line member the getters call. The bar, the track,
- * mUnknown14, and mFlags are read with no call at all, and the image has no accessor for them,
- * which is what makes those four public.
+ * result before the load. Renderer::OnBarStatus() at `0x0042d068` and Print() both show that shape
+ * at every read. Has() is the out-of-line member the getters call, and each getter also has one
+ * uncalled out-of-line copy, recorded on its declaration. The bar, the track, mUnknown14, and
+ * mFlags are read with no call at all, and the image has no accessor for them. Those four are
+ * public.
+ *
+ * The destructor at `0x003deee0` is compiler-generated and has no declaration here.
  *
  * Clone() copies only as far as `0x2c` of the 0x30 bytes it allocates, so the remaining 4 are
  * either alignment padding or a field the copy omits.
@@ -69,6 +71,24 @@ public:
     }
 
     /**
+     * Start with no optional field set and the effect mask clear.
+     *
+     * Inline, with no address of its own. New() expands it.
+     */
+    BarStatusMsg() : mFlags(0) {
+    }
+
+    /**
+     * Build an empty message on the heap for the message registry.
+     *
+     * Allocates 0x30 bytes under the tag `MSG`. The unit's static initialiser registers it.
+     *
+     * @return The new message.
+     * @ghidraAddress 0x003d7440
+     */
+    static Message *New();
+
+    /**
      * Produce a heap copy of this message.
      *
      * @return The copy.
@@ -93,6 +113,17 @@ public:
     virtual const char *Name();
 
     /**
+     * Write the bar, the track, and each set optional field.
+     *
+     * Streams `b#<bar> tr#<track>`, then the player's colour name, ` enabled` or ` disabled`,
+     * ` pow:<powerup>`, and ` effect:<mask>` for each Field bit set in mFlags.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003d8670
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
      * Report whether one optional field is set.
      *
      * @param nField The Field bit to test.
@@ -105,6 +136,7 @@ public:
      * Report the player field.
      *
      * @return The player whose track the bar belongs to.
+     * @ghidraAddress 0x003df130
      */
     Player *GetPlayer() {
         Has(kFieldPlayer); // Yes, the binary discards this result.
@@ -115,6 +147,7 @@ public:
      * Report the enabled field.
      *
      * @return Non-zero when the bar is enabled.
+     * @ghidraAddress 0x003df160
      */
     int GetEnabled() {
         Has(kFieldEnabled); // Yes, the binary discards this result.
@@ -125,6 +158,7 @@ public:
      * Report the powerup field.
      *
      * @return The powerup kind on the bar.
+     * @ghidraAddress 0x003df190
      */
     int GetPowerup() {
         Has(kFieldPowerup); // Yes, the binary discards this result.
@@ -135,6 +169,7 @@ public:
      * Report the effect mask.
      *
      * @return One bit per effect kind.
+     * @ghidraAddress 0x003df1c0
      */
     Effects GetEffects() {
         Has(kFieldEffects); // Yes, the binary discards this result.

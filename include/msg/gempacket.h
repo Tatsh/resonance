@@ -31,6 +31,8 @@ class Player;
  *
  * The allocation tag on both the allocation in Clone() and the release in the destructor is `MSG`,
  * which is the tag Message declares rather than one of this class.
+ *
+ * The destructor at `0x003f16d8` is compiler-generated and has no declaration here.
  */
 class GemPacket : public ToAllOtherGameSystemsPacket {
 public:

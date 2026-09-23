@@ -102,6 +102,16 @@ public:
      */
     virtual void Load(IBStream &stream);
 
+    /**
+     * Report the game settings.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of the settings.
+     * @ghidraAddress 0x003f1290
+     */
+    GameParams GetParams();
+
 private:
     GameParams mUnknown14; // +0x14
 };

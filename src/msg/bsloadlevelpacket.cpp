@@ -57,3 +57,8 @@ void BSLoadLevelPacket::Load(IBStream &stream) {
     mUnknown14.Load(&stream);
     stream.Read(&mUnknown0c, sizeof(mUnknown0c));
 }
+
+// 0x003f1290
+GameParams BSLoadLevelPacket::GetParams() {
+    return mUnknown14;
+}

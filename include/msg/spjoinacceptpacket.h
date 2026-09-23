@@ -104,6 +104,56 @@ public:
      */
     virtual void Load(IBStream &stream);
 
+    /**
+     * Report the username of the carried appearance.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of the appearance's first string.
+     * @ghidraAddress 0x003ef390
+     */
+    HxStr GetUsername();
+
+    /**
+     * Report the game settings.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of the settings.
+     * @ghidraAddress 0x003ef3c0
+     */
+    GameParams GetParams();
+
+    /**
+     * Report the colour name.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of mColorName.
+     * @ghidraAddress 0x003ef3f0
+     */
+    HxStr GetColorName();
+
+    /**
+     * Report the carried appearance.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @return A copy of the appearance.
+     * @ghidraAddress 0x003ef420
+     */
+    FreqAppearance GetAppearance();
+
+    /**
+     * Append one player to the player list.
+     *
+     * The image lists no caller. The title is inferred.
+     *
+     * @param player The player to copy in.
+     * @ghidraAddress 0x003ef450
+     */
+    void AddPlayer(const PlayerInfo &player);
+
 private:
     int mDestId;                        // +0x14
     int mPlayerId;                      // +0x18

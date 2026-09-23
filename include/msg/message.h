@@ -70,6 +70,10 @@ public:
     /**
      * Vtable slot 1. The body is empty.
      *
+     * A second emission at `0x003da2f0`, with forty copies in other units, is the same destructor
+     * releasing through the class operator delete, FreeTaggedMemory() under the tag `MSG`, where
+     * `0x001051c0` releases through the scalar free. It has no source of its own.
+     *
      * @ghidraAddress 0x001051c0
      */
     virtual ~Message();
