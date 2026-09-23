@@ -69,6 +69,7 @@ TnlPanelFX::TnlPanelFX(int nIndex)
     }
 }
 
+// 0x0043cb78
 void TnlPanelFX::Start(int nRing, int nSlice, int nForward) {
     mDirection = nForward != 0 ? 1.0f : -1.0f;
     mMat->mStages.front().mBlend = Rnd::Mat::kBlendModeSrcAlpha;
@@ -92,6 +93,7 @@ void TnlPanelFX::Start(int nRing, int nSlice, int nForward) {
     mState = kStateRise;
 }
 
+// 0x0043cd38
 void TnlPanelFX::Update(float flFrame) {
     switch (mState) {
     case kStateIdle:

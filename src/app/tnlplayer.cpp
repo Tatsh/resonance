@@ -47,6 +47,7 @@ inline void ResetLocalXfm(Rnd::Transformable *pTrans) {
 
 } // namespace
 
+// 0x00440020
 TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
     : mPlayerNum(pPlayer->Slot2() + 1), mCrippleFrame(kUnsetFrame),
       mCrippleActPath(FindObject<Rnd::TransAnim>("crip act path")), mActivatorFx(nullptr),
@@ -80,6 +81,7 @@ TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
     }
 }
 
+// 0x00440b48
 void TnlPlayer::Update(float flFrame, float flScaledFrame) {
     mActivator.Update(flFrame, flScaledFrame);
     mGridMarkers.Update(flFrame);

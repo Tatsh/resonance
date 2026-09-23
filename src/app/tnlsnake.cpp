@@ -77,6 +77,7 @@ TnlSnake::TnlSnake() : mStartFrame(kNoFrame) {
     mString->AddDraw(mHead, nullptr);
 }
 
+// 0x0043ed50
 TnlSnake::~TnlSnake() {
     mView->RemoveDraw(mString);
     mString->RemoveDraw(mHead);
@@ -84,6 +85,7 @@ TnlSnake::~TnlSnake() {
     delete mHead;
 }
 
+// 0x00456960
 void TnlSnake::Start(
     float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude) {
     mString->SetShowing(1);
@@ -99,6 +101,7 @@ void TnlSnake::Start(
     }
 }
 
+// 0x0043eec0
 void TnlSnake::Update(float flFrame) {
     if (mStartFrame == kNoFrame || mLastFrame == flFrame) {
         return;
