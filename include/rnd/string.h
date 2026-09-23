@@ -392,15 +392,16 @@ protected:
      *
      * Rnd::Drawable vtable slot 3. Draws nothing without a current camera and nothing with fewer
      * than two points. Each point is transformed into camera space through the inverse camera
-     * transform composed with Rnd::Transformable::mWorldXfm, and flagged when it sits at or in
-     * front of the near plane plus 0.01. A flagged point with an unflagged neighbour is pushed
-     * onto the near plane along the segment that joins them and then unflagged, and a point whose
-     * neighbours are both flagged is dropped. The survivors are projected by dividing x and z by
-     * the absolute value of the depth component y. EmitRibbonVerts() then fills the mesh, once over
-     * every point, or once per pair with mLinePairs set. A pair with a point still behind the near
-     * plane instead collapses every vertex it governs onto its camera-space points. The mesh
-     * receives Rnd::Mesh::kSyncPoints, the camera transform as its local transform, a world
-     * transform update, and a draw.
+     * transform composed with Rnd::Transformable::mWorldXfm, and flagged when its depth is strictly
+     * less than the near plane plus 0.01. A flagged point with an unflagged neighbour is pushed
+     * onto the near plane along the segment that joins them and then unflagged. A point whose
+     * neighbours are both flagged stays flagged and retains a stale mScreen. The unflagged points
+     * are projected by dividing x and z by the absolute value of the depth component y.
+     * EmitRibbonVerts() then fills the mesh, once over every point, flagged ones included, or once
+     * per pair with mLinePairs set. A pair with a point still flagged instead collapses every
+     * vertex it governs onto the camera-space position of its first point. The mesh receives
+     * Rnd::Mesh::kSyncPoints, the camera transform as its local transform, a world transform
+     * update, and a draw.
      *
      * @return Non-zero. The children are drawn as well.
      * @ghidraAddress 0x004b95f8
