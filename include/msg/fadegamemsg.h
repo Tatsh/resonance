@@ -13,6 +13,8 @@
  * because Overlay::OnFadeGame() at `0x0042b1f8` reads them directly with no accessor in the image.
  * It passes both to HudScreenFlash::Start(), converting mDuration to a float, and hides the
  * panel's message text when mFadeIn is clear.
+ *
+ * The destructor at `0x00193ed8` is compiler-generated and has no declaration here.
  */
 class FadeGameMsg : public Message {
 public:

@@ -16,6 +16,9 @@
  *
  * mText is public because Overlay::OnText() at `0x0041f5e8` copies it directly at `0x0041f608`
  * with no accessor in the image. The purpose of the word at `+0x0c` is not recovered.
+ *
+ * The destructor at `0x00193d38` is compiler-generated and has no declaration here. Besides the
+ * deleting release, it frees the text of the HxStr member.
  */
 class TextMsg : public Message {
 public:

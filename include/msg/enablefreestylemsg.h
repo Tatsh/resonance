@@ -18,6 +18,8 @@ class Player;
  *
  * The word at `+0x04` belongs to CmdMsg, which New() zeroes. The two words after it belong to this
  * class, for the reason CmdMsg records.
+ *
+ * The destructor at `0x001ca7e8` is compiler-generated and has no declaration here.
  */
 class EnableFreestyleMsg : public CmdMsg {
 public:

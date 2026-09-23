@@ -20,6 +20,8 @@ class Player;
  * and shows `BAR ERASED` when `mEndBar - mFirstBar < 2`, `TRACK ERASED` otherwise. mTrack is
  * public because AppTunnel's erase handler at `0x004481d0` reads it directly. Scratcher stores its
  * own track there. The purpose of the word at `+0x14` is not recovered.
+ *
+ * The destructor at `0x0019d600` is compiler-generated and has no declaration here.
  */
 class ShowEraseEffectMsg : public Message {
 public:

@@ -15,6 +15,8 @@
  *
  * This class adds no field of its own, and the size is exactly the size of the base, which is what
  * fixes the size of the base.
+ *
+ * The destructor at `0x00193b28` is compiler-generated and has no declaration here.
  */
 class GameOverMsg : public Message {
 public:

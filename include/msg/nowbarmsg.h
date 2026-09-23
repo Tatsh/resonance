@@ -18,6 +18,8 @@ class Player;
  *
  * A second, identical vtable at `0x007de200` is emitted in the guitar and vocal units, and the
  * five writers of mUnknown04 store it.
+ *
+ * The destructor at `0x0019f970` is compiler-generated and has no declaration here.
  */
 class NowBarMsg : public Message {
 public:

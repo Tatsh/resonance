@@ -13,6 +13,8 @@
  * AppTunnel::HandleMessage() at `0x00449938` reads them directly with no accessor in the image. It
  * scales mBar by the 1920 ticks of a bar and loads mTrack with `lb`, which reads only the low byte
  * of the word.
+ *
+ * The destructor at `0x0019d4e0` is compiler-generated and has no declaration here.
  */
 class ClearGemsMsg : public Message {
 public:

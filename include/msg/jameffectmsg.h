@@ -12,6 +12,8 @@
  * The payload layout comes from the run of field copies in Clone(). Every field is public, because
  * JamEffectsMgr::PostRemixFxMsg() at `0x001a54d8` reads all four directly and the image has no
  * accessor for any of them.
+ *
+ * The destructor at `0x001ca950` is compiler-generated and has no declaration here.
  */
 class JamEffectMsg : public Message {
 public:

@@ -14,6 +14,8 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(), and the stack build in
  * MultiplierPowerup::Deploy() fixes the meaning of the first two words. LocalPlayer's handler reads
  * only mBar, so the other two words are private.
+ *
+ * The destructor at `0x001caa80` is compiler-generated and has no declaration here.
  */
 class MultiplierMsg : public Message {
 public:

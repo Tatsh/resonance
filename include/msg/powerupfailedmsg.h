@@ -16,6 +16,8 @@ class Player;
  * because Overlay::OnPowerupFailed() at `0x0041f138` reads them directly with no accessor in the
  * image. It compares mPlayer with HudTrack::mPlayer and switches over mKind across the five
  * powerup kinds.
+ *
+ * The destructor at `0x001ca6c8` is compiler-generated and has no declaration here.
  */
 class PowerupFailedMsg : public Message {
 public:
