@@ -11,6 +11,7 @@
 #include "rnd/raytest.h"
 #include "rnd/tunnelevent.h"
 #include "rnd/tunnelmeshchain.h"
+#include "rnd/tunnelseeker.h"
 
 class FailSink;
 namespace Rnd {
@@ -89,14 +90,9 @@ namespace Rnd {
  * mVertsOwner of the first mesh of a mesh list, and an earlier reading had it as a bounding box
  * resize of this class.
  *
- * The record the vector at `+0xdc` stores is a class of its own and is not recovered. The routine
- * at `0x00477830` is one of its members rather than one of this class, which Update() pins by
- * passing the vector element in $a0, the tunnel in $a1, and the element index in $a2. The fields
- * that routine touches at `+0x50`, `+0x68`, `+0x6c`, and `+0x74` are fields of the record, and an
- * earlier reading attributed all four to this class. `0x0046e830` is a second member of the same
- * record, and between them they pin a tunnel pointer at `+0x24` and `+0x6c`, an object reference at
- * `+0x20`, `+0x50`, and `+0x68`, three counters from `+0x2c`, a `std::vector` of 0x20-byte elements
- * at `+0x38`, and the frame at `+0x74`.
+ * The record the vector at `+0xdc` stores is Rnd::TunnelSeeker. The routines at `0x00477830` and
+ * `0x0046e830` are members of the seeker and of its strip rather than of this class, and the three
+ * seek records read private members of this class directly.
  */
 class Tunnel : public Drawable, public Animatable, public Collideable {
 public:
@@ -371,8 +367,8 @@ private:
     // Set the frame of every section of one ring. 0x0046c638.
     void SetRingSectionFrames();
 
-    // No class derives from Rnd::Tunnel and no access from outside it is recovered, so every
-    // member is private. The order below is the recovered offset order. Every title is the offset
+    // No class derives from Rnd::Tunnel and only the three seek records, as friends, read its
+    // members. The order below is the recovered offset order. Every title is the offset
     // itself, because DumpText() is a stub and no other routine in the image identifies a member
     // by name. The initial value each one receives from the constructor is the whole of the
     // evidence about it. A member with no recorded value is one the constructor does not write, or
@@ -442,11 +438,13 @@ private:
     // walks it taking a reference on every entry, and Copy() assigns it through the list assignment
     // operator at 0x004727b0.
     std::list<TunnelEvent> mEvents;
-    // +0xdc A std::vector whose element is the 0x80-byte record described in the class note.
-    // Update() walks it calling the record member at 0x00477830 once per element, and Copy()
-    // assigns it through the vector assignment operator at 0x004728e8. The element class is
-    // undetermined, which is why the member is a byte run rather than a container.
-    unsigned char mUnknowndc[0x0c];
+    // +0xdc Update() calls TunnelSeeker::SetTunnel() once per element, and Copy() assigns the
+    // vector through the assignment operator at 0x004728e8.
+    std::vector<TunnelSeeker> mSeekers;
+
+    friend struct TunnelSeekSection;
+    friend struct TunnelSeekStrip;
+    friend struct TunnelSeeker;
 };
 
 /**

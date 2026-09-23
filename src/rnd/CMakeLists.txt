@@ -41,6 +41,9 @@ set(RESONANCE_RND_SRCS
     transformable.cpp
     tunnel.cpp
     tunnelmeshchain.cpp
+    tunnelseeker.cpp
+    tunnelseeksection.cpp
+    tunnelseekstrip.cpp
     view.cpp)
 
 add_library(resonance_rnd STATIC ${RESONANCE_RND_SRCS})

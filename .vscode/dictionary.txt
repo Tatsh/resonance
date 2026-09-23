@@ -115,6 +115,7 @@ devirtualised
 dhave
 dictobject
 dimx
+dispfb
 displaypointermsg
 docstrings
 dsizeof
@@ -139,6 +140,7 @@ execv
 ezmidi
 fadegamemsg
 failsink
+fbmsk
 fileobject
 filetab
 floatobject
@@ -183,11 +185,13 @@ getpid
 gfxdevice
 ghidra
 ghostnoteseffector
+giftag
 graminit
 graphviz
 grooveworld
 grvscript
 gscripts
+gsdoublebuffer
 handoff
 hardsynth
 harmonix
@@ -588,6 +592,9 @@ trxdir
 trxpos
 trxreg
 tunnelmeshchain
+tunnelseeker
+tunnelseeksection
+tunnelseekstrip
 tupleobject
 tvel
 typeobject
@@ -669,5 +676,7 @@ yarnrc
 zbuf
 zizmor
 zmsk
+zpsm
+ztest
 ztst
 Ångström
