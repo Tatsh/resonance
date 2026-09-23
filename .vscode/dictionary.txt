@@ -1,6 +1,7 @@
 Colorable
 Dfan
 Eran
+Invers
 Kasson
 NODISC
 Orthonormalize
@@ -417,6 +418,7 @@ libsdr
 libsdr's
 libsonnet
 libvifpk
+libvu
 lightanim
 linearmap
 linearramp

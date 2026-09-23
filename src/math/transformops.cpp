@@ -121,39 +121,6 @@ void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pSc
     pAngles[1] = atan2f(-aRot[0].z, aRot[2].z);
 }
 
-void Mat44Multiply(float *pDst, const float *pA, const float *pB) {
-    // The image loads the whole left factor into vector registers before the first store. That is
-    // what permits the destination to alias it.
-    const float flA00 = pA[0];
-    const float flA01 = pA[1];
-    const float flA02 = pA[2];
-    const float flA10 = pA[4];
-    const float flA11 = pA[5];
-    const float flA12 = pA[6];
-    const float flA20 = pA[8];
-    const float flA21 = pA[9];
-    const float flA22 = pA[10];
-
-    for (int nRow = 0; nRow < 3; ++nRow) {
-        const int nBase = nRow * kMatRowStride;
-        const float flX = pB[nBase];
-        const float flY = pB[nBase + 1];
-        const float flZ = pB[nBase + 2];
-
-        pDst[nBase] = (flA00 * flX) + (flA10 * flY) + (flA20 * flZ);
-        pDst[nBase + 1] = (flA01 * flX) + (flA11 * flY) + (flA21 * flZ);
-        pDst[nBase + 2] = (flA02 * flX) + (flA12 * flY) + (flA22 * flZ);
-    }
-
-    const float flX = pB[12];
-    const float flY = pB[13];
-    const float flZ = pB[14];
-
-    pDst[12] = (flA00 * flX) + (flA10 * flY) + (flA20 * flZ) + pA[12];
-    pDst[13] = (flA01 * flX) + (flA11 * flY) + (flA21 * flZ) + pA[13];
-    pDst[14] = (flA02 * flX) + (flA12 * flY) + (flA22 * flZ) + pA[14];
-}
-
 void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut) {
     if (pMatB == pOut) {
         // Each product row lands in a scratch quadword before the three are copied back over the
@@ -214,81 +181,5 @@ void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pO
 }
 
 void XfmConcat(const float *pA, const float *pB, float *pOut) {
-    Mat44Multiply(pOut, pB, pA);
-}
-
-void XfmInvertRigid(float *pDst, const float *pSrc) {
-    const float flBasisXx = pSrc[0];
-    const float flBasisXy = pSrc[1];
-    const float flBasisXz = pSrc[2];
-    const float flBasisYx = pSrc[4];
-    const float flBasisYy = pSrc[5];
-    const float flBasisYz = pSrc[6];
-    const float flBasisZx = pSrc[8];
-    const float flBasisZy = pSrc[9];
-    const float flBasisZz = pSrc[10];
-    const float flTransX = pSrc[12];
-    const float flTransY = pSrc[13];
-    const float flTransZ = pSrc[14];
-    const float flTransW = pSrc[15];
-
-    // The parallel pack instructions transpose the three basis rows and zero the fourth word of
-    // each.
-    pDst[0] = flBasisXx;
-    pDst[1] = flBasisYx;
-    pDst[2] = flBasisZx;
-    pDst[3] = 0.0f;
-
-    pDst[4] = flBasisXy;
-    pDst[5] = flBasisYy;
-    pDst[6] = flBasisZy;
-    pDst[7] = 0.0f;
-
-    pDst[8] = flBasisXz;
-    pDst[9] = flBasisYz;
-    pDst[10] = flBasisZz;
-    pDst[11] = 0.0f;
-
-    pDst[12] = -((flBasisXx * flTransX) + (flBasisXy * flTransY) + (flBasisXz * flTransZ));
-    pDst[13] = -((flBasisYx * flTransX) + (flBasisYy * flTransY) + (flBasisYz * flTransZ));
-    pDst[14] = -((flBasisZx * flTransX) + (flBasisZy * flTransY) + (flBasisZz * flTransZ));
-    pDst[15] = flTransW;
-}
-
-void Mat44Concat(float *pDst, const float *pA, const float *pB) {
-    // The image loads the whole left factor into vector registers before the first store, which is
-    // what permits the destination to alias it.
-    const float flA00 = pA[0];
-    const float flA01 = pA[1];
-    const float flA02 = pA[2];
-    const float flA03 = pA[3];
-    const float flA10 = pA[4];
-    const float flA11 = pA[5];
-    const float flA12 = pA[6];
-    const float flA13 = pA[7];
-    const float flA20 = pA[8];
-    const float flA21 = pA[9];
-    const float flA22 = pA[10];
-    const float flA23 = pA[11];
-
-    for (int nRow = 0; nRow < 3; ++nRow) {
-        const int nBase = nRow * kMatRowStride;
-        const float flX = pB[nBase];
-        const float flY = pB[nBase + 1];
-        const float flZ = pB[nBase + 2];
-
-        pDst[nBase] = (flA00 * flX) + (flA10 * flY) + (flA20 * flZ);
-        pDst[nBase + 1] = (flA01 * flX) + (flA11 * flY) + (flA21 * flZ);
-        pDst[nBase + 2] = (flA02 * flX) + (flA12 * flY) + (flA22 * flZ);
-        pDst[nBase + 3] = (flA03 * flX) + (flA13 * flY) + (flA23 * flZ);
-    }
-
-    const float flX = pB[12];
-    const float flY = pB[13];
-    const float flZ = pB[14];
-
-    pDst[12] = (flA00 * flX) + (flA10 * flY) + (flA20 * flZ) + pA[12];
-    pDst[13] = (flA01 * flX) + (flA11 * flY) + (flA21 * flZ) + pA[13];
-    pDst[14] = (flA02 * flX) + (flA12 * flY) + (flA22 * flZ) + pA[14];
-    pDst[15] = (flA03 * flX) + (flA13 * flY) + (flA23 * flZ) + pA[15];
+    sceVu0Sub005e7ab0(pOut, pB, pA);
 }

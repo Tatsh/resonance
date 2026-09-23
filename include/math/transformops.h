@@ -1,18 +1,49 @@
 #pragma once
 
+extern "C" {
+
 /**
- * Invert a rigid transform into a separate destination.
+ * Invert a rigid transform.
  *
- * The three basis rows are transposed with the parallel pack instructions and the translation row
- * becomes the negated transposed basis applied to the original translation, which makes the result
- * the inverse rather than a plain transpose. An input whose basis is not orthonormal therefore does
- * not invert correctly, and no caller supplies one.
+ * Sony libvu0, linked as shipped. The basis rows are transposed and the translation row becomes the
+ * negated transposed basis applied to the original translation. An input whose basis is not
+ * orthonormal therefore does not invert correctly.
  *
  * @param pDst Receives the inverse, four rows of four floats.
  * @param pSrc The transform to invert, four rows of four floats.
  * @ghidraAddress 0x005e7b08
  */
-void XfmInvertRigid(float *pDst, const float *pSrc);
+void sceVu0InversMatrix(float *pDst, const float *pSrc);
+
+/**
+ * Multiply two affine transforms across all four words of every row.
+ *
+ * A member of the Sony libvu0 object, linked as shipped, whose published name is unknown. It is
+ * sceVu0MulMatrix with the loop cut to three rows that ignore the fourth word of pB, and a fourth
+ * row that adds the translation row of pA. Callers use it where the fourth word is consumed.
+ *
+ * @param pDst Receives the product, four rows of four floats. It may alias either factor.
+ * @param pA The left factor, four rows of four floats.
+ * @param pB The right factor, four rows of four floats.
+ * @ghidraAddress 0x005e7a58
+ */
+void sceVu0Sub005e7a58(float *pDst, const float *pA, const float *pB);
+
+/**
+ * Multiply two affine transforms in the first three words of every row.
+ *
+ * A member of the Sony libvu0 object, linked as shipped, whose published name is unknown. It is
+ * sceVu0Sub005e7a58 under an `xyz` destination mask, so the fourth word of every destination row
+ * receives whatever the vector register already held.
+ *
+ * @param pDst Receives the product, four rows of four floats. It may alias either factor.
+ * @param pA The left factor, four rows of four floats.
+ * @param pB The right factor, four rows of four floats.
+ * @ghidraAddress 0x005e7ab0
+ */
+void sceVu0Sub005e7ab0(float *pDst, const float *pA, const float *pB);
+
+} // extern "C"
 
 /**
  * Compose two transforms on VU0.
@@ -22,27 +53,10 @@ void XfmInvertRigid(float *pDst, const float *pSrc);
  *
  * @param pA The transform applied first, four rows of four floats.
  * @param pB The transform applied second, four rows of four floats.
- * @param pOut Receives the composition and may not alias either input.
+ * @param pOut Receives the composition and may alias either input.
  * @ghidraAddress 0x0045dae8
  */
 void XfmConcat(const float *pA, const float *pB, float *pOut);
-
-/**
- * Multiply two affine transforms on VU0.
- *
- * Every row of pB is pushed through pA, and the translation row of pA is added to the translation
- * row of the result. The vector register the accumulator lands in is never given a fourth word.
- * The fourth word of every destination row therefore receives whatever that register already
- * held. This reconstruction does not write those four words at all.
- *
- * XfmConcat() is a wrapper that swaps the two factors.
- *
- * @param pDst Receives the product, four rows of four floats.
- * @param pA The left factor, four rows of four floats.
- * @param pB The right factor, four rows of four floats.
- * @ghidraAddress 0x005e7ab0
- */
-void Mat44Multiply(float *pDst, const float *pA, const float *pB);
 
 /**
  * Build a rotation matrix from three Euler angles.
@@ -152,20 +166,3 @@ void ScaleRows3x3(const float *pScale, const float *pMat3Rows, float *pOut);
  * @ghidraAddress 0x00453ea0
  */
 void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pOut);
-
-/**
- * Multiply two affine transforms on VU0 across all four words of every row.
- *
- * The algorithm matches Mat44Multiply() exactly. The one difference is the destination field
- * mask, which is `xyzw` here and `xyz` there, so this variant also multiplies the fourth column
- * of the left factor through and adds the fourth word of the translation row. The two bodies sit
- * next to each other in the image, at `0x005e7a58` and `0x005e7ab0`, which is what two
- * instantiations of one inline routine under different masks produce. Every caller of this variant
- * is a PlayStation 2 render path that consumes the fourth word.
- *
- * @param pDst Receives the product, four rows of four floats.
- * @param pA The left factor, four rows of four floats.
- * @param pB The right factor, four rows of four floats.
- * @ghidraAddress 0x005e7a58
- */
-void Mat44Concat(float *pDst, const float *pA, const float *pB);

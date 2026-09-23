@@ -40,13 +40,13 @@ constexpr int kVu1EntryDirectional = 0x2f8;
 constexpr int kVu1EntryPoint = 0x35c;
 constexpr int kVu1EntryNoLight = 0x3d4;
 
-// The inverse of a rigid transform with the fourth word of every row preset, as the binary builds
-// it before XfmInvertRigid() writes only the other words.
+// The inverse of a rigid transform. The binary presets the fourth word of every row, and
+// sceVu0InversMatrix() then overwrites every word.
 inline void InvertWithUnitW(const float *pXfm, float aflInverse[kXfmRowCount][kXfmRowFloatCount]) {
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         aflInverse[nRow][kXfmRowFloatCount - 1] = 1.0f;
     }
-    XfmInvertRigid(&aflInverse[0][0], pXfm);
+    sceVu0InversMatrix(&aflInverse[0][0], pXfm);
 }
 
 // On VU0 as vmulax, vmadday, vmaddz. The fourth word is carried over from the source.

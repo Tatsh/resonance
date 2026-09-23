@@ -427,7 +427,7 @@ int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere) {
     clipXfm.mBasisX.w = 1.0f;
     clipXfm.mBasisY.w = 1.0f;
     clipXfm.mBasisZ.w = 1.0f;
-    Mat44Concat(&clipXfm.mBasisX.x, &g_viewProjectUnscaledXfm.mBasisX.x, pXfm);
+    sceVu0Sub005e7a58(&clipXfm.mBasisX.x, &g_viewProjectUnscaledXfm.mBasisX.x, pXfm);
     PushTransform(clipXfm);
 
     PushColorScale();
@@ -535,7 +535,7 @@ void EmitEdgeVu1Setup(const float *pXfm, const Color &color) {
     clipXfm.mBasisX.w = 1.0f;
     clipXfm.mBasisY.w = 1.0f;
     clipXfm.mBasisZ.w = 1.0f;
-    Mat44Concat(&clipXfm.mBasisX.x, &g_viewProjectXfm.mBasisX.x, pXfm);
+    sceVu0Sub005e7a58(&clipXfm.mBasisX.x, &g_viewProjectXfm.mBasisX.x, pXfm);
     PushTransform(clipXfm);
 
     PushGifTag(kPrimLineAntialiased |
@@ -608,7 +608,7 @@ void TransformAndLightMeshVerts(void *pOutVerts,
     }
 
     float aflClip[kXfmRowCount][kXfmRowFloatCount];
-    Mat44Concat(&aflClip[0][0], &g_viewProjectXfm.mBasisX.x, pXfm);
+    sceVu0Sub005e7a58(&aflClip[0][0], &g_viewProjectXfm.mBasisX.x, pXfm);
     const Color &colorScale = bFullColor ? kParticleColorScaleFull : kParticleColorScaleHalf;
     const float aflViewScale[] = {
         g_viewportXfm.mBasisX.x, g_viewportXfm.mBasisY.y, g_viewportXfm.mBasisZ.z, g_flFogScale};
@@ -766,7 +766,7 @@ int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, in
         {0.0f, 0.0f, 0.0f, 1.0f},
     };
     float aflClip[kXfmRowCount][kXfmRowFloatCount];
-    Mat44Concat(&aflClip[0][0], &g_viewProjectXfm.mBasisX.x, &aflIdentity[0][0]);
+    sceVu0Sub005e7a58(&aflClip[0][0], &g_viewProjectXfm.mBasisX.x, &aflIdentity[0][0]);
     const Color &colorScale = bFullColor ? kParticleColorScaleFull : kParticleColorScaleHalf;
     const float aflViewScale[] = {
         g_viewportXfm.mBasisX.x, g_viewportXfm.mBasisY.y, g_viewportXfm.mBasisZ.z, 0.0f};
@@ -1311,10 +1311,10 @@ int PsCam::DrawSelf() {
     g_particleScreenScale.y = -flProjectY * g_viewportXfm.mBasisY.y;
     g_particleScreenScale.w = 0.0f;
     g_particleProjectScale.w = 0.0f;
-    Mat44Concat(&g_viewProjectXfm.mBasisX.x, &g_viewProjectXfm.mBasisX.x, &mWorldToCam[0].x);
-    Mat44Concat(&g_viewProjectUnscaledXfm.mBasisX.x,
-                &g_viewProjectUnscaledXfm.mBasisX.x,
-                &mWorldToCam[0].x);
+    sceVu0Sub005e7a58(&g_viewProjectXfm.mBasisX.x, &g_viewProjectXfm.mBasisX.x, &mWorldToCam[0].x);
+    sceVu0Sub005e7a58(&g_viewProjectUnscaledXfm.mBasisX.x,
+                      &g_viewProjectUnscaledXfm.mBasisX.x,
+                      &mWorldToCam[0].x);
 
     const float flLeft = ClampToUnit(mScreenRect.x);
     const float flTop = ClampToUnit(mScreenRect.y);

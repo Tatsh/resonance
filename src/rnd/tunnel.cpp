@@ -694,7 +694,7 @@ void Tunnel::SetFrameSelf(float flFrame) {
         aim.mTranslation.y = 0.0f;
         aim.mTranslation.z = 0.0f;
         aim.mTranslation.w = 1.0f;
-        Mat44Multiply(&aim.mBasisX.x, &look.mBasisX.x, &aim.mBasisX.x);
+        sceVu0Sub005e7ab0(&aim.mBasisX.x, &look.mBasisX.x, &aim.mBasisX.x);
 
         Vector3 lanePoint;
         lanePoint.x = 0.0f;

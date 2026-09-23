@@ -467,7 +467,7 @@ void Cam::UpdateProjection() {
 
 // 0x004afc18
 void Cam::UpdateWorldProject() {
-    XfmInvertRigid(&mWorldToCam[0].x, &mWorldXfm[0][0]);
+    sceVu0InversMatrix(&mWorldToCam[0].x, &mWorldXfm[0][0]);
 
     Frustum worldFrustum;
     worldFrustum.mFront = TransformPlaneToWorld(mLocalFrustum.mFront, &mWorldXfm[0][0]);
