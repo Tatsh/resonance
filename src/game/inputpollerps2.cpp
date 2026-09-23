@@ -10,6 +10,13 @@ void InputPoller::SetActive(int bActive) {
     mActive = bActive;
 }
 
+// 0x001e19a0
+void InputPoller::DetachController(RawController *pController) {
+    if (mController == pController) {
+        mController = nullptr;
+    }
+}
+
 // 0x001e1c18
 void InputPoller::SetPaused(int bPaused) {
     mPaused = bPaused;

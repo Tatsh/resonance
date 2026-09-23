@@ -8,6 +8,7 @@
 #include "game/forcefeedbackmgr.h"
 #include "game/gameplayback.h"
 #include "game/gamerecorder.h"
+#include "game/inputmap.h"
 #include "met/metpersonadata.h"
 #include "msg/begingamelocalmsg.h"
 #include "msg/endgamemsg.h"
@@ -211,6 +212,17 @@ void GameManagerImpl::HandleMessage(Message *pMsg) {
     }
 }
 
+// 0x00105f50
+GameManagerImpl::GameManagerImpl()
+    : mState(0), mUnknown08(0), mpWorld(nullptr), mpMetaWorld(nullptr), mUnknown18(0), mGameMode(0),
+      mChangeCount(0), mUnknowna8(0), mpRecorder(nullptr), mpPlayback(nullptr), mUnknownfc(1),
+      mUnknown100(0), mPaused(0), mDrawSuppressed(1) {
+    mQueue.AddSink(this);
+    mpPoller = new InputPoller;
+    mpPoller->mUnknown34 = 0;
+    CheckState(); // Yes, the binary discards this call's result.
+}
+
 // 0x001062d0
 GameManagerImpl::~GameManagerImpl() {
     CheckState(); // Yes, the binary discards this call's result.
@@ -271,6 +283,44 @@ void GameManagerImpl::OnPauseGameSystem(Message *) {
 // 0x0010c148
 void GameManagerImpl::OnEndGame(Message *pMsg) {
     EndGame(static_cast<EndGameMsg *>(pMsg)->mRestart);
+}
+
+// 0x00106af8
+void GameManagerImpl::OnUnpauseGameSystem(Message *) {
+    if (mPaused == 0) {
+        return;
+    }
+
+    mPaused = 0;
+    mpMetaWorld->OnUnknownForwarder003d4890();
+    mpPoller->SetController(mpWorld);
+    mpPoller->SetPaused(0);
+    if (GetWorld()->mUnknown90 == 0) {
+        GetWorld()->mInputMap->Rebuild();
+    }
+    Application::shared()->GetSynth()->Slot14(0);
+    if (mpWorld != nullptr) {
+        mpWorld->mForceFeedback->SetPaused(0);
+    }
+    if (GetGameMode() != kGameModeNet) {
+        Application::shared()->GetWatchdog()->mClock.Resume();
+    }
+}
+
+// 0x0010c0c0
+void GameManagerImpl::FinishWorldLoad() {
+    mUnknownfc = 1;
+    while (mpWorld->IsLoadDone() == 0) {
+    }
+    mpWorld->FinishLoad();
+    AddPlayers();
+    mpWorld->PrepareLevel();
+    mpPoller->SetController(mpWorld);
+}
+
+// 0x0010c1f0
+void GameManagerImpl::AddPlayers() {
+    AddPersonaPlayers();
 }
 
 // 0x0010c420

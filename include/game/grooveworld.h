@@ -208,6 +208,20 @@ public:
     void FinishLoad();
 
     /**
+     * Prepare the loaded level for play.
+     *
+     * Resets the synthesiser through its slots 5 and 6, sets its jam flag from the play mode,
+     * builds the draw passes through `0x0018cce8`, `0x0018caa8`, and `0x0018c828`, starts the
+     * streamed audio named by configuration code 0x3a5 when code 0x3a4 is set, and reads the
+     * start offset from code 0x38d. GameManagerImpl's FinishWorldLoad() and Load() call it after
+     * FinishLoad(). Not reconstructed yet, because most of the routines it runs are unrecovered.
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x0018dc88
+     */
+    void PrepareLevel();
+
+    /**
      * Create a remote player and append it to mPlayers.
      *
      * @param nId The player's identifier, passed to NetPlayer twice.
@@ -334,8 +348,18 @@ public:
     void MarkStatsFlag();
 
 private:
-    Application *mApp;             // +0x08
-    InputMap *mInputMap;           // +0x0c
+    Application *mApp; // +0x08
+
+public:
+    /**
+     * The input map of the world's players. +0x0c
+     *
+     * Public because GameManagerImpl::OnUnpauseGameSystem() rebuilds it directly at `0x00106b74`,
+     * and the image has no accessor for it.
+     */
+    InputMap *mInputMap;
+
+private:
     TrackSelector *mTrackSelector; // +0x10
     MsgJoiner *mJoiner;            // +0x14
     // The MIDI level. The draw path at 0x0018cce8 halts with `MIDI level file has not been
@@ -392,13 +416,21 @@ private:
     int mUnknown84;                       // +0x84
     int mUnknown88;                       // +0x88
     int mUnknown8c;                       // +0x8c
-    int mUnknown90;                       // +0x90
-    int mUnknown94;                       // +0x94, the exit mode
-    int mState;                           // +0x98
-    HxStr mLevelPath;                     // +0x9c
-    void *mLoadBuffer;                    // +0xa4, the raw MIDI file
-    int mLoadSize;                        // +0xa8
-    int mLoadHandle;                      // +0xac
+
+public:
+    /**
+     * A word GameManagerImpl::OnUnpauseGameSystem() reads directly at `0x00106b54`. It rebuilds
+     * mInputMap only while the word is zero. The image has no accessor for it. +0x90
+     */
+    int mUnknown90;
+
+private:
+    int mUnknown94;    // +0x94, the exit mode
+    int mState;        // +0x98
+    HxStr mLevelPath;  // +0x9c
+    void *mLoadBuffer; // +0xa4, the raw MIDI file
+    int mLoadSize;     // +0xa8
+    int mLoadHandle;   // +0xac
 
 public:
     /**
@@ -410,6 +442,11 @@ public:
      */
     HxStr mSongName;
 
-private:
-    int mUnknownb8; // +0xb8, starts at 1
+    /**
+     * A word that starts at 1 and that PostExitMode1() posts with the exit.
+     *
+     * Public because GameManagerImpl::EndGame() reads it directly at `0x00106c30` and announces
+     * MetFreqEndedMsg(1) only while it is zero. The image has no accessor for it. +0xb8
+     */
+    int mUnknownb8;
 };

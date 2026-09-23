@@ -117,15 +117,11 @@ public:
      * Build the manager, its input poller, and its message queue.
      *
      * The constructor creates the InputPoller, registers itself as a sink of its own embedded
-     * queue, and clears the poller's field at `+0x34`. It does not write mUnknown18, so the manager
-     * starts with one indeterminate field.
+     * queue, and clears the poller's field at `+0x34`. Every word it does not set otherwise starts
+     * at zero, mUnknown18 at `0x00105f8c` included.
      *
      * mUnknownfc and mDrawSuppressed both start at 1. The second of the two is what makes the first
      * frame after construction draw nothing until SetDrawEnabled() runs.
-     *
-     * The call to MsgSource::AddSink() has its result discarded. The instruction that looks like
-     * the capture sits in the call's delay slot and therefore stores the constant 1 that preceded
-     * it.
      *
      * @ghidraAddress 0x00105f50
      */
@@ -534,9 +530,8 @@ protected:
      * Resume the session.
      *
      * Slot 37. Returns at once when not paused. Otherwise clears the pause and undoes each step
-     * OnPauseGameSystem() took. The message itself is ignored.
-     *
-     * The body is not written, for the reason recorded on OnBeginGameLocal().
+     * OnPauseGameSystem() took, handing the poller to the game world. It also rebuilds the world's
+     * input map while the world's mUnknown90 is zero. The message itself is ignored.
      *
      * @param pMsg The message, ignored.
      * @ghidraAddress 0x00106af8
@@ -566,9 +561,17 @@ private:
     void CreateWorld();
 
     // 0x0010c0c0. Sets mUnknownfc, spins on the world's load report at 0x00194ca0 until it
-    // finishes, completes the load, and reconnects the poller. Load() inlines the same sequence
-    // rather than calling this.
+    // finishes, completes the load, adds the players, prepares the level, and reconnects the
+    // poller. Load() inlines the same sequence rather than calling this.
     void FinishWorldLoad();
+
+    // 0x0010c1f0. Forwards to AddPersonaPlayers(). FinishWorldLoad() and Load() call it.
+    void AddPlayers();
+
+    // 0x00106ec0. Deals the personas out in a shuffled order, each with one of the colour names
+    // at 0x007cd3b0, and adds a player for each through the GrooveWorld routine at 0x0018c600.
+    // Not written, because that routine and the random draw at 0x0052d098 are not declared.
+    void AddPersonaPlayers();
 
     // 0x00106c08. The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
     // and a playback, and then either queues a BeginGameLocalMsg or returns to the front end.

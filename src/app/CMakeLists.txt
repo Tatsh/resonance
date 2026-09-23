@@ -3,6 +3,7 @@ set(RESONANCE_APP_SRCS
     appactivefilter.cpp
     application.cpp
     appticktask.cpp
+    apptimetask.cpp
     apptunnel.cpp
     attachment.cpp
     cutscene.c

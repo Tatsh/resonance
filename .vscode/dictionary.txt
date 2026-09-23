@@ -23,6 +23,7 @@ apalette
 apolygon
 appactivefilter
 appticktask
+apptimetask
 apptnl
 apptunnel
 apsz
@@ -744,6 +745,7 @@ texs
 textmsg
 tickclock
 timedcommand
+timetask
 tkinter
 tmpnam
 tnlactivator

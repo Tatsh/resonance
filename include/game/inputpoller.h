@@ -96,6 +96,26 @@ public:
      */
     void SetPaused(int bPaused);
 
+    /**
+     * Clear the controller the readings go to, if it is pController.
+     *
+     * GameManagerImpl::EndGame() and the routine at `0x0010c050` run it before deleting the game
+     * world. The title is inferred.
+     *
+     * @param pController The controller being withdrawn.
+     * @ghidraAddress 0x001e19a0
+     */
+    void DetachController(RawController *pController);
+
+    /**
+     * The word at `+0x34`, which the constructor starts at 1.
+     *
+     * Public because GameManagerImpl's constructor clears it directly at `0x00106024`, and the
+     * image has no accessor. Its purpose is unrecovered: the one other access found, in the
+     * routine at `0x001dfab0`, cannot be tied to this object with confidence.
+     */
+    int mUnknown34;
+
 private:
     // Words per Entry. The setup routine at 0x001df248 zeroes exactly this many with a word loop,
     // and the table of controller bit masks that 0x001e19b8 builds at 0x008efb60 has the same
@@ -129,7 +149,6 @@ private:
     int mUnknown28;            // +0x28
     std::list<int> mUnknown2c; // +0x2c element type not recovered, 16-byte node
     int mUnknown30;            // +0x30
-    int mUnknown34;            // +0x34 starts at 1
     int mUnknown38;            // +0x38
     int mActive;               // +0x3c starts at 1
     int mUnknown40;            // +0x40
