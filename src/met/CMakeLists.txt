@@ -41,6 +41,7 @@ set(RESONANCE_MET_SRCS
     metloadgamescreen.cpp
     metloadnewfreqscreen.cpp
     metloadprefabscreen.cpp
+    metlocnumplayscreen.cpp
     metlocpickcharscreen.cpp
     metlogoscreen.cpp
     metmainscreen.cpp
