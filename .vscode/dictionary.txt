@@ -188,6 +188,7 @@ durgemstrip
 durgemtrails
 eekernel
 effectpowerup
+egmg
 egsl
 egsw
 egwb
@@ -518,6 +519,8 @@ metmemdetectscreen
 metmemdetectstartup
 metmodescreen
 metmsgscreen
+metmultiendremixscreen
+metmultiendscreen
 metmultisaveremixscreen
 metmultistatsscreen
 metmultitips
@@ -747,6 +750,7 @@ releaseable
 remixfx
 remixfxmsg
 remixindex
+remixpan
 remixtype
 remixunavail
 remotetrackselectmsg

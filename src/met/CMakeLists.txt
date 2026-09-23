@@ -51,6 +51,8 @@ set(RESONANCE_MET_SRCS
     metmemdetectstartup.cpp
     metmodescreen.cpp
     metmsgscreen.cpp
+    metmultiendremixscreen.cpp
+    metmultiendscreen.cpp
     metmultisaveremixscreen.cpp
     metmultistatsscreen.cpp
     metmultitips1screen.cpp
