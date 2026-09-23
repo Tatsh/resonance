@@ -79,8 +79,7 @@ void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     pEffector->Enable((*pStep & nBit) != 0);
 
     InvalidateTrackMsg invalidate(kSongFirstBar, kSongEndBar, mTrack);
-    MsgSink *pPhraseSink = mPhraseMgr;
-    pPhraseSink->HandleMessage(&invalidate);
+    mPhraseMgr->Handle(&invalidate);
 
     RemixFXMsg remix(mTrack, nBar, nEffect, (*pStep & nBit) != 0, pMsg->mPlayer);
     Send(&remix);
