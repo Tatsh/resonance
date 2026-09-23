@@ -162,13 +162,9 @@ enum MetScreenCommandCode {
  * `+0xd4` before delivering it, and the translator at `0x002e3738` copies that word out of the
  * input message unchanged. A screen that records -1 plays its sound for every controller.
  *
- * PlayLeaveSound() is declared here with no argument and the evidence now contradicts that.
- * DeliverCommand() loads `a1` from the same `+0x04` for slot 21 at `0x0038b7e8` exactly as it does
- * for the other five, and the MetFreqMakerInventoryScreen override at `0x00272bb8` that an earlier
- * reading treated as an argument-free forward compiles identically either way, because the value
- * already sits in `a1`. The declaration is unchanged here because nine derived headers in other
- * files declare the override without the argument, and correcting one file alone would produce a
- * base that its subclasses no longer override.
+ * PlayLeaveSound() takes the selector as well. DeliverCommand() loads `a1` from the same `+0x04`
+ * for slot 21 at `0x0038b7e8` exactly as it does for the other five, and the
+ * MetConfigControllerScreen override at `0x00206970` compares it against its own controller.
  *
  * Four data members are protected and the rest are private. MetRemixLoadScreen and
  * MetRemixDelScreen both clear mUnknown60 in their constructors, and MetSaveRemixScreen clears
@@ -582,11 +578,12 @@ public:
      *
      * Slot 21. Passes the literal `SND_MET_LEAVE` to the named-sound player at `0x0012f470`.
      * DeliverCommand() routes command 6 to this slot, loading the controller index into `a1`
-     * first. The declaration retains no parameter for the reason recorded on the class.
+     * first. The body does not read the selector.
      *
+     * @param nSelector The pad index of the command.
      * @ghidraAddress 0x00390160
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * Play the sound that accompanies the emphasised selection.

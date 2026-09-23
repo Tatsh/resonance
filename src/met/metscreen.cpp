@@ -273,7 +273,7 @@ void MetScreen::PlaySlideSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kSlideSound);
 }
 
-void MetScreen::PlayLeaveSound() {
+void MetScreen::PlayLeaveSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kLeaveSound);
 }
 
@@ -313,9 +313,7 @@ void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
             PlaySlideSound(pCommand->mPadIndex);
             break;
         case kMetScreenCommandBack:
-            // Yes, the binary loads the controller index into a1 here as it does for the other
-            // five, and this declaration accepts none.
-            PlayLeaveSound();
+            PlayLeaveSound(pCommand->mPadIndex);
             break;
         default:
             break;

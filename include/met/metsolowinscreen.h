@@ -90,9 +90,10 @@ public:
     /**
      * Play no leave sound. Slot 21.
      *
+     * @param nSelector The pad index of the command, which the body does not read.
      * @ghidraAddress 0x003b9b90
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * Play no left cycle sound. Slot 23.

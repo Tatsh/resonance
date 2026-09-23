@@ -94,9 +94,10 @@ public:
     /**
      * Play no leave sound. Slot 21.
      *
+     * @param nSelector The pad index of the command, which the body does not read.
      * @ghidraAddress 0x003c4228
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * Play no high sound. Slot 22.

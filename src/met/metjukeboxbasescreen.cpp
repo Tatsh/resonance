@@ -323,7 +323,7 @@ void MetJukeboxBaseScreen::PlaySlideSound(int) {
 }
 
 // 0x00224970
-void MetJukeboxBaseScreen::PlayLeaveSound() {
+void MetJukeboxBaseScreen::PlayLeaveSound(int) {
 }
 
 // 0x00224978

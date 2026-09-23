@@ -133,13 +133,10 @@ public:
     /**
      * Play the leave sound for this screen's controller only.
      *
-     * The body compares `a1` against mUnknownc8 plus one exactly as the other four sound slots
-     * do, and MetScreen::PlayLeaveSound() records why the declaration omits the parameter. The
-     * comparison is therefore not written.
-     *
+     * @param nSelector The pad index of the command.
      * @ghidraAddress 0x00206970
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * Play the emphasised-selection sound for this screen's controller only.

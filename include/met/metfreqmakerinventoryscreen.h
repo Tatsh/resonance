@@ -138,9 +138,10 @@ public:
      *
      * Slot 21.
      *
+     * @param nSelector Passed through to MetScreen::PlayLeaveSound().
      * @ghidraAddress 0x00272bb8
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * Play `SND_MET_FM_PART_SELECT` while the inventory is browsed.

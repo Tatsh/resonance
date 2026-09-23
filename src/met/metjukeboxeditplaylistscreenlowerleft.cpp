@@ -26,7 +26,7 @@ void MetJukeboxEditPlaylistScreenLowerLeft::PlaySlideSound(int) {
 }
 
 // 0x0023aa48
-void MetJukeboxEditPlaylistScreenLowerLeft::PlayLeaveSound() {
+void MetJukeboxEditPlaylistScreenLowerLeft::PlayLeaveSound(int) {
 }
 
 // 0x0023aa50

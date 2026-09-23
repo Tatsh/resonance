@@ -250,7 +250,7 @@ void MetStageFinishScreen::HandleCommand(const MetScreenCommand *pCommand) {
     MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
 }
 
-void MetStageFinishScreen::PlayLeaveSound() {
+void MetStageFinishScreen::PlayLeaveSound(int) {
 }
 
 void MetStageFinishScreen::PlayHighSound(int) {

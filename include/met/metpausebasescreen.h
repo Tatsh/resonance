@@ -55,9 +55,10 @@ public:
     virtual void PlaySlideSound(int nSelector);
 
     /**
+     * @param nSelector The pad index of the command, which the body does not read.
      * @ghidraAddress 0x0031bff8
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.

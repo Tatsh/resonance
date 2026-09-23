@@ -157,7 +157,7 @@ void MetJukeboxEditPlaylistScreenDone::PlaySlideSound(int) {
 }
 
 // 0x00237168
-void MetJukeboxEditPlaylistScreenDone::PlayLeaveSound() {
+void MetJukeboxEditPlaylistScreenDone::PlayLeaveSound(int) {
 }
 
 // 0x00237170

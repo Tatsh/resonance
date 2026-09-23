@@ -126,7 +126,7 @@ void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-void MetSoloWinScreen::PlayLeaveSound() {
+void MetSoloWinScreen::PlayLeaveSound(int) {
 }
 
 void MetSoloWinScreen::PlayCycleLeftSound(int) {

@@ -466,8 +466,10 @@ void MetConfigControllerScreen::PlayHighSound(int nSelector) {
 }
 
 // 0x00206970
-void MetConfigControllerScreen::PlayLeaveSound() {
-    MetScreenMultiSoundBank::PlayLeaveSound();
+void MetConfigControllerScreen::PlayLeaveSound(int nSelector) {
+    if (nSelector == mUnknownc8 + 1) {
+        MetScreenMultiSoundBank::PlayLeaveSound(nSelector);
+    }
 }
 
 // 0x002069a0

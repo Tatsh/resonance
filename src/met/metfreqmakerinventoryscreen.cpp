@@ -337,9 +337,9 @@ void MetFreqMakerInventoryScreen::PlaySlideSound(int nSelector) {
 }
 
 // 0x00272bb8
-void MetFreqMakerInventoryScreen::PlayLeaveSound() {
+void MetFreqMakerInventoryScreen::PlayLeaveSound(int nSelector) {
     if (mMode == kModeInventory || mMode == kModeColor || mMode == kModePart) {
-        MetScreen::PlayLeaveSound();
+        MetScreen::PlayLeaveSound(nSelector);
     }
 }
 

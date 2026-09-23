@@ -68,7 +68,7 @@ public:
      *
      * @ghidraAddress 0x00291628
      */
-    virtual void PlayLeaveSound() {
+    virtual void PlayLeaveSound(int) {
     }
 
     /**

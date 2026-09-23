@@ -203,9 +203,10 @@ public:
     /**
      * Overridden empty, so a jukebox screen plays no departure sound.
      *
+     * @param nSelector The pad index of the command, which the body does not read.
      * @ghidraAddress 0x00224970
      */
-    virtual void PlayLeaveSound();
+    virtual void PlayLeaveSound(int nSelector);
 
     /**
      * Overridden empty, so a jukebox screen plays no emphasis sound.
