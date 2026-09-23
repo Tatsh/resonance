@@ -32,6 +32,7 @@ constexpr int kBlinkShown = 120;
 
 } // namespace
 
+// 0x00416428
 HudEnergy::HudEnergy([[maybe_unused]] int nIndex) {
     Rnd::Mesh *pFrame = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 energy.mesh")));
     mBar = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 energy bar.mesh")));
@@ -49,6 +50,7 @@ HudEnergy::HudEnergy([[maybe_unused]] int nIndex) {
     }
 }
 
+// 0x004166b8
 void HudEnergy::SetFrame(float flFrame) {
     mAnim->SetFrame(mLevel * kFramesPerLevel);
 

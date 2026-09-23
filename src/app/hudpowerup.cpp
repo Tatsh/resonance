@@ -10,6 +10,7 @@
 #include "rnd/mesh.h"
 #include "rnd/view.h"
 
+// 0x004167d0
 HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;

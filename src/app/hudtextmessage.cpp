@@ -20,6 +20,7 @@ constexpr float kFadeLength = 250.0f;
 
 } // namespace
 
+// 0x00416dd8
 HudTextMessage::HudTextMessage(const HxStr &name)
     : mText(nullptr), mStart(kMessageIdle), mActive(0) {
     mBlur = dynamic_cast<Rnd::Blur *>(Rnd::g_manager.Find(name + ".blur"));

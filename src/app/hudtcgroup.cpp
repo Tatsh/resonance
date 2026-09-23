@@ -4,6 +4,7 @@
 #include "rnd/manager.h"
 #include "rnd/view.h"
 
+// 0x00417a60
 HudTcGroup::HudTcGroup() {
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tc_hi_group.view")));
     SetShowing(0);

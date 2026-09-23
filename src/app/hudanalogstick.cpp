@@ -5,6 +5,7 @@
 #include "rnd/mat.h"
 #include "rnd/mesh.h"
 
+// 0x00417840
 HudAnalogStick::HudAnalogStick() {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 analog_stick.mesh")));
     mInOutMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD in_out_stick.mat")));
