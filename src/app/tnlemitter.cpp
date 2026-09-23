@@ -3,6 +3,7 @@
 #include "math/transformops.h"
 #include "rnd/particlesys.h"
 
+// 0x00455d08
 TnlEmitter::~TnlEmitter() {
     if (mParticleSys != nullptr) {
         mParticleSys->mEmitRateLow = mEmitRateLow;
@@ -11,6 +12,7 @@ TnlEmitter::~TnlEmitter() {
     }
 }
 
+// 0x00455d58
 void TnlEmitter::Attach(Rnd::ParticleSys *pSys) {
     mParticleSys = pSys;
     mEmitRateLow = pSys->mEmitRateLow;
@@ -21,6 +23,7 @@ void TnlEmitter::Attach(Rnd::ParticleSys *pSys) {
     pSys->FreeAllParticles();
 }
 
+// 0x00455e30
 void TnlEmitter::RotateForce(const float *pMat3Rows) {
     if (mParticleSys != nullptr) {
         Vector3 force;
@@ -30,6 +33,7 @@ void TnlEmitter::RotateForce(const float *pMat3Rows) {
     }
 }
 
+// 0x00455e88
 void TnlEmitter::Restart() {
     if (mParticleSys != nullptr) {
         mParticleSys->FreeAllParticles();
@@ -38,6 +42,7 @@ void TnlEmitter::Restart() {
     }
 }
 
+// 0x00455ed0
 void TnlEmitter::Stop() {
     if (mParticleSys != nullptr) {
         mParticleSys->mEmitRateHigh = 0.0f;

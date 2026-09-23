@@ -25,17 +25,19 @@ constexpr float kTurnBackLead = 6500.0f;
 
 } // namespace
 
+// 0x0043e1f0
 TnlCrippleFX::TnlCrippleFX(int nIndex, float flRate)
-    : mState(kStateIdle), mHitFrame(0.0f), mRate(flRate) {
-    mView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("cripfx%d.view", nIndex))));
-    mPath = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::g_manager.Find(HxStr(FormatString("cripfx%d.path", nIndex))));
-    mParticleSys = dynamic_cast<Rnd::ParticleSys *>(
-        Rnd::g_manager.Find(HxStr(FormatString("cripfx%d.ps", nIndex))));
+    : mView(dynamic_cast<Rnd::View *>(
+          Rnd::g_manager.Find(HxStr(FormatString("cripfx%d.view", nIndex))))),
+      mPath(dynamic_cast<Rnd::TransAnim *>(
+          Rnd::g_manager.Find(HxStr(FormatString("cripfx%d.path", nIndex))))),
+      mParticleSys(dynamic_cast<Rnd::ParticleSys *>(
+          Rnd::g_manager.Find(HxStr(FormatString("cripfx%d.ps", nIndex))))),
+      mState(kStateIdle), mHitFrame(0.0f), mRate(flRate) {
     mView->SetShowing(0);
 }
 
+// 0x004568b8
 void TnlCrippleFX::Start(const std::vector<TnlPlayer *> &targets, float flFrame) {
     mState = kStateRunning;
     mTargets = targets;
@@ -44,6 +46,7 @@ void TnlCrippleFX::Start(const std::vector<TnlPlayer *> &targets, float flFrame)
     mView->SetShowing(1);
 }
 
+// 0x0043e500
 void TnlCrippleFX::SetFrame(float flFrame) {
     mView->SetFrame(flFrame * mRate);
     if (mState == kStateIdle) {
