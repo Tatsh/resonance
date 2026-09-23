@@ -58,6 +58,17 @@ public:
      */
     void Resume();
 
+    /**
+     * Stop the clock and move its paused running time forward.
+     *
+     * Pause() is inlined first. The running time then grows by nAmount times one million divided
+     * by the double at `+0x00`. HxScript::Clock() is the caller. The title is inferred.
+     *
+     * @param nAmount The amount to advance by.
+     * @ghidraAddress 0x00512788
+     */
+    void Advance(int nAmount);
+
     /** The millisecond reading the current run started at. `+0x10` */
     long long mOriginMs;
 
