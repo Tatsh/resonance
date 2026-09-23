@@ -39,6 +39,11 @@ MetRemixDelScreen::~MetRemixDelScreen() {
     delete mUnknownf4;
 }
 
+// 0x00343f30
+MetRemixDelScreen *MetRemixDelScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetRemixDelScreen(pRenderer, nPriority);
+}
+
 int MetRemixDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     if (static_cast<unsigned>(nItem) < mUnknownf0->size()) {
         MetRemixRecord record((*mUnknownf0)[nItem]);

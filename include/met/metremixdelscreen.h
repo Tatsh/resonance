@@ -92,6 +92,16 @@ public:
     virtual ~MetRemixDelScreen();
 
     /**
+     * Build the screen on the heap.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x00343f30
+     */
+    static MetRemixDelScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
      * Hide the screen and request the remix catalogue. Slot 5.
      *
      * The body is not written. It hides itself through slot 17 with a zero argument, clears
