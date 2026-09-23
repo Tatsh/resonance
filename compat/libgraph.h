@@ -12,26 +12,26 @@ extern "C" {
 // Both descriptors are 96 bytes in the image, an opening GIFtag, four register-and-tag pairs for
 // BITBLTBUF, TRXPOS, TRXREG, and TRXDIR, and a closing GIFtag.
 typedef struct {
-    unsigned long mWords[12];
+    unsigned long long mWords[12];
 } sceGsLoadImage;
 
 typedef struct {
-    unsigned long mWords[12];
+    unsigned long long mWords[12];
 } sceGsStoreImage;
 
 // One GIFtag, 16 bytes.
 typedef struct {
-    unsigned long mWords[2];
+    unsigned long long mWords[2];
 } sceGifTag;
 
 // The five display registers in the order sceGsSetDefDispEnv() fills them. The game writes each
 // word to the privileged register of the same name.
 typedef struct {
-    unsigned long pmode;
-    unsigned long smode2;
-    unsigned long dispfb;
-    unsigned long display;
-    unsigned long bgcolor;
+    unsigned long long pmode;
+    unsigned long long smode2;
+    unsigned long long dispfb;
+    unsigned long long display;
+    unsigned long long bgcolor;
 } sceGsDispEnv;
 
 // Eight A+D register and address pairs, 128 bytes. sceGsSetDefDrawEnv() returns 8, the pair
@@ -39,27 +39,27 @@ typedef struct {
 // XYOFFSET_1 from the third. GfxDevice::SwapBuffers() copies every register word into its
 // register shadow, which fixes the order of the remaining five.
 typedef struct {
-    unsigned long frame1;
-    unsigned long frame1addr;
-    unsigned long zbuf1;
-    unsigned long zbuf1addr;
-    unsigned long xyoffset1;
-    unsigned long xyoffset1addr;
-    unsigned long scissor1;
-    unsigned long scissor1addr;
-    unsigned long prmodecont;
-    unsigned long prmodecontaddr;
-    unsigned long colclamp;
-    unsigned long colclampaddr;
-    unsigned long dthe;
-    unsigned long dtheaddr;
-    unsigned long test1;
-    unsigned long test1addr;
+    unsigned long long frame1;
+    unsigned long long frame1addr;
+    unsigned long long zbuf1;
+    unsigned long long zbuf1addr;
+    unsigned long long xyoffset1;
+    unsigned long long xyoffset1addr;
+    unsigned long long scissor1;
+    unsigned long long scissor1addr;
+    unsigned long long prmodecont;
+    unsigned long long prmodecontaddr;
+    unsigned long long colclamp;
+    unsigned long long colclampaddr;
+    unsigned long long dthe;
+    unsigned long long dtheaddr;
+    unsigned long long test1;
+    unsigned long long test1addr;
 } sceGsDrawEnv1;
 
 // Six A+D register and address pairs, 96 bytes. sceGsSetDefClear() returns 6, the pair count.
 typedef struct {
-    unsigned long mWords[12];
+    unsigned long long mWords[12];
 } sceGsClear;
 
 // The Sony double buffer, 0x230 bytes. sceGsSetDefDBuff() fills the clear colour of each half
@@ -77,7 +77,7 @@ typedef struct {
 // Four A+D register and address pairs, 64 bytes: ALPHA_1, PABE, TEXA, and FBA_1 among them.
 // sceGsSetDefAlphaEnv() returns 4, the pair count.
 typedef struct {
-    unsigned long mWords[8];
+    unsigned long long mWords[8];
 } sceGsAlphaEnv;
 
 // Resets VIF1, VU1, and the GIF, and primes VIF1 through its FIFO.
@@ -96,10 +96,10 @@ int sceGsSetDefClear(sceGsClear *pClear,
                      short nY,
                      short nWidth,
                      short nHeight,
-                     unsigned long nRed,
-                     unsigned long nGreen,
-                     unsigned long nBlue,
-                     unsigned long nAlpha,
+                     unsigned long long nRed,
+                     unsigned long long nGreen,
+                     unsigned long long nBlue,
+                     unsigned long long nAlpha,
                      unsigned int nZ);
 int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
                      short nPsm,

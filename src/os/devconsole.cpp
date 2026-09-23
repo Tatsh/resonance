@@ -46,16 +46,16 @@ constexpr short kClearEnabled = 1;
 
 // The clear colour, written into the low three bytes of each half's RGBAQ value word.
 constexpr int kClearRgbaqWord = 4;
-constexpr unsigned long kClearRed = 0x40;
-constexpr unsigned long kClearGreen = 0x40;
-constexpr unsigned long kClearBlue = 0x80;
-constexpr unsigned long kRgbMask = 0xffffff;
+constexpr unsigned long long kClearRed = 0x40;
+constexpr unsigned long long kClearGreen = 0x40;
+constexpr unsigned long long kClearBlue = 0x80;
+constexpr unsigned long long kRgbMask = 0xffffff;
 constexpr int kGreenShift = 8;
 constexpr int kBlueShift = 16;
 
 // A one-register A+D GIFtag with end of packet, as the alpha environment is sent.
-constexpr unsigned long kAdGifTagLo = 0x1000000000008000UL;
-constexpr unsigned long kAdGifTagHi = 0xe;
+constexpr unsigned long long kAdGifTagLo = 0x1000000000008000ULL;
+constexpr unsigned long long kAdGifTagHi = 0xe;
 constexpr unsigned int kWordsPerQuadword = 4;
 constexpr short kPabeOff = 0;
 constexpr unsigned int kVifPacketOptionNone = 0;
@@ -68,7 +68,7 @@ constexpr unsigned int kConsoleColumns = 75;
 constexpr unsigned int kConsoleRows = 30;
 
 inline void SetClearRgb(sceGsClear &clear) {
-    unsigned long &rgbaq = clear.mWords[kClearRgbaqWord];
+    unsigned long long &rgbaq = clear.mWords[kClearRgbaqWord];
     rgbaq =
         (rgbaq & ~kRgbMask) | kClearRed | (kClearGreen << kGreenShift) | (kClearBlue << kBlueShift);
 }
