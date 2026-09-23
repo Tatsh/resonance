@@ -790,8 +790,6 @@ void MetScreen::CreateFrontEndScreens(MetRenderer *pRenderer) {
         return;
     }
 
-    // Five of the classes have no factory of their own, so their `new` expressions stand here,
-    // and each one is emitted out of line in its class's unit.
     int nZone = FindZoneByName(kGlobalZone);
     ScreenRegistry()[HxStr(kLoadPreFabScreenKey)] =
         MetScreenEntry(MetLoadPreFabScreen::New(pRenderer, nZone));
