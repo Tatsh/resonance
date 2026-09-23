@@ -12,6 +12,27 @@
 
 #include "app/hudutil.h"
 
+class HxStr;
+
+/**
+ * Look up the synthesiser notes, the velocity, and the auto-stop flag registered under one name.
+ *
+ * The four outputs start at -1, -1, 127, and 0, and a name in the table overwrites the ones it
+ * sets. Most names set one note. `SND_MET_MUSIC1`, `SND_MET_MUSIC2`, and `SND_MET_SLIDE` set a
+ * second note, the two music names also set the velocity to 75, and the in-game deploy, erase
+ * section, caught powerup, win, and crippler-hit names set the auto-stop flag. A name outside the
+ * table leaves all four at their starting values. PlaySoundByName() and StopSoundByName() are the
+ * callers. The title is inferred.
+ *
+ * @param name The registered name.
+ * @param pNote Receives the note, or is left at -1.
+ * @param pNote2 Receives the second note, or is left at -1.
+ * @param pVelocity Receives the velocity, or is left at 127.
+ * @param pAutoStop Receives 1 for a sound that releases itself, or is left at 0.
+ * @ghidraAddress 0x0012e570
+ */
+void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int *pAutoStop);
+
 /**
  * Play the sound registered under one name.
  *
@@ -23,6 +44,19 @@
  * @ghidraAddress 0x0012f470
  */
 void PlaySoundByName(const char *pszName);
+
+/**
+ * Silence the sound registered under one name.
+ *
+ * Looks the name up through LookupSound() and sends a note-off for each of its notes to
+ * Globals::GetSynth() on the last MIDI channel. The first note is skipped when it is 1, not when it
+ * is -1 as for the second, which is what the binary compares against. MetRenderer::OnUnknownSlot5()
+ * is the one caller, and it stops `SND_MET_MUSIC1`. The title is inferred from the note-off.
+ *
+ * @param pszName The registered name.
+ * @ghidraAddress 0x0012eba0
+ */
+void StopSoundByName(const char *pszName);
 
 /**
  * Play one sound of the hardware synthesiser.

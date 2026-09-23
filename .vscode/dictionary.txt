@@ -768,6 +768,10 @@ seccache
 sectioncapturedmsg
 seekermsg
 seekop
+selectarena
+selectnumplayer
+selectremix
+selectskill
 sequencercmd
 serialiser
 setubal's
@@ -795,6 +799,7 @@ sndb
 sndbank
 sndh
 socketmodule
+solomulti
 solopowerbarmgr
 soloremix
 soloscreenanim

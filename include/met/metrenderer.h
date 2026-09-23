@@ -60,9 +60,9 @@ class MetFade;
  * supplies none. Each is documented under the placeholder the base declares it as, and what the
  * override does is recorded on the declaration.
  *
- * Two routines in the class's translation unit are not declared here. `0x00390088` and
- * `0x00390090` are empty bodies that take the renderer and are re-emitted into the translation
- * unit of every screen that runs them, and neither has a recovered name.
+ * `0x00390088` and `0x00390090` are empty bodies that take the renderer. Every caller, from nine
+ * screens and the renderer's own OnFreqEnded(), reaches the same single copy of each, so they are
+ * ordinary members, OnUnknown00390088() and OnUnknown00390090().
  *
  * The bodies listed below are understood and not written, because each needs a routine that no
  * header in this tree declares yet. The blocking dependency of each is recorded below so that the
@@ -72,22 +72,10 @@ class MetFade;
  *   and the four no-argument shutdown helpers at `0x00217fa0`, `0x0018ba48`, `0x00383700`, and
  *   MetFreqMakerAssetManager::Destroy() at `0x002551b8`, reached through its out-of-line forwarder
  *   at `0x00254970`.
- * - HandleMessage() needs RawControllerMsg to declare its four-word payload, which
- *   msg/rawcontrollermsg.h records as recovered from Clone() and does not declare. The payload
- *   record is declared as MetControllerReading in msg/metcontrollerreading.h until it does.
- * - OnUnknownSlot5() needs the named-sound player at `0x0012eba0`, which is not the one
- *   app/playsound.h declares, and the singleton getter at `0x00217f30`.
  * - OnUnknownSlot7() needs the two asynchronous predicates at `0x00464628` and `0x00460b20`, the
  *   device clear-colour setter at `0x0049b368`, and `0x00381ef8`.
- * - OnUnknownSlot8() and OnUnknownSlot10() both need
- *   GfxDevice::DrawSubsystemTimingGraph() at `0x0049c778` and
- *   GfxDevice::DrawRenderStatsOverlay() at `0x0049bec8`, and OnUnknownSlot8() also needs
- *   `0x001716d0`.
- * - RemoveScreen() needs Rnd::Transformable::RemoveTrans() at `0x004f09c0` and
- *   Rnd::Drawable::RemoveDraw() at `0x00503360`, and it reads MetScreen::mUnknown14, which
- *   metscreen.h declares private.
- * - ResolveSceneViews() needs the fade constructor's sibling at `0x00384300`, and
- *   ResolveArenaView() needs AddBackgroundView().
+ * - RemoveScreen() reads MetScreen::mUnknown14, which metscreen.h declares protected.
+ * - ResolveSceneViews() needs the fade constructor's sibling at `0x00384300`.
  */
 class MetRenderer : public MsgSource, public RendererBase, public FadeUser {
     // MetaGameWorld::OnUnknownQuery003d48c0() at 0x003d48c0 reads mUnknown60 directly.
@@ -148,10 +136,10 @@ public:
     /**
      * Stop the front end running.
      *
-     * RendererBase slot 5, whose verb the base does not supply. Clears mUnknowna8, empties the
-     * screen stack one element at a time, releases both scene views, clears the active panel, and
-     * starts the front-end music when the object at `0x00699d70` reports state 2. The destructor
-     * calls the routine directly.
+     * RendererBase slot 5, whose verb the base does not supply. Clears mUnknowna8, resets the
+     * command repeater, empties the screen stack one element at a time from the front, releases
+     * both scene views, clears the active panel, and stops `SND_MET_MUSIC1` unless
+     * MetFrontEndState::mUnknown18 is 2. The destructor calls the routine directly.
      *
      * @ghidraAddress 0x0036b0c0
      */
@@ -233,6 +221,28 @@ public:
      * @ghidraAddress 0x003714c8
      */
     void SetActivePanel(MetScreen *pScreen);
+
+    /**
+     * Do nothing.
+     *
+     * A two-instruction `jr ra` body that about ten screens call as they enter or return to the
+     * title, among them MetSaveRemixScreen::EnterAndShow(), MetSoloEndRemixScreen::ReturnToTitle(),
+     * and MetSoloWinScreen's slot 36. The caller passes the renderer as the receiver. Its purpose
+     * is not recovered.
+     *
+     * @ghidraAddress 0x00390088
+     */
+    void OnUnknown00390088();
+
+    /**
+     * Do nothing.
+     *
+     * A two-instruction `jr ra` body that the same screens call after OnUnknown00390088(). Its
+     * purpose is not recovered.
+     *
+     * @ghidraAddress 0x00390090
+     */
+    void OnUnknown00390090();
 
     /**
      * Attach the three animatable, drawable, and transformable subobjects of one view to the
@@ -448,11 +458,13 @@ private:
     void ClearBackgroundScene();
 
     // 0x0036b938
-    // Handles a MetStartPauseMsg. The body is not written.
+    // Handles a MetStartPauseMsg by activating the pause screen the game mode and play mode call
+    // for.
     void OnStartPause(Message *pMsg);
 
     // 0x0036bcb8
-    // Handles a MetFreqEndedMsg. The body is not written.
+    // Handles a MetFreqEndedMsg by choosing the screen the next fade promotes and starting that
+    // fade.
     void OnFreqEnded(Message *pMsg);
 
     // 0x0036aae0

@@ -4,15 +4,29 @@
 #include <list>
 
 #include "app/application.h"
+#include "app/playsound.h"
 #include "app/watchdog.h"
+#include "game/freqappearance.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "game/gamestats.h"
+#include "game/globalsettings.h"
+#include "gfx/gfxdevice.h"
+#include "math/color.h"
 #include "met/metcommandmap.h"
 #include "met/metcommandrepeater.h"
+#include "met/metfade.h"
+#include "met/metfrontendstate.h"
 #include "met/metlogoscreen.h"
+#include "met/metremixmanager.h"
 #include "met/metscreen.h"
+#include "msg/gameconnectionlostmsg.h"
+#include "msg/isrecordingmsg.h"
+#include "msg/lobbyconnectionlostmsg.h"
 #include "msg/metcontrollerreading.h"
+#include "msg/metfreqendedmsg.h"
+#include "msg/metstartnetlaunchmsg.h"
+#include "msg/metstartpausemsg.h"
 #include "msg/metunlockstagesmsg.h"
 #include "msg/rawcontrollermsg.h"
 #include "os/hxstr.h"
@@ -21,8 +35,10 @@
 #include "rnd/animatable.h"
 #include "rnd/asyncloader.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 #include "rnd/transformable.h"
 #include "script/configquery.h"
+#include "script/scripthost.h"
 
 namespace {
 
@@ -73,6 +89,43 @@ inline int FrameIntervalMs(long long nNowNs, long long nThenNs) {
     return static_cast<int>((nNowNs - nThenNs + kHalfMillisecondNs) / kNanosecondsPerMillisecond);
 }
 
+// 0x006c359c
+// Set to send the next finished game back to the logo screen. OnFreqEnded() is the one reader and
+// clears it, and no routine in the image sets it. The name is inferred.
+int g_nReturnToLogo;
+
+// The front-end state phase in which a pause shows the plain pause screen. The meaning of the
+// phase is not recovered.
+constexpr int kPlainPausePhase = 5;
+
+// The front-end state phase in which OnUnknownSlot5() leaves the music playing. The meaning of
+// the phase is not recovered.
+constexpr int kNoMusicStopPhase = 2;
+
+// The music OnUnknownSlot5() stops.
+static const char *const kFrontEndMusic = "SND_MET_MUSIC1";
+
+// The full scale OnUnknownSlot8() and OnUnknownSlot10() give the subsystem timing graph.
+constexpr int kTimingGraphFullScaleMs = 50;
+
+// The arena view ResolveArenaView() attaches.
+static const char *const kArenaView = "Metagame_arena.view";
+
+// The fade OnFreqEnded() starts, in frames.
+constexpr float kFreqEndedFadeFrames = 360.0f;
+
+// The two levels that return to the main screen and complete the tutorial.
+static const char *const kTutorialLevel = "tutorial";
+static const char *const kTutorialRemixLevel = "tutorialrmx";
+
+// The script template OnFreqEnded() runs on leaving a jam, and its one argument.
+constexpr int kJukeboxTemplate = 0x267;
+static const char *const kJukeboxStopArgument = "0";
+
+// The components of the two clear colours OnFreqEnded() sets.
+constexpr float kClearBlue = 0.15f;
+constexpr float kOpaque = 1.0f;
+
 } // namespace
 
 // 0x006c3598
@@ -90,6 +143,7 @@ RndAsyncLoader *MetRenderer::sSharedTexLoader;
 // 0x006c3610
 RndAsyncLoader *MetRenderer::sArenaLoader;
 
+// 0x0036a900
 void MetRenderer::OnUnknownSlot4() {
     if (mUnknown94 != nullptr) {
         mUnknown94->Reset();
@@ -101,6 +155,24 @@ void MetRenderer::OnUnknownSlot4() {
     QueryConfigValue(kStartUpConfigCode); // Yes, the binary discards the result.
 }
 
+// 0x0036b0c0
+void MetRenderer::OnUnknownSlot5() {
+    mUnknowna8 = 0;
+    if (mUnknown94 != nullptr) {
+        mUnknown94->Reset();
+    }
+    while (mUnknown84.begin() != mUnknown84.end()) {
+        mUnknown84.erase(mUnknown84.begin());
+    }
+    ClearScreenScene();
+    ClearBackgroundScene();
+    mUnknown7c = nullptr;
+    if (MetFrontEndState::shared()->mUnknown18 != kNoMusicStopPhase) {
+        StopSoundByName(kFrontEndMusic);
+    }
+}
+
+// 0x0036b740
 void MetRenderer::OnUnknownSlot9() {
     if (mUnknowna8 == 0) {
         return;
@@ -132,6 +204,7 @@ void MetRenderer::OnUnknownSlot9() {
     mUnknown9c->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
+// 0x003715e0
 void MetRenderer::OnFadeOutDone() {
     mUnknownd0 = 0;
 
@@ -153,9 +226,11 @@ void MetRenderer::OnFadeOutDone() {
     mUnknown7c->mUnknown50 = 1;
 }
 
+// 0x003715d8
 void MetRenderer::OnFadeInDone() {
 }
 
+// 0x003714c8
 void MetRenderer::SetActivePanel(MetScreen *pScreen) {
     mUnknown7c = pScreen;
 
@@ -164,6 +239,15 @@ void MetRenderer::SetActivePanel(MetScreen *pScreen) {
     }
 }
 
+// 0x00390088
+void MetRenderer::OnUnknown00390088() {
+}
+
+// 0x00390090
+void MetRenderer::OnUnknown00390090() {
+}
+
+// 0x003719e0
 void MetRenderer::AddScreen(MetScreen *pScreen) {
     if (std::find(mUnknown84.begin(), mUnknown84.end(), pScreen) != mUnknown84.end()) {
         return;
@@ -206,12 +290,14 @@ void MetRenderer::RemoveScreenView(Rnd::View *pView) {
     mUnknowna0->RemoveAnim(pView);
 }
 
+// 0x003719a0
 void MetRenderer::ClearScreenScene() {
     mUnknowna0->ReleaseAnimsRefs();
     mUnknowna0->ClearDraws();
     mUnknowna0->ClearTransList();
 }
 
+// 0x00371960
 void MetRenderer::ClearBackgroundScene() {
     mUnknowna4->ReleaseAnimsRefs();
     mUnknowna4->ClearDraws();
@@ -409,4 +495,167 @@ int MetRenderer::PollArenaLoader(float *pfProgress) {
     const int bDone = sArenaLoader->Poll(&flProgress);
     *pfProgress += flProgress;
     return bDone;
+}
+
+// 0x0036a9e0
+void MetRenderer::ResolveArenaView(int nSkipResolve) {
+    Rnd::View *pView = nullptr;
+    if (nSkipResolve == 0) {
+        float flProgress;
+        sArenaLoader->Poll(&flProgress); // Yes, the binary discards the result.
+        pView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kArenaView)));
+    }
+    if (pView != nullptr) {
+        AddBackgroundView(pView);
+    }
+}
+
+// 0x00371670
+void MetRenderer::OnUnknownSlot8() {
+    if (mUnknowna8 == 0) {
+        return;
+    }
+    FreqAppearance::RenderBurnTextures();
+    mUnknown9c->Rnd::Drawable::Draw();
+    for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end(); ++it) {
+        (*it)->OnDrawPass();
+    }
+    if (mUnknownac != 0) {
+        g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
+    }
+    if (mUnknownb0 != 0) {
+        g_gfxDevice.DrawRenderStatsOverlay();
+    }
+}
+
+// 0x00371570
+void MetRenderer::OnUnknownSlot10() {
+    if (mUnknowna8 == 0) {
+        return;
+    }
+    mUnknown9c->Rnd::Drawable::Draw();
+    if (mUnknownac != 0) {
+        g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
+    }
+    if (mUnknownb0 != 0) {
+        g_gfxDevice.DrawRenderStatsOverlay();
+    }
+}
+
+// 0x0036c5d8
+void MetRenderer::HandleMessage(Message *pMsg) {
+    const int nType = pMsg->Type();
+    if (nType == g_nRawControllerMsgType) {
+        OnRawController(static_cast<RawControllerMsg *>(pMsg));
+    } else if (nType == g_nMetStartNetLaunchMsgType) {
+        ForwardToPanel(pMsg);
+    } else if (nType == g_nMetStartPauseMsgType) {
+        OnStartPause(pMsg);
+    } else if (nType == g_nGameConnectionLostMsgType) {
+        // Yes, the binary drops this message rather than forwarding it.
+    } else if (nType == g_nLobbyConnectionLostMsgType) {
+        ForwardToPanelUnchecked(pMsg);
+    } else if (nType == g_nIsRecordingMsgType) {
+        mUnknown78 = static_cast<IsRecordingMsg *>(pMsg)->mIsRecording;
+    } else if (nType == g_nMetFreqEndedMsgType) {
+        OnFreqEnded(pMsg);
+    } else {
+        ForwardToPanel(pMsg);
+    }
+}
+
+// 0x0036b938
+void MetRenderer::OnStartPause([[maybe_unused]] Message *pMsg) {
+    OnUnknownSlot4();
+    if (MetFrontEndState::shared()->mUnknown18 == kPlainPausePhase) {
+        ActivatePanel(MetScreen::FindScreenByName(HxStr("MetPauseGameScreen")));
+    } else if (Application::shared()->GetGameMode() == kGameModeLocal) {
+        if (Application::shared()->GetPlayMode() == kPlayModeGame) {
+            ActivatePanel(MetScreen::FindScreenByName(HxStr("MetPauseGameScreen")));
+        } else {
+            ActivatePanel(MetScreen::FindScreenByName(HxStr("MetPauseMultiRemixScreen")));
+        }
+    } else if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
+        if (Application::shared()->GetPlayMode() == kPlayModeGame) {
+            ActivatePanel(MetScreen::FindScreenByName(HxStr("MetPauseSoloGameScreen")));
+        } else {
+            ActivatePanel(MetScreen::FindScreenByName(HxStr("MetPauseSoloRemixScreen")));
+        }
+    }
+}
+
+// 0x0036bcb8
+void MetRenderer::OnFreqEnded(Message *pMsg) {
+    MetFreqEndedMsg *pEnded = static_cast<MetFreqEndedMsg *>(pMsg);
+    const GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    SetDoWinSequence(0);
+
+    if (params.mJukeboxMode == 1 && pEnded->mUnknownb8Clear == 0) {
+        const Color black{0.0f, 0.0f, 0.0f, kOpaque};
+        g_gfxDevice.SetClearColor(black);
+        OnUnknownSlot4();
+        AddScreen(MetScreen::FindScreenByName(HxStr("MetRemixManager")));
+        MetRemixManager::shared()->PlayCurrentTrack();
+        return;
+    }
+
+    const Color blue{0.0f, 0.0f, kClearBlue, kOpaque};
+    g_gfxDevice.SetClearColor(blue);
+    mUnknownc8 = 1;
+    mUnknownc4 = nullptr;
+
+    if (mUnknown78 != 0 || g_nReturnToLogo != 0) {
+        mUnknown78 = 0;
+        g_nReturnToLogo = 0;
+        OnUnknown00390088();
+        mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetLogoScreen"));
+    } else if (params.mLevelName == kTutorialLevel || params.mLevelName == kTutorialRemixLevel) {
+        OnUnknown00390088();
+        if (GlobalSettings::shared()->mTutorialComplete == 0) {
+            GlobalSettings::shared()->mTutorialComplete = 1;
+            if (MetFrontEndState::shared()->mUnknown0c != 0) {
+                MetFrontEndState::shared()->mUnknown10 = 1;
+            }
+        }
+        mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetMainScreen"));
+    } else if (params.mUnknown1c == kPlayModeJam) {
+        GameStats *pStats = Application::shared()->GetGameManager()->GetStats();
+        if (params.mJukeboxMode != 0) {
+            GameParams cleared(*Application::shared()->GetGameManager()->GetParams());
+            cleared.mLoadingGame = 0;
+            Application::shared()->GetGameManager()->SetParams(cleared);
+            CallScriptTemplate(kJukeboxTemplate, kJukeboxStopArgument);
+            OnUnknown00390088();
+            OnUnknown00390090();
+            MetRemixManager::shared()->LeaveJukeboxMode();
+            mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetJukeboxTopButtonsScreen"));
+        } else if (MetFrontEndState::shared()->mUnknown0c != 0 && pStats->mUnknown14 != 0) {
+            mUnknownc4 = SelectEndScreen();
+        } else {
+            OnUnknown00390088();
+            OnUnknown00390090();
+            mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetRemixTypeScreen"));
+            GameParams cleared(*Application::shared()->GetGameManager()->GetParams());
+            cleared.mLoadingGame = 0;
+            Application::shared()->GetGameManager()->SetParams(cleared);
+            CallScriptTemplate(kJukeboxTemplate, kJukeboxStopArgument);
+        }
+    } else if (pEnded->mUnknownb8Clear != 0) {
+        OnUnknown00390088();
+        if (params.mUnknown28 != 1) {
+            OnUnknown00390090();
+            mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetSoloStagesScreen"));
+            GameParams cleared(*Application::shared()->GetGameManager()->GetParams());
+            cleared.mLoadingGame = 0;
+            Application::shared()->GetGameManager()->SetParams(cleared);
+            CallScriptTemplate(kJukeboxTemplate, kJukeboxStopArgument);
+        }
+    } else {
+        mUnknownc4 = SelectEndScreen();
+    }
+
+    mUnknownd0 = 1;
+    OnUnknownSlot4();
+    mUnknowncc->FadeOut(kFreqEndedFadeFrames, mUnknown68, this, 0);
+    ResolveArenaView(0);
 }

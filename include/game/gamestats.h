@@ -136,8 +136,18 @@ private:
     // Not written by the constructor.
     float mProgress; // +0x0c
     int mUnknown10;  // +0x10
-    // Not written by the constructor.
-    int mUnknown14;             // +0x14
+
+public:
+    /**
+     * Written by GrooveWorld. Not written by the constructor.
+     *
+     * Public because MetRenderer::OnFreqEnded() reads it directly at `0x0036c138`, where a
+     * non-zero value sends a finished jam to the end screen rather than MetRemixTypeScreen, and the
+     * image has no accessor. +0x14
+     */
+    int mUnknown14;
+
+private:
     std::vector<int> mScores;   // +0x18
     std::vector<float> mRatios; // +0x24
     std::vector<int> mTallies;  // +0x30
