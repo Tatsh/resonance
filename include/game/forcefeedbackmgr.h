@@ -11,19 +11,20 @@ class Player;
  * Driver of the controllers' vibration motors during a song.
  *
  * The class is not polymorphic and emits no RTTI. The name is inferred from its translation unit.
- * The five file-local scheduler commands beside it record `ForceFeedbackMgr.cpp` in their
+ * The six file-local scheduler commands beside it record `ForceFeedbackMgr.cpp` in their
  * anonymous-namespace RTTI names (SteadyFBCmd, StartMetronomeFBCmd, SetPowerupFBCmd,
- * SetSmallMotorCmd, and SetBothMotorsCmd). The object is 0x48 bytes. GrooveWorld builds one, keeps
- * it at `+0x34`, and deletes it in GrooveWorld::Shutdown(). The constructor also stores the object
- * in the unit's pointer at `0x0067a3f0`, which every command's Execute() goes through.
+ * SetSmallMotorCmd, SetLargeMotorCmd, and SetBothMotorsCmd). The object is 0x48 bytes. GrooveWorld
+ * builds one, keeps it at `+0x34`, and deletes it in GrooveWorld::Shutdown(). The constructor also
+ * stores the object in the unit's pointer at `0x0067a3f0`, which every command's Execute() goes
+ * through.
  *
  * Two kinds of vibration run through it. The metronome pulses the small motor of every player not
  * inside a powerup effect once a beat, and an effect runs one of five configured motor patterns on
  * one player's controller. Any bit set in mFlags suspends both.
  *
  * The unit's static initialiser at `0x0016ff68` hands six factory functions to the command
- * registrar at `0x00538208` with an identifier of zero, and each factory returns null. Five are the
- * commands' NewCmd() members. The sixth, at `0x001703d8`, belongs to no recovered class.
+ * registrar at `0x00538208` with an identifier of zero, and each factory returns null. All six are
+ * the commands' NewCmd() members.
  */
 class ForceFeedbackMgr {
 public:

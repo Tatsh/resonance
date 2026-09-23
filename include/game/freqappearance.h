@@ -41,19 +41,21 @@ public:
     /** The longest username a Record stores, without its terminator. */
     static constexpr int kRecordNameLength = 12;
 
+    /** The number of packed parts a Record has room for. */
+    static constexpr int kRecordPartCapacity = 16;
+
     /**
      * Compact form of an appearance that Pack() fills and Unpack() reads.
      *
-     * The record has no RTTI and no name in the image, so the title is inferred. Its length
-     * follows from the part count, and no routine in the image fixes the largest count. mParts is
-     * declared with one entry, and a record runs past it by the remaining parts.
+     * The record has no RTTI and no name in the image, so the title is inferred. EncodeRecord()
+     * and DecodeRecord() both copy 0x94 bytes, which fixes the capacity at 16 parts.
      */
     struct Record {
         bool mValid;                       /*!< Set by Pack(). Unpack() ignores a clear record. */
         char mName[kRecordNameLength + 1]; /*!< The username, cut to 12 characters. */
         unsigned char mSkillStatus;        /*!< The skill status. */
-        int mPartCount;                    /*!< The number of entries in mParts. */
-        FreqPart::Packed mParts[1];        /*!< The packed parts, mPartCount of them. */
+        int mPartCount;                    /*!< The number of entries in use in mParts. */
+        FreqPart::Packed mParts[kRecordPartCapacity]; /*!< The packed parts. */
     };
 
     /**
@@ -219,6 +221,34 @@ public:
      * @ghidraAddress 0x001749e8
      */
     void Unpack(const Record &record);
+
+    /**
+     * Encode a compact record as a 256-character string with no zero bytes.
+     *
+     * The record is split into 32 groups of seven bytes, zero padded, and each group becomes eight
+     * bytes through EncodeNonZeroBytes(). The encoded buffer has no terminator, and the last
+     * group's fill runs seven bytes past the buffer. The string therefore ends at the next zero
+     * byte on the stack. The image has no caller, and the name is inferred.
+     *
+     * @param record The record to encode.
+     * @return The encoded string.
+     * @ghidraAddress 0x00170ca8
+     */
+    static HxStr EncodeRecord(const Record &record);
+
+    /**
+     * Decode a string EncodeRecord() wrote back into a compact record.
+     *
+     * The string is copied over 256 bytes of 1 with no length check, and the first seven bytes of
+     * each eight-byte group are kept with each 1 turned back into zero. The mask byte is ignored,
+     * and a zero EncodeRecord() wrote as 0xff therefore decodes as 0xff. The image has no caller,
+     * and the name is inferred.
+     *
+     * @param encoded The encoded string.
+     * @param pRecord The record to fill.
+     * @ghidraAddress 0x00170ee0
+     */
+    static void DecodeRecord(const HxStr &encoded, Record *pRecord);
 
     /**
      * Record the skill status.

@@ -54,6 +54,11 @@ constexpr int kEncodedMaskByte = 7;
 constexpr int kEncodedFillLength = 8;
 constexpr int kEncodedMaskBase = 0x80;
 constexpr unsigned char kEncodedZero = 0xff;
+// EncodeRecord() and DecodeRecord() work in 32 groups of seven record bytes, eight encoded bytes
+// each. DecodeRecord() pads with, and turns back into zero, a byte of 1.
+constexpr int kEncodedGroupCount = 32;
+constexpr int kEncodedGroupLength = 8;
+constexpr unsigned char kDecodedZero = 1;
 
 } // namespace
 
@@ -246,4 +251,43 @@ void FreqAppearance::Unpack(const Record &record) {
         mUnknown00 = record.mName;
         mDetail->unpack(record.mParts, record.mPartCount);
     }
+}
+
+// 0x00170ca8
+HxStr FreqAppearance::EncodeRecord(const Record &record) {
+    unsigned char aDecoded[kEncodedGroupCount * kEncodedDataLength];
+    memset(aDecoded, 0, sizeof(aDecoded));
+    memcpy(aDecoded, &record, sizeof(record));
+
+    // No terminator follows, and the last group's fill overruns by seven bytes, as in the binary.
+    unsigned char aEncoded[kEncodedGroupCount * kEncodedGroupLength];
+    memset(aEncoded, 0, sizeof(aEncoded));
+    for (int i = 0; i < kEncodedGroupCount; ++i) {
+        EncodeNonZeroBytes(&aDecoded[i * kEncodedDataLength], &aEncoded[i * kEncodedGroupLength]);
+    }
+
+    HxStr encoded(reinterpret_cast<const char *>(aEncoded));
+    return encoded;
+}
+
+// 0x00170ee0
+void FreqAppearance::DecodeRecord(const HxStr &encoded, Record *pRecord) {
+    unsigned char aEncoded[kEncodedGroupCount * kEncodedGroupLength];
+    memset(aEncoded, kDecodedZero, sizeof(aEncoded));
+    // The length is not checked against the buffer.
+    memcpy(aEncoded, encoded.mStr != nullptr ? encoded.mStr : g_szEmptyString, encoded.mLen);
+
+    unsigned char aDecoded[kEncodedGroupCount * kEncodedDataLength];
+    memset(aDecoded, 0, sizeof(aDecoded));
+    for (int i = 0; i < kEncodedGroupCount; ++i) {
+        for (int j = 0; j < kEncodedDataLength; ++j) {
+            unsigned char &decoded = aDecoded[i * kEncodedDataLength + j];
+            decoded = aEncoded[i * kEncodedGroupLength + j];
+            if (aEncoded[i * kEncodedGroupLength + j] == kDecodedZero) {
+                decoded = 0;
+            }
+        }
+    }
+
+    memcpy(pRecord, aDecoded, sizeof(*pRecord));
 }

@@ -228,6 +228,26 @@ private:
 int SetSmallMotorCmd::sCmdID;
 
 /**
+ * Scheduler command for the big motor of one slot, never constructed.
+ *
+ * `Q237_GLOBAL_$N$ForceFeedbackMgr.cppXFKhgb16SetLargeMotorCmd` at `0x007d9478` is the only other
+ * trace. The binary emits no vtable, CmdID(), or Execute() for the class.
+ */
+class SetLargeMotorCmd : public Sch::Command {
+public:
+    // 0x001703d8
+    // The factory the unit's static initialiser registers under identifier zero.
+    static Sch::Command *NewCmd() {
+        return nullptr;
+    }
+
+    // The word at 0x0067a414, which no emitted routine reads.
+    static int sCmdID;
+};
+
+[[maybe_unused]] int SetLargeMotorCmd::sCmdID;
+
+/**
  * Scheduler command that sets both motors of one slot.
  *
  * `Q237_GLOBAL_$N$ForceFeedbackMgr.cppXFKhgb16SetBothMotorsCmd` in the RTTI, with its vtable at
