@@ -401,6 +401,7 @@ metexpansionpakscreen
 metfade
 metfreqendedmsg
 metfreqmakerdirectionsscreen
+metfrontendstate
 metglobalsettingssaverscreen
 methodobject
 metjukeboxbasescreen

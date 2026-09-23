@@ -3,6 +3,7 @@ set(RESONANCE_MET_SRCS
     metarenasscreen.cpp
     metexpansionpakscreen.cpp
     metfreqmakerdirectionsscreen.cpp
+    metfrontendstate.cpp
     metglobalsettingssaverscreen.cpp
     metjukeboxbasescreen.cpp
     metjukeboxcustomremixesscreen.cpp

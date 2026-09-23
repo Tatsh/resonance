@@ -45,9 +45,8 @@ class MetButtonList;
  * a factory on this class is not settled.
  *
  * OnUnknownSlot36() is the one body that is not written. It needs MetRenderer::ResolveArenaView()
- * and the two empty MetRenderer routines at `0x00390088` and `0x00390090`, the singleton getter at
- * `0x00217f30`, and the two GameManagerImpl slots at table offsets 0xc8 and 0xd8, none of which
- * this tree declares yet.
+ * and the two empty MetRenderer routines at `0x00390088` and `0x00390090`, which this tree does not
+ * declare yet.
  */
 class MetSoloWinScreen : public MetScreen, public MemcardUser {
 public:
@@ -138,18 +137,30 @@ public:
      * runs the slot once the exit animation has finished. Selection 0 continues to
      * `MetSoloStagesScreen` with the game manager's stage index advanced by one, selection 1
      * returns to `MetMainScreen`, and any other selection goes to `MetLoadGameScreen` after
-     * recording this screen's own name in the object at `0x00217f30`. Every path then clears the
+     * recording this screen's own name in MetFrontEndState::mUnknown24. Every path then clears the
      * selection.
      *
      * @ghidraAddress 0x003b6188
      */
     virtual void OnUnknownSlot36();
 
+    /**
+     * Record on the registered solo win screen whether the finished stage unlocked a difficulty.
+     *
+     * The screen is resolved under the registry key `MetSoloWinScreen` and narrowed with
+     * dynamic_cast. The result is written through without a null test. MetStageFinishScreen slot
+     * 36 is the one caller.
+     *
+     * @param nUnlocked Non-zero when a difficulty was unlocked.
+     * @ghidraAddress 0x003b9c20
+     */
+    static void SetDifficultyUnlocked(int nUnlocked);
+
 private:
     // The three-button ring. The constructor allocates it and the destructor releases it. +0x90
     MetButtonList *mUnknown90;
-    // Set while the session result still needs committing. The constructor clears it and slot 36
-    // clears it again after committing. No writer that sets it has been identified, so the commit
-    // branch of slot 36 is unreachable from anything recovered so far. +0x94
-    int mUnknown94;
+    // Set while a difficulty unlocked by the finished stage still needs committing.
+    // SetDifficultyUnlocked() writes it from MetStageFinishScreen slot 36, the constructor clears
+    // it, and slot 36 clears it again after committing. +0x94
+    int mDifficultyUnlocked;
 };

@@ -33,6 +33,9 @@ static const char *const kSoloStatsScreen = "MetSoloStatsScreen";
 static const char *const kEndGameGizmoScreen = "MetEndGameGizmoScreen";
 static const char *const kTitleScreen = "MetScreenTitleScreen";
 
+// This screen's own registry key, which SetDifficultyUnlocked() resolves.
+static const char *const kOwnScreenName = "MetSoloWinScreen";
+
 // The prompt layout OnUnknownSlot33() selects.
 static const char *const kPromptLayout = "no_back_title";
 
@@ -57,7 +60,7 @@ constexpr int kSelectAlternateCycles = 2;
 
 MetSoloWinScreen::MetSoloWinScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown90(new MetButtonList()), mUnknown94(0) {
+      mUnknown90(new MetButtonList()), mDifficultyUnlocked(0) {
 }
 
 MetSoloWinScreen::~MetSoloWinScreen() {
@@ -143,4 +146,11 @@ void MetSoloWinScreen::OnUnknownSlot30(Rnd::Object *) {
 void MetSoloWinScreen::OnUnknownSlot33() {
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
     MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+}
+
+void MetSoloWinScreen::SetDifficultyUnlocked(int nUnlocked) {
+    MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
+    MetSoloWinScreen *pWinScreen =
+        pScreen != nullptr ? dynamic_cast<MetSoloWinScreen *>(pScreen) : nullptr;
+    pWinScreen->mDifficultyUnlocked = nUnlocked; // The binary does not test the result for null.
 }
