@@ -38,8 +38,8 @@ class WatchdogRecorder;
  * not observe progress and it reports nothing.
  *
  * The threshold of six seconds in Service() is not a stall limit. When the distance from the last
- * reading exceeds it, the clock is marked forward and re-read, which stops the loop from running
- * six seconds of arrears in one burst.
+ * reading exceeds it, the clock is marked back to the current time and re-read, which stops the
+ * loop from running six seconds of arrears in one burst.
  *
  * The member at `+0x0c` is a stream mode, one for recording and two for playback, and `+0x10` is
  * the WatchdogRecorder that BeginRecording() installs. The member at `+0x48` blocks every

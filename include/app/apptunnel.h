@@ -126,10 +126,10 @@ public:
      * Advance the tunnel to one song position.
      *
      * Fades the string flares, shrinks the gem flashes, retires finished panels and fired
-     * triggers, and advances every helper and effect. The arrows and the players also receive the
-     * position scaled by the tempo rate. Renderer::OnUnknownSlot7() is the caller. The title is
-     * inferred from that caller, which hands the same value to Rnd::Animatable::SetFrame() on its
-     * three views.
+     * triggers, and advances every helper and effect. The fire effects' views, the arrows, and the
+     * players also receive the position scaled by the tempo rate. Renderer::OnUnknownSlot7() is the
+     * caller. The title is inferred from that caller, which hands the same value to
+     * Rnd::Animatable::SetFrame() on its three views.
      *
      * @param flFrame The song position, in MIDI ticks.
      * @ghidraAddress 0x00446960

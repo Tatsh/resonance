@@ -23,6 +23,8 @@ public:
     /**
      * Build the badge for one player.
      *
+     * Overlay::Overlay() inlines the body, and this copy has no caller.
+     *
      * @param pPlayer The player the badge shows.
      * @param nIndex The badge number, counted over the world's players from 0.
      * @ghidraAddress 0x0042ac58
