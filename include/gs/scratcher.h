@@ -3,36 +3,55 @@
 #include <vector>
 
 #include "gs/pitcher.h"
+#include "mid/mbt.h"
 #include "msg/message.h"
+
+class PhraseMgr;
+class Player;
+class Quantizer;
+class TrackData;
+
+namespace Sch {
+class TickClock;
+} // namespace Sch
 
 /**
  * Pitcher that drives the scratch track.
  *
  * `9Scratcher` in the RTTI descriptor at `0x00901fe0`, with Pitcher as its one base. Its three
  * tables are at `0x007e57b8`, `0x007e5790`, and `0x007e5760`, and it overrides exactly the two
- * slots Pitcher leaves pure.
+ * slots Pitcher leaves pure. PitchingSTG's tagged allocation measures the object at 0x90 bytes,
+ * and PitchingSTG builds one of these when the track's kind word is 3 and a NotePitcher when it is
+ * 2.
  *
  * Tick() is what fixes mBarDivisor. It divides the elapsed tick count by that member, sends the
- * result through SendSeekerMsg(), and then, while mUnknown54 is set, tests the object at
- * mUnknown40 against the same bar and dispatches a slot on the synthesiser that
- * Globals::GetSynth() returns.
+ * result through SendSeekerMsg(), and then, while mUnknown54 is set, tests the track description
+ * against the same bar and dispatches a slot on the synthesiser that Globals::GetSynth() returns.
  *
- * Its destructor releases one vector of four-byte elements at `+0x74`, which is the one member of
- * the class the destructor reveals.
+ * The constructor fixes the member map. It copies the bar length from the phrase manager's `+0x34`
+ * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
+ * both player references at the stand-in player, and sizes mUnknown74 to three zeroed words.
  *
- * Only HandleMessage() and Tick() are written. The five routines they dispatch to and the
- * constructor are declared with their addresses and their bodies are not written.
+ * Only HandleMessage() is written. The five routines it dispatches to, Tick(), and the constructor
+ * are declared with their addresses and their bodies are not written.
  */
 class Scratcher : public Pitcher {
 public:
     /**
-     * Construct a scratcher.
+     * Construct a scratcher for one track.
      *
      * The body is not written.
      *
+     * @param pPhraseMgr The phrase manager for the track.
+     * @param pQuantizer The quantiser for the track.
+     * @param pClock The clock the producer schedules against.
+     * @param pTrackData The track description.
      * @ghidraAddress 0x001cf988
      */
-    Scratcher();
+    Scratcher(PhraseMgr *pPhraseMgr,
+              Quantizer *pQuantizer,
+              Sch::TickClock *pClock,
+              const TrackData *pTrackData);
 
     /**
      * @ghidraAddress 0x001d1bf0
@@ -109,30 +128,33 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
-    void *mUnknown38; // +0x38
-    void *mUnknown3c; // +0x3c
-    // The object Tick() tests the current bar against.
-    void *mUnknown40; // +0x40
-    // Matched against a PitchRiffMsg's `+0x10` and an InvalidateSeekerMsg's `+0x08`, so it
-    // identifies the track this Scratcher serves.
+    PhraseMgr *mPhraseMgr;       // +0x38
+    Quantizer *mQuantizer;       // +0x3c
+    const TrackData *mTrackData; // +0x40, the object Tick() tests the current bar against
+    // Copied from the track description's `+0x04`. Matched against a PitchRiffMsg's `+0x10` and
+    // an InvalidateSeekerMsg's `+0x08`, so it identifies the track this Scratcher serves.
     int mUnknown44; // +0x44
-    // Divisor that turns an elapsed tick count into a bar index.
-    int mBarDivisor; // +0x48
-    int mUnknown4c;  // +0x4c
-    int mUnknown50;  // +0x50
-    // Tick() performs its second half only while this is set.
+    // Copied from the phrase manager's `+0x34`. Turns an elapsed tick count into a bar index.
+    int mBarDivisor;        // +0x48
+    Sch::TickClock *mClock; // +0x4c
+    int mUnknown50;         // +0x50, starts at kIDableUnregistered
+    // Tick() performs its second half only while this is set. The constructor derives it from two
+    // configuration queries.
     int mUnknown54; // +0x54
-    // The argument Tick() hands to the synthesiser slot.
+    // The track description's MIDI channel byte, and the argument Tick() hands to the synthesiser
+    // slot.
     int mUnknown58; // +0x58
-    // Matched against a PitchRiffMsg's `+0x08`.
-    int mUnknown5c; // +0x5c
-    int mUnknown60; // +0x60
-    int mUnknown64; // +0x64
-    // Result of the PitchRiffMsg handler.
-    int mUnknown68; // +0x68
-    int mUnknown6c; // +0x6c
-    int mUnknown70; // +0x70
-    // One vector of four-byte elements, which the destructor releases. Its element type is
-    // unrecovered.
-    std::vector<int> mUnknown74; // +0x74
+    // Starts at g_nullPlayer. Matched against a PitchRiffMsg's `+0x08`, which msg/pitchriffmsg.h
+    // types as an int.
+    Player *mUnknown5c;          // +0x5c
+    Mid::MBT mUnknown60;         // +0x60, starts at kMBTInfinity
+    Player *mUnknown64;          // +0x64, starts at g_nullPlayer
+    int mUnknown68;              // +0x68, result of the PitchRiffMsg handler
+    int mUnknown6c;              // +0x6c, starts at -1
+    int mUnknown70;              // +0x70
+    std::vector<int> mUnknown74; // +0x74, three zeroed words on construction
+    int mUnknown80;              // +0x80, not written by the constructor
+    int mUnknown84;              // +0x84
+    int mUnknown88;              // +0x88
+    int mUnknown8c;              // +0x8c
 };

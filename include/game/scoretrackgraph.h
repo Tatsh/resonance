@@ -4,10 +4,10 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/mixer.h"
-#include "game/phrasemgr.h"
 #include "game/phraseplayer.h"
 #include "game/quantizer.h"
 #include "game/trackdata.h"
+#include "gs/phrasemgr.h"
 #include "synth/musesynth.h"
 
 /**

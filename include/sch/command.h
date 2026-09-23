@@ -46,9 +46,13 @@ namespace Sch {
  * their bodies, and both bodies stream one field after another in the same order through the two
  * stream interfaces. CmdID() follows from the static member the RTTI records as
  * `_13ControllerCmd$sCmdID` and from the two diagnostics `Streamed Command ID %ld` and `Cannot
- * find ID %ld in Command Factory List`; every slot-3 body returns one per-class word, and each of
- * those words is zero throughout the shipped image. Execute() and Print() are inferred from their
- * bodies alone, and no string in the image identifies either.
+ * find ID %ld in Command Factory List`; every slot-3 body returns one per-class word. The image
+ * initialises four of the twenty-four words to a non-zero identifier, and the program records a
+ * single reader and no writer for each of the four: ControllerCmd 2 at `0x0067f238`,
+ * DoGameSystemPlayCmd 4 at `0x006682b8`, EndRecordingCmd 6 at `0x006693e8`, and ExitCmd 7 at
+ * `0x0067f24c`. The other twenty words are initialised to zero.
+ * Execute() and Print() are inferred from their bodies alone, and no string in the image
+ * identifies either.
  *
  * Nothing registers a factory in the shipped build. The registrar constructor at `0x00538208`
  * receives a literal zero for the identifier at all twenty-seven of its call sites, and it returns

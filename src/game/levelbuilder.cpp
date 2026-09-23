@@ -61,6 +61,6 @@ Attachment *LevelBuilder::OnUnknownSlot7() {
 }
 
 // 0x001ec480
-void *LevelBuilder::OnUnknownSlot8() {
+PlayMap *LevelBuilder::OnUnknownSlot8() {
     return mUnknown34;
 }

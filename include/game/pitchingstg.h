@@ -3,11 +3,11 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/jameffectsmgr.h"
-#include "game/notepitcher.h"
-#include "game/pitcher.h"
 #include "game/scoretrackgraph.h"
-#include "game/scratcher.h"
 #include "game/trackdata.h"
+#include "gs/notepitcher.h"
+#include "gs/pitcher.h"
+#include "gs/scratcher.h"
 
 /**
  * Gameplay stage for a track whose input is a pitch.

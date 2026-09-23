@@ -1,10 +1,10 @@
 #pragma once
 
 #include "game/genericcatcher.h"
-#include "game/phrasemgr.h"
 #include "game/player.h"
 #include "game/quantizer.h"
 #include "game/trackdata.h"
+#include "gs/phrasemgr.h"
 #include "msg/message.h"
 #include "sch/cmdid.h"
 #include "sch/tick.h"

@@ -69,7 +69,7 @@ public:
     /**
      * @ghidraAddress 0x001ec480
      */
-    virtual void *OnUnknownSlot8();
+    virtual PlayMap *OnUnknownSlot8();
 
     /**
      * @ghidraAddress 0x001ec738
@@ -160,5 +160,5 @@ private:
     // replaces it. Which subclass it is remains unrecovered.
     Attachment *mUnknown30; // +0x30
     // Deleted by the destructor through its own table slot 1. Its vptr sits at its own +0x38.
-    void *mUnknown34; // +0x34
+    PlayMap *mUnknown34; // +0x34
 };

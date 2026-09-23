@@ -1,6 +1,7 @@
 #pragma once
 
 class Attachment;
+class PlayMap;
 class TrackData;
 
 /**
@@ -90,14 +91,16 @@ public:
     virtual Attachment *OnUnknownSlot7() = 0;
 
     /**
-     * Unrecovered. Slot 8, and pure.
+     * Report the level's play map. Slot 8, and pure.
      *
-     * LevelBuilder returns the word at its own `+0x34`, which its destructor deletes through that
-     * object's own table slot 1. The object has its vptr at `+0x38`, and its class is unrecovered.
+     * LevelBuilder returns the word at its own `+0x34`. The LevelBuilder constructor at
+     * `0x001ea838` fills that word with a 0x74-byte allocation under the tag `PlayMap`, constructed
+     * by `0x00127a80` with PlayMapLinear's table at `0x007d1060` written to its `+0x38`, and the
+     * destructor deletes it through table slot 1. The verb remains unrecovered.
      *
-     * @return The object.
+     * @return The play map.
      */
-    virtual void *OnUnknownSlot8() = 0;
+    virtual PlayMap *OnUnknownSlot8() = 0;
 
     /**
      * Unrecovered. Slot 9, and pure.

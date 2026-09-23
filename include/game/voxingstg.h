@@ -7,7 +7,7 @@
 #include "game/jameffectsmgr.h"
 #include "game/scoretrackgraph.h"
 #include "game/trackdata.h"
-#include "game/voxer.h"
+#include "gs/voxer.h"
 
 /**
  * Gameplay stage for a vocal track.

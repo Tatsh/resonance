@@ -1,14 +1,25 @@
 #pragma once
 
 #include "gs/pitcher.h"
+#include "mid/mbt.h"
 #include "msg/message.h"
+
+class PhraseMgr;
+class Player;
+class Quantizer;
+class TrackData;
+
+namespace Sch {
+class TickClock;
+} // namespace Sch
 
 /**
  * Pitcher that drives a note track.
  *
  * `11NotePitcher` in the RTTI descriptor at `0x008eef68`, with Pitcher as its one base. Its three
  * tables are at `0x007e14a0`, `0x007e1478`, and `0x007e1448`, and it overrides exactly the two
- * slots Pitcher leaves pure.
+ * slots Pitcher leaves pure. PitchingSTG's tagged allocation measures the object at 0x70 bytes,
+ * and PitchingSTG builds one of these when the track's kind word is 2 and a Scratcher when it is 3.
  *
  * It ignores an EraseOffMsg rather than forwarding it, which is the one message the three Pitcher
  * subclasses treat differently from each other.
@@ -21,13 +32,27 @@
 class NotePitcher : public Pitcher {
 public:
     /**
-     * Construct a note pitcher.
+     * Construct a note pitcher for one track.
      *
-     * The body is not written.
+     * The seven arguments arrive in a1 through a3 and t0 through t3, which is the register
+     * convention this target uses for arguments five through eight. The body is not written.
      *
+     * @param pPhraseMgr The phrase manager for the track.
+     * @param pQuantizer The quantiser for the track.
+     * @param pClock The clock the producer schedules against.
+     * @param pTrackData The track description.
+     * @param bPlayModeOne Non-zero when the game manager reports play mode 1.
+     * @param nUnknown1 PitchingSTG passes 1.
+     * @param nUnknown2 PitchingSTG passes zero.
      * @ghidraAddress 0x001b1ce0
      */
-    NotePitcher();
+    NotePitcher(PhraseMgr *pPhraseMgr,
+                Quantizer *pQuantizer,
+                Sch::TickClock *pClock,
+                const TrackData *pTrackData,
+                int bPlayModeOne,
+                int nUnknown1,
+                int nUnknown2);
 
     /**
      * @ghidraAddress 0x001b39c0
@@ -104,9 +129,22 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
-    // Matched against an InvalidateSeekerMsg's `+0x08`, so it identifies the track this pitcher
-    // serves.
-    int mUnknown40; // +0x40
-    // Divisor that turns an elapsed tick count into a bar index.
-    int mBarDivisor; // +0x50
+    PhraseMgr *mPhraseMgr; // +0x38
+    Quantizer *mQuantizer; // +0x3c
+    // Copied from the track description's `+0x04`. Matched against an InvalidateSeekerMsg's
+    // `+0x08`, so it identifies the track this pitcher serves.
+    int mUnknown40;      // +0x40
+    Player *mUnknown44;  // +0x44, starts at g_nullPlayer
+    int mUnknown48;      // +0x48, starts at -1
+    Mid::MBT mUnknown4c; // +0x4c, starts at kMBTInfinity
+    // Copied from the phrase manager's `+0x34` after an initial kMBTInfinity. Turns an elapsed
+    // tick count into a bar index.
+    int mBarDivisor;             // +0x50
+    int mUnknown54;              // +0x54, starts at -1
+    int mPlayModeOne;            // +0x58, the constructor's fifth argument
+    int mUnknown5c;              // +0x5c, starts at 2
+    int mUnknown60;              // +0x60, the constructor's sixth argument
+    int mUnknown64;              // +0x64, the constructor's seventh argument
+    const TrackData *mTrackData; // +0x68
+    Sch::TickClock *mClock;      // +0x6c
 };

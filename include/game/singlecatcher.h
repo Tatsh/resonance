@@ -1,9 +1,9 @@
 #pragma once
 
 #include "game/catcher.h"
-#include "game/phrasemgr.h"
 #include "game/quantizer.h"
 #include "game/trackdata.h"
+#include "gs/phrasemgr.h"
 #include "sch/tick.h"
 #include "sch/tickclock.h"
 
