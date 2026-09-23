@@ -430,6 +430,7 @@ metsonglists
 metstagefinishscreen
 metstartnetlaunchmsg
 metstartpausemsg
+mettutorialscreen
 metunlockstagesmsg
 mgen
 midifilereader

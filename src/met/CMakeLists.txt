@@ -35,7 +35,8 @@ set(RESONANCE_MET_SRCS
     metsoloendremixscreen.cpp
     metsolowinscreen.cpp
     metsonglists.cpp
-    metstagefinishscreen.cpp)
+    metstagefinishscreen.cpp
+    mettutorialscreen.cpp)
 
 add_library(resonance_met STATIC ${RESONANCE_MET_SRCS})
 target_link_libraries(resonance_met PRIVATE resonance_common)
