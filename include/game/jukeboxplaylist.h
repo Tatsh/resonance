@@ -6,6 +6,8 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
+struct MetRemixRecord;
+
 /**
  * One queued remix.
  *
@@ -46,8 +48,10 @@ public:
     /**
      * Construct an empty list.
      *
-     * Inline. The image has no out-of-line copy; MetRemixManager's constructor expands it, writing
-     * the vptr and the empty vector and then running clear().
+     * Inline. MetRemixManager's constructor expands it, writing the vptr and the empty vector and
+     * then running clear(). The one out-of-line copy has no caller.
+     *
+     * @ghidraAddress 0x001e5ce8
      */
     JukeboxPlayList() {
         clear();
@@ -63,12 +67,9 @@ public:
     /**
      * Write the list to a stream.
      *
-     * Vtable slot 2. Writes the record version 1, then the entry count, then each entry. The name
-     * is inferred from the stream slot it reaches, which MetPersonaData::Save() settles as
-     * OBStream slot 4.
-     *
-     * The body is not written. The per-entry part runs through two further stream slots whose
-     * arguments are not recovered.
+     * Vtable slot 2. Writes the record version 1, then the entry count, then each entry as its
+     * name's length, the name's bytes, and the factory flag. The name is inferred from the stream
+     * slot it reaches, which MetPersonaData::Save() settles as OBStream slot 4.
      *
      * @param pStream The stream to write to.
      * @ghidraAddress 0x001e1e38
@@ -78,7 +79,9 @@ public:
     /**
      * Read the list back from a stream.
      *
-     * Vtable slot 3. The counterpart of save(). The body is not written, for the same reason.
+     * Vtable slot 3. The counterpart of save(). A version of zero or less leaves the list as it is.
+     * Otherwise the vector is resized to the entry count, and each slot receives a fresh entry. The
+     * entries the list held before are not released.
      *
      * @param pStream The stream to read from.
      * @ghidraAddress 0x001e1f70
@@ -116,6 +119,40 @@ public:
      * @ghidraAddress 0x001e5ec0
      */
     JukeboxPlayListEntry *GetEntry(int nIndex);
+
+    /**
+     * Append an entry for one remix.
+     *
+     * The entry takes the record's `+0x08` string as its name and its `+0x24` word as its factory
+     * flag. MetJukeboxBaseScreen's slot 19 is the caller. The title is inferred.
+     *
+     * @param record The remix to queue.
+     * @ghidraAddress 0x001e21b8
+     */
+    void AddEntry(const MetRemixRecord &record);
+
+    /**
+     * Release and remove the entry at one position.
+     *
+     * A position past the end does nothing. MetJukeboxEditPlaylistScreen's slot 19 is the caller.
+     * The title is inferred.
+     *
+     * @param nIndex The position, counted from zero.
+     * @ghidraAddress 0x001e20f8
+     */
+    void RemoveEntry(int nIndex);
+
+    /**
+     * Exchange the entries at two positions.
+     *
+     * Neither position is checked. MetJukeboxEditPlaylistScreen's slot 19 moves an entry up and
+     * down through it. The title is inferred.
+     *
+     * @param nFirst The first position.
+     * @param nSecond The second position.
+     * @ghidraAddress 0x001e5fa0
+     */
+    void SwapEntries(int nFirst, int nSecond);
 
     /** The queued remixes, owned by the list. +0x00 */
     std::vector<JukeboxPlayListEntry *> entries;
