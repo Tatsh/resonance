@@ -4,6 +4,10 @@
 #include "met/metfade.h"
 #include "met/metscreen.h"
 
+namespace Rnd {
+class Text;
+} // namespace Rnd
+
 /**
  * Transition screen shown while a game loads.
  *
@@ -24,9 +28,8 @@
  *
  * It declares one virtual of its own at slot 39, at `0x0028e158`, and the name is not recovered.
  *
- * The object is 0xac bytes, which the constructor's zeroing run through `+0xa8` and the 4-byte
- * mFade pointer settle together. Nothing derives from the class, so no base offset in any
- * descriptor corroborates the total.
+ * The object is 0xb0 bytes, the size New() requests. The last member, mFade, ends at `+0xac`, and
+ * the eight-byte mDeadlineNs gives the class eight-byte alignment.
  *
  * The destructor at `0x00291a50` releases mFade and then runs the MetScreen destructor. MetFade
  * has no destructor of its own, which is why the release is a bare deallocator call with no null
@@ -51,6 +54,93 @@ public:
      * @ghidraAddress 0x00291a50
      */
     virtual ~MetLoadGameScreen();
+
+    /**
+     * Produce a load screen on the heap.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The screen.
+     * @ghidraAddress 0x002919c8
+     */
+    static MetScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Show the loading captions and start the enter animation.
+     *
+     * Slot 5. Outside a jukebox session, `loading.txt` shows `load_loading` and the event text
+     * shows `load_demo`, `load_tut`, `load_remix`, or `load_game` for an attract run, the tutorial,
+     * jam mode, or anything else. The win sequence is armed for a solo game on its last remaining
+     * level, and slot 39 runs. A jukebox session that returns to
+     * `MetJukeboxEditPlaylistScreenDone` clears that return and shows `load_loading` and
+     * `load_jukebox`, and any other jukebox session blanks both texts.
+     *
+     * @ghidraAddress 0x0028d590
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Wait for the music to fade, then load the level and fade in.
+     *
+     * Slot 26. Once mWaiting is set and the watchdog time passes mDeadlineNs, the common loads
+     * start. An attract run fades in at once. Otherwise the level loads for a net, tutorial, or
+     * other game, and polling starts. While polling, the fade in starts once the common and level
+     * loads both report done. The fade advances on every call.
+     *
+     * @param flTime The current renderer time.
+     * @ghidraAddress 0x0028dd38
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Start fading the music and arm the wait.
+     *
+     * Slot 33. The music fades over two seconds, and mDeadlineNs is set 2.1 seconds past the
+     * watchdog time.
+     *
+     * @ghidraAddress 0x0028dc60
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Resolve `event.txt` into mpEvent.
+     *
+     * Slot 38. Runs MetScreen::ResolveContainerViews() first.
+     *
+     * @ghidraAddress 0x0028d4c0
+     */
+    virtual void ResolveContainerViews();
+
+    /**
+     * Assign the burn slots of the players about to play.
+     *
+     * Slot 39, the one virtual this class declares. The game manager's personas take slots in
+     * order. An attract run instead picks one prefabricated identity at random, gives it slot 0,
+     * and makes it the game manager's only persona. The title is inferred.
+     *
+     * @ghidraAddress 0x0028e158
+     */
+    virtual void AssignBurnSlots();
+
+    /**
+     * Start the game once the fade out has finished.
+     *
+     * FadeUser slot. Clears the background scene, queues a GameManagerDoPlaybackMsg for an attract
+     * run and a BeginGameLocalMsg otherwise, removes this screen from the renderer, clears
+     * MetFrontEndState::mUnknown10, and clears the display to black.
+     *
+     * @ghidraAddress 0x0028e018
+     */
+    virtual void OnFadeInDone();
+
+    /**
+     * Do nothing.
+     *
+     * FadeUser slot. The body is empty in the image.
+     *
+     * @ghidraAddress 0x00291b80
+     */
+    virtual void OnFadeOutDone();
 
     /**
      * Silence the slide sound.
@@ -96,9 +186,24 @@ public:
     }
 
 private:
-    int mUnknown90; // +0x90, not written by the constructor
-    int mUnknown94; // +0x94
-    int mUnknown98; // +0x98
+    // 0x0028df18
+    // Load the level of the net game. The game settings are copied first.
+    void LoadNetLevel();
+
+    // 0x00291ad0
+    // Record game phase 1 and load the level.
+    void LoadGameLevel();
+
+    // 0x00291b28
+    // Record the tutorial phase and load the level.
+    void LoadTutorialLevel();
+
+    // `event.txt`, which slot 38 resolves. Not written by the constructor. +0x90
+    Rnd::Text *mpEvent;
+    // Set while slot 26 polls the level load. +0x94
+    int mPolling;
+    // Set while slot 26 waits for mDeadlineNs. +0x98
+    int mWaiting;
 
 public:
     /**
@@ -108,9 +213,8 @@ public:
     int mUnknown9c;
 
 private:
-    // Zeroed together in one 8-byte store. +0xa0 and +0xa4
-    int mUnknowna0;
-    int mUnknowna4;
+    // The watchdog time slot 26 waits for, in nanoseconds. +0xa0
+    long long mDeadlineNs;
     // The fade driver, built from the renderer. +0xa8
     MetFade *mFade;
 };

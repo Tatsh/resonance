@@ -425,6 +425,15 @@ public:
      */
     GifQuadword *mpOpenVifDirect;
 
+    /**
+     * Put the draw environment of the current half, then run SwapBuffers().
+     *
+     * InitDisplayMode() and MetLoadGameScreen::OnFadeInDone() at `0x0028e118` are the callers.
+     *
+     * @ghidraAddress 0x004a0388
+     */
+    void FlipFrameBuffer();
+
 private:
     // Start the DMA transfer of the packet, on VIF1 when mnUseVu1 is set and on the GIF otherwise.
     // FlushGifPacket() expands it inline, and the out-of-line copy at 0x004a00e8 has no caller.
@@ -434,10 +443,6 @@ private:
     // drawing, and copy that half's context 1 registers into mGsRegs with PRIM invalidated.
     // PresentFrame() expands it inline, and the out-of-line copy at 0x004a0238 has no caller.
     void SwapBuffers();
-
-    // Put the draw environment of the current half, then run SwapBuffers(). InitDisplayMode() is
-    // the one caller. 0x004a0388.
-    void FlipFrameBuffer();
 
     // Draw a string in the debug stroke font. Each glyph is a six-point line strip from the table
     // at 0x006f2f28, scaled to a cell of rect.w by rect.h from a pen at rect.x and rect.y, in GS

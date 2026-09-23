@@ -6,8 +6,12 @@
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `24GameManagerDoPlaybackMsg` in the RTTI descriptor at `0x008ef790`, with Message as its one
- * base. The object is 0x4 bytes and its vtable is at `0x00811cd0`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * base. The object is 0x4 bytes and its vtable is at `0x007f5e18`, the table New(), Clone(), and
+ * MetLoadGameScreen::OnFadeInDone() store. The allocation in New() and the allocation in Clone()
+ * report the same size, which measures the class twice.
+ *
+ * The deleting destructor at `0x002918c0` is implicitly declared. It restores Message's table and
+ * frees the object under the class tag, which is what the compiler generates.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so

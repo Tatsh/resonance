@@ -250,9 +250,9 @@ public:
      * Release the animatable, drawable, and transformable lists of the background scene at
      * mUnknowna4.
      *
-     * The title is inferred. OnUnknownSlot5() calls it, and so does MetSonyScreen's finishing
-     * routine at `0x003ba620` from outside the class, which is why it is public. The image has no
-     * accessor to route that call through.
+     * The title is inferred. OnUnknownSlot5() calls it, and so do MetSonyScreen's finishing
+     * routine at `0x003ba620` and MetLoadGameScreen::OnFadeInDone() at `0x0028e02c` from outside
+     * the class, which is why it is public. The image has no accessor to route those calls through.
      *
      * @ghidraAddress 0x00371960
      */
