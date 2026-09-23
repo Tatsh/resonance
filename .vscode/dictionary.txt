@@ -10,6 +10,8 @@ abmpfile
 acanvas
 acanvaslin
 acceler
+activatelistenmode
+activatepracticemode
 addiu
 adtl
 advancesectionmsg
@@ -71,6 +73,7 @@ bascus
 begingamelocalmsg
 beginphrasecatchmsg
 bgtrackgraph
+biggem
 bitbltbuf
 blak
 blit
@@ -184,6 +187,8 @@ egwb
 elif
 enablefreestylemsg
 enablemgr
+enablepowerupcheats
+enableteamfreqs
 endforeach
 endgamemsg
 endrecordingcmd

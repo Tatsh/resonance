@@ -1,6 +1,7 @@
 #include "game/inputcheatdetector.h"
 
 #include <algorithm>
+#include <initializer_list>
 #include <vector>
 
 #include "app/application.h"
@@ -25,6 +26,35 @@ constexpr double kPressThreshold = 0.1;
 constexpr int kCheatScriptTemplate = 0xce;
 
 constexpr long long kNanosecondsPerMillisecond = 1000000;
+
+// The button numbers the pad poller reports, one more than the index of the button's mask in the
+// table at 0x008efb60 that 0x001e19b8 fills with the libpad masks in this order.
+enum PadButton {
+    kPadUp = 1,
+    kPadRight = 2,
+    kPadDown = 3,
+    kPadLeft = 4,
+    kPadSelect = 5,
+    kPadL3 = 6,
+    kPadR3 = 7,
+    kPadStart = 8,
+    kPadL2 = 9,
+    kPadR1 = 10,
+    kPadL1 = 11,
+    kPadR2 = 12,
+    kPadTriangle = 13,
+    kPadCircle = 14,
+    kPadCross = 15,
+    kPadSquare = 16,
+};
+
+// RegisterCheats() appends every button of a sequence with its own push_back().
+inline void AppendButtons(InputCheatDetector::CheatSequence &cheat,
+                          std::initializer_list<int> buttons) {
+    for (const int nButton : buttons) {
+        cheat.mButtons.push_back(nButton);
+    }
+}
 
 // One controller's recent presses.
 struct InputHistory {
@@ -63,6 +93,141 @@ InputCheatDetector::InputCheatDetector(std::vector<CheatSequence> *pCheats) : mC
     }
 }
 
+// 0x001dabc8
+void InputCheatDetector::RegisterCheats() {
+    CheatSequence cheat;
+
+    cheat.mName = "activatelistenmode";
+    AppendButtons(cheat, {kPadR3, kPadStart, kPadL3, kPadL2});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "enableteamfreqs";
+    AppendButtons(cheat,
+                  {kPadCircle,
+                   kPadTriangle,
+                   kPadSquare,
+                   kPadCross,
+                   kPadCircle,
+                   kPadTriangle,
+                   kPadSquare,
+                   kPadCross});
+    AddMetCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "activatepracticemode";
+    AppendButtons(cheat,
+                  {kPadTriangle, kPadCross, kPadSquare, kPadCircle, kPadDown, kPadDown, kPadDown});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "activateallaccessmode";
+    AppendButtons(cheat,
+                  {kPadSquare,
+                   kPadTriangle,
+                   kPadCircle,
+                   kPadCross,
+                   kPadSquare,
+                   kPadTriangle,
+                   kPadCircle,
+                   kPadCross,
+                   kPadSquare,
+                   kPadCircle,
+                   kPadSquare,
+                   kPadCircle,
+                   kPadSquare,
+                   kPadCircle,
+                   kPadUp,
+                   kPadRight,
+                   kPadUp});
+    AddMetCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "enablepowerupcheats";
+    AppendButtons(cheat,
+                  {kPadCross,
+                   kPadCircle,
+                   kPadTriangle,
+                   kPadSquare,
+                   kPadSquare,
+                   kPadTriangle,
+                   kPadCircle,
+                   kPadCross});
+    AddMetCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "autocatcher";
+    AppendButtons(cheat, {kPadSquare, kPadCircle, kPadCircle, kPadSquare, kPadTriangle});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "freestyle";
+    AppendButtons(cheat, {kPadSquare, kPadCircle, kPadCircle, kPadSquare, kPadCross});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "multiplier";
+    AppendButtons(cheat, {kPadCircle, kPadSquare, kPadSquare, kPadCircle, kPadTriangle});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "neutralizer";
+    AppendButtons(cheat, {kPadSquare, kPadCircle, kPadSquare, kPadCircle, kPadTriangle});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "crippler";
+    AppendButtons(cheat, {kPadSquare, kPadCircle, kPadSquare, kPadCircle, kPadCross});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "bumper";
+    AppendButtons(cheat, {kPadCircle, kPadSquare, kPadCircle, kPadSquare, kPadTriangle});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "biggem";
+    AppendButtons(cheat,
+                  {kPadTriangle,
+                   kPadCross,
+                   kPadTriangle,
+                   kPadCross,
+                   kPadSquare,
+                   kPadCircle,
+                   kPadCircle,
+                   kPadSquare});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "nolattice";
+    AppendButtons(cheat,
+                  {kPadCross,
+                   kPadTriangle,
+                   kPadCross,
+                   kPadTriangle,
+                   kPadCircle,
+                   kPadSquare,
+                   kPadSquare,
+                   kPadCircle});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    cheat.mName = "lsdmode";
+    AppendButtons(cheat,
+                  {kPadCross,
+                   kPadTriangle,
+                   kPadTriangle,
+                   kPadCross,
+                   kPadCross,
+                   kPadTriangle,
+                   kPadTriangle,
+                   kPadCross});
+    AddGameCheat(cheat);
+    cheat.mButtons.clear();
+
+    g_bCheatsRegistered = 1;
+}
+
 // 0x001dc658
 void InputCheatDetector::OnUnknownSlot2(int nType, int nSlot, int nButton, float flValue) {
     if (!(nButton < kFirstNonButton) || nType != kJoystickType || !(flValue >= kPressThreshold)) {
@@ -91,4 +256,14 @@ void InputCheatDetector::OnUnknownSlot2(int nType, int nSlot, int nButton, float
                                nSlot - 1);
         }
     }
+}
+
+// 0x001deb30
+void InputCheatDetector::AddGameCheat(const CheatSequence &cheat) {
+    g_gameCheatSequences.push_back(cheat);
+}
+
+// 0x001deb90
+void InputCheatDetector::AddMetCheat(const CheatSequence &cheat) {
+    g_metCheatSequences.push_back(cheat);
 }

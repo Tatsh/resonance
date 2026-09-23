@@ -31,6 +31,11 @@ public:
      * The record is 0x14 bytes, the stride the detector's slot 2 walks the table by. Slot 2
      * compares the pressed buttons against mButtons and, on a match, passes mName to script event
      * 0xce. `CheatSequence` is a placeholder for the name.
+     *
+     * The implicit default constructor at `0x001de858` and copy constructor at `0x001de880` are
+     * emitted out of line. The translation unit's static initialiser and destructor at
+     * `0x001de3e8`, which constructs and destroys the two cheat tables and the four input
+     * histories, is compiler-generated as well.
      */
     struct CheatSequence {
         HxStr mName;               /*!< The script name the match reports. */
@@ -76,10 +81,19 @@ public:
     virtual void OnUnknownSlot3() = 0;
 
 private:
-    // Fills g_metCheatSequences and g_gameCheatSequences and sets the registered flag. Not written
-    // yet. At 0x1a90 bytes it is a long run of name and button-sequence appends.
+    // Fills g_metCheatSequences with three cheats and g_gameCheatSequences with eleven, reusing
+    // one stack record, and sets the registered flag.
     // 0x001dabc8
     void RegisterCheats();
+
+    // Appends a copy of the cheat to g_gameCheatSequences. RegisterCheats() passes its own
+    // receiver, which the body does not read. The title is inferred.
+    // 0x001deb30
+    void AddGameCheat(const CheatSequence &cheat);
+
+    // Appends a copy of the cheat to g_metCheatSequences, as AddGameCheat() does.
+    // 0x001deb90
+    void AddMetCheat(const CheatSequence &cheat);
 
     // The table the constructor stores. +0x04
     std::vector<CheatSequence> *mCheats;
