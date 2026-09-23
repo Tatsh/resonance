@@ -26,3 +26,17 @@ struct Vector2 {
  * @ghidraAddress 0x00169818
  */
 void AddVec2(const float *pA, const float *pB, float *pOut);
+
+/**
+ * Subtract one two-component vector from another.
+ *
+ * The destination may alias either source because both loads precede both stores. The routine
+ * reads y before x and stores y before x, with the x store in the return delay slot, matching
+ * AddVec2().
+ *
+ * @param pA The vector subtracted from.
+ * @param pB The vector subtracted.
+ * @param pOut Receives pA minus pB, and may alias either input.
+ * @ghidraAddress 0x004bec40
+ */
+void SubVec2(const float *pA, const float *pB, float *pOut);

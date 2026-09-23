@@ -62,6 +62,12 @@ protected:
     virtual int DrawSelf();
 
 private:
+    // Submit one GS point per particle from the packed vertices, each with its colour and
+    // position. The point counter advances by the whole vertex count first. DrawSelf() expands
+    // the body, and the out-of-line copy at 0x005ffaf0 has no caller. The body reads no member,
+    // but the copy still receives the object in its first argument register.
+    void EmitGifPoints(int nVertCount);
+
     // Submit one GS line per particle from the packed vertex pairs. Each pair yields a two-vertex
     // line with a colour of its own, and the line counter advances by the whole vertex count
     // before any of them is examined. 0x005fc570.

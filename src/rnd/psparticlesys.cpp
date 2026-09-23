@@ -161,6 +161,17 @@ PsParticleSys::PsParticleSys(const HxStr &name) : ParticleSys(name) {
 PsParticleSys::~PsParticleSys() {
 }
 
+// 0x005ffaf0
+inline void PsParticleSys::EmitGifPoints(int nVertCount) {
+    g_renderStats.mnPoints += nVertCount;
+    g_gfxDevice.SetGsReg(kGsRegPrim, kGsPrimPoint | kGsPrimAbe, kGsPrimFieldMask);
+    WritePackedGifTag(kGifNRegPoint, kGifRegsPoint);
+    for (int i = 0; i < nVertCount; i += kVertsPerPointParticle) {
+        AppendDrawVert(g_aDrawVerts[i], kDrawVertColorQuadword, kQuadwordsColorAndPos);
+        g_gfxDevice.FlushGifPacket(1, 1);
+    }
+}
+
 // 0x005fcb18
 int PsParticleSys::DrawSelf() {
     ++g_renderStats.mnMeshDraws;
@@ -209,13 +220,7 @@ int PsParticleSys::DrawSelf() {
 
     const int nVertCount = PackParticleQuads(g_aDrawVerts, mMode, mLiveParticles, mLineLength);
     if (mMode == kModePoint) {
-        g_renderStats.mnPoints += nVertCount;
-        g_gfxDevice.SetGsReg(kGsRegPrim, kGsPrimPoint | kGsPrimAbe, kGsPrimFieldMask);
-        WritePackedGifTag(kGifNRegPoint, kGifRegsPoint);
-        for (int i = 0; i < nVertCount; i += kVertsPerPointParticle) {
-            AppendDrawVert(g_aDrawVerts[i], kDrawVertColorQuadword, kQuadwordsColorAndPos);
-            g_gfxDevice.FlushGifPacket(1, 1);
-        }
+        EmitGifPoints(nVertCount);
         return 1;
     }
     if (mMode == kModeLine) {

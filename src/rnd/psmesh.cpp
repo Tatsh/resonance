@@ -151,6 +151,7 @@ constexpr int kVertQuadwordStride = 4;
 constexpr int kFaceIndicesPerPrim = 3;
 constexpr int kEdgeIndicesPerPrim = 2;
 constexpr int kIndexHalfwordsPerQuadword = 8;
+constexpr int kIndexHalfwordShift = 3;
 
 // Assemble one VIFcode.
 inline unsigned MakeVifCode(unsigned nCmd, int nNum, unsigned nImmediate) {
@@ -663,6 +664,20 @@ void PsMesh::DrawEdgesSoftware(int nClip) {
     }
 }
 
+// 0x006069a0
+inline void PsMesh::DrawRun::ReserveIndices(int nIndexCount) {
+    // The binary rounds with a plain arithmetic shift rather than a signed division.
+    const int nQuadwords = (nIndexCount + kIndexHalfwordsPerQuadword - 1) >> kIndexHalfwordShift;
+    if (mIndexCount < nQuadwords) {
+        mIndexCount = nIndexCount;
+        if (mIndices != nullptr) {
+            MemFree(mIndices);
+        }
+        mIndices = static_cast<unsigned short *>(
+            MemAlloc(static_cast<size_t>(nQuadwords) * sizeof(GifQuadword)));
+    }
+}
+
 // The compiler inlined this at both of its call sites in Sync().
 void PsMesh::AppendRun(std::list<DrawRun> &runs,
                        const std::vector<unsigned short> &vertIndices,
@@ -675,19 +690,8 @@ void PsMesh::AppendRun(std::list<DrawRun> &runs,
     DrawRun &run = runs.back();
     run.mVertIndices = vertIndices;
 
-    const int nIndexCount = static_cast<int>(primIndices.size());
-    const int nQuadwords =
-        (nIndexCount + kIndexHalfwordsPerQuadword - 1) / kIndexHalfwordsPerQuadword;
-    // The comparison is between a halfword count and a quadword count, which is what the binary
-    // does. A node arrives here with a count of zero, so the block is always allocated once.
-    if (run.mIndexCount < nQuadwords) {
-        run.mIndexCount = nIndexCount;
-        if (run.mIndices != nullptr) {
-            MemFree(run.mIndices);
-        }
-        run.mIndices = static_cast<unsigned short *>(
-            MemAlloc(static_cast<size_t>(nQuadwords) * sizeof(GifQuadword)));
-    }
+    // A node arrives here with a count of zero, so the block is always allocated once.
+    run.ReserveIndices(static_cast<int>(primIndices.size()));
 
     // The block travels a whole quadword at a time, so the padding past the last index is cleared
     // rather than sent as whatever the allocator returned.

@@ -164,6 +164,19 @@ private:
         int mIndexCount;
         /** Vertices of mVertsOwner this batch uploads. +0x08 */
         std::vector<unsigned short> mVertIndices;
+
+        /**
+         * Replace mIndices with a block large enough for nIndexCount halfwords.
+         *
+         * The block is reallocated only when mIndexCount is below the quadword count nIndexCount
+         * needs. The test compares a halfword count with a quadword count, which is what the
+         * binary does, so a run that already has a block rarely grows it. Both AppendRun() sites
+         * in Sync() expand the body. The out-of-line copy has no caller.
+         *
+         * @param nIndexCount Halfwords of index data the block is to receive.
+         * @ghidraAddress 0x006069a0
+         */
+        void ReserveIndices(int nIndexCount);
     };
 
     // Sync() builds both. Every reader takes them off mFacesOwner rather than off this mesh, so a

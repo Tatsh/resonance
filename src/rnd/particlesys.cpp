@@ -769,12 +769,8 @@ void ParticleSys::UpdateParticles(float flDeltaFrames) {
 
         AddVec3(&pParticle->mVel.x, &forceStep.x, &pParticle->mVel.x);
 
-        // The binary scales the colour rate through the routine at 0x00453e08.
         Color colorStep;
-        colorStep.r = pParticle->mColVel.r * flDeltaFrames;
-        colorStep.g = pParticle->mColVel.g * flDeltaFrames;
-        colorStep.b = pParticle->mColVel.b * flDeltaFrames;
-        colorStep.a = pParticle->mColVel.a * flDeltaFrames;
+        ScaleColor(pParticle->mColVel, flDeltaFrames, colorStep);
         AddColor(pParticle->mCol, colorStep, pParticle->mCol);
 
         pParticle = pParticle->mNext;
@@ -844,12 +840,9 @@ void ParticleSys::SpawnParticles(float flDeltaFrames) {
         pParticle->mColVel.b = RandomInRange(mEndColorLow.b, mEndColorHigh.b);
         pParticle->mColVel.a = RandomInRange(mEndColorLow.a, mEndColorHigh.a);
         SubColor(pParticle->mColVel, pParticle->mCol, pParticle->mColVel);
-        // The binary scales through the routine at 0x00453e08.
-        const float flRate = 1.0f / (pParticle->mDeathFrame - pParticle->mBirthFrame);
-        pParticle->mColVel.r *= flRate;
-        pParticle->mColVel.g *= flRate;
-        pParticle->mColVel.b *= flRate;
-        pParticle->mColVel.a *= flRate;
+        ScaleColor(pParticle->mColVel,
+                   1.0f / (pParticle->mDeathFrame - pParticle->mBirthFrame),
+                   pParticle->mColVel);
 
         mEmitAccumulator -= 1.0f;
     }

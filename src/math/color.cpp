@@ -24,6 +24,18 @@ void SubColor(const Color &left, const Color &right, Color &result) {
     result.b = flBlue;
 }
 
+// 0x00453e08
+void ScaleColor(const Color &source, float flScale, Color &result) {
+    const float flAlpha = source.a * flScale;
+    const float flRed = source.r * flScale;
+    const float flGreen = source.g * flScale;
+    const float flBlue = source.b * flScale;
+    result.a = flAlpha;
+    result.r = flRed;
+    result.g = flGreen;
+    result.b = flBlue;
+}
+
 namespace {
 
 // The ceiling the vector unit broadcasts into the minimum stage.

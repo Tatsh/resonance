@@ -177,10 +177,14 @@ int PsCam::DrawSelf() {
         nTargetHeight = g_gfxDevice.mnDisplayHeight;
     }
 
-    // The binary subtracts the half through the Vector2 routine at 0x004bec40.
+    Vector2 centre;
+    centre.x = mScreenRect.x + mScreenRect.w * 0.5f;
+    centre.y = mScreenRect.y + mScreenRect.h * 0.5f;
+    Vector2 half;
+    half.x = 0.5f;
+    half.y = 0.5f;
     Vector2 offset;
-    offset.x = mScreenRect.x + mScreenRect.w * 0.5f - 0.5f;
-    offset.y = mScreenRect.y + mScreenRect.h * 0.5f - 0.5f;
+    SubVec2(&centre.x, &half.x, &offset.x);
     g_flCamNear = mNearPlane;
 
     const float flWidth = static_cast<float>(nTargetWidth);

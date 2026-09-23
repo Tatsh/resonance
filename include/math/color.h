@@ -65,3 +65,19 @@ void AddColor(const Color &left, const Color &right, Color &result);
  * @ghidraAddress 0x0052b258
  */
 void SubColor(const Color &left, const Color &right, Color &result);
+
+/**
+ * Scale all four components of a colour by one factor.
+ *
+ * The factor arrives in the first floating-point argument register, which consumes no integer
+ * argument register, so its position among the parameters is not recoverable from the body. It is
+ * placed second to match `Vec3Scale()`. All four loads precede all four stores.
+ *
+ * The title is inferred. No literal in the image identifies the routine.
+ *
+ * @param source The colour to scale.
+ * @param flScale The factor applied to every component, alpha included.
+ * @param result Receives the scaled colour. It may alias the source.
+ * @ghidraAddress 0x00453e08
+ */
+void ScaleColor(const Color &source, float flScale, Color &result);
