@@ -221,6 +221,7 @@ execv
 ezmidi
 ezmpeg
 fadegamemsg
+fadeuser
 failsink
 favorite
 fbmsk
@@ -429,6 +430,7 @@ lightanim
 linearmap
 linearramp
 linecache
+listdataprovider
 listdir
 listdirop
 listobject
@@ -515,6 +517,7 @@ metjukeboxeditplaylistscreendone
 metjukeboxeditplaylistscreenlowerleft
 metjukeboxfactoryremixesscreen
 metjukeboxtopbuttonsscreen
+metkbuser
 metkeyboardrequest
 metkeyboardscreen
 metleftgizmoscreen

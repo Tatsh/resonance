@@ -5,6 +5,7 @@
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
+#include "game/globalsettings.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
 
@@ -169,4 +170,15 @@ MemcardConnectState NextCardSlot(const MemcardConnectState &slot) {
         next.mSlotName = "1-A";
     }
     return next;
+}
+
+// 0x003d0b98
+HxStr FirstCardSlotName() {
+    HxStr name;
+    if (GlobalSettings::shared()->mCardSlots.size() != 0) {
+        name = GlobalSettings::shared()->mCardSlots[0].mSlotName;
+    } else {
+        name = "1";
+    }
+    return name;
 }

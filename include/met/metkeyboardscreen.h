@@ -53,17 +53,12 @@ class Button;
  * place the names on the grid mRow and mColumn walk. A key wider than one cell repeats its name in
  * every cell it covers, which is why the movers step until the name changes.
  *
- * The constructor and slot 38 are not written. Slot 38 drives members of Rnd::Text whose
- * signatures are not settled.
- *
  * Every member is private. Nothing outside the class touches one directly.
  */
 class MetKeyboardScreen : public MetScreen {
 public:
     /**
      * Construct the screen.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -294,8 +289,6 @@ public:
      * Slot 38. Runs MetScreen::ResolveContainerViews() first and then resolves each of the seven
      * container objects by name, casting three to Rnd::View and four to Rnd::Text. It records the
      * two caption offsets, selects the regular layout and panel, and runs ResetKeyStates().
-     *
-     * The body is not written, for the reason recorded in the class documentation.
      *
      * @ghidraAddress 0x00282948
      */

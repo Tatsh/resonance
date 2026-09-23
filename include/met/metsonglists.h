@@ -141,9 +141,7 @@ MemcardConnectState NextCardSlot(const MemcardConnectState &slot);
 /**
  * Report the name of the first memory-card location found, or `1` when there is none.
  *
- * The body reads the vector of MemcardConnectState at `+0x60` of the game-wide object the accessor
- * at
- * `0x0018b9c8` vends, and is not written because that object's class is unrecovered. The front
+ * The body reads GlobalSettings::mCardSlots and copies the slot name of its first entry. The front
  * end's character, remix, and Freq-maker screens call it.
  *
  * @return The name.

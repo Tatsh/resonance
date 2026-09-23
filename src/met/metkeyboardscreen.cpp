@@ -415,7 +415,83 @@ inline const char *TextOf(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
+// The screen name, the directory the container loads from, and the container name.
+static const char *const kScreenName = "kb";
+static const char *const kDirectory = "metagame/Shared";
+static const char *const kContainerName = "keyboard";
+
+// The text the constructor starts mText at.
+static const char *const kNoText = "";
+
+// The seven container objects slot 38 resolves.
+static const char *const kCursorObject = "cursor.txt";
+static const char *const kTextEntryObject = "text entry window.txt";
+static const char *const kTitleBarObject = "title bar.txt";
+static const char *const kMacroDisplayObject = "macro_display.txt";
+static const char *const kRegularPanelObject = "keypanel_regular.view";
+static const char *const kShiftPanelObject = "keypanel_shift.view";
+static const char *const kCapsPanelObject = "keypanel_caps.view";
+
+// The selection slot 38 leaves before EnterAndShow() moves it.
+constexpr int kResolvedRow = 3;
+constexpr int kResolvedColumn = 6;
+
+// What the constructor leaves in mMacrosDisabled and in two MetScreen members.
+constexpr int kMacrosDisabled = 1;
+constexpr float kBaseUnknown58 = 1.0f;
+constexpr int kBaseUnknown5c = 0;
+
+inline Rnd::Text *FindText(const char *pszName) {
+    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    return pObject != nullptr ? dynamic_cast<Rnd::Text *>(pObject) : nullptr;
+}
+
+inline Rnd::View *FindView(const char *pszName) {
+    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
+}
+
 } // namespace
+
+// 0x00282660
+MetKeyboardScreen::MetKeyboardScreen(MetRenderer *pRenderer, int nPriority)
+    : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
+      mMacros(nullptr), mpKeypanelRegular(nullptr), mpKeypanelShift(nullptr),
+      mpKeypanelCaps(nullptr), mpCursor(nullptr), mpTextEntryWindow(nullptr), mpTitleBar(nullptr),
+      mpMacroDisplay(nullptr), mText(kNoText), mCaret(0), mBlinkTime(0.0f), mUser(nullptr),
+      mRows(nullptr), mPanel(nullptr), mRow(0), mColumn(0), mShiftState(kShiftStateRegular),
+      mMacrosDisabled(kMacrosDisabled), mLastAction(kActionShift) {
+    mCursorOffset.w = kVectorPadding;
+    mMacroOffset.w = kVectorPadding;
+    GetDefaultMacros(); // Yes, the binary discards this call's result.
+    mUnknown58 = kBaseUnknown58;
+    mUnknown5c = kBaseUnknown5c;
+}
+
+// 0x00282e30
+MetKeyboardScreen::~MetKeyboardScreen() {
+}
+
+// 0x00282948
+void MetKeyboardScreen::ResolveContainerViews() {
+    MetScreen::ResolveContainerViews();
+    mpCursor = FindText(kCursorObject);
+    // Yes, the binary does not test the cursor or the macro display for null.
+    memcpy(&mCursorOffset, mpCursor->mLocalXfm[kTranslationRow], sizeof(mCursorOffset));
+    mpTextEntryWindow = FindText(kTextEntryObject);
+    mpTextEntryWindow->SetText(mText);
+    mpTitleBar = FindText(kTitleBarObject);
+    mpMacroDisplay = FindText(kMacroDisplayObject);
+    memcpy(&mMacroOffset, mpMacroDisplay->mLocalXfm[kTranslationRow], sizeof(mMacroOffset));
+    mpKeypanelRegular = FindView(kRegularPanelObject);
+    mpKeypanelShift = FindView(kShiftPanelObject);
+    mpKeypanelCaps = FindView(kCapsPanelObject);
+    mPanel = mpKeypanelRegular;
+    mRows = g_regularRows;
+    mRow = kResolvedRow;
+    mColumn = kResolvedColumn;
+    ResetKeyStates();
+}
 
 // 0x00282ef0
 void MetKeyboardScreen::DispatchKeyName(const HxStr &name) {

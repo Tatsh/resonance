@@ -113,6 +113,18 @@ void MetSonyScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
 void MetSonyScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
 }
 
+// 0x003bd8b8
+void MetSonyScreen::OnFadeInDone() {
+    SetShowing(0);
+    BeginExit();
+}
+
+// 0x003bd908
+void MetSonyScreen::OnFadeOutDone() {
+    MetScreen::CreateFrontEndScreens(MetRenderer::sInstance);
+    mFadeOutDoneTime = mUnknown10->mUnknown68;
+}
+
 // 0x003bd868
 void MetSonyScreen::EnterAndShow() {
     SetShowing(0);

@@ -4,7 +4,9 @@ set(RESONANCE_MET_SRCS
     albumcache.cpp
     creditsroll.cpp
     discswap.cpp
+    fadeuser.cpp
     gameoptions.cpp
+    listdataprovider.cpp
     metarenasscreen.cpp
     metbuttonlist.cpp
     metcommandmap.cpp
@@ -34,6 +36,7 @@ set(RESONANCE_MET_SRCS
     metjukeboxeditplaylistscreenlowerleft.cpp
     metjukeboxfactoryremixesscreen.cpp
     metjukeboxtopbuttonsscreen.cpp
+    metkbuser.cpp
     metkeyboardrequest.cpp
     metkeyboardscreen.cpp
     metleftgizmoscreen.cpp

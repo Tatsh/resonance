@@ -494,8 +494,19 @@ private:
     // 0x00371438. Enqueues the arena loader while it is pending.
     static void EnqueueArenaLoader();
 
-    // 0x006c3598. The constructor records the renderer here and the destructor clears it.
+public:
+    /**
+     * The one front-end renderer. The constructor records itself here and the destructor clears
+     * it.
+     *
+     * Public because MetSonyScreen::OnFadeOutDone() reads it directly, and the image has no
+     * accessor.
+     *
+     * @ghidraAddress 0x006c3598
+     */
     static MetRenderer *sInstance;
+
+private:
     // 0x006c3600
     static RndAsyncLoader *sMetagameLoader;
     // 0x006c3608
