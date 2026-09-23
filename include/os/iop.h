@@ -120,9 +120,10 @@ void InitDebugConsole();
  *
  * The routine belongs to the same translation unit as GetHostMode() and is declared here so that
  * iop.cpp can call it. It reports ` Running from CD only, since we couldn't find the config file`
- * and ` Running from CD ONLY, forcing arkfiles ON and async ON`, writes the host mode and the ark
- * flag again, and then calls InitializeZoneList(). The shipped build reports both messages
- * unconditionally, so the configuration file is read in no build variant that shipped.
+ * and ` Running from CD ONLY, forcing arkfiles ON and async ON`, writes the host mode, the ark
+ * flag, and the disc flag again, opens the memory report, and then calls InitializeZoneList().
+ * The shipped build reports both messages unconditionally. No build variant that shipped reads
+ * the configuration file.
  *
  * The name is inferred. Nothing in the image attests it, and InitIop() is the only caller.
  *

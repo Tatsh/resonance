@@ -52,6 +52,18 @@ int UsingArkFiles();
 int UsingCdMedia();
 
 /**
+ * Whether a MIDI conversion writes its error log.
+ *
+ * Another word of the same boot-option block, at 0x0070bf28. The retail configurator writes 0
+ * there, and the `.data` default is also 0. LevelConverter is the only caller. It tests the word
+ * before it opens the log and before each line it writes. The title is inferred.
+ *
+ * @return Non-zero when the error log is written.
+ * @ghidraAddress 0x0050eff0
+ */
+int MidiErrorLogEnabled();
+
+/**
  * Whether Warn() reports anything.
  *
  * Another word of the same boot-option block, at 0x0070bf18. Warn() is the only reader of either
