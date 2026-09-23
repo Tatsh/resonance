@@ -242,6 +242,7 @@ freqappearance
 freqappearancedetail
 freqcontroller
 freqmakercursor
+freqpan
 freqpart
 freqparttemplate
 frustrum

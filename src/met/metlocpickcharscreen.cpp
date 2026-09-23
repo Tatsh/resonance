@@ -111,8 +111,8 @@ constexpr float kExitDelayFrames = 5.0f;
 // mCardPersonaStarts records this for a card whose load failed or held no personas.
 constexpr int kNoCardPersonas = -1;
 
-// A second packed port and slot value that also matches a player. The meaning of the offset is
-// not recovered.
+// Player i also matches the card packed as i + 255. For player 1 that is port 2 (0x100), beside
+// multitap slot `1-B` (1).
 constexpr int kAlternatePortSlotOffset = 255;
 
 inline const char *TextOrEmpty(const HxStr &text) {

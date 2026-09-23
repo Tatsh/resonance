@@ -15,6 +15,9 @@ static const char *const kContainerName = "dialogue";
 static const char *const kOwnScreenName = "MetPersonaSaverScreen";
 static const char *const kLoadGameScreen = "MetLoadGameScreen";
 
+// What StartDelete() records in mUnknown94.
+constexpr int kDeleteRequest = 1;
+
 } // namespace
 
 MetPersonaSaverScreen::MetPersonaSaverScreen(MetRenderer *pRenderer, int nPriority)
@@ -39,6 +42,24 @@ void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
     pSaver->mUnknown98 = nUnknown98;
     pSaver->mUnknown9c = nUnknown9c;
     pSaver->mUnknown94 = 0;
+
+    MetScreen *pLoadGame = MetScreen::FindScreenByName(HxStr(kLoadGameScreen));
+    pLoadGame->PushNamedScreen(HxStr(kOwnScreenName));
+    pLoadGame->ActivateNamedPanel(HxStr(kOwnScreenName));
+}
+
+// 0x0032eaa8
+void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
+                                        MetPersonaData *pPersona,
+                                        const MemcardConnectState &slot) {
+    MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
+    MetPersonaSaverScreen *pSaver =
+        pScreen != nullptr ? dynamic_cast<MetPersonaSaverScreen *>(pScreen) : nullptr;
+    // The binary does not test the result for null.
+    pSaver->SetSaveRequest(screens, pPersona, slot);
+    pSaver->mUnknown9c = 0;
+    pSaver->mUnknown98 = 0;
+    pSaver->mUnknown94 = kDeleteRequest;
 
     MetScreen *pLoadGame = MetScreen::FindScreenByName(HxStr(kLoadGameScreen));
     pLoadGame->PushNamedScreen(HxStr(kOwnScreenName));

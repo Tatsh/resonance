@@ -94,6 +94,21 @@ public:
                           int nUnknown98);
 
     /**
+     * Hand a delete request to the registered saver screen and show it over MetLoadGameScreen.
+     *
+     * The same sequence as StartSave(), except that mUnknown94 is set to 1 and mUnknown98 and
+     * mUnknown9c are cleared. MetMCFreqDelScreen's slot 15 is the caller. The title is inferred.
+     *
+     * @param screens The registry keys of the screens to return to.
+     * @param pPersona The persona to delete.
+     * @param slot The card location.
+     * @ghidraAddress 0x0032eaa8
+     */
+    static void StartDelete(const std::vector<HxStr> &screens,
+                            MetPersonaData *pPersona,
+                            const MemcardConnectState &slot);
+
+    /**
      * Populate the dialogue and enter.
      *
      * Slot 5, not the MemcardUser slot 5 at `0x00331358`. The body is not written.
@@ -197,7 +212,8 @@ private:
                         MetPersonaData *pPersona,
                         const MemcardConnectState &slot);
 
-    // Cleared by StartSave(). The constructor does not write it. +0x94
+    // 1 for a delete request from StartDelete(), cleared by StartSave(). The constructor does not
+    // write it. +0x94
     int mUnknown94;
     // Written by StartSave() from its last argument. +0x98
     int mUnknown98;

@@ -9,60 +9,35 @@
 #include "met/metscreen.h"
 
 class MetPersonaData;
+class ScrollingList;
+
+namespace Rnd {
+class Mat;
+class Mesh;
+class Tex;
+class Text;
+} // namespace Rnd
 
 /**
- * Screen that lists the saved FreQs on a memory card.
- *
- * The class name and the container name disagree. The RTTI titles the class for deletion and the
- * constructor loads `memcard_freq_load`, and both are reproduced as the image records them rather
- * than reconciled.
+ * Screen that lists the saved FreQs on a memory card, to copy one to the other card or delete one.
  *
  * `18MetMCFreqDelScreen` in the RTTI descriptor at `0x00901ea0`, with four public non-virtual bases
  * at fixed offsets, MetScreen at `+0x00`, MemcardUser at `+140`, ListDataProvider at `+144`, and
- * MetMemCardPickerUser at `+148`.
+ * MetMemCardPickerUser at `+148`. New() allocates 0xe8 bytes.
  *
- * The 39-entry primary vtable is at `0x007fabe0`, the same length as the MetScreen table, so the
- * class declares no virtual of its own.
+ * The 39-entry primary vtable is at `0x007fabe0`, the same length as the MetScreen table, and the
+ * class declares no new virtual. The twenty-one-entry MemcardUser table at `0x007fab30` adjusts
+ * `this` by `-140` in every entry, and the four-entry ListDataProvider table at `0x007fab08` by
+ * `-144`. The class emits no vtable for MetMemCardPickerUser and writes no vptr at `+0x94`.
  *
- * The twenty-one-entry MemcardUser table at `0x007fab30` adjusts `this` by `-140` in every entry.
+ * MetMemCardTypeScreen hands the card over through SetCardSlot(). Activating the screen loads the
+ * card's personas, and the list then shows each one's username, face, and birthday. Command 7
+ * offers to copy the selected FreQ to NextCardSlot() through MetPersonaSaverScreen::StartSave(),
+ * and command 8 offers to delete it through MetPersonaSaverScreen::StartDelete().
  *
- * The four-entry ListDataProvider table at `0x007fab08` adjusts `this` by `-144` in every entry.
- *
- * The constructor at `0x002be968` takes only the renderer and the load priority, and supplies
- * `mcfl` for the screen name, `metagame/Shared` for the directory, and `memcard_freq_load` for the
- * container. It writes `+0x8c` and `+0x90`, which are the MemcardUser and ListDataProvider vptrs,
- * then `+0xb4` and `+0xb8`, the MemcardConnectState at `+0xbc`, `+0xd4`, mPersonas at `+0xd8`,
- * and `+0xe4`.
- *
- * It pushes the object name `del_freq` into the container object-name vector that MetScreen owns.
- * It emits two secondary vtables and none for MetMemCardPickerUser, and writes no vptr at `+0x94`
- * where that subobject sits, which is one of the five observations that prove the class declares
- * no virtual function.
- *
- * The object is at least 0xe8 bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the lower bound the constructor's highest store
- * gives.
- *
- * The destructor is at `0x002beca8`.
- *
- * A diff of the primary table against the MetScreen table at `0x0080b6a0` reads eleven overrides,
- * slots 1, 5, 7, 15, 19, 20, 23, 24, 36, and 38 apart from the type function. Every one of the nine
- * below is declared with its address and none has a written body. The three sound overrides sit
- * eight bytes apart at `0x002c5b48`, `0x002c5b50`, and `0x002c5b58`, which bounds each at two
- * instructions.
- *
- * Four addresses that the memory-card band worklist assigned to primary slots 2, 3, and 13 are in
- * the two secondary tables instead. `0x002c1d10` is MemcardUser slot 2 and `0x002c1510` is
- * MemcardUser slot 13, and `0x002c5c28` and `0x002c5b40` are ListDataProvider slots 2 and 3. The
- * primary table leaves slot 2 as the inherited MsgSink::Handle and slot 3 as the MetScreen override
- * of MsgSink::HandleMessage, and no derived table in the family fills primary slot 13 at all. All
- * four are now titled for the table they occupy.
- *
- * `0x002c5b60` is the out-of-line emission of the `new` expression that builds one, which is
- * compiler-generated glue rather than a member and is therefore not declared.
- *
- * Neither overridden MemcardUser virtual is declared here, because MemcardUser does not declare
- * either slot by a recovered name. The two ListDataProvider overrides are declared below.
+ * The translation unit spans `0x002be968` to `0x002c6090`. Besides the members below, it has the
+ * type function at `0x002c5aa0`, per-unit copies of MsgSink, MemcardUser, and ListDataProvider
+ * routines, and template library emissions.
  */
 class MetMCFreqDelScreen :
     public MetScreen,
@@ -73,6 +48,10 @@ public:
     /**
      * Construct the screen.
      *
+     * Supplies `mcfl` for the screen name, `metagame/Shared` for the directory, and
+     * `memcard_freq_load` for the container, records the help text `del_freq`, and clears
+     * MetScreen::mUnknown60.
+     *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @ghidraAddress 0x002be968
@@ -80,97 +59,133 @@ public:
     MetMCFreqDelScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
+     * Delete the list and every listed persona.
+     *
      * @ghidraAddress 0x002beca8
      */
     virtual ~MetMCFreqDelScreen();
 
     /**
-     * Populate the FreQ list and enter.
+     * Build the screen on the heap.
      *
-     * Slot 5. The body is not written.
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x002c5b60
+     */
+    static MetMCFreqDelScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Hide the screen and mark the card's personas as due to load.
+     *
+     * Slot 5.
      *
      * @ghidraAddress 0x002c5be8
      */
     virtual void EnterAndShow();
 
     /**
-     * Unrecovered. Slot 7.
+     * Show the loading notice and query the card, when a load is due.
      *
-     * The MetScreen body is empty and reveals no parameter list, so the declaration follows the
-     * base and is provisional. The body is not written.
+     * Slot 7.
      *
      * @ghidraAddress 0x002bf750
      */
     virtual void OnUnknownSlot7();
 
     /**
-     * Respond to a message screen being dismissed.
+     * Act on the player's response to one of the screen's dialogues.
      *
-     * Slot 15. The body is not written.
+     * Slot 15. A confirmed `okDelete` or `okCopy` starts the deletion or the copy, and a refusal
+     * brings the list back. `notifyloadfailed` and `no_freq_on_card` return to
+     * MetMemCardTypeScreen. Any other dialogue shows the list.
      *
      * @param name The message screen that was dismissed.
-     * @param nChoice The response.
+     * @param nChoice The chosen button, counted from zero.
      * @ghidraAddress 0x002c0ad8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
     /**
-     * Act on one navigation command.
+     * Scroll the list, back out, or start a copy or a deletion.
      *
-     * Slot 19. The body is not written.
+     * Slot 19. The select command does nothing.
      *
-     * @param pCommand The command the renderer translated from an input message.
+     * @param pCommand The command.
      * @ghidraAddress 0x002bf3a8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
-     * Play the slide sound.
+     * Play nothing.
      *
-     * Slot 20. The body is not written.
+     * Slot 20. The body is empty.
      *
-     * @param nSelector The controller the command came from.
      * @ghidraAddress 0x002c5b58
      */
-    virtual void PlaySlideSound(int nSelector);
+    virtual void PlaySlideSound(int) {
+    }
 
     /**
-     * Play the cycle-left sound.
+     * Play nothing.
      *
-     * Slot 23. The body is not written.
+     * Slot 23. The body is empty.
      *
-     * @param nSelector The controller the command came from.
      * @ghidraAddress 0x002c5b48
      */
-    virtual void PlayCycleLeftSound(int nSelector);
+    virtual void PlayCycleLeftSound(int) {
+    }
 
     /**
-     * Play the cycle-right sound.
+     * Play nothing.
      *
-     * Slot 24. The body is not written.
+     * Slot 24. The body is empty.
      *
-     * @param nSelector The controller the command came from.
      * @ghidraAddress 0x002c5b50
      */
-    virtual void PlayCycleRightSound(int nSelector);
+    virtual void PlayCycleRightSound(int) {
+    }
 
     /**
-     * Respond to the exit animation finishing.
+     * Confirm a copy or a deletion, or return to MetMemCardTypeScreen, once the screen has exited.
      *
-     * Slot 36. The body is not written.
+     * Slot 36.
      *
      * @ghidraAddress 0x002c01c0
      */
     virtual void OnUnknownSlot36();
 
     /**
-     * Resolve the container views.
+     * Resolve the base views, title the two panels, and resolve the persona detail objects.
      *
-     * Slot 38. The body is not written.
+     * Slot 38.
      *
      * @ghidraAddress 0x002bee90
      */
     virtual void ResolveContainerViews();
+
+    /**
+     * Load the card's personas, or report that the card could not be read.
+     *
+     * MemcardUser slot 2.
+     *
+     * @param state The card that was queried. The body does not read it.
+     * @param nStatus The result, 0 when the card is present.
+     * @ghidraAddress 0x002c1d10
+     */
+    virtual void OnConnectState(MemcardConnectState state, int nStatus);
+
+    /**
+     * Close the loading notice, report that the card has no FreQ, or report a failed load.
+     *
+     * MemcardUser slot 13. Statuses 0, 3, and 11 count as loaded, and nothing happens unless a
+     * load is due.
+     *
+     * @param nPortSlot The card the personas came from. The body does not read it.
+     * @param nStatus The result.
+     * @ghidraAddress 0x002c1510
+     */
+    virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
     /**
      * Show the username of one persona of mPersonas.
@@ -178,9 +193,9 @@ public:
      * An index past the end empties the text instead.
      *
      * @param nItem The entry.
-     * @param nColumn The cell index, which the body does not read.
+     * @param nColumn The cell index. The body does not read it.
      * @param pText The cell.
-     * @param nContext The list context, which the body does not read.
+     * @param nContext The list context. The body does not read it.
      * @return Always 1.
      * @ghidraAddress 0x002c5c28
      */
@@ -189,17 +204,17 @@ public:
     /**
      * Leave the cell as it is.
      *
-     * @param nItem The row, which the body does not read.
-     * @param nColumn The cell index, which the body does not read.
-     * @param pMesh The cell, which the body does not read.
-     * @param nContext The list context, which the body does not read.
+     * @param nItem The row. The body does not read it.
+     * @param nColumn The cell index. The body does not read it.
+     * @param pMesh The cell. The body does not read it.
+     * @param nContext The list context. The body does not read it.
      * @return Always 1.
      * @ghidraAddress 0x002c5b40
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
     /**
-     * Record the card the screen works on, and clear mUnknowne4.
+     * Record the card the screen works on, and clear mLoadPending.
      *
      * MetMemCardTypeScreen's slot 36 is the caller. The title is inferred.
      *
@@ -209,14 +224,31 @@ public:
     void SetCardSlot(MemcardConnectState slot);
 
 private:
-    // The seven words from +0x98 through +0xb3 are not written by the constructor and no reader
-    // is recovered.
-    int mUnknown98[7];
-    int mUnknownb4;                 // +0xb4
-    int mUnknownb8;                 // +0xb8
-    MemcardConnectState mUnknownbc; // +0xbc
-    int mUnknownd4;                 // +0xd4
+    // 0x002bfa88
+    // Builds the list on first use, fills it from mPersonas, titles the panel with the card, and
+    // enters. The title is inferred.
+    void ShowList();
+
+    // 0x002bff98
+    // Shows the selected persona's username, face, and birthday, or hides the details when the
+    // list is empty. The title is inferred.
+    void ShowSelection();
+
+    Rnd::Text *mNameText;     // +0x98
+    Rnd::Mat *mFaceMat;       // +0x9c
+    int mUnknowna0;           // +0xa0
+    Rnd::Mesh *mFreqMesh;     // +0xa4
+    Rnd::Text *mBirthdayText; // +0xa8
+    Rnd::Tex *mBurnTexture;   // +0xac
+    int mUnknownb0;           // +0xb0
+    // Set while a confirmed deletion runs. +0xb4
+    int mDeleting;
+    ScrollingList *mList;          // +0xb8
+    MemcardConnectState mCardSlot; // +0xbc
+    // The persona a copy command chose, until the copy starts. +0xd4
+    MetPersonaData *mCopyPersona;
     // The personas the screen lists. The destructor deletes each one. +0xd8
     std::vector<MetPersonaData *> mPersonas;
-    int mUnknowne4; // +0xe4
+    // Set by EnterAndShow() and cleared once the list shows. +0xe4
+    int mLoadPending;
 };
