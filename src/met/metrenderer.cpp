@@ -78,13 +78,23 @@ constexpr int kRepeatCommandFirst = 0x10;
 constexpr int kRepeatCommandLast = 0x13;
 
 // Whether a scene list holds the matching subobject of a view. The list's element type selects
-// the subobject the comparison converts the view to. The out-of-line copies are at 0x00370ab8 for
-// the drawable list, at 0x00370b08 for the transformable list, and at 0x00370b58 for the
-// animatable list.
+// the subobject the comparison converts the view to.
 template <class T>
 inline bool ContainsRef(const std::list<T *> &list, Rnd::View *const &pView) {
     return std::find(list.begin(), list.end(), pView) != list.end();
 }
+
+// 0x00370ab8
+template bool ContainsRef<Rnd::Drawable>(const std::list<Rnd::Drawable *> &list,
+                                         Rnd::View *const &pView);
+
+// 0x00370b08
+template bool ContainsRef<Rnd::Transformable>(const std::list<Rnd::Transformable *> &list,
+                                              Rnd::View *const &pView);
+
+// 0x00370b58
+template bool ContainsRef<Rnd::Animatable>(const std::list<Rnd::Animatable *> &list,
+                                           Rnd::View *const &pView);
 
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
 // recorded when the run started. MainLoop has its own copy of the same inline.
