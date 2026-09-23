@@ -16,30 +16,36 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                   | Count  |
 | ------------------------- | ------ |
-| Functions in the program  | 15,528 |
-| Excluded by rule          | 6,278  |
-| Reconstructable           | 9,250  |
-| Declared or defined       | 3,112  |
-| Share declared or defined | 33.64% |
-| Defined, with a body      | 1,573  |
-| Share implemented         | 17.01% |
-| Remaining, with a name    | 1,682  |
-| Remaining, unidentified   | 4,456  |
+| Functions in the program  | 15,532 |
+| Excluded by rule          | 6,453  |
+| Reconstructable           | 9,079  |
+| Declared or defined       | 3,445  |
+| Share declared or defined | 37.94% |
+| Defined, with a body      | 1,848  |
+| Share implemented         | 20.35% |
+| Remaining, with a name    | 1,543  |
+| Remaining, unidentified   | 4,091  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,539 of
-the 3,112 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 1,573 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,597 of
+the 3,445 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 1,848 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 17.01% as the answer to
-"how much is reconstructed" and 33.64% as the answer to "how much is accounted for". A pass that
-writes a header moves the larger share and not the smaller one, and a pass that writes bodies for an
-already-declared class moves neither, because the addresses were annotated when the header landed.
+Implementation is the figure the project's goal is stated against, so treat 20.35% as the answer to
+"how much is reconstructed" and 37.94% as the answer to "how much is accounted for".
 
-Both figures come from `.wiswa-ci/freq/implemented_report.py`, which intersects the body markers
-under `src` with the reconstructable set so that the two shares use one denominator. Do not measure
-the implemented share by grepping for address literals. A `.cpp` mentions an address in ordinary
+The implemented count above was taken from a fresh function list. `implemented_report.py` reads
+`functions-latest.txt`, a stored list, and so reports a different denominator (9,257 on the same
+day) until that list is refreshed. The body count intersects the body markers under `src` with the
+function list after the default exclusions. That set is 52 routines smaller than the audit's
+reconstructable figure, because the audit also bounds addresses. The implemented share is exact to
+within those 52.
+
+A pass that writes a header moves the larger share and not the smaller one, and a pass that writes
+bodies for an already-declared class moves the smaller share alone.
+
+Do not measure the implemented share by grepping for address literals. A `.cpp` mentions an address in ordinary
 commentary as well as at a body marker, and that method returned 1,956 where the marker scanner
 returns 1,605, of which 1,573 fall inside the reconstructable set and 32 belong to excluded
 routines.
@@ -74,12 +80,12 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 823   | Type functions, their unfolded per-unit copies, static-init glue |
+| Compiler-generated             | 832   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 1,712 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,312 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 669   | Container instantiations                                         |
-| Platform SDK                   | 338   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 184   | Exception, cast, and unwinding support                           |
+| Per-translation-unit duplicate | 2,362 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 789   | Container instantiations                                         |
+| Platform SDK                   | 355   | `sce` entry points and kernel syscalls                           |
+| C++ runtime                    | 183   | Exception, cast, and unwinding support                           |
 | C runtime                      | 220   | String and memory routines, and the floating-point library       |
 
 ## Verification
@@ -90,8 +96,8 @@ subsystem, with no warnings. Nothing is linked yet, because the reconstruction i
 
 | Check                                 | Status       |
 | ------------------------------------- | ------------ |
-| Headers compiling standalone          | 488/513      |
-| Sources compiling                     | 335/341      |
+| Headers compiling standalone          | 525/550      |
+| Sources compiling                     | 363/369      |
 | Address annotations with no function  | 0            |
 | Lines over 100 characters             | 0            |
 | `clang-format` differences            | 0            |
@@ -173,15 +179,20 @@ from the SDK is reconstructed.
 | Transform and animation base  | `Rnd::TransAnim` with its keyframe channels, over the transform and animatable bases                                                                                                                           |
 | View, camera, and environment | `Rnd::Blur`, `Rnd::View` with its five class keys, and the camera and environment serialisation                                                                                                                |
 | Mesh animation and instancing | `Rnd::MeshAnim` with its three keyframe channels, `Rnd::MultiMesh`, and `Rnd::PsMultiMesh`                                                                                                                     |
+| Art library                   | Every canvas class, the polygon fills, the stretch and clip routines, `APalette`, `ARleReader`, and the BMP, TGA, and GIF readers. Only compiler-generated emissions remain in its ranges                      |
+| Texture, PlayStation 2        | `Rnd::PsTex` in full, including surface restore, the upload and bind path, and render-target binding                                                                                                           |
+| Particles                     | `Rnd::ParticleSys` in full, including the simulation, the text dump, and revisions 0 to 6 of its file format                                                                                                   |
 | Exception runtime             | Identified rather than reconstructed. The scheme is DWARF, and the unwinding driver, the frame-state builder, the handler-chain accessor, the terminate path, and the `dynamic_cast` entry point are all named |
 
 ### Partial
 
 | Area                   | What remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Texture, PlayStation 2 | Upload and bind bodies. The GS video memory manager they use is written in gfx/vramtable                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Graphics device        | Packet submission through the Sony DMA library, in progress                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Art library            | `ABitmap` layout is recorded from the disassembler, not yet verified                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Graphics device        | Packet submission is written. The game-side double-buffer descriptor and its four setters, the clear colour, and the timing and statistics overlays remain                                                                                                                                                                                                                                                                                                                                                                               |
+| Camera and environment | `PsCam` and `PsEnviron` draw paths are written. A handful of light-record and frustum helpers remain                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Tunnel                 | `Rnd::Generator` is written, and `Rnd::Tunnel` has its event list, ring lookup, collision, and mesh chains. Its section records, update, draw, and file format remain, then `AppTunnel` and its effect classes                                                                                                                                                                                                                                                                                                                           |
+| Gameplay display       | `Renderer`, the per-track HUD and its parts, and the badge classes. The HUD panel, the remaining `Overlay` bodies, `TnlArena`, and the screen animations remain                                                                                                                                                                                                                                                                                                                                                                          |
+| Phrases                | `Phrase` and `PhraseDatabase` are written. The gameplay commands, riffs, and note playback around them remain                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Sound                  | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` has its whole bank path: the load entry point, both transfer starters, both transfer classes, the claim table, the command dispatcher, the driver submit, the core and voice report, and the SPU2 bring-up. There is no voice table, because the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array query at `0x00509110`, and 27 routines remain |
 
 ### Not started
