@@ -178,6 +178,13 @@ public:
      */
     FreqAppearance mUnknown140;
     HxStr mUnknown154; // +0x154
-    int mUnknown15c;   // +0x15c
+
+    /**
+     * Set to 1 by MetFreqLoader's parser on every pre-fab persona it reads. +0x15c
+     *
+     * Public because that parser writes it directly, and the image has no accessor.
+     */
+    int mUnknown15c;
+
     HxStr mUnknown160; // +0x160
 };
