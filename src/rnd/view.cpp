@@ -169,8 +169,15 @@ void View::Load(Stream &stream) {
     }
 }
 
+// 0x004e2088
+// The five registered creators above inline this body, handler and all, and set their flag after
+// it even when it produced null.
 View *View::NewView(const HxStr &name) {
-    return new View(name);
+    try {
+        return new View(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 void View::Init() {

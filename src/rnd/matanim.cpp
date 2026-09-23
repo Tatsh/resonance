@@ -347,12 +347,20 @@ const HxStr &MatAnim::ClassName() const {
 
 // 0x004dcb00
 Object *CreateRegisteredMatAnim(const HxStr &name) {
-    return new MatAnim(name);
+    try {
+        return new MatAnim(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004dbfb0
 MatAnim *NewMatAnim(const HxStr &name) {
-    return new MatAnim(name);
+    try {
+        return new MatAnim(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x004dbf80

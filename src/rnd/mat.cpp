@@ -462,7 +462,20 @@ void Mat::RemoveStage(int nIndex) {
 
 // 0x004dba28
 Mat *NewMatThroughHook(const HxStr &name) {
-    return g_pfnNewMat(name);
+    try {
+        return g_pfnNewMat(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
+}
+
+// 0x004dbc80
+Object *CreateRegisteredMat(const HxStr &name) {
+    try {
+        return g_pfnNewMat(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004dbb10

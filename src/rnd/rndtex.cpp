@@ -313,7 +313,11 @@ Tex *(*g_pfnNewTex)(const HxStr &name) = NewTex;
 
 // 0x004e7770
 Object *CreateRegisteredTex(const HxStr &name) {
-    return g_pfnNewTex(name);
+    try {
+        return g_pfnNewTex(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004e7878
@@ -550,7 +554,11 @@ void Tex::operator delete(void *pBlock) {
 
 // 0x004e7448
 Tex *NewTexThroughHook(const HxStr &name) {
-    return g_pfnNewTex(name);
+    try {
+        return g_pfnNewTex(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x004e7568

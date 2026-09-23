@@ -171,7 +171,11 @@ int g_nRndMultiMeshLoadVersion;
 
 // 0x004ebb58
 Object *CreateRegisteredMultiMesh(const HxStr &name) {
-    return g_pfnNewMultiMesh(name);
+    try {
+        return g_pfnNewMultiMesh(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x004e8830

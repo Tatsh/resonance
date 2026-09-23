@@ -1172,7 +1172,11 @@ HxStr g_transAnimClassName("TransAnim");
 
 // 0x004fc740
 TransAnim *NewTransAnim(const HxStr &name) {
-    return new TransAnim(name);
+    try {
+        return new TransAnim(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x00706820
@@ -1180,12 +1184,20 @@ TransAnim *(*g_pfnNewTransAnim)(const HxStr &name) = NewTransAnim;
 
 // 0x004fba90
 TransAnim *NewTransAnimThroughHook(const HxStr &name) {
-    return g_pfnNewTransAnim(name);
+    try {
+        return g_pfnNewTransAnim(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x004fbf70
 Object *CreateRegisteredTransAnim(const HxStr &name) {
-    return g_pfnNewTransAnim(name);
+    try {
+        return g_pfnNewTransAnim(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004fba50

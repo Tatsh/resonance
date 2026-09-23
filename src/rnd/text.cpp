@@ -735,7 +735,15 @@ void Text::BuildGlyphMesh() {
         return;
     }
 
-    mMesh = g_pfnNewMesh(HxStr(FormatString("[%s_mesh]", NameText(this))));
+    {
+        const HxStr meshName(FormatString("[%s_mesh]", NameText(this)));
+        // The binary's handler covers only the factory call and returns null.
+        try {
+            mMesh = g_pfnNewMesh(meshName);
+        } catch (...) {
+            mMesh = nullptr;
+        }
+    }
     mMesh->SetBillboard(mBillboard);
     mMesh->mInternal = 1;
     mMesh->SetMaterial(mFont->mMat);
@@ -814,12 +822,20 @@ Text *(*g_pfnNewText)(const HxStr &name) = NewText;
 
 // 0x004cf1d0
 Text *NewTextThroughHook(const HxStr &name) {
-    return g_pfnNewText(name);
+    try {
+        return g_pfnNewText(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004cf770
 Object *CreateRegisteredText(const HxStr &name) {
-    return g_pfnNewText(name);
+    try {
+        return g_pfnNewText(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004cf190
