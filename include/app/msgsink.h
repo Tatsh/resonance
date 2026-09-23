@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+#include "os/mem.h"
+
 class Message;
 
 /**
@@ -47,7 +49,9 @@ public:
      * @param nSize The object size the compiler supplies.
      * @return The block.
      */
-    void *operator new(size_t nSize);
+    void *operator new(size_t nSize) {
+        return AllocateTaggedMemory(nSize, "MsgSink");
+    }
 
     /**
      * Release a sink to the tagged heap.
@@ -57,7 +61,9 @@ public:
      *
      * @param pBlock The block.
      */
-    void operator delete(void *pBlock);
+    void operator delete(void *pBlock) {
+        FreeTaggedMemory(pBlock, "MsgSink");
+    }
 
     /**
      * @ghidraAddress 0x00105120
