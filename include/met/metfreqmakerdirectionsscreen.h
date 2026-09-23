@@ -58,14 +58,13 @@ public:
     virtual void PlayCycleRightSound(int nSelector);
 
     /**
-     * Show one cell of the directions page `+0x98` selects.
+     * Show one cell of the directions page mPage selects.
      *
-     * The body switches on the page, 0 through 16, and shows the string at row nItem and column
-     * nColumn of that page's table. The tables are static arrays of two HxStr per row at
-     * `0x006a3a50` through `0x006a40e0`, indexed through the helper at `0x0026a008`. On the page
-     * whose table is at `0x006a4070`, row 1 is a format that receives FirstCardSlotName(). A page
-     * outside the range leaves the cell as it is. The body is not written, because the tables and
-     * the static initialiser that builds them are not recovered.
+     * Each of pages 0 through 15 shows the string at row nItem and column nColumn of its table,
+     * and page 16 shows an empty string. The tables are file-scope arrays of seven rows of two
+     * HxStr each at `0x006a3a50` through `0x006a414f`, built by the unit's static initialiser. On
+     * the save page, row 1 is a format that receives FirstCardSlotName(). A page outside the range
+     * leaves the cell as it is.
      *
      * @param nItem The row.
      * @param nColumn The column.
@@ -87,4 +86,14 @@ public:
      * @ghidraAddress 0x0026a020
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
+
+private:
+    // 0x0026a008. The cell at one row and column of a page table. The body does not read this
+    // object.
+    const HxStr &PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]);
+
+    int mUnknown90; // +0x90, not written by the constructor
+    int mUnknown94; // +0x94, not written by the constructor
+    // The directions page ProvideText() shows. The constructor writes it. +0x98
+    int mPage;
 };

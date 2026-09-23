@@ -114,6 +114,7 @@ collectchildren
 collideable
 collideables
 color
+coloring
 confstr
 congrat
 contctrlmsg
@@ -205,6 +206,7 @@ formatop
 formatstring
 foxundermoon
 fpathconf
+fqmak
 fram
 frameobject
 freestylefxmsg

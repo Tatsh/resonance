@@ -1,9 +1,14 @@
 #pragma once
 
+#include <vector>
+
 #include "memcard/memcarduser.h"
 #include "met/listdataprovider.h"
 #include "met/metmemcardpickeruser.h"
 #include "met/metscreen.h"
+#include "met/metsonglists.h"
+
+class MetPersonaData;
 
 /**
  * Screen that lists the saved FreQs on a memory card.
@@ -26,7 +31,7 @@
  * The constructor at `0x002be968` takes only the renderer and the load priority, and supplies
  * `mcfl` for the screen name, `metagame/Shared` for the directory, and `memcard_freq_load` for the
  * container. It writes `+0x8c` and `+0x90`, which are the MemcardUser and ListDataProvider vptrs,
- * then `+0xb4`, `+0xb8`, `+0xbc`, `+0xd4`, `+0xd8`, a vector, and `+0xe4`.
+ * then `+0xb4` and `+0xb8`, the CardSlot at `+0xbc`, `+0xd4`, mPersonas at `+0xd8`, and `+0xe4`.
  *
  * It pushes the object name `del_freq` into the container object-name vector that MetScreen owns.
  * It emits two secondary vtables and none for MetMemCardPickerUser, and writes no vptr at `+0x94`
@@ -167,11 +172,9 @@ public:
     virtual void ResolveContainerViews();
 
     /**
-     * Show the name of one entry of the vector at `+0xd8`.
+     * Show the username of one persona of mPersonas.
      *
-     * Each element is a pointer to a record whose name is the HxStr at `+0x140`. An index past
-     * the end empties the text instead. The body is not written, because neither the vector nor
-     * the record class is declared yet.
+     * An index past the end empties the text instead.
      *
      * @param nItem The entry.
      * @param nColumn The cell index, which the body does not read.
@@ -193,4 +196,16 @@ public:
      * @ghidraAddress 0x002c5b40
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
+
+private:
+    // The seven words from +0x98 through +0xb3 are not written by the constructor and no reader
+    // is recovered.
+    int mUnknown98[7];
+    int mUnknownb4;      // +0xb4
+    int mUnknownb8;      // +0xb8
+    CardSlot mUnknownbc; // +0xbc
+    int mUnknownd4;      // +0xd4
+    // The personas the screen lists. The destructor deletes each one. +0xd8
+    std::vector<MetPersonaData *> mPersonas;
+    int mUnknowne4; // +0xe4
 };
