@@ -40,6 +40,7 @@ Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm) {
     return result;
 }
 
+// 0x00551078
 void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, float flT) {
     constexpr int kValueCount = 4;
     for (int i = 0; i < kValueCount; ++i) {
@@ -47,6 +48,7 @@ void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, fl
     }
 }
 
+// 0x00551218
 bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, float *pT) {
     const auto &start = segment[0];
     const auto &end = segment[1];

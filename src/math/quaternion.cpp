@@ -44,6 +44,7 @@ inline float RowLength(const float *pMat3Rows, int nRow) {
 
 } // namespace
 
+// 0x004efd80
 Quat AxisAngleToQuat(const float *pAxis, float flAngle) {
     const float flHalf = flAngle * 0.5f;
     const float flSin = sinf(flHalf);
@@ -56,6 +57,7 @@ Quat AxisAngleToQuat(const float *pAxis, float flAngle) {
     return out;
 }
 
+// 0x004f0350
 void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle) {
     *pflAngle = (quat.w > 1.0f) ? 0.0f : (2.0f * acosf(quat.w));
 
@@ -72,6 +74,7 @@ void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle) {
     pAxis[2] = quat.z * flScale;
 }
 
+// 0x004f0230
 Quat EulerAnglesToQuat(const float *pAngles) {
     Vector3 half;
     half.w = 1.0f;
@@ -99,6 +102,7 @@ Quat EulerAnglesToQuat(const float *pAngles) {
     return out;
 }
 
+// 0x004ee9c0
 Quat Mat33ToQuat(const float *pMat3Rows) {
     // The image writes the destination in place and indexes it by axis. Returning by value
     // makes gathering the components into a local indistinguishable from that.
@@ -121,10 +125,10 @@ Quat Mat33ToQuat(const float *pMat3Rows) {
         const int nJ = kNextAxis[nI];
         const int nK = kNextAxis[nJ];
 
-        float flRoot = sqrtf(
-            (pMat3Rows[(nI * kMat3RowStride) + nI] -
-             (pMat3Rows[(nJ * kMat3RowStride) + nJ] + pMat3Rows[(nK * kMat3RowStride) + nK])) +
-            1.0f);
+        float flRoot =
+            sqrtf(((pMat3Rows[(nI * kMat3RowStride) + nI] - pMat3Rows[(nJ * kMat3RowStride) + nJ]) -
+                   pMat3Rows[(nK * kMat3RowStride) + nK]) +
+                  1.0f);
         aflQuat[nI] = flRoot * 0.5f;
         if (flRoot != 0.0f) {
             flRoot = 0.5f / flRoot;
@@ -149,6 +153,7 @@ Quat Mat33ToQuat(const float *pMat3Rows) {
     return out;
 }
 
+// 0x004f06a0
 void QuatMultiply(const Quat &a, const Quat &b, Quat &out) {
     const float flX = (((a.w * b.x) + (a.x * b.w)) + (a.y * b.z)) - (a.z * b.y);
     const float flY = (((a.w * b.y) + (a.y * b.w)) + (a.z * b.x)) - (a.x * b.z);
@@ -161,6 +166,7 @@ void QuatMultiply(const Quat &a, const Quat &b, Quat &out) {
     out.w = flW;
 }
 
+// 0x004f0178
 Quat QuatRotateByVector(const Quat &quat, const float *pRotVec) {
     const float flAngle =
         sqrtf((pRotVec[0] * pRotVec[0]) + (pRotVec[1] * pRotVec[1]) + (pRotVec[2] * pRotVec[2]));
@@ -175,6 +181,7 @@ Quat QuatRotateByVector(const Quat &quat, const float *pRotVec) {
     return out;
 }
 
+// 0x004eec20
 void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT) {
     if (flT == 0.0f) {
         out = from;
@@ -193,7 +200,7 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT) {
         target.y = -to.y;
         target.z = -to.z;
         target.w = -to.w;
-        dDot = -dDot;
+        dDot = 0.0 - dDot; // Yes, the binary subtracts from zero rather than negating.
     }
 
     double dFromScale;
@@ -214,6 +221,7 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT) {
     out.w = (dFromScale * from.w) + (dToScale * target.w);
 }
 
+// 0x004f0600
 void QuatToMat33(const Quat &quat, float *pMat3Rows) {
     const float flX2 = quat.x + quat.x;
     const float flY2 = quat.y + quat.y;
@@ -242,6 +250,7 @@ void QuatToMat33(const Quat &quat, float *pMat3Rows) {
     pMat3Rows[10] = 1.0f - flXx - flYy;
 }
 
+// 0x004efe08
 void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles) {
     const float flYRowZ = MatAt(pMat3Rows, kRowY, kZ);
     if (fabsf(flYRowZ) > kGimbalLockLimit) {
@@ -256,6 +265,7 @@ void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles) {
     pAngles[kY] = atan2f(-MatAt(pMat3Rows, kRowX, kZ), MatAt(pMat3Rows, kRowZ, kZ));
 }
 
+// 0x004efed8
 void Mat33ExtractScale(const float *pMat3Rows, float *pScale) {
     const float flLenZ = RowLength(pMat3Rows, kRowZ);
     const float flLenX = RowLength(pMat3Rows, kRowX);
@@ -277,12 +287,18 @@ void Mat33ExtractScale(const float *pMat3Rows, float *pScale) {
     pScale[kY] = flLenY;
 }
 
+// 0x004effe0
 void LerpEulerAngles(const float *pFrom, const float *pTo, float *pOut, float flT) {
+    // The image reads every input before it writes the first output.
+    float aflOut[kComponentCount];
     for (int i = 0; i < kComponentCount; ++i) {
         float flDelta = fmodf((pTo[i] - pFrom[i]) + kHalfTurn, kFullTurn);
         if (flDelta < 0.0f) {
             flDelta += kFullTurn;
         }
-        pOut[i] = ((flDelta - kHalfTurn) * flT) + pFrom[i];
+        aflOut[i] = ((flDelta - kHalfTurn) * flT) + pFrom[i];
+    }
+    for (int i = 0; i < kComponentCount; ++i) {
+        pOut[i] = aflOut[i];
     }
 }
