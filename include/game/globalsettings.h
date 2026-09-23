@@ -178,10 +178,15 @@ public:
      */
     int mMinimumFreeClusters;
 
-private:
-    int mUnknown74; // +0x74, starts at 24
+    /**
+     * The free space a persona save needs. Starts at 24. +0x74
+     *
+     * Public because MetPersonaSaverScreen::OnConnectState() and OnPersonasSaved() compare the
+     * target card's MemcardConnectState::mFree against it and write it into the copy warning, and
+     * the image has no accessor.
+     */
+    int mUnknown74;
 
-public:
     /**
      * Non-zero to offer the team FreQ identities instead of the pre-fab ones. Starts at 0. +0x78
      *
