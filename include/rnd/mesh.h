@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "math/sphere.h"
+#include "math/vector3.h"
 #include "os/hxstr.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
@@ -259,6 +260,21 @@ public:
      * @ghidraAddress 0x00494048
      */
     void SetVertexColor(const Color &color);
+
+    /**
+     * Mirror the mesh across its local x axis by negating the x row of its local transform, and
+     * mark the transform dirty.
+     *
+     * Defined in the header. The one out-of-line copy is emitted in FreqAppearanceDetail's
+     * translation unit and has no caller, and FreqAppearanceDetail::unpack() expands the body. The
+     * title is inferred.
+     *
+     * @ghidraAddress 0x0024ed50
+     */
+    void MirrorX() {
+        Vec3Scale(mLocalXfm[0], -1.0f, mLocalXfm[0]);
+        mDirty = 1;
+    }
 
     /**
      * Append the two triangles of a quad to the faces of mFacesOwner.

@@ -153,13 +153,44 @@ public:
      */
     void Unpack(const Packed &packed);
 
+    /**
+     * The template this part is an instance of. +0x00
+     *
+     * Public because FreqAppearanceDetail::unpack() reads it directly, and the image has no
+     * accessor.
+     */
+    FreqPartTemplate *mTemplate;
+
 private:
-    FreqPartTemplate *mTemplate; // +0x00
     // Not written by any recovered routine.
     unsigned char mUnknown04[0xc]; // +0x04
-    Vector3 mPosition;             // +0x10
-    int mMirrored;                 // +0x20
-    Vector2 mPalettePosition;      // +0x24
-    Rnd::Mesh *mMesh;              // +0x2c
-    Color mColor;                  // +0x30
+
+public:
+    /**
+     * The placement. +0x10
+     *
+     * Public because FreqAppearanceDetail::unpack() raises it and copies it into the mesh
+     * directly, and the image has no accessor.
+     */
+    Vector3 mPosition;
+
+    /**
+     * Non-zero when the part is mirrored. +0x20
+     *
+     * Public because FreqAppearanceDetail::unpack() reads it directly, and the image has no
+     * accessor.
+     */
+    int mMirrored;
+
+    /**
+     * The palette position the colour is taken from, (-1, -1) while unset. +0x24
+     *
+     * Public because FreqAppearanceDetail::unpack() reads it directly, and the image has no
+     * accessor.
+     */
+    Vector2 mPalettePosition;
+
+private:
+    Rnd::Mesh *mMesh; // +0x2c
+    Color mColor;     // +0x30
 };

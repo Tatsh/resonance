@@ -3,13 +3,15 @@
 #include <vector>
 
 #include "math/color.h"
+#include "math/vector2.h"
 #include "met/metpersonadata.h"
 #include "os/hxstr.h"
 
 class FreqPartTemplate;
 namespace Rnd {
 class Mesh;
-}
+class Tex;
+} // namespace Rnd
 
 /**
  * Owner of the art and sound assets the FreQ maker works from.
@@ -150,13 +152,64 @@ public:
      */
     Rnd::Mesh *CloneMesh(const HxStr &name);
 
+    /**
+     * Scale a mesh to one part template.
+     *
+     * The template's x and z scales are converted from 1/128 units and reported through pScaleX
+     * and pScaleZ. The mesh's local basis is rebuilt as orthonormal around its y row, its x row is
+     * scaled by the x scale times flFactorX, its z row by the z scale times flFactorZ, and the mesh
+     * is marked dirty. The body does not read this object. The title is inferred.
+     *
+     * @param pMesh The mesh to scale.
+     * @param pTemplate The template whose scale applies.
+     * @param pScaleX Receives the template's x scale.
+     * @param pScaleZ Receives the template's z scale.
+     * @param flFactorX The further factor on the x row.
+     * @param flFactorZ The further factor on the z row.
+     * @ghidraAddress 0x00254b30
+     */
+    void ApplyPartScale(Rnd::Mesh *pMesh,
+                        FreqPartTemplate *pTemplate,
+                        float *pScaleX,
+                        float *pScaleZ,
+                        float flFactorX,
+                        float flFactorZ);
+
+    /**
+     * Report the colour at one position of the spectrum palette.
+     *
+     * The palette texture, g_spectrumTextureName, is resolved out of Rnd::g_manager on first use
+     * and kept in mPaletteTex. The title is inferred.
+     *
+     * @param position The palette position, each coordinate from 0 to 1.
+     * @return The colour, in storage SampleTexture() shares between calls.
+     * @ghidraAddress 0x00254f30
+     */
+    Color *ColorAt(const Vector2 &position);
+
+    /**
+     * Read the colour of one texel of a texture.
+     *
+     * The coordinates are scaled by the texture's bitmap size, and the colour is written to a
+     * static Color that every call shares. The body does not read this object. The body is not
+     * written. The title is inferred.
+     *
+     * @param pTex The texture.
+     * @param flU The horizontal coordinate, from 0 to 1.
+     * @param flV The vertical coordinate, from 0 to 1.
+     * @return The shared colour.
+     * @ghidraAddress 0x00250638
+     */
+    Color *SampleTexture(Rnd::Tex *pTex, float flU, float flV);
+
 private:
     // The members the destructor walks, described in the class documentation above.
     unsigned char mUnknown00[0x20];         // +0x00
     std::vector<FreqPartTemplate *> mParts; // +0x20, indexed by template identifier
     unsigned char mUnknown2c[0x4];          // +0x2c
     Rnd::Mesh *mMeshTemplate;               // +0x30, the mesh CloneMesh() copies
-    unsigned char mUnknown34[0x30];         // +0x34
+    Rnd::Tex *mPaletteTex;                  // +0x34, resolved by ColorAt()
+    unsigned char mUnknown38[0x2c];         // +0x38
     int mMeshCount;                         // +0x64, the counter NextMeshName() advances
     unsigned char mUnknown68[0x18];         // +0x68
 };
@@ -168,3 +221,11 @@ private:
  * @ghidraAddress 0x006a0f40
  */
 extern Color g_freqMakerDefaultColor;
+
+/**
+ * Registry key of the palette texture MetFreqMakerAssetManager::ColorAt() samples,
+ * `spectrum.bmp`.
+ *
+ * @ghidraAddress 0x006a0f60
+ */
+extern HxStr g_spectrumTextureName;

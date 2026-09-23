@@ -231,6 +231,7 @@ freestylefxmsg
 freestylepowerup
 freqappearance
 freqappearancedetail
+freqmakercursor
 freqpart
 frustrum
 fsmblks

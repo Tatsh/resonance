@@ -23,6 +23,7 @@ set(RESONANCE_GAME_SRCS
     freestylepowerup.cpp
     freqappearance.cpp
     freqappearancedetail.cpp
+    freqmakercursor.cpp
     freqpart.cpp
     gameenablemgr.cpp
     gamemanagerimpl.cpp
