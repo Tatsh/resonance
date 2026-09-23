@@ -26,6 +26,7 @@ set(RESONANCE_RND_SRCS
     particlesys.cpp
     particlesysanim.cpp
     pscam.cpp
+    psenviron.cpp
     psmat.cpp
     psmesh.cpp
     psmultimesh.cpp

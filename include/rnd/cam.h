@@ -385,4 +385,14 @@ private:
  */
 extern Cam *g_pCurrentCam;
 
+/**
+ * Creator the registered "Cam" class builds through.
+ *
+ * Cam::NewCam() until Rnd::PsCam::Init() installs Rnd::PsCam::NewCam(), so a camera loaded from a
+ * file on the PlayStation 2 is a Rnd::PsCam.
+ *
+ * @ghidraAddress 0x006f958c
+ */
+extern Cam *(*g_pfnNewCam)(const HxStr &name);
+
 } // namespace Rnd

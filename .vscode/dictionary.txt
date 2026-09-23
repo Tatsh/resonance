@@ -419,6 +419,7 @@ powerupcountmsg
 powerupfailedmsg
 preapproved
 pscam
+psenviron
 psgr
 psjoinrequestpacket
 psmat

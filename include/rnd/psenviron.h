@@ -30,10 +30,13 @@ public:
     /**
      * Construct an environment with no lights and no fog.
      *
+     * NewEnviron() and Init() both open-code the body. The out-of-line copy has no caller.
+     *
      * @param name The registry key for this object.
      * @ghidraAddress 0x005b2648
      */
-    explicit PsEnviron(const HxStr &name);
+    explicit PsEnviron(const HxStr &name) : Object(name), Environ(name) {
+    }
 
     /**
      * @ghidraAddress 0x005b2200
@@ -43,11 +46,14 @@ public:
     /**
      * Build a PlayStation 2 environment the class registry vends.
      *
+     * The return type is the base class, which is what lets Init() store the routine in
+     * Rnd::g_pfnNewEnviron.
+     *
      * @param name The registry key for the new environment.
      * @return The new environment.
      * @ghidraAddress 0x005b27b0
      */
-    static PsEnviron *NewEnviron(const HxStr &name);
+    static Environ *NewEnviron(const HxStr &name);
 
     /**
      * Install the PlayStation 2 environment factory and build the default scene fixtures.

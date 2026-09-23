@@ -47,6 +47,9 @@ const char *NameText(const Object *pObject) {
 
 Cam *g_pCurrentCam;
 
+// 0x006f958c
+Cam *(*g_pfnNewCam)(const HxStr &name) = Cam::NewCam;
+
 int Cam::DrawSelf() {
     g_pCurrentCam = this;
     return 1;

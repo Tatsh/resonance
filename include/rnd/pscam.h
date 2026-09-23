@@ -69,9 +69,7 @@ public:
      *
      * Vtable slot 4 of the Rnd::Drawable table. The point is scaled by the screen rectangle
      * extents and offset by its origin, then scaled again by the size of the render target, or by
-     * the display size of Rnd::g_gfxDevice when there is no render target. The body is not
-     * reconstructed, because the display width and height of the device sit inside a reserved run
-     * of `gfx/gfxdevice.h`.
+     * the display size of g_gfxDevice when there is no render target.
      *
      * @param ptScreen The point, in the coordinates the screen rectangle is expressed in.
      * @return The same point in render target pixels.
@@ -105,11 +103,14 @@ public:
     /**
      * Build a camera the class registry vends.
      *
+     * The return type is the base class, which is what lets Init() store the routine in
+     * Rnd::g_pfnNewCam.
+     *
      * @param name The registry key for the new camera.
      * @return The new camera.
      * @ghidraAddress 0x00588500
      */
-    static PsCam *NewCam(const HxStr &name);
+    static Cam *NewCam(const HxStr &name);
 
     /**
      * Install the PlayStation 2 camera factory and build the default camera.

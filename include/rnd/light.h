@@ -260,4 +260,24 @@ private:
  */
 extern HxStr g_lightClassName;
 
+/**
+ * Allocate and construct a light.
+ *
+ * The binary bills the 0x120-byte allocation to the tag "Rnd::Light".
+ *
+ * @param name The object name.
+ * @return The new light.
+ * @ghidraAddress 0x005448b8
+ */
+Light *NewLight(const HxStr &name);
+
+/**
+ * Creator the registered "Light" class builds through.
+ *
+ * Rnd::PsEnviron::Init() calls through it to build the default light.
+ *
+ * @ghidraAddress 0x00720bc8
+ */
+extern Light *(*g_pfnNewLight)(const HxStr &name);
+
 } // namespace Rnd

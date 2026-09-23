@@ -237,4 +237,12 @@ void Light::Copy(const Object *pSource, unsigned nFlags) {
     ApplyUnknown();
 }
 
+// 0x005448b8
+Light *NewLight(const HxStr &name) {
+    return new Light(name);
+}
+
+// 0x00720bc8
+Light *(*g_pfnNewLight)(const HxStr &name) = NewLight;
+
 } // namespace Rnd
