@@ -1149,8 +1149,6 @@ protected:
      * pointers to member functions at 0x0077dcf8, whose first five entries address the unclipped
      * read slots ReadRect4NoClip() through ReadRect32NoClip() and whose sixth is ReadRectRle8().
      *
-     * Body not yet written.
-     *
      * @param dest The destination bitmap, whose extent selects the rectangle.
      * @param nX The source column.
      * @param nY The source row.
@@ -1165,8 +1163,6 @@ protected:
      * Non-virtual and orphaned. Calls through the table at 0x0077dd28, which addresses the clipped
      * read slots ReadRect4() through ReadRect32() and then ReadRectRle8().
      *
-     * Body not yet written.
-     *
      * @param dest The destination bitmap, whose extent selects the rectangle.
      * @param nX The source column.
      * @param nY The source row.
@@ -1179,8 +1175,6 @@ protected:
      *
      * Empty. The run length encoded entry of both read tables addresses this one body, so a read
      * into kABitmapFormatRle8 does nothing.
-     *
-     * Body not yet written.
      *
      * @param dest The destination bitmap.
      * @param nX The source column.
@@ -1200,8 +1194,6 @@ protected:
      *
      * The palette resolves from the source, then the canvas, then g_pDefaultPalette.
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle, before clipping.
      * @param pBlit The record to fill.
@@ -1217,8 +1209,6 @@ protected:
      * at 0x0077dd58, whose entries are StretchBlit4() through StretchBlit32() and then
      * StretchBlitRle8(). Every arm clips against the clip rectangle.
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress 0x005ee580
@@ -1232,8 +1222,6 @@ protected:
      * The row walk starts at the first source row rather than at the row SetupStretchBlit()
      * selected, so a rectangle clipped at the top samples rows from too high in the source.
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress 0x005ea640
@@ -1242,8 +1230,6 @@ protected:
 
     /**
      * Stretch an eight bit source bitmap into a destination rectangle, through StretchRowIndexed().
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1254,8 +1240,6 @@ protected:
     /**
      * Stretch a 1555 source bitmap into a destination rectangle, through StretchRow15().
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress 0x005ee6f8
@@ -1265,8 +1249,6 @@ protected:
     /**
      * Stretch a 24 bit source bitmap into a destination rectangle, through StretchRow24().
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress 0x005ee7c8
@@ -1275,8 +1257,6 @@ protected:
 
     /**
      * Stretch a 32 bit source bitmap into a destination rectangle, through StretchRow32().
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1290,8 +1270,6 @@ protected:
      * Decodes the first sampled row into g_abCanvasRowScratch, then decodes again only when the
      * sampled row changes, consuming any rows between through ARleReader::SkipRows().
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress 0x005ea960
@@ -1304,8 +1282,6 @@ protected:
      * Non-virtual and orphaned. Format code 0 goes to StretchBlitRemap4(), code 1 to
      * StretchBlitRemap8(), and code 5 to StretchBlitRemapRle8(). Every other code draws nothing.
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @param pRemap 256 replacement indices, one per source index.
@@ -1316,8 +1292,6 @@ protected:
     /**
      * Stretch a four bit source through a remap table. Empty.
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @param pRemap 256 replacement indices, one per source index.
@@ -1327,8 +1301,6 @@ protected:
 
     /**
      * Stretch an eight bit source through a remap table, through StretchRowRemap().
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1341,8 +1313,6 @@ protected:
      * Stretch a run length encoded source through a remap table.
      *
      * The same code as StretchBlitRle8() with StretchRowRemap() in place of StretchRowIndexed().
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1361,8 +1331,6 @@ protected:
      * four bit source is read as eight bit and an eight bit source draws nothing. Code 5 goes to
      * StretchBlitBlendRle8().
      *
-     * Body not yet written.
-     *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
@@ -1373,8 +1341,6 @@ protected:
 
     /**
      * Stretch a four bit source blended against the destination. Empty.
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1387,8 +1353,6 @@ protected:
 
     /**
      * Stretch an eight bit source blended against the destination, through StretchRowBlend().
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1403,8 +1367,6 @@ protected:
      * Stretch a run length encoded source blended against the destination.
      *
      * The same code as StretchBlitRle8() with StretchRowBlend() in place of StretchRowIndexed().
-     *
-     * Body not yet written.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.

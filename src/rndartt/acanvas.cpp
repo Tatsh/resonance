@@ -1199,3 +1199,350 @@ void ACanvas::BlitBlendRle8(const ABitmap &source,
         BlendRowIndexed(span, ppBlend);
     }
 }
+
+// 0x005ecc68
+void ACanvas::ReadRectNoClip(const ABitmap &dest, int nX, int nY) {
+    // 0x0077dcf8
+    static const ABitmapCopyMember kReadNoClipForFormat[kABitmapFormatCount] = {
+        &ACanvas::ReadRect4NoClip,
+        &ACanvas::ReadRect8NoClip,
+        &ACanvas::ReadRect15NoClip,
+        &ACanvas::ReadRect24NoClip,
+        &ACanvas::ReadRect32NoClip,
+        &ACanvas::ReadRectRle8};
+    (this->*kReadNoClipForFormat[dest.mFormat])(dest, nX, nY);
+}
+
+// 0x005ecd10
+void ACanvas::ReadRect(const ABitmap &dest, int nX, int nY) {
+    // 0x0077dd28
+    static const ABitmapCopyMember kReadForFormat[kABitmapFormatCount] = {&ACanvas::ReadRect4,
+                                                                          &ACanvas::ReadRect8,
+                                                                          &ACanvas::ReadRect15,
+                                                                          &ACanvas::ReadRect24,
+                                                                          &ACanvas::ReadRect32,
+                                                                          &ACanvas::ReadRectRle8};
+    (this->*kReadForFormat[dest.mFormat])(dest, nX, nY);
+}
+
+// 0x005eb190
+void ACanvas::ReadRectRle8([[maybe_unused]] const ABitmap &dest,
+                           [[maybe_unused]] int nX,
+                           [[maybe_unused]] int nY) {
+}
+
+// 0x005ea780
+int ACanvas::SetupStretchBlit(const ABitmap &source, const ARect &rect, AStretchBlit *pBlit) const {
+    if (!(rect.mLeft < rect.mRight && rect.mTop < rect.mBottom)) {
+        return 0;
+    }
+
+    pBlit->mSourceStepY =
+        (source.mHeight << kACanvasFractionBits) / static_cast<short>(rect.mBottom - rect.mTop);
+    pBlit->mSourcePositionY = pBlit->mSourceStepY / 2;
+    pBlit->mTop = rect.mTop;
+    if (rect.mTop < mClip.mTop) {
+        pBlit->mSourcePositionY += pBlit->mSourceStepY * (mClip.mTop - rect.mTop);
+        pBlit->mTop = mClip.mTop;
+    }
+    pBlit->mBottom = rect.mBottom;
+    if (mClip.mBottom < rect.mBottom) {
+        pBlit->mBottom = mClip.mBottom;
+    }
+
+    pBlit->mSourceStep =
+        (source.mWidth << kACanvasFractionBits) / static_cast<short>(rect.mRight - rect.mLeft);
+    pBlit->mSourcePosition = pBlit->mSourceStep / 2;
+    pBlit->mLeft = rect.mLeft;
+    if (rect.mLeft < mClip.mLeft) {
+        pBlit->mSourcePosition += pBlit->mSourceStep * (mClip.mLeft - rect.mLeft);
+        pBlit->mLeft = mClip.mLeft;
+    }
+    pBlit->mRight = rect.mRight;
+    if (mClip.mRight < rect.mRight) {
+        pBlit->mRight = mClip.mRight;
+    }
+
+    pBlit->mSource =
+        DestRow(source) + (pBlit->mSourcePositionY >> kACanvasFractionBits) * source.mBytesPerRow;
+    pBlit->mPalette = source.mPalette;
+    if (pBlit->mPalette == nullptr) {
+        pBlit->mPalette = mBitmap.mPalette;
+        if (pBlit->mPalette == nullptr) {
+            pBlit->mPalette = g_pDefaultPalette;
+        }
+    }
+    pBlit->mHasTransparentColor = source.mHasTransparentColor;
+    pBlit->mTransparentColor = source.mTransparentColor;
+    return pBlit->mTop < pBlit->mBottom && pBlit->mLeft < pBlit->mRight;
+}
+
+// 0x005ee580
+void ACanvas::StretchBlit(const ABitmap &source, const ARect &rect) {
+    // 0x0077dd58
+    static const ABitmapStretchMember kStretchForFormat[kABitmapFormatCount] = {
+        &ACanvas::StretchBlit4,
+        &ACanvas::StretchBlit8,
+        &ACanvas::StretchBlit15,
+        &ACanvas::StretchBlit24,
+        &ACanvas::StretchBlit32,
+        &ACanvas::StretchBlitRle8};
+    (this->*kStretchForFormat[source.mFormat])(source, rect);
+}
+
+// 0x005ea640
+void ACanvas::StretchBlit4(const ABitmap &source, const ARect &rect) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    blit.mSource = g_abCanvasRowScratch;
+    // Yes, the walk starts at the first source row rather than at the row SetupStretchBlit()
+    // selected, so a rectangle clipped at the top samples from too high in the source.
+    const unsigned char *pRow = SourceRow(source);
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        UnpackNibbleRow(pRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        StretchRowIndexed(blit);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        pRow += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005ee628
+void ACanvas::StretchBlit8(const ABitmap &source, const ARect &rect) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRowIndexed(blit);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        blit.mSource += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005ee6f8
+void ACanvas::StretchBlit15(const ABitmap &source, const ARect &rect) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRow15(blit);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        blit.mSource += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005ee7c8
+void ACanvas::StretchBlit24(const ABitmap &source, const ARect &rect) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRow24(blit);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        blit.mSource += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005ee898
+void ACanvas::StretchBlit32(const ABitmap &source, const ARect &rect) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRow32(blit);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        blit.mSource += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005ea960
+void ACanvas::StretchBlitRle8(const ABitmap &source, const ARect &rect) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    if (nRow != 0) {
+        reader.SkipRows(nRow);
+    }
+    reader.DecodeRow(g_abCanvasRowScratch);
+    blit.mSource = g_abCanvasRowScratch;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRowIndexed(blit);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        if (nNextRow != nRow) {
+            if (nNextRow - nRow != 1) {
+                reader.SkipRows(nNextRow - nRow - 1);
+            }
+            reader.DecodeRow(g_abCanvasRowScratch);
+        }
+        nRow = nNextRow;
+    }
+}
+
+// 0x005eec70
+void ACanvas::StretchBlitRemap(const ABitmap &source,
+                               const ARect &rect,
+                               const unsigned char *pRemap) {
+    switch (source.mFormat) {
+    case kABitmapFormatLinear4:
+        StretchBlitRemap4(source, rect, pRemap);
+        break;
+    case kABitmapFormatLinear8:
+        StretchBlitRemap8(source, rect, pRemap);
+        break;
+    case kABitmapFormatRle8:
+        StretchBlitRemapRle8(source, rect, pRemap);
+        break;
+    default:
+        break;
+    }
+}
+
+// 0x005eecd0
+void ACanvas::StretchBlitRemap4([[maybe_unused]] const ABitmap &source,
+                                [[maybe_unused]] const ARect &rect,
+                                [[maybe_unused]] const unsigned char *pRemap) {
+}
+
+// 0x005eecd8
+void ACanvas::StretchBlitRemap8(const ABitmap &source,
+                                const ARect &rect,
+                                const unsigned char *pRemap) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRowRemap(blit, pRemap);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        blit.mSource += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005eaa98
+void ACanvas::StretchBlitRemapRle8(const ABitmap &source,
+                                   const ARect &rect,
+                                   const unsigned char *pRemap) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    if (nRow != 0) {
+        reader.SkipRows(nRow);
+    }
+    reader.DecodeRow(g_abCanvasRowScratch);
+    blit.mSource = g_abCanvasRowScratch;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRowRemap(blit, pRemap);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        if (nNextRow != nRow) {
+            if (nNextRow - nRow != 1) {
+                reader.SkipRows(nNextRow - nRow - 1);
+            }
+            reader.DecodeRow(g_abCanvasRowScratch);
+        }
+        nRow = nNextRow;
+    }
+}
+
+// 0x005eee78
+void ACanvas::StretchBlitBlend(const ABitmap &source,
+                               const ARect &rect,
+                               const unsigned char *const *ppBlend) {
+    // Yes, the binary exchanges the first two arms, so a four bit source takes the eight bit path
+    // and an eight bit source takes the empty one.
+    switch (source.mFormat) {
+    case kABitmapFormatLinear4:
+        StretchBlitBlend8(source, rect, ppBlend);
+        break;
+    case kABitmapFormatLinear8:
+        StretchBlitBlend4(source, rect, ppBlend);
+        break;
+    case kABitmapFormatRle8:
+        StretchBlitBlendRle8(source, rect, ppBlend);
+        break;
+    default:
+        break;
+    }
+}
+
+// 0x005eeed8
+void ACanvas::StretchBlitBlend4([[maybe_unused]] const ABitmap &source,
+                                [[maybe_unused]] const ARect &rect,
+                                [[maybe_unused]] const unsigned char *const *ppBlend) {
+}
+
+// 0x005eeee0
+void ACanvas::StretchBlitBlend8(const ABitmap &source,
+                                const ARect &rect,
+                                const unsigned char *const *ppBlend) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRowBlend(blit, ppBlend);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        blit.mSource += (nNextRow - nRow) * source.mBytesPerRow;
+        nRow = nNextRow;
+    }
+}
+
+// 0x005eabe0
+void ACanvas::StretchBlitBlendRle8(const ABitmap &source,
+                                   const ARect &rect,
+                                   const unsigned char *const *ppBlend) {
+    AStretchBlit blit;
+    if (SetupStretchBlit(source, rect, &blit) == 0) {
+        return;
+    }
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+    int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
+    if (nRow != 0) {
+        reader.SkipRows(nRow);
+    }
+    reader.DecodeRow(g_abCanvasRowScratch);
+    blit.mSource = g_abCanvasRowScratch;
+    for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
+        StretchRowBlend(blit, ppBlend);
+        const int nNextRow = AdvanceStretchRow(&blit);
+        if (nNextRow != nRow) {
+            if (nNextRow - nRow != 1) {
+                reader.SkipRows(nNextRow - nRow - 1);
+            }
+            reader.DecodeRow(g_abCanvasRowScratch);
+        }
+        nRow = nNextRow;
+    }
+}
