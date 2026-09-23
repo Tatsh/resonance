@@ -12,9 +12,10 @@ class Player;
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). mOwner and mType are public
+ * because Overlay::OnChoosePowerup() at `0x0041e9b8` reads both directly with no accessor in the
+ * image. It compares mOwner with HudTrack::mPlayer and passes mType to script template 1016. The
+ * selected entry is read only by Print() and remains private.
  *
  * The destructor at `0x003dcfc8` is compiler-generated and has no declaration here.
  */
@@ -88,9 +89,11 @@ public:
 private:
     // The three names come from the two collections, the only producers of the message, which
     // write the selected entry, the owning player, and the selected kind into them in this order.
-    int mIndex;     // +0x04
-    Player *mOwner; // +0x08
-    int mType;      // +0x0c
+    int mIndex; // +0x04
+
+public:
+    Player *mOwner; /*!< The player whose selection changed. +0x08 */
+    int mType;      /*!< The selected HudItemKind value, or kHudItemNone. +0x0c */
 };
 
 /**

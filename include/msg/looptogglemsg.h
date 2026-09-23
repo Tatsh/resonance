@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,9 @@
  * object is 0xc bytes and its vtable is at `0x007cfff0`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Both members are public
+ * because Overlay::OnLoopToggle() at `0x0041f708` reads them directly with no accessor in the
+ * image. It compares mPlayer with HudTrack::mPlayer and picks the displayed text on mOn.
  */
 class LoopToggleMsg : public Message {
 public:
@@ -49,9 +51,8 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    int mOn;         /*!< Non-zero when looping starts, zero when it stops. +0x04 */
+    Player *mPlayer; /*!< The player who toggled looping. +0x08 */
 };
 
 /**

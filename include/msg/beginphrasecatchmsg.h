@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,10 @@
  * The object is 0x10 bytes and its vtable is at `0x007e0a70`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Every member is public because
+ * Overlay::OnBeginPhraseCatch() at `0x004201c0` reads it directly with no accessor in the image.
+ * It compares mPlayer with HudTrack::mPlayer, formats a non-zero mPoints with `%d`, and formats
+ * mMultiplier with `x%d`.
  */
 class BeginPhraseCatchMsg : public Message {
 public:
@@ -49,10 +52,9 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    Player *mPlayer; /*!< The player starting the phrase. +0x04 */
+    int mPoints;     /*!< The points the phrase is worth. +0x08 */
+    int mMultiplier; /*!< The multiplier the phrase is caught under. +0x0c */
 };
 
 /**

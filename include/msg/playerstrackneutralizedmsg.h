@@ -17,6 +17,10 @@ class Player;
  * affected player, with a per-player total at `+0x08` and the player at `+0x0c`. Print() writes
  * only that player's colour name. New() zeroes both words.
  *
+ * Both members are public because Overlay::OnPlayersTrackNeutralized() at `0x00420588` reads them
+ * directly with no accessor in the image. It compares mPlayer with HudTrack::mPlayer and formats
+ * mPoints into `NEUTRALIZED!\n%d POINTS`.
+ *
  * The destructor at `0x003e0490` is compiler-generated and has no declaration here.
  */
 class PlayersTrackNeutralizedMsg : public CmdMsg {
@@ -63,9 +67,8 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown08 = 0;        // +0x08
-    Player *mPlayer = nullptr; // +0x0c
+    int mPoints = 0;           /*!< The points shown under `NEUTRALIZED!`. +0x08 */
+    Player *mPlayer = nullptr; /*!< The player whose track was neutralised. +0x0c */
 };
 
 /**

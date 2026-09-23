@@ -1,6 +1,9 @@
 #pragma once
 
+#include "app/hudutil.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -10,9 +13,10 @@
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Both members are public
+ * because Overlay::OnCaughtPowerbar() at `0x0041eba0` reads them directly with no accessor in the
+ * image. It compares mPlayer with HudTrack::mPlayer and passes mKind to HudPowerupName() at
+ * `0x0041ebf4`. That call types mKind.
  *
  * The destructor at `0x003dce20` is compiler-generated and has no declaration here.
  */
@@ -53,16 +57,15 @@ public:
     virtual const char *Name();
 
     /**
-     * Write the word at `+0x04` to a diagnostic stream as a number.
+     * Write the item kind to a diagnostic stream as a number.
      *
      * @param stream The stream to write to.
      * @ghidraAddress 0x003e3cb8
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    HudItemKind mKind; /*!< The captured item. +0x04 */
+    Player *mPlayer;   /*!< The capturing player. +0x08 */
 };
 
 /**

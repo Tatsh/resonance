@@ -4,6 +4,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -11,13 +13,15 @@
  * 0x10 bytes and its vtable is at `0x007ce690`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The vector at `+0x04` comes
+ * from the copy constructor at `0x00116eb8`, which allocates one element for every element of the
+ * source and moves them with a block copy. Its three words are the start, the finish, and the end
+ * of storage.
  *
- * The vector at `+0x04` comes from the copy constructor at `0x00116eb8`, which allocates one
- * element for every element of the source and moves them with a block copy. Its three words are
- * the start, the finish, and the end of storage.
+ * The vector is public because two handlers outside the class read it directly with no accessor in
+ * the image. Overlay::OnWin() at `0x0041e020` searches it for HudTrack::mPlayer with std::find at
+ * `0x0041e1d0`. That search types the elements as players. TnlArena::HandleMessage() tests the
+ * vector for emptiness.
  */
 class WinMsg : public Message {
 public:
@@ -55,8 +59,7 @@ public:
      */
     virtual const char *Name();
 
-private:
-    std::vector<int> mUnknown04; // +0x04
+    std::vector<Player *> mWinners; /*!< The winning players. +0x04 */
 };
 
 /**

@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,14 @@
  * object is 0x18 bytes and its vtable is at `0x007ddb50`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Scratcher::EraseGemRange()
+ * builds it on the stack at `0x001d0194` with the erased range as a first bar and an end bar one
+ * past the last. A single erased bar therefore gives an end one greater than its start.
+ *
+ * mPlayer, mFirstBar, and mEndBar are public because Overlay::OnShowEraseEffect() at `0x0041fba0`
+ * reads them directly with no accessor in the image. It compares mPlayer with HudTrack::mPlayer
+ * and shows `BAR ERASED` when `mEndBar - mFirstBar < 2`, `TRACK ERASED` otherwise. The purpose of
+ * the words at `+0x08` and `+0x14` is not recovered.
  */
 class ShowEraseEffectMsg : public Message {
 public:
@@ -49,11 +56,16 @@ public:
      */
     virtual const char *Name();
 
+    Player *mPlayer; /*!< The player who erased the range. +0x04 */
+
 private:
-    int mUnknown04; // +0x04
     int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+
+public:
+    int mFirstBar; /*!< The first erased bar. +0x0c */
+    int mEndBar;   /*!< The bar one past the last erased bar. +0x10 */
+
+private:
     int mUnknown14; // +0x14
 };
 

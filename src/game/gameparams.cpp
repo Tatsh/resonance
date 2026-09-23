@@ -2,6 +2,13 @@
 
 #include <iostream>
 
+namespace {
+
+// 0x0067e798
+int g_nDoWinSequence;
+
+} // namespace
+
 // 0x00187170
 GameParams::GameParams() {
     mUnknown10 = 0;
@@ -116,4 +123,14 @@ GameParams &GameParams::operator=(const GameParams &other) {
     mUnknown2c = other.mUnknown2c;
     mJukeboxMode = other.mJukeboxMode;
     return *this;
+}
+
+// 0x00187b00
+int GetDoWinSequence() {
+    return g_nDoWinSequence;
+}
+
+// 0x00187b10
+void SetDoWinSequence(int nDoWinSequence) {
+    g_nDoWinSequence = nDoWinSequence;
 }

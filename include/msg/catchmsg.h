@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,12 @@
  * 0x20 bytes and its vtable is at `0x007e0a28`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Every member but the word at
+ * `+0x0c` is public because Overlay::OnCatch() at `0x0041fed8` reads it directly with no accessor
+ * in the image. It compares mPlayer with HudTrack::mPlayer, draws the catch progress from mCaught
+ * over mTotal, converts mTick to a bar by the 1920 ticks of a bar before looking mTrack up, and
+ * resets its miss count when mHit is set. Catcher::Slot7() at `0x001abe50` sends the message for
+ * a missed gem with mHit clear.
  */
 class CatchMsg : public Message {
 public:
@@ -49,14 +54,17 @@ public:
      */
     virtual const char *Name();
 
+    int mTick;  /*!< The scheduler time of the gem. +0x04 */
+    int mTrack; /*!< The track the gem lies on. +0x08 */
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
     int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14
-    int mUnknown18; // +0x18
-    int mUnknown1c; // +0x1c
+
+public:
+    int mHit;        /*!< Non-zero for a caught gem, zero for a miss. +0x10 */
+    Player *mPlayer; /*!< The catching player. +0x14 */
+    int mCaught;     /*!< The gems caught so far in the phrase. +0x18 */
+    int mTotal;      /*!< The gems the phrase requires. +0x1c */
 };
 
 /**

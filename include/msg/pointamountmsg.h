@@ -16,7 +16,8 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). Print() dispatches
  * Player::Print() through the word at `+0x04`, which types it. The purpose of the word at `+0x08`
- * is not recovered. Readers of the fields have not been traced, so they are private by default.
+ * is not recovered. mPlayer is public because Overlay::OnPointAmount() at `0x0042aff0` reads it
+ * directly with no accessor in the image, comparing it with HudBadge::mPlayer.
  *
  * The destructor at `0x003e0958` is compiler-generated and has no declaration here.
  */
@@ -87,9 +88,10 @@ public:
      */
     float GetScoreFraction();
 
+    Player *mPlayer; /*!< The player whose score changed. +0x04 */
+
 private:
-    Player *mPlayer; // +0x04
-    int mUnknown08;  // +0x08
+    int mUnknown08; // +0x08
 };
 
 /**

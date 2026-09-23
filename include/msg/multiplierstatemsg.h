@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,12 @@
  * object is 0x10 bytes and its vtable is at `0x007cffa8`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The producer at `0x0011eb20`
+ * writes the player, its base multiplier plus one, and its bonus multiplier.
+ *
+ * Every member is public because Overlay::OnMultiplierState() at `0x00420408` reads it directly
+ * with no accessor in the image. It compares mPlayer with HudTrack::mPlayer, shows the sum of
+ * mMultiplier and mBonus, and selects the hot material when mBonus is non-zero.
  */
 class MultiplierStateMsg : public Message {
 public:
@@ -49,10 +54,9 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    Player *mPlayer; /*!< The player whose multiplier changed. +0x04 */
+    int mMultiplier; /*!< The base multiplier. +0x08 */
+    int mBonus;      /*!< The multiplier added on top of the base, or zero. +0x0c */
 };
 
 /**

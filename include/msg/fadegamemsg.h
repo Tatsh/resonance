@@ -9,9 +9,10 @@
  * is 0xc bytes and its vtable is at `0x007dc430`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Both members are public
+ * because Overlay::OnFadeGame() at `0x0042b1f8` reads them directly with no accessor in the image.
+ * It passes both to HudScreenFlash::Start(), converting mDuration to a float, and hides the
+ * panel's message text when mFadeIn is clear.
  */
 class FadeGameMsg : public Message {
 public:
@@ -49,9 +50,8 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    int mDuration; /*!< The length of the fade in milliseconds. +0x04 */
+    int mFadeIn;   /*!< Non-zero to fade the game in, zero to fade it out. +0x08 */
 };
 
 /**

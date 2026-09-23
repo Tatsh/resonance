@@ -161,3 +161,28 @@ public:
      */
     bool mJukeboxMode;
 };
+
+/**
+ * Report whether a won game plays the win sequence.
+ *
+ * A free function of this translation unit over a file-scope word at `0x0067e798`. Only this pair
+ * reads and writes the word. Overlay::OnWin() is the one caller and plays the win sequence only
+ * when the result is non-zero. The name follows the script function `do_win_sequence_cheat`, whose
+ * handler sets the word. The title is inferred.
+ *
+ * @return Non-zero when the win sequence is enabled.
+ * @ghidraAddress 0x00187b00
+ */
+int GetDoWinSequence();
+
+/**
+ * Enable or disable the win sequence.
+ *
+ * ScriptDoWinSequenceCheat() and PyInvokeDoWinSequenceCheat() pass 1, the MetRenderer constructor
+ * and the routine at `0x0036bcb8` pass 0, and MetLoadGameScreen::Slot5() passes 1 or 0 by the
+ * result of the call before it. The title is inferred.
+ *
+ * @param nDoWinSequence Non-zero to enable the win sequence.
+ * @ghidraAddress 0x00187b10
+ */
+void SetDoWinSequence(int nDoWinSequence);

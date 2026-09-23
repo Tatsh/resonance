@@ -1,6 +1,9 @@
 #pragma once
 
+#include "app/hudutil.h"
 #include "msg/message.h"
+
+class Player;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -9,9 +12,11 @@
  * object is 0x1c bytes and its vtable is at `0x007d0080`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The first three words are
+ * public because Overlay::OnDeployedPowerup() at `0x0041eda8` reads them directly with no accessor
+ * in the image. It passes mKind to HudPowerupName(), compares mPlayer with HudTrack::mPlayer, and,
+ * when mKind is kHudItemBumper, compares mTarget with HudTrack::mPlayer as well. The purpose of the
+ * last three words is not recovered.
  */
 class DeployedPowerupMsg : public Message {
 public:
@@ -49,10 +54,11 @@ public:
      */
     virtual const char *Name();
 
+    HudItemKind mKind; /*!< The deployed powerup. +0x04 */
+    Player *mPlayer;   /*!< The deploying player. +0x08 */
+    Player *mTarget;   /*!< The player a bumper strikes. +0x0c */
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
     int mUnknown10; // +0x10
     int mUnknown14; // +0x14
     int mUnknown18; // +0x18

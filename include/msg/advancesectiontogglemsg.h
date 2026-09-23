@@ -9,9 +9,10 @@
  * base. The object is 0xc bytes and its vtable is at `0x007ce768`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). mAdvance is public because
+ * Overlay::OnAdvanceSectionToggle() at `0x0041f440` reads it directly with no accessor in the
+ * image, showing `ADVANCE TO NEXT SECTION` when it is non-zero and `REPEAT SECTION` otherwise. The
+ * purpose of the word at `+0x08` is not recovered.
  */
 class AdvanceSectionToggleMsg : public Message {
 public:
@@ -49,8 +50,9 @@ public:
      */
     virtual const char *Name();
 
+    int mAdvance; /*!< Non-zero to advance past the section, zero to repeat it. +0x04 */
+
 private:
-    int mUnknown04; // +0x04
     int mUnknown08; // +0x08
 };
 

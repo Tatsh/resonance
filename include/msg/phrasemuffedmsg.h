@@ -17,8 +17,9 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). Print() labels `+0x04` as a
  * track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
- * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. Readers of the
- * fields have not been traced, so they are private by default.
+ * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. mPlayer is public
+ * because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly with no accessor in the
+ * image, comparing it with HudTrack::mPlayer.
  *
  * The destructor at `0x003dff48` is compiler-generated and has no declaration here.
  */
@@ -69,8 +70,12 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    int mTrack;         // +0x04
-    Player *mPlayer;    // +0x08
+    int mTrack; // +0x04
+
+public:
+    Player *mPlayer; /*!< The player who muffed the phrase. +0x08 */
+
+private:
     Mid::MBT mPosition; // +0x0c
     int mTried;         // +0x10
 };

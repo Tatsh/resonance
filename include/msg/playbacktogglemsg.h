@@ -9,9 +9,10 @@
  * object is 0x8 bytes and its vtable is at `0x007ce6d8`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). mOn is public because
+ * Overlay::OnPlaybackToggle() at `0x0041f9a8` reads it directly with no accessor in the image. It
+ * copies the flag into its own state and, when the flag is set, shows `Press the SELECT button to
+ * edit`.
  */
 class PlaybackToggleMsg : public Message {
 public:
@@ -49,8 +50,7 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
+    int mOn; /*!< Non-zero when playback starts, zero when it stops. +0x04 */
 };
 
 /**

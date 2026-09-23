@@ -10,12 +10,12 @@
  * 0x10 bytes and its vtable is at `0x007dc478`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The HxStr at `+0x04` comes
+ * from the copy constructor at `0x00193e10`, which copy-constructs it rather than copying its
+ * words.
  *
- * The HxStr at `+0x04` comes from the copy constructor at `0x00193e10`, which copy-constructs it
- * rather than copying its words.
+ * mText is public because Overlay::OnText() at `0x0041f5e8` copies it directly at `0x0041f608`
+ * with no accessor in the image. The purpose of the word at `+0x0c` is not recovered.
  */
 class TextMsg : public Message {
 public:
@@ -53,9 +53,10 @@ public:
      */
     virtual const char *Name();
 
+    HxStr mText; /*!< The text the track display shows. +0x04 */
+
 private:
-    HxStr mUnknown04; // +0x04
-    int mUnknown0c;   // +0x0c
+    int mUnknown0c; // +0x0c
 };
 
 /**

@@ -25,5 +25,5 @@ const char *CaughtPowerbarMsg::Name() {
 
 // 0x003e3cb8
 void CaughtPowerbarMsg::Print(std::ostream &stream) {
-    stream << mUnknown04;
+    stream << mKind;
 }

@@ -17,8 +17,11 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Print() labels five of the
  * nine words: a bar range at `+0x04` and `+0x08`, the track at `+0x14`, the score at `+0x1c`, and
  * the juice at `+0x20`, and it writes the colour name of the player at `+0x18`. The words at
- * `+0x0c`, `+0x10`, and `+0x24` are not printed. Readers of the fields have not been traced, so
- * they are private by default.
+ * `+0x0c`, `+0x10`, and `+0x24` are not printed.
+ *
+ * mTrack, mPlayer, and mScore are public because Overlay::OnPhraseCaptured() at `0x0042b068`
+ * reads them directly with no accessor in the image. It passes mTrack to script template 1005,
+ * compares mPlayer with HudTrack::mPlayer, and hands a non-zero mScore to the track display.
  *
  * The destructor at `0x003deaf0` is compiler-generated and has no declaration here.
  */
@@ -68,15 +71,19 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    int mUnknown04;  // +0x04
-    int mUnknown08;  // +0x08
-    int mUnknown0c;  // +0x0c
-    int mUnknown10;  // +0x10
-    int mTrack;      // +0x14
-    Player *mPlayer; // +0x18
-    int mScore;      // +0x1c
-    int mJuice;      // +0x20
-    int mUnknown24;  // +0x24
+    int mUnknown04; // +0x04
+    int mUnknown08; // +0x08
+    int mUnknown0c; // +0x0c
+    int mUnknown10; // +0x10
+
+public:
+    int mTrack;      /*!< The track the phrase lies on. +0x14 */
+    Player *mPlayer; /*!< The capturing player. +0x18 */
+    int mScore;      /*!< The score the capture earned. +0x1c */
+
+private:
+    int mJuice;     // +0x20
+    int mUnknown24; // +0x24
 };
 
 /**

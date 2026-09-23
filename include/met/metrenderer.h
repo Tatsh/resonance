@@ -74,7 +74,7 @@ class MetFade;
  *   `0x00254970`.
  * - HandleMessage() needs RawControllerMsg to declare its four-word payload, which
  *   msg/rawcontrollermsg.h records as recovered from Clone() and does not declare. The payload
- *   record is declared as MetControllerReading in met/metcommandmap.h until it does.
+ *   record is declared as MetControllerReading in msg/metcontrollerreading.h until it does.
  * - OnUnknownSlot5() needs the named-sound player at `0x0012eba0`, which is not the one
  *   app/playsound.h declares, and the singleton getter at `0x00217f30`.
  * - OnUnknownSlot7() needs the two asynchronous predicates at `0x00464628` and `0x00460b20`, the

@@ -11,9 +11,8 @@ class Player;
  * object is 0xc bytes and its vtable is at `0x007cf4e8`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Both members are public, the
+ * player because LocalPlayer::Slot22() writes it and the flag because Overlay reads it.
  */
 class ToggleGhostMsg : public Message {
 public:
@@ -62,8 +61,16 @@ public:
      */
     Player *mUnknown04;
 
-private:
-    int mUnknown08; // +0x08
+    /**
+     * Non-zero to light the player's track display, zero to darken it.
+     *
+     * LocalPlayer::Slot22() at `0x0011e908` writes its argument here. Overlay::OnToggleGhost() at
+     * `0x0042aef8` reads it directly with no accessor in the image and selects one of two values
+     * from the track display for each of the display's kind-11 components.
+     *
+     * +0x08
+     */
+    int mOn;
 };
 
 /**
