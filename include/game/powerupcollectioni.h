@@ -71,17 +71,16 @@ public:
     /**
      * Deploy the selected powerup and account for the one used.
      *
-     * Slot 7, and an empty default. Neither implementation reads either parameter, and the arity
-     * comes from the three call sites instead. PowerupPlacer's three subclasses all dispatch this
-     * slot with two arguments, at `0x001ccf30`, `0x001cdeb8`, and `0x001cdfe0`, so the signature
-     * cannot be recovered from the implementations alone.
+     * Slot 7, and an empty default. Both implementations forward the two arguments untouched to
+     * Powerup::Deploy(). PowerupPlacer's three subclasses all dispatch this slot with two
+     * arguments, at `0x001ccf30`, `0x001cdeb8`, and `0x001cdfe0`.
      *
-     * @param nPlayerValue Whatever Player::Slot4() reports for the deploying player. Its meaning
-     *                     is unrecovered, and the default in Player returns -1.
+     * @param nTrack Whatever Player::Slot4() reports for the deploying player, its track. The
+     *               default in Player returns -1.
      * @param nBar The current bar, as the song tick divided by 1920.
      * @ghidraAddress 0x001ccb58
      */
-    virtual void Deploy(int nPlayerValue, int nBar);
+    virtual void Deploy(int nTrack, int nBar);
 
     /**
      * Report whether an entry is selected.

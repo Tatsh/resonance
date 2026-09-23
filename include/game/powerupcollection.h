@@ -102,11 +102,11 @@ public:
      * message follows. Otherwise the count drops by one, a PowerupCountMsg follows, and an entry
      * that reaches zero triggers SelectRelative(1).
      *
-     * @param nPlayerValue Ignored. See PowerupCollectionI::Deploy().
-     * @param nBar Ignored. See PowerupCollectionI::Deploy().
+     * @param nTrack Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
+     * @param nBar Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
      * @ghidraAddress 0x001cb500
      */
-    virtual void Deploy(int nPlayerValue, int nBar);
+    virtual void Deploy(int nTrack, int nBar);
 
     /**
      * Report whether an entry is selected.

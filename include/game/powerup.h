@@ -1,5 +1,7 @@
 #pragma once
 
+class Player;
+
 /**
  * Base of the thirteen powerups a player can store and deploy.
  *
@@ -31,9 +33,18 @@ public:
      * is what recovers the return value as a result rather than as a state read. NeutralizePowerup
      * implements it at `0x001c9c40` and CripplePowerup at `0x001c9830`.
      *
+     * The arity comes from the two call sites (`0x001cb538` and `0x001cb97c`), which forward the
+     * collection's two arguments untouched in a1 and a2, load the owning player into a3, and clear
+     * t0. NeutralizePowerup stores a1 where PhraseNeutralizer compares the track and a2 where it
+     * reads the bar. No implementation reads the fourth argument.
+     *
+     * @param nTrack The deploying player's track, from Player::Slot4().
+     * @param nBar The current bar.
+     * @param pPlayer The deploying player.
+     * @param nUnused Zero at both call sites.
      * @return Non-zero once the effect has been applied.
      */
-    virtual int Deploy() = 0;
+    virtual int Deploy(int nTrack, int nBar, Player *pPlayer, int nUnused) = 0;
 
     /**
      * Report which of the thirteen kinds this powerup is.

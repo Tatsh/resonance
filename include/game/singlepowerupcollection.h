@@ -61,11 +61,11 @@ public:
      * A success sends a ChoosePowerupMsg with a kind of -1, then deletes the powerup and clears
      * both members.
      *
-     * @param nPlayerValue Ignored. See PowerupCollectionI::Deploy().
-     * @param nBar Ignored. See PowerupCollectionI::Deploy().
+     * @param nTrack Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
+     * @param nBar Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
      * @ghidraAddress 0x001cb948
      */
-    virtual void Deploy(int nPlayerValue, int nBar);
+    virtual void Deploy(int nTrack, int nBar);
 
     /**
      * Report whether a powerup is stored.

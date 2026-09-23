@@ -16,6 +16,9 @@ constexpr int kPowerupKindsConfigCode = 0x389;
 // The largest count one entry stores. AddPowerup ignores an entry already at this count.
 constexpr int kMaximumCount = 9;
 
+// The fourth argument Deploy() passes to Powerup::Deploy().
+constexpr int kDeployUnused = 0;
+
 // Predicate std::find_if runs over the entries. The name is a placeholder: the class is
 // file-private, non-polymorphic, and four bytes, so no descriptor, allocation tag, or literal in
 // the image supplies one. The body appears inside the instantiation at 0x001cc628, which dispatches
@@ -118,8 +121,8 @@ void PowerupCollection::Select(int nIndex) {
 }
 
 // 0x001cb500. The selected entry is read with no test against -1.
-void PowerupCollection::Deploy(int, int) {
-    if (mEntries[mSelected].mPowerup->Deploy() == 0) {
+void PowerupCollection::Deploy(int nTrack, int nBar) {
+    if (mEntries[mSelected].mPowerup->Deploy(nTrack, nBar, mOwner, kDeployUnused) == 0) {
         return;
     }
     if (mUnlimited != 0) {

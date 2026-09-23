@@ -4,6 +4,13 @@
 #include "game/powerup.h"
 #include "msg/choosepowerupmsg.h"
 
+namespace {
+
+// The fourth argument Deploy() passes to Powerup::Deploy().
+constexpr int kDeployUnused = 0;
+
+} // namespace
+
 // 0x001cb760
 SinglePowerupCollection::SinglePowerupCollection(LocalPlayer *pOwner)
     : mType(-1), mPowerup(nullptr), mOwner(pOwner) {
@@ -25,11 +32,11 @@ void SinglePowerupCollection::AddPowerup(int nType) {
 }
 
 // 0x001cb948
-void SinglePowerupCollection::Deploy(int, int) {
+void SinglePowerupCollection::Deploy(int nTrack, int nBar) {
     if (mType == -1) {
         return;
     }
-    if (mPowerup->Deploy() == 0) {
+    if (mPowerup->Deploy(nTrack, nBar, mOwner, kDeployUnused) == 0) {
         return;
     }
     ChoosePowerupMsg msg(0, mOwner, -1);
