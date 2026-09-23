@@ -55,6 +55,11 @@ set(RESONANCE_MET_SRCS
     metmultitips4screen.cpp
     metmultitips5screen.cpp
     metmultitipsbasescreen.cpp
+    metpausebasescreen.cpp
+    metpausegamescreen.cpp
+    metpausemultiremixscreen.cpp
+    metpausesologamescreen.cpp
+    metpausesoloremixscreen.cpp
     metpersonadata.cpp
     metpersonasaverscreen.cpp
     metremixdatascreen.cpp
