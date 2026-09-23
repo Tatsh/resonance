@@ -63,6 +63,17 @@ public:
     void Pause();
 
     /**
+     * Restart the time base from the reading Pause() stopped it at.
+     *
+     * Sets mHasOrigin and stores the origin that makes Now() continue from mUnknown08. Does
+     * nothing while mHasOrigin is already set. GrooveWorld::StartPlay() calls it on the song clock.
+     * The title is inferred.
+     *
+     * @ghidraAddress 0x004a7848
+     */
+    void Resume();
+
+    /**
      * Queue a command, choosing between the absolute and the delta path.
      *
      * A non-zero bDelta takes the delta path, which resolves the due tick against the later of the
