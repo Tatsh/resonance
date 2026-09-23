@@ -32,14 +32,10 @@
  * opens the keyboard rather than committing a selection, which is the whole difference from
  * MetLoadFreqScreen.
  *
- * Four bodies are not written. OnNameButton() builds a MetKeyboardRequest and passes it to
+ * Three bodies are not written. OnNameButton() builds a MetKeyboardRequest and passes it to
  * MetKeyboardScreen::Open(), which are both declared now. OnUnknownSlot2() continues past the
- * name assignment into a larger body.
- * OnMsgScreenDismissed() needs members no header in this tree declares yet. The two FreQ maker
- * slots are not written either, although every routine they call is now declared.
- * PrepareFreqMakerForSelection() calls MetFreqMakerCanvasScreen::LoadPrefab() and
- * MetFreqMakerButtonsScreen::SetEditing(), and OnCreateButton() calls
- * MetLoadFreqBaseScreen::OnCreateButton().
+ * name assignment into a larger body. OnMsgScreenDismissed() needs members no header in this tree
+ * declares yet.
  */
 class MetLoadNewFreqScreen : public MetLoadFreqBaseScreen, public MetKBUser {
 public:
@@ -127,7 +123,10 @@ public:
     /**
      * Hand the selected identity to the FreQ maker.
      *
-     * Slot 41. The body is not written. The class documentation records what it calls.
+     * Slot 41. The selected identity goes to MetFreqMakerCanvasScreen::LoadPrefab() with no
+     * randomisation, the editing mode is selected through MetFreqMakerButtonsScreen::SetEditing(),
+     * MetFreqMakerButtonsScreen::mNewPersona is set, and `MetLoadNewFreqScreen` is recorded in
+     * MetFrontEndState::mUnknown24.
      *
      * @ghidraAddress 0x002a3f80
      */
@@ -136,7 +135,8 @@ public:
     /**
      * Create a new identity in the FreQ maker.
      *
-     * Slot 43. The body is not written. The class documentation records what it calls.
+     * Slot 43. `MetLoadNewFreqScreen` is recorded in MetFrontEndState::mUnknown24, and then
+     * MetLoadFreqBaseScreen::OnCreateButton() runs.
      *
      * @ghidraAddress 0x002a8670
      */

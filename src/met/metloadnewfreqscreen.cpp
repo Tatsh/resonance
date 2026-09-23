@@ -1,6 +1,9 @@
 #include "met/metloadnewfreqscreen.h"
 
 #include "met/metfreqmakerassetmanager.h"
+#include "met/metfreqmakerbuttonsscreen.h"
+#include "met/metfreqmakercanvasscreen.h"
+#include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
 #include "met/metscreentitlescreen.h"
 #include "os/hxstr.h"
@@ -33,6 +36,12 @@ static const char *const kPromptLayout = "standard_title";
 // Screens the class pushes, exits, and activates by registry key.
 static const char *const kHelpScreen = "MetHelpScreen";
 static const char *const kLoadNewFreqScreen = "MetLoadNewFreqScreen";
+static const char *const kFreqMakerCanvasScreen = "MetFreqMakerCanvasScreen";
+static const char *const kFreqMakerButtonsScreen = "MetFreqMakerButtonsScreen";
+
+// The MetFreqMakerButtonsScreen::SetEditing() value, and the LoadPrefab() randomise flag.
+constexpr int kFreqMakerEditing = 1;
+constexpr int kNoRandomize = 0;
 
 // Ring index of the button BuildButtonList() selects and UpdateNameLabel() labels.
 constexpr int kNameButtonIndex = 0;
@@ -78,6 +87,24 @@ void MetLoadNewFreqScreen::UpdateNameLabel() {
     HxStr label;
     QueryConfigString(&label, kLabelConfigCode, kNameLabelKey);
     pLabel->SetText(label);
+}
+
+// 0x002a3f80
+void MetLoadNewFreqScreen::PrepareFreqMakerForSelection() {
+    MetFreqMakerCanvasScreen *pCanvas =
+        static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
+    MetFreqMakerButtonsScreen *pButtons =
+        static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
+    pCanvas->LoadPrefab((*mUnknown8c)[mUnknown94], kNoRandomize);
+    pButtons->SetEditing(kFreqMakerEditing);
+    pButtons->mNewPersona = 1;
+    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadNewFreqScreen);
+}
+
+// 0x002a8670
+void MetLoadNewFreqScreen::OnCreateButton() {
+    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadNewFreqScreen);
+    MetLoadFreqBaseScreen::OnCreateButton();
 }
 
 void MetLoadNewFreqScreen::AcquireIdentityList() {

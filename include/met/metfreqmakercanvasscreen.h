@@ -287,11 +287,30 @@ public:
      */
     void RecentrePart(int nIndex);
 
+    // Declared in recovered offset order, with the access specifiers interleaved.
+
+    /**
+     * The persona being edited, or null for a new one.
+     *
+     * Public because MetFreqMakerButtonsScreen's slots 15 and 36 pass it to
+     * MetPersonaSaverScreen::StartSave(), and the image has no accessor. +0x90
+     */
+    MetPersonaData *mPersona;
+
 private:
-    MetPersonaData *mPersona;         // +0x90, the persona being edited, or null for a new one
     unsigned char mUnknown94[0xc];    // +0x94
     FreqAppearanceDetail mAppearance; // +0xa0, the avatar under edit
-    int mModified;                    // +0x150, set by every edit and cleared on commit or load
-    HxStr mFreqName;                  // +0x154
-    int mViewAttached;                // +0x15c, set once slot 38 has hung the avatar view
+
+public:
+    /**
+     * Non-zero after any edit, and cleared on commit or load.
+     *
+     * Public because MetFreqMakerButtonsScreen's slot 36 reads it to decide whether to raise the
+     * save-before-leaving dialogue, and the image has no accessor. +0x150
+     */
+    int mModified;
+
+private:
+    HxStr mFreqName;   // +0x154
+    int mViewAttached; // +0x15c, set once slot 38 has hung the avatar view
 };

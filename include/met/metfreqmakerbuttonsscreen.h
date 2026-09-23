@@ -1,10 +1,15 @@
 #pragma once
 
+#include <vector>
+
 #include "met/metkbuser.h"
 #include "met/metscreen.h"
 #include "os/hxstr.h"
 
 class MetButtonList;
+namespace Rnd {
+class Button;
+}
 
 /**
  * Button row of the FreQ maker.
@@ -26,8 +31,7 @@ class MetButtonList;
  * library emissions.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetScreen table
- * are 5, 7 `0x0025e1e0`, 14, 15 `0x00259ad0`, 19 `0x002581c8`, 23, 24, 30, 33 `0x0025e1a0`, 36
- * `0x00259040`, and 38, and MetKBUser slot 2.
+ * are 5, 7, 14, 15, 19, 23, 24, 30, 33, 36, and 38, and MetKBUser slot 2.
  */
 class MetFreqMakerButtonsScreen : public MetScreen, public MetKBUser {
 public:
@@ -87,6 +91,41 @@ public:
     virtual int PollContainerLoad();
 
     /**
+     * Enable the row again and show the page and directions of the selected button.
+     *
+     * Slot 7. Every button returns to state 0 and the selected button takes state 1.
+     *
+     * @ghidraAddress 0x0025e1e0
+     */
+    virtual void OnUnknownSlot7();
+
+    /**
+     * Act on the save-before-leaving dialogue.
+     *
+     * Slot 15. Only `check_if_changed` is handled. YES commits the persona on the canvas and
+     * saves it, returning to the screen MetFrontEndState::mUnknown24 records and the help screen.
+     * NO brings back those two screens without saving.
+     *
+     * @param name The dialogue name.
+     * @param nChoice The index of the button chosen.
+     * @ghidraAddress 0x00259ad0
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
+     * Step the selection, act on the selected button, or exit the FreQ maker.
+     *
+     * Slot 19. The two ring steps move the selection and show its page and directions. Select
+     * opens the keyboard for the name button, commits the persona and exits for the save button,
+     * randomises or mutates for the randomise button, and otherwise starts the chosen button's
+     * alternation. Back exits without saving.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x002581c8
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
      * Play nothing.
      *
      * Slot 23. The body is empty.
@@ -116,6 +155,27 @@ public:
      * @ghidraAddress 0x00258f40
      */
     virtual void OnUnknownSlot30(Rnd::Object *pObject);
+
+    /**
+     * Show the page and directions of the selected button.
+     *
+     * Slot 33.
+     *
+     * @ghidraAddress 0x0025e1a0
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Take the action recorded on the way out, once the screen has exited.
+     *
+     * Slot 36. The inventory pages are hidden first. After the save button the persona is saved
+     * and the mode screen, or the network portal in a network game, follows. After a back command
+     * the save-before-leaving dialogue is raised when a save is possible and the canvas is
+     * modified, and otherwise the screen MetFrontEndState::mUnknown24 records returns.
+     *
+     * @ghidraAddress 0x00259040
+     */
+    virtual void OnUnknownSlot36();
 
     /**
      * Resolve the base views and add the nine buttons with their labels.
@@ -153,6 +213,18 @@ private:
     // 0x0025a228. Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
     void UpdateRandomizeLabel();
 
+    // 0x0025a3e0. Show the inventory page a part button selects, or hide the pages for the edit,
+    // name, randomise, and save buttons. The directions screen is resolved and not used.
+    void ShowPageForButton(Rnd::Button *pButton);
+
+    // 0x0025a5e0. Show the directions page for a button, or the blank page for no button.
+    void ShowDirectionsForButton(Rnd::Button *pButton);
+
+    // Resolve the canvas and hand its persona to MetPersonaSaverScreen::StartSave(). The card is
+    // the one GlobalSettings records when MetFrontEndState::mUnknown0c is set, and otherwise a
+    // stand-in slot named `1` on port 0. Slots 15 and 36 expand it.
+    void StartPersonaSave(const std::vector<HxStr> &screens);
+
     // Declared in recovered offset order, with the access specifiers interleaved.
 
     MetButtonList *mButtonList; // +0x90
@@ -169,6 +241,6 @@ public:
     int mNewPersona;
 
 private:
-    // The action slot 36 takes once the screen has exited, or -1 for none. +0x9c
-    int mUnknown9c;
+    // The action slot 36 takes once the screen has exited, from ExitAction. +0x9c
+    int mExitAction;
 };

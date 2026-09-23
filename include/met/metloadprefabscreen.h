@@ -18,9 +18,9 @@
  * vector below. The destructor at `0x002ad450` restores the vptr, returns the vector buffer to the
  * pool, runs the MetLoadFreqBaseScreen destructor, and releases the object with the tag `MsgSink`.
  *
- * Ten slots differ from the MetLoadFreqBaseScreen table, and only the destructor has a recovered
- * name. The others are 5 `0x002a8aa0`, 15 `0x002a9b38`, 39 `0x002a8fe0`, 40 `0x002a94f0`,
- * 41 `0x002a9330`, 43 `0x002a9710`, 44 `0x002a91b8`, and 45 `0x002a8b80`.
+ * Ten slots differ from the MetLoadFreqBaseScreen table. Apart from the destructor and slot 41,
+ * PrepareFreqMakerForSelection(), they are 5 `0x002a8aa0`, 15 `0x002a9b38`, 39 `0x002a8fe0`, 40
+ * `0x002a94f0`, 43 `0x002a9710`, 44 `0x002a91b8`, and 45 `0x002a8b80`.
  */
 class MetLoadPreFabScreen : public MetLoadFreqBaseScreen {
 public:
@@ -37,6 +37,20 @@ public:
      * @ghidraAddress 0x002ad450
      */
     virtual ~MetLoadPreFabScreen();
+
+    /**
+     * Hand the selected identity to the FreQ maker.
+     *
+     * Slot 41. An index inside MetPersonaData::savedList() is a saved persona and goes to
+     * MetFreqMakerCanvasScreen::LoadPersona(), and a later index is a pre-fab and goes to
+     * MetFreqMakerCanvasScreen::LoadPrefab() with no randomisation. The editing mode is then
+     * selected through MetFreqMakerButtonsScreen::SetEditing(),
+     * MetFreqMakerButtonsScreen::mNewPersona is cleared, and `MetLoadPreFabScreen` is recorded in
+     * MetFrontEndState::mUnknown24.
+     *
+     * @ghidraAddress 0x002a9330
+     */
+    virtual void PrepareFreqMakerForSelection();
 
 private:
     std::vector<Rnd::Object *> mUnknowna4; // +0xa4

@@ -121,6 +121,19 @@ public:
     static void Open(const MetKeyboardRequest &request);
 
     /**
+     * Put every one of the twelve named keys back in state 3.
+     *
+     * Sets mUnknown11c to 1, then resolves `key_<name>.but` as a Rnd::Button for each of the
+     * twelve names in the array at `0x00891be0` and calls Rnd::Button::SetState() with 3.
+     * ResolveContainerViews() and MetFreqMakerButtonsScreen::HandleCommand() call it. The body is
+     * not written, because it waits on the keyboard static initialiser that builds the array at
+     * `0x00891be0`. The title is inferred.
+     *
+     * @ghidraAddress 0x00283c10
+     */
+    void ResetKeyStates();
+
+    /**
      * Show the keyboard and start its enter animation.
      *
      * Slot 5. Hands the two panel captions to the title bar and the text entry window, copies the
