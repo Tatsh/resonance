@@ -16,7 +16,9 @@ public:
     /**
      * Destroy the trigger.
      *
-     * The deleting destructor at `0x004585b8` is compiler-generated.
+     * The compiler emits the deleting form out of line.
+     *
+     * @ghidraAddress 0x004585b8
      */
     virtual ~TnlTrigger() {
     }

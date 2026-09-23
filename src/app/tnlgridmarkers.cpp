@@ -37,10 +37,16 @@ constexpr float kMaxAlpha = 0.8f;
 
 constexpr float kCentreLane = 0.5f;
 
+// 0x004546a0
+// Deletes a marker's mesh. ~Marker() expands it inline, and this out-of-line copy has no caller.
+inline void DeleteMesh(Rnd::Mesh *pMesh) {
+    delete pMesh;
+}
+
 } // namespace
 
 TnlGridMarkers::Marker::~Marker() {
-    delete mMesh;
+    DeleteMesh(mMesh);
 }
 
 void TnlGridMarkers::Marker::Init(Rnd::Mesh *pSource, Rnd::Drawable *pParent) {
