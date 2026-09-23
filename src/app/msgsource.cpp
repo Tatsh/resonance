@@ -5,8 +5,9 @@
 
 namespace {
 
-// 0x00723208. Nesting depth of Send(). No instruction outside Send() touches the word. Nothing
-// therefore acts on the depth, and the counter survives only as a debugging aid.
+// Nesting depth of Send(). No instruction outside Send() touches the word. Nothing therefore acts
+// on the depth, and the counter survives only as a debugging aid.
+// 0x00723208
 int g_nMsgSendDepth;
 
 } // namespace

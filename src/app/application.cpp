@@ -6,8 +6,8 @@
 
 namespace {
 
-// 0x00680f50. The compiler generated the initialiser and destructor pair at 0x00198c58 for this
-// definition.
+// The compiler generated the initialiser and destructor pair at 0x00198c58 for this definition.
+// 0x00680f50
 Application g_app;
 
 } // namespace

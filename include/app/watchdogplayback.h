@@ -56,7 +56,8 @@ public:
     void Start();
 
 private:
-    // 0x00596330. Hands every wrapper from mCursor to the end to Watchdog::QueueReplayed().
+    // Hands every wrapper from mCursor to the end to Watchdog::QueueReplayed().
+    // 0x00596330
     void QueueRemaining();
 
     std::vector<Sch::TimedCommand *> mCommands;         // +0x00

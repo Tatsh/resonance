@@ -6,9 +6,9 @@
 #include "sch/command.h"
 #include "sch/tickclock.h"
 
-// The original file is AppActiveFilter.cpp. Its static initialiser at 0x00100040, run through
-// 0x00100350, registers the command below with identifier zero through the registrar Sch::Command
-// records as unreconstructed.
+// The original file is AppActiveFilter.cpp. Its static initialiser at 0x00100040, run
+// through 0x00100350, registers the command below with identifier zero through the registrar
+// Sch::Command records as unreconstructed.
 
 namespace {
 

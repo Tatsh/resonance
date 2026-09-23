@@ -269,8 +269,8 @@ private:
 
     // Gem flash record, the element of mGemFlashes. The name is inferred.
     struct GemFlash {
-        // Release the flash particle. The destructor inlines the body. The deleting copy at
-        // 0x00456cd0 has no callers.
+        // Release the flash particle. The destructor inlines the body. The deleting copy
+        // at 0x00456cd0 has no callers.
         ~GemFlash();
 
         // Take a white particle of size 1 at pos when the record is free, reporting 1, else
@@ -286,7 +286,7 @@ private:
     };
 
     // Offer a fire to each TnlFireFX in turn until one starts it. HandleMessage() inlines this.
-    // 0x004576a0.
+    // 0x004576a0
     void StartFireFX(float flPathStart,
                      int nIndex,
                      int nSlot,
@@ -299,7 +299,7 @@ private:
     int StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flFrame);
 
     // Start the first idle TnlBumpFX. Returns 1 when one started. HandleMessage() inlines this.
-    // 0x00457828.
+    // 0x00457828
     int StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
 
     // Start the first idle TnlSnake, through TnlSnake::Start() inlined. Returns 1 when one
@@ -314,7 +314,7 @@ private:
     void PlaceStringFlareOnRing(int nRing, float flBlend);
 
     // Append a panel to mPanels and set the frame it starts from. OnBarChanged() is the caller.
-    // 0x00447268.
+    // 0x00447268
     void AddPanel(TnlPanel *pPanel, float flStartFrame);
 
     // GemMsg: queue a gem of the kind the track, the powerup, the ghost flag, and the jukebox
@@ -322,7 +322,7 @@ private:
     void OnGem(GemMsg *pMsg);
 
     // CatchMsg: mark the catcher target, and flash and pulse on a hit or queue a miss gem.
-    // 0x00447938.
+    // 0x00447938
     void OnCatch(CatchMsg *pMsg);
 
     // PhraseMuffedMsg: redraw the bar's panel when the player tried the phrase. 0x00447ba8.
@@ -347,18 +347,18 @@ private:
     void OnFreestyleFX(FreestyleFXMsg *pMsg);
 
     // DeployedPowerupMsg: the effect of a neutralizer, autocatcher, bumper, or multiplier.
-    // 0x00448d58.
+    // 0x00448d58
     void OnDeployedPowerup(DeployedPowerupMsg *pMsg);
 
     // NowBarMsg: ease the player's pointer toward a lane. HandleMessage() inlines this.
-    // 0x00457cf0.
+    // 0x00457cf0
     void OnNowBar(NowBarMsg *pMsg);
 
     // ClearGemMsg: remove one gem. HandleMessage() inlines this. 0x00457d88.
     void OnClearGem(ClearGemMsg *pMsg);
 
     // ClearGemsMsg: remove one bar's gems and end its trail. HandleMessage() inlines this.
-    // 0x00457dd8.
+    // 0x00457dd8
     void OnClearGems(ClearGemsMsg *pMsg);
 
     // SusGemMsg: start or stop a sustain strip. HandleMessage() inlines this. 0x00457e48.
@@ -396,11 +396,11 @@ private:
     void OnAxeButton(AxeButtonMsg *pMsg);
 
     // PlayersTrackNeutralizedMsg: rumble the player's controller. HandleMessage() inlines this.
-    // 0x004580e8.
+    // 0x004580e8
     void OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg);
 
     // ToggleGhostMsg: show or hide the player's track ghost. HandleMessage() inlines this.
-    // 0x00458120.
+    // 0x00458120
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
     // JuiceAmountMsg: in a solo game, blink the player's activator while the juice is low.
@@ -413,7 +413,7 @@ private:
 
     // Move each ghost material's alpha by its fade rate. A ghost that fades out completely hides
     // its gem kind, and either end of the range stops the fade. SetFrame() is the caller.
-    // 0x00446460.
+    // 0x00446460
     void UpdateGhostFades();
 
     Renderer *mRenderer; // +0x04
