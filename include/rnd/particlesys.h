@@ -10,6 +10,7 @@
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
+#include "rnd/manager.h"
 #include "rnd/particle.h"
 #include "rnd/transformable.h"
 
@@ -54,8 +55,7 @@ namespace Rnd {
  * reads each member under its label in the order "life:", " posLow:", " posHigh:", "speed:",
  * " pitch:", " yaw:", "emitRate:", " size:", the four colours, " collide:", " collidePlane:",
  * "force:", " mat:", " mode:", "numParticles:", " lineLength:", "bubblePeriod:", " bubbleSize:",
- * "bubble:", and " readZ:". The dump reads "numParticles:" from the size of the pool. Save() and
- * Load() are not reconstructed, and neither is DumpText(), which is 0xe20 bytes.
+ * "bubble:", and " readZ:". The dump reads "numParticles:" from the size of the pool.
  */
 class ParticleSys : public Animatable, public Transformable, public Drawable {
 public:
@@ -222,6 +222,29 @@ public:
      */
     void RandomizeColorAndSize(Particle *pParticle);
 
+    /**
+     * Point the system at a material, moving its reference registration from the old one.
+     *
+     * The body is inline. The only copy in the image is an out-of-line emission with no caller,
+     * and the name is inferred.
+     *
+     * @param pMat The material, or null.
+     * @ghidraAddress 0x0052c658
+     */
+    void SetMat(Mat *pMat);
+
+    /**
+     * Draw the particles of another system, or of this one.
+     *
+     * Releases the object references, stores the owner, and takes the references again. A system
+     * that no longer owns its particles then empties its own pool. The body is inline. The only
+     * copy in the image is an out-of-line emission with no caller, and the name is inferred.
+     *
+     * @param pOwner The system whose particles to draw.
+     * @ghidraAddress 0x0052c288
+     */
+    void SetParticlesOwner(ParticleSys *pOwner);
+
 protected:
     /**
      * Advance the emission to a frame.
@@ -369,6 +392,18 @@ public:
 ParticleSys *NewParticleSys(const HxStr &name);
 
 /**
+ * Build a system for the registered "ParticleSys" class.
+ *
+ * Calls through g_pfnNewParticleSys and narrows the result to its Rnd::Object subobject, or to
+ * null for a null result.
+ *
+ * @param name The object name.
+ * @return The new system, as its Rnd::Object subobject.
+ * @ghidraAddress 0x0052b6d8
+ */
+Object *CreateRegisteredParticleSys(const HxStr &name);
+
+/**
  * Creator the registered "ParticleSys" class builds through.
  *
  * GfxDevice::Init() overwrites the hook with the Rnd::PsParticleSys creator, so a system loaded
@@ -384,5 +419,19 @@ extern ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name);
  * @ghidraAddress 0x0071aef0
  */
 extern HxStr g_particleSysClassName;
+
+/**
+ * Point g_pfnNewParticleSys at NewParticleSys() and register the "ParticleSys" class.
+ *
+ * The routine is inline. It has an out-of-line copy in this unit and another in the
+ * Rnd::PsParticleSys unit at `0x005ffa38`, neither with a caller, and the static initialiser of
+ * the GfxDevice unit at `0x0049afe0` expands the same sequence. The name is inferred.
+ *
+ * @ghidraAddress 0x0052b380
+ */
+inline void RegisterParticleSysClass() {
+    g_pfnNewParticleSys = NewParticleSys;
+    g_manager.RegisterClass(g_particleSysClassName, CreateRegisteredParticleSys);
+}
 
 } // namespace Rnd

@@ -349,9 +349,16 @@ private:
     int mnFps;           // +0x45c
     float mflSyncMsSum;  // +0x460
     int mnSyncMsAverage; // +0x464
-    int mUnknown468;     // +0x468
 
 public:
+    /**
+     * Non-zero while the feedback effect is enabled, stored as a whole word.
+     *
+     * Written directly, with no accessor, by the panel's count-in component at `0x0041bc50`, which
+     * sets and clears it during the song intro, and cleared by Overlay's destructor at
+     * `0x0041daec`. +0x468
+     */
+    int mFeedbackEnabled;
     /**
      * Rectangle SetupGsDrawContext() draws and samples, in fractions of the display.
      *

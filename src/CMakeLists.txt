@@ -50,6 +50,7 @@ set(RESONANCE_SUBSYSTEMS
     mid
     msg
     os
+    profile
     rnd
     rndartt
     sch

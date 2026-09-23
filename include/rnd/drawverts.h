@@ -92,6 +92,21 @@ extern float g_afDrawFrustumPlanes[kFrustumPlaneCount * kFrustumPlaneFloatCount]
 int IsSphereInsideFrustum(const Sphere &sphere, const float *pPlanes);
 
 /**
+ * Report whether a sphere lies wholly inside the draw frustum, g_afDrawFrustumPlanes.
+ *
+ * The only copy in the image is an out-of-line emission at the end of the Rnd::PsCam unit with no
+ * caller, which marks the routine as an inline of a header that unit includes. The name is
+ * inferred.
+ *
+ * @param sphere The sphere, in world space.
+ * @return Non-zero when no plane gives a negative distance.
+ * @ghidraAddress 0x005884e0
+ */
+inline int IsSphereInDrawFrustum(const Sphere &sphere) {
+    return IsSphereInsideFrustum(sphere, g_afDrawFrustumPlanes);
+}
+
+/**
  * Transform and light a run of vertices into the shared draw buffer.
  *
  * The final argument exists in the prototype and the body never reads it. Two independent call

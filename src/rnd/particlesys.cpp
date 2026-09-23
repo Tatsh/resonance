@@ -874,4 +874,30 @@ ParticleSys *NewParticleSys(const HxStr &name) {
     return new ParticleSys(name);
 }
 
+// 0x0052b6d8
+Object *CreateRegisteredParticleSys(const HxStr &name) {
+    return g_pfnNewParticleSys(name);
+}
+
+// 0x0052c658
+inline void ParticleSys::SetMat(Mat *pMat) {
+    if (mMat != nullptr) {
+        mMat->RemoveRef(this);
+    }
+    mMat = pMat;
+    if (pMat != nullptr) {
+        pMat->AddRef(this);
+    }
+}
+
+// 0x0052c288
+inline void ParticleSys::SetParticlesOwner(ParticleSys *pOwner) {
+    RemoveObjectRefs();
+    mParticlesOwner = pOwner;
+    AddObjectRefs();
+    if (mParticlesOwner != this) {
+        mParticles.clear();
+    }
+}
+
 } // namespace Rnd
