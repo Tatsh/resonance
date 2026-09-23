@@ -5,6 +5,7 @@
 #include "rndartt/afont.h"
 #include "rndartt/apoint.h"
 #include "rndartt/arowspan.h"
+#include "rndartt/astretchblit.h"
 #include "rndartt/astretchspan.h"
 
 namespace {
@@ -18,8 +19,11 @@ constexpr int kRGBByteCount = 3;
 constexpr char kNewline = '\n';
 
 // One pointer to member per ABitmapFormat code. DrawGlyphNoClip() and DrawGlyph() index the first
-// two tables by the glyph format code, and the third belongs to the read slots.
+// two tables by the glyph format code, ReadRectNoClip() and ReadRect() the next two by the
+// destination format code, and StretchBlit() the last by the source format code. The last three
+// address protected members, so each is a static inside the member that indexes it.
 typedef void (ACanvas::*ABitmapCopyMember)(const ABitmap &, int, int);
+typedef void (ACanvas::*ABitmapStretchMember)(const ABitmap &, const ARect &);
 
 // 0x0077dc98
 const ABitmapCopyMember kCopyNoClipForFormat[kABitmapFormatCount] = {&ACanvas::Blit4NoClip,
@@ -53,6 +57,12 @@ inline const ABitmap *GlyphForCode(const AFont *pFont, int nCharCode) {
         return pFont->mGlyphs[nIndex];
     }
     return nullptr;
+}
+
+// Advance a stretched copy by one destination row and return the source row it then samples.
+inline int AdvanceStretchRow(AStretchBlit *pBlit) {
+    pBlit->mSourcePositionY += pBlit->mSourceStepY;
+    return pBlit->mSourcePositionY >> kACanvasFractionBits;
 }
 
 } // namespace
@@ -926,6 +936,88 @@ void ACanvas::BlitRemap(const ABitmap &source, int nX, int nY, const unsigned ch
     }
 }
 
+// 0x005edbd8
+void ACanvas::BlitRemapRle8NoClip(const ABitmap &source,
+                                  int nX,
+                                  int nY,
+                                  const unsigned char *pRemap) {
+    ARowSpan span;
+    span.mLeft = static_cast<short>(nX);
+    span.mRight = static_cast<short>(source.mWidth + nX);
+    span.mHasTransparentColor = source.mHasTransparentColor != 0;
+    span.mTransparentColor = source.mTransparentColor;
+    span.mSource = g_abCanvasRowScratch;
+    span.mPalette = source.mPalette;
+    if (span.mPalette == nullptr) {
+        span.mPalette = mBitmap.mPalette;
+        if (span.mPalette == nullptr) {
+            span.mPalette = g_pDefaultPalette;
+        }
+    }
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+    // Yes, the binary advances nY rather than span.mY, so the bound recedes with the row and a
+    // source with any rows never ends. BlitRemapNoClip() has no caller, so the loop never runs.
+    for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++nY) {
+        reader.DecodeRow(g_abCanvasRowScratch);
+        RemapRowIndexed(span, pRemap);
+    }
+}
+
+// 0x005ea280. The clipping matches BlitRle8(), without its test for a source wholly inside the
+// clip rectangle.
+void ACanvas::BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+
+    short nStopColumn = source.mWidth;
+    if (mClip.mRight < nX + source.mWidth) {
+        nStopColumn = static_cast<short>(mClip.mRight - nX);
+    }
+    short nSkipLeft = 0;
+    if (nX < mClip.mLeft) {
+        nSkipLeft = static_cast<short>(mClip.mLeft - nX);
+        nX = mClip.mLeft;
+    }
+    if (nSkipLeft >= nStopColumn) {
+        return;
+    }
+
+    short nStopRow = static_cast<short>(nY + source.mHeight);
+    if (mClip.mBottom < nStopRow) {
+        nStopRow = mClip.mBottom;
+    }
+    if (nY < mClip.mTop) {
+        reader.SkipRows(mClip.mTop - nY);
+        nY = mClip.mTop;
+    }
+    if (nY >= nStopRow) {
+        return;
+    }
+
+    ARowSpan span;
+    span.mLeft = static_cast<short>(nX);
+    span.mRight = static_cast<short>(nX + (nStopColumn - nSkipLeft));
+    span.mHasTransparentColor = source.mHasTransparentColor != 0;
+    span.mTransparentColor = source.mTransparentColor;
+    span.mSource = g_abCanvasRowScratch + nSkipLeft;
+    span.mPalette = source.mPalette;
+    if (span.mPalette == nullptr) {
+        span.mPalette = mBitmap.mPalette;
+        if (span.mPalette == nullptr) {
+            span.mPalette = g_pDefaultPalette;
+        }
+    }
+    for (span.mY = static_cast<short>(nY); span.mY < nStopRow; ++span.mY) {
+        reader.DecodeRow(g_abCanvasRowScratch);
+        RemapRowIndexed(span, pRemap);
+    }
+}
+
 // 0x005ede08
 void ACanvas::BlitBlendNoClip(const ABitmap &source,
                               int nX,
@@ -967,5 +1059,91 @@ void ACanvas::BlitBlend(const ABitmap &source,
         break;
     default:
         break;
+    }
+}
+
+// 0x005ee370. Instruction for instruction BlitRemapRle8NoClip() with the blend slot called in
+// place of the remap slot.
+void ACanvas::BlitBlendRle8NoClip(const ABitmap &source,
+                                  int nX,
+                                  int nY,
+                                  const unsigned char *const *ppBlend) {
+    ARowSpan span;
+    span.mLeft = static_cast<short>(nX);
+    span.mRight = static_cast<short>(source.mWidth + nX);
+    span.mHasTransparentColor = source.mHasTransparentColor != 0;
+    span.mTransparentColor = source.mTransparentColor;
+    span.mSource = g_abCanvasRowScratch;
+    span.mPalette = source.mPalette;
+    if (span.mPalette == nullptr) {
+        span.mPalette = mBitmap.mPalette;
+        if (span.mPalette == nullptr) {
+            span.mPalette = g_pDefaultPalette;
+        }
+    }
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+    // Yes, the binary advances nY rather than span.mY here as well, and BlitBlendNoClip() has no
+    // caller either.
+    for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++nY) {
+        reader.DecodeRow(g_abCanvasRowScratch);
+        BlendRowIndexed(span, ppBlend);
+    }
+}
+
+// 0x005ea460. Instruction for instruction BlitRemapRle8() with the blend slot called in place of
+// the remap slot.
+void ACanvas::BlitBlendRle8(const ABitmap &source,
+                            int nX,
+                            int nY,
+                            const unsigned char *const *ppBlend) {
+    ARleReader reader;
+    reader.mSource = SourceRow(source);
+    reader.mWidth = source.mWidth;
+    reader.mTransparentValue = kARleReaderNoTransparentValue;
+
+    short nStopColumn = source.mWidth;
+    if (mClip.mRight < nX + source.mWidth) {
+        nStopColumn = static_cast<short>(mClip.mRight - nX);
+    }
+    short nSkipLeft = 0;
+    if (nX < mClip.mLeft) {
+        nSkipLeft = static_cast<short>(mClip.mLeft - nX);
+        nX = mClip.mLeft;
+    }
+    if (nSkipLeft >= nStopColumn) {
+        return;
+    }
+
+    short nStopRow = static_cast<short>(nY + source.mHeight);
+    if (mClip.mBottom < nStopRow) {
+        nStopRow = mClip.mBottom;
+    }
+    if (nY < mClip.mTop) {
+        reader.SkipRows(mClip.mTop - nY);
+        nY = mClip.mTop;
+    }
+    if (nY >= nStopRow) {
+        return;
+    }
+
+    ARowSpan span;
+    span.mLeft = static_cast<short>(nX);
+    span.mRight = static_cast<short>(nX + (nStopColumn - nSkipLeft));
+    span.mHasTransparentColor = source.mHasTransparentColor != 0;
+    span.mTransparentColor = source.mTransparentColor;
+    span.mSource = g_abCanvasRowScratch + nSkipLeft;
+    span.mPalette = source.mPalette;
+    if (span.mPalette == nullptr) {
+        span.mPalette = mBitmap.mPalette;
+        if (span.mPalette == nullptr) {
+            span.mPalette = g_pDefaultPalette;
+        }
+    }
+    for (span.mY = static_cast<short>(nY); span.mY < nStopRow; ++span.mY) {
+        reader.DecodeRow(g_abCanvasRowScratch);
+        BlendRowIndexed(span, ppBlend);
     }
 }

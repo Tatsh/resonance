@@ -8,6 +8,7 @@ class APalette;
 struct AFont;
 struct APoint;
 struct ARowSpan;
+struct AStretchBlit;
 struct AStretchSpan;
 
 /** Fractional bits in the coordinates DrawLine() and TextureRowIndexed() take. */
@@ -1035,10 +1036,14 @@ protected:
     void BlitRemap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
-     * Copy a run length encoded source through a remap table. Body not yet written.
+     * Copy a run length encoded source through a remap table.
      *
      * The run length encoded arm of BlitRemapNoClip(), reached only for format code 5. It decodes
-     * into g_abCanvasRowScratch through ARleReader.
+     * each row into g_abCanvasRowScratch through ARleReader and stores it with RemapRowIndexed().
+     *
+     * The row loop advances nY rather than the span row, so its bound recedes with the row and a
+     * source of one row or more never finishes. BlitRemapNoClip() has no caller in the image, so
+     * the defect is unreachable.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1049,7 +1054,7 @@ protected:
     void BlitRemapRle8NoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
-     * Clip and copy a run length encoded source through a remap table. Body not yet written.
+     * Clip and copy a run length encoded source through a remap table.
      *
      * The clipped counterpart of BlitRemapRle8NoClip(), reached only from BlitRemap(). Rows above
      * the clip rectangle are consumed through ARleReader::SkipRows() rather than decoded.
@@ -1071,7 +1076,7 @@ protected:
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @param ppBlend One blend table per destination index.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
      * @ghidraAddress 0x005ede08
      */
     void
@@ -1083,34 +1088,311 @@ protected:
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @param ppBlend One blend table per destination index.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
      * @ghidraAddress 0x005ede78
      */
     void BlitBlend(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
-     * Copy a run length encoded source through a table of blend tables. Body not yet written.
+     * Copy a run length encoded source through a table of blend tables.
+     *
+     * The same code as BlitRemapRle8NoClip() with BlendRowIndexed() in place of RemapRowIndexed(),
+     * including the row loop that never finishes. BlitBlendNoClip() has no caller in the image.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @param ppBlend One blend table per destination index.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
      * @ghidraAddress 0x005ee370
      */
     void
     BlitBlendRle8NoClip(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
-     * Clip and copy a run length encoded source through a table of blend tables. Body not yet
-     * written.
+     * Clip and copy a run length encoded source through a table of blend tables.
+     *
+     * The same code as BlitRemapRle8() with BlendRowIndexed() in place of RemapRowIndexed().
      *
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @param ppBlend One blend table per destination index.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
      * @ghidraAddress 0x005ea460
      */
     void BlitBlendRle8(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+
+    /**
+     * Read a rectangle of the canvas into a bitmap, choosing the slot by destination format.
+     *
+     * Non-virtual and orphaned, like BlitRemapNoClip(). Calls through the six entry table of
+     * pointers to member functions at 0x0077dcf8, whose first five entries address the unclipped
+     * read slots ReadRect4NoClip() through ReadRect32NoClip() and whose sixth is ReadRectRle8().
+     *
+     * Body not yet written.
+     *
+     * @param dest The destination bitmap, whose extent selects the rectangle.
+     * @param nX The source column.
+     * @param nY The source row.
+     * @ghidraAddress 0x005ecc68
+     */
+    void ReadRectNoClip(const ABitmap &dest, int nX, int nY);
+
+    /**
+     * Read a rectangle of the canvas into a bitmap, clipped, choosing the slot by destination
+     * format.
+     *
+     * Non-virtual and orphaned. Calls through the table at 0x0077dd28, which addresses the clipped
+     * read slots ReadRect4() through ReadRect32() and then ReadRectRle8().
+     *
+     * Body not yet written.
+     *
+     * @param dest The destination bitmap, whose extent selects the rectangle.
+     * @param nX The source column.
+     * @param nY The source row.
+     * @ghidraAddress 0x005ecd10
+     */
+    void ReadRect(const ABitmap &dest, int nX, int nY);
+
+    /**
+     * Read a rectangle of the canvas into a run length encoded bitmap.
+     *
+     * Empty. The run length encoded entry of both read tables addresses this one body, so a read
+     * into kABitmapFormatRle8 does nothing.
+     *
+     * Body not yet written.
+     *
+     * @param dest The destination bitmap.
+     * @param nX The source column.
+     * @param nY The source row.
+     * @ghidraAddress 0x005eb190
+     */
+    void ReadRectRle8(const ABitmap &dest, int nX, int nY);
+
+    /**
+     * Prepare a stretched copy of a source bitmap into a destination rectangle.
+     *
+     * Both steps are the source extent in 24.8 fixed point divided by the destination extent, and
+     * each position starts at half its step, so the walk samples the centre of each source cell.
+     * The destination rectangle is clamped to the clip rectangle, and the positions advance by one
+     * step per row or column clamped away. AStretchSpan::mSource addresses the first source row
+     * the walk samples.
+     *
+     * The palette resolves from the source, then the canvas, then g_pDefaultPalette.
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle, before clipping.
+     * @param pBlit The record to fill.
+     * @return Zero when the rectangle is empty before or after clipping.
+     * @ghidraAddress 0x005ea780
+     */
+    int SetupStretchBlit(const ABitmap &source, const ARect &rect, AStretchBlit *pBlit) const;
+
+    /**
+     * Stretch a source bitmap into a destination rectangle, choosing the arm by source format.
+     *
+     * Non-virtual and orphaned. Calls through the six entry table of pointers to member functions
+     * at 0x0077dd58, whose entries are StretchBlit4() through StretchBlit32() and then
+     * StretchBlitRle8(). Every arm clips against the clip rectangle.
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ee580
+     */
+    void StretchBlit(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch a four bit source bitmap into a destination rectangle.
+     *
+     * Unpacks each sampled row into g_abCanvasRowScratch and stores it with StretchRowIndexed().
+     * The row walk starts at the first source row rather than at the row SetupStretchBlit()
+     * selected, so a rectangle clipped at the top samples rows from too high in the source.
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ea640
+     */
+    void StretchBlit4(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch an eight bit source bitmap into a destination rectangle, through StretchRowIndexed().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ee628
+     */
+    void StretchBlit8(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch a 1555 source bitmap into a destination rectangle, through StretchRow15().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ee6f8
+     */
+    void StretchBlit15(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch a 24 bit source bitmap into a destination rectangle, through StretchRow24().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ee7c8
+     */
+    void StretchBlit24(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch a 32 bit source bitmap into a destination rectangle, through StretchRow32().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ee898
+     */
+    void StretchBlit32(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch a run length encoded source into a destination rectangle.
+     *
+     * Decodes the first sampled row into g_abCanvasRowScratch, then decodes again only when the
+     * sampled row changes, consuming any rows between through ARleReader::SkipRows().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @ghidraAddress 0x005ea960
+     */
+    void StretchBlitRle8(const ABitmap &source, const ARect &rect);
+
+    /**
+     * Stretch an indexed source through a remap table, choosing the arm by source format.
+     *
+     * Non-virtual and orphaned. Format code 0 goes to StretchBlitRemap4(), code 1 to
+     * StretchBlitRemap8(), and code 5 to StretchBlitRemapRle8(). Every other code draws nothing.
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005eec70
+     */
+    void StretchBlitRemap(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+
+    /**
+     * Stretch a four bit source through a remap table. Empty.
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005eecd0
+     */
+    void StretchBlitRemap4(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+
+    /**
+     * Stretch an eight bit source through a remap table, through StretchRowRemap().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005eecd8
+     */
+    void StretchBlitRemap8(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+
+    /**
+     * Stretch a run length encoded source through a remap table.
+     *
+     * The same code as StretchBlitRle8() with StretchRowRemap() in place of StretchRowIndexed().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005eaa98
+     */
+    void
+    StretchBlitRemapRle8(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+
+    /**
+     * Stretch an indexed source blended against the destination, choosing the arm by source
+     * format.
+     *
+     * Non-virtual and orphaned. The first two cases are exchanged relative to StretchBlitRemap().
+     * Format code 0 goes to StretchBlitBlend8() and code 1 to the empty StretchBlitBlend4(), so a
+     * four bit source is read as eight bit and an eight bit source draws nothing. Code 5 goes to
+     * StretchBlitBlendRle8().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
+     * @ghidraAddress 0x005eee78
+     */
+    void
+    StretchBlitBlend(const ABitmap &source, const ARect &rect, const unsigned char *const *ppBlend);
+
+    /**
+     * Stretch a four bit source blended against the destination. Empty.
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
+     * @ghidraAddress 0x005eeed8
+     */
+    void StretchBlitBlend4(const ABitmap &source,
+                           const ARect &rect,
+                           const unsigned char *const *ppBlend);
+
+    /**
+     * Stretch an eight bit source blended against the destination, through StretchRowBlend().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
+     * @ghidraAddress 0x005eeee0
+     */
+    void StretchBlitBlend8(const ABitmap &source,
+                           const ARect &rect,
+                           const unsigned char *const *ppBlend);
+
+    /**
+     * Stretch a run length encoded source blended against the destination.
+     *
+     * The same code as StretchBlitRle8() with StretchRowBlend() in place of StretchRowIndexed().
+     *
+     * Body not yet written.
+     *
+     * @param source The source bitmap.
+     * @param rect The destination rectangle.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
+     * @ghidraAddress 0x005eabe0
+     */
+    void StretchBlitBlendRle8(const ABitmap &source,
+                              const ARect &rect,
+                              const unsigned char *const *ppBlend);
 
     /**
      * Derive the per pixel step of a line and return the pixel count.

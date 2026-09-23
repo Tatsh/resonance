@@ -45,10 +45,10 @@ public:
      */
     virtual ~ACanvasLin4();
 
-    /** Slot 13. Writes the stored colour into the addressed nibble. @ghidraAddress 0x00628108 */
     // Lookup only, as in the base: this overload would otherwise hide the base's other one.
     using ACanvas8::PutPixelNoClip;
 
+    /** Slot 13. Writes the stored colour into the addressed nibble. @ghidraAddress 0x00628108 */
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 15. @ghidraAddress 0x00628180 */
@@ -58,7 +58,7 @@ public:
     virtual int GetPixelIndexedNoClip(int nX, int nY);
 
     /**
-     * Slot 47. Body not yet written.
+     * Slot 47.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -68,7 +68,7 @@ public:
     virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
 
     /**
-     * Slot 49. Body not yet written.
+     * Slot 49.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -78,7 +78,7 @@ public:
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
     /**
-     * Slot 57. Body not yet written.
+     * Slot 57.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
