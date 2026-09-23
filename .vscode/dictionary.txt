@@ -14,6 +14,7 @@ anim
 animatables
 anims
 apalette
+apolygon
 apsz
 arect
 arkfile

@@ -8,6 +8,7 @@ class APalette;
 struct AClipSpan;
 struct AFont;
 struct APoint;
+struct APolygon;
 struct ARowSpan;
 struct AStretchBlit;
 struct AStretchSpan;
@@ -119,6 +120,20 @@ public:
      * @ghidraAddress 0x005eb200
      */
     static ACanvas *CreateWithOwnedPixels(const ABitmap &bitmap);
+
+    /**
+     * Copy a source bitmap, clipped, choosing the slot by source format.
+     *
+     * Calls through the six entry table of pointers to member functions at 0x0077dcc8, the same
+     * table DrawGlyph() uses, whose entries are Blit4() through Blit32() and then BlitRle8(). The
+     * one caller in the image is the routine at 0x005cf4c0, outside the art library.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @ghidraAddress 0x005ec1d8
+     */
+    void Blit(const ABitmap &source, int nX, int nY);
 
     /**
      * Release the canvas.
@@ -1058,6 +1073,127 @@ protected:
      * @ghidraAddress 0x005e91b8
      */
     int ClipBlitToRect(ABitmap *pBitmap, int *pnX, int *pnY) const;
+
+    /**
+     * Intersect a rectangle with the clip rectangle in place.
+     *
+     * Non-virtual and orphaned: the program lists no caller.
+     *
+     * @param pRect The rectangle to clip.
+     * @return Zero when the intersection is empty.
+     * @ghidraAddress 0x005eaeb8
+     */
+    int ClipRect(ARect *pRect) const;
+
+    /**
+     * Rewrite the palette indices inside a rectangle through a remap table, clipped.
+     *
+     * Intersects the rectangle with the clip rectangle and calls RemapRectIndices() when the
+     * result is not empty. Non-virtual and orphaned.
+     *
+     * @param rect The rectangle.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005ebe10
+     */
+    void RemapRectIndicesClipped(ARect rect, const unsigned char *pRemap);
+
+    /**
+     * Copy a source bitmap, with no clip test, choosing the slot by source format.
+     *
+     * Calls through the table at 0x0077dc98, the one DrawGlyphNoClip() uses. Non-virtual and
+     * orphaned.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @ghidraAddress 0x005ec130
+     */
+    void BlitNoClip(const ABitmap &source, int nX, int nY);
+
+    /**
+     * Clip against the clip rectangle and then copy a four bit source through a remap table.
+     *
+     * The clip runs against a stack copy of the source description. Non-virtual and orphaned.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005ed990
+     */
+    void BlitRemap4Clipped(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+
+    /**
+     * Clip against the clip rectangle and then copy an eight bit source through a remap table.
+     *
+     * Non-virtual and orphaned.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param pRemap 256 replacement indices, one per source index.
+     * @ghidraAddress 0x005edb38
+     */
+    void BlitRemap8Clipped(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+
+    /**
+     * Clip against the clip rectangle and then copy a four bit source through a blend table.
+     *
+     * Non-virtual and orphaned.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
+     * @ghidraAddress 0x005ee128
+     */
+    void
+    BlitBlend4Clipped(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+
+    /**
+     * Clip against the clip rectangle and then copy an eight bit source through a blend table.
+     *
+     * Non-virtual and orphaned.
+     *
+     * @param source The source bitmap.
+     * @param nX The destination column.
+     * @param nY The destination row.
+     * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
+     * @ghidraAddress 0x005ee2d0
+     */
+    void
+    BlitBlend8Clipped(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+
+    /**
+     * Fill a convex polygon with its colour.
+     *
+     * Sets the pen colour through SetColorNative() from APolygon::mColor, then walks two edges
+     * down from the top vertex, one forward and one backward through the vertex list, filling
+     * each row between them with FillRow(). Each edge column is rounded to the nearest whole column
+     * with g_nFixedHalf. Rows above the clip rectangle advance the edges without drawing, and the
+     * walk stops at the bottom of the clip rectangle or when the two edges meet.
+     *
+     * Non-virtual and orphaned.
+     *
+     * @param polygon The polygon.
+     * @ghidraAddress 0x005e95e8
+     */
+    void FillPolygon(const APolygon &polygon);
+
+    /**
+     * Fill a convex polygon by sampling its texture.
+     *
+     * Walks the edges as FillPolygon() does. Each row interpolates the texture position between
+     * the two edges, clamps its columns to the clip rectangle, advancing the start position by the
+     * columns clamped away on the left, and draws with TextureRowIndexed(). A row of no columns
+     * draws nothing. APolygon::FindTopVertex() is compiled inline here.
+     *
+     * Non-virtual and orphaned.
+     *
+     * @param polygon The polygon, whose first word is its texture.
+     * @ghidraAddress 0x005e98c8
+     */
+    void FillTexturedPolygon(const APolygon &polygon);
 
     /**
      * Copy a source bitmap through a remap table, choosing the arm by source format.

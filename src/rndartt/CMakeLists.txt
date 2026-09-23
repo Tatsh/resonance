@@ -12,6 +12,7 @@ set(RESONANCE_RNDARTT_SRCS
     acanvaslin8.cpp
     afixed.cpp
     apalette.cpp
+    apolygon.cpp
     arect.cpp
     arlereader.cpp)
 

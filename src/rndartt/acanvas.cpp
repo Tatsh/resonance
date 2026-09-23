@@ -13,6 +13,8 @@
 #include "rndartt/afixed.h"
 #include "rndartt/afont.h"
 #include "rndartt/apoint.h"
+#include "rndartt/apolygon.h"
+#include "rndartt/apolygonedge.h"
 #include "rndartt/arowspan.h"
 #include "rndartt/astretchblit.h"
 #include "rndartt/astretchspan.h"
@@ -27,6 +29,10 @@ constexpr unsigned int kNibbleMask = 0x0f;
 constexpr int kRGBByteCount = 3;
 constexpr char kNewline = '\n';
 constexpr int kFixedOne = 1 << kACanvasFractionBits;
+
+// The two directions a polygon edge walks through the vertex list.
+constexpr int kEdgeForward = 1;
+constexpr int kEdgeBackward = -1;
 
 // 0x00837d80, this translation unit's copy of the tag ABitmap::ABitmap() also uses.
 const char *const kBitmapAllocTag = "abitmap.h";
@@ -422,6 +428,182 @@ void ACanvas::FrameRect(ARect rect) {
     FillRow(rect.mBottom - 1, rect.mLeft, rect.mRight);
     FillColumn(rect.mLeft, rect.mTop + 1, rect.mBottom - 1);
     FillColumn(rect.mRight - 1, rect.mTop + 1, rect.mBottom - 1);
+}
+
+// 0x005eaeb8
+int ACanvas::ClipRect(ARect *pRect) const {
+    *pRect = pRect->Intersection(mClip);
+    return pRect->mLeft < pRect->mRight && pRect->mTop < pRect->mBottom;
+}
+
+// 0x005ebe10
+void ACanvas::RemapRectIndicesClipped(ARect rect, const unsigned char *pRemap) {
+    rect = rect.Intersection(mClip);
+    if (rect.mLeft < rect.mRight && rect.mTop < rect.mBottom) {
+        RemapRectIndices(rect, pRemap);
+    }
+}
+
+// 0x005e95e8
+void ACanvas::FillPolygon(const APolygon &polygon) {
+    const short nTop = static_cast<short>(polygon.FindTopVertex());
+    int nY = polygon.mPoints[polygon.mIndices[nTop]].mY >> kACanvasFractionBits;
+    APolygonEdge left;
+    APolygonEdge right;
+    left.mBottom = static_cast<short>(nY);
+    right.mBottom = static_cast<short>(nY);
+    polygon.SetupEdge(&left, nTop, kEdgeForward);
+    polygon.SetupEdge(&right, nTop, kEdgeBackward);
+    SetColorNative(polygon.mColor);
+    for (;;) {
+        if (nY >= left.mBottom) {
+            if (nY >= right.mBottom) {
+                if (left.mTo == right.mTo) {
+                    return;
+                }
+                int nNext = right.mTo - 1;
+                if (nNext < 0) {
+                    nNext = polygon.mVertexCount - 1;
+                }
+                if (nNext == left.mTo) {
+                    return;
+                }
+            }
+            polygon.SetupEdge(&left, left.mTo, kEdgeForward);
+        }
+        if (nY >= right.mBottom) {
+            polygon.SetupEdge(&right, right.mTo, kEdgeBackward);
+        }
+        if (nY >= mClip.mTop) {
+            FillRow(nY,
+                    (left.mX + g_nFixedHalf) >> kACanvasFractionBits,
+                    (right.mX + g_nFixedHalf) >> kACanvasFractionBits);
+        }
+        ++nY;
+        left.mX += left.mStepX;
+        right.mX += right.mStepX;
+        if (nY >= mClip.mBottom) {
+            return;
+        }
+    }
+}
+
+// 0x005e98c8
+void ACanvas::FillTexturedPolygon(const APolygon &polygon) {
+    const short nTop = static_cast<short>(polygon.FindTopVertex());
+    int nY = polygon.mPoints[polygon.mIndices[nTop]].mY >> kACanvasFractionBits;
+    APolygonEdge left;
+    APolygonEdge right;
+    left.mBottom = static_cast<short>(nY);
+    right.mBottom = static_cast<short>(nY);
+    polygon.SetupTexturedEdge(&left, nTop, kEdgeForward, polygon.mTexture);
+    polygon.SetupTexturedEdge(&right, nTop, kEdgeBackward, polygon.mTexture);
+    for (;;) {
+        if (nY >= left.mBottom) {
+            if (nY >= right.mBottom) {
+                if (left.mTo == right.mTo) {
+                    return;
+                }
+                int nNext = right.mTo - 1;
+                if (nNext < 0) {
+                    nNext = polygon.mVertexCount - 1;
+                }
+                if (nNext == left.mTo) {
+                    return;
+                }
+            }
+            polygon.SetupTexturedEdge(&left, left.mTo, kEdgeForward, polygon.mTexture);
+        }
+        if (nY >= right.mBottom) {
+            polygon.SetupTexturedEdge(&right, right.mTo, kEdgeBackward, polygon.mTexture);
+        }
+        if (nY >= mClip.mTop) {
+            int nLeft = (left.mX + g_nFixedHalf) >> kACanvasFractionBits;
+            const int nRight = (right.mX + g_nFixedHalf) >> kACanvasFractionBits;
+            const int nColumns = nRight - nLeft;
+            if (nColumns > 0) {
+                APoint position = left.mTexCoord;
+                APoint step;
+                step.mX = (right.mTexCoord.mX - position.mX) / nColumns;
+                step.mY = (right.mTexCoord.mY - position.mY) / nColumns;
+                if (nLeft < mClip.mLeft) {
+                    position.mY += step.mY * (mClip.mLeft - nLeft);
+                    position.mX += step.mX * (mClip.mLeft - nLeft);
+                    nLeft = mClip.mLeft;
+                }
+                TextureRowIndexed(nY,
+                                  nLeft,
+                                  mClip.mRight < nRight ? mClip.mRight : nRight,
+                                  polygon.mTexture,
+                                  &position,
+                                  &step);
+            }
+        }
+        ++nY;
+        left.mX += left.mStepX;
+        right.mX += right.mStepX;
+        left.mTexCoord.mX += left.mTexStep.mX;
+        left.mTexCoord.mY += left.mTexStep.mY;
+        right.mTexCoord.mX += right.mTexStep.mX;
+        right.mTexCoord.mY += right.mTexStep.mY;
+        if (nY >= mClip.mBottom) {
+            return;
+        }
+    }
+}
+
+// 0x005ec130
+void ACanvas::BlitNoClip(const ABitmap &source, int nX, int nY) {
+    (this->*kCopyNoClipForFormat[source.mFormat])(source, nX, nY);
+}
+
+// 0x005ec1d8
+void ACanvas::Blit(const ABitmap &source, int nX, int nY) {
+    (this->*kCopyForFormat[source.mFormat])(source, nX, nY);
+}
+
+// 0x005ed990
+void ACanvas::BlitRemap4Clipped(const ABitmap &source,
+                                int nX,
+                                int nY,
+                                const unsigned char *pRemap) {
+    ABitmap clipped = source;
+    if (ClipBlitToRect(&clipped, &nX, &nY) != 0) {
+        BlitRemap4(clipped, nX, nY, pRemap);
+    }
+}
+
+// 0x005edb38
+void ACanvas::BlitRemap8Clipped(const ABitmap &source,
+                                int nX,
+                                int nY,
+                                const unsigned char *pRemap) {
+    ABitmap clipped = source;
+    if (ClipBlitToRect(&clipped, &nX, &nY) != 0) {
+        BlitRemap8(clipped, nX, nY, pRemap);
+    }
+}
+
+// 0x005ee128
+void ACanvas::BlitBlend4Clipped(const ABitmap &source,
+                                int nX,
+                                int nY,
+                                const unsigned char *const *ppBlend) {
+    ABitmap clipped = source;
+    if (ClipBlitToRect(&clipped, &nX, &nY) != 0) {
+        BlitBlend4(clipped, nX, nY, ppBlend);
+    }
+}
+
+// 0x005ee2d0
+void ACanvas::BlitBlend8Clipped(const ABitmap &source,
+                                int nX,
+                                int nY,
+                                const unsigned char *const *ppBlend) {
+    ABitmap clipped = source;
+    if (ClipBlitToRect(&clipped, &nX, &nY) != 0) {
+        BlitBlend8(clipped, nX, nY, ppBlend);
+    }
 }
 
 // 0x005ebd40
