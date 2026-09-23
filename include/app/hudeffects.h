@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "msg/barstatusmsg.h"
+
 namespace Rnd {
 class Font;
 class Mat;
@@ -45,13 +47,13 @@ public:
     /**
      * Light every lamp whose kind's bit is set in a mask, and darken the rest.
      *
-     * The kHudItemGuides lamp does not change. Overlay::OnBarChanged() passes the cell value a
-     * BarStatusMsg with flag 8 reports. The title is inferred.
+     * The kHudItemGuides lamp does not change. Overlay::OnBarChanged() passes the effect mask a
+     * BarStatusMsg reports. The title is inferred.
      *
-     * @param llMask One bit per item kind, bit n for kind n.
+     * @param effects One bit per item kind, bit n for kind n.
      * @ghidraAddress 0x00418760
      */
-    void SetMask(long long llMask);
+    void SetMask(BarStatusMsg::Effects effects);
 
     /**
      * Show one kind's name in the selected font and every other name in the plain font.

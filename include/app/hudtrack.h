@@ -26,9 +26,6 @@ class Player;
  * Every member is public because Overlay's handlers access the parts directly. They look a
  * display up by mPlayer, set the track name through mTrackLabel, record the track in mTrack,
  * and drive mPoints, mEffects, and the words at `+0xe0` and `+0xec`.
- *
- * The constructor's body is not written. It needs the Globals accessor at `0x00118da0`, whose
- * result supplies the countdown's target bar through its slot 9.
  */
 class HudTrack {
 public:

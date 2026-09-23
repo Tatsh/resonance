@@ -53,12 +53,12 @@ HudEffects::HudEffects(int nIndex) {
     mWires->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
 }
 
-void HudEffects::SetMask(long long llMask) {
+void HudEffects::SetMask(BarStatusMsg::Effects effects) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == kHudItemGuides) {
             continue;
         }
-        it->mMesh->SetMaterial((llMask & (1LL << it->mKind)) != 0 ? mLitMat : mUnlitMat);
+        it->mMesh->SetMaterial(effects[it->mKind] ? mLitMat : mUnlitMat);
     }
 }
 

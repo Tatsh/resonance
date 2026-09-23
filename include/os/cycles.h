@@ -3,6 +3,9 @@
 /** EE clock in cycles per millisecond, which is the divisor the elapsed time is computed with. */
 constexpr unsigned kCyclesPerMillisecond = 294912;
 
+/** Milliseconds in one second, the rate GetMillisecondsPerSecond() reports. */
+constexpr int kMillisecondsPerSecond = 1000;
+
 /**
  * Read the free-running cycle counter.
  *
@@ -64,4 +67,21 @@ inline int GetElapsedMilliseconds() {
     g_nLastCycleCount = nCount;
     g_llTotalCycles += g_nLastCycleDelta;
     return static_cast<int>(g_llTotalCycles / kCyclesPerMillisecond);
+}
+
+/**
+ * Report how many units GetElapsedMilliseconds() counts in one second.
+ *
+ * The body is here rather than in a source file for the reason recorded on
+ * GetElapsedMilliseconds(). Its one out-of-line copy follows that routine's copy directly, in the
+ * unit whose static initialiser is at `0x004662d0` and which also defines ShowReportedMessage().
+ * HudScreenFlash's constructor calls that copy, and WatchdogClock divides its scale by the result.
+ *
+ * The name is inferred from the value. Nothing in the image attests it.
+ *
+ * @return 1000.
+ * @ghidraAddress 0x00466360
+ */
+inline int GetMillisecondsPerSecond() {
+    return kMillisecondsPerSecond;
 }

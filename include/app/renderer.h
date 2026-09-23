@@ -4,9 +4,9 @@
 
 #include "app/msgsource.h"
 #include "app/rendererbase.h"
+#include "msg/barstatusmsg.h"
 
 class AppTunnel;
-class BarStatusMsg;
 class GameParams;
 class HxStr;
 class Message;
@@ -56,15 +56,15 @@ public:
      * One cell of the bar grid, a plain record of the last BarStatusMsg state per track and bar.
      *
      * The record is 0x20 bytes. The constructor fills every cell with the static NullPlayer at
-     * `0x0066f930`, 0, -1, 0, and -1 in field order. The name is inferred from the grid indexing in
-     * GetCell().
+     * `0x0066f930`, 0, -1, an empty mask, and -1 in field order. The name is inferred from the grid
+     * indexing in GetCell().
      */
     struct Cell {
-        Player *mPlayer;    /*!< The player a BarStatusMsg last reported. +0x00 */
-        int mEnabled;       /*!< The enabled field a BarStatusMsg last reported. +0x04 */
-        int mPowerup;       /*!< The powerup a BarStatusMsg last reported, or -1. +0x08 */
-        long long mEffects; /*!< The effect mask a BarStatusMsg last reported. +0x10 */
-        int mBar;           /*!< Bar the cell last recorded, or -1. +0x18 */
+        Player *mPlayer; /*!< The player a BarStatusMsg last reported. +0x00 */
+        int mEnabled;    /*!< The enabled field a BarStatusMsg last reported. +0x04 */
+        int mPowerup;    /*!< The powerup a BarStatusMsg last reported, or -1. +0x08 */
+        BarStatusMsg::Effects mEffects; /*!< The effect mask a BarStatusMsg last reported. +0x10 */
+        int mBar;                       /*!< Bar the cell last recorded, or -1. +0x18 */
     };
 
     /**

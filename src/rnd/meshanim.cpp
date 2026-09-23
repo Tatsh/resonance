@@ -633,6 +633,17 @@ void MeshAnim::SetFrameSelf(float flFrame) {
     }
 }
 
+// 0x00494120
+void MeshAnim::SetMesh(Mesh *pMesh) {
+    if (mMesh != nullptr) {
+        mMesh->RemoveRef(this);
+    }
+    mMesh = pMesh;
+    if (pMesh != nullptr) {
+        pMesh->AddRef(this);
+    }
+}
+
 void MeshAnim::AddObjectRefs() {
     if (mMesh != nullptr) {
         mMesh->AddRef(this);

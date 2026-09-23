@@ -20,14 +20,14 @@ constexpr int kJamEffectScriptTemplate = 1017;
 Overlay *g_pOverlay;
 HxStr g_hudLayoutName;
 
-void Overlay::OnBarChanged(int nTrack, int nBar, long long llValue) {
+void Overlay::OnBarChanged(int nTrack, int nBar, BarStatusMsg::Effects effects) {
     if (nBar != mCurrentBar) {
         return;
     }
 
     for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
         if ((*it)->mTrack == nTrack) {
-            (*it)->mEffects.SetMask(llValue);
+            (*it)->mEffects.SetMask(effects);
         }
     }
 }

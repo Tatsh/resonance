@@ -102,6 +102,11 @@ Sch::TickClock *Globals::GetSongClock() {
     return GetWorld()->GetSongClock();
 }
 
+// 0x00118da0
+PlayMap *Globals::GetPlayMap() {
+    return GetWorld()->GetPlayMap();
+}
+
 // 0x00118e38
 bool Globals::IsJukeboxMode() {
     return GetGameManager()->GetParams()->mJukeboxMode;

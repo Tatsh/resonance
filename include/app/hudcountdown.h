@@ -23,8 +23,8 @@ public:
      * Resolve the countdown's objects and hide its blur.
      *
      * @param nIndex The track display number that fills `<layout> countdown<n>`.
-     * @param nTargetBar The bar the countdown runs to. HudTrack's constructor reads it from slot 9
-     *        of the object the Globals accessor at `0x00118da0` returns.
+     * @param nTargetBar The bar the countdown runs to. HudTrack's constructor reads it from
+     *        PlayMap::Slot9() of Globals::GetPlayMap(), the last bar of the level.
      * @ghidraAddress 0x004191b8
      */
     HudCountdown(int nIndex, int nTargetBar);

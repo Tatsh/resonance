@@ -3,19 +3,30 @@ set(RESONANCE_APP_SRCS
     application.cpp
     attachment.cpp
     globals.cpp
+    hudanalogstick.cpp
+    hudanimramp.cpp
     hudbadge.cpp
     hudcountdown.cpp
     hudeffects.cpp
     hudenergy.cpp
+    hudfeedback.cpp
     hudfreq.cpp
+    hudgenmessage.cpp
+    hudhighlight.cpp
+    hudletterbox.cpp
     hudloop.cpp
+    hudpanel.cpp
     hudpoints.cpp
+    hudposition.cpp
     hudpowerup.cpp
     hudscore.cpp
     hudscorepulse.cpp
+    hudscreenflash.cpp
+    hudtcgroup.cpp
     hudtextmessage.cpp
     hudtrack.cpp
     hudtracklabel.cpp
+    hudwinmessage.cpp
     hudutil.cpp
     linearramp.cpp
     longop.cpp

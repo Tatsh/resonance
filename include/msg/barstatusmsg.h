@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bitset>
+
 #include "msg/message.h"
 
 class Player;
@@ -30,6 +32,17 @@ class Player;
  */
 class BarStatusMsg : public Message {
 public:
+    /** Effect kinds the effect mask records, one bit each. */
+    enum { kEffectCount = 13 };
+
+    /**
+     * One bit per effect kind.
+     *
+     * Print() streams the mask through std::operator<<() for a thirteen-bit set at `0x003d9690`,
+     * and on this target the set is one eight-byte word.
+     */
+    typedef std::bitset<kEffectCount> Effects;
+
     /**
      * Bits of mFlags, one per optional field.
      */
@@ -108,7 +121,7 @@ public:
      *
      * @return One bit per effect kind.
      */
-    long long GetEffects() {
+    Effects GetEffects() {
         Has(kFieldEffects); // Yes, the binary discards this result.
         return mEffects;
     }
@@ -125,8 +138,8 @@ public:
     int mUnknown14;
 
 private:
-    int mPowerup;       // +0x18
-    long long mEffects; // +0x20
+    int mPowerup;     // +0x18
+    Effects mEffects; // +0x20
 
 public:
     int mFlags; /*!< The Field bits of the fields that are set. +0x28 */

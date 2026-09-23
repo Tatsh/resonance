@@ -189,6 +189,18 @@ public:
      */
     void CopyVertKeys(int nFromVert, int nToVert);
 
+    /**
+     * Change the mesh this animation deforms.
+     *
+     * Drops this object's reference on the previous mesh, records the new one, and takes a
+     * reference on it. HudPosition's constructor points the shared position animation at each
+     * section mesh this way. The title is inferred.
+     *
+     * @param pMesh The new mesh, or null.
+     * @ghidraAddress 0x00494120
+     */
+    void SetMesh(Mesh *pMesh);
+
 protected:
     /**
      * Interpolate the three channels at a frame and write the result into the mesh.

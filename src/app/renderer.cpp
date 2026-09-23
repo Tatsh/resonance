@@ -127,8 +127,8 @@ Renderer::Renderer()
     mCellsPerRow = pTunnel->mSliceCount;
     mRowCount = pTunnel->mRingCount;
 
+    // Only the mask of the fill value is initialised, by its own constructor.
     Cell fill;
-    fill.mEffects = 0; // Yes, the binary sets no other field of the fill value.
     mCells.resize(mCellsPerRow * mRowCount, fill);
     for (int i = 0; i < mCellsPerRow * mRowCount; ++i) {
         Cell &cell = mCells[i];
@@ -136,7 +136,7 @@ Renderer::Renderer()
         cell.mPlayer = &g_nullPlayer;
         cell.mEnabled = 0;
         cell.mPowerup = kNoPowerup;
-        cell.mEffects = 0;
+        cell.mEffects.reset();
     }
 
     g_pRenderer = this;

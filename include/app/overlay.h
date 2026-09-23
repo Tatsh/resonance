@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "app/msgsink.h"
+#include "msg/barstatusmsg.h"
 #include "os/hxstr.h"
 
 class HudBadge;
@@ -96,10 +97,10 @@ public:
      *
      * @param nTrack The track.
      * @param nBar The bar.
-     * @param llValue The cell's `mUnknown10`.
+     * @param effects The cell's effect mask.
      * @ghidraAddress 0x0042ad10
      */
-    void OnBarChanged(int nTrack, int nBar, long long llValue);
+    void OnBarChanged(int nTrack, int nBar, BarStatusMsg::Effects effects);
 
     /**
      * Move the leader marker from one player to another.

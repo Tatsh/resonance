@@ -4,6 +4,7 @@ class GameManagerImpl;
 class GrooveWorld;
 class IOBPreallocMemStream;
 class MainLoop;
+class PlayMap;
 class Ps2HardSynth;
 class ScriptSink;
 class Watchdog;
@@ -38,10 +39,8 @@ constexpr int kLogBufferSize = 0x19000;
  * reads one either. The accessors are themselves the out-of-line copies of inline members, and
  * dozens of call sites inlined their own copy.
  *
- * Five further accessors forward into the game manager and are not declared yet: `0x00118ce8`,
- * `0x00118d18`, `0x00118d70`, `0x00118da0`, and `0x00118ec8`. `0x00118da0` returns slot 8 of the
- * world's MIDI level through the GrooveWorld accessor at `0x001952a8`, an object whose class is
- * unrecovered.
+ * Four further accessors forward into the game manager and are not declared yet: `0x00118ce8`,
+ * `0x00118d18`, `0x00118d70`, and `0x00118ec8`.
  */
 class Globals {
 public:
@@ -164,6 +163,16 @@ public:
      * @ghidraAddress 0x00118e78
      */
     Sch::TickClock *GetSongClock();
+
+    /**
+     * Report the play map of the world's level.
+     *
+     * The body composes GetWorld() with GrooveWorld::GetPlayMap().
+     *
+     * @return The play map.
+     * @ghidraAddress 0x00118da0
+     */
+    PlayMap *GetPlayMap();
 
     /**
      * Report whether the session is a jukebox session.
