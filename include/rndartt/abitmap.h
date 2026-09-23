@@ -58,9 +58,9 @@ extern const unsigned char g_abBitmapBitsPerPixel[kABitmapFormatCount];
 /**
  * Non-zero to leave bitmap colours in file order rather than swapping red and blue.
  *
- * Every caller of ABitmap::SwapRedBlue() tests it first: Rnd::MovieStream::Update(),
- * Rnd::Tex::OnMipLoaded(), VramTable::Screendump(), and the routines at `0x00250638` and
- * `0x00254cf8`. Nothing in the image writes it, so it stays zero. The name is inferred.
+ * Rnd::MovieStream::Update(), Rnd::Tex::OnMipLoaded(), and the routines at `0x00250638` and
+ * `0x00254cf8` test it before calling ABitmap::SwapRedBlue(). VramTable::Screendump() swaps without
+ * the test. The image never writes it, and it stays zero. The name is inferred.
  *
  * @ghidraAddress 0x00725cd0
  */

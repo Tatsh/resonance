@@ -566,9 +566,10 @@ public:
     /**
      * Move a region of video memory back into a bitmap.
      *
-     * The body is not reconstructed. It reads the storage mode and the dimensions out of `ABitmap`,
-     * whose leading members are still placeholders, and indexes the storage mode table the art
-     * bitmap unit owns.
+     * The region starts at the top left of nMemAddr and has the bitmap's size, with the buffer
+     * width rounded up to whole 64-texel units and the storage mode taken from
+     * g_anGsPixelStorageModes. The data cache is written back first, and the GS paths are drained
+     * before and after the transfer.
      *
      * @param pBitmap Bitmap to fill, which supplies the shape and the destination.
      * @param nMemAddr First block to read.
@@ -579,9 +580,11 @@ public:
     /**
      * Write the display buffer to a numbered file.
      *
-     * The body is not reconstructed, for the same reason as ReadBackBitmap(), and additionally
-     * because the bitmap file writer at 0x005f9d18 has no title yet. The file is
-     * `<pszName>_<n>.bmp` with an index that advances on every call.
+     * The zone "temp" is reset and supplies a 16-bit bitmap of the display size, which
+     * ReadBackBitmap() fills from block 0. The red and blue channels are swapped without testing
+     * g_nSkipColorSwap, and AGfxFile::WriteBitmap() writes `<pszName>_<n>.bmp`, n being
+     * g_nScreendumpIndex before it advances. The previous zone is selected again once the pixels
+     * are allocated.
      *
      * @param pszName Stem of the file to write.
      * @ghidraAddress 0x00513528
@@ -773,3 +776,19 @@ extern sceGsLoadImage g_vramPalLoadImage;
  * @ghidraAddress 0x0089de00
  */
 extern sceGsLoadImage g_vramWipeLoadImage;
+
+/**
+ * Transfer descriptor VramTable::ReadBackBitmap() reuses, and therefore VramTable::Screendump().
+ *
+ * The program's label is `g_abScreendumpStoreImage`.
+ *
+ * @ghidraAddress 0x0089dd90
+ */
+extern sceGsStoreImage g_vramReadBackStoreImage;
+
+/**
+ * Number the next VramTable::Screendump() file takes, advanced after each dump.
+ *
+ * @ghidraAddress 0x00718468
+ */
+extern int g_nScreendumpIndex;

@@ -1,11 +1,15 @@
 #include "gfx/vramtable.h"
 
 #include <eekernel.h>
+#include <libgraph.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "gfx/gfxdevice.h"
 #include "os/log.h"
+#include "os/zone.h"
 #include "rndartt/abitmap.h"
+#include "rndartt/agfxfile.h"
 
 // 0x0070d3d0
 const int g_anGsPixelStorageModes[kABitmapFormatCount] = {
@@ -13,6 +17,36 @@ const int g_anGsPixelStorageModes[kABitmapFormatCount] = {
 
 // 0x0070d3e8
 const int g_anBitsPerPixelTable[kABitmapFormatCount] = {4, 8, 16, 24, 32, 8};
+
+// 0x0089dd90
+sceGsStoreImage g_vramReadBackStoreImage;
+
+// 0x0089de00
+sceGsLoadImage g_vramWipeLoadImage;
+
+// 0x00718468
+int g_nScreendumpIndex;
+
+namespace {
+
+// The zone Screendump() allocates its pixels from, and the file name it formats.
+constexpr char kScreendumpZoneName[] = "temp";
+constexpr char kScreendumpPathFormat[] = "%s_%d.bmp";
+
+// Bytes per pixel of the kABitmapFormatLinear15 bitmap Screendump() captures into.
+constexpr int kScreendumpBytesPerPixel = 2;
+
+// Size of the buffer Screendump() formats the file name into.
+constexpr int kScreendumpPathSize = 128;
+
+// Arguments to sceGsSyncPath() that wait for every path without a timeout.
+constexpr int kGsSyncPathWait = 0;
+constexpr unsigned short kGsSyncPathNoTimeout = 0;
+
+// The write-back mode of FlushCache().
+constexpr int kFlushCacheWriteBackData = 0;
+
+} // namespace
 
 // 0x005149f0
 VramTable::~VramTable() {
@@ -458,6 +492,45 @@ void VramTable::AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks) {
         FreeBlock(pRest);
         mBlocksInUse -= nRestSize;
     }
+}
+
+// 0x00514d00
+void VramTable::ReadBackBitmap(ABitmap *pBitmap, unsigned short nMemAddr) {
+    const int nBufferWidth = (pBitmap->mWidth + kGsTexelsPerTbwUnit - 1) / kGsTexelsPerTbwUnit;
+    sceGsSetDefStoreImage(&g_vramReadBackStoreImage,
+                          static_cast<short>(nMemAddr),
+                          static_cast<short>(nBufferWidth),
+                          static_cast<short>(g_anGsPixelStorageModes[pBitmap->mFormat]),
+                          0,
+                          0,
+                          pBitmap->mWidth,
+                          pBitmap->mHeight);
+    FlushCache(kFlushCacheWriteBackData);
+    sceGsSyncPath(kGsSyncPathWait, kGsSyncPathNoTimeout);
+    sceGsExecStoreImage(&g_vramReadBackStoreImage, pBitmap->mPixels);
+    sceGsSyncPath(kGsSyncPathWait, kGsSyncPathNoTimeout);
+}
+
+// 0x00513528
+void VramTable::Screendump(const char *pszName) {
+    const int nPreviousZone = ZoneGetCurrent();
+    ZoneSetCurrent(FindZoneByName(kScreendumpZoneName));
+    ZoneReset();
+    ABitmap bitmap(ZoneAlloc(g_gfxDevice.mnDisplayWidth * g_gfxDevice.mnDisplayHeight *
+                             kScreendumpBytesPerPixel),
+                   kABitmapFormatLinear15,
+                   false,
+                   g_gfxDevice.mnDisplayWidth,
+                   g_gfxDevice.mnDisplayHeight,
+                   0);
+    ZoneSetCurrent(nPreviousZone);
+
+    ReadBackBitmap(&bitmap, 0);
+    bitmap.SwapRedBlue();
+
+    char szPath[kScreendumpPathSize];
+    sprintf(szPath, kScreendumpPathFormat, pszName, g_nScreendumpIndex++);
+    AGfxFile::WriteBitmap(szPath, bitmap);
 }
 
 // 0x00514db8
