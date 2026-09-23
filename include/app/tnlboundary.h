@@ -43,10 +43,16 @@ public:
      */
     void SetFrame(float flFrame);
 
-private:
-    // Write the message for mStep into mText. 0x0043fdf0.
+    /**
+     * Write the message for mStep into the "boundary msg" text.
+     *
+     * AppTunnel's handler for an AdvanceSectionToggleMsg calls it as well as SetFrame().
+     *
+     * @ghidraAddress 0x0043fdf0
+     */
     void UpdateText();
 
+private:
     PlayMap *mPlayMap;
     Rnd::View *mView; // "boundary.view".
     Rnd::Text *mText; // "boundary msg".

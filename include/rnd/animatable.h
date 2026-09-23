@@ -925,10 +925,15 @@ private:
     // The frame SetFrame() last received, before the filter chain.
     float mFrame; // +0x0c
 
-protected:
-    // The same frame after the filter chain. This is the value handed to SetFrameSelf() and to
-    // every child. Protected because Rnd::ParticleSys::UpdateParticles() reads it.
-    float mFilteredFrame; // +0x10
+public:
+    /**
+     * The frame SetFrame() last received, after the filter chain.
+     *
+     * This is the value handed to SetFrameSelf() and to every child. Public because
+     * TnlCrippleFX::SetFrame() at `0x0043e500` reads it through the crippler path, and the image
+     * has no accessor. +0x10
+     */
+    float mFilteredFrame;
 };
 
 } // namespace Rnd

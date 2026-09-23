@@ -16,16 +16,7 @@ class View;
  * it. The name is inferred from the objects it drives, "cripfx<n>.view", "cripfx<n>.path", and
  * "cripfx<n>.ps", and from the "SND_CRIPPLER_HIT" sound the frame routine plays.
  *
- * The frame routine at `0x0043e500` is not reconstructed. It drives the view at mRate times the
- * song frame and, while running, drives the path. Once the path frame runs more than 6500 frames
- * ahead of the song it sets the path rate to `-3 * mRate`. Once the path frame falls behind the
- * song, it plays "SND_CRIPPLER_HIT" once per target, stores the song frame as the target's crippler
- * frame through `0x00457008`, and hands the target's Player to `0x00170c40` on the object at
- * `+0x34` of the game world. The next frame hides the view and releases the particles. The
- * GrooveWorld member at `+0x34` has no type in the tree, and `0x00170c40` belongs to that
- * unrecovered class.
- *
- * AppTunnel allocates three, 0x28 bytes each, and stores them in its vector at `+0x30`. The
+ * AppTunnel allocates two, 0x28 bytes each, and stores them in its vector at `+0x30`. The
  * destructor at `0x00456810` is the implicit one and is not written.
  */
 class TnlCrippleFX {
@@ -55,8 +46,12 @@ public:
     /**
      * Advance the crippler through its launch, return, and hit phases.
      *
-     * AppTunnel::SetFrame() calls it for every crippler. The body is not written, because it calls
-     * a method of the unrecovered GrooveWorld member at `+0x34`.
+     * The view always runs at mRate times flFrame, and the path runs from flFrame while the
+     * crippler is not idle. Once the path frame is more than 6500 frames ahead of the song, the
+     * path rate becomes `-3 * mRate` and the crippler returns. Once the path frame falls behind the
+     * song, each target plays "SND_CRIPPLER_HIT", starts its crippler paths from flFrame, and
+     * receives the crippler rumble through the world's ForceFeedbackMgr. The next call hides the
+     * view and releases the particles. AppTunnel::SetFrame() calls it for every crippler.
      *
      * @param flFrame The current frame.
      * @ghidraAddress 0x0043e500

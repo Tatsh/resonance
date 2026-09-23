@@ -72,6 +72,7 @@ private:
     friend class AppTunnel;
     friend class TnlActivator;
     friend class TnlArrow;
+    friend class TnlCrippleFX;
 
     int mPlayerNum; // Player::Slot2() plus 1.
     float mCrippleFrame;

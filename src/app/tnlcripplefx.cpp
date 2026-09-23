@@ -1,5 +1,10 @@
 #include "app/tnlcripplefx.h"
 
+#include "app/application.h"
+#include "app/playsound.h"
+#include "app/tnlplayer.h"
+#include "game/forcefeedbackmgr.h"
+#include "game/grooveworld.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -11,6 +16,12 @@ namespace {
 
 // Path frames per song frame on the way out, before mRate applies.
 constexpr float kLaunchRate = 6.0f;
+
+// Path frames per song frame on the way back, before mRate applies.
+constexpr float kReturnRate = -3.0f;
+
+// Frames the path may run ahead of the song before the crippler turns back.
+constexpr float kTurnBackLead = 6500.0f;
 
 } // namespace
 
@@ -31,4 +42,36 @@ void TnlCrippleFX::Start(const std::vector<TnlPlayer *> &targets, float flFrame)
     mPath->SetRate(mRate * kLaunchRate);
     mPath->SetOffset(flFrame - flFrame * kLaunchRate * mRate);
     mView->SetShowing(1);
+}
+
+void TnlCrippleFX::SetFrame(float flFrame) {
+    mView->SetFrame(flFrame * mRate);
+    if (mState == kStateIdle) {
+        return;
+    }
+    mPath->SetFrame(flFrame);
+    const float flPathFrame = mPath->mFilteredFrame;
+    if (mState == kStateRunning) {
+        if (flFrame + kTurnBackLead < flPathFrame) {
+            mPath->SetRate(mRate * kReturnRate);
+            mState = kStateReturning;
+        }
+    } else if (mState == kStateReturning) {
+        if (flPathFrame < flFrame) {
+            for (auto it = mTargets.begin(); it != mTargets.end(); ++it) {
+                PlaySoundByName("SND_CRIPPLER_HIT");
+                (*it)->SetCrippleFrame(flFrame);
+                if (Application::shared()->GetWorld() != nullptr) {
+                    Application::shared()->GetWorld()->mForceFeedback->PlayCrippleEffect(
+                        (*it)->mPlayer);
+                }
+            }
+            mHitFrame = flFrame;
+            mState = kStateHit;
+        }
+    } else if (mState == kStateHit) {
+        mState = kStateIdle;
+        mView->SetShowing(0);
+        mParticleSys->FreeAllParticles();
+    }
 }
