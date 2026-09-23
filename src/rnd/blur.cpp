@@ -71,7 +71,20 @@ Blur *(*g_pfnNewBlur)(const HxStr &name);
 // The thunk the class registry stores. The null test is the conversion of a Blur
 // pointer to its virtual Rnd::Object base rather than a check the source asks for.
 static Object *NewBlurObject(const HxStr &name) {
-    return g_pfnNewBlur(name);
+    try {
+        return g_pfnNewBlur(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
+}
+
+// 0x004c3398
+Blur *Blur::NewFromHook(const HxStr &name) {
+    try {
+        return g_pfnNewBlur(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 Blur::Blur(const HxStr &name)

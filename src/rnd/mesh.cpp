@@ -598,7 +598,11 @@ Stream &ReadIndexRunVector(Stream &stream, std::vector<std::vector<unsigned shor
 Mesh *NewMesh(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Mesh" and rounds the 0x16c-byte object up
     // to 0x170 bytes.
-    return new Mesh(name);
+    try {
+        return new Mesh(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x00492590
@@ -621,7 +625,11 @@ Mesh *NewMeshThroughHook(const HxStr &name) {
 
 // 0x00492f50
 Object *CreateRegisteredMesh(const HxStr &name) {
-    return g_pfnNewMesh(name);
+    try {
+        return g_pfnNewMesh(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x006eed68

@@ -544,12 +544,20 @@ Font *(*g_pfnNewFont)(const HxStr &name);
 
 // 0x004ced40
 Font *NewFontThroughHook(const HxStr &name) {
-    return g_pfnNewFont(name);
+    try {
+        return g_pfnNewFont(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x004cefe0
 Object *CreateRegisteredFont(const HxStr &name) {
-    return g_pfnNewFont(name);
+    try {
+        return g_pfnNewFont(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x004ced00

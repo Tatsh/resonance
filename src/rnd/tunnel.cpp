@@ -1304,12 +1304,20 @@ void Tunnel::ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int
 
 // 0x00476288
 Tunnel *NewTunnel(const HxStr &name) {
-    return new Tunnel(name);
+    try {
+        return new Tunnel(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x00476468
 Object *CreateRegisteredTunnel(const HxStr &name) {
-    return new Tunnel(name);
+    try {
+        return new Tunnel(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 // 0x00894d64

@@ -557,8 +557,13 @@ void String::DeleteMesh() {
     mpMesh = nullptr;
 }
 
+// 0x004bedc8
 String *String::NewString(const HxStr &name) {
-    return new String(name);
+    try {
+        return new String(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 void String::Init() {

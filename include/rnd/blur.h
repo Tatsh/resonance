@@ -231,6 +231,20 @@ public:
     static Blur *NewBlur(const HxStr &name);
 
     /**
+     * Build a trail through g_pfnNewBlur.
+     *
+     * Unlike the registered thunk at `0x004c34e0`, the result is returned as a Blur without the
+     * narrowing to Rnd::Object. An exception from the factory produces null. Nothing in the image
+     * calls it, and the only reference is the exception range table at `0x008693d0`. The name is
+     * inferred.
+     *
+     * @param name The registry key for the new trail.
+     * @return The new trail, or null.
+     * @ghidraAddress 0x004c3398
+     */
+    static Blur *NewFromHook(const HxStr &name);
+
+    /**
      * Resolve a registry key to a trail.
      *
      * A key that resolves to an object of another class produces null rather than a pointer of
@@ -337,11 +351,7 @@ extern int g_nRndBlurLoadRevision;
  * calling the factory directly, which is what lets a platform layer substitute a subclass.
  * Rnd::Manager::Init() writes the hook a second time, at `0x00519c98`.
  *
- * A second dispatcher sits at `0x004c3398`. It loads the same hook and returns what the hook
- * produced without the narrowing to Rnd::Object that the registered thunk at `0x004c34e0`
- * performs, so it is the entry point a caller wanting a Rnd::Blur would use. Nothing in the image
- * calls it, and the only reference to it is the exception range table at `0x008693d0`. Its title
- * is not recoverable from the image, so this tree records its address rather than inventing one.
+ * Blur::NewFromHook() is a second dispatcher through the same hook.
  *
  * @ghidraAddress 0x006fd250
  */

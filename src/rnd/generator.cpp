@@ -894,7 +894,11 @@ void Generator::Load(Stream &stream) {
 // Nothing in the image references this copy. The allocation is billed to the tag "Rnd::Generator"
 // and takes 0x160 bytes.
 Generator *NewGenerator(const HxStr &name) {
-    return new Generator(name);
+    try {
+        return new Generator(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x0045e300

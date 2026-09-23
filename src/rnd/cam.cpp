@@ -118,12 +118,20 @@ void Cam::operator delete(void *pBlock) {
 
 // 0x004b1f20
 Cam *NewCamThroughHook(const HxStr &name) {
-    return g_pfnNewCam(name);
+    try {
+        return g_pfnNewCam(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x004b23e0
 Object *CreateRegisteredCam(const HxStr &name) {
-    return g_pfnNewCam(name);
+    try {
+        return g_pfnNewCam(name);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 Cam::Cam(const HxStr &name)

@@ -429,7 +429,8 @@ private:
     // 0x004ba3d0
     // Builds the owned mesh, applies the stored material and the depth state to it,
     // caches the sine of the fold angle, and sizes the geometry to the current point count. The
-    // constructor, Load(), and Copy() are the callers.
+    // constructor, Load(), and Copy() are the callers. The binary has a catch-all handler inside it
+    // that returns null.
     void CreateMesh();
 
     // 0x004bf810
