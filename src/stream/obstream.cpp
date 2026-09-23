@@ -10,3 +10,9 @@ OBStream &operator<<(OBStream &stream, int bValue) {
     char cValue = static_cast<char>(bValue);
     return stream.WriteBytes(&cValue, sizeof(cValue));
 }
+
+// 0x004edcb8
+OBStream &operator<<(OBStream &stream, long nValue) {
+    const int nLow = static_cast<int>(nValue);
+    return stream.Write(&nLow, sizeof(nLow));
+}

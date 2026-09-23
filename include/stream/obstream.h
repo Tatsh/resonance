@@ -92,7 +92,7 @@ OBStream &operator<<(OBStream &stream, int bValue);
  *
  * The routine truncates the register to 32 bits with a sign extension and moves four bytes through
  * Write(). A second emission at `0x004edcf8` is byte-identical, and PhraseDatabase::Save() calls
- * that copy. The body is not written.
+ * that copy.
  *
  * @param stream The stream to write to.
  * @param nValue The value, of which only the low four bytes reach the stream.
