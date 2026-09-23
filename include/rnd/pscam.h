@@ -1,6 +1,8 @@
 #pragma once
 
+#include "math/transform.h"
 #include "math/vector2.h"
+#include "math/vector3.h"
 #include "rnd/cam.h"
 
 class HxStr;
@@ -52,12 +54,13 @@ public:
     /**
      * Make this camera the one the frame is drawn through and submit its display registers.
      *
-     * Vtable slot 3 of the Rnd::Drawable table. Beyond storing itself in g_pCurrentCam and
-     * reporting that the children are to be drawn, the routine builds the scissor and offset
-     * registers from the screen rectangle and the render target size, moves the six frustum planes
-     * into the space the draw path tests against through the plane transform at `0x00550fa8`, and
-     * records the previous display state for the next camera to restore. The body is not
-     * reconstructed.
+     * Vtable slot 3 of the Rnd::Drawable table. A render target is bound through
+     * Rnd::PsTex::BindAsRenderTarget(), and a camera following one that drew into a texture points
+     * the GS back at the display buffer. The routine then computes the guard band, widens the four
+     * side planes of the local frustum by it, moves all six planes into world space as
+     * Rnd::g_afDrawFrustumPlanes, builds the viewport and projection transforms, programs
+     * SCISSOR_1 from the screen rectangle clamped to the unit square, and stores itself in
+     * g_pCurrentCam. It does not call the base implementation.
      *
      * @return Non-zero, which draws the children as well.
      * @ghidraAddress 0x00582830
@@ -134,5 +137,102 @@ public:
  * @ghidraAddress 0x00768410
  */
 extern PsCam *g_pDefaultCam;
+
+// The globals below are the draw state PsCam::DrawSelf() leaves for the software and VU1 paths.
+// Every title is inferred from the computation that fills the global, because the image
+// retains no name for any of them.
+
+/**
+ * Camera to clip transform, the local projection widened by the guard band and then preceded by
+ * the camera's world to camera transform.
+ *
+ * @ghidraAddress 0x008e4020
+ */
+extern Transform g_viewProjectXfm;
+
+/**
+ * The same transform without the guard band widening.
+ *
+ * @ghidraAddress 0x008e4060
+ */
+extern Transform g_viewProjectUnscaledXfm;
+
+/**
+ * Clip to GS coordinate transform, scaled by the guard band.
+ *
+ * @ghidraAddress 0x008e40a0
+ */
+extern Transform g_viewportXfm;
+
+/**
+ * The same transform without the guard band scaling.
+ *
+ * @ghidraAddress 0x008e40e0
+ */
+extern Transform g_viewportUnscaledXfm;
+
+/**
+ * g_viewportXfm with a small depth bias added to the translation.
+ *
+ * @ghidraAddress 0x008e4120
+ */
+extern Transform g_viewportBiasedXfm;
+
+/**
+ * Screen scale of a particle's extent, the widened projection scale times the viewport scale.
+ *
+ * @ghidraAddress 0x008e4160
+ */
+extern Vector3 g_particleScreenScale;
+
+/**
+ * The widened projection scale on each axis, with y negated.
+ *
+ * @ghidraAddress 0x008e4170
+ */
+extern Vector3 g_particleProjectScale;
+
+/**
+ * Factor the view is widened by on each axis before clipping.
+ *
+ * Each axis is the room left in the 4096-unit GS coordinate space around the screen rectangle,
+ * divided by the rectangle's extent with a 2 per cent margin. Primitives inside the widened view
+ * need no clipping, because the GS scissors them.
+ *
+ * @ghidraAddress 0x008e4180
+ */
+extern Vector3 g_guardBandScale;
+
+/**
+ * Reciprocal of g_guardBandScale, left unchanged when either axis of it is zero.
+ *
+ * @ghidraAddress 0x008e4190
+ */
+extern Vector3 g_invGuardBandScale;
+
+/**
+ * Near plane distance of the camera last drawn through.
+ *
+ * @ghidraAddress 0x008e41a0
+ */
+extern float g_flCamNear;
+
+/**
+ * Scissor rectangle of the camera last drawn through, in GS primitive coordinates of 1/16 pixel.
+ *
+ * DrawSelf() first stores pixel bounds here to program SCISSOR_1 and then converts them.
+ *
+ * @ghidraAddress 0x008e41a4
+ */
+extern int g_nScissorX0;
+
+/** @ghidraAddress 0x008e41a8 */
+extern int g_nScissorX1;
+
+/** @ghidraAddress 0x008e41ac */
+extern int g_nScissorY0;
+
+/** @ghidraAddress 0x008e41b0 */
+extern int g_nScissorY1;
 
 } // namespace Rnd

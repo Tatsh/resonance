@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+
+#include "math/color.h"
+#include "math/vector3.h"
 #include "rnd/environ.h"
 
 class HxStr;
@@ -8,6 +12,36 @@ class Light;
 }
 
 namespace Rnd {
+
+/**
+ * One directional light as the vertex lighting path consumes it.
+ *
+ * The record is not polymorphic and emits no RTTI descriptor. The name is the analysis program's
+ * and is inferred. PsEnviron::DrawSelf() fills every member except mTransformedDirection.
+ */
+struct DirectionalLightRecord {
+    Vector3 mDirection;            /*!< Negated second row of the light's world transform. */
+    Vector3 mTransformedDirection; /*!< Untouched by PsEnviron::DrawSelf(). Inferred. +0x10 */
+    Color mAmbient;                /*!< Copied from Rnd::Light::mAmbient. */
+    Color mDiffuse;                /*!< Copied from Rnd::Light::mDiffuse. */
+};
+
+/**
+ * One point light as the vertex lighting path consumes it.
+ *
+ * The record is not polymorphic and emits no RTTI descriptor. The name is the analysis program's
+ * and is inferred. PsEnviron::DrawSelf() fills mPosition, mAmbient, and mDiffuse.
+ */
+struct PointLightRecord {
+    /*!< Translation row of the light's world transform, with Rnd::Light::mRange in the padding
+         word. */
+    Vector3 mPosition;
+    Vector3 mTransformedPosition; /*!< Untouched by PsEnviron::DrawSelf(). Inferred. +0x10 */
+    Color mAmbient;               /*!< Copied from Rnd::Light::mAmbient. */
+    Color mDiffuse;               /*!< Copied from Rnd::Light::mDiffuse. */
+    unsigned mUnknown40;          /*!< Written by the routine at `0x005af0c8`. +0x40 */
+    unsigned mUnknown44[3];       /*!< Pads the record to 0x50 bytes. +0x44 */
+};
 
 /**
  * Lighting and fog a subtree is drawn under, PlayStation 2.
@@ -80,10 +114,10 @@ protected:
      * no fog the scale is zero and the offset 255.0, which fogs no pixel at all. The fog colour
      * is packed into the low three bytes of GS register 0x3d.
      *
-     * Each entry of mLights is then appended to one of two record vectors, a directional light
-     * contributing the negated second basis row of its world transform and a point light its
-     * translation row and its range. A spot light is skipped. The body is not reconstructed,
-     * because neither record vector has been recovered.
+     * Both record vectors are then emptied and each entry of mLights appended to one of them, a
+     * directional light contributing the negated second basis row of its world transform and a
+     * point light its translation row and its range. A spot light is skipped. The routine ends by
+     * making this environment Rnd::g_pCurrentEnviron.
      *
      * @return Non-zero, which draws the children as well.
      * @ghidraAddress 0x005aecb8
@@ -119,5 +153,23 @@ extern float g_flFogScale;
  * @ghidraAddress 0x00776114
  */
 extern float g_flFogOffset;
+
+/**
+ * Directional lights of the current environment, rebuilt by PsEnviron::DrawSelf().
+ *
+ * The program's label is `g_abDirectionalLightRecords`.
+ *
+ * @ghidraAddress 0x00776120
+ */
+extern std::vector<DirectionalLightRecord> g_directionalLightRecords;
+
+/**
+ * Point lights of the current environment, rebuilt by PsEnviron::DrawSelf().
+ *
+ * The program's label is `g_abPointLightRecords`.
+ *
+ * @ghidraAddress 0x00776130
+ */
+extern std::vector<PointLightRecord> g_pointLightRecords;
 
 } // namespace Rnd

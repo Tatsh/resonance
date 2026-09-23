@@ -165,6 +165,22 @@ public:
     bool BindToGsSlot(unsigned nTexFunc);
 
     /**
+     * Make mip 0 the surface the GS draws into.
+     *
+     * Waits for the outstanding mip reads. A mip 0 block that is not a render target is released
+     * and replaced by a new render target record of the bitmap's shape, and a block that is not
+     * resident is allocated without a transfer. FRAME_1 then addresses the block with the buffer
+     * width and storage mode of TEX0, XYOFFSET_1 centres the surface in the GS coordinate space,
+     * ZBUF_1 masks depth writes, and TEST_1 passes every depth test.
+     *
+     * Rnd::PsCam::DrawSelf() is the one caller. The routine was previously titled after surface
+     * restoration.
+     *
+     * @ghidraAddress 0x00596d68
+     */
+    void BindAsRenderTarget();
+
+    /**
      * Upload one mip level into the video memory block of its level.
      *
      * A level of the run-length format is decompressed into the temporary zone buffer and uploaded

@@ -200,6 +200,18 @@ public:
      */
     void LeaveVu1Path();
 
+    /**
+     * Point FRAME_1 and XYOFFSET_1 back at the display buffer being drawn.
+     *
+     * Rnd::PsCam::DrawSelf() calls it when the previous camera drew into a texture. Both values
+     * come from the draw environment of the current half of the double buffer descriptor that
+     * mpDisplayBuffers addresses, and each goes through the body of SetGsReg() open-coded. The body
+     * is not reconstructed, because the descriptor's layout is unrecovered.
+     *
+     * @ghidraAddress 0x0049b6b8
+     */
+    void RestoreFrameBufferTarget();
+
     // The layout is recovered only where the packet routines read it. A reserved run records a span
     // that has not been recovered and is not a field.
 
@@ -218,12 +230,22 @@ public:
     int mnDisplayWidth;
     /** Display height in pixels. Read alongside the width by the same routine. */
     int mnDisplayHeight;
-    unsigned char mReserved28[0x08];
+    /** Framebuffer bytes per pixel, the Init() bit depth rounded up to whole bytes. +0x28 */
+    int mnPixelBytes;
+    /**
+     * Depth buffer bytes per sample, which InitDisplayMode() derives from mnPixelBytes.
+     *
+     * Rnd::PsCam::DrawSelf() reads it to find the largest depth value. +0x2c
+     */
+    int mnDepthBytes;
     /** A+D GIFtag SetGsReg() opens when the open tag is not already an A+D tag. +0x30 */
     GifQuadword mAdTag;
     /** Last value written to each GS register, indexed by register number. +0x40 */
     unsigned long long mGsRegs[kGsRegisterCount];
-    unsigned char mReserved440[0x08];
+    unsigned char mReserved440[0x04];
+    /** Half of the double buffer being drawn, which RestoreFrameBufferTarget() selects by. +0x444
+     */
+    int mnDrawBuffer;
     /**
      * Double buffer descriptor InitDisplayMode() builds through the SDK, at its uncached address.
      *

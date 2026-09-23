@@ -292,9 +292,10 @@ public:
     /** mInvLocalProject followed by the world transform. +0x1e0 */
     Vector3 mInvWorldProject[kXfmRowCount];
 
-private:
+protected:
     // The view volume in camera space, which UpdateProjection() builds from the four projection
-    // parameters below.
+    // parameters below. Protected because Rnd::PsCam::DrawSelf() reads it, along with the near and
+    // far planes, the field of view, and mZRange.
     Frustum mLocalFrustum; // +0x220
 
 public:
@@ -306,16 +307,16 @@ public:
      */
     Frustum mWorldFrustum;
 
-private:
+protected:
     float mNearPlane; // +0x2e0
     float mFarPlane;  // +0x2e4
-    float mFov;       // +0x2e8
+    float mFov;       // +0x2e8 Zero selects an orthographic projection.
 
 protected:
     // Protected because Rnd::PsCam writes it when there is no render target.
     float mYRatio; // +0x2ec
 
-private:
+protected:
     // Depth the projected image is mapped into, as a low value in x and a high value in y.
     Vector2 mZRange; // +0x2f0
 

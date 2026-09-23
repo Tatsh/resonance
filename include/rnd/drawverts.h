@@ -203,7 +203,7 @@ int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, in
  * Non-zero while fog is enabled.
  *
  * Both software draw paths shift it into the GS PRIM fog-enable bit, which is what identifies it
- * as fog rather than a general flag. Rnd::Environ::Select() is the writer.
+ * as fog rather than a general flag. Rnd::PsEnviron::DrawSelf() is the one writer.
  *
  * @ghidraAddress 0x00776118
  */

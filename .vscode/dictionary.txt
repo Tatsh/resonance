@@ -27,6 +27,7 @@ atten
 augm
 autobrief
 autocatch
+autocatcher
 autocatchmsg
 axebuttonmsg
 axingstg
@@ -135,6 +136,7 @@ fileobject
 filetab
 floatobject
 flusha
+fogcol
 fopen
 formatcardmct
 formatop
@@ -182,6 +184,11 @@ handoff
 hardsynth
 harmonix
 hostmode
+hudbadge
+hudfreq
+hudscore
+hudscorepulse
+hudutil
 hxcons
 hxmemstream
 hxstr
@@ -628,6 +635,7 @@ xdecref
 xfms
 xincref
 xori
+xyoffset
 xyzf
 yarnrc
 zbuf

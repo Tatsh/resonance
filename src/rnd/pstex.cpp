@@ -31,6 +31,29 @@ constexpr int kMipTbpFirstShift = 0;
 constexpr int kMipTbpSecondShift = 20;
 constexpr int kMipTbpThirdShift = 40;
 
+// The registers BindAsRenderTarget() programs, the TEX0 fields it copies into FRAME_1, and the
+// fields of each register it sets.
+constexpr int kGsRegXyOffset1 = 0x18;
+constexpr int kGsRegTest1 = 0x47;
+constexpr int kGsRegFrame1 = 0x4c;
+constexpr int kGsRegZbuf1 = 0x4e;
+constexpr int kTex0TbwShift = 14;
+constexpr int kTex0PsmShift = 20;
+constexpr unsigned long long kSixBitField = 0x3f;
+constexpr int kFrameFbwShift = 16;
+constexpr int kFramePsmShift = 24;
+constexpr unsigned long long kFrameFbpMask = 0x1ff;
+constexpr unsigned long long kFrameFields = 0x3f3f01ff;
+constexpr int kBlocksPerFramePageShift = 5;
+constexpr unsigned long long kXyOffsetFields = 0x0000ffff0000ffffULL;
+constexpr int kXyOffsetYShift = 32;
+constexpr int kGsCoordinateCentre = 0x800;
+constexpr int kGsSubpixelShift = 4;
+constexpr unsigned long long kGsSubpixelCoordMask = 0xffff;
+constexpr unsigned long long kZbufZmsk = 1ULL << 32;
+constexpr unsigned long long kTestZtstAlways = 1ULL << 17;
+constexpr unsigned long long kTestZtstMask = 3ULL << 17;
+
 // TEX0.TFX, two bits at bit 35.
 constexpr unsigned long long kTex0TfxMask = 3;
 constexpr int kTex0TfxShift = 35;
@@ -87,6 +110,36 @@ PsTex::PsTex(const HxStr &name) : Tex(name), mPaletteVram(nullptr) {
 // 0x0059a558
 PsTex::~PsTex() {
     FreeGsSurfaces();
+}
+
+// 0x00596fd8
+void PsTex::OnMipLoaded(int nMip) {
+    Tex::OnMipLoaded(nMip);
+    if (mLoadedBitmaps.empty()) {
+        return;
+    }
+    ABitmap *pBitmap = mLoadedBitmaps[nMip];
+    if (pBitmap == nullptr) {
+        return;
+    }
+
+    APalette *pPalette = pBitmap->mPalette;
+    if (pPalette != nullptr) {
+        for (int nEntry = 0; nEntry < pPalette->mEnd; ++nEntry) {
+            pPalette->mEntries[nEntry] = HalveAlpha(pPalette->mEntries[nEntry]);
+        }
+        return;
+    }
+    if (pBitmap->mFormat != kABitmapFormatLinear32) {
+        return;
+    }
+    for (int nRow = 0; nRow < pBitmap->mHeight; ++nRow) {
+        unsigned int *pTexel = reinterpret_cast<unsigned int *>(
+            static_cast<unsigned char *>(pBitmap->mPixels) + nRow * pBitmap->mBytesPerRow);
+        for (int nColumn = 0; nColumn < pBitmap->mWidth; ++nColumn) {
+            pTexel[nColumn] = HalveAlpha(pTexel[nColumn]);
+        }
+    }
 }
 
 // 0x00597130
@@ -276,6 +329,44 @@ bool PsTex::BindToGsSlot(unsigned nTexFunc) {
         g_gfxDevice.SetGsReg(kGsRegMipTbp2, mMipTbp2, kGsRegAllBits);
     }
     return true;
+}
+
+// 0x00596d68
+void PsTex::BindAsRenderTarget() {
+    WaitForMipsLoaded();
+    GsMip &mip = mGsMips[0];
+    const ABitmap *pBitmap = mLoadedBitmaps[0];
+
+    if (mip.mPage->mKind != kVramBlockKindRenderTarget) {
+        mip.mPage->FreeSelf();
+        mip.mPage = g_vramTable.AllocEntry();
+        mip.mPage->SetupSurface(
+            pBitmap->mWidth, pBitmap->mHeight, mBitsPerPixel, mGsPsm, kVramBlockKindRenderTarget);
+    }
+    int nBlockAddr = mip.mPage->GetBlockAddr();
+    if (nBlockAddr == 0) {
+        nBlockAddr = mip.mPage->UploadImage(nullptr, 0, 0, 0, 0);
+    }
+
+    // The binary builds FRAME_1 and XYOFFSET_1 in bit-field temporaries whose other fields it never
+    // writes. The masks passed to SetGsReg() exclude those fields.
+    const unsigned long long qwFrame =
+        (static_cast<unsigned long long>(nBlockAddr >> kBlocksPerFramePageShift) & kFrameFbpMask) |
+        (((mTex0 >> kTex0TbwShift) & kSixBitField) << kFrameFbwShift) |
+        (((mTex0 >> kTex0PsmShift) & kSixBitField) << kFramePsmShift);
+    const unsigned long long qwOffsetX =
+        static_cast<unsigned long long>((kGsCoordinateCentre - (pBitmap->mWidth >> 1))
+                                        << kGsSubpixelShift) &
+        kGsSubpixelCoordMask;
+    const unsigned long long qwOffsetY =
+        static_cast<unsigned long long>((kGsCoordinateCentre - (pBitmap->mHeight >> 1))
+                                        << kGsSubpixelShift) &
+        kGsSubpixelCoordMask;
+    g_gfxDevice.SetGsReg(kGsRegFrame1, qwFrame, kFrameFields);
+    g_gfxDevice.SetGsReg(
+        kGsRegXyOffset1, qwOffsetX | (qwOffsetY << kXyOffsetYShift), kXyOffsetFields);
+    g_gfxDevice.SetGsReg(kGsRegZbuf1, kZbufZmsk, kZbufZmsk);
+    g_gfxDevice.SetGsReg(kGsRegTest1, kTestZtstAlways, kTestZtstMask);
 }
 
 // 0x005982a0
