@@ -23,6 +23,7 @@ set(RESONANCE_GAME_SRCS
     localplayer.cpp
     msgjoiner.cpp
     multicatcher.cpp
+    multiscreenanim.cpp
     netplayer.cpp
     nullplayer.cpp
     phrase.cpp
@@ -42,8 +43,11 @@ set(RESONANCE_GAME_SRCS
     riff.cpp
     riffset.cpp
     scoretrackgraph.cpp
+    screenanim.cpp
     singlepowerupcollection.cpp
     skillstats.cpp
+    soloscreenanim.cpp
+    tnlarena.cpp
     trackdata.cpp
     trackselector.cpp
     voxingstg.cpp)

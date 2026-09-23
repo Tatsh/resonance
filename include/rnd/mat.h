@@ -10,6 +10,7 @@
 
 class FailSink;
 namespace Rnd {
+class Mesh;
 class Stream;
 class Tex;
 } // namespace Rnd
@@ -118,6 +119,18 @@ public:
 
     /** @ghidraAddress 0x004dbb10 */
     virtual ~Mat();
+
+    /**
+     * Append every referrer of this material whose class is "Mesh" to meshes.
+     *
+     * Walks the referrer list in order and appends each match through `dynamic_cast`.
+     * TnlArena's constructor is the one caller. The definition sits in the TnlArena unit, and the
+     * title is inferred.
+     *
+     * @param meshes The vector to append to.
+     * @ghidraAddress 0x00406010
+     */
+    void GetMeshReferrers(std::vector<Mesh *> &meshes);
 
 protected:
     // Drop this material's reference on every stage texture. Walks mStages and calls

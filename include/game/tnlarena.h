@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "app/msgsink.h"
+#include "rnd/mesh.h"
 
 class Message;
 class Player;
@@ -11,7 +12,6 @@ class ScreenAnim;
 
 namespace Rnd {
 class Mat;
-class Mesh;
 } // namespace Rnd
 
 /**
@@ -38,11 +38,31 @@ public:
     /**
      * One mesh that shows an arena screen, with the material it had when the arena was built.
      *
-     * A plain eight-byte record. The name is inferred.
+     * An eight-byte record. The name is inferred.
      */
     struct ScreenMesh {
-        Rnd::Mesh *mMesh; /*!< The mesh. +0x00 */
-        Rnd::Mat *mMat;   /*!< The material the mesh used at construction. +0x04 */
+        /**
+         * Put the recorded material back on the mesh.
+         *
+         * Every copy runs it, so the temporary TnlArena's constructor pushes re-applies the
+         * mesh's material, and destroying mScreenMeshes restores every screen.
+         */
+        ~ScreenMesh() {
+            mMesh->SetMaterial(mMat);
+        }
+
+        /**
+         * Put a material on the mesh.
+         *
+         * The out-of-line copy sits in the TnlArena unit. The title is inferred.
+         *
+         * @param pMat The material.
+         * @ghidraAddress 0x0040c938
+         */
+        void SetMaterial(Rnd::Mat *pMat) const;
+
+        Rnd::Mesh *mMesh; /*!< The mesh. */
+        Rnd::Mat *mMat;   /*!< The material the mesh used at construction. */
     };
 
     /**
@@ -66,9 +86,8 @@ public:
     /**
      * Build the arena screens for the game about to start.
      *
-     * The body is not written. It needs declarations of ScreenAnim, of SoloScreenAnim with its
-     * constructor at `0x004066d0`, and of MultiScreenAnim with its constructor at `0x00406200`, and
-     * it needs the GrooveWorld player vector.
+     * Starts at level 1, or at the play mode when that is kPlayModeJam, and passes the level to the
+     * animation it builds.
      *
      * @param pRenderer The renderer that constructs this object. The body does not read it.
      * @ghidraAddress 0x004067e8
@@ -78,9 +97,9 @@ public:
     /**
      * Stop the screen animation and restore every screen mesh's original material.
      *
-     * Runs slot 3 of the animation with 1, deletes it, frees every PlayerMaterial, and then
-     * restores each mesh's material twice over, once through `0x0040c938` and once inline. The body
-     * is not written.
+     * Passes level 1 to the animation, deletes it, frees every PlayerMaterial, and then restores
+     * each mesh's material twice over, once through ScreenMesh::SetMaterial() and once through the
+     * ScreenMesh destructor.
      *
      * @ghidraAddress 0x00406de0
      */
@@ -89,10 +108,10 @@ public:
     /**
      * Act on one message the renderer sends on.
      *
-     * A PointAmountMsg runs slot 4 of the animation. A JuiceAmountMsg, only in game mode 1 and play
-     * mode 1 and only while mUnknown24 is -1, sets the level from the juice amount (2 above 0.85, 0
-     * below 0.2, and 1 otherwise) and passes it to slot 3 of the animation. A WinMsg in game mode 1
-     * with a non-empty list passes one level higher to slot 3. The body is not written.
+     * A PointAmountMsg runs ScreenAnim::UpdateLeaders(). A JuiceAmountMsg, only in game mode 1 and
+     * play mode 1 and only while mUnknown24 is -1, sets the level from the juice amount (2 above
+     * 0.85, 0 below 0.2, and 1 otherwise) and passes it to ScreenAnim::SetLevel(). A WinMsg in game
+     * mode 1 with a non-empty winner list passes one level higher. The body is not written.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x00406ff0
@@ -102,7 +121,7 @@ public:
     /**
      * Advance the screen animation to one song position.
      *
-     * Forwards to slot 2 of the animation. Renderer::OnUnknownSlot7() is the caller, and the title
+     * Forwards to ScreenAnim::SetFrame(). Renderer::OnUnknownSlot7() is the caller, and the title
      * is inferred from it.
      *
      * @param flFrame The song position, in MIDI ticks.
@@ -118,7 +137,7 @@ private:
     int mGameMode;
     // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while it still is.
     int mUnknown24; // +0x24
-    // The level last passed to slot 3 of the animation. Starts at 1, or at the play mode when that
+    // The level last passed to ScreenAnim::SetLevel(). Starts at 1, or at the play mode when that
     // is 2.
     int mLevel;
 };
