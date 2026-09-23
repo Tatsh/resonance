@@ -28,6 +28,28 @@ class Player;
 class CripplePacket : public ToAllOtherGameSystemsPacket {
 public:
     /**
+     * Construct a packet with no references.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    CripplePacket() {
+    }
+
+    /**
+     * Report a crippler deployed on a set of players.
+     *
+     * The body stores the attacker, then appends one reference per victim, taking the victims'
+     * size again on every pass. The victims arrive by value, and the body releases their storage
+     * on the way out. Gamer's crippler handler at `0x00111578` is the one caller.
+     *
+     * @param pAttacker The player who deployed the crippler.
+     * @param victims The players it strikes.
+     * @ghidraAddress 0x003e7668
+     */
+    CripplePacket(Player *pAttacker, std::vector<Player *> victims);
+
+    /**
      * Produce a packet with no references on the heap.
      *
      * The registry the translation unit at `0x003ed2e0` builds stores this address against
@@ -90,7 +112,7 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    IDablePtr<Player> mUnknown14; // +0x14
+    IDablePtr<Player> mAttacker; // +0x14
 
 public:
     /**

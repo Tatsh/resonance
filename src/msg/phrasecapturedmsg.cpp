@@ -28,6 +28,6 @@ const char *PhraseCapturedMsg::Name() {
 
 // 0x003d8448. The colour name is copied into a temporary before it is written.
 void PhraseCapturedMsg::Print(std::ostream &stream) {
-    stream << "b " << mUnknown04 << "--" << mUnknown08 << " tr# " << mTrack;
+    stream << "b " << mFirstBar << "--" << mEndBar << " tr# " << mTrack;
     stream << " score " << mScore << " juice " << mJuice << " " << HxStr(mPlayer->mColorName);
 }

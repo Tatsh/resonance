@@ -2,6 +2,8 @@
 
 #include "msg/cmdmsg.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -9,9 +11,10 @@
  * object is 0x10 bytes and its vtable is at `0x007e4570`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Both members are public because
+ * Gamer's freestyle handler at `0x00111080` reads them directly with no accessor in the image. It
+ * dispatches Player slot 4 on mPlayer to find the track, runs the freestyle effect over mBar to
+ * mBar + 8, and sets CmdMsg::mUnknown04 to 1.
  *
  * The word at `+0x04` belongs to CmdMsg, which New() zeroes. The two words after it belong to this
  * class, for the reason CmdMsg records.
@@ -52,9 +55,8 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
+    int mBar;        /*!< The bar freestyle starts at. +0x08 */
+    Player *mPlayer; /*!< The player freestyle is enabled for. +0x0c */
 };
 
 /**

@@ -70,9 +70,16 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    /**
+     * The first bar of the captured phrase, which Print() writes ahead of `--`. +0x04
+     *
+     * Public because Gamer's HandleMessage() at `0x00112a80` reads it directly with no accessor in
+     * the image.
+     */
+    int mFirstBar;
+
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    int mEndBar;    // +0x08, written after `--` by Print()
     int mUnknown0c; // +0x0c
     int mUnknown10; // +0x10
 

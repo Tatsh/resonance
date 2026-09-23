@@ -14,8 +14,8 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). The types come from
  * InputMap::OnControllerReading(), the one builder, which stores the resolved player and the
- * controller reading's position. Readers of the fields have not been traced, so they are private
- * by default.
+ * controller reading's position. Both members are public because Gamer's playback-mode handler at
+ * `0x00110e60` reads them directly with no accessor in the image.
  *
  * The destructor at `0x0011d4c8` is compiler-generated and has no declaration here. The routine
  * at `0x0011d500` is a further emission of the type-information accessor.
@@ -77,9 +77,8 @@ public:
      */
     virtual const char *Name();
 
-private:
-    Player *mPlayer;    // +0x04
-    Mid::MBT mPosition; // +0x08
+    Player *mPlayer;    /*!< The player the controller belongs to. +0x04 */
+    Mid::MBT mPosition; /*!< The song position of the reading. +0x08 */
 };
 
 /**

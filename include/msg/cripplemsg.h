@@ -17,6 +17,9 @@ class Player;
  * reads the result word back after sending. Print() labels `+0x0c` as a track number and writes
  * the player's identifier after ` p#`.
  *
+ * mPlayer and mTrack are public because Gamer's crippler handler at `0x00111230` reads them
+ * directly with no accessor in the image, and sets CmdMsg::mUnknown04 to 1 when victims exist.
+ *
  * The destructor at `0x003e2668` is compiler-generated and has no declaration here.
  */
 class CrippleMsg : public CmdMsg {
@@ -63,10 +66,11 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    Player *mPlayer; /*!< The player who deployed the crippler. +0x08 */
+    int mTrack;      /*!< The track, labelled by Print(). +0x0c */
+
 private:
-    Player *mPlayer; // +0x08
-    int mTrack;      // +0x0c
-    int mUnknown10;  // +0x10
+    int mUnknown10; // +0x10
 };
 
 /**
