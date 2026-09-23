@@ -860,7 +860,7 @@ void MetSoloStagesScreen::StyleLevel(int bStageLocked, const HxStr &levelName) {
         mTvMats[kTvLeft], mTvMats[kTvRight], mTvLogoMats[kTvLeft], mTvLogoMats[kTvRight]};
     for (Rnd::Mat *pMat : mats) {
         if (pMat->mStages[kTexStage].mTex != nullptr) {
-            pMat->SetDiffuse(color);
+            pMat->SetEmissive(color);
         }
     }
     mLabelText->SetFont(pLabelFont);
