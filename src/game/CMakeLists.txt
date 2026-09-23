@@ -11,18 +11,22 @@ set(RESONANCE_GAME_SRCS
     catchingstg.cpp
     controllercmd.cpp
     cripplepowerup.cpp
+    dogamesystemplaycmd.cpp
     effectpowerup.cpp
     enablemgr.cpp
+    endrecordingcmd.cpp
     forcefeedbackmgr.cpp
     freestylepowerup.cpp
     freqappearance.cpp
     gameenablemgr.cpp
     gamemanagerimpl.cpp
     gameparams.cpp
+    gameplayback.cpp
     gamepowerbarmgr.cpp
     gamepowerupplacer.cpp
     gamer.cpp
     gamercmd.cpp
+    gamerecorder.cpp
     gamestats.cpp
     genericcatcher.cpp
     ghostnotespowerup.cpp
@@ -33,6 +37,7 @@ set(RESONANCE_GAME_SRCS
     inputcheatdetector.cpp
     inputcheatdetectormet.cpp
     inputmap.cpp
+    inputpollerps2.cpp
     jameffectsmgr.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp

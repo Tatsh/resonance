@@ -22,6 +22,7 @@ anims
 apalette
 apolygon
 appactivefilter
+appticktask
 apptnl
 apptunnel
 apsz
@@ -147,6 +148,7 @@ dimx
 dispfb
 displaypointermsg
 docstrings
+dogamesystemplaycmd
 dsizeof
 dsubu
 dthe
@@ -164,6 +166,7 @@ enablefreestylemsg
 enablemgr
 endforeach
 endgamemsg
+endrecordingcmd
 endx
 entspaceop
 envx
@@ -218,9 +221,11 @@ gamemanagerdoplaybackmsg
 gamemanagerimpl
 gameovermsg
 gameparams
+gameplayback
 gamepowerbarmgr
 gamepowerupplacer
 gamercmd
+gamerecorder
 gameskill
 gamestats
 gemmsg
@@ -300,6 +305,7 @@ inittab
 inputcheatdetector
 inputcheatdetectormet
 inputmap
+inputpollerps2
 intobject
 invalidateseekermsg
 invalidatetrackmsg
@@ -856,6 +862,7 @@ vrsqrt
 vtable
 vtables
 vutext
+watchdogclock
 watchdogtimer
 wdelete
 werror

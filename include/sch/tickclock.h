@@ -149,26 +149,6 @@ public:
     void PostAt(Command *pCommand, Tick tick);
 
     /**
-     * Queue a command a distance from now, under a handle the caller retains.
-     *
-     * @param pCommand The command to run.
-     * @param tick The distance from now.
-     * @param id The handle to queue under.
-     * @param bRecordable Non-zero for a post the recorded stream is to include.
-     * @ghidraAddress 0x004a60a0
-     */
-    void PostIn(Command *pCommand, Tick tick, CmdID &id, int bRecordable);
-
-    /**
-     * Queue a command a distance from now, discarding the handle.
-     *
-     * @param pCommand The command to run.
-     * @param tick The distance from now.
-     * @ghidraAddress 0x004a6178
-     */
-    void PostIn(Command *pCommand, Tick tick);
-
-    /**
      * Queue a command at a song position, under a handle the caller retains.
      *
      * @param pCommand The command to run.

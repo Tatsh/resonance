@@ -1,6 +1,13 @@
 #pragma once
 
+#include "sch/tick.h"
+
+class CmdID;
 class Watchdog;
+
+namespace Sch {
+class Command;
+} // namespace Sch
 
 /**
  * Time base a scheduler measures its due times against, and the base class of Sch::TickClock.
@@ -43,6 +50,32 @@ public:
      * @ghidraAddress 0x004a77c0
      */
     long long Now();
+
+    /**
+     * Queue a command a distance from now, under a handle the caller retains.
+     *
+     * The body reads only mWatchdog, which is what places it on this class rather than on
+     * Sch::TickClock. GameRecorder::ScheduleEnd() calls it on the plain WatchdogTimer that
+     * Globals creates.
+     *
+     * @param pCommand The command to run.
+     * @param tick The distance from now.
+     * @param id The handle to queue under.
+     * @param bRecordable Non-zero for a post the recorded stream is to include.
+     * @ghidraAddress 0x004a60a0
+     */
+    void PostIn(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable);
+
+    /**
+     * Queue a command a distance from now, discarding the handle.
+     *
+     * The body reads only mWatchdog, as the keyed overload does.
+     *
+     * @param pCommand The command to run.
+     * @param tick The distance from now.
+     * @ghidraAddress 0x004a6178
+     */
+    void PostIn(Sch::Command *pCommand, Sch::Tick tick);
 
 private:
     long long mNegatedOrigin; // +0x00

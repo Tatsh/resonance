@@ -2,6 +2,7 @@ set(RESONANCE_APP_SRCS
     animrange.cpp
     appactivefilter.cpp
     application.cpp
+    appticktask.cpp
     apptunnel.cpp
     attachment.cpp
     cutscene.c
@@ -77,6 +78,7 @@ set(RESONANCE_APP_SRCS
     tnlsnake.cpp
     tnlutil.cpp
     tunnelcache.cpp
+    watchdogclock.cpp
     watchdogtimer.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})

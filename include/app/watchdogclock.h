@@ -38,14 +38,33 @@ public:
      */
     void Mark(long long nNanoseconds);
 
+    /**
+     * Stop the clock, remembering how far it had run.
+     *
+     * Does nothing while the clock is already stopped. GameManagerImpl's pause handler is the
+     * caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00512680
+     */
+    void Pause();
+
+    /**
+     * Restart a stopped clock from where it stopped.
+     *
+     * Moves mStartMs so that the elapsed time excludes the pause. Does nothing while the clock is
+     * running. GameManagerImpl's unpause handler is the caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00512700
+     */
+    void Resume();
+
     /** The millisecond reading the current run started at. `+0x10` */
     long long mOriginMs;
 
 private:
-    double mUnknown00;    // +0x00
-    int mUnknown08;       // +0x08
-    int mUnknown0c;       // +0x0c
-    int mUnknown18;       // +0x18 set to 1 on construction
-    int mUnknown1c;       // +0x1c
-    long long mUnknown20; // +0x20 cleared on construction
+    double mUnknown00;      // +0x00
+    long long mStartMs;     // +0x08 the reading the running time is measured from
+    int mRunning;           // +0x18 set to 1 on construction, cleared while paused
+    int mUnknown1c;         // +0x1c
+    long long mPausedRunMs; // +0x20 the running time at the last pause, cleared on construction
 };

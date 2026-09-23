@@ -85,3 +85,16 @@ int ScreenMessagesEnabled();
  * @ghidraAddress 0x0050ef30
  */
 HxStr GetFreqRoot();
+
+/**
+ * Compose a data path against GetFreqRoot().
+ *
+ * The routine sits in the same translation unit as GetFreqRoot(). Its callers include the
+ * asynchronous loader, the `save_rnd` script command, and GamePlayback, each of which opens the
+ * returned path. The title is inferred.
+ *
+ * @param name The path below the root.
+ * @return The root followed by name.
+ * @ghidraAddress 0x0050d9f0
+ */
+HxStr MakeFreqPath(const HxStr &name);

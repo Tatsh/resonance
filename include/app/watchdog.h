@@ -2,6 +2,8 @@
 
 #include "app/watchdogclock.h"
 
+class IBStream;
+
 /**
  * Scheduler that runs queued commands when their due time arrives.
  *
@@ -44,6 +46,19 @@ public:
      * @ghidraAddress 0x004ac9e8
      */
     void Close();
+
+    /**
+     * Start replaying a recorded command stream.
+     *
+     * Creates the 0x14-byte reader at `+0x14` with the constructor at `0x00594968`, has it read
+     * the stream through `0x00594a78`, sets mStreamMode to 2, and starts it through `0x005962e8`.
+     * GamePlayback's constructor is the caller. Not reconstructed, because the reader's class is
+     * unrecovered. The title is inferred.
+     *
+     * @param stream The recording, positioned after the session state.
+     * @ghidraAddress 0x004ac950
+     */
+    void StartPlayback(IBStream &stream);
 
     /**
      * Run every queued command whose due time has arrived.

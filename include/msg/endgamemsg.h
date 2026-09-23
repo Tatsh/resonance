@@ -49,8 +49,14 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
+    /**
+     * Non-zero to start another local game at once rather than return to the front end.
+     *
+     * Public because GameManagerImpl::OnEndGame() at `0x0010c150` reads it directly and passes it
+     * to EndGame(), which queues a BeginGameLocalMsg when it is set. The image has no accessor.
+     * +0x04
+     */
+    int mRestart;
 };
 
 /**

@@ -2,14 +2,24 @@
 
 #include <vector>
 
+#include "app/application.h"
+#include "app/rendererbase.h"
+#include "app/watchdog.h"
+#include "game/forcefeedbackmgr.h"
+#include "game/gameplayback.h"
+#include "game/gamerecorder.h"
 #include "met/metpersonadata.h"
 #include "msg/begingamelocalmsg.h"
 #include "msg/endgamemsg.h"
 #include "msg/gamemanagerdoplaybackmsg.h"
+#include "msg/metstartpausemsg.h"
 #include "msg/pausegamesystemmsg.h"
 #include "msg/unpausegamesystemmsg.h"
+#include "os/hxstr.h"
 #include "os/log.h"
+#include "script/configquery.h"
 #include "script/scripthost.h"
+#include "synth/ps2hardsynth.h"
 
 namespace {
 
@@ -17,6 +27,24 @@ namespace {
 constexpr int kScriptTemplateGameMode = 0x262;
 constexpr int kScriptTemplatePlayMode = 0x263;
 constexpr int kScriptTemplateUnknown88 = 0x264;
+constexpr int kScriptTemplateLevelName = 0x277;
+constexpr int kScriptTemplateArenaName = 0x27b;
+
+// Configuration code of the container name CreateWorld() hands the world.
+constexpr int kContainerConfigCode = 0x38e;
+
+// The diagnostics StartRecording() and StartPlayback() trip.
+constexpr char kRecordingInProgress[] = "Recording already in progress";
+constexpr char kCannotStartRecording[] = "Cannot start recording from this state";
+constexpr char kCannotRecreateGame[] = "Cannot recreate game from this state";
+constexpr char kPlaybackInProgress[] = "Playback already in progress";
+
+// The MIDI message a pause sends: all notes off, controller 123, on the last channel.
+constexpr unsigned char kStatusControlChangeChannel16 = 0xbf;
+constexpr unsigned char kControllerAllNotesOff = 123;
+
+// Configuration code of the recording OnDoPlayback() replays.
+constexpr int kPlaybackFileConfigCode = 0x26a;
 
 } // namespace
 
@@ -181,4 +209,106 @@ void GameManagerImpl::HandleMessage(Message *pMsg) {
         // The format string has no placeholder, so the name is formatted into nothing.
         Fatal("DISPATCH_CHECK: ", pMsg->Name());
     }
+}
+
+// 0x001062d0
+GameManagerImpl::~GameManagerImpl() {
+    CheckState(); // Yes, the binary discards this call's result.
+    delete mpRecorder;
+    mpRecorder = nullptr;
+    delete mpMetaWorld;
+    mpMetaWorld = nullptr;
+    delete mpPoller;
+    mpPoller = nullptr;
+}
+
+// 0x001068a0
+void GameManagerImpl::CreateWorld() {
+    mpWorld = new GrooveWorld(Application::shared(), &mStats);
+    const HxStr &level = mParams.mLevelName;
+    CallScriptTemplate(kScriptTemplateLevelName,
+                       level.mStr != nullptr ? level.mStr : g_szEmptyString);
+    const HxStr &arena = mParams.mArenaName;
+    CallScriptTemplate(kScriptTemplateArenaName,
+                       arena.mStr != nullptr ? arena.mStr : g_szEmptyString);
+
+    HxStr container;
+    QueryConfigString(&container, kContainerConfigCode);
+    mpWorld->StartLoad(container);
+}
+
+// 0x0010c168
+void GameManagerImpl::Start() {
+    mpMetaWorld = new MetaGameWorld;
+    mpPoller->SetController(mpMetaWorld);
+    mUnknowna8 = 1;
+    mpPoller->SetActive(1);
+}
+
+// 0x001069a8
+void GameManagerImpl::OnPauseGameSystem(Message *) {
+    if (mPaused != 0) {
+        return;
+    }
+
+    mPaused = 1;
+    if (GetGameMode() != kGameModeNet) {
+        Application::shared()->GetWatchdog()->mClock.Pause();
+    }
+    mpPoller->SetController(mpMetaWorld);
+    mpPoller->SetPaused(1);
+    Application::shared()->GetSynth()->SendMidi(
+        kStatusControlChangeChannel16, kControllerAllNotesOff, 0);
+    Application::shared()->GetSynth()->Slot14(1);
+    if (mpWorld != nullptr) {
+        mpWorld->mForceFeedback->SetPaused(1);
+    }
+
+    MetStartPauseMsg pause;
+    mpMetaWorld->GetRenderer()->Handle(&pause);
+}
+
+// 0x0010c148
+void GameManagerImpl::OnEndGame(Message *pMsg) {
+    EndGame(static_cast<EndGameMsg *>(pMsg)->mRestart);
+}
+
+// 0x0010c420
+void GameManagerImpl::StartRecording() {
+    if (mpRecorder != nullptr) {
+        Fatal(kRecordingInProgress);
+    }
+    if (mState != 0) {
+        Fatal(kCannotStartRecording);
+    }
+    mpRecorder = new GameRecorder(this);
+}
+
+// 0x0010c4b8
+void GameManagerImpl::StartPlayback(const HxStr &file, int nFlag) {
+    if (mState != 0) {
+        Fatal(kCannotRecreateGame);
+    }
+    if (mpPlayback != nullptr) {
+        Fatal(kPlaybackInProgress);
+    }
+    if (mpRecorder != nullptr) {
+        delete mpRecorder;
+    }
+    mpRecorder = nullptr;
+    mpMetaWorld->OnUnknownForwarder003d4890();
+    mpPlayback = new GamePlayback(file, this, nFlag);
+}
+
+// 0x0010bee0
+void GameManagerImpl::QueueMessage(Message *pMsg) {
+    MsgSink *pQueueSink = &mQueue;
+    pQueueSink->HandleMessage(pMsg);
+}
+
+// 0x0010bf10
+void GameManagerImpl::OnDoPlayback(Message *) {
+    HxStr file;
+    QueryConfigString(&file, kPlaybackFileConfigCode);
+    StartPlayback(file, 0);
 }

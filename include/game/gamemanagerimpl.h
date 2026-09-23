@@ -15,6 +15,9 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
+class GamePlayback;
+class GameRecorder;
+
 /**
  * Connectivity of a session, recorded by GameManagerImpl::SetGameMode().
  *
@@ -94,12 +97,9 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  * makes the pairing certain. A type that matches none of the five trips
  * `FatalError("DISPATCH_CHECK: ", pMsg->Name())`.
  *
- * Two of the slots are documented rather than written. StartRecording() installs an 8-byte object
- * built at `0x0010f010` and destroyed at `0x0010f020`, and StartPlayback() installs a 4-byte object
- * built at `0x0010cf30`. Neither class emits RTTI, neither has an embedded file path, and no method
- * name for either survives anywhere in the image, so neither is titled here. The two members that
- * store them are the only opaque pointers in the class, and each records the refusal at its
- * declaration.
+ * StartRecording() installs a GameRecorder and StartPlayback() a GamePlayback. Neither class emits
+ * RTTI, so both titles are inferred, from EndRecordingCmd, whose name the RTTI attests, running the
+ * recorder's end.
  *
  * Four slots read or write the embedded settings rather than a member of this class. The offsets
  * `+0x84`, `+0x88`, and `+0x90` all fall inside the 0x38-byte GameParams subobject at `+0x68`, so
@@ -132,7 +132,9 @@ public:
     GameManagerImpl();
 
     /**
-     * Destroy the recorder, the two worlds, the queue, and the tally.
+     * Destroy the recorder, the front-end world, the poller, the queue, and the tally.
+     *
+     * The game world is not deleted here. CheckState() runs first and its result is discarded.
      *
      * @ghidraAddress 0x001062d0
      */
@@ -181,9 +183,7 @@ public:
      *
      * Slot 7. Trips `Recording already in progress` when a recorder already exists and
      * `Cannot start recording from this state` when mState is non-zero. The two diagnostics are
-     * what establish mState as a state word.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * what establish mState as a state word. Otherwise it installs a GameRecorder.
      *
      * @ghidraAddress 0x0010c420
      */
@@ -196,10 +196,8 @@ public:
      * `Playback already in progress` when a playback already exists. Any recorder is destroyed
      * first, and the front-end world is then asked to tear its game down through `0x003d4890`.
      *
-     * The installed object reopens the file, reads three words from it, and runs Load() on this
-     * manager, so a playback restores a saved session rather than feeding input back.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * The installed GamePlayback reopens the file, reads three words from it, and runs Load() on
+     * this manager, so a playback restores a saved session rather than feeding input back.
      *
      * @param file The recording to replay.
      * @param nFlag Passed to the installed object unchanged.
@@ -512,9 +510,9 @@ protected:
     /**
      * Leave the game.
      *
-     * Slot 35. Forwards the word at `+0x04` of the message to the out-of-line body at `0x00106c08`.
+     * Slot 35. Forwards EndGameMsg::mRestart to EndGame().
      *
-     * @param pMsg The message, read for one word.
+     * @param pMsg The EndGameMsg.
      * @ghidraAddress 0x0010c148
      */
     virtual void OnEndGame(Message *pMsg);
@@ -522,11 +520,10 @@ protected:
     /**
      * Pause the session.
      *
-     * Slot 36. Returns at once when already paused. Otherwise records the pause, silences the audio
-     * unless the connectivity mode is `net`, reconnects the poller to the front-end world, and
-     * posts a pause notification. The message itself is ignored.
-     *
-     * The body is not written, for the reason recorded on OnBeginGameLocal().
+     * Slot 36. Returns at once when already paused. Otherwise records the pause, stops the watchdog
+     * clock unless the connectivity mode is `net`, reconnects the poller to the front-end world and
+     * pauses it, silences and pauses the synthesiser, pauses the vibration, and hands the
+     * front-end renderer a MetStartPauseMsg. The message itself is ignored.
      *
      * @param pMsg The message, ignored.
      * @ghidraAddress 0x001069a8
@@ -552,8 +549,6 @@ protected:
      * Slot 38. The file comes from script symbol 0x26a and the flag is zero. The message is
      * ignored.
      *
-     * The body is not written, for the reason recorded in the class documentation.
-     *
      * @param pMsg The message, ignored.
      * @ghidraAddress 0x0010bf10
      */
@@ -575,8 +570,9 @@ private:
     // rather than calling this.
     void FinishWorldLoad();
 
-    // 0x00106c08. The out-of-line body of OnEndGame(), taking the word the message carried.
-    void EndGame(int nReason);
+    // 0x00106c08. The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
+    // and a playback, and then either queues a BeginGameLocalMsg or returns to the front end.
+    void EndGame(int bRestart);
 
     // A state word. The two diagnostics StartRecording() and StartPlayback() trip both describe it
     // as the state, and both fire when it is non-zero. Load() is the only writer recovered, so its
@@ -596,19 +592,12 @@ private:
     int mChangeCount; // +0xa4
     // Set by Start() and cleared by OnBeginGameLocal(). DrawFrame() runs one extra pass while it is
     // set, so it distinguishes the front end from a game session.
-    int mUnknowna8; // +0xa8
-    // The recorder StartRecording() installs. The class is 8 bytes, is built at 0x0010f010 with
-    // this manager as its one argument, and is destroyed at 0x0010f020. It emits no RTTI, has no
-    // embedded file path, and no method name for it survives, so it is not titled and the member
-    // stays opaque.
-    void *mpRecorder; // +0xac
-    // The playback StartPlayback() installs. The class is 4 bytes and is built at 0x0010cf30 with
-    // the file name, this manager, and the flag. It is not titled, on the same evidence as
-    // mpRecorder.
-    void *mpPlayback; // +0xb0
-    int mUnknownb4;   // +0xb4
-    // Freed untagged by the destructor. Nothing recovered writes it.
-    int mUnknownb8; // +0xb8
+    int mUnknowna8;           // +0xa8
+    GameRecorder *mpRecorder; // +0xac the recorder StartRecording() installs
+    GamePlayback *mpPlayback; // +0xb0 the playback StartPlayback() installs
+    // The constructor clears both of its words and the destructor frees the buffer at +0xb8 only
+    // when it is set, which is HxStr's own destruction. Nothing recovered writes it otherwise.
+    HxStr mUnknownb4; // +0xb4
     // Neither written by the constructor nor touched anywhere recovered. The field exists
     // because the queue starts at +0xc0 while the run of cleared fields ends at +0xb8, so four
     // bytes sit between them.

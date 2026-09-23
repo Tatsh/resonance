@@ -48,3 +48,10 @@ int UsingCdMedia() {
 HxStr GetFreqRoot() {
     return HxStr("");
 }
+
+// 0x0050d9f0
+HxStr MakeFreqPath(const HxStr &name) {
+    HxStr path(GetFreqRoot());
+    path += name;
+    return path;
+}
