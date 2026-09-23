@@ -175,10 +175,16 @@ public:
      */
     Rnd::Button *mUnknown00;
 
-private:
-    // The element is Rnd::Button rather than Rnd::Object. Add() appends the result of a
-    // `dynamic_cast` to Rnd::Button, and both navigation virtuals read Rnd::Button::mState at
-    // `+0x1c` to pass over a disabled entry. +0x04
+    /**
+     * The buttons in list order.
+     *
+     * The element is Rnd::Button rather than Rnd::Object. Add() appends the result of a
+     * `dynamic_cast` to Rnd::Button, and both navigation virtuals read Rnd::Button::mState at
+     * `+0x1c` to pass over a disabled entry.
+     *
+     * Public rather than private, because MetMsgScreen::Refresh() at `0x002ecd10` reads its size
+     * directly and the image has no accessor to route that read through. +0x04
+     */
     std::vector<Rnd::Button *> mButtons;
 
 public:

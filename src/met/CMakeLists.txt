@@ -31,6 +31,7 @@ set(RESONANCE_MET_SRCS
     metmemcardtypescreen.cpp
     metmemdetectscreen.cpp
     metmemdetectstartup.cpp
+    metmsgscreen.cpp
     metmultisaveremixscreen.cpp
     metpersonadata.cpp
     metpersonasaverscreen.cpp

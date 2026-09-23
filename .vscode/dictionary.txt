@@ -157,6 +157,7 @@ daddu
 dashcam
 datarootdir
 dbuild
+dbut
 dcmake
 deci
 deletefileop
@@ -487,6 +488,7 @@ metmemcardloadscreen
 metmemcardtypescreen
 metmemdetectscreen
 metmemdetectstartup
+metmsgscreen
 metmultisaveremixscreen
 metpersonadata
 metpersonasaverscreen
