@@ -207,7 +207,8 @@ void Synth::SetChannelVolume(unsigned char nVolume) {
     }
 }
 
-// 0x0013a360, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x0013a360
 inline void Synth::OnStdMidi(StdMidiMsg *pMsg) {
     SendMidi(pMsg->mUnknown08, pMsg->mUnknown09, pMsg->mUnknown0a);
 }

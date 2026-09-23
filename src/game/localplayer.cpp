@@ -268,14 +268,16 @@ int LocalPlayer::Slot20(int value) {
     return 0;
 }
 
-// 0x00122a20, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x00122a20
 inline void LocalPlayer::OnAxisYPow(AxisYPowMsg *pMsg) {
     if (pMsg->mPlayer == this && mCollection != nullptr) {
         mCollection->SelectRelative(pMsg->mValue);
     }
 }
 
-// 0x00122ae0, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x00122ae0
 inline void LocalPlayer::OnLoopTool(LoopToolMsg *pMsg) {
     if (pMsg->mPlayer == this) {
         const Mid::MBT position = pMsg->mPosition;
@@ -283,7 +285,8 @@ inline void LocalPlayer::OnLoopTool(LoopToolMsg *pMsg) {
     }
 }
 
-// 0x00122b38, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x00122b38
 inline void LocalPlayer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     if (pMsg->mPlayer != this) {
         return;
@@ -308,7 +311,8 @@ inline void LocalPlayer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     AwardCapture(pMsg);
 }
 
-// 0x00122c20, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x00122c20
 inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     if (pMsg->mPlayer != this || pMsg->mTried == 0) {
         return;
@@ -321,14 +325,16 @@ inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     }
 }
 
-// 0x001229d8, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x001229d8
 inline void LocalPlayer::OnButtonPow(ButtonPowMsg *pMsg) {
     if (pMsg->mPlayer == this && mPlacer != nullptr) {
         mPlacer->OnUnknownSlot8();
     }
 }
 
-// 0x00122a68, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x00122a68
 inline void LocalPlayer::OnCaughtPowerbar(CaughtPowerbarMsg *pMsg) {
     if (pMsg->mPlayer != this) {
         return;

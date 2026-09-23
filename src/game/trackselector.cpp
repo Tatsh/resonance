@@ -140,7 +140,8 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
     return 1;
 }
 
-// 0x0013f5a0, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x0013f5a0
 inline void TrackSelector::OnRotLeft(RotLeftMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->HasInputSlot()) {
@@ -148,7 +149,8 @@ inline void TrackSelector::OnRotLeft(RotLeftMsg *pMsg) {
     }
 }
 
-// 0x0013f608, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x0013f608
 inline void TrackSelector::OnRotRight(RotRightMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->HasInputSlot()) {
@@ -156,7 +158,8 @@ inline void TrackSelector::OnRotRight(RotRightMsg *pMsg) {
     }
 }
 
-// 0x0013f670, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x0013f670
 inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->HasInputSlot()) {
@@ -164,7 +167,8 @@ inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     }
 }
 
-// 0x0013f6d8, the out-of-line copy.
+// The address below is the out-of-line copy.
+// 0x0013f6d8
 inline void TrackSelector::OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     RebindLightColumn(pPlayer, pPlayer->Slot4(), pMsg->mUnknown04, pMsg->mPosition.mTick);

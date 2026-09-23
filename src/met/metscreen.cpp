@@ -301,6 +301,7 @@ int MetScreen::PollContainerLoad() {
     return 1;
 }
 
+// 0x0038bd60
 void MetScreen::ResolveAnimationViews() {
     {
         HxStr name(FormatString(kEnterAnimationFormat,
