@@ -103,10 +103,10 @@ public:
      *
      * Slot 30.
      *
-     * @param pObject The object whose alternation finished, which is not read.
+     * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x00273f28
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Bring up the next screen once this one has exited.

@@ -101,10 +101,10 @@ public:
      *
      * Slot 30. The help screen is exited only when a button other than the first is selected.
      *
-     * @param pObject The object whose alternation finished, which is not read.
+     * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x00362fa0
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Move on once the screen has exited.

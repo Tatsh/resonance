@@ -279,7 +279,7 @@ void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x00362fa0
-void MetRemixTypeScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Object *pObject) {
+void MetRemixTypeScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
     mUnknown18 = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));

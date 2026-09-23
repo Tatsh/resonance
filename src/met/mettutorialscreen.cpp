@@ -172,7 +172,7 @@ void MetTutorialScreen::PlayCycleLeftSound(int) {
 void MetTutorialScreen::PlayCycleRightSound(int) {
 }
 
-void MetTutorialScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetTutorialScreen::OnUnknownSlot30(Rnd::Button *) {
     mUnknown18 = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));

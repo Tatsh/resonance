@@ -179,10 +179,10 @@ public:
      *
      * Slot 30.
      *
-     * @param pObject The object slot 29 finished with, which the body does not read.
+     * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x00272560
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Resolve the base views, list every part template on its page, and resolve the screen's

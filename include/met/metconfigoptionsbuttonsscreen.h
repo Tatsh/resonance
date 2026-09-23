@@ -103,10 +103,10 @@ public:
      * Every button records 2 in MetScreen::mUnknown18 and exits the right gizmo and title
      * screens. The memory, credits, and disc buttons also exit the help screen.
      *
-     * @param pObject The button that finished alternating.
+     * @param pButton The button that finished alternating.
      * @ghidraAddress 0x00207fc0
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Push the screen the selected button opens.

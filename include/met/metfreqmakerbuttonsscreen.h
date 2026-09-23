@@ -151,10 +151,10 @@ public:
      * Slot 30. The inventory becomes the active panel, every button is disabled, and the chosen
      * button stays in its pressed state.
      *
-     * @param pObject The object whose alternation finished, which is not read.
+     * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x00258f40
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Show the page and directions of the selected button.

@@ -291,7 +291,7 @@ void MetStageFinishScreen::OnUnknownSlot26(float flTime) {
     }
 }
 
-void MetStageFinishScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetStageFinishScreen::OnUnknownSlot30(Rnd::Button *) {
     BeginExit();
 }
 

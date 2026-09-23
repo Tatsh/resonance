@@ -15,6 +15,7 @@
 #include "os/zone.h"
 #include "rnd/animatable.h"
 #include "rnd/asyncloader.h"
+#include "rnd/button.h"
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
 #include "rnd/object.h"
@@ -39,6 +40,11 @@ static const char *const kCycleLeftSound = "SND_MET_CYCLE_L";
 static const char *const kCycleRightSound = "SND_MET_CYCLE_R";
 static const char *const kHighSound = "SND_MET_HIGH";
 static const char *const kErrorSound = "SND_MET_ERROR";
+
+// The two button states the repeating alternation switches between, and the steps in one cycle.
+constexpr int kRestState = 1;
+constexpr int kAlternateState = 2;
+constexpr int kStepsPerCycle = 2;
 
 // What RndAsyncLoader::Poll() reports once a load is finished, which PollContainerLoads() also
 // records in MetContainerLoad::mUnknown04.
@@ -297,7 +303,44 @@ void MetScreen::OnUnknownSlot26([[maybe_unused]] float flTime) {
 void MetScreen::UpdateIdleAnimation([[maybe_unused]] float flTime) {
 }
 
-void MetScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Object *pObject) {
+// 0x00390498
+void MetScreen::StartRepeatingSound(float flStartTime,
+                                    float flInterval,
+                                    Rnd::Button *pButton,
+                                    int nCycles) {
+    if (pButton == nullptr) {
+        return;
+    }
+    mUnknown64 = flStartTime;
+    mUnknown70 = nCycles * kStepsPerCycle;
+    mUnknown74 = flInterval;
+    mUnknown6c = 0;
+    mUnknown68 = pButton;
+    pButton->SetState(kAlternateState);
+}
+
+// 0x003904e0
+void MetScreen::UpdateRepeatingSound(float flTime) {
+    if (mUnknown64 == 0.0f) {
+        return;
+    }
+    if (!((mUnknown64 + mUnknown74) < flTime)) {
+        return;
+    }
+    ++mUnknown6c;
+    mUnknown68->SetState((mUnknown6c & 1) != 0 ? kRestState : kAlternateState);
+    if (mUnknown6c < mUnknown70) {
+        mUnknown64 = flTime + mUnknown74;
+        return;
+    }
+    mUnknown68->SetState(kRestState);
+    OnUnknownSlot30(mUnknown68);
+    mUnknown68 = nullptr;
+    mUnknown64 = 0.0f;
+    mUnknown6c = 0;
+}
+
+void MetScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
 }
 
 void MetScreen::OnUnknownSlot33() {

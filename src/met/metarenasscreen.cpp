@@ -324,7 +324,7 @@ void MetArenasScreen::OnUnknownSlot26(float) {
 }
 
 // 0x001f8378
-void MetArenasScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetArenasScreen::OnUnknownSlot30(Rnd::Button *) {
     const int nSelected = mUnknown8c->mSelected;
     (void)GetArenaList(); // Yes, the binary discards this call's result.
     if (!(nSelected < mUnknown98) && nSelected != mUnknown94) {

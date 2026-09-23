@@ -188,7 +188,7 @@ void MetMainScreen::PlayCycleRightSound(int) {
 }
 
 // 0x002c6c20
-void MetMainScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetMainScreen::OnUnknownSlot30(Rnd::Button *) {
     mUnknown18 = kExitToButtonAction;
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kLeftGizmoSmallScreen));

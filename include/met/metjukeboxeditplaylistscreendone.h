@@ -127,10 +127,10 @@ public:
      * the shuffle choice, and exits the top buttons, help, and title screens. The save button
      * records the save request and exits the top buttons screen.
      *
-     * @param pObject The button that finished alternating, which the body does not read.
+     * @param pButton The button that finished alternating, which the body does not read.
      * @ghidraAddress 0x002321f8
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Select the first button and forget the recorded choice.

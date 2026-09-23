@@ -113,10 +113,10 @@ public:
      *
      * Slot 30. An arrow's alternation is passed over.
      *
-     * @param pObject The object whose alternation finished.
+     * @param pButton The button whose alternation finished.
      * @ghidraAddress 0x0029ce58
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Bring up the next screen once this one has exited.

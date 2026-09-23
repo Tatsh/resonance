@@ -188,6 +188,7 @@ durgemstrip
 durgemtrails
 eekernel
 effectpowerup
+egsl
 egsw
 egwb
 elif
@@ -542,6 +543,8 @@ metscreen
 metscreenmultisoundbank
 metscreens
 metsoloendremixscreen
+metsololosescreen
+metsolostatsscreen
 metsolowinscreen
 metsonglists
 metsonyscreen

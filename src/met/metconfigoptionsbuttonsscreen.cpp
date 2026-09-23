@@ -153,8 +153,8 @@ void MetConfigOptionsButtonsScreen::EnterAndShow() {
 }
 
 // 0x00207fc0
-void MetConfigOptionsButtonsScreen::OnUnknownSlot30(Rnd::Object *pObject) {
-    HxStr name(pObject->mName);
+void MetConfigOptionsButtonsScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+    HxStr name(pButton->mName);
     if (name == kControllerButton || name == kMemoryButton || name == kGameButton ||
         name == kCreditsButton || name == kDiscButton) {
         mUnknown18 = kExitToButton;

@@ -191,8 +191,8 @@ void MetFreqCreateScreen::PlayCycleRightSound(int nSelector) {
 }
 
 // 0x0029ce58
-void MetFreqCreateScreen::OnUnknownSlot30(Rnd::Object *pObject) {
-    if (pObject == mLeftArrow || pObject == mRightArrow) {
+void MetFreqCreateScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+    if (pButton == mLeftArrow || pButton == mRightArrow) {
         return;
     }
     ExitScreenByName(HxStr(kLeftGizmoScreen));

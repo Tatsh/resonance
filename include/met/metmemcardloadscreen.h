@@ -111,10 +111,10 @@ public:
      *
      * Slot 30. The selection wraps at both ends.
      *
-     * @param pObject The arrow that finished alternating.
+     * @param pButton The arrow that finished alternating.
      * @ghidraAddress 0x002ccfb8
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Show the help text and select the `mc_opt` preset once the enter animation has finished.

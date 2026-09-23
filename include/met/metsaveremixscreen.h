@@ -263,10 +263,10 @@ public:
      * `MetHelpScreen` and `MetScreenTitleScreen`, and begins the exit. MetScreen slot 29 passes the
      * object it finished alternating, and this body does not read it.
      *
-     * @param pObject The object slot 29 finished with, which the body does not read.
+     * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x0037c110
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Act on the button the user chose once the exit animation has finished. Slot 36.

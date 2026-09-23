@@ -151,7 +151,7 @@ void MetGameSkillScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00273f28
-void MetGameSkillScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetGameSkillScreen::OnUnknownSlot30(Rnd::Button *) {
     mUnknown18 = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));

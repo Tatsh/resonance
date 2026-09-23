@@ -125,10 +125,10 @@ public:
      * screen. Any other object is the button the select command alternated, and the departure runs
      * with MetScreen::mUnknown18 at 2 so that OnUnknownSlot36() acts on the button.
      *
-     * @param pObject The object slot 29 finished alternating.
+     * @param pButton The button slot 29 finished alternating.
      * @ghidraAddress 0x00292c60
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Act on the departure the exit animation has just finished.

@@ -4,6 +4,12 @@
 #include "met/metscreen.h"
 #include "met/texturepairrecord.h"
 
+namespace Rnd {
+class Mat;
+class Tex;
+class Text;
+} // namespace Rnd
+
 /**
  * End-of-remix screen for a solo session.
  *
@@ -55,12 +61,23 @@ public:
     virtual ~MetSoloEndRemixScreen();
 
     /**
-     * Show the screen and start its enter animation. Slot 5.
+     * Allocate and construct the screen.
      *
-     * The body is not written. It runs for roughly 0x2c0 instructions, resolving the song title and
-     * the score fields of the finished session and writing them into the container's Rnd::Text
-     * objects, and it reads the two TexturePairRecord members. The routines it drives belong to the
-     * game-session and data-array layers and none of them is identified.
+     * The 0x11c-byte allocation is billed to the tag `MsgSink`.
+     *
+     * @param pRenderer The front-end renderer this screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x00399630
+     */
+    static MetSoloEndRemixScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Show the screen, or first save the global settings when the front end asks for it. Slot 5.
+     *
+     * When MetFrontEndState's `+0x0c` and `+0x10` flags are both 1, `+0x10` is cleared,
+     * MetGlobalSettingsSaverScreen::StartSave() runs with this screen as the one to return to, and
+     * mUnknown50 is cleared. Otherwise ShowResults() fills and shows the screen.
      *
      * @ghidraAddress 0x00394e10
      */
@@ -77,15 +94,10 @@ public:
     virtual void OnUnknownSlot7();
 
     /**
-     * Advance both texture pairs and hand each one's current texture to its target. Slot 26.
+     * Advance both texture pairs and show each one's current texture. Slot 26.
      *
-     * The body is not written. Each of the two records is advanced through the
-     * TexturePairRecord method at `0x00249850` and then read through the one at `0x00249808`, and
-     * the texture that read returns is handed to the routine at `0x004dd0a0` along with the field
-     * at `+0x1c` of the object the screen stores at `+0xb0` for the first record and at `+0xb4` for
-     * the second. Neither TexturePairRecord method is declared, `0x004dd0a0` sits in the
-     * Rnd::MatAnim region and is not identified, and the class of the two stored objects is not
-     * recovered. The float argument the slot receives is not read.
+     * The song logo pair feeds the first stage of mLogoMat and the song label pair the first stage
+     * of mPhotoMat. The float argument the slot receives is not read.
      *
      * @param flTime The current renderer time, which the body does not read.
      * @ghidraAddress 0x00399748
@@ -106,9 +118,10 @@ public:
     /**
      * Resolve the container objects this screen drives. Slot 38.
      *
-     * The body is not written. It runs the MetScreen slot 38 body first and then resolves several
-     * container objects by name through Rnd::Manager::Find(), narrowing each with dynamic_cast, and
-     * fills the unrecovered span at `+0x90`.
+     * Runs the MetScreen slot 38 body first. It then labels the remix panel text from configuration
+     * code 0x258 without storing it, and resolves the six text fields, the three materials, and the
+     * first persona burn texture into the members at `+0x90` through `+0xb4`. Only the panel text
+     * is used without a null test.
      *
      * @ghidraAddress 0x00394728
      */
@@ -148,18 +161,31 @@ public:
 
 private:
     // 0x00395a20
-    // Hands the session result to the renderer and then returns to the title screen.
-    // Slots 2 and 36 are its two callers. The body is not written: it runs the MetRenderer routine
-    // at 0x0036a9e0 with a second argument of zero and then the two empty MetRenderer routines at
-    // 0x00390088 and 0x00390090, none of which is identified, and only then pushes
-    // `MetHelpScreen`, `MetScreenTitleScreen`, and `MetRemixTypeScreen` and activates
-    // `MetRemixTypeScreen` as the panel.
+    // Resolves the arena view, runs the renderer's two empty hooks, pushes `MetHelpScreen`,
+    // `MetScreenTitleScreen`, and `MetRemixTypeScreen`, and activates `MetRemixTypeScreen` as the
+    // panel. Slots 2 and 36 are its two callers.
     void ReturnToTitle();
 
-    // +0x90 through +0xb7 are not recovered. Two of the words in the span are objects that slot 26
-    // reaches through, at +0xb0 for the first texture pair and +0xb4 for the second, and neither
-    // class is identified. The constructor writes none of the span.
-    unsigned char mUnknown90[0x28]; // +0x90
+    // 0x00395058
+    // Loads both texture pairs for the session's level and fills the song, date, and username
+    // fields from configuration codes 0x320 through 0x327, falling back to the short title when the
+    // full one exceeds the title's wrap width. It then shows the persona's burn texture on the face
+    // material's second stage, sets the title-screen caption, pushes `MetHelpScreen`, opens the
+    // save screen for the first persona's appearance on the first card slot, and runs
+    // MetScreen::EnterAndShow(). EnterAndShow() is its one caller, and the title is inferred.
+    void ShowResults();
+
+    // ResolveContainerViews() fills +0x90 through +0xb4, and the constructor writes none of them.
+    Rnd::Text *mBpmText;      // +0x90 "ers_bpm.txt"
+    Rnd::Text *mGenreText;    // +0x94 "ers_genre.txt"
+    Rnd::Text *mTitleText;    // +0x98 "ers_title.txt"
+    Rnd::Text *mArtistText;   // +0x9c "ers_artist.txt"
+    Rnd::Text *mDateText;     // +0xa0 "ers_date.txt"
+    Rnd::Text *mFreqNameText; // +0xa4 "ers_freqname_remix.txt"
+    Rnd::Mat *mFaceMat;       // +0xa8 "ers_face.mat"
+    Rnd::Tex *mBurnTex;       // +0xac The first persona burn texture.
+    Rnd::Mat *mLogoMat;       // +0xb0 "ers_logo.mat"
+    Rnd::Mat *mPhotoMat;      // +0xb4 "ers_photo.mat"
     // Set once the departure has been requested. Slot 3 sets it, slot 4 stores the negation of its
     // argument in it, and slots 2 and 36 branch on it. The constructor never writes it, so a screen
     // whose slot 36 runs before either setter reads an indeterminate value.

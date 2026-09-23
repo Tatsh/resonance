@@ -148,10 +148,10 @@ public:
      * `MetScreenTitleScreen`, and starts the exit animation. Any other index activates the panel
      * named `MetArenasScreen`.
      *
-     * @param pObject The object slot 29 finished with, which the body does not read.
+     * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x001f8378
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Post the first prompt. Slot 33.

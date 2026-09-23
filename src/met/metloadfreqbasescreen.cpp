@@ -187,8 +187,8 @@ void MetLoadFreqBaseScreen::PlayCycleRightSound(int nSelector) {
     }
 }
 
-void MetLoadFreqBaseScreen::OnUnknownSlot30(Rnd::Object *pObject) {
-    if (pObject == mUnknown98 || pObject == mUnknown9c) {
+void MetLoadFreqBaseScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+    if (pButton == mUnknown98 || pButton == mUnknown9c) {
         return;
     }
 

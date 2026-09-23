@@ -277,7 +277,7 @@ void MetFreqMakerDirectionsScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00269f00
-void MetFreqMakerDirectionsScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetFreqMakerDirectionsScreen::OnUnknownSlot30(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 

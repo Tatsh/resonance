@@ -37,16 +37,6 @@ class MetButtonList;
  * Slots 21, 23, and 24 are two-instruction empty bodies at distinct addresses. Each is a genuine
  * override rather than an inherited empty body, because MetScreen's own slot 21, 23, and 24 all
  * play a named sound. The class therefore silences the leave sound and both cycle sounds.
- *
- * One routine in the translation unit is not declared. `0x003b9b98` allocates 0x98 bytes under the
- * tag `MetSoloWinScreen`, runs the constructor, and returns the object, which is what a `new`
- * expression compiles to. It has exactly one caller, the routine at `0x00385180` that creates
- * every front-end screen, and whether the original wrote the expression at that call site or wrote
- * a factory on this class is not settled.
- *
- * OnUnknownSlot36() is the one body that is not written. It needs MetRenderer::ResolveArenaView()
- * and the two empty MetRenderer routines at `0x00390088` and `0x00390090`, which this tree does not
- * declare yet.
  */
 class MetSoloWinScreen : public MetScreen, public MemcardUser {
 public:
@@ -63,6 +53,19 @@ public:
      * @ghidraAddress 0x003b9ce8
      */
     virtual ~MetSoloWinScreen();
+
+    /**
+     * Allocate and construct the screen.
+     *
+     * The 0x98-byte allocation is billed to the tag `MsgSink`. The routine that creates every
+     * front-end screen at `0x00385180` is its one caller.
+     *
+     * @param pRenderer The front-end renderer this screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x003b9b98
+     */
+    static MetSoloWinScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Build the three buttons, title the screen, and push the three companion panels. Slot 5.
@@ -117,10 +120,10 @@ public:
      * MetScreen slot 29 runs the slot once the selection has finished alternating, which is what
      * pairs the button press with the departure. The Rnd::Object the slot receives is not read.
      *
-     * @param pObject The object slot 29 finished with, which the body does not read.
+     * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x003b5f88
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Select the prompt layout with no back button and post the selected button's prompt. Slot 33.
@@ -134,9 +137,10 @@ public:
     /**
      * Commit the session result and go on to whichever screen the selection chose. Slot 36.
      *
-     * The body is not written, for the reason the class documentation records. MetScreen slot 35
-     * runs the slot once the exit animation has finished. Selection 0 continues to
-     * `MetSoloStagesScreen` with the game manager's stage index advanced by one, selection 1
+     * MetScreen slot 35 runs the slot once the exit animation has finished. The renderer first
+     * resolves its arena view and runs its two empty hooks. A pending mDifficultyUnlocked is then
+     * cleared and committed by handing the game manager a copy of its GameParams with the
+     * difficulty raised by one. Selection 0 continues to `MetSoloStagesScreen`, selection 1
      * returns to `MetMainScreen`, and any other selection goes to `MetLoadGameScreen` after
      * recording this screen's own name in MetFrontEndState::mUnknown24. Every path then clears the
      * selection.

@@ -242,7 +242,7 @@ void MetSaveRemixScreen::ResolveContainerViews() {
 }
 
 // 0x0037c110
-void MetSaveRemixScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Object *pObject) {
+void MetSaveRemixScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
     mUnknown18 = kExitToHelp;
     if (mUnknownfc != nullptr) {
         mUnknownfc->OnUnknownSlot3();

@@ -150,10 +150,10 @@ public:
     /**
      * Start this screen's exit animation. Slot 30.
      *
-     * @param pObject The object slot 29 finished with, which the body does not read.
+     * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x003c4390
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Select no button, record the time the first message appears, and clear the panel. Slot 33.

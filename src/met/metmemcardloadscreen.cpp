@@ -252,11 +252,11 @@ void MetMemCardLoadScreen::ShowSelection() {
 }
 
 // 0x002ccfb8
-void MetMemCardLoadScreen::OnUnknownSlot30(Rnd::Object *pObject) {
+void MetMemCardLoadScreen::OnUnknownSlot30(Rnd::Button *pButton) {
     const int nCards = mCards.size();
-    if (pObject == mLeftArrow) {
+    if (pButton == mLeftArrow) {
         mSelected = mSelected - 1 > -1 ? mSelected - 1 : nCards - 1;
-    } else if (pObject == mRightArrow) {
+    } else if (pButton == mRightArrow) {
         mSelected = mSelected + 1 < nCards ? mSelected + 1 : 0;
     }
     ShowSelection();

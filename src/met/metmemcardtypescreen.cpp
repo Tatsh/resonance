@@ -146,7 +146,7 @@ void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x002d2cf0
-void MetMemCardTypeScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetMemCardTypeScreen::OnUnknownSlot30(Rnd::Button *) {
     mUnknown18 = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));

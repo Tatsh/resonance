@@ -481,7 +481,7 @@ void MetFreqMakerButtonsScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00258f40
-void MetFreqMakerButtonsScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetFreqMakerButtonsScreen::OnUnknownSlot30(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kInventoryScreen));
     int nCount = mButtonList->mButtons.size();
     for (int i = 0; i < nCount; ++i) {

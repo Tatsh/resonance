@@ -95,7 +95,7 @@ void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot36() {
 }
 
 // 0x002321f8
-void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30([[maybe_unused]] Rnd::Object *pObject) {
+void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
     switch (mUnknown8c->mSelected) {
     case kButtonRandom:
         if (MetRemixManager::shared()->mPlayList.entries.size() == 0) {

@@ -1,6 +1,10 @@
 #include "met/metsolowinscreen.h"
 
+#include "app/application.h"
+#include "game/gamemanagerimpl.h"
+#include "game/gameparams.h"
 #include "met/metbuttonlist.h"
+#include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
@@ -49,8 +53,20 @@ static const char *const kNoName = "";
 constexpr int kPromptConfigCode = 0x258;
 constexpr int kTitleConfigCode = 0x269;
 
-// Index EnterAndShow() selects, which is the continue button.
+// Index EnterAndShow() selects, which is the continue button, and the exit button after it.
 constexpr int kContinueButtonIndex = 0;
+constexpr int kExitButtonIndex = 1;
+
+// The screens slot 36 goes on to for each selection.
+static const char *const kSoloStagesScreen = "MetSoloStagesScreen";
+static const char *const kMainScreen = "MetMainScreen";
+static const char *const kLoadGameScreen = "MetLoadGameScreen";
+
+// The selection slot 36 leaves behind, which is none.
+constexpr int kNoSelection = -1;
+
+// Slot 36 lets the renderer resolve the arena view rather than skipping it.
+constexpr int kResolveArenaView = 0;
 
 // The selection alternation the select path starts.
 constexpr float kSelectAlternateInterval = 30.0f;
@@ -67,6 +83,42 @@ MetSoloWinScreen::MetSoloWinScreen(MetRenderer *pRenderer, int nPriority)
 // 0x003b9ce8
 MetSoloWinScreen::~MetSoloWinScreen() {
     delete mUnknown90;
+}
+
+// 0x003b9b98
+MetSoloWinScreen *MetSoloWinScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetSoloWinScreen(pRenderer, nPriority);
+}
+
+// 0x003b6188
+void MetSoloWinScreen::OnUnknownSlot36() {
+    mUnknown10->ResolveArenaView(kResolveArenaView);
+    mUnknown10->OnUnknown00390088();
+    mUnknown10->OnUnknown00390090();
+    if (mDifficultyUnlocked != 0) {
+        mDifficultyUnlocked = 0;
+        GameParams params(*Application::shared()->GetGameManager()->GetParams());
+        ++params.mDifficulty;
+        Application::shared()->GetGameManager()->SetParams(params);
+    }
+    switch (mUnknown90->mSelected) {
+    case kContinueButtonIndex:
+        PushNamedScreen(HxStr(kSoloStagesScreen));
+        ActivateNamedPanel(HxStr(kSoloStagesScreen));
+        break;
+
+    case kExitButtonIndex:
+        PushNamedScreen(HxStr(kMainScreen));
+        ActivateNamedPanel(HxStr(kMainScreen));
+        break;
+
+    default:
+        MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+        PushNamedScreen(HxStr(kLoadGameScreen));
+        ActivateNamedPanel(HxStr(kLoadGameScreen));
+        break;
+    }
+    mUnknown90->SetSelected(kNoSelection);
 }
 
 // 0x003b5968
@@ -143,7 +195,7 @@ void MetSoloWinScreen::PlayCycleRightSound(int) {
 }
 
 // 0x003b5f88
-void MetSoloWinScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetSoloWinScreen::OnUnknownSlot30(Rnd::Button *) {
     ExitScreenByName(HxStr(kSoloStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));

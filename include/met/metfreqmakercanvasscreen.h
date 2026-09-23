@@ -119,10 +119,10 @@ public:
      *
      * Slot 30. The body is empty.
      *
-     * @param pObject The object slot 29 finished with.
+     * @param pButton The button slot 29 finished with.
      * @ghidraAddress 0x002620d0
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Unhang the avatar view from `fm_canvas.view`.

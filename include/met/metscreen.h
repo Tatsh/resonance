@@ -12,6 +12,10 @@
 #include "rnd/object.h"
 #include "rnd/view.h"
 
+namespace Rnd {
+class Button;
+} // namespace Rnd
+
 /**
  * One shared container load, interned under the container name.
  *
@@ -703,33 +707,30 @@ public:
     virtual void UpdateIdleAnimation(float flTime);
 
     /**
-     * Start alternating one object between two material states.
+     * Start alternating one button between its states 2 and 1.
      *
-     * Slot 28. A null object records nothing and starts nothing. The step count is doubled,
-     * because one full cycle of the alternation is two steps.
-     *
-     * The body is not written. The alternation runs through the instance method at `0x00534a48`
-     * on the recorded object, and the class that method belongs to cannot be titled. It reads a
-     * current state at `+0x1c`, a `Rnd::Mesh` at `+0x20`, a drawable at `+0x24`, and two
-     * state-indexed arrays at `+0x28` and `+0x34`, and neither RTTI, an embedded path, nor a
-     * method name for it survives anywhere in the image.
+     * Slot 28. A null button records nothing and starts nothing. The start time, the interval, the
+     * button, and twice the cycle count are recorded, because one full cycle of the alternation is
+     * two steps, and the button is set to state 2 through Rnd::Button::SetState().
      *
      * @param flStartTime The frame position the first step runs at.
      * @param flInterval The interval between steps.
-     * @param pObject The object whose material state alternates.
+     * @param pButton The button whose state alternates.
      * @param nCycles The number of full cycles to run.
      * @ghidraAddress 0x00390498
      */
     virtual void
-    StartRepeatingSound(float flStartTime, float flInterval, Rnd::Object *pObject, int nCycles);
+    StartRepeatingSound(float flStartTime, float flInterval, Rnd::Button *pButton, int nCycles);
 
     /**
      * Advance the alternation that StartRepeatingSound() started.
      *
-     * Slot 29. One step runs per elapsed interval. The last step restores state 1, hands the
-     * object to slot 30, and clears the three fields that drive the alternation.
-     *
-     * The body is not written, for the reason recorded on StartRepeatingSound().
+     * Slot 29. Nothing runs while no alternation is recorded, and a step runs only once the frame
+     * passes the recorded time plus one interval. Each step alternates the button between states 1
+     * and 2, the odd steps selecting 1. Before the recorded count is reached, the recorded time
+     * becomes the current frame plus one interval, so steps after the first run two intervals
+     * apart. The last step restores state 1, hands the button to slot 30, and clears the three
+     * fields that drive the alternation.
      *
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x003904e0
@@ -739,15 +740,14 @@ public:
     /**
      * Unrecovered. Slot 30.
      *
-     * The body is empty. Slot 29 passes the object it finished alternating, and
+     * The body is empty. Slot 29 passes the button it finished alternating, and
      * MetConfigOptionsButtonsScreen overrides the slot at `0x00207fc0` with a body that copies the
-     * `HxStr` at `+0x04` of the same argument. The argument is therefore one pointer, and its type
-     * is recorded as the class that slot 29 passes.
+     * `HxStr` at `+0x04` of the same argument.
      *
-     * @param pObject The object slot 29 finished with.
+     * @param pButton The button slot 29 finished with.
      * @ghidraAddress 0x0038fe48
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Rewind the enter animation and record the time it starts at.
@@ -959,14 +959,12 @@ protected:
     int mUnknown60; // +0x60, starts at 1
 
 private:
-    float mUnknown64; // +0x64
-    // Object whose state slots 28 and 29 alternate through 0x00534a48. The exact class is not
-    // identified, and Rnd::Object is the base that the destructor of MetButtonList proves for the
-    // same class by releasing a vector of them through 0x00520be0.
-    Rnd::Object *mUnknown68; // +0x68
-    int mUnknown6c;          // +0x6c, not written by the constructor
-    int mUnknown70;          // +0x70, not written by the constructor
-    float mUnknown74;        // +0x74, not written by the constructor
+    float mUnknown64; // +0x64, the time of the next alternation step, or zero when none is running
+    // The button whose state slots 28 and 29 alternate through Rnd::Button::SetState().
+    Rnd::Button *mUnknown68; // +0x68
+    int mUnknown6c;          // +0x6c, the steps run, not written by the constructor
+    int mUnknown70;          // +0x70, the steps to run, not written by the constructor
+    float mUnknown74;        // +0x74, the step interval, not written by the constructor
     int mUnknown78;          // +0x78
     int mUnknown7c;          // +0x7c
     HxStr mUnknown80;        // +0x80, the container name without its suffix

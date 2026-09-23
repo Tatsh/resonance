@@ -227,12 +227,12 @@ public:
      *
      * @param flStartTime The time the first step runs at.
      * @param flInterval The interval between steps.
-     * @param pObject The object whose material state alternates.
+     * @param pButton The button whose state alternates.
      * @param nCycles The number of full cycles to run.
      * @ghidraAddress 0x0028c5e0
      */
     virtual void
-    StartRepeatingSound(float flStartTime, float flInterval, Rnd::Object *pObject, int nCycles);
+    StartRepeatingSound(float flStartTime, float flInterval, Rnd::Button *pButton, int nCycles);
 
     /**
      * Commit the pending key command.
@@ -244,10 +244,10 @@ public:
      *
      * The body is not written, for the reason recorded in the class documentation.
      *
-     * @param pObject The object slot 29 finished with, ignored.
+     * @param pButton The button slot 29 finished with, ignored.
      * @ghidraAddress 0x00283968
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Report the entered text and depart.

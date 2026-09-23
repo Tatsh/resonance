@@ -98,10 +98,10 @@ public:
      * MetScreen slot 29 runs the slot once the selection has finished alternating. The companion
      * screens are `MetLeftGizmoScreen`, `MetScreenTitleScreen`, and `MetHelpScreen`.
      *
-     * @param pObject The object slot 29 finished with, which the body does not read.
+     * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x003c84d8
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Act on the exit recorded in MetScreen::mUnknown18 once the exit animation has finished.

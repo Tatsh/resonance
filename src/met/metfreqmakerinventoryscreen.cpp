@@ -365,7 +365,7 @@ void MetFreqMakerInventoryScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00272560
-void MetFreqMakerInventoryScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetFreqMakerInventoryScreen::OnUnknownSlot30(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 

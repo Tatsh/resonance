@@ -101,10 +101,10 @@ public:
      *
      * Slot 30.
      *
-     * @param pObject The object whose alternation finished, which is not read.
+     * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x002c6c20
      */
-    virtual void OnUnknownSlot30(Rnd::Object *pObject);
+    virtual void OnUnknownSlot30(Rnd::Button *pButton);
 
     /**
      * Select the starting button, return the game to no mode, and post the help text.

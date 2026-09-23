@@ -97,7 +97,7 @@ void MetFreqMakerCanvasScreen::PlayCycleRightSound(int) {
 }
 
 // 0x002620d0
-void MetFreqMakerCanvasScreen::OnUnknownSlot30(Rnd::Object *) {
+void MetFreqMakerCanvasScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x0025e898
