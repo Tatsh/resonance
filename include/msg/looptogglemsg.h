@@ -18,6 +18,27 @@ class Player;
 class LoopToggleMsg : public Message {
 public:
     /**
+     * Construct a message with every payload word indeterminate.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    LoopToggleMsg() {
+    }
+
+    /**
+     * Report that a player started or stopped looping.
+     *
+     * Inline, with no address of its own. LocalPlayer's loop handler expands it on its stack at
+     * `0x0011e7a4`.
+     *
+     * @param nOn Non-zero when looping starts.
+     * @param pPlayer The player who toggled looping.
+     */
+    LoopToggleMsg(int nOn, Player *pPlayer) : mOn(nOn), mPlayer(pPlayer) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 313.

@@ -50,7 +50,7 @@ public:
      * @param pPlayer The capturing player.
      * @param nScore The score the capture earned.
      * @param nJuice The value SingleCatcher reads from its TrackData.
-     * @param nUnknown24 The flag at `+0x24`.
+     * @param bExtendsStreak Non-zero when the capture extends the streak.
      */
     PhraseCapturedMsg(int nFirstBar,
                       int nEndBar,
@@ -60,10 +60,10 @@ public:
                       Player *pPlayer,
                       int nScore,
                       int nJuice,
-                      int nUnknown24)
+                      int bExtendsStreak)
         : mFirstBar(nFirstBar), mEndBar(nEndBar), mRunFirstBar(nRunFirstBar),
           mRunEndBar(nRunEndBar), mTrack(nTrack), mPlayer(pPlayer), mScore(nScore), mJuice(nJuice),
-          mUnknown24(nUnknown24) {
+          mExtendsStreak(bExtendsStreak) {
     }
 
     /**
@@ -118,18 +118,33 @@ public:
     int mFirstBar;
 
 private:
-    int mEndBar;      // +0x08, written after `--` by Print()
-    int mRunFirstBar; // +0x0c, the first bar of the caught run
-    int mRunEndBar;   // +0x10, one past the last bar of the run
+    int mEndBar; // +0x08, written after `--` by Print()
 
 public:
-    int mTrack;      /*!< The track the phrase lies on. +0x14 */
-    Player *mPlayer; /*!< The capturing player. +0x18 */
-    int mScore;      /*!< The score the capture earned. +0x1c */
+    // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011ee88` and
+    // `0x0011ef0c`, and the image has no accessor.
+    int mRunFirstBar; /*!< The first bar of the caught run. +0x0c */
+    int mRunEndBar;   /*!< One past the last bar of the run. +0x10 */
+    int mTrack;       /*!< The track the phrase lies on. +0x14 */
+    Player *mPlayer;  /*!< The capturing player. +0x18 */
+    int mScore;       /*!< The score the capture earned. +0x1c */
 
-private:
-    int mJuice;     // +0x20, a value SingleCatcher reads from its TrackData
-    int mUnknown24; // +0x24, a flag, the inverse of SingleCatcher::Slot9's argument
+    /**
+     * The juice the capture earned, a value SingleCatcher reads from its TrackData.
+     *
+     * Public because Player::AwardCapture() reads it directly at `0x001331ec`, and the image has
+     * no accessor. +0x20
+     */
+    int mJuice;
+
+    /**
+     * Non-zero when the capture extends the player's streak of consecutive captures.
+     *
+     * The inverse of SingleCatcher::Slot9's argument. Public because LocalPlayer::HandleMessage()
+     * reads it directly at `0x0011ee9c` and lengthens the streak only when it is set, and the
+     * image has no accessor. +0x24
+     */
+    int mExtendsStreak;
 };
 
 /**

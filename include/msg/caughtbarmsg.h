@@ -74,9 +74,10 @@ public:
      */
     virtual const char *Name();
 
-private:
-    Player *mPlayer; // +0x04
-    int mBar;        // +0x08
+    // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011efa0` and
+    // `0x0011efac`, and the image has no accessor.
+    Player *mPlayer; /*!< The catching player. +0x04 */
+    int mBar;        /*!< The caught bar. +0x08 */
 };
 
 /**

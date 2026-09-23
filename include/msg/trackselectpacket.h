@@ -28,6 +28,30 @@ class Player;
 class TrackSelectPacket : public ToAllOtherGameSystemsPacket {
 public:
     /**
+     * Construct a packet with the position at kMBTInfinity and no player.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    TrackSelectPacket() {
+    }
+
+    /**
+     * Report a player's track selection to the other game systems.
+     *
+     * Inline, with no address of its own. LocalPlayer's track-select handler expands it on its
+     * stack at `0x0011e9f8`.
+     *
+     * @param position The song position of the selection.
+     * @param pPlayer The selecting player.
+     * @param nTrack The selected track.
+     * @param nPlace The player's place on the track.
+     */
+    TrackSelectPacket(Mid::MBT position, Player *pPlayer, int nTrack, int nPlace)
+        : mPosition(position), mPlayer(pPlayer), mTrack(nTrack), mPlace(nPlace) {
+    }
+
+    /**
      * Produce a default-constructed packet on the heap.
      *
      * The registry the translation unit at `0x003ed2e0` builds stores this address against

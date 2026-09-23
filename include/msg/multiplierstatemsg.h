@@ -21,6 +21,29 @@ class Player;
 class MultiplierStateMsg : public Message {
 public:
     /**
+     * Construct a message with every payload word indeterminate.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    MultiplierStateMsg() {
+    }
+
+    /**
+     * Report a player's multiplier.
+     *
+     * Inline, with no address of its own. LocalPlayer expands it on its stack at `0x0011eb98` and
+     * `0x0011ec90`.
+     *
+     * @param pPlayer The player whose multiplier changed.
+     * @param nMultiplier The base multiplier.
+     * @param nBonus The multiplier added on top of the base, or zero.
+     */
+    MultiplierStateMsg(Player *pPlayer, int nMultiplier, int nBonus)
+        : mPlayer(pPlayer), mMultiplier(nMultiplier), mBonus(nBonus) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 117.

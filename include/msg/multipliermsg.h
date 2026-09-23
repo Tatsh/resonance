@@ -51,7 +51,17 @@ public:
 
 private:
     int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+
+public:
+    /**
+     * The bar the multiplier bonus starts at.
+     *
+     * Public because LocalPlayer's multiplier handler at `0x0011eb44` reads it directly and ends
+     * the bonus eight bars later, and the image has no accessor. +0x08
+     */
+    int mBar;
+
+private:
     int mUnknown0c; // +0x0c
 };
 

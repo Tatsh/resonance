@@ -91,8 +91,15 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
+    /**
+     * The player the controller belongs to.
+     *
+     * Public because LocalPlayer::HandleMessage() reads it directly at `0x0011f004`, and the image
+     * has no accessor. +0x04
+     */
+    Player *mPlayer;
+
 private:
-    Player *mPlayer;    // +0x04
     int mUnknown08;     // +0x08
     Mid::MBT mPosition; // +0x0c
 };

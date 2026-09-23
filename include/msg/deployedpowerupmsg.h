@@ -23,6 +23,38 @@ class Player;
 class DeployedPowerupMsg : public Message {
 public:
     /**
+     * Construct a message with every payload word indeterminate.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    DeployedPowerupMsg() {
+    }
+
+    /**
+     * Report a deployed powerup.
+     *
+     * Inline, with no address of its own. LocalPlayer's multiplier handler at `0x0011eb48`
+     * expands it on its stack. The six arguments are the six members in declaration order.
+     *
+     * @param kind The deployed powerup.
+     * @param pPlayer The deploying player.
+     * @param pTarget The player a bumper strikes.
+     * @param nFirstBar The first bar the powerup covers.
+     * @param nBarCount The number of bars it covers.
+     * @param nTrack The track it acts on.
+     */
+    DeployedPowerupMsg(HudItemKind kind,
+                       Player *pPlayer,
+                       Player *pTarget,
+                       int nFirstBar,
+                       int nBarCount,
+                       int nTrack)
+        : mKind(kind), mPlayer(pPlayer), mTarget(pTarget), mFirstBar(nFirstBar),
+          mBarCount(nBarCount), mTrack(nTrack) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 306.
