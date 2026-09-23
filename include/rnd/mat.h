@@ -538,7 +538,7 @@ Mat *NewMat(const HxStr &name);
  * Build a material through the creator hook.
  *
  * No call site survives in the shipped program. The name is inferred from the Rnd::Button
- * counterpart.
+ * counterpart. The binary also expands this inline at its callers.
  *
  * @param name The object name.
  * @return The new material.

@@ -560,6 +560,7 @@ Object *CreateRegisteredCam(const HxStr &name);
  *
  * The one recovered reference to this routine is its entry in the exception range table at
  * `0x00868e64`, and nothing in the image calls it. The title follows Rnd::NewTextThroughHook().
+ * The binary also expands this inline at its callers.
  *
  * @param name The object name.
  * @return The new camera.
