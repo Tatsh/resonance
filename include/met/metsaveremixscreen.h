@@ -1,9 +1,12 @@
 #pragma once
 
+#include <vector>
+
 #include "met/metsaveremix.h"
 #include "os/hxstr.h"
 
 class MetButtonList;
+class MetRemixSaver;
 
 namespace Rnd {
 class Object;
@@ -57,9 +60,10 @@ class Text;
  *
  * Two of the words in the span the constructor never writes are objects. mUnknownf8 is the
  * Rnd::Text the entered name is drawn into, which slot 38 resolves by name and narrows with a
- * dynamic_cast to Rnd::Text. The word at `+0xfc` is an object with its vptr at offset 0 whose
- * slots 2 and 3 slots 40, 41, and 30 dispatch, and no routine of this class writes it, so its
- * class is not recovered.
+ * dynamic_cast to Rnd::Text. The word at `+0xfc` is the MetRemixSaver subobject of the screen
+ * that asked for the save, which Open() stores through SetSaver(). Both callers of Open() pass
+ * their own subobject at `+140`, where MetMultiSaveRemixScreen and MetSoloEndRemixScreen place
+ * MetRemixSaver.
  */
 class MetSaveRemixScreen : public MetSaveRemix {
 public:
@@ -76,6 +80,71 @@ public:
      * @ghidraAddress 0x00381868
      */
     virtual ~MetSaveRemixScreen();
+
+    /**
+     * Fill the registered save screen with a save request and bring it up over MetLoadGameScreen.
+     *
+     * The screen registered as `MetSaveRemixScreen` receives each argument through the setters
+     * below and the location through a direct assignment to MetSaveRemix::mUnknown94. A non-zero
+     * bClearName assigns the empty string to `+0x104`. MetLoadGameScreen then pushes the save
+     * screen and makes it the active panel. Neither screen lookup is checked for null.
+     * MetMultiSaveRemixScreen's slots 2 and 36 and MetSoloEndRemixScreen's routine at `0x00395058`
+     * call it. The title is inferred.
+     *
+     * @param nUnknownec Stored through SetUnknownec().
+     * @param nPad The controller that owns the save, stored through SetOwnerPad().
+     * @param pSaver The screen to report back to, stored through SetSaver().
+     * @param slot The memory-card location to save to.
+     * @param appearances The players' appearances, stored through SetAppearances().
+     * @param bClearName Non-zero to empty `+0x104` through SetUnknown104().
+     * @ghidraAddress 0x0037a9e0
+     */
+    static void Open(int nUnknownec,
+                     int nPad,
+                     MetRemixSaver *pSaver,
+                     const MemcardConnectState &slot,
+                     const std::vector<FreqAppearance> &appearances,
+                     int bClearName);
+
+    /**
+     * Store the word at `+0xec`.
+     *
+     * @param nUnknownec The value.
+     * @ghidraAddress 0x00381910
+     */
+    void SetUnknownec(int nUnknownec);
+
+    /**
+     * Store the controller that owns the save in MetSaveRemix::mUnknownc8.
+     *
+     * @param nPad The controller index.
+     * @ghidraAddress 0x00381918
+     */
+    void SetOwnerPad(int nPad);
+
+    /**
+     * Store the screen slots 40 and 41 report back to.
+     *
+     * @param pSaver The screen.
+     * @ghidraAddress 0x00381920
+     */
+    void SetSaver(MetRemixSaver *pSaver);
+
+    /**
+     * Copy the players' appearances into MetSaveRemix::mUnknownac.
+     *
+     * @param appearances The appearances.
+     * @ghidraAddress 0x00381928
+     */
+    void SetAppearances(const std::vector<FreqAppearance> &appearances);
+
+    /**
+     * Assign the string at `+0x104`.
+     *
+     * @param text The new text.
+     * @ghidraAddress 0x00381948
+     */
+    void SetUnknown104(const HxStr &text);
 
     /**
      * Show the screen and fill it from the finished session. Slot 5.
@@ -216,8 +285,8 @@ public:
     /**
      * Dispatch slot 2 of the object at `+0xfc` with a zero argument. Slot 40.
      *
-     * A null word at `+0xfc` does nothing. The class of the object is not recovered, so the body is
-     * not written.
+     * A null word at `+0xfc` does nothing. The body is not written, because MetRemixSaver declares
+     * slot 2 without the integer argument this dispatch passes in a1.
      *
      * @ghidraAddress 0x003819f0
      */
@@ -226,8 +295,8 @@ public:
     /**
      * Dispatch slot 2 of the object at `+0xfc` with an argument of one. Slot 41.
      *
-     * The body differs from slot 40's in that one immediate and nothing else. The class of the
-     * object is not recovered, so the body is not written.
+     * The body differs from slot 40's in that one immediate and nothing else, and is not written
+     * for the same reason.
      *
      * @ghidraAddress 0x00381a28
      */
@@ -266,9 +335,9 @@ private:
     unsigned char mUnknownf0[0x8]; // +0xf0
     // The text object the entered name is drawn into. Slot 38 resolves it. +0xf8
     Rnd::Text *mUnknownf8;
-    // Slots 30, 40, and 41 dispatch slots 2 and 3 of the object here, whose vptr sits at its own
-    // offset 0. No routine of this class writes the word and the class is not recovered. +0xfc
-    int mUnknownfc;
+    // The screen that asked for the save, which Open() stores through SetSaver(). Slots 30, 40,
+    // and 41 dispatch its slots 2 and 3. +0xfc
+    MetRemixSaver *mUnknownfc;
     int mUnknown100; // +0x100
     // Default-constructed, and its buffer is what the destructor releases at `+0x108`. +0x104
     HxStr mUnknown104;

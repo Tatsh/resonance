@@ -243,10 +243,17 @@ private:
     // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.
     void BeginSave();
 
-    MemcardConnectState mUnknown94;         // +0x94
-    std::vector<FreqAppearance> mUnknownac; // +0xac
-    HxStr mUnknownb8;                       // +0xb8
-    HxStr mUnknownc0;                       // +0xc0
+protected:
+    // The card location to save to. MetSaveRemixScreen::Open() assigns it directly, which is why
+    // it is protected. +0x94
+    MemcardConnectState mUnknown94;
+    // The players' appearances. MetSaveRemixScreen::SetAppearances() assigns it, which is why it
+    // is protected. +0xac
+    std::vector<FreqAppearance> mUnknownac;
+
+private:
+    HxStr mUnknownb8; // +0xb8
+    HxStr mUnknownc0; // +0xc0
 
 protected:
     // The selector the MetSaveRemixScreen sound overrides compare their argument against, which is

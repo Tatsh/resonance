@@ -1,6 +1,12 @@
 #include "met/metsaveremixscreen.h"
 
+#include <vector>
+
+#include "game/freqappearance.h"
+#include "memcard/memcardconnectstate.h"
 #include "met/metbuttonlist.h"
+#include "met/metremixsaver.h"
+#include "met/metscreen.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
 
@@ -16,8 +22,14 @@ static const char *const kContainerName = "save_remix";
 // The one container object the screen registers.
 static const char *const kSaveObjectName = "remix_save";
 
+// The registry keys Open() looks up.
+static const char *const kSaveRemixScreen = "MetSaveRemixScreen";
+static const char *const kLoadGameScreen = "MetLoadGameScreen";
+static const char *const kEmptyText = "";
+
 } // namespace
 
+// 0x0037ace0
 MetSaveRemixScreen::MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetSaveRemix(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -28,16 +40,66 @@ MetSaveRemixScreen::MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     mUnknowne0 = 0;
 }
 
+// 0x00381868
 MetSaveRemixScreen::~MetSaveRemixScreen() {
     delete mUnknowne8;
 }
 
+// 0x0037a9e0
+void MetSaveRemixScreen::Open(int nUnknownec,
+                              int nPad,
+                              MetRemixSaver *pSaver,
+                              const MemcardConnectState &slot,
+                              const std::vector<FreqAppearance> &appearances,
+                              int bClearName) {
+    MetSaveRemixScreen *pScreen =
+        dynamic_cast<MetSaveRemixScreen *>(MetScreen::FindScreenByName(HxStr(kSaveRemixScreen)));
+    pScreen->SetUnknownec(nUnknownec);
+    pScreen->SetOwnerPad(nPad);
+    pScreen->SetSaver(pSaver);
+    pScreen->SetAppearances(appearances);
+    pScreen->mUnknown94 = slot;
+    if (bClearName != 0) {
+        pScreen->SetUnknown104(HxStr(kEmptyText));
+    }
+    MetScreen *pLoadGame = MetScreen::FindScreenByName(HxStr(kLoadGameScreen));
+    pLoadGame->PushNamedScreen(HxStr(kSaveRemixScreen));
+    pLoadGame->ActivateNamedPanel(HxStr(kSaveRemixScreen));
+}
+
+// 0x00381910
+void MetSaveRemixScreen::SetUnknownec(int nUnknownec) {
+    mUnknownec = nUnknownec;
+}
+
+// 0x00381918
+void MetSaveRemixScreen::SetOwnerPad(int nPad) {
+    mUnknownc8 = nPad;
+}
+
+// 0x00381920
+void MetSaveRemixScreen::SetSaver(MetRemixSaver *pSaver) {
+    mUnknownfc = pSaver;
+}
+
+// 0x00381928
+void MetSaveRemixScreen::SetAppearances(const std::vector<FreqAppearance> &appearances) {
+    mUnknownac = appearances;
+}
+
+// 0x00381948
+void MetSaveRemixScreen::SetUnknown104(const HxStr &text) {
+    mUnknown104 = text;
+}
+
+// 0x00381968
 void MetSaveRemixScreen::PlaySlideSound(int nSelector) {
     if (nSelector == mUnknownc8) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
+// 0x00381990
 void MetSaveRemixScreen::OnUnknownSlot2(const HxStr &text) {
     mUnknownf8->SetText(text); // The binary dereferences the text object with no null check.
     if (mUnknowne0 != 0) {
