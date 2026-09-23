@@ -354,7 +354,7 @@ inline void MetRemixDelScreen::StartDelete() {
         HxStr(kDeleteDialogue), HxStr(kDeleteTitle), text, kNoButtons, buttons, this);
     const MetRemixRecord record((*mUnknownf0)[mUnknownf4->getSelected()]);
     MemcardManager::shared()->mUser = this;
-    MemcardManager::shared()->CreateDeleteRemixTask(mUnknown108.mPortSlot, record.unknown00_);
+    MemcardManager::shared()->CreateDeleteRemixTask(mUnknown108.mPortSlot, record.name);
 }
 
 // 0x0033b280
