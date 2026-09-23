@@ -2,6 +2,7 @@ set(RESONANCE_APP_SRCS
     animrange.cpp
     appactivefilter.cpp
     application.cpp
+    apptunnel.cpp
     attachment.cpp
     cutscene.c
     durgemcurve.cpp
@@ -45,19 +46,29 @@ set(RESONANCE_APP_SRCS
     rendererbase.cpp
     scriptsink.cpp
     task.cpp
+    tnlactivator.cpp
     tnlarms.cpp
+    tnlarrow.cpp
     tnlboundary.cpp
     tnlbumpfx.cpp
     tnlcatcher.cpp
     tnlcripplefx.cpp
     tnlemitter.cpp
     tnlfirefx.cpp
+    tnlgem.cpp
+    tnlgemeffectkind.cpp
+    tnlgemmanager.cpp
+    tnlgemmeshkind.cpp
+    tnlgridmarkers.cpp
     tnllattice.cpp
     tnlmultfx.cpp
     tnlname.cpp
     tnlnowring.cpp
+    tnlpanel.cpp
     tnlpanelfx.cpp
+    tnlpanelfxdelay.cpp
     tnlpendingtrigger.cpp
+    tnlplayer.cpp
     tnlpointer.cpp
     tnlsabretrail.cpp
     tnlseekerfade.cpp

@@ -151,6 +151,18 @@ public:
         return mTransforms;
     }
 
+    /**
+     * Report the mesh every instance draws.
+     *
+     * The out-of-line copy has no callers. TnlGemMeshKind's constructor inlines it.
+     *
+     * @return The mesh, or null.
+     * @ghidraAddress 0x004eba90
+     */
+    Mesh *GetMesh() const {
+        return mMesh;
+    }
+
 protected:
     /**
      * Draw the mesh once per instance.
