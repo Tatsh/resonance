@@ -44,6 +44,7 @@ set(RESONANCE_GAME_SRCS
     harmony.cpp
     idablebase.cpp
     inputcheatdetector.cpp
+    inputcheatdetectorgs.cpp
     inputcheatdetectormet.cpp
     inputmap.cpp
     inputpollerps2.cpp

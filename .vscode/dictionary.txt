@@ -340,6 +340,7 @@ immediates
 ingame
 inittab
 inputcheatdetector
+inputcheatdetectorgs
 inputcheatdetectormet
 inputmap
 inputpollerps2
