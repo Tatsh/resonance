@@ -4,6 +4,7 @@
 #include "mid/mbt.h"
 #include "msg/message.h"
 
+class InvalidateSeekerMsg;
 class PhraseMgr;
 class Player;
 class Quantizer;
@@ -129,6 +130,14 @@ protected:
     virtual void HandleMessage(Message *pMsg);
 
 private:
+    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // 0x001b3a38
+    void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
+
+    // Returns non-zero when nTick differs from mUnknown4c. PostPitchMsg() calls it at 0x001b1fa4.
+    // 0x001b3b88
+    int IsOtherTick(int nTick);
+
     PhraseMgr *mPhraseMgr; // +0x38
     Quantizer *mQuantizer; // +0x3c
     // Copied from the track description's `+0x04`. Matched against an InvalidateSeekerMsg's

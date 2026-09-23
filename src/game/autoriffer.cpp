@@ -269,3 +269,8 @@ void AutoRiffer::OnTrackSelect(TrackSelectMsg *pMsg) {
     }
     mPlayer = pPlayer;
 }
+
+// 0x0019a920
+void AutoRiffer::OnGameOver() {
+    StopRiff(Mid::MBT(0).mTick);
+}

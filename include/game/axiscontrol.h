@@ -8,6 +8,7 @@
 #include "msg/message.h"
 #include "msg/trackselectmsg.h"
 
+class AllNotesOffMsg;
 class Player;
 
 /**
@@ -68,6 +69,11 @@ private:
     // is zero.
     // 0x0019ecf0
     void SendPitchBend(int nTick, int nValue);
+
+    // The out-of-line copy of the AllNotesOffMsg branch HandleMessage() expands inline. A bend in
+    // progress ends with a centred pitch bend at the message's tick.
+    // 0x0019fb40
+    void OnAllNotesOff(AllNotesOffMsg *pMsg);
 
     int mTrack;            // +0x18
     int mChannel;          // +0x1c, the track's channel byte widened to a word

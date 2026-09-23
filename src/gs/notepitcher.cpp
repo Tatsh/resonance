@@ -41,3 +41,15 @@ void NotePitcher::HandleMessage(Message *pMsg) {
         }
     }
 }
+
+// 0x001b3a38
+void NotePitcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
+    if (pMsg->mUnknown08 == mUnknown40) {
+        PostSeekerMsgSecond(pMsg->mUnknown04, 0);
+    }
+}
+
+// 0x001b3b88
+int NotePitcher::IsOtherTick(int nTick) {
+    return mUnknown4c.mTick != nTick;
+}

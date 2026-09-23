@@ -110,6 +110,11 @@ private:
     // 0x00199758
     void PlayRiff(int nTick);
 
+    // The out-of-line copy of the GameOverMsg branch HandleMessage() expands inline. It stops the
+    // riff at position zero and reads nothing from the message.
+    // 0x0019a920
+    void OnGameOver();
+
     // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline.
     // 0x0019a898
     void OnTrackSelect(TrackSelectMsg *pMsg);

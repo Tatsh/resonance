@@ -98,3 +98,12 @@ void AxisControl::HandleMessage(Message *pMsg) {
     SendPitchBend(nTick, kNoBend);
     mBending = 0;
 }
+
+// 0x0019fb40
+void AxisControl::OnAllNotesOff(AllNotesOffMsg *pMsg) {
+    if (mBending == 0) {
+        return;
+    }
+    SendPitchBend(pMsg->mTick, kNoBend);
+    mBending = 0;
+}
