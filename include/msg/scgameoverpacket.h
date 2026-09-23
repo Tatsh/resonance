@@ -24,6 +24,17 @@
 class SCGameOverPacket : public ToAllGameControllersPacket {
 public:
     /**
+     * Produce a default-constructed packet on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nSCGameOverPacketType. Only the Packet words are initialised.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e50f0
+     */
+    static Message *New();
+
+    /**
      * Produce a heap copy of this packet.
      *
      * @return The copy.

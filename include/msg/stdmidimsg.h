@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/musemsg.h"
+
+class IBStream;
+class OBStream;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -17,11 +22,21 @@
  * Clone() copies only as far as `0xb` of the 0xc bytes it allocates, so the remaining 1 are
  * either alignment padding or a field the copy omits.
  *
- * The class overrides Message::Print() at `0x003d7ec0`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dbe80` is compiler-generated and has no declaration here.
  */
 class StdMidiMsg : public MuseMsg {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the song position is
+     * initialised, by the MuseMsg constructor, and the three bytes are left unset.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6d40
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -45,6 +60,36 @@ public:
      * @ghidraAddress 0x003dc020
      */
     virtual const char *Name();
+
+    /**
+     * Write the message to a diagnostic stream.
+     *
+     * Writes the song position, a short label for the kind in the status byte's high nibble, both
+     * data bytes as numbers, and the channel from its low nibble after ` n`. The labels are `off`,
+     * `on`, `poly`, `ctl`, `prg`, `pres`, `pb`, and `sys` for the kinds 0x80 through 0xf0 in order.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003d7ec0
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the three bytes to a stream, one byte each through OBStream::WriteBytes().
+     *
+     * The song position is not written.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3658
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the three bytes back in place, one byte each through IBStream::ReadBytes().
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e36e8
+     */
+    virtual void Load(IBStream &stream);
 
     /**
      * The three bytes of one Standard MIDI channel message. +0x08, +0x09, and +0x0a

@@ -9,7 +9,16 @@
  * base. It has no vtable of its own, and its RTTI accessor is shared with a concrete packet, so a
  * per-name scan credits that packet's vtable to this name as well.
  *
- * Nothing is declared here. Every one of its 3 derived classes starts its own payload at `+0x14`,
- * so this class adds nothing beyond the four words Packet owns.
+ * The class adds no payload. Every one of its 3 derived classes starts its own payload at
+ * `+0x14`.
  */
-class ToAllOtherNetManagersPacket : public Packet {};
+class ToAllOtherNetManagersPacket : public Packet {
+public:
+    /**
+     * Route the packet with the pair 2 and 0.
+     *
+     * Inline. The New() factories of all three derived classes store that pair.
+     */
+    ToAllOtherNetManagersPacket() : Packet(2, 0) {
+    }
+};

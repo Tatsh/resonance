@@ -17,6 +17,17 @@
 class CSInitiatePlayPacket : public ToHostPacket {
 public:
     /**
+     * Produce a default-constructed packet on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nCSInitiatePlayPacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e4ea0
+     */
+    static Message *New();
+
+    /**
      * Produce a heap copy of this packet.
      *
      * @return The copy.

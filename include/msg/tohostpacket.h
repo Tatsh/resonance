@@ -10,7 +10,16 @@
  * scan credits that packet's vtable to this name as well, and why a size read there is really the
  * derived class's.
  *
- * Nothing is declared here. The shared prefix of its 2 derived classes is the four words Packet
- * already owns, so this class adds no payload of its own.
+ * The class adds no payload. Its four derived classes (PSJoinRequestPacket, CSClientStatusPacket,
+ * CSInitiatePlayPacket, and BSLoadLevelPacket) all start their own payload at `+0x14`.
  */
-class ToHostPacket : public Packet {};
+class ToHostPacket : public Packet {
+public:
+    /**
+     * Route the packet with the pair 0 and 0.
+     *
+     * Inline. The New() factories of all four derived classes store that pair.
+     */
+    ToHostPacket() : Packet(0, 0) {
+    }
+};

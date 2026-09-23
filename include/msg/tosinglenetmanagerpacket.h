@@ -10,8 +10,16 @@
  * why a per-name scan credits that packet's vtable to this name as well, and why a size read
  * there is really the derived class's.
  *
- * Nothing is declared here. The class has one derived class, so a shared prefix would be that one
- * class's whole payload and would attribute all of it to this base. The payload stays in the
- * derived class until a second one exists to measure against.
+ * The class adds no payload. Its two derived classes, SPJoinAcceptPacket and SPJoinDenyPacket,
+ * both start their own payload at `+0x14`.
  */
-class ToSingleNetManagerPacket : public Packet {};
+class ToSingleNetManagerPacket : public Packet {
+public:
+    /**
+     * Route the packet with the pair 1 and 0.
+     *
+     * Inline. The New() factories of both derived classes store that pair.
+     */
+    ToSingleNetManagerPacket() : Packet(1, 0) {
+    }
+};

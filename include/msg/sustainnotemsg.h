@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iostream>
+
 #include "msg/musemsg.h"
+
+class IBStream;
+class OBStream;
 
 /**
  * Event the game passes between a MsgSource and a MsgSink.
@@ -18,11 +23,21 @@
  * Clone() copies only as far as `0x9` of the 0xc bytes it allocates, so the remaining 3 are
  * either alignment padding or a field the copy omits.
  *
- * The class overrides Message::Print() at `0x003e3a18`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
+ * The destructor at `0x003dc658` is compiler-generated and has no declaration here.
  */
 class SustainNoteMsg : public MuseMsg {
 public:
+    /**
+     * Produce a default-constructed message on the heap.
+     *
+     * The translation unit at `0x003d9818` registers this factory. Only the song position is
+     * initialised, by the MuseMsg constructor.
+     *
+     * @return The message.
+     * @ghidraAddress 0x003d6e50
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this message.
      *
@@ -46,6 +61,33 @@ public:
      * @ghidraAddress 0x003dc7e8
      */
     virtual const char *Name();
+
+    /**
+     * Write the song position and the byte, as a character, to a diagnostic stream.
+     *
+     * The byte is loaded sign-extended and written through the character inserter rather than the
+     * integer one, so a note number appears as the character with that code.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3a18
+     */
+    virtual void Print(std::ostream &stream);
+
+    /**
+     * Write the byte to a stream through OBStream::WriteBytes().
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003e3a70
+     */
+    virtual void Save(OBStream &stream);
+
+    /**
+     * Read the byte back in place through IBStream::ReadBytes().
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress 0x003e3ab0
+     */
+    virtual void Load(IBStream &stream);
 
     /**
      * Undetermined, and the one byte the message carries. +0x08

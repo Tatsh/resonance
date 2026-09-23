@@ -10,7 +10,16 @@
  * why a per-name scan credits that packet's vtable to this name as well, and why a size read
  * there is really the derived class's.
  *
- * Nothing is declared here. The shared prefix of its 2 derived classes is the four words Packet
- * already owns, so this class adds no payload of its own.
+ * The class adds no payload. Its three derived classes (SCStartPlayingPacket, SCLoadLevelPacket,
+ * and SCGameOverPacket) start their own payload at `+0x14`.
  */
-class ToAllGameControllersPacket : public Packet {};
+class ToAllGameControllersPacket : public Packet {
+public:
+    /**
+     * Route the packet with the pair 3 and 2.
+     *
+     * Inline. The New() factories of all three derived classes store that pair.
+     */
+    ToAllGameControllersPacket() : Packet(3, 2) {
+    }
+};

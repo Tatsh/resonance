@@ -54,6 +54,26 @@ public:
     virtual void Load(IBStream &stream);
 
 protected:
+    /**
+     * Set the two routing words and mark the remaining two as unset.
+     *
+     * No address attaches to the constructor on its own. Every one of the 21 New() factories at
+     * `0x003e4a98` through `0x003e54d8` expands it in place, storing a pair of small constants at
+     * `+0x04` and `+0x08` and -1 at both `+0x0c` and `+0x10`. The pair is fixed by the routing
+     * class the packet derives from, which is why each routing class supplies it: ToHostPacket
+     * passes 0 and 0, ToSingleNetManagerPacket 1 and 0, ToAllOtherNetManagersPacket 2 and 0,
+     * ToAllOtherGameSystemsPacket 2 and 3, ToAllNetManagersPacket 3 and 0,
+     * ToAllGameControllersPacket 3 and 2, and ToArbiterPacket 0 and 1. The first word therefore
+     * selects which peers receive the packet and the second which subsystem on each peer, but no
+     * literal in the image labels either one.
+     *
+     * @param nUnknown04 The word stored at `+0x04`.
+     * @param nUnknown08 The word stored at `+0x08`.
+     */
+    Packet(int nUnknown04, int nUnknown08)
+        : mUnknown04(nUnknown04), mUnknown08(nUnknown08), mUnknown0c(-1), mUnknown10(-1) {
+    }
+
     int mUnknown04; // +0x04
     int mUnknown08; // +0x08
     int mUnknown0c; // +0x0c
