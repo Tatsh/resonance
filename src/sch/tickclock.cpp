@@ -85,7 +85,10 @@ void TickClock::PostAt(Command *pCommand, Tick tick) {
 }
 
 // 0x004a6248
-void TickClock::PostAtSongTick(Command *pCommand, long long nTick, CmdID &id) {
+void TickClock::PostAtSongTick(Command *pCommand,
+                               long long nTick,
+                               CmdID &id,
+                               [[maybe_unused]] int nUnused) {
     const long long nTime = SongTickToTime(mTempoMap, nTick);
     TimedCommand *pTimed = new TimedCommand(pCommand, Tick{nTime}, kAbsolutePost);
     mWatchdog->QueueAbsolute(pTimed, nTime - mNegatedOrigin, id, kNotRecordable, kDefaultOrder);

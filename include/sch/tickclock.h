@@ -126,9 +126,11 @@ public:
      * @param pCommand The command to run.
      * @param nTick The song position, in MIDI ticks at 480 per quarter note.
      * @param id The handle to queue under.
+     * @param nUnused Every one of the 17 callers passes 0 in the fifth argument register, and the
+     *                body never reads it. The type and the meaning are not recoverable.
      * @ghidraAddress 0x004a6248
      */
-    void PostAtSongTick(Command *pCommand, long long nTick, CmdID &id);
+    void PostAtSongTick(Command *pCommand, long long nTick, CmdID &id, int nUnused = 0);
 
     /**
      * Queue a command at a song position, discarding the handle.
