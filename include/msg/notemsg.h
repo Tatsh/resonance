@@ -122,10 +122,13 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    unsigned char mChannel; // +0x08
+    /**
+     * The MIDI channel. +0x08
+     *
+     * Public because MuseSynth::StartNotePlayer() at `0x001aa6bc` reads it directly.
+     */
+    unsigned char mChannel;
 
-public:
     /**
      * The note number. +0x09
      *
@@ -134,10 +137,13 @@ public:
      */
     unsigned char mNote;
 
-private:
-    unsigned char mVelocity; // +0x0a
+    /**
+     * The note-on velocity. +0x0a
+     *
+     * Public because MuseSynth::StartNotePlayer() at `0x001aa6c8` reads it directly.
+     */
+    unsigned char mVelocity;
 
-public:
     /**
      * The length of the note, in MIDI ticks. +0x0c
      *

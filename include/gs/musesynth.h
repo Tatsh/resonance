@@ -104,8 +104,6 @@ protected:
      * Creates a 0x20-byte NotePlayer from the message's three payload bytes and its word at
      * `+0x0c`, stores it, and starts it against mOutput.
      *
-     * The body is not written, because NoteMsg's channel, velocity, and length are private.
-     *
      * @param pMsg The NoteMsg.
      * @ghidraAddress 0x001aa690
      */

@@ -37,8 +37,7 @@ class TickClock;
  * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
  * both player references at the stand-in player, and sizes mUnknown74 to three zeroed elements.
  *
- * PostNowBarMsg() and OnPitchRiff() are declared and not written, for the message access each one
- * records.
+ * PostNowBarMsg() is declared and not written, for the message access it records.
  */
 class Scratcher : public Pitcher {
 public:
@@ -116,8 +115,7 @@ protected:
      * Play a gem at a pitch step.
      *
      * The routine checks the bar, sends the riff transposed by nStep, records the gem, and
-     * announces it with several messages, among them a DurGemMsg and a PitchMsg. The body is not
-     * written, because DurGemMsg's word at `+0x18` and PitchMsg's word at `+0x04` are private.
+     * announces it with several messages, among them a DurGemMsg and a PitchMsg.
      *
      * @param nGem The gem, a PitchRiffMsg's first word.
      * @param nStep The pitch step, zero from a PitchRiffMsg and -3 to 3 from PostNowBarMsg().
@@ -177,16 +175,16 @@ private:
     // Starts at g_nullPlayer. Matched against a PitchRiffMsg's `+0x08`, which msg/pitchriffmsg.h
     // types as an int.
     Player *mUnknown5c;  // +0x5c
-    Mid::MBT mUnknown60; // +0x60, starts at kMBTInfinity
-    Player *mUnknown64;  // +0x64, starts at g_nullPlayer
+    Mid::MBT mUnknown60; // +0x60, the position of the last scratch, kMBTInfinity at first
+    Player *mUnknown64;  // +0x64, the player of the last scratch, g_nullPlayer at first
     int mUnknown68;      // +0x68, the gem of the last PitchRiffMsg, which PostNowBarMsg() replays
-    int mUnknown6c;      // +0x6c, starts at -1
-    int mUnknown70;      // +0x70
+    int mUnknown6c;      // +0x6c, the bar last announced, -1 at first
+    int mUnknown70;      // +0x70, the scratch direction PostNowBarMsg() last detected
     // +0x74. The constructor builds three elements from an int zero through the float fill
     // instantiation at 0x001d1f90, which converts each with cvt.s.w.
     std::vector<float> mUnknown74;
     int mUnknown80;      // +0x80, not written by the constructor
-    Mid::MBT mUnknown84; // +0x84, MBT(0), stored and then tested at 0x001cfc20
-    int mUnknown88;      // +0x88
-    int mUnknown8c;      // +0x8c
+    Mid::MBT mUnknown84; // +0x84, where the last scratch gem ends
+    float mUnknown88;    // +0x88, the blend the last scratch gem ends at
+    int mUnknown8c;      // +0x8c, the step of the last scratch
 };

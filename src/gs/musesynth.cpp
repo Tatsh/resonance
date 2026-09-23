@@ -1,6 +1,7 @@
 #include "gs/musesynth.h"
 
 #include "gs/multimuseplayer.h"
+#include "gs/noteplayer.h"
 #include "msg/allnotesoffmsg.h"
 #include "msg/multimusemsg.h"
 #include "msg/notemsg.h"
@@ -57,6 +58,15 @@ void MuseSynth::ReleaseAllPlayers() {
         delete *it;
     }
     mPlayers.clear();
+}
+
+// 0x001aa690
+void MuseSynth::StartNotePlayer(Message *pMsg) {
+    NoteMsg *pNote = static_cast<NoteMsg *>(pMsg);
+    NotePlayer *pPlayer = new NotePlayer(
+        pNote->mNote, pNote->mVelocity, pNote->mLength.mTick, pNote->mChannel, this, mClock);
+    mPlayers.push_back(pPlayer);
+    pPlayer->Start(mOutput);
 }
 
 // 0x001aa7c0
