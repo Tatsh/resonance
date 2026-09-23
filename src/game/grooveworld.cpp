@@ -8,15 +8,21 @@
 
 #include "app/application.h"
 #include "app/mainloop.h"
+#include "app/playsound.h"
 #include "app/renderer.h"
+#include "app/watchdog.h"
 #include "app/watchdogtimer.h"
 #include "game/axingstg.h"
 #include "game/bgtrackgraph.h"
 #include "game/catchingstg.h"
+#include "game/controllercmd.h"
 #include "game/delayer.h"
+#include "game/forcefeedbackmgr.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gamer.h"
 #include "game/gamestats.h"
+#include "game/globalsettings.h"
+#include "game/inputcheatdetectorgs.h"
 #include "game/inputmap.h"
 #include "game/levelbuilder.h"
 #include "game/levelconverter.h"
@@ -40,7 +46,13 @@
 #include "msg/bumppacket.h"
 #include "msg/cripplepacket.h"
 #include "msg/endgamemsg.h"
+#include "msg/fadegamemsg.h"
+#include "msg/gamebeginmsg.h"
+#include "msg/gameovermsg.h"
 #include "msg/message.h"
+#include "msg/metcontrollerreading.h"
+#include "msg/pausegamesystemmsg.h"
+#include "msg/rawcontrollermsg.h"
 #include "msg/seekermsg.h"
 #include "msg/textmsg.h"
 #include "msg/trackselectmsg.h"
@@ -77,6 +89,48 @@ constexpr int kLevelNameQuery = 0x278;
 constexpr int kStateLoading = 1;
 constexpr int kStateLoaded = 2;
 constexpr int kStateEnded = 6;
+// What PrepareLevel() leaves in mState once the level is ready to start, and what StartPlay()
+// leaves once the world accepts controller readings.
+constexpr int kStatePrepared = 3;
+constexpr int kStatePlaying = 4;
+// What PostExit() leaves in mState once an exit is under way.
+constexpr int kStateExiting = 5;
+
+// The handle PostExit() passes before the scheduler allocates one, and the recordable flag.
+constexpr int kUnallocatedCommand = -2;
+constexpr int kRecordable = 1;
+
+// The fade Exit() applies, in milliseconds: the default, the length for exit mode 1 or a running
+// playback, and the length in jukebox mode. The screen fade runs 500 milliseconds longer, and
+// FinishSong() runs 600 milliseconds after the fade.
+constexpr int kExitFadeMs = 1000;
+constexpr int kExitFadeLongMs = 3000;
+constexpr int kExitFadeJukeboxMs = 5000;
+constexpr int kExitScreenFadeExtraMs = 500;
+constexpr int kExitFinishDelayMs = 600;
+constexpr long long kNsPerMs = 1000000;
+constexpr int kFadeOut = 0;
+
+// The joystick tag of a controller reading, the button OnUnknownSlot2() treats as pause, and the
+// bound below which a joystick button counts during a playback.
+constexpr int kReadingTypeJoy = 0x6a6f7920;
+constexpr int kPauseButton = 10;
+constexpr int kJoyButtonLimit = 100;
+
+// The fade StartPlay() sends to the delayer, the track and bar whose quantum sets when input is
+// enabled, and the lead of the metronome it starts, in MIDI ticks.
+constexpr int kStartFadeMs = 1000;
+constexpr int kStartFadeIn = 1;
+constexpr int kFirstTrack = 0;
+constexpr int kFirstBar = 0;
+constexpr int kMetronomeLeadTicks = 3200;
+
+// The configuration codes PrepareLevel() reads: the sound-bank movie flag and its path, the start
+// offset in ticks, and the flag it stores in mUnknown90.
+constexpr int kSoundBankMovieFlagCode = 0x3a4;
+constexpr int kSoundBankMoviePathCode = 0x3a5;
+constexpr int kStartOffsetCode = 0x38d;
+constexpr int kUnknown90FlagCode = 0x3a1;
 
 // The Slot13() argument FinishSong() passes to the synthesiser.
 constexpr int kSynthSlot13Off = 0;
@@ -234,6 +288,213 @@ constexpr int kExitCmdId = 7;
 int ExitCmd::sCmdID = kExitCmdId;
 
 } // namespace
+
+// 0x0018bef0
+GrooveWorld::GrooveWorld(Application *pApp, GameStats *pStats)
+    : mApp(pApp), mInputMap(nullptr), mTrackSelector(nullptr), mJoiner(nullptr), mLevel(nullptr),
+      mUnknown1c(nullptr), mUnknown20(nullptr), mDelayer(nullptr), mRenderer(nullptr),
+      mGamer(nullptr), mStats(pStats), mUnknown5c(nullptr), mMuseSynth(nullptr),
+      mSongClock(nullptr), mCheatDetector(nullptr), mUnknown84(0), mUnknown88(0), mUnknown8c(0),
+      mUnknown90(0), mUnknown94(0), mState(0), mUnknownb8(1) {
+    mSongClock = new Sch::TickClock(mApp->GetWatchdog(), nullptr);
+    mCheatDetector = new InputCheatDetectorGS(&g_gameCheatSequences);
+    mForceFeedback = new ForceFeedbackMgr;
+}
+
+// 0x0018c368
+GrooveWorld::~GrooveWorld() {
+    Shutdown();
+}
+
+// 0x001951e8
+void GrooveWorld::Shutdown() {
+    if (mState == kStateEnded) {
+        StopLevel();
+    }
+    DeletePlayers();
+    delete mLevel;
+    delete mSongClock;
+    delete mCheatDetector;
+    delete mForceFeedback;
+    StopNoteDestroyer();
+    DestroyNoteDestroyer();
+}
+
+// 0x0018dc88
+void GrooveWorld::PrepareLevel() {
+    Ps2HardSynth *pSynth = mApp->GetSynth();
+    pSynth->LoadBankSet5();
+    pSynth->LoadBankSet6();
+    pSynth->Slot13(Application::shared()->GetPlayMode() == kPlayModeJam);
+    BuildGraphs();
+    CreateRenderer();
+    ConnectPlayers();
+    if (QueryConfigFlag(kSoundBankMovieFlagCode) != 0) {
+        HxStr path;
+        QueryConfigString(&path, kSoundBankMoviePathCode);
+        StartSoundBankMovie(path.mStr != nullptr ? path.mStr : g_szEmptyString);
+    }
+    const Mid::MBT offset(QueryConfigValue(kStartOffsetCode));
+    const Mid::MBT zero(0);
+    const Mid::MBT start(std::min(kMBTMaximum, std::max(kMBTMinimum, zero.mTick - offset.mTick)));
+    mSongClock->SetSongTick(start);
+    mUnknown90 = QueryConfigFlag(kUnknown90FlagCode);
+    mState = kStatePrepared;
+}
+
+// 0x0018de38
+void GrooveWorld::StartPlay() {
+    mInputMap->DisableEntries();
+    mApp->GetWatchdog()->Flush();
+    mSongClock->Resume();
+    CreateNoteDestroyer();
+    StartNoteDestroyer();
+    mState = kStatePlaying;
+    mApp->GetSynth()->Slot10();
+    std::for_each(
+        mUnknown50.begin(), mUnknown50.end(), std::mem_fn(&BGTrackGraph::CallBuildSequencer));
+
+    if (mUnknown90 == 0) {
+        FuncCmd *pEnable = new FuncCmd(this, &GrooveWorld::EnableInput);
+        const Mid::MBT zero(0);
+        const Mid::MBT lead(mLevel->GetTrack(kFirstTrack)->GetQuant(kFirstBar) / 2);
+        const Mid::MBT when(std::min(kMBTMaximum, std::max(kMBTMinimum, zero.mTick - lead.mTick)));
+        mSongClock->PostAtSongTick(pEnable, when.mTick);
+        Attachment::ReleaseIfSet(pEnable);
+    }
+
+    FuncCmd *pStart = new FuncCmd(this, &GrooveWorld::StartSequencers);
+    mSongClock->PostAtSongTick(pStart, Mid::MBT(0).mTick);
+    Attachment::ReleaseIfSet(pStart);
+
+    GameBeginMsg begin;
+    mDelayer->Handle(&begin);
+    mJoiner->Handle(&begin);
+    FadeGameMsg fade;
+    fade.mDuration = kStartFadeMs;
+    fade.mFadeIn = kStartFadeIn;
+    mDelayer->Handle(&fade);
+
+    mStats->Reset(mPlayers.size());
+    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallSlot11));
+    mForceFeedback->SetJukeboxMode(Application::shared()->IsJukeboxMode());
+    mForceFeedback->SetUnknownFlag04(mUnknown8c);
+    mForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mUnknown08);
+    mForceFeedback->SetPlayerCount(mLocalPlayers.size());
+    mForceFeedback->StartMetronome(Mid::MBT(kMetronomeLeadTicks));
+}
+
+// 0x0018ed98
+void GrooveWorld::OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4) {
+    if (mState != kStatePlaying) {
+        return;
+    }
+    if (mUnknown90 == 0) {
+        mCheatDetector->OnUnknownSlot2(nUnknown1, nUnknown2, nUnknown3, flUnknown4);
+    }
+    if (mApp->IsJukeboxMode()) {
+        if (nUnknown1 == kReadingTypeJoy && flUnknown4 > 0.0f && nUnknown3 == kPauseButton) {
+            mUnknownb8 = 0;
+            PostExit(kExitMode1, mUnknownb8, 0);
+        }
+        return;
+    }
+    if (mApp->GetGameManager()->IsPlaybackActive() == 1) {
+        if (nUnknown1 == kReadingTypeJoy && flUnknown4 > 0.0f && nUnknown3 < kJoyButtonLimit) {
+            PostExit(kExitMode1, mUnknownb8, 0);
+            return;
+        }
+    } else if (nUnknown1 == kReadingTypeJoy && nUnknown3 == kPauseButton && flUnknown4 > 0.0f &&
+               !(mLocalPlayers.size() < static_cast<unsigned>(nUnknown2))) {
+        const int nGameMode = Application::shared()->GetGameMode();
+        if (nGameMode == kGameModeSolo && Application::shared()->GetPlayMode() == nGameMode &&
+            mStats->mCompleted != 0) {
+            PostExit(kExitMode1, mUnknownb8, 0);
+        } else {
+            PauseGameSystemMsg pause;
+            mApp->GetGameManager()->QueueMessage(&pause);
+            mInputMap->StopAllRiffs();
+        }
+        return;
+    } else if (mUnknown84 != 0) {
+        return;
+    }
+    const MetControllerReading reading{nUnknown1, nUnknown2, nUnknown3, flUnknown4};
+    ControllerCmd *pCommand = new ControllerCmd(reading);
+    CmdID id;
+    id.mValue = kUnallocatedCommand;
+    mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
+    Attachment::ReleaseIfSet(pCommand);
+}
+
+// 0x0018f078
+void GrooveWorld::ReplayControllerReading(const MetControllerReading *pReading) {
+    if (mInputMap == nullptr || mState != kStatePlaying) {
+        return;
+    }
+    RawControllerMsg msg;
+    msg.mReading = *pReading;
+    // Yes, the binary stores the tick without the finite check an Mid::MBT constructor runs.
+    msg.mPosition.mTick = mSongClock->SongTick();
+    mInputMap->Handle(&msg);
+}
+
+// 0x0018e368
+void GrooveWorld::PostExit(int nMode, int nUnknownb8, int nUnknown88) {
+    if (mState != kStatePlaying) {
+        return;
+    }
+    mState = kStateExiting;
+    if (mApp->GetGameManager()->IsPlaybackActive() != 0 || nUnknown88 != 0) {
+        Exit(nMode, nUnknownb8, nUnknown88);
+        return;
+    }
+    ExitCmd *pCommand = new ExitCmd(nMode, nUnknownb8, nUnknown88);
+    CmdID id;
+    id.mValue = kUnallocatedCommand;
+    Application::shared()->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
+    Attachment::ReleaseIfSet(pCommand);
+}
+
+// 0x0018e478
+void GrooveWorld::Exit(int nMode, int nUnknownb8, int nUnknown88) {
+    mUnknown94 = nMode;
+    mUnknownb8 = nUnknownb8;
+    mUnknown88 = nUnknown88;
+    mInputMap->StopAllRiffs();
+    mInputMap->DisableEntries();
+    GameOverMsg over;
+    mDelayer->Handle(&over);
+
+    int bFadeSynth = 0;
+    if (mUnknown94 == kExitMode1 || mApp->GetGameManager()->IsPlaybackActive() != 0) {
+        bFadeSynth = 1;
+    }
+    int nFadeMs = kExitFadeMs;
+    if (mApp->IsJukeboxMode()) {
+        nFadeMs = kExitFadeJukeboxMs;
+    } else if (bFadeSynth != 0) {
+        nFadeMs = kExitFadeLongMs;
+    }
+    FadeGameMsg fade;
+    fade.mDuration = nFadeMs + kExitScreenFadeExtraMs;
+    fade.mFadeIn = kFadeOut;
+    mDelayer->Handle(&fade);
+
+    if (bFadeSynth != 0) {
+        Application::shared()->GetSynth()->FadeOut(nFadeMs);
+    } else {
+        Application::shared()->GetSynth()->AllNotesOffExceptSfxChannel();
+        Application::shared()->GetWatchdog()->Snapshot();
+        mSongClock->Pause();
+    }
+    mForceFeedback->StopAll(Mid::MBT(0));
+
+    FuncCmd *pFinish = new FuncCmd(this, &GrooveWorld::FinishSong);
+    mApp->GetWatchdogTimer()->PostIn(
+        pFinish, Sch::Tick{static_cast<long long>(nFadeMs + kExitFinishDelayMs) * kNsPerMs});
+    Attachment::ReleaseIfSet(pFinish);
+}
 
 // 0x00195388
 void GrooveWorld::HandleMessage(Message *pMsg) {

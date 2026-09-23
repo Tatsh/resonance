@@ -500,7 +500,7 @@ void ForceFeedbackMgr::SetPowerup(unsigned int nPlayerSlot, int bPowerup) {
 }
 
 // 0x001708d0
-void ForceFeedbackMgr::StopAll() {
+void ForceFeedbackMgr::StopAll([[maybe_unused]] Mid::MBT when) {
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
     }

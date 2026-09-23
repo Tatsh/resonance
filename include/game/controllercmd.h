@@ -31,6 +31,25 @@ class OBStream;
 class ControllerCmd : public Sch::Command {
 public:
     /**
+     * Start with the reading unset.
+     *
+     * Inline. NewCmd() expands it for Load() to fill.
+     */
+    ControllerCmd() {
+    }
+
+    /**
+     * Record one controller reading to replay.
+     *
+     * Inline, with no address of its own. GrooveWorld::OnUnknownSlot2() expands it when it
+     * queues a reading.
+     *
+     * @param reading The reading.
+     */
+    explicit ControllerCmd(const MetControllerReading &reading) : mReading(reading) {
+    }
+
+    /**
      * Report the identifier this class streams itself under.
      *
      * @return sCmdID.

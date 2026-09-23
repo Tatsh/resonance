@@ -165,11 +165,15 @@ public:
     void SetPowerup(unsigned int nPlayerSlot, int bPowerup);
 
     /**
-     * Stop every motor twice over and set the stopped flag. The image has no caller.
+     * Stop every motor twice over and set the stopped flag.
      *
+     * GrooveWorld::Exit() is the one caller, and it passes a song position of zero that the body
+     * does not read.
+     *
+     * @param when The song position, which the body does not read.
      * @ghidraAddress 0x001708d0
      */
-    void StopAll();
+    void StopAll(Mid::MBT when);
 
     /**
      * @param nPlayerSlot The slot.

@@ -71,8 +71,9 @@ public:
     /**
      * Construct an empty world.
      *
-     * The body is not written. It clears every member, sets mUnknownb8 to 1, and creates the song
-     * clock and the cheat detector.
+     * It clears every member except the three load-buffer words, sets mUnknownb8 to 1, and creates
+     * the song clock on the application's Watchdog with no tempo map, the cheat detector over
+     * g_gameCheatSequences, and the force-feedback manager.
      *
      * @param pApp The application.
      * @param pStats The game manager's statistics.
@@ -100,8 +101,13 @@ public:
     /**
      * Report a controller reading. Slot 2 of the secondary table.
      *
-     * The body reads mState and returns at once unless it holds 4, which is what makes the world
-     * respond to a controller only in one of its states.
+     * The body returns at once unless mState is 4, and passes the reading to the cheat detector
+     * unless mUnknown90 is set. In jukebox mode a joystick press of button 10 clears mUnknownb8
+     * and posts exit mode 1, and every other reading is dropped. While a playback runs, a
+     * joystick press of any button below 100 posts exit mode 1. Otherwise a joystick press of
+     * button 10 from a local pad posts exit mode 1 once a solo game song is complete, and queues
+     * a PauseGameSystemMsg and stops the riffs in any other case. Every remaining reading is
+     * queued as a ControllerCmd for replay, unless mUnknown84 is set outside a playback.
      *
      * @param nUnknown1 The first word of the reading.
      * @param nUnknown2 The second word of the reading.
@@ -114,10 +120,9 @@ public:
     /**
      * Hand one recorded controller reading to the input map.
      *
-     * The body is not written. It returns at once unless the input map exists and mState is 4,
-     * and otherwise builds a RawControllerMsg from the reading and the song clock's position on
-     * the stack and passes it to InputMap's MsgSink half. ControllerCmd::Execute() is the
-     * recovered caller.
+     * It returns at once unless the input map exists and mState is 4, and otherwise builds a
+     * RawControllerMsg from the reading and the song clock's position on the stack and passes it
+     * to InputMap's MsgSink half. ControllerCmd::Execute() is the recovered caller.
      *
      * @param pReading The reading.
      * @ghidraAddress 0x0018f078
@@ -127,8 +132,10 @@ public:
     /**
      * Queue an ExitCmd built from three values.
      *
-     * The body is not written. PostExitMode1(), PostExitMode2(), and PostExitMode3() are the
-     * recovered callers.
+     * Does nothing unless mState is 4, and otherwise sets mState to 5. While a playback runs, or
+     * when nUnknown88 is set, it runs Exit() at once. Otherwise it queues the ExitCmd on the
+     * application's watchdog timer with no delay, as a recordable command. PostExitMode1(),
+     * PostExitMode2(), and PostExitMode3() are the recovered callers.
      *
      * @param nMode The value Exit() stores in mUnknown94.
      * @param nUnknownb8 The value Exit() stores in mUnknownb8.
@@ -140,10 +147,14 @@ public:
     /**
      * Leave the game in one of three modes.
      *
-     * The body is not written. It stores nMode in mUnknown94, nUnknownb8 in mUnknownb8, and
-     * nUnknown88 in mUnknown88, disables the input map, picks a delay of 1000, 3000, or 5000
-     * milliseconds from the game manager's state, and queues a FuncCmd. ExitCmd::Execute() is the
-     * recovered caller.
+     * It stores nMode in mUnknown94, nUnknownb8 in mUnknownb8, and nUnknown88 in mUnknown88,
+     * stops the riffs and disables the input map, and sends a GameOverMsg to the delayer. The fade
+     * is 5000 milliseconds in jukebox mode, 3000 for exit mode 1 or a running playback, and 1000
+     * otherwise, and the screen fade sent to the delayer runs 500 longer. The synthesiser fades
+     * out over the same length for exit mode 1 or a playback. Otherwise the notes stop at once,
+     * the watchdog takes a snapshot, and the song clock pauses. It then stops the force feedback
+     * and queues FinishSong() 600 milliseconds after the fade. ExitCmd::Execute() is the recovered
+     * caller.
      *
      * @param nMode The exit mode.
      * @param nUnknownb8 Stored in mUnknownb8.
@@ -219,8 +230,9 @@ public:
      * Resets the synthesiser through its slots 5 and 6, sets its jam flag from the play mode,
      * runs BuildGraphs(), CreateRenderer(), and ConnectPlayers(), starts the streamed audio named
      * by configuration code 0x3a5 when code 0x3a4 is set, and reads the start offset from code
-     * 0x38d. GameManagerImpl's FinishWorldLoad() and Load() call it after FinishLoad(). Not
-     * reconstructed yet. The title is inferred.
+     * 0x38d, which becomes the negated song start clamped to the finite range. It then stores
+     * configuration flag 0x3a1 in mUnknown90 and sets mState to 3. GameManagerImpl's
+     * FinishWorldLoad() and Load() call it after FinishLoad(). The title is inferred.
      *
      * @ghidraAddress 0x0018dc88
      */
@@ -229,10 +241,15 @@ public:
     /**
      * Starts play on a prepared level.
      *
-     * Disables the input map entries, flushes the watchdog, resumes mSongClock, and sets mState to
-     * 4, then configures the synthesiser and the force feedback manager (jukebox mode, player
-     * count, and metronome). GameManagerImpl's OnUnknownSlot6() is the only caller. Not
-     * reconstructed yet, because several routines it runs are unrecovered. The title is inferred.
+     * Disables the input map entries, flushes the watchdog, resumes mSongClock, starts the note
+     * destroyer, and sets mState to 4. It runs synthesiser slot 10 and builds the mUnknown50
+     * sequencers. Unless mUnknown90 is set, it posts EnableInput() half a quantum of the first
+     * track ahead of the song start, and it always posts StartSequencers() at the start. It
+     * sends a GameBeginMsg to the delayer and the joiner and a one-second FadeGameMsg that fades
+     * in to the delayer, resets the statistics for the player count, runs Player slot 11 on
+     * every player, and configures the force feedback manager (jukebox mode, mUnknown8c, the
+     * settings flag, the local player count, and a metronome 3200 ticks ahead).
+     * GameManagerImpl's OnUnknownSlot6() is the only caller. The title is inferred.
      *
      * @ghidraAddress 0x0018de38
      */
@@ -329,10 +346,10 @@ public:
     /**
      * Tear the world down ahead of destruction.
      *
-     * The body is not written. It runs StopLevel() when mState is 6 and DeletePlayers() always,
-     * deletes the level, the song clock, the cheat detector, and mForceFeedback, and then
-     * runs `0x0012f400` and `0x0012f428`, which release a global at `0x0066f538`. The destructor is
-     * the recovered caller.
+     * It runs StopLevel() when mState is 6 and DeletePlayers() always, deletes the level, the song
+     * clock, the cheat detector, and mForceFeedback, and then stops and destroys the note destroyer
+     * through StopNoteDestroyer() and DestroyNoteDestroyer(). The destructor is the recovered
+     * caller.
      *
      * @ghidraAddress 0x001951e8
      */
