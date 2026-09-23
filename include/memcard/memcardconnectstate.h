@@ -3,20 +3,34 @@
 #include "os/hxstr.h"
 
 /**
- * What one card slot reports about itself.
+ * What one card slot reports about itself, and the memory-card location the front end stores.
  *
- * A plain record of 0x18 bytes with no behaviour and no RTTI. `GetConnectStateMCT` stores one
- * inline and passes it by value to `MemcardUser::OnConnectState()`, which is the only place the
- * record appears. The class title is inferred from `GetConnectStateMCT`, and no string in the
- * image identifies it.
+ * A plain record of 0x18 bytes with no RTTI. `GetConnectStateMCT` stores one inline and passes it
+ * by value to `MemcardUser::OnConnectState()`. The front end keeps the same record as its card
+ * location. GlobalSettings::mCardSlots is a vector of them, MetSaveRemix::OnConnectState() at
+ * `0x00372c10` assigns a reported state into its first entry, and NextCardSlot() and
+ * MetRemixManager::ListRemixes() take them. The class title is inferred from `GetConnectStateMCT`,
+ * and no string in the image identifies it.
+ *
+ * mPortSlot combines the port in its high byte with the multitap slot in its low byte, which
+ * NextCardSlot() establishes: `1` and `1-A` are 0, `1-B` is 1, and `2` is 0x100.
  *
  * Every member is filled by `GetConnectStateMCT::OnCheckInfo()` at `0x00177fb0` from one
  * `CheckInfoOp`.
  */
 struct MemcardConnectState {
-    int mPortSlot;   /*!< The packed port and slot the state describes. +0x00 */
+    /**
+     * Start with no location and an empty name.
+     *
+     * Inline. The `GetConnectStateMCT` constructor, NextCardSlot(), and the screens that hold one
+     * expand it in place.
+     */
+    MemcardConnectState() : mPortSlot(-1), mSlotName(""), mFree(-1), mType(-1), mFormatted(0) {
+    }
+
+    int mPortSlot;   /*!< The packed port and slot the state describes, or -1. +0x00 */
     HxStr mSlotName; /*!< Display text for the slot, from the table at `0x0067bfe0`. +0x04 */
-    int mFree;       /*!< Free clusters, from `CheckInfoOp::mFree`. +0x0c */
+    int mFree;       /*!< Free clusters, from `CheckInfoOp::mFree`. -1 by default. +0x0c */
     int mType;       /*!< The `sceMcType*` value, from `CheckInfoOp::mType`. +0x10 */
     int mFormatted;  /*!< Non-zero when `CheckInfoOp::mFormatted` was exactly 1. +0x14 */
 };

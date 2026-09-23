@@ -28,7 +28,7 @@ MetPersonaSaverScreen::~MetPersonaSaverScreen() {
 
 void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
                                       MetPersonaData *pPersona,
-                                      const CardSlot &slot,
+                                      const MemcardConnectState &slot,
                                       int nUnknown9c,
                                       int nUnknown98) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
@@ -47,7 +47,7 @@ void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
 
 void MetPersonaSaverScreen::SetSaveRequest(const std::vector<HxStr> &screens,
                                            MetPersonaData *pPersona,
-                                           const CardSlot &slot) {
+                                           const MemcardConnectState &slot) {
     mUnknownac = screens;
     mUnknownb8 = pPersona;
     mUnknownc0 = slot;

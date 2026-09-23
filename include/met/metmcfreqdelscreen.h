@@ -2,11 +2,11 @@
 
 #include <vector>
 
+#include "memcard/memcardconnectstate.h"
 #include "memcard/memcarduser.h"
 #include "met/listdataprovider.h"
 #include "met/metmemcardpickeruser.h"
 #include "met/metscreen.h"
-#include "met/metsonglists.h"
 
 class MetPersonaData;
 
@@ -31,7 +31,8 @@ class MetPersonaData;
  * The constructor at `0x002be968` takes only the renderer and the load priority, and supplies
  * `mcfl` for the screen name, `metagame/Shared` for the directory, and `memcard_freq_load` for the
  * container. It writes `+0x8c` and `+0x90`, which are the MemcardUser and ListDataProvider vptrs,
- * then `+0xb4` and `+0xb8`, the CardSlot at `+0xbc`, `+0xd4`, mPersonas at `+0xd8`, and `+0xe4`.
+ * then `+0xb4` and `+0xb8`, the MemcardConnectState at `+0xbc`, `+0xd4`, mPersonas at `+0xd8`,
+ * and `+0xe4`.
  *
  * It pushes the object name `del_freq` into the container object-name vector that MetScreen owns.
  * It emits two secondary vtables and none for MetMemCardPickerUser, and writes no vptr at `+0x94`
@@ -201,10 +202,10 @@ private:
     // The seven words from +0x98 through +0xb3 are not written by the constructor and no reader
     // is recovered.
     int mUnknown98[7];
-    int mUnknownb4;      // +0xb4
-    int mUnknownb8;      // +0xb8
-    CardSlot mUnknownbc; // +0xbc
-    int mUnknownd4;      // +0xd4
+    int mUnknownb4;                 // +0xb4
+    int mUnknownb8;                 // +0xb8
+    MemcardConnectState mUnknownbc; // +0xbc
+    int mUnknownd4;                 // +0xd4
     // The personas the screen lists. The destructor deletes each one. +0xd8
     std::vector<MetPersonaData *> mPersonas;
     int mUnknowne4; // +0xe4

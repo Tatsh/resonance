@@ -150,22 +150,22 @@ std::vector<ArenaListEntry> *GetArenaList() {
 }
 
 // 0x003d0a40
-CardSlot NextCardSlot(const CardSlot &slot) {
-    CardSlot next;
+MemcardConnectState NextCardSlot(const MemcardConnectState &slot) {
+    MemcardConnectState next;
     if (slot.mPortSlot == kCardPort1) {
-        if (slot.mName == "1") {
+        if (slot.mSlotName == "1") {
             next.mPortSlot = kCardPort2;
-            next.mName = "2";
+            next.mSlotName = "2";
         } else {
             next.mPortSlot = kCardPort1SlotB;
-            next.mName = "1-B";
+            next.mSlotName = "1-B";
         }
     } else if (slot.mPortSlot == kCardPort2) {
         next.mPortSlot = kCardPort1;
-        next.mName = "1";
+        next.mSlotName = "1";
     } else if (slot.mPortSlot == kCardPort1SlotB) {
         next.mPortSlot = kCardPort1;
-        next.mName = "1-A";
+        next.mSlotName = "1-A";
     }
     return next;
 }

@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "game/controllerconfig.h"
+#include "memcard/memcardconnectstate.h"
 #include "met/gameoptions.h"
-#include "met/metsonglists.h"
 #include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
@@ -167,14 +167,14 @@ public:
      * The memory-card locations. MetStageFinishScreen's slot 5 and FirstCardSlotName() read
      * them. +0x60
      */
-    std::vector<CardSlot> mCardSlots;
+    std::vector<MemcardConnectState> mCardSlots;
     /** Starts at 256. MinimumSaveSpaceMCT reads it. +0x6c */
     int mUnknown6c;
     /**
      * The free space a remix save needs. Starts at 60. MetRemixTypeScreen::OnUnknownSlot36()
-     * (`0x00363920`) raises `warn_remix_no_space` when the first card slot's CardSlot::mUnknown0c
-     * is below it. The name is inferred from that comparison and from the matching
-     * kSaveFileMinimumFreeClusters. +0x70
+     * (`0x00363920`) raises `warn_remix_no_space` when the first card slot's
+     * MemcardConnectState::mFree is below it. The name is inferred from that comparison and from
+     * the matching kSaveFileMinimumFreeClusters. +0x70
      */
     int mMinimumFreeClusters;
 

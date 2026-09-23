@@ -26,7 +26,7 @@ constexpr int kDefaultNetPort = 2000;
 static const char *const kDefaultCardSlotName = "1";
 constexpr int kDefaultCardSlotPort = 0;
 constexpr int kDefaultUnknown6c = 256;
-constexpr int kDefaultUnknown70 = 60;
+constexpr int kDefaultMinimumFreeClusters = 60;
 constexpr int kDefaultUnknown74 = 24;
 
 // The labels Print() writes.
@@ -87,15 +87,15 @@ GlobalSettings::GlobalSettings()
     }
 
     mCardSlots.clear();
-    CardSlot slot;
-    slot.mName = kDefaultCardSlotName;
+    MemcardConnectState slot;
+    slot.mSlotName = kDefaultCardSlotName;
     slot.mPortSlot = kDefaultCardSlotPort;
-    slot.mUnknown14 = 0;
-    slot.mUnknown0c = 0;
+    slot.mFormatted = 0;
+    slot.mFree = 0;
     mCardSlots.push_back(slot);
 
     mUnknown6c = kDefaultUnknown6c;
-    mMinimumFreeClusters = kDefaultUnknown70;
+    mMinimumFreeClusters = kDefaultMinimumFreeClusters;
     mUnknown74 = kDefaultUnknown74;
 }
 

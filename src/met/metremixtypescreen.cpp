@@ -6,6 +6,7 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "game/globalsettings.h"
+#include "memcard/memcardconnectstate.h"
 #include "met/metbuttonlist.h"
 #include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
@@ -13,7 +14,6 @@
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
-#include "met/metsonglists.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/manager.h"
@@ -106,7 +106,7 @@ constexpr int kSkipPlayList = 0;
 constexpr int kLoadPlayList = 1;
 
 // Adds the first memory-card slot when a card is in use.
-inline void AddCardSlot(std::vector<CardSlot> &slots) {
+inline void AddCardSlot(std::vector<MemcardConnectState> &slots) {
     if (MetFrontEndState::shared()->mUnknown0c != 0) {
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         slots.push_back(GlobalSettings::shared()->mCardSlots[0]);
@@ -303,7 +303,7 @@ void MetRemixTypeScreen::OnUnknownSlot36() {
         if (MetFrontEndState::shared()->mUnknown0c != 0 &&
             Application::shared()->GetGameMode() == kGameModeSolo) {
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
-            if (GlobalSettings::shared()->mCardSlots[0].mUnknown0c <
+            if (GlobalSettings::shared()->mCardSlots[0].mFree <
                 GlobalSettings::shared()->mMinimumFreeClusters) {
                 std::vector<HxStr> buttons;
                 buttons.push_back(HxStr(kBackButton));
@@ -324,10 +324,10 @@ void MetRemixTypeScreen::OnUnknownSlot36() {
         screens.resize(kJukeboxReturnScreenCount);
         screens[0] = kJukeboxTopButtonsScreen;
         screens[1] = kHelpScreen;
-        std::vector<CardSlot> slots;
+        std::vector<MemcardConnectState> slots;
         AddCardSlot(slots);
-        CardSlot disc;
-        disc.mName = kDiscSlotName;
+        MemcardConnectState disc;
+        disc.mSlotName = kDiscSlotName;
         disc.mPortSlot = kDiscSlot;
         slots.push_back(disc);
         MetRemixManager::shared()->ListRemixes(screens, slots, kLoadPlayList);
@@ -363,10 +363,10 @@ void MetRemixTypeScreen::OpenSelectedButton() {
         screens[1] = kTitleScreen;
         screens[2] = kRemixDataScreen;
         screens[3] = kHelpScreen;
-        std::vector<CardSlot> slots;
+        std::vector<MemcardConnectState> slots;
         AddCardSlot(slots);
-        CardSlot disc;
-        disc.mName = kDiscSlotName;
+        MemcardConnectState disc;
+        disc.mSlotName = kDiscSlotName;
         disc.mPortSlot = kDiscSlot;
         slots.push_back(disc);
         MetRemixManager::shared()->ListRemixes(screens, slots, kSkipPlayList);

@@ -95,4 +95,17 @@ public:
                            int nUnknown,
                            const std::vector<HxStr> &buttons,
                            MetScreen *pOwner);
+
+    /**
+     * Limit the registered message screen to one controller.
+     *
+     * Writes `+0xdc` of the screen registered as `MetMsgScreen`, which Show() and ShowActive()
+     * reset to -1. Every caller passes MetSaveRemix::mUnknownc8, the index of the controller that
+     * owns the save. The result of the cast is not checked. The title is inferred. The body is not
+     * written yet.
+     *
+     * @param nPad The controller index.
+     * @ghidraAddress 0x002f0348
+     */
+    static void SetOwnerPad(int nPad);
 };

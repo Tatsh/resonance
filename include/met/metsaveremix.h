@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "game/freqappearance.h"
+#include "memcard/memcardconnectstate.h"
 #include "memcard/memcarduser.h"
 #include "met/metkbuser.h"
 #include "met/metremixrecord.h"
-#include "met/metremixselection.h"
 #include "met/metscreen.h"
 #include "os/hxstr.h"
 
@@ -32,7 +32,7 @@
  *
  * All four slots the class declares are declared below. Slot 39 takes six arguments in a1 through
  * t2, and the two that could not be typed before are now settled from other bands:
- * MetRemixSelection is the 0x18-byte record whose five fields mirror this class's own `+0x94`
+ * MemcardConnectState is the 0x18-byte record whose five fields mirror this class's own `+0x94`
  * through `+0xa8`, and FreqAppearance is the 0x14-byte element of the vector at `+0xac`, RTTI
  * name `14FreqAppearance`. The 0x38-byte element of the vector at `+0xcc` is MetRemixRecord, whose
  * name is inferred.
@@ -47,7 +47,7 @@
  * through `+0x0c` as unresolved; the three words are `+0xa0`, `+0xa4`, and `+0xa8` reached through
  * a register set to `this + 0x94`, and all three are literals.
  *
- * Every one of those stores is a member initialiser, and the MetRemixSelection default
+ * Every one of those stores is a member initialiser, and the MemcardConnectState default
  * constructor produces the -1, empty-string, -1, -1, zero run at `+0x94` exactly, which is
  * independent confirmation of that record's layout.
  *
@@ -91,7 +91,7 @@ public:
      * Unrecovered. Slot 39.
      *
      * Records the remix a save is about to write. The six parameters are what the register reads
-     * prove: a1 is a MetRemixSelection whose five fields are copied into mUnknown94 through the
+     * prove: a1 is a MemcardConnectState whose five fields are copied into mUnknown94 through the
      * compiler-generated assignment, a2 becomes mUnknownc8, a3 and t0 are assigned to mUnknownb8
      * and mUnknownc0, t1 is assigned to mUnknownac, and t2 becomes mUnknowne4. It also clears
      * mUnknownd8.
@@ -113,7 +113,7 @@ public:
      * @param last Assigned to mUnknowne4.
      * @ghidraAddress 0x00372488
      */
-    virtual void OnUnknownSlot39(const MetRemixSelection &selection,
+    virtual void OnUnknownSlot39(const MemcardConnectState &selection,
                                  int selector,
                                  HxStr first,
                                  HxStr second,
@@ -167,7 +167,7 @@ public:
     virtual void OnUnknownSlot2(const HxStr &text);
 
 private:
-    MetRemixSelection mUnknown94;           // +0x94
+    MemcardConnectState mUnknown94;         // +0x94
     std::vector<FreqAppearance> mUnknownac; // +0xac
     HxStr mUnknownb8;                       // +0xb8
     HxStr mUnknownc0;                       // +0xc0

@@ -8,9 +8,6 @@
 
 namespace {
 
-// Value the record's port, free count and type all start at.
-constexpr int kMemcardSlotUnknown = -1;
-
 // First multi-tap entry in the parallel slot tables.
 constexpr int kFirstMultiTapSlot = 2;
 
@@ -22,13 +19,6 @@ GetConnectStateMCT::GetConnectStateMCT(MemcardUser *pUser,
                                        int nPortSlot,
                                        int nCookie)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
-    mConnectState.mPortSlot = kMemcardSlotUnknown;
-    // The binary constructs the member from the literal in place rather than assigning to a
-    // default-constructed one.
-    mConnectState.mSlotName = "";
-    mConnectState.mFree = kMemcardSlotUnknown;
-    mConnectState.mType = kMemcardSlotUnknown;
-    mConnectState.mFormatted = 0;
 }
 
 // 0x001849c8

@@ -2,11 +2,11 @@
 
 #include <vector>
 
+#include "memcard/memcardconnectstate.h"
 #include "memcard/memcarduser.h"
 #include "met/metkbuser.h"
 #include "met/metpersonadata.h"
 #include "met/metscreen.h"
-#include "met/metsonglists.h"
 #include "os/hxstr.h"
 
 /**
@@ -26,8 +26,8 @@
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the
  * container. It writes `+0x8c` and `+0x90`, which are the two secondary vptrs, then zeroes
  * mUnknown98 and mUnknown9c, default-constructs mPersonas and mUnknownac, zeroes mUnknownbc, and
- * default-constructs the CardSlot mUnknownc0, whose name starts from the empty literal at
- * `0x00805160`.
+ * default-constructs the MemcardConnectState mUnknownc0, whose name starts from the empty literal
+ * at `0x00805160`.
  *
  * The object is at least 0xd8 bytes. Nothing derives from the class, so no base offset in any
  * descriptor pins the total, and the figure is the lower bound the constructor's highest store
@@ -89,7 +89,7 @@ public:
      */
     static void StartSave(const std::vector<HxStr> &screens,
                           MetPersonaData *pPersona,
-                          const CardSlot &slot,
+                          const MemcardConnectState &slot,
                           int nUnknown9c,
                           int nUnknown98);
 
@@ -195,7 +195,7 @@ private:
      */
     void SetSaveRequest(const std::vector<HxStr> &screens,
                         MetPersonaData *pPersona,
-                        const CardSlot &slot);
+                        const MemcardConnectState &slot);
 
     // Cleared by StartSave(). The constructor does not write it. +0x94
     int mUnknown94;
@@ -210,7 +210,7 @@ private:
     // The persona to save, which SetSaveRequest() records. Not written by the constructor. +0xb8
     MetPersonaData *mUnknownb8;
     int mUnknownbc; // +0xbc
-    // The card location to save to. The constructor's inline CardSlot construction stores
-    // mUnknown10, mUnknown14, and mUnknown0c out of offset order. +0xc0
-    CardSlot mUnknownc0;
+    // The card location to save to. The constructor's inline MemcardConnectState construction
+    // stores mType, mFormatted, and mFree out of offset order. +0xc0
+    MemcardConnectState mUnknownc0;
 };

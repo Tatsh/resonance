@@ -2,9 +2,9 @@
 
 #include <vector>
 
+#include "memcard/memcardconnectstate.h"
 #include "met/listdataprovider.h"
 #include "met/metmemcardpickeruser.h"
-#include "met/metremixselection.h"
 #include "met/metsaveremix.h"
 
 class HxStr;
@@ -32,13 +32,13 @@ struct MetRemixRecord;
  * MetSaveRemix constructor at `0x00372120` with `mcrd` for the screen name, `metagame/Shared` for
  * the directory, and `memcard_remix_del` for the container, writes its four vptrs, zeroes
  * mUnknownf4, mUnknownfc, mUnknown100, and mUnknown104, default-constructs the two
- * MetRemixSelection records, zeroes mUnknown138 and mUnknown13c, clears MetScreen::mUnknown60,
+ * MemcardConnectState records, zeroes mUnknown138 and mUnknown13c, clears MetScreen::mUnknown60,
  * and pushes `mem_del_remix` into the container object-name vector MetScreen declares at `+0x38`.
  *
  * An earlier reading recorded the span from `+0x10c` to `+0x137` as reserved, on the grounds that
  * the constructor addresses a nested object through a register it could not resolve. The two
  * registers are `+0x108` and `+0x120`, exactly 0x18 apart, and each receives the identical
- * five-store run from the same empty literal at `0x00805ca8`. Both are MetRemixSelection records.
+ * five-store run from the same empty literal at `0x00805ca8`. Both are MemcardConnectState records.
  *
  * The destructor at `0x003397a8` restores the four vptrs, deletes mUnknownf4 through slot 1 of a
  * table at `+0x94` of the object itself, which is where ScrollingList places its vptr, releases
@@ -338,9 +338,9 @@ private:
     int mUnknownfc;  // +0xfc
     int mUnknown100; // +0x100
     int mUnknown104; // +0x104
-    // The two remixes the screen tracks. +0x108 and +0x120
-    MetRemixSelection mUnknown108;
-    MetRemixSelection mUnknown120;
+    // Two memory-card locations the screen tracks. +0x108 and +0x120
+    MemcardConnectState mUnknown108;
+    MemcardConnectState mUnknown120;
     int mUnknown138; // +0x138
     int mUnknown13c; // +0x13c
 };

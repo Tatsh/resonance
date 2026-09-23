@@ -218,8 +218,8 @@ void MetStageFinishScreen::EnterAndShow() {
                 MetPersonaSaverScreen::StartSave(
                     screens, pPersona, GlobalSettings::shared()->mCardSlots[0], 0, 0);
             } else {
-                CardSlot slot;
-                slot.mName = kDefaultCardSlotName;
+                MemcardConnectState slot;
+                slot.mSlotName = kDefaultCardSlotName;
                 slot.mPortSlot = kDefaultCardSlotPort;
                 MetPersonaSaverScreen::StartSave(screens, pPersona, slot, 0, 0);
             }

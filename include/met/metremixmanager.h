@@ -11,7 +11,7 @@
 #include "os/hxstr.h"
 
 class MetRenderer;
-struct CardSlot;
+struct MemcardConnectState;
 
 /**
  * Manager of the remix catalogue, which also presents itself as a dialogue screen.
@@ -253,7 +253,7 @@ public:
      * @ghidraAddress 0x00353350
      */
     void ListRemixes(const std::vector<HxStr> &returnScreens,
-                     std::vector<CardSlot> slots,
+                     std::vector<MemcardConnectState> slots,
                      int bLoadPlayList);
 
     /**

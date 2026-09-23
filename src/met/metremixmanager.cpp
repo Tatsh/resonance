@@ -6,6 +6,7 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "game/globalsettings.h"
+#include "memcard/memcardconnectstate.h"
 #include "memcard/memcardmanager.h"
 #include "memcard/remixindex.h"
 #include "met/metmsgscreen.h"
@@ -141,7 +142,7 @@ inline HxStr ConfigText(const char *pszKey) {
 
 // The display name of the first memory-card slot, or the empty string.
 inline const char *FirstCardSlotText() {
-    return PathOrEmpty(GlobalSettings::shared()->mCardSlots[0].mName);
+    return PathOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName);
 }
 
 // Replaces a list of screen names by clearing, resizing, and then assigning, which is the sequence
@@ -315,7 +316,7 @@ inline void MetRemixManager::NextTrack() {
 
 // 0x00353350
 void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
-                                  std::vector<CardSlot> slots,
+                                  std::vector<MemcardConnectState> slots,
                                   int bLoadPlayList) {
     CacheSharedInstance(); // Yes, the binary resolves its own instance first and ignores it.
     ReplaceScreens(mUnknownac, returnScreens);
@@ -342,10 +343,10 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     }
     if (cardSlots.size() != 0) {
         ++nParts;
-        slotNames = slots[cardSlots[0]].mName;
+        slotNames = slots[cardSlots[0]].mSlotName;
         for (unsigned i = 1; i < cardSlots.size(); ++i) {
             slotNames.Insert(slotNames.mLen, HxStr(kSlotNameSeparator));
-            slotNames.Insert(slotNames.mLen, slots[cardSlots[i]].mName);
+            slotNames.Insert(slotNames.mLen, slots[cardSlots[i]].mSlotName);
         }
         cardText = FormatString(PathOrEmpty(ConfigText(kMemLoadDialogue)), PathOrEmpty(slotNames));
     }

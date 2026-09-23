@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "memcard/memcardconnectstate.h"
 #include "os/hxstr.h"
 
 /**
@@ -55,30 +56,6 @@ struct ArenaListEntry {
 inline bool operator<(const ArenaListEntry &left, const ArenaListEntry &right) {
     return left.mOrder < right.mOrder;
 }
-
-/**
- * A memory-card location, as the front end's memory-card screens store it.
- *
- * The record is 0x18 bytes. mPortSlot combines the port in its high byte with the multitap slot in
- * its low byte, which NextCardSlot() establishes: `1` and `1-A` are 0, `1-B` is 1, and `2` is
- * 0x100. The screens store one at `+0xbc`, and the game-wide object the accessor at `0x0018b9c8`
- * vends stores a vector of them at `+0x60`. The name is a placeholder.
- */
-struct CardSlot {
-    /**
-     * Start with no location and an empty name.
-     *
-     * Inline. NextCardSlot() expands it on its stack.
-     */
-    CardSlot() : mPortSlot(-1), mName(""), mUnknown0c(-1), mUnknown10(-1), mUnknown14(0) {
-    }
-
-    int mPortSlot;  /*!< The port in the high byte and the slot in the low byte, or -1. +0x00 */
-    HxStr mName;    /*!< The location as the screens display it. +0x04 */
-    int mUnknown0c; /*!< Purpose unrecovered. -1 by default. +0x0c */
-    int mUnknown10; /*!< Purpose unrecovered. -1 by default. +0x10 */
-    int mUnknown14; /*!< Purpose unrecovered. 0 by default. +0x14 */
-};
 
 /**
  * Report the display name of a difficulty.
@@ -152,19 +129,20 @@ std::vector<ArenaListEntry> *GetArenaList();
  * Report the memory-card location that follows another.
  *
  * Port 1 without a multitap is followed by port 2, port 2 by port 1, slot 1-A by slot 1-B, and
- * slot 1-B by slot 1-A. Any other location gives the default CardSlot. The memory-card screens
- * call it to cycle the selected card.
+ * slot 1-B by slot 1-A. Any other location gives the default MemcardConnectState. The memory-card
+ * screens call it to cycle the selected card.
  *
  * @param slot The current location.
  * @return The next location.
  * @ghidraAddress 0x003d0a40
  */
-CardSlot NextCardSlot(const CardSlot &slot);
+MemcardConnectState NextCardSlot(const MemcardConnectState &slot);
 
 /**
  * Report the name of the first memory-card location found, or `1` when there is none.
  *
- * The body reads the vector of CardSlot at `+0x60` of the game-wide object the accessor at
+ * The body reads the vector of MemcardConnectState at `+0x60` of the game-wide object the accessor
+ * at
  * `0x0018b9c8` vends, and is not written because that object's class is unrecovered. The front
  * end's character, remix, and Freq-maker screens call it.
  *
