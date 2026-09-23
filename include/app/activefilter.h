@@ -40,8 +40,9 @@ public:
     /**
      * Withdraw the pending step and release the command.
      *
-     * The deleting variant at `0x001000b8` frees the object under the `ActiveFilter` tag and has
-     * no caller.
+     * The variant at `0x001000b8` takes the destructor flags, runs this body, and frees the object
+     * under the `ActiveFilter` tag only when bit 0 of the flags is set. AxeFX::~AxeFX() calls it
+     * at `0x0019b178` with flags 2 for its embedded filter.
      *
      * @ghidraAddress 0x00100100
      */

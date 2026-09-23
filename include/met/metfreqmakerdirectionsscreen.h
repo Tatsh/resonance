@@ -175,8 +175,8 @@ public:
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
 private:
-    // 0x0026a008. The cell at one row and column of a page table. The body does not read this
-    // object.
+    // 0x0026a008
+    // The cell at one row and column of a page table. The body does not read this object.
     const HxStr &PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]);
 
     Rnd::View *mRowTemplate; // +0x90, resolved by slot 38

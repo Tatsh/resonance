@@ -178,16 +178,18 @@ GridCell g_gridBottomLeft(0, 2);
 GridCell g_gridTopRight(7, 0);
 GridCell g_gridBottomRight(7, 2);
 
-// 0x00272268. Negate a value unless it is already negative. The product is taken in double
-// precision. The routine is never called.
+// 0x00272268
+// Negate a value unless it is already negative. The product is taken in double precision. The
+// routine is never called.
 inline void ForceNonPositive(float &flValue) {
     if (!(flValue < 0.0f)) {
         flValue = static_cast<float>(static_cast<double>(flValue) * -1.0);
     }
 }
 
-// 0x002722c8. Negate a value when it is negative. The product is taken in double precision. The
-// routine is never called.
+// 0x002722c8
+// Negate a value when it is negative. The product is taken in double precision. The routine is
+// never called.
 inline void ForceNonNegative(float &flValue) {
     if (flValue < 0.0f) {
         flValue = static_cast<float>(static_cast<double>(flValue) * -1.0);

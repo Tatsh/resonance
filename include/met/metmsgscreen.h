@@ -152,6 +152,7 @@ public:
      * Inline. Show() and ShowActive() expand it, and `0x002f0230` is its uncalled out-of-line copy.
      *
      * @param name The new name.
+     * @ghidraAddress 0x002f0230
      */
     void SetName(const HxStr &name) {
         mName = name;
@@ -163,6 +164,7 @@ public:
      * Inline. `0x002f0250` is its uncalled out-of-line copy.
      *
      * @param title The new title.
+     * @ghidraAddress 0x002f0250
      */
     void SetTitle(const HxStr &title) {
         mTitle = title;
@@ -174,6 +176,7 @@ public:
      * Inline. `0x002f0270` is its uncalled out-of-line copy.
      *
      * @param text The new text.
+     * @ghidraAddress 0x002f0270
      */
     void SetText(const HxStr &text) {
         mText = text;
@@ -299,8 +302,8 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x002f0610. Inline, and HandleMessage() expands it. The address is its uncalled out-of-line
-    // copy.
+    // 0x002f0610
+    // Inline, and HandleMessage() expands it. The address is its uncalled out-of-line copy.
     void ForwardToOwner(Message *pMsg) {
         mOwner->Handle(pMsg);
     }

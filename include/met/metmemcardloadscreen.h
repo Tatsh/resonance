@@ -71,6 +71,7 @@ public:
      * Inline. `0x002d1d88` is its uncalled out-of-line copy. The title is inferred.
      *
      * @param pUser The requester.
+     * @ghidraAddress 0x002d1d88
      */
     static void OpenPicker(MetMemCardPickerUser *pUser);
 
