@@ -503,6 +503,16 @@ public:
      */
     void DisplayText(const HxStr &text);
 
+    /**
+     * Report the jukebox song title.
+     *
+     * The image has no caller. Overlay copies mSongName directly instead. The name is inferred.
+     *
+     * @return A copy of mSongName.
+     * @ghidraAddress 0x001937a8
+     */
+    HxStr GetSongName() const;
+
 private:
     Application *mApp; // +0x08
 

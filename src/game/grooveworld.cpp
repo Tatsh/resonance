@@ -643,6 +643,11 @@ void GrooveWorld::DisplayText(const HxStr &text) {
     }
 }
 
+// 0x001937a8
+HxStr GrooveWorld::GetSongName() const {
+    return mSongName;
+}
+
 // 0x00194de8
 void GrooveWorld::AddNetPlayer(int nId,
                                [[maybe_unused]] int nUnused,

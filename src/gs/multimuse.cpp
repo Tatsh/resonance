@@ -31,6 +31,19 @@ void MultiMuse::SaveFields(OBStream &stream) {
     }
 }
 
+// 0x001a8808
+void MultiMuse::Append(const MultiMuse &other) {
+    mEntries.reserve(other.mEntries.size());
+    for (std::vector<TickObj<MuseMsg *> >::const_iterator it = other.mEntries.begin();
+         it != other.mEntries.end();
+         ++it) {
+        TickObj<MuseMsg *> entry;
+        entry.mValue = static_cast<MuseMsg *>(it->mValue->Clone());
+        entry.mPosition = it->mPosition;
+        mEntries.push_back(entry);
+    }
+}
+
 // 0x001a9650
 void MultiMuse::Add(MuseMsg *pMsg, int nTick, int bCheckLast) {
     TickObj<MuseMsg *> entry;

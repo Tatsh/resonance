@@ -116,6 +116,18 @@ public:
     MuseMsg *Find(int nTick);
 
     /**
+     * Append a Clone() of every message of another sequence, at the same song positions.
+     *
+     * mEntries is first grown to hold at least as many entries as the other sequence has. The
+     * existing entries are kept and the new ones are appended without sorting. The image has no
+     * caller, and the name is inferred.
+     *
+     * @param other The sequence to copy from.
+     * @ghidraAddress 0x001a8808
+     */
+    void Append(const MultiMuse &other);
+
+    /**
      * Every message of the sequence, in ascending song position.
      *
      * Public because MultiMusePlayer::Start() reads the start and the finish directly, through a
