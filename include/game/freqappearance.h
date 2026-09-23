@@ -34,6 +34,17 @@
 class FreqAppearance {
 public:
     /**
+     * Construct the appearance a new player starts with.
+     *
+     * The username starts as the literal `initial name`, a fresh 0xb0-byte detail object is
+     * allocated, and the skill status is cleared. PSJoinRequestPacket, SPJoinAcceptPacket, and
+     * PlayerInfo reach it through their own constructors.
+     *
+     * @ghidraAddress 0x001745b8
+     */
+    FreqAppearance();
+
+    /**
      * Copy another appearance.
      *
      * The three members are initialised first and the assignment below then replaces the string

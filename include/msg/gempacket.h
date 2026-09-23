@@ -60,15 +60,12 @@ public:
         /**
          * Read the five values back from a stream.
          *
-         * The body is not written yet. It reads mGem, mTrans, and mBar, calls Mid::MBT::Load() for
-         * mLoc, and reads the identifier into an eight-byte local pair of a cached pointer and an
-         * identifier, initialised to a null pointer and -1. It then resolves the pair: -1 yields a
-         * null pointer, kIDableUnregistered yields the one static NullPlayer the translation unit
-         * at `0x00132618` constructs at `0x0066f930`, and any other value indexes the
-         * IDable<Player> table at `0x0066f920`. Two things block the body. The pair is an inline
-         * member of a class the image never emits out of line and no descriptor, allocation tag,
-         * or literal supplies a name for, and both the table and the static NullPlayer are
-         * unreachable from here at present.
+         * Reads mGem, mTrans, and mBar, calls Mid::MBT::Load() for mLoc, and reads the identifier
+         * into a local IDablePtr<Player>. Resolving it differs from IDablePtr's own conversion in
+         * one respect. An identifier of -1 yields a null pointer here, while the conversion the
+         * packets' Print() bodies expand would index the table at -1. The other two cases agree:
+         * kIDableUnregistered yields g_nullPlayer and any other value indexes the IDable<Player>
+         * table.
          *
          * @param stream The stream to read from.
          * @ghidraAddress 0x001a2630

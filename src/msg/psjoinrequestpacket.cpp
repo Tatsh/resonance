@@ -1,5 +1,21 @@
 #include "msg/psjoinrequestpacket.h"
 
+#include <iostream>
+
+// 0x003eef50
+PSJoinRequestPacket::PSJoinRequestPacket() {
+}
+
+// 0x003e4a98
+Message *PSJoinRequestPacket::New() {
+    return new PSJoinRequestPacket;
+}
+
+// 0x003f1f38
+void PSJoinRequestPacket::Print(std::ostream &stream) {
+    mUnknown14.Print(stream);
+}
+
 // 0x003eeeb8. Clone allocates and hands off to the copy constructor at 0x003f2dc0, which is
 // the compiler expanding the implicit one.
 Message *PSJoinRequestPacket::Clone() {

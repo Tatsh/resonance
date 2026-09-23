@@ -9,6 +9,11 @@ constexpr int kRecordVersion = 8;
 
 } // namespace
 
+// 0x001745b8
+FreqAppearance::FreqAppearance()
+    : mUnknown00("initial name"), mDetail(new FreqAppearanceDetail), mUnknown0c(0) {
+}
+
 // 0x00174668
 FreqAppearance::FreqAppearance(const FreqAppearance &other)
     : mUnknown00("initial name"), mDetail(new FreqAppearanceDetail), mUnknown0c(0) {

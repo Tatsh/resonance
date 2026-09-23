@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
@@ -99,6 +101,20 @@ public:
      * @ghidraAddress 0x00187be8
      */
     GameParams &operator=(const GameParams &other);
+
+    /**
+     * Write the settings to a diagnostic stream on one line, ending it with a newline.
+     *
+     * Not virtual. The labels are `GameParams:`, ` level=`, ` arena=`, ` friends=`, then ` game` or
+     * ` jam` for a play mode of 1 or anything else, ` difficulty=`, ` constrain-jam` when
+     * mUnknown24 is set, and then `netgame=`, `loadinggame=`, and `jukeboxmode=`, each of the last
+     * three written with no separating space. SPJoinAcceptPacket, BSLoadLevelPacket, and
+     * SCLoadLevelPacket call it from their own Print().
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x00187570
+     */
+    void Print(std::ostream &stream);
 
     /**
      * The level the session plays. +0x00

@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "game/idableptr.h"
 #include "game/player.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
@@ -38,23 +39,42 @@ void GemPacket::Print(std::ostream &stream) {
 void GemPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mFields.Save(stream);
-    stream << mTr;
-    stream << mUnknown0c;
+
+    int tr = mTr;
+    int unknown0c = mUnknown0c;
+    stream.Write(&tr, sizeof(tr)).Write(&unknown0c, sizeof(unknown0c));
 }
 
 // 0x003e8368
 void GemPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mFields.Load(stream);
-    stream >> mTr;
-    stream >> mUnknown0c;
+    stream.Read(&mTr, sizeof(mTr)).Read(&mUnknown0c, sizeof(mUnknown0c));
 }
 
-// 0x001a2560
+// 0x001a2560. The stream Mid::MBT::Save() returns is not used.
 void GemPacket::Fields::Save(OBStream &stream) {
-    stream << mGem << mTrans << mBar;
-    mLoc.Save(stream);
-    stream << mPlayer->mId20;
+    int gem = mGem;
+    int trans = mTrans;
+    int bar = mBar;
+    OBStream &rest =
+        stream.Write(&gem, sizeof(gem)).Write(&trans, sizeof(trans)).Write(&bar, sizeof(bar));
+    mLoc.Save(rest);
+
+    int id = mPlayer->mId20;
+    rest.Write(&id, sizeof(id));
+}
+
+// 0x001a2630. The binary tests the local's cached pointer before the -1 case, and that pointer
+// is always null here, so the order does not change the result.
+void GemPacket::Fields::Load(IBStream &stream) {
+    IBStream &rest =
+        stream.Read(&mGem, sizeof(mGem)).Read(&mTrans, sizeof(mTrans)).Read(&mBar, sizeof(mBar));
+    mLoc.Load(rest);
+
+    IDablePtr<Player> player;
+    rest.Read(&player.mId, sizeof(player.mId));
+    mPlayer = player.mId == -1 ? nullptr : static_cast<Player *>(player);
 }
 
 // 0x001a2ce0

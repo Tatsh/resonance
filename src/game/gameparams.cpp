@@ -1,5 +1,7 @@
 #include "game/gameparams.h"
 
+#include <iostream>
+
 // 0x00187170
 GameParams::GameParams() {
     mUnknown10 = 0;
@@ -91,6 +93,15 @@ void GameParams::Load(IBStream *pStream) {
     mUnknown28 = unknown28 != 0;
     mUnknown2c = unknown2c != 0;
     mJukeboxMode = unknown30 != 0;
+}
+
+// 0x00187570
+void GameParams::Print(std::ostream &stream) {
+    stream << "GameParams:" << " level=" << mLevelName << " arena=" << mArenaName
+           << " friends=" << mUnknown10 << " " << (mUnknown1c == 1 ? " game" : " jam")
+           << " difficulty=" << mUnknown20 << " " << (mUnknown24 ? " constrain-jam" : "")
+           << "netgame=" << mUnknown28 << "loadinggame=" << mUnknown2c
+           << "jukeboxmode=" << mJukeboxMode << std::endl;
 }
 
 // 0x00187be8

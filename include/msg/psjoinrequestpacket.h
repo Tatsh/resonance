@@ -11,15 +11,34 @@
  * copy constructor at `0x003f2dc0`, which Clone() delegates to, and it accounts for the
  * allocation exactly. The four words Packet owns are declared there rather than here.
  *
- * The class overrides Message::Print() at `0x003f1f38`. That body streams the payload and is not
- * recovered, so the override is recorded here rather than declared.
- *
  * Its vtable has eight entries and a zero terminator at index 8. Slots 6 and 7 are its own
  * overrides rather than the inherited Packet ones at `0x003f1de8` and `0x003f1ea0`. Neither
- * override calls the base: each repeats the four-word transfer inline and adds the appearance.
+ * override calls the base. Each repeats the four-word transfer inline and adds the appearance.
+ *
+ * The destructor at `0x003eee18` is compiler-generated and has no declaration here.
  */
 class PSJoinRequestPacket : public ToHostPacket {
 public:
+    /**
+     * Construct a packet with a fresh appearance.
+     *
+     * The image lists no caller for the out-of-line body. New() expands the same stores in place.
+     *
+     * @ghidraAddress 0x003eef50
+     */
+    PSJoinRequestPacket();
+
+    /**
+     * Produce a packet with a fresh appearance on the heap.
+     *
+     * The registry the translation unit at `0x003ed2e0` builds stores this address against
+     * g_nPSJoinRequestPacketType.
+     *
+     * @return The packet.
+     * @ghidraAddress 0x003e4a98
+     */
+    static Message *New();
+
     /**
      * Produce a heap copy of this packet.
      *
@@ -64,6 +83,16 @@ public:
      * @ghidraAddress 0x003e5638
      */
     virtual void Load(IBStream &stream);
+
+    /**
+     * Write the appearance to a diagnostic stream through FreqAppearance::Print().
+     *
+     * Slot 5.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x003f1f38
+     */
+    virtual void Print(std::ostream &stream);
 
 private:
     FreqAppearance mUnknown14; // +0x14

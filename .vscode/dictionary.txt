@@ -145,8 +145,10 @@ erss
 esbenp
 execv
 ezmidi
+ezmpeg
 fadegamemsg
 failsink
+favorite
 fbmsk
 fbrst
 fileobject
@@ -212,20 +214,25 @@ hudbadge
 hudcountdown
 hudeffects
 hudenergy
+hudfeedback
 hudfreq
 hudgenmessage
 hudhighlight
 hudletterbox
 hudloop
+hudpanel
 hudpoints
+hudposition
 hudpowerup
 hudscore
 hudscorepulse
+hudscreenflash
 hudtcgroup
 hudtextmessage
 hudtrack
 hudtracklabel
 hudutil
+hudwinmessage
 hxcons
 hxmemstream
 hxstr
@@ -258,6 +265,7 @@ jsonnet
 jsonschema
 juiceamountmsg
 juke
+jukeboxmode
 jukeboxplaylist
 keychannel
 keyframed
@@ -277,6 +285,7 @@ libdma
 libera
 libgraph
 libmc
+libmpeg
 libmtap
 libscf
 libsd
@@ -295,6 +304,7 @@ listpan
 listremixesmct
 loadfilemct
 loadgame
+loadinggame
 loadremixmct
 lobbyconnectionlostmsg
 localplayer
@@ -406,6 +416,7 @@ mypy
 myreadline
 nearesttrackmsg
 netflow
+netgame
 netplayer
 neut
 neutralizemsg
@@ -459,6 +470,7 @@ playmaplinear
 playmaprepeatring
 playmapring
 playsound
+plid
 pmgr
 pngr
 pointamountmsg
@@ -559,6 +571,7 @@ sifdev
 signalmodule
 singlepowerupcollection
 skillstats
+skillz
 slerp
 sliceobject
 smgs
