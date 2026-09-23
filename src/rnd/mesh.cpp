@@ -8,12 +8,14 @@
 
 #include "math/box.h"
 #include "math/color.h"
+#include "math/frustum.h"
 #include "math/quaternion.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
 #include "netflow/netflow.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "rnd/cam.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
 #include "rnd/meshanim.h"
@@ -183,6 +185,10 @@ constexpr float kCoplanarCosine = 0.99939f;
 constexpr int kNoVert = -1;
 
 constexpr float kOneThird = 1.0f / 3.0f;
+
+// Row of a camera's world transform along which it looks, and the translation row of a transform.
+constexpr int kCamDepthAxis = 1;
+constexpr int kXfmTranslationRow = kXfmRowCount - 1;
 
 // Whether two faces use the same three vertices in any order.
 inline bool SameCorners(const MeshFace &a, const MeshFace &b) {
@@ -620,7 +626,11 @@ Mesh *(*g_pfnNewMesh)(const HxStr &name) = NewMesh;
 
 // 0x004926f0
 Mesh *NewMeshThroughHook(const HxStr &name) {
-    return g_pfnNewMesh(name);
+    try {
+        return g_pfnNewMesh(name);
+    } catch (...) {
+        return nullptr; // The binary's handler returns null.
+    }
 }
 
 // 0x00492f50
@@ -1738,6 +1748,54 @@ void Mesh::ClearSharedGeometry() {
         mFaces.clear();
         mEdges.clear();
     }
+}
+
+// 0x00480818
+int Mesh::PrepareDraw(Sphere &worldSphere) {
+    if (mFacesOwner->mFaces.size() == 0 && mFacesOwner->mEdges.size() == 0) {
+        return 0;
+    }
+
+    Cam *pCam = g_pCurrentCam;
+    if (mSphere.mRadius == 0.0f) {
+        return 1;
+    }
+
+    Sphere sphere;
+    TransformPoint(mTransOwner->mWorldXfm, &mSphere.mCenter.x, &sphere.mCenter.x);
+    sphere.mRadius = mSphere.mRadius;
+    worldSphere = sphere;
+    if (IsSphereOutsideFrustum(worldSphere, pCam->mWorldFrustum) != 0) {
+        return 0;
+    }
+
+    if (mMinScreen == 0.0f) {
+        return 1;
+    }
+
+    // The depth is the centre's y component in camera space, the axis a camera looks along.
+    const float flDepth = worldSphere.mCenter.x * pCam->mWorldXfm[kCamDepthAxis][0] +
+                          worldSphere.mCenter.y * pCam->mWorldXfm[kCamDepthAxis][1] +
+                          worldSphere.mCenter.z * pCam->mWorldXfm[kCamDepthAxis][2] +
+                          pCam->mWorldToCam[kXfmTranslationRow].y;
+    const float flScreenSize =
+        worldSphere.mRadius * pCam->mLocalProject[0].x / std::fabs(flDepth) * pCam->mScreenRect.w;
+    if (mMinScreen <= flScreenSize) {
+        return 1;
+    }
+
+    Mesh *pLevel = mNext;
+    while (pLevel != nullptr && flScreenSize < pLevel->mMinScreen) {
+        pLevel = pLevel->mNext;
+    }
+    if (pLevel == nullptr) {
+        return 0;
+    }
+
+    const float flRadius = pLevel->mSphere.mRadius;
+    pLevel->Draw();
+    pLevel->mSphere.mRadius = flRadius; // Yes, the binary writes the radius back after the draw.
+    return 0;
 }
 
 } // namespace Rnd

@@ -715,7 +715,8 @@ Object *CreateRegisteredMesh(const HxStr &name);
  * Build a mesh through g_pfnNewMesh, without the narrowing CreateRegisteredMesh() performs.
  *
  * The one recovered reference to this routine is its entry in the exception range table at
- * `0x00868634`, and nothing in the image calls it. The title follows Rnd::NewCamThroughHook().
+ * `0x00868634`, and nothing in the image calls it. The title follows Rnd::NewCamThroughHook(). The
+ * binary also expands this inline at its callers.
  *
  * @param name The object name.
  * @return The new mesh.
