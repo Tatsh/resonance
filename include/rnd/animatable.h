@@ -762,6 +762,18 @@ public:
     void RemoveFilter(int nIndex);
 
     /**
+     * Return the filter at one position in mFilters.
+     *
+     * The position is not tested against the list. The out-of-line copy has no caller, and the
+     * title is inferred.
+     *
+     * @param nIndex How far into mFilters the filter sits.
+     * @return The filter.
+     * @ghidraAddress 0x0049a0b0
+     */
+    Filter *FilterAt(int nIndex);
+
+    /**
      * Change the multiplier of the ScaleOffset stage at the front of mFilters.
      *
      * The addend is recomputed as well, so the stage maps the current mFrame to the same output

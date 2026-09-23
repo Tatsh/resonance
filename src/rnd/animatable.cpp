@@ -597,6 +597,15 @@ void Animatable::RemoveFilter(int nIndex) {
     mFilters.erase(it);
 }
 
+// 0x0049a0b0
+Animatable::Filter *Animatable::FilterAt(int nIndex) {
+    std::list<Filter *>::iterator it = mFilters.begin();
+    for (int i = 0; i < nIndex; ++i) {
+        ++it;
+    }
+    return *it;
+}
+
 // 0x004950e8
 Animatable::Filter *Animatable::NewFilter(int nType) {
     switch (nType) {
