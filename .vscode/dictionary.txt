@@ -681,6 +681,7 @@ socketmodule
 solopowerbarmgr
 soloremix
 soloscreenanim
+spewregistrar
 spjoinacceptpacket
 spjoindenypacket
 srcs
