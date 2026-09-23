@@ -25,3 +25,8 @@ MetMemDetectStartup::MetMemDetectStartup(MetRenderer *pRenderer, int nPriority)
 MetMemDetectStartup::~MetMemDetectStartup() {
     delete mFade;
 }
+
+// 0x002e2e30
+MetMemDetectStartup *MetMemDetectStartup::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetMemDetectStartup(pRenderer, nPriority);
+}

@@ -3,11 +3,16 @@
 #include <map>
 
 #include "app/playsound.h"
+#include "met/metlogoscreen.h"
+#include "met/metmemdetectstartup.h"
+#include "met/metmsgscreen.h"
 #include "met/metrenderer.h"
+#include "met/metsonyscreen.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "os/mem.h"
+#include "os/zone.h"
 #include "rnd/animatable.h"
 #include "rnd/asyncloader.h"
 #include "rnd/drawable.h"
@@ -34,6 +39,18 @@ static const char *const kCycleLeftSound = "SND_MET_CYCLE_L";
 static const char *const kCycleRightSound = "SND_MET_CYCLE_R";
 static const char *const kHighSound = "SND_MET_HIGH";
 static const char *const kErrorSound = "SND_MET_ERROR";
+
+// What RndAsyncLoader::Poll() reports once a load is finished, which PollContainerLoads() also
+// records in MetContainerLoad::mUnknown04.
+constexpr int kLoadComplete = 1;
+
+// The zone the start-up screens load into.
+static const char *const kGlobalZone = "rndglobal";
+// The registry keys CreateStartupScreens() writes.
+static const char *const kSonyScreenKey = "MetSonyScreen";
+static const char *const kMemDetectStartupKey = "MetMemDetectStartup";
+static const char *const kMsgScreenKey = "MetMsgScreen";
+static const char *const kLogoScreenKey = "MetLogoScreen";
 
 } // namespace
 
@@ -414,4 +431,54 @@ void MetScreen::UpdateExitAnimation(float flTime) {
     if (mUnknown0c + mUnknown04 < flTime) {
         mUnknown78 = 1;
     }
+}
+
+// 0x00383700
+void MetScreen::DestroyAllScreens() {
+    std::map<HxStr, MetScreen *>::iterator screen = ScreenRegistry().begin();
+    while (screen != ScreenRegistry().end()) {
+        delete screen->second;
+        ScreenRegistry().erase(screen++);
+    }
+    std::map<HxStr, MetContainerLoad *>::iterator load = ContainerLoaderMap().begin();
+    while (load != ContainerLoaderMap().end()) {
+        MetContainerLoad *pLoad = load->second;
+        if (pLoad->mLoader != nullptr) {
+            delete pLoad->mLoader;
+            pLoad->mLoader = nullptr;
+        }
+        // Yes, the binary erases the entry without freeing the record it points at.
+        ContainerLoaderMap().erase(load++);
+    }
+}
+
+// 0x00381ef8
+void MetScreen::PollContainerLoads() {
+    for (std::map<HxStr, MetContainerLoad *>::iterator it = ContainerLoaderMap().begin();
+         it != ContainerLoaderMap().end();
+         ++it) {
+        MetContainerLoad *pLoad = it->second;
+        if (pLoad->mUnknown04 != 0) {
+            continue;
+        }
+        float flProgress;
+        if (pLoad->mLoader->Poll(&flProgress) != kLoadComplete) {
+            continue;
+        }
+        pLoad->mUnknown04 = kLoadComplete;
+        std::list<Rnd::Drawable *> draws(pLoad->mLoader->mDrawables);
+        for (std::list<Rnd::Drawable *>::iterator draw = draws.begin(); draw != draws.end();
+             ++draw) {
+            (*draw)->SetShowing(0);
+        }
+    }
+}
+
+// 0x00384300
+void MetScreen::CreateStartupScreens(MetRenderer *pRenderer) {
+    int nZone = FindZoneByName(kGlobalZone);
+    ScreenRegistry()[HxStr(kSonyScreenKey)] = MetSonyScreen::New(pRenderer, nZone);
+    ScreenRegistry()[HxStr(kMemDetectStartupKey)] = MetMemDetectStartup::New(pRenderer, nZone);
+    ScreenRegistry()[HxStr(kMsgScreenKey)] = MetMsgScreen::New(pRenderer, nZone);
+    ScreenRegistry()[HxStr(kLogoScreenKey)] = MetLogoScreen::New(pRenderer, nZone);
 }

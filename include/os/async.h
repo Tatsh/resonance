@@ -271,6 +271,17 @@ void AsyncCheck(int nBlocking);
 void AsyncPumpCompletedRequests();
 
 /**
+ * Report whether the disc is ready to read.
+ *
+ * This build always reports 1. MetRenderer::OnUnknownSlot7() is the one caller, and it shows
+ * `met_disc_prob.view` while the report is 0. The name is inferred from that view.
+ *
+ * @return 1.
+ * @ghidraAddress 0x00460b20
+ */
+int IsMediaReady();
+
+/**
  * Drive completion callback the async layer installs on disc media.
  *
  * The shape is libcdvd's `sceCdCBFunc`, and the argument is the function code of the command that

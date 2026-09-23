@@ -259,6 +259,11 @@ void AsyncQueueRequest(AsyncRequest request) {
     g_asyncPendingJobs.push_back(request);
 }
 
+// 0x00460b20
+int IsMediaReady() {
+    return 1;
+}
+
 void AsyncMediaEventCallback(int nFunction) {
     g_nAsyncOpError = sceCdGetError();
 

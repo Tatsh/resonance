@@ -16,10 +16,13 @@
 #include "met/metcommandmap.h"
 #include "met/metcommandrepeater.h"
 #include "met/metfade.h"
+#include "met/metfreqmakerassetmanager.h"
 #include "met/metfrontendstate.h"
 #include "met/metlogoscreen.h"
+#include "met/metpersonadata.h"
 #include "met/metremixmanager.h"
 #include "met/metscreen.h"
+#include "met/metsonglists.h"
 #include "msg/gameconnectionlostmsg.h"
 #include "msg/isrecordingmsg.h"
 #include "msg/lobbyconnectionlostmsg.h"
@@ -29,7 +32,9 @@
 #include "msg/metstartpausemsg.h"
 #include "msg/metunlockstagesmsg.h"
 #include "msg/rawcontrollermsg.h"
+#include "os/async.h"
 #include "os/hxstr.h"
+#include "os/r250.h"
 #include "os/zone.h"
 #include "profile/profiler.h"
 #include "rnd/animatable.h"
@@ -39,6 +44,8 @@
 #include "rnd/transformable.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
+#include "synth/midi_main.h"
+#include "synth/ps2hardsynth.h"
 
 namespace {
 
@@ -98,6 +105,26 @@ int g_nReturnToLogo;
 // phase is not recovered.
 constexpr int kPlainPausePhase = 5;
 
+// The frame rate the constructor starts mUnknown64 at, in frames per second.
+constexpr float kFrameRate = 500.0f;
+
+// The highest pad index HandleMessage() accepts, which the constructor records in mUnknownd4.
+constexpr int kHighestPadIndex = 4;
+
+// Configuration codes of the two debug overlays the constructor reads.
+constexpr int kTimingGraphConfigCode = 0x397;
+constexpr int kRenderStatsConfigCode = 0x3a2;
+
+// The three scene views ResolveSceneViews() resolves, and the view OnUnknownSlot7() shows while
+// the disc cannot be read.
+static const char *const kTopView = "met top view";
+static const char *const kBackgroundView = "meta bg view";
+static const char *const kScreensView = "metscreens.view";
+static const char *const kDiscProblemView = "met_disc_prob.view";
+
+// The first screen OnUnknownSlot7() activates once the boot containers have loaded.
+static const char *const kStartupScreen = "MetMemDetectStartup";
+
 // The front-end state phase in which OnUnknownSlot5() leaves the music playing. The meaning of
 // the phase is not recovered.
 constexpr int kNoMusicStopPhase = 2;
@@ -153,6 +180,53 @@ void MetRenderer::OnUnknownSlot4() {
     mUnknown68 = kFirstFrame;
     mUnknown70 = FrameClockNs(Application::shared()->GetWatchdog());
     QueryConfigValue(kStartUpConfigCode); // Yes, the binary discards the result.
+}
+
+// 0x00369fb0
+MetRenderer::MetRenderer()
+    : mUnknown68(0.0f), mUnknown80(1), mUnknown60(0), mUnknown64(kFrameRate), mUnknown70(0),
+      mUnknown78(0), mUnknown7c(nullptr), mUnknown90(nullptr), mUnknown94(nullptr), mUnknown98(0),
+      mUnknown9c(nullptr), mUnknowna8(0), mUnknownac(0), mUnknownb0(0), mUnknownb4(1),
+      mUnknownb8(0), mUnknownbc(0), mUnknownc4(nullptr), mUnknownc8(0), mUnknowncc(nullptr),
+      mUnknownd0(0), mUnknownd4(kHighestPadIndex) {
+    sInstance = this;
+    MetFreqMakerAssetManager::Create();
+    MetFreqMakerAssetManager::shared()->StartAssetLoad();
+    MetFrontEndState::Create();
+    GlobalSettings::Create();
+    mUnknown94 = new MetCommandRepeater;
+    mUnknown90 = new MetCommandMap;
+    SeedR250(FrameIntervalMs(FrameClockNs(Application::shared()->GetWatchdog()), 0));
+    RebuildStageLists();
+    RebuildArenaLists();
+    MetPersonaData::ClearSavedList();
+    MetPersonaData::ClearLoadList();
+    CreateCommonLoaders();
+    mUnknownb8 = 1;
+    EnqueueCommonLoaders();
+    mUnknownac = QueryConfigFlag(kTimingGraphConfigCode);
+    mUnknownb0 = QueryConfigFlag(kRenderStatsConfigCode);
+    const Color black{0.0f, 0.0f, 0.0f, kOpaque};
+    g_gfxDevice.SetClearColor(black);
+    SetDoWinSequence(0);
+}
+
+// 0x0036a460
+MetRenderer::~MetRenderer() {
+    delete mUnknown94;
+    mUnknown94 = nullptr;
+    delete mUnknown90;
+    mUnknown90 = nullptr;
+    delete mUnknowncc;
+    mUnknowncc = nullptr;
+    OnUnknownSlot5();
+    UnloadCommonLoaders();
+    UnloadArenaLoader();
+    sInstance = nullptr;
+    MetFrontEndState::Destroy();
+    GlobalSettings::Destroy();
+    MetScreen::DestroyAllScreens();
+    MetFreqMakerAssetManager::Destroy();
 }
 
 // 0x0036b0c0
@@ -658,4 +732,114 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
     OnUnknownSlot4();
     mUnknowncc->FadeOut(kFreqEndedFadeFrames, mUnknown68, this, 0);
     ResolveArenaView(0);
+}
+
+// 0x0036a680
+void MetRenderer::ResolveSceneViews() {
+    // Yes, the binary polls the three boot loaders again and discards every result.
+    float flProgress;
+    sMetagameLoader->Poll(&flProgress);
+    sFontsLoader->Poll(&flProgress);
+    sSharedTexLoader->Poll(&flProgress);
+    mUnknown9c = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kTopView)));
+    mUnknowna4 = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kBackgroundView)));
+    mUnknowna0 = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kScreensView)));
+    MetScreen::CreateStartupScreens(this);
+    mUnknowncc = new MetFade(this);
+}
+
+// 0x0036b190
+void MetRenderer::OnUnknownSlot7() {
+    if (mUnknownb8 != 0) {
+        float flProgress;
+        const int bMetagame = sMetagameLoader->Poll(&flProgress);
+        const int bFonts = sFontsLoader->Poll(&flProgress);
+        const int bSharedTex = sSharedTexLoader->Poll(&flProgress);
+        if (bMetagame != 0 && bFonts != 0 && bSharedTex != 0) {
+            mUnknownb8 = 0;
+            ResolveSceneViews();
+            OnUnknownSlot4();
+            CreateArenaLoader();
+            ActivatePanel(MetScreen::FindScreenByName(HxStr(kStartupScreen)));
+            const Color black{0.0f, 0.0f, 0.0f, kOpaque};
+            g_gfxDevice.SetClearColor(black);
+        }
+    }
+
+    if (mUnknownc8 != 0) {
+        if (IsBankXferBusy() != 0) {
+            AsyncPumpCompletedRequests();
+        } else {
+            Application::shared()->GetSynth()->AllNotesOff();
+            mUnknownc8 = 0;
+            PlaySoundByName(kFrontEndMusic);
+            const Color blue{0.0f, 0.0f, kClearBlue, kOpaque};
+            g_gfxDevice.SetClearColor(blue);
+            if (mUnknownd0 == 0) {
+                ActivatePanel(mUnknownc4);
+            }
+        }
+    }
+
+    if (mUnknownb8 == 0) {
+        if (IsMediaReady() == 0) {
+            Rnd::Drawable *pProblem =
+                dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kDiscProblemView)));
+            pProblem->SetShowing(1);
+            return;
+        }
+        Rnd::Drawable *pProblem =
+            dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kDiscProblemView)));
+        pProblem->SetShowing(0);
+    }
+
+    if (mUnknowna8 == 0) {
+        return;
+    }
+    MetScreen::PollContainerLoads();
+
+    const long long nNowNs = FrameClockNs(Application::shared()->GetWatchdog());
+    const int nIntervalMs = FrameIntervalMs(nNowNs, mUnknown70);
+    mUnknown70 = nNowNs;
+    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecond;
+
+    if (mUnknownd0 != 0) {
+        mUnknowncc->Update(mUnknown68);
+    } else {
+        for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end();
+             ++it) {
+            (*it)->UpdateFrame(mUnknown68);
+            if (mUnknowna8 == 0) {
+                return;
+            }
+            // A screen that pushed or popped another one invalidated the iterator.
+            if (mUnknown98 != 0) {
+                mUnknown98 = 0;
+                break;
+            }
+        }
+        if (mUnknowna8 == 0) {
+            return;
+        }
+        if (mUnknown80 != 0) {
+            mUnknown94->Update(mUnknown7c, &nNowNs);
+        }
+    }
+    mUnknown9c->SetFrame(mUnknown68);
+    mUnknown9c->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
+}
+
+// 0x00371a78
+void MetRenderer::RemoveScreen(MetScreen *pScreen) {
+    for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end(); ++it) {
+        if (*it == pScreen) {
+            Rnd::View *pView = pScreen->mUnknown14;
+            mUnknowna0->RemoveTrans(pView);
+            mUnknowna0->RemoveDraw(pView);
+            mUnknowna0->RemoveAnim(pView);
+            mUnknown84.erase(it);
+            mUnknown98 = 1;
+            return;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 #include "app/msgsource.h"
@@ -63,19 +64,6 @@ class MetFade;
  * `0x00390088` and `0x00390090` are empty bodies that take the renderer. Every caller, from nine
  * screens and the renderer's own OnFreqEnded(), reaches the same single copy of each, so they are
  * ordinary members, OnUnknown00390088() and OnUnknown00390090().
- *
- * The bodies listed below are understood and not written, because each needs a routine that no
- * header in this tree declares yet. The blocking dependency of each is recorded below so that the
- * body can be written once the owning subsystem declares it.
- *
- * - The constructor and the destructor both need the asynchronous-request release at `0x003f8240`
- *   and the four no-argument shutdown helpers at `0x00217fa0`, `0x0018ba48`, `0x00383700`, and
- *   MetFreqMakerAssetManager::Destroy() at `0x002551b8`, reached through its out-of-line forwarder
- *   at `0x00254970`.
- * - OnUnknownSlot7() needs the two asynchronous predicates at `0x00464628` and `0x00460b20`, the
- *   device clear-colour setter at `0x0049b368`, and `0x00381ef8`.
- * - RemoveScreen() reads MetScreen::mUnknown14, which metscreen.h declares protected.
- * - ResolveSceneViews() needs the fade constructor's sibling at `0x00384300`.
  */
 class MetRenderer : public MsgSource, public RendererBase, public FadeUser {
     // MetaGameWorld::OnUnknownQuery003d48c0() at 0x003d48c0 reads mUnknown60 directly.
@@ -552,12 +540,11 @@ private:
     int mUnknownb8; // +0xb8
     // +0xbc. Zeroed by the constructor and read nowhere that has been identified.
     int mUnknownbc;
-    // +0xc0. A std::list, which in this template library is one pointer to a self-linked dummy
-    // node. The constructor creates that node inline under the allocation tag `stl_list` for a
-    // four-byte element, and the destructor clears the list through 0x00272ee8 and returns the
-    // node. Nothing that has been read appends to it or walks it, so the element type is not
-    // recovered and the member is recorded as the four bytes it occupies.
-    unsigned char mUnknownc0[4];
+    // +0xc0. The constructor creates the list's dummy node inline under the allocation tag
+    // `stl_list` for a four-byte element, and the destructor clears the list through 0x00272ee8
+    // and returns the node. Nothing that has been read appends to it or walks it, so the element
+    // type is not recovered, and int stands in for the four-byte element.
+    std::list<int> mUnknownc0;
     // The screen the next fade promotes to the active panel.
     MetScreen *mUnknownc4; // +0xc4
     // Set while the disc-problem phase of the poll routine has work outstanding.

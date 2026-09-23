@@ -52,6 +52,36 @@ public:
     virtual ~MetMemDetectStartup();
 
     /**
+     * Build the screen on the heap.
+     *
+     * MetScreen::CreateStartupScreens() registers this factory. It allocates 0xb0 bytes.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x002e2e30
+     */
+    static MetMemDetectStartup *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Respond to a MetFade fade out having finished.
+     *
+     * FadeUser slot 2, through the FadeUser table entry that adjusts `this` by `-160`.
+     *
+     * @ghidraAddress 0x002e30f0
+     */
+    virtual void OnFadeOutDone();
+
+    /**
+     * Respond to a MetFade fade in having finished.
+     *
+     * FadeUser slot 3, through the FadeUser table entry that adjusts `this` by `-160`.
+     *
+     * @ghidraAddress 0x002e30a0
+     */
+    virtual void OnFadeInDone();
+
+    /**
      * Silence the slide sound.
      *
      * All six overrides are two-instruction stubs, so each was written inline with an empty body.

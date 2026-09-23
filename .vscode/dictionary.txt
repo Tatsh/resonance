@@ -501,6 +501,7 @@ metloadfreqscreen
 metloadgamescreen
 metloadnewfreqscreen
 metloadprefabscreen
+metlogoscreen
 metmcfreqdelscreen
 metmemcardloadscreen
 metmemcardtypescreen
@@ -525,6 +526,7 @@ metscreens
 metsoloendremixscreen
 metsolowinscreen
 metsonglists
+metsonyscreen
 metstagefinishscreen
 metstartnetlaunchmsg
 metstartpausemsg

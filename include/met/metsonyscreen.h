@@ -19,9 +19,7 @@
  * container. It writes `+0x8c`, which is the FadeUser vptr, then `+0x90`, `+0x94`, `+0x98`, and
  * `+0x9c`.
  *
- * The object is at least 0xa0 bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the lower bound the constructor's highest store
- * gives.
+ * The object is 0xa0 bytes, the size New() allocates.
  *
  * The destructor is at `0x003bd7a8`.
  *
@@ -44,6 +42,36 @@ public:
      * @ghidraAddress 0x003bd7a8
      */
     virtual ~MetSonyScreen();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * MetScreen::CreateStartupScreens() registers this factory.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x003bd720
+     */
+    static MetSonyScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Respond to a MetFade fade out having finished.
+     *
+     * FadeUser slot 2, through the FadeUser table entry that adjusts `this` by `-140`.
+     *
+     * @ghidraAddress 0x003bd908
+     */
+    virtual void OnFadeOutDone();
+
+    /**
+     * Respond to a MetFade fade in having finished.
+     *
+     * FadeUser slot 3, through the FadeUser table entry that adjusts `this` by `-140`.
+     *
+     * @ghidraAddress 0x003bd8b8
+     */
+    virtual void OnFadeInDone();
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.

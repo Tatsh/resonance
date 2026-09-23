@@ -287,6 +287,42 @@ public:
     static void CreateMainMenuScreens(MetRenderer *pRenderer);
 
     /**
+     * Delete every registered screen and release every container loader.
+     *
+     * Walks ScreenRegistry(), deleting each screen through its virtual destructor and erasing its
+     * entry, then walks ContainerLoaderMap(), deleting each record's RndAsyncLoader, clearing the
+     * record's pointer, and erasing the entry. The MetContainerLoad records themselves are not
+     * freed. MetRenderer's destructor is the one caller. The title is inferred.
+     *
+     * @ghidraAddress 0x00383700
+     */
+    static void DestroyAllScreens();
+
+    /**
+     * Create the four screens the front end needs before its containers have loaded.
+     *
+     * Registers MetSonyScreen, MetMemDetectStartup, MetMsgScreen, and MetLogoScreen in
+     * ScreenRegistry(), each built by its factory on the renderer with the `rndglobal` zone.
+     * MetRenderer::ResolveSceneViews() is the one caller. The title is inferred.
+     *
+     * @param pRenderer The renderer the screens register on.
+     * @ghidraAddress 0x00384300
+     */
+    static void CreateStartupScreens(MetRenderer *pRenderer);
+
+    /**
+     * Poll every container load that has not finished, and hide the drawables of each that does.
+     *
+     * Each record whose mUnknown04 is clear polls its loader. When the poll reports completion the
+     * record's mUnknown04 is set and every drawable the load produced is hidden through
+     * Rnd::Drawable::SetShowing(). MetRenderer::OnUnknownSlot7() is the one caller. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x00381ef8
+     */
+    static void PollContainerLoads();
+
+    /**
      * Play the sound one navigation command calls for and then act on the command.
      *
      * Not a vtable slot. MetRenderer::HandleMessage at `0x0036c6e8` and three further routines
@@ -834,10 +870,17 @@ protected:
     // through it in slots 5, 19, and 39, which is why it is protected.
     MetRenderer *mUnknown10; // +0x10
 
-    // The container's root view. MetTopLogoScreen's slot 38 resolves it itself, which is why it is
-    // protected.
-    Rnd::View *mUnknown14; // +0x14
+public:
+    /**
+     * The container's root view.
+     *
+     * Public because MetRenderer::RemoveScreen() at `0x00371a78` reads it directly to detach the
+     * view from the screen scene, and the image has no accessor. MetTopLogoScreen's slot 38 also
+     * resolves it itself. +0x14
+     */
+    Rnd::View *mUnknown14;
 
+protected:
     // MetLoadFreqBaseScreen writes 2 in its slot 30 and 0 in its slot 19, and reads it in its slot
     // 36 to choose between the gizmo panels and the three button actions, which is why it is
     // protected.

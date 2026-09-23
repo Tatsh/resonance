@@ -39,6 +39,7 @@ set(RESONANCE_MET_SRCS
     metloadgamescreen.cpp
     metloadnewfreqscreen.cpp
     metloadprefabscreen.cpp
+    metlogoscreen.cpp
     metmcfreqdelscreen.cpp
     metmemcardloadscreen.cpp
     metmemcardtypescreen.cpp
@@ -62,6 +63,7 @@ set(RESONANCE_MET_SRCS
     metsoloendremixscreen.cpp
     metsolowinscreen.cpp
     metsonglists.cpp
+    metsonyscreen.cpp
     metstagefinishscreen.cpp
     mettoplogoscreen.cpp
     mettutorialscreen.cpp

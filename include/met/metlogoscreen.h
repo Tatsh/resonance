@@ -19,9 +19,8 @@
  * a body rather than inheriting the empty MetScreen override. It is also the only class that
  * overrides slot 27.
  *
- * The object is at least 0xb4 bytes. Nothing derives from the class, so no base offset in any
- * descriptor pins the total, and the figure is the lower bound the constructor's highest store
- * gives.
+ * The object is 0xc0 bytes, the size New() allocates. The constructor's highest store is at
+ * `+0xb0`.
  *
  * The destructor is at `0x002be418`.
  *
@@ -45,6 +44,18 @@ public:
      * @ghidraAddress 0x002be418
      */
     virtual ~MetLogoScreen();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * MetScreen::CreateStartupScreens() registers this factory.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x002be390
+     */
+    static MetLogoScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
