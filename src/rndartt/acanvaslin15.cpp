@@ -1,5 +1,12 @@
 #include "rndartt/acanvaslin15.h"
 
+#include <string.h>
+
+#include "rndartt/apalette.h"
+#include "rndartt/apoint.h"
+#include "rndartt/arowspan.h"
+#include "rndartt/astretchspan.h"
+
 namespace {
 
 constexpr unsigned int kColor15Mask = 0x7fff;
@@ -15,6 +22,32 @@ inline unsigned short *RowAt(void *pPixels, int nBytesPerRow, int nY) {
 
 inline unsigned short *PixelAt(void *pPixels, int nBytesPerRow, int nX, int nY) {
     return RowAt(pPixels, nBytesPerRow, nY) + nX;
+}
+
+inline const unsigned char *SourceByteAt(const ABitmap &source, int nX, int nY) {
+    return static_cast<const unsigned char *>(source.mPixels) + (nY * source.mBytesPerRow) + nX;
+}
+
+// Blit15NoClip() walks both rectangles as bytes, because its row advance is not a whole number of
+// pixels.
+inline const unsigned short *HalfwordAt(const unsigned char *pByte) {
+    return static_cast<const unsigned short *>(static_cast<const void *>(pByte));
+}
+
+inline unsigned short *HalfwordAt(unsigned char *pByte) {
+    return static_cast<unsigned short *>(static_cast<void *>(pByte));
+}
+
+// The source, then the canvas, then the global default. Every palette reading override of this
+// class opens with the same three tests.
+inline const APalette *ResolvePalette(const ABitmap &source, const ABitmap &canvas) {
+    if (source.mPalette != nullptr) {
+        return source.mPalette;
+    }
+    if (canvas.mPalette != nullptr) {
+        return canvas.mPalette;
+    }
+    return g_pDefaultPalette;
 }
 
 } // namespace
@@ -92,5 +125,168 @@ void ACanvasLin15::FillRectNoClip(ARect rect) {
         // to bytes. That halving and doubling is what the binary computes, and it differs from the
         // pitch less twice the span whenever the pitch is odd.
         pPixel += (mBitmap.mBytesPerRow / kBytesPerPixel) - nColumns;
+    }
+}
+
+// 0x00619518
+void ACanvasLin15::TextureRowIndexed(int nY,
+                                     int nLeft,
+                                     int nRight,
+                                     const ABitmap *pSource,
+                                     APoint *pSourcePosition,
+                                     const APoint *pSourceStep) {
+    const APalette *pPalette = ResolvePalette(*pSource, mBitmap);
+    if (pPalette == nullptr) {
+        return;
+    }
+    unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
+    for (int nRemaining = nRight - nLeft; nRemaining > 0; --nRemaining) {
+        const unsigned char nIndex = *SourceByteAt(*pSource,
+                                                   pSourcePosition->mX >> kACanvasFractionBits,
+                                                   pSourcePosition->mY >> kACanvasFractionBits);
+        *pDest = APackRgb1555From8888(pPalette->mEntries[nIndex]);
+        ++pDest;
+        pSourcePosition->mX += pSourceStep->mX;
+        pSourcePosition->mY += pSourceStep->mY;
+    }
+}
+
+// 0x00618b00. Each row is unpacked into g_abCanvasRowScratch first, and the key is compared against
+// the low byte of the transparent colour.
+void ACanvasLin15::Blit4NoClip(const ABitmap &source, int nX, int nY) {
+    const APalette *pPalette = ResolvePalette(source, mBitmap);
+    if (pPalette == nullptr) {
+        return;
+    }
+    unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
+    const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
+    for (int nRows = source.mHeight; nRows > 0; --nRows) {
+        UnpackNibbleRow(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        const unsigned char *pIndex = g_abCanvasRowScratch;
+        for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
+            if (source.mHasTransparentColor == 0 ||
+                *pIndex != static_cast<unsigned char>(source.mTransparentColor)) {
+                *pDest = APackRgb1555From8888(pPalette->mEntries[*pIndex]);
+            }
+            ++pIndex;
+            ++pDest;
+        }
+        pSourceRow += source.mBytesPerRow;
+        pDest += (mBitmap.mBytesPerRow / kBytesPerPixel) - source.mWidth;
+    }
+}
+
+// 0x00618c78. The transparency flag is tested once per row, choosing between a keyed and an
+// opaque walk.
+void ACanvasLin15::Blit8NoClip(const ABitmap &source, int nX, int nY) {
+    const APalette *pPalette = ResolvePalette(source, mBitmap);
+    if (pPalette == nullptr) {
+        return;
+    }
+    unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
+    const unsigned char *pIndex = static_cast<const unsigned char *>(source.mPixels);
+    for (int nRows = source.mHeight; nRows > 0; --nRows) {
+        if (source.mHasTransparentColor != 0) {
+            for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
+                if (*pIndex != static_cast<unsigned char>(source.mTransparentColor)) {
+                    *pDest = APackRgb1555From8888(pPalette->mEntries[*pIndex]);
+                }
+                ++pIndex;
+                ++pDest;
+            }
+        } else {
+            for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
+                *pDest = APackRgb1555From8888(pPalette->mEntries[*pIndex]);
+                ++pIndex;
+                ++pDest;
+            }
+        }
+        pIndex += source.mBytesPerRow - source.mWidth;
+        pDest += (mBitmap.mBytesPerRow / kBytesPerPixel) - source.mWidth;
+    }
+}
+
+// 0x00618e00. Three tiers, as in ACanvasLin8::Blit8NoClip().
+void ACanvasLin15::Blit15NoClip(const ABitmap &source, int nX, int nY) {
+    const unsigned char *pSourceByte = static_cast<const unsigned char *>(source.mPixels);
+    unsigned char *pDestByte = static_cast<unsigned char *>(
+        static_cast<void *>(PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY)));
+    if (source.mHasTransparentColor == 0 && source.mBytesPerRow == mBitmap.mBytesPerRow) {
+        memcpy(pDestByte, pSourceByte, static_cast<unsigned int>(source.mByteCount));
+        return;
+    }
+    for (int nRows = source.mHeight; nRows > 0; --nRows) {
+        if (source.mHasTransparentColor != 0) {
+            for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
+                if (*HalfwordAt(pSourceByte) !=
+                    static_cast<unsigned short>(source.mTransparentColor)) {
+                    *HalfwordAt(pDestByte) = *HalfwordAt(pSourceByte);
+                }
+                pSourceByte += kBytesPerPixel;
+                pDestByte += kBytesPerPixel;
+            }
+            // Yes, the binary advances both rectangles by the pitch less the width in PIXELS after
+            // a keyed row, which starts the next row mWidth bytes past where it belongs.
+            pSourceByte += source.mBytesPerRow - source.mWidth;
+            pDestByte += mBitmap.mBytesPerRow - source.mWidth;
+        } else {
+            memcpy(
+                pDestByte, pSourceByte, static_cast<unsigned int>(kBytesPerPixel * source.mWidth));
+            pSourceByte += source.mBytesPerRow;
+            pDestByte += mBitmap.mBytesPerRow;
+        }
+    }
+}
+
+// 0x00619280. The key is compared against the low byte of the transparent colour.
+void ACanvasLin15::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
+    if (span.mPalette == nullptr) {
+        return;
+    }
+    unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    const unsigned char *pIndex = span.mSource;
+    for (int nRemaining = span.mRight - span.mLeft; nRemaining > 0; --nRemaining) {
+        if (!span.mHasTransparentColor ||
+            *pIndex != static_cast<unsigned char>(span.mTransparentColor)) {
+            *pDest = APackRgb1555From8888(span.mPalette->mEntries[pRemap[*pIndex]]);
+        }
+        ++pIndex;
+        ++pDest;
+    }
+}
+
+// 0x00619360. The key comparison here is against the whole transparent colour word, where
+// StretchRowRemap() compares its low byte.
+void ACanvasLin15::StretchRowIndexed(const AStretchSpan &span) {
+    if (span.mPalette == nullptr) {
+        return;
+    }
+    unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    int nPosition = span.mSourcePosition;
+    for (int nRemaining = span.mRight - span.mLeft; nRemaining > 0; --nRemaining) {
+        const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
+        if (span.mHasTransparentColor == 0 || nIndex != span.mTransparentColor) {
+            *pDest = APackRgb1555From8888(span.mPalette->mEntries[nIndex]);
+        }
+        ++pDest;
+        nPosition += span.mSourceStep;
+    }
+}
+
+// 0x00619430
+void ACanvasLin15::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
+    if (span.mPalette == nullptr) {
+        return;
+    }
+    unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    int nPosition = span.mSourcePosition;
+    for (int nRemaining = span.mRight - span.mLeft; nRemaining > 0; --nRemaining) {
+        const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
+            *pDest = APackRgb1555From8888(span.mPalette->mEntries[pRemap[nIndex]]);
+        }
+        ++pDest;
+        nPosition += span.mSourceStep;
     }
 }

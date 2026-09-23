@@ -2,7 +2,10 @@
 
 #include <string.h>
 
+#include "rndartt/apoint.h"
 #include "rndartt/arlereader.h"
+#include "rndartt/arowspan.h"
+#include "rndartt/astretchspan.h"
 
 namespace {
 
@@ -155,5 +158,123 @@ void ACanvasLin8::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
     for (int nRow = nY; nRow < nY + source.mHeight; ++nRow) {
         (void)reader.DecodeRow(pDest); // The advanced destination the decoder returns is discarded.
         pDest += mBitmap.mBytesPerRow;
+    }
+}
+
+// 0x00628db0. The source position is advanced in place, so the caller sees where the row ended.
+void ACanvasLin8::TextureRowIndexed(int nY,
+                                    int nLeft,
+                                    int nRight,
+                                    const ABitmap *pSource,
+                                    APoint *pSourcePosition,
+                                    const APoint *pSourceStep) {
+    unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
+    for (int nRemaining = nRight - nLeft; nRemaining > 0; --nRemaining) {
+        *pDest = *PixelAt(pSource->mPixels,
+                          pSource->mBytesPerRow,
+                          pSourcePosition->mX >> kACanvasFractionBits,
+                          pSourcePosition->mY >> kACanvasFractionBits);
+        ++pDest;
+        pSourcePosition->mX += pSourceStep->mX;
+        pSourcePosition->mY += pSourceStep->mY;
+    }
+}
+
+// 0x00628ae8. The keyed and the opaque walks are separate loops in the binary.
+void ACanvasLin8::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
+    unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    const unsigned char *pSourceByte = span.mSource;
+    const int nColumns = span.mRight - span.mLeft;
+    if (span.mHasTransparentColor) {
+        for (int nRemaining = nColumns; nRemaining > 0; --nRemaining) {
+            if (*pSourceByte != static_cast<unsigned char>(span.mTransparentColor)) {
+                *pDest = pRemap[*pSourceByte];
+            }
+            ++pSourceByte;
+            ++pDest;
+        }
+        return;
+    }
+    for (int nRemaining = nColumns; nRemaining > 0; --nRemaining) {
+        *pDest = pRemap[*pSourceByte];
+        ++pSourceByte;
+        ++pDest;
+    }
+}
+
+// 0x00628ba8. Unlike ACanvas::BlendRowIndexed(), the key here is the span transparent colour
+// rather than index zero.
+void ACanvasLin8::BlendRowIndexed(const ARowSpan &span, const unsigned char *const *ppBlend) {
+    unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    const unsigned char *pSourceByte = span.mSource;
+    const int nColumns = span.mRight - span.mLeft;
+    if (span.mHasTransparentColor) {
+        for (int nRemaining = nColumns; nRemaining > 0; --nRemaining) {
+            if (*pSourceByte != static_cast<unsigned char>(span.mTransparentColor)) {
+                *pDest = ppBlend[*pSourceByte][*pDest];
+            }
+            ++pSourceByte;
+            ++pDest;
+        }
+        return;
+    }
+    for (int nRemaining = nColumns; nRemaining > 0; --nRemaining) {
+        *pDest = ppBlend[*pSourceByte][*pDest];
+        ++pSourceByte;
+        ++pDest;
+    }
+}
+
+// 0x006284a0. The keyed loop runs until its counter passes zero exactly, where the opaque loop
+// stops at any count of zero or less, so a reversed span walks far past the row only when keyed.
+void ACanvasLin8::StretchRowIndexed(const AStretchSpan &span) {
+    unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    int nPosition = span.mSourcePosition;
+    const int nColumns = span.mRight - span.mLeft;
+    if (span.mHasTransparentColor != 0) {
+        for (int nRemaining = nColumns; nRemaining != 0; --nRemaining) {
+            const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
+            if (nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
+                *pDest = nIndex;
+            }
+            ++pDest;
+            nPosition += span.mSourceStep;
+        }
+        return;
+    }
+    for (int nRemaining = nColumns; nRemaining > 0; --nRemaining) {
+        *pDest = span.mSource[nPosition >> kACanvasFractionBits];
+        ++pDest;
+        nPosition += span.mSourceStep;
+    }
+}
+
+// 0x00628c80. The transparency flag is re-read for every pixel.
+void ACanvasLin8::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
+    unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    int nPosition = span.mSourcePosition;
+    for (int nRemaining = span.mRight - span.mLeft; nRemaining != 0; --nRemaining) {
+        const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
+            *pDest = pRemap[nIndex];
+        }
+        ++pDest;
+        nPosition += span.mSourceStep;
+    }
+}
+
+// 0x00628d10
+void ACanvasLin8::StretchRowBlend(const AStretchSpan &span, const unsigned char *const *ppBlend) {
+    unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
+    int nPosition = span.mSourcePosition;
+    for (int nRemaining = span.mRight - span.mLeft; nRemaining != 0; --nRemaining) {
+        const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
+            *pDest = ppBlend[nIndex][*pDest];
+        }
+        ++pDest;
+        nPosition += span.mSourceStep;
     }
 }

@@ -25,8 +25,10 @@
  * and no layout is involved. That asymmetry was inferred from the slot tables and is confirmed
  * here by the body.
  *
- * Seven bodies are not yet written: the three block copies, the indexed row remap, the textured
- * row, and the two stretch variants.
+ * Every override that reads a palette converts the entry to 1555 through APackRgb1555From8888().
+ * The block copies and the textured row resolve the palette from the source, then the canvas, then
+ * g_pDefaultPalette, and the span overrides read ARowSpan::mPalette or AStretchSpan::mPalette.
+ * Each returns without drawing when the palette is null.
  */
 class ACanvasLin15 : public ACanvas15 {
 public:
@@ -55,11 +57,11 @@ public:
      */
     virtual void BuildAlphaFromColorKey(unsigned int nColorKey);
 
-    /** Slot 13. @ghidraAddress 0x006190c0 */
     // Lookup only: this overload would otherwise hide the root's three-argument one, which
     // ACanvas15 does not redeclare.
     using ACanvas::PutPixelNoClip;
 
+    /** Slot 13. @ghidraAddress 0x006190c0 */
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 17. @ghidraAddress 0x006190e8 */
@@ -77,7 +79,7 @@ public:
     /** Slot 39. @ghidraAddress 0x006191c0 */
     virtual void FillRectNoClip(ARect rect);
 
-    /** Slot 46. Body not yet written. @ghidraAddress 0x00619518 */
+    /** Slot 46. @ghidraAddress 0x00619518 */
     virtual void TextureRowIndexed(int nY,
                                    int nLeft,
                                    int nRight,
@@ -85,21 +87,21 @@ public:
                                    APoint *pSourcePosition,
                                    const APoint *pSourceStep);
 
-    /** Slot 47. Body not yet written. @ghidraAddress 0x00618b00 */
+    /** Slot 47. @ghidraAddress 0x00618b00 */
     virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 49. Body not yet written. @ghidraAddress 0x00618c78 */
+    /** Slot 49. @ghidraAddress 0x00618c78 */
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 51. Body not yet written. @ghidraAddress 0x00618e00 */
+    /** Slot 51. @ghidraAddress 0x00618e00 */
     virtual void Blit15NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 75. Body not yet written. @ghidraAddress 0x00619280 */
+    /** Slot 75. @ghidraAddress 0x00619280 */
     virtual void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
 
-    /** Slot 79. Body not yet written. @ghidraAddress 0x00619360 */
+    /** Slot 79. @ghidraAddress 0x00619360 */
     virtual void StretchRowIndexed(const AStretchSpan &span);
 
-    /** Slot 83. Body not yet written. @ghidraAddress 0x00619430 */
+    /** Slot 83. @ghidraAddress 0x00619430 */
     virtual void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
 };

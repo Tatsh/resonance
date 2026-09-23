@@ -19,10 +19,6 @@
  *
  * ONE BYTE IS ONE PIXEL, so the address of a pixel is `mPixels + nY * mBytesPerRow + nX` with no
  * packing and no odd-start flag. The four-bit sibling needs both.
- *
- * Six bodies are not yet written: two row operations, the three stretch variants, and the textured
- * row. Each is recoverable and each is a loop over the row primitives the written bodies already
- * establish.
  */
 class ACanvasLin8 : public ACanvas8 {
 public:
@@ -44,10 +40,10 @@ public:
      */
     virtual ~ACanvasLin8();
 
-    /** Slot 13. @ghidraAddress 0x00628638 */
     // Lookup only, as in the base: this overload would otherwise hide the base's other one.
     using ACanvas8::PutPixelNoClip;
 
+    /** Slot 13. @ghidraAddress 0x00628638 */
     virtual void PutPixelNoClip(int nX, int nY);
 
     /** Slot 15. @ghidraAddress 0x00628658 */
@@ -68,7 +64,7 @@ public:
     /** Slot 43. @ghidraAddress 0x006287b8 */
     virtual void RemapRectIndices(ARect rect, const unsigned char *pRemap);
 
-    /** Slot 46. Body not yet written. @ghidraAddress 0x00628db0 */
+    /** Slot 46. @ghidraAddress 0x00628db0 */
     virtual void TextureRowIndexed(int nY,
                                    int nLeft,
                                    int nRight,
@@ -94,14 +90,20 @@ public:
     /** Slot 57. Decodes through ARleReader, one row per call. @ghidraAddress 0x00628a48 */
     virtual void BlitRle8NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 75. Body not yet written. @ghidraAddress 0x00628ae8 */
+    /** Slot 75. @ghidraAddress 0x00628ae8 */
     virtual void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
 
-    /** Slot 78. Body not yet written. @ghidraAddress 0x00628ba8 */
+    /**
+     * Slot 78.
+     *
+     * Skips a source index equal to the span transparent colour, where the base skips index zero.
+     *
+     * @ghidraAddress 0x00628ba8
+     */
     virtual void BlendRowIndexed(const ARowSpan &span, const unsigned char *const *ppBlend);
 
     /**
-     * Slot 79. Body not yet written.
+     * Slot 79.
      *
      * The program titled this routine for the four-bit sibling until the table diff placed it
      * here: it occupies slot 79 of this class's table and appears in none of the 85 entries of the
@@ -112,9 +114,9 @@ public:
      */
     virtual void StretchRowIndexed(const AStretchSpan &span);
 
-    /** Slot 83. Body not yet written. @ghidraAddress 0x00628c80 */
+    /** Slot 83. @ghidraAddress 0x00628c80 */
     virtual void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
 
-    /** Slot 84. Body not yet written. @ghidraAddress 0x00628d10 */
+    /** Slot 84. @ghidraAddress 0x00628d10 */
     virtual void StretchRowBlend(const AStretchSpan &span, const unsigned char *const *ppBlend);
 };
