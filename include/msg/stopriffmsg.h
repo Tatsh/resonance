@@ -28,6 +28,31 @@ class Player;
 class StopRiffMsg : public Message {
 public:
     /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    StopRiffMsg() {
+    }
+
+    /**
+     * Report the end of a riff.
+     *
+     * Inline, with no address of its own. The routine at `0x0011da68`, which
+     * InputMap::OnControllerReading() calls, and the build at `0x00119e74` expand it on their
+     * stacks. The four arguments are the four members in declaration order.
+     *
+     * @param nUnknown04 The word Print() labels `b#`.
+     * @param pPlayer The player whose riff stops.
+     * @param position The song position of the stop.
+     * @param nTrack The player's track.
+     */
+    StopRiffMsg(int nUnknown04, Player *pPlayer, Mid::MBT position, int nTrack)
+        : mUnknown04(nUnknown04), mPlayer(pPlayer), mPosition(position), mUnknown10(nTrack) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. Only the position is
@@ -74,7 +99,7 @@ public:
     int mUnknown04;     /*!< Labelled `b#` by Print(). +0x04 */
     Player *mPlayer;    /*!< The player whose riff stops. +0x08 */
     Mid::MBT mPosition; /*!< The song position of the stop. +0x0c */
-    int mUnknown10;     /*!< Purpose unrecovered. +0x10 */
+    int mUnknown10;     /*!< The player's track, from its slot 4. +0x10 */
 };
 
 /**

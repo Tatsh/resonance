@@ -15,9 +15,11 @@ class Player;
  * everything recovered comes from them, and no other routine in the image refers to this type by
  * anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone().
+ * InputMap::OnControllerReading(), the one builder, stores the resolved player, the controller
+ * reading's position, the track the player's slot 4 reports, and a double-tap flag. The flag is set
+ * when the press falls within 400,000,000 of the previous press time the player stores at `+0x40`,
+ * and Scratcher widens the erased range to the whole section when it is set.
  *
  * Print() hands `+0x08` to Mid::MBT::Print() and writes the colour name of the player at `+0x04`,
  * which types both. New() initialises the position to kMBTInfinity.
@@ -26,6 +28,30 @@ class Player;
  */
 class EraseMsg : public Message {
 public:
+    /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    EraseMsg() {
+    }
+
+    /**
+     * Report an erase press.
+     *
+     * Inline, with no address of its own. InputMap::OnControllerReading() at `0x00119aa0` expands
+     * it on its stack. The four arguments are the four members in declaration order.
+     *
+     * @param pPlayer The player the controller belongs to.
+     * @param position The song position of the reading.
+     * @param nTrack The player's track.
+     * @param nDoubleTap Non-zero when the press follows the previous one closely.
+     */
+    EraseMsg(Player *pPlayer, Mid::MBT position, int nTrack, int nDoubleTap)
+        : mUnknown04(pPlayer), mUnknown08(position), mUnknown0c(nTrack), mUnknown10(nDoubleTap) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *

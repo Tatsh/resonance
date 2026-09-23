@@ -29,5 +29,5 @@ const char *AxisRegisterMsg::Name() {
 // 0x003e3160. The colour name is copied into a temporary before it is written.
 void AxisRegisterMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);
-    stream << " " << HxStr(mPlayer->mColorName) << " " << mUnknown08;
+    stream << " " << HxStr(mPlayer->mColorName) << " " << mValue;
 }

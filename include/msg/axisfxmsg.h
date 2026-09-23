@@ -18,11 +18,37 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
  * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
  * float at `+0x08` is printed without a label, and the word at `+0x10` is not printed.
+ * InputMap::OnControllerReading(), the one builder, stores the reading's axis value at `+0x08` and
+ * the track the player's slot 4 reports at `+0x10`.
  *
  * The destructor at `0x003dabd8` is compiler-generated and has no declaration here.
  */
 class AxisFXMsg : public Message {
 public:
+    /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    AxisFXMsg() {
+    }
+
+    /**
+     * Report an effect-axis movement.
+     *
+     * Inline, with no address of its own. InputMap::OnControllerReading() at `0x001199ac` expands
+     * it on its stack.
+     *
+     * @param pPlayer The player the controller belongs to.
+     * @param flValue The axis value.
+     * @param position The song position of the reading.
+     * @param nTrack The player's track.
+     */
+    AxisFXMsg(Player *pPlayer, float flValue, Mid::MBT position, int nTrack)
+        : mPlayer(pPlayer), mValue(flValue), mPosition(position), mTrack(nTrack) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -69,9 +95,9 @@ public:
 
 private:
     Player *mPlayer;    // +0x04
-    float mUnknown08;   // +0x08
+    float mValue;       // +0x08
     Mid::MBT mPosition; // +0x0c
-    int mUnknown10;     // +0x10
+    int mTrack;         // +0x10
 };
 
 /**

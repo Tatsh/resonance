@@ -17,12 +17,36 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
  * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
- * purpose of the word at `+0x08` is not recovered.
+ * purpose of the word at `+0x08` is not recovered. InputMap::OnControllerReading() stores 1 there
+ * at both of its builds, once after testing that the play mode is 1 and once as a constant.
  *
  * The destructor at `0x003db130` is compiler-generated and has no declaration here.
  */
 class ButtonPowMsg : public Message {
 public:
+    /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    ButtonPowMsg() {
+    }
+
+    /**
+     * Report a powerup button press.
+     *
+     * Inline, with no address of its own. InputMap::OnControllerReading() expands it on its stack
+     * at `0x00119a18` and `0x00119c50`.
+     *
+     * @param pPlayer The player the controller belongs to.
+     * @param nUnknown08 The word at `+0x08`, 1 at both builds.
+     * @param position The song position of the reading.
+     */
+    ButtonPowMsg(Player *pPlayer, int nUnknown08, Mid::MBT position)
+        : mPlayer(pPlayer), mUnknown08(nUnknown08), mPosition(position) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *

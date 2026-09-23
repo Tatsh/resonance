@@ -16,13 +16,37 @@ class Player;
  * type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
- * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
- * purpose of the word at `+0x08` is not recovered.
+ * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both.
+ * InputMap::OnControllerReading(), the one builder, stores the reading's axis value truncated to
+ * an integer at `+0x08`.
  *
  * The destructor at `0x003dadb0` is compiler-generated and has no declaration here.
  */
 class AxisYPowMsg : public Message {
 public:
+    /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    AxisYPowMsg() {
+    }
+
+    /**
+     * Report a vertical powerup-axis movement.
+     *
+     * Inline, with no address of its own. InputMap::OnControllerReading() at `0x00119bf8` expands
+     * it on its stack.
+     *
+     * @param pPlayer The player the controller belongs to.
+     * @param nValue The axis value, truncated to an integer.
+     * @param position The song position of the reading.
+     */
+    AxisYPowMsg(Player *pPlayer, int nValue, Mid::MBT position)
+        : mPlayer(pPlayer), mValue(nValue), mPosition(position) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -69,7 +93,7 @@ public:
 
 private:
     Player *mPlayer;    // +0x04
-    int mUnknown08;     // +0x08
+    int mValue;         // +0x08
     Mid::MBT mPosition; // +0x0c
 };
 

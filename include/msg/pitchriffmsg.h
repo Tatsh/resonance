@@ -27,6 +27,32 @@ class Player;
 class PitchRiffMsg : public Message {
 public:
     /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    PitchRiffMsg() {
+    }
+
+    /**
+     * Report the start of a riff.
+     *
+     * Inline, with no address of its own. The routine at `0x0011d9b0`, which
+     * InputMap::OnControllerReading() calls, expands it on its stack at `0x0011d9fc`. The four
+     * arguments are the four members in declaration order. The last is the track the player's
+     * slot 4 reports.
+     *
+     * @param nUnknown04 The word Print() labels `b#`.
+     * @param pPlayer The player whose riff starts.
+     * @param position The song position of the start.
+     * @param nTrack The player's track.
+     */
+    PitchRiffMsg(int nUnknown04, Player *pPlayer, Mid::MBT position, int nTrack)
+        : mUnknown04(nUnknown04), mUnknown08(pPlayer), mUnknown0c(position), mUnknown10(nTrack) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. Only the position is
