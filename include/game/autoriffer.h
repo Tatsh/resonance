@@ -7,6 +7,7 @@
 #include "game/quantizer.h"
 #include "game/riff.h"
 #include "game/trackdata.h"
+#include "gs/musesynth.h"
 #include "msg/erasemsg.h"
 #include "msg/message.h"
 #include "msg/pitchriffmsg.h"
@@ -14,7 +15,6 @@
 #include "msg/trackselectmsg.h"
 #include "sch/cmdid.h"
 #include "sch/tickclock.h"
-#include "synth/musesynth.h"
 
 /**
  * Producer of the automatic riff a guitar track plays when it is not being played.

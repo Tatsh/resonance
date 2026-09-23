@@ -80,14 +80,14 @@ public:
     virtual void Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
     /**
-     * Install a word in the mixer and attach the mixer to the synthesiser.
+     * Attach the mixer to the synthesiser and give it its output sink.
      *
      * Slot 6.
      *
-     * @param nValue The word to install.
+     * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
      * @ghidraAddress 0x001c4d60
      */
-    virtual void Slot6(int nValue);
+    virtual void Slot6(MsgSink *pOutput);
 
     /**
      * Register one sink with every source the stage provides.

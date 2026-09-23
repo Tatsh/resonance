@@ -50,9 +50,9 @@ void CatchingSTG::Slot5(MsgSource *pSource) {
 }
 
 // 0x001a0588
-void CatchingSTG::Slot6(int nValue) {
-    mMuseSynth->AddMuseSink(mMixer);
-    mMixer->mUnknown04 = nValue;
+void CatchingSTG::Slot6(MsgSink *pOutput) {
+    mMuseSynth->AddSink(mMixer);
+    mMixer->mOutput = pOutput;
 }
 
 // 0x001a05c8

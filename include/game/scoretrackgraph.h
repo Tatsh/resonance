@@ -3,12 +3,12 @@
 #include "app/application.h"
 #include "app/msgsink.h"
 #include "app/msgsource.h"
-#include "game/mixer.h"
 #include "game/phraseplayer.h"
 #include "game/quantizer.h"
 #include "game/trackdata.h"
+#include "gs/mixer.h"
+#include "gs/musesynth.h"
 #include "gs/phrasemgr.h"
-#include "synth/musesynth.h"
 
 class PhraseDatabase;
 class Player;
@@ -30,10 +30,9 @@ class Player;
  * The object is 0x2c bytes with the vptr at `+0x28`, which is where this toolchain places it for a
  * class with no base. Derived members therefore start at `+0x2c`.
  *
- * The constructor at `0x001cee50` builds the four objects the members below store, each through
- * the tagged allocator under the tag `MsgSink`, and it takes the track description as its only
- * argument. Its body is not written here, because it is outside the assignment this class was
- * recovered under.
+ * The constructor builds the five objects the members below store. The phrase manager, phrase
+ * player, mixer, and synthesiser go through the tagged allocator under the tag `MsgSink`, and the
+ * quantiser through the plain allocator.
  *
  * An earlier pass titled the five default bodies for AxingSTG, which owns none of them. The table
  * diff against each derived table is what corrects the attribution: `0x001cf750`, `0x001cf758`,
@@ -52,6 +51,17 @@ class Player;
  */
 class ScoreTrackGraph {
 public:
+    /**
+     * Build the stage's quantiser, phrase manager, phrase player, mixer, and synthesiser.
+     *
+     * The phrase manager takes the song clock, a bar of 1920 ticks, the play map, and
+     * configuration code 0x2be. The phrase player is then installed in the phrase manager.
+     *
+     * @param pTrackData The track description.
+     * @ghidraAddress 0x001cee50
+     */
+    explicit ScoreTrackGraph(const TrackData *pTrackData);
+
     /**
      * @ghidraAddress 0x001cf840
      */
@@ -110,16 +120,15 @@ public:
     virtual void Slot5(MsgSource *pSource);
 
     /**
-     * Install a word in the mixer and attach the mixer to the synthesiser.
+     * Attach the mixer to the synthesiser and give it its output sink.
      *
      * Slot 6, pure. All four overrides are the same three instructions: they register the mixer
-     * with the synthesiser through MuseSynth::AddMuseSink() and then store the argument in
-     * Mixer::mUnknown04. No call site was inspected, so the four-byte argument's type is
-     * unconfirmed.
+     * with the synthesiser through MuseSynth::AddSink() and then store the argument in
+     * Mixer::mOutput, which types it as a sink.
      *
-     * @param nValue The word to install.
+     * @param pOutput The sink the mixer sends to.
      */
-    virtual void Slot6(int nValue) = 0;
+    virtual void Slot6(MsgSink *pOutput) = 0;
 
     /**
      * Register one sink with every source the stage provides.

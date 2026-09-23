@@ -72,7 +72,7 @@ void AxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSeco
     mAutoRiffer->mSynth = mMuseSynth;
     mAutoRiffer->mPhraseMaker = mPhraseMaker;
 
-    mAxeSynth->AddMuseSink(mPitchPicker);
+    mAxeSynth->AddSink(mPitchPicker);
 
     mPitchPicker->AddSink(mPhraseMaker);
     mPitchPicker->AddSink(mNewGemMaker);
@@ -95,9 +95,9 @@ void AxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSeco
 }
 
 // 0x0019e810
-void AxingSTG::Slot6(int nValue) {
-    mMuseSynth->AddMuseSink(mMixer);
-    mMixer->mUnknown04 = nValue;
+void AxingSTG::Slot6(MsgSink *pOutput) {
+    mMuseSynth->AddSink(mMixer);
+    mMixer->mOutput = pOutput;
 }
 
 // 0x0019e850

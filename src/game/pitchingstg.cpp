@@ -31,9 +31,9 @@ void PitchingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pS
 }
 
 // 0x001c4d60
-void PitchingSTG::Slot6(int nValue) {
-    mMuseSynth->AddMuseSink(mMixer);
-    mMixer->mUnknown04 = nValue;
+void PitchingSTG::Slot6(MsgSink *pOutput) {
+    mMuseSynth->AddSink(mMixer);
+    mMixer->mOutput = pOutput;
 }
 
 // 0x001c4da0

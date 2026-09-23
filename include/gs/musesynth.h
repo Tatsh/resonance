@@ -23,8 +23,9 @@
  * message is discarded.
  *
  * Every player it creates is started against mOutput, which addresses its own embedded
- * MsgSplitter. AddSink() registers a sink with that splitter, so a caller that wants the sound
- * registers once here rather than with each player.
+ * MsgSplitter, or the sustainer CreateSustainer() places in front of it. AddSink() registers a
+ * sink with that splitter, so a caller that wants the sound registers once here rather than with
+ * each player.
  *
  * The name comes from the RTTI descriptor and is not the invented `Rnd::LightMsgSplitter` that the
  * type-function harvest recorded for the accessor. Neither is this class a light manager: the two
@@ -53,6 +54,17 @@ public:
      * @ghidraAddress 0x001ab038
      */
     void AddSink(MsgSink *pSink);
+
+    /**
+     * Build the sustain filter this synthesiser feeds through.
+     *
+     * The routine allocates a SynthSustainer under the tag `MsgSink`, stores it at both `+0x24`
+     * and `+0x28`, and points its downstream sink at this object's `+0x0c`. AxingSTG is the only
+     * caller. The title is inferred from that body. The body is not written.
+     *
+     * @ghidraAddress 0x001aafb0
+     */
+    void CreateSustainer();
 
     /**
      * @ghidraAddress 0x001aa908
@@ -118,10 +130,10 @@ protected:
     Sch::TickClock *mClock; // +0x08
     // Every player this object created reports back to it and sends through it.
     MsgSplitter mSplitter; // +0x0c
-    // Set to zero by the constructor. No recovered routine reads it.
+    // Set to zero by the constructor. CreateSustainer() stores the new SynthSustainer here.
     int mUnknown24; // +0x24
-    // The sink every player is started against, which always addresses mSplitter. The indirection
-    // is the compiler's MsgSink conversion of the splitter rather than a member that ever varies.
+    // The sink every player is started against. It addresses mSplitter until CreateSustainer()
+    // points it at the sustainer, whose own output is mSplitter.
     MsgSink *mOutput; // +0x28
     // Every player currently sounding. A four-byte element places the value at +0x08 of a 16-byte
     // node.

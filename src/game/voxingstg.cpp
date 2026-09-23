@@ -36,9 +36,9 @@ void VoxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSec
 }
 
 // 0x001da868
-void VoxingSTG::Slot6(int nValue) {
-    mMuseSynth->AddMuseSink(mMixer);
-    mMixer->mUnknown04 = nValue;
+void VoxingSTG::Slot6(MsgSink *pOutput) {
+    mMuseSynth->AddSink(mMixer);
+    mMixer->mOutput = pOutput;
 }
 
 // 0x001da8a8
