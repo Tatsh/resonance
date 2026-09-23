@@ -1,5 +1,6 @@
 #include "rnd/multimesh.h"
 
+#include <iterator>
 #include <list>
 
 #include "math/transform.h"
@@ -101,8 +102,9 @@ void ReadRow(Stream &stream, Vector3 &row) {
     stream.Read(&row.z, sizeof(float));
 }
 
-// 0x004eb6a0. Ghidra titles this routine WriteInstances, which is wrong. Load() is its only caller
-// and every transfer goes through the read slot of the stream.
+// 0x004eb6a0
+// Ghidra titled this routine WriteInstances, which is wrong. Load() is its only caller and every
+// transfer goes through the read slot of the stream.
 Stream &ReadTransformList(Stream &stream, std::list<Transform> &transforms) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -271,6 +273,31 @@ void MultiMesh::AcquireMeshRef() {
 void MultiMesh::ReleaseMeshRef() {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
+    }
+}
+
+// 0x004ebaa0
+Transform &MultiMesh::GetTransform(int nIndex) {
+    auto it = mTransforms.begin();
+    std::advance(it, nIndex);
+    return *it;
+}
+
+// 0x004ebae8
+void MultiMesh::RemoveTransform(int nIndex) {
+    auto it = mTransforms.begin();
+    std::advance(it, nIndex);
+    mTransforms.erase(it);
+}
+
+// 0x004ebf18
+void MultiMesh::SetMesh(Mesh *pMesh) {
+    if (mMesh != nullptr) {
+        mMesh->RemoveRef(this);
+    }
+    mMesh = pMesh;
+    if (pMesh != nullptr) {
+        pMesh->AddRef(this);
     }
 }
 

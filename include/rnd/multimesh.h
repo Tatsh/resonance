@@ -163,6 +163,39 @@ public:
         return mMesh;
     }
 
+    /**
+     * Report one instance transform by position.
+     *
+     * The index is not checked. The routine has no caller in the shipped build. The name is
+     * inferred.
+     *
+     * @param nIndex The position of the instance.
+     * @return The instance transform.
+     * @ghidraAddress 0x004ebaa0
+     */
+    Transform &GetTransform(int nIndex);
+
+    /**
+     * Remove one instance by position.
+     *
+     * The index is not checked. The routine has no caller in the shipped build. The name is
+     * inferred.
+     *
+     * @param nIndex The position of the instance.
+     * @ghidraAddress 0x004ebae8
+     */
+    void RemoveTransform(int nIndex);
+
+    /**
+     * Replace the mesh every instance draws, moving this object's reference to the new mesh.
+     *
+     * The routine has no caller in the shipped build. The name is inferred.
+     *
+     * @param pMesh The new mesh, or null.
+     * @ghidraAddress 0x004ebf18
+     */
+    void SetMesh(Mesh *pMesh);
+
 protected:
     /**
      * Draw the mesh once per instance.
