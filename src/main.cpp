@@ -42,6 +42,13 @@ void HaltOnFailure() {
     Fatal(g_szLastFailure);
 }
 
+// 0x001f2698
+// ShowLoadingScreen expands this inline; the out-of-line copy has no caller.
+inline void PrintLoadingDot() {
+    ++g_nLoadingDots;
+    LogPrintf(".%s", (g_nLoadingDots & (kLoadingDotsPerLine - 1)) == 0 ? "\n" : "");
+}
+
 // 0x001ef620
 void ShowLoadingScreen() {
     RndAsyncLoader loader(HxStr("loading/"), HxStr("loading.rnd"), -1);
@@ -49,8 +56,7 @@ void ShowLoadingScreen() {
 
     float flProgress = 0.0f;
     while (loader.Poll(&flProgress) == 0) {
-        ++g_nLoadingDots;
-        LogPrintf(".%s", (g_nLoadingDots & (kLoadingDotsPerLine - 1)) == 0 ? "\n" : "");
+        PrintLoadingDot();
         RndAsyncLoader::PollAsyncLoads();
     }
 
