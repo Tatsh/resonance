@@ -67,11 +67,10 @@ public:
      * Resolve the list of records the memory-card path last read.
      *
      * The list is a function-local static vector at `0x00891ab8` behind the guard flag at
-     * `0x00699d78`, in the accessor at `0x00215ca0`, which registers its destructor through
-     * `atexit`. `0x00215cf8` fills it and eight front-end screens read it, among them
-     * MetExpansionPakScreen, MetLoadFreqScreen, MetMemCardLoadScreen, MetPersonaSaverScreen, and
-     * MetLocPickCharScreen. The address recorded here is the single out-of-line emission of the
-     * inline accessor those eight share, and it forwards to the static holder.
+     * `0x00699d78`, in LoadListStorage(). ClearLoadList() empties it and eight front-end screens
+     * read it, among them MetExpansionPakScreen, MetLoadFreqScreen, MetMemCardLoadScreen,
+     * MetPersonaSaverScreen, and MetLocPickCharScreen. The address recorded here is the single
+     * out-of-line emission of the inline accessor those eight share.
      *
      * It is a static member rather than a free function, because it takes no receiver and vends
      * exactly one class. The owning class is an inference from the element type alone, since no
@@ -80,7 +79,80 @@ public:
      * @return The list. It is never null.
      * @ghidraAddress 0x00218118
      */
-    static std::vector<MetPersonaData *> *loadList();
+    static std::vector<MetPersonaData *> *loadList() {
+        return &LoadListStorage();
+    }
+
+    /**
+     * Resolve the list of records the player has saved.
+     *
+     * The list is a function-local static vector at `0x00891aa8` behind the guard flag at
+     * `0x00699d74`, in SavedListStorage(). MetPersonaSaverScreen appends a copy of a newly saved
+     * record that is not a team identity, and MetLoadPreFabScreen, MetLocPickCharScreen, and
+     * MetExpansionPakScreen read it. The title is inferred from the saver's use. The address
+     * recorded here is the single out-of-line emission of the inline accessor those callers
+     * share.
+     *
+     * @return The list. It is never null.
+     * @ghidraAddress 0x00218078
+     */
+    static std::vector<MetPersonaData *> *savedList() {
+        return &SavedListStorage();
+    }
+
+    /**
+     * Hold the list loadList() reports.
+     *
+     * The first call constructs the vector and registers its destructor at `0x00218098` through
+     * `atexit`.
+     *
+     * @return The list.
+     * @ghidraAddress 0x00215ca0
+     */
+    static std::vector<MetPersonaData *> &LoadListStorage();
+
+    /**
+     * Hold the list savedList() reports.
+     *
+     * The first call constructs the vector and registers its destructor at `0x00217ff8` through
+     * `atexit`.
+     *
+     * @return The list.
+     * @ghidraAddress 0x00215b88
+     */
+    static std::vector<MetPersonaData *> &SavedListStorage();
+
+    /**
+     * Delete every record in loadList() and empty it.
+     *
+     * MetRenderer's constructor, MetLocPickCharScreen, MetMemDetectScreen, and
+     * MetPersonaSaverScreen call it. The list is resolved afresh for every read.
+     *
+     * @ghidraAddress 0x00215cf8
+     */
+    static void ClearLoadList();
+
+    /**
+     * Delete every record in savedList() and empty it.
+     *
+     * MetRenderer's constructor is the one caller.
+     *
+     * @ghidraAddress 0x00215be0
+     */
+    static void ClearSavedList();
+
+    /**
+     * Replace one list with fresh copies of the records in another.
+     *
+     * Every record in the destination is deleted first. MetLocPickCharScreen's slot 19 is the one
+     * caller.
+     *
+     * @param pDestination The list to replace.
+     * @param pSource The records to copy.
+     * @ghidraAddress 0x002159f8
+     */
+    static void CopyList(std::vector<MetPersonaData *> *pDestination,
+                         const std::vector<MetPersonaData *> *pSource);
 
     /**
      * @ghidraAddress 0x0032e278
