@@ -16,11 +16,18 @@ class Command;
  * retained from an earlier pass rather than attested, and it understates the class: this 0x18-byte
  * object is the base of Sch::TickClock, and the bodies at `0x004a7828`, `0x004a7848`, `0x004a7878`,
  * and `0x004a77c0` are single bodies shared between the two rather than routines of a monitor.
- * A replacement title would be invention, because the only `Sch` names in the image are the command
- * classes, the tick, and the clock itself.
+ *
+ * The image does not include the strings `Watchdog`, `Scheduler`, or `Timer`, and its only `Sch`
+ * names are the command classes, the tempo map, the tick, and the clock itself. The sequel
+ * Amplitude (SCUS_972.58) is the best evidence for a replacement title. Its RTTI records a class
+ * `Timer` (`5Timer` and `P5Timer` in template and pointer type names) beside a class `Scheduler`
+ * with nested `CommandInfo`, `ByCommand`, `ByID`, and `CancelPred` types. Amplitude has no `Sch`
+ * namespace, no TimedCommand, and no TempoMap. Together with this image's `Sch` namespace, that
+ * record makes `Sch::Timer` the likely original title of this class. The title is inferred rather
+ * than attested, and it is not applied yet.
  *
  * The origin is stored negated and may be set only once, so a second SetOrigin() is ignored. Every
- * member is private, because the only code that reads one is a member of this class.
+ * member is public, because Sch::TickClock reads each one directly and the image has no accessor.
  */
 class WatchdogTimer {
 public:
@@ -43,7 +50,7 @@ public:
     /**
      * Report the current time.
      *
-     * Before an origin is set the reading is mUnknown08. Afterwards it is the monitor's
+     * Before an origin is set the reading is mPausedNs. Afterwards it is the monitor's
      * most recent due tick relative to the origin.
      *
      * @return The time in nanoseconds.
@@ -54,8 +61,8 @@ public:
     /**
      * Stop the time base at its current reading.
      *
-     * Clears mHasOrigin and stores the reading Now() would have reported in mUnknown08. Now()
-     * reports mUnknown08 from then on. Does nothing while mHasOrigin is already clear.
+     * Clears mHasOrigin and stores the reading Now() would have reported in mPausedNs. Now()
+     * reports mPausedNs from then on. Does nothing while mHasOrigin is already clear.
      * GrooveWorld::StopLevel() at `0x0018ec90` calls it on the song clock. The title is inferred.
      *
      * @ghidraAddress 0x004a7878
@@ -65,7 +72,7 @@ public:
     /**
      * Restart the time base from the reading Pause() stopped it at.
      *
-     * Sets mHasOrigin and stores the origin that makes Now() continue from mUnknown08. Does
+     * Sets mHasOrigin and stores the origin that makes Now() continue from mPausedNs. Does
      * nothing while mHasOrigin is already set. GrooveWorld::StartPlay() calls it on the song clock.
      * The title is inferred.
      *
@@ -131,9 +138,28 @@ public:
      */
     void PostIn(Sch::Command *pCommand, Sch::Tick tick);
 
-private:
-    long long mNegatedOrigin; // +0x00
-    long long mUnknown08;     // +0x08
-    int mHasOrigin;           // +0x10
-    Watchdog *mWatchdog;      // +0x14
+    /**
+     * The origin, negated, in nanoseconds.
+     *
+     * Sch::TickClock::PostAt() and both PostAtSongTick() overloads subtract it to express a due
+     * time in the scheduler's frame.
+     */
+    long long mNegatedOrigin;
+
+    /**
+     * The reading Now() reports while no origin is set, in nanoseconds.
+     *
+     * Sch::TickClock::SetSongTick() writes it.
+     */
+    long long mPausedNs;
+
+    /** Non-zero while the time base runs against the scheduler. */
+    int mHasOrigin;
+
+    /**
+     * The scheduler whose current time the readings follow.
+     *
+     * Sch::TickClock::PostAt() and both PostAtSongTick() overloads queue through it.
+     */
+    Watchdog *mWatchdog;
 };

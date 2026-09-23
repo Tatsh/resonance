@@ -14,9 +14,18 @@ class WatchdogRecorder;
 /**
  * Scheduler that runs queued commands when their due time arrives.
  *
- * The class is not polymorphic and has no RTTI, and no literal in the image titles it. The title
- * here is retained from an earlier pass rather than attested. Only four `Sch` names exist anywhere
- * in the program, and none of them is a scheduler, so a replacement would be invention.
+ * The class is not polymorphic and has no RTTI, and no literal in the image identifies it. The
+ * title here is retained from an earlier pass rather than attested. The image does not include the
+ * strings `Watchdog` or `Scheduler`, and its four `Sch` names (Sch::Command, Sch::TempoMap,
+ * Sch::TickClock, and Sch::TimedCommand) do not include a scheduler.
+ *
+ * The sequel Amplitude (SCUS_972.58) is the best evidence for a replacement title. Its RTTI records
+ * a class `Scheduler` with the nested types `Scheduler::CommandInfo`, `Scheduler::ByCommand`,
+ * `Scheduler::ByID`, and `Scheduler::CancelPred`, and red-black tree nodes of `CommandInfo`, beside
+ * a time-base class `Timer`. Amplitude has no `Sch` namespace, no TimedCommand, and no TempoMap.
+ * Together with this image's `Sch` namespace, that record makes `Sch::Scheduler` the likely
+ * original title of this class. The title is inferred rather than attested, and it is not applied
+ * yet.
  *
  * What the class does is measured rather than inferred. The member at `+0x00` is the one pointer of
  * a red-black tree of Sch::TimedCommand pointers, whose header node the constructor takes from the

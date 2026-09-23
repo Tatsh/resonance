@@ -118,6 +118,13 @@ unsigned GetGzFileSize(int nFile);
 /**
  * Decompress a whole file into a buffer.
  *
+ * Vendored gzip glue, declared by title only. The body stores the file in the bundled gzip code's
+ * input-descriptor global at `0x00761488`, copies `unknown` into its input-name global at
+ * `0x00761490`, and drives the gzip routines at `0x006125b8`, `0x00612468`, `0x00562f88`,
+ * `0x0061d778`, and `0x006125d0`. Both exits close the file with FileClose() unless the descriptor
+ * reads -1. The failure exit leaves -1 in the result register, which LoadGzFile(), the one caller,
+ * ignores.
+ *
  * @param nFile The file to read.
  * @param pBuffer The destination, which must take the whole decompressed size.
  * @ghidraAddress 0x005635b8

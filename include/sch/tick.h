@@ -33,9 +33,9 @@ namespace Sch {
  * `1.0e9 / 1000.0` at `0x005124c8` to produce one. The run loop at `0x004aa8a4` treats a gap of
  * 6000000000 as six seconds of arrears.
  *
- * A song position is a separate quantity and is not one of these. Sch::TickClock::Tick() reports
- * a song position as a plain `int` in MIDI ticks at 480 per quarter note, and Sch::TempoMap
- * converts between the two.
+ * A song position is a separate quantity and is not one of these. Sch::TickClock::SongTick()
+ * reports a song position as a plain `int` in MIDI ticks at 480 per quarter note, and
+ * Sch::TempoMap converts between the two.
  */
 struct Tick {
     /**

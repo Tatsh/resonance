@@ -35,11 +35,11 @@ namespace Sch {
  *
  * **The base's title, and the title of the class the base refers to, are both disputed.** This
  * reconstruction derives from `WatchdogTimer` so that the tree continues to compile, and the
- * evidence against both titles is recorded in the report that accompanies this file. In short, the
- * 0x50-byte object those headers title `Watchdog` is the command scheduler: its `+0x00` is a
- * red-black tree of Sch::TimedCommand pointers ordered by due tick, its `Service()` at `0x004aa848`
- * pops every due wrapper and calls Sch::TimedCommand::Run() on it, and its `+0x0c` selects between
- * recording and playback of the queued stream.
+ * evidence against both titles is recorded in the Watchdog and WatchdogTimer class
+ * documentation. In short, the 0x50-byte object those headers call `Watchdog` is the command
+ * scheduler: its `+0x00` is a red-black tree of Sch::TimedCommand pointers ordered by due tick,
+ * its `Service()` at `0x004aa848` pops every due wrapper and calls Sch::TimedCommand::Run() on it,
+ * and its `+0x0c` selects between recording and playback of the queued stream.
  *
  * Every post below wraps the command in a Sch::TimedCommand, hands the wrapper to one of the
  * scheduler's two queueing paths, and then gives back its own reference, which leaves the queue as
@@ -87,11 +87,8 @@ public:
      *
      * The body divides the current time, biased by TempoMap::mCeilingBias, by
      * TempoMap::mNanosecondsPerTick, which rounds up to the next whole MIDI tick. The result is
-     * then passed to the range predicate at `0x00100ab8`, which tests whether it fits in a third
-     * of the signed range; the binary discards that test's result.
-     *
-     * The body is not reconstructed, because it reads members that the base currently declares
-     * private.
+     * then wrapped in a Mid::MBT, whose constructor runs the discarded IsFiniteMBT() check at
+     * `0x00100ab8`.
      *
      * @return The song position, in MIDI ticks at 480 per quarter note.
      * @ghidraAddress 0x004a7af8
@@ -102,8 +99,8 @@ public:
      * Move the clock to a song position.
      *
      * The body converts the position to scheduler time through mTempoMap and stores it as the
-     * paused reading, but only when it differs from the current reading. The body is not
-     * reconstructed, for the reason recorded on SongTick().
+     * paused reading, but only when it differs from the current reading. The store happens even
+     * while the clock runs, when Now() does not report the paused reading.
      *
      * The position is a Mid::MBT passed by value in one register. Both callers, GrooveWorld's
      * PrepareLevel() at `0x0018ddd8` and StopLevel() at `0x0018ed6c`, construct it through

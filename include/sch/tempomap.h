@@ -83,7 +83,7 @@ public:
      *
      * The value is always mNanosecondsPerTick minus mOriginNanoseconds minus one, which makes
      * `(time + mCeilingBias) / mNanosecondsPerTick` the smallest MIDI tick at or after the
-     * requested time. Sch::TickClock::Tick() at `0x004a7b30` is the one reader.
+     * requested time. Sch::TickClock::SongTick() at `0x004a7b28` is the one reader.
      *
      * +0x18
      */

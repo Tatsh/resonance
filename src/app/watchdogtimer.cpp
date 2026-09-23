@@ -25,7 +25,7 @@ constexpr int kUnallocatedCommand = -2;
 
 // 0x004a7780
 WatchdogTimer::WatchdogTimer(Watchdog *pWatchdog)
-    : mNegatedOrigin(0), mUnknown08(0), mHasOrigin(0), mWatchdog(pWatchdog) {
+    : mNegatedOrigin(0), mPausedNs(0), mHasOrigin(0), mWatchdog(pWatchdog) {
 }
 
 // 0x004a7828
@@ -39,7 +39,7 @@ void WatchdogTimer::SetOrigin(long long nNanoseconds) {
 // 0x004a77c0
 long long WatchdogTimer::Now() {
     if (mHasOrigin == 0) {
-        return mUnknown08;
+        return mPausedNs;
     }
     return mWatchdog->mNowNs + mNegatedOrigin;
 }
@@ -48,7 +48,7 @@ long long WatchdogTimer::Now() {
 void WatchdogTimer::Pause() {
     if (mHasOrigin != 0) {
         mHasOrigin = 0;
-        mUnknown08 = mNegatedOrigin + mWatchdog->mNowNs;
+        mPausedNs = mNegatedOrigin + mWatchdog->mNowNs;
     }
 }
 
@@ -56,7 +56,7 @@ void WatchdogTimer::Pause() {
 void WatchdogTimer::Resume() {
     if (mHasOrigin == 0) {
         mHasOrigin = 1;
-        mNegatedOrigin = mUnknown08 - mWatchdog->mNowNs;
+        mNegatedOrigin = mPausedNs - mWatchdog->mNowNs;
     }
 }
 
