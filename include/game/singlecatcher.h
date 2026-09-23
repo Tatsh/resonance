@@ -14,14 +14,16 @@
  * 0. Its primary table is at `0x007e0bb0` with eleven entries and its MsgSource subobject table at
  * `0x007e0b88` with four. The table is the same length as the base's, so the class introduces no
  * virtual and overrides only the destructor and the base's two pure slots. The object is 0x84
- * bytes against the base's 0x80, so it adds one word, and that word is not recovered.
+ * bytes against the base's 0x80, so it adds one word, mLastStep.
  *
- * The class is not reconstructed. Only the surface CatchingSTG and the table walk establish is
- * declared. Its constructor is at `0x001b19b0` and its destructor at `0x001b0d30`.
+ * Slot 9 is declared but not written. It sends a PhraseCapturedMsg and a SectionCapturedMsg built
+ * on the stack, and neither class has a constructor that takes the payload yet.
  */
 class SingleCatcher : public Catcher {
 public:
     /**
+     * Construct the base with two-bar seeker ranges and record the last step of the play map.
+     *
      * @param pPhraseMgr The phrase manager for the track.
      * @param pQuantizer The quantiser for the track.
      * @param pTrackData The track description.
@@ -41,41 +43,46 @@ public:
     virtual ~SingleCatcher();
 
     /**
-     * Score one bar.
+     * Capture the phrase a caught run of bars completes.
      *
-     * Slot 9.
+     * Slot 9. The routine gives every bar of the step around nBar to mPlayer, totals the points of
+     * the nRun bars ending at nBar, and sends a PhraseCapturedMsg (score, the multiplier
+     * Player::Slot16() reports for the first bar of the run, and the flag inverted) and a
+     * SectionCapturedMsg for the step.
      *
-     * @param nFirst The bar.
-     * @param nSecond The second word.
-     * @param nThird Zero selects a different query, as in MultiCatcher.
+     * @param nBar The last bar of the run.
+     * @param nRun The bars the run spans.
+     * @param nAutoCatch Non-zero for an automatic catch. The PhraseCapturedMsg receives it inverted
+     *                   and the SectionCapturedMsg unchanged.
      * @ghidraAddress 0x001ad630
      */
-    virtual void Slot9(int nFirst, int nSecond, int nThird);
+    virtual void Slot9(int nBar, int nRun, int nAutoCatch);
 
     /**
      * Report the caught power bar to this catcher's player.
      *
-     * Slot 10. The routine queries the phrase manager and, for an answer other than -1, sends a
-     * CaughtPowerbarMsg carrying that answer and the player, then delivers the same message to the
-     * player directly through MsgSink::Handle().
+     * Slot 10. The routine queries PhraseMgr::GetPowerbar() for the bar and, for an answer other
+     * than -1, sends a CaughtPowerbarMsg carrying that answer and the player, then delivers the
+     * same message to the player directly through MsgSink::Handle().
      *
-     * @param nBar The caught bar, unread.
+     * @param nBar The caught bar.
      * @ghidraAddress 0x001ad840
      */
     virtual void Slot10(int nBar);
 
     /**
-     * Score two words against this catcher.
+     * Give every phrase of the track to one player.
      *
-     * The routine is the target of ScoreTrackGraph's slot 10, which CatchingSTG reaches by casting
-     * its catcher to this class with `dynamic_cast`. Both arguments pass through unchanged and the
-     * answer is returned to that slot's caller. The title is inferred from that one call site; no
-     * literal in the image attests the original.
+     * CatchingSTG's slot 10 reaches it by casting its catcher to this class with `dynamic_cast`.
+     * The routine forwards the player to PhraseMgr::ResetOwners() and returns nothing. The title
+     * follows that callee and is inferred.
      *
-     * @param nFirst The first word.
-     * @param nSecond The second word.
-     * @return The answer ScoreTrackGraph::Slot10() reports.
+     * @param nTick The song position the caller received, unread.
+     * @param pPlayer The player the phrases go to.
      * @ghidraAddress 0x001b1a40
      */
-    int Score(int nFirst, int nSecond);
+    void ResetOwners(int nTick, Player *pPlayer);
+
+private:
+    int mLastStep; // +0x80, the play map's last step, read once by the constructor
 };

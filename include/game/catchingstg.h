@@ -128,18 +128,17 @@ public:
 
     /**
      * Slot 10. The routine casts the catcher to SingleCatcher with `dynamic_cast` and forwards
-     * both arguments to it. The cast is unguarded, so a MultiCatcher yields a null receiver and
-     * the forwarded call dereferences it.
+     * both arguments to SingleCatcher::ResetOwners(). The cast is unguarded, so a MultiCatcher
+     * yields a null receiver and the forwarded call dereferences it.
      *
-     * The routine also calls the game-mode accessor and discards the answer, which is what remains
-     * of an assertion the release build compiled away.
+     * The routine also calls the game-mode accessor on mApplication and discards the answer,
+     * which is what remains of an assertion the release build compiled away.
      *
-     * @param nFirst The first word, forwarded unchanged.
-     * @param nSecond The second word, forwarded unchanged.
-     * @return Whatever SingleCatcher reports.
+     * @param nTick The song position, forwarded unchanged.
+     * @param pPlayer The player the phrases go to.
      * @ghidraAddress 0x001a0668
      */
-    virtual int Slot10(int nFirst, int nSecond);
+    virtual void Slot10(int nTick, Player *pPlayer);
 
     /**
      * Slot 11. Returns 1 where the base returns zero.

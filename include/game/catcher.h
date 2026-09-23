@@ -164,7 +164,7 @@ public:
      * Slot 10, pure. MultiCatcher's override is empty and SingleCatcher's sends a
      * CaughtPowerbarMsg to its player when the phrase manager reports a value other than -1.
      *
-     * @param nBar The caught bar. PostCaughtBarMsg() passes it and neither override reads it.
+     * @param nBar The caught bar. SingleCatcher's override passes it to PhraseMgr::GetPowerbar().
      */
     virtual void Slot10(int nBar) = 0;
 

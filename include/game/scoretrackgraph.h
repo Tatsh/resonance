@@ -11,6 +11,7 @@
 #include "synth/musesynth.h"
 
 class PhraseDatabase;
+class Player;
 
 /**
  * Shared base of the four per-instrument gameplay stages.
@@ -154,17 +155,18 @@ public:
     virtual int Slot9();
 
     /**
-     * Slot 10. The default body is empty and does not write the return register, so its value is
-     * indeterminate and the default is not meant to be called. CatchingSTG is the only class that
-     * overrides it, and its override casts the catcher to SingleCatcher and forwards both
-     * arguments to it.
+     * Give every phrase of the track to one player.
      *
-     * @param nFirst The first word, forwarded unchanged.
-     * @param nSecond The second word, forwarded unchanged.
-     * @return Whatever the override computes.
+     * Slot 10. The default body is empty. CatchingSTG is the only class that overrides it, and its
+     * override forwards both arguments to SingleCatcher::ResetOwners(). The Gamer routine at
+     * `0x001123b0` calls the slot for every track whose slot 11 reports non-zero, with the
+     * winning player, and discards the return register.
+     *
+     * @param nTick The song position the caller received. No implementation reads it.
+     * @param pPlayer The player the phrases go to.
      * @ghidraAddress 0x001cf760
      */
-    virtual int Slot10(int nFirst, int nSecond);
+    virtual void Slot10(int nTick, Player *pPlayer);
 
     /**
      * Slot 11. The default returns zero and CatchingSTG returns 1, which is the whole of the

@@ -59,6 +59,7 @@ set(RESONANCE_GAME_SRCS
     riffset.cpp
     scoretrackgraph.cpp
     screenanim.cpp
+    singlecatcher.cpp
     singlepowerupcollection.cpp
     skillstats.cpp
     solopowerbarmgr.cpp

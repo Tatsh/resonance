@@ -1,7 +1,6 @@
 #include "game/catchingstg.h"
 
 #include "app/application.h"
-#include "game/gamemanagerimpl.h"
 #include "game/singlecatcher.h"
 
 // 0x001a0450
@@ -76,12 +75,12 @@ int CatchingSTG::Slot9() {
 }
 
 // 0x001a0668
-int CatchingSTG::Slot10(int nFirst, int nSecond) {
+void CatchingSTG::Slot10(int nTick, Player *pPlayer) {
     // Yes, the binary discards this call's result. It is what remains of a compiled-away assertion.
-    Application::shared()->GetGameManager()->GetGameMode();
+    mApplication->GetGameMode();
 
     // Unguarded on purpose: a MultiCatcher yields a null receiver here.
-    return dynamic_cast<SingleCatcher *>(mCatcher)->Score(nFirst, nSecond);
+    dynamic_cast<SingleCatcher *>(mCatcher)->ResetOwners(nTick, pPlayer);
 }
 
 // 0x001a0428
