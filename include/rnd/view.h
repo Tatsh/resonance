@@ -115,6 +115,30 @@ public:
      */
     static void Init();
 
+    /**
+     * Add another view as a child in all three roles.
+     *
+     * Appends it to the draw list and adds it to the animation and transform lists. The body is
+     * defined in the unit of the tunnel object cache, and Overlay's constructor is the one caller.
+     * The title is inferred.
+     *
+     * @param pChild The view to add.
+     * @ghidraAddress 0x0040f660
+     */
+    void AddView(View *pChild);
+
+    /**
+     * Remove another view from all four child roles.
+     *
+     * Removes it from the draw, animation, transform, and collision lists. The body is defined in
+     * the unit of the tunnel object cache, and Overlay's constructor is the one caller. The title
+     * is inferred.
+     *
+     * @param pChild The view to remove.
+     * @ghidraAddress 0x0040f5f8
+     */
+    void RemoveView(View *pChild);
+
     // Declared in recovered offset order. Each flag is titled from the class key of the factory
     // that sets it. Every writer is one of those factories and no reader was located, so the four
     // are public because nothing in the image constrains them further.

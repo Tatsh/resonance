@@ -39,7 +39,8 @@ set(RESONANCE_APP_SRCS
     renderer.cpp
     rendererbase.cpp
     scriptsink.cpp
-    task.cpp)
+    task.cpp
+    tunnelcache.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})
 target_link_libraries(resonance_app PRIVATE resonance_common)

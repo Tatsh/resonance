@@ -88,6 +88,16 @@ public:
     void AddDraw(Drawable *pDraw);
 
     /**
+     * Erase pDraw from mDraws.
+     *
+     * Drops this object's reference on pDraw first. A pDraw absent from mDraws does nothing.
+     *
+     * @param pDraw The drawable to remove.
+     * @ghidraAddress 0x00503360
+     */
+    void RemoveDraw(Drawable *pDraw);
+
+    /**
      * Empty mDraws, dropping this object's reference on every entry.
      *
      * @ghidraAddress 0x00503420

@@ -74,6 +74,16 @@ public:
     void AddTrans(Transformable *pTrans);
 
     /**
+     * Erase pTrans from mTransList.
+     *
+     * Drops this object's reference on pTrans first. A pTrans absent from mTransList does nothing.
+     *
+     * @param pTrans The transformable to remove.
+     * @ghidraAddress 0x004f09c0
+     */
+    void RemoveTrans(Transformable *pTrans);
+
+    /**
      * Drop this object's reference on every mTransList entry and empty the list.
      *
      * @ghidraAddress 0x004f0a80

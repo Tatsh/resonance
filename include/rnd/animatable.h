@@ -234,9 +234,11 @@ public:
          */
         virtual void Copy(const Filter *pSource);
 
-    private:
-        float mScale;  // +0x04
-        float mOffset; // +0x08
+        // Public because Animatable::SetRate() and Animatable::SetOffset() write both parameters
+        // directly, and the image has no accessor to route those writes through.
+
+        float mScale;  /*!< The multiplier. */
+        float mOffset; /*!< The addend. */
     };
 
     /**
@@ -318,10 +320,14 @@ public:
          */
         virtual void Copy(const Filter *pSource);
 
+        // Public because Animatable::SetLoopRange() writes both ends directly, and the image has
+        // no accessor to route those writes through.
+
+        float mMin; /*!< The lower end of the range. */
+        float mMax; /*!< The upper end of the range. */
+
     private:
-        float mMin; // +0x04
-        float mMax; // +0x08
-        int mLoop;  // +0x0c
+        int mLoop; // +0x0c
     };
 
     /**
@@ -746,6 +752,44 @@ public:
      * @ghidraAddress 0x00494c00
      */
     void RemoveFilter(int nIndex);
+
+    /**
+     * Change the multiplier of the ScaleOffset stage at the front of mFilters.
+     *
+     * The addend is recomputed as well, so the stage maps the current mFrame to the same output
+     * as before and only later frames advance at the new rate. An empty chain, or a front stage of
+     * another type, produces the fatal report "%s must have scale-offset filter in slot 1". The
+     * definition sits in the unit of the tunnel object cache. The title is inferred.
+     *
+     * @param flRate The new multiplier.
+     * @ghidraAddress 0x0040d2b0
+     */
+    void SetRate(float flRate);
+
+    /**
+     * Change the addend of the ScaleOffset stage at the front of mFilters.
+     *
+     * An empty chain, or a front stage of another type, produces the fatal report "%s must have
+     * scale-offset filter in slot 1". The definition sits in the unit of the tunnel object cache.
+     * The title is inferred.
+     *
+     * @param flOffset The new addend.
+     * @ghidraAddress 0x0040d3d0
+     */
+    void SetOffset(float flOffset);
+
+    /**
+     * Change both ends of the MinMaxLoop stage at the back of mFilters.
+     *
+     * An empty chain, or a back stage of another type, produces the fatal report "%s must have
+     * min-max-loop filter in last slot". The definition sits in the unit of the tunnel object
+     * cache. The title is inferred.
+     *
+     * @param flMin The new lower end.
+     * @param flMax The new upper end.
+     * @ghidraAddress 0x0040d4a8
+     */
+    void SetLoopRange(float flMin, float flMax);
 
     /**
      * Build one default-constructed filter for a type tag.
