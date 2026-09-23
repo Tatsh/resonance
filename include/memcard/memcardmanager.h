@@ -168,17 +168,17 @@ public:
      * Queue a SaveRemixMCT.
      *
      * @param nPortSlot The packed port and slot.
-     * @param unknown60 Passed through to the task.
+     * @param remixName The remix's name.
      * @param appearances The players' appearances.
-     * @param unknown74 Passed through to the task.
-     * @param nUnknown58 Passed through to the task.
+     * @param levelName The level the remix was built over.
+     * @param nAlbumNum The album number the index entry records.
      * @ghidraAddress 0x001f31c8
      */
     void CreateSaveRemixTask(int nPortSlot,
-                             const HxStr &unknown60,
+                             const HxStr &remixName,
                              const std::vector<FreqAppearance> &appearances,
-                             const HxStr &unknown74,
-                             int nUnknown58);
+                             const HxStr &levelName,
+                             int nAlbumNum);
 
     /**
      * Queue a ListRemixesMCT.

@@ -35,21 +35,43 @@ constexpr int kRemixIndexFileNameSize = 8;
  *
  * The destructor at `0x00139410` is the authoritative member list. It releases the `std::vector`
  * at `+0x5c` by destroying each element through the element's own virtual slot, returns the buffer
- * to the pool, and then releases unknown54. The element of that vector is FreqAppearance, 20 bytes
+ * to the pool, and then releases dateTime. The element of that vector is FreqAppearance, 20 bytes
  * with its vptr at `+0x10`, the element MetRemixRecord::appearances and SaveRemixMCT's vector at
  * `+0x68` store.
  *
- * The record is a plain data aggregate, so it is a `struct` with public members.
+ * The record is plain data with public members, so it is a `struct`.
  */
 struct RemixIndexElement {
+    /**
+     * Construct an element with only AlbumNum cleared.
+     *
+     * The body is inline. RemixIndex::ReadFromStream() expands it at `0x00136790` and
+     * SaveRemixMCT::WriteIndex() at `0x0017b4ec`, where Reset() follows it.
+     */
+    RemixIndexElement() : AlbumNum(0) {
+    }
+
+    /**
+     * Clear the three names, clear GameOK, set Version to 2, and set dateTime to the empty string.
+     *
+     * Not reconstructed yet.
+     *
+     * @ghidraAddress 0x001397f0
+     */
+    void Reset();
+
     char LevelName[kRemixIndexLevelNameSize]; /*!< Level the remix was built over. +0x00 */
     char RemixName[kRemixIndexRemixNameSize]; /*!< Name the player gave the remix. +0x20 */
     /** Decimal file name of the remix payload inside the directory. +0x40 */
     char FileName[kRemixIndexFileNameSize];
-    char GameOK;     /*!< Read as a signed byte by the dump. +0x48 */
-    int Version;     /*!< +0x4c */
-    int AlbumNum;    /*!< +0x50 */
-    HxStr unknown54; /*!< Released by the destructor. Purpose not recovered. +0x54 */
+    char GameOK;  /*!< Read as a signed byte by the dump. +0x48 */
+    int Version;  /*!< +0x4c */
+    int AlbumNum; /*!< +0x50 */
+    /**
+     * When the remix was saved, from FormatCurrentDateTime(), or `FIXME: default date` when the
+     * clock cannot be read. SaveRemixMCT::WriteIndex() writes it. +0x54
+     */
+    HxStr dateTime;
     /** Appearances of the players who recorded the remix. +0x5c */
     std::vector<FreqAppearance> appearances;
 };
@@ -91,6 +113,15 @@ struct RemixIndex {
      * @ghidraAddress 0x00139858
      */
     void WriteToStream(OBStream &stream);
+
+    /**
+     * Print every element to the debug console.
+     *
+     * Not reconstructed yet.
+     *
+     * @ghidraAddress 0x00139920
+     */
+    void DumpElements();
 
     int version;                             /*!< First word of the file. +0x00 */
     std::vector<RemixIndexElement> elements; /*!< +0x04 */

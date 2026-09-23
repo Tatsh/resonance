@@ -126,12 +126,12 @@ void MemcardManager::CreateLoadJukeboxPlayListTask(int nPortSlot,
 
 // 0x001f31c8
 void MemcardManager::CreateSaveRemixTask(int nPortSlot,
-                                         const HxStr &unknown60,
+                                         const HxStr &remixName,
                                          const std::vector<FreqAppearance> &appearances,
-                                         const HxStr &unknown74,
-                                         int nUnknown58) {
+                                         const HxStr &levelName,
+                                         int nAlbumNum) {
     mTasks.push_back(new SaveRemixMCT(
-        mUser, mCard, nPortSlot, ++mTicket, unknown60, appearances, unknown74, nUnknown58));
+        mUser, mCard, nPortSlot, ++mTicket, remixName, appearances, levelName, nAlbumNum));
 }
 
 // 0x001f3598

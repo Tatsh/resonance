@@ -137,6 +137,12 @@ public:
     ScriptSink *GetScriptSink();
 
     /**
+     * @return The shared log stream, which the remix tasks also use as the remix payload buffer.
+     * @ghidraAddress 0x00118f00
+     */
+    IOBPreallocMemStream *GetLog();
+
+    /**
      * Rewind the shared log stream and report it.
      *
      * LoadRemixMCT's constructor and MetRemixManager::AsyncCallbackDone() use the rewound stream

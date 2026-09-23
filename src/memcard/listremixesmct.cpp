@@ -107,7 +107,7 @@ void ListRemixesMCT::OnFileLoaded(int nStatus) {
         mRecords->push_back(MetRemixRecord(HxStr(it->LevelName),
                                            HxStr(it->RemixName),
                                            HxStr(it->FileName),
-                                           it->unknown54,
+                                           it->dateTime,
                                            it->GameOK,
                                            it->appearances,
                                            it->AlbumNum));

@@ -7,8 +7,11 @@
 #include "memcard/memcardtask.h"
 #include "memcard/memcarduser.h"
 #include "memcard/remixdirinfo.h"
+#include "memcard/savefilemct.h"
 #include "os/hxstr.h"
 #include "stream/iobpreallocmemstream.h"
+
+class ListDirOp;
 
 /** Free clusters a remix save needs, which the card enquiry reports through CheckInfoOp::mFree. */
 constexpr int kRemixSaveMinimumFreeClusters = 60;
@@ -25,53 +28,47 @@ constexpr int kRemixSaveMinimumFreeClusters = 60;
  *
  * The task enquires about the card, rejects a card with fewer than kRemixSaveMinimumFreeClusters
  * free clusters, lists `/BASCUS-97125r*`, and then reads the index out of each remix save directory
- * to find one with room. It owns a `LoadFileMCT` at `+0x9c` and a `SaveFileMCT` at `+0xa0`, and
- * receives both reports as a `MemcardUser`, which is why it derives from both interfaces.
+ * (step 1), recording a RemixDirInfo for each. A directory whose index already lists a remix of
+ * the same name becomes the target and the save replaces that entry. Otherwise ChooseTargetDir()
+ * picks the first directory with room, or a fresh one. The task then reads the target's index
+ * (step 2), writes the payload from the shared log stream (step 3), and finally rewrites the
+ * target's index (step 4). It owns a LoadFileMCT and a SaveFileMCT, and receives both reports as a
+ * `MemcardUser`, which is why it derives from both interfaces.
  *
- * A directory with room is one whose index holds fewer than thirteen entries. When no directory has
- * room, the task builds a fresh directory name by formatting `%02d` from one past the highest
- * directory number the listing found and appending it to g_remixDirBase.
- *
- * Six routines are recovered and not written, and the same one obstacle blocks all six. The index
- * record that the string `********** RemixIndex element **********` at `0x007d2b18` titles, with
- * the six fields `LevelName`, `RemixName`, `FileName`, `GameOK`, `Version`, and `AlbumNum`, is a
- * class the image does not name. Its descriptor is absent from the 574 in the RTTI harvest, no
- * `__FILE__` path survives for the translation unit, and no method name for it survives either, so
- * titling it would be invention. The six are the constructor at `0x00179ec0`, `OnListDir()` at
- * `0x0017a430`, the two step bodies at `0x0017a928` and `0x0017ab50`, `OnFileLoaded()` at
- * `0x0017ad70`, and `WriteIndex()` at `0x0017b318`.
- *
- * The method titles ListRemixDir(), WriteIndex(), Execute(), and Finish() are inferred. No string
- * in the image identifies any of them.
+ * The method titles are inferred. No string in the image identifies any of them.
  */
 class SaveRemixMCT : public MemcardTask, public MemcardUser {
 public:
     /**
      * Construct an idle remix save.
      *
-     * MemcardManager::CreateSaveRemixTask() at `0x001f31c8` is the one caller. Not written, for the
-     * reason recorded in the class documentation.
+     * MemcardManager::CreateSaveRemixTask() at `0x001f31c8` is the one caller. mStep and
+     * mTargetIndexStatus are not written.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
-     * @param unknown60 Copied into mUnknown60.
-     * @param appearances The players' appearances, copied into the vector at `+0x68`.
-     * @param unknown74 Copied into mUnknown74.
-     * @param nUnknown58 Stored in mUnknown58.
+     * @param remixName The remix's name, copied into mRemixName.
+     * @param appearances The players' appearances, copied into mAppearances.
+     * @param levelName The level the remix was built over, copied into mLevelName.
+     * @param nAlbumNum The album number the index entry records.
      * @ghidraAddress 0x00179ec0
      */
     SaveRemixMCT(MemcardUser *pUser,
                  Memcard *pCard,
                  int nPortSlot,
                  int nCookie,
-                 const HxStr &unknown60,
+                 const HxStr &remixName,
                  const std::vector<FreqAppearance> &appearances,
-                 const HxStr &unknown74,
-                 int nUnknown58);
+                 const HxStr &levelName,
+                 int nAlbumNum);
 
-    /** @ghidraAddress 0x001850a8 */
+    /**
+     * Delete the inner save and the inner read.
+     *
+     * @ghidraAddress 0x001850a8
+     */
     virtual ~SaveRemixMCT();
 
     /**
@@ -84,7 +81,16 @@ public:
      */
     void ListRemixDir();
 
-    /** @ghidraAddress 0x0017b318 */
+    /**
+     * Rewrite the target directory's index with the saved remix, and save it.
+     *
+     * The index read in step 2 is parsed again from the start of mStream, or started afresh at
+     * version 1 when that read failed. When mReplacing is set, the entry with the same RemixName
+     * is refreshed in place. Otherwise a new entry is appended. mStream then receives the
+     * rewritten index, and a fresh SaveFileMCT saves it with its icon files as `<dir>/index`.
+     *
+     * @ghidraAddress 0x0017b318
+     */
     void WriteIndex();
 
     /**
@@ -97,6 +103,17 @@ public:
      * @ghidraAddress 0x00186a40
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
+
+    /**
+     * Collect the listed directories and start the index walk.
+     *
+     * A failed listing collects nothing. With directories listed the first index is read in step
+     * 1. With none, the target and payload file name are chosen at once and step 2 starts.
+     *
+     * @param pOp The finished listing.
+     * @ghidraAddress 0x0017a430
+     */
+    virtual void OnListDir(ListDirOp *pOp);
 
     /**
      * Report the finished save through MemcardUser::OnRemixSaved().
@@ -112,7 +129,19 @@ public:
      */
     virtual void Execute();
 
-    /** @ghidraAddress 0x0017ad70 */
+    /**
+     * Advance the index walk, or move from the target's index to the payload write.
+     *
+     * A failure outside step 2 abandons the task. In step 1 the index is parsed, recorded through
+     * AppendDirInfo(), and each element's file number raises the directory's highestFileNumber.
+     * An element named mRemixName makes this directory the target and its file name the payload
+     * file name, and step 2 starts. Otherwise the next directory is read, or the target and payload
+     * file name are chosen and step 2 starts. In step 2 the read status, success or not, is kept
+     * in mTargetIndexStatus and step 3 writes the payload.
+     *
+     * @param nStatus The inner read's status.
+     * @ghidraAddress 0x0017ad70
+     */
     virtual void OnFileLoaded(int nStatus);
 
     /**
@@ -128,24 +157,37 @@ public:
     virtual void OnFileSaved(int nStatus);
 
 private:
+    // 0x00179c28
+    // Appends a summary of one directory to infos, with the directory number parsed out of name
+    // and no highest file number yet.
+    static void AppendDirInfo(std::vector<RemixDirInfo> &infos, const HxStr &name, int nEntryCount);
+
+    // 0x00179d60
+    // Returns the first directory with room, or a fresh name one past the highest directory number.
+    static HxStr ChooseTargetDir(const std::vector<RemixDirInfo> &infos);
+
     // 0x0017a928
-    // Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream,
-    // and reads `<dir>/index` into the stream buffer through a fresh inner LoadFileMCT. Not
-    // written, for the reason recorded in the class documentation. The title is inferred.
+    // Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream, and reads
+    // `<dir>/index` through a fresh inner LoadFileMCT.
     void ReadNextIndex();
+
     // 0x0017ab50
-    // Writes the remix payload into the chosen directory through a fresh inner
-    // SaveFileMCT, and advances mStep to 2. Not written, for the same reason. The title is
-    // inferred.
+    // Stamps mRemixName into the payload in the shared log stream, rewinds mStream, and reads the
+    // target directory's index through a fresh inner LoadFileMCT.
+    void ReadTargetIndex();
+
+    // 0x0017ba98
+    // Saves the payload in the shared log stream as `<target>/<mPayloadFileName>`, without icon
+    // files, through a fresh inner SaveFileMCT.
     void WritePayload();
 
-    // Selects the step the four step bodies run next. Execute() clears it. +0x20
+    // Selects the step the bodies run next. Execute() clears it. +0x20
     int mStep;
 
-    // +0x24, not written by the constructor
-    int mUnknown24;
+    // The status of the step-2 read of the target's index, which WriteIndex() tests. +0x24
+    int mTargetIndexStatus;
 
-    // The directory the index is being read out of, or written into. +0x28
+    // The directory the index is being read out of. +0x28
     HxStr mCurrentDir;
 
     // Every remix save directory the listing found, consumed one per step. +0x30
@@ -154,36 +196,33 @@ private:
     // A summary of every directory the listing found, built one entry per directory. +0x3c
     std::vector<RemixDirInfo> mDirInfos;
 
-    // The directory the remix lands in, chosen by the index walk. +0x48
+    // The directory the remix lands in. +0x48
     HxStr mTargetDir;
 
-    // +0x50
-    HxStr mUnknown50;
+    // The payload's file name inside mTargetDir. +0x50
+    HxStr mPayloadFileName;
 
-    // +0x58, from the constructor's one stack argument
-    int mUnknown58;
+    // The album number the index entry records. +0x58
+    int mAlbumNum;
 
-    // +0x5c
-    int mUnknown5c;
+    // Non-zero once an entry named mRemixName was found, so the save replaces it. +0x5c
+    int mReplacing;
 
-    // +0x60, from the constructor's fifth register argument
-    HxStr mUnknown60;
+    // The remix's name. +0x60
+    HxStr mRemixName;
 
-    // A copy of the constructor's sixth argument. The 20-byte element with its vptr at +0x10 is
-    // FreqAppearance, the element of MetRemixRecord::appearances. +0x68
+    // The players' appearances the index entry records. +0x68
     std::vector<FreqAppearance> mAppearances;
 
-    // +0x74, from the constructor's seventh register argument
-    HxStr mUnknown74;
+    // The level the remix was built over. +0x74
+    HxStr mLevelName;
 
-    // One index or payload file passes through this stream's buffer at a time. +0x7c
+    // One index file passes through this stream's buffer at a time. +0x7c
     IOBPreallocMemStream mStream;
 
-    // The inner read task. Recorded as a reserved word rather than as a pointer, because the
-    // destructor releases it through a virtual slot and no step body that would fix its class is
-    // written. +0x9c
-    unsigned char mReserved9c[4];
+    // The inner read. The destructor deletes it. +0x9c
+    LoadFileMCT *mLoadTask;
 
-    // The inner save task, recorded for the same reason. +0xa0
-    unsigned char mReserveda0[4];
+    // The inner save. The destructor deletes it. +0xa0
+    SaveFileMCT *mSaveTask;
 };

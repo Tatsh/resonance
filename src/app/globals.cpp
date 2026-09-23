@@ -101,6 +101,11 @@ ScriptSink *Globals::GetScriptSink() {
     return mScriptSink;
 }
 
+// 0x00118f00
+IOBPreallocMemStream *Globals::GetLog() {
+    return mLog;
+}
+
 // 0x00118f08
 IOBPreallocMemStream *Globals::GetResetLog() {
     mLog->Reset();
