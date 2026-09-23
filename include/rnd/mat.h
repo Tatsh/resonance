@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <vector>
 
 #include "math/color.h"
@@ -102,6 +103,53 @@ public:
          * @ghidraAddress 0x004dd0a0
          */
         void SetTex(Tex *pTex);
+
+        /**
+         * Reset the stage to the default surface.
+         *
+         * The blend becomes kBlendModeMultiply, the coordinate set and the generation mode zero,
+         * the transform the identity, the wrap kWrapModeRepeat, and both references null. The
+         * routine returns nothing, so it is an initialiser rather than a constructor. The name is
+         * inferred.
+         *
+         * @ghidraAddress 0x004dd020
+         */
+        void InitDefaults();
+
+        /**
+         * Write the stage to the engine text sink.
+         *
+         * @param sink The text sink.
+         * @ghidraAddress 0x004d2270
+         */
+        void Dump(FailSink &sink) const;
+
+        /**
+         * Serialise the stage.
+         *
+         * Writes the blend, the coordinate set, the generation mode, the twelve transform floats,
+         * the transform flag as one byte, the wrap, and the texture as its name. The material
+         * reference is not written.
+         *
+         * @param stream The stream to write to.
+         * @ghidraAddress 0x004d26f8
+         */
+        void Save(Stream &stream) const;
+
+        /**
+         * Load the stage.
+         *
+         * Rnd::g_nRndMatLoadVersion decides the layout. From revision 3 the blend arrives as a
+         * BlendMode. Below that it arrives as two words, of which only the first is used, mapped
+         * 0, 1, 2, 3, 4, 5, and 6 to kBlendModeDest, kBlendModeSrc, kBlendModeMultiply,
+         * kBlendModeAdd, kBlendModeDestAlpha, kBlendModeSrcAlpha, and kBlendModeInvDestAlpha, and
+         * any other value leaves the blend as it was. A revision 0 record then names the material
+         * the stage belongs to, and every revision ends with the texture.
+         *
+         * @param stream The stream to read from.
+         * @ghidraAddress 0x004d2a20
+         */
+        void Load(Stream &stream);
     };
 
     /** Serial version this build writes, and the highest version it loads. */
@@ -120,6 +168,43 @@ public:
 
     /** @ghidraAddress 0x004dbb10 */
     virtual ~Mat();
+
+    /**
+     * Allocate a material block under the tag "Rnd::Mat".
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x004db900
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a material block under the same tag.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004db920
+     */
+    static void operator delete(void *pBlock);
+
+    /**
+     * Append one stage with the default surface, owned by this material.
+     *
+     * The routine has no caller in the shipped build. The name is inferred.
+     *
+     * @ghidraAddress 0x004d2198
+     */
+    void AddStage();
+
+    /**
+     * Remove one stage, dropping this material's reference on its texture.
+     *
+     * The index is not checked. The routine has no caller in the shipped build. The name is
+     * inferred.
+     *
+     * @param nIndex The position of the stage.
+     * @ghidraAddress 0x004dcf60
+     */
+    void RemoveStage(int nIndex);
 
     /**
      * Append every referrer of this material whose class is "Mesh" to meshes.
@@ -442,6 +527,18 @@ extern Mat *(*g_pfnNewMat)(const HxStr &name);
  * @ghidraAddress 0x004dbd00
  */
 Mat *NewMat(const HxStr &name);
+
+/**
+ * Build a material through the creator hook.
+ *
+ * No call site survives in the shipped program. The name is inferred from the Rnd::Button
+ * counterpart.
+ *
+ * @param name The object name.
+ * @return The new material.
+ * @ghidraAddress 0x004dba28
+ */
+Mat *NewMatThroughHook(const HxStr &name);
 
 /**
  * Build a material for the registered "Mat" class by calling through g_pfnNewMat.

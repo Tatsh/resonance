@@ -4,6 +4,7 @@
 
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 #include "rnd/manager.h"
 #include "rnd/stream.h"
 #include "rnd/tex.h"
@@ -14,6 +15,9 @@ namespace Rnd {
 namespace {
 
 constexpr char kNoObject[] = "no object";
+
+// The allocation tag every material block is billed to.
+constexpr char kMatTag[] = "Rnd::Mat";
 
 // 0x004d2e68
 // The same printer serves the material blend and the stage blend.
@@ -163,58 +167,26 @@ void PrintBool(FailSink &sink, int nValue) {
     sink.Print(nValue != 0 ? "true" : "false");
 }
 
-// 0x004dd020
-void InitStageDefaults(Mat::Stage &stage) {
-    stage.mBlend = Mat::kBlendModeMultiply;
-    stage.mCoordIndex = 0;
-    stage.mGenMode = Mat::Stage::kGenModeFixed;
-    stage.mXfm.mBasisX.x = 1.0f;
-    stage.mXfm.mBasisX.y = 0.0f;
-    stage.mXfm.mBasisX.z = 0.0f;
-    stage.mXfm.mBasisX.w = 1.0f;
-    stage.mXfm.mBasisY.x = 0.0f;
-    stage.mXfm.mBasisY.y = 1.0f;
-    stage.mXfm.mBasisY.z = 0.0f;
-    stage.mXfm.mBasisY.w = 1.0f;
-    stage.mXfm.mBasisZ.x = 0.0f;
-    stage.mXfm.mBasisZ.y = 0.0f;
-    stage.mXfm.mBasisZ.z = 1.0f;
-    stage.mXfm.mBasisZ.w = 1.0f;
-    stage.mXfm.mTranslation.x = 0.0f;
-    stage.mXfm.mTranslation.y = 0.0f;
-    stage.mXfm.mTranslation.z = 0.0f;
-    stage.mXfm.mTranslation.w = 1.0f;
-    stage.mUseXfm = 0;
-    stage.mWrap = Mat::Stage::kWrapModeRepeat;
-    stage.mTex = nullptr;
-    stage.mMat = nullptr;
-}
+// A stage record below revision 3 names its blend as a legacy word, mapped through this table in
+// Mat::Stage::Load(). Only the first of the two legacy words is used.
+struct LegacyStageBlend {
+    int mLegacy;
+    Mat::BlendMode mBlend;
+};
 
-// 0x004d2270
-FailSink &DumpStage(FailSink &sink, const Mat::Stage &stage) {
-    sink.Print("\n\tblend:");
-    PrintBlendMode(sink, stage.mBlend);
-    sink.Print(" coordIndex:");
-    sink.Format("%d", stage.mCoordIndex);
-    sink.Print(" genMode:");
-    PrintGenMode(sink, stage.mGenMode);
-    sink.Print(" xfm:");
-    PrintVector3(sink, stage.mXfm.mBasisX);
-    PrintVector3(sink, stage.mXfm.mBasisY);
-    PrintVector3(sink, stage.mXfm.mBasisZ);
-    PrintVector3(sink, stage.mXfm.mTranslation);
-    sink.Print("useXfm:");
-    PrintBool(sink, stage.mUseXfm);
-    sink.Print(" wrap:");
-    PrintWrapMode(sink, stage.mWrap);
-    // Yes, the dump writes the material reference before the texture reference even though the
-    // texture is the earlier member.
-    sink.Print(" mat:");
-    PrintObjectRef(sink, stage.mMat);
-    sink.Print(" tex:");
-    PrintObjectRef(sink, stage.mTex);
-    return sink;
-}
+constexpr LegacyStageBlend kLegacyStageBlends[] = {{0, Mat::kBlendModeDest},
+                                                   {1, Mat::kBlendModeSrc},
+                                                   {2, Mat::kBlendModeMultiply},
+                                                   {3, Mat::kBlendModeAdd},
+                                                   {4, Mat::kBlendModeDestAlpha},
+                                                   {5, Mat::kBlendModeSrcAlpha},
+                                                   {6, Mat::kBlendModeInvDestAlpha}};
+
+// The revision from which a stage stores its blend as a BlendMode.
+constexpr int kStageBlendModeRevision = 3;
+
+// The last revision in which a stage names the material it belongs to.
+constexpr int kStageMatRefRevision = 0;
 
 // 0x004d75c8
 // The vector dump opens with the element count and then writes the index of every stage on its
@@ -227,34 +199,9 @@ FailSink &DumpStageVector(FailSink &sink, const std::vector<Mat::Stage> &stages)
         sink.Print("\n");
         sink.Format("%d", nIndex);
         sink.Print("\t");
-        DumpStage(sink, stages[nIndex]);
+        stages[nIndex].Dump(sink);
     }
     return sink;
-}
-
-// 0x004d26f8
-Stream &WriteStage(Stream &stream, const Mat::Stage &stage) {
-    stream.Write(&stage.mBlend, sizeof(stage.mBlend));
-    stream.Write(&stage.mCoordIndex, sizeof(stage.mCoordIndex));
-    stream.Write(&stage.mGenMode, sizeof(stage.mGenMode));
-    stream.Write(&stage.mXfm.mBasisX.x, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisX.y, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisX.z, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisY.x, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisY.y, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisY.z, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisZ.x, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisZ.y, sizeof(float));
-    stream.Write(&stage.mXfm.mBasisZ.z, sizeof(float));
-    stream.Write(&stage.mXfm.mTranslation.x, sizeof(float));
-    stream.Write(&stage.mXfm.mTranslation.y, sizeof(float));
-    stream.Write(&stage.mXfm.mTranslation.z, sizeof(float));
-    const char chUseXfm = static_cast<char>(stage.mUseXfm);
-    stream.WriteBytes(&chUseXfm, sizeof(chUseXfm));
-    stream.Write(&stage.mWrap, sizeof(stage.mWrap));
-    WriteObjectRef(stream, stage.mTex);
-    WriteObjectRef(stream, stage.mMat);
-    return stream;
 }
 
 // 0x004dd860
@@ -262,40 +209,21 @@ Stream &WriteStageVector(Stream &stream, const std::vector<Mat::Stage> &stages) 
     const int nCount = static_cast<int>(stages.size());
     stream.Write(&nCount, sizeof(nCount));
     for (const auto &stage : stages) {
-        WriteStage(stream, stage);
+        stage.Save(stream);
     }
     return stream;
 }
 
 // 0x004d76d8
-// The stage record is read back in the order WriteStage() writes it.
+// Every new stage is a copy of one default stage, and each stage then reads itself.
 Stream &ReadStageVector(Stream &stream, std::vector<Mat::Stage> &stages) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
-    stages.resize(nCount);
+    Mat::Stage defaultStage;
+    defaultStage.InitDefaults();
+    stages.resize(nCount, defaultStage);
     for (auto &stage : stages) {
-        InitStageDefaults(stage);
-        stream.Read(&stage.mBlend, sizeof(stage.mBlend));
-        stream.Read(&stage.mCoordIndex, sizeof(stage.mCoordIndex));
-        stream.Read(&stage.mGenMode, sizeof(stage.mGenMode));
-        stream.Read(&stage.mXfm.mBasisX.x, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisX.y, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisX.z, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisY.x, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisY.y, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisY.z, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisZ.x, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisZ.y, sizeof(float));
-        stream.Read(&stage.mXfm.mBasisZ.z, sizeof(float));
-        stream.Read(&stage.mXfm.mTranslation.x, sizeof(float));
-        stream.Read(&stage.mXfm.mTranslation.y, sizeof(float));
-        stream.Read(&stage.mXfm.mTranslation.z, sizeof(float));
-        char chUseXfm = 0;
-        stream.ReadBytes(&chUseXfm, sizeof(chUseXfm));
-        stage.mUseXfm = chUseXfm != 0;
-        stream.Read(&stage.mWrap, sizeof(stage.mWrap));
-        ReadObjectRef(stream, stage.mTex);
-        ReadObjectRef(stream, stage.mMat);
+        stage.Load(stream);
     }
     return stream;
 }
@@ -388,6 +316,153 @@ void Mat::Stage::SetTex(Tex *pTex) {
     if (pTex != nullptr) {
         pTex->AddRef(mMat);
     }
+}
+
+// 0x004dd020
+void Mat::Stage::InitDefaults() {
+    mBlend = kBlendModeMultiply;
+    mCoordIndex = 0;
+    mGenMode = kGenModeFixed;
+    mXfm.mBasisX.x = 1.0f;
+    mXfm.mBasisX.y = 0.0f;
+    mXfm.mBasisX.z = 0.0f;
+    mXfm.mBasisX.w = 1.0f;
+    mXfm.mBasisY.x = 0.0f;
+    mXfm.mBasisY.y = 1.0f;
+    mXfm.mBasisY.z = 0.0f;
+    mXfm.mBasisY.w = 1.0f;
+    mXfm.mBasisZ.x = 0.0f;
+    mXfm.mBasisZ.y = 0.0f;
+    mXfm.mBasisZ.z = 1.0f;
+    mXfm.mBasisZ.w = 1.0f;
+    mXfm.mTranslation.x = 0.0f;
+    mXfm.mTranslation.y = 0.0f;
+    mXfm.mTranslation.z = 0.0f;
+    mXfm.mTranslation.w = 1.0f;
+    mUseXfm = 0;
+    mWrap = kWrapModeRepeat;
+    mTex = nullptr;
+    mMat = nullptr;
+}
+
+// 0x004d2270
+void Mat::Stage::Dump(FailSink &sink) const {
+    sink.Print("\n\tblend:");
+    PrintBlendMode(sink, mBlend);
+    sink.Print(" coordIndex:");
+    sink.Format("%d", mCoordIndex);
+    sink.Print(" genMode:");
+    PrintGenMode(sink, mGenMode);
+    sink.Print(" xfm:");
+    PrintVector3(sink, mXfm.mBasisX);
+    PrintVector3(sink, mXfm.mBasisY);
+    PrintVector3(sink, mXfm.mBasisZ);
+    PrintVector3(sink, mXfm.mTranslation);
+    sink.Print("useXfm:");
+    PrintBool(sink, mUseXfm);
+    sink.Print(" wrap:");
+    PrintWrapMode(sink, mWrap);
+    // Yes, the dump writes the material reference before the texture reference even though the
+    // texture is the earlier member.
+    sink.Print(" mat:");
+    PrintObjectRef(sink, mMat);
+    sink.Print(" tex:");
+    PrintObjectRef(sink, mTex);
+}
+
+// 0x004d26f8
+void Mat::Stage::Save(Stream &stream) const {
+    stream.Write(&mBlend, sizeof(mBlend));
+    stream.Write(&mCoordIndex, sizeof(mCoordIndex));
+    stream.Write(&mGenMode, sizeof(mGenMode));
+    stream.Write(&mXfm.mBasisX.x, sizeof(float));
+    stream.Write(&mXfm.mBasisX.y, sizeof(float));
+    stream.Write(&mXfm.mBasisX.z, sizeof(float));
+    stream.Write(&mXfm.mBasisY.x, sizeof(float));
+    stream.Write(&mXfm.mBasisY.y, sizeof(float));
+    stream.Write(&mXfm.mBasisY.z, sizeof(float));
+    stream.Write(&mXfm.mBasisZ.x, sizeof(float));
+    stream.Write(&mXfm.mBasisZ.y, sizeof(float));
+    stream.Write(&mXfm.mBasisZ.z, sizeof(float));
+    stream.Write(&mXfm.mTranslation.x, sizeof(float));
+    stream.Write(&mXfm.mTranslation.y, sizeof(float));
+    stream.Write(&mXfm.mTranslation.z, sizeof(float));
+    const char chUseXfm = static_cast<char>(mUseXfm);
+    stream.WriteBytes(&chUseXfm, sizeof(chUseXfm));
+    stream.Write(&mWrap, sizeof(mWrap));
+    WriteObjectRef(stream, mTex);
+}
+
+// 0x004d2a20
+void Mat::Stage::Load(Stream &stream) {
+    if (g_nRndMatLoadVersion >= kStageBlendModeRevision) {
+        stream.Read(&mBlend, sizeof(mBlend));
+    } else {
+        int nLegacyBlend = 0;
+        int nUnused = 0;
+        stream.Read(&nLegacyBlend, sizeof(nLegacyBlend));
+        stream.Read(&nUnused, sizeof(nUnused)); // Yes, the binary discards the second word.
+        for (const auto &entry : kLegacyStageBlends) {
+            if (entry.mLegacy == nLegacyBlend) {
+                mBlend = entry.mBlend;
+                break;
+            }
+        }
+    }
+    stream.Read(&mCoordIndex, sizeof(mCoordIndex));
+    stream.Read(&mGenMode, sizeof(mGenMode));
+    stream.Read(&mXfm.mBasisX.x, sizeof(float));
+    stream.Read(&mXfm.mBasisX.y, sizeof(float));
+    stream.Read(&mXfm.mBasisX.z, sizeof(float));
+    stream.Read(&mXfm.mBasisY.x, sizeof(float));
+    stream.Read(&mXfm.mBasisY.y, sizeof(float));
+    stream.Read(&mXfm.mBasisY.z, sizeof(float));
+    stream.Read(&mXfm.mBasisZ.x, sizeof(float));
+    stream.Read(&mXfm.mBasisZ.y, sizeof(float));
+    stream.Read(&mXfm.mBasisZ.z, sizeof(float));
+    stream.Read(&mXfm.mTranslation.x, sizeof(float));
+    stream.Read(&mXfm.mTranslation.y, sizeof(float));
+    stream.Read(&mXfm.mTranslation.z, sizeof(float));
+    char chUseXfm = 0;
+    stream.ReadBytes(&chUseXfm, sizeof(chUseXfm));
+    mUseXfm = chUseXfm != 0;
+    stream.Read(&mWrap, sizeof(mWrap));
+    if (g_nRndMatLoadVersion <= kStageMatRefRevision) {
+        ReadObjectRef(stream, mMat);
+    }
+    ReadObjectRef(stream, mTex);
+}
+
+// 0x004db900
+void *Mat::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kMatTag);
+}
+
+// 0x004db920
+void Mat::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kMatTag);
+}
+
+// 0x004d2198
+void Mat::AddStage() {
+    Stage stage;
+    stage.InitDefaults();
+    mStages.resize(mStages.size() + 1, stage);
+    mStages.back().mMat = this;
+}
+
+// 0x004dcf60
+void Mat::RemoveStage(int nIndex) {
+    Stage &stage = mStages[nIndex];
+    if (stage.mTex != nullptr) {
+        stage.mTex->RemoveRef(this);
+    }
+    mStages.erase(mStages.begin() + nIndex);
+}
+
+// 0x004dba28
+Mat *NewMatThroughHook(const HxStr &name) {
+    return g_pfnNewMat(name);
 }
 
 // 0x004dbb10
