@@ -51,8 +51,8 @@ class TickClock;
  */
 class PhraseMgr : public MsgSink, public MsgSource {
     // ScoreTrackGraph::GetPhraseDatabase() at 0x001cf978 reads mDatabase directly, the Catcher
-    // constructor at 0x001aba30 copies mBarTicks, PhrasePlayer maps a bar through mMap at
-    // 0x001c1a28, and PhraseEraser divides by mBarTicks at 0x001b9a8c. The three Pitcher
+    // constructor at 0x001aba30 copies mBarTicks, PhrasePlayer maps a bar through mMap (at
+    // `0x001c1a28`), and PhraseEraser divides by mBarTicks at 0x001b9a8c. The three Pitcher
     // subclasses copy mBarTicks in their constructors (0x001b1ea4, 0x001cfb00, 0x001d8330). The
     // CatchingSTG constructor at 0x0019fb80 writes mExportLead.
     friend class Catcher;

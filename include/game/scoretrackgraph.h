@@ -252,19 +252,22 @@ protected:
     BarSequencer *mSequencer;    // +0x24, built by Slot2() and deleted by Slot3()
 };
 
-// 0x001cf6b8, the out-of-line copy.
+// 0x001cf6b8
+// The out-of-line copy.
 inline int ScoreTrackGraph::CallSlot2() {
     Slot2();
     return 0;
 }
 
-// 0x001cf6e8, the out-of-line copy.
+// 0x001cf6e8
+// The out-of-line copy.
 inline int ScoreTrackGraph::CallSlot3() {
     Slot3();
     return 0;
 }
 
-// 0x001cf718, the out-of-line copy.
+// 0x001cf718
+// The out-of-line copy.
 inline void ScoreTrackGraph::Delete(ScoreTrackGraph *pGraph) {
     delete pGraph;
 }

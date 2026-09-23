@@ -148,8 +148,8 @@ private:
     // 0x001d1d18
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
-    // Returns TrackData::QueryBar() for the bar on mTrackData. OnPitchRiff() calls it at
-    // 0x001d03dc.
+    // Returns TrackData::QueryBar() for the bar on mTrackData. OnPitchRiff() calls it (at
+    // `0x001d03dc`).
     // 0x001d1d48
     int QueryBar(int nBar);
 
