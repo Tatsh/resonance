@@ -40,8 +40,8 @@ class Tex;
  * two owned objects are undetermined. Only the members the recovered routines read are typed, and
  * the rest of the span is recorded as reserved.
  *
- * The one instance is created by the routine at `0x00255158`, which allocates exactly 0x84 bytes,
- * runs the constructor, and records the result in the global at `0x006a0f30` that shared() reads.
+ * The one instance is created by Create(), which allocates exactly 0x84 bytes, runs the
+ * constructor, and records the result in the global at `0x006a0f30` that shared() reads.
  * Creation and access are separate routines, so shared() does not construct on first use.
  *
  * The titles shared(), PollLoad(), and WaitForLoad() are inferred. No string in the image
@@ -50,7 +50,7 @@ class Tex;
 class MetFreqMakerAssetManager {
 public:
     /**
-     * Return the one instance, or null before the routine at `0x00255158` has created it.
+     * Return the one instance, or null before Create() has created it.
      *
      * The compiler also emitted an out-of-line copy of this accessor at `0x00254950`.
      *
@@ -58,6 +58,27 @@ public:
      * @ghidraAddress 0x002551f0
      */
     static MetFreqMakerAssetManager *shared();
+
+    /**
+     * Allocate the one instance and record it for shared().
+     *
+     * MetRenderer's and MetNullRenderer's constructors reach it through an out-of-line forwarder at
+     * `0x00254930`. The title is inferred.
+     *
+     * @ghidraAddress 0x00255158
+     */
+    static void Create();
+
+    /**
+     * Delete the one instance through its virtual destructor.
+     *
+     * The pointer shared() reports is not cleared. MetRenderer's and MetNullRenderer's
+     * destructors reach it through an out-of-line forwarder at `0x00254970`. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x002551b8
+     */
+    static void Destroy();
 
     /**
      * Release the owned assets, the two vectors, and the list run.
@@ -78,8 +99,8 @@ public:
     bool PollLoad();
 
     /**
-     * Block until PollLoad() reports the assets resident, waiting for vertical blank between
-     * attempts.
+     * Block until PollLoad() reports the assets resident, running
+     * RndAsyncLoader::PollAsyncLoads() between attempts.
      *
      * @ghidraAddress 0x00255200
      */
@@ -191,9 +212,9 @@ public:
     /**
      * Read the colour of one texel of a texture.
      *
-     * The coordinates are scaled by the texture's bitmap size, and the colour is written to a
-     * static Color that every call shares. The body does not read this object. The body is not
-     * written. The title is inferred.
+     * The coordinates are scaled by the texture's bitmap size, and the texel's three channels are
+     * converted from bytes to the unit range in a Color that every call shares, with an alpha of
+     * 1. The body does not read this object. The title is inferred.
      *
      * @param pTex The texture.
      * @param flU The horizontal coordinate, from 0 to 1.
@@ -202,6 +223,50 @@ public:
      * @ghidraAddress 0x00250638
      */
     Color *SampleTexture(Rnd::Tex *pTex, float flU, float flV);
+
+    /**
+     * Write one colour into one texel of a texture.
+     *
+     * The colour's three channels are scaled to bytes, and the texel under the coordinates scaled
+     * by the texture's bitmap size is written. The body does not read this object, and the image
+     * has no caller. The title is inferred.
+     *
+     * @param pTex The texture.
+     * @param color The colour. Its alpha is not written.
+     * @param flU The horizontal coordinate, from 0 to 1.
+     * @param flV The vertical coordinate, from 0 to 1.
+     * @return Always true.
+     * @ghidraAddress 0x00254cf8
+     */
+    bool PaintTexel(Rnd::Tex *pTex, const Color &color, float flU, float flV);
+
+    /**
+     * Scale the three basis rows of a mesh's local transform.
+     *
+     * With nOrthonormalize equal to 1 the basis is first rebuilt as orthonormal around its y row.
+     * The mesh is marked dirty. The body does not read this object, and the image has no caller.
+     * The title is inferred.
+     *
+     * @param pMesh The mesh.
+     * @param nOrthonormalize 1 to rebuild the basis first.
+     * @param flScaleX The factor on the x row.
+     * @param flScaleY The factor on the y row.
+     * @param flScaleZ The factor on the z row.
+     * @return Always true.
+     * @ghidraAddress 0x00254c20
+     */
+    bool ScaleMesh(
+        Rnd::Mesh *pMesh, int nOrthonormalize, float flScaleX, float flScaleY, float flScaleZ);
+
+    /**
+     * Report the part templates by name, once PollLoad() has run and its result is discarded.
+     *
+     * MetFreqMakerInventoryScreen's slot 38 is the one caller. The title is inferred.
+     *
+     * @return The map.
+     * @ghidraAddress 0x00254990
+     */
+    std::map<HxStr, FreqPartTemplate *> *GetPartsByName();
 
     /**
      * Report the part template registered under one name.
