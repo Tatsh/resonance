@@ -1,6 +1,7 @@
 #include "gfx/gfxdevice.h"
 
 #include <cstdint>
+#include <eekernel.h>
 #include <libdma.h>
 #include <libgraph.h>
 
@@ -62,6 +63,94 @@ constexpr int kBytesPerWordShift = 2;
 // Arguments to sceGsSyncPath() that wait for every path without a timeout.
 constexpr int kGsSyncPathWait = 0;
 constexpr unsigned short kGsSyncPathNoTimeout = 0;
+
+// RGBAQ as the device packs a colour. Red, green, and blue scale to 255, alpha to 128, and Q is
+// 1.0f in the upper word.
+constexpr float kRgbaqColorScale = 255.0f;
+constexpr float kRgbaqAlphaScale = 128.0f;
+constexpr int kRgbaqGreenShift = 8;
+constexpr int kRgbaqBlueShift = 16;
+constexpr int kRgbaqAlphaShift = 24;
+constexpr unsigned long long kRgbaqQOne = 0x3f800000ULL << 32;
+
+// The value word of the RGBAQ pair, the third register pair of an sceGsClear.
+constexpr int kClearRgbaqWord = 4;
+
+// The write-back mode of FlushCache().
+constexpr int kFlushCacheWriteBackData = 0;
+
+// Registers and fields SetupGsDrawContext() programs.
+constexpr int kGsRegTex0_1 = 0x06;
+constexpr int kGsRegClamp1 = 0x08;
+constexpr int kGsRegTex1_1 = 0x14;
+constexpr int kGsRegTexA = 0x3b;
+constexpr int kGsRegAlpha1 = 0x42;
+constexpr int kGsRegDimX = 0x44;
+constexpr int kGsRegTest1 = 0x47;
+constexpr int kGsRegZbuf1 = 0x4e;
+constexpr unsigned long long kAllBits = ~0ULL;
+constexpr unsigned long long kTestZTestMask = 0x60000;
+constexpr unsigned long long kTestZTestAlways = 0x20000;
+constexpr unsigned long long kZbufZmsk = 1ULL << 32;
+constexpr unsigned long long kAlphaMask = 0xff000000ffULL;
+// A = Cs, B = Cd, C = FIX, and D = Cd. The source is blended over the destination by FIX.
+constexpr unsigned long long kAlphaBlendByFix = 0x64;
+constexpr int kAlphaFixShift = 32;
+constexpr unsigned long long kDimXMatrix = 0x1212303012120303ULL;
+constexpr unsigned long long kTex1MinMask = 0x1c0;
+constexpr unsigned long long kTex1MinLinear = 0x40;
+constexpr unsigned long long kClampMask = 0xf;
+constexpr unsigned long long kClampBothAxes = 5;
+constexpr unsigned long long kTexAHalfAlpha = 0x0000008000000080ULL;
+
+// FRAME_1 fields the texture binding copies, and the TEX0_1 fields it fills. The texture is
+// 1024 by 1024 with its alpha taken from the texture and applied as a decal.
+constexpr unsigned long long kFrameFbpMask = 0x1ff;
+constexpr int kFrameFbwShift = 16;
+constexpr unsigned long long kFrameFbwMask = 0x3f;
+constexpr int kFramePsmShift = 24;
+constexpr unsigned long long kFramePsmMask = 0x3f;
+constexpr int kBlocksPerPageShift = 5;
+constexpr int kTex0TbwShift = 14;
+constexpr int kTex0PsmShift = 20;
+constexpr int kTex0TwShift = 26;
+constexpr int kTex0ThShift = 30;
+constexpr int kTex0TccShift = 34;
+constexpr int kTex0TfxShift = 35;
+constexpr unsigned long long kTex0Log2Size1024 = 10;
+constexpr unsigned long long kTex0TccRgba = 1;
+constexpr unsigned long long kTex0TfxDecal = 1;
+constexpr unsigned long long kTex0Mask = 0xffffffffffULL;
+
+// The feedback sprite travels under one REGLIST tag, PRIM and RGBAQ then two UV and XYZ2 pairs.
+constexpr unsigned long long kFeedbackTagLo = 0x6400000000008000ULL;
+constexpr unsigned long long kFeedbackTagHi = 0x535310;
+// A textured, alpha-blended sprite with texel coordinates, drawn in mid grey at alpha 100.
+constexpr unsigned long long kFeedbackPrim = 0x156;
+constexpr unsigned long long kFeedbackRgbaq = 0x3f80000064808080ULL;
+constexpr unsigned long long kFeedbackZ = 160000ULL << 32;
+// Coordinates are in sixteenths. The primitive origin is 2048, and a texel is sampled at its
+// centre.
+constexpr int kGsCoordinateCentre = 0x8000;
+constexpr int kGsSubpixelShift = 4;
+constexpr int kHalfSizeToSubpixelShift = 3;
+constexpr int kTexelCentre = 8;
+constexpr int kGsYShift = 16;
+
+inline unsigned long long PackRgbaq(const Color &color) {
+    const int nRed = static_cast<int>(color.r * kRgbaqColorScale);
+    const int nGreen = static_cast<int>(color.g * kRgbaqColorScale);
+    const int nBlue = static_cast<int>(color.b * kRgbaqColorScale);
+    const int nAlpha = static_cast<int>(color.a * kRgbaqAlphaScale);
+    return static_cast<unsigned long long>(nRed) |
+           (static_cast<unsigned long long>(nGreen) << kRgbaqGreenShift) |
+           (static_cast<unsigned long long>(nBlue) << kRgbaqBlueShift) |
+           (static_cast<unsigned long long>(nAlpha) << kRgbaqAlphaShift) | kRgbaqQOne;
+}
+
+inline unsigned long long PackCoordinates(int nX, int nY) {
+    return static_cast<unsigned long long>(nX) | (static_cast<unsigned long long>(nY) << kGsYShift);
+}
 
 } // namespace
 
@@ -261,6 +350,76 @@ void GfxDevice::RestoreFrameBufferTarget() {
         mnDrawBuffer != 0 ? mpDisplayBuffers->mHalves[1].mDraw : mpDisplayBuffers->mHalves[0].mDraw;
     SetGsReg(kGsRegFrame1, draw.frame1, kGsFrameMask);
     SetGsReg(kGsRegXyOffset1, draw.xyoffset1, kGsXyOffsetMask);
+}
+
+// 0x0049b368
+void GfxDevice::SetClearColor(const Color &color) {
+    mClearColor = color;
+    mpDisplayBuffers->mHalves[0].mClear.mWords[kClearRgbaqWord] = PackRgbaq(color);
+    mpDisplayBuffers->mHalves[1].mClear.mWords[kClearRgbaqWord] = PackRgbaq(color);
+    FlushCache(kFlushCacheWriteBackData);
+}
+
+// 0x0049ccb8
+void GfxDevice::SetupGsDrawContext() {
+    SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
+    SetGsReg(kGsRegZbuf1, kZbufZmsk, kZbufZmsk);
+    SetGsReg(
+        kGsRegAlpha1,
+        (static_cast<unsigned long long>(mFeedbackAlpha * kRgbaqAlphaScale) << kAlphaFixShift) |
+            kAlphaBlendByFix,
+        kAlphaMask);
+    SetGsReg(kGsRegDimX, kDimXMatrix, kAllBits);
+
+    // The texture is the frame buffer of the half not being drawn.
+    const unsigned long long qwFrame = mnDrawBuffer == 0 ?
+                                           mpDisplayBuffers->mHalves[1].mDraw.frame1 :
+                                           mpDisplayBuffers->mHalves[0].mDraw.frame1;
+    // The binary builds TEX0_1 over an uninitialised register, so bits 37 to 39 inside the mask
+    // are undefined there. They are zero here.
+    const unsigned long long qwTex0 =
+        ((qwFrame & kFrameFbpMask) << kBlocksPerPageShift) |
+        (((qwFrame >> kFrameFbwShift) & kFrameFbwMask) << kTex0TbwShift) |
+        (((qwFrame >> kFramePsmShift) & kFramePsmMask) << kTex0PsmShift) |
+        (kTex0Log2Size1024 << kTex0TwShift) | (kTex0Log2Size1024 << kTex0ThShift) |
+        (kTex0TccRgba << kTex0TccShift) | (kTex0TfxDecal << kTex0TfxShift);
+    SetGsReg(kGsRegTex0_1, qwTex0, kTex0Mask);
+    SetGsReg(kGsRegTex1_1, kTex1MinLinear, kTex1MinMask);
+    SetGsReg(kGsRegClamp1, kClampBothAxes, kClampMask);
+    SetGsReg(kGsRegTexA, kTexAHalfAlpha, kAllBits);
+
+    GifQuadword tag;
+    tag.mLo = kFeedbackTagLo;
+    tag.mHi = kFeedbackTagHi;
+    WriteGifTag(&tag);
+    GifQuadword *pPrim = mpWrite;
+    mpWrite = pPrim + 1;
+    pPrim->mHi = kFeedbackRgbaq;
+    pPrim->mLo = kFeedbackPrim;
+
+    const float flWidth = static_cast<float>(mnDisplayWidth);
+    const float flHeight = static_cast<float>(mnDisplayHeight);
+    const int nLeft = kGsCoordinateCentre - (mnDisplayWidth << kHalfSizeToSubpixelShift);
+    const int nTop = kGsCoordinateCentre - (mnDisplayHeight << kHalfSizeToSubpixelShift);
+
+    const int nNearY = static_cast<int>(mFeedbackRect.g * flHeight) << kGsSubpixelShift;
+    const int nNearX = static_cast<int>(mFeedbackRect.r * flWidth) << kGsSubpixelShift;
+    GifQuadword *pNear = mpWrite;
+    mpWrite = pNear + 1;
+    pNear->mLo = PackCoordinates(nNearX + mFeedbackInset + kTexelCentre,
+                                 nNearY + mFeedbackInset + kTexelCentre);
+    pNear->mHi = PackCoordinates(nLeft + nNearX, nTop + nNearY) | kFeedbackZ;
+
+    const int nFarY = static_cast<int>((mFeedbackRect.g + mFeedbackRect.a) * flHeight)
+                      << kGsSubpixelShift;
+    const int nFarX = static_cast<int>((mFeedbackRect.r + mFeedbackRect.b) * flWidth)
+                      << kGsSubpixelShift;
+    GifQuadword *pFar = mpWrite;
+    mpWrite = pFar + 1;
+    pFar->mHi = PackCoordinates(nLeft + nFarX, nTop + nFarY) | kFeedbackZ;
+    pFar->mLo = PackCoordinates(nFarX - mFeedbackInset + kTexelCentre,
+                                nFarY - mFeedbackInset + kTexelCentre);
+    FlushGifPacket(0, 1);
 }
 
 // 0x0049fec0

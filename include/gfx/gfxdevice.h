@@ -1,5 +1,7 @@
 #pragma once
 
+#include "math/color.h"
+
 class GsDoubleBuffer;
 
 /** Quadwords of the packet buffer a caller may fill before it has to be submitted. */
@@ -212,6 +214,49 @@ public:
      */
     void RestoreFrameBufferTarget();
 
+    /**
+     * Record the colour both halves of the double buffer clear to.
+     *
+     * Stores the colour in mClearColor and writes it into the RGBAQ pair of each half's clear,
+     * red, green, and blue scaled by 255, alpha by 128, and Q at 1.0. The data cache is then
+     * written back, because the double buffer is read through its uncached alias.
+     *
+     * @param color The clear colour, each component from 0 to 1.
+     * @ghidraAddress 0x0049b368
+     */
+    void SetClearColor(const Color &color);
+
+    /**
+     * Draw the render statistics as debug text.
+     *
+     * One line each for the frame rate and for every RenderStats counter, then the kilobytes of
+     * texture the VRAM table uploaded in the last frame.
+     *
+     * @ghidraAddress 0x0049bec8
+     */
+    void DrawRenderStatsOverlay();
+
+    /**
+     * Draw one bar per profiler timer, scaled against a full-scale time.
+     *
+     * @param nFullScaleMs Milliseconds a bar spanning 95 per cent of the display width stands for.
+     * @ghidraAddress 0x0049c778
+     */
+    void DrawSubsystemTimingGraph(int nFullScaleMs);
+
+    /**
+     * Blend the displayed frame back over the frame being drawn.
+     *
+     * Disables the depth test and depth writes, sets ALPHA_1 to blend by mFeedbackAlpha, and
+     * binds the frame buffer of the half not being drawn as a 1024 by 1024 texture. It then draws
+     * one sprite over mFeedbackRect that samples the same rectangle of the texture, inset by
+     * mFeedbackInset at both corners. The title covers only the register setup, although
+     * the routine also draws. Renderer::OnUnknownSlot8() calls it while g_nLsdMode is set.
+     *
+     * @ghidraAddress 0x0049ccb8
+     */
+    void SetupGsDrawContext();
+
     // The layout is recovered only where the packet routines read it. A reserved run records a span
     // that has not been recovered and is not a field.
 
@@ -262,6 +307,42 @@ public:
      * CloseGifTag() with the end-of-packet bit fills the count in from this pointer. +0x450
      */
     GifQuadword *mpOpenVifDirect;
+
+private:
+    // Frame-rate sampling, read and written only by the overlay routines. The overlay averages two
+    // profiler timers over a five-frame window, counted down here.
+    int mnStatsCountdown;     // +0x454
+    float mflFrameMsSum;      // +0x458
+    int mnFps;                // +0x45c
+    float mflSubsystemMsSum;  // +0x460
+    int mnSubsystemMsAverage; // +0x464
+    int mUnknown468;          // +0x468
+
+public:
+    /**
+     * Rectangle SetupGsDrawContext() draws and samples, in fractions of the display.
+     *
+     * The components are read as x (r), y (g), width (b), and height (a).
+     * Renderer::OnUnknownSlot8() writes it directly, with no accessor, before each call. +0x46c
+     */
+    Color mFeedbackRect;
+    /**
+     * Blend factor SetupGsDrawContext() writes into ALPHA_1 FIX after scaling it by 128.
+     *
+     * Renderer::OnUnknownSlot8() writes it directly. +0x47c
+     */
+    float mFeedbackAlpha;
+    /**
+     * Inset of the texture window at both corners, in sixteenths of a texel.
+     *
+     * Renderer::OnUnknownSlot8() writes it directly. +0x480
+     */
+    int mFeedbackInset;
+
+private:
+    unsigned char mReserved484[0x0c]; // +0x484
+    // Colour SetClearColor() last recorded.
+    Color mClearColor; // +0x490
 };
 
 /**
