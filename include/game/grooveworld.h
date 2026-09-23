@@ -222,6 +222,18 @@ public:
     void PrepareLevel();
 
     /**
+     * Starts play on a prepared level.
+     *
+     * Disables the input map entries, flushes the watchdog, resumes mSongClock, and sets mState to
+     * 4, then configures the synthesiser and the force feedback manager (jukebox mode, player
+     * count, and metronome). GameManagerImpl's OnUnknownSlot6() is the only caller. Not
+     * reconstructed yet, because several routines it runs are unrecovered. The title is inferred.
+     *
+     * @ghidraAddress 0x0018de38
+     */
+    void StartPlay();
+
+    /**
      * Create a remote player and append it to mPlayers.
      *
      * @param nId The player's identifier, passed to NetPlayer twice.

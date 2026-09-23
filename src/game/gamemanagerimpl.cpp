@@ -318,6 +318,11 @@ void GameManagerImpl::FinishWorldLoad() {
     mpPoller->SetController(mpWorld);
 }
 
+// 0x0010c128
+void GameManagerImpl::OnUnknownSlot6() {
+    mpWorld->StartPlay();
+}
+
 // 0x0010c1f0
 void GameManagerImpl::AddPlayers() {
     AddPersonaPlayers();

@@ -165,10 +165,9 @@ public:
     virtual void DrawFrameSimple();
 
     /**
-     * Unrecovered. Slot 6.
+     * Starts play on the game world. Slot 6.
      *
-     * The body forwards the game world to the GrooveWorld member at `0x0018de38` and nothing else.
-     * Neither that member nor this slot has a recovered purpose.
+     * Calls GrooveWorld::StartPlay() and nothing else. DoGameSystemPlayCmd runs it.
      *
      * @ghidraAddress 0x0010c128
      */
