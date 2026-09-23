@@ -132,6 +132,7 @@ failsink
 fileobject
 filetab
 floatobject
+flusha
 fopen
 formatcardmct
 formatop
@@ -225,6 +226,7 @@ levelstats
 libc
 libcdvd
 libcdvd's
+libdma
 libera
 libgraph
 libmc
@@ -248,6 +250,7 @@ loadremixmct
 lobbyconnectionlostmsg
 localplayer
 longobject
+longop
 looptogglemsg
 looptoolmsg
 lseek

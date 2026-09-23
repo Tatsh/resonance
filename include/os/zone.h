@@ -97,10 +97,12 @@ void *ZoneAlloc(unsigned nSize);
  * allocation when zones are switched off. It is claimed once and stays claimed
  * until ZoneReleaseTemp() runs, and a second claim is fatal.
  *
+ * @param nSize The size the caller needs in bytes, which the routine never reads. The buffer is
+ *              not checked against it.
  * @return The buffer.
  * @ghidraAddress 0x004613d0
  */
-void *ZoneGrabTemp();
+void *ZoneGrabTemp(int nSize);
 
 /**
  * Turn zone allocation on or off.

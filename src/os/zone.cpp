@@ -121,7 +121,7 @@ void *ZoneAlloc(unsigned nSize) {
     return pBlock;
 }
 
-void *ZoneGrabTemp() {
+void *ZoneGrabTemp([[maybe_unused]] int nSize) {
     if (g_pTempBuffer == nullptr) {
         if (g_nZonesEnabled != 0) {
             int nZone = kNoZone;
