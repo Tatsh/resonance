@@ -393,7 +393,7 @@ private:
     // trips of mLoopDist, and record nLoop in the section. The view is written and marked dirty
     // only when mTeleport is set. Does nothing without a view or when the loop is unchanged.
     // UpdateSection() calls it, and the setters above expand it inline with nLoop zero.
-    // 0x005bbda8.
+    // 0x005bbda8
     void SetSectionLoop(Section &section, int nLoop);
 
     // Place a section for the current filtered frame. The loop count is the number of whole

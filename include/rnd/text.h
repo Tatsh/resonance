@@ -458,7 +458,7 @@ private:
     void RemoveObjectRefs();
 
     // Take a reference on the font and rebuild. Copy() and Load() inline the same body.
-    // 0x004cf9b8.
+    // 0x004cf9b8
     void AddObjectRefs();
 
     // Declared in recovered offset order. Every member but mWrapWidth and mPreWrapText is private:

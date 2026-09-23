@@ -446,7 +446,7 @@ private:
     void AddObjectRefs();
 
     // Drop the references AddObjectRefs() took. The destructor is the one out-of-line caller.
-    // 0x004fd118.
+    // 0x004fd118
     void RemoveObjectRefs();
 
     // Declared in recovered offset order. The transformable this animation drives.

@@ -8,7 +8,8 @@
 
 namespace {
 
-// 0x0082b1c0, the only source path the shipped image retains for this file.
+// The only source path the shipped image retains for this file.
+// 0x0082b1c0
 const char *const kAllocTag = "abitmap.h";
 constexpr int kAllocLine = 0x47;
 

@@ -118,11 +118,12 @@ int ReadBool(Stream &stream) {
     return chFlag != 0 ? 1 : 0;
 }
 
-// 0x0081c1d8, the tag the allocation operators bill to.
+// The tag the allocation operators bill to.
+// 0x0081c1d8
 const char *const kGeneratorTag = "Rnd::Generator";
 
-// The next spawn frame the constructor starts from, a hand-written sentinel whose bit pattern is
-// 0xcb18967f.
+// The next spawn frame the constructor starts from, a hand-written sentinel whose bit pattern
+// is 0xcb18967f.
 constexpr float kUnsetFrame = -9999999.0f;
 
 constexpr float kDefaultRateGen = 100.0f;

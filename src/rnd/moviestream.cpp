@@ -68,8 +68,8 @@ constexpr int kAlphaShift = 24;
 
 namespace Rnd {
 
-// The chunk types, built by the unit's static initialiser from the literals at 0x0082eb90.
-// 0x007678f0 through 0x00767930.
+// The chunk types, built by the unit's static initialiser from the literals at 0x0082eb90 into
+// the words at 0x007678f0 through 0x00767930.
 const unsigned int g_nMovsTag = FourCc("MOVS");
 const unsigned int g_nMovtTag = FourCc("MOVT");
 const unsigned int g_nPallTag = FourCc("PALL");

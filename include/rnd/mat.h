@@ -403,8 +403,8 @@ public:
     // Rnd::Font::ComputeCharUV at 0x004ca050 reads the vector's bounds through a Rnd::Mat pointer
     // from outside the hierarchy, divides the span by 96 to size it, and then reads the first
     // stage's texture. The image supplies no accessor. That is the same evidence that makes
-    // mSpecular public. The assignment operator Copy() uses is instantiated out of line at
-    // 0x004d77d8, which is library code and has no body in this tree.
+    // mSpecular public. The assignment operator Copy() uses is instantiated out of line
+    // at 0x004d77d8, which is library code and has no body in this tree.
     std::vector<Stage> mStages; // +0x1c
 
 protected:

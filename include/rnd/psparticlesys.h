@@ -77,7 +77,7 @@ private:
     // is the near corner and the second the far one, and a pair is rejected when the near corner
     // falls below zero or the far corner passes 0xffff in either axis. A textured sprite sends
     // three quadwords per vertex, and an untextured one sends the colour and both positions.
-    // 0x005fc6d0.
+    // 0x005fc6d0
     void EmitGifSprites(int nVertCount);
 
     // Upload the live list to VU1 as sprite records and call the microprogram. Two quadwords
@@ -85,7 +85,7 @@ private:
     // fourth word of the position first because a GS sprite takes a centre and a half extent.
     // A batch closes at 162 particles or at 254 destination quadwords, whichever comes first, and
     // the first batch enters through MSCAL 0x258 while every batch after it uses MSCNT.
-    // 0x005fc940.
+    // 0x005fc940
     void DrawSpritesDmaKicked();
 };
 

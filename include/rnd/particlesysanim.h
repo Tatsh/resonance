@@ -196,7 +196,7 @@ private:
     void ClearKeys();
 
     // Register this animation as a referrer of mParticleSys and mFramesOwner. Load() inlines it.
-    // 0x0052c868.
+    // 0x0052c868
     void AddObjectRefs();
 
     // Drop the references AddObjectRefs() took. The destructor calls it. 0x0052c818.

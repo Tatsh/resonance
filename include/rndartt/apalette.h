@@ -78,9 +78,9 @@ public:
     /**
      * Release the inverse lookup table.
      *
-     * The release is the single-object path, MemFreeScalar(), rather than the array path. ABmpFile
-     * open-codes the destructor at 0x0061c9d0 and 0x0061ca28, testing the member against null
-     * before each release.
+     * The release is the single-object path, the global operator delete, rather than the array
+     * path. ABmpFile open-codes the destructor at 0x0061c9d0 and 0x0061ca28, testing the member
+     * against null before each release.
      */
     ~APalette() {
         delete mpRgb15ToIndex;

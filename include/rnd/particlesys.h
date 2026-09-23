@@ -331,19 +331,19 @@ private:
     void UpdateParticles(float flDeltaFrames);
 
     // Allocate and initialise the particles the emission rate calls for over a span of frames.
-    // 0x005244b0.
+    // 0x005244b0
     void SpawnParticles(float flDeltaFrames);
 
     // Drop the reference on the material and on the particle owner, and remove this system from
     // the owner's sharer list. Copy() calls it, and the destructor and Replace() open-code it.
-    // 0x0052c318.
+    // 0x0052c318
     void RemoveObjectRefs();
 
     // Take the references RemoveObjectRefs() drops. A system that is its own owner also threads
     // the whole pool onto its free list and empties the live list of every sharer, and any other
     // system joins the sharer list of its owner. Either way this system's live list starts empty
     // and mEmitAccumulator is cleared. The constructor, Copy(), Replace(), and Load() call it.
-    // 0x005241a8.
+    // 0x005241a8
     void AddObjectRefs();
 
     // Data members follow the recovered offset order.
@@ -373,8 +373,8 @@ private:
     // Head of the free list, threaded through Particle::mNext and ending at the finish pointer of
     // mParticles. Only the owning system's list is used.
     Particle *mFreeParticles;
-    // Frame SetFrameSelf() last ran for. It starts at the sentinel -0.9997e7, whose bit pattern is
-    // 0xcb18967f, and a frame equal to it makes SetFrameSelf() return without emitting.
+    // Frame SetFrameSelf() last ran for. It starts at the sentinel -0.9997e7, whose bit pattern
+    // is 0xcb18967f, and a frame equal to it makes SetFrameSelf() return without emitting.
     float mLastFrame;
     // Particles owed by the emission rate, of which SpawnParticles() emits the whole part and
     // retains the fraction for the next call. The title is inferred.

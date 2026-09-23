@@ -596,7 +596,7 @@ private:
     // rotated to start at its vertex, and Sync() follows. WeldVerts() is the only caller. The
     // matcher at 0x00569bf0 is upstream code from the vendored netflow package (its diagnostics
     // read "Inconsistent matching between %d(U) and %d(V)"), and it is not reconstructed.
-    // 0x00483438.
+    // 0x00483438
     void AssignFlatVerts(std::list<MeshAnim *> &anims);
 
     // Data members follow the recovered offset order, and the access specifiers interleave.

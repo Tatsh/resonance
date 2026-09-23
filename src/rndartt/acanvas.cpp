@@ -37,7 +37,8 @@ constexpr int kFixedOne = 1 << kACanvasFractionBits;
 constexpr int kEdgeForward = 1;
 constexpr int kEdgeBackward = -1;
 
-// 0x00837d80, this translation unit's copy of the tag ABitmap::ABitmap() also uses.
+// This translation unit's copy of the tag ABitmap::ABitmap() also uses.
+// 0x00837d80
 const char *const kBitmapAllocTag = "abitmap.h";
 constexpr int kBitmapAllocLine = 0x47;
 

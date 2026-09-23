@@ -485,7 +485,7 @@ protected:
 private:
     // Drop every reference Update() takes (the path, each event drawable, and each seeker's
     // objects) and delete the generated meshes. The destructor, Load(), and Copy() call it.
-    // 0x00468020.
+    // 0x00468020
     void ReleaseRefs();
 
     // Write the material and the first vertex colour of every chain of both grids. 0x00468a78.
@@ -499,7 +499,7 @@ private:
     // Rebuild every generated mesh. The material and first vertex colour of each chain are kept
     // across the rebuild. The ring transforms and lane profiles are regenerated from mUnknown38 and
     // the four lane parameters, and mSliceSteps becomes 2 to the power of one less than mLodCount.
-    // 0x004699c0.
+    // 0x004699c0
     void BuildMesh();
 
     // Build one chain per slice, "[<name>_lat<slice>]", whose finest level holds a block of
@@ -523,7 +523,7 @@ private:
     // lane profile is carried through it into the slice mesh, and the edges of the neighbouring
     // cells follow. The first and last columns also close the ends of each lane block. Column zero,
     // the last one written, resynchronises the slice mesh and every cell mesh of the slice.
-    // 0x0046c638.
+    // 0x0046c638
     void SetRingSectionFrames();
 
     // A signed remainder moved into [0, nCount), the form every ring and slice lookup uses.

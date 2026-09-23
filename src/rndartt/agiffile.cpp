@@ -73,7 +73,8 @@ constexpr int kLineBufferSize = 0xac8;
 
 const char *const kSignature = "GIF";
 
-// 0x008e8168, the byte every block introducer and code size is read into.
+// The byte every block introducer and code size is read into.
+// 0x008e8168
 signed char s_cByte;
 
 // 0x008e8170
@@ -107,9 +108,11 @@ const unsigned short kCodeMasks[] = {0x0000,
                                      0x3fff,
                                      0x7fff};
 
-// 0x007b3608 and 0x007b3620. Each is bounded at six entries by its neighbour, and the trailing
-// zeros are what a fifth pass reads.
+// Each is bounded at six entries by its neighbour, and the trailing zeros are what a fifth pass
+// reads.
+// 0x007b3608
 const int kInterlaceStep[] = {8, 8, 4, 2, 0, 0};
+// 0x007b3620
 const int kInterlaceStart[] = {0, 4, 2, 1, 0, 0};
 
 // 0x007b3638

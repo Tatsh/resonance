@@ -276,8 +276,8 @@ private:
     void AcquireLightsRefs();
 
     // Drops this environment's registration on every mLights entry. Inlined in Load() and
-    // Copy(). The destructors of this class and Rnd::PsEnviron call the out-of-line copy at
-    // 0x00519390.
+    // Copy(). The destructors of this class and Rnd::PsEnviron call the out-of-line copy
+    // at 0x00519390.
     void ReleaseLightsRefs();
 };
 

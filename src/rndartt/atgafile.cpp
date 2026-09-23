@@ -28,7 +28,8 @@ constexpr unsigned char kAlphaOpaque = 0xff;
 constexpr unsigned char kPacketRunFlag = 0x80;
 constexpr unsigned char kPacketCountMask = 0x7f;
 
-// 0x007b8100, the one pixel a run length encoded packet is read into.
+// The one pixel a run length encoded packet is read into.
+// 0x007a8100
 unsigned char s_abPixel[kRGBAByteCount];
 
 } // namespace

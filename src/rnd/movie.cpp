@@ -54,11 +54,13 @@ constexpr int kMovieBitsPerPixel = 8;
 // The second SetPalette() argument OnChunk() passes, which no implementation reads.
 constexpr int kSetPaletteUnknownArg = -1;
 
-// 0x0077a59c. The last time SetFrameSelf() converted.
+// The last time SetFrameSelf() converted.
+// 0x0077a59c
 float g_flMovieBeatCached;
 
-// 0x0077a598. SetFrameSelf() returns early while it is positive. It only ever stores zero, and
-// the test never fires.
+// SetFrameSelf() returns early while it is positive. It only ever stores zero, and the test never
+// fires.
+// 0x0077a598
 int g_nMovieBeatCacheAge;
 
 // Reconfigure a texture whose size or depth differs from its track's frame, logging the change.

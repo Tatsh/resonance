@@ -373,9 +373,9 @@ private:
     // that this tree writes no body for. For this map they are the insert helper at 0x004cdc50,
     // insert() at 0x004ce040, the hinted insert at 0x004ce180, find() at 0x004ceb28, lower_bound()
     // at 0x004d0d70, and the recursive subtree erase at 0x004d0d00. Load() builds a second,
-    // throwaway map of the revision 0 record over the same key type, whose insert helper is at
-    // 0x004ce318, whose insert() is at 0x004ce6e8, whose hinted insert is at 0x004ce828, and whose
-    // subtree erase is at 0x004d0db0.
+    // throwaway map of the revision 0 record over the same key type, whose insert helper is
+    // at 0x004ce318, whose insert() is at 0x004ce6e8, whose hinted insert is at 0x004ce828, and
+    // whose subtree erase is at 0x004d0db0.
     std::map<char, CharInfo> mCharMap; // +0x38
 
 public:

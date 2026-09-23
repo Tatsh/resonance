@@ -71,15 +71,18 @@ int g_anStageBlendTexFunc[] = {0, 1, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0};
 // 0x0076d65c
 int g_nSelectedStage;
 
-// 0x0076d680. Set by PsMat::SelectAlphaBlend() and cleared once PsMat::Select() has restored the
-// material blend.
+// Set by PsMat::SelectAlphaBlend() and cleared once PsMat::Select() has restored the material
+// blend.
+// 0x0076d680
 int g_nBlendOverridden;
 
-// 0x008e41c0. The identity halved with V flipped and the translation moved to the texture centre,
-// which is the transform a sphere map needs.
+// The identity halved with V flipped and the translation moved to the texture centre, which is
+// the transform a sphere map needs.
+// 0x008e41c0
 Transform g_sphereMapUvXfm;
 
-// 0x008e4200. Scratch the non-sphere path composes a stage transform into.
+// Scratch the non-sphere path composes a stage transform into.
+// 0x008e4200
 Transform g_stageUvXfm;
 
 } // namespace

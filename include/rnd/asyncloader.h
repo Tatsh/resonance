@@ -179,9 +179,10 @@ public:
     std::list<Rnd::Drawable *> mDrawables;
 
 private:
-    // 0x003f8460. Copy Rnd::g_manager.mLoaded into mUnknown08, then append every `Tex` in mLoaded
-    // and then in mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is
-    // the one caller, and the name is inferred.
+    // Copy Rnd::g_manager.mLoaded into mUnknown08, then append every `Tex` in mLoaded and then in
+    // mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is the one
+    // caller, and the name is inferred.
+    // 0x003f8460
     void HarvestLoadedObjects();
 
     // Every object the request loaded, copied from Rnd::g_manager.mLoaded.

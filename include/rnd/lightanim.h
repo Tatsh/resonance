@@ -195,7 +195,7 @@ protected:
 
 private:
     // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it.
-    // 0x00545570.
+    // 0x00545570
     void ClearKeys();
 
     // No class derives from Rnd::LightAnim and no access from outside it is recovered. Every
