@@ -3,9 +3,11 @@
 #include <algorithm>
 
 #include "app/application.h"
+#include "app/playsound.h"
 #include "game/enablemgr.h"
 #include "game/gameenablemgr.h"
 #include "game/gamemanagerimpl.h"
+#include "game/gamestats.h"
 #include "game/grooveworld.h"
 #include "game/inputmap.h"
 #include "game/leveldata.h"
@@ -21,6 +23,7 @@
 #include "msg/invalidateseekermsg.h"
 #include "msg/invalidatetrackmsg.h"
 #include "msg/tracksonmsg.h"
+#include "msg/winmsg.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
@@ -47,6 +50,12 @@ constexpr int kUnallocatedCommand = -2;
 // The script template AdvanceTo() runs.
 constexpr int kAdvanceScriptTemplate = 1013;
 
+// The sound DeclareWinners() plays.
+constexpr char kWinSound[] = "SND_WIN";
+
+// The progress a completed solo song records.
+constexpr float kCompleteProgress = 1.0f;
+
 // The score and ceiling every player starts with.
 constexpr int kInitialScore = 0;
 constexpr int kMaxScore = 100000;
@@ -63,11 +72,12 @@ constexpr unsigned kSharedTrackPlayerCount = 2;
 } // namespace
 
 Gamer::Gamer(int nTrackCount, int nUnknown24, GameStats *pStats)
-    : mUnknown1c(0), mUnknown28(0), mJukeboxMode(0), mUnknown38(0), mTrackCount(nTrackCount),
-      mUnknown44(kInitialUnknown44), mUnknown48(0), mPlaybackOn(0), mGlobals(Application::shared()),
-      mStats(pStats), mBarLength(kTicksPerBar), mPlayers(mGlobals->GetWorld()->mPlayers),
-      mBackGraphs(nullptr), mGraphs(nullptr), mTrackSources(nTrackCount, MsgSource()),
-      mUnknown84(0), mEnableMgr(nullptr), mUnknown94(nullptr), mUnknown98(0) {
+    : mUnknown1c(0), mEndState(kEndStateNone), mJukeboxMode(0), mUnknown38(0),
+      mTrackCount(nTrackCount), mUnknown44(kInitialUnknown44), mUnknown48(0), mPlaybackOn(0),
+      mGlobals(Application::shared()), mStats(pStats), mBarLength(kTicksPerBar),
+      mPlayers(mGlobals->GetWorld()->mPlayers), mBackGraphs(nullptr), mGraphs(nullptr),
+      mTrackSources(nTrackCount, MsgSource()), mUnknown84(0), mEnableMgr(nullptr),
+      mUnknown94(nullptr), mUnknown98(0) {
     mCommand.mValue = kUnallocatedCommand;
     mFreeEndBar = kInitialFreeEndBar;
     mPlayMap = mGlobals->GetPlayMap();
@@ -231,4 +241,38 @@ bool Gamer::FreeTracksAfterCapture(int nBar) {
     }
     mFreeEndBar = nFreeEndBar;
     return bComplete;
+}
+
+void Gamer::DeclareWinners() {
+    int nBestScore = 0;
+    for (unsigned i = 0; i < mPlayers.size(); ++i) {
+        const int nScore = mPlayers[i]->GetScore();
+        if (nBestScore < nScore) {
+            nBestScore = nScore;
+        }
+        mStats->SetScore(i, nScore);
+    }
+
+    WinMsg win;
+    for (unsigned i = 0; i < mPlayers.size(); ++i) {
+        if (mPlayers[i]->GetScore() == nBestScore) {
+            win.AddWinner(mPlayers[i]);
+        }
+    }
+    Send(&win);
+    PlaySoundByName(kWinSound);
+    mEndState = kEndStateOver;
+}
+
+void Gamer::RecordSoloStats(int bCompleted, int nBar) {
+    mStats->mCompleted = bCompleted;
+    mStats->mUnknown08 = mUnknown98;
+    mStats->SetScore(0, mPlayers[0]->GetScore());
+    if (bCompleted != 0) {
+        mStats->SetProgress(kCompleteProgress);
+    } else {
+        mStats->SetProgress(static_cast<float>(nBar) / static_cast<float>(mPlayMap->Slot9()));
+    }
+    mStats->SetTally(0, mPlayers[0]->Slot17());
+    mStats->SetRatio(0, mPlayers[0]->Slot18());
 }

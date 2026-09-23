@@ -19,9 +19,9 @@
  * GrooveWorld constructor receives that address and stores it, so the world writes the tally while
  * the manager owns it.
  *
- * Each vector has a four-byte element, which the destructor proves by dividing the byte span by
- * four to recover the count. The element type itself is not recovered, and `int` stands in for it.
- * Every member is private, and the purpose of each is unrecovered. GrooveWorld writes mUnknown14
+ * Reset() sizes the three per-player vectors, and Gamer fills them when a game ends. The metagame
+ * statistics screens read them back through the accessors, printing a score and a tally with `%d`
+ * and a progress and a ratio, each scaled by 100, with `%3d%%`. GrooveWorld writes mUnknown14
  * directly, which a friend declaration models; a public member fits the image equally well.
  */
 class GameStats {
@@ -32,7 +32,7 @@ public:
     /**
      * Start with every counter clear and all three vectors empty.
      *
-     * The constructor does not write mUnknown08, mUnknown0c, or mUnknown14, so a tally starts with
+     * The constructor does not write mUnknown08, mProgress, or mUnknown14, so a tally starts with
      * three indeterminate fields.
      *
      * @ghidraAddress 0x0010f150
@@ -42,21 +42,103 @@ public:
     /**
      * Release the three vectors.
      *
+     * The GameStats unit also emits an unreferenced, byte-identical copy at `0x0010fda0`.
+     *
      * @ghidraAddress 0x0010b648
      */
     virtual ~GameStats();
 
+    /**
+     * Clear the tally for a new game and give each player a zero entry in every vector.
+     *
+     * The title is inferred.
+     *
+     * @param nPlayers The number of players.
+     * @ghidraAddress 0x0010f1a8
+     */
+    void Reset(int nPlayers);
+
+    /**
+     * @param nPlayer The player's index.
+     * @return The player's final score.
+     * @ghidraAddress 0x0010ff20
+     */
+    int GetScore(int nPlayer);
+
+    /**
+     * @param nPlayer The player's index.
+     * @param nScore The player's final score.
+     * @ghidraAddress 0x0010ff38
+     */
+    void SetScore(int nPlayer, int nScore);
+
+    /**
+     * @return The fraction of the song reached, 1.0 when it was completed.
+     * @ghidraAddress 0x0010ff50
+     */
+    float GetProgress();
+
+    /**
+     * @param flProgress The fraction of the song reached.
+     * @ghidraAddress 0x0010ff58
+     */
+    void SetProgress(float flProgress);
+
+    /**
+     * @param nPlayer The player's index.
+     * @return The player's Player::Slot18() fraction at the end of the game.
+     * @ghidraAddress 0x0010ff60
+     */
+    float GetRatio(int nPlayer);
+
+    /**
+     * @param nPlayer The player's index.
+     * @param flRatio The player's Player::Slot18() fraction.
+     * @ghidraAddress 0x0010ff78
+     */
+    void SetRatio(int nPlayer, float flRatio);
+
+    /**
+     * @param nPlayer The player's index.
+     * @return The player's Player::Slot17() count at the end of the game.
+     * @ghidraAddress 0x0010ff90
+     */
+    int GetTally(int nPlayer);
+
+    /**
+     * @param nPlayer The player's index.
+     * @param nTally The player's Player::Slot17() count.
+     * @ghidraAddress 0x0010ffa8
+     */
+    void SetTally(int nPlayer, int nTally);
+
 private:
-    int mUnknown00; // +0x00
-    int mUnknown04; // +0x04
+    int mPlayerCount; // +0x00
+
+public:
+    /**
+     * Non-zero when the solo song was completed.
+     *
+     * Public because Gamer writes it directly at `0x00111b9c`, and the image has no accessor.
+     * +0x04
+     */
+    int mCompleted;
+
+    /**
+     * Copied from Gamer +0x98 when a solo game ends.
+     *
+     * Public because Gamer writes it directly at `0x00111ba8`, and the image has no accessor. Not
+     * written by the constructor. +0x08
+     */
+    int mUnknown08;
+
+private:
     // Not written by the constructor.
-    int mUnknown08; // +0x08
+    float mProgress; // +0x0c
+    int mUnknown10;  // +0x10
     // Not written by the constructor.
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
-    // Not written by the constructor.
-    int mUnknown14;              // +0x14
-    std::vector<int> mUnknown18; // +0x18
-    std::vector<int> mUnknown24; // +0x24
-    std::vector<int> mUnknown30; // +0x30
+    int mUnknown14;             // +0x14
+    std::vector<int> mScores;   // +0x18
+    std::vector<float> mRatios; // +0x24
+    std::vector<int> mTallies;  // +0x30
 };

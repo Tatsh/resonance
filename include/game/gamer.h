@@ -168,11 +168,26 @@ private:
     // to the following step bar and sends a FreestyleFXMsg for each. The title is inferred.
     bool FreeTracksAfterCapture(int nBar);
 
+    // 0x001118c0. Records every player's score in mStats, sends a WinMsg with the players on the
+    // best score, plays `SND_WIN`, and ends the game. The title is inferred.
+    void DeclareWinners();
+
+    // 0x00111b78. Records player 0's score, Slot17() count, and Slot18() fraction in mStats, with
+    // the fraction of the song reached. The title is inferred.
+    void RecordSoloStats(int bCompleted, int nBar);
+
+    // How the game has ended. The constructor starts at kEndStateNone.
+    enum EndState {
+        kEndStateNone = 0,
+        kEndStateWon = 1,
+        kEndStateOver = 2,
+    };
+
     int mUnknown18;                           // +0x18
     int mUnknown1c;                           // +0x1c
     int mUnknown20;                           // +0x20
     int mUnknown24;                           // +0x24
-    int mUnknown28;                           // +0x28
+    int mEndState;                            // +0x28 an EndState
     int mPlayMode;                            // +0x2c
     int mGameMode;                            // +0x30
     int mJukeboxMode;                         // +0x34
