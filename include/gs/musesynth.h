@@ -109,6 +109,11 @@ protected:
      */
     virtual void HandleMessage(Message *pMsg);
 
+    // The out-of-line copy of the AllNotesOffMsg branch HandleMessage() expands inline. The message
+    // is not read.
+    // 0x001ab0b8
+    void OnAllNotesOff();
+
     // The clock every player is scheduled against.
     Sch::TickClock *mClock; // +0x08
     // Every player this object created reports back to it and sends through it.

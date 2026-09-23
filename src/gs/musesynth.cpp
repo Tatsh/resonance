@@ -20,6 +20,11 @@ void MuseSynth::AddSink(MsgSink *pSink) {
     mSplitter.MsgSource::AddSink(pSink);
 }
 
+// 0x001ab0b8
+void MuseSynth::OnAllNotesOff() {
+    ReleaseAllPlayers();
+}
+
 // 0x001ab0d8
 void MuseSynth::ReleaseAllPlayers() {
     for (std::list<MusePlayer *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
