@@ -67,9 +67,9 @@ constexpr int kBitsPerByte = 8;
 constexpr int kBitsPerHalfword = 16;
 constexpr int kSubBlockSize = 256;
 
-// The line buffer has no recorded size. The static at 0x007b8100 bounds it, and it may belong to
-// another translation unit.
-constexpr int kLineBufferSize = 0xac8;
+// The line buffer has no recorded size. Nothing in the image addresses a word between its start
+// and 0x007b88d8, where the next referenced object begins, so that distance is the bound.
+constexpr int kLineBufferSize = 0x12a0;
 
 const char *const kSignature = "GIF";
 
