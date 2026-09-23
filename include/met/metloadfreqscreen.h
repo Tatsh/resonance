@@ -25,9 +25,6 @@
  * labels up through Script::QueryConfigString() under configuration code 0x258, passing the keys
  * `lf_edit` and `lf_create`, and UpdateNameLabel() then appends the selected username to the
  * `lf_edit` label so that the second button reads as an edit of a particular identity.
- *
- * OnCreateButton() builds a message screen through a MetMsgScreen construction that is not
- * recovered, and its body is not written.
  */
 class MetLoadFreqScreen : public MetLoadFreqBaseScreen, public MemcardUser {
 public:
@@ -127,12 +124,12 @@ public:
     /**
      * Refuse a ninth identity, or create one.
      *
-     * Slot 43. A list already holding eight or more identities is refused. The prompt layout is
-     * set to `MetHelpScreen`, a message screen is built with the name `freq_limit` and one `OK`
-     * response, and OnMsgScreenDismissed() restores this screen when the user dismisses it. The
-     * entry limit is the one hard number the class records.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 43. A list already holding eight or more identities is refused: the help screen is
+     * exited and a message screen named `freq_limit` with one `OK` response shows the limit and the
+     * first card slot's name. A first card slot with fewer free clusters than
+     * GlobalSettings::mUnknown74 is refused the same way, with the `freq_no_space` text, the slot
+     * name, and that minimum. OnMsgScreenDismissed() restores this screen after either refusal.
+     * Otherwise MetFreqCreateScreen is pushed and activated.
      *
      * @ghidraAddress 0x00297c10
      */

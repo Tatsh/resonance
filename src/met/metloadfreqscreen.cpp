@@ -1,15 +1,20 @@
 #include "met/metloadfreqscreen.h"
 
+#include <vector>
+
 #include "app/application.h"
 #include "app/playsound.h"
 #include "game/gamemanagerimpl.h"
+#include "game/globalsettings.h"
 #include "met/metfreqmakerbuttonsscreen.h"
 #include "met/metfreqmakercanvasscreen.h"
 #include "met/metfrontendstate.h"
 #include "met/methelpscreen.h"
+#include "met/metmsgscreen.h"
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
 #include "script/configquery.h"
@@ -54,6 +59,15 @@ constexpr int kFreqMakerEditing = 1;
 // The message screen OnCreateButton() shows and OnMsgScreenDismissed() responds to.
 static const char *const kFreqLimitMessage = "freq_limit";
 
+// OnCreateButton()'s two refusals: the identity limit and its text, the text for a card without
+// room, the dialogue title and its one button, and the screen it opens otherwise.
+constexpr unsigned kMaxIdentities = 8;
+static const char *const kNoSpaceText = "freq_no_space";
+static const char *const kErrorTitle = "ERROR";
+static const char *const kOkButton = "OK";
+constexpr int kOneButton = 1;
+static const char *const kFreqCreateScreen = "MetFreqCreateScreen";
+
 // The sound slot 33 plays.
 static const char *const kSelectFreqSound = "SND_MET_SELECTFREQ";
 
@@ -67,6 +81,17 @@ constexpr int kEditButtonIndex = 1;
 // Game mode that sends OnNameButton() to the network portal rather than to mode select.
 constexpr int kNetworkGameMode = 3;
 
+inline const char *TextOrEmpty(const HxStr &text) {
+    return text.mStr != nullptr ? text.mStr : g_szEmptyString;
+}
+
+// A dialogue text read by value from configuration.
+inline HxStr ConfigText(const char *pszKey) {
+    HxStr value;
+    QueryConfigString(&value, kLabelConfigCode, pszKey);
+    return value;
+}
+
 } // namespace
 
 // 0x0029bcf0
@@ -77,6 +102,39 @@ MetLoadFreqScreen::MetLoadFreqScreen(MetRenderer *pRenderer, int nPriority)
 
 // 0x0029bd38
 MetLoadFreqScreen::~MetLoadFreqScreen() {
+}
+
+// 0x00297c10
+void MetLoadFreqScreen::OnCreateButton() {
+    GlobalSettings::shared(); // Yes, the binary discards this call's result.
+    if (mUnknown8c->size() >= kMaxIdentities) {
+        ExitScreenByName(HxStr(kHelpScreen));
+        std::vector<HxStr> buttons;
+        buttons.push_back(HxStr(kOkButton));
+        const HxStr format(ConfigText(kFreqLimitMessage));
+        const HxStr text(
+            FormatString(TextOrEmpty(format),
+                         kMaxIdentities,
+                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName)));
+        MetMsgScreen::Show(
+            HxStr(kFreqLimitMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+        return;
+    }
+    if (GlobalSettings::shared()->mCardSlots[0].mFree < GlobalSettings::shared()->mUnknown74) {
+        ExitScreenByName(HxStr(kHelpScreen));
+        std::vector<HxStr> buttons;
+        buttons.push_back(HxStr(kOkButton));
+        const HxStr format(ConfigText(kNoSpaceText));
+        const HxStr text(
+            FormatString(TextOrEmpty(format),
+                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
+                         GlobalSettings::shared()->mUnknown74));
+        MetMsgScreen::Show(
+            HxStr(kFreqLimitMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+        return;
+    }
+    PushNamedScreen(HxStr(kFreqCreateScreen));
+    ActivateNamedPanel(HxStr(kFreqCreateScreen));
 }
 
 // 0x0029bc68
