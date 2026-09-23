@@ -84,6 +84,19 @@ HxStr FormatMessage(const HxStr &format, va_list args, int nUnknown);
  * @ghidraAddress 0x00466368
  */
 void ShowReportedMessage(const HxStr &text, int nDuration);
+
+/**
+ * Show a message and write it to `cout` prefixed `Alert! `.
+ *
+ * Unlike ShowReportedMessage(), the on-screen half always runs, for a fixed duration of 50. The
+ * variadic log routines at `0x0052e960` and `0x0052ea68` are the two callers.
+ *
+ * The name is inferred from the prefix.
+ *
+ * @param text The message.
+ * @ghidraAddress 0x004663d8
+ */
+void ShowAlertMessage(const HxStr &text);
 #endif
 
 /**

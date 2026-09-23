@@ -84,6 +84,12 @@ private:
     char *mpReadBuffer; // +0x0c
     int mChunkLength;   // +0x10
     int mDest;          // +0x14
-    int mRemaining;     // +0x18
-    int mBusy;          // +0x1c
+
+public:
+    /*!< Bytes of the bank still to move. Public because IsBankXferBusy() at 0x00464628 tests it
+         through g_pBdXfer, and the image has no accessor for it. +0x18 */
+    int mRemaining;
+
+private:
+    int mBusy; // +0x1c
 };

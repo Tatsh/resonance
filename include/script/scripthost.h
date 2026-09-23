@@ -64,8 +64,8 @@ void InvokeMasterInitScript();
  * that. The homed block's address is passed on to the formatter as the argument list, which is
  * what proves the arguments are read rather than merely reserved.
  *
- * Not reconstructed. The body needs the template registry reader at `0x00466438` and the HxStr
- * formatter at `0x005e4148`, and neither belongs to this subsystem.
+ * Not reconstructed. The body reads the template through GetScriptTemplate() and needs the HxStr
+ * formatter at `0x005e4148`, which does not belong to this subsystem.
  *
  * @param nTemplate The template identifier.
  * @ghidraAddress 0x005099b0

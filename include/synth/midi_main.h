@@ -589,13 +589,12 @@ void ReleaseSoundBanks();
 /**
  * Move one MIDI message to the sound driver.
  *
- * Retains the program each channel holds in the table at `0x006f9bd8` and the bank each channel
- * holds in the table at `0x006f9c18`, and returns without submitting anything when a program
- * change or a bank select repeats what the channel already holds. Otherwise it packs the status
- * into the low byte, the first data byte into the second, and the second data byte into the third,
- * and submits that word.
- *
- * The body is not reconstructed.
+ * Retains the program each channel holds in the table at `0x006e9bd8` and the bank each channel
+ * holds in the table at `0x006e9c18`, and returns without submitting anything when a program
+ * change or a bank select (controller 0x20) repeats what the channel already holds. Otherwise it
+ * packs the status into the low byte, the first data byte into the second, and the second data
+ * byte into the third, and puts that word on port 0 of the MIDI stream input through
+ * `sceMSIn_PutMsg()`.
  *
  * @param nStatus The status byte.
  * @param nData1 The first data byte.
@@ -657,9 +656,6 @@ void SubmitDriverSelectorC0();
  * 0x400-byte MIDI stream buffer, and passes it to `sceMSIn_Init()`. A failure logs
  * `sceMSIn_Init Error`. Otherwise the routine puts the message 0xc0 on port 0 through
  * `sceMSIn_PutMsg()`. InitSynthDriver() is the one caller.
- *
- * The body is not reconstructed. The library header that declares the context types is not in the
- * SDK this tree builds against.
  *
  * @ghidraAddress 0x00462290
  */

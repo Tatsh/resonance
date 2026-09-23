@@ -212,7 +212,6 @@ gameparams
 gamepowerbarmgr
 gamepowerupplacer
 gamercmd
-gamerconstructcmd
 gameskill
 gamestats
 gemmsg
@@ -639,6 +638,7 @@ screenanim
 screendump
 scriptmsg
 scriptsink
+scripttemplatemap
 scstartplayingpacket
 scus
 sdrdrv

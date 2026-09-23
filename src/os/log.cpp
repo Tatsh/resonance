@@ -1,5 +1,6 @@
 #include "os/log.h"
 
+#include <iostream>
 #include <stdio.h>
 
 #include "os/hostmode.h"
@@ -14,6 +15,9 @@ constexpr int kFatalMessageSize = 1024;
 
 // How long a warning asks to stay on screen, in whatever unit ShowScreenMessage() takes.
 constexpr int kWarningMessageDuration = 50;
+
+// How long an alert asks to stay on screen.
+constexpr int kAlertMessageDuration = 50;
 
 // The argument Warn passes as the third one to FormatMessage(). The callee never reads it.
 constexpr int kFormatMessageUnknown = 1;
@@ -52,4 +56,9 @@ void Fatal(const char *pszFormat, ...) {
 
     for (;;) {
     }
+}
+
+void ShowAlertMessage(const HxStr &text) {
+    ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, kAlertMessageDuration);
+    std::cout << "Alert! " << text << std::endl;
 }

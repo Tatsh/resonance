@@ -1,7 +1,9 @@
 #include "synth/midi_main.h"
 
+#include <csl.h>
 #include <eekernel.h>
 #include <libsdr.h>
+#include <msin.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -191,6 +193,17 @@ void ReleaseAllBankSlots() {
         }
     }
     g_bankSlots.clear();
+}
+
+// 0x00464628
+int IsBankXferBusy() {
+    if (g_nHdXferInFlight != 0) {
+        return 1;
+    }
+    if (g_pBdXfer != nullptr && g_pBdXfer->mRemaining != 0) {
+        return 1;
+    }
+    return 0;
 }
 
 // Scratch the four-character code is copied into. The second word is never written and terminates
@@ -409,6 +422,101 @@ void InitSpu2Cores() {
         sceSdRemote(kSdRemoteBlocking, rSdSetAddr, SD_ADDR_EEA | nCore, nEffectEnd);
         nEffectEnd -= kSpu2EffectAreaSize;
     }
+}
+
+// Bytes of the MIDI stream buffer, its two-word header included, which is how the input module
+// measures it. The bank block follows directly at 0x00894bc0.
+constexpr unsigned kMidiStreamBufferSize = 0x400;
+
+// The layout of sceCslMidiStream with its storage, which the library reaches through a void
+// pointer.
+struct MidiStreamBuffer {
+    unsigned int mBufferSize;
+    unsigned int mValidSize;
+    unsigned char mData[kMidiStreamBufferSize - 2 * sizeof(unsigned int)];
+};
+
+// Buffer groups of the input context. The first is empty and the second has the stream.
+enum MidiInputBufferGroup {
+    kMidiInputGroupUnused,
+    kMidiInputGroupStream,
+    kMidiInputGroupCount,
+};
+
+// Port the whole driver writes to.
+constexpr unsigned kMidiInputPort = 0;
+
+// Channel messages that the driver filters against the retained channel state.
+constexpr unsigned kMidiStatusTypeMask = 0xf0;
+constexpr unsigned kMidiChannelMask = 0xf;
+constexpr unsigned kMidiControlChange = 0xb0;
+constexpr unsigned kMidiProgramChange = 0xc0;
+constexpr unsigned kMidiControllerBankSelectLsb = 0x20;
+constexpr int kMidiChannelCount = 16;
+
+// Shifts that pack the two data bytes above the status.
+constexpr int kMidiData1Shift = 8;
+constexpr int kMidiData2Shift = 16;
+
+// 0x00894760
+sceCslCtx g_midiInputContext;
+
+// 0x00894778
+sceCslBuffGrp g_aMidiInputGroups[kMidiInputGroupCount];
+
+// 0x00894788
+sceCslBuffCtx g_midiInputBuffer;
+
+// 0x008947c0
+MidiStreamBuffer g_midiStreamBuffer;
+
+// 0x006e9bd8. The program each channel last received.
+int g_anChannelProgram[kMidiChannelCount];
+
+// 0x006e9c18. The bank each channel last received.
+int g_anChannelBank[kMidiChannelCount];
+
+// 0x00462290
+void InitSynthStreamInput() {
+    g_midiStreamBuffer.mBufferSize = kMidiStreamBufferSize;
+    g_midiInputContext.buffGrpNum = kMidiInputGroupCount;
+    g_aMidiInputGroups[kMidiInputGroupUnused].buffNum = 0;
+    g_aMidiInputGroups[kMidiInputGroupStream].buffNum = 1;
+    g_aMidiInputGroups[kMidiInputGroupStream].buffCtx = &g_midiInputBuffer;
+    g_midiInputBuffer.sema = 0;
+    g_midiInputBuffer.buff = &g_midiStreamBuffer;
+    g_midiStreamBuffer.mValidSize = 0;
+    g_midiInputContext.extmod = nullptr;
+    g_midiInputContext.callBack = nullptr;
+    g_midiInputContext.conf = nullptr;
+    g_midiInputContext.buffGrp = g_aMidiInputGroups;
+    g_aMidiInputGroups[kMidiInputGroupUnused].buffCtx = nullptr;
+    if (sceMSIn_Init(&g_midiInputContext) != 0) {
+        LogPrintf("sceMSIn_Init Error\n");
+        return;
+    }
+    sceMSIn_PutMsg(&g_midiInputContext, kMidiInputPort, kMidiProgramChange);
+}
+
+// 0x00464928
+void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char nData2) {
+    const unsigned nType = nStatus & kMidiStatusTypeMask;
+    if (nType == kMidiProgramChange) {
+        int &nProgram = g_anChannelProgram[nStatus & kMidiChannelMask];
+        if (nProgram == nData1) {
+            return;
+        }
+        nProgram = nData1;
+    } else if (nType == kMidiControlChange && nData1 == kMidiControllerBankSelectLsb) {
+        int &nBank = g_anChannelBank[nStatus & kMidiChannelMask];
+        if (nBank == nData2) {
+            return;
+        }
+        nBank = nData2;
+    }
+    sceMSIn_PutMsg(&g_midiInputContext,
+                   kMidiInputPort,
+                   nStatus | (nData1 << kMidiData1Shift) | (nData2 << kMidiData2Shift));
 }
 
 // Selector ReleaseSoundBanks() submits through SubmitDriverSelectorC0(). Its effect is
