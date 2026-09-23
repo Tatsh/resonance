@@ -196,6 +196,7 @@ durgemrowstring
 durgemstrip
 durgemtrails
 easywarn
+ecossin
 eekernel
 effectpowerup
 egmg
@@ -230,6 +231,7 @@ fbmsk
 fbrst
 fileobject
 filetab
+findenv
 firefs
 firemult
 floatobject
@@ -292,6 +294,7 @@ genpath
 getallconnectstatesmct
 getargs
 getconnectstatemct
+getenv
 getpath
 getpathp
 getpid
@@ -417,6 +420,7 @@ libcdvd's
 libdma
 libera
 libgraph
+libio
 libmc
 libmpeg
 libmtap

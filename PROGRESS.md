@@ -17,26 +17,42 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                   | Count  |
 | ------------------------- | ------ |
 | Functions in the program  | 15,643 |
-| Excluded by rule          | 8,780  |
-| Reconstructable           | 6,863  |
-| Declared or defined       | 6,333  |
-| Share declared or defined | 92.28% |
-| Defined, with a body      | 5,848  |
-| Share implemented         | 85.21% |
-| Remaining, with a name    | 530    |
+| Excluded by rule          | 8,768  |
+| Reconstructable           | 6,875  |
+| Declared or defined       | 6,338  |
+| Share declared or defined | 92.19% |
+| Defined, with a body      | 6,017  |
+| Share implemented         | 87.52% |
+| Remaining, with a name    | 537    |
 | Remaining, unidentified   | 0      |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 485 of the
-6,333 are declared with their address, their signature, and their evidence recorded, and have no
-body the scanner counts. 5,848 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 321 of the
+6,338 are declared with their address, their signature, and their evidence recorded, and have no
+body the scanner counts. 6,017 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 85.21% as the answer to
-"how much is reconstructed" and 92.28% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 87.52% as the answer to
+"how much is reconstructed" and 92.19% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `a40a970`. Work written and checked but not yet committed
+The table measures the committed tree at `5e32890`. Work written and checked but not yet committed
 is not included.
+
+At this measurement every routine the scanner does not count is accounted for by a rule rather than
+owed. Of the declared routines without a counted body, the bodies of 197 are inline in headers,
+three are template instances, four have a split signature, and sixteen are compiler generated,
+defaulted, or vendored glue. Of the 537 routines with no annotation, 252 are implicit special
+members, 102 are interpreter bindings and their wrappers, 91 are static initialiser and exit stubs,
+57 are ezmpeg sample routines, three are interrupt-context SDK entry points, and the remaining 32
+are library routines titled by their upstream names or recorded exceptions, each listed in the known
+gaps below. No routine the program's own code defines is left without a written or recorded body.
+
+Since the measurement at `a40a970` (85.21%), bodies rose by 169 over 48 commits. Every remaining
+declared routine gained a body or a classification, the four global allocators became the
+replacement `operator new` and `operator delete` they are in the image, and `QueryConfigString`
+returns its string by value at all 179 call sites. Six routines left the C++ runtime category and
+five the C runtime category when correct titles (such as `type_info__Destruct`) replaced ones that
+matched an exclusion pattern by accident, so the reconstructable figure rose by twelve.
 
 Since the measurement at `d7e688b` (73.39%), bodies rose by 741 over 66 commits and the
 reconstructable figure fell by 96. Most of the rise is bodies that were already written but carried
@@ -103,9 +119,16 @@ tools are unchanged:
 - Static initialiser stubs titled `__StaticCtor`, `__StaticDtor`, or `__GlobalCtors`, and the exit
   handlers of function-local statics (`AtExitDestroy…`, `__StaticDestroy`), are compiler output that
   no exclusion pattern matches.
-- The `hx.*` script bindings (54 routines in `0x00150000..0x0016ffff`, the `HxScript__X` bodies
-  and their `HxScript__XEntry` wrappers) are titled and plated but have no source until the tree
-  has a `Python.h` of the era, and no exclusion pattern matches their titles.
+- The `hx.*` script bindings (56 routines in `0x00150000..0x0016ffff`, the `HxScript__X` bodies
+  and their `HxScript__XEntry` wrappers, including `ActivateAllAccessMode`) are titled and plated
+  but have no source until the tree has a `Python.h` of the era, and no exclusion pattern matches
+  their titles. Every game routine they call directly has a body.
+- Library routines titled by their upstream names rather than a family prefix (`getenv`,
+  `_findenv_r`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and the
+  `type_info` and `exception` members) are toolchain or SDK code that no exclusion pattern matches.
+- Recorded exceptions with no separate body are the three `MetFreqMakerAssetManager` forwarders,
+  the `TunnelEvent::DrawFiltered` copy, three unreferenced return-zero stubs, an unreferenced
+  `Delayer` send copy, and one unidentified three-integer printer at `0x003d67f0`.
 
 Before that, from the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
 reconstructable figure fell by 85. The template library category grew by 99, the duplicate category
@@ -179,11 +202,11 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 899   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 2,018 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 1,957 | Bodies proven byte-identical to another routine of the image     |
+| Per-translation-unit duplicate | 1,956 | Bodies proven byte-identical to another routine of the image     |
 | Template library               | 2,874 | Container instantiations                                         |
 | Platform SDK                   | 484   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 219   | Exception, cast, and unwinding support                           |
-| C runtime                      | 329   | String and memory routines, and the floating-point library       |
+| C++ runtime                    | 213   | Exception, cast, and unwinding support                           |
+| C runtime                      | 324   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
