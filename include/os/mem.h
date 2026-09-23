@@ -328,8 +328,10 @@ void MemLogSourceReport(const char *pszTitle, FILE *pFile);
 /**
  * Write the memory statistics files and probe the largest possible allocation.
  *
- * The routine belongs to another translation unit and is declared here so MemCloseLogAndReport()
- * can call it. It writes `memdump_%d.txt` through MemLogSourceReport() and `memstat_%d.txt`.
+ * It writes `memdump_%d.txt` through MemLogSourceReport(). It then writes `memstat_%d.txt` with the
+ * largest single allocation, probed downward from 128 megabytes in tenths, and the number of
+ * 2048-byte and 128-byte blocks that fit, each counted to at most 65536 and released again. Each
+ * line also goes to the log. Neither file open is checked.
  *
  * @param nIndex The number the file names carry.
  * @ghidraAddress 0x0054b348

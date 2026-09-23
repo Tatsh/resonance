@@ -89,6 +89,23 @@ constexpr char kStlUnknownTag[] = "stl_unk";
 // The block size ReportHeapCapacity() probes with.
 constexpr int kHeapProbeBlockSize = 0x800;
 
+// DumpHeapMemoryLog() probes the largest single allocation downward from 1280 steps of a tenth of
+// a megabyte, and reports the step count in megabytes.
+constexpr unsigned kLargestProbeSteps = 1280;
+constexpr unsigned kLargestProbeStepSize = 102400;
+constexpr double kLargestProbeStepsPerMegabyte = 10.0;
+
+// DumpHeapMemoryLog() then counts how many blocks of each size fit, up to this many, and reports
+// each block as costing its size plus the allocator's overhead.
+constexpr int kProbeBlockLimit = 0x10000;
+constexpr int kProbeBlockOverhead = 16;
+
+// Bytes of the path DumpHeapMemoryLog() formats each file name into.
+constexpr int kHeapLogPathSize = 0x40;
+
+// 0x0089e200. The blocks one counting pass of DumpHeapMemoryLog() holds before releasing them.
+void *g_apProbeBlocks[kProbeBlockLimit];
+
 // 0x006f57d0
 int g_bMemLogging;
 
@@ -260,6 +277,7 @@ inline void LogStackUse() {
 
 } // namespace
 
+// 0x004a8380
 void *MemAlloc(size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
@@ -276,6 +294,7 @@ void *MemAlloc(size_t nSize) {
     return pBlock;
 }
 
+// 0x004a8520
 void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
     void *pBlock = HeapAlloc(nSize);
 
@@ -293,6 +312,7 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
     return pBlock;
 }
 
+// 0x004a81e0
 void *MemAllocScalar(size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
@@ -309,6 +329,7 @@ void *MemAllocScalar(size_t nSize) {
     return pBlock;
 }
 
+// 0x004a90a0
 void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
@@ -325,6 +346,7 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
     return pBlock;
 }
 
+// 0x004a92c8
 void MemFree(void *pBlock) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK[],%p)\n", pBlock);
@@ -332,6 +354,7 @@ void MemFree(void *pBlock) {
     HeapFree(pBlock);
 }
 
+// 0x004a9230
 void MemFreeScalar(void *pBlock) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(UNK,%p)\n", pBlock);
@@ -339,6 +362,7 @@ void MemFreeScalar(void *pBlock) {
     HeapFree(pBlock);
 }
 
+// 0x004a91e0
 void FreeTaggedMemory(void *pBlock, const char *pszClass) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "del(%s,%p)\n", pszClass, pBlock);
@@ -346,6 +370,7 @@ void FreeTaggedMemory(void *pBlock, const char *pszClass) {
     HeapFree(pBlock);
 }
 
+// 0x004a94e8
 void MemFreeTagged(void *pBlock, const char *pszTag, int nLine) {
     int nZone = FindZoneForPointer(pBlock);
     if (nZone != kNoZone) {
@@ -358,6 +383,7 @@ void MemFreeTagged(void *pBlock, const char *pszTag, int nLine) {
     HeapFree(pBlock);
 }
 
+// 0x004a93b8
 void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine) {
     int nZone = FindZoneForPointer(pBlock);
     if (nZone != kNoZone) {
@@ -381,20 +407,24 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
     return pNew;
 }
 
+// 0x004a9090
 char *MemGetCurrentTag() {
     return g_szStlAllocTag;
 }
 
+// 0x004a9048
 void MemSetStlTag(const char *pszKind, int nElemSize) {
     sprintf(g_szStlAllocTag, "%s.%d", pszKind, nElemSize);
 }
 
+// 0x004a8e18
 void MemLogWrite(const char *pszText) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "MARKER: %s\n", pszText);
     }
 }
 
+// 0x004a86c0
 int MemLogFindSource(const char *pszName) {
     const char *pName = TagBasename(pszName);
 
@@ -424,6 +454,7 @@ int MemLogFindSource(const char *pszName) {
     return nRow;
 }
 
+// 0x004a95c8
 void MemLogSourceInit() {
     g_pMemLogBlocks =
         static_cast<MemLogBlock *>(HeapAlloc(kMemLogBlockCount * sizeof(MemLogBlock)));
@@ -433,6 +464,7 @@ void MemLogSourceInit() {
     }
 }
 
+// 0x004a87d0
 void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int nSize) {
     if (g_pMemLogBlocks == nullptr) {
         return;
@@ -455,6 +487,7 @@ void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int
     }
 }
 
+// 0x004a8a68
 void MemLogSourceReport(const char *pszTitle, FILE *pFile) {
     if (g_pMemLogBlocks == nullptr) {
         return;
@@ -502,12 +535,14 @@ void MemLogSourceReport(const char *pszTitle, FILE *pFile) {
     }
 }
 
+// 0x004a8e50
 void MemLogPrint(const char *pszText) {
     if (g_bMemLogging != 0) {
         fprintf(g_pMemLogFile, "%s", pszText);
     }
 }
 
+// 0x004a8e88
 void MemBeginAccounting() {
     g_nMemTotalBytes = 0;
     memset(g_aMemTagTotals, 0, sizeof(g_aMemTagTotals));
@@ -515,6 +550,7 @@ void MemBeginAccounting() {
     g_bMemAccounting = 1;
 }
 
+// 0x004a8ef8
 int MemEndAccounting(char *pszReport, int nReportSize) {
     sprintf(pszReport, "Memory Allocated: %d\n", g_nMemTotalBytes);
     for (int i = 0; i < kMemTagCount; ++i) {
@@ -542,6 +578,7 @@ int MemEndAccounting(char *pszReport, int nReportSize) {
     return g_nMemTotalBytes;
 }
 
+// 0x004a7c40
 void MemOpenLog(const char *pszPath) {
     if (pszPath != nullptr) {
         strcpy(g_szMemLogPath, pszPath);
@@ -562,6 +599,7 @@ void MemOpenLog(const char *pszPath) {
     atexit(MemCloseLogAndReport);
 }
 
+// 0x004a7d30
 void MemCloseLogAndReport() {
     if (g_pMemLogFile != nullptr) {
         fclose(g_pMemLogFile);
@@ -575,6 +613,7 @@ void MemCloseLogAndReport() {
     DumpHeapMemoryLog(0);
 }
 
+// 0x004a7ef8
 void MemLogCloseAndContinue() {
     LogPrintf("MemLogCloseAndContinue:, fpLog: %p\n", g_pMemLogFile);
     if (g_pMemLogFile != nullptr) {
@@ -623,4 +662,60 @@ void ReportHeapCapacity() {
     for (void *pAllocated : blocks) {
         HeapFree(pAllocated);
     }
+}
+
+// 0x0054b348
+void DumpHeapMemoryLog(int nIndex) {
+    char szPath[kHeapLogPathSize];
+    sprintf(szPath, "memdump_%d.txt", nIndex);
+    FILE *pFile = fopen(szPath, "w");
+    MemLogSourceReport("MEMLOG STATS", pFile);
+    fclose(pFile);
+
+    sprintf(szPath, "memstat_%d.txt", nIndex);
+    pFile = fopen(szPath, "w");
+
+    void *pLargest = nullptr;
+    unsigned nSteps = kLargestProbeSteps;
+    while (nSteps != 0) {
+        pLargest = HeapAlloc(nSteps * kLargestProbeStepSize);
+        if (pLargest != nullptr) {
+            break;
+        }
+        --nSteps;
+    }
+    if (pLargest != nullptr) {
+        LogPrintf("Largest possible allocation: %f megabytes\n",
+                  static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
+        fprintf(pFile,
+                "Largest possible allocation: %f megabytes\n",
+                static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
+        HeapFree(pLargest);
+    }
+
+    const int anBlockSizes[] = {2048, 128};
+    for (const int nBlockSize : anBlockSizes) {
+        int nCount = 0;
+        while (nCount < kProbeBlockLimit) {
+            g_apProbeBlocks[nCount] = HeapAlloc(nBlockSize);
+            if (g_apProbeBlocks[nCount] == nullptr) {
+                break;
+            }
+            ++nCount;
+        }
+        LogPrintf("Able to allocate %d blocks of size %d (%d bytes total)\n",
+                  nCount,
+                  nBlockSize,
+                  nCount * (nBlockSize + kProbeBlockOverhead));
+        fprintf(pFile,
+                "Able to allocate %d blocks of size %d (%d bytes total)\n",
+                nCount,
+                nBlockSize,
+                nCount * (nBlockSize + kProbeBlockOverhead));
+        for (int i = 0; i < nCount; ++i) {
+            HeapFree(g_apProbeBlocks[i]);
+        }
+    }
+
+    fclose(pFile);
 }
