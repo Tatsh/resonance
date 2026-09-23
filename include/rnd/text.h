@@ -445,21 +445,42 @@ private:
     // 0x004cf9b8.
     void AddObjectRefs();
 
-    // Declared in recovered offset order. Every member is private: each one that the engine changes
-    // has a setter, no call from outside this class arrives at one of those setters, and the image
-    // no accessor for any of them.
+    // Declared in recovered offset order. Every member but mWrapWidth and mPreWrapText is private:
+    // each one that the engine changes has a setter, and no call from outside this class arrives at
+    // one of those setters.
 
     Color mColor;  // +0xd0
     int mAlign;    // +0xe0
     Font *mFont;   // +0xe4
     int mWordWrap; // +0xe8
-    // Width a wrapped line is broken at. Load() clamps a value read from a file below revision 5
-    // into 0 through 1000, and nothing clamps a value SetWrapWidth() receives.
-    float mWrapWidth; // +0xec
+
+public:
+    /**
+     * Width a wrapped line is broken at.
+     *
+     * Load() clamps a value read from a file below revision 5 into 0 through 1000, and nothing
+     * clamps a value SetWrapWidth() receives. Public because MetSaveRemixScreen and the
+     * ShowRemixDetails() of MetJukeboxBaseScreen and MetJukeboxEditPlaylistScreen compare it
+     * against MeasureText() through a plain load, and the image has no accessor. +0xec
+     */
+    float mWrapWidth;
+
+private:
     // mPreWrapText with a newline inserted at every wrap point. Derived rather than stored, which
     // is why Save() does not write it.
-    HxStr mText;        // +0xf0
-    HxStr mPreWrapText; // +0xf8
+    HxStr mText; // +0xf0
+
+public:
+    /**
+     * Text as a caller or a file supplied it, before wrapping.
+     *
+     * Public because MetConfigControllerScreen (HandleCommand() at `0x00200ba8` and the helpers at
+     * `0x00201eb8`, `0x00202070`, `0x00206b30`, and `0x00206ca8`) and MetSaveRemixScreen read it
+     * directly, and the image has no accessor. +0xf8
+     */
+    HxStr mPreWrapText;
+
+private:
     // Geometry built from mText. Owned outright, created through the Rnd::Mesh creator hook, and
     // marked internal so that a scene save does not write it as an object of its own.
     Mesh *mMesh; // +0x100

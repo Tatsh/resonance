@@ -26,6 +26,7 @@ agiffile
 albumcache
 allnotesoffmsg
 almodule
+analogl
 analogr
 andi
 anim
@@ -202,6 +203,7 @@ entspaceop
 envx
 erasemsg
 eraseoffmsg
+erasepower
 errnomodule
 erss
 esbenp
@@ -462,8 +464,11 @@ messageio
 metagameworld
 metarenasscreen
 metbuttonlist
+metconfigcontrollerscreen
 metconfiggameoptionsscreen
+metconfigoptionsbuttonsscreen
 metcontrollerreading
+metcreditsscreen
 metendgamegizmoscreen
 metexpansionpakscreen
 metfade
@@ -589,6 +594,7 @@ newmodule
 njgb
 nocard
 nolattice
+nomemcard
 noone
 normalkey
 notefinder
@@ -712,6 +718,7 @@ regexmodule
 regexpr
 regi
 releaseable
+remixfx
 remixfxmsg
 remixtype
 remotetrackselectmsg
