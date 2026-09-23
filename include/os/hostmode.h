@@ -110,3 +110,71 @@ HxStr GetFreqRoot();
  * @ghidraAddress 0x0050d9f0
  */
 HxStr MakeFreqPath(const HxStr &name);
+
+/**
+ * Whether a held modifier turns a controller button into a debug script hook.
+ *
+ * The boot-option word at 0x0070bf24. InputPoller::Poll() is the one reader. While it reports
+ * non-zero, a button pressed with the modifier bits runs script template 0x3f2 instead of the
+ * usual `'joy '` message. ConfigureRetailBoot() clears it. The name is inferred.
+ *
+ * @return Non-zero when the debug hooks are active.
+ * @ghidraAddress 0x0050efe0
+ */
+int DebugKeysEnabled();
+
+/**
+ * Whether the asynchronous loader brackets each load with memory accounting.
+ *
+ * The boot-option word at 0x0070bf2c. RndAsyncLoader::PollAsyncLoads() calls
+ * MemBeginAccounting() before reading a completed load and reports the accounting afterwards
+ * while it is non-zero. ConfigureRetailBoot() clears it. The name is inferred.
+ *
+ * @return Non-zero when loads are accounted.
+ * @ghidraAddress 0x0050f000
+ */
+int MemAccountingEnabled();
+
+/**
+ * Whether the start-up sequence plays the intro movie `ps2intro.pss`.
+ *
+ * The boot-option word at 0x0070bf30. MetSonyScreen is the one reader. ConfigureRetailBoot()
+ * sets it. The name is inferred.
+ *
+ * @return Non-zero when the intro movie plays.
+ * @ghidraAddress 0x0050f010
+ */
+int IntroMovieEnabled();
+
+/**
+ * Report the build version, "198" in the shipped build.
+ *
+ * The title screen shows it after "Version:". The unit's static initialiser builds the string, the
+ * HxStr at 0x0070bf38. The name is inferred.
+ *
+ * @return A copy of the version string.
+ * @ghidraAddress 0x0050ef60
+ */
+HxStr GetVersionString();
+
+/**
+ * Report whether a file can be opened for reading through the file service.
+ *
+ * The file is opened read-only and closed again at once. No call site survives in the shipped
+ * program, and the name is inferred.
+ *
+ * @param pszPath The path to test.
+ * @return True when the open succeeded.
+ * @ghidraAddress 0x0050f0c8
+ */
+bool FileExists(const char *pszPath);
+
+/**
+ * Release every zone, the counterpart of InitBootConfig().
+ *
+ * The body is one call to ReleaseAllZoneSlots(). No call site survives in the shipped program,
+ * and the name is inferred from the counterpart.
+ *
+ * @ghidraAddress 0x0050f0a8
+ */
+void TerminateBootConfig();
