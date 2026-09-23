@@ -3,6 +3,8 @@
 #include "math/color.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
+#include "rnd/manager.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
 #include "rnd/transformable.h"
@@ -16,6 +18,9 @@ constexpr int kLightRevision = 1;
 
 // First revision that stores the type word. A revision of 0 predates it.
 constexpr int kLightTypeRevision = 1;
+
+// The allocation tag every light block is billed to.
+constexpr char kLightTag[] = "Rnd::Light";
 
 // src/rnd/mat.cpp declares a helper of the same title file-locally for the same reason. Every
 // component is a separate Print and Format pair, which is why the two literals "(r:" and "%.2f"
@@ -244,5 +249,31 @@ Light *NewLight(const HxStr &name) {
 
 // 0x00720bc8
 Light *(*g_pfnNewLight)(const HxStr &name) = NewLight;
+
+// 0x005443c0
+void *Light::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kLightTag);
+}
+
+// 0x005443e0
+void Light::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kLightTag);
+}
+
+// 0x00544490
+Light *NewLightThroughHook(const HxStr &name) {
+    return g_pfnNewLight(name);
+}
+
+// 0x00544828
+Object *CreateRegisteredLight(const HxStr &name) {
+    return g_pfnNewLight(name);
+}
+
+// 0x00544450
+void RegisterLightClass() {
+    g_pfnNewLight = NewLight;
+    g_manager.RegisterClass(g_lightClassName, CreateRegisteredLight);
+}
 
 } // namespace Rnd

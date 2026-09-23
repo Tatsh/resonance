@@ -58,9 +58,8 @@ public:
     /**
      * Construct an animation with three empty channels and no light.
      *
-     * The body is not reconstructed. The creator at `0x005452d0` is the one construction site and
-     * allocates 0x48 untagged bytes before invoking it. A second identical copy of that creator
-     * sits at `0x005449f8`.
+     * The body is not reconstructed. NewLightAnim() is the one construction site and allocates
+     * 0x48 untagged bytes before invoking it.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
      * @ghidraAddress 0x00544df0
@@ -88,6 +87,18 @@ public:
      * @ghidraAddress 0x00544dd8
      */
     LightAnim *GetKeysOwner();
+
+    /**
+     * Make another animation the one whose channels drive this one.
+     *
+     * Moves this object's reference from the previous owner to the new one, and then empties this
+     * object's own channels unless it is its own owner. No call site survives in the shipped
+     * program, and the name follows GetKeysOwner().
+     *
+     * @param pOwner The new keys owner, or null.
+     * @ghidraAddress 0x005455b8
+     */
+    void SetKeysOwner(LightAnim *pOwner);
 
     /**
      * Write the animation to the engine text sink.
@@ -183,6 +194,10 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
+    // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it.
+    // 0x00545570.
+    void ClearKeys();
+
     // No class derives from Rnd::LightAnim and no access from outside it is recovered. Every
     // member is therefore private. The order below is the recovered offset order, and the text
     // dump pins all five.
@@ -209,14 +224,35 @@ extern HxStr g_lightAnimClassName;
 /**
  * Allocate and construct a light animation.
  *
- * This is the creator the class registers with Rnd::Manager, at `0x005449c8`. The class installs
- * no creator hook, unlike Rnd::Light. There is therefore one creator and no platform
- * subclass.
+ * The allocation is 0x48 untagged bytes. The out-of-line copy has no caller, and
+ * CreateRegisteredLightAnim() expands the same body.
  *
  * @param name The object name.
  * @return The new animation.
- * @ghidraAddress 0x005452d0
+ * @ghidraAddress 0x005449f8
  */
 LightAnim *NewLightAnim(const HxStr &name);
+
+/**
+ * Build a light animation for the registered "LightAnim" class.
+ *
+ * Builds as NewLightAnim() does and converts the result to its Rnd::Object virtual base. The class
+ * installs no creator hook, unlike Rnd::Light. There is one creator and no platform subclass.
+ *
+ * @param name The object name.
+ * @return The new animation, as its Rnd::Object subobject.
+ * @ghidraAddress 0x005452d0
+ */
+Object *CreateRegisteredLightAnim(const HxStr &name);
+
+/**
+ * Register the "LightAnim" class with Rnd::Manager, through CreateRegisteredLightAnim().
+ *
+ * The out-of-line copy has no caller, and Rnd::Manager::Init() expands the same registration. The
+ * name is inferred.
+ *
+ * @ghidraAddress 0x005449c8
+ */
+void RegisterLightAnimClass();
 
 } // namespace Rnd

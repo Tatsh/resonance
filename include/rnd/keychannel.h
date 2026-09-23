@@ -79,7 +79,9 @@ struct Vector3Key {
  * Rnd::MatAnim dumps its emissive, ambient, diffuse, and specular channels through this one,
  * Rnd::LightAnim its three colour channels, and Rnd::ParticleSysAnim its two spawn colour
  * channels. The dump opens with the keyframe count from `std::list::size()` and then writes one
- * indexed line per keyframe.
+ * indexed line per keyframe. Further emissions of this routine and of its per-key helper sit at
+ * `0x0052a688`/`0x0052a528` and `0x00543da8`/`0x00543c48`, identical apart from their literal and
+ * branch addresses, and have no callers.
  *
  * @param sink The text sink.
  * @param keys The channel.

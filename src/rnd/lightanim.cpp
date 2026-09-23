@@ -261,11 +261,43 @@ void LightAnim::Load(Stream &stream) {
     }
 }
 
-// 0x005452d0
+// 0x005449f8
 LightAnim *NewLightAnim(const HxStr &name) {
     // The allocation is untagged here, as it is for Rnd::ParticleSysAnim, and it is exactly 0x48
     // bytes rather than a rounded size.
     return new LightAnim(name);
+}
+
+// 0x005452d0
+Object *CreateRegisteredLightAnim(const HxStr &name) {
+    return NewLightAnim(name);
+}
+
+// 0x005449c8
+void RegisterLightAnimClass() {
+    g_manager.RegisterClass(g_lightAnimClassName, CreateRegisteredLightAnim);
+}
+
+// 0x00545570
+void LightAnim::ClearKeys() {
+    if (mKeysOwner == this) {
+        return;
+    }
+    mAmbientKeys.clear();
+    mDiffuseKeys.clear();
+    mSpecularKeys.clear();
+}
+
+// 0x005455b8
+void LightAnim::SetKeysOwner(LightAnim *pOwner) {
+    if (mKeysOwner != nullptr) {
+        mKeysOwner->RemoveRef(this);
+    }
+    mKeysOwner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+    ClearKeys();
 }
 
 } // namespace Rnd

@@ -68,6 +68,23 @@ public:
     virtual ~Light();
 
     /**
+     * Allocate a light block under the tag "Rnd::Light".
+     *
+     * @param nSize The block size.
+     * @return The block.
+     * @ghidraAddress 0x005443c0
+     */
+    static void *operator new(size_t nSize);
+
+    /**
+     * Release a block operator new() allocated.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x005443e0
+     */
+    static void operator delete(void *pBlock);
+
+    /**
      * Set all three colours at once.
      *
      * Vtable slot 3 of the Rnd::Transformable table. The parameter order is the recovered one and
@@ -279,5 +296,37 @@ Light *NewLight(const HxStr &name);
  * @ghidraAddress 0x00720bc8
  */
 extern Light *(*g_pfnNewLight)(const HxStr &name);
+
+/**
+ * Build a light through the creator hook.
+ *
+ * No call site survives in the shipped program. The name follows the Rnd::Tex counterpart.
+ *
+ * @param name The object name.
+ * @return The new light.
+ * @ghidraAddress 0x00544490
+ */
+Light *NewLightThroughHook(const HxStr &name);
+
+/**
+ * Build a light for the registered "Light" class by calling through g_pfnNewLight.
+ *
+ * The result is converted to its Rnd::Object virtual base.
+ *
+ * @param name The object name.
+ * @return The new light, as its Rnd::Object subobject.
+ * @ghidraAddress 0x00544828
+ */
+Object *CreateRegisteredLight(const HxStr &name);
+
+/**
+ * Point g_pfnNewLight at NewLight() and register the "Light" class with Rnd::Manager.
+ *
+ * The out-of-line copy has no caller, and Rnd::Manager::Init() expands the same body. The name is
+ * inferred.
+ *
+ * @ghidraAddress 0x00544450
+ */
+void RegisterLightClass();
 
 } // namespace Rnd
