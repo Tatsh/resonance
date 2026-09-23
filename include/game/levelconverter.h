@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "game/harmony.h"
 #include "mid/receiver.h"
 #include "os/hxstr.h"
 
@@ -272,13 +273,13 @@ private:
     int mUnknown68; // +0x68
     int mUnknown6c; // +0x6c, cleared by NewTrack
     std::vector<PendingEvent> mPending; // +0x70
-    // Element size 1, from the byte arithmetic in the vector assignment at 0x001e9440 and in the
-    // destructor. EndTrack hands it to the builder.
-    std::vector<char> mNameMap; // +0x7c
-    int mUnknown88; // +0x88, Mid::kMBTInfinity at construction, -1 at the start of each track
-    int mHasTempo;  // +0x8c, cleared by Convert and set to 1 by Tempo
-    int mUnknown90; // +0x90
-    int mUnknown94; // +0x94
+    // The harmony the converter builds note by note through Harmony::AddNote() (0x001e7b90) and
+    // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04).
+    Harmony mHarmony; // +0x7c
+    int mUnknown88;   // +0x88, Mid::kMBTInfinity at construction, -1 at the start of each track
+    int mHasTempo;    // +0x8c, cleared by Convert and set to 1 by Tempo
+    int mUnknown90;   // +0x90
+    int mUnknown94;   // +0x94
     std::vector<Span> mUnknown98; // +0x98
     std::vector<Span> mUnknowna4; // +0xa4
     std::vector<Span> mUnknownb0; // +0xb0

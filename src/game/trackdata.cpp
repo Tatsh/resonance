@@ -195,7 +195,7 @@ void TrackData::AddRiff(int nTick, Riff *pRiff) {
 }
 
 // 0x001d3d10
-void TrackData::AddHarmony(int nTick, const std::vector<char> &notes) {
+void TrackData::AddHarmony(int nTick, const Harmony &harmony) {
     const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
@@ -205,7 +205,7 @@ void TrackData::AddHarmony(int nTick, const std::vector<char> &notes) {
     Mid::MBT offset;
     Locate(nTick, pBar, offset);
 
-    Harmony *pHarmony = new Harmony(notes);
+    Harmony *pHarmony = new Harmony(harmony);
     mHarmoniesOwned.push_back(pHarmony);
     SetAtTick(pBar->mHarmonies, pHarmony, offset.mTick);
 

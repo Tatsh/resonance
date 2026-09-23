@@ -5,6 +5,8 @@
 #include "app/attachment.h"
 #include "game/leveldata.h"
 
+struct Harmony;
+
 /**
  * Accumulator a MIDI conversion fills, and the one implementation of LevelData.
  *
@@ -106,17 +108,16 @@ public:
     void AddEvent(int nTick, int nStatus, int nData1, int nData2, int nChannel);
 
     /**
-     * Unrecovered. A two-argument forwarder to the routine at `0x001d3d10` on the track at
-     * `+0x2c`.
+     * Start a harmony on the current track.
      *
-     * LevelConverter::EndTrack() calls it with the name map it built for the track. The body is not
-     * written yet.
+     * Forwards to TrackData::AddHarmony() on mCurrentTrack. LevelConverter calls it at
+     * `0x001e6a60` and `0x001e7b04` with the harmony at its `+0x7c`.
      *
-     * @param nFirst The first argument, forwarded unchanged.
-     * @param pSecond The second argument, forwarded unchanged.
+     * @param nTick The song position, in MIDI ticks.
+     * @param harmony The harmony, copied by the track.
      * @ghidraAddress 0x001ec560
      */
-    void OnUnknownForwarder001ec560(int nFirst, void *pSecond);
+    void AddHarmony(int nTick, const Harmony &harmony);
 
     /**
      * Unrecovered. A two-argument forwarder to the routine at `0x001d7758` on the track at

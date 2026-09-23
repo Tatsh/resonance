@@ -66,6 +66,11 @@ PlayMap *LevelBuilder::OnUnknownSlot8() {
     return mUnknown34;
 }
 
+// 0x001ec560
+void LevelBuilder::AddHarmony(int nTick, const Harmony &harmony) {
+    mCurrentTrack->AddHarmony(nTick, harmony);
+}
+
 // 0x001ec5f8
 void LevelBuilder::SetTempo([[maybe_unused]] int nTick, int nMicrosecondsPerQuarter) {
     if (mUnknown30 != nullptr) {

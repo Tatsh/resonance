@@ -131,10 +131,10 @@ public:
      * position at or past the end of the track is ignored.
      *
      * @param nTick The song position, in MIDI ticks.
-     * @param notes The notes of the harmony, copied into it.
+     * @param harmony The harmony, copied onto the heap.
      * @ghidraAddress 0x001d3d10
      */
-    void AddHarmony(int nTick, const std::vector<char> &notes);
+    void AddHarmony(int nTick, const Harmony &harmony);
 
     /**
      * Add a gem at a song position, with a riff set of its own when a riff is given.
