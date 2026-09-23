@@ -1,12 +1,17 @@
 #pragma once
 
 class GameManagerImpl;
+class GrooveWorld;
 class IOBPreallocMemStream;
 class MainLoop;
 class Ps2HardSynth;
 class ScriptSink;
 class Watchdog;
 class WatchdogTimer;
+
+namespace Sch {
+class TickClock;
+} // namespace Sch
 
 /** Size of the buffer that Globals opens its log stream over. */
 constexpr int kLogBufferSize = 0x19000;
@@ -33,9 +38,9 @@ constexpr int kLogBufferSize = 0x19000;
  * reads one either. The accessors are themselves the out-of-line copies of inline members, and
  * dozens of call sites inlined their own copy.
  *
- * Eight further accessors forward into the game manager and return an object whose owning class
- * belongs to the renderer rather than here, so they are not titled yet: `0x00118ce8`, `0x00118d18`,
- * `0x00118d70`, `0x00118da0`, `0x00118dd8`, `0x00118e08`, `0x00118e38`, and `0x00118ec8`.
+ * Six further accessors forward into the game manager and return an object whose owning class
+ * belongs to the renderer rather than here. None of the six is identified yet: `0x00118ce8`,
+ * `0x00118d18`, `0x00118d70`, `0x00118da0`, `0x00118e38`, and `0x00118ec8`.
  */
 class Globals {
 public:
@@ -122,6 +127,43 @@ public:
      * @ghidraAddress 0x00118e70
      */
     WatchdogTimer *GetWatchdogTimer();
+
+    /**
+     * Report the game manager's world.
+     *
+     * Reads mGameManager directly rather than through GetGameManager().
+     *
+     * @return GameManagerImpl::GetWorld().
+     * @ghidraAddress 0x00118d40
+     */
+    GrooveWorld *GetWorld();
+
+    /**
+     * Report the game manager's play mode.
+     *
+     * @return GameManagerImpl::GetPlayMode().
+     * @ghidraAddress 0x00118dd8
+     */
+    int GetPlayMode();
+
+    /**
+     * Report the game manager's game mode.
+     *
+     * @return GameManagerImpl::GetGameMode().
+     * @ghidraAddress 0x00118e08
+     */
+    int GetGameMode();
+
+    /**
+     * Report the song clock of the game manager's world.
+     *
+     * The body composes GetWorld() with the GrooveWorld accessor at `0x001952a0`, which returns the
+     * world's `+0x64`. It is not written, because grooveworld.h does not declare that accessor.
+     *
+     * @return The world's song clock.
+     * @ghidraAddress 0x00118e78
+     */
+    Sch::TickClock *GetSongClock();
 
 private:
     GameManagerImpl *mGameManager; // +0x00

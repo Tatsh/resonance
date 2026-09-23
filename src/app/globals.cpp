@@ -89,3 +89,18 @@ Watchdog *Globals::GetWatchdog() {
 WatchdogTimer *Globals::GetWatchdogTimer() {
     return mWatchdogTimer;
 }
+
+// 0x00118d40
+GrooveWorld *Globals::GetWorld() {
+    return mGameManager->GetWorld();
+}
+
+// 0x00118dd8
+int Globals::GetPlayMode() {
+    return GetGameManager()->GetPlayMode();
+}
+
+// 0x00118e08
+int Globals::GetGameMode() {
+    return GetGameManager()->GetGameMode();
+}
