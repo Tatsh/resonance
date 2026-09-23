@@ -413,16 +413,36 @@ private:
     // 0x006c1110
     static MetRemixManager *sInstance;
 
-    std::map<int, std::vector<MetRemixRecord>> mRemixes; // +0x94, keyed by card slot
-    std::map<int, int> mListStatus;                      // +0xa0, by port and slot
-    std::vector<HxStr> mUnknownac;                       // +0xac
-    std::vector<HxStr> mUnknownb8;                       // +0xb8
-    JukeboxPlayList mPlayList;                           // +0xc4
-    int mUnknownd4;                                      // +0xd4
-    int mUnknownd8;                                      // +0xd8
-    int mUnknowndc;                                      // +0xdc, starts at one
-    int mIndexRequest;                                   // +0xe0
-    int mRemixRequest;                                   // +0xe4, matched by Done()
+public:
+    /**
+     * The remix lists, keyed by card slot, with -1 for the factory remixes.
+     *
+     * Public because MetJukeboxBaseScreen::BindLists() and EnterAndShow() index it directly
+     * through an inline operator[], and the image has no accessor. +0x94
+     */
+    std::map<int, std::vector<MetRemixRecord>> mRemixes;
+
+private:
+    std::map<int, int> mListStatus; // +0xa0, by port and slot
+    std::vector<HxStr> mUnknownac;  // +0xac
+    std::vector<HxStr> mUnknownb8;  // +0xb8
+
+public:
+    /**
+     * The jukebox playlist.
+     *
+     * Public because MetJukeboxBaseScreen::BindLists() and EnterAndShow() take its address, and
+     * MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30() reads its entry count, with no accessor
+     * in the image. +0xc4
+     */
+    JukeboxPlayList mPlayList;
+
+private:
+    int mUnknownd4;    // +0xd4
+    int mUnknownd8;    // +0xd8
+    int mUnknowndc;    // +0xdc, starts at one
+    int mIndexRequest; // +0xe0
+    int mRemixRequest; // +0xe4, matched by Done()
     // The mRemixes key Done() files the index under. Starts at -1.
     int mUnknowne8;                  // +0xe8
     int mCurrentPlaylistTrack;       // +0xec

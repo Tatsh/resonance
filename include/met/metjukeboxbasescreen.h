@@ -13,6 +13,9 @@
 
 namespace Rnd {
 class Font;
+class Mat;
+class Mesh;
+class Text;
 } // namespace Rnd
 
 /**
@@ -42,35 +45,30 @@ class Font;
  *
  * The constructor resolves no object name. It builds the two TexturePairRecord members from
  * `gSongLogo1.tex` with `gSongLogo2.tex` and `gSongLabel1.tex` with `gSongLabel2.tex`, at
- * `0x007ec520` through `0x007ec550`. The four object names
- * `met_jukebox_base_screen_help_tab`, `met_jukebox_base_screen_ticker_tape`,
- * `met_jukebox_base_screen_error_tab`, and `met_jukebox_base_screen_error_ticker_tape`, at
- * `0x007ec590` through `0x007ec608`, are resolved by slot 41 instead.
+ * `0x007ec520` through `0x007ec550`.
  *
  * Fifteen slots of the primary table differ from the MetScreen table. Slots 20 through 24 are
  * two-instruction `jr ra` stubs, so a jukebox screen plays none of those five sounds. Slot 25 is
- * inherited unchanged, so the error sound still plays. None of the nine remaining overrides beyond
- * the destructor and SetShowing() has a recovered name.
+ * inherited unchanged, so the error sound still plays.
  *
  *  - 1 `0x0021dfc0` the destructor.
- *  - 5 `0x0021e908` replaces the show-and-animate routine at `0x003900a8`.
- *  - 7 `0x00224a90` replaces an empty MetScreen slot.
+ *  - 5 `0x0021e908` EnterAndShow().
+ *  - 7 `0x00224a90` OnUnknownSlot7().
  *  - 17 `0x00224af0` SetShowing().
- *  - 19 `0x0021e268` replaces an empty MetScreen slot.
+ *  - 19 `0x0021e268` HandleCommand().
  *  - 20 `0x00224968` PlaySlideSound(), overridden empty.
  *  - 21 `0x00224970` PlayLeaveSound(), overridden empty.
  *  - 22 `0x00224978` PlayHighSound(), overridden empty.
  *  - 23 `0x00224980` PlayCycleLeftSound(), overridden empty.
  *  - 24 `0x00224988` PlayCycleRightSound(), overridden empty.
- *  - 26 `0x0021fc88` replaces an empty MetScreen slot.
- *  - 33 `0x00224990` replaces an empty MetScreen slot.
- *  - 36 `0x002249e0` replaces an empty MetScreen slot.
- *  - 38 `0x0021e0f0` replaces the view-resolving routine at `0x0038b1b0`, and resolves the two
- *    fonts `font1_pink_2` and `font1_pinkgrey_2` into mUnknownd8 and mUnknowndc.
+ *  - 26 `0x0021fc88` OnUnknownSlot26().
+ *  - 33 `0x00224990` OnUnknownSlot33().
+ *  - 36 `0x002249e0` OnUnknownSlot36().
+ *  - 38 `0x0021e0f0` ResolveContainerViews().
  *  - 39 `0x005381a8` the pure virtual the three children supply.
- *  - 40 `0x0021f3e8`.
- *  - 41 `0x0021fe98`.
- *  - 42 `0x0021e3f8`.
+ *  - 40 `0x0021f3e8` ShowRemixDetails().
+ *  - 41 `0x0021fe98` UpdateHelpText().
+ *  - 42 `0x0021e3f8` BindLists().
  *
  * Every member of the class is protected. The slot 33, 38, 39, 40, and 41 overrides of the three
  * children read or write most of the block directly, including the two scrolling lists, the five
@@ -107,6 +105,79 @@ public:
      * @ghidraAddress 0x0021dfc0
      */
     virtual ~MetJukeboxBaseScreen();
+
+    /**
+     * Show the five detail texts, bind the lists, and select the first catalogue row.
+     *
+     * Slot 5. The MetScreen body runs first. The playlist selection moves to its last entry, both
+     * lists are refreshed, the two song pictures are hidden, and slot 40 fills the details.
+     *
+     * @ghidraAddress 0x0021e908
+     */
+    virtual void EnterAndShow();
+
+    /**
+     * Refresh the details and the help text, then show the playlist.
+     *
+     * Slot 7. Runs slot 33, then slot 41, then shows mUnknown9c.
+     *
+     * @ghidraAddress 0x00224a90
+     */
+    virtual void OnUnknownSlot7();
+
+    /**
+     * Act on a command.
+     *
+     * Previous and next move the catalogue selection and refresh the details and the help text.
+     * Select refreshes the help text and, while the playlist has room for another entry, appends
+     * the selected remix when its album is the one the jukebox plays. Every other command is
+     * ignored.
+     *
+     * @param pCommand The command.
+     * @ghidraAddress 0x0021e268
+     */
+    virtual void HandleCommand(const MetScreenCommand *pCommand);
+
+    /**
+     * Advance the two song pictures while the view is showing and the details are current.
+     *
+     * Each TexturePairRecord that advances hides its mesh, and shows it again with the new
+     * texture on the first stage of its material when the list has rows and the selected remix
+     * belongs to the jukebox album. mUnknown14c is cleared once both pictures are shown.
+     *
+     * @param flTime The renderer's current animation frame position, which the body does not read.
+     * @ghidraAddress 0x0021fc88
+     */
+    virtual void OnUnknownSlot26(float flTime);
+
+    /**
+     * Bind the lists again and refresh both.
+     *
+     * Slot 33. Runs slot 42, then refreshes mUnknown98 when it exists and mUnknown9c without a
+     * null check.
+     *
+     * @ghidraAddress 0x00224990
+     */
+    virtual void OnUnknownSlot33();
+
+    /**
+     * Hide the five detail texts.
+     *
+     * Slot 36.
+     *
+     * @ghidraAddress 0x002249e0
+     */
+    virtual void OnUnknownSlot36();
+
+    /**
+     * Resolve the container views and the two fonts.
+     *
+     * Slot 38. The MetScreen body runs first, then `font1_pink_2` and `font1_pinkgrey_2` are
+     * resolved into mUnknownd8 and mUnknowndc.
+     *
+     * @ghidraAddress 0x0021e0f0
+     */
+    virtual void ResolveContainerViews();
 
     /**
      * Show or hide the view, both scrolling lists, and the list frame.
@@ -174,36 +245,45 @@ public:
     virtual int GetItemCount() = 0;
 
     /**
-     * Unrecovered. Slot 40.
+     * Fill the detail texts from the selected catalogue row.
      *
-     * SetShowing() runs it with no argument whenever the screen becomes visible. The body
-     * constructs six strings, resolves objects through Rnd::Manager, and writes mUnknown14c.
+     * Slot 40. Every detail text is emptied, the lock mesh mUnknown148 is hidden, and mUnknown14c
+     * is cleared. An empty or absent catalogue stops there. A remix from another album shows the
+     * lock mesh and hides both song pictures. Otherwise both TexturePairRecord members load the
+     * song's logo and picture paths, and the first two texts take the configuration values of
+     * codes 0x321 and 0x322 for the record's first string, the second followed by ` bpm`. Every
+     * remix shows its name, the first string of each player appearance, and its `+0x18` string.
+     * A remix of the jukebox album also shows the value of code 0x325, or of code 0x327 when the
+     * first is wider than the text wraps at, and sets mUnknown14c. The selected row is read
+     * without testing mUnknown98 for null. The title is inferred.
      *
      * @ghidraAddress 0x0021f3e8
      */
-    virtual void OnUnknownSlot40();
+    virtual void ShowRemixDetails();
 
     /**
-     * Unrecovered. Slot 41.
+     * Select the help text for the playlist's state.
      *
-     * The body reads the count of the vector mUnknownc4 addresses, compares it against the global
-     * at `0x0069ad78`, and resolves the four `met_jukebox_base_screen_` object names. It reads no
-     * argument.
+     * Slot 41. A playlist below the limit at `0x0069ad78` selects the
+     * `met_jukebox_base_screen_help_tab` layout and posts `met_jukebox_base_screen_ticker_tape`.
+     * A full playlist selects `met_jukebox_base_screen_error_tab` and posts
+     * `met_jukebox_base_screen_error_ticker_tape`. The title is inferred.
      *
      * @ghidraAddress 0x0021fe98
      */
-    virtual void OnUnknownSlot41();
+    virtual void UpdateHelpText();
 
     /**
-     * Unrecovered. Slot 42.
+     * Bind the catalogue and the playlist from the shared MetRemixManager.
      *
-     * SetShowing() runs it with no argument before anything else it does. The body resolves the
-     * shared MetRemixManager, writes mUnknowna0 and mUnknownc4 from it, and pushes a row count
-     * into each of the two scrolling lists through the routine at `0x00401088`.
+     * Slot 42. mUnknownc4 becomes the manager's playlist and mUnknowna0 the manager's remix list
+     * for the slot mUnknownc8 identifies, inserted empty when absent. The row counts are pushed
+     * into both scrolling lists, and the playlist selection moves to its last entry. SetShowing()
+     * runs it before anything else it does. The title is inferred.
      *
      * @ghidraAddress 0x0021e3f8
      */
-    virtual void OnUnknownSlot42();
+    virtual void BindLists();
 
     /**
      * Show one row of whichever list the context selects.
@@ -247,29 +327,30 @@ protected:
     // The catalogue slots 39 and 42 count rows from. Slot 42 sets it from the shared
     // MetRemixManager and the base constructor starts it null.
     std::vector<MetRemixRecord> *mUnknowna0; // +0xa0
-    Rnd::Drawable *mUnknowna4;               // +0xa4
-    Rnd::Drawable *mUnknowna8;               // +0xa8
-    Rnd::Drawable *mUnknownac;               // +0xac
-    Rnd::Drawable *mUnknownb0;               // +0xb0
-    Rnd::Drawable *mUnknownb4;               // +0xb4
-    Rnd::Drawable *mUnknownb8;               // +0xb8, the frame SetShowing() hides with the screen
-    int mUnknownbc;                          // +0xbc, written by the child slot 38
-    int mUnknownc0;                          // +0xc0, written by the child slot 38
+    // The five detail texts slot 40 fills.
+    Rnd::Text *mUnknowna4; // +0xa4
+    Rnd::Text *mUnknowna8; // +0xa8
+    Rnd::Text *mUnknownac; // +0xac
+    Rnd::Text *mUnknownb0; // +0xb0
+    Rnd::Text *mUnknownb4; // +0xb4
+    Rnd::Text *mUnknownb8; // +0xb8, the playlist caption SetShowing() hides with the screen
+    Rnd::Mat *mUnknownbc;  // +0xbc, the song picture material
+    Rnd::Mat *mUnknownc0;  // +0xc0, the song logo material
     // The playlist the edit screen counts rows from. Slot 42 sets it to the instance embedded at
     // `+0xc4` of the shared MetRemixManager.
     JukeboxPlayList *mUnknownc4; // +0xc4
     // Distinguishes the three jukebox lists. Zero for the saved and edit screens and -1 for the
     // factory screen. Each of the three children writes it in its own constructor.
-    int mUnknownc8;                        // +0xc8
-    std::vector<Rnd::Object *> mUnknowncc; // +0xcc
+    int mUnknownc8;                      // +0xc8
+    std::vector<Rnd::Text *> mUnknowncc; // +0xcc, the player appearance texts
     // The two fonts slot 38 resolves, `font1_pink_2` and `font1_pinkgrey_2`. ProvideText() hands
     // them to Rnd::Text::SetFont(), which is what types both.
     Rnd::Font *mUnknownd8;         // +0xd8
     Rnd::Font *mUnknowndc;         // +0xdc
     TexturePairRecord mUnknowne0;  // +0xe0, the song logo pair
     TexturePairRecord mUnknown110; // +0x110, the song label pair
-    int mUnknown140;               // +0x140, written by the child slot 38
-    int mUnknown144;               // +0x144, written by the child slot 38
-    int mUnknown148;               // +0x148, written by two of the three child slot 38 overrides
-    int mUnknown14c;               // +0x14c, written by slots 26 and 40
+    Rnd::Mesh *mUnknown140;        // +0x140, the song picture mesh
+    Rnd::Mesh *mUnknown144;        // +0x144, the song logo mesh
+    Rnd::Text *mUnknown148;        // +0x148, the warning slot 40 shows for another album
+    int mUnknown14c;               // +0x14c, set while the song pictures are still to show
 };
