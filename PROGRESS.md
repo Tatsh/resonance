@@ -16,27 +16,27 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                   | Count  |
 | ------------------------- | ------ |
-| Functions in the program  | 15,572 |
-| Excluded by rule          | 6,509  |
-| Reconstructable           | 9,063  |
-| Declared or defined       | 3,942  |
-| Share declared or defined | 43.50% |
-| Defined, with a body      | 2,215  |
-| Share implemented         | 24.44% |
-| Remaining, with a name    | 1,374  |
-| Remaining, unidentified   | 3,747  |
+| Functions in the program  | 15,576 |
+| Excluded by rule          | 6,555  |
+| Reconstructable           | 9,021  |
+| Declared or defined       | 4,313  |
+| Share declared or defined | 47.81% |
+| Defined, with a body      | 2,417  |
+| Share implemented         | 26.79% |
+| Remaining, with a name    | 1,275  |
+| Remaining, unidentified   | 3,433  |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 1,727 of
-the 3,942 are declared with their address, their signature, and their evidence recorded, and have no
-implementation. 2,215 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. So 1,896 of
+the 4,313 are declared with their address, their signature, and their evidence recorded, and have no
+implementation. 2,417 have a body.
 
-Implementation is the figure the project's goal is stated against, so treat 24.44% as the answer to
-"how much is reconstructed" and 43.50% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 26.79% as the answer to
+"how much is reconstructed" and 47.81% as the answer to "how much is accounted for".
 
-The table measures the working tree. The committed tree at the same moment measured 42.38%
-accounted and 23.75% implemented, because work that has been written and checked but not yet
+The table measures the working tree. The committed tree at the same moment measured 46.39%
+accounted and 26.45% implemented, because work that has been written and checked but not yet
 committed is included above.
 
 One known undercount remains in the scanner. A routine whose definition clang-format breaks after
@@ -89,11 +89,11 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 
 | Category                       | Count | Basis                                                            |
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
-| Compiler-generated             | 835   | Type functions, their unfolded per-unit copies, static-init glue |
-| Vendored upstream              | 1,712 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 2,356 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 850   | Container instantiations                                         |
-| Platform SDK                   | 358   | `sce` entry points and kernel syscalls                           |
+| Compiler-generated             | 838   | Type functions, their unfolded per-unit copies, static-init glue |
+| Vendored upstream              | 1,713 | CPython 2.0, identified by diagnostic literal                    |
+| Per-translation-unit duplicate | 2,316 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 930   | Container instantiations                                         |
+| Platform SDK                   | 360   | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 184   | Exception, cast, and unwinding support                           |
 | C runtime                      | 214   | String and memory routines, and the floating-point library       |
 
@@ -105,8 +105,8 @@ subsystem, with no warnings. Nothing is linked yet, because the reconstruction i
 
 | Check                                 | Status       |
 | ------------------------------------- | ------------ |
-| Headers compiling standalone          | 546/571      |
-| Sources compiling                     | 397/403      |
+| Headers compiling standalone          | 606/631      |
+| Sources compiling                     | 454/460      |
 | Address annotations with no function  | 0            |
 | Lines over 100 characters             | 0            |
 | `clang-format` differences            | 0            |
@@ -199,12 +199,12 @@ from the SDK is reconstructed.
 
 | Area                   | What remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Graphics device        | Packet submission, the game-side `GsDoubleBuffer`, the clear colour, the feedback draw context, and the debug overlays are written. The VU1 setup routines of the draw path remain                                                                                                                                                                                                                                                                                                                                                       |
+| Graphics device        | Every `GfxDevice` routine is written, with the VU1 setup, lighting, and clipping routines of the draw path, except the vertical-blank handler, whose body is MIPS assembly the host build cannot assemble                                                                                                                                                                                                                                                                                                                                |
 | Camera and environment | `PsCam` and `PsEnviron` draw paths are written. The light selection for vertex lighting remains                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Tunnel                 | `Rnd::Tunnel` with its seek records, events, mesh chains, geometry, and file format, and `Rnd::Generator`, are written apart from one uncalled routine. `AppTunnel` and its effect classes remain                                                                                                                                                                                                                                                                                                                                        |
-| Gameplay display       | `Renderer`, the HUD panel and per-track display with every component, and `Overlay`'s destructor, frame update, and draw are written. `Overlay`'s constructor and message handlers, `TnlArena`, and the screen animations remain                                                                                                                                                                                                                                                                                                         |
-| Gameplay world         | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `GsPeriodical`, and the pitcher classes are written. The gameplay commands, riffs, and note playback remain                                                                                                                                                                                                                                                                                                                                                                                   |
-| Messages and packets   | Every factory, printer, and serializer of the join, level, status, and gameplay packets and of most messages is written. The MIDI file reader, the chunk reader, and a few helpers remain                                                                                                                                                                                                                                                                                                                                                |
+| Tunnel                 | `Rnd::Tunnel` with its seek records, events, mesh chains, geometry, and file format, and `Rnd::Generator`, are written apart from one uncalled routine. The duration-gem trails and the first tunnel effect classes are written; `AppTunnel` itself and the remaining effect classes remain                                                                                                                                                                                                                                              |
+| Gameplay display       | `Renderer`, `Overlay` with its constructor and all 23 message handlers, the HUD panel and per-track display with every component, `TnlArena`, and the screen animations are written. Two small HUD helpers remain unassigned                                                                                                                                                                                                                                                                                                             |
+| Gameplay world         | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `PhraseMgr`, `TrackData`, `Catcher`, `AutoRiffer`, `NotePlayer`, the power-bar managers, the R250 generator, and the pitcher classes are written. The message-building bodies these classes declare, the riff pickers, and the neutralizer remain                                                                                                                                                                                                                                             |
+| Messages and packets   | Every factory, printer, serializer, and stack constructor of the join, level, status, and gameplay packets and messages is written, with the Standard MIDI File reader and its chunk reader. The metagame world, song lists, and album cache remain                                                                                                                                                                                                                                                                                      |
 | Sound                  | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` has its whole bank path: the load entry point, both transfer starters, both transfer classes, the claim table, the command dispatcher, the driver submit, the core and voice report, and the SPU2 bring-up. There is no voice table, because the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array query at `0x00509110`, and 27 routines remain |
 
 ### Not started
