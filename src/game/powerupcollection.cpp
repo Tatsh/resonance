@@ -28,7 +28,7 @@ struct MatchesType {
     }
 
     bool operator()(const PowerupCollection::Entry &entry) const {
-        return entry.mPowerup->Type() == mType;
+        return entry.IsType(mType);
     }
 
     int mType;

@@ -55,6 +55,26 @@ public:
     virtual void AddPowerup(int nType);
 
     /**
+     * Do nothing. A store of one has no other entry to move to.
+     *
+     * An empty override of its own at table slot 5, apart from the base's empty default.
+     *
+     * @param nDelta Not read.
+     * @ghidraAddress 0x001cc9f0
+     */
+    virtual void SelectRelative(int nDelta);
+
+    /**
+     * Do nothing. A store of one has no other entry to select.
+     *
+     * An empty override of its own at table slot 6, apart from the base's empty default.
+     *
+     * @param nIndex Not read.
+     * @ghidraAddress 0x001cc9f8
+     */
+    virtual void Select(int nIndex);
+
+    /**
      * Deploy the stored powerup and discard it.
      *
      * An empty store returns with no message, and a powerup that reports failure keeps its place.

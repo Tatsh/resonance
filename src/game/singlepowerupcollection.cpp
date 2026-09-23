@@ -46,6 +46,14 @@ void SinglePowerupCollection::Deploy(int nTrack, int nBar) {
     mType = -1;
 }
 
+// 0x001cc9f0
+void SinglePowerupCollection::SelectRelative(int) {
+}
+
+// 0x001cc9f8
+void SinglePowerupCollection::Select(int) {
+}
+
 // 0x001cca00
 int SinglePowerupCollection::HasSelection() {
     return mType != -1;

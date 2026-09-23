@@ -2,10 +2,10 @@
 
 #include <vector>
 
+#include "game/powerup.h"
 #include "game/powerupcollectioni.h"
 
 class LocalPlayer;
-class Powerup;
 
 /**
  * Store of one powerup of every configured kind, with a count for each.
@@ -39,6 +39,20 @@ public:
      * PowerupCollection and the record has no behaviour of its own.
      */
     struct Entry {
+        /**
+         * Report whether the entry holds a powerup of one kind.
+         *
+         * Inline, with an unreferenced out-of-line copy. The std::find_if instantiation at
+         * `0x001cc628` expands it through the file-local predicate.
+         *
+         * @param nType The kind.
+         * @return Non-zero when Powerup::Type() reports nType.
+         * @ghidraAddress 0x001cc9b0
+         */
+        bool IsType(int nType) const {
+            return mPowerup->Type() == nType;
+        }
+
         Powerup *mPowerup; /*!< The powerup, which the collection deletes. +0x00 */
         int mCount;        /*!< How many are stored, from 0 to 9. +0x04 */
     };
