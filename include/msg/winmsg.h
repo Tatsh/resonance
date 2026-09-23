@@ -30,6 +30,15 @@ class Player;
 class WinMsg : public Message {
 public:
     /**
+     * Construct a message with no winners.
+     *
+     * Inline, with no address of its own. New() and Gamer's stack builds at `0x0011196c` and
+     * `0x00112170` expand it, storing the table and three zero words.
+     */
+    WinMsg() {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 421.
@@ -62,6 +71,20 @@ public:
      * @ghidraAddress 0x001163f0
      */
     virtual const char *Name();
+
+    /**
+     * Append one winning player.
+     *
+     * Inline. The one out-of-line copy sits at `0x00116400` in Gamer's translation unit, which
+     * calls it after building the message on its stack at `0x00112170`. The body is
+     * `mWinners.push_back()`, growing the vector through `0x00112cd8` when it is full.
+     *
+     * @param pPlayer The winner.
+     * @ghidraAddress 0x00116400
+     */
+    void AddWinner(Player *pPlayer) {
+        mWinners.push_back(pPlayer);
+    }
 
     std::vector<Player *> mWinners; /*!< The winning players. +0x04 */
 };

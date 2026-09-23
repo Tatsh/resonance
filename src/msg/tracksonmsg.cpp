@@ -25,5 +25,5 @@ const char *TracksOnMsg::Name() {
 
 // 0x003e4408
 void TracksOnMsg::Print(std::ostream &stream) {
-    stream << "bar " << mUnknown04 << " tracks " << mUnknown08;
+    stream << "bar " << mBar << " tracks " << mTracks;
 }

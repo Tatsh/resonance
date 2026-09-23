@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 /**
@@ -12,13 +13,35 @@
  * The payload layout comes from the run of field copies in Clone(). mAdvance is public because
  * Overlay::OnAdvanceSectionToggle() at `0x0041f440` reads it directly with no accessor in the
  * image, showing `ADVANCE TO NEXT SECTION` when it is non-zero and `REPEAT SECTION` otherwise. The
- * purpose of the word at `+0x08` is not recovered.
+ * position at `+0x08` is the section tick Gamer's build at `0x00111754` clamps and passes through
+ * the Mid::MBT constructor.
  *
  * The destructor at `0x00115ee0` is compiler-generated and has no declaration here. The routine
  * at `0x00115f18` is a further emission of the type-information accessor.
  */
 class AdvanceSectionToggleMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    AdvanceSectionToggleMsg() {
+    }
+
+    /**
+     * Report the section toggle.
+     *
+     * Inline, with no address of its own. Gamer's build at `0x00111754` expands it on its stack.
+     *
+     * @param nAdvance Non-zero to advance past the section, zero to repeat it.
+     * @param position The section's position, already clamped to Mid::MBT's bounds.
+     */
+    AdvanceSectionToggleMsg(int nAdvance, Mid::MBT position)
+        : mAdvance(nAdvance), mPosition(position) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -56,7 +79,7 @@ public:
     int mAdvance; /*!< Non-zero to advance past the section, zero to repeat it. +0x04 */
 
 private:
-    int mUnknown08; // +0x08
+    Mid::MBT mPosition; // +0x08
 };
 
 /**

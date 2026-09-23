@@ -10,16 +10,36 @@
  * class: everything recovered comes from them, and no other routine in the image refers to this
  * type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
- *
- * Print() labels `+0x04` as a bar and `+0x08` as tracks.
+ * The payload layout comes from the run of field copies in Clone(), and Print() labels `+0x04` as
+ * a bar and `+0x08` as tracks. Both members are public because Mixer::OnTracksOn() at `0x001a76d0`
+ * reads them directly with no accessor in the image.
  *
  * The destructor at `0x003de820` is compiler-generated and has no declaration here.
  */
 class TracksOnMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    TracksOnMsg() {
+    }
+
+    /**
+     * Report how many tracks are on from a bar.
+     *
+     * Inline, with no address of its own. Gamer's builds at `0x00111dc8` and `0x001122e4` expand
+     * it on their stacks, the first with the count of tracks its loop found on and the second with
+     * zero.
+     *
+     * @param nBar The bar.
+     * @param nTracks The number of tracks on.
+     */
+    TracksOnMsg(int nBar, int nTracks) : mBar(nBar), mTracks(nTracks) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -63,9 +83,8 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    int mBar;    /*!< The bar, labelled `bar` by Print(). +0x04 */
+    int mTracks; /*!< The number of tracks on, labelled `tracks` by Print(). +0x08 */
 };
 
 /**

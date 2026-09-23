@@ -20,6 +20,26 @@
 class PlaybackToggleMsg : public Message {
 public:
     /**
+     * Construct a message with the flag unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    PlaybackToggleMsg() {
+    }
+
+    /**
+     * Report a playback toggle.
+     *
+     * Inline, with no address of its own. Gamer's build at `0x00110ff4` expands it on its stack
+     * with its own word at `+0x4c`.
+     *
+     * @param nOn Non-zero when playback starts.
+     */
+    explicit PlaybackToggleMsg(int nOn) : mOn(nOn) {
+    }
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 316.

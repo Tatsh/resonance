@@ -9,15 +9,36 @@
  * The object is 0xc bytes and its vtable is at `0x007ce720`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). The word at `+0x04` is a bar
+ * and the word at `+0x08` a track, which the builds and every reader agree on. The readers compare
+ * the track with their own and move their seeker to the bar.
  *
  * The destructor at `0x00116000` is compiler-generated and has no declaration here. The routine
  * at `0x00116038` is a further emission of the type-information accessor.
  */
 class InvalidateSeekerMsg : public Message {
 public:
+    /**
+     * Construct a message with the payload unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    InvalidateSeekerMsg() {
+    }
+
+    /**
+     * Invalidate the seeker of one track from a bar on.
+     *
+     * Inline, with no address of its own. Gamer's builds at `0x00111168` and `0x00111820` expand
+     * it on their stacks.
+     *
+     * @param nBar The bar.
+     * @param nTrack The track.
+     */
+    InvalidateSeekerMsg(int nBar, int nTrack) : mUnknown04(nBar), mUnknown08(nTrack) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *

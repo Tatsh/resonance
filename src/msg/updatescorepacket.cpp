@@ -28,23 +28,23 @@ const char *UpdateScorePacket::Name() {
 
 // 0x003f2510
 void UpdateScorePacket::Print(std::ostream &stream) {
-    stream << "pid:" << mUnknown14 << " score-delta:" << mUnknown18;
+    stream << "pid:" << mPlayerId << " score-delta:" << mScoreDelta;
 }
 
 // 0x003e7018
 void UpdateScorePacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
-    int unknown14 = mUnknown14;
-    stream.Write(&unknown14, sizeof(unknown14));
+    int playerId = mPlayerId;
+    stream.Write(&playerId, sizeof(playerId));
 
-    int unknown18 = mUnknown18;
-    stream.Write(&unknown18, sizeof(unknown18));
+    int scoreDelta = mScoreDelta;
+    stream.Write(&scoreDelta, sizeof(scoreDelta));
 }
 
 // 0x003e7120
 void UpdateScorePacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    stream.Read(&mUnknown14, sizeof(mUnknown14));
-    stream.Read(&mUnknown18, sizeof(mUnknown18));
+    stream.Read(&mPlayerId, sizeof(mPlayerId));
+    stream.Read(&mScoreDelta, sizeof(mScoreDelta));
 }

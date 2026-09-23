@@ -17,13 +17,34 @@
  * overrides. Both transfer members open by expanding the Packet pair inline rather than calling it,
  * which every one of the twenty overriding packet classes does identically.
  *
- * Print() labels the two members `pid:` and ` score-delta:`, so the first is a player identifier
- * and the second a score change. Both labels are display text rather than identifiers, and one of
- * them is not a valid identifier at all, so the members retain their recovered-purpose-pending
- * spelling.
+ * Print() labels the two members `pid:` and ` score-delta:`. The builds in two Player routines at
+ * `0x0012f904` and `0x0012fa6c` store the player's identifier from its `+0x20` and the amount
+ * added, which settles both names.
  */
 class UpdateScorePacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Construct a packet with only the Packet words set.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    UpdateScorePacket() {
+    }
+
+    /**
+     * Report a change to a player's score.
+     *
+     * Inline, with no address of its own. The two Player routines at `0x0012f808` and
+     * `0x0012f970` expand it on their stacks after the ToAllOtherGameSystemsPacket words.
+     *
+     * @param nPlayerId The player's identifier.
+     * @param nScoreDelta The amount added to the score.
+     */
+    UpdateScorePacket(int nPlayerId, int nScoreDelta)
+        : mPlayerId(nPlayerId), mScoreDelta(nScoreDelta) {
+    }
+
     /**
      * Produce a default-constructed packet on the heap.
      *
@@ -90,8 +111,8 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    int mUnknown14; // +0x14
-    int mUnknown18; // +0x18
+    int mPlayerId;   // +0x14
+    int mScoreDelta; // +0x18
 };
 
 /**
