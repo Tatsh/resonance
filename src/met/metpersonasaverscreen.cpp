@@ -150,24 +150,28 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy) {
 // The no-card dialogue OnConnectState() and OnPersonasSaved() both expand.
 inline void ShowNoCard(MetScreen *pOwner, const HxStr &slotName, int nDelete, int nCopy) {
     std::vector<HxStr> buttons;
-    const char *pszKey;
     if (nDelete != 0) {
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kContinueButton));
-        pszKey = kDeleteFailNoCardText;
+        HxStr format = QueryConfigString(kDialogueConfigCode, kDeleteFailNoCardText);
+        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        MetMsgScreen::Show(
+            HxStr(kMemCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, pOwner);
     } else if (nCopy == 0) {
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kContinueButton));
-        pszKey = kSaveFailNoCardText;
+        HxStr format = QueryConfigString(kDialogueConfigCode, kSaveFailNoCardText);
+        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        MetMsgScreen::Show(
+            HxStr(kMemCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, pOwner);
     } else {
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kCancelButton));
-        pszKey = kCopyFailNoCardText;
+        HxStr format = QueryConfigString(kDialogueConfigCode, kCopyFailNoCardText);
+        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        MetMsgScreen::Show(
+            HxStr(kMemCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, pOwner);
     }
-    HxStr format = QueryConfigString(kDialogueConfigCode, pszKey);
-    HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
-    MetMsgScreen::Show(
-        HxStr(kMemCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, pOwner);
 }
 
 // The FreQ name keyboard OnMsgScreenDismissed() opens from two dialogues.
@@ -353,9 +357,9 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
     } else {
         title = ConfigText(kCopyTitleKey);
         format = ConfigText(kCopyText);
-        text = FormatString(TextOrEmpty(format),
-                            TextOrEmpty(NextCardSlot(state).mSlotName),
-                            TextOrEmpty(state.mSlotName));
+        MemcardConnectState next = NextCardSlot(state);
+        text = FormatString(
+            TextOrEmpty(format), TextOrEmpty(next.mSlotName), TextOrEmpty(state.mSlotName));
         MetMsgScreen::Show(HxStr(kSaveDialogue), title, text, kNoButtons, buttons, this);
     }
 }
