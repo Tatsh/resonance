@@ -2,6 +2,8 @@
 
 #include "math/plane.h"
 
+class FailSink;
+
 /**
  * Six-plane view volume.
  *
@@ -34,3 +36,16 @@ struct Frustum {
  * @ghidraAddress 0x00550b78
  */
 void BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, float flAspect);
+
+/**
+ * Write the six planes of a view volume to a diagnostic sink.
+ *
+ * Each plane goes on its own tab-indented line under its title, as `(a: b: c: d:)` with two
+ * decimals. Rnd::Cam::DumpText() is the one caller.
+ *
+ * @param sink The sink to write to.
+ * @param frustum The view volume.
+ * @return The sink.
+ * @ghidraAddress 0x0054f798
+ */
+FailSink &operator<<(FailSink &sink, const Frustum &frustum);

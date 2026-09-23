@@ -1,5 +1,6 @@
 set(RESONANCE_MATH_SRCS
     color.cpp
+    frustum.cpp
     plane.cpp
     quaternion.cpp
     transformops.cpp

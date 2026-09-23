@@ -291,7 +291,8 @@ public:
      * The three base descriptions come first. The near plane, the far plane, the field of view,
      * the screen rectangle, the depth range, and the render target name follow at any positive
      * dump level, and the vertical ratio, both local matrices, both frustums, and the inverse
-     * world projection only from level two. A render target with no name produces "no object".
+     * world projection only from level two. A camera with no render target writes "no object" in
+     * place of the target's quoted name.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress 0x004ad980
@@ -448,7 +449,9 @@ protected:
      *
      * Vtable slot 2 of the Rnd::Collideable table. The camera tests the start point of the ray
      * against mScreenRect rather than against geometry, which makes the second collision query of
-     * Rnd::Collideable a screen space test here.
+     * Rnd::Collideable a screen space test here. A showing camera whose rectangle strictly
+     * contains the start point appends itself at distance zero. The Rnd::Collideable query runs
+     * afterwards either way.
      *
      * @param ray The ray to test.
      * @param sink The collector to append an intersection to.
@@ -472,8 +475,8 @@ private:
     // UpdateTargetAspect(). The constructor, SetTargetTex(), Copy(), and Load() are the callers.
     void AcquireTargetTex();
 
-    // 0x004b2778. Drops this camera's registration on the render target. Copy() and Load() are
-    // the callers.
+    // 0x004b2778. Drops this camera's registration on the render target. The destructor, Copy(),
+    // and Load() are the callers.
     void ReleaseTargetTex();
 
     // Neither written by the constructor nor read anywhere in the image. A reserved run records a

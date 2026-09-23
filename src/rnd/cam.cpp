@@ -50,6 +50,43 @@ const char *NameText(const Object *pObject) {
 
 constexpr char kCamTag[] = "Rnd::Cam";
 
+constexpr char kFloatFormat[] = "%.2f";
+
+// Dump level from which DumpText() adds the vertical ratio, the matrices, and the frustums.
+constexpr int kCamMatrixDumpLevel = 2;
+
+// Defaults the constructor gives the projection. The field of view is one ulp short of pi / 2.
+constexpr float kDefaultFarPlane = 1000.0f;
+constexpr float kDefaultFov = 1.57079625f;
+constexpr float kDefaultYRatio = 0.75f;
+
+// Depths SetTargetTex() resizes a render target to: anything deeper than the first becomes the
+// second.
+constexpr int kTargetMinDepth = 16;
+constexpr int kTargetMaxDepth = 32;
+
+// The padding word of every row of a matrix member, which the construction of each quadword row
+// sets to 1.0.
+inline void SetRowPadding(Vector3 (&rows)[kXfmRowCount]) {
+    for (Vector3 &row : rows) {
+        row.w = 1.0f;
+    }
+}
+
+// One matrix as DumpText() writes it, a tab-indented line per row.
+void PrintMatrix(FailSink &sink, const Vector3 (&rows)[kXfmRowCount]) {
+    for (const Vector3 &row : rows) {
+        sink.Print("\n\t");
+        sink.Print("(x:");
+        sink.Format(kFloatFormat, row.x);
+        sink.Print(" y:");
+        sink.Format(kFloatFormat, row.y);
+        sink.Print(" z:");
+        sink.Format(kFloatFormat, row.z);
+        sink.Print(")");
+    }
+}
+
 // Row of a transform that holds the translation.
 constexpr int kXfmTranslationRow = 3;
 
@@ -101,6 +138,164 @@ Cam *NewCamThroughHook(const HxStr &name) {
 // 0x004b23e0
 Object *CreateRegisteredCam(const HxStr &name) {
     return g_pfnNewCam(name);
+}
+
+Cam::Cam(const HxStr &name)
+    : Object(name), mNearPlane(1.0f), mFarPlane(kDefaultFarPlane), mFov(kDefaultFov),
+      mYRatio(kDefaultYRatio), mZRange{0.0f, 1.0f}, mScreenRect{0.0f, 0.0f, 1.0f, 1.0f},
+      mpTargetTex(nullptr) {
+    SetRowPadding(mWorldToCam);
+    SetRowPadding(mLocalProject);
+    SetRowPadding(mInvLocalProject);
+    SetRowPadding(mWorldProject);
+    SetRowPadding(mInvWorldProject);
+    AcquireTargetTex();
+}
+
+Cam::~Cam() {
+    if (g_pCurrentCam == this) {
+        g_pCurrentCam = nullptr;
+    }
+    ReleaseTargetTex();
+    ReleaseAllRefs();
+}
+
+void Cam::SetTargetTex(Tex *pTex) {
+    if (mpTargetTex != nullptr) {
+        mpTargetTex->RemoveRef(this);
+    }
+    mpTargetTex = pTex;
+    if (pTex != nullptr) {
+        pTex->AddRef(this);
+        // Yes, the binary tests the new target a second time.
+        if (pTex != nullptr) {
+            const int nDepth =
+                pTex->mBitsPerPixel > kTargetMinDepth ? kTargetMaxDepth : kTargetMinDepth;
+            pTex->SetBitmapConfig(
+                pTex->mWidth, pTex->mHeight, nDepth, HxStr(""), pTex->mMipSelect, 0);
+            pTex->ReloadBitmaps();
+        }
+    }
+    UpdateTargetAspect();
+}
+
+void Cam::CollideUnknown(const Ray &ray, HitSink &sink) {
+    if (mShowing != 0 && mScreenRect.x < ray.mStart[0] &&
+        ray.mStart[0] < mScreenRect.x + mScreenRect.w && mScreenRect.y < ray.mStart[1] &&
+        ray.mStart[1] < mScreenRect.y + mScreenRect.h) {
+        const Hit hit{this, 0.0f};
+        sink.mHits.push_back(hit);
+    }
+    Collideable::CollideUnknown(ray, sink);
+}
+
+void Cam::DumpText(FailSink &sink) {
+    Object::DumpText(sink);
+    Transformable::DumpText(sink);
+    Drawable::DumpText(sink);
+    Collideable::DumpText(sink);
+
+    if (sink.mDumpLevel <= 0) {
+        return;
+    }
+
+    sink.Print("[Cam]\n");
+    sink.Print("nearPlane:");
+    sink.Format(kFloatFormat, mNearPlane);
+    sink.Print(" farPlane:");
+    sink.Format(kFloatFormat, mFarPlane);
+    sink.Print(" fov:");
+    sink.Format(kFloatFormat, mFov);
+    sink.Print("\n");
+    sink.Print("screenRect:");
+    sink.Print("(x:");
+    sink.Format(kFloatFormat, mScreenRect.x);
+    sink.Print(" y:");
+    sink.Format(kFloatFormat, mScreenRect.y);
+    sink.Print(" w:");
+    sink.Format(kFloatFormat, mScreenRect.w);
+    sink.Print(" h:");
+    sink.Format(kFloatFormat, mScreenRect.h);
+    sink.Print(")");
+    sink.Print("\n");
+    sink.Print("zRange:");
+    sink.Print("(x:");
+    sink.Format(kFloatFormat, mZRange.x);
+    sink.Print(" y:");
+    sink.Format(kFloatFormat, mZRange.y);
+    sink.Print(")");
+    sink.Print(" targetTex:");
+    if (mpTargetTex != nullptr) {
+        sink.Format("\"%s\"", NameText(mpTargetTex));
+    } else {
+        sink.Print("no object");
+    }
+    sink.Print("\n");
+
+    if (sink.mDumpLevel < kCamMatrixDumpLevel) {
+        return;
+    }
+
+    sink.Print("yRatio:");
+    sink.Format(kFloatFormat, mYRatio);
+    sink.Print(" localProject:");
+    PrintMatrix(sink, mLocalProject);
+    sink.Print("\n");
+    sink.Print("worldProject:");
+    PrintMatrix(sink, mWorldProject);
+    sink.Print("\n");
+    sink.Print("localFrustrum:");
+    sink << mLocalFrustum;
+    sink.Print("\n");
+    sink.Print("worldFrustrum:");
+    sink << mWorldFrustum;
+    sink.Print("\n");
+    sink.Print("invWorldProject:");
+    PrintMatrix(sink, mInvWorldProject);
+    sink.Print("\n");
+}
+
+Vector2 Cam::ScreenToPixels([[maybe_unused]] const Vector2 &ptScreen) {
+    Vector2 ptPixels; // Yes, the binary returns this unset.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+    return ptPixels;
+#pragma GCC diagnostic pop
+}
+
+void Cam::UpdateTargetAspect() {
+    if (mpTargetTex != nullptr) {
+        mYRatio =
+            static_cast<float>(mpTargetTex->mHeight) / static_cast<float>(mpTargetTex->mWidth);
+    }
+    UpdateProjection();
+}
+
+const HxStr &Cam::ClassName() const {
+    return g_camClassName;
+}
+
+Cam *Cam::NewCam(const HxStr &name) {
+    return new Cam(name);
+}
+
+void Cam::Replace(Object *pFrom, Object *pTo) {
+    Transformable::Replace(pFrom, pTo);
+    Drawable::Replace(pFrom, pTo);
+    Collideable::Replace(pFrom, pTo);
+
+    if (mpTargetTex != pFrom) {
+        return;
+    }
+    if (mpTargetTex != nullptr) {
+        mpTargetTex->RemoveRef(this);
+    }
+    if (mpTargetTex != nullptr) {
+        mpTargetTex = pTo != nullptr ? dynamic_cast<Tex *>(pTo) : nullptr;
+    }
+    if (mpTargetTex != nullptr) {
+        mpTargetTex->AddRef(this);
+    }
 }
 
 int Cam::DrawSelf() {
