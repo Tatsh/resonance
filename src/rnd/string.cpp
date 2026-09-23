@@ -2,12 +2,16 @@
 
 #include <list>
 #include <math.h>
+#include <string.h>
 #include <vector>
 
 #include "math/color.h"
+#include "math/transformops.h"
+#include "math/vector2.h"
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
+#include "rnd/cam.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
@@ -205,6 +209,210 @@ String::String(const HxStr &name)
 String::~String() {
     DeleteMesh();
     ReleaseAllRefs();
+}
+
+// A point is behind the camera when it is closer than this beyond the near plane.
+constexpr float kNearPlaneMargin = 0.01f;
+
+// Fewest points DrawSelf() draws a ribbon through.
+constexpr unsigned kMinRibbonPoints = 2;
+
+// A point carried through a transform, the VU0 multiply and accumulate the image inlines. The w
+// component is taken from the input.
+static inline void TransformPoint(const float (&aflXfm)[kXfmRowCount][kXfmRowFloatCount],
+                                  const Vector3 &in,
+                                  Vector3 &out) {
+    const float flX =
+        aflXfm[0][0] * in.x + aflXfm[1][0] * in.y + aflXfm[2][0] * in.z + aflXfm[3][0];
+    const float flY =
+        aflXfm[0][1] * in.x + aflXfm[1][1] * in.y + aflXfm[2][1] * in.z + aflXfm[3][1];
+    const float flZ =
+        aflXfm[0][2] * in.x + aflXfm[1][2] * in.y + aflXfm[2][2] * in.z + aflXfm[3][2];
+    out.x = flX;
+    out.y = flY;
+    out.z = flZ;
+    out.w = in.w;
+}
+
+// Cosine of the turn below which EmitRibbonVerts() mitres a corner rather than keeping the normal.
+constexpr float kStraightCos = 0.99985f;
+
+// The camera-space position beside a point on one edge of the ribbon, the near edge taking the
+// negated normal. The normal is a screen-space vector, and its y component displaces the depth-free
+// camera z.
+static inline Vector3 RibbonEdge(const String::Point &point, bool bFarEdge) {
+    const float flSign = bFarEdge ? 1.0f : -1.0f;
+    return Vector3{point.mCamPos.x + flSign * point.mNormal.x,
+                   point.mCamPos.y,
+                   point.mCamPos.z + flSign * point.mNormal.y,
+                   1.0f};
+}
+
+// A cap vertex, the edge position pushed further along the ribbon by cap.
+static inline Vector3 CapEdge(const String::Point &point, bool bFarEdge, const Vector2 &cap) {
+    Vector3 edge = RibbonEdge(point, bFarEdge);
+    edge.x += cap.x;
+    edge.z += cap.y;
+    return edge;
+}
+
+// 0x004b9008
+void String::EmitRibbonVerts(Point *pFirst, Point *pLast) {
+    Point *pPoint;
+    for (pPoint = pFirst; pPoint != pLast; ++pPoint) {
+        Vector2 dir;
+        SubVec2(&pPoint[1].mScreen.x, &pPoint->mScreen.x, &dir.x);
+        NormalizeVec2(&dir.x, &dir.x);
+        pPoint->mDir = dir;
+        pPoint->mNormal.x = -pPoint->mDir.y;
+        pPoint->mNormal.y = pPoint->mDir.x;
+        ScaleVec2(&pPoint->mNormal.x, mWidth, &pPoint->mNormal.x);
+    }
+    pLast->mDir = pLast[-1].mDir;
+    pLast->mNormal = pLast[-1].mNormal;
+
+    // Each edge line is a point on the far edge and the segment direction. A turn sharper than
+    // mFoldCos folds the ribbon over, and every later normal is negated until the next fold.
+    Vector2 line[2];
+    AddVec2(&pFirst->mScreen.x, &pFirst->mNormal.x, &line[0].x);
+    line[1] = pFirst->mDir;
+    int bFolded = 0;
+    for (pPoint = pFirst + 1; pPoint != pLast; ++pPoint) {
+        const float flTurn =
+            pPoint->mDir.x * pPoint[-1].mDir.x + pPoint->mDir.y * pPoint[-1].mDir.y;
+        if (flTurn < mFoldCos) {
+            bFolded ^= 1;
+        }
+        if (bFolded != 0) {
+            NegateVec2(&pPoint->mNormal.x, &pPoint->mNormal.x);
+        }
+
+        const Vector2 previous[] = {line[0], line[1]};
+        AddVec2(&pPoint->mScreen.x, &pPoint->mNormal.x, &line[0].x);
+        line[1] = pPoint->mDir;
+        if (flTurn < kStraightCos) {
+            const Vector2 corner = IntersectLines(line, previous);
+            SubVec2(&corner.x, &pPoint->mScreen.x, &pPoint->mNormal.x);
+        }
+    }
+    if (bFolded != 0) {
+        NegateVec2(&pLast->mNormal.x, &pLast->mNormal.x);
+    }
+
+    VertexSlot slot;
+    ResolvePointVertexSlot(static_cast<unsigned>(pFirst - &mPoints[0]), slot);
+    const Vector2 startCap{-pFirst->mNormal.y, pFirst->mNormal.x};
+    if (mHasCaps != 0) {
+        (slot.mpVert++)->mPoint = CapEdge(*pFirst, false, startCap);
+        (slot.mpVert++)->mPoint = CapEdge(*pFirst, true, startCap);
+    }
+    for (pPoint = pFirst; pPoint != pLast + 1; ++pPoint) {
+        (slot.mpVert++)->mPoint = RibbonEdge(*pPoint, false);
+        (slot.mpVert++)->mPoint = RibbonEdge(*pPoint, true);
+    }
+    if (mHasCaps != 0) {
+        const Vector2 endCap = bFolded != 0 ? Vector2{-pLast->mNormal.y, pLast->mNormal.x} :
+                                              Vector2{pLast->mNormal.y, -pLast->mNormal.x};
+        (slot.mpVert++)->mPoint = CapEdge(*pLast, false, endCap);
+        (slot.mpVert++)->mPoint = CapEdge(*pLast, true, endCap);
+    }
+}
+
+// 0x004b95f8
+int String::DrawSelf() {
+    Cam *pCam = g_pCurrentCam;
+    if (pCam == nullptr || mPoints.size() < kMinRibbonPoints) {
+        return 1;
+    }
+
+    float aflInverse[kXfmRowCount][kXfmRowFloatCount];
+    float aflToCam[kXfmRowCount][kXfmRowFloatCount];
+    for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
+        aflInverse[nRow][kXfmRowFloatCount - 1] = 1.0f;
+        aflToCam[nRow][kXfmRowFloatCount - 1] = 1.0f;
+    }
+    sceVu0InversMatrix(aflInverse[0], pCam->mWorldXfm[0]);
+    sceVu0Sub005e7ab0(aflToCam[0], aflInverse[0], mWorldXfm[0]);
+
+    const float flNear = pCam->GetNearPlane() + kNearPlaneMargin;
+    int bAllClipped = 1;
+    for (auto &point : mPoints) {
+        TransformPoint(aflToCam, point.mPos, point.mCamPos);
+        point.mClipped = point.mCamPos.y < flNear ? 1 : 0;
+        bAllClipped &= point.mClipped;
+    }
+    if (bAllClipped != 0) {
+        return 1;
+    }
+
+    // A clipped point moves onto the near plane towards an unclipped neighbour, the next one first.
+    Point *const pFirst = &mPoints.front();
+    Point *const pLast = &mPoints.back();
+    for (Point *pPoint = pFirst; pPoint != pFirst + mPoints.size(); ++pPoint) {
+        if (pPoint->mClipped == 0) {
+            continue;
+        }
+        const Point *pOther;
+        if (pPoint != pLast && pPoint[1].mClipped == 0) {
+            pOther = pPoint + 1;
+        } else if (pPoint != pFirst && pPoint[-1].mClipped == 0) {
+            pOther = pPoint - 1;
+        } else {
+            continue;
+        }
+        const float flT = (flNear - pPoint->mCamPos.y) / (pOther->mCamPos.y - pPoint->mCamPos.y);
+        const float flS = 1.0f - flT;
+        pPoint->mCamPos.x = pOther->mCamPos.x * flT + pPoint->mCamPos.x * flS;
+        pPoint->mCamPos.y = pOther->mCamPos.y * flT + pPoint->mCamPos.y * flS;
+        pPoint->mCamPos.z = pOther->mCamPos.z * flT + pPoint->mCamPos.z * flS;
+        pPoint->mCamPos.w = pOther->mCamPos.w;
+        pPoint->mClipped = 0;
+    }
+
+    for (auto &point : mPoints) {
+        if (point.mClipped == 0) {
+            const float flDepth = fabsf(point.mCamPos.y);
+            point.mScreen.x = point.mCamPos.x / flDepth;
+            point.mScreen.y = point.mCamPos.z / flDepth;
+        }
+    }
+
+    if (mLinePairs == 0) {
+        EmitRibbonVerts(pFirst, pLast);
+    } else {
+        for (unsigned i = 0; i < mPoints.size() - 1; i += kPointsPerPair) {
+            Point *pPairFirst = &mPoints[i];
+            Point *pPairEnd = pPairFirst + 1;
+            if (pPairFirst->mClipped == 0 && pPairEnd->mClipped == 0) {
+                EmitRibbonVerts(pPairFirst, pPairEnd);
+                continue;
+            }
+
+            // A pair with a clipped point collapses every vertex it governs onto its first point.
+            VertexSlot slot;
+            ResolvePointVertexSlot(i, slot);
+            if (mHasCaps != 0) {
+                (slot.mpVert++)->mPoint = pPairFirst->mCamPos;
+                (slot.mpVert++)->mPoint = pPairFirst->mCamPos;
+            }
+            Point *pPoint = pPairFirst;
+            for (; pPoint != pPairEnd; ++pPoint) {
+                (slot.mpVert++)->mPoint = pPoint->mCamPos;
+                (slot.mpVert++)->mPoint = pPoint->mCamPos;
+            }
+            if (mHasCaps != 0) {
+                (slot.mpVert++)->mPoint = pPoint[-1].mCamPos;
+                (slot.mpVert++)->mPoint = pPoint[-1].mCamPos;
+            }
+        }
+    }
+
+    mpMesh->SyncChanged(Mesh::kSyncPoints);
+    memcpy(mpMesh->mLocalXfm, g_pCurrentCam->mWorldXfm, sizeof(mpMesh->mLocalXfm));
+    mpMesh->mDirty = 1;
+    mpMesh->UpdateWorldXfm(nullptr, 0);
+    mpMesh->Draw();
+    return 1;
 }
 
 // 0x004b9a68

@@ -265,18 +265,18 @@ public:
 
 protected:
     /**
-     * Draw the subject once per recorded transform, then once at its own transform.
+     * Draw the subject at its own transform, then once per recorded transform.
      *
-     * Drawable vtable slot 3. Each step past the first restores one recorded transform onto the
-     * subject, sets the subject's material alpha to a value that falls from the material's own
-     * alpha towards that alpha scaled by mFalloff, recomposes the world transform, and draws. A
-     * recorded transform equal to the current one is skipped. The subject's own transform and the
-     * material alpha are restored afterwards. One transform is appended to mXfms every mRate
-     * frames, and the list is trimmed to mLength entries.
-     *
-     * The body is not reconstructed. It writes the material alpha through a virtual of `Rnd::Mat`
-     * that `mat.h` does not declare, and it reads the material handle out of reserved runs of
-     * `mesh.h` and of `text.h`.
+     * Drawable vtable slot 3. The text subject is drawn in preference to the mesh, but a mesh
+     * subject supplies the material even when a text is set, and a subject with no material draws
+     * no trail. Each recorded transform, newest first, is written into the subject's local
+     * transform and drawn with Rnd::Mat::SetAlpha() at a value that starts at the material alpha
+     * scaled by mFalloff and falls by an equal step per entry. A recorded transform equal to the
+     * one before it, the first compared with the current world transform, is skipped. A mesh
+     * subject draws its trail with Rnd::Mesh::kZModeZReadOnly. The subject's transforms, the
+     * material alpha, and the depth state are restored afterwards. Every mRate frames the current
+     * world transform goes to the front of mXfms, the oldest entry dropping once mLength are
+     * stored.
      *
      * @return Non-zero, which draws the children as well.
      * @ghidraAddress 0x004c0638

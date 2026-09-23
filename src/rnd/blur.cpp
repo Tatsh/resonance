@@ -2,11 +2,14 @@
 
 #include <algorithm>
 #include <list>
+#include <string.h>
 
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "rnd/drawable.h"
+#include "rnd/font.h"
 #include "rnd/manager.h"
+#include "rnd/mat.h"
 #include "rnd/mesh.h"
 #include "rnd/object.h"
 #include "rnd/stream.h"
@@ -272,6 +275,108 @@ void Blur::Copy(const Object *pSource, unsigned nFlags) {
     mFalloff = pSourceBlur->mFalloff;
 
     AcquireObjectRefs();
+}
+
+// Whether two recorded transforms agree in the first three floats of every row. The padding float
+// of each row is not compared.
+static inline bool SameXfm(const float aflLeft[kXfmRowCount][kXfmRowFloatCount],
+                           const float aflRight[kXfmRowCount][kXfmRowFloatCount]) {
+    for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
+        if (aflLeft[nRow][0] != aflRight[nRow][0] || aflLeft[nRow][1] != aflRight[nRow][1] ||
+            aflLeft[nRow][2] != aflRight[nRow][2]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 0x004c0638
+int Blur::DrawSelf() {
+    Drawable *pSubject = mpText != nullptr ? static_cast<Drawable *>(mpText) : mpMesh;
+    if (pSubject == nullptr) {
+        return 1;
+    }
+    pSubject->Draw();
+    if (mLength == 0) {
+        return 1;
+    }
+
+    // With both subjects set, the text is drawn but the mesh material is faded.
+    Mat *pMat = nullptr;
+    if (mpText != nullptr) {
+        Font *pFont = mpText->GetFont();
+        if (pFont == nullptr) {
+            return 1;
+        }
+        pMat = pFont->mMat;
+        if (pMat == nullptr) {
+            return 1;
+        }
+    }
+    if (mpMesh != nullptr) {
+        pMat = mpMesh->mMat;
+        if (pMat == nullptr) {
+            return 1;
+        }
+    }
+
+    --mCountdown;
+    Transformable *pXfm = mpText != nullptr ? static_cast<Transformable *>(mpText) : mpMesh;
+    Xfm savedLocal;
+    Xfm savedWorld;
+    memcpy(savedLocal.m, pXfm->mLocalXfm, sizeof(savedLocal.m));
+    memcpy(savedWorld.m, pXfm->mWorldXfm, sizeof(savedWorld.m));
+
+    const float flBaseAlpha = pMat->mDiffuse.a;
+    const float flTopAlpha = flBaseAlpha * mFalloff;
+    const float flStep = flTopAlpha / static_cast<float>(mLength * mRate);
+    float flAlpha = flTopAlpha - flStep * static_cast<float>(mRate - mCountdown);
+    const float flRecordStep = flStep * static_cast<float>(mRate);
+
+    Mesh::ZMode savedZMode{};
+    Mesh::ZFunc savedZFunc{};
+    if (mpText == nullptr) {
+        savedZMode = mpMesh->mZMode;
+        savedZFunc = mpMesh->mZFunc;
+        mpMesh->mZMode = Mesh::kZModeZReadOnly;
+    }
+
+    // Each recorded transform is compared with the one before it, the first with the current one.
+    const float (*pPrevious)[kXfmRowFloatCount] = savedWorld.m;
+    for (auto it = mXfms.begin(); it != mXfms.end(); ++it) {
+        if (!SameXfm(it->m, pPrevious)) {
+            pMat->SetAlpha(flAlpha);
+            memcpy(pXfm->mLocalXfm, it->m, sizeof(it->m));
+            pXfm->mDirty = 1;
+            pXfm->UpdateWorldXfm(nullptr, 0);
+            pSubject->Draw();
+        }
+        flAlpha -= flRecordStep;
+        pPrevious = it->m;
+    }
+
+    // The world transform goes back through the local one, and the local one is then restored.
+    memcpy(pXfm->mLocalXfm, savedWorld.m, sizeof(savedWorld.m));
+    pXfm->mDirty = 1;
+    pXfm->UpdateWorldXfm(nullptr, 0);
+    memcpy(pXfm->mLocalXfm, savedLocal.m, sizeof(savedLocal.m));
+    pXfm->mDirty = 1;
+    pMat->SetAlpha(flBaseAlpha);
+
+    if (mpText == nullptr) {
+        mpMesh->mZFunc = savedZFunc;
+        mpMesh->mZMode = savedZMode;
+    }
+
+    if (mCountdown != 0) {
+        return 1;
+    }
+    if (mXfms.size() == static_cast<unsigned>(mLength)) {
+        mXfms.pop_back();
+    }
+    mXfms.push_front(savedWorld);
+    mCountdown = mRate;
+    return 1;
 }
 
 // 0x004c04c0

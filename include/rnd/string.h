@@ -396,11 +396,11 @@ protected:
      * front of the near plane plus 0.01. A flagged point with an unflagged neighbour is pushed
      * onto the near plane along the segment that joins them and then unflagged, and a point whose
      * neighbours are both flagged is dropped. The survivors are projected by dividing x and z by
-     * the absolute value of the depth component y. EmitRibbonVerts() then fills the mesh. The mesh
-     * receives Rnd::Mesh::kSyncPoints, the camera transform, and a draw.
-     *
-     * The body is not reconstructed. It reads the current camera through a global this header does
-     * not declare, and it reads two camera fields that `cam.h` does not declare.
+     * the absolute value of the depth component y. EmitRibbonVerts() then fills the mesh, once over
+     * every point, or once per pair with mLinePairs set. A pair with a point still behind the near
+     * plane instead collapses every vertex it governs onto its camera-space points. The mesh
+     * receives Rnd::Mesh::kSyncPoints, the camera transform as its local transform, a world
+     * transform update, and a draw.
      *
      * @return Non-zero. The children are drawn as well.
      * @ghidraAddress 0x004b95f8
@@ -441,8 +441,9 @@ private:
     // 0x004b9008
     // Builds the screen direction and the perpendicular of every point in the closed
     // range, widens each by mWidth, and folds the ribbon wherever the turn between two segments
-    // passes mFoldCos. DrawSelf() is the only caller, and the body is not reconstructed for the
-    // same reason DrawSelf() is not.
+    // passes mFoldCos. A corner sharper than a near-straight turn is mitred at the crossing of the
+    // two edge lines. The vertices are camera-space positions displaced by the screen-space
+    // normals. DrawSelf() is the only caller.
     void EmitRibbonVerts(Point *pFirst, Point *pLast);
 
     // Declared in recovered offset order. Every member is private, because the image supplies an
