@@ -110,6 +110,19 @@ public:
      */
     void operator=(const FreqAppearance &other);
 
+    /**
+     * Record the skill status.
+     *
+     * Defined in the header. The one out-of-line copy is never called, and
+     * MetPersonaData::UpdateSkillStatus() expands the store where it is used.
+     *
+     * @param nStatus The status, 0 through 4.
+     * @ghidraAddress 0x00174478
+     */
+    void SetSkillStatus(int nStatus) {
+        mUnknown0c = nStatus;
+    }
+
 public:
     /**
      * Player username, starting as the literal `initial name`.

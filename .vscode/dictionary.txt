@@ -430,6 +430,7 @@ metmemcardtypescreen
 metmemdetectscreen
 metmemdetectstartup
 metmultisaveremixscreen
+metpersonadata
 metpersonasaverscreen
 metremixdatascreen
 metremixdelscreen

@@ -127,10 +127,26 @@ public:
      */
     virtual void Load(IBStream *pStream);
 
-private:
-    CampaignStats mUnknown00; // +0x00
+    /**
+     * Record in the appearance the highest skill the campaign has reached.
+     *
+     * The status is 4 when stage 5 is complete on expert and the secret stage is unlocked, 3 when
+     * only that stage is complete, 2 when stage 4 is complete on normal, 1 when stage 3 is complete
+     * on easy, and 0 otherwise. MetStageFinishScreen slot 5 is the caller.
+     *
+     * @ghidraAddress 0x0032e308
+     */
+    void UpdateSkillStatus();
 
-public:
+    /**
+     * Campaign progress of this persona. +0x00
+     *
+     * Public because MetStageFinishScreen slot 5 records and queries the finished stage through it
+     * directly, and the image has no accessor. The member sits at offset 0, which is why callers
+     * pass the persona where a CampaignStats is expected.
+     */
+    CampaignStats mStats;
+
     /**
      * Appearance the front end displays and edits.
      *

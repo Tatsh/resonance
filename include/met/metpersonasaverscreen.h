@@ -6,6 +6,7 @@
 #include "met/metkbuser.h"
 #include "met/metpersonadata.h"
 #include "met/metscreen.h"
+#include "met/metsonglists.h"
 #include "os/hxstr.h"
 
 /**
@@ -24,17 +25,16 @@
  * The constructor at `0x0032ece0` takes only the renderer and the load priority, and supplies
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the
  * container. It writes `+0x8c` and `+0x90`, which are the two secondary vptrs, then zeroes
- * mUnknown98 and mUnknown9c, default-constructs mPersonas and mUnknownac, zeroes mUnknownbc, sets
- * mUnknownc0 to -1, constructs mUnknownc4 from the empty literal at `0x00805160`, and finishes
- * with mUnknownd0 at -1, mUnknownd4 at zero, and mUnknowncc at -1. The last three are stored out
- * of offset order, mUnknowncc last of all.
+ * mUnknown98 and mUnknown9c, default-constructs mPersonas and mUnknownac, zeroes mUnknownbc, and
+ * default-constructs the CardSlot mUnknownc0, whose name starts from the empty literal at
+ * `0x00805160`.
  *
  * The object is at least 0xd8 bytes. Nothing derives from the class, so no base offset in any
  * descriptor pins the total, and the figure is the lower bound the constructor's highest store
  * gives.
  *
  * The destructor at `0x0032f020` calls ClearPersonas() and then runs the compiler-generated
- * teardown of mUnknownc4, mUnknownac, and mPersonas in reverse declaration order, so the call is
+ * teardown of mUnknownc0, mUnknownac, and mPersonas in reverse declaration order, so the call is
  * the whole of its reconstructed body.
  *
  * A diff of the primary table against the MetScreen table at `0x0080b6a0` reads nine overrides,
@@ -70,6 +70,28 @@ public:
      * @ghidraAddress 0x0032f020
      */
     virtual ~MetPersonaSaverScreen();
+
+    /**
+     * Hand a save request to the registered saver screen and show it over MetLoadGameScreen.
+     *
+     * The saver is resolved under `MetPersonaSaverScreen` and narrowed with dynamic_cast, and the
+     * result is used without a null test. After SetSaveRequest(), mUnknown98 takes nUnknown98,
+     * mUnknown9c takes nUnknown9c, and mUnknown94 is cleared. The screen registered under
+     * `MetLoadGameScreen` then pushes the saver and activates it. MetStageFinishScreen, the FreQ
+     * maker, and the memory-card screens call it.
+     *
+     * @param screens The registry keys of the screens to return to.
+     * @param pPersona The persona to save.
+     * @param slot The card location.
+     * @param nUnknown9c Stored in mUnknown9c.
+     * @param nUnknown98 Stored in mUnknown98.
+     * @ghidraAddress 0x0032e858
+     */
+    static void StartSave(const std::vector<HxStr> &screens,
+                          MetPersonaData *pPersona,
+                          const CardSlot &slot,
+                          int nUnknown9c,
+                          int nUnknown98);
 
     /**
      * Populate the dialogue and enter.
@@ -160,16 +182,35 @@ private:
      */
     void ClearPersonas();
 
-    int mUnknown98; // +0x98
-    int mUnknown9c; // +0x9c
+    /**
+     * Take the screens to return to, the persona to save, and the card location.
+     *
+     * The screen list replaces mUnknownac, the persona goes to mUnknownb8, and the location is
+     * copied into mUnknownc0. StartSave() is the one caller.
+     *
+     * @param screens The registry keys of the screens to return to.
+     * @param pPersona The persona to save.
+     * @param slot The card location.
+     * @ghidraAddress 0x00339020
+     */
+    void SetSaveRequest(const std::vector<HxStr> &screens,
+                        MetPersonaData *pPersona,
+                        const CardSlot &slot);
+
+    // Cleared by StartSave(). The constructor does not write it. +0x94
+    int mUnknown94;
+    // Written by StartSave() from its last argument. +0x98
+    int mUnknown98;
+    // Written by StartSave() from its fourth argument. +0x9c
+    int mUnknown9c;
     // The personas the screen offers. ClearPersonas() deletes every element. +0xa0
     std::vector<MetPersonaData *> mPersonas;
-    std::vector<HxStr> mUnknownac; // +0xac
-    int mUnknownb8;                // +0xb8, not written by the constructor
-    int mUnknownbc;                // +0xbc
-    int mUnknownc0;                // +0xc0, starts at -1
-    HxStr mUnknownc4;              // +0xc4, constructed from the empty literal
-    int mUnknowncc;                // +0xcc, starts at -1
-    int mUnknownd0;                // +0xd0, starts at -1
-    int mUnknownd4;                // +0xd4
+    // The registry keys of the screens to return to after the save. +0xac
+    std::vector<HxStr> mUnknownac;
+    // The persona to save, which SetSaveRequest() records. Not written by the constructor. +0xb8
+    MetPersonaData *mUnknownb8;
+    int mUnknownbc; // +0xbc
+    // The card location to save to. The constructor's inline CardSlot construction stores
+    // mUnknown10, mUnknown14, and mUnknown0c out of offset order. +0xc0
+    CardSlot mUnknownc0;
 };

@@ -1,8 +1,47 @@
 #include "game/campaignstats.h"
 
+#include <algorithm>
+
+#include "met/albumcache.h"
+#include "met/metsonglists.h"
+
 namespace {
 
 constexpr int kRecordVersion = 2;
+
+// The difficulties that limit which stages count.
+constexpr int kDifficultyEasy = 0;
+constexpr int kDifficultyNormal = 1;
+constexpr int kDifficultyExpert = 2;
+
+// The last stage each difficulty plays. The secret stage follows the last regular stage.
+constexpr int kEasyLastStage = 3;
+constexpr int kNormalLastStage = 4;
+constexpr int kLastRegularStage = 5;
+constexpr int kSecretStage = 6;
+
+// The stages UpdateUnlockLevel() tests, counted from 1, and the index of the first in the
+// per-stage arrays.
+constexpr int kFirstStage = 1;
+constexpr int kSecondStage = 2;
+constexpr int kThirdStage = 3;
+constexpr int kFourthStage = 4;
+constexpr int kFirstStageIndex = kFirstStage - 1;
+
+// The number of levels the secret stage needs before its first level unlocks the super secret.
+constexpr unsigned kSuperSecretMinimumLevels = 2;
+
+// The unlock levels UpdateUnlockLevel() computes. Before any stage is complete, the level starts
+// at kFewLevelsUnlock or kManyLevelsUnlock, depending on whether stage 1 has more than
+// kManyLevelsThreshold levels, and rises with the completed count up to kMaxStageOneUnlock.
+constexpr int kManyLevelsThreshold = 3;
+constexpr int kManyLevelsUnlock = 1;
+constexpr int kFewLevelsUnlock = 2;
+constexpr int kMaxStageOneUnlock = 4;
+constexpr int kStageOneCompleteUnlock = 5;
+
+// The text GetBonusLevelName() reports when a stage has no bonus level.
+static const char *const kNoName = "";
 
 } // namespace
 
@@ -53,4 +92,189 @@ int CampaignStats::FindLevelIndex(const HxStr &name) {
         ++nIndex;
     }
     return static_cast<int>(nIndex);
+}
+
+// 0x00144f08
+int CampaignStats::GetLevelBeaten(int nDifficulty, const HxStr &name) {
+    return mLevels[FindLevelIndex(name)].mSkills[nDifficulty].mBeaten;
+}
+
+// 0x00144ca8
+int CampaignStats::GetLevelHighScore(int nDifficulty, const HxStr &name) {
+    return mLevels[FindLevelIndex(name)].mSkills[nDifficulty].mHighScore;
+}
+
+// 0x00141798
+void CampaignStats::RecordLevelBeaten(int nDifficulty, const HxStr &name) {
+    int nIndex = FindLevelIndex(name);
+    int nStage = GetAlbumLevelStage(name);
+    SkillStats &skill = mLevels[nIndex].mSkills[nDifficulty];
+    if (skill.mBeaten != 0) {
+        return;
+    }
+    skill.mBeaten = 1;
+    RecountStageCompleted(nDifficulty, nStage);
+    RecountStageScore(nDifficulty, nStage);
+    UpdateUnlockLevel();
+}
+
+// 0x00144d68
+void CampaignStats::RecordHighScore(int nDifficulty, const HxStr &name, int nScore) {
+    SkillStats &skill = mLevels[FindLevelIndex(name)].mSkills[nDifficulty];
+    if (skill.mHighScore < nScore) {
+        skill.mHighScore = nScore;
+        RecountStageScore(nDifficulty, GetAlbumLevelStage(name));
+    }
+}
+
+// 0x00145028
+int CampaignStats::GetStageScoreBeaten(int nDifficulty, int nStage) {
+    return mStageScoreBeaten[nDifficulty][nStage - kFirstStage];
+}
+
+// 0x00145048
+int CampaignStats::GetStageScore(int nDifficulty, int nStage) {
+    return mStageScores[nDifficulty][nStage - kFirstStage];
+}
+
+// 0x00144e58
+int CampaignStats::IsStageComplete(int nDifficulty, int nStage) {
+    if ((nDifficulty == kDifficultyEasy && nStage > kEasyLastStage) ||
+        (nDifficulty == kDifficultyNormal && nStage > kNormalLastStage) ||
+        nStage > kLastRegularStage) {
+        return 0;
+    }
+    int nRequired = mStageLevelCounts[nStage - kFirstStage];
+    if (GetAlbumLevelValue(nStage - kFirstStage, nDifficulty) != 0) {
+        --nRequired;
+    }
+    return mStageCompleted[nDifficulty][nStage - kFirstStage] >= nRequired;
+}
+
+// 0x00140d40
+int CampaignStats::IsDifficultyComplete(int nDifficulty) {
+    int nStageCount = nDifficulty + kEasyLastStage;
+    int nComplete = 0;
+    for (int nStage = kFirstStage; nStage <= nStageCount; ++nStage) {
+        nComplete += IsStageComplete(nDifficulty, nStage);
+    }
+
+    int bComplete = 0;
+    if (nComplete == nStageCount) {
+        bComplete = 1;
+        for (int nStage = kFirstStage; nStage <= nStageCount; ++nStage) {
+            HxStr name = GetBonusLevelName(nDifficulty, nStage);
+            if (name != kNoName) {
+                bComplete = bComplete && GetLevelBeaten(nDifficulty, name) != 0;
+            }
+        }
+    }
+    return bComplete;
+}
+
+// 0x00141690
+HxStr CampaignStats::GetBonusLevelName(int nDifficulty, int nStage) {
+    int nCount = GetStageList(nStage)->size();
+    int nBonus = GetAlbumLevelValue(nStage - kFirstStage, nDifficulty);
+    if (nCount == 0 || nBonus == 0) {
+        return HxStr(kNoName);
+    }
+    HxStr name((*GetStageList(nStage))[nCount - 1].mName);
+    return name;
+}
+
+// 0x00144fc8
+int CampaignStats::IsSecretUnlocked() {
+    int bUnlocked = 0;
+    if (IsDifficultyComplete(kDifficultyExpert)) {
+        bUnlocked = GetStageList(kSecretStage)->size() != 0;
+    }
+    return bUnlocked;
+}
+
+// 0x001410f0
+int CampaignStats::IsSuperSecretUnlocked() {
+    int bUnlocked = 0;
+    if (!IsSecretUnlocked()) {
+        return bUnlocked;
+    }
+    std::vector<StageListEntry> levels(*GetStageList(kSecretStage));
+    HxStr name(levels[0].mName);
+    if (mLevels[FindLevelIndex(name)].mSkills[kDifficultyExpert].mBeaten != 0) {
+        bUnlocked = levels.size() >= kSuperSecretMinimumLevels;
+    }
+    return bUnlocked;
+}
+
+// 0x00141b90
+void CampaignStats::RecountStageCompleted(int nDifficulty, int nStage) {
+    std::vector<int> &levels = mStageLevels[nStage - kFirstStage];
+    int nCount = levels.size();
+    int nBeaten = 0;
+    for (int i = 0; i < nCount; ++i) {
+        int nIndex = levels[i];
+        HxStr name(mLevels[nIndex].mName);
+        (void)name; // Yes, the binary copies the name and never reads it.
+        if (mLevels[nIndex].mSkills[nDifficulty].mBeaten != 0) {
+            ++nBeaten;
+        }
+    }
+    mStageCompleted[nDifficulty][nStage - kFirstStage] = nBeaten;
+}
+
+// 0x00141898
+void CampaignStats::RecountStageScore(int nDifficulty, int nStage) {
+    if (nStage > kLastRegularStage) {
+        return;
+    }
+    int &nTotal = mStageScores[nDifficulty][nStage - kFirstStage];
+    nTotal = 0;
+    std::vector<int> &levels = mStageLevels[nStage - kFirstStage];
+    int nCount = levels.size();
+    for (int i = 0; i < nCount; ++i) {
+        int nIndex = levels[i];
+        HxStr name(mLevels[nIndex].mName);
+        if (mLevels[nIndex].mSkills[nDifficulty].mBeaten != 0) {
+            nTotal += mLevels[FindLevelIndex(name)].mSkills[nDifficulty].mHighScore;
+        }
+    }
+
+    int nTarget = GetAlbumLevelValue(nStage - kFirstStage, nDifficulty);
+    if (nTarget != 0 && nTotal >= nTarget && IsStageComplete(nDifficulty, nStage)) {
+        mStageScoreBeaten[nDifficulty][nStage - kFirstStage] = 1;
+    } else {
+        mStageScoreBeaten[nDifficulty][nStage - kFirstStage] = 0;
+    }
+}
+
+// 0x00141cb8
+int CampaignStats::UpdateUnlockLevel() {
+    int nLevel = mStageLevelCounts[kFirstStageIndex] > kManyLevelsThreshold ? kManyLevelsUnlock :
+                                                                              kFewLevelsUnlock;
+    if (IsStageComplete(kDifficultyEasy, kFirstStage) ||
+        IsStageComplete(kDifficultyNormal, kFirstStage) ||
+        IsStageComplete(kDifficultyExpert, kFirstStage)) {
+        nLevel = kStageOneCompleteUnlock;
+    } else {
+        int nCompleted = mStageCompleted[kDifficultyEasy][kFirstStageIndex] +
+                         mStageCompleted[kDifficultyNormal][kFirstStageIndex] +
+                         mStageCompleted[kDifficultyExpert][kFirstStageIndex] + nLevel;
+        nLevel = std::min(nCompleted, kMaxStageOneUnlock);
+    }
+
+    // Only the listed difficulties are tested at stages 3 and 4, which matches the binary.
+    if (nLevel == kStageOneCompleteUnlock && (IsStageComplete(kDifficultyEasy, kSecondStage) ||
+                                              IsStageComplete(kDifficultyNormal, kSecondStage) ||
+                                              IsStageComplete(kDifficultyExpert, kSecondStage))) {
+        ++nLevel;
+        if (IsStageComplete(kDifficultyNormal, kThirdStage) ||
+            IsStageComplete(kDifficultyExpert, kThirdStage)) {
+            ++nLevel;
+            if (IsStageComplete(kDifficultyExpert, kFourthStage)) {
+                ++nLevel;
+            }
+        }
+    }
+    mUnlockLevel = nLevel;
+    return nLevel;
 }

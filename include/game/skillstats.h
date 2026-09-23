@@ -13,12 +13,12 @@
  * LevelStats stores exactly three of these and Save() at `0x00142760` writes all three without a
  * loop, so the count is fixed in the source rather than computed.
  *
- * Neither member's purpose is recovered. Save() emits the first as a single truth byte and the
- * second as a 16-bit halfword, and the version 1 branch of Load() reads the second as a full
- * word, so the narrowing arrived with record version 2.
+ * Save() emits the beaten flag as a single truth byte and the high score as a 16-bit halfword,
+ * and the version 1 branch of Load() reads the high score as a full word, so the narrowing arrived
+ * with record version 2.
  *
- * Both members are private. Only this class's own Save() and Load() read either, and the
- * element copy the vector performs is compiler-generated rather than written code.
+ * Both members are public, because CampaignStats reads and writes them directly and the image has
+ * no accessor for either.
  */
 class SkillStats {
 public:
@@ -62,9 +62,15 @@ public:
      */
     virtual void Load(IBStream &stream);
 
-private:
-    int mUnknown00; // +0x00, written as one truth byte and read back normalised to 0 or 1
-    int mUnknown04; // +0x04, written as a 16-bit halfword under record version 2
+    /**
+     * Non-zero once the level is beaten at this difficulty. CampaignStats::RecordLevelBeaten()
+     * sets it. +0x00
+     */
+    int mBeaten;
+    /**
+     * The best score at this difficulty. CampaignStats::RecordHighScore() raises it. +0x04
+     */
+    int mHighScore;
 };
 
 /**

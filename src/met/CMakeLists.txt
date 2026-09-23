@@ -24,6 +24,7 @@ set(RESONANCE_MET_SRCS
     metmemdetectscreen.cpp
     metmemdetectstartup.cpp
     metmultisaveremixscreen.cpp
+    metpersonadata.cpp
     metpersonasaverscreen.cpp
     metremixdatascreen.cpp
     metremixdelscreen.cpp

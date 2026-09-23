@@ -79,6 +79,13 @@ private:
     // word under version 1. The constructor does not initialise it and its purpose is not
     // recovered.
     int mUnknown08;
-    // Exactly three entries once a record has been read.
-    std::vector<SkillStats> mSkills; // +0x0c
+
+public:
+    /**
+     * One result per difficulty, exactly three once a record has been read. +0x0c
+     *
+     * Public because CampaignStats reads and writes the entries directly from its level lookups
+     * and recounts, and the image has no accessor for the vector.
+     */
+    std::vector<SkillStats> mSkills;
 };

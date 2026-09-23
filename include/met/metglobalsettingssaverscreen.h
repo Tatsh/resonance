@@ -72,6 +72,24 @@ public:
     virtual void PlayCycleRightSound(int) {
     }
 
+    /**
+     * Hand the return screens to the registered saver and show it, or the screens themselves.
+     *
+     * The saver is resolved under `MetGlobalSettingsSaverScreen` and narrowed with dynamic_cast,
+     * and the result is used without a null test. When MetFrontEndState::mUnknown0c is set, the
+     * screen registered under `MetSonyScreen` pushes the saver. Otherwise it pushes every screen
+     * of the list and activates the first. Seven front-end screens call it, MetStageFinishScreen
+     * among them.
+     *
+     * @param screens The registry keys of the screens to return to.
+     * @ghidraAddress 0x0027c2e0
+     */
+    static void StartSave(const std::vector<HxStr> &screens);
+
 private:
-    std::vector<HxStr> mUnknown90; // +0x90
+    // 0x00282048. Replace mUnknown90 with the screens to return to.
+    void SetReturnScreens(const std::vector<HxStr> &screens);
+
+    // The registry keys of the screens to return to after the save. +0x90
+    std::vector<HxStr> mUnknown90;
 };
