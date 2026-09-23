@@ -1,8 +1,12 @@
 #include "script/scripthost.h"
 
+#include <stdarg.h>
+
+#include "os/log.h"
 #include "script/cxx/config.h"
 #include "script/pyshell.h"
 #include "script/scripteval.h"
+#include "script/scripttemplatemap.h"
 
 PyShell *g_pPyShell;
 
@@ -32,4 +36,13 @@ void InvokeMasterInitScript() {
 // 0x00509b00
 void RunScript(const HxStr &script) {
     g_pPyShell->Eval(script, Py_file_input);
+}
+
+// 0x005099b0
+void CallScriptTemplate(int nTemplate, ...) {
+    va_list args;
+    va_start(args, nTemplate);
+    const HxStr text = FormatMessage(GetScriptTemplate(nTemplate), args);
+    va_end(args);
+    g_pPyShell->Eval(text, Py_file_input);
 }

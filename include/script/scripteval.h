@@ -34,9 +34,6 @@ extern PyShell *g_pPyShell;
  *
  * The same shape as CallScriptTemplate(), running with `Py_eval_input` and returning the result.
  *
- * Not reconstructed. The body needs the template registry reader at `0x00466438` and the HxStr
- * formatter at `0x005e4148`, and neither belongs to this subsystem.
- *
  * @param nTemplate The template identifier.
  * @return A handle on the result.
  * @ghidraAddress 0x0050a750

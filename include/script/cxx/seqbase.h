@@ -62,6 +62,18 @@ protected:
 
 public:
     /**
+     * Take a new reference to an existing object as a sequence.
+     *
+     * Inline. The configuration queries at `0x00509b78` and `0x0050a1a0` expand it as Object's
+     * copy, Object's validate(), the store of this class's vptr, and this class's validate().
+     *
+     * @param ob The object to wrap.
+     */
+    explicit SeqBase(const Object &ob) : Object(ob) {
+        validate();
+    }
+
+    /**
      * Accept any reference the sequence protocol supports.
      *
      * @param pyob The reference to test.
