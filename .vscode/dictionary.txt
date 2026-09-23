@@ -878,6 +878,7 @@ worklists
 worktree
 writable
 writeop
+wuninitialized
 xdecref
 xfms
 xincref
