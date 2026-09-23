@@ -1,7 +1,11 @@
 #include "rnd/mesh.h"
 
+#include <algorithm>
+#include <cmath>
 #include <vector>
 
+#include "math/box.h"
+#include "math/quaternion.h"
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
@@ -18,6 +22,23 @@ namespace {
 // The text dump writes an absent object reference as this literal, and a present one as its
 // quoted name.
 constexpr char kNoObject[] = "no object";
+
+// The last mesh file version whose faces carry a normal.
+constexpr int kFaceNormalLastVersion = 0;
+
+// BoundingSphere() places the centre halfway between the box corners.
+constexpr float kHalf = 0.5f;
+
+// The tag every mesh allocation is billed to.
+constexpr char kMeshAllocationTag[] = "Rnd::Mesh";
+
+// The rows of a transform, three axes and then the translation.
+enum XfmRow {
+    kXfmRowX = 0,
+    kXfmRowY = 1,
+    kXfmRowZ = 2,
+    kXfmRowTranslation = 3,
+};
 
 // 0x00493f00
 FailSink &PrintZMode(FailSink &sink, Mesh::ZMode nZMode) {
@@ -259,15 +280,29 @@ Stream &ReadVertVector(Stream &stream, std::vector<MeshVert> &verts) {
     return stream;
 }
 
+// 0x00482e28
+Stream &ReadFace(Stream &stream, MeshFace &face) {
+    stream.Read(&face.mV1, sizeof(face.mV1))
+        .Read(&face.mV2, sizeof(face.mV2))
+        .Read(&face.mV3, sizeof(face.mV3));
+    if (g_nRndMeshLoadVersion <= kFaceNormalLastVersion) {
+        // Files of these versions store a face normal after the indices, which is discarded.
+        Vector3 normal;
+        normal.w = 1.0f;
+        stream.Read(&normal.x, sizeof(normal.x))
+            .Read(&normal.y, sizeof(normal.y))
+            .Read(&normal.z, sizeof(normal.z));
+    }
+    return stream;
+}
+
 // 0x0048ae78
 Stream &ReadFaceVector(Stream &stream, std::vector<MeshFace> &faces) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
     faces.resize(nCount);
     for (auto &face : faces) {
-        stream.Read(&face.mV1, sizeof(face.mV1));
-        stream.Read(&face.mV2, sizeof(face.mV2));
-        stream.Read(&face.mV3, sizeof(face.mV3));
+        ReadFace(stream, face);
     }
     return stream;
 }
@@ -368,8 +403,23 @@ Mesh *NewMesh(const HxStr &name) {
     return new Mesh(name);
 }
 
+// 0x00492590
+void *Mesh::operator new(size_t nSize) {
+    return AllocateTaggedMemory(nSize, kMeshAllocationTag);
+}
+
+// 0x004925b0
+void Mesh::operator delete(void *pBlock) {
+    FreeTaggedMemory(pBlock, kMeshAllocationTag);
+}
+
 // 0x006eed60
 Mesh *(*g_pfnNewMesh)(const HxStr &name) = NewMesh;
+
+// 0x004926f0
+Mesh *NewMeshThroughHook(const HxStr &name) {
+    return g_pfnNewMesh(name);
+}
 
 // 0x00492f50
 Object *CreateRegisteredMesh(const HxStr &name) {
@@ -810,6 +860,105 @@ void Mesh::SetMaterial(Mat *pMat) {
     if (pMat != nullptr) {
         pMat->AddRef(this);
     }
+}
+
+// 0x00493c98
+void Mesh::SetTrans1Owner(Transformable *pOwner) {
+    if (mTrans1Owner != nullptr) {
+        mTrans1Owner->RemoveRef(this);
+    }
+    mTrans1Owner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+}
+
+// 0x00493cf0
+void Mesh::SetTrans2Owner(Transformable *pOwner) {
+    if (mTrans2Owner != nullptr) {
+        mTrans2Owner->RemoveRef(this);
+    }
+    mTrans2Owner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+}
+
+// 0x00492e98
+Sphere Mesh::WorldSphere() {
+    const float (*xfm)[kXfmRowFloatCount] = mTransOwner->mWorldXfm;
+    const Vector3 &center = mSphere.mCenter;
+    Sphere sphere;
+    sphere.mCenter.x = xfm[kXfmRowX][0] * center.x + xfm[kXfmRowY][0] * center.y +
+                       xfm[kXfmRowZ][0] * center.z + xfm[kXfmRowTranslation][0];
+    sphere.mCenter.y = xfm[kXfmRowX][1] * center.x + xfm[kXfmRowY][1] * center.y +
+                       xfm[kXfmRowZ][1] * center.z + xfm[kXfmRowTranslation][1];
+    sphere.mCenter.z = xfm[kXfmRowX][2] * center.x + xfm[kXfmRowY][2] * center.y +
+                       xfm[kXfmRowZ][2] * center.z + xfm[kXfmRowTranslation][2];
+    sphere.mCenter.w = center.w; // The transform writes three lanes, and the fourth is the input's.
+    sphere.mRadius = mSphere.mRadius;
+    return sphere;
+}
+
+// 0x004940a8
+void Mesh::ForwardSync() {
+    Sync();
+}
+
+// 0x00483030
+Sphere Mesh::BoundingSphere() {
+    Sphere sphere;
+    const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+    if (verts.size() == 0) {
+        sphere.mCenter.x = 0.0f;
+        sphere.mCenter.y = 0.0f;
+        sphere.mCenter.z = 0.0f;
+        sphere.mCenter.w = 1.0f;
+        sphere.mRadius = 0.0f;
+        return sphere;
+    }
+
+    // BoundingBox()'s loop, expanded rather than called.
+    Box box;
+    box.mMin = verts[0].mPoint;
+    box.mMax = verts[0].mPoint;
+    for (auto it = verts.begin() + 1; it != mVertsOwner->mVerts.end(); ++it) {
+        box.GrowToContain(it->mPoint);
+    }
+    Vector3 sum;
+    AddVec3(&box.mMin.x, &box.mMax.x, &sum.x);
+    Vector3 center;
+    Vec3Scale(&sum.x, kHalf, &center.x);
+    sphere.mCenter = center;
+
+    float flRadiusSquared = 0.0f;
+    for (auto it = mVertsOwner->mVerts.begin(); it != mVertsOwner->mVerts.end(); ++it) {
+        Vector3 offset;
+        Vec3Sub(&it->mPoint.x, &sphere.mCenter.x, &offset.x);
+        const float flLengthSquared =
+            offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
+        flRadiusSquared = std::max(flRadiusSquared, flLengthSquared);
+    }
+    sphere.mRadius = std::sqrt(flRadiusSquared);
+
+    Vector3 scale;
+    Mat33ExtractScale(&mWorldXfm[0][0], &scale.x);
+    // Yes, only the third axis scale is made absolute before the three are compared.
+    scale.z = std::fabs(scale.z);
+    sphere.mRadius *= std::max(scale.x, std::max(scale.y, scale.z));
+    return sphere;
+}
+
+// 0x00493fb8
+Box Mesh::BoundingBox() {
+    const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
+    Box box;
+    box.mMin = verts[0].mPoint;
+    box.mMax = verts[0].mPoint;
+    for (auto it = verts.begin() + 1; it != mVertsOwner->mVerts.end(); ++it) {
+        box.GrowToContain(it->mPoint);
+    }
+    return box;
 }
 
 // 0x00493c40

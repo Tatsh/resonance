@@ -436,6 +436,11 @@ Object *CreateRegisteredMeshAnim(const HxStr &name) {
     return new MeshAnim(name);
 }
 
+// 0x00493170
+MeshAnim *NewMeshAnim(const HxStr &name) {
+    return new MeshAnim(name);
+}
+
 // 0x00493520
 MeshAnim::MeshAnim(const HxStr &name) : Object(name), mMesh(nullptr), mKeysOwner(this) {
 }
@@ -542,11 +547,7 @@ void MeshAnim::Copy(const Object *pSource, unsigned nFlags) {
     mMesh = pSourceAnim->mMesh;
     if ((nFlags & kCopyShareKeys) != 0 || pSourceAnim->mKeysOwner != pSourceAnim) {
         mKeysOwner = pSourceAnim->mKeysOwner;
-        if (mKeysOwner != this) {
-            mVertPointsKeys.clear();
-            mVertTexsKeys.clear();
-            mVertColorsKeys.clear();
-        }
+        ClearKeys();
     } else {
         mKeysOwner = this;
         mVertPointsKeys = pSourceAnim->mVertPointsKeys;
@@ -599,6 +600,19 @@ void MeshAnim::CopyVertKeys(int nFromVert, int nToVert) {
     }
 }
 
+// 0x00486900
+void MeshAnim::AppendVertKeys(int nVert) {
+    for (auto &key : mKeysOwner->mVertPointsKeys) {
+        key.mValues.push_back(key.mValues[nVert]);
+    }
+    for (auto &key : mKeysOwner->mVertTexsKeys) {
+        key.mValues.push_back(key.mValues[nVert]);
+    }
+    for (auto &key : mKeysOwner->mVertColorsKeys) {
+        key.mValues.push_back(key.mValues[nVert]);
+    }
+}
+
 // 0x00487518
 void MeshAnim::SetFrameSelf(float flFrame) {
     if (mMesh == nullptr) {
@@ -644,6 +658,7 @@ void MeshAnim::SetMesh(Mesh *pMesh) {
     }
 }
 
+// 0x00494288
 void MeshAnim::AddObjectRefs() {
     if (mMesh != nullptr) {
         mMesh->AddRef(this);
@@ -661,6 +676,28 @@ void MeshAnim::RemoveObjectRefs() {
     if (mKeysOwner != nullptr) {
         mKeysOwner->RemoveRef(this);
     }
+}
+
+// 0x00494178
+void MeshAnim::ClearKeys() {
+    if (mKeysOwner == this) {
+        return;
+    }
+    mVertPointsKeys.clear();
+    mVertTexsKeys.clear();
+    mVertColorsKeys.clear();
+}
+
+// 0x004941c0
+void MeshAnim::SetKeysOwner(MeshAnim *pOwner) {
+    if (mKeysOwner != nullptr) {
+        mKeysOwner->RemoveRef(this);
+    }
+    mKeysOwner = pOwner;
+    if (pOwner != nullptr) {
+        pOwner->AddRef(this);
+    }
+    ClearKeys();
 }
 
 } // namespace Rnd

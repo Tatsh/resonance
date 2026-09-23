@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "math/box.h"
 #include "math/sphere.h"
 #include "math/vector3.h"
 #include "os/hxstr.h"
@@ -104,6 +105,27 @@ public:
 
     /** @ghidraAddress 0x00492838 */
     virtual ~Mesh();
+
+    /**
+     * Allocate a mesh from the tagged heap under the tag "Rnd::Mesh".
+     *
+     * NewMesh() inlines the call, and the out-of-line copy has no caller.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     * @ghidraAddress 0x00492590
+     */
+    void *operator new(size_t nSize);
+
+    /**
+     * Release a mesh to the tagged heap under the same tag.
+     *
+     * The out-of-line copy has no caller.
+     *
+     * @param pBlock The block.
+     * @ghidraAddress 0x004925b0
+     */
+    void operator delete(void *pBlock);
 
     /**
      * Write the mesh to the engine text sink.
@@ -213,6 +235,71 @@ public:
      * @param pNext The next mesh in the chain, or null.
      */
     void SetNext(Mesh *pNext);
+
+    /**
+     * Point the mesh at its second transform owner.
+     *
+     * The same shape as SetTransOwner(). Load() and Copy() inline it, and the out-of-line copy has
+     * no caller. The title is inferred.
+     *
+     * @param pOwner The owner, or null.
+     * @ghidraAddress 0x00493c98
+     */
+    void SetTrans1Owner(Transformable *pOwner);
+
+    /**
+     * Point the mesh at its third transform owner.
+     *
+     * Recorded on the same evidence as SetTrans1Owner().
+     *
+     * @param pOwner The owner, or null.
+     * @ghidraAddress 0x00493cf0
+     */
+    void SetTrans2Owner(Transformable *pOwner);
+
+    /**
+     * Report the bounding sphere in world space.
+     *
+     * The centre is transformed by mTransOwner's world transform, and the radius is copied
+     * unscaled. The out-of-line copy has no caller. The title is inferred.
+     *
+     * @return The sphere.
+     * @ghidraAddress 0x00492e98
+     */
+    Sphere WorldSphere();
+
+    /**
+     * Dispatch Sync().
+     *
+     * The out-of-line copy has no caller. The title is inferred.
+     *
+     * @ghidraAddress 0x004940a8
+     */
+    void ForwardSync();
+
+    /**
+     * Compute a bounding sphere of the vertices.
+     *
+     * The centre is the middle of the vertices' bounding box, and the radius reaches the farthest
+     * vertex and is then scaled by the largest axis scale of this mesh's world transform. Only the
+     * third axis scale is taken as an absolute value. A mesh with no vertices reports the origin
+     * with a zero radius. The routine has no caller, and the title is inferred.
+     *
+     * @return The sphere.
+     * @ghidraAddress 0x00483030
+     */
+    Sphere BoundingSphere();
+
+    /**
+     * Compute the bounding box of the vertices.
+     *
+     * The first vertex seeds both corners, so the mesh must have one. The routine has no caller,
+     * and the title is inferred.
+     *
+     * @return The box.
+     * @ghidraAddress 0x00493fb8
+     */
+    Box BoundingBox();
 
     /**
      * Point the mesh at the mesh whose vertices it draws.
@@ -537,6 +624,18 @@ extern Mesh *(*g_pfnNewMesh)(const HxStr &name);
  * @ghidraAddress 0x00492f50
  */
 Object *CreateRegisteredMesh(const HxStr &name);
+
+/**
+ * Build a mesh through g_pfnNewMesh, without the narrowing CreateRegisteredMesh() performs.
+ *
+ * The one recovered reference to this routine is its entry in the exception range table at
+ * `0x00868634`, and nothing in the image calls it. The title follows Rnd::NewCamThroughHook().
+ *
+ * @param name The object name.
+ * @return The new mesh.
+ * @ghidraAddress 0x004926f0
+ */
+Mesh *NewMeshThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Mesh, the string "Mesh".

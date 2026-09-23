@@ -8,6 +8,7 @@
 #include "math/vector3.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
+#include "rnd/manager.h"
 
 class FailSink;
 namespace Rnd {
@@ -190,6 +191,17 @@ public:
     void CopyVertKeys(int nFromVert, int nToVert);
 
     /**
+     * Append a copy of one vertex slot to every keyframe of all three channels.
+     *
+     * The channels written belong to mKeysOwner. The seam-normal builder at `0x00483438` calls it
+     * on each animation of a mesh after it splits a vertex. The title is inferred.
+     *
+     * @param nVert The vertex slot to copy.
+     * @ghidraAddress 0x00486900
+     */
+    void AppendVertKeys(int nVert);
+
+    /**
      * Change the mesh this animation deforms.
      *
      * Drops this object's reference on the previous mesh, records the new one, and takes a
@@ -200,6 +212,18 @@ public:
      * @ghidraAddress 0x00494120
      */
     void SetMesh(Mesh *pMesh);
+
+    /**
+     * Make another animation the one whose channels drive this one.
+     *
+     * Moves this object's reference from the previous owner to the new one, and then empties this
+     * object's own channels unless it is its own owner. The out-of-line copy has no caller, and
+     * the title follows Rnd::LightAnim::SetKeysOwner().
+     *
+     * @param pOwner The new keys owner, or null.
+     * @ghidraAddress 0x004941c0
+     */
+    void SetKeysOwner(MeshAnim *pOwner);
 
 protected:
     /**
@@ -217,8 +241,12 @@ protected:
 
 private:
     // Take a reference on the mesh and on the keys owner. Load() and Copy() inline it as their own
-    // second half, and no standalone body survives.
+    // second half, and the standalone copy at 0x00494288 has no caller.
     void AddObjectRefs();
+
+    // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it, and
+    // the standalone copy at 0x00494178 has no caller.
+    void ClearKeys();
 
     // Drop the reference on the mesh and on the keys owner. 0x00494238. The destructor calls it and
     // Load(), Copy(), and Replace() inline it.
@@ -253,10 +281,34 @@ public:
 Object *CreateRegisteredMeshAnim(const HxStr &name);
 
 /**
+ * Allocate and construct a mesh animation, without the narrowing CreateRegisteredMeshAnim()
+ * performs.
+ *
+ * Nothing in the image calls it. The title follows Rnd::NewMesh().
+ *
+ * @param name The object name.
+ * @return The new animation.
+ * @ghidraAddress 0x00493170
+ */
+MeshAnim *NewMeshAnim(const HxStr &name);
+
+/**
  * Registered class name of Rnd::MeshAnim, the string "MeshAnim".
  *
  * @ghidraAddress 0x006eed70
  */
 extern HxStr g_meshAnimClassName;
+
+/**
+ * Register the "MeshAnim" class with Rnd::Manager.
+ *
+ * An inline function, in the shape of Rnd::RegisterMeshClass(). The out-of-line copy has no
+ * caller.
+ *
+ * @ghidraAddress 0x00493140
+ */
+inline void RegisterMeshAnimClass() {
+    g_manager.RegisterClass(g_meshAnimClassName, CreateRegisteredMeshAnim);
+}
 
 } // namespace Rnd

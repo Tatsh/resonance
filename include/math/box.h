@@ -14,8 +14,8 @@ struct Box {
      * Widen this box on each axis where a point falls outside it.
      *
      * An axis whose value is below the lower corner moves only the lower corner, and the upper
-     * corner is tested only when the lower one did not move. Two unidentified routines, at
-     * `0x00483030` and `0x00493fb8`, call it. The name is inferred.
+     * corner is tested only when the lower one did not move. Rnd::Mesh::BoundingSphere() and
+     * Rnd::Mesh::BoundingBox() call it. The name is inferred.
      *
      * @param point The point to enclose.
      * @ghidraAddress 0x00551020
