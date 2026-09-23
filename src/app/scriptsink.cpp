@@ -11,6 +11,11 @@ ScriptSink::ScriptSink(Globals *pOwner) : mGlobals(pOwner) {
 ScriptSink::~ScriptSink() {
 }
 
+// 0x00118c00
+ScriptSink *ScriptSink::CreateInstance(Globals *pOwner) {
+    return new ScriptSink(pOwner);
+}
+
 // 0x00118ad0
 // The receiver is unused, which is why the body reads only the message.
 void ScriptSink::RunMessageScript(Message *pMsg) {

@@ -1,9 +1,9 @@
 #include "app/application.h"
 #include "app/globals.h"
+#include "app/scriptsink.h"
 #include "msg/scriptmsg.h"
 #include "os/hxstr.h"
 #include "sch/command.h"
-#include "script/scriptsink.h"
 
 namespace {
 
