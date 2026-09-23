@@ -106,6 +106,11 @@ MetLoadFreqBaseScreen::~MetLoadFreqBaseScreen() {
     delete mUnknown90;
 }
 
+// 0x00296a58
+MetScreen *MetLoadFreqBaseScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetLoadFreqBaseScreen(pRenderer, nPriority);
+}
+
 void MetLoadFreqBaseScreen::EnterAndShow() {
     AcquireIdentityList();
     BuildButtonList();

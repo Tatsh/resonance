@@ -71,6 +71,18 @@ public:
     virtual ~MetLoadFreqBaseScreen();
 
     /**
+     * Produce a base load screen on the heap.
+     *
+     * No call site exists.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The screen.
+     * @ghidraAddress 0x00296a58
+     */
+    static MetScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
      * Populate the screen and enter it.
      *
      * Slot 5. The three build steps run in declaration order, AcquireIdentityList() first, then

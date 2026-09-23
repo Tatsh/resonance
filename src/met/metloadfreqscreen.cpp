@@ -74,6 +74,11 @@ MetLoadFreqScreen::MetLoadFreqScreen(MetRenderer *pRenderer, int nPriority)
     mUnknowna8 = kInitialUnknowna8;
 }
 
+// 0x0029bc68
+MetScreen *MetLoadFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetLoadFreqScreen(pRenderer, nPriority);
+}
+
 void MetLoadFreqScreen::EnterAndShow() {
     HxStr title;
     QueryConfigString(&title, kTitleConfigCode, kTitleKey);

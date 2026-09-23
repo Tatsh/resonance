@@ -52,6 +52,11 @@ MetLoadNewFreqScreen::MetLoadNewFreqScreen(MetRenderer *pRenderer, int nPriority
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
+// 0x002a8390
+MetScreen *MetLoadNewFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
+    return new MetLoadNewFreqScreen(pRenderer, nPriority);
+}
+
 void MetLoadNewFreqScreen::EnterAndShow() {
     HxStr title;
     QueryConfigString(&title, kTitleConfigCode, kTitleKey);

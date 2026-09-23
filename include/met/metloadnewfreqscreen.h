@@ -54,6 +54,18 @@ public:
     virtual ~MetLoadNewFreqScreen();
 
     /**
+     * Produce a new-identity load screen on the heap.
+     *
+     * The front end's screen factory at `0x00385180` is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The screen.
+     * @ghidraAddress 0x002a8390
+     */
+    static MetScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
      * Set the screen title and the prompt layout, then enter.
      *
      * Slot 5. The title comes from configuration code 0x269 under the key `create_char`, and the
