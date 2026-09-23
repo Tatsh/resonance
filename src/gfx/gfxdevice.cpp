@@ -91,9 +91,6 @@ constexpr int kRgbaqBlueShift = 16;
 constexpr int kRgbaqAlphaShift = 24;
 constexpr unsigned long long kRgbaqQOne = 0x3f800000ULL << 32;
 
-// The value word of the RGBAQ pair, the third register pair of an sceGsClear.
-constexpr int kClearRgbaqWord = 4;
-
 // The write-back mode of FlushCache().
 constexpr int kFlushCacheWriteBackData = 0;
 
@@ -750,8 +747,8 @@ void GfxDevice::RestoreFrameBufferTarget() {
 // 0x0049b368
 void GfxDevice::SetClearColor(const Color &color) {
     mClearColor = color;
-    mpDisplayBuffers->mHalves[0].mClear.mWords[kClearRgbaqWord] = PackRgbaq(color);
-    mpDisplayBuffers->mHalves[1].mClear.mWords[kClearRgbaqWord] = PackRgbaq(color);
+    mpDisplayBuffers->mHalves[0].mClear.rgbaqWord = PackRgbaq(color);
+    mpDisplayBuffers->mHalves[1].mClear.rgbaqWord = PackRgbaq(color);
     FlushCache(kFlushCacheWriteBackData);
 }
 

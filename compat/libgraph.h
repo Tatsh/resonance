@@ -57,9 +57,33 @@ typedef struct {
     unsigned long long test1addr;
 } sceGsDrawEnv1;
 
-// Six A+D register and address pairs, 96 bytes. sceGsSetDefClear() returns 6, the pair count.
+// The GS RGBAQ register: three colour bytes, alpha, and the Q texture coordinate.
 typedef struct {
-    unsigned long long mWords[12];
+    unsigned char R;
+    unsigned char G;
+    unsigned char B;
+    unsigned char A;
+    float Q;
+} sceGsRgbaq;
+
+// Six A+D register and address pairs, 96 bytes. sceGsSetDefClear() returns 6, the pair count. The
+// pair names follow GS register order and are inferred.
+typedef struct {
+    unsigned long long testa;
+    unsigned long long testaaddr;
+    unsigned long long prim;
+    unsigned long long primaddr;
+    union {
+        sceGsRgbaq rgbaq;
+        unsigned long long rgbaqWord;
+    };
+    unsigned long long rgbaqaddr;
+    unsigned long long xyz2a;
+    unsigned long long xyz2aaddr;
+    unsigned long long xyz2b;
+    unsigned long long xyz2baddr;
+    unsigned long long testb;
+    unsigned long long testbaddr;
 } sceGsClear;
 
 // The Sony double buffer, 0x230 bytes. sceGsSetDefDBuff() fills the clear colour of each half

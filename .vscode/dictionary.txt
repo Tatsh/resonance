@@ -733,6 +733,7 @@ powerupplacer
 powx
 powy
 preapproved
+primaddr
 prmodecont
 prmodecontaddr
 pscam
@@ -791,6 +792,7 @@ rendererbase
 reserveda
 reservedfc
 rgbaq
+rgbaqaddr
 riffer
 riffrangefinder
 riffset
@@ -904,7 +906,11 @@ tatsh
 teamfreq
 teardowns
 tempomap
+testa
+testaaddr
 testarbiterpacket
+testb
+testbaddr
 testregistry
 texa
 texburn

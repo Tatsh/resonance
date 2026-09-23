@@ -44,14 +44,10 @@ constexpr short kDisplayHeight = 224;
 constexpr short kGsZTestGEqual = 2;
 constexpr short kClearEnabled = 1;
 
-// The clear colour, written into the low three bytes of each half's RGBAQ value word.
-constexpr int kClearRgbaqWord = 4;
-constexpr unsigned long long kClearRed = 0x40;
-constexpr unsigned long long kClearGreen = 0x40;
-constexpr unsigned long long kClearBlue = 0x80;
-constexpr unsigned long long kRgbMask = 0xffffff;
-constexpr int kGreenShift = 8;
-constexpr int kBlueShift = 16;
+// The clear colour, written into the three colour bytes of each half's RGBAQ register.
+constexpr unsigned char kClearRed = 0x40;
+constexpr unsigned char kClearGreen = 0x40;
+constexpr unsigned char kClearBlue = 0x80;
 
 // A one-register A+D GIFtag with end of packet, as the alpha environment is sent.
 constexpr unsigned long long kAdGifTagLo = 0x1000000000008000ULL;
@@ -66,12 +62,6 @@ constexpr unsigned int kConsoleGsX = 0x6d00;
 constexpr unsigned int kConsoleGsY = 0x7a80;
 constexpr unsigned int kConsoleColumns = 75;
 constexpr unsigned int kConsoleRows = 30;
-
-inline void SetClearRgb(sceGsClear &clear) {
-    unsigned long long &rgbaq = clear.mWords[kClearRgbaqWord];
-    rgbaq =
-        (rgbaq & ~kRgbMask) | kClearRed | (kClearGreen << kGreenShift) | (kClearBlue << kBlueShift);
-}
 
 } // namespace
 
@@ -119,8 +109,12 @@ int InitDebugGs() {
                      kGsZTestGEqual,
                      kGsPsmZ24,
                      kClearEnabled);
-    SetClearRgb(g_debugDoubleBuffer.clear1);
-    SetClearRgb(g_debugDoubleBuffer.clear0);
+    g_debugDoubleBuffer.clear0.rgbaq.R = kClearRed;
+    g_debugDoubleBuffer.clear0.rgbaq.G = kClearGreen;
+    g_debugDoubleBuffer.clear0.rgbaq.B = kClearBlue;
+    g_debugDoubleBuffer.clear1.rgbaq.R = kClearRed;
+    g_debugDoubleBuffer.clear1.rgbaq.G = kClearGreen;
+    g_debugDoubleBuffer.clear1.rgbaq.B = kClearBlue;
     FlushCache(kFlushCacheWriteBackData);
 
     sceVif1PkReset(&packet);
