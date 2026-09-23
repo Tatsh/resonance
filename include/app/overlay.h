@@ -36,9 +36,15 @@ public:
     /**
      * Build the display for the game about to start.
      *
-     * Records the renderer, reads configuration code 0x3a1, and records the game mode and the play
-     * mode before loading the layout `HUD layout%d`. Records itself in g_pOverlay at the end. The
-     * body is not written.
+     * Records the renderer, configuration code 0x3a1, the game mode, the play mode, and the last
+     * bar. The layout number is the count of world players with a slot, with three players using
+     * the four-player layout. The constructor sets g_hudLayoutName from it, swaps `hud<n>.view`
+     * into `hud.view` in place of the other layouts, runs the layout at mMsPerTick, and hides
+     * every layout child other than `hud.cam` and `hud.env`. It then builds one track display per
+     * player with a slot, one badge per player, the panel, and the name and kind of each of the
+     * level's eight tracks. A jukebox session shows the jukebox prompt, the song name, and the
+     * level caption, and snaps the assembly and letterbox animations. Otherwise the assembly
+     * animation starts. Jam mode pulses every badge icon. Records itself in g_pOverlay at the end.
      *
      * @param pRenderer The renderer that constructs this object.
      * @ghidraAddress 0x0041c940
@@ -137,9 +143,9 @@ private:
     // mUnknown44 is set.
     void OnChoosePowerup(Message *pMsg);
 
-    // 0x0041eba0. PowerupCountMsg and CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's
-    // text message for 1500.
-    void OnPowerupCount(Message *pMsg);
+    // 0x0041eba0. CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's text message for
+    // 1500. HandleMessage() ignores a PowerupCountMsg outright.
+    void OnCaughtPowerbar(Message *pMsg);
 
     // 0x0041eda8. DeployedPowerupMsg.
     void OnDeployedPowerup(Message *pMsg);

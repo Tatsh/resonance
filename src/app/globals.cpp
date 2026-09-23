@@ -7,6 +7,9 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "game/grooveworld.h"
+#include "mid/mbt.h"
+#include "sch/tempomap.h"
+#include "sch/tickclock.h"
 #include "stream/iobpreallocmemstream.h"
 #include "synth/ps2hardsynth.h"
 
@@ -110,6 +113,18 @@ PlayMap *Globals::GetPlayMap() {
 // 0x00118e38
 bool Globals::IsJukeboxMode() {
     return GetGameManager()->GetParams()->mJukeboxMode;
+}
+
+// 0x00118d18
+LevelData *Globals::GetLevel() {
+    return GetWorld()->GetLevel();
+}
+
+// 0x00118ce8
+int Globals::GetTempo() {
+    Sch::TempoMap *pTempoMap = GetSongClock()->mTempoMap;
+    (void)IsFiniteMBT(0); // Yes, the binary discards this call's result.
+    return pTempoMap->mMicrosecondsPerQuarter;
 }
 
 // 0x00118dd8

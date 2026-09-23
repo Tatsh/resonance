@@ -3,6 +3,7 @@
 class GameManagerImpl;
 class GrooveWorld;
 class IOBPreallocMemStream;
+class LevelData;
 class MainLoop;
 class PlayMap;
 class Ps2HardSynth;
@@ -181,6 +182,27 @@ public:
      * @ghidraAddress 0x00118e38
      */
     bool IsJukeboxMode();
+
+    /**
+     * Report the world's level.
+     *
+     * The body composes GetWorld() with GrooveWorld::GetLevel().
+     *
+     * @return The level.
+     * @ghidraAddress 0x00118d18
+     */
+    LevelData *GetLevel();
+
+    /**
+     * Report the tempo of the song clock's tempo map.
+     *
+     * Reads Sch::TempoMap::mMicrosecondsPerQuarter through Sch::TickClock::mTempoMap inline, after
+     * a finiteness test of song position 0 whose result is discarded. The title is inferred.
+     *
+     * @return The tempo, in microseconds per quarter note.
+     * @ghidraAddress 0x00118ce8
+     */
+    int GetTempo();
 
 private:
     GameManagerImpl *mGameManager; // +0x00
