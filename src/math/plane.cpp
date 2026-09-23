@@ -31,6 +31,7 @@ inline Vector3 PointAlongSegment(const Segment &segment, float flT) {
 
 } // namespace
 
+// 0x00550fa8
 Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm) {
     Plane result;
     result.a = (pXfm[0] * plane.a) + (pXfm[4] * plane.b) + (pXfm[8] * plane.c);

@@ -187,6 +187,7 @@ void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pO
     pOut[3] = flW;
 }
 
+// 0x0045dae8
 void XfmConcat(const float *pA, const float *pB, float *pOut) {
     sceVu0Sub005e7ab0(pOut, pB, pA);
 }

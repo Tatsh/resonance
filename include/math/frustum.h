@@ -29,14 +29,18 @@ struct Frustum {
  * Every plane is expressed in camera space. A caller that needs world space therefore transforms
  * the result afterwards. Rnd::Cam::UpdateProjection() is the only caller recovered.
  *
+ * The four side planes pass through the origin unless flFov is zero, in which case they keep the
+ * distances of the unit offsets they are built through.
+ *
  * @param frustum Receives the six planes.
  * @param flNear Distance to the near plane.
  * @param flFar Distance to the far plane.
  * @param flFov Field of view in radians.
  * @param flAspect Vertical extent divided by the horizontal extent.
+ * @return frustum.
  * @ghidraAddress 0x00550b78
  */
-void BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, float flAspect);
+Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, float flAspect);
 
 /**
  * Write the six planes of a view volume to a diagnostic sink.
