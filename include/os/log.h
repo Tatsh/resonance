@@ -2,7 +2,11 @@
 
 #include <stdarg.h>
 
+#ifdef __cplusplus
 #include "os/hxstr.h"
+
+extern "C" {
+#endif
 
 /**
  * Write a formatted message to the debug console.
@@ -14,6 +18,9 @@
  * @ghidraAddress 0x0053dde0
  */
 void LogPrintf(const char *pszFormat, ...);
+
+#ifdef __cplusplus
+}
 
 /**
  * Report a recoverable problem and continue.
@@ -77,6 +84,7 @@ HxStr FormatMessage(const HxStr &format, va_list args, int nUnknown);
  * @ghidraAddress 0x00466368
  */
 void ShowReportedMessage(const HxStr &text, int nDuration);
+#endif
 
 /**
  * Show a message for a while, rather than writing it to the console.

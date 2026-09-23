@@ -2,6 +2,7 @@ set(RESONANCE_APP_SRCS
     animrange.cpp
     application.cpp
     attachment.cpp
+    cutscene.c
     globals.cpp
     hudanalogstick.cpp
     hudanimramp.cpp

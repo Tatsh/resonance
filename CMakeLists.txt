@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(resonance VERSION 0.0.2 LANGUAGES CXX)
+project(resonance VERSION 0.0.2 LANGUAGES C CXX)
 
 option(BUILD_DOCS "Build documentation alongside the sources." OFF)
 option(BUILD_DOCS_ONLY "Build documentation and nothing else." OFF)
@@ -10,6 +10,9 @@ option(INSTALL_DOCS "Install documentation." OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 if(BUILD_DOCS OR BUILD_DOCS_ONLY)
   set(DOXYGEN_GENERATE_HTML YES)

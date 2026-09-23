@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
 /**
  * The number of per-tag accounting records.
  *
@@ -28,6 +29,7 @@ struct MemTagTotal {
 
 /** Bytes the tag the STL allocator hook formats may occupy, including the terminator. */
 constexpr int kMemStlTagSize = 128;
+#endif
 
 /**
  * Allocate a block.
@@ -125,7 +127,13 @@ void MemSetStlTag(const char *pszKind, int nElemSize);
  * @return The block.
  * @ghidraAddress 0x004a8520
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine);
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Release a block.
@@ -160,7 +168,13 @@ void MemFreeScalar(void *pBlock);
  * @param nLine The caller's line number.
  * @ghidraAddress 0x004a94e8
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void MemFreeTagged(void *pBlock, const char *pszTag, int nLine);
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Find or claim the report row for a source name.
