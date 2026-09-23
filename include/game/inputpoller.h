@@ -53,6 +53,20 @@ public:
      */
     virtual ~InputPoller();
 
+    /**
+     * Drive the vibration motors of the controller on one port.
+     *
+     * The body is not written. It finds the port in the list at `+0x0c` and, when present, passes
+     * both levels to the pad record at `+0x1c`. ForceFeedbackMgr::ApplyMotors() is the recovered
+     * caller.
+     *
+     * @param nPort The controller's port, from 1.
+     * @param nSmallMotor The small motor's state, 0 or 1.
+     * @param nBigMotor The big motor's level.
+     * @ghidraAddress 0x001e1b78
+     */
+    void SetVibration(int nPort, int nSmallMotor, int nBigMotor);
+
 private:
     // Words per Entry. The setup routine at 0x001df248 zeroes exactly this many with a word loop,
     // and the table of controller bit masks that 0x001e19b8 builds at 0x008efb60 has the same

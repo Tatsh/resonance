@@ -7,6 +7,7 @@ set(RESONANCE_GAME_SRCS
     catchingstg.cpp
     controllercmd.cpp
     enablemgr.cpp
+    forcefeedbackmgr.cpp
     freqappearance.cpp
     gameenablemgr.cpp
     gamemanagerimpl.cpp
