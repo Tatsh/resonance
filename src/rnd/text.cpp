@@ -430,7 +430,7 @@ void Text::Load(Stream &stream) {
     stream.Read(&nVersion, sizeof(nVersion));
     if (nVersion > kSerialVersion) {
         g_failSink.Report("Can't load new Text\n");
-        g_failSink.mAbortProc();
+        return;
     }
 
     Drawable::Load(stream);

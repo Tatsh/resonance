@@ -288,6 +288,8 @@ void Manager::Read(Stream &stream) {
                                   NameText(className));
                 if (g_failSink.mAbortProc != nullptr) {
                     g_failSink.mAbortProc();
+                } else {
+                    throw; // With no handler the binary rethrows the exception in flight.
                 }
                 continue;
             }

@@ -58,6 +58,8 @@ Object::Object(const HxStr &name) : mName(name), mInternal(0), mMerge(1), mDelet
         g_failSink.Report(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
         if (g_failSink.mAbortProc != nullptr) {
             g_failSink.mAbortProc();
+        } else {
+            throw; // With no handler the binary rethrows the exception in flight.
         }
     }
 

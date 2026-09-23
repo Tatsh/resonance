@@ -252,6 +252,8 @@ void Drawable::Load(Stream &stream) {
         g_failSink.Report("Can't load new Drawable\n");
         if (g_failSink.mAbortProc != nullptr) {
             g_failSink.mAbortProc();
+        } else {
+            throw; // With no handler the binary rethrows the exception in flight.
         }
     }
 

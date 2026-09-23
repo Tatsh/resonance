@@ -908,7 +908,6 @@ void Mesh::Load(Stream &stream) {
     stream.Read(&g_nRndMeshLoadVersion, sizeof(g_nRndMeshLoadVersion));
     if (g_nRndMeshLoadVersion > kSerialVersion) {
         g_failSink.Report("Can't load new Mesh\n");
-        g_failSink.mAbortProc();
         return;
     }
 

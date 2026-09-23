@@ -639,7 +639,6 @@ void Mat::Load(Stream &stream) {
     stream.Read(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
     if (g_nRndMatLoadVersion > kSerialVersion) {
         g_failSink.Report("Can't load new Mat\n");
-        g_failSink.mAbortProc();
         return;
     }
 

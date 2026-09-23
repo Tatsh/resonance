@@ -322,7 +322,7 @@ void Font::Load(Stream &stream) {
     stream.Read(&nVersion, sizeof(nVersion));
     if (nVersion > kSerialVersion) {
         g_failSink.Report("Can't load new Font\n");
-        g_failSink.mAbortProc();
+        return;
     }
 
     RemoveMatRef();

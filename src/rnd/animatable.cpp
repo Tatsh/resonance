@@ -624,6 +624,8 @@ Animatable::Filter *Animatable::NewFilter(int nType) {
     // An unrecognised tag runs the abort handler with no message of its own.
     if (g_failSink.mAbortProc != nullptr) {
         g_failSink.mAbortProc();
+    } else {
+        throw; // With no handler the binary rethrows the exception in flight.
     }
     return nullptr;
 }
@@ -677,6 +679,8 @@ void Animatable::Load(Stream &stream) {
         g_failSink.Report("Can't load new Animatable\n");
         if (g_failSink.mAbortProc != nullptr) {
             g_failSink.mAbortProc();
+        } else {
+            throw;
         }
     }
 

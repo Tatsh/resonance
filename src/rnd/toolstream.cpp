@@ -61,6 +61,8 @@ Stream &ToolStream::WriteBytes([[maybe_unused]] const void *pSrc, [[maybe_unused
     g_failSink.Report("Can't write to a PS ToolStream\n");
     if (g_failSink.mAbortProc != nullptr) {
         g_failSink.mAbortProc();
+    } else {
+        throw; // With no handler the binary rethrows the exception in flight.
     }
     return *this;
 }

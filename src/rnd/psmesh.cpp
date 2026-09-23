@@ -326,6 +326,8 @@ int PsMesh::DrawSelf() {
         g_failSink.Report("DrawShowing vert buffer overflow... %d\n", mVertsOwner->mVerts.size());
         if (g_failSink.mAbortProc != nullptr) {
             g_failSink.mAbortProc();
+        } else {
+            throw; // With no handler the binary rethrows the exception in flight.
         }
         return 0;
     }

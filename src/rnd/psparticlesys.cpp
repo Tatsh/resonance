@@ -213,6 +213,8 @@ int PsParticleSys::DrawSelf() {
         g_failSink.Report("DrawShowing particle buffer overflow... %d\n", mParticles.size());
         if (g_failSink.mAbortProc != nullptr) {
             g_failSink.mAbortProc();
+        } else {
+            throw; // With no handler the binary rethrows the exception in flight.
         }
     }
 
