@@ -5,13 +5,17 @@
 #include "app/playsound.h"
 #include "game/nullplayer.h"
 #include "game/player.h"
+#include "game/quantizer.h"
+#include "game/riff.h"
 #include "game/trackdata.h"
 #include "gs/phrasemgr.h"
 #include "msg/allnotesoffmsg.h"
 #include "msg/erasemsg.h"
 #include "msg/eraseoffmsg.h"
 #include "msg/invalidateseekermsg.h"
+#include "msg/multimusemsg.h"
 #include "msg/phrasecapturedmsg.h"
+#include "msg/pitchmsg.h"
 #include "msg/pitchriffmsg.h"
 #include "msg/seekermsg.h"
 #include "msg/showeraseeffectmsg.h"
@@ -39,6 +43,7 @@ constexpr int kGemFlag = 1;
 constexpr int kNoJuice = 0;
 constexpr int kNoStreak = 0;
 
+constexpr char kInactiveSound[] = "SND_INACTIVE";
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
 constexpr char kEraseBarSound[] = "SND_ERASE";
 
@@ -64,6 +69,40 @@ NotePitcher::NotePitcher(PhraseMgr *pPhraseMgr,
       mTrackData(pTrackData), mClock(pClock) {
     // The divisor is stored twice, the placeholder and then the bar length.
     mBarDivisor = mPhraseMgr->mBarTicks;
+}
+
+// 0x001b1f10
+void NotePitcher::PostPitchMsg(PitchRiffMsg *pMsg) {
+    if (pMsg->mUnknown10 != mUnknown40 || pMsg->mUnknown08 != mUnknown44) {
+        return;
+    }
+
+    const int nTick = mQuantizer->Quantize(pMsg->mUnknown0c.mTick);
+    if (CanPlayBar(nTick / mBarDivisor, mUnknown54) == 0) {
+        PlaySoundByName(kInactiveSound);
+        return;
+    }
+    if (IsOtherTick(nTick) != 1) {
+        return;
+    }
+
+    const int nGem = pMsg->mUnknown04;
+    Riff *pRiff = mTrackData->GetRiff(nTick, nGem);
+    if (pRiff == nullptr) {
+        return;
+    }
+    MultiMuseMsg muse(pRiff);
+    Send(&muse);
+    PostPhraseCapturedMsg(nGem, nTick);
+
+    PitchMsg pitch;
+    pitch.mUnknown04 = nTick;
+    pitch.mUnknown08 = mUnknown40;
+    pitch.mUnknown0c = nGem;
+    pitch.mUnknown10 = mUnknown44;
+    Send(&pitch);
+    // The position is stored without the finiteness check.
+    mUnknown4c.mTick = nTick;
 }
 
 // 0x001b20b0

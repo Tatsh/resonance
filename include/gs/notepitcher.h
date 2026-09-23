@@ -30,7 +30,7 @@ class TickClock;
  *
  * The titles of the routines HandleMessage() and Tick() dispatch to come from the message each
  * routine posts rather than from the message it receives. That is the naming the program already
- * had, and it is retained here. PostPitchMsg() is the one routine not written.
+ * had, and it is retained here.
  */
 class NotePitcher : public Pitcher {
 public:
@@ -81,8 +81,7 @@ protected:
      * The message's position is quantised. A bar CanPlayBar() rejects plays `SND_INACTIVE`.
      * Otherwise, at a new position, the riff TrackData::GetRiff() reports goes out as a
      * MultiMuseMsg, PostPhraseCapturedMsg() records the gem, a PitchMsg follows, and the position
-     * is stored in mUnknown4c. The body is not written, because PitchMsg's word at `+0x04` is
-     * private and the class has no payload constructor.
+     * is stored in mUnknown4c.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001b1f10

@@ -15,6 +15,9 @@ class Player;
  * public because AppTunnel's pitch handler at `0x00447cc0` reads them directly with no accessor in
  * the image. It compares `+0x10` with the player each tunnel item stores, which types it.
  *
+ * A second, identical vtable at `0x007e1320` is emitted in NotePitcher's unit, and
+ * NotePitcher::PostPitchMsg() stores it at `0x001b2024`.
+ *
  * The destructor at `0x001b3890` is compiler-generated and has no declaration here.
  */
 class PitchMsg : public Message {
@@ -53,10 +56,13 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
+    /**
+     * The quantised song position, in MIDI ticks. +0x04
+     *
+     * Public because NotePitcher::PostPitchMsg() at `0x001b1f10` writes it directly.
+     */
+    int mUnknown04;
 
-public:
     int mUnknown08;     /*!< Purpose unrecovered. AppTunnel passes it on to a lookup. +0x08 */
     int mUnknown0c;     /*!< Purpose unrecovered. AppTunnel converts it to a float. +0x0c */
     Player *mUnknown10; /*!< The player. +0x10 */
