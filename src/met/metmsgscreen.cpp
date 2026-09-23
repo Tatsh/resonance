@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "met/metbuttonlist.h"
+#include "met/metrenderer.h"
+#include "msg/message.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
@@ -40,6 +42,22 @@ constexpr int kTwoButtons = 2;
 constexpr int kFirstButtonIndex = 0;
 constexpr int kNoPad = -1;
 constexpr int kNoSelection = -1;
+constexpr float kNoExitTime = 0.0f;
+
+// How long after the renderer's current time a dialogue with no buttons exits.
+constexpr float kNoButtonExitDelay = 480.0f;
+
+// The objects ResolveContainerViews() builds the button lists from and resolves.
+static const char *const kTwoButtonFirst = "dlg2_01.but";
+static const char *const kTwoButtonSecond = "dlg2_02.but";
+static const char *const kOneButtonOnly = "dlg1_01.but";
+static const char *const kNoLabel = "";
+static const char *const kTitleTextObject = "dlg_warning.txt";
+static const char *const kMessageTextObject = "dlg_message.txt";
+static const char *const kButtonViewObject = "dlg_buts.view";
+
+// The dialogue with no buttons, which ignores commands and exits on a timer.
+constexpr int kNoButtons = 0;
 
 inline Rnd::View *FindView(const HxStr &name) {
     return dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(name));
@@ -51,14 +69,14 @@ inline Rnd::View *FindView(const HxStr &name) {
 MetMsgScreen::MetMsgScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr), mUnknown90(nullptr), mUnknownd0(0), mUnknownd4(kNoSelection),
-      mShowing(0), mOwnerPad(kNoPad) {
+      mOneButtonList(nullptr), mTwoButtonList(nullptr), mExitTime(kNoExitTime),
+      mChoice(kNoSelection), mShowing(0), mOwnerPad(kNoPad) {
 }
 
 // 0x002ec450
 MetMsgScreen::~MetMsgScreen() {
-    delete mUnknown90;
-    delete mUnknown8c;
+    delete mTwoButtonList;
+    delete mOneButtonList;
 }
 
 // 0x002f02c0
@@ -139,13 +157,13 @@ void MetMsgScreen::SetButtons(const std::vector<HxStr> &buttons) {
 
 // 0x002ecd10
 void MetMsgScreen::Refresh() {
-    mUnknown98->ClearDraws();
+    mButtonView->ClearDraws();
     Rnd::View *pButtons = FindView(HxStr(FormatString(kButtonViewFormat, mButtonCount)));
-    mUnknown98->AddDraw(pButtons);
-    mUnknowna0->SetText(mTitle);
-    mUnknown9c->SetText(mText);
+    mButtonView->AddDraw(pButtons);
+    mTitleText->SetText(mTitle);
+    mMessageText->SetText(mText);
 
-    const int nLines = mUnknown9c->CountLines();
+    const int nLines = mMessageText->CountLines();
     Rnd::View *pFrame;
     if (nLines < kSmallFrameLines) {
         pFrame = FindView(HxStr(kSmallFrameView));
@@ -161,17 +179,131 @@ void MetMsgScreen::Refresh() {
     pGroup->AddDraw(pFrame);
 
     if (mButtonCount == kOneButton) {
-        mUnknown94 = mUnknown8c;
+        mButtonList = mOneButtonList;
     } else if (mButtonCount == kTwoButtons) {
-        mUnknown94 = mUnknown90;
+        mButtonList = mTwoButtonList;
     } else {
-        mUnknown94 = nullptr;
+        mButtonList = nullptr;
     }
-    if (mUnknown94 != nullptr) {
-        for (int i = 0; i < static_cast<int>(mUnknown94->mButtons.size()); ++i) {
-            mUnknown94->ButtonAt(i)->mText->SetText(mButtons[i]);
+    if (mButtonList != nullptr) {
+        for (int i = 0; i < static_cast<int>(mButtonList->mButtons.size()); ++i) {
+            mButtonList->ButtonAt(i)->mText->SetText(mButtons[i]);
         }
-        mUnknown94->SetSelected(kFirstButtonIndex);
+        mButtonList->SetSelected(kFirstButtonIndex);
     }
-    mUnknownd4 = kNoSelection;
+    mChoice = kNoSelection;
+}
+
+// 0x002f0640
+void MetMsgScreen::HandleMessage(Message *pMsg) {
+    pMsg->Type(); // Yes, the binary discards this call's result.
+    ForwardToOwner(pMsg);
+}
+
+// 0x002f04d0
+void MetMsgScreen::EnterAndShow() {
+    mShowing = 0;
+    Refresh();
+    MetScreen::EnterAndShow();
+}
+
+// 0x002f0588
+void MetMsgScreen::BeginExit() {
+    if (mButtonCount == kNoButtons) {
+        mExitTime = mUnknown10->mUnknown68 + kNoButtonExitDelay;
+    } else {
+        MetScreen::BeginExit();
+    }
+}
+
+// 0x002ecba0
+void MetMsgScreen::HandleCommand(const MetScreenCommand *pCommand) {
+    if (mButtonCount == kNoButtons) {
+        return;
+    }
+    if (mOwnerPad != kNoPad && mOwnerPad != pCommand->mPadIndex) {
+        return;
+    }
+    switch (pCommand->mCommand) {
+    case kMetScreenCommandLeft:
+        if (mButtonList != nullptr) {
+            mButtonList->OnUnknownSlot2();
+        }
+        break;
+
+    case kMetScreenCommandRight:
+        if (mButtonList != nullptr) {
+            mButtonList->OnUnknownSlot3();
+        }
+        break;
+
+    case kMetScreenCommandSelect:
+        if (mButtonList != nullptr) {
+            mChoice = mButtonList->mSelected;
+        }
+        ActivateNamedPanel(HxStr(kNoLabel));
+        BeginExit();
+        break;
+
+    default:
+        break;
+    }
+}
+
+// 0x002f0410
+void MetMsgScreen::PlaySlideSound(int nSelector) {
+    if (mButtonCount != kNoButtons && (mOwnerPad == nSelector || mOwnerPad == kNoPad)) {
+        MetScreenMultiSoundBank::PlaySlideSound(nSelector);
+    }
+}
+
+// 0x002f0450
+void MetMsgScreen::PlayCycleLeftSound(int nSelector) {
+    if (mButtonCount >= kTwoButtons && (mOwnerPad == nSelector || mOwnerPad == kNoPad)) {
+        MetScreenMultiSoundBank::PlayCycleLeftSound(nSelector);
+    }
+}
+
+// 0x002f0490
+void MetMsgScreen::PlayCycleRightSound(int nSelector) {
+    if (mButtonCount >= kTwoButtons && (mOwnerPad == nSelector || mOwnerPad == kNoPad)) {
+        MetScreenMultiSoundBank::PlayCycleRightSound(nSelector);
+    }
+}
+
+// 0x002f0540
+void MetMsgScreen::OnUnknownSlot26(float flTime) {
+    if (mExitTime != kNoExitTime && mExitTime < flTime) {
+        mExitTime = kNoExitTime;
+        MetScreen::BeginExit();
+    }
+}
+
+// 0x002f0500
+void MetMsgScreen::OnUnknownSlot33() {
+    mShowing = 1;
+    if (mOwner != nullptr) {
+        mOwner->OnMsgScreenShown(mName);
+    }
+}
+
+// 0x002f05d0
+void MetMsgScreen::OnUnknownSlot36() {
+    mShowing = 0;
+    if (mOwner != nullptr) {
+        mOwner->OnMsgScreenDismissed(mName, mChoice);
+    }
+}
+
+// 0x002ec6f8
+void MetMsgScreen::ResolveContainerViews() {
+    MetScreen::ResolveContainerViews();
+    mTwoButtonList = new MetButtonList;
+    mTwoButtonList->Add(HxStr(kTwoButtonFirst), HxStr(kNoLabel));
+    mTwoButtonList->Add(HxStr(kTwoButtonSecond), HxStr(kNoLabel));
+    mOneButtonList = new MetButtonList;
+    mOneButtonList->Add(HxStr(kOneButtonOnly), HxStr(kNoLabel));
+    mTitleText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kTitleTextObject)));
+    mMessageText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kMessageTextObject)));
+    mButtonView = FindView(HxStr(kButtonViewObject));
 }
