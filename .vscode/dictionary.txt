@@ -82,6 +82,7 @@ bitbltbuf
 blak
 blit
 bltinmodule
+bluegrey
 bsky
 bsloadlevelpacket
 bufferobject
@@ -186,6 +187,7 @@ durgemmsg
 durgemrowstring
 durgemstrip
 durgemtrails
+easywarn
 eekernel
 effectpowerup
 egmg
@@ -552,6 +554,7 @@ metscreens
 metscreentitlescreen
 metsoloendremixscreen
 metsololosescreen
+metsolostagesscreen
 metsolostatsscreen
 metsolowinscreen
 metsonglists
@@ -843,6 +846,7 @@ spewregistrar
 spjoinacceptpacket
 spjoindenypacket
 srcs
+sstv
 startable
 statusline
 stcycl

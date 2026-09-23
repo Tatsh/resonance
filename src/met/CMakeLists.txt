@@ -86,6 +86,7 @@ set(RESONANCE_MET_SRCS
     metscreentitlescreen.cpp
     metsoloendremixscreen.cpp
     metsololosescreen.cpp
+    metsolostagesscreen.cpp
     metsolostatsscreen.cpp
     metsolowinscreen.cpp
     metsonglists.cpp
