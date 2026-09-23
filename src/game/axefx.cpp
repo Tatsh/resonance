@@ -2,6 +2,7 @@
 
 #include "app/globals.h"
 #include "game/trackdata.h"
+#include "msg/axisfxmsg.h"
 #include "msg/stdmidimsg.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
@@ -41,6 +42,11 @@ void AxeFX::SendController() {
                    mController,
                    static_cast<unsigned char>(mValue));
     Send(&msg);
+}
+
+// 0x0019b498
+void AxeFX::OnAxisFX(AxisFXMsg *pMsg) {
+    mFilter.SetTarget(pMsg->mValue);
 }
 
 // 0x0019b4b8

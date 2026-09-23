@@ -44,9 +44,7 @@ private:
     // Clears the owned phrases of the four bars after the message's bar on this track. Each owner
     // loses the phrase's value from its score through the Player routine at 0x0012f808. When a
     // phrase was cleared, the message is marked handled, a DeployedPowerupMsg covering the four
-    // bars is sent, and a PlayersTrackNeutralizedMsg follows for each player that lost points. The
-    // body is not written, because NeutralizeMsg declares its payload private and Player does not
-    // declare the score routine.
+    // bars is sent, and a PlayersTrackNeutralizedMsg follows for each player that lost points.
     // 0x001c0980
     void PostTrackNeutralizedMsg(NeutralizeMsg *pMsg);
 

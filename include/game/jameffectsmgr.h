@@ -75,8 +75,7 @@ private:
     // For a message on this track, flips the effect's bit in the step value of the message's bar,
     // enables or disables the effect to match, sends an InvalidateTrackMsg for the whole song to
     // the phrase manager, and sends a RemixFXMsg. An effect type from 5 through 10 also marks the
-    // world's statistics. The body is not written, because JamEffectMsg's payload is private and
-    // RemixFXMsg has no payload constructor.
+    // world's statistics.
     // 0x001a54d8
     void PostRemixFxMsg(JamEffectMsg *pMsg);
 

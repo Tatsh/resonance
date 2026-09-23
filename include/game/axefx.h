@@ -66,8 +66,7 @@ private:
     // 0x0019abd8
     void SendController();
 
-    // The out-of-line copy of the AxisFXMsg branch HandleMessage() expands inline. The body is
-    // not written, for the reason HandleMessage() records.
+    // The out-of-line copy of the AxisFXMsg branch HandleMessage() expands inline.
     // 0x0019b498
     void OnAxisFX(AxisFXMsg *pMsg);
 
