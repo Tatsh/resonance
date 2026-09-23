@@ -50,6 +50,7 @@ char *AlignZoneStart(void *pBlock) {
 
 } // namespace
 
+// 0x00461190
 int ZoneCreate(const char *pszName, int nSize) {
     if (g_nZonesEnabled == 0) {
         return kNoZone;
@@ -91,6 +92,7 @@ int ZoneCreate(const char *pszName, int nSize) {
     return nZone;
 }
 
+// 0x004612e0
 void *ZoneAlloc(unsigned nSize) {
     if (g_nZonesEnabled == 0) {
         return MemAllocTagged(nSize, __FILE__, __LINE__);
@@ -121,6 +123,7 @@ void *ZoneAlloc(unsigned nSize) {
     return pBlock;
 }
 
+// 0x004613d0
 void *ZoneGrabTemp([[maybe_unused]] int nSize) {
     if (g_pTempBuffer == nullptr) {
         if (g_nZonesEnabled != 0) {
@@ -153,6 +156,7 @@ void *ZoneGrabTemp([[maybe_unused]] int nSize) {
     return g_pTempBuffer;
 }
 
+// 0x00461518
 void SetZonesEnabled(int nEnabled) {
     if (g_nZonesEnabled != 0) {
         FreeAllZones();
@@ -160,6 +164,7 @@ void SetZonesEnabled(int nEnabled) {
     g_nZonesEnabled = nEnabled;
 }
 
+// 0x00461558
 void FreeAllZones() {
     for (int i = 0; i < kZoneCount; ++i) {
         if (g_adZones[i].mBlock != nullptr) {
@@ -170,12 +175,14 @@ void FreeAllZones() {
     g_nCurrentZone = kNoZone;
 }
 
+// 0x004615d8
 void InitializeZoneList() {
     for (const ZoneConfig *pConfig = g_aZoneConfigs; pConfig->mName != nullptr; ++pConfig) {
         ZoneCreate(pConfig->mName, pConfig->mSizeKb * 1024);
     }
 }
 
+// 0x00461628
 void ZoneDelete(int nZone) {
     if (g_nZonesEnabled == 0) {
         return;
@@ -194,6 +201,7 @@ void ZoneDelete(int nZone) {
     }
 }
 
+// 0x004616c8
 void ReleaseAllZoneSlots() {
     for (int i = 0; i < kZoneCount; ++i) {
         if (g_adZones[i].mBlock != nullptr) {
@@ -202,6 +210,7 @@ void ReleaseAllZoneSlots() {
     }
 }
 
+// 0x00461770
 int FindZoneByName(const char *pszName) {
     for (int i = 0; i < kZoneCount; ++i) {
         if (g_adZones[i].mBlock != nullptr && strcmp(g_adZones[i].mName, pszName) == 0) {
@@ -211,6 +220,7 @@ int FindZoneByName(const char *pszName) {
     return kNoZone;
 }
 
+// 0x004617f8
 void ZoneSetCurrent(int nZone) {
     if (g_nZonesEnabled == 0) {
         return;
@@ -218,14 +228,17 @@ void ZoneSetCurrent(int nZone) {
     g_nCurrentZone = nZone;
 }
 
+// 0x00461818
 int ZoneGetCurrent() {
     return g_nCurrentZone;
 }
 
+// 0x00461828
 void ZoneReset() {
     ZoneResetZone(g_nCurrentZone);
 }
 
+// 0x00461850
 void ZoneResetZone(int nZone) {
     if (g_nZonesEnabled == 0) {
         return;
@@ -242,6 +255,7 @@ void ZoneResetZone(int nZone) {
     pZone->mCur = pZone->mStart;
 }
 
+// 0x004618b0
 void ZoneFree(void *pBlock) {
     if (g_nZonesEnabled != 0 && g_nCurrentZone != kNoZone) {
         return;
@@ -249,6 +263,7 @@ void ZoneFree(void *pBlock) {
     MemFreeTagged(pBlock, __FILE__, __LINE__);
 }
 
+// 0x00461900
 int ZoneGetAvail(int nDefault) {
     if (g_nZonesEnabled == 0) {
         return nDefault;
@@ -264,6 +279,7 @@ int ZoneGetAvail(int nDefault) {
     return pZone->mSize - (pZone->mCur - pZone->mStart);
 }
 
+// 0x00461968
 int FindZoneForPointer(const void *pBlock) {
     const char *pAddress = static_cast<const char *>(pBlock);
     for (int i = 0; i < kZoneCount; ++i) {
@@ -278,10 +294,12 @@ int FindZoneForPointer(const void *pBlock) {
     return kNoZone;
 }
 
+// 0x004619c8
 void ZoneReleaseTemp() {
     g_bTempGrabbed = 0;
 }
 
+// 0x004619d8
 void ZoneDump() {
     if (g_nZonesEnabled == 0) {
         return;

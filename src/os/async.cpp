@@ -141,6 +141,7 @@ char g_abAsyncCallbackStack[kAsyncCallbackStackSize];
 
 } // namespace
 
+// 0x0045f000
 void InitAsync() {
     g_nAsyncHostMedia = (UsingCdMedia() == 0);
     g_asyncPendingJobs.clear();
@@ -177,6 +178,7 @@ void InitAsync() {
     g_bAsyncInitialised = 1;
 }
 
+// 0x0045fc90
 void AsyncQueueRequest(AsyncRequest request) {
     if (g_nAsyncHostMedia != 0) {
         const int nRead = FileRead(request.mFile, request.mReadBuffer, request.mReadLength);
@@ -264,6 +266,7 @@ int IsMediaReady() {
     return 1;
 }
 
+// 0x00460b28
 void AsyncMediaEventCallback(int nFunction) {
     g_nAsyncOpError = sceCdGetError();
 
@@ -275,12 +278,14 @@ void AsyncMediaEventCallback(int nFunction) {
     }
 }
 
+// 0x00460b98
 void ShutdownAsync() {
     if (g_bAsyncInitialised != 0) {
         MemFreeTagged(g_pAsyncFreeJobs, __FILE__, __LINE__);
     }
 }
 
+// 0x00460bd0
 int AsyncSubmitRequest(int nFile,
                        void *pBuffer,
                        int nLength,
@@ -318,6 +323,7 @@ int AsyncSubmitRequest(int nFile,
     return request.mId;
 }
 
+// 0x00460d90
 AsyncJob *AsyncGetFreeJobChain() {
     AsyncJob *pJob = g_pAsyncFreeJobs;
     AsyncJob *pNext = pJob->mNext;
@@ -330,6 +336,7 @@ AsyncJob *AsyncGetFreeJobChain() {
     return pJob;
 }
 
+// 0x00460dd8
 void AsyncReleaseJobChain(AsyncJob *pChain) {
     if (pChain == nullptr) {
         return;
@@ -376,6 +383,7 @@ void AsyncIssueOp() {
 
 } // namespace
 
+// 0x00460590
 void AsyncCheck(int nBlocking) {
     if ((g_asyncCurrentOp.mStatus != kAsyncOpSeeking) &&
         (g_asyncCurrentOp.mStatus != kAsyncOpReading)) {
@@ -610,6 +618,7 @@ int AsyncQueueCachedSector(int nFile, int nSector, int nBaseSector) {
 
 } // namespace
 
+// 0x0045f8d8
 void AsyncPumpCompletedRequests() {
     if (g_nAsyncHostMedia == 0) {
         int nFile;
@@ -641,6 +650,7 @@ void AsyncPumpCompletedRequests() {
     }
 }
 
+// 0x00460d58
 int ResolveAsyncStreamFile(int nFile) {
     if ((nFile & kFileHandleArkStream) == 0) {
         return nFile;
@@ -649,6 +659,7 @@ int ResolveAsyncStreamFile(int nFile) {
     return GetArkStreamArkId(nFile & ~kFileHandleArkStream);
 }
 
+// 0x00460f78
 int MatchesCurrentAsyncOp(int nFile, int nSector) {
     if (g_asyncCurrentOp.mId != nFile) {
         return 0;
@@ -657,6 +668,7 @@ int MatchesCurrentAsyncOp(int nFile, int nSector) {
     return (g_asyncCurrentOp.mSector == nSector) ? 1 : 0;
 }
 
+// 0x0045ffa8
 void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     if (nStatus > 0) {
         LogPrintf("AsyncJobComplete: job %d has error: %d\n", pRequest->mId, nStatus);
@@ -673,6 +685,7 @@ void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     g_asyncCompletedJobs.push_back(*pRequest);
 }
 
+// 0x0045f658
 int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
     for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
         if (it->mId != nHandle) {
@@ -696,6 +709,7 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
     return -1;
 }
 
+// 0x0045f738
 void AsyncCancelRequest(int nHandle) {
     for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
         if (it->mId != nHandle) {
@@ -733,6 +747,7 @@ void AsyncCancelRequest(int nHandle) {
     }
 }
 
+// 0x0045faf0
 void AsyncDump() {
     LogPrintf("\nASYNC DUMP\n\n");
     LogPrintf("current op:  id: %d, sector: %d, buffer: %p, status: %d, retry: %d (%d)\n",
@@ -760,6 +775,7 @@ void AsyncDump() {
     LogPrintf("num Free Job Chains: %d\n", nFreeJobs);
 }
 
+// 0x0045f148
 int AsyncLoadFileByPath(const char *pszPath,
                         void *pBuffer,
                         unsigned nLength,
@@ -880,6 +896,7 @@ int AsyncLoadFileByPath(const char *pszPath,
     return request.mId;
 }
 
+// 0x0045fa38
 void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs) {
     *pnPending = static_cast<int>(g_asyncPendingJobs.size());
     *pnCompleted = static_cast<int>(g_asyncCompletedJobs.size());
