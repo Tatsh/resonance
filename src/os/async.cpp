@@ -345,7 +345,8 @@ void AsyncReleaseJobChain(AsyncJob *pChain) {
 
 namespace {
 
-// Issue the command the current transfer's state calls for, 0x004604c8.
+// 0x004604c8
+// Issue the command the current transfer's state calls for.
 //
 // The name is attested by the routine's own report. A state the routine does not recognise is
 // reported and nothing is issued, and the timing stamps are then not written either.
@@ -450,7 +451,8 @@ void AsyncCheck(int nBlocking) {
 
 namespace {
 
-// Advance the current transfer and take its results once it has finished, 0x004603d8.
+// 0x004603d8
+// Advance the current transfer and take its results once it has finished.
 //
 // Reports non-zero only on the pass that finds the data in place, and the record is idle again
 // afterwards. A pending retry is counted and the command reissued instead.
@@ -510,7 +512,8 @@ inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJob *pJob) {
     }
 }
 
-// Perform one job at once rather than through the sector cache, 0x00460e10.
+// 0x00460e10
+// Perform one job at once rather than through the sector cache.
 //
 // This is the path a request on a loose file takes. The cache is keyed by 64 KiB chunks of an
 // archive, and a loose file has no archive to key it by. The job therefore reads straight from the
@@ -525,7 +528,8 @@ void DeliverAsyncJobData(AsyncRequest *pRequest, AsyncJob *pJob) {
     UnlinkAsyncJob(pRequest, pJob);
 }
 
-// Report the work the drive should do next, 0x00460120.
+// 0x00460120
+// Report the work the drive should do next.
 //
 // A pending request on a loose file is serviced in place and ends the scan. The first pending
 // ark-stream request is copied out instead, and the chunk its first job wants is reported for the
@@ -546,7 +550,8 @@ int PickNextAsyncFetch(AsyncRequest *pRequest) {
     return (nSector != kAsyncNoSectorPending) ? nSector : -1;
 }
 
-// Hand a freshly read chunk to every pending request that wants it, 0x00460238.
+// 0x00460238
+// Hand a freshly read chunk to every pending request that wants it.
 //
 // A request whose last job is satisfied here completes immediately. The data a caller asked for is
 // therefore in place before the caller is told about it.
@@ -579,7 +584,8 @@ void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) 
     }
 }
 
-// Start the transfer of one chunk into the cache, 0x00460ee0.
+// 0x00460ee0
+// Start the transfer of one chunk into the cache.
 //
 // The name is attested by the routine's own report. The row the transfer will fill is locked for
 // the whole of it, which is what stops AsyncQueueRequest() copying a half-filled row out. The
