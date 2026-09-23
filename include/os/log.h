@@ -83,8 +83,8 @@ void ShowReportedMessage(const HxStr &text, int nDuration);
  *
  * The body of this routine is a bare return in the shipped build. None of the three messages that
  * go through it therefore ever appears. The reconstruction retains the call sites because the
- * strings and the calls are both in the image. The routine sits with the C library rather than with
- * the routines above, so log.cpp declares it without defining it.
+ * strings and the calls are both in the image. The routine sits in the debug console unit, between
+ * InitDebugGs() and OpenDebugConsole(), and devconsole.cpp defines it.
  *
  * The text is already formatted at every call site, so the routine is not variadic. Both the name
  * and the second argument's unit are inferred: the three callers pass a duration of 300, 600, and a

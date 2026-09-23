@@ -104,8 +104,9 @@ void Error(const char *pszFormat, ...);
  * Bring up the graphics path and the on-screen debug console.
  *
  * The routine belongs to another translation unit and is declared here so that iop.cpp can call it.
- * It initialises the GS through 0x005e5d08 and then creates a console of 75 columns by 30 rows of
- * 16-bit character cells, clearing every cell to 0x0720, a space with attribute 7.
+ * That unit is devconsole.cpp. It initialises the GS through InitDebugGs() and then creates a
+ * console of 75 columns by 30 rows of 16-bit character cells, clearing every cell to 0x0720, a
+ * space with attribute 7.
  *
  * The name is inferred from the console geometry and the cell fill. Nothing in the image attests
  * it, and InitIop() is the only caller.

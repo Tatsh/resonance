@@ -3,6 +3,7 @@ set(RESONANCE_OS_SRCS
     async.cpp
     asynccallback.cpp
     cycles.cpp
+    devconsole.cpp
     failsink.cpp
     formatstring.cpp
     heap.cpp

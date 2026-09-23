@@ -64,6 +64,18 @@ typedef struct {
     sceGsClear clear1;
 } sceGsDBuff;
 
+// Four A+D register and address pairs, 64 bytes: ALPHA_1, PABE, TEXA, and FBA_1 among them.
+// sceGsSetDefAlphaEnv() returns 4, the pair count.
+typedef struct {
+    unsigned long mWords[8];
+} sceGsAlphaEnv;
+
+// Resets VIF1, VU1, and the GIF, and primes VIF1 through its FIFO.
+void sceGsResetPath(void);
+void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFieldMode);
+// Waits for the next vertical blank and returns the field it began.
+int sceGsSyncV(int nMode);
+int sceGsSetDefAlphaEnv(sceGsAlphaEnv *pAlpha, short nPabe);
 void sceGsSetDefDispEnv(
     sceGsDispEnv *pDisp, short nPsm, short nWidth, short nHeight, short nDx, short nDy);
 int sceGsSetDefDrawEnv(
