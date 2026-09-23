@@ -86,7 +86,8 @@ struct AsyncOp {
     int mRetryCount; // +0x18
 };
 
-// 0x006e9128. The element is the 48-byte request inline, not a pointer to one.
+// The element is the 48-byte request inline, not a pointer to one.
+// 0x006e9128
 std::list<AsyncRequest> g_asyncPendingJobs;
 
 // 0x006e9130
@@ -107,15 +108,18 @@ AsyncOp g_asyncCurrentOp;
 // 0x006e915c
 int g_bAsyncThreaded;
 
-// 0x006e9160. Raised by the drive callback and consumed by AsyncCheck.
+// Raised by the drive callback and consumed by AsyncCheck.
+// 0x006e9160
 int g_nAsyncOpFinished;
 
-// 0x006e9168. Nothing in the image writes this, so every field stays at its zero: no retry limit,
-// no spindle override, and 2048-byte sectors.
+// Nothing in the image writes this, so every field stays at its zero: no retry limit, no spindle
+// override, and 2048-byte sectors.
+// 0x006e9168
 sceCdRMode g_asyncOpReadMode;
 
-// 0x006e9170. Cleared once the read finishes, which is what makes a zero here mean "no command in
-// flight" to AsyncCheck.
+// Cleared once the read finishes, which is what makes a zero here mean "no command in flight" to
+// AsyncCheck.
+// 0x006e9170
 long long g_llAsyncOpDeadline;
 
 // 0x006e9178
@@ -127,13 +131,16 @@ AsyncJob *g_pAsyncFreeJobs;
 // 0x006e91d4
 int g_nAsyncCallbackThread;
 
-// 0x006e91d8. Nothing restores it.
+// Nothing restores it.
+// 0x006e91d8
 sceCdCBFunc g_pfnAsyncPrevCdCallback;
 
-// 0x006e91dc. The drive error code the last callback report latched.
+// The drive error code the last callback report latched.
+// 0x006e91dc
 int g_nAsyncOpError;
 
-// 0x00892590. The absolute disc sector the seek moves to and the read then starts at.
+// The absolute disc sector the seek moves to and the read then starts at.
+// 0x00892590
 int g_nAsyncOpLsn;
 
 // 0x008925a0

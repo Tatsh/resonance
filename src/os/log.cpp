@@ -11,7 +11,7 @@
 
 namespace {
 
-// 0x0071d368. Fatal formats into this buffer with no bound, and nothing else in the image
+// Fatal formats into the buffer at 0x0071d368 with no bound, and nothing else in the image
 // references the region, so no neighbour fixes its end. The size below is a placeholder rather
 // than a recovered value.
 constexpr int kFatalMessageSize = 1024;

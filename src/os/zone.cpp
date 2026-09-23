@@ -30,8 +30,9 @@ constexpr char kTempZoneName[] = "temp";
 // 0x006e9808
 int g_nZonesEnabled;
 
-// 0x006e980c. The initial value is not recoverable from the image.
-// FreeAllZones() and ZoneDelete() are what establish kNoZone at runtime.
+// The initial value is not recoverable from the image. FreeAllZones() and ZoneDelete() are what
+// establish kNoZone at runtime.
+// 0x006e980c
 int g_nCurrentZone;
 
 // 0x006e9860

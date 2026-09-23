@@ -14,8 +14,9 @@ namespace {
 // the shipped target.
 constexpr int kCyclesPerMicrosecond = 0x127;
 
-// 0x00724578. Set while Realloc() drives Alloc() and Free() internally, so that the nested calls
-// do not accumulate their own timings on top of the enclosing one.
+// Set while Realloc() drives Alloc() and Free() internally, so that the nested calls do not
+// accumulate their own timings on top of the enclosing one.
+// 0x00724578
 int g_bHeapTimingSuspended;
 
 // 0x0072457c

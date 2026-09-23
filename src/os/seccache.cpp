@@ -9,12 +9,14 @@ namespace {
 // The zone the cache carves its row buffers out of.
 constexpr char kSectorCacheZoneName[] = "seccache";
 
-// 0x008de798. The access clock, not a flag. Stamps start at 1 so that a row that has never been
-// used, whose stamp is zero, always sorts as the oldest.
+// The access clock, not a flag. Stamps start at 1 so that a row that has never been used, whose
+// stamp is zero, always sorts as the oldest.
+// 0x008de798
 unsigned g_nSectorCacheClock;
 
-// 0x00724bf0. The image initialises this word to kNoZone and nothing writes it. The read below is
-// its only reference, so the ZoneFree() branch it selects is dead code.
+// The image initialises this word to kNoZone and nothing writes it. The read below is its only
+// reference, so the ZoneFree() branch it selects is dead code.
+// 0x00724bf0
 int g_nSectorCacheZone = kNoZone;
 
 } // namespace
