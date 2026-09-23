@@ -109,7 +109,7 @@ void PrintRow(FailSink &sink, const Vector3 &row) {
 // A byte is written for each of the two flags even though both are stored as words.
 void WriteBool(Stream &stream, int nValue) {
     const char chFlag = static_cast<char>(nValue);
-    stream.Write(&chFlag, sizeof(chFlag));
+    stream.WriteBytes(&chFlag, sizeof(chFlag));
 }
 
 int ReadBool(Stream &stream) {

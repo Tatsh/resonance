@@ -168,13 +168,16 @@ Stream &WritePointsVector(Stream &stream, const std::vector<Vector3> &values) {
 }
 
 // 0x004911d8
-Stream &WriteTexsVector(Stream &stream, const std::vector<Vector2> &values) {
-    const int nCount = static_cast<int>(values.size());
+// Unlike the other two channels, a texture-coordinate key writes its frame here rather than in
+// WriteTexsKeys().
+Stream &WriteTexsKey(Stream &stream, const MeshAnim::TexsKey &key) {
+    const int nCount = static_cast<int>(key.mValues.size());
     stream.Write(&nCount, sizeof(nCount));
-    for (const auto &value : values) {
+    for (const auto &value : key.mValues) {
         stream.Write(&value.x, sizeof(float));
         stream.Write(&value.y, sizeof(float));
     }
+    stream.Write(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
@@ -207,8 +210,7 @@ Stream &WriteTexsKeys(Stream &stream, const std::list<MeshAnim::TexsKey> &keys) 
     const int nCount = static_cast<int>(keys.size());
     stream.Write(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
-        WriteTexsVector(stream, key.mValues);
-        stream.Write(&key.mFrame, sizeof(key.mFrame));
+        WriteTexsKey(stream, key);
     }
     return stream;
 }

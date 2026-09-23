@@ -580,20 +580,26 @@ inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
         aflInverse[0][2] * negated.x + aflInverse[1][2] * negated.y + aflInverse[2][2] * negated.z;
 }
 
+// 0x0048c040
+Stream &ReadIndexRun(Stream &stream, std::vector<unsigned short> &run) {
+    int nIndexCount;
+    stream.Read(&nIndexCount, sizeof(nIndexCount));
+    run.resize(nIndexCount);
+    for (auto &index : run) {
+        stream.Read(&index, sizeof(index));
+    }
+    return stream;
+}
+
 // 0x0048c138
 // Versions 1 through 3 stored a run of vertex indices per record. The renderer no longer uses
 // them, and the loader releases the vector as soon as it has been read.
 Stream &ReadIndexRunVector(Stream &stream, std::vector<std::vector<unsigned short> > &runs) {
-    int nCount = 0;
+    int nCount;
     stream.Read(&nCount, sizeof(nCount));
     runs.resize(nCount);
     for (auto &run : runs) {
-        int nIndexCount = 0;
-        stream.Read(&nIndexCount, sizeof(nIndexCount));
-        run.resize(nIndexCount);
-        for (auto &index : run) {
-            stream.Read(&index, sizeof(index));
-        }
+        ReadIndexRun(stream, run);
     }
     return stream;
 }
