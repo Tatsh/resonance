@@ -156,6 +156,7 @@ fstat
 fsyntax
 funcobject
 funcs
+fxwires
 gamebeginmsg
 gamechatpacket
 gameconnectfailuremsg
@@ -457,6 +458,7 @@ pythonrun
 quadword
 quadwords
 quat
+randu
 rangeobject
 rawcontroller
 rawcontrollermsg

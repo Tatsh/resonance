@@ -12,6 +12,7 @@ set(RESONANCE_OS_SRCS
     loadfile.cpp
     log.cpp
     mem.cpp
+    random.cpp
     seccache.cpp
     zone.cpp)
 
