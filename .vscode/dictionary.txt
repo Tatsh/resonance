@@ -240,6 +240,7 @@ freestylefxmsg
 freestylepowerup
 freqappearance
 freqappearancedetail
+freqcontroller
 freqmakercursor
 freqpart
 freqparttemplate
@@ -257,6 +258,7 @@ gameconnectfailuremsg
 gameconnectionlostmsg
 gameconnectsuccessmsg
 gameenablemgr
+gameinfo
 gamemanagerdoplaybackmsg
 gamemanagerimpl
 gameoptions
@@ -450,6 +452,7 @@ mcrf
 mcrl
 mcserv
 mdfile
+medius
 memcard
 memcardcbhandler
 memcardmanager
@@ -502,6 +505,7 @@ metloadfreqscreen
 metloadgamescreen
 metloadnewfreqscreen
 metloadprefabscreen
+metlocpickcharscreen
 metlogoscreen
 metmainscreen
 metmcfreqdelscreen
@@ -513,6 +517,11 @@ metmsgscreen
 metmultisaveremixscreen
 metmultitips
 metmultitipsbasescreen
+metpausebasescreen
+metpausegamescreen
+metpausemultiremixscreen
+metpausesologamescreen
+metpausesoloremixscreen
 metpersonadata
 metpersonasaverscreen
 metremixdatascreen

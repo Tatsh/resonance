@@ -197,7 +197,12 @@ public:
 private:
     int mUnknown90; // +0x90
     int mUnknown94; // +0x94
-    int mUnknown98; // +0x98
+
+protected:
+    // Set by StartLoadPersonas() and by the MetLocPickCharScreen override at 0x002ba148. +0x98
+    int mUnknown98;
+
+private:
     // The renderer time the autosave notice went up, or 0 while it is not showing.
     float mAutosaveNoticeTime;
 };
