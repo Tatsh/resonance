@@ -398,27 +398,34 @@ private:
     static MetRemixManager *ResolveSharedInstance();
     // 0x00361210
     static void CacheSharedInstance();
-    // 0x00357f80. Starts reading the remix index file, recording the request in mIndexRequest.
+    // 0x00357f80
+    // Starts reading the remix index file, recording the request in mIndexRequest.
     void LoadIndex();
-    // 0x003580f0. Starts reading one remix file, recording the request in mRemixRequest.
+    // 0x003580f0
+    // Starts reading one remix file, recording the request in mRemixRequest.
     void LoadRemixFile(const HxStr &fileName);
-    // 0x00361418. A factory remix is read from its file and any other through the memory card.
+    // 0x00361418
+    // A factory remix is read from its file and any other through the memory card.
     // LoadCurrentTrack() expands it inline.
     inline void LoadRemix(const MetRemixRecord &record, int nFactory);
     // 0x00361480
     void LoadCurrentTrack();
-    // 0x0035abf8. Starts a jukebox game on the current track's remix in a random arena, burns the
-    // recorded appearances, steps the playlist, and brings up MetLoadGameScreen. Both remix-load
+    // 0x0035abf8
+    // Starts a jukebox game on the current track's remix in a random arena, burns the recorded
+    // appearances, steps the playlist, and brings up MetLoadGameScreen. Both remix-load
     // completions call it. The title is inferred.
     void StartLoadedRemix();
     // Saves the playlist again with a copy of mUnknownac as the return screens.
     // OnMsgScreenDismissed() expands it at each retry.
     inline void RetrySavePlayList();
-    // 0x003613d8. Clamps into zero through the track count, which admits one past the end.
+    // 0x003613d8
+    // Clamps into zero through the track count, which admits one past the end.
     void SetCurrentTrack(int nTrack);
-    // 0x003610d0. Pushes every screen named in mUnknownb8 and activates the first.
+    // 0x003610d0
+    // Pushes every screen named in mUnknownb8 and activates the first.
     void PushUnknownb8Screens();
-    // 0x00361170. Pushes every screen named in mUnknownac and activates the first.
+    // 0x00361170
+    // Pushes every screen named in mUnknownac and activates the first.
     void PushUnknownacScreens();
 
     // 0x006c1110

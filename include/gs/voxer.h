@@ -54,6 +54,8 @@ public:
           const TrackData *pTrackData);
 
     /**
+     * Destroy the voxer. The body only chains to Pitcher's destructor.
+     *
      * @ghidraAddress 0x001d9dd0
      */
     virtual ~Voxer();
