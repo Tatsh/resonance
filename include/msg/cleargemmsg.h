@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 /**
@@ -11,11 +12,34 @@
  *
  * The payload layout comes from the run of field copies in Clone(). Every member is public because
  * AppTunnel::HandleMessage() at `0x00449790` reads them directly with no accessor in the image. It
- * converts mFrame and mGem to floats and loads mTrack with `lb`, which reads only the low byte of
- * the word.
+ * converts mPosition's tick and mGem to floats and loads mTrack with `lb`, which reads only the low
+ * byte of the word.
  */
 class ClearGemMsg : public Message {
 public:
+    /**
+     * Construct a message with the position at kMBTInfinity and the rest unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    ClearGemMsg() {
+    }
+
+    /**
+     * Clear one gem.
+     *
+     * Inline, with no address of its own. PhraseMgr::AddGem() expands it on its stack at
+     * `0x001bad0c` with an IsFiniteMBT-checked position and the manager's track.
+     *
+     * @param position The song position of the gem.
+     * @param nTrack The track.
+     * @param nGem The gem.
+     */
+    ClearGemMsg(Mid::MBT position, int nTrack, int nGem)
+        : mPosition(position), mTrack(nTrack), mGem(nGem) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -50,9 +74,9 @@ public:
      */
     virtual const char *Name();
 
-    int mFrame; /*!< The frame of the gem to clear. +0x04 */
-    int mTrack; /*!< The track. +0x08 */
-    int mGem;   /*!< The gem. +0x0c */
+    Mid::MBT mPosition; /*!< The song position of the gem to clear. +0x04 */
+    int mTrack;         /*!< The track. +0x08 */
+    int mGem;           /*!< The gem. +0x0c */
 };
 
 /**

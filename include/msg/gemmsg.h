@@ -22,8 +22,8 @@ class Player;
  * and the gem TrackData::FindGemAtOrAfter() reports.
  *
  * Every member is public because AppTunnel's gem handler at `0x00447638` reads all five directly
- * with no accessor in the image. A non-zero mGhost selects the ghost gem there, and every stack
- * build clears it.
+ * with no accessor in the image. A non-zero mGhost selects the ghost gem there. Every stack build
+ * clears it except PhraseMgr::AddGem()'s at `0x001bae48`, which stores its own flag.
  *
  * The destructor at `0x003df450` is compiler-generated and has no declaration here.
  */
@@ -41,17 +41,19 @@ public:
     /**
      * Report a gem played on a track.
      *
-     * Inline, with no address of its own. Every stack build in the image expands it and clears
-     * mGhost (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::Slot8() at
-     * `0x001ac25c`, and PhraseMgr::PostGemMsg() at `0x001ba86c`, among others).
+     * Inline, with no address of its own. Every stack build in the image expands it. Most clear
+     * mGhost (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::Slot8() at `0x001ac25c`,
+     * PhraseMgr::PostGemMsg() at `0x001ba86c`, and PhraseMgr::AddGem() at `0x001baed0`), and
+     * PhraseMgr::AddGem()'s build at `0x001bae48` passes a flag of its own.
      *
      * @param position The song position of the gem.
      * @param nTrack The track the gem lies on.
      * @param nGem The gem.
      * @param pPlayer The player who played it.
+     * @param nGhost Non-zero for a ghost gem.
      */
-    GemMsg(Mid::MBT position, int nTrack, int nGem, Player *pPlayer)
-        : mPosition(position), mTrack(nTrack), mGem(nGem), mPlayer(pPlayer), mGhost(0) {
+    GemMsg(Mid::MBT position, int nTrack, int nGem, Player *pPlayer, int nGhost = 0)
+        : mPosition(position), mTrack(nTrack), mGem(nGem), mPlayer(pPlayer), mGhost(nGhost) {
     }
 
     /**
