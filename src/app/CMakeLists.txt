@@ -78,7 +78,9 @@ set(RESONANCE_APP_SRCS
     tnlsnake.cpp
     tnlutil.cpp
     tunnelcache.cpp
+    watchdog.cpp
     watchdogclock.cpp
+    watchdogplayback.cpp
     watchdogtimer.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})

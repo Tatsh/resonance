@@ -864,6 +864,7 @@ vtable
 vtables
 vutext
 watchdogclock
+watchdogplayback
 watchdogtimer
 wdelete
 werror

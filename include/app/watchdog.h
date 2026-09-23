@@ -1,8 +1,13 @@
 #pragma once
 
+#include <set>
+
 #include "app/watchdogclock.h"
+#include "sch/cmdid.h"
+#include "sch/timedcommand.h"
 
 class IBStream;
+class WatchdogPlayback;
 
 /**
  * Scheduler that runs queued commands when their due time arrives.
@@ -36,9 +41,78 @@ class IBStream;
 class Watchdog {
 public:
     /**
+     * Order of the command queue: by due tick, then by order as an unsigned quantity.
+     *
+     * The comparison is recovered from the queue's insert at `0x004acd60` and lower bound at
+     * `0x004ac4f8`, both template instantiations.
+     */
+    struct QueueOrder {
+        /**
+         * Report whether one wrapper runs before another.
+         *
+         * @param pLeft The first wrapper.
+         * @param pRight The second wrapper.
+         * @return True when pLeft sorts first.
+         */
+        bool operator()(const Sch::TimedCommand *pLeft, const Sch::TimedCommand *pRight) const {
+            if (pLeft->mDueTick.mValue == pRight->mDueTick.mValue) {
+                return static_cast<unsigned>(pLeft->mOrder) < static_cast<unsigned>(pRight->mOrder);
+            }
+            return pLeft->mDueTick.mValue < pRight->mDueTick.mValue;
+        }
+    };
+
+    /**
+     * Construct an idle scheduler with an empty queue and a fresh clock.
+     *
      * @ghidraAddress 0x004a9858
      */
     Watchdog();
+
+    /**
+     * Queue a command the playback reader supplies.
+     *
+     * The command is marked queued, and the wrapper is queued with a reference of the queue's own
+     * unless queueing is blocked. The due tick is the one the recording stored. WatchdogPlayback's
+     * start routine is the caller. The title is retained from an earlier pass.
+     *
+     * @param pCommand The wrapper to queue.
+     * @ghidraAddress 0x004ac7b0
+     */
+    void QueueReplayed(Sch::TimedCommand *pCommand);
+
+    /**
+     * Withdraw the first queued wrapper whose handle matches.
+     *
+     * A handle that is not positive withdraws nothing. The walk stops at the first match, which is
+     * erased and released.
+     *
+     * @param id The handle.
+     * @ghidraAddress 0x004aa260
+     */
+    void WithdrawByCmdID(const CmdID &id);
+
+    /**
+     * Withdraw the entry at a wrapper's position in the queue.
+     *
+     * The entry erased is the first one that does not sort before pCommand, which need not be
+     * pCommand itself, and the reference released is pCommand's. The image has no caller. The
+     * title is inferred.
+     *
+     * @param pCommand The wrapper whose position is withdrawn.
+     * @ghidraAddress 0x004a9d00
+     */
+    void Withdraw(Sch::TimedCommand *pCommand);
+
+    /**
+     * Reset the clock to zero and the current time with it.
+     *
+     * WatchdogPlayback's start routine calls this before queueing a recording. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x004aca30
+     */
+    void RestartClock();
 
     /**
      * Release the monitor's buffers.
@@ -50,10 +124,8 @@ public:
     /**
      * Start replaying a recorded command stream.
      *
-     * Creates the 0x14-byte reader at `+0x14` with the constructor at `0x00594968`, has it read
-     * the stream through `0x00594a78`, sets mStreamMode to 2, and starts it through `0x005962e8`.
-     * GamePlayback's constructor is the caller. Not reconstructed, because the reader's class is
-     * unrecovered. The title is inferred.
+     * Installs a WatchdogPlayback in mPlayback, has it read the stream, sets mStreamMode to 2,
+     * and starts it. GamePlayback's constructor is the caller. The title is inferred.
      *
      * @param stream The recording, positioned after the session state.
      * @ghidraAddress 0x004ac950
@@ -65,21 +137,32 @@ public:
      *
      * The loop takes the leftmost entry of the queue, stops once that entry is still in the future,
      * erases it, copies its due tick into the scheduler's current time, dispatches
-     * Sch::TimedCommand::Run(), clears the command's queued flag, and releases the wrapper.
+     * Sch::TimedCommand::Run(), clears the command's queued flag, and releases the wrapper. A
+     * std::exception that escapes a command is shown through ShowReportedMessage() for 50 units
+     * and the loop continues.
+     *
+     * Before the loop, g_llWatchdogSecondNs catches up with the clock when more than a second
+     * behind, and a clock more than six seconds past the current time is marked back to it and
+     * re-read. When the loop stops, the current time advances to the clock reading if that is
+     * later.
      *
      * @ghidraAddress 0x004aa848
      */
     void Service();
 
     /**
-     * Write the accumulated readings out and restart the measurement.
+     * Mark the clock at the current time and record the reading in g_llWatchdogSecondNs.
      *
      * @ghidraAddress 0x004aca60
      */
     void Flush();
 
     /**
-     * Copy the command queue so that it can be walked safely.
+     * Empty the command queue, releasing every wrapper it held.
+     *
+     * The queue is copied, emptied, and the copy's wrappers are released one by one, so a release
+     * that reaches back into the scheduler finds the queue already empty. The title is retained
+     * from an earlier pass.
      *
      * @ghidraAddress 0x004a9a78
      */
@@ -92,13 +175,24 @@ private:
     // WatchdogTimer::Now() reads mNowNs.
     friend class WatchdogTimer;
 
-    int mUnknown00;   // +0x00 the red-black tree of Sch::TimedCommand pointers, one pointer
-    int mUnknown04;   // +0x04
-    int mUnknown08;   // +0x08
-    int mStreamMode;  // +0x0c 1 while recording, 2 while playing back; released by Close()
-    int mUnknown10;   // +0x10 the one-word box for the installed stream; released by Close()
-    int mUnknown14;   // +0x14 released by Close()
-    long long mNowNs; // +0x18 the due tick of the command most recently run
-    int mBlocked;     // +0x48 blocks every queueing path while set
-    int mUnknown4c;   // +0x4c
+    // Every queued wrapper, each holding one reference the queue gives back when it runs or is
+    // withdrawn.
+    std::multiset<Sch::TimedCommand *, QueueOrder> mQueue; // +0x00
+    // +0x0c 1 while recording, 2 while playing back; released by Close().
+    int mStreamMode;
+    int mUnknown10; // +0x10 the one-word box for the installed stream; released by Close()
+    // The replay StartPlayback() installs, released by Close().
+    WatchdogPlayback *mPlayback; // +0x14
+    long long mNowNs;            // +0x18 the due tick of the command most recently run
+    int mBlocked;                // +0x48 blocks every queueing path while set
+    int mUnknown4c;              // +0x4c
 };
+
+/**
+ * Clock reading Watchdog::Service() refreshes at most once a second, and Watchdog::Flush() sets.
+ *
+ * Only those two routines touch it. Nothing reads it outside Service().
+ *
+ * @ghidraAddress 0x006f8a80
+ */
+extern long long g_llWatchdogSecondNs;
