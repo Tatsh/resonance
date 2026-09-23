@@ -51,6 +51,7 @@ set(RESONANCE_APP_SRCS
     tnlarrow.cpp
     tnlboundary.cpp
     tnlbumpfx.cpp
+    tnlcamerarig.cpp
     tnlcatcher.cpp
     tnlcripplefx.cpp
     tnlemitter.cpp

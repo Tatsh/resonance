@@ -371,7 +371,7 @@ void Tunnel::Save(Stream &stream) {
     stream.Write(&mUnknown54, sizeof(mUnknown54));
     WriteObjectRef(stream, mPath);
     stream.Write(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
-    WriteFloatVector(stream, mUnknown68);
+    WriteFloatVector(stream, mLodScreenSizes);
     WriteEventList(stream, mEvents);
     WriteSeekerVector(stream, mSeekers);
     stream.Write(&mUnknownbc, sizeof(mUnknownbc));
@@ -407,7 +407,7 @@ void Tunnel::Load(Stream &stream) {
         stream.Read(&nDiscarded, sizeof(nDiscarded));
     }
     stream.Read(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
-    ReadFloatVector(stream, mUnknown68);
+    ReadFloatVector(stream, mLodScreenSizes);
     ReadEventList(stream, mEvents);
     ReadSeekerVector(stream, mSeekers);
     stream.Read(&mUnknownbc, sizeof(mUnknownbc));
@@ -463,7 +463,7 @@ void Tunnel::Copy(const Object *pSource, unsigned nFlags) {
     mUnknown54 = pTunnel->mUnknown54;
     mPath = pTunnel->mPath;
     mLaneChangeFrames = pTunnel->mLaneChangeFrames;
-    mUnknown68 = pTunnel->mUnknown68;
+    mLodScreenSizes = pTunnel->mLodScreenSizes;
     mEvents = pTunnel->mEvents;
     mSeekers = pTunnel->mSeekers;
     mUnknown5c = pTunnel->mUnknown5c;
@@ -566,8 +566,8 @@ Tunnel::Tunnel(const HxStr &name)
       mUnknown60(0), mLaneChangeFrames(480.0f), mUnknown74(1), mUnknown78(1), mUnknown7c(kNoSlice),
       mUnknown80(0.0f), mUnknown84(0), mSlicesPerFrame(0.0f), mSliceFrames(0.0f), mUnknownbc(0) {
     mSeekers.reserve(kInitialSeekerCapacity);
-    mUnknown68.resize(mLodCount, 0.0f);
-    std::fill(mUnknown68.begin(), mUnknown68.end(), 0);
+    mLodScreenSizes.resize(mLodCount, 0.0f);
+    std::fill(mLodScreenSizes.begin(), mLodScreenSizes.end(), 0);
     Update();
 }
 
@@ -804,7 +804,7 @@ void Tunnel::BuildMesh() {
     BuildSliceMeshes();
     BuildCellMeshes();
     // Yes, the binary passes the member to its own setter, which assigns it to itself.
-    ApplyMeshLodScreenSizes(mUnknown68);
+    ApplyMeshLodScreenSizes(mLodScreenSizes);
 
     for (unsigned i = 0; i < mUnknowna4.size(); ++i) {
         if (i < cellMats.size()) {
@@ -1118,12 +1118,12 @@ void Tunnel::DumpText(FailSink &sink) {
 
 // 0x0046d180
 void Tunnel::ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes) {
-    mUnknown68 = screenSizes;
+    mLodScreenSizes = screenSizes;
     for (TunnelMeshChain &chain : mUnknowna4) {
-        chain.SetScreenSizes(mUnknown68);
+        chain.SetScreenSizes(mLodScreenSizes);
     }
     for (TunnelMeshChain &chain : mUnknownb0) {
-        chain.SetScreenSizes(mUnknown68);
+        chain.SetScreenSizes(mLodScreenSizes);
     }
 }
 

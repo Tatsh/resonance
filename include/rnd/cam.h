@@ -131,6 +131,56 @@ public:
     void UpdateWorldProject();
 
     /**
+     * Set the clip distances and the field of view, then rebuild the projection.
+     *
+     * The near distance is raised to a thousandth of the far distance when it is smaller.
+     * UpdateProjection() runs afterwards. AppTunnel and TnlCameraRig are the callers. The title is
+     * inferred.
+     *
+     * @param flNear The near clip distance.
+     * @param flFar The far clip distance.
+     * @param flFov The field of view, zero for an orthographic projection.
+     * @ghidraAddress 0x004b26e0
+     */
+    void SetFrustum(float flNear, float flFar, float flFov);
+
+    /**
+     * Report the near clip distance.
+     *
+     * The out-of-line copy has no callers. AppTunnel's constructor inlines it.
+     *
+     * @return The distance.
+     * @ghidraAddress 0x004b23a8
+     */
+    float GetNearPlane() const {
+        return mNearPlane;
+    }
+
+    /**
+     * Report the far clip distance.
+     *
+     * The out-of-line copy has no callers. AppTunnel's constructor inlines it.
+     *
+     * @return The distance.
+     * @ghidraAddress 0x004b23b0
+     */
+    float GetFarPlane() const {
+        return mFarPlane;
+    }
+
+    /**
+     * Report the field of view, zero for an orthographic projection.
+     *
+     * The out-of-line copy has no callers. AppTunnel's constructor inlines it.
+     *
+     * @return The field of view.
+     * @ghidraAddress 0x004b23b8
+     */
+    float GetFov() const {
+        return mFov;
+    }
+
+    /**
      * Set the texture this camera draws into, or none to draw into the frame buffer.
      *
      * The previous target loses its reference on this camera and the new one gains one. A new

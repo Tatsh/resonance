@@ -1,11 +1,11 @@
 #pragma once
 
 #include "math/vector3.h"
+#include "rnd/mesh.h"
+#include "rnd/view.h"
 
 namespace Rnd {
 class Mat;
-class Mesh;
-class View;
 } // namespace Rnd
 
 /**
@@ -36,6 +36,16 @@ public:
      * @ghidraAddress 0x0043c688
      */
     explicit TnlPanelFX(int nIndex);
+
+    /**
+     * Take the mesh out of "tnl transparent" and delete it.
+     *
+     * AppTunnel's destructor inlines the body, and no out-of-line copy exists.
+     */
+    ~TnlPanelFX() {
+        mView->RemoveDraw(mMesh);
+        delete mMesh;
+    }
 
     /**
      * Show the panel over one ring section and begin the rise phase.
@@ -78,9 +88,6 @@ public:
     }
 
 private:
-    // AppTunnel::StartPanelFX() reads mState to find an idle effect.
-    friend class AppTunnel;
-
     // Phase Update() runs. Idle is hidden and waiting for Start(), rise slides into the wall and
     // fades in, hold shows with an additive blend, and fade fades out.
     enum State { kStateIdle = 0, kStateRise = 1, kStateHold = 2, kStateFade = 3 };

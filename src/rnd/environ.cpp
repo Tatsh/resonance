@@ -250,4 +250,9 @@ Environ *Environ::NewEnviron(const HxStr &name) {
     return new Environ(name);
 }
 
+void Environ::ClearLights() {
+    ReleaseLightsRefs();
+    mLights.clear();
+}
+
 } // namespace Rnd

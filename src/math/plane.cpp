@@ -9,6 +9,13 @@ Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm) {
     return result;
 }
 
+void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, float flT) {
+    constexpr int kValueCount = 4;
+    for (int i = 0; i < kValueCount; ++i) {
+        pOut[i] = ((pTo[i] - pFrom[i]) * flT) + pFrom[i];
+    }
+}
+
 bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, float *pT) {
     const auto &start = segment[0];
     const auto &end = segment[1];

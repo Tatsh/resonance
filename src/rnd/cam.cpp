@@ -1,5 +1,6 @@
 #include "rnd/cam.h"
 
+#include <algorithm>
 #include <math.h>
 
 #include "math/frustum.h"
@@ -36,6 +37,9 @@ constexpr int kCamTargetTexRevision = 5;
 
 // Revision from which the Rnd::Collideable form is present.
 constexpr int kCamCollideRevision = 8;
+
+// SetFrustum() keeps the near distance at no less than the far distance divided by this.
+constexpr float kFarToMinNearRatio = 1000.0f;
 
 // An empty HxStr stores a null buffer, and the binary substitutes the program-wide empty-string
 // pointer at 0x006fbd10 rather than passing null to the stream.
@@ -231,6 +235,15 @@ void Cam::UpdateWorldProject() {
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         mInvWorldProject[nRow] = aResult[nRow];
     }
+}
+
+void Cam::SetFrustum(float flNear, float flFar, float flFov) {
+    const float flMinNear = flFar / kFarToMinNearRatio;
+    mFov = flFov;
+    mNearPlane = flNear;
+    mFarPlane = flFar;
+    mNearPlane = std::max(mNearPlane, flMinNear);
+    UpdateProjection();
 }
 
 } // namespace Rnd

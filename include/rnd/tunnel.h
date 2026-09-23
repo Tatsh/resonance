@@ -278,8 +278,8 @@ public:
     /**
      * Replace the level of detail thresholds and apply them to every generated mesh.
      *
-     * The argument is assigned over mUnknown68, then both mesh grids are walked. Each mesh takes
-     * the threshold whose index matches its position within its own list, and a mesh whose
+     * The argument is assigned over mLodScreenSizes, then both mesh grids are walked. Each mesh
+     * takes the threshold whose index matches its position within its own list, and a mesh whose
      * position passes the end of the threshold vector is skipped rather than clamped. The title is
      * inferred from Rnd::Mesh::mMinScreen, the member it writes.
      *
@@ -562,25 +562,43 @@ public:
     int mSliceCount;
 
 private:
-    // +0x44 Starts at 2. The level count of every generated chain and the length of mUnknown68.
+    // +0x44 Starts at 2. The level count of every generated chain and the length of
+    // mLodScreenSizes.
     int mLodCount;
     float mUnknown48; // +0x48 Starts at 0.1f. The inward pull of the lane floor.
     float mUnknown4c; // +0x4c Starts at 0.1f. The gap each lane edge keeps from the ring boundary.
     float mUnknown50; // +0x50 Starts at 0.25f. The weight of the edge in the floor points.
     float mUnknown54; // +0x54 Starts at 0.01f. The cell edge blend per slice step.
-    // +0x58 Starts at 0. The path the tunnel follows, which the camera space projection at
-    // 0x0046db80 and GetPathXfm() evaluate through Rnd::TransAnim::EvalFrame(). A null path makes
-    // both write the identity.
+public:
+    /*!< The path the tunnel follows, 0 at construction, which ProjectSectionToCameraSpace() and
+         GetPathXfm() evaluate through Rnd::TransAnim::EvalFrame(). A null path makes both write the
+         identity. Public because AppTunnel's constructor reads it at `0x004433a4` to hand it back
+         to SetPath(), and the image has no accessor. +0x58 */
     TransAnim *mPath;
+
+private:
     int mUnknown5c; // +0x5c Starts at 0. Copy() carries it.
-    int mUnknown60; // +0x60 Starts at 0. Save() and Load() carry it.
+
+public:
+    /*!< Starts at 0, and Save(), Load(), and Copy() carry it. No routine of this class reads it
+         otherwise. Public because AppTunnel's constructor writes 2, 3, or 4 there by local player
+         count at `0x004433a0`, and the image has no accessor. +0x60 */
+    int mUnknown60;
+
+private:
     // +0x64 Starts at 480.0f. The tunnel frames a seeker takes to move one ring, which
     // TunnelSeeker::UpdateLane() divides the elapsed frames by.
     float mLaneChangeFrames;
-    // +0x68 One level of detail threshold per chain level, each written into the mMinScreen of the
-    // mesh at the matching position of its chain. Copy() assigns it through
-    // `std::vector<float>::operator=`, and the setter at 0x0046d180 reads an element with `lwc1`.
-    std::vector<float> mUnknown68;
+
+public:
+    /*!< One level of detail threshold per chain level, each written into the mMinScreen of the
+         mesh at the matching position of its chain. Copy() assigns it through
+         `std::vector<float>::operator=`. Public because AppTunnel's constructor copies it at
+         `0x00442fc4` to build the thresholds it passes to ApplyMeshLodScreenSizes(), and the image
+         has no accessor. +0x68 */
+    std::vector<float> mLodScreenSizes;
+
+private:
     int mUnknown74; // +0x74 Starts at 1. DrawSelf() tests it.
     int mUnknown78; // +0x78 Starts at 1. DrawSelf() tests it.
     // +0x7c Starts at 99999999, which is a hand-written sentinel in the same style as the

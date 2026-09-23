@@ -177,6 +177,15 @@ public:
      */
     void AddLight(Light *pLight);
 
+    /**
+     * Drop this environment's reference on every light and empty mLights.
+     *
+     * AppTunnel's constructor calls it on "tunnel.env". The title is inferred.
+     *
+     * @ghidraAddress 0x00519568
+     */
+    void ClearLights();
+
     // Declared in recovered offset order. Every member is public because
     // Rnd::PsEnviron::DrawSelf() reads mLights, mFogMode, the two fog distances, and mFogColor
     // directly, and the image exposes no accessor for any of them.

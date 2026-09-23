@@ -32,6 +32,20 @@ struct Plane {
 Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm);
 
 /**
+ * Blend four consecutive floats linearly.
+ *
+ * Each result is `from + (to - from) * flT`. TnlCameraRig::SetFrame() blends a camera screen
+ * rectangle with it. The title is inferred.
+ *
+ * @param pFrom The four values at flT of 0.
+ * @param pTo The four values at flT of 1.
+ * @param pOut Receives the four blended values.
+ * @param flT The blend weight.
+ * @ghidraAddress 0x00551078
+ */
+void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, float flT);
+
+/**
  * Find where a segment crosses a plane.
  *
  * The parameter is the signed distance of the start divided by the difference between the signed

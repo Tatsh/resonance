@@ -65,7 +65,12 @@ public:
     /**
      * Build the tunnel for the game about to start.
      *
-     * Records the renderer, the game mode, and the play mode first. The body is not written.
+     * Records itself in g_pAppTunnel, sets the tunnel's rates and levels of detail for the local
+     * player count, and splits the screen between "tnl cam1" to "tnl cam4" and their outer
+     * cameras, saving a copy of each main camera first. It then registers the gem kinds, builds
+     * the gem trails, one TnlPlayer per player, and every effect, and runs "hx.nowring(1)",
+     * "hx.sections(1)", and "hx.fade_activator(1)". A jam in jukebox mode starts in the playing
+     * camera pose with every activator suppressed and the now ring hidden.
      *
      * @param pRenderer The renderer that constructs this object.
      * @ghidraAddress 0x00442020
@@ -73,9 +78,9 @@ public:
     AppTunnel(Renderer *pRenderer);
 
     /**
-     * Release every tunnel object.
+     * Release every tunnel object and give each main camera back its saved state.
      *
-     * Clears g_pAppTunnel first. The body is not written.
+     * Clears g_pAppTunnel first. The pending triggers are not deleted.
      *
      * @ghidraAddress 0x00445740
      */
@@ -229,10 +234,14 @@ private:
     // The length of mTrackModes, and the track count the constructor stores.
     static constexpr int kTrackCount = 8;
 
-    /** Gem flash record, the element of mGemFlashes. The name is inferred. */
+    // Gem flash record, the element of mGemFlashes. The name is inferred.
     struct GemFlash {
-        Rnd::ParticleSys *mSystem; /*!< "gem_flash.ps", shared by every record. */
-        Rnd::Particle *mParticle;  /*!< The flash, or null while the record is free. */
+        // Release the flash particle. The destructor inlines the body, and no out-of-line copy
+        // exists.
+        ~GemFlash();
+
+        Rnd::ParticleSys *mSystem; // "gem_flash.ps", shared by every record.
+        Rnd::Particle *mParticle;  // The flash, or null while the record is free.
     };
 
     // Offer a fire to each TnlFireFX in turn until one starts it. HandleMessage() inlines this.
