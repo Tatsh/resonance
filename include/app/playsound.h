@@ -10,6 +10,8 @@
  * in a platform header, so a port supplies its own body for the same prototype.
  */
 
+#include "app/hudutil.h"
+
 /**
  * Play the sound registered under one name.
  *
@@ -21,3 +23,30 @@
  * @ghidraAddress 0x0012f470
  */
 void PlaySoundByName(const char *pszName);
+
+/**
+ * Play one sound of the hardware synthesiser.
+ *
+ * Starts the sound through slot 9 of Globals::GetSynth() with the velocity, and when bAutoStop is
+ * set queues its release 480 ticks later on the song clock. Not reconstructed, because the queue
+ * the release goes into at `0x00669538` is unrecovered. The title is inferred.
+ *
+ * @param nSound The sound number.
+ * @param nUnknown The second argument. Every recovered caller passes -1.
+ * @param nVelocity The velocity, from 0 to 127.
+ * @param bAutoStop Non-zero to release the sound after 480 ticks.
+ * @ghidraAddress 0x0012ea50
+ */
+void PlaySynthSound(int nSound, int nUnknown, int nVelocity, int bAutoStop);
+
+/**
+ * Play the sound of a captured powerup.
+ *
+ * The neutralizer, crippler, freestyler, autocatcher, bumper, and multiplier each have a sound.
+ * The effect powerups and the guides have none. LocalPlayer::HandleMessage() and the routine at
+ * `0x00122ab8` are the callers. The title is inferred.
+ *
+ * @param kind The captured powerup.
+ * @ghidraAddress 0x0012f520
+ */
+void PlayPowerupSound(HudItemKind kind);

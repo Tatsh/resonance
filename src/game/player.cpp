@@ -5,6 +5,7 @@
 
 #include "app/msgsource.h"
 #include "msg/juiceamountmsg.h"
+#include "msg/phrasecapturedmsg.h"
 #include "msg/pointamountmsg.h"
 #include "msg/updatescorepacket.h"
 
@@ -13,10 +14,19 @@ namespace {
 // Ceiling Slot11 applies to the value it publishes.
 constexpr int kJuiceMaximum = 800;
 
+// The ceiling the constructor gives both the score and the juice.
+constexpr int kInitialCeiling = 1;
+
 constexpr char kNullText[] = "{player null}";
 constexpr char kOpenText[] = "{player ";
 
 } // namespace
+
+// 0x0012f5c0
+Player::Player(int nId, const HxStr &colorName, int nUnknown2c)
+    : IDable<Player>(nId), mId20(nId), mColorName(colorName), mUnknown2c(nUnknown2c), mJuice(0),
+      mUnknown34(kInitialCeiling), mScore(0), mUnknown3c(kInitialCeiling), mLastEraseTime(0) {
+}
 
 // 0x00132c20
 int Player::Slot2() {
@@ -161,6 +171,12 @@ void Player::AddScore(int nDelta, int bNotify) {
         UpdateScorePacket packet(mId20, nDelta);
         Send(&packet);
     }
+}
+
+// 0x001331c8
+void Player::AwardCapture(PhraseCapturedMsg *pMsg) {
+    AddScore(pMsg->mScore, 1);
+    AddJuice(pMsg->mJuice, 1);
 }
 
 // 0x0012f970

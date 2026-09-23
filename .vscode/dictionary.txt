@@ -355,6 +355,7 @@ loadremixmct
 lobbyconnectionlostmsg
 localjamenablemgr
 localplayer
+localplayercmd
 longobject
 longop
 looptogglemsg
@@ -661,6 +662,7 @@ shoemake
 showeraseeffectmsg
 sifdev
 signalmodule
+simplifiedgamepowerupplacer
 singlecatcher
 singlepowerupcollection
 skillstats

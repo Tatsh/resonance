@@ -29,6 +29,22 @@ template <typename T>
 class IDable : public IDableBase {
 public:
     /**
+     * Register the object in sObjects under an identifier.
+     *
+     * Inline. Player's constructor at `0x0012f5c0` expands it, storing the identifier and then,
+     * unless it is kIDableUnregistered, the object into the slot the identifier indexes. The slot
+     * must already exist, because the vector is not grown.
+     *
+     * @param nId The identifier.
+     */
+    explicit IDable(int nId) {
+        mId = nId;
+        if (nId != kIDableUnregistered) {
+            sObjects[nId] = static_cast<T *>(this);
+        }
+    }
+
+    /**
      * Release the table slot this object occupies.
      *
      * An object that never registered retains kIDableUnregistered and skips the clear.

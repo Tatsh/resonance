@@ -3,7 +3,20 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/player.h"
+#include "game/powerupcollectioni.h"
 #include "game/powerupplacer.h"
+#include "mid/mbt.h"
+#include "sch/cmdid.h"
+
+class HxStr;
+class LoopToolMsg;
+class MultiplierMsg;
+class ToggleGhostMsg;
+class TrackSelectMsg;
+
+namespace Sch {
+class TickClock;
+} // namespace Sch
 
 /**
  * Player driven by a controller on this machine.
@@ -17,20 +30,44 @@
  * `AddSink` and `RemoveSink`, which the base leaves inherited, and in the `MsgSink` table it
  * replaces `HandleMessage`.
  *
- * Nine of its own members are recovered, eight being the values its accessor slots return and the
- * ninth the pair of message sources at `+0xa4` and `+0xa8`. AddSink() and RemoveSink() fan
- * registration out to both of those through slots 2 and 3 of a `MsgSource` table, and the vptr
- * each is read through sits at `+0x10` of the target, which is where `MsgSource` places its own.
- * The one at `+0xa8` also answers a slot 5, past the four entries a `MsgSource` table has, so its
- * dynamic type extends `MsgSource` the way this class extends `Player`. The destructor releases
- * that object by calling a virtual on it rather than by freeing it.
+ * The constructor gives the player a powerup collection and a placer that fits the play mode, and
+ * AddSink() and RemoveSink() fan registration out to both. The player also keeps the capture
+ * statistics the solo statistics read back: the streak of consecutive captures and its best, the
+ * multiplier, and the counts of captured and muffed phrases. A LocalPlayerCmd posted every bar on
+ * mClock ends a multiplier bonus and resets the multiplier when the player stops catching.
  *
  * A slot whose verb is unrecovered keeps its table index as its title, because the index is part
  * of the layout.
  */
 class LocalPlayer : public Player {
 public:
-    /** @ghidraAddress 0x0011e348 */
+    /**
+     * Build the player and the powerup collection and placer its play mode calls for.
+     *
+     * In jam the player gets an unlimited PowerupCollection and a JamPowerupPlacer, a freestyle
+     * span that never ends, and starts looping. In game modes 1 through 3 it gets a
+     * SinglePowerupCollection and a SimplifiedGamePowerupPlacer. In any other mode it gets neither.
+     *
+     * @param nId The player's identifier.
+     * @param nInputSlot The controller slot Slot2() reports.
+     * @param colorName The player's colour name.
+     * @param nUnknown2c The value Player's constructor records at `+0x2c`.
+     * @param pClock The clock the per-bar command is posted on.
+     * @param nTrack The track Slot4() reports.
+     * @ghidraAddress 0x0011e000
+     */
+    LocalPlayer(int nId,
+                int nInputSlot,
+                const HxStr &colorName,
+                int nUnknown2c,
+                Sch::TickClock *pClock,
+                int nTrack);
+
+    /**
+     * Delete the placer and the collection.
+     *
+     * @ghidraAddress 0x0011e348
+     */
     virtual ~LocalPlayer();
 
     /** @ghidraAddress 0x00121ea0 */
@@ -58,21 +95,19 @@ public:
     virtual int Slot10();
 
     /**
-     * Slot 11. Calls the base, then publishes a message of its own.
+     * Announce the player's whole state and start the per-bar command.
      *
-     * Invokes `Player::Slot11` first, computes a value through three calls at `0x00198da8`,
-     * `0x00118e78`, and `0x004a7af8`, invokes slot 4 of the object at `+0xa8`, and publishes a
-     * message built from `+0x58`, this player, and that value.
-     *
-     * Not reconstructed, because the message class behind the vptr at `0x00812d68` is
-     * unidentified.
+     * Runs Player::Slot11(), then sends a TrackSelectMsg for the player's track at the current
+     * song position, has the collection announce its state, and sends a PointAmountMsg, a
+     * ToggleGhostMsg, and a LoopToggleMsg. It then posts a LocalPlayerCmd at the end of the first
+     * bar under mCommand.
      *
      * @ghidraAddress 0x0011e4e0
      */
     virtual void Slot11();
 
     /**
-     * Slot 12. Forwards to slot 5 of the placer at `+0xa8`.
+     * Slot 12. Forwards to slot 5 of the placer.
      *
      * That slot is declared on `PowerupPlacer` and its body is two instructions, so the call
      * reaches an empty routine. Both the `PowerupPlacer` and `JamPowerupPlacer` tables record the
@@ -92,13 +127,17 @@ public:
     /** @ghidraAddress 0x00122ca0 */
     virtual int Slot16(int value);
 
-    /** @ghidraAddress 0x00121ee0 */
+    /**
+     * Report the best streak of consecutive captures.
+     *
+     * @ghidraAddress 0x00121ee0
+     */
     virtual int Slot17();
 
     /**
-     * Report the proportion mCount9c is of the total it forms with mCounta0.
+     * Report the proportion of captured phrases among those captured and muffed.
      *
-     * Returns zero when mCount9c is zero, so the division never runs on an empty total.
+     * Returns zero when nothing was captured, so the division never runs on an empty total.
      *
      * @return A fraction between 0 and 1.
      * @ghidraAddress 0x00122cc8
@@ -112,19 +151,21 @@ public:
     virtual int Slot20(int value);
 
     /**
-     * Slot 21. Declared by this class rather than inherited.
+     * Start or stop looping.
      *
-     * Returns at once unless mMode68 is 2. Otherwise it stores its first argument in `+0x60` and
-     * divides a field of its second by 0x780. Not reconstructed past that.
+     * Only in jam. Stores bLooping, invalidates the seeker of the player's track at the position's
+     * bar, and sends a LoopToggleMsg. The title is inferred.
      *
+     * @param bLooping Non-zero to loop.
+     * @param position The song position of the change.
      * @ghidraAddress 0x0011e810
      */
-    virtual void Slot21(int value, int *pCounts);
+    virtual void SetLooping(int bLooping, const Mid::MBT &position);
 
     /**
      * Slot 22. Declared by this class rather than inherited.
      *
-     * Returns at once unless mMode68 is 2. Otherwise it stores its argument in mUnknown64 and
+     * Returns at once unless the play mode is jam. Otherwise it stores its argument in mGhost and
      * sends a `ToggleGhostMsg` naming this player with its argument as ToggleGhostMsg::mOn.
      *
      * @ghidraAddress 0x0011e908
@@ -134,13 +175,8 @@ public:
     /**
      * Receive one message.
      *
-     * Dispatches on `Message::Type()` down a chain of at least four identities. A
-     * `TrackSelectMsg` goes to the helper at `0x0011e980`; the identity at `0x006d0164` is
-     * accepted and ignored; the one at `0x006d015c` is acted on only when the message's `+0x04`
-     * names this player and `+0xa4` is present.
-     *
-     * Not reconstructed. Three of the identities in the chain are unidentified globals, and the
-     * chain runs to `0x0011f0b0`.
+     * Acts on the controller, capture, and powerup messages that address this player, and passes
+     * every message it does not recognise to Player::HandleMessage().
      *
      * @param pMsg The message.
      * @ghidraAddress 0x0011ed98
@@ -153,24 +189,64 @@ public:
     /** @ghidraAddress 0x00122968 */
     virtual void RemoveSink(MsgSink *pSink);
 
+    /**
+     * Run the update of the bar that starts at a tick, then post the next bar's.
+     *
+     * Ends a multiplier bonus whose last bar has passed, resets the multiplier two bars after the
+     * last caught bar, and announces the multiplier when either changes. LocalPlayerCmd::Execute()
+     * is the caller. The title is inferred.
+     *
+     * @param nTick The song position.
+     * @ghidraAddress 0x0011ec00
+     */
+    void OnBarTick(int nTick);
+
+    /**
+     * Toggle looping.
+     *
+     * Only in jam. Invalidates the seeker of the player's track at the position's bar and sends a
+     * LoopToggleMsg. The title is inferred.
+     *
+     * @param position The song position of the change.
+     * @ghidraAddress 0x0011e700
+     */
+    void ToggleLoop(const Mid::MBT &position);
+
 private:
-    int mUnknown50; // +0x50 returned by Slot2
-    int mUnknown58; // +0x58 returned by Slot4
-    int mUnknown5c; // +0x5c returned by Slot5
-    int mUnknown60; // +0x60 written by Slot21 and returned by Slot10
-    int mUnknown6c; // +0x6c returned by Slot19
-    int mUnknown70; // +0x70 written by Slot8, compared by Slot9
-    int mUnknown74; // +0x74 written by Slot8
-    int mUnknown78; // +0x78 compared by Slot20
-    int mUnknown7c; // +0x7c compared by Slot16
-    int mUnknown88; // +0x88 returned by Slot17
-    int mUnknown64; // +0x64 written by Slot22
-    // Both Slot21 and Slot22 return at once unless this is 2, so it selects a mode.
-    int mMode68;              // +0x68
-    int mCount9c;             // +0x9c numerator of Slot18
-    int mCounta0;             // +0xa0 the rest of Slot18's total
-    int mUnknownac;           // +0xac returned plus one by Slot15
-    int mUnknownb0;           // +0xb0 returned plus one by Slot14
-    MsgSource *mSourceA4;     // +0xa4
-    PowerupPlacer *mSourceA8; // +0xa8
+    // 0x0011e980. Records a selection of this player's track and place, and tells the other game
+    // systems unless the player stayed on the same track and dropped back.
+    void OnTrackSelect(TrackSelectMsg *pMsg);
+
+    // 0x0011eaa8. Toggles the ghost display of this player and announces it.
+    void OnToggleGhost(ToggleGhostMsg *pMsg);
+
+    // 0x0011eb20. Starts a multiplier bonus of 2 for eight bars from the message's bar.
+    void OnMultiplier(MultiplierMsg *pMsg);
+
+    Sch::TickClock *mClock;          // +0x48
+    CmdID mCommand;                  // +0x4c
+    int mInputSlot;                  // +0x50 returned by Slot2
+    int mTrack;                      // +0x58 returned by Slot4
+    int mPlace;                      // +0x5c returned by Slot5
+    int mLooping;                    // +0x60 returned by Slot10
+    int mGhost;                      // +0x64 the ghost display, set by Slot22
+    int mPlayMode;                   // +0x68
+    int mGameMode;                   // +0x6c returned by Slot19
+    int mUnknown70;                  // +0x70 written by Slot8, compared by Slot9
+    int mUnknown74;                  // +0x74 written by Slot8
+    int mUnknown78;                  // +0x78 compared by Slot20
+    int mRunEndBar;                  // +0x7c the end of the last caught run, compared by Slot16
+    int mLastCaughtBar;              // +0x80
+    int mStreak;                     // +0x84
+    int mBestStreak;                 // +0x88 returned by Slot17
+    int mMultiplier;                 // +0x8c
+    int mBonus;                      // +0x90
+    int mBonusEndBar;                // +0x94 not written by the constructor
+    int mLastMuffedBar;              // +0x98
+    int mCaptures;                   // +0x9c
+    int mMisses;                     // +0xa0
+    PowerupCollectionI *mCollection; // +0xa4
+    PowerupPlacer *mPlacer;          // +0xa8
+    int mUnknownac;                  // +0xac returned plus one by Slot15
+    int mUnknownb0;                  // +0xb0 returned plus one by Slot14
 };

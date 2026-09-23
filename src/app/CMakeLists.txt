@@ -42,6 +42,7 @@ set(RESONANCE_APP_SRCS
     msgsink.cpp
     msgsource.cpp
     overlay.cpp
+    playsound.cpp
     renderer.cpp
     rendererbase.cpp
     scriptsink.cpp

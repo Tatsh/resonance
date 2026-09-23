@@ -33,6 +33,7 @@ set(RESONANCE_GAME_SRCS
     linearmap.cpp
     localjamenablemgr.cpp
     localplayer.cpp
+    localplayercmd.cpp
     metagameworld.cpp
     msgjoiner.cpp
     multicatcher.cpp
@@ -63,6 +64,7 @@ set(RESONANCE_GAME_SRCS
     riffset.cpp
     scoretrackgraph.cpp
     screenanim.cpp
+    simplifiedgamepowerupplacer.cpp
     singlecatcher.cpp
     singlepowerupcollection.cpp
     skillstats.cpp

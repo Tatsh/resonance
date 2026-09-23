@@ -27,10 +27,8 @@ public:
     /**
      * Construct a player that a remote machine drives.
      *
-     * The body is not written, because it runs the Player constructor at `0x0012f5c0`, which is
-     * not declared. That constructor receives nId, name, and nUnknown2c, copies name into the
-     * player's `+0x24`, and stores nUnknown2c at `+0x2c`. This constructor then stores nUnknown48
-     * in mUnknown48 and clears mUnknown4c. GrooveWorld::AddNetPlayer() is the recovered caller,
+     * Runs Player's constructor with nId, name, and nUnknown2c, then stores nUnknown48 in
+     * mUnknown48 and clears mUnknown4c. GrooveWorld::AddNetPlayer() is the recovered caller,
      * and it passes its own identifier as both nId and nUnknown48.
      *
      * @param nId The player's identifier.

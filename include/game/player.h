@@ -7,6 +7,8 @@
 #include "game/idable.h"
 #include "os/hxstr.h"
 
+class PhraseCapturedMsg;
+
 /**
  * One participant in a session, local or remote.
  *
@@ -34,6 +36,19 @@
  */
 class Player : public IDable<Player>, public MsgSink, public MsgSource {
 public:
+    /**
+     * Register the player under its identifier and start its tallies.
+     *
+     * The score starts at 0 with a ceiling of 1, the juice at 0 with a ceiling of 1, and the last
+     * erase time at 0.
+     *
+     * @param nId The identifier, also recorded in mId20.
+     * @param colorName The player's colour name.
+     * @param nUnknown2c The value recorded at `+0x2c`.
+     * @ghidraAddress 0x0012f5c0
+     */
+    Player(int nId, const HxStr &colorName, int nUnknown2c);
+
     /** @ghidraAddress 0x00132ae8 */
     virtual ~Player();
 
@@ -299,6 +314,17 @@ public:
      */
     void AddScore(int nDelta, int bNotify);
 
+    /**
+     * Add a captured phrase's score and juice, announcing both.
+     *
+     * LocalPlayer::HandleMessage() and the routine at `0x00122be8` are the callers. The title is
+     * inferred.
+     *
+     * @param pMsg The capture.
+     * @ghidraAddress 0x001331c8
+     */
+    void AwardCapture(PhraseCapturedMsg *pMsg);
+
 private:
     int mUnknown2c; // +0x2c
     int mJuice;     // +0x30
@@ -309,7 +335,9 @@ protected:
 
 private:
     int mScore; // +0x38
-    // The ceiling the routine at 0x0012f808 clamps mScore to.
+
+protected:
+    // The ceiling AddScore() clamps mScore to. LocalPlayer::Slot11() announces it.
     int mUnknown3c; // +0x3c
 
 public:
