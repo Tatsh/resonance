@@ -82,22 +82,16 @@ constexpr int kPathVarAxisCount = 3;
  * performs through the `dynamic_cast` helper at `0x005570e0`, whose target type function
  * identifies the class in every case.
  *
- * SetFrameSelf() and DrawSelf() are not reconstructed. SetFrameSelf() at `0x0045aa40` expires the
- * instances whose age passed the path span, then spawns instances while the next spawn frame has
- * not passed the current one, culling against mBirthCam and mBirthSquareDist first and giving each
- * instance a random rotation drawn from mPathVarMax and a random uniform scale drawn from
- * mScaleGenLow and mScaleGenHigh. DrawSelf() at `0x0045b040` selects one of four draw paths from
- * the table of pointers to member functions at `0x0081c448`, DrawInstanceView(),
+ * SetFrameSelf() expires the instances whose age passed the path span, then spawns instances while
+ * the next spawn frame has not passed the current one, culling against mBirthCam and
+ * mBirthSquareDist first and giving each instance a random rotation drawn from mPathVarMax and a
+ * random uniform scale drawn from mScaleGenLow and mScaleGenHigh. DrawSelf() selects one of four
+ * draw paths from the table of pointers to member functions at `0x0081c448`, DrawInstanceView(),
  * DrawInstanceMesh(), DrawInstanceMultiMesh(), and DrawInstanceParticle(), preferring mView, then
  * mMesh, then mMultiMesh, then mParticleSys.
  *
- * Three bodies are blocked on other headers rather than on the analysis. SetFrameSelf() and
- * DrawSelf() both read the head of the live list of mParticleSys, `Rnd::ParticleSys` `+0xf4`,
- * which particlesys.h declares protected, and DrawSelf() also walks the transform list of
- * mMultiMesh, which multimesh.h declares protected. The path setter at `0x0045e920`, which takes
- * the path and its start and end frames and which AppTunnel calls, calls slot 4 of the Animatable
- * table of `Rnd::TransAnim`, `0x004f4188`, which returns the frame of the first keyframe and which
- * transanim.h does not declare.
+ * The accessors between `0x0045dbb8` and `0x0045dca0` are inline, and each out-of-line copy has no
+ * callers.
  */
 class Generator : public Animatable, public Transformable, public Drawable {
 public:
@@ -307,11 +301,273 @@ public:
      */
     void SetBirthCam(Cam *pCam);
 
+    /**
+     * Replace the path and set the frame span the instances travel.
+     *
+     * Moves the reference from the previous path to the new one. A bound of -1 takes the matching
+     * end of the path's keyframe range, from TransAnim::StartFrame() or TransAnim::EndFrame(), and
+     * any other value is stored as given. AppTunnel calls it.
+     *
+     * @param pPath The path, or null.
+     * @param flStartFrame The path frame an instance starts at, or -1.
+     * @param flEndFrame The path frame an instance ends at, or -1.
+     * @ghidraAddress 0x0045e920
+     */
+    void SetPath(TransAnim *pPath, float flStartFrame, float flEndFrame);
+
+    /**
+     * Report the path.
+     *
+     * @return The path, or null.
+     * @ghidraAddress 0x0045dbb8
+     */
+    TransAnim *GetPath() const {
+        return mPath;
+    }
+
+    /**
+     * Report the path frame an instance starts at.
+     *
+     * @return The frame.
+     * @ghidraAddress 0x0045dbc0
+     */
+    float GetPathStartFrame() const {
+        return mPathStartFrame;
+    }
+
+    /**
+     * Report the path frame an instance ends at.
+     *
+     * @return The frame.
+     * @ghidraAddress 0x0045dbc8
+     */
+    float GetPathEndFrame() const {
+        return mPathEndFrame;
+    }
+
+    /**
+     * Report the mesh subject.
+     *
+     * @return The mesh, or null.
+     * @ghidraAddress 0x0045dbd0
+     */
+    Mesh *GetMesh() const {
+        return mMesh;
+    }
+
+    /**
+     * Report the view subject.
+     *
+     * @return The view, or null.
+     * @ghidraAddress 0x0045dbd8
+     */
+    View *GetView() const {
+        return mView;
+    }
+
+    /**
+     * Report the multi-mesh subject.
+     *
+     * @return The multi-mesh, or null.
+     * @ghidraAddress 0x0045dbe0
+     */
+    MultiMesh *GetMultiMesh() const {
+        return mMultiMesh;
+    }
+
+    /**
+     * Report the particle system subject.
+     *
+     * @return The particle system, or null.
+     * @ghidraAddress 0x0045dbe8
+     */
+    ParticleSys *GetParticleSys() const {
+        return mParticleSys;
+    }
+
+    /**
+     * Set mAnimateFromStart.
+     *
+     * @param nAnimateFromStart Non-zero to drive mView to each instance's age.
+     * @ghidraAddress 0x0045dbf0
+     */
+    void SetAnimateFromStart(int nAnimateFromStart) {
+        mAnimateFromStart = nAnimateFromStart;
+    }
+
+    /**
+     * Report mAnimateFromStart.
+     *
+     * @return Non-zero when mView is driven to each instance's age.
+     * @ghidraAddress 0x0045dbf8
+     */
+    int GetAnimateFromStart() const {
+        return mAnimateFromStart;
+    }
+
+    /**
+     * Set mBirthFrontOnly.
+     *
+     * @param nBirthFrontOnly Non-zero to spawn only in front of mBirthCam.
+     * @ghidraAddress 0x0045dc00
+     */
+    void SetBirthFrontOnly(int nBirthFrontOnly) {
+        mBirthFrontOnly = nBirthFrontOnly;
+    }
+
+    /**
+     * Report mBirthFrontOnly.
+     *
+     * @return Non-zero when instances spawn only in front of mBirthCam.
+     * @ghidraAddress 0x0045dc08
+     */
+    int GetBirthFrontOnly() const {
+        return mBirthFrontOnly;
+    }
+
+    /**
+     * Set mBirthSquareDistCull.
+     *
+     * @param nCull Non-zero to apply the mBirthSquareDist cull.
+     * @ghidraAddress 0x0045dc10
+     */
+    void SetBirthSquareDistCull(int nCull) {
+        mBirthSquareDistCull = nCull;
+    }
+
+    /**
+     * Report mBirthSquareDistCull.
+     *
+     * @return Non-zero when the mBirthSquareDist cull applies.
+     * @ghidraAddress 0x0045dc18
+     */
+    int GetBirthSquareDistCull() const {
+        return mBirthSquareDistCull;
+    }
+
+    /**
+     * Set mBirthSquareDist.
+     *
+     * @param flSquareDist The squared distance from mBirthCam beyond which nothing spawns.
+     * @ghidraAddress 0x0045dc20
+     */
+    void SetBirthSquareDist(float flSquareDist) {
+        mBirthSquareDist = flSquareDist;
+    }
+
+    /**
+     * Report mBirthSquareDist.
+     *
+     * @return The squared distance from mBirthCam beyond which nothing spawns.
+     * @ghidraAddress 0x0045dc28
+     */
+    float GetBirthSquareDist() const {
+        return mBirthSquareDist;
+    }
+
+    /**
+     * Report the birth camera.
+     *
+     * @return The camera, or null.
+     * @ghidraAddress 0x0045dc30
+     */
+    Cam *GetBirthCam() const {
+        return mBirthCam;
+    }
+
+    /**
+     * Set mNextSpawnFrame.
+     *
+     * @param flFrame The frame the next instance spawns on.
+     * @ghidraAddress 0x0045dc38
+     */
+    void SetNextSpawnFrame(float flFrame) {
+        mNextSpawnFrame = flFrame;
+    }
+
+    /**
+     * Set the bounds of the random spawn interval.
+     *
+     * @param flLow The low bound.
+     * @param flHigh The high bound.
+     * @ghidraAddress 0x0045dc40
+     */
+    void SetRateGen(float flLow, float flHigh) {
+        mRateGenHigh = flHigh;
+        mRateGenLow = flLow;
+    }
+
+    /**
+     * Report the bounds of the random spawn interval.
+     *
+     * @param flLow Receives the low bound.
+     * @param flHigh Receives the high bound.
+     * @ghidraAddress 0x0045dc50
+     */
+    void GetRateGen(float &flLow, float &flHigh) const {
+        flLow = mRateGenLow;
+        flHigh = mRateGenHigh;
+    }
+
+    /**
+     * Set the bounds of the random instance scale.
+     *
+     * @param flLow The low bound.
+     * @param flHigh The high bound.
+     * @ghidraAddress 0x0045dc68
+     */
+    void SetScaleGen(float flLow, float flHigh) {
+        mScaleGenHigh = flHigh;
+        mScaleGenLow = flLow;
+    }
+
+    /**
+     * Report the bounds of the random instance scale.
+     *
+     * @param flLow Receives the low bound.
+     * @param flHigh Receives the high bound.
+     * @ghidraAddress 0x0045dc78
+     */
+    void GetScaleGen(float &flLow, float &flHigh) const {
+        flLow = mScaleGenLow;
+        flHigh = mScaleGenHigh;
+    }
+
+    /**
+     * Set the largest random rotation about each axis, in degrees.
+     *
+     * @param flX The bound about x.
+     * @param flY The bound about y.
+     * @param flZ The bound about z.
+     * @ghidraAddress 0x0045dc90
+     */
+    void SetPathVarMax(float flX, float flY, float flZ) {
+        mPathVarMax[0] = flX;
+        mPathVarMax[1] = flY;
+        mPathVarMax[2] = flZ;
+    }
+
+    /**
+     * Report the largest random rotation about each axis, in degrees.
+     *
+     * @param flX Receives the bound about x.
+     * @param flY Receives the bound about y.
+     * @param flZ Receives the bound about z.
+     * @ghidraAddress 0x0045dca0
+     */
+    void GetPathVarMax(float &flX, float &flY, float &flZ) const {
+        flX = mPathVarMax[0];
+        flY = mPathVarMax[1];
+        flZ = mPathVarMax[2];
+    }
+
 protected:
     /**
      * Draw every live instance.
      *
-     * Rnd::Drawable vtable slot 3. The body is not reconstructed.
+     * Rnd::Drawable vtable slot 3. Nothing is drawn without a path or a subject. Each instance is
+     * placed on the path at its age, scaled, and composed with its mXfmMod, then drawn through the
+     * selected path. A multi-mesh or particle system subject then draws once for all instances.
      *
      * @return Non-zero when the children are to be drawn as well.
      * @ghidraAddress 0x0045b040
@@ -321,7 +577,8 @@ protected:
     /**
      * Expire and spawn instances for a frame.
      *
-     * Rnd::Animatable vtable slot 3. The body is not reconstructed.
+     * Rnd::Animatable vtable slot 3. The first call only records the frame. A spawn that the birth
+     * camera culls ends the call, leaving later spawns for the next frame.
      *
      * @param flFrame The filtered frame to animate to.
      * @ghidraAddress 0x0045aa40
@@ -373,9 +630,9 @@ private:
     // title is inferred from SetFrameSelf().
     float mNextSpawnFrame; // +0x108
     int mBirthFrontOnly;   // +0x10c
-    // +0x110 Unrecovered. The constructor zeroes it, neither the dump nor the serialiser touches
-    // it, and SetFrameSelf() only tests it for zero before applying the mBirthSquareDist cull.
-    int mUnknown110;
+    // +0x110 Whether SetFrameSelf() applies the mBirthSquareDist cull. The constructor zeroes it,
+    // and neither the dump nor the serialiser touches it, so the title is inferred.
+    int mBirthSquareDistCull;
     float mBirthSquareDist;               // +0x114
     Cam *mBirthCam;                       // +0x118
     float mRateGenLow;                    // +0x11c

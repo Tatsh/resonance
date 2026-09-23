@@ -137,6 +137,19 @@ public:
      */
     void ReleaseMeshRef();
 
+    /**
+     * Report the instance transforms.
+     *
+     * The out-of-line copy has no callers. Rnd::Generator::DrawSelf() inlines it to walk the list
+     * from outside this hierarchy.
+     *
+     * @return The transform list.
+     * @ghidraAddress 0x004eba98
+     */
+    std::list<Transform> &GetTransforms() {
+        return mTransforms;
+    }
+
 protected:
     /**
      * Draw the mesh once per instance.

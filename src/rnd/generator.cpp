@@ -1,12 +1,15 @@
 #include "rnd/generator.h"
 
 #include <list>
+#include <math.h>
 
 #include "math/transform.h"
+#include "math/transformops.h"
 #include "math/vector3.h"
 #include "os/failsink.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
+#include "os/random.h"
 #include "rnd/animatable.h"
 #include "rnd/cam.h"
 #include "rnd/drawable.h"
@@ -181,6 +184,66 @@ T *ReadObjectRef(Stream &stream) {
     return dynamic_cast<T *>(g_manager.Find(name));
 }
 
+// A path bound SetPath() replaces with the matching end of the path's keyframe range.
+constexpr float kPathKeyframeBound = -1.0f;
+
+// The rows of a world transform SetFrameSelf() reads from the birth camera.
+constexpr int kXfmRowAxisY = 1;
+constexpr int kXfmRowTranslation = 3;
+
+// The components of mPathVarMax.
+enum PathVarAxis {
+    kPathVarAxisX = 0,
+    kPathVarAxisY = 1,
+    kPathVarAxisZ = 2,
+};
+
+// The draw paths of the table in DrawSelf(), in its order.
+enum DrawPath {
+    kDrawPathView = 0,
+    kDrawPathMesh = 1,
+    kDrawPathMultiMesh = 2,
+    kDrawPathParticle = 3,
+};
+
+// The value of pi the image uses, one unit in the last place below the nearest float.
+constexpr float kPi = 3.1415925f;
+constexpr float kDegreesPerHalfTurn = 180.0f;
+
+// Scale that maps a 31-bit NextRandomValue() result onto the unit range, 2 to the power of -31.
+constexpr float kRandomUnitScale = 1.0f / 2147483648.0f;
+
+// A random value interpolated from the high end of a range toward the low end.
+inline float RandomInRange(float flLow, float flHigh) {
+    return static_cast<float>(NextRandomValue()) * kRandomUnitScale * (flLow - flHigh) + flHigh;
+}
+
+// A random angle within flMax degrees either way, in radians, or zero when flMax is not positive.
+inline float RandomDegreesToRadians(float flMax) {
+    const float flDegrees = 0.0f < flMax ? RandomInRange(-flMax, flMax) : 0.0f;
+    return flDegrees * kPi / kDegreesPerHalfTurn;
+}
+
+// The identity, with every padding word at 1.0.
+inline void SetIdentity(Transform &xfm) {
+    xfm.mBasisX.x = 1.0f;
+    xfm.mBasisX.y = 0.0f;
+    xfm.mBasisX.z = 0.0f;
+    xfm.mBasisX.w = 1.0f;
+    xfm.mBasisY.x = 0.0f;
+    xfm.mBasisY.y = 1.0f;
+    xfm.mBasisY.z = 0.0f;
+    xfm.mBasisY.w = 1.0f;
+    xfm.mBasisZ.x = 0.0f;
+    xfm.mBasisZ.y = 0.0f;
+    xfm.mBasisZ.z = 1.0f;
+    xfm.mBasisZ.w = 1.0f;
+    xfm.mTranslation.x = 0.0f;
+    xfm.mTranslation.y = 0.0f;
+    xfm.mTranslation.z = 0.0f;
+    xfm.mTranslation.w = 1.0f;
+}
+
 } // namespace
 
 // 0x006e8280
@@ -222,9 +285,9 @@ static FailSink &operator<<(FailSink &sink, const std::list<Generator::Instance>
 Generator::Generator(const HxStr &name)
     : Object(name), mPath(nullptr), mPathStartFrame(0.0f), mPathEndFrame(0.0f), mMesh(nullptr),
       mView(nullptr), mMultiMesh(nullptr), mParticleSys(nullptr), mAnimateFromStart(1),
-      mNextSpawnFrame(kUnsetFrame), mBirthFrontOnly(0), mUnknown110(0), mBirthSquareDist(0.0f),
-      mBirthCam(nullptr), mRateGenLow(kDefaultRateGen), mRateGenHigh(kDefaultRateGen),
-      mScaleGenLow(1.0f), mScaleGenHigh(1.0f) {
+      mNextSpawnFrame(kUnsetFrame), mBirthFrontOnly(0), mBirthSquareDistCull(0),
+      mBirthSquareDist(0.0f), mBirthCam(nullptr), mRateGenLow(kDefaultRateGen),
+      mRateGenHigh(kDefaultRateGen), mScaleGenLow(1.0f), mScaleGenHigh(1.0f) {
     mPathVarMax[0] = 0.0f;
     mPathVarMax[1] = 0.0f;
     mPathVarMax[2] = 0.0f;
@@ -374,6 +437,173 @@ void Generator::SetBirthCam(Cam *pCam) {
     ReleaseObjectRef(this, mBirthCam);
     mBirthCam = pCam;
     AcquireObjectRef(this, mBirthCam);
+}
+
+// 0x0045e920
+void Generator::SetPath(TransAnim *pPath, float flStartFrame, float flEndFrame) {
+    ReleaseObjectRef(this, mPath);
+    mPath = pPath;
+    AcquireObjectRef(this, mPath);
+    mPathStartFrame =
+        mPath != nullptr && flStartFrame == kPathKeyframeBound ? mPath->StartFrame() : flStartFrame;
+    mPathEndFrame =
+        mPath != nullptr && flEndFrame == kPathKeyframeBound ? mPath->EndFrame() : flEndFrame;
+}
+
+// 0x0045aa40
+void Generator::SetFrameSelf(float flFrame) {
+    if (mNextSpawnFrame == kUnsetFrame) {
+        mNextSpawnFrame = flFrame;
+        return;
+    }
+
+    // Expire the instances whose age has left the path span, keeping the particle walk in step.
+    const float flDirection = 0.0f < mPathEndFrame - mPathStartFrame ? 1.0f : -1.0f;
+    mParticleCursor = mParticleSys != nullptr ? mParticleSys->GetLiveParticles() : nullptr;
+    std::list<Instance>::iterator it = mInstances.begin();
+    while (it != mInstances.end()) {
+        const float flAge = flFrame - it->mFrameOrg;
+        if (flDirection * (mPathEndFrame - mPathStartFrame) < flAge || flAge < 0.0f) {
+            if (flAge < 0.0f) {
+                mNextSpawnFrame = it->mFrameOrg;
+            }
+            it = mInstances.erase(it);
+            if (mParticleCursor != nullptr) {
+                mParticleCursor = mParticleSys->FreeParticle(mParticleCursor);
+            }
+        } else {
+            ++it;
+            if (mParticleCursor != nullptr) {
+                mParticleCursor = mParticleCursor->mNext;
+            }
+        }
+    }
+
+    if (mView != nullptr && mAnimateFromStart == 0) {
+        mView->SetFrame(mFilteredFrame);
+    }
+    if (mRateGenLow < 0.0f) {
+        return;
+    }
+    const float flEarliest = flFrame - fabsf(mPathEndFrame - mPathStartFrame);
+    if (mNextSpawnFrame < flEarliest) {
+        mNextSpawnFrame = flEarliest;
+    }
+    if (flFrame + mRateGenHigh < mNextSpawnFrame) {
+        mNextSpawnFrame = flFrame + mRateGenHigh;
+    }
+
+    while (mNextSpawnFrame <= flFrame) {
+        if (mBirthCam != nullptr) {
+            Vector3 offset;
+            offset.w = 1.0f;
+            Vec3Sub(
+                mWorldXfm[kXfmRowTranslation], mBirthCam->mWorldXfm[kXfmRowTranslation], &offset.x);
+            if (mBirthFrontOnly != 0) {
+                const float *pAxis = mBirthCam->mWorldXfm[kXfmRowAxisY];
+                if (offset.x * pAxis[0] + offset.y * pAxis[1] + offset.z * pAxis[2] < 0.0f) {
+                    return;
+                }
+            }
+            const float flSquareDist =
+                offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
+            if (mBirthSquareDistCull != 0 && mBirthSquareDist < flSquareDist) {
+                return;
+            }
+        }
+
+        Instance instance;
+        instance.mFrameOrg = mNextSpawnFrame;
+        instance.mScale.w = 1.0f;
+        SetIdentity(instance.mXfmMod);
+
+        // A random rotation within mPathVarMax degrees about each axis, then the world transform.
+        Vector3 angles;
+        angles.x = RandomDegreesToRadians(mPathVarMax[kPathVarAxisX]);
+        angles.y = RandomDegreesToRadians(mPathVarMax[kPathVarAxisY]);
+        angles.z = RandomDegreesToRadians(mPathVarMax[kPathVarAxisZ]);
+        angles.w = 1.0f;
+        EulerAnglesToMatrix3x3(&angles.x, &instance.mXfmMod.mBasisX.x);
+        XfmConcat(&instance.mXfmMod.mBasisX.x, mWorldXfm[0], &instance.mXfmMod.mBasisX.x);
+
+        float flScale = mScaleGenLow;
+        if (mScaleGenLow < mScaleGenHigh) {
+            flScale = RandomInRange(mScaleGenLow, mScaleGenHigh);
+        }
+        instance.mScale.x = flScale;
+        instance.mScale.y = flScale;
+        instance.mScale.z = flScale;
+        mInstances.push_front(instance);
+
+        if (mParticleSys != nullptr) {
+            mParticleCursor = mParticleSys->AllocParticle();
+            if (mParticleCursor != nullptr) {
+                mParticleSys->RandomizeColorAndSize(mParticleCursor);
+            }
+        }
+        mNextSpawnFrame += RandomInRange(mRateGenLow, mRateGenHigh);
+    }
+}
+
+// 0x0045b040
+int Generator::DrawSelf() {
+    // 0x0081c448, the four draw paths in DrawPath order.
+    static void (Generator::*const kDrawPaths[])(const Transform &, float) = {
+        &Generator::DrawInstanceView,
+        &Generator::DrawInstanceMesh,
+        &Generator::DrawInstanceMultiMesh,
+        &Generator::DrawInstanceParticle,
+    };
+
+    if (mPath == nullptr) {
+        return 1;
+    }
+    if (mMesh == nullptr && mView == nullptr && mMultiMesh == nullptr && mParticleSys == nullptr) {
+        return 1;
+    }
+    void (Generator::*pfnDraw)(const Transform &, float);
+    if (mView != nullptr) {
+        pfnDraw = kDrawPaths[kDrawPathView];
+    } else if (mMesh != nullptr) {
+        pfnDraw = kDrawPaths[kDrawPathMesh];
+    } else if (mMultiMesh != nullptr) {
+        std::list<Transform> &transforms = mMultiMesh->GetTransforms();
+        if (transforms.size() != mInstances.size()) {
+            Transform blank;
+            blank.mBasisX.w = 1.0f;
+            blank.mBasisY.w = 1.0f;
+            blank.mBasisZ.w = 1.0f;
+            blank.mTranslation.w = 1.0f;
+            transforms.resize(mInstances.size(), blank);
+        }
+        mMultiMeshCursor = mMultiMesh->GetTransforms().begin();
+        pfnDraw = kDrawPaths[kDrawPathMultiMesh];
+    } else if (mParticleSys != nullptr) {
+        mParticleCursor = mParticleSys->GetLiveParticles();
+        pfnDraw = kDrawPaths[kDrawPathParticle];
+    }
+
+    const float flDirection = 0.0f < mPathEndFrame - mPathStartFrame ? 1.0f : -1.0f;
+    for (Instance &instance : mInstances) {
+        const float flAge = mFilteredFrame - instance.mFrameOrg;
+        Transform xfm;
+        xfm.mBasisX.w = 1.0f;
+        xfm.mBasisY.w = 1.0f;
+        xfm.mBasisZ.w = 1.0f;
+        xfm.mTranslation.w = 1.0f;
+        mPath->EvalFrame(flAge * flDirection + mPathStartFrame, &xfm.mBasisX.x, 1);
+        ScaleRows3x3(&instance.mScale.x, &xfm.mBasisX.x, &xfm.mBasisX.x);
+        // Yes, the output is also the first input.
+        XfmConcat(&xfm.mBasisX.x, &instance.mXfmMod.mBasisX.x, &xfm.mBasisX.x);
+        (this->*pfnDraw)(xfm, flAge);
+    }
+
+    if (mMultiMesh != nullptr) {
+        mMultiMesh->Draw();
+    } else if (mParticleSys != nullptr) {
+        mParticleSys->Draw();
+    }
+    return 1;
 }
 
 // 0x0045ea70

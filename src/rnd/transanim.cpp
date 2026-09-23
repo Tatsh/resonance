@@ -236,6 +236,17 @@ float TransAnim::EndFrame() {
     return std::max(flTrans, std::max(flRot, flScale));
 }
 
+// 0x004f4188
+float TransAnim::StartFrame() {
+    const float flTrans =
+        mFramesOwner->mTransKeys.size() != 0 ? mFramesOwner->mTransKeys.front().mFrame : 0.0f;
+    const float flRot =
+        mFramesOwner->mRotKeys.size() != 0 ? mFramesOwner->mRotKeys.front().mFrame : 0.0f;
+    const float flScale =
+        mFramesOwner->mScaleKeys.size() != 0 ? mFramesOwner->mScaleKeys.front().mFrame : 0.0f;
+    return std::min(flTrans, std::min(flRot, flScale));
+}
+
 // 0x004f2ab0
 void TransAnim::DumpText(FailSink &sink) {
     Object::DumpText(sink);

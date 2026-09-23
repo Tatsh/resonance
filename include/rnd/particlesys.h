@@ -245,6 +245,19 @@ public:
      */
     void SetParticlesOwner(ParticleSys *pOwner);
 
+    /**
+     * Report the head of the live list.
+     *
+     * The out-of-line copy has no callers. Rnd::Generator::SetFrameSelf() and
+     * Rnd::Generator::DrawSelf() inline it.
+     *
+     * @return The first live particle, or null.
+     * @ghidraAddress 0x0052b4b8
+     */
+    Particle *GetLiveParticles() const {
+        return mLiveParticles;
+    }
+
 protected:
     /**
      * Advance the emission to a frame.

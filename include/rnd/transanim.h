@@ -135,6 +135,18 @@ public:
     virtual float EndFrame();
 
     /**
+     * Report the first frame the frames owner's three channels animate from.
+     *
+     * Animatable vtable slot 4, the one virtual this class adds. Every channel is read off
+     * mFramesOwner, and an empty channel contributes zero. Rnd::Generator's path setter at
+     * `0x0045e920` calls it.
+     *
+     * @return The smallest first-key frame across the three channels.
+     * @ghidraAddress 0x004f4188
+     */
+    virtual float StartFrame();
+
+    /**
      * Write a description of this object to sink.
      *
      * @param sink The diagnostic sink to write to.
