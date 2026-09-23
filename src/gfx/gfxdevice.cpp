@@ -381,6 +381,13 @@ void GfxDevice::Terminate() {
     g_vramTable.~VramTable(); // Yes, the binary calls the destructor on the global directly.
 }
 
+// 0x0049fea0
+int GfxDevice::VblankHandler([[maybe_unused]] int nCause) {
+    ++g_nVblankCounter;
+    ExitHandler();
+    return 0;
+}
+
 // 0x0049fef0
 void GfxDevice::ResetVramAndSavePacket() {
     g_vramTable.Clear(1);

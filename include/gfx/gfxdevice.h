@@ -119,9 +119,9 @@ public:
      * Count one vertical blank in g_nVblankCounter.
      *
      * InitDisplayMode() installs it through sceGsSyncVCallback(). The body increments the counter,
-     * runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. It has no
-     * reconstructed body, because ExitHandler() is MIPS inline assembly that the host build cannot
-     * assemble. The routine was an orphan in the analysis, and its name is inferred.
+     * runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. ExitHandler() is MIPS
+     * inline assembly and assembles only with the PlayStation 2 toolchain. The routine was an
+     * orphan in the analysis, and its name is inferred.
      *
      * @param nCause The interrupt cause the kernel passes, unused.
      * @return 0.
