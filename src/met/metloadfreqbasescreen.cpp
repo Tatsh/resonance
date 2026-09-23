@@ -10,6 +10,7 @@
 #include "met/metrenderer.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
+#include "rnd/mat.h"
 #include "rnd/text.h"
 
 namespace {
@@ -51,6 +52,12 @@ static const char *const kNoName = "";
 
 // The burn texture the constructor resolves.
 constexpr int kBurnTextureIndex = 0;
+
+// The material RefreshSelection() burns the selected identity into, the burn slot, and the
+// material stage that shows it.
+static const char *const kPreviewMaterial = "cid_char.mat";
+constexpr int kPreviewBurnSlot = 0;
+constexpr int kPreviewStage = 1;
 
 // Entries the identity list needs before either cycle sound plays.
 constexpr unsigned kMinimumCyclableEntries = 2;
@@ -299,6 +306,14 @@ void MetLoadFreqBaseScreen::UpdateCycleArrows() {
         mUnknown98->SetState(kArrowShownState);
         mUnknown9c->SetState(kArrowShownState);
     }
+}
+
+// 0x00292508
+void MetLoadFreqBaseScreen::RefreshSelection() {
+    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kPreviewMaterial)));
+    (*mUnknown8c)[mUnknown94]->AttachToBurnSlot(kPreviewBurnSlot);
+    pMat->mStages[kPreviewStage].SetTex(mBurnTexture);
+    UpdateNameLabel();
 }
 
 void MetLoadFreqBaseScreen::StepSelection(const MetScreenCommand *pCommand) {

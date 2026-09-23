@@ -53,9 +53,6 @@
  * Seven inherited slots differ from the MetScreen table, and all seven bodies are shared by all
  * three children, which is what proves they belong here. Those are slots 5, 19, 23, 24, 30, 36,
  * and 38.
- *
- * RefreshSelection() calls MetPersonaData::AttachToBurnSlot() and Rnd::Mat::Stage::SetTex(), and
- * its body is not written yet. Its declaration records what the body does.
  */
 class MetLoadFreqBaseScreen : public MetScreen {
 public:
@@ -255,10 +252,8 @@ protected:
      *
      * The body resolves `cid_char.mat` out of Rnd::g_manager and casts it to Rnd::Mat, runs
      * MetPersonaData::AttachToBurnSlot() on the selected identity with slot 0, assigns
-     * mBurnTexture into that material's stage through Rnd::Mat::Stage::SetTex(), and finishes with
-     * UpdateNameLabel(). The title is inferred from those three steps.
-     *
-     * The body is not written.
+     * mBurnTexture into the material's second stage through Rnd::Mat::Stage::SetTex(), and
+     * finishes with UpdateNameLabel(). The title is inferred from those three steps.
      *
      * @ghidraAddress 0x00292508
      */
