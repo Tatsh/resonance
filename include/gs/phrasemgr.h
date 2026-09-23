@@ -289,7 +289,7 @@ public:
      * Install a phrase at a bar, report the owner change, and optionally post the bar again.
      *
      * The body is not written, because it sends a message built on the stack through the sink at
-     * mUnknown1c. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
+     * mNetSink. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
      * at `0x00195378` and discards both results. AxePhraseMaker and Voxer are the recovered
      * callers.
      *
@@ -305,7 +305,7 @@ public:
      * affected window bars again.
      *
      * The body is not written, because it sends a message built on the stack through the sink at
-     * mUnknown1c for each cleared bar. The chain is followed only in kPlayModeGame with bAll set.
+     * mNetSink for each cleared bar. The chain is followed only in kPlayModeGame with bAll set.
      * AxePhraseMaker, NotePitcher, and PhraseNeutralizer are the recovered callers.
      *
      * @param nBar The bar, mapped through slot 5 of mMap.
@@ -340,7 +340,7 @@ public:
      * Add a gem to the phrase at a bar, creating the phrase for an owner when the bar has none.
      *
      * The body is not written, because it sends a message built on the stack through the sink at
-     * mUnknown1c. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
+     * mNetSink. It first calls the Globals routine at `0x00118d40` and the GrooveWorld routine
      * at `0x00195378` and discards both results, gives a bar without a phrase to pOwner through
      * SetPhraseOwner(), and adds the gem through Phrase::AddGem(). NotePitcher and Scratcher are
      * the recovered callers.
@@ -412,7 +412,7 @@ public:
      * The body is not written. It maps the bar through slot 5 of mMap, exchanges the owner in
      * mDatabase through the routines at `0x001b9130` and `0x001b9070`, calls TrackData::SetOwner()
      * when the owner changed, and then sends a message built on the stack through the sink at
-     * mUnknown1c. The Catcher subclasses' slot 9, Catcher::SetPhraseOwners(), and
+     * mNetSink. The Catcher subclasses' slot 9, Catcher::SetPhraseOwners(), and
      * NotePitcher::PostPhraseCapturedMsg() are the recovered callers.
      *
      * @param pPlayer The new owner.
@@ -444,15 +444,16 @@ public:
     PhrasePlayer *mPhrasePlayer;
 
     /**
-     * Word the stage classes install through their table slot 8.
+     * Sink the phrase changes go to as packets, installed by the stage classes' slot 8.
      *
      * The constructor clears it and every one of the four stages writes it from outside the class,
-     * which is what records the member public. A friend declaration on the stage classes fits the
-     * image equally well.
+     * which is what records the member public. InstallPhrase(), ClearPhrase(), AddGem(), and
+     * SetPhraseOwner() send it GemPacket and CaughtPhrasePacket objects through MsgSink::Handle()
+     * when it is set.
      *
      * +0x1c
      */
-    int mUnknown1c;
+    MsgSink *mNetSink;
 
 private:
     const TrackData *mTrackData; // +0x20

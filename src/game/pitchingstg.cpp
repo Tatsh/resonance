@@ -46,8 +46,8 @@ void PitchingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x001c4e30
-void PitchingSTG::Slot8(int nValue) {
-    if (nValue != 0) {
-        mPhraseMgr->mUnknown1c = nValue;
+void PitchingSTG::Slot8(MsgSink *pSink) {
+    if (pSink != nullptr) {
+        mPhraseMgr->mNetSink = pSink;
     }
 }

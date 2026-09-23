@@ -131,14 +131,15 @@ public:
     virtual void Slot7(MsgSink *pSink) = 0;
 
     /**
-     * Install a word in the phrase manager.
+     * Install the sink the phrase manager reports phrase changes to.
      *
-     * Slot 8, pure. All four overrides store the argument in PhraseMgr::mUnknown1c and ignore a
-     * zero. No call site was inspected, so the four-byte argument's type is unconfirmed.
+     * Slot 8, pure. All four overrides store the argument in PhraseMgr::mNetSink and ignore a
+     * null sink. PhraseMgr sends messages through that member's MsgSink::Handle(), which is what
+     * types the argument.
      *
-     * @param nValue The word to install, ignored when zero.
+     * @param pSink The sink to install, ignored when null.
      */
-    virtual void Slot8(int nValue) = 0;
+    virtual void Slot8(MsgSink *pSink) = 0;
 
     /**
      * Report whether the stage has nothing outstanding.

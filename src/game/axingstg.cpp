@@ -111,8 +111,8 @@ void AxingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x0019e928
-void AxingSTG::Slot8(int nValue) {
-    if (nValue != 0) {
-        mPhraseMgr->mUnknown1c = nValue;
+void AxingSTG::Slot8(MsgSink *pSink) {
+    if (pSink != nullptr) {
+        mPhraseMgr->mNetSink = pSink;
     }
 }

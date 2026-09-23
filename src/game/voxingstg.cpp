@@ -53,8 +53,8 @@ void VoxingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x001da978
-void VoxingSTG::Slot8(int nValue) {
-    if (nValue != 0) {
-        mPhraseMgr->mUnknown1c = nValue;
+void VoxingSTG::Slot8(MsgSink *pSink) {
+    if (pSink != nullptr) {
+        mPhraseMgr->mNetSink = pSink;
     }
 }

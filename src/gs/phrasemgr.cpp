@@ -121,7 +121,7 @@ int ExportCmd::sCmdID;
 // 0x001ba0d0
 PhraseMgr::PhraseMgr(
     Sch::TickClock *pClock, int nBarTicks, PlayMap *pMap, int nConfig, const TrackData *pTrackData)
-    : mPhrasePlayer(nullptr), mUnknown1c(0), mTrackData(pTrackData), mMap(pMap),
+    : mPhrasePlayer(nullptr), mNetSink(nullptr), mTrackData(pTrackData), mMap(pMap),
       mPowerbarMgr(nullptr), mUnknown30(pTrackData->mUnknown04), mBarTicks(nBarTicks),
       mConfig(nConfig), mWindowStart(0), mWindowEnd(0), mRefreshing(0), mExportLead(0),
       mClock(pClock), mTrackKind(pTrackData->mKind) {

@@ -112,14 +112,14 @@ public:
     virtual void Slot7(MsgSink *pSink);
 
     /**
-     * Install a word in the phrase manager.
+     * Install the sink the phrase manager reports phrase changes to.
      *
      * Slot 8.
      *
-     * @param nValue The word to install, ignored when zero.
+     * @param pSink The sink to install, ignored when null.
      * @ghidraAddress 0x0019e928
      */
-    virtual void Slot8(int nValue);
+    virtual void Slot8(MsgSink *pSink);
 
 private:
     AutoRiffer *mAutoRiffer;      // +0x2c

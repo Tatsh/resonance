@@ -64,9 +64,9 @@ void CatchingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x001a0650
-void CatchingSTG::Slot8(int nValue) {
-    if (nValue != 0) {
-        mPhraseMgr->mUnknown1c = nValue;
+void CatchingSTG::Slot8(MsgSink *pSink) {
+    if (pSink != nullptr) {
+        mPhraseMgr->mNetSink = pSink;
     }
 }
 
