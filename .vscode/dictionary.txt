@@ -381,6 +381,7 @@ isrecordingmsg
 iwyu
 jameffectmsg
 jameffectsmgr
+jampowerupplacer
 jbed
 jbep
 jinja
@@ -716,6 +717,7 @@ powerupcollection
 powerupcollectioni
 powerupcountmsg
 powerupfailedmsg
+powerupplacer
 powx
 powy
 preapproved

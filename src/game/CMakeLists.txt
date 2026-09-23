@@ -50,6 +50,7 @@ set(RESONANCE_GAME_SRCS
     inputmap.cpp
     inputpollerps2.cpp
     jameffectsmgr.cpp
+    jampowerupplacer.cpp
     joypad.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
@@ -91,6 +92,7 @@ set(RESONANCE_GAME_SRCS
     powerup.cpp
     powerupcollection.cpp
     powerupcollectioni.cpp
+    powerupplacer.cpp
     quantizer.cpp
     rawcontroller.cpp
     riff.cpp

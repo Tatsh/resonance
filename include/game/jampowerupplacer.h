@@ -4,6 +4,8 @@
 #include "game/localplayer.h"
 #include "game/powerupplacer.h"
 
+class PowerupCollectionI;
+
 /**
  * Powerup placer a LocalPlayer owns.
  *
@@ -23,10 +25,10 @@ class JamPowerupPlacer : public PowerupPlacer {
 public:
     /**
      * @param pOwner The player that owns this placer.
-     * @param pSource The further source the owner holds at its own `+0xa4`.
+     * @param pCollection The powerup collection the owner holds at its own `+0xa4`.
      * @ghidraAddress 0x001cdf88
      */
-    JamPowerupPlacer(LocalPlayer *pOwner, MsgSource *pSource);
+    JamPowerupPlacer(LocalPlayer *pOwner, PowerupCollectionI *pCollection);
 
     /**
      * @ghidraAddress 0x001cdc58
@@ -34,13 +36,16 @@ public:
     virtual ~JamPowerupPlacer();
 
     /**
-     * Unrecovered. Slot 8, overriding the base.
+     * Deploy the owner's selected powerup on the current bar. Slot 8, overriding the base.
+     *
+     * The bar is the song position divided by the 1920 ticks of a bar, and the track is the
+     * owner's Player slot 4. Both go to PowerupCollectionI::Deploy() on mCollection.
      *
      * @ghidraAddress 0x001cdfe0
      */
     virtual void OnUnknownSlot8();
 
 private:
-    LocalPlayer *mOwner;   // +0x14
-    MsgSource *mUnknown18; // +0x18
+    LocalPlayer *mOwner;             // +0x14
+    PowerupCollectionI *mCollection; // +0x18
 };
