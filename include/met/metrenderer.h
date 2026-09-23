@@ -94,6 +94,9 @@ class MetFade;
  *   ResolveArenaView() needs AddBackgroundView().
  */
 class MetRenderer : public MsgSource, public RendererBase, public FadeUser {
+    // MetaGameWorld::OnUnknownQuery003d48c0() at 0x003d48c0 reads mUnknown60 directly.
+    friend class MetaGameWorld;
+
 public:
     /**
      * Construct the renderer and start the front-end load.
@@ -328,7 +331,7 @@ private:
     // 0x0036bcb8. Handles a MetFreqEndedMsg. The body is not written.
     void OnFreqEnded(Message *pMsg);
 
-    // +0x60. Zeroed by the constructor and read nowhere that has been identified.
+    // +0x60. Zeroed by the constructor. MetaGameWorld::OnUnknownQuery003d48c0() reads it.
     int mUnknown60;
     // Rate the animation frame advances at, in frames per second. The constructor sets 500.0f, and
     // both frame routines compute `mUnknown68 += mUnknown64 * elapsedMilliseconds / 1000.0f`.

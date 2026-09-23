@@ -2,6 +2,9 @@
 
 #include "game/rawcontroller.h"
 
+class InputCheatDetectorMet;
+class RendererBase;
+
 /**
  * Owner of the front-end world, outside a game session.
  *
@@ -11,44 +14,31 @@
  * `0x00810f58` has three entries and a zero terminator at index 3, the type function at
  * `0x003d45e8`, the destructor at `0x003d4790`, and the RawController override below.
  *
- * Recovery of the bodies has barely started, and neither member below is defined. Each needs the
- * two owned objects declared, and neither of their classes is recovered.
+ * The world owns the front-end renderer at `+0x04` and a cheat detector at `+0x08`. A controller
+ * reading reaches the detector first and then the renderer, as a RawControllerMsg.
  *
- * The constructor stores a null in `+0x04`, installs an 8-byte object in `+0x08` through
- * `0x001daaf8` and then overwrites that object's table pointer with `0x00810ee8`, and runs
- * `0x003d31c0` on itself. The destructor releases the object at `+0x08` through its own table and
- * then runs `0x003d4810`, which releases the object at `+0x04` and clears the field.
+ * GameManagerImpl drives the world through GetRenderer() and OnUnknownForwarder003d4890(). No
+ * caller of OnUnknownForwarder003d4860() or OnUnknownQuery003d48c0() is recovered.
  *
- * The object at `+0x08` is an InputCheatDetectorMet. Walking the table the constructor installs
- * settles it: that table has four entries with a zero terminator at index 4, and its slot 0 guards
- * on the descriptor at `0x008efcb0`, built from the mangled name `21InputCheatDetectorMet` at
- * `0x00811010` over the InputCheatDetector descriptor at `0x008f2a40`. Slot 2 is inherited at
- * `0x001dc658` and slot 3 is its own at `0x003d4788`. InputCheatDetector derives from
- * RawController, which places its slot 2 at the same index as this class's own, and the cheat
- * detector family shares the InputPollerPS2.cpp string pool with InputPoller. The member is not
- * declared, because no header for that class exists yet and no body here is unblocked without the
- * type of `+0x04` as well.
- *
- * The object at `+0x04` is polymorphic and its class is unrecovered. No writer of the field is
- * recovered, so no table address is available to walk; the constructor only clears it and
- * `0x003d4810` only releases and clears it. Its table has at least six entries, because
- * `0x003d4890` dispatches slot 5 of it.
- *
- * Two further members are recorded by address rather than declared. `0x003d4858` returns the
- * pointer at `+0x04`, and `0x003d4890` runs slot 5 of that object. GameManagerImpl drives the
- * second one from three of its message handlers. The first is a single load, which the brief's own
- * rule places outside what a reconstruction may declare, and it currently carries the title
- * `RndMemStream__EofCopy1` in the program because a two-instruction accessor is byte-identical
- * across every class with a pointer at that offset.
+ * The function at `0x003d4758` is the destructor of InputCheatDetectorMet, re-emitted in this
+ * translation unit, and is recorded in that class.
  */
 class MetaGameWorld : public RawController {
 public:
     /**
+     * Build the renderer and the cheat detector.
+     *
+     * Both members start null. CreateRenderer() runs next, and the detector is then allocated at
+     * 8 bytes over g_metCheatSequences.
+     *
      * @ghidraAddress 0x003d3110
      */
     MetaGameWorld();
 
     /**
+     * Release the cheat detector through its own table, then the renderer through
+     * DestroyRenderer().
+     *
      * @ghidraAddress 0x003d4790
      */
     virtual ~MetaGameWorld();
@@ -56,14 +46,9 @@ public:
     /**
      * Report a controller reading. Slot 2.
      *
-     * The body forwards all four arguments unchanged to slot 2 of the InputCheatDetectorMet at
-     * `+0x08`, which is that class's own RawController slot, so a controller reading reaches the
-     * cheat detector before the world handles it. No argument register is reloaded ahead of that
-     * dispatch, which is what establishes the forwarding. It then builds a RawControllerMsg on the
-     * stack whose
-     * payload is the three words followed by the float in parameter order, and hands it to slot 2
-     * of the object at `+0x04`. The temporary is destroyed on the way out, which the inlined
-     * Message destructor at the end of the body records.
+     * The body forwards all four arguments unchanged to slot 2 of the cheat detector. It then
+     * builds a RawControllerMsg on the stack whose reading is the four arguments in parameter
+     * order and whose position is Mid::MBT(0), and hands it to the renderer's Handle().
      *
      * @param nUnknown1 The first word of the reading.
      * @param nUnknown2 The second word of the reading.
@@ -72,4 +57,74 @@ public:
      * @ghidraAddress 0x003d3288
      */
     virtual void OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4);
+
+    /**
+     * Report the front-end renderer.
+     *
+     * An out-of-line accessor with eighteen callers, among them GameManagerImpl::DrawFrame() and
+     * the script cheats, several of which cast the result to MetRenderer. The body is
+     * byte-identical to every other two-instruction accessor of a pointer at `+0x04`, which is why
+     * the program titled it after one of them.
+     *
+     * @return The renderer.
+     * @ghidraAddress 0x003d4858
+     */
+    RendererBase *GetRenderer();
+
+    /**
+     * Unrecovered. Runs RendererBase slot 4 on the renderer.
+     *
+     * No caller is recovered.
+     *
+     * @ghidraAddress 0x003d4860
+     */
+    void OnUnknownForwarder003d4860();
+
+    /**
+     * Unrecovered. Runs RendererBase slot 5 on the renderer.
+     *
+     * GameManagerImpl::OnBeginGameLocal(), GameManagerImpl::OnUnpauseGameSystem(), and
+     * GameManagerImpl::StartPlayback() call it.
+     *
+     * @ghidraAddress 0x003d4890
+     */
+    void OnUnknownForwarder003d4890();
+
+    /**
+     * Unrecovered. Report MetRenderer's word at `+0x60`, or 0 under the null renderer.
+     *
+     * The body returns 0 when QueryConfigFlag() reports option 0xcb set, the option that selects
+     * MetNullRenderer. Otherwise it converts the renderer back to its MetRenderer and reads the
+     * word. No caller is recovered.
+     *
+     * @return The word, or 0.
+     * @ghidraAddress 0x003d48c0
+     */
+    int OnUnknownQuery003d48c0();
+
+private:
+    /**
+     * Build the front-end renderer.
+     *
+     * With option 0xcb set the renderer is a MetNullRenderer, and otherwise a MetRenderer, whose
+     * RendererBase subobject lies at `+0x14`. The constructor is the one caller. GrooveWorld has
+     * the routine of the same shape for the game renderer, which is where the name comes from.
+     *
+     * @ghidraAddress 0x003d31c0
+     */
+    void CreateRenderer();
+
+    /**
+     * Release the renderer through its own table and clear the member.
+     *
+     * The destructor is the one caller.
+     *
+     * @ghidraAddress 0x003d4810
+     */
+    void DestroyRenderer();
+
+    // The front-end renderer, a MetNullRenderer or a MetRenderer. +0x04
+    RendererBase *mRenderer;
+    // Receives every controller reading ahead of the renderer. +0x08
+    InputCheatDetectorMet *mCheatDetector;
 };

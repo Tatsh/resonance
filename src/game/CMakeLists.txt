@@ -18,11 +18,13 @@ set(RESONANCE_GAME_SRCS
     gsperiodical.cpp
     harmony.cpp
     idablebase.cpp
+    inputcheatdetectormet.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
     levelconverter.cpp
     levelstats.cpp
     localplayer.cpp
+    metagameworld.cpp
     msgjoiner.cpp
     multicatcher.cpp
     multipowerbarmgr.cpp
