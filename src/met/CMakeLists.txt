@@ -6,6 +6,7 @@ set(RESONANCE_MET_SRCS
     metarenasscreen.cpp
     metbuttonlist.cpp
     metconfiggameoptionsscreen.cpp
+    metendgamegizmoscreen.cpp
     metexpansionpakscreen.cpp
     metfade.cpp
     metfreqloader.cpp
@@ -15,6 +16,7 @@ set(RESONANCE_MET_SRCS
     metfreqmakerinventoryscreen.cpp
     metfrontendstate.cpp
     metgameskillscreen.cpp
+    metgizmopanel.cpp
     metglobalsettingssaverscreen.cpp
     metjukeboxbasescreen.cpp
     metjukeboxcustomremixesscreen.cpp
@@ -24,6 +26,8 @@ set(RESONANCE_MET_SRCS
     metjukeboxfactoryremixesscreen.cpp
     metjukeboxtopbuttonsscreen.cpp
     metkeyboardscreen.cpp
+    metleftgizmoscreen.cpp
+    metleftgizmosmallscreen.cpp
     metloadfreqbasescreen.cpp
     metloadfreqscreen.cpp
     metloadgamescreen.cpp
@@ -45,6 +49,7 @@ set(RESONANCE_MET_SRCS
     metremixsaver.cpp
     metremixtypescreen.cpp
     metrenderer.cpp
+    metrightgizmoscreen.cpp
     metsaveremix.cpp
     metsaveremixscreen.cpp
     metscreen.cpp

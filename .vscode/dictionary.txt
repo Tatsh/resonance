@@ -463,6 +463,7 @@ metarenasscreen
 metbuttonlist
 metconfiggameoptionsscreen
 metcontrollerreading
+metendgamegizmoscreen
 metexpansionpakscreen
 metfade
 metfreqendedmsg
@@ -473,6 +474,7 @@ metfreqmakerdirectionsscreen
 metfreqmakerinventoryscreen
 metfrontendstate
 metgameskillscreen
+metgizmopanel
 metglobalsettingssaverscreen
 methodobject
 metjukeboxbasescreen
@@ -483,6 +485,8 @@ metjukeboxeditplaylistscreenlowerleft
 metjukeboxfactoryremixesscreen
 metjukeboxtopbuttonsscreen
 metkeyboardscreen
+metleftgizmoscreen
+metleftgizmosmallscreen
 metloadfreqbasescreen
 metloadfreqscreen
 metloadgamescreen
@@ -504,6 +508,7 @@ metremixmanager
 metremixsaver
 metremixtypescreen
 metrenderer
+metrightgizmoscreen
 metsaveremix
 metsaveremixscreen
 metscreen

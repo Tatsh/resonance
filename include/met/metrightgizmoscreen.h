@@ -3,30 +3,24 @@
 #include "met/metgizmopanel.h"
 
 /**
- * Gizmo panel that frames the front end.
+ * Large gizmo panel on the right of the front end.
  *
  * `19MetRightGizmoScreen` in the RTTI descriptor at `0x008f2a00`, with MetGizmoPanel as its one
- * public non-virtual base at offset 0. The class declares no data member of its own, and the
- * 39-entry vtable at `0x007f3f80` is the same length as the MetGizmoPanel table, so it
- * declares no virtual of its own either.
+ * public non-virtual base at offset 0. The class declares no data member. The 39-entry vtable at
+ * `0x007f3f80` is the same length as the MetGizmoPanel table, and the class declares no new
+ * virtual.
  *
- * The constructor at `0x00277628` takes only the renderer and the load priority. It runs the
- * MetGizmoPanel constructor at `0x00276d38` with `rpl` for the screen name,
- * `metagame/shared` for the directory, and `right_panel_large` for the container, and then
- * registers the alternate views it owns, `rpl_gizmo.view`, `rpl_gizmo_eq.view`, and
- * `rpl_gizmo_kscope.view`. Those names go into a vector that MetGizmoPanel owns, which is what the
- * destructor tears down.
- *
- * The destructor at `0x0027b9b8` releases that vector, restores the MetGizmoPanel vptr, and
- * runs the MetGizmoPanel destructor.
- *
- * Apart from the type function and the destructor, the slots that differ from the
- * MetGizmoPanel table are 9 `0x0027bc38` and 33 `0x0027bbb0`.
+ * Apart from the type function and the destructor, the slots that differ from the MetGizmoPanel
+ * table are 9 and 33.
  */
 class MetRightGizmoScreen : public MetGizmoPanel {
 public:
     /**
      * Construct the screen.
+     *
+     * Supplies `rpl` for the screen name, `metagame/shared` for the directory, and
+     * `right_panel_large` for the container, and registers the alternate views `rpl_gizmo.view`,
+     * `rpl_gizmo_eq.view`, and `rpl_gizmo_kscope.view`.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -35,7 +29,37 @@ public:
     MetRightGizmoScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
+     * Release the screen. The body is empty, and MetGizmoPanel's destructor is expanded in it.
+     *
      * @ghidraAddress 0x0027b9b8
      */
     virtual ~MetRightGizmoScreen();
+
+    /**
+     * Build the screen on the heap.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0027bb28
+     */
+    static MetRightGizmoScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Hide `rpl_gizmo_eq.view` and begin the exit.
+     *
+     * Slot 9. The view is resolved by name again rather than read from mViews.
+     *
+     * @ghidraAddress 0x0027bc38
+     */
+    virtual void BeginExit();
+
+    /**
+     * Show `rpl_gizmo_eq.view`.
+     *
+     * Slot 33. The view is resolved by name again rather than read from mViews.
+     *
+     * @ghidraAddress 0x0027bbb0
+     */
+    virtual void OnUnknownSlot33();
 };
