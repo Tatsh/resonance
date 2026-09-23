@@ -24,14 +24,32 @@ constexpr int kLeadVertex = 0;
 
 } // namespace
 
-HudHighlight::HudHighlight()
-    : mStarting(0), mDone(1), mEndTime(kNoEndTime),
-      mCornerVerts{{8, 9, 13, 12}, {10, 14, 15, 11}, {5, 7, 6, 4}, {2, 1, 0, 3}} {
+// 0x00417170
+HudHighlight::HudHighlight() : mStarting(0), mDone(1), mEndTime(kNoEndTime) {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 hilite_box.mesh")));
     mMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD hilite_box.mat")));
     SetShowing(0);
+
+    // The corner table is written after SetShowing(), one byte at a time.
+    mCornerVerts[kTopLeft][0] = 8;
+    mCornerVerts[kTopLeft][1] = 9;
+    mCornerVerts[kTopLeft][2] = 13;
+    mCornerVerts[kTopLeft][3] = 12;
+    mCornerVerts[kTopRight][0] = 10;
+    mCornerVerts[kTopRight][1] = 14;
+    mCornerVerts[kTopRight][2] = 15;
+    mCornerVerts[kTopRight][3] = 11;
+    mCornerVerts[kBottomRight][0] = 5;
+    mCornerVerts[kBottomRight][1] = 7;
+    mCornerVerts[kBottomRight][2] = 6;
+    mCornerVerts[kBottomRight][3] = 4;
+    mCornerVerts[kBottomLeft][0] = 2;
+    mCornerVerts[kBottomLeft][1] = 1;
+    mCornerVerts[kBottomLeft][2] = 0;
+    mCornerVerts[kBottomLeft][3] = 3;
 }
 
+// 0x00417388
 void HudHighlight::MoveTo(
     float flLeft, float flTop, float flRight, float flBottom, float flDuration) {
     std::vector<Rnd::MeshVert> &verts = mMesh->mVertsOwner->mVerts;
@@ -74,6 +92,7 @@ void HudHighlight::MoveTo(
     mDone = 0;
 }
 
+// 0x00417570
 void HudHighlight::JumpTo(float flLeft, float flTop, float flRight, float flBottom) {
     std::vector<Rnd::MeshVert> &verts = mMesh->mVertsOwner->mVerts;
     const Rnd::MeshVert &topLeft = verts[mCornerVerts[kTopLeft][kLeadVertex]];
@@ -100,6 +119,7 @@ void HudHighlight::JumpTo(float flLeft, float flTop, float flRight, float flBott
     }
 }
 
+// 0x00417690
 void HudHighlight::SetFrame(float flTime) {
     if (mStarting != 0) {
         mLastTime = flTime;

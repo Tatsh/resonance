@@ -20,6 +20,7 @@ constexpr int kLampKindsConfigCode = 0x389;
 
 } // namespace
 
+// 0x00417f50
 HudEffects::HudEffects(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -53,6 +54,7 @@ HudEffects::HudEffects(int nIndex) {
     mWires->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
 }
 
+// 0x00418760
 void HudEffects::SetMask(BarStatusMsg::Effects effects) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == kHudItemGuides) {

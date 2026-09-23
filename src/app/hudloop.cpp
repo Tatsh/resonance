@@ -8,6 +8,7 @@
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
 
+// 0x00417b40
 HudLoop::HudLoop(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;

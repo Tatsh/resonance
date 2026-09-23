@@ -7,6 +7,7 @@
 #include "rnd/mesh.h"
 #include "rnd/text.h"
 
+// 0x00417d58
 HudTrackLabel::HudTrackLabel(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
