@@ -113,16 +113,19 @@ public:
      * @param pGlobals The globals whose song clock and synthesiser the task uses.
      * @ghidraAddress 0x0012f1e0
      */
+    // 0x0012f1e0
     explicit NoteDestroyer(Globals *pGlobals)
         : TickTask(
               pGlobals->GetSongClock(), Mid::MBT(kDestroyerPeriodTicks).mTick, kDestroyerUnaligned),
-          mGlobals(pGlobals), mSynth(pGlobals->GetSynth()), mCount(0) {
+          mGlobals(pGlobals), mSynth(pGlobals->GetSynth()) {
         for (int nIndex = 0; nIndex < kDestroyerCapacity; ++nIndex) {
             mEntries[nIndex].mTick = kMBTInfinity;
         }
+        mCount = 0;
     }
 
     /** @ghidraAddress 0x0012f2b8 */
+    // 0x0012f2b8
     virtual ~NoteDestroyer() {
     }
 
@@ -135,6 +138,7 @@ public:
      * @return Always 1, to run again.
      * @ghidraAddress 0x0012f308
      */
+    // 0x0012f308
     virtual int Tick(int nTick) {
         for (int nIndex = 0; nIndex < mCount;) {
             if (!(nTick < mEntries[nIndex].mTick)) {

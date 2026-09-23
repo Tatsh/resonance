@@ -48,6 +48,7 @@ public:
      * @return The new synthesiser.
      * @ghidraAddress 0x0013a0c0
      */
+    // 0x0013a0c0
     static Synth *New() {
         return new NullSynth;
     }
@@ -57,6 +58,7 @@ public:
      *
      * @ghidraAddress 0x0013a478
      */
+    // 0x0013a478
     virtual void SendMidi(unsigned char, unsigned char, unsigned char) {
     }
 };
@@ -85,6 +87,7 @@ public:
      *
      * @ghidraAddress 0x0013a6a8
      */
+    // 0x0013a6a8
     virtual ~SynthFade() {
         delete mSource;
     }
@@ -96,6 +99,7 @@ public:
      * @return What the Source reports, so the task stops once the fade has finished.
      * @ghidraAddress 0x0013a710
      */
+    // 0x0013a710
     virtual int Tick(long long nElapsedNs) {
         const int nElapsedMs = static_cast<int>((nElapsedNs + kNsRounding) / kNsPerMs);
         float flLevel;

@@ -104,6 +104,7 @@ ScrollingList::~ScrollingList() {
     }
 }
 
+// 0x003fdec0
 Rnd::View *ScrollingList::makeRow(int nIndex) {
     HxStr prefix(FormatString(kRowNameFormat, nIndex));
     Rnd::Object *pObject =
@@ -111,6 +112,7 @@ Rnd::View *ScrollingList::makeRow(int nIndex) {
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 
+// 0x003fd858
 void ScrollingList::buildRowCells(Rnd::View *pRow) {
     std::vector<Cell> cells;
     std::list<Rnd::Drawable *> &draws = pRow->GetDraws();
@@ -191,6 +193,7 @@ void ScrollingList::scrollDown() {
     refresh();
 }
 
+// 0x00401030
 void ScrollingList::updateHighlight() {
     if (mHighlight == nullptr) {
         return;
@@ -242,6 +245,7 @@ void ScrollingList::setSelected(int nSelected) {
     updateHighlight();
 }
 
+// 0x00401270
 void ScrollingList::updateArrows() {
     if (mUpArrow != nullptr) {
         mUpArrow->SetShowing(0 < mSelected - mCursorRow);
