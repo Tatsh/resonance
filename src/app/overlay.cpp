@@ -144,6 +144,7 @@ constexpr float kScoreChangedNow = -1.0f;
 Overlay *g_pOverlay;
 HxStr g_hudLayoutName;
 
+// 0x0041c940
 Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     mUnknown44 = QueryConfigFlag(kDisplayModeConfigCode);
     mPlaybackOn = 0;
@@ -261,6 +262,7 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     g_pOverlay = this;
 }
 
+// 0x0041da00
 Overlay::~Overlay() {
     g_pOverlay = nullptr;
     for (std::vector<HudBadge *>::iterator it = mBadges.begin(); it != mBadges.end(); ++it) {
@@ -273,6 +275,7 @@ Overlay::~Overlay() {
     g_gfxDevice.mFeedbackEnabled = 0;
 }
 
+// 0x0041dd20
 void Overlay::SetFrame(float flFrame) {
     const int nBar = static_cast<int>(flFrame / kTicksPerBar);
     bool bBarChanged = false;

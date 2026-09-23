@@ -143,6 +143,7 @@ Renderer::Renderer()
     g_pRenderer = this;
 }
 
+// 0x0042ce08
 Renderer::~Renderer() {
     g_pRenderer = nullptr;
     delete mArena;
@@ -164,11 +165,13 @@ void Renderer::HandleMessage(Message *pMsg) {
     }
 }
 
+// 0x00432460
 void Renderer::OnUnknownSlot6() {
     mSongTick = static_cast<float>(mSongClock->SongTick());
     RendererBase::OnUnknownSlot6();
 }
 
+// 0x004324a0
 void Renderer::OnUnknownSlot7() {
     mTunnel->SetFrame(mSongTick);
     mOverlay->SetFrame(mSongTick);
@@ -211,6 +214,7 @@ void Renderer::OnUnknownSlot8() {
     }
 }
 
+// 0x004322b8
 Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
     int nSlice = nBar % mCellsPerRow;
     if (nSlice < 0) {
@@ -290,6 +294,7 @@ void Renderer::LoadLevel(const GameParams &params) {
     }
 }
 
+// 0x00432128
 void Renderer::UnloadLevel() {
     delete g_pLevelLoader;
     g_pLevelLoader = nullptr;
@@ -300,6 +305,7 @@ void Renderer::UnloadLevel() {
     g_arenaName = "";
 }
 
+// 0x00432080
 int Renderer::PollCommon(float *pflProgress) {
     if (g_pTunnelLoader == nullptr) {
         return 0;
@@ -314,6 +320,7 @@ int Renderer::PollCommon(float *pflProgress) {
     return nTunnelDone != 0 && nLaunchDone != 0 && nHudDone != 0;
 }
 
+// 0x004321a8
 int Renderer::PollLevel(float *pflProgress) {
     if (g_pArenaLoader == nullptr) {
         return 0;
@@ -326,6 +333,7 @@ int Renderer::PollLevel(float *pflProgress) {
     return nArenaDone != 0 && nLevelDone != 0;
 }
 
+// 0x00432228
 int Renderer::IsLevelLoaded(const HxStr &arena, const HxStr &level) {
     if (!(g_arenaName == arena) || !(g_levelName == level)) {
         return 0;
