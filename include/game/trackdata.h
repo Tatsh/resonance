@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <iostream>
 #include <vector>
 
 #include "mid/mbt.h"
 #include "mid/tickobj.h"
 #include "os/hxstr.h"
+#include "os/mem.h"
 
 class Gamer;
 class MuseMsg;
@@ -52,8 +54,34 @@ enum TrackMode {
 class TrackData {
     // Catcher::FindNextGemTick() at 0x001aca48 reads mUnknown30 directly.
     friend class Catcher;
+    // LevelBuilder::SetInstrument() at 0x001ec5d0 assigns mName directly.
+    friend class LevelBuilder;
 
 public:
+    /**
+     * Allocate a track from the tagged heap under the tag `TrackData`.
+     *
+     * No out-of-line body exists. The LevelBuilder constructor and LevelBuilder::SelectTrack()
+     * expand the call inline.
+     *
+     * @param nSize The object size the compiler supplies.
+     * @return The block.
+     */
+    void *operator new(size_t nSize) {
+        return AllocateTaggedMemory(nSize, "TrackData");
+    }
+
+    /**
+     * Release a track to the tagged heap.
+     *
+     * No out-of-line body exists. The deleting destructor expands the call inline.
+     *
+     * @param pBlock The block.
+     */
+    void operator delete(void *pBlock) {
+        FreeTaggedMemory(pBlock, "TrackData");
+    }
+
     /**
      * One bar of a track, with its scoring values and the sorted lists of what starts in it.
      *

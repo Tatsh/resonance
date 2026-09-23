@@ -148,6 +148,27 @@ public:
     }
 
     /**
+     * Do nothing.
+     *
+     * The body is inline, and the one out-of-line copy has no caller. Its place between the
+     * other InputPoller accessor copies is the only evidence for the class. The title is inferred.
+     *
+     * @ghidraAddress 0x001e1970
+     */
+    void OnUnknown001e1970() {
+    }
+
+    /**
+     * Do nothing.
+     *
+     * Recorded on the same evidence as OnUnknown001e1970(). The title is inferred.
+     *
+     * @ghidraAddress 0x001e1978
+     */
+    void OnUnknown001e1978() {
+    }
+
+    /**
      * Report mUnknown50.
      *
      * The body is inline, and the one out-of-line copy has no caller. The title is inferred.

@@ -1,11 +1,28 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 
 #include "app/attachment.h"
 #include "game/leveldata.h"
 
+class HxStr;
+class Riff;
 struct Harmony;
+
+/**
+ * Collection LevelBuilder::SelectTrack() takes the current track from.
+ *
+ * The values are the cases of the jump table at `0x007e7940`. The three collection names are the
+ * labels LevelBuilder::Print() writes ahead of each track.
+ */
+enum LevelTrackKind {
+    kLevelTrackNone = 0,    /*!< Clear the current track. */
+    kLevelTrackBacking = 1, /*!< A track of mBackingTracks, labelled `Backing Track#`. */
+    kLevelTrackIntro = 2,   /*!< A track of mIntroTracks, labelled `Intro Track#`. */
+    kLevelTrackScore = 3,   /*!< A track of mTracks, labelled `Score Track#`. */
+    kLevelTrackOwn = 4,     /*!< The one track the builder manages outside the collections. */
+};
 
 /**
  * Accumulator a MIDI conversion fills, and the one implementation of LevelData.
@@ -59,7 +76,7 @@ public:
     /**
      * @ghidraAddress 0x001ec448
      */
-    virtual int UnknownCount();
+    virtual int BackingTrackCount();
 
     /**
      * @ghidraAddress 0x001ec6d0
@@ -74,7 +91,7 @@ public:
     /**
      * @ghidraAddress 0x001ec708
      */
-    virtual TrackData *UnknownAt(int nIndex);
+    virtual TrackData *BackingTrackAt(int nIndex);
 
     /**
      * @ghidraAddress 0x001ec478
@@ -87,16 +104,88 @@ public:
     virtual PlayMap *OnUnknownSlot8();
 
     /**
+     * Call the play map's slot 8 and discard the result.
+     *
      * @ghidraAddress 0x001ec738
      */
     virtual void OnUnknownSlot9();
 
     /**
-     * Append one MIDI event to the track being filled.
+     * Make one track the current track, creating it on first use.
+     *
+     * A score track must already exist. A backing or intro collection grows to include nIndex.
+     * An empty slot, like an absent own track, receives a new TrackData with the index -1 over the
+     * play map at mUnknown34. The title is inferred.
+     *
+     * @param nKind The collection, a LevelTrackKind.
+     * @param nIndex The position in the collection. The none and own kinds do not read it.
+     * @ghidraAddress 0x001eb200
+     */
+    void SelectTrack(int nKind, int nIndex);
+
+    /**
+     * Write every track of the three collections to a diagnostic stream.
+     *
+     * Each track is introduced by its collection's label, its position, and a colon. The routine
+     * has no caller in the image.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress 0x001eb4a8
+     */
+    void Print(std::ostream &stream);
+
+    /**
+     * Forward a bar count to the play map through its slot 3.
+     *
+     * GrooveWorld's draw pass at `0x0018cd44` passes zero. The title is inferred.
+     *
+     * @param nBarCount The value stored in the play map's bar count.
+     * @ghidraAddress 0x001ec498
+     */
+    void SetBarCount(int nBarCount);
+
+    /**
+     * Return one intro track.
+     *
+     * The index is not tested against the collection. GrooveWorld's draw pass at `0x0018d22c` is
+     * the caller. The title is inferred.
+     *
+     * @param nIndex The position in mIntroTracks.
+     * @return The track, or null for a slot SelectTrack() passed over.
+     * @ghidraAddress 0x001ec720
+     */
+    TrackData *IntroTrackAt(int nIndex);
+
+    /**
+     * Set the MIDI channel of the current track.
+     *
+     * @param nChannel The channel.
+     * @ghidraAddress 0x001ec488
+     */
+    void SetChannel(unsigned char nChannel);
+
+    /**
+     * Set the TrackMode of the current track.
+     *
+     * @param nKind The TrackMode.
+     * @ghidraAddress 0x001ec5c0
+     */
+    void SetKind(int nKind);
+
+    /**
+     * Set the instrument index and the name of the current track.
+     *
+     * @param nInstrument The instrument index.
+     * @param name The track name, copied.
+     * @ghidraAddress 0x001ec5d0
+     */
+    void SetInstrument(int nInstrument, const HxStr &name);
+
+    /**
+     * Append one MIDI event to the current track.
      *
      * The status and the channel arrive separately and the body combines them with a bitwise or
-     * before forwarding, so the appender receives the whole status byte. The body is not written
-     * yet, because the appender at `0x001d4088` has no recovered name.
+     * before forwarding to TrackData::AddMidiMsg().
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nStatus The MIDI status byte without its channel, 0x80 through 0xe0.
@@ -105,7 +194,55 @@ public:
      * @param nChannel The channel, which the body ors into the status.
      * @ghidraAddress 0x001ec4c8
      */
-    void AddEvent(int nTick, int nStatus, int nData1, int nData2, int nChannel);
+    void AddEvent(int nTick,
+                  unsigned char nStatus,
+                  unsigned char nData1,
+                  unsigned char nData2,
+                  unsigned char nChannel);
+
+    /**
+     * Forward to TrackData::AddNoteMsg() on the current track.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param nUnknown09 The byte stored at the message's `+0x09`.
+     * @param nUnknown0a The byte stored at the message's `+0x0a`.
+     * @param nUnknown0c The word stored at the message's `+0x0c`.
+     * @param nUnknown08 The byte stored at the message's `+0x08`.
+     * @ghidraAddress 0x001ec4f8
+     */
+    void AddNoteMsg(int nTick,
+                    unsigned char nUnknown09,
+                    unsigned char nUnknown0a,
+                    int nUnknown0c,
+                    unsigned char nUnknown08);
+
+    /**
+     * Forward to TrackData::SetQuant() on the current track.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param nQuant The quantisation, in MIDI ticks.
+     * @ghidraAddress 0x001ec520
+     */
+    void SetQuant(int nTick, int nQuant);
+
+    /**
+     * Forward to TrackData::AddRiff() on the current track.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param pRiff The riff.
+     * @ghidraAddress 0x001ec540
+     */
+    void AddRiff(int nTick, Riff *pRiff);
+
+    /**
+     * Forward to TrackData::AddGem() on the current track.
+     *
+     * @param nTick The song position, in MIDI ticks.
+     * @param nGem The gem.
+     * @param pRiff The riff, or null.
+     * @ghidraAddress 0x001ec5a0
+     */
+    void AddGem(int nTick, int nGem, Riff *pRiff);
 
     /**
      * Start a harmony on the current track.
@@ -120,10 +257,9 @@ public:
     void AddHarmony(int nTick, const Harmony &harmony);
 
     /**
-     * Unrecovered. A two-argument forwarder to the routine at `0x001d7758` on the track at
-     * `+0x2c`.
+     * Forward to TrackData::OnUnknown001d7758() on the current track.
      *
-     * LevelConverter::EndTrack() calls it with two zeroes. The body is not written yet.
+     * LevelConverter::EndTrack() calls it with two zeroes.
      *
      * @param nFirst The first argument, forwarded unchanged.
      * @param nSecond The second argument, forwarded unchanged.
@@ -145,11 +281,10 @@ public:
     void SetTempo(int nTick, int nMicrosecondsPerQuarter);
 
     /**
-     * Apply the routine at `0x001d4308` to every track in the collection.
+     * Run TrackData::ScoreBars() on every score track.
      *
      * LevelConverter::Convert() calls it once the reader has been built and before the file is
-     * read. The body is not written yet, because that routine has no recovered name. It is a
-     * TrackData member, from its address range and from its one call site.
+     * read.
      *
      * @ghidraAddress 0x001ec680
      */
@@ -158,11 +293,10 @@ public:
 private:
     // All three vectors manage their elements. The destructor clears each with a std::for_each
     // over the deleting function at 0x001ec328.
-    std::vector<TrackData *> mTracks; // +0x04
-    // What distinguishes this collection from mTracks is unrecovered.
-    std::vector<TrackData *> mUnknown10; // +0x10
+    std::vector<TrackData *> mTracks;        // +0x04
+    std::vector<TrackData *> mBackingTracks; // +0x10
     // No slot of LevelData reads this collection.
-    std::vector<TrackData *> mUnknown1c; // +0x1c
+    std::vector<TrackData *> mIntroTracks; // +0x1c
     // Deleted by the destructor through TrackData's own destructor at 0x001d3900.
     TrackData *mOwnTrack; // +0x28
     // The track the forwarding members append to. The destructor does not release it.

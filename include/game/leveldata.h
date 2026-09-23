@@ -21,8 +21,8 @@ class TempoMap;
  * accessor interface over data a conversion has already produced.
  *
  * Every method name here is inferred from the LevelBuilder body behind it. RTTI in this image
- * yields class names only. The two collections are distinguished only by which vector each slot
- * reads, so the pair of names below records the offsets rather than a recovered purpose.
+ * yields class names only. The labels LevelBuilder's print routine writes, `Score Track#` and
+ * `Backing Track#`, distinguish the two collections.
  */
 class LevelData {
 public:
@@ -41,13 +41,13 @@ public:
     virtual int TrackCount() = 0;
 
     /**
-     * Report how many entries the second collection has.
+     * Report how many backing tracks the level has.
      *
      * Slot 3, and pure.
      *
      * @return The count.
      */
-    virtual int UnknownCount() = 0;
+    virtual int BackingTrackCount() = 0;
 
     /**
      * Report the level's own track.
@@ -70,17 +70,17 @@ public:
     virtual TrackData *TrackAt(int nIndex) = 0;
 
     /**
-     * Report one entry of the second collection by index.
+     * Report one backing track by index.
      *
      * Slot 6, and pure. An index outside the collection is not tested for. The element type comes
      * from LevelBuilder's destructor, which clears all three of its collections with the same
-     * deleting function at `0x001ec328`, and that function deletes a TrackData. What distinguishes
-     * the second collection from the first is unrecovered.
+     * deleting function at `0x001ec328`, and that function deletes a TrackData. LevelBuilder's
+     * print routine labels the collection `Backing Track#`.
      *
-     * @param nIndex The entry.
+     * @param nIndex The track.
      * @return The track.
      */
-    virtual TrackData *UnknownAt(int nIndex) = 0;
+    virtual TrackData *BackingTrackAt(int nIndex) = 0;
 
     /**
      * Report the level's tempo map. Slot 7, and pure.
