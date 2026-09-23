@@ -9,9 +9,9 @@
  * object is 0x14 bytes and its vtable is at `0x007e4528`. The allocation in New() and the
  * allocation in Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone(). Every field is public, because
+ * JamEffectsMgr::PostRemixFxMsg() at `0x001a54d8` reads all four directly and the image has no
+ * accessor for any of them.
  */
 class JamEffectMsg : public Message {
 public:
@@ -49,11 +49,11 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    int mBar;    /*!< The bar the effect toggles on. +0x04 */
+    int mTrack;  /*!< The track, which PostRemixFxMsg() compares with its manager's. +0x08 */
+    int mEffect; /*!< The effect type, the bit PostRemixFxMsg() toggles in the bar's mask. +0x0c */
+    /** Purpose unrecovered. PostRemixFxMsg() copies it into RemixFXMsg::mUnknown14. +0x10 */
+    int mUnknown10;
 };
 
 /**

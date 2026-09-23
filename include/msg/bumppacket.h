@@ -17,13 +17,36 @@ class Player;
  * the copy constructor at `0x003f3b58`, which Clone() delegates to. The four words Packet
  * provides are declared there rather than here.
  *
- * Print() labels `+0x1c` as a bar and `+0x20` as a track. The word at `+0x24` is zeroed by New()
+ * Print() labels `+0x1c` as a bar and `+0x20` as a track. mResult at `+0x24` is zeroed by New()
  * and is neither transferred nor printed.
  *
  * The destructor at `0x003f0e08` is compiler-generated and has no declaration here.
  */
 class BumpPacket : public ToAllOtherGameSystemsPacket {
 public:
+    /**
+     * Construct a packet with only the player reference, the Packet words, and mResult set.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    BumpPacket() {
+    }
+
+    /**
+     * Report a bumper deployed by a player.
+     *
+     * Inline, with no address of its own. BumpPowerup::Deploy() at `0x001c9de0` expands it on its
+     * stack after the ToAllOtherGameSystemsPacket words.
+     *
+     * @param pPlayer The player who deployed the bumper, or null.
+     * @param nBar The bar.
+     * @param nTrack The track.
+     */
+    BumpPacket(Player *pPlayer, int nBar, int nTrack)
+        : mPlayer(pPlayer), mBar(nBar), mTrack(nTrack) {
+    }
+
     /**
      * Produce a default-constructed packet on the heap.
      *
@@ -90,7 +113,15 @@ private:
     IDablePtr<Player> mPlayer; // +0x14
     int mBar;                  // +0x1c
     int mTrack;                // +0x20
-    int mUnknown24 = 0;        // +0x24
+
+public:
+    /**
+     * Non-zero once a receiver has acted on the packet. +0x24
+     *
+     * Both constructors clear it. Public because BumpPowerup::Deploy() reads it back after sending,
+     * plays `SND_DEPLOY_BUMPER` when it is set, and the image has no accessor.
+     */
+    int mResult = 0;
 };
 
 /**

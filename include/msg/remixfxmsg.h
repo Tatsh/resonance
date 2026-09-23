@@ -9,12 +9,38 @@
  * is 0x18 bytes and its vtable is at `0x00812b28`. The allocation in New() and the allocation in
  * Clone() report the same size, which measures the class twice.
  *
- * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
- * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
- * they are private by default.
+ * The payload layout comes from the run of field copies in Clone() and from the stack build in
+ * JamEffectsMgr::PostRemixFxMsg() at `0x001a55d4`. That build stores the vtable `0x007df1e0`
+ * rather than `0x00812b28`, a second emission of the same table in the unit that constructs it.
+ * Readers of the fields have not been traced, so they are private.
  */
 class RemixFXMsg : public Message {
 public:
+    /**
+     * Construct a message with every field unset.
+     *
+     * Inline. New() expands it. A declaration is required because the class declares a second
+     * constructor.
+     */
+    RemixFXMsg() {
+    }
+
+    /**
+     * Report one remix effect toggle.
+     *
+     * Inline, with no address of its own. JamEffectsMgr::PostRemixFxMsg() expands it on its stack
+     * at `0x001a55d4`.
+     *
+     * @param nTrack The track.
+     * @param nBar The bar.
+     * @param nEffect The effect type.
+     * @param bEnabled Non-zero when the effect is now on for the bar.
+     * @param nUnknown10 JamEffectMsg::mUnknown10, passed through.
+     */
+    RemixFXMsg(int nTrack, int nBar, int nEffect, int bEnabled, int nUnknown10)
+        : mTrack(nTrack), mBar(nBar), mEffect(nEffect), mEnabled(bEnabled), mUnknown14(nUnknown10) {
+    }
+
     /**
      * Produce a default-constructed message on the heap.
      *
@@ -50,11 +76,11 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14
+    int mTrack;     // +0x04
+    int mBar;       // +0x08
+    int mEffect;    // +0x0c
+    int mEnabled;   // +0x10
+    int mUnknown14; // +0x14, JamEffectMsg::mUnknown10 passed through
 };
 
 /**

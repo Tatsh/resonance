@@ -68,9 +68,13 @@ public:
 
     Player *mPlayer; /*!< The player who deployed the crippler. +0x08 */
     int mTrack;      /*!< The track, labelled by Print(). +0x0c */
-
-private:
-    int mUnknown10; // +0x10
+    /**
+     * The bar the crippler is deployed at. +0x10
+     *
+     * Public because CripplePowerup::Deploy() at `0x001c9830` stores its bar argument here
+     * directly, and the image has no accessor.
+     */
+    int mBar;
 };
 
 /**
