@@ -41,7 +41,8 @@ enum CanvasCommand {
 // LoadPrefab() runs randomize() a random number of times below this.
 constexpr float kRandomizePasses = 10.0f;
 
-// 0x00891af0. The name a new avatar starts with.
+// 0x00891af0
+// The name a new avatar starts with.
 HxStr g_defaultFreqName("player1");
 
 // Resolve the view the avatar view hangs from.

@@ -148,7 +148,8 @@ public:
     }
 
 private:
-    // 0x00363148. Brings up the solo stages screen for the new button, or lists the remixes on
+    // 0x00363148
+    // Brings up the solo stages screen for the new button, or lists the remixes on
     // the card and the disc for the load button. Other selections do nothing.
     void OpenSelectedButton();
 

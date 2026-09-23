@@ -131,7 +131,8 @@ constexpr int kTranslationRow = 3;
 HxStr g_textTooWide("met_keyboard_text_too_wide");
 HxStr g_macroTooLarge("met_keyboard_macro_too_large.");
 
-// 0x00891b30. The names of the keys that are not typed as a character.
+// 0x00891b30
+// The names of the keys that are not typed as a character.
 HxStr g_keyBackspace("BACKSPACE");
 HxStr g_keyTab("TAB");
 HxStr g_keyCaps("CAPS");
@@ -155,7 +156,8 @@ HxStr g_keyF10("F10");
 HxStr g_keyF11("F11");
 HxStr g_keyF12("F12");
 
-// 0x00891be0. The function keys, in macro order.
+// 0x00891be0
+// The function keys, in macro order.
 HxStr g_macroKeys[] = {g_keyF1,
                        g_keyF2,
                        g_keyF3,
@@ -169,7 +171,8 @@ HxStr g_macroKeys[] = {g_keyF1,
                        g_keyF11,
                        g_keyF12};
 
-// 0x00891c40. The first row of every layout.
+// 0x00891c40
+// The first row of every layout.
 HxStr g_functionRow[] = {g_keyF1,
                          g_keyF1,
                          g_keyF2,
@@ -187,7 +190,8 @@ HxStr g_functionRow[] = {g_keyF1,
                          g_keyF12,
                          g_keyF12};
 
-// 0x00891cc0. The last row of every layout.
+// 0x00891cc0
+// The last row of every layout.
 HxStr g_spaceRow[] = {g_keySpace,
                       g_keySpace,
                       g_keySpace,

@@ -58,7 +58,8 @@ constexpr int kAppearanceTextCount = 4;
 
 constexpr int kFirstRow = 0;
 
-// 0x0069ad78. The most entries the playlist takes.
+// 0x0069ad78
+// The most entries the playlist takes.
 int g_nMaxPlayListEntries = 50;
 
 inline const char *TextOrEmpty(const HxStr &text) {

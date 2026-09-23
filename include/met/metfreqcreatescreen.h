@@ -141,10 +141,12 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x0029cb30. Step the carousel one identity, wrapping at both ends, and refresh the preview.
+    // 0x0029cb30
+    // Step the carousel one identity, wrapping at both ends, and refresh the preview.
     void StepSelection(const MetScreenCommand *pCommand);
 
-    // 0x0029cbb8. Burn the selected identity into `cf_char.mat`.
+    // 0x0029cbb8
+    // Burn the selected identity into `cf_char.mat`.
     void RefreshSelection();
 
     std::vector<MetPersonaData *> *mIdentities; // +0x8c, the pre-fab list slot 5 takes

@@ -322,15 +322,18 @@ private:
     // The panel SetHighlight() draws with its highlight material. The names are inferred.
     enum Highlight { kHighlightCanvas = 0, kHighlightInventory = 1, kHighlightNone = 2 };
 
-    // 0x0026e9e0. Show or hide `fm_spectrum.view`, mCrossOrigin, and `COLOR.txt`.
+    // 0x0026e9e0
+    // Show or hide `fm_spectrum.view`, mCrossOrigin, and `COLOR.txt`.
     void ShowPalette(int nShowing);
 
-    // 0x0026e690. Show or hide the inventory decorations and the main view. The wires and the
+    // 0x0026e690
+    // Show or hide the inventory decorations and the main view. The wires and the
     // limit text are hidden first, and when shown, the edit page shows mLimitText and mWire16 and
     // every other page shows mWire30.
     void ShowInventory(int nShowing);
 
-    // 0x0026ebb8. Choose the materials of `canvas_2.mesh` and `fm_inventory.mesh`. A value outside
+    // 0x0026ebb8
+    // Choose the materials of `canvas_2.mesh` and `fm_inventory.mesh`. A value outside
     // Highlight clears both materials.
     void SetHighlight(int nHighlight);
 
@@ -341,60 +344,78 @@ private:
     // mesh under the grid cursor. Slot 19 expands it for each palette move.
     void ApplyPaletteToCurrentMesh();
 
-    // 0x0026e448. Hide `fm_inventory_hisquare.mesh`.
+    // 0x0026e448
+    // Hide `fm_inventory_hisquare.mesh`.
     void HideGridCursor();
 
-    // 0x0026e528. Move `fm_inventory_hisquare.mesh` to the grid cursor and show it.
+    // 0x0026e528
+    // Move `fm_inventory_hisquare.mesh` to the grid cursor and show it.
     void UpdateGridCursor();
 
-    // 0x0026eff0. Show one directions page, or the full page for the select page once the canvas
+    // 0x0026eff0
+    // Show one directions page, or the full page for the select page once the canvas
     // has its maximum of parts and the edit page is not shown.
     void ShowDirections(int nPage);
 
-    // 0x0026f100. Report whether the grid cursor is on a template, or on the edit page on a part.
+    // 0x0026f100
+    // Report whether the grid cursor is on a template, or on the edit page on a part.
     bool IsCurrentCellFilled();
 
-    // 0x0026f1b0. The name list of the page shown, or null when the grid cursor is past its end.
+    // 0x0026f1b0
+    // The name list of the page shown, or null when the grid cursor is past its end.
     std::vector<HxStr> *GetCurrentPageNames();
 
-    // 0x002726e8. Apply the palette colour and preview the template under the grid cursor.
+    // 0x002726e8
+    // Apply the palette colour and preview the template under the grid cursor.
     void PreviewCurrentTemplate();
 
-    // 0x00272868. The palette position at the centre of the palette cursor's cell.
+    // 0x00272868
+    // The palette position at the centre of the palette cursor's cell.
     void GetPalettePosition(Vector2 &position);
 
-    // 0x00272918. Move `fm_cross_origin.view` to one palette position.
+    // 0x00272918
+    // Move `fm_cross_origin.view` to one palette position.
     void MoveCrossOrigin(const Vector2 &position);
 
-    // 0x00272800. Move `fm_cross_origin.view` to one palette position. The routine is never called.
+    // 0x00272800
+    // Move `fm_cross_origin.view` to one palette position. The routine is never called.
     void MoveCrossOrigin(float flX, float flY);
 
-    // 0x00272828. Move `fm_cross_origin.view` to the palette cursor.
+    // 0x00272828
+    // Move `fm_cross_origin.view` to the palette cursor.
     void UpdateCrossOrigin();
 
-    // 0x002727d0. The colour at one palette position.
+    // 0x002727d0
+    // The colour at one palette position.
     Color *PaletteColorAt(const Vector2 &position);
 
-    // 0x002724c8. Report the colour under the palette cursor and apply it on the canvas.
+    // 0x002724c8
+    // Report the colour under the palette cursor and apply it on the canvas.
     void ApplyPaletteColor(Color &color);
 
-    // 0x00272988. Put the palette cursor on the cell a part's colour came from, or on the centre
+    // 0x00272988
+    // Put the palette cursor on the cell a part's colour came from, or on the centre
     // for a part with no palette position.
     void SetPaletteFromPart(FreqPart *pPart);
 
-    // 0x00272a68. Select the part under the grid cursor on the canvas.
+    // 0x00272a68
+    // Select the part under the grid cursor on the canvas.
     FreqPart *SelectCurrentPart();
 
-    // 0x00272790. Delete the part under the grid cursor from the canvas.
+    // 0x00272790
+    // Delete the part under the grid cursor from the canvas.
     void DeleteCurrentPart();
 
-    // 0x002727c0. Empty. Slot 19 runs it when the grid cursor cannot move above row 0.
+    // 0x002727c0
+    // Empty. Slot 19 runs it when the grid cursor cannot move above row 0.
     void OnGridTopReached();
 
-    // 0x002727c8. Empty. Slot 19 runs it when the grid cursor cannot move below the last row.
+    // 0x002727c8
+    // Empty. Slot 19 runs it when the grid cursor cannot move below the last row.
     void OnGridBottomReached();
 
-    // 0x00272d20. The scale a part's template category is drawn at on the grid.
+    // 0x00272d20
+    // The scale a part's template category is drawn at on the grid.
     float PartScale(FreqPart *pPart);
 
     Rnd::View *mMainInventoryView;        // +0x8c

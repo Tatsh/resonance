@@ -137,12 +137,14 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x002c7030. Promote a pending transition, bringing up the top logo, the small left gizmo, and
+    // 0x002c7030
+    // Promote a pending transition, bringing up the top logo, the small left gizmo, and
     // the help screen and activating this screen, then select the title preset and show the
     // screen. The title is inferred.
     void EnterMenu();
 
-    // 0x002c7520. Open the screen the chosen button leads to. Solo goes to MetLoadPreFabScreen
+    // 0x002c7520
+    // Open the screen the chosen button leads to. Solo goes to MetLoadPreFabScreen
     // while no save is possible, and otherwise to MetLoadFreqScreen or, with no saved identity,
     // MetLoadNewFreqScreen. The title is inferred.
     void OpenSelectedButton();

@@ -178,10 +178,12 @@ public:
     static void StartSave(const std::vector<HxStr> &screens);
 
 private:
-    // 0x00282048. Replace mReturnScreens with the screens to return to.
+    // 0x00282048
+    // Replace mReturnScreens with the screens to return to.
     void SetReturnScreens(const std::vector<HxStr> &screens);
 
-    // 0x002820a8. Become the memory card manager's user and ask for the state of the card
+    // 0x002820a8
+    // Become the memory card manager's user and ask for the state of the card
     // GlobalSettings records. OnMsgScreenDismissed() expands it.
     void RequestConnectState();
 

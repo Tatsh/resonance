@@ -41,8 +41,8 @@ std::vector<ArenaListEntry> g_localArenaList;
 std::vector<ArenaListEntry> g_soloArenaList;
 
 // 0x003cc748
-// The static's guard is at 0x006ce608, the list at 0x00892360, and its exit destructor at
-// 0x003cc678.
+// The static's guard is at 0x006ce608, the list at 0x00892360, and the exit destructor the
+// compiler emits for it at 0x003cc678.
 std::vector<HxStr> &LevelNameStorage() {
     static std::vector<HxStr> names;
     return names;

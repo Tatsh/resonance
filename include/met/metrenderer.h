@@ -491,7 +491,8 @@ private:
     // 0x003712d8
     static void StartArenaLoad();
 
-    // 0x00371438. Enqueues the arena loader while it is pending.
+    // 0x00371438
+    // Enqueues the arena loader while it is pending.
     static void EnqueueArenaLoader();
 
 public:

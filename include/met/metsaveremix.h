@@ -234,7 +234,8 @@ public:
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
 private:
-    // 0x00372760. Raises the `save_remix` dialogue, titled `save_title` with the `mem_save` text
+    // 0x00372760
+    // Raises the `save_remix` dialogue, titled `save_title` with the `mem_save` text
     // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.
     void BeginSave();
 

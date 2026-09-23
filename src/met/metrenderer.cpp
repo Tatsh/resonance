@@ -78,8 +78,9 @@ constexpr int kRepeatCommandFirst = 0x10;
 constexpr int kRepeatCommandLast = 0x13;
 
 // Whether a scene list holds the matching subobject of a view. The list's element type selects
-// the subobject the comparison converts the view to. Emitted out of line for the drawable list at
-// 0x00370ab8, the transformable list at 0x00370b08, and the animatable list at 0x00370b58.
+// the subobject the comparison converts the view to. The out-of-line copies are at 0x00370ab8 for
+// the drawable list, at 0x00370b08 for the transformable list, and at 0x00370b58 for the
+// animatable list.
 template <class T>
 inline bool ContainsRef(const std::list<T *> &list, Rnd::View *const &pView) {
     return std::find(list.begin(), list.end(), pView) != list.end();

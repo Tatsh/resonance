@@ -361,7 +361,8 @@ public:
     std::list<Rnd::Object *> GetLoadedObjects();
 
 private:
-    // 0x0024ff80. Build a part template over one loaded texture: a material named after it with
+    // 0x0024ff80
+    // Build a part template over one loaded texture: a material named after it with
     // `.mat` appended, copied from mMaterialTemplate with the texture on its first stage, the
     // texture's bitmap size as its scale, the category the seventh character from the end of the
     // name selects, and the colour and randomisation flags the next two characters set.

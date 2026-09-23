@@ -35,10 +35,12 @@ constexpr int kBasisZRow = 2;
 // Part categories count from 1.
 constexpr int kFirstCategory = 1;
 
-// 0x006a0f30. The instance Create() allocates.
+// 0x006a0f30
+// The instance Create() allocates.
 MetFreqMakerAssetManager *g_pFreqMakerAssetManager = nullptr;
 
-// 0x006a0f70. The colour SampleTexture() reports.
+// 0x006a0f70
+// The colour SampleTexture() reports.
 Color g_sampledColor;
 
 // The colour SampleTexture() clears the result to.
@@ -70,10 +72,12 @@ Color g_freqMakerDefaultColor = {0.75f, 0.75f, 0.75f, 1.0f};
 
 namespace {
 
-// 0x006a0f50. The material RegisterPart() copies into every part material.
+// 0x006a0f50
+// The material RegisterPart() copies into every part material.
 HxStr g_prototypeMaterialName("freq_maker_prototype_material");
 
-// 0x006a0f58. The mesh CloneMesh() copies into every part mesh.
+// 0x006a0f58
+// The mesh CloneMesh() copies into every part mesh.
 HxStr g_prototypeMeshName("freq_maker_prototype_mesh");
 
 } // namespace
@@ -83,22 +87,28 @@ HxStr g_spectrumTextureName("spectrum.bmp");
 
 namespace {
 
-// 0x006a0f68. A loaded texture PollLoad() does not make a part of.
+// 0x006a0f68
+// A loaded texture PollLoad() does not make a part of.
 HxStr g_burnPrototypeName("persona_texburn_prototype_texture.tex");
 
-// 0x00891ac8. The PC pre-fab persona file, which nothing reads.
+// 0x00891ac8
+// The PC pre-fab persona file, which nothing reads.
 HxStr g_prefabPersonaPathPc("metagame/persona/pre_fab_personas/pers_PC.dat");
 
-// 0x00891ad0. The pre-fab persona file mPrefabLoader reads.
+// 0x00891ad0
+// The pre-fab persona file mPrefabLoader reads.
 HxStr g_prefabPersonaPath("metagame/persona/pre_fab_personas/pers_PS2.dat");
 
-// 0x00891ad8. The PC team FreQ persona file, which nothing reads.
+// 0x00891ad8
+// The PC team FreQ persona file, which nothing reads.
 HxStr g_teamFreqPersonaPathPc("metagame/persona/pre_fab_personas/teamfreq_pers_PC.dat");
 
-// 0x00891ae0. The team FreQ persona file mTeamFreqLoader reads.
+// 0x00891ae0
+// The team FreQ persona file mTeamFreqLoader reads.
 HxStr g_teamFreqPersonaPath("metagame/persona/pre_fab_personas/teamfreq_pers_PS2.dat");
 
-// 0x00891ae8. A loaded texture PollLoad() does not make a part of.
+// 0x00891ae8
+// A loaded texture PollLoad() does not make a part of.
 HxStr g_freqFrameName("freq_frame.bmp");
 
 // The four burn textures, which PollLoad() also does not make parts of.

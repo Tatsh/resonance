@@ -330,7 +330,8 @@ private:
     // Append the default macro of one function key to the text when it fits.
     void InsertMacro(int nIndex);
 
-    // 0x00285378. Inline, with this out-of-line copy.
+    // 0x00285378
+    // Inline, with this out-of-line copy.
     // Find the button of a key. A single letter uses its case-specific button.
     Rnd::Button *FindKeyButton(const HxStr &key);
 
@@ -370,7 +371,8 @@ private:
     // Insert the first character of a key name when it fits.
     void OnCharacter(const HxStr &key);
 
-    // 0x0028c3e8. Inline, with this out-of-line copy.
+    // 0x0028c3e8
+    // Inline, with this out-of-line copy.
     // Show the caret beside the character it precedes.
     void UpdateCursor();
 
@@ -382,31 +384,38 @@ private:
     // Empty in the image. Slot 36 calls it last. The title is inferred.
     void OnDeparted();
 
-    // 0x0028c870. Inline, with this out-of-line copy.
+    // 0x0028c870
+    // Inline, with this out-of-line copy.
     // The name of the selected key.
     HxStr *CurrentKey();
 
-    // 0x0028c898. Inline, with this out-of-line copy.
+    // 0x0028c898
+    // Inline, with this out-of-line copy.
     // Put a key's button back in its resting state, latched for an active shift or caps key.
     void UnhighlightKey(const HxStr &key);
 
-    // 0x0028c9c8. Inline, with this out-of-line copy and no call site.
+    // 0x0028c9c8
+    // Inline, with this out-of-line copy and no call site.
     // Remove one character of the text.
     void RemoveChar(int nIndex);
 
-    // 0x0028c9e8. Inline, with this out-of-line copy and no call site.
+    // 0x0028c9e8
+    // Inline, with this out-of-line copy and no call site.
     // Append to the text.
     void AppendText(const HxStr &text);
 
-    // 0x0028ca08. Inline, with this out-of-line copy and no call site.
+    // 0x0028ca08
+    // Inline, with this out-of-line copy and no call site.
     // Insert into the text at a position, or append past its end.
     void InsertText(const HxStr &text, unsigned nPos);
 
-    // 0x0028ca58. Inline, with this out-of-line copy.
+    // 0x0028ca58
+    // Inline, with this out-of-line copy.
     // The horizontal position the end of the text is laid out at, truncated.
     int TextEndX();
 
-    // 0x0028caf8. Inline, with this out-of-line copy.
+    // 0x0028caf8
+    // Inline, with this out-of-line copy.
     // Clear the macro caption.
     void HideMacro();
 
@@ -418,7 +427,8 @@ private:
     // Record the key a press is applying.
     void SetPendingCommand(const HxStr &key);
 
-    // 0x0028cd00. Inline, with this out-of-line copy.
+    // 0x0028cd00
+    // Inline, with this out-of-line copy.
     // Replace the shared ticker text with the argument and repost it at the renderer's current
     // time, doing nothing when the text has not changed. The text is a function-local static
     // HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0, and 0x0028ccd8 is its destructor.
@@ -436,22 +446,28 @@ private:
     // Insert the macro of one function key and move the caret past it.
     void OnMacro(int nIndex);
 
-    // 0x0028c830. Assigns the entered text. Open() is the one caller.
+    // 0x0028c830
+    // Assigns the entered text. Open() is the one caller.
     void SetText(const HxStr &text);
 
-    // 0x0028c850. Assigns the prompt. Open() is the one caller.
+    // 0x0028c850
+    // Assigns the prompt. Open() is the one caller.
     void SetPrompt(const HxStr &prompt);
 
-    // 0x0028cad0. Records the receiver of the committed text. Open() is the one caller.
+    // 0x0028cad0
+    // Records the receiver of the committed text. Open() is the one caller.
     void SetUser(MetKBUser *pUser);
 
-    // 0x0028c3e0. Records the one controller the keyboard accepts. Open() is the one caller.
+    // 0x0028c3e0
+    // Records the one controller the keyboard accepts. Open() is the one caller.
     void SetSelector(int nSelector);
 
-    // 0x0028cad8. Assigns the ticker text slot 33 posts. Open() is the one caller.
+    // 0x0028cad8
+    // Assigns the ticker text slot 33 posts. Open() is the one caller.
     void SetTicker(const HxStr &ticker);
 
-    // 0x0028cab0. Assigns the registry key of the screen slot 36 departs to.
+    // 0x0028cab0
+    // Assigns the registry key of the screen slot 36 departs to.
     void SetReturnScreen(const HxStr &returnScreen);
 
     // The macro list the keyboard offers. Open() stores the request's list here, or the default

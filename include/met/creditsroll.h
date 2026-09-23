@@ -97,15 +97,18 @@ private:
     int ClassifyPicture(Rnd::Mesh *pPicture);
     // 0x001658c8
     int ClassifyText(Rnd::Text *pText);
-    // 0x00169970. The combined band of one credit.
+    // 0x00169970
+    // The combined band of one credit.
     int Classify(Rnd::Mesh *pPicture, Rnd::Text *pText);
     // 0x00169900
     Rnd::Mesh *GetPicture(int nIndex);
     // 0x00169938
     Rnd::Text *GetText(int nIndex);
-    // 0x001699e8. The receiver is not read.
+    // 0x001699e8
+    // The receiver is not read.
     void SetShowing(Rnd::Mesh *pPicture, Rnd::Text *pText, int nShowing);
-    // 0x00169860. Update() expands the same search inline.
+    // 0x00169860
+    // Update() expands the same search inline.
     static inline MetPersonaData *FindPersona(const HxStr &name,
                                               const std::vector<MetPersonaData *> &identities);
 

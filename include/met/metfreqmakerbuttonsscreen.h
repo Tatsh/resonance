@@ -210,14 +210,17 @@ public:
     void SetEditing(int nEditing);
 
 private:
-    // 0x0025a228. Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
+    // 0x0025a228
+    // Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
     void UpdateRandomizeLabel();
 
-    // 0x0025a3e0. Show the inventory page a part button selects, or hide the pages for the edit,
+    // 0x0025a3e0
+    // Show the inventory page a part button selects, or hide the pages for the edit,
     // name, randomise, and save buttons. The directions screen is resolved and not used.
     void ShowPageForButton(Rnd::Button *pButton);
 
-    // 0x0025a5e0. Show the directions page for a button, or the blank page for no button.
+    // 0x0025a5e0
+    // Show the directions page for a button, or the blank page for no button.
     void ShowDirectionsForButton(Rnd::Button *pButton);
 
     // Resolve the canvas and hand its persona to MetPersonaSaverScreen::StartSave(). The card is

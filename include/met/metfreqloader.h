@@ -90,7 +90,8 @@ public:
     int IsLoaded();
 
 private:
-    // 0x002a0e30. Read a persona count and then each persona from the buffer, marking each one with
+    // 0x002a0e30
+    // Read a persona count and then each persona from the buffer, marking each one with
     // 1 at MetPersonaData +0x15c, rebuilding its campaign level list, and appending it to
     // mIdentities.
     void ParseIdentities(const void *pBuffer, int nLength);

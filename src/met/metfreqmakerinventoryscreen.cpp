@@ -171,8 +171,9 @@ struct GridCell {
     int mRow;
 };
 
-// 0x00891af8 through 0x00891b17. The corners of the three visible rows of the grid. No routine
-// reads them. The names are inferred.
+// 0x00891af8
+// The corners of the three visible rows of the grid, through 0x00891b17. No routine reads them.
+// The names are inferred.
 GridCell g_gridTopLeft(0, 0);
 GridCell g_gridBottomLeft(0, 2);
 GridCell g_gridTopRight(7, 0);

@@ -147,7 +147,8 @@ static const char *const kOkButton = "OK";
 HxStr g_abLeftStickName("left analog stick");
 // 0x00891a98
 HxStr g_abRightStickName("right analog stick");
-// 0x00891aa0. The value of a row with no button.
+// 0x00891aa0
+// The value of a row with no button.
 HxStr g_abUnassignedName("o");
 
 inline HxStr ConfigText(int nCode, const char *pszKey) {
