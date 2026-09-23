@@ -41,14 +41,10 @@ struct Tick {
     /**
      * Write the count.
      *
-     * The body is not reconstructed, because two measurements of the member count disagree. Save()
-     * reads the words at `+0x00` and `+0x04` with two separate four-byte loads at `0x006100c8` and
-     * `0x006100e0` and writes each through its own OBStream::Write(), with no shift anywhere, which
-     * is evidence of two 32-bit lvalues. Print() instead reads the whole value with one `ld` at
-     * `0x00610064`, and the scheduler applies 64-bit `daddu`, `dsubu`, and signed `slt` to it,
-     * which is evidence of one 64-bit lvalue. An anonymous union of a `long long` and a
-     * two-element `int` array satisfies both, and that model is recorded here as a hypothesis
-     * rather than written into the member below.
+     * The low word and then the high word each go through their own OBStream::Write(). The binary
+     * reads the two halves with separate four-byte loads at `0x006100c8` and `0x006100e0`, while
+     * Print() and the scheduler treat the member as one 64-bit value, so the member stays a
+     * `long long` and the body splits it.
      *
      * @param stream The stream to write to.
      * @return The stream, allowing calls to be chained.
@@ -59,8 +55,8 @@ struct Tick {
     /**
      * Read the count back.
      *
-     * The body is not reconstructed, for the reason recorded on Save(). Load() reads four bytes
-     * into `+0x00` and four bytes into `+0x04` through two separate IBStream::Read() calls.
+     * The low word and then the high word arrive through two separate IBStream::Read() calls, the
+     * inverse of Save().
      *
      * @param stream The stream to read from.
      * @return The stream, allowing calls to be chained.

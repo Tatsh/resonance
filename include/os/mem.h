@@ -39,6 +39,9 @@ constexpr int kMemStlTagSize = 128;
  * to the tag `UNK[]`, and a failure is fatal. This is the array form, and
  * MemAllocScalar() is the single-object form.
  *
+ * This is the game's replacement `operator new[](size_t)`. Its exception tables carry the
+ * `throw(std::bad_alloc)` specification, and `UNK[]` is the array tag.
+ *
  * @param nSize The block size in bytes.
  * @return The block.
  * @ghidraAddress 0x004a8380
@@ -52,6 +55,9 @@ void *MemAlloc(size_t nSize);
  * to the tag `UNK`, and a failure is fatal. The log line and the failure
  * message both omit a tag, and the message reads
  * `NEW ALLOCATION FAILURE, size: %d`.
+ *
+ * This is the game's replacement `operator new(size_t)`. Its exception tables carry the
+ * `throw(std::bad_alloc)` specification, and `UNK` is the single-object tag.
  *
  * @param nSize The block size in bytes.
  * @return The block.
@@ -142,6 +148,9 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine);
  * This is the array release path, which the log line identifies as
  * `del(UNK[],%p)`.
  *
+ * This is the game's replacement `operator delete[](void *)`. Its exception tables carry the
+ * empty `throw()` specification, and `UNK[]` is the array tag.
+ *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a92c8
  */
@@ -152,6 +161,9 @@ void MemFree(void *pBlock);
  *
  * The log line identifies the path as `del(UNK,%p)`. HxStr::Alloc() is the one
  * caller inside the string class.
+ *
+ * This is the game's replacement `operator delete(void *)`. Its exception tables carry the empty
+ * `throw()` specification, and `UNK` is the single-object tag.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a9230

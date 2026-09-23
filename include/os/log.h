@@ -46,10 +46,14 @@ void Warn(const char *pszFormat, ...);
  * message in memory and nothing on the console, which is what makes a debugger the only way to
  * recover the text.
  *
+ * The declaration the game compiled against did not mark the routine as never returning, so its
+ * callers carry code after the call (Heap::Alloc() at `0x00551780` continues into its timing
+ * tail). This declaration omits the attribute for the same reason.
+ *
  * @param pszFormat A printf-style format string.
  * @ghidraAddress 0x0052e868
  */
-void Fatal(const char *pszFormat, ...) __attribute__((noreturn));
+void Fatal(const char *pszFormat, ...);
 
 /**
  * Report a problem and return to the caller.
