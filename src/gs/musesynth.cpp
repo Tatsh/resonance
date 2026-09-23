@@ -9,6 +9,13 @@
 #include "msg/sustainnotemsg.h"
 #include "synth/synthsustainer.h"
 
+// 0x00686290
+int g_nMusePlayerSerial;
+
+// 0x001aa440
+MusePlayer::MusePlayer() : mId(++g_nMusePlayerSerial) {
+}
+
 // 0x001aa4d8
 MuseSynth::MuseSynth(Sch::TickClock *pClock)
     : mClock(pClock), mSustainer(nullptr), mOutput(&mSplitter) {
@@ -17,6 +24,14 @@ MuseSynth::MuseSynth(Sch::TickClock *pClock)
 // 0x001aa5d8
 MuseSynth::~MuseSynth() {
     ReleaseAllPlayers();
+}
+
+// 0x001aad98
+MsgSplitter::~MsgSplitter() {
+}
+
+// 0x001aae68
+MsgSplitter::MsgSplitter() {
 }
 
 // 0x001aafb0
@@ -119,4 +134,9 @@ void MuseSynth::HandleMessage(Message *pMsg) {
     if (nType == static_cast<int>(g_dwAllNotesOffMsgType)) {
         ReleaseAllPlayers();
     }
+}
+
+// 0x001ab4a8
+void MsgSplitter::HandleMessage(Message *pMsg) {
+    Send(pMsg);
 }

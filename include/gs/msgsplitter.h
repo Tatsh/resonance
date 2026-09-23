@@ -14,10 +14,9 @@
  * Its primary table is at `0x007e0128` and its MsgSource table at `0x007e0100`. MuseSynth embeds
  * one at `+0x0c` and exposes it as the sink every player it creates sends to.
  *
- * The constructor, the destructor, and the slot of the HandleMessage() override are recovered. The
- * body of that override is not written and the file the class belongs to is not identified. The
- * name comes from the RTTI descriptor and is not the invented `Rnd::LightMsgSplitter` that the
- * type-function harvest recorded for it.
+ * The three bodies sit inside MuseSynth's run of code, so they are written in that translation
+ * unit. The name comes from the RTTI descriptor and is not the invented `Rnd::LightMsgSplitter`
+ * that the type-function harvest recorded for it.
  */
 class MsgSplitter : public MsgSink, public MsgSource {
 public:
@@ -32,9 +31,9 @@ public:
     virtual ~MsgSplitter();
 
     /**
-     * Act on a message.
+     * Deliver a message to every registered sink.
      *
-     * Primary table slot 3. The body is not written.
+     * Primary table slot 3. Forwards to MsgSource::Send().
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001ab4a8

@@ -13,8 +13,9 @@ class MsgSink;
  * 0x20-byte NotePlayer that MuseSynth creates for a NoteMsg is the other, and its constructor at
  * `0x001b4328` takes seven arguments.
  *
- * No vtable of this class alone exists in the image, so it is never instantiated. Its table shape
- * comes from MultiMusePlayer's secondary table at `0x007dfd08`, which runs five entries.
+ * The class table at `0x007dfe68` runs five entries. Slots 2 through 4 point to the pure-virtual
+ * stub at `0x005381a8`, so the class is never instantiated alone. The constructor and destructor
+ * install the table while a derived object is being built or torn down.
  *
  * The three verbs come from MuseSynth, which is the one caller of all three. It calls Start()
  * immediately after creating a player, Stop() on every player it releases, and slot 4 on the
@@ -40,14 +41,22 @@ public:
     void operator delete(void *pBlock);
 
     /**
+     * Construct a player with the next serial number.
+     *
+     * Increments g_nMusePlayerSerial and records the new value in mId.
+     *
      * @ghidraAddress 0x001aa440
      */
     MusePlayer();
 
     /**
+     * Inline. Identical copies sit at `0x001aa3e8` and `0x001aa4a8`, one in each translation unit
+     * that emits the table at `0x007dfe68`.
+     *
      * @ghidraAddress 0x001aa3e8
      */
-    virtual ~MusePlayer();
+    virtual ~MusePlayer() {
+    }
 
     /**
      * Begin playing, sending every message to one sink.
@@ -80,7 +89,15 @@ public:
     virtual int Slot4() = 0;
 
 private:
-    // Serial number, taken from the counter at 0x00686290 that the constructor increments. Nothing
-    // recovered so far reads it.
+    // Serial number, taken from g_nMusePlayerSerial. Nothing recovered so far reads it.
     int mId; // +0x00
 };
+
+/**
+ * Serial number of the most recently constructed MusePlayer.
+ *
+ * Starts at 0. MusePlayer's constructor is the one reader and writer.
+ *
+ * @ghidraAddress 0x00686290
+ */
+extern int g_nMusePlayerSerial;
