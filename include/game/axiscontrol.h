@@ -30,9 +30,6 @@ class StdMidiMsg;
  * stick until the next note or an AllNotesOffMsg.
  *
  * The destructor at `0x0019f6a8` is implicitly declared.
- *
- * OnAxisRegister() is declared and not written, because it reads AxisRegisterMsg's private
- * position at `+0x0c`.
  */
 class AxisControl : public MsgSink, public MsgSource {
 public:

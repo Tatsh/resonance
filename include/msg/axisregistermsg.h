@@ -98,10 +98,14 @@ public:
     Player *mPlayer; /*!< The player the controller belongs to. +0x04 */
     float mValue;    /*!< The axis value. +0x08 */
 
-private:
-    Mid::MBT mPosition; // +0x0c
+    /**
+     * The song position of the reading. +0x0c
+     *
+     * Public because AxisControl::OnAxisRegister() at `0x0019ea80` and Scratcher::PostNowBarMsg()
+     * at `0x001cfd20` read it directly.
+     */
+    Mid::MBT mPosition;
 
-public:
     /**
      * The player's track. +0x10
      *

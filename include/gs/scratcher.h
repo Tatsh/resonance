@@ -36,8 +36,6 @@ class TickClock;
  * The constructor fixes the member map. It copies the bar length from the phrase manager's `+0x34`
  * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
  * both player references at the stand-in player, and sizes mUnknown74 to three zeroed elements.
- *
- * PostNowBarMsg() is declared and not written, for the message access it records.
  */
 class Scratcher : public Pitcher {
 public:
@@ -79,8 +77,7 @@ protected:
      *
      * The routine sends a NowBarMsg at lane one minus the value, then tracks the reading's
      * movement against the ring of past readings in mUnknown74 and replays the last gem through
-     * OnPitchRiff() at a step of up to 3 in either direction. The body is not written, because
-     * AxisRegisterMsg's position at `+0x0c` is private.
+     * OnPitchRiff() at a step of up to 3 in either direction.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001cfd20
@@ -183,7 +180,7 @@ private:
     // +0x74. The constructor builds three elements from an int zero through the float fill
     // instantiation at 0x001d1f90, which converts each with cvt.s.w.
     std::vector<float> mUnknown74;
-    int mUnknown80;      // +0x80, not written by the constructor
+    int mUnknown80;      // +0x80, the newest slot of mUnknown74, not written by the constructor
     Mid::MBT mUnknown84; // +0x84, where the last scratch gem ends
     float mUnknown88;    // +0x88, the blend the last scratch gem ends at
     int mUnknown8c;      // +0x8c, the step of the last scratch

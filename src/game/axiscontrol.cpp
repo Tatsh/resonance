@@ -38,12 +38,55 @@ constexpr int kNoBend = 0;
 constexpr int kLaneCount = 128;
 constexpr float kLaneScale = 1.0f / kLaneCount;
 
+// An AxisRegisterMsg's value, between 0 and 1, scales onto the 0..1024 stick range, and the
+// coarse lane is the stick position divided by this.
+constexpr float kAxisScale = 1024.0f;
+constexpr int kLaneDivisor = 8;
+
 } // namespace
 
 // 0x0019e940
 AxisControl::AxisControl(const TrackData *pTrackData)
     : mTrack(pTrackData->mUnknown04), mChannel(pTrackData->mChannel), mLane(kLaneCenter),
       mAxis(kNoAxis), mBending(0), mBendOrigin(0), mSustainTick(0), mPlayer(&g_nullPlayer) {
+}
+
+// 0x0019ea80
+void AxisControl::OnAxisRegister(AxisRegisterMsg *pMsg) {
+    const int bOwnTrack = pMsg->mTrack == mTrack;
+    mAxis = static_cast<int>(pMsg->mValue * kAxisScale);
+    const int nLane = mAxis / kLaneDivisor;
+    if (nLane != mLane) {
+        mLane = nLane;
+        if (bOwnTrack == 0) {
+            return;
+        }
+        NowBarMsg nowBar;
+        nowBar.mUnknown04 = pMsg->mTrack;
+        nowBar.mPlayer = pMsg->mPlayer;
+        nowBar.mLane = static_cast<float>(kLaneCount - nLane) * kLaneScale;
+        Send(&nowBar);
+    }
+    if (bOwnTrack == 0) {
+        return;
+    }
+
+    if (mBending != 0 && mBendOrigin == kAxisCenter) {
+        if (pMsg->mPlayer == mPlayer) {
+            SendPitchBend(pMsg->mPosition.mTick, mAxis - kAxisCenter);
+        }
+        return;
+    }
+    // A bend that started off centre waits for the stick to cross the centre before it drives.
+    if (mBendOrigin > kAxisCenter) {
+        if (mAxis <= kAxisCenter) {
+            mBendOrigin = kAxisCenter;
+        }
+    } else if (mBendOrigin < kAxisCenter) {
+        if (mAxis >= kAxisCenter) {
+            mBendOrigin = kAxisCenter;
+        }
+    }
 }
 
 // 0x0019ec10

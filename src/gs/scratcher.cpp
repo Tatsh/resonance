@@ -67,6 +67,25 @@ constexpr int kScratchGem = 1;
 // AxeButtonMsg's state for a press, which a scratch sends in both of its first two words.
 constexpr int kButtonPressed = 1;
 
+// PostNowBarMsg() maps an axis value from 0..1 onto a position from 1 down to -1, and records the
+// direction of the last scratch it detected.
+constexpr double kAxisMidpoint = 0.5;
+constexpr double kAxisToPosition = -2.0;
+constexpr int kScratchForward = 1;
+constexpr int kScratchBackward = -1;
+constexpr int kScratchNone = 0;
+
+// A position beyond this is a scratch, and one within the dead zone rearms the detector.
+constexpr double kScratchThreshold = 0.2;
+constexpr double kDeadZone = 0.15;
+
+// The change in position since the oldest reading scales onto a step of up to three.
+constexpr double kSpeedScale = 4.5;
+constexpr int kMaxStep = 3;
+
+// The backward step is the scaled speed negated and less this, which is what the binary computes.
+constexpr int kBackwardStepBias = 4;
+
 // Saturates a tick to the finite range, as the inline Mid::MBT arithmetic does.
 inline int ClampTick(int nTick) {
     return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
@@ -93,6 +112,42 @@ Scratcher::Scratcher(PhraseMgr *pPhraseMgr,
         mUnknown54 = QueryConfigFlag(kBankSwitchOverrideConfigCode) == 0;
     }
     mUnknown58 = pTrackData->mChannel;
+}
+
+// 0x001cfd20
+void Scratcher::PostNowBarMsg(AxisRegisterMsg *pMsg) {
+    if (pMsg->mTrack != mUnknown44 || mUnknown5c != pMsg->mPlayer) {
+        return;
+    }
+    NowBarMsg nowBar;
+    nowBar.mUnknown04 = pMsg->mTrack;
+    nowBar.mPlayer = mUnknown5c;
+    nowBar.mLane = 1.0f - pMsg->mValue;
+    Send(&nowBar);
+
+    const float flPosition = static_cast<float>((pMsg->mValue - kAxisMidpoint) * kAxisToPosition);
+    const unsigned int nReadings = mUnknown74.size();
+
+    if (flPosition > kScratchThreshold && mUnknown70 != kScratchForward) {
+        mUnknown70 = kScratchForward;
+        const float flOldest = mUnknown74[(nReadings + mUnknown80) % nReadings];
+        const int nSpeed = static_cast<int>((flPosition - flOldest) * kSpeedScale);
+        OnPitchRiff(mUnknown68, std::max(std::min(nSpeed, kMaxStep), 1), pMsg->mPosition.mTick);
+    }
+    if (flPosition < -kScratchThreshold && mUnknown70 != kScratchBackward) {
+        mUnknown70 = kScratchBackward;
+        const float flOldest = mUnknown74[(nReadings + mUnknown80) % nReadings];
+        const int nSpeed = static_cast<int>((flPosition - flOldest) * kSpeedScale);
+        // Yes, the binary negates the speed and then subtracts four.
+        const int nStep = -nSpeed - kBackwardStepBias;
+        OnPitchRiff(mUnknown68, std::max(std::min(nStep, -1), -kMaxStep), pMsg->mPosition.mTick);
+    }
+    if (flPosition > -kDeadZone && flPosition < kDeadZone) {
+        mUnknown70 = kScratchNone;
+    }
+
+    mUnknown80 = (mUnknown80 + 1) % nReadings;
+    mUnknown74[mUnknown80] = flPosition;
 }
 
 // 0x001d0038
