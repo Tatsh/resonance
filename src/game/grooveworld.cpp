@@ -675,7 +675,7 @@ void GrooveWorld::BuildGraphs() {
     for (unsigned int i = 0; i < static_cast<unsigned int>(mLevel->TrackCount()); ++i) {
         TrackData *pTrack = mLevel->GetTrack(i);
         pTrack->mGamer = mGamer;
-        ScoreTrackGraph *pGraph;
+        ScoreTrackGraph *pGraph = nullptr; // Yes, the binary leaves it unset on the Fatal path.
         if (pTrack->mKind == kTrackModeCatch ||
             (Application::shared()->GetPlayMode() == kPlayModeGame &&
              pTrack->mKind == kTrackModeRiff &&
