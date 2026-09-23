@@ -28,6 +28,7 @@ constexpr float kScoreChangeLongAgo = -100000.0f;
 
 } // namespace
 
+// 0x00419618
 HudScore::HudScore(Player *pPlayer, int nIndex) : mText(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;

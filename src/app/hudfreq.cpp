@@ -30,6 +30,7 @@ constexpr int kBurnStage = 1;
 
 } // namespace
 
+// 0x00419b40
 HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulseLoop) {
     Rnd::Tex *pBurn = FreqAppearance::FindPersonaBurnTexture(nIndex);
 

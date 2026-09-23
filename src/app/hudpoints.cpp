@@ -36,6 +36,7 @@ constexpr float kBankTo = 300.0f;
 
 } // namespace
 
+// 0x00418818
 HudPoints::HudPoints(int nIndex)
     : mFlash(0.0f), mPulse(0.0f), mPulseRest(0.0f), mMultiplier(kInitialMultiplier), mPoints(0),
       mShowing(0), mHot(0), mUnknown38(0) {
@@ -70,6 +71,7 @@ HudPoints::HudPoints(int nIndex)
     mMultiplierText->SetShowing(0);
 }
 
+// 0x00418de8
 void HudPoints::SetFrame(float flTime) {
     mExitView->SetShowing(mExit.Update(flTime));
 
@@ -99,6 +101,7 @@ void HudPoints::SetFrame(float flTime) {
     }
 }
 
+// 0x00418f90
 void HudPoints::ShowExit(int nPoints) {
     mPointsText->SetShowing(0);
     mShowing = 0;
@@ -111,6 +114,7 @@ void HudPoints::ShowExit(int nPoints) {
     }
 }
 
+// 0x004190a8
 void HudPoints::Bank() {
     if (mShowing != 0) {
         mExitText->SetText(HxStr(FormatString("%d", mPoints)));
