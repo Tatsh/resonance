@@ -41,9 +41,8 @@ class Object;
  * queues one message for each change through the private builders. Slot 26 then shows the queued
  * messages one at a time, 360 frames apart, and shows the continue button after the last.
  *
- * Slot 5 at `0x003be2a8` is not written yet. It saves the persona through
- * MetPersonaSaverScreen::StartSave() to the first memory-card location GlobalSettings records, and
- * GlobalSettings is not declared in this tree.
+ * The allocation at `0x003c4250` has one caller, the routine at `0x00385180` that creates every
+ * front-end screen.
  */
 class MetStageFinishScreen : public MetScreen {
 public:
@@ -60,6 +59,25 @@ public:
      * @ghidraAddress 0x003bded8
      */
     virtual ~MetStageFinishScreen();
+
+    /**
+     * Record the finished stage, queue the messages it earns, and save or show them. Slot 5.
+     *
+     * Unless the stage is already recorded or a saved game is loading, the body records the game's
+     * score and the level as beaten in the first persona's CampaignStats, updates the persona's
+     * skill status, and queues one message for each change the recording made. The level named
+     * second of a two-level secret stage additionally queues `end_game_end_super_secret`. When the
+     * level was not beaten before or its high score was beaten, and MetFrontEndState::mUnknown14 is
+     * clear, the persona is saved through MetPersonaSaverScreen::StartSave() with this screen to
+     * return to, to the first card location GlobalSettings records when
+     * MetFrontEndState::mUnknown0c is set and to location `1` otherwise, and the body returns.
+     * Otherwise, when MetFrontEndState::mUnknown0c and mUnknown10 are both 1, the global settings
+     * are saved first through MetGlobalSettingsSaverScreen::StartSave(), and ShowMessages() runs in
+     * every other case.
+     *
+     * @ghidraAddress 0x003be2a8
+     */
+    virtual void EnterAndShow();
 
     /**
      * Start the continue button alternating once the messages are done. Slot 19.
@@ -181,14 +199,14 @@ private:
     void AddHighScoreMessage(int nPreviousScore, int nScore);
 
     /**
-     * Queue `end_game_arena_complete` for an arena finished for the first time.
+     * Queue `end_game_arena_complete` when the finished stage unlocks another arena.
      *
      * The configuration string is a format that receives the display name (configuration code
      * 0x326) of the arena at index nCompleted - 1 in GetArenaList(). Slot 5 at `0x003be450` is the
-     * one caller.
+     * one caller, and passes CampaignStats::mUnlockLevel from before and after the recording.
      *
-     * @param nPreviousCompleted The number of completed arenas before this game.
-     * @param nCompleted The number of completed arenas now.
+     * @param nPreviousCompleted The unlock level before this game.
+     * @param nCompleted The unlock level now.
      * @ghidraAddress 0x003bf9b8
      */
     void AddArenaCompleteMessage(int nPreviousCompleted, int nCompleted);

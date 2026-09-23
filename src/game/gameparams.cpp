@@ -16,7 +16,7 @@ GameParams::GameParams() {
     mUnknown20 = 0;
     mUnknown24 = false;
     mUnknown28 = false;
-    mUnknown2c = false;
+    mLoadingGame = false;
     mJukeboxMode = false;
 }
 
@@ -51,7 +51,7 @@ void GameParams::Save(OBStream *pStream) {
     int unknown28 = mUnknown28;
     pStream->Write(&unknown28, sizeof(unknown28));
 
-    int unknown2c = mUnknown2c;
+    int unknown2c = mLoadingGame;
     pStream->Write(&unknown2c, sizeof(unknown2c));
 
     int unknown30 = mJukeboxMode;
@@ -98,7 +98,7 @@ void GameParams::Load(IBStream *pStream) {
     mUnknown1c = unknown1c;
     mUnknown24 = unknown24 != 0;
     mUnknown28 = unknown28 != 0;
-    mUnknown2c = unknown2c != 0;
+    mLoadingGame = unknown2c != 0;
     mJukeboxMode = unknown30 != 0;
 }
 
@@ -107,7 +107,7 @@ void GameParams::Print(std::ostream &stream) {
     stream << "GameParams:" << " level=" << mLevelName << " arena=" << mArenaName
            << " friends=" << mUnknown10 << " " << (mUnknown1c == 1 ? " game" : " jam")
            << " difficulty=" << mUnknown20 << " " << (mUnknown24 ? " constrain-jam" : "")
-           << "netgame=" << mUnknown28 << "loadinggame=" << mUnknown2c
+           << "netgame=" << mUnknown28 << "loadinggame=" << mLoadingGame
            << "jukeboxmode=" << mJukeboxMode << std::endl;
 }
 
@@ -120,7 +120,7 @@ GameParams &GameParams::operator=(const GameParams &other) {
     mUnknown20 = other.mUnknown20;
     mUnknown24 = other.mUnknown24;
     mUnknown28 = other.mUnknown28;
-    mUnknown2c = other.mUnknown2c;
+    mLoadingGame = other.mLoadingGame;
     mJukeboxMode = other.mJukeboxMode;
     return *this;
 }

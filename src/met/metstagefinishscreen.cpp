@@ -1,11 +1,17 @@
 #include "met/metstagefinishscreen.h"
 
 #include "app/application.h"
+#include "game/campaignstats.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
+#include "game/gamestats.h"
+#include "game/globalsettings.h"
 #include "met/metbuttonlist.h"
 #include "met/metfrontendstate.h"
+#include "met/metglobalsettingssaverscreen.h"
 #include "met/methelpscreen.h"
+#include "met/metpersonadata.h"
+#include "met/metpersonasaverscreen.h"
 #include "met/metrenderer.h"
 #include "met/metsolowinscreen.h"
 #include "met/metsonglists.h"
@@ -95,6 +101,20 @@ static const char *const kMessageTextFormat = "%s%d.txt";
 // The screen slot 36 hands over to.
 static const char *const kSoloWinScreen = "MetSoloWinScreen";
 
+// The player whose score EnterAndShow() records.
+constexpr int kFirstPlayer = 0;
+
+// The secret stage, and the number of levels it has when its last level ends the super secret.
+constexpr int kSecretStage = 6;
+constexpr unsigned kSecretStageLevelCount = 2;
+
+// The card location EnterAndShow() saves to when MetFrontEndState::mUnknown0c is clear.
+static const char *const kDefaultCardSlotName = "1";
+constexpr int kDefaultCardSlotPort = 0;
+
+// The value both MetFrontEndState flags must have for the global settings to be saved first.
+constexpr int kFrontEndFlagSet = 1;
+
 // Reports the text of a string, or the shared empty string when it has no buffer.
 inline const char *TextOf(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
@@ -140,6 +160,81 @@ void MetStageFinishScreen::ResolveContainerViews() {
         HxStr text;
         QueryConfigString(&text, kPromptConfigCode, kContainerName);
         pText->SetText(text); // The binary does not test the lookup for null.
+    }
+}
+
+void MetStageFinishScreen::EnterAndShow() {
+    GameParams params(*Application::shared()->GetGameManager()->GetParams());
+    if (mUnknowna8 == 0 && !params.mLoadingGame) {
+        MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
+        CampaignStats *pStats = &pPersona->mStats;
+        GameStats *pGameStats = Application::shared()->GetGameManager()->GetStats();
+        int nStage = QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName));
+        int nDifficulty = params.mUnknown20;
+
+        int nWasBeaten = pStats->GetLevelBeaten(nDifficulty, params.mLevelName);
+        int nOldHighScore = pStats->GetLevelHighScore(nDifficulty, params.mLevelName);
+        int nOldUnlockLevel = pStats->mUnlockLevel;
+        int nWasScoreBeaten = pStats->GetStageScoreBeaten(nDifficulty, nStage);
+        int nWasStageComplete = pStats->IsStageComplete(nDifficulty, nStage);
+        int nWasDifficultyComplete = pStats->IsDifficultyComplete(nDifficulty);
+        int nWasSecret = pStats->IsSecretUnlocked();
+        int nWasSuperSecret = pStats->IsSuperSecretUnlocked();
+
+        pStats->RecordHighScore(nDifficulty, params.mLevelName, pGameStats->GetScore(kFirstPlayer));
+        pStats->RecordLevelBeaten(nDifficulty, params.mLevelName);
+        pPersona->UpdateSkillStatus();
+
+        AddHighScoreMessage(nOldHighScore, pGameStats->GetScore(kFirstPlayer));
+        AddArenaCompleteMessage(nOldUnlockLevel, pStats->mUnlockLevel);
+        AddStageScoreBeatMessage(nWasScoreBeaten, pStats->GetStageScoreBeaten(nDifficulty, nStage));
+        AddStageCompleteMessage(nWasStageComplete, pStats->IsStageComplete(nDifficulty, nStage));
+        AddDifficultyUnlockMessage(nWasDifficultyComplete,
+                                   pStats->IsDifficultyComplete(nDifficulty));
+        AddSecretUnlockMessage(nWasSecret, pStats->IsSecretUnlocked());
+        AddSuperSecretUnlockMessage(nWasSuperSecret, pStats->IsSuperSecretUnlocked());
+
+        int nWasEndBeaten = 0;
+        int nIsEndBeaten = 0;
+        std::vector<StageListEntry> secretLevels(*GetStageList(kSecretStage));
+        HxStr lastSecretLevel(kNoName);
+        if (secretLevels.size() == kSecretStageLevelCount) {
+            lastSecretLevel = secretLevels[kSecretStageLevelCount - 1].mName;
+        }
+        if (params.mLevelName == lastSecretLevel) {
+            nWasEndBeaten = nWasBeaten;
+            nIsEndBeaten = 1;
+        }
+        AddEndSuperSecretUnlockMessage(nWasEndBeaten, nIsEndBeaten);
+
+        mUnknowna8 = 1;
+        if ((nWasBeaten == 0 || nOldHighScore < pGameStats->GetScore(kFirstPlayer)) &&
+            MetFrontEndState::shared()->mUnknown14 == 0) {
+            std::vector<HxStr> screens;
+            screens.resize(1);
+            screens[0] = kPanelName;
+            if (MetFrontEndState::shared()->mUnknown0c != 0) {
+                GlobalSettings::shared(); // Yes, the binary discards this call's result.
+                MetPersonaSaverScreen::StartSave(
+                    screens, pPersona, GlobalSettings::shared()->mCardSlots[0], 0, 0);
+            } else {
+                CardSlot slot;
+                slot.mName = kDefaultCardSlotName;
+                slot.mPortSlot = kDefaultCardSlotPort;
+                MetPersonaSaverScreen::StartSave(screens, pPersona, slot, 0, 0);
+            }
+            return;
+        }
+    }
+
+    if (MetFrontEndState::shared()->mUnknown0c == kFrontEndFlagSet &&
+        MetFrontEndState::shared()->mUnknown10 == kFrontEndFlagSet) {
+        MetFrontEndState::shared()->mUnknown10 = 0;
+        std::vector<HxStr> screens;
+        screens.push_back(HxStr(kPanelName));
+        MetGlobalSettingsSaverScreen::StartSave(screens);
+    } else {
+        ShowMessages();
     }
 }
 

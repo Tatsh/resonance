@@ -238,9 +238,17 @@ private:
     void MergeLevelList();
 
     std::vector<LevelStats> mLevels;
-    // The progress UpdateUnlockLevel() last computed, 1 through 8. Not initialised by the
-    // constructor.
+
+public:
+    /**
+     * The number of arenas unlocked, 1 through 8, as UpdateUnlockLevel() last computed it. +0x0c
+     *
+     * Not initialised by the constructor. Public because MetStageFinishScreen::EnterAndShow()
+     * reads it directly before and after recording a stage, and the image has no accessor.
+     */
     int mUnlockLevel;
+
+private:
     int mStageLevelCounts[kStageCount];
     int mStageCompleted[kDifficultyCount][kStageCount];
     int mStageScoreBeaten[kDifficultyCount][kStageCount];

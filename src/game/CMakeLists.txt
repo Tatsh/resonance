@@ -11,6 +11,7 @@ set(RESONANCE_GAME_SRCS
     catcher.cpp
     catchingstg.cpp
     controllercmd.cpp
+    controllerconfig.cpp
     cripplepowerup.cpp
     dogamesystemplaycmd.cpp
     effectpowerup.cpp

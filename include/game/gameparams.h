@@ -30,8 +30,9 @@
  * The purpose of most members is not recovered. Three of the ten are public because
  * GameManagerImpl reads and writes them directly with no accessor in the image, and the two names
  * are public because Renderer::LoadLevel() reads them directly, as is the jukebox flag, which
- * Globals::IsJukeboxMode() reads. A friend declaration on this class would fit the image equally
- * well as the promotion. The other four have no traced reader and stay private.
+ * Globals::IsJukeboxMode() reads, and the loading flag, which MetStageFinishScreen reads. A friend
+ * declaration on this class would fit the image equally well as the promotion. The other three
+ * have no traced reader and stay private.
  *
  * mUnknown14 is the one member that neither Save(), Load(), nor operator=() touches, and the
  * compiler-generated copy constructor is the only routine in the image that copies it.
@@ -148,10 +149,14 @@ public:
     /** Written by GameManagerImpl::SetGameMode() as the test for `net`. +0x28 */
     bool mUnknown28;
 
-private:
-    bool mUnknown2c; // +0x2c
+    /**
+     * Set while a saved game is loading, labelled `loadinggame=` by Print(). +0x2c
+     *
+     * Public because MetStageFinishScreen::EnterAndShow() reads it directly, and the image has no
+     * GameParams accessor for it.
+     */
+    bool mLoadingGame;
 
-public:
     /**
      * Set for a jukebox session. +0x30
      *

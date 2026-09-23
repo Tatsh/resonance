@@ -7,6 +7,7 @@ addiu
 adtl
 advancesectionmsg
 advancesectiontogglemsg
+advn
 afixed
 agfxfile
 agiffile
@@ -47,6 +48,7 @@ autoriffer
 axebuttonmsg
 axefx
 axephrasemaker
+axfx
 axingstg
 axiscontrol
 axisfxmsg
@@ -115,6 +117,7 @@ confstr
 congrat
 contctrlmsg
 controllercmd
+controllerconfig
 counta
 coveragerc
 cpprtti
@@ -221,6 +224,7 @@ gameconnectsuccessmsg
 gameenablemgr
 gamemanagerdoplaybackmsg
 gamemanagerimpl
+gameoptions
 gameovermsg
 gameparams
 gameplayback
@@ -640,6 +644,7 @@ refreshnetmsg
 regen
 regexmodule
 regexpr
+regi
 releaseable
 remixfxmsg
 remixtype
@@ -660,6 +665,7 @@ rndtex
 rodata
 rotleftmsg
 rotrightmsg
+rpch
 rtti
 savefilemct
 saveremixmct

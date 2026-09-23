@@ -1,5 +1,6 @@
 set(RESONANCE_MET_SRCS
     albumcache.cpp
+    gameoptions.cpp
     metarenasscreen.cpp
     metexpansionpakscreen.cpp
     metfreqmakerdirectionsscreen.cpp
