@@ -1,14 +1,15 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 /**
  * The number of per-tag accounting records.
  *
- * Record 0 is the overflow bucket. Its name is never written, and it receives
- * the byte count of every allocation whose tag did not fit in records 1
- * through 23.
+ * Record 0 is the overflow bucket. It receives the byte count of every
+ * allocation whose tag did not fit in records 1 through 23, and
+ * MemBeginAccounting() titles it `Other_Sources`.
  */
 constexpr int kMemTagCount = 24;
 
@@ -215,19 +216,125 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
 void MemLogWrite(const char *pszText);
 
 /**
- * Close the memory report and print a summary of it.
+ * Close the memory report and print a summary of the heap.
  *
- * Closing is skipped when the report was never opened. The routine then clears the logging flag,
- * formats a summary, and writes it through LogPrintf(). Fatal() is the only caller, which makes
- * this the last thing the machine does with its allocation record before it stops.
- *
- * Only the closing half is recovered. The summary builds its text by scanning for a character and
- * differencing two pointers, and neither the format string nor the quantity it reports has been
- * determined, so the body is not reconstructed.
+ * Closing is skipped when the report was never opened, and otherwise also clears the logging
+ * flag. The summary is the ten fields of the C library's `mallinfo()` and, once MemOpenLog() has
+ * painted the stack, the stack depth reached. DumpHeapMemoryLog(0) runs last. Fatal() calls this,
+ * and MemOpenLog() registers it with atexit().
  *
  * @ghidraAddress 0x004a7d30
  */
 void MemCloseLogAndReport();
+
+/**
+ * Open the memory report and paint the stack.
+ *
+ * A path opens the report for writing and turns logging on when the file opens. Either way the
+ * three linker symbols `_stack`, `_stack_size`, and `_end` are logged, every byte of the stack
+ * below its top 0x2000 bytes is set to `u` so that a later report can measure the depth reached,
+ * and MemCloseLogAndReport() is registered with atexit().
+ *
+ * The name is inferred.
+ *
+ * @param pszPath The report path, or null to paint the stack only.
+ * @ghidraAddress 0x004a7c40
+ */
+void MemOpenLog(const char *pszPath);
+
+/**
+ * Start a new report file that retains everything written so far.
+ *
+ * The open report is closed, its content is copied into a file named after the original path with
+ * `_N` before the extension, and writing continues there. The mallinfo summary and the stack depth
+ * are logged afterwards whether or not a report was open. The title is the one its log line
+ * gives.
+ *
+ * @ghidraAddress 0x004a7ef8
+ */
+void MemLogCloseAndContinue();
+
+/**
+ * Write text to the memory report while logging is on.
+ *
+ * The image has no caller. The name is inferred.
+ *
+ * @param pszText The text.
+ * @ghidraAddress 0x004a8e50
+ */
+void MemLogPrint(const char *pszText);
+
+/**
+ * Clear the per-tag accounting table and start charging it.
+ *
+ * Record 0 is titled `Other_Sources`. Rnd::AsyncLoader's poll brackets a load with this and
+ * MemEndAccounting(). The name is inferred.
+ *
+ * @ghidraAddress 0x004a8e88
+ */
+void MemBeginAccounting();
+
+/**
+ * Stop charging the accounting table and format its totals.
+ *
+ * The report begins `Memory Allocated: %d` and adds one line per titled record. Record 0 appears
+ * only when it has been charged. A line that would leave less than 0x40 bytes of the buffer is
+ * replaced by `...REPORT TOO LONG FOR BUFFER!` and ends the report. The name is inferred.
+ *
+ * @param pszReport Receives the report.
+ * @param nReportSize The size of the buffer.
+ * @return The total bytes charged since MemBeginAccounting().
+ * @ghidraAddress 0x004a8ef8
+ */
+int MemEndAccounting(char *pszReport, int nReportSize);
+
+/**
+ * Allocate the per-block tracking table and clear the per-source table.
+ *
+ * The block table is 32 MB, 0x200000 slots of 16 bytes. The image has no caller, so block
+ * tracking never runs in the shipped build. The name is inferred.
+ *
+ * @ghidraAddress 0x004a95c8
+ */
+void MemLogSourceInit();
+
+/**
+ * Move a tracked block to its new address after a resize.
+ *
+ * An untracked old block is reported and recorded as a new allocation. Otherwise the entry takes
+ * the new address and size and its source's byte totals move by the difference. The title is the
+ * one its log line gives.
+ *
+ * @param pszSource The source the block is billed to.
+ * @param pNew The block after the resize.
+ * @param pOld The block before the resize.
+ * @param nSize The new size in bytes.
+ * @ghidraAddress 0x004a87d0
+ */
+void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int nSize);
+
+/**
+ * Print the per-source table, sorted by name.
+ *
+ * Performs no work before MemLogSourceInit(). DumpHeapMemoryLog() is the one caller. The name is
+ * inferred.
+ *
+ * @param pszTitle The heading line.
+ * @param pFile The stream to write, or null for standard output.
+ * @ghidraAddress 0x004a8a68
+ */
+void MemLogSourceReport(const char *pszTitle, FILE *pFile);
+
+/**
+ * Write the memory statistics files and probe the largest possible allocation.
+ *
+ * The routine belongs to another translation unit and is declared here so MemCloseLogAndReport()
+ * can call it. It writes `memdump_%d.txt` through MemLogSourceReport() and `memstat_%d.txt`.
+ *
+ * @param nIndex The number the file names carry.
+ * @ghidraAddress 0x0054b348
+ */
+void DumpHeapMemoryLog(int nIndex);
 
 /**
  * Take a block from the backing allocator.

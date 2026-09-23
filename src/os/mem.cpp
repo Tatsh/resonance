@@ -1,10 +1,19 @@
 #include "os/mem.h"
 
+#include <malloc.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "os/log.h"
 #include "os/zone.h"
+
+// The linker script defines these three, and each carries its value in its address: the base of
+// the stack, its size, and the end of the loaded image.
+extern "C" char _stack[];
+extern "C" char _stack_size[];
+extern "C" char _end[];
 
 // Five of the log lines below pass a size_t through %d, which the format literals in the image do.
 // size_t is 32 bits on the Emotion Engine, where the pairing is exact, and the cross build reports
@@ -15,11 +24,57 @@ namespace {
 
 // The interned source table MemLogFindSource() matches against.
 constexpr int kMemLogSourceCount = 128;
-constexpr int kMemLogSourceNameSize = 64;
 
-// A source name of this length or more is rejected, which leaves each record
-// spare room.
+// A source name of this length or more is rejected, which is the size of the name field.
 constexpr int kMemLogSourceNameLimit = 40;
+
+// One row of the per-source report MemLogSourceReport() prints, 0x40 bytes. The counters are
+// titled from the report's column heading.
+struct MemLogSource {
+    char mName[kMemLogSourceNameLimit]; // +0x00
+    int mAllocCount;                    // +0x28 totalloc
+    int mLiveCount;                     // +0x2c curalloc
+    int mPeakCount;                     // +0x30 hialloc
+    int mTotalBytes;                    // +0x34 totbytes
+    int mLiveBytes;                     // +0x38 curbytes
+    int mPeakBytes;                     // +0x3c hibytes
+};
+
+// One tracked block of the table MemLogSourceInit() allocates, 0x10 bytes. A block hashes to the
+// slot its address selects, and a collision takes the next free slot after the chain's tail.
+struct MemLogBlock {
+    void *mBlock;       // +0x00 null for a free slot
+    int mSize;          // +0x04
+    int mSource;        // +0x08 row of g_aMemLogSources
+    MemLogBlock *mNext; // +0x0c
+};
+
+// Slots of the block table, which the address hash is masked to.
+constexpr int kMemLogBlockCount = 0x200000;
+constexpr int kMemLogBlockMask = kMemLogBlockCount - 1;
+
+// The low address bits the block hash discards.
+constexpr int kMemLogBlockHashShift = 4;
+
+// Byte the stack is painted with, so that the deepest write can be found afterwards.
+constexpr int kStackPaintByte = 'u';
+
+// Bytes at the top of the stack the paint leaves alone, because the painting routine is running
+// there.
+constexpr int kStackPaintReserve = 0x2000;
+
+// Largest line MemLogCloseAndContinue() copies from the old report at once.
+constexpr int kMemLogLineSize = 0x800;
+
+// Room for the extension MemLogCloseAndContinue() moves past the reopen count.
+constexpr int kMemLogExtensionSize = 0x30;
+
+// Bytes of each report path, bounded by the next global rather than measured.
+constexpr int kMemLogPathSize = 0x40;
+
+// Room for one line of the report MemEndAccounting() builds, and the margin it keeps free.
+constexpr int kAccountingLineSize = 0x80;
+constexpr unsigned kAccountingReportMargin = 0x40;
 
 // The tag the untagged array allocation path bills to.
 constexpr char kUntaggedTag[] = "UNK[]";
@@ -47,13 +102,29 @@ int g_nMemTotalBytes;
 MemTagTotal g_aMemTagTotals[kMemTagCount];
 
 // 0x006f6460
-char g_aMemLogSourceNames[kMemLogSourceCount][kMemLogSourceNameSize];
+MemLogSource g_aMemLogSources[kMemLogSourceCount];
+
+// 0x006f8460. Null until MemLogSourceInit() runs, which disables the tracking routines.
+MemLogBlock *g_pMemLogBlocks;
+
+// 0x006f57c8. Set once MemOpenLog() has painted the stack.
+int g_bMemStackPainted;
+
+// 0x006f57cc. Reports MemLogCloseAndContinue() has started since MemOpenLog().
+int g_nMemLogReopenCount;
 
 // 0x00894d70
 FILE *g_pMemLogFile;
 
-// Reduces a tag to the text after its last path separator. Both separators are
-// tried, so a tag recorded on a Windows build host still logs as a basename.
+// 0x00894db8. Path of the report being written.
+char g_szMemLogPath[kMemLogPathSize];
+
+// 0x00894d78. Path MemOpenLog() was given, which each reopened report is named after.
+char g_szMemLogBaseName[kMemLogPathSize];
+
+// 0x004a9360, an out-of-line copy with no caller. Reduces a tag to the text after its last path
+// separator. Both separators are tried, so a tag recorded on a Windows build host still logs as a
+// basename.
 inline const char *TagBasename(const char *pszTag) {
     const char *pName = strrchr(pszTag, '/');
     pName = (pName == nullptr) ? pszTag : pName + 1;
@@ -78,6 +149,107 @@ inline void ChargeTagTotal(const char *pszTag, size_t nSize) {
         }
     }
     g_aMemTagTotals[0].mBytes += nSize;
+}
+
+// The value of a linker-script symbol, which carries its meaning in its address.
+inline unsigned LinkerAddress(const char *pSymbol) {
+    return static_cast<unsigned>(reinterpret_cast<uintptr_t>(pSymbol));
+}
+
+// The slot of the block table an address hashes to.
+inline int BlockSlot(const void *pBlock) {
+    return (static_cast<int>(reinterpret_cast<intptr_t>(pBlock)) >> kMemLogBlockHashShift) &
+           kMemLogBlockMask;
+}
+
+// The tracked entry for a block, or null. The walk stops at the first free slot of the chain.
+inline MemLogBlock *FindTrackedBlock(const void *pBlock) {
+    for (MemLogBlock *pEntry = &g_pMemLogBlocks[BlockSlot(pBlock)]; pEntry != nullptr;
+         pEntry = pEntry->mNext) {
+        if (pEntry->mBlock == nullptr) {
+            return nullptr;
+        }
+        if (pEntry->mBlock == pBlock) {
+            return pEntry;
+        }
+    }
+    return nullptr;
+}
+
+// 0x004a9620, an out-of-line copy with no caller; MemLogSourceTrackRealloc() expands it. Records
+// a block against its source. The new entry is linked only when the chain it joins has a second
+// entry, which is what the binary does.
+inline void TrackBlock(const char *pszSource, void *pBlock, int nSize) {
+    if (g_pMemLogBlocks == nullptr) {
+        return;
+    }
+    MemLogBlock *pEntry = &g_pMemLogBlocks[BlockSlot(pBlock)];
+    MemLogBlock *pTail = nullptr;
+    while (pEntry->mNext != nullptr) {
+        pEntry = pEntry->mNext;
+        pTail = pEntry;
+    }
+    while (pEntry->mBlock != nullptr) {
+        pEntry = &g_pMemLogBlocks[(pEntry - g_pMemLogBlocks + 1) & kMemLogBlockMask];
+    }
+    if (pTail != nullptr) {
+        pTail->mNext = pEntry;
+    }
+    const int nSource = MemLogFindSource(pszSource);
+    pEntry->mBlock = pBlock;
+    pEntry->mNext = nullptr;
+    pEntry->mSize = nSize;
+    pEntry->mSource = nSource;
+    MemLogSource &source = g_aMemLogSources[nSource];
+    ++source.mAllocCount;
+    ++source.mLiveCount;
+    if (source.mPeakCount < source.mLiveCount) {
+        source.mPeakCount = source.mLiveCount;
+    }
+    source.mTotalBytes += nSize;
+    source.mLiveBytes += nSize;
+    if (source.mPeakBytes < source.mLiveBytes) {
+        source.mPeakBytes = source.mLiveBytes;
+    }
+}
+
+// The C library's heap statistics. A current glibc marks mallinfo() deprecated, which the
+// Emotion Engine's newlib does not; the pragma keeps a host build free of that warning only.
+inline struct mallinfo ReadMallinfo() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    return mallinfo();
+#pragma GCC diagnostic pop
+}
+
+// The ten mallinfo lines MemCloseLogAndReport() and MemLogCloseAndContinue() share.
+inline void LogMallinfo(const struct mallinfo &info) {
+    LogPrintf("   arena:    %d   (total space allocated from system)\n", info.arena);
+    LogPrintf("   ordblks:  %d   (number of non-inuse chunks)\n", info.ordblks);
+    LogPrintf("   smblks:   %d   (unused)\n", info.smblks);
+    LogPrintf("   hblks:    %d   (number of mmapped regions)\n", info.hblks);
+    LogPrintf("   hblkhd:   %d   (total space in mmapped regions)\n", info.hblkhd);
+    LogPrintf("   usmblks:  %d   (unused)\n", info.usmblks);
+    LogPrintf("   fsmblks:  %d   (unused)\n", info.fsmblks);
+    LogPrintf("   uordblks: %d   (total allocated space)\n", info.uordblks);
+    LogPrintf("   fordblks: %d   (total non-inuse space)\n", info.fordblks);
+    LogPrintf("   keepcost: %d   (top-most, releaseable (via malloc_trim) space)\n", info.keepcost);
+}
+
+// The stack depth both report routines log once MemOpenLog() has painted the stack. The deepest
+// write is the first byte from the bottom that no longer holds the paint.
+inline void LogStackUse() {
+    if (g_bMemStackPainted == 0) {
+        return;
+    }
+    const int nStackSize = static_cast<int>(LinkerAddress(_stack_size));
+    const int nPainted = nStackSize - kStackPaintReserve;
+    int nUntouched = 0;
+    while (nUntouched < nPainted && _stack[nUntouched] == kStackPaintByte) {
+        ++nUntouched;
+    }
+    LogPrintf(
+        "STACK AREA USED IS %d BYTES of STACK SIZE %d\n", nStackSize - nUntouched, nStackSize);
 }
 
 } // namespace
@@ -221,16 +393,16 @@ int MemLogFindSource(const char *pszName) {
     const char *pName = TagBasename(pszName);
 
     int nRow = 0;
-    if (g_aMemLogSourceNames[0][0] != '\0') {
+    if (g_aMemLogSources[0].mName[0] != '\0') {
         for (;;) {
-            if (strcmp(g_aMemLogSourceNames[nRow], pName) == 0) {
+            if (strcmp(g_aMemLogSources[nRow].mName, pName) == 0) {
                 return nRow;
             }
             ++nRow;
             if (nRow >= kMemLogSourceCount) {
                 break;
             }
-            if (g_aMemLogSourceNames[nRow][0] == '\0') {
+            if (g_aMemLogSources[nRow].mName[0] == '\0') {
                 break;
             }
         }
@@ -242,8 +414,187 @@ int MemLogFindSource(const char *pszName) {
     if (strlen(pName) >= kMemLogSourceNameLimit) {
         Fatal("MemLogFindSource: name %s too long\n", pName);
     }
-    strcpy(g_aMemLogSourceNames[nRow], pName);
+    strcpy(g_aMemLogSources[nRow].mName, pName);
     return nRow;
+}
+
+void MemLogSourceInit() {
+    g_pMemLogBlocks =
+        static_cast<MemLogBlock *>(HeapAlloc(kMemLogBlockCount * sizeof(MemLogBlock)));
+    if (g_pMemLogBlocks != nullptr) {
+        memset(g_pMemLogBlocks, 0, kMemLogBlockCount * sizeof(MemLogBlock));
+        memset(g_aMemLogSources, 0, sizeof(g_aMemLogSources));
+    }
+}
+
+void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int nSize) {
+    if (g_pMemLogBlocks == nullptr) {
+        return;
+    }
+    MemLogBlock *pEntry = FindTrackedBlock(pOld);
+    if (pEntry == nullptr) {
+        LogPrintf("MemLogSourceTrackRealloc(): can't find realloc for src: %s\n", pszSource);
+        TrackBlock(pszSource, pNew, nSize);
+        return;
+    }
+    // Yes, the binary retains the entry in the old block's chain under the new address.
+    const int nDelta = nSize - pEntry->mSize;
+    pEntry->mBlock = pNew;
+    pEntry->mSize = nSize;
+    MemLogSource &source = g_aMemLogSources[pEntry->mSource];
+    source.mTotalBytes += nDelta;
+    source.mLiveBytes += nDelta;
+    if (source.mPeakBytes < source.mLiveBytes) {
+        source.mPeakBytes = source.mLiveBytes;
+    }
+}
+
+void MemLogSourceReport(const char *pszTitle, FILE *pFile) {
+    if (g_pMemLogBlocks == nullptr) {
+        return;
+    }
+    MemLogSource aSources[kMemLogSourceCount];
+    int nCount = 0;
+    while (nCount < kMemLogSourceCount) {
+        aSources[nCount] = g_aMemLogSources[nCount];
+        if (aSources[nCount].mName[0] == '\0') {
+            break;
+        }
+        ++nCount;
+    }
+    for (int i = 0; i < nCount - 1; ++i) {
+        for (int j = i + 1; j < nCount; ++j) {
+            if (strcmp(aSources[i].mName, aSources[j].mName) > 0) {
+                const MemLogSource swap = aSources[i];
+                aSources[i] = aSources[j];
+                aSources[j] = swap;
+            }
+        }
+    }
+
+    if (pFile == nullptr) {
+        pFile = stdout;
+    }
+    fprintf(pFile, "%s\n", pszTitle);
+    fprintf(pFile,
+            "                  *** NAME ***  totalloc curalloc  hialloc  totbytes curbytes  "
+            "hibytes\n");
+    fprintf(pFile,
+            "------------------------------  -------- -------- --------  -------- -------- "
+            "---------\n");
+    for (int i = 0; i < nCount; ++i) {
+        const MemLogSource &source = aSources[i];
+        fprintf(pFile,
+                "%30s  %8d %8d %8d  %8d %8d %8d\n",
+                source.mName,
+                source.mAllocCount,
+                source.mLiveCount,
+                source.mPeakCount,
+                source.mTotalBytes,
+                source.mLiveBytes,
+                source.mPeakBytes);
+    }
+}
+
+void MemLogPrint(const char *pszText) {
+    if (g_bMemLogging != 0) {
+        fprintf(g_pMemLogFile, "%s", pszText);
+    }
+}
+
+void MemBeginAccounting() {
+    g_nMemTotalBytes = 0;
+    memset(g_aMemTagTotals, 0, sizeof(g_aMemTagTotals));
+    strcpy(g_aMemTagTotals[0].mName, "Other_Sources");
+    g_bMemAccounting = 1;
+}
+
+int MemEndAccounting(char *pszReport, int nReportSize) {
+    sprintf(pszReport, "Memory Allocated: %d\n", g_nMemTotalBytes);
+    for (int i = 0; i < kMemTagCount; ++i) {
+        const MemTagTotal &record = g_aMemTagTotals[i];
+        if (record.mName[0] == '\0') {
+            continue;
+        }
+        if (i == 0 && record.mBytes <= 0) {
+            continue;
+        }
+        char szLine[kAccountingLineSize];
+        // Yes, the binary's line buffer is shorter than the longest tag the table admits.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-overflow"
+        sprintf(szLine, "   %s: alloced: %d\n", record.mName, record.mBytes);
+#pragma GCC diagnostic pop
+        if (static_cast<unsigned>(nReportSize) - kAccountingReportMargin <
+            strlen(pszReport) + strlen(szLine)) {
+            sprintf(&pszReport[strlen(pszReport)], "...REPORT TOO LONG FOR BUFFER!\n");
+            break;
+        }
+        strcat(pszReport, szLine);
+    }
+    g_bMemAccounting = 0;
+    return g_nMemTotalBytes;
+}
+
+void MemOpenLog(const char *pszPath) {
+    if (pszPath != nullptr) {
+        strcpy(g_szMemLogPath, pszPath);
+        strcpy(g_szMemLogBaseName, pszPath);
+        g_nMemLogReopenCount = 0;
+        g_pMemLogFile = fopen(g_szMemLogPath, "w");
+        if (g_pMemLogFile != nullptr) {
+            g_bMemLogging = 1;
+        }
+    }
+    LogPrintf("_stack = $%x\n", LinkerAddress(_stack));
+    LogPrintf("_stack_size = $%x\n", LinkerAddress(_stack_size));
+    LogPrintf("_end = $%x\n", LinkerAddress(_end));
+    if (static_cast<int>(LinkerAddress(_stack)) > 0) {
+        g_bMemStackPainted = 1;
+        memset(_stack, kStackPaintByte, LinkerAddress(_stack_size) - kStackPaintReserve);
+    }
+    atexit(MemCloseLogAndReport);
+}
+
+void MemCloseLogAndReport() {
+    if (g_pMemLogFile != nullptr) {
+        fclose(g_pMemLogFile);
+        g_pMemLogFile = nullptr;
+        g_bMemLogging = 0;
+    }
+    const struct mallinfo info = ReadMallinfo();
+    LogPrintf("system heap info (mallinfo):\n");
+    LogMallinfo(info);
+    LogStackUse();
+    DumpHeapMemoryLog(0);
+}
+
+void MemLogCloseAndContinue() {
+    LogPrintf("MemLogCloseAndContinue:, fpLog: %p\n", g_pMemLogFile);
+    if (g_pMemLogFile != nullptr) {
+        fclose(g_pMemLogFile);
+        FILE *pOld = fopen(g_szMemLogPath, "r");
+        ++g_nMemLogReopenCount;
+        strcpy(g_szMemLogPath, g_szMemLogBaseName);
+        char *pszExtension = strchr(g_szMemLogPath, '.');
+        if (pszExtension == nullptr) {
+            pszExtension = &g_szMemLogPath[strlen(g_szMemLogPath)];
+        }
+        char szExtension[kMemLogExtensionSize];
+        strcpy(szExtension, pszExtension);
+        sprintf(pszExtension, "_%d%s", g_nMemLogReopenCount, szExtension);
+        g_pMemLogFile = fopen(g_szMemLogPath, "w");
+        LogPrintf("reopened %s at %p\n", g_szMemLogPath, g_pMemLogFile);
+        char szLine[kMemLogLineSize];
+        while (fgets(szLine, kMemLogLineSize, pOld) != nullptr) {
+            fputs(szLine, g_pMemLogFile);
+        }
+        fclose(pOld);
+    }
+    const struct mallinfo info = ReadMallinfo();
+    LogPrintf("system heap info (mallinfo) at dump %d:\n", g_nMemLogReopenCount);
+    LogMallinfo(info);
+    LogStackUse();
 }
 
 // HeapAlloc(), HeapFree(), and HeapRealloc() have no bodies here. Each is two instructions that

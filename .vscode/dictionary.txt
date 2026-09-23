@@ -190,6 +190,7 @@ fogcol
 fogcol's
 fopen
 forcefeedbackmgr
+fordblks
 formatcardmct
 formatop
 formatstring
@@ -200,6 +201,7 @@ frameobject
 freestylefxmsg
 freestylepowerup
 freqappearance
+fsmblks
 fstat
 fsyntax
 funcobject
@@ -247,6 +249,10 @@ gsperiodical
 handoff
 hardsynth
 harmonix
+hblkhd
+hblks
+hialloc
+hibytes
 hilite
 hostmode
 hudanalogstick
@@ -527,6 +533,7 @@ ohgb
 oneline
 openreadop
 openwriteop
+ordblks
 overcutting
 pabe
 padman
@@ -623,6 +630,7 @@ refreshnetmsg
 regen
 regexmodule
 regexpr
+releaseable
 remixfxmsg
 remixtype
 remotetrackselectmsg
@@ -682,6 +690,7 @@ skillstats
 skillz
 slerp
 sliceobject
+smblks
 smgs
 smpl
 smpte
@@ -763,6 +772,7 @@ tnlstr
 tnlutil
 toggleghostmsg
 toolstream
+totbytes
 trackdata
 trackselectmsg
 trackselector
@@ -810,6 +820,7 @@ unpaletted
 unpausegamesystemmsg
 unrecovered
 unsuffixed
+uordblks
 updatescorepacket
 updateworldxfm
 usbd
