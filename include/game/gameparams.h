@@ -104,6 +104,19 @@ public:
     GameParams &operator=(const GameParams &other);
 
     /**
+     * Compare every member except mUnknown14 with another instance, the set operator=() copies.
+     *
+     * The level name and the arena are compared as strings and the other seven words as integers,
+     * in declaration order, stopping at the first difference. The shipped program does not call it,
+     * and the title is inferred from the shape.
+     *
+     * @param other The settings to compare with.
+     * @return Whether every compared member is equal.
+     * @ghidraAddress 0x00187b20
+     */
+    bool operator==(const GameParams &other) const;
+
+    /**
      * Write the settings to a diagnostic stream on one line, ending it with a newline.
      *
      * Not virtual. The labels are `GameParams:`, ` level=`, ` arena=`, ` friends=`, then ` game` or

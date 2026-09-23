@@ -125,6 +125,15 @@ GameParams &GameParams::operator=(const GameParams &other) {
     return *this;
 }
 
+// 0x00187b20
+bool GameParams::operator==(const GameParams &other) const {
+    return mLevelName == other.mLevelName && mArenaName == other.mArenaName &&
+           mUnknown10 == other.mUnknown10 && mUnknown1c == other.mUnknown1c &&
+           mDifficulty == other.mDifficulty && mUnknown24 == other.mUnknown24 &&
+           mUnknown28 == other.mUnknown28 && mLoadingGame == other.mLoadingGame &&
+           mJukeboxMode == other.mJukeboxMode;
+}
+
 // 0x00187b00
 int GetDoWinSequence() {
     return g_nDoWinSequence;
