@@ -260,12 +260,14 @@ constexpr float kMultiplierRun = 15360.0f;
 
 AppTunnel *g_pAppTunnel;
 
+// 0x00456cd0
 inline AppTunnel::GemFlash::~GemFlash() {
     if (mParticle != nullptr) {
         mSystem->FreeParticle(mParticle);
     }
 }
 
+// 0x00456d28
 inline int AppTunnel::GemFlash::Start(const Vector3 &pos) {
     if (mParticle != nullptr) {
         return 0;
@@ -278,6 +280,7 @@ inline int AppTunnel::GemFlash::Start(const Vector3 &pos) {
     return 1;
 }
 
+// 0x00456db0
 inline void AppTunnel::GemFlash::Update() {
     if (mParticle == nullptr) {
         return;
@@ -662,11 +665,13 @@ void AppTunnel::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
     }
 }
 
+// 0x00447268
 void AppTunnel::AddPanel(TnlPanel *pPanel, float flStartFrame) {
     mPanels.push_back(pPanel);
     pPanel->SetStartFrame(flStartFrame);
 }
 
+// 0x00447638
 void AppTunnel::OnGem(GemMsg *pMsg) {
     const float flFrame = static_cast<float>(pMsg->mPosition.mTick);
     const float flBlend = static_cast<float>(pMsg->mGem) * kGemLaneScale + kGemLaneBase;
@@ -702,6 +707,7 @@ void AppTunnel::OnGem(GemMsg *pMsg) {
     mGemManager->Add(TnlGem(nKind, nTrack, nColor, bFlash, flFrame, flBlend, flAppearFrame));
 }
 
+// 0x00447938
 void AppTunnel::OnCatch(CatchMsg *pMsg) {
     TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
     const int nGem = pMsg->mGem;
@@ -727,6 +733,7 @@ void AppTunnel::OnCatch(CatchMsg *pMsg) {
     }
 }
 
+// 0x00447ba8
 void AppTunnel::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     if (!pMsg->mTried) {
         return;
@@ -741,6 +748,7 @@ void AppTunnel::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     panel.Apply();
 }
 
+// 0x00447cc0
 void AppTunnel::OnPitch(PitchMsg *pMsg) {
     TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown10);
     const int nGem = pMsg->mUnknown0c;
@@ -755,6 +763,7 @@ void AppTunnel::OnPitch(PitchMsg *pMsg) {
     }
 }
 
+// 0x00447eb0
 void AppTunnel::OnSeeker(SeekerMsg *pMsg) {
     TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
     // Yes, the binary converts both bar words to float and back.
@@ -774,6 +783,7 @@ void AppTunnel::OnSeeker(SeekerMsg *pMsg) {
     }
 }
 
+// 0x004481d0
 void AppTunnel::OnShowEraseEffect(ShowEraseEffectMsg *pMsg) {
     const float flTick = mRenderer->mSongTick;
     for (int nBar = pMsg->mFirstBar; nBar < pMsg->mEndBar; ++nBar) {
@@ -788,6 +798,7 @@ void AppTunnel::OnShowEraseEffect(ShowEraseEffectMsg *pMsg) {
     }
 }
 
+// 0x00448530
 void AppTunnel::OnSectionCaptured(SectionCapturedMsg *pMsg) {
     if ((mGameMode != kGameModeSolo) && pMsg->mAutoCatch) {
         return;
@@ -805,6 +816,7 @@ void AppTunnel::OnSectionCaptured(SectionCapturedMsg *pMsg) {
     StartFireFX(flPathStart, nIndex, pMsg->mTrack, color, playerColor, flPathEnd);
 }
 
+// 0x004486f8
 void AppTunnel::OnCripple(CripplePacket *pPacket) {
     std::vector<TnlPlayer *> targets;
     for (unsigned i = 0; i < pPacket->mTargets.size(); ++i) {
@@ -813,6 +825,7 @@ void AppTunnel::OnCripple(CripplePacket *pPacket) {
     (void)StartCrippleFX(targets, mRenderer->mSongTick + kCrippleLaunchLead);
 }
 
+// 0x00448a08
 void AppTunnel::OnFreestyleFX(FreestyleFXMsg *pMsg) {
     const float flTick = mRenderer->mSongTick;
     const float flEnd = flTick + kFreestyleFrames;
@@ -832,6 +845,7 @@ void AppTunnel::OnFreestyleFX(FreestyleFXMsg *pMsg) {
                 flEnd - kFreestyleFireLead);
 }
 
+// 0x00448d58
 void AppTunnel::OnDeployedPowerup(DeployedPowerupMsg *pMsg) {
     switch (pMsg->mKind) {
     case kHudItemNeutralizer: {
@@ -885,6 +899,7 @@ void AppTunnel::OnDeployedPowerup(DeployedPowerupMsg *pMsg) {
     }
 }
 
+// 0x00457cf0
 inline void AppTunnel::OnNowBar(NowBarMsg *pMsg) {
     TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
     if (pPlayer != nullptr) {
@@ -892,18 +907,21 @@ inline void AppTunnel::OnNowBar(NowBarMsg *pMsg) {
     }
 }
 
+// 0x00457d88
 inline void AppTunnel::OnClearGem(ClearGemMsg *pMsg) {
     mGemManager->Remove(pMsg->mTrack,
                         static_cast<float>(pMsg->mPosition.mTick),
                         static_cast<float>(pMsg->mGem) * kGemLaneScale + kGemLaneBase);
 }
 
+// 0x00457dd8
 inline void AppTunnel::OnClearGems(ClearGemsMsg *pMsg) {
     const float flStart = static_cast<float>(pMsg->mBar) * static_cast<float>(kFramesPerBar);
     mGemManager->RemoveRange(pMsg->mTrack, flStart, flStart + static_cast<float>(kFramesPerBar));
     mGemTrails->EndTrail(pMsg->mTrack, pMsg->mBar);
 }
 
+// 0x00457e48
 inline void AppTunnel::OnSusGem(SusGemMsg *pMsg) {
     const float flFrame = static_cast<float>(pMsg->mFrame);
     const float flBlend = pMsg->mBlend;
@@ -916,6 +934,7 @@ inline void AppTunnel::OnSusGem(SusGemMsg *pMsg) {
     }
 }
 
+// 0x00457f38
 inline void AppTunnel::OnDurGem(DurGemMsg *pMsg) {
     // The binary copies the name before the lookup.
     const Color color = TnlColorFromName(HxStr(pMsg->mPlayer->mColorName));
@@ -986,6 +1005,7 @@ void AppTunnel::HandleMessage(Message *pMsg) {
     }
 }
 
+// 0x00447328
 void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {
     TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown10);
     if (pPlayer == nullptr) {
@@ -1002,6 +1022,7 @@ void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {
     mNowRing->SetPlayerMesh(pPlayer->mIndex, nTrack);
 }
 
+// 0x00448048
 void AppTunnel::OnAdvanceSectionToggle() {
     mBoundary->UpdateText();
     mUnknown140 = mPlayMap->FollowingStepBar(
@@ -1019,6 +1040,7 @@ void AppTunnel::OnAdvanceSectionToggle() {
     }
 }
 
+// 0x00448330
 void AppTunnel::OnPlaybackToggle(PlaybackToggleMsg *pMsg) {
     if (pMsg->mOn) {
         mCameraRig->ZoomIn();
@@ -1045,6 +1067,7 @@ void AppTunnel::OnPlaybackToggle(PlaybackToggleMsg *pMsg) {
     mNowRing->SetShowing(!mJukebox);
 }
 
+// 0x00449240
 void AppTunnel::OnWin(WinMsg *pMsg) {
     if (pMsg->mWinners.size() == 0) {
         return;
@@ -1059,10 +1082,12 @@ void AppTunnel::OnWin(WinMsg *pMsg) {
     }
 }
 
+// 0x00449450
 void AppTunnel::OnMultiplierState(MultiplierStateMsg *pMsg) {
     FindTnlPlayer(pMsg->mPlayer)->mActivator.mCatcher.SetMultiplied(pMsg->mBonus > 0);
 }
 
+// 0x00449500
 void AppTunnel::OnPowerupFailed(PowerupFailedMsg *pMsg) {
     const float flScaledTick = mRenderer->mSongTick * mUnknown144;
     if (pMsg->mKind != kHudItemFreestyler) {
@@ -1077,6 +1102,7 @@ void AppTunnel::OnPowerupFailed(PowerupFailedMsg *pMsg) {
     }
 }
 
+// 0x00457ff0
 inline void AppTunnel::OnAxeButton(AxeButtonMsg *pMsg) {
     TnlPointer &pointer = FindTnlPlayer(pMsg->mPlayer)->mActivator.mPointer;
     if (pMsg->mPressed) {
@@ -1089,14 +1115,17 @@ inline void AppTunnel::OnAxeButton(AxeButtonMsg *pMsg) {
     }
 }
 
+// 0x004580e8
 inline void AppTunnel::OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg) {
     Application::shared()->GetWorld()->mForceFeedback->PlayEffect3(pMsg->mPlayer);
 }
 
+// 0x00458120
 inline void AppTunnel::OnToggleGhost(ToggleGhostMsg *pMsg) {
     FindTnlPlayer(pMsg->mUnknown04)->mActivator.SetGhost(pMsg->mOn);
 }
 
+// 0x004581b8
 inline void AppTunnel::OnJuiceAmount(JuiceAmountMsg *pMsg) {
     if ((mGameMode != kGameModeSolo) || (mPlayMode != kPlayModeGame)) {
         return;
@@ -1105,6 +1134,7 @@ inline void AppTunnel::OnJuiceAmount(JuiceAmountMsg *pMsg) {
     pPlayer->mActivator.mBlink = (pMsg->GetJuiceFraction() < kLowJuiceFraction);
 }
 
+// 0x00446460
 void AppTunnel::UpdateGhostFades() {
     for (unsigned i = 0; i < mGhostFadeRates.size(); ++i) {
         Rnd::Mat *pMat = GetGhostMat(i);
@@ -1239,6 +1269,7 @@ int AppTunnel::StartPanelFX(int nRing, int nSlice, int nForward) {
     return 0;
 }
 
+// 0x004576a0
 void AppTunnel::StartFireFX(float flPathStart,
                             int nIndex,
                             int nSlot,
@@ -1252,6 +1283,7 @@ void AppTunnel::StartFireFX(float flPathStart,
     }
 }
 
+// 0x00457758
 int AppTunnel::StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flFrame) {
     for (auto it = mCrippleFX.begin(); it != mCrippleFX.end(); ++it) {
         if ((*it)->mState == TnlCrippleFX::kStateIdle) {
@@ -1262,6 +1294,7 @@ int AppTunnel::StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flF
     return 0;
 }
 
+// 0x00457828
 int AppTunnel::StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset) {
     for (auto it = mBumpFX.begin(); it != mBumpFX.end(); ++it) {
         if ((*it)->IsIdle()) {
@@ -1272,6 +1305,7 @@ int AppTunnel::StartBumpFX(int nStep, const HxStr &colorName, int nForward, floa
     return 0;
 }
 
+// 0x00457880
 int AppTunnel::StartSnake(
     float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude) {
     for (auto it = mSnakes.begin(); it != mSnakes.end(); ++it) {
@@ -1283,6 +1317,7 @@ int AppTunnel::StartSnake(
     return 0;
 }
 
+// 0x004579e0
 void AppTunnel::AddPendingTrigger(TnlTrigger *pTrigger, float flFrame) {
     mPendingTriggers.push_back(TnlPendingTrigger{pTrigger, flFrame});
 }
@@ -1298,6 +1333,7 @@ void AppTunnel::PlaceStringFlare(const Vector3 &pos) {
     }
 }
 
+// 0x00457ae0
 void AppTunnel::PlaceStringFlareOnRing(int nRing, float flBlend) {
     for (Rnd::Particle *pParticle = mStringFlare->GetLiveParticles(); pParticle != nullptr;
          pParticle = pParticle->mNext) {

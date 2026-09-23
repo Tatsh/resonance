@@ -25,7 +25,8 @@ class View;
  * animation plays, and after frame -1920 the activator mesh appears and the rotation view is
  * removed from the owner's local view.
  *
- * TnlPlayer embeds one, 0xe0 bytes, at `+0x34`.
+ * TnlPlayer embeds one, 0xe0 bytes, at `+0x34`. The destructor at `0x00455970` is the implicit
+ * one, in its deleting form with no caller, and is not written.
  */
 class TnlActivator {
 public:

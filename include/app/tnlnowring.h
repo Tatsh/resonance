@@ -18,7 +18,8 @@ class View;
  * frame -1920 the meshes are not refreshed on a slot change. That SetFrame() refreshes them,
  * resets the basis of "nowring rot.view" to the identity, and clears the pending flag.
  *
- * AppTunnel allocates one, 0x24 bytes, and stores it at `+0x14`.
+ * AppTunnel allocates one, 0x24 bytes, and stores it at `+0x14`. The destructor at `0x00455ef0`
+ * is the implicit one and is not written.
  */
 class TnlNowRing {
 public:

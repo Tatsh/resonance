@@ -20,7 +20,8 @@ class Mesh;
  * song position forward by 3840 frames, the length of the whole row, and hides a marker whose bar
  * AppTunnel::IsTrackBarLocked() reports for mTrack.
  *
- * TnlPlayer embeds one, 0x14 bytes, at `+0x114`.
+ * TnlPlayer embeds one, 0x14 bytes, at `+0x114`. The destructor at `0x00454970` is the implicit
+ * one and is not written.
  */
 class TnlGridMarkers {
 public:
