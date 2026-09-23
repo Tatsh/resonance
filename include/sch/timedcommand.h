@@ -174,7 +174,7 @@ public:
 private:
     // Non-zero when the requested tick is a distance from now rather than an absolute scheduler
     // time. Print() writes " delta" for a non-zero value and " abs" for zero, and
-    // Sch::TickClock::Post() at 0x004a7924 branches on the same argument to choose between the two
+    // WatchdogTimer::Post() at 0x004a7924 branches on the same argument to choose between the two
     // queueing paths. Save() writes only the low byte. No code outside this class reads it. +0x20
     int mDelta;
 

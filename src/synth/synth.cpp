@@ -75,8 +75,7 @@ public:
      */
     SynthFade(Synth *pSynth, int nDurationMs)
         // Globals' watchdog time base is the clock this task posts against.
-        : TimeTask(static_cast<Sch::TickClock *>(Application::shared()->GetWatchdogTimer()),
-                   kFadePeriodNs),
+        : TimeTask(Application::shared()->GetWatchdogTimer(), kFadePeriodNs),
           mSource(Source::AllocateFadeOutSource(kFadeStopsAtEnd, static_cast<float>(nDurationMs))),
           mSynth(pSynth) {
     }

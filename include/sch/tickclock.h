@@ -115,36 +115,6 @@ public:
     void SetSongTick(Mid::MBT tick);
 
     /**
-     * Queue a command, choosing between the absolute and the delta path.
-     *
-     * A non-zero bDelta takes the delta path, which resolves the due tick against the later of the
-     * scheduler's current time and its clock. A zero bDelta takes the absolute path, which
-     * subtracts this clock's origin instead. The body is not reconstructed, for the reason recorded
-     * on SongTick().
-     *
-     * @param pCommand The command to run.
-     * @param tick The tick the caller requests.
-     * @param id The handle to queue under, allocated here when it is still -2.
-     * @param bRecordable Non-zero for a post the recorded stream is to include. Recording writes
-     *                    such a post out and playback suppresses it, because the stream supplies
-     *                    it instead.
-     * @param bDelta Non-zero to treat tick as a distance from now.
-     * @ghidraAddress 0x004a78b8
-     */
-    void Post(Command *pCommand, Tick tick, CmdID &id, int bRecordable, int bDelta);
-
-    /**
-     * Withdraw every wrapper that was queued under a handle.
-     *
-     * The body forwards the handle's value to the scheduler at `0x004aa260`. The body is not
-     * reconstructed, for the reason recorded on SongTick().
-     *
-     * @param id The handle to withdraw.
-     * @ghidraAddress 0x004a79d0
-     */
-    void Withdraw(const CmdID &id);
-
-    /**
      * Queue a command at an absolute scheduler time, discarding the handle.
      *
      * @param pCommand The command to run.

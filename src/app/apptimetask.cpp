@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include "app/timetask.h"
+#include "app/watchdogtimer.h"
 #include "sch/command.h"
 #include "sch/tick.h"
-#include "sch/tickclock.h"
 
 namespace {
 
@@ -62,7 +62,7 @@ int Cmd::sCmdID;
 } // namespace
 
 // 0x0013b100
-TimeTask::TimeTask(Sch::TickClock *pClock, long long nPeriodNs)
+TimeTask::TimeTask(WatchdogTimer *pClock, long long nPeriodNs)
     : mClock(pClock), mPeriodNs(nPeriodNs), mNextNs(0), mEpochNs(0) {
     mCommand.mValue = kUnallocatedCommand;
 }
