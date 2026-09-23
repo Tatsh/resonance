@@ -9,7 +9,8 @@
  *
  * The class is not polymorphic, emits no RTTI, and has no embedded file path. The title is
  * inferred from the vocabulary of InputPollerPS2.cpp, whose one file-private class is
- * FindJoypadConnectionsCmd. The object is the four-byte slot index. Constructing a handle marks
+ * FindJoypadConnectionsCmd. The object is eight bytes, the allocation InputPoller::Setup() makes:
+ * the slot index and the position mId. Constructing a handle marks
  * its slot in sSlotsInUse and destroying it clears the mark. Every other member forwards to the
  * PadRecord of the slot in sRecords.
  */
@@ -36,7 +37,7 @@ public:
     /**
      * Decode the slot's latest report through PadRecord::Read(), without the pressure outputs.
      *
-     * InputPoller's reading routine at `0x001dfab0` is the caller. The title is inferred.
+     * InputPoller::ReadControllers() is the caller. The title is inferred.
      *
      * @param pButtons Receives the button word, or null.
      * @param pAxis0 Receives the first analog byte, or null.
@@ -65,7 +66,7 @@ public:
     /**
      * Open the slot's pad through PadRecord::Open().
      *
-     * InputPoller's setup routine at `0x001df248` is the caller. The title is inferred.
+     * InputPoller::Setup() is the caller. The title is inferred.
      *
      * @param nPort The port, from 0.
      * @param nSlot The multitap slot, from 0.
@@ -77,7 +78,7 @@ public:
     /**
      * Close the slot's pad through scePadPortClose().
      *
-     * The routine at `0x001df9d8` is the caller. The title is inferred.
+     * InputPoller::Shutdown() is the caller. The title is inferred.
      *
      * @ghidraAddress 0x004ecb90
      */
@@ -107,6 +108,17 @@ public:
 private:
     int mIndex; // +0x00
 
+public:
+    /**
+     * Position of the handle among the InputPoller's Joypads, from 0.
+     *
+     * The constructor does not write it. InputPoller::Setup() assigns it after construction, and
+     * InputPoller::ReadControllers() indexes the player table with it. Both accesses are direct.
+     * +0x04
+     */
+    int mId;
+
+private:
     // One bit per slot, set while a handle holds the slot. The unit's static initialiser at
     // 0x004ec7d0 builds it at 0x00704b40 with every bit clear.
     static std::vector<bool> sSlotsInUse;

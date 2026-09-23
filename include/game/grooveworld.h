@@ -64,6 +64,9 @@ class TickClock;
  * `0x0018de38` both run once the world is ready.
  */
 class GrooveWorld : public MsgSink, public RawController {
+    // InputPoller::ReadControllers() at 0x001dfab0 reads mState directly.
+    friend class InputPoller;
+
 public:
     /**
      * Construct an empty world.

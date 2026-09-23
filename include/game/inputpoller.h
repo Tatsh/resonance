@@ -3,6 +3,7 @@
 #include <list>
 #include <vector>
 
+class Joypad;
 class RawController;
 
 /**
@@ -25,10 +26,7 @@ class RawController;
  * at `0x001df248` together, and it accounts for every byte up to the vptr. The purpose of each
  * member is mostly unrecovered, so those members are private.
  *
- * Two further routines the constructor and destructor call are unrecovered, `0x001e19b8` on the way
- * in and `0x001df9d8` on the way out. The first is not a member: it ignores the pointer it receives
- * and fills a 16-entry table of controller bit masks at `0x008efb60` before delegating to
- * `0x001df248`.
+ * The constructor finishes in Init(), and the destructor begins with Shutdown().
  */
 class InputPoller {
 public:
@@ -102,10 +100,8 @@ public:
     /**
      * Read the controllers once.
      *
-     * Runs the reading routine at `0x001dfab0`, which clears mPressedThisPoll and sets it again
-     * when a reading goes out, and then an empty member at `0x001e1c58`.
-     * GameManagerImpl::PollPlayback() is the caller. Not reconstructed yet, because the reading
-     * routine is unrecovered. The title is inferred.
+     * Runs ReadControllers() and then OnUnknown001e1c58(). GameManagerImpl::PollPlayback() is the
+     * caller. The title is inferred.
      *
      * @ghidraAddress 0x001e1c28
      */
@@ -202,46 +198,106 @@ private:
     // purpose is unrecovered. +0x34
     int mUnknown34;
 
-    // Words per Entry. The setup routine at 0x001df248 zeroes exactly this many with a word loop,
-    // and the table of controller bit masks that 0x001e19b8 builds at 0x008efb60 has the same
-    // count, which is what suggests one word per control. The correspondence is an inference.
-    static constexpr int kEntryWordCount = 16;
+    /**
+     * Fill the control mask table and open the controllers.
+     *
+     * Called by the constructor. The table does not depend on the object, and the pointer is
+     * forwarded to Setup() unread. The title is inferred.
+     *
+     * @ghidraAddress 0x001e19b8
+     */
+    void Init();
 
-    // Trailing bytes per Entry, zeroed one byte at a time rather than as a word, which is what
-    // establishes them as byte-wide members rather than a single word.
-    static constexpr int kEntryByteCount = 4;
+    /**
+     * Open a Joypad on each of the four multitap slots of port 0 and on slot 0 of port 1.
+     *
+     * Each Joypad takes the next id and an empty Entry, and mJoypadPlayers gains one zeroed word
+     * per Joypad. With a multitap on port 0 the Joypads are numbered as players 1 onward in order,
+     * the last one excepted. Without one, the first Joypad is player 1 and, unless a multitap
+     * sits on port 1, the port 1 Joypad is player 2. The title is inferred.
+     *
+     * @ghidraAddress 0x001df248
+     */
+    void Setup();
 
-    // One record per controller the setup routine finds. The class emits no RTTI, has no
-    // constructor or destructor of its own, and is copied into the vector byte for byte by the
-    // compiler, so no name for it survives anywhere in the image. Its allocation is billed to
-    // `stl_vector` because the vector owns it. The title here records only that it is an element of
-    // that vector.
+    /**
+     * Close and delete every Joypad, and empty mJoypads and mEntries.
+     *
+     * Nothing happens when mJoypads is already empty. The destructor is the caller. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x001df9d8
+     */
+    void Shutdown();
+
+    /**
+     * Follow a multitap being connected or removed on either port.
+     *
+     * Does nothing while mActive is clear. A change on port 1 restarts every Joypad. A multitap
+     * newly on port 0 renumbers the players in order and restarts every Joypad, and one newly
+     * gone restores the single-pad numbering. Named after the file-private
+     * FindJoypadConnectionsCmd.
+     *
+     * @ghidraAddress 0x001df798
+     */
+    void FindJoypadConnections();
+
+    /**
+     * Read every Joypad and send the changes to mController.
+     *
+     * Each pressed or released control goes out as a `joy ` reading with the Joypad's player,
+     * the control number from 1, and 0.99 or 0, and each moved stick axis as a reading with its
+     * axis control and its position scaled to 0 through 1. The four face buttons send only
+     * the first of them pressed while any stays held. A Joypad that reports 0 during a game pauses
+     * the game when its player is one of the world's local players, and one that reports 1 sets
+     * mUnknown50. The routine returns at the first ready Joypad that has no player. The title is
+     * inferred.
+     *
+     * @ghidraAddress 0x001dfab0
+     */
+    void ReadControllers();
+
+    /**
+     * Do nothing. Poll() calls it after ReadControllers().
+     *
+     * @ghidraAddress 0x001e1c58
+     */
+    void OnUnknown001e1c58();
+
+    // The controls, in the order of the mask table the control numbers index.
+    static constexpr int kControlCount = 16;
+
+    // Bytes of stick position per reading, one per axis.
+    static constexpr int kAxisCount = 4;
+
+    // One record per Joypad, the last reading it sent. The class emits no RTTI, has no constructor
+    // or destructor of its own, and is copied into the vector byte for byte, so no name survives.
     struct Entry {
-        int mUnknown00[kEntryWordCount];  // +0x00
-        char mUnknown40[kEntryByteCount]; // +0x40
-        int mUnknown44;                   // +0x44
-        int mUnknown48;                   // +0x48
+        int mUnknown00[kControlCount]; // +0x00, zeroed by Setup() and never read
+        char mAxes[kAxisCount];        // +0x40
+        unsigned int mButtons;         // +0x44
+        // Set while a face button's press has gone out, cleared once all four are up.
+        int mFaceButtonHeld; // +0x48
     };
 
-    std::vector<Entry> mUnknown00; // +0x00 element stride 0x4c
-    std::vector<int> mUnknown0c;   // +0x0c element type not recovered
-    // Incremented once per record the setup routine appends to mUnknown1c.
-    int mUnknown18;              // +0x18
-    std::vector<int> mUnknown1c; // +0x1c holds pointers to 8-byte polymorphic objects the setup
-                                 // routine builds, whose class is not recovered
+    std::vector<Entry> mEntries;     // +0x00
+    std::vector<int> mJoypadPlayers; // +0x0c, the player of each Joypad from 1, or 0 for none
+    int mNextJoypadId;               // +0x18
+    std::vector<Joypad *> mJoypads;  // +0x1c
     // Set from the return of 0x00558d10, which is titled as a static-initialisation stub and
     // cannot be one, because a stub does not return a value a caller stores.
     int mUnknown28;            // +0x28
     std::list<int> mUnknown2c; // +0x2c element type not recovered, 16-byte node
     int mUnknown30;            // +0x30
     int mActive;               // +0x3c starts at 1
-    int mUnknown40;            // +0x40
-    int mUnknown44;            // +0x44
-    int mPaused;               // +0x48
+    int mMultitap0;            // +0x40, a multitap is on port 0
+    int mMultitap1;            // +0x44, a multitap is on port 1
+    // Set by SetPaused() and by ReadControllers() when it pauses the game.
+    int mPaused; // +0x48
     // Starts at 1. The reading routine at 0x001dfab0 tests it at 0x001dfb7c before it hands a
     // reading to a game world. +0x4c
     int mGameInputEnabled;
-    int mUnknown50; // +0x50
+    int mUnknown50; // +0x50, set when a Joypad's read reports 1
     // The receiver of the readings, which SetController() installs.
     RawController *mController; // +0x54
 };
