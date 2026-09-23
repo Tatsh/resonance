@@ -9,6 +9,7 @@
 #include "rnd/transformable.h"
 
 class FailSink;
+struct Vector3;
 namespace Rnd {
 class Font;
 class Mesh;
@@ -349,6 +350,19 @@ public:
      * @ghidraAddress 0x004d0010
      */
     float MeasureText(const char *pText, int nCount);
+
+    /**
+     * Report where one glyph of the laid-out text sits.
+     *
+     * A text with no glyph mesh or no font reports the origin. An index past the last glyph
+     * reports the position after the last glyph, which is how MetHelpScreen::FillTexts() at
+     * `0x00313208` measures a whole line. The body is not written, and the name is inferred.
+     *
+     * @param nIndex The glyph.
+     * @return The position.
+     * @ghidraAddress 0x004c9e98
+     */
+    Vector3 CharPosition(int nIndex);
 
     /**
      * Report the vertical extent of the text block about the origin.

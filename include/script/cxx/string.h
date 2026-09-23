@@ -55,6 +55,18 @@ public:
     explicit String(const HxStr &text);
 
     /**
+     * Take another handle's reference as a string.
+     *
+     * The out-of-line body copies the reference with a count of its own and runs validate() under
+     * the Py::Object, `SeqBase<Char>`, and Py::String vptrs in turn. It belongs to the vendored
+     * binding and is not reconstructed.
+     *
+     * @param ob The handle to copy.
+     * @ghidraAddress 0x004c4c60
+     */
+    explicit String(const Object &ob);
+
+    /**
      * Accept only a string.
      *
      * @param pyob The reference to test.

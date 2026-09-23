@@ -489,6 +489,7 @@ metfrontendstate
 metgameskillscreen
 metgizmopanel
 metglobalsettingssaverscreen
+methelpscreen
 methodobject
 metjukeboxbasescreen
 metjukeboxcustomremixesscreen
@@ -519,6 +520,7 @@ metmultisaveremixscreen
 metmultistatsscreen
 metmultitips
 metmultitipsbasescreen
+metnullrenderer
 metpausebasescreen
 metpausegamescreen
 metpausemultiremixscreen

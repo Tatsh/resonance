@@ -3,6 +3,7 @@
 #include "script/cxx/config.h"
 #include "script/cxx/exception.h"
 #include "script/cxx/object.h"
+#include "script/cxx/seqref.h"
 
 namespace Py {
 
@@ -154,6 +155,45 @@ public:
             throw Exception();
         }
     }
+
+    /**
+     * Take another handle's reference as a sequence.
+     *
+     * Inline. MetNullRenderer::OnRawController() at `0x0030e4c0` expands it as the Py::Object copy,
+     * its validate(), the `0x007d0ff0` vptr store, and a second validate().
+     *
+     * @param ob The handle to copy.
+     */
+    explicit SeqBase(const Object &ob) : Object(ob) {
+        validate();
+    }
+
+    /**
+     * Number of elements, read without the table.
+     *
+     * Inline. Unlike size(), the call goes straight to `PySequence_Length()` at `0x004a53f0`, which
+     * is how MetHelpScreen::FillTexts() at `0x00313208` expands it.
+     *
+     * @return The length.
+     */
+    int length() const {
+        return PySequence_Length(mPtr);
+    }
+
+    /**
+     * Address one element.
+     *
+     * Inline. The proxy fetches the element through getItem() as it is built.
+     *
+     * @param i The index.
+     * @return A proxy for the element.
+     */
+    seqref<T> operator[](int i) {
+        return seqref<T>(*this, i);
+    }
 };
+
+/** The sequence handle over plain objects, as released PyCXX spells it. */
+typedef SeqBase<Object> Sequence;
 
 } // namespace Py

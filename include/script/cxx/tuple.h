@@ -57,6 +57,16 @@ public:
     explicit Tuple(int nSize);
 
     /**
+     * Take another handle's reference as a tuple.
+     *
+     * The body is out of line. It belongs to the vendored binding and is not reconstructed.
+     *
+     * @param ob The handle to copy.
+     * @ghidraAddress 0x004c5568
+     */
+    explicit Tuple(const Object &ob);
+
+    /**
      * Write one element.
      *
      * The override exists for the reference count. `PyTuple_SetItem()` steals a reference, so the

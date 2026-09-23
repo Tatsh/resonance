@@ -11,9 +11,7 @@ namespace Py {
 // Py::String derives from Py::SeqBase<Py::Char>, which derives from this class, so the two
 // headers cannot include each other. str() returns a String by value and is defined out of line
 // in src/script/cxx/object.cpp, where the complete type is available.
-namespace Rnd {
 class String;
-}
 
 /**
  * Reference-counted handle on any Python object, and the root of the PyCXX object hierarchy.
@@ -129,6 +127,29 @@ public:
      * @ghidraAddress 0x0055cb30
      */
     HxStr as_string() const;
+
+    /**
+     * Report whether the object is a tuple.
+     *
+     * Inline. The type word is compared with `PyTuple_Type` without a null test, which is how
+     * MetHelpScreen::FillTexts() at `0x00313208` expands it.
+     *
+     * @return True for a tuple.
+     */
+    bool isTuple() const {
+        return PyTuple_Check(mPtr);
+    }
+
+    /**
+     * Report whether the object is a list.
+     *
+     * Inline, expanded the same way as isTuple().
+     *
+     * @return True for a list.
+     */
+    bool isList() const {
+        return PyList_Check(mPtr);
+    }
 
     /**
      * Wrapped reference, null only between release() and the next assignment.

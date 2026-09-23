@@ -1,3 +1,5 @@
+# methelpscreen.cpp and metnullrenderer.cpp are not built. Each includes the embedded
+# interpreter's Python 2 headers through PyCXX.
 set(RESONANCE_MET_SRCS
     albumcache.cpp
     creditsroll.cpp
