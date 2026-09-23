@@ -37,8 +37,8 @@ class TickClock;
  * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
  * both player references at the stand-in player, and sizes mUnknown74 to three zeroed elements.
  *
- * PostNowBarMsg(), OnTrackSelect(), and OnPitchRiff() are declared and not written, for the
- * message access each one records.
+ * PostNowBarMsg() and OnPitchRiff() are declared and not written, for the message access each one
+ * records.
  */
 class Scratcher : public Pitcher {
 public:
@@ -81,7 +81,7 @@ protected:
      * The routine sends a NowBarMsg at lane one minus the value, then tracks the reading's
      * movement against the ring of past readings in mUnknown74 and replays the last gem through
      * OnPitchRiff() at a step of up to 3 in either direction. The body is not written, because
-     * NowBarMsg's word at `+0x04` is private and the class has no payload constructor.
+     * AxisRegisterMsg's position at `+0x0c` is private.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001cfd20
@@ -106,7 +106,6 @@ protected:
      *
      * A real new player first gets a NowBarMsg at lane 0.5. A message with a zero second word
      * installs the player, and a real player then has SendSeekerMsg() run for the message's bar.
-     * The body is not written, for the reason recorded on PostNowBarMsg().
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001d0248

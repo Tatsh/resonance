@@ -36,7 +36,7 @@ class TickClock;
  *
  * The Voxer records what the singer holds into a Phrase per bar, as AxePhraseMaker does for a
  * guitar. Holding any PitchRiffMsg level presses the sustain controller (46) and releasing the
- * last one lets it go. OnTrackSelect() is the one routine not written.
+ * last one lets it go.
  */
 class Voxer : public Pitcher {
 public:
@@ -99,9 +99,7 @@ protected:
      * Install the player a TrackSelectMsg for this track selects.
      *
      * A player still holding levels has them cleared, the sustain updated, and the button
-     * released. A real new player gets a NowBarMsg at lane 0.5 and its seeker turned off. The
-     * body is not written, because NowBarMsg's word at `+0x04` is private and the class has no
-     * payload constructor.
+     * released. A real new player gets a NowBarMsg at lane 0.5 and its seeker turned off.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001d8840

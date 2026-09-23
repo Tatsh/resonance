@@ -14,7 +14,10 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). mPlayer and mLane are public
  * because AppTunnel::HandleMessage() at `0x004496e8` reads them directly with no accessor in the
  * image. It compares mPlayer with the player each tunnel item stores, which types it, and eases
- * the item toward mLane. The purpose of the word at `+0x04` is not recovered.
+ * the item toward mLane.
+ *
+ * A second, identical vtable at `0x007de200` is emitted in the guitar and vocal units, and the
+ * five writers of mUnknown04 store it.
  */
 class NowBarMsg : public Message {
 public:
@@ -52,10 +55,15 @@ public:
      */
     virtual const char *Name();
 
-private:
-    int mUnknown04; // +0x04
+    /**
+     * The track of the now bar. +0x04
+     *
+     * Public because five routines write it directly: AxisControl's OnAxisRegister() at
+     * `0x0019ea80` and OnTrackSelect() at `0x0019ec10`, Scratcher's PostNowBarMsg() at `0x001cfd20`
+     * and OnTrackSelect() at `0x001d0248`, and Voxer::OnTrackSelect() at `0x001d8840`.
+     */
+    int mUnknown04;
 
-public:
     Player *mPlayer; /*!< The player the now bar belongs to. +0x08 */
     float mLane;     /*!< The lane AppTunnel eases the item toward. +0x0c */
 };

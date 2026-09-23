@@ -11,6 +11,7 @@
 #include "msg/axisregistermsg.h"
 #include "msg/erasemsg.h"
 #include "msg/invalidateseekermsg.h"
+#include "msg/nowbarmsg.h"
 #include "msg/pitchriffmsg.h"
 #include "msg/seekermsg.h"
 #include "msg/showeraseeffectmsg.h"
@@ -33,6 +34,9 @@ constexpr int kBankSwitchOverrideConfigCode = 0x3a1;
 
 // The word at ShowEraseEffectMsg `+0x14` that EraseGemRange() always sets.
 constexpr int kEraseEffectFlag = 1;
+
+// The lane a new player's now bar starts on, the middle of the tunnel.
+constexpr float kCenterLane = 0.5f;
 
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
 constexpr char kEraseBarSound[] = "SND_ERASE";
@@ -94,6 +98,27 @@ void Scratcher::EraseGemRange(EraseMsg *pMsg) {
     ShowEraseEffectMsg effect(mUnknown5c, mUnknown44, nFirstBar, nEndBar, kEraseEffectFlag);
     Send(&effect);
     SendSeekerMsg(pMsg->mUnknown08.mTick / mBarDivisor);
+}
+
+// 0x001d0248
+void Scratcher::OnTrackSelect(TrackSelectMsg *pMsg) {
+    if (pMsg->mUnknown04 != mUnknown44) {
+        return;
+    }
+    if (pMsg->mUnknown10->IsNull() == 0) {
+        NowBarMsg nowBar;
+        nowBar.mUnknown04 = mUnknown44;
+        nowBar.mPlayer = pMsg->mUnknown10;
+        nowBar.mLane = kCenterLane;
+        Send(&nowBar);
+    }
+    if (pMsg->mUnknown08 != 0) {
+        return;
+    }
+    mUnknown5c = pMsg->mUnknown10;
+    if (mUnknown5c->IsNull() == 0) {
+        SendSeekerMsg(pMsg->mPosition.mTick / mBarDivisor);
+    }
 }
 
 // 0x001d08e0

@@ -3,8 +3,10 @@
 #include <cstdlib>
 
 #include "game/nullplayer.h"
+#include "game/player.h"
 #include "msg/allnotesoffmsg.h"
 #include "msg/axisfxmsg.h"
+#include "msg/nowbarmsg.h"
 #include "msg/stdmidimsg.h"
 #include "msg/sustainnotemsg.h"
 
@@ -32,12 +34,32 @@ constexpr unsigned char kStatusNoteOn = 0x90;
 // The bend value that returns the pitch to the centre.
 constexpr int kNoBend = 0;
 
+// A NowBarMsg lane runs from 1 at coarse position 0 down to 0 at 128.
+constexpr int kLaneCount = 128;
+constexpr float kLaneScale = 1.0f / kLaneCount;
+
 } // namespace
 
 // 0x0019e940
 AxisControl::AxisControl(const TrackData *pTrackData)
     : mTrack(pTrackData->mUnknown04), mChannel(pTrackData->mChannel), mLane(kLaneCenter),
       mAxis(kNoAxis), mBending(0), mBendOrigin(0), mSustainTick(0), mPlayer(&g_nullPlayer) {
+}
+
+// 0x0019ec10
+void AxisControl::OnTrackSelect(TrackSelectMsg *pMsg) {
+    if (pMsg->mUnknown04 != mTrack) {
+        return;
+    }
+    mPlayer = pMsg->mUnknown10;
+    if (mPlayer->IsNull() != 0) {
+        return;
+    }
+    NowBarMsg nowBar;
+    nowBar.mUnknown04 = mTrack;
+    nowBar.mPlayer = pMsg->mUnknown10;
+    nowBar.mLane = static_cast<float>(kLaneCount - mLane) * kLaneScale;
+    Send(&nowBar);
 }
 
 // 0x0019ecf0

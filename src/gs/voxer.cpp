@@ -14,6 +14,7 @@
 #include "msg/barstatusmsg.h"
 #include "msg/erasemsg.h"
 #include "msg/invalidateseekermsg.h"
+#include "msg/nowbarmsg.h"
 #include "msg/pitchriffmsg.h"
 #include "msg/seekermsg.h"
 #include "msg/showeraseeffectmsg.h"
@@ -38,6 +39,9 @@ constexpr int kButtonPressed = 1;
 
 // The word at ShowEraseEffectMsg `+0x14` that OnErase() always sets.
 constexpr int kEraseEffectFlag = 1;
+
+// The lane a new player's now bar starts on, the middle of the tunnel.
+constexpr float kCenterLane = 0.5f;
 
 constexpr char kInactiveSound[] = "SND_INACTIVE";
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
@@ -141,6 +145,31 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
         Send(&effect);
     }
     OnInvalidateSeeker(nBar);
+}
+
+// 0x001d8840
+void Voxer::OnTrackSelect(TrackSelectMsg *pMsg) {
+    if (pMsg->mUnknown04 != mUnknown44 || pMsg->mUnknown08 != 0) {
+        return;
+    }
+
+    if (mHeldLevels.any() && mUnknown50->IsNull() == 0) {
+        mHeldLevels.reset();
+        UpdateSustain(pMsg->mPosition.mTick);
+        AxeButtonMsg release(kButtonReleased, 0, mUnknown50);
+        Send(&release);
+    }
+
+    mUnknown50 = pMsg->mUnknown10;
+    if (mUnknown50->IsNull() != 0) {
+        return;
+    }
+    NowBarMsg nowBar;
+    nowBar.mUnknown04 = mUnknown44;
+    nowBar.mPlayer = mUnknown50;
+    nowBar.mLane = kCenterLane;
+    Send(&nowBar);
+    OnInvalidateSeeker(pMsg->mPosition.mTick / mUnknown48);
 }
 
 // 0x001d89d0

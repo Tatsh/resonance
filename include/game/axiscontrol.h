@@ -31,8 +31,8 @@ class StdMidiMsg;
  *
  * The destructor at `0x0019f6a8` is implicitly declared.
  *
- * Two routines are declared but not written, because each needs a message whose payload is not
- * public yet: OnAxisRegister() (AxisRegisterMsg and NowBarMsg) and OnTrackSelect() (NowBarMsg).
+ * OnAxisRegister() is declared and not written, because it reads AxisRegisterMsg's private
+ * position at `+0x0c`.
  */
 class AxisControl : public MsgSink, public MsgSource {
 public:
