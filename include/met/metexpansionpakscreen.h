@@ -40,9 +40,6 @@
  * it every frame through the embedded record at `+0x90` and through mFade. Two message screens
  * feed it, `expansion_prepare` and `expansion_load`, whose appearance sets mUnknownac and
  * mUnknownb0 in OnMsgScreenShown().
- *
- * Four bodies are not written. EnterAndShow(), BeginExit(), OnMsgScreenDismissed(), and
- * OnUnknownSlot26() drive the screen through MetFade and DiscSwap.
  */
 class MetExpansionPakScreen : public MetScreen, public FadeUser {
 public:
@@ -61,13 +58,44 @@ public:
     virtual ~MetExpansionPakScreen();
 
     /**
+     * Build the screen on the heap.
+     *
+     * The routine at `0x00385180` that creates every front-end screen is the caller.
+     *
+     * @param pRenderer The front-end renderer the screen registers on.
+     * @param nPriority The load priority.
+     * @return The new screen.
+     * @ghidraAddress 0x0021d820
+     */
+    static MetExpansionPakScreen *New(MetRenderer *pRenderer, int nPriority);
+
+    /**
+     * Leave the screen once the fade out finishes.
+     *
+     * FadeUser slot 2, through the FadeUser table entry that adjusts `this`. The screen is erased
+     * from the renderer's stack. A cancel returns to the options screens, and any other exit
+     * returns to the main menu.
+     *
+     * @ghidraAddress 0x0021a128
+     */
+    virtual void OnFadeOutDone();
+
+    /**
+     * Show the `expansion_prepare` dialogue once the fade in finishes.
+     *
+     * FadeUser slot 3, through the FadeUser table entry that adjusts `this`. The dialogue has no
+     * buttons.
+     *
+     * @ghidraAddress 0x00219e80
+     */
+    virtual void OnFadeInDone();
+
+    /**
      * Reset the state machine and start the fade in.
      *
      * Slot 5. mUnknowna8 through mUnknownbc are cleared, the record at `+0x90` is reset through
      * `0x0016a048`, and the fade starts on mFade over 360.0 units from MetRenderer::mUnknown68
      * with this screen's FadeUser subobject as the receiver. The MetScreen body does not run.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
      *
      * @ghidraAddress 0x0021d948
      */
@@ -80,8 +108,6 @@ public:
      * rather than `0x0016d750`, and with a zero where EnterAndShow() passes a one. The MetScreen
      * body does not run, so the fade rather than the base drives the departure.
      *
-     * The body is not written, for the reason recorded in the class documentation.
-     *
      * @ghidraAddress 0x0021d9a8
      */
     virtual void BeginExit();
@@ -89,10 +115,10 @@ public:
     /**
      * Advance the state machine once a message screen is dismissed.
      *
-     * Slot 15. A message screen whose name is not `expansion_prepare` is ignored. mUnknownb8 then
-     * selects between two branches, each of which builds its own message screen.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 15. `expansion_prepare` shows `expansion_check` with two buttons, CONTINUE and CANCEL
+     * the first time and RETRY and CANCEL once mUnknownb8 is set. `expansion_check` clears
+     * mUnknownb0 and shows `expansion_load` whatever the choice. `expansion_done` records 2 in
+     * MetScreen::mUnknown18 and begins the exit, and any other name records 0 and begins it.
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The response.
@@ -135,12 +161,11 @@ public:
     /**
      * Drive the dialogue state machine by one frame.
      *
-     * Slot 26. The routine returns at once once mUnknownb4 is set. Otherwise it ticks mFade
-     * through `0x0016d710` and advances mUnknowna8 through the record at `+0x90`, pushing a
-     * message screen by name at the states that call for one. The argument is the renderer time
-     * the MetScreen declaration records.
-     *
-     * The body is not written, for the reason recorded in the class documentation.
+     * Slot 26. mFade is ticked first, and nothing else runs once mUnknownb4 is set. Otherwise
+     * mUnknowna8 advances through the record at `+0x90`. The open tray exits `MetMsgScreen`, a
+     * disc found in the open tray shows `expansion_load`, a failed swap shows
+     * `expansion_prepare` again, and a completed mount rebuilds the stage and arena lists,
+     * merges the level lists of every identity and persona again, and shows `expansion_done`.
      *
      * @param flTime The current renderer time.
      * @ghidraAddress 0x00218518
@@ -163,7 +188,7 @@ private:
     // each result as mUnknowna8. +0x90
     DiscSwap mUnknown90;
     // State of the dialogue. EnterAndShow() clears it and OnUnknownSlot26() advances it through
-    // the values 1, 2, and 4. +0xa8
+    // the DiscSwap::Step values and its own 0, 1, 8, and 13. +0xa8
     int mUnknowna8;
     // Set by OnMsgScreenShown() for `expansion_prepare`. +0xac
     int mUnknownac;

@@ -242,10 +242,19 @@ private:
     // at 0x00145068, neither of which is identified, so it is declared here and not yet written.
     void ResetCounters();
 
-    // Rebuilds the level vector from the global level list after a load. The body at 0x00142070
-    // shares that pass with RebuildLevelList() and is not yet written.
+public:
+    /**
+     * Rebuild the level vector from the global level list after a load.
+     *
+     * The body shares that pass with RebuildLevelList() and is not yet written. Public because
+     * MetExpansionPakScreen::OnUnknownSlot26() calls it on every persona once the expansion disc
+     * is mounted.
+     *
+     * @ghidraAddress 0x00142070
+     */
     void MergeLevelList();
 
+private:
     std::vector<LevelStats> mLevels;
 
 public:
