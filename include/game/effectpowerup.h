@@ -26,8 +26,7 @@ public:
      * Ask the track's JamEffectsMgr to toggle the effect for one bar.
      *
      * A JamEffectMsg (bar at `+0x04`, track at `+0x08`, mEffectType at `+0x0c`, player at
-     * `+0x10`) goes out through the player's MsgSource. The body is not written, because
-     * JamEffectMsg's payload is private.
+     * `+0x10`) goes out through the player's MsgSource.
      *
      * @param nTrack The track.
      * @param nBar The bar.

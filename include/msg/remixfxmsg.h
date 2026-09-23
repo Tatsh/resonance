@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -35,10 +37,10 @@ public:
      * @param nBar The bar.
      * @param nEffect The effect type.
      * @param bEnabled Non-zero when the effect is now on for the bar.
-     * @param nUnknown10 JamEffectMsg::mUnknown10, passed through.
+     * @param pPlayer The deploying player, JamEffectMsg::mPlayer passed through.
      */
-    RemixFXMsg(int nTrack, int nBar, int nEffect, int bEnabled, int nUnknown10)
-        : mTrack(nTrack), mBar(nBar), mEffect(nEffect), mEnabled(bEnabled), mUnknown14(nUnknown10) {
+    RemixFXMsg(int nTrack, int nBar, int nEffect, int bEnabled, Player *pPlayer)
+        : mTrack(nTrack), mBar(nBar), mEffect(nEffect), mEnabled(bEnabled), mPlayer(pPlayer) {
     }
 
     /**
@@ -76,11 +78,11 @@ public:
     virtual const char *Name();
 
 private:
-    int mTrack;     // +0x04
-    int mBar;       // +0x08
-    int mEffect;    // +0x0c
-    int mEnabled;   // +0x10
-    int mUnknown14; // +0x14, JamEffectMsg::mUnknown10 passed through
+    int mTrack;      // +0x04
+    int mBar;        // +0x08
+    int mEffect;     // +0x0c
+    int mEnabled;    // +0x10
+    Player *mPlayer; // +0x14
 };
 
 /**

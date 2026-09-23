@@ -2,6 +2,8 @@
 
 #include "msg/message.h"
 
+class Player;
+
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
@@ -54,8 +56,8 @@ public:
     int mBar;    /*!< The bar the effect toggles on. +0x04 */
     int mTrack;  /*!< The track, which PostRemixFxMsg() compares with its manager's. +0x08 */
     int mEffect; /*!< The effect type, the bit PostRemixFxMsg() toggles in the bar's mask. +0x0c */
-    /** Purpose unrecovered. PostRemixFxMsg() copies it into RemixFXMsg::mUnknown14. +0x10 */
-    int mUnknown10;
+    /** The deploying player, which PostRemixFxMsg() copies into RemixFXMsg::mPlayer. +0x10 */
+    Player *mPlayer;
 };
 
 /**
