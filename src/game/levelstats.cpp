@@ -74,7 +74,7 @@ void LevelStats::Load(IBStream &stream) {
         stream.ReadBytes(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
                          nLength);
 
-        char nStage;
+        unsigned char nStage;
         stream.ReadBytes(&nStage, sizeof(nStage));
         mStage = nStage;
 

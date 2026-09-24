@@ -44,8 +44,8 @@ constexpr unsigned kMeshCopyFlags = 0;
 // tenth of them, inside these bounds.
 constexpr double kHalf = 0.5;
 constexpr float kEdgeInset = 0.1f;
-constexpr int kLowBound = -55;
-constexpr int kHighBound = 55;
+constexpr double kLowBound = -55.0;
+constexpr double kHighBound = 55.0;
 
 // A part of this category cannot rise above the zero line, and randomize() does not swap its
 // template. randomize() does not swap the templates of the other two categories.
