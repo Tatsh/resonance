@@ -249,8 +249,8 @@ int IsBankXferBusy();
  * Performs no work when both paths already match what is loaded. The placement argument selects
  * where the pair goes: a negative value leaves both destinations as they are, 0 or 1 selects
  * kBankFixedDestAddress and the first IOP address, 2 selects the first destination buffer, and 3
- * rotates through both destination buffers and through the IOP addresses. Anything above 3 leaves
- * the IOP address alone while still selecting a destination.
+ * rotates through both destination buffers and through the IOP addresses. Anything above 3 behaves
+ * like a negative value and leaves both the destination and the IOP address as they are.
  *
  * A placement other than 3 restores the destination the call found, so only the rotating placement
  * leaves the choice behind for the next caller.
