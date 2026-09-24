@@ -359,8 +359,8 @@ void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
         }
 
         const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
-        for (const int nWindowBar : bars) {
-            RefreshBar(nWindowBar, 0);
+        for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
+            RefreshBar(*it, 0);
         }
         nStep = mMap->Slot7(nStep, mUnknown30);
     } while (mPlayMode == kPlayModeGame && nStep != nFirstStep);
@@ -403,8 +403,8 @@ void PhraseMgr::ClearPhrase(int nBar, int bAll) {
         }
 
         const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
-        for (const int nWindowBar : bars) {
-            RefreshBar(nWindowBar, 1);
+        for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
+            RefreshBar(*it, 1);
         }
         nStep = mMap->Slot7(nStep, mUnknown30);
     } while (mPlayMode == kPlayModeGame && bAll != 0 && nStep != nFirstStep);
@@ -589,11 +589,13 @@ void PhraseMgr::PostGemMsgSecond(int nBar) {
         return;
     }
 
-    for (const Phrase::Gem &gem : pPhrase->mGems) {
+    for (std::vector<Phrase::Gem>::const_iterator gem = pPhrase->mGems.begin();
+         gem != pPhrase->mGems.end();
+         ++gem) {
         const Mid::MBT start(ClampPosition(mBarTicks * nBar));
-        GemMsg msg(Mid::MBT(ClampPosition(start.mTick + gem.mPosition.mTick)),
+        GemMsg msg(Mid::MBT(ClampPosition(start.mTick + gem->mPosition.mTick)),
                    mUnknown30,
-                   gem.mGem,
+                   gem->mGem,
                    pPhrase->mPlayer);
         Send(&msg);
     }
@@ -613,11 +615,12 @@ void PhraseMgr::PostGemMsgThird(int nBar, int bGhost) {
         }
     }
 
-    for (const TickObj<int> &gem : *mTrackData->GetGems(nBar)) {
+    const std::vector<TickObj<int> > &gems = *mTrackData->GetGems(nBar);
+    for (std::vector<TickObj<int> >::const_iterator gem = gems.begin(); gem != gems.end(); ++gem) {
         const Mid::MBT start(ClampPosition(mBarTicks * nBar));
-        GemMsg msg(Mid::MBT(ClampPosition(gem.mPosition.mTick + start.mTick)),
+        GemMsg msg(Mid::MBT(ClampPosition(gem->mPosition.mTick + start.mTick)),
                    mUnknown30,
-                   gem.mValue,
+                   gem->mValue,
                    pPlayer,
                    bGhost);
         Send(&msg);
