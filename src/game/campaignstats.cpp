@@ -13,13 +13,11 @@ constexpr int kRecordVersion = 2;
 // The difficulties that limit which stages count.
 constexpr int kDifficultyEasy = 0;
 constexpr int kDifficultyNormal = 1;
-constexpr int kDifficultyExpert = 2;
 
 // The last stage each difficulty plays. The secret stage follows the last regular stage.
 constexpr int kEasyLastStage = 3;
 constexpr int kNormalLastStage = 4;
 constexpr int kLastRegularStage = 5;
-constexpr int kSecretStage = 6;
 
 // The stages UpdateUnlockLevel() tests, counted from 1, and the index of the first in the
 // per-stage arrays.
@@ -81,18 +79,6 @@ void CampaignStats::Load(IBStream &stream) {
     }
 
     MergeLevelList();
-}
-
-// 0x00144ba8
-int CampaignStats::FindLevelIndex(const HxStr &name) {
-    unsigned nIndex = 0;
-    while (nIndex < mLevels.size()) {
-        if (mLevels[nIndex].mName == name) {
-            break;
-        }
-        ++nIndex;
-    }
-    return static_cast<int>(nIndex);
 }
 
 // 0x00144f08
@@ -182,15 +168,6 @@ HxStr CampaignStats::GetBonusLevelName(int nDifficulty, int nStage) {
     }
     HxStr name((*GetStageList(nStage))[nCount - 1].mName);
     return name;
-}
-
-// 0x00144fc8
-int CampaignStats::IsSecretUnlocked() {
-    int bUnlocked = 0;
-    if (IsDifficultyComplete(kDifficultyExpert)) {
-        bUnlocked = GetStageList(kSecretStage)->size() != 0;
-    }
-    return bUnlocked;
 }
 
 // 0x001410f0

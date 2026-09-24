@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "game/levelstats.h"
+#include "met/metsonglists.h"
 #include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
@@ -41,6 +42,12 @@ public:
 
     /** The number of stages whose level indices the record stores, stages 1 through 5. */
     static constexpr int kIndexedStageCount = 5;
+
+    /** The expert difficulty, the last of the three. */
+    static constexpr int kDifficultyExpert = 2;
+
+    /** The secret stage, which follows the last regular stage. */
+    static constexpr int kSecretStage = 6;
 
     /**
      * Construct empty progress.
@@ -93,10 +100,22 @@ public:
      * Find the record for a level by name.
      *
      * @param name The level's name.
+     * Inline. Every caller in the unit expands it, and the address is the out-of-line copy the
+     * unit emits.
+     *
      * @return The index, or the element count when no record matches.
      * @ghidraAddress 0x00144ba8
      */
-    int FindLevelIndex(const HxStr &name);
+    int FindLevelIndex(const HxStr &name) {
+        unsigned nIndex = 0;
+        while (nIndex < mLevels.size()) {
+            if (mLevels[nIndex].mName == name) {
+                break;
+            }
+            ++nIndex;
+        }
+        return static_cast<int>(nIndex);
+    }
 
     /**
      * Report whether a level has been beaten at a difficulty.
@@ -209,10 +228,19 @@ public:
      *
      * Expert must be complete and stage 6 must have levels.
      *
+     * Inline. Every caller in the unit expands it, and the address is the out-of-line copy the
+     * unit emits for callers in other units.
+     *
      * @return 1 when unlocked, otherwise 0.
      * @ghidraAddress 0x00144fc8
      */
-    int IsSecretUnlocked();
+    int IsSecretUnlocked() {
+        int bUnlocked = 0;
+        if (IsDifficultyComplete(kDifficultyExpert)) {
+            bUnlocked = GetStageList(kSecretStage)->size() != 0;
+        }
+        return bUnlocked;
+    }
 
     /**
      * Report whether the super secret is unlocked.
