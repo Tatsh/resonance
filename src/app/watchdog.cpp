@@ -171,7 +171,7 @@ void Watchdog::WithdrawByCmdID(const CmdID &id) {
 
 // 0x004a9d00
 void Watchdog::Withdraw(Sch::TimedCommand *pCommand) {
-    const auto it = mQueue.lower_bound(pCommand);
+    const auto it = mQueue.find(pCommand);
     if (it == mQueue.end()) {
         return;
     }

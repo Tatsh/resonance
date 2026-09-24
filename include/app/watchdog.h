@@ -54,8 +54,8 @@ public:
     /**
      * Order of the command queue: by due tick, then by order as an unsigned quantity.
      *
-     * The comparison is recovered from the queue's insert at `0x004acd60` and lower bound at
-     * `0x004ac4f8`, both template instantiations.
+     * The comparison is recovered from the queue's insert at `0x004acd60` and find at `0x004ac4f8`,
+     * both template instantiations.
      */
     struct QueueOrder {
         /**
@@ -173,8 +173,9 @@ public:
     /**
      * Withdraw the entry at a wrapper's position in the queue.
      *
-     * The entry erased is the first one that does not sort before pCommand, which need not be
-     * pCommand itself, and the reference released is pCommand's. The image has no caller. The
+     * The entry erased is the one that sorts equivalent to pCommand (the same due tick and order),
+     * which need not be pCommand itself, and the reference released is pCommand's. Nothing is
+     * erased or released when no entry is equivalent. The image has no caller. The
      * title is inferred.
      *
      * @param pCommand The wrapper whose position is withdrawn.
