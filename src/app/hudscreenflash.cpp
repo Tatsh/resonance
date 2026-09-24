@@ -24,12 +24,14 @@ HudScreenFlash::HudScreenFlash() : mStart(kNoFade), mRate(1.0f) {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD screen rect")));
     mMesh->SetShowing(1);
     mMesh->SetVertexColor(Color{0.0f, 0.0f, 0.0f, 1.0f});
-    mScale = kScaleNumerator / static_cast<float>(GetMillisecondsPerSecond());
+    mScale =
+        kScaleNumerator / static_cast<float>(static_cast<long long>(GetMillisecondsPerSecond()));
 }
 
 // 0x0042a548
 void HudScreenFlash::Start(float flDuration, int nFadeIn) {
-    mStart = static_cast<float>(GetElapsedMilliseconds()) * mScale;
+    // The binary converts through the 64-bit integer to float routine.
+    mStart = static_cast<float>(static_cast<long long>(GetElapsedMilliseconds())) * mScale;
     if (flDuration < kShortestFade) {
         flDuration = kShortestFade;
     }
@@ -39,7 +41,8 @@ void HudScreenFlash::Start(float flDuration, int nFadeIn) {
 
 // 0x0041b2a0
 void HudScreenFlash::SetFrame() {
-    const float flNow = static_cast<float>(GetElapsedMilliseconds()) * mScale;
+    const float flNow =
+        static_cast<float>(static_cast<long long>(GetElapsedMilliseconds())) * mScale;
     if (flNow < mStart) {
         return;
     }
