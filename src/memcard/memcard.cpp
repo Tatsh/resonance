@@ -47,7 +47,7 @@ void Memcard::Unformat(MemcardCBHandler *pHandler, int nPortSlot, int nCookie) {
 }
 
 // 0x0047e820
-void Memcard::CreateDir(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie) {
+void Memcard::CreateDir(MemcardCBHandler *pHandler, int nPortSlot, HxStr path, int nCookie) {
     mOps.push_back(new CreateDirOp(pHandler, nPortSlot, path, nCookie));
 }
 

@@ -104,11 +104,11 @@ public:
      *
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
-     * @param path The directory to create.
+     * @param path The directory to create, taken by value and destroyed on return.
      * @param nCookie The tag Cancel() matches on.
      * @ghidraAddress 0x0047e820
      */
-    void CreateDir(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
+    void CreateDir(MemcardCBHandler *pHandler, int nPortSlot, HxStr path, int nCookie);
 
     /**
      * Queue a listing of one directory.

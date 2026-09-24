@@ -73,19 +73,18 @@ void SaveFileMCT::Save(const HxStr &dirName,
 
 // 0x001776e8
 void SaveFileMCT::RunStep() {
+    HxStr path;
     switch (mStep) {
     case kSaveFileStepCreateDir:
         mCard->CreateDir(this, mPortSlot, mDirName, mCookie);
         mStep = mSkipIconFiles != 0 ? kSaveFileStepOpenData : kSaveFileStepOpenIconSys;
         break;
 
-    case kSaveFileStepOpenIconSys: {
-        HxStr iconSysPath(mDirName);
-        iconSysPath += kIconSysName;
-        mCard->OpenWrite(this, mPortSlot, iconSysPath, mCookie);
+    case kSaveFileStepOpenIconSys:
+        path = mDirName + kIconSysName;
+        mCard->OpenWrite(this, mPortSlot, path, mCookie);
         mStep = kSaveFileStepWriteIconSys;
         break;
-    }
 
     case kSaveFileStepWriteIconSys:
         BuildIconSys(mIconTitle.mStr != nullptr ? mIconTitle.mStr : g_szEmptyString);
@@ -94,13 +93,11 @@ void SaveFileMCT::RunStep() {
         mStep = kSaveFileStepOpenIconImage;
         break;
 
-    case kSaveFileStepOpenIconImage: {
-        HxStr iconImagePath(mDirName);
-        iconImagePath += kIconImageName;
-        mCard->OpenWrite(this, mPortSlot, iconImagePath, mCookie);
+    case kSaveFileStepOpenIconImage:
+        path = mDirName + kIconImageName;
+        mCard->OpenWrite(this, mPortSlot, path, mCookie);
         mStep = kSaveFileStepWriteIconImage;
         break;
-    }
 
     case kSaveFileStepWriteIconImage:
         mCard->Write(this, mPortSlot, mFile, g_abSaveIcon, g_nSaveIconLength, mCookie);
@@ -108,13 +105,11 @@ void SaveFileMCT::RunStep() {
         mStep = kSaveFileStepOpenMarker;
         break;
 
-    case kSaveFileStepOpenMarker: {
-        HxStr markerPath(mDirName);
-        markerPath += mDirName;
-        mCard->OpenWrite(this, mPortSlot, markerPath, mCookie);
+    case kSaveFileStepOpenMarker:
+        path = mDirName + mDirName;
+        mCard->OpenWrite(this, mPortSlot, path, mCookie);
         mStep = kSaveFileStepWriteMarker;
         break;
-    }
 
     case kSaveFileStepWriteMarker:
         mCard->Write(this, mPortSlot, mFile, kMarkerText, kMarkerLength, mCookie);
@@ -122,13 +117,11 @@ void SaveFileMCT::RunStep() {
         mStep = kSaveFileStepOpenData;
         break;
 
-    case kSaveFileStepOpenData: {
-        HxStr dataPath(mDirName);
-        dataPath += mFileName;
-        mCard->OpenWrite(this, mPortSlot, dataPath, mCookie);
+    case kSaveFileStepOpenData:
+        path = mDirName + mFileName;
+        mCard->OpenWrite(this, mPortSlot, path, mCookie);
         mStep = kSaveFileStepWriteData;
         break;
-    }
 
     case kSaveFileStepWriteData:
         mCard->Write(this, mPortSlot, mFile, mData, mDataLength, mCookie);
