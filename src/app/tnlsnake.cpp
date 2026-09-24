@@ -63,7 +63,9 @@ TnlSnake::TnlSnake()
     : mStartFrame(kNoFrame), mString(Rnd::String::NewString(NextAppTunnelName())),
       mHead(Rnd::NewMeshThroughHook(NextAppTunnelName())),
       mView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl transparent")))) {
-    mString->SetMat(dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("snake.mat"))));
+    // The binary releases the name before SetMat(), so the lookup is its own statement.
+    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("snake.mat")));
+    mString->SetMat(pMat);
     mString->SetNumPoints(kPointCount);
     mString->SetWidth(kRibbonWidth);
     mString->SetShowing(0);
