@@ -24,15 +24,10 @@
 Reconstructed source code for _FreQuency_, the 2001 PlayStation 2 rhythm game developed by Harmonix
 Music Systems and published by Sony Computer Entertainment.
 
-The game shipped as a compiled disc, and its source code was never released. This project rebuilds
-that source by reading the shipped program instruction by instruction and writing back the C++ it
-was compiled from. Nothing here is decompiler output: every file is written by hand to match what
-the original program does, and every routine records the address it was recovered from.
-
 ## Status
 
 This is an active, partial reconstruction. It does not build a playable game yet, and it is not a
-port. Over nine tenths of the game's own routines are accounted for and nearly nine tenths have a
+port. Over nine tenths of the game's routines are accounted for and nearly nine tenths have a
 body, with the current figures and how they are measured in [PROGRESS.md](PROGRESS.md).
 
 | Area                               | State                                        |
@@ -50,7 +45,7 @@ body, with the current figures and how they are measured in [PROGRESS.md](PROGRE
 | Embedded Python interpreter        | Characterised, with its differences recorded |
 | Networking                         | Packet records only                          |
 
-Recovered means every routine the game's own code defines has a body or a recorded reason for
+Recovered means every routine the game's code defines has a body or a recorded reason for
 having none. Cross-reviews against the disassembly continue to correct bodies in every area.
 
 ## Layout
@@ -76,9 +71,8 @@ conventions the source follows.
 ## Building
 
 CI compiles every buildable source with the Emotion Engine cross compiler in the ps2dev container
-and archives one static library per subsystem. Nothing is linked yet. The original was compiled
-with Sony's toolchain, which this tree cannot reproduce, and the embedded interpreter and its C++
-binding are not built.
+and archives one static library per subsystem. The libraries are not linked yet, and the embedded
+interpreter and its C++ binding are not built.
 
 ## Provenance and licence
 
@@ -88,4 +82,4 @@ respective rights holders, and this project is not affiliated with or endorsed b
 Sony Interactive Entertainment.
 
 Third-party code the game linked against, including the Python interpreter and its C++ binding
-layer, remains under its own licence and is identified as such under `3rdparty/` and `src/python/`.
+layer, remains under its licence and is identified as such under `3rdparty/` and `src/python/`.
