@@ -498,7 +498,9 @@ public:
      *
      * The title is attested, through the diagnostic of the palette allocator of the same name. On
      * success the record is resident and joins the address ordered chain in place of the run it
-     * took, and any remainder of that run becomes a new free record.
+     * took, and any remainder of that run becomes a new free record. When no free run is large
+     * enough, the least recently used unlocked resident block that is large enough is taken whole
+     * before any block is evicted.
      *
      * @param pEntry Record to make resident.
      * @param nBlocks Blocks to find.

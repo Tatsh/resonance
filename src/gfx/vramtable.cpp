@@ -372,7 +372,7 @@ void VramTable::AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks) {
 
     while (pTaken == nullptr) {
         int nBestSize = 0;
-        int nBestAge = 0;
+        unsigned int nBestAge = 0;
 
         for (VramTableEntry *pFree = mpListHead[kVramListFree]; pFree != nullptr;
              pFree = pFree->mpNext) {
@@ -394,7 +394,9 @@ void VramTable::AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks) {
             if (pScan->mLockMask != 0 || pScan->mMemAddr == 0) {
                 continue;
             }
-            const int nAge = mFlushCount - pScan->mLastUsed;
+            // Yes, the binary reads the global table's counter here rather than this table's.
+            const unsigned int nAge =
+                static_cast<unsigned int>(g_vramTable.mFlushCount - pScan->mLastUsed);
             if (pScan->mSize >= nBlocks && (pTaken == nullptr || nBestAge < nAge)) {
                 nBestAge = nAge;
                 pTaken = pScan;
@@ -448,6 +450,7 @@ void VramTable::AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks) {
             LogPrintf("!!! VRAM ALLOCATION FAILURE - CALLING CLEAR() !!!\n");
             Clear(0);
             pTaken = mpListHead[kVramListFree];
+            break; // Yes, the binary does not test the reloaded free head.
         }
     }
 
