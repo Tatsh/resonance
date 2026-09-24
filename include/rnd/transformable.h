@@ -185,6 +185,16 @@ public:
     Transformable *Parent();
 
     /**
+     * Set the billboard mode and mark the transform dirty.
+     *
+     * Vtable slot 1.
+     *
+     * @param nBillboard The billboard mode.
+     * @ghidraAddress 0x004fce08
+     */
+    virtual void SetBillboard(int nBillboard);
+
+    /**
      * Compose mWorldXfm from mLocalXfm and the parent's world transform.
      *
      * Vtable slot 2. Returns at once when nForce is clear, mDirty is clear, and the parent is
@@ -202,16 +212,6 @@ public:
      * @ghidraAddress 0x004f0b18
      */
     virtual int UpdateWorldXfm(Transformable *pParent, int nForce);
-
-    /**
-     * Set the billboard mode and mark the transform dirty.
-     *
-     * Vtable slot 1.
-     *
-     * @param nBillboard The billboard mode.
-     * @ghidraAddress 0x004fce08
-     */
-    virtual void SetBillboard(int nBillboard);
 
     /**
      * Set the origin row and mark the transform dirty.

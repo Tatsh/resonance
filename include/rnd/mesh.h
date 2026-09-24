@@ -506,18 +506,6 @@ public:
     virtual void Collide(const Ray &ray, HitSink &sink);
 
     /**
-     * Report which parts of the mesh have changed.
-     *
-     * Rnd::Drawable vtable slot 5. Empty in Rnd::Mesh and in Rnd::PsMesh. The name is inferred
-     * from the slot it fills. Public because Rnd::MeshAnim::SetFrameSelf() at `0x004876b0` calls
-     * it on the mesh it animates, from outside this hierarchy and with no accessor in the image.
-     *
-     * @param nMask The changed parts, a set of the kSync bits above.
-     * @ghidraAddress 0x00492778
-     */
-    virtual void SyncChanged(int nMask);
-
-    /**
      * Rebuild whatever the platform subclass derives from the geometry.
      *
      * Rnd::Drawable vtable slot 4. Empty in Rnd::Mesh. Rnd::PsMesh rebuilds its triangle strips
@@ -531,6 +519,18 @@ public:
      * @ghidraAddress 0x00492770
      */
     virtual void Sync();
+
+    /**
+     * Report which parts of the mesh have changed.
+     *
+     * Rnd::Drawable vtable slot 5. Empty in Rnd::Mesh and in Rnd::PsMesh. The name is inferred
+     * from the slot it fills. Public because Rnd::MeshAnim::SetFrameSelf() at `0x004876b0` calls
+     * it on the mesh it animates, from outside this hierarchy and with no accessor in the image.
+     *
+     * @param nMask The changed parts, a set of the kSync bits above.
+     * @ghidraAddress 0x00492778
+     */
+    virtual void SyncChanged(int nMask);
 
     /**
      * Report every part of the mesh as changed.
