@@ -17,35 +17,46 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Measure                   | Count  |
 | ------------------------- | ------ |
 | Functions in the program  | 15,643 |
-| Excluded by rule          | 8,768  |
-| Reconstructable           | 6,875  |
-| Declared or defined       | 6,338  |
-| Share declared or defined | 92.19% |
-| Defined, with a body      | 6,017  |
-| Share implemented         | 87.52% |
-| Remaining, with a name    | 537    |
+| Excluded by rule          | 8,765  |
+| Reconstructable           | 6,878  |
+| Declared or defined       | 6,346  |
+| Share declared or defined | 92.27% |
+| Defined, with a body      | 6,025  |
+| Share implemented         | 87.60% |
+| Remaining, with a name    | 532    |
 | Remaining, unidentified   | 0      |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
-tree annotates it, and a header declaration carries the same annotation a body does. So 321 of the
-6,338 are declared with their address, their signature, and their evidence recorded, and have no
-body the scanner counts. 6,017 have a body.
+tree annotates it, and a header declaration carries the same annotation a body does. Of the 6,346
+accounted, 6,025 have a body the scanner counts. Of the other 321, 220 are reconstructable routines
+declared with their address, their signature, and their evidence recorded but no counted body, and
+101 are annotated library and vendored routines whose titles fall outside the body count.
 
-Implementation is the figure the project's goal is stated against, so treat 87.52% as the answer to
-"how much is reconstructed" and 92.19% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 87.60% as the answer to
+"how much is reconstructed" and 92.27% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `5e32890`. Work written and checked but not yet committed
+The table measures the committed tree at `c135774`. Work written and checked but not yet committed
 is not included.
 
 At this measurement every routine the scanner does not count is accounted for by a rule rather than
-owed. Of the declared routines without a counted body, the bodies of 197 are inline in headers,
-three are template instances, four have a split signature, and sixteen are compiler generated,
-defaulted, or vendored glue. Of the 537 routines with no annotation, 252 are implicit special
-members, 102 are interpreter bindings and their wrappers, 91 are static initialiser and exit stubs,
-57 are ezmpeg sample routines, three are interrupt-context SDK entry points, and the remaining 32
-are library routines titled by their upstream names or recorded exceptions, each listed in the known
-gaps below. No routine the program's own code defines is left without a written or recorded body.
+owed. Of the 220 declared routines without a counted body, the bodies of 204 are inline in headers,
+seven are template instances, four have a split signature, and five are defaulted or vendored glue.
+Of the 532 routines with no annotation, 254 are implicit special members, 102 are interpreter
+bindings and their wrappers, 90 are static initialiser and exit stubs, 57 are ezmpeg sample
+routines, three are interrupt-context SDK entry points, and the remaining 26 are library routines
+titled by their upstream names (17) or recorded exceptions (9), each listed in the known gaps below.
+No routine the program's own code defines is left without a written or recorded body.
+
+Since the measurement at `5e32890` (87.52%), the work has been faithfulness review rather than new
+bodies. Cross-reviews that traced every argument to its producer and placed every destructor
+corrected bodies across every reviewed subsystem (a remix deleted by the wrong key, a feedback
+sprite drawn sixteen times too deep, signed and unsigned comparisons, message lifetimes, and loops
+that reload a vector's end).
+Tree-owned values the image holds in eight bytes became `long long` after the CI toolchain was
+measured to have a four-byte `long`. Six forwarders and template instances gained bodies or markers,
+three routines the tree treated as copies were shown to be distinct functions, and two headers that
+could not compile on their own were fixed.
 
 Since the measurement at `a40a970` (85.21%), bodies rose by 169 over 48 commits. Every remaining
 declared routine gained a body or a classification, the four global allocators became the
@@ -111,8 +122,8 @@ tools are unchanged:
   interrupt-context SDK entry points titled `isce…` fall outside the `sce` pattern.
 - An inline member defined in a header with its `// 0x...` marker (for example `Cam::ProjectToUnit`)
   counts as declared but not as a body, because the body count reads `src` only. So does a
-  function template instance whose body is the template in a header (the `ContainsRef` instances
-  in the front end renderer and the `Phrase` sequencer instances).
+  function template instance whose body is the template in a header (the `Phrase` sequencer
+  instances).
 - A marker counts only when the next line holding code names the function. A definition whose
   return type clang-format places on its own line (`CheckPalEqual`,
   `MetJukeboxEditPlaylistScreenLowerLeft::New`) is written but uncounted.
@@ -126,9 +137,9 @@ tools are unchanged:
 - Library routines titled by their upstream names rather than a family prefix (`getenv`,
   `_findenv_r`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and the
   `type_info` and `exception` members) are toolchain or SDK code that no exclusion pattern matches.
-- Recorded exceptions with no separate body are the three `MetFreqMakerAssetManager` forwarders,
-  the `TunnelEvent::DrawFiltered` copy, three unreferenced return-zero stubs, an unreferenced
-  `Delayer` send copy, and one unidentified three-integer printer at `0x003d67f0`.
+- Recorded exceptions with no separate body are the `TunnelEvent::DrawFiltered` copy, three
+  unreferenced return-zero stubs, the unreferenced send copies in the `Delayer`, `MidiDisabler`, and
+  `Renderer` units, and one unidentified three-integer printer at `0x003d67f0`.
 
 Before that, from the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
 reconstructable figure fell by 85. The template library category grew by 99, the duplicate category
@@ -202,32 +213,35 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 899   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 2,018 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 1,956 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 2,874 | Container instantiations                                         |
+| Per-translation-unit duplicate | 1,951 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 2,876 | Container instantiations                                         |
 | Platform SDK                   | 484   | `sce` entry points and kernel syscalls                           |
-| C++ runtime                    | 213   | Exception, cast, and unwinding support                           |
-| C runtime                      | 324   | String and memory routines, and the floating-point library       |
+| C++ runtime                    | 214   | Exception, cast, and unwinding support                           |
+| C runtime                      | 323   | String and memory routines, and the floating-point library       |
 
 ## Verification
 
 Every figure below is produced by a command rather than asserted. CI compiles every buildable source
 with the Emotion Engine cross compiler in the ps2dev container and archives one static library per
-subsystem, with no warnings. Nothing is linked yet, because the reconstruction is partial.
+subsystem. Its only warnings are two recorded ones. `remixindex.h` reports five fields that
+`RemixIndex::ReadFromStream()` copies before they are written, which the binary also does, and
+`mem.cpp` lacks the sized `operator delete` forms, which postdate the original compiler. Nothing is
+linked yet, because the reconstruction is partial.
 
 | Check                                 | Status       |
 | ------------------------------------- | ------------ |
-| Headers compiling standalone          | 606/631      |
-| Sources compiling                     | 454/460      |
+| Headers compiling standalone          | 705/705      |
+| Sources compiling                     | 627/627      |
 | Address annotations with no function  | 0            |
 | Lines over 100 characters             | 0            |
 | `clang-format` differences            | 0            |
 | `cspell`                              | 0 issues     |
 | Declared virtuals resolving to a base | 0 mismatches |
 
-Both shortfalls are the same gap. 26 headers and 10 sources reach the embedded interpreter's own
-`Python.h`, and the two scripts skip them. The interpreter-path line below checks them against the
-vendored Python 2.0 headers. It found two headers that used `HxStr` without including it, and both
-now compile standalone. Both checks are scripts rather than hand-written compiler lines,
+The two scripts skip the 26 headers and 10 sources that reach the embedded interpreter's own
+`Python.h`. The first two rows count them through the interpreter-path line below, run against the
+vendored Python 2.0 headers. That line found two headers that used `HxStr` without including it,
+and both now compile standalone. Both checks are scripts rather than hand-written compiler lines,
 `.wiswa-ci/freq/syntax_check.sh` for sources and `.wiswa-ci/freq/header_check.sh` for headers, and
 both report their skip count so a partial run cannot read as a whole one.
 
