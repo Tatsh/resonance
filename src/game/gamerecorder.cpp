@@ -42,6 +42,7 @@ void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
     banner += "PS2 application.";
     WriteText(*mStream, banner);
 
+    HxStr description;
     const char *pszMode;
     switch (nGameMode) {
     case kGameModeSolo:
@@ -67,13 +68,13 @@ void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
         difficulty = "hard)\n";
         break;
     }
-    HxStr description;
     description += params.mLevelName + pszMode;
     description += pszPlay;
     description += difficulty;
     WriteText(*mStream, description);
 
-    WriteText(*mStream, HxStr("no autoexec"));
+    HxStr noAutoexec("no autoexec");
+    WriteText(*mStream, noAutoexec);
     mManager->Save(mStream);
     Application::shared()->GetWatchdog()->BeginRecording(*mStream);
 }
