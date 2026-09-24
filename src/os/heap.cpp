@@ -72,9 +72,14 @@ unsigned RoundPayload(unsigned nSize) {
     return (nWant + kHeapPayloadAlignment - 1) & ~(kHeapPayloadAlignment - 1);
 }
 
+// Realloc() adds its time through this form, which does not test g_bHeapTimingSuspended.
+void AddMicroseconds(int *pnTotal, unsigned nStart) {
+    *pnTotal += static_cast<int>(ReadCycleCount() - nStart) / kCyclesPerMicrosecond;
+}
+
 void AccumulateMicroseconds(int *pnTotal, unsigned nStart) {
     if (g_bHeapTimingSuspended == 0) {
-        *pnTotal += (ReadCycleCount() - nStart) / kCyclesPerMicrosecond;
+        *pnTotal += static_cast<int>(ReadCycleCount() - nStart) / kCyclesPerMicrosecond;
     }
 }
 
@@ -313,6 +318,7 @@ void *Heap::Realloc(void *pBlock,
                 ReplaceFreeNode(pNext, pRemainder);
                 pNode->mNext = pRemainder;
             } else {
+                pRemainder->mNext = pNext;
                 SetNodePrev(pRemainder, pNode);
                 pNode->mNext = pRemainder;
                 SetNodePrev(pNext, pRemainder);
@@ -325,7 +331,7 @@ void *Heap::Realloc(void *pBlock,
                 MarkNodeFree(pRemainder);
             }
         }
-        AccumulateMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+        AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
         return pBlock;
     }
 
@@ -340,7 +346,7 @@ void *Heap::Realloc(void *pBlock,
                 (reinterpret_cast<char *>(pRemainder) - static_cast<char *>(pBlock)) - nExtent;
             ReplaceFreeNode(pNext, pRemainder);
             pNode->mNext = pRemainder;
-            AccumulateMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+            AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
             return pBlock;
         }
         if (nCombined >= nWant + kHeapSplitThreshold) {
@@ -350,7 +356,7 @@ void *Heap::Realloc(void *pBlock,
             SetNodePrev(pNext->mNext, pNode);
             pNode->mNext = pNext->mNext;
             --mFreeNodes;
-            AccumulateMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+            AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
             return pBlock;
         }
     }
@@ -360,13 +366,13 @@ void *Heap::Realloc(void *pBlock,
     void *pMoved = Alloc(nWant, __FILE__, __LINE__);
     if (pMoved == nullptr) {
         g_bHeapTimingSuspended = 0;
-        AccumulateMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+        AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
         return nullptr;
     }
     memcpy(pMoved, pBlock, NodeExtent(pNode) - kHeapNodePrologueSize);
     Free(pBlock, __FILE__, __LINE__);
     g_bHeapTimingSuspended = 0;
-    AccumulateMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+    AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
     return pMoved;
 }
 
