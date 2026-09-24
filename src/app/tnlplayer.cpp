@@ -33,14 +33,8 @@ T *FindObject(const char *pszName) {
     return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
 }
 
-// Write the identity into the local transform of pTrans and mark it dirty.
-inline void ResetLocalXfm(Rnd::Transformable *pTrans) {
-    const Transform identity{
-        {1.0f, 0.0f, 0.0f, 1.0f},
-        {0.0f, 1.0f, 0.0f, 1.0f},
-        {0.0f, 0.0f, 1.0f, 1.0f},
-        {0.0f, 0.0f, 0.0f, 1.0f},
-    };
+// Copy identity into the local transform of pTrans and mark it dirty.
+inline void ResetLocalXfm(Rnd::Transformable *pTrans, const Transform &identity) {
     std::memcpy(pTrans->mLocalXfm, &identity, sizeof(pTrans->mLocalXfm));
     pTrans->mDirty = 1;
 }
@@ -57,16 +51,22 @@ TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
       mTunnel(pTunnel), mUnknown28(0), mIndex(nIndex), mPlayer(pPlayer),
       mActivator(nIndex, pPlayer->mColorName, this), mGridMarkers(pTunnel, mPlayerNum),
       mSabreTrail(nIndex, pPlayer->mColorName),
-      mSeekerFade(nIndex, TnlColorFromName(pPlayer->mColorName)) {
+      mSeekerFade(nIndex, TnlColorFromName(HxStr(pPlayer->mColorName))) {
     Rnd::TunnelSeeker *pSeeker = GetCachedTunnelObject()->GetSeeker(nIndex);
+    const Transform identity{
+        {1.0f, 0.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 0.0f, 1.0f},
+    };
     // The binary does not test either effect transform for null.
     mActivatorFx = FindObject<Rnd::Transformable>(FormatString("activator fx%d", mIndex));
-    ResetLocalXfm(mActivatorFx);
+    ResetLocalXfm(mActivatorFx, identity);
     if (pPlayer->Slot2() != kNoLocalSlot) {
         pSeeker->SetTrans(
             FindObject<Rnd::Transformable>(FormatString("tnl cam slide%d", mPlayerNum)));
         mCamFx = FindObject<Rnd::Transformable>(FormatString("tnl cam fx%d", mPlayerNum));
-        ResetLocalXfm(mCamFx);
+        ResetLocalXfm(mCamFx, identity);
         mCamIntro = FindObject<Rnd::TransAnim>(FormatString(
             "tnl cam intro%d.tnm",
             static_cast<int>(Application::shared()->GetWorld()->mLocalPlayers.size())));
