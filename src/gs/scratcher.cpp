@@ -245,8 +245,10 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
         if (mUnknown5c->Slot20(nBar) == 0) {
             nPoints = 0;
         }
-        BeginPhraseCatchMsg begin(mUnknown5c, nPoints, mUnknown5c->Slot16(nBar));
-        Send(&begin);
+        {
+            BeginPhraseCatchMsg begin(mUnknown5c, nPoints, mUnknown5c->Slot16(nBar));
+            Send(&begin);
+        }
         PhraseCapturedMsg captured(
             nBar, nBar + 1, nBar, nBar + 1, mUnknown44, mUnknown5c, nPoints, 0, 0);
         Send(&captured);
@@ -285,13 +287,15 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
         Send(&gem);
     }
     if (bContinues == 0) {
-        GemMsg gem;
-        gem.mPosition.mTick = nTick;
-        gem.mTrack = mUnknown44;
-        gem.mGem = kScratchGem;
-        gem.mPlayer = mUnknown5c;
-        gem.mGhost = 0;
-        Send(&gem);
+        {
+            GemMsg gem;
+            gem.mPosition.mTick = nTick;
+            gem.mTrack = mUnknown44;
+            gem.mGem = kScratchGem;
+            gem.mPlayer = mUnknown5c;
+            gem.mGhost = 0;
+            Send(&gem);
+        }
 
         PitchMsg pitch;
         pitch.mUnknown04 = nTick;

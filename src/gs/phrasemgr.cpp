@@ -303,28 +303,33 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
 
     if (bPost != 0) {
         const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
-        for (const int nWindowBar : bars) {
+        for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
+            const int nWindowBar = *it;
             const Mid::MBT start(ClampPosition(mBarTicks * nWindowBar));
             const Mid::MBT position(ClampPosition(nTick + start.mTick));
             if (nReplaced != kNoReplacedGem) {
-                ClearGemMsg clear(position, mUnknown30, nReplaced);
-                Send(&clear);
+                {
+                    ClearGemMsg clear(position, mUnknown30, nReplaced);
+                    Send(&clear);
+                }
                 if (mTrackKind == kTrackModeRiff) {
                     // Repost the first other gem the track lists at the same position, as a ghost.
                     const std::vector<TickObj<int> > &gems = *mTrackData->GetGems(nWindowBar);
-                    for (const TickObj<int> &other : gems) {
-                        if (other.mPosition.mTick == nTick && other.mValue != nGem) {
+                    for (std::vector<TickObj<int> >::const_iterator other = gems.begin();
+                         other != gems.end();
+                         ++other) {
+                        if (other->mPosition.mTick == nTick && other->mValue != nGem) {
                             const Mid::MBT otherStart(ClampPosition(mBarTicks * nWindowBar));
                             GemMsg ghost(
-                                Mid::MBT(ClampPosition(other.mPosition.mTick + otherStart.mTick)),
+                                Mid::MBT(ClampPosition(other->mPosition.mTick + otherStart.mTick)),
                                 mUnknown30,
-                                other.mValue,
+                                other->mValue,
                                 pOwner,
                                 kGhostGem);
                             Send(&ghost);
                             break;
                         }
-                        if (nTick < other.mPosition.mTick) {
+                        if (nTick < other->mPosition.mTick) {
                             break;
                         }
                     }
