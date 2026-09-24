@@ -384,6 +384,7 @@ isatty
 isce
 isdir
 isrecordingmsg
+isystem
 iwyu
 jameffectmsg
 jameffectsmgr

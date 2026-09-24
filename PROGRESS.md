@@ -224,12 +224,10 @@ subsystem, with no warnings. Nothing is linked yet, because the reconstruction i
 | `cspell`                              | 0 issues     |
 | Declared virtuals resolving to a base | 0 mismatches |
 
-Both shortfalls are the same gap and neither is a defect. 25 headers under `include/script` and 6
-sources under `src/script` need the embedded interpreter's own `Python.h`, and this tree carries only
-the interpreter's differences rather than its headers. The host's Python 3 headers would report
-errors against Python 2 API use that describe nothing about the reconstruction. Every failure is
-confined to that one subsystem, which was verified by listing the failures and finding none outside
-it. Both checks are scripts rather than hand-written compiler lines,
+Both shortfalls are the same gap. 26 headers and 10 sources reach the embedded interpreter's own
+`Python.h`, and the two scripts skip them. The interpreter-path line below checks them against the
+vendored Python 2.0 headers. It found two headers that used `HxStr` without including it, and both
+now compile standalone. Both checks are scripts rather than hand-written compiler lines,
 `.wiswa-ci/freq/syntax_check.sh` for sources and `.wiswa-ci/freq/header_check.sh` for headers, and
 both report their skip count so a partial run cannot read as a whole one.
 
@@ -262,10 +260,12 @@ definition following it, which is what separates a routine marker from a comment
 an address.
 
 A header is checked on its own, through a translation unit that includes nothing else. That catches
-a break in a header which no implementation file happens to include.
+a break in a header which no implementation file happens to include. The ten sources and the headers
+that reach the interpreter's `Python.h`, skipped by both scripts, are checked with the line below, run
+from `freq-src`.
 
 ```shell
-g++ -fsyntax-only -D_EE -DHAVE_LIMITS_H -DSIZEOF_LONG=8 -I include -I src/python/PC -I ../.wiswa-ci/freq/compat -I ../.wiswa-ci/freq/Python-2.0/Include -I ../ps2sdk/common/include -I ../ps2sdk/ee/kernel/include -I ../ps2sdk/ee/rpc/cdvd/include -I ../ps2sdk/ee/rpc/sdr/include -I ../ps2sdk/ee/rpc/memorycard/include <file>
+g++ -fsyntax-only -std=c++17 -Wall -Wextra -D_EE -DHAVE_LIMITS_H -DSIZEOF_LONG=8 -I include -I compat -isystem src/python/PC -isystem ../.wiswa-ci/freq/Python-2.0/Include -isystem ../ps2sdk/common/include -isystem ../ps2sdk/ee/kernel/include -isystem ../ps2sdk/ee/rpc/cdvd/include -isystem ../ps2sdk/ee/rpc/sdr/include -isystem ../ps2sdk/ee/rpc/memorycard/include -isystem ../ps2sdk/ee/rpc/multitap/include <file>
 ```
 
 The `-DSIZEOF_LONG=8` flag on that line states the original target's true width. The interpreter's
