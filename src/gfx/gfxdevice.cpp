@@ -143,7 +143,7 @@ constexpr unsigned long long kFeedbackTagHi = 0x535310;
 // A textured, alpha-blended sprite with texel coordinates, drawn in mid grey at alpha 100.
 constexpr unsigned long long kFeedbackPrim = 0x156;
 constexpr unsigned long long kFeedbackRgbaq = 0x3f80000064808080ULL;
-constexpr unsigned long long kFeedbackZ = 160000ULL << 32;
+constexpr unsigned long long kFeedbackZ = 10000ULL << 32;
 // Coordinates are in sixteenths. The primitive origin is 2048, and a texel is sampled at its
 // centre.
 constexpr int kGsCoordinateCentre = 0x8000;
