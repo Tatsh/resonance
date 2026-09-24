@@ -9,8 +9,9 @@ class Player;
  * Event the game passes between a MsgSource and a MsgSink.
  *
  * `11LoopToolMsg` in the RTTI descriptor at `0x008effd0`, with Message as its one base. The object
- * is 0x10 bytes and its vtable is at `0x00813088`. The allocation in New() and the allocation in
- * Clone() report the same size, which measures the class twice.
+ * is 0x10 bytes and its vtable is at `0x007cf4a0`, which New(), Clone(), and the one builder
+ * install. An identical, unreferenced emission sits at `0x00813088`. The allocation in New() and
+ * the allocation in Clone() report the same size, which measures the class twice.
  *
  * The payload layout comes from the run of field copies in Clone(). The types come from
  * InputMap::OnControllerReading(), the one builder, which stores the resolved player, the
