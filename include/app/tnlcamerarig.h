@@ -34,7 +34,8 @@ public:
      * The intro pose comes from frame 0 of "tnl cam intro<nPlayerCount>.tnm" and from the current
      * screen rectangle and field of view of "tnl cam1". The playing pose is a pitch of 28 degrees,
      * the position `(0, -0.5, 0)`, the rectangle `(0, 0.1, 1, 0.8)`, and a field of view of 80
-     * degrees. With nSkipIntro set the ramp jumps to the playing pose.
+     * degrees. With nSkipIntro set the ramp jumps to the playing pose and ZoomIn() hides the other
+     * players' cameras and views.
      *
      * @param nPlayerCount The number of players, each with an outer camera and a local view.
      * @param nSkipIntro Non-zero to start in the playing pose. AppTunnel passes its `+0xc8`.

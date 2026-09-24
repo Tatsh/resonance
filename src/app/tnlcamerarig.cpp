@@ -70,9 +70,16 @@ TnlCameraRig::TnlCameraRig(int nPlayerCount, int nSkipIntro)
     Rnd::TransAnim *pIntro = dynamic_cast<Rnd::TransAnim *>(
         Rnd::g_manager.Find(HxStr(FormatString("tnl cam intro%d.tnm", mPlayerCount))));
     Transform xfm;
-    pIntro->EvalFrame(0.0f, &xfm.mBasisX.x, 1);
     Vector3 angles;
     Vector3 scale;
+    // The binary also writes the translation's w, which EvalFrame() always overwrites. It
+    // overwrites the basis rows' w only when it builds a follow-path basis.
+    xfm.mBasisX.w = 1.0f;
+    xfm.mBasisY.w = 1.0f;
+    xfm.mBasisZ.w = 1.0f;
+    angles.w = 1.0f;
+    scale.w = 1.0f;
+    pIntro->EvalFrame(0.0f, &xfm.mBasisX.x, 1);
     Mat34DecomposeEulerScale(&xfm.mBasisX.x, &angles.x, &scale.x);
 
     mIntroPitch = angles.x;
