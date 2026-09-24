@@ -1,9 +1,8 @@
 #pragma once
 
+#include "os/hxstr.h"
 #include "script/cxx/config.h"
 #include "script/cxx/standarderror.h"
-
-class HxStr;
 
 namespace Py {
 
@@ -11,7 +10,8 @@ namespace Py {
  * Exception for a binding rule broken at run time, mirroring Python's RuntimeError.
  *
  * `Q22Py12RuntimeError` in the RTTI descriptor at `0x008ef078`, with Py::StandardError at offset 0
- * as its one base. Its accessor is at `0x005abc48`.
+ * as its one base. Its accessor is at `0x004c6aa8`, and the emission at `0x005abc48` is an
+ * unreferenced copy.
  *
  * Py::MethodTable::add() at `0x005a5bc8` throws it with `Too late to add a module method!`, and
  * the string `Object::decrement_reference_count error.` at `0x00821bb8` belongs to the second
