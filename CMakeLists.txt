@@ -33,9 +33,9 @@ if(BUILD_DOCS OR BUILD_DOCS_ONLY)
   # Every reconstructed routine records the address it was recovered from with this tag.
   set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
   set(DOXYGEN_ALIASES [[ghidraAddress="\par Ghidra address:^^"]])
-  set(DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/build/*" "*/src/python/*")
+  set(DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/build/*")
   find_package(Doxygen REQUIRED COMPONENTS dot)
-  doxygen_add_docs(docs README.md PROGRESS.md include src ALL)
+  doxygen_add_docs(docs README.md PROGRESS.md include ALL)
   if(INSTALL_DOCS)
     install(
       DIRECTORY "${CMAKE_BINARY_DIR}/html"
