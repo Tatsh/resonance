@@ -78,8 +78,14 @@ public:
      */
     PlayMap();
 
-    /** @ghidraAddress 0x00127158 */
-    virtual ~PlayMap();
+    /**
+     * Inline. PlayMapLinear's destructor expands it, and the address is the out-of-line copy the
+     * unit emits for the table.
+     *
+     * @ghidraAddress 0x00127158
+     */
+    virtual ~PlayMap() {
+    }
 
     /**
      * Slot 2. Appends one step, its distance from the previous step, and a label.

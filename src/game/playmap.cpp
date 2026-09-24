@@ -31,10 +31,6 @@ PlayMap::PlayMap() : mBarCount(0), mUnknown28(0) {
     mSectionLengths.reserve(kInitialCapacity);
 }
 
-// 0x00127158
-PlayMap::~PlayMap() {
-}
-
 // 0x001268b0
 void PlayMap::Slot2(int nValue, HxStr strLabel) {
     mSectionLengths.push_back(nValue - mSteps.back()); // Unguarded on the first call.
