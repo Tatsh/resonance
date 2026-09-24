@@ -211,7 +211,21 @@ inline void FreqAppearanceDetail::addLoadedPart(FreqPart *pPart) {
     mScaleStepX = static_cast<int>(mScaleX * kPlacedScaleFactor);
     mScaleStepZ = static_cast<int>(mScaleZ * kPlacedScaleFactor);
     mParts.push_back(pPart);
-    resetCursor();
+
+    // The binary expands the reset here rather than calling resetCursor().
+    ensureCursorMesh();
+    mCursorMesh->SetShowing(0);
+    PlaceMesh(mCursorMesh, kCursorOrigin);
+    mCursorMesh->SetMaterial(nullptr);
+    mScaleStepZ = kUnsetScaleStep;
+    mScaleZ = kUnsetScale;
+    mSelected = nullptr;
+    mTemplate = nullptr;
+    mCursorX = 0;
+    mCursorZ = 0;
+    mScaleX = kUnsetScale;
+    mScaleStepX = kUnsetScaleStep;
+    mCursorMirrored = 0;
 }
 
 // 0x0024c398
