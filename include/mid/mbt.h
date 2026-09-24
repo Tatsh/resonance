@@ -45,11 +45,16 @@ namespace Mid {
 /**
  * Song position in MIDI ticks, printed as measure, beat, and tick.
  *
- * The object is four bytes and the class is not polymorphic, so it emits no vtable. `Q23Mid3MBT`
- * is the one descriptor in the image whose demangled form matches what Print() produces, and the
- * accessor at `0x003d63f8` builds it through TypeInfo__ConstructBuiltin with no base list, which
- * is the shape a non-polymorphic type takes. Only that accessor refers to the descriptor, so the
- * match between the descriptor and the three routines below is inferred rather than proven.
+ * The object is four bytes and the class is not polymorphic, so it emits no vtable and no RTTI. The
+ * image never records this type's name, and the name Mid::MBT is retained by convention only.
+ *
+ * The image's `Q23Mid3MBT` descriptor belongs to a different, unused class. That class is 0x10
+ * bytes, with a one-based measure at `+0x0`, a one-based beat at `+0x4`, the tick within the beat
+ * at `+0x8`, and a vptr at `+0xc`. Its vtable at `0x008110e8` has the accessor at `0x003d63f8` in
+ * slot 0 and a Print() at `0x003d67f0` in slot 1 that writes `[measure:beat:tick]`. Its inline
+ * constructor at `0x003d6798` splits a tick count by beats per measure and ticks per beat. No code
+ * refers to the constructor, the Print(), or the vtable. The tree cannot declare both classes under
+ * the one name Mid::MBT, so only this four-byte word is reconstructed.
  *
  * Print() fixes the units. It divides the word by 1920 for a measure, divides the remainder by 480
  * for a beat, and prints the second remainder as the tick, then appends `tk`. Measure and beat are

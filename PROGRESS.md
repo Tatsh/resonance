@@ -372,6 +372,12 @@ Four worklist lines are titled for the wrong class. 0x00372c10, 0x00373808, 0x00
 0x00374b58 are titled for `MetRemixDelScreen` but sit inside `MetSaveRemix`'s address region, and
 `MetRemixDelScreen`'s own code runs from 0x00339000 to 0x00344000.
 
+Two types compete for the name `Mid::MBT`. The image's `Q23Mid3MBT` descriptor belongs to an
+unused 0x10-byte polymorphic class (measure, beat, tick, and a vptr at +0xc, with its vtable at
+0x008110e8, constructor at 0x003d6798, and Print() at 0x003d67f0). The four-byte position word
+the messages carry emits no RTTI, so its true name is not in the image. The tree retains the name
+for the four-byte word by convention, and a rename waits for evidence of its real name.
+
 ## Duplicated routines
 
 An address count is not a function count in this image. Fingerprinting every routine by its opcode
