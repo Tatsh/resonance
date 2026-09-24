@@ -40,15 +40,18 @@ body, with the current figures and how they are measured in [PROGRESS.md](PROGRE
 | Start-up and the application shell | Recovered                                    |
 | Memory, archives, and file loading | Recovered                                    |
 | Renderer object model and streams  | Recovered                                    |
-| Meshes, materials, and textures    | Substantially recovered                      |
-| Art and canvas library             | Substantially recovered                      |
-| Game messages and packets          | Substantially recovered                      |
-| Memory card                        | Substantially recovered                      |
-| Front end screens and the metagame | Partially recovered                          |
-| Gameplay                           | Partially recovered                          |
-| Audio and the synthesiser          | Partially recovered                          |
+| Meshes, materials, and textures    | Recovered                                    |
+| Art and canvas library             | Recovered apart from two routines            |
+| Game messages and packets          | Recovered                                    |
+| Memory card                        | Recovered                                    |
+| Front end screens and the metagame | Recovered                                    |
+| Gameplay                           | Recovered                                    |
+| Audio and the synthesiser          | Recovered                                    |
 | Embedded Python interpreter        | Characterised, with its differences recorded |
 | Networking                         | Packet records only                          |
+
+Recovered means every routine the game's own code defines has a body or a recorded reason for
+having none. Cross-reviews against the disassembly continue to correct bodies in every area.
 
 ## Layout
 
@@ -72,9 +75,10 @@ conventions the source follows.
 
 ## Building
 
-There is no build yet. The original was compiled for the PlayStation 2 with Sony's toolchain, which
-this tree cannot reproduce, and several subsystems are still missing. The source is checked for
-syntax as it is written.
+CI compiles every buildable source with the Emotion Engine cross compiler in the ps2dev container
+and archives one static library per subsystem. Nothing is linked yet. The original was compiled
+with Sony's toolchain, which this tree cannot reproduce, and the embedded interpreter and its C++
+binding are not built.
 
 ## Provenance and licence
 

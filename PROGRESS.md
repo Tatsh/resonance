@@ -16,47 +16,49 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 
 | Measure                   | Count  |
 | ------------------------- | ------ |
-| Functions in the program  | 15,643 |
+| Functions in the program  | 15,647 |
 | Excluded by rule          | 8,765  |
-| Reconstructable           | 6,878  |
+| Reconstructable           | 6,882  |
 | Declared or defined       | 6,346  |
-| Share declared or defined | 92.27% |
-| Defined, with a body      | 6,025  |
-| Share implemented         | 87.60% |
-| Remaining, with a name    | 532    |
+| Share declared or defined | 92.21% |
+| Defined, with a body      | 6,022  |
+| Share implemented         | 87.50% |
+| Remaining, with a name    | 536    |
 | Remaining, unidentified   | 0      |
 
 Two shares are recorded because they measure different things and the larger one was quoted alone
 for most of this project's history. The audit counts an address as accounted once any file in the
 tree annotates it, and a header declaration carries the same annotation a body does. Of the 6,346
-accounted, 6,025 have a body the scanner counts. Of the other 321, 220 are reconstructable routines
+accounted, 6,022 have a body the scanner counts. Of the other 324, 223 are reconstructable routines
 declared with their address, their signature, and their evidence recorded but no counted body, and
 101 are annotated library and vendored routines whose titles fall outside the body count.
 
-Implementation is the figure the project's goal is stated against, so treat 87.60% as the answer to
-"how much is reconstructed" and 92.27% as the answer to "how much is accounted for".
+Implementation is the figure the project's goal is stated against, so treat 87.50% as the answer to
+"how much is reconstructed" and 92.21% as the answer to "how much is accounted for".
 
-The table measures the committed tree at `c135774`. Work written and checked but not yet committed
-is not included.
+The table measures a clean export of the commit `064615f`. Work written but not yet committed is not
+included.
 
-At this measurement every routine the scanner does not count is accounted for by a rule rather than
-owed. Of the 220 declared routines without a counted body, the bodies of 204 are inline in headers,
-seven are template instances, four have a split signature, and five are defaulted or vendored glue.
-Of the 532 routines with no annotation, 254 are implicit special members, 102 are interpreter
-bindings and their wrappers, 90 are static initialiser and exit stubs, 57 are ezmpeg sample
-routines, three are interrupt-context SDK entry points, and the remaining 26 are library routines
-titled by their upstream names (17) or recorded exceptions (9), each listed in the known gaps below.
-No routine the program's own code defines is left without a written or recorded body.
+Of the 223 declared routines without a counted body, the bodies of 207 are inline in headers, seven
+are template instances, four have a split signature, and five are defaulted or vendored glue. Of the
+536 routines with no annotation, 255 are implicit special members, 102 are interpreter bindings and
+their wrappers, 90 are static initialiser and exit stubs, 57 are ezmpeg sample routines, three are
+interrupt-context SDK entry points, 18 are library routines titled by their upstream names, nine are
+recorded exceptions listed in the known gaps below, and two are owed. The canvas
+factory `ACanvas::CreateForSubBitmap()` at `0x005e8e38` and the sub-rectangle constructor of
+`ABitmap` at `0x00558dd8` it calls were found in code the disassembler had not defined, and neither
+has a body in the tree yet.
 
 Since the measurement at `5e32890` (87.52%), the work has been faithfulness review rather than new
 bodies. Cross-reviews that traced every argument to its producer and placed every destructor
 corrected bodies across every reviewed subsystem (a remix deleted by the wrong key, a feedback
-sprite drawn sixteen times too deep, signed and unsigned comparisons, message lifetimes, and loops
-that reload a vector's end).
-Tree-owned values the image holds in eight bytes became `long long` after the CI toolchain was
-measured to have a four-byte `long`. Six forwarders and template instances gained bodies or markers,
-three routines the tree treated as copies were shown to be distinct functions, and two headers that
-could not compile on their own were fixed.
+sprite drawn sixteen times too deep, a heap split that left a free node unlinked, signed and
+unsigned comparisons, message lifetimes, and loops that reload a vector's end). Tree-owned values the
+image holds in eight bytes became `long long` after the CI toolchain was measured to have a
+four-byte `long`. Six forwarders and template instances gained bodies or markers, and three routines
+the tree treated as copies were shown to be distinct functions. Three bodies moved into headers as
+inline definitions where another unit expands them, which lowered the counted bodies by three, and a
+scan for vtable stores in undefined code added four functions to the program.
 
 Since the measurement at `a40a970` (85.21%), bodies rose by 169 over 48 commits. Every remaining
 declared routine gained a body or a classification, the four global allocators became the
@@ -132,14 +134,16 @@ tools are unchanged:
   no exclusion pattern matches.
 - The `hx.*` script bindings (56 routines in `0x00150000..0x0016ffff`, the `HxScript__X` bodies
   and their `HxScript__XEntry` wrappers, including `ActivateAllAccessMode`) are titled and plated
-  but have no source until the tree has a `Python.h` of the era, and no exclusion pattern matches
-  their titles. Every game routine they call directly has a body.
+  but have no source yet, and no exclusion pattern matches their titles. Every game routine they
+  call directly has a body.
 - Library routines titled by their upstream names rather than a family prefix (`getenv`,
-  `_findenv_r`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and the
-  `type_info` and `exception` members) are toolchain or SDK code that no exclusion pattern matches.
+  `_findenv_r`, `toupper`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and
+  the `type_info` and `exception` members) are toolchain or SDK code that no exclusion pattern
+  matches.
 - Recorded exceptions with no separate body are the `TunnelEvent::DrawFiltered` copy, three
   unreferenced return-zero stubs, the unreferenced send copies in the `Delayer`, `MidiDisabler`, and
-  `Renderer` units, and one unidentified three-integer printer at `0x003d67f0`.
+  `Renderer` units, and the `Print()` at `0x003d67f0` of the unused class the `Q23Mid3MBT`
+  descriptor belongs to.
 
 Before that, from the measurement at `72f44cb` (31.68%), bodies rose by 478 over 42 commits and the
 reconstructable figure fell by 85. The template library category grew by 99, the duplicate category
@@ -161,51 +165,19 @@ originals are now titled `UnidentifiedPrimary<address>` through `.wiswa-ci/freq/
 (every rename read back, the log beside it), which returns them to the reconstructable figure and to
 the unwritten work. With those 195 restored, `de1134b` stood at 53.44% and 30.83%.
 
-One known undercount remains in the scanner. A routine whose definition clang-format breaks after
-`inline bool` on its own line is not recognised as a body marker, because the scanner requires a
-parenthesis or a brace on the first line after the marker. `CheckPalEqual` at `0x0059a908` is the
-known instance; it has a body and counts as unaccounted.
-
-The implemented count above was taken from a fresh function list. `implemented_report.py` reads
-`functions-latest.txt`, a stored list, and so reports a different denominator (9,257 on the same
-day) until that list is refreshed. The body count intersects the body markers under `src` with the
-function list after the default exclusions, through `.wiswa-ci/freq/body_share.py`. That set is 78
-routines smaller than the audit's reconstructable figure, because the audit also bounds addresses.
-The implemented share is exact to within those 78.
+The body count intersects the body markers under `src` with the function list after the default
+exclusions, through `.wiswa-ci/freq/body_share.py`. Its set is 101 routines smaller than the
+audit's reconstructable figure (6,781 against 6,882). The implemented share divides by the audit's
+figure and therefore understates by at most those 101.
 
 A pass that writes a header moves the larger share and not the smaller one, and a pass that writes
 bodies for an already-declared class moves the smaller share alone.
 
-Do not measure the implemented share by grepping for address literals. A `.cpp` mentions an
-address in ordinary commentary as well as at a body marker, and that method returned 1,956 where
-the marker scanner returned 1,605, of which 1,573 fell inside the reconstructable set and 32
-belonged to excluded routines.
-
-The identified remainder rises as well as falls, because identifying a routine moves it out of the
-unidentified column before any source accounts for it. A rise there is progress rather than
-regression.
+Do not measure the implemented share by grepping for address literals. An implementation file
+mentions an address in ordinary commentary as well as at a body marker, and that method counts both.
 
 Exclusions are keyed on the name a function has. A routine therefore has to be identified before it
-can be excluded, and the reconstructable figure falls as identification proceeds. That figure is
-still overstated. A large part of the unidentified routines belongs to the platform SDK, the
-compiler runtime, the template library, and the embedded interpreter. None of those is
-reconstructed.
-
-The identified but unwritten routines are the cheapest remaining work, because the analysis behind
-each one is already done and only the source is missing. Two cautions apply to that column. A
-routine's recorded title comes from an earlier pass and is sometimes wrong, and in one band
-seventeen of twenty-one entries were titled for the wrong class entirely. And an entry may already
-exist in the source under its real C++ name, because the column is built from unannotated addresses
-rather than from absent code, which accounted for thirty-six of another band's fifty entries. Both
-are fixed by confirming the owning class from the type-info accessor and by searching the tree
-before writing.
-
-A third caution outranks both. A title can identify a class that does not exist. Five renderer
-class names invented by an earlier pass appear on game code, and no descriptor among the 574 in the
-image bears any of them. Two bands were handed worklists grouped by those names, one of them 40
-entries of 50. The harvest's accessor field records the same invented names, because it ran after
-the pass that applied them. `.wiswa-ci/freq/make_band.py` now refuses a prefix that names no
-descriptor, and rejecting the three prefixes that caused the damage is its regression check.
+can be excluded, and the reconstructable figure falls as identification proceeds.
 
 ### Breakdown of exclusions
 
@@ -213,8 +185,8 @@ descriptor, and rejecting the three prefixes that caused the damage is its regre
 | ------------------------------ | ----- | ---------------------------------------------------------------- |
 | Compiler-generated             | 899   | Type functions, their unfolded per-unit copies, static-init glue |
 | Vendored upstream              | 2,018 | CPython 2.0, identified by diagnostic literal                    |
-| Per-translation-unit duplicate | 1,951 | Bodies proven byte-identical to another routine of the image     |
-| Template library               | 2,876 | Container instantiations                                         |
+| Per-translation-unit duplicate | 1,950 | Bodies proven byte-identical to another routine of the image     |
+| Template library               | 2,877 | Container instantiations                                         |
 | Platform SDK                   | 484   | `sce` entry points and kernel syscalls                           |
 | C++ runtime                    | 214   | Exception, cast, and unwinding support                           |
 | C runtime                      | 323   | String and memory routines, and the floating-point library       |
@@ -247,14 +219,10 @@ both report their skip count so a partial run cannot read as a whole one.
 
 Sources are measured by `.wiswa-ci/freq/syntax_check.sh`, which compiles each one with `-Wall
 -Wextra` against ps2sdk and a small set of stand-ins for the Sony SDK headers ps2sdk lacks. Use that
-script rather than a hand-written compiler line. Two bands reported a clean result from their own
-line, and neither reproduced: one depended on stand-ins that existed only in its own scratchpad, and
-the other was not passing the warning flags over reconstructed code at all.
+script rather than a hand-written compiler line.
 
-The figures read the working tree rather than the commit history, so they lead it. A routine counts
-as accounted the moment its annotation is written to disk, which is before the change is committed
-and often before the agent that wrote it has reported. A commit landing several hundred lines can
-therefore move the share by almost nothing, because the measurement had already seen the file.
+The coverage figures read a clean export of the named commit rather than the working tree. Work in
+progress on disk does not count until it is committed.
 
 The override check is `.wiswa-ci/freq/check_overrides.py` over `freq-src/include`. It reports a
 declared virtual whose name matches a base name only in letter case, and one whose name matches
@@ -263,15 +231,11 @@ diagnostic: both declare a new virtual, the class silently stops overriding, and
 past the entry count the image shows. Pass the directory rather than a file list, because with no
 base header in scope nothing can fail to match and the pass means nothing.
 
-Two changes to what the audit counts are recorded here rather than folded into the figure
-silently. The function list grew by 393 routines, because a vtable slot points at its class's
-virtual function whether or not the disassembler has claimed the bytes, and claiming those raises
-the reconstructable total. And the annotation scanner now recognises the bare comment a file-local
-routine is tied by, not only the Doxygen tag. The tag belongs on a public declaration, so a routine
-with no header declaration cannot carry one, and 165 fully reconstructed routines were invisible to
-the audit for that reason. The scanner requires the comment to sit on its own line with a
-definition following it, which is what separates a routine marker from a comment merely mentioning
-an address.
+The function list includes every routine a vtable slot points at, whether or not the disassembler
+had claimed the bytes. The annotation scanner recognises the bare comment a file-local routine is
+tied by as well as the Doxygen tag, because a routine with no header declaration cannot carry the
+tag. It requires the comment to sit on its own line with a definition following it. That separates
+a routine marker from a comment that mentions an address.
 
 A header is checked on its own, through a translation unit that includes nothing else. That catches
 a break in a header which no implementation file happens to include. The ten sources and the headers
@@ -296,81 +260,36 @@ from the SDK is reconstructed.
 
 ### Complete
 
-| Area                          | Notes                                                                                                                                                                                                          |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Entry point                   | `main` and the loading screen                                                                                                                                                                                  |
-| Asynchronous file layer       | Submission, the drive callback, the request and job records                                                                                                                                                    |
-| Animation base                | `Rnd::Animatable` with all five nested filters                                                                                                                                                                 |
-| Collision base                | `Rnd::Collideable` with its hit and sink types                                                                                                                                                                 |
-| Message and packet family     | 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg` and seven routing intermediates. `ScriptMsg` alone is still partial                                                     |
-| Material, PlayStation 2       | `Rnd::PsMat` in full, including the blend mode table                                                                                                                                                           |
-| Streams                       | File, buffer, memory, and tool streams, plus the nine-class byte stream family over the input and output interfaces                                                                                            |
-| Mesh, PlayStation 2           | `Sync` and all four draw paths, software and VU1                                                                                                                                                               |
-| GIF packet buffer             | Reservation, tag closing, and the scratchpad double buffer                                                                                                                                                     |
-| Scheduler command base        | `Sch::Command`, `Sch::TimedCommand`, and `Sch::Tick`. The command factory is dead in the shipped build                                                                                                         |
-| Transform and animation base  | `Rnd::TransAnim` with its keyframe channels, over the transform and animatable bases                                                                                                                           |
-| View, camera, and environment | `Rnd::Blur`, `Rnd::View` with its five class keys, and the camera and environment serialisation                                                                                                                |
-| Mesh animation and instancing | `Rnd::MeshAnim` with its three keyframe channels, `Rnd::MultiMesh`, and `Rnd::PsMultiMesh`                                                                                                                     |
-| Art library                   | Every canvas class, the polygon fills, the stretch and clip routines, `APalette`, `ARleReader`, and the BMP, TGA, and GIF readers. Only compiler-generated emissions remain in its ranges                      |
-| Texture, PlayStation 2        | `Rnd::PsTex` in full, including surface restore, the upload and bind path, and render-target binding                                                                                                           |
-| Particles                     | `Rnd::ParticleSys` in full, including the simulation, the text dump, and revisions 0 to 6 of its file format                                                                                                   |
-| Cutscene player               | `cutscene.c`, the game's C unit around Sony's MPEG sample. The sample itself is identified and titled as SDK code                                                                                              |
-| Debug console                 | The development console bring-up in `devconsole.cpp`                                                                                                                                                           |
-| Exception runtime             | Identified rather than reconstructed. The scheme is DWARF, and the unwinding driver, the frame-state builder, the handler-chain accessor, the terminate path, and the `dynamic_cast` entry point are all named |
-
-### Partial
-
-| Area                   | What remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Graphics device        | Every `GfxDevice` routine is written, with the VU1 setup, lighting, and clipping routines of the draw path, except the vertical-blank handler, whose body is MIPS assembly the host build cannot assemble                                                                                                                                                                                                                                                                                                                                |
-| Camera and environment | `PsCam` and `PsEnviron` draw paths are written. The light selection for vertex lighting remains                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Tunnel                 | `Rnd::Tunnel` with its seek records, events, mesh chains, geometry, and file format, and `Rnd::Generator`, are written apart from one uncalled routine. The duration-gem trails and the first tunnel effect classes are written; `AppTunnel` itself and the remaining effect classes remain                                                                                                                                                                                                                                              |
-| Gameplay display       | `Renderer`, `Overlay` with its constructor and all 23 message handlers, the HUD panel and per-track display with every component, `TnlArena`, and the screen animations are written. Two small HUD helpers remain unassigned                                                                                                                                                                                                                                                                                                             |
-| Gameplay world         | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `PhraseMgr`, `TrackData`, `Catcher`, `AutoRiffer`, `NotePlayer`, the power-bar managers, the R250 generator, and the pitcher classes are written. The message-building bodies these classes declare, the riff pickers, and the neutralizer remain                                                                                                                                                                                                                                             |
-| Messages and packets   | Every factory, printer, serializer, and stack constructor of the join, level, status, and gameplay packets and messages is written, with the Standard MIDI File reader and its chunk reader. The metagame world, song lists, and album cache remain                                                                                                                                                                                                                                                                                      |
-| Sound                  | `Synth` and `Ps2HardSynth` declared with the interface mapped slot by slot, and `midi_main` has its whole bank path: the load entry point, both transfer starters, both transfer classes, the claim table, the command dispatcher, the driver submit, the core and voice report, and the SPU2 bring-up. There is no voice table, because the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable, the reverb configuration waits on the data-array query at `0x00509110`, and 27 routines remain |
-
-### Not started
-
-Networking beyond the packet records, and the game modes.
+| Area                          | Notes                                                                                                                                                                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry point                   | `main` and the loading screen                                                                                                                                                                                                               |
+| Asynchronous file layer       | Submission, the drive callback, the request and job records                                                                                                                                                                                 |
+| Animation base                | `Rnd::Animatable` with all five nested filters                                                                                                                                                                                              |
+| Collision base                | `Rnd::Collideable` with its hit and sink types                                                                                                                                                                                              |
+| Message and packet family     | 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg` and seven routing intermediates                                                                                                                      |
+| Material, PlayStation 2       | `Rnd::PsMat` in full, including the blend mode table                                                                                                                                                                                        |
+| Streams                       | File, buffer, memory, and tool streams, plus the nine-class byte stream family over the input and output interfaces                                                                                                                         |
+| Mesh, PlayStation 2           | `Sync` and all four draw paths, software and VU1                                                                                                                                                                                            |
+| GIF packet buffer             | Reservation, tag closing, and the scratchpad double buffer                                                                                                                                                                                  |
+| Scheduler command base        | `Sch::Command`, `Sch::TimedCommand`, and `Sch::Tick`. The command factory is dead in the shipped build                                                                                                                                      |
+| Transform and animation base  | `Rnd::TransAnim` with its keyframe channels, over the transform and animatable bases                                                                                                                                                        |
+| View, camera, and environment | `Rnd::Blur`, `Rnd::View` with its five class keys, and the camera and environment serialisation                                                                                                                                             |
+| Mesh animation and instancing | `Rnd::MeshAnim` with its three keyframe channels, `Rnd::MultiMesh`, and `Rnd::PsMultiMesh`                                                                                                                                                  |
+| Art library                   | Every canvas class, the polygon fills, the stretch and clip routines, `APalette`, `ARleReader`, and the BMP, TGA, and GIF readers, apart from the two owed routines above                                                                   |
+| Texture, PlayStation 2        | `Rnd::PsTex` in full, including surface restore, the upload and bind path, and render-target binding                                                                                                                                        |
+| Particles                     | `Rnd::ParticleSys` in full, including the simulation, the text dump, and revisions 0 to 6 of its file format                                                                                                                                |
+| Cutscene player               | `cutscene.c`, the game's C unit around Sony's MPEG sample. The sample itself is identified and titled as SDK code                                                                                                                           |
+| Debug console                 | The development console bring-up in `devconsole.cpp`                                                                                                                                                                                        |
+| Exception runtime             | Identified rather than reconstructed. The scheme is DWARF, and the unwinding driver, the frame-state builder, the handler-chain accessor, the terminate path, and the `dynamic_cast` entry point are all named                              |
+| Graphics device               | Every `GfxDevice` routine, with the VU1 setup, lighting, and clipping routines of the draw path. The vertical-blank handler's body is MIPS assembly that only the Emotion Engine compiler assembles                                         |
+| Camera and environment        | `PsCam` and `PsEnviron` draw paths                                                                                                                                                                                                          |
+| Tunnel                        | `Rnd::Tunnel` with its seek records, events, mesh chains, geometry, and file format, `Rnd::Generator`, the duration-gem trails, `AppTunnel`, and the tunnel effect classes                                                                  |
+| Gameplay display              | `Renderer`, `Overlay` with its constructor and all its message handlers, the HUD panel and per-track display with every component, `TnlArena`, and the screen animations                                                                    |
+| Gameplay world                | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `PhraseMgr`, `TrackData`, `Catcher`, `AutoRiffer`, `NotePlayer`, the power-bar managers, the R250 generator, and the pitcher classes                                                             |
+| Messages and packets          | Every factory, printer, serializer, and stack constructor of the join, level, status, and gameplay packets and messages, with the Standard MIDI File reader and its chunk reader                                                            |
+| Sound                         | `Synth` and `Ps2HardSynth` with the interface mapped slot by slot, and the whole bank path of `midi_main`. There is no voice table, because the module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable |
 
 ### Parked questions
-
-Fifteen bands were paused mid-round, and these decisions were open at that point. Each is recorded
-with what the band established, so none has to be re-derived.
-
-`Renderer` has no placement evidence. Both levers that settled placement elsewhere came back nil
-for the region 0x410000 to 0x43ffff: not one of the 30 anonymous-namespace markers falls inside it,
-and every string recovered from the assert arguments there is the template library rather than a
-game path. Sibling convention puts it in `app/` beside `RendererBase`, and that is a convention
-argument rather than evidence, so no file was created.
-
-Two addresses are the highest-yield pair in that same region, because each heads an unbroken run of
-unidentified routines as well as blocking `Overlay`'s destructor: 0x0042aa18 heads a run of 14 and
-0x0041ac18 heads a run of 12.
-
-`Phrase` has no header anywhere in the tree, and `PhrasePacket` is otherwise fully recovered and
-blocked only on that. `Phrase` has its own save, load, and print, so it belongs to whoever owns
-gameplay rather than to the message band that needs it.
-
-The class stored at +0x40 by `NotePitcher`, `SingleCatcher`, `MultiCatcher`, `Scratcher`, and
-`Voxer` is unidentified, and so is the time-conversion object at its own +0x1c. Identifying both
-makes bodies writable across all five classes at once. The entry points are 0x00127548,
-0x00127628, and 0x00105de8.
-
-`PowerupPlacer` and `JamPowerupPlacer` were declared by the message band because three of another
-band's bodies were blocked on them, and neither is a message class. A sibling `GamePowerupPlacer`
-sits beside them at 0x007e4ca0 with no header, and `GrooveWorld` is the likely owner.
-
-`include/app/rendererbase.h` needs an owner. The additive change is well evidenced: the table at
-0x007d2d20 runs eleven entries against `MsgSink`'s four, so slots 4 through 10 are `RendererBase`'s
-own seven virtuals and the class is abstract. Slots 3, 7, and 8 all hold 0x005381a8, the pure
-virtual stub. The placeholder spelling is preferred over verbs taken from `MetRenderer`, because
-naming an interface from one subclass is the same error as reading a signature off a call site.
-
-Four worklist lines are titled for the wrong class. 0x00372c10, 0x00373808, 0x00374208, and
-0x00374b58 are titled for `MetRemixDelScreen` but sit inside `MetSaveRemix`'s address region, and
-`MetRemixDelScreen`'s own code runs from 0x00339000 to 0x00344000.
 
 Two types compete for the name `Mid::MBT`. The image's `Q23Mid3MBT` descriptor belongs to an
 unused 0x10-byte polymorphic class (measure, beat, tick, and a vptr at +0xc, with its vtable at
@@ -412,8 +331,8 @@ are different functions. Byte comparison against the image is the only test that
 The same test then applied to clusters whose every member was unidentified. 382 such clusters hold
 2,268 addresses, and marking the surplus removed 1,843 of them from the denominator, with a further
 142 removed where an unidentified body matched one already titled. Three safeguards make that
-honest rather than convenient. The lowest address of each cluster is deliberately untouched, because
-the one definition it stands for is still owed and still unidentified. An address the source already
+honest rather than convenient. The lowest address of each cluster was deliberately untouched,
+because the one definition it stood for was still owed. An address the source already
 annotates is never retitled and always wins as its cluster's representative, which caught one case
 where the annotated routine would otherwise have been titled a copy of its own duplicate. And 25
 clusters were held back because their bodies are too short for identity to prove duplication, the
@@ -521,13 +440,8 @@ Two lessons sit behind that. A pass reporting nothing looks exactly like a subsy
 left to find, so a negative result needs a control before it is believed. And a control has to
 exercise the part that can be wrong, not merely the part that is easy to check.
 
-Four clusters of 148 copies each remain unidentified, at `0x00107d28`, `0x00107eb8`, `0x001080a8`,
-and `0x00108738`. They are members of one map keyed by object name: the comparator is
-`HxStr::SortsBefore`, and `Rnd::Object::SetName()` and its destructor are the callers. The specific
-algorithm of each is not pinned, and they are left unidentified rather than given a name that
-claims more than has been established. One caution for a later reader: the node colour of this
-container is an `int` rather than a byte, and the absence of byte operations is therefore not
-evidence against a tree.
+The node colour of the template library's red-black tree is an `int` rather than a byte, and the
+absence of byte operations is therefore not evidence against a tree.
 
 ## Conventions
 
@@ -667,8 +581,7 @@ and pointed at unrelated memory throughout.
 Two destination meanings in one routine mean the reading is incomplete, not that the routine is odd.
 `ACanvasLin4`'s row writer packs two source bytes into one destination byte in its bulk loop and
 stores a literal 0 or 1 as a whole byte in its per-pixel paths, which was confirmed by decoding the
-raw instruction words rather than by trusting a listing. The body is recorded as unresolved and its
-three callers are written, because their signatures are settled independently of it.
+raw instruction words rather than by trusting a listing.
 
 A routine can be orphaned rather than merely unreferenced by a table. Eight members of the canvas
 remap and blend families fill no vtable slot and the program lists no caller and no data reference

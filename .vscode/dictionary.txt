@@ -958,6 +958,7 @@ tnlutil
 toggleghostmsg
 toolstream
 totbytes
+toupper
 trackdata
 trackselectmsg
 trackselector
