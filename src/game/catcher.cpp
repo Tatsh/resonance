@@ -81,9 +81,11 @@ inline Mid::MBT MakePosition(int nTick) {
 /**
  * Scheduler command that runs Catcher::ProcessGemCommand() after a gem.
  *
- * `Q285_GLOBAL_$N$__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick10PostGemCmd`
- * in the RTTI, with Sch::Command as its one base and its vtable at `0x007e0998`.
- * Catcher::SchedulePostGemCommand() expands the constructor into its 0x14-byte allocation.
+ * The RTTI name string at `0x007e0fc8` places PostGemCmd in the anonymous namespace that g++ 2.9x
+ * qualifies by the signature of
+ * `Catcher(PhraseMgr *, Quantizer *, const TrackData *, Sch::TickClock *, int, Sch::Tick)`. Its
+ * one base is Sch::Command, and its vtable is at `0x007e0998`. Catcher::SchedulePostGemCommand()
+ * expands the constructor into its 0x14-byte allocation.
  *
  * The destructor at `0x001b1678` is implicitly declared.
  */
@@ -120,9 +122,11 @@ int PostGemCmd::sCmdID;
 /**
  * Scheduler command that runs Catcher::SimulateRemoteGem() at a gem.
  *
- * `Q285_GLOBAL_$N$__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick6GemCmd`
- * in the RTTI, with Sch::Command as its one base and its vtable at `0x007e0950`.
- * Catcher::ScheduleGemCommand() expands the constructor into its 0x14-byte allocation.
+ * The RTTI name string at `0x007e1030` places GemCmd in the anonymous namespace that g++ 2.9x
+ * qualifies by the signature of
+ * `Catcher(PhraseMgr *, Quantizer *, const TrackData *, Sch::TickClock *, int, Sch::Tick)`. Its
+ * one base is Sch::Command, and its vtable is at `0x007e0950`. Catcher::ScheduleGemCommand()
+ * expands the constructor into its 0x14-byte allocation.
  *
  * The destructor at `0x001b1750` is implicitly declared.
  */
