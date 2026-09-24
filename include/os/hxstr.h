@@ -444,6 +444,23 @@ inline HxStr operator+(const HxStr &left, const char *pszRight) {
 }
 
 /**
+ * Concatenate a string and one character.
+ *
+ * Recovered on the same evidence as the overloads above, from the triple at `0x0043a8b4` through
+ * `0x0043a8cc` in the TnlPointer constructor, whose middle call is the character operator+=() at
+ * `0x004b7d28`.
+ *
+ * @param left The string the result starts with.
+ * @param ch The character appended to it.
+ * @return The concatenation.
+ */
+inline HxStr operator+(const HxStr &left, char ch) {
+    HxStr result(left);
+    result += ch;
+    return result;
+}
+
+/**
  * Substitute an empty HxStr passes in place of a null buffer.
  *
  * A string whose mStr is null is the empty representation, and a caller handing that string to an
