@@ -10,8 +10,8 @@
  */
 class TestRegistry {
 public:
-    /** A self-test. It takes no arguments and reports through the log. */
-    typedef void (*TestFunc)();
+    /** A self-test. It takes no arguments, reports through the log, and reports pass or fail. */
+    typedef int (*TestFunc)();
 
     /** One registered test. */
     struct Entry {

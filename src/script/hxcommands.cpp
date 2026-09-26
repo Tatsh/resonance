@@ -1,3 +1,6 @@
+#include <cstring>
+#include <sstream>
+
 #include "app/application.h"
 #include "app/attachment.h"
 #include "app/globals.h"
@@ -23,10 +26,12 @@
 #include "sch/tickclock.h"
 #include "script/cxx/config.h"
 #include "script/cxx/int.h"
+#include "script/cxx/nameerror.h"
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/scriptcmd.h"
+#include "script/testregistry.h"
 #include "synth/midi_main.h"
 #include "synth/ps2hardsynth.h"
 
@@ -465,6 +470,43 @@ PyObject *PyInvokeMidi(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
         Py::Object result = ScriptMidi(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Run a named self-test.
+//
+// Reports `ok` for a passing test and `not ok` otherwise. An unknown name throws NameError
+// over the valid test list.
+// 0x0015f270
+Py::Object ScriptTest(const Py::Tuple &args) {
+    if (args.length() <= 0) {
+        throw Py::TypeError(HxStr(FormatString("requires 1 arg (name of test)")));
+    }
+    HxStr name = args.getItem(0).as_string();
+    for (int i = 0; i < TestRegistry::sTestCount; ++i) {
+        if (std::strcmp(TestRegistry::sTests[i].mName, name.mStr) == 0) {
+            const int nPassed = TestRegistry::sTests[i].mFunc();
+            return Py::String(HxStr(nPassed != 0 ? "ok" : "not ok"));
+        }
+    }
+    std::ostringstream report;
+    report << "wrong arg: test \"" << name << "\" does not exist\n";
+    report << "valid tests are:";
+    for (int i = 0; i < TestRegistry::sTestCount; ++i) {
+        report << "\n  " << TestRegistry::sTests[i].mName;
+    }
+    throw Py::NameError(HxStr(report.str().c_str()));
+}
+
+// Run ScriptTest() on the interpreter's argument tuple.
+// 0x0015fa20
+PyObject *PyInvokeTest(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Py::Object result = ScriptTest(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;

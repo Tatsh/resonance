@@ -191,13 +191,14 @@ public:
     static int SelfTest();
 
     /**
-     * Run SelfTest() in the shape TestRegistry::TestFunc requires, discarding its result.
+     * Run SelfTest() in the shape TestRegistry::TestFunc requires.
      *
-     * The unit's static initialiser registers it.
+     * The unit's static initialiser registers it. The integer result reaches the `hx.test`
+     * command through the return register, which decides its `ok` report.
      *
      * @ghidraAddress 0x0012b110
      */
-    static void RunSelfTest();
+    static int RunSelfTest();
 
 protected:
     /** The number of partner tables in mUnknown68. */

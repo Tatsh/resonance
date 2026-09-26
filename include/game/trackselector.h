@@ -107,13 +107,14 @@ public:
     static int SelfTest();
 
     /**
-     * Run SelfTest() in the shape TestRegistry::TestFunc requires, discarding its result.
+     * Run SelfTest() in the shape TestRegistry::TestFunc requires.
      *
-     * The unit's static initialiser registers it.
+     * The unit's static initialiser registers it. The integer result reaches the `hx.test`
+     * command through the return register, which decides its `ok` report.
      *
      * @ghidraAddress 0x0013f8e8
      */
-    static void RunSelfTest();
+    static int RunSelfTest();
 
 private:
     // Close the gap one player occupies in a channel's column by shifting every slot above it

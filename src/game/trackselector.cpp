@@ -245,8 +245,8 @@ int TrackSelector::SelfTest() {
 }
 
 // 0x0013f8e8
-void TrackSelector::RunSelfTest() {
-    SelfTest();
+int TrackSelector::RunSelfTest() {
+    return SelfTest();
 }
 
 // 0x0013f020

@@ -167,8 +167,8 @@ int PlayMapLinear::SelfTest() {
 }
 
 // 0x0012b110
-void PlayMapLinear::RunSelfTest() {
-    SelfTest();
+int PlayMapLinear::RunSelfTest() {
+    return SelfTest();
 }
 
 // 0x0012a4d8
