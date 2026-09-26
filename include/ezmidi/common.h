@@ -20,6 +20,15 @@
 int HardSynthLoadBD(int nSpuAddr, const void *pSource, int nSize);
 
 /**
+ * Update every playing note and clear the recompute mask.
+ *
+ * EZMIDI `0x5c54`.
+ *
+ * @return Zero.
+ */
+int HardSynthUpdate(void);
+
+/**
  * Copy memory from the IOP to the SPU, waiting for the move.
  *
  * EZMIDI `0x8c8`.
