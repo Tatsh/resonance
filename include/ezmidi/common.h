@@ -90,6 +90,103 @@ void HardSynthAllNotesOff(int nChannel, int nReset);
  */
 unsigned char *HandleMidiMessage(unsigned char *pMsg);
 
+/** RPC reply word. EZMIDI `0x6e70`. Inferred. */
+extern int gRpcReply;
+
+/** Unknown command message. EZMIDI `0x6c10`. Inferred. */
+extern const char gRpcError[];
+
+/**
+ * Initialise the synthesiser.
+ *
+ * EZMIDI `0x6800`.
+ *
+ * @return The init result. Inferred.
+ */
+int HardSynthInit(void);
+
+/**
+ * Attach bank headers to bank data.
+ *
+ * EZMIDI `0x579c`.
+ *
+ * @param nBank Bank index. Inferred.
+ * @param nHd Header handle. Inferred.
+ * @param nBd0 Data handle. Inferred.
+ * @param nBd1 Data handle. Inferred.
+ * @return The attach result. Inferred.
+ */
+int HardSynthAttachHDtoBD(int nBank, int nHd, int nBd0, int nBd1);
+
+/**
+ * Configure the synthesiser.
+ *
+ * EZMIDI `0x66f4`.
+ *
+ * @param nValue Configuration value. Inferred.
+ */
+void HardSynthConfig(int nValue);
+
+/**
+ * Pause the synthesiser.
+ *
+ * EZMIDI `0x6390`.
+ */
+void HardSynthPause(void);
+
+/**
+ * Resume the synthesiser.
+ *
+ * EZMIDI `0x64e0`.
+ */
+void HardSynthResume(void);
+
+/**
+ * Set the remix mode.
+ *
+ * EZMIDI `0x6660`.
+ *
+ * @param nMode Remix mode. Inferred.
+ */
+void HardSynthSetRemix(int nMode);
+
+/**
+ * Set the mono mode.
+ *
+ * EZMIDI `0x66a4`.
+ *
+ * @param nMode Mono mode. Inferred.
+ */
+void HardSynthSetMono(int nMode);
+
+/**
+ * Report synthesiser information.
+ *
+ * EZMIDI `0x6960`.
+ *
+ * @param nValue Information selector. Inferred.
+ */
+void HardSynthInfo(int nValue);
+
+/**
+ * Invalidate a bank header.
+ *
+ * EZMIDI `0x5a28`.
+ *
+ * @param nValue Header selector. Inferred.
+ */
+void HardSynthInvalidateHd(int nValue);
+
+/**
+ * Invalidate a bank.
+ *
+ * EZMIDI `0x586c`.
+ *
+ * @param nValue Bank selector. Inferred.
+ * @return The invalidate result. Inferred.
+ */
+int HardSynthInvalidateBank(int nValue);
+
 /**
  * Kill expired voices.
  *
