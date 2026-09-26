@@ -411,7 +411,7 @@ public:
      * The view volume in world space.
      *
      * Rnd::Mesh::PrepareDraw() tests a bounding sphere against these planes. They are not the same
-     * planes as Rnd::g_afDrawFrustumPlanes, which a separate test uses. +0x280
+     * planes as Rnd::g_drawFrustum, which a separate test uses. +0x280
      */
     Frustum mWorldFrustum;
 

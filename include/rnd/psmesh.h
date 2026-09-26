@@ -167,17 +167,29 @@ private:
      * index each, scaled by 0x40 to reach a Rnd::MeshVert.
      *
      * The structure is 0x14 bytes inside a 0x1c-byte list node, which the constructor draws from
-     * the 0x20-byte allocator bucket. The node destructor at `0x006056f8` releases mIndices
-     * through the global operator delete[] and then the vector, and it zeroes mIndices and
-     * mIndexCount between the two.
+     * the 0x20-byte allocator bucket. The copy constructor at `0x00606678` is implicitly
+     * defined, copying each member in turn.
      */
     struct DrawRun {
         /** Packed VIF index data, in halfwords. +0x00 */
-        unsigned short *mIndices;
+        unsigned short *mIndices = {};
         /** Halfwords of index data at mIndices. +0x04 */
-        int mIndexCount;
+        int mIndexCount = {};
         /** Vertices of mVertsOwner this batch uploads. +0x08 */
         std::vector<unsigned short> mVertIndices;
+
+        /**
+         * Release mIndices through the global operator delete[] and zero both index fields.
+         *
+         * The node destructor at `0x006056f8` and both AppendRun() sites in Sync() expand it.
+         */
+        ~DrawRun() {
+            if (mIndices != nullptr) {
+                delete[] mIndices;
+            }
+            mIndices = nullptr;
+            mIndexCount = 0;
+        }
 
         /**
          * Replace mIndices with a block large enough for nIndexCount halfwords.

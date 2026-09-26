@@ -46,7 +46,7 @@ constexpr int kDepthProgramPassLimit = 2;
 
 // Vertices the transformed vertex buffer holds. The software path reports an overflow rather than
 // clipping the count.
-constexpr int kMaxSoftwareVerts = 2500;
+constexpr unsigned kMaxSoftwareVerts = 2500;
 
 // GS PRIM fields. Both software paths program the whole of the register that matters and leave
 // the context and fixed-fragment bits alone.
@@ -97,8 +97,9 @@ constexpr int kRunVertCapacity = 128;
 constexpr int kRunIndexCapacity = 330;
 
 // A run index addresses VU1 memory rather than the vertex list, so it is scaled by the quadwords
-// a vertex occupies there.
+// a vertex occupies there. That is four for a face vertex and two for an edge vertex.
 constexpr int kVu1VertStride = 4;
+constexpr int kVu1EdgeVertStride = 2;
 
 // The clipper appends its output above the mesh vertex cap and reports the next free index. A
 // result of fewer than three vertices describes nothing.
@@ -140,8 +141,8 @@ constexpr int kVu1EdgeEntry = 0x1c2;
 constexpr int kVifUnpackQuadwordLimit = 0xfc;
 
 // Quadwords of a Rnd::MeshVert each path sends. An untextured face batch omits the texture
-// coordinate quadword and an edge batch sends the position alone, but the destination stride
-// stays at four either way, which is what the write cycle of each batch arranges.
+// coordinate quadword, but its destination stride stays at four. An edge batch sends the position
+// alone under STCYCL CL=2 WL=1, at a destination stride of two.
 constexpr int kVertQuadwordsTextured = 4;
 constexpr int kVertQuadwordsUntextured = 3;
 constexpr int kVertQuadwordsEdge = 1;
@@ -322,7 +323,7 @@ int PsMesh::DrawSelf() {
     }
 
     const int nUseVu1 = g_gfxDevice.mnUseVu1;
-    if (nUseVu1 == 0 && static_cast<int>(mVertsOwner->mVerts.size()) > kMaxSoftwareVerts) {
+    if (nUseVu1 == 0 && mVertsOwner->mVerts.size() > kMaxSoftwareVerts) {
         g_failSink.Report("DrawShowing vert buffer overflow... %d\n", mVertsOwner->mVerts.size());
         if (g_failSink.mAbortProc != nullptr) {
             g_failSink.mAbortProc();
@@ -333,7 +334,7 @@ int PsMesh::DrawSelf() {
     }
 
     int nClip = 1;
-    if (mSphere.mRadius != 0.0f && IsSphereInsideFrustum(worldSphere, g_afDrawFrustumPlanes) != 0) {
+    if (mSphere.mRadius != 0.0f && IsSphereInsideFrustum(worldSphere, g_drawFrustum) != 0) {
         nClip = 0;
     }
 
@@ -684,10 +685,7 @@ inline void PsMesh::DrawRun::ReserveIndices(int nIndexCount) {
 void PsMesh::AppendRun(std::list<DrawRun> &runs,
                        const std::vector<unsigned short> &vertIndices,
                        const std::vector<unsigned short> &primIndices) {
-    DrawRun empty;
-    empty.mIndices = nullptr;
-    empty.mIndexCount = 0;
-    runs.push_back(empty);
+    runs.push_back(DrawRun());
 
     DrawRun &run = runs.back();
     run.mVertIndices = vertIndices;
@@ -698,7 +696,7 @@ void PsMesh::AppendRun(std::list<DrawRun> &runs,
     // The block travels a whole quadword at a time, so the padding past the last index is cleared
     // rather than sent as whatever the allocator returned.
     const int nBlockQuadwords =
-        (run.mIndexCount + kIndexHalfwordsPerQuadword - 1) / kIndexHalfwordsPerQuadword;
+        (run.mIndexCount + kIndexHalfwordsPerQuadword - 1) >> kIndexHalfwordShift;
     GifQuadword *pBlock = AsWritableQuadwords(run.mIndices);
     pBlock[nBlockQuadwords - 1].mLo = 0;
     pBlock[nBlockQuadwords - 1].mHi = 0;
@@ -712,21 +710,17 @@ void PsMesh::Sync() {
     std::vector<unsigned short> vertIndices(kRunVertCapacity, 0);
     std::vector<unsigned short> primIndices(kRunIndexCapacity, 0);
 
-    PsMesh *pOwner = static_cast<PsMesh *>(mFacesOwner);
-
-    pOwner->mFaceRuns.clear();
-    unsigned nFace = 0;
-    while (nFace < pOwner->mFaces.size()) {
+    static_cast<PsMesh *>(mFacesOwner)->mFaceRuns.clear();
+    auto face = mFacesOwner->mFaces.begin();
+    while (face != mFacesOwner->mFaces.end()) {
         int nBudget = kFaceRunQuadwordBudget;
         vertIndices.resize(0);
         primIndices.resize(0);
-        for (;;) {
-            const MeshFace &face = pOwner->mFaces[nFace];
+        while (face != mFacesOwner->mFaces.end()) {
             // The corners are visited from the second, which the binary expresses as a modulo
             // over the three and which the draw paths match when they submit a triangle.
-            const unsigned short anCorners[] = {face.mV2, face.mV3, face.mV1};
+            const unsigned short anCorners[] = {face->mV2, face->mV3, face->mV1};
             int nPrimVerts = 0;
-            bool bOutOfRoom = false;
             for (int nCorner = 0; nCorner < kFaceIndicesPerPrim; ++nCorner) {
                 auto found = std::find(vertIndices.begin(), vertIndices.end(), anCorners[nCorner]);
                 if (found != vertIndices.end()) {
@@ -735,11 +729,12 @@ void PsMesh::Sync() {
                     continue;
                 }
                 if (nBudget < kFaceRunReserve) {
-                    // Un-do the part of this face already recorded and reprocess it at the head of
-                    // the next run.
+                    // Un-do the part of this face already recorded, and step back so the advance
+                    // below closes the run with this face at the head of the next one.
                     primIndices.resize(primIndices.size() - nCorner);
                     vertIndices.resize(vertIndices.size() - nPrimVerts);
-                    bOutOfRoom = true;
+                    nBudget = 1;
+                    --face;
                     break;
                 }
                 vertIndices.push_back(anCorners[nCorner]);
@@ -748,58 +743,51 @@ void PsMesh::Sync() {
                 primIndices.push_back(
                     static_cast<unsigned short>((vertIndices.size() - 1) * kVu1VertStride));
             }
-            if (bOutOfRoom) {
-                break;
-            }
             --nBudget;
-            ++nFace;
-            if (nBudget == 0 || nFace == pOwner->mFaces.size()) {
+            ++face;
+            if (nBudget == 0) {
                 break;
             }
         }
-        AppendRun(pOwner->mFaceRuns, vertIndices, primIndices);
+        AppendRun(static_cast<PsMesh *>(mFacesOwner)->mFaceRuns, vertIndices, primIndices);
     }
 
-    pOwner->mEdgeRuns.clear();
-    unsigned nEdge = 0;
-    while (nEdge < pOwner->mEdges.size()) {
+    static_cast<PsMesh *>(mFacesOwner)->mEdgeRuns.clear();
+    auto edge = mFacesOwner->mEdges.begin();
+    while (edge != mFacesOwner->mEdges.end()) {
         int nBudget = kEdgeRunQuadwordBudget;
         vertIndices.resize(0);
         primIndices.resize(0);
-        for (;;) {
-            const MeshEdge &edge = pOwner->mEdges[nEdge];
-            const unsigned short anCorners[] = {edge.mV1, edge.mV2};
+        while (edge != mFacesOwner->mEdges.end()) {
+            const unsigned short anCorners[] = {edge->mV1, edge->mV2};
             int nPrimVerts = 0;
-            bool bOutOfRoom = false;
             for (int nCorner = 0; nCorner < kEdgeIndicesPerPrim; ++nCorner) {
                 auto found = std::find(vertIndices.begin(), vertIndices.end(), anCorners[nCorner]);
                 if (found != vertIndices.end()) {
                     primIndices.push_back(static_cast<unsigned short>(
-                        (found - vertIndices.begin()) * kVu1VertStride));
+                        (found - vertIndices.begin()) * kVu1EdgeVertStride));
                     continue;
                 }
                 if (nBudget < kEdgeRunReserve) {
                     primIndices.resize(primIndices.size() - nCorner);
                     vertIndices.resize(vertIndices.size() - nPrimVerts);
-                    bOutOfRoom = true;
+                    nBudget = 1;
+                    --edge;
                     break;
                 }
                 vertIndices.push_back(anCorners[nCorner]);
                 ++nPrimVerts;
                 nBudget -= kEdgeVertQuadwordCost;
                 primIndices.push_back(
-                    static_cast<unsigned short>((vertIndices.size() - 1) * kVu1VertStride));
-            }
-            if (bOutOfRoom) {
-                break;
+                    static_cast<unsigned short>((vertIndices.size() - 1) * kVu1EdgeVertStride));
             }
             --nBudget;
-            ++nEdge;
-            if (nBudget == 0 || nEdge == pOwner->mEdges.size()) {
+            ++edge;
+            if (nBudget == 0) {
                 break;
             }
         }
-        AppendRun(pOwner->mEdgeRuns, vertIndices, primIndices);
+        AppendRun(static_cast<PsMesh *>(mFacesOwner)->mEdgeRuns, vertIndices, primIndices);
     }
 }
 

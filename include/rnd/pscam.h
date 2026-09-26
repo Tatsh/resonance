@@ -52,7 +52,7 @@ public:
      * Rnd::PsTex::BindAsRenderTarget(), and a camera following one that drew into a texture points
      * the GS back at the display buffer. The routine then computes the guard band, widens the four
      * side planes of the local frustum by it, moves all six planes into world space as
-     * Rnd::g_afDrawFrustumPlanes, builds the viewport and projection transforms, programs
+     * Rnd::g_drawFrustum, builds the viewport and projection transforms, programs
      * SCISSOR_1 from the screen rectangle clamped to the unit square, and stores itself in
      * g_pCurrentCam. It does not call the base implementation.
      *

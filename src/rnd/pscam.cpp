@@ -53,21 +53,6 @@ constexpr int kScissorX1Shift = 16;
 constexpr int kScissorY0Shift = 32;
 constexpr int kScissorY1Shift = 48;
 
-// Index of the first side plane in a frustum, after the front and back planes.
-constexpr int kFirstSidePlane = 2;
-
-// Store one plane into the flat plane array the draw path tests against.
-inline void StoreDrawFrustumPlane(int nPlane, const Plane &plane) {
-    memcpy(&g_afDrawFrustumPlanes[nPlane * kFrustumPlaneFloatCount], &plane, sizeof(plane));
-}
-
-// Read one plane back out of the same array.
-inline Plane LoadDrawFrustumPlane(int nPlane) {
-    Plane plane;
-    memcpy(&plane, &g_afDrawFrustumPlanes[nPlane * kFrustumPlaneFloatCount], sizeof(plane));
-    return plane;
-}
-
 // Widen one side plane of the local frustum by a guard band factor applied to the y component of
 // its normal, retaining the point of the plane nearest the origin.
 inline Plane WidenSidePlane(const Plane &plane, float flScale) {
@@ -76,6 +61,7 @@ inline Plane WidenSidePlane(const Plane &plane, float flScale) {
     point.x = plane.a * flDistance;
     point.y = plane.b * flDistance;
     point.z = plane.c * flDistance;
+    point.w = 1.0f;
 
     Vector3 normal;
     normal.x = plane.a;
@@ -557,7 +543,7 @@ void EmitEdgeVu1Setup(const float *pXfm, const Color &color) {
 }
 
 // 0x00584040
-void TransformAndLightMeshVerts(void *pOutVerts,
+void TransformAndLightMeshVerts(DrawVert *pOutVerts,
                                 const float *pXfm,
                                 MeshVert *pVerts,
                                 int nCount,
@@ -587,17 +573,16 @@ void TransformAndLightMeshVerts(void *pOutVerts,
     Color diffuse = {};
     Color environAmbient = {};
     if (bLighting != 0) {
-        const Mat *pMat = g_pSelectedMat;
-        bVertAlpha = pMat->mVertAlpha;
-        bVertEmissive = pMat->mVertEmissive;
-        bVertAmbient = pMat->mVertAmbient;
-        bVertDiffuse = pMat->mVertDiffuse;
+        bVertAlpha = g_pSelectedMat->mVertAlpha;
+        bVertEmissive = g_pSelectedMat->mVertEmissive;
+        bVertAmbient = g_pSelectedMat->mVertAmbient;
+        bVertDiffuse = g_pSelectedMat->mVertDiffuse;
         nLights = TransformLightRecords(
             pDirectionalBegin, pDirectionalEnd, pPointBegin, pPointEnd, pXfm, &sphere);
         g_renderStats.mnLitVerts += nCount * nLights;
-        emissive = pMat->mEmissive;
-        ambient = pMat->mAmbient;
-        diffuse = pMat->mDiffuse;
+        emissive = g_pSelectedMat->mEmissive;
+        ambient = g_pSelectedMat->mAmbient;
+        diffuse = g_pSelectedMat->mDiffuse;
         environAmbient = g_pCurrentEnviron->mAmbient;
     }
 
@@ -621,7 +606,7 @@ void TransformAndLightMeshVerts(void *pOutVerts,
     // and only partly written otherwise, so its lanes carry over between vertices. The fourth
     // lane reaches the output unless clip flags replace it.
     float aflStq[kXfmRowFloatCount] = {};
-    DrawVert *pOut = static_cast<DrawVert *>(pOutVerts);
+    DrawVert *pOut = pOutVerts;
     MeshVert *pVert = pVerts;
     int nRemaining = nCount;
     for (;;) {
@@ -862,7 +847,10 @@ int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, in
 }
 
 // 0x00584700
-void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, const float *pXfm) {
+void TransformMeshVertsNoLight(DrawVert *pOutVerts,
+                               MeshVert *pVerts,
+                               int nCount,
+                               const float *pXfm) {
     const Transform *pUvXfm = g_pSelectedUvXfm;
     const int nGenMode = g_nSelectedGenMode;
     if (pUvXfm == nullptr || nCount == 0) {
@@ -880,7 +868,7 @@ void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, co
     // which for the first vertex is whatever the vector register held.
     float flS = 0.0f;
     float flT = 0.0f;
-    DrawVert *pOut = static_cast<DrawVert *>(pOutVerts);
+    DrawVert *pOut = pOutVerts;
     for (int i = 0; i < nCount; ++i) {
         const MeshVert &vert = pVerts[i];
         if (nGenMode == kGenModeExplicit) {
@@ -1137,7 +1125,7 @@ void EmitParticleVu1Setup() {
 PsCam *g_pDefaultCam;
 
 // 0x00768420
-float g_afDrawFrustumPlanes[kFrustumPlaneCount * kFrustumPlaneFloatCount];
+Frustum g_drawFrustum;
 
 // 0x008e4020
 Transform g_viewProjectXfm;
@@ -1212,8 +1200,8 @@ int PsCam::DrawSelf() {
     half.x = 0.5f;
     half.y = 0.5f;
     Vector2 offset;
-    SubVec2(&centre.x, &half.x, &offset.x);
     g_flCamNear = mNearPlane;
+    SubVec2(&centre.x, &half.x, &offset.x);
 
     const float flWidth = static_cast<float>(nTargetWidth);
     const float flHeight = static_cast<float>(nTargetHeight);
@@ -1228,25 +1216,22 @@ int PsCam::DrawSelf() {
         g_invGuardBandScale.y = 1.0f / g_guardBandScale.y;
     }
 
-    StoreDrawFrustumPlane(0, mLocalFrustum.mFront);
-    StoreDrawFrustumPlane(1, mLocalFrustum.mBack);
-    StoreDrawFrustumPlane(kFirstSidePlane, WidenSidePlane(mLocalFrustum.mLeft, g_guardBandScale.x));
-    StoreDrawFrustumPlane(kFirstSidePlane + 1,
-                          WidenSidePlane(mLocalFrustum.mRight, g_guardBandScale.x));
-    StoreDrawFrustumPlane(kFirstSidePlane + 2,
-                          WidenSidePlane(mLocalFrustum.mTop, g_guardBandScale.y));
-    StoreDrawFrustumPlane(kFirstSidePlane + 3,
-                          WidenSidePlane(mLocalFrustum.mBottom, g_guardBandScale.y));
+    g_drawFrustum.mFront = mLocalFrustum.mFront;
+    g_drawFrustum.mBack = mLocalFrustum.mBack;
+    g_drawFrustum.mLeft = WidenSidePlane(mLocalFrustum.mLeft, g_guardBandScale.x);
+    g_drawFrustum.mRight = WidenSidePlane(mLocalFrustum.mRight, g_guardBandScale.x);
+    g_drawFrustum.mTop = WidenSidePlane(mLocalFrustum.mTop, g_guardBandScale.y);
+    g_drawFrustum.mBottom = WidenSidePlane(mLocalFrustum.mBottom, g_guardBandScale.y);
 
     // Every plane is transformed before any is stored back.
-    Plane aWorldPlanes[kFrustumPlaneCount];
-    for (int nPlane = 0; nPlane < kFrustumPlaneCount; ++nPlane) {
-        aWorldPlanes[nPlane] =
-            TransformPlaneToWorld(LoadDrawFrustumPlane(nPlane), &mWorldXfm[0][0]);
-    }
-    for (int nPlane = 0; nPlane < kFrustumPlaneCount; ++nPlane) {
-        StoreDrawFrustumPlane(nPlane, aWorldPlanes[nPlane]);
-    }
+    Frustum world;
+    world.mFront = TransformPlaneToWorld(g_drawFrustum.mFront, &mWorldXfm[0][0]);
+    world.mBack = TransformPlaneToWorld(g_drawFrustum.mBack, &mWorldXfm[0][0]);
+    world.mLeft = TransformPlaneToWorld(g_drawFrustum.mLeft, &mWorldXfm[0][0]);
+    world.mRight = TransformPlaneToWorld(g_drawFrustum.mRight, &mWorldXfm[0][0]);
+    world.mTop = TransformPlaneToWorld(g_drawFrustum.mTop, &mWorldXfm[0][0]);
+    world.mBottom = TransformPlaneToWorld(g_drawFrustum.mBottom, &mWorldXfm[0][0]);
+    g_drawFrustum = world;
 
     // The three basis rows are set to the identity without touching their padding words.
     g_viewportXfm.mBasisX.x = 1.0f;

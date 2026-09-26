@@ -3,6 +3,7 @@
 #include "gfx/gfxdevice.h"
 
 struct Color;
+struct Frustum;
 namespace Rnd {
 struct MeshVert;
 struct Particle;
@@ -13,12 +14,6 @@ namespace Rnd {
 
 /** Vertices a single draw may submit, from the overflow guard in Rnd::PsMesh::DrawSelf(). */
 constexpr int kDrawVertCapacity = 2500;
-
-/** Plane equations in the draw frustum. */
-constexpr int kFrustumPlaneCount = 6;
-
-/** Floats per plane equation, a quadword each. */
-constexpr int kFrustumPlaneFloatCount = 4;
 
 /**
  * Vertex as the software draw paths leave it, ready for the GS.
@@ -88,14 +83,15 @@ constexpr int kDrawVertClipOtherPlanes = 0x2f;
 extern DrawVert g_aDrawVerts[];
 
 /**
- * Plane equations of the frustum IsSphereInsideFrustum() tests against.
+ * World-space frustum IsSphereInsideFrustum() tests against.
  *
- * Rnd::Cam retains a second, per-camera set that Rnd::Mesh::PrepareDraw() uses instead. The two
- * tests do not share a plane set.
+ * Rnd::PsCam::DrawSelf() rebuilds it for each camera, with the side planes widened by the guard
+ * band. Rnd::Cam retains a second, per-camera set that Rnd::Mesh::PrepareDraw() uses instead. The
+ * two tests do not share a plane set.
  *
  * @ghidraAddress 0x00768420
  */
-extern float g_afDrawFrustumPlanes[kFrustumPlaneCount * kFrustumPlaneFloatCount];
+extern Frustum g_drawFrustum;
 
 /**
  * Report whether a sphere lies wholly inside a frustum.
@@ -105,14 +101,14 @@ extern float g_afDrawFrustumPlanes[kFrustumPlaneCount * kFrustumPlaneFloatCount]
  * which is what lets a caller skip clipping only on a true.
  *
  * @param sphere The sphere, in the space the planes are expressed in.
- * @param pPlanes The plane equations, kFrustumPlaneCount quadwords.
+ * @param frustum The view volume.
  * @return Non-zero when no plane gives a negative distance.
  * @ghidraAddress 0x005514a0
  */
-int IsSphereInsideFrustum(const Sphere &sphere, const float *pPlanes);
+int IsSphereInsideFrustum(const Sphere &sphere, const Frustum &frustum);
 
 /**
- * Report whether a sphere lies wholly inside the draw frustum, g_afDrawFrustumPlanes.
+ * Report whether a sphere lies wholly inside the draw frustum, g_drawFrustum.
  *
  * The only copy in the image is an out-of-line emission at the end of the Rnd::PsCam unit with no
  * caller, which marks the routine as an inline of a header that unit includes. The name is
@@ -123,7 +119,7 @@ int IsSphereInsideFrustum(const Sphere &sphere, const float *pPlanes);
  * @ghidraAddress 0x005884e0
  */
 inline int IsSphereInDrawFrustum(const Sphere &sphere) {
-    return IsSphereInsideFrustum(sphere, g_afDrawFrustumPlanes);
+    return IsSphereInsideFrustum(sphere, g_drawFrustum);
 }
 
 /**
@@ -150,7 +146,7 @@ inline int IsSphereInDrawFrustum(const Sphere &sphere) {
  * @param sphere The bounds the point lights are culled against.
  * @ghidraAddress 0x00584040
  */
-void TransformAndLightMeshVerts(void *pOutVerts,
+void TransformAndLightMeshVerts(DrawVert *pOutVerts,
                                 const float *pXfm,
                                 MeshVert *pVerts,
                                 int nCount,
@@ -169,7 +165,10 @@ void TransformAndLightMeshVerts(void *pOutVerts,
  * @param pXfm The transform, four rows of four floats.
  * @ghidraAddress 0x00584700
  */
-void TransformMeshVertsNoLight(void *pOutVerts, MeshVert *pVerts, int nCount, const float *pXfm);
+void TransformMeshVertsNoLight(DrawVert *pOutVerts,
+                               MeshVert *pVerts,
+                               int nCount,
+                               const float *pXfm);
 
 /**
  * Clip one triangle against the near plane and the scissor rectangle and append the polygon to the
