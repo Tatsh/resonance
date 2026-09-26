@@ -466,9 +466,13 @@ private:
     std::vector<char> mGhostGemKinds;
     char mMissGemKind;  // "gem_miss".
     char mCrateGemKind; // "gem_crate".
+
+public:
     // Non-zero draws every hex gem as "gem_crate". The hx.crates script command at 0x00449dc0
-    // toggles it.
+    // toggles it. Public because that command writes it with no accessor in the image.
     int mShowCrates;
+
+private:
     // The mode of each track, from LevelData::TrackAt().
     TrackMode mTrackModes[kTrackCount];
     PlayMap *mPlayMap;

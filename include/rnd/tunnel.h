@@ -598,13 +598,16 @@ public:
          has no accessor. +0x68 */
     std::vector<float> mLodScreenSizes;
 
-private:
     // +0x74 Starts at 1. DrawSelf() draws the "_lat" slice meshes only while it is set. The
-    // hx.nolattice script command at 0x0044a080 cycles it with mDrawPanels.
+    // hx.nolattice script command at 0x0044a080 cycles it with mDrawPanels. Public because that
+    // command writes it with no accessor in the image.
     int mDrawLattice;
     // +0x78 Starts at 1. DrawSelf() draws the "_pan" cell meshes and the seeker sections only
-    // while it is set.
+    // while it is set. Public because the hx.nolattice script command writes it with no accessor
+    // in the image.
     int mDrawPanels;
+
+private:
     // +0x7c Starts at 99999999, which is a hand-written sentinel in the same style as the
     // -9999999.0f Rnd::ParticleSys uses for an unset frame. The ring advance at 0x00476fe0 compares
     // the requested slice against it and writes the same sentinel into the mUnknown88 entry of the
