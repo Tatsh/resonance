@@ -413,4 +413,62 @@ PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
     }
 }
 
+// Send MIDI messages.
+//
+// The tuple carries a device name, a command, and four values. Voice and fx send bank selects
+// on every channel while the last value is 1, play sends a note on, stop a note off, and
+// bank_swap moves the stream. The channel nibble reads 0 where it is consumed: voice and fx
+// never reach play or stop with their values, so the status is always channel 0 there.
+// 0x00157578
+Py::Object ScriptMidi(const Py::Tuple &args) {
+    if (args.length() != 6) {
+        throw Py::TypeError(HxStr(FormatString("requires 6 args")));
+    }
+    Py::Object deviceElement = args.getItem(0);
+    Py::String deviceText(deviceElement);
+    HxStr device = deviceText;
+    Py::Object commandElement = args.getItem(1);
+    Py::String commandText(commandElement);
+    HxStr command = commandText;
+    const long nA = Py::Int(args.getItem(2));
+    const long nB = Py::Int(args.getItem(3));
+    const long nC = Py::Int(args.getItem(4));
+    const long nD = Py::Int(args.getItem(5));
+    int nChannel = 0;
+    if (command == "voice") {
+        nChannel = 0xE;
+    } else if (command == "fx") {
+        nChannel = 0xF;
+    }
+    if ((command == "voice" || command == "fx") && nD == 1) {
+        for (int nCh = 0; nCh < 15; ++nCh) {
+            const int nStatus = (nCh - 0x50) & 0xFF;
+            Application::shared()->GetSynth()->SendMidi(nStatus, 0, 0);
+            Application::shared()->GetSynth()->SendMidi(nStatus, 0x20, nC & 0xFF);
+        }
+    }
+    if (command == "play") {
+        Application::shared()->GetSynth()->SendMidi(nChannel | 0x90, nA & 0xFF, nB & 0xFF);
+    }
+    if (command == "stop") {
+        Application::shared()->GetSynth()->SendMidi(nChannel | 0x80, nA & 0xFF, 0);
+    }
+    if (command == "bank_swap") {
+        SetSynthStreamBar(static_cast<int>(nA));
+    }
+    return Py::Object();
+}
+
+// Run ScriptMidi() on the interpreter's argument tuple.
+// 0x001588a8
+PyObject *PyInvokeMidi(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Py::Object result = ScriptMidi(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
 } // namespace
