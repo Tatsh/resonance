@@ -8,6 +8,7 @@
  */
 
 struct BankHeader;
+struct BankData;
 
 /**
  * Copy a bank into SPU memory.
@@ -29,6 +30,9 @@ int HardSynthLoadBD(int nSpuAddr, const void *pSource, int nSize);
  * @return Zero.
  */
 int HardSynthUpdate(void);
+
+/** Nonzero once a bank attaches. EZMIDI `0x6e80`. Inferred. */
+extern int gBanksAttached;
 
 /** Nonzero prints tick brackets. EZMIDI `0x6e84`. Inferred. */
 extern int gTickTrace;
@@ -187,15 +191,15 @@ int HardSynthReset(void);
 /**
  * Attach bank headers to bank data.
  *
- * EZMIDI `0x579c`.
+ * Records the header and payload under the bank index. EZMIDI `0x579c`.
  *
+ * @param nSub Sub-command, ignored by the binary. Inferred.
+ * @param pHd Header handle. Inferred.
+ * @param pBd Data handle. Inferred.
  * @param nBank Bank index. Inferred.
- * @param nHd Header handle. Inferred.
- * @param nBd0 Data handle. Inferred.
- * @param nBd1 Data handle. Inferred.
- * @return The attach result. Inferred.
+ * @return Zero, or -1 when the bank index is out of range.
  */
-int HardSynthAttachHDtoBD(int nBank, int nHd, int nBd0, int nBd1);
+int HardSynthAttachHDtoBD(int nSub, struct BankHeader *pHd, struct BankData *pBd, int nBank);
 
 /**
  * Configure the synthesiser.

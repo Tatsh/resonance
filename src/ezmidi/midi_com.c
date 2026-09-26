@@ -6,6 +6,9 @@
 
 // This file mirrors the original `midi_com.c`: common support around the engine.
 
+// EZMIDI 0x6e80
+int gBanksAttached;
+
 // EZMIDI 0x6e84
 int gTickTrace;
 
@@ -409,6 +412,18 @@ void HardSynthInfo(int nSelector) {
     } else if (nSelector == 2) {
         HardSynthSetMono(gMonoMode == 0);
     }
+}
+
+// EZMIDI 0x579c
+int HardSynthAttachHDtoBD(int nSub, struct BankHeader *pHd, struct BankData *pBd, int nBank) {
+    (void)nSub; // Yes, the binary takes a sub-command and never reads it.
+    if (nBank < 0 || nBank >= 16) {
+        return -1;
+    }
+    gaHds[nBank] = pHd;
+    gaBds[nBank] = pBd;
+    gBanksAttached = 1;
+    return 0;
 }
 
 // EZMIDI 0x586c

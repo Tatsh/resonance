@@ -46,7 +46,10 @@ void *midiFunc(int nCommand, void *pData, int nSize) {
     case 0x1050: {
         const int *pAttach = *(const int *const *)pData;
 
-        gRpcReply = HardSynthAttachHDtoBD(nSub, pAttach[0], pAttach[3], pAttach[4]);
+        gRpcReply = HardSynthAttachHDtoBD(nSub,
+                                          (struct BankHeader *)pAttach[0],
+                                          (struct BankData *)pAttach[3],
+                                          pAttach[4]);
         break;
     }
     case 0x1070:
