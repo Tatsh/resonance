@@ -19,7 +19,7 @@ struct MidiChannel {
     unsigned char mVolume;       /**< +0x01. Reset to 100. Inferred. */
     unsigned char mPan;          /**< +0x02. Reset to centre. Inferred. */
     unsigned char mExpression;   /**< +0x03. Reset to 127. Inferred. */
-    unsigned short mUnknown04;   /**< +0x04. Reset to 0. */
+    unsigned short mBank;        /**< +0x04. Indexes `gaBds`. Inferred. */
     unsigned short mUnknown06;   /**< +0x06. Reset to 0. */
     unsigned short mUnknown08;   /**< +0x08. Reset to 0. */
     unsigned char mUnknown0A;    /**< +0x0A. Reset to 0xff. */
@@ -210,8 +210,8 @@ int _note_2_pitch(int nNote, int nFine, int nTune, int nScale);
  * purposes marked inferred come from a single use each.
  */
 struct Note {
-    unsigned char mChannel;       /**< +0x00. Indexes `gChan`. Inferred. */
-    unsigned char mUnknown01;     /**< +0x01. Key in `_find_note`. */
+    unsigned char mNote;          /**< +0x00. Note number. Inferred. */
+    unsigned char mChannel;       /**< +0x01. Channel. Inferred. */
     unsigned char mUnknown02;     /**< +0x02. Filter bit and voice bits. */
     unsigned char mUnknown03;     /**< +0x03. Compared against 0xff. */
     unsigned char mFlags;         /**< +0x04. Bit 0 marks use; bits 2 and 3 gate updates. */
@@ -331,24 +331,37 @@ void do_kOn(int nGroup);
 int get_free_slot(int nGroup);
 
 /**
+ * Start a note.
+ *
+ * Selects a bank program and articulation, fires the primary voice and then the
+ * alternate voice, and links the two notes. EZMIDI `0x2c6c`.
+ *
+ * @param nChannel Channel index. Inferred.
+ * @param nNote Note number. Inferred.
+ * @param nVelocity Velocity. Inferred.
+ * @return The note index, or negative without one.
+ */
+int hs_note_on(int nChannel, int nNote, int nVelocity);
+
+/**
  * Fire a voice for a sample.
  *
  * Assembles voice parameters from the bank tables, takes a note, programs the SPU
  * registers, and returns the note index. EZMIDI `0x2240`.
  *
  * @param nSample Sample index. Inferred.
+ * @param nNote Note number. Inferred.
  * @param nChannel Channel index. Inferred.
- * @param nKey Key value. Inferred.
- * @param nScale Pitch scale. Inferred.
+ * @param nVelocity Velocity. Inferred.
  * @param pEvent Note event parameters. Inferred.
  * @param pExtra Extra note event parameters. Inferred.
  * @param nMode Alternate voice mode. Inferred.
  * @return The note index, or -2 without a slot.
  */
 int _fire_off_sample(int nSample,
+                     int nNote,
                      int nChannel,
-                     int nKey,
-                     int nScale,
+                     int nVelocity,
                      const struct NoteEvent *pEvent,
                      const struct NoteEvent *pExtra,
                      int nMode);
@@ -371,11 +384,11 @@ int _apply_channel_to_note(struct Note *pNote, int nApply);
  *
  * EZMIDI `0xe24`.
  *
- * @param nKey0 First key byte. Inferred.
- * @param nKey1 Second key byte. Inferred.
+ * @param nNote Note number. Inferred.
+ * @param nChannel Channel index. Inferred.
  * @return The note index, or -1.
  */
-int _find_note(int nKey0, int nKey1);
+int _find_note(int nNote, int nChannel);
 
 /**
  * Release a note.

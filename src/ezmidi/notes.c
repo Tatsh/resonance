@@ -41,13 +41,13 @@ int get_free_slot(int nGroup) {
 }
 
 // EZMIDI 0xe24
-int _find_note(int nKey0, int nKey1) {
+int _find_note(int nNote, int nChannel) {
     int nIndex;
 
     for (nIndex = 0; nIndex < 50; ++nIndex) {
         struct Note *pNote = &gCurrentNotes[nIndex];
 
-        if ((pNote->mFlags & 9) == 1 && pNote->mChannel == nKey0 && pNote->mUnknown01 == nKey1) {
+        if ((pNote->mFlags & 9) == 1 && pNote->mNote == nNote && pNote->mChannel == nChannel) {
             return nIndex;
         }
     }

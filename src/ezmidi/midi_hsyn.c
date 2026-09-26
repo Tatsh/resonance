@@ -65,7 +65,7 @@ void _init_channels(void) {
         pChannel->mVolume = 0x64;
         pChannel->mPan = 0x40;
         pChannel->mExpression = 0x7f;
-        pChannel->mUnknown04 = 0;
+        pChannel->mBank = 0;
         pChannel->mUnknown06 = 0;
         pChannel->mUnknown08 = 0;
         pChannel->mUnknown0A = 0xff;
@@ -154,8 +154,8 @@ int _apply_channel_to_note(struct Note *pNote, int nApply) {
     int nPan = pNote->mPan;
     int nSaved0C = pNote->mUnknown0C;
     int nSaved14 = pNote->mUnknown14;
-    int nVolume = ScaleCurve((unsigned short)ScaleCurve(pNote->mUnknown06 * gChan[pNote->mChannel].mVolume) *
-                             gChan[pNote->mChannel].mExpression);
+    int nVolume = ScaleCurve((unsigned short)ScaleCurve(pNote->mUnknown06 * gChan[pNote->mNote].mVolume) *
+                             gChan[pNote->mNote].mExpression);
     unsigned short nVoice;
 
     if ((pNote->mFlags & 2) != 0) {
@@ -163,7 +163,7 @@ int _apply_channel_to_note(struct Note *pNote, int nApply) {
     }
     if (gPauseCount <= 0) {
         nVoice = pNote->mUnknown0C;
-    } else if (((unsigned int)gSynthRun >> pNote->mChannel & 1) == 0) {
+    } else if (((unsigned int)gSynthRun >> pNote->mNote & 1) == 0) {
         nVoice = 0;
     } else {
         nVoice = pNote->mUnknown0C;
@@ -237,7 +237,7 @@ int _note_2_pitch(int nNote, int nFine, int nTune, int nScale) {
 }
 
 // EZMIDI 0x2240
-int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const struct NoteEvent *pEvent,
+int _fire_off_sample(int nSample, int nNote, int nChannel, int nVelocity, const struct NoteEvent *pEvent,
                      const struct NoteEvent *pExtra, int nMode) {
     int nFine = 0;
     int nTune = 0;
@@ -264,7 +264,7 @@ int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const stru
     if (gRemixMode != 0) {
         nEff = (nEff & 0x40) | 3;
     }
-    nLevel = pSample->mUnknown10 * nScale;
+    nLevel = pSample->mUnknown10 * nVelocity;
     nLevel = ScaleCurve(nLevel * pEvent->mUnknown06);
     if (pExtra != 0) {
         nFine += pExtra->mUnknown12;
@@ -272,7 +272,7 @@ int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const stru
         nLevel = ScaleCurve(nLevel * pExtra->mUnknown10);
         nPan = pExtra->mUnknown11;
     }
-    nGroup = gChan[nKey].mUnknown0C;
+    nGroup = gChan[nChannel].mUnknown0C;
     pDesc = (struct SampleDesc *)((char *)pSamples2 + pSamples2->mOffsets[pSample->mUnknown00]);
     nDataAddr = (int)(long)((char *)gpBd + pDesc->mDataOff);
     if (pDesc->mUnknown06 == 1) {
@@ -286,8 +286,8 @@ int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const stru
     if (pSample->mUnknown0D != 0x40) {
         nPan = pSample->mUnknown0D;
     }
-    nPitch = _note_2_pitch(pSample->mUnknown0B, nChannel + nFine, nTune, pDesc->mUnknown04);
-    nPitch2 = _note_2_pitch(pSample->mUnknown0B, nChannel + nFine,
+    nPitch = _note_2_pitch(pSample->mUnknown0B, nNote + nFine, nTune, pDesc->mUnknown04);
+    nPitch2 = _note_2_pitch(pSample->mUnknown0B, nNote + nFine,
                             nTune + ((nMode & 1) != 0 ? gTuneAlt1 : gTuneAlt0), pDesc->mUnknown04);
     nSlot = _search_for_slot(nGroup, nGroup, nLevel);
     if (nSlot == -1) {
@@ -295,20 +295,20 @@ int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const stru
     }
     pNote = _new_note();
     pNote->mUnknown02 = nSample;
+    pNote->mNote = nNote;
     pNote->mChannel = nChannel;
-    pNote->mUnknown01 = nKey;
     pNote->mFlags = nFlags;
     pNote->mUnknown03 = (nMode & 1) != 0 ? 0xff : 0;
     pNote->mUnknown08 = nPitch;
     pNote->mUnknown06 = nLevel;
     pNote->mPan = nPan;
-    pNote->mUnknown20 = (gChan[nKey].mUnknown04 & 0xff) - 1;
+    pNote->mUnknown20 = (gChan[nChannel].mBank & 0xff) - 1;
     pNote->mUnknown16 = 0;
     pNote->mUnknown1E = 0;
     pNote->mUnknown1F = 0;
-    pNote->mUnknown21 = gChan[nKey].mUnknown04 & 0xff;
+    pNote->mUnknown21 = gChan[nChannel].mBank & 0xff;
     pNote->mUnknown18 = nPitch - nPitch2;
-    if ((gChan[nKey].mUnknown0B & 1) != 0) {
+    if ((gChan[nChannel].mUnknown0B & 1) != 0) {
         pNote->mUnknown05 |= 1;
     }
     _apply_channel_to_note(pNote, 1);
@@ -322,4 +322,80 @@ int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const stru
     do_kOn(nSlot);
     voice_alloc[nSlot] |= slot_2_mask.mWords[nSlot];
     return (int)(pNote - gCurrentNotes);
+}
+
+
+// EZMIDI 0x2c6c
+int hs_note_on(int nChannel, int nNote, int nVelocity) {
+    int nSlot = -1;
+    const unsigned char *pProg = 0;
+    const unsigned char *pArt = 0;
+    struct OffsetTable *pTab0;
+    struct OffsetTable *pTab1;
+    int nEntry;
+    int nCount;
+    int nIndex;
+    int nResult2;
+    int nSamp2;
+    const unsigned char *pVoice2;
+    unsigned short nArt;
+
+    if (nChannel < 0 || nChannel >= 16) {
+        return -1;
+    }
+    if (gChan[nChannel].mBank >= 0x11) {
+        return -2;
+    }
+    gpHd = gaHds[gChan[nChannel].mBank];
+    if (gpHd == 0 || gpBd == 0) {
+        return -3;
+    }
+    pTab0 = (struct OffsetTable *)((char *)gpHd + gpHd->mProgTab0);
+    pTab1 = (struct OffsetTable *)((char *)gpHd + gpHd->mProgTab1);
+    if (pTab0->mCount < gChan[nChannel].mUnknown00) {
+        return -4;
+    }
+    if (gpHd == 0 || gpBd == 0) {
+        return -5;
+    }
+    nEntry = pTab0->mOffsets[gChan[nChannel].mUnknown00];
+    if (nEntry == -1) {
+        return -6;
+    }
+    pProg = (const unsigned char *)pTab0 + nEntry;
+    nCount = pProg[4];
+    for (nIndex = 0; nIndex < nCount; ++nIndex) {
+        if (nNote < pProg[nIndex * 20 + 0x26]) {
+            continue;
+        }
+        if (pProg[nIndex * 20 + 0x28] < nNote) {
+            continue;
+        }
+        pArt = pProg + nIndex * 20 + 0x24;
+        break;
+    }
+    if (pArt == 0) {
+        return -7;
+    }
+    nArt = pArt[0] | ((unsigned short)pArt[1] << 8);
+    if ((short)nArt == -1) {
+        return -8;
+    }
+    pVoice2 = (const unsigned char *)pTab1 + pTab1->mOffsets[nArt];
+    nSamp2 = pVoice2[4] | ((unsigned short)pVoice2[5] << 8);
+    if (nSamp2 == -1) {
+        return -9;
+    }
+    nSlot = _fire_off_sample(nSamp2, nNote, nChannel, nVelocity, (const struct NoteEvent *)pProg,
+                             (const struct NoteEvent *)pArt, 0);
+    if (nSlot < 0) {
+        return nSlot;
+    }
+    if ((gChan[nChannel].mUnknown0B & 4) == 0) {
+        return nSlot;
+    }
+    nResult2 = _fire_off_sample(nSamp2, nNote, nChannel, nVelocity, (const struct NoteEvent *)pProg,
+                                (const struct NoteEvent *)pArt, 1);
+    gCurrentNotes[nSlot].mUnknown02 = (unsigned char)nResult2;
+    return nSlot;
 }
