@@ -431,3 +431,15 @@ int HardSynthInvalidateBank(int nBank) {
     }
     return 0;
 }
+
+// EZMIDI 0x5a28
+void HardSynthInvalidateHd(struct BankHeader *pHd) {
+    int nBank;
+
+    for (nBank = 0; nBank < 16; ++nBank) {
+        if (gaHds[nBank] == pHd) {
+            HardSynthInvalidateBank(nBank);
+            return;
+        }
+    }
+}

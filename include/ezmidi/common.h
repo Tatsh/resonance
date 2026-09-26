@@ -7,6 +7,8 @@
  * All addresses in this header are relative to the EZMIDI image base.
  */
 
+struct BankHeader;
+
 /**
  * Copy a bank into SPU memory.
  *
@@ -256,11 +258,11 @@ void HardSynthInfo(int nSelector);
 /**
  * Invalidate a bank header.
  *
- * EZMIDI `0x5a28`.
+ * Invalidates the first bank using the header. EZMIDI `0x5a28`.
  *
- * @param nValue Header selector. Inferred.
+ * @param pHd Bank header. Inferred.
  */
-void HardSynthInvalidateHd(int nValue);
+void HardSynthInvalidateHd(struct BankHeader *pHd);
 
 /**
  * Invalidate a bank.

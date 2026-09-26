@@ -2,6 +2,7 @@
 
 #include "ezmidi/common.h"
 #include "ezmidi/imports.h"
+#include "ezmidi/synth.h"
 
 // This file mirrors the original `midi_ent.c`: the module entry, server thread,
 // and RPC command handler.
@@ -74,7 +75,7 @@ void *midiFunc(int nCommand, void *pData, int nSize) {
         HardSynthInfo(pArgs[0]);
         break;
     case 0x120:
-        HardSynthInvalidateHd(pArgs[0]);
+        HardSynthInvalidateHd((struct BankHeader *)pArgs[0]);
         break;
     case 0x8130:
         gRpcReply = HardSynthInvalidateBank(pArgs[0]);
