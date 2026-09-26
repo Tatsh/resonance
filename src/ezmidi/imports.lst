@@ -5,6 +5,7 @@ END_IMPORT_TABLE
 
 DECLARE_IMPORT_TABLE(libsd, 1, 4)
 I_sceSdGetParam
+I_sceSdGetSwitch
 I_sceSdNote2Pitch
 I_sceSdSetAddr
 I_sceSdSetParam
