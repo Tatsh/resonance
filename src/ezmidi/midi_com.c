@@ -1,5 +1,6 @@
 #include "ezmidi/common.h"
 
+#include "ezmidi/ezmidi.h"
 #include "ezmidi/imports.h"
 #include "ezmidi/synth.h"
 
@@ -21,7 +22,7 @@ const char gScanFmt[] = "%d midi bytes\n";
 int gTickThread;
 
 // EZMIDI 0x8558
-int gTimerThread;
+struct TimerState gTimerState;
 
 // EZMIDI 0x7040
 struct InBuffer gInBuf[2];
@@ -266,6 +267,47 @@ int MemCpy_IOPtoSPU(int nSpuAddr, const void *pSource, int nSize) {
     return 0;
 }
 
+// EZMIDI 0x6054
+int make_thread(void) {
+    struct ThreadParam param;
+
+    param.mAttr = 0x02000000;
+    param.mOption = 0;
+    param.mEntry = hsyn_atick;
+    param.mStackSize = 0x800;
+    param.mPriority = 0x1d;
+    return CreateThread(&param);
+}
+
+// EZMIDI 0x60c8
+int set_timer(struct TimerState *pTimer) {
+    unsigned int aClock[2];
+    int nAlarm;
+
+    USec2SysClock(0x823, aClock);
+    pTimer->mClock = (int)aClock[0];
+    nAlarm = AllocHardTimer(1, 0x20, 1);
+    if (nAlarm <= 0) {
+        return -1;
+    }
+    pTimer->mTimer = nAlarm;
+    if (SetTimerHandler(nAlarm, (unsigned int)pTimer->mClock, 0x5fec, pTimer) != 0) {
+        return -2;
+    }
+    if (SetupHardTimer(nAlarm, 1, 0, 1) != 0) {
+        return -3;
+    }
+    return 0;
+}
+
+// EZMIDI 0x620c
+int start_timer(struct TimerState *pTimer) {
+    if (StartHardTimer(pTimer->mTimer) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
 // EZMIDI 0x6800
 int HardSynthInit(void) {
     _init_channels();
@@ -275,11 +317,11 @@ int HardSynthInit(void) {
     _build_chorus(0x400);
     HardSynthConfig(0);
     gTickThread = make_thread();
-    gTimerThread = gTickThread;
+    gTimerState.mThread = gTickThread;
     StartThread(gTickThread, 0);
-    set_timer(gTimerThread);
+    set_timer(&gTimerState);
     HardSynthReset();
-    start_timer(gTimerThread);
+    start_timer(&gTimerState);
     return (int)gInBuf;
 }
 

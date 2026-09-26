@@ -250,3 +250,62 @@ extern int CreateThread(struct ThreadParam *pParam);
  * @return The start result.
  */
 extern int StartThread(int nThreadId, int nArg);
+
+/**
+ * Convert microseconds to a system clock.
+ *
+ * Kernel. The timer setup converts its interval with it.
+ *
+ * @param nUsec Microseconds. Inferred.
+ * @param pClock Two-word clock buffer. Inferred.
+ * @return The convert result.
+ */
+extern int USec2SysClock(int nUsec, unsigned int *pClock);
+
+/**
+ * Allocate a hard timer.
+ *
+ * Kernel. The timer setup allocates one channel with it.
+ *
+ * @param nUnit Timer unit. Inferred.
+ * @param nScale Timer scale. Inferred.
+ * @param nMode Timer mode. Inferred.
+ * @return The timer identifier, or zero and below when allocation fails.
+ */
+extern int AllocHardTimer(int nUnit, int nScale, int nMode);
+
+/**
+ * Set a timer handler.
+ *
+ * Kernel.
+ *
+ * @param nTimer Timer identifier. Inferred.
+ * @param nClock Clock word. Inferred.
+ * @param nInterval Interval. Inferred.
+ * @param pArg Handler argument. Inferred.
+ * @return Zero when setting succeeds.
+ */
+extern int SetTimerHandler(int nTimer, unsigned int nClock, int nInterval, void *pArg);
+
+/**
+ * Set up a hard timer.
+ *
+ * Kernel.
+ *
+ * @param nTimer Timer identifier. Inferred.
+ * @param nUnknown0 Always one at the call site. Inferred.
+ * @param nUnknown1 Always zero at the call site. Inferred.
+ * @param nUnknown2 Always one at the call site. Inferred.
+ * @return Zero when setup succeeds.
+ */
+extern int SetupHardTimer(int nTimer, int nUnknown0, int nUnknown1, int nUnknown2);
+
+/**
+ * Start a hard timer.
+ *
+ * Kernel.
+ *
+ * @param nTimer Timer identifier. Inferred.
+ * @return Zero when starting succeeds.
+ */
+extern int StartHardTimer(int nTimer);

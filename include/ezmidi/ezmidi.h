@@ -27,11 +27,11 @@ int start(int nArgc, char **pArgv);
  * Five words on the stack at entry. Inferred.
  */
 struct ThreadParam {
-    int mAttr;           /**< +0x00. */
-    int mOption;         /**< +0x04. */
-    int (*mEntry)(void); /**< +0x08. Thread entry. Inferred. */
-    int mStackSize;      /**< +0x0C. */
-    int mPriority;       /**< +0x10. */
+    int mAttr;      /**< +0x00. */
+    int mOption;    /**< +0x04. */
+    void *mEntry;   /**< +0x08. Entry address. Inferred. */
+    int mStackSize; /**< +0x0C. */
+    int mPriority;  /**< +0x10. */
 };
 
 /**

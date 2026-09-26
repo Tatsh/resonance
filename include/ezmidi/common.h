@@ -40,8 +40,20 @@ extern const char gTickPost[];
 /** Created tick thread identifier. EZMIDI `0x8564`. Inferred. */
 extern int gTickThread;
 
-/** Tick thread identifier for the timer calls. EZMIDI `0x8558`. Inferred. */
-extern int gTimerThread;
+/**
+ * Tick timer state.
+ *
+ * Holds the thread identifier with its alarm and clock words. EZMIDI `0x8558`.
+ * Inferred.
+ */
+struct TimerState {
+    int mThread; /**< +0x00. Thread identifier. */
+    int mTimer;  /**< +0x04. Alarm identifier. */
+    int mClock;  /**< +0x08. Clock word. */
+};
+
+/** Tick timer state. EZMIDI `0x8558`. Inferred. */
+extern struct TimerState gTimerState;
 
 /** Scan count message. EZMIDI `0x6e40`. Inferred. */
 extern const char gScanFmt[];
@@ -125,18 +137,20 @@ int make_thread(void);
  *
  * EZMIDI `0x60c8`.
  *
- * @param nThread Thread identifier. Inferred.
+ * @param pTimer Timer state. Inferred.
+ * @return Zero, or negative when arming fails.
  */
-void set_timer(int nThread);
+int set_timer(struct TimerState *pTimer);
 
 /**
  * Start the tick timer.
  *
  * EZMIDI `0x620c`.
  *
- * @param nThread Thread identifier. Inferred.
+ * @param pTimer Timer state. Inferred.
+ * @return Zero, or -1 when starting fails.
  */
-void start_timer(int nThread);
+int start_timer(struct TimerState *pTimer);
 
 /**
  * Reset the synthesiser.
