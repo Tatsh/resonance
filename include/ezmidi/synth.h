@@ -270,6 +270,15 @@ extern unsigned int gReg_koff[2];
 /** Last flushed voice mix effect-left. EZMIDI `0x6ff8`. Inferred. */
 extern unsigned int gPrev_VMixEL[2];
 
+/** System time buffer. EZMIDI `0x7c50`. Inferred. */
+extern unsigned int gSysTime[2];
+
+/** Tick setup count. EZMIDI `0x6e88`. Inferred. */
+extern unsigned int gTickCount;
+
+/** System time high at the last tick setup. EZMIDI `0x6e8c`. Inferred. */
+extern unsigned int gTickTimeHi;
+
 /** Remix flag, set by `HardSynthSetRemix`. EZMIDI `0x6ec0`. Inferred. */
 extern unsigned char gRemixMode;
 
@@ -377,6 +386,14 @@ void do_kOn(int nGroup);
  * EZMIDI `0x4840`.
  */
 void _do_reg_out(void);
+
+/**
+ * Snapshot the voice shadows from the SPU.
+ *
+ * Reads the switch registers into the persisted shadows, syncs the staged
+ * shadows, and stamps the tick count and time. EZMIDI `0x1550`.
+ */
+void hs_tick_setup(void);
 
 /**
  * Take a voice slot.

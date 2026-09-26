@@ -91,13 +91,6 @@ void HardSynthAllNotesOff(int nChannel, int nReset);
 unsigned char *HandleMidiMessage(unsigned char *pMsg);
 
 /**
- * Prepare the tick.
- *
- * EZMIDI `0x1550`.
- */
-void hs_tick_setup(void);
-
-/**
  * Kill expired voices.
  *
  * EZMIDI `0x5b7c`.

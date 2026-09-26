@@ -62,6 +62,26 @@ extern int sceSdGetParam(int nEntry);
 extern void sceSdSetSwitch(int nEntry, unsigned int nValue);
 
 /**
+ * Read a voice switch.
+ *
+ * Sony's sound library. The tick setup snapshots the shadows with it.
+ *
+ * @param nEntry Switch entry.
+ * @return The switch value.
+ */
+extern unsigned int sceSdGetSwitch(int nEntry);
+
+/**
+ * Read the system time.
+ *
+ * Kernel. The tick setup stamps the time with it.
+ *
+ * @param pTime Two-word time buffer. Inferred.
+ * @return The time result.
+ */
+extern int GetSystemTime(unsigned int *pTime);
+
+/**
  * Move a block between IOP memory and SPU memory.
  *
  * Sony's sound library.
