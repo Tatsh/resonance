@@ -50,8 +50,10 @@ tree since the script-layer push.
 
 Of the 448 remaining routines, 333 are compiler-generated: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
-declares, and the static and global initialisation and exit glue. The completion table
-below omits those 333 and tracks the other 115.
+declares, and the static and global initialisation and exit glue. Four more come from
+the toolchain's standard library, and one is the exit callback for the shared
+instance. The completion table below omits the 338 excluded routines and tracks
+the other 110.
 
 ### Remaining routines
 
@@ -62,7 +64,8 @@ as `::` and the calling convention omitted. The reference count unions the disas
 references with aligned byte-level call and address matches, covering code and data.
 Compiler-generated routines are excluded from this table: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
-declares, and the static and global initialisation and exit glue.
+declares, and the static and global initialisation and exit glue. The table also omits
+the four standard library destructors. The toolchain provides them.
 
 | Done | Address      | Length | # xrefs | Name                                         | Preliminary signature                                                                        |
 | ---- | ------------ | ------ | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -94,13 +97,8 @@ declares, and the static and global initialisation and exit glue.
 | ❌   | `0x0040d0d0` | 27     | 1       | `Delayer::UnreferencedSend`                  | `undefined Delayer::UnreferencedSend(void)`                                                  |
 | ❌   | `0x00432440` | 27     | 1       | `Renderer::UnreferencedSend`                 | `undefined Renderer::UnreferencedSend(void)`                                                 |
 | ❌   | `0x004776f8` | 107    | 1       | `TunnelEvent::DrawFiltered`                  | `void TunnelEvent::DrawFiltered(void * pFilter, int nArg)`                                   |
-| ❌   | `0x00478848` | 47     | 12      | `type_info::Destruct`                        | `undefined type_info::Destruct(void)`                                                        |
-| ❌   | `0x00478d68` | 47     | 3       | `bad_typeid::Destruct`                       | `undefined bad_typeid::Destruct(void)`                                                       |
-| ❌   | `0x00478e00` | 47     | 3       | `bad_cast::Destruct`                         | `undefined bad_cast::Destruct(void)`                                                         |
 | ❌   | `0x00479f98` | 287    | 3       | `ostrstream::Slot1`                          | `undefined ostrstream::Slot1(void)`                                                          |
 | ❌   | `0x0047a118` | 287    | 6       | `istrstream::Slot1`                          | `undefined istrstream::Slot1(void)`                                                          |
-| ❌   | `0x004ad5d8` | 47     | 3       | `StdBadException::Destruct`                  | `undefined StdBadException::Destruct(void)`                                                  |
-| ❌   | `0x004b4660` | 35     | 3       | `Spew::SharedInstanceDtor`                   | `void Spew::SharedInstanceDtor(void)`                                                        |
 | ❌   | `0x00536eb0` | 15     | 1       | `isceSifSetDma`                              | `undefined isceSifSetDma(void)`                                                              |
 | ❌   | `0x00536ed0` | 15     | 1       | `isceSifSetDChain`                           | `undefined isceSifSetDChain(void)`                                                           |
 | ❌   | `0x00558db8` | 7      | 1       | `UnreferencedReturnZeroStub00558db8`         | `undefined UnreferencedReturnZeroStub00558db8(void)`                                         |
