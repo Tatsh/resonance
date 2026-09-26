@@ -47,7 +47,7 @@ int _find_note(int nKey0, int nKey1) {
     for (nIndex = 0; nIndex < 50; ++nIndex) {
         struct Note *pNote = &gCurrentNotes[nIndex];
 
-        if ((pNote->mFlags & 9) == 1 && pNote->mUnknown00 == nKey0 && pNote->mUnknown01 == nKey1) {
+        if ((pNote->mFlags & 9) == 1 && pNote->mChannel == nKey0 && pNote->mUnknown01 == nKey1) {
             return nIndex;
         }
     }

@@ -20,3 +20,13 @@
  * @return The pitch value.
  */
 extern int sceSdNote2Pitch(int nNote, int nFine, int nTune, int nReserved);
+
+/**
+ * Write a voice parameter.
+ *
+ * Sony's sound library.
+ *
+ * @param nEntry Voice entry.
+ * @param nValue Value.
+ */
+extern void sceSdSetParam(int nEntry, int nValue);

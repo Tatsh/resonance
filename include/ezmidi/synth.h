@@ -118,18 +118,28 @@ int _note_2_pitch(int nNote, int nFine, int nTune, int nScale);
 /**
  * One playing note.
  *
- * Fifty entries live in `gCurrentNotes`. Only the fields the slot routines touch are
- * known; the rest arrives with the pitch and envelope code.
+ * Fifty entries live in `gCurrentNotes`. Fields arrive as the voice code uses them;
+ * purposes marked inferred come from a single use each.
  */
 struct Note {
-    unsigned char mUnknown00;      /**< +0x00. Key in `_find_note`. */
+    unsigned char mChannel;        /**< +0x00. Indexes `gChan`. Inferred. */
     unsigned char mUnknown01;      /**< +0x01. Key in `_find_note`. */
-    unsigned char mUnknown02;      /**< +0x02. Filter bit in `_search_for_slot`. */
-    unsigned char mPadding03;      /**< +0x03. */
-    unsigned char mFlags;          /**< +0x04. Bit 0 marks use; bit 3 excludes matches. */
-    unsigned char mReserved05[27]; /**< +0x05. */
+    unsigned char mUnknown02;      /**< +0x02. Filter bit and voice bits. */
+    unsigned char mUnknown03;      /**< +0x03. Compared against 0xff. */
+    unsigned char mFlags;          /**< +0x04. Bit 0 marks use; bits 2 and 3 gate updates. */
+    unsigned char mUnknown05;      /**< +0x05. Bit 0 and bit 2 steer gains. */
+    unsigned short mUnknown06;     /**< +0x06. Scaled by volume. */
+    unsigned short mUnknown08;     /**< +0x08. Copied to `mUnknown0C`. */
+    unsigned char mPan;            /**< +0x0A. Indexes `pan_2_vol`. Inferred. */
+    unsigned char mPadding0B;      /**< +0x0B. */
+    unsigned short mUnknown0C;     /**< +0x0C. */
+    unsigned short mUnknown0E;     /**< +0x0E. */
+    unsigned short mUnknown10;     /**< +0x10. */
+    unsigned short mUnknown12;     /**< +0x12. */
+    unsigned short mUnknown14;     /**< +0x14. */
+    unsigned char mReserved16[10]; /**< +0x16. */
     unsigned char mUnknown20;      /**< +0x20. Count weight in `_search_for_slot`. */
-    unsigned char mReserved21[15]; /**< +0x21. */
+    unsigned char mReserved21[7];  /**< +0x21. */
 };
 
 /**
@@ -164,6 +174,24 @@ extern unsigned int gReg_kon[2];
 /** Key-off voice shadows. EZMIDI `0x7c48`. */
 extern unsigned int gReg_koff[2];
 
+/** Remix flag, set by `HardSynthSetRemix`. EZMIDI `0x6ec0`. Inferred. */
+extern unsigned char gRemixMode;
+
+/** Mono flag, set by `HardSynthSetMono`. EZMIDI `0x6ec1`. Inferred. */
+extern unsigned char gMonoMode;
+
+/** Pause counter. EZMIDI `0x6e90`. */
+extern int gPauseCount;
+
+/** Per-channel run bits. EZMIDI `0x6ebc`. */
+extern unsigned short gSynthRun;
+
+/** Fixed gain for one branch. EZMIDI `0x7e58`. Inferred. */
+extern int gFixedGainA;
+
+/** Fixed gain for the other branch. EZMIDI `0x7e5c`. Inferred. */
+extern int gFixedGainB;
+
 /**
  * Key off a voice group.
  *
@@ -193,6 +221,19 @@ void do_kOn(int nGroup);
  * @return The slot, or -1 when both groups are full.
  */
 int get_free_slot(int nGroup);
+
+/**
+ * Recompute a note's voice gains.
+ *
+ * Scales the note level through its channel, picks pan or fixed gains, optionally
+ * writes the voice registers, and reports whether the cached gains moved.
+ * EZMIDI `0x1d14`.
+ *
+ * @param pNote The note.
+ * @param nApply Nonzero writes the voice registers. Inferred.
+ * @return Nonzero when the cached gains moved.
+ */
+int _apply_channel_to_note(struct Note *pNote, int nApply);
 
 /**
  * Find a note by key.

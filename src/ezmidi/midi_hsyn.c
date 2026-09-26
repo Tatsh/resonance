@@ -2,6 +2,24 @@
 
 #include "ezmidi/imports.h"
 
+// EZMIDI 0x6ec0
+unsigned char gRemixMode;
+
+// EZMIDI 0x6ec1
+unsigned char gMonoMode;
+
+// EZMIDI 0x6e90
+int gPauseCount;
+
+// EZMIDI 0x6ebc
+unsigned short gSynthRun;
+
+// EZMIDI 0x7e58
+int gFixedGainA;
+
+// EZMIDI 0x7e5c
+int gFixedGainB;
+
 // EZMIDI image-relative addresses appear in the markers below. The module is an IOP
 // program of its own, so they never coincide with the main program. This file mirrors
 // the original `midi_hsyn.c`: the synthesiser voice engine.
@@ -90,6 +108,86 @@ void _build_chorus(int nDepth) {
     for (; nIndex < 512; ++nIndex) {
         chr_curve[nIndex] = chr_curve[0x300 - nIndex];
     }
+}
+
+/**
+ * Scale through the volume curve idiom.
+ *
+ * Reproduces the binary's multiply-high sequence bit for bit.
+ */
+static int ScaleCurve(int nValue) {
+    long long nWide = (long long)nValue * 0x81020409LL;
+    int nHigh = (int)(nWide >> 32);
+
+    return ((nHigh + nValue) >> 6) - (nValue < 0 ? 1 : 0);
+}
+
+/**
+ * Scale into fifteen bits with symmetric rounding.
+ */
+static int MulShr15(int nValue, int nGain) {
+    int nProduct = nValue * nGain;
+
+    if (nProduct < 0) {
+        nProduct += 0x7fff;
+    }
+    return nProduct >> 15;
+}
+
+// EZMIDI 0x1d14
+int _apply_channel_to_note(struct Note *pNote, int nApply) {
+    int nPan = pNote->mPan;
+    int nSaved0C = pNote->mUnknown0C;
+    int nSaved14 = pNote->mUnknown14;
+    int nVolume = ScaleCurve((unsigned short)ScaleCurve(pNote->mUnknown06 * gChan[pNote->mChannel].mVolume) *
+                             gChan[pNote->mChannel].mExpression);
+    unsigned short nVoice;
+
+    if ((pNote->mFlags & 2) != 0) {
+        pNote->mUnknown0C = pNote->mUnknown08;
+    }
+    if (gPauseCount <= 0) {
+        nVoice = pNote->mUnknown0C;
+    } else if (((unsigned int)gSynthRun >> pNote->mChannel & 1) == 0) {
+        nVoice = 0;
+    } else {
+        nVoice = pNote->mUnknown0C;
+    }
+    if (gMonoMode == 0) {
+        if (gRemixMode != 0 && (pNote->mUnknown05 & 1) == 0) {
+            nPan = 0x40;
+        }
+        if ((pNote->mUnknown05 & 4) != 0) {
+            if (pNote->mUnknown03 == 0xff) {
+                nPan = 0x7f;
+                pNote->mUnknown12 = 0;
+                pNote->mUnknown14 = (unsigned short)MulShr15(nVolume, gFixedGainB);
+            } else {
+                nPan = 0;
+                pNote->mUnknown12 = (unsigned short)MulShr15(nVolume, gFixedGainA);
+                pNote->mUnknown14 = 0;
+            }
+        } else {
+            pNote->mUnknown12 = (unsigned short)MulShr15(nVolume, pan_2_vol[nPan].mLeft);
+            pNote->mUnknown14 = (unsigned short)MulShr15(nVolume, pan_2_vol[nPan].mRight);
+        }
+    } else {
+        pNote->mUnknown12 = (unsigned short)MulShr15(nVolume, pan_2_vol[nPan].mLeft);
+        pNote->mUnknown14 = (unsigned short)MulShr15(nVolume, pan_2_vol[nPan].mRight);
+    }
+    if ((pNote->mFlags & 2) != 0) {
+        pNote->mUnknown0E = pNote->mUnknown12;
+        pNote->mUnknown10 = pNote->mUnknown14;
+    }
+    if (nApply == 0) {
+        return 0;
+    }
+    sceSdSetParam((pNote->mUnknown02 | 0x100) & 0xffff, pNote->mUnknown10);
+    sceSdSetParam((pNote->mUnknown02 | 0x200) & 0xffff, nVoice);
+    if (pNote->mUnknown0C != nSaved0C || pNote->mUnknown14 != nSaved14) {
+        return 1;
+    }
+    return 0;
 }
 
 // EZMIDI 0x1aa4
