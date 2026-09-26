@@ -122,8 +122,9 @@ Py::Object ScriptEmptyAlbumCaches([[maybe_unused]] const Py::Tuple &args) {
 
 // Enter practice mode.
 // 0x00148f98
-PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *) {
+PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         PlayActivateSound();
         GrooveWorld *pWorld = Application::shared()->GetWorld();
         if (pWorld != nullptr) {
@@ -138,8 +139,9 @@ PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *) {
 
 // Unlock every stage.
 // 0x00149230
-PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *) {
+PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         MetRenderer *pRenderer =
             dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
         if (pRenderer != nullptr) {
@@ -155,8 +157,9 @@ PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *) {
 //
 // Only from the logo screen, where the cheat is entered.
 // 0x001494f8
-PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *) {
+PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         MetRenderer *pRenderer =
             dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
         if (pRenderer->IsLogoScreenActive() != 0) {
@@ -173,8 +176,9 @@ PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *) {
 //
 // Only from the logo screen, where the cheat is entered.
 // 0x001497d8
-PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *) {
+PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         MetRenderer *pRenderer =
             dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
         if (pRenderer->IsLogoScreenActive() != 0) {
@@ -189,8 +193,9 @@ PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *) {
 
 // Play the powerup cheat sound.
 // 0x00149ab0
-PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *) {
+PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         PlayActivateSound();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
@@ -200,8 +205,9 @@ PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *) {
 
 // Play the big-gem cheat sound.
 // 0x00149d20
-PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *) {
+PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         PlayActivateSound();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
@@ -211,8 +217,9 @@ PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *) {
 
 // Play the no-lattice cheat sound.
 // 0x00149f90
-PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *) {
+PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         PlayActivateSound();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
@@ -222,8 +229,9 @@ PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *) {
 
 // Play the arena-cycle cheat sound.
 // 0x0014aa58
-PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *) {
+PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         PlayActivateSound();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
@@ -235,8 +243,9 @@ PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *) {
 //
 // Only from the logo screen, where the cheat is entered.
 // 0x0014acc8
-PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *) {
+PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         MetRenderer *pRenderer =
             dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
         if (pRenderer->IsLogoScreenActive() != 0) {
@@ -251,8 +260,9 @@ PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *) {
 
 // Flag the win sequence to run.
 // 0x0014afa8
-PyObject *PyInvokeDoWinSequenceCheat(PyObject *, PyObject *) {
+PyObject *PyInvokeDoWinSequenceCheat(PyObject *, PyObject *pArgs) {
     try {
+        Py::Tuple args(pArgs);
         SetDoWinSequence(1);
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {

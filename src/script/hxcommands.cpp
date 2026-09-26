@@ -25,6 +25,7 @@
 #include "os/mem.h"
 #include "os/seccache.h"
 #include "os/spew.h"
+#include "os/zone.h"
 #include "sch/cmdid.h"
 #include "sch/command.h"
 #include "sch/tempomap.h"
@@ -619,6 +620,64 @@ PyObject *PyInvokeClock(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
         Py::Object result = ScriptClock(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Dump the zone table.
+// 0x00163660
+PyObject *PyInvokeZoneDump(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        ZoneDump();
+        Py::Object result;
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Start a recording capture.
+// 0x0015bdf8
+PyObject *PyInvokeCapture(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Application::shared()->GetGameManager()->StartRecording();
+        Py::Object result;
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Silence every channel.
+// 0x00158af0
+PyObject *PyInvokeStopAllMidi(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Ps2HardSynth *pSynth = Application::shared()->GetSynth();
+        if (pSynth != nullptr) {
+            pSynth->AllNotesOff();
+        }
+        Py::Object result;
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Win with five hundred points.
+// 0x001508f8
+PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        GrooveWorld *pWorld = Application::shared()->GetWorld();
+        if (pWorld != nullptr) {
+            pWorld->mGamer->EndWithScore(500);
+        }
+        Py::Object result;
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
