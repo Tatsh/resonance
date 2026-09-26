@@ -119,6 +119,12 @@ struct MidiChannel gChan[16];
 // EZMIDI 0x8f00
 struct BankData *gaBds[16];
 
+// EZMIDI 0x6ec4
+struct BankHeader *gpHd;
+
+// EZMIDI 0x6ec8
+struct BankData *gpBd;
+
 // EZMIDI 0x85f0
 struct BankHeader *gaHds[16];
 
