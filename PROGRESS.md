@@ -48,9 +48,10 @@ exceptions, and one is a measurement gap. The canvas factory
 `0x00558dd8` it calls, found in code the disassembler had not defined, both have bodies in the
 tree since the script-layer push.
 
-Of the 448 remaining routines, 204 are compiler-generated destructors: the deleting-destructor
-wrappers and the implicit destructors the tree never declares. The completion table below
-omits those 204 and tracks the other 244.
+Of the 448 remaining routines, 333 are compiler-generated: the deleting-destructor
+wrappers, the implicit destructors, constructors, and copy constructors the tree never
+declares, and the static and global initialisation and exit glue. The completion table
+below omits those 333 and tracks the other 115.
 
 ### Remaining routines
 
@@ -59,255 +60,127 @@ rule from the gaps list. Addresses are relative to the image base and lengths ar
 from the disassembler. Signatures are the prototypes Ghidra reports, with its separator written
 as `::` and the calling convention omitted. The reference count unions the disassembler's
 references with aligned byte-level call and address matches, covering code and data.
-Compiler-generated destructors are excluded from this table: the deleting-destructor
-wrappers and the implicit destructors the tree never declares.
+Compiler-generated routines are excluded from this table: the deleting-destructor
+wrappers, the implicit destructors, constructors, and copy constructors the tree never
+declares, and the static and global initialisation and exit glue.
 
-| Done | Address      | Length | # xrefs | Name                                             | Preliminary signature                                                                                   |
-| ---- | ------------ | ------ | ------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| ❌   | `0x00100350` | 31     | 5       | `Unit00100040::GlobalCtors`                      | `void Unit00100040::GlobalCtors(void)`                                                                  |
-| ❌   | `0x0010baa0` | 615    | 77      | `PlayerInfo::ConstructCopy`                      | `void * PlayerInfo::ConstructCopy(void * pOther)`                                                       |
-| ❌   | `0x0010c8b0` | 31     | 5       | `Unit0010b530::GlobalCtors`                      | `undefined Unit0010b530::GlobalCtors(void)`                                                             |
-| ❌   | `0x0010f130` | 31     | 4       | `Unit0010ed58::GlobalCtors`                      | `undefined Unit0010ed58::GlobalCtors(void)`                                                             |
-| ❌   | `0x00115860` | 479    | 2       | `MsgSource::ConstructCopy`                       | `undefined MsgSource::ConstructCopy(void)`                                                              |
-| ❌   | `0x00115cc0` | 43     | 37      | `MsgSource::Construct`                           | `undefined MsgSource::Construct(void)`                                                                  |
-| ❌   | `0x001170b0` | 31     | 4       | `Unit00115c68::GlobalCtors`                      | `undefined Unit00115c68::GlobalCtors(void)`                                                             |
-| ❌   | `0x00119048` | 95     | 1       | `ScriptKillSch`                                  | `PyCxxObject * ScriptKillSch(PyCxxObject * pResult, PyCxxObject * pArgs)`                               |
-| ❌   | `0x00119140` | 31     | 4       | `Unit00118960::GlobalCtors`                      | `undefined Unit00118960::GlobalCtors(void)`                                                             |
-| ❌   | `0x00122ef0` | 31     | 4       | `Unit00121bf0::GlobalCtors`                      | `undefined Unit00121bf0::GlobalCtors(void)`                                                             |
-| ❌   | `0x0012b640` | 31     | 4       | `Unit0012a4a0::GlobalCtors`                      | `undefined Unit0012a4a0::GlobalCtors(void)`                                                             |
-| ❌   | `0x0012da80` | 31     | 4       | `Unit0012d178::GlobalCtors`                      | `undefined Unit0012d178::GlobalCtors(void)`                                                             |
-| ❌   | `0x0012daa0` | 51     | 1       | `PlayMapRing::Construct`                         | `PlayMapRing * PlayMapRing::Construct(void)`                                                            |
-| ❌   | `0x00133538` | 31     | 4       | `Unit00132618::GlobalCtors`                      | `undefined Unit00132618::GlobalCtors(void)`                                                             |
-| ❌   | `0x00133558` | 31     | 5       | `Unit00132618::GlobalDtors`                      | `undefined Unit00132618::GlobalDtors(void)`                                                             |
-| ❌   | `0x00139530` | 699    | 13      | `RemixIndexElement::ConstructCopy`               | `undefined RemixIndexElement::ConstructCopy(void)`                                                      |
-| ❌   | `0x0013ae50` | 31     | 4       | `Unit0013aba0::GlobalCtors`                      | `undefined Unit0013aba0::GlobalCtors(void)`                                                             |
-| ❌   | `0x0013b230` | 31     | 4       | `Unit0013af38::GlobalCtors`                      | `undefined Unit0013af38::GlobalCtors(void)`                                                             |
-| ❌   | `0x0013faf0` | 31     | 4       | `Unit0013eef8::GlobalCtors`                      | `undefined Unit0013eef8::GlobalCtors(void)`                                                             |
-| ❌   | `0x001453e0` | 19     | 2       | `SkillStats::AssignImplicit`                     | `void SkillStats::AssignImplicit(SkillStats * pOther)`                                                  |
-| ❌   | `0x0014e848` | 131    | 1       | `ScriptActivatePracticeMode`                     | `PyCxxObject * ScriptActivatePracticeMode(PyCxxObject * pResult, PyCxxObject * pArgs)`                  |
-| ❌   | `0x0014e8d0` | 175    | 1       | `ScriptActivateAllAccessMode`                    | `PyCxxObject * ScriptActivateAllAccessMode(PyCxxObject * pResult, PyCxxObject * pArgs)`                 |
-| ❌   | `0x0014e980` | 199    | 1       | `ScriptEnableTeamFreqs`                          | `PyCxxObject * ScriptEnableTeamFreqs(PyCxxObject * pResult, PyCxxObject * pArgs)`                       |
-| ❌   | `0x0014ea48` | 191    | 1       | `ScriptEnablePowerupCheats`                      | `PyCxxObject * ScriptEnablePowerupCheats(PyCxxObject * pResult, PyCxxObject * pArgs)`                   |
-| ❌   | `0x0014eb08` | 87     | 1       | `ScriptDoPowerupCheat`                           | `PyCxxObject * ScriptDoPowerupCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`                        |
-| ❌   | `0x0014eb60` | 87     | 1       | `ScriptDoBigGemModeCheat`                        | `PyCxxObject * ScriptDoBigGemModeCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`                     |
-| ❌   | `0x0014ebb8` | 87     | 1       | `ScriptDoNoLatticeModeCheat`                     | `PyCxxObject * ScriptDoNoLatticeModeCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`                  |
-| ❌   | `0x0014ec60` | 87     | 1       | `ScriptDoArenaStateCycleCheat`                   | `PyCxxObject * ScriptDoArenaStateCycleCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`                |
-| ❌   | `0x0014ecb8` | 203    | 1       | `ScriptDoExpansionPackToggleCheat`               | `PyCxxObject * ScriptDoExpansionPackToggleCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`            |
-| ❌   | `0x0014ed88` | 91     | 1       | `ScriptDoWinSequenceCheat`                       | `PyCxxObject * ScriptDoWinSequenceCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`                    |
-| ❌   | `0x001506c0` | 175    | 1       | `HxScript::ActivateAllAccessMode`                | `undefined HxScript::ActivateAllAccessMode(void)`                                                       |
-| ❌   | `0x001508d8` | 31     | 4       | `Unit00150580::StaticCtor`                       | `undefined Unit00150580::StaticCtor(void)`                                                              |
-| ❌   | `0x00150cc0` | 167    | 1       | `HxScript::CheatWin`                             | `undefined HxScript::CheatWin(void)`                                                                    |
-| ❌   | `0x00150d68` | 31     | 4       | `Unit00150b80::StaticCtor`                       | `undefined Unit00150b80::StaticCtor(void)`                                                              |
-| ❌   | `0x00153258` | 31     | 4       | `Unit00153030::StaticCtor`                       | `undefined Unit00153030::StaticCtor(void)`                                                              |
-| ❌   | `0x001532b8` | 31     | 4       | `Unit00153278::StaticCtor`                       | `undefined Unit00153278::StaticCtor(void)`                                                              |
-| ❌   | `0x001539e0` | 31     | 4       | `Unit001537d8::StaticCtor`                       | `undefined Unit001537d8::StaticCtor(void)`                                                              |
-| ❌   | `0x00154238` | 31     | 4       | `Unit00154030::StaticCtor`                       | `undefined Unit00154030::StaticCtor(void)`                                                              |
-| ❌   | `0x00154948` | 31     | 4       | `Unit00154740::StaticCtor`                       | `undefined Unit00154740::StaticCtor(void)`                                                              |
-| ❌   | `0x00155da0` | 31     | 4       | `Unit00155b98::StaticCtor`                       | `undefined Unit00155b98::StaticCtor(void)`                                                              |
-| ❌   | `0x00157558` | 31     | 4       | `Unit00157418::StaticCtor`                       | `undefined Unit00157418::StaticCtor(void)`                                                              |
-| ❌   | `0x00159410` | 139    | 1       | `HxScript::StopAllMidi`                          | `undefined HxScript::StopAllMidi(void)`                                                                 |
-| ❌   | `0x00159518` | 31     | 4       | `Unit00159248::StaticCtor`                       | `undefined Unit00159248::StaticCtor(void)`                                                              |
-| ❌   | `0x0015a800` | 31     | 4       | `Unit0015a1c0::StaticCtor`                       | `undefined Unit0015a1c0::StaticCtor(void)`                                                              |
-| ❌   | `0x0015bae0` | 31     | 4       | `Unit0015b850::StaticCtor`                       | `undefined Unit0015b850::StaticCtor(void)`                                                              |
-| ❌   | `0x0015c420` | 115    | 1       | `HxScript::Capture`                              | `undefined HxScript::Capture(void)`                                                                     |
-| ❌   | `0x0015c560` | 31     | 4       | `Unit0015c2c8::StaticCtor`                       | `undefined Unit0015c2c8::StaticCtor(void)`                                                              |
-| ❌   | `0x0015c978` | 31     | 4       | `Unit0015c838::StaticCtor`                       | `undefined Unit0015c838::StaticCtor(void)`                                                              |
-| ❌   | `0x0015d930` | 31     | 4       | `Unit0015d6d8::StaticCtor`                       | `undefined Unit0015d6d8::StaticCtor(void)`                                                              |
-| ❌   | `0x0015e5d0` | 31     | 4       | `Unit0015e3c8::StaticCtor`                       | `undefined Unit0015e3c8::StaticCtor(void)`                                                              |
-| ❌   | `0x0015eb68` | 31     | 4       | `Unit0015e960::StaticCtor`                       | `undefined Unit0015e960::StaticCtor(void)`                                                              |
-| ❌   | `0x0015f250` | 31     | 4       | `Unit0015f048::StaticCtor`                       | `undefined Unit0015f048::StaticCtor(void)`                                                              |
-| ❌   | `0x0015ff78` | 31     | 4       | `Unit0015fc68::StaticCtor`                       | `undefined Unit0015fc68::StaticCtor(void)`                                                              |
-| ❌   | `0x001611d8` | 31     | 4       | `Unit00160fb8::StaticCtor`                       | `undefined Unit00160fb8::StaticCtor(void)`                                                              |
-| ❌   | `0x00162c70` | 31     | 4       | `Unit00162a68::StaticCtor`                       | `undefined Unit00162a68::StaticCtor(void)`                                                              |
-| ❌   | `0x00163640` | 31     | 4       | `Unit00163438::StaticCtor`                       | `undefined Unit00163438::StaticCtor(void)`                                                              |
-| ❌   | `0x00163a10` | 87     | 1       | `HxScript::ZoneDump`                             | `undefined HxScript::ZoneDump(void)`                                                                    |
-| ❌   | `0x00163a68` | 31     | 4       | `Unit001638d0::StaticCtor`                       | `undefined Unit001638d0::StaticCtor(void)`                                                              |
-| ❌   | `0x00170c88` | 31     | 4       | `Unit0016ff68::GlobalCtors`                      | `void Unit0016ff68::GlobalCtors(void)`                                                                  |
-| ❌   | `0x00174da8` | 31     | 4       | `Unit001742f0::GlobalCtors`                      | `undefined Unit001742f0::GlobalCtors(void)`                                                             |
-| ❌   | `0x00174dc8` | 31     | 5       | `Unit001742f0::GlobalDtors`                      | `undefined Unit001742f0::GlobalDtors(void)`                                                             |
-| ❌   | `0x00183ed0` | 31     | 8       | `RemixIndex::ConstructImplicit`                  | `void * RemixIndex::ConstructImplicit(void)`                                                            |
-| ❌   | `0x00184130` | 723    | 39      | `MetRemixRecord::ConstructCopy`                  | `MetRemixRecord * MetRemixRecord::ConstructCopy(MetRemixRecord * pOther)`                               |
-| ❌   | `0x00187130` | 31     | 4       | `Unit00187130::StaticCtor`                       | `undefined Unit00187130::StaticCtor(void)`                                                              |
-| ❌   | `0x00187150` | 31     | 4       | `Unit00187150::StaticDtor`                       | `undefined Unit00187150::StaticDtor(void)`                                                              |
-| ❌   | `0x001940e0` | 63     | 2       | `MsgJoiner::Construct`                           | `void * MsgJoiner::Construct(void)`                                                                     |
-| ❌   | `0x0019d1b0` | 111    | 2       | `PhraseMaker::Construct`                         | `PhraseMaker * PhraseMaker::Construct(void)`                                                            |
-| ❌   | `0x001a6ed8` | 27     | 1       | `MidiDisabler::UnreferencedSend`                 | `undefined MidiDisabler::UnreferencedSend(void)`                                                        |
-| ❌   | `0x001bfbc0` | 51     | 2       | `JamPowerbarMgr::Construct`                      | `JamPowerbarMgr * JamPowerbarMgr::Construct(void)`                                                      |
-| ❌   | `0x001c0680` | 51     | 3       | `PowerbarMgr::Construct`                         | `PowerbarMgr * PowerbarMgr::Construct(void)`                                                            |
-| ❌   | `0x001de858` | 39     | 2       | `InputCheatDetectorCheatSequence::Construct`     | `InputCheatDetectorCheatSequence * InputCheatDetectorCheatSequence::Construct(void)`                    |
-| ❌   | `0x001de880` | 515    | 8       | `InputCheatDetectorCheatSequence::CopyConstruct` | `void InputCheatDetectorCheatSequence::CopyConstruct(InputCheatDetectorCheatSequence * pOther)`         |
-| ❌   | `0x001ea1e8` | 27     | 4       | `Harmony::Construct`                             | `Harmony * Harmony::Construct(void)`                                                                    |
-| ❌   | `0x001f6530` | 35     | 2       | `MemcardManager::AtExitDestroyShared`            | `void MemcardManager::AtExitDestroyShared(void)`                                                        |
-| ❌   | `0x002071b0` | 31     | 4       | `Unit002065a0::GlobalCtors`                      | `undefined Unit002065a0::GlobalCtors(void)`                                                             |
-| ❌   | `0x002071d0` | 31     | 4       | `Unit002065a0::GlobalDtors`                      | `undefined Unit002065a0::GlobalDtors(void)`                                                             |
-| ❌   | `0x00217ff8` | 127    | 2       | `MetPersonaData::AtExitDestroySavedList`         | `undefined MetPersonaData::AtExitDestroySavedList(void)`                                                |
-| ❌   | `0x00218098` | 127    | 2       | `MetPersonaData::AtExitDestroyLoadList`          | `undefined MetPersonaData::AtExitDestroyLoadList(void)`                                                 |
-| ❌   | `0x00255750` | 31     | 4       | `Unit00254690::GlobalCtors`                      | `undefined Unit00254690::GlobalCtors(void)`                                                             |
-| ❌   | `0x00255770` | 31     | 4       | `Unit00254690::GlobalDtors`                      | `undefined Unit00254690::GlobalDtors(void)`                                                             |
-| ❌   | `0x002627d0` | 31     | 4       | `Unit00261d50::GlobalCtors`                      | `undefined Unit00261d50::GlobalCtors(void)`                                                             |
-| ❌   | `0x002627f0` | 31     | 4       | `Unit00261d50::GlobalDtors`                      | `undefined Unit00261d50::GlobalDtors(void)`                                                             |
-| ❌   | `0x00273120` | 31     | 4       | `Unit00272030::GlobalCtors`                      | `undefined Unit00272030::GlobalCtors(void)`                                                             |
-| ❌   | `0x0028ccd8` | 39     | 13      | `MetKeyboardScreen::AtExitDestroyTicker`         | `undefined MetKeyboardScreen::AtExitDestroyTicker(void)`                                                |
-| ❌   | `0x0028d288` | 31     | 4       | `Unit0028d288::StaticCtor`                       | `undefined Unit0028d288::StaticCtor(void)`                                                              |
-| ❌   | `0x0028d2a8` | 31     | 4       | `Unit0028d2a8::StaticDtor`                       | `undefined Unit0028d2a8::StaticDtor(void)`                                                              |
-| ❌   | `0x00344700` | 31     | 4       | `Unit00343848::StaticCtor`                       | `undefined Unit00343848::StaticCtor(void)`                                                              |
-| ❌   | `0x00344720` | 31     | 4       | `Unit00343848::StaticDtor`                       | `undefined Unit00343848::StaticDtor(void)`                                                              |
-| ❌   | `0x00381d98` | 119    | 2       | `MetScreen::AtExitDestroyContainerLoaderMap`     | `undefined MetScreen::AtExitDestroyContainerLoaderMap(void)`                                            |
-| ❌   | `0x00382168` | 119    | 2       | `MetScreen::AtExitDestroyScreenRegistry`         | `undefined MetScreen::AtExitDestroyScreenRegistry(void)`                                                |
-| ❌   | `0x003cc678` | 203    | 2       | `LevelNameStorage::StaticDestroy`                | `undefined LevelNameStorage::StaticDestroy(void)`                                                       |
-| ❌   | `0x003d6798` | 87     | 1       | `MidMBT::Construct`                              | `MidMBTPolymorphic * MidMBT::Construct(int nTick, int nBeatsPerMeasure, int nTicksPerBeat)`             |
-| ❌   | `0x003d67f0` | 115    | 2       | `MidMBT::Print`                                  | `void MidMBT::Print(ostream * stream)`                                                                  |
-| ❌   | `0x003e1868` | 43     | 1       | `GameConnectFailureMsg::ConstructCopy`           | `undefined GameConnectFailureMsg::ConstructCopy(void)`                                                  |
-| ❌   | `0x003e1ae8` | 43     | 1       | `GameConnectionLostMsg::ConstructCopy`           | `undefined GameConnectionLostMsg::ConstructCopy(void)`                                                  |
-| ❌   | `0x003e1d68` | 43     | 1       | `LobbyConnectionLostMsg::ConstructCopy`          | `undefined LobbyConnectionLostMsg::ConstructCopy(void)`                                                 |
-| ❌   | `0x003f2dc0` | 135    | 2       | `PSJoinRequestPacket::ConstructCopy`             | `PSJoinRequestPacket * PSJoinRequestPacket::ConstructCopy(PSJoinRequestPacket * pOther)`                |
-| ❌   | `0x003f2e48` | 743    | 2       | `SPJoinAcceptPacket::ConstructCopy`              | `SPJoinAcceptPacket * SPJoinAcceptPacket::ConstructCopy(SPJoinAcceptPacket * pOther)`                   |
-| ❌   | `0x003f3130` | 147    | 2       | `SPJoinDenyPacket::ConstructCopy`                | `SPJoinDenyPacket * SPJoinDenyPacket::ConstructCopy(SPJoinDenyPacket * pOther)`                         |
-| ❌   | `0x003f31c8` | 135    | 2       | `SCPlayerJoinedPacket::ConstructCopy`            | `SCPlayerJoinedPacket * SCPlayerJoinedPacket::ConstructCopy(SCPlayerJoinedPacket * pOther)`             |
-| ❌   | `0x003f3250` | 71     | 2       | `CSClientStatusPacket::ConstructCopy`            | `CSClientStatusPacket * CSClientStatusPacket::ConstructCopy(CSClientStatusPacket * pOther)`             |
-| ❌   | `0x003f3298` | 523    | 2       | `SCAllClientsStatusPacket::ConstructCopy`        | `SCAllClientsStatusPacket * SCAllClientsStatusPacket::ConstructCopy(SCAllClientsStatusPacket * pOther)` |
-| ❌   | `0x003f34a8` | 63     | 2       | `CSInitiatePlayPacket::ConstructCopy`            | `CSInitiatePlayPacket * CSInitiatePlayPacket::ConstructCopy(CSInitiatePlayPacket * pOther)`             |
-| ❌   | `0x003f34e8` | 567    | 2       | `SCAllPlayersInfoPacket::ConstructCopy`          | `SCAllPlayersInfoPacket * SCAllPlayersInfoPacket::ConstructCopy(SCAllPlayersInfoPacket * pOther)`       |
-| ❌   | `0x003f3720` | 63     | 2       | `SCStartPlayingPacket::ConstructCopy`            | `SCStartPlayingPacket * SCStartPlayingPacket::ConstructCopy(SCStartPlayingPacket * pOther)`             |
-| ❌   | `0x003f3760` | 87     | 2       | `PhrasePacket::ConstructCopy`                    | `PhrasePacket * PhrasePacket::ConstructCopy(PhrasePacket * pOther)`                                     |
-| ❌   | `0x003f37b8` | 95     | 2       | `CaughtPhrasePacket::ConstructCopy`              | `CaughtPhrasePacket * CaughtPhrasePacket::ConstructCopy(CaughtPhrasePacket * pOther)`                   |
-| ❌   | `0x003f3818` | 79     | 2       | `UpdateScorePacket::ConstructCopy`               | `UpdateScorePacket * UpdateScorePacket::ConstructCopy(UpdateScorePacket * pOther)`                      |
-| ❌   | `0x003f3868` | 103    | 2       | `TrackSelectPacket::ConstructCopy`               | `TrackSelectPacket * TrackSelectPacket::ConstructCopy(TrackSelectPacket * pOther)`                      |
-| ❌   | `0x003f38d0` | 103    | 2       | `CatchProgressPacket::ConstructCopy`             | `CatchProgressPacket * CatchProgressPacket::ConstructCopy(CatchProgressPacket * pOther)`                |
-| ❌   | `0x003f3938` | 539    | 2       | `CripplePacket::ConstructCopy`                   | `CripplePacket * CripplePacket::ConstructCopy(CripplePacket * pOther)`                                  |
-| ❌   | `0x003f3b58` | 103    | 2       | `BumpPacket::ConstructCopy`                      | `BumpPacket * BumpPacket::ConstructCopy(BumpPacket * pOther)`                                           |
-| ❌   | `0x003f3bc0` | 135    | 2       | `BSLoadLevelPacket::ConstructCopy`               | `BSLoadLevelPacket * BSLoadLevelPacket::ConstructCopy(BSLoadLevelPacket * pOther)`                      |
-| ❌   | `0x003f3c48` | 135    | 2       | `SCLoadLevelPacket::ConstructCopy`               | `SCLoadLevelPacket * SCLoadLevelPacket::ConstructCopy(SCLoadLevelPacket * pOther)`                      |
-| ❌   | `0x003f3cd0` | 71     | 2       | `SCGameOverPacket::ConstructCopy`                | `SCGameOverPacket * SCGameOverPacket::ConstructCopy(SCGameOverPacket * pOther)`                         |
-| ❌   | `0x003f3d18` | 111    | 2       | `GemPacket::ConstructCopy`                       | `GemPacket * GemPacket::ConstructCopy(GemPacket * pOther)`                                              |
-| ❌   | `0x003f3d88` | 203    | 2       | `GameChatPacket::ConstructCopy`                  | `GameChatPacket * GameChatPacket::ConstructCopy(GameChatPacket * pOther)`                               |
-| ❌   | `0x003f3e58` | 203    | 2       | `TestArbiterPacket::ConstructCopy`               | `TestArbiterPacket * TestArbiterPacket::ConstructCopy(TestArbiterPacket * pOther)`                      |
-| ❌   | `0x003f7bc0` | 31     | 4       | `Unit003f6760::GlobalCtors`                      | `undefined Unit003f6760::GlobalCtors(void)`                                                             |
-| ❌   | `0x003f7be0` | 31     | 4       | `Unit003f6760::GlobalDtors`                      | `undefined Unit003f6760::GlobalDtors(void)`                                                             |
-| ❌   | `0x0040cec8` | 31     | 4       | `Unit0040cec8::StaticCtor`                       | `undefined Unit0040cec8::StaticCtor(void)`                                                              |
-| ❌   | `0x0040d060` | 111    | 1       | `Delayer::Construct`                             | `undefined Delayer::Construct(void)`                                                                    |
-| ❌   | `0x0040d0d0` | 27     | 1       | `Delayer::UnreferencedSend`                      | `undefined Delayer::UnreferencedSend(void)`                                                             |
-| ❌   | `0x0042b760` | 31     | 4       | `Unit0042b760::StaticCtor`                       | `void Unit0042b760::StaticCtor(void)`                                                                   |
-| ❌   | `0x0042b780` | 31     | 4       | `Unit0042b780::StaticDtor`                       | `void Unit0042b780::StaticDtor(void)`                                                                   |
-| ❌   | `0x00432440` | 27     | 1       | `Renderer::UnreferencedSend`                     | `undefined Renderer::UnreferencedSend(void)`                                                            |
-| ❌   | `0x004327f0` | 31     | 4       | `Unit004327f0::StaticCtor`                       | `undefined Unit004327f0::StaticCtor(void)`                                                              |
-| ❌   | `0x00432810` | 31     | 4       | `Unit00432810::StaticDtor`                       | `undefined Unit00432810::StaticDtor(void)`                                                              |
-| ❌   | `0x00461150` | 31     | 4       | `Unit00461150::StaticCtor`                       | `void Unit00461150::StaticCtor(void)`                                                                   |
-| ❌   | `0x00461170` | 31     | 4       | `Unit00461170::StaticDtor`                       | `void Unit00461170::StaticDtor(void)`                                                                   |
-| ❌   | `0x00464f30` | 31     | 4       | `Unit00464170::StaticCtor`                       | `void Unit00464170::StaticCtor(void)`                                                                   |
-| ❌   | `0x00464f50` | 31     | 4       | `Unit00464170::StaticDtor`                       | `void Unit00464170::StaticDtor(void)`                                                                   |
-| ❌   | `0x004664e8` | 31     | 4       | `Unit004662d0::StaticCtor`                       | `void Unit004662d0::StaticCtor(void)`                                                                   |
-| ❌   | `0x00466508` | 31     | 4       | `Unit004662d0::StaticDtor`                       | `void Unit004662d0::StaticDtor(void)`                                                                   |
-| ❌   | `0x00471e28` | 99     | 11      | `TunnelSeekSection::ConstructCopy`               | `undefined TunnelSeekSection::ConstructCopy(void)`                                                      |
-| ❌   | `0x00471e90` | 555    | 2       | `TunnelSeekStrip::ConstructCopy`                 | `undefined TunnelSeekStrip::ConstructCopy(void)`                                                        |
-| ❌   | `0x004720c0` | 131    | 7       | `TunnelSeeker::CopyConstruct`                    | `TunnelSeeker * TunnelSeeker::CopyConstruct(TunnelSeeker * pOther)`                                     |
-| ❌   | `0x004776f8` | 107    | 1       | `TunnelEvent::DrawFiltered`                      | `void TunnelEvent::DrawFiltered(void * pFilter, int nArg)`                                              |
-| ❌   | `0x00478808` | 31     | 4       | `Unit00476088::StaticCtor`                       | `undefined Unit00476088::StaticCtor(void)`                                                              |
-| ❌   | `0x00478828` | 31     | 4       | `Unit00476088::StaticDtor`                       | `undefined Unit00476088::StaticDtor(void)`                                                              |
-| ❌   | `0x00478848` | 47     | 12      | `type_info::Destruct`                            | `undefined type_info::Destruct(void)`                                                                   |
-| ❌   | `0x00478d68` | 47     | 3       | `bad_typeid::Destruct`                           | `undefined bad_typeid::Destruct(void)`                                                                  |
-| ❌   | `0x00478e00` | 47     | 3       | `bad_cast::Destruct`                             | `undefined bad_cast::Destruct(void)`                                                                    |
-| ❌   | `0x00479f98` | 287    | 3       | `ostrstream::Slot1`                              | `undefined ostrstream::Slot1(void)`                                                                     |
-| ❌   | `0x0047a118` | 287    | 6       | `istrstream::Slot1`                              | `undefined istrstream::Slot1(void)`                                                                     |
-| ❌   | `0x0047e330` | 31     | 4       | `Unit0047dc18::StaticCtor`                       | `undefined Unit0047dc18::StaticCtor(void)`                                                              |
-| ❌   | `0x0047e350` | 31     | 4       | `Unit0047dc18::StaticDtor`                       | `undefined Unit0047dc18::StaticDtor(void)`                                                              |
-| ❌   | `0x00494a48` | 31     | 4       | `Unit00492340::StaticCtor`                       | `undefined Unit00492340::StaticCtor(void)`                                                              |
-| ❌   | `0x00494a68` | 31     | 4       | `Unit00492340::StaticDtor`                       | `undefined Unit00492340::StaticDtor(void)`                                                              |
-| ❌   | `0x004a0748` | 31     | 4       | `Unit0049fcc0::StaticCtor`                       | `void Unit0049fcc0::StaticCtor(void)`                                                                   |
-| ❌   | `0x004a0768` | 31     | 4       | `Unit0049fcc0::StaticDtor`                       | `void Unit0049fcc0::StaticDtor(void)`                                                                   |
-| ❌   | `0x004acdf8` | 31     | 4       | `Unit004ac5c8::StaticCtor`                       | `void Unit004ac5c8::StaticCtor(void)`                                                                   |
-| ❌   | `0x004ad5d8` | 47     | 3       | `StdBadException::Destruct`                      | `undefined StdBadException::Destruct(void)`                                                             |
-| ❌   | `0x004b2b88` | 31     | 4       | `Unit004b1cb8::StaticCtor`                       | `void Unit004b1cb8::StaticCtor(void)`                                                                   |
-| ❌   | `0x004b2ba8` | 31     | 4       | `Unit004b1cb8::StaticDtor`                       | `void Unit004b1cb8::StaticDtor(void)`                                                                   |
-| ❌   | `0x004b4660` | 35     | 3       | `Spew::SharedInstanceDtor`                       | `void Spew::SharedInstanceDtor(void)`                                                                   |
-| ❌   | `0x004bfd08` | 31     | 4       | `Unit004beb40::StaticCtor`                       | `void Unit004beb40::StaticCtor(void)`                                                                   |
-| ❌   | `0x004bfd28` | 31     | 4       | `Unit004beb40::StaticDtor`                       | `void Unit004beb40::StaticDtor(void)`                                                                   |
-| ❌   | `0x004c3ba0` | 31     | 4       | `Unit004c32a8::StaticCtor`                       | `void Unit004c32a8::StaticCtor(void)`                                                                   |
-| ❌   | `0x004c3bc0` | 31     | 4       | `Unit004c32a8::StaticDtor`                       | `void Unit004c32a8::StaticDtor(void)`                                                                   |
-| ❌   | `0x00536eb0` | 15     | 1       | `isceSifSetDma`                                  | `undefined isceSifSetDma(void)`                                                                         |
-| ❌   | `0x00536ed0` | 15     | 1       | `isceSifSetDChain`                               | `undefined isceSifSetDChain(void)`                                                                      |
-| ❌   | `0x00558db8` | 7      | 1       | `UnreferencedReturnZeroStub00558db8`             | `undefined UnreferencedReturnZeroStub00558db8(void)`                                                    |
-| ❌   | `0x00558dc0` | 7      | 1       | `UnreferencedReturnZeroStub00558dc0`             | `undefined UnreferencedReturnZeroStub00558dc0(void)`                                                    |
-| ❌   | `0x00558dc8` | 7      | 1       | `UnreferencedReturnZeroStub00558dc8`             | `undefined UnreferencedReturnZeroStub00558dc8(void)`                                                    |
-| ❌   | `0x00559830` | 35     | 3       | `HxMethods::StaticDestroy`                       | `void HxMethods::StaticDestroy(void)`                                                                   |
-| ❌   | `0x00567670` | 431    | 2       | `audioDecSendToIOP`                              | `undefined audioDecSendToIOP(void)`                                                                     |
-| ❌   | `0x00567820` | 187    | 2       | `audioDecCreate`                                 | `undefined audioDecCreate(void)`                                                                        |
-| ❌   | `0x005678e0` | 59     | 2       | `audioDecDelete`                                 | `undefined audioDecDelete(void)`                                                                        |
-| ❌   | `0x00567a50` | 19     | 2       | `audioDecIsPreset`                               | `undefined audioDecIsPreset(void)`                                                                      |
-| ❌   | `0x00567a68` | 107    | 2       | `audioDecStart`                                  | `undefined audioDecStart(void)`                                                                         |
-| ❌   | `0x00567ad8` | 163    | 2       | `audioDecReset`                                  | `undefined audioDecReset(void)`                                                                         |
-| ❌   | `0x00569128` | 455    | 2       | `decode`                                         | `undefined decode(void)`                                                                                |
-| ❌   | `0x005692f0` | 7      | 2       | `MpegDecoderRoutine005692f0`                     | `undefined MpegDecoderRoutine005692f0(void)`                                                            |
-| ❌   | `0x005692f8` | 255    | 2       | `videoDecCreate`                                 | `undefined videoDecCreate(void)`                                                                        |
-| ❌   | `0x005693f8` | 51     | 2       | `videoDecDelete`                                 | `undefined videoDecDelete(void)`                                                                        |
-| ❌   | `0x00569430` | 11     | 2       | `videoDecAbort`                                  | `undefined videoDecAbort(void)`                                                                         |
-| ❌   | `0x00569440` | 7      | 3       | `videoDecGetState`                               | `undefined videoDecGetState(void)`                                                                      |
-| ❌   | `0x00569458` | 27     | 1       | `videoDecInputCount`                             | `undefined videoDecInputCount(void)`                                                                    |
-| ❌   | `0x00569478` | 55     | 1       | `videoDecInputSpaceCount`                        | `undefined videoDecInputSpaceCount(void)`                                                               |
-| ❌   | `0x005694b0` | 27     | 1       | `videoDecReset`                                  | `undefined videoDecReset(void)`                                                                         |
-| ❌   | `0x005694d0` | 223    | 2       | `videoDecFlush`                                  | `undefined videoDecFlush(void)`                                                                         |
-| ❌   | `0x005695b0` | 75     | 2       | `videoDecIsFlushed`                              | `undefined videoDecIsFlushed(void)`                                                                     |
-| ❌   | `0x00569600` | 31     | 3       | `videoDecSetStream`                              | `undefined videoDecSetStream(void)`                                                                     |
-| ❌   | `0x00569620` | 27     | 2       | `videoDecBeginPut`                               | `undefined videoDecBeginPut(void)`                                                                      |
-| ❌   | `0x00569640` | 27     | 2       | `videoDecEndPut`                                 | `undefined videoDecEndPut(void)`                                                                        |
-| ❌   | `0x00569660` | 59     | 2       | `videoDecPutTs`                                  | `undefined videoDecPutTs(void)`                                                                         |
-| ❌   | `0x005696a0` | 91     | 2       | `videoDecMain`                                   | `undefined videoDecMain(void)`                                                                          |
-| ❌   | `0x00569700` | 39     | 2       | `mpegError`                                      | `undefined mpegError(void)`                                                                             |
-| ❌   | `0x00569728` | 43     | 2       | `mpegNodata`                                     | `undefined mpegNodata(void)`                                                                            |
-| ❌   | `0x00569758` | 35     | 2       | `mpegStopDMA`                                    | `undefined mpegStopDMA(void)`                                                                           |
-| ❌   | `0x00569780` | 35     | 2       | `mpegRestartDMA`                                 | `undefined mpegRestartDMA(void)`                                                                        |
-| ❌   | `0x005697a8` | 67     | 2       | `mpegTS`                                         | `undefined mpegTS(void)`                                                                                |
-| ❌   | `0x005697f0` | 303    | 2       | `cpy2area`                                       | `undefined cpy2area(void)`                                                                              |
-| ❌   | `0x0058de70` | 703    | 2       | `strFileOpen`                                    | `undefined strFileOpen(void)`                                                                           |
-| ❌   | `0x0058e130` | 79     | 2       | `strFileClose`                                   | `undefined strFileClose(void)`                                                                          |
-| ❌   | `0x0058e180` | 59     | 2       | `strFileRead`                                    | `undefined strFileRead(void)`                                                                           |
-| ❌   | `0x0059a908` | 223    | 1       | `CheckPalEqual`                                  | `bool CheckPalEqual(APalette * pPalMip0, APalette * pPalMip, char * pszName, int nMip)`                 |
-| ❌   | `0x0059afa0` | 291    | 2       | `videoCallback`                                  | `undefined videoCallback(void)`                                                                         |
-| ❌   | `0x0059b0c8` | 211    | 2       | `pcmCallback`                                    | `undefined pcmCallback(void)`                                                                           |
-| ❌   | `0x005a4e70` | 175    | 2       | `ScriptTemplateMap::Construct`                   | `ScriptTemplateMap * ScriptTemplateMap::Construct(void)`                                                |
-| ❌   | `0x005cb2b8` | 23     | 2       | `readBufCreate`                                  | `undefined readBufCreate(void)`                                                                         |
-| ❌   | `0x005cb2d0` | 7      | 2       | `readBufDelete`                                  | `undefined readBufDelete(void)`                                                                         |
-| ❌   | `0x005cb2d8` | 47     | 2       | `readBufBeginPut`                                | `undefined readBufBeginPut(void)`                                                                       |
-| ❌   | `0x005cb308` | 67     | 2       | `readBufEndPut`                                  | `undefined readBufEndPut(void)`                                                                         |
-| ❌   | `0x005cb350` | 71     | 2       | `readBufBeginGet`                                | `undefined readBufBeginGet(void)`                                                                       |
-| ❌   | `0x005cb398` | 35     | 2       | `readBufEndGet`                                  | `undefined readBufEndGet(void)`                                                                         |
-| ❌   | `0x005d2860` | 599    | 3       | `clearGsMem`                                     | `undefined clearGsMem(void)`                                                                            |
-| ❌   | `0x005d2ab8` | 895    | 3       | `setImageTag`                                    | `undefined setImageTag(void)`                                                                           |
-| ❌   | `0x005d2e38` | 459    | 2       | `handler_endimage`                               | `undefined handler_endimage(void)`                                                                      |
-| ❌   | `0x005d3008` | 71     | 2       | `startDisplay`                                   | `undefined startDisplay(void)`                                                                          |
-| ❌   | `0x005d3050` | 19     | 2       | `endDisplay`                                     | `undefined endDisplay(void)`                                                                            |
-| ❌   | `0x005d3068` | 71     | 2       | `vblankHandler`                                  | `undefined vblankHandler(void)`                                                                         |
-| ❌   | `0x005d3a88` | 59     | 2       | `isceSifSendCmd`                                 | `undefined isceSifSendCmd(void)`                                                                        |
-| ❌   | `0x005d3fa0` | 71     | 2       | `voBufCreate`                                    | `undefined voBufCreate(void)`                                                                           |
-| ❌   | `0x005d3fe8` | 15     | 2       | `voBufReset`                                     | `undefined voBufReset(void)`                                                                            |
-| ❌   | `0x005d3ff8` | 19     | 2       | `voBufIsFull`                                    | `undefined voBufIsFull(void)`                                                                           |
-| ❌   | `0x005d4010` | 119    | 2       | `voBufIncCount`                                  | `undefined voBufIncCount(void)`                                                                         |
-| ❌   | `0x005d4088` | 51     | 2       | `voBufGetData`                                   | `undefined voBufGetData(void)`                                                                          |
-| ❌   | `0x005d40c0` | 7      | 2       | `voBufDelete`                                    | `undefined voBufDelete(void)`                                                                           |
-| ❌   | `0x005d40d8` | 83     | 2       | `voBufGetTag`                                    | `undefined voBufGetTag(void)`                                                                           |
-| ❌   | `0x005d4130` | 31     | 2       | `voBufDecCount`                                  | `undefined voBufDecCount(void)`                                                                         |
-| ❌   | `0x005e29e0` | 39     | 6       | `getenv`                                         | `undefined getenv(void)`                                                                                |
-| ❌   | `0x005e4510` | 71     | 39      | `SpinDisableInterrupts`                          | `bool SpinDisableInterrupts(void)`                                                                      |
-| ❌   | `0x005e4558` | 23     | 44      | `ReenableInterrupts`                             | `bool ReenableInterrupts(void)`                                                                         |
-| ❌   | `0x005e4600` | 147    | 3       | `MSInPutBytes`                                   | `int MSInPutBytes(sceCslCtx * pCtx, uint nPort, uchar * pBytes, int nCount)`                            |
-| ❌   | `0x005e5a88` | 31     | 4       | `Unit005e5a88::StaticCtor`                       | `undefined Unit005e5a88::StaticCtor(void)`                                                              |
-| ❌   | `0x005e5aa8` | 31     | 4       | `Unit005e5aa8::StaticDtor`                       | `undefined Unit005e5aa8::StaticDtor(void)`                                                              |
-| ❌   | `0x005e84e0` | 115    | 4       | `_sceVu0ecossin`                                 | `undefined _sceVu0ecossin(void)`                                                                        |
-| ❌   | `0x005f1f90` | 31     | 1       | `toupper`                                        | `int toupper(int c)`                                                                                    |
-| ❌   | `0x005fa8c0` | 55     | 3       | `PutSioByte`                                     | `undefined PutSioByte(void)`                                                                            |
-| ❌   | `0x005fa8f8` | 175    | 1       | `PutSioLineBufferedChar`                         | `undefined PutSioLineBufferedChar(void)`                                                                |
-| ❌   | `0x005fa9a8` | 51     | 18      | `PutSioCharCrlf`                                 | `undefined PutSioCharCrlf(void)`                                                                        |
-| ❌   | `0x005fa9e0` | 143    | 1       | `ConvertDoubleToScaledInt`                       | `undefined ConvertDoubleToScaledInt(void)`                                                              |
-| ❌   | `0x005faa70` | 359    | 1       | `PrintFloatInScientific`                         | `undefined PrintFloatInScientific(void)`                                                                |
-| ❌   | `0x005fabd8` | 1479   | 2       | `VPrintfToSioConsole`                            | `undefined VPrintfToSioConsole(void)`                                                                   |
-| ❌   | `0x005fb1a0` | 55     | 8       | `PrintfToSioRaw`                                 | `undefined PrintfToSioRaw(void)`                                                                        |
-| ❌   | `0x005fb1d8` | 95     | 30      | `PrintfToSioLineBuffered`                        | `undefined PrintfToSioLineBuffered(void)`                                                               |
-| ❌   | `0x0060d920` | 231    | 2       | `istdiostream::Slot1`                            | `undefined istdiostream::Slot1(void)`                                                                   |
-| ❌   | `0x006134e8` | 243    | 4       | `viBufBeginPut`                                  | `undefined viBufBeginPut(void)`                                                                         |
-| ❌   | `0x006135e0` | 83     | 3       | `viBufEndPut`                                    | `undefined viBufEndPut(void)`                                                                           |
-| ❌   | `0x00613638` | 271    | 2       | `viBufPutTs`                                     | `undefined viBufPutTs(void)`                                                                            |
-| ❌   | `0x00613748` | 75     | 3       | `viBufCount`                                     | `undefined viBufCount(void)`                                                                            |
-| ❌   | `0x00620b70` | 287    | 3       | `_findenv_r`                                     | `undefined _findenv_r(void)`                                                                            |
+| Done | Address      | Length | # xrefs | Name                                         | Preliminary signature                                                                        |
+| ---- | ------------ | ------ | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ❌   | `0x00119048` | 95     | 1       | `ScriptKillSch`                              | `PyCxxObject * ScriptKillSch(PyCxxObject * pResult, PyCxxObject * pArgs)`                    |
+| ❌   | `0x001453e0` | 19     | 2       | `SkillStats::AssignImplicit`                 | `void SkillStats::AssignImplicit(SkillStats * pOther)`                                       |
+| ❌   | `0x0014e848` | 131    | 1       | `ScriptActivatePracticeMode`                 | `PyCxxObject * ScriptActivatePracticeMode(PyCxxObject * pResult, PyCxxObject * pArgs)`       |
+| ❌   | `0x0014e8d0` | 175    | 1       | `ScriptActivateAllAccessMode`                | `PyCxxObject * ScriptActivateAllAccessMode(PyCxxObject * pResult, PyCxxObject * pArgs)`      |
+| ❌   | `0x0014e980` | 199    | 1       | `ScriptEnableTeamFreqs`                      | `PyCxxObject * ScriptEnableTeamFreqs(PyCxxObject * pResult, PyCxxObject * pArgs)`            |
+| ❌   | `0x0014ea48` | 191    | 1       | `ScriptEnablePowerupCheats`                  | `PyCxxObject * ScriptEnablePowerupCheats(PyCxxObject * pResult, PyCxxObject * pArgs)`        |
+| ❌   | `0x0014eb08` | 87     | 1       | `ScriptDoPowerupCheat`                       | `PyCxxObject * ScriptDoPowerupCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`             |
+| ❌   | `0x0014eb60` | 87     | 1       | `ScriptDoBigGemModeCheat`                    | `PyCxxObject * ScriptDoBigGemModeCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`          |
+| ❌   | `0x0014ebb8` | 87     | 1       | `ScriptDoNoLatticeModeCheat`                 | `PyCxxObject * ScriptDoNoLatticeModeCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`       |
+| ❌   | `0x0014ec60` | 87     | 1       | `ScriptDoArenaStateCycleCheat`               | `PyCxxObject * ScriptDoArenaStateCycleCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`     |
+| ❌   | `0x0014ecb8` | 203    | 1       | `ScriptDoExpansionPackToggleCheat`           | `PyCxxObject * ScriptDoExpansionPackToggleCheat(PyCxxObject * pResult, PyCxxObject * pArgs)` |
+| ❌   | `0x0014ed88` | 91     | 1       | `ScriptDoWinSequenceCheat`                   | `PyCxxObject * ScriptDoWinSequenceCheat(PyCxxObject * pResult, PyCxxObject * pArgs)`         |
+| ❌   | `0x001506c0` | 175    | 1       | `HxScript::ActivateAllAccessMode`            | `undefined HxScript::ActivateAllAccessMode(void)`                                            |
+| ❌   | `0x00150cc0` | 167    | 1       | `HxScript::CheatWin`                         | `undefined HxScript::CheatWin(void)`                                                         |
+| ❌   | `0x00159410` | 139    | 1       | `HxScript::StopAllMidi`                      | `undefined HxScript::StopAllMidi(void)`                                                      |
+| ❌   | `0x0015c420` | 115    | 1       | `HxScript::Capture`                          | `undefined HxScript::Capture(void)`                                                          |
+| ❌   | `0x00163a10` | 87     | 1       | `HxScript::ZoneDump`                         | `undefined HxScript::ZoneDump(void)`                                                         |
+| ❌   | `0x001a6ed8` | 27     | 1       | `MidiDisabler::UnreferencedSend`             | `undefined MidiDisabler::UnreferencedSend(void)`                                             |
+| ❌   | `0x001f6530` | 35     | 2       | `MemcardManager::AtExitDestroyShared`        | `void MemcardManager::AtExitDestroyShared(void)`                                             |
+| ❌   | `0x00217ff8` | 127    | 2       | `MetPersonaData::AtExitDestroySavedList`     | `undefined MetPersonaData::AtExitDestroySavedList(void)`                                     |
+| ❌   | `0x00218098` | 127    | 2       | `MetPersonaData::AtExitDestroyLoadList`      | `undefined MetPersonaData::AtExitDestroyLoadList(void)`                                      |
+| ❌   | `0x0028ccd8` | 39     | 13      | `MetKeyboardScreen::AtExitDestroyTicker`     | `undefined MetKeyboardScreen::AtExitDestroyTicker(void)`                                     |
+| ❌   | `0x00381d98` | 119    | 2       | `MetScreen::AtExitDestroyContainerLoaderMap` | `undefined MetScreen::AtExitDestroyContainerLoaderMap(void)`                                 |
+| ❌   | `0x00382168` | 119    | 2       | `MetScreen::AtExitDestroyScreenRegistry`     | `undefined MetScreen::AtExitDestroyScreenRegistry(void)`                                     |
+| ❌   | `0x003d67f0` | 115    | 2       | `MidMBT::Print`                              | `void MidMBT::Print(ostream * stream)`                                                       |
+| ❌   | `0x0040d0d0` | 27     | 1       | `Delayer::UnreferencedSend`                  | `undefined Delayer::UnreferencedSend(void)`                                                  |
+| ❌   | `0x00432440` | 27     | 1       | `Renderer::UnreferencedSend`                 | `undefined Renderer::UnreferencedSend(void)`                                                 |
+| ❌   | `0x004776f8` | 107    | 1       | `TunnelEvent::DrawFiltered`                  | `void TunnelEvent::DrawFiltered(void * pFilter, int nArg)`                                   |
+| ❌   | `0x00478848` | 47     | 12      | `type_info::Destruct`                        | `undefined type_info::Destruct(void)`                                                        |
+| ❌   | `0x00478d68` | 47     | 3       | `bad_typeid::Destruct`                       | `undefined bad_typeid::Destruct(void)`                                                       |
+| ❌   | `0x00478e00` | 47     | 3       | `bad_cast::Destruct`                         | `undefined bad_cast::Destruct(void)`                                                         |
+| ❌   | `0x00479f98` | 287    | 3       | `ostrstream::Slot1`                          | `undefined ostrstream::Slot1(void)`                                                          |
+| ❌   | `0x0047a118` | 287    | 6       | `istrstream::Slot1`                          | `undefined istrstream::Slot1(void)`                                                          |
+| ❌   | `0x004ad5d8` | 47     | 3       | `StdBadException::Destruct`                  | `undefined StdBadException::Destruct(void)`                                                  |
+| ❌   | `0x004b4660` | 35     | 3       | `Spew::SharedInstanceDtor`                   | `void Spew::SharedInstanceDtor(void)`                                                        |
+| ❌   | `0x00536eb0` | 15     | 1       | `isceSifSetDma`                              | `undefined isceSifSetDma(void)`                                                              |
+| ❌   | `0x00536ed0` | 15     | 1       | `isceSifSetDChain`                           | `undefined isceSifSetDChain(void)`                                                           |
+| ❌   | `0x00558db8` | 7      | 1       | `UnreferencedReturnZeroStub00558db8`         | `undefined UnreferencedReturnZeroStub00558db8(void)`                                         |
+| ❌   | `0x00558dc0` | 7      | 1       | `UnreferencedReturnZeroStub00558dc0`         | `undefined UnreferencedReturnZeroStub00558dc0(void)`                                         |
+| ❌   | `0x00558dc8` | 7      | 1       | `UnreferencedReturnZeroStub00558dc8`         | `undefined UnreferencedReturnZeroStub00558dc8(void)`                                         |
+| ❌   | `0x00567670` | 431    | 2       | `audioDecSendToIOP`                          | `undefined audioDecSendToIOP(void)`                                                          |
+| ❌   | `0x00567820` | 187    | 2       | `audioDecCreate`                             | `undefined audioDecCreate(void)`                                                             |
+| ❌   | `0x005678e0` | 59     | 2       | `audioDecDelete`                             | `undefined audioDecDelete(void)`                                                             |
+| ❌   | `0x00567a50` | 19     | 2       | `audioDecIsPreset`                           | `undefined audioDecIsPreset(void)`                                                           |
+| ❌   | `0x00567a68` | 107    | 2       | `audioDecStart`                              | `undefined audioDecStart(void)`                                                              |
+| ❌   | `0x00567ad8` | 163    | 2       | `audioDecReset`                              | `undefined audioDecReset(void)`                                                              |
+| ❌   | `0x00569128` | 455    | 2       | `decode`                                     | `undefined decode(void)`                                                                     |
+| ❌   | `0x005692f0` | 7      | 2       | `MpegDecoderRoutine005692f0`                 | `undefined MpegDecoderRoutine005692f0(void)`                                                 |
+| ❌   | `0x005692f8` | 255    | 2       | `videoDecCreate`                             | `undefined videoDecCreate(void)`                                                             |
+| ❌   | `0x005693f8` | 51     | 2       | `videoDecDelete`                             | `undefined videoDecDelete(void)`                                                             |
+| ❌   | `0x00569430` | 11     | 2       | `videoDecAbort`                              | `undefined videoDecAbort(void)`                                                              |
+| ❌   | `0x00569440` | 7      | 3       | `videoDecGetState`                           | `undefined videoDecGetState(void)`                                                           |
+| ❌   | `0x00569458` | 27     | 1       | `videoDecInputCount`                         | `undefined videoDecInputCount(void)`                                                         |
+| ❌   | `0x00569478` | 55     | 1       | `videoDecInputSpaceCount`                    | `undefined videoDecInputSpaceCount(void)`                                                    |
+| ❌   | `0x005694b0` | 27     | 1       | `videoDecReset`                              | `undefined videoDecReset(void)`                                                              |
+| ❌   | `0x005694d0` | 223    | 2       | `videoDecFlush`                              | `undefined videoDecFlush(void)`                                                              |
+| ❌   | `0x005695b0` | 75     | 2       | `videoDecIsFlushed`                          | `undefined videoDecIsFlushed(void)`                                                          |
+| ❌   | `0x00569600` | 31     | 3       | `videoDecSetStream`                          | `undefined videoDecSetStream(void)`                                                          |
+| ❌   | `0x00569620` | 27     | 2       | `videoDecBeginPut`                           | `undefined videoDecBeginPut(void)`                                                           |
+| ❌   | `0x00569640` | 27     | 2       | `videoDecEndPut`                             | `undefined videoDecEndPut(void)`                                                             |
+| ❌   | `0x00569660` | 59     | 2       | `videoDecPutTs`                              | `undefined videoDecPutTs(void)`                                                              |
+| ❌   | `0x005696a0` | 91     | 2       | `videoDecMain`                               | `undefined videoDecMain(void)`                                                               |
+| ❌   | `0x00569700` | 39     | 2       | `mpegError`                                  | `undefined mpegError(void)`                                                                  |
+| ❌   | `0x00569728` | 43     | 2       | `mpegNodata`                                 | `undefined mpegNodata(void)`                                                                 |
+| ❌   | `0x00569758` | 35     | 2       | `mpegStopDMA`                                | `undefined mpegStopDMA(void)`                                                                |
+| ❌   | `0x00569780` | 35     | 2       | `mpegRestartDMA`                             | `undefined mpegRestartDMA(void)`                                                             |
+| ❌   | `0x005697a8` | 67     | 2       | `mpegTS`                                     | `undefined mpegTS(void)`                                                                     |
+| ❌   | `0x005697f0` | 303    | 2       | `cpy2area`                                   | `undefined cpy2area(void)`                                                                   |
+| ❌   | `0x0058de70` | 703    | 2       | `strFileOpen`                                | `undefined strFileOpen(void)`                                                                |
+| ❌   | `0x0058e130` | 79     | 2       | `strFileClose`                               | `undefined strFileClose(void)`                                                               |
+| ❌   | `0x0058e180` | 59     | 2       | `strFileRead`                                | `undefined strFileRead(void)`                                                                |
+| ❌   | `0x0059a908` | 223    | 1       | `CheckPalEqual`                              | `bool CheckPalEqual(APalette * pPalMip0, APalette * pPalMip, char * pszName, int nMip)`      |
+| ❌   | `0x0059afa0` | 291    | 2       | `videoCallback`                              | `undefined videoCallback(void)`                                                              |
+| ❌   | `0x0059b0c8` | 211    | 2       | `pcmCallback`                                | `undefined pcmCallback(void)`                                                                |
+| ❌   | `0x005cb2b8` | 23     | 2       | `readBufCreate`                              | `undefined readBufCreate(void)`                                                              |
+| ❌   | `0x005cb2d0` | 7      | 2       | `readBufDelete`                              | `undefined readBufDelete(void)`                                                              |
+| ❌   | `0x005cb2d8` | 47     | 2       | `readBufBeginPut`                            | `undefined readBufBeginPut(void)`                                                            |
+| ❌   | `0x005cb308` | 67     | 2       | `readBufEndPut`                              | `undefined readBufEndPut(void)`                                                              |
+| ❌   | `0x005cb350` | 71     | 2       | `readBufBeginGet`                            | `undefined readBufBeginGet(void)`                                                            |
+| ❌   | `0x005cb398` | 35     | 2       | `readBufEndGet`                              | `undefined readBufEndGet(void)`                                                              |
+| ❌   | `0x005d2860` | 599    | 3       | `clearGsMem`                                 | `undefined clearGsMem(void)`                                                                 |
+| ❌   | `0x005d2ab8` | 895    | 3       | `setImageTag`                                | `undefined setImageTag(void)`                                                                |
+| ❌   | `0x005d2e38` | 459    | 2       | `handler_endimage`                           | `undefined handler_endimage(void)`                                                           |
+| ❌   | `0x005d3008` | 71     | 2       | `startDisplay`                               | `undefined startDisplay(void)`                                                               |
+| ❌   | `0x005d3050` | 19     | 2       | `endDisplay`                                 | `undefined endDisplay(void)`                                                                 |
+| ❌   | `0x005d3068` | 71     | 2       | `vblankHandler`                              | `undefined vblankHandler(void)`                                                              |
+| ❌   | `0x005d3a88` | 59     | 2       | `isceSifSendCmd`                             | `undefined isceSifSendCmd(void)`                                                             |
+| ❌   | `0x005d3fa0` | 71     | 2       | `voBufCreate`                                | `undefined voBufCreate(void)`                                                                |
+| ❌   | `0x005d3fe8` | 15     | 2       | `voBufReset`                                 | `undefined voBufReset(void)`                                                                 |
+| ❌   | `0x005d3ff8` | 19     | 2       | `voBufIsFull`                                | `undefined voBufIsFull(void)`                                                                |
+| ❌   | `0x005d4010` | 119    | 2       | `voBufIncCount`                              | `undefined voBufIncCount(void)`                                                              |
+| ❌   | `0x005d4088` | 51     | 2       | `voBufGetData`                               | `undefined voBufGetData(void)`                                                               |
+| ❌   | `0x005d40c0` | 7      | 2       | `voBufDelete`                                | `undefined voBufDelete(void)`                                                                |
+| ❌   | `0x005d40d8` | 83     | 2       | `voBufGetTag`                                | `undefined voBufGetTag(void)`                                                                |
+| ❌   | `0x005d4130` | 31     | 2       | `voBufDecCount`                              | `undefined voBufDecCount(void)`                                                              |
+| ❌   | `0x005e29e0` | 39     | 6       | `getenv`                                     | `undefined getenv(void)`                                                                     |
+| ❌   | `0x005e4510` | 71     | 39      | `SpinDisableInterrupts`                      | `bool SpinDisableInterrupts(void)`                                                           |
+| ❌   | `0x005e4558` | 23     | 44      | `ReenableInterrupts`                         | `bool ReenableInterrupts(void)`                                                              |
+| ❌   | `0x005e4600` | 147    | 3       | `MSInPutBytes`                               | `int MSInPutBytes(sceCslCtx * pCtx, uint nPort, uchar * pBytes, int nCount)`                 |
+| ❌   | `0x005e84e0` | 115    | 4       | `_sceVu0ecossin`                             | `undefined _sceVu0ecossin(void)`                                                             |
+| ❌   | `0x005f1f90` | 31     | 1       | `toupper`                                    | `int toupper(int c)`                                                                         |
+| ❌   | `0x005fa8c0` | 55     | 3       | `PutSioByte`                                 | `undefined PutSioByte(void)`                                                                 |
+| ❌   | `0x005fa8f8` | 175    | 1       | `PutSioLineBufferedChar`                     | `undefined PutSioLineBufferedChar(void)`                                                     |
+| ❌   | `0x005fa9a8` | 51     | 18      | `PutSioCharCrlf`                             | `undefined PutSioCharCrlf(void)`                                                             |
+| ❌   | `0x005fa9e0` | 143    | 1       | `ConvertDoubleToScaledInt`                   | `undefined ConvertDoubleToScaledInt(void)`                                                   |
+| ❌   | `0x005faa70` | 359    | 1       | `PrintFloatInScientific`                     | `undefined PrintFloatInScientific(void)`                                                     |
+| ❌   | `0x005fabd8` | 1479   | 2       | `VPrintfToSioConsole`                        | `undefined VPrintfToSioConsole(void)`                                                        |
+| ❌   | `0x005fb1a0` | 55     | 8       | `PrintfToSioRaw`                             | `undefined PrintfToSioRaw(void)`                                                             |
+| ❌   | `0x005fb1d8` | 95     | 30      | `PrintfToSioLineBuffered`                    | `undefined PrintfToSioLineBuffered(void)`                                                    |
+| ❌   | `0x0060d920` | 231    | 2       | `istdiostream::Slot1`                        | `undefined istdiostream::Slot1(void)`                                                        |
+| ❌   | `0x006134e8` | 243    | 4       | `viBufBeginPut`                              | `undefined viBufBeginPut(void)`                                                              |
+| ❌   | `0x006135e0` | 83     | 3       | `viBufEndPut`                                | `undefined viBufEndPut(void)`                                                                |
+| ❌   | `0x00613638` | 271    | 2       | `viBufPutTs`                                 | `undefined viBufPutTs(void)`                                                                 |
+| ❌   | `0x00613748` | 75     | 3       | `viBufCount`                                 | `undefined viBufCount(void)`                                                                 |
+| ❌   | `0x00620b70` | 287    | 3       | `_findenv_r`                                 | `undefined _findenv_r(void)`                                                                 |
 
 ### Measurement history
 
