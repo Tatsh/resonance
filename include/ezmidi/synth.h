@@ -267,6 +267,9 @@ extern unsigned int gReg_kon[2];
 /** Key-off voice shadows. EZMIDI `0x7c48`. */
 extern unsigned int gReg_koff[2];
 
+/** Last flushed voice mix effect-left. EZMIDI `0x6ff8`. Inferred. */
+extern unsigned int gPrev_VMixEL[2];
+
 /** Remix flag, set by `HardSynthSetRemix`. EZMIDI `0x6ec0`. Inferred. */
 extern unsigned char gRemixMode;
 
@@ -366,6 +369,14 @@ void do_kOff(int nGroup);
  * @param nGroup Voice group. Inferred.
  */
 void do_kOn(int nGroup);
+
+/**
+ * Flush the voice shadows to the SPU.
+ *
+ * Writes the key, mix, and effect shadows whose staged values moved.
+ * EZMIDI `0x4840`.
+ */
+void _do_reg_out(void);
 
 /**
  * Take a voice slot.

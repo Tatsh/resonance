@@ -52,6 +52,16 @@ extern void sceSdSetAddr(int nEntry, int nAddress);
 extern int sceSdGetParam(int nEntry);
 
 /**
+ * Write a voice switch.
+ *
+ * Sony's sound library.
+ *
+ * @param nEntry Switch entry.
+ * @param nValue Value.
+ */
+extern void sceSdSetSwitch(int nEntry, unsigned int nValue);
+
+/**
  * Move a block between IOP memory and SPU memory.
  *
  * Sony's sound library.

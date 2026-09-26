@@ -64,13 +64,6 @@ int HardSynthKillOld(void);
 int scan_inbuf(int nBuffer);
 
 /**
- * Flush the voice registers.
- *
- * EZMIDI `0x4840`.
- */
-void _do_reg_out(void);
-
-/**
  * Run the synthesiser tick.
  *
  * Sleeps, scans the input buffers, updates the voices, and flushes the
