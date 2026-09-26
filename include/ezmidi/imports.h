@@ -30,3 +30,38 @@ extern int sceSdNote2Pitch(int nNote, int nFine, int nTune, int nReserved);
  * @param nValue Value.
  */
 extern void sceSdSetParam(int nEntry, int nValue);
+
+/**
+ * Write a voice address.
+ *
+ * Sony's sound library.
+ *
+ * @param nEntry Voice entry.
+ * @param nAddress Address.
+ */
+extern void sceSdSetAddr(int nEntry, int nAddress);
+
+/**
+ * Move a block between IOP memory and SPU memory.
+ *
+ * Sony's sound library.
+ *
+ * @param nChannel Channel.
+ * @param nMode Mode.
+ * @param nSpuAddr SPU address.
+ * @param pSource IOP source.
+ * @param nSize Size.
+ * @return Zero.
+ */
+extern int sceSdVoiceTrans(int nChannel, int nMode, int nSpuAddr, const void *pSource, int nSize);
+
+/**
+ * Poll a block move.
+ *
+ * Sony's sound library.
+ *
+ * @param nChannel Channel.
+ * @param nMode Mode.
+ * @return Nonzero once done.
+ */
+extern int sceSdVoiceTransStatus(int nChannel, int nMode);

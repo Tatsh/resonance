@@ -28,17 +28,105 @@ struct MidiChannel {
     unsigned char mPadding0D[3]; /**< +0x0D. Untouched by the reset. */
 };
 
-/** Bank payload. Refined when the bank loader lands. */
-struct BankData;
+/**
+ * Bank payload. Contents arrive with the bank loader.
+ *
+ * Only the address is used so far.
+ */
+struct BankData {
+    unsigned char mReserved00[1];
+};
 
-/** Bank header. Refined when the bank loader lands. */
-struct BankHeader;
+/**
+ * Bank header.
+ *
+ * Holds byte offsets to four offset tables, measured from the header base. Refined
+ * when the bank loader lands.
+ */
+struct BankHeader {
+    unsigned char mReserved00[0x24];
+    int mProgTab0;   /**< +0x24. Program table offset. Inferred. */
+    int mProgTab1;   /**< +0x28. Program table offset. Inferred. */
+    int mSampleTab0; /**< +0x2C. Sample table offset. Inferred. */
+    int mSampleTab1; /**< +0x30. Sample table offset. Inferred. */
+};
+
+/**
+ * Offset table into bank data.
+ *
+ * Entries address descriptors relative to the table base.
+ */
+struct OffsetTable {
+    int mReserved00[3]; /**< +0x00. */
+    int mCount;         /**< +0x0C. Inclusive upper bound. */
+    int mOffsets[1];    /**< +0x10. */
+};
+
+/**
+ * One sample descriptor.
+ *
+ * Addressed through the offset tables. Fields arrive as the voice code uses them.
+ */
+struct Sample {
+    short mUnknown00;              /**< +0x00. Selects the descriptor table entry. */
+    unsigned short mUnknown02;     /**< +0x02. */
+    unsigned short mUnknown04;     /**< +0x04. */
+    unsigned char mUnknown06;      /**< +0x06. */
+    unsigned char mReserved07[4];  /**< +0x07. */
+    unsigned char mUnknown0B;      /**< +0x0B. */
+    unsigned char mReserved0C;     /**< +0x0C. */
+    unsigned char mUnknown0D;      /**< +0x0D. */
+    unsigned char mReserved0E[2];  /**< +0x0E. */
+    unsigned char mUnknown10;      /**< +0x10. */
+    unsigned char mReserved11;     /**< +0x11. */
+    unsigned short mUnknown12;     /**< +0x12. */
+    unsigned short mUnknown14;     /**< +0x14. */
+    unsigned char mReserved16[19]; /**< +0x16. */
+    unsigned char mUnknown29;      /**< +0x29. */
+};
+
+/**
+ * One sample descriptor of the second table.
+ *
+ * May share its layout with `Sample`; kept apart until a use proves it.
+ */
+struct SampleDesc {
+    int mDataOff;              /**< +0x00. Offset into bank data. */
+    unsigned short mUnknown04; /**< +0x04. */
+    unsigned char mUnknown06;  /**< +0x06. */
+    unsigned char mReserved07; /**< +0x07. */
+};
+
+/**
+ * Note launch parameters from bank program data.
+ *
+ * Both parameter pointers the voice launcher takes address instances of this shape
+ * in different bank regions. Refined with the note-on path.
+ */
+struct NoteEvent {
+    unsigned char mReserved00[6]; /**< +0x00. */
+    unsigned char mUnknown06;     /**< +0x06. */
+    unsigned char mUnknown07;     /**< +0x07. */
+    signed char mUnknown08;       /**< +0x08. */
+    signed char mUnknown09;       /**< +0x09. */
+    unsigned char mReserved0A[6]; /**< +0x0A. */
+    unsigned char mUnknown10;     /**< +0x10. */
+    unsigned char mUnknown11;     /**< +0x11. */
+    signed char mUnknown12;       /**< +0x12. */
+    signed char mUnknown13;       /**< +0x13. */
+};
 
 /** Channel states. EZMIDI `0x8e00`. */
 extern struct MidiChannel gChan[16];
 
 /** Bank payload per bank. EZMIDI `0x8f00`. */
 extern struct BankData *gaBds[16];
+
+/** Current bank header. Set at note-on. EZMIDI `0x6ec4`. Inferred. */
+extern struct BankHeader *gpHd;
+
+/** Current bank data. Set at note-on. EZMIDI `0x6ec8`. Inferred. */
+extern struct BankData *gpBd;
 
 /** Bank header per bank. EZMIDI `0x85f0`. */
 extern struct BankHeader *gaHds[16];
@@ -122,24 +210,29 @@ int _note_2_pitch(int nNote, int nFine, int nTune, int nScale);
  * purposes marked inferred come from a single use each.
  */
 struct Note {
-    unsigned char mChannel;        /**< +0x00. Indexes `gChan`. Inferred. */
-    unsigned char mUnknown01;      /**< +0x01. Key in `_find_note`. */
-    unsigned char mUnknown02;      /**< +0x02. Filter bit and voice bits. */
-    unsigned char mUnknown03;      /**< +0x03. Compared against 0xff. */
-    unsigned char mFlags;          /**< +0x04. Bit 0 marks use; bits 2 and 3 gate updates. */
-    unsigned char mUnknown05;      /**< +0x05. Bit 0 and bit 2 steer gains. */
-    unsigned short mUnknown06;     /**< +0x06. Scaled by volume. */
-    unsigned short mUnknown08;     /**< +0x08. Copied to `mUnknown0C`. */
-    unsigned char mPan;            /**< +0x0A. Indexes `pan_2_vol`. Inferred. */
-    unsigned char mPadding0B;      /**< +0x0B. */
-    unsigned short mUnknown0C;     /**< +0x0C. */
-    unsigned short mUnknown0E;     /**< +0x0E. */
-    unsigned short mUnknown10;     /**< +0x10. */
-    unsigned short mUnknown12;     /**< +0x12. */
-    unsigned short mUnknown14;     /**< +0x14. */
-    unsigned char mReserved16[10]; /**< +0x16. */
-    unsigned char mUnknown20;      /**< +0x20. Count weight in `_search_for_slot`. */
-    unsigned char mReserved21[7];  /**< +0x21. */
+    unsigned char mChannel;       /**< +0x00. Indexes `gChan`. Inferred. */
+    unsigned char mUnknown01;     /**< +0x01. Key in `_find_note`. */
+    unsigned char mUnknown02;     /**< +0x02. Filter bit and voice bits. */
+    unsigned char mUnknown03;     /**< +0x03. Compared against 0xff. */
+    unsigned char mFlags;         /**< +0x04. Bit 0 marks use; bits 2 and 3 gate updates. */
+    unsigned char mUnknown05;     /**< +0x05. Bit 0 and bit 2 steer gains. */
+    unsigned short mUnknown06;    /**< +0x06. Scaled by volume. */
+    unsigned short mUnknown08;    /**< +0x08. Copied to `mUnknown0C`. */
+    unsigned char mPan;           /**< +0x0A. Indexes `pan_2_vol`. Inferred. */
+    unsigned char mPadding0B;     /**< +0x0B. */
+    unsigned short mUnknown0C;    /**< +0x0C. */
+    unsigned short mUnknown0E;    /**< +0x0E. */
+    unsigned short mUnknown10;    /**< +0x10. */
+    unsigned short mUnknown12;    /**< +0x12. */
+    unsigned short mUnknown14;    /**< +0x14. */
+    unsigned short mUnknown16;    /**< +0x16. */
+    unsigned short mUnknown18;    /**< +0x18. Pitch difference. Inferred. */
+    unsigned char mReserved1A[4]; /**< +0x1A. */
+    unsigned char mUnknown1E;     /**< +0x1E. */
+    unsigned char mUnknown1F;     /**< +0x1F. */
+    unsigned char mUnknown20;     /**< +0x20. Count weight in `_search_for_slot`. */
+    unsigned char mUnknown21;     /**< +0x21. */
+    unsigned char mReserved22[6]; /**< +0x22. */
 };
 
 /**
@@ -157,7 +250,7 @@ union SlotMasks {
 };
 
 /** Voice allocation words. EZMIDI `0x7000`. */
-extern unsigned int voice_alloc[24];
+extern unsigned int voice_alloc[48];
 
 /** Last voice per group. EZMIDI `0x6ecc`. */
 extern int last_voice[2];
@@ -192,6 +285,21 @@ extern int gFixedGainA;
 /** Fixed gain for the other branch. EZMIDI `0x7e5c`. Inferred. */
 extern int gFixedGainB;
 
+/** Alternate tune for one mode. EZMIDI `0x6ea8`. Inferred. */
+extern int gTuneAlt0;
+
+/** Alternate tune for the other mode. EZMIDI `0x6eac`. Inferred. */
+extern int gTuneAlt1;
+
+/** Voice mix right shadows. EZMIDI `0x6ff0`. */
+extern unsigned int gReg_VMixR[2];
+
+/** Voice mix effect-left shadows. EZMIDI `0x7010`. */
+extern unsigned int gReg_VMixEL[2];
+
+/** Voice mix effect-right shadows. EZMIDI `0x7028`. */
+extern unsigned int gReg_VMixER[2];
+
 /**
  * Key off a voice group.
  *
@@ -213,7 +321,7 @@ void do_kOff(int nGroup);
 void do_kOn(int nGroup);
 
 /**
- * Take a free voice slot.
+ * Take a voice slot.
  *
  * EZMIDI `0xc2c`.
  *
@@ -221,6 +329,29 @@ void do_kOn(int nGroup);
  * @return The slot, or -1 when both groups are full.
  */
 int get_free_slot(int nGroup);
+
+/**
+ * Fire a voice for a sample.
+ *
+ * Assembles voice parameters from the bank tables, takes a note, programs the SPU
+ * registers, and returns the note index. EZMIDI `0x2240`.
+ *
+ * @param nSample Sample index. Inferred.
+ * @param nChannel Channel index. Inferred.
+ * @param nKey Key value. Inferred.
+ * @param nScale Pitch scale. Inferred.
+ * @param pEvent Note event parameters. Inferred.
+ * @param pExtra Extra note event parameters. Inferred.
+ * @param nMode Alternate voice mode. Inferred.
+ * @return The note index, or -2 without a slot.
+ */
+int _fire_off_sample(int nSample,
+                     int nChannel,
+                     int nKey,
+                     int nScale,
+                     const struct NoteEvent *pEvent,
+                     const struct NoteEvent *pExtra,
+                     int nMode);
 
 /**
  * Recompute a note's voice gains.

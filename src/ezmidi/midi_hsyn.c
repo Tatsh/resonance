@@ -20,6 +20,21 @@ int gFixedGainA;
 // EZMIDI 0x7e5c
 int gFixedGainB;
 
+// EZMIDI 0x6ea8
+int gTuneAlt0;
+
+// EZMIDI 0x6eac
+int gTuneAlt1;
+
+// EZMIDI 0x6ff0
+unsigned int gReg_VMixR[2];
+
+// EZMIDI 0x7010
+unsigned int gReg_VMixEL[2];
+
+// EZMIDI 0x7028
+unsigned int gReg_VMixER[2];
+
 // EZMIDI image-relative addresses appear in the markers below. The module is an IOP
 // program of its own, so they never coincide with the main program. This file mirrors
 // the original `midi_hsyn.c`: the synthesiser voice engine.
@@ -219,4 +234,92 @@ int _note_2_pitch(int nNote, int nFine, int nTune, int nScale) {
         nPitch = 0x3fff;
     }
     return nPitch;
+}
+
+// EZMIDI 0x2240
+int _fire_off_sample(int nSample, int nChannel, int nKey, int nScale, const struct NoteEvent *pEvent,
+                     const struct NoteEvent *pExtra, int nMode) {
+    int nFine = 0;
+    int nTune = 0;
+    int nPan = 0x40;
+    int nGroup = 0xa;
+    int nFlags = 3;
+    struct OffsetTable *pSamples = (struct OffsetTable *)((char *)gpHd + gpHd->mSampleTab0);
+    struct OffsetTable *pSamples2 = (struct OffsetTable *)((char *)gpHd + gpHd->mSampleTab1);
+    struct Sample *pSample;
+    struct SampleDesc *pDesc;
+    unsigned short nLevel;
+    int nPitch;
+    int nPitch2;
+    int nEff;
+    int nDataAddr;
+    int nSlot;
+    struct Note *pNote;
+
+    if (nSample > pSamples->mCount) {
+        return -1;
+    }
+    pSample = (struct Sample *)((char *)pSamples + pSamples->mOffsets[nSample]);
+    nEff = pSample->mUnknown29;
+    if (gRemixMode != 0) {
+        nEff = (nEff & 0x40) | 3;
+    }
+    nLevel = pSample->mUnknown10 * nScale;
+    nLevel = ScaleCurve(nLevel * pEvent->mUnknown06);
+    if (pExtra != 0) {
+        nFine += pExtra->mUnknown12;
+        nTune += pExtra->mUnknown13;
+        nLevel = ScaleCurve(nLevel * pExtra->mUnknown10);
+        nPan = pExtra->mUnknown11;
+    }
+    nGroup = gChan[nKey].mUnknown0C;
+    pDesc = (struct SampleDesc *)((char *)pSamples2 + pSamples2->mOffsets[pSample->mUnknown00]);
+    nDataAddr = (int)(long)((char *)gpBd + pDesc->mDataOff);
+    if (pDesc->mUnknown06 == 1) {
+        nFlags |= 4;
+    }
+    nFine += pEvent->mUnknown08;
+    nTune += pEvent->mUnknown09;
+    if (pEvent->mUnknown07 != 0x40) {
+        nPan = pEvent->mUnknown07;
+    }
+    if (pSample->mUnknown0D != 0x40) {
+        nPan = pSample->mUnknown0D;
+    }
+    nPitch = _note_2_pitch(pSample->mUnknown0B, nChannel + nFine, nTune, pDesc->mUnknown04);
+    nPitch2 = _note_2_pitch(pSample->mUnknown0B, nChannel + nFine,
+                            nTune + ((nMode & 1) != 0 ? gTuneAlt1 : gTuneAlt0), pDesc->mUnknown04);
+    nSlot = _search_for_slot(nGroup, nGroup, nLevel);
+    if (nSlot == -1) {
+        return -2;
+    }
+    pNote = _new_note();
+    pNote->mUnknown02 = nSample;
+    pNote->mChannel = nChannel;
+    pNote->mUnknown01 = nKey;
+    pNote->mFlags = nFlags;
+    pNote->mUnknown03 = (nMode & 1) != 0 ? 0xff : 0;
+    pNote->mUnknown08 = nPitch;
+    pNote->mUnknown06 = nLevel;
+    pNote->mPan = nPan;
+    pNote->mUnknown20 = (gChan[nKey].mUnknown04 & 0xff) - 1;
+    pNote->mUnknown16 = 0;
+    pNote->mUnknown1E = 0;
+    pNote->mUnknown1F = 0;
+    pNote->mUnknown21 = gChan[nKey].mUnknown04 & 0xff;
+    pNote->mUnknown18 = nPitch - nPitch2;
+    if ((gChan[nKey].mUnknown0B & 1) != 0) {
+        pNote->mUnknown05 |= 1;
+    }
+    _apply_channel_to_note(pNote, 1);
+    sceSdSetParam((nSlot | 0x300) & 0xffff, pSample->mUnknown12);
+    sceSdSetParam((nSlot | 0x400) & 0xffff, pSample->mUnknown14);
+    sceSdSetAddr((nSlot | 0x2040) & 0xffff, nDataAddr);
+    CheckEffBits(nEff & 1, &voice_alloc[14], nSlot, 0x1800);
+    CheckEffBits(nEff & 2, gReg_VMixR, nSlot, 0x1a00);
+    CheckEffBits(nEff & 4, gReg_VMixEL, nSlot, 0x1900);
+    CheckEffBits(nEff & 8, gReg_VMixER, nSlot, 0x1b00);
+    do_kOn(nSlot);
+    voice_alloc[nSlot] |= slot_2_mask.mWords[nSlot];
+    return (int)(pNote - gCurrentNotes);
 }

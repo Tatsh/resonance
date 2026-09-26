@@ -4,7 +4,7 @@
 // binary, including the allocator's retry shapes.
 
 // EZMIDI 0x7000
-unsigned int voice_alloc[24];
+unsigned int voice_alloc[48];
 
 // EZMIDI 0x6ecc
 int last_voice[2];
