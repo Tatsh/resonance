@@ -30,6 +30,7 @@ appticktask
 apptimetask
 apptnl
 apptunnel
+apptunnelscript
 apsz
 arect
 arkfile
@@ -127,6 +128,7 @@ collideables
 color
 colorable
 coloring
+configquery
 confstr
 congrat
 contctrlmsg
@@ -257,6 +259,7 @@ fx's
 fxwires
 gamebeginmsg
 gamechatpacket
+gamecheats
 gameconnectfailuremsg
 gameconnectionlostmsg
 gameconnectsuccessmsg
@@ -333,6 +336,7 @@ hudpowerup
 hudscore
 hudscorepulse
 hudscreenflash
+hudscript
 hudtcgroup
 hudtextmessage
 hudtrack
@@ -340,11 +344,13 @@ hudtracklabel
 hudutil
 hudwinmessage
 hxchunkname
+hxcommands
 hxcons
 hxdatachunkid
 hxdatachunkreader
 hxidatachunk
 hxmemstream
+hxmodule
 hxstr
 hxstream
 hxutl
@@ -752,6 +758,7 @@ pyob
 pyos
 pypcre
 pyproject
+pyshell
 pystate
 pythonrun
 quadword
@@ -766,6 +773,7 @@ raytest
 rdparty
 readbuf
 readop
+recinfo
 recolor
 recomputation
 recon
@@ -825,6 +833,9 @@ scratchplate
 screenanim
 screendump
 scriptcalltemplates
+scripteval
+scriptfunc
+scripthost
 scriptmsg
 scriptsink
 scripttemplatemap
@@ -953,6 +964,7 @@ tnlsnake
 tnlstr
 tnlutil
 toggleghostmsg
+togglemode
 toolstream
 totbytes
 toupper
