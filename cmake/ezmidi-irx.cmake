@@ -98,7 +98,7 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.IRX"
-  COMMAND ${EZMIDI_IOP_CC} -T${EZMIDI_LINKFILE} -Os -o "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.elf"
+  COMMAND ${EZMIDI_IOP_CC} -T${EZMIDI_LINKFILE} -e start -Os -o "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.elf"
           ${EZMIDI_OBJS} "${EZMIDI_IRX_BUILD_DIR}/build-imports.o" -nostdlib -dc -r
   COMMAND ${EZMIDI_IOP_STRIP} --strip-unneeded --remove-section=.pdr --remove-section=.comment
           --remove-section=.mdebug.abi32 --remove-section=.gnu.attributes -o
