@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ezmidi/ezmidi.h"
+
 /**
  * Foreign routines EZMIDI.IRX calls into.
  *
@@ -136,3 +138,115 @@ extern int SleepThread(void);
  * @return The destination.
  */
 extern void *memcpy(void *pDest, const void *pSource, unsigned int nSize);
+
+/**
+ * Enable CPU interrupts.
+ *
+ * Kernel.
+ */
+extern void CpuEnableIntr(void);
+
+/**
+ * Enable an interrupt.
+ *
+ * Kernel. The server thread enables two interrupt lines with it.
+ *
+ * @param nLine Interrupt line. Inferred.
+ * @return The interrupt result.
+ */
+extern int EnableIntr(int nLine);
+
+/**
+ * Check SIF initialisation.
+ *
+ * SIF module.
+ *
+ * @return Nonzero when initialisation is needed.
+ */
+extern int sceSifCheckInit(void);
+
+/**
+ * Initialise SIF.
+ *
+ * SIF module.
+ */
+extern void sceSifInit(void);
+
+/**
+ * Initialise the RPC layer.
+ *
+ * SIF module. Both call sites pass zero.
+ *
+ * @param nMode Mode. Inferred.
+ */
+extern void sceSifInitRpc(int nMode);
+
+/**
+ * Fetch the calling thread.
+ *
+ * Kernel.
+ *
+ * @return The thread identifier.
+ */
+extern int GetThreadId(void);
+
+/**
+ * Bind an RPC queue to a thread.
+ *
+ * SIF module.
+ *
+ * @param pQueue Queue. Inferred.
+ * @param nThreadId Thread identifier. Inferred.
+ */
+extern void sceSifSetRpcQueue(void *pQueue, int nThreadId);
+
+/**
+ * Register an RPC server.
+ *
+ * SIF module. The binary passes two zero words and the queue after the buffer.
+ *
+ * @param pServerData Server data. Inferred.
+ * @param nServerId Server identifier. Inferred.
+ * @param pFunc Command handler. Inferred.
+ * @param pBuf Receive buffer. Inferred.
+ * @param nUnknown0 Always zero at the call site. Inferred.
+ * @param nUnknown1 Always zero at the call site. Inferred.
+ * @param pQueue Queue. Inferred.
+ */
+extern void sceSifRegisterRpc(void *pServerData,
+                              unsigned int nServerId,
+                              SifRpcFunc pFunc,
+                              void *pBuf,
+                              int nUnknown0,
+                              int nUnknown1,
+                              void *pQueue);
+
+/**
+ * Pump the RPC queue forever.
+ *
+ * SIF module.
+ *
+ * @param pQueue Queue. Inferred.
+ */
+extern void sceSifRpcLoop(void *pQueue);
+
+/**
+ * Create a thread.
+ *
+ * Kernel.
+ *
+ * @param pParam Thread parameters. Inferred.
+ * @return The thread identifier, or zero and below when creation fails.
+ */
+extern int CreateThread(struct ThreadParam *pParam);
+
+/**
+ * Start a thread.
+ *
+ * Kernel. The entry passes zero with the identifier.
+ *
+ * @param nThreadId Thread identifier. Inferred.
+ * @param nArg Argument. Inferred.
+ * @return The start result.
+ */
+extern int StartThread(int nThreadId, int nArg);
