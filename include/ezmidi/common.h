@@ -203,17 +203,19 @@ void HardSynthResume(void);
  * EZMIDI `0x6660`.
  *
  * @param nMode Remix mode. Inferred.
+ * @return Zero.
  */
-void HardSynthSetRemix(int nMode);
+int HardSynthSetRemix(int nMode);
 
 /**
  * Set the mono mode.
  *
- * EZMIDI `0x66a4`.
+ * Marks every channel for recompute. EZMIDI `0x66a4`.
  *
  * @param nMode Mono mode. Inferred.
+ * @return Zero.
  */
-void HardSynthSetMono(int nMode);
+int HardSynthSetMono(int nMode);
 
 /**
  * Report synthesiser information.

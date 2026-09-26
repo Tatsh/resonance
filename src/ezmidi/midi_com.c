@@ -330,3 +330,16 @@ int HardSynthReset(void) {
     ResetSynthState();
     return 0;
 }
+
+// EZMIDI 0x6660
+int HardSynthSetRemix(int nMode) {
+    gRemixMode = nMode != 0;
+    return 0;
+}
+
+// EZMIDI 0x66a4
+int HardSynthSetMono(int nMode) {
+    gMonoMode = nMode != 0;
+    gUpdateMask = 0xffff;
+    return 0;
+}
