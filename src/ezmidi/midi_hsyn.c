@@ -44,6 +44,44 @@ int gFadeTimed = 1;
 // EZMIDI 0x6eec
 unsigned short gVoiceParamBase[2] = {0x0600, 0x0700};
 
+// EZMIDI 0x6ef0
+int gLinValTable[59] = {
+    655320, 546100, 468085, 364066, 327660, 273050, 218440, 182033, 156028, 136525, 112986, 91016,
+    79917,  68262,  56493,  44884,  39477,  33779,  27305,  21844,  19274,  17245,  14246,  11298,
+    9929,   8401,   7123,   5649,   4964,   4255,   3523,   2730,   2520,   2184,   1724,   1424,
+    1213,   1056,   885,    712,    618,    528,    442,    352,    297,    273,    218,    172,
+    156,    131,    109,    88,     78,     65,     55,     44,     38,     33,     27,
+};
+
+// EZMIDI 0x37fc
+int _pick_lin_val(int nAbs, unsigned char *pTimer) {
+    int nLo = 0;
+    int nHi = 58;
+    int nMid;
+
+    if ((unsigned int)(gLinValTable[nLo] * 30) < (unsigned int)nAbs) {
+        *pTimer = (unsigned char)((unsigned int)nAbs / (unsigned int)gLinValTable[nLo]);
+        return nLo;
+    }
+    if ((unsigned int)nAbs < (unsigned int)(gLinValTable[nHi] * 30)) {
+        *pTimer = (unsigned char)((unsigned int)nAbs / (unsigned int)gLinValTable[nHi]);
+        return nHi;
+    }
+    for (;;) {
+        nMid = (nLo + nHi) / 2;
+        if ((unsigned int)(gLinValTable[nMid] * 30) < (unsigned int)nAbs) {
+            nHi = nMid;
+        } else {
+            nLo = nMid;
+        }
+        if (nLo + 1 >= nHi) {
+            break;
+        }
+    }
+    *pTimer = (unsigned char)((unsigned int)nAbs / (unsigned int)(gLinValTable[nHi] * 2));
+    return nHi;
+}
+
 // EZMIDI 0x7e58
 int gFixedGainA;
 

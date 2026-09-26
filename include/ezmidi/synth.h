@@ -319,6 +319,13 @@ extern int gFadeTimed;
 /** Voice parameter entry bases per mode. EZMIDI `0x6eec`. Inferred. */
 extern unsigned short gVoiceParamBase[2];
 
+/**
+ * Linear fade value table, descending.
+ *
+ * Contents read from the image. EZMIDI `0x6ef0`. Inferred.
+ */
+extern int gLinValTable[59];
+
 /** Fixed gain for one branch. EZMIDI `0x7e58`. Inferred. */
 extern int gFixedGainA;
 
