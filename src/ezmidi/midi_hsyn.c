@@ -399,3 +399,30 @@ int hs_note_on(int nChannel, int nNote, int nVelocity) {
     gCurrentNotes[nSlot].mUnknown02 = (unsigned char)nResult2;
     return nSlot;
 }
+
+// EZMIDI 0x3250
+int hs_kill_idx(struct Note *pNote, int nUnused) {
+    int nVoice = pNote->mUnknown02;
+
+    (void)nUnused; // Yes, the binary takes a second argument and never reads it.
+    if (nUnused == 0) {
+        if ((pNote->mFlags & 8) == 0) {
+            do_kOff(nVoice);
+            pNote->mFlags |= 8;
+        }
+    }
+    sceSdSetParam(nVoice, 0);
+    sceSdSetParam((nVoice | 0x100) & 0xffff, 0);
+    voice_alloc[nVoice] &= ~slot_2_mask.mWords[nVoice];
+    return _free_note(pNote, 0);
+}
+
+// EZMIDI 0x33cc
+int hs_idx_off(int nIndex) {
+    if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+        return -1;
+    }
+    do_kOff(gCurrentNotes[nIndex].mUnknown02);
+    gCurrentNotes[nIndex].mFlags = gCurrentNotes[nIndex].mUnknown02 | 8;
+    return 0;
+}

@@ -331,6 +331,28 @@ void do_kOn(int nGroup);
 int get_free_slot(int nGroup);
 
 /**
+ * Silence a voice by index.
+ *
+ * Keys the voice off and parks its flags. EZMIDI `0x33cc`.
+ *
+ * @param nIndex Note index.
+ * @return Zero, or -1 when the note is already free.
+ */
+int hs_idx_off(int nIndex);
+
+/**
+ * Silence a voice by note.
+ *
+ * Keys the voice off unless told to keep it, clears its registers and allocation,
+ * and releases the note. EZMIDI `0x3250`.
+ *
+ * @param pNote The note.
+ * @param nUnused Ignored by the binary.
+ * @return Zero from the release, or -1 when the note is already free.
+ */
+int hs_kill_idx(struct Note *pNote, int nUnused);
+
+/**
  * Start a note.
  *
  * Selects a bank program and articulation, fires the primary voice and then the
