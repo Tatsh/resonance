@@ -19,6 +19,19 @@ int HardSynthLoadBD(int nSpuAddr, const void *pSource, int nSize) {
     return MemCpy_IOPtoSPU(nSpuAddr, pSource, nSize);
 }
 
+// EZMIDI 0x5b7c
+int HardSynthKillOld(void) {
+    int nIndex;
+
+    for (nIndex = 0; nIndex < 50; ++nIndex) {
+        if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+            continue;
+        }
+        hs_check_playing(&gCurrentNotes[nIndex]);
+    }
+    return 0;
+}
+
 // EZMIDI 0x5c54
 int HardSynthUpdate(void) {
     int nIndex;

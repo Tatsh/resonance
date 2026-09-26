@@ -48,8 +48,10 @@ void hs_tick_setup(void);
  * Kill expired voices.
  *
  * EZMIDI `0x5b7c`.
+ *
+ * @return Zero.
  */
-void HardSynthKillOld(void);
+int HardSynthKillOld(void);
 
 /**
  * Scan an input buffer.

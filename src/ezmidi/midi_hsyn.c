@@ -462,6 +462,33 @@ int hs_note_off(int nChannel, int nNote) {
     return 0;
 }
 
+// EZMIDI 0x3654
+int hs_check_playing(struct Note *pNote) {
+    int nVoice = pNote->mUnknown02;
+    int nDead;
+
+    if ((pNote->mFlags & 2) != 0) {
+        pNote->mFlags &= 0xfd;
+        return 0;
+    }
+    nDead = 0;
+    if ((pNote->mFlags & 8) != 0) {
+        nDead = 1;
+    } else if ((pNote->mFlags & 4) == 0 &&
+               (voice_alloc[12 + (nVoice & 1)] & (unsigned int)slot_2_mask.mWords[nVoice]) != 0) {
+        nDead = 1;
+    }
+    if (nDead == 0) {
+        return 0;
+    }
+    if ((sceSdGetParam((nVoice | 0x500) & 0xffff) & 0xffff) != 0) {
+        return 0;
+    }
+    pNote->mFlags |= 8;
+    hs_kill_idx(pNote, 1);
+    return -1;
+}
+
 // EZMIDI 0x4334
 int _apply_chorus(int nCurrent, int nRate, int nTarget, unsigned short *pState) {
     *pState = (unsigned short)(*pState + nRate);

@@ -42,6 +42,16 @@ extern void sceSdSetParam(int nEntry, int nValue);
 extern void sceSdSetAddr(int nEntry, int nAddress);
 
 /**
+ * Read a voice parameter.
+ *
+ * Sony's sound library. The one call site masks the result to sixteen bits.
+ *
+ * @param nEntry Voice entry.
+ * @return The parameter value.
+ */
+extern int sceSdGetParam(int nEntry);
+
+/**
  * Move a block between IOP memory and SPU memory.
  *
  * Sony's sound library.

@@ -472,6 +472,17 @@ int _find_note(int nChannel, int nNote);
 int hs_note_off(int nChannel, int nNote);
 
 /**
+ * Check whether a voice is still playing.
+ *
+ * Clears the update flag, and kills and releases the note when its envelope
+ * parameter reads back zero. EZMIDI `0x3654`.
+ *
+ * @param pNote The note. Inferred.
+ * @return -1 when the voice died, else zero.
+ */
+int hs_check_playing(struct Note *pNote);
+
+/**
  * Recompute the gains of every playing note on a channel.
  *
  * With a -1 channel, recomputes every playing note. EZMIDI `0x4654`.
