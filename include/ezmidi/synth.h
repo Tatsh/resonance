@@ -239,7 +239,7 @@ struct Note {
     unsigned char mUnknown1E;     /**< +0x1E. */
     unsigned char mUnknown1F;     /**< +0x1F. */
     unsigned char mUnknown20;     /**< +0x20. Count weight in `_search_for_slot`. */
-    unsigned char mUnknown21;     /**< +0x21. */
+    unsigned char mBank;          /**< +0x21. Bank index. Inferred. */
     unsigned char mReserved22[6]; /**< +0x22. */
 };
 

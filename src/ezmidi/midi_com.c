@@ -410,3 +410,24 @@ void HardSynthInfo(int nSelector) {
         HardSynthSetMono(gMonoMode == 0);
     }
 }
+
+// EZMIDI 0x586c
+int HardSynthInvalidateBank(int nBank) {
+    int nIndex;
+
+    if (gaHds[nBank] == 0 || gaBds[nBank] == 0) {
+        return -1;
+    }
+    gaHds[nBank] = 0;
+    gaBds[nBank] = 0;
+    for (nIndex = 0; nIndex < 50; ++nIndex) {
+        if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+            continue;
+        }
+        if (gCurrentNotes[nIndex].mBank != nBank) {
+            continue;
+        }
+        hs_kill_idx(&gCurrentNotes[nIndex], 0);
+    }
+    return 0;
+}

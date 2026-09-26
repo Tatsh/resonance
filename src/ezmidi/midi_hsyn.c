@@ -397,7 +397,7 @@ int _fire_off_sample(int nSample, int nNote, int nChannel, int nVelocity, const 
     pNote->mUnknown16 = 0;
     pNote->mUnknown1E = 0;
     pNote->mUnknown1F = 0;
-    pNote->mUnknown21 = gChan[nChannel].mBank & 0xff;
+    pNote->mBank = (unsigned char)(gChan[nChannel].mBank & 0xff);
     pNote->mUnknown18 = nPitch - nPitch2;
     if ((gChan[nChannel].mUnknown0B & 1) != 0) {
         pNote->mUnknown05 |= 1;

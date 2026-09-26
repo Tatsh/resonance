@@ -265,12 +265,13 @@ void HardSynthInvalidateHd(int nValue);
 /**
  * Invalidate a bank.
  *
+ * Forgets the bank header and payload, and kills its playing notes.
  * EZMIDI `0x586c`.
  *
- * @param nValue Bank selector. Inferred.
- * @return The invalidate result. Inferred.
+ * @param nBank Bank index. Inferred.
+ * @return Zero, or -1 when the bank is not loaded.
  */
-int HardSynthInvalidateBank(int nValue);
+int HardSynthInvalidateBank(int nBank);
 
 /**
  * Kill expired voices.
