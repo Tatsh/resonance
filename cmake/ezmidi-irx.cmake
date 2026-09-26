@@ -67,7 +67,8 @@ set(EZMIDI_IOP_FLAGS
     -I${EZMIDI_IRX_DIR}
     -I${CMAKE_SOURCE_DIR}/include)
 
-# midi_ent.o comes first so that start lands at the start of .text.
+# midi_ent.o comes first so the module entry and handlers lead .text. The fixup
+# resolves the entry from the start symbol wherever the compiler places it.
 set(EZMIDI_SRCS midi_ent.c key.c midi_com.c midi_hsyn.c notes.c irx_id.c)
 set(EZMIDI_OBJS "")
 foreach(_src ${EZMIDI_SRCS})
@@ -98,7 +99,7 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.IRX"
-  COMMAND ${EZMIDI_IOP_CC} -T${EZMIDI_LINKFILE} -e start -Os -o "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.elf"
+  COMMAND ${EZMIDI_IOP_CC} -T${EZMIDI_LINKFILE} -Os -o "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.elf"
           ${EZMIDI_OBJS} "${EZMIDI_IRX_BUILD_DIR}/build-imports.o" -nostdlib -dc -r
   COMMAND ${EZMIDI_IOP_STRIP} --strip-unneeded --remove-section=.pdr --remove-section=.comment
           --remove-section=.mdebug.abi32 --remove-section=.gnu.attributes -o
