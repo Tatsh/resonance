@@ -89,8 +89,14 @@ private:
     Player *mPlayer;
     TnlActivator mActivator;
     TnlGridMarkers mGridMarkers;
+
+public:
+    // Public because the seeker script command reaches the sabre string through them with no
+    // accessor in the image.
     TnlSabreTrail mSabreTrail;
     TnlSeekerFade mSeekerFade;
+
+private:
     int mUnknown198; // +0x198, never accessed by the recovered routines.
     int mUnknown19c; // +0x19c, never accessed by the recovered routines.
 };

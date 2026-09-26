@@ -30,7 +30,8 @@ public:
      * Put the material for one stick motion on the prompt.
      *
      * `in_out` selects `HUD in_out_stick.mat` and `up_down` selects `HUD up_down_stick.mat`. Any
-     * other text changes nothing. The out-of-line copy has no caller. The title is inferred.
+     * other text changes nothing. The stick-material script command calls it. The title is
+     * inferred.
      *
      * @param motion The motion.
      * @ghidraAddress 0x00429d60

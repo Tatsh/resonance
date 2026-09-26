@@ -86,11 +86,19 @@ private:
     // Alpha removed per update while the seeker fades out for a range change.
     static constexpr float kFadeOutRate = -0.2f;
 
+public:
+    // Public because the seeker script command reads and writes them with no accessor in the
+    // image.
     int mActive;
     int mFirstSlice;
     int mSliceCount;
     int mRing;
+
+private:
     Color mColor;
     float mFadeRate;
+
+public:
+    // Public because the seeker script command reads it with no accessor in the image.
     int mIndex;
 };

@@ -34,6 +34,17 @@ public:
     explicit Int(const Object &ob);
 
     /**
+     * Wrap a C long as an integer.
+     *
+     * The out-of-line body adopts the result of `PyInt_FromLong()` at `0x00580c68` and runs
+     * validate(). It belongs to the vendored binding and is not reconstructed.
+     *
+     * @param nValue The value to wrap.
+     * @ghidraAddress 0x004c44c0
+     */
+    explicit Int(long nValue);
+
+    /**
      * Read the value.
      *
      * The out-of-line body forwards to `PyInt_AsLong()`. It belongs to the vendored binding and is

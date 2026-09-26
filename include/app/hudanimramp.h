@@ -62,5 +62,8 @@ public:
 
 private:
     Rnd::Animatable *mAnim;
+
+public:
+    // Public because the activator-label script command drives it with no accessor in the image.
     LinearRamp mRamp;
 };

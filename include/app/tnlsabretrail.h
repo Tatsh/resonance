@@ -131,7 +131,12 @@ private:
 
     std::vector<Point> mPoints;
     int mRevealed; // Points handed to mString so far.
+
+public:
+    // Public because the seeker script command drives it with no accessor in the image.
     Rnd::String *mString;
+
+private:
     int mFirstBar;
     int mBarCount;
     int mTrack;

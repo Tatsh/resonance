@@ -819,6 +819,7 @@ scloadlevelpacket
 scoretrackgraph
 scplayerjoinedpacket
 scratchpad
+scratchplate
 screenanim
 screendump
 scriptcalltemplates
@@ -841,6 +842,7 @@ selectremix
 selectskill
 sequencercmd
 serialiser
+setmat
 shellcheck
 shellformat
 shiftjis

@@ -437,7 +437,13 @@ private:
     std::vector<TnlArrow *> mArrows;
     TnlGemManager *mGemManager;
     DurGemTrails *mGemTrails;
+
+public:
+    // Public because the seeker script command reads the first player with no accessor in the
+    // image.
     std::vector<TnlPlayer *> mPlayers;
+
+private:
     Rnd::ParticleSys *mStringFlare; // "string flare.ps".
     Rnd::View *mStringView;         // "tnl strings".
     Rnd::Mat *mStringGemMat;        // "string gem mat".

@@ -236,8 +236,10 @@ protected:
      */
     void ReleaseDrawsRefs();
 
+public:
     // Declared in recovered offset order, with the access specifiers interleaved. Protected
     // because Rnd::Mesh derives from this class and Mesh::Collide tests this flag at its top.
+    // Public because the drawable show commands read it with no accessor in the image.
     int mShowing; // +0x04
 
 private:
