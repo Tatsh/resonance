@@ -1085,6 +1085,7 @@ xdecref
 xfms
 xincref
 xori
+xrefs
 xyoffset
 xyzf
 yarnrc
