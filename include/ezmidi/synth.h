@@ -210,8 +210,8 @@ int _note_2_pitch(int nNote, int nFine, int nTune, int nScale);
  * purposes marked inferred come from a single use each.
  */
 struct Note {
-    unsigned char mNote;          /**< +0x00. Note number. Inferred. */
-    unsigned char mChannel;       /**< +0x01. Channel. Inferred. */
+    unsigned char mChannel;       /**< +0x00. Channel. Inferred. */
+    unsigned char mNote;          /**< +0x01. Note number. Inferred. */
     unsigned char mUnknown02;     /**< +0x02. Filter bit and voice bits. */
     unsigned char mUnknown03;     /**< +0x03. Compared against 0xff. */
     unsigned char mFlags;         /**< +0x04. Bit 0 marks use; bits 2 and 3 gate updates. */
@@ -406,11 +406,22 @@ int _apply_channel_to_note(struct Note *pNote, int nApply);
  *
  * EZMIDI `0xe24`.
  *
- * @param nNote Note number. Inferred.
  * @param nChannel Channel index. Inferred.
+ * @param nNote Note number. Inferred.
  * @return The note index, or -1.
  */
-int _find_note(int nNote, int nChannel);
+int _find_note(int nChannel, int nNote);
+
+/**
+ * Stop a note.
+ *
+ * Keys the voice off and unlinks it. EZMIDI `0x34e0`.
+ *
+ * @param nChannel Channel index. Inferred.
+ * @param nNote Note number. Inferred.
+ * @return Zero, or -1 when the note is not playing.
+ */
+int hs_note_off(int nChannel, int nNote);
 
 /**
  * Release a note.

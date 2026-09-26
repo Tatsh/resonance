@@ -154,8 +154,8 @@ int _apply_channel_to_note(struct Note *pNote, int nApply) {
     int nPan = pNote->mPan;
     int nSaved0C = pNote->mUnknown0C;
     int nSaved14 = pNote->mUnknown14;
-    int nVolume = ScaleCurve((unsigned short)ScaleCurve(pNote->mUnknown06 * gChan[pNote->mNote].mVolume) *
-                             gChan[pNote->mNote].mExpression);
+    int nVolume = ScaleCurve((unsigned short)ScaleCurve(pNote->mUnknown06 * gChan[pNote->mChannel].mVolume) *
+                             gChan[pNote->mChannel].mExpression);
     unsigned short nVoice;
 
     if ((pNote->mFlags & 2) != 0) {
@@ -163,7 +163,7 @@ int _apply_channel_to_note(struct Note *pNote, int nApply) {
     }
     if (gPauseCount <= 0) {
         nVoice = pNote->mUnknown0C;
-    } else if (((unsigned int)gSynthRun >> pNote->mNote & 1) == 0) {
+    } else if (((unsigned int)gSynthRun >> pNote->mChannel & 1) == 0) {
         nVoice = 0;
     } else {
         nVoice = pNote->mUnknown0C;
@@ -424,5 +424,26 @@ int hs_idx_off(int nIndex) {
     }
     do_kOff(gCurrentNotes[nIndex].mUnknown02);
     gCurrentNotes[nIndex].mFlags = gCurrentNotes[nIndex].mUnknown02 | 8;
+    return 0;
+}
+
+// EZMIDI 0x34e0
+int hs_note_off(int nChannel, int nNote) {
+    int nIndex = _find_note(nChannel, nNote);
+
+    if (nIndex == -1) {
+        return -1;
+    }
+    hs_idx_off(nIndex);
+    if (gCurrentNotes[nIndex].mUnknown03 == 0) {
+        return 0;
+    }
+    if (gCurrentNotes[nIndex].mUnknown03 == 0xff) {
+        return 0;
+    }
+    hs_idx_off(gCurrentNotes[nIndex].mUnknown03);
+    gCurrentNotes[nIndex].mUnknown03 = 0;
+    // Yes, the binary rereads the cleared link, so this always parks index zero.
+    gCurrentNotes[gCurrentNotes[nIndex].mUnknown03].mUnknown03 = 0;
     return 0;
 }

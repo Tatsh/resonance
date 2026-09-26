@@ -41,7 +41,7 @@ int get_free_slot(int nGroup) {
 }
 
 // EZMIDI 0xe24
-int _find_note(int nNote, int nChannel) {
+int _find_note(int nChannel, int nNote) {
     int nIndex;
 
     for (nIndex = 0; nIndex < 50; ++nIndex) {
