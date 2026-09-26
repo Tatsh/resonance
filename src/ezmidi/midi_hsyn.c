@@ -11,8 +11,17 @@ unsigned char gMonoMode;
 // EZMIDI 0x6e90
 int gPauseCount;
 
+// EZMIDI 0x6e94
+unsigned int gUpdateMask;
+
+// EZMIDI 0x6eb8
+unsigned short gPauseKeepMask;
+
 // EZMIDI 0x6ebc
 unsigned short gSynthRun;
+
+// EZMIDI 0x6ebe
+unsigned short gChorusAltStep;
 
 // EZMIDI 0x7e58
 int gFixedGainA;
@@ -450,5 +459,51 @@ int hs_note_off(int nChannel, int nNote) {
     gCurrentNotes[nIndex].mUnknown03 = 0;
     // Yes, the binary rereads the cleared link, so this always parks index zero.
     gCurrentNotes[gCurrentNotes[nIndex].mUnknown03].mUnknown03 = 0;
+    return 0;
+}
+
+// EZMIDI 0x43f8
+int hs_update_note_and_fx(struct Note *pNote) {
+    int nCount = 0;
+    int nValue;
+    int nAlt;
+
+    if ((gUpdateMask >> pNote->mChannel & 1) != 0) {
+        nCount += _apply_channel_to_note(pNote, 0);
+    }
+    if (gPauseCount > 0 && (gPauseKeepMask >> pNote->mChannel & 1) == 0) {
+        nValue = 0;
+    } else if ((pNote->mUnknown05 & 4) != 0) {
+        nAlt = pNote->mUnknown03 == 0xff ? 1 : 0;
+        // Yes, the binary reads the halfword after the run bits for the alternate step.
+        nValue = (unsigned short)_apply_chorus(pNote->mUnknown0C, nAlt != 0 ? gChorusAltStep : gSynthRun,
+                                               pNote->mUnknown18, &pNote->mUnknown16);
+        ++nCount;
+    } else {
+        nValue = pNote->mUnknown0C;
+    }
+    nCount += _move_vol_towards(pNote, 0);
+    nCount += _move_vol_towards(pNote, 1);
+    if (nCount != 0) {
+        sceSdSetParam(pNote->mUnknown02, pNote->mUnknown0E);
+        sceSdSetParam((pNote->mUnknown02 | 0x100) & 0xffff, pNote->mUnknown10);
+        sceSdSetParam((pNote->mUnknown02 | 0x200) & 0xffff, (unsigned short)nValue);
+    }
+    return 0;
+}
+
+// EZMIDI 0x4654
+int hs_reapply_channel(int nChannel) {
+    int nIndex;
+
+    for (nIndex = 0; nIndex < 50; ++nIndex) {
+        if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+            continue;
+        }
+        if (nChannel != -1 && gCurrentNotes[nIndex].mChannel != nChannel) {
+            continue;
+        }
+        _apply_channel_to_note(&gCurrentNotes[nIndex], 1);
+    }
     return 0;
 }

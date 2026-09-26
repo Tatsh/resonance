@@ -276,8 +276,22 @@ extern unsigned char gMonoMode;
 /** Pause counter. EZMIDI `0x6e90`. */
 extern int gPauseCount;
 
+/** Channels recomputed by the voice updater. EZMIDI `0x6e94`. Inferred. */
+extern unsigned int gUpdateMask;
+
+/** Channels that keep sounding while paused. EZMIDI `0x6eb8`. Inferred. */
+extern unsigned short gPauseKeepMask;
+
 /** Per-channel run bits. EZMIDI `0x6ebc`. */
 extern unsigned short gSynthRun;
+
+/**
+ * Alternate chorus step.
+ *
+ * The voice updater reads the halfword after the run bits. EZMIDI `0x6ebe`.
+ * Inferred.
+ */
+extern unsigned short gChorusAltStep;
 
 /** Fixed gain for one branch. EZMIDI `0x7e58`. Inferred. */
 extern int gFixedGainA;
@@ -412,6 +426,30 @@ int _fire_off_sample(int nSample,
 int _apply_channel_to_note(struct Note *pNote, int nApply);
 
 /**
+ * Step a note's volume towards its target.
+ *
+ * EZMIDI `0x3a70`.
+ *
+ * @param pNote The note. Inferred.
+ * @param nMode Step mode. Inferred.
+ * @return Nonzero when the volume moved. Inferred.
+ */
+int _move_vol_towards(struct Note *pNote, int nMode);
+
+/**
+ * Step a chorus value towards its target.
+ *
+ * EZMIDI `0x4334`.
+ *
+ * @param nCurrent Current value. Inferred.
+ * @param nRate Step rate. Inferred.
+ * @param nTarget Target value. Inferred.
+ * @param pState Step state. Inferred.
+ * @return The stepped value. Inferred.
+ */
+int _apply_chorus(int nCurrent, int nRate, int nTarget, unsigned short *pState);
+
+/**
  * Find a note by key.
  *
  * EZMIDI `0xe24`.
@@ -432,6 +470,27 @@ int _find_note(int nChannel, int nNote);
  * @return Zero, or -1 when the note is not playing.
  */
 int hs_note_off(int nChannel, int nNote);
+
+/**
+ * Recompute the gains of every playing note on a channel.
+ *
+ * With a -1 channel, recomputes every playing note. EZMIDI `0x4654`.
+ *
+ * @param nChannel Channel index, or -1 for every channel. Inferred.
+ * @return Zero.
+ */
+int hs_reapply_channel(int nChannel);
+
+/**
+ * Update a note's gains, chorus, and envelope.
+ *
+ * Recomputes the gains, steps the chorus and the volume envelope, and writes
+ * the voice registers when anything moved. EZMIDI `0x43f8`.
+ *
+ * @param pNote The note. Inferred.
+ * @return Zero.
+ */
+int hs_update_note_and_fx(struct Note *pNote);
 
 /**
  * Release a note.
