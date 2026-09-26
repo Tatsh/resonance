@@ -21,6 +21,7 @@
 #include "os/log.h"
 #include "os/mem.h"
 #include "os/seccache.h"
+#include "os/spew.h"
 #include "sch/cmdid.h"
 #include "sch/command.h"
 #include "sch/tickclock.h"
@@ -507,6 +508,45 @@ PyObject *PyInvokeTest(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
         Py::Object result = ScriptTest(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Report the spew connections, and optionally connect a channel.
+//
+// Without arguments reports the connections. With a file and a channel, connects them first.
+// The report is built before the arguments are checked.
+// 0x0015d950
+Py::Object ScriptSpew(const Py::Tuple &args) {
+    Spew &shared = Spew::shared();
+    std::ostringstream report;
+    report << "Spew Connections:\n";
+    shared.PrintConnections(report);
+    Py::Object result = Py::String(HxStr(report.str().c_str()));
+    if (args.length() == 0) {
+        return result;
+    }
+    if (args.length() != 2) {
+        throw Py::TypeError(HxStr(FormatString("requires arguments: HxStr, HxStr")));
+    }
+    Py::Object fileElement = args.getItem(0);
+    Py::String fileText(fileElement);
+    HxStr file = fileText;
+    Py::Object channelElement = args.getItem(1);
+    Py::String channelText(channelElement);
+    HxStr channel = channelText;
+    shared.Connect(file, channel);
+    return result;
+}
+
+// Run ScriptSpew() on the interpreter's argument tuple.
+// 0x0015e180
+PyObject *PyInvokeSpew(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Py::Object result = ScriptSpew(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
