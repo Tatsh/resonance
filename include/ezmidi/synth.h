@@ -583,6 +583,14 @@ int hs_reapply_channel(int nChannel);
 int ShowSynthState(int nUnknown);
 
 /**
+ * Reset the synthesiser state.
+ *
+ * Clears the channel programs and allocation, then reinitialises the channels
+ * and banks. EZMIDI `0x47ac`.
+ */
+void ResetSynthState(void);
+
+/**
  * Update a note's gains, chorus, and envelope.
  *
  * Recomputes the gains, steps the chorus and the volume envelope, and writes

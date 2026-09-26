@@ -282,3 +282,9 @@ int HardSynthInit(void) {
     start_timer(gTimerThread);
     return (int)gInBuf;
 }
+
+// EZMIDI 0x68d0
+int HardSynthReset(void) {
+    ResetSynthState();
+    return 0;
+}

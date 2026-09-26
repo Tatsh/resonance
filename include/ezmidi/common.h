@@ -142,8 +142,10 @@ void start_timer(int nThread);
  * Reset the synthesiser.
  *
  * EZMIDI `0x68d0`.
+ *
+ * @return Zero.
  */
-void HardSynthReset(void);
+int HardSynthReset(void);
 
 /**
  * Attach bank headers to bank data.

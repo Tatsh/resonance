@@ -707,3 +707,16 @@ int ShowSynthState(int nUnknown) {
     (void)nUnknown; // Yes, the binary takes a value and never reads it.
     return 0;
 }
+
+// EZMIDI 0x47ac
+void ResetSynthState(void) {
+    int nChannel;
+
+    for (nChannel = 0; nChannel < 16; ++nChannel) {
+        hs_prog_change(nChannel, 0);
+    }
+    voice_alloc[1] = 0;
+    voice_alloc[0] = 0;
+    _init_channels();
+    _init_banks();
+}
