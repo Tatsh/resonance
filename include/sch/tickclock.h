@@ -124,10 +124,12 @@ public:
      * Queue a command at a song position, under a handle the caller retains.
      *
      * @param pCommand The command to run.
-     * @param nTick The song position, in MIDI ticks at 480 per quarter note.
+     * @param nTick The song position, in MIDI ticks at 480 per quarter note. Callers widen a
+     *              32-bit position into the 64-bit register, and the body multiplies the full
+     *              width through its 64-bit helper at `0x00600270`.
      * @param id The handle to queue under.
-     * @param nUnused Every one of the 17 callers passes 0 in the fifth argument register, and the
-     *                body never reads it. The type and the meaning are not recoverable.
+     * @param nUnused All 17 call sites pass 0 as the fifth argument, and the body never reads
+     *                it. The type and the meaning are not recoverable.
      * @ghidraAddress 0x004a6248
      */
     void PostAtSongTick(Command *pCommand, long long nTick, CmdID &id, int nUnused = 0);
