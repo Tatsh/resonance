@@ -246,11 +246,12 @@ int HardSynthSetMono(int nMode);
 /**
  * Report synthesiser information.
  *
- * EZMIDI `0x6960`.
+ * Shows the state for selectors zero and one, and toggles the mono mode for
+ * selector two. EZMIDI `0x6960`.
  *
- * @param nValue Information selector. Inferred.
+ * @param nSelector Information selector. Inferred.
  */
-void HardSynthInfo(int nValue);
+void HardSynthInfo(int nSelector);
 
 /**
  * Invalidate a bank header.

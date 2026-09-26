@@ -401,3 +401,12 @@ int HardSynthResume(void) {
     }
     return 0;
 }
+
+// EZMIDI 0x6960
+void HardSynthInfo(int nSelector) {
+    if (nSelector == 1 || nSelector == 0) {
+        ShowSynthState(0xff);
+    } else if (nSelector == 2) {
+        HardSynthSetMono(gMonoMode == 0);
+    }
+}
