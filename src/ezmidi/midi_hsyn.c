@@ -23,6 +23,27 @@ unsigned short gSynthRun;
 // EZMIDI 0x6ebe
 unsigned short gChorusAltStep;
 
+// EZMIDI 0x6e9a
+unsigned short gFadeStepMin = 0x1800;
+
+// EZMIDI 0x6e9c
+unsigned char gFadeTableIdx = 2;
+
+// EZMIDI 0x6ed4
+int gFadeSnap = 0x200;
+
+// EZMIDI 0x6ed8
+unsigned short gFadeTable[6] = {0x08, 0x11, 0x1b, 0x1f, 0x25, 0x00};
+
+// EZMIDI 0x6ee4
+int gFadeMode = 6;
+
+// EZMIDI 0x6ee8
+int gFadeTimed = 1;
+
+// EZMIDI 0x6eec
+unsigned short gVoiceParamBase[2] = {0x0600, 0x0700};
+
 // EZMIDI 0x7e58
 int gFixedGainA;
 
@@ -30,10 +51,10 @@ int gFixedGainA;
 int gFixedGainB;
 
 // EZMIDI 0x6ea8
-int gTuneAlt0;
+int gTuneAlt0 = 30;
 
 // EZMIDI 0x6eac
-int gTuneAlt1;
+int gTuneAlt1 = 20;
 
 // EZMIDI 0x6ff0
 unsigned int gReg_VMixR[2];
@@ -487,6 +508,96 @@ int hs_check_playing(struct Note *pNote) {
     pNote->mFlags |= 8;
     hs_kill_idx(pNote, 1);
     return -1;
+}
+
+// EZMIDI 0x3a70
+int _move_vol_towards(struct Note *pNote, int nMode) {
+    // The mode picks a gain pair: mode 0 moves +0x0E towards +0x12, mode 1
+    // moves +0x10 towards +0x14.
+    unsigned short *pGains = (unsigned short *)pNote + nMode;
+    unsigned char *pTimer = (unsigned char *)pNote + nMode;
+    int nDiff = 0;
+    int nResult = 0;
+    int nDir;
+    int nStep;
+    int nAbs;
+
+    if ((gChan[pNote->mChannel].mUnknown0B & 2) == 0) {
+        if (pGains[7] == pGains[9]) {
+            return 0;
+        }
+        pGains[7] = pGains[9];
+        return 1;
+    }
+    if (pTimer[0x1E] != 0 && --pTimer[0x1E] == 0) {
+        nResult = 1;
+        pGains[9] = pGains[13];
+    }
+    if ((pGains[9] & 0x8000) == 0 && (pGains[7] & 0x8000) == 0) {
+        nDiff = (int)pGains[9] - (int)pGains[7];
+    } else if (pGains[7] == pGains[9]) {
+        nDiff = 0;
+    } else {
+        nResult = (pGains[9] & 0x8000) != 0 ? 2 : 1;
+    }
+    if (nResult != 0) {
+        pGains[7] = (unsigned short)sceSdGetParam((pNote->mUnknown02 | gVoiceParamBase[nMode]) & 0xffff);
+        if (nResult == 2) {
+            pGains[9] = pGains[7];
+        }
+        nDiff = (int)pGains[9] - (int)pGains[7];
+    }
+    if (nDiff == 0) {
+        return 0;
+    }
+    if (gFadeMode == 5) {
+        pGains[7] = pGains[9];
+        return 1;
+    }
+    if (gFadeMode != 6) {
+        nAbs = nDiff >= 0 ? nDiff : -nDiff;
+        if ((int)gFadeStepMin < nAbs) {
+            if ((pGains[7] & 0xa000) == 0xa000) {
+                nDir = 1;
+            } else if ((pGains[7] & 0xa000) == 0x8000) {
+                nDir = -1;
+            } else if (pGains[9] >= 0x801) {
+                nDir = 1;
+            } else {
+                nDir = -1;
+            }
+            if (gFadeTimed != 0) {
+                if (nDir != -1 || pGains[9] >= 0x100) {
+                    pTimer[0x1E] = 0x0f;
+                    pGains[13] = pGains[9];
+                    nStep = _pick_lin_val(nAbs, &pTimer[0x1E]);
+                } else {
+                    pGains[7] = (unsigned short)(gFadeTable[gFadeMode] | 0xa000);
+                    return 1;
+                }
+            } else {
+                nStep = gFadeTable[gFadeTableIdx];
+            }
+            if (nDir == 1) {
+                pGains[7] = (unsigned short)(nStep | 0x8000);
+            } else {
+                pGains[7] = (unsigned short)(nStep | 0xa000);
+            }
+            pGains[9] = pGains[7];
+            return 1;
+        }
+    }
+    nAbs = nDiff >= 0 ? nDiff : -nDiff;
+    if (nAbs < gFadeSnap) {
+        pGains[7] = pGains[9];
+        return 1;
+    }
+    if (nDiff > 0) {
+        pGains[7] += (unsigned short)gFadeSnap;
+    } else {
+        pGains[7] -= (unsigned short)gFadeSnap;
+    }
+    return 1;
 }
 
 // EZMIDI 0x4334

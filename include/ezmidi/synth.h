@@ -293,6 +293,32 @@ extern unsigned short gSynthRun;
  */
 extern unsigned short gChorusAltStep;
 
+/** Minimum difference that steps the volume. EZMIDI `0x6e9a`. Inferred. */
+extern unsigned short gFadeStepMin;
+
+/** Fade table index for the untimed path. EZMIDI `0x6e9c`. Inferred. */
+extern unsigned char gFadeTableIdx;
+
+/**
+ * Snap threshold and nudge step.
+ *
+ * The low half nudges the gain when the difference stays large. EZMIDI
+ * `0x6ed4`. Inferred.
+ */
+extern int gFadeSnap;
+
+/** Fade step table. EZMIDI `0x6ed8`. Inferred. */
+extern unsigned short gFadeTable[6];
+
+/** Fade mode. EZMIDI `0x6ee4`. Inferred. */
+extern int gFadeMode;
+
+/** Nonzero uses the timer fade path. EZMIDI `0x6ee8`. Inferred. */
+extern int gFadeTimed;
+
+/** Voice parameter entry bases per mode. EZMIDI `0x6eec`. Inferred. */
+extern unsigned short gVoiceParamBase[2];
+
 /** Fixed gain for one branch. EZMIDI `0x7e58`. Inferred. */
 extern int gFixedGainA;
 
@@ -435,6 +461,17 @@ int _apply_channel_to_note(struct Note *pNote, int nApply);
  * @return Nonzero when the volume moved. Inferred.
  */
 int _move_vol_towards(struct Note *pNote, int nMode);
+
+/**
+ * Pick a linear fade value.
+ *
+ * EZMIDI `0x37fc`.
+ *
+ * @param nAbs Absolute gain difference. Inferred.
+ * @param pTimer Fade timer to refill. Inferred.
+ * @return The fade step. Inferred.
+ */
+int _pick_lin_val(int nAbs, unsigned char *pTimer);
 
 /**
  * Step a chorus value towards its target.
