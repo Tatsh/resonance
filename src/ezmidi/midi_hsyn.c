@@ -462,6 +462,12 @@ int hs_note_off(int nChannel, int nNote) {
     return 0;
 }
 
+// EZMIDI 0x4334
+int _apply_chorus(int nCurrent, int nRate, int nTarget, unsigned short *pState) {
+    *pState = (unsigned short)(*pState + nRate);
+    return (nCurrent + MulShr15(nTarget, chr_curve[*pState >> 7])) & 0xffff;
+}
+
 // EZMIDI 0x43f8
 int hs_update_note_and_fx(struct Note *pNote) {
     int nCount = 0;
