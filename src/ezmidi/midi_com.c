@@ -1,5 +1,7 @@
 #include "ezmidi/common.h"
 
+#include <stdint.h>
+
 #include "ezmidi/ezmidi.h"
 #include "ezmidi/imports.h"
 #include "ezmidi/synth.h"
@@ -231,7 +233,7 @@ int scan_inbuf(int nBuffer) {
         if (gTickTrace != 0) {
             printf(gScanFmt, nCount);
         }
-        memcpy(&gStagedBuf, pBuf, (unsigned int)(nCount + 8));
+        memcpy(&gStagedBuf, pBuf, (size_t)(nCount + 8));
         pBuf->mCount = 0;
         HardSynthParseNew(gStagedBuf.mData, gStagedBuf.mCount, nBuffer);
     }
@@ -325,7 +327,7 @@ int HardSynthInit(void) {
     set_timer(&gTimerState);
     HardSynthReset();
     start_timer(&gTimerState);
-    return (int)gInBuf;
+    return (int)(uintptr_t)gInBuf;
 }
 
 // EZMIDI 0x68d0

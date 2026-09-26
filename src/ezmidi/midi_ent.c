@@ -1,5 +1,7 @@
 #include "ezmidi/ezmidi.h"
 
+#include <stdint.h>
+
 #include "ezmidi/common.h"
 #include "ezmidi/imports.h"
 #include "ezmidi/synth.h"
@@ -47,19 +49,19 @@ void *midiFunc(int nCommand, void *pData, int nSize) {
         const int *pAttach = *(const int *const *)pData;
 
         gRpcReply = HardSynthAttachHDtoBD(nSub,
-                                          (struct BankHeader *)pAttach[0],
-                                          (struct BankData *)pAttach[3],
+                                          (struct BankHeader *)(uintptr_t)pAttach[0],
+                                          (struct BankData *)(uintptr_t)pAttach[3],
                                           pAttach[4]);
         break;
     }
     case 0x1070:
-        gRpcReply = HardSynthLoadBD(pArgs[1], (const void *)pArgs[3], pArgs[2]);
+        gRpcReply = HardSynthLoadBD(pArgs[1], (const void *)(uintptr_t)pArgs[3], pArgs[2]);
         break;
     case 0xc0:
         HardSynthAllNotesOff(-1, 1);
         break;
     case 0x10e0:
-        HardSynthConfig((const void *)pArgs[0]);
+        HardSynthConfig((const void *)(uintptr_t)pArgs[0]);
         break;
     case 0xf0:
         if (pArgs[0] != 0) {
@@ -78,7 +80,7 @@ void *midiFunc(int nCommand, void *pData, int nSize) {
         HardSynthInfo(pArgs[0]);
         break;
     case 0x120:
-        HardSynthInvalidateHd((struct BankHeader *)pArgs[0]);
+        HardSynthInvalidateHd((struct BankHeader *)(uintptr_t)pArgs[0]);
         break;
     case 0x8130:
         gRpcReply = HardSynthInvalidateBank(pArgs[0]);

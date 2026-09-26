@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "ezmidi/ezmidi.h"
 
 /**
@@ -137,7 +139,7 @@ extern int SleepThread(void);
  * @param nSize Byte count.
  * @return The destination.
  */
-extern void *memcpy(void *pDest, const void *pSource, unsigned int nSize);
+extern void *memcpy(void *pDest, const void *pSource, size_t nSize);
 
 /**
  * Enable CPU interrupts.
