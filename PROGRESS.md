@@ -26,7 +26,7 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Remaining, with a name    | 448    |
 | Remaining, unidentified   | 0      |
 
-The table measures a clean export of the commit `b915bb7`.
+The table measures a clean export of the commit `d47a35c`.
 
 The audit counts an address as accounted once any file in the tree annotates it, and a header
 declaration takes the same annotation a body does. Treat 88.24% as the answer to "how much is
