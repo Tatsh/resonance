@@ -343,3 +343,20 @@ int HardSynthSetMono(int nMode) {
     gUpdateMask = 0xffff;
     return 0;
 }
+
+// EZMIDI 0x66f4
+void HardSynthConfig(const void *pConfig) {
+    if (pConfig != 0) {
+        const struct SynthConfig *pBlock = (const struct SynthConfig *)pConfig;
+
+        gFadeStepMin = pBlock->mFadeStepMin;
+        gFadeTableIdx = pBlock->mFadeTableIdx;
+        gRunDivisor = pBlock->mRunDivisor;
+        gAltDivisor = pBlock->mAltDivisor;
+        gTuneAlt0 = pBlock->mTuneAlt0;
+        gTuneAlt1 = pBlock->mTuneAlt1;
+        gPauseKeepMask = pBlock->mPauseKeepMask;
+    }
+    gSynthRun = (unsigned short)(0x8230000 / (1000 * (gRunDivisor + 1)));
+    gChorusAltStep = (unsigned short)(0x8230000 / (1000 * (gAltDivisor + 1)));
+}

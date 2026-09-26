@@ -23,6 +23,12 @@ unsigned short gSynthRun;
 // EZMIDI 0x6ebe
 unsigned short gChorusAltStep;
 
+// EZMIDI 0x6ea0
+int gRunDivisor = 0xc800;
+
+// EZMIDI 0x6ea4
+int gAltDivisor = 0x12c;
+
 // EZMIDI 0x6e9a
 unsigned short gFadeStepMin = 0x1800;
 

@@ -55,7 +55,7 @@ void *midiFunc(int nCommand, void *pData, int nSize) {
         HardSynthAllNotesOff(-1, 1);
         break;
     case 0x10e0:
-        HardSynthConfig(pArgs[0]);
+        HardSynthConfig((const void *)pArgs[0]);
         break;
     case 0xf0:
         if (pArgs[0] != 0) {

@@ -313,6 +313,12 @@ extern unsigned short gSynthRun;
  */
 extern unsigned short gChorusAltStep;
 
+/** Run rate divider. EZMIDI `0x6ea0`. Inferred. */
+extern int gRunDivisor;
+
+/** Alternate rate divider. EZMIDI `0x6ea4`. Inferred. */
+extern int gAltDivisor;
+
 /** Minimum difference that steps the volume. EZMIDI `0x6e9a`. Inferred. */
 extern unsigned short gFadeStepMin;
 

@@ -77,6 +77,27 @@ extern struct InBuffer gInBuf[2];
 extern struct InBuffer gStagedBuf;
 
 /**
+ * Synthesiser configuration block.
+ *
+ * Thirty-six bytes the control layer copies over `0x6e98`. Only the fields
+ * with live uses are stored; the rest land with their uses.
+ */
+struct SynthConfig {
+    unsigned short mUnknown00;     /**< +0x00. */
+    unsigned short mFadeStepMin;   /**< +0x02. Minimum difference that steps the volume. */
+    unsigned char mFadeTableIdx;   /**< +0x04. Fade table index for the untimed path. */
+    unsigned char mReserved05[3];  /**< +0x05. */
+    int mRunDivisor;               /**< +0x08. Run rate divider. */
+    int mAltDivisor;               /**< +0x0C. Alternate rate divider. */
+    int mTuneAlt0;                 /**< +0x10. Alternate tune for one mode. */
+    int mTuneAlt1;                 /**< +0x14. Alternate tune for the other mode. */
+    int mUnknown18;                /**< +0x18. */
+    int mUnknown1C;                /**< +0x1C. */
+    unsigned short mPauseKeepMask; /**< +0x20. Channels that keep sounding while paused. */
+    unsigned short mReserved22;    /**< +0x22. */
+};
+
+/**
  * Parse a staged input buffer.
  *
  * EZMIDI `0x5d34`.
@@ -177,11 +198,12 @@ int HardSynthAttachHDtoBD(int nBank, int nHd, int nBd0, int nBd1);
 /**
  * Configure the synthesiser.
  *
- * EZMIDI `0x66f4`.
+ * Copies the configuration block over the live values, then recomputes the
+ * run rates. EZMIDI `0x66f4`.
  *
- * @param nValue Configuration value. Inferred.
+ * @param pConfig Configuration block, or zero to keep the live values. Inferred.
  */
-void HardSynthConfig(int nValue);
+void HardSynthConfig(const void *pConfig);
 
 /**
  * Pause the synthesiser.
