@@ -577,9 +577,13 @@ public:
      */
     ForceFeedbackMgr *mForceFeedback;
 
-private:
+public:
+    // The score graphs, indexed by track. Public because the volume script command reads one
+    // with no accessor in the image.
     std::vector<ScoreTrackGraph *> mTrackGraphs; // +0x38
-    std::vector<BGTrackGraph *> mUnknown44;      // +0x44
+
+private:
+    std::vector<BGTrackGraph *> mUnknown44; // +0x44
     // The element type is fixed by DestroyGraphs() and StartSequencers(). Both run one
     // std::for_each instantiation over this vector and mUnknown44.
     std::vector<BGTrackGraph *> mUnknown50; // +0x50

@@ -214,3 +214,11 @@ private:
     int mCallsFree;      // +0x20
     unsigned mBytes;     // +0x24 payload bytes handed out
 };
+
+/**
+ * The one interpreter heap, built by Py_Initialize() over the whole of the zone titled
+ * `python`.
+ *
+ * @ghidraAddress 0x00723998
+ */
+extern Heap *g_pPythonHeap;

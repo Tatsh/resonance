@@ -306,6 +306,7 @@ hardsynth
 harmonix
 hblkhd
 hblks
+heapdump
 heff
 hialloc
 hibytes
@@ -785,6 +786,7 @@ remixunavail
 remotetrackselectmsg
 renamefileop
 rendererbase
+requres
 reservedfc
 rgbaq
 rgbaqaddr
@@ -826,6 +828,7 @@ scriptcalltemplates
 scriptmsg
 scriptsink
 scripttemplatemap
+scrndump
 scrollinglist
 scstartplayingpacket
 scus

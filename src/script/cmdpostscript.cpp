@@ -4,6 +4,7 @@
 #include "msg/scriptmsg.h"
 #include "os/hxstr.h"
 #include "sch/command.h"
+#include "script/scriptcmd.h"
 
 namespace {
 
@@ -44,3 +45,7 @@ private:
 int ScriptCmd::sCmdID;
 
 } // namespace
+
+Sch::Command *NewScriptCmd(const HxStr &script) {
+    return new ScriptCmd(script);
+}

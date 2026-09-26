@@ -258,30 +258,35 @@ private:
     // Adds the caught powerup to the collection, plays its sounds, and passes the message on.
     void OnCaughtPowerbar(CaughtPowerbarMsg *pMsg);
 
-    Sch::TickClock *mClock;          // +0x48
-    CmdID mCommand;                  // +0x4c
-    int mInputSlot;                  // +0x50 returned by Slot2
-    int mTrack;                      // +0x58 returned by Slot4
-    int mPlace;                      // +0x5c returned by Slot5
-    int mLooping;                    // +0x60 returned by Slot10
-    int mGhost;                      // +0x64 the ghost display, set by Slot22
-    int mPlayMode;                   // +0x68
-    int mGameMode;                   // +0x6c returned by Slot19
-    int mUnknown70;                  // +0x70 written by Slot8, compared by Slot9
-    int mUnknown74;                  // +0x74 written by Slot8
-    int mUnknown78;                  // +0x78 compared by Slot20
-    int mRunEndBar;                  // +0x7c the end of the last caught run, compared by Slot16
-    int mLastCaughtBar;              // +0x80
-    int mStreak;                     // +0x84
-    int mBestStreak;                 // +0x88 returned by Slot17
-    int mMultiplier;                 // +0x8c
-    int mBonus;                      // +0x90
-    int mBonusEndBar;                // +0x94 not written by the constructor
-    int mLastMuffedBar;              // +0x98
-    int mCaptures;                   // +0x9c
-    int mMisses;                     // +0xa0
+    Sch::TickClock *mClock; // +0x48
+    CmdID mCommand;         // +0x4c
+    int mInputSlot;         // +0x50 returned by Slot2
+    int mTrack;             // +0x58 returned by Slot4
+    int mPlace;             // +0x5c returned by Slot5
+    int mLooping;           // +0x60 returned by Slot10
+    int mGhost;             // +0x64 the ghost display, set by Slot22
+    int mPlayMode;          // +0x68
+    int mGameMode;          // +0x6c returned by Slot19
+    int mUnknown70;         // +0x70 written by Slot8, compared by Slot9
+    int mUnknown74;         // +0x74 written by Slot8
+    int mUnknown78;         // +0x78 compared by Slot20
+    int mRunEndBar;         // +0x7c the end of the last caught run, compared by Slot16
+    int mLastCaughtBar;     // +0x80
+    int mStreak;            // +0x84
+    int mBestStreak;        // +0x88 returned by Slot17
+    int mMultiplier;        // +0x8c
+    int mBonus;             // +0x90
+    int mBonusEndBar;       // +0x94 not written by the constructor
+    int mLastMuffedBar;     // +0x98
+    int mCaptures;          // +0x9c
+    int mMisses;            // +0xa0
+
+public:
+    // Public because the select-powerup script command drives it with no accessor in the image.
     PowerupCollectionI *mCollection; // +0xa4
-    PowerupPlacer *mPlacer;          // +0xa8
-    int mUnknownac;                  // +0xac returned plus one by Slot15
-    int mUnknownb0;                  // +0xb0 returned plus one by Slot14
+
+private:
+    PowerupPlacer *mPlacer; // +0xa8
+    int mUnknownac;         // +0xac returned plus one by Slot15
+    int mUnknownb0;         // +0xb0 returned plus one by Slot14
 };
