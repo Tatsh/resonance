@@ -1,18 +1,3 @@
-Breug
-Colorable
-Dfan
-EVOLL
-EVOLR
-Eran
-Invers
-Kasson
-NODISC
-Orthonormalize
-Pitchbend
-RNDASYNCLOAD
-Randomizable
-Recolor
-Vron
 abitmap
 abmpfile
 acanvas
@@ -89,6 +74,7 @@ blak
 blit
 bltinmodule
 bluegrey
+breug
 bsky
 bsloadlevelpacket
 bufferobject
@@ -139,13 +125,13 @@ collectchildren
 collideable
 collideables
 color
+colorable
 coloring
 confstr
 congrat
 contctrlmsg
 controllercmd
 controllerconfig
-counta
 coveragerc
 cpic
 cpprtti
@@ -168,16 +154,14 @@ datarootdir
 dbuild
 dbut
 dcmake
-deci
-delayer
 deletefileop
 deleteremixmct
 demangled
-demangler
 demangles
 deployedpowerupmsg
 devconsole
 devirtualised
+dfan
 dhave
 dictobject
 dimx
@@ -214,12 +198,15 @@ endrecordingcmd
 endx
 entspaceop
 envx
+eran
 erasemsg
 eraseoffmsg
 erasepower
 errnomodule
 erss
 esbenp
+evoll
+evolr
 execv
 ezmidi
 ezmpeg
@@ -372,10 +359,11 @@ inputcheatdetector
 inputcheatdetectorgs
 inputcheatdetectormet
 inputmap
-inputpollerps2
+inputpollerps
 intobject
 invalidateseekermsg
 invalidatetrackmsg
+invers
 iobmemstream
 iobpreallocmemstream
 iobstream
@@ -392,7 +380,6 @@ jampowerupplacer
 jbed
 jbep
 jinja
-joypad
 jsonnet
 jsonschema
 juiceamountmsg
@@ -400,6 +387,7 @@ juke
 jukeboxmode
 jukeboxplaylist
 kapsz
+kasson
 keychannel
 keyframed
 keypanel
@@ -475,6 +463,7 @@ mcrd
 mcrf
 mcrl
 mcserv
+mct's
 mdfile
 medius
 memcard
@@ -485,7 +474,6 @@ memcardps
 memcardsavepaths
 memcardtask
 memcarduser
-memcpy
 memorycard
 memstream
 meshanim
@@ -606,6 +594,7 @@ movt
 mpfn
 mscal
 mscnt
+msg's
 msgjoiner
 msgqueue
 msgsink
@@ -651,6 +640,7 @@ newmodule
 njgb
 nlfilebuf
 nocard
+nodisc
 nolattice
 nomemcard
 noone
@@ -676,6 +666,7 @@ oneline
 openreadop
 openwriteop
 ordblks
+orthonormalize
 overcutting
 pabe
 padman
@@ -702,6 +693,7 @@ phraseneutralizer
 phrasepacket
 phraseplayer
 pinkgrey
+pitchbend
 pitchingstg
 pitchmsg
 pitchpicker
@@ -763,6 +755,7 @@ pythonrun
 quadword
 quadwords
 quat
+randomizable
 randu
 rangeobject
 rawcontroller
@@ -771,6 +764,7 @@ raytest
 rdparty
 readbuf
 readop
+recolor
 recomputation
 recon
 reflow
@@ -790,7 +784,6 @@ remixunavail
 remotetrackselectmsg
 renamefileop
 rendererbase
-reserveda
 reservedfc
 rgbaq
 rgbaqaddr
@@ -799,6 +792,7 @@ riffrangefinder
 riffset
 ripgreprc
 rndartt
+rndasyncload
 rndfile
 rndglobal
 rndmovie
@@ -817,6 +811,7 @@ savepersonasmct
 saveremixmct
 scallclientsstatuspacket
 scallplayersinfopacket
+sceneanim
 scgameoverpacket
 schemafile
 scloadlevelpacket
@@ -845,7 +840,6 @@ selectremix
 selectskill
 sequencercmd
 serialiser
-setubal's
 shellcheck
 shellformat
 shiftjis
@@ -891,7 +885,6 @@ streakovermsg
 strerror
 strfile
 stringobject
-strncpy
 stropmodule
 structmember
 structmodule
@@ -905,7 +898,6 @@ tagfile
 tamtypes
 tatsh
 teamfreq
-teardowns
 tempomap
 testa
 testaaddr
@@ -920,7 +912,6 @@ textmsg
 texturepairrecord
 tickclock
 timedcommand
-timetask
 tkinter
 tmpnam
 tnlactivator
@@ -1006,7 +997,6 @@ unoverridden
 unpaletted
 unpausegamesystemmsg
 unrecovered
-unsuffixed
 uordblks
 updatescorepacket
 updateworldxfm
@@ -1041,6 +1031,7 @@ voxstring
 vptr
 vramk
 vramtable
+vron
 vrsqrt
 vtable
 vtables
@@ -1059,10 +1050,6 @@ winmsg
 wiswa
 wiswa's
 wnonnull
-worklist
-worklists
-worktree
-writable
 writeop
 wuninitialized
 xdecref
