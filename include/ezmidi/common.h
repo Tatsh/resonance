@@ -28,6 +28,54 @@ int HardSynthLoadBD(int nSpuAddr, const void *pSource, int nSize);
  */
 int HardSynthUpdate(void);
 
+/** Nonzero prints tick brackets. EZMIDI `0x6e84`. Inferred. */
+extern int gTickTrace;
+
+/** Tick mark printed before sleeping. EZMIDI `0x6e50`. Inferred. */
+extern const char gTickPre[];
+
+/** Tick mark printed after waking. EZMIDI `0x6e54`. Inferred. */
+extern const char gTickPost[];
+
+/**
+ * Prepare the tick.
+ *
+ * EZMIDI `0x1550`.
+ */
+void hs_tick_setup(void);
+
+/**
+ * Kill expired voices.
+ *
+ * EZMIDI `0x5b7c`.
+ */
+void HardSynthKillOld(void);
+
+/**
+ * Scan an input buffer.
+ *
+ * EZMIDI `0x5e00`.
+ *
+ * @param nBuffer Buffer index. Inferred.
+ * @return The scanned count. Inferred.
+ */
+int scan_inbuf(int nBuffer);
+
+/**
+ * Flush the voice registers.
+ *
+ * EZMIDI `0x4840`.
+ */
+void _do_reg_out(void);
+
+/**
+ * Run the synthesiser tick.
+ *
+ * Sleeps, scans the input buffers, updates the voices, and flushes the
+ * registers, forever. EZMIDI `0x5f00`.
+ */
+void hsyn_atick(void);
+
 /**
  * Copy memory from the IOP to the SPU, waiting for the move.
  *

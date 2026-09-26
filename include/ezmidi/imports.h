@@ -65,3 +65,22 @@ extern int sceSdVoiceTrans(int nChannel, int nMode, int nSpuAddr, const void *pS
  * @return Nonzero once done.
  */
 extern int sceSdVoiceTransStatus(int nChannel, int nMode);
+
+/**
+ * Print a message.
+ *
+ * C library. The tick passes a bare message with no arguments.
+ *
+ * @param pFormat Message. Inferred.
+ * @return The print result.
+ */
+extern int printf(const char *pFormat, ...);
+
+/**
+ * Sleep the calling thread.
+ *
+ * Kernel. The tick ignores the wake result.
+ *
+ * @return The wake result.
+ */
+extern int SleepThread(void);
