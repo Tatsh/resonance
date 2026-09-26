@@ -710,6 +710,7 @@ playbackmodemsg
 playbacktogglemsg
 playerinfo
 playerleftgamemsg
+playermode
 playerstrackneutralizedmsg
 playmap
 playmaplinear
