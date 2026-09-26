@@ -4,10 +4,13 @@
 #include "app/application.h"
 #include "app/attachment.h"
 #include "app/globals.h"
+#include "app/watchdog.h"
+#include "app/watchdogclock.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gamer.h"
 #include "game/grooveworld.h"
 #include "game/localplayer.h"
+#include "game/playmap.h"
 #include "game/powerupcollection.h"
 #include "game/scoretrackgraph.h"
 #include "game/trackdata.h"
@@ -24,6 +27,7 @@
 #include "os/spew.h"
 #include "sch/cmdid.h"
 #include "sch/command.h"
+#include "sch/tempomap.h"
 #include "sch/tickclock.h"
 #include "script/cxx/config.h"
 #include "script/cxx/int.h"
@@ -547,6 +551,74 @@ PyObject *PyInvokeSpew(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
         Py::Object result = ScriptSpew(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Ticks per measure, four quarter notes at 480 ticks each.
+constexpr int kTicksPerMeasure = 1920;
+
+// Drive the song clock.
+//
+// Pause and start hold and release it, step advances it by milliseconds, tempo reports or sets
+// the microseconds per quarter, tick reports the song position, and song_bar reports the
+// play map's section there.
+// 0x00150d88
+Py::Object ScriptClock(const Py::Tuple &args) {
+    if (args.length() == 0) {
+        throw Py::TypeError(
+            HxStr(FormatString("requires 1st arg: pause, start, step, tempo, tick")));
+    }
+    Py::Object element = args.getItem(0);
+    Py::String text(element);
+    HxStr command = text;
+    Watchdog *pWatchdog = Application::shared()->GetWatchdog();
+    if (command == "pause") {
+        pWatchdog->mClock.Pause();
+        return Py::Object();
+    }
+    if (command == "start") {
+        pWatchdog->mClock.Resume();
+        return Py::Object();
+    }
+    if (command == "step") {
+        if (args.length() != 2) {
+            throw Py::TypeError(HxStr(FormatString("requires 2nd arg: milliseconds")));
+        }
+        const long nMs = Py::Int(args.getItem(1));
+        pWatchdog->mClock.Advance(static_cast<int>(nMs));
+        return Py::Object();
+    }
+    if (command == "tempo") {
+        Sch::TickClock *pClock = Application::shared()->GetSongClock();
+        if (args.length() == 1) {
+            return Py::Int(static_cast<long>(pClock->mTempoMap->mMicrosecondsPerQuarter));
+        }
+        const long nTempo = Py::Int(args.getItem(1));
+        const int nTick = pClock->SongTick();
+        pClock->mTempoMap->SetTempo(static_cast<int>(nTempo), nTick);
+        return Py::Object();
+    }
+    if (command == "tick") {
+        Sch::TickClock *pClock = Application::shared()->GetSongClock();
+        return Py::Int(static_cast<long>(pClock->SongTick()));
+    }
+    if (command == "song_bar") {
+        Sch::TickClock *pClock = Application::shared()->GetSongClock();
+        const int nBar = pClock->SongTick() / kTicksPerMeasure;
+        return Py::Int(static_cast<long>(Application::shared()->GetPlayMap()->Slot5(nBar)));
+    }
+    throw Py::TypeError(HxStr(FormatString("requires 1st arg: pause, start, step, tempo, tick")));
+}
+
+// Run ScriptClock() on the interpreter's argument tuple.
+// 0x00151b20
+PyObject *PyInvokeClock(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Py::Object result = ScriptClock(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
