@@ -921,6 +921,7 @@ testaaddr
 testarbiterpacket
 testb
 testbaddr
+testmap
 testregistry
 texa
 texburn

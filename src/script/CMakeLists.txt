@@ -1,4 +1,4 @@
-# Thirteen sources of this directory are not built. Each one includes the embedded
+# Fourteen sources of this directory are not built. Each one includes the embedded
 # interpreter's own Python 2 headers. This tree records that interpreter's differences
 # rather than including its headers. They are listed so every source is accounted for.
 set(RESONANCE_SCRIPT_UNBUILT_SRCS
@@ -14,6 +14,7 @@ set(RESONANCE_SCRIPT_UNBUILT_SRCS
     scripteval.cpp
     scriptfunc.cpp
     scripthost.cpp
+    testmap.cpp
     togglemode.cpp)
 
 set(RESONANCE_SCRIPT_SRCS
