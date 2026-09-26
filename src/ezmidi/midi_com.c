@@ -23,6 +23,124 @@ struct InBuffer gInBuf[2];
 // EZMIDI 0x7840
 struct InBuffer gStagedBuf;
 
+// EZMIDI 0x4d70
+unsigned char *HandleMidiMessage(unsigned char *pMsg) {
+    int nChannel = pMsg[0] & 0xf;
+    int nLen = 3;
+
+    switch (pMsg[0] & 0xf0) {
+    case 0x80:
+        hs_note_off(nChannel, pMsg[1]);
+        nLen = 2;
+        break;
+    case 0x90:
+        hs_note_on(nChannel, pMsg[1], pMsg[2]);
+        break;
+    case 0xa0:
+        break;
+    case 0xb0: {
+        unsigned int nController = pMsg[1];
+
+        if (nController >= 0x7c) {
+            break;
+        }
+        switch (nController) {
+        case 0:
+            gChan[nChannel].mBankMsb = pMsg[2];
+            break;
+        case 1:
+            gChan[nChannel].mUnknown06 = pMsg[2];
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 7:
+            gChan[nChannel].mVolume = pMsg[2];
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 10:
+            gChan[nChannel].mPan = pMsg[2];
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 11:
+            gChan[nChannel].mExpression = pMsg[2];
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 32:
+            gChan[nChannel].mBank = (unsigned short)((gChan[nChannel].mBankMsb << 7) + pMsg[2]);
+            gChan[nChannel].mBankMsb = 0;
+            break;
+        case 80:
+            if (pMsg[2] >= 0x40) {
+                gChan[nChannel].mUnknown0B |= 2;
+            } else {
+                gChan[nChannel].mUnknown0B &= 0xfd;
+            }
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 81:
+            if (pMsg[2] >= 0x40) {
+                gChan[nChannel].mUnknown0B |= 4;
+            } else {
+                gChan[nChannel].mUnknown0B &= 0xfb;
+            }
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 82:
+            if (pMsg[2] >= 0x40) {
+                gChan[nChannel].mUnknown0B |= 0x20;
+            } else {
+                gChan[nChannel].mUnknown0B &= 0xdf;
+            }
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 83:
+            if (pMsg[2] >= 0x40) {
+                gChan[nChannel].mUnknown0B |= 0x10;
+            } else {
+                gChan[nChannel].mUnknown0B &= 0xef;
+            }
+            gUpdateMask |= (unsigned int)1 << nChannel;
+            break;
+        case 88:
+            if (pMsg[2] < 3) {
+                gChan[nChannel].mUnknown0C = pMsg[2];
+            } else {
+                gChan[nChannel].mUnknown0C = (unsigned char)(pMsg[2] * 48 + 16);
+            }
+            break;
+        case 89:
+            if (pMsg[2] >= 0x40) {
+                gChan[nChannel].mUnknown0B |= 1;
+            } else {
+                gChan[nChannel].mUnknown0B &= 0xfe;
+            }
+            break;
+        case 121:
+            break;
+        case 123:
+            HardSynthAllNotesOff(nChannel, 0);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+    case 0xc0:
+        hs_prog_change(nChannel, pMsg[1]);
+        nLen = 2;
+        break;
+    case 0xd0:
+        nLen = 2;
+        break;
+    case 0xe0:
+        gChan[nChannel].mUnknown08 = (unsigned short)((pMsg[1] << 7) + pMsg[2]);
+        gUpdateMask |= (unsigned int)1 << nChannel;
+        break;
+    default:
+        break;
+    }
+    return pMsg + nLen;
+}
+
 // EZMIDI 0x5744
 int HardSynthLoadBD(int nSpuAddr, const void *pSource, int nSize) {
     return MemCpy_IOPtoSPU(nSpuAddr, pSource, nSize);

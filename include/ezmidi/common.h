@@ -71,6 +71,16 @@ extern struct InBuffer gStagedBuf;
 int HardSynthParseNew(unsigned char *pData, int nCount, int nBuffer);
 
 /**
+ * Silence every voice on a channel.
+ *
+ * EZMIDI `0x4bf4`.
+ *
+ * @param nChannel Channel index. Inferred.
+ * @param nUnused Ignored by the binary. Inferred.
+ */
+void HardSynthAllNotesOff(int nChannel, int nUnused);
+
+/**
  * Handle one MIDI message.
  *
  * EZMIDI `0x4d70`.

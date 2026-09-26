@@ -136,7 +136,7 @@ void _init_channels(void) {
         pChannel->mBank = 0;
         pChannel->mUnknown06 = 0;
         pChannel->mUnknown08 = 0;
-        pChannel->mUnknown0A = 0xff;
+        pChannel->mBankMsb = 0xff;
         pChannel->mUnknown0B = 0;
         pChannel->mUnknown0C = 0x40;
     }

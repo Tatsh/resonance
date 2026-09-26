@@ -22,7 +22,7 @@ struct MidiChannel {
     unsigned short mBank;        /**< +0x04. Indexes `gaBds`. Inferred. */
     unsigned short mUnknown06;   /**< +0x06. Reset to 0. */
     unsigned short mUnknown08;   /**< +0x08. Reset to 0. */
-    unsigned char mUnknown0A;    /**< +0x0A. Reset to 0xff. */
+    unsigned char mBankMsb;      /**< +0x0A. Bank select MSB, cleared by the LSB. Inferred. */
     unsigned char mUnknown0B;    /**< +0x0B. Reset to 0. */
     unsigned char mUnknown0C;    /**< +0x0C. Reset to 0x40. */
     unsigned char mPadding0D[3]; /**< +0x0D. Untouched by the reset. */
