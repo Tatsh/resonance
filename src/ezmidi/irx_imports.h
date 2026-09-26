@@ -8,10 +8,11 @@
  */
 
 #include <intrman.h>
+#include <irx.h>
 #include <libsd.h>
 #include <sifcmd.h>
 #include <sifman.h>
 #include <stdio.h>
 #include <sysclib.h>
 #include <thbase.h>
-#include <timrman.h>
+#include <xtimrman.h>

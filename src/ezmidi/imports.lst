@@ -1,9 +1,9 @@
-intrman_IMPORTS_start
+DECLARE_IMPORT_TABLE(intrman, 1, 2)
 I_CpuEnableIntr
 I_EnableIntr
-intrman_IMPORTS_end
+END_IMPORT_TABLE
 
-libsd_IMPORTS_start
+DECLARE_IMPORT_TABLE(libsd, 1, 4)
 I_sceSdGetParam
 I_sceSdNote2Pitch
 I_sceSdSetAddr
@@ -11,40 +11,40 @@ I_sceSdSetParam
 I_sceSdSetSwitch
 I_sceSdVoiceTrans
 I_sceSdVoiceTransStatus
-libsd_IMPORTS_end
+END_IMPORT_TABLE
 
-sifcmd_IMPORTS_start
+DECLARE_IMPORT_TABLE(sifcmd, 1, 1)
 I_sceSifInitRpc
 I_sceSifRegisterRpc
 I_sceSifRpcLoop
 I_sceSifSetRpcQueue
-sifcmd_IMPORTS_end
+END_IMPORT_TABLE
 
-sifman_IMPORTS_start
+DECLARE_IMPORT_TABLE(sifman, 1, 1)
 I_sceSifCheckInit
 I_sceSifInit
-sifman_IMPORTS_end
+END_IMPORT_TABLE
 
-stdio_IMPORTS_start
+DECLARE_IMPORT_TABLE(stdio, 1, 3)
 I_printf
-stdio_IMPORTS_end
+END_IMPORT_TABLE
 
-sysclib_IMPORTS_start
+DECLARE_IMPORT_TABLE(sysclib, 1, 2)
 I_memcpy
-sysclib_IMPORTS_end
+END_IMPORT_TABLE
 
-thbase_IMPORTS_start
+DECLARE_IMPORT_TABLE(thbase, 1, 1)
 I_CreateThread
 I_GetSystemTime
 I_GetThreadId
 I_SleepThread
 I_StartThread
 I_USec2SysClock
-thbase_IMPORTS_end
+END_IMPORT_TABLE
 
-timrman_IMPORTS_start
+DECLARE_IMPORT_TABLE(timrman, 1, 2)
 I_AllocHardTimer
 I_SetTimerHandler
 I_SetupHardTimer
 I_StartHardTimer
-timrman_IMPORTS_end
+END_IMPORT_TABLE

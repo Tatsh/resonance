@@ -30,8 +30,7 @@ jobs:
           echo "::add-matcher::.github/problem-matchers/gcc.json"
           cmake --build build --target archives -- -k 0 2>&1 | tee build/compile.log
       - name: 'Link EZMIDI.IRX'
-        run: |
-          cmake --build build --target ezmidi_irx 2>&1 | tee build/irx.log
+        run: cmake --build build --target ezmidi_irx
       - name: 'Count produced artifacts'
         if: always()
         run: |
