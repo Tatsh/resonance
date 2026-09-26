@@ -30,20 +30,20 @@ This is an active, partial reconstruction. It does not build a playable game yet
 port. Over nine tenths of the game's routines are accounted for and nearly nine tenths have a
 body, with the current figures and how they are measured in [PROGRESS.md](PROGRESS.md).
 
-| Area                               | State                                        |
-| ---------------------------------- | -------------------------------------------- |
-| Start-up and the application shell | Recovered                                    |
-| Memory, archives, and file loading | Recovered                                    |
-| Renderer object model and streams  | Recovered                                    |
-| Meshes, materials, and textures    | Recovered                                    |
-| Art and canvas library             | Recovered apart from two routines            |
-| Game messages and packets          | Recovered                                    |
-| Memory card                        | Recovered                                    |
-| Front end screens and the metagame | Recovered                                    |
-| Gameplay                           | Recovered                                    |
-| Audio and the synthesiser          | Recovered                                    |
-| Embedded Python interpreter        | Characterised, with its differences recorded |
-| Networking                         | Packet records only                          |
+| Area                               | State                                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------------------- |
+| Start-up and the application shell | Recovered                                                                          |
+| Memory, archives, and file loading | Recovered                                                                          |
+| Renderer object model and streams  | Recovered                                                                          |
+| Meshes, materials, and textures    | Recovered                                                                          |
+| Art and canvas library             | Recovered                                                                          |
+| Game messages and packets          | Recovered                                                                          |
+| Memory card                        | Recovered                                                                          |
+| Front end screens and the metagame | Recovered                                                                          |
+| Gameplay                           | Recovered                                                                          |
+| Audio and the synthesiser          | Recovered                                                                          |
+| Embedded Python interpreter        | Characterised, with its differences recorded; the `hx` script commands have bodies |
+| Networking                         | Packet records only                                                                |
 
 Recovered means every routine the game's code defines has a body or a recorded reason for
 having none. Cross-reviews against the disassembly continue to correct bodies in every area.
