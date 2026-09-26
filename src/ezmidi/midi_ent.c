@@ -18,6 +18,31 @@ int gRpcReply;
 // EZMIDI 0x6c10
 const char gRpcError[] = "EzMIDI driver error: unknown command %d (data %d)\n";
 
+// EZMIDI 0x0
+int start(int nArgc, char **pArgv) {
+    struct ThreadParam param;
+    int nThread;
+
+    (void)nArgc; // Yes, the binary never reads its arguments.
+    (void)pArgv;
+    CpuEnableIntr();
+    if (sceSifCheckInit() != 0) {
+        sceSifInit();
+    }
+    sceSifInitRpc(0);
+    param.mAttr = 0x02000000;
+    param.mOption = 0;
+    param.mEntry = sce_midi_loop;
+    param.mStackSize = 0x800;
+    param.mPriority = 0x1e;
+    nThread = CreateThread(&param);
+    if (nThread <= 0) {
+        return 1;
+    }
+    StartThread(nThread, 0);
+    return 0;
+}
+
 // EZMIDI 0xd0
 int sce_midi_loop(void) {
     // Queue and server data on the stack; the binary sizes them by address.
@@ -90,29 +115,4 @@ void *midiFunc(int nCommand, void *pData, int nSize) {
         break;
     }
     return &gRpcReply;
-}
-
-// EZMIDI 0x0
-int start(int nArgc, char **pArgv) {
-    struct ThreadParam param;
-    int nThread;
-
-    (void)nArgc; // Yes, the binary never reads its arguments.
-    (void)pArgv;
-    CpuEnableIntr();
-    if (sceSifCheckInit() != 0) {
-        sceSifInit();
-    }
-    sceSifInitRpc(0);
-    param.mAttr = 0x02000000;
-    param.mOption = 0;
-    param.mEntry = sce_midi_loop;
-    param.mStackSize = 0x800;
-    param.mPriority = 0x1e;
-    nThread = CreateThread(&param);
-    if (nThread <= 0) {
-        return 1;
-    }
-    StartThread(nThread, 0);
-    return 0;
 }

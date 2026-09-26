@@ -372,6 +372,7 @@ inputcheatdetectormet
 inputmap
 inputpollerps
 intobject
+intr
 intrman
 invalidateseekermsg
 invalidatetrackmsg
@@ -380,6 +381,7 @@ iobmemstream
 iobpreallocmemstream
 iobstream
 ioman
+iopfixup
 ioprp
 isatty
 isce
@@ -441,6 +443,7 @@ lightanim
 linearmap
 linearramp
 linecache
+linkfile
 listdataprovider
 listdir
 listdirop
@@ -481,6 +484,7 @@ mcrf
 mcrl
 mcserv
 mct's
+mdebug
 mdfile
 medius
 memcard
@@ -491,6 +495,7 @@ memcardps
 memcardsavepaths
 memcardtask
 memcarduser
+memcpy
 memorycard
 memstream
 meshanim
@@ -597,6 +602,7 @@ midichase
 midifilereader
 midionoffeffector
 minimumsavespacemct
+mipsel
 miptbp
 missingconfigvals
 mktemp
@@ -618,6 +624,7 @@ msgsink
 msgsource
 msifrpc
 msnm
+msoft
 mtap
 mtapman
 mtba
@@ -663,6 +670,7 @@ nolattice
 nomemcard
 noone
 normalkey
+nostdlib
 notefinder
 notemsg
 notepitcher
@@ -677,6 +685,7 @@ numpydoc
 obfilestream
 objc
 objimpl
+objs
 obmalloc
 obstream
 ohgb
@@ -798,6 +807,7 @@ regexmodule
 regexpr
 regi
 releaseable
+relocs
 remixfx
 remixfxmsg
 remixindex
@@ -875,6 +885,7 @@ shellformat
 shiftjis
 shoemake
 showeraseeffectmsg
+sifcmd
 sifdev
 sifman
 sifrpc
@@ -906,6 +917,7 @@ spewregistrar
 spjoinacceptpacket
 spjoindenypacket
 srcs
+srxfixup
 sstv
 startable
 statusline
@@ -924,6 +936,7 @@ stuttereffector
 susgemmsg
 sustainnotemsg
 synthsustainer
+sysclib
 sysconf
 sysmodule
 tagfile
@@ -943,8 +956,10 @@ texburn
 texs
 textmsg
 texturepairrecord
+thbase
 tickclock
 timedcommand
+timrman
 tkinter
 tmpnam
 tnlactivator
@@ -982,6 +997,7 @@ tnlutil
 toggleghostmsg
 togglemode
 toolstream
+toplevel
 totbytes
 toupper
 trackdata
