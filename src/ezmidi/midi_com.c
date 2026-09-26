@@ -360,3 +360,44 @@ void HardSynthConfig(const void *pConfig) {
     gSynthRun = (unsigned short)(0x8230000 / (1000 * (gRunDivisor + 1)));
     gChorusAltStep = (unsigned short)(0x8230000 / (1000 * (gAltDivisor + 1)));
 }
+
+// EZMIDI 0x6390
+int HardSynthPause(void) {
+    int nIndex;
+
+    if (gPauseCount != 0) {
+        return 1;
+    }
+    gPauseCount = 1;
+    for (nIndex = 0; nIndex < 50; ++nIndex) {
+        if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+            continue;
+        }
+        if (((unsigned int)gPauseKeepMask >> gCurrentNotes[nIndex].mChannel & 1) != 0) {
+            continue;
+        }
+        sceSdSetParam((gCurrentNotes[nIndex].mUnknown02 | 0x200) & 0xffff, 0);
+    }
+    return 0;
+}
+
+// EZMIDI 0x64e0
+int HardSynthResume(void) {
+    int nIndex;
+
+    if (gPauseCount <= 0) {
+        return -1;
+    }
+    gPauseCount = 0;
+    for (nIndex = 0; nIndex < 50; ++nIndex) {
+        if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+            continue;
+        }
+        if (((unsigned int)gPauseKeepMask >> gCurrentNotes[nIndex].mChannel & 1) != 0) {
+            continue;
+        }
+        sceSdSetParam((gCurrentNotes[nIndex].mUnknown02 | 0x200) & 0xffff,
+                      gCurrentNotes[nIndex].mUnknown0C);
+    }
+    return 0;
+}

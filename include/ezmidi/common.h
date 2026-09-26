@@ -208,16 +208,20 @@ void HardSynthConfig(const void *pConfig);
 /**
  * Pause the synthesiser.
  *
- * EZMIDI `0x6390`.
+ * Quiets every voice outside the pause keep mask. EZMIDI `0x6390`.
+ *
+ * @return One when already paused, else zero.
  */
-void HardSynthPause(void);
+int HardSynthPause(void);
 
 /**
  * Resume the synthesiser.
  *
- * EZMIDI `0x64e0`.
+ * Restores every voice outside the pause keep mask. EZMIDI `0x64e0`.
+ *
+ * @return -1 when not paused, else zero.
  */
-void HardSynthResume(void);
+int HardSynthResume(void);
 
 /**
  * Set the remix mode.
