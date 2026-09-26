@@ -409,6 +409,7 @@ keypanel
 khgb
 kind's
 kochanek
+koff
 kscope
 kseg
 kuhgb
@@ -691,6 +692,7 @@ padman
 padrecord
 paletted
 pangame
+pantable
 parsermodule
 parsetok
 particlesys
@@ -736,7 +738,6 @@ popen
 posixmodule
 posixpath
 powb
-powerbar
 powerup
 powerupcollection
 powerupcollectioni
@@ -876,6 +877,7 @@ shoemake
 showeraseeffectmsg
 sifdev
 sifman
+sifrpc
 signalmodule
 simplifiedgamepowerupplacer
 singlecatcher
