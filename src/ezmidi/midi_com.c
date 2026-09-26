@@ -23,6 +23,31 @@ struct InBuffer gInBuf[2];
 // EZMIDI 0x7840
 struct InBuffer gStagedBuf;
 
+// EZMIDI 0x4bf4
+void HardSynthAllNotesOff(int nChannel, int nReset) {
+    int nIndex;
+
+    if (nReset != 0) {
+        hs_tick_setup();
+    }
+    for (nIndex = 0; nIndex < 50; ++nIndex) {
+        if ((gCurrentNotes[nIndex].mFlags & 1) == 0) {
+            continue;
+        }
+        if (nChannel != -1 && gCurrentNotes[nIndex].mChannel != nChannel) {
+            continue;
+        }
+        hs_kill_idx(&gCurrentNotes[nIndex], 0);
+    }
+    if (nChannel == -1 && _count_notes() != 0) {
+        ShowSynthState(0xff);
+    }
+    if (nReset == 0) {
+        return;
+    }
+    _do_reg_out();
+}
+
 // EZMIDI 0x4d70
 unsigned char *HandleMidiMessage(unsigned char *pMsg) {
     int nChannel = pMsg[0] & 0xf;

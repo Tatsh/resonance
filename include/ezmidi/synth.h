@@ -548,6 +548,16 @@ int hs_check_playing(struct Note *pNote);
 int hs_reapply_channel(int nChannel);
 
 /**
+ * Report the synthesiser state.
+ *
+ * Takes a value and reports zero. EZMIDI `0x477c`.
+ *
+ * @param nUnknown Ignored by the binary. Inferred.
+ * @return Zero.
+ */
+int ShowSynthState(int nUnknown);
+
+/**
  * Update a note's gains, chorus, and envelope.
  *
  * Recomputes the gains, steps the chorus and the volume envelope, and writes

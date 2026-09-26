@@ -73,12 +73,12 @@ int HardSynthParseNew(unsigned char *pData, int nCount, int nBuffer);
 /**
  * Silence every voice on a channel.
  *
- * EZMIDI `0x4bf4`.
+ * With a -1 channel, silences every playing note. EZMIDI `0x4bf4`.
  *
- * @param nChannel Channel index. Inferred.
- * @param nUnused Ignored by the binary. Inferred.
+ * @param nChannel Channel index, or -1 for every channel. Inferred.
+ * @param nReset Nonzero resets the tick and flushes. Inferred.
  */
-void HardSynthAllNotesOff(int nChannel, int nUnused);
+void HardSynthAllNotesOff(int nChannel, int nReset);
 
 /**
  * Handle one MIDI message.

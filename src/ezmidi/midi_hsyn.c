@@ -689,3 +689,9 @@ int hs_reapply_channel(int nChannel) {
     }
     return 0;
 }
+
+// EZMIDI 0x477c
+int ShowSynthState(int nUnknown) {
+    (void)nUnknown; // Yes, the binary takes a value and never reads it.
+    return 0;
+}
