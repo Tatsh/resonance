@@ -17,6 +17,12 @@ const char gTickPost[] = "[";
 // EZMIDI 0x6e40
 const char gScanFmt[] = "%d midi bytes\n";
 
+// EZMIDI 0x8564
+int gTickThread;
+
+// EZMIDI 0x8558
+int gTimerThread;
+
 // EZMIDI 0x7040
 struct InBuffer gInBuf[2];
 
@@ -258,4 +264,21 @@ int MemCpy_IOPtoSPU(int nSpuAddr, const void *pSource, int nSize) {
     while (sceSdVoiceTransStatus(0, 0) == 0) {
     }
     return 0;
+}
+
+// EZMIDI 0x6800
+int HardSynthInit(void) {
+    _init_channels();
+    _init_banks();
+    _build_slotmask();
+    _build_pantable();
+    _build_chorus(0x400);
+    HardSynthConfig(0);
+    gTickThread = make_thread();
+    gTimerThread = gTickThread;
+    StartThread(gTickThread, 0);
+    set_timer(gTimerThread);
+    HardSynthReset();
+    start_timer(gTimerThread);
+    return (int)gInBuf;
 }

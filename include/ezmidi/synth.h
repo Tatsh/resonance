@@ -169,6 +169,14 @@ void _init_banks(void);
 void _build_pantable(void);
 
 /**
+ * Fill the voice slot masks.
+ *
+ * The binary carries a compiler label here, but the code is a genuine table
+ * builder called by the initialiser. EZMIDI `0x470`.
+ */
+void _build_slotmask(void);
+
+/**
  * Fill the chorus modulation curve.
  *
  * Takes a size the binary never reads. EZMIDI `0x668`.

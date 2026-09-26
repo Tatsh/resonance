@@ -37,6 +37,12 @@ extern const char gTickPre[];
 /** Tick mark printed after waking. EZMIDI `0x6e54`. Inferred. */
 extern const char gTickPost[];
 
+/** Created tick thread identifier. EZMIDI `0x8564`. Inferred. */
+extern int gTickThread;
+
+/** Tick thread identifier for the timer calls. EZMIDI `0x8558`. Inferred. */
+extern int gTimerThread;
+
 /** Scan count message. EZMIDI `0x6e40`. Inferred. */
 extern const char gScanFmt[];
 
@@ -101,9 +107,43 @@ extern const char gRpcError[];
  *
  * EZMIDI `0x6800`.
  *
- * @return The init result. Inferred.
+ * @return The input buffer address. Inferred.
  */
 int HardSynthInit(void);
+
+/**
+ * Create the tick thread.
+ *
+ * EZMIDI `0x6054`.
+ *
+ * @return The thread identifier. Inferred.
+ */
+int make_thread(void);
+
+/**
+ * Arm the tick timer.
+ *
+ * EZMIDI `0x60c8`.
+ *
+ * @param nThread Thread identifier. Inferred.
+ */
+void set_timer(int nThread);
+
+/**
+ * Start the tick timer.
+ *
+ * EZMIDI `0x620c`.
+ *
+ * @param nThread Thread identifier. Inferred.
+ */
+void start_timer(int nThread);
+
+/**
+ * Reset the synthesiser.
+ *
+ * EZMIDI `0x68d0`.
+ */
+void HardSynthReset(void);
 
 /**
  * Attach bank headers to bank data.

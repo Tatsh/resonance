@@ -157,6 +157,18 @@ void hs_prog_change(int nChannel, int nProgram) {
     gChan[nChannel].mProgram = (unsigned char)nProgram;
 }
 
+// EZMIDI 0x470
+void _build_slotmask(void) {
+    int nGroup;
+    int nSlot;
+
+    for (nGroup = 0; nGroup < 2; ++nGroup) {
+        for (nSlot = 0; nSlot < 24; ++nSlot) {
+            slot_2_mask.mWords[nGroup | (nSlot << 1)] = 1 << nSlot;
+        }
+    }
+}
+
 // EZMIDI 0x54c
 void _build_pantable(void) {
     int nIndex;
