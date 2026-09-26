@@ -196,6 +196,7 @@ enablepowerupcheats
 enableteamfreqs
 endforeach
 endgamemsg
+endimage
 endrecordingcmd
 endx
 entspaceop
@@ -379,6 +380,8 @@ isatty
 isce
 isdir
 isrecordingmsg
+istdiostream
+istrstream
 isystem
 iwyu
 jameffectmsg
@@ -648,6 +651,7 @@ newmodule
 njgb
 nlfilebuf
 nocard
+nodata
 nodisc
 nolattice
 nomemcard
@@ -675,6 +679,7 @@ openreadop
 openwriteop
 ordblks
 orthonormalize
+ostrstream
 overcutting
 pabe
 padman
@@ -726,6 +731,7 @@ popen
 posixmodule
 posixpath
 powb
+powerbar
 powerup
 powerupcollection
 powerupcollectioni
@@ -993,6 +999,7 @@ tupleobject
 tutorialrmx
 tvel
 typeobject
+uchar
 ucnhash
 udvare
 undraft
@@ -1021,8 +1028,10 @@ uordblks
 updatescorepacket
 updateworldxfm
 usbd
+utilcppd
 utime
 vars
+vblank
 vclipw
 vendored
 venv
