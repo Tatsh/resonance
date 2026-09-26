@@ -99,6 +99,7 @@ caughtphrasepacket
 caughtpowerbarmsg
 cdrom
 cdvd
+cdvdman
 ceval
 chcr
 chdir
@@ -170,6 +171,7 @@ dimx
 discswap
 dispfb
 displaypointermsg
+dmacman
 docstrings
 dogamesystemplaycmd
 drawverts
@@ -361,6 +363,7 @@ idablebase
 ifdef
 ifndef
 immediates
+imsifrpc
 ingame
 inittab
 inputcheatdetector
@@ -369,12 +372,14 @@ inputcheatdetectormet
 inputmap
 inputpollerps
 intobject
+intrman
 invalidateseekermsg
 invalidatetrackmsg
 invers
 iobmemstream
 iobpreallocmemstream
 iobstream
+ioman
 ioprp
 isatty
 isce
@@ -870,6 +875,7 @@ shiftjis
 shoemake
 showeraseeffectmsg
 sifdev
+sifman
 signalmodule
 simplifiedgamepowerupplacer
 singlecatcher
@@ -1028,7 +1034,7 @@ uordblks
 updatescorepacket
 updateworldxfm
 usbd
-utilcppd
+usbkeybd
 utime
 vars
 vblank
