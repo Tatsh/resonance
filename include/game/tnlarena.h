@@ -154,11 +154,18 @@ private:
 
     std::vector<PlayerMaterial *> mPlayerMaterials;
     std::vector<ScreenMesh> mScreenMeshes;
+
+public:
+    // The animation the screens show. Public because the test-arena script command drives it
+    // directly.
     ScreenAnim *mScreenAnim;
+    // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while it still is. Public
+    // because the test-arena script command sets it directly.
+    int mUnknown24; // +0x24
+
+private:
     // Globals::GetGameMode() at construction.
     int mGameMode;
-    // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while it still is.
-    int mUnknown24; // +0x24
     // The level last passed to ScreenAnim::SetLevel(). Starts at 1, or at the play mode when that
     // is 2.
     int mLevel;
