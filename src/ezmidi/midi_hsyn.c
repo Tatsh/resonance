@@ -61,7 +61,7 @@ void _init_channels(void) {
     for (nChannel = 0; nChannel < 16; ++nChannel) {
         struct MidiChannel *pChannel = &gChan[nChannel];
 
-        pChannel->mUnknown00 = 0;
+        pChannel->mProgram = 0;
         pChannel->mVolume = 0x64;
         pChannel->mPan = 0x40;
         pChannel->mExpression = 0x7f;
@@ -82,6 +82,11 @@ void _init_banks(void) {
         gaBds[nBank] = 0;
         gaHds[nBank] = 0;
     }
+}
+
+// EZMIDI 0xbe4
+void hs_prog_change(int nChannel, int nProgram) {
+    gChan[nChannel].mProgram = (unsigned char)nProgram;
 }
 
 // EZMIDI 0x54c
@@ -352,13 +357,13 @@ int hs_note_on(int nChannel, int nNote, int nVelocity) {
     }
     pTab0 = (struct OffsetTable *)((char *)gpHd + gpHd->mProgTab0);
     pTab1 = (struct OffsetTable *)((char *)gpHd + gpHd->mProgTab1);
-    if (pTab0->mCount < gChan[nChannel].mUnknown00) {
+    if (pTab0->mCount < gChan[nChannel].mProgram) {
         return -4;
     }
     if (gpHd == 0 || gpBd == 0) {
         return -5;
     }
-    nEntry = pTab0->mOffsets[gChan[nChannel].mUnknown00];
+    nEntry = pTab0->mOffsets[gChan[nChannel].mProgram];
     if (nEntry == -1) {
         return -6;
     }

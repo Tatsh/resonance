@@ -15,7 +15,7 @@
  * purposes from volume onwards are inferred rather than confirmed.
  */
 struct MidiChannel {
-    unsigned char mUnknown00;    /**< +0x00. Reset to 0. */
+    unsigned char mProgram;      /**< +0x00. Selects the program table entry. Inferred. */
     unsigned char mVolume;       /**< +0x01. Reset to 100. Inferred. */
     unsigned char mPan;          /**< +0x02. Reset to centre. Inferred. */
     unsigned char mExpression;   /**< +0x03. Reset to 127. Inferred. */
@@ -351,6 +351,16 @@ int hs_idx_off(int nIndex);
  * @return Zero from the release, or -1 when the note is already free.
  */
 int hs_kill_idx(struct Note *pNote, int nUnused);
+
+/**
+ * Select a program on a channel.
+ *
+ * EZMIDI `0xbe4`.
+ *
+ * @param nChannel Channel index. Inferred.
+ * @param nProgram Program number. Inferred.
+ */
+void hs_prog_change(int nChannel, int nProgram);
 
 /**
  * Start a note.
