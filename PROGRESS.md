@@ -19,27 +19,27 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Functions in the program  | 15,647 |
 | Excluded by rule          | 8,725  |
 | Reconstructable           | 6,922  |
-| Declared or defined       | 6,454  |
-| Share declared or defined | 93.24% |
-| Defined, with a body      | 6,085  |
-| Share implemented         | 87.91% |
-| Remaining, with a name    | 468    |
+| Declared or defined       | 6,459  |
+| Share declared or defined | 93.30% |
+| Defined, with a body      | 6,093  |
+| Share implemented         | 88.01% |
+| Remaining, with a name    | 464    |
 | Remaining, unidentified   | 0      |
 
-The table measures a clean export of the commit `bb0b785`.
+The table measures a clean export of the commit `ff765e8`.
 
 The audit counts an address as accounted once any file in the tree annotates it, and a header
-declaration takes the same annotation a body does. Treat 87.91% as the answer to "how much is
-reconstructed" and 93.24% as the answer to "how much is accounted for".
+declaration takes the same annotation a body does. Treat 88.01% as the answer to "how much is
+reconstructed" and 93.30% as the answer to "how much is accounted for".
 
-Of the 6,454 accounted routines, 6,085 have a body the scanner counts. Of the other 369, the
+Of the 6,459 accounted routines, 6,093 have a body the scanner counts. Of the other 366, the
 great majority are reconstructable routines declared with their address, signature, and evidence
 (inline in headers, template instances, split signatures, and defaulted or vendored glue), and the
 rest are annotated library and vendored routines whose titles fall outside the body count.
 
-Of the 468 routines with no annotation, 249 are implicit special members, 91 are static
-initialiser and exit stubs, 57 are ezmpeg sample routines, 23 are interpreter bindings and their
-wrappers, 20 are library routines labelled with their upstream names, 13 are script workers (ten
+Of the 464 routines with no annotation, 249 are implicit special members, 91 are static
+initialiser and exit stubs, 57 are ezmpeg sample routines, 21 are interpreter bindings and their
+wrappers, 20 are library routines labelled with their upstream names, 11 are script workers (ten
 unreferenced duplicates of live entry points, two building the play-map test probe, and one
 scheduler kill with no caller), six are SDK routines the open-source SDK provides or links (three
 interrupt-context entries, two interrupt toggles, and one stream-input helper), eight are recorded
@@ -52,6 +52,7 @@ tree since the script-layer push.
 
 | Commit    | Share implemented | Main change                                                           |
 | --------- | ----------------- | --------------------------------------------------------------------- |
+| `ff765e8` | 88.01%            | Script command layer plus test-map builders, spew, test, and clock    |
 | `bb0b785` | 87.91%            | Script command layer plus spew and test commands                      |
 | `451cec1` | 87.91%            | Script command layer: scene, cheat, toggle, tunnel, HUD, and hx units |
 | `064615f` | 87.50%            | Faithfulness review against the disassembly, four functions found     |
@@ -175,34 +176,34 @@ the Doxygen tag. The comment has to sit on a separate line with a definition aft
 
 ## Subsystems
 
-| Area                          | Notes                                                                                                                                                                                                                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Entry point                   | `main` and the loading screen                                                                                                                                                                                                                                             |
-| Asynchronous file layer       | Submission, the drive callback, the request and job records                                                                                                                                                                                                               |
-| Animation base                | `Rnd::Animatable` with all five nested filters                                                                                                                                                                                                                            |
-| Collision base                | `Rnd::Collideable` with its hit and sink types                                                                                                                                                                                                                            |
-| Message and packet family     | 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg`, and seven routing intermediates                                                                                                                                                   |
-| Material, PlayStation 2       | `Rnd::PsMat`, including the blend mode table                                                                                                                                                                                                                              |
-| Streams                       | File, buffer, memory, and tool streams, and the nine-class byte stream family over the input and output interfaces                                                                                                                                                        |
-| Mesh, PlayStation 2           | `Sync` and all four draw paths, software and VU1                                                                                                                                                                                                                          |
-| GIF packet buffer             | Reservation, tag closing, and the scratchpad double buffer                                                                                                                                                                                                                |
-| Scheduler command base        | `Sch::Command`, `Sch::TimedCommand`, and `Sch::Tick`                                                                                                                                                                                                                      |
-| Transform and animation base  | `Rnd::TransAnim` with its keyframe channels                                                                                                                                                                                                                               |
-| View, camera, and environment | `Rnd::Blur`, `Rnd::View`, `PsCam`, and `PsEnviron`, with camera and environment serialisation                                                                                                                                                                             |
-| Mesh animation and instancing | `Rnd::MeshAnim` with its three keyframe channels, `Rnd::MultiMesh`, and `Rnd::PsMultiMesh`                                                                                                                                                                                |
-| Art library                   | Every canvas class, the polygon fills, the stretch and clip routines, `APalette`, `ARleReader`, and the BMP, TGA, and GIF readers, apart from the two owed routines above                                                                                                 |
-| Texture, PlayStation 2        | `Rnd::PsTex`, including surface restore, the upload and bind path, and render-target binding                                                                                                                                                                              |
-| Particles                     | `Rnd::ParticleSys`, including the simulation, the text dump, and revisions 0 to 6 of its file format                                                                                                                                                                      |
-| Cutscene player               | The game's C unit around Sony's MPEG sample                                                                                                                                                                                                                               |
-| Debug console                 | The development console bring-up                                                                                                                                                                                                                                          |
-| Exception runtime             | Identified rather than reconstructed. The scheme is DWARF                                                                                                                                                                                                                 |
-| Graphics device               | Every `GfxDevice` routine, with the VU1 setup, lighting, and clipping routines of the draw path. The vertical-blank handler's body is MIPS assembly                                                                                                                       |
-| Tunnel                        | `Rnd::Tunnel`, `Rnd::Generator`, the duration-gem trails, `AppTunnel`, and the tunnel effect classes                                                                                                                                                                      |
-| Gameplay display              | `Renderer`, `Overlay`, the HUD panel and per-track display, `TnlArena`, and the screen animations                                                                                                                                                                         |
-| Gameplay world                | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `PhraseMgr`, `TrackData`, `Catcher`, `AutoRiffer`, `NotePlayer`, the power-bar managers, the R250 generator, and the pitcher classes                                                                                           |
-| Messages and packets          | Every factory, printer, serializer, and stack constructor of the packets and messages, with the Standard MIDI File reader                                                                                                                                                 |
-| Sound                         | `Synth` and `Ps2HardSynth` with the interface mapped slot by slot, and the bank path of `midi_main`. The module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable                                                                      |
-| Script commands               | The scene, cheat, toggle, tunnel, HUD, and `hx` command implementations with their interpreter entry points, over the `Py::` binding. The play-map test builders, the ghost and loop setters, and the MIDI, input, spew, test, powerup, and clock commands are still open |
+| Area                          | Notes                                                                                                                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry point                   | `main` and the loading screen                                                                                                                                                                                       |
+| Asynchronous file layer       | Submission, the drive callback, the request and job records                                                                                                                                                         |
+| Animation base                | `Rnd::Animatable` with all five nested filters                                                                                                                                                                      |
+| Collision base                | `Rnd::Collideable` with its hit and sink types                                                                                                                                                                      |
+| Message and packet family     | 73 concrete classes, 22 of them packets, over `Message`, `Packet`, `CmdMsg`, `MuseMsg`, and seven routing intermediates                                                                                             |
+| Material, PlayStation 2       | `Rnd::PsMat`, including the blend mode table                                                                                                                                                                        |
+| Streams                       | File, buffer, memory, and tool streams, and the nine-class byte stream family over the input and output interfaces                                                                                                  |
+| Mesh, PlayStation 2           | `Sync` and all four draw paths, software and VU1                                                                                                                                                                    |
+| GIF packet buffer             | Reservation, tag closing, and the scratchpad double buffer                                                                                                                                                          |
+| Scheduler command base        | `Sch::Command`, `Sch::TimedCommand`, and `Sch::Tick`                                                                                                                                                                |
+| Transform and animation base  | `Rnd::TransAnim` with its keyframe channels                                                                                                                                                                         |
+| View, camera, and environment | `Rnd::Blur`, `Rnd::View`, `PsCam`, and `PsEnviron`, with camera and environment serialisation                                                                                                                       |
+| Mesh animation and instancing | `Rnd::MeshAnim` with its three keyframe channels, `Rnd::MultiMesh`, and `Rnd::PsMultiMesh`                                                                                                                          |
+| Art library                   | Every canvas class, the polygon fills, the stretch and clip routines, `APalette`, `ARleReader`, and the BMP, TGA, and GIF readers, apart from the two owed routines above                                           |
+| Texture, PlayStation 2        | `Rnd::PsTex`, including surface restore, the upload and bind path, and render-target binding                                                                                                                        |
+| Particles                     | `Rnd::ParticleSys`, including the simulation, the text dump, and revisions 0 to 6 of its file format                                                                                                                |
+| Cutscene player               | The game's C unit around Sony's MPEG sample                                                                                                                                                                         |
+| Debug console                 | The development console bring-up                                                                                                                                                                                    |
+| Exception runtime             | Identified rather than reconstructed. The scheme is DWARF                                                                                                                                                           |
+| Graphics device               | Every `GfxDevice` routine, with the VU1 setup, lighting, and clipping routines of the draw path. The vertical-blank handler's body is MIPS assembly                                                                 |
+| Tunnel                        | `Rnd::Tunnel`, `Rnd::Generator`, the duration-gem trails, `AppTunnel`, and the tunnel effect classes                                                                                                                |
+| Gameplay display              | `Renderer`, `Overlay`, the HUD panel and per-track display, `TnlArena`, and the screen animations                                                                                                                   |
+| Gameplay world                | `GrooveWorld`, `Phrase`, `PhraseDatabase`, `PhraseMgr`, `TrackData`, `Catcher`, `AutoRiffer`, `NotePlayer`, the power-bar managers, the R250 generator, and the pitcher classes                                     |
+| Messages and packets          | Every factory, printer, serializer, and stack constructor of the packets and messages, with the Standard MIDI File reader                                                                                           |
+| Sound                         | `Synth` and `Ps2HardSynth` with the interface mapped slot by slot, and the bank path of `midi_main`. The module drives the hardware through libsdr. Thirteen interface slot titles are unrecoverable                |
+| Script commands               | The scene, cheat, toggle, tunnel, HUD, record, test-map, and `hx` command implementations with their interpreter entry points, over the `Py::` binding. The input, powerup, ghost, and loop commands are still open |
 
 ### Parked questions
 
