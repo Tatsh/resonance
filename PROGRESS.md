@@ -19,26 +19,26 @@ uv run --project recon-tools python .wiswa-ci/freq/coverage_report.py .wiswa-ci/
 | Functions in the program  | 15,647 |
 | Excluded by rule          | 8,725  |
 | Reconstructable           | 6,922  |
-| Declared or defined       | 6,450  |
-| Share declared or defined | 93.18% |
+| Declared or defined       | 6,454  |
+| Share declared or defined | 93.24% |
 | Defined, with a body      | 6,085  |
 | Share implemented         | 87.91% |
-| Remaining, with a name    | 472    |
+| Remaining, with a name    | 468    |
 | Remaining, unidentified   | 0      |
 
-The table measures a clean export of the commit `451cec1`.
+The table measures a clean export of the commit `bb0b785`.
 
 The audit counts an address as accounted once any file in the tree annotates it, and a header
 declaration takes the same annotation a body does. Treat 87.91% as the answer to "how much is
-reconstructed" and 93.18% as the answer to "how much is accounted for".
+reconstructed" and 93.24% as the answer to "how much is accounted for".
 
-Of the 6,450 accounted routines, 6,085 have a body the scanner counts. Of the other 365, the
+Of the 6,454 accounted routines, 6,085 have a body the scanner counts. Of the other 369, the
 great majority are reconstructable routines declared with their address, signature, and evidence
 (inline in headers, template instances, split signatures, and defaulted or vendored glue), and the
 rest are annotated library and vendored routines whose titles fall outside the body count.
 
-Of the 472 routines with no annotation, 249 are implicit special members, 91 are static
-initialiser and exit stubs, 57 are ezmpeg sample routines, 27 are interpreter bindings and their
+Of the 468 routines with no annotation, 249 are implicit special members, 91 are static
+initialiser and exit stubs, 57 are ezmpeg sample routines, 23 are interpreter bindings and their
 wrappers, 20 are library routines labelled with their upstream names, 13 are script workers (ten
 unreferenced duplicates of live entry points, two building the play-map test probe, and one
 scheduler kill with no caller), six are SDK routines the open-source SDK provides or links (three
@@ -52,6 +52,7 @@ tree since the script-layer push.
 
 | Commit    | Share implemented | Main change                                                           |
 | --------- | ----------------- | --------------------------------------------------------------------- |
+| `bb0b785` | 87.91%            | Script command layer plus spew and test commands                      |
 | `451cec1` | 87.91%            | Script command layer: scene, cheat, toggle, tunnel, HUD, and hx units |
 | `064615f` | 87.50%            | Faithfulness review against the disassembly, four functions found     |
 | `5e32890` | 87.52%            | Every declared routine gained a body or a classification              |
