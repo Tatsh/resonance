@@ -65,9 +65,20 @@ extern struct InBuffer gStagedBuf;
  *
  * @param pData Staged data. Inferred.
  * @param nCount Data byte count. Inferred.
- * @param nBuffer Buffer index. Inferred.
+ * @param nBuffer Buffer index, ignored by the binary. Inferred.
+ * @return Zero, or -1 when a message fails to parse.
  */
-void HardSynthParseNew(unsigned char *pData, int nCount, int nBuffer);
+int HardSynthParseNew(unsigned char *pData, int nCount, int nBuffer);
+
+/**
+ * Handle one MIDI message.
+ *
+ * EZMIDI `0x4d70`.
+ *
+ * @param pMsg Message bytes. Inferred.
+ * @return The next message, or zero when parsing stops. Inferred.
+ */
+unsigned char *HandleMidiMessage(unsigned char *pMsg);
 
 /**
  * Prepare the tick.

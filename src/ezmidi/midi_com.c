@@ -55,6 +55,20 @@ int HardSynthUpdate(void) {
     return 0;
 }
 
+// EZMIDI 0x5d34
+int HardSynthParseNew(unsigned char *pData, int nCount, int nBuffer) {
+    unsigned char *pMsg = pData;
+
+    (void)nBuffer; // Yes, the binary takes a buffer index and never reads it.
+    while (pMsg < pData + nCount) {
+        pMsg = HandleMidiMessage(pMsg);
+        if (pMsg == 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
 // EZMIDI 0x5e00
 int scan_inbuf(int nBuffer) {
     struct InBuffer *pBuf = &gInBuf[nBuffer];
