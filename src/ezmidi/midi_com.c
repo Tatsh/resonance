@@ -14,6 +14,15 @@ const char gTickPre[] = "]";
 // EZMIDI 0x6e54
 const char gTickPost[] = "[";
 
+// EZMIDI 0x6e40
+const char gScanFmt[] = "%d midi bytes\n";
+
+// EZMIDI 0x7040
+struct InBuffer gInBuf[2];
+
+// EZMIDI 0x7840
+struct InBuffer gStagedBuf;
+
 // EZMIDI 0x5744
 int HardSynthLoadBD(int nSpuAddr, const void *pSource, int nSize) {
     return MemCpy_IOPtoSPU(nSpuAddr, pSource, nSize);
@@ -44,6 +53,23 @@ int HardSynthUpdate(void) {
     }
     gUpdateMask = 0;
     return 0;
+}
+
+// EZMIDI 0x5e00
+int scan_inbuf(int nBuffer) {
+    struct InBuffer *pBuf = &gInBuf[nBuffer];
+    int nCount = pBuf->mCount;
+
+    if (nCount > 0) {
+        if (gTickTrace != 0) {
+            printf(gScanFmt, nCount);
+        }
+        memcpy(&gStagedBuf, pBuf, (unsigned int)(nCount + 8));
+        pBuf->mCount = 0;
+        HardSynthParseNew(gStagedBuf.mData, gStagedBuf.mCount, nBuffer);
+    }
+    gStagedBuf.mCount = 0;
+    return nCount;
 }
 
 // EZMIDI 0x5f00

@@ -37,6 +37,38 @@ extern const char gTickPre[];
 /** Tick mark printed after waking. EZMIDI `0x6e54`. Inferred. */
 extern const char gTickPost[];
 
+/** Scan count message. EZMIDI `0x6e40`. Inferred. */
+extern const char gScanFmt[];
+
+/**
+ * One input buffer.
+ *
+ * Two live in `gInBuf`; the scan stages one into `gStagedBuf`. The count word
+ * gates the copy and measures the data past the header.
+ */
+struct InBuffer {
+    int mUnknown00;             /**< +0x00. Copied with the data. Inferred. */
+    int mCount;                 /**< +0x04. Data byte count. Inferred. */
+    unsigned char mData[0x3f8]; /**< +0x08. */
+};
+
+/** Input buffers. EZMIDI `0x7040`. Inferred. */
+extern struct InBuffer gInBuf[2];
+
+/** Staged input buffer. EZMIDI `0x7840`. Inferred. */
+extern struct InBuffer gStagedBuf;
+
+/**
+ * Parse a staged input buffer.
+ *
+ * EZMIDI `0x5d34`.
+ *
+ * @param pData Staged data. Inferred.
+ * @param nCount Data byte count. Inferred.
+ * @param nBuffer Buffer index. Inferred.
+ */
+void HardSynthParseNew(unsigned char *pData, int nCount, int nBuffer);
+
 /**
  * Prepare the tick.
  *

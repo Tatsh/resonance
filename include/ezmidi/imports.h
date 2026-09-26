@@ -104,3 +104,15 @@ extern int printf(const char *pFormat, ...);
  * @return The wake result.
  */
 extern int SleepThread(void);
+
+/**
+ * Copy memory.
+ *
+ * C library. The input scan stages the buffer with it.
+ *
+ * @param pDest Destination.
+ * @param pSource Source.
+ * @param nSize Byte count.
+ * @return The destination.
+ */
+extern void *memcpy(void *pDest, const void *pSource, unsigned int nSize);
