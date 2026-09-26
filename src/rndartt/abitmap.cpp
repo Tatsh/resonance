@@ -49,6 +49,31 @@ const unsigned char g_abBitmapBytesPerPixel[kABitmapFormatCount] = {0, 1, 2, 3, 
 // 0x00725cc8
 const unsigned char g_abBitmapBitsPerPixel[kABitmapFormatCount] = {4, 8, 16, 24, 32, 8};
 
+// 0x00558dd8
+ABitmap::ABitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight) {
+    mFormat = source.mFormat;
+    unsigned char *pRow = static_cast<unsigned char *>(source.mPixels) + nY * source.mBytesPerRow;
+    if (mFormat != kABitmapFormatLinear4) {
+        mPixels = pRow + nX * g_abBitmapBytesPerPixel[mFormat];
+    } else {
+        mOddNibbleStart = source.mOddNibbleStart;
+        if ((nX & 1) == 0) {
+            mPixels = pRow + nX / 2;
+        } else {
+            mPixels = pRow + (mOddNibbleStart ? (nX + 1) / 2 : nX / 2);
+            mOddNibbleStart = !source.mOddNibbleStart;
+        }
+    }
+    mOwnsPixels = 0;
+    mHasTransparentColor = source.mHasTransparentColor;
+    mWidth = static_cast<short>(nWidth);
+    mHeight = static_cast<short>(nHeight);
+    mBytesPerRow = source.mBytesPerRow;
+    mByteCount = mBytesPerRow * mHeight;
+    mPalette = source.mPalette;
+    // Yes, the binary never writes mTransparentColor.
+}
+
 // 0x005593a0
 ABitmap::ABitmap(void *pPixels,
                  int nFormat,

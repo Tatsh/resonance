@@ -131,6 +131,24 @@ struct ABitmap {
             int nBytesPerRow);
 
     /**
+     * Describe a rectangle inside another bitmap, sharing its pixels.
+     *
+     * The format, the row stride, mHasTransparentColor, and the palette come from source, and
+     * mOwnsPixels is cleared. mPixels points at column nX of row nY of source. A
+     * kABitmapFormatLinear4 source addresses half bytes, so the column offset is nX / 2 bytes and
+     * an odd nX inverts mOddNibbleStart, taking one more byte when source starts high.
+     * mTransparentColor is never written. ACanvas::CreateForSubBitmap() is the only caller.
+     *
+     * @param source The bitmap whose pixels the rectangle lies in.
+     * @param nX The left column of the rectangle.
+     * @param nY The top row of the rectangle.
+     * @param nWidth The width in pixels.
+     * @param nHeight The height in pixels.
+     * @ghidraAddress 0x00558dd8
+     */
+    ABitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight);
+
+    /**
      * Set or replace a run of palette entries, allocating the palette on first use.
      *
      * The palette is constructed before the allocation is tested against null, and the path

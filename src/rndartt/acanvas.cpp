@@ -192,6 +192,25 @@ ACanvas *ACanvas::CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels) {
     }
 }
 
+// 0x005e8e38
+ACanvas *
+ACanvas::CreateForSubBitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight) {
+    ABitmap rect(source, nX, nY, nWidth, nHeight);
+    switch (rect.mFormat) {
+    case kABitmapFormatLinear4: // Yes, the binary gives a four bit rectangle an ACanvasLin8.
+    case kABitmapFormatLinear8:
+        return new ACanvasLin8(rect);
+    case kABitmapFormatLinear15:
+        return new ACanvasLin15(rect);
+    case kABitmapFormatLinear24:
+        return new ACanvasLin24(rect);
+    case kABitmapFormatLinear32:
+        return new ACanvasLin32(rect);
+    default:
+        return nullptr;
+    }
+}
+
 // 0x005eb200
 ACanvas *ACanvas::CreateWithOwnedPixels(const ABitmap &bitmap) {
     ABitmap copy = bitmap;

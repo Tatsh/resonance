@@ -125,6 +125,25 @@ public:
     static ACanvas *CreateWithOwnedPixels(const ABitmap &bitmap);
 
     /**
+     * Construct a canvas over a rectangle of a bitmap's pixels, sharing them.
+     *
+     * Builds the rectangle through the sub-rectangle ABitmap constructor and selects the subclass
+     * through the jump table at 0x00837db0. Unlike CreateForBitmap(), a kABitmapFormatLinear4
+     * rectangle gets an ACanvasLin8, and kABitmapFormatRle8 gets no canvas. The program lists no
+     * caller.
+     *
+     * @param source The bitmap whose pixels the canvas draws into.
+     * @param nX The left column of the rectangle.
+     * @param nY The top row of the rectangle.
+     * @param nWidth The width in pixels.
+     * @param nHeight The height in pixels.
+     * @return The new canvas, or null for a format code of kABitmapFormatRle8 or more.
+     * @ghidraAddress 0x005e8e38
+     */
+    static ACanvas *
+    CreateForSubBitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight);
+
+    /**
      * Reduce this canvas's 32 bit pixels to palette indices over ramps of the given colours.
      *
      * One NormalKey per distinct hue is collected from colors through
