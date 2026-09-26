@@ -9,6 +9,7 @@ set(RESONANCE_SCRIPT_UNBUILT_SRCS
     hudscript.cpp
     hxcommands.cpp
     hxmodule.cpp
+    input.cpp
     pyshell.cpp
     recinfo.cpp
     scripteval.cpp
