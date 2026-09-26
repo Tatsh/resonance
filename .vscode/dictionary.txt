@@ -431,6 +431,7 @@ listdirop
 listobject
 listpan
 listremixesmct
+livegame
 loadfilemct
 loadgame
 loadglobalsettingsmct

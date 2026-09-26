@@ -222,6 +222,17 @@ public:
      */
     void EndWithScore(int nScore);
 
+    /**
+     * Advance to the bar of a position, with PlayMap::Slot18() of that bar as the advance.
+     *
+     * Public because the advance-section script command calls it with no accessor in the image.
+     * The title is inferred.
+     *
+     * @param position The position to advance to.
+     * @ghidraAddress 0x00116a30
+     */
+    void AdvanceAt(Mid::MBT position);
+
 private:
     // 0x00116920
     // Outside jam or in a network game, and outside the tutorial, ignores the
@@ -260,11 +271,6 @@ private:
     // through each track's source, and runs script template 1013. The title is inferred.
     void AdvanceTo(int nBar, int nAdvance);
 
-    // 0x00116a30
-    // AdvanceTo() the bar of position, with PlayMap::Slot18() of that bar as the
-    // advance. The title is inferred.
-    void AdvanceAt(Mid::MBT position);
-
     // 0x00111c90
     // Sends a TracksOnMsg with the count of catch tracks whose phrase at the bar has
     // an owner. Returns true when no enabled catch track has an unowned phrase with gems there.
@@ -293,8 +299,18 @@ private:
         kEndStateOver = 2,
     };
 
-    int mTutorial;                            // +0x18 set in the tutorial
-    int mUnknown1c;                           // +0x1c
+    int mTutorial; // +0x18 set in the tutorial
+
+public:
+    /**
+     * Practice-mode flag the practice cheat sets. +0x1c
+     *
+     * Public because the practice cheat writes it through GrooveWorld::mGamer with no accessor
+     * in the image.
+     */
+    int mUnknown1c;
+
+private:
     int mUnknown20;                           // +0x20
     int mEndBar;                              // +0x24 the bar the game ends at
     int mEndState;                            // +0x28 an EndState
@@ -326,10 +342,28 @@ public:
     std::vector<MsgSource> mTrackSources;
 
 private:
-    int mUnknown84;            // +0x84
-    int mFreeEndBar;           // +0x88 the end bar non-catch tracks are free until
-    PlayMap *mPlayMap;         // +0x8c
-    EnableMgr *mEnableMgr;     // +0x90
+    int mUnknown84;    // +0x84
+    int mFreeEndBar;   // +0x88 the end bar non-catch tracks are free until
+    PlayMap *mPlayMap; // +0x8c
+
+public:
+    /**
+     * Per-track enable policy. +0x90
+     *
+     * Public because the enable-all-tracks cheat drives it through GrooveWorld::mGamer with no
+     * accessor in the image.
+     */
+    EnableMgr *mEnableMgr;
+
+private:
     EnableMgr *mBackEnableMgr; // +0x94
-    int mUnknown98;            // +0x98
+
+public:
+    /**
+     * Cheat-armed flag the cheats set. +0x98
+     *
+     * Public because the practice, listen-mode, and enable-all-tracks cheats write it through
+     * GrooveWorld::mGamer with no accessor in the image.
+     */
+    int mUnknown98;
 };

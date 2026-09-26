@@ -554,8 +554,18 @@ private:
     Delayer *mDelayer;     // +0x24
     // The in-game renderer. CreateRenderer() creates it.
     Renderer *mRenderer; // +0x28
-    Gamer *mGamer;       // +0x2c
-    GameStats *mStats;   // +0x30
+
+public:
+    /**
+     * The scoring state. +0x2c
+     *
+     * Public because the juice, section, and track cheats reach it through Globals::GetWorld()
+     * with no accessor in the image.
+     */
+    Gamer *mGamer;
+
+private:
+    GameStats *mStats; // +0x30
 
 public:
     /**
