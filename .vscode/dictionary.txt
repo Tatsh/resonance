@@ -161,6 +161,7 @@ deletefileop
 deleteremixmct
 demangled
 demangles
+demuxed
 deployedpowerupmsg
 devconsole
 devirtualised
@@ -426,6 +427,7 @@ libcdvd
 libcdvd's
 libdma
 libera
+libgifpk
 libgraph
 libio
 libmc

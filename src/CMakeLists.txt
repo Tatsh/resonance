@@ -42,6 +42,7 @@ endforeach()
 set(RESONANCE_SUBSYSTEMS
     app
     ezmidi
+    ezmpeg
     game
     gfx
     gs
