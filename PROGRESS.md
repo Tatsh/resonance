@@ -37,8 +37,8 @@ great majority are reconstructable routines declared with their address, signatu
 (inline in headers, template instances, split signatures, and defaulted or vendored glue), and the
 rest are annotated library and vendored routines whose titles fall outside the body count.
 
-Of the 447 routines with no annotation, 249 are implicit special members, 91 are static
-initialiser and exit stubs, 57 are ezmpeg sample routines, 5 are unreferenced interpreter workers
+Of the 390 routines with no annotation, 249 are implicit special members, 91 are static
+initialiser and exit stubs, 5 are unreferenced interpreter workers
 whose entries inline their bodies, 20 are library routines labelled with their upstream names, 11
 are script workers (ten unreferenced duplicates of live cheat entry points and one scheduler kill
 with no caller), six are SDK routines the open-source SDK provides or links (three
@@ -48,12 +48,12 @@ recorded exceptions. The canvas factory
 `0x00558dd8` it calls, found in code the disassembler had not defined, both have bodies in the
 tree since the script-layer push.
 
-Of the 447 remaining routines, 333 are compiler-generated: the deleting-destructor
+Of the 390 remaining routines, 333 are compiler-generated: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
 declares, and the static and global initialisation and exit glue. Seven more come from
 the toolchain's standard library, and one is the exit callback for the shared
 instance. The completion table below omits the 341 excluded routines and tracks
-the other 106.
+the other 49.
 
 ### Remaining routines
 
@@ -105,60 +105,7 @@ toolchain provides them.
 | ❌   | `0x00558db8` | 7      | 1       | `UnreferencedReturnZeroStub00558db8`         | `undefined UnreferencedReturnZeroStub00558db8(void)`                                         |
 | ❌   | `0x00558dc0` | 7      | 1       | `UnreferencedReturnZeroStub00558dc0`         | `undefined UnreferencedReturnZeroStub00558dc0(void)`                                         |
 | ❌   | `0x00558dc8` | 7      | 1       | `UnreferencedReturnZeroStub00558dc8`         | `undefined UnreferencedReturnZeroStub00558dc8(void)`                                         |
-| ❌   | `0x00567670` | 431    | 2       | `audioDecSendToIOP`                          | `undefined audioDecSendToIOP(void)`                                                          |
-| ❌   | `0x00567820` | 187    | 2       | `audioDecCreate`                             | `undefined audioDecCreate(void)`                                                             |
-| ❌   | `0x005678e0` | 59     | 2       | `audioDecDelete`                             | `undefined audioDecDelete(void)`                                                             |
-| ❌   | `0x00567a50` | 19     | 2       | `audioDecIsPreset`                           | `undefined audioDecIsPreset(void)`                                                           |
-| ❌   | `0x00567a68` | 107    | 2       | `audioDecStart`                              | `undefined audioDecStart(void)`                                                              |
-| ❌   | `0x00567ad8` | 163    | 2       | `audioDecReset`                              | `undefined audioDecReset(void)`                                                              |
-| ❌   | `0x00569128` | 455    | 2       | `decode`                                     | `undefined decode(void)`                                                                     |
-| ❌   | `0x005692f0` | 7      | 2       | `MpegDecoderRoutine005692f0`                 | `undefined MpegDecoderRoutine005692f0(void)`                                                 |
-| ❌   | `0x005692f8` | 255    | 2       | `videoDecCreate`                             | `undefined videoDecCreate(void)`                                                             |
-| ❌   | `0x005693f8` | 51     | 2       | `videoDecDelete`                             | `undefined videoDecDelete(void)`                                                             |
-| ❌   | `0x00569430` | 11     | 2       | `videoDecAbort`                              | `undefined videoDecAbort(void)`                                                              |
-| ❌   | `0x00569440` | 7      | 3       | `videoDecGetState`                           | `undefined videoDecGetState(void)`                                                           |
-| ❌   | `0x00569458` | 27     | 1       | `videoDecInputCount`                         | `undefined videoDecInputCount(void)`                                                         |
-| ❌   | `0x00569478` | 55     | 1       | `videoDecInputSpaceCount`                    | `undefined videoDecInputSpaceCount(void)`                                                    |
-| ❌   | `0x005694b0` | 27     | 1       | `videoDecReset`                              | `undefined videoDecReset(void)`                                                              |
-| ❌   | `0x005694d0` | 223    | 2       | `videoDecFlush`                              | `undefined videoDecFlush(void)`                                                              |
-| ❌   | `0x005695b0` | 75     | 2       | `videoDecIsFlushed`                          | `undefined videoDecIsFlushed(void)`                                                          |
-| ❌   | `0x00569600` | 31     | 3       | `videoDecSetStream`                          | `undefined videoDecSetStream(void)`                                                          |
-| ❌   | `0x00569620` | 27     | 2       | `videoDecBeginPut`                           | `undefined videoDecBeginPut(void)`                                                           |
-| ❌   | `0x00569640` | 27     | 2       | `videoDecEndPut`                             | `undefined videoDecEndPut(void)`                                                             |
-| ❌   | `0x00569660` | 59     | 2       | `videoDecPutTs`                              | `undefined videoDecPutTs(void)`                                                              |
-| ❌   | `0x005696a0` | 91     | 2       | `videoDecMain`                               | `undefined videoDecMain(void)`                                                               |
-| ❌   | `0x00569700` | 39     | 2       | `mpegError`                                  | `undefined mpegError(void)`                                                                  |
-| ❌   | `0x00569728` | 43     | 2       | `mpegNodata`                                 | `undefined mpegNodata(void)`                                                                 |
-| ❌   | `0x00569758` | 35     | 2       | `mpegStopDMA`                                | `undefined mpegStopDMA(void)`                                                                |
-| ❌   | `0x00569780` | 35     | 2       | `mpegRestartDMA`                             | `undefined mpegRestartDMA(void)`                                                             |
-| ❌   | `0x005697a8` | 67     | 2       | `mpegTS`                                     | `undefined mpegTS(void)`                                                                     |
-| ❌   | `0x005697f0` | 303    | 2       | `cpy2area`                                   | `undefined cpy2area(void)`                                                                   |
-| ❌   | `0x0058de70` | 703    | 2       | `strFileOpen`                                | `undefined strFileOpen(void)`                                                                |
-| ❌   | `0x0058e130` | 79     | 2       | `strFileClose`                               | `undefined strFileClose(void)`                                                               |
-| ❌   | `0x0058e180` | 59     | 2       | `strFileRead`                                | `undefined strFileRead(void)`                                                                |
-| ❌   | `0x0059afa0` | 291    | 2       | `videoCallback`                              | `undefined videoCallback(void)`                                                              |
-| ❌   | `0x0059b0c8` | 211    | 2       | `pcmCallback`                                | `undefined pcmCallback(void)`                                                                |
-| ❌   | `0x005cb2b8` | 23     | 2       | `readBufCreate`                              | `undefined readBufCreate(void)`                                                              |
-| ❌   | `0x005cb2d0` | 7      | 2       | `readBufDelete`                              | `undefined readBufDelete(void)`                                                              |
-| ❌   | `0x005cb2d8` | 47     | 2       | `readBufBeginPut`                            | `undefined readBufBeginPut(void)`                                                            |
-| ❌   | `0x005cb308` | 67     | 2       | `readBufEndPut`                              | `undefined readBufEndPut(void)`                                                              |
-| ❌   | `0x005cb350` | 71     | 2       | `readBufBeginGet`                            | `undefined readBufBeginGet(void)`                                                            |
-| ❌   | `0x005cb398` | 35     | 2       | `readBufEndGet`                              | `undefined readBufEndGet(void)`                                                              |
-| ❌   | `0x005d2860` | 599    | 3       | `clearGsMem`                                 | `undefined clearGsMem(void)`                                                                 |
-| ❌   | `0x005d2ab8` | 895    | 3       | `setImageTag`                                | `undefined setImageTag(void)`                                                                |
-| ❌   | `0x005d2e38` | 459    | 2       | `handler_endimage`                           | `undefined handler_endimage(void)`                                                           |
-| ❌   | `0x005d3008` | 71     | 2       | `startDisplay`                               | `undefined startDisplay(void)`                                                               |
-| ❌   | `0x005d3050` | 19     | 2       | `endDisplay`                                 | `undefined endDisplay(void)`                                                                 |
-| ❌   | `0x005d3068` | 71     | 2       | `vblankHandler`                              | `undefined vblankHandler(void)`                                                              |
 | ❌   | `0x005d3a88` | 59     | 2       | `isceSifSendCmd`                             | `undefined isceSifSendCmd(void)`                                                             |
-| ❌   | `0x005d3fa0` | 71     | 2       | `voBufCreate`                                | `undefined voBufCreate(void)`                                                                |
-| ❌   | `0x005d3fe8` | 15     | 2       | `voBufReset`                                 | `undefined voBufReset(void)`                                                                 |
-| ❌   | `0x005d3ff8` | 19     | 2       | `voBufIsFull`                                | `undefined voBufIsFull(void)`                                                                |
-| ❌   | `0x005d4010` | 119    | 2       | `voBufIncCount`                              | `undefined voBufIncCount(void)`                                                              |
-| ❌   | `0x005d4088` | 51     | 2       | `voBufGetData`                               | `undefined voBufGetData(void)`                                                               |
-| ❌   | `0x005d40c0` | 7      | 2       | `voBufDelete`                                | `undefined voBufDelete(void)`                                                                |
-| ❌   | `0x005d40d8` | 83     | 2       | `voBufGetTag`                                | `undefined voBufGetTag(void)`                                                                |
-| ❌   | `0x005d4130` | 31     | 2       | `voBufDecCount`                              | `undefined voBufDecCount(void)`                                                              |
 | ❌   | `0x005e4510` | 71     | 39      | `SpinDisableInterrupts`                      | `bool SpinDisableInterrupts(void)`                                                           |
 | ❌   | `0x005e4558` | 23     | 44      | `ReenableInterrupts`                         | `bool ReenableInterrupts(void)`                                                              |
 | ❌   | `0x005e4600` | 147    | 3       | `MSInPutBytes`                               | `int MSInPutBytes(sceCslCtx * pCtx, uint nPort, uchar * pBytes, int nCount)`                 |
@@ -172,10 +119,6 @@ toolchain provides them.
 | ❌   | `0x005fb1a0` | 55     | 8       | `PrintfToSioRaw`                             | `undefined PrintfToSioRaw(void)`                                                             |
 | ❌   | `0x005fb1d8` | 95     | 30      | `PrintfToSioLineBuffered`                    | `undefined PrintfToSioLineBuffered(void)`                                                    |
 | ❌   | `0x0060d920` | 231    | 2       | `istdiostream::Slot1`                        | `undefined istdiostream::Slot1(void)`                                                        |
-| ❌   | `0x006134e8` | 243    | 4       | `viBufBeginPut`                              | `undefined viBufBeginPut(void)`                                                              |
-| ❌   | `0x006135e0` | 83     | 3       | `viBufEndPut`                                | `undefined viBufEndPut(void)`                                                                |
-| ❌   | `0x00613638` | 271    | 2       | `viBufPutTs`                                 | `undefined viBufPutTs(void)`                                                                 |
-| ❌   | `0x00613748` | 75     | 3       | `viBufCount`                                 | `undefined viBufCount(void)`                                                                 |
 
 ### Measurement history
 
@@ -209,8 +152,6 @@ These routines count as remaining although the tree handles them by rule:
 
 - An implicit destructor, copy constructor, or assignment of a project class, labelled
   `<Class>__Destruct`, `__ConstructCopy`, or `__AssignImplicit`. The compiler generates it.
-- The ezmpeg sample units (`disp.c`, `vobuf.c`, `readbuf.c`, `strfile.c`, `audiodec.c`,
-  `videodec.c`, and `vibuf.c`), linked as shipped.
 - The interrupt-context SDK entry points labelled `isce…`. The `sce` pattern does not match them.
 - An inline member defined in a header with its `// 0x...` marker (for example
   `Cam::ProjectToUnit`), and a function template instance whose body is the template in a header.
