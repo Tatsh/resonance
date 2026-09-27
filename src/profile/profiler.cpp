@@ -51,5 +51,5 @@ long long ProfileClockMilliseconds() {
     g_nLastCycleDelta = nCount - g_nLastCycleCount;
     g_nLastCycleCount = nCount;
     g_llTotalCycles += g_nLastCycleDelta;
-    return static_cast<int>(g_llTotalCycles / kCyclesPerMillisecond);
+    return g_llTotalCycles / kCyclesPerMillisecond;
 }

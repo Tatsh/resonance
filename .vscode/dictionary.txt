@@ -218,6 +218,7 @@ ezmidi
 ezmpeg
 fadegamemsg
 fadeuser
+faild
 failsink
 favorite
 fbmsk
@@ -375,6 +376,7 @@ inputcheatdetectorgs
 inputcheatdetectormet
 inputmap
 inputpollerps
+insns
 intobject
 intr
 intrman
@@ -850,6 +852,7 @@ rndmovie
 rndtex
 robotkid
 rodata
+romver
 rotleftmsg
 rotrightmsg
 rpch

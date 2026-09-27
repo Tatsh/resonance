@@ -91,9 +91,9 @@ target_compile_definitions(
 target_compile_options(
   resonance_python PRIVATE "-include${CMAKE_SOURCE_DIR}/src/python/PC/pycompat.h")
 # Four translation units defeat the optimiser's register allocator on this toolchain at every
-# standard level, and the shipped image carries no stack guards. They build small with
-# scheduling, delay slots, branch-likely, and stack protection off until the failure is
-# understood.
+# standard level, and the shipped image carries no stack guards. They build small without
+# multiply-add fusion, builtin expansion, scheduling, delay slots, branch-likely, or stack
+# protection until the failure is understood.
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getargs.c"
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/marshal.c"
@@ -101,7 +101,7 @@ set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/bltinmodule.c"
   PROPERTIES
     COMPILE_OPTIONS
-    "-Os;-mno-explicit-relocs;-fno-schedule-insns;-fno-schedule-insns2;-fno-delayed-branch;-mno-branch-likely;-fno-stack-protector;-fno-stack-clash-protection"
+    "-Os;-mno-explicit-relocs;-mno-mad;-fno-builtin;-fno-schedule-insns;-fno-schedule-insns2;-fno-delayed-branch;-mno-branch-likely;-fno-stack-protector;-fno-stack-clash-protection"
 )
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/posixmodule.c" PROPERTIES COMPILE_DEFINITIONS

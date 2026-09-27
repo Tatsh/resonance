@@ -3,12 +3,11 @@
 /**
  * Report a failed check and stop the machine.
  *
- * The routine is newlib's own `__assert`, toolchain C library linked as shipped, with no body in
- * this tree. This declaration exists because the game calls it, and the program's label is
- * `LibcAssert`. Its report goes to `stderr`, taken from the reentrancy structure
- * at 0x007819cc, through the format `assertion "%s" failed: file "%s", line %d`, which is that
- * library's text verbatim. It then tail-calls abort, which raises signal 6, calls exit, and spins
- * forever.
+ * The routine behaves as newlib's own `__assert`, toolchain C library linked as shipped. Its
+ * report goes to `stderr`, taken from the reentrancy structure at 0x007819cc, through the format
+ * `assertion "%s" failed: file "%s", line %d`, which is that library's text verbatim. It then
+ * tail-calls abort, which raises signal 6, calls exit, and spins forever. This declaration exists
+ * because the game calls it, and the program's label is `LibcAssert`.
  *
  * The identification is strong rather than verified. The format string, the argument order, and the
  * three-parameter signature were matched against newlib from knowledge of that library and not
@@ -24,7 +23,13 @@
  * @param pszExpression The source text of the failed expression.
  * @ghidraAddress 0x0055c548
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void HxAssertFailed(const char *pszFile, int nLine, const char *pszExpression);
+#ifdef __cplusplus
+}
+#endif
 
 // Every assert in the shipped code expands to this shape, which is the shape of newlib's own
 // assert() macro. The expression text, the file, and the line all survive in .rodata, which is what

@@ -12,7 +12,7 @@ constexpr char kAssertFormat[] = "assertion \"%s\" failed: file \"%s\", line %d\
 
 // 0x0055c548
 // Report the failed expression through the error stream and abort.
-void HxAssertFailed(const char *pszFile, int nLine, const char *pszExpression) {
+extern "C" void HxAssertFailed(const char *pszFile, int nLine, const char *pszExpression) {
     fprintf(stderr, kAssertFormat, pszExpression, pszFile, nLine);
     abort();
 }
