@@ -87,18 +87,20 @@ target_compile_definitions(
           SIZEOF_LONG=4
           SIZEOF_VOID_P=4
           SIZEOF_SHORT=2
-          SIZEOF_DOUBLE=8
-          HAVE_LONG_LONG=1
-          SIZEOF_LONG_LONG=8)
+          SIZEOF_DOUBLE=8)
 target_compile_options(
   resonance_python PRIVATE "-include${CMAKE_SOURCE_DIR}/src/python/PC/pycompat.h")
-# Four translation units defeat the optimiser's register allocator on this toolchain. They build
-# without optimisation until the failure is understood.
+# Four translation units defeat the optimiser's register allocator on this toolchain, and the
+# backend needs implicit relocations for them. They build without optimisation until the failure
+# is understood. Long long support stays out: nothing references the wide integer entry points,
+# and the wide code paths are what overload the allocator.
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getargs.c"
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/marshal.c"
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/compile.c"
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/bltinmodule.c" PROPERTIES COMPILE_OPTIONS -O0)
+  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/bltinmodule.c" PROPERTIES COMPILE_OPTIONS
+                                                                            "-O0;-mno-explicit-relocs"
+)
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/posixmodule.c" PROPERTIES COMPILE_DEFINITIONS
                                                                             initposix=initps2)
