@@ -73,6 +73,10 @@ target_include_directories(resonance_python PRIVATE "${CMAKE_SOURCE_DIR}/src/pyt
 target_compile_definitions(
   resonance_python
   PRIVATE HAVE_PROTOTYPES=1
+          HAVE_STDARG_PROTOTYPES=1
+          HAVE_DIRENT_H=1
+          HAVE_NETDB_H=1
+          HAVE_SYS_SOCKET_H=1
           SIZEOF_INT=4
           SIZEOF_LONG=4
           SIZEOF_VOID_P=4
@@ -80,6 +84,14 @@ target_compile_definitions(
           SIZEOF_DOUBLE=8
           HAVE_LONG_LONG=1
           SIZEOF_LONG_LONG=8)
+target_compile_options(
+  resonance_python PRIVATE "-include${CMAKE_SOURCE_DIR}/src/python/PC/pycompat.h")
+# Three translation units defeat the optimiser's register allocator on this toolchain. They build
+# at -O1 until the failure is understood.
+set_source_files_properties(
+  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getargs.c"
+  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/marshal.c"
+  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/compile.c" PROPERTIES COMPILE_OPTIONS -O1)
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/posixmodule.c" PROPERTIES COMPILE_DEFINITIONS
                                                                             initposix=initps2)

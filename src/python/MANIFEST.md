@@ -136,6 +136,15 @@ branch, which is a third independent confirmation of the Windows lineage after `
 
 `hx` and `ucnhash` are registered from outside the table. `hx` is the game's own extension module.
 
+### Build configuration, taken from the toolchain
+
+The build defines `HAVE_PROTOTYPES`, `HAVE_STDARG_PROTOTYPES`, `HAVE_DIRENT_H`,
+`HAVE_NETDB_H`, and `HAVE_SYS_SOCKET_H` with the console widths, because the toolchain headers
+provide the matching declarations. A forced include of `PC/pycompat.h` supplies the C library
+headers, the `PYTHONPATH` default, and the socket constants upstream expects from its own
+configuration, all without editing a vendored file. Three units build at `-O1` where the
+optimiser fails on this toolchain. None of this changes which upstream blocks compile in.
+
 ### The trim is configuration, not code
 
 An earlier reading of this called the trim four deletions of upstream code. That was wrong, and the

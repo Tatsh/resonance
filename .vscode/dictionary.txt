@@ -663,6 +663,7 @@ mypy
 myreadline
 namenogood
 nearesttrackmsg
+netdb
 netflow
 netgame
 netjamenablemgr
@@ -784,6 +785,7 @@ pstex
 ptsmult
 ptstmp
 ptstmphot
+pycompat
 pycxx
 pyinstaller
 pylock
@@ -794,6 +796,7 @@ pypcre
 pyproject
 pyshell
 pystate
+pythonpath
 pythonrun
 quadword
 quadwords
@@ -938,6 +941,7 @@ sstv
 startable
 statusline
 stcycl
+stdarg
 stdmidimsg
 stopriffmsg
 strcmp

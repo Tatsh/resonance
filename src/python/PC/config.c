@@ -27,6 +27,7 @@ extern void initregex(void);
 extern void initps2(void);
 extern void initnew(void);
 extern void initarray(void);
+extern void PyMarshal_Init(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
