@@ -228,6 +228,7 @@ ffloat
 fileobject
 filetab
 findenv
+fira
 firefs
 firemult
 floatobject
