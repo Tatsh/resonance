@@ -18,4 +18,15 @@ HxStr Object::as_string() const {
     return static_cast<HxStr>(str());
 }
 
+// 0x004c3f80
+Object Object::getAttr(const HxStr &name) const {
+    FromAPI holder(
+        PyObject_GetAttrString(mPtr, const_cast<char *>(name.mStr != nullptr ? name.mStr : "")));
+    Object result;
+    result.mPtr = holder.mPtr;
+    Py_XINCREF(result.mPtr);
+    result.validate();
+    return result;
+}
+
 } // namespace Py

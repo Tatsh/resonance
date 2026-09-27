@@ -43,14 +43,28 @@
    tables guard every entry with that entry's own constant, and the console defines almost none of
    them, which is why 140 of its 143 literals are absent while the module itself is compiled in. */
 
+#ifdef __cplusplus
 #include "os/heap.h"
 
 /* The one interpreter heap, built by Py_Initialize over the whole of the zone titled python. */
 extern Heap *g_pPythonHeap;
 
-#define PyCore_MALLOC(n) g_pPythonHeap->Alloc((n), __FILE__, __LINE__)
-#define PyCore_REALLOC(p, n) g_pPythonHeap->Realloc((p), (n), __FILE__, __LINE__)
-#define PyCore_FREE(p) g_pPythonHeap->Free((p), __FILE__, __LINE__)
+/* The C translation units of the interpreter cannot call methods, so the redirect goes through
+   these functions, which forward to the heap. Their names are build scaffolding rather than
+   recovered titles, but the file and line tagging they carry is the observed behaviour. The C++
+   declarations beside them keep the one definition in heap.cpp visible to every includer. */
+extern "C" {
+#endif
+void *PyHeap_Alloc(unsigned nSize, const char *pszFile, int nLine);
+void *PyHeap_Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine);
+void PyHeap_Free(void *pBlock, const char *pszFile, int nLine);
+#ifdef __cplusplus
+}
+#endif
+
+#define PyCore_MALLOC(n) PyHeap_Alloc((n), __FILE__, __LINE__)
+#define PyCore_REALLOC(p, n) PyHeap_Realloc((p), (n), __FILE__, __LINE__)
+#define PyCore_FREE(p) PyHeap_Free((p), __FILE__, __LINE__)
 
 #define PyCore_OBJECT_MALLOC(n) PyCore_MALLOC(n)
 #define PyCore_OBJECT_REALLOC(p, n) PyCore_REALLOC((p), (n))

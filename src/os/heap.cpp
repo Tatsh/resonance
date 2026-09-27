@@ -463,3 +463,17 @@ void Heap::DumpStats() {
     MemLogWrite(szLine);
     LogPrintf("%s\n", szLine);
 }
+
+Heap *g_pPythonHeap = nullptr;
+
+extern "C" void *PyHeap_Alloc(unsigned nSize, const char *pszFile, int nLine) {
+    return g_pPythonHeap->Alloc(nSize, pszFile, nLine);
+}
+
+extern "C" void *PyHeap_Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine) {
+    return g_pPythonHeap->Realloc(pBlock, nSize, pszFile, nLine);
+}
+
+extern "C" void PyHeap_Free(void *pBlock, const char *pszFile, int nLine) {
+    g_pPythonHeap->Free(pBlock, pszFile, nLine);
+}

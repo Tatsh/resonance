@@ -347,28 +347,40 @@ void DumpHeapMemoryLog(int nIndex);
 /**
  * Take a block from the backing allocator.
  *
- * The routine is newlib's `malloc`, toolchain C library linked as shipped, with no body in this
- * tree. It loads the reentrancy structure at 0x007819cc and calls `_malloc_r` at 0x0059b528. It is
- * not the Heap class in `os/heap.h`, which is the arena the embedded Python allocates from. The
- * program's label is `LibcMalloc`.
+ * The routine behaves as newlib's `malloc`, toolchain C library linked as shipped. It loads the
+ * reentrancy structure at 0x007819cc and calls `_malloc_r` at 0x0059b528. It is not the Heap class
+ * in `os/heap.h`, which is the arena the embedded Python allocates from. The program's label is
+ * `LibcMalloc`.
  *
  * @param nSize The block size in bytes.
  * @return The block, or null when the request cannot be met.
  * @ghidraAddress 0x004bfd48
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void *HeapAlloc(size_t nSize);
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Give a block back to the backing allocator.
  *
- * The routine is newlib's `free`, toolchain C library linked as shipped, with no body in this tree.
- * It loads the same reentrancy structure and tail-calls `_free_r` at 0x005da3b0. The program's
- * label is `LibcFreeBlock`.
+ * The routine behaves as newlib's `free`, toolchain C library linked as shipped. It loads the
+ * same reentrancy structure and tail-calls `_free_r` at 0x005da3b0. The program's label is
+ * `LibcFreeBlock`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004bfd70
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void HeapFree(void *pBlock);
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Resize a block through the backing allocator.
@@ -380,7 +392,13 @@ void HeapFree(void *pBlock);
  * @param nSize The new size in bytes.
  * @return The block, which differs from pBlock only when it moved.
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void *HeapRealloc(void *pBlock, size_t nSize);
+#ifdef __cplusplus
+}
+#endif
 
 /**
  * Log how much of the backing allocator is free, then give it all back.

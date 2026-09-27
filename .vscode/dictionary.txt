@@ -366,6 +366,8 @@ ifndef
 immediates
 imsifrpc
 ingame
+initposix
+initps
 inittab
 inputcheatdetector
 inputcheatdetectorgs
@@ -887,6 +889,7 @@ selectarena
 selectnumplayer
 selectremix
 selectskill
+seqbase
 sequencercmd
 serialiser
 setmat

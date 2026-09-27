@@ -39,18 +39,24 @@ their defaults with `#ifndef`, so a definition made before either is reached rep
 without editing an upstream file. **`pymem.h` and `objimpl.h` are therefore unmodified.**
 
 The port supplies those definitions in its configuration header, which is where `PC/config.h`
-would carry them and where upstream carries none. The recovered form is below. The size argument
-comes from the macro's own parameter and the other two from the call site, which is what makes
-every allocating translation unit store its own basename.
+would carry them and where upstream carries none. The recovered behaviour is below. The size
+argument comes from the macro's own parameter and the other two from the call site, which is what
+makes every allocating translation unit store its own basename.
 
 ```c
-#define PyCore_MALLOC(n)                g_pPythonHeap->Alloc((n), __FILE__, __LINE__)
-#define PyCore_REALLOC(p, n)            g_pPythonHeap->Realloc((p), (n), __FILE__, __LINE__)
-#define PyCore_FREE(p)                  g_pPythonHeap->Free((p), __FILE__, __LINE__)
-#define PyCore_OBJECT_MALLOC(n)         PyCore_MALLOC(n)
-#define PyCore_OBJECT_REALLOC(p, n)     PyCore_REALLOC((p), (n))
-#define PyCore_OBJECT_FREE(p)           PyCore_FREE(p)
+#define PyCore_MALLOC(n) PyHeap_Alloc((n), __FILE__, __LINE__)
+#define PyCore_REALLOC(p, n) PyHeap_Realloc((p), (n), __FILE__, __LINE__)
+#define PyCore_FREE(p) PyHeap_Free((p), __FILE__, __LINE__)
+
+#define PyCore_OBJECT_MALLOC(n) PyCore_MALLOC(n)
+#define PyCore_OBJECT_REALLOC(p, n) PyCore_REALLOC((p), (n))
+#define PyCore_OBJECT_FREE(p) PyCore_FREE(p)
 ```
+
+The forwards go through plain C functions rather than through methods on the heap object, because
+the interpreter itself compiles as C and a method call does not parse there. The functions forward
+to the one interpreter heap and their names are build scaffolding, while the tagging they carry is
+the observed behaviour.
 
 The object variants must be overridden as well as the raw ones, because upstream defaults
 `PyCore_OBJECT_MALLOC_FUNC` to `PyCore_MALLOC_FUNC` rather than to the `PyCore_MALLOC` macro, so

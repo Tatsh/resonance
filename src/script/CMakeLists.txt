@@ -5,7 +5,11 @@ set(RESONANCE_SCRIPT_SRCS
     apptunnelscript.cpp
     cmdpostscript.cpp
     configquery.cpp
+    cxx/int.cpp
     cxx/object.cpp
+    cxx/seqbase.cpp
+    cxx/string.cpp
+    cxx/tuple.cpp
     gamecheats.cpp
     hudscript.cpp
     hxcommands.cpp

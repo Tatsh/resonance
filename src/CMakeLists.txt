@@ -53,6 +53,7 @@ set(RESONANCE_SUBSYSTEMS
     msg
     os
     profile
+    python
     rnd
     rndartt
     sch

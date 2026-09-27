@@ -728,3 +728,18 @@ void DumpHeapMemoryLog(int nIndex) {
 
     fclose(pFile);
 }
+
+// 0x004bfd48
+extern "C" void *HeapAlloc(size_t nSize) {
+    return malloc(nSize);
+}
+
+// 0x004bfd70
+extern "C" void HeapFree(void *pBlock) {
+    free(pBlock);
+}
+
+// 0x00589278
+extern "C" void *HeapRealloc(void *pBlock, size_t nSize) {
+    return realloc(pBlock, nSize);
+}
