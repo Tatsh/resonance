@@ -1,10 +1,10 @@
 #ifndef EZMPEG_H
 #define EZMPEG_H
 
-// Build support for Sony's ezmpeg sample. The game links the sample's decoder, reader, and display
-// units as shipped with the SDK, and cutscene.c drives them. They are not reconstructed. The types
-// and entry points cutscene.c touches are declared here with the layouts and signatures the
-// shipped program's bodies and call sites prove, under the sample's own names.
+// Build support for Sony's ezmpeg sample. The sample's decoder, reader, and display units
+// reconstruct under src/ezmpeg/, and cutscene.c drives them. The types and entry points
+// cutscene.c touches are declared here with the layouts and signatures the shipped program's
+// bodies and call sites prove, under the sample's own names.
 
 #include <libmpeg.h>
 
@@ -23,10 +23,23 @@ typedef struct {
     int hid_endimage;
 } VideoDec;
 
-// The audio decoder. The game touches it only through the calls below, and the next global in
-// the image bounds it at 0x5c bytes.
+// The audio decoder, 0x5c bytes. The transfer stage, the staging buffer on the Emotion Engine
+// side, and the two processor side regions live here with the counts the transfers advance.
 typedef struct {
-    unsigned char mUnknown00[0x5c];
+    int state; // +0x00: stage of the transfer, idle, priming, streaming, or stopping.
+    unsigned char reserved04[0x28]; // +0x04: untouched by the decoder unit.
+    int field2c; // +0x2c: cleared on creation and on reset.
+    unsigned char *buffer; // +0x30: staging buffer on the Emotion Engine side.
+    int field34; // +0x34: base count the block size derives from.
+    int field38; // +0x38: pending count drained by each transfer.
+    int bufferSize; // +0x3c: staging buffer size in bytes.
+    int field40; // +0x40: cleared on creation and on reset.
+    int iopBuffer; // +0x44: buffer address on the Input Output Processor side.
+    int iopBufferSize; // +0x48: buffer size on the Input Output Processor side.
+    int iopOffset; // +0x4c: write offset into the processor side buffer.
+    int field50; // +0x50: driver reply kept across the stop call.
+    int field54; // +0x54: count already handed to the processor side.
+    int iopExtra; // +0x58: second processor side region, holding the preset block.
 } AudioDec;
 
 // The ring buffer between the file reader and the demultiplexer, 0x5000c bytes. The data comes

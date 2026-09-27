@@ -28,6 +28,33 @@ int sceMpegInit(void);
 int sceMpegDemuxPssRing(
     sceMpeg *pMpeg, unsigned char *pStart, int nSize, unsigned char *pBuffer, int nBufferSize);
 
+// Reads word zero of the decoder context. The decode worker spins on it.
+int sceMpegGetContextWordZero(void *pDecoder);
+
+// Decodes one picture with the given mode, negative when the picture is rejected.
+int sceMpegSub005e07b0(void *pDecoder, void *pPicture, int nMode);
+
+// Drains the decoder after the input ends.
+void sceMpegSub005e08e8(void *pDecoder);
+
+// Creates the decoder context over the work area.
+void sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize);
+
+// Registers a callback in the given slot.
+void sceMpegSetCallbackSlot(void *pDecoder, int nSlot, void *pfnCallback, void *pData);
+
+// Reports one. Inferred.
+int sceMpegReturnOne(void *pDecoder);
+
+// Resets the decoder with three values.
+void sceMpegSub005e0890(void *pDecoder, int nArgA, int nArgB, int nArgC);
+
+// Reports whether word four of the decoder context is clear.
+int sceMpegIsContextWordFourClear(void *pDecoder);
+
+// Registers a stream callback for the given type and channel.
+void sceMpegAddStrCallback(void *pDecoder, int nType, int nChannel, void *pfnCallback, void *pData);
+
 #ifdef __cplusplus
 }
 #endif

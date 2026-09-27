@@ -152,6 +152,8 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
                           short nRrh);
 int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest);
 int sceGsSyncPath(int nMode, unsigned short nTimeout);
+void sceGsSetHalfOffset(void *pDrawEnv, int nOffsetX, int nOffsetY, int nField);
+void sceGsSwapDBuff(sceGsDBuff *pDBuff, int nField);
 
 // Installs pfnHandler on the vertical blank start interrupt, replacing the previous handler, or
 // removes the handler when pfnHandler is null. Returns the previous handler.

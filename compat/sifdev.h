@@ -24,6 +24,9 @@
 #define sceSifRebootIop SifIopReboot
 #define sceSifSyncIop SifIopSync
 
+// The free call forwards the same way.
+#define sceSifFreeIopHeap SifFreeIopHeap
+
 #ifdef __cplusplus
 extern "C" {
 #endif
