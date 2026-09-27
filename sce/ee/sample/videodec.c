@@ -302,6 +302,15 @@ static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
 }
 
 // 0x005697f0
+// The short-source branch below reads past its source and reports a negative size, which the
+// analyser flags. The branch structure matches the image instruction for instruction, and the
+// branch only runs with a negative destination size, which never happens, so the diagnostics
+// are suppressed at the function rather than worked around in the reconstruction.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#pragma GCC diagnostic ignored "-Wnonnull"
+#endif
 int cpy2area(unsigned char *pDestA,
                     int nDestA,
                     unsigned char *pDestB,
@@ -331,3 +340,6 @@ int cpy2area(unsigned char *pDestA,
     }
     return nSrcA + nSrcB;
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

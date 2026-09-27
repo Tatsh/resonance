@@ -1145,6 +1145,7 @@ wiswa
 wiswa's
 wnonnull
 writeop
+wstringop
 wuninitialized
 xdecref
 xfms

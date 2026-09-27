@@ -139,7 +139,9 @@ void audioDecSendToIOP(AudioDec *pAudioDec) {
     const int pending = pAudioDec->field38;
     const int total = pAudioDec->field34 - pending + pAudioDec->bufferSize;
     const int aligned = pending / kBlockStep * kBlockStep;
-    int span[4];
+    // Both writers below fill every slot, but the stage chain leaves the array untouched on its
+    // early exits, so the staging starts cleared.
+    int span[4] = {0, 0, 0, 0};
     int transferred = 0;
     int ready;
     int extra;

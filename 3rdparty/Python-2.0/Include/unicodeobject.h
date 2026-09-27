@@ -301,7 +301,7 @@ extern DL_IMPORT(int) PyUnicode_Resize(
 */
 
 extern DL_IMPORT(PyObject*) PyUnicode_FromEncodedObject(
-    register PyObject *obj, 	/* Object */
+    PyObject *obj, 	/* Object */
     const char *encoding,       /* encoding */
     const char *errors          /* error handling */
     );
@@ -319,7 +319,7 @@ extern DL_IMPORT(PyObject*) PyUnicode_FromEncodedObject(
 */
 
 extern DL_IMPORT(PyObject*) PyUnicode_FromObject(
-    register PyObject *obj 	/* Object */
+    PyObject *obj 	/* Object */
     );
 
 /* --- wchar_t support for platforms which support it --------------------- */
@@ -332,7 +332,7 @@ extern DL_IMPORT(PyObject*) PyUnicode_FromObject(
    The buffer is copied into the new object. */
 
 extern DL_IMPORT(PyObject*) PyUnicode_FromWideChar(
-    register const wchar_t *w,  /* wchar_t buffer */
+    const wchar_t *w,  /* wchar_t buffer */
     int size                    /* size of buffer */
     );
 
@@ -344,7 +344,7 @@ extern DL_IMPORT(PyObject*) PyUnicode_FromWideChar(
 
 extern DL_IMPORT(int) PyUnicode_AsWideChar(
     PyUnicodeObject *unicode,   /* Unicode object */
-    register wchar_t *w,        /* wchar_t buffer */
+    wchar_t *w,        /* wchar_t buffer */
     int size                    /* size of buffer */
     );
 
@@ -847,63 +847,63 @@ extern DL_IMPORT(int) PyUnicode_Contains(
 */
 
 extern DL_IMPORT(int) _PyUnicode_IsLowercase(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsUppercase(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsTitlecase(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsWhitespace(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsLinebreak(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(Py_UNICODE) _PyUnicode_ToLowercase(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(Py_UNICODE) _PyUnicode_ToUppercase(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(Py_UNICODE) _PyUnicode_ToTitlecase(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_ToDecimalDigit(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_ToDigit(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(double) _PyUnicode_ToNumeric(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsDecimalDigit(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsDigit(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsNumeric(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 extern DL_IMPORT(int) _PyUnicode_IsAlpha(
-    register const Py_UNICODE ch 	/* Unicode character */
+    const Py_UNICODE ch 	/* Unicode character */
     );
 
 #ifdef __cplusplus

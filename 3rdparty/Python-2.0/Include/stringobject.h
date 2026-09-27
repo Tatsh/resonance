@@ -112,9 +112,9 @@ extern DL_IMPORT(PyObject*) PyString_AsEncodedString(
    cause an exception).  */
 
 extern DL_IMPORT(int) PyString_AsStringAndSize(
-    register PyObject *obj,	/* string or Unicode object */
-    register char **s,		/* pointer to buffer variable */
-    register int *len		/* pointer to length variable or NULL
+    PyObject *obj,	/* string or Unicode object */
+    char **s,		/* pointer to buffer variable */
+    int *len		/* pointer to length variable or NULL
 				   (only possible for 0-terminated
 				   strings) */
     );

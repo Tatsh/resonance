@@ -208,10 +208,17 @@ upstream behaviour: the manual construction repeats `PyComplex_FromCComplex`, an
 parser's `PyComplex_RealAsDouble` plus `PyComplex_ImagAsDouble` pair takes the same branches and
 calls as `PyComplex_AsCComplex`. No literal changes, so the counts above are unaffected.
 
-No other file gets a patch. `ceval.c` needs none. `posixmodule.c` needs none, because its trim is
-configuration. `pythonrun.c` has one unexplained literal and inventing a patch shape around it
-would pass the acceptance test without being evidence, since any cut containing that literal would
-pass equally.
+[patches/posixmodule.c.patch](patches/posixmodule.c.patch) is described under the `ps2` method
+table below: it reduces the table to the twelve evidenced entries with null docs.
+
+[patches/unicodeobject.h.patch](patches/unicodeobject.h.patch) is a build patch: it drops the
+`register` storage class from nine parameter declarations across `stringobject.h` and
+`unicodeobject.h`, which the C++ standard no longer allows. The keyword was only ever a hint,
+so no behaviour changes.
+
+No other file gets a patch. `ceval.c` needs none. `pythonrun.c` has one unexplained literal and
+inventing a patch shape around it would pass the acceptance test without being evidence, since
+any cut containing that literal would pass equally.
 
 ### Still unexplained
 
