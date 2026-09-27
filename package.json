@@ -27,6 +27,7 @@
       ".git/**",
       ".yarn/**/*.cjs",
       ".vscode/extensions.json",
+      "3rdparty/**",
       "dist/**",
       "man/**",
       "src/python/PC/**",
@@ -72,6 +73,7 @@
     },
     "gitignore": true,
     "globs": ["**/*.md", "**/*.mdc"],
+    "ignores": ["3rdparty/**"],
     "noBanner": true,
     "showFound": true
   },

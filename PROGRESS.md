@@ -229,7 +229,7 @@ interpreter's `Python.h` are skipped by the scripts and checked with the line be
 `freq-src`. The first two rows count them.
 
 ```shell
-g++ -fsyntax-only -std=c++17 -Wall -Wextra -D_EE -DHAVE_LIMITS_H -DSIZEOF_LONG=8 -I include -I compat -isystem src/python/PC -isystem ../.wiswa-ci/freq/Python-2.0/Include -isystem ../ps2sdk/common/include -isystem ../ps2sdk/ee/kernel/include -isystem ../ps2sdk/ee/rpc/cdvd/include -isystem ../ps2sdk/ee/rpc/sdr/include -isystem ../ps2sdk/ee/rpc/memorycard/include -isystem ../ps2sdk/ee/rpc/multitap/include <file>
+g++ -fsyntax-only -std=c++17 -Wall -Wextra -D_EE -DHAVE_LIMITS_H -DSIZEOF_LONG=8 -I include -I compat -isystem src/python/PC -isystem 3rdparty/Python-2.0/Include -isystem ../ps2sdk/common/include -isystem ../ps2sdk/ee/kernel/include -isystem ../ps2sdk/ee/rpc/cdvd/include -isystem ../ps2sdk/ee/rpc/sdr/include -isystem ../ps2sdk/ee/rpc/memorycard/include -isystem ../ps2sdk/ee/rpc/multitap/include <file>
 ```
 
 `-DSIZEOF_LONG=8` is the original target's width. The interpreter's `PyInt_AsLong()` at

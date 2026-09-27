@@ -5,7 +5,10 @@ port **changed**. Every other translation unit is upstream 2.0 and is listed bel
 evidence rather than copied, so the interpreter is reproducible as upstream plus the differences
 recorded here.
 
-The reference tree is at `.wiswa-ci/freq/Python-2.0/`.
+The reference tree is vendored at `3rdparty/Python-2.0/`, the BeOpen release archive with
+its top directory name preserved, so the interpreter is reproducible as upstream plus the
+differences recorded here. The build compiles the port's own `PC/config.c` and `PC/config.h`
+from this directory against those upstream headers and sources.
 
 ## Method
 
@@ -307,10 +310,18 @@ configuration name` and `configuration names must be strings or integers`, remai
 `confstr`, `sysconf`, `fpathconf`, and `pathconf` are all absent from the method table, so the
 messages survive without a caller that can produce them.
 
-## Outstanding
+## Vendored PyCXX
 
-The PyCXX release is deliberately deferred until the core is verified, because its version marker
-is likely a header comment that does not survive compilation.
+The binding layer under `include/script/cxx/` is the port's modified PyCXX, so upstream is
+vendored as reference at `3rdparty/pycxx_5_2_2/`, the 5.2.2 release archive with its top
+directory name preserved. The 5.2 series is contemporary with development and still supports
+Python 2.0, which later series dropped. The exact patch the port used is unrecoverable, because
+its version marker is likely a header comment that does not survive compilation, so the newest
+5.2 patch stands in. The tree's headers remain the build's binding layer, with the game's own
+`HxStr` in place of `std::string` and no `owned` flag on `Py::Object`, and upstream is never on
+the include path.
+
+## Outstanding
 
 `ceval.c` and `pythonrun.c` get no patch, and the reason is not size. Nine of `ceval.c`'s ten
 absences are macros the port does not define, so a patch would assert an edit that never happened.

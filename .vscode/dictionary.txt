@@ -777,6 +777,7 @@ pstex
 ptsmult
 ptstmp
 ptstmphot
+pycxx
 pyinstaller
 pylock
 pymem

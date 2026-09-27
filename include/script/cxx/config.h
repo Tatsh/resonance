@@ -26,7 +26,7 @@
  * uses. The names are third-party API and are preserved. Data members are the exception, because
  * no member name survives compilation, so those take the tree's `m` prefix.
  *
- * The interpreter headers are vendored outside this tree, at
- * `.wiswa-ci/freq/Python-2.0/Include`, so a syntax check of anything under `script/cxx/` needs
+ * The interpreter headers are vendored inside this tree, at
+ * `3rdparty/Python-2.0/Include`, so a syntax check of anything under `script/cxx/` needs
  * that directory and the port's own `src/python/PC` on the include path.
  */
