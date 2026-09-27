@@ -292,6 +292,8 @@ genericcatcher
 genpath
 getallconnectstatesmct
 getargs
+getbuildinfo
+getcompiler
 getconnectstatemct
 getcopyright
 getenv

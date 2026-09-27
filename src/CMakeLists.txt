@@ -103,7 +103,8 @@ target_link_libraries(
           pad
           mc
           mtap
-          cdvd)
+          cdvd
+          z)
 add_custom_command(
   TARGET ${CMAKE_PROJECT_NAME}
   POST_BUILD
