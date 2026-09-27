@@ -92,12 +92,13 @@ target_compile_definitions(
           SIZEOF_LONG_LONG=8)
 target_compile_options(
   resonance_python PRIVATE "-include${CMAKE_SOURCE_DIR}/src/python/PC/pycompat.h")
-# Three translation units defeat the optimiser's register allocator on this toolchain. They build
-# at -O1 until the failure is understood.
+# Four translation units defeat the optimiser's register allocator on this toolchain. They build
+# without optimisation until the failure is understood.
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getargs.c"
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/marshal.c"
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/compile.c" PROPERTIES COMPILE_OPTIONS -O1)
+  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/compile.c"
+  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/bltinmodule.c" PROPERTIES COMPILE_OPTIONS -O0)
 set_source_files_properties(
   "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/posixmodule.c" PROPERTIES COMPILE_DEFINITIONS
                                                                             initposix=initps2)

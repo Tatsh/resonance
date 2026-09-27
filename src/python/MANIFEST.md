@@ -144,7 +144,8 @@ The build defines `_GNU_SOURCE` with the hosted feature macros (`HAVE_UNISTD_H`,
 console widths, because the toolchain headers provide the matching declarations. A forced include
 of `PC/pycompat.h` supplies the C library headers, the `PYTHONPATH` default, and the socket
 constants and name service declarations upstream expects from its own configuration, all without
-editing a vendored file. Three units build at `-O1` where the optimiser fails on this toolchain.
+editing a vendored file. Four units build without optimisation where the
+optimiser fails on this toolchain.
 None of this changes which upstream blocks compile in.
 
 ### The trim is configuration, not code

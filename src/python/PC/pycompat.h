@@ -19,6 +19,11 @@
 /* The Windows headers supply this for the path module upstream. */
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
+/* The toolchain declares its own close-with-flag as posix_close, which collides with the
+   module method of the same name. The method is static and only its address in the method
+   table matters, so it builds under a distinct name. */
+#define posix_close py_posix_close_method
+
 /* Socket types newlib does not name. The values follow the Linux ABI and are unverified against
    the image, whose socket tables the reconstruction has not recovered. */
 #ifndef SOCK_SEQPACKET
