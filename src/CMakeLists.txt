@@ -33,6 +33,7 @@ foreach(
   ee/rpc/cdvd/include
   ee/rpc/memorycard/include
   ee/rpc/multitap/include
+  ee/rpc/pad/include
   ee/rpc/sdr/include)
   if(IS_DIRECTORY "${PS2SDK}/${SDK_INCLUDE}")
     target_include_directories(resonance_common SYSTEM INTERFACE "${PS2SDK}/${SDK_INCLUDE}")
