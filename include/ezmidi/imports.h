@@ -4,6 +4,10 @@
 
 #include "ezmidi/ezmidi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Foreign routines EZMIDI.IRX calls into.
  *
@@ -311,3 +315,7 @@ extern int SetupHardTimer(int nTimer, int nUnknown0, int nUnknown1, int nUnknown
  * @return Zero when starting succeeds.
  */
 extern int StartHardTimer(int nTimer);
+
+#ifdef __cplusplus
+}
+#endif

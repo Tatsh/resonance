@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Module interface of EZMIDI.IRX.
  *
@@ -65,3 +69,7 @@ void *midiFunc(int nCommand, void *pData, int nSize);
 
 /** RPC receive buffer. EZMIDI `0x8570`, sized by the gap to the notes. Inferred. */
 extern unsigned char gRpcBuf[0xc0];
+
+#ifdef __cplusplus
+}
+#endif

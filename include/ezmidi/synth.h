@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Voice and channel state of the EZMIDI synthesiser.
  *
@@ -648,3 +652,7 @@ int _count_notes(void);
  * @return The slot, or -1.
  */
 int _search_for_slot(int nGroup, int nUnused1, int nUnused2);
+
+#ifdef __cplusplus
+}
+#endif

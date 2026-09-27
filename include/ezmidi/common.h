@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Common support of the EZMIDI synthesiser: transfers, threads, timers, buffers, and
  * the synthesiser control layer.
@@ -317,3 +321,7 @@ void hsyn_atick(void);
  * @return Zero.
  */
 int MemCpy_IOPtoSPU(int nSpuAddr, const void *pSource, int nSize);
+
+#ifdef __cplusplus
+}
+#endif
