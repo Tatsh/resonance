@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMIDI_IMPORTS_H
+#define EZMIDI_IMPORTS_H
 
 #include <stddef.h>
 
@@ -318,4 +319,6 @@ extern int StartHardTimer(int nTimer);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

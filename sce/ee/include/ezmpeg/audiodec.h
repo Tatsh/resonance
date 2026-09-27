@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMPEG_AUDIODEC_H
+#define EZMPEG_AUDIODEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,4 +15,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMIDI_COMMON_H
+#define EZMIDI_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -324,4 +325,6 @@ int MemCpy_IOPtoSPU(int nSpuAddr, const void *pSource, int nSize);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

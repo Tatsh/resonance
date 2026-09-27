@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMIDI_EZMIDI_H
+#define EZMIDI_EZMIDI_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,4 +73,6 @@ extern unsigned char gRpcBuf[0xc0];
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

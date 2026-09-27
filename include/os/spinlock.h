@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OS_SPINLOCK_H
+#define OS_SPINLOCK_H
 
 #include <stdbool.h>
 
@@ -31,4 +32,6 @@ bool ReenableInterrupts(void);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

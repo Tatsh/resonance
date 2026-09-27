@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMPEG_VOBUF_H
+#define EZMPEG_VOBUF_H
 
 #include <ezmpeg.h>
 
@@ -66,4 +67,6 @@ void voBufDecCount(VoBuf *pVoBuf);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

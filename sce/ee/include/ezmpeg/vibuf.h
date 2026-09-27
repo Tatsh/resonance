@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMPEG_VIBUF_H
+#define EZMPEG_VIBUF_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -194,4 +195,6 @@ void sceDmaSub00613798(ViBuf *buffer);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

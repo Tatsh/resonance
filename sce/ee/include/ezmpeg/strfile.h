@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMPEG_STRFILE_H
+#define EZMPEG_STRFILE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,4 +14,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

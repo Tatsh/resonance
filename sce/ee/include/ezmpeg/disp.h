@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMPEG_DISP_H
+#define EZMPEG_DISP_H
 
 // The display unit of Sony's ezmpeg sample, disp.c. The unit clears the graphics memory, builds
 // the display packets for decoded pictures, shows them across the vertical blank, and hosts the
@@ -31,4 +32,6 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMPEG_VIDEODEC_H
+#define EZMPEG_VIDEODEC_H
 
 // The video decoder of Sony's ezmpeg sample, videodec.c. The decoder consumes the input ring of
 // vibuf.c and stages pictures into the frame queue of vobuf.c, while the playback driver owns the
@@ -123,4 +124,6 @@ int cpy2area(unsigned char *pDestA,
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

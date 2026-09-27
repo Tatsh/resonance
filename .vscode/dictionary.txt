@@ -476,6 +476,7 @@ lvalues
 mainloop
 mainpage
 malloc
+madr
 matanim
 math
 mcdat

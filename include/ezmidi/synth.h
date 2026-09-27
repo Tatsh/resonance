@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMIDI_SYNTH_H
+#define EZMIDI_SYNTH_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -655,4 +656,6 @@ int _search_for_slot(int nGroup, int nUnused1, int nUnused2);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
