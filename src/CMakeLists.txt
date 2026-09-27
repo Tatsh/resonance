@@ -86,10 +86,11 @@ add_custom_target(archives DEPENDS ${RESONANCE_LIBRARIES})
 # The link step the reconstruction has reached. Every routine a call arrives at must have a body
 # or come from the SDK libraries below. An undefined reference names the next routine to recover.
 # The startup file and the library set are what the original linked against, and the toolchain
-# file the SDK ships supplies the linker flags and the link script.
+# file the SDK ships supplies the linker flags and the link script. The open-source SDK ships no
+# static syscall library, so the set below omits it.
 add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>)
 target_link_libraries(
-  ${CMAKE_PROJECT_NAME} PRIVATE ${RESONANCE_LIBRARIES} kernel c syscall graph dma packet math3d)
+  ${CMAKE_PROJECT_NAME} PRIVATE ${RESONANCE_LIBRARIES} kernel c graph dma packet math3d)
 add_custom_command(
   TARGET ${CMAKE_PROJECT_NAME}
   POST_BUILD
