@@ -197,6 +197,7 @@ enablefreestylemsg
 enablemgr
 enablepowerupcheats
 enableteamfreqs
+enablew
 endforeach
 endgamemsg
 endrecordingcmd
@@ -430,9 +431,11 @@ libera
 libgifpk
 libgraph
 libio
+libk
 libmc
 libmpeg
 libmtap
+libpad
 libscf
 libsd
 libsd's
@@ -764,6 +767,7 @@ preapproved
 primaddr
 prmodecont
 prmodecontaddr
+prtc
 pscam
 psenviron
 psgr
@@ -924,6 +928,7 @@ soundbank
 spewregistrar
 spjoinacceptpacket
 spjoindenypacket
+sqwc
 srcs
 srxfixup
 sstv
@@ -947,6 +952,7 @@ synthsustainer
 sysclib
 sysconf
 sysmodule
+tadr
 tagfile
 tamtypes
 tatsh

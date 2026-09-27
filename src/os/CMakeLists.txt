@@ -8,6 +8,7 @@ set(RESONANCE_OS_SRCS
     datetime.cpp
     devconsole.cpp
     failsink.cpp
+    fileio.cpp
     filelog.cpp
     formatmessage.cpp
     formatstring.cpp
@@ -24,6 +25,7 @@ set(RESONANCE_OS_SRCS
     seccache.cpp
     spew.cpp
     spewregistrar.cpp
+    spinlock.cpp
     zone.cpp)
 
 add_library(resonance_os STATIC ${RESONANCE_OS_SRCS})

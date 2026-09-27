@@ -16,9 +16,12 @@ target_include_directories(resonance_ezmpeg PRIVATE "${CMAKE_SOURCE_DIR}/sce/ee/
 set(RESONANCE_SONYLIB_SRCS
     src/fileio.c
     src/libdev.c
+    src/libdma.c
     src/libgifpk.c
     src/libgraph.c
     src/libmpeg.c
+    src/libpad.c
+    src/libsdr.c
     src/libvifpk.c
     src/libvu0.c
     src/mcextra.c
