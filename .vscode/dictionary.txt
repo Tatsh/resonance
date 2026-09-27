@@ -224,6 +224,7 @@ favorite
 fbmsk
 fbrst
 fcntl
+ffloat
 fileobject
 filetab
 findenv
