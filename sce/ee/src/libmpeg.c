@@ -1,8 +1,12 @@
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <libmpeg.h>
 #include <os/spinlock.h>
+
+#include "os/log.h"
 
 // Layout facts recovered from the disassembly of the routines in this file. The decoder
 // (sceMpeg) lives in the caller and points at the work area through pContext (+0x40). The work
@@ -95,21 +99,659 @@ typedef struct {
     MpegRing mRing; // +0x108: input ring.
 } MpegWork;
 
-// One pending table cleared by the flag path. Only the word at +0x28 is observed.
+// IPU table at 0x007a30f8, written by the disable path. Only the observed words are named.
 typedef struct {
-    unsigned char mReserved00[0x28];
+    int mUnknown00; // +0x00: base address.
+    int mUnknown04; // +0x04: base + 0x1800.
+    int mReserved08[78]; // +0x08.
+    int mUnknown140; // +0x140: base + 0x1b00.
+    int mUnknown144; // +0x144: base + 0x3300.
+    int mReserved148[77]; // +0x148.
+    int mUnknown280; // +0x280: cleared by the disable path.
+} MpegIpuTable;
+static MpegIpuTable g_mpegIpuTable;
+
+// One sequence table, 0x68 bytes. The picture setup writes the first five words, the flag path
+// clears the word at +0x28, and the rest is not yet observed.
+typedef struct {
+    int mUnknown00; // +0x00.
+    int mUnknown04; // +0x04.
+    int mUnknown08; // +0x08.
+    int mUnknown0C; // +0x0c: set from the first width word.
+    int mUnknown10; // +0x10: set from the second width word.
+    int mReserved14[5]; // +0x14: untouched by the observed writers.
     int mUnknown28; // +0x28: cleared when the table is present.
-} PendingTable;
+    int mReserved2C[15]; // +0x2c: untouched by the observed writers.
+} MpegSeqTable;
 
 // Picture handler for the dispatch inside the picture path. The table stands in for the words
 // near 0x00837430, whose targets are not yet recovered, so every slot starts empty.
 typedef void (*PictureHandler)(void *pDecoder);
 static PictureHandler g_pictureHandlers[5];
 
-// Scratch areas standing in for the pointer table near 0x007a2b00. Each area hosts at least
-// the +0x28 word the flag path clears; the true sizes are not yet recovered.
-static unsigned char g_mpegTableArea[kTableCount][0x30];
-static void *g_mpegTables[kTableCount];
+// Sequence table arenas at 0x007a2d50, nine of 0x68 bytes ending where the IPU table below
+// begins. Creation points the table slots at them in order.
+static MpegSeqTable g_mpegSeqAreas[kTableCount];
+static MpegSeqTable *g_mpegTables[kTableCount];
+
+// Nibble dispatch words at 0x007a3408, read in full. The last two are code addresses the image
+// stores as data; no call passes through them here.
+static unsigned int g_mpegNibbleTable[16] = {
+    0x00000001u, 0x00000001u, 0x00000000u, 0x00000000u,
+    0x00000000u, 0x00000001u, 0x00000001u, 0x00000001u,
+    0x00000001u, 0x00000001u, 0x00000000u, 0xffffffffu,
+    0x00000000u, 0x00000000u, 0x0060e880u, 0x0060e668u,
+};
+
+// Indirect sequence kernels at 0x007a3440, read in full. Each word is the image address of a
+// variable-length decode kernel the reconstruction has not recovered yet, so the declarations
+// below name them for the next wave and the table calls through them.
+int sceMpegSub0060e880(void);
+int sceMpegSub0060e668(void);
+int sceMpegSub0060e7d0(void);
+int sceMpegSub0060c138(void);
+int sceMpegSub0060c2d8(void);
+int sceMpegSub0060e870(void);
+int sceMpegSub0060e890(void);
+int sceMpegSub0060c1e8(void);
+int sceMpegSub0060bd08(void);
+int sceMpegSub0060e8a0(void);
+typedef int (*MpegKernelFunc)(void);
+static MpegKernelFunc g_mpegIndirectTable[11] = {
+    sceMpegSub0060e880, sceMpegSub0060e668, sceMpegSub0060e7d0, sceMpegSub0060c138,
+    sceMpegSub0060c2d8, sceMpegSub0060e870, sceMpegSub0060e880, sceMpegSub0060c1e8,
+    sceMpegSub0060bd08, sceMpegSub0060e890, sceMpegSub0060e8a0,
+};
+
+// IPU words the poll cluster shares, named by address. Roles follow the observed use.
+static int g_mpegIpuBase; // Word at 0x007a38b0, the base the disable path derives pointers from.
+static int g_mpegIpuBusyFlag; // Word at 0x007a2b24, nonzero while an IPU command is outstanding.
+static int g_mpegShiftAccum; // Word at 0x007a3398, shifted down by the poll readers.
+static int g_mpegShiftBudget; // Word at 0x007a339c, compared against the poll argument.
+
+// Sequence words the poll cluster shares, named by address.
+static int g_mpeg2c78; // Word at 0x007a2c78.
+static int g_mpeg2c7c; // Word at 0x007a2c7c, returned by the poll loop.
+static int g_mpeg2c80; // Word at 0x007a2c80.
+static int g_mpeg2c84; // Word at 0x007a2c84.
+static int g_mpeg2c88; // Word at 0x007a2c88.
+static int g_mpeg2c8c; // Word at 0x007a2c8c.
+static int g_mpeg2c90; // Word at 0x007a2c90.
+static int g_mpeg3430; // Word at 0x007a3430.
+static int g_mpeg3434; // Word at 0x007a3434.
+static int g_mpeg3438; // Word at 0x007a3438.
+static int g_mpeg2d1c; // Word at 0x007a2d1c.
+static int g_mpeg2d20; // Word at 0x007a2d20.
+static int g_mpeg2d24; // Word at 0x007a2d24.
+static int g_mpeg2d28; // Word at 0x007a2d28.
+static int g_mpeg2d2c; // Word at 0x007a2d2c.
+static int g_mpeg2d30; // Word at 0x007a2d30.
+static int g_mpeg2d34; // Word at 0x007a2d34.
+static unsigned long long g_mpeg3388; // Words at 0x007a3388, saved entry pair.
+static unsigned long long g_mpeg3390; // Words at 0x007a3390, saved entry pair.
+static int g_mpeg346c; // Word at 0x007a346c.
+static int g_mpeg3470; // Word at 0x007a3470.
+static int g_mpeg2d38; // Word at 0x007a2d38.
+static int g_mpeg2d3c; // Word at 0x007a2d3c, cleared by the drain path.
+
+// Sequence setup words the picture setup shares, named by address.
+static int g_mpeg2c0c; // Word at 0x007a2c0c.
+static int g_mpeg2c10; // Word at 0x007a2c10.
+static int g_mpeg2c14; // Word at 0x007a2c14.
+static int g_mpeg2c18; // Word at 0x007a2c18.
+static int g_mpeg2c20; // Word at 0x007a2c20.
+static int g_mpeg2c24; // Word at 0x007a2c24.
+static int g_mpeg2c28; // Word at 0x007a2c28.
+static int g_mpeg2c2c; // Word at 0x007a2c2c.
+static int g_mpeg2c30; // Word at 0x007a2c30.
+static int g_mpeg2c34; // Word at 0x007a2c34.
+static int g_mpeg2c38; // Word at 0x007a2c38.
+static int g_mpeg2c3c; // Word at 0x007a2c3c.
+static int g_mpeg2c40; // Word at 0x007a2c40.
+static int g_mpeg2c48; // Word at 0x007a2c48.
+static int g_mpeg2c4c; // Word at 0x007a2c4c.
+static int g_mpeg2c6c; // Word at 0x007a2c6c.
+static int g_mpeg2cb4; // Word at 0x007a2cb4.
+static int g_mpeg2cc8; // Word at 0x007a2cc8.
+static int g_mpeg33a0; // Word at 0x007a33a0.
+static int g_mpeg33a4; // Word at 0x007a33a4.
+
+// Forward declarations for the poll cluster, whose routines call one another in an order the
+// file layout does not match.
+static void sceMpegSub0060bc58(void);
+static int sceMpegSub0060bf70(void);
+static int sceMpegSub0060e020(void);
+static int sceMpegSub0060b290(unsigned int nValue);
+static int sceMpegSub0060e5a8(void *pArg0, int nArg1);
+static int sceMpegSub0060e000(MpegSeqTable *pTable, int nA, int nB);
+static void sceMpegSub0060e4c0(MpegSeqTable *pT0,
+                               MpegSeqTable *pT1,
+                               MpegSeqTable *pT2,
+                               MpegSeqTable *pT3,
+                               MpegSeqTable *pT4,
+                               MpegSeqTable *pT5,
+                               MpegSeqTable *pT6,
+                               MpegSeqTable *pT7,
+                               MpegSeqTable *pT8,
+                               int nA,
+                               int nB,
+                               int nC);
+static int sceMpegSub005e0a08(void *pDecoder);
+static int sceMpegSub0060b2c0(void);
+static int sceMpegSub0060b368(void);
+static int sceMpegSub0060b708(int nCommand);
+static int sceMpegSub0060b5d0(int nArg);
+static int sceMpegSub0060b988(void);
+static void sceMpegSub0060bf38(void);
+static void *g_decoderInstance;
+static int g_mpegPollFlag;
+static int g_mpegCompareWord;
+
+// IPU register words and the watchdog limit the poll loops share.
+enum {
+    kIpuCommandAddress = 0x10002000,
+    kIpuControlAddress = 0x10002010,
+    kIpuBusyMask = 0x80004000u,
+    kIpuBusyValue = 0x80000000u,
+    kIpuDataReadyBit = 0x4000u,
+    kIpuWatchdogLimit = 0x1389u
+};
+
+// 0x0060b820
+static int sceMpegSub0060b820(int nArg) {
+    volatile unsigned int *pControl;
+    volatile unsigned int *pData;
+    unsigned int count;
+    unsigned int command;
+    unsigned int index;
+    int shifted;
+
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
+    if ((*pControl & kIpuBusyMask) == kIpuBusyValue) {
+        count = 0;
+        for (;;) {
+            if (count >= kIpuWatchdogLimit) {
+                sceMpegSub005e0a08(g_decoderInstance);
+                count = 0;
+            }
+            ++count;
+            if ((*pControl & kIpuBusyMask) != kIpuBusyValue) {
+                break;
+            }
+        }
+    }
+    if (g_mpegIpuBusyFlag != 0 || g_mpegShiftBudget < nArg) {
+        *pData = 0x40000000u;
+        g_mpegIpuBusyFlag = (int)g_mpegNibbleTable[4];
+        g_mpegShiftAccum = sceMpegSub0060b368();
+    }
+    g_mpegShiftBudget = 0x20;
+    command = (unsigned int)nArg | 0x40000000u;
+    *pData = command;
+    shifted = (int)((unsigned int)g_mpegShiftAccum >> ((0x20 - nArg) & 31));
+    index = (command >> 28) & 0xfu;
+    g_mpegIpuBusyFlag = (int)g_mpegNibbleTable[index];
+    g_mpegShiftAccum = sceMpegSub0060b368();
+    return shifted;
+}
+
+// 0x0060bb88
+static int sceMpegSub0060bb88(void) {
+    g_mpeg2c78 = sceMpegSub0060b820(0xa);
+    g_mpeg2c7c = sceMpegSub0060b820(3);
+    g_mpeg2c80 = sceMpegSub0060b820(0x10);
+    if ((unsigned int)(g_mpeg2c7c - 2) < 2u) {
+        g_mpeg2c84 = sceMpegSub0060b820(1);
+        g_mpeg2c88 = sceMpegSub0060b820(3);
+    }
+    if (g_mpeg2c7c == 3) {
+        g_mpeg2c8c = sceMpegSub0060b820(1);
+        g_mpeg2c90 = sceMpegSub0060b820(3);
+    }
+    sceMpegSub0060bf38();
+    sceMpegSub0060bc58();
+    return sceMpegSub0060bf70();
+}
+
+// 0x0060c050
+static void sceMpegSub0060c050(void) {
+    sceMpeg *decoder;
+    MpegWork *work;
+
+    decoder = (sceMpeg *)g_decoderInstance;
+    work = (MpegWork *)decoder->pContext;
+    work->mUnknownE8 = 0;
+    g_mpeg3430 = g_mpeg3434 + 1;
+    g_mpeg3438 = 1;
+    g_mpeg2d1c = sceMpegSub0060b820(1);
+    g_mpeg2d20 = sceMpegSub0060b820(5);
+    g_mpeg2d24 = sceMpegSub0060b820(6);
+    (void)sceMpegSub0060b820(1);
+    g_mpeg2d28 = sceMpegSub0060b820(6);
+    g_mpeg2d2c = sceMpegSub0060b820(6);
+    g_mpeg2d30 = sceMpegSub0060b820(1);
+    g_mpeg2d34 = sceMpegSub0060b820(1);
+    sceMpegSub0060bc58();
+}
+
+// 0x0060bf38
+static void sceMpegSub0060bf38(void) {
+    for (;;) {
+        if (sceMpegSub0060b820(1) == 0) {
+            return;
+        }
+        sceMpegSub0060b708(8);
+    }
+}
+
+// 0x0060bc58
+static void sceMpegSub0060bc58(void) {
+    int index;
+
+    for (;;) {
+        index = sceMpegSub0060b5d0(0x20);
+        if (index == 0x1b5) {
+            // The image forwards whatever argument value survives to this point, which varies by
+            // caller. The reconstruction passes zero pending recovery of the intended command.
+            sceMpegSub0060b708(0);
+            index = sceMpegSub0060b820(4);
+            if ((unsigned int)index > 10u) {
+                index = 0;
+            }
+            g_mpegIndirectTable[index]();
+            sceMpegSub0060b988();
+            continue;
+        }
+        if (index != 0x1b2) {
+            return;
+        }
+        sceMpegSub0060b708(0x20);
+        sceMpegSub0060b988();
+    }
+}
+
+// 0x0060bf70
+static int sceMpegSub0060bf70(void) {
+    if (g_mpeg2c7c != 3 && g_mpeg2c78 != g_mpeg3470) {
+        if (g_mpeg346c != 0) {
+            g_mpeg346c = 0;
+            g_mpeg3430 += 0x400;
+        }
+        if (g_mpeg2c78 < g_mpeg3470 && g_mpeg3438 == 0) {
+            g_mpeg346c = 1;
+        }
+        g_mpeg3438 = 0;
+        g_mpeg3470 = g_mpeg2c78;
+    }
+    // The sum stores unconditionally; the constant overwrites it only on the narrow path.
+    g_mpeg2d38 = g_mpeg3430 + g_mpeg2c78;
+    if (g_mpeg346c != 0 && g_mpeg3470 < g_mpeg2c78) {
+        g_mpeg2d38 = 0x7a0400;
+    }
+    if (g_mpeg3434 < g_mpeg2d38) {
+        g_mpeg3434 = g_mpeg2d38;
+    }
+    return g_mpeg3434;
+}
+
+// 0x0060ba60
+int sceMpegSub0060ba60(void) {
+    StreamEntry entry;
+
+    for (;;) {
+        int status = sceMpegSub0060b988();
+        if (status == 0x1b3) {
+            sceMpegSub0060e020();
+            continue;
+        }
+        if ((unsigned int)status >= 0x1b4u) {
+            if (status == 0x1b7) {
+                return g_mpeg2c7c;
+            }
+            if (status == 0x1b8) {
+                sceMpegSub0060c050();
+            }
+            continue;
+        }
+        if (status != 0x100) {
+            continue;
+        }
+        sceMpegSub0060bb88();
+        entry.key = 5;
+        entry.templateBits = ~(unsigned long long)0;
+        entry.callback = (void *)~(uintptr_t)0;
+        entry.data = (void *)~(uintptr_t)0;
+        sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
+        g_mpeg3388 = entry.templateBits;
+        g_mpeg3390 = (unsigned long long)(unsigned int)(uintptr_t)entry.data << 32 |
+            (unsigned int)(uintptr_t)entry.callback;
+        return g_mpeg2c7c;
+    }
+}
+
+// 0x0060e020
+static int sceMpegSub0060e020(void) {
+    sceMpeg *decoder;
+    MpegWork *work;
+    int bits;
+    int half;
+
+    decoder = (sceMpeg *)g_decoderInstance;
+    work = (MpegWork *)decoder->pContext;
+    // The clear falls in the setup call delay slot, so it lands before the setup body.
+    work->mUnknownD4 = 0;
+    bits = sceMpegSub0060b820(0x20);
+    g_mpeg2c34 = bits & 0xf;
+    g_mpeg2c30 = (bits >> 4) & 0xf;
+    g_mpeg2c20 = (unsigned int)bits >> 0x14;
+    if (((bits >> 8) & 0xfff) >= 0xaf1) {
+        sceMpegRaiseError("vertical size > 2800");
+    }
+    g_mpeg2c24 = (bits >> 8) & 0xfff;
+    bits = sceMpegSub0060b820(0x1e);
+    g_mpeg2c40 = bits & 1;
+    g_mpeg2c3c = (bits >> 1) & 0x3ff;
+    g_mpeg2c38 = (unsigned int)bits >> 12;
+    bits = sceMpegSub0060b820(1);
+    g_mpeg33a0 = bits;
+    if (bits == 0) {
+        sceMpegSub0060e5a8((void *)(uintptr_t)0x50000000, 0x7a2b80);
+    } else {
+        sceMpegSub0060b2c0();
+        sceMpegSub0060b290(0x50000000u);
+        sceMpegSub0060b2c0();
+    }
+    bits = sceMpegSub0060b820(1);
+    g_mpeg33a4 = bits;
+    if (bits == 0) {
+        sceMpegSub0060e5a8((void *)(uintptr_t)0x58000000, 0x7a2bc0);
+    } else {
+        sceMpegSub0060b2c0();
+        sceMpegSub0060b290(0x58000000u);
+        sceMpegSub0060b2c0();
+    }
+    sceMpegSub0060bc58();
+    decoder = (sceMpeg *)g_decoderInstance;
+    work = (MpegWork *)decoder->pContext;
+    if (g_mpegPollFlag == 0) {
+        g_mpegCompareWord = 3;
+        g_mpeg2cb4 = 1;
+        g_mpeg2c6c = 5;
+        g_mpeg2c48 = 1;
+        g_mpeg2c4c = 1;
+        g_mpeg2cc8 = 1;
+    }
+    g_mpeg2c28 = (g_mpeg2c20 + 0xf) >> 4;
+    if (g_mpegPollFlag == 0 || g_mpeg2c48 != 0) {
+        g_mpeg2c2c = (g_mpeg2c24 + 0xf) >> 4;
+    } else {
+        g_mpeg2c2c = ((g_mpeg2c24 + 0x1f) >> 5) << 1;
+    }
+    g_mpeg2c0c = g_mpeg2c28 << 4;
+    g_mpeg2c10 = g_mpeg2c2c << 4;
+    if (g_mpeg2c0c == work->mCompleted && g_mpeg2c10 == work->mClear) {
+        return work->mClear;
+    }
+    work->mClear = g_mpeg2c10;
+    work->mCompleted = g_mpeg2c0c;
+    g_mpeg2c14 = g_mpeg2c0c >> 1;
+    g_mpeg2c18 = g_mpeg2c10 >> 1;
+    sceMpegRewindWritePointer(&work->mRing);
+    work->mUnknownFC =
+        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, g_mpeg2c0c * 0x180 >> 8, 0x40);
+    work->mUnknown100 =
+        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, g_mpeg2c0c * 0x180 >> 8, 0x40);
+    work->mUnknown104 =
+        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, g_mpeg2c0c * 0x180 >> 8, 0x40);
+    sceMpegSub0060e4c0(&g_mpegSeqAreas[0],
+                        &g_mpegSeqAreas[1],
+                        &g_mpegSeqAreas[2],
+                        &g_mpegSeqAreas[3],
+                        &g_mpegSeqAreas[4],
+                        &g_mpegSeqAreas[5],
+                        &g_mpegSeqAreas[6],
+                        &g_mpegSeqAreas[7],
+                        &g_mpegSeqAreas[8],
+                        work->mUnknownFC,
+                        work->mUnknown100,
+                        work->mUnknown104);
+    sceMpegSub0060e000(&g_mpegSeqAreas[0], g_mpeg2c0c, g_mpeg2c10);
+    sceMpegSub0060e000(&g_mpegSeqAreas[1], g_mpeg2c0c, g_mpeg2c10);
+    sceMpegSub0060e000(&g_mpegSeqAreas[2], g_mpeg2c0c, g_mpeg2c10);
+    sceMpegSub0060e000(&g_mpegSeqAreas[3], g_mpeg2c0c, g_mpeg2c10);
+    sceMpegSub0060e000(&g_mpegSeqAreas[4], g_mpeg2c0c, g_mpeg2c10);
+    sceMpegSub0060e000(&g_mpegSeqAreas[5], g_mpeg2c0c, g_mpeg2c10);
+    half = g_mpeg2c10 / 2;
+    sceMpegSub0060e000(&g_mpegSeqAreas[6], g_mpeg2c0c, half);
+    sceMpegSub0060e000(&g_mpegSeqAreas[7], g_mpeg2c0c, half);
+    return sceMpegSub0060e000(&g_mpegSeqAreas[8], g_mpeg2c0c, half);
+}
+
+// Issues an IPU command word and returns the nibble table word its top nibble selects.
+// 0x0060b290
+static int sceMpegSub0060b290(unsigned int nValue) {
+    unsigned int index;
+    int value;
+
+    *(volatile unsigned int *)(uintptr_t)kIpuCommandAddress = nValue;
+    index = (nValue >> 28) & 0xfu;
+    value = (int)g_mpegNibbleTable[index];
+    g_mpegIpuBusyFlag = value;
+    return value;
+}
+
+// 0x0060e5a8
+static int sceMpegSub0060e5a8(void *pArg0, int nArg1) {
+    StreamEntry entry;
+    volatile unsigned int *pData;
+    volatile unsigned int *pGifA;
+    volatile unsigned int *pGifB;
+
+    entry.key = 2;
+    entry.templateBits = 0;
+    entry.callback = NULL;
+    entry.data = NULL;
+    sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
+    sceMpegSub0060b2c0();
+    pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
+    *pData = 0u;
+    pGifA = (volatile unsigned int *)(uintptr_t)0x1000b410;
+    *pGifA = (unsigned int)nArg1 & 0xffffffu;
+    pGifB = (volatile unsigned int *)(uintptr_t)0x1000b420;
+    *pGifB = 4u;
+    *pData = 0x101u;
+    sceMpegSub0060b290((unsigned int)(uintptr_t)pArg0);
+    sceMpegSub0060b2c0();
+    entry.key = 3;
+    return sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
+}
+
+// Sets picture dimensions into a sequence table and reports one.
+// 0x0060e000
+static int sceMpegSub0060e000(MpegSeqTable *pTable, int nA, int nB) {
+    pTable->mUnknown0C = nA >> 4;
+    pTable->mUnknown10 = nB >> 4;
+    pTable->mUnknown04 = nA;
+    pTable->mUnknown08 = nB;
+    return 1;
+}
+
+// 0x0060e4c0
+static void sceMpegSub0060e4c0(MpegSeqTable *pT0,
+                               MpegSeqTable *pT1,
+                               MpegSeqTable *pT2,
+                               MpegSeqTable *pT3,
+                               MpegSeqTable *pT4,
+                               MpegSeqTable *pT5,
+                               MpegSeqTable *pT6,
+                               MpegSeqTable *pT7,
+                               MpegSeqTable *pT8,
+                               int nA,
+                               int nB,
+                               int nC) {
+    int width = g_mpeg2c0c;
+    int s1 = (nA & 0xffffff) | 0x20000000;
+    int t7 = (nB & 0xffffff) | 0x20000000;
+    int t4 = ((nA + width) & 0xffffff) | 0x20000000;
+    int t5 = ((nB + width) & 0xffffff) | 0x20000000;
+    int v1 = (nC & 0xffffff) | 0x20000000;
+    // The image adds the table address to the third size with plain addition.
+    int v0 = (int)(((uintptr_t)pT0 + (unsigned int)nC) & 0xffffffu) | 0x20000000;
+
+    pT0->mUnknown00 = s1;
+    pT1->mUnknown00 = t7;
+    pT2->mUnknown00 = v1;
+    pT3->mUnknown00 = s1;
+    pT4->mUnknown00 = t7;
+    pT5->mUnknown00 = v1;
+    pT6->mUnknown00 = t4;
+    pT7->mUnknown00 = t5;
+    pT8->mUnknown00 = v0;
+}
+
+// 0x0060b708
+static int sceMpegSub0060b708(int nCommand) {
+    volatile unsigned int *pControl;
+    volatile unsigned int *pData;
+    unsigned int count;
+    unsigned int index;
+    int result;
+
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
+    if ((*pControl & kIpuBusyMask) == kIpuBusyValue) {
+        count = 0;
+        for (;;) {
+            if (count >= kIpuWatchdogLimit) {
+                sceMpegSub005e0a08(g_decoderInstance);
+                count = 0;
+            }
+            ++count;
+            if ((*pControl & kIpuBusyMask) != kIpuBusyValue) {
+                break;
+            }
+        }
+    }
+    *pData = (unsigned int)nCommand | 0x40000000u;
+    index = (((unsigned int)nCommand | 0x40000000u) >> 28) & 0xfu;
+    g_mpegIpuBusyFlag = (int)g_mpegNibbleTable[index];
+    result = sceMpegSub0060b368();
+    g_mpegShiftAccum = result;
+    g_mpegShiftBudget = 0x20;
+    return result;
+}
+
+// 0x0060b5d0
+static int sceMpegSub0060b5d0(int nArg) {
+    volatile unsigned int *pControl;
+    volatile unsigned int *pData;
+    unsigned int count;
+
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
+    if (g_mpegIpuBusyFlag != 0 || g_mpegShiftBudget < nArg) {
+        count = 0;
+        for (;;) {
+            if (count >= kIpuWatchdogLimit) {
+                sceMpegSub005e0a08(g_decoderInstance);
+                count = 0;
+            }
+            ++count;
+            if ((*pControl & kIpuBusyMask) != kIpuBusyValue) {
+                break;
+            }
+        }
+        *pData = 0x40000000u;
+        g_mpegIpuBusyFlag = (int)g_mpegNibbleTable[4];
+        g_mpegShiftAccum = sceMpegSub0060b368();
+        g_mpegShiftBudget = 0x20;
+    }
+    // The shift is a variable rotate the hardware masks to five bits.
+    return (int)((unsigned int)g_mpegShiftAccum >> ((0 - nArg) & 31));
+}
+
+// 0x0060b988
+static int sceMpegSub0060b988(void) {
+    volatile unsigned int *pStatus;
+    unsigned int arg;
+    int result;
+
+    pStatus = (volatile unsigned int *)(uintptr_t)0x10002020;
+    arg = (0u - (*pStatus & 7u)) & 7u;
+    if (arg != 0) {
+        sceMpegSub0060b708((int)arg);
+    }
+    for (;;) {
+        result = sceMpegSub0060b5d0(0x18);
+        if (result == 1) {
+            return result;
+        }
+        sceMpegSub0060b708(8);
+    }
+}
+
+// 0x005e0a08
+static int sceMpegSub005e0a08(void *pDecoder) {
+    StreamEntry entry;
+
+    // The image stores only the low key word and leaves the rest of the stack entry as garbage.
+    // The reconstruction zeroes it instead, which no observed reader distinguishes.
+    entry.key = 1;
+    entry.templateBits = 0;
+    entry.callback = NULL;
+    entry.data = NULL;
+    return sceMpegInvokeCallbackSlot(pDecoder, &entry);
+}
+
+// 0x0060b2c0
+static int sceMpegSub0060b2c0(void) {
+    volatile unsigned int *pControl;
+    unsigned int count;
+
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    count = 0;
+    if ((*pControl & kIpuBusyMask) != kIpuBusyValue) {
+        return 0;
+    }
+    for (;;) {
+        if (count >= kIpuWatchdogLimit) {
+            sceMpegSub005e0a08(g_decoderInstance);
+            count = 0;
+        }
+        ++count;
+        if ((*pControl & kIpuBusyMask) == kIpuBusyValue) {
+            return (int)count;
+        }
+    }
+}
+
+// 0x0060b368
+static int sceMpegSub0060b368(void) {
+    volatile unsigned long long *pData;
+    volatile unsigned int *pControl;
+    long long value;
+    unsigned int count;
+
+    pData = (volatile unsigned long long *)(uintptr_t)kIpuCommandAddress;
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    value = (long long)*pData;
+    count = 0;
+    for (;;) {
+        if (value >= 0) {
+            return (int)value;
+        }
+        if ((*pControl & kIpuDataReadyBit) != 0) {
+            return (int)value;
+        }
+        if (count >= kIpuWatchdogLimit) {
+            sceMpegSub005e0a08(g_decoderInstance);
+            count = 0;
+        }
+        ++count;
+        value = (long long)*pData;
+    }
+}
 
 // The decoder instance address kept for the interrupt handlers, the end flag the drain path
 // clears, and the wait, compare, and poll words the picture path shares. These stand in for
@@ -173,7 +815,7 @@ void *sceMpegCheckWorkAreaSize(void *pRing, int nNeed, int nAlign) {
 
     ring = (MpegRing *)pRing;
     if (nAlign == 0) {
-        sceMpegRaiseError(NULL); // Format near 0x008373c8 not yet recovered.
+        sceMpegRaiseError("work area size is too small");
         return NULL;
     }
     write = (unsigned int)ring->mWrite;
@@ -184,11 +826,217 @@ void *sceMpegCheckWorkAreaSize(void *pRing, int nNeed, int nAlign) {
     aligned = aligned * (unsigned int)nAlign;
     needed = aligned + (unsigned int)nNeed;
     if (end < needed) {
-        sceMpegRaiseError(NULL); // Format near 0x008373c8 not yet recovered.
+        sceMpegRaiseError("work area size is too small");
         return NULL;
     }
     ring->mWrite = (int)needed;
     return (void *)(uintptr_t)aligned;
+}
+
+// 0x0060ded0
+void sceMpegRaiseError(const char *pFormat) {
+    sceMpeg *decoder;
+    MpegWork *work;
+    StreamEntry entry;
+
+    decoder = (sceMpeg *)g_decoderInstance;
+    if (decoder == NULL) {
+        sceMpegPrintErrorLine(pFormat);
+        return;
+    }
+    work = (MpegWork *)decoder->pContext;
+    if (work == NULL || work->mSlots[0].callback == NULL) {
+        sceMpegPrintErrorLine(pFormat);
+        return;
+    }
+    // The low word carries zero and the high word carries the message, which the slot callback
+    // reads back from the entry. The remaining words stay uninitialised, as they do in the image.
+    entry.key = (unsigned long long)(unsigned int)(uintptr_t)pFormat << 32;
+    sceMpegInvokeCallbackSlot(decoder, &entry);
+}
+
+// 0x0060de90
+void sceMpegPrintErrorLine(const char *pMessage) {
+    LogPrintf("[MPEG ERROR]%s\n", pMessage);
+}
+
+// 0x0060dea0
+void sceMpegReportErrorFormatted(const char *pFormat, ...) {
+    char buffer[0x110];
+    va_list args;
+
+    va_start(args, pFormat);
+    vsprintf(buffer, pFormat, args);
+    va_end(args);
+    sceMpegRaiseError(buffer);
+}
+
+// 0x0060a038
+int sceIpuSetControlBitTwentyThree(int nFlag) {
+    volatile unsigned int *pControl;
+    unsigned int value;
+
+    pControl = (volatile unsigned int *)(uintptr_t)0x10002010;
+    value = (*pControl & 0xff7fffffu) | ((unsigned int)nFlag << 23);
+    // The store falls in the return delay slot, so it lands before the return either way.
+    *pControl = value;
+    return (int)value;
+}
+
+// 0x00637178
+int sceIpuSync(int nMode) {
+    volatile unsigned int *pControl;
+
+    pControl = (volatile unsigned int *)(uintptr_t)0x10002010;
+    if (nMode == 0) {
+        while ((int)*pControl < 0) {
+        }
+        return 0;
+    }
+    if (nMode == 1) {
+        return (int)(*pControl >> 31);
+    }
+    return 0;
+}
+
+// 0x0060dd78
+void sceMpegDisableIpuControlBit(void *pBase, int nFlag) {
+    int base;
+
+    (void)pBase;
+    (void)nFlag;
+    sceIpuSetControlBitTwentyThree(1);
+    base = g_mpegIpuBase;
+    g_mpegIpuTable.mUnknown00 = base;
+    g_mpegIpuTable.mUnknown04 = base + 0x1800;
+    g_mpegIpuTable.mUnknown140 = base + 0x1b00;
+    g_mpegIpuTable.mUnknown144 = base + 0x3300;
+    g_mpegIpuTable.mUnknown280 = 0;
+}
+
+// 0x0060ddc8
+void sceMpegSub0060ddc8(void *pDecoder) {
+    volatile unsigned int *pStatus;
+    volatile unsigned int *pStatusSet;
+    volatile unsigned int *pMaskA;
+    volatile unsigned int *pMaskB;
+    volatile unsigned int *pClearC;
+    unsigned int value;
+
+    (void)pDecoder;
+    g_mpeg2d3c = 0;
+    SpinDisableInterrupts();
+    // The enable store falls in the disable call delay slot, so it lands first.
+    *(volatile int *)(uintptr_t)0x7a2b24 = 1;
+    pStatus = (volatile unsigned int *)(uintptr_t)0x1000f520;
+    pStatusSet = (volatile unsigned int *)(uintptr_t)0x1000f590;
+    value = *pStatus;
+    value = value | 0x00010000u;
+    *pStatusSet = value;
+    pMaskA = (volatile unsigned int *)(uintptr_t)0x1000b000;
+    *pMaskA = 0;
+    pMaskB = (volatile unsigned int *)(uintptr_t)0x1000b400;
+    *pMaskB = 0;
+    pClearC = (volatile unsigned int *)(uintptr_t)0x1000d400;
+    *pClearC = 0;
+    value = *pStatus;
+    value = value & 0xfffeffffu;
+    ReenableInterrupts();
+    // The clear store falls in the reenable call delay slot, so it lands first.
+    *pStatusSet = value;
+    pMaskA = (volatile unsigned int *)(uintptr_t)0x1000b020;
+    *pMaskA = 0;
+    pMaskB = (volatile unsigned int *)(uintptr_t)0x1000b420;
+    *pMaskB = 0;
+    pClearC = (volatile unsigned int *)(uintptr_t)0x1000d420;
+    *pClearC = 0;
+    *(volatile int *)(uintptr_t)0x10002010 = 0x40000000;
+    sceIpuSync(0);
+}
+
+// 0x0060dce0
+void sceIpuEnableControlBitTwentyThree(void) {
+    *(volatile int *)(uintptr_t)0x7a33b0 = 0;
+    sceIpuSetControlBitTwentyThree(1);
+}
+
+// 0x0061d9d8
+int sceMpegSub0061d9d8(int nMode) {
+    volatile unsigned int *pStatus;
+    volatile unsigned int *pStatusSet;
+    volatile unsigned int *pClear;
+    unsigned int value;
+
+    SpinDisableInterrupts();
+    pStatus = (volatile unsigned int *)(uintptr_t)0x1000f520;
+    pStatusSet = (volatile unsigned int *)(uintptr_t)0x1000f590;
+    value = *pStatus;
+    value = value | 0x00010000u;
+    *pStatusSet = value;
+    pClear = (volatile unsigned int *)(uintptr_t)0x1000b400;
+    *pClear = (unsigned int)nMode;
+    value = *pStatus;
+    value = value & 0xfffeffffu;
+    *pStatusSet = value;
+    return (int)ReenableInterrupts();
+}
+
+// IPU command words copied by the initialiser, read from the image.
+static const unsigned long long kIpuInitCommandsA[6] = {
+    0x1616131013101008ULL, 0x1b1a181a16161616ULL, 0x1b1b1a1a1a1a1b1bULL,
+    0x1d2222221d1d1d1bULL, 0x20201d1d1b1b1d1dULL, 0x2223232526252222ULL,
+};
+static const unsigned long long kIpuInitCommandsB[2] = {
+    0x3e0084204210000ULL, 0x1ce718c614a51084ULL,
+};
+
+// 0x0061da40
+int sceMpegSub0061da40(void) {
+    volatile unsigned int *pReg;
+    volatile unsigned long long *pFifo;
+    int value;
+    int i;
+    static const int kCommandWords[6] = {0, 1, 2, 3, 4, 4};
+
+    sceMpegSub0061d9d8(1);
+    pReg = (volatile unsigned int *)(uintptr_t)0x10002010;
+    *pReg = 0x40000000u;
+    while ((int)*pReg < 0) {
+    }
+    pReg = (volatile unsigned int *)(uintptr_t)0x10002000;
+    *pReg = 0u;
+    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
+    }
+    pFifo = (volatile unsigned long long *)(uintptr_t)0x10007010;
+    for (i = 0; i < 6; ++i) {
+        pFifo[0] = kIpuInitCommandsA[kCommandWords[i]];
+    }
+    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0x60000000u;
+    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
+    }
+    pFifo[0] = kIpuInitCommandsB[0];
+    pFifo[0] = kIpuInitCommandsB[1];
+    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0x58000000u;
+    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
+    }
+    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0x90000000u;
+    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
+    }
+    *(volatile unsigned int *)(uintptr_t)0x10002010 = 0x40000000u;
+    pReg = (volatile unsigned int *)(uintptr_t)0x10002010;
+    while ((int)*pReg < 0) {
+    }
+    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0u;
+    pReg = (volatile unsigned int *)(uintptr_t)0x10002010;
+    while ((int)*pReg < 0) {
+    }
+    value = (int)*pReg;
+    return value;
+}
+
+// 0x005caa58
+int sceMpegDemuxPss(sceMpeg *pMpeg, unsigned char *pStart, int nSize) {
+    return sceMpegDemuxPssRing(pMpeg, pStart, nSize, NULL, -1);
 }
 
 // 0x005ca4e0
@@ -243,7 +1091,7 @@ int sceMpegSub005e0928(void *pDecoder) {
     for (i = 0; i < 6; ++i) {
         index = kPendingTableOrder[i];
         if (g_mpegTables[index] != NULL) {
-            ((PendingTable *)g_mpegTables[index])->mUnknown28 = 0;
+            g_mpegTables[index]->mUnknown28 = 0;
         }
     }
     return 1;
@@ -401,7 +1249,7 @@ static int decodePictureInner(void *pDecoder) {
     picture = (unsigned int)work->mPictureAddress;
     if ((picture & (unsigned int)kPictureAlignMask) != 0) {
         work->mCompleted = 0;
-        sceMpegReportErrorFormatted(NULL); // Format near 0x008373e8 not yet recovered.
+        sceMpegReportErrorFormatted("image buffer needs to be aligned to 64byte bound");
         return -1;
     }
     g_pictureWaitFlag = 0;
@@ -498,7 +1346,7 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     aligned = (work + (uintptr_t)kAlignMask) & ~(uintptr_t)kAlignMask;
     rest = nWorkSize - (int)(aligned - work);
     if (rest < kMinWorkSize) {
-        sceMpegRaiseError(NULL); // Format near 0x008373a0 not yet recovered.
+        sceMpegRaiseError("The size of work area is too small");
         return NULL;
     }
     context = (MpegWork *)aligned;
@@ -568,7 +1416,7 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     sceMpegSub005e08e8(decoder);
     sceMpegSub005e0928(decoder);
     for (i = 0; i < kTableCount; ++i) {
-        g_mpegTables[i] = &g_mpegTableArea[i];
+        g_mpegTables[i] = &g_mpegSeqAreas[i];
     }
     return (void *)(uintptr_t)sceMpegCommitWritePointer(ring);
 }

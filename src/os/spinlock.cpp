@@ -13,7 +13,9 @@ bool SpinDisableInterrupts(void) {
     }
     do {
         __asm__ volatile("di");
-        __asm__ volatile("sync 0x10");
+        // The image synchronises with stype 0x10, which the assembler rejects as an operand, so
+        // the instruction is emitted as a word.
+        __asm__ volatile(".word 0x0000040f");
         __asm__ volatile("mfc0 %0, $12" : "=r"(nStatus));
     } while ((nStatus & kStatusInterruptBit) != 0);
     return true;

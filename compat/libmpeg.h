@@ -38,6 +38,9 @@ typedef struct {
 
 int sceMpegInit(void);
 
+// Demultiplexes a pack stream without a ring buffer, passing no buffer and -1 as its size.
+int sceMpegDemuxPss(sceMpeg *pMpeg, unsigned char *pStart, int nSize);
+
 // Demultiplexes size bytes of a PSS stream starting at pStart inside the ring buffer pBuffer of
 // nBufferSize bytes, and returns the bytes consumed.
 int sceMpegDemuxPssRing(
@@ -107,13 +110,15 @@ void sceMpegSub0060ddc8(void *pDecoder);
 // Enables IPU control bit twenty-three.
 void sceIpuEnableControlBitTwentyThree(void);
 
-// Reports a decoder error with the given format. The formats live in rodata and are not yet
-// recovered, so callers pass null.
+// Reports a decoder error with the given message, through the slot callback when one is
+// installed and through the error line otherwise.
 void sceMpegRaiseError(const char *pFormat);
 
-// Reports a picture error with the given format. The formats live in rodata and are not yet
-// recovered, so callers pass null.
-void sceMpegReportErrorFormatted(const char *pFormat);
+// Prints a decoder error line in the stock "[MPEG ERROR]%s" format.
+void sceMpegPrintErrorLine(const char *pMessage);
+
+// Reports a picture error with the given format and arguments.
+void sceMpegReportErrorFormatted(const char *pFormat, ...);
 
 // Polls the picture engine and returns its state.
 int sceMpegSub0060ba60(void);
