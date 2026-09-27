@@ -100,7 +100,8 @@ target_link_libraries(
           math3d
           pad
           mc
-          mtap)
+          mtap
+          cdvd)
 add_custom_command(
   TARGET ${CMAKE_PROJECT_NAME}
   POST_BUILD

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "os/async.h"
-#include "os/cdsearch.h"
 #include "os/fileio.h"
 #include "os/hostmode.h"
 #include "os/loadfile.h"
@@ -134,12 +133,12 @@ int ArkFile::Open(const char *pszPath) {
     pArk->mPath = pszPath;
 
     if (UsingCdMedia() != 0) {
-        CdFile cdFile;
+        sceCdlFILE cdFile;
         if (sceCdSearchFile(&cdFile, strchr(szDevice, ':') + 1) == 0) {
             LogPrintf("sceCdSearchFile failed on: %s\n", szDevice);
             return 0;
         }
-        pArk->mDiscLsn = cdFile.mLsn;
+        pArk->mDiscLsn = cdFile.lsn;
     }
 
     pArk->mOptimized = 0;
