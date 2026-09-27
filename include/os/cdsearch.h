@@ -23,4 +23,4 @@ struct CdFile {
  * @return Non-zero on success.
  * @ghidraAddress 0x004ff620
  */
-int sceCdSearchFile(CdFile *pFile, const char *pszName);
+extern "C" int sceCdSearchFile(CdFile *pFile, const char *pszName);

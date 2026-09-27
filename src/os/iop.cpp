@@ -138,7 +138,7 @@ inline void InitMultitapPorts() {
 
 // 0x004dfd60
 inline void InitMemoryCardLibrary() {
-    sceMcInit(); // Yes, the binary discards this call's result.
+    sceMcInitLibrary(); // Yes, the binary discards this call's result.
 }
 
 } // namespace

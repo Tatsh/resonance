@@ -15,7 +15,7 @@ constexpr int kSceFsExecuting = 1;
  * @return The file server's result, or a negative error.
  * @ghidraAddress 0x0056b870
  */
-int sceIoctl(int nFile, int nRequest, void *pArg);
+extern "C" int sceIoctl(int nFile, int nRequest, void *pArg);
 
 extern "C" {
 

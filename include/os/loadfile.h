@@ -129,7 +129,7 @@ unsigned GetGzFileSize(int nFile);
  * @param pBuffer The destination, which must take the whole decompressed size.
  * @ghidraAddress 0x005635b8
  */
-void InflateGzFileWhole(int nFile, void *pBuffer);
+extern "C" void InflateGzFileWhole(int nFile, void *pBuffer);
 
 /**
  * Inflate a gzip member that is already in memory.

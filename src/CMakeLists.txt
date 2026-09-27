@@ -90,7 +90,17 @@ add_custom_target(archives DEPENDS ${RESONANCE_LIBRARIES})
 # static syscall library, so the set below omits it.
 add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>)
 target_link_libraries(
-  ${CMAKE_PROJECT_NAME} PRIVATE ${RESONANCE_LIBRARIES} kernel c graph dma packet math3d)
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE ${RESONANCE_LIBRARIES}
+          kernel
+          c
+          graph
+          dma
+          packet
+          math3d
+          pad
+          mc
+          mtap)
 add_custom_command(
   TARGET ${CMAKE_PROJECT_NAME}
   POST_BUILD

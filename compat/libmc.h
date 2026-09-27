@@ -39,9 +39,10 @@ extern "C" {
 // against one.
 int sceMcGetSlotMax(int nPort);
 
-// Nor is this one a rename. ps2sdk's mcInit() takes a server-type argument, and 0x005659e8 does not
-// read an argument register before writing a0. The Sony entry point this forwards to takes none.
-int sceMcInit(void);
+// Nor is this one a rename. The image names the entry point sceMcInitLibrary at 0x005659e8,
+// which takes no arguments, while ps2sdk's mcInit() takes a server-type argument. The
+// declaration therefore covers the Sony routine directly.
+int sceMcInitLibrary(void);
 
 #ifdef __cplusplus
 }
