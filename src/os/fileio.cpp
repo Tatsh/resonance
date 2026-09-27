@@ -469,7 +469,7 @@ typedef struct {
 } FsSemaPacket;
 
 // 0x0056A4F0
-extern "C" void sceFileioRpcRoutine0056A4F0(void) {
+extern "C" void sceFileioRpcRoutine0056a4f0(void) {
     FsSemaPacket packet = {0, 1, 1, 0, 0, 0};
 
     if (*(volatile int *)(uintptr_t)0x762c10 != -1) {
@@ -480,7 +480,7 @@ extern "C" void sceFileioRpcRoutine0056A4F0(void) {
 }
 
 // 0x0056AA08
-extern "C" void sceFileioRpcRoutine0056AA08(void) {
+extern "C" void sceFileioRpcRoutine0056aa08(void) {
     FsSemaPacket packet = {0, 1, 1, 0, 0, 0};
 
     if (*(volatile int *)(uintptr_t)0x762c0c != -1) {
@@ -1138,7 +1138,7 @@ extern "C" int sceMcSync(int nMode, int *pnCmd, int *pnResult) {
 }
 
 // 0x0056B340
-extern "C" int sceFileioRpcRoutine0056B340(int nFile, void *pBuffer, int nSize) {
+extern "C" int sceFileioRpcRoutine0056b340(int nFile, void *pBuffer, int nSize) {
     void *pClient;
     int nResult;
 

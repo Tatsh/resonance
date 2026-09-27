@@ -4,6 +4,7 @@
 # than the host. posixmodule.c builds under the console module name through a define.
 set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/acceler.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/grammar1.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/myreadline.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/node.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/parser.c"
@@ -13,14 +14,20 @@ set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/ceval.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/codecs.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/compile.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/dynload_stub.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/errors.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/exceptions.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/frozen.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getargs.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getcopyright.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getmtime.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getplatform.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getversion.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/graminit.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/import.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/marshal.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/modsupport.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/mystrtoul.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/pystate.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/pythonrun.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/structmember.c"
@@ -47,6 +54,7 @@ set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Objects/tupleobject.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Objects/typeobject.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Objects/unicodeobject.c"
+    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Objects/unicodectype.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/arraymodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/_codecsmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/cPickle.c"
@@ -64,7 +72,8 @@ set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/stropmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/structmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/PC/getpathp.c"
-    PC/config.c)
+    PC/config.c
+    hostshims.c)
 
 add_library(resonance_python STATIC ${RESONANCE_PYTHON_SRCS})
 target_link_libraries(resonance_python PRIVATE resonance_common)

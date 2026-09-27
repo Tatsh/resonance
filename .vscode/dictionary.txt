@@ -184,6 +184,7 @@ durgemmsg
 durgemrowstring
 durgemstrip
 durgemtrails
+dynload
 easywarn
 ecossin
 eekernel
@@ -292,10 +293,14 @@ genpath
 getallconnectstatesmct
 getargs
 getconnectstatemct
+getcopyright
 getenv
+getmtime
 getpath
 getpathp
 getpid
+getplatform
+getversion
 gfxdevice
 ghidra
 ghostnoteseffector
@@ -324,6 +329,7 @@ hibytes
 hilite
 hisquare
 hostmode
+hostshims
 hsyn
 hudanalogstick
 hudanimramp
@@ -670,6 +676,7 @@ mvoll
 mvolr
 mypy
 myreadline
+mystrtoul
 namenogood
 nearesttrackmsg
 netdb
@@ -1060,6 +1067,7 @@ udvare
 undraft
 undrafted
 unformatop
+unicodectype
 unicodeobject
 unistd
 unknowna

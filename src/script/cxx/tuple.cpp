@@ -4,6 +4,11 @@
 
 namespace Py {
 
+// 0x004c5568
+Tuple::Tuple(const Object &ob) : SeqBase<Object>(ob) {
+    validate();
+}
+
 // 0x004c5690
 Tuple::Tuple(int nSize) {
     // The image fills the slots through helpers the reconstruction has not recovered. Prefilling

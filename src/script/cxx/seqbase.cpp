@@ -25,4 +25,21 @@ void SeqBase<Char>::swap(SeqBase<Char> &other) {
     other.mPtr = temp;
 }
 
+template <>
+int SeqBase<Object>::size() const {
+    return PySequence_Size(mPtr);
+}
+
+template <>
+int SeqBase<Object>::max_size() const {
+    return static_cast<int>(g_nHxStrNoPosition);
+}
+
+template <>
+void SeqBase<Object>::swap(SeqBase<Object> &other) {
+    PyObject *temp = mPtr;
+    mPtr = other.mPtr;
+    other.mPtr = temp;
+}
+
 } // namespace Py
