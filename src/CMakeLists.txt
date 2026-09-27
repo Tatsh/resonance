@@ -51,6 +51,7 @@ set(RESONANCE_SUBSYSTEMS
     met
     mid
     msg
+    netflow
     os
     profile
     python

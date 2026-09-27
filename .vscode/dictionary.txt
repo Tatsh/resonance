@@ -656,6 +656,7 @@ multipowerbarmgr
 multiscreenanim
 multitap
 musemsg
+museplayer
 musesynth
 museutil
 mvoll

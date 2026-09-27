@@ -217,14 +217,14 @@ inline HxStr Player::GetUsername() {
 
 // 0x00132cd0
 // The out-of-line copy.
-inline int Player::CallSlot11() {
+int Player::CallSlot11() {
     Slot11();
     return 0;
 }
 
 // 0x00132d00
 // The out-of-line copy.
-inline int Player::CallSlot12() {
+int Player::CallSlot12() {
     Slot12();
     return 0;
 }

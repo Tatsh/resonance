@@ -42,3 +42,14 @@ void ResetFrameTimer() {
     g_frameTimer.mStartCycles = ReadCycleCount();
     g_llFrameTimerCycles = 0;
 }
+
+// 0x001ecc90
+// The image emits no out-of-line copy.
+// The sequence below repeats the inline work at 0x001ecc90.
+long long ProfileClockMilliseconds() {
+    const unsigned nCount = ReadCycleCount();
+    g_nLastCycleDelta = nCount - g_nLastCycleCount;
+    g_nLastCycleCount = nCount;
+    g_llTotalCycles += g_nLastCycleDelta;
+    return static_cast<int>(g_llTotalCycles / kCyclesPerMillisecond);
+}

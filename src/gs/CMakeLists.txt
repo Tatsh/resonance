@@ -5,6 +5,7 @@ set(RESONANCE_GS_SRCS
     mixer.cpp
     multimuse.cpp
     multimuseplayer.cpp
+    museplayer.cpp
     musesynth.cpp
     museutil.cpp
     notepitcher.cpp

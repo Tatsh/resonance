@@ -1,6 +1,7 @@
 #include "os/iop.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <ctype.h>
 #include <iostream>
 #include <libcdvd.h>
@@ -49,6 +50,17 @@ constexpr char kHardSynthErrorFileExpression[] = "current_level.ps2_hsyn_error_f
 
 // The exit status every failure in this file reports.
 constexpr int kLoadFailureStatus = 1;
+
+// The address of the interrupt status word the wait polls.
+constexpr std::uintptr_t kVsyncStatusAddress = 0x1000f000U;
+
+// The bit the wait clears and then polls until it rises.
+constexpr unsigned kVsyncStartBit = 4;
+
+// The wait polls this interrupt status word.
+struct VsyncStatus {
+    volatile unsigned mStatus; // +0x00
+};
 
 // Read off the walk at 0x004de6d8, which ends 0x78 bytes past the base of a table of 12-byte
 // records.
@@ -206,6 +218,20 @@ void LoadIopModules() {
     InitMultitapPorts();
     InitMemoryCardLibrary();
 }
+
+extern "C" {
+
+// 0x005963e0
+// Clears the start bit, spins until the bit rises, and clears the bit again.
+void WaitVsync() {
+    volatile VsyncStatus &status = *reinterpret_cast<volatile VsyncStatus *>(kVsyncStatusAddress);
+    status.mStatus = kVsyncStartBit;
+    while ((status.mStatus & kVsyncStartBit) == 0) {
+    }
+    status.mStatus = kVsyncStartBit;
+}
+
+} // extern "C"
 
 // 0x005e1210
 void RegisterHardEffectCommands() {

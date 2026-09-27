@@ -1,5 +1,6 @@
 set(RESONANCE_OS_SRCS
     arkfile.cpp
+    assert.cpp
     async.cpp
     asynccallback.cpp
     bytepairstatic.cpp

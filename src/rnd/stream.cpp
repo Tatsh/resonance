@@ -19,6 +19,11 @@ Stream &Stream::Write(const void *pSrc, int nSize) {
     return WriteBytes(pSrc, nSize);
 }
 
+// The image emits no out-of-line copy for the base destructor.
+// The base stores no member, so the body performs no work.
+Stream::~Stream() {
+}
+
 // 0x0050f140
 Stream &Stream::ReadString(HxStr &name) {
     name.Clear();

@@ -1,5 +1,4 @@
-# methelpscreen.cpp and metnullrenderer.cpp are not built. Each includes the embedded
-# interpreter's Python 2 headers through PyCXX.
+# The interpreter headers the two scripting-adjacent units need are vendored under 3rdparty.
 set(RESONANCE_MET_SRCS
     albumcache.cpp
     creditsroll.cpp
@@ -28,6 +27,7 @@ set(RESONANCE_MET_SRCS
     metfrontendstate.cpp
     metgameskillscreen.cpp
     metgizmopanel.cpp
+    methelpscreen.cpp
     metglobalsettingssaverscreen.cpp
     metjukeboxbasescreen.cpp
     metjukeboxcustomremixesscreen.cpp
@@ -67,6 +67,7 @@ set(RESONANCE_MET_SRCS
     metmultitips4screen.cpp
     metmultitips5screen.cpp
     metmultitipsbasescreen.cpp
+    metnullrenderer.cpp
     metpausebasescreen.cpp
     metpausegamescreen.cpp
     metpausemultiremixscreen.cpp
@@ -102,3 +103,5 @@ set(RESONANCE_MET_SRCS
 
 add_library(resonance_met STATIC ${RESONANCE_MET_SRCS})
 target_link_libraries(resonance_met PRIVATE resonance_common)
+target_include_directories(resonance_met PRIVATE "${CMAKE_SOURCE_DIR}/src/python/PC"
+                                                 "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Include")
