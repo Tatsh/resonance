@@ -65,7 +65,8 @@ foreach(SUBSYSTEM ${RESONANCE_SUBSYSTEMS})
 endforeach()
 
 # The entry point sits at the root of the tree rather than in a subsystem, matching the original.
-add_library(resonance_main STATIC main.cpp)
+# It is an object library so the executable below links the same objects the archive step builds.
+add_library(resonance_main OBJECT main.cpp)
 target_link_libraries(resonance_main PRIVATE resonance_common)
 
 # Every archive the build produces, for a target that builds all of them at once.
@@ -77,19 +78,20 @@ endforeach()
 # The Sony sample archive lives under sce/ee rather than with the game subsystems.
 list(APPEND RESONANCE_LIBRARIES resonance_ezmpeg)
 
+# The Sony library reconstructions live under sce/ee with the sample.
+list(APPEND RESONANCE_LIBRARIES resonance_sonylibs)
+
 add_custom_target(archives DEPENDS ${RESONANCE_LIBRARIES})
 
-# The link step the reconstruction is working towards. It stays commented out until every routine a
-# call arrives at has a body. An incomplete tree produces a wall of undefined references that
-# reports nothing about the reconstruction. The startup file and the library set are what the
-# original linked against, and the toolchain file the SDK ships supplies the linker flags and the
-# link script.
-#
-# add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>)
-# target_link_libraries(
-#   ${CMAKE_PROJECT_NAME} PRIVATE ${RESONANCE_LIBRARIES} kernel c syscall graph dma packet math3d)
-# add_custom_command(
-#   TARGET ${CMAKE_PROJECT_NAME}
-#   POST_BUILD
-#   COMMAND ${CMAKE_STRIP} --strip-all $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
-#   COMMENT "Stripping the executable, as the shipped disc image is stripped")
+# The link step the reconstruction has reached. Every routine a call arrives at must have a body
+# or come from the SDK libraries below. An undefined reference names the next routine to recover.
+# The startup file and the library set are what the original linked against, and the toolchain
+# file the SDK ships supplies the linker flags and the link script.
+add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>)
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME} PRIVATE ${RESONANCE_LIBRARIES} kernel c syscall graph dma packet math3d)
+add_custom_command(
+  TARGET ${CMAKE_PROJECT_NAME}
+  POST_BUILD
+  COMMAND ${CMAKE_STRIP} --strip-all $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+  COMMENT "Stripping the executable, as the shipped disc image is stripped")

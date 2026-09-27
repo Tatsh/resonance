@@ -199,7 +199,6 @@ enablepowerupcheats
 enableteamfreqs
 endforeach
 endgamemsg
-endimage
 endrecordingcmd
 endx
 entspaceop
@@ -425,6 +424,7 @@ levelstats
 libc
 libcdvd
 libcdvd's
+libdev
 libdma
 libera
 libgifpk
@@ -473,13 +473,14 @@ lsdmode
 lseek
 ltxt
 lvalues
+madr
 mainloop
 mainpage
 malloc
-madr
 matanim
 math
 mcdat
+mcextra
 mcfl
 mcman
 mcrd
@@ -626,6 +627,7 @@ msgqueue
 msgsink
 msgsource
 msifrpc
+msin
 msnm
 msoft
 mtap
@@ -667,7 +669,6 @@ newmodule
 njgb
 nlfilebuf
 nocard
-nodata
 nodisc
 nolattice
 nomemcard
@@ -915,6 +916,8 @@ solopowerbarmgr
 soloremix
 soloscreenanim
 songtitle
+sonylib
+sonylibs
 soundbank
 spewregistrar
 spjoinacceptpacket
@@ -1058,7 +1061,6 @@ usbd
 usbkeybd
 utime
 vars
-vblank
 vclipw
 vendored
 venv

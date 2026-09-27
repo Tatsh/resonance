@@ -31,12 +31,15 @@ jobs:
           cmake --build build --target archives -- -k 0 2>&1 | tee build/compile.log
       - name: 'Link EZMIDI.IRX'
         run: cmake --build build --target ezmidi_irx
+      - name: 'Link executable'
+        run: cmake --build build --target resonance
       - name: 'Count produced artifacts'
         if: always()
         run: |
           OBJECTS=$(find build '(' -name '*.o' -o -name '*.obj' ')' | wc -l)
           ARCHIVES=$(find build -name '*.a' | wc -l)
           IRX=$(find build -name 'EZMIDI.IRX' | wc -l)
+          ELF=$(find build -name 'resonance' -type f | wc -l)
           # grep yields an empty string rather than a zero when the log is absent. That happens
           # whenever an earlier step failed and this one still runs.
           ERRORS=$(grep -c 'error:' build/compile.log || true)
@@ -49,11 +52,13 @@ jobs:
             echo "| Object files | $OBJECTS |"
             echo "| Archives | $ARCHIVES |"
             echo "| IOP modules | $IRX |"
+            echo "| Executables | $ELF |"
             echo "| Compiler errors | $ERRORS |"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "Compiled $OBJECTS object file(s) into $ARCHIVES archive(s), $ERRORS error(s)"
           find build -name '*.a' | sort
           find build -name 'EZMIDI.IRX' | sort
+          find build -name 'resonance' -type f | sort
           test "$OBJECTS" -gt 0
           test "$IRX" -gt 0
       - name: 'Upload archives'
@@ -69,6 +74,13 @@ jobs:
         with:
           name: ezmidi-irx
           path: 'build/**/EZMIDI.IRX'
+          if-no-files-found: warn
+      - name: 'Upload resonance'
+        if: always()
+        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
+        with:
+          name: resonance
+          path: 'build/**/resonance'
           if-no-files-found: warn
 name: 'Build'
 'on':
