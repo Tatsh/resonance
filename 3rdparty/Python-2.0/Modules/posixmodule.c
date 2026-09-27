@@ -4141,9 +4141,9 @@ struct constdef {
 
 /* The image keeps the two messages below with no registered caller, so the helper is
    retained even though the trimmed table references nothing that calls it. */
-static int
+static int __attribute__((used))
 conv_confname(PyObject *arg, int *valuep, struct constdef *table,
-	      size_t tablesize) __attribute__((used))
+	      size_t tablesize)
 {
     if (PyInt_Check(arg)) {
         *valuep = PyInt_AS_LONG(arg);
