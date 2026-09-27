@@ -37,23 +37,23 @@ great majority are reconstructable routines declared with their address, signatu
 (inline in headers, template instances, split signatures, and defaulted or vendored glue), and the
 rest are annotated library and vendored routines whose titles fall outside the body count.
 
-Of the 448 routines with no annotation, 249 are implicit special members, 91 are static
+Of the 447 routines with no annotation, 249 are implicit special members, 91 are static
 initialiser and exit stubs, 57 are ezmpeg sample routines, 5 are unreferenced interpreter workers
 whose entries inline their bodies, 20 are library routines labelled with their upstream names, 11
 are script workers (ten unreferenced duplicates of live cheat entry points and one scheduler kill
 with no caller), six are SDK routines the open-source SDK provides or links (three
-interrupt-context entries, two interrupt toggles, and one stream-input helper), eight are recorded
-exceptions, and one is a measurement gap. The canvas factory
+interrupt-context entries, two interrupt toggles, and one stream-input helper), and eight are
+recorded exceptions. The canvas factory
 `ACanvas::CreateForSubBitmap()` at `0x005e8e38` and the `ABitmap` sub-rectangle constructor at
 `0x00558dd8` it calls, found in code the disassembler had not defined, both have bodies in the
 tree since the script-layer push.
 
 Of the 447 remaining routines, 333 are compiler-generated: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
-declares, and the static and global initialisation and exit glue. Five more come from
+declares, and the static and global initialisation and exit glue. Seven more come from
 the toolchain's standard library, and one is the exit callback for the shared
-instance. The completion table below omits the 339 excluded routines and tracks
-the other 108.
+instance. The completion table below omits the 341 excluded routines and tracks
+the other 106.
 
 ### Remaining routines
 
@@ -65,7 +65,8 @@ references with aligned byte-level call and address matches, covering code and d
 Compiler-generated routines are excluded from this table: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
 declares, and the static and global initialisation and exit glue. The table also omits
-the four standard library destructors and the C library toupper. The toolchain provides them.
+the four standard library destructors and the C library toupper, getenv, and _findenv_r. The
+toolchain provides them.
 
 | Done | Address      | Length | # xrefs | Name                                         | Preliminary signature                                                                        |
 | ---- | ------------ | ------ | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -158,7 +159,6 @@ the four standard library destructors and the C library toupper. The toolchain p
 | ❌   | `0x005d40c0` | 7      | 2       | `voBufDelete`                                | `undefined voBufDelete(void)`                                                                |
 | ❌   | `0x005d40d8` | 83     | 2       | `voBufGetTag`                                | `undefined voBufGetTag(void)`                                                                |
 | ❌   | `0x005d4130` | 31     | 2       | `voBufDecCount`                              | `undefined voBufDecCount(void)`                                                              |
-| ❌   | `0x005e29e0` | 39     | 6       | `getenv`                                     | `undefined getenv(void)`                                                                     |
 | ❌   | `0x005e4510` | 71     | 39      | `SpinDisableInterrupts`                      | `bool SpinDisableInterrupts(void)`                                                           |
 | ❌   | `0x005e4558` | 23     | 44      | `ReenableInterrupts`                         | `bool ReenableInterrupts(void)`                                                              |
 | ❌   | `0x005e4600` | 147    | 3       | `MSInPutBytes`                               | `int MSInPutBytes(sceCslCtx * pCtx, uint nPort, uchar * pBytes, int nCount)`                 |
@@ -176,7 +176,6 @@ the four standard library destructors and the C library toupper. The toolchain p
 | ❌   | `0x006135e0` | 83     | 3       | `viBufEndPut`                                | `undefined viBufEndPut(void)`                                                                |
 | ❌   | `0x00613638` | 271    | 2       | `viBufPutTs`                                 | `undefined viBufPutTs(void)`                                                                 |
 | ❌   | `0x00613748` | 75     | 3       | `viBufCount`                                 | `undefined viBufCount(void)`                                                                 |
-| ❌   | `0x00620b70` | 287    | 3       | `_findenv_r`                                 | `undefined _findenv_r(void)`                                                                 |
 
 ### Measurement history
 
@@ -223,9 +222,9 @@ These routines count as remaining although the tree handles them by rule:
   of function-local statics (`AtExitDestroy…`, `__StaticDestroy`).
 - The `hx.*` script bindings (the `HxScript__X` bodies and their `HxScript__XEntry` wrappers) and the
   PyCXX wrappers. The interpreter and its C++ binding are not yet in the tree.
-- Library routines labelled with their upstream names rather than a family prefix (`getenv`,
-  `_findenv_r`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and
-  the `type_info` and `exception` members).
+- Library routines labelled with their upstream names rather than a family prefix (the SIO
+  printf engine, `_sceVu0ecossin`, the `libio` stream slots, and the `type_info` and `exception`
+  members).
 - Recorded exceptions without a separate body: the `TunnelEvent::DrawFiltered` copy, three
   unreferenced return-zero stubs, the unreferenced send copies in the `Delayer`,
   `MidiDisabler`, and `Renderer` units, and the `Print()` at `0x003d67f0` of the unused class the
