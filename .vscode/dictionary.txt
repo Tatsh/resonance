@@ -222,6 +222,7 @@ failsink
 favorite
 fbmsk
 fbrst
+fcntl
 fileobject
 filetab
 findenv
@@ -1051,6 +1052,7 @@ undraft
 undrafted
 unformatop
 unicodeobject
+unistd
 unknowna
 unknownac
 unknownb

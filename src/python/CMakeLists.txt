@@ -72,11 +72,17 @@ target_include_directories(resonance_python PRIVATE "${CMAKE_SOURCE_DIR}/src/pyt
                                                    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Include")
 target_compile_definitions(
   resonance_python
-  PRIVATE HAVE_PROTOTYPES=1
+  PRIVATE _GNU_SOURCE
+          HAVE_PROTOTYPES=1
           HAVE_STDARG_PROTOTYPES=1
           HAVE_DIRENT_H=1
+          HAVE_FCNTL_H=1
           HAVE_NETDB_H=1
+          HAVE_SIGNAL_H=1
           HAVE_SYS_SOCKET_H=1
+          HAVE_SYS_WAIT_H=1
+          HAVE_UNISTD_H=1
+          HAVE_UTIME_H=1
           SIZEOF_INT=4
           SIZEOF_LONG=4
           SIZEOF_VOID_P=4

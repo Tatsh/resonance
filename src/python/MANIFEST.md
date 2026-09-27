@@ -138,12 +138,14 @@ branch, which is a third independent confirmation of the Windows lineage after `
 
 ### Build configuration, taken from the toolchain
 
-The build defines `HAVE_PROTOTYPES`, `HAVE_STDARG_PROTOTYPES`, `HAVE_DIRENT_H`,
-`HAVE_NETDB_H`, and `HAVE_SYS_SOCKET_H` with the console widths, because the toolchain headers
-provide the matching declarations. A forced include of `PC/pycompat.h` supplies the C library
-headers, the `PYTHONPATH` default, and the socket constants upstream expects from its own
-configuration, all without editing a vendored file. Three units build at `-O1` where the
-optimiser fails on this toolchain. None of this changes which upstream blocks compile in.
+The build defines `_GNU_SOURCE` with the hosted feature macros (`HAVE_UNISTD_H`,
+`HAVE_FCNTL_H`, `HAVE_SIGNAL_H`, `HAVE_UTIME_H`, `HAVE_SYS_WAIT_H`, `HAVE_DIRENT_H`,
+`HAVE_NETDB_H`, `HAVE_SYS_SOCKET_H`, `HAVE_PROTOTYPES`, and `HAVE_STDARG_PROTOTYPES`) and the
+console widths, because the toolchain headers provide the matching declarations. A forced include
+of `PC/pycompat.h` supplies the C library headers, the `PYTHONPATH` default, and the socket
+constants and name service declarations upstream expects from its own configuration, all without
+editing a vendored file. Three units build at `-O1` where the optimiser fails on this toolchain.
+None of this changes which upstream blocks compile in.
 
 ### The trim is configuration, not code
 
