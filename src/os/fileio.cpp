@@ -1035,8 +1035,8 @@ extern "C" int sceDeci2Sub00627C38(const void *pBuffer) {
     pState->mUnknown0C = 0;
     pState->mUnknown04 = 0;
     pState->mUnknown08 = 0;
-    pState->mUnknown14 = (void *)((uintptr_t)0x8e7fc0u | 0x20000000u);
-    pState->mUnknown10 = (void *)((uintptr_t)0x8e7e80u | 0x20000000u);
+    pState->mUnknown14 = (int)((uintptr_t)0x8e7fc0u | 0x20000000u);
+    pState->mUnknown10 = (int)((uintptr_t)0x8e7e80u | 0x20000000u);
     pRegs->mUnknown02 = 0;
     pRegs->mUnknown04 = 0x210;
     pRegs->mUnknown06 = 0x45;
