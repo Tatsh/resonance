@@ -24,7 +24,7 @@ jobs:
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="$PS2SDK/ps2dev.cmake" \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Debug
       - name: 'Compile'
         run: |
           echo "::add-matcher::.github/problem-matchers/gcc.json"

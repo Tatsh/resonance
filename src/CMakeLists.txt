@@ -105,8 +105,12 @@ target_link_libraries(
           mtap
           cdvd
           z)
-add_custom_command(
-  TARGET ${CMAKE_PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_STRIP} --strip-all $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
-  COMMENT "Stripping the executable, as the shipped disc image is stripped")
+# The shipped disc image is stripped, so release builds strip the executable. Debug builds keep
+# their symbols.
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_STRIP} --strip-all $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+    COMMENT "Stripping the executable, as the shipped disc image is stripped")
+endif()

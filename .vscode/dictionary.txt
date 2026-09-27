@@ -965,6 +965,7 @@ stdmidimsg
 stopriffmsg
 strcmp
 streakovermsg
+strequal
 strerror
 strfile
 stringobject
