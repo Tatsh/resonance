@@ -43,7 +43,6 @@ endforeach()
 set(RESONANCE_SUBSYSTEMS
     app
     ezmidi
-    ezmpeg
     game
     gfx
     gs
@@ -74,6 +73,9 @@ set(RESONANCE_LIBRARIES resonance_main)
 foreach(SUBSYSTEM ${RESONANCE_SUBSYSTEMS})
   list(APPEND RESONANCE_LIBRARIES resonance_${SUBSYSTEM})
 endforeach()
+
+# The Sony sample archive lives under sce/ee rather than with the game subsystems.
+list(APPEND RESONANCE_LIBRARIES resonance_ezmpeg)
 
 add_custom_target(archives DEPENDS ${RESONANCE_LIBRARIES})
 
