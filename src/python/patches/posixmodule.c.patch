@@ -1,0 +1,270 @@
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -4139,9 +4139,11 @@ struct constdef {
+     long value;
+ };
+ 
++/* The image keeps the two messages below with no registered caller, so the helper is
++   retained even though the trimmed table references nothing that calls it. */
+ static int
+ conv_confname(PyObject *arg, int *valuep, struct constdef *table,
+-	      size_t tablesize)
++	      size_t tablesize) __attribute__((used))
+ {
+     if (PyInt_Check(arg)) {
+         *valuep = PyInt_AS_LONG(arg);
+@@ -5147,229 +5149,22 @@ win32_startfile(PyObject *self, PyObject *args)
+ }
+ #endif
+ 
++/* The port registers twelve methods with no doc strings, in the order of the name run in the
++   image. The remaining entries are upstream only; with no table entry referencing them, the
++   compiler discards their bodies along with the doc strings. */
+ static PyMethodDef posix_methods[] = {
+-	{"access",	posix_access, METH_VARARGS, posix_access__doc__},
+-#ifdef HAVE_TTYNAME
+-	{"ttyname",	posix_ttyname, METH_VARARGS, posix_ttyname__doc__},
+-#endif
+-	{"chdir",	posix_chdir, METH_VARARGS, posix_chdir__doc__},
+-	{"chmod",	posix_chmod, METH_VARARGS, posix_chmod__doc__},
+-#ifdef HAVE_CHOWN
+-	{"chown",	posix_chown, METH_VARARGS, posix_chown__doc__},
+-#endif /* HAVE_CHOWN */
+-#ifdef HAVE_CTERMID
+-	{"ctermid",	posix_ctermid, METH_VARARGS, posix_ctermid__doc__},
+-#endif
+-#ifdef HAVE_GETCWD
+-	{"getcwd",	posix_getcwd, METH_VARARGS, posix_getcwd__doc__},
+-#endif
+-#ifdef HAVE_LINK
+-	{"link",	posix_link, METH_VARARGS, posix_link__doc__},
+-#endif /* HAVE_LINK */
+-	{"listdir",	posix_listdir, METH_VARARGS, posix_listdir__doc__},
+-	{"lstat",	posix_lstat, METH_VARARGS, posix_lstat__doc__},
+-	{"mkdir",	posix_mkdir, METH_VARARGS, posix_mkdir__doc__},
+-#ifdef HAVE_NICE
+-	{"nice",	posix_nice, METH_VARARGS, posix_nice__doc__},
+-#endif /* HAVE_NICE */
+-#ifdef HAVE_READLINK
+-	{"readlink",	posix_readlink, METH_VARARGS, posix_readlink__doc__},
+-#endif /* HAVE_READLINK */
+-	{"rename",	posix_rename, METH_VARARGS, posix_rename__doc__},
+-	{"rmdir",	posix_rmdir, METH_VARARGS, posix_rmdir__doc__},
+-	{"stat",	posix_stat, METH_VARARGS, posix_stat__doc__},
+-#ifdef HAVE_SYMLINK
+-	{"symlink",	posix_symlink, METH_VARARGS, posix_symlink__doc__},
+-#endif /* HAVE_SYMLINK */
+-#ifdef HAVE_SYSTEM
+-	{"system",	posix_system, METH_VARARGS, posix_system__doc__},
+-#endif
+-	{"umask",	posix_umask, METH_VARARGS, posix_umask__doc__},
+-#ifdef HAVE_UNAME
+-	{"uname",	posix_uname, METH_VARARGS, posix_uname__doc__},
+-#endif /* HAVE_UNAME */
+-	{"unlink",	posix_unlink, METH_VARARGS, posix_unlink__doc__},
+-	{"remove",	posix_unlink, METH_VARARGS, posix_remove__doc__},
+-	{"utime",	posix_utime, METH_VARARGS, posix_utime__doc__},
+-#ifdef HAVE_TIMES
+-	{"times",	posix_times, METH_VARARGS, posix_times__doc__},
+-#endif /* HAVE_TIMES */
+-	{"_exit",	posix__exit, METH_VARARGS, posix__exit__doc__},
+-#ifdef HAVE_EXECV
+-	{"execv",	posix_execv, METH_VARARGS, posix_execv__doc__},
+-	{"execve",	posix_execve, METH_VARARGS, posix_execve__doc__},
+-#endif /* HAVE_EXECV */
+-#ifdef HAVE_SPAWNV
+-	{"spawnv",	posix_spawnv, METH_VARARGS, posix_spawnv__doc__},
+-	{"spawnve",	posix_spawnve, METH_VARARGS, posix_spawnve__doc__},
+-#endif /* HAVE_SPAWNV */
+-#ifdef HAVE_FORK
+-	{"fork",	posix_fork, METH_VARARGS, posix_fork__doc__},
+-#endif /* HAVE_FORK */
+-#if defined(HAVE_OPENPTY) || defined(HAVE__GETPTY)
+-	{"openpty",	posix_openpty, METH_VARARGS, posix_openpty__doc__},
+-#endif /* HAVE_OPENPTY || HAVE__GETPTY */
+-#ifdef HAVE_FORKPTY
+-	{"forkpty",	posix_forkpty, METH_VARARGS, posix_forkpty__doc__},
+-#endif /* HAVE_FORKPTY */
+-#ifdef HAVE_GETEGID
+-	{"getegid",	posix_getegid, METH_VARARGS, posix_getegid__doc__},
+-#endif /* HAVE_GETEGID */
+-#ifdef HAVE_GETEUID
+-	{"geteuid",	posix_geteuid, METH_VARARGS, posix_geteuid__doc__},
+-#endif /* HAVE_GETEUID */
+-#ifdef HAVE_GETGID
+-	{"getgid",	posix_getgid, METH_VARARGS, posix_getgid__doc__},
+-#endif /* HAVE_GETGID */
+-#ifdef HAVE_GETGROUPS
+-	{"getgroups",	posix_getgroups, METH_VARARGS, posix_getgroups__doc__},
+-#endif
+-	{"getpid",	posix_getpid, METH_VARARGS, posix_getpid__doc__},
+-#ifdef HAVE_GETPGRP
+-	{"getpgrp",	posix_getpgrp, METH_VARARGS, posix_getpgrp__doc__},
+-#endif /* HAVE_GETPGRP */
+-#ifdef HAVE_GETPPID
+-	{"getppid",	posix_getppid, METH_VARARGS, posix_getppid__doc__},
+-#endif /* HAVE_GETPPID */
+-#ifdef HAVE_GETUID
+-	{"getuid",	posix_getuid, METH_VARARGS, posix_getuid__doc__},
+-#endif /* HAVE_GETUID */
+-#ifdef HAVE_GETLOGIN
+-	{"getlogin",	posix_getlogin, METH_VARARGS, posix_getlogin__doc__},
+-#endif
+-#ifdef HAVE_KILL
+-	{"kill",	posix_kill, METH_VARARGS, posix_kill__doc__},
+-#endif /* HAVE_KILL */
+-#ifdef HAVE_PLOCK
+-	{"plock",	posix_plock, METH_VARARGS, posix_plock__doc__},
+-#endif /* HAVE_PLOCK */
+-#ifdef HAVE_POPEN
+-	{"popen",	posix_popen, METH_VARARGS, posix_popen__doc__},
+-#ifdef MS_WIN32
+-	{"popen2",	win32_popen2, METH_VARARGS},
+-	{"popen3",	win32_popen3, METH_VARARGS},
+-	{"popen4",	win32_popen4, METH_VARARGS},
+-	{"startfile",	win32_startfile, METH_VARARGS, win32_startfile__doc__},
+-#endif
+-#endif /* HAVE_POPEN */
+-#ifdef HAVE_SETUID
+-	{"setuid",	posix_setuid, METH_VARARGS, posix_setuid__doc__},
+-#endif /* HAVE_SETUID */
+-#ifdef HAVE_SETEUID
+-	{"seteuid",	posix_seteuid, METH_VARARGS, posix_seteuid__doc__},
+-#endif /* HAVE_SETEUID */
+-#ifdef HAVE_SETEGID
+-	{"setegid",	posix_setegid, METH_VARARGS, posix_setegid__doc__},
+-#endif /* HAVE_SETEGID */
+-#ifdef HAVE_SETREUID
+-	{"setreuid",	posix_setreuid, METH_VARARGS, posix_setreuid__doc__},
+-#endif /* HAVE_SETREUID */
+-#ifdef HAVE_SETREGID
+-	{"setregid",	posix_setregid,	METH_VARARGS, posix_setregid__doc__},
+-#endif /* HAVE_SETREGID */
+-#ifdef HAVE_SETGID
+-	{"setgid",	posix_setgid, METH_VARARGS, posix_setgid__doc__},
+-#endif /* HAVE_SETGID */
+-#ifdef HAVE_SETPGRP
+-	{"setpgrp",	posix_setpgrp, METH_VARARGS, posix_setpgrp__doc__},
+-#endif /* HAVE_SETPGRP */
+-#ifdef HAVE_WAIT
+-	{"wait",	posix_wait, METH_VARARGS, posix_wait__doc__},
+-#endif /* HAVE_WAIT */
+-#ifdef HAVE_WAITPID
+-	{"waitpid",	posix_waitpid, METH_VARARGS, posix_waitpid__doc__},
+-#endif /* HAVE_WAITPID */
+-#ifdef HAVE_SETSID
+-	{"setsid",	posix_setsid, METH_VARARGS, posix_setsid__doc__},
+-#endif /* HAVE_SETSID */
+-#ifdef HAVE_SETPGID
+-	{"setpgid",	posix_setpgid, METH_VARARGS, posix_setpgid__doc__},
+-#endif /* HAVE_SETPGID */
+-#ifdef HAVE_TCGETPGRP
+-	{"tcgetpgrp",	posix_tcgetpgrp, METH_VARARGS, posix_tcgetpgrp__doc__},
+-#endif /* HAVE_TCGETPGRP */
+-#ifdef HAVE_TCSETPGRP
+-	{"tcsetpgrp",	posix_tcsetpgrp, METH_VARARGS, posix_tcsetpgrp__doc__},
+-#endif /* HAVE_TCSETPGRP */
+-	{"open",	posix_open, METH_VARARGS, posix_open__doc__},
+-	{"close",	posix_close, METH_VARARGS, posix_close__doc__},
+-	{"dup",		posix_dup, METH_VARARGS, posix_dup__doc__},
+-	{"dup2",	posix_dup2, METH_VARARGS, posix_dup2__doc__},
+-	{"lseek",	posix_lseek, METH_VARARGS, posix_lseek__doc__},
+-	{"read",	posix_read, METH_VARARGS, posix_read__doc__},
+-	{"write",	posix_write, METH_VARARGS, posix_write__doc__},
+-	{"fstat",	posix_fstat, METH_VARARGS, posix_fstat__doc__},
+-	{"fdopen",	posix_fdopen, METH_VARARGS, posix_fdopen__doc__},
+-	{"isatty",	posix_isatty, METH_VARARGS, posix_isatty__doc__},
+-#ifdef HAVE_PIPE
+-	{"pipe",	posix_pipe, METH_VARARGS, posix_pipe__doc__},
+-#endif
+-#ifdef HAVE_MKFIFO
+-	{"mkfifo",	posix_mkfifo, METH_VARARGS, posix_mkfifo__doc__},
+-#endif
+-#ifdef HAVE_FTRUNCATE
+-	{"ftruncate",	posix_ftruncate, METH_VARARGS, posix_ftruncate__doc__},
+-#endif
+-#ifdef HAVE_PUTENV
+-	{"putenv",	posix_putenv, METH_VARARGS, posix_putenv__doc__},
+-#endif
+-#ifdef HAVE_STRERROR
+-	{"strerror",	posix_strerror, METH_VARARGS, posix_strerror__doc__},
+-#endif
+-#ifdef HAVE_FSYNC
+-	{"fsync",       posix_fsync, METH_VARARGS, posix_fsync__doc__},
+-#endif
+-#ifdef HAVE_FDATASYNC
+-	{"fdatasync",   posix_fdatasync,  METH_VARARGS, posix_fdatasync__doc__},
+-#endif
+-#ifdef HAVE_SYS_WAIT_H
+-#ifdef WIFSTOPPED
+-        {"WIFSTOPPED",	posix_WIFSTOPPED, METH_VARARGS, posix_WIFSTOPPED__doc__},
+-#endif /* WIFSTOPPED */
+-#ifdef WIFSIGNALED
+-        {"WIFSIGNALED",	posix_WIFSIGNALED, METH_VARARGS, posix_WIFSIGNALED__doc__},
+-#endif /* WIFSIGNALED */
+-#ifdef WIFEXITED
+-        {"WIFEXITED",	posix_WIFEXITED, METH_VARARGS, posix_WIFEXITED__doc__},
+-#endif /* WIFEXITED */
+-#ifdef WEXITSTATUS
+-        {"WEXITSTATUS",	posix_WEXITSTATUS, METH_VARARGS, posix_WEXITSTATUS__doc__},
+-#endif /* WEXITSTATUS */
+-#ifdef WTERMSIG
+-        {"WTERMSIG",	posix_WTERMSIG, METH_VARARGS, posix_WTERMSIG__doc__},
+-#endif /* WTERMSIG */
+-#ifdef WSTOPSIG
+-        {"WSTOPSIG",	posix_WSTOPSIG, METH_VARARGS, posix_WSTOPSIG__doc__},
+-#endif /* WSTOPSIG */
+-#endif /* HAVE_SYS_WAIT_H */
+-#ifdef HAVE_FSTATVFS
+-	{"fstatvfs",	posix_fstatvfs, METH_VARARGS, posix_fstatvfs__doc__},
+-#endif
+-#ifdef HAVE_STATVFS
+-	{"statvfs",	posix_statvfs, METH_VARARGS, posix_statvfs__doc__},
+-#endif
+-#ifdef HAVE_TMPNAM
+-	{"tmpfile",	posix_tmpfile, METH_VARARGS, posix_tmpfile__doc__},
+-#endif
+-#ifdef HAVE_TEMPNAM
+-	{"tempnam",	posix_tempnam, METH_VARARGS, posix_tempnam__doc__},
+-#endif
+-#ifdef HAVE_TMPNAM
+-	{"tmpnam",	posix_tmpnam, METH_VARARGS, posix_tmpnam__doc__},
+-#endif
+-#ifdef HAVE_CONFSTR
+-	{"confstr",	posix_confstr, METH_VARARGS, posix_confstr__doc__},
+-#endif
+-#ifdef HAVE_SYSCONF
+-	{"sysconf",	posix_sysconf, METH_VARARGS, posix_sysconf__doc__},
+-#endif
+-#ifdef HAVE_FPATHCONF
+-	{"fpathconf",	posix_fpathconf, METH_VARARGS, posix_fpathconf__doc__},
+-#endif
+-#ifdef HAVE_PATHCONF
+-	{"pathconf",	posix_pathconf, METH_VARARGS, posix_pathconf__doc__},
+-#endif
+-	{"abort",	posix_abort, METH_VARARGS, posix_abort__doc__},
++	{"listdir",	posix_listdir, METH_VARARGS, NULL},
++	{"lstat",	posix_lstat, METH_VARARGS, NULL},
++	{"stat",	posix_stat, METH_VARARGS, NULL},
++	{"getpid",	posix_getpid, METH_VARARGS, NULL},
++	{"open",	posix_open, METH_VARARGS, NULL},
++	{"close",	posix_close, METH_VARARGS, NULL},
++	{"lseek",	posix_lseek, METH_VARARGS, NULL},
++	{"read",	posix_read, METH_VARARGS, NULL},
++	{"write",	posix_write, METH_VARARGS, NULL},
++	{"fstat",	posix_fstat, METH_VARARGS, NULL},
++	{"isatty",	posix_isatty, METH_VARARGS, NULL},
++	{"abort",	posix_abort, METH_VARARGS, NULL},
+ 	{NULL,		NULL}		 /* Sentinel */
+ };
+ 
+@@ -5549,7 +5344,7 @@ INITFUNC(void)
+ 	
+ 	m = Py_InitModule4(MODNAME,
+ 			   posix_methods,
+-			   posix__doc__,
++			   (char *)NULL,
+ 			   (PyObject *)NULL,
+ 			   PYTHON_API_VERSION);
+ 	d = PyModule_GetDict(m);

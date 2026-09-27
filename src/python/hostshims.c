@@ -3,8 +3,7 @@
 // The complex accessors repeat upstream complexobject.c without moving a
 // Py_complex by value, which the console backend cannot reload. The type is
 // a minimal tag for the objects the patched constructors build; the scripts
-// never call into its slots. The terminal query always fails, because the
-// console has no controlling terminal for the descriptor to name.
+// never call into its slots.
 
 #include <Python.h>
 
@@ -28,8 +27,3 @@ PyTypeObject PyComplex_Type = {
     sizeof(PyComplexObject),
     0,
 };
-
-char *ttyname(int nDescriptor) {
-    (void)nDescriptor;
-    return NULL;
-}

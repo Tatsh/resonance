@@ -333,10 +333,17 @@ predicts: the directory and metadata calls needed to import a module, the descri
 no process control beyond `abort`. It also explains the third surviving literal, because `abort` is
 a real method here.
 
-The `abort` method accounts for one of the three surviving literals. The other two, `unrecognized
-configuration name` and `configuration names must be strings or integers`, remain unexplained:
-`confstr`, `sysconf`, `fpathconf`, and `pathconf` are all absent from the method table, so the
-messages survive without a caller that can produce them.
+The trim is a table, not deletions. [patches/posixmodule.c.patch](patches/posixmodule.c.patch)
+reduces `posix_methods[]` to those twelve entries, in the order of the run, with null doc
+pointers: twelve long doc strings would each clear the fourteen-character bar, so the image's
+three surviving literals prove the entries carry none. The module doc goes null for the same
+reason. With no entry referencing them, the compiler discards the other eighty-two bodies with
+their doc strings, which is what removes their literals. The two configuration messages survive
+because their shared helper is retained with `used` even though the trimmed table references
+nothing that calls it; the image keeps those literals with no registered caller, so the helper
+stays.
+`confstr`, `sysconf`, `fpathconf`, and `pathconf` are all absent from the method table, and their
+bodies go with the other discards; only the shared helper's two messages remain.
 
 ## Vendored PyCXX
 
