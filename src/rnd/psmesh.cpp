@@ -799,6 +799,7 @@ Mesh *NewPsMesh(const HxStr &name) {
 }
 
 DrawVert g_aDrawVerts[kDrawVertCapacity + 16];
-RenderStats g_renderStats;
 
 } // namespace Rnd
+
+RenderStats g_renderStats;
