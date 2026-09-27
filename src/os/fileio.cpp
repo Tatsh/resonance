@@ -5,10 +5,42 @@
 #include <cstring>
 
 #include "os/log.h"
+#include "os/spinlock.h"
 
 // Declaration matches compat/libmc.h. The header is not included here
 // because the syntax check lacks a compatible memory card header.
 extern "C" int sceMcInitLibrary(void);
+
+// Client record table at 0x8E39C0 in the image, thirty-two sixteen-byte records. Declared here
+// because the file service entry points below use it before its neighbours.
+typedef struct {
+    int mUnknown00; // +0x00
+    int mUnknown04; // +0x04
+    int mUnknown08; // +0x08
+    int mUnknown0C; // +0x0c
+} FsClientRecord;
+
+static FsClientRecord *FsClientTable(void) {
+    return (FsClientRecord *)(uintptr_t)0x8e39c0U;
+}
+
+// Forward declarations for kernel and libkernel helpers used before their definitions below.
+extern "C" int LibkWaitSema(int nSema);
+extern "C" int LibkSignalSema(int nSema);
+extern "C" void sceSifInitRpc(int nMode);
+extern "C" int sceSifAddCmdHandler(int nCommand, void *pPacket, void *pBuffer);
+extern "C" int sceSifBindRpc(void *pClient, int nRpcId, int nMode);
+extern "C" int sceSifCallRpcInternal(void *pClient,
+                                     int nFunction,
+                                     int nMode,
+                                     void *pSend,
+                                     int nSendSize,
+                                     void *pReceive,
+                                     int nReceiveSize,
+                                     void *pExtra,
+                                     int nReserved);
+extern "C" int sceDeci2Sub0061D868(void *pPacket, int nChar);
+extern "C" int sceDeci2Sub0061D898(void *pPacket);
 
 // The console initialised flag at 0x76F014 in the image.
 static int *ConsoleInitialisedFlag(void) {
@@ -455,18 +487,6 @@ extern "C" void sceFileioRpcRoutine0056AA08(void) {
         return;
     }
     *(volatile int *)(uintptr_t)0x762c0c = LibkCreateSema(&packet);
-}
-
-// Client record table at 0x8E39C0 in the image, thirty-two sixteen-byte records.
-typedef struct {
-    int mUnknown00; // +0x00
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0C; // +0x0c
-} FsClientRecord;
-
-static FsClientRecord *FsClientTable(void) {
-    return (FsClientRecord *)(uintptr_t)0x8e39c0U;
 }
 
 // Console output queue at 0x8E7D40 in the image.
@@ -1015,8 +1035,8 @@ extern "C" int sceDeci2Sub00627C38(const void *pBuffer) {
     pState->mUnknown0C = 0;
     pState->mUnknown04 = 0;
     pState->mUnknown08 = 0;
-    pState->mUnknown14 = (void *)(uintptr_t)0x8e7fc0u | 0x20000000u;
-    pState->mUnknown10 = (void *)(uintptr_t)0x8e7e80u | 0x20000000u;
+    pState->mUnknown14 = (void *)((uintptr_t)0x8e7fc0u | 0x20000000u);
+    pState->mUnknown10 = (void *)((uintptr_t)0x8e7e80u | 0x20000000u);
     pRegs->mUnknown02 = 0;
     pRegs->mUnknown04 = 0x210;
     pRegs->mUnknown06 = 0x45;
@@ -1135,128 +1155,6 @@ extern "C" int sceFileioRpcRoutine0056B340(int nFile, void *pBuffer, int nSize) 
     return 0;
 }
 
-// Sema packet built on the stack for creation.
-typedef struct {
-    int mUnknown00; // +0x00
-    int mUnknown04; // +0x04: set to one.
-    int mUnknown08; // +0x08: set to one.
-    int mUnknown0C; // +0x0c
-    int mUnknown10; // +0x10
-    int mUnknown14; // +0x14: cleared.
-} FsSemaPacket;
-
-// 0x0056A4F0
-extern "C" void sceFileioRpcRoutine0056a4f0(void) {
-    FsSemaPacket packet = {0, 1, 1, 0, 0, 0};
-
-    if (*(volatile int *)(uintptr_t)0x762c10 != -1) {
-        return;
-    }
-    *(volatile int *)(uintptr_t)0x762c10 = LibkCreateSema(&packet);
-    *(volatile int *)(uintptr_t)0x762c14 = LibkCreateSema(&packet);
-}
-
-// 0x0056AA08
-extern "C" void sceFileioRpcRoutine0056aa08(void) {
-    FsSemaPacket packet = {0, 1, 1, 0, 0, 0};
-
-    if (*(volatile int *)(uintptr_t)0x762c0c != -1) {
-        return;
-    }
-    *(volatile int *)(uintptr_t)0x762c0c = LibkCreateSema(&packet);
-}
-
-// Pool of 0x40-byte blocks the memory card RPC layer allocates from.
-typedef struct {
-    int mUnknown00;   // +0x00: allocation count.
-    void *mUnknown04; // +0x04: first block.
-    int mUnknown08;   // +0x08: block limit.
-} McSifPool;
-
-// One pooled block with status words.
-typedef struct {
-    unsigned char mReserved00[0x10]; // +0x00
-    int mUnknown10;                  // +0x10: busy flag bit.
-    void *mUnknown14;                // +0x14: self pointer.
-    int mUnknown18;                  // +0x18
-    unsigned char mReserved1C[0x24]; // +0x1c
-} McSifBlock;
-
-// 0x00564C50
-extern "C" void *sceMcSifRpcRoutine00564C50(void *pPool) {
-    McSifPool *pool = (McSifPool *)pPool;
-    McSifBlock *block;
-    int v1 = 0;
-
-    SpinDisableInterrupts();
-    if (pool->mUnknown08 <= 0) {
-        ReenableInterrupts();
-        return NULL;
-    }
-    block = (McSifBlock *)pool->mUnknown04;
-    for (;;) {
-        if ((block->mUnknown10 & 1) == 0) {
-            int count = pool->mUnknown00;
-            block->mUnknown10 = (v1 << 16) | 5;
-            v1 = count + 1;
-            pool->mUnknown00 = v1;
-            if (v1 == 1) {
-                pool->mUnknown00 = count + 2;
-                v1 = 1;
-            }
-            block->mUnknown14 = block;
-            block->mUnknown18 = v1;
-            ReenableInterrupts();
-            return block;
-        }
-        v1++;
-        block = (McSifBlock *)((uintptr_t)block + 0x40u);
-        if (v1 >= 1) {
-            ReenableInterrupts();
-            return NULL;
-        }
-    }
-}
-
-// 0x00564CF8
-extern "C" void sceMcSifRpcRoutine00564CF8(void *pPacket) {
-    McSifBlock *block = (McSifBlock *)pPacket;
-
-    block->mUnknown18 = 0;
-    block->mUnknown10 &= 0xfffffffeu;
-}
-
-// 0x005663E8
-extern "C" int sceMcSync(int nMode, int *pnCmd, int *pnResult) {
-    int nStat;
-    int bReady;
-
-    if (*(volatile int *)(uintptr_t)0x761730 == 0) {
-        return -1;
-    }
-    nStat = sceSifCheckStatRpc((void *)(uintptr_t)0x8e0180);
-    if (nMode == 0 && nStat != 0) {
-        do {
-            sceMcSifRpcRoutine005663A0(0x3c);
-            nStat = sceSifCheckStatRpc((void *)(uintptr_t)0x8e0180);
-        } while (nStat != 0);
-        nStat = 0;
-    }
-    bReady = (nStat < 1);
-    if (pnCmd != NULL) {
-        *pnCmd = *(volatile int *)(uintptr_t)0x761730;
-    }
-    if (bReady == 0) {
-        return 0;
-    }
-    *(volatile int *)(uintptr_t)0x761730 = 0;
-    if (pnResult != NULL) {
-        *pnResult = *(volatile int *)(uintptr_t)0x8e1740;
-    }
-    LibkSignalSema(*(volatile int *)(uintptr_t)0x761734);
-    return bReady;
-}
-
 // 0x00627B68
 extern "C" int sceDeci2Sub00627B68(void *pBuffer, int nLength) {
     DeciOutState *pState = (DeciOutState *)(uintptr_t)0x8e7e50;
@@ -1275,7 +1173,7 @@ extern "C" int sceDeci2Sub00627B68(void *pBuffer, int nLength) {
         pQueue = *(DeciQueue **)(uintptr_t)0x8e7e68;
         while (pQueue->mUnknown04 == 0) {
         }
-        pEntry = pState->mUnknown18;
+        pEntry = (DeciQueue *)pState->mUnknown18;
         pEntry = *(DeciQueue **)pEntry;
         nByte = *(unsigned char *)pEntry->mUnknown08;
         *pDest = (unsigned char)nByte;
