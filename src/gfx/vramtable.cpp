@@ -895,3 +895,19 @@ void VramPalEntry::FreeSelf() {
     mpNext = g_pVramPalFree;
     g_pVramPalFree = this;
 }
+
+VramTable g_vramTable;
+VramTableEntry g_vramEntries[kVramTableEntries];
+VramPalEntry g_vramPalEntries[kVramPalEntries];
+VramTableEntry *g_apVramLocked[kVramLockGenerations][kVramLockedPerGeneration];
+VramPalEntry *g_apVramPalLocked[kVramLockGenerations][kVramLockedPerGeneration];
+VramPalEntry *g_pVramPalFree;
+VramPalEntry *g_pVramPalUsed;
+int g_anVramLockCount[kVramLockGenerations];
+int g_anVramPalLockCount[kVramLockGenerations];
+unsigned g_adVramPalSlots[kVramPalSlotWords];
+sceGsLoadImage g_vramPalLoadImage;
+sceGsLoadImage g_vramUploadLoadImage;
+sceGsLoadImage g_vramUploadSubLoadImage;
+int g_nVramLoadsLastFrame;
+int g_nVramLoadBlocksLastFrame;

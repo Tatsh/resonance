@@ -626,6 +626,7 @@ msgjoiner
 msgqueue
 msgsink
 msgsource
+msgtypes
 msifrpc
 msin
 msnm

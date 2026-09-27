@@ -75,3 +75,29 @@ void GetConnectStateMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);
 }
+
+const int g_anMemcardSlotPortSlot[kMemcardSlotCount] = {
+    0,
+    0x100,
+    0,
+    1,
+    2,
+    3,
+    0x100,
+    0x101,
+    0x102,
+    0x103,
+};
+
+const char *const g_apszMemcardSlotNames[kMemcardSlotCount] = {
+    "1",
+    "2",
+    "1-A",
+    "1-B",
+    "1-C",
+    "1-D",
+    "2-A",
+    "2-B",
+    "2-C",
+    "2-D",
+};

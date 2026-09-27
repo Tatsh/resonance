@@ -26,3 +26,5 @@ void GamerCmd::Execute() {
 void GamerCmd::Print(std::ostream &stream) {
     stream << kDescription;
 }
+
+int g_nGamerCmdID;

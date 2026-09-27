@@ -715,3 +715,6 @@ int CloseArk() {
     }
     return nClosed == 0;
 }
+
+std::vector<ArkFile *> g_apMountedArks;
+std::vector<ArkStream> g_aArkStreams;

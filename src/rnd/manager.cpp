@@ -536,4 +536,6 @@ void Manager::DeleteLoadedObjects() {
     }
 }
 
+Manager g_manager;
+
 } // namespace Rnd

@@ -27,6 +27,15 @@
 class NullPlayer : public Player {
 public:
     /**
+     * Build the stand-in.
+     *
+     * The image has no out-of-line constructor. Its static initialiser writes the tables and
+     * members directly, which this constructor performs through the base with an unregistered
+     * identifier, no colour, and no appearance.
+     */
+    NullPlayer();
+
+    /**
      * Report that this player is a stand-in.
      *
      * Returns 1 where the base returns 0, which is the whole of what makes this the null member of

@@ -412,3 +412,7 @@ std::ostream &operator<<(std::ostream &stream, const HxStr &text) {
     stream << text.mStr;
     return stream;
 }
+
+const char *g_szEmptyString = "";
+
+const unsigned g_nHxStrNoPosition = 0xffffffffu;

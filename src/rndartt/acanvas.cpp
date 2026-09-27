@@ -1884,3 +1884,7 @@ void ACanvas::StretchBlitBlendRle8(const ABitmap &source,
         nRow = nNextRow;
     }
 }
+
+// One row of unpacked pixels. The bound is the address-space limit the header records, not a
+// recovered size: the nearest referenced address sits just above 0x400 bytes past the buffer.
+unsigned char g_abCanvasRowScratch[0x400];

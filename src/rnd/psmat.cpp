@@ -192,6 +192,8 @@ Mat *NewPsMat(const HxStr &name) {
     return new PsMat(name);
 }
 
+Mat *(*g_pfnNewMat)(const HxStr &name) = nullptr;
+
 // 0x0058eb40
 int PsMat::Select() {
     if (this == g_pSelectedMat && mStages.size() < 2) {

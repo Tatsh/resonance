@@ -542,4 +542,6 @@ void Cam::SetFrustum(float flNear, float flFar, float flFov) {
     UpdateProjection();
 }
 
+HxStr g_camClassName("Cam");
+
 } // namespace Rnd

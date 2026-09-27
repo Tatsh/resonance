@@ -62,6 +62,7 @@ set(RESONANCE_MSG_SRCS
     metstartnetlaunchmsg.cpp
     metstartpausemsg.cpp
     metunlockstagesmsg.cpp
+    msgtypes.cpp
     multimusemsg.cpp
     multipliermsg.cpp
     multiplierstatemsg.cpp

@@ -321,3 +321,18 @@ void ZoneDump() {
                   pZone->mStart + pZone->mSize);
     }
 }
+
+Zone g_adZones[kZoneCount];
+
+ZoneConfig g_aZoneConfigs[] = {
+    {"seccache", 512},
+    {"rndfile", 660},
+    {"rndglobal", 1290},
+    {"rndCommon", 1350},
+    {"rndTnlLevel", 450},
+    {"rndTnlArena", 490},
+    {"movieStreamBuff", 1024},
+    {"python", 2400},
+    {"temp", 128},
+    {nullptr, 0},
+};
