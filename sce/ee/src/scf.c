@@ -1,6 +1,7 @@
 #include <eekernel.h>
 #include <libcdvd.h>
 #include <libscf.h>
+#include <stdint.h>
 
 #include "os/assert.h"
 #include "os/log.h"
@@ -31,6 +32,10 @@ enum {
     // The daylight flag starts after this many bits in the detail byte.
     kDaylightShift = 4,
 };
+
+// Helpers defined below for the minute offset path.
+int sceScfReadRomVersion(void);
+void sceScfSub005f3190(sceCdCLOCK *pClock);
 
 // Month lengths for the day arithmetic below, read from the image.
 static const unsigned char kMonthLengths[12] = {
@@ -153,6 +158,19 @@ void sceScfSub005f3388(sceCdCLOCK *pClock) {
     }
     pClock->month = 0xc;
     pClock->day = monthLengths[11];
+}
+
+// 0x005f3190
+void sceScfSub005f3190(sceCdCLOCK *pClock) {
+    if (pClock == NULL) {
+        HxAssertFailed("libscf.c", 0x132, "prtc != NULL");
+    }
+    pClock->year = (unsigned char)sceScfCheckBcdByte(pClock->year);
+    pClock->month = (unsigned char)sceScfCheckBcdByte(pClock->month);
+    pClock->day = (unsigned char)sceScfCheckBcdByte(pClock->day);
+    pClock->hour = (unsigned char)sceScfCheckBcdByte(pClock->hour);
+    pClock->minute = (unsigned char)sceScfCheckBcdByte(pClock->minute);
+    pClock->second = (unsigned char)sceScfCheckBcdByte(pClock->second);
 }
 
 // 0x005f3218

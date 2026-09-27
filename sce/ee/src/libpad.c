@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <os/spinlock.h>
+
 #include "os/log.h"
 
 // Declarations match compat/libpad.h. The header is not included here
@@ -90,6 +92,11 @@ typedef struct {
 // SIF DMA primitives the pad paths share, provided by the toolchain kernel.
 extern int sceSifDmaStat(int nTransfer);
 extern int sceSifSetDma(void *pTransfer, int nCount);
+extern void sceSifWriteBackDCache(void *pAddress, int nSize);
+
+// Cache range sync helper, defined below.
+void LibkSyncDCacheRange(void *pStart, void *pEnd);
+void scePadSub00620730(void *pStart, void *pEnd);
 
 // 0x0059c608
 void *scePadGetDmaStr(int nPort, int nSlot) {
