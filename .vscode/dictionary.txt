@@ -367,6 +367,7 @@ ibstream
 idablebase
 ifdef
 ifndef
+imag
 immediates
 imsifrpc
 ingame
@@ -378,6 +379,7 @@ inputcheatdetectorgs
 inputcheatdetectormet
 inputmap
 inputpollerps
+insn
 insns
 intobject
 intr

@@ -445,7 +445,19 @@ r_object(RFILE *p)
 			PyFPE_START_PROTECT("atof", return 0)
 			c.imag = atof(buf);
 			PyFPE_END_PROTECT(c)
-			return PyComplex_FromCComplex(c);
+			/* The console backend cannot reload a complex value
+			   passed by value, so the object is filled in place. */
+			{
+				PyComplexObject *op;
+				op = (PyComplexObject *)PyObject_MALLOC(
+					sizeof(PyComplexObject));
+				if (op == NULL)
+					return PyErr_NoMemory();
+				PyObject_INIT(op, &PyComplex_Type);
+				op->cval.real = c.real;
+				op->cval.imag = c.imag;
+				return (PyObject *)op;
+			}
 		}
 #endif
 	

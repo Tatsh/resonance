@@ -531,12 +531,16 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 	case 'D': /* complex double */
 		{
 			Py_complex *p = va_arg(*p_va, Py_complex *);
-			Py_complex cval;
-			cval = PyComplex_AsCComplex(arg);
+			double real = PyComplex_RealAsDouble(arg);
+			double imag = PyComplex_ImagAsDouble(arg);
+			/* The console backend cannot reload a complex value
+			   passed by value, so the parts move one by one. */
 			if (PyErr_Occurred())
 				return "complex<D>";
-			else
-				*p = cval;
+			else {
+				p->real = real;
+				p->imag = imag;
+			}
 			break;
 		}
 #endif /* WITHOUT_COMPLEX */

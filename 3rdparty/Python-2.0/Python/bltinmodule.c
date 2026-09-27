@@ -535,7 +535,18 @@ complex_from_string(PyObject *v)
 		return NULL;
 	}
 
-	return PyComplex_FromDoubles(x,y);
+	/* The console backend cannot reload a complex value passed by
+	   value, so the object is filled in place. */
+	{
+		PyComplexObject *op;
+		op = (PyComplexObject *)PyObject_MALLOC(sizeof(PyComplexObject));
+		if (op == NULL)
+			return PyErr_NoMemory();
+		PyObject_INIT(op, &PyComplex_Type);
+		op->cval.real = x;
+		op->cval.imag = y;
+		return (PyObject *)op;
+	}
 }
 
 static PyObject *
@@ -617,7 +628,18 @@ builtin_complex(PyObject *self, PyObject *args)
 	}
 	cr.real -= ci.imag;
 	cr.imag += ci.real;
-	return PyComplex_FromCComplex(cr);
+	/* The console backend cannot reload a complex value passed by
+	   value, so the object is filled in place. */
+	{
+		PyComplexObject *op;
+		op = (PyComplexObject *)PyObject_MALLOC(sizeof(PyComplexObject));
+		if (op == NULL)
+			return PyErr_NoMemory();
+		PyObject_INIT(op, &PyComplex_Type);
+		op->cval.real = cr.real;
+		op->cval.imag = cr.imag;
+		return (PyObject *)op;
+	}
 }
 
 static char complex_doc[] =

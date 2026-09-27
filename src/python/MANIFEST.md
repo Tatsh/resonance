@@ -144,8 +144,9 @@ The build defines `_GNU_SOURCE` with the hosted feature macros (`HAVE_UNISTD_H`,
 console widths, because the toolchain headers provide the matching declarations. A forced include
 of `PC/pycompat.h` supplies the C library headers, the `PYTHONPATH` default, and the socket
 constants and name service declarations upstream expects from its own configuration, all without
-editing a vendored file. Four units build without optimisation where the
-optimiser fails on this toolchain.
+editing a vendored file. Four units build small with explicit relocations and allocator settings
+that steer reload away from its failure, and carry the complex patch below, because the failure
+is a backend reload fault on by-value complex transfers rather than optimisation pressure.
 None of this changes which upstream blocks compile in.
 
 ### The trim is configuration, not code
@@ -190,13 +191,22 @@ tested exactly. The rest sit under autoconf feature macros the console does not 
 `HAVE_EXECV`, `HAVE_POPEN`, `HAVE_TMPNAM`, `USE_TMPNAM_R`, `HAVE_FPATHCONF`, `HAVE_PATHCONF`,
 `HAVE_STRERROR`, and `PYOS_OS2`.
 
-### The one patch
+### The patches
 
 [patches/import.c.patch](patches/import.c.patch) removes a single line, the
 `write_compiled_module` call in `load_source_module`. The function is static and that was its only
 call site, so the compiler then discards it along with its two verbose messages, which is exactly
 what the image shows. The port cannot write a compiled module next to a source file on read-only
 media, and this is the smallest edit that produces that.
+
+[patches/complex-by-value.patch](patches/complex-by-value.patch) is a build patch, not a
+recovered port edit: the console backend reports `maximum number of generated reload insns per
+insn achieved (90)` in exactly the four routines that move a `Py_complex` by value, at every
+optimisation level including `-O0`, while single doubles pass and return cleanly in the surrounding
+files. Each site fills the object in place through field stores instead, which keeps the exact
+upstream behaviour: the manual construction repeats `PyComplex_FromCComplex`, and the argument
+parser's `PyComplex_RealAsDouble` plus `PyComplex_ImagAsDouble` pair takes the same branches and
+calls as `PyComplex_AsCComplex`. No literal changes, so the counts above are unaffected.
 
 No other file gets a patch. `ceval.c` needs none. `posixmodule.c` needs none, because its trim is
 configuration. `pythonrun.c` has one unexplained literal and inventing a patch shape around it
