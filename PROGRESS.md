@@ -48,12 +48,12 @@ exceptions, and one is a measurement gap. The canvas factory
 `0x00558dd8` it calls, found in code the disassembler had not defined, both have bodies in the
 tree since the script-layer push.
 
-Of the 448 remaining routines, 333 are compiler-generated: the deleting-destructor
+Of the 447 remaining routines, 333 are compiler-generated: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
-declares, and the static and global initialisation and exit glue. Four more come from
+declares, and the static and global initialisation and exit glue. Five more come from
 the toolchain's standard library, and one is the exit callback for the shared
-instance. The completion table below omits the 338 excluded routines and tracks
-the other 110.
+instance. The completion table below omits the 339 excluded routines and tracks
+the other 108.
 
 ### Remaining routines
 
@@ -65,7 +65,7 @@ references with aligned byte-level call and address matches, covering code and d
 Compiler-generated routines are excluded from this table: the deleting-destructor
 wrappers, the implicit destructors, constructors, and copy constructors the tree never
 declares, and the static and global initialisation and exit glue. The table also omits
-the four standard library destructors. The toolchain provides them.
+the four standard library destructors and the C library toupper. The toolchain provides them.
 
 | Done | Address      | Length | # xrefs | Name                                         | Preliminary signature                                                                        |
 | ---- | ------------ | ------ | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -135,7 +135,6 @@ the four standard library destructors. The toolchain provides them.
 | ❌   | `0x0058de70` | 703    | 2       | `strFileOpen`                                | `undefined strFileOpen(void)`                                                                |
 | ❌   | `0x0058e130` | 79     | 2       | `strFileClose`                               | `undefined strFileClose(void)`                                                               |
 | ❌   | `0x0058e180` | 59     | 2       | `strFileRead`                                | `undefined strFileRead(void)`                                                                |
-| ❌   | `0x0059a908` | 223    | 1       | `CheckPalEqual`                              | `bool CheckPalEqual(APalette * pPalMip0, APalette * pPalMip, char * pszName, int nMip)`      |
 | ❌   | `0x0059afa0` | 291    | 2       | `videoCallback`                              | `undefined videoCallback(void)`                                                              |
 | ❌   | `0x0059b0c8` | 211    | 2       | `pcmCallback`                                | `undefined pcmCallback(void)`                                                                |
 | ❌   | `0x005cb2b8` | 23     | 2       | `readBufCreate`                              | `undefined readBufCreate(void)`                                                              |
@@ -164,7 +163,6 @@ the four standard library destructors. The toolchain provides them.
 | ❌   | `0x005e4558` | 23     | 44      | `ReenableInterrupts`                         | `bool ReenableInterrupts(void)`                                                              |
 | ❌   | `0x005e4600` | 147    | 3       | `MSInPutBytes`                               | `int MSInPutBytes(sceCslCtx * pCtx, uint nPort, uchar * pBytes, int nCount)`                 |
 | ❌   | `0x005e84e0` | 115    | 4       | `_sceVu0ecossin`                             | `undefined _sceVu0ecossin(void)`                                                             |
-| ❌   | `0x005f1f90` | 31     | 1       | `toupper`                                    | `int toupper(int c)`                                                                         |
 | ❌   | `0x005fa8c0` | 55     | 3       | `PutSioByte`                                 | `undefined PutSioByte(void)`                                                                 |
 | ❌   | `0x005fa8f8` | 175    | 1       | `PutSioLineBufferedChar`                     | `undefined PutSioLineBufferedChar(void)`                                                     |
 | ❌   | `0x005fa9a8` | 51     | 18      | `PutSioCharCrlf`                             | `undefined PutSioCharCrlf(void)`                                                             |
@@ -218,15 +216,15 @@ These routines count as remaining although the tree handles them by rule:
 - An inline member defined in a header with its `// 0x...` marker (for example
   `Cam::ProjectToUnit`), and a function template instance whose body is the template in a header.
   The body count reads `src` only.
-- A definition whose return type clang-format places on a separate line (`CheckPalEqual`,
-  `MetJukeboxEditPlaylistScreenLowerLeft::New`). A marker counts only when the next line with code
+- A definition whose return type clang-format places on a separate line
+  (`MetJukeboxEditPlaylistScreenLowerLeft::New`). A marker counts only when the next line with code
   identifies the function.
 - Static initialiser stubs (`__StaticCtor`, `__StaticDtor`, `__GlobalCtors`) and the exit handlers
   of function-local statics (`AtExitDestroy…`, `__StaticDestroy`).
 - The `hx.*` script bindings (the `HxScript__X` bodies and their `HxScript__XEntry` wrappers) and the
   PyCXX wrappers. The interpreter and its C++ binding are not yet in the tree.
 - Library routines labelled with their upstream names rather than a family prefix (`getenv`,
-  `_findenv_r`, `toupper`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and
+  `_findenv_r`, the SIO printf engine, `_sceVu0ecossin`, the `libio` stream slots, and
   the `type_info` and `exception` members).
 - Recorded exceptions without a separate body: the `TunnelEvent::DrawFiltered` copy, three
   unreferenced return-zero stubs, the unreferenced send copies in the `Delayer`,
