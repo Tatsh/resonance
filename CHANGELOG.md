@@ -21,6 +21,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - GIF waits in `sceGsPutDrawEnv` and `sceGsExecLoadImage` allow 0x1000000 polls instead of 256.
   - `sceGsExecStoreImage` recovers from a transfer timeout as the original does.
   - Error messages, including the `sceGsSyncPath` message, match the original.
+  - `sceGsSetDefClear` sets the second clear address.
 - The `libdev` console heap allocator uses the original masks.
 - `libvifpk` packet alignment no longer shifts by 32 bits when the boundary mask is empty.
 - `sceFsReset` drops the file-service binding after the IOP reboot. The next file call binds the

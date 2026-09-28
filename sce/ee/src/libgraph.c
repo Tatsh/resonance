@@ -183,7 +183,7 @@ static void WriteDisplayEnv(const sceGsDispEnv *pDisp) {
 }
 
 // 0x006002d0
-// Resets the VIF1, VU1, and GIF path, then primes VIF1 through its fifo.
+// Resets the VIF1, VU1, and GIF path, then primes VIF1 through its FIFO.
 void sceGsResetPath(void) {
     unsigned int clip = 0U;
 
@@ -201,7 +201,7 @@ void sceGsResetPath(void) {
 
 // 0x00600338
 // Resets the graphics state. Mode one clears the vertical blank flag, mode
-// five replays the video setup while keeping the blank handler, mode zero
+// five replays the video setup while retaining the blank handler, mode zero
 // additionally removes that handler, and other modes return quietly.
 void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFieldMode) {
     GsState *state;
@@ -452,6 +452,7 @@ int sceGsSetDefClear(sceGsClear *pClear,
     pClear->xyz2a = first;
     pClear->xyz2aaddr = 5ULL;
     pClear->xyz2b = second;
+    pClear->xyz2baddr = 5ULL;
     pClear->testaaddr = 0x47ULL;
     pClear->testa = 0x30000ULL;
     pClear->primaddr = 0ULL;
@@ -467,7 +468,7 @@ int sceGsSetDefClear(sceGsClear *pClear,
 }
 
 // 0x005e4b30
-// Fills both display, draw, and clear halves plus the two display tags. The
+// Fills the display, draw, and clear halves plus the two display tags. The
 // clear halves stay empty unless requested, and interlaced modes patch the
 // first half frame addresses for the odd field.
 int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
@@ -594,8 +595,7 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
         printf("sceGsSetDefLoadImage: too big size\r\n");
         return 0;
     }
-    // The hardware clears both tag slots before the masked words go in, so
-    // the stale free bits never survive.
+    // The hardware clears both tag slots before the masked words go in.
     pLoadImage->mWords[10] = 0ULL;
     pLoadImage->mWords[11] = 0ULL;
     pLoadImage->mWords[0] = 0ULL;
@@ -683,7 +683,7 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
     unsigned long long size;
 
     // The hardware clears the first register pair before merging the masked
-    // words in, so only the freshly set bits survive.
+    // words in.
     words[2] = 0ULL;
     words[3] = 0ULL;
     words[2] = 0x8005ULL;
