@@ -51,7 +51,7 @@ inline void PrintLoadingDot() {
 
 // 0x001ef620
 void ShowLoadingScreen() {
-    TraceHere();
+    TRACE_HERE
     RndAsyncLoader loader(HxStr("loading/"), HxStr("loading.rnd"), -1);
     loader.Enqueue();
 
@@ -67,22 +67,22 @@ void ShowLoadingScreen() {
     g_gfxDevice.BeginFrame();
     pView->Draw();
     g_gfxDevice.PresentFrame(1);
-    TraceHere();
+    TRACE_HERE
 }
 
 } // namespace
 
 // 0x001ef870
 int main() {
-    TraceHere();
+    TRACE_HERE
     LogPrintf("\n\n**********************\n");
     LogPrintf("FREQ session beginning\n");
     LogPrintf("**********************\n");
 
     SetZonesEnabled(1);
-    TraceHere();
+    TRACE_HERE
     InitIop();
-    TraceHere();
+    TRACE_HERE
     InitAsync();
 
     g_failSink.SetReportHandler(RecordFailMessage);

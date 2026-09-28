@@ -22,9 +22,9 @@ void LogPrintf(const char *pszFormat, ...);
 // Trace markers for patch builds. The macro reports the file and line through the debug
 // console, and vanishes when patches are disabled.
 #ifdef ENABLE_PATCHES
-#define TraceHere() LogPrintf("Got to here %s:%d\n", __FILE__, __LINE__)
+#define TRACE_HERE LogPrintf("Got to here %s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
 #else
-#define TraceHere() ((void)0)
+#define TRACE_HERE ((void)0);
 #endif
 
 #ifdef __cplusplus
