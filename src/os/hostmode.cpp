@@ -9,41 +9,42 @@
 
 namespace {
 
-// The boot options are nine consecutive words from 0x0070fbf10, each with an accessor of the same
+// The boot options are nine consecutive words from 0x0070bf10, each with an accessor of the same
 // three-instruction shape, followed by the version string. Both writers of the block are in this
 // translation unit, ConfigureRetailBoot() and ForceCdOnlyBoot().
 
 // The value of the file-service open flag that opens for reading only.
 constexpr int kOpenReadOnly = 1;
 
-// 0x0070fbf10
+// 0x0070bf10
 int g_nHostMode = 0;
 
-// 0x0070fbf14
+// 0x0070bf14
 int g_nUsingArkFiles = 0;
 
-// 0x0070fbf18
-int g_nWarningsEnabled = 0;
+// 0x0070bf18
+int g_nWarningsEnabled = 1;
 
-// 0x0070fbf1c
-int g_nScreenMessagesEnabled = 0;
+// No routine writes this word. ConfigureRetailBoot() omits it from the block.
+// 0x0070bf1c
+int g_nScreenMessagesEnabled = 1;
 
-// 0x0070fbf20
+// 0x0070bf20
 int g_nUsingCdMedia = 0;
 
-// 0x0070fbf24
+// 0x0070bf24
 int g_nDebugKeysEnabled = 0;
 
-// 0x0070fbf28
+// 0x0070bf28
 int g_nMidiErrorLogEnabled = 0;
 
-// 0x0070fbf2c
+// 0x0070bf2c
 int g_nMemAccountingEnabled = 0;
 
-// 0x0070fbf30
-int g_nIntroMovieEnabled = 0;
+// 0x0070bf30
+int g_nIntroMovieEnabled = 1;
 
-// 0x0070fbf38
+// 0x0070bf38
 HxStr g_versionString("198");
 
 // Report that no configuration file was found, force the disc configuration, and open the memory

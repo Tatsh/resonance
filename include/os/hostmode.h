@@ -35,12 +35,12 @@ int UsingArkFiles();
 /**
  * Whether data is being read from the disc.
  *
- * The flag is one word of a block of nine boot options at 0x0070fbf10 that each have an accessor of
+ * The flag is one word of a block of nine boot options at 0x0070bf10 that each have an accessor of
  * this shape. The retail configurator at 0x0050f030, which InitIop() calls first, writes the block
  * in one pass and sets this word to 1 in the same instruction run that sets GetHostMode() to
  * kHostModeCdOnly and UsingArkFiles() to 1. The `.data` default is zero, which is the
  * host-development configuration. It is a separate word from the one UsingArkFiles() reads at
- * 0x0070fbf14.
+ * 0x0070bf14.
  *
  * Both uses agree with that reading. InitAsync() starts the worker thread only when this reports
  * the disc, because a host-link read needs no latency hiding, and ArkFile::Open() searches the
@@ -54,7 +54,7 @@ int UsingCdMedia();
 /**
  * Whether a MIDI conversion writes its error log.
  *
- * Another word of the same boot-option block, at 0x0070fbf28. The retail configurator writes 0
+ * Another word of the same boot-option block, at 0x0070bf28. The retail configurator writes 0
  * there, and the `.data` default is also 0. LevelConverter is the only caller. It tests the word
  * before it opens the log and before each line it writes. The title is inferred.
  *
@@ -66,9 +66,9 @@ int MidiErrorLogEnabled();
 /**
  * Whether Warn() reports anything.
  *
- * Another word of the same boot-option block, at 0x0070fbf18. Warn() is the only reader of either
+ * Another word of the same boot-option block, at 0x0070bf18. Warn() is the only reader of either
  * the word or this accessor, and it reports nothing unless the answer is 1, which is what fixes
- * the meaning of the word.
+ * the meaning of the word. The `.data` value is 1, and ConfigureRetailBoot() clears it.
  *
  * @return 1 when warnings are reported.
  * @ghidraAddress 0x0050efb0
@@ -78,8 +78,9 @@ int WarningsEnabled();
 /**
  * Whether a reported message also goes to the screen.
  *
- * Another word of the same boot-option block, at 0x0070fbf1c. ReportMessage() is the only reader of
- * either the word or this accessor, and it skips the on-screen half unless the answer is 1.
+ * Another word of the same boot-option block, at 0x0070bf1c. ReportMessage() is the only reader of
+ * either the word or this accessor, and it skips the on-screen half unless the answer is 1. No
+ * routine writes the word, and its `.data` value is 1.
  *
  * @return 1 when messages go to the screen.
  * @ghidraAddress 0x0050efc0
@@ -114,7 +115,7 @@ HxStr MakeFreqPath(const HxStr &name);
 /**
  * Whether a held modifier turns a controller button into a debug script hook.
  *
- * The boot-option word at 0x0070fbf24. InputPoller::Poll() is the one reader. While it reports
+ * The boot-option word at 0x0070bf24. InputPoller::Poll() is the one reader. While it reports
  * non-zero, a button pressed with the modifier bits runs script template 0x3f2 instead of the
  * usual `'joy '` message. ConfigureRetailBoot() clears it. The name is inferred.
  *
@@ -126,7 +127,7 @@ int DebugKeysEnabled();
 /**
  * Whether the asynchronous loader brackets each load with memory accounting.
  *
- * The boot-option word at 0x0070fbf2c. RndAsyncLoader::PollAsyncLoads() calls
+ * The boot-option word at 0x0070bf2c. RndAsyncLoader::PollAsyncLoads() calls
  * MemBeginAccounting() before reading a completed load and reports the accounting afterwards
  * while it is non-zero. ConfigureRetailBoot() clears it. The name is inferred.
  *
@@ -138,7 +139,7 @@ int MemAccountingEnabled();
 /**
  * Whether the start-up sequence plays the intro movie `ps2intro.pss`.
  *
- * The boot-option word at 0x0070fbf30. MetSonyScreen is the one reader. ConfigureRetailBoot()
+ * The boot-option word at 0x0070bf30. MetSonyScreen is the one reader. ConfigureRetailBoot()
  * sets it. The name is inferred.
  *
  * @return Non-zero when the intro movie plays.
@@ -150,7 +151,7 @@ int IntroMovieEnabled();
  * Report the build version, "198" in the shipped build.
  *
  * The title screen shows it after "Version:". The unit's static initialiser builds the string, the
- * HxStr at 0x0070fbf38. The name is inferred.
+ * HxStr at 0x0070bf38. The name is inferred.
  *
  * @return A copy of the version string.
  * @ghidraAddress 0x0050ef60
