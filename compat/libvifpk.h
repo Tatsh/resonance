@@ -31,6 +31,10 @@ void sceVif1PkCloseDirectCode(sceVif1Packet *pPacket);
 void sceVif1PkEnd(sceVif1Packet *pPacket, unsigned int nOption);
 unsigned int *sceVif1PkTerminate(sceVif1Packet *pPacket);
 
+// Zero-fills from the write pointer until nSize words past the 2^(nKind + 2) byte boundary at or
+// below it, wrapping to the next boundary when that position is already behind the pointer.
+void sceVif1PkAlign(sceVif1Packet *pPacket, int nKind, int nSize);
+
 #ifdef __cplusplus
 }
 #endif

@@ -3,9 +3,6 @@
 
 #include <libvifpk.h>
 
-// Advance the write pointer for nSize words at the boundary nKind selects, zero-filling the gap.
-static void alignPacket(sceVif1Packet *pPacket, int nKind, int nSize);
-
 // 0x0061e7c8
 void sceVif1PkInit(sceVif1Packet *pPacket, void *pBase) {
     pPacket->pCurrent = (unsigned int *)pBase;
@@ -37,7 +34,7 @@ void sceVif1PkOpenDirectCode(sceVif1Packet *pPacket, int bStall) {
     unsigned int *pCode;
     unsigned int nCode = 0x50000000u;
 
-    alignPacket(pPacket, 2, 3);
+    sceVif1PkAlign(pPacket, 2, 3);
     if (bStall != 0) {
         nCode = 0xd0000000u;
     }
@@ -129,10 +126,11 @@ unsigned int *sceVif1PkTerminate(sceVif1Packet *pPacket) {
 }
 
 // 0x00651fe8
-static void alignPacket(sceVif1Packet *pPacket, int nKind, int nSize) {
+void sceVif1PkAlign(sceVif1Packet *pPacket, int nKind, int nSize) {
     unsigned int nKeep = ((unsigned int)nKind + 2u) & 31u;
-    unsigned int nLow = 0xffffffffu >> (32u - nKeep);
-    unsigned int nEnd = (unsigned int)(((uintptr_t)pPacket->pCurrent & ~(uintptr_t)nLow) + (uintptr_t)nSize * 4u);
+    unsigned int nLow = 0xffffffffu >> ((32u - nKeep) & 31u);
+    unsigned int nEnd =
+        (unsigned int)(((uintptr_t)pPacket->pCurrent & ~(uintptr_t)nLow) + (uintptr_t)nSize * 4u);
     unsigned int *pCurrent = pPacket->pCurrent;
 
     if (nEnd < (uintptr_t)pCurrent) {
