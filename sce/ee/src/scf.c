@@ -1,22 +1,16 @@
+#include <assert.h>
+#include <stdio.h>
+
 #include <eekernel.h>
 #include <libcdvd.h>
 #include <libscf.h>
-#include <stdint.h>
-
-#include "os/assert.h"
-#include "os/log.h"
+#include <sifdev.h>
 
 enum {
     // Minutes in one hour.
     kMinutesPerHour = 60,
     // Minutes in nine hours of Tokyo time, the baseline the RTC keeps.
     kTokyoMinutes = 540,
-    // The line the binary reports for a null clock argument.
-    kNullClockLine = 455,
-    // The offset routine reports this line for a null clock.
-    kOffsetNullLine = 416,
-    // The offset routine reports this line for an out of range offset.
-    kOffsetRangeLine = 417,
     // Half the minutes in one day define the largest accepted offset magnitude.
     kHalfDayMinutes = 1440,
     // Twice the largest magnitude plus one gives the accepted range width.
@@ -33,8 +27,28 @@ enum {
     kDaylightShift = 4,
 };
 
+// The ROM region letter of a tool console. A tool console reports the defaults below rather than
+// the console configuration.
+enum {
+    kRomRegionIndex = 4,
+    kRomRegionTool = 'T',
+    kRomVersionReadSize = 14,
+};
+
+// The timezone a tool console reports, in minutes east of UTC.
+// 0x0077fbf0
+static short g_nScfDefaultTimezone = 540;
+
+// The summer time flag a tool console reports.
+// 0x0077fbf6
+static unsigned char g_nScfDefaultSummerTime = 0;
+
+// The contents of rom0:ROMVER, empty until the first read.
+// 0x0077fbf8
+static char g_szScfRomVersion[16];
+
 // Helpers defined below for the minute offset path.
-int sceScfReadRomVersion(void);
+char *sceScfReadRomVersion(void);
 void sceScfSub005f3190(sceCdCLOCK *pClock);
 
 // Month lengths for the day arithmetic below, read from the image.
@@ -42,47 +56,39 @@ static const unsigned char kMonthLengths[12] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
 };
 
-// Helpers the read path below needs, provided by the file layer and the toolchain.
-extern int sceFileioRpcRoutine0056b340(int nFile, void *pBuffer, int nSize);
-extern int sceOpen(const char *pathname, int flags);
-extern int sceClose(int nFile);
-
 // 0x005f2da8
+// Reports whether the console runs a tool ROM, reading the ROM version first if needed.
 int sceScfEnsureRomVersionRead(void) {
-    if (*(volatile signed char *)(uintptr_t)0x77fbf8 != 0) {
-        return 0x77fbf8;
+    if (g_szScfRomVersion[0] == '\0') {
+        sceScfReadRomVersion();
     }
-    sceScfReadRomVersion();
-    return *(volatile signed char *)(uintptr_t)0x77fbfc == 0x54 ? 1 : 0;
+    return g_szScfRomVersion[kRomRegionIndex] == kRomRegionTool;
 }
 
 // 0x005f2d08
-int sceScfReadRomVersion(void) {
+char *sceScfReadRomVersion(void) {
     int fd;
 
-    if (*(volatile char *)(uintptr_t)0x77fbf8 != 0) {
-        return 0x77fbf8;
+    if (g_szScfRomVersion[0] != '\0') {
+        return g_szScfRomVersion;
     }
-    fd = sceOpen("rom0:ROMVER", 1);
+    fd = sceOpen("rom0:ROMVER", SCE_RDONLY);
     if (fd == -1) {
-        LogPrintf("Can't open rom0:ROMVER\n");
+        printf("Can't open rom0:ROMVER\n");
     }
-    // The buffer argument survives in the register from the report call. The reconstruction
-    // passes the version area it points at in every observed run.
-    if (sceFileioRpcRoutine0056b340(fd, (void *)(uintptr_t)0x77fbf8, 0xe) == -1) {
-        LogPrintf("Can't read rom error\n");
+    // The binary reads even when the open failed.
+    if (sceRead(fd, g_szScfRomVersion, kRomVersionReadSize) == -1) {
+        printf("Can't read rom error\n");
     }
     sceClose(fd);
-    return 0x77fbf8;
+    return g_szScfRomVersion;
 }
 
 // 0x005f3138
 int sceScfCheckBcdByte(int nValue) {
     unsigned int value = (unsigned int)nValue & 0xffu;
 
-    if (value >= 0x9au) {
-        HxAssertFailed("libscf.c", 0x126, "c <= 0x99");
-    }
+    assert(value <= 0x99u);
     return (int)((value - ((value >> 4) * 6u)) & 0xffu);
 }
 
@@ -90,9 +96,7 @@ int sceScfCheckBcdByte(int nValue) {
 int sceScfCheckBcdBelowHundred(int nValue) {
     unsigned int value = (unsigned int)nValue & 0xffu;
 
-    if (value >= 0x64u) {
-        HxAssertFailed("libscf.c", 0x119, "c <=99");
-    }
+    assert(value <= 99u);
     // The image guards a divide by zero against the constant divisor, which cannot fire.
     return (int)((value / 10u) * 6u + value);
 }
@@ -102,9 +106,7 @@ void sceScfSub005f32a0(sceCdCLOCK *pClock) {
     unsigned char monthLengths[12];
     int i;
 
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", 0x150, "prtc != NULL");
-    }
+    assert(pClock != NULL);
     for (i = 0; i < 12; ++i) {
         monthLengths[i] = kMonthLengths[i];
     }
@@ -133,9 +135,7 @@ void sceScfSub005f3388(sceCdCLOCK *pClock) {
     unsigned char monthLengths[12];
     int i;
 
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", 0x168, "prtc != NULL");
-    }
+    assert(pClock != NULL);
     for (i = 0; i < 12; ++i) {
         monthLengths[i] = kMonthLengths[i];
     }
@@ -162,9 +162,7 @@ void sceScfSub005f3388(sceCdCLOCK *pClock) {
 
 // 0x005f3190
 void sceScfSub005f3190(sceCdCLOCK *pClock) {
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", 0x132, "prtc != NULL");
-    }
+    assert(pClock != NULL);
     pClock->year = (unsigned char)sceScfCheckBcdByte(pClock->year);
     pClock->month = (unsigned char)sceScfCheckBcdByte(pClock->month);
     pClock->day = (unsigned char)sceScfCheckBcdByte(pClock->day);
@@ -175,9 +173,7 @@ void sceScfSub005f3190(sceCdCLOCK *pClock) {
 
 // 0x005f3218
 void sceScfSub005f3218(sceCdCLOCK *pClock) {
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", 0x141, "prtc != NULL");
-    }
+    assert(pClock != NULL);
     pClock->year = (unsigned char)sceScfCheckBcdBelowHundred(pClock->year);
     pClock->month = (unsigned char)sceScfCheckBcdBelowHundred(pClock->month);
     pClock->day = (unsigned char)sceScfCheckBcdBelowHundred(pClock->day);
@@ -190,9 +186,7 @@ void sceScfSub005f3218(sceCdCLOCK *pClock) {
 void sceScfSub005f3460(sceCdCLOCK *pClock) {
     unsigned int hour;
 
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", 0x181, "prtc != NULL");
-    }
+    assert(pClock != NULL);
     hour = (unsigned int)pClock->hour + 1u;
     if ((hour & 0xffu) != 0x18u) {
         pClock->hour = (unsigned char)hour;
@@ -206,9 +200,7 @@ void sceScfSub005f3460(sceCdCLOCK *pClock) {
 void sceScfSub005f34d0(sceCdCLOCK *pClock) {
     unsigned int hour;
 
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", 0x18e, "prtc != NULL");
-    }
+    assert(pClock != NULL);
     hour = pClock->hour;
     if (hour == 0) {
         pClock->hour = 0x17;
@@ -225,7 +217,7 @@ int sceScfGetTimezone(void) {
     int nTimezone;
 
     if (sceScfEnsureRomVersionRead() != 0) {
-        return (int)*(short *)0x77FBF0;
+        return g_nScfDefaultTimezone;
     }
     GetOsdConfigParam(&nConfig);
     nVersion = (nConfig >> kVersionShift) & (unsigned int)kVersionMask;
@@ -233,7 +225,7 @@ int sceScfGetTimezone(void) {
         return kTokyoMinutes;
     }
     nTimezone = (int)nConfig >> kTimezoneShift;
-    LogPrintf("Timezone=%d\n", nTimezone);
+    printf("Timezone=%d\n", nTimezone);
     return nTimezone;
 }
 
@@ -245,7 +237,7 @@ int sceScfGetSummerTime(void) {
     int nSummer;
 
     if (sceScfEnsureRomVersionRead() != 0) {
-        return *(unsigned char *)0x77FBF6;
+        return g_nScfDefaultSummerTime;
     }
     GetOsdConfigParam(&nConfig);
     nVersion = (nConfig >> kVersionShift) & (unsigned int)kVersionMask;
@@ -254,7 +246,7 @@ int sceScfGetSummerTime(void) {
     }
     GetOsdConfigParam2(&nDetail, 1, 1);
     nSummer = (nDetail >> kDaylightShift) & 1;
-    LogPrintf("SummerTime=%d\n", nSummer);
+    printf("SummerTime=%d\n", nSummer);
     return nSummer;
 }
 
@@ -262,12 +254,8 @@ int sceScfGetSummerTime(void) {
 void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
     int nTotal;
 
-    if (pClock == NULL) {
-        HxAssertFailed("libscf.c", kOffsetNullLine, "prtc != NULL");
-    }
-    if ((unsigned int)(nMinutes + kHalfDayMinutes) >= (unsigned int)kOffsetRangeWidth) {
-        HxAssertFailed("libscf.c", kOffsetRangeLine, "-60*24<=diff && diff <= 60*24");
-    }
+    assert(pClock != NULL);
+    assert((unsigned int)(nMinutes + kHalfDayMinutes) < (unsigned int)kOffsetRangeWidth);
     sceScfSub005f3190(pClock);
     nTotal = pClock->minute + nMinutes;
     if (nTotal < 0) {
@@ -294,9 +282,6 @@ void sceScfGetLocalTimefromRTC(sceCdCLOCK *pClock) {
     int nSummer = sceScfGetSummerTime();
     int nOffset = nTimezone + nSummer * kMinutesPerHour - kTokyoMinutes;
 
-    if (pClock == NULL) {
-        // The binary records the file as libscf.c with the line above.
-        HxAssertFailed("libscf.c", kNullClockLine, "pClock != NULL");
-    }
+    assert(pClock != NULL);
     sceScfApplyMinuteOffset(pClock, nOffset);
 }

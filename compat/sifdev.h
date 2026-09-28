@@ -12,6 +12,8 @@
 #include <iopheap.h>
 #include <loadfile.h>
 
+#define SCE_RDONLY 0x0001
+
 #define SCE_SEEK_SET 0
 #define SCE_SEEK_CUR 1
 #define SCE_SEEK_END 2

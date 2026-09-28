@@ -220,7 +220,6 @@ ezmidi
 ezmpeg
 fadegamemsg
 fadeuser
-faild
 failsink
 favorite
 fbmsk
@@ -453,7 +452,6 @@ libk
 libmc
 libmpeg
 libmtap
-libpad
 libscf
 libsd
 libsd's
@@ -501,7 +499,6 @@ malloc
 matanim
 math
 mcdat
-mcextra
 mcfl
 mcman
 mcrd
@@ -789,7 +786,6 @@ preapproved
 primaddr
 prmodecont
 prmodecontaddr
-prtc
 pscam
 psenviron
 psgr
@@ -1071,6 +1067,7 @@ typeobject
 uchar
 ucnhash
 udvare
+undebug
 undraft
 undrafted
 unformatop

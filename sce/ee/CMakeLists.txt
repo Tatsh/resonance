@@ -28,4 +28,6 @@ set(RESONANCE_SONYLIB_SRCS
 
 add_library(resonance_sonylibs STATIC ${RESONANCE_SONYLIB_SRCS})
 target_link_libraries(resonance_sonylibs PRIVATE resonance_common)
+# The original libraries assert in the shipped build. No build type may compile the assertions out.
+target_compile_options(resonance_sonylibs PRIVATE -UNDEBUG)
 target_include_directories(resonance_sonylibs PRIVATE "${CMAKE_SOURCE_DIR}/sce/ee/include")
