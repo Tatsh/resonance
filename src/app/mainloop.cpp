@@ -66,6 +66,9 @@ MainLoop *g_pMainLoop;
 
 // 0x001ec998
 MainLoop::MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
+    // The call passes 1. The value selects virtual-base setup the compiler emits. The body
+    // does not use the flag.
+    (void)nFlag;
     mRunning = 0;
     mNextBankPollNs = 0;
     mNextWatchdogPollNs = 0;
@@ -77,12 +80,10 @@ MainLoop::MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager
     g_pMainLoop = this;
     SetLongOperationPollProc(PumpTimers);
     SetLongOperationDrawProc(KeepAliveDraw);
-    if (nFlag == 0) {
-        g_profileTimers[kAppTimerPreDraw].mName = HxStr("    app predraw");
-        g_profileTimers[kAppTimerDraw].mName = HxStr("    app draw");
-        g_profileTimers[kAppTimerAsync].mName = HxStr("    app async");
-        g_profileTimers[kAppTimerBank].mName = HxStr("    app bank");
-    }
+    g_profileTimers[kAppTimerPreDraw].mName = HxStr("    app predraw");
+    g_profileTimers[kAppTimerDraw].mName = HxStr("    app draw");
+    g_profileTimers[kAppTimerAsync].mName = HxStr("    app async");
+    g_profileTimers[kAppTimerBank].mName = HxStr("    app bank");
     UpdateNextDeadline();
 }
 

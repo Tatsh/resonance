@@ -31,8 +31,8 @@ public:
     /**
      * Create the frame loop and take over the long-operation callbacks.
      *
-     * @param nFlag Non-zero skips the profile timer registration and sets the trailing flag
-     * word. The image passes 1.
+     * @param nFlag The call site always passes 1. The flag selects virtual-base setup the
+     * compiler emits. The body does not use the flag.
      * @param pWatchdog The long-operation watchdog to service.
      * @param pGameManager The game manager to draw through.
      * @ghidraAddress 0x001ec998
