@@ -1,6 +1,5 @@
 #include <fcntl.h>
 #include <sifdev.h>
-#include <string.h>
 #include <unistd.h>
 
 // Sony open flags with their newlib equivalents. FileOpen at 0x0047c9c0 maps newlib
@@ -74,16 +73,10 @@ int sceLseek(int nDescriptor, int nOffset, int nWhence) {
     return (int)lseek(nDescriptor, (off_t)nOffset, nWhence);
 }
 
-// The initialised flag the reset clears, at 0x00762c08 in the image.
-static int g_nFsInitialised;
-
-// The cached client word the reset zeroes, at 0x008e3be8 in the image.
-static unsigned int g_nFsClient;
-
 // 0x0056acc8
 int sceFsReset(void) {
-    // The binary clears the flag above and zeroes the client word, then reports success.
-    g_nFsInitialised = 0;
-    memset(&g_nFsClient, 0, sizeof(g_nFsClient));
+    // The binary clears its bound flag at 0x00762c08 and the server version word at 0x008e3be8.
+    // The next file call then binds the service again. The ps2sdk file client rebinds by itself on
+    // the first call after an IOP reboot.
     return 0;
 }
