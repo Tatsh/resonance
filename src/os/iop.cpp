@@ -106,25 +106,39 @@ inline void LoadModuleFromCd(const char *pszPath, int nArgLength, const char *pA
 // The host mode is read again here rather than passed in, so InitIop() and this helper
 // each call GetHostMode() once.
 inline void RebootIopWithImage() {
+    TRACE_HERE
     sceSifInitRpc(0);
+    TRACE_HERE
     sceCdInit(SCECdINIT);
+    TRACE_HERE
     sceCdMmode(SCECdMmodeCd);
+    TRACE_HERE
 
     if (GetHostMode() == kHostModeCdOnly) {
+        TRACE_HERE
         while (sceSifRebootIop(kDiscImagePath) == 0) {
         }
+        TRACE_HERE
     } else {
+        TRACE_HERE
         while (sceSifRebootIop(kHostImagePath) == 0) {
         }
+        TRACE_HERE
     }
 
+    TRACE_HERE
     while (sceSifSyncIop() == 0) {
     }
+    TRACE_HERE
 
     sceFsReset();
+    TRACE_HERE
     sceSifInitRpc(0);
+    TRACE_HERE
     sceCdInit(SCECdINIT);
+    TRACE_HERE
     sceCdMmode(SCECdMmodeCd);
+    TRACE_HERE
 }
 
 // 0x004dfcc8
@@ -157,10 +171,15 @@ inline void InitMemoryCardLibrary() {
 
 // 0x004dfe28
 void InitIop() {
+    TRACE_HERE
     ConfigureRetailBoot();
+    TRACE_HERE
     RebootIopWithImage();
+    TRACE_HERE
     InitDebugConsole();
+    TRACE_HERE
     InitBootConfig();
+    TRACE_HERE
 }
 
 // 0x004de170

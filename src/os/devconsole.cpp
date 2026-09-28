@@ -102,7 +102,9 @@ int InitDebugGs() {
 
     sceGsSyncPath(kGsSyncPathWait, kGsSyncPathNoTimeout);
     (void)sceGsSyncV(kGsSyncVWait); // Yes, the binary discards the field.
+    TRACE_HERE
     sceGsResetGraph(kGsResetAll, kGsInterlace, kGsNtsc, kGsFrameMode);
+    TRACE_HERE
     sceGsSetDefDBuff(&g_debugDoubleBuffer,
                      kGsPsmCt32,
                      kDisplayWidth,
@@ -152,9 +154,13 @@ void OpenDebugConsole() {
 // 0x005e5f18
 void InitDebugConsole() {
     (void)InitDebugGs(); // Yes, the binary discards the result.
+    TRACE_HERE
     sceDevConsInit();
+    TRACE_HERE
     g_nDebugConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
+    TRACE_HERE
     sceDevConsClear(g_nDebugConsole);
+    TRACE_HERE
 }
 
 // 0x005e5f60
