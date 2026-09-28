@@ -10,10 +10,8 @@ class Watchdog;
  * The game's frame loop.
  *
  * `8MainLoop` in the RTTI descriptor at `0x00901f80`, deriving from Task. The declared members
- * occupy `+0x0c` through `+0x3f`, which makes the object the allocated 0x40 bytes, and the
- * trailing words at `+0x38` and `+0x3c` hold a flag and a descriptor pointer the constructor
- * fills when its flag argument is non-zero; no recovered routine reads either word. Its own
- * table is at `0x007e7ce0`.
+ * occupy `+0x0c` through `+0x37`, and the virtual Attachment base closes the object at `+0x38`.
+ * The allocation is 0x40 bytes. The MainLoop table is at `0x007e7ce0`.
  *
  * Globals::Init() creates the single instance and Globals::RunMainLoop() drives it. Every member
  * below is private, because the only code that reads one is a member of this class.
@@ -161,8 +159,9 @@ private:
     int mFlushFrame;               // +0x2c
     Watchdog *mWatchdog;           // +0x30
     GameManagerImpl *mGameManager; // +0x34
-    int mUnknown38;                // +0x38: set to 1 when the constructor flag is non-zero.
-    int mUnknown3c; // +0x3c: image descriptor pointer, invalid in this layout, never written.
+    // The virtual Attachment base closes the object at `+0x38`; the compiler constructs the base
+    // with one reference and the base table. The constructor's flag-gated stores perform the
+    // construction in the image. No member is declared for the base here.
 };
 
 /**

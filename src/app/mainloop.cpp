@@ -74,12 +74,6 @@ MainLoop::MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager
     mFlushFrame = kFlushFrameNever;
     mWatchdog = pWatchdog;
     mGameManager = pGameManager;
-    if (nFlag != 0) {
-        // The image also installs words at +0x00 and +0x3c here. The base constructor overwrites
-        // the first, and the second is a descriptor pointer with no recovered readers, so only
-        // the surviving flag word is reproduced.
-        mUnknown38 = 1;
-    }
     g_pMainLoop = this;
     SetLongOperationPollProc(PumpTimers);
     SetLongOperationDrawProc(KeepAliveDraw);
