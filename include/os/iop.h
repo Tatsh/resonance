@@ -82,8 +82,8 @@ void WaitVsync();
  * Write the retail boot options over the boot-option block.
  *
  * The routine belongs to the same translation unit as GetHostMode() and is declared here so that
- * iop.cpp can call it. It writes all nine words of the block at 0x0070bf10 in one pass, setting the
- * host mode to kHostModeCdOnly and UsingArkFiles() to 1.
+ * iop.cpp can call it. It writes all nine words of the block at 0x0070fbf10 in one pass, setting
+ * the host mode to kHostModeCdOnly and UsingArkFiles() to 1.
  *
  * @ghidraAddress 0x0050f030
  */
