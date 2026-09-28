@@ -6,10 +6,9 @@
 #include "os/log.h"
 #include "os/mem.h"
 
-// The tag arguments below record the original line numbers of zone.cpp,
-// recovered from the constants the calls pass: ZoneCreate at 139, FreeAllZones
-// at 74, ZoneDelete at 181, ZoneAlloc at 301 and 304, ZoneFree at 336, and
-// ZoneGrabTemp at 399.
+// The original tags pass "zone.cpp" with these line numbers: ZoneCreate at 139, FreeAllZones at
+// 74, ZoneDelete at 181, ZoneAlloc at 301 and 304, ZoneFree at 336, and ZoneGrabTemp at 399. The
+// calls below pass the rebuilt file and lines instead.
 
 namespace {
 
@@ -30,10 +29,8 @@ constexpr char kTempZoneName[] = "temp";
 // 0x006e9808
 int g_nZonesEnabled = 0;
 
-// The initial value is not recoverable from the image. FreeAllZones() and ZoneDelete() are what
-// establish kNoZone at runtime.
 // 0x006e980c
-int g_nCurrentZone = 0;
+int g_nCurrentZone = kNoZone;
 
 // 0x006e9860
 void *g_pTempBuffer = nullptr;
