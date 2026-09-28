@@ -4,6 +4,11 @@ project(resonance VERSION 0.0.2 LANGUAGES C CXX)
 option(BUILD_DOCS "Build documentation alongside the sources." OFF)
 option(BUILD_DOCS_ONLY "Build documentation and nothing else." OFF)
 option(INSTALL_DOCS "Install documentation." OFF)
+option(ENABLE_PATCHES "Include patch-only code in the build." ON)
+
+if(ENABLE_PATCHES)
+  add_compile_definitions(ENABLE_PATCHES)
+endif()
 
 # The reconstruction is checked as C++17. The target toolchain accepts a later standard, and raising
 # it here would mean the tree is no longer checked at the level it is written to.

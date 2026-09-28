@@ -77,6 +77,7 @@ sceGsDBuff g_debugDoubleBuffer;
 
 // 0x005e5d08
 int InitDebugGs() {
+    TraceHere();
     sceGifTag adTag;
     adTag.mWords[0] = kAdGifTagLo;
     adTag.mWords[1] = kAdGifTagHi;
@@ -133,6 +134,7 @@ int InitDebugGs() {
     sceDmaSend(pVif1, reinterpret_cast<void *>((nBase & kDmaAddressMask) | kDmaScratchpadFlag));
     while (sceGsSyncV(kGsSyncVWait) == 0) {
     }
+    TraceHere();
     return 1;
 }
 
