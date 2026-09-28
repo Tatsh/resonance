@@ -26,7 +26,6 @@ set(RESONANCE_OS_SRCS
     seccache.cpp
     spew.cpp
     spewregistrar.cpp
-    spinlock.cpp
     zone.cpp)
 
 add_library(resonance_os STATIC ${RESONANCE_OS_SRCS})
