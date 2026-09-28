@@ -44,6 +44,9 @@ int sceRead(int nDescriptor, void *pBuffer, int nBytes);
 int sceWrite(int nDescriptor, const void *pBuffer, int nBytes);
 int sceLseek(int nDescriptor, int nOffset, int nWhence);
 
+// Sends a control request for an open file to its device.
+int sceIoctl(int nDescriptor, int nRequest, void *pArg);
+
 #ifdef __cplusplus
 }
 #endif

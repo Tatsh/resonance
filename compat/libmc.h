@@ -34,9 +34,11 @@ extern "C" {
 
 // Every line above renames an entry point ps2sdk writes differently. This one is not a rename. The
 // image lists the entry point at 0x005659e8 as sceMcInitLibrary. The routine takes no arguments,
-// while ps2sdk's mcInit() takes a server-type argument. The declaration therefore covers the Sony
-// routine directly.
-int sceMcInitLibrary(void);
+// while ps2sdk's mcInit() takes a server-type argument. Both bind the memory card server and check
+// the module versions, and the ps2sdk calls above work only after mcInit().
+static inline int sceMcInitLibrary(void) {
+    return mcInit(MC_TYPE_MC);
+}
 
 #ifdef __cplusplus
 }

@@ -1,11 +1,17 @@
+// The SDK API header sizes a buffer with MAXNAMLEN. The C library defines MAXNAMLEN only for BSD
+// visibility.
+#define _DEFAULT_SOURCE
+
 #include <fcntl.h>
-#include <sifdev.h>
 #include <unistd.h>
 
+#include <ps2sdkapi.h>
+#include <sifdev.h>
+
 // Sony open flags with their newlib equivalents. FileOpen at 0x0047c9c0 maps newlib
-// access 0, 1, and 2 to Sony 1, 2, and 3, newlib append 0x8 to Sony 0x100, and carries
+// access 0, 1, and 2 to Sony 1, 2, and 3, newlib append 0x8 to Sony 0x100, and moves
 // create 0x200 and truncate 0x400 across unchanged. strFileOpen passes Sony 1 to open
-// for reading, which confirms the read-only value.
+// for reading.
 enum {
     kSceAccessMask = 3,
     kSceOpenReadOnly = 1,
@@ -69,8 +75,15 @@ int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
 
 // 0x0056b108
 int sceLseek(int nDescriptor, int nOffset, int nWhence) {
-    // The Sony origins match the newlib ones, so the value passes through.
+    // The Sony origins match the newlib ones.
     return (int)lseek(nDescriptor, (off_t)nOffset, nWhence);
+}
+
+// 0x0056b870
+int sceIoctl(int nDescriptor, int nRequest, void *pArg) {
+    // The original sends the request through its file-service client. Descriptors here come from
+    // the C library. The request therefore goes through the ps2sdk descriptor table instead.
+    return _ps2sdk_ioctl(nDescriptor, nRequest, pArg);
 }
 
 // 0x0056acc8
