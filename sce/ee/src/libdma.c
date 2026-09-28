@@ -137,7 +137,7 @@ typedef struct {
 sceDmaChan *sceDmaGetChan(int nChannel) {
     volatile sceDmaChan **table;
 
-    table = (volatile sceDmaChan **)(uintptr_t)0x77FC08U;
+    table = (volatile sceDmaChan **)(uintptr_t)0x77FFC08U;
     if ((unsigned int)nChannel < 10U) {
         return (sceDmaChan *)table[nChannel];
     }
@@ -155,8 +155,8 @@ int sceDmaReset(int nMode) {
     unsigned char clearEnv[20];
     int i;
 
-    channelTable = (volatile DmaChannelRegs **)(uintptr_t)0x77FC08U;
-    enableTable = (volatile int *)(uintptr_t)0x77FC48U;
+    channelTable = (volatile DmaChannelRegs **)(uintptr_t)0x77FFC08U;
+    enableTable = (volatile int *)(uintptr_t)0x77FFC48U;
     oldCtrl = DMAC_CTRL;
     index = 9;
     do {
