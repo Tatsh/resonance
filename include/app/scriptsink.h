@@ -32,11 +32,6 @@ public:
     ScriptSink(Globals *pOwner);
 
     /**
-     * @ghidraAddress 0x00118a08
-     */
-    virtual ~ScriptSink();
-
-    /**
      * Build a sink on the heap.
      *
      * The body is the same allocation and construction Globals::InitServices() inlines. No caller

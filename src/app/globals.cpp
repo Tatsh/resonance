@@ -37,7 +37,7 @@ void Globals::Init() {
     mWatchdogTimer->SetOrigin(0);
     mScriptSink = new ScriptSink(this);
     mGameManager = new GameManagerImpl;
-    mMainLoop = new MainLoop(mWatchdog, mGameManager);
+    mMainLoop = new MainLoop(1, mWatchdog, mGameManager);
     // 0x004ee2f8
     // The log stream is the preallocated read-write stream rather than the
     // output interface: the constructor writes two base vtables and fills a 0x20-byte

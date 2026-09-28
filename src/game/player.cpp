@@ -20,6 +20,8 @@ constexpr int kInitialCeiling = 1;
 
 constexpr char kNullText[] = "{player null}";
 constexpr char kOpenText[] = "{player ";
+constexpr char kNetText[] = " net}";
+constexpr char kLocalText[] = " local}";
 
 } // namespace
 
@@ -93,6 +95,11 @@ void Player::Print(std::ostream &stream) {
     }
 
     stream << kOpenText << mId20;
+    if (Slot2() == kNoInputSlot) {
+        stream << kNetText;
+    } else {
+        stream << kLocalText;
+    }
 }
 
 // 0x00132d70

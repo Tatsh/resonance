@@ -33,11 +33,13 @@ public:
     /**
      * Create the frame loop and take over the long-operation callbacks.
      *
+     * @param nFlag Non-zero skips the profile timer registration and sets the trailing flag
+     * word. The image passes 1.
      * @param pWatchdog The long-operation watchdog to service.
      * @param pGameManager The game manager to draw through.
      * @ghidraAddress 0x001ec998
      */
-    MainLoop(Watchdog *pWatchdog, GameManagerImpl *pGameManager);
+    MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager);
 
     /**
      * Drop the instance pointer and remove the poll callback.
@@ -159,6 +161,7 @@ private:
     int mFlushFrame;               // +0x2c
     Watchdog *mWatchdog;           // +0x30
     GameManagerImpl *mGameManager; // +0x34
+    int mUnknown38;                // +0x38: set to 1 when the constructor flag is non-zero.
 };
 
 /**

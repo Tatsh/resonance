@@ -123,6 +123,9 @@ PyObject *PyInvokeStopGame(PyObject *, PyObject *pArgs) {
 // Show a line of text on the display.
 // 0x001532d8
 Py::Object ScriptDisplayText(const Py::Tuple &args) {
+    if (args.length() != 1) {
+        throw Py::TypeError(HxStr(FormatString("wrong # args for display_text")));
+    }
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr message = text;
@@ -426,10 +429,11 @@ PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
 
 // Send MIDI messages.
 //
-// The tuple carries a device name, a command, and four values. Voice and fx send bank selects
-// on every channel while the last value is 1, play sends a note on, stop a note off, and
-// bank_swap moves the stream. The channel nibble reads 0 where it is consumed: voice and fx
-// never reach play or stop with their values, so the status is always channel 0 there.
+// The tuple carries a device name, a command, and four values. Voice and fx select their
+// channels, then any command with a last value of 1 sends bank selects on every channel.
+// Otherwise play sends a note on, stop a note off, and bank_swap moves the stream. The
+// channel nibble reads 0 where it is consumed: voice and fx never reach play or stop with
+// their values, so the status is always channel 0 there.
 // 0x00157578
 Py::Object ScriptMidi(const Py::Tuple &args) {
     if (args.length() != 6) {
@@ -451,7 +455,7 @@ Py::Object ScriptMidi(const Py::Tuple &args) {
     } else if (command == "fx") {
         nChannel = 0xF;
     }
-    if ((command == "voice" || command == "fx") && nD == 1) {
+    if (nD == 1) {
         for (int nCh = 0; nCh < 15; ++nCh) {
             const int nStatus = (nCh - 0x50) & 0xFF;
             Application::shared()->GetSynth()->SendMidi(nStatus, 0, 0);

@@ -8,9 +8,9 @@ constexpr char kDescription[] = "{Gamer}";
 
 } // namespace
 
-// 0x00116b48
-GamerCmd::~GamerCmd() {
-}
+// The destructor slot of the table at `0x007ce600` holds the inherited `Sch::Command`
+// destructor at `0x00116b48`, which installs the base table at `0x008288c0`; this class
+// declares no destructor of its own.
 
 // 0x00116bc0
 int GamerCmd::CmdID() {

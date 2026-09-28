@@ -23,7 +23,7 @@ Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long nBar) {
 
 // Build a synthetic map and probe it.
 //
-// Lays four sections over a repeat ring, probes two bars per section step, and returns the
+// Lays four sections over a repeat ring, probes three bars per section step, and returns the
 // pairs. The tuple arrives by value and is released here.
 // 0x0012c448
 Py::Object ScriptTestMap([[maybe_unused]] Py::Tuple args) {
@@ -45,6 +45,7 @@ Py::Object ScriptTestMap([[maybe_unused]] Py::Tuple args) {
     for (int i = 0; i < kTestMapProbeCount; ++i) {
         result.setItem(i * 3, BuildTestMapProbeList(&ring, i * 5 + 4));
         result.setItem(i * 3 + 1, BuildTestMapProbeList(&ring, (i + 1) * 5));
+        result.setItem(i * 3 + 2, BuildTestMapProbeList(&ring, (i + 1) * 5 + 1));
     }
     return result;
 }

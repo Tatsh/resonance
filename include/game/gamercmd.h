@@ -12,9 +12,10 @@
  * for, so the name is inferred from what Execute() does. Print() writes the literal `{Gamer}` at
  * `0x007ce588`.
  *
- * Its table at `0x007ce600` has eight entries. This class supplies the destructor and slots 3, 4,
- * and 5, and inherits slots 2, 6, and 7, the last two being `Sch::Command::Save` at `0x00539f20`
- * and `Load` at `0x00539f28`, which is what identifies the base.
+ * Its table at `0x007ce600` has eight entries. This class supplies slots 3, 4, and 5,
+ * and inherits the rest, slot 1 being the `Sch::Command` destructor at `0x00116b48` and the
+ * last two being `Sch::Command::Save` at `0x00539f20` and `Load` at `0x00539f28`, which is
+ * what identifies the base.
  *
  * `Sch::Command` is 0x0c bytes, so this class's own two members start at `+0x0c`.
  *
@@ -34,9 +35,6 @@ public:
      */
     GamerCmd(Gamer *pGamer, int nBar) : mGamer(pGamer), mBar(nBar) {
     }
-
-    /** @ghidraAddress 0x00116b48 */
-    virtual ~GamerCmd();
 
     /**
      * Report the identifier this class streams itself under.

@@ -529,8 +529,7 @@ void Gamer::OnBar(int nBar) {
                         InputMap::shared()->DisableEntries();
                     }
                 }
-            } else if (mEndState == kEndStateNone && !FreeTracksAfterCapture(nBar) &&
-                       mUnknown1c == 0) {
+            } else if (!FreeTracksAfterCapture(nBar) && mUnknown1c == 0) {
                 pPlayer->AddJuice(kBarJuiceCost, 1);
             }
         }

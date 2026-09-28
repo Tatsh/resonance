@@ -217,12 +217,12 @@ void LocalPlayer::Slot22(int value) {
 
 // 0x00121ec0
 int LocalPlayer::Slot14() {
-    return mUnknownb0 + 1;
+    return mUnknownb0 += 1;
 }
 
 // 0x00121ed0
 int LocalPlayer::Slot15() {
-    return mUnknownac + 1;
+    return mUnknownac += 1;
 }
 
 // 0x00122cc8

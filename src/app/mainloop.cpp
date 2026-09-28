@@ -65,7 +65,7 @@ inline long long FrameClockNs(Watchdog *pWatchdog) {
 MainLoop *g_pMainLoop;
 
 // 0x001ec998
-MainLoop::MainLoop(Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
+MainLoop::MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
     mRunning = 0;
     mNextBankPollNs = 0;
     mNextWatchdogPollNs = 0;
@@ -74,13 +74,21 @@ MainLoop::MainLoop(Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
     mFlushFrame = kFlushFrameNever;
     mWatchdog = pWatchdog;
     mGameManager = pGameManager;
+    if (nFlag != 0) {
+        // The image also installs words at +0x00 and +0x3c here, but the base constructor
+        // overwrites the first and the second belongs to a secondary base this class does not
+        // declare yet, so only the surviving flag word is reproduced.
+        mUnknown38 = 1;
+    }
     g_pMainLoop = this;
     SetLongOperationPollProc(PumpTimers);
     SetLongOperationDrawProc(KeepAliveDraw);
-    g_profileTimers[kAppTimerPreDraw].mName = HxStr("    app predraw");
-    g_profileTimers[kAppTimerDraw].mName = HxStr("    app draw");
-    g_profileTimers[kAppTimerAsync].mName = HxStr("    app async");
-    g_profileTimers[kAppTimerBank].mName = HxStr("    app bank");
+    if (nFlag == 0) {
+        g_profileTimers[kAppTimerPreDraw].mName = HxStr("    app predraw");
+        g_profileTimers[kAppTimerDraw].mName = HxStr("    app draw");
+        g_profileTimers[kAppTimerAsync].mName = HxStr("    app async");
+        g_profileTimers[kAppTimerBank].mName = HxStr("    app bank");
+    }
     UpdateNextDeadline();
 }
 

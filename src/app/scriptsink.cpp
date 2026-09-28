@@ -7,9 +7,9 @@
 ScriptSink::ScriptSink(Globals *pOwner) : mGlobals(pOwner) {
 }
 
-// 0x00118a08
-ScriptSink::~ScriptSink() {
-}
+// The destructor slot of the table at `0x007cee50` holds the inherited `MsgSink` destructor
+// at `0x00118a08`, which installs the base table at `0x007ccc40`; this class declares no
+// destructor of its own.
 
 // 0x00118c00
 ScriptSink *ScriptSink::CreateInstance(Globals *pOwner) {
