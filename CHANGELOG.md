@@ -28,6 +28,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Boot-option flags match the original, with `ScreenMessagesEnabled` set to 1.
 - The initial current zone is -1.
 - The stack is 512 KiB at 0x01F80000, as in the original.
+- `GetConnectStateMCT` and `GetAllConnectStatesMCT` test for a multitap correctly. They call
+  `sceMtapGetConnection` (0x0053a920), previously misidentified as a slot-count query, and no
+  longer invert the result.
+- Pad reads and actuator calls go through the SDK pad library like the rest of the pad API. A
+  partial copy of the Sony pad library read a table that was never filled.
+- `libscf` now matches the original in these areas:
+  - `sceScfEnsureRomVersionRead` returns the original value after the first call. The time zone
+    and summer-time queries previously always reported the tool defaults.
+  - The ROM version, the defaults, and the assertions no longer read fixed addresses.
+- `libmpeg` now matches the original in these areas:
+  - The default quantiser matrices are tables with the original contents instead of fixed
+    addresses.
+  - The picture timestamp adds 0x400 instead of storing a misread constant.
+- `sceSdRemote` sends a full 0x40-byte packet from real storage through the SDK RPC client.
+- The Sony libraries assert in every build type.
 
 ## [0.0.1] - 2026-00-00
 

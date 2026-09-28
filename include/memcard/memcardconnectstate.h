@@ -65,5 +65,5 @@ constexpr int kMemcardPort1 = 0;
 /** Controller port the second memory-card slot sits in. */
 constexpr int kMemcardPort2 = 1;
 
-/** Slots `sceMcGetSlotMax()` reports for a port with no multi-tap. */
-constexpr int kMemcardSlotsWithoutMultiTap = 1;
+/** The value `sceMtapGetConnection()` reports for a port with a multi-tap. */
+constexpr int kMemcardMultitapConnected = 1;

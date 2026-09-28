@@ -14,7 +14,7 @@ constexpr int kMemcardMaxEnumeratedSlots = 8;
  * `22GetAllConnectStatesMCT` in the RTTI descriptor at `0x008ef6b0`, single inheritance from
  * `MemcardTask` at offset 0. An instance is 0x48 bytes and the vtable is at `0x007dacf8`.
  *
- * Execute() queues one `CheckInfo` per slot, decides how many from `sceMcGetSlotMax()`, and
+ * Execute() queues one `CheckInfo` per slot, decides how many from `sceMtapGetConnection()`, and
  * records the expected count. Each report appends one MemcardConnectState to the vector the task
  * was given and increments the completed count, and the last of them finishes the task. The
  * MemcardTask::mPortSlot the task was constructed with is not used, because the slots come from

@@ -20,11 +20,9 @@ set(RESONANCE_SONYLIB_SRCS
     src/libgifpk.c
     src/libgraph.c
     src/libmpeg.c
-    src/libpad.c
     src/libsdr.c
     src/libvifpk.c
     src/libvu0.c
-    src/mcextra.c
     src/msin.c
     src/scf.c)
 

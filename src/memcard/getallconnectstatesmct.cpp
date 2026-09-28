@@ -1,6 +1,7 @@
 #include "memcard/getallconnectstatesmct.h"
 
 #include <libmc.h>
+#include <libmtap.h>
 
 #include "memcard/checkinfoop.h"
 #include "memcard/memcard.h"
@@ -55,7 +56,7 @@ void GetAllConnectStatesMCT::Finish() {
 void GetAllConnectStatesMCT::Execute() {
     mState = kMemcardTaskRunning;
 
-    if (sceMcGetSlotMax(kMemcardPort1) != kMemcardSlotsWithoutMultiTap) {
+    if (sceMtapGetConnection(kMemcardPort1) == kMemcardMultitapConnected) {
         for (int i = kFirstMultiTapSlot; i < kPastLastPort1MultiTapSlot; ++i) {
             mCard->CheckInfo(this, g_anMemcardSlotPortSlot[i], mCookie);
             mSlotIndex[i - kFirstMultiTapSlot] = i;
@@ -71,7 +72,7 @@ void GetAllConnectStatesMCT::Execute() {
 
     // A multi-tap on the second port yields no enquiry at all, rather than the four the first port
     // would yield, which is what leaves the port 2 entries of both slot tables unreferenced.
-    if (sceMcGetSlotMax(kMemcardPort2) == kMemcardSlotsWithoutMultiTap) {
+    if (sceMtapGetConnection(kMemcardPort2) != kMemcardMultitapConnected) {
         mCard->CheckInfo(this, g_anMemcardSlotPortSlot[1], mCookie);
         mSlotIndex[1] = 1;
         mExpected = 2;

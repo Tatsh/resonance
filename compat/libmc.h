@@ -32,16 +32,10 @@
 extern "C" {
 #endif
 
-// Every line above renames an entry point ps2sdk writes differently. This one is not a rename.
-// ps2sdk does not model a slot-count entry point at all, and the declaration therefore covers a
-// Sony routine the open-source SDK lacks. The identification of 0x0053a920 is inferred from its
-// port argument, its position in the libmc RPC neighbourhood, and every caller comparing the result
-// against one.
-int sceMcGetSlotMax(int nPort);
-
-// Nor is this one a rename. The image names the entry point sceMcInitLibrary at 0x005659e8,
-// which takes no arguments, while ps2sdk's mcInit() takes a server-type argument. The
-// declaration therefore covers the Sony routine directly.
+// Every line above renames an entry point ps2sdk writes differently. This one is not a rename. The
+// image lists the entry point at 0x005659e8 as sceMcInitLibrary. The routine takes no arguments,
+// while ps2sdk's mcInit() takes a server-type argument. The declaration therefore covers the Sony
+// routine directly.
 int sceMcInitLibrary(void);
 
 #ifdef __cplusplus

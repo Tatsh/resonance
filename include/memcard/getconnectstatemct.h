@@ -12,7 +12,7 @@
  * The task is the thinnest of the family. It queues one `CheckInfo`, translates the result into
  * mConnectState, and reports that record by value. The slot's display text comes from
  * g_apszMemcardSlotNames, chosen by matching mPortSlot against g_anMemcardSlotPortSlot, and the
- * search falls back on `sceMcGetSlotMax()` to decide whether a port has a multi-tap.
+ * search falls back on `sceMtapGetConnection()` to decide whether a port has a multi-tap.
  */
 class GetConnectStateMCT : public MemcardTask {
 public:

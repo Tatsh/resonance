@@ -1,6 +1,7 @@
 #include "memcard/getconnectstatemct.h"
 
 #include <libmc.h>
+#include <libmtap.h>
 
 #include "memcard/checkinfoop.h"
 #include "memcard/memcard.h"
@@ -40,7 +41,7 @@ void GetConnectStateMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 
     const char *pszSlotName = "";
-    if (sceMcGetSlotMax(kMemcardPort1) != kMemcardSlotsWithoutMultiTap) {
+    if (sceMtapGetConnection(kMemcardPort1) == kMemcardMultitapConnected) {
         for (int i = kFirstMultiTapSlot; i < kMemcardSlotCount; ++i) {
             if (g_anMemcardSlotPortSlot[i] == mPortSlot) {
                 pszSlotName = g_apszMemcardSlotNames[i];
@@ -49,7 +50,7 @@ void GetConnectStateMCT::OnCheckInfo(CheckInfoOp *pOp) {
         }
     } else if (g_anMemcardSlotPortSlot[0] == mPortSlot) {
         pszSlotName = g_apszMemcardSlotNames[0];
-    } else if (sceMcGetSlotMax(kMemcardPort2) != kMemcardSlotsWithoutMultiTap) {
+    } else if (sceMtapGetConnection(kMemcardPort2) == kMemcardMultitapConnected) {
         // The four multi-tap entries of port 2 are never searched, so a slot behind a tap on the
         // second port cannot be identified at all.
         mStatus = kMemcardStatusUnknown;
