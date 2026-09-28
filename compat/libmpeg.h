@@ -101,8 +101,8 @@ int sceMpegSub005e07f8(void *pDecoder, void *pPicture, int nMode);
 // takes nA times nB, and the first clear word takes nA shifted by four.
 int sceMpegSub005e0840(void *pDecoder, void *pPicture, int nA, int nB);
 
-// Disables an IPU control bit over the given base with the given flag.
-void sceMpegDisableIpuControlBit(void *pBase, int nFlag);
+// Sets IPU control bit twenty-three and resets the IPU table from the IPU base address.
+void sceMpegDisableIpuControlBit(void);
 
 // Drains the IPU fifo for the decoder.
 void sceMpegSub0060ddc8(void *pDecoder);

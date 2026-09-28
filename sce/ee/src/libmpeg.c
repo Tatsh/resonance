@@ -3,10 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <eekernel.h>
 #include <libmpeg.h>
-#include <os/spinlock.h>
-
-#include "os/log.h"
 
 // Layout facts recovered from the disassembly of the routines in this file. The decoder
 // (sceMpeg) lives in the caller and points at the work area through pContext (+0x40). The work
@@ -166,6 +164,20 @@ static MpegKernelFunc g_mpegIndirectTable[11] = {
 // IPU words the poll cluster shares, named by address. Roles follow the observed use.
 static int g_mpegIpuBase; // Word at 0x007a38b0, the base the disable path derives pointers from.
 static int g_mpegIpuBusyFlag; // Word at 0x007a2b24, nonzero while an IPU command is outstanding.
+static int g_nMpegIsMpeg2;    // Word at 0x007a33b0, set once a sequence extension marks MPEG-2.
+
+// The default quantiser matrices in zigzag order. The IPU reads them by DMA when a sequence header
+// does not load its own.
+// 0x007a2b80
+static const unsigned char g_abMpegDefaultIntraMatrix[] __attribute__((aligned(16))) = {
+    8,  16, 16, 19, 16, 19, 22, 22, 22, 22, 22, 22, 26, 24, 26, 27, 27, 27, 26, 26, 26, 26,
+    27, 27, 27, 29, 29, 29, 34, 34, 34, 29, 29, 29, 27, 27, 29, 29, 32, 32, 34, 34, 37, 38,
+    37, 35, 35, 34, 35, 38, 38, 40, 40, 40, 48, 48, 46, 46, 56, 56, 58, 69, 69, 83};
+// 0x007a2bc0
+static const unsigned char g_abMpegDefaultNonIntraMatrix[] __attribute__((aligned(16))) = {
+    16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
+    16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
+    16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16};
 static int g_mpegShiftAccum; // Word at 0x007a3398, shifted down by the poll readers.
 static int g_mpegShiftBudget; // Word at 0x007a339c, compared against the poll argument.
 
@@ -222,7 +234,7 @@ static void sceMpegSub0060bc58(void);
 static int sceMpegSub0060bf70(void);
 static int sceMpegSub0060e020(void);
 static int sceMpegSub0060b290(unsigned int nValue);
-static int sceMpegSub0060e5a8(void *pArg0, int nArg1);
+static int sceMpegSub0060e5a8(unsigned int nCommand, const unsigned char *pMatrix);
 static int sceMpegSub0060e000(MpegSeqTable *pTable, int nA, int nB);
 static void sceMpegSub0060e4c0(MpegSeqTable *pT0,
                                MpegSeqTable *pT1,
@@ -384,10 +396,9 @@ static int sceMpegSub0060bf70(void) {
         g_mpeg3438 = 0;
         g_mpeg3470 = g_mpeg2c78;
     }
-    // The sum stores unconditionally; the constant overwrites it only on the narrow path.
     g_mpeg2d38 = g_mpeg3430 + g_mpeg2c78;
-    if (g_mpeg346c != 0 && g_mpeg3470 < g_mpeg2c78) {
-        g_mpeg2d38 = 0x7a0400;
+    if (g_mpeg346c != 0 && g_mpeg3470 >= g_mpeg2c78) {
+        g_mpeg2d38 += 0x400;
     }
     if (g_mpeg3434 < g_mpeg2d38) {
         g_mpeg3434 = g_mpeg2d38;
@@ -456,7 +467,7 @@ static int sceMpegSub0060e020(void) {
     bits = sceMpegSub0060b820(1);
     g_mpeg33a0 = bits;
     if (bits == 0) {
-        sceMpegSub0060e5a8((void *)(uintptr_t)0x50000000, 0x7a2b80);
+        sceMpegSub0060e5a8(0x50000000u, g_abMpegDefaultIntraMatrix);
     } else {
         sceMpegSub0060b2c0();
         sceMpegSub0060b290(0x50000000u);
@@ -465,7 +476,7 @@ static int sceMpegSub0060e020(void) {
     bits = sceMpegSub0060b820(1);
     g_mpeg33a4 = bits;
     if (bits == 0) {
-        sceMpegSub0060e5a8((void *)(uintptr_t)0x58000000, 0x7a2bc0);
+        sceMpegSub0060e5a8(0x58000000u, g_abMpegDefaultNonIntraMatrix);
     } else {
         sceMpegSub0060b2c0();
         sceMpegSub0060b290(0x58000000u);
@@ -542,7 +553,7 @@ static int sceMpegSub0060b290(unsigned int nValue) {
 }
 
 // 0x0060e5a8
-static int sceMpegSub0060e5a8(void *pArg0, int nArg1) {
+static int sceMpegSub0060e5a8(unsigned int nCommand, const unsigned char *pMatrix) {
     StreamEntry entry;
     volatile unsigned int *pData;
     volatile unsigned int *pGifA;
@@ -557,11 +568,11 @@ static int sceMpegSub0060e5a8(void *pArg0, int nArg1) {
     pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
     *pData = 0u;
     pGifA = (volatile unsigned int *)(uintptr_t)0x1000b410;
-    *pGifA = (unsigned int)nArg1 & 0xffffffu;
+    *pGifA = (unsigned int)(uintptr_t)pMatrix & 0xffffffu;
     pGifB = (volatile unsigned int *)(uintptr_t)0x1000b420;
     *pGifB = 4u;
     *pData = 0x101u;
-    sceMpegSub0060b290((unsigned int)(uintptr_t)pArg0);
+    sceMpegSub0060b290(nCommand);
     sceMpegSub0060b2c0();
     entry.key = 3;
     return sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
@@ -857,7 +868,7 @@ void sceMpegRaiseError(const char *pFormat) {
 
 // 0x0060de90
 void sceMpegPrintErrorLine(const char *pMessage) {
-    LogPrintf("[MPEG ERROR]%s\n", pMessage);
+    printf("[MPEG ERROR]%s\n", pMessage);
 }
 
 // 0x0060dea0
@@ -900,11 +911,9 @@ int sceIpuSync(int nMode) {
 }
 
 // 0x0060dd78
-void sceMpegDisableIpuControlBit(void *pBase, int nFlag) {
+void sceMpegDisableIpuControlBit(void) {
     int base;
 
-    (void)pBase;
-    (void)nFlag;
     sceIpuSetControlBitTwentyThree(1);
     base = g_mpegIpuBase;
     g_mpegIpuTable.mUnknown00 = base;
@@ -925,9 +934,9 @@ void sceMpegSub0060ddc8(void *pDecoder) {
 
     (void)pDecoder;
     g_mpeg2d3c = 0;
-    SpinDisableInterrupts();
+    DIntr();
     // The enable store falls in the disable call delay slot, so it lands first.
-    *(volatile int *)(uintptr_t)0x7a2b24 = 1;
+    g_mpegIpuBusyFlag = 1;
     pStatus = (volatile unsigned int *)(uintptr_t)0x1000f520;
     pStatusSet = (volatile unsigned int *)(uintptr_t)0x1000f590;
     value = *pStatus;
@@ -941,7 +950,7 @@ void sceMpegSub0060ddc8(void *pDecoder) {
     *pClearC = 0;
     value = *pStatus;
     value = value & 0xfffeffffu;
-    ReenableInterrupts();
+    EIntr();
     // The clear store falls in the reenable call delay slot, so it lands first.
     *pStatusSet = value;
     pMaskA = (volatile unsigned int *)(uintptr_t)0x1000b020;
@@ -956,7 +965,7 @@ void sceMpegSub0060ddc8(void *pDecoder) {
 
 // 0x0060dce0
 void sceIpuEnableControlBitTwentyThree(void) {
-    *(volatile int *)(uintptr_t)0x7a33b0 = 0;
+    g_nMpegIsMpeg2 = 0;
     sceIpuSetControlBitTwentyThree(1);
 }
 
@@ -967,7 +976,7 @@ int sceMpegSub0061d9d8(int nMode) {
     volatile unsigned int *pClear;
     unsigned int value;
 
-    SpinDisableInterrupts();
+    DIntr();
     pStatus = (volatile unsigned int *)(uintptr_t)0x1000f520;
     pStatusSet = (volatile unsigned int *)(uintptr_t)0x1000f590;
     value = *pStatus;
@@ -978,7 +987,7 @@ int sceMpegSub0061d9d8(int nMode) {
     value = *pStatus;
     value = value & 0xfffeffffu;
     *pStatusSet = value;
-    return (int)ReenableInterrupts();
+    return (int)EIntr();
 }
 
 // IPU command words copied by the initialiser, read from the image.
@@ -1107,7 +1116,7 @@ int sceMpegInit(void) {
     volatile unsigned int *pClearB;
     unsigned int value;
 
-    SpinDisableInterrupts();
+    DIntr();
     pStatus = (volatile unsigned int *)(uintptr_t)0x1000f520;
     pStatusSet = (volatile unsigned int *)(uintptr_t)0x1000f590;
     value = *pStatus;
@@ -1127,7 +1136,7 @@ int sceMpegInit(void) {
     pClearA = (volatile unsigned int *)(uintptr_t)0x1000b020;
     // The first clear falls in the call delay slot, so it lands before the reenable body.
     *pClearA = 0;
-    ReenableInterrupts();
+    EIntr();
     pClearB = (volatile unsigned int *)(uintptr_t)0x1000b420;
     *pClearB = 0;
     return sceMpegSub0061da40();
@@ -1412,7 +1421,7 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     context->mResetArgA = -1;
     context->mResetArgB = -1;
     // The last busy clear falls in the disable call delay slot and still lands here.
-    sceMpegDisableIpuControlBit((void *)(uintptr_t)0x7a0000, 1);
+    sceMpegDisableIpuControlBit();
     sceMpegSub005e08e8(decoder);
     sceMpegSub005e0928(decoder);
     for (i = 0; i < kTableCount; ++i) {
