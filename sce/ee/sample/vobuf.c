@@ -2,9 +2,8 @@
 
 #include <stddef.h>
 
+#include <eekernel.h>
 #include <ezmpeg.h>
-
-#include "os/spinlock.h"
 
 enum {
     kTagEntrySize = 0x40440,
@@ -49,11 +48,11 @@ int voBufIsFull(VoBuf *pVoBuf) {
 
 // 0x005d4010
 void voBufIncCount(VoBuf *pVoBuf) {
-    SpinDisableInterrupts();
+    DIntr();
     *(int *)((unsigned char *)pVoBuf->tag + pVoBuf->mUnknown08 * kTagEntrySize) = kTagDecoded;
     ++pVoBuf->count;
     pVoBuf->mUnknown08 = (pVoBuf->mUnknown08 + 1) % pVoBuf->size;
-    ReenableInterrupts();
+    EIntr();
 }
 
 // 0x005d4088

@@ -9,10 +9,10 @@
 #include <malloc.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "ezmpeg/videodec.h"
 #include "ezmpeg/vobuf.h"
-#include "os/mem.h"
 
 // The decoder instance, which the playback driver owns. The stream callbacks address it directly.
 extern VideoDec videoDec;
@@ -154,7 +154,7 @@ void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     sceGsSyncPath(0, 0);
     sceDmaSend(pChannel, packet.mBase);
     sceGsSyncPath(0, 0);
-    HeapFree(pBuffer);
+    free(pBuffer);
 }
 
 // 0x005d2ab8

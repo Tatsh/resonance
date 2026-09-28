@@ -6,9 +6,8 @@
 #include <sifdev.h>
 #include <sifdma.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
-
-#include "os/log.h"
 
 enum {
     kPresetSize = 0x800,
@@ -222,12 +221,12 @@ int audioDecCreate(AudioDec *pAudioDec,
     pAudioDec->iopBufferSize = nIopBufferSize;
     pAudioDec->iopBuffer = (int)(uintptr_t)sceSifAllocIopHeap(nIopBufferSize);
     if (pAudioDec->iopBuffer < 0) {
-        LogPrintf("Cannot allocate IOP memory\n");
+        printf("Cannot allocate IOP memory\n");
         return 0;
     }
     pAudioDec->iopExtra = (int)(uintptr_t)sceSifAllocIopHeap(kPresetSize);
     if (pAudioDec->iopExtra < 0) {
-        LogPrintf("Cannot allocate IOP memory\n");
+        printf("Cannot allocate IOP memory\n");
         return 0;
     }
     memset(g_presetData, 0, kPresetSize);

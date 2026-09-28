@@ -1,12 +1,11 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <eekernel.h>
 #include <ezmpeg.h>
 #include <ezmpeg/vibuf.h>
 #include <libdma.h>
-#include <os/log.h>
-#include <os/spinlock.h>
 
 // Sony libdma is reproduced here from the disassembly.
 // Register words match the disassembly packing.
@@ -266,7 +265,7 @@ void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
         timeout = kBusySpin;
         do {
             if (timeout < 0) {
-                LogPrintf("libdma: sync timeout\n");
+                printf("libdma: sync timeout\n");
                 if (((channel->mChcr >> 8) & 1U) != 0U) {
                     channel->mChcr &= 0xFFFFFEFFU;
                 }
@@ -295,7 +294,7 @@ void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
         timeout = kBusySpin;
         do {
             if (timeout < 0) {
-                LogPrintf("libdma: sync timeout\n");
+                printf("libdma: sync timeout\n");
                 if (((channel->mChcr >> 8) & 1U) != 0U) {
                     channel->mChcr &= 0xFFFFFEFFU;
                 }
@@ -330,7 +329,7 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     while ((word & 0x100U) != 0U) {
         timeout--;
         if (timeout < 0) {
-            LogPrintf("libdma: sync timeout\n");
+            printf("libdma: sync timeout\n");
             if (((channel->mChcr >> 8) & 1U) != 0U) {
                 channel->mChcr &= 0xFFFFFEFFU;
             }
@@ -373,13 +372,13 @@ void sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
     unsigned int enabler;
 
     queue = (DmaQueue *)buffer;
-    (void)SpinDisableInterrupts();
+    (void)DIntr();
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler | 0x10000U;
     IPU_TO_CHCR = 5U;
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-    (void)ReenableInterrupts();
+    (void)EIntr();
     IPU_TO_QWC = 0U;
     IPU_TO_MADR = 0U;
     IPU_TO_TADR = 0U;
@@ -458,7 +457,7 @@ void sceDmaSub006126e8(ViBuf *buffer) {
     IPU_TO_QWC = 0U;
     IPU_TO_MADR = (unsigned int)(uintptr_t)queue->mData & 0x0FFFFFFFU;
     IPU_TO_TADR = queue->mTagBase & 0x0FFFFFFFU;
-    (void)SpinDisableInterrupts();
+    (void)DIntr();
     {
         unsigned int enabler;
 
@@ -468,7 +467,7 @@ void sceDmaSub006126e8(ViBuf *buffer) {
         enabler = DMA_ENABLER;
         DMA_ENABLEW = enabler & 0xFFFEFFFFU;
     }
-    (void)ReenableInterrupts();
+    (void)EIntr();
 }
 
 // 0x00612890
@@ -494,13 +493,13 @@ void sceDmaSub00612890(ViBuf *buffer) {
         ErrMessage("DMA ADD not active\n");
         return;
     }
-    (void)SpinDisableInterrupts();
+    (void)DIntr();
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler | 0x10000U;
     IPU_TO_CHCR = 5U;
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-    (void)ReenableInterrupts();
+    (void)EIntr();
     chcr = IPU_TO_CHCR;
     madr = IPU_TO_MADR;
     tagBase = queue->mTagBase;
@@ -599,13 +598,13 @@ void sceDmaSub00612890(ViBuf *buffer) {
             chcr &= 0x0FFFFFFFU;
             chcr |= 0x30000000U;
         }
-        (void)SpinDisableInterrupts();
+        (void)DIntr();
         enabler = DMA_ENABLER;
         DMA_ENABLEW = enabler | 0x10000U;
         IPU_TO_CHCR = chcr | 0x100U;
         enabler = DMA_ENABLER;
         DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-        (void)ReenableInterrupts();
+        (void)EIntr();
     }
     SignalSema(queue->mSemaId);
 }
@@ -621,13 +620,13 @@ void sceDmaSub00612b40(ViBuf *buffer) {
     queue = (DmaQueue *)buffer;
     WaitSema(queue->mSemaId);
     queue->mUnknown44 = 0;
-    (void)SpinDisableInterrupts();
+    (void)DIntr();
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler | 0x10000U;
     IPU_TO_CHCR = 5U;
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-    (void)ReenableInterrupts();
+    (void)EIntr();
     queue->mSavedMadr = (int)IPU_TO_MADR;
     queue->mSavedTadr = (int)IPU_TO_TADR;
     queue->mSavedQwc = (int)IPU_TO_QWC;
@@ -635,13 +634,13 @@ void sceDmaSub00612b40(ViBuf *buffer) {
     do {
         ctrl = IPU_CTRL;
     } while ((ctrl & 0xF0U) != 0U);
-    (void)SpinDisableInterrupts();
+    (void)DIntr();
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler | 0x10000U;
     IPU_FROM_CHCR = 0U;
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-    (void)ReenableInterrupts();
+    (void)EIntr();
     queue->mSavedFromMadr = (int)IPU_FROM_MADR;
     queue->mSavedFromQwc = (int)IPU_FROM_QWC;
     queue->mSavedFromChcr = (int)IPU_FROM_CHCR;
@@ -818,13 +817,13 @@ void sceDmaSub00612cc0(ViBuf *buffer) {
         {
             unsigned int enabler;
 
-            (void)SpinDisableInterrupts();
+            (void)DIntr();
             enabler = DMA_ENABLER;
             DMA_ENABLEW = enabler | 0x10000U;
             IPU_FROM_CHCR = (unsigned int)queue->mSavedFromChcr | 0x100U;
             enabler = DMA_ENABLER;
             DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-            (void)ReenableInterrupts();
+            (void)EIntr();
         }
         qwc = (unsigned int)queue->mBufferedSectors;
     }
@@ -841,7 +840,7 @@ void sceDmaSub00612cc0(ViBuf *buffer) {
     if (queue->mBufferedSectors == 0) {
         bp = (unsigned int)queue->mSavedIpuCtrl;
     } else {
-        (void)SpinDisableInterrupts();
+        (void)DIntr();
         {
             unsigned int enabler;
 
@@ -850,7 +849,7 @@ void sceDmaSub00612cc0(ViBuf *buffer) {
             IPU_TO_CHCR = chcr;
             enabler = DMA_ENABLER;
             DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-            (void)ReenableInterrupts();
+            (void)EIntr();
         }
         bp = (unsigned int)queue->mSavedIpuCtrl;
     }

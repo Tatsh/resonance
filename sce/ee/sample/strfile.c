@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "os/log.h"
-
 // Room for a rebuilt path and for the device prefix before the colon.
 enum {
     kPathSize = 256,
@@ -66,7 +64,7 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
         sprintf(szPath, "%s:%s", szDev, pszName);
     }
 
-    LogPrintf("file: %s\n", szPath);
+    printf("file: %s\n", szPath);
 
     if (pFile->isOnCD != 0) {
         if (g_bCdInitialized == 0) {
@@ -79,7 +77,7 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
 
         sceCdlFILE *pEntry = (sceCdlFILE *)&pFile->mUnknown08[0];
         if (sceCdSearchFile(pEntry, szPath) == 0) {
-            LogPrintf("Cannot open '%s'(sceCdSearchFile)\n", szPath);
+            printf("Cannot open '%s'(sceCdSearchFile)\n", szPath);
             return 0;
         }
         pFile->size = (int)pEntry->size;
@@ -90,21 +88,21 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
 
     int nDescriptor = sceOpen(szPath, kOpenReadOnly);
     if (nDescriptor < 0) {
-        LogPrintf("Cannot open '%s'(sceOpen)\n", szPath);
+        printf("Cannot open '%s'(sceOpen)\n", szPath);
         return 0;
     }
     pFile->fd = nDescriptor;
 
     int nSize = sceLseek(nDescriptor, 0, SCE_SEEK_END);
     if (nSize < 0) {
-        LogPrintf("sceLseek() fails (%s): %d\n", szPath, nSize);
+        printf("sceLseek() fails (%s): %d\n", szPath, nSize);
         sceClose(nDescriptor);
         return 0;
     }
     pFile->size = nSize;
 
     if (sceLseek(nDescriptor, 0, SCE_SEEK_SET) < 0) {
-        LogPrintf("sceLseek() fails (%s)\n", szPath);
+        printf("sceLseek() fails (%s)\n", szPath);
         sceClose(nDescriptor);
         return 0;
     }
