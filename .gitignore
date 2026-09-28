@@ -1,4 +1,5 @@
 *.info
+*.iso
 *.kate-swp
 *.log
 *.tsbuildinfo

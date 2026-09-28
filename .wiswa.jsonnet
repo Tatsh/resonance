@@ -43,4 +43,5 @@
   pre_commit_config+: {
     exclude: '^src/python/(PC|patches)/',
   },
+  gitignore+: ['*.iso'],
 }
