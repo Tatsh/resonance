@@ -10,14 +10,14 @@ namespace {
 constexpr int kDirectoryBufferSize = 0x100;
 
 // 0x008de290
-char g_szDirectoryBuffer[kDirectoryBufferSize];
+char g_szDirectoryBuffer[kDirectoryBufferSize] = {};
 
 // The size is not recovered: nothing else in the image references the region, and the format runs
 // unbounded. The value below is a placeholder rather than a recovered size.
 constexpr int kFormatStringBufferSize = 1024;
 
 // 0x008de390
-char g_szFormatStringBuffer[kFormatStringBufferSize];
+char g_szFormatStringBuffer[kFormatStringBufferSize] = {};
 
 } // namespace
 

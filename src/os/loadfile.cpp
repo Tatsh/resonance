@@ -103,87 +103,87 @@ int GzipInflatedSize();
 
 // 0x00761488
 // The inflate input descriptor always reads minus one for a memory source.
-int g_nGzipInputDescriptor;
+int g_nGzipInputDescriptor = 0;
 
 // 0x00761490
 // The inflate input name holds the memory name during a memory run.
-char g_szGzipInputName[12];
+char g_szGzipInputName[12] = {};
 
 // 0x00761594
 // The inflate memory source appears twice for the two readers.
-const void *g_pGzipMemorySourceCopy;
+const void *g_pGzipMemorySourceCopy = nullptr;
 
 // 0x00761598
 // The inflate memory source arrives here for the run.
-const void *g_pGzipMemorySource;
+const void *g_pGzipMemorySource = nullptr;
 
 // 0x0076159c
 // The inflate memory source length arrives here for the run.
-int g_nGzipMemoryLength;
+int g_nGzipMemoryLength = 0;
 
 // 0x00728c24
 // The inflate path sets this flag once before the first run.
-int g_nGzipInitialisedFlag;
+int g_nGzipInitialisedFlag = 0;
 
 // 0x00728c1c
 // The inflate path enables this word before each run.
-int g_nGzipOutputEnabled;
+int g_nGzipOutputEnabled = 0;
 
 // 0x00728c10
 // This word receives the inflate status.
-int g_nGzipInflateStatus;
+int g_nGzipInflateStatus = 0;
 
 // 0x00728c28
 // The staging buffer refilled from the memory source or the file.
-unsigned char g_bGzipInputBuffer[kGzipInputBufferSize];
+unsigned char g_bGzipInputBuffer[kGzipInputBufferSize] = {};
 
 // 0x00761468
 // The valid byte count in the staging buffer.
-int g_nGzipInputLength;
+int g_nGzipInputLength = 0;
 
 // 0x0076146c
 // The read position in the staging buffer.
-int g_nGzipInputPosition;
+int g_nGzipInputPosition = 0;
 
 // 0x00761470
 // The inflate state word, cleared before each run.
-int g_nGzipInflateState;
+int g_nGzipInflateState = 0;
 
 // 0x00761478
 // The cumulative input bytes fed through the staging buffer.
-unsigned long long g_llGzipTotalInput;
+unsigned long long g_llGzipTotalInput = 0;
 
 // 0x00761480
 // Eight bytes the wrappers clear and only the inflate core owns otherwise.
-unsigned long long g_llGzipUnknown1480;
+unsigned long long g_llGzipUnknown1480 = 0;
 
 // 0x007615a0
 // The member modification time, stored once as a zero-extended word.
-unsigned long long g_llGzipModificationTime;
+unsigned long long g_llGzipModificationTime = 0;
 
 // 0x007a5b50
 // The stream state word, zeroed on entry and set past the header on exit.
-unsigned long long g_llGzipStreamState;
+unsigned long long g_llGzipStreamState = 0;
 
 // 0x007a3ea0
 // The running checksum of the inflate output.
-unsigned long long g_llGzipCrc;
+unsigned long long g_llGzipCrc = 0;
 
 // 0x00728c20
 // A nonzero value suppresses the modification time store.
-int g_nGzipTimeFlag;
+int g_nGzipTimeFlag = 0;
 
 // 0x00728c18
 // This word is set on every error path.
-int g_nGzipErrorFlag;
+int g_nGzipErrorFlag = 0;
 
 // 0x008e68d4
 // The base of the inflate output.
-unsigned char *g_pGzipOutputStart;
+unsigned char *g_pGzipOutputStart = nullptr;
 
 // 0x008e68d8
 // The current inflate output position, advanced by the deflate driver.
-unsigned char *g_pGzipOutputCurrent;
+unsigned char *g_pGzipOutputCurrent = nullptr;
 
 // 0x00555538
 void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsigned *pnSize) {

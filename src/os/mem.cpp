@@ -105,21 +105,21 @@ constexpr int kHeapLogPathSize = 0x40;
 
 // The blocks one counting pass of DumpHeapMemoryLog() holds before releasing them.
 // 0x0089e200
-void *g_apProbeBlocks[kProbeBlockLimit];
+void *g_apProbeBlocks[kProbeBlockLimit] = {};
 
 // 0x006f57d0
-int g_bMemLogging;
+int g_bMemLogging = 0;
 
 // The rewind to kStlUnknownTag compiles to one doubleword store. The array bound comes from the
 // distance to the next global rather than from any single access.
 // 0x006f57d8
-char g_szStlAllocTag[kMemStlTagSize];
+char g_szStlAllocTag[kMemStlTagSize] = {};
 
 // 0x006f5858
-int g_bMemAccounting;
+int g_bMemAccounting = 0;
 
 // 0x006f585c
-int g_nMemTotalBytes;
+int g_nMemTotalBytes = 0;
 
 // 0x006f5860
 MemTagTotal g_aMemTagTotals[kMemTagCount];
@@ -129,26 +129,26 @@ MemLogSource g_aMemLogSources[kMemLogSourceCount];
 
 // Null until MemLogSourceInit() runs, which disables the tracking routines.
 // 0x006f8460
-MemLogBlock *g_pMemLogBlocks;
+MemLogBlock *g_pMemLogBlocks = nullptr;
 
 // Set once MemOpenLog() has painted the stack.
 // 0x006f57c8
-int g_bMemStackPainted;
+int g_bMemStackPainted = 0;
 
 // Reports MemLogCloseAndContinue() has started since MemOpenLog().
 // 0x006f57cc
-int g_nMemLogReopenCount;
+int g_nMemLogReopenCount = 0;
 
 // 0x00894d70
-FILE *g_pMemLogFile;
+FILE *g_pMemLogFile = nullptr;
 
 // Path of the report being written.
 // 0x00894db8
-char g_szMemLogPath[kMemLogPathSize];
+char g_szMemLogPath[kMemLogPathSize] = {};
 
 // Path MemOpenLog() was given, which each reopened report is named after.
 // 0x00894d78
-char g_szMemLogBaseName[kMemLogPathSize];
+char g_szMemLogBaseName[kMemLogPathSize] = {};
 
 // 0x004a9360
 // The address is an out-of-line copy with no caller. Reduces a tag to the text after its last path

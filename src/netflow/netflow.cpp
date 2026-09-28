@@ -27,15 +27,15 @@ void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_si
 
 // 0x007B88D8
 // Edge examinations counted across the search, statistics only.
-int g_nNetflowProbeCount;
+int g_nNetflowProbeCount = 0;
 
 // 0x007B88DC
 // Augmentations applied, statistics only.
-int g_nNetflowAugmentTotal;
+int g_nNetflowAugmentTotal = 0;
 
 // 0x007B88E0
 // Head of the free U queue, 2500 when the queue is empty.
-int g_nNetflowQueueHead;
+int g_nNetflowQueueHead = 0;
 
 // One slot of the augmenting path search queue.
 struct NetflowQueueEntry {

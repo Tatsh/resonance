@@ -28,21 +28,21 @@ constexpr int kTempBufferFallbackSize = 128 * 1024;
 constexpr char kTempZoneName[] = "temp";
 
 // 0x006e9808
-int g_nZonesEnabled;
+int g_nZonesEnabled = 0;
 
 // The initial value is not recoverable from the image. FreeAllZones() and ZoneDelete() are what
 // establish kNoZone at runtime.
 // 0x006e980c
-int g_nCurrentZone;
+int g_nCurrentZone = 0;
 
 // 0x006e9860
-void *g_pTempBuffer;
+void *g_pTempBuffer = nullptr;
 
 // 0x006e9864
-int g_nTempBufferSize;
+int g_nTempBufferSize = 0;
 
 // 0x006e9868
-int g_bTempGrabbed;
+int g_bTempGrabbed = 0;
 
 char *AlignZoneStart(void *pBlock) {
     uintptr_t nAddress = reinterpret_cast<uintptr_t>(pBlock) + kZoneStartAlignment - 1;

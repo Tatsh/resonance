@@ -67,10 +67,10 @@ constexpr unsigned int kConsoleRows = 30;
 
 // 0x0077d5d0
 // Nothing in the image reads it.
-int g_nDebugGsResetWord;
+int g_nDebugGsResetWord = 0;
 
 // 0x008e4f20
-int g_nDebugConsole;
+int g_nDebugConsole = 0;
 
 // 0x008e4f30
 sceGsDBuff g_debugDoubleBuffer;

@@ -94,23 +94,23 @@ std::list<AsyncRequest> g_asyncPendingJobs;
 std::list<AsyncRequest> g_asyncCompletedJobs;
 
 // 0x006e9134
-int g_nAsyncNextJobId;
+int g_nAsyncNextJobId = 0;
 
 // 0x006e9138
-int g_bAsyncInitialised;
+int g_bAsyncInitialised = 0;
 
 // 0x006e913c
-int g_nAsyncHostMedia;
+int g_nAsyncHostMedia = 0;
 
 // 0x006e9140
 AsyncOp g_asyncCurrentOp;
 
 // 0x006e915c
-int g_bAsyncThreaded;
+int g_bAsyncThreaded = 0;
 
 // Raised by the drive callback and consumed by AsyncCheck.
 // 0x006e9160
-int g_nAsyncOpFinished;
+int g_nAsyncOpFinished = 0;
 
 // Nothing in the image writes this, so every field stays at its zero: no retry limit, no spindle
 // override, and 2048-byte sectors.
@@ -126,10 +126,10 @@ long long g_llAsyncOpDeadline;
 long long g_llAsyncOpStartTime;
 
 // 0x006e91d0
-AsyncJob *g_pAsyncFreeJobs;
+AsyncJob *g_pAsyncFreeJobs = nullptr;
 
 // 0x006e91d4
-int g_nAsyncCallbackThread;
+int g_nAsyncCallbackThread = 0;
 
 // Nothing restores it.
 // 0x006e91d8
@@ -137,14 +137,14 @@ sceCdCBFunc g_pfnAsyncPrevCdCallback;
 
 // The drive error code the last callback report latched.
 // 0x006e91dc
-int g_nAsyncOpError;
+int g_nAsyncOpError = 0;
 
 // The absolute disc sector the seek moves to and the read then starts at.
 // 0x00892590
-int g_nAsyncOpLsn;
+int g_nAsyncOpLsn = 0;
 
 // 0x008925a0
-char g_abAsyncCallbackStack[kAsyncCallbackStackSize];
+char g_abAsyncCallbackStack[kAsyncCallbackStackSize] = {};
 
 } // namespace
 

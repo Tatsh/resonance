@@ -105,10 +105,10 @@ inline void BuildHostPath(char *pszDest, const char *pszPath) {
 std::fstream g_fileLog;
 
 // 0x006ee320
-int g_bFileLogOpen;
+int g_bFileLogOpen = 0;
 
 // 0x006ee378
-char g_szFileLogPath[kFileLogPathSize];
+char g_szFileLogPath[kFileLogPathSize] = {};
 
 // 0x0047c9c0
 int FileOpen(const char *pszPath, int nFlags, ...) {

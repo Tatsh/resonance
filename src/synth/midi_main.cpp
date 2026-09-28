@@ -113,11 +113,11 @@ SifRpcClientData_t g_soundDriverClient;
 
 // Set while a request sent without waiting is still running on the driver.
 // 0x00780878
-int g_bSoundRequestPending;
+int g_bSoundRequestPending = 0;
 
 // The driver's reply, whose first word SubmitSoundDriverRequest() reports.
 // 0x008e5b80
-unsigned int g_anSoundDriverReply[kSoundDriverReplyWords];
+unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
 // The descriptor XferToIop() hands to the SIF DMA.
 // 0x008e5be8
@@ -125,15 +125,15 @@ SifDmaTransfer_t g_xferToIopDma;
 
 // Set once InitSynthDriver() has brought the driver up.
 // 0x006e9b88
-int g_bSynthDriverReady;
+int g_bSynthDriverReady = 0;
 
 // The IOP address of the driver's event buffers, from InitSynthDriver().
 // 0x006e9dc0
-int g_nMidiEventIopAddress;
+int g_nMidiEventIopAddress = 0;
 
 // The event buffer PollSynthEvents() writes next.
 // 0x006e9bd0
-int g_nMidiEventBufferIndex;
+int g_nMidiEventBufferIndex = 0;
 
 // 0x00894cc0
 SoundDriverCommand g_chunkCommand;
@@ -142,13 +142,13 @@ SoundDriverCommand g_chunkCommand;
 SoundDriverCommand g_bankCommand;
 
 // 0x00894748
-int g_anIopStagingAddress[kIopStagingBufferCount];
+int g_anIopStagingAddress[kIopStagingBufferCount] = {};
 
 // 0x006e9b80
-int g_nIopStagingIndex;
+int g_nIopStagingIndex = 0;
 
 // 0x006e9b84
-int g_nBankIopAddress;
+int g_nBankIopAddress = 0;
 
 // 0x006e9b90
 HxStr g_bdBankName;

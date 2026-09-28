@@ -17,31 +17,31 @@ namespace {
 constexpr int kOpenReadOnly = 1;
 
 // 0x0070bf10
-int g_nHostMode;
+int g_nHostMode = 0;
 
 // 0x0070bf14
-int g_nUsingArkFiles;
+int g_nUsingArkFiles = 0;
 
 // 0x0070bf18
-int g_nWarningsEnabled;
+int g_nWarningsEnabled = 0;
 
 // 0x0070bf1c
-int g_nScreenMessagesEnabled;
+int g_nScreenMessagesEnabled = 0;
 
 // 0x0070bf20
-int g_nUsingCdMedia;
+int g_nUsingCdMedia = 0;
 
 // 0x0070bf24
-int g_nDebugKeysEnabled;
+int g_nDebugKeysEnabled = 0;
 
 // 0x0070bf28
-int g_nMidiErrorLogEnabled;
+int g_nMidiErrorLogEnabled = 0;
 
 // 0x0070bf2c
-int g_nMemAccountingEnabled;
+int g_nMemAccountingEnabled = 0;
 
 // 0x0070bf30
-int g_nIntroMovieEnabled;
+int g_nIntroMovieEnabled = 0;
 
 // 0x0070bf38
 HxStr g_versionString("198");

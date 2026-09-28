@@ -27,7 +27,7 @@ constexpr int kDisplayBitDepth = 16;
 // A newline follows every kLoadingDotsPerLine progress dots.
 constexpr int kLoadingDotsPerLine = 64;
 
-int g_nLoadingDots;
+int g_nLoadingDots = 0;
 
 const char *g_szLastFailure;
 

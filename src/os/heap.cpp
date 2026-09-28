@@ -17,16 +17,16 @@ constexpr int kCyclesPerMicrosecond = 0x127;
 // Set while Realloc() drives Alloc() and Free() internally, so that the nested calls do not
 // accumulate their own timings on top of the enclosing one.
 // 0x00724578
-int g_bHeapTimingSuspended;
+int g_bHeapTimingSuspended = 0;
 
 // 0x0072457c
-int g_nHeapAllocMicroseconds;
+int g_nHeapAllocMicroseconds = 0;
 
 // 0x00724580
-int g_nHeapReallocMicroseconds;
+int g_nHeapReallocMicroseconds = 0;
 
 // 0x00724584
-int g_nHeapFreeMicroseconds;
+int g_nHeapFreeMicroseconds = 0;
 
 HeapNode *NodePrev(const HeapNode *pNode) {
     return reinterpret_cast<HeapNode *>(pNode->mPrevAndFree & ~static_cast<uintptr_t>(1));

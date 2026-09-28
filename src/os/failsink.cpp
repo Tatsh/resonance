@@ -14,10 +14,10 @@ namespace {
 constexpr int kFailMessageSize = 0x100;
 
 // 0x00894e30
-char g_szFailMessage[kFailMessageSize];
+char g_szFailMessage[kFailMessageSize] = {};
 
 // 0x00894f30
-char g_szFailFormatted[kFailMessageSize];
+char g_szFailFormatted[kFailMessageSize] = {};
 
 // The handler SetReportHandler() installs when it is given none. It hands the message to Print(),
 // and Print() discards it. A sink with this handler reports nothing at all.

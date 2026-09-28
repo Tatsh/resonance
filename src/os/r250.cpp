@@ -21,10 +21,10 @@ constexpr float kFloatScale = 1.0f / 65536.0f;
 } // namespace
 
 // 0x0071c8e8
-int g_aR250Table[kR250TableSize];
+int g_aR250Table[kR250TableSize] = {};
 
 // 0x0071c8e0
-int g_nR250Index;
+int g_nR250Index = 0;
 
 // 0x0071c8e4
 int g_nR250LagIndex = kR250Lag;
