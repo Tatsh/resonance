@@ -105,6 +105,10 @@ target_link_libraries(
           mtap
           cdvd
           z)
+# MemOpenLog() at 0x004a7c40 reports the original stack as 512 KiB at 0x01F80000, where the SDK
+# link script would otherwise supply 128 KiB at the top of memory.
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,--defsym,_stack=0x01F80000
+                    -Wl,--defsym,_stack_size=0x80000)
 # The shipped disc image is stripped, so release builds strip the executable. Debug builds keep
 # their symbols.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
