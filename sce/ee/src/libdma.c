@@ -48,15 +48,15 @@
 #define DMA_ENABLER (*(volatile unsigned int *)(uintptr_t)0x1000F520U)
 // The interrupt enable word occupies 0x1000F590.
 #define DMA_ENABLEW (*(volatile unsigned int *)(uintptr_t)0x1000F590U)
-// The first translation table occupies 0x77FC70.
-// The put path indexes the table with the opening byte.
-#define FIRST_TABLE ((volatile unsigned char *)(uintptr_t)0x77FC70U)
-// The second translation table occupies 0x77FC80.
-// The put path indexes the table with the second byte.
-#define SECOND_TABLE ((volatile unsigned char *)(uintptr_t)0x77FC80U)
-// The third translation table occupies 0x77FC90.
-// The put path indexes the table with the third byte.
-#define THIRD_TABLE ((volatile unsigned char *)(uintptr_t)0x77FC90U)
+// The put path indexes this table with the opening byte.
+// 0x0077fc70
+static const unsigned char FIRST_TABLE[] = {0, 0, 0, 3, 0, 1, 0, 0, 2, 0};
+// The put path indexes this table with the second byte.
+// 0x0077fc80
+static const unsigned char SECOND_TABLE[] = {0, 1, 2, 0, 0, 0, 3, 0, 0, 0};
+// The put path indexes this table with the third byte.
+// 0x0077fc90
+static const unsigned char THIRD_TABLE[] = {0, 2, 3, 0, 0, 0, 0, 0, 0, 0};
 
 // Spin budgets bound the busy waits.
 enum {
@@ -84,6 +84,29 @@ typedef struct {
     unsigned char mUnknown54[44]; // Padding occupies offsets 0x54 to 0x7F.
     volatile unsigned int mUnknown80; // The word resides at offset 0x80.
 } DmaChannelRegs;
+
+// The register block of each channel, VIF0 through the scratchpad input.
+// 0x0077fc08
+static DmaChannelRegs *g_apDmacChannelRegs[kChannelCount] = {
+    (DmaChannelRegs *)(uintptr_t)0x10008000U,
+    (DmaChannelRegs *)(uintptr_t)0x10009000U,
+    (DmaChannelRegs *)(uintptr_t)0x1000A000U,
+    (DmaChannelRegs *)(uintptr_t)0x1000B000U,
+    (DmaChannelRegs *)(uintptr_t)0x1000B400U,
+    (DmaChannelRegs *)(uintptr_t)0x1000C000U,
+    (DmaChannelRegs *)(uintptr_t)0x1000C400U,
+    (DmaChannelRegs *)(uintptr_t)0x1000C800U,
+    (DmaChannelRegs *)(uintptr_t)0x1000D000U,
+    (DmaChannelRegs *)(uintptr_t)0x1000D400U};
+
+// Whether the reset clears each channel. The three SIF channels are excluded, as the IOP link
+// runs over them.
+// 0x0077fc48
+static int g_anDmacChannelEnabled[kChannelCount] = {1, 1, 1, 1, 1, 0, 0, 0, 1, 1};
+
+// The environment sceDmaPutEnv() last applied, which sceDmaGetEnv() copies out.
+// 0x0077fca0
+static sceDmaEnv g_dmaSavedEnv;
 
 // Raw environment view. Offsets match the image. Members expose every byte the put path validates.
 typedef struct {
@@ -135,11 +158,8 @@ typedef struct {
 // 0x005f36f0
 // Returns the channel block for the identifier. An out of range identifier yields a null pointer.
 sceDmaChan *sceDmaGetChan(int nChannel) {
-    volatile sceDmaChan **table;
-
-    table = (volatile sceDmaChan **)(uintptr_t)0x77FFC08U;
-    if ((unsigned int)nChannel < 10U) {
-        return (sceDmaChan *)table[nChannel];
+    if ((unsigned int)nChannel < kChannelCount) {
+        return (sceDmaChan *)g_apDmacChannelRegs[nChannel];
     }
     return NULL;
 }
@@ -148,22 +168,19 @@ sceDmaChan *sceDmaGetChan(int nChannel) {
 // Resets every channel and returns the previous enable flag. The routine clears channel words
 // and status bits and applies a cleared environment.
 int sceDmaReset(int nMode) {
-    volatile DmaChannelRegs **channelTable;
-    volatile int *enableTable;
     unsigned int oldCtrl;
+    unsigned int stat;
     int index;
     unsigned char clearEnv[20];
     int i;
 
-    channelTable = (volatile DmaChannelRegs **)(uintptr_t)0x77FFC08U;
-    enableTable = (volatile int *)(uintptr_t)0x77FFC48U;
     oldCtrl = DMAC_CTRL;
-    index = 9;
+    index = kChannelCount - 1;
     do {
-        if (enableTable[index] != 0) {
+        if (g_anDmacChannelEnabled[index] != 0) {
             DmaChannelRegs *regs;
 
-            regs = (DmaChannelRegs *)channelTable[index];
+            regs = g_apDmacChannelRegs[index];
             regs->mUnknown80 = 0U;
             regs->mChcr = 0U;
             regs->mTadr = 0U;
@@ -174,8 +191,8 @@ int sceDmaReset(int nMode) {
         index--;
     } while (index >= 0);
     DMAC_STAT = 0xFF1FU;
-    oldCtrl = DMAC_STAT;
-    DMAC_STAT = oldCtrl & 0xFF1F0000U;
+    stat = DMAC_STAT;
+    DMAC_STAT = stat & 0xFF1F0000U;
     for (i = 0; i < 20; i++) {
         clearEnv[i] = 0U;
     }
@@ -224,22 +241,14 @@ int sceDmaPutEnv(sceDmaEnv *pEnv) {
     DMAC_SQWC = ((unsigned int)raw->mHalf0A << 16) | (unsigned int)raw->mHalf08;
     DMAC_REG_E050 = raw->mWord0C;
     DMAC_REG_E040 = raw->mWord10;
-    {
-        sceDmaEnv *saved;
-
-        saved = (sceDmaEnv *)(uintptr_t)0x77FCA0U;
-        *saved = *pEnv;
-    }
+    g_dmaSavedEnv = *pEnv;
     return 0;
 }
 
 // 0x005f39e0
 // Copies the saved environment into the caller buffer and returns the caller buffer.
 sceDmaEnv *sceDmaGetEnv(sceDmaEnv *pEnv) {
-    sceDmaEnv *saved;
-
-    saved = (sceDmaEnv *)(uintptr_t)0x77FCA0U;
-    *pEnv = *saved;
+    *pEnv = g_dmaSavedEnv;
     return pEnv;
 }
 
