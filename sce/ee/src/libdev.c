@@ -17,14 +17,21 @@ typedef struct {
 } DevConsole;
 
 enum {
-    kConsoleBase = 0x8e6980,
     kConsoleCount = 4,
     kColumnLimit = 0x51,
     kRowLimit = 0x41,
     kDefaultAttribute = 7,
     kClearCell = 0x720,
-    kHeapBase = 0x7a8530
+    kHeapWords = 0x2800
 };
+
+// The console slots. A null buffer marks a free slot.
+// 0x008e6980
+static DevConsole g_devConsoles[kConsoleCount];
+
+// The console heap. An all-ones size in the first header marks the heap as not yet initialised.
+// 0x007a8530
+static unsigned int g_anDevHeap[kHeapWords] __attribute__((aligned(16))) = {0xffffffffu};
 
 // Fill the console state words with their defaults, and record the GS primitive position.
 static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsigned int nGsY);
@@ -50,7 +57,7 @@ void sceDevVu0Reset(void) {
 
 // 0x00622710
 void sceDevConsInit(void) {
-    DevConsole *pConsoles = (DevConsole *)kConsoleBase;
+    DevConsole *pConsoles = g_devConsoles;
     int nIndex;
 
     for (nIndex = 0; nIndex < kConsoleCount; nIndex++) {
@@ -61,7 +68,7 @@ void sceDevConsInit(void) {
 // 0x00622748
 int sceDevConsOpen(
     unsigned int nGsX, unsigned int nGsY, unsigned int nColumns, unsigned int nRows) {
-    DevConsole *pConsoles = (DevConsole *)kConsoleBase;
+    DevConsole *pConsoles = g_devConsoles;
     DevConsole *pConsole = NULL;
     int nIndex;
 
@@ -123,7 +130,7 @@ static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsign
 
 // 0x00623b10
 static void *heapAllocate(unsigned int nSize) {
-    unsigned int *pHeap = (unsigned int *)kHeapBase;
+    unsigned int *pHeap = g_anDevHeap;
     unsigned int nWords = (nSize + 3u) >> 2;
     unsigned int nIndex = 0u;
     unsigned int nOffset = 0u;
@@ -131,12 +138,12 @@ static void *heapAllocate(unsigned int nSize) {
     unsigned int nBlockSize;
     void *pResult = NULL;
 
-    if (*pHeap == 0xffffffffu) {
+    if ((*pHeap & 0x0fffffffu) == 0x0fffffffu) {
         unsigned long long *pHeapWide = (unsigned long long *)pHeap;
         unsigned char *pHeapEnd = (unsigned char *)pHeap + 0x8000u;
         unsigned long long *pEndMark = (unsigned long long *)(pHeapEnd + 0x1ff8u);
         unsigned long long nHeap = *pHeapWide & 0xfffffffff0000000ull;
-        unsigned long long nMark = *pEndMark & 0xf0000000fffffffull;
+        unsigned long long nMark = *pEndMark & 0xf0000000ffffffffull;
 
         nHeap |= 0x27feull;
         nHeap &= 0xffffffff0fffffffull;
