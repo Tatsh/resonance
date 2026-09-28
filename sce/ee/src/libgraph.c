@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <eekernel.h>
 #include <libgraph.h>
@@ -14,18 +15,16 @@
 #define VIF1_MADR (*(volatile unsigned int *)(uintptr_t)0x10009010U)
 // The VIF1 channel quadword count register.
 #define VIF1_QWC (*(volatile unsigned int *)(uintptr_t)0x10009020U)
+// The VIF1 channel tag address register.
+#define VIF1_TADR (*(volatile unsigned int *)(uintptr_t)0x10009030U)
 // The VIF1 status register.
 #define VIF1_STAT (*(volatile unsigned int *)(uintptr_t)0x10003C00U)
 // The VIF1 force break register.
 #define VIF1_FBRST (*(volatile unsigned int *)(uintptr_t)0x10003C10U)
 // The VIF1 error mask register.
 #define VIF1_ERR (*(volatile unsigned int *)(uintptr_t)0x10003C20U)
-// The VIF1 data fifo, read and written a quadword at a time.
-typedef struct {
-    unsigned long long lowWord;
-    unsigned long long highWord;
-} FifoQuad;
-#define VIF1_FIFO (*(volatile FifoQuad *)(uintptr_t)0x10005000U)
+// The VIF1 data FIFO, read and written a whole quadword at a time.
+#define VIF1_FIFO (*(vu128 *)(uintptr_t)0x10005000U)
 // The GIF control register.
 #define GIF_CTRL (*(volatile unsigned int *)(uintptr_t)0x10003000U)
 // The GIF status register. Bits 10 and 11 report path activity.
@@ -36,6 +35,10 @@ typedef struct {
 #define GIF_MADR (*(volatile unsigned int *)(uintptr_t)0x1000A010U)
 // The GIF channel quadword count register.
 #define GIF_QWC (*(volatile unsigned int *)(uintptr_t)0x1000A020U)
+// The GIF channel tag address register.
+#define GIF_TADR (*(volatile unsigned int *)(uintptr_t)0x1000A030U)
+// The interrupt controller status register. Writing a set bit acknowledges the matching cause.
+#define INTC_STAT (*(volatile unsigned int *)(uintptr_t)0x1000F000U)
 // The graphics synthesiser status register.
 #define GS_CSR (*(volatile unsigned long long *)(uintptr_t)0x12001000U)
 // The graphics synthesiser bus direction register.
@@ -50,9 +53,8 @@ typedef struct {
 #define GS_EXTDATA (*(volatile unsigned long long *)(uintptr_t)0x120000C0U)
 #define GS_BGCOLOR (*(volatile unsigned long long *)(uintptr_t)0x120000E0U)
 
-// The shared graphics state block the library keeps at a fixed address.
-// The interlace, output, field, and signal words occupy the first eight
-// bytes, followed by the vertical blank handler and its identifier.
+// The shared graphics state block. The interlace, output, field, and GS revision words occupy the
+// first eight bytes, followed by the vertical blank handler and its identifier.
 typedef struct {
     short interlaceMode;
     short outputMode;
@@ -62,89 +64,101 @@ typedef struct {
     int handlerId;
 } GsState;
 
-// The packet the reset path primes the VIF1 fifo with.
-#define PRIMING_PACKET ((volatile FifoQuad *)(uintptr_t)0x7848D0U)
-// The fallback priming packet restored after image store work.
-#define STORE_PACKET ((volatile FifoQuad *)(uintptr_t)0x7729C0U)
+// The eight VIF1 codes the reset path primes the FIFO with, as two quadwords (STCYCL, STMASK and
+// its operand, STMOD, MSKPATH3, OFFSET, BASE, and ITOP).
+typedef union {
+    unsigned int mWords[8];
+    u128 mQuads[2];
+} Vif1InitPacket;
 
-// The spin budget for GIF and VIF waits, and the longer VU0 busy wait.
+// 0x007848d0
+static const Vif1InitPacket g_dwVif1InitPacket = {{0x01000404U,
+                                                   0x20000000U,
+                                                   0U,
+                                                   0x05000000U,
+                                                   0x06000000U,
+                                                   0x03000000U,
+                                                   0x02000000U,
+                                                   0x04000000U}};
+
+// The MSKPATH3 code restored to the VIF1 FIFO after image store work, padded with three NOP codes.
+// 0x007729c0
+static const u128 g_vif1StorePacket = 0x06000000U;
+
+// 0x00784900
+static GsState g_GsStateBlock = {1, 2, 1, 3, NULL, 0};
+
+// Mode words of the state block, and the vertical blank start bit of the interrupt controller.
 enum {
-    kChannelSpinLimit = 0x100,
-    kVuSpinLimit = 0x1000000
+    kGsFieldMode = 0,
+    kGsInterlace = 1,
+    kGsFrameMode = 1,
+    kGsNtsc = 2,
+    kGsPal = 3,
+    kIntcVblankStartBit = 4
+};
+
+// The spin budget every libgraph busy wait shares.
+enum {
+    kChannelSpinLimit = 0x1000000
 };
 
 // 0x006004c8
 // Returns the shared graphics state block.
-static GsState *GsStateBlock(void) {
-    return (GsState *)(uintptr_t)0x784900U;
-}
-
-// 0x0053dde0
-// Reports a graphics failure. The message selects the call site, and the
-// value carries the register word the failing wait observed.
-static void ReportGraphicsError(const char *pMessage, int value) {
-    (void)pMessage;
-    (void)value;
+static GsState *sceGsGetGParam(void) {
+    return &g_GsStateBlock;
 }
 
 // 0x005963e0
-// Waits for the next vertical blank without consuming a handler result.
-static void WaitVblankPlain(void) {
-    while ((GS_CSR & 8ULL) == 0ULL) {
+// Acknowledges the vertical blank start interrupt, spins until it is raised again, and
+// acknowledges it once more.
+static void WaitVsyncStart(void) {
+    INTC_STAT = kIntcVblankStartBit;
+    while ((INTC_STAT & kIntcVblankStartBit) == 0U) {
     }
+    INTC_STAT = kIntcVblankStartBit;
 }
 
 // 0x00596420
-// Waits for the next vertical blank and returns the status word observed,
-// whose bit 13 carries the field the blank began in.
-static unsigned long long WaitVblankHooked(void) {
-    while ((GS_CSR & 8ULL) == 0ULL) {
+// Waits for the next vertical blank while a handler is installed and returns the GS status word
+// the kernel captured at the blank. Bit 13 of the word records the field the blank began.
+static unsigned long long WaitVsyncFlag(void) {
+    unsigned int flag = 0U;
+    unsigned long long status;
+
+    SetVSyncFlag(&flag, &status);
+    INTC_STAT = kIntcVblankStartBit;
+    while ((INTC_STAT & kIntcVblankStartBit) == 0U) {
+        __asm__ volatile("" ::: "memory");
+        if (flag != 0U) {
+            break;
+        }
     }
-    return GS_CSR;
+    INTC_STAT = kIntcVblankStartBit;
+    return status; // The binary returns the word unread when the interrupt bit ends the wait.
 }
 
 // 0x0062f318
-// Counts the frame buffer pages a width and height pair occupies. Sixteen
-// bit formats count rows in 64 pixel units, while the remaining formats use
-// 32 pixel units. The global mode word selects the result width.
+// Returns the frame buffer page count of a width and height pair. The count is also the base page
+// of a depth buffer placed after the frame buffer. Sixteen-bit formats count rows in 64-pixel
+// units, and the other formats in 32-pixel units. Only interlaced field mode retains a single
+// count; every other mode doubles it. The result is truncated to 16 bits.
 static int FramePageCount(short nPsm, short nWidth, short nHeight) {
-    GsState *state = GsStateBlock();
-    int width = nWidth;
-    int wide = width + 0x3F;
+    GsState *state = sceGsGetGParam();
+    int columns = (nWidth + 63) / 64;
     int rows;
     int blocks;
-    unsigned long long mode;
 
-    width += 0x7E;
-    if (-1 < wide) {
-        width = wide;
-    }
-    if ((nPsm & 2) == 0) {
-        int tall = nHeight + 0x1F;
-        int wideRows = nHeight + 0x3E;
-
-        if (-1 < tall) {
-            wideRows = tall;
-        }
-        rows = wideRows >> 5;
+    if ((nPsm & 2) != 0) {
+        rows = (nHeight + 63) / 64;
     } else {
-        int tall = nHeight + 0x3F;
-        int wideRows = nHeight + 0x7E;
-
-        if (-1 < tall) {
-            wideRows = tall;
-        }
-        rows = wideRows >> 6;
+        rows = (nHeight + 31) / 32;
     }
-    width >>= 6;
-    blocks = width * rows;
-    mode = *(volatile unsigned long long *)state;
-    if (mode != 1ULL) {
-        blocks = (blocks << 16) >> 16;
-    } else {
-        blocks = (blocks << 17) >> 16;
+    blocks = columns * rows;
+    if (state->interlaceMode == kGsInterlace && state->fieldMode == kGsFieldMode) {
+        return (short)blocks;
     }
-    return blocks;
+    return (short)(blocks << 1);
 }
 
 // 0x00636360
@@ -152,7 +166,7 @@ static int FramePageCount(short nPsm, short nWidth, short nHeight) {
 // one selects the first video circuit, and any other mode selects the
 // second circuit together with the output mode register.
 static void WriteDisplayEnv(const sceGsDispEnv *pDisp) {
-    GsState *state = GsStateBlock();
+    GsState *state = sceGsGetGParam();
 
     if (state->fieldMode == 1) {
         GS_PMODE = pDisp->pmode;
@@ -180,10 +194,8 @@ void sceGsResetPath(void) {
     clip |= 0x200U;
     __asm__ volatile("ctc2 %0, $12" ::"r"(clip));
     __sync_synchronize();
-    VIF1_FIFO.lowWord = PRIMING_PACKET[0].lowWord;
-    VIF1_FIFO.highWord = PRIMING_PACKET[0].highWord;
-    VIF1_FIFO.lowWord = PRIMING_PACKET[1].lowWord;
-    VIF1_FIFO.highWord = PRIMING_PACKET[1].highWord;
+    VIF1_FIFO = g_dwVif1InitPacket.mQuads[0];
+    VIF1_FIFO = g_dwVif1InitPacket.mQuads[1];
     GIF_CTRL = 1U;
 }
 
@@ -204,7 +216,7 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
         if (nMode != 0) {
             return;
         }
-        state = GsStateBlock();
+        state = sceGsGetGParam();
         GS_CSR = 0x200ULL;
         state->interlaceMode = nInterlace;
         state->outputMode = nOutputMode;
@@ -222,7 +234,7 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
         if (nMode != 5) {
             return;
         }
-        state = GsStateBlock();
+        state = sceGsGetGParam();
         state->fieldMode = (short)(nFieldMode > 0);
         state->interlaceMode = nInterlace;
         state->outputMode = nOutputMode;
@@ -235,19 +247,19 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
 // Waits for the next vertical blank and returns the field it began in.
 // Progressive modes report field one.
 int sceGsSyncV(int nMode) {
-    GsState *state = GsStateBlock();
+    GsState *state = sceGsGetGParam();
     unsigned long long status;
     int field;
 
     (void)nMode;
     if (state->vblankHandler == NULL) {
-        WaitVblankPlain();
+        WaitVsyncStart();
         if (state->interlaceMode != 1) {
             return 1;
         }
         return (int)((GS_CSR >> 13) & 1ULL);
     }
-    status = WaitVblankHooked() >> 13;
+    status = WaitVsyncFlag() >> 13;
     field = (int)(status & 1ULL);
     if (state->interlaceMode != 1) {
         return 1;
@@ -275,7 +287,7 @@ int sceGsSetDefAlphaEnv(sceGsAlphaEnv *pAlpha, short nPabe) {
 // branch, and unknown modes only report an error.
 void sceGsSetDefDispEnv(
     sceGsDispEnv *pDisp, short nPsm, short nWidth, short nHeight, short nDx, short nDy) {
-    GsState *state = GsStateBlock();
+    GsState *state = sceGsGetGParam();
     long long width = nWidth;
     long long height = nHeight;
     int interlace = state->interlaceMode;
@@ -349,7 +361,7 @@ void sceGsSetDefDispEnv(
         shown = vertical | mode | across | (down & 0xFFFFFFFFULL) | (lines << 44);
         pDisp->display = shown;
     } else {
-        ReportGraphicsError("sceGsSetDefDispEnv: unknown output mode.", output);
+        printf("sceGsDefDispEnv:Not support displaymode for %d!!\n", output);
     }
     pDisp->bgcolor = 0ULL;
 }
@@ -465,7 +477,7 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
                      short nZTest,
                      short nZPsm,
                      short nClear) {
-    GsState *state = GsStateBlock();
+    GsState *state = sceGsGetGParam();
     unsigned long long loops = (nClear != 0) ? 0xEULL : 8ULL;
     int clearX = 0x800 - (nWidth >> 1);
     int clearY = 0x800 - (nHeight >> 1);
@@ -511,8 +523,8 @@ int sceGsPutDrawEnv(sceGifTag *pGifTag) {
     if ((GIF_CHCR & 0x100U) != 0U) {
         spins = 0U;
         while ((GIF_CHCR & 0x100U) != 0U) {
-            if (0x100U < spins) {
-                ReportGraphicsError("sceGsPutDrawEnv: GIF channel timeout.", 0);
+            if (kChannelSpinLimit < spins) {
+                printf("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -579,7 +591,7 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
         }
     }
     if (0x7FFF < count) {
-        ReportGraphicsError("sceGsSetDefLoadImage: transfer too large.", count);
+        printf("sceGsSetDefLoadImage: too big size\r\n");
         return 0;
     }
     // The hardware clears both tag slots before the masked words go in, so
@@ -619,8 +631,8 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
 
     if ((GIF_CHCR & 0x100U) != 0U) {
         while ((GIF_CHCR & 0x100U) != 0U) {
-            if (0x100U < spins) {
-                ReportGraphicsError("sceGsExecLoadImage: GIF channel timeout.", 0);
+            if (kChannelSpinLimit < spins) {
+                printf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -635,8 +647,8 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     }
     GIF_CHCR = 0x101U;
     while ((GIF_CHCR & 0x100U) != 0U) {
-        if (0x100U < spins) {
-            ReportGraphicsError("sceGsExecLoadImage: GIF kick timeout.", 0);
+        if (kChannelSpinLimit < spins) {
+            printf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
             return -1;
         }
         spins++;
@@ -797,7 +809,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     if ((VIF1_CHCR & 0x100U) != 0U) {
         while ((VIF1_CHCR & 0x100U) != 0U) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                ReportGraphicsError("sceGsExecStoreImage: path timeout.", 0);
+                printf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -815,7 +827,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     VIF1_CHCR = 0x101U;
     while ((VIF1_CHCR & 0x100U) != 0U) {
         if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-            ReportGraphicsError("sceGsExecStoreImage: kick timeout.", 0);
+            printf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
             return -1;
         }
         spins++;
@@ -823,9 +835,8 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     if ((GS_CSR & 2ULL) == 0ULL) {
         while ((GS_CSR & 2ULL) == 0ULL) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                ReportGraphicsError("sceGsExecStoreImage: finish timeout.", 0);
-                VIF1_FIFO.lowWord = STORE_PACKET[0].lowWord;
-                VIF1_FIFO.highWord = STORE_PACKET[0].highWord;
+                printf("sceGsExecStoreImage: GS does not terminate\r\n");
+                VIF1_FIFO = g_vif1StorePacket;
                 return -1;
             }
             spins++;
@@ -843,10 +854,11 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         VIF1_CHCR = 0x100U;
         while ((VIF1_CHCR & 0x100U) != 0U) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                ReportGraphicsError("sceGsExecStoreImage: destination timeout.", 0);
-                ReportGraphicsError("sceGsExecStoreImage: destination status.", 0);
-                VIF1_FIFO.lowWord = STORE_PACKET[0].lowWord;
-                VIF1_FIFO.highWord = STORE_PACKET[0].highWord;
+                printf("sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n");
+                GS_CSR = 0x100ULL;
+                GS_BUSDIR = 0ULL;
+                GIF_CTRL = 1U;
+                VIF1_FBRST = 1U;
                 return -1;
             }
             spins++;
@@ -856,11 +868,11 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         int drained = 0;
 
         while (drained < extra) {
-            FifoQuad quad;
+            u128 quad;
 
             while ((VIF1_STAT & 0x1F000000U) == 0U) {
                 if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                    ReportGraphicsError("sceGsExecStoreImage: drain timeout.", 0);
+                    printf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
                     GS_CSR = 0x100ULL;
                     GS_BUSDIR = 0ULL;
                     GIF_CTRL = 1U;
@@ -869,9 +881,8 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
                 }
                 spins++;
             }
-            quad.lowWord = VIF1_FIFO.lowWord;
-            quad.highWord = VIF1_FIFO.highWord;
-            (void)quad;
+            quad = VIF1_FIFO;
+            (void)quad; // The binary drains the FIFO and discards each quadword.
             drained++;
         }
     }
@@ -879,111 +890,88 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     GsPutIMR(saved);
     GS_BUSDIR = 0ULL;
     GS_CSR = 2ULL;
-    VIF1_FIFO.lowWord = STORE_PACKET[0].lowWord;
-    VIF1_FIFO.highWord = STORE_PACKET[0].highWord;
+    VIF1_FIFO = g_vif1StorePacket;
     return 0;
 }
 
 // 0x00552270
-// Synchronises the graphics path. Mode zero waits for every unit with a
-// shared spin budget, while other modes report the busy units as a mask.
-// The timeout argument is accepted but unused.
+// Synchronises the graphics path. Mode zero waits for VIF1, GIF, and VU1 with one spin budget
+// shared across every wait, and dumps the channel registers when the budget runs out. Other modes
+// report the busy units as a mask. The timeout argument is accepted but unused.
 int sceGsSyncPath(int nMode, unsigned short nTimeout) {
-    int spins = 0;
+    unsigned int spins = 0U;
+    unsigned int vuStatus;
+    const char *stage;
+    int mask;
 
     (void)nTimeout;
-    if (nMode == 0) {
-        const char *stage = NULL;
-
-        if ((VIF1_CHCR & 0x100U) != 0U) {
-            while ((VIF1_CHCR & 0x100U) != 0U) {
-                if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                    stage = "sceGsSyncPath: VIF1 channel timeout.";
-                    goto timeout;
-                }
-                spins++;
-            }
-        }
+    if (nMode != 0) {
+        mask = (VIF1_CHCR & 0x100U) != 0U ? 1 : 0;
         if ((GIF_CHCR & 0x100U) != 0U) {
-            while ((GIF_CHCR & 0x100U) != 0U) {
-                if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                    stage = "sceGsSyncPath: GIF channel timeout.";
-                    goto timeout;
-                }
-                spins++;
-            }
+            mask |= 2;
         }
         if ((VIF1_STAT & 0x1F000003U) != 0U) {
-            while ((VIF1_STAT & 0x1F000003U) != 0U) {
-                if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                    stage = "sceGsSyncPath: VIF1 status timeout.";
-                    goto timeout;
-                }
-                spins++;
-            }
+            mask |= 4;
         }
-        {
-            unsigned int vuStatus = 0U;
-
-            __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
-            if ((vuStatus & 0x100U) != 0U) {
-                while ((vuStatus & 0x100U) != 0U) {
-                    if ((unsigned int)kVuSpinLimit < (unsigned int)spins) {
-                        stage = "sceGsSyncPath: VU0 timeout.";
-                        goto timeout;
-                    }
-                    spins++;
-                    __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
-                }
-            }
+        __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
+        if ((vuStatus & 0x100U) != 0U) {
+            mask |= 8;
         }
         if ((GIF_STAT & 0xC00U) != 0U) {
-            while ((GIF_STAT & 0xC00U) != 0U) {
-                if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                    stage = "sceGsSyncPath: GIF status timeout.";
-                    goto timeout;
-                }
-                spins++;
-            }
-        }
-        return 0;
-    timeout:
-        ReportGraphicsError(stage, 0);
-        ReportGraphicsError("sceGsSyncPath: VIF1 channel word.", (int)VIF1_CHCR);
-        ReportGraphicsError("sceGsSyncPath: VIF1 tag word.", (int)VIF1_MADR);
-        ReportGraphicsError("sceGsSyncPath: GIF channel word.", (int)GIF_CHCR);
-        ReportGraphicsError("sceGsSyncPath: GIF tag word.", (int)GIF_MADR);
-        ReportGraphicsError("sceGsSyncPath: GIF count word.", (int)GIF_QWC);
-        ReportGraphicsError("sceGsSyncPath: VIF1 status word.", (int)VIF1_STAT);
-        ReportGraphicsError("sceGsSyncPath: GIF status word.", (int)GIF_STAT);
-        ReportGraphicsError("sceGsSyncPath: GS status word.", (int)GS_CSR);
-        return -1;
-    }
-    {
-        int busy = ((VIF1_CHCR & 0x100U) != 0U) ? 1 : 0;
-        int gifBusy = ((GIF_CHCR & 0x100U) != 0U) ? 1 : 0;
-        unsigned int vuStatus = 0U;
-        int mask;
-
-        __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
-        mask = busy | 2;
-        if (gifBusy == 0) {
-            mask = busy;
-        }
-        mask |= 4;
-        if ((VIF1_STAT & 0x1F000003U) == 0U) {
-            mask &= ~4;
-        }
-        mask |= 8;
-        if ((vuStatus & 0x100U) == 0U) {
-            mask &= ~8;
-        }
-        mask |= 0x10;
-        if ((GIF_STAT & 0xC00U) == 0U) {
-            mask &= ~0x10;
+            mask |= 0x10;
         }
         return mask;
     }
+
+    while ((VIF1_CHCR & 0x100U) != 0U) {
+        if (spins++ > kChannelSpinLimit) {
+            stage = "sceGsSyncPath: DMA Ch.1 does not terminate\r\n";
+            goto timeout;
+        }
+    }
+    while ((GIF_CHCR & 0x100U) != 0U) {
+        if (spins++ > kChannelSpinLimit) {
+            stage = "sceGsSyncPath: DMA Ch.2 does not terminate\r\n";
+            goto timeout;
+        }
+    }
+    while ((VIF1_STAT & 0x1F000003U) != 0U) {
+        if (spins++ > kChannelSpinLimit) {
+            stage = "sceGsSyncPath: VIF1 does not terminate\r\n";
+            goto timeout;
+        }
+    }
+    for (;;) {
+        __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
+        if ((vuStatus & 0x100U) == 0U) {
+            break;
+        }
+        if (spins++ > kChannelSpinLimit) {
+            stage = "sceGsSyncPath: VU1 does not terminate\r\n";
+            goto timeout;
+        }
+    }
+    while ((GIF_STAT & 0xC00U) != 0U) {
+        if (spins++ > kChannelSpinLimit) {
+            stage = "sceGsSyncPath: GIF does not terminate\r\n";
+            goto timeout;
+        }
+    }
+    return 0;
+
+timeout:
+    printf(stage);
+    printf("\t<D1_CHCR=%08x:", VIF1_CHCR);
+    printf("D1_TADR=%08x:", VIF1_TADR);
+    printf("D1_MADR=%08x:", VIF1_MADR);
+    printf("D1_QWC=%08x>\r\n", VIF1_QWC);
+    printf("\t<D2_CHCR=%08x:", GIF_CHCR);
+    printf("D2_TADR=%08x:", GIF_TADR);
+    printf("D2_MADR=%08x:", GIF_MADR);
+    printf("D2_QWC=%08x>\r\n", GIF_QWC);
+    printf("\t<VIF1_STAT=%08x:", VIF1_STAT);
+    printf("GIF_STAT=%08x>\r\n", GIF_STAT);
+    return -1;
 }
 
 // 0x0062dca0
@@ -1028,7 +1016,7 @@ void sceGsSwapDBuff(sceGsDBuff *pDBuff, int nField) {
 // Installs the vertical blank handler, replacing the previous one, or
 // removes it when null. Returns the previous handler.
 int (*sceGsSyncVCallback(int (*pfnHandler)(int)))(int) {
-    GsState *state = GsStateBlock();
+    GsState *state = sceGsGetGParam();
     int (*oldHandler)(int) = state->vblankHandler;
 
     if (pfnHandler == NULL) {

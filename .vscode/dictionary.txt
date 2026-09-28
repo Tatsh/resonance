@@ -157,6 +157,7 @@ datarootdir
 dbuild
 dbut
 dcmake
+defsym
 deletefileop
 deleteremixmct
 demangled
@@ -877,6 +878,7 @@ saveicon
 savejukeboxplaylistmct
 savepersonasmct
 saveremixmct
+sbclaude
 scallclientsstatuspacket
 scallplayersinfopacket
 sceneanim
@@ -962,6 +964,8 @@ statusline
 stcycl
 stdarg
 stdmidimsg
+stmask
+stmod
 stopriffmsg
 strcmp
 streakovermsg
