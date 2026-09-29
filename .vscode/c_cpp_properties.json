@@ -5,7 +5,13 @@
       "compilerPath": "/usr/bin/gcc",
       "cppStandard": "gnu++23",
       "defines": ["VERSION=\"unknown\""],
-      "includePath": ["${workspaceFolder}/include/**", "${workspaceFolder}/src/**"],
+      "includePath": [
+        "${workspaceFolder}/compat/**",
+        "${workspaceFolder}/include/**",
+        "${workspaceFolder}/sce/**/include/**",
+        "${workspaceFolder}/src/**",
+        "${workspaceFolder}/.wiswa-ci/**/include/**"
+      ],
       "name": "Linux"
     }
   ],
