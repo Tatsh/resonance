@@ -113,11 +113,11 @@ void sceVu0InversMatrix(float *pDst, const float *pSrc) {
     pDst[10] = flZz;
     pDst[11] = 0.0f;
 
-    // The translation row is the negated transposed basis applied to the source translation,
-    // and its fourth word passes through unchanged.
-    pDst[12] = -((flXx * flTx) + (flYx * flTy) + (flZx * flTz));
-    pDst[13] = -((flXy * flTx) + (flYy * flTy) + (flZy * flTz));
-    pDst[14] = -((flXz * flTx) + (flYz * flTy) + (flZz * flTz));
+    // The translation row is the source translation dotted with each source basis row, subtracted
+    // from the cleared scratch row, and its fourth word passes through unchanged.
+    pDst[12] = 0.0f - (((flXx * flTx) + (flXy * flTy)) + (flXz * flTz));
+    pDst[13] = 0.0f - (((flYx * flTx) + (flYy * flTy)) + (flYz * flTz));
+    pDst[14] = 0.0f - (((flZx * flTx) + (flZy * flTy)) + (flZz * flTz));
     pDst[15] = flTw;
 }
 
