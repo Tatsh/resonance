@@ -152,7 +152,7 @@ inline bool IsSpriteOffScreen(const DrawVert &nearCorner, const DrawVert &farCor
 } // namespace
 
 // 0x005fcdf0
-PsParticleSys::PsParticleSys(const HxStr &name) : ParticleSys(name) {
+PsParticleSys::PsParticleSys(const HxStr &name) : Object(name), ParticleSys(name) {
 }
 
 // 0x005ff878

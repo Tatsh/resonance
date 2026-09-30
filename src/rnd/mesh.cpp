@@ -34,6 +34,9 @@ constexpr char kNoObject[] = "no object";
 // The last mesh file version whose faces carry a normal.
 constexpr int kFaceNormalLastVersion = 0;
 
+// Mesh files older than this store two more floats after each vertex position.
+constexpr int kVertPadFirstDroppedVersion = 10;
+
 // BoundingSphere() places the centre halfway between the box corners.
 constexpr float kHalf = 0.5f;
 
@@ -459,6 +462,11 @@ Stream &ReadVert(Stream &stream, MeshVert &vert) {
     stream.Read(&vert.mPoint.x, sizeof(float));
     stream.Read(&vert.mPoint.y, sizeof(float));
     stream.Read(&vert.mPoint.z, sizeof(float));
+    if (g_nRndMeshLoadVersion < kVertPadFirstDroppedVersion) {
+        float aflDiscarded[2];
+        stream.Read(&aflDiscarded[0], sizeof(float));
+        stream.Read(&aflDiscarded[1], sizeof(float));
+    }
     stream.Read(&vert.mNorm.x, sizeof(float));
     stream.Read(&vert.mNorm.y, sizeof(float));
     stream.Read(&vert.mNorm.z, sizeof(float));

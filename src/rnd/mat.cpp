@@ -487,6 +487,7 @@ Object *CreateRegisteredMat(const HxStr &name) {
 Mat::~Mat() {
     // The stage textures are the only references a material takes.
     RemoveStageTexRefs();
+    ReleaseAllRefs();
 }
 
 // 0x004d0f78

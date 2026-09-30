@@ -303,7 +303,7 @@ void PsMesh::SelectDepthRegsForPass(const Mesh &mesh, int nPass) {
 }
 
 // 0x00602600
-PsMesh::PsMesh(const HxStr &name) : Mesh(name) {
+PsMesh::PsMesh(const HxStr &name) : Object(name), Mesh(name) {
 }
 
 // 0x00605f48

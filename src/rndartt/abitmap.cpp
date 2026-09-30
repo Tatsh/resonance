@@ -163,7 +163,7 @@ void ABitmap::SwapRedBlue32(unsigned char *pPixels, int nCount) {
 }
 
 // 0x00725cd0
-int g_nSkipColorSwap;
+int g_nSkipColorSwap = 1;
 
 // 0x00558f28
 int ABitmap::Copy(const ABitmap &source) {

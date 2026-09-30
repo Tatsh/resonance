@@ -13,7 +13,7 @@ struct Vector3 {
     float x;
     float y;
     float z;
-    float w; // +0x0c Padding for quadword access, set to 1.0 on construction.
+    float w = 1.0f; // +0x0c Padding for quadword access, set to 1.0 on construction.
 };
 
 /**

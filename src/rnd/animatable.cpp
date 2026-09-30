@@ -446,7 +446,12 @@ Animatable::~Animatable() {
 
 // 0x00494cb0
 void Animatable::ReleaseAnimsAndFilters() {
-    ReleaseAnimsRefs();
+    // Unlike ReleaseAnimsRefs(), the walk leaves mAnims populated.
+    for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end(); ++it) {
+        if (*it != nullptr) {
+            (*it)->RemoveRef(this);
+        }
+    }
     for (std::list<Filter *>::iterator it = mFilters.begin(); it != mFilters.end(); ++it) {
         // Filter declares no destructor, so every subclass is released through a base pointer
         // without one being run. 0x00494d2c calls the global operator delete on the pointer
@@ -637,6 +642,7 @@ void Animatable::ReleaseAnimsRefs() {
             (*it)->RemoveRef(this);
         }
     }
+    mAnims.clear();
 }
 
 // 0x0049a750

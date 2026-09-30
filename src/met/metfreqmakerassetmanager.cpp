@@ -228,7 +228,7 @@ bool MetFreqMakerAssetManager::PollLoad() {
 
     mMaterialTemplate = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(g_prototypeMaterialName));
     mMeshTemplate = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(g_prototypeMeshName));
-    std::list<Rnd::Object *> objects = GetLoadedObjects();
+    std::list<Rnd::Object *> objects = mAssetLoader->mObjects;
     HxStr unused; // Yes, the binary builds an empty string it never reads.
 
     mParts.erase(mParts.begin(), mParts.end());

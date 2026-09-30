@@ -65,7 +65,7 @@ MultiMesh *NewPsMultiMesh(const HxStr &name) {
 }
 
 // 0x005b2fd8
-PsMultiMesh::PsMultiMesh(const HxStr &name) : MultiMesh(name) {
+PsMultiMesh::PsMultiMesh(const HxStr &name) : Object(name), MultiMesh(name) {
 }
 
 // 0x005b5a40

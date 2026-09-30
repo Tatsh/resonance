@@ -326,9 +326,11 @@ private:
     // One bit per level awaiting upload, with the sign bit standing for a dirty CLUT.
     unsigned mDirtyMips;
     unsigned long long mUnknown98; // +0x98 Inferred from the alignment of mClut.
-    APalette mClut;                // CLUT staging palette, in the GS CSM1 order.
-    VramPalEntry *mPaletteVram;    // The manager's CLUT slot, or null.
-    int mLockedMip;                // Level recorded by LockMipBitmap().
+    // CLUT staging palette, in the GS CSM1 order. The upload sends it by DMA in whole
+    // quadwords. The entries must therefore start on a quadword boundary.
+    alignas(16) APalette mClut;
+    VramPalEntry *mPaletteVram; // The manager's CLUT slot, or null.
+    int mLockedMip;             // Level recorded by LockMipBitmap().
 };
 
 /**
