@@ -26,9 +26,11 @@ Music Systems and published by Sony Computer Entertainment.
 
 ## Status
 
-This is an active, partial reconstruction. It does not build a playable game yet, and it is not a
-port. Over nine tenths of the game's routines are accounted for and nearly nine tenths have a
-body, with the current figures and how they are measured in [PROGRESS.md](PROGRESS.md).
+The source builds a bootable disc image. In PCSX2 the game plays its intro movie, draws the title
+screen and its 3D city, loads a saved profile from a memory card, and plays songs through the menus
+and into the arenas. Sound plays, and its output level follows the original game's through the
+title screen and a song. A complete run through the game has not been tested, and the project is
+not a port.
 
 | Area                               | State                                                                              |
 | ---------------------------------- | ---------------------------------------------------------------------------------- |
@@ -42,6 +44,8 @@ body, with the current figures and how they are measured in [PROGRESS.md](PROGRE
 | Front end screens and the metagame | Recovered                                                                          |
 | Gameplay                           | Recovered                                                                          |
 | Audio and the synthesiser          | Recovered                                                                          |
+| EZMIDI.IRX, the IOP synthesiser    | Recovered                                                                          |
+| Sony SDK libraries                 | Recovered for every routine the game calls                                         |
 | Embedded Python interpreter        | Characterised, with its differences recorded; the `hx` script commands have bodies |
 | Networking                         | Packet records only                                                                |
 
@@ -50,29 +54,39 @@ having none. Cross-reviews against the disassembly continue to correct bodies in
 
 ## Layout
 
-| Path        | Contents                                 |
-| ----------- | ---------------------------------------- |
-| `include/`  | Headers, grouped by subsystem            |
-| `src/`      | Implementations, mirroring `include/`    |
-| `3rdparty/` | Third-party code the game linked against |
+| Path        | Contents                                                          |
+| ----------- | ----------------------------------------------------------------- |
+| `include/`  | Headers, grouped by subsystem                                     |
+| `src/`      | Implementations, mirroring `include/`                             |
+| `sce/ee/`   | Sony's Emotion Engine libraries, headers, start-up, and link file |
+| `sce/iop/`  | Sony's IOP headers and the IOP link file                          |
+| `3rdparty/` | Third-party code the game linked against                          |
 
 Within those, `rnd` is the renderer and `rndartt` its art and canvas library, `os` the memory and
 file layer, `app` the application shell, `msg` the message and packet classes, `math` the vector and
 transform types, `gfx` the display device, `sch` the command scheduler, `synth` and `mid` the audio
 path, `game` and `gs` the gameplay classes, `met` the front end screens and the metagame, and
-`memcard` the save and load tasks. `src/python` records the differences between the game's embedded
-Python interpreter and the public release it was built from.
+`memcard` the save and load tasks. `src/ezmidi` is the IOP synthesiser module EZMIDI.IRX.
+`src/python` records the differences between the game's embedded Python interpreter and the public
+release it was built from.
 
 A class whose name begins `Ps` is the PlayStation 2 implementation of the portable class above it.
 
-[PROGRESS.md](PROGRESS.md) records how much is recovered, how the figures are measured, and the
-conventions the source follows.
-
 ## Building
 
-CI compiles every buildable source with the Emotion Engine cross compiler in the ps2dev container
-and archives one static library per subsystem. The libraries are not linked yet, and the embedded
-interpreter and its C++ binding are not built.
+The build uses the ps2dev cross compilers for the Emotion Engine and the IOP, their C and C++
+runtime, and the IRX fixup tool. It does not use ps2sdk. Every Sony library routine the game calls
+is reconstructed under `sce/`, and `sce/ee/runtime` connects the compiler's runtime to the
+reconstructed kernel.
+
+```shell
+cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/ps2-ee-toolchain.cmake -DRESONANCE_DISC_IMAGE=/path/to/FreQuency.cue
+cmake --build build --target iso
+```
+
+The `iso` target writes `build/resonance.iso`, a copy of the original disc image with the built
+executable and EZMIDI.IRX in place of the originals. Without `RESONANCE_DISC_IMAGE`, the build
+produces the executable and the module only.
 
 ## Provenance and licence
 
