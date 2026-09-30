@@ -117,7 +117,7 @@ int g_bSoundRequestPending = 0;
 
 // The driver's reply, whose first word SubmitSoundDriverRequest() reports.
 // 0x008e5b80
-unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
+alignas(64) unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
 // The descriptor XferToIop() hands to the SIF DMA.
 // 0x008e5be8
