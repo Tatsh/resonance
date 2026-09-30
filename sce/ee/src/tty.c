@@ -261,7 +261,13 @@ int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
     }
     if (g_bConsoleOpen == 0) {
         if (TtyOpen() == 0) {
+#ifdef ENABLE_PATCHES
+            // Without a DECI2 host (after an IOP reboot, or on a retail console) the original drops
+            // the text. The serial port shows it instead.
+            return (int)sio_write((void *)pBuffer, (size_t)nLength);
+#else
             return -1;
+#endif
         }
         g_bConsoleOpen = 1;
     }
