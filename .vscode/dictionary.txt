@@ -170,7 +170,6 @@ deletefileop
 deleteremixmct
 demangled
 demangles
-demuxed
 deployedpowerupmsg
 devconsole
 devirtualised
@@ -188,6 +187,7 @@ docstrings
 dogamesystemplaycmd
 drawverts
 dsizeof
+dsmcc
 dsubu
 dthe
 durgemcurve

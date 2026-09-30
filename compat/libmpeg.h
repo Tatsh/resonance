@@ -36,6 +36,24 @@ typedef struct {
 #define sceMpegStrM2V 0
 #define sceMpegStrPCM 2
 
+// Callback type the demultiplexer reports in sceMpegCbDataStr::type for each stream packet.
+#define sceMpegCbStr 6
+
+// One demultiplexed stream packet, as sceMpegDemuxPssRing() passes it to a stream callback. The
+// pointers address the input ring and may wrap at its end.
+typedef struct {
+    int type; /**< +0x00. Always sceMpegCbStr. */
+    unsigned char *header; /**< +0x04. The packet start code. */
+    unsigned char *data; /**< +0x08. The packet payload. */
+    unsigned int len; /**< +0x0c. Payload length in bytes. */
+    long long pts; /**< +0x10. Presentation time stamp, or -1 when absent. */
+    long long dts; /**< +0x18. Decoding time stamp, or -1 when absent. */
+} sceMpegCbDataStr;
+
+// A decoder or stream callback. The callback data is an sceMpegCbDataStr for a stream callback.
+// A stream callback returns zero to stop the demultiplexer.
+typedef int (*sceMpegCallback)(sceMpeg *pMpeg, void *pCallbackData, void *pData);
+
 int sceMpegInit(void);
 
 // Demultiplexes a pack stream without a ring buffer, passing no buffer and -1 as its size.
@@ -79,7 +97,8 @@ int sceMpegIsContextWordFourClear(void *pDecoder);
 // Registers a stream callback for the given type and channel. A duplicate key overwrites the
 // entry in place, still bumps the count, and returns the previous callback; a fresh entry
 // returns null.
-void *sceMpegAddStrCallback(void *pDecoder, int nType, int nChannel, void *pfnCallback, void *pData);
+sceMpegCallback sceMpegAddStrCallback(
+    void *pDecoder, int nType, int nChannel, sceMpegCallback pfnCallback, void *pData);
 
 // Resets the ring to the given base and size. The write and commit positions start at base.
 void sceMpegResetRingPointers(void *pRing, void *pBase, int nSize);

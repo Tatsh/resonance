@@ -63,6 +63,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `rec.bin` recordings begin with the original banner text.
 - The movie stream error table has all twelve original messages. Error codes below -7 previously
   read past the end of the table.
+- The PSS movie demultiplexer is reconstructed. Its bit reader and pack and packet parsers were
+  stubs, and the intro movie delivered no video or audio packets. The stream key table was also
+  empty, and every packet matched the first registered stream.
 
 ## [0.0.1] - 2026-00-00
 

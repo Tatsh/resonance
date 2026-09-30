@@ -29,7 +29,7 @@ enum {
 typedef struct {
     unsigned long long key; // +0x00: combined key, compared as a pair.
     unsigned long long templateBits; // +0x08: template for the stream type.
-    void *callback; // +0x10: stream callback, returned on duplicate registration.
+    sceMpegCallback callback; // +0x10: stream callback, returned on duplicate registration.
     void *data; // +0x14: stream data.
 } StreamEntry;
 
@@ -778,9 +778,21 @@ static int g_mpegPollFlag;
 static void *g_defaultSlotTwo;
 static void *g_defaultSlotThree;
 
-// Template bits copied into each new stream entry, standing in for the table near 0x007798b8.
-// Word zero feeds the key and word one picks the channel shift.
-static unsigned long long g_streamTemplates[10][2];
+// 0x007798b8
+// Key and match mask for each stream type. A packet belongs to a stream when its key, masked,
+// equals the stream key. The mask also selects where the channel number goes.
+static const unsigned long long g_streamTemplates[10][2] = {
+    { 0xe000000000ULL, 0xff00000000ULL }, // MPEG-2 video, channel in the stream identifier.
+    { 0xbdffc00000ULL, 0xffffffffffULL },
+    { 0xbdffa00000ULL, 0xffffffffffULL }, // PCM audio.
+    { 0xbdffa10000ULL, 0xffffffffffULL },
+    { 0xbdff900000ULL, 0xffffffffffULL },
+    { 0xc000000000ULL, 0xff00000000ULL },
+    { 0xbd80000000ULL, 0xffff000000ULL },
+    { 0xbda0000000ULL, 0xffff000000ULL },
+    { 0xbd88000000ULL, 0xffff000000ULL },
+    { 0xbd90000000ULL, 0xffff000000ULL },
+};
 
 // 0x005e0ad8
 void sceMpegResetRingPointers(void *pRing, void *pBase, int nSize) {
@@ -1050,23 +1062,25 @@ int sceMpegDemuxPss(sceMpeg *pMpeg, unsigned char *pStart, int nSize) {
 
 // 0x005ca4e0
 static unsigned long long buildStreamKey(int nType, int nChannel) {
-    unsigned long long discriminator;
-    unsigned long long key;
+    static const unsigned long long kSubstreamByteMask = 0xffffULL << 24;
+    static const unsigned long long kStreamIdMask = 0xff00ULL << 24;
+    unsigned long long mask;
     int shift;
 
-    key = 0;
     if ((unsigned int)nType >= 10u) {
         return 0;
     }
-    discriminator = g_streamTemplates[nType][1];
-    if (discriminator == 0x00ff000000000000ULL) {
-        shift = 0x20;
+    mask = g_streamTemplates[nType][1];
+    if (mask == kSubstreamByteMask) {
+        shift = 24;
+    } else if (mask > kSubstreamByteMask) {
+        shift = 0;
+    } else if (mask == kStreamIdMask) {
+        shift = 32;
     } else {
-        shift = 0x18;
+        shift = 0;
     }
-    key = g_streamTemplates[nType][0];
-    key = key | ((unsigned long long)(unsigned int)nChannel << shift);
-    return key;
+    return g_streamTemplates[nType][0] | ((unsigned long long)(long long)nChannel << shift);
 }
 
 // 0x005e08e8
@@ -1142,51 +1156,362 @@ int sceMpegInit(void) {
     return sceMpegSub0061da40();
 }
 
+// Bit reader over the input, 0x30 bytes. The cache has the next bits left-aligned, and each
+// advance refills it past 56 valid bits. A read of up to 32 bits therefore never needs a refill. The fetch pointer wraps
+// from the ring end back to its base.
+typedef struct {
+    unsigned long long mCache;
+    unsigned char *mStart;
+    unsigned char *mFetch;
+    int mCached;
+    unsigned long long mPosition; // Bits consumed since mStart.
+    unsigned char *mRingBase;
+    uintptr_t mRingEnd; // All ones without a ring, which the fetch pointer never arrives at.
+    int mRingSize;
+} BitReader;
+
+// The pack header fields the demultiplexer stores, 0x10 bytes.
+typedef struct {
+    int mScrExtension;
+    unsigned int mScrLow; // System clock reference bits 31 to 0.
+    int mScrHigh; // System clock reference bit 32.
+    int mHasSystemHeader;
+} PackHeader;
+
+// One parsed packet, 0x2c bytes. The key is the stream identifier shifted up by 32 bits, with the
+// substream word of a private stream in the low word. Positions are bit positions from the start
+// of the input.
+typedef struct {
+    unsigned long long mKey;
+    int mPacketLength;
+    int mScrambling;
+    long long mPts;
+    long long mDts;
+    int mDataPosition;
+    int mDataLength;
+    int mHeaderPosition;
+} PesPacket;
+
+enum {
+    kCacheRefillBits = 57,
+    kCacheTopShift = 56,
+    kPacketStartPrefix = 0x000001,
+    kPackStartCode = 0x000001ba,
+    kSystemHeaderStartCode = 0x000001bb,
+    kProgramEndCode = 0x000001b9,
+    kStreamIdProgramStreamMap = 0xbc,
+    kStreamIdPrivate1 = 0xbd,
+    kStreamIdPadding = 0xbe,
+    kStreamIdPrivate2 = 0xbf,
+    kStreamIdEcm = 0xf0,
+    kStreamIdEmm = 0xf1,
+    kStreamIdDsmcc = 0xf2,
+    kStreamIdH2221TypeE = 0xf8,
+    kStreamIdDirectory = 0xff,
+    kPtsFlag = 2,
+    kPtsDtsFlags = 3,
+    kSubstreamHeaderBytes = 4,
+    // The packet length counts the three bytes of flags and header length ahead of the header data.
+    kPesFlagBytes = 3,
+    kPrivateDataBits = 128
+};
+
+// Stream key the demultiplexer falls back to when no registered stream matches a packet.
+static const unsigned long long kDefaultStreamKey = 0xbdffULL << 24;
+
+// 0x00779958
+// Bits the optional PES fields occupy for each combination of the ES rate, trick mode, copy
+// information, and CRC flags.
+static const unsigned char kOptionalFieldBits[] = {
+    0, 16, 8, 24, 8, 24, 16, 32, 24, 40, 32, 48, 32, 48, 40, 56 };
+
+static unsigned long long streamKey(int nStreamId) {
+    return (unsigned long long)(unsigned int)nStreamId << 32;
+}
+
+// 0x006102c0
+static void bitReaderAdvance(BitReader *pReader, int nBits) {
+    pReader->mCache <<= nBits;
+    pReader->mCached -= nBits;
+    // An overdrawn count wraps to a large unsigned value and skips the refill, as in the image.
+    while ((unsigned int)pReader->mCached < kCacheRefillBits) {
+        pReader->mCache |= (unsigned long long)*pReader->mFetch
+                           << (kCacheTopShift - pReader->mCached);
+        ++pReader->mFetch;
+        if ((uintptr_t)pReader->mFetch >= pReader->mRingEnd) {
+            pReader->mFetch = pReader->mRingBase;
+        }
+        pReader->mCached += 8;
+    }
+    pReader->mPosition += (unsigned long long)(long long)nBits;
+}
+
 // 0x00610268
-static int initBitReader(void *pState,
-                         unsigned char *pStart,
-                         int nSize,
-                         unsigned char *pBuffer,
-                         int nBufferSize) {
-    (void)pState;
-    (void)pStart;
-    (void)nSize;
-    (void)pBuffer;
-    (void)nBufferSize;
-    return 0;
+static void initBitReader(BitReader *pReader,
+                          unsigned char *pStart,
+                          unsigned char *pRingBase,
+                          int nRingSize) {
+    pReader->mFetch = pStart;
+    pReader->mRingEnd = (uintptr_t)pRingBase + (uintptr_t)(intptr_t)nRingSize;
+    pReader->mRingSize = nRingSize;
+    pReader->mStart = pStart;
+    pReader->mCache = 0;
+    pReader->mCached = 0;
+    pReader->mPosition = 0;
+    pReader->mRingBase = pRingBase;
+    bitReaderAdvance(pReader, 0);
 }
 
 // 0x006102a0
-static int peekBits(void *pState, int nBits) {
-    (void)pState;
-    (void)nBits;
-    return 0;
+static int peekBits(const BitReader *pReader, int nBits) {
+    return (int)(pReader->mCache >> (64 - nBits));
+}
+
+// 0x00610358
+static int getBits(BitReader *pReader, int nBits) {
+    int value = peekBits(pReader, nBits);
+    bitReaderAdvance(pReader, nBits);
+    return value;
+}
+
+// 0x006103a8
+static int getBit(BitReader *pReader) {
+    int value = peekBits(pReader, 1);
+    bitReaderAdvance(pReader, 1);
+    return value;
+}
+
+// 0x006103f0
+// Moves the reader nBytes ahead of its bit position, rounded down to a byte, and refills.
+static void skipBytes(BitReader *pReader, int nBytes) {
+    unsigned long long position;
+    unsigned char *pFetch;
+
+    position = pReader->mPosition + (unsigned long long)(long long)(nBytes * 8);
+    pReader->mCache = 0;
+    pReader->mCached = 0;
+    pFetch = pReader->mStart + (int)(position >> 3);
+    if ((uintptr_t)pFetch >= pReader->mRingEnd) {
+        pFetch -= pReader->mRingSize;
+    }
+    pReader->mFetch = pFetch;
+    pReader->mPosition = position;
+    bitReaderAdvance(pReader, 0);
 }
 
 // 0x00610448
-static int skipBits(void *pState, int nBits) {
-    (void)pState;
-    (void)nBits;
-    return 0;
+static unsigned char *pointerAt(const BitReader *pReader, int nBitPosition) {
+    unsigned char *pByte = pReader->mStart + (nBitPosition >> 3);
+    if ((uintptr_t)pByte >= pReader->mRingEnd) {
+        pByte -= pReader->mRingSize;
+    }
+    return pByte;
+}
+
+// A 33-bit time stamp split 3, 15, and 15 around marker bits, after its four-bit prefix.
+static inline long long readTimestamp(BitReader *pReader) {
+    int high;
+    int middle;
+    int low;
+    unsigned int lowWord;
+
+    (void)getBits(pReader, 4);
+    high = getBits(pReader, 3);
+    (void)getBit(pReader);
+    middle = getBits(pReader, 15);
+    (void)getBit(pReader);
+    low = getBits(pReader, 15);
+    (void)getBit(pReader);
+    lowWord = ((unsigned int)high << 30) | ((unsigned int)middle << 15) | (unsigned int)low;
+    return (long long)(((unsigned long long)((high >> 2) & 1) << 32) | lowWord);
+}
+
+// 0x005cacc0
+static int parseSystemHeader(BitReader *pReader, PackHeader *pPack) {
+    (void)pPack; // The image passes the pack header and never reads it.
+    (void)getBits(pReader, 56); // Start code, header length, and the first rate bits.
+    (void)getBits(pReader, 40); // The rest of the fixed fields.
+    while (peekBits(pReader, 1) == 1) {
+        (void)getBits(pReader, 24); // One stream bound entry.
+    }
+    return 1;
 }
 
 // 0x005cab70
-static int parsePackHeader(void *pState, void *pOut) {
-    (void)pState;
-    (void)pOut;
+static int parsePackHeader(BitReader *pReader, PackHeader *pPack) {
+    int high;
+    int middle;
+    int low;
+    int stuffing;
+    int i;
+
+    (void)getBits(pReader, 34); // Start code and the '01' marker.
+    high = getBits(pReader, 3);
+    (void)getBit(pReader);
+    middle = getBits(pReader, 15);
+    (void)getBit(pReader);
+    low = getBits(pReader, 15);
+    (void)getBit(pReader);
+    pPack->mScrExtension = getBits(pReader, 9);
+    (void)getBits(pReader, 30); // Marker, mux rate, markers, and reserved bits.
+    stuffing = getBits(pReader, 3);
+    pPack->mScrLow = ((unsigned int)high << 30) | ((unsigned int)middle << 15) | (unsigned int)low;
+    pPack->mScrHigh = (int)(((unsigned int)high >> 2) & 1);
+    for (i = 0; i < stuffing; ++i) {
+        (void)getBits(pReader, 8);
+    }
+    if (peekBits(pReader, 32) == kSystemHeaderStartCode) {
+        pPack->mHasSystemHeader = 1;
+        parseSystemHeader(pReader, pPack);
+    } else {
+        pPack->mHasSystemHeader = 0;
+    }
     return 1;
 }
 
 // 0x005cad30
-static int parsePacket(void *pState, void *pOut) {
-    (void)pState;
-    (void)pOut;
+// Returns zero when the packet embeds a pack header. A program stream may not embed one.
+static int parsePacket(BitReader *pReader, PesPacket *pPacket) {
+    int streamId;
+    int ptsDtsFlags;
+    int hasEscr;
+    int optionalFlags;
+    int hasExtension;
+    int headerDataLength;
+    int headerStart;
+    int payload;
+    int skip;
+    int i;
+
+    pPacket->mHeaderPosition = (int)pReader->mPosition;
+    (void)getBits(pReader, 24);
+    streamId = getBits(pReader, 8);
+    pPacket->mKey = streamKey(streamId);
+    pPacket->mPacketLength = getBits(pReader, 16);
+    pPacket->mPts = -1;
+    pPacket->mDts = -1;
+    switch (streamId) {
+    case kStreamIdPrivate2:
+        pPacket->mKey |= (unsigned int)getBits(pReader, 32);
+        skip = pPacket->mPacketLength - kSubstreamHeaderBytes;
+        if (skip != 0) {
+            skipBytes(pReader, skip);
+        }
+        return 1;
+    case kStreamIdProgramStreamMap:
+    case kStreamIdPadding:
+    case kStreamIdEcm:
+    case kStreamIdEmm:
+    case kStreamIdDirectory:
+    case kStreamIdDsmcc:
+    case kStreamIdH2221TypeE:
+        if (pPacket->mPacketLength != 0) {
+            skipBytes(pReader, pPacket->mPacketLength);
+        }
+        return 1;
+    default:
+        break;
+    }
+
+    (void)getBits(pReader, 2); // The '10' marker.
+    pPacket->mScrambling = getBits(pReader, 2);
+    (void)getBits(pReader, 4); // Priority, alignment, copyright, and original flags.
+    ptsDtsFlags = getBits(pReader, 2);
+    hasEscr = getBits(pReader, 1);
+    optionalFlags = getBits(pReader, 4);
+    hasExtension = getBits(pReader, 1);
+    headerDataLength = getBits(pReader, 8);
+    headerStart = (int)pReader->mPosition;
+    if ((ptsDtsFlags & kPtsFlag) != 0) {
+        pPacket->mPts = readTimestamp(pReader);
+    }
+    if (ptsDtsFlags == kPtsDtsFlags) {
+        pPacket->mDts = readTimestamp(pReader);
+    }
+    if (hasEscr == 1) {
+        (void)getBits(pReader, 48);
+    }
+    if (optionalFlags != 0) {
+        (void)getBits(pReader, kOptionalFieldBits[optionalFlags]);
+    }
+    if (hasExtension == 1) {
+        int hasPrivateData = getBits(pReader, 1);
+        int hasPackHeader = getBits(pReader, 1);
+        int hasSequenceCounter = getBits(pReader, 1);
+        int hasPStdBuffer = getBits(pReader, 1);
+        int hasExtension2;
+
+        (void)getBits(pReader, 3);
+        hasExtension2 = getBits(pReader, 1);
+        if (hasPrivateData == 1) {
+            // 128 bits, read as 48, 48, and 32.
+            (void)getBits(pReader, 48);
+            (void)getBits(pReader, 48);
+            (void)getBits(pReader, 32);
+        }
+        if (hasPackHeader == 1) {
+            sceMpegRaiseError("pack_header_field_flag needs to be '0' in PS\n");
+            return 0;
+        }
+        if (hasSequenceCounter == 1) {
+            (void)getBits(pReader, 16);
+        }
+        if (hasPStdBuffer == 1) {
+            (void)getBits(pReader, 16);
+        }
+        if (hasExtension2 == 1) {
+            int length;
+
+            (void)getBit(pReader);
+            length = getBits(pReader, 7);
+            for (i = 0; i < length; ++i) {
+                (void)getBits(pReader, 8);
+            }
+        }
+    }
+    // Skip the rest of the header data, including any stuffing.
+    skip = headerDataLength -
+           (int)((pReader->mPosition - (unsigned long long)(long long)headerStart) >> 3);
+    if (skip != 0) {
+        skipBytes(pReader, skip);
+    }
+    payload = pPacket->mPacketLength - headerDataLength;
+    pPacket->mDataLength = payload - kPesFlagBytes;
+    pPacket->mDataPosition = (int)pReader->mPosition;
+    skip = payload - kPesFlagBytes;
+    if (pPacket->mKey == streamKey(kStreamIdPrivate1)) {
+        // The substream word stays in the reported data and length.
+        pPacket->mKey |= (unsigned int)getBits(pReader, 32);
+        skip = payload - kPesFlagBytes - kSubstreamHeaderBytes;
+    }
+    if (skip != 0) {
+        skipBytes(pReader, skip);
+    }
     return 1;
 }
 
+static int deliverPacket(sceMpeg *pMpeg,
+                         const BitReader *pReader,
+                         const PesPacket *pPacket,
+                         sceMpegCallback pfnCallback,
+                         void *pData) {
+    sceMpegCbDataStr callbackData;
+
+    callbackData.type = sceMpegCbStr;
+    callbackData.header = pointerAt(pReader, pPacket->mHeaderPosition);
+    callbackData.data = pointerAt(pReader, pPacket->mDataPosition);
+    callbackData.len = (unsigned int)pPacket->mDataLength;
+    callbackData.pts = pPacket->mPts;
+    callbackData.dts = pPacket->mDts;
+    return pfnCallback(pMpeg, &callbackData, pData);
+}
+
+static int isPacketStart(const BitReader *pReader) {
+    return peekBits(pReader, 24) == kPacketStartPrefix &&
+           peekBits(pReader, 32) != kPackStartCode && peekBits(pReader, 32) != kProgramEndCode;
+}
+
 // 0x005ca768
-// The body below is not yet verified against the disassembly; only the table references have
-// been repointed at the work area.
 int sceMpegDemuxPssRing(sceMpeg *pMpeg,
                         unsigned char *pStart,
                         int nSize,
@@ -1194,46 +1519,72 @@ int sceMpegDemuxPssRing(sceMpeg *pMpeg,
                         int nBufferSize) {
     MpegWork *work;
     StreamEntry *table;
-    int tableCount;
-    unsigned char state[0x30];
-    unsigned char header[0x48];
-    int selected;
-    int callbackIndex;
+    BitReader reader;
+    PackHeader pack;
+    // Packets without header data do not set the payload fields, so a callback sees the previous
+    // packet's values. The image starts them from uninitialised stack memory.
+    PesPacket packet = { 0 };
+    sceMpegCallback defaultCallback;
+    void *defaultData;
+    unsigned long long limit;
     int consumed;
-    int code;
+    int proceed;
+    int count;
     int i;
 
     work = (MpegWork *)pMpeg->pContext;
     table = work->mStreamTable;
-    tableCount = work->mStreamCount;
-    initBitReader(state, pStart, nSize, pBuffer, nBufferSize);
-    selected = 0;
-    callbackIndex = 0;
+    defaultCallback = NULL;
+    defaultData = NULL;
     consumed = 0;
-    for (i = 0; i < tableCount; ++i) {
-        if (table[i].key == 0xbdff000000000000ULL) {
-            selected = (int)(table[i].callback != NULL);
-            callbackIndex = i;
+    proceed = 1;
+    limit = (unsigned long long)(long long)(nSize * 8);
+    initBitReader(&reader, pStart, pBuffer, nBufferSize);
+    count = work->mStreamCount;
+    for (i = 0; i < count; ++i) {
+        if (table[i].key == kDefaultStreamKey) {
+            defaultData = table[i].data;
+            defaultCallback = table[i].callback;
+        }
+        if (defaultCallback != NULL) {
             break;
         }
     }
-    (void)selected;
-    (void)callbackIndex;
-    code = peekBits(state, 0x20);
-    if (code == 0x1ba) {
-        parsePackHeader(state, header);
-        consumed = nSize;
-        return consumed;
+
+    if (peekBits(&reader, 32) == kPackStartCode) {
+        parsePackHeader(&reader, &pack);
     }
-    skipBits(state, 0x80);
-    skipBits(state, 0x20);
-    if (parsePacket(state, header) != 0) {
-        consumed = nSize;
+    for (;;) {
+        if (isPacketStart(&reader) && reader.mPosition < limit) {
+            if (proceed == 0) {
+                return consumed;
+            }
+            parsePacket(&reader, &packet);
+            if (limit < reader.mPosition) {
+                continue;
+            }
+            count = work->mStreamCount;
+            for (i = 0; i < count; ++i) {
+                if (table[i].key == (packet.mKey & table[i].templateBits)) {
+                    proceed =
+                        deliverPacket(pMpeg, &reader, &packet, table[i].callback, table[i].data);
+                    break;
+                }
+            }
+            // The count is read again after a callback. The callback may register a stream.
+            if (i == work->mStreamCount && defaultCallback != NULL) {
+                proceed = deliverPacket(pMpeg, &reader, &packet, defaultCallback, defaultData);
+            }
+            if (proceed != 0) {
+                consumed = (int)(reader.mPosition >> 3);
+            }
+            continue;
+        }
+        if (limit < reader.mPosition || peekBits(&reader, 32) != kPackStartCode) {
+            return consumed;
+        }
+        parsePackHeader(&reader, &pack);
     }
-    if (consumed == 0) {
-        consumed = nSize;
-    }
-    return consumed;
 }
 
 // 0x005e08c8
@@ -1496,11 +1847,8 @@ int sceMpegIsContextWordFourClear(void *pDecoder) {
 }
 
 // 0x005caa78
-void *sceMpegAddStrCallback(void *pDecoder,
-                            int nType,
-                            int nChannel,
-                            void *pfnCallback,
-                            void *pData) {
+sceMpegCallback sceMpegAddStrCallback(
+    void *pDecoder, int nType, int nChannel, sceMpegCallback pfnCallback, void *pData) {
     MpegWork *work;
     StreamEntry *table;
     int count;
@@ -1508,7 +1856,7 @@ void *sceMpegAddStrCallback(void *pDecoder,
     unsigned long long templateBits;
     StreamEntry *entry;
     int index;
-    void *found;
+    sceMpegCallback found;
 
     work = (MpegWork *)((sceMpeg *)pDecoder)->pContext;
     key = buildStreamKey(nType, nChannel);

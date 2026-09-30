@@ -56,16 +56,6 @@ typedef struct {
 // and the zeroes below stand in for the image words, which the disassembly does not reveal.
 static const PacketHeader g_packetHeaders[2] = { { 0ULL, 0ULL }, { 0ULL, 0ULL } };
 
-// One demultiplexed stream packet, as the stream callbacks receive it. Only the data pointer,
-// the byte count, and the two stamp words are read. Inferred.
-typedef struct {
-    unsigned char mUnknown00[8]; // +0x00, skipped by the callbacks.
-    unsigned char *mData; // +0x08, packet bytes in the ring.
-    int mSize; // +0x0c, packet byte count.
-    long long mFirstStamp; // +0x10, first time stamp.
-    long long mSecondStamp; // +0x18, second time stamp.
-} DemuxedPacket;
-
 // 0x0077b128
 // Set while the display runs. The endimage handler leaves quietly outside that window.
 static int g_isDisplaying;
@@ -309,16 +299,16 @@ int vblankHandler(int nCause) {
 // 0x0059afa0
 int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
-    DemuxedPacket *packet = (DemuxedPacket *)pCallbackData;
+    sceMpegCbDataStr *packet = (sceMpegCbDataStr *)pCallbackData;
     ReadBuf *readBuffer = (ReadBuf *)pData;
 
     // The bytes up to the ring end move first, and the rest wraps to the ring base.
     unsigned char *ringEnd = readBuffer->data + readBuffer->size;
-    int contiguous = (int)(ringEnd - packet->mData);
-    if (packet->mSize < contiguous) {
-        contiguous = packet->mSize;
+    int contiguous = (int)(ringEnd - packet->data);
+    if ((int)packet->len < contiguous) {
+        contiguous = (int)packet->len;
     }
-    int remaining = packet->mSize - contiguous;
+    int remaining = (int)packet->len - contiguous;
     unsigned char *putA;
     int sizeA;
     unsigned char *putB;
@@ -328,12 +318,12 @@ int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
                           sizeA,
                           ToUncachedAddress(putB),
                           sizeB,
-                          packet->mData,
+                          packet->data,
                           contiguous,
                           readBuffer->data,
                           remaining);
     if (copied > 0) {
-        if (videoDecPutTs(&videoDec, packet->mFirstStamp, packet->mSecondStamp, putA, copied) ==
+        if (videoDecPutTs(&videoDec, packet->pts, packet->dts, putA, copied) ==
             0) {
             ErrMessage("pts buffer overflow\n");
         }
@@ -393,12 +383,12 @@ static void AudioCommitCopied(AudioDec *pFields, int nCopied) {
 
 // 0x0059b0c8
 int pcmCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
-    DemuxedPacket *packet = (DemuxedPacket *)pCallbackData;
+    sceMpegCbDataStr *packet = (sceMpegCbDataStr *)pCallbackData;
     ReadBuf *readBuffer = (ReadBuf *)pData;
 
     // Pulse code modulation packets carry a four-byte header, which the copy skips.
-    unsigned char *source = packet->mData + 4;
-    int total = packet->mSize - 4;
+    unsigned char *source = packet->data + 4;
+    int total = (int)packet->len - 4;
     unsigned char *ringEnd = readBuffer->data + readBuffer->size;
     int contiguous;
     int remaining;
