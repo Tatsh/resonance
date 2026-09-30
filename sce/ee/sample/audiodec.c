@@ -57,6 +57,7 @@ static void splitIopSpan(int *pWrite,
     nEnd -= pWork->iopOffset;
     span = pWork->iopBufferSize - pWork->iopOffset;
     nEnd -= kBlockStep;
+    nEnd %= pWork->iopBufferSize;
     aligned = nEnd / kBlockStep * kBlockStep;
     *pWrite = pWork->iopBuffer + pWork->iopOffset;
     if (span < aligned) {
@@ -176,16 +177,12 @@ void audioDecSendToIOP(AudioDec *pAudioDec) {
     rest = total % pAudioDec->bufferSize;
     chunk = pAudioDec->bufferSize - rest;
     pRead = pAudioDec->buffer + rest;
-    remaining = aligned - chunk;
     if (aligned < chunk) {
         chunk = aligned;
     }
-    if (ready + extra < kBlockStep) {
-        writePos = pAudioDec->iopOffset;
-    } else if (aligned < kBlockStep) {
-        writePos = aligned;
-    } else {
-        writePos = pAudioDec->iopOffset;
+    remaining = aligned - chunk;
+    writePos = pAudioDec->iopOffset;
+    if (ready + extra >= kBlockStep && chunk + remaining >= kBlockStep) {
         transferred = sendWrappedToIop(span[0],
                                        ready,
                                        span[2],

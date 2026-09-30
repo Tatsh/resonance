@@ -10,24 +10,18 @@ extern "C" {
 #endif
 
 // The decoder state, 0x48 bytes. The sample's VideoDec embeds one at its start and places its next
-// member at +0x48. The decode worker reads the first two words as context words and the count of
-// decoded frames.
+// member at +0x48. The picture path fills the time stamps and flags of each picture it outputs.
 typedef struct {
-    int mUnknown00[2]; /**< +0x00. Read as context words by the decode worker. */
+    int width; /**< +0x00. Picture width. */
+    int height; /**< +0x04. Picture height. */
     int frameCount; /**< +0x08. Count of decoded frames. */
     int mUnknown0C; /**< +0x0c. Not initialised at creation. */
-    int mUnknown10; /**< +0x10. -1 at creation. */
-    int mUnknown14; /**< +0x14. -1 at creation. */
-    int mUnknown18; /**< +0x18. -1 at creation. */
-    int mUnknown1C; /**< +0x1c. -1 at creation. */
-    int mUnknown20; /**< +0x20. 0 at creation. */
-    int mUnknown24; /**< +0x24. 0 at creation. */
-    int mUnknown28; /**< +0x28. -1 at creation. */
-    int mUnknown2C; /**< +0x2c. -1 at creation. */
-    int mUnknown30; /**< +0x30. -1 at creation. */
-    int mUnknown34; /**< +0x34. -1 at creation. */
-    int mUnknown38; /**< +0x38. 0 at creation. */
-    int mUnknown3C; /**< +0x3c. 0 at creation. */
+    long long pts; /**< +0x10. Presentation time stamp, or -1 when absent. */
+    long long dts; /**< +0x18. Decoding time stamp, or -1 when absent. */
+    unsigned long long flags; /**< +0x20. Picture header flags. */
+    long long pts2nd; /**< +0x28. Second field presentation time stamp, or -1. */
+    long long dts2nd; /**< +0x30. Second field decoding time stamp, or -1. */
+    unsigned long long flags2nd; /**< +0x38. Second field picture header flags. */
     void *pContext; /**< +0x40. Decoder context. Inferred. */
     int mUnknown44; /**< +0x44. */
 } sceMpeg;

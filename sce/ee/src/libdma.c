@@ -650,216 +650,109 @@ void sceDmaSub00612b40(ViBuf *buffer) {
 }
 
 // 0x00612cc0
-// Restarts the transfer channels from the saved positions. The routine recomputes the free span,
-// programs the channel words, and reenables interrupts for active work.
-void sceDmaSub00612cc0(ViBuf *buffer) {
-    DmaQueue *queue;
-    unsigned int bp;
-    unsigned int ctrl;
-    unsigned int madr;
-    unsigned int qwc;
-    unsigned int tadr;
-    unsigned int chcr;
-    int capacity;
-    int readPos;
-    int buffered;
-    int remainder;
+// Restarts both IPU channels from the positions sceDmaSub00612b40() saved. The input channel is
+// rewound by the words the IPU FIFO had, the read position and buffered count are corrected for
+// whatever the rewind crossed, the saved IPU command is reissued, and IPU_CTRL is restored.
+int sceDmaSub00612cc0(ViBuf *buffer) {
+    DmaQueue *queue = (DmaQueue *)buffer;
+    const unsigned int savedBp = (unsigned int)queue->mSavedIpuBp;
+    const unsigned int command = savedBp & 0x7FU;
+    const unsigned int fifoWords = ((savedBp >> 16) & 3U) + ((savedBp >> 8) & 0xFU);
+    unsigned int madr = (unsigned int)queue->mSavedMadr - (fifoWords << 4);
+    unsigned int qwc = (unsigned int)queue->mSavedQwc + fifoWords;
+    unsigned int chcr = (unsigned int)queue->mSavedChcr | 0x100U;
+    unsigned int tadr = (unsigned int)queue->mSavedTadr;
+    const unsigned int base = (unsigned int)(uintptr_t)queue->mData;
+    const int capacity = queue->mCapacitySectors;
+    int crossed = 0;
 
-    queue = (DmaQueue *)buffer;
-    bp = (unsigned int)queue->mSavedIpuBp;
-    ctrl = (bp >> 16) & 3U;
-    ctrl += (bp >> 8) & 0xFU;
-    madr = (unsigned int)queue->mSavedFromMadr + ctrl * (unsigned int)-0x10;
-    tadr = (unsigned int)queue->mSavedFromQwc + ctrl;
-    chcr = (unsigned int)queue->mSavedFromChcr | 0x100U;
-    qwc = (unsigned int)queue->mSavedFromMadr;
     WaitSema(queue->mSemaId);
-    {
-        unsigned int base;
+    if (madr < base) {
+        // The rewind extends back past the ring start, into the last sector.
+        const unsigned int ringBytes = (unsigned int)capacity << kSectorShift;
+        unsigned int tagId = 0;
+        int remaining;
 
-        base = (unsigned int)(uintptr_t)queue->mData;
-        if (madr < base) {
-            unsigned int tagBase;
-            unsigned int sectors;
-
-            tagBase = queue->mTagBase;
-            sectors = (unsigned int)queue->mCapacitySectors;
-            madr = (base - madr) >> 4;
-            qwc = tagBase & 0x0FFFFFFFU;
-            madr = madr + sectors * 0x800;
-            {
-                int kind;
-
-                kind = 0;
-                if (queue->mSavedFromMadr != (int)base) {
-                    kind = 3;
-                    if (queue->mSavedFromMadr == (int)(base + sectors * 0x800)) {
-                        kind = 0;
-                    }
-                }
-                if (sectors == 0U) {
-                    __builtin_trap();
-                }
-                remainder = (int)((sectors - (unsigned int)queue->mSavedFromQwc) % sectors);
-                chcr = (qwc & 0x0FFFFFFFU) | (unsigned int)(kind << 28) | 0x100U;
-                if (remainder >= 0) {
-                    if (sectors == 0U) {
-                        __builtin_trap();
-                    }
-                    if (remainder < queue->mBufferedBytes) {
-                        madr = (unsigned int)queue->mSavedFromQwc;
-                        madr = madr + 1U;
-                        queue->mSavedFromQwc = (int)(sectors - 1U);
-                        queue->mBufferedBytes = (int)madr;
-                        madr = (unsigned int)queue->mSavedFromQwc;
-                    } else {
-                        buffered = queue->mBufferedBytes;
-                        madr = (unsigned int)(buffered + 1);
-                        queue->mBufferedBytes = (int)madr;
-                        madr = (unsigned int)queue->mSavedFromQwc;
-                    }
-                } else {
-                    queue->mSavedFromQwc = (int)(sectors - 1U);
-                    queue->mBufferedBytes = (int)((unsigned int)queue->mSavedIpuCtrl + 1U);
-                    madr = (unsigned int)queue->mSavedFromQwc;
-                }
-            }
-        } else {
-            unsigned int sectors;
-            unsigned int tagBase;
-            unsigned int savedMadr;
-            unsigned int aligned;
-            unsigned int current;
-            int first;
-            int second;
-
-            sectors = (unsigned int)queue->mCapacitySectors;
-            tagBase = queue->mTagBase;
-            savedMadr = (unsigned int)queue->mSavedFromMadr;
-            aligned = (sectors * 0x10U + tagBase + 0x10U) & 0x0FFFFFFFU;
-            if (savedMadr == aligned) {
-                current = 0U;
-            } else {
-                current = (savedMadr - base) >> 11;
-            }
-            if (madr == aligned) {
-                second = 0;
-            } else {
-                second = (int)((madr - base) >> 11);
-            }
-            if (current != (unsigned int)second) {
-                unsigned int maskedData;
-
-                if ((sectors << 11) == 0U) {
-                    __builtin_trap();
-                }
-                maskedData = base;
-                first = 3;
-                tadr = (maskedData + (unsigned int)current * 0x800 - madr) >> 4;
-                qwc = (unsigned int)current * 0x10U + tagBase;
-                qwc &= 0x0FFFFFFFU;
-                {
-                    unsigned int shifted;
-
-                    shifted = (unsigned int)(second + (int)sectors);
-                    shifted -= (unsigned int)queue->mReadSectors;
-                    second = (int)shifted;
-                }
-                second %= (int)sectors;
-                {
-                    int check;
-                    unsigned int span;
-                    unsigned int used;
-
-                    span = (unsigned int)(savedMadr - maskedData) % (sectors << 11);
-                    check = (int)(maskedData + span);
-                    used = (unsigned int)(queue->mReadSectors + queue->mBufferedSectors);
-                    used %= sectors;
-                    check += (int)used;
-                    check *= 0x800;
-                    if (check == (int)(maskedData + (unsigned int)second * 0x800)) {
-                        first = 0;
-                    }
-                }
-                chcr = (qwc & 0x0FFFFFFFU) | (unsigned int)(first << 28) | 0x100U;
-                if (second >= 0) {
-                    if (sectors == 0U) {
-                        __builtin_trap();
-                    }
-                    if (second < queue->mBufferedSectors) {
-                        madr = (unsigned int)queue->mSavedFromQwc;
-                        queue->mSavedFromMadr = second;
-                        queue->mBufferedBytes = (int)(madr + 1U);
-                        madr = (unsigned int)queue->mSavedFromQwc;
-                    } else {
-                        queue->mSavedFromMadr = second;
-                        queue->mBufferedBytes = (int)((unsigned int)queue->mBufferedSectors + 1U);
-                        madr = (unsigned int)queue->mSavedFromQwc;
-                    }
-                } else {
-                    queue->mSavedFromMadr = second;
-                    queue->mBufferedBytes = (int)((unsigned int)queue->mSavedIpuCtrl + 1U);
-                    madr = (unsigned int)queue->mSavedFromQwc;
-                }
-            } else {
-                madr = (unsigned int)queue->mSavedFromQwc;
-            }
+        if ((unsigned int)queue->mSavedMadr != base) {
+            tagId = ((unsigned int)queue->mSavedMadr == base + ringBytes) ? 0U : 3U;
         }
-    }
-    if (madr != 0U) {
-        qwc = (unsigned int)queue->mBufferedBytes;
+        qwc = (base - madr) >> 4;
+        tadr = queue->mTagBase & 0x0FFFFFFFU;
+        madr += ringBytes;
+        chcr = ((unsigned int)queue->mSavedChcr & 0x0FFFFFFFU) | (tagId << 28) | 0x100U;
+        remaining = (capacity - queue->mReadSectors) % capacity;
+        if (remaining < 0 || remaining >= queue->mBufferedSectors) {
+            queue->mReadSectors = capacity - 1;
+            crossed = 1;
+        }
     } else {
-        qwc = (unsigned int)queue->mBufferedSectors;
-    }
-    if ((queue->mSavedFromQwc != 0) && (madr != 0U)) {
-        IPU_FROM_MADR = madr;
-        IPU_FROM_QWC = qwc;
-        {
-            unsigned int enabler;
+        const unsigned int endTag =
+            (((unsigned int)capacity << 4) + queue->mTagBase + 0x10U) & 0x0FFFFFFFU;
+        const unsigned int savedMadr = (unsigned int)queue->mSavedMadr;
+        const int savedSector = (savedMadr == endTag) ? 0 : (int)((savedMadr - base) >> kSectorShift);
+        const int rewoundSector = (madr == endTag) ? 0 : (int)((madr - base) >> kSectorShift);
 
-            (void)DIntr();
-            enabler = DMA_ENABLER;
-            DMA_ENABLEW = enabler | 0x10000U;
-            IPU_FROM_CHCR = (unsigned int)queue->mSavedFromChcr | 0x100U;
-            enabler = DMA_ENABLER;
-            DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-            (void)EIntr();
+        if (savedSector != rewoundSector) {
+            const unsigned int ringBytes = (unsigned int)capacity << kSectorShift;
+            const unsigned int savedWrapped = base + (savedMadr - base) % ringBytes;
+            const unsigned int nextRead =
+                base +
+                ((unsigned int)((queue->mReadSectors + queue->mBufferedSectors) % capacity)
+                 << kSectorShift);
+            const unsigned int tagId = (savedWrapped == nextRead) ? 0U : 3U;
+            const int behind = (rewoundSector + capacity - queue->mReadSectors) % capacity;
+
+            qwc = (base + ((unsigned int)savedSector << kSectorShift) - madr) >> 4;
+            tadr = (((unsigned int)savedSector << 4) + queue->mTagBase) & 0x0FFFFFFFU;
+            chcr = ((unsigned int)queue->mSavedChcr & 0x0FFFFFFFU) | (tagId << 28) | 0x100U;
+            if (behind < 0 || behind >= queue->mBufferedSectors) {
+                queue->mReadSectors = rewoundSector;
+                crossed = 1;
+            }
         }
-        qwc = (unsigned int)queue->mBufferedSectors;
     }
-    if (qwc != 0U) {
+    if (crossed != 0) {
+        ++queue->mBufferedSectors;
+    }
+
+    if (queue->mSavedFromMadr != 0 && queue->mSavedFromQwc != 0) {
+        unsigned int enabler;
+
+        IPU_FROM_MADR = (unsigned int)queue->mSavedFromMadr;
+        IPU_FROM_QWC = (unsigned int)queue->mSavedFromQwc;
+        (void)DIntr();
+        enabler = DMA_ENABLER;
+        DMA_ENABLEW = enabler | 0x10000U;
+        IPU_FROM_CHCR = (unsigned int)queue->mSavedFromChcr | 0x100U;
+        enabler = DMA_ENABLER;
+        DMA_ENABLEW = enabler & 0xFFFEFFFFU;
+        (void)EIntr();
+    }
+    if (queue->mBufferedSectors != 0) {
         while ((int)IPU_CTRL < 0) {
         }
-        IPU_CMD = bp & 0x7FU;
+        IPU_CMD = command;
         while ((int)IPU_CTRL < 0) {
         }
     }
     IPU_TO_MADR = madr;
     IPU_TO_TADR = tadr;
     IPU_TO_QWC = qwc;
-    if (queue->mBufferedSectors == 0) {
-        bp = (unsigned int)queue->mSavedIpuCtrl;
-    } else {
-        (void)DIntr();
-        {
-            unsigned int enabler;
+    if (queue->mBufferedSectors != 0) {
+        unsigned int enabler;
 
-            enabler = DMA_ENABLER;
-            DMA_ENABLEW = enabler | 0x10000U;
-            IPU_TO_CHCR = chcr;
-            enabler = DMA_ENABLER;
-            DMA_ENABLEW = enabler & 0xFFFEFFFFU;
-            (void)EIntr();
-        }
-        bp = (unsigned int)queue->mSavedIpuCtrl;
+        (void)DIntr();
+        enabler = DMA_ENABLER;
+        DMA_ENABLEW = enabler | 0x10000U;
+        IPU_TO_CHCR = chcr;
+        enabler = DMA_ENABLER;
+        DMA_ENABLEW = enabler & 0xFFFEFFFFU;
+        (void)EIntr();
     }
-    IPU_CTRL = bp;
+    IPU_CTRL = (unsigned int)queue->mSavedIpuCtrl;
     queue->mUnknown44 = 1;
     SignalSema(queue->mSemaId);
-    (void)capacity;
-    (void)readPos;
-    (void)buffered;
-    (void)ctrl;
+    return 1;
 }
 
 // 0x00613088

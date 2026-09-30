@@ -51,10 +51,14 @@ typedef struct {
     unsigned long long mHigh;
 } PacketHeader;
 
-// The two packet headers the image holds at 0x00835e78. The first heads register data and the
-// second heads image transfer data. Their words are copied unchanged into every display packet,
-// and the zeroes below stand in for the image words, which the disassembly does not reveal.
-static const PacketHeader g_packetHeaders[2] = { { 0ULL, 0ULL }, { 0ULL, 0ULL } };
+// The two GIF tag templates, each one address and data register per loop. The first ends the
+// packet and heads the display setup, and the second heads each transfer's registers. The loop
+// count is filled in when the tag closes.
+// 0x00835e78
+static const PacketHeader g_packetHeaders[2] = {
+    {0x1000000000008000ULL, 0xeULL},
+    {0x1000000000000000ULL, 0xeULL},
+};
 
 // 0x0077b128
 // Set while the display runs. The endimage handler leaves quietly outside that window.
@@ -218,7 +222,7 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) 
 }
 
 // 0x005d2e38
-int handler_endimage(int nCause) {
+int vblankHandler(int nCause) {
     (void)nCause;
     sceDmaChan *pChannel = sceDmaGetChan(SCE_DMA_GIF);
 
@@ -286,7 +290,7 @@ void endDisplay(void) {
 }
 
 // 0x005d3068
-int vblankHandler(int nCause) {
+int handler_endimage(int nCause) {
     (void)nCause;
     if (g_frameShown != 0) {
         voBufDecCount(&voBuf);

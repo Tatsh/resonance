@@ -13,16 +13,17 @@ extern "C" {
 // BITBLTBUF, TRXPOS, TRXREG, and TRXDIR, and a closing GIFtag.
 typedef struct {
     unsigned long long mWords[12];
-} sceGsLoadImage;
+} sceGsLoadImage __attribute__((aligned(16)));
 
 typedef struct {
     unsigned long long mWords[12];
-} sceGsStoreImage;
+} sceGsStoreImage __attribute__((aligned(16)));
 
-// One GIFtag, 16 bytes.
+// One GIFtag, 16 bytes. DMA reads it by quadword. It and every structure that includes it are
+// therefore quadword aligned.
 typedef struct {
     unsigned long long mWords[2];
-} sceGifTag;
+} sceGifTag __attribute__((aligned(16)));
 
 // The five display registers in the order sceGsSetDefDispEnv() fills them. The game writes each
 // word to the privileged register of the same name.

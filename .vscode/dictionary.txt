@@ -9,6 +9,7 @@ adda
 addi
 addiu
 addq
+addu
 addx
 addy
 addz
@@ -72,9 +73,11 @@ barsequencer
 barstatusmsg
 bartels
 bascus
+bdec
 begingamelocalmsg
 beginphrasecatchmsg
 bgtrackgraph
+bgtz
 biggem
 bitbltbuf
 blak
@@ -137,6 +140,7 @@ collideables
 color
 colorable
 coloring
+complexobject
 configquery
 confstr
 congrat
@@ -167,6 +171,7 @@ dbut
 dcmake
 deci
 defsym
+delattr
 deletefileop
 deleteremixmct
 demangled
@@ -241,11 +246,9 @@ fcand
 fcget
 fcntl
 fcset
-ffloat
 fileobject
 filetab
 findenv
-fira
 firefs
 firemult
 floatobject
@@ -262,6 +265,7 @@ formatop
 formatstring
 foxundermoon
 fpathconf
+fplugin
 fqmak
 fram
 frameobject
@@ -349,7 +353,6 @@ hibytes
 hilite
 hisquare
 hostmode
-hostshims
 hsyn
 hudanalogstick
 hudanimramp
@@ -398,11 +401,10 @@ ibstream
 idablebase
 ifdef
 ifndef
-imag
 immediates
 imsifrpc
 ingame
-initposix
+initfunc
 initps
 inittab
 inputcheatdetector
@@ -410,8 +412,6 @@ inputcheatdetectorgs
 inputcheatdetectormet
 inputmap
 inputpollerps
-insn
-insns
 intobject
 intr
 intrman
@@ -455,6 +455,7 @@ keychannel
 keyframed
 keypanel
 khgb
+killsch
 kind's
 kochanek
 koff
@@ -517,10 +518,15 @@ longobject
 longop
 looptogglemsg
 looptoolmsg
+lsce
 lsdmode
 lseek
 ltxt
+luma
 lvalues
+macroblock
+macroblock's
+macroblocks
 madd
 maddaq
 maddaw
@@ -538,6 +544,7 @@ malloc
 matanim
 math
 maxx
+mbai
 mcdat
 mcfl
 mcman
@@ -658,7 +665,6 @@ metstartpausemsg
 mettoplogoscreen
 mettutorialscreen
 metunlockstagesmsg
-mexplicit
 mfir
 mgen
 middisabler
@@ -674,6 +680,8 @@ mktemp
 mmag
 mmapmodule
 mmix
+modion
+modname
 modsupport
 moduleobject
 mous
@@ -699,6 +707,7 @@ mtba
 mthd
 mtir
 mtrk
+mtsab
 mulaw
 mulax
 mulq
@@ -742,11 +751,14 @@ newjam
 newmodule
 njgb
 nlfilebuf
+noat
 nocard
 nodisc
 nolattice
+nomacro
 nomemcard
 noone
+noreorder
 normalkey
 nostdlib
 notefinder
@@ -775,6 +787,7 @@ orthonormalize
 ostrstream
 overcutting
 pabe
+paddh
 padman
 padrecord
 paletted
@@ -787,7 +800,11 @@ particlesysanim
 pathconf
 pausegamesystemmsg
 pbck
+pcgth
+pcpyld
 pcremodule
+pextlb
+pextub
 phello
 phrasecapturedmsg
 phrasedatabase
@@ -799,6 +816,7 @@ phrasemuffedmsg
 phraseneutralizer
 phrasepacket
 phraseplayer
+picure
 pinkgrey
 pitchbend
 pitchingstg
@@ -818,8 +836,11 @@ playmaprepeatring
 playmapring
 playsound
 plid
+pmaxh
 pmgr
+pminh
 pngr
+pnor
 pointamountmsg
 popen
 posixmodule
@@ -833,6 +854,7 @@ powerupfailedmsg
 powerupplacer
 powx
 powy
+ppacb
 preapproved
 primaddr
 prmodecont
@@ -841,12 +863,15 @@ pscam
 psenviron
 psgr
 psjoinrequestpacket
+psllh
 psmat
 psmct
 psmesh
 psmt
 psmultimesh
 psparticlesys
+psrah
+psrlh
 pstex
 ptsmult
 ptstmp
@@ -855,6 +880,7 @@ putsn
 pycompat
 pycxx
 pyinstaller
+pyinterpreter
 pylock
 pymem
 pyob
@@ -865,9 +891,11 @@ pyshell
 pystate
 pythonpath
 pythonrun
+qfsrv
 quadword
 quadwords
 quat
+qwords
 randomizable
 randu
 rangeobject
@@ -881,6 +909,7 @@ recinfo
 recolor
 recomputation
 recon
+refe
 reflow
 refree
 refreshnetmsg
@@ -1014,6 +1043,7 @@ stcycl
 stdarg
 stdmidimsg
 stmask
+stmnblk
 stmod
 stopriffmsg
 strcmp
@@ -1030,6 +1060,7 @@ subx
 suby
 susgemmsg
 sustainnotemsg
+sutructure
 synthsustainer
 sysclib
 sysconf
@@ -1141,6 +1172,7 @@ unknowne
 unknownec
 unknownf
 unknownfc
+unlockstages
 unmute
 unmuted
 unoverridden
@@ -1155,6 +1187,7 @@ usbkeybd
 utime
 vars
 vclipw
+vdec
 vendored
 venv
 vibuf

@@ -50,9 +50,9 @@ void sceDevVif0Reset(void) {
 void sceDevVu0Reset(void) {
     unsigned int nStatus;
 
-    __asm__ volatile ("cfc2 %0, $vi12" : "=r" (nStatus));
+    __asm__ volatile ("cfc2 %0, $vi28" : "=r" (nStatus));
     nStatus |= 2u;
-    __asm__ volatile ("ctc2 %0, $vi12" : : "r" (nStatus));
+    __asm__ volatile ("ctc2 %0, $vi28" : : "r" (nStatus));
 }
 
 // 0x00622710

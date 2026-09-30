@@ -67,8 +67,8 @@ static int decode(VideoDec *pVideoDec) {
             ErrMessage("sceMpegGetPicture() decode error");
         }
         if (pVideoDec->mpeg.frameCount == 0) {
-            contextWordZero = pVideoDec->mpeg.mUnknown00[0];
-            contextWordOne = pVideoDec->mpeg.mUnknown00[1];
+            contextWordZero = pVideoDec->mpeg.width;
+            contextWordOne = pVideoDec->mpeg.height;
             slotIndex = 0;
             tagOffset = 0;
             dataOffset = 0;
@@ -327,11 +327,11 @@ int cpy2area(unsigned char *pDestA,
 
         if (nSrcB < firstPart) {
             memcpy(pDestA, pSrcA, nSrcA);
-            memcpy(pDestA + nSrcA, pSrcB, firstPart);
-            memcpy(pDestB, pSrcB + nDestA - nSrcA, nSrcB - firstPart);
+            memcpy(pDestA + nSrcA, pSrcB, nSrcB);
         } else {
             memcpy(pDestA, pSrcA, nSrcA);
-            memcpy(pDestA + nSrcA, pSrcB, nSrcB);
+            memcpy(pDestA + nSrcA, pSrcB, firstPart);
+            memcpy(pDestB, pSrcB + firstPart, nSrcB - firstPart);
         }
     } else {
         memcpy(pDestA, pSrcA, nDestA);

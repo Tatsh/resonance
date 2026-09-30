@@ -19,8 +19,8 @@ typedef struct {
     unsigned char mUnknown48[0x60];
     int state;
     int mUnknownac;
-    int hid_vblank;
     int hid_endimage;
+    int hid_vblank;
 } VideoDec;
 
 // The audio decoder, 0x5c bytes. The transfer stage, the staging buffer on the Emotion Engine
@@ -61,12 +61,13 @@ typedef struct {
     int mUnknown34;
 } StrFile;
 
-// The decoded-frame queue, 0x14 bytes. voBufIsFull() compares count with size.
+// The decoded-frame queue, 0x14 bytes. voBufIsFull() compares count with size. The display's
+// interrupt handler lowers the count while the decode worker waits on it.
 typedef struct {
     void *data;
     void *tag;
     int mUnknown08;
-    int count;
+    volatile int count;
     int size;
 } VoBuf;
 

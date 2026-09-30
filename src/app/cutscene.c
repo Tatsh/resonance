@@ -84,7 +84,7 @@ enum {
     ((void *)(((uintptr_t)(pointer) + kBufferAlign - 1) & ~(uintptr_t)(kBufferAlign - 1)))
 
 // 0x0070cae0
-static int g_is_with_audio;
+static int g_is_with_audio = 1;
 
 // 0x0070cae8
 VoBuf voBuf;
@@ -124,7 +124,8 @@ static void *g_frame_images;
 static void *g_frame_tags;
 
 // 0x00895440
-static unsigned long long g_video_tags[kVideoTagCount][2];
+// The ring the input buffer builds ends in one more tag that points back to the first.
+static unsigned long long g_video_tags[kVideoTagCount + 1][2];
 
 // 0x00896450
 static unsigned char *g_mpeg_work;
@@ -255,10 +256,10 @@ static void prepare_playback(const char *name) {
         LogPrintf("Can't Open file %s\n", name);
     }
 
-    videoDec.hid_endimage = AddDmacHandler(DMAC_GIF, handler_endimage, 0);
-    EnableDmac(DMAC_GIF);
     videoDec.hid_vblank = AddIntcHandler(INTC_VBLANK_S, vblankHandler, 0);
     EnableIntc(INTC_VBLANK_S);
+    videoDec.hid_endimage = AddDmacHandler(DMAC_GIF, handler_endimage, 0);
+    EnableDmac(DMAC_GIF);
 }
 
 // Read the pad and report whether Cross or Start has been pressed and released. A button counts
@@ -360,10 +361,10 @@ static void term_all(void) {
     DeleteThread(g_decode_thread);
     TerminateThread(g_default_thread);
     DeleteThread(g_default_thread);
-    DisableIntc(INTC_VBLANK_S);
-    RemoveIntcHandler(INTC_VBLANK_S, videoDec.hid_vblank);
     DisableDmac(DMAC_GIF);
     RemoveDmacHandler(DMAC_GIF, videoDec.hid_endimage);
+    DisableIntc(INTC_VBLANK_S);
+    RemoveIntcHandler(INTC_VBLANK_S, videoDec.hid_vblank);
     videoDecDelete(&videoDec);
     audioDecDelete(&audioDec);
     strFileClose(&g_in_file);

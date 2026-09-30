@@ -163,9 +163,10 @@ void sceDmaSub00612b40(ViBuf *buffer);
  * Restart the input DMA from the saved position.
  *
  * @param buffer The input record.
+ * @return 1.
  * @ghidraAddress 0x00612cc0
  */
-void sceDmaSub00612cc0(ViBuf *buffer);
+int sceDmaSub00612cc0(ViBuf *buffer);
 
 /**
  * Latch the DMA-derived stamp into the callback record.

@@ -59,7 +59,7 @@ typedef struct {
     short interlaceMode;
     short outputMode;
     short fieldMode;
-    short signalBits;
+    short gsVersion;
     int (*vblankHandler)(int);
     int handlerId;
 } GsState;
@@ -160,13 +160,13 @@ static int FramePageCount(short nPsm, short nWidth, short nHeight) {
 }
 
 // 0x00636360
-// Writes one display environment to the privileged registers. Field mode
-// one selects the first video circuit, and any other mode selects the
+// Writes one display environment to the privileged registers. The first
+// GS revision uses the first video circuit, and any other revision uses the
 // second circuit together with the output mode register.
 static void WriteDisplayEnv(const sceGsDispEnv *pDisp) {
     GsState *state = sceGsGetGParam();
 
-    if (state->fieldMode == 1) {
+    if (state->gsVersion == 1) {
         GS_PMODE = pDisp->pmode;
         GS_DISPFB1 = pDisp->dispfb;
         GS_DISPLAY1 = pDisp->display;
@@ -188,9 +188,9 @@ void sceGsResetPath(void) {
     VIF1_FBRST = 1U;
     VIF1_ERR = 2U;
     __sync_synchronize();
-    __asm__ volatile("cfc2 %0, $12" : "=r"(clip));
+    __asm__ volatile("cfc2 %0, $vi28" : "=r"(clip));
     clip |= 0x200U;
-    __asm__ volatile("ctc2 %0, $12" ::"r"(clip));
+    __asm__ volatile("ctc2 %0, $vi28" ::"r"(clip));
     __sync_synchronize();
     VIF1_FIFO = g_dwVif1InitPacket.mQuads[0];
     VIF1_FIFO = g_dwVif1InitPacket.mQuads[1];
@@ -219,7 +219,7 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
         state->interlaceMode = nInterlace;
         state->outputMode = nOutputMode;
         status = GS_CSR;
-        state->signalBits = (short)((status >> 16) & 0xFFULL);
+        state->gsVersion = (short)((status >> 16) & 0xFFULL);
         GsPutIMR(0xFF00ULL);
         state->fieldMode = (short)(nFieldMode > 0);
         if (state->vblankHandler != NULL) {
@@ -236,7 +236,7 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
         state->fieldMode = (short)(nFieldMode > 0);
         state->interlaceMode = nInterlace;
         state->outputMode = nOutputMode;
-        state->signalBits = (short)((GS_CSR >> 16) & 0xFFULL);
+        state->gsVersion = (short)((GS_CSR >> 16) & 0xFFULL);
     }
     SetGsCrt((short)(nInterlace & 1), (short)(nOutputMode & 0xFF), (short)(nFieldMode & 1));
 }
@@ -628,7 +628,7 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
         }
         spins++;
     }
-    count = (unsigned int)(pLoadImage->mWords[10] & 0x7FFFULL) + 1U;
+    count = (unsigned int)(pLoadImage->mWords[10] & 0x7FFFULL);
     GIF_QWC = count;
     address = (unsigned int)(uintptr_t)pSource;
     if ((address & 0x70000000U) == 0x70000000U) {
@@ -888,7 +888,7 @@ int sceGsSyncPath(int nMode, unsigned short nTimeout) {
         if ((VIF1_STAT & 0x1F000003U) != 0U) {
             mask |= 4;
         }
-        __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
+        __asm__ volatile("cfc2 %0, $vi29" : "=r"(vuStatus));
         if ((vuStatus & 0x100U) != 0U) {
             mask |= 8;
         }
@@ -917,7 +917,7 @@ int sceGsSyncPath(int nMode, unsigned short nTimeout) {
         }
     }
     for (;;) {
-        __asm__ volatile("cfc2 %0, $13" : "=r"(vuStatus));
+        __asm__ volatile("cfc2 %0, $vi29" : "=r"(vuStatus));
         if ((vuStatus & 0x100U) == 0U) {
             break;
         }
