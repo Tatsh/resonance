@@ -730,6 +730,7 @@ mous
 moviestream
 movt
 mpfn
+mpfr
 mscal
 mscnt
 msflag
