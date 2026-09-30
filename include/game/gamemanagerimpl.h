@@ -95,7 +95,7 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  * to UnpauseGameSystemMsg, and `0x006d03c4` to GameManagerDoPlaybackMsg. Each of the five globals
  * has exactly two readers, this dispatcher and the message class's own type reporter, which is what
  * makes the pairing certain. A type that matches none of the five trips
- * `FatalError("DISPATCH_CHECK: ", pMsg->Name())`.
+ * `FatalError("DISPATCH_CHECK: Unhandled Message: %s", pMsg->Name())`.
  *
  * StartRecording() installs a GameRecorder and StartPlayback() a GamePlayback. Neither class emits
  * RTTI, so both titles are inferred, from EndRecordingCmd, whose name the RTTI attests, running the

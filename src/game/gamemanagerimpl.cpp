@@ -267,8 +267,7 @@ void GameManagerImpl::HandleMessage(Message *pMsg) {
     } else if (nType == g_nGameManagerDoPlaybackMsgType) {
         OnDoPlayback(pMsg);
     } else {
-        // The format string has no placeholder, so the name is formatted into nothing.
-        Fatal("DISPATCH_CHECK: ", pMsg->Name());
+        Fatal("DISPATCH_CHECK: Unhandled Message: %s", pMsg->Name());
     }
 }
 

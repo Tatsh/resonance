@@ -31,10 +31,11 @@ public:
      * Open the recording file and start the watchdog's recording into it.
      *
      * Opens `rec.bin` through MakeFreqPath() as an OBFileStream and writes three length-prefixed
-     * strings: `PS2 application.`, a description built from the level name, the game mode, the
-     * play mode, and GameParams::mDifficulty (0 easy, 1 medium, otherwise hard), and
-     * `no autoexec`. The manager then saves itself into the stream, and the watchdog records from
-     * there on. GameManagerImpl::OnBeginGameLocal() is the caller. The title is inferred.
+     * strings: a fixed banner beginning `PS2 application...`, a description built from the level
+     * name, the game mode, the play mode, and GameParams::mDifficulty (0 easy, 1 medium, otherwise
+     * hard), and `no autoexec`. The manager then saves itself into the stream, and the watchdog
+     * records from there on. GameManagerImpl::OnBeginGameLocal() is the caller. The title is
+     * inferred.
      *
      * @param nGameMode The manager's game mode.
      * @param params The manager's settings.

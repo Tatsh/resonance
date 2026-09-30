@@ -88,7 +88,11 @@ const char *const g_apszMovieStreamErrors[] = {"NO ERROR",
                                                "Write error",
                                                "Invalid filename or extension",
                                                "File/data format is bad",
-                                               "Missing driver"};
+                                               "Missing driver",
+                                               "Driver/file is wrong version",
+                                               "Invalid mode",
+                                               "Can't access device",
+                                               "Exceeded limit"};
 
 // 0x0057f7b8
 MovieStream::MovieStream(const char *pszPath, int bStreaming, int *pnError) {

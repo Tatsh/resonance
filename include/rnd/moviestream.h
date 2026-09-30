@@ -212,7 +212,8 @@ extern const unsigned int g_nSndpTag;
  * Text for each error a MovieStream reports, indexed by the negated error code.
  *
  * "NO ERROR", "Out of memory", "Can't open file", "Read error", "Write error", "Invalid filename or
- * extension", "File/data format is bad", and "Missing driver". Rnd::Movie::OpenMovieFile() is the
+ * extension", "File/data format is bad", "Missing driver", "Driver/file is wrong version",
+ * "Invalid mode", "Can't access device", and "Exceeded limit". Rnd::Movie::OpenMovieFile() is the
  * one reader.
  *
  * @ghidraAddress 0x007a8400

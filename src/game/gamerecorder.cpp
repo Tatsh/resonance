@@ -39,7 +39,7 @@ void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
     mStream = new OBFileStream(path);
 
     HxStr banner;
-    banner += "PS2 application.";
+    banner += "PS2 application...  Unknown size and modification time\n Details below: ";
     WriteText(*mStream, banner);
 
     HxStr description;

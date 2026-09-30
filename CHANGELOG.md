@@ -58,6 +58,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   members and disc paths.
 - The VU0 and VU1 microprograms are reconstructed as DVP assembly, and the build assembles the DMA
   chains that upload them. VU1 previously started on empty microcode and never stopped.
+- The tunnel arm emitters run for 7680 frames after their trigger, not 1920, as in the original.
+- An unhandled game manager message reports its name in the fatal error, as in the original.
+- `rec.bin` recordings begin with the original banner text.
+- The movie stream error table has all twelve original messages. Error codes below -7 previously
+  read past the end of the table.
 
 ## [0.0.1] - 2026-00-00
 

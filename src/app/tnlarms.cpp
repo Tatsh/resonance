@@ -20,7 +20,7 @@ constexpr int kLastLocalView = 4;
 constexpr int kEmitterCount = 3;
 
 // Frames after the trigger during which the systems emit, and after which the view hides.
-constexpr float kEmitFrames = 1920.0f;
+constexpr float kEmitFrames = 7680.0f;
 constexpr float kShowFrames = 9600.0f;
 
 } // namespace
