@@ -43,6 +43,11 @@
    tables guard every entry with that entry's own constant, and the console defines almost none of
    them, which is why 140 of its 143 literals are absent while the module itself is compiled in. */
 
+/* The complex type is compiled out. The builtin method table at 0x0076c390 runs from compile
+   straight to delattr, and none of complexobject.c's literals are in the image. The shipped
+   types.py therefore takes its NameError branch. */
+#define WITHOUT_COMPLEX
+
 #ifdef __cplusplus
 #include "os/heap.h"
 
@@ -55,6 +60,7 @@ extern Heap *g_pPythonHeap;
    declarations beside them keep the one definition in heap.cpp visible to every includer. */
 extern "C" {
 #endif
+void PyHeap_Init(void);
 void *PyHeap_Alloc(unsigned nSize, const char *pszFile, int nLine);
 void *PyHeap_Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine);
 void PyHeap_Free(void *pBlock, const char *pszFile, int nLine);

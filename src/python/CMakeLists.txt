@@ -1,7 +1,7 @@
 # The embedded interpreter. Upstream CPython 2.0 translation units the manifest accounts for,
 # compiled against the port's own PC/config.h, which comes first on the path so its allocator
 # redirect wins over anything upstream with the same name. The sizes match the console rather
-# than the host. posixmodule.c builds under the console module name through a define.
+# than the host.
 set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/acceler.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Parser/grammar1.c"
@@ -75,8 +75,7 @@ set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/stropmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/structmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/PC/getpathp.c"
-    PC/config.c
-    hostshims.c)
+    PC/config.c)
 
 add_library(resonance_python STATIC ${RESONANCE_PYTHON_SRCS})
 target_link_libraries(resonance_python PRIVATE resonance_common)
@@ -102,21 +101,3 @@ target_compile_definitions(
           SIZEOF_DOUBLE=8)
 target_compile_options(
   resonance_python PRIVATE "-include${CMAKE_SOURCE_DIR}/src/python/PC/pycompat.h")
-# Four translation units defeat the optimiser's register allocator on this toolchain at every
-# standard level, and the shipped image carries no stack guards. They build small with explicit
-# relocations and without small-data addressing, multiply-add fusion, builtin expansion,
-# scheduling, delay slots, branch-likely, caller saves, shared spill slots, or stack protection,
-# keep the older allocator colouring, and spill their doubles to memory, until the failure is
-# understood.
-set_source_files_properties(
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/getargs.c"
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/marshal.c"
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/compile.c"
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Python/bltinmodule.c"
-  PROPERTIES
-    COMPILE_OPTIONS
-    "-Os;-G0;-ffloat-store;-mexplicit-relocs;-mno-mad;-fira-algorithm=CB;-fno-builtin;-fno-caller-saves;-fno-ira-share-save-slots;-fno-ira-share-spill-slots;-fno-schedule-insns;-fno-schedule-insns2;-fno-delayed-branch;-mno-branch-likely;-fno-stack-protector;-fno-stack-clash-protection"
-)
-set_source_files_properties(
-  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/posixmodule.c" PROPERTIES COMPILE_DEFINITIONS
-                                                                            initposix=initps2)

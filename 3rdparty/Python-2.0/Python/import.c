@@ -734,27 +734,15 @@ load_source_module(char *name, char *pathname, FILE *fp)
 		return NULL;
 	}
 #endif
+	/* The port compiles every source module and neither reads nor writes a compiled module. The
+	   compiled path is still formed and then unused. */
 	cpathname = make_compiled_pathname(pathname, buf, (size_t)MAXPATHLEN+1);
-	if (cpathname != NULL &&
-	    (fpc = check_compiled_module(pathname, mtime, cpathname))) {
-		co = read_compiled_module(cpathname, fpc);
-		fclose(fpc);
-		if (co == NULL)
-			return NULL;
-		if (Py_VerboseFlag)
-			PySys_WriteStderr("import %s # precompiled from %s\n",
-				name, cpathname);
-		pathname = cpathname;
-	}
-	else {
-		co = parse_source_module(pathname, fp);
-		if (co == NULL)
-			return NULL;
-		if (Py_VerboseFlag)
-			PySys_WriteStderr("import %s # from %s\n",
-				name, pathname);
-		write_compiled_module(co, cpathname, mtime);
-	}
+	co = parse_source_module(pathname, fp);
+	if (co == NULL)
+		return NULL;
+	if (Py_VerboseFlag)
+		PySys_WriteStderr("import %s # from %s\n",
+			name, pathname);
 	m = PyImport_ExecCodeModuleEx(name, (PyObject *)co, pathname);
 	Py_DECREF(co);
 

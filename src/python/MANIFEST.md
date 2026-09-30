@@ -86,8 +86,8 @@ is reported through the host's error path.
 That `fopen` resolves through the game's own FILE layer down to the PlayStation 2 open primitive,
 so a Python source file is read through the SDK rather than through any interpreter-side hook. It
 is not frozen, which three separate findings agree on: the frozen table is upstream's stock
-test-module table, `getpathp.c` computes `sys.path` normally, and the game's `LoadWholeFile` has no
-callers anywhere in the image.
+test-module table, `getpathp.c` computes `sys.path` from its defaults, and the game's
+`LoadWholeFile` has no callers anywhere in the image.
 
 The scripts ship as **`.py` source text** in the archives, with no `.pyc` anywhere, so the
 interpreter compiles every script at run time. `ARK/ROOT/global/grvscript.py` is the file
@@ -109,8 +109,8 @@ not to the loop that does the finding.
 directory, and nothing in the shipped data exercises it. There is no `__init__.py` anywhere, and
 `hx` is in `_PyImport_Inittab`, so `import hx` resolves to the built-in C module rather than to a
 directory. `gscripts/hx` is only a location on `sys.path` holding two plain modules, `hxcons` and
-`hxutl`. So the port may not need a working `stat` at all, which tightens the account to exactly
-two substitutions, the allocator and the file primitive.
+`hxutl`. The port has no working `stat` at all. It always fails, as the system call section
+below records.
 
 ### Path and configuration, taken from the Windows build
 
@@ -143,17 +143,14 @@ The build defines `_GNU_SOURCE` with the hosted feature macros (`HAVE_UNISTD_H`,
 `HAVE_NETDB_H`, `HAVE_SYS_SOCKET_H`, `HAVE_PROTOTYPES`, and `HAVE_STDARG_PROTOTYPES`) and the
 console widths, because the toolchain headers provide the matching declarations. A forced include
 of `PC/pycompat.h` supplies the C library headers, the `PYTHONPATH` default, and the socket
-constants and name service declarations upstream expects from its own configuration, all without
-editing a vendored file. Four units build small with explicit relocations and allocator settings
-that steer reload away from its failure, and carry the complex patch below, because the failure
-is a backend reload fault on by-value complex transfers rather than optimisation pressure.
-None of this changes which upstream blocks compile in.
+constants and name service declarations upstream expects from its configuration. The forced include
+does not change which upstream blocks compile in.
 
 ### The trim is configuration, not code
 
 An earlier reading of this called the trim four deletions of upstream code. That was wrong, and the
 correction matters because it changes how invasive the fork is. Almost every absence is an upstream
-`#ifdef` the port simply does not define, so the file is byte-identical upstream and no patch
+`#ifdef` the port does not define. The file is therefore byte-identical upstream, and no edit
 exists to write. The undefined macros are listed with their evidence in
 [PC/config.h](PC/config.h).
 
@@ -163,14 +160,14 @@ work when the source is unmodified:
 
 - **GUARDED**, behind a macro the port does not define
 - **COMMENT**, quoted text the literal extractor matched inside a comment, so never a literal
-- **DROPPED**, inside a static function that nothing references once a patch applies, so the
-  compiler discards the function and its literals with it
-- **PATCHED**, removed outright by a patch
+- **DROPPED**, inside a static function that no caller references once the port's edit applies
+  (the compiler discards the function and its literals)
+- **PATCHED**, removed outright by the port's edit
 
-It also rejects overcutting, by requiring that every literal the unpatched file had present in the
-image is still present after patching. That is the half a naive check misses, since deleting a
-function that holds a present literal does not raise the missing count, it merely stops the literal
-being checked.
+It also rejects overcutting, by requiring that every literal the unedited file had present in the
+image is still present after the edit. A naive check misses the overcutting half. Deleting a
+function that includes a present literal does not raise the missing count, and only stops the
+literal being checked.
 
 A fifth heading, **ARTEFACT**, covers a fragment the extractor split across a quote boundary. Such
 a fragment opens with a close paren or a comma, so it was never one literal.
@@ -178,12 +175,12 @@ a fragment opens with a close paren or a comma, so it was never one literal.
 **The suite exits non-zero, and it should.** Three literals remain unexplained out of the 165
 absent, and the test reports that rather than absorbing them, which is the point of having it.
 
-| File                    | Absent     | Account                                      | Verdict       |
-| ----------------------- | ---------- | -------------------------------------------- | ------------- |
-| `Python/import.c`       | 10 of 47   | 6 guarded, 2 comment, 2 dropped by the patch | accounted for |
-| `Python/ceval.c`        | 10 of 60   | 9 guarded, 1 unexplained                     | 1 open        |
-| `Python/pythonrun.c`    | 5 of 36    | 2 guarded, 2 artefact, 1 unexplained         | 1 open        |
-| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained                   | 1 open        |
+| File                    | Absent     | Account                                     | Verdict       |
+| ----------------------- | ---------- | ------------------------------------------- | ------------- |
+| `Python/import.c`       | 10 of 47   | 6 guarded, 2 comment, 2 dropped by the edit | accounted for |
+| `Python/ceval.c`        | 10 of 60   | 9 guarded, 1 unexplained                    | 1 open        |
+| `Python/pythonrun.c`    | 5 of 36    | 2 guarded, 2 artefact, 1 unexplained        | 1 open        |
+| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained                  | 1 open        |
 
 Every guard was read off the literal's own enclosing block rather than assumed. The confstr,
 sysconf, and pathconf table entries are guarded by an underscore plus the entry name, which is
@@ -191,34 +188,49 @@ tested exactly. The rest sit under autoconf feature macros the console does not 
 `HAVE_EXECV`, `HAVE_POPEN`, `HAVE_TMPNAM`, `USE_TMPNAM_R`, `HAVE_FPATHCONF`, `HAVE_PATHCONF`,
 `HAVE_STRERROR`, and `PYOS_OS2`.
 
-### The patches
+### Edits to the vendored source
 
-[patches/import.c.patch](patches/import.c.patch) removes a single line, the
-`write_compiled_module` call in `load_source_module`. The function is static and that was its only
-call site, so the compiler then discards it along with its two verbose messages, which is exactly
-what the image shows. The port cannot write a compiled module next to a source file on read-only
-media, and this is the smallest edit that produces that.
+The port's changes are made in place in `3rdparty/Python-2.0`, each marked with a short comment at
+the edit. The build compiles the edited files directly.
 
-[patches/complex-by-value.patch](patches/complex-by-value.patch) is a build patch, not a
-recovered port edit: the console backend reports `maximum number of generated reload insns per
-insn achieved (90)` in exactly the four routines that move a `Py_complex` by value, at every
-optimisation level including `-O0`, while single doubles pass and return cleanly in the surrounding
-files. Each site fills the object in place through field stores instead, which keeps the exact
-upstream behaviour: the manual construction repeats `PyComplex_FromCComplex`, and the argument
-parser's `PyComplex_RealAsDouble` plus `PyComplex_ImagAsDouble` pair takes the same branches and
-calls as `PyComplex_AsCComplex`. No literal changes, so the counts above are unaffected.
+`Python/import.c` has `load_source_module` compile every source module without consulting or
+writing a compiled module. Retail `load_source_module` at `0x0057c470` calls
+`PyOS_GetLastModificationTime`, forms the compiled path (unused), parses, compiles, frees the
+tree, and executes the code, and it makes no call to `check_compiled_module`,
+`read_compiled_module`, or `write_compiled_module`. The static helpers then have no caller, and
+their literals are absent from the image.
 
-[patches/posixmodule.c.patch](patches/posixmodule.c.patch) is described under the `ps2` method
-table below: it reduces the table to the twelve evidenced entries with null docs.
+`Python/pythonrun.c` calls `PyHeap_Init()` at the top of `Py_Initialize()`, before the first
+allocation. The allocator section above describes the heap.
 
-[patches/unicodeobject.h.patch](patches/unicodeobject.h.patch) is a build patch: it drops the
-`register` storage class from nine parameter declarations across `stringobject.h` and
-`unicodeobject.h`, which the C++ standard no longer allows. The keyword was only ever a hint,
-so no behaviour changes.
+`Modules/posixmodule.c` registers under the console name. `INITFUNC` is `initps2` and `MODNAME` is
+`"ps2"`, and `"posix"` is absent from the image. The method table is reduced as described under
+the `ps2` method table below.
 
-No other file gets a patch. `ceval.c` needs none. `pythonrun.c` has one unexplained literal and
-inventing a patch shape around it would pass the acceptance test without being evidence, since
-any cut containing that literal would pass equally.
+`Include/stringobject.h` and `Include/unicodeobject.h` drop the `register` storage class from nine
+parameter declarations. The C++ standard no longer allows the storage class there. The keyword was
+only a hint, and no behaviour changes.
+
+`PC/config.h` defines `WITHOUT_COMPLEX`. The builtin method table at `0x0076c390` runs from
+`compile` straight to `delattr`, and none of `complexobject.c`'s literals are in the image. The
+shipped `types.py` therefore takes its `NameError` branch. `complexobject.c` is not compiled.
+
+`PC/pycompat.h` sets the `PYTHONPATH` default to the empty string at `0x0082c9f0`. A `.` entry
+would arrive at the archive lookup as a `./` path. `ArkFile::MapPathToArkIndex()` treats a `./`
+path as fatal in retail and in the reconstruction.
+
+`ceval.c` needs no edit. `pythonrun.c` has one unexplained literal, and inventing an edit around it
+would pass the acceptance test without being evidence. Any cut including the unexplained literal
+would pass equally.
+
+### C library system calls
+
+The game supplies the C library's system calls, and two of them differ from a hosted library in a
+way the interpreter depends on. `stat()` at `0x005966b8` sets `errno` to `EIO` and returns -1 for
+every path. `getpathp.c` therefore never finds its landmark, and `find_module` never sees a
+package directory. `fstat()` at `0x00596670` reports a character device for every descriptor and
+succeeds. `PyOS_GetLastModificationTime` therefore succeeds for an archive stream. Both are in
+`src/os/filelog.cpp` beside the other system calls.
 
 ### Still unexplained
 
@@ -340,8 +352,8 @@ predicts: the directory and metadata calls needed to import a module, the descri
 no process control beyond `abort`. It also explains the third surviving literal, because `abort` is
 a real method here.
 
-The trim is a table, not deletions. [patches/posixmodule.c.patch](patches/posixmodule.c.patch)
-reduces `posix_methods[]` to those twelve entries, in the order of the run, with null doc
+The trim is a table, not deletions. The edit reduces `posix_methods[]` to the twelve entries above,
+in the order of the run, with null doc
 pointers: twelve long doc strings would each clear the fourteen-character bar, so the image's
 three surviving literals prove the entries carry none. The module doc goes null for the same
 reason. With no entry referencing them, the compiler discards the other eighty-two bodies with
@@ -365,7 +377,7 @@ the include path.
 
 ## Outstanding
 
-`ceval.c` and `pythonrun.c` get no patch, and the reason is not size. Nine of `ceval.c`'s ten
-absences are macros the port does not define, so a patch would assert an edit that never happened.
-The acceptance test cannot tell the difference, which means it would pass and still be false, so a
-passing patch is necessary evidence rather than sufficient evidence.
+`ceval.c` gets no edit, and the reason is not size. Nine of its ten absences are macros the port
+does not define. An edit would therefore assert a change that never happened. The acceptance test
+cannot tell the difference, and a passing edit is necessary evidence rather than sufficient
+evidence.

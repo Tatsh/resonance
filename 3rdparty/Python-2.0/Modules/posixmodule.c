@@ -5332,8 +5332,9 @@ all_ins(PyObject *d)
 #define INITFUNC initos2
 #define MODNAME "os2"
 #else
-#define INITFUNC initposix
-#define MODNAME "posix"
+/* The port registers the module under the console name. "posix" is absent from the image. */
+#define INITFUNC initps2
+#define MODNAME "ps2"
 #endif
 #endif
 

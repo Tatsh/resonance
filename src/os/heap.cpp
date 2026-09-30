@@ -7,6 +7,7 @@
 #include "os/cycles.h"
 #include "os/log.h"
 #include "os/mem.h"
+#include "os/zone.h"
 
 namespace {
 
@@ -464,7 +465,29 @@ void Heap::DumpStats() {
     LogPrintf("%s\n", szLine);
 }
 
+// 0x00723998
 Heap *g_pPythonHeap = nullptr;
+
+namespace {
+
+// The zone the interpreter heap takes whole, and the size ZoneGetAvail() reports when the zone is
+// not found.
+constexpr char kPythonZoneName[] = "python";
+constexpr int kPythonHeapFallbackSize = 0x200000;
+
+} // namespace
+
+// 0x0054d55c
+// The heap setup Py_Initialize() runs first, before the interpreter allocates anything.
+extern "C" void PyHeap_Init(void) {
+    const int nPreviousZone = ZoneGetCurrent();
+    ZoneSetCurrent(FindZoneByName(kPythonZoneName));
+    const int nSize = ZoneGetAvail(kPythonHeapFallbackSize);
+    void *pBlock = ZoneAlloc(static_cast<unsigned>(nSize));
+    g_pPythonHeap = Heap::Create(
+        pBlock, static_cast<unsigned>(nSize), kHeapFlagFirstFit | kHeapFlagFatalWhenFull);
+    ZoneSetCurrent(nPreviousZone);
+}
 
 extern "C" void *PyHeap_Alloc(unsigned nSize, const char *pszFile, int nLine) {
     return g_pPythonHeap->Alloc(nSize, pszFile, nLine);

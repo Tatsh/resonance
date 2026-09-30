@@ -346,15 +346,17 @@ extern "C" int _isatty(int nFile) {
     return FileIsatty(nFile);
 }
 
-// The original C library queries isatty() when it sizes a stream's buffer, and this C library
-// queries fstat(). A console reports a character device and every other descriptor fails. The
-// console is then buffered by line and a file in full, as in the original.
-extern "C" int _fstat(int nFile, struct stat *pStat) {
-    if (FileIsatty(nFile) == 0) {
-        errno = EBADF;
-        return -1;
-    }
+// Every descriptor reports a character device. The C library then queries isatty() before it
+// buffers a stream by line, and Python's modification time lookup succeeds for an archive stream.
+// 0x00596670
+extern "C" int _fstat(int /* nFile */, struct stat *pStat) {
     memset(pStat, 0, sizeof(*pStat));
     pStat->st_mode = S_IFCHR;
     return 0;
+}
+
+// 0x005966b8
+extern "C" int _stat(const char * /* pszPath */, struct stat * /* pStat */) {
+    errno = EIO;
+    return -1;
 }

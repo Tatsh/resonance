@@ -97,6 +97,8 @@ Py_Initialize(void)
 	if (initialized)
 		return;
 	initialized = 1;
+	/* The port builds the interpreter heap before any allocation. */
+	PyHeap_Init();
 	
 	if ((p = getenv("PYTHONDEBUG")) && *p != '\0')
 		Py_DebugFlag = Py_DebugFlag ? Py_DebugFlag : 1;

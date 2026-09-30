@@ -12,9 +12,9 @@
 #include <string.h>
 #include <unistd.h>
 
-/* Module search default the port never recorded. The leading dot matches every upstream
-   variant and keeps the buffer sizing honest. */
-#define PYTHONPATH "."
+/* The port's module search default is empty (0x0082c9f0). A dot entry would arrive at the archive
+   lookup as a `./` path, and the lookup treats a `./` path as fatal. */
+#define PYTHONPATH ""
 
 /* The Windows headers supply this for the path module upstream. */
 #define min(a, b) ((a) < (b) ? (a) : (b))
