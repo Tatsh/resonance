@@ -3,10 +3,6 @@ abmpfile
 acanvas
 acanvaslin
 acceler
-accw
-accxy
-accxyz
-accxyzw
 activatelistenmode
 activatepracticemode
 adda
@@ -1215,7 +1211,6 @@ xrefs
 xtop
 xyoffset
 xyzf
-xyzw
 yarnrc
 zbuf
 zizmor

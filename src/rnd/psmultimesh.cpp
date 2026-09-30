@@ -38,8 +38,8 @@ constexpr int kVifCmdShift = 24;
 constexpr int kVifNumShift = 16;
 constexpr unsigned kVifUnpackFlg = 0x8000;
 
-// Microprogram entry point of the instanced face path, called by the first batch. Every later
-// batch continues the program instead.
+// Vu1DrawInstances is the instanced face path. The first batch calls it, and every later batch
+// continues the program instead.
 constexpr unsigned kVu1InstanceEntry = 0x406;
 
 inline unsigned MakeVifCode(unsigned nCmd, int nNum, unsigned nImmediate) {

@@ -34,7 +34,8 @@ constexpr int kFogColBlueShift = 16;
 constexpr int kXfmRowLightAxis = 1;
 constexpr int kXfmRowTranslation = 3;
 
-// VU1 microprogram entries SelectLightForVertex() chooses between.
+// SelectLightForVertex() chooses Vu1LightUnlit, Vu1LightDirectional, Vu1LightPoint, or
+// Vu1LightNone.
 constexpr int kVu1EntryUnlit = 0x2ee;
 constexpr int kVu1EntryDirectional = 0x2f8;
 constexpr int kVu1EntryPoint = 0x35c;

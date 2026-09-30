@@ -1,5 +1,5 @@
-; The VU0 microprogram and the DMA chain GfxDevice::Init() sends it through VIF0, from the
-; .vutext section at 0x00666de0.
+; GfxDevice::Init() sends the VU0 microprogram, from the .vutext section at 0x00666de0, through
+; VIF0 with the DMA chain below. Vu0BlendVectors has no end bit and is not called.
 
 	.data
 	.align 4
@@ -8,17 +8,17 @@ g_vu0MicrocodeChain:
 	dmacnt *
 
 	mpg 0x0, *
-vu0_0000:
-	nop                                     	lqi.xyzw vf03xyzw,(vi01++)
-	nop                                     	lqi.xyzw vf04xyzw,(vi02++)
-	nop                                     	nop
-	nop                                     	nop
-	mulax.xyz accxyz,vf03xyz,vf01x          	nop
-	maddx.xyz vf05xyz,vf04xyz,vf02x         	nop
-	nop                                     	nop
-	nop                                     	nop
-	nop                                     	nop
-	nop                                     	sq.xyzw vf05xyzw,0(vi03)
+Vu0BlendVectors:
+	nop                             lqi VF03, (VI01++)
+	nop                             lqi VF04, (VI02++)
+	nop                             nop
+	nop                             nop
+	mulax.xyz ACC, VF03, VF01x      nop
+	maddx.xyz VF05, VF04, VF02x     nop
+	nop                             nop
+	nop                             nop
+	nop                             nop
+	nop                             sq VF05, 0(VI03)
 	.endmpg
 	.enddmadata
 	dmaend

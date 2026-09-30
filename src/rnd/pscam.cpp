@@ -352,9 +352,9 @@ constexpr unsigned kVifCmdUnpackV3_16 = 0x69;
 constexpr int kIndexHalfwordsPerQuadword = 8;
 constexpr int kIndexQuadwordShift = 3;
 
-// VU1 microprogram entries the face setup selects without a light.
+// The face setup selects Vu1LightUnlit or Vu1LightNone when no light applies.
 constexpr int kVu1EntryUnlit = 0x2ee;
-constexpr int kVu1EntryMultiMeshLit = 0x3d4;
+constexpr int kVu1EntryNoLight = 0x3d4;
 
 // PRIM shading bits every face tag shares. The multi-mesh upload leaves fog out.
 inline unsigned long long FaceShadingBits(bool bWithFog) {
@@ -478,7 +478,7 @@ int PsMesh::EmitMultiMeshFaceRun() {
         PushQuadword(&g_pSelectedMat->mAmbient);
         PushQuadword(&g_pSelectedMat->mDiffuse);
         PushMaterialVertexFlags();
-        nEntry = kVu1EntryMultiMeshLit;
+        nEntry = kVu1EntryNoLight;
     } else {
         g_gfxDevice.mpWrite += kMultiMeshLightBlockQuadwords;
         nEntry = kVu1EntryUnlit;
