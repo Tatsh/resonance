@@ -174,3 +174,73 @@ int GetStoredFileLength(const char *pszPath);
  * @ghidraAddress 0x00555800
  */
 int GetUncompressedFileLength(const char *pszPath);
+
+/** The window length the decompressor fills before each flush. */
+constexpr unsigned kGzipWindowSize = 0x8000;
+
+/**
+ * The decompressor window.
+ *
+ * The image reserves two window lengths, and only the first is written.
+ *
+ * @ghidraAddress 0x00731468
+ */
+extern unsigned char g_bGzipWindow[2 * kGzipWindowSize];
+
+/**
+ * The write position in g_bGzipWindow.
+ *
+ * @ghidraAddress 0x00761470
+ */
+extern unsigned g_nGzipWindowPosition;
+
+/**
+ * The staging buffer refilled from the memory source or the file.
+ *
+ * @ghidraAddress 0x00728c28
+ */
+extern unsigned char g_bGzipInputBuffer[];
+
+/**
+ * The valid byte count in g_bGzipInputBuffer.
+ *
+ * @ghidraAddress 0x00761468
+ */
+extern int g_nGzipInputLength;
+
+/**
+ * The read position in g_bGzipInputBuffer.
+ *
+ * @ghidraAddress 0x0076146c
+ */
+extern int g_nGzipInputPosition;
+
+/**
+ * Refill the staging buffer from the memory source or the file and report its first byte.
+ *
+ * @param nSilentEof Nonzero to report -1 rather than an error when a file has no more bytes.
+ * @return The first byte of the refilled buffer, or -1 at a silent end of file.
+ * @ghidraAddress 0x006121a0
+ */
+int GzipRefillInputBuffer(int nSilentEof);
+
+/**
+ * Checksum the filled part of g_bGzipWindow, copy it to the output, and rewind the window.
+ *
+ * An empty window is not flushed.
+ *
+ * @ghidraAddress 0x006122f8
+ */
+void GzipFlushWindow();
+
+/**
+ * Read one byte through the staging buffer, refilling the buffer when it is exhausted.
+ *
+ * @return The byte.
+ */
+inline int GzipGetByte() {
+    if (g_nGzipInputPosition < g_nGzipInputLength) {
+        return g_bGzipInputBuffer[g_nGzipInputPosition++];
+    }
+    return GzipRefillInputBuffer(0);
+}

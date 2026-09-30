@@ -16,6 +16,7 @@ set(RESONANCE_OS_SRCS
     heap.cpp
     hostmode.cpp
     hxstr.cpp
+    inflate.cpp
     iop.cpp
     loadfile.cpp
     log.cpp
