@@ -646,10 +646,13 @@ void AsyncPumpCompletedRequests() {
         }
     }
 
+    // A request without a callback stays queued until AsyncPollComplete() collects it by handle.
     for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end();) {
-        if (it->mCallback != nullptr) {
-            it->mCallback->Done(it->mId, it->mFile, it->mBuffer, it->mLength, it->mStatus);
+        if (it->mCallback == nullptr) {
+            ++it;
+            continue;
         }
+        it->mCallback->Done(it->mId, it->mFile, it->mBuffer, it->mLength, it->mStatus);
         if (it->mJobs != nullptr) {
             AsyncReleaseJobChain(it->mJobs);
         }
