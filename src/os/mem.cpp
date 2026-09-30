@@ -113,7 +113,7 @@ int g_bMemLogging = 0;
 // The rewind to kStlUnknownTag compiles to one doubleword store. The array bound comes from the
 // distance to the next global rather than from any single access.
 // 0x006f57d8
-char g_szStlAllocTag[kMemStlTagSize] = {};
+char g_szStlAllocTag[kMemStlTagSize] = "stl_unk";
 
 // 0x006f5858
 int g_bMemAccounting = 0;

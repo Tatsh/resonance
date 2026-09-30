@@ -109,8 +109,9 @@ inline int FrameIntervalMs(long long nNowNs, long long nThenNs) {
 
 // 0x006c359c
 // Set to send the next finished game back to the logo screen. OnFreqEnded() is the one reader and
-// clears it, and no routine in the image sets it. The name is inferred.
-int g_nReturnToLogo;
+// clears it, and no routine in the image sets it. It starts set. Only the first finished game
+// therefore returns to the logo screen. The name is inferred.
+int g_nReturnToLogo = 1;
 
 // The front-end state phase in which a pause shows the plain pause screen. The meaning of the
 // phase is not recovered.

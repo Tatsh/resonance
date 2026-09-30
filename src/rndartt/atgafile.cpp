@@ -30,7 +30,7 @@ constexpr unsigned char kPacketCountMask = 0x7f;
 
 // The one pixel a run length encoded packet is read into.
 // 0x007a8100
-unsigned char s_abPixel[kRGBAByteCount];
+unsigned char s_abPixel[kRGBAByteCount] = {0, 0, 0, 0xff};
 
 } // namespace
 

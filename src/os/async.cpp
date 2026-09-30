@@ -94,7 +94,7 @@ std::list<AsyncRequest> g_asyncPendingJobs;
 std::list<AsyncRequest> g_asyncCompletedJobs;
 
 // 0x006e9134
-int g_nAsyncNextJobId = 0;
+int g_nAsyncNextJobId = 1;
 
 // 0x006e9138
 int g_bAsyncInitialised = 0;
@@ -103,7 +103,7 @@ int g_bAsyncInitialised = 0;
 int g_nAsyncHostMedia = 0;
 
 // 0x006e9140
-AsyncOp g_asyncCurrentOp;
+AsyncOp g_asyncCurrentOp = {-1, -1, -1};
 
 // 0x006e915c
 int g_bAsyncThreaded = 0;
@@ -112,10 +112,10 @@ int g_bAsyncThreaded = 0;
 // 0x006e9160
 int g_nAsyncOpFinished = 0;
 
-// Nothing in the image writes this, so every field stays at its zero: no retry limit, no spindle
-// override, and 2048-byte sectors.
+// The image never writes the read mode. Reads retry three times, with no spindle override and
+// 2048-byte sectors.
 // 0x006e9168
-sceCdRMode g_asyncOpReadMode;
+sceCdRMode g_asyncOpReadMode = {3};
 
 // Cleared once the read finishes, which is what makes a zero here mean "no command in flight" to
 // AsyncCheck.

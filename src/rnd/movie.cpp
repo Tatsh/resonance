@@ -56,7 +56,7 @@ constexpr int kSetPaletteUnknownArg = -1;
 
 // The last time SetFrameSelf() converted.
 // 0x0077a59c
-float g_flMovieBeatCached;
+float g_flMovieBeatCached = -9999.999f;
 
 // SetFrameSelf() returns early while it is positive. It only ever stores zero, and the test never
 // fires.

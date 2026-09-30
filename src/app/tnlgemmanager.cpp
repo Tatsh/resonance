@@ -21,7 +21,7 @@ constexpr float kFlashLeadFrames = -20.0f;
 } // namespace
 
 // 0x006df360
-int g_nTnlMeshNameCounter;
+int g_nTnlMeshNameCounter = 1;
 
 // 0x006df364
 float g_flTnlGemLastFrame;

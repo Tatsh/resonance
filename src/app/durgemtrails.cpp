@@ -50,7 +50,7 @@ inline void SetPaddingWords(Transform &xfm) {
 } // namespace
 
 // 0x006e3440
-int g_nDurGemStringCount;
+int g_nDurGemStringCount = 1;
 
 // 0x00432f60
 DurGemTrails::DurGemTrails(AppTunnel *pTunnel, int nMaxPoints)

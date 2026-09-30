@@ -187,7 +187,7 @@ Light *g_pDefaultLight;
 float g_flFogScale;
 
 // 0x00776114
-float g_flFogOffset;
+float g_flFogOffset = 255.0f;
 
 // 0x005b2200
 PsEnviron::~PsEnviron() {

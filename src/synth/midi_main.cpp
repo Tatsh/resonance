@@ -157,7 +157,7 @@ HxStr g_bdBankName;
 HxStr g_hdBankName;
 
 // 0x006e9ba4
-int g_nBankDestAddress;
+int g_nBankDestAddress = 0x5010;
 
 // 0x006e9bb4
 int g_nSynthXferTag;
@@ -178,10 +178,10 @@ void *g_pBdXferBuffer;
 CallbackXferBdToIop *g_pBdXfer;
 
 // 0x006e9ba8
-int g_anBankDestAddress[kBankDestBufferCount];
+int g_anBankDestAddress[kBankDestBufferCount] = {0x1d6b0, 0xf2b38};
 
 // 0x006e9bb0
-int g_nBankDestIndex;
+int g_nBankDestIndex = 1;
 
 // 0x00894750
 int g_anBankIopAddress[kBankIopAddressCount];
@@ -633,11 +633,13 @@ MidiStreamBuffer g_midiStreamBuffer;
 
 // The program each channel last received.
 // 0x006e9bd8
-int g_anChannelProgram[kMidiChannelCount];
+int g_anChannelProgram[kMidiChannelCount] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 // The bank each channel last received.
 // 0x006e9c18
-int g_anChannelBank[kMidiChannelCount];
+int g_anChannelBank[kMidiChannelCount] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 // 0x00462290
 void InitSynthStreamInput() {

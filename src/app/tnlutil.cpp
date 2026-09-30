@@ -33,7 +33,7 @@ inline Color MakeColor(float flR, float flG, float flB) {
 int g_nAppTunnelDisplayMode;
 
 // 0x006e42b0
-float g_flTunnelBrightness;
+float g_flTunnelBrightness = 1.0f;
 
 // 0x00437e60
 Color TnlColorFromName(const HxStr &name) {

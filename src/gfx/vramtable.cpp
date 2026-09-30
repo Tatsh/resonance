@@ -25,7 +25,7 @@ sceGsStoreImage g_vramReadBackStoreImage;
 sceGsLoadImage g_vramWipeLoadImage;
 
 // 0x00718468
-int g_nScreendumpIndex;
+int g_nScreendumpIndex = 1;
 
 namespace {
 

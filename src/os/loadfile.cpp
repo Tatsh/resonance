@@ -130,8 +130,8 @@ int g_nGzipInitialisedFlag = 0;
 int g_nGzipOutputEnabled = 0;
 
 // 0x00728c10
-// This word receives the inflate status.
-int g_nGzipInflateStatus = 0;
+// The compression method, deflate until a member header or the inflate result replaces it.
+int g_nGzipInflateStatus = kGzipDeflated;
 
 // 0x00728c28
 // The staging buffer refilled from the memory source or the file.
@@ -167,11 +167,11 @@ unsigned long long g_llGzipStreamState = 0;
 
 // 0x007a3ea0
 // The running checksum of the inflate output.
-unsigned long long g_llGzipCrc = 0;
+unsigned long long g_llGzipCrc = 0xffffffff;
 
 // 0x00728c20
 // A nonzero value suppresses the modification time store.
-int g_nGzipTimeFlag = 0;
+int g_nGzipTimeFlag = -1;
 
 // 0x00728c18
 // This word is set on every error path.

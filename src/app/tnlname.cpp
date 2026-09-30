@@ -3,7 +3,7 @@
 #include "os/formatstring.h"
 
 // 0x006e42ac
-int g_nAppTunnelNameCounter;
+int g_nAppTunnelNameCounter = 1;
 
 // 0x00454650
 HxStr NextAppTunnelName() {
