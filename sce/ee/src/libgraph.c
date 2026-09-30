@@ -110,9 +110,7 @@ static GsState *sceGsGetGParam(void) {
 }
 
 // 0x005963e0
-// Acknowledges the vertical blank start interrupt, spins until it is raised again, and
-// acknowledges it once more.
-static void WaitVsyncStart(void) {
+void WaitVsync(void) {
     INTC_STAT = kIntcVblankStartBit;
     while ((INTC_STAT & kIntcVblankStartBit) == 0U) {
     }
@@ -253,7 +251,7 @@ int sceGsSyncV(int nMode) {
 
     (void)nMode;
     if (state->vblankHandler == NULL) {
-        WaitVsyncStart();
+        WaitVsync();
         if (state->interlaceMode != 1) {
             return 1;
         }
@@ -282,6 +280,34 @@ int sceGsSetDefAlphaEnv(sceGsAlphaEnv *pAlpha, short nPabe) {
     return 4;
 }
 
+// Packs the DISPLAY register for one video standard. Interlaced output uses the interlaced vertical
+// offset and doubles the shown height in frame mode. Progressive output shows the height unchanged.
+static unsigned long long MakeDisplayWord(const GsState *state,
+                                          short nWidth,
+                                          short nHeight,
+                                          short nDx,
+                                          short nDy,
+                                          int nOffsetX,
+                                          int nOffsetYInterlaced,
+                                          int nOffsetYProgressive) {
+    int factor = (nWidth + 0x9FF) / nWidth;
+    unsigned long long across = (unsigned long long)((nDx * factor + nOffsetX) & 0xFFF);
+    unsigned long long magnify = (unsigned long long)(factor - 1) << 23;
+    unsigned long long width = (unsigned long long)(long long)(factor * nWidth - 1) << 32;
+    unsigned long long down;
+    unsigned long long lines;
+
+    if (state->interlaceMode == kGsInterlace) {
+        down = (unsigned long long)((nDy + nOffsetYInterlaced) & 0xFFF) << 12;
+        lines = (unsigned long long)(long long)(state->fieldMode == 0 ? nHeight - 1
+                                                                      : nHeight * 2 - 1);
+    } else {
+        down = (unsigned long long)((nDy + nOffsetYProgressive) & 0xFFF) << 12;
+        lines = (unsigned long long)(long long)(nHeight - 1);
+    }
+    return across | down | magnify | width | (lines << 44);
+}
+
 // 0x006217c8
 // Fills the five display registers. The output mode selects the timing
 // branch, and unknown modes only report an error.
@@ -289,13 +315,10 @@ void sceGsSetDefDispEnv(
     sceGsDispEnv *pDisp, short nPsm, short nWidth, short nHeight, short nDx, short nDy) {
     GsState *state = sceGsGetGParam();
     long long width = nWidth;
-    long long height = nHeight;
     int interlace = state->interlaceMode;
     int output = state->outputMode;
     int field = state->fieldMode;
-    unsigned long long mode;
     unsigned long long buffer;
-    unsigned long long shown;
 
     pDisp->pmode = 0x66ULL;
     if (interlace == 0) {
@@ -308,58 +331,10 @@ void sceGsSetDefDispEnv(
     buffer = ((unsigned long long)(nPsm & 0xF) << 15) |
         ((((unsigned long long)(width + 0x3F) >> 6) & 0x3FULL) << 9);
     pDisp->dispfb = buffer;
-    if (output == 2) {
-        long long divisor = width + 0x9FF;
-        long long factor = divisor / width;
-        long long product = factor * width;
-        long long scan = factor * nDx;
-        unsigned long long vertical;
-        unsigned long long across;
-        unsigned long long down;
-        unsigned long long lines;
-
-        if (nDx != 1) {
-            vertical = ((unsigned long long)(nDy + 0x32) & 0xFFFULL) << 12;
-            across = ((unsigned long long)(scan + 0x27C) & 0xFFFULL);
-        } else {
-            vertical = ((unsigned long long)(nDy + 0x19) & 0xFFFULL) << 12;
-            across = ((unsigned long long)(scan + 0x27C) & 0xFFFULL);
-        }
-        mode = ((unsigned long long)(factor - 1) << 23);
-        down = (unsigned long long)(product - 1);
-        if (field == 0) {
-            lines = (unsigned long long)(height - 1);
-        } else {
-            lines = (unsigned long long)(height * 2 - 1);
-        }
-        shown = vertical | mode | across | (down & 0xFFFFFFFFULL) | (lines << 44);
-        pDisp->display = shown;
-    } else if (output == 3) {
-        long long divisor = width + 0x9FF;
-        long long factor = divisor / width;
-        long long product = factor * width;
-        long long scan = factor * nDx;
-        unsigned long long vertical;
-        unsigned long long across;
-        unsigned long long down;
-        unsigned long long lines;
-
-        if (nDx != 1) {
-            vertical = ((unsigned long long)(nDy + 0x48) & 0xFFFULL) << 12;
-            across = ((unsigned long long)(scan + 0x290) & 0xFFFULL);
-        } else {
-            vertical = ((unsigned long long)(nDy + 0x24) & 0xFFFULL) << 12;
-            across = ((unsigned long long)(scan + 0x290) & 0xFFFULL);
-        }
-        mode = ((unsigned long long)(factor - 1) << 23);
-        down = (unsigned long long)(product - 1);
-        if (field == 0) {
-            lines = (unsigned long long)(height - 1);
-        } else {
-            lines = (unsigned long long)(height * 2 - 1);
-        }
-        shown = vertical | mode | across | (down & 0xFFFFFFFFULL) | (lines << 44);
-        pDisp->display = shown;
+    if (output == kGsNtsc) {
+        pDisp->display = MakeDisplayWord(state, nWidth, nHeight, nDx, nDy, 0x27C, 0x32, 0x19);
+    } else if (output == kGsPal) {
+        pDisp->display = MakeDisplayWord(state, nWidth, nHeight, nDx, nDy, 0x290, 0x48, 0x24);
     } else {
         printf("sceGsDefDispEnv:Not support displaymode for %d!!\n", output);
     }
@@ -401,8 +376,8 @@ int sceGsSetDefDrawEnv(
     pDraw->prmodecont |= 1ULL;
     pDraw->colclampaddr = 0x46ULL;
     pDraw->colclamp |= 1ULL;
+    pDraw->dtheaddr = 0x45ULL;
     if ((nPsm & 2) != 0) {
-        pDraw->dtheaddr = 0x45ULL;
         pDraw->dthe |= 1ULL;
     } else {
         pDraw->dthe &= ~1ULL;

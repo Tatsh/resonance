@@ -22,6 +22,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `sceGsExecStoreImage` recovers from a transfer timeout as the original does.
   - Error messages, including the `sceGsSyncPath` message, match the original.
   - `sceGsSetDefClear` sets the second clear address.
+  - `sceGsSetDefDBuff` writes the second buffer's page into the display frame buffer register.
+  - `sceGsSetDefDispEnv` selects the display offsets by the interlace mode and places the display
+    width in its field.
+  - `sceGsSetDefDrawEnv` sets the dither register address for every pixel format.
 - The `libdev` console heap allocator uses the original masks.
 - `libvifpk` packet alignment no longer shifts by 32 bits when the boundary mask is empty.
 - `sceFsReset` drops the file-service binding after the IOP reboot. The next file call binds the

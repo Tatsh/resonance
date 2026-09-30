@@ -109,6 +109,10 @@ void sceGsResetPath(void);
 void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFieldMode);
 // Waits for the next vertical blank and returns the field it began.
 int sceGsSyncV(int nMode);
+// Acknowledges the vertical blank start interrupt, spins until it is raised again, and
+// acknowledges it once more. The library has no published name for the routine at 0x005963e0,
+// which sceGsSyncV() calls and the game calls directly.
+void WaitVsync(void);
 int sceGsSetDefAlphaEnv(sceGsAlphaEnv *pAlpha, short nPabe);
 void sceGsSetDefDispEnv(
     sceGsDispEnv *pDisp, short nPsm, short nWidth, short nHeight, short nDx, short nDy);

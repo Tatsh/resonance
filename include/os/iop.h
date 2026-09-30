@@ -63,21 +63,6 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources);
  */
 void LoadIopModules();
 
-extern "C" {
-
-/**
- * Spin until the GS raises the start-of-vblank interrupt, then acknowledge it.
- *
- * Sony libgraph, linked as shipped, with no published name. It clears the vblank-start bit of the
- * interrupt status, polls it until it rises, and clears it again, and sceGsSyncV() calls it for
- * the same wait. The name here is the tree's own.
- *
- * @ghidraAddress 0x005963e0
- */
-void WaitVsync();
-
-} // extern "C"
-
 /**
  * Write the retail boot options over the boot-option block.
  *
