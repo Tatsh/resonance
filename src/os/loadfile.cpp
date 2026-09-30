@@ -418,15 +418,18 @@ static int GzipGetHeaderByte() {
 }
 
 // 0x006123f0
-// Resets the checksum with null data and updates it otherwise.
+// Resets the checksum with null data and updates it otherwise, reporting the checksum so far. The
+// register is stored inverted, as gzip stores it, and zlib's crc32() takes and returns the plain
+// value.
 unsigned GzipUpdateCrc(const void *pData, int nLength) {
     unsigned nCrc;
     if (pData == nullptr) {
         nCrc = 0xffffffffU;
     } else {
-        nCrc = crc32(static_cast<unsigned>(g_llGzipCrc),
-                     static_cast<const Bytef *>(pData),
-                     static_cast<uInt>(nLength));
+        nCrc = static_cast<unsigned>(crc32(static_cast<unsigned>(g_llGzipCrc) ^ 0xffffffffU,
+                                           static_cast<const Bytef *>(pData),
+                                           static_cast<uInt>(nLength))) ^
+               0xffffffffU;
     }
     g_llGzipCrc = nCrc;
     return nCrc ^ 0xffffffffU;
@@ -587,7 +590,7 @@ int GzipInflateData() {
         }
         nStoredSize |= static_cast<unsigned>(nByte) << (8 * i);
     }
-    if (nStoredCrc != static_cast<unsigned>(g_llGzipCrc)) {
+    if (nStoredCrc != GzipUpdateCrc(g_pGzipOutputCurrent, 0)) {
         return 1;
     }
     if (nStoredSize != static_cast<unsigned>(g_pGzipOutputCurrent - g_pGzipOutputStart)) {
