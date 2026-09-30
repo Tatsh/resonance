@@ -10,7 +10,7 @@ jobs:
       image: 'ghcr.io/ps2dev/ps2dev:latest'
     steps:
       - name: 'Install build dependencies'
-        run: apk add --no-cache build-base cmake git ninja
+        run: apk add --no-cache build-base cmake git gmp-dev mpc1-dev mpfr-dev ninja
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
           persist-credentials: false
