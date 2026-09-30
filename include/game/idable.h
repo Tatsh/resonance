@@ -11,9 +11,9 @@
  * The descriptor at `0x008ef1f0` records `IDableBase` as its only base at offset 0, so the
  * subobject adds no data of its own and reuses mId at `+0x00` with its own vptr at `+0x04`.
  *
- * Each instantiation has one table of object pointers. For `IDable<Player>` that table is the
- * vector at `0x0066f920`, which the static-initialisation stub at `0x00132618` empties before any
- * player exists.
+ * Each instantiation has one table of object pointers. For `IDable<Player>` the table is the vector
+ * at `0x0066f920`. The static-initialisation stub at `0x00132618` fills the vector with four null
+ * pointers before any player exists.
  *
  * Three words decide the type. The stub zeroes `0x0066f920`, `0x0066f924`, and `0x0066f928` in
  * sequence, and `0x0066f924` takes three writes from that stub and no read anywhere else, which is
@@ -63,8 +63,15 @@ public:
     static std::vector<T *> sObjects;
 };
 
+/**
+ * Slots each identifier table starts with, one per player. The static initialiser at `0x00132618`
+ * allocates four null pointers and the table never grows. Identifiers 0 to 3 are the only ones a
+ * constructor can register.
+ */
+constexpr int kIDableInitialSlots = 4;
+
 template <typename T>
-std::vector<T *> IDable<T>::sObjects;
+std::vector<T *> IDable<T>::sObjects(kIDableInitialSlots);
 
 // 0x00121db0
 template <typename T>

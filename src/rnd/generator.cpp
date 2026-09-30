@@ -849,7 +849,7 @@ void Generator::Load(Stream &stream) {
         mView = ReadObjectRef<View>(stream);
     }
 
-    if (nRevision > kGeneratorAnimateFromStartRevision) {
+    if (nRevision >= kGeneratorAnimateFromStartRevision) {
         mAnimateFromStart = ReadBool(stream);
     }
 
