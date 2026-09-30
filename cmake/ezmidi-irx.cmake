@@ -111,3 +111,5 @@ add_custom_command(
   VERBATIM)
 
 add_custom_target(ezmidi_irx DEPENDS "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.IRX")
+# The disc image target reads the module path from here.
+set_property(TARGET ezmidi_irx PROPERTY IRX_FILE "${EZMIDI_IRX_BUILD_DIR}/EZMIDI.IRX")
