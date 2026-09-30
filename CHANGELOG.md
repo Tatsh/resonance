@@ -72,6 +72,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The PSS movie demultiplexer is reconstructed. Its bit reader and pack and packet parsers were
   stubs, and the intro movie delivered no video or audio packets. The stream key table was also
   empty, and every packet matched the first registered stream.
+- The file service's init call sends its result-area pointer from a quadword-aligned slot. The
+  server previously read the wrong word and wrote the first open's result to an invalid address
+  (`DMA error: 1f400000` in the emulator), and the game stopped.
+- The sound driver's reply buffer is 64-byte aligned, as in the original.
+- `sceCdSearchFile` sends Sony's packet layout. The SDK's version placed the name 4 bytes early for
+  the replacement IOP image's server, every disc search failed, and `LOADING.ARK` did not open.
+- The gzip checksum no longer fails every compressed file. The inverted register the original stores
+  was passed to zlib as the plain value.
+- A finished asynchronous read without a callback waits for its caller to collect it. The pump
+  discarded it, and the loading screen polled forever.
+- With patches enabled, console output falls back to the serial port when no DECI2 host is present,
+  as after the IOP reboot.
 
 ## [0.0.1] - 2026-00-00
 
