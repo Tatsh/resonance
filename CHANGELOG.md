@@ -84,6 +84,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   discarded it, and the loading screen polled forever.
 - With patches enabled, console output falls back to the serial port when no DECI2 host is present,
   as after the IOP reboot.
+- The intro movie plays. The MPEG picture decoder is reconstructed, frame buffers no longer overwrite
+  the program, and the movie's display handlers, GIF packets, and GS registers match the original.
+- After the intro movie the game reaches the title screen. Message type identities have their
+  original values, so the front end recognises the finished message.
+- Float constants round to nearest as in the original instead of truncating.
+- Global initial values match the original, including the async, MIDI, and gzip state.
+- The loading screen no longer draws a white surround.
 
 ## [0.0.1] - 2026-00-00
 
