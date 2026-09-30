@@ -32,6 +32,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `sceGsSetDefDispEnv` selects the display offsets by the interlace mode and places the display
     width in its field.
   - `sceGsSetDefDrawEnv` sets the dither register address for every pixel format.
+  - `sceGsSetDefLoadImage` and `sceGsExecStoreImage` size transfers for the correct pixel formats.
+  - `sceGsSetDefStoreImage` sets the register count in the GIF tag.
+  - `sceGsExecStoreImage` masks the image height and receives the trailing quadwords.
 - The `libdev` console heap allocator uses the original masks.
 - `libvifpk` packet alignment no longer shifts by 32 bits when the boundary mask is empty.
 - `sceFsReset` drops the file-service binding after the IOP reboot. The next file call binds the
@@ -91,6 +94,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Float constants round to nearest as in the original instead of truncating.
 - Global initial values match the original, including the async, MIDI, and gzip state.
 - The loading screen no longer draws a white surround.
+- The title screen draws its 3D city background. `sceVu0InversMatrix` computed the wrong
+  translation row and placed the camera incorrectly.
+- Long stray lines no longer cross the title screen city. Mesh edge uploads to VU1 sent half of the
+  edge indices.
+- Loading a saved game from the memory card no longer hangs:
+  - `Memcard::Cancel` no longer deletes the operation in progress.
+  - The minimum save space check no longer charges new-file space for files already on the card.
+  - The directory entry buffer is 64-byte aligned for DMA.
+- The ACCEPT and BACK help labels no longer overlap.
 
 ## [0.0.1] - 2026-00-00
 
