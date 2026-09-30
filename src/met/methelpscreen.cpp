@@ -161,6 +161,7 @@ void MetHelpScreen::FillTexts(const HxStr &key,
                 Py::String value(entry[kEntryFieldText]);
                 HxStr fontName = font.as_string();
                 HxStr textValue = value.as_string();
+                std::memcpy(texts[i]->mLocalXfm[kTranslationRow], &end, sizeof(end));
                 texts[i]->mDirty = 1;
                 texts[i]->SetFont(dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(fontName)));
                 texts[i]->SetText(textValue);
