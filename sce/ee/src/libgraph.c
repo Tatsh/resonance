@@ -539,18 +539,18 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
     if (nPsm < 0x3B) {
         switch (nPsm) {
         case 0x00:
-        case 0x2D:
+        case 0x30:
             count = (nRrw * nRrh) >> 2;
             break;
         case 0x01:
-        case 0x30:
+        case 0x31:
             count = ((nRrw * nRrh) << 1) + (nRrw * nRrh);
             count >>= 4;
             break;
         case 0x02:
         case 0x0A:
-        case 0x31:
-        case 0x39:
+        case 0x32:
+        case 0x3A:
             count = (nRrw * nRrh) >> 3;
             break;
         case 0x13:
@@ -661,7 +661,7 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
     // words in.
     words[2] = 0ULL;
     words[3] = 0ULL;
-    words[2] = 0x8005ULL;
+    words[2] = 0x1000000000008005ULL;
     words[3] = 0xEULL;
     buffer = ((unsigned long long)(long long)nSbp) | (((unsigned long long)nSbw) << 16);
     buffer |= ((unsigned long long)(long long)nPsm) << 24;
@@ -685,6 +685,23 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
     return 7;
 }
 
+// Waits for a quadword in the VIF1 FIFO during an image store. A timeout reports the stall, resets
+// the transfer path, and returns -1.
+static inline int StoreImageWaitFifo(int *pSpins) {
+    while ((VIF1_STAT & 0x1F000000U) == 0U) {
+        if ((unsigned int)kChannelSpinLimit < (unsigned int)*pSpins) {
+            printf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
+            GS_CSR = 0x100ULL;
+            GS_BUSDIR = 0ULL;
+            GIF_CTRL = 1U;
+            VIF1_FBRST = 1U;
+            return -1;
+        }
+        ++*pSpins;
+    }
+    return 0;
+}
+
 // 0x005a3550
 // Streams one store image descriptor, then receives the pixels at the
 // destination. Ragged widths round the height up and drain the remainder
@@ -694,7 +711,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     unsigned long long packed = words[4];
     unsigned long long regs = words[8];
     int width = (int)(regs & 0xFFFULL);
-    int height = (int)(regs >> 32);
+    int height = (int)((regs >> 32) & 0xFFFULL);
     int format = (int)((packed >> 24) & 0x3FULL);
     int extra = 0;
     int ragged = 0;
@@ -709,7 +726,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
 
         switch (format) {
         case 0x00:
-        case 0x2D:
+        case 0x30:
             full = (width * height) << 2;
             aligned = (full >> 4) & ~7;
             ragged = full & 0xF;
@@ -720,7 +737,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             }
             break;
         case 0x01:
-        case 0x30:
+        case 0x31:
             full = width * height;
             full += (full << 1);
             aligned = (full >> 4) & ~7;
@@ -736,8 +753,8 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             break;
         case 0x02:
         case 0x0A:
-        case 0x31:
-        case 0x39:
+        case 0x32:
+        case 0x3A:
             full = (width * height) << 1;
             aligned = (full >> 4) & ~7;
             ragged = full & 0xF;
@@ -758,7 +775,9 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
                 extra = ((width * rounded) >> 4) - aligned - small - 1;
             }
             break;
-        default:
+        case 0x14:
+        case 0x24:
+        case 0x2C:
             full = width * height;
             aligned = (full >> 5) & ~7;
             ragged = (full >> 1) & 0xF;
@@ -767,6 +786,8 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
                 rounded = (height + 7) & ~7;
                 extra = ((width * rounded) >> 5) - aligned - small - 1;
             }
+            break;
+        default:
             break;
         }
     } else {
@@ -817,7 +838,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             spins++;
         }
     }
-    VIF1_STAT = 0x80000000U;
+    VIF1_STAT = 0x00800000U;
     GS_BUSDIR = 1ULL;
     if (aligned != 0) {
         VIF1_QWC = (unsigned int)aligned;
@@ -839,31 +860,42 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             spins++;
         }
     }
-    if (0 < extra) {
-        int drained = 0;
+    if (small != 0) {
+        u128 *pTail = (u128 *)pDest + aligned;
+        int i;
 
-        while (drained < extra) {
-            u128 quad;
-
-            while ((VIF1_STAT & 0x1F000000U) == 0U) {
-                if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                    printf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
-                    GS_CSR = 0x100ULL;
-                    GS_BUSDIR = 0ULL;
-                    GIF_CTRL = 1U;
-                    VIF1_FBRST = 1U;
-                    return -1;
-                }
-                spins++;
+        for (i = 0; i < small; ++i) {
+            if (StoreImageWaitFifo(&spins) != 0) {
+                return -1;
             }
-            quad = VIF1_FIFO;
-            (void)quad; // The binary drains the FIFO and discards each quadword.
-            drained++;
+            pTail[i] = VIF1_FIFO;
+        }
+    }
+    if (ragged != 0) {
+        union {
+            u128 quad;
+            unsigned char bytes[16];
+        } last;
+        unsigned char *pBytes = (unsigned char *)((u128 *)pDest + aligned + small);
+        int i;
+
+        if (StoreImageWaitFifo(&spins) != 0) {
+            return -1;
+        }
+        last.quad = VIF1_FIFO;
+        for (i = 0; i < ragged; ++i) {
+            pBytes[i] = last.bytes[i];
+        }
+        for (i = 0; i < extra; ++i) {
+            if (StoreImageWaitFifo(&spins) != 0) {
+                return -1;
+            }
+            last.quad = VIF1_FIFO; // The binary drains the padding and discards it.
         }
     }
     VIF1_STAT = 0U;
-    GsPutIMR(saved);
     GS_BUSDIR = 0ULL;
+    GsPutIMR(saved);
     GS_CSR = 2ULL;
     VIF1_FIFO = g_vif1StorePacket;
     return 0;
