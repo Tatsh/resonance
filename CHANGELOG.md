@@ -44,6 +44,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - The picture timestamp adds 0x400 instead of storing a misread constant.
 - `sceSdRemote` sends a full 0x40-byte packet from real storage through the SDK RPC client.
 - The Sony libraries assert in every build type.
+- File opens succeed after the IOP reboot. The SDK file client sent the ROM file server's packet
+  layout to the multi-threaded file server in the replacement image, and paths arrived 16 bytes
+  late (for example `Unknown device 'ING.ARK;1'`). The game now uses the reconstructed original
+  file-service client.
+- Standard output goes through the DECI2 TTY console as in the original and continues after the
+  IOP reboot.
+- C library file calls (`fopen` and C++ streams) go through the game's file layer and open ark
+  members and disc paths.
 
 ## [0.0.1] - 2026-00-00
 

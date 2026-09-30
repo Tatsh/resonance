@@ -15,6 +15,7 @@ target_include_directories(resonance_ezmpeg PRIVATE "${CMAKE_SOURCE_DIR}/sce/ee/
 # libraries do. libdma is absent until its routines are recovered.
 set(RESONANCE_SONYLIB_SRCS
     src/fileio.c
+    src/iopcontrol.c
     src/libdev.c
     src/libdma.c
     src/libgifpk.c
@@ -24,7 +25,8 @@ set(RESONANCE_SONYLIB_SRCS
     src/libvifpk.c
     src/libvu0.c
     src/msin.c
-    src/scf.c)
+    src/scf.c
+    src/tty.c)
 
 add_library(resonance_sonylibs STATIC ${RESONANCE_SONYLIB_SRCS})
 target_link_libraries(resonance_sonylibs PRIVATE resonance_common)

@@ -157,6 +157,7 @@ datarootdir
 dbuild
 dbut
 dcmake
+deci
 defsym
 deletefileop
 deleteremixmct
@@ -399,6 +400,7 @@ iobmemstream
 iobpreallocmemstream
 iobstream
 ioman
+iopcontrol
 iopfixup
 ioprp
 isatty
@@ -440,6 +442,7 @@ levelconverter
 leveldata
 levelstats
 libc
+libcconsole
 libcdvd
 libcdvd's
 libdev
@@ -448,7 +451,6 @@ libera
 libgifpk
 libgraph
 libio
-libk
 libmc
 libmpeg
 libmtap
@@ -800,6 +802,7 @@ pstex
 ptsmult
 ptstmp
 ptstmphot
+putsn
 pycompat
 pycxx
 pyinstaller
@@ -931,6 +934,7 @@ skillz
 slerp
 sliceobject
 smblks
+smflag
 smgs
 smpl
 smpte

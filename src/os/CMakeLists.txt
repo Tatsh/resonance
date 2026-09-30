@@ -9,7 +9,6 @@ set(RESONANCE_OS_SRCS
     datetime.cpp
     devconsole.cpp
     failsink.cpp
-    fileio.cpp
     filelog.cpp
     formatmessage.cpp
     formatstring.cpp

@@ -1,16 +1,20 @@
 #include "os/filelog.h"
 
 #include <ctype.h>
+#include <errno.h>
 #include <fstream>
+#include <libcconsole.h>
 #include <libcdvd.h>
 #include <ostream>
 #include <sifdev.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "os/arkfile.h"
 #include "os/async.h"
-#include "os/fileio.h"
 #include "os/hostmode.h"
 #include "os/loadfile.h"
 
@@ -307,4 +311,50 @@ int FileIsatty(int nFile) {
         return 0;
     }
     return LibcConsoleIsatty(nFile);
+}
+
+// The C library's system calls. The original C library called the file layer through them, for
+// the standard descriptors as for every file the game opens with the C library.
+
+// 0x005da840
+extern "C" int _open(const char *pszPath, int nFlags, ...) {
+    va_list args;
+    va_start(args, nFlags);
+    const int nMode = va_arg(args, int);
+    va_end(args);
+    return FileOpen(pszPath, nFlags, nMode);
+}
+
+extern "C" int _close(int nFile) {
+    return FileClose(nFile);
+}
+
+// 0x0062db94
+extern "C" int _read(int nFile, void *pBuffer, size_t nLength) {
+    return FileRead(nFile, pBuffer, static_cast<int>(nLength));
+}
+
+extern "C" int _write(int nFile, const void *pBuffer, size_t nLength) {
+    return FileWrite(nFile, pBuffer, static_cast<int>(nLength));
+}
+
+extern "C" off_t _lseek(int nFile, off_t nOffset, int nOrigin) {
+    return FileSeek(nFile, static_cast<int>(nOffset), nOrigin);
+}
+
+extern "C" int _isatty(int nFile) {
+    return FileIsatty(nFile);
+}
+
+// The original C library queries isatty() when it sizes a stream's buffer, and this C library
+// queries fstat(). A console reports a character device and every other descriptor fails. The
+// console is then buffered by line and a file in full, as in the original.
+extern "C" int _fstat(int nFile, struct stat *pStat) {
+    if (FileIsatty(nFile) == 0) {
+        errno = EBADF;
+        return -1;
+    }
+    memset(pStat, 0, sizeof(*pStat));
+    pStat->st_mode = S_IFCHR;
+    return 0;
 }

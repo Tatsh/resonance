@@ -18,13 +18,12 @@
 #define SCE_SEEK_CUR 1
 #define SCE_SEEK_END 2
 
-// ps2sdk declares these five under Sif* names with identical signatures. They are forwarded rather
+// ps2sdk declares these four under Sif* names with identical signatures. They are forwarded rather
 // than redeclared.
 #define sceSifAllocIopHeap SifAllocIopHeap
 #define sceSifInitIopHeap SifInitIopHeap
 #define sceSifLoadModule SifLoadModule
 #define sceSifRebootIop SifIopReboot
-#define sceSifSyncIop SifIopSync
 
 // The free call forwards the same way.
 #define sceSifFreeIopHeap SifFreeIopHeap
@@ -33,12 +32,18 @@
 extern "C" {
 #endif
 
-// Resets the file-service RPC state after an IOP reboot. ps2sdk does not model an equivalent under
-// this name. 0x0056acc8 clears the init flag at 0x00762c08 and the cached client word at
-// 0x008e3be8, and fioExit() does the same upstream.
+// Reports whether the IOP has finished booting, and closes the console once it has. ps2sdk's
+// SifIopSync() performs the test without the console reset.
+int sceSifSyncIop(void);
+
+// The file-service client is defined in sce/ee/src/fileio.c. It speaks the protocol of the
+// multi-threaded file server in the IOP replacement image. The ps2sdk client does not.
+
+// Unbinds the file-service client after an IOP reboot. The next call binds the new server.
 int sceFsReset(void);
 
-int sceOpen(const char *pszPath, int nFlags);
+// The optional mode argument is sent to the server as it is.
+int sceOpen(const char *pszPath, int nFlags, ...);
 int sceClose(int nDescriptor);
 int sceRead(int nDescriptor, void *pBuffer, int nBytes);
 int sceWrite(int nDescriptor, const void *pBuffer, int nBytes);
