@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libpad.h>
+
 /**
  * One controller's pad-library state: the DMA area libpad fills and the decoder's working state.
  *
@@ -20,8 +22,8 @@ public:
     /** Bytes of the pressure baseline Read() subtracts from each pressure reading. */
     static constexpr int kPressureByteCount = 12;
 
-    /** Bytes of the DMA area scePadPortOpen() receives. */
-    static constexpr int kDmaAreaSize = 0x100;
+    /** Frames of the DMA area scePadPortOpen() receives. */
+    static constexpr int kDmaFrameCount = 2;
 
     /** Entries of mUnknown130, which Open() clears one byte at a time. */
     static constexpr int kUnknownByteCount = 4;
@@ -84,7 +86,7 @@ public:
     void SetVibration(int nSmallMotor, int nBigMotor);
 
     /** The area libpad writes reports into. +0x000 */
-    alignas(64) unsigned char mDmaArea[kDmaAreaSize];
+    alignas(64) scePadDmaFrame mDmaArea[kDmaFrameCount];
 
     /** The decoded button word Read() reports. +0x100 */
     unsigned int mButtons;

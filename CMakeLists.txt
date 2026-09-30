@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(resonance VERSION 0.0.2 LANGUAGES C CXX)
+project(resonance VERSION 0.0.2 LANGUAGES C CXX ASM)
 
 option(BUILD_DOCS "Build documentation alongside the sources." OFF)
 option(BUILD_DOCS_ONLY "Build documentation and nothing else." OFF)
@@ -40,7 +40,7 @@ if(BUILD_DOCS OR BUILD_DOCS_ONLY)
   set(DOXYGEN_ALIASES [[ghidraAddress="\par Ghidra address:^^"]])
   set(DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/build/*")
   find_package(Doxygen REQUIRED COMPONENTS dot)
-  doxygen_add_docs(docs README.md PROGRESS.md include ALL)
+  doxygen_add_docs(docs README.md include ALL)
   if(INSTALL_DOCS)
     install(
       DIRECTORY "${CMAKE_BINARY_DIR}/html"
@@ -50,22 +50,12 @@ endif()
 
 # A docs-only configure must not require the cross toolchain. The sources are skipped entirely.
 if(NOT BUILD_DOCS_ONLY)
-  # The SDK toolchain file sets this in its own scope and that scope does not extend here. A host
-  # build configures without any toolchain file at all. Reading the environment covers both, and
-  # the sibling checkout is the fallback for a host build with nothing exported.
-  if(NOT PS2SDK)
-    if(DEFINED ENV{PS2SDK})
-      set(PS2SDK "$ENV{PS2SDK}" CACHE PATH "PlayStation 2 SDK root.")
-    else()
-      set(PS2SDK "${CMAKE_SOURCE_DIR}/../ps2sdk" CACHE PATH "PlayStation 2 SDK root.")
-    endif()
-  endif()
-  message(STATUS "PlayStation 2 SDK at ${PS2SDK}")
   include(FeatureSummary)
   include(GNUInstallDirs)
   feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
   include(cmake/ieee-single-plugin.cmake)
   add_subdirectory(src)
   add_subdirectory(sce/ee)
+  include(cmake/ezmidi-irx.cmake)
   include(cmake/iso.cmake)
 endif()

@@ -1,11 +1,7 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdio.h>
 
 #include <deci2.h>
 #include <eekernel.h>
 #include <libcconsole.h>
-#include <sio.h>
 
 // The DECI2 TTY the original C library writes standard output to, and the console device built on
 // it.
@@ -18,7 +14,6 @@ enum {
     kTtyPayloadSize = 0x100,
     kTtyBufferSize = 0x140,
     kTtyQueueSize = 0x100,
-    kTtyDiagnosticSize = 0x40,
 
     kDeci2EventRead = 1,
     kDeci2EventReadDone = 2,
@@ -77,18 +72,6 @@ static TtyPacket g_ttyReceivePacket __attribute__((aligned(64)));
 // 0x0076f014
 static int g_bConsoleOpen;
 
-// 0x005fb1a0
-// Reports a TTY failure on the serial port. DECI2 cannot report its failures.
-static void TtyDiagnostic(const char *pszFormat, ...) {
-    char szBuffer[kTtyDiagnosticSize];
-    va_list args;
-
-    va_start(args, pszFormat);
-    vsnprintf(szBuffer, sizeof(szBuffer), pszFormat, args);
-    va_end(args);
-    sio_putsn(szBuffer);
-}
-
 // 0x006277d8
 static TtyQueue *TtyQueueInit(int nCapacity) {
     g_ttyQueue.nCapacity = nCapacity;
@@ -126,13 +109,12 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     case kDeci2EventReadDone:
         if (nParam != 0) {
             if (pState->nReceived + nParam > kTtyBufferSize) {
-                TtyDiagnostic("TTY: packet size larger than expect\n");
+                PrintfToSioRaw("TTY: packet size larger than expect\n");
             }
-            nDone = sceDeci2ExRecv(pState->mSocket,
-                                   pState->pReceive + pState->nReceived,
-                                   (unsigned short)nParam);
+            nDone = sceDeci2ExRecv(
+                pState->mSocket, pState->pReceive + pState->nReceived, (unsigned short)nParam);
             if (nDone < 0) {
-                TtyDiagnostic("TTY: receive error");
+                PrintfToSioRaw("TTY: receive error");
             }
             pState->nReceived += nDone; // Yes, the binary adds a failed receive's result.
         } else {
@@ -149,7 +131,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     case kDeci2EventWrite:
         nDone = sceDeci2ExSend(pState->mSocket, pState->pSend, (unsigned short)pState->nSendLength);
         if (nDone < 0) {
-            TtyDiagnostic("TTY: send err %d\n", nDone);
+            PrintfToSioRaw("TTY: send err %d\n", nDone);
             pState->bBusy = 0;
             break;
         }
@@ -158,7 +140,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
         break;
     case kDeci2EventWriteDone:
         if (pState->nSendLength != 0) {
-            TtyDiagnostic("TTY: err ti->wlen=%08x\n", pState->nSendLength);
+            PrintfToSioRaw("TTY: err ti->wlen=%08x\n", pState->nSendLength);
         }
         pState->bBusy = 0;
         break;
@@ -264,7 +246,13 @@ int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
 #ifdef ENABLE_PATCHES
             // Without a DECI2 host (after an IOP reboot, or on a retail console) the original drops
             // the text. The serial port shows it instead.
-            return (int)sio_write((void *)pBuffer, (size_t)nLength);
+            const unsigned char *pBytes = (const unsigned char *)pBuffer;
+            int i;
+
+            for (i = 0; i < nLength; ++i) {
+                PutSioByte(pBytes[i]);
+            }
+            return nLength;
 #else
             return -1;
 #endif
@@ -312,4 +300,3 @@ int LibcConsoleIsatty(int nFile) {
 void LibcConsoleReset(void) {
     g_bConsoleOpen = 0;
 }
-

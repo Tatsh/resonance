@@ -15,6 +15,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   through `scripts/build-iso.py`. Set `RESONANCE_DISC_IMAGE` to an original disc image to enable
   it.
 
+### Changed
+
+- The build no longer uses ps2sdk. Every Sony SDK routine the game calls (kernel, SIF, CD/DVD,
+  memory card, pad, multitap, and sound remote) is reconstructed under `sce/`, with start-up code
+  and a link script. Pass `cmake/ps2-ee-toolchain.cmake` as the CMake toolchain file.
+- Gzip decompression uses the game's inflate routines instead of zlib.
+
+### Removed
+
+- `PROGRESS.md`.
+
 ### Fixed
 
 - The rebuilt executable no longer crashes in `InitIop`. The `libdma`, `libgraph`, and `libdev`
@@ -103,6 +114,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - The minimum save space check no longer charges new-file space for files already on the card.
   - The directory entry buffer is 64-byte aligned for DMA.
 - The ACCEPT and BACK help labels no longer overlap.
+- `EZMIDI.IRX` is rebuilt from the original module and no longer crashes the IOP at boot. Its timer
+  handler was passed as an address in the original image.
+- `EZMIDI.IRX` attaches sound banks and plays notes. The RPC attach command was dereferenced twice.
+- Sound banks arrive at the IOP synthesiser. The EE sound driver command and MIDI stream buffers
+  are 64-byte aligned for SIF DMA and previously arrived shifted by 8 bytes. Game sound matches the
+  original output level.
 
 ## [0.0.1] - 2026-00-00
 

@@ -9,7 +9,6 @@
 
 // Sony libdma is reproduced here from the disassembly.
 // Register words match the disassembly packing.
-// Kernel services use the open source interface.
 
 // The control register occupies 0x1000E000. Bit zero enables transfers.
 #define DMAC_CTRL (*(volatile unsigned int *)(uintptr_t)0x1000E000U)
@@ -154,6 +153,14 @@ typedef struct {
     unsigned long long mHigh; // The high word resides at offset 0x08.
 } DmaTag;
 
+// 0x005f36b8
+// Clears a byte range one byte at a time.
+static void DmaClearBytes(unsigned char *pBytes, int nCount) {
+    while (nCount-- > 0) {
+        *pBytes++ = 0U;
+    }
+}
+
 // 0x005f36f0
 // Returns the channel block for the identifier. An out of range identifier yields a null pointer.
 sceDmaChan *sceDmaGetChan(int nChannel) {
@@ -171,7 +178,6 @@ int sceDmaReset(int nMode) {
     unsigned int stat;
     int index;
     unsigned char clearEnv[20];
-    int i;
 
     oldCtrl = DMAC_CTRL;
     index = kChannelCount - 1;
@@ -192,9 +198,7 @@ int sceDmaReset(int nMode) {
     DMAC_STAT = 0xFF1FU;
     stat = DMAC_STAT;
     DMAC_STAT = stat & 0xFF1F0000U;
-    for (i = 0; i < 20; i++) {
-        clearEnv[i] = 0U;
-    }
+    DmaClearBytes(clearEnv, sizeof(clearEnv));
     sceDmaPutEnv((sceDmaEnv *)clearEnv);
     if (nMode == 1) {
         unsigned int ctrl;
@@ -346,7 +350,7 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
 void sceDmaCreateQueueSemaphore(
     ViBuf *buffer, void *pData, void *pTag, int nTagSize, void *pTimeStamps, int nTimeStamps) {
     DmaQueue *queue;
-    ee_sema_t sema;
+    struct SemaParam sema;
     int semaId;
 
     queue = (DmaQueue *)buffer;
@@ -356,8 +360,8 @@ void sceDmaCreateQueueSemaphore(
     queue->mTimeStampCapacity = nTimeStamps;
     queue->mCapacitySectors = nTagSize;
     queue->mSize = nTagSize << kSectorShift;
-    sema.max_count = 1;
-    sema.init_count = 1;
+    sema.maxCount = 1;
+    sema.initCount = 1;
     semaId = CreateSema(&sema);
     queue->mSemaId = semaId;
     sceDmaSub006126e8(buffer);

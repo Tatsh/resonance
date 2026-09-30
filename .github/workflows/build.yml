@@ -23,7 +23,7 @@ jobs:
       - name: 'Configure'
         run: |
           cmake -B build -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="$PS2SDK/ps2dev.cmake" \
+            -DCMAKE_TOOLCHAIN_FILE="$PWD/cmake/ps2-ee-toolchain.cmake" \
             -DCMAKE_BUILD_TYPE=Debug
       - name: 'Compile'
         run: |

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include <eekernel.h>
+#include <eetypes.h>
 #include <libgraph.h>
 
 // Plain C reconstruction of the Sony libgraph entry points used by the game,
@@ -24,7 +25,7 @@
 // The VIF1 error mask register.
 #define VIF1_ERR (*(volatile unsigned int *)(uintptr_t)0x10003C20U)
 // The VIF1 data FIFO, read and written a whole quadword at a time.
-#define VIF1_FIFO (*(vu128 *)(uintptr_t)0x10005000U)
+#define VIF1_FIFO (*(volatile u_long128 *)(uintptr_t)0x10005000U)
 // The GIF control register.
 #define GIF_CTRL (*(volatile unsigned int *)(uintptr_t)0x10003000U)
 // The GIF status register. Bits 10 and 11 report path activity.
@@ -68,7 +69,7 @@ typedef struct {
 // its operand, STMOD, MSKPATH3, OFFSET, BASE, and ITOP).
 typedef union {
     unsigned int mWords[8];
-    u128 mQuads[2];
+    u_long128 mQuads[2];
 } Vif1InitPacket;
 
 // 0x007848d0
@@ -83,7 +84,7 @@ static const Vif1InitPacket g_dwVif1InitPacket = {{0x01000404U,
 
 // The MSKPATH3 code restored to the VIF1 FIFO after image store work, padded with three NOP codes.
 // 0x007729c0
-static const u128 g_vif1StorePacket = 0x06000000U;
+static const u_long128 g_vif1StorePacket = 0x06000000U;
 
 // 0x00784900
 static GsState g_GsStateBlock = {1, 2, 1, 3, NULL, 0};
@@ -861,7 +862,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         }
     }
     if (small != 0) {
-        u128 *pTail = (u128 *)pDest + aligned;
+        u_long128 *pTail = (u_long128 *)pDest + aligned;
         int i;
 
         for (i = 0; i < small; ++i) {
@@ -873,10 +874,10 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     }
     if (ragged != 0) {
         union {
-            u128 quad;
+            u_long128 quad;
             unsigned char bytes[16];
         } last;
-        unsigned char *pBytes = (unsigned char *)((u128 *)pDest + aligned + small);
+        unsigned char *pBytes = (unsigned char *)((u_long128 *)pDest + aligned + small);
         int i;
 
         if (StoreImageWaitFifo(&spins) != 0) {

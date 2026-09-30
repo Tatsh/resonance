@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <cstring>
-#include <ee_regs.h>
 #include <eekernel.h>
+#include <eeregs.h>
 #include <libdma.h>
 #include <libgraph.h>
 
@@ -487,8 +487,8 @@ void GfxDevice::InitDisplayMode() {
     FlipFrameBuffer();
     RestorePacket();
 
-    *R_EE_D0_CHCR |= kChcrTransferTag;
-    *R_EE_D1_CHCR |= kChcrTransferTag;
+    *D0_CHCR |= kChcrTransferTag;
+    *D1_CHCR |= kChcrTransferTag;
     sceDmaSend(sceDmaGetChan(SCE_DMA_VIF0), ToDmaAddress(g_vu0MicrocodeChain));
     sceDmaSend(sceDmaGetChan(SCE_DMA_VIF1), ToDmaAddress(g_vu1MicrocodeChain));
 

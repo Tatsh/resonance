@@ -100,7 +100,7 @@ inline void RebootIopWithImage() {
     TRACE_HERE
     sceCdInit(SCECdINIT);
     TRACE_HERE
-    sceCdMmode(SCECdMmodeCd);
+    sceCdMmode(SCECdCD);
     TRACE_HERE
 
     if (GetHostMode() == kHostModeCdOnly) {
@@ -126,7 +126,7 @@ inline void RebootIopWithImage() {
     TRACE_HERE
     sceCdInit(SCECdINIT);
     TRACE_HERE
-    sceCdMmode(SCECdMmodeCd);
+    sceCdMmode(SCECdCD);
     TRACE_HERE
 }
 

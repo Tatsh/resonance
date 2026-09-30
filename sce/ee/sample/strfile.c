@@ -2,7 +2,6 @@
 
 #include <ctype.h>
 #include <ezmpeg.h>
-#include <iopheap.h>
 #include <libcdvd.h>
 #include <sifdev.h>
 #include <stdint.h>
@@ -70,9 +69,9 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
         if (g_bCdInitialized == 0) {
             g_bCdInitialized = 1;
         }
-        void *pHeap = SifAllocIopHeap(kIopHeapSize);
+        void *pHeap = sceSifAllocIopHeap(kIopHeapSize);
         uintptr_t nAligned = ((uintptr_t)pHeap + 15) >> 4 << 4;
-        sceCdStInit(kStreamSectors, kStreamBanks, (void *)nAligned);
+        sceCdStInit(kStreamSectors, kStreamBanks, (unsigned int)nAligned);
         *(void **)&pFile->mUnknown08[kHeapSlot] = pHeap;
 
         sceCdlFILE *pEntry = (sceCdlFILE *)&pFile->mUnknown08[0];
@@ -114,7 +113,7 @@ int strFileClose(StrFile* pFile) {
     if (pFile->isOnCD != 0) {
         sceCdStStop();
         void *pHeap = *(void **)&pFile->mUnknown08[kHeapSlot];
-        SifFreeIopHeap(pHeap);
+        sceSifFreeIopHeap(pHeap);
     } else {
         sceClose(pFile->fd);
     }

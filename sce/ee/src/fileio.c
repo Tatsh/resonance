@@ -216,7 +216,7 @@ static FsResult g_fsResult __attribute__((aligned(64)));
 static FsHandle g_aFsHandles[kFsHandleCount];
 
 // 0x008e3bc0
-static SifRpcClientData_t g_fsClient;
+static sceSifClientData g_fsClient;
 
 // 0x008e3be8, the version the server reported when the client bound it.
 static char g_abFsServerVersion[4];
@@ -227,26 +227,26 @@ static int FsReceivedWord(void) {
 
 // 0x0056aa08
 static void FsCreateCallSema(void) {
-    ee_sema_t param;
+    struct SemaParam param;
 
     if (g_nFsCallSema != -1) {
         return;
     }
-    param.max_count = 1;
-    param.init_count = 1;
+    param.maxCount = 1;
+    param.initCount = 1;
     param.option = 0;
     g_nFsCallSema = CreateSema(&param);
 }
 
 // 0x0056a4f0
 static void FsCreateTableSemaphores(void) {
-    ee_sema_t param;
+    struct SemaParam param;
 
     if (g_nFsHandleSema != -1) {
         return;
     }
-    param.max_count = 1;
-    param.init_count = 1;
+    param.maxCount = 1;
+    param.initCount = 1;
     param.option = 0;
     g_nFsHandleSema = CreateSema(&param);
     g_nFsPendingSema = CreateSema(&param);
@@ -376,7 +376,7 @@ static int FsBind(void) {
         if (nBound < 0) {
             return -1;
         }
-        if (g_fsClient.server != NULL) {
+        if (g_fsClient.serve != NULL) {
             break;
         }
         for (nDelay = kFsBindDelay; nDelay != -1; --nDelay) {
@@ -419,10 +419,10 @@ static int FsVersionMismatch(void) {
 }
 
 static int FsCreateCallSemaphore(void) {
-    ee_sema_t param;
+    struct SemaParam param;
 
-    param.max_count = 1;
-    param.init_count = 0;
+    param.maxCount = 1;
+    param.initCount = 0;
     param.option = 0;
     return CreateSema(&param);
 }

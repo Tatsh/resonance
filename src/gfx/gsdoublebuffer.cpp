@@ -1,6 +1,6 @@
 #include "gfx/gsdoublebuffer.h"
 
-#include <gs_privileged.h>
+#include <eeregs.h>
 #include <libgraph.h>
 
 namespace {
@@ -144,13 +144,13 @@ inline void WriteDisplayRegisters(GsDoubleBuffer::DispEnv &env, int bEnableCircu
     }
     env.mEnv.pmode |= kPmodeEn2;
 
-    *GS_REG_PMODE = env.mEnv.pmode;
-    *GS_REG_SMODE2 = env.mEnv.smode2;
-    *GS_REG_DISPFB2 = env.mEnv.dispfb;
-    *GS_REG_DISPLAY2 = env.mEnv.display;
-    *GS_REG_BGCOLOR = env.mEnv.bgcolor;
-    *GS_REG_DISPLAY1 = env.mDisplay1;
-    *GS_REG_DISPFB1 = env.mDispFb1;
+    *GS_PMODE = env.mEnv.pmode;
+    *GS_SMODE2 = env.mEnv.smode2;
+    *GS_DISPFB2 = env.mEnv.dispfb;
+    *GS_DISPLAY2 = env.mEnv.display;
+    *GS_BGCOLOR = env.mEnv.bgcolor;
+    *GS_DISPLAY1 = env.mDisplay1;
+    *GS_DISPFB1 = env.mDispFb1;
 }
 
 } // namespace

@@ -115,7 +115,7 @@ int g_nAsyncOpFinished = 0;
 // The image never writes the read mode. Reads retry three times, with no spindle override and
 // 2048-byte sectors.
 // 0x006e9168
-sceCdRMode g_asyncOpReadMode = {3};
+sceCdRMode g_asyncOpReadMode = {3, 0, SCECdSecS2048, 0};
 
 // Cleared once the read finishes, which is what makes a zero here mean "no command in flight" to
 // AsyncCheck.

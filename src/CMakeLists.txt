@@ -11,38 +11,17 @@
 add_library(resonance_common INTERFACE)
 target_compile_options(resonance_common INTERFACE -Wall -Wextra -Wno-unknown-pragmas)
 
-# _EE selects the Emotion Engine side of every SDK header serving both processors. The SDK toolchain
-# file defines it and a host configure does not use a toolchain file at all. Without the definition
-# tamtypes.h refuses to define u32, and every use of that type then fails.
+# _EE selects the Emotion Engine side of the headers serving both processors.
 target_compile_definitions(resonance_common INTERFACE _EE)
 
-# compat comes first, and its #include_next then resolves to the real SDK header behind it. The
-# original was built against Sony's official SDK, whose header names differ from the open-source
-# ps2sdk in places. compat forwards those names rather than redeclaring anything.
-target_include_directories(resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/include"
-                                                      "${CMAKE_SOURCE_DIR}/compat")
-
-# Five headers the reconstruction includes do not sit in the two directories the SDK toolchain file
-# adds. An installed SDK flattens them into ee/include and a source checkout retains them where they
-# are built from. Each candidate is added only where it exists, and neither layout is assumed.
-foreach(
-  SDK_INCLUDE
-  ee/include
-  common/include
-  ee/kernel/include
-  ee/rpc/cdvd/include
-  ee/rpc/memorycard/include
-  ee/rpc/multitap/include
-  ee/rpc/pad/include
-  ee/rpc/sdr/include)
-  if(IS_DIRECTORY "${PS2SDK}/${SDK_INCLUDE}")
-    target_include_directories(resonance_common SYSTEM INTERFACE "${PS2SDK}/${SDK_INCLUDE}")
-  endif()
-endforeach()
+# The reconstructed Sony headers sit under sce/ee/include, and compat declares the rest of the Sony
+# interfaces the game calls.
+target_include_directories(
+  resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/sce/ee/include"
+                             "${CMAKE_SOURCE_DIR}/compat")
 
 set(RESONANCE_SUBSYSTEMS
     app
-    ezmidi
     game
     gfx
     gs
@@ -85,36 +64,54 @@ list(APPEND RESONANCE_LIBRARIES resonance_sonylibs)
 
 add_custom_target(archives DEPENDS ${RESONANCE_LIBRARIES})
 
-# The link step the reconstruction has reached. Every routine a call arrives at must have a body
-# or come from the SDK libraries below. An undefined reference names the next routine to recover.
-# The startup file and the library set are what the original linked against, and the toolchain
-# file the SDK ships supplies the linker flags and the link script. The open-source SDK ships no
-# static syscall library, so the set below omits it.
-add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>)
+# The executable links the reconstructed start-up code, every archive, and the compiler runtime
+# (the C and C++ libraries and libgcc) with the reconstructed link script. The compiler driver's
+# default start files and libraries belong to an SDK this tree does not use. Both are replaced.
+add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>
+                                     "${CMAKE_SOURCE_DIR}/sce/ee/src/crt0.s")
+enable_language(ASM)
 # The original linked every object. The metagame screens and the script interface register
 # themselves from static initialisation with nothing else referring to them. Both therefore link
 # whole.
 set(RESONANCE_ARCHIVE_LIBRARIES ${RESONANCE_LIBRARIES})
 list(REMOVE_ITEM RESONANCE_ARCHIVE_LIBRARIES resonance_main resonance_met resonance_script)
+foreach(_crt crti.o crtbegin.o crtend.o crtn.o)
+  execute_process(
+    COMMAND ${CMAKE_C_COMPILER} -print-file-name=${_crt}
+    OUTPUT_VARIABLE _crt_path
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REPLACE "." "_" _crt_var "${_crt}")
+  set(RESONANCE_${_crt_var} "${_crt_path}")
+endforeach()
 target_link_libraries(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE -Wl,--whole-archive resonance_met resonance_script -Wl,--no-whole-archive
+  PRIVATE "${RESONANCE_crti_o}"
+          "${RESONANCE_crtbegin_o}"
+          -Wl,--whole-archive
+          resonance_met
+          resonance_script
+          -Wl,--no-whole-archive
+          -Wl,--start-group
           ${RESONANCE_ARCHIVE_LIBRARIES}
-          kernel
+          resonance_runtime
+          stdc++
+          m
           c
-          graph
-          dma
-          packet
-          math3d
-          pad
-          mc
-          mtap
-          cdvd
-          z)
-# MemOpenLog() at 0x004a7c40 reports the original stack as 512 KiB at 0x01F80000, where the SDK
-# link script would otherwise supply 128 KiB at the top of memory.
-target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,--defsym,_stack=0x01F80000
-                    -Wl,--defsym,_stack_size=0x80000)
+          gcc
+          -Wl,--end-group
+          "${RESONANCE_crtend_o}"
+          "${RESONANCE_crtn_o}")
+# MemOpenLog() at 0x004a7c40 reports the original stack as 512 KiB at 0x01F80000.
+target_link_options(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE
+  -nostartfiles
+  -nodefaultlibs
+  -T${CMAKE_SOURCE_DIR}/sce/ee/app.ld
+  -Wl,--defsym,_stack=0x01F80000
+  -Wl,--defsym,_stack_size=0x80000)
+set_property(TARGET ${CMAKE_PROJECT_NAME} APPEND PROPERTY LINK_DEPENDS
+                                                          "${CMAKE_SOURCE_DIR}/sce/ee/app.ld")
 # The shipped disc image is stripped, so release builds strip the executable. Debug builds keep
 # their symbols.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

@@ -5,7 +5,6 @@
 #include <libsdr.h>
 #include <msin.h>
 #include <sifdev.h>
-#include <sifdma.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -42,12 +41,6 @@ constexpr int kSdRemoteBlocking = 1;
 constexpr int kSpu2CoreCount = 2;
 
 constexpr int kSpu2VoicesPerCore = 24;
-
-// Both voice-address entries reach libsd with this bit set above the 0x3e voice field. The library
-// masks the voice out, so the bit does not change which voice is read; the SDK of this era
-// evidently folded it into the two SD_VADDR_* constants the way it folds 0x80 into the core-level
-// SD_PARAM_* ones.
-constexpr int kSdVoiceAddrEntryBit = 0x40;
 
 // Mixer routing each core starts with. Core 1 additionally takes the input core 0 feeds it.
 constexpr int kSpu2Core0Mix = 0xf00;
@@ -109,7 +102,7 @@ constexpr int kMidiStreamHeaderSize = 2 * sizeof(unsigned int);
 constexpr int kSynthStreamReadSize = 0x4000;
 
 // 0x008e5bc0
-SifRpcClientData_t g_soundDriverClient;
+sceSifClientData g_soundDriverClient;
 
 // Set while a request sent without waiting is still running on the driver.
 // 0x00780878
@@ -121,7 +114,7 @@ alignas(64) unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
 // The descriptor XferToIop() hands to the SIF DMA.
 // 0x008e5be8
-SifDmaTransfer_t g_xferToIopDma;
+sceSifDmaData g_xferToIopDma;
 
 // Set once InitSynthDriver() has brought the driver up.
 // 0x006e9b88
@@ -135,11 +128,13 @@ int g_nMidiEventIopAddress = 0;
 // 0x006e9bd0
 int g_nMidiEventBufferIndex = 0;
 
+// SIF DMA moves whole quadwords. Both commands the driver receives start on the cache line the
+// original placed them on.
 // 0x00894cc0
-SoundDriverCommand g_chunkCommand;
+alignas(64) SoundDriverCommand g_chunkCommand;
 
 // 0x00894bc0
-SoundDriverCommand g_bankCommand;
+alignas(64) SoundDriverCommand g_bankCommand;
 
 // 0x00894748
 int g_anIopStagingAddress[kIopStagingBufferCount] = {};
@@ -442,14 +437,14 @@ void SynthCommand(int nCommand) {
 void DumpSynthVoices(int bActiveOnly) {
     int nActive = 0;
     for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
-        const int nMMix = sceSdRemote(kSdRemoteBlocking, rSdGetParam, SD_PARAM_MMIX | nCore);
+        const int nMMix = sceSdRemote(kSdRemoteBlocking, rSdGetParam, SD_P_MMIX | nCore);
         const int nEffect =
-            sceSdRemote(kSdRemoteBlocking, rSdGetCoreAttr, SD_CORE_EFFECT_ENABLE | nCore);
-        const int nVMixL = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_SWITCH_VMIXL | nCore);
-        const int nVMixEL = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_SWITCH_VMIXEL | nCore);
-        const int nVMixR = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_SWITCH_VMIXR | nCore);
-        const int nVMixER = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_SWITCH_VMIXER | nCore);
-        const int nEndX = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_SWITCH_ENDX | nCore);
+            sceSdRemote(kSdRemoteBlocking, rSdGetCoreAttr, SD_C_EFFECT_ENABLE | nCore);
+        const int nVMixL = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_VMIXL | nCore);
+        const int nVMixEL = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_VMIXEL | nCore);
+        const int nVMixR = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_VMIXR | nCore);
+        const int nVMixER = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_VMIXER | nCore);
+        const int nEndX = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_ENDX | nCore);
         LogPrintf("Core    %2.2d: MMix %x eff %d vmix L %x %x R %x %x end %x\n",
                   nCore,
                   nMMix,
@@ -461,12 +456,10 @@ void DumpSynthVoices(int bActiveOnly) {
                   nEndX);
         for (int nVoice = 0; nVoice < kSpu2VoicesPerCore; ++nVoice) {
             const int nEntry = SD_VOICE(nCore, nVoice);
-            const int nStart = sceSdRemote(
-                kSdRemoteBlocking, rSdGetAddr, SD_VADDR_SSA | kSdVoiceAddrEntryBit | nEntry);
+            const int nStart = sceSdRemote(kSdRemoteBlocking, rSdGetAddr, SD_VA_SSA | nEntry);
             // Yes, the binary discards this read's result.
-            sceSdRemote(
-                kSdRemoteBlocking, rSdGetAddr, SD_VADDR_NAX | kSdVoiceAddrEntryBit | nEntry);
-            const int nEnvX = sceSdRemote(kSdRemoteBlocking, rSdGetParam, SD_VPARAM_ENVX | nEntry);
+            sceSdRemote(kSdRemoteBlocking, rSdGetAddr, SD_VA_NAX | nEntry);
+            const int nEnvX = sceSdRemote(kSdRemoteBlocking, rSdGetParam, SD_VP_ENVX | nEntry);
             const int nBit = 1 << nVoice;
             if ((nEndX & nBit) == 0) {
                 ++nActive;
@@ -539,14 +532,14 @@ void ConfigureSpu2Effects(int bEnable) {
             attr.delay = QueryConfigValue(kTemplateHardDelayTime, nCore);
             attr.feedback = QueryConfigValue(kTemplateHardFeedback, nCore);
             sceSdRemote(kSdRemoteBlocking, rSdSetEffectAttr, nCore, &attr);
-            sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_CORE_EFFECT_ENABLE | nCore, 1);
+            sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_C_EFFECT_ENABLE | nCore, 1);
         } else {
-            sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_CORE_EFFECT_ENABLE | nCore, 0);
-            sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_EVOLL | nCore, 0);
-            sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_EVOLR | nCore, 0);
+            sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_C_EFFECT_ENABLE | nCore, 0);
+            sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_EVOLL | nCore, 0);
+            sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_EVOLR | nCore, 0);
         }
-        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MVOLL | nCore, kSpu2MaxVolume);
-        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MVOLR | nCore, kSpu2MaxVolume);
+        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_MVOLL | nCore, kSpu2MaxVolume);
+        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_MVOLR | nCore, kSpu2MaxVolume);
     }
 
     if (bEnable == 0) {
@@ -573,14 +566,14 @@ void ConfigureSpu2Effects(int bEnable) {
 void InitSpu2Cores() {
     sceSdRemoteInit(); // Yes, the binary discards this call's result.
     sceSdRemote(kSdRemoteBlocking, rSdInit, 0);
-    sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MMIX | 1, kSpu2Core1Mix);
-    sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MMIX | 0, kSpu2Core0Mix);
+    sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_MMIX | 1, kSpu2Core1Mix);
+    sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_MMIX | 0, kSpu2Core0Mix);
     unsigned nEffectEnd = kSpu2EffectAreaTop;
     for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
-        sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_CORE_EFFECT_ENABLE | nCore, 0);
-        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MVOLL | nCore, kSpu2MaxVolume);
-        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_PARAM_MVOLR | nCore, kSpu2MaxVolume);
-        sceSdRemote(kSdRemoteBlocking, rSdSetAddr, SD_ADDR_EEA | nCore, nEffectEnd);
+        sceSdRemote(kSdRemoteBlocking, rSdSetCoreAttr, SD_C_EFFECT_ENABLE | nCore, 0);
+        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_MVOLL | nCore, kSpu2MaxVolume);
+        sceSdRemote(kSdRemoteBlocking, rSdSetParam, SD_P_MVOLR | nCore, kSpu2MaxVolume);
+        sceSdRemote(kSdRemoteBlocking, rSdSetAddr, SD_A_EEA | nCore, nEffectEnd);
         nEffectEnd -= kSpu2EffectAreaSize;
     }
 }
@@ -628,8 +621,9 @@ sceCslBuffGrp g_aMidiInputGroups[kMidiInputGroupCount];
 // 0x00894788
 sceCslBuffCtx g_midiInputBuffer;
 
+// SIF DMA sends the buffer from its start. The original placed the buffer on a cache line.
 // 0x008947c0
-MidiStreamBuffer g_midiStreamBuffer;
+alignas(64) MidiStreamBuffer g_midiStreamBuffer;
 
 // The program each channel last received.
 // 0x006e9bd8
@@ -872,14 +866,14 @@ int BindSoundDriverRpc() {
         int nSpin = kSoundDriverBindSpin;
         while (nSpin-- != 0) {
         }
-    } while (g_soundDriverClient.server == nullptr);
+    } while (g_soundDriverClient.serve == nullptr);
     return 1;
 }
 
 // 0x005f96c8
 int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     if (g_bSoundRequestPending != 0) {
-        while (sceSifCheckStatRpc(&g_soundDriverClient) == kSifRpcStillRunning) {
+        while (sceSifCheckStatRpc(&g_soundDriverClient.rpcd) == kSifRpcStillRunning) {
         }
         g_bSoundRequestPending = 0;
     }
@@ -890,7 +884,7 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
         nMode = kSifRpcModeWait;
         nReplySize = sizeof(g_anSoundDriverReply);
     } else {
-        nMode = SIF_RPC_M_NOWAIT;
+        nMode = SIF_RPCM_NOWAIT;
         g_bSoundRequestPending = 1;
     }
 
@@ -921,12 +915,12 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
 
 // 0x005f97d0
 int XferToIop(int nIopAddress, const void *pSource, int nLength) {
-    g_xferToIopDma.src = const_cast<void *>(pSource);
-    g_xferToIopDma.dest = reinterpret_cast<void *>(static_cast<uintptr_t>(nIopAddress));
-    g_xferToIopDma.size = nLength;
-    g_xferToIopDma.attr = 0;
+    g_xferToIopDma.data = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(pSource));
+    g_xferToIopDma.addr = static_cast<unsigned int>(nIopAddress);
+    g_xferToIopDma.size = static_cast<unsigned int>(nLength);
+    g_xferToIopDma.mode = 0;
     FlushCache(WRITEBACK_DCACHE);
-    const int nTransfer = sceSifSetDma(&g_xferToIopDma, 1);
+    const unsigned int nTransfer = sceSifSetDma(&g_xferToIopDma, 1);
     while (sceSifDmaStat(nTransfer) >= 0) {
     }
     return (nTransfer != 0) ? 0 : -1;

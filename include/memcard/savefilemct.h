@@ -137,7 +137,7 @@ protected:
     int mFile;
 
     // The browser icon header, built in place and written as one 964-byte block. +0x20
-    mcIcon mIconSys;
+    sceMcIconSys mIconSys;
 
     // The save directory, and the name of the marker file written inside it. +0x3e4
     HxStr mDirName;

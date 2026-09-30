@@ -1,7 +1,7 @@
 #include "app/cutscene.h"
 
-#include <ee_regs.h>
 #include <eekernel.h>
+#include <eeregs.h>
 #include <ezmpeg.h>
 #include <libdma.h>
 #include <libgraph.h>
@@ -207,8 +207,8 @@ static void init_all(void) {
 
 // 0x00510b98
 static void prepare_playback(const char *name) {
-    *R_EE_D_CTRL |= kDmaCtrlEnable;
-    *R_EE_D_STAT = kDmaStatClearVif1;
+    *D_CTRL |= kDmaCtrlEnable;
+    *D_STAT = kDmaStatClearVif1;
 
     readBufCreate(g_read_buf);
     sceMpegInit();
@@ -230,24 +230,24 @@ static void prepare_playback(const char *name) {
     voBufCreate(&voBuf, UNCACHED(g_frame_images), g_frame_tags, kFrameCount);
 
     // Both threads run at the priority of the calling thread.
-    ee_thread_status_t status;
+    struct ThreadParam status;
     ReferThreadStatus(GetThreadId(), &status);
-    ee_thread_t thread;
-    thread.func = (void *)default_main;
+    struct ThreadParam thread;
+    thread.entry = default_main;
     thread.stack = g_default_stack;
-    thread.stack_size = kDefaultStackSize;
-    thread.initial_priority = status.current_priority;
-    thread.gp_reg = &_gp;
+    thread.stackSize = kDefaultStackSize;
+    thread.initPriority = status.currentPriority;
+    thread.gpReg = _gp;
     thread.option = 0;
-    g_default_priority = status.current_priority;
+    g_default_priority = status.currentPriority;
     g_default_thread = CreateThread(&thread);
     StartThread(g_default_thread, NULL);
 
-    thread.func = (void *)videoDecMain;
+    thread.entry = (void (*)(void *))videoDecMain;
     thread.stack = g_decode_stack;
-    thread.stack_size = kDecodeStackSize;
-    thread.initial_priority = g_default_priority;
-    thread.gp_reg = &_gp;
+    thread.stackSize = kDecodeStackSize;
+    thread.initPriority = g_default_priority;
+    thread.gpReg = _gp;
     thread.option = 0;
     g_decode_thread = CreateThread(&thread);
     StartThread(g_decode_thread, &videoDec);

@@ -70,7 +70,6 @@ set(RESONANCE_PYTHON_SRCS
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/regexmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/regexpr.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/signalmodule.c"
-    "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/socketmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/_sre.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/stropmodule.c"
     "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Modules/structmodule.c"
@@ -88,9 +87,7 @@ target_compile_definitions(
           HAVE_STDARG_PROTOTYPES=1
           HAVE_DIRENT_H=1
           HAVE_FCNTL_H=1
-          HAVE_NETDB_H=1
           HAVE_SIGNAL_H=1
-          HAVE_SYS_SOCKET_H=1
           HAVE_SYS_WAIT_H=1
           HAVE_UNISTD_H=1
           HAVE_UTIME_H=1

@@ -52,7 +52,7 @@ void SynthCommand(int nCommand);
  *
  * @ghidraAddress 0x008e5bc0
  */
-extern SifRpcClientData_t g_soundDriverClient;
+extern sceSifClientData g_soundDriverClient;
 
 /**
  * Bind g_soundDriverClient to the sound driver's RPC server.

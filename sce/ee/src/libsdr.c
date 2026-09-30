@@ -67,18 +67,18 @@ typedef struct {
 static SdrPacket g_sdrPacket __attribute__((aligned(64)));
 
 // 0x008e3e40
-static SifRpcClientData_t g_sdrClient;
+static sceSifClientData g_sdrClient;
 
 // 0x007b2754
 static SdrCallbackTable g_sdrCallbackTable;
 
 // The completion callback of a call made with a zero control word. The image never writes it.
 // 0x00765d38
-static SifRpcEndFunc_t g_pfnSdrEndFunction;
+static sceSifEndFunc g_pfnSdrEndFunction;
 
 // 0x00576fe0
 int sceSdRemoteInit(void) {
-    SifRpcClientData_t *pClient = &g_sdrClient;
+    sceSifClientData *pClient = &g_sdrClient;
     int nBind;
     int nDelay;
 
@@ -95,7 +95,7 @@ int sceSdRemoteInit(void) {
         while (nDelay != -1) {
             nDelay--;
         }
-        if (pClient->server == NULL) {
+        if (pClient->serve == NULL) {
             continue;
         }
         FlushCache(0);
@@ -106,7 +106,7 @@ int sceSdRemoteInit(void) {
 // 0x00577120
 int sceSdRemote(int nControl, ...) {
     SdrPacket *pPacket = &g_sdrPacket;
-    SifRpcClientData_t *pClient = &g_sdrClient;
+    sceSifClientData *pClient = &g_sdrClient;
     SdrCallbackTable *pTable = &g_sdrCallbackTable;
     va_list oArguments;
     int nCommand;
@@ -114,7 +114,7 @@ int sceSdRemote(int nControl, ...) {
     // The block-read path below returns the preserved register rather than a computed value, so
     // no initialiser can reproduce it. The reconstruction returns zero there.
     int nResult = 0;
-    SifRpcEndFunc_t pfnEnd;
+    sceSifEndFunc pfnEnd;
 
     nFlag = 0;
     pfnEnd = NULL;

@@ -13,7 +13,7 @@
 
 namespace {
 
-// Components of an iconIVECTOR and an iconFVECTOR.
+// Components of a background colour and a light vector.
 enum IconVectorComponent { kIconX = 0, kIconY = 1, kIconZ = 2, kIconW = 3 };
 
 // Half intensity, which every corner of the background gradient uses.
@@ -35,15 +35,15 @@ const char kIconImageLeafName[] = "freq1.ico";
 const char kMarkerText[] = "0";
 
 // 0x007da170
-const iconFVECTOR kIconLightDir[] = {
+const float kIconLightDir[][4] = {
     {0.5f, 0.5f, 0.5f, 0.0f}, {0.0f, -0.4f, -0.1f, 0.0f}, {-0.5f, -0.5f, 0.5f, 0.0f}};
 
 // 0x007da1a0
-const iconFVECTOR kIconLightCol[] = {
+const float kIconLightCol[][4] = {
     {0.48f, 0.48f, 0.03f, 0.0f}, {0.5f, 0.33f, 0.2f, 0.0f}, {0.14f, 0.14f, 0.38f, 0.0f}};
 
 // 0x007da1d0
-const iconFVECTOR kIconLightAmbient = {0.5f, 0.5f, 0.5f, 0.0f};
+const float kIconLightAmbient[] = {0.5f, 0.5f, 0.5f, 0.0f};
 
 } // namespace
 
@@ -143,39 +143,38 @@ void SaveFileMCT::RunStep() {
 
 // 0x00177ca0
 void SaveFileMCT::BuildIconSys(const char *pszTitle) {
-    mcIcon pattern;
-    memset(pattern.bgCol, 0, sizeof(pattern.bgCol));
-    pattern.bgCol[0][kIconX] = kIconBackgroundLevel;
-    pattern.bgCol[1][kIconY] = kIconBackgroundLevel;
-    pattern.bgCol[2][kIconZ] = kIconBackgroundLevel;
-    pattern.bgCol[3][kIconX] = kIconBackgroundLevel;
-    pattern.bgCol[3][kIconY] = kIconBackgroundLevel;
-    pattern.bgCol[3][kIconZ] = kIconBackgroundLevel;
-    memcpy(pattern.lightDir, kIconLightDir, sizeof(pattern.lightDir));
-    memcpy(pattern.lightCol, kIconLightCol, sizeof(pattern.lightCol));
-    memcpy(pattern.lightAmbient, kIconLightAmbient, sizeof(pattern.lightAmbient));
+    sceMcIconSys pattern;
+    memset(pattern.BgColor, 0, sizeof(pattern.BgColor));
+    pattern.BgColor[0][kIconX] = kIconBackgroundLevel;
+    pattern.BgColor[1][kIconY] = kIconBackgroundLevel;
+    pattern.BgColor[2][kIconZ] = kIconBackgroundLevel;
+    pattern.BgColor[3][kIconX] = kIconBackgroundLevel;
+    pattern.BgColor[3][kIconY] = kIconBackgroundLevel;
+    pattern.BgColor[3][kIconZ] = kIconBackgroundLevel;
+    memcpy(pattern.LightDir, kIconLightDir, sizeof(pattern.LightDir));
+    memcpy(pattern.LightColor, kIconLightCol, sizeof(pattern.LightColor));
+    memcpy(pattern.Ambient, kIconLightAmbient, sizeof(pattern.Ambient));
 
     HxStr iconName(kIconImageLeafName);
 
     memset(&mIconSys, 0, sizeof(mIconSys));
-    memcpy(mIconSys.head, kIconSysHeader, sizeof(kIconSysHeader));
+    memcpy(mIconSys.Head, kIconSysHeader, sizeof(kIconSysHeader));
 
     char szShiftJisTitle[kIconTitleBufferSize];
     AsciiToShiftJis(pszTitle, szShiftJisTitle);
-    // The field is typed as a code-unit array by the platform header and used as bytes here.
-    strcpy(reinterpret_cast<char *>(mIconSys.title), szShiftJisTitle);
+    strcpy(reinterpret_cast<char *>(mIconSys.TitleName), szShiftJisTitle);
 
-    mIconSys.nlOffset = kIconTitleLineBreak;
-    mIconSys.trans = kIconTransparency;
-    memcpy(mIconSys.bgCol, pattern.bgCol, sizeof(mIconSys.bgCol));
-    memcpy(mIconSys.lightDir, pattern.lightDir, sizeof(mIconSys.lightDir));
-    memcpy(mIconSys.lightCol, pattern.lightCol, sizeof(mIconSys.lightCol));
-    memcpy(mIconSys.lightAmbient, pattern.lightAmbient, sizeof(mIconSys.lightAmbient));
+    mIconSys.OffsLF = kIconTitleLineBreak;
+    mIconSys.TransRate = kIconTransparency;
+    memcpy(mIconSys.BgColor, pattern.BgColor, sizeof(mIconSys.BgColor));
+    memcpy(mIconSys.LightDir, pattern.LightDir, sizeof(mIconSys.LightDir));
+    memcpy(mIconSys.LightColor, pattern.LightColor, sizeof(mIconSys.LightColor));
+    memcpy(mIconSys.Ambient, pattern.Ambient, sizeof(mIconSys.Ambient));
 
     const char *pszIconName = iconName.mStr != nullptr ? iconName.mStr : g_szEmptyString;
-    strcpy(reinterpret_cast<char *>(mIconSys.view), pszIconName);
-    strcpy(reinterpret_cast<char *>(mIconSys.copy), pszIconName);
-    strcpy(reinterpret_cast<char *>(mIconSys.del), pszIconName);
+    strcpy(reinterpret_cast<char *>(mIconSys.FnameView), pszIconName);
+    strcpy(reinterpret_cast<char *>(mIconSys.FnameCopy), pszIconName);
+    strcpy(reinterpret_cast<char *>(mIconSys.FnameDel), pszIconName);
 }
 
 // 0x00185c20

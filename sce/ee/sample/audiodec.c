@@ -4,7 +4,6 @@
 #include <ezmpeg.h>
 #include <libsdr.h>
 #include <sifdev.h>
-#include <sifdma.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,16 +22,16 @@ static unsigned char g_presetData[kPresetSize];
 // 0x00567e68
 static int dmaToIop(int nIopDest, void *pSource, int nSize) {
     // Send one contiguous block to the processor side, then wait for completion.
-    SifDmaTransfer_t transfer;
-    int transferId;
+    sceSifDmaData transfer;
+    unsigned int transferId;
 
     if (nSize <= 0) {
         return 0;
     }
-    transfer.src = pSource;
-    transfer.dest = (void *)(uintptr_t)nIopDest;
-    transfer.size = nSize;
-    transfer.attr = 0;
+    transfer.data = (unsigned int)(uintptr_t)pSource;
+    transfer.addr = (unsigned int)nIopDest;
+    transfer.size = (unsigned int)nSize;
+    transfer.mode = 0;
     FlushCache(WRITEBACK_DCACHE);
     transferId = sceSifSetDma(&transfer, 1);
     while (sceSifDmaStat(transferId) >= 0) {

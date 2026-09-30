@@ -1,7 +1,7 @@
 #include "ezmpeg/disp.h"
 
-#include <ee_regs.h>
 #include <eekernel.h>
+#include <eeregs.h>
 #include <ezmpeg.h>
 #include <libdma.h>
 #include <libgifpk.h>
@@ -227,7 +227,7 @@ int vblankHandler(int nCause) {
     sceDmaChan *pChannel = sceDmaGetChan(SCE_DMA_GIF);
 
     // The field bit sits at bit 13 of the graphics status register.
-    const int field = (int)((*R_EE_GS_CSR >> 13) & 1);
+    const int field = (int)((*GS_CSR >> 13) & 1);
     g_currentField = field;
     if (g_isDisplaying == 0) {
         ExitHandler();
