@@ -360,7 +360,9 @@ static void FsCompletionHandler(void *pData, void *pArg) {
 // 0x0056aa98
 static int FsBind(void) {
     FsHandle *pHandle;
-    FsResult *pResultArea = &g_fsResult;
+    // SIF DMA moves whole quadwords from an aligned address, and the send buffer must start on
+    // one. The binary places it 16 bytes into its frame.
+    FsResult *pResultArea __attribute__((aligned(16))) = &g_fsResult;
     int nBound;
     int nDelay;
 
