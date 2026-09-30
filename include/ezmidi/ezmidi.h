@@ -6,70 +6,65 @@ extern "C" {
 #endif
 
 /**
- * Module interface of EZMIDI.IRX.
- *
- * The module exports one entry to the loader, `start`. Everything else runs behind its
- * SIFRPC server, which the main program reaches by server identifier rather than by
- * direct call, so no other routine is an export. The command set the server dispatches
- * is recorded alongside `midiFunc` in `midi_ent.c` as each command is decoded.
+ * Types the three units of the EZMIDI IOP module share. The layouts and names follow the stabs
+ * the shipped EZMIDI.IRX records. Addresses in the comments below are offsets into EZMIDI.IRX.
  */
 
-/**
- * Enter the module.
- *
- * Initialises the RPC layer, starts the server thread, and reports whether the module
- * stays resident. EZMIDI `0x0`.
- *
- * @param nArgc Argument count from the loader.
- * @param pArgv Argument strings from the loader.
- * @return Zero to stay resident, positive to unload.
- */
-int start(int nArgc, char **pArgv);
+/** SIF RPC server identifier of the module. */
+#define EZMIDI_RPC_SERVER 0x12346
 
-/**
- * Thread parameters for the server thread.
- *
- * Five words on the stack at entry. Inferred.
- */
-struct ThreadParam {
-    int mAttr;      /**< +0x00. */
-    int mOption;    /**< +0x04. */
-    void *mEntry;   /**< +0x08. Entry address. Inferred. */
-    int mStackSize; /**< +0x0C. */
-    int mPriority;  /**< +0x10. */
+/** Bits of an RPC function number that select the port. */
+#define EZMIDI_CMD_PORT_MASK 0xf
+
+/** Bits of an RPC function number that select the command. */
+#define EZMIDI_CMD_MASK 0xfff0
+
+/** RPC commands. The argument buffer is an int unless noted. */
+enum {
+    EZMIDI_CMD_ALL_NOTES_OFF = 0xc0,     /*!< Silence every channel. */
+    EZMIDI_CMD_INFO = 0xd0,              /*!< Diagnostic request, see HardSynthInfo(). */
+    EZMIDI_CMD_PAUSE = 0xf0,             /*!< Nonzero pauses, zero resumes. */
+    EZMIDI_CMD_REMIX = 0x100,            /*!< Switch remix mode. */
+    EZMIDI_CMD_MONO = 0x110,             /*!< Switch mono output. */
+    EZMIDI_CMD_INVALIDATE_HD = 0x120,    /*!< Detach the bank slot using a header address. */
+    EZMIDI_CMD_ATTACH_HD = 0x1050,       /*!< Attach a bank; the buffer is an EZMIDI_BANK. */
+    EZMIDI_CMD_LOAD_BD = 0x1070,         /*!< Load a bank body; the buffer is an EZMIDI_BANK. */
+    EZMIDI_CMD_CONFIG = 0x10e0,          /*!< Replace the settings; the buffer is sSynthConfig. */
+    EZMIDI_CMD_INIT = 0x8010,            /*!< Initialise; replies with the MIDI buffer address. */
+    EZMIDI_CMD_INVALIDATE_BANK = 0x8130, /*!< Detach a bank slot. */
 };
 
 /**
- * RPC command handler.
- *
- * Inferred.
- */
-typedef void *(*SifRpcFunc)(int nCommand, void *pData, int nSize);
-
-/**
- * Run the server thread.
- *
- * Enables interrupts, binds the RPC queue, registers the server, and loops the
- * RPC pump. EZMIDI `0xd0`.
+ * Enable the SPU2 DMA interrupts and serve #EZMIDI_RPC_SERVER. It does not return.
  *
  * @return Zero.
  */
 int sce_midi_loop(void);
 
-/**
- * Handle one RPC command.
- *
- * EZMIDI `0x18c`.
- *
- * @param nCommand Command number. Inferred.
- * @param pData Command data. Inferred.
- * @param nSize Data size. Inferred.
- * @return The reply. Inferred.
- */
-void *midiFunc(int nCommand, void *pData, int nSize);
+/** One sound bank the EE describes to the module. */
+typedef struct {
+    unsigned int hdAddr;  /*!< IOP address of the bank header. */
+    unsigned int bdAddr;  /*!< IOP address of the bank body. */
+    unsigned int bdSize;  /*!< Byte size of the bank body. */
+    unsigned int spuAddr; /*!< SPU2 address the body loads to. */
+    int bank;             /*!< Bank slot. */
+    char bdName[108];     /*!< Body file name. */
+} EZMIDI_BANK;
 
-/** RPC receive buffer. EZMIDI `0x8570`, sized by the gap to the notes. Inferred. */
-extern unsigned char gRpcBuf[0xc0];
+/** Synthesiser settings the EE sends with HardSynthConfig(). */
+typedef struct {
+    unsigned short stt_speed;            /*!< Frames a volume slide takes. */
+    unsigned short stt_limit;            /*!< Smallest volume change that slides. */
+    unsigned char stt_type;              /*!< Slide curve. */
+    unsigned char stt_pad[3];            /*!< Padding. */
+    unsigned int chorus_rate[2];         /*!< Chorus rate per core. */
+    unsigned int chorus_depth[2];        /*!< Chorus depth per core. */
+    unsigned char chorus_shape[2];       /*!< Chorus curve per core. */
+    unsigned char chorus_pad[2];         /*!< Padding. */
+    unsigned int echo_pad;               /*!< Padding. */
+    unsigned short rnd_nopause_channels; /*!< Channels that continue playing while paused. */
+    unsigned short rnd_pad;              /*!< Padding. */
+} sSynthConfig;
 
 #ifdef __cplusplus
 }
