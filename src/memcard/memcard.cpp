@@ -112,7 +112,12 @@ void Memcard::RenameFile(MemcardCBHandler *pHandler,
 
 // 0x0047f4e8
 void Memcard::Cancel(int nCookie) {
-    std::list<MemcardOp *>::iterator it = mOps.begin();
+    // The front operation is spared. It is the one completing when a handler cancels, and
+    // MemcardPS2::Update() deletes it once its handler returns.
+    if (mOps.empty()) {
+        return;
+    }
+    std::list<MemcardOp *>::iterator it = std::next(mOps.begin());
     while (it != mOps.end()) {
         if ((*it)->mCookie == nCookie) {
             delete *it;

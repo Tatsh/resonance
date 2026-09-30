@@ -4,7 +4,9 @@
 
 #include "memcard/memcardcbhandler.h"
 
-sceMcTblGetDir g_aMemcardDirEntries[kListDirMaxEntries];
+// The IOP writes the entries here by DMA.
+// 0x00726a40
+alignas(64) sceMcTblGetDir g_aMemcardDirEntries[kListDirMaxEntries];
 
 // 0x0055e778
 ListDirOp::ListDirOp(

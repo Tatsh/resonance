@@ -66,7 +66,6 @@ void MinimumSaveSpaceMCT::RunStep() {
         break;
 
     case kMinimumSaveSpaceStepOpenSettings:
-        mSpace += kMinimumSaveSpaceNewFile;
         mCard->OpenRead(this, mPortSlot, mSettingsPath, mCookie);
         mStep = kMinimumSaveSpaceStepAfterSettings;
         break;
@@ -83,7 +82,6 @@ void MinimumSaveSpaceMCT::RunStep() {
         break;
 
     case kMinimumSaveSpaceStepReport:
-        mSpace += kMinimumSaveSpaceNewFile;
         Finish();
         break;
 

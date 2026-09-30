@@ -15,7 +15,7 @@ enum MinimumSaveSpaceStep {
     kMinimumSaveSpaceStepAfterPersonas = 2, /*!< Charge for the roster, then the settings. */
     kMinimumSaveSpaceStepOpenSettings = 3,  /*!< Open the settings file for reading. */
     kMinimumSaveSpaceStepAfterSettings = 4, /*!< Charge for the settings, then report. */
-    kMinimumSaveSpaceStepReport = 5         /*!< Charge for a missing file and report. */
+    kMinimumSaveSpaceStepReport = 5         /*!< Report after the settings file closes uncharged. */
 };
 
 /**
