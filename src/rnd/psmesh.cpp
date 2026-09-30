@@ -570,14 +570,12 @@ void PsMesh::DrawEdgesVU1(const float *pXfm) {
 
         GifQuadword *pIndexCode = TakeQuadword();
         pIndexCode->mLo = 0;
-        // The immediate is shifted one short of the NUM field, which puts the low bit of the
-        // halved index count on the FLG bit that the next term sets regardless.
+        // Each V2-16 element is the index pair of one edge.
         pIndexCode->mHi = PackWordPair(
             MakeVifCode(kVifCmdStCycl, 0, kVifStCyclWl1Cl1),
             (kVifCmdUnpackV2_16 << kVifCmdShift) |
-                (static_cast<unsigned>(nPrimCount) << (kVifNumShift - 1)) | kVifUnpackFlg |
-                static_cast<unsigned>(nVertCount * kVertQuadwordStride + nVertCount +
-                                      kVu1EdgeVertAddr));
+                (static_cast<unsigned>(nPrimCount) << kVifNumShift) | kVifUnpackFlg |
+                static_cast<unsigned>(nVertCount * kVu1EdgeVertStride + kVu1EdgeVertAddr));
         AppendIndexData(run.mIndices, run.mIndexCount);
 
         g_gfxDevice.FlushReservedGif();
