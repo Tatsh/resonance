@@ -105,6 +105,7 @@ caughtphrasepacket
 caughtpowerbarmsg
 cdrom
 cdvd
+cdvdfsv
 cdvdman
 ceval
 chcr
@@ -470,6 +471,7 @@ libc
 libcconsole
 libcdvd
 libcdvd's
+libcdvdinternal
 libdev
 libdma
 libera
