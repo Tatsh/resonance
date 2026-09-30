@@ -482,7 +482,6 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     unsigned long long loops = (nClear != 0) ? 0xEULL : 8ULL;
     int clearX = 0x800 - (nWidth >> 1);
     int clearY = 0x800 - (nHeight >> 1);
-    unsigned long long mode;
     int pages;
 
     sceGsSetDefDispEnv(&pDBuff->disp[0], nPsm, nWidth, nHeight, 0, 0);
@@ -500,15 +499,16 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     pDBuff->giftag1.mWords[0] = loops | 0x8000ULL | 0x1000000000000000ULL;
     pDBuff->giftag1.mWords[1] = 0xEULL;
     pages = FramePageCount(nPsm, nWidth, nHeight);
-    mode = *(volatile unsigned long long *)state;
-    if (mode != 0x100000001ULL && state->interlaceMode != 0) {
+    // Interlaced frame mode and progressive output place the second buffer after the first.
+    if (!(state->interlaceMode == kGsInterlace && state->fieldMode == kGsFrameMode) &&
+        state->interlaceMode != 0) {
         return 0;
     }
     pages >>= 1;
-    pDBuff->disp[0].display &= ~0x200ULL;
-    pDBuff->disp[0].display |= (unsigned long long)(pages & 0x1FF);
-    pDBuff->draw0.frame1 &= ~0x200ULL;
-    pDBuff->draw0.frame1 |= (unsigned long long)(pages & 0x1FF);
+    pDBuff->disp[1].dispfb =
+        (pDBuff->disp[1].dispfb & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
+    pDBuff->draw0.frame1 =
+        (pDBuff->draw0.frame1 & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
     return 0;
 }
 
