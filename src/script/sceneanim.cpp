@@ -9,6 +9,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
+#include "script/scriptfunc.h"
 
 namespace {
 
@@ -184,5 +185,13 @@ PyObject *PyInvokeTestArena(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x0040bfe8
+const ScriptFunc kAnimFrameFunc("anim_frame", PyInvokeAnimFrame);
+const ScriptFunc kAnimSpeedFunc("anim_speed", PyInvokeAnimSpeed);
+const ScriptFunc kAnimOffsetFunc("anim_offset", PyInvokeAnimOffset);
+const ScriptFunc kAnimMinmaxFunc("anim_minmax", PyInvokeAnimMinmax);
+const ScriptFunc kTestArenaFunc("test_arena", PyInvokeTestArena);
 
 } // namespace

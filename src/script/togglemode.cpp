@@ -6,6 +6,7 @@
 #include "script/cxx/config.h"
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
+#include "script/scriptfunc.h"
 
 namespace {
 
@@ -98,5 +99,12 @@ PyObject *PyInvokeNolatticeToggle(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x00431ab8
+const ScriptFunc kLsdmodeFunc("lsdmode", PyInvokeLsdMode);
+// 0x00453bc8
+const ScriptFunc kCratesFunc("crates", PyInvokeCrates);
+const ScriptFunc kNolatticeFunc("nolattice", PyInvokeNolatticeToggle);
 
 } // namespace

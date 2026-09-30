@@ -37,6 +37,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/scriptcmd.h"
+#include "script/scriptfunc.h"
 #include "script/testregistry.h"
 #include "synth/midi_main.h"
 #include "synth/ps2hardsynth.h"
@@ -45,7 +46,7 @@ namespace {
 
 // Calls the memlog terminator has made, which names it. The name is inferred.
 // 0x00676750
-int g_nMemlogTermCalls = 0;
+int g_nMemlogTermCalls = 1;
 
 // Report the frequency root.
 // 0x00506f50
@@ -62,6 +63,18 @@ PyObject *PyInvokeGetFreqRoot(PyObject *, PyObject *pArgs) {
         Py::Tuple args(pArgs);
         Py::Object result = ScriptGetFreqRoot(args);
         return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    }
+}
+
+// Record the watchdog's snapshot.
+// 0x00117388
+PyObject *PyInvokeKillSch(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Application::shared()->GetWatchdog()->Snapshot();
+        return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
     }
@@ -687,5 +700,49 @@ PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x00118960
+const ScriptFunc kKillschFunc("killsch", PyInvokeKillSch);
+// 0x00150b80
+const ScriptFunc kCheatWinFunc("cheat_win", PyInvokeCheatWin);
+// 0x00153030
+const ScriptFunc kClockFunc("clock", PyInvokeClock);
+// 0x001537d8
+const ScriptFunc kDisplayTextFunc("display_text", PyInvokeDisplayText);
+// 0x00154030
+const ScriptFunc kEnableFreestyleFunc("enable_freestyle", PyInvokeEnableFreestyle);
+// 0x00154740
+const ScriptFunc kFreezeJuiceFunc("freeze_juice", PyInvokeFreezeJuice);
+// 0x00157418
+const ScriptFunc kMemlogTermFunc("memlog_term", PyInvokeMemlogTerm);
+// 0x00159248
+const ScriptFunc kSetVolumeFunc("set_volume", PyInvokeSetVolume);
+const ScriptFunc kMidiFunc("midi", PyInvokeMidi);
+const ScriptFunc kStopAllMidiFunc("stop_all_midi", PyInvokeStopAllMidi);
+// 0x0015a1c0
+const ScriptFunc kPostScriptFunc("post_script", PyInvokePostScript);
+const ScriptFunc kCancelCmdFunc("cancel_cmd", PyInvokeCancelCmd);
+// 0x0015c2c8
+const ScriptFunc kCaptureFunc("capture", PyInvokeCapture);
+const ScriptFunc kRecreateFunc("recreate", PyInvokeRecreate);
+// 0x0015c838
+const ScriptFunc kScreenDumpFunc("screen_dump", PyInvokeScreenDump);
+// 0x0015d6d8
+const ScriptFunc kSelectPowerupFunc("select_powerup", PyInvokeSelectPowerup);
+// 0x0015e3c8
+const ScriptFunc kSpewFunc("spew", PyInvokeSpew);
+// 0x0015e960
+const ScriptFunc kStopGameFunc("stop_game", PyInvokeStopGame);
+// 0x0015f048
+const ScriptFunc kSynthCmdFunc("synth_cmd", PyInvokeSynthCmd);
+// 0x0015fc68
+const ScriptFunc kTestFunc("test", PyInvokeTest);
+// 0x00162a68
+const ScriptFunc kTraceFunc("trace", PyInvokeTrace);
+// 0x001638d0
+const ScriptFunc kZoneDumpFunc("zone_dump", PyInvokeZoneDump);
+// 0x0050cbc0
+const ScriptFunc kGetFreqRootFunc("get_freq_root", PyInvokeGetFreqRoot);
 
 } // namespace

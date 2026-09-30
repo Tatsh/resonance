@@ -2,6 +2,7 @@
 
 #include "script/cxx/dict.h"
 #include "script/cxx/object.h"
+#include "script/pyinterpreter.h"
 
 class HxStr;
 
@@ -14,17 +15,14 @@ class HxStr;
  * identifier.
  *
  * The object is twelve bytes, and GetPythonScriptHost() at `0x0050d588` reserves exactly that
- * much for the single instance. Only the dictionary at `+0x04` is recovered. The four bytes at
- * `+0x00` are read by no routine anywhere in the image and written by none, including the
- * constructor and the destructor, so the member there is recorded as a gap rather than titled.
- *
- * One further gap is recorded in the destructor below, because it bears on what the missing
- * member is.
- *
- * The two members are grouped by access rather than by offset, and each trailing comment records
- * the real offset.
+ * much for the single instance. The four bytes at `+0x00` are the interpreter's lifetime, a member
+ * with no data. No routine reads or writes them, and the member's constructor and destructor
+ * bracket the dictionary at `+0x04`.
  */
 class PyShell {
+private:
+    PyInterpreter mInterpreter; // +0x00
+
 public:
     /**
      * Bring the interpreter up and prepare the script environment.
@@ -43,7 +41,8 @@ public:
     PyShell();
 
     /**
-     * Shut the interpreter down.
+     * Release the namespace dictionary, and then shut the interpreter down through the
+     * interpreter member.
      *
      * @ghidraAddress 0x0050d480
      */
@@ -103,7 +102,4 @@ public:
      * +0x04
      */
     Py::Dict mDict;
-
-private:
-    int mUnknown00; // +0x00, written and read by no recovered routine
 };

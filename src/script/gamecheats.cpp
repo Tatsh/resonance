@@ -22,6 +22,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
+#include "script/scriptfunc.h"
 #include "script/scripthost.h"
 
 namespace {
@@ -353,5 +354,37 @@ PyObject *PyInvokeEmptyAlbumCaches(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x00147af8
+const ScriptFunc kSaveRndFunc("save_rnd", PyInvokeSaveRnd);
+// 0x00148318
+const ScriptFunc kAddJuiceFunc("add_juice", PyInvokeAddJuice);
+// 0x00148a20
+const ScriptFunc kAdvanceSectionFunc("advance_section", PyInvokeAdvanceSection);
+// 0x0014e5b8
+const ScriptFunc kActivateListenModeFunc("activate_listen_mode", PyInvokeActivateListenMode);
+const ScriptFunc kActivatePracticeModeFunc("activate_practice_mode", PyInvokeActivatePracticeMode);
+const ScriptFunc kActivateAllAccessModeFunc("activate_all_access_mode",
+                                            PyInvokeActivateAllAccessMode);
+const ScriptFunc kEnableTeamFreqsFunc("enable_team_freqs", PyInvokeEnableTeamFreqs);
+const ScriptFunc kEnablePowerupCheatsFunc("enable_powerup_cheats", PyInvokeEnablePowerupCheats);
+const ScriptFunc kDoPowerupCheatFunc("do_powerup_cheat", PyInvokeDoPowerupCheat);
+const ScriptFunc kDoBigGemModeCheatFunc("do_big_gem_mode_cheat", PyInvokeDoBigGemModeCheat);
+const ScriptFunc kDoNoLatticeModeCheatFunc("do_no_lattice_mode_cheat",
+                                           PyInvokeDoNoLatticeModeCheat);
+const ScriptFunc kDoWinWithPointsCheatFunc("do_win_with_points_cheat",
+                                           PyInvokeDoWinWithPointsCheat);
+const ScriptFunc kDoEnableAllTracksCheatFunc("do_enable_all_tracks_cheat",
+                                             PyInvokeDoEnableAllTracksCheat);
+const ScriptFunc kDoArenaStateCycleCheatFunc("do_arena_state_cycle_cheat",
+                                             PyInvokeDoArenaStateCycleCheat);
+const ScriptFunc kDoWinSequenceCheatFunc("do_win_sequence_cheat", PyInvokeDoWinSequenceCheat);
+// 0x00150580
+const ScriptFunc kCheatUnlockstagesFunc(
+    "cheat_unlockstages",
+    PyInvokeActivateAllAccessMode); // The binary has an identical copy of the body at 0x0014f0c8.
+// 0x003f6760
+const ScriptFunc kClearAlbumCacheFunc("clear_album_cache", PyInvokeEmptyAlbumCaches);
 
 } // namespace

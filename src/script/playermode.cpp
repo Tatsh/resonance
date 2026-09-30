@@ -11,6 +11,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
+#include "script/scriptfunc.h"
 
 namespace {
 
@@ -79,5 +80,10 @@ PyObject *PyInvokeSetGhostMode(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x00160fb8
+const ScriptFunc kSetLoopModeFunc("set_loop_mode", PyInvokeSetLoopMode);
+const ScriptFunc kSetGhostModeFunc("set_ghost_mode", PyInvokeSetGhostMode);
 
 } // namespace

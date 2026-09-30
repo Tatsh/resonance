@@ -3,6 +3,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
+#include "script/scriptfunc.h"
 #include "stream/ibfilestream.h"
 
 namespace {
@@ -44,5 +45,9 @@ PyObject *PyInvokeRecInfo(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x0010ed58
+const ScriptFunc kRecInfoFunc("rec_info", PyInvokeRecInfo);
 
 } // namespace

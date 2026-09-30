@@ -91,9 +91,15 @@ add_custom_target(archives DEPENDS ${RESONANCE_LIBRARIES})
 # file the SDK ships supplies the linker flags and the link script. The open-source SDK ships no
 # static syscall library, so the set below omits it.
 add_executable(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:resonance_main>)
+# The original linked every object. The metagame screens and the script interface register
+# themselves from static initialisation with nothing else referring to them. Both therefore link
+# whole.
+set(RESONANCE_ARCHIVE_LIBRARIES ${RESONANCE_LIBRARIES})
+list(REMOVE_ITEM RESONANCE_ARCHIVE_LIBRARIES resonance_main resonance_met resonance_script)
 target_link_libraries(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE ${RESONANCE_LIBRARIES}
+  PRIVATE -Wl,--whole-archive resonance_met resonance_script -Wl,--no-whole-archive
+          ${RESONANCE_ARCHIVE_LIBRARIES}
           kernel
           c
           graph

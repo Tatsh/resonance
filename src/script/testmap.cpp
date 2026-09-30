@@ -3,6 +3,7 @@
 #include "script/cxx/int.h"
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
+#include "script/scriptfunc.h"
 
 namespace {
 
@@ -61,5 +62,9 @@ PyObject *PyInvokeTestMap(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x0012d178
+const ScriptFunc kTestMapFunc("test_map", PyInvokeTestMap);
 
 } // namespace

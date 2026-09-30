@@ -11,6 +11,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
+#include "script/scriptfunc.h"
 
 namespace {
 
@@ -224,5 +225,15 @@ PyObject *PyInvokeAnalogStickSetmat(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+// The script interface this file exports, registered in static initialisation.
+// 0x00429348
+const ScriptFunc kActivatorLabelFunc("activator_label", PyInvokeActivatorLabel);
+const ScriptFunc kHighlightSnapFunc("highlight_snap", PyInvokeHighlightSnap);
+const ScriptFunc kHighlightSlideFunc("highlight_slide", PyInvokeHighlightSlide);
+const ScriptFunc kHighlightSetshowFunc("highlight_setshow", PyInvokeHighlightSetshow);
+const ScriptFunc kAnalogStickSetshowFunc("analog_stick_setshow", PyInvokeAnalogStickSetshow);
+const ScriptFunc kControllerSetshowFunc("controller_setshow", PyInvokeControllerSetshow);
+const ScriptFunc kAnalogStickSetmatFunc("analog_stick_setmat", PyInvokeAnalogStickSetmat);
 
 } // namespace

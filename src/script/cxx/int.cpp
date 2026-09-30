@@ -13,6 +13,12 @@ Int::Int(const Object &ob) {
     validate();
 }
 
+// 0x004c44c0
+Int::Int(long nValue) {
+    FromAPI holder(PyInt_FromLong(nValue));
+    set(holder.mPtr);
+}
+
 // 0x004c7240
 Int::operator long() const {
     return PyInt_AsLong(mPtr);

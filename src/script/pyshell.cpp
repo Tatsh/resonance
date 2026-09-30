@@ -29,8 +29,6 @@ static const int kTracebackArgCount = 2;
 
 // 0x005072e8
 PyShell::PyShell() {
-    Py_NoSiteFlag = 1;
-    Py_Initialize();
     try {
         Py::Module main(HxStr("__main__"));
         mDict = main.getDict();
@@ -66,9 +64,7 @@ PyShell::PyShell() {
 // which is where a member or a base subobject at +0x00 would run and not where a destructor body
 // runs. The four bytes at +0x00 are therefore probably a guard object holding the interpreter
 // open, and the call is written here because nothing in the image establishes that class.
-PyShell::~PyShell() {
-    Py_Finalize();
-}
+PyShell::~PyShell() = default;
 
 // 0x00508ca8
 Py::Object PyShell::Eval(const HxStr &source, int nStartSymbol) {

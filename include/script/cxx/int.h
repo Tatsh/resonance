@@ -36,8 +36,8 @@ public:
     /**
      * Wrap a C long as an integer.
      *
-     * The out-of-line body adopts the result of `PyInt_FromLong()` at `0x00580c68` and runs
-     * validate(). It belongs to the vendored binding and is not reconstructed.
+     * The out-of-line body starts from `None` and adopts the result of `PyInt_FromLong()` at
+     * `0x00580c68` through set().
      *
      * @param nValue The value to wrap.
      * @ghidraAddress 0x004c44c0

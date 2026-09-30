@@ -17,6 +17,7 @@ set(RESONANCE_SCRIPT_SRCS
     input.cpp
     playermode.cpp
     powerup.cpp
+    pyinterpreter.cpp
     pyshell.cpp
     recinfo.cpp
     sceneanim.cpp
