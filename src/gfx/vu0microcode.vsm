@@ -1,0 +1,24 @@
+; The VU0 microprogram and the DMA chain GfxDevice::Init() sends it through VIF0, from the
+; .vutext section at 0x00666de0.
+
+	.data
+	.align 4
+	.global g_vu0MicrocodeChain
+g_vu0MicrocodeChain:
+	dmacnt *
+
+	mpg 0x0, *
+vu0_0000:
+	nop                                     	lqi.xyzw vf03xyzw,(vi01++)
+	nop                                     	lqi.xyzw vf04xyzw,(vi02++)
+	nop                                     	nop
+	nop                                     	nop
+	mulax.xyz accxyz,vf03xyz,vf01x          	nop
+	maddx.xyz vf05xyz,vf04xyz,vf02x         	nop
+	nop                                     	nop
+	nop                                     	nop
+	nop                                     	nop
+	nop                                     	sq.xyzw vf05xyzw,0(vi03)
+	.endmpg
+	.enddmadata
+	dmaend

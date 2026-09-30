@@ -524,8 +524,10 @@ extern "C" {
 /**
  * DMA chain that uploads the VU1 microcode, the start of the `.vutext` section.
  *
- * The microcode is assembled rather than compiled, so the chain has no reconstructed source.
- * InitDisplayMode() sends it on the VIF1 channel. The name is inferred.
+ * The chain and the microprogram it uploads are DVP assembly. The microprogram enters at VU
+ * address 0x3c0 to initialise, 0x000 and 0x4ce for textured and untextured faces, 0x1c2 for edges,
+ * and 0x258 for sprites. InitDisplayMode() sends the chain on the VIF1 channel. The name is
+ * inferred.
  *
  * @ghidraAddress 0x00664ab0
  */
@@ -534,7 +536,8 @@ extern GifQuadword g_vu1MicrocodeChain[];
 /**
  * DMA chain at the end of `.vutext` that uploads the VU0 microcode.
  *
- * InitDisplayMode() sends it on the VIF0 channel. The name is inferred.
+ * The chain and the microprogram it uploads are DVP assembly. InitDisplayMode() sends the chain
+ * on the VIF0 channel. The name is inferred.
  *
  * @ghidraAddress 0x00666de0
  */

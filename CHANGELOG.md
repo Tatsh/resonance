@@ -56,6 +56,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   IOP reboot.
 - C library file calls (`fopen` and C++ streams) go through the game's file layer and open ark
   members and disc paths.
+- The VU0 and VU1 microprograms are reconstructed as DVP assembly, and the build assembles the DMA
+  chains that upload them. VU1 previously started on empty microcode and never stopped.
 
 ## [0.0.1] - 2026-00-00
 
