@@ -105,3 +105,17 @@ add_library(resonance_met STATIC ${RESONANCE_MET_SRCS})
 target_link_libraries(resonance_met PRIVATE resonance_common)
 target_include_directories(resonance_met PRIVATE "${CMAKE_SOURCE_DIR}/src/python/PC"
                                                  "${CMAKE_SOURCE_DIR}/3rdparty/Python-2.0/Include")
+
+# Patched builds show the commit and the build time on the title screen. The header is regenerated
+# on every build.
+if(ENABLE_PATCHES)
+  set(_build_info "${CMAKE_BINARY_DIR}/generated/buildinfo.h")
+  add_custom_target(
+    resonance_build_info
+    COMMAND "${CMAKE_COMMAND}" "-DSOURCE_DIR=${CMAKE_SOURCE_DIR}" "-DOUTPUT=${_build_info}" -P
+            "${CMAKE_SOURCE_DIR}/cmake/build-info.cmake"
+    BYPRODUCTS "${_build_info}"
+    VERBATIM)
+  add_dependencies(resonance_met resonance_build_info)
+  target_include_directories(resonance_met PRIVATE "${CMAKE_BINARY_DIR}/generated")
+endif()

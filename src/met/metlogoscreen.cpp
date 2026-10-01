@@ -22,6 +22,10 @@
 #include "rnd/view.h"
 #include "script/configquery.h"
 
+#ifdef ENABLE_PATCHES
+#include "buildinfo.h"
+#endif
+
 namespace {
 
 // The screen name, from which the two animation view names are formatted.
@@ -40,6 +44,12 @@ static const char *const kLegalTextFormat = "flp_legal%d.txt";
 
 // The label the version text starts with.
 static const char *const kVersionLabel = "Version:";
+
+#ifdef ENABLE_PATCHES
+// Heads the legal text of a patched build, so it is never mistaken for the retail disc.
+static const char *const kBuildTag =
+    "github.com/Tatsh/resonance " RESONANCE_GIT_SHA " " RESONANCE_BUILD_TIME;
+#endif
 
 // Sounds.
 static const char *const kSlideSound = "SND_MET_SLIDE";
@@ -138,6 +148,11 @@ void MetLogoScreen::ResolveContainerViews() {
         pLegal->SetShowing(0);
         mLegalTexts.push_back(pLegal);
     }
+#ifdef ENABLE_PATCHES
+    // The title screen never draws the version text, so the build tag heads the first legal text.
+    Rnd::Text *pFirstLegal = mLegalTexts.front();
+    pFirstLegal->SetText(HxStr(kBuildTag) + "\n" + pFirstLegal->mPreWrapText);
+#endif
     SetShowing(0);
 }
 

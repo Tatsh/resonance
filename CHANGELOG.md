@@ -14,6 +14,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - An `iso` CMake target writes a bootable disc image with the built executable and `EZMIDI.IRX`
   through `scripts/build-iso.py`. Set `RESONANCE_DISC_IMAGE` to an original disc image to enable
   it.
+- With `ENABLE_PATCHES`, the title screen shows the project URL, the short commit hash, and the
+  build time above the legal text.
 
 ### Changed
 
