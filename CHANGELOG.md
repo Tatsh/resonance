@@ -21,6 +21,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   memory card, pad, multitap, and sound remote) is reconstructed under `sce/`, with start-up code
   and a link script. Pass `cmake/ps2-ee-toolchain.cmake` as the CMake toolchain file.
 - Gzip decompression uses the game's inflate routines instead of zlib.
+- The embedded Python interpreter matches the game's port of Python 2.0:
+  - Python integers are 64-bit.
+  - Heap allocations are tagged as in the original.
+  - `sys.version` reports the original build string.
+  - Doubles follow the original NaN and negative zero behaviour.
+  - Failed assertions print the original output.
+  - `listdir`, `posix_do_stat`, `PyRun_SimpleFile` (`.pyc` handling), and `PyRun_SimpleString`
+    (echo) include the port's changes.
 
 ### Removed
 
@@ -120,6 +128,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Sound banks arrive at the IOP synthesiser. The EE sound driver command and MIDI stream buffers
   are 64-byte aligned for SIF DMA and previously arrived shifted by 8 bytes. Game sound matches the
   original output level.
+- Menus with several screens in one container, including the jukebox, load correctly:
+  - A screen pushed before its container finished loading no longer enters again every frame.
+  - A second screen sharing a container no longer resets and queues the container load again.
+- Movies and graphics now match the original in these areas:
+  - 128-bit writes to the VIF1 and IPU FIFOs reach the hardware in full. Each write was split into
+    two 64-bit stores, and only half of the quadword arrived.
+  - The IPU initialiser loads the quantiser matrices and the colour table in the original order and
+    loads the intra matrix.
+  - MPEG field pictures use the original area heights.
+  - The GS image upload packet includes every tag instead of ending after the first.
+- Audio now matches the original in these areas:
+  - Section pan uses the original table.
+  - Sustain pedal handling is no longer inverted.
+  - A muted mixer no longer discards level changes.
+  - The powerup catch sound plays. The game requested the sound by the wrong name.
+  - `TickObjVector` replaces an existing riff set or harmony instead of inserting a duplicate.
+  - `MuseSynth` frees its sustainer.
+- Pitch riff input events match their handlers. The event tag was assembled in the wrong byte order.
+- The cheat that toggles the expansion pack is registered.
+- Script commands no longer leak a Python float for each argument.
+- Script command wrappers convert C++ exceptions to Python `RuntimeError`.
+- Materials loaded from files acquire their textures in `Mat::Load` and `Mat::Refresh`.
+- Capped line strings draw every face instead of half.
+- Memory card saves no longer treat a negative free space count as a full card.
 
 ## [0.0.1] - 2026-00-00
 
