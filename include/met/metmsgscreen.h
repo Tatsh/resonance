@@ -117,7 +117,7 @@ public:
      *
      * Writes mOwnerPad of the screen registered as `MetMsgScreen`, which Show() and ShowActive()
      * reset to -1. Every caller passes MetSaveRemix::mOwnerPad, the index of the controller that
-     * owns the save. The result of the cast is not checked. The title is inferred.
+     * started the save. The result of the cast is not checked. The title is inferred.
      *
      * @param nPad The controller index.
      * @ghidraAddress 0x002f0348

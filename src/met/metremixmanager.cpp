@@ -144,8 +144,8 @@ inline const char *FirstCardSlotText() {
     return PathOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName);
 }
 
-// Replaces a list of screen names by clearing, resizing, and then assigning, which is the sequence
-// every writer of mReturnScreens and mRestoreScreens expands.
+// Replaces a list of screen names by clearing, resizing, and then assigning, the sequence every
+// writer of mReturnScreens and mRestoreScreens expands.
 inline void ReplaceScreens(std::vector<HxStr> &screens, const std::vector<HxStr> &source) {
     screens.clear();
     screens.resize(source.size());

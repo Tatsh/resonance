@@ -114,7 +114,7 @@ protected:
      * The bar, or with bWholeStep set every bar of its step, is cleared wherever mPlayer is its
      * owner, and clearing nBar itself also releases the sustain controller at position
      * kMBTInfinity. When anything was cleared, bAnnounce plays `SND_ERASE_SECTION` or `SND_ERASE`
-     * and sends a ShowEraseEffectMsg, and the seeker is turned off either way.
+     * and sends a ShowEraseEffectMsg. The seeker is turned off in both cases.
      *
      * @param nBar The bar.
      * @param bWholeStep Non-zero to erase the whole step, an EraseMsg's `+0x10`.

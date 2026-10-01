@@ -37,8 +37,8 @@ void GemPacket::Print(std::ostream &stream) {
 }
 
 // 0x003e8258
-// The transfer of mClientId repeats the one the Packet prefix already performed, and
-// Load() reads the same word twice to match, so the word crosses the wire twice.
+// The transfer of mClientId repeats the one the Packet prefix already performed, and Load() reads
+// the same word twice to match.
 void GemPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mFields.Save(stream);

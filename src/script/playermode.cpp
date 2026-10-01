@@ -57,7 +57,7 @@ PyObject *PyInvokeSetLoopMode(PyObject *, PyObject *pArgs) {
 // Show or hide the local player's ghost.
 //
 // The tuple includes the ghost flag. SetGhost() stores it and announces it; a player that is not a
-// LocalPlayer keeps its display.
+// LocalPlayer retains its display.
 // 0x001602a8
 Py::Object ScriptSetGhostMode(const Py::Tuple &args) {
     if (args.length() != 1) {

@@ -307,7 +307,7 @@ private:
     int mIsDelete;
     // Non-zero for a copy to another card. Written by StartSave() from its last argument. +0x98
     int mIsCopy;
-    // Non-zero to ask before saving over a persona of the same name. Written by StartSave() from
+    // Non-zero to prompt before saving over a persona of the same name. Written by StartSave() from
     // its fourth argument. +0x9c
     int mConfirmReplace;
     // The roster loaded from the target card. ClearPersonas() deletes every element. +0xa0

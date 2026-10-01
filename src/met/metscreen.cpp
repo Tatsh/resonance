@@ -115,8 +115,8 @@ constexpr int kStepsPerCycle = 2;
 // The stack buffer ExitScreenByName() formats its log line into.
 constexpr int kExitLogBufferSize = 128;
 
-// What RndAsyncLoader::Poll() reports once a load is finished, which PollContainerLoads() also
-// records in MetContainerLoad::mFinished.
+// What RndAsyncLoader::PollAsyncLoads() reports once a load is finished. PollContainerLoads() also
+// records it in MetContainerLoad::mFinished.
 constexpr int kLoadComplete = 1;
 
 // The zone the start-up screens load into.

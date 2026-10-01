@@ -9,7 +9,7 @@ extern "C" {
  * Video input buffer of Sony's ezmpeg sample.
  *
  * The buffer holds video bytes in a ring between the file reader and the decoder, and queues one
- * 0x18 byte time stamp per span. The decoder embeds this record at +0x48 of its own state and
+ * 0x18-byte time stamp per span. The decoder embeds the buffer at +0x48 of its state and
  * accesses it through the wrappers in its unit.
  */
 

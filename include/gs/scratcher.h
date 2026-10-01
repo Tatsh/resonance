@@ -88,8 +88,8 @@ protected:
     /**
      * Erase a player's phrases at an EraseMsg's position for this track.
      *
-     * The bar, or with the message's last word set every bar of its step, is cleared wherever the
-     * message's player owns it, and clearing the message's own bar also sends an AllNotesOffMsg.
+     * The bar, or with the message's last word set every bar of its step, is cleared wherever it
+     * belongs to the message's player, and clearing the message's bar also sends an AllNotesOffMsg.
      * When anything was cleared, `SND_ERASE_SECTION` or `SND_ERASE` plays, a ShowEraseEffectMsg
      * identifying mPlayer goes out, and SendSeekerMsg() runs for the bar.
      *

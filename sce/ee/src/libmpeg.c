@@ -36,77 +36,80 @@ enum {
 // One stream entry, 0x18 bytes. The key is compared as eight bytes, the template copies the
 // eight bytes for the stream type, and the callback returns on duplicate registration.
 typedef struct {
-    unsigned long long key; // +0x00: combined key, compared as a pair.
-    unsigned long long templateBits; // +0x08: template for the stream type.
-    sceMpegCallback callback; // +0x10: stream callback, returned on duplicate registration.
-    void *data; // +0x14: stream data.
+    unsigned long long key; // Combined key, compared as a pair. +0x00
+    unsigned long long templateBits; // Template for the stream type. +0x08
+    sceMpegCallback callback; // Stream callback, returned on duplicate registration. +0x10
+    void *data; // Stream data. +0x14
 } StreamEntry;
 
 // One callback slot, 8 bytes. Seven slots run from +0x0c to +0x44, where the table pointer
 // sits. Slots two and three start with default callbacks.
 typedef struct {
-    void *callback; // +0x00: slot callback; the old one returns on replacement.
-    void *data; // +0x04: slot data.
+    void *callback; // Slot callback. A replacement returns the old callback. +0x00
+    void *data; // Slot data. +0x04
 } MpegSlot;
 
 // The input ring at +0x108. The base and size bound the buffer while the write pointer doubles
 // as the bump allocator cursor and the commit pointer saves it.
 typedef struct {
-    int mBase; // +0x00: buffer base, set at reset.
-    int mSize; // +0x04: buffer size, set at reset.
-    int mWrite; // +0x08: write position, bumped by allocation.
-    int mCommit; // +0x0c: committed write position.
+    int mBase; // Buffer base, set at reset. +0x00
+    int mSize; // Buffer size, set at reset. +0x04
+    int mWrite; // Write position, bumped by allocation. +0x08
+    int mCommit; // Committed write position. +0x0c
 } MpegRing;
 
 // The work area behind the decoder context pointer. Reserved members are never read or written.
 typedef struct {
-    int mCompleted; // +0x00: 1 when the picture is done; cleared to arm or fail.
-    int mPictureIndex; // +0x04: pictures decoded since the last flush.
-    int mOutputState; // +0x08: idle, decoding, or shown; cleared by sceMpegReset().
-    MpegSlot mSlots[kSlotCount]; // +0x0c: callback slots.
-    StreamEntry *mStreamTable; // +0x44: stream entries, bump-allocated from the ring.
-    int mStreamCount; // +0x48: entries used; duplicates overwrite and still count.
-    int mReserved4C[9]; // +0x4c: untouched at creation.
-    int mUseDefaultPtsGap; // +0x70: 1 to interpolate a missing stamp from the default gap.
-    int mReserved74; // +0x74: untouched at creation.
-    unsigned long long mDefaultPtsGap; // +0x78: stamp ticks per frame for the interpolation.
-    int mLastPts; // +0x80: stamp of the last output picture; -1 at creation and on drain.
-    int mReserved84; // +0x84: untouched at creation.
-    unsigned long long mDisplayFieldCount; // +0x88: fields the displayed picture occupies.
-    int mOddGapPictures; // +0x90: pictures interpolated with an odd gap, for the rounding.
-    int mDecodeLimits[kPictureCountTypes]; // +0x94: pictures of each type to decode, -1 for all.
-    int mDecodeCounts[kPictureCountTypes]; // +0xa0: pictures of each type met so far.
-    int mFrameCountBase; // +0xac: picture counter when the first picture was shown.
-    int mConvertColours; // +0xb0: 1 to colour convert the output, 0 to copy it raw.
-    int mFrameCentreHorizontalOffset[kFrameCentreOffsetCount]; // +0xb4: copied from the displayed picture.
-    int mFrameCentreVerticalOffset[kFrameCentreOffsetCount]; // +0xc0: copied from the displayed picture.
-    int mDisplayHorizontalSize; // +0xcc: copied from the displayed picture.
-    int mDisplayVerticalSize; // +0xd0: copied from the displayed picture.
-    int mFirstFieldStructure; // +0xd4: picture_structure of the first picture of the sequence.
-    int mPictureAddress; // +0xd8: output buffer of the picture under decode.
-    int mOutputWidth; // +0xdc: output buffer width in pixels, or 0 for a macroblock count.
-    int mOutputHeight; // +0xe0: output buffer height in pixels, or 0 for a macroblock count.
-    int mOutputMacroblocks; // +0xe4: output buffer capacity in macroblocks.
-    int mForceBrokenLink; // +0xe8: treated as broken_link; only ever cleared. Inferred.
-    int mReservedEC; // +0xec: untouched by the observed code.
-    long long mPendingPts; // +0xf0: a pending time stamp, -1 when there is none.
-    int mPendingPtsState; // +0xf8: armed, then ready once a picture is output.
-    int mFirstFrameBuffer; // +0xfc: the three frame buffers, carved from the ring per sequence.
-    int mSecondFrameBuffer; // +0x100.
-    int mThirdFrameBuffer; // +0x104.
-    MpegRing mRing; // +0x108: input ring.
+    int mCompleted; // Set to 1 when the picture is done and cleared to arm or fail. +0x00
+    int mPictureIndex; // Pictures decoded since the last flush. +0x04
+    int mOutputState; // Idle, decoding, or shown, and cleared by sceMpegReset(). +0x08
+    MpegSlot mSlots[kSlotCount]; // Callback slots. +0x0c
+    StreamEntry *mStreamTable; // Stream entries, bump-allocated from the ring. +0x44
+    int mStreamCount; // Entries used. Duplicates overwrite and still count. +0x48
+    int mReserved4C[9]; // Untouched at creation. +0x4c
+    int mUseDefaultPtsGap; // Set to 1 to interpolate a missing stamp from the default gap. +0x70
+    int mReserved74; // Untouched at creation. +0x74
+    unsigned long long mDefaultPtsGap; // Stamp ticks per frame for the interpolation. +0x78
+    int mLastPts; // Stamp of the last output picture, -1 at creation and on drain. +0x80
+    int mReserved84; // Untouched at creation. +0x84
+    unsigned long long mDisplayFieldCount; // Fields the displayed picture occupies. +0x88
+    int mOddGapPictures; // Pictures interpolated with an odd gap, for the rounding. +0x90
+    int mDecodeLimits[kPictureCountTypes]; // Pictures of each type to decode, -1 for all. +0x94
+    int mDecodeCounts[kPictureCountTypes]; // Pictures of each type met so far. +0xa0
+    int mFrameCountBase; // Picture counter when the first picture was shown. +0xac
+    int mConvertColours; // Set to 1 to colour-convert the output, 0 to copy it raw. +0xb0
+    // Copied from the displayed picture. +0xb4
+    int mFrameCentreHorizontalOffset[kFrameCentreOffsetCount];
+    // Copied from the displayed picture. +0xc0
+    int mFrameCentreVerticalOffset[kFrameCentreOffsetCount];
+    int mDisplayHorizontalSize; // Copied from the displayed picture. +0xcc
+    int mDisplayVerticalSize; // Copied from the displayed picture. +0xd0
+    int mFirstFieldStructure; // The picture_structure of the sequence's first picture. +0xd4
+    int mPictureAddress; // Output buffer of the picture under decode. +0xd8
+    int mOutputWidth; // Output buffer width in pixels, or 0 for a macroblock count. +0xdc
+    int mOutputHeight; // Output buffer height in pixels, or 0 for a macroblock count. +0xe0
+    int mOutputMacroblocks; // Output buffer capacity in macroblocks. +0xe4
+    // Treated as broken_link and only ever cleared. The purpose is inferred. +0xe8
+    int mForceBrokenLink;
+    int mReservedEC; // Untouched by the observed code. +0xec
+    long long mPendingPts; // Pending time stamp, or -1 when there is none. +0xf0
+    int mPendingPtsState; // Armed, then ready once a picture is output. +0xf8
+    int mFirstFrameBuffer; // First of three frame buffers carved from the ring per sequence. +0xfc
+    int mSecondFrameBuffer; // +0x100
+    int mThirdFrameBuffer; // +0x104
+    MpegRing mRing; // Input ring. +0x108
 } MpegWork;
 
 // One motion compensation job for a kernel, 28 bytes. The source spans two staged macroblock
 // columns and continues into the macroblock below after mRows rows.
 typedef struct {
-    int mDest;        // +0x00: prediction output address.
-    int mShift;       // +0x04: byte offset of the reference column within the loaded quadword.
-    int mRows;        // +0x08: rows read before the source crosses into the macroblock below.
-    int mRowsBelow;   // +0x0c: rows read from the macroblock below.
-    int mStride;      // +0x10: source row stride.
-    int mSourceLeft;  // +0x14: source in the left staged column.
-    int mSourceRight; // +0x18: source in the right staged column.
+    int mDest;        // Prediction output address. +0x00
+    int mShift;       // Byte offset of the reference column within the loaded quadword. +0x04
+    int mRows;        // Rows read before the source crosses into the macroblock below. +0x08
+    int mRowsBelow;   // Rows read from the macroblock below. +0x0c
+    int mStride;      // Source row stride. +0x10
+    int mSourceLeft;  // Source in the left staged column. +0x14
+    int mSourceRight; // Source in the right staged column. +0x18
 } MpegMcDescriptor;
 
 typedef void (*MpegMcKernel)(const MpegMcDescriptor *pDescriptor);
@@ -119,53 +122,53 @@ enum {
 // One macroblock in flight, 0x140 bytes. Two alternate so the kernels of one macroblock run while
 // the IPU decodes the next.
 typedef struct {
-    int mStaging;                                     // +0x000: reference macroblocks land here.
-    int mCoefficients;                                // +0x004: the IPU writes the block here.
-    int mRefLeft[kMcPredictionSlots];                 // +0x008: left reference column pair.
-    int mRefRight[kMcPredictionSlots];                // +0x018: right reference column pair.
-    MpegMcKernel mLumaKernels[kMcPredictionSlots];    // +0x028.
-    MpegMcKernel mChromaKernels[kMcPredictionSlots];  // +0x038.
-    MpegMcDescriptor mLuma[kMcPredictionSlots];       // +0x048.
-    MpegMcDescriptor mChroma[kMcPredictionSlots];     // +0x0b8.
-    int mOutput;                                      // +0x128: macroblock in the frame.
-    int mPredictionCount;                             // +0x12c.
-    int mIntra;                                       // +0x130.
-    int mFollowsCoded;                                // +0x134: coded and adjacent; unread.
-    int mDmaPending;                                  // +0x138: references are being staged.
-    int mNotCoded;                                    // +0x13c: no block data for the macroblock.
+    int mStaging;                                     // Reference macroblocks land here. +0x000
+    int mCoefficients;                                // The IPU writes the block here. +0x004
+    int mRefLeft[kMcPredictionSlots];                 // Left reference column pair. +0x008
+    int mRefRight[kMcPredictionSlots];                // Right reference column pair. +0x018
+    MpegMcKernel mLumaKernels[kMcPredictionSlots];    // +0x028
+    MpegMcKernel mChromaKernels[kMcPredictionSlots];  // +0x038
+    MpegMcDescriptor mLuma[kMcPredictionSlots];       // +0x048
+    MpegMcDescriptor mChroma[kMcPredictionSlots];     // +0x0b8
+    int mOutput;                                      // Macroblock in the frame. +0x128
+    int mPredictionCount;                             // +0x12c
+    int mIntra;                                       // +0x130
+    int mFollowsCoded;                                // Coded and adjacent, and never read. +0x134
+    int mDmaPending;                                  // References are being staged. +0x138
+    int mNotCoded;                                    // The macroblock has no block data. +0x13c
 } MpegMcBuffer;
 
 // Motion compensation state at 0x007a30f8.
 typedef struct {
-    MpegMcBuffer mBuffers[2]; // +0x000.
-    int mCurrent;             // +0x280: buffer the next macroblock uses.
-    int mPictureResetWord;    // +0x284: cleared per picture; no reader found.
+    MpegMcBuffer mBuffers[2]; // +0x000
+    int mCurrent;             // Buffer the next macroblock uses. +0x280
+    int mPictureResetWord;    // Cleared per picture. No reader was found. +0x284
 } MpegIpuTable;
 static MpegIpuTable g_mpegIpuTable;
 
 // One picture table, 0x68 bytes. The picture setup writes the first five words, and the reorder
 // step copies the picture header state into the rest when a picture is decoded into it.
 typedef struct {
-    int mBuffer; // +0x00: frame buffer address, uncached.
-    int mWidth; // +0x04: width in pixels.
-    int mHeight; // +0x08: height in pixels.
-    int mMbWidth; // +0x0c: width in macroblocks.
-    int mMbHeight; // +0x10: height in macroblocks, the column stride of the buffer.
-    int mReserved14; // +0x14: untouched by the observed writers.
-    long long mPts; // +0x18: presentation time stamp, or -1 when absent.
-    long long mDts; // +0x20: decoding time stamp, or -1 when absent.
-    int mDecoded; // +0x28: 1 once the picture is complete, cleared when it is reused.
-    int mPictureCodingType; // +0x2c.
-    int mPictureStructure; // +0x30.
-    int mProgressiveSequence; // +0x34.
-    int mProgressiveFrame; // +0x38.
-    int mTopFieldFirst; // +0x3c.
-    int mRepeatFirstField; // +0x40.
-    int mFrameCentreHorizontalOffset[kFrameCentreOffsetCount]; // +0x44.
-    int mFrameCentreVerticalOffset[kFrameCentreOffsetCount]; // +0x50.
-    int mDisplayHorizontalSize; // +0x5c.
-    int mDisplayVerticalSize; // +0x60.
-    int mReserved64; // +0x64: untouched by the observed writers.
+    int mBuffer; // Frame buffer address, uncached. +0x00
+    int mWidth; // Width in pixels. +0x04
+    int mHeight; // Height in pixels. +0x08
+    int mMbWidth; // Width in macroblocks. +0x0c
+    int mMbHeight; // Height in macroblocks and the column stride of the buffer. +0x10
+    int mReserved14; // Untouched by the observed writers. +0x14
+    long long mPts; // Presentation time stamp, or -1 when absent. +0x18
+    long long mDts; // Decoding time stamp, or -1 when absent. +0x20
+    int mDecoded; // Set to 1 once the picture is complete and cleared when it is reused. +0x28
+    int mPictureCodingType; // +0x2c
+    int mPictureStructure; // +0x30
+    int mProgressiveSequence; // +0x34
+    int mProgressiveFrame; // +0x38
+    int mTopFieldFirst; // +0x3c
+    int mRepeatFirstField; // +0x40
+    int mFrameCentreHorizontalOffset[kFrameCentreOffsetCount]; // +0x44
+    int mFrameCentreVerticalOffset[kFrameCentreOffsetCount]; // +0x50
+    int mDisplayHorizontalSize; // +0x5c
+    int mDisplayVerticalSize; // +0x60
+    int mReserved64; // Untouched by the observed writers. +0x64
 } MpegSeqTable;
 
 
