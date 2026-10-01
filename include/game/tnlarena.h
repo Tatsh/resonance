@@ -159,13 +159,17 @@ public:
     // The animation the screens show. Public because the test-arena script command drives it
     // directly.
     ScreenAnim *mScreenAnim;
-    // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while it still is. Public
-    // because the test-arena script command sets it directly.
-    int mJuiceLock; // +0x24
 
 private:
     // Globals::GetGameMode() at construction.
     int mGameMode;
+
+public:
+    // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while the value is still
+    // -1. It is public because the test-arena script command sets it directly.
+    int mJuiceLock;
+
+private:
     // The level last passed to ScreenAnim::SetLevel(). Starts at 1, or at the play mode when that
     // is 2.
     int mLevel;
