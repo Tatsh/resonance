@@ -14,6 +14,10 @@
 #include "rnd/manager.h"
 #include "rnd/view.h"
 
+#ifdef ENABLE_PATCHES
+#include "os/bootlog.h"
+#endif
+
 namespace {
 
 // The loading screen has its own archive, which is mounted before the session archives and
@@ -78,13 +82,26 @@ int main() {
 
     SetZonesEnabled(1);
     InitIop();
+#ifdef ENABLE_PATCHES
+    BootLogOpen();
+    BootLogCheckpoint("IOP rebooted");
+#endif
     InitAsync();
 
     g_failSink.SetReportHandler(RecordFailMessage);
     g_failSink.mAbortProc = HaltOnFailure;
 
     Rnd::g_manager.Init();
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("renderer manager started");
+#endif
     g_gfxDevice.Init(kDisplayWidth, kDisplayHeight, kDisplayBitDepth);
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("GS started at %dx%d, %d bits, NTSC interlaced",
+                      kDisplayWidth,
+                      kDisplayHeight,
+                      kDisplayBitDepth);
+#endif
 
     if (UsingArkFiles() != 0) {
         if (ArkFile::Open(kLoadingArkPath) == 0) {
@@ -93,13 +110,22 @@ int main() {
     }
 
     ShowLoadingScreen();
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("loading screen drawn");
+#endif
 
     if (UsingArkFiles() != 0) {
         ArkFile::Close(kLoadingArkPath);
     }
 
     InitArk(); // Yes, the binary discards this call's result.
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("session archives opened");
+#endif
     LoadIopModules();
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("IOP modules loaded");
+#endif
 
     Application::shared()->Run(); // Yes, the binary discards this call's result.
     return 0;

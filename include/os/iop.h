@@ -63,6 +63,17 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources);
  */
 void LoadIopModules();
 
+#ifdef ENABLE_PATCHES
+/**
+ * Load the memory card modules ahead of the rest, for the boot log.
+ *
+ * Loads the first three modules of the table (`sio2man`, `mcman`, and `mcserv`) from the media the
+ * host mode selects. LoadIopModules() then starts after them. Every module still loads once and in
+ * the table's order.
+ */
+void PreloadMemoryCardModules();
+#endif
+
 /**
  * Write the retail boot options over the boot-option block.
  *

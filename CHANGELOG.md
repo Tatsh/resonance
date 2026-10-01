@@ -18,6 +18,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   console.
 - With `ENABLE_PATCHES`, the title screen shows the project URL, the short commit hash, and the
   build time above the legal text.
+- With `ENABLE_PATCHES`, the game writes a boot log to `RESONANCE/BOOT.TXT` on the memory card in
+  slot 1. It records each start-up stage, the game's log text, a heartbeat every five seconds for
+  ten minutes, and any fatal error, assertion, or alert. A fatal error also turns the screen red.
 
 ### Changed
 

@@ -12,6 +12,10 @@
 #include "rnd/asyncloader.h"
 #include "synth/ps2hardsynth.h"
 
+#ifdef ENABLE_PATCHES
+#include "os/bootlog.h"
+#endif
+
 namespace {
 
 constexpr long long kNanosecondsPerMillisecond = 1000000;
@@ -100,6 +104,9 @@ void MainLoop::Run() {
     mRunning = 1;
     do {
         Poll(); // Yes, the binary discards this call's result and tests mRunning instead.
+#ifdef ENABLE_PATCHES
+        BootLogHeartbeat();
+#endif
     } while (mRunning != 0);
 }
 

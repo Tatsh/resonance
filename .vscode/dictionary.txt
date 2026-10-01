@@ -95,6 +95,7 @@ blit
 bltinmodule
 bltz
 bluegrey
+bootlog
 breug
 bsky
 bsloadlevelpacket
@@ -179,8 +180,10 @@ cripplemsg
 cripplepacket
 cripplepowerup
 crtbegin
+crtc
 crtend
 crti
+crtmd
 crtn
 csclientstatuspacket
 csinitiateplaypacket

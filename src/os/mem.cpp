@@ -10,6 +10,10 @@
 #include "os/log.h"
 #include "os/zone.h"
 
+#ifdef ENABLE_PATCHES
+#include "os/bootlog.h"
+#endif
+
 // The linker script defines these three, and each carries its value in its address: the base of
 // the stack, its size, and the end of the loaded image.
 extern "C" char _stack[];
@@ -610,6 +614,9 @@ void MemOpenLog(const char *pszPath) {
 
 // 0x004a7d30
 void MemCloseLogAndReport() {
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("exiting with the memory report");
+#endif
     if (g_pMemLogFile != nullptr) {
         fclose(g_pMemLogFile);
         g_pMemLogFile = nullptr;
@@ -673,13 +680,27 @@ void ReportHeapCapacity() {
     }
 }
 
+// Reports whether a report file may be written. The image writes through and closes the file even
+// when fopen() failed. A write through the failed file faults on a console when the game runs from
+// a disc.
+inline bool CanWriteReport(const FILE *pFile) {
+#ifdef ENABLE_PATCHES
+    return pFile != nullptr;
+#else
+    (void)pFile;
+    return true;
+#endif
+}
+
 // 0x0054b348
 void DumpHeapMemoryLog(int nIndex) {
     char szPath[kHeapLogPathSize];
     sprintf(szPath, "memdump_%d.txt", nIndex);
     FILE *pFile = fopen(szPath, "w");
     MemLogSourceReport("MEMLOG STATS", pFile);
-    fclose(pFile);
+    if (CanWriteReport(pFile)) {
+        fclose(pFile);
+    }
 
     sprintf(szPath, "memstat_%d.txt", nIndex);
     pFile = fopen(szPath, "w");
@@ -696,9 +717,11 @@ void DumpHeapMemoryLog(int nIndex) {
     if (pLargest != nullptr) {
         LogPrintf("Largest possible allocation: %f megabytes\n",
                   static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
-        fprintf(pFile,
-                "Largest possible allocation: %f megabytes\n",
-                static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
+        if (CanWriteReport(pFile)) {
+            fprintf(pFile,
+                    "Largest possible allocation: %f megabytes\n",
+                    static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
+        }
         HeapFree(pLargest);
     }
 
@@ -716,17 +739,21 @@ void DumpHeapMemoryLog(int nIndex) {
                   nCount,
                   nBlockSize,
                   nCount * (nBlockSize + kProbeBlockOverhead));
-        fprintf(pFile,
-                "Able to allocate %d blocks of size %d (%d bytes total)\n",
-                nCount,
-                nBlockSize,
-                nCount * (nBlockSize + kProbeBlockOverhead));
+        if (CanWriteReport(pFile)) {
+            fprintf(pFile,
+                    "Able to allocate %d blocks of size %d (%d bytes total)\n",
+                    nCount,
+                    nBlockSize,
+                    nCount * (nBlockSize + kProbeBlockOverhead));
+        }
         for (int i = 0; i < nCount; ++i) {
             HeapFree(g_apProbeBlocks[i]);
         }
     }
 
-    fclose(pFile);
+    if (CanWriteReport(pFile)) {
+        fclose(pFile);
+    }
 }
 
 // 0x004bfd48

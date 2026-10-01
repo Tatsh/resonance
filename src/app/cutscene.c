@@ -15,6 +15,10 @@
 #include "os/log.h"
 #include "os/mem.h"
 
+#ifdef ENABLE_PATCHES
+#include "os/bootlog.h"
+#endif
+
 // The one block every decoder buffer is carved from. Each buffer starts on a 64-byte boundary, and
 // the block reserves 64 bytes of slack for aligning the first.
 enum {
@@ -390,7 +394,13 @@ void play_cutscene(const char *name, int with_audio) {
         }
         fclose(probe);
     }
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("movie %s starting", name);
+#endif
     init_all();
     play(name, with_audio);
     free_all();
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("movie %s finished", name);
+#endif
 }
