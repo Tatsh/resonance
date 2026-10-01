@@ -79,7 +79,8 @@ unsigned int ACanvasLin32::GetPixelNoClip(int nX, int nY) {
 // 0x00614370
 void ACanvasLin32::FillRowNoClip(int nY, int nLeft, int nRight) {
     unsigned int *pPixel = PixelAt(mBitmap, nLeft, nY);
-    for (int nRemaining = nRight - nLeft; nRemaining > 0; --nRemaining) {
+    // Yes, the binary counts down to zero exactly. A reversed span runs on.
+    for (int nRemaining = nRight - nLeft; nRemaining != 0; --nRemaining) {
         *pPixel++ = mColor;
     }
 }
@@ -87,7 +88,8 @@ void ACanvasLin32::FillRowNoClip(int nY, int nLeft, int nRight) {
 // 0x006143b8
 void ACanvasLin32::FillColumnNoClip(int nX, int nTop, int nBottom) {
     unsigned char *pPixel = ByteAt(mBitmap, nX, nTop);
-    for (int nRemaining = nBottom - nTop; nRemaining > 0; --nRemaining) {
+    // Yes, the binary counts down to zero exactly. A reversed span runs on.
+    for (int nRemaining = nBottom - nTop; nRemaining != 0; --nRemaining) {
         *reinterpret_cast<unsigned int *>(pPixel) = mColor;
         pPixel += mBitmap.mBytesPerRow;
     }
@@ -95,12 +97,14 @@ void ACanvasLin32::FillColumnNoClip(int nX, int nTop, int nBottom) {
 
 // 0x00614408
 void ACanvasLin32::FillRectNoClip(ARect rect) {
-    const int nWidth = rect.mRight - rect.mLeft;
+    const short nWidth = static_cast<short>(rect.mRight - rect.mLeft);
     unsigned char *pRow = ByteAt(mBitmap, rect.mLeft, rect.mTop);
     const int nGap = mBitmap.mBytesPerRow - kBytesPerPixel * nWidth;
-    for (int nRemainingRows = rect.mBottom - rect.mTop; nRemainingRows > 0; --nRemainingRows) {
+    for (short nRemainingRows = static_cast<short>(rect.mBottom - rect.mTop); nRemainingRows > 0;
+         --nRemainingRows) {
         unsigned int *pPixel = reinterpret_cast<unsigned int *>(pRow);
-        for (int nRemaining = nWidth; nRemaining > 0; --nRemaining) {
+        // Yes, the binary counts the columns down to zero exactly. A reversed span runs on.
+        for (int nRemaining = nWidth; nRemaining != 0; --nRemaining) {
             *pPixel++ = mColor;
         }
         pRow = reinterpret_cast<unsigned char *>(pPixel) + nGap;
@@ -143,7 +147,8 @@ void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
         const unsigned char *pIndex = g_abCanvasRowScratch;
         unsigned int *pDest = reinterpret_cast<unsigned int *>(pDestRow);
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
-            if (source.mHasTransparentColor == 0 || *pIndex != source.mTransparentColor) {
+            if (source.mHasTransparentColor == 0 ||
+                *pIndex != static_cast<unsigned char>(source.mTransparentColor)) {
                 *pDest = pPalette->mEntries[*pIndex];
             }
             ++pIndex;
@@ -166,7 +171,8 @@ void ACanvasLin32::Blit8NoClip(const ABitmap &source, int nX, int nY) {
         const unsigned char *pIndex = pSourceRow;
         unsigned int *pDest = reinterpret_cast<unsigned int *>(pDestRow);
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
-            if (source.mHasTransparentColor == 0 || *pIndex != source.mTransparentColor) {
+            if (source.mHasTransparentColor == 0 ||
+                *pIndex != static_cast<unsigned char>(source.mTransparentColor)) {
                 *pDest = pPalette->mEntries[*pIndex];
             }
             ++pIndex;
@@ -212,7 +218,8 @@ void ACanvasLin32::RemapRowIndexed(const ARowSpan &span, const unsigned char *pR
     unsigned int *pDest = PixelAt(mBitmap, span.mLeft, span.mY);
     const unsigned char *pIndex = span.mSource;
     for (int nRemaining = span.mRight - span.mLeft; nRemaining > 0; --nRemaining) {
-        if (!span.mHasTransparentColor || *pIndex != span.mTransparentColor) {
+        if (!span.mHasTransparentColor ||
+            *pIndex != static_cast<unsigned char>(span.mTransparentColor)) {
             *pDest = span.mPalette->mEntries[pRemap[*pIndex]];
         }
         ++pIndex;
@@ -229,7 +236,8 @@ void ACanvasLin32::StretchRowIndexed(const AStretchSpan &span) {
     int nPosition = span.mSourcePosition;
     for (int nRemaining = span.mRight - span.mLeft; nRemaining > 0; --nRemaining) {
         const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
-        if (span.mHasTransparentColor == 0 || nIndex != span.mTransparentColor) {
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
             *pDest = span.mPalette->mEntries[nIndex];
         }
         ++pDest;
@@ -246,7 +254,8 @@ void ACanvasLin32::StretchRowRemap(const AStretchSpan &span, const unsigned char
     int nPosition = span.mSourcePosition;
     for (int nRemaining = span.mRight - span.mLeft; nRemaining > 0; --nRemaining) {
         const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
-        if (span.mHasTransparentColor == 0 || nIndex != span.mTransparentColor) {
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
             *pDest = span.mPalette->mEntries[pRemap[nIndex]];
         }
         ++pDest;

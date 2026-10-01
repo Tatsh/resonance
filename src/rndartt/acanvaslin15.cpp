@@ -128,16 +128,17 @@ void ACanvasLin15::FillRowNoClip(int nY, int nLeft, int nRight) {
 // The colour and the row pitch are both re-read on every iteration, which recomputing
 // the address per row reproduces.
 void ACanvasLin15::FillColumnNoClip(int nX, int nTop, int nBottom) {
-    for (int nY = nTop; nY < nBottom; ++nY) {
+    // Yes, the binary counts the rows down to zero exactly. A reversed span runs on.
+    for (int nY = nTop; nY != nBottom; ++nY) {
         *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY) = mColor;
     }
 }
 
 // 0x006191c0
 void ACanvasLin15::FillRectNoClip(ARect rect) {
-    const int nColumns = rect.mRight - rect.mLeft;
+    const short nColumns = static_cast<short>(rect.mRight - rect.mLeft);
     unsigned short *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, rect.mLeft, rect.mTop);
-    for (int nRows = rect.mBottom - rect.mTop; nRows > 0; --nRows) {
+    for (short nRows = static_cast<short>(rect.mBottom - rect.mTop); nRows > 0; --nRows) {
         for (int nCount = nColumns; nCount != 0; --nCount) {
             *pPixel = mColor;
             ++pPixel;

@@ -39,7 +39,6 @@ unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
         }
         return pDest;
     }
-    const unsigned char nKey = static_cast<unsigned char>(mTransparentValue);
     while (nColumns > 0) {
         const unsigned char nControl = *mSource;
         ++mSource;
@@ -48,7 +47,7 @@ unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
         if ((nControl & kControlLiteralFlag) != 0) {
             for (int nRemaining = nLength; nRemaining > 0; --nRemaining) {
                 const unsigned char nValue = *mSource;
-                if (nValue != nKey) {
+                if (nValue != mTransparentValue) {
                     *pDest = nValue;
                 }
                 ++pDest;
@@ -56,7 +55,7 @@ unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
             }
         } else {
             const unsigned char nValue = *mSource;
-            if (nValue == nKey) {
+            if (nValue == mTransparentValue) {
                 pDest += nLength;
             } else {
                 for (int nRemaining = nLength; nRemaining > 0; --nRemaining) {

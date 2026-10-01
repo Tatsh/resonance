@@ -11,7 +11,6 @@ namespace {
 // The only source path the shipped image retains for this file.
 // 0x0082b1c0
 const char *const kAllocTag = "abitmap.h";
-constexpr int kAllocLine = 0x47;
 
 constexpr int kBitsPerPixel4 = 4;
 constexpr int kBitsPerPixel8 = 8;
@@ -95,7 +94,7 @@ ABitmap::ABitmap(void *pPixels,
     mByteCount = mBytesPerRow * mHeight;
     mPixels = pPixels;
     if (pPixels == nullptr) {
-        mPixels = MemAllocTagged(mByteCount, kAllocTag, kAllocLine);
+        mPixels = MemAllocTagged(mByteCount, kAllocTag, __LINE__);
         mOwnsPixels = 1;
     } else {
         mOwnsPixels = 0;
@@ -181,7 +180,7 @@ int ABitmap::Copy(const ABitmap &source) {
         mByteCount = mBytesPerRow * mHeight;
     }
 
-    mPixels = MemAllocTagged(mByteCount, kAllocTag, kAllocLine);
+    mPixels = MemAllocTagged(mByteCount, kAllocTag, __LINE__);
     if (mPixels == nullptr) {
         return kCopyFailed;
     }

@@ -115,10 +115,10 @@ void ACanvasLin24::FillColumnNoClip(int nX, int nTop, int nBottom) {
 
 // 0x00618630
 void ACanvasLin24::FillRectNoClip(ARect rect) {
-    const int nColumns = rect.mRight - rect.mLeft;
+    const short nColumns = static_cast<short>(rect.mRight - rect.mLeft);
     const int nRowAdvance = mBitmap.mBytesPerRow - (nColumns * kBytesPerPixel);
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, rect.mLeft, rect.mTop);
-    for (int nRows = rect.mBottom - rect.mTop; nRows > 0; --nRows) {
+    for (short nRows = static_cast<short>(rect.mBottom - rect.mTop); nRows > 0; --nRows) {
         for (int nCount = nColumns; nCount != 0; --nCount) {
             *pPixel = mColorChannels[0];
             ++pPixel;

@@ -40,12 +40,12 @@ constexpr int kEdgeBackward = -1;
 // This translation unit's copy of the tag ABitmap::ABitmap() also uses.
 // 0x00837d80
 const char *const kBitmapAllocTag = "abitmap.h";
-constexpr int kBitmapAllocLine = 0x47;
 
-// One pointer to member per ABitmapFormat code. DrawGlyphNoClip() and DrawGlyph() index the first
-// two tables by the glyph format code, ReadRectNoClip() and ReadRect() the next two by the
-// destination format code, and StretchBlit() the last by the source format code. The last three
-// address protected members, so each is a static inside the member that indexes it.
+// One pointer to member per ABitmapFormat code. DrawGlyphNoClip() and DrawGlyph() both index the
+// first table by the glyph format code, BlitNoClip() and Blit() the first two by the source format
+// code, ReadRectNoClip() and ReadRect() the next two by the destination format code, and
+// StretchBlit() the last by the source format code. The last three address protected members.
+// Each is therefore a static inside the member that indexes it.
 typedef void (ACanvas::*ABitmapCopyMember)(const ABitmap &, int, int);
 typedef void (ACanvas::*ABitmapStretchMember)(const ABitmap &, const ARect &);
 
@@ -168,9 +168,8 @@ ACanvas *ACanvas::CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels) {
             copy.mBytesPerRow =
                 static_cast<short>(copy.mWidth * g_abBitmapBytesPerPixel[copy.mFormat]);
         }
-        copy.mPixels = MemAllocTagged(static_cast<long long>(copy.mHeight) * copy.mBytesPerRow,
-                                      kBitmapAllocTag,
-                                      kBitmapAllocLine);
+        copy.mPixels = MemAllocTagged(
+            static_cast<long long>(copy.mHeight) * copy.mBytesPerRow, kBitmapAllocTag, __LINE__);
         if (copy.mPixels == nullptr) {
             return nullptr;
         }
@@ -767,9 +766,11 @@ void ACanvas::Blit4NoClip(const ABitmap &source, int nX, int nY) {
                 pByte = pNext;
             }
             bHighNibble ^= 1;
-            // Yes, the test compares a whole source byte against the key rather than the nibble
-            // just consumed, and it reads the byte the walk has already advanced to.
-            if (source.mHasTransparentColor == 0 || *pByte != source.mTransparentColor) {
+            // Yes, the test compares a whole source byte against the low byte of the key rather
+            // than the nibble just consumed, and it reads the byte the walk has already advanced
+            // to.
+            if (source.mHasTransparentColor == 0 ||
+                *pByte != static_cast<unsigned char>(source.mTransparentColor)) {
                 PutPixelIndexedNoClip(x, y, nIndex);
             }
         }
@@ -790,7 +791,9 @@ void ACanvas::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned char *pPixel = SourceRow(source);
     for (int y = nY; y < nY + source.mHeight; ++y) {
         for (int x = nX; x < nX + source.mWidth; ++x) {
-            if (source.mHasTransparentColor == 0 || *pPixel != source.mTransparentColor) {
+            // The binary compares the index with the low byte of the transparent colour only.
+            if (source.mHasTransparentColor == 0 ||
+                *pPixel != static_cast<unsigned char>(source.mTransparentColor)) {
                 PutPixelIndexedNoClip(x, y, *pPixel);
             }
             ++pPixel;
@@ -812,7 +815,9 @@ void ACanvas::Blit15NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned short *pPixel = static_cast<const unsigned short *>(source.mPixels);
     for (int y = nY; y < nY + source.mHeight; ++y) {
         for (int x = nX; x < nX + source.mWidth; ++x) {
-            if (source.mHasTransparentColor == 0 || *pPixel != source.mTransparentColor) {
+            // The binary compares the pixel with the low halfword of the transparent colour only.
+            if (source.mHasTransparentColor == 0 ||
+                *pPixel != static_cast<unsigned short>(source.mTransparentColor)) {
                 PutPixel15NoClip(x, y, *pPixel);
             }
             ++pPixel;
@@ -862,15 +867,17 @@ void ACanvas::Blit24(const ABitmap &source, int nX, int nY) {
 
 // 0x005ec9b8
 void ACanvas::Blit32NoClip(const ABitmap &source, int nX, int nY) {
-    const unsigned int *pPixel = static_cast<const unsigned int *>(source.mPixels);
+    const unsigned char *pRow = SourceRow(source);
     for (int y = nY; y < nY + source.mHeight; ++y) {
+        const unsigned int *pPixel =
+            static_cast<const unsigned int *>(static_cast<const void *>(pRow));
         for (int x = nX; x < nX + source.mWidth; ++x) {
             if (source.mHasTransparentColor == 0 || source.mTransparentColor != *pPixel) {
                 PutPixelNoClip(x, y, *pPixel);
             }
             ++pPixel;
         }
-        pPixel += source.mBytesPerRow / 4 - source.mWidth;
+        pRow += source.mBytesPerRow;
     }
 }
 
@@ -1057,7 +1064,7 @@ void ACanvas::DrawGlyph(int nCharCode, const AFont *pFont, int nX, int nY) {
     ABitmap clipped = *pGlyph;
     nY -= pFont->mBaseline;
     if (ClipBlitToRect(&clipped, &nX, &nY) != 0) {
-        (this->*kCopyForFormat[clipped.mFormat])(clipped, nX, nY);
+        (this->*kCopyNoClipForFormat[clipped.mFormat])(clipped, nX, nY);
     }
 }
 
@@ -1227,7 +1234,8 @@ void ACanvas::StretchRowIndexed(const AStretchSpan &span) {
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
         const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
-        if (span.mHasTransparentColor == 0 || nIndex != span.mTransparentColor) {
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
             PutPixelIndexedNoClip(x, span.mY, nIndex);
         }
         nPosition += span.mSourceStep;
@@ -1240,7 +1248,8 @@ void ACanvas::StretchRow15(const AStretchSpan &span) {
     for (int x = span.mLeft; x < span.mRight; ++x) {
         const unsigned short nColor = *reinterpret_cast<const unsigned short *>(
             span.mSource + 2 * (nPosition >> kACanvasFractionBits));
-        if (span.mHasTransparentColor == 0 || nColor != span.mTransparentColor) {
+        if (span.mHasTransparentColor == 0 ||
+            nColor != static_cast<unsigned short>(span.mTransparentColor)) {
             PutPixel15NoClip(x, span.mY, nColor);
         }
         nPosition += span.mSourceStep;
@@ -1287,7 +1296,8 @@ void ACanvas::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRe
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
         const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
-        if (span.mHasTransparentColor == 0 || nIndex != span.mTransparentColor) {
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
             PutPixelIndexedNoClip(x, span.mY, pRemap[nIndex]);
         }
         nPosition += span.mSourceStep;
@@ -1299,7 +1309,8 @@ void ACanvas::StretchRowBlend(const AStretchSpan &span, const unsigned char *con
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
         const unsigned char nIndex = span.mSource[nPosition >> kACanvasFractionBits];
-        if (span.mHasTransparentColor == 0 || nIndex != span.mTransparentColor) {
+        if (span.mHasTransparentColor == 0 ||
+            nIndex != static_cast<unsigned char>(span.mTransparentColor)) {
             const int nDestIndex = GetPixelIndexedNoClip(x, span.mY);
             PutPixelIndexedNoClip(x, span.mY, ppBlend[nIndex][nDestIndex]);
         }
@@ -1343,22 +1354,17 @@ void ACanvas::BlitRemapNoClip(const ABitmap &source, int nX, int nY, const unsig
 }
 
 // 0x005ed718
-// The description is copied before clipping, because ClipBlitToRect() rewrites the one
-// it is given.
+// The run-length format is handed over unclipped, because BlitRemapRle8() clips for itself.
 void ACanvas::BlitRemap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
-    ABitmap clipped = source;
-    if (ClipBlitToRect(&clipped, &nX, &nY) == 0) {
-        return;
-    }
     switch (source.mFormat) {
     case kABitmapFormatLinear4:
-        BlitRemap4(clipped, nX, nY, pRemap);
+        BlitRemap4Clipped(source, nX, nY, pRemap);
         break;
     case kABitmapFormatLinear8:
-        BlitRemap8(clipped, nX, nY, pRemap);
+        BlitRemap8Clipped(source, nX, nY, pRemap);
         break;
     case kABitmapFormatRle8:
-        BlitRemapRle8(clipped, nX, nY, pRemap);
+        BlitRemapRle8(source, nX, nY, pRemap);
         break;
     default:
         break;
@@ -1452,19 +1458,16 @@ void ACanvas::BlitBlend(const ABitmap &source,
                         int nX,
                         int nY,
                         const unsigned char *const *ppBlend) {
-    ABitmap clipped = source;
-    if (ClipBlitToRect(&clipped, &nX, &nY) == 0) {
-        return;
-    }
+    // As in BlitRemap(), the run-length format is handed over unclipped.
     switch (source.mFormat) {
     case kABitmapFormatLinear4:
-        BlitBlend4(clipped, nX, nY, ppBlend);
+        BlitBlend4Clipped(source, nX, nY, ppBlend);
         break;
     case kABitmapFormatLinear8:
-        BlitBlend8(clipped, nX, nY, ppBlend);
+        BlitBlend8Clipped(source, nX, nY, ppBlend);
         break;
     case kABitmapFormatRle8:
-        BlitBlendRle8(clipped, nX, nY, ppBlend);
+        BlitBlendRle8(source, nX, nY, ppBlend);
         break;
     default:
         break;
