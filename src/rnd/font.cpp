@@ -104,7 +104,7 @@ void PrintObjectRef(FailSink &sink, const Object *pObject) {
         sink.Print(kNoObject);
         return;
     }
-    sink.Format("%s", NameText(pObject));
+    sink.Format("\"%s\"", NameText(pObject));
 }
 
 void WriteObjectRef(Stream &stream, const Object *pObject) {
@@ -227,12 +227,13 @@ void Font::DumpText(FailSink &sink) {
         sink.Format("%d", mHeight);
         sink.Print(" weight:");
         PrintFontWeight(sink, mWeight);
+        sink.Print("\n");
         sink.Print("italic:");
         sink.Print(mItalic != 0 ? "true" : "false");
         sink.Print(" family:");
         PrintFontFamily(sink, mFamily);
         sink.Print(" name:");
-        sink.Format("%s", StringText(mName));
+        sink.Format("\"%s\"", StringText(mName));
         sink.Print("\n");
         return;
     }

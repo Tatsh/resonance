@@ -52,6 +52,7 @@ Stream &ToolStream::ReadBytes(void *pDest, int nSize) {
     }
 
     memcpy(pCursor, mBuffer + mCursor, nSize);
+    mCursor += nSize;
     return *this;
 }
 

@@ -134,7 +134,6 @@ void Light::DumpText(FailSink &sink) {
     sink.Print("\n");
     sink.Print("specular:");
     PrintColor(sink, mSpecular);
-    sink.Print("\n");
     sink.Print(" innerAng:");
     sink.Format("%.2f", mInnerAngle);
     sink.Print("\n");

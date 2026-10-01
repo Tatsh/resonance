@@ -284,8 +284,6 @@ void Button::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
 void Button::Load(Stream &stream) {
     stream.Read(&g_nRndButtonLoadVersion, sizeof(g_nRndButtonLoadVersion));
     if (g_nRndButtonLoadVersion > kSerialVersion) {
-        // The report is the whole of the response. No other renderer class returns here without
-        // transferring control to the abort handler of g_failSink.
         g_failSink.Report("Can't load new Button\n");
         return;
     }

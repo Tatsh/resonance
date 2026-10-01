@@ -283,7 +283,10 @@ void MultiMesh::ReleaseMeshRef() {
 // 0x004ebaa0
 Transform &MultiMesh::GetTransform(int nIndex) {
     auto it = mTransforms.begin();
-    std::advance(it, nIndex);
+    // Yes, the binary counts the index down to zero. A negative index walks forward.
+    for (int i = nIndex; i != 0; --i) {
+        ++it;
+    }
     return *it;
 }
 

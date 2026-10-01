@@ -149,7 +149,7 @@ void LightAnim::Replace(Object *pFrom, Object *pTo) {
                 mKeysOwner->AddRef(this);
             }
         }
-    } else if (mKeysOwner == pFrom && mKeysOwner != nullptr) {
+    } else if (mKeysOwner == pFrom) { // Yes, a null owner matching a null pFrom is read through.
         mAmbientKeys = mKeysOwner->mAmbientKeys;
         mDiffuseKeys = mKeysOwner->mDiffuseKeys;
         mSpecularKeys = mKeysOwner->mSpecularKeys;

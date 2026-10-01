@@ -205,7 +205,7 @@ int PsMat::Select() {
         return 0;
     }
     ++g_renderStats.mnMatSelects;
-    if (this != g_pSelectedMat || g_nSelectedStage >= static_cast<int>(mStages.size())) {
+    if (this != g_pSelectedMat || static_cast<unsigned>(g_nSelectedStage) >= mStages.size()) {
         g_nSelectedStage = 0;
     }
     g_nSelectedFlat = mFlat;
@@ -214,7 +214,7 @@ int PsMat::Select() {
     SetupUvXfm();
     g_pSelectedMat = this;
     ++g_nSelectedStage;
-    return g_nSelectedStage < static_cast<int>(mStages.size());
+    return static_cast<unsigned>(g_nSelectedStage) < mStages.size();
 }
 
 // 0x005910b0

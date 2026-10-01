@@ -63,14 +63,21 @@ void PrintElementIndex(FailSink &sink, unsigned nIndex) {
     sink.Print("\t");
 }
 
+// Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
+// The FailSink format buffer therefore ends with the bare number.
+void PrintFloatField(FailSink &sink, const char *pszLabel, float flValue) {
+    sink.Print(pszLabel);
+    sink.Format("%.2f", flValue);
+}
+
 // 0x004906a8
 FailSink &DumpPointsVector(FailSink &sink, const std::vector<Vector3> &values) {
     PrintVectorHeader(sink, values.size());
     for (unsigned nIndex = 0; nIndex < values.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
-        sink.Format("(x:%.2f", values[nIndex].x);
-        sink.Format(" y:%.2f", values[nIndex].y);
-        sink.Format(" z:%.2f", values[nIndex].z);
+        PrintFloatField(sink, "(x:", values[nIndex].x);
+        PrintFloatField(sink, " y:", values[nIndex].y);
+        PrintFloatField(sink, " z:", values[nIndex].z);
         sink.Print(")");
     }
     return sink;
@@ -81,8 +88,8 @@ FailSink &DumpTexsVector(FailSink &sink, const std::vector<Vector2> &values) {
     PrintVectorHeader(sink, values.size());
     for (unsigned nIndex = 0; nIndex < values.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
-        sink.Format("(x:%.2f", values[nIndex].x);
-        sink.Format(" y:%.2f", values[nIndex].y);
+        PrintFloatField(sink, "(x:", values[nIndex].x);
+        PrintFloatField(sink, " y:", values[nIndex].y);
         sink.Print(")");
     }
     return sink;
@@ -93,10 +100,10 @@ FailSink &DumpColorsVector(FailSink &sink, const std::vector<Color> &values) {
     PrintVectorHeader(sink, values.size());
     for (unsigned nIndex = 0; nIndex < values.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
-        sink.Format("(r:%.2f", values[nIndex].r);
-        sink.Format(" g:%.2f", values[nIndex].g);
-        sink.Format(" b:%.2f", values[nIndex].b);
-        sink.Format(" a:%.2f", values[nIndex].a);
+        PrintFloatField(sink, "(r:", values[nIndex].r);
+        PrintFloatField(sink, " g:", values[nIndex].g);
+        PrintFloatField(sink, " b:", values[nIndex].b);
+        PrintFloatField(sink, " a:", values[nIndex].a);
         sink.Print(")");
     }
     return sink;
@@ -526,7 +533,7 @@ void MeshAnim::Replace(Object *pFrom, Object *pTo) {
 
     // Losing the animation that owned the shared keys takes a copy of the channels rather than
     // discarding them. No reference is dropped on this path.
-    if (mKeysOwner == pFrom && mKeysOwner != nullptr) {
+    if (mKeysOwner == pFrom) { // Yes, a null owner matching a null pFrom is read through.
         mVertPointsKeys = mKeysOwner->mVertPointsKeys;
         mVertTexsKeys = mKeysOwner->mVertTexsKeys;
         mVertColorsKeys = mKeysOwner->mVertColorsKeys;

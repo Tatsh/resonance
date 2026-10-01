@@ -332,10 +332,22 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
     refOut = dynamic_cast<T *>(g_manager.Find(name));
 }
 
+// Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
+// The FailSink format buffer therefore ends with the bare number.
+void PrintFloatField(FailSink &sink, const char *pszLabel, float flValue) {
+    sink.Print(pszLabel);
+    sink.Format("%.2f", flValue);
+}
+
+void PrintIndexField(FailSink &sink, const char *pszLabel, unsigned short nValue) {
+    sink.Print(pszLabel);
+    sink.Format("%hu", nValue);
+}
+
 void PrintVector3(FailSink &sink, const Vector3 &v) {
-    sink.Format("(x:%.2f", v.x);
-    sink.Format(" y:%.2f", v.y);
-    sink.Format(" z:%.2f", v.z);
+    PrintFloatField(sink, "(x:", v.x);
+    PrintFloatField(sink, " y:", v.y);
+    PrintFloatField(sink, " z:", v.z);
     sink.Print(")");
 }
 
@@ -360,18 +372,18 @@ FailSink &DumpVert(FailSink &sink, const MeshVert &vert) {
     sink.Print("\n\tn:");
     PrintVector3(sink, vert.mNorm);
     sink.Print("\n\tc:");
-    sink.Format("(r:%.2f", vert.mColor.r);
-    sink.Format(" g:%.2f", vert.mColor.g);
-    sink.Format(" b:%.2f", vert.mColor.b);
-    sink.Format(" a:%.2f", vert.mColor.a);
+    PrintFloatField(sink, "(r:", vert.mColor.r);
+    PrintFloatField(sink, " g:", vert.mColor.g);
+    PrintFloatField(sink, " b:", vert.mColor.b);
+    PrintFloatField(sink, " a:", vert.mColor.a);
     sink.Print(")");
     sink.Print("\n\tt1:");
-    sink.Format("(x:%.2f", vert.mTex1.x);
-    sink.Format(" y:%.2f", vert.mTex1.y);
+    PrintFloatField(sink, "(x:", vert.mTex1.x);
+    PrintFloatField(sink, " y:", vert.mTex1.y);
     sink.Print(")");
     sink.Print(" t2:");
-    sink.Format("(x:%.2f", vert.mTex2.x);
-    sink.Format(" y:%.2f", vert.mTex2.y);
+    PrintFloatField(sink, "(x:", vert.mTex2.x);
+    PrintFloatField(sink, " y:", vert.mTex2.y);
     sink.Print(")");
     return sink;
 }
@@ -391,9 +403,9 @@ FailSink &DumpFaceVector(FailSink &sink, const std::vector<MeshFace> &faces) {
     PrintVectorHeader(sink, faces.size());
     for (unsigned nIndex = 0; nIndex < faces.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
-        sink.Format("(v1:%hu", faces[nIndex].mV1);
-        sink.Format(" v2:%hu", faces[nIndex].mV2);
-        sink.Format(" v3:%hu", faces[nIndex].mV3);
+        PrintIndexField(sink, "(v1:", faces[nIndex].mV1);
+        PrintIndexField(sink, " v2:", faces[nIndex].mV2);
+        PrintIndexField(sink, " v3:", faces[nIndex].mV3);
         sink.Print(")");
     }
     return sink;
@@ -404,8 +416,8 @@ FailSink &DumpEdgeVector(FailSink &sink, const std::vector<MeshEdge> &edges) {
     PrintVectorHeader(sink, edges.size());
     for (unsigned nIndex = 0; nIndex < edges.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
-        sink.Format("(v1:%hu", edges[nIndex].mV1);
-        sink.Format(" v2:%hu", edges[nIndex].mV2);
+        PrintIndexField(sink, "(v1:", edges[nIndex].mV1);
+        PrintIndexField(sink, " v2:", edges[nIndex].mV2);
         sink.Print(")");
     }
     return sink;
@@ -807,7 +819,7 @@ void Mesh::Replace(Object *pFrom, Object *pTo) {
     } else if (mVertsOwner == pFrom && mVertsOwner != nullptr) {
         mVerts = mVertsOwner->mVerts;
         mVertsOwner = this;
-        Sync();
+        SyncAll();
     }
 
     if (pTo != nullptr) {
@@ -880,17 +892,13 @@ void Mesh::Copy(const Object *pSource, unsigned nFlags) {
     mSphere = pMesh->mSphere;
     mNext = pMesh->mNext;
     mMinScreen = pMesh->mMinScreen;
+    mMaxVerts = pMesh->mMaxVerts;
 
-    if ((nFlags & kCopyShareVerts) != 0) {
-        mVertsOwner = pMesh->mVertsOwner;
+    if ((nFlags & kCopyShareVerts) == 0 && pMesh->mVertsOwner == pMesh) {
+        mVertsOwner = this;
+        mVerts = pMesh->mVerts;
     } else {
-        mMaxVerts = pMesh->mMaxVerts;
-        if (pMesh->mVertsOwner == pMesh) {
-            mVertsOwner = this;
-            mVerts = pMesh->mVerts;
-        } else {
-            mVertsOwner = pMesh->mVertsOwner;
-        }
+        mVertsOwner = pMesh->mVertsOwner;
     }
 
     if ((nFlags & kCopyShareFaces) != 0) {
@@ -1776,6 +1784,7 @@ int Mesh::PrepareDraw(Sphere &worldSphere) {
 
     Sphere sphere;
     TransformPoint(mTransOwner->mWorldXfm, &mSphere.mCenter.x, &sphere.mCenter.x);
+    sphere.mCenter.w = mSphere.mCenter.w; // Yes, the VU0 transform passes the local w through.
     sphere.mRadius = mSphere.mRadius;
     worldSphere = sphere;
     if (IsSphereOutsideFrustum(worldSphere, pCam->mWorldFrustum) != 0) {

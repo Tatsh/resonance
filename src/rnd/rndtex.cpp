@@ -23,15 +23,6 @@ namespace Rnd {
 
 namespace {
 
-// The tag every release in this file bills to, and the file name its asserts record.
-constexpr char kTexFileName[] = "rndtex.cpp";
-
-// Line 610 of rndtex.cpp, which FreeLoadedBitmaps() passes to the tagged release.
-constexpr int kFreeBitmapLine = 0x262;
-
-// Line 205 of rndtex.cpp, which AllocateBitmapFromStream() passes to the tagged allocation.
-constexpr int kBlankBitmapLine = 0xcd;
-
 // The path buffers the mip loader and the read queue work in.
 constexpr int kMaxPathLength = 0x100;
 
@@ -381,8 +372,8 @@ void Tex::AllocateBitmapFromStream() {
     const size_t nHeaderBytes = bIndexed ? sizeof(ABitmap) + sizeof(APalette) : sizeof(ABitmap);
     const size_t nBlockBytes = nPixelBytes + nHeaderBytes + kPixelAlignment - 1;
 
-    void *pBlock = mZone == -1 ? MemAllocTagged(nBlockBytes, kTexFileName, kBlankBitmapLine) :
-                                 ZoneAlloc(nBlockBytes);
+    void *pBlock =
+        mZone == -1 ? MemAllocTagged(nBlockBytes, __FILE__, __LINE__) : ZoneAlloc(nBlockBytes);
     if (pBlock == nullptr) {
         return;
     }
@@ -467,7 +458,7 @@ bool Tex::PollAsyncMips() {
         }
         if (nStatus > 0) {
             g_failSink.Report(
-                "Texture %s mip %d: async read error %d\n", mBitmapPath.mStr, nMip, nStatus);
+                "Texture %s mip %d: async read error %d\n", TextOf(mBitmapPath), nMip, nStatus);
             // A failed read clears its bit and reports the load complete, which stops the caller
             // spinning on a mip that will never arrive.
             mPendingMipMask &= ~(1 << nMip);
@@ -594,7 +585,7 @@ void Tex::FreeLoadedBitmaps() {
     for (const auto pBitmap : mLoadedBitmaps) {
         // Zone memory goes with its zone. Only a bitmap from the tagged heap is released here.
         if (pBitmap != nullptr && mZone == -1) {
-            MemFreeTagged(pBitmap, kTexFileName, kFreeBitmapLine);
+            MemFreeTagged(pBitmap, __FILE__, __LINE__);
         }
     }
     mLoadedBitmaps.clear();

@@ -80,7 +80,7 @@ void PrintObjectRef(FailSink &sink, const Object *pObject) {
         sink.Print(kNoObject);
         return;
     }
-    sink.Format("%s", NameText(pObject));
+    sink.Format("\"%s\"", NameText(pObject));
 }
 
 void WriteObjectRef(Stream &stream, const Object *pObject) {
@@ -326,7 +326,7 @@ void Text::DumpText(FailSink &sink) {
     sink.Print("\n");
 
     sink.Print("preWrapText:");
-    sink.Format("%s", StringText(mPreWrapText));
+    sink.Format("\"%s\"", StringText(mPreWrapText));
     sink.Print("\n");
 
     sink.Print("color:");
@@ -350,7 +350,7 @@ void Text::DumpText(FailSink &sink) {
     }
 
     sink.Print("text:");
-    sink.Format("%s", StringText(mText));
+    sink.Format("\"%s\"", StringText(mText));
     sink.Print("mesh:");
     PrintObjectRef(sink, mMesh);
     sink.Print("\n");
@@ -634,9 +634,7 @@ HxStr Text::ApplyWordWrap(const HxStr &text) {
         return text;
     }
 
-    // A line whose first character is a newline reports nothing, and the routine then wraps no part
-    // of the text at all rather than stepping over that newline and continuing.
-    if (nFit != 0) {
+    if (szLine[0] != '\0') {
         char szTail[kWrapBufferSize];
         char *pPos = szLine;
         do {

@@ -605,7 +605,8 @@ void Animatable::RemoveFilter(int nIndex) {
 // 0x0049a0b0
 Animatable::Filter *Animatable::FilterAt(int nIndex) {
     std::list<Filter *>::iterator it = mFilters.begin();
-    for (int i = 0; i < nIndex; ++i) {
+    // Yes, the binary counts the index down to zero. A negative index walks forward.
+    for (int i = nIndex; i != 0; --i) {
         ++it;
     }
     return *it;

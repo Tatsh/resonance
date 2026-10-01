@@ -148,18 +148,26 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
     refOut = dynamic_cast<T *>(g_manager.Find(name));
 }
 
+// Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
+// The FailSink format buffer therefore ends with the bare number.
+void PrintFloatField(FailSink &sink, const char *pszLabel, float flValue) {
+    sink.Print(pszLabel);
+    sink.Format("%.2f", flValue);
+}
+
 void PrintColor(FailSink &sink, const Color &color) {
-    sink.Format("(r:%.2f", color.r);
-    sink.Format(" g:%.2f", color.g);
-    sink.Format(" b:%.2f", color.b);
-    sink.Format(" a:%.2f", color.a);
+    PrintFloatField(sink, "(r:", color.r);
+    PrintFloatField(sink, " g:", color.g);
+    PrintFloatField(sink, " b:", color.b);
+    PrintFloatField(sink, " a:", color.a);
     sink.Print(")");
 }
 
 void PrintVector3(FailSink &sink, const Vector3 &v) {
-    sink.Format("(x:%.2f", v.x);
-    sink.Format(" y:%.2f", v.y);
-    sink.Format(" z:%.2f", v.z);
+    sink.Print("\n\t");
+    PrintFloatField(sink, "(x:", v.x);
+    PrintFloatField(sink, " y:", v.y);
+    PrintFloatField(sink, " z:", v.z);
     sink.Print(")");
 }
 
@@ -358,6 +366,7 @@ void Mat::Stage::Dump(FailSink &sink) const {
     PrintVector3(sink, mXfm.mBasisY);
     PrintVector3(sink, mXfm.mBasisZ);
     PrintVector3(sink, mXfm.mTranslation);
+    sink.Print("\n");
     sink.Print("useXfm:");
     PrintBool(sink, mUseXfm);
     sink.Print(" wrap:");
@@ -500,6 +509,7 @@ void Mat::DumpText(FailSink &sink) {
     sink.Print("[Mat]\n");
     sink.Print("stages:");
     DumpStageVector(sink, mStages);
+    sink.Print("\n");
     sink.Print("blend:");
     PrintBlendMode(sink, mBlend);
     sink.Print(" enable:");
@@ -510,6 +520,7 @@ void Mat::DumpText(FailSink &sink) {
     PrintColor(sink, mAmbient);
     sink.Print("diffuse:");
     PrintColor(sink, mDiffuse);
+    sink.Print("\n");
     sink.Print("specular:");
     PrintColor(sink, mSpecular);
     sink.Print(" emissive:");
@@ -716,6 +727,8 @@ void Mat::Load(Stream &stream) {
         stream.ReadBytes(&chFlag, sizeof(chFlag));
         mFlat = chFlag != 0;
     }
+
+    Refresh();
 }
 
 // 0x004db958

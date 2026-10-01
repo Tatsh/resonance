@@ -19,7 +19,7 @@ MemStream::~MemStream() {
 // 0x005100c0
 Stream &MemStream::ReadBytes(void *pDest, int nSize) {
     const int nAvailable = mBuffer.size();
-    if (nAvailable < mPos + nSize) {
+    if (static_cast<unsigned>(nAvailable) < static_cast<unsigned>(mPos + nSize)) {
         mEof = 1;
         mFail = 1;
         nSize = nAvailable - mPos;
@@ -32,11 +32,15 @@ Stream &MemStream::ReadBytes(void *pDest, int nSize) {
 
 // 0x0050f448
 Stream &MemStream::WriteBytes(const void *pSrc, int nSize) {
-    if (static_cast<int>(mBuffer.capacity()) < mPos + nSize) {
+    const unsigned nEnd = static_cast<unsigned>(mPos + nSize);
+    if (mBuffer.capacity() < nEnd) {
         mBuffer.reserve(mBuffer.capacity() + kMemStreamReserve);
     }
+    if (mBuffer.size() < nEnd) {
+        mBuffer.resize(nEnd);
+    }
 
-    memcpy(&mBuffer[mPos], pSrc, nSize);
+    memcpy(mBuffer.data() + mPos, pSrc, nSize);
     mPos += nSize;
     return *this;
 }
@@ -63,6 +67,8 @@ Stream &MemStream::Seek(int nOffset, int nWhence) {
 
     if (nOffset >= 0 && nOffset <= static_cast<int>(mBuffer.size())) {
         mPos = nOffset;
+    } else {
+        mFail = 1;
     }
     return *this;
 }

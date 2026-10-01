@@ -57,6 +57,8 @@ Stream &BufStream::Seek(int nOffset, int nWhence) {
 
     if (nOffset >= 0 && nOffset <= mSize) {
         mPos = nOffset;
+    } else {
+        mFail = 1;
     }
     return *this;
 }

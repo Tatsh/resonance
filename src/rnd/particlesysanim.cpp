@@ -270,7 +270,7 @@ void ParticleSysAnim::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
     if (nRevision > kSerialVersion) {
-        g_failSink.Report("Can't load new ParticleSysAnim");
+        g_failSink.Report("Can't load new ParticleSysAnim\n");
         return;
     }
 

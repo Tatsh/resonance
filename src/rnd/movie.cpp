@@ -191,8 +191,9 @@ void Movie::Replace(Object *pFrom, Object *pTo) {
                     it->mTex->AddRef(this);
                 }
             }
-        } else if (it->mTex == pFrom) {
-            DetachTrack(it->mTrackId);
+        } else if (it->mTex == pFrom && mStream != nullptr) {
+            // Yes, without an open stream the entry retains the departing texture.
+            mStream->SetTrackHandler(it->mTrackId, nullptr, nullptr);
             it->mTex = nullptr;
         }
 

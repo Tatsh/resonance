@@ -501,7 +501,9 @@ void String::SetNumPoints(int nCount) {
 
     int nFaceCount = (nRungs - 1) * kFacesPerQuad;
     if (mLinePairs != 0) {
-        nFaceCount = mHasCaps != 0 ? (nRungs * kFacesPerCappedPair) / kVertsPerCappedPair : nRungs;
+        nFaceCount = mHasCaps != 0 ?
+                         (nRungs * kVertsPerRung * kFacesPerCappedPair) / kVertsPerCappedPair :
+                         nRungs;
     }
     std::vector<MeshFace> &faces = mpMesh->mFacesOwner->mFaces;
     faces.resize(nFaceCount);
@@ -769,7 +771,7 @@ void String::Load(Stream &stream) {
 
 // 0x004ba3d0
 void String::CreateMesh() {
-    mpMesh = g_pfnNewMesh(HxStr("[") + mName + "_mesh]");
+    mpMesh = NewMeshThroughHook(HxStr("[") + mName + "_mesh]");
     mpMesh->mInternal = 1;
     mpMesh->SetMaterial(mpMat);
     mpMesh->mZMode = Mesh::kZModeZReadOnly;

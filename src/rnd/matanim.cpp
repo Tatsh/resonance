@@ -314,7 +314,10 @@ void MatAnim::StageAnim::AddTexKey(Tex *pTex, float flFrame) {
 // 0x004d3e30
 void MatAnim::StageAnim::RemoveTexKey(int nIndex) {
     auto it = mTexKeys.begin();
-    std::advance(it, nIndex);
+    // Yes, the binary counts the index down to zero. A negative index walks forward.
+    for (int i = nIndex; i != 0; --i) {
+        ++it;
+    }
     if (it->mValue != nullptr) {
         it->mValue->RemoveRef(mOwner);
     }

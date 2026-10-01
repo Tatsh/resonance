@@ -70,6 +70,13 @@ inline Vector3 TransformByRows(const float aflRows[kXfmRowCount][kXfmRowFloatCou
     return transformed;
 }
 
+inline float LightDistanceToSphere(const PointLightRecord &light, const Sphere &sphere) {
+    Vector3 offset;
+    offset.w = 1.0f;
+    Vec3Sub(&light.mTransformedPosition.x, &sphere.mCenter.x, &offset.x);
+    return sqrtf(offset.x * offset.x + offset.y * offset.y + offset.z * offset.z);
+}
+
 // Whether a point light, already in the sphere's space, reaches a bounding sphere. A sphere with no
 // radius is always reached. The range is the fourth word of the transformed position, which the
 // transform carries over from the range in mPosition.
@@ -77,11 +84,16 @@ inline bool LightReachesSphere(const PointLightRecord &light, const Sphere *pSph
     if (pSphere == nullptr || pSphere->mRadius == 0.0f) {
         return true;
     }
-    Vector3 offset;
-    offset.w = 1.0f;
-    Vec3Sub(&light.mTransformedPosition.x, &pSphere->mCenter.x, &offset.x);
-    const float flDistance = sqrtf(offset.x * offset.x + offset.y * offset.y + offset.z * offset.z);
-    return flDistance <= light.mTransformedPosition.w + pSphere->mRadius;
+    return LightDistanceToSphere(light, *pSphere) <=
+           light.mTransformedPosition.w + pSphere->mRadius;
+}
+
+// The culling pass writes its test the other way round from LightReachesSphere().
+inline bool LightFallsShortOfSphere(const PointLightRecord &light, const Sphere *pSphere) {
+    if (pSphere == nullptr || pSphere->mRadius == 0.0f) {
+        return false;
+    }
+    return light.mTransformedPosition.w + pSphere->mRadius < LightDistanceToSphere(light, *pSphere);
 }
 
 // Scale a packet colour by a light colour, or replace it when the material takes that term from
@@ -125,7 +137,7 @@ int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
     }
     for (PointLightRecord *pLight = pPointBegin; pLight != pPointEnd; ++pLight) {
         pLight->mTransformedPosition = TransformByRows(aflInverse, pLight->mPosition);
-        pLight->mCulled = LightReachesSphere(*pLight, pSphere) ? 0 : 1;
+        pLight->mCulled = LightFallsShortOfSphere(*pLight, pSphere) ? 1 : 0;
         nActive += pLight->mCulled ^ 1;
     }
     return nActive;

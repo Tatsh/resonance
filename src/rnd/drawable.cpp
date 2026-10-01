@@ -16,6 +16,7 @@ constexpr int kDrawableRevision = 0;
 
 constexpr char kAlreadyInFormat[] = "%s already in %s\n";
 constexpr char kCountFormat[] = "%d";
+constexpr char kSizeFormat[] = "%u";
 constexpr char kQuotedTextFormat[] = "\"%s\"";
 constexpr char kTrueText[] = "true";
 constexpr char kFalseText[] = "false";
@@ -29,7 +30,7 @@ static const char *NameText(const Object *pObject) {
 // 0x00505c78
 static FailSink &operator<<(FailSink &sink, const std::list<Drawable *> &draws) {
     sink.Print("(size:");
-    sink.Format(kCountFormat, draws.size());
+    sink.Format(kSizeFormat, draws.size());
     sink.Print(")");
 
     int nIndex = 0;
