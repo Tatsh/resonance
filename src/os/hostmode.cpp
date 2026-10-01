@@ -51,16 +51,12 @@ HxStr g_versionString("198");
 // report. InitBootConfig() is the one caller.
 // 0x0050dad8
 void ForceCdOnlyBoot() {
-    TRACE_HERE
     LogPrintf(" Running from CD only, since we couldn't find the config file\n");
-    TRACE_HERE
     g_nHostMode = kHostModeCdOnly;
     LogPrintf(" Running from CD ONLY, forcing arkfiles ON and async ON\n");
-    TRACE_HERE
     g_nUsingArkFiles = 1;
     g_nUsingCdMedia = 1;
     MemOpenLog(nullptr);
-    TRACE_HERE
 }
 
 } // namespace
@@ -129,7 +125,6 @@ HxStr GetVersionString() {
 
 // 0x0050f030
 void ConfigureRetailBoot() {
-    TRACE_HERE
     g_nHostMode = kHostModeCdOnly;
     g_nIntroMovieEnabled = 1;
     g_nUsingArkFiles = 1;
@@ -138,16 +133,12 @@ void ConfigureRetailBoot() {
     g_nDebugKeysEnabled = 0;
     g_nMidiErrorLogEnabled = 0;
     g_nMemAccountingEnabled = 0;
-    TRACE_HERE
 }
 
 // 0x0050f080
 void InitBootConfig() {
-    TRACE_HERE
     ForceCdOnlyBoot();
-    TRACE_HERE
     InitializeZoneList();
-    TRACE_HERE
 }
 
 // 0x0050f0a8

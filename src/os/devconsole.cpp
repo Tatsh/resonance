@@ -8,7 +8,6 @@
 #include <libvifpk.h>
 
 #include "os/iop.h"
-#include "os/log.h"
 
 namespace {
 
@@ -77,7 +76,6 @@ sceGsDBuff g_debugDoubleBuffer;
 
 // 0x005e5d08
 int InitDebugGs() {
-    TRACE_HERE
     sceGifTag adTag;
     adTag.mWords[0] = kAdGifTagLo;
     adTag.mWords[1] = kAdGifTagHi;
@@ -102,9 +100,7 @@ int InitDebugGs() {
 
     sceGsSyncPath(kGsSyncPathWait, kGsSyncPathNoTimeout);
     (void)sceGsSyncV(kGsSyncVWait); // Yes, the binary discards the field.
-    TRACE_HERE
     sceGsResetGraph(kGsResetAll, kGsInterlace, kGsNtsc, kGsFrameMode);
-    TRACE_HERE
     sceGsSetDefDBuff(&g_debugDoubleBuffer,
                      kGsPsmCt32,
                      kDisplayWidth,
@@ -136,7 +132,6 @@ int InitDebugGs() {
     sceDmaSend(pVif1, reinterpret_cast<void *>((nBase & kDmaAddressMask) | kDmaScratchpadFlag));
     while (sceGsSyncV(kGsSyncVWait) == 0) {
     }
-    TRACE_HERE
     return 1;
 }
 
@@ -154,13 +149,9 @@ void OpenDebugConsole() {
 // 0x005e5f18
 void InitDebugConsole() {
     (void)InitDebugGs(); // Yes, the binary discards the result.
-    TRACE_HERE
     sceDevConsInit();
-    TRACE_HERE
     g_nDebugConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
-    TRACE_HERE
     sceDevConsClear(g_nDebugConsole);
-    TRACE_HERE
 }
 
 // 0x005e5f60
