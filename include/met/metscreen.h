@@ -448,10 +448,11 @@ public:
      *
      * The deferred half consults the container load interned under mUnknown28. Once that load
      * reports finished, slot 38 resolves the views while mUnknown48 is set, the view is handed to
-     * the renderer, slot 5 enters the screen, and a screen that also has mUnknown50 set becomes the
-     * active panel and runs slot 7. While the load is unfinished the half polls the RndAsyncLoader
-     * instead and records the completion in the shared load record, which is the one place
-     * MetContainerLoad::mUnknown04 is written after BeginContainerLoad().
+     * the renderer, slot 5 enters the screen, and mUnknown4c is cleared. A screen that also has
+     * mUnknown50 set then becomes the active panel and runs slot 7. While the load is unfinished
+     * the half polls the RndAsyncLoader instead and records the completion in the shared load
+     * record. The record is the one place MetContainerLoad::mUnknown04 is written after
+     * BeginContainerLoad().
      *
      * The animation half runs slot 32, then slot 26 either when mUnknown54 is set or when neither
      * animation is running, then slot 29 and slot 35. Slot 26 therefore fires on the same
@@ -655,6 +656,8 @@ public:
      *
      * Slot 18. A separator is appended to the directory before the request is built. The file
      * argument is declared and ignored, because the request is built from mUnknown28 instead.
+     * When a record is already interned under the name, the call returns without resetting or
+     * enqueuing it.
      *
      * @param directory The directory the container loads from.
      * @param file Declared and ignored.

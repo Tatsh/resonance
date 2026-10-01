@@ -10,8 +10,8 @@
 namespace {
 
 // Configuration codes the caches are filled from.
-constexpr int kLevelStageConfigCode = 0x25d;
-constexpr int kLevelValueConfigCode = 0x27d;
+constexpr int kLevelStageConfigCode = 605;
+constexpr int kLevelValueConfigCode = 637;
 constexpr int kJukeboxConfigCode = 0x514;
 
 // A cache word that has not been read yet.

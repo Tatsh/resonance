@@ -10,10 +10,6 @@
 
 namespace {
 
-// The tag and line Done() bills the buffer release to.
-static const char *const kSourceFile = "MetFreqLoader.cpp";
-constexpr int kReleaseLine = 124;
-
 // The value ParseIdentities() writes to each persona's word at +0x15c.
 constexpr int kParsedIdentity = 1;
 
@@ -34,7 +30,7 @@ void MetFreqLoader::Done(int, int, void *pBuffer, int nLength, int nStatus) {
         return;
     }
     ParseIdentities(pBuffer, nLength);
-    MemFreeTagged(pBuffer, kSourceFile, kReleaseLine);
+    MemFreeTagged(pBuffer, __FILE__, __LINE__);
     mHandle = 0;
     mLoaded = 1;
 }

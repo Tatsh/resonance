@@ -1,6 +1,7 @@
 #include "met/metscreen.h"
 
 #include <map>
+#include <stdio.h>
 
 #include "app/playsound.h"
 #include "met/metarenasscreen.h"
@@ -110,6 +111,9 @@ static const char *const kErrorSound = "SND_MET_ERROR";
 constexpr int kRestState = 1;
 constexpr int kAlternateState = 2;
 constexpr int kStepsPerCycle = 2;
+
+// The stack buffer ExitScreenByName() formats its log line into.
+constexpr int kExitLogBufferSize = 128;
 
 // What RndAsyncLoader::Poll() reports once a load is finished, which PollContainerLoads() also
 // records in MetContainerLoad::mUnknown04.
@@ -269,13 +273,15 @@ MetScreen *MetScreen::FindEndScreen([[maybe_unused]] MetRenderer *pRenderer, con
 // 0x0038aa00
 void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] const HxStr &file) {
     HxStr dir = directory + kPathSeparator;
-    if (ContainerLoaderMap()[mUnknown28] == nullptr) {
-        MetContainerLoad *pLoad = new MetContainerLoad;
-        pLoad->mLoader = new RndAsyncLoader(dir, mUnknown28, mUnknown88);
-        pLoad->mUnknown08 = 1;
-        pLoad->mUnknown04 = 0;
-        ContainerLoaderMap()[mUnknown28] = pLoad;
+    // A screen whose container another screen already loads does not touch the existing load.
+    if (ContainerLoaderMap()[mUnknown28] != nullptr) {
+        return;
     }
+    MetContainerLoad *pLoad = new MetContainerLoad;
+    pLoad->mLoader = new RndAsyncLoader(dir, mUnknown28, mUnknown88);
+    pLoad->mUnknown08 = 1;
+    pLoad->mUnknown04 = 0;
+    ContainerLoaderMap()[mUnknown28] = pLoad;
     ContainerLoaderMap()[mUnknown28]->mUnknown04 = 0;
     // Yes, the binary sets mUnknown08 and then immediately tests it, so the branch is always taken.
     ContainerLoaderMap()[mUnknown28]->mUnknown08 = 1;
@@ -383,8 +389,9 @@ void MetScreen::ActivateNamedPanel(const HxStr &name) {
 
 // 0x003902d0
 void MetScreen::ExitScreenByName(const HxStr &name) {
-    MemLogWrite(
-        FormatString("Exiting screen: %s\n", name.mStr != nullptr ? name.mStr : g_szEmptyString));
+    char szLine[kExitLogBufferSize];
+    sprintf(szLine, "Exiting screen: %s\n", name.mStr != nullptr ? name.mStr : g_szEmptyString);
+    MemLogWrite(szLine);
     // The binary neither checks the result nor recovers from a key nothing registered under.
     FindScreenByName(name)->BeginExit();
 }
@@ -623,8 +630,8 @@ void MetScreen::UpdateFrame(float flTime) {
             }
             mUnknown10->AddScreenView(mUnknown14);
             EnterAndShow();
+            mUnknown4c = 0;
             if (mUnknown50 != 0) {
-                mUnknown4c = 0;
                 mUnknown10->SetActivePanel(this);
                 mUnknown10->mUnknown80 = 1;
                 OnUnknownSlot7();

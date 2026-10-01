@@ -38,7 +38,7 @@ static const char *const kNoName = "";
 // The number of default macros, one for each function key.
 constexpr int kDefaultMacroCount = 12;
 static const char *const kMacroKeyFormat = "kb_macro_f%i";
-constexpr int kMacroConfigCode = 0x258;
+constexpr int kMacroConfigCode = 600;
 
 // Posted to the ticker when the keyboard departs.
 static const char *const kClearTickerTemplate = "keyboard_clear_ticker";

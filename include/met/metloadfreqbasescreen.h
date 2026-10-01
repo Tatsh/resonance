@@ -149,7 +149,7 @@ public:
      * and the main menu is restored by pushing MetLeftGizmoSmallScreen, MetTopLogoScreen, and
      * MetMainScreen and activating the last. Anything else is a selected button, and the selected
      * index picks one of OnNameButton(), OnEditButton(), and OnCreateButton(). An index outside 0
-     * through 2 does nothing, and the button selection is cleared on every path but the back one.
+     * through 2 does not call a handler, and the button selection is cleared on every path.
      *
      * @ghidraAddress 0x00292da8
      */

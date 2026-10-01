@@ -4,7 +4,7 @@
 
 #include "app/application.h"
 #include "app/watchdog.h"
-#include "profile/profiler.h"
+#include "os/cycles.h"
 
 namespace {
 
@@ -27,7 +27,7 @@ constexpr long long kHalfMillisecondNs = kNanosecondsPerMillisecond / 2;
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
 // recorded when the run started. MetRenderer and MainLoop have their own copies of the same inline.
 inline long long FrameClockNs(Watchdog *pWatchdog) {
-    return (ProfileClockMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
+    return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 
 // Milliseconds between two frame-clock readings, rounded rather than truncated.

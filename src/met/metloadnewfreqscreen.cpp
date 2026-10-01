@@ -33,8 +33,8 @@ static const char *const kEditPrompt = "cid_edit";
 static const char *const kCreatePrompt = "id_create";
 
 // Configuration code every label and the title come from, with the key each one passes.
-constexpr int kLabelConfigCode = 0x258;
-constexpr int kTitleConfigCode = 0x269;
+constexpr int kLabelConfigCode = 600;
+constexpr int kTitleConfigCode = 617;
 static const char *const kNameLabelKey = "nf_enter";
 static const char *const kEditLabelKey = "nf_edit";
 static const char *const kCreateLabelKey = "nf_create";

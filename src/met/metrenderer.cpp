@@ -33,10 +33,10 @@
 #include "msg/metunlockstagesmsg.h"
 #include "msg/rawcontrollermsg.h"
 #include "os/async.h"
+#include "os/cycles.h"
 #include "os/hxstr.h"
 #include "os/r250.h"
 #include "os/zone.h"
-#include "profile/profiler.h"
 #include "rnd/animatable.h"
 #include "rnd/asyncloader.h"
 #include "rnd/drawable.h"
@@ -55,7 +55,7 @@ constexpr long long kNanosecondsPerMillisecond = 1000000;
 // milliseconds so that the quotient rounds rather than truncates.
 constexpr long long kHalfMillisecondNs = 500000;
 
-constexpr float kMillisecondsPerSecond = 1000.0f;
+constexpr float kMillisecondsPerSecondFloat = 1000.0f;
 
 // Frame position the front end rewinds to when it starts running.
 constexpr float kFirstFrame = 1.0f;
@@ -99,7 +99,7 @@ template bool ContainsRef<Rnd::Animatable>(const std::list<Rnd::Animatable *> &l
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
 // recorded when the run started. MainLoop has its own copy of the same inline.
 inline long long FrameClockNs(Watchdog *pWatchdog) {
-    return (ProfileClockMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
+    return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 
 // Milliseconds between two frame-clock readings, rounded rather than truncated.
@@ -268,7 +268,7 @@ void MetRenderer::OnUnknownSlot9() {
     const int nIntervalMs = FrameIntervalMs(nNowNs, mUnknown70);
 
     mUnknown70 = nNowNs;
-    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecond;
+    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecondFloat;
 
     for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end(); ++it) {
         (*it)->UpdateAnimationFrame(mUnknown68);
@@ -813,7 +813,7 @@ void MetRenderer::OnUnknownSlot7() {
     const long long nNowNs = FrameClockNs(Application::shared()->GetWatchdog());
     const int nIntervalMs = FrameIntervalMs(nNowNs, mUnknown70);
     mUnknown70 = nNowNs;
-    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecond;
+    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecondFloat;
 
     if (mUnknownd0 != 0) {
         mUnknowncc->Update(mUnknown68);

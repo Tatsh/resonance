@@ -463,9 +463,7 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
         }
         delete mPersonas[nOldIndex];
         mPersonas.erase(mPersonas.begin() + nOldIndex);
-    }
-
-    if (bRenamed != 0) {
+    } else if (bRenamed != 0) {
         if (nNameIndex != kNotFound) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kOkButton));

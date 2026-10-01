@@ -262,7 +262,7 @@ void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
                                           GlobalSettings::shared()->mMinimumFreeClusters));
             MetMsgScreen::ShowActive(
                 HxStr(kCopyNoSpaceDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
-            MetMsgScreen::SetOwnerPad(mUnknownc8);
+            // Yes, the binary does not set the owner pad for the copy dialogue.
         } else {
             buttons.push_back(HxStr(kRetryButton));
             buttons.push_back(HxStr(kContinueButton));

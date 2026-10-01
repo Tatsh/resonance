@@ -56,8 +56,8 @@ static const char *const kPanelName = "MetStageFinishScreen";
 static const char *const kNoName = "";
 
 // Configuration codes the messages and the arena names are read under.
-constexpr int kPromptConfigCode = 0x258;
-constexpr int kArenaNameConfigCode = 0x326;
+constexpr int kPromptConfigCode = 600;
+constexpr int kArenaNameConfigCode = 806;
 
 // Frames between two steps of the message sequence.
 constexpr float kMessageInterval = 360.0f;

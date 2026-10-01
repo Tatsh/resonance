@@ -217,21 +217,20 @@ void MetLoadFreqBaseScreen::OnUnknownSlot36() {
         PushNamedScreen(HxStr(kTopLogoScreen));
         PushNamedScreen(HxStr(kMainScreen));
         ActivateNamedPanel(HxStr(kMainScreen));
-        return;
-    }
-
-    switch (mUnknown90->mSelected) {
-    case kNameButtonIndex:
-        OnNameButton();
-        break;
-    case kEditButtonIndex:
-        OnEditButton();
-        break;
-    case kCreateButtonIndex:
-        OnCreateButton();
-        break;
-    default:
-        break;
+    } else {
+        switch (mUnknown90->mSelected) {
+        case kNameButtonIndex:
+            OnNameButton();
+            break;
+        case kEditButtonIndex:
+            OnEditButton();
+            break;
+        case kCreateButtonIndex:
+            OnCreateButton();
+            break;
+        default:
+            break;
+        }
     }
 
     mUnknown90->SetSelected(-1);
