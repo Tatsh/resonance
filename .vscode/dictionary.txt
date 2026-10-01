@@ -933,7 +933,6 @@ ptsmult
 ptstmp
 ptstmphot
 pycompat
-pycxx
 pyinstaller
 pyinterpreter
 pylock
@@ -1208,7 +1207,6 @@ tracksonmsg
 transanim
 transformops
 transportaddress
-treeview
 trmopn
 trxdir
 trxpos

@@ -364,16 +364,13 @@ stays.
 `confstr`, `sysconf`, `fpathconf`, and `pathconf` are all absent from the method table, and their
 bodies go with the other discards; only the shared helper's two messages remain.
 
-## Vendored PyCXX
+## PyCXX
 
-The binding layer under `include/script/cxx/` is the port's modified PyCXX, so upstream is
-vendored as reference at `3rdparty/pycxx_5_2_2/`, the 5.2.2 release archive with its top
-directory name preserved. The 5.2 series is contemporary with development and still supports
-Python 2.0, which later series dropped. The exact patch the port used is unrecoverable, because
-its version marker is likely a header comment that does not survive compilation, so the newest
-5.2 patch stands in. The tree's headers remain the build's binding layer, with the game's own
-`HxStr` in place of `std::string` and no `owned` flag on `Py::Object`, and upstream is never on
-the include path.
+The binding layer under `include/script/cxx/` is the port's modified PyCXX. The PyCXX 5.2 series
+is contemporary with development and still supports Python 2.0. Later series dropped Python 2.0
+support. The exact patch the port used is unrecoverable, because its version marker is likely a
+header comment that compilation discards. The headers use the game's `HxStr` in place of
+`std::string`, and `Py::Object` has no `owned` flag.
 
 ## Outstanding
 
