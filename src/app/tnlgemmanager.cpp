@@ -156,7 +156,8 @@ TnlGemMeshKind *TnlGemManager::GetMeshKind(char nKind) {
 
 // 0x00415a68
 TnlGemEffectKind *TnlGemManager::GetEffectKind(char nKind) {
-    return mEffectKinds[nKind - kEffectKindBase];
+    // The binary narrows the difference back to a signed char before indexing.
+    return mEffectKinds[static_cast<signed char>(nKind - kEffectKindBase)];
 }
 
 // 0x00415a88

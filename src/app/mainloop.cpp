@@ -6,6 +6,7 @@
 #include "app/longop.h"
 #include "app/watchdog.h"
 #include "game/gamemanagerimpl.h"
+#include "os/cycles.h"
 #include "os/mem.h"
 #include "profile/profiler.h"
 #include "rnd/asyncloader.h"
@@ -20,7 +21,7 @@ constexpr long long kNanosecondsPerSecond = 1000000000;
 // milliseconds so that the quotient rounds rather than truncates.
 constexpr long long kHalfMillisecondNs = 500000;
 
-constexpr double kMillisecondsPerSecond = 1000.0;
+constexpr double kMillisecondsPerSecondDouble = 1000.0;
 
 // Period of both periodic timers.
 constexpr long long kTimerPeriodNs = 4000000;
@@ -56,7 +57,7 @@ Watchdog *s_pPumpedWatchdog;
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
 // recorded when the run started.
 inline long long FrameClockNs(Watchdog *pWatchdog) {
-    return (ProfileClockMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
+    return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 
 } // namespace
@@ -155,7 +156,7 @@ HxStr MainLoop::Name() {
 
 // 0x001ecc90
 int MainLoop::Poll() {
-    s_qwElapsedMs = ProfileClockMilliseconds();
+    s_qwElapsedMs = GetElapsedMilliseconds();
 
     char szFrameLabel[kFrameLabelSize];
     sprintf(szFrameLabel, "Frame: %d\n", s_nFramesThisWindow);
@@ -169,7 +170,7 @@ int MainLoop::Poll() {
         int nWindowMs = static_cast<int>((nNowNs - s_qwFpsWindowStartNs + kHalfMillisecondNs) /
                                          kNanosecondsPerMillisecond);
         float flFps = static_cast<float>(static_cast<double>(s_nFramesThisWindow) *
-                                         kMillisecondsPerSecond / nWindowMs);
+                                         kMillisecondsPerSecondDouble / nWindowMs);
         int nFps = static_cast<int>(flFps + 0.5);
         if (nFps != s_nFramesPerSecond) {
             s_nFramesPerSecond = nFps;
@@ -207,7 +208,7 @@ void MainLoop::PumpTimers() {
 
 // 0x001ec8c0
 void MainLoop::KeepAliveDraw() {
-    long long nNowMs = ProfileClockMilliseconds();
+    long long nNowMs = GetElapsedMilliseconds();
     if (nNowMs - s_qwLastKeepAliveMs < kKeepAliveIntervalMs) {
         return;
     }

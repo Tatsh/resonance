@@ -199,7 +199,7 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
 
     if (pChosen == nullptr) {
         if ((mFlags & kHeapFlagFatalWhenFull) != 0) {
-            Fatal("Python heap is out of memory!\n");
+            Fatal("Python heap is out of memory!");
         }
         AccumulateMicroseconds(&g_nHeapAllocMicroseconds, nStart);
         return nullptr;
@@ -212,8 +212,8 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
     } else {
         HeapNode *pRemainder = NodeAt(pChosen, nNeed);
         SetNodePrev(pRemainder, pChosen);
+        pRemainder->mNext = pChosen->mNext;
         if (pChosen->mNext != nullptr) {
-            pRemainder->mNext = pChosen->mNext;
             SetNodePrev(pChosen->mNext, pRemainder);
         }
         pRemainder->mFreePrev = pChosen->mFreePrev;

@@ -226,7 +226,7 @@ public:
      * @return GameParams::mJukeboxMode of GameManagerImpl::GetParams().
      * @ghidraAddress 0x00118e38
      */
-    bool IsJukeboxMode();
+    int IsJukeboxMode();
 
     /**
      * Report the world's level.

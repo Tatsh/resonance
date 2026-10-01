@@ -1070,7 +1070,8 @@ void AppTunnel::OnPlaybackToggle(PlaybackToggleMsg *pMsg) {
     for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         (*it)->mActivator.SetSuppressed(mJukebox);
     }
-    mNowRing->SetShowing(!mJukebox);
+    // Yes, the binary flips the low bit rather than testing zero.
+    mNowRing->SetShowing(mJukebox ^ 1);
 }
 
 // 0x00449240

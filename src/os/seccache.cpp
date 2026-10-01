@@ -148,7 +148,7 @@ SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
     unsigned nOldest = kSectorCacheStampCeiling;
     SectorCacheRow *pChosen = nullptr;
     SectorCacheRow *pRow = g_pSectorCacheRows;
-    for (int i = g_nSectorCacheRows; i != 0; --i) {
+    for (int i = g_nSectorCacheRows; i > 0; --i) {
         // The unsigned comparison already excludes a locked row, because the locked stamp sorts
         // above the ceiling. The second test is the shipped code's own belt and braces.
         if (pRow->mStamp < nOldest && pRow->mStamp != kSectorCacheLocked) {

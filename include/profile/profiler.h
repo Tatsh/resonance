@@ -79,15 +79,3 @@ extern long long g_llFrameTimerCycles;
  * @ghidraAddress 0x0053dcf8
  */
 void ResetFrameTimer();
-
-/**
- * Sample the wall clock the profiler counts against.
- *
- * The routine accumulates the EE cycle counter into a 64-bit total and divides by the cycles per
- * millisecond. It is inline in the profiler's own header, so the compiler expanded a copy into
- * each of MainLoop::Poll(), MainLoop::PumpTimers(), and MainLoop::KeepAliveDraw() rather than
- * emitting one body.
- *
- * @return Milliseconds since the counter started.
- */
-long long ProfileClockMilliseconds();

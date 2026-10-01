@@ -113,7 +113,7 @@ void TnlGridMarkers::Update(float flFrame) {
             }
             it->mMesh->SetVertexColor(Color{1.0f, 1.0f, 1.0f, flAlpha});
             const int nBar = static_cast<int>(it->mFrame) / kFramesPerBar;
-            it->mMesh->SetShowing(!mTunnel->IsTrackBarLocked(mTrack, nBar));
+            it->mMesh->SetShowing(mTunnel->IsTrackBarLocked(mTrack, nBar) ^ 1);
         }
     }
 }

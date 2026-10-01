@@ -198,11 +198,15 @@ void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_si
                                 graph->u[nUpMate].mate = nUpVertex;
                                 nChild = nUp;
                                 nUp = g_aNetflowQueue[nChild].mParent;
+                                // Yes, the binary counts every step of the path, not each path.
+                                ++g_nNetflowAugmentTotal;
                             }
-                            ++g_nNetflowAugmentTotal;
                             for (int i = 0; i <= nWrite; ++i) {
                                 g_abNetflowVisited[g_aNetflowQueue[i].mUVertex] = 0;
                             }
+                            // The binary abandons this root after one augmentation.
+                            nWrite = nParent;
+                            break;
                         }
                     }
                     pEdge = pEdge->next;

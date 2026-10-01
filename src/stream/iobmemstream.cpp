@@ -33,7 +33,7 @@ IOBMemStream::~IOBMemStream() {
 // 0x004ee0e8
 IBStream &IOBMemStream::ReadBytes(void *pDest, int nSize) {
     const int nAvailable = static_cast<int>(mBuffer.size());
-    if (nAvailable < (mPos + nSize)) {
+    if (static_cast<unsigned>(nAvailable) < static_cast<unsigned>(mPos + nSize)) {
         nSize = nAvailable - mPos;
         mEof = 1;
         mFail = 1;
@@ -110,10 +110,10 @@ void IOBMemStream::DiscardReadBytes() {
 
 // 0x004ed068
 OBStream &IOBMemStream::WriteBytes(const void *pSrc, int nSize) {
-    if (static_cast<int>(mBuffer.capacity()) < (mPos + nSize)) {
+    if (mBuffer.capacity() < static_cast<unsigned int>(mPos + nSize)) {
         mBuffer.reserve(mBuffer.capacity() + kMemStreamGrowStep);
     }
-    if (static_cast<int>(mBuffer.size()) < (mPos + nSize)) {
+    if (mBuffer.size() < static_cast<unsigned int>(mPos + nSize)) {
         mBuffer.resize(mPos + nSize);
     }
     memcpy(&mBuffer[mPos], pSrc, nSize);

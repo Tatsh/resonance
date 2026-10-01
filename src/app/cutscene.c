@@ -15,10 +15,6 @@
 #include "os/log.h"
 #include "os/mem.h"
 
-// The binary passes __FILE__ and __LINE__ to the tagged allocator. The literal was "cutscene.c".
-static const char kSourceFile[] = "cutscene.c";
-enum { kAllocLine = 134, kFreeLine = 167 };
-
 // The one block every decoder buffer is carved from. Each buffer starts on a 64-byte boundary, and
 // the block reserves 64 bytes of slack for aligning the first.
 enum {
@@ -189,7 +185,7 @@ static void reset_display(void) {
 
 // 0x005107a8
 static void init_all(void) {
-    g_cutscene_memory = MemAllocTagged(kCutsceneMemorySize, kSourceFile, kAllocLine);
+    g_cutscene_memory = MemAllocTagged(kCutsceneMemorySize, __FILE__, __LINE__);
     g_mpeg_work = ALIGN_UP(g_cutscene_memory);
     g_audio_buffer = ALIGN_UP(g_mpeg_work + kMpegWorkSize);
     g_video_data = ALIGN_UP(g_audio_buffer + kAudioBufferSize);
@@ -381,7 +377,7 @@ static int play(const char *name, int with_audio) {
 
 // 0x00510f90
 static void free_all(void) {
-    MemFreeTagged(g_cutscene_memory, kSourceFile, kFreeLine);
+    MemFreeTagged(g_cutscene_memory, __FILE__, __LINE__);
 }
 
 // 0x00511010

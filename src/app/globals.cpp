@@ -139,7 +139,7 @@ PlayMap *Globals::GetPlayMap() {
 }
 
 // 0x00118e38
-bool Globals::IsJukeboxMode() {
+int Globals::IsJukeboxMode() {
     return GetGameManager()->GetParams()->mJukeboxMode;
 }
 

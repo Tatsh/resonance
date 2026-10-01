@@ -55,7 +55,7 @@ void FailSink::OpenLog(const HxStr &path) {
     CloseLog();
     mLogStream = new Rnd::FileStream(path, kOpenForWriting);
     if (mLogStream->Fail()) {
-        g_failSink.Report("Couldn't open log %s",
+        g_failSink.Report("Couldn't open log %s\n",
                           path.mStr != nullptr ? path.mStr : g_szEmptyString);
         delete mLogStream;
         mLogStream = nullptr;

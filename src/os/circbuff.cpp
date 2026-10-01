@@ -125,7 +125,8 @@ int CircBuff::ReadFromFile(int nFile, int nBytes) {
         if (nBytes >= mRead - mBuff) {
             return 0;
         }
-        FileRead(nFile, mBuff, nBytes);
+        // Yes, the binary reads to the old write position and only then wraps it to mBuff.
+        FileRead(nFile, mWrite, nBytes);
         mWrite = mBuff + nBytes;
         return nBytes;
     }
