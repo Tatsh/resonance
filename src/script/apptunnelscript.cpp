@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app/apptunnel.h"
 #include "app/tnlplayer.h"
 #include "app/tnlsabretrail.h"
@@ -12,6 +14,7 @@
 #include "rnd/tunnel.h"
 #include "rnd/tunnelseeker.h"
 #include "script/cxx/config.h"
+#include "script/cxx/float.h"
 #include "script/cxx/int.h"
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
@@ -23,8 +26,8 @@ namespace {
 
 // Show or report a drawable.
 //
-// An empty tuple reports the showing flag. Otherwise the first element selects showing, and a
-// value above zero shows. The tuple arrives by value, so the copy the caller builds is released
+// An empty tuple reports the showing flag. Otherwise the first element selects showing, and any
+// nonzero value shows. The tuple arrives by value, and the copy the caller builds is released
 // here.
 // 0x0044a380
 Py::Object ShowDrawable(Py::Tuple args, Rnd::Drawable *pTarget) {
@@ -32,16 +35,16 @@ Py::Object ShowDrawable(Py::Tuple args, Rnd::Drawable *pTarget) {
         return Py::Object();
     }
     if (args.length() == 0) {
-        return Py::Int(static_cast<long>(pTarget->mShowing));
+        return Py::Int(static_cast<long long>(pTarget->mShowing));
     }
-    const long nShow = Py::Int(args.getItem(0));
-    pTarget->SetShowing(nShow > 0 ? 1 : 0);
+    const int nShow = Py::Int(args.getItem(0));
+    pTarget->SetShowing(nShow != 0 ? 1 : 0);
     return Py::Object();
 }
 
 // Show the activator.
 // 0x0044a7b0
-Py::Object ScriptActivatorShow(const Py::Tuple &args) {
+Py::Object ScriptActivatorShow(Py::Tuple args) {
     Rnd::Drawable *pTarget =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("activator0")));
     return ShowDrawable(Py::Tuple(args), pTarget);
@@ -49,7 +52,7 @@ Py::Object ScriptActivatorShow(const Py::Tuple &args) {
 
 // Show the now ring.
 // 0x0044a930
-Py::Object ScriptNowRing(const Py::Tuple &args) {
+Py::Object ScriptNowRing(Py::Tuple args) {
     Rnd::Drawable *pTarget =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("nowring.view")));
     return ShowDrawable(Py::Tuple(args), pTarget);
@@ -57,7 +60,7 @@ Py::Object ScriptNowRing(const Py::Tuple &args) {
 
 // Show the three head-up displays.
 // 0x0044aab0
-Py::Object ScriptHudEnable(const Py::Tuple &args) {
+Py::Object ScriptHudEnable(Py::Tuple args) {
     Rnd::Drawable *pEnergy =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("HUD1 energy.mesh")));
     ShowDrawable(Py::Tuple(args), pEnergy);
@@ -72,7 +75,7 @@ Py::Object ScriptHudEnable(const Py::Tuple &args) {
 
 // Show the section boundary.
 // 0x0044af40
-Py::Object ScriptSections(const Py::Tuple &args) {
+Py::Object ScriptSections(Py::Tuple args) {
     Rnd::Drawable *pMessage =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("boundary msg")));
     ShowDrawable(Py::Tuple(args), pMessage);
@@ -85,7 +88,7 @@ Py::Object ScriptSections(const Py::Tuple &args) {
 // Show or hide the first player's seeker.
 //
 // An empty tuple reports the seeker fade's active flag. Otherwise the first element selects
-// showing: a value above zero applies the fade's stored range to the seeker, anything else
+// showing. Any nonzero value applies the fade's stored range to the seeker, and anything else
 // applies an empty range. Either way the sabre-trail string follows the flag. Without an app
 // tunnel there is nothing to drive. The tuple arrives by value and is released here.
 // 0x0044b2d8
@@ -95,10 +98,10 @@ Py::Object ScriptSeeker(Py::Tuple args) {
     }
     TnlPlayer *pPlayer = g_pAppTunnel->mPlayers[0];
     if (args.length() == 0) {
-        return Py::Int(static_cast<long>(pPlayer->mSeekerFade.mActive));
+        return Py::Int(static_cast<long long>(pPlayer->mSeekerFade.mActive));
     }
-    const long nShow = Py::Int(args.getItem(0));
-    const int bShow = nShow > 0 ? 1 : 0;
+    const int nShow = Py::Int(args.getItem(0));
+    const int bShow = nShow != 0 ? 1 : 0;
     pPlayer->mSeekerFade.mActive = bShow;
     Rnd::TunnelSeeker *pSeeker = GetCachedTunnelObject()->GetSeeker(pPlayer->mSeekerFade.mIndex);
     if (bShow == 0) {
@@ -116,7 +119,7 @@ Py::Object ScriptSeeker(Py::Tuple args) {
 //
 // All five materials have to resolve, or nothing happens. The tuple carries the alpha.
 // 0x0044b7a0
-Py::Object ScriptFadeActivator(const Py::Tuple &args) {
+Py::Object ScriptFadeActivator(Py::Tuple args) {
     Rnd::Mat *pActTarUp = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("act_g tar up.mat")));
     Rnd::Mat *pScratch = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("scratch_g.mat")));
     Rnd::Mat *pAct = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("act_g.mat")));
@@ -128,9 +131,9 @@ Py::Object ScriptFadeActivator(const Py::Tuple &args) {
         return Py::Object();
     }
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for fade_activator")));
+        throw Py::TypeError(HxStr("wrong # args for fade_activator"));
     }
-    Py::Object number(PyNumber_Float(args.getItem(0).mPtr));
+    Py::Float number(Py::FromAPI(PyNumber_Float(args.getItem(0).mPtr)).mPtr);
     const float flAlpha = static_cast<float>(PyFloat_AsDouble(number.mPtr));
     pActTarUp->SetAlpha(flAlpha);
     pAct->SetAlpha(flAlpha);
@@ -149,6 +152,9 @@ PyObject *PyInvokeActivatorShow(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -160,6 +166,9 @@ PyObject *PyInvokeNowRing(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptNowRing(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -173,6 +182,9 @@ PyObject *PyInvokeHudEnable(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -184,6 +196,9 @@ PyObject *PyInvokeSections(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptSections(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -197,6 +212,9 @@ PyObject *PyInvokeSeeker(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -208,6 +226,9 @@ PyObject *PyInvokeFadeActivator(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptFadeActivator(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <exception>
 #include <sstream>
 #include <string>
 
@@ -53,7 +54,7 @@ void InputParseDevice(const HxStr &text, InputDeviceDesc *pDesc) {
     std::istringstream stream(text.mStr != nullptr ? text.mStr : "");
     std::string word;
     if (!(stream >> word)) {
-        throw Py::TypeError(HxStr(FormatString("cannot parse Device Type from:")));
+        throw Py::TypeError(HxStr("cannot parse Device Type from:"));
     }
     if (word == "none") {
         pDesc->mTag = kDeviceNone;
@@ -64,7 +65,7 @@ void InputParseDevice(const HxStr &text, InputDeviceDesc *pDesc) {
     } else if (word == "key") {
         pDesc->mTag = kDeviceKeyboard;
     } else {
-        throw Py::TypeError(HxStr(FormatString("cannot parse Device Type from:")));
+        throw Py::TypeError(HxStr("cannot parse Device Type from:"));
     }
 }
 
@@ -74,9 +75,11 @@ void InputParseDevice(const HxStr &text, InputDeviceDesc *pDesc) {
 // 0x00154b30
 void InputParseEvent(const HxStr &text, InputEventDesc *pDesc) {
     std::istringstream stream(text.mStr != nullptr ? text.mStr : "");
+    // The first character becomes the most significant byte, and spaces count as characters.
     char tag[4];
-    if (!(stream >> tag[0] >> tag[1] >> tag[2] >> tag[3])) {
-        throw Py::TypeError(HxStr(FormatString("bad Event Type")));
+    stream >> std::noskipws;
+    if (!(stream >> tag[3] >> tag[2] >> tag[1] >> tag[0])) {
+        throw Py::TypeError(HxStr("bad Event Type"));
     }
     std::memcpy(&pDesc->mTag, tag, sizeof(tag));
 }
@@ -90,12 +93,12 @@ void InputParseEvent(const HxStr &text, InputEventDesc *pDesc) {
 Py::Object ScriptInput(const Py::Tuple &args) {
     InputMap *pMap = InputMap::shared();
     if (args.length() < 3) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for input")));
+        throw Py::TypeError(HxStr("wrong # args for input"));
     }
     Py::Object commandElement = args.getItem(0);
     Py::String commandText(commandElement);
     HxStr command = commandText;
-    const long nSlot = Py::Int(args.getItem(1));
+    const int nSlot = Py::Int(args.getItem(1));
     Py::Object eventElement = args.getItem(2);
     Py::String eventString(eventElement);
     HxStr eventName = eventString;
@@ -103,7 +106,7 @@ Py::Object ScriptInput(const Py::Tuple &args) {
     InputParseEvent(eventName, &event);
     if (command == "add") {
         if (event.mTag == kEventPitchRiff) {
-            const long nExtra = Py::Int(args.getItem(3));
+            const int nExtra = Py::Int(args.getItem(3));
             event.mExtra = static_cast<int>(nExtra);
         }
         Py::Object deviceElement = args.getItem(4);
@@ -111,8 +114,8 @@ Py::Object ScriptInput(const Py::Tuple &args) {
         HxStr deviceName = deviceText;
         InputDeviceDesc device{};
         InputParseDevice(deviceName, &device);
-        const long nPort = Py::Int(args.getItem(5));
-        const long nButton = Py::Int(args.getItem(6));
+        const int nPort = Py::Int(args.getItem(5));
+        const int nButton = Py::Int(args.getItem(6));
         pMap->AddBinding(device.mTag,
                          static_cast<int>(nPort),
                          static_cast<int>(nButton),
@@ -129,7 +132,7 @@ Py::Object ScriptInput(const Py::Tuple &args) {
         pMap->SetEnabled(static_cast<int>(nSlot), event.mTag, 1);
         return Py::Object();
     }
-    throw Py::TypeError(HxStr(FormatString("bad first arg to input")));
+    throw Py::TypeError(HxStr("bad first arg to input"));
 }
 
 // Run ScriptInput() on the interpreter's argument tuple.
@@ -140,6 +143,9 @@ PyObject *PyInvokeInput(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptInput(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -152,12 +158,12 @@ PyObject *PyInvokeInput(PyObject *, PyObject *pArgs) {
 // 0x00162c90
 Py::Object ScriptTrackCtrl(const Py::Tuple &args) {
     if (args.length() != 2) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for input")));
+        throw Py::TypeError(HxStr("wrong # args for input"));
     }
     Py::Object commandElement = args.getItem(0);
     Py::String commandText(commandElement);
     HxStr command = commandText;
-    const long nTrack = Py::Int(args.getItem(1));
+    const int nTrack = Py::Int(args.getItem(1));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld == nullptr) {
         return Py::Object();
@@ -188,6 +194,9 @@ PyObject *PyInvokeTrackCtrl(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptTrackCtrl(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

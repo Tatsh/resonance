@@ -22,6 +22,17 @@ namespace Py {
 class Type : public Object {
 public:
     /**
+     * Take a borrowed reference to an existing type object.
+     *
+     * Inline. Object::type() at `0x0055c818` expands it.
+     *
+     * @param pyob The type object to wrap.
+     */
+    explicit Type(PyObject *pyob) : Object(pyob) {
+        validate();
+    }
+
+    /**
      * Accept only a type object.
      *
      * @param pyob The reference to test.

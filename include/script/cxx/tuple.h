@@ -47,9 +47,9 @@ public:
     /**
      * Create a tuple of a given length.
      *
-     * Only the signature is recovered. The body builds a handle on the result of a zero-length
-     * `PyTuple_New()` and then grows it, and the growth path is not worked out, so no body is
-     * written. PyShell::ReportError() creates a two-element tuple this way.
+     * The base starts on an empty tuple. The body replaces it with a new tuple of the requested
+     * length through set() and fills every slot with `None`, throwing Py::Exception when a slot
+     * cannot be written. PyShell::ReportError() creates a two-element tuple this way.
      *
      * @param nSize The number of elements.
      * @ghidraAddress 0x004c5690

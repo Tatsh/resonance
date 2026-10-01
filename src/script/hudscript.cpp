@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app/hudanimramp.h"
 #include "app/hudpanel.h"
 #include "app/linearramp.h"
@@ -6,6 +8,7 @@
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "script/cxx/config.h"
+#include "script/cxx/float.h"
 #include "script/cxx/int.h"
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
@@ -17,14 +20,14 @@ namespace {
 
 // Move the activator label to a value.
 // 0x00420d00
-Py::Object ScriptActivatorLabel(const Py::Tuple &args) {
+Py::Object ScriptActivatorLabel(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for activator_label")));
+        throw Py::TypeError(HxStr("wrong # args for activator_label"));
     }
-    Py::Object number(PyNumber_Float(args.getItem(0).mPtr));
+    Py::Float number(Py::FromAPI(PyNumber_Float(args.getItem(0).mPtr)).mPtr);
     const float flValue = static_cast<float>(PyFloat_AsDouble(number.mPtr));
     g_pOverlay->mPanel->mLabelSwap.mRamp.SetTarget(flValue);
     return Py::Object();
@@ -32,20 +35,20 @@ Py::Object ScriptActivatorLabel(const Py::Tuple &args) {
 
 // Put the highlight box on a rectangle at once.
 // 0x00421238
-Py::Object ScriptHighlightSnap(const Py::Tuple &args) {
+Py::Object ScriptHighlightSnap(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 4) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for highlight_snap")));
+        throw Py::TypeError(HxStr("wrong # args for highlight_snap"));
     }
-    Py::Object leftNumber(PyNumber_Float(args.getItem(0).mPtr));
+    Py::Float leftNumber(Py::FromAPI(PyNumber_Float(args.getItem(0).mPtr)).mPtr);
     const float flLeft = static_cast<float>(PyFloat_AsDouble(leftNumber.mPtr));
-    Py::Object topNumber(PyNumber_Float(args.getItem(1).mPtr));
+    Py::Float topNumber(Py::FromAPI(PyNumber_Float(args.getItem(1).mPtr)).mPtr);
     const float flTop = static_cast<float>(PyFloat_AsDouble(topNumber.mPtr));
-    Py::Object rightNumber(PyNumber_Float(args.getItem(2).mPtr));
+    Py::Float rightNumber(Py::FromAPI(PyNumber_Float(args.getItem(2).mPtr)).mPtr);
     const float flRight = static_cast<float>(PyFloat_AsDouble(rightNumber.mPtr));
-    Py::Object bottomNumber(PyNumber_Float(args.getItem(3).mPtr));
+    Py::Float bottomNumber(Py::FromAPI(PyNumber_Float(args.getItem(3).mPtr)).mPtr);
     const float flBottom = static_cast<float>(PyFloat_AsDouble(bottomNumber.mPtr));
     g_pOverlay->mPanel->mHighlight.JumpTo(flLeft, flTop, flRight, flBottom);
     return Py::Object();
@@ -53,22 +56,22 @@ Py::Object ScriptHighlightSnap(const Py::Tuple &args) {
 
 // Glide the highlight box to a rectangle over a time.
 // 0x004220f8
-Py::Object ScriptHighlightSlide(const Py::Tuple &args) {
+Py::Object ScriptHighlightSlide(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 5) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for highlight_slide")));
+        throw Py::TypeError(HxStr("wrong # args for highlight_slide"));
     }
-    Py::Object leftNumber(PyNumber_Float(args.getItem(0).mPtr));
+    Py::Float leftNumber(Py::FromAPI(PyNumber_Float(args.getItem(0).mPtr)).mPtr);
     const float flLeft = static_cast<float>(PyFloat_AsDouble(leftNumber.mPtr));
-    Py::Object topNumber(PyNumber_Float(args.getItem(1).mPtr));
+    Py::Float topNumber(Py::FromAPI(PyNumber_Float(args.getItem(1).mPtr)).mPtr);
     const float flTop = static_cast<float>(PyFloat_AsDouble(topNumber.mPtr));
-    Py::Object rightNumber(PyNumber_Float(args.getItem(2).mPtr));
+    Py::Float rightNumber(Py::FromAPI(PyNumber_Float(args.getItem(2).mPtr)).mPtr);
     const float flRight = static_cast<float>(PyFloat_AsDouble(rightNumber.mPtr));
-    Py::Object bottomNumber(PyNumber_Float(args.getItem(3).mPtr));
+    Py::Float bottomNumber(Py::FromAPI(PyNumber_Float(args.getItem(3).mPtr)).mPtr);
     const float flBottom = static_cast<float>(PyFloat_AsDouble(bottomNumber.mPtr));
-    Py::Object durationNumber(PyNumber_Float(args.getItem(4).mPtr));
+    Py::Float durationNumber(Py::FromAPI(PyNumber_Float(args.getItem(4).mPtr)).mPtr);
     const float flDuration = static_cast<float>(PyFloat_AsDouble(durationNumber.mPtr));
     g_pOverlay->mPanel->mHighlight.MoveTo(flLeft, flTop, flRight, flBottom, flDuration);
     return Py::Object();
@@ -78,14 +81,14 @@ Py::Object ScriptHighlightSlide(const Py::Tuple &args) {
 //
 // Only a value of 1 shows.
 // 0x004232d8
-Py::Object ScriptHighlightSetshow(const Py::Tuple &args) {
+Py::Object ScriptHighlightSetshow(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for highlight_show")));
+        throw Py::TypeError(HxStr("wrong # args for highlight_show"));
     }
-    const long nShow = Py::Int(args.getItem(0));
+    const long long nShow = Py::Int(args.getItem(0));
     g_pOverlay->mPanel->mHighlight.SetShowing(nShow == 1 ? 1 : 0);
     return Py::Object();
 }
@@ -94,14 +97,14 @@ Py::Object ScriptHighlightSetshow(const Py::Tuple &args) {
 //
 // Only a value of 1 shows.
 // 0x004236f8
-Py::Object ScriptAnalogStickSetshow(const Py::Tuple &args) {
+Py::Object ScriptAnalogStickSetshow(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for analog_stick_show")));
+        throw Py::TypeError(HxStr("wrong # args for analog_stick_show"));
     }
-    const long nShow = Py::Int(args.getItem(0));
+    const long long nShow = Py::Int(args.getItem(0));
     g_pOverlay->mPanel->mAnalogStick.SetShowing(nShow == 1 ? 1 : 0);
     return Py::Object();
 }
@@ -111,14 +114,14 @@ Py::Object ScriptAnalogStickSetshow(const Py::Tuple &args) {
 // Only a value of 1 shows. The length error repeats the analog stick message, as the image
 // does.
 // 0x00423b18
-Py::Object ScriptControllerSetshow(const Py::Tuple &args) {
+Py::Object ScriptControllerSetshow(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for analog_stick_show")));
+        throw Py::TypeError(HxStr("wrong # args for analog_stick_show"));
     }
-    const long nShow = Py::Int(args.getItem(0));
+    const long long nShow = Py::Int(args.getItem(0));
     g_pOverlay->mPanel->mTcGroup.SetShowing(nShow == 1 ? 1 : 0);
     return Py::Object();
 }
@@ -128,12 +131,12 @@ Py::Object ScriptControllerSetshow(const Py::Tuple &args) {
 // The binary expands the two branches of HudAnalogStick::SetMotion() inline; calling it repeats
 // them without duplicating the body.
 // 0x00423f40
-Py::Object ScriptAnalogStickSetmat(const Py::Tuple &args) {
+Py::Object ScriptAnalogStickSetmat(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
     }
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for analog_stick_show")));
+        throw Py::TypeError(HxStr("wrong # args for analog_stick_show"));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -151,6 +154,9 @@ PyObject *PyInvokeActivatorLabel(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -162,6 +168,9 @@ PyObject *PyInvokeHighlightSnap(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptHighlightSnap(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -175,6 +184,9 @@ PyObject *PyInvokeHighlightSlide(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -186,6 +198,9 @@ PyObject *PyInvokeHighlightSetshow(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptHighlightSetshow(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -199,6 +214,9 @@ PyObject *PyInvokeAnalogStickSetshow(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -211,6 +229,9 @@ PyObject *PyInvokeControllerSetshow(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -222,6 +243,9 @@ PyObject *PyInvokeAnalogStickSetmat(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptAnalogStickSetmat(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

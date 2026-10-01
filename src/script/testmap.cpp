@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "game/playmaprepeatring.h"
 #include "script/cxx/config.h"
 #include "script/cxx/int.h"
@@ -15,7 +17,7 @@ constexpr int kTestMapResultSize = 61;
 
 // Build one probe pair: the bar and the section holding it.
 // 0x0012c040
-Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long nBar) {
+Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long long nBar) {
     Py::Tuple probe(2);
     probe.setItem(0, Py::Int(nBar));
     probe.setItem(1, Py::Int(pRing->Slot5(static_cast<int>(nBar))));
@@ -59,6 +61,9 @@ PyObject *PyInvokeTestMap(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptTestMap(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

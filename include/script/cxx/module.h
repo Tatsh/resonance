@@ -35,10 +35,13 @@ public:
      *
      * The interpreter call is `PyImport_ImportModule()` rather than `PyImport_AddModule()`, which
      * released PyCXX uses. Recovered from PyShell's constructor, which imports `__main__` this
-     * way, so the body is inlined at that site and has no address of its own.
+     * way with the body inlined. The out-of-line copy is never called. set() adds a count to the
+     * new reference the import returns. Every import through this constructor therefore retains
+     * one extra reference to the module.
      *
      * @param name The module name. An empty string arrives at the interpreter as
      *             g_szEmptyString rather than as a null pointer.
+     * @ghidraAddress 0x005a6008
      */
     explicit Module(const HxStr &name) : Object() {
         set(PyImport_ImportModule(

@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app/application.h"
 #include "app/globals.h"
 #include "game/grooveworld.h"
@@ -23,9 +25,9 @@ namespace {
 // 0x0015ff98
 Py::Object ScriptSetLoopMode(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for set_loop_mode")));
+        throw Py::TypeError(HxStr("wrong # args for set_loop_mode"));
     }
-    const long nLooping = Py::Int(args.getItem(0));
+    const long long nLooping = Py::Int(args.getItem(0));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
         LocalPlayer *pPlayer = dynamic_cast<LocalPlayer *>(pWorld->mLocalPlayers[0]);
@@ -46,6 +48,9 @@ PyObject *PyInvokeSetLoopMode(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -56,9 +61,9 @@ PyObject *PyInvokeSetLoopMode(PyObject *, PyObject *pArgs) {
 // 0x001602a8
 Py::Object ScriptSetGhostMode(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for set_ghost_mode")));
+        throw Py::TypeError(HxStr("wrong # args for set_ghost_mode"));
     }
-    const long nGhost = Py::Int(args.getItem(0));
+    const long long nGhost = Py::Int(args.getItem(0));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
         LocalPlayer *pPlayer = dynamic_cast<LocalPlayer *>(pWorld->mLocalPlayers[0]);
@@ -77,6 +82,9 @@ PyObject *PyInvokeSetGhostMode(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptSetGhostMode(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

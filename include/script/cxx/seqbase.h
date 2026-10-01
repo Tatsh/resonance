@@ -81,6 +81,7 @@ public:
      * @param pyob The reference to test.
      * @return True when the reference is a sequence.
      * @ghidraAddress 0x0012b328
+     * @ghidraAddress 0x004c7c30
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PySequence_Check(pyob) != 0;
@@ -96,11 +97,11 @@ public:
      * and released PyCXX returns `std::string::npos` from the same member, which is what settles
      * the reading.
      *
-     * No body is written, because the constant belongs in `os/hxstr.h` and this subsystem cannot
-     * declare it.
+     * The bodies are explicit specialisations that read the sentinel from `os/hxstr.h`.
      *
      * @return The sentinel.
      * @ghidraAddress 0x0012ad48
+     * @ghidraAddress 0x004c7260
      */
     virtual int max_size() const;
 
@@ -112,6 +113,7 @@ public:
      *
      * @return The length.
      * @ghidraAddress 0x0012b378
+     * @ghidraAddress 0x004c7c80
      */
     virtual int capacity() const {
         return size();
@@ -120,12 +122,13 @@ public:
     /**
      * Exchange references with another handle of the same kind.
      *
-     * Only the signature is recovered. The body opens by copy-constructing a handle of this type
-     * from the argument and then cross-assigns the two references, which is the shape released
-     * PyCXX has, and the exchange itself is not worked out, so no body is written.
+     * Copies the argument into a temporary handle, gives the argument this handle's reference
+     * unless the two already match, and then takes the temporary's reference through set(). Each
+     * set() runs validate(). A reference the receiving type rejects throws.
      *
      * @param other The handle to exchange with.
      * @ghidraAddress 0x0012b3a0
+     * @ghidraAddress 0x004c7890
      */
     virtual void swap(SeqBase<T> &other);
 
@@ -136,10 +139,11 @@ public:
      * on. `SeqBase<Object>` calls `PySequence_Length()` at `0x004a53f0` and `SeqBase<Char>` calls
      * `PyString_Size()` at `0x005a1ca0`, so a single template body cannot produce both. Whether
      * the port wrote an explicit specialisation or routed the call through the element type is
-     * not recovered, and no body is written rather than picking one.
+     * not recovered. The bodies are explicit specialisations.
      *
      * @return The length.
      * @ghidraAddress 0x0012b358
+     * @ghidraAddress 0x004c73d0
      */
     virtual int size() const;
 
@@ -152,6 +156,7 @@ public:
      * @param i The index.
      * @return A handle on the element.
      * @ghidraAddress 0x0012ac48
+     * @ghidraAddress 0x004c7a48
      */
     virtual T getItem(int i) const {
         return T(FromAPI(PySequence_GetItem(mPtr, i)).mPtr);
@@ -163,6 +168,7 @@ public:
      * @param i The index.
      * @param value The element to store.
      * @ghidraAddress 0x0012b4d0
+     * @ghidraAddress 0x004c7bb8
      */
     virtual void setItem(int i, const T &value) {
         if (PySequence_SetItem(mPtr, i, value.mPtr) == -1) {

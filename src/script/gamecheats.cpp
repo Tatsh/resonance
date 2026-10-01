@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app/application.h"
 #include "app/globals.h"
 #include "app/playsound.h"
@@ -39,9 +41,9 @@ constexpr int kPowerupCheatTemplate = 207;
 // 0x00147e40
 Py::Object ScriptAddJuice(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for enable_freestyle")));
+        throw Py::TypeError(HxStr("wrong # args for enable_freestyle"));
     }
-    const long nAmount = Py::Int(args.getItem(0));
+    const int nAmount = Py::Int(args.getItem(0));
     Application::shared()->GetWorld()->mGamer->AddJuice(static_cast<int>(nAmount));
     return Py::Object();
 }
@@ -50,9 +52,9 @@ Py::Object ScriptAddJuice(const Py::Tuple &args) {
 // 0x00148540
 Py::Object ScriptAdvanceSection(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for advance_section")));
+        throw Py::TypeError(HxStr("wrong # args for advance_section"));
     }
-    const long nPosition = Py::Int(args.getItem(0));
+    const int nPosition = Py::Int(args.getItem(0));
     Mid::MBT position(static_cast<int>(nPosition));
     Application::shared()->GetWorld()->mGamer->AdvanceAt(position);
     return Py::Object();
@@ -63,9 +65,9 @@ Py::Object ScriptAdvanceSection(const Py::Tuple &args) {
 Py::Object ScriptWinWithPointsCheat(const Py::Tuple &args) {
     PlayActivateSound();
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for do_win_with_points_cheat")));
+        throw Py::TypeError(HxStr("wrong # args for do_win_with_points_cheat"));
     }
-    const long nScore = Py::Int(args.getItem(0));
+    const int nScore = Py::Int(args.getItem(0));
     Application::shared()->GetWorld()->mGamer->EndWithScore(static_cast<int>(nScore));
     return Py::Object();
 }
@@ -83,8 +85,8 @@ Py::Object ScriptEnableAllTracksCheat([[maybe_unused]] const Py::Tuple &args) {
             for (int nTrack = 0; nTrack < kCheatTrackCount; ++nTrack) {
                 pWorld->mGamer->mEnableMgr->SetFreeUntil(nTrack, 0, -1);
             }
+            pWorld->mGamer->mUnknown98 = 1;
         }
-        pWorld->mGamer->mUnknown98 = 1;
     }
     return Py::Object();
 }
@@ -116,7 +118,7 @@ Py::Object ScriptSaveRnd([[maybe_unused]] const Py::Tuple &args) {
 // The binary expands the three steps of ClearAlbumCache() inline; calling it repeats them
 // without duplicating the body, which met/albumcache.h records.
 // 0x003f6860
-Py::Object ScriptEmptyAlbumCaches([[maybe_unused]] const Py::Tuple &args) {
+Py::Object ScriptEmptyAlbumCaches([[maybe_unused]] Py::Tuple args) {
     ClearAlbumCache();
     return Py::Object();
 }
@@ -135,6 +137,9 @@ PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -150,6 +155,9 @@ PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *pArgs) {
         }
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -170,6 +178,9 @@ PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -189,6 +200,9 @@ PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -200,6 +214,9 @@ PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *pArgs) {
         PlayActivateSound();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -213,6 +230,9 @@ PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -225,6 +245,9 @@ PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -236,6 +259,9 @@ PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *pArgs) {
         PlayActivateSound();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -256,6 +282,9 @@ PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -267,6 +296,9 @@ PyObject *PyInvokeDoWinSequenceCheat(PyObject *, PyObject *pArgs) {
         SetDoWinSequence(1);
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -280,6 +312,9 @@ PyObject *PyInvokeAddJuice(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -291,6 +326,9 @@ PyObject *PyInvokeAdvanceSection(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptAdvanceSection(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -304,6 +342,9 @@ PyObject *PyInvokeDoWinWithPointsCheat(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -315,6 +356,9 @@ PyObject *PyInvokeDoEnableAllTracksCheat(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptEnableAllTracksCheat(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -328,6 +372,9 @@ PyObject *PyInvokeActivateListenMode(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -340,6 +387,9 @@ PyObject *PyInvokeSaveRnd(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -351,6 +401,9 @@ PyObject *PyInvokeEmptyAlbumCaches(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptEmptyAlbumCaches(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -379,6 +432,8 @@ const ScriptFunc kDoEnableAllTracksCheatFunc("do_enable_all_tracks_cheat",
                                              PyInvokeDoEnableAllTracksCheat);
 const ScriptFunc kDoArenaStateCycleCheatFunc("do_arena_state_cycle_cheat",
                                              PyInvokeDoArenaStateCycleCheat);
+const ScriptFunc kDoExpansionPackToggleCheatFunc("do_expansion_pack_toggle_cheat",
+                                                 PyInvokeDoExpansionPackToggleCheat);
 const ScriptFunc kDoWinSequenceCheatFunc("do_win_sequence_cheat", PyInvokeDoWinSequenceCheat);
 // 0x00150580
 const ScriptFunc kCheatUnlockstagesFunc(

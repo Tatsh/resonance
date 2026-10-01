@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "game/screenanim.h"
 #include "game/tnlarena.h"
 #include "os/formatstring.h"
@@ -5,6 +7,7 @@
 #include "rnd/animatable.h"
 #include "rnd/manager.h"
 #include "script/cxx/config.h"
+#include "script/cxx/float.h"
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
@@ -35,9 +38,10 @@ void ScriptParseAnimatableArgs(Py::Tuple args, Rnd::Animatable **ppTarget, float
     Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(name));
     *ppTarget = pTarget;
     if (pTarget == nullptr) {
-        throw Py::TypeError(HxStr(FormatString("%s: not animatable", name.mStr)));
+        throw Py::TypeError(HxStr(FormatString(
+            "%s: not animatable", name.mStr != nullptr ? name.mStr : g_szEmptyString)));
     }
-    Py::Object number(PyNumber_Float(args.getItem(1).mPtr));
+    Py::Float number(Py::FromAPI(PyNumber_Float(args.getItem(1).mPtr)).mPtr);
     *pflValue = static_cast<float>(PyFloat_AsDouble(number.mPtr));
 }
 
@@ -60,17 +64,18 @@ void ScriptParseAnimLoopRange(Py::Tuple args,
     Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(name));
     *ppTarget = pTarget;
     if (pTarget == nullptr) {
-        throw Py::TypeError(HxStr(FormatString("%s: not animatable", name.mStr)));
+        throw Py::TypeError(HxStr(FormatString(
+            "%s: not animatable", name.mStr != nullptr ? name.mStr : g_szEmptyString)));
     }
-    Py::Object minNumber(PyNumber_Float(args.getItem(1).mPtr));
+    Py::Float minNumber(Py::FromAPI(PyNumber_Float(args.getItem(1).mPtr)).mPtr);
     *pflMin = static_cast<float>(PyFloat_AsDouble(minNumber.mPtr));
-    Py::Object maxNumber(PyNumber_Float(args.getItem(2).mPtr));
+    Py::Float maxNumber(Py::FromAPI(PyNumber_Float(args.getItem(2).mPtr)).mPtr);
     *pflMax = static_cast<float>(PyFloat_AsDouble(maxNumber.mPtr));
 }
 
 // Move a named animation to a frame.
 // 0x004084a8
-Py::Object ScriptAnimFrame(const Py::Tuple &args) {
+Py::Object ScriptAnimFrame(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flValue = 0.0f;
     ScriptParseAnimatableArgs(Py::Tuple(args), &pTarget, &flValue);
@@ -80,7 +85,7 @@ Py::Object ScriptAnimFrame(const Py::Tuple &args) {
 
 // Change the rate multiplier of a named animation.
 // 0x004085c0
-Py::Object ScriptAnimSpeed(const Py::Tuple &args) {
+Py::Object ScriptAnimSpeed(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flValue = 0.0f;
     ScriptParseAnimatableArgs(Py::Tuple(args), &pTarget, &flValue);
@@ -90,7 +95,7 @@ Py::Object ScriptAnimSpeed(const Py::Tuple &args) {
 
 // Change the addend of a named animation.
 // 0x004086d8
-Py::Object ScriptAnimOffset(const Py::Tuple &args) {
+Py::Object ScriptAnimOffset(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flValue = 0.0f;
     ScriptParseAnimatableArgs(Py::Tuple(args), &pTarget, &flValue);
@@ -100,7 +105,7 @@ Py::Object ScriptAnimOffset(const Py::Tuple &args) {
 
 // Change both ends of the loop range of a named animation.
 // 0x004087f0
-Py::Object ScriptAnimMinmax(const Py::Tuple &args) {
+Py::Object ScriptAnimMinmax(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flMin = 0.0f;
     float flMax = 0.0f;
@@ -135,6 +140,9 @@ PyObject *PyInvokeAnimFrame(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -146,6 +154,9 @@ PyObject *PyInvokeAnimSpeed(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptAnimSpeed(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -159,6 +170,9 @@ PyObject *PyInvokeAnimOffset(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -171,6 +185,9 @@ PyObject *PyInvokeAnimMinmax(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -182,6 +199,9 @@ PyObject *PyInvokeTestArena(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptTestArena(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

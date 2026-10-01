@@ -1,6 +1,8 @@
 #pragma once
 
 #include "script/cxx/config.h"
+#include "script/cxx/exception.h"
+#include "script/cxx/fromapi.h"
 #include "script/cxx/object.h"
 #include "script/cxx/seqbase.h"
 
@@ -18,6 +20,26 @@ namespace Py {
  */
 class List : public SeqBase<Object> {
 public:
+    /**
+     * Create a list of a given length.
+     *
+     * Inline, built as Py::Tuple's sized constructor is. The base starts on an empty tuple, the
+     * body replaces it with a new list through set(), and every slot is filled with `None`.
+     * PythonExtension::getattr_methods() at `0x005ad5e0` expands it with the default length.
+     *
+     * @param nSize The number of elements.
+     */
+    explicit List(int nSize = 0) : SeqBase<Object>(FromAPI(PyTuple_New(0)).mPtr) {
+        set(FromAPI(PyList_New(nSize)).mPtr);
+        validate();
+        for (int i = 0; i < nSize; ++i) {
+            Py_INCREF(Py_None);
+            if (PyList_SetItem(mPtr, i, Py_None) == -1) {
+                throw Exception();
+            }
+        }
+    }
+
     /**
      * Take another handle's reference as a list.
      *
@@ -49,6 +71,19 @@ public:
      */
     virtual int capacity() const {
         return max_size();
+    }
+
+    /**
+     * Append one element.
+     *
+     * Inline. PythonExtension::getattr_methods() at `0x005ad5e0` expands it.
+     *
+     * @param ob The element.
+     */
+    void append(const Object &ob) {
+        if (PyList_Append(mPtr, ob.mPtr) == -1) {
+            throw Exception();
+        }
     }
 };
 

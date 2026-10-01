@@ -2,6 +2,7 @@
 
 #include "script/cxx/fromapi.h"
 #include "script/cxx/string.h"
+#include "script/cxx/type.h"
 
 namespace Py {
 
@@ -16,6 +17,16 @@ String Object::str() const {
 // 0x0055cb30
 HxStr Object::as_string() const {
     return static_cast<HxStr>(str());
+}
+
+// 0x0055c818
+Type Object::type() const {
+    return Type(FromAPI(PyObject_Type(mPtr)).mPtr);
+}
+
+// 0x0055ceb0
+bool Object::isType(const Type &type) const {
+    return this->type().mPtr == type.mPtr;
 }
 
 // 0x004c3f80

@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app/application.h"
 #include "app/globals.h"
 #include "app/hudutil.h"
@@ -22,12 +24,12 @@ namespace {
 // matches gets a CaughtPowerbarMsg naming it and the kind. A number no slot matches leaves
 // every player alone.
 // 0x0015a820
-Py::Object ScriptAddPowerup(const Py::Tuple &args) {
+Py::Object ScriptAddPowerup(Py::Tuple args) {
     if (args.length() != 2) {
-        throw Py::TypeError(HxStr(FormatString("required args: int:player-num, int:powerup-type")));
+        throw Py::TypeError(HxStr("required args: int:player-num, int:powerup-type"));
     }
-    const long nPlayer = Py::Int(args.getItem(0));
-    const long nKind = Py::Int(args.getItem(1));
+    const int nPlayer = Py::Int(args.getItem(0));
+    const int nKind = Py::Int(args.getItem(1));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
         for (std::vector<Player *>::iterator it = pWorld->mPlayers.begin();
@@ -53,6 +55,9 @@ PyObject *PyInvokeAddPowerup(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptAddPowerup(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

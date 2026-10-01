@@ -29,6 +29,21 @@ public:
     }
 
     /**
+     * Store an element through the proxy.
+     *
+     * The proxy's copy takes the value through Py::Object's assignment before the sequence
+     * stores it, as PythonExtension::getattr_methods() at `0x005ad5e0` expands it.
+     *
+     * @param value The element to store.
+     * @return This proxy.
+     */
+    seqref &operator=(const Object &value) {
+        mItem = value;
+        mSequence.setItem(mOffset, value);
+        return *this;
+    }
+
+    /**
      * Copy the fetched element out.
      *
      * @return A handle on the element.

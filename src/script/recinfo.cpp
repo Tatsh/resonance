@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "os/hxstr.h"
 #include "script/cxx/config.h"
 #include "script/cxx/object.h"
@@ -13,7 +15,7 @@ namespace {
 // The file holds two length-prefixed strings, and the result joins them with a newline. The
 // tuple carries the path.
 // 0x0010d1a8
-Py::Object ScriptRecInfo(const Py::Tuple &args) {
+Py::Object ScriptRecInfo(Py::Tuple args) {
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr path = text;
@@ -42,6 +44,9 @@ PyObject *PyInvokeRecInfo(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptRecInfo(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

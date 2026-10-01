@@ -97,12 +97,11 @@ void PyShell::ReportError(const HxStr &context, int bWithTraceback) {
     PyObject *pTraceback = nullptr;
     PyErr_Fetch(&pType, &pValue, &pTraceback);
 
-    if (pType != nullptr) {
-        message = Py::Object(Py::FromAPI(pType).mPtr).as_string();
-        if (pValue != nullptr) {
-            message += '\n';
-            message += Py::Object(Py::FromAPI(pValue).mPtr).as_string();
-        }
+    // Yes, the binary wraps the type without a null test. An empty indicator throws here.
+    message = Py::Object(Py::FromAPI(pType).mPtr).as_string();
+    if (pValue != nullptr) {
+        message += '\n';
+        message += Py::Object(Py::FromAPI(pValue).mPtr).as_string();
     }
 
     if (bWithTraceback != 0 && pTraceback != nullptr) {

@@ -1,3 +1,5 @@
+#include <exception>
+
 #include "app/apptunnel.h"
 #include "app/playsound.h"
 #include "app/renderer.h"
@@ -31,6 +33,9 @@ PyObject *PyInvokeLsdMode(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -55,23 +60,23 @@ PyObject *PyInvokeCrates(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
 // Cycle the lattice and panel meshes through their three visibility states.
 //
-// Both drawn, panels only, neither, and back to both. A missing tunnel draws nothing and
-// returns at once; the sound plays only while an app tunnel exists. The tuple arrives by value
-// and is released here.
+// Both drawn, panels only, neither, and back to both. The mode does not change and no sound plays
+// unless both the tunnel and the app tunnel exist. The tuple arrives by value and is released here.
 // 0x0044a080
 Py::Object ScriptNolatticeToggle([[maybe_unused]] Py::Tuple args) {
     Rnd::Tunnel *pTunnel = GetCachedTunnelObject();
-    if (pTunnel == nullptr) {
+    if (pTunnel == nullptr || g_pAppTunnel == nullptr) {
         return Py::Object();
     }
-    if (g_pAppTunnel != nullptr) {
-        PlayActivateSound();
-    }
+    PlayActivateSound();
     if (pTunnel->mDrawLattice != 0) {
         if (pTunnel->mDrawPanels != 0) {
             pTunnel->mDrawLattice = 0;
@@ -96,6 +101,9 @@ PyObject *PyInvokeNolatticeToggle(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptNolatticeToggle(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

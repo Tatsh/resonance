@@ -46,13 +46,27 @@ public:
     /**
      * Build a Python string from a game string.
      *
-     * Only the signature is recovered, from the call in PyShell::ReportError() that passes the
-     * error context to `hxutl.traceback_str`. The body is not worked out, so none is written.
+     * The base wraps the result of `PyString_FromString()` at `0x0059d6b8`, stored in a
+     * Py::FromAPI temporary, and the body runs validate(). A null game string converts as the
+     * empty string. PyShell::ReportError() passes the error context to `hxutl.traceback_str` this
+     * way.
      *
      * @param text The text to copy.
      * @ghidraAddress 0x004c4d88
      */
     explicit String(const HxStr &text);
+
+    /**
+     * Build a Python string from a C string.
+     *
+     * The base wraps the result of `PyString_FromString()` at `0x0059d6b8`, stored in a
+     * Py::FromAPI temporary, and the body runs validate(). The pointer arrives at the interpreter
+     * unchanged.
+     *
+     * @param pszText The text to copy.
+     * @ghidraAddress 0x004c5138
+     */
+    explicit String(const char *pszText);
 
     /**
      * Take another handle's reference as a string.

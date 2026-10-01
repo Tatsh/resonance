@@ -5,21 +5,20 @@
 namespace Py {
 
 // 0x004c4d88
-String::String(const HxStr &text) {
-    // A null handle falls back to an empty string. The image reads the fallback through a global
-    // whose stable value was not recovered, so the reconstruction uses the literal directly.
-    FromAPI holder(PyString_FromString(text.mStr != nullptr ? text.mStr : ""));
-    mPtr = holder.mPtr;
-    Py_XINCREF(mPtr);
+String::String(const HxStr &text)
+    : SeqBase<Char>(
+          FromAPI(PyString_FromString(text.mStr != nullptr ? text.mStr : g_szEmptyString)).mPtr) {
     validate();
+}
+
+// 0x004c5138
+String::String(const char *pszText)
+    : SeqBase<Char>(FromAPI(PyString_FromString(const_cast<char *>(pszText))).mPtr) {
     validate();
 }
 
 // 0x004c4c60
-String::String(const Object &ob) {
-    mPtr = ob.mPtr;
-    Py_XINCREF(mPtr);
-    validate();
+String::String(const Object &ob) : SeqBase<Char>(ob) {
     validate();
 }
 

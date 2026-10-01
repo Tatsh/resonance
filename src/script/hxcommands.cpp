@@ -1,4 +1,5 @@
 #include <cstring>
+#include <exception>
 #include <sstream>
 
 #include "app/application.h"
@@ -65,6 +66,9 @@ PyObject *PyInvokeGetFreqRoot(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -76,6 +80,9 @@ PyObject *PyInvokeKillSch(PyObject *, PyObject *pArgs) {
         Application::shared()->GetWatchdog()->Snapshot();
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -106,6 +113,9 @@ PyObject *PyInvokeMemlogTerm(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -113,9 +123,9 @@ PyObject *PyInvokeMemlogTerm(PyObject *, PyObject *pArgs) {
 //
 // Takes no arguments.
 // 0x0015e5f0
-Py::Object ScriptStopGame(Py::Tuple args) {
+Py::Object ScriptStopGame(const Py::Tuple &args) {
     if (args.length() != 0) {
-        throw Py::TypeError(HxStr(FormatString("requires 0 args")));
+        throw Py::TypeError(HxStr("requires 0 args"));
     }
     Application::shared()->GetWorld()->PostExitMode1();
     return Py::Object();
@@ -130,6 +140,9 @@ PyObject *PyInvokeStopGame(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -137,7 +150,7 @@ PyObject *PyInvokeStopGame(PyObject *, PyObject *pArgs) {
 // 0x001532d8
 Py::Object ScriptDisplayText(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for display_text")));
+        throw Py::TypeError(HxStr("wrong # args for display_text"));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -158,6 +171,9 @@ PyObject *PyInvokeDisplayText(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -167,7 +183,7 @@ PyObject *PyInvokeDisplayText(PyObject *, PyObject *pArgs) {
 // 0x001611f8
 Py::Object ScriptTrace(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("requires 1 arg")));
+        throw Py::TypeError(HxStr("requires 1 arg"));
     }
     HxStr text = args.getItem(0).as_string();
     text += '\n';
@@ -184,6 +200,9 @@ PyObject *PyInvokeTrace(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -193,9 +212,9 @@ PyObject *PyInvokeTrace(PyObject *, PyObject *pArgs) {
 // 0x00159a90
 Py::Object ScriptCancelCmd(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("requres 1 arg: cmdId")));
+        throw Py::TypeError(HxStr("requres 1 arg: cmdId"));
     }
-    const long nId = Py::Int(args.getItem(0));
+    const int nId = Py::Int(args.getItem(0));
     CmdID id;
     id.mValue = static_cast<int>(nId);
     Application::shared()->GetSongClock()->Withdraw(id);
@@ -211,6 +230,9 @@ PyObject *PyInvokeCancelCmd(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -220,9 +242,9 @@ PyObject *PyInvokeCancelCmd(PyObject *, PyObject *pArgs) {
 // 0x00154258
 Py::Object ScriptFreezeJuice(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for freeze_juice")));
+        throw Py::TypeError(HxStr("wrong # args for freeze_juice"));
     }
-    const long nFreeze = Py::Int(args.getItem(0));
+    const int nFreeze = Py::Int(args.getItem(0));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
         pWorld->mGamer->mUnknown1c = nFreeze != 0 ? 1 : 0;
@@ -239,6 +261,9 @@ PyObject *PyInvokeFreezeJuice(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -248,7 +273,7 @@ PyObject *PyInvokeFreezeJuice(PyObject *, PyObject *pArgs) {
 // 0x0015bb00
 Py::Object ScriptRecreate(const Py::Tuple &args) {
     if (args.length() <= 0) {
-        throw Py::TypeError(HxStr(FormatString("requres arg: filename [ignore-autoexec]")));
+        throw Py::TypeError(HxStr("requres arg: filename [ignore-autoexec]"));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -266,6 +291,9 @@ PyObject *PyInvokeRecreate(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -274,10 +302,10 @@ PyObject *PyInvokeRecreate(PyObject *, PyObject *pArgs) {
 // 0x00153a00
 Py::Object ScriptEnableFreestyle(const Py::Tuple &args) {
     if (args.length() != 2) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for enable_freestyle")));
+        throw Py::TypeError(HxStr("wrong # args for enable_freestyle"));
     }
-    const long nStartBar = Py::Int(args.getItem(0));
-    const long nEndBar = Py::Int(args.getItem(1));
+    const int nStartBar = Py::Int(args.getItem(0));
+    const int nEndBar = Py::Int(args.getItem(1));
     Application::shared()->GetWorld()->mGamer->EnablePlayerFreestyle(static_cast<int>(nStartBar),
                                                                      static_cast<int>(nEndBar));
     return Py::Object();
@@ -292,6 +320,9 @@ PyObject *PyInvokeEnableFreestyle(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -299,9 +330,9 @@ PyObject *PyInvokeEnableFreestyle(PyObject *, PyObject *pArgs) {
 // 0x0015c998
 Py::Object ScriptSelectPowerup(const Py::Tuple &args) {
     if (args.length() != 1) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for select_powerup")));
+        throw Py::TypeError(HxStr("wrong # args for select_powerup"));
     }
-    const long nPowerup = Py::Int(args.getItem(0));
+    const int nPowerup = Py::Int(args.getItem(0));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld == nullptr) {
         return Py::Object();
@@ -327,6 +358,9 @@ PyObject *PyInvokeSelectPowerup(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -336,9 +370,9 @@ PyObject *PyInvokeSelectPowerup(PyObject *, PyObject *pArgs) {
 // 0x00159538
 Py::Object ScriptPostScript(const Py::Tuple &args) {
     if (args.length() != 2) {
-        throw Py::TypeError(HxStr(FormatString("requres 2 arg: tick, script")));
+        throw Py::TypeError(HxStr("requres 2 arg: tick, script"));
     }
-    const long nTick = Py::Int(args.getItem(0));
+    const int nTick = Py::Int(args.getItem(0));
     Py::Object element = args.getItem(1);
     Py::String text(element);
     HxStr script = text;
@@ -347,7 +381,7 @@ Py::Object ScriptPostScript(const Py::Tuple &args) {
     CmdID id;
     Application::shared()->GetSongClock()->PostAtSongTick(pCommand, nTick, id);
     Attachment::ReleaseIfSet(pCommand);
-    return Py::Int(static_cast<long>(id.mValue));
+    return Py::Int(static_cast<long long>(id.mValue));
 }
 
 // Run ScriptPostScript() on the interpreter's argument tuple.
@@ -358,6 +392,9 @@ PyObject *PyInvokePostScript(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptPostScript(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -378,6 +415,9 @@ PyObject *PyInvokeScreenDump(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -387,9 +427,9 @@ PyObject *PyInvokeScreenDump(PyObject *, PyObject *pArgs) {
 // 0x0015eb88
 Py::Object ScriptSynthCmd(const Py::Tuple &args) {
     if (args.length() <= 0) {
-        throw Py::TypeError(HxStr(FormatString("wrong # args for synth_info")));
+        throw Py::TypeError(HxStr("wrong # args for synth_info"));
     }
-    const long nCommand = Py::Int(args.getItem(0));
+    const int nCommand = Py::Int(args.getItem(0));
     SynthCommand(static_cast<int>(nCommand));
     return Py::Object();
 }
@@ -403,6 +443,9 @@ PyObject *PyInvokeSynthCmd(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -413,13 +456,13 @@ PyObject *PyInvokeSynthCmd(PyObject *, PyObject *pArgs) {
 // 0x00158060
 Py::Object ScriptSetVolume(const Py::Tuple &args) {
     if (args.length() != 3) {
-        throw Py::TypeError(HxStr(FormatString("requires 3 args")));
+        throw Py::TypeError(HxStr("requires 3 args"));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr name = text;
-    const long nTrack = Py::Int(args.getItem(1));
-    const long nVolume = Py::Int(args.getItem(2));
+    const int nTrack = Py::Int(args.getItem(1));
+    const int nVolume = Py::Int(args.getItem(2));
     if (name == "score" || name == "bg") {
         GrooveWorld *pWorld = Application::shared()->GetWorld();
         const int nChannel = pWorld->mTrackGraphs[nTrack]->mTrackData->mChannel;
@@ -437,6 +480,9 @@ PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -450,7 +496,7 @@ PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
 // 0x00157578
 Py::Object ScriptMidi(const Py::Tuple &args) {
     if (args.length() != 6) {
-        throw Py::TypeError(HxStr(FormatString("requires 6 args")));
+        throw Py::TypeError(HxStr("requires 6 args"));
     }
     Py::Object deviceElement = args.getItem(0);
     Py::String deviceText(deviceElement);
@@ -458,10 +504,10 @@ Py::Object ScriptMidi(const Py::Tuple &args) {
     Py::Object commandElement = args.getItem(1);
     Py::String commandText(commandElement);
     HxStr command = commandText;
-    const long nA = Py::Int(args.getItem(2));
-    const long nB = Py::Int(args.getItem(3));
-    const long nC = Py::Int(args.getItem(4));
-    const long nD = Py::Int(args.getItem(5));
+    const int nA = Py::Int(args.getItem(2));
+    const int nB = Py::Int(args.getItem(3));
+    const int nC = Py::Int(args.getItem(4));
+    const int nD = Py::Int(args.getItem(5));
     int nChannel = 0;
     if (command == "voice") {
         nChannel = 0xE;
@@ -496,6 +542,9 @@ PyObject *PyInvokeMidi(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -506,13 +555,13 @@ PyObject *PyInvokeMidi(PyObject *, PyObject *pArgs) {
 // 0x0015f270
 Py::Object ScriptTest(const Py::Tuple &args) {
     if (args.length() <= 0) {
-        throw Py::TypeError(HxStr(FormatString("requires 1 arg (name of test)")));
+        throw Py::TypeError(HxStr("requires 1 arg (name of test)"));
     }
     HxStr name = args.getItem(0).as_string();
     for (int i = 0; i < TestRegistry::sTestCount; ++i) {
         if (std::strcmp(TestRegistry::sTests[i].mName, name.mStr) == 0) {
             const int nPassed = TestRegistry::sTests[i].mFunc();
-            return Py::String(HxStr(nPassed != 0 ? "ok" : "not ok"));
+            return Py::String(nPassed != 0 ? "ok" : "not ok");
         }
     }
     std::ostringstream report;
@@ -533,6 +582,9 @@ PyObject *PyInvokeTest(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -546,12 +598,12 @@ Py::Object ScriptSpew(const Py::Tuple &args) {
     std::ostringstream report;
     report << "Spew Connections:\n";
     shared.PrintConnections(report);
-    Py::Object result = Py::String(HxStr(report.str().c_str()));
+    Py::Object result = Py::String(report.str().c_str());
     if (args.length() == 0) {
         return result;
     }
     if (args.length() != 2) {
-        throw Py::TypeError(HxStr(FormatString("requires arguments: HxStr, HxStr")));
+        throw Py::TypeError(HxStr("requires arguments: HxStr, HxStr"));
     }
     Py::Object fileElement = args.getItem(0);
     Py::String fileText(fileElement);
@@ -572,6 +624,9 @@ PyObject *PyInvokeSpew(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -584,10 +639,9 @@ constexpr int kTicksPerMeasure = 1920;
 // the microseconds per quarter, tick reports the song position, and song_bar reports the
 // play map's section there.
 // 0x00150d88
-Py::Object ScriptClock(const Py::Tuple &args) {
+Py::Object ScriptClock(Py::Tuple args) {
     if (args.length() == 0) {
-        throw Py::TypeError(
-            HxStr(FormatString("requires 1st arg: pause, start, step, tempo, tick")));
+        throw Py::TypeError(HxStr("requires 1st arg: pause, start, step, tempo, tick"));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -603,32 +657,32 @@ Py::Object ScriptClock(const Py::Tuple &args) {
     }
     if (command == "step") {
         if (args.length() != 2) {
-            throw Py::TypeError(HxStr(FormatString("requires 2nd arg: milliseconds")));
+            throw Py::TypeError(HxStr("requires 2nd arg: milliseconds"));
         }
-        const long nMs = Py::Int(args.getItem(1));
+        const int nMs = Py::Int(args.getItem(1));
         pWatchdog->mClock.Advance(static_cast<int>(nMs));
         return Py::Object();
     }
     if (command == "tempo") {
         Sch::TickClock *pClock = Application::shared()->GetSongClock();
         if (args.length() == 1) {
-            return Py::Int(static_cast<long>(pClock->mTempoMap->mMicrosecondsPerQuarter));
+            return Py::Int(static_cast<long long>(pClock->mTempoMap->mMicrosecondsPerQuarter));
         }
-        const long nTempo = Py::Int(args.getItem(1));
+        const int nTempo = Py::Int(args.getItem(1));
         const int nTick = pClock->SongTick();
         pClock->mTempoMap->SetTempo(static_cast<int>(nTempo), nTick);
         return Py::Object();
     }
     if (command == "tick") {
         Sch::TickClock *pClock = Application::shared()->GetSongClock();
-        return Py::Int(static_cast<long>(pClock->SongTick()));
+        return Py::Int(static_cast<long long>(pClock->SongTick()));
     }
     if (command == "song_bar") {
         Sch::TickClock *pClock = Application::shared()->GetSongClock();
         const int nBar = pClock->SongTick() / kTicksPerMeasure;
-        return Py::Int(static_cast<long>(Application::shared()->GetPlayMap()->Slot5(nBar)));
+        return Py::Int(static_cast<long long>(Application::shared()->GetPlayMap()->Slot5(nBar)));
     }
-    throw Py::TypeError(HxStr(FormatString("requires 1st arg: pause, start, step, tempo, tick")));
+    throw Py::TypeError(HxStr("requires 1st arg: pause, start, step, tempo, tick"));
 }
 
 // Run ScriptClock() on the interpreter's argument tuple.
@@ -639,6 +693,9 @@ PyObject *PyInvokeClock(PyObject *, PyObject *pArgs) {
         Py::Object result = ScriptClock(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -653,6 +710,9 @@ PyObject *PyInvokeZoneDump(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -665,6 +725,9 @@ PyObject *PyInvokeCapture(PyObject *, PyObject *pArgs) {
         Py::Object result;
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }
@@ -682,6 +745,9 @@ PyObject *PyInvokeStopAllMidi(PyObject *, PyObject *pArgs) {
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
     }
 }
 
@@ -697,6 +763,9 @@ PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
         Py::Object result;
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
         return nullptr;
     }
 }

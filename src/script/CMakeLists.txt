@@ -5,8 +5,11 @@ set(RESONANCE_SCRIPT_SRCS
     apptunnelscript.cpp
     cmdpostscript.cpp
     configquery.cpp
+    cxx/extensionmodulebase.cpp
     cxx/int.cpp
     cxx/object.cpp
+    cxx/pythonextensionbase.cpp
+    cxx/pythontype.cpp
     cxx/seqbase.cpp
     cxx/string.cpp
     cxx/tuple.cpp

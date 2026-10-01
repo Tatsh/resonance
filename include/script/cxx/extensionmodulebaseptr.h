@@ -1,5 +1,6 @@
 #pragma once
 
+#include "script/cxx/extensionmodulebase.h"
 #include "script/cxx/pythonextension.h"
 
 namespace Py {
@@ -15,8 +16,31 @@ namespace Py {
  * type its own Python type object. Released PyCXX hides the same wrapper inside `Extensions.hxx`
  * so that a module method can recover the C++ module object from the `self` argument.
  *
- * No member routine is identified, so none is reconstructed.
+ * The object is 0x10 bytes, the module pointer following the base. The vtable at `0x00832d50`
+ * matches the base's apart from the type function and the destructor.
  */
-class ExtensionModuleBasePtr : public PythonExtension<ExtensionModuleBasePtr> {};
+class ExtensionModuleBasePtr : public PythonExtension<ExtensionModuleBasePtr> {
+public:
+    /**
+     * Wrap a module.
+     *
+     * Inline. ExtensionModuleBase::initialize() at `0x005a5ea0` expands it.
+     *
+     * @param pModule The module.
+     */
+    explicit ExtensionModuleBasePtr(ExtensionModuleBase *pModule) : mModule(pModule) {
+    }
+
+    /**
+     * Destroy the wrapper without destroying the module.
+     *
+     * @ghidraAddress 0x005abf30
+     */
+    virtual ~ExtensionModuleBasePtr() {
+    }
+
+    /** The wrapped module. */
+    ExtensionModuleBase *mModule;
+};
 
 } // namespace Py

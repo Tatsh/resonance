@@ -10,8 +10,10 @@ namespace Py {
 
 // Py::String derives from Py::SeqBase<Py::Char>, which derives from this class, so the two
 // headers cannot include each other. str() returns a String by value and is defined out of line
-// in src/script/cxx/object.cpp, where the complete type is available.
+// in src/script/cxx/object.cpp, where the complete type is available. Py::Type and type() stand
+// in the same relation.
 class String;
+class Type;
 
 /**
  * Reference-counted handle on any Python object, and the root of the PyCXX object hierarchy.
@@ -127,6 +129,23 @@ public:
      * @ghidraAddress 0x0055cb30
      */
     HxStr as_string() const;
+
+    /**
+     * Produce the object's type.
+     *
+     * @return A new handle on the type object.
+     * @ghidraAddress 0x0055c818
+     */
+    Type type() const;
+
+    /**
+     * Report whether the object's type is a given type.
+     *
+     * @param type The type to compare with.
+     * @return True when the two type objects are the same object.
+     * @ghidraAddress 0x0055ceb0
+     */
+    bool isType(const Type &type) const;
 
     /**
      * Report whether the object is a tuple.

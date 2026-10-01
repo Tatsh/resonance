@@ -30,7 +30,7 @@ int QueryConfigValue(int nEventCode, ...) {
     va_end(args);
 
     try {
-        return static_cast<long>(Py::Int(EvalScriptExpression(expression)));
+        return static_cast<int>(Py::Int(EvalScriptExpression(expression)));
     } catch (Py::Exception &) {
         Fatal("%s does not evaluate to an int", ExpressionText(expression));
         PyErr_Clear();
@@ -46,7 +46,7 @@ int QueryConfigFlag(int nEventCode, ...) {
     va_end(args);
 
     try {
-        return (static_cast<long>(Py::Int(EvalScriptExpression(expression))) != 0) ? 1 : 0;
+        return (static_cast<int>(Py::Int(EvalScriptExpression(expression))) != 0) ? 1 : 0;
     } catch (Py::Exception &) {
         Fatal("%s does not evaluate to an int", ExpressionText(expression));
         PyErr_Clear();
@@ -100,7 +100,7 @@ void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...) {
         Py::Sequence sequence(EvalScriptExpression(expression));
         pResult->clear();
         for (int i = 0; i < sequence.length(); ++i) {
-            pResult->push_back(static_cast<long>(Py::Int(sequence.getItem(i))));
+            pResult->push_back(static_cast<int>(Py::Int(sequence.getItem(i))));
         }
     } catch (Py::Exception &) {
         Fatal("%s does not evaluate to a sequence", ExpressionText(expression));

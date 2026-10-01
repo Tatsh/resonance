@@ -10,18 +10,15 @@ Tuple::Tuple(const Object &ob) : SeqBase<Object>(ob) {
 }
 
 // 0x004c5690
-Tuple::Tuple(int nSize) {
-    // The image fills the slots through helpers the reconstruction has not recovered. Prefilling
-    // with None keeps every slot owned, which a bare new tuple does not guarantee.
-    FromAPI holder(PyTuple_New(nSize));
-    mPtr = holder.mPtr;
-    Py_XINCREF(mPtr);
+Tuple::Tuple(int nSize) : SeqBase<Object>(FromAPI(PyTuple_New(0)).mPtr) {
+    set(FromAPI(PyTuple_New(nSize)).mPtr);
+    validate();
     for (int i = 0; i < nSize; ++i) {
         Py_INCREF(Py_None);
-        PyTuple_SetItem(mPtr, i, Py_None);
+        if (PyTuple_SetItem(mPtr, i, Py_None) == -1) {
+            throw Exception();
+        }
     }
-    validate();
-    validate();
 }
 
 } // namespace Py
