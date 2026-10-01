@@ -15,17 +15,17 @@
 namespace {
 
 // The configuration codes the factory reads the tuning values from.
-constexpr int kVolumeConfigCode = 0x392;
-constexpr int kWahDepthConfigCode = 0x390;
-constexpr int kWahPeriodConfigCode = 0x38f;
-constexpr int kStutterConfigCode = 0x391;
+constexpr int kVolumeConfigCode = 914;
+constexpr int kWahDepthConfigCode = 912;
+constexpr int kWahPeriodConfigCode = 911;
+constexpr int kStutterConfigCode = 913;
 
 constexpr unsigned int kStutterParameterCount = 2;
 
 // The controllers the three MidiOnOffEffector types switch.
-constexpr unsigned char kFirstSwitchController = 0x52;
-constexpr unsigned char kSecondSwitchController = 0x53;
-constexpr unsigned char kThirdSwitchController = 0x51;
+constexpr unsigned char kFirstSwitchController = 82;
+constexpr unsigned char kSecondSwitchController = 83;
+constexpr unsigned char kThirdSwitchController = 81;
 
 } // namespace
 

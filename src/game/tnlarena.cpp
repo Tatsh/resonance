@@ -30,7 +30,7 @@ constexpr int kNoJuiceLock = -1;
 constexpr int kJuiceLocked = 1;
 
 // Configuration code whose flag selects the plain ScreenAnim.
-constexpr int kDisplayModeConfigCode = 0x3a1;
+constexpr int kDisplayModeConfigCode = 929;
 
 // The arena screens use `screen01.mat` through `screen04.mat`.
 constexpr int kScreenCount = 4;

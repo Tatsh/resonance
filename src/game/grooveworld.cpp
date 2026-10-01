@@ -75,15 +75,15 @@
 namespace {
 
 // Configuration identifiers the load path queries.
-constexpr int kTrackCountQuery = 0x384;
-constexpr int kLevelConverterOptionQuery = 0x39a;
+constexpr int kTrackCountQuery = 900;
+constexpr int kLevelConverterOptionQuery = 922;
 // One more than the track a solo player takes.
-constexpr int kSoloTrackConfigCode = 0x3a6;
+constexpr int kSoloTrackConfigCode = 934;
 
 // Set while the level plays streamed audio. FinishSong() then stops the sound-bank movie.
-constexpr int kStreamedAudioQuery = 0x3a4;
+constexpr int kStreamedAudioQuery = 932;
 // The level name FinishSong() records in the log.
-constexpr int kLevelNameQuery = 0x278;
+constexpr int kLevelNameQuery = 632;
 
 // mState values.
 constexpr int kStateLoading = 1;
@@ -127,10 +127,10 @@ constexpr int kMetronomeLeadTicks = 3200;
 
 // The configuration codes PrepareLevel() reads: the sound-bank movie flag and its path, the start
 // offset in ticks, and the flag it stores in mUnknown90.
-constexpr int kSoundBankMovieFlagCode = 0x3a4;
-constexpr int kSoundBankMoviePathCode = 0x3a5;
-constexpr int kStartOffsetCode = 0x38d;
-constexpr int kUnknown90FlagCode = 0x3a1;
+constexpr int kSoundBankMovieFlagCode = 932;
+constexpr int kSoundBankMoviePathCode = 933;
+constexpr int kStartOffsetCode = 909;
+constexpr int kUnknown90FlagCode = 929;
 
 // The Slot13() argument FinishSong() passes to the synthesiser.
 constexpr int kSynthSlot13Off = 0;
@@ -144,7 +144,7 @@ constexpr int kLogTextLength = 32;
 constexpr char kLogMarker = 1;
 
 // The script template BuildGraphs() runs with the player count.
-constexpr int kPlayerCountTemplate = 0x266;
+constexpr int kPlayerCountTemplate = 614;
 
 // BGTrackGraph's second constructor argument for a backing and for an intro track.
 constexpr int kBackingTrackGraph = 0;
@@ -163,9 +163,8 @@ constexpr float kOpaque = 1.0f;
 constexpr int kAsyncComplete = 0;
 constexpr int kAsyncPending = -1;
 
-// The tag and line FinishLoad() bills the release of the file buffer to.
+// The tag FinishLoad() bills the release of the file buffer to.
 constexpr char kAllocTag[] = "GrooveWorld.cpp";
-constexpr int kAllocLine = 302;
 
 // Exit modes PostExitMode1(), PostExitMode2(), and PostExitMode3() queue.
 constexpr int kExitMode1 = 1;
@@ -571,7 +570,7 @@ void GrooveWorld::FinishLoad() {
                       mLoadBuffer,
                       mLoadSize,
                       mLevel);
-    MemFreeTagged(mLoadBuffer, kAllocTag, kAllocLine);
+    MemFreeTagged(mLoadBuffer, kAllocTag, __LINE__);
 
     mSongClock->SetTempoMap(mLevel->OnUnknownSlot7());
 

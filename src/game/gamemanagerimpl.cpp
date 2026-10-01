@@ -37,14 +37,14 @@
 namespace {
 
 // Script templates the manager publishes its settings through.
-constexpr int kScriptTemplateGameMode = 0x262;
-constexpr int kScriptTemplatePlayMode = 0x263;
-constexpr int kScriptTemplateDifficulty = 0x264;
-constexpr int kScriptTemplateLevelName = 0x277;
-constexpr int kScriptTemplateArenaName = 0x27b;
+constexpr int kScriptTemplateGameMode = 610;
+constexpr int kScriptTemplatePlayMode = 611;
+constexpr int kScriptTemplateDifficulty = 612;
+constexpr int kScriptTemplateLevelName = 631;
+constexpr int kScriptTemplateArenaName = 635;
 
 // Configuration code of the container name CreateWorld() hands the world.
-constexpr int kContainerConfigCode = 0x38e;
+constexpr int kContainerConfigCode = 910;
 
 // The diagnostics StartRecording() and StartPlayback() trip.
 constexpr char kRecordingInProgress[] = "Recording already in progress";
@@ -57,7 +57,7 @@ constexpr unsigned char kStatusControlChangeChannel16 = 0xbf;
 constexpr unsigned char kControllerAllNotesOff = 123;
 
 // Configuration code of the recording OnDoPlayback() replays.
-constexpr int kPlaybackFileConfigCode = 0x26a;
+constexpr int kPlaybackFileConfigCode = 618;
 
 // DrawFrame() draws the game world's renderer and the front end's, at most one of each.
 constexpr int kMaxDrawRoots = 2;

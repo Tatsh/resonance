@@ -18,9 +18,14 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Print() labels `+0x04` as a
  * track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
  * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. mPlayer is public
- * because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly with no accessor in the
- * image, comparing it with HudTrack::mPlayer. The other three are public because AppTunnel's
- * muffed-phrase handler at `0x00447ba8` reads them directly.
+ * because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly, comparing it with
+ * HudTrack::mPlayer. The other three are public because AppTunnel's muffed-phrase handler at
+ * `0x00447ba8` reads them directly.
+ *
+ * After Name() the image retains uncalled out-of-line copies of the two constructors, at
+ * `0x003e00b8` and `0x003e00d8`, and of four member accessors: the position at `0x003e0100`, the
+ * track at `0x003e0108`, the player at `0x003e0110`, and `tried` at `0x003e0118`. No code calls
+ * the accessors. They are not declared here.
  *
  * The destructor at `0x003dff48` is compiler-generated and has no declaration here.
  */

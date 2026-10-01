@@ -34,8 +34,8 @@ constexpr int kNoBar = -1;
 constexpr float kAxisCenter = 0.5f;
 
 // The two configuration codes that decide mSwitchBanks.
-constexpr int kBankSwitchConfigCode = 0x3a4;
-constexpr int kBankSwitchOverrideConfigCode = 0x3a1;
+constexpr int kBankSwitchConfigCode = 932;
+constexpr int kBankSwitchOverrideConfigCode = 929;
 
 constexpr unsigned char kStatusKindMask = 0xf0;
 constexpr unsigned char kStatusNoteOff = 0x80;

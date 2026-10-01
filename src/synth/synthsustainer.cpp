@@ -34,7 +34,7 @@ void SynthSustainer::HandleSustainNote(SustainNoteMsg *pMsg) {
     (void)std::find(mSustained.begin(),
                     mSustained.end(),
                     pMsg->mUnknown08); // Yes, the binary discards this result.
-    if (std::find(mSounding.begin(), mSounding.end(), pMsg->mUnknown08) == mSounding.end()) {
+    if (std::find(mSounding.begin(), mSounding.end(), pMsg->mUnknown08) != mSounding.end()) {
         mSustained.push_back(pMsg->mUnknown08);
     }
 }

@@ -29,7 +29,7 @@ SavePersonasMCT::~SavePersonasMCT() {
 void SavePersonasMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown && mStatus != kMemcardStatusNotFormatted) {
-        if (pOp->mFree >= kSaveFileMinimumFreeClusters) {
+        if (static_cast<unsigned>(pOp->mFree) >= kSaveFileMinimumFreeClusters) {
             mStep = kSaveFileStepCreateDir;
             RunStep();
             return;

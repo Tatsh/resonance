@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 class Player;
@@ -61,7 +62,7 @@ public:
      *
      * Public because NotePitcher::PostPitchMsg() at `0x001b1f10` writes it directly.
      */
-    int mUnknown04;
+    int mUnknown04 = kMBTInfinity;
 
     int mUnknown08;     /*!< Purpose unrecovered. AppTunnel passes it on to a lookup. +0x08 */
     int mUnknown0c;     /*!< Purpose unrecovered. AppTunnel converts it to a float. +0x0c */

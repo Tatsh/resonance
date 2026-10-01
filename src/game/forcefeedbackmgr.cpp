@@ -23,8 +23,8 @@ constexpr unsigned char kFlagPaused = 0x08;
 constexpr unsigned char kFlagStopped = 0x10;
 constexpr unsigned char kFlagDisabled = 0x20;
 
-// SetPlayerCount() suspends vibration from this many players up.
-constexpr unsigned int kMaxVibratingPlayers = 2;
+// SetPlayerCount() suspends vibration above this many players.
+constexpr int kMaxVibratingPlayers = 2;
 
 // PlayEffect() ignores a player without a slot.
 constexpr int kNoPlayerSlot = -1;
@@ -34,7 +34,7 @@ constexpr int kBarTicks = 1920;
 constexpr int kBeatTicks = 480;
 
 // The configuration codes LoadConfig() reads.
-constexpr int kMetronomeQuery = 0x4b1;
+constexpr int kMetronomeQuery = 1201;
 constexpr int kEffectCount = 5;
 
 // SyncMetronome() rounds the pulse to milliseconds and adds this lead before converting to ticks.
@@ -320,7 +320,7 @@ void ForceFeedbackMgr::LoadConfig() {
     mPulseLength.mValue = static_cast<long long>(values[1]) * kNanosecondsPerMillisecond;
     mBeatPeriod = Mid::MBT(kBarTicks / values[2]);
 
-    const int aEffectQueries[] = {0x4b4, 0x4b5, 0x4b2, 0x4b3, 0x4b6};
+    const int aEffectQueries[] = {1204, 1205, 1202, 1203, 1206};
     mEffects.resize(kEffectCount, Effect());
     for (int i = 0; i < kEffectCount; ++i) {
         values.clear();
@@ -349,7 +349,7 @@ void ForceFeedbackMgr::StartMetronome(const Mid::MBT &delay) {
 // 0x0016e2b8
 void ForceFeedbackMgr::SetPlayerCount(unsigned int nPlayers) {
     mSlots.resize(nPlayers, Slot());
-    if (nPlayers <= kMaxVibratingPlayers) {
+    if (static_cast<int>(nPlayers) <= kMaxVibratingPlayers) { // The binary tests the count signed.
         mFlags &= ~kFlagTooManyPlayers;
         return;
     }

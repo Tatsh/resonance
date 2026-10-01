@@ -132,7 +132,7 @@ void MultiMuse::Add(MuseMsg *pMsg, int nTick, int bCheckLast) {
     if (bCheckLast != 0) {
         InsertSorted(mEntries, entry);
     } else {
-        InsertAtUpperBound(mEntries, entry);
+        InsertAtLowerBound(mEntries, entry);
     }
 }
 

@@ -20,10 +20,10 @@ void DeleteTrackData(TrackData *pTrack) {
 }
 
 // Configuration codes the constructor queries.
-constexpr int kPlayMapSlot17Query = 0x3a1;
-constexpr int kPlayMapStepsQuery = 0x396;
-constexpr int kPlayMapLabelsQuery = 0x3a0;
-constexpr int kPlayMapSlot20Query = 0x39d;
+constexpr int kPlayMapSlot17Query = 929;
+constexpr int kPlayMapStepsQuery = 918;
+constexpr int kPlayMapLabelsQuery = 928;
+constexpr int kPlayMapSlot20Query = 925;
 
 // The tempo a level starts with, 120 beats per minute.
 constexpr int kDefaultMicrosecondsPerQuarter = 500000;
@@ -109,9 +109,7 @@ LevelBuilder::~LevelBuilder() {
     if (mUnknown30 != nullptr) {
         mUnknown30->Release();
     }
-    // The image deletes the object at +0x34 here through its own table slot 1 with an in-charge
-    // argument of 3. The statement is omitted rather than written, because the object's class is
-    // unrecovered and deleting through an untyped pointer would assert the wrong thing.
+    delete mUnknown34;
 }
 
 // 0x001ec430

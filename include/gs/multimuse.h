@@ -98,7 +98,7 @@ public:
      * The sequence stores the message's Clone() rather than the message itself. Both insertion
      * paths keep the entries sorted by position; a non-zero bCheckLast first compares against the
      * last entry and appends when the new position does not precede it, and zero always searches.
-     * The two insertion paths are InsertSorted() and InsertAtUpperBound().
+     * The two insertion paths are InsertSorted() and InsertAtLowerBound().
      *
      * @param pMsg The message to copy.
      * @param nTick The song position, in MIDI ticks.

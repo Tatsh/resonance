@@ -6,7 +6,7 @@
 namespace {
 
 // The script template that yields a table's step rings, and the step value before the first.
-constexpr int kStepRingTemplate = 0x3a3;
+constexpr int kStepRingTemplate = 931;
 constexpr int kNoStep = -1;
 
 } // namespace

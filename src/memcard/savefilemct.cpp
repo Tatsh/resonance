@@ -17,13 +17,13 @@ namespace {
 enum IconVectorComponent { kIconX = 0, kIconY = 1, kIconZ = 2, kIconW = 3 };
 
 // Half intensity, which every corner of the background gradient uses.
-constexpr int kIconBackgroundLevel = 0x80;
+constexpr int kIconBackgroundLevel = 128;
 
 // Character offset the browser breaks the title at.
-constexpr int kIconTitleLineBreak = 0x18;
+constexpr int kIconTitleLineBreak = 24;
 
 // Background transparency the browser applies.
-constexpr int kIconTransparency = 0x60;
+constexpr int kIconTransparency = 96;
 
 // Bytes the marker file holds, which is the terminated text below.
 constexpr int kMarkerLength = 2;

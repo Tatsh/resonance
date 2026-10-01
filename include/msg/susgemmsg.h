@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 class Player;
@@ -55,12 +56,12 @@ public:
      */
     virtual const char *Name();
 
-    int mStripId;    /*!< The sustain strip. +0x04 */
-    int mStop;       /*!< Non-zero to stop the strip. +0x08 */
-    int mLane;       /*!< The lane. +0x0c */
-    int mFrame;      /*!< The frame the strip extends to. +0x10 */
-    float mBlend;    /*!< The blend at that frame. +0x14 */
-    Player *mPlayer; /*!< The player the strip belongs to. +0x18 */
+    int mStripId;              /*!< The sustain strip. +0x04 */
+    int mStop;                 /*!< Non-zero to stop the strip. +0x08 */
+    int mLane;                 /*!< The lane. +0x0c */
+    int mFrame = kMBTInfinity; /*!< The frame the strip extends to. +0x10 */
+    float mBlend;              /*!< The blend at that frame. +0x14 */
+    Player *mPlayer;           /*!< The player the strip belongs to. +0x18 */
 };
 
 /**

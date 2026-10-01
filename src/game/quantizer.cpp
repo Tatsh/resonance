@@ -18,7 +18,7 @@ Quantizer::Quantizer(const TrackData *pTrackData) : mTrackData(pTrackData) {
 }
 
 // 0x001ce680
-unsigned Quantizer::Quantize(int nTick) {
+int Quantizer::Quantize(int nTick) {
     return Round(nTick, GetQuantum(nTick));
 }
 

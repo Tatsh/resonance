@@ -51,7 +51,7 @@ constexpr int kSkipIconFiles = 1;
 constexpr int kWriteIconFiles = 0;
 
 // Where ReadTargetIndex() stamps the remix name into the payload, and the bytes it copies.
-constexpr int kPayloadRemixNameOffset = 0x25;
+constexpr int kPayloadRemixNameOffset = 37;
 constexpr int kPayloadRemixNameSize = 32;
 
 // Bytes of the stack buffers the directory and file numbers are formatted into.
@@ -136,7 +136,7 @@ void SaveRemixMCT::ListRemixDir() {
 void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
-        if (pOp->mFree >= kRemixSaveMinimumFreeClusters) {
+        if (static_cast<unsigned>(pOp->mFree) >= kRemixSaveMinimumFreeClusters) {
             ListRemixDir();
             return;
         }

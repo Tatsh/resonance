@@ -143,6 +143,7 @@ IBStream &operator>>(IBStream &stream, Command *&pCommand) {
     }
     if (cPresent != '1') {
         Fatal("Stream error while reading in a Command object.");
+        return stream;
     }
     int nCmdID;
     stream.Read(&nCmdID, sizeof(nCmdID));

@@ -35,7 +35,7 @@ constexpr unsigned char kMidiBankSelectLsb = 0x20;
 // The value mProgram and mChannel have until the track supplies one.
 constexpr unsigned char kNoProgram = 0xff;
 
-constexpr int kGemDifficultyQuery = 0x38a;
+constexpr int kGemDifficultyQuery = 906;
 
 // The gem track's octaves, counted from the lowest, are the three difficulties.
 constexpr int kFirstGemOctave = 5;
@@ -78,11 +78,11 @@ constexpr unsigned char kMidiStatusClassMask = 0xf0;
 // The controllers the handlers act on or reject.
 constexpr unsigned char kControllerVolume = 7;
 constexpr unsigned char kControllerExpression = 11;
-constexpr unsigned char kControllerQuantization = 0x66;
-constexpr unsigned char kControllerScoreThreshold = 0x68;
-constexpr unsigned char kControllerErrorThreshold = 0x69;
-constexpr unsigned char kControllerActiveness = 0x6a;
-constexpr unsigned char kControllerGem = 0x6b;
+constexpr unsigned char kControllerQuantization = 102;
+constexpr unsigned char kControllerScoreThreshold = 104;
+constexpr unsigned char kControllerErrorThreshold = 105;
+constexpr unsigned char kControllerActiveness = 106;
+constexpr unsigned char kControllerGem = 107;
 
 // The quantisation values the quantisation controller accepts.
 constexpr unsigned char kQuantizationWhole = 1;
@@ -101,8 +101,8 @@ constexpr int kUnsetTick = -1;
 constexpr int kNoTrack = -1;
 
 // Configuration codes Convert() and ParseTrackTypeString() query.
-constexpr int kBankSelectDisableQuery = 0x3a1;
-constexpr int kBankSelectQuery = 0x3a4;
+constexpr int kBankSelectDisableQuery = 929;
+constexpr int kBankSelectQuery = 932;
 
 // The play mode in which a vocal track is read as a catch track.
 constexpr int kCatchVocalPlayMode = 1;

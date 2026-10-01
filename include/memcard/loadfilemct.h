@@ -14,10 +14,10 @@
  * of them.
  */
 enum LoadFileState {
-    kLoadFileStateOpen = 0x7b,   /*!< Open the file for reading. */
-    kLoadFileStateRead = 0x8f,   /*!< Read the payload, then close. */
-    kLoadFileStateReport = 0xa3, /*!< Call Finish(). */
-    kLoadFileStateDone = 0xb7    /*!< Terminal. RunStep() performs no work. */
+    kLoadFileStateOpen = 123,   /*!< Open the file for reading. */
+    kLoadFileStateRead = 143,   /*!< Read the payload, then close. */
+    kLoadFileStateReport = 163, /*!< Call Finish(). */
+    kLoadFileStateDone = 183    /*!< Terminal. RunStep() does not perform work. */
 };
 
 /**

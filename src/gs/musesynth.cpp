@@ -24,6 +24,7 @@ MuseSynth::MuseSynth(Sch::TickClock *pClock)
 // 0x001aa5d8
 MuseSynth::~MuseSynth() {
     ReleaseAllPlayers();
+    delete mSustainer;
 }
 
 // 0x001aad98

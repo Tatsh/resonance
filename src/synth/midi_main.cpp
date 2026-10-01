@@ -24,12 +24,6 @@
 // because the whole of midi_main compiled as a single translation unit.
 constexpr char kMidiMainFileName[] = "midi_main.cpp";
 
-// Line 575 of midi_main.cpp, which the BD read buffer's allocation passes to the tagged allocator.
-constexpr int kStartBdXferLine = 0x23f;
-
-// Line 467 of midi_main.cpp, for the HD read buffer.
-constexpr int kStartHdXferLine = 0x1d3;
-
 // Selector submitted by SynthCommand's third command and by the tail of the voice report. What it
 // asks the driver to do is unrecovered, so the title records the selector rather than an effect.
 constexpr int kSoundSelectorUnknownD0 = 0xd0;
@@ -342,8 +336,8 @@ int StartBdBankXfer(const char *pszPath) {
         return -1;
     }
     const int nFile = FileOpen(pszName, 0);
-    g_pBdXferBuffer = MemAllocTagged(
-        kBankChunkSize + kBankBufferAlignment - 1, kMidiMainFileName, kStartBdXferLine);
+    g_pBdXferBuffer =
+        MemAllocTagged(kBankChunkSize + kBankBufferAlignment - 1, kMidiMainFileName, __LINE__);
     const uintptr_t nRaw = reinterpret_cast<uintptr_t>(g_pBdXferBuffer) + kBankBufferAlignment - 1;
     char *pReadBuffer =
         reinterpret_cast<char *>(nRaw & ~static_cast<uintptr_t>(kBankBufferAlignment - 1));
@@ -376,8 +370,7 @@ int StartHdBankXfer(const char *pszPath, int nPlacement) {
         LogPrintf("\nCan't alloc heap \n");
         return -1;
     }
-    g_pHdXferBuffer =
-        MemAllocTagged(nLength + kBankBufferAlignment, kMidiMainFileName, kStartHdXferLine);
+    g_pHdXferBuffer = MemAllocTagged(nLength + kBankBufferAlignment, kMidiMainFileName, __LINE__);
     const uintptr_t nRaw = reinterpret_cast<uintptr_t>(g_pHdXferBuffer) + kBankBufferAlignment - 1;
     char *pReadBuffer =
         reinterpret_cast<char *>(nRaw & ~static_cast<uintptr_t>(kBankBufferAlignment - 1));

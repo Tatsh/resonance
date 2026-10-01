@@ -14,7 +14,7 @@
 namespace {
 
 // The configuration code that lists the effect types a jam track builds.
-constexpr int kEffectorTypesConfigCode = 0x389;
+constexpr int kEffectorTypesConfigCode = 905;
 
 // The width of a step mask, one machine word.
 constexpr int kStepMaskBits = 64;

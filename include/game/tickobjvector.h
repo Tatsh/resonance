@@ -73,9 +73,6 @@ bool TickObjAfter(TickObj<T> entry, int nTick) {
  * @param value The value to place.
  * @return The upper bound of value.
  * @ghidraAddress 0x001b5b40
- * @ghidraAddress 0x001a91a8
- * @ghidraAddress 0x001d5b98
- * @ghidraAddress 0x001d61d8
  * @ghidraAddress 0x001d6898
  * @ghidraAddress 0x001d6a48
  */
@@ -83,6 +80,22 @@ template <typename T>
 typename std::vector<TickObj<T> >::iterator UpperBoundByEntry(std::vector<TickObj<T> > &values,
                                                               const TickObj<T> &value) {
     return std::upper_bound(values.begin(), values.end(), value, TickObjLess<T>);
+}
+
+/**
+ * Find the first entry a value does not follow.
+ *
+ * @param values The entries, sorted by position.
+ * @param value The value to place.
+ * @return The lower bound of value.
+ * @ghidraAddress 0x001a91a8
+ * @ghidraAddress 0x001d5b98
+ * @ghidraAddress 0x001d61d8
+ */
+template <typename T>
+typename std::vector<TickObj<T> >::iterator LowerBoundByEntry(std::vector<TickObj<T> > &values,
+                                                              const TickObj<T> &value) {
+    return std::lower_bound(values.begin(), values.end(), value, TickObjLess<T>);
 }
 
 /**
@@ -179,11 +192,7 @@ void InsertSorted(std::vector<TickObj<T> > &values, const TickObj<T> &value) {
 }
 
 /**
- * Store a value at a song position, overwriting the entry the search lands on when that entry sits
- * at the same position.
- *
- * The search is the upper bound and lands past every entry at the same position. The overwrite
- * branch is reachable only through the comparator's definition of order.
+ * Store a value at a song position, overwriting the first entry already at that position.
  *
  * @param values The entries, sorted by position.
  * @param value The value.
@@ -196,7 +205,7 @@ void SetAtTick(std::vector<TickObj<T> > &values, const T &value, int nTick) {
     TickObj<T> entry;
     entry.mPosition.mTick = nTick;
     entry.mValue = value;
-    typename std::vector<TickObj<T> >::iterator it = UpperBoundByEntry(values, entry);
+    typename std::vector<TickObj<T> >::iterator it = LowerBoundByEntry(values, entry);
     if (it != values.end() && it->mPosition.mTick == nTick) {
         *it = entry;
         return;
@@ -205,7 +214,7 @@ void SetAtTick(std::vector<TickObj<T> > &values, const T &value, int nTick) {
 }
 
 /**
- * Insert an entry at its upper bound, always searching first.
+ * Insert an entry before every entry at the same position, always searching first.
  *
  * MultiMuse::Add() takes this path when it is told not to try appending.
  *
@@ -214,8 +223,8 @@ void SetAtTick(std::vector<TickObj<T> > &values, const T &value, int nTick) {
  * @ghidraAddress 0x001a9a20
  */
 template <typename T>
-void InsertAtUpperBound(std::vector<TickObj<T> > &values, const TickObj<T> &value) {
-    values.insert(UpperBoundByEntry(values, value), value);
+void InsertAtLowerBound(std::vector<TickObj<T> > &values, const TickObj<T> &value) {
+    values.insert(LowerBoundByEntry(values, value), value);
 }
 
 /**

@@ -15,7 +15,7 @@ namespace {
 constexpr int kBarTicks = 1920;
 
 // The configuration code the phrase manager's configuration word comes from.
-constexpr int kPhraseMgrConfigCode = 0x2be;
+constexpr int kPhraseMgrConfigCode = 702;
 
 // The BarSequencer unmapped argument Slot2() passes, where BGTrackGraph passes its own flag.
 constexpr int kMapped = 0;

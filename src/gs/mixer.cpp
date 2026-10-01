@@ -25,14 +25,13 @@ constexpr unsigned char kMaxLevel = 127;
 // 127 cubed, which is what normalises the product of the four gain factors back into seven bits.
 constexpr int kGainDivisor = 0x1f417f;
 
-// Pan the section index maps to. The index is three bits, so entries 6 and 7 fall outside the
-// table and send zero.
-constexpr unsigned char kSectionPan[] = {0, 0, 0x20, 0x40, 0x60, kMaxLevel};
+// Pan the three-bit section index maps to.
+constexpr unsigned char kSectionPan[] = {0x40, 0x60, kMaxLevel, 0x60, 0x40, 0x20, 0, 0x20};
 
 // The three configuration codes the constructor reads.
-constexpr int kOwnsPanConfigCode = 0x398;
-constexpr int kUnknown10ConfigCode = 0x399;
-constexpr int kTrackLevelsConfigCode = 0x39f;
+constexpr int kOwnsPanConfigCode = 920;
+constexpr int kUnknown10ConfigCode = 921;
+constexpr int kTrackLevelsConfigCode = 927;
 
 // The value the constructor gives mUnknown50.
 constexpr int kNoValue = -1;
@@ -80,14 +79,16 @@ void Mixer::SendPan() {
 void Mixer::SetGainFactor(int nIndex, unsigned char nFactor) {
     mGainFactors[nIndex] = nFactor;
 
-    const unsigned char nLevel =
-        static_cast<unsigned char>(static_cast<unsigned>(mGainFactors[0] * mGainFactors[1] *
-                                                         mGainFactors[2] * mGainFactors[3]) /
-                                   kGainDivisor);
-    if (nLevel == mLevel || mMuted != 0) {
+    const unsigned nLevel = static_cast<unsigned>(mGainFactors[0] * mGainFactors[1] *
+                                                  mGainFactors[2] * mGainFactors[3]) /
+                            kGainDivisor;
+    if (nLevel == mLevel) {
         return;
     }
-    mLevel = nLevel;
+    mLevel = static_cast<unsigned char>(nLevel); // Yes, a muted mixer still takes the new level.
+    if (mMuted != 0) {
+        return;
+    }
 
     StdMidiMsg msg;
     msg.mUnknown08 = kStatusControlChange | mChannel;

@@ -83,8 +83,8 @@ void Ps2HardSynth::LoadBankSet4() {
 void Ps2HardSynth::LoadBankSet5() {
     mUseSfxBank = 1;
 
-    HxStr bdName = QueryConfigString(kBankSet5BdCode, GetHostMode());
-    HxStr hdName = QueryConfigString(kBankSet5HdCode, GetHostMode());
+    HxStr bdName = QueryConfigString(kBankSet5BdCode);
+    HxStr hdName = QueryConfigString(kBankSet5HdCode);
     LoadBankPair(bdName, hdName, kTagAllChannels, kPlacementFixedSecond);
 
     SelectSfxProgram();

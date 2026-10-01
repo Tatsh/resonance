@@ -59,7 +59,7 @@ constexpr int kBonusBars = 8;
 constexpr int kMultiplierDecayBars = 2;
 
 // The sound a caught powerup plays before its own.
-constexpr char kCaughtPowerSound[] = "SND_CAUGHT_POWER";
+constexpr char kCaughtPowerSound[] = "SND_CAUGHT_POWERUP";
 
 } // namespace
 

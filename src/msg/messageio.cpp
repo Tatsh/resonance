@@ -88,6 +88,7 @@ IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
     }
     if (cPresent != '1') {
         Fatal("Stream error while reading in a Message object pointer.");
+        return stream;
     }
     int nType;
     stream.Read(&nType, sizeof(nType));

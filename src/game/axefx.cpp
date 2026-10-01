@@ -12,7 +12,7 @@
 namespace {
 
 // The configuration code the controller number is read from.
-constexpr int kControllerConfigCode = 0x393;
+constexpr int kControllerConfigCode = 915;
 
 // The controller value the constructor assumes, the middle of the range.
 constexpr int kValueCenter = 64;

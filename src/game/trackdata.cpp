@@ -41,10 +41,10 @@ constexpr int kSkippedTrack = -1;
 constexpr unsigned kFlatPointModeCount = 3;
 
 // Configuration codes this file queries.
-constexpr int kFlatPointsQuery = 0x395;
-constexpr int kBarUnknown08Query = 0x38b;
-constexpr int kScoreWeightsQuery = 0x3a7;
-constexpr int kScoreThresholdsQuery = 0x3a8;
+constexpr int kFlatPointsQuery = 917;
+constexpr int kBarUnknown08Query = 907;
+constexpr int kScoreWeightsQuery = 935;
+constexpr int kScoreThresholdsQuery = 936;
 
 // The gem value GetGemAt() reports when no gem sits at the position.
 constexpr int kNoGem = -1;
@@ -363,7 +363,7 @@ void TrackData::Print(std::ostream &stream) {
     stream << "TrackData[" << mUnknown04 << "]" << std::endl;
     stream << "Chan = " << static_cast<int>(mChannel) << ". Mode = " << pszMode << std::endl;
 
-    for (unsigned i = 0; i < mBars.size(); ++i) {
+    for (int i = 0; static_cast<unsigned>(i) < mBars.size(); ++i) {
         stream << "Bar# " << i << std::endl;
         mBars[i].Print(stream);
         stream << std::endl << std::endl;

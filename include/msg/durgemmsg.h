@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 class Player;
@@ -52,11 +53,11 @@ public:
      */
     virtual const char *Name();
 
-    int mLane;         /*!< The lane. +0x04 */
-    int mStartFrame;   /*!< The frame the gem starts at. +0x08 */
-    float mStartBlend; /*!< The blend at the start. +0x0c */
-    int mEndFrame;     /*!< The frame the gem ends at. +0x10 */
-    float mEndBlend;   /*!< The blend at the end. +0x14 */
+    int mLane;                      /*!< The lane. +0x04 */
+    int mStartFrame = kMBTInfinity; /*!< The frame the gem starts at. +0x08 */
+    float mStartBlend;              /*!< The blend at the start. +0x0c */
+    int mEndFrame = kMBTInfinity;   /*!< The frame the gem ends at. +0x10 */
+    float mEndBlend;                /*!< The blend at the end. +0x14 */
 
     /**
      * Purpose unrecovered. +0x18

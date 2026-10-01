@@ -11,7 +11,7 @@
 namespace {
 
 // The configuration code the catch window comes from, in milliseconds.
-constexpr int kCatchWindowConfigCode = 0x39c;
+constexpr int kCatchWindowConfigCode = 924;
 
 constexpr long long kNanosecondsPerMillisecond = 1000000;
 

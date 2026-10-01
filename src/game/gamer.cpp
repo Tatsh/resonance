@@ -43,13 +43,13 @@
 namespace {
 
 // Configuration code of the solo game's track requirement lists.
-constexpr int kSoloRequirementsConfigCode = 0x387;
+constexpr int kSoloRequirementsConfigCode = 903;
 
 // Configuration codes of the constructor's recorded values.
-constexpr int kUnknown3cConfigCode = 0x2be;
-constexpr int kSoloJuiceConfigCode = 0x38c;
-constexpr int kSoloMaxJuiceConfigCode = 0x394;
-constexpr int kTutorialConfigCode = 0x3a1;
+constexpr int kUnknown3cConfigCode = 702;
+constexpr int kSoloJuiceConfigCode = 908;
+constexpr int kSoloMaxJuiceConfigCode = 916;
+constexpr int kTutorialConfigCode = 929;
 
 // MIDI ticks in one bar.
 constexpr int kTicksPerBar = 1920;
@@ -85,7 +85,7 @@ constexpr int kBarJuiceCost = -1;
 constexpr int kSynthStreamLeadBars = 3;
 
 // Configuration code of the background tracks' enable policy.
-constexpr int kBackTrackConfigCode = 0x386;
+constexpr int kBackTrackConfigCode = 902;
 
 // The length of the freestyle span OnEnableFreestyle() grants.
 constexpr int kFreestyleBars = 8;
@@ -529,7 +529,8 @@ void Gamer::OnBar(int nBar) {
                         InputMap::shared()->DisableEntries();
                     }
                 }
-            } else if (!FreeTracksAfterCapture(nBar) && mUnknown1c == 0) {
+            } else if (mEndState == kEndStateNone && !FreeTracksAfterCapture(nBar) &&
+                       mUnknown1c == 0) {
                 pPlayer->AddJuice(kBarJuiceCost, 1);
             }
         }
@@ -578,6 +579,7 @@ void Gamer::SetBackGraphs(std::vector<BGTrackGraph *> *pGraphs) {
 void Gamer::EnablePlayerFreestyle(int nStartBar, int nEndBar) {
     if (mTutorial == 0) {
         Fatal(kFreestyleOutsideTutorial);
+        return;
     }
     mPlayers[0]->Slot8(nStartBar, nEndBar);
 }

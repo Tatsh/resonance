@@ -312,7 +312,7 @@ void InputMap::Rebuild() {
 
 // 0x00119dd0
 void InputMap::StopAllRiffs() {
-    const int nNow = mGlobals->GetSongClock()->SongTick();
+    const int nNow = Application::shared()->GetSongClock()->SongTick();
     for (unsigned i = 0; i < mPlayers->size(); ++i) {
         for (int nRiff = 0; nRiff < kRiffCount; ++nRiff) {
             Player *pPlayer = (*mPlayers)[i];

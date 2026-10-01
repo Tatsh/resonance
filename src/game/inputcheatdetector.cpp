@@ -23,7 +23,7 @@ constexpr int kFirstNonButton = 100;
 constexpr double kPressThreshold = 0.1;
 
 // The script template a matched cheat runs, with the cheat's name and the zero-based slot.
-constexpr int kCheatScriptTemplate = 0xce;
+constexpr int kCheatScriptTemplate = 206;
 
 constexpr long long kNanosecondsPerMillisecond = 1000000;
 
@@ -247,14 +247,15 @@ void InputCheatDetector::OnUnknownSlot2(int nType, int nSlot, int nButton, float
     history.mInputs.push_back(nButton);
     history.mLastInputNs = llNowNs;
 
-    for (CheatSequence &cheat : *mCheats) {
+    // The binary re-reads the list and its end on every pass.
+    for (auto it = mCheats->begin(); it != mCheats->end(); ++it) {
         if (std::search(history.mInputs.begin(),
                         history.mInputs.end(),
-                        cheat.mButtons.begin(),
-                        cheat.mButtons.end()) != history.mInputs.end()) {
+                        it->mButtons.begin(),
+                        it->mButtons.end()) != history.mInputs.end()) {
             history.mInputs.clear();
             CallScriptTemplate(kCheatScriptTemplate,
-                               cheat.mName.mStr != nullptr ? cheat.mName.mStr : g_szEmptyString,
+                               it->mName.mStr != nullptr ? it->mName.mStr : g_szEmptyString,
                                nSlot - 1);
         }
     }

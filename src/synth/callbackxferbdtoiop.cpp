@@ -11,9 +11,6 @@
 // because the whole of midi_main compiled as a single translation unit.
 constexpr char kMidiMainFileName[] = "midi_main.cpp";
 
-// Line 305 of midi_main.cpp, which the release of the read buffer passes to the tagged free.
-constexpr int kFreeReadBufferLine = 0x131;
-
 // Selector that hands one chunk to the driver.
 constexpr int kSoundSelectorXferChunk = 0x1070;
 
@@ -71,12 +68,17 @@ inline void CallbackXferBdToIop::XferChunk() {
     if (mRemaining != 0) {
         mBusy = 0;
         mDest += mChunkLength;
-        mChunkLength = (mRemaining <= kBankChunkSize) ? mRemaining : kBankChunkSize;
+        // The comparison is unsigned, unlike in StartBdBankXfer(). A negative remainder sends a
+        // full chunk.
+        mChunkLength =
+            (static_cast<unsigned int>(mRemaining) <= static_cast<unsigned int>(kBankChunkSize)) ?
+                mRemaining :
+                kBankChunkSize;
         mRequestId = AsyncSubmitRequest(mFile, mpReadBuffer, mChunkLength, 0, this, 0);
         return;
     }
     // Yes, the binary finishes with the transfer still marked busy.
-    MemFreeTagged(g_pBdXferBuffer, kMidiMainFileName, kFreeReadBufferLine);
+    MemFreeTagged(g_pBdXferBuffer, kMidiMainFileName, __LINE__);
     FileClose(mFile);
     SubmitSoundDriverRequest(kSoundSelectorBankComplete,
                              reinterpret_cast<uintptr_t>(&g_bankCommand));

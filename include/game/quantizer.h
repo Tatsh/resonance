@@ -30,7 +30,7 @@ public:
      * @return The rounded position.
      * @ghidraAddress 0x001ce680
      */
-    unsigned Quantize(int nTick);
+    int Quantize(int nTick);
 
     /**
      * Report the quantisation of the bar a song position falls in.

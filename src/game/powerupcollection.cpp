@@ -11,7 +11,7 @@
 namespace {
 
 // The configuration code the constructor reads the list of kinds from.
-constexpr int kPowerupKindsConfigCode = 0x389;
+constexpr int kPowerupKindsConfigCode = 905;
 
 // The largest count one entry stores. AddPowerup ignores an entry already at this count.
 constexpr int kMaximumCount = 9;

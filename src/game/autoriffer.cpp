@@ -95,7 +95,7 @@ void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
     }
 
     const int nTick = pMsg->mUnknown0c.mTick;
-    const unsigned int nQuantized = mQuantizer->Quantize(nTick);
+    const int nQuantized = mQuantizer->Quantize(nTick);
     if (mPhraseMaker != nullptr &&
         mPhraseMaker->IsBarPlayable(nQuantized / Mid::MBT(kBarTicks).mTick) != 1) {
         PlaySoundByName("SND_INACTIVE");
@@ -131,7 +131,7 @@ void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
     }
 
     const int nTick = pMsg->mPosition.mTick;
-    const int nQuantized = static_cast<int>(mQuantizer->Quantize(nTick));
+    const int nQuantized = mQuantizer->Quantize(nTick);
     mLevelHeld[pMsg->mUnknown04] = kNotHeld;
     for (int nLevel = 0; nLevel < kLevelCount; ++nLevel) {
         if (mLevelHeld[nLevel] != kNotHeld) {

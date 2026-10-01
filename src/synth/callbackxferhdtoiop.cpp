@@ -8,9 +8,6 @@
 // because the whole of midi_main compiled as a single translation unit.
 constexpr char kMidiMainFileName[] = "midi_main.cpp";
 
-// Line 382 of midi_main.cpp, which the release of the read buffer passes to the tagged free.
-constexpr int kFreeReadBufferLine = 0x17e;
-
 // The compiler generated the initialiser and destructor pair at 0x00464170 for this definition.
 // 0x006e9bc8
 CallbackXferHdToIop g_hdXfer;
@@ -26,7 +23,7 @@ void CallbackXferHdToIop::Done([[maybe_unused]] int nHandle,
     } else {
         XferToIop(g_nBankIopAddress, pBuffer, nLength);
     }
-    MemFreeTagged(g_pHdXferBuffer, kMidiMainFileName, kFreeReadBufferLine);
+    MemFreeTagged(g_pHdXferBuffer, kMidiMainFileName, __LINE__);
     g_nHdXferInFlight = 0;
     if (mpBdXfer != nullptr && mpBdXfer->mRequestId != 0) {
         mpBdXfer->Resume();

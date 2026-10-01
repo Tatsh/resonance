@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mid/mbt.h"
 #include "msg/message.h"
 
 class Player;
@@ -86,13 +87,13 @@ public:
      */
     virtual const char *Name();
 
-    int mTick;       /*!< The scheduler time of the gem. +0x04 */
-    int mTrack;      /*!< The track the gem lies on. +0x08 */
-    int mGem;        /*!< The gem, which AppTunnel uses as the lane. +0x0c */
-    int mHit;        /*!< Non-zero for a caught gem, zero for a miss. +0x10 */
-    Player *mPlayer; /*!< The catching player. +0x14 */
-    int mCaught;     /*!< The gems caught so far in the phrase. +0x18 */
-    int mTotal;      /*!< The gems the phrase requires. +0x1c */
+    int mTick = kMBTInfinity; /*!< The scheduler time of the gem. +0x04 */
+    int mTrack;               /*!< The track the gem lies on. +0x08 */
+    int mGem;                 /*!< The gem, used by AppTunnel as the lane. +0x0c */
+    int mHit;                 /*!< Non-zero for a caught gem, zero for a miss. +0x10 */
+    Player *mPlayer;          /*!< The catching player. +0x14 */
+    int mCaught;              /*!< The gems caught so far in the phrase. +0x18 */
+    int mTotal;               /*!< The gems the phrase requires. +0x1c */
 };
 
 /**

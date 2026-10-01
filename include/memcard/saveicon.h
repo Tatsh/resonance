@@ -1,7 +1,7 @@
 #pragma once
 
 /** Bytes LoadSaveIcon() requests, which is the size of the buffer it fills. */
-constexpr int kSaveIconBufferSize = 0x9088;
+constexpr int kSaveIconBufferSize = 37000;
 
 /**
  * Load the memory-card save icon.
