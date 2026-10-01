@@ -1,31 +1,37 @@
 """Rebuild a FreQuency disc image with replacement binaries.
 
 The entry point reads an original FreQuency image in cue, bin, or ISO form, exchanges the
-`SCUS_971.25` executable and the `EZMIDI.IRX` module for fresh builds, and writes a plain
-ISO. Every other byte retains its sector. A payload fitting its original extent overwrites
-the extent. A larger payload moves to sectors appended after the volume. The directory
-record and the volume size move with the payload. Nothing else shifts. The layout still
-boots the console.
+`SCUS_971.25` executable and the `EZMIDI.IRX` module for fresh builds, and writes a raw
+MODE2/2352 bin and its cue sheet like the original CD. An ISO input is the original's data
+sectors without their Mode 2 framing. Burned as it is, an ISO makes a Mode 1 disc, and the
+console's CD driver cannot read files from one.
+
+Every output sector is encoded afresh as a Mode 2 Form 1 data sector from its 2048 data bytes,
+and a two-second postgap follows the volume. A payload fitting its original extent overwrites
+the extent. A larger payload moves to sectors appended after the volume. The directory record
+and the volume size move with the payload. Every other data byte retains its sector.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple, Self
+import argparse
 import contextlib
 import io
 import json
 import logging
+import operator
 import os
 import re
 import struct
+import sys
 import zipfile
 
-import click
 import requests
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Sequence
     from types import TracebackType
 
 log = logging.getLogger(__name__)
@@ -44,7 +50,7 @@ class DiscImageError(Exception):
 _DEFAULT_REPO = 'Tatsh/resonance'
 _WORKFLOW_FILE = 'build.yml'
 _GITHUB_API = 'https://api.github.com'
-_USER_AGENT = 'resonance-build-iso'
+_USER_AGENT = 'resonance-build-image'
 _HTTP_TIMEOUT = 30
 _SECTOR_DATA = 2048
 _SECTOR_RAW = 2352
@@ -64,7 +70,107 @@ _CUE_TRACK_RE = re.compile(r'TRACK\s+(?P<number>\d+)\s+(?P<mode>\S+)', re.IGNORE
 _CUE_INDEX_RE = re.compile(r'INDEX\s+01\s+(?P<minute>\d+):(?P<second>\d+):(?P<frame>\d+)',
                            re.IGNORECASE)
 
+_SYNC = b'\x00' + b'\xff' * 10 + b'\x00'
+_MODE2 = 2
+_LEAD_IN_SECTORS = 150
+_SECTORS_PER_SECOND = 75
+_SECONDS_PER_MINUTE = 60
+_POSTGAP_SECTORS = 150
+_ECC_P_COLUMNS = 86
+_ECC_P_ROWS = 24
+_ECC_Q_DIAGONALS = 52
+_ECC_Q_ROWS = 43
+_ECC_Q_STRIDE = 88
+_ECC_POLYNOMIAL = 0x11D
+_EDC_POLYNOMIAL = 0xD8018001
+_DATA_SUBHEADER = bytes((0, 0, 8, 0)) * 2
+_CUE_TEMPLATE = 'FILE "{name}" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n'
+
 type _Replacements = dict[str, bytes]
+
+
+def _build_ecc_tables() -> tuple[bytes, bytes]:
+    forward = bytearray(256)
+    backward = bytearray(256)
+    for value in range(256):
+        doubled = ((value << 1) ^ (_ECC_POLYNOMIAL if value & 0x80 else 0)) & 0xFF
+        forward[value] = doubled
+        backward[value ^ doubled] = value
+    return bytes(forward), bytes(backward)
+
+
+def _build_edc_table() -> tuple[int, ...]:
+    table = []
+    for value in range(256):
+        edc = value
+        for _ in range(8):
+            edc = (edc >> 1) ^ (_EDC_POLYNOMIAL if edc & 1 else 0)
+        table.append(edc)
+    return tuple(table)
+
+
+_ECC_FORWARD, _ECC_BACKWARD = _build_ecc_tables()
+_EDC_TABLE = _build_edc_table()
+# Each row gathers one byte per parity column. A row of XORs then computes every column at once.
+_ECC_P_ROW_GETTERS = tuple(
+    operator.itemgetter(*range(row * _ECC_P_COLUMNS, (row + 1) * _ECC_P_COLUMNS))
+    for row in range(_ECC_P_ROWS))
+_ECC_Q_ROW_GETTERS = tuple(
+    operator.itemgetter(*(((diagonal >> 1) * _ECC_P_COLUMNS + (diagonal & 1) + row * _ECC_Q_STRIDE)
+                          % (_ECC_Q_DIAGONALS * _ECC_Q_ROWS)
+                          for diagonal in range(_ECC_Q_DIAGONALS)))
+    for row in range(_ECC_Q_ROWS))
+
+
+def _xor(left: bytes, right: bytes) -> bytes:
+    return (int.from_bytes(left) ^ int.from_bytes(right)).to_bytes(len(left))
+
+
+def _ecc_parity(data: bytes, getters: tuple[operator.itemgetter[int], ...]) -> bytes:
+    width = len(getters[0](data))
+    first = second = bytes(width)
+    for getter in getters:
+        row = bytes(getter(data))
+        first = _xor(first, row).translate(_ECC_FORWARD)
+        second = _xor(second, row)
+    first = _xor(first.translate(_ECC_FORWARD), second).translate(_ECC_BACKWARD)
+    return first + _xor(first, second)
+
+
+def _bcd(value: int) -> int:
+    return ((value // 10) << 4) | (value % 10)
+
+
+def _encode_mode2_form1(lba: int, subheader: bytes, data: bytes) -> bytes:
+    """
+    Encode one CD-ROM XA Mode 2 Form 1 sector.
+
+    Parameters
+    ----------
+    lba : int
+        Sector number relative to the track start.
+    subheader : bytes
+        The eight subheader bytes.
+    data : bytes
+        The 2048 data bytes.
+
+    Returns
+    -------
+    bytes
+        The 2352-byte raw sector with its EDC and both ECC parity blocks.
+    """
+    address = lba + _LEAD_IN_SECTORS
+    header = bytes((_bcd(address // (_SECTORS_PER_SECOND * _SECONDS_PER_MINUTE)),
+                    _bcd(address // _SECTORS_PER_SECOND % _SECONDS_PER_MINUTE),
+                    _bcd(address % _SECTORS_PER_SECOND), _MODE2))
+    edc = 0
+    for value in subheader + data:
+        edc = (edc >> 8) ^ _EDC_TABLE[(edc ^ value) & 0xFF]
+    # Form 1 parity treats the header as zero.
+    protected = bytes(4) + subheader + data + edc.to_bytes(4, 'little')
+    parity_p = _ecc_parity(protected, _ECC_P_ROW_GETTERS)
+    parity_q = _ecc_parity(protected + parity_p, _ECC_Q_ROW_GETTERS)
+    return _SYNC + header + protected[4:] + parity_p + parity_q
 
 
 class _Geometry(NamedTuple):
@@ -619,14 +725,24 @@ def _patch_record(sector: bytes,
     raise DiscImageError(message)
 
 
-def _write_iso(source: _SourceImage, replacements: _Replacements, output: Path) -> int:
+class _Plan(NamedTuple):
+    """Sectors that differ from the original image."""
+
+    overlays: dict[int, bytes]
+    """Replacement data bytes by sector."""
+    volume_sectors: int
+    """Sectors in the output volume."""
+    written: dict[str, int]
+    """Output sector by target file name."""
+
+
+def _plan_overlays(source: _SourceImage, replacements: _Replacements) -> _Plan:
     """
-    Stream the output ISO with replaced extents.
+    Place each payload and collect the sectors that change.
 
     A payload fitting its original extent overwrites the extent with zero padding, and the
     metadata stays untouched. A larger payload moves to sectors appended after the volume,
-    and the directory record and volume size move with the payload. Every other sector is
-    copied verbatim.
+    and the directory record and volume size move with the payload.
 
     Parameters
     ----------
@@ -634,13 +750,11 @@ def _write_iso(source: _SourceImage, replacements: _Replacements, output: Path) 
         Open original image.
     replacements : _Replacements
         Payloads by target file name.
-    output : Path
-        Destination ISO path.
 
     Returns
     -------
-    int
-        Sectors in the output image.
+    _Plan
+        Changed sectors, the output volume size, and where each payload starts.
     """
     volume_sectors = source.volume_sectors()
     overlays: dict[int, bytes] = {}
@@ -681,22 +795,49 @@ def _write_iso(source: _SourceImage, replacements: _Replacements, output: Path) 
         struct.pack_into('<I', descriptor, 80, append_lba)
         struct.pack_into('>I', descriptor, 84, append_lba)
         overlays[_PVD_SECTOR] = bytes(descriptor)
-    with output.open('wb') as handle:
-        for lba in range(append_lba):
-            chunk = overlays.get(lba)
-            handle.write(chunk if chunk is not None else source.read_sector(lba))
-    _verify_output(output, written, replacements)
-    return append_lba
+    return _Plan(overlays=overlays, volume_sectors=append_lba, written=written)
 
 
-def _verify_output(output: Path, written: dict[str, int], replacements: _Replacements) -> None:
+def _write_image(source: _SourceImage, replacements: _Replacements, output: Path) -> int:
+    """
+    Encode the raw MODE2/2352 image and write its cue sheet.
+
+    Parameters
+    ----------
+    source : _SourceImage
+        Open original image.
+    replacements : _Replacements
+        Payloads by target file name.
+    output : Path
+        Destination cue sheet path. The image is written beside it with a `.bin` suffix.
+
+    Returns
+    -------
+    int
+        Sectors in the output image, including the postgap.
+    """
+    plan = _plan_overlays(source, replacements)
+    image = output.with_suffix('.bin')
+    with image.open('wb') as handle:
+        for lba in range(plan.volume_sectors):
+            if (data := plan.overlays.get(lba)) is None:
+                data = source.read_sector(lba)
+            handle.write(_encode_mode2_form1(lba, _DATA_SUBHEADER, data))
+        for lba in range(plan.volume_sectors, plan.volume_sectors + _POSTGAP_SECTORS):
+            handle.write(_encode_mode2_form1(lba, _DATA_SUBHEADER, bytes(_SECTOR_DATA)))
+    output.write_text(_CUE_TEMPLATE.format(name=image.name), encoding='utf-8')
+    _verify_output(image, plan.written, replacements)
+    return plan.volume_sectors + _POSTGAP_SECTORS
+
+
+def _verify_output(image: Path, written: dict[str, int], replacements: _Replacements) -> None:
     """
     Confirm the replaced extents open with the payload prefix.
 
     Parameters
     ----------
-    output : Path
-        Written ISO path.
+    image : Path
+        Written raw image path.
     written : dict[str, int]
         Output sector by target file name.
     replacements : _Replacements
@@ -707,9 +848,9 @@ def _verify_output(output: Path, written: dict[str, int], replacements: _Replace
     DiscImageError
         A prefix mismatches.
     """
-    with output.open('rb') as handle:
+    with image.open('rb') as handle:
         for target, lba in written.items():
-            handle.seek(lba * _SECTOR_DATA)
+            handle.seek(lba * _SECTOR_RAW + _MODE2_OFFSET)
             if handle.read(4) != replacements[target][:4]:
                 message = f'Verification failed for {target}.'
                 raise DiscImageError(message)
@@ -724,8 +865,8 @@ class _Options(NamedTuple):
     """Local module file, bypassing the artifact download."""
     input_image: Path
     """Original image in cue, bin, or ISO form."""
-    output_iso: Path
-    """Destination ISO path."""
+    output_cue: Path
+    """Destination cue sheet path. The bin is written beside it."""
     overwrite: bool
     """Replace the output file when present."""
     repo: str
@@ -740,7 +881,7 @@ class _Options(NamedTuple):
 
 def _run(options: _Options) -> int:
     """
-    Build the ISO from resolved selections.
+    Build the image from resolved selections.
 
     Parameters
     ----------
@@ -755,17 +896,22 @@ def _run(options: _Options) -> int:
     Raises
     ------
     DiscImageError
-        The image cannot be read or rewritten.
+        The output is not a cue sheet, or the image cannot be read or rewritten.
     """
-    if options.output_iso.exists() and not options.overwrite:
-        message = f'Output exists: {options.output_iso}.'
+    if options.output_cue.suffix.lower() != '.cue':
+        message = f'Output must be a cue sheet: {options.output_cue}.'
         raise DiscImageError(message)
-    if options.output_iso.resolve() == options.input_image.resolve():
+    image = options.output_cue.with_suffix('.bin')
+    if not options.overwrite and (options.output_cue.exists() or image.exists()):
+        message = f'Output exists: {options.output_cue}.'
+        raise DiscImageError(message)
+    if image.resolve() == options.input_image.resolve() or (options.output_cue.resolve()
+                                                            == options.input_image.resolve()):
         message = 'Output must differ from the input.'
         raise DiscImageError(message)
     replacements = _resolve_payloads(options)
     with _SourceImage(options.input_image) as source:
-        return _write_iso(source, replacements, options.output_iso)
+        return _write_image(source, replacements, options.output_cue)
 
 
 def _resolve_payloads(options: _Options) -> _Replacements:
@@ -810,80 +956,98 @@ def _resolve_payloads(options: _Options) -> _Replacements:
     return {_TARGET_EXECUTABLE: executable, _TARGET_MODULE: module}
 
 
-@click.command()
-@click.argument('input_image', type=click.Path(dir_okay=False, exists=True, path_type=Path))
-@click.argument('output_iso', type=click.Path(dir_okay=False, path_type=Path))
-@click.option('--debug', default=False, help='Enable debug logging.', is_flag=True,
-              show_default=True)
-@click.option('--ezmidi-irx', default=None,
-              help='Local module file, bypassing the artifact download.',
-              type=click.Path(dir_okay=False, exists=True, path_type=Path))
-@click.option('--overwrite', default=False, help='Replace the output file when present.',
-              is_flag=True, show_default=True)
-@click.option('--repo', default=_DEFAULT_REPO, help='Repository holding the build artifacts.',
-              show_default=True)
-@click.option('--resonance-bin', default=None,
-              help='Local executable file, bypassing the artifact download.',
-              type=click.Path(dir_okay=False, exists=True, path_type=Path))
-@click.option('--run-id', default=None, help='Actions run to fetch. The latest successful run '
-              'is used when omitted.', type=int)
-@click.option('--token', default=None, help='GitHub token. GITHUB_TOKEN or GH_TOKEN provides '
-              'the value when the flag is absent.')
-def main(input_image: Path,  # ruff: ignore[too-many-arguments]
-         output_iso: Path,
-         *,
-         debug: bool,
-         ezmidi_irx: Path | None,
-         overwrite: bool,
-         repo: str,
-         resonance_bin: Path | None,
-         run_id: int | None,
-         token: str | None) -> None:
+def _existing_file(value: str) -> Path:
     """
-    Rebuild a FreQuency ISO with replacement binaries.
+    Convert an argument to the path of an existing file.
 
     Parameters
     ----------
-    input_image : Path
-        Original image in cue, bin, or ISO form.
-    output_iso : Path
-        Destination ISO path.
-    debug : bool
-        Enable debug logging.
-    ezmidi_irx : Path | None
-        Local module file, bypassing the artifact download.
-    overwrite : bool
-        Replace the output file when present.
-    repo : str
-        Repository holding the build artifacts.
-    resonance_bin : Path | None
-        Local executable file, bypassing the artifact download.
-    run_id : int | None
-        Actions run to fetch. The latest successful run is used when omitted.
-    token : str | None
-        GitHub token. GITHUB_TOKEN or GH_TOKEN provides the value when the flag is absent.
+    value : str
+        Argument text.
+
+    Returns
+    -------
+    Path
+        The file path.
 
     Raises
     ------
-    click.Abort
-        Any failure, chained from the cause.
+    argparse.ArgumentTypeError
+        No file exists at the path.
     """
+    path = Path(value)
+    if not path.is_file():
+        message = f'No such file: {value}.'
+        raise argparse.ArgumentTypeError(message)
+    return path
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    """
+    Describe the command line.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The parser.
+    """
+    parser = argparse.ArgumentParser(
+        description='Rebuild a FreQuency CD image with replacement binaries. The raw MODE2/2352 '
+        'bin is written beside the cue sheet, with the same name and a .bin suffix.')
+    parser.add_argument('input_image', help='Original image in cue, bin, or ISO form.',
+                        type=_existing_file)
+    parser.add_argument('output_cue', help='Destination cue sheet path.', type=Path)
+    parser.add_argument('--debug', action='store_true', help='Enable debug logging.')
+    parser.add_argument('--ezmidi-irx', help='Local module file, bypassing the artifact download.',
+                        type=_existing_file)
+    parser.add_argument('--overwrite', action='store_true',
+                        help='Replace the output files when present.')
+    parser.add_argument('--repo', default=_DEFAULT_REPO,
+                        help='Repository holding the build artifacts (default: %(default)s).')
+    parser.add_argument('--resonance-bin',
+                        help='Local executable file, bypassing the artifact download.',
+                        type=_existing_file)
+    parser.add_argument('--run-id', help='Actions run to fetch. The latest successful run is used '
+                        'when omitted.', type=int)
+    parser.add_argument('--token', help='GitHub token. GITHUB_TOKEN or GH_TOKEN provides the value '
+                        'when the flag is absent.')
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """
+    Rebuild a FreQuency CD image with replacement binaries.
+
+    Parameters
+    ----------
+    argv : Sequence[str] | None
+        Arguments after the program name. The process arguments are used when omitted.
+
+    Returns
+    -------
+    int
+        The exit status, 0 on success and 1 on failure.
+    """
+    args = _build_parser().parse_args(argv)
     logging.basicConfig(format='%(levelname)s: %(message)s',
-                        level=logging.DEBUG if debug else logging.INFO)
-    options = _Options(debug=debug, ezmidi_irx=ezmidi_irx, input_image=input_image,
-                       output_iso=output_iso, overwrite=overwrite, repo=repo,
-                       resonance_bin=resonance_bin, run_id=run_id, token=token)
-    existed = output_iso.exists()
+                        level=logging.DEBUG if args.debug else logging.INFO)
+    options = _Options(debug=args.debug, ezmidi_irx=args.ezmidi_irx, input_image=args.input_image,
+                       output_cue=args.output_cue, overwrite=args.overwrite, repo=args.repo,
+                       resonance_bin=args.resonance_bin, run_id=args.run_id, token=args.token)
+    outputs = (options.output_cue, options.output_cue.with_suffix('.bin'))
+    existed = {path for path in outputs if path.exists()}
     try:
         sectors = _run(options)
-    except (ArtifactError, DiscImageError, OSError) as e:
-        if not existed:
-            with contextlib.suppress(OSError):
-                output_iso.unlink(missing_ok=True)
-        log.exception('ISO build failed.')
-        raise click.Abort from e
-    click.echo(f'Wrote {options.output_iso} ({sectors} sectors).')
+    except (ArtifactError, DiscImageError, OSError):
+        for path in outputs:
+            if path not in existed:
+                with contextlib.suppress(OSError):
+                    path.unlink(missing_ok=True)
+        log.exception('Image build failed.')
+        return 1
+    print(f'Wrote {options.output_cue} ({sectors} sectors).')  # ruff: ignore[print]
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

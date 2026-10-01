@@ -11,9 +11,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- An `iso` CMake target writes a bootable disc image with the built executable and `EZMIDI.IRX`
-  through `scripts/build-iso.py`. Set `RESONANCE_DISC_IMAGE` to an original disc image to enable
-  it.
+- An `image` CMake target writes `resonance.cue` and `resonance.bin`, a bootable raw Mode 2 CD
+  image with the built executable and `EZMIDI.IRX`, through `scripts/build-image.py`. Set
+  `RESONANCE_DISC_IMAGE` to an original disc image (cue, bin, or ISO) to enable it. Every sector is
+  encoded as Mode 2 Form 1. A burned ISO is a Mode 1 disc, and the game cannot read its files on a
+  console.
 - With `ENABLE_PATCHES`, the title screen shows the project URL, the short commit hash, and the
   build time above the legal text.
 
