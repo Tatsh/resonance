@@ -20,7 +20,7 @@ static const char *const kContainerFile = "juke_butts";
 
 constexpr int kTitleConfigCode = 0x269;
 
-// MetScreen::mUnknown18 on exit, read back by OnUnknownSlot36().
+// MetScreen::mExitChoice on exit, read back by OnExitFinished().
 constexpr int kExitCancelled = 0;
 constexpr int kExitNotCancelled = 2;
 
@@ -79,8 +79,8 @@ MetJukeboxTopButtonsScreen::MetJukeboxTopButtonsScreen(MetRenderer *pRenderer, i
                 HxStr(kScreenName),
                 HxStr(kContainerDirectory),
                 HxStr(kContainerFile)),
-      mUnknown94(nullptr), mUnknown98(0) {
-    mUnknown94 = new MetButtonList;
+      mButtons(nullptr), mUnused(0) {
+    mButtons = new MetButtonList;
 }
 
 // 0x00246778
@@ -95,16 +95,16 @@ MetJukeboxTopButtonsScreen *MetJukeboxTopButtonsScreen::New(MetRenderer *pRender
 // 0x00240e28
 void MetJukeboxTopButtonsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mUnknown94->Add(HxStr(kSavedRemixesObject), HxStr(kSavedRemixesLabel));
-    mUnknown94->Add(HxStr(kFactoryRemixesObject), HxStr(kFactoryRemixesLabel));
-    mUnknown94->Add(HxStr(kEditPlaylistObject), HxStr(kEditPlaylistLabel));
-    mUnknown94->Add(HxStr(kDoneObject), HxStr(kDoneLabel));
-    mUnknown94->SetSelected(kSavedRemixesButton);
+    mButtons->Add(HxStr(kSavedRemixesObject), HxStr(kSavedRemixesLabel));
+    mButtons->Add(HxStr(kFactoryRemixesObject), HxStr(kFactoryRemixesLabel));
+    mButtons->Add(HxStr(kEditPlaylistObject), HxStr(kEditPlaylistLabel));
+    mButtons->Add(HxStr(kDoneObject), HxStr(kDoneLabel));
+    mButtons->SetSelected(kSavedRemixesButton);
 }
 
 // 0x00241120
-void MetJukeboxTopButtonsScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitCancelled) {
+void MetJukeboxTopButtonsScreen::OnExitFinished() {
+    if (mExitChoice == kExitCancelled) {
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kTitleScreen));
         PushNamedScreen(HxStr(kRemixTypeScreen));
@@ -114,7 +114,7 @@ void MetJukeboxTopButtonsScreen::OnUnknownSlot36() {
 
 // 0x00241320
 void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
-    const int nSelected = mUnknown94->mSelected;
+    const int nSelected = mButtons->mSelected;
     ShowScreen(kCustomRemixesScreen, kHidden);
     ShowScreen(kFactoryRemixesScreen, kHidden);
     ShowScreen(kEditPlaylistScreen, kHidden);
@@ -124,30 +124,30 @@ void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
     switch (nSelected) {
     case kSavedRemixesButton:
         ShowScreen(kCustomRemixesScreen, kShown);
-        FindScreenByName(HxStr(kCustomRemixesScreen))->OnUnknownSlot7();
-        mUnknown8c = kCustomRemixesScreen;
+        FindScreenByName(HxStr(kCustomRemixesScreen))->OnPanelActivated();
+        mCommandTargetScreen = kCustomRemixesScreen;
         MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kCreateTitleKey));
         break;
 
     case kFactoryRemixesButton:
         ShowScreen(kFactoryRemixesScreen, kShown);
-        FindScreenByName(HxStr(kFactoryRemixesScreen))->OnUnknownSlot7();
-        mUnknown8c = kFactoryRemixesScreen;
+        FindScreenByName(HxStr(kFactoryRemixesScreen))->OnPanelActivated();
+        mCommandTargetScreen = kFactoryRemixesScreen;
         MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kCreateTitleKey));
         break;
 
     case kEditPlaylistButton:
         ShowScreen(kEditPlaylistScreen, kShown);
-        FindScreenByName(HxStr(kEditPlaylistScreen))->OnUnknownSlot7();
+        FindScreenByName(HxStr(kEditPlaylistScreen))->OnPanelActivated();
         ShowScreen(kLowerLeftScreen, kShown);
-        mUnknown8c = kEditPlaylistScreen;
+        mCommandTargetScreen = kEditPlaylistScreen;
         MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kEditTitleKey));
         break;
 
     case kDoneButton:
         ShowScreen(kEditPlaylistScreen, kShown);
         ShowScreen(kDoneScreen, kShown);
-        mUnknown8c = kDoneScreen;
+        mCommandTargetScreen = kDoneScreen;
         MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kPlayTitleKey));
         break;
 
@@ -159,16 +159,16 @@ void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
 // 0x00241b08
 void MetJukeboxTopButtonsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
-    mUnknown18 = kExitNotCancelled;
+    mExitChoice = kExitNotCancelled;
     MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kTitleKey));
 
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState *pState = MetFrontEndState::shared();
-        pState->mUnknown1c = pState->mUnknown18;
-        pState->mUnknown18 = 0;
+        pState->mLastTransition = pState->mPendingTransition;
+        pState->mPendingTransition = 0;
         MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
         PushNamedScreen(HxStr(kHelpScreen));
-        mUnknown10->SetActivePanel(this);
+        mRenderer->SetActivePanel(this);
     }
 
     bool loaded;
@@ -189,7 +189,7 @@ void MetJukeboxTopButtonsScreen::EnterAndShow() {
     PushNamedScreen(HxStr(kDoneScreen));
     PushNamedScreen(HxStr(kCustomRemixesScreen));
     PushNamedScreen(HxStr(kFactoryRemixesScreen));
-    mUnknown94->SetSelected(kSavedRemixesButton);
+    mButtons->SetSelected(kSavedRemixesButton);
     ShowSelectedPanel();
 }
 
@@ -207,31 +207,31 @@ void MetJukeboxTopButtonsScreen::BeginExit() {
 void MetJukeboxTopButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandLeft:
-        mUnknown94->OnUnknownSlot2();
+        mButtons->SelectPrevious();
         ShowSelectedPanel();
         break;
 
     case kMetScreenCommandRight:
-        mUnknown94->OnUnknownSlot3();
+        mButtons->SelectNext();
         ShowSelectedPanel();
         break;
 
     case kMetScreenCommandBack:
-        mUnknown18 = kExitCancelled;
+        mExitChoice = kExitCancelled;
         BeginExit();
         break;
 
     default:
-        FindScreenByName(mUnknown8c)->DeliverCommand(pCommand);
+        FindScreenByName(mCommandTargetScreen)->DeliverCommand(pCommand);
         break;
     }
 }
 
 // 0x002468b8
-void MetJukeboxTopButtonsScreen::OnUnknownSlot33() {
+void MetJukeboxTopButtonsScreen::OnEnterFinished() {
     ShowSelectedPanel();
 }
 
 // 0x002468d8
-void MetJukeboxTopButtonsScreen::OnUnknownSlot26(float) {
+void MetJukeboxTopButtonsScreen::UpdateIdle(float) {
 }

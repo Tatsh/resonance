@@ -112,11 +112,11 @@ public:
      * Sample the song clock, then deliver every queued message.
      *
      * RendererBase slot 6. The tick is stored as a float in mSongTick before
-     * RendererBase::OnUnknownSlot6() drains the queue.
+     * RendererBase::PollMessages() drains the queue.
      *
      * @ghidraAddress 0x00432460
      */
-    virtual void OnUnknownSlot6();
+    virtual void PollMessages();
 
     /**
      * Advance everything the renderer draws to the sampled song tick.
@@ -126,7 +126,7 @@ public:
      *
      * @ghidraAddress 0x004324a0
      */
-    virtual void OnUnknownSlot7();
+    virtual void Update();
 
     /**
      * Draw the frame.
@@ -138,7 +138,7 @@ public:
      *
      * @ghidraAddress 0x0042d258
      */
-    virtual void OnUnknownSlot8();
+    virtual void Draw();
 
     /**
      * Look up the cell for one track and bar.
@@ -250,7 +250,7 @@ private:
 
 public:
     /**
-     * The song tick OnUnknownSlot6() last sampled, in MIDI ticks. +0x60
+     * The song tick PollMessages() last sampled, in MIDI ticks. +0x60
      *
      * Public because Overlay's handlers at `0x0041fdd8` and `0x0042b068` and
      * AppTunnel::OnBarChanged() read it directly through the renderer they record, and the image
@@ -295,7 +295,7 @@ private:
 extern Renderer *g_pRenderer;
 
 /**
- * Switch that selects the alternative GS draw context in Renderer::OnUnknownSlot8().
+ * Switch that selects the alternative GS draw context in Renderer::Draw().
  *
  * The script function `lsdmode` inverts it, and only while a renderer exists. The translation
  * unit's static initialiser at `0x00431ab8` registers that function. The global's name follows the

@@ -26,5 +26,5 @@ const char *ContCtrlMsg::Name() {
 
 // 0x003e3e80
 void ContCtrlMsg::Print(std::ostream &stream) {
-    stream << mUnknown0c;
+    stream << mValue;
 }

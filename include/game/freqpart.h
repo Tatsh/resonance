@@ -163,7 +163,7 @@ public:
 
 private:
     // Not written by any recovered routine.
-    unsigned char mUnknown04[0xc]; // +0x04
+    unsigned char mPositionAlignment[0xc]; // +0x04, the quadword alignment of mPosition
 
 public:
     /**

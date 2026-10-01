@@ -56,13 +56,13 @@ namespace {
 // MIDI ticks in one bar.
 constexpr float kTicksPerBar = 1920.0f;
 
-// Configuration code whose flag the constructor records in mUnknown44.
-constexpr int kDisplayModeConfigCode = 0x3a1;
+// Configuration code that reports whether the level is a tutorial, recorded in mTutorial.
+constexpr int kTutorialConfigCode = 0x3a1;
 
 // mCurrentBar before SetFrame() sees the first bar.
 constexpr int kNoCurrentBar = -123123;
 
-// Player::Slot2() for a player without a track.
+// Player::GetInputSlot() for a player without a track.
 constexpr int kNoPlayerSlot = -1;
 
 // A three-player session uses the four-player layout.
@@ -89,13 +89,13 @@ enum Instrument {
 // Configuration code of the jukebox caption for a level.
 constexpr int kJukeboxCaptionConfigCode = 0x320;
 
-// Script template a GameOverMsg runs when mUnknown44 is set.
+// Script template a GameOverMsg runs when mTutorial is set.
 constexpr int kGameOverScriptTemplate = 1001;
 
-// Script template a JamEffectMsg runs in kPlayModeJam when mUnknown44 is set.
+// Script template a JamEffectMsg runs in kPlayModeJam when mTutorial is set.
 constexpr int kJamEffectScriptTemplate = 1017;
 
-// Script templates other handlers run when mUnknown44 is set.
+// Script templates other handlers run when mTutorial is set.
 constexpr int kPhraseCapturedScriptTemplate = 1005;
 constexpr int kLoopToggleScriptTemplate = 1011;
 constexpr int kChoosePowerupScriptTemplate = 1016;
@@ -148,17 +148,17 @@ HxStr g_hudLayoutName;
 
 // 0x0041c940
 Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
-    mUnknown44 = QueryConfigFlag(kDisplayModeConfigCode);
+    mTutorial = QueryConfigFlag(kTutorialConfigCode);
     mPlaybackOn = 0;
     mCurrentBar = kNoCurrentBar;
     mGameMode = Application::shared()->GetGameMode();
     mPlayMode = Application::shared()->GetPlayMode();
-    mLastBar = Application::shared()->GetPlayMap()->Slot9();
+    mLastBar = Application::shared()->GetPlayMap()->GetEndBar();
 
     std::vector<Player *> &players = Application::shared()->GetWorld()->mPlayers;
     int nLayout = 0;
     for (unsigned i = 0; i < players.size(); ++i) {
-        if (players[i]->Slot2() != kNoPlayerSlot) {
+        if (players[i]->GetInputSlot() != kNoPlayerSlot) {
             ++nLayout;
         }
     }
@@ -191,7 +191,7 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
 
     int nTrack = 0;
     for (unsigned i = 0; i < players.size(); ++i) {
-        if (players[i]->Slot2() != kNoPlayerSlot) {
+        if (players[i]->GetInputSlot() != kNoPlayerSlot) {
             mTracks.push_back(new HudTrack(players[i], nTrack++));
         }
         mBadges.push_back(new HudBadge(players[i], i));
@@ -381,17 +381,17 @@ void Overlay::HandleMessage(Message *pMsg) {
 // 0x0041fdd8
 void Overlay::OnTrackSelect(Message *pMsg) {
     TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
-    HudTrack *pTrack = FindTrack(pSelect->mUnknown10);
+    HudTrack *pTrack = FindTrack(pSelect->mPlayer);
     if (pTrack == nullptr) {
         return;
     }
 
     const int nBar = static_cast<int>(mRenderer->mSongTick) / kTicksPerBarInt;
-    const int nTrack = pSelect->mUnknown04;
+    const int nTrack = pSelect->mTrack;
     pTrack->mTrackLabel.SetText(mInstrumentNames[nTrack]);
     pTrack->mTrack = nTrack;
     pTrack->mEffects.SetMask(mRenderer->GetCell(nTrack, nBar)->mEffects);
-    if (mUnknown44 == 0) {
+    if (mTutorial == 0) {
         pTrack->mPoints.Bank();
     }
 }
@@ -445,7 +445,7 @@ void Overlay::OnChoosePowerup(Message *pMsg) {
     } else {
         pTrack->mEffects.Select(pChoose->mType);
     }
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         CallScriptTemplate(kChoosePowerupScriptTemplate, pChoose->mType);
     }
 }
@@ -476,7 +476,7 @@ void Overlay::OnDeployedPowerup(Message *pMsg) {
 
     const HxStr text = HudPowerupName(pDeployed->mKind) + "\nDEPLOYED";
     pTrack->mTextMessage.Show(text, kMessageScale, kMessageHold);
-    pTrack->mUnknownec = 1;
+    pTrack->mDeployedPowerup = 1;
     if (pDeployed->mKind == kHudItemBumper) {
         HudTrack *pTarget = FindTrack(pDeployed->mTarget);
         if (pTarget != nullptr) {
@@ -504,7 +504,7 @@ void Overlay::OnJuiceAmount(Message *pMsg) {
     }
 
     JuiceAmountMsg *pJuice = static_cast<JuiceAmountMsg *>(pMsg);
-    HudTrack *pTrack = FindTrack(pJuice->mUnknown04);
+    HudTrack *pTrack = FindTrack(pJuice->mPlayer);
     if (pTrack == nullptr) {
         return;
     }
@@ -513,13 +513,13 @@ void Overlay::OnJuiceAmount(Message *pMsg) {
     (void)pJuice->GetJuice(); // Yes, the binary discards this call's result.
     pTrack->mEnergy.mLevel = flLevel;
     // Yes, the binary does not test the badge for null.
-    FindBadge(pJuice->mUnknown04)->mFreq.SetPulsing(pJuice->GetJuiceFraction() > kPulseJuice);
+    FindBadge(pJuice->mPlayer)->mFreq.SetPulsing(pJuice->GetJuiceFraction() > kPulseJuice);
 }
 
 // 0x0042b068
 void Overlay::OnPhraseCaptured(Message *pMsg) {
     PhraseCapturedMsg *pCaptured = static_cast<PhraseCapturedMsg *>(pMsg);
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         CallScriptTemplate(kPhraseCapturedScriptTemplate, pCaptured->mTrack);
         return;
     }
@@ -560,7 +560,7 @@ void Overlay::OnLoopToggle(Message *pMsg) {
         return;
     }
 
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         CallScriptTemplate(kLoopToggleScriptTemplate);
     }
     pTrack->mLoop.SetShowing(pLoop->mOn);
@@ -577,7 +577,7 @@ void Overlay::OnLoopToggle(Message *pMsg) {
 
 // 0x0041f440
 void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         return;
     }
 
@@ -637,13 +637,13 @@ void Overlay::OnPlaybackToggle(Message *pMsg) {
 // 0x0042aef8
 void Overlay::OnToggleGhost(Message *pMsg) {
     ToggleGhostMsg *pGhost = static_cast<ToggleGhostMsg *>(pMsg);
-    HudTrack *pTrack = FindTrack(pGhost->mUnknown04);
+    HudTrack *pTrack = FindTrack(pGhost->mPlayer);
     if (pTrack == nullptr || mPlayMode == kPlayModeGame) {
         return;
     }
 
     pTrack->mEffects.SetLit(kHudItemGuides, pGhost->mOn);
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         CallScriptTemplate(kToggleGhostScriptTemplate);
     }
 }
@@ -663,34 +663,34 @@ void Overlay::OnCatch(Message *pMsg) {
         return;
     }
 
-    if (mUnknown44 == 0 && pCatch->mTotal != 0 && pCatch->mCaught + 1 < pCatch->mTotal) {
+    if (mTutorial == 0 && pCatch->mTotal != 0 && pCatch->mCaught + 1 < pCatch->mTotal) {
         pTrack->mPoints.Pulse(static_cast<float>(pCatch->mCaught) /
                               static_cast<float>(pCatch->mTotal));
     }
-    if (mDifficulty >= kNoRotateHintDifficulty || mGameMode != kGameModeSolo || mUnknown44 != 0) {
+    if (mDifficulty >= kNoRotateHintDifficulty || mGameMode != kGameModeSolo || mTutorial != 0) {
         return;
     }
 
     const int nBar = pCatch->mTick / Mid::MBT(kTicksPerBarInt).mTick;
     const Renderer::Cell *pCell = mRenderer->GetCell(pCatch->mTrack, nBar);
     if (pCatch->mHit != 0) {
-        pTrack->mUnknowne0 = 0;
+        pTrack->mBlockedCatches = 0;
     } else if (pCell->mEnabled == 0 || pCell->mPlayer->IsNull() == 0) {
-        ++pTrack->mUnknowne0;
+        ++pTrack->mBlockedCatches;
     } else {
-        pTrack->mUnknowne0 = 0;
+        pTrack->mBlockedCatches = 0;
     }
-    if (pTrack->mUnknowne0 < kRotateHintCatches) {
+    if (pTrack->mBlockedCatches < kRotateHintCatches) {
         return;
     }
 
     pTrack->mTextMessage.Show(HxStr("ROTATE TO\nNEW TRACK"), kMessageScale, kMessageHold);
-    pTrack->mUnknowne0 = 0;
+    pTrack->mBlockedCatches = 0;
 }
 
 // 0x0042b178
 void Overlay::OnPhraseMuffed(Message *pMsg) {
-    if (mPlayMode != kPlayModeGame || mUnknown44 != 0) {
+    if (mPlayMode != kPlayModeGame || mTutorial != 0) {
         return;
     }
 
@@ -708,7 +708,7 @@ void Overlay::OnBeginPhraseCatch(Message *pMsg) {
     if (static_cast<float>(mLastBar * kTicksPerBarInt) <= mRenderer->mSongTick) {
         return;
     }
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         return;
     }
 
@@ -743,7 +743,7 @@ void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
 
 // 0x00420408
 void Overlay::OnMultiplierState(Message *pMsg) {
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         return;
     }
     if (static_cast<float>(mLastBar * kTicksPerBarInt) <= mRenderer->mSongTick) {
@@ -793,14 +793,14 @@ void Overlay::OnPowerupFailed(Message *pMsg) {
 
 // 0x0042aec8
 void Overlay::OnGameOver() {
-    if (mUnknown44 != 0) {
+    if (mTutorial != 0) {
         CallScriptTemplate(kGameOverScriptTemplate);
     }
 }
 
 // 0x0042b130
 void Overlay::OnJamEffect() {
-    if (mUnknown44 != 0 && Application::shared()->GetPlayMode() == kPlayModeJam) {
+    if (mTutorial != 0 && Application::shared()->GetPlayMode() == kPlayModeJam) {
         CallScriptTemplate(kJamEffectScriptTemplate);
     }
 }

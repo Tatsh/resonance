@@ -97,7 +97,7 @@ enum GsPixelStorageMode {
     kGsPsmT4 = 20   /*!< Four bits per texel, indexed. */
 };
 
-/** Bytes of the frame counter run EndFrame() clears, from mSwaps through mUnknown18. */
+/** Bytes of the frame counter run EndFrame() clears, from mSwaps through mSpareFrameCounter. */
 constexpr int kVramFrameCounterBytes = 28;
 
 /** Texels along each edge of a tile VramTable::WipeVram() writes. */
@@ -257,7 +257,7 @@ public:
     unsigned char mKind;
     /** Generation bits plus kVramLockPinned. The literals write it "lockmask". */
     unsigned char mLockMask;
-    unsigned short mUnknown06; /*!< No instruction reads or writes it. +0x06 */
+    unsigned short mReserved06; /*!< No instruction reads or writes it. +0x06 */
     /** Value of VramTable::mFlushCount at the last GetBlockAddr(). */
     int mLastUsed;
     /** Previous record on whichever of the three lists this record is on. Attested. */
@@ -605,7 +605,8 @@ public:
     int mFreeMerges;
     /** Lookups this frame, which is the divisor of the two reported percentages. */
     int mRequests;
-    int mUnknown18; /*!< Cleared with the other frame counters and read nowhere. +0x18 */
+    /*!< A seventh frame counter, cleared with the others and never advanced or read. +0x18 */
+    int mSpareFrameCounter;
     /** Running total of mSwaps. */
     int mAccumSwaps;
     /** Running total of mLoads. */
@@ -616,7 +617,7 @@ public:
     int mAccumMisses;
     /** Running total of mFreeMerges. */
     int mAccumFreeMerges;
-    int mUnknown30; /*!< No instruction reads or writes it. +0x30 */
+    int mReserved30; /*!< No instruction reads or writes it. +0x30 */
     /** Blocks currently allocated out of the texture pool. */
     int mBlocksInUse;
     /** Packets submitted, advanced by GfxDevice::FlushGifPacket() through AdvanceLockCycle(). */

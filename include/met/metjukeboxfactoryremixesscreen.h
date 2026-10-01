@@ -14,7 +14,7 @@
  *
  * The constructor at `0x0023ae58` takes only the renderer and the load priority. It runs the
  * MetJukeboxBaseScreen constructor at `0x0021dcc0` with `jbf` for the screen name,
- * `metagame/Shared` for the directory, and `juke_factory` for the container, and sets mUnknownc8
+ * `metagame/Shared` for the directory, and `juke_factory` for the container, and sets mCatalogueKey
  * to -1. That value is what separates this screen from the other two, which both clear the same
  * member. The destructor at `0x00240780` releases the object with the tag `MsgSink` and does
  * nothing of its own.
@@ -43,7 +43,7 @@ public:
     /**
      * Report the number of factory remixes.
      *
-     * Slot 39. The size of the catalogue mUnknowna0 addresses, read without a null check. The
+     * Slot 39. The size of the catalogue mCatalogue addresses, read without a null check. The
      * body coincides byte for byte with MetJukeboxCustomRemixesScreen::GetItemCount(), and the
      * vtable slot each occupies is what separates them.
      *

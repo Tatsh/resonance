@@ -61,7 +61,7 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    int mUnknown04; // +0x04
+    int mTrack; // +0x04, or -1 (written as `reset` by Print())
 };
 
 /**

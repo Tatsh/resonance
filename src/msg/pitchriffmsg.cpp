@@ -30,6 +30,6 @@ const char *PitchRiffMsg::Name() {
 // 0x003e2fd0
 // The colour name is copied into a temporary before it is written.
 void PitchRiffMsg::Print(std::ostream &stream) {
-    mUnknown0c.Print(stream);
-    stream << " " << HxStr(mUnknown08->mColorName) << " b#" << mUnknown04;
+    mPosition.Print(stream);
+    stream << " " << HxStr(mPlayer->mColorName) << " b#" << mButton;
 }

@@ -132,9 +132,9 @@ void MetSoloEndRemixScreen::ResolveContainerViews() {
 
 // 0x00395a20
 void MetSoloEndRemixScreen::ReturnToTitle() {
-    mUnknown10->ResolveArenaView(kResolveArenaView);
-    mUnknown10->OnUnknown00390088();
-    mUnknown10->OnUnknown00390090();
+    mRenderer->ResolveArenaView(kResolveArenaView);
+    mRenderer->OnReturnFromGame();
+    mRenderer->OnReturnToMenus();
     PushNamedScreen(HxStr(kHelpScreenName));
     PushNamedScreen(HxStr(kTitleScreenName));
     PushNamedScreen(HxStr(kRemixTypeScreenName));
@@ -143,13 +143,13 @@ void MetSoloEndRemixScreen::ReturnToTitle() {
 
 // 0x00394e10
 void MetSoloEndRemixScreen::EnterAndShow() {
-    if ((MetFrontEndState::shared()->mUnknown0c == kFrontEndFlagSet) &&
-        (MetFrontEndState::shared()->mUnknown10 == kFrontEndFlagSet)) {
-        MetFrontEndState::shared()->mUnknown10 = 0;
+    if ((MetFrontEndState::shared()->mUsingMemcard == kFrontEndFlagSet) &&
+        (MetFrontEndState::shared()->mSettingsDirty == kFrontEndFlagSet)) {
+        MetFrontEndState::shared()->mSettingsDirty = 0;
         std::vector<HxStr> screens(1, HxStr());
         screens[0] = kOwnScreenName;
         MetGlobalSettingsSaverScreen::StartSave(screens);
-        mUnknown50 = 0;
+        mActivatePending = 0;
     } else {
         ShowResults();
     }
@@ -159,8 +159,8 @@ void MetSoloEndRemixScreen::EnterAndShow() {
 void MetSoloEndRemixScreen::ShowResults() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
-    mUnknownbc.Load(TexturePairRecord::LogoPath(params.mLevelName));
-    mUnknownec.Load(TexturePairRecord::PicturePath(params.mLevelName));
+    mLogoTextures.Load(TexturePairRecord::LogoPath(params.mLevelName));
+    mLabelTextures.Load(TexturePairRecord::PicturePath(params.mLevelName));
 
     HxStr genre = QueryConfigString(kGenreConfigCode, TextOf(params.mLevelName));
     HxStr bpm = QueryConfigString(kBpmConfigCode, TextOf(params.mLevelName));
@@ -185,13 +185,13 @@ void MetSoloEndRemixScreen::ShowResults() {
     }
     mDateText->SetText(date);
 
-    mFreqNameText->SetText(pPersona->mUnknown140.mUnknown00);
+    mFreqNameText->SetText(pPersona->mAppearance.mUserName);
     pPersona->AttachToBurnSlot(kFirstBurnTexture);
     mFaceMat->mStages[kFaceBurnStage].SetTex(mBurnTex);
-    mUnknownb8 = 0;
+    mScreenExited = 0;
 
     std::vector<FreqAppearance> appearances;
-    appearances.push_back(pPersona->mUnknown140);
+    appearances.push_back(pPersona->mAppearance);
     {
         HxStr caption = QueryConfigString(kCaptionConfigCode, kCaptionKey);
         MetScreenTitleScreen::SetTitle(caption);
@@ -208,19 +208,19 @@ void MetSoloEndRemixScreen::ShowResults() {
 }
 
 // 0x00399748
-void MetSoloEndRemixScreen::OnUnknownSlot26([[maybe_unused]] float flTime) {
+void MetSoloEndRemixScreen::UpdateIdle([[maybe_unused]] float flTime) {
     // Both Advance() results are discarded, as in the binary.
-    mUnknownbc.Advance();
-    mLogoMat->mStages[0].SetTex(mUnknownbc.Current());
-    mUnknownec.Advance();
-    mPhotoMat->mStages[0].SetTex(mUnknownec.Current());
+    mLogoTextures.Advance();
+    mLogoMat->mStages[0].SetTex(mLogoTextures.Current());
+    mLabelTextures.Advance();
+    mPhotoMat->mStages[0].SetTex(mLabelTextures.Current());
 }
 
 // 0x003943f8
 MetSoloEndRemixScreen::MetSoloEndRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknownbc(HxStr(kSongLogoFirstTexture), HxStr(kSongLogoSecondTexture)),
-      mUnknownec(HxStr(kSongLabelFirstTexture), HxStr(kSongLabelSecondTexture)) {
+      mLogoTextures(HxStr(kSongLogoFirstTexture), HxStr(kSongLogoSecondTexture)),
+      mLabelTextures(HxStr(kSongLabelFirstTexture), HxStr(kSongLabelSecondTexture)) {
 }
 
 // 0x003996b8
@@ -228,20 +228,20 @@ MetSoloEndRemixScreen::~MetSoloEndRemixScreen() {
 }
 
 // 0x003997d0
-void MetSoloEndRemixScreen::OnUnknownSlot7() {
+void MetSoloEndRemixScreen::OnPanelActivated() {
     ActivateNamedPanel(HxStr(kSaveScreenName));
 }
 
 // 0x00399870
-void MetSoloEndRemixScreen::OnUnknownSlot36() {
-    if (mUnknownb8 == 0) {
+void MetSoloEndRemixScreen::OnExitFinished() {
+    if (mScreenExited == 0) {
         ReturnToTitle();
     }
 }
 
 // 0x003998c8
-void MetSoloEndRemixScreen::OnUnknownSlot2([[maybe_unused]] int nUnknown) {
-    if (mUnknownb8 == 0) {
+void MetSoloEndRemixScreen::OnSaveFinished([[maybe_unused]] int bCompleted) {
+    if (mScreenExited == 0) {
         BeginExit();
     } else {
         ReturnToTitle();
@@ -249,17 +249,17 @@ void MetSoloEndRemixScreen::OnUnknownSlot2([[maybe_unused]] int nUnknown) {
 }
 
 // 0x00399898
-void MetSoloEndRemixScreen::OnUnknownSlot3() {
-    mUnknownb8 = 1;
+void MetSoloEndRemixScreen::OnHelpRequested() {
+    mScreenExited = 1;
     BeginExit();
 }
 
 // 0x00395918
-void MetSoloEndRemixScreen::OnUnknownSlot4(int nFlag) {
+void MetSoloEndRemixScreen::SetOwnerScreenShowing(int bShowing) {
     // The binary negates with `xori` against 1, which is what a bool argument compiles to, so only
     // 0 and 1 round-trip through the member.
-    mUnknownb8 = nFlag ^ 1;
-    if (nFlag != 0) {
+    mScreenExited = bShowing ^ 1;
+    if (bShowing != 0) {
         PushNamedScreen(HxStr(kOwnScreenName));
     } else {
         ExitScreenByName(HxStr(kOwnScreenName));

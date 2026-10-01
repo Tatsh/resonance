@@ -10,8 +10,7 @@ extern "C" {
  *
  * The buffer holds video bytes in a ring between the file reader and the decoder, and queues one
  * 0x18 byte time stamp per span. The decoder embeds this record at +0x48 of its own state and
- * reaches it through the wrappers in its own unit. Members whose purpose the routines below do
- * not show keep placeholder titles.
+ * accesses it through the wrappers in its unit.
  */
 
 /**
@@ -34,15 +33,15 @@ typedef struct {
  */
 typedef struct {
     unsigned char *mData;           /**< +0x00. Ring base. */
-    int mUnknown04;                 /**< +0x04. */
+    int mTagBase;                   /**< +0x04. Uncached base of the DMA tag ring. */
     int mCapacitySectors;           /**< +0x08. Sector budget for free space. Inferred. */
     int mReadSectors;               /**< +0x0c. Read position in sectors. Inferred. */
     int mBufferedSectors;           /**< +0x10. Buffered whole sectors. Inferred. */
     int mBufferedBytes;             /**< +0x14. Buffered bytes past the whole sectors. */
     int mSize;                      /**< +0x18. Ring capacity in bytes. */
-    unsigned char mUnknown1c[0x24]; /**< +0x1c. */
+    unsigned char mSavedChannels[0x24]; /**< +0x1c. IPU channel words saved across a stop. */
     int mSemaId;                    /**< +0x40. Semaphore guarding the record. */
-    int mUnknown44;                 /**< +0x44. */
+    int mActive;                    /**< +0x44. 1 while the input DMA runs. */
     long long mTotalPut;            /**< +0x48. Bytes accepted through EndPut over the lifetime. */
     ViTimeStamp *mTimeStamps;       /**< +0x50. Stamp ring base. */
     int mTimeStampCapacity;         /**< +0x54. Stamp ring capacity in entries. */
@@ -137,22 +136,22 @@ void sceDmaCreateQueueSemaphore(
 int sceDmaDeleteQueueSemaphore(ViBuf *buffer);
 
 /**
- * Stage the input DMA for the decoder worker.
+ * Clear the buffered counts and the stamp ring, build the DMA tag ring, and start the input DMA.
  *
  * @param buffer The input record.
  * @return 1.
  * @ghidraAddress 0x006126e8
  */
-int sceDmaSub006126e8(ViBuf *buffer);
+int viBufReset(ViBuf *buffer);
 
 /**
- * Kick the input DMA after a stall.
+ * Hand the newly buffered sectors to the input DMA after a stall.
  *
  * @param buffer The input record.
  * @return 1, or 0 when the queue is not active.
  * @ghidraAddress 0x00612890
  */
-int sceDmaSub00612890(ViBuf *buffer);
+int viBufAddDMA(ViBuf *buffer);
 
 /**
  * Stop the input DMA, saving its position.
@@ -161,7 +160,7 @@ int sceDmaSub00612890(ViBuf *buffer);
  * @return 1.
  * @ghidraAddress 0x00612b40
  */
-int sceDmaSub00612b40(ViBuf *buffer);
+int viBufStopDMA(ViBuf *buffer);
 
 /**
  * Restart the input DMA from the saved position.
@@ -170,34 +169,34 @@ int sceDmaSub00612b40(ViBuf *buffer);
  * @return 1.
  * @ghidraAddress 0x00612cc0
  */
-int sceDmaSub00612cc0(ViBuf *buffer);
+int viBufRestartDMA(ViBuf *buffer);
 
 /**
- * Latch the DMA-derived stamp into the callback record.
+ * Take the stamp of the span the IPU is reading into the callback record.
  *
  * @param buffer The input record.
- * @param pStamps Receives two stamp words. Inferred.
+ * @param pStamps Receives the two stamp words, -1 when no stamp covers the span.
  * @return 1.
  * @ghidraAddress 0x006131e0
  */
-int sceDmaSub006131e0(ViBuf *buffer, long long *pStamps);
+int viBufGetTs(ViBuf *buffer, long long *pStamps);
 
 /**
- * Queue one stamp that the reader has passed.
+ * Shrink or discard the queued stamps whose bytes the new span overwrites.
  *
  * @param buffer The input record.
- * @param timeStamp The stamp to discard past. Inferred.
+ * @param timeStamp The stamp about to be queued.
  * @ghidraAddress 0x00613088
  */
-void sceDmaSub00613088(ViBuf *buffer, ViTimeStamp *timeStamp);
+void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp);
 
 /**
- * Arm the DMA behind the flushed bytes.
+ * Round the buffered byte count up to a whole sector so the DMA moves the flushed bytes.
  *
  * @param buffer The input record.
  * @ghidraAddress 0x00613798
  */
-void sceDmaSub00613798(ViBuf *buffer);
+void viBufFlush(ViBuf *buffer);
 
 #ifdef __cplusplus
 }

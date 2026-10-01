@@ -193,7 +193,7 @@ private:
     void updateArrows();
 
     ListDataProvider *mProvider;
-    int mUnknown04; // +0x04, cleared by the constructor and read nowhere
+    int mReserved; // +0x04, cleared by the constructor and read nowhere
     int mRowCount;
     int mItemCount;
     int mCursorRow;

@@ -45,7 +45,7 @@ constexpr unsigned char kChannelMask = 0xf;
 // A held note still sounding when its bar ends lasts until this many ticks after the bar.
 constexpr int kHeldNoteOverhang = 1;
 
-// The word at ShowEraseEffectMsg `+0x14` that Erase() always sets.
+// The ShowEraseEffectMsg::mEffectFlag value that Erase() always sets.
 constexpr int kEraseEffectFlag = 1;
 
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
@@ -63,7 +63,7 @@ AxePhraseMaker::AxePhraseMaker(PhraseMgr *pPhraseMgr,
                                Quantizer *pQuantizer,
                                const TrackData *pTrackData,
                                Sch::TickClock *)
-    : mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mUnknown04),
+    : mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mIndex),
       mChannel(pTrackData->mChannel), mPhrase(nullptr), mPhraseBar(kNoBar), mPlayer(&g_nullPlayer),
       mBarTicks(kBarTicks), mTrackData(pTrackData), mValue(kAxisCenter) {
     mSwitchBanks = 0;
@@ -75,10 +75,10 @@ AxePhraseMaker::AxePhraseMaker(PhraseMgr *pPhraseMgr,
 // 0x0019b958
 void AxePhraseMaker::OnStdMidi(StdMidiMsg *pMsg) {
     const int nTick = pMsg->mTick;
-    const unsigned char nKind = pMsg->mUnknown08 & kStatusKindMask;
+    const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
 
     if (nKind == kStatusNoteOff) {
-        const unsigned char nNote = pMsg->mUnknown09;
+        const unsigned char nNote = pMsg->mData1;
         for (auto it = mHeldNotes.begin(); it != mHeldNotes.end(); ++it) {
             if (it->mNote != nNote) {
                 continue;
@@ -104,11 +104,11 @@ void AxePhraseMaker::OnStdMidi(StdMidiMsg *pMsg) {
 
     HeldNote held;
     std::memset(&held, 0, sizeof(held));
-    held.mNote = pMsg->mUnknown09;
-    held.mVelocity = pMsg->mUnknown0a;
+    held.mNote = pMsg->mData1;
+    held.mVelocity = pMsg->mData2;
     held.mTick = nTick;
     mHeldNotes.push_back(held);
-    mChannel = pMsg->mUnknown08 & kChannelMask;
+    mChannel = pMsg->mStatus & kChannelMask;
 }
 
 // 0x0019bbd8
@@ -142,10 +142,10 @@ void AxePhraseMaker::StartPhrase(int nTick) {
     Send(&status);
 
     int nPoints = mTrackData->GetPoints(nBar);
-    if (mPlayer->Slot20(nBar) == 0) {
+    if (mPlayer->MarkBarScored(nBar) == 0) {
         nPoints = 0;
     }
-    BeginPhraseCatchMsg begin(mPlayer, nPoints, mPlayer->Slot16(nBar));
+    BeginPhraseCatchMsg begin(mPlayer, nPoints, mPlayer->GetMultiplier(nBar));
     Send(&begin);
 
     PhraseCapturedMsg captured(
@@ -239,16 +239,16 @@ void AxePhraseMaker::HandleMessage(Message *pMsg) {
 }
 
 // 0x0019d438
-int AxePhraseMaker::Slot5() {
+int AxePhraseMaker::GetPeriodOrigin() {
     return Mid::MBT(kPeriodOrigin).mTick;
 }
 
 // 0x0019d860
 void AxePhraseMaker::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mTrack || pMsg->mUnknown08 != 0) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
     }
-    mPlayer = pMsg->mUnknown10;
+    mPlayer = pMsg->mPlayer;
     if (mPlayer->IsNull()) {
         return;
     }
@@ -257,8 +257,8 @@ void AxePhraseMaker::OnTrackSelect(TrackSelectMsg *pMsg) {
 
 // 0x0019d8f0
 void AxePhraseMaker::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
-    if (pMsg->mUnknown08 == mTrack) {
-        PostSeekerMsg(pMsg->mUnknown04);
+    if (pMsg->mTrack == mTrack) {
+        PostSeekerMsg(pMsg->mBar);
     }
 }
 
@@ -269,7 +269,7 @@ void AxePhraseMaker::OnSustainNote(SustainNoteMsg *pMsg) {
 }
 
 // 0x0019d990
-void AxePhraseMaker::Slot4(int nBar) {
+void AxePhraseMaker::OnPeriod(int nBar) {
     if ((nBar - 1) == mPhraseBar) {
         FinishPhrase();
     }
@@ -287,7 +287,7 @@ void AxePhraseMaker::Slot4(int nBar) {
 int AxePhraseMaker::IsBarPlayable(int nBar) {
     int bPlayable = 0;
     if (mTrackData->QueryBar(nBar) != 0) {
-        bPlayable = mPlayer->Slot9(nBar) != 0;
+        bPlayable = mPlayer->IsFreestyleBar(nBar) != 0;
     }
     return bPlayable;
 }

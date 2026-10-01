@@ -47,17 +47,17 @@ void Mid::Receiver::AllDone() {
 }
 
 // 0x001ea2c8
-void Mid::Receiver::OnUnknownSlot12() {
+void Mid::Receiver::UnusedFirstHook() {
 }
 
 // 0x001ea2d0
-void Mid::Receiver::OnUnknownSlot13() {
+void Mid::Receiver::UnusedSecondHook() {
 }
 
 // 0x001ea2d8
-void Mid::Receiver::OnUnknownSlot14() {
+void Mid::Receiver::UnusedThirdHook() {
 }
 
 // 0x001ea2e0
-void Mid::Receiver::OnUnknownSlot15() {
+void Mid::Receiver::UnusedFourthHook() {
 }

@@ -16,7 +16,7 @@ constexpr int kFormatMessageBufferSize = 0x1000;
 } // namespace
 
 // 0x005e4178
-HxStr FormatMessage(const HxStr &format, va_list args, [[maybe_unused]] int nUnknown) {
+HxStr FormatMessage(const HxStr &format, va_list args, [[maybe_unused]] int nUnused) {
     char szMessage[kFormatMessageBufferSize];
     vsprintf(szMessage, format.mStr != nullptr ? format.mStr : g_szEmptyString, args);
     return HxStr(szMessage);

@@ -17,8 +17,8 @@ class RendererBase;
  * The world owns the front-end renderer at `+0x04` and a cheat detector at `+0x08`. A controller
  * reading reaches the detector first and then the renderer, as a RawControllerMsg.
  *
- * GameManagerImpl drives the world through GetRenderer() and OnUnknownForwarder003d4890(). No
- * caller of OnUnknownForwarder003d4860() or OnUnknownQuery003d48c0() is recovered.
+ * GameManagerImpl drives the world through GetRenderer() and StopFrontEnd(). No caller of
+ * StartFrontEnd() or IsAwaitingStart() is recovered.
  *
  * The function at `0x003d4758` is the destructor of InputCheatDetectorMet, re-emitted in this
  * translation unit, and is recorded in that class.
@@ -50,13 +50,13 @@ public:
      * builds a RawControllerMsg on the stack whose reading is the four arguments in parameter
      * order and whose position is Mid::MBT(0), and hands it to the renderer's Handle().
      *
-     * @param nUnknown1 The first word of the reading.
-     * @param nUnknown2 The second word of the reading.
-     * @param nUnknown3 The third word of the reading.
-     * @param flUnknown4 The float of the reading.
+     * @param nTag The device tag, a four-character code.
+     * @param nPadIndex The controller that produced the reading, from 1.
+     * @param nButton The button or axis control number.
+     * @param flValue The reading's value.
      * @ghidraAddress 0x003d3288
      */
-    virtual void OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4);
+    virtual void OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue);
 
     /**
      * Report the front-end renderer.
@@ -72,35 +72,36 @@ public:
     RendererBase *GetRenderer();
 
     /**
-     * Unrecovered. Runs RendererBase slot 4 on the renderer.
+     * Start the front end running through RendererBase::Start().
      *
      * No caller is recovered.
      *
      * @ghidraAddress 0x003d4860
      */
-    void OnUnknownForwarder003d4860();
+    void StartFrontEnd();
 
     /**
-     * Unrecovered. Runs RendererBase slot 5 on the renderer.
+     * Stop the front end running through RendererBase::Stop().
      *
      * GameManagerImpl::OnBeginGameLocal(), GameManagerImpl::OnUnpauseGameSystem(), and
      * GameManagerImpl::StartPlayback() call it.
      *
      * @ghidraAddress 0x003d4890
      */
-    void OnUnknownForwarder003d4890();
+    void StopFrontEnd();
 
     /**
-     * Unrecovered. Report MetRenderer's word at `+0x60`, or 0 under the null renderer.
+     * Report whether the title screen waits for Start, or 0 under the null renderer.
      *
      * The body returns 0 when QueryConfigFlag() reports option 0xcb set, the option that selects
      * MetNullRenderer. Otherwise it converts the renderer back to its MetRenderer and reads the
-     * word. No caller is recovered.
+     * word at `+0x60`, which MetLogoScreen sets when it begins waiting and clears when Start or
+     * Select is pressed. No caller is recovered.
      *
      * @return The word, or 0.
      * @ghidraAddress 0x003d48c0
      */
-    int OnUnknownQuery003d48c0();
+    int IsAwaitingStart();
 
 private:
     /**

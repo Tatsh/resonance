@@ -14,8 +14,8 @@ class OBStream;
  * `LocalPlayerCmd` is one of the five ordinary Sch::Command subclasses. Its table is at
  * `0x007cff18` with eight entries, and it overrides Save() and Load() with empty bodies of its own.
  * LocalPlayer allocates the 0x14-byte object with the untagged allocator and expands the
- * constructor, in LocalPlayer::Slot11() for the first bar and in LocalPlayer::OnBarTick() for
- * every bar after.
+ * constructor, in LocalPlayer::AnnounceState() for the first bar and in LocalPlayer::OnBarTick()
+ * for every bar after.
  */
 class LocalPlayerCmd : public Sch::Command {
 public:

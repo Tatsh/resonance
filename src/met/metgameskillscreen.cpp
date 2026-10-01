@@ -47,7 +47,7 @@ static const char *const kNoName = "";
 constexpr int kPromptConfigCode = 0x258;
 constexpr int kTitleConfigCode = 0x269;
 
-// The values MetScreen::mUnknown18 takes on the way out.
+// The values MetScreen::mExitChoice takes on the way out.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
 
@@ -79,29 +79,29 @@ void MetGameSkillScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     mButtonList->SetSelected(params.mDifficulty);
     HxStr mode;
-    mUnknown38.clear();
+    mHelpKeys.clear();
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
         {
             HxStr key = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
             mode = key;
         }
-        mUnknown38.push_back(HxStr(kSoloEasyHelp));
-        mUnknown38.push_back(HxStr(kSoloNormalHelp));
-        mUnknown38.push_back(HxStr(kSoloExpertHelp));
+        mHelpKeys.push_back(HxStr(kSoloEasyHelp));
+        mHelpKeys.push_back(HxStr(kSoloNormalHelp));
+        mHelpKeys.push_back(HxStr(kSoloExpertHelp));
     } else {
         {
             HxStr key = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
             mode = key;
         }
-        mUnknown38.push_back(HxStr(kMultiEasyHelp));
-        mUnknown38.push_back(HxStr(kMultiNormalHelp));
-        mUnknown38.push_back(HxStr(kMultiExpertHelp));
+        mHelpKeys.push_back(HxStr(kMultiEasyHelp));
+        mHelpKeys.push_back(HxStr(kMultiNormalHelp));
+        mHelpKeys.push_back(HxStr(kMultiExpertHelp));
     }
     {
         HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);
     }
-    MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
 
@@ -109,27 +109,27 @@ void MetGameSkillScreen::EnterAndShow() {
 void MetGameSkillScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mButtonList->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mButtonList->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mButtonList->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
         break;
@@ -148,16 +148,16 @@ void MetGameSkillScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00273f28
-void MetGameSkillScreen::OnUnknownSlot30(Rnd::Button *) {
-    mUnknown18 = kExitToButtonAction;
+void MetGameSkillScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     BeginExit();
 }
 
 // 0x00274058
-void MetGameSkillScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetGameSkillScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kModeScreen));
         ActivateNamedPanel(HxStr(kModeScreen));
         return;

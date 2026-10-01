@@ -36,74 +36,75 @@ const SelfTestRegistration sSelfTestRegistration;
 
 // 0x00127a80
 PlayMapLinear::PlayMapLinear(int bLoadStepRings)
-    : mUnknown54(0), mUnknown64(0), mUnknown68(kSetCount) {
-    mUnknown3c.reserve(kInitialCapacity);
-    mUnknown48.reserve(kInitialCapacity);
+    : mTrimmedCount(0), mPatternEnd(0), mStepRings(kSetCount) {
+    mWindow.reserve(kInitialCapacity);
+    mWindowStarts.reserve(kInitialCapacity);
     if (bLoadStepRings != 0) {
         LoadStepRings();
     }
 }
 
 // 0x00128c38
-void PlayMapLinear::Slot20(int nSection) {
-    mUnknown48.push_back(Slot8());
+void PlayMapLinear::AppendSection(int nSection) {
+    mWindowStarts.push_back(GetExtent());
     const Entry entry{nSection, 1};
-    mUnknown3c.push_back(entry);
+    mWindow.push_back(entry);
 }
 
 // 0x00129150
 void PlayMapLinear::GrowPastLimit(int nLimit) {
-    while (!(nLimit < Slot8())) {
-        // The extent is re-read on every iteration rather than cached, and slot 8 is called once
-        // per element rather than once per pass.
-        for (std::vector<Entry>::size_type nIndex = 0; nIndex < mUnknown58.size(); ++nIndex) {
-            mUnknown48.push_back(Slot8());
-            const Entry entry{mUnknown58[nIndex].mSection, 1};
-            mUnknown3c.push_back(entry);
+    while (!(nLimit < GetExtent())) {
+        // The extent is re-read on every iteration rather than cached, and GetExtent() is called
+        // once per element rather than once per pass.
+        for (std::vector<Entry>::size_type nIndex = 0; nIndex < mPattern.size(); ++nIndex) {
+            mWindowStarts.push_back(GetExtent());
+            const Entry entry{mPattern[nIndex].mSection, 1};
+            mWindow.push_back(entry);
         }
     }
 
-    const std::vector<Entry>::size_type nPassed = mUnknown58.size();
+    const std::vector<Entry>::size_type nPassed = mPattern.size();
     // The guard compares a byte offset against an element count. That mismatch is what the binary
     // computes, so the trim only fires once the window is more than eight times the source.
-    if ((nPassed * sizeof(Entry)) < mUnknown3c.size()) {
-        mUnknown3c.erase(mUnknown3c.begin(), mUnknown3c.begin() + nPassed);
-        mUnknown48.erase(mUnknown48.begin(), mUnknown48.begin() + nPassed);
-        mUnknown54 += static_cast<int>(nPassed);
+    if ((nPassed * sizeof(Entry)) < mWindow.size()) {
+        mWindow.erase(mWindow.begin(), mWindow.begin() + nPassed);
+        mWindowStarts.erase(mWindowStarts.begin(), mWindowStarts.begin() + nPassed);
+        mTrimmedCount += static_cast<int>(nPassed);
     }
 }
 
 // 0x0012ade8
-inline int PlayMapLinear::WindowIndex(int nValue) {
-    GrowPastLimit(nValue);
+inline int PlayMapLinear::WindowIndex(int nBar) {
+    GrowPastLimit(nBar);
     const std::vector<int>::iterator it =
-        std::upper_bound(mUnknown48.begin(), mUnknown48.end(), nValue);
-    return static_cast<int>(it - mUnknown48.begin()) - 1;
+        std::upper_bound(mWindowStarts.begin(), mWindowStarts.end(), nBar);
+    return static_cast<int>(it - mWindowStarts.begin()) - 1;
 }
 
 inline void PlayMapLinear::RestartFrom(std::vector<int>::size_type nFirst) {
-    for (std::vector<Entry>::size_type nIndex = nFirst; nIndex < mUnknown3c.size(); ++nIndex) {
-        const Entry &previous = mUnknown3c[nIndex - 1];
-        mUnknown48[nIndex] =
-            mUnknown48[nIndex - 1] + (mSectionLengths[previous.mSection] * previous.mRepeats);
+    for (std::vector<Entry>::size_type nIndex = nFirst; nIndex < mWindow.size(); ++nIndex) {
+        const Entry &previous = mWindow[nIndex - 1];
+        mWindowStarts[nIndex] =
+            mWindowStarts[nIndex - 1] + (mSectionLengths[previous.mSection] * previous.mRepeats);
     }
 }
 
 // 0x00128d08
-std::vector<int> &PlayMapLinear::Slot6(int nStart, int nMin, int nEnd) {
+std::vector<int> &PlayMapLinear::FindBarsPlaying(int nStart, int nMin, int nEnd) {
     GrowPastLimit(nEnd);
-    mUnknown2c.clear();
+    mFoundBars.clear();
     const int nStep = FindStepIndex(nStart);
     const int nLength = mSectionLengths[nStep];
     const int nOffset = nStart - mSteps[nStep];
 
-    std::vector<int>::iterator start = std::upper_bound(mUnknown48.begin(), mUnknown48.end(), nMin);
-    if (mUnknown48.begin() < start) {
+    std::vector<int>::iterator start =
+        std::upper_bound(mWindowStarts.begin(), mWindowStarts.end(), nMin);
+    if (mWindowStarts.begin() < start) {
         --start;
     }
     // Unbounded by the end of the window. GrowPastLimit() has grown it past nEnd.
     for (; *start < nEnd; ++start) {
-        const Entry &entry = mUnknown3c[start - mUnknown48.begin()];
+        const Entry &entry = mWindow[start - mWindowStarts.begin()];
         if (entry.mSection != nStep) {
             continue;
         }
@@ -113,7 +114,7 @@ std::vector<int> &PlayMapLinear::Slot6(int nStart, int nMin, int nEnd) {
                 if (nPosition >= nEnd) {
                     break;
                 }
-                mUnknown2c.push_back(nPosition);
+                mFoundBars.push_back(nPosition);
             }
             if (nPosition >= nEnd) {
                 break;
@@ -121,27 +122,27 @@ std::vector<int> &PlayMapLinear::Slot6(int nStart, int nMin, int nEnd) {
             nPosition += nLength;
         }
     }
-    return mUnknown2c;
+    return mFoundBars;
 }
 
 // 0x00128ed8
-int PlayMapLinear::Slot16(int nBar) {
+int PlayMapLinear::EndLoop(int nBar) {
     GrowPastLimit(nBar);
     const int nIndex = WindowIndex(nBar);
-    Entry &entry = mUnknown3c[nIndex];
+    Entry &entry = mWindow[nIndex];
     if (entry.mRepeats != kRepeatForever) {
         return 0;
     }
-    entry.mRepeats = ((nBar - mUnknown48[nIndex]) / mSectionLengths[entry.mSection]) + 1;
+    entry.mRepeats = ((nBar - mWindowStarts[nIndex]) / mSectionLengths[entry.mSection]) + 1;
     RestartFrom(nIndex + 1);
     return 1;
 }
 
 // 0x00129038
-int PlayMapLinear::Slot17(int nBar) {
+int PlayMapLinear::StartLoop(int nBar) {
     GrowPastLimit(nBar);
     const int nIndex = WindowIndex(nBar);
-    mUnknown3c[nIndex].mRepeats = kRepeatForever;
+    mWindow[nIndex].mRepeats = kRepeatForever;
     RestartFrom(nIndex + 1);
     return 1;
 }
@@ -150,19 +151,19 @@ int PlayMapLinear::Slot17(int nBar) {
 int PlayMapLinear::SelfTest() {
     PlayMapLinear map(kSkipStepRings);
     for (const int nStep : kTestSteps) {
-        map.Slot2(nStep, HxStr(kTestLabel));
+        map.AddStep(nStep, HxStr(kTestLabel));
     }
     for (const int nSection : kTestSections) {
-        map.Slot20(nSection);
+        map.AppendSection(nSection);
     }
     // Yes, the binary discards every result.
     for (const int nProbe : kTestProbes) {
-        map.Slot5(nProbe);
+        map.MapBar(nProbe);
     }
-    map.Slot18(kTestFirstToggle);
-    map.Slot5(kTestLateProbe);
-    map.Slot18(kTestSecondToggle);
-    map.Slot5(kTestLateProbe);
+    map.ToggleLoop(kTestFirstToggle);
+    map.MapBar(kTestLateProbe);
+    map.ToggleLoop(kTestSecondToggle);
+    map.MapBar(kTestLateProbe);
     return 1;
 }
 
@@ -176,78 +177,78 @@ PlayMapLinear::~PlayMapLinear() {
 }
 
 // 0x0012aa18
-void PlayMapLinear::Slot19() {
-    mUnknown58 = mUnknown3c;
-    mUnknown64 = Slot8();
+void PlayMapLinear::RecordPattern() {
+    mPattern = mWindow;
+    mPatternEnd = GetExtent();
 }
 
 // 0x0012aa60
-int PlayMapLinear::Slot9() {
-    return mUnknown64;
+int PlayMapLinear::GetEndBar() {
+    return mPatternEnd;
 }
 
 // 0x0012aa68
-int PlayMapLinear::Slot10() {
-    return static_cast<int>(mUnknown58.size());
+int PlayMapLinear::GetSectionCount() {
+    return static_cast<int>(mPattern.size());
 }
 
 // 0x0012aa80
-int PlayMapLinear::Slot11(int nValue) {
-    return mUnknown58[nValue].mSection;
+int PlayMapLinear::GetPatternSection(int nIndex) {
+    return mPattern[nIndex].mSection;
 }
 
 // 0x0012ad58
-int PlayMapLinear::Slot5(int nValue) {
-    GrowPastLimit(nValue);
-    const int nIndex = WindowIndex(nValue);
-    const int nSection = mUnknown3c[nIndex].mSection;
-    return mSteps[nSection] + ((nValue - mUnknown48[nIndex]) % mSectionLengths[nSection]);
+int PlayMapLinear::MapBar(int nBar) {
+    GrowPastLimit(nBar);
+    const int nIndex = WindowIndex(nBar);
+    const int nSection = mWindow[nIndex].mSection;
+    return mSteps[nSection] + ((nBar - mWindowStarts[nIndex]) % mSectionLengths[nSection]);
 }
 
 // 0x0012ae38
-int PlayMapLinear::Slot8() {
-    if (mUnknown48.empty()) {
+int PlayMapLinear::GetExtent() {
+    if (mWindowStarts.empty()) {
         return 0;
     }
-    const Entry &last = mUnknown3c.back();
-    return mUnknown48.back() + (mSectionLengths[last.mSection] * last.mRepeats);
+    const Entry &last = mWindow.back();
+    return mWindowStarts.back() + (mSectionLengths[last.mSection] * last.mRepeats);
 }
 
 // 0x0012ae88
-int PlayMapLinear::Slot7(int nValue, int nSet) {
-    const int nStep = FindStepIndex(nValue);
-    const std::vector<StepPair> &pairs = mUnknown68[nSet];
+int PlayMapLinear::MapToLinkedStep(int nPosition, int nSet) {
+    const int nStep = FindStepIndex(nPosition);
+    const std::vector<StepPair> &pairs = mStepRings[nSet];
     for (std::vector<StepPair>::const_iterator it = pairs.begin(); it != pairs.end(); ++it) {
         if (it->mStep == nStep) {
-            return (mSteps[it->mPartner] - mSteps[nStep]) + nValue;
+            return (mSteps[it->mPartner] - mSteps[nStep]) + nPosition;
         }
     }
-    return nValue;
+    return nPosition;
 }
 
 // 0x0012af30
-int PlayMapLinear::Slot12(int nValue) {
-    GrowPastLimit(nValue);
-    return static_cast<int>(WindowIndex(nValue) % mUnknown58.size());
+int PlayMapLinear::GetPatternIndex(int nBar) {
+    GrowPastLimit(nBar);
+    return static_cast<int>(WindowIndex(nBar) % mPattern.size());
 }
 
 // 0x0012afb8
-int PlayMapLinear::Slot13(int nValue) {
-    GrowPastLimit(nValue);
-    return WindowIndex(nValue) + mUnknown54;
+int PlayMapLinear::GetAbsoluteSectionIndex(int nBar) {
+    GrowPastLimit(nBar);
+    return WindowIndex(nBar) + mTrimmedCount;
 }
 
 // 0x0012b028
-int PlayMapLinear::Slot14(int nValue) {
-    GrowPastLimit(nValue);
-    return mUnknown3c[WindowIndex(nValue)].mRepeats == kRepeatForever;
+int PlayMapLinear::IsLooping(int nBar) {
+    GrowPastLimit(nBar);
+    return mWindow[WindowIndex(nBar)].mRepeats == kRepeatForever;
 }
 
 // 0x0012b0a8
-int PlayMapLinear::Slot18(int nBar) {
-    if (Slot16(nBar) != 0) {
+int PlayMapLinear::ToggleLoop(int nBar) {
+    if (EndLoop(nBar) != 0) {
         return 1;
     }
-    Slot17(nBar); // Yes, the binary discards this call's result.
+    StartLoop(nBar); // Yes, the binary discards this call's result.
     return 0;
 }

@@ -110,7 +110,7 @@ struct ABitmap {
      * entry of g_abBitmapBytesPerPixel for every other code. mByteCount then becomes the stride
      * times the height.
      *
-     * A null pixel pointer allocates mByteCount bytes with the tag "abitmap.h" and line 0x47, and
+     * A null pixel pointer allocates mByteCount bytes, tagged with the source file and line, and
      * sets mOwnsPixels. A supplied pointer clears the flag.
      *
      * mTransparentColor and mPalette are both cleared, so a caller that wants either writes it
@@ -270,7 +270,7 @@ struct ABitmap {
      * Every descriptor field is taken from source, apart from mOwnsPixels, and mPalette is shared
      * rather than copied. Unless the format is kABitmapFormatRle8, a stride that differs from the
      * packed stride the constructor would derive is replaced by it, with mByteCount recomputed.
-     * mByteCount bytes are then allocated with the tag "abitmap.h" and line 0x47, and the pixels
+     * mByteCount bytes are then allocated, tagged with the source file and line, and the pixels
      * are copied in one block when both strides agree and row by row otherwise. No call site
      * survives in the shipped program, and the name is inferred.
      *

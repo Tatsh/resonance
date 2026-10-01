@@ -52,7 +52,7 @@ HxStream &HxStream::Read([[maybe_unused]] void *pDest, [[maybe_unused]] int nSiz
 }
 
 // 0x00145f40
-HxStream *HxStream::Unknown7() {
+HxStream *HxStream::UnderlyingStream() {
     return nullptr;
 }
 
@@ -114,7 +114,7 @@ HxStream &HxStream::ReadString(HxStr &str) {
 // 0x00405a98
 HxStream *HxStream::BaseStream() {
     HxStream *pStream = this;
-    while (HxStream *pInner = pStream->Unknown7()) {
+    while (HxStream *pInner = pStream->UnderlyingStream()) {
         pStream = pInner;
     }
     return pStream;

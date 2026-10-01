@@ -71,12 +71,12 @@ MetMemDetectStartup *MetMemDetectStartup::New(MetRenderer *pRenderer, int nPrior
 }
 
 // 0x002df250
-void MetMemDetectStartup::OnUnknownSlot26(float flTime) {
+void MetMemDetectStartup::UpdateIdle(float flTime) {
     mFade->Update(flTime);
     if (mEnterTime != 0 && mEnterTime + kFadeFrames < flTime) {
         mEnterTime = 0;
         mFade->FadeOut(kFadeFrames, flTime, this, kReleaseView);
-        mUnknown14->SetShowing(1);
+        mView->SetShowing(1);
     }
     if (mNoCardTime != 0 && mNoCardTime + kFadeFrames < flTime) {
         mNoCardTime = 0;
@@ -90,7 +90,7 @@ void MetMemDetectStartup::OnUnknownSlot26(float flTime) {
                                  buttons,
                                  this);
     }
-    MetMemDetectScreen::OnUnknownSlot26(flTime);
+    MetMemDetectScreen::UpdateIdle(flTime);
 }
 
 // 0x002df6e0
@@ -107,10 +107,10 @@ void MetMemDetectStartup::StartDetect() {
 
 // 0x002e2f40
 void MetMemDetectStartup::EnterAndShow() {
-    mUnknown10->AddScreenView(mUnknown14);
+    mRenderer->AddScreenView(mView);
     Application::shared()->GetGameManager()->SetDrawEnabled(1);
     SetShowing(0);
-    mEnterTime = mUnknown10->mUnknown68;
+    mEnterTime = mRenderer->mAnimationFrame;
 }
 
 // 0x002e2fb8
@@ -120,12 +120,12 @@ void MetMemDetectStartup::BeginExit() {
 
 // 0x002e3058
 void MetMemDetectStartup::OnNoCard() {
-    mNoCardTime = mUnknown10->mUnknown68;
+    mNoCardTime = mRenderer->mAnimationFrame;
 }
 
 // 0x002e3068
 void MetMemDetectStartup::OnDetectFinished() {
-    mFade->FadeIn(kFadeFrames, mUnknown10->mUnknown68, this, kReleaseView);
+    mFade->FadeIn(kFadeFrames, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
 // 0x002e30a0

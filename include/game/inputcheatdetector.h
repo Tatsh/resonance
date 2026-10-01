@@ -70,15 +70,16 @@ public:
      * @param flValue The reading's value.
      * @ghidraAddress 0x001dc658
      */
-    virtual void OnUnknownSlot2(int nType, int nSlot, int nButton, float flValue);
+    virtual void OnControllerReading(int nType, int nSlot, int nButton, float flValue);
 
     /**
-     * Unrecovered. Slot 3, pure in this class.
+     * A hook that does nothing. Slot 3, pure in this class.
      *
      * Both overrides, InputCheatDetectorGS's at `0x001940d8` and InputCheatDetectorMet's at
-     * `0x003d4788`, are empty. The verb, the parameter list, and the return type are unrecovered.
+     * `0x003d4788`, are empty, and the image has no call through the slot. The verb, the parameter
+     * list, and the return type are unrecovered.
      */
-    virtual void OnUnknownSlot3() = 0;
+    virtual void UnusedHook() = 0;
 
 private:
     // Fills g_metCheatSequences with three cheats and g_gameCheatSequences with eleven, reusing

@@ -21,7 +21,7 @@ class Mesh;
  *
  * The class is a `std::vector<Mesh *>` with a destructor. That destructor, at 0x00476a80, is what
  * the vector of chains runs for each element it destroys. It calls DeleteMeshes() before the
- * vector storage is released, which is why emptying Rnd::Tunnel::mUnknowna4 deletes every mesh.
+ * vector storage is released. Emptying Rnd::Tunnel::mCellChains therefore deletes every mesh.
  *
  * Element zero is the finest level. Build() links each mesh to the next coarser one through
  * Mesh::mNext and points every level at element zero for its vertices and its transform.

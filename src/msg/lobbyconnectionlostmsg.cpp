@@ -3,7 +3,7 @@
 #include <iostream>
 
 // 0x003e1d10
-LobbyConnectionLostMsg::LobbyConnectionLostMsg(const HxStr &unknown04) : mUnknown04(unknown04) {
+LobbyConnectionLostMsg::LobbyConnectionLostMsg(const HxStr &reason) : mReason(reason) {
 }
 
 // 0x003d7ad8

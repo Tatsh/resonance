@@ -18,8 +18,8 @@ class MsgSink;
  * install the table while a derived object is being built or torn down.
  *
  * The three verbs come from MuseSynth, which is the one caller of all three. It calls Start()
- * immediately after creating a player, Stop() on every player it releases, and slot 4 on the
- * player that requests exclusivity.
+ * immediately after creating a player, Stop() on every player it releases, and DisplacesSiblings()
+ * on the player that requests exclusivity.
  */
 class MusePlayer {
 public:
@@ -77,16 +77,16 @@ public:
     virtual void Stop() = 0;
 
     /**
-     * Table slot 4, verb unrecovered.
+     * Report whether this player displaces its siblings.
      *
-     * MuseParent::RetainOnly() performs no work unless this member reports non-zero, so it decides
-     * whether a player displaces its siblings. MultiMusePlayer's override at `0x001a9ed0` is one
-     * instruction and returns 1. No other implementation is recovered, and one constant body
-     * cannot fix the verb.
+     * Table slot 4. MuseParent::RetainOnly() does not perform work unless this member reports
+     * non-zero.
+     * MultiMusePlayer's override at `0x001a9ed0` returns 1 and NotePlayer's at `0x001b41c0`
+     * returns zero.
      *
      * @return Non-zero to displace the sibling players.
      */
-    virtual int Slot4() = 0;
+    virtual int DisplacesSiblings() = 0;
 
 private:
     // Serial number, taken from g_nMusePlayerSerial. Nothing recovered so far reads it.

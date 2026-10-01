@@ -24,13 +24,13 @@ class Button;
  * distinct container name and MetScreen::SetShowing() and MetScreen::PollContainerLoad() read it
  * back. Two screens loading the same container therefore share one RndAsyncLoader.
  *
- * The two integers are recorded as unrecovered. BeginContainerLoad() writes both and tests
- * mUnknown08, and nothing else in the image reads either.
+ * BeginContainerLoad() writes both integers and tests mEnqueuePending. PollContainerLoads() and
+ * MetScreen::UpdateFrame() test and set mFinished.
  */
 struct MetContainerLoad {
     RndAsyncLoader *mLoader; /*!< The request the container loads through. +0x00 */
-    int mUnknown04;          /*!< +0x04 */
-    int mUnknown08;          /*!< +0x08 */
+    int mFinished;           /*!< Set once a poll reports the load complete. +0x04 */
+    int mEnqueuePending;     /*!< Set until BeginContainerLoad() enqueues the request. +0x08 */
 };
 
 /**
@@ -89,9 +89,9 @@ struct MetScreenEntry {
  * The six values are the ones MetScreen::DeliverCommand() routes to a sound, through a six-entry
  * jump table at `0x0080b460` indexed by the command code less one. Left and right are fixed by
  * the sound literals that branch plays, `SND_MET_CYCLE_L` and `SND_MET_CYCLE_R`. Previous and next
- * both play `SND_MET_HIGH`, and MetMainScreen separates them at `0x002c6820` by routing one to
- * MetButtonList vtable slot 2 and the other to slot 3, the two navigation virtuals that walk the
- * button ring in opposite directions. Which of the two moves which way is not recovered.
+ * both play `SND_MET_HIGH`, and MetMainScreen separates them at `0x002c6820` by routing previous
+ * to MetButtonList::SelectPrevious() (a step of the selected index down) and next to
+ * MetButtonList::SelectNext() (a step up).
  *
  * The translator at `0x002e3738` produces further codes from a 103-entry table, among them 7 and
  * 15. A code above six is discarded by DeliverCommand() without a sound and passed to slot 19
@@ -99,8 +99,8 @@ struct MetScreenEntry {
  */
 enum MetScreenCommandCode {
     kMetScreenCommandNone = 0, /*!< The renderer discards the command instead of delivering it. */
-    kMetScreenCommandPrevious = 1, /*!< One step along the button ring. */
-    kMetScreenCommandNext = 2,     /*!< One step the other way along the button ring. */
+    kMetScreenCommandPrevious = 1, /*!< One step back along the button ring. */
+    kMetScreenCommandNext = 2,     /*!< One step forward along the button ring. */
     kMetScreenCommandLeft = 3,     /*!< Cycle the selected value to the left. */
     kMetScreenCommandRight = 4,    /*!< Cycle the selected value to the right. */
     kMetScreenCommandSelect = 5,   /*!< Act on the selection. */
@@ -134,10 +134,10 @@ enum MetScreenCommandCode {
  * Every float this class passes or receives for an animation is a frame position rather than a time
  * in seconds. MetRenderer advances the field at its own `+0x68` by a rate at `+0x64` that defaults
  * to 500, and hands the result to Rnd::Animatable::SetFrame(). That is what makes the arithmetic
- * here coherent: mUnknown08 and mUnknown0c store frame positions, mUnknown04 stores the enter
- * animation's end frame from Rnd::View::EndFrame(), and UpdateEnterAnimation() subtracts one from
- * the sum of the other two. An earlier reading described the argument as a time in seconds, which
- * would have mixed units across that expression.
+ * here coherent: mEnterStartTime and mExitStartTime store frame positions, mAnimEndFrame stores the
+ * enter animation's end frame from Rnd::View::EndFrame(), and UpdateEnterAnimation() subtracts one
+ * from the sum of the other two. An earlier reading described the argument as a time in seconds.
+ * That reading would have mixed units across the subtraction.
  *
  * The 39 entries follow in table order. Slot 0 is the compiler-generated GetTypeInfo at
  * `0x0038fd78` and is not source. An entry marked empty is a two-instruction `jr ra` stub. Each
@@ -151,10 +151,10 @@ enum MetScreenCommandCode {
  *  - 4 `0x00390200` PushNamedScreen().
  *  - 5 `0x003900a8` EnterAndShow().
  *  - 6 `0x0038b828` ActivateNamedPanel().
- *  - 7 `0x0038fdf8` OnUnknownSlot7(), empty.
+ *  - 7 `0x0038fdf8` OnPanelActivated(), empty.
  *  - 8 `0x003902d0` ExitScreenByName().
  *  - 9 `0x00390100` BeginExit().
- *  - 10 `0x00390130` OnUnknownSlot10(), empty and unrecovered.
+ *  - 10 `0x00390130` OnUnusedHook(), empty and never dispatched.
  *  - 11 `0x00390138` OnKeyboardDismissed(), empty.
  *  - 12 `0x0038fe00` OnDrawPass(), empty.
  *  - 13 `0x003900a0` OnDestroying(), empty.
@@ -170,17 +170,17 @@ enum MetScreenCommandCode {
  *  - 23 `0x00390180` PlayCycleLeftSound().
  *  - 24 `0x003901a0` PlayCycleRightSound().
  *  - 25 `0x003901e0` PlayErrorSound().
- *  - 26 `0x0038fe38` OnUnknownSlot26(), empty.
+ *  - 26 `0x0038fe38` UpdateIdle(), empty.
  *  - 27 `0x0038fe40` UpdateIdleAnimation(), empty.
  *  - 28 `0x00390498` StartRepeatingSound().
  *  - 29 `0x003904e0` UpdateRepeatingSound().
- *  - 30 `0x0038fe48` OnUnknownSlot30(), empty.
+ *  - 30 `0x0038fe48` OnRepeatingSoundFinished(), empty.
  *  - 31 `0x003905c0` StartEnterAnimation().
  *  - 32 `0x003905f0` UpdateEnterAnimation().
- *  - 33 `0x0038fe50` OnUnknownSlot33(), empty.
+ *  - 33 `0x0038fe50` OnEnterFinished(), empty.
  *  - 34 `0x003906a0` StartExitAnimation().
  *  - 35 `0x003906b0` UpdateExitAnimation().
- *  - 36 `0x0038fe58` OnUnknownSlot36(), empty.
+ *  - 36 `0x0038fe58` OnExitFinished(), empty.
  *  - 37 `0x00390788` Draw().
  *  - 38 `0x0038b1b0` ResolveContainerViews().
  *
@@ -205,10 +205,11 @@ enum MetScreenCommandCode {
  * MetConfigControllerScreen override at `0x00206970` compares it against its own controller.
  *
  * Four data members are protected and the rest are private. MetRemixLoadScreen and
- * MetRemixDelScreen both clear mUnknown60 in their constructors, and MetSaveRemixScreen clears
- * mUnknown5c in its own. Four derived constructors append to mUnknown38, and
- * MetJukeboxBaseScreen::SetShowing() reads mUnknown48. Those four are written or read by derived
- * code and the others are not. Nothing outside the class and its children reads any member.
+ * MetRemixDelScreen both clear mShowsLoadedDrawables in their constructors, and MetSaveRemixScreen
+ * clears mPlaysCommandSounds in its own. Four derived constructors append to mHelpKeys, and
+ * MetJukeboxBaseScreen::SetShowing() reads mViewsUnresolved. Those four are written or read by
+ * derived code and the others are not. No code outside the class and its children reads a
+ * member.
  */
 class MetScreen : public MsgSink {
 public:
@@ -221,18 +222,20 @@ public:
      * earlier reading recorded a dispatched call and a registration that happens last, and both are
      * wrong. MsgSource::AddSink() runs before the load starts, not after it.
      *
-     * mUnknown04, mUnknown70, and mUnknown74 are not written, so a screen starts with three
-     * indeterminate fields. Slot 38 writes mUnknown04 and slot 28 writes the other two.
+     * mAnimEndFrame, mRepeatSteps, and mRepeatInterval are not written. A screen therefore starts
+     * with three indeterminate fields. Slot 38 writes mAnimEndFrame and slot 28 writes the other
+     * two.
      *
-     * The body is not written. Every part is recovered: mUnknown10 takes pRenderer, mUnknown18
-     * takes 2, mUnknown58 takes 1.0f, mUnknown48, mUnknown5c, and mUnknown60 each take 1,
-     * mUnknown20 is copy-constructed from name, mUnknown80 from file, mUnknown88 from nPriority,
-     * every remaining integer, float, and pointer member is zeroed, mUnknown28 is assigned `file`
-     * with `.rnd` appended, `mUnknown10->AddSink(this)` registers the screen, and the load then
-     * starts. What blocks the body is MetRenderer's own header, which declares the class with no
-     * base and a reserved byte array over `+0x00` through `+0x67`, so AddSink() is unreachable
-     * through the member. The RTTI descriptor lists MsgSource at offset 0, RendererBase at 20, and
-     * FadeUser at 92, and the body follows once MetRenderer declares them.
+     * The body is not written. Every part is recovered. mRenderer takes pRenderer, mExitChoice
+     * takes 2, mRepeatScale takes 1.0f, mViewsUnresolved, mPlaysCommandSounds, and
+     * mShowsLoadedDrawables each take 1, mScreenName is copy-constructed from name, mContainerName
+     * from file, mLoadPriority from nPriority, every remaining integer, float, and pointer member
+     * is zeroed, mContainerFile is assigned `file` with `.rnd` appended,
+     * `mRenderer->AddSink(this)` registers the screen, and the load then starts. MetRenderer's
+     * header blocks the body. It declares the class with no base and a reserved byte array over
+     * `+0x00` through `+0x67`, and AddSink() is unreachable through the member. The RTTI
+     * descriptor lists MsgSource at offset 0, RendererBase at 20, and FadeUser at 92, and the body
+     * follows once MetRenderer declares them.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority, passed to RndAsyncLoader unchanged.
@@ -252,12 +255,12 @@ public:
      *
      * Slot 1. The hand-written part is three calls and nothing else. Everything the disassembly
      * shows besides them is compiler-generated: the two table-pointer stores, the inlined `HxStr`
-     * destructors for mUnknown20, mUnknown28, and mUnknown80, the `std::vector` and `std::list`
-     * teardown, and the conditional release under the `__in_chrg` flag.
+     * destructors for mScreenName, mContainerFile, and mContainerName, the `std::vector` and
+     * `std::list` teardown, and the conditional release under the `__in_chrg` flag.
      *
      * The body is not written, and the three calls are
-     * `mUnknown10->RemoveScreen(this)`, `OnDestroying()`, and
-     * `mUnknown10->RemoveSink(this)`, in that order. RemoveSink() blocks it for the reason recorded
+     * `mRenderer->RemoveScreen(this)`, `OnDestroying()`, and
+     * `mRenderer->RemoveSink(this)`, in that order. RemoveSink() blocks it for the reason recorded
      * on the constructor.
      *
      * @ghidraAddress 0x0038a848
@@ -397,9 +400,9 @@ public:
     /**
      * Poll every container load that has not finished, and hide the drawables of each that does.
      *
-     * Each record whose mUnknown04 is clear polls its loader. When the poll reports completion the
-     * record's mUnknown04 is set and every drawable the load produced is hidden through
-     * Rnd::Drawable::SetShowing(). MetRenderer::OnUnknownSlot7() is the one caller. The title is
+     * Each record whose mFinished is clear polls its loader. When the poll reports completion the
+     * record's mFinished is set and every drawable the load produced is hidden through
+     * Rnd::Drawable::SetShowing(). MetRenderer::Update() is the one caller. The title is
      * inferred.
      *
      * @ghidraAddress 0x00381ef8
@@ -410,11 +413,12 @@ public:
      * Play the sound one navigation command calls for and then act on the command.
      *
      * Not a vtable slot. MetRenderer::HandleMessage at `0x0036c6e8` and three further routines
-     * arrive at it with a direct call. A screen whose mUnknown1c is clear ignores the command
-     * completely, and a screen whose mUnknown5c is clear skips the sound and acts on the command
-     * regardless. The sound is chosen through a six-entry jump table at `0x0080b460` indexed by the
-     * command code less one, and every branch of that table passes MetScreenCommand::mPadIndex to
-     * the sound slot it runs. Slot 19 then receives the whole record.
+     * arrive at it with a direct call. A screen whose mAcceptsCommands is clear ignores the command
+     * completely, and a screen whose mPlaysCommandSounds is clear skips the sound and acts on the
+     * command regardless. The sound is chosen through a six-entry jump table at `0x0080b460`
+     * indexed by the command code less one, and every branch of that table passes
+     * MetScreenCommand::mPadIndex to the sound slot it runs. Slot 19 then receives the whole
+     * record.
      *
      * Declared public because MetRenderer calls it from outside the hierarchy and the image has
      * no other route to it. A friend declaration fits the image equally well.
@@ -427,9 +431,9 @@ public:
     /**
      * Drive the frame of whichever animation is running and run the idle hook when none is.
      *
-     * Not a vtable slot. MetRenderer::Slot9 at `0x0036b858` is its one caller. A screen still
-     * waiting for its container load, which is what a set mUnknown4c records, does nothing here.
-     * Both branches drive mUnknown30 rather than mUnknown34, matching UpdateExitAnimation().
+     * Not a vtable slot. MetRenderer::UpdateSimple() at `0x0036b858` is its one caller. A screen
+     * still waiting for its container load (the state a set mEnterPending records) does nothing
+     * here. Both branches drive mEnterAnim rather than mBackAnim, matching UpdateExitAnimation().
      *
      * Declared public for the same reason as DeliverCommand().
      *
@@ -441,26 +445,26 @@ public:
     /**
      * Advance one screen by one frame.
      *
-     * Not a vtable slot. MetRenderer::Slot7 at `0x0036b650` is its one caller. The routine has two
-     * disjoint halves and mUnknown4c selects between them. A screen still waiting for its container
-     * load, which is what a set mUnknown4c records, takes the deferred-entry half and no animation
-     * runs. Every other screen takes the animation half.
+     * Not a vtable slot. MetRenderer::Update() at `0x0036b650` is its one caller. The routine has
+     * two disjoint halves and mEnterPending selects between them. A screen still waiting for its
+     * container load (the state a set mEnterPending records) takes the deferred-entry half and
+     * no animation runs. Every other screen takes the animation half.
      *
-     * The deferred half consults the container load interned under mUnknown28. Once that load
-     * reports finished, slot 38 resolves the views while mUnknown48 is set, the view is handed to
-     * the renderer, slot 5 enters the screen, and mUnknown4c is cleared. A screen that also has
-     * mUnknown50 set then becomes the active panel and runs slot 7. While the load is unfinished
-     * the half polls the RndAsyncLoader instead and records the completion in the shared load
-     * record. The record is the one place MetContainerLoad::mUnknown04 is written after
+     * The deferred half consults the container load interned under mContainerFile. Once that load
+     * reports finished, slot 38 resolves the views while mViewsUnresolved is set, the view is
+     * handed to the renderer, slot 5 enters the screen, and mEnterPending is cleared. A screen that
+     * also has mActivatePending set then becomes the active panel and runs slot 7. While the load
+     * is unfinished the half polls the RndAsyncLoader instead and records the completion in the
+     * shared load record. The record is the one place MetContainerLoad::mFinished is written after
      * BeginContainerLoad().
      *
-     * The animation half runs slot 32, then slot 26 either when mUnknown54 is set or when neither
-     * animation is running, then slot 29 and slot 35. Slot 26 therefore fires on the same
+     * The animation half runs slot 32, then slot 26 either when mIdleWhileAnimating is set or when
+     * neither animation is running, then slot 29 and slot 35. Slot 26 therefore fires on the same
      * both-times-zero condition that UpdateAnimationFrame() uses for slot 27, which is what pairs
      * the two idle hooks across the renderer's two passes.
      *
      * An earlier reading titled this routine for the deferred half alone and recorded the
-     * mUnknown4c test inverted. The animation half is the common path, not the exceptional one.
+     * mEnterPending test inverted. The animation half is the common path, not the exceptional one.
      *
      * Declared public for the same reason as DeliverCommand().
      *
@@ -474,7 +478,7 @@ public:
      *
      * Slot 4. The screen is appended to the stack first and only enters once its own slot 14
      * reports the container load finished. A screen whose load has not finished instead records 1
-     * in mUnknown4c and is entered by a later call.
+     * in mEnterPending and is entered by a later call.
      *
      * @param name The registry key of the screen to push.
      * @ghidraAddress 0x00390200
@@ -493,8 +497,8 @@ public:
     /**
      * Make one named screen the renderer's active panel.
      *
-     * Slot 6. An empty name clears MetRenderer::mUnknown80 and activates nothing. A screen whose
-     * slot 14 reports the load unfinished instead records 1 in its own mUnknown50.
+     * Slot 6. An empty name clears MetRenderer::mPanelActive and does not activate a screen. A
+     * screen whose slot 14 reports the load unfinished instead records 1 in its mActivatePending.
      *
      * @param name The registry key of the panel to activate, or an empty string for none.
      * @ghidraAddress 0x0038b828
@@ -502,14 +506,16 @@ public:
     virtual void ActivateNamedPanel(const HxStr &name);
 
     /**
-     * Unrecovered. Slot 7.
+     * Act on this screen having become the renderer's active panel.
      *
-     * The body is empty and slot 6 is its one caller, which passes no argument. Neither its
-     * purpose nor a wider argument list can be established.
+     * Slot 7. The body is empty. Slot 6 and UpdateFrame() run it with no argument immediately
+     * after MetRenderer::SetActivePanel() has made this screen the active panel. The overrides
+     * start the screen's interaction, for example MetFreqMakerInventoryScreen returning its grid
+     * cursor to the first cell and MetRemixDelScreen running its pending keyboard action.
      *
      * @ghidraAddress 0x0038fdf8
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Start one named screen's exit animation.
@@ -532,9 +538,10 @@ public:
     virtual void BeginExit();
 
     /**
-     * Unrecovered. Slot 10.
+     * Do nothing. Slot 10.
      *
-     * The body is empty. No derived table among the 78 in the image fills the slot, and no routine
+     * The title records the one fact recovered. No routine uses the hook. The body is
+     * empty. No derived table among the 78 in the image fills the slot, and no routine
      * in the image dispatches it on a screen. Every one of the 42 sites that loads a table entry at
      * this index dispatches it on the object Globals::GetGameManager() vends or on an unrelated
      * class, and the destructor's direct call to slot 13 has no counterpart here. Neither the
@@ -542,12 +549,12 @@ public:
      *
      * @ghidraAddress 0x00390130
      */
-    virtual void OnUnknownSlot10();
+    virtual void OnUnusedHook();
 
     /**
      * Take control back after the keyboard screen has finished.
      *
-     * Slot 11. The body is empty. MetKeyboardScreen::OnUnknownSlot36() at `0x00283b74` is the one
+     * Slot 11. The body is empty. MetKeyboardScreen::OnExitFinished() at `0x00283b74` is the one
      * caller in the image: once the entered text is committed it resolves the screen whose registry
      * key it recorded, runs this slot on that screen with no argument, and then makes the same key
      * its active panel. MetLoadNewFreqScreen fills the slot at `0x002a3978` and re-pushes two named
@@ -562,7 +569,7 @@ public:
      * Contribute to the renderer's draw pass.
      *
      * Slot 12. The body is empty and no derived table among the 78 fills it, so the hook exists and
-     * the shipped game implements it nowhere. MetRenderer::Slot8 at `0x003716c8` is the one caller
+     * the shipped game implements it nowhere. MetRenderer::Draw() at `0x003716c8` is the one caller
      * on a screen: it draws its own root drawable, walks the screen vector at `+0x84` running this
      * slot on each entry with no argument, and then draws the timing graph and the statistics
      * overlay.
@@ -587,8 +594,8 @@ public:
     /**
      * Advance this screen's container load and resolve its views once the load finishes.
      *
-     * Slot 14. The views are resolved only while mUnknown48 is set, which slot 38 clears, so the
-     * resolution happens once. The report does not depend on mUnknown48.
+     * Slot 14. The views are resolved only while mViewsUnresolved is set. Slot 38 clears the flag,
+     * and the resolution happens once. The report does not depend on mViewsUnresolved.
      *
      * @return Non-zero once the container load has finished.
      * @ghidraAddress 0x0038b338
@@ -598,8 +605,8 @@ public:
     /**
      * Act on the choice the user made in a message dialogue.
      *
-     * Slot 15. The body is empty. MetMsgScreen::Slot36() at `0x002f05f4` is the one caller on a
-     * screen: once its own exit animation has finished it clears its `+0xd8` flag and runs this
+     * Slot 15. The body is empty. MetMsgScreen::OnExitFinished() at `0x002f05f4` is the one caller
+     * on a screen. Once its exit animation has finished it clears its `+0xd8` flag and runs this
      * slot on the screen at its `+0xb8`, passing the `HxStr` at its `+0xb0` and the integer at its
      * `+0xd4`. Twenty-three derived tables fill the slot, and each body compares the first argument
      * against dialogue names through HxStr::MatchesLiteral and then branches on the second against
@@ -622,12 +629,13 @@ public:
     /**
      * Act on a message dialogue becoming visible.
      *
-     * Slot 16. The body is empty. MetMsgScreen::Slot33() at `0x002f0524` is the one caller on a
-     * screen: once its own enter animation has finished it sets its `+0xd8` flag and runs this slot
-     * on the screen at its `+0xb8`, passing only the `HxStr` at its `+0xb0`. No second argument is
-     * set. Two derived tables fill the slot. MetExpansionPakScreen at `0x0021d9e0` matches the name
-     * against `expansion_prepare` and `expansion_load` and records which dialogue is up, and
-     * MetRemixDelScreen at `0x003441a0` ignores the argument and activates a named panel.
+     * Slot 16. The body is empty. MetMsgScreen::OnEnterFinished() at `0x002f0524` is the one caller
+     * on a screen. Once its enter animation has finished it sets its `+0xd8` flag and runs this
+     * slot on the screen at its `+0xb8`, passing only the `HxStr` at its `+0xb0`. No second
+     * argument is set. Two derived tables fill the slot. MetExpansionPakScreen at `0x0021d9e0`
+     * matches the name against `expansion_prepare` and `expansion_load` and records which dialogue
+     * is up, and MetRemixDelScreen at `0x003441a0` ignores the argument and activates a named
+     * panel.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @ghidraAddress 0x0038fe28
@@ -637,9 +645,9 @@ public:
     /**
      * Show or hide the view and every drawable the container loaded.
      *
-     * Slot 17. Forwards to Rnd::Drawable::SetShowing() on mUnknown14 and then, when mUnknown60 is
-     * set, on each entry of the drawable list that the loader recorded for mUnknown28. The name is
-     * inferred from the Rnd::Drawable virtual it forwards to.
+     * Slot 17. Forwards to Rnd::Drawable::SetShowing() on mView and then, when
+     * mShowsLoadedDrawables is set, on each entry of the drawable list that the loader recorded for
+     * mContainerFile. The name is inferred from the Rnd::Drawable virtual it forwards to.
      *
      * The second half copies RndAsyncLoader::mDrawables out of the interned container load into a
      * temporary and walks it. The helper at `0x0014d560` that the copy expands to is
@@ -655,7 +663,7 @@ public:
      * Intern a container load under this screen's container name and enqueue it.
      *
      * Slot 18. A separator is appended to the directory before the request is built. The file
-     * argument is declared and ignored, because the request is built from mUnknown28 instead.
+     * argument is declared and ignored, because the request is built from mContainerFile instead.
      * When a record is already interned under the name, the call returns without resetting or
      * enqueuing it.
      *
@@ -671,8 +679,9 @@ public:
      * Slot 19. The body is empty. DeliverCommand() is the one caller, and it passes the whole
      * command record after playing the sound the command code calls for. Fifty-three derived tables
      * fill the slot, more than any other, and every body inspected reads MetScreenCommand::mCommand
-     * and branches on it. MetMainScreen at `0x002c6820` routes command 1 to MetButtonList vtable
-     * slot 2, command 2 to slot 3, command 5 to a named panel, and command 6 elsewhere.
+     * and branches on it. MetMainScreen at `0x002c6820` routes command 1 to
+     * MetButtonList::SelectPrevious(), command 2 to MetButtonList::SelectNext(), command 5 to a
+     * named panel, and command 6 elsewhere.
      * MetConfigControllerScreen fills it at `0x00200ba8` and MetKeyboardScreen at `0x00283268`.
      *
      * @param pCommand The command the renderer translated from an input message.
@@ -760,28 +769,32 @@ public:
     virtual void PlayErrorSound(int nSelector);
 
     /**
-     * Unrecovered. Slot 26.
+     * Advance whatever the screen updates once per frame while it is idle.
      *
-     * The body is empty here. MetKeyboardScreen fills it at `0x0028c708` with a body that reads its
-     * argument out of `f12` and compares a float member against it, which is what fixes the single
-     * parameter as a float. Nine further screens fill the slot too. The argument is the renderer
-     * time, on the same evidence that fixes it for the two animation slots, because the
-     * MetKeyboardScreen body adds a fixed 240 to a recorded value and tests the sum against it.
+     * Slot 26. UpdateFrame() runs it while neither animation is running, or on every frame when
+     * mIdleWhileAnimating is set. The overrides blink a caret, advance a fade, or start a
+     * scheduled exit. The body is empty here. MetKeyboardScreen fills it at `0x0028c708` with a
+     * body that reads its argument out of `f12` and compares a float member against it. That
+     * comparison fixes the single parameter as a float. Nine further screens fill the slot too.
+     * The argument is the renderer time, on the same evidence that fixes it for the two animation
+     * slots, because the MetKeyboardScreen body adds a fixed 240 to a recorded value and tests the
+     * sum against it.
      *
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x0038fe38
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Advance whatever the screen animates while it is neither entering nor exiting.
      *
      * Slot 27. The body is empty. UpdateAnimationFrame() is the one caller on a screen, and it runs
-     * the slot only while both mUnknown08 and mUnknown0c are zero, which is the interval after the
-     * enter animation has finished and before the exit animation starts. Six derived tables fill
-     * the slot. MetGizmoPanel at `0x0027b388` forwards to slot 26 unchanged, which is what pairs
-     * the two hooks and confirms the float. MetLogoScreen at `0x002be5a8` toggles one object every
-     * 120 units of renderer time and sets an animation view's frame to the time it received.
+     * the slot only while both mEnterStartTime and mExitStartTime are zero (the interval after the
+     * enter animation has finished and before the exit animation starts). Six derived tables fill
+     * the slot. MetGizmoPanel at `0x0027b388` forwards to slot 26 unchanged. That forwarding pairs
+     * the two hooks and confirms the float. MetLogoScreen at `0x002be5a8` toggles one
+     * object every 120 units of renderer time and sets an animation view's frame to the time it
+     * received.
      *
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x0038fe40
@@ -820,16 +833,16 @@ public:
     virtual void UpdateRepeatingSound(float flTime);
 
     /**
-     * Unrecovered. Slot 30.
+     * Act on the alternation that StartRepeatingSound() started having finished.
      *
-     * The body is empty. Slot 29 passes the button it finished alternating, and
+     * Slot 30. The body is empty. Slot 29 passes the button it finished alternating, and
      * MetConfigOptionsButtonsScreen overrides the slot at `0x00207fc0` with a body that copies the
      * `HxStr` at `+0x04` of the same argument.
      *
      * @param pButton The button slot 29 finished with.
      * @ghidraAddress 0x0038fe48
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Rewind the enter animation and record the time it starts at.
@@ -844,8 +857,8 @@ public:
     /**
      * Drive the enter animation and finish it once it passes its end.
      *
-     * Slot 32. The end is detected on one call and acted on the next, which is what mUnknown7c
-     * records between the two.
+     * Slot 32. The end is detected on one call and acted on the next, with mEnterDone recording
+     * the end between the two.
      *
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x003905f0
@@ -853,19 +866,20 @@ public:
     virtual void UpdateEnterAnimation(float flTime);
 
     /**
-     * Unrecovered. Slot 33.
+     * Act on the enter animation having finished.
      *
-     * The body is empty. Slot 32 runs it with no argument once the enter animation has finished,
-     * and the MetConfigControllerScreen override at `0x002069d0` reads none either.
+     * Slot 33. The body is empty. Slot 32 runs it with no argument once the enter animation has
+     * finished, in the same call that sets mAcceptsCommands, and the MetConfigControllerScreen
+     * override at `0x002069d0` does not read an argument.
      *
      * @ghidraAddress 0x0038fe50
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Record the time the exit animation starts at.
      *
-     * Slot 34. Clears the enter animation start time and mUnknown1c. The title is inferred to
+     * Slot 34. Clears the enter animation start time and mAcceptsCommands. The title is inferred to
      * pair with UpdateExitAnimation().
      *
      * @param flTime The frame position the animation starts at.
@@ -876,7 +890,7 @@ public:
     /**
      * Drive the exit animation and hide the screen once it passes its end.
      *
-     * Slot 35. The end is detected on one call and acted on the next, through mUnknown78. The
+     * Slot 35. The end is detected on one call and acted on the next, through mExitDone. The
      * screen is hidden, erased from the renderer's stack, and then slot 36 runs.
      *
      * @param flTime The renderer's current animation frame position.
@@ -885,19 +899,21 @@ public:
     virtual void UpdateExitAnimation(float flTime);
 
     /**
-     * Unrecovered. Slot 36.
+     * Act on the exit animation having finished.
      *
-     * Recorded on the same evidence as OnUnknownSlot33(), with the MetConfigControllerScreen
-     * override at `0x00201790`.
+     * Slot 36. The body is empty. Slot 35 runs it with no argument once the exit animation has
+     * finished and the screen has exited the renderer's stack. Screens override it to push the
+     * screen their exit led to, and the MetConfigControllerScreen override at `0x00201790` does
+     * not read an argument.
      *
      * @ghidraAddress 0x0038fe58
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Draw the view.
      *
-     * Slot 37. Forwards to Rnd::Drawable::Draw() on the Drawable subobject of mUnknown14, at
+     * Slot 37. Forwards to Rnd::Drawable::Draw() on the Drawable subobject of mView, at
      * `+0x18` within the view. The name is inferred from the Rnd::Drawable routine it forwards to.
      *
      * @ghidraAddress 0x00390788
@@ -907,8 +923,8 @@ public:
     /**
      * Resolve the three views the container produced and hide the screen.
      *
-     * Slot 38. The scene root is the object named by mUnknown80 with `.view` appended. A container
-     * with no such object stops the machine through Fatal() with
+     * Slot 38. The scene root is the object identified by mContainerName with `.view` appended. A
+     * container with no such object stops the machine through Fatal() with
      * `the screen %s doesn't have a valid view!`.
      *
      * @ghidraAddress 0x0038b1b0
@@ -934,24 +950,24 @@ protected:
     void ResolveAnimationViews();
 
 protected:
-    // End frame of the enter animation, read from mUnknown30 by the helper at 0x0038bd60. Not
+    // End frame of the enter animation, read from mEnterAnim by the helper at 0x0038bd60. Not
     // written by the constructor. MetRemixTypeScreen's slot 5 reads it, which is why it is
     // protected.
-    float mUnknown04; // +0x04
+    float mAnimEndFrame; // +0x04
 
 protected:
     // Time the enter animation started, or zero while no enter animation runs.
     // MetCreditsScreen::EnterAndShow() at 0x00214e70 clears it, which is why it is protected.
-    float mUnknown08; // +0x08
+    float mEnterStartTime; // +0x08
 
 private:
     // Time the exit animation started, or zero while no exit animation runs.
-    float mUnknown0c; // +0x0c
+    float mExitStartTime; // +0x0c
 
 protected:
-    // The renderer this screen registers on. MetLoadFreqBaseScreen reads MetRenderer::mUnknown68
-    // through it in slots 5, 19, and 39, which is why it is protected.
-    MetRenderer *mUnknown10; // +0x10
+    // The renderer this screen registers on. Protected because MetLoadFreqBaseScreen reads
+    // MetRenderer::mAnimationFrame through it in slots 5, 19, and 39.
+    MetRenderer *mRenderer; // +0x10
 
 public:
     /**
@@ -961,43 +977,47 @@ public:
      * view from the screen scene, and the image has no accessor. MetTopLogoScreen's slot 38 also
      * resolves it itself. +0x14
      */
-    Rnd::View *mUnknown14;
+    Rnd::View *mView;
 
 protected:
-    // MetLoadFreqBaseScreen writes 2 in its slot 30 and 0 in its slot 19, and reads it in its slot
-    // 36 to choose between the gizmo panels and the three button actions, which is why it is
-    // protected.
-    int mUnknown18; // +0x18, starts at 2
+    // How the screen is departing, for the exit hook to act on (0 for a back command and 2 for a
+    // chosen button). Protected because MetLoadFreqBaseScreen writes 2 in its slot 30 and 0 in its
+    // slot 19, and reads it in its slot 36 to choose between the gizmo panels and the three button
+    // actions.
+    int mExitChoice; // +0x18, starts at 2
 
 protected:
-    // MetCreditsScreen::EnterAndShow() at 0x00214e70 writes 1, which is why it is protected.
-    int mUnknown1c; // +0x1c
+    // Set once the enter animation finishes and cleared when the exit animation starts.
+    // DeliverCommand() ignores every command while it is clear. MetCreditsScreen::EnterAndShow()
+    // at 0x00214e70 writes 1, and the member is protected for that write.
+    int mAcceptsCommands; // +0x1c
 
 private:
-    HxStr mUnknown20; // +0x20, the screen name
-    HxStr mUnknown28; // +0x28, mUnknown80 with `.rnd` appended
+    HxStr mScreenName;    // +0x20
+    HxStr mContainerFile; // +0x28, mContainerName with `.rnd` appended
 
 protected:
     // The view named `<screen>_EE.anim`. MetRemixTypeScreen's slot 5 swaps its animation, which
     // is why it is protected.
-    Rnd::View *mUnknown30; // +0x30
+    Rnd::View *mEnterAnim; // +0x30
 
 private:
-    Rnd::View *mUnknown34; // +0x34, the view named `<screen>_BF.anim`
+    Rnd::View *mBackAnim; // +0x34, the view `<screen>_BF.anim`
 
 protected:
-    // Extra container object names a screen wants resolved. MetMemCardLoadScreen,
-    // MetMemCardTypeScreen, MetRemixTypeScreen, and MetRemixDelScreen each append one in their
-    // constructors, which is why it is protected.
-    std::vector<HxStr> mUnknown38; // +0x38
+    // Help text keys, one per button, for the screens to pass to MetHelpScreen::SetText().
+    // Protected because MetMemCardLoadScreen, MetMemCardTypeScreen, MetRemixTypeScreen, and
+    // MetRemixDelScreen each append one in their constructors.
+    std::vector<HxStr> mHelpKeys; // +0x38
 
 private:
-    std::list<Rnd::Drawable *> mUnknown44; // +0x44
+    // Neither read nor written outside construction and destruction.
+    std::list<Rnd::Drawable *> mUnusedDrawables; // +0x44
 
 protected:
     // Set while the container views still need resolving, and cleared by slot 38. Read by
     // MetJukeboxBaseScreen::SetShowing(), which is why it is protected.
-    int mUnknown48; // +0x48, starts at 1
+    int mViewsUnresolved; // +0x48, starts at 1
 
 public:
     /**
@@ -1008,18 +1028,20 @@ public:
      * `0x0037164c`, each immediately after dispatching slot 14, so the access rule gives public. A
      * friend declaration for MetRenderer fits the image equally well. +0x4c
      */
-    int mUnknown4c;
+    int mEnterPending;
 
     /**
      * Set when the screen was activated as a panel before its container load finished.
      *
      * Written by MetRenderer at `0x0036b294`, `0x0036b3d4`, and `0x0037164c` on the same three
-     * paths as mUnknown4c, and public for the same reason. +0x50
+     * paths as mEnterPending, and public for the same reason. +0x50
      */
-    int mUnknown50;
+    int mActivatePending;
 
 private:
-    int mUnknown54; // +0x54
+    // Runs slot 26 on every frame rather than only while neither animation runs. The constructor
+    // clears it and no writer of a set value is identified.
+    int mIdleWhileAnimating; // +0x54
 
 public:
     /**
@@ -1031,24 +1053,26 @@ public:
      * declaration therefore cannot cover this access and the two above, which is what settles the
      * three as public rather than as friendship. +0x58, starts at 1.0f
      */
-    float mUnknown58;
+    float mRepeatScale;
 
 protected:
-    // Cleared by the MetSaveRemixScreen constructor, which is why it is protected.
-    int mUnknown5c; // +0x5c, starts at 1
+    // Enables the navigation sounds in DeliverCommand(). Protected because the MetSaveRemixScreen
+    // constructor clears it.
+    int mPlaysCommandSounds; // +0x5c, starts at 1
     // Gates the drawable-list walk in SetShowing(). Cleared by the MetRemixLoadScreen and
     // MetRemixDelScreen constructors, which is why it is protected.
-    int mUnknown60; // +0x60, starts at 1
+    int mShowsLoadedDrawables; // +0x60, starts at 1
 
 private:
-    float mUnknown64; // +0x64, the time of the next alternation step, or zero when none is running
+    // The time of the next alternation step, or zero when none is running.
+    float mRepeatNextTime; // +0x64
     // The button whose state slots 28 and 29 alternate through Rnd::Button::SetState().
-    Rnd::Button *mUnknown68; // +0x68
-    int mUnknown6c;          // +0x6c, the steps run, not written by the constructor
-    int mUnknown70;          // +0x70, the steps to run, not written by the constructor
-    float mUnknown74;        // +0x74, the step interval, not written by the constructor
-    int mUnknown78;          // +0x78
-    int mUnknown7c;          // +0x7c
-    HxStr mUnknown80;        // +0x80, the container name without its suffix
-    int mUnknown88;          // +0x88, the load priority
+    Rnd::Button *mRepeatButton; // +0x68
+    int mRepeatStep;            // +0x6c, the steps run, not written by the constructor
+    int mRepeatSteps;           // +0x70, the steps to run, not written by the constructor
+    float mRepeatInterval;      // +0x74, the step interval, not written by the constructor
+    int mExitDone;              // +0x78, set once the exit animation has passed its end
+    int mEnterDone;             // +0x7c, set once the enter animation has passed its end
+    HxStr mContainerName;       // +0x80, the container name without its suffix
+    int mLoadPriority;          // +0x88
 };

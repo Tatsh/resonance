@@ -17,16 +17,16 @@ constexpr int kBarTicks = 1920;
 // The configuration code the phrase manager's configuration word comes from.
 constexpr int kPhraseMgrConfigCode = 702;
 
-// The BarSequencer unmapped argument Slot2() passes, where BGTrackGraph passes its own flag.
+// The BarSequencer unmapped argument Start() passes, where BGTrackGraph passes its flag.
 constexpr int kMapped = 0;
 
 } // namespace
 
 // 0x001cee50
 ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
-    : mUnknown00(pTrackData->mUnknown04), mTrackData(pTrackData), mPhraseMgr(nullptr),
-      mPhrasePlayer(nullptr), mQuantizer(nullptr), mMuseSynth(nullptr), mUnknown18(0),
-      mMixer(nullptr), mApplication(Application::shared()), mSequencer(nullptr) {
+    : mTrack(pTrackData->mIndex), mTrackData(pTrackData), mPhraseMgr(nullptr),
+      mPhrasePlayer(nullptr), mQuantizer(nullptr), mMuseSynth(nullptr), mUnused(0), mMixer(nullptr),
+      mApplication(Application::shared()), mSequencer(nullptr) {
     mQuantizer = new Quantizer(mTrackData);
     mPhraseMgr = new PhraseMgr(mApplication->GetSongClock(),
                                Mid::MBT(kBarTicks).mTick,
@@ -34,7 +34,7 @@ ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
                                QueryConfigValue(kPhraseMgrConfigCode),
                                mTrackData);
     mPhrasePlayer = new PhrasePlayer(mPhraseMgr, mQuantizer, mTrackData);
-    mMixer = new Mixer(mUnknown00, mTrackData->mChannel);
+    mMixer = new Mixer(mTrack, mTrackData->mChannel);
     mMuseSynth = new MuseSynth(mApplication->GetSongClock());
     mPhraseMgr->mPhrasePlayer = mPhrasePlayer;
 }
@@ -49,7 +49,7 @@ ScoreTrackGraph::~ScoreTrackGraph() {
 }
 
 // 0x001cf088
-void ScoreTrackGraph::Slot2() {
+void ScoreTrackGraph::Start() {
     mPhraseMgr->StartCommands();
     MidiChase chase;
     const int nBarCount = mApplication->GetPlayMap()->mBarCount;
@@ -64,32 +64,32 @@ void ScoreTrackGraph::Slot2() {
 }
 
 // 0x001cf918
-void ScoreTrackGraph::Slot3() {
+void ScoreTrackGraph::Stop() {
     mPhraseMgr->WithdrawCommands();
     delete mSequencer;
     mSequencer = nullptr;
 }
 
 // 0x001cf750
-void ScoreTrackGraph::Slot5(MsgSource *) {
+void ScoreTrackGraph::AddMixerToSource(MsgSource *) {
 }
 
 // 0x001cf758
-int ScoreTrackGraph::Slot9() {
+int ScoreTrackGraph::HasNothingPending() {
     return 1;
 }
 
 // 0x001cf760
-void ScoreTrackGraph::Slot10(int, Player *) {
+void ScoreTrackGraph::GivePhrases(int, Player *) {
 }
 
 // 0x001cf768
-int ScoreTrackGraph::Slot11() {
+int ScoreTrackGraph::CanGivePhrases() {
     return 0;
 }
 
 // 0x001cf778
-void ScoreTrackGraph::Slot12() {
+void ScoreTrackGraph::CreatePowerbarMgr() {
 }
 
 // 0x001cf978

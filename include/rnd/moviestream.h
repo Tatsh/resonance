@@ -45,10 +45,10 @@ public:
         Track() {
         }
 
-        unsigned char mUnknown00[4];    // +0x00
-        short mWidth;                   /*!< Frame width in pixels. +0x04 */
-        short mHeight;                  /*!< Frame height in pixels. +0x06 */
-        unsigned char mUnknown08[0x24]; // +0x08
+        unsigned char mReserved00[4];    // +0x00
+        short mWidth;                    /*!< Frame width in pixels. +0x04 */
+        short mHeight;                   /*!< Frame height in pixels. +0x06 */
+        unsigned char mReserved08[0x24]; // +0x08
     };
 
     /** Payload of a PALL chunk. */
@@ -62,7 +62,7 @@ public:
     struct FrameChunk {
         short mX;        /*!< Column the frame is copied to. */
         short mY;        /*!< Row the frame is copied to. */
-        int mUnknown04;  // +0x04
+        int mReserved04; // +0x04
         int mFlags;      /*!< Bit 0 records that Update() has swapped the colours. */
         ABitmap mBitmap; /*!< Description of the pixels that follow. */
     };

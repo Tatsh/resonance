@@ -57,7 +57,7 @@ static const char *const kPersonaNameFormat = "freq player%d";
 } // namespace
 
 // 0x0030e2c8
-MetNullRenderer::MetNullRenderer() : mUnknown80(0) {
+MetNullRenderer::MetNullRenderer() : mLoadPending(0) {
     SeedR250(kRandomSeed);
     MetFreqMakerAssetManager::Create();
     MetFreqMakerAssetManager::Instance()->StartAssetLoad();
@@ -85,23 +85,23 @@ void MetNullRenderer::OnRawController(RawControllerMsg *pMsg) {
         if (pWorld != nullptr) {
             UnpauseGameSystemMsg msg;
             Application::shared()->GetGameManager()->QueueMessage(&msg);
-            pWorld->PostExitMode2();
+            pWorld->PostQuit();
             break;
         }
 
         PlaySoundByName(kSlideSound);
         Py::Sequence ruleset(EvalScriptTemplate(kRulesetTemplate));
-        mUnknown48.mLevelName = Py::String(ruleset[kRulesetFieldLevel]);
+        mParams.mLevelName = Py::String(ruleset[kRulesetFieldLevel]);
 
-        mUnknown48.mUnknown1c = ParseRuleset(Py::String(ruleset[kRulesetFieldMode]));
-        mUnknown48.mDifficulty = Py::Int(ruleset[kRulesetFieldDifficulty]);
-        mUnknown48.mUnknown28 = 0;
-        mUnknown48.mArenaName = Py::String(ruleset[kRulesetFieldArena]);
-        mUnknown84 = Py::Int(ruleset[kRulesetFieldPlayerCount]);
+        mParams.mPlayMode = ParseRuleset(Py::String(ruleset[kRulesetFieldMode]));
+        mParams.mDifficulty = Py::Int(ruleset[kRulesetFieldDifficulty]);
+        mParams.mNetGame = 0;
+        mParams.mArenaName = Py::String(ruleset[kRulesetFieldArena]);
+        mPlayerCount = Py::Int(ruleset[kRulesetFieldPlayerCount]);
 
         Renderer::LoadCommon();
-        Renderer::LoadLevel(mUnknown48);
-        mUnknown80 = 1;
+        Renderer::LoadLevel(mParams);
+        mLoadPending = 1;
         break;
     }
     case kButtonUnload:
@@ -112,24 +112,24 @@ void MetNullRenderer::OnRawController(RawControllerMsg *pMsg) {
 }
 
 // 0x0030f320
-void MetNullRenderer::OnUnknownSlot8() {
+void MetNullRenderer::Draw() {
     float flCommonProgress;
     float flLevelProgress;
     const int nCommonDone = Renderer::PollCommon(&flCommonProgress);
     const int nLevelDone = Renderer::PollLevel(&flLevelProgress);
-    if (mUnknown80 != 0 && nCommonDone != 0 && nLevelDone != 0) {
+    if (mLoadPending != 0 && nCommonDone != 0 && nLevelDone != 0) {
         Application::shared()->GetGameManager()->ClearPersonas();
-        for (int nPlayer = 0; nPlayer < mUnknown84; ++nPlayer) {
+        for (int nPlayer = 0; nPlayer < mPlayerCount; ++nPlayer) {
             MetPersonaData persona;
-            persona.mUnknown140.mUnknown00 = HxStr(FormatString(kPersonaNameFormat, nPlayer));
+            persona.mAppearance.mUserName = HxStr(FormatString(kPersonaNameFormat, nPlayer));
             Application::shared()->GetGameManager()->AddPersona(persona);
         }
         Application::shared()->GetGameManager()->SetGameMode(
-            mUnknown84 == kSinglePlayer ? kGameModeSolo : kGameModeLocal);
-        Application::shared()->GetGameManager()->SetParams(mUnknown48);
+            mPlayerCount == kSinglePlayer ? kGameModeSolo : kGameModeLocal);
+        Application::shared()->GetGameManager()->SetParams(mParams);
         BeginGameLocalMsg msg;
         Application::shared()->GetGameManager()->QueueMessage(&msg);
-        mUnknown80 = 0;
+        mLoadPending = 0;
     }
 
     if (Application::shared()->GetGameManager()->GetWorld() == nullptr) {
@@ -138,7 +138,7 @@ void MetNullRenderer::OnUnknownSlot8() {
 }
 
 // 0x00311a20
-void MetNullRenderer::OnUnknownSlot7() {
+void MetNullRenderer::Update() {
 }
 
 // 0x00311f80

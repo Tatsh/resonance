@@ -33,10 +33,10 @@ public:
      *
      * The image lists no caller for the out-of-line body.
      *
-     * @param unknown04 The string copied into `+0x04`.
+     * @param reason The string copied into `+0x04`.
      * @ghidraAddress 0x003e1a90
      */
-    GameConnectionLostMsg(const HxStr &unknown04);
+    GameConnectionLostMsg(const HxStr &reason);
 
     /**
      * Produce a message with an empty string on the heap.
@@ -84,7 +84,7 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    HxStr mUnknown04; // +0x04
+    HxStr mReason; // +0x04, the text Print() writes, with a title after the loss it reports
 };
 
 /**

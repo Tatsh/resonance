@@ -29,7 +29,7 @@ const char *SCAllClientsStatusPacket::Name() {
 
 // 0x003f2160
 void SCAllClientsStatusPacket::Print(std::ostream &stream) {
-    for (const auto &entry : mUnknown14) {
+    for (const auto &entry : mClients) {
         stream << "(id:" << entry.mId << " stat:" << entry.mStatus << ") ";
     }
 }
@@ -38,9 +38,9 @@ void SCAllClientsStatusPacket::Print(std::ostream &stream) {
 void SCAllClientsStatusPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
-    int count = static_cast<int>(mUnknown14.size());
+    int count = static_cast<int>(mClients.size());
     stream.Write(&count, sizeof(count));
-    for (const auto &entry : mUnknown14) {
+    for (const auto &entry : mClients) {
         int id = entry.mId;
         int status = entry.mStatus;
         stream.Write(&id, sizeof(id)).Write(&status, sizeof(status));
@@ -53,13 +53,13 @@ void SCAllClientsStatusPacket::Load(IBStream &stream) {
 
     int count;
     stream.Read(&count, sizeof(count));
-    mUnknown14.resize(count);
-    for (auto &entry : mUnknown14) {
+    mClients.resize(count);
+    for (auto &entry : mClients) {
         stream.Read(&entry.mId, sizeof(entry.mId)).Read(&entry.mStatus, sizeof(entry.mStatus));
     }
 }
 
 // 0x003f2218
-void SCAllClientsStatusPacket::AppendEntry(Entry14 entry) {
-    mUnknown14.push_back(entry);
+void SCAllClientsStatusPacket::AppendEntry(ClientStatus entry) {
+    mClients.push_back(entry);
 }

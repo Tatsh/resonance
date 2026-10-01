@@ -31,5 +31,5 @@ const char *ButtonPowMsg::Name() {
 // The colour name is copied into a temporary before it is written.
 void ButtonPowMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);
-    stream << " " << HxStr(mPlayer->mColorName) << " " << mUnknown08;
+    stream << " " << HxStr(mPlayer->mColorName) << " " << mPlayMode;
 }

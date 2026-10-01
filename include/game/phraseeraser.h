@@ -23,16 +23,20 @@ class PhraseEraser : public MsgSource, public MsgSink {
 public:
     /**
      * Store the five arguments. Three are not read by any recovered routine, so their types are
-     * recorded as words.
+     * recorded as words and their titles record only their argument positions.
      *
      * @param nTrack The track the eraser listens for.
-     * @param nUnknown34 Stored at `+0x34`.
+     * @param nSecondArgument Stored at `+0x34`.
      * @param pPhraseMgr The phrase manager whose bar length divides an erase position.
-     * @param nUnknown38 Stored at `+0x38`.
-     * @param nUnknown28 Stored at `+0x28`.
+     * @param nFourthArgument Stored at `+0x38`.
+     * @param nFifthArgument Stored at `+0x28`.
      * @ghidraAddress 0x001b99c8
      */
-    PhraseEraser(int nTrack, int nUnknown34, PhraseMgr *pPhraseMgr, int nUnknown38, int nUnknown28);
+    PhraseEraser(int nTrack,
+                 int nSecondArgument,
+                 PhraseMgr *pPhraseMgr,
+                 int nFourthArgument,
+                 int nFifthArgument);
 
     /**
      * Act on a message.
@@ -59,9 +63,9 @@ private:
     int mFirstBar;         // +0x1c
     int mLastBar;          // +0x20
     Player *mPlayer;       // +0x24
-    int mUnknown28;        // +0x28
+    int mFifthArgument;    // +0x28
     int mTrack;            // +0x2c
     PhraseMgr *mPhraseMgr; // +0x30
-    int mUnknown34;        // +0x34
-    int mUnknown38;        // +0x38
+    int mSecondArgument;   // +0x34
+    int mFourthArgument;   // +0x38
 };

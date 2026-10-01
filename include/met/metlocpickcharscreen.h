@@ -143,7 +143,7 @@ public:
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x002ba038
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Bring up the next screen once this one has exited.
@@ -153,7 +153,7 @@ public:
      *
      * @ghidraAddress 0x002b3e18
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views and the four players' materials, views, buttons, meshes, and burn
@@ -168,7 +168,7 @@ public:
     /**
      * Show the multi-player detection notice, then run the base probe.
      *
-     * Slot 39. The notice receives MetFrontEndState::mUnknown2c.
+     * Slot 39. The notice receives MetFrontEndState::mPlayerCount.
      *
      * @ghidraAddress 0x002b4068
      */
@@ -177,7 +177,7 @@ public:
     /**
      * Skip the base persona load and go straight to StartSaveSpaceCheck().
      *
-     * Slot 40. Sets mUnknown98 as the base does.
+     * Slot 40. Sets mPersonaLoadRequested as the base does.
      *
      * @ghidraAddress 0x002ba148
      */
@@ -233,7 +233,7 @@ private:
 
     // Players who have locked a character in.
     int mReadyCount; // +0xa0
-    // From MetFrontEndState::mUnknown2c.
+    // From MetFrontEndState::mPlayerCount.
     int mPlayerCount; // +0xa4
     // Each view shows once its player locks a character in.
     std::vector<Rnd::View *> mSelectViews;      // +0xa8
@@ -253,9 +253,10 @@ private:
     // Indices into GlobalSettings::mCardSlots.
     std::vector<int> mFormattedCards; // +0x114
     // Index into mFormattedCards of the card being loaded.
-    int mCardIndex;  // +0x120
-    int mUnknown124; // +0x124
-    int mUnknown128; // +0x128
+    int mCardIndex; // +0x120
+    // Zeroed by the constructor and never read or written again.
+    int mUnusedFirst;  // +0x124
+    int mUnusedSecond; // +0x128
     // The two flags are not written by the constructor.
     int mShowOnDismiss;                  // +0x12c
     int mLoadingCards;                   // +0x130

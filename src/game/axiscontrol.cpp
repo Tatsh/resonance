@@ -47,7 +47,7 @@ constexpr int kLaneDivisor = 8;
 
 // 0x0019e940
 AxisControl::AxisControl(const TrackData *pTrackData)
-    : mTrack(pTrackData->mUnknown04), mChannel(pTrackData->mChannel), mLane(kLaneCenter),
+    : mTrack(pTrackData->mIndex), mChannel(pTrackData->mChannel), mLane(kLaneCenter),
       mAxis(kNoAxis), mBending(0), mBendOrigin(0), mSustainTick(0), mPlayer(&g_nullPlayer) {
 }
 
@@ -62,7 +62,7 @@ void AxisControl::OnAxisRegister(AxisRegisterMsg *pMsg) {
             return;
         }
         NowBarMsg nowBar;
-        nowBar.mUnknown04 = pMsg->mTrack;
+        nowBar.mTrack = pMsg->mTrack;
         nowBar.mPlayer = pMsg->mPlayer;
         nowBar.mLane = static_cast<float>(kLaneCount - nLane) * kLaneScale;
         Send(&nowBar);
@@ -91,16 +91,16 @@ void AxisControl::OnAxisRegister(AxisRegisterMsg *pMsg) {
 
 // 0x0019ec10
 void AxisControl::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    mPlayer = pMsg->mUnknown10;
+    mPlayer = pMsg->mPlayer;
     if (mPlayer->IsNull() != 0) {
         return;
     }
     NowBarMsg nowBar;
-    nowBar.mUnknown04 = mTrack;
-    nowBar.mPlayer = pMsg->mUnknown10;
+    nowBar.mTrack = mTrack;
+    nowBar.mPlayer = pMsg->mPlayer;
     nowBar.mLane = static_cast<float>(kLaneCount - mLane) * kLaneScale;
     Send(&nowBar);
 }
@@ -142,7 +142,7 @@ void AxisControl::HandleMessage(Message *pMsg) {
 
 // 0x0019fab0
 void AxisControl::OnStdMidi(StdMidiMsg *pMsg) {
-    if ((pMsg->mUnknown08 & kStatusKindMask) != kStatusNoteOn) {
+    if ((pMsg->mStatus & kStatusKindMask) != kStatusNoteOn) {
         return;
     }
     if (mSustainTick.mTick == pMsg->mTick) {

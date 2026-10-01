@@ -122,22 +122,22 @@ void MetSonyScreen::OnFadeInDone() {
 // 0x003bd908
 void MetSonyScreen::OnFadeOutDone() {
     MetScreen::CreateFrontEndScreens(MetRenderer::sInstance);
-    mFadeOutDoneTime = mUnknown10->mUnknown68;
+    mFadeOutDoneTime = mRenderer->mAnimationFrame;
 }
 
 // 0x003bd868
 void MetSonyScreen::EnterAndShow() {
     SetShowing(0);
     mHidden = 1;
-    mEnterTime = mUnknown10->mUnknown68;
+    mEnterTime = mRenderer->mAnimationFrame;
 }
 
 // 0x003ba2f0
-void MetSonyScreen::OnUnknownSlot26(float flTime) {
+void MetSonyScreen::UpdateIdle(float flTime) {
     mFade->Update(flTime);
     if ((mEnterTime != 0.0f) && ((mEnterTime + kPresentationFrames) < flTime)) {
         mEnterTime = 0.0f;
-        mFade->FadeOut(kFadeFrames, mUnknown10->mUnknown68, this, kReleaseView);
+        mFade->FadeOut(kFadeFrames, mRenderer->mAnimationFrame, this, kReleaseView);
         if (mHidden != 0) {
             mHidden = 0;
             SetShowing(1);
@@ -161,11 +161,11 @@ void MetSonyScreen::OnUnknownSlot26(float flTime) {
         return;
     }
     mFadeOutDoneTime = 0.0f;
-    mFade->FadeIn(kFadeFrames, mUnknown10->mUnknown68, this, kReleaseView);
+    mFade->FadeIn(kFadeFrames, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
 // 0x003ba4c8
-void MetSonyScreen::OnUnknownSlot36() {
+void MetSonyScreen::OnExitFinished() {
     if (g_nSonyIntroPending == 0) {
         return;
     }
@@ -175,7 +175,7 @@ void MetSonyScreen::OnUnknownSlot36() {
         g_gfxDevice.InitDisplayMode();
     }
     g_nSonyIntroPending = 0;
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
     Finish();
 }
 
@@ -187,12 +187,12 @@ void MetSonyScreen::ResolveContainerViews() {
 
 // 0x003ba620
 void MetSonyScreen::Finish() {
-    mUnknown10->RemoveScreen(this);
-    mUnknown10->ClearBackgroundScene();
+    mRenderer->RemoveScreen(this);
+    mRenderer->ClearBackgroundScene();
     SetBankLoadProgressHook(MainLoop::KeepAliveDraw);
     Application::shared()->GetSynth()->LoadBankSet4();
-    mUnknown10->OnUnknownSlot5();
+    mRenderer->Stop();
     MetFreqEndedMsg msg;
-    msg.mUnknownb8Clear = kFreqEndedPayload;
-    mUnknown10->Handle(&msg);
+    msg.mStopJukebox = kFreqEndedPayload;
+    mRenderer->Handle(&msg);
 }

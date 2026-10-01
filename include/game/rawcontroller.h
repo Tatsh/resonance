@@ -29,18 +29,18 @@ public:
      *
      * Pure in this class. GrooveWorld fills it at `0x0018ed98` and MetaGameWorld at `0x003d3288`.
      * Both implementations package the four arguments into a RawControllerMsg, whose payload is
-     * three words followed by the float in the same order, and dispatch it. The member name is a
-     * placeholder rather than a recovered verb.
+     * three words followed by the float in the same order, and dispatch it. The words are the
+     * fields of MetControllerReading in member order.
      *
      * The signature is recovered from the two implementations, which agree. Each reads a1, a2, and
      * a3 and moves f12 into a saved float register before doing anything else. Only the last
      * parameter's type is distinguished by the registers; the three words ahead of it are written
      * as int because nothing in either body narrows them further.
      *
-     * @param nUnknown1 The first word of the reading.
-     * @param nUnknown2 The second word of the reading.
-     * @param nUnknown3 The third word of the reading.
-     * @param flUnknown4 The float of the reading.
+     * @param nTag The device tag, a four-character code such as `joy `.
+     * @param nPadIndex The controller that produced the reading, from 1.
+     * @param nButton The button or axis control number.
+     * @param flValue The reading's value. A button is pressed while it is above zero.
      */
-    virtual void OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4) = 0;
+    virtual void OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue) = 0;
 };

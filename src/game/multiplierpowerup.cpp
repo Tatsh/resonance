@@ -7,8 +7,8 @@
 
 namespace {
 
-// The third word Deploy() passes to MultiplierMsg, whose purpose is unrecovered.
-constexpr int kMultiplierUnknown0c = 4;
+// The third word Deploy() passes to MultiplierMsg. LocalPlayer's handler does not read it.
+constexpr int kRequestedFactor = 4;
 
 // What Deploy() reports, whatever the player did with the message.
 constexpr int kDeployed = 1;
@@ -22,7 +22,7 @@ int MultiplierPowerup::Type() {
 
 // 0x001ca218
 int MultiplierPowerup::Deploy(int, int nBar, Player *pPlayer, int) {
-    MultiplierMsg msg(pPlayer, nBar, kMultiplierUnknown0c);
+    MultiplierMsg msg(pPlayer, nBar, kRequestedFactor);
     pPlayer->Handle(&msg);
     PlaySoundByName("SND_DEPLOY_MULTIPLIER");
     return kDeployed;

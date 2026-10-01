@@ -29,7 +29,7 @@ const char *SCAllPlayersInfoPacket::Name() {
 
 // 0x003f2278
 void SCAllPlayersInfoPacket::Print(std::ostream &stream) {
-    for (const auto &entry : mUnknown14) {
+    for (const auto &entry : mPlayers) {
         std::ostream &rest = stream << " pid:" << entry.mPid << " tracks:";
         rest << "(";
         for (int track : entry.mTracks) {
@@ -44,12 +44,12 @@ void SCAllPlayersInfoPacket::Print(std::ostream &stream) {
 void SCAllPlayersInfoPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
-    int count = static_cast<int>(mUnknown14.size());
+    int count = static_cast<int>(mPlayers.size());
     stream.Write(&count, sizeof(count));
-    for (const auto &entry : mUnknown14) {
+    for (const auto &entry : mPlayers) {
         int pid = entry.mPid;
-        int unknown04 = entry.mUnknown04;
-        OBStream &rest = stream.Write(&pid, sizeof(pid)).Write(&unknown04, sizeof(unknown04));
+        int clientId = entry.mClientId;
+        OBStream &rest = stream.Write(&pid, sizeof(pid)).Write(&clientId, sizeof(clientId));
 
         int trackCount = static_cast<int>(entry.mTracks.size());
         rest.Write(&trackCount, sizeof(trackCount));
@@ -65,10 +65,10 @@ void SCAllPlayersInfoPacket::Load(IBStream &stream) {
 
     int count;
     stream.Read(&count, sizeof(count));
-    mUnknown14.resize(count);
-    for (auto &entry : mUnknown14) {
+    mPlayers.resize(count);
+    for (auto &entry : mPlayers) {
         IBStream &rest = stream.Read(&entry.mPid, sizeof(entry.mPid))
-                             .Read(&entry.mUnknown04, sizeof(entry.mUnknown04));
+                             .Read(&entry.mClientId, sizeof(entry.mClientId));
 
         int trackCount;
         rest.Read(&trackCount, sizeof(trackCount));
@@ -80,6 +80,6 @@ void SCAllPlayersInfoPacket::Load(IBStream &stream) {
 }
 
 // 0x003f23a8
-void SCAllPlayersInfoPacket::AppendEntry(const Entry14 &entry) {
-    mUnknown14.push_back(entry);
+void SCAllPlayersInfoPacket::AppendEntry(const PlayerEntry &entry) {
+    mPlayers.push_back(entry);
 }

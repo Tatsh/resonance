@@ -294,10 +294,11 @@ public:
      * No subclass in the shipped build overrides it, so its purpose is undetermined. It fills the
      * ninth vtable slot.
      *
-     * @param nUnknown Ignored by the body. TnlCatcher::SetMultiplied() passes 0 (`0x004552ac`).
+     * @param nStage The stage index. Ignored by the body. Refresh() passes the index of each stage
+     *               in turn, and TnlCatcher::SetMultiplied() passes 0 (`0x004552ac`).
      * @ghidraAddress 0x004db958
      */
-    virtual void SyncMat(int nUnknown);
+    virtual void SyncMat(int nStage);
 
     /**
      * Set the ambient colour.

@@ -58,11 +58,11 @@ public:
      * Fill the panel from one remix record.
      *
      * Nothing happens before the views are resolved. The panel is shown first. A record made on
-     * this disc (its unknown34_ equal to GetAlbumJukeboxValue()) shows the song name from
+     * this disc (its albumNumber equal to GetAlbumJukeboxValue()) shows the song name from
      * configuration code 0x325, or the shorter code 0x327 when the name is wider than the text
      * wraps at, and starts loading the song's logo and picture. Any other record shows
      * `remix_unavail_disc` from code 0x258 instead and hides both textures. The date comes from
-     * unknown18_, and one row per appearance takes the name and the persona burn texture, with
+     * dateTime, and one row per appearance takes the name and the persona burn texture, with
      * the remaining rows hidden and emptied. No view is tested for null.
      *
      * @param pRecord The record to show.
@@ -98,7 +98,7 @@ public:
      * @param flTime The renderer time, which the body does not read.
      * @ghidraAddress 0x00345de8
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Hide the unavailable notice.
@@ -107,7 +107,7 @@ public:
      *
      * @ghidraAddress 0x00349ab8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views, the seven single views, and the four player rows.
@@ -120,16 +120,16 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    std::vector<Rnd::Text *> mUnknown8c; // The player names, `mcrl_name_0N.txt`.
-    std::vector<Rnd::Mat *> mUnknown98;  // The persona pictures, `mcrl_playerN.mat`.
-    std::vector<Rnd::Mesh *> mUnknowna4; // The player meshes, `mcrl_freq_0N.mesh`.
-    Rnd::Text *mUnknownb0;               // `mcrl_songtitle.txt`
-    Rnd::Text *mUnknownb4;               // `mcrl_dob.txt`
-    Rnd::Mat *mUnknownb8;                // `mcrl_photo.mat`, which takes the picture
-    Rnd::Mat *mUnknownbc;                // `mcrl_logo.mat`, which takes the logo
-    Rnd::Text *mUnknownc0;               // `mcrl_remixunavail.txt`
-    Rnd::Mesh *mUnknownc4;               // `mcrl_label.mesh`, shown with the picture
-    Rnd::Mesh *mUnknownc8;               // `mcrl_logo.mesh`, shown with the logo
+    std::vector<Rnd::Text *> mPlayerNames;   // The player names, `mcrl_name_0N.txt`.
+    std::vector<Rnd::Mat *> mPlayerPictures; // The persona pictures, `mcrl_playerN.mat`.
+    std::vector<Rnd::Mesh *> mPlayerMeshes;  // The player meshes, `mcrl_freq_0N.mesh`.
+    Rnd::Text *mSongTitleText;               // `mcrl_songtitle.txt`
+    Rnd::Text *mDateText;                    // `mcrl_dob.txt`
+    Rnd::Mat *mLabelMaterial;                // `mcrl_photo.mat`, the material for the picture
+    Rnd::Mat *mLogoMaterial;                 // `mcrl_logo.mat`, the material for the logo
+    Rnd::Text *mUnavailableText;             // `mcrl_remixunavail.txt`
+    Rnd::Mesh *mLabelMesh;                   // `mcrl_label.mesh`, shown with the picture
+    Rnd::Mesh *mLogoMesh;                    // `mcrl_logo.mesh`, shown with the logo
     TexturePairRecord mLogoTextures;
     TexturePairRecord mLabelTextures;
 };

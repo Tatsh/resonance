@@ -129,7 +129,7 @@ void TnlActivator::Update(float flFrame, float flScaledFrame) {
             mOwner->mTunnel->ShowTrackGhost(mTrack, mGhostView);
         }
     }
-    if (!g_nAppTunnelDisplayMode) {
+    if (!g_nAppTunnelTutorial) {
         int nDim = 0;
         if (mBlink) {
             nDim = kBlinkDimStart <= static_cast<int>(flFrame) % kBlinkPeriod;

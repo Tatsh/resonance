@@ -15,9 +15,9 @@ public:
      * Ask the catchers to play bars for the player.
      *
      * One AutoCatchMsg per bar, from nBar on, goes out through the player's MsgSource: one bar when
-     * Player::Slot19() reports 1 and four otherwise. When any catcher marked a message handled, a
-     * DeployedPowerupMsg covering the bars follows and `SND_DEPLOY_AUTOCATCHER` plays. Otherwise a
-     * PowerupFailedMsg goes out.
+     * Player::GetGameMode() reports 1 and four otherwise. When any catcher marked a message
+     * handled, a DeployedPowerupMsg covering the bars follows and `SND_DEPLOY_AUTOCATCHER` plays.
+     * Otherwise a PowerupFailedMsg goes out.
      *
      * @param nTrack The track.
      * @param nBar The first bar.

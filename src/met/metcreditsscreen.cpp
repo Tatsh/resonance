@@ -32,29 +32,29 @@ static const char *const kOptionsButtonsScreen = "MetConfigOptionsButtonsScreen"
 // 0x00211970
 MetCreditsScreen::MetCreditsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr) {
-    mUnknown60 = 0;
+      mCreditsRoll(nullptr) {
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x00211ae8
 void MetCreditsScreen::ResolveContainerViews() {
     ResolveAnimationViews();
-    mUnknown14 = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName)));
-    mUnknown14->ReleaseAnimsRefs(); // Yes, the binary does not test the view for null.
-    mUnknown48 = 0;
+    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName)));
+    mView->ReleaseAnimsRefs(); // Yes, the binary does not test the view for null.
+    mViewsUnresolved = 0;
 
-    mUnknown90 = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kAnimationName)));
-    mUnknown98 = mUnknown90->EndFrame();
-    mUnknown90->SetFrame(0.0f);
+    mAnimation = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kAnimationName)));
+    mEndFrame = mAnimation->EndFrame();
+    mAnimation->SetFrame(0.0f);
 
     Rnd::Cam *pCam = dynamic_cast<Rnd::Cam *>(Rnd::g_manager.Find(HxStr(kCameraName)));
-    mUnknown8c = new CreditsRoll(HxStr(kPicturePrefix), HxStr(kTextPrefix), pCam, kFirstCredit);
-    mUnknown8c->Build();
+    mCreditsRoll = new CreditsRoll(HxStr(kPicturePrefix), HxStr(kTextPrefix), pCam, kFirstCredit);
+    mCreditsRoll->Build();
 }
 
 // 0x00211e40
-void MetCreditsScreen::OnUnknownSlot36() {
-    mUnknown8c->HideAll();
+void MetCreditsScreen::OnExitFinished() {
+    mCreditsRoll->HideAll();
     PushNamedScreen(HxStr(kHelpScreen));
     PushNamedScreen(HxStr(kRightGizmoScreen));
     PushNamedScreen(HxStr(kOptionsButtonsScreen));
@@ -84,27 +84,27 @@ MetCreditsScreen *MetCreditsScreen::New(MetRenderer *pRenderer, int nPriority) {
 
 // 0x00214e00
 MetCreditsScreen::~MetCreditsScreen() {
-    delete mUnknown8c;
+    delete mCreditsRoll;
 }
 
 // 0x00214e70
 void MetCreditsScreen::EnterAndShow() {
-    mUnknown8c->Reset();
+    mCreditsRoll->Reset();
     SetShowing(1);
-    mUnknown08 = 0.0f;
-    mUnknown1c = 1;
-    mUnknown94 = mUnknown10->mUnknown68;
-    OnUnknownSlot33();
+    mEnterStartTime = 0.0f;
+    mAcceptsCommands = 1;
+    mStartFrame = mRenderer->mAnimationFrame;
+    OnEnterFinished();
 }
 
 // 0x00214ee0
-void MetCreditsScreen::OnUnknownSlot26(float flTime) {
-    const float flFrame = flTime - mUnknown94;
-    mUnknown90->SetFrame(flFrame);
-    if (mUnknown98 + kExitDelayFrames < flFrame) {
+void MetCreditsScreen::UpdateIdle(float flTime) {
+    const float flFrame = flTime - mStartFrame;
+    mAnimation->SetFrame(flFrame);
+    if (mEndFrame + kExitDelayFrames < flFrame) {
         BeginExit();
     } else {
-        mUnknown8c->Update(); // Yes, the binary discards this call's result.
+        mCreditsRoll->Update(); // Yes, the binary discards this call's result.
     }
 }
 

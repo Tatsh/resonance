@@ -31,37 +31,37 @@ public:
     virtual ~MetRemixSaver();
 
     /**
-     * Unrecovered. Slot 2.
+     * Continue once the save screen has finished. Slot 2.
      *
-     * The MetSoloEndRemixScreen override at `0x003998c8` tests one member and dispatches through
-     * the primary table, and the MetMultiSaveRemixScreen override at `0x002facc0` runs for several
-     * hundred instructions. Neither reads an argument register, but MetSaveRemixScreen's slots 40
-     * and 41 pass 0 and 1 in a1, so the slot takes one integer that both overrides ignore.
+     * MetSaveRemixScreen runs it with 0 when the save is abandoned or the user backs out, and with
+     * 1 when a save dialogue it does not handle itself closes. The MetSoloEndRemixScreen override
+     * at `0x003998c8` tests one member and dispatches through the primary table, and the
+     * MetMultiSaveRemixScreen override at `0x002facc0` opens the next save. Neither reads an
+     * argument register.
      *
-     * @param nUnknown Passed by the caller and read by neither override.
+     * @param bCompleted 1 after a save dialogue closed, 0 otherwise. Neither override reads it.
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot2(int nUnknown) = 0;
+    virtual void OnSaveFinished(int bCompleted) = 0;
 
     /**
-     * Unrecovered. Slot 3.
+     * Note that the user exited the save screen for the help screen. Slot 3.
      *
      * Both overrides, at `0x002fee48` and `0x00399898`, write one to the member the slot 4 override
      * clears and then dispatch through the primary table. Neither reads an argument register.
      *
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot3() = 0;
+    virtual void OnHelpRequested() = 0;
 
     /**
-     * Unrecovered. Slot 4.
+     * Push or exit the saver's screen as the save screen returns or is declined. Slot 4.
      *
-     * Both overrides, at `0x002fb248` and `0x00395918`, write the logical negation of one integer
-     * argument into a member and branch on the same argument, which is what fixes the single
-     * parameter.
+     * Both overrides, at `0x002fb248` and `0x00395918`, write the logical negation of the argument
+     * into a member and branch on the same argument.
      *
-     * @param nFlag The value the override negates into its own member.
+     * @param bShowing 1 when the save screen returns, 0 when the save is declined.
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot4(int nFlag) = 0;
+    virtual void SetOwnerScreenShowing(int bShowing) = 0;
 };

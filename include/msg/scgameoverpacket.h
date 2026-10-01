@@ -91,7 +91,7 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    int mUnknown14; // +0x14
+    int mResult; /*!< The outcome of the game. The title is inferred from the class name. +0x14 */
 };
 
 /**

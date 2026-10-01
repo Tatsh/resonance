@@ -23,7 +23,7 @@ constexpr int kWarningMessageDuration = 50;
 constexpr int kAlertMessageDuration = 50;
 
 // The argument Warn passes as the third one to FormatMessage(). The callee never reads it.
-constexpr int kFormatMessageUnknown = 1;
+constexpr int kFormatMessageWarnUnused = 1;
 
 // The third argument AlertScriptTemplate() passes to FormatMessage(). The callee never reads it.
 constexpr int kFormatMessageUnused = 0;
@@ -52,7 +52,7 @@ void Warn(const char *pszFormat, ...) {
 
     va_list args;
     va_start(args, pszFormat);
-    ShowReportedMessage(FormatMessage(HxStr(pszFormat), args, kFormatMessageUnknown),
+    ShowReportedMessage(FormatMessage(HxStr(pszFormat), args, kFormatMessageWarnUnused),
                         kWarningMessageDuration);
     va_end(args);
 }

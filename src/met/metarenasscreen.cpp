@@ -82,14 +82,14 @@ constexpr int kLastButton = 9;
 // The palette entries ResolveContainerViews() copies out of each template button.
 constexpr int kPaletteSize = 4;
 
-// GameManagerImpl::GetGameMode() and GameParams::mUnknown1c values the title reads.
+// GameManagerImpl::GetGameMode() and GameParams::mPlayMode values the title reads.
 constexpr int kSoloGameMode = 1;
 constexpr int kGamePlayMode = 1;
 
 // The game mode in which every arena is unlocked.
 constexpr int kUnlockAllGameMode = 2;
 
-// MetScreen::mUnknown18 values the departure records.
+// MetScreen::mExitChoice values the departure records.
 constexpr int kExitBack = 0;
 constexpr int kExitToArena = 2;
 
@@ -125,9 +125,9 @@ inline HxStr Concatenate(const HxStr &left, char ch) {
 // 0x001f65a0
 MetArenasScreen::MetArenasScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr), mUnknown90(nullptr) {
-    mUnknown8c = new MetButtonList();
-    mUnknown38.push_back(HxStr(kArenasObject));
+      mArenaButtons(nullptr), mScreenshots(nullptr) {
+    mArenaButtons = new MetButtonList();
+    mHelpKeys.push_back(HxStr(kArenasObject));
 }
 
 // 0x001fc690
@@ -137,8 +137,8 @@ MetArenasScreen *MetArenasScreen::New(MetRenderer *pRenderer, int nPriority) {
 
 // 0x001f70f0
 MetArenasScreen::~MetArenasScreen() {
-    delete mUnknown8c;
-    delete mUnknown90;
+    delete mArenaButtons;
+    delete mScreenshots;
 }
 
 // 0x001f7750
@@ -155,7 +155,7 @@ void MetArenasScreen::EnterAndShow() {
     }
     {
         HxStr value = QueryConfigString(kTitleQuery,
-                                        params.mUnknown1c == kGamePlayMode ? kGameKey : kRemixKey);
+                                        params.mPlayMode == kGamePlayMode ? kGameKey : kRemixKey);
         kind = value;
     }
 
@@ -164,8 +164,8 @@ void MetArenasScreen::EnterAndShow() {
     HxStr arenas = QueryConfigString(kTitleQuery, kArenasKey);
     MetScreenTitleScreen::SetTitle(modeKind + arenas);
 
-    mUnknown90->invalidate();
-    SetupArenaButtons(MetFrontEndState::shared()->mUnknown14);
+    mScreenshots->invalidate();
+    SetupArenaButtons(MetFrontEndState::shared()->mUnlockAll);
     MetHelpScreen::SelectPreset(HxStr(kStandardTitleLayout));
     MetScreen::EnterAndShow();
 }
@@ -173,9 +173,9 @@ void MetArenasScreen::EnterAndShow() {
 // 0x001f75c8
 void MetArenasScreen::UpdateScreenshot() {
     (void)GetArenaList(); // Yes, the binary discards this call's result.
-    const int nSelected = mUnknown8c->mSelected;
+    const int nSelected = mArenaButtons->mSelected;
     Color color;
-    if (nSelected < mUnknown98 || nSelected == mUnknown94) {
+    if (nSelected < mUnlockedCount || nSelected == mNoArenaIndex) {
         color.r = kScreenshotFull;
         color.g = kScreenshotFull;
         color.b = kScreenshotFull;
@@ -186,34 +186,34 @@ void MetArenasScreen::UpdateScreenshot() {
         color.b = kScreenshotDimmed;
         color.a = kScreenshotFull;
     }
-    mUnknown9c->SetEmissive(color);
+    mScreenshotMat->SetEmissive(color);
     const HxStr name((*GetArenaList())[nSelected].mName);
-    mUnknown90->Load(TexturePairRecord::ArenaPath(name));
+    mScreenshots->Load(TexturePairRecord::ArenaPath(name));
 }
 
 // 0x001f7d40
 void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
-    mUnknown8c->SetSelected(kNoSelection);
+    mArenaButtons->SetSelected(kNoSelection);
     const int nArenaCount = GetArenaList()->size();
-    mUnknowna0->ClearDraws();
-    mUnknowna0->ClearTransList();
+    mButtonView->ClearDraws();
+    mButtonView->ClearTransList();
 
     const HxStr viewName(FormatString(kButtonViewFormat, nArenaCount));
     Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(viewName));
-    mUnknowna0->AddDraw(pView, nullptr);
-    mUnknowna0->AddTrans(pView);
+    mButtonView->AddDraw(pView, nullptr);
+    mButtonView->AddTrans(pView);
 
-    const int nButtonCount = mUnknown8c->mButtons.size();
+    const int nButtonCount = mArenaButtons->mButtons.size();
     const int nUnlocked = MetFrontEndState::shared()->GetFirstPersona()->mStats.mUnlockLevel;
-    mUnknown98 = std::min(nUnlocked, nArenaCount);
+    mUnlockedCount = std::min(nUnlocked, nArenaCount);
     if (bUnlockAll || Application::shared()->GetGameMode() == kUnlockAllGameMode) {
-        mUnknown98 = nArenaCount;
+        mUnlockedCount = nArenaCount;
     }
-    mUnknown94 = GetArenaList()->size() - 1;
+    mNoArenaIndex = GetArenaList()->size() - 1;
 
     for (int i = 0; i < nButtonCount; ++i) {
         HxStr label;
-        Rnd::Button *pButton = mUnknown8c->ButtonAt(i);
+        Rnd::Button *pButton = mArenaButtons->ButtonAt(i);
         const bool bArena = i < nArenaCount;
         if (bArena) {
             const HxStr &arena = (*GetArenaList())[i].mName;
@@ -225,9 +225,9 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
         }
         pButton->mText->SetText(label);
 
-        const bool bSelectable = i < mUnknown98 || i == mUnknown94;
-        const std::vector<Rnd::Mat *> &mats = bSelectable ? mUnknowna4 : mUnknownb0;
-        const std::vector<Rnd::Font *> &fonts = bSelectable ? mUnknownbc : mUnknownc8;
+        const bool bSelectable = i < mUnlockedCount || i == mNoArenaIndex;
+        const std::vector<Rnd::Mat *> &mats = bSelectable ? mUnlockedMats : mLockedMats;
+        const std::vector<Rnd::Font *> &fonts = bSelectable ? mUnlockedFonts : mLockedFonts;
         for (unsigned j = 0; j < mats.size(); ++j) {
             pButton->SetMat(j, mats[j]);
             pButton->SetFont(j, fonts[j]);
@@ -235,7 +235,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
         pButton->SetState(bArena ? kButtonStateNormal : kButtonStateDisabled);
     }
 
-    Rnd::Button *pNone = mUnknown8c->ButtonAt(mUnknown94);
+    Rnd::Button *pNone = mArenaButtons->ButtonAt(mNoArenaIndex);
     pNone->SetState(kButtonStateNormal);
     {
         HxStr text = QueryConfigString(kArenaNoneQuery, kArenaNoneKey);
@@ -243,9 +243,9 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     }
 
     if (bUnlockAll || Application::shared()->GetGameMode() == kUnlockAllGameMode) {
-        mUnknown8c->SetSelected(0);
+        mArenaButtons->SetSelected(0);
     } else {
-        mUnknown8c->SetSelected(mUnknown98 - 1);
+        mArenaButtons->SetSelected(mUnlockedCount - 1);
     }
     UpdateScreenshot();
 
@@ -255,33 +255,33 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
 
 // 0x001f7310
 void MetArenasScreen::HandleCommand(const MetScreenCommand *pCommand) {
-    const int nSelected = mUnknown8c->mSelected;
+    const int nSelected = mArenaButtons->mSelected;
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
+        mArenaButtons->SelectPrevious();
         UpdateScreenshot();
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
+        mArenaButtons->SelectNext();
         UpdateScreenshot();
         break;
 
     case kMetScreenCommandSelect:
-        if (!(nSelected < mUnknown98) && nSelected != mUnknown94) {
+        if (!(nSelected < mUnlockedCount) && nSelected != mNoArenaIndex) {
             return;
         }
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         ActivateNamedPanel(HxStr(kNoName));
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mUnknown8c->mUnknown00,
+                            mArenaButtons->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
         break;
@@ -293,7 +293,7 @@ void MetArenasScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x001fc718
 void MetArenasScreen::PlaySlideSound(int nSelector) {
-    if (mUnknown8c->mSelected < mUnknown98 || mUnknown8c->mSelected == mUnknown94) {
+    if (mArenaButtons->mSelected < mUnlockedCount || mArenaButtons->mSelected == mNoArenaIndex) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
@@ -307,43 +307,43 @@ void MetArenasScreen::PlayCycleRightSound(int) {
 }
 
 // 0x001f8af0
-void MetArenasScreen::OnUnknownSlot26(float) {
-    mUnknown90->Advance(); // Yes, the binary discards whether the pair advanced.
+void MetArenasScreen::UpdateIdle(float) {
+    mScreenshots->Advance(); // Yes, the binary discards whether the pair advanced.
     Rnd::Mesh *pPanel = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kArenaPanelMesh)));
     pPanel->SetShowing(kHidden);
-    if (mUnknown90->Current() == nullptr) {
+    if (mScreenshots->Current() == nullptr) {
         return;
     }
     pPanel->SetShowing(kShown);
-    mUnknown9c->mStages[0].SetTex(mUnknown90->Current());
+    mScreenshotMat->mStages[0].SetTex(mScreenshots->Current());
 }
 
 // 0x001f8378
-void MetArenasScreen::OnUnknownSlot30(Rnd::Button *) {
-    const int nSelected = mUnknown8c->mSelected;
+void MetArenasScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    const int nSelected = mArenaButtons->mSelected;
     (void)GetArenaList(); // Yes, the binary discards this call's result.
-    if (!(nSelected < mUnknown98) && nSelected != mUnknown94) {
+    if (!(nSelected < mUnlockedCount) && nSelected != mNoArenaIndex) {
         ActivateNamedPanel(HxStr(kThisScreen));
         return;
     }
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     params.mArenaName = (*GetArenaList())[nSelected].mName;
     Application::shared()->GetGameManager()->SetParams(params);
-    mUnknown18 = kExitToArena;
+    mExitChoice = kExitToArena;
     ExitScreenByName(HxStr(kHelpScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     BeginExit();
 }
 
 // 0x001fc758
-void MetArenasScreen::OnUnknownSlot33() {
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+void MetArenasScreen::OnEnterFinished() {
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
 // 0x001f8658
-void MetArenasScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
-        if (MetFrontEndState::shared()->mUnknown24 == kRemixLoadScreen) {
+void MetArenasScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
+        if (MetFrontEndState::shared()->mReturnScreen == kRemixLoadScreen) {
             PushNamedScreen(HxStr(kTitleScreen));
             PushNamedScreen(HxStr(kRemixDataScreen));
             PushNamedScreen(HxStr(kHelpScreen));
@@ -354,39 +354,39 @@ void MetArenasScreen::OnUnknownSlot36() {
             ActivateNamedPanel(HxStr(kSoloStagesScreen));
         }
     } else {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kThisScreen);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kThisScreen);
         PushNamedScreen(HxStr(kLoadGameScreen));
         ActivateNamedPanel(HxStr(kLoadGameScreen));
     }
-    mUnknown8c->SetSelected(kNoSelection);
+    mArenaButtons->SetSelected(kNoSelection);
 }
 
 // 0x001f6a08
 void MetArenasScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    // Yes, the binary empties mUnknownbc twice and never empties mUnknowna4.
-    mUnknownbc.erase(mUnknownbc.begin(), mUnknownbc.end());
-    mUnknownbc.erase(mUnknownbc.begin(), mUnknownbc.end());
-    mUnknownb0.erase(mUnknownb0.begin(), mUnknownb0.end());
-    mUnknownc8.erase(mUnknownc8.begin(), mUnknownc8.end());
+    // Yes, the binary empties mUnlockedFonts twice and never empties mUnlockedMats.
+    mUnlockedFonts.erase(mUnlockedFonts.begin(), mUnlockedFonts.end());
+    mUnlockedFonts.erase(mUnlockedFonts.begin(), mUnlockedFonts.end());
+    mLockedMats.erase(mLockedMats.begin(), mLockedMats.end());
+    mLockedFonts.erase(mLockedFonts.begin(), mLockedFonts.end());
 
     Rnd::Button *pUnlocked =
         dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kUnlockedButton)));
     for (int i = 0; i < kPaletteSize; ++i) {
-        mUnknowna4.push_back(pUnlocked->mMats[i]);
-        mUnknownbc.push_back(pUnlocked->mFonts[i]);
+        mUnlockedMats.push_back(pUnlocked->mMats[i]);
+        mUnlockedFonts.push_back(pUnlocked->mFonts[i]);
     }
     Rnd::Button *pLocked = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kLockedButton)));
     for (int i = 0; i < kPaletteSize; ++i) {
-        mUnknownb0.push_back(pLocked->mMats[i]);
-        mUnknownc8.push_back(pLocked->mFonts[i]);
+        mLockedMats.push_back(pLocked->mMats[i]);
+        mLockedFonts.push_back(pLocked->mFonts[i]);
     }
 
     for (int i = kFirstButton; i <= kLastButton; ++i) {
-        mUnknown8c->Add(HxStr(FormatString(kButtonFormat, i)), HxStr(kNoName));
+        mArenaButtons->Add(HxStr(FormatString(kButtonFormat, i)), HxStr(kNoName));
     }
 
-    mUnknown9c = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kScreenshotMaterial)));
-    mUnknowna0 = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kButtonView)));
-    mUnknown90 = new TexturePairRecord(HxStr(kFirstScreenshot), HxStr(kSecondScreenshot));
+    mScreenshotMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kScreenshotMaterial)));
+    mButtonView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kButtonView)));
+    mScreenshots = new TexturePairRecord(HxStr(kFirstScreenshot), HxStr(kSecondScreenshot));
 }

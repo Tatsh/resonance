@@ -24,9 +24,9 @@
  * OnGlobalSettingsLoaded() starts StartLoadPersonas(), OnPersonasLoaded() starts
  * StartSaveSpaceCheck(), and OnMinimumSaveSpace() either warns about the free space or shows the
  * autosave notice. Each dialogue returns through OnMsgScreenDismissed(). That routine retries
- * through StartDetect() or ends the probe through OnDetectFinished(). MetFrontEndState::mUnknown0c
- * records whether the probe settled on a card, 1 when it did and 0 when the player continued
- * without one.
+ * through StartDetect() or ends the probe through OnDetectFinished().
+ * MetFrontEndState::mUsingMemcard records whether the probe settled on a card, 1 when it did and 0
+ * when the player continued without one.
  *
  * The translation unit spans `0x002d89c8` to `0x002df058`. Besides the members below, it has the
  * type function at `0x002dea28`, per-unit copies of MsgSink and MemcardUser routines, and template
@@ -87,7 +87,7 @@ public:
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x002dec10
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Load the global settings from the card in port 1, or offer to format it.
@@ -157,8 +157,8 @@ public:
     /**
      * Show the loading notice and load the personas from the card in port 1.
      *
-     * Slot 40. Sets mUnknown98 and empties MetPersonaData::loadList() before the load fills it.
-     * The title is inferred.
+     * Slot 40. Sets mPersonaLoadRequested and empties MetPersonaData::loadList() before the load
+     * fills it. The title is inferred.
      *
      * @ghidraAddress 0x002db328
      */
@@ -195,12 +195,14 @@ public:
     virtual void StartSaveSpaceCheck();
 
 private:
-    int mUnknown90; // +0x90
-    int mUnknown94; // +0x94
+    // Zeroed by the constructor and never read. +0x90 and +0x94
+    int mUnused1;
+    int mUnused2;
 
 protected:
-    // Set by StartLoadPersonas() and by the MetLocPickCharScreen override at 0x002ba148. +0x98
-    int mUnknown98;
+    // Set by StartLoadPersonas() and by the MetLocPickCharScreen override at 0x002ba148, and never
+    // read. +0x98
+    int mPersonaLoadRequested;
 
 private:
     // The renderer time the autosave notice went up, or 0 while it is not showing.

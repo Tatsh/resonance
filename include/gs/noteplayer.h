@@ -74,7 +74,7 @@ public:
      * @return Zero. A note never displaces its sibling players.
      * @ghidraAddress 0x001b41c0
      */
-    virtual int Slot4();
+    virtual int DisplacesSiblings();
 
     /**
      * Send the note-off at a song position and report the player finished to mParent.

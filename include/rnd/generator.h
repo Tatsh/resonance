@@ -106,7 +106,8 @@ public:
     struct Instance {
         /** Frame this instance was spawned on. +0x00 */
         float mFrameOrg;
-        unsigned char mUnknown04[0x0c]; // +0x04 Unrecovered. The instance dump reads none of it.
+        // +0x04 Alignment padding before mXfmMod. The instance dump does not read it.
+        unsigned char mReserved04[0x0c];
         /** Rotation and translation the instance is drawn with. +0x10 */
         Transform mXfmMod;
         // +0x50 The uniform scale SetFrameSelf() draws for this instance, written into all three

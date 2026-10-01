@@ -3,7 +3,7 @@
 #include <iostream>
 
 // 0x003e1a90
-GameConnectionLostMsg::GameConnectionLostMsg(const HxStr &unknown04) : mUnknown04(unknown04) {
+GameConnectionLostMsg::GameConnectionLostMsg(const HxStr &reason) : mReason(reason) {
 }
 
 // 0x003d7a98
@@ -28,5 +28,5 @@ const char *GameConnectionLostMsg::Name() {
 
 // 0x003e4070
 void GameConnectionLostMsg::Print(std::ostream &stream) {
-    stream << mUnknown04;
+    stream << mReason;
 }

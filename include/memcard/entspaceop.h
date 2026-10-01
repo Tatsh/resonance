@@ -47,13 +47,13 @@ public:
     HxStr mPath;
 
     /**
-     * Unrecovered.
+     * Reserved.
      *
      * The operation is 0x28 bytes where its recovered members end at 0x24, and the word is
      * neither written by the constructor nor read anywhere in the image. `Memcard::EntSpace()` is
-     * itself never called. Nothing exercises the class.
+     * itself never called. The class is never exercised.
      *
      * +0x24
      */
-    int mUnknown24;
+    int mReserved24;
 };

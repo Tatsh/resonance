@@ -14,7 +14,7 @@
  * 4 address the shared pure-virtual stub at `0x005381a8`, and slot 5 has a body of its own, so the
  * class introduces two virtuals and is abstract. The MsgSource table at `0x007dddf0` adjusts
  * `this` by `-4` and retains AddSink() and RemoveSink(). GsPeriodical drives both new slots: it
- * reads slot 5 once as its origin and calls slot 4 once per period with the period index.
+ * reads GetPeriodOrigin() once and calls OnPeriod() once per period with the period index.
  *
  * The destructor at `0x0019d2a0` is implicitly declared. It restores the base tables, frees
  * MsgSource's vector, and releases the object under MsgSink's tag, which is what the compiler
@@ -24,21 +24,21 @@
 class PhraseMaker : public MsgSink, public MsgSource {
 public:
     /**
-     * Act on a period that has elapsed. Slot 4, pure. The verb is unrecovered.
+     * Act on the start of a period. Slot 4, pure.
      *
      * AxePhraseMaker's override at `0x0019d990` is the one recovered body.
      *
-     * @param nPeriod The index of the period, counted from the origin slot 5 reports.
+     * @param nPeriod The index of the period, counted from the origin GetPeriodOrigin() reports.
      */
-    virtual void Slot4(int nPeriod) = 0;
+    virtual void OnPeriod(int nPeriod) = 0;
 
     /**
-     * Report the song position periods are counted from. Slot 5. The verb is unrecovered.
+     * Report the song position periods are counted from. Slot 5.
      *
      * The body here discards the finiteness test on zero and returns zero.
      *
      * @return The origin, in MIDI ticks.
      * @ghidraAddress 0x0019d370
      */
-    virtual int Slot5();
+    virtual int GetPeriodOrigin();
 };

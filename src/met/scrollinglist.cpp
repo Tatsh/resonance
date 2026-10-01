@@ -40,7 +40,7 @@ ScrollingList::ScrollingList(ListDataProvider *pProvider,
                              Rnd::Mesh *pUpArrow,
                              Rnd::Mesh *pDownArrow,
                              int nContext)
-    : mProvider(pProvider), mUnknown04(0), mRowCount(nRowCount), mItemCount(0), mCursorRow(0),
+    : mProvider(pProvider), mReserved(0), mRowCount(nRowCount), mItemCount(0), mCursorRow(0),
       mSelected(0), mRowPitch(nRowPitch), mTemplateDrawCount(0), mTemplate(pTemplate),
       mHighlight(pHighlight), mUpArrow(pUpArrow), mDownArrow(pDownArrow), mShowing(1),
       mContext(nContext) {

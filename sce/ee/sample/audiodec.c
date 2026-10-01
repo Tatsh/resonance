@@ -13,7 +13,7 @@
 enum {
     kPresetSize = 0x800,
     kFullLevel = 0x3fff,
-    kLoopFull = 0x7fff,
+    kFullInputVolume = 0x7fff,
     kBlockStep = 0x400,
     kPositionMask = 0xffffff,
 };
@@ -126,10 +126,10 @@ static void setupIopVoices(int nLevel) {
 }
 
 // 0x00567f48
-static void setIopLoop(int nValue) {
-    // Program the loop points through the sound driver.
-    sceSdRemote(1, 0x8010, 0xf81, nValue);
-    sceSdRemote(1, 0x8010, 0x1081, nValue);
+static void setIopInputVolume(int nVolume) {
+    // Set the left and right sound data input volume of the second core through the sound driver.
+    sceSdRemote(1, 0x8010, 0xf81, nVolume);
+    sceSdRemote(1, 0x8010, 0x1081, nVolume);
 }
 
 // 0x00567670
@@ -154,8 +154,8 @@ int audioDecSendToIOP(AudioDec *pAudioDec) {
     int writePos;
 
     if (pAudioDec->state == 1) {
-        span[1] = pAudioDec->iopBufferSize - pAudioDec->field54;
-        span[0] = pAudioDec->iopBuffer + pAudioDec->field54 % pAudioDec->iopBufferSize;
+        span[1] = pAudioDec->iopBufferSize - pAudioDec->totalBytesSent;
+        span[0] = pAudioDec->iopBuffer + pAudioDec->totalBytesSent % pAudioDec->iopBufferSize;
         span[2] = 0;
         span[3] = 0;
     } else if (pAudioDec->state < 2) {
@@ -174,8 +174,8 @@ int audioDecSendToIOP(AudioDec *pAudioDec) {
     } else if (pAudioDec->state == 3) {
         return 0;
     }
-    pending = pAudioDec->field38;
-    total = pAudioDec->field34 - pending + pAudioDec->bufferSize;
+    pending = pAudioDec->count;
+    total = pAudioDec->put - pending + pAudioDec->bufferSize;
     aligned = pending / kBlockStep * kBlockStep;
     ready = span[1];
     extra = span[3];
@@ -198,8 +198,8 @@ int audioDecSendToIOP(AudioDec *pAudioDec) {
                                        remaining);
     }
     writePos += transferred;
-    pAudioDec->field38 -= transferred;
-    pAudioDec->field54 += transferred;
+    pAudioDec->count -= transferred;
+    pAudioDec->totalBytesSent += transferred;
     pAudioDec->iopOffset = writePos % pAudioDec->iopBufferSize;
     return transferred;
 }
@@ -212,13 +212,13 @@ int audioDecCreate(AudioDec *pAudioDec,
     // Clear the decoder, reserve both processor side regions, and upload the preset block. A
     // failed reservation reports through the console and the routine returns zero.
     pAudioDec->state = 0;
-    pAudioDec->field2c = 0;
-    pAudioDec->field34 = 0;
-    pAudioDec->field38 = 0;
-    pAudioDec->field40 = 0;
-    pAudioDec->field54 = 0;
+    pAudioDec->headerCount = 0;
+    pAudioDec->put = 0;
+    pAudioDec->count = 0;
+    pAudioDec->totalBytes = 0;
+    pAudioDec->totalBytesSent = 0;
     pAudioDec->iopOffset = 0;
-    pAudioDec->field50 = 0;
+    pAudioDec->iopPauseOffset = 0;
     pAudioDec->buffer = pBuffer;
     pAudioDec->bufferSize = nBufferSize;
     pAudioDec->iopBufferSize = nIopBufferSize;
@@ -250,22 +250,22 @@ int audioDecDelete(AudioDec *pAudioDec) {
 // 0x00567a50
 int audioDecIsPreset(AudioDec *pAudioDec) {
     // Report whether the handed count has reached the processor side buffer size.
-    return pAudioDec->field54 >= pAudioDec->iopBufferSize;
+    return pAudioDec->totalBytesSent >= pAudioDec->iopBufferSize;
 }
 
 // 0x00567a68
 void audioDecStart(AudioDec *pAudioDec) {
-    // Program the loop points, hand the buffer range to the driver, and enter streaming.
+    // Raise the input volume, hand the buffer range to the driver, and enter streaming.
     const int aligned = pAudioDec->iopBufferSize / kBlockStep * kBlockStep;
 
-    setIopLoop(kLoopFull);
+    setIopInputVolume(kFullInputVolume);
     sceSdRemote(1,
                 0x80e0,
                 1,
                 0x13,
                 pAudioDec->iopBuffer,
                 aligned,
-                pAudioDec->iopBuffer + pAudioDec->field50);
+                pAudioDec->iopBuffer + pAudioDec->iopPauseOffset);
     pAudioDec->state = 2;
 }
 
@@ -275,16 +275,16 @@ void audioDecReset(AudioDec *pAudioDec) {
     int position;
 
     pAudioDec->state = 3;
-    setIopLoop(0);
+    setIopInputVolume(0);
     sceSdRemote(1, 0x80e0, 1, 2, 0, 0);
     position = sceSdRemote(1, 0x80d0, 1, 0, pAudioDec->iopExtra, 0x4000, 0x800);
-    pAudioDec->field50 = (position & kPositionMask) - pAudioDec->iopBuffer;
-    pAudioDec->field50 = 0;
+    pAudioDec->iopPauseOffset = (position & kPositionMask) - pAudioDec->iopBuffer;
+    pAudioDec->iopPauseOffset = 0;
     pAudioDec->state = 0;
-    pAudioDec->field2c = 0;
-    pAudioDec->field34 = 0;
-    pAudioDec->field38 = 0;
-    pAudioDec->field40 = 0;
-    pAudioDec->field54 = 0;
+    pAudioDec->headerCount = 0;
+    pAudioDec->put = 0;
+    pAudioDec->count = 0;
+    pAudioDec->totalBytes = 0;
+    pAudioDec->totalBytesSent = 0;
     pAudioDec->iopOffset = 0;
 }

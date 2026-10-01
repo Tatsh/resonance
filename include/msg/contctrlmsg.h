@@ -65,9 +65,11 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    Mid::MBT mUnknown04; // +0x04
-    int mUnknown08;      // +0x08
-    int mUnknown0c;      // +0x0c
+    // The controller and value titles are inferred from the class name, a MIDI continuous
+    // controller change, whose value is the word Print() writes.
+    Mid::MBT mPosition; // +0x04
+    int mController;    // +0x08
+    int mValue;         // +0x0c
 };
 
 /**

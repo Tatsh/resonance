@@ -51,7 +51,7 @@ static const char *const kHelpText = "met_jukebox_edit_screen_ticker_tape";
 static const char *const kNoText = "";
 static const char *const kTempoSuffix = " bpm";
 
-// The configuration codes the detail texts are read under, keyed by the record's first string.
+// The configuration codes the detail texts are read under, keyed by the record's level name.
 constexpr int kDetailConfigCode1 = 0x321;
 constexpr int kDetailConfigCode2 = 0x322;
 constexpr int kDetailConfigCode3 = 0x325;
@@ -84,7 +84,7 @@ MetJukeboxEditPlaylistScreen::MetJukeboxEditPlaylistScreen(MetRenderer *pRendere
                            HxStr(kScreenName),
                            HxStr(kContainerDirectory),
                            HxStr(kContainerFile)) {
-    mUnknownc8 = 0;
+    mCatalogueKey = 0;
 }
 
 // 0x0022ae78
@@ -95,32 +95,32 @@ void MetJukeboxEditPlaylistScreen::ResolveContainerViews() {
     Rnd::Mesh *pHighlight = dynamic_cast<Rnd::Mesh *>(Find(kHighlight));
     Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Find(kUpArrow));
     Rnd::Mesh *pDownArrow = dynamic_cast<Rnd::Mesh *>(Find(kDownArrow));
-    mUnknown9c = new ScrollingList(this,
-                                   mUnknown90,
-                                   mUnknown94,
-                                   pPlayListRow,
-                                   pHighlight,
-                                   pUpArrow,
-                                   pDownArrow,
-                                   kPlayListContext);
-    mUnknown98 = nullptr;
+    mPlayListList = new ScrollingList(this,
+                                      mListRowPitch,
+                                      mListRowCount,
+                                      pPlayListRow,
+                                      pHighlight,
+                                      pUpArrow,
+                                      pDownArrow,
+                                      kPlayListContext);
+    mCatalogueList = nullptr;
 
-    mUnknowna4 = dynamic_cast<Rnd::Text *>(Find(kDetailText1));
-    mUnknowna8 = dynamic_cast<Rnd::Text *>(Find(kDetailText2));
-    mUnknownac = dynamic_cast<Rnd::Text *>(Find(kDetailText3));
-    mUnknownb0 = dynamic_cast<Rnd::Text *>(Find(kDetailText4));
-    mUnknownb4 = dynamic_cast<Rnd::Text *>(Find(kDetailText5));
-    mUnknownbc = dynamic_cast<Rnd::Mat *>(Find(kPictureMaterial));
-    mUnknownc0 = dynamic_cast<Rnd::Mat *>(Find(kLogoMaterial));
+    mGenreText = dynamic_cast<Rnd::Text *>(Find(kDetailText1));
+    mTempoText = dynamic_cast<Rnd::Text *>(Find(kDetailText2));
+    mSongTitleText = dynamic_cast<Rnd::Text *>(Find(kDetailText3));
+    mDateText = dynamic_cast<Rnd::Text *>(Find(kDetailText4));
+    mRemixTitleText = dynamic_cast<Rnd::Text *>(Find(kDetailText5));
+    mPictureMaterial = dynamic_cast<Rnd::Mat *>(Find(kPictureMaterial));
+    mLogoMaterial = dynamic_cast<Rnd::Mat *>(Find(kLogoMaterial));
 
-    mUnknowncc.resize(kAppearanceTextCount);
+    mAppearanceTexts.resize(kAppearanceTextCount);
     // The binary expands this loop into one call per text.
     for (int i = 0; i < kAppearanceTextCount; ++i) {
-        mUnknowncc[i] = dynamic_cast<Rnd::Text *>(Find(kAppearanceTexts[i]));
+        mAppearanceTexts[i] = dynamic_cast<Rnd::Text *>(Find(kAppearanceTexts[i]));
     }
 
-    mUnknown140 = dynamic_cast<Rnd::Mesh *>(Find(kPictureMesh));
-    mUnknown144 = dynamic_cast<Rnd::Mesh *>(Find(kLogoMesh));
+    mPictureMesh = dynamic_cast<Rnd::Mesh *>(Find(kPictureMesh));
+    mLogoMesh = dynamic_cast<Rnd::Mesh *>(Find(kLogoMesh));
 }
 
 // 0x0022ba08
@@ -130,7 +130,7 @@ int MetJukeboxEditPlaylistScreen::ProvideText(int nItem,
                                               int nContext) {
     if (nContext == kPlayListContext) {
         // Yes, the binary copies the whole entry vector to read one entry.
-        std::vector<JukeboxPlayListEntry *> entries(mUnknownc4->entries);
+        std::vector<JukeboxPlayListEntry *> entries(mPlayList->entries);
         if (static_cast<unsigned>(nItem) < entries.size()) {
             pText->SetText(entries[nItem]->name);
         } else {
@@ -144,58 +144,58 @@ int MetJukeboxEditPlaylistScreen::ProvideText(int nItem,
 void MetJukeboxEditPlaylistScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown9c->scrollUp();
+        mPlayListList->scrollUp();
         break;
 
     case kMetScreenCommandNext:
-        mUnknown9c->scrollDown();
+        mPlayListList->scrollDown();
         break;
 
     case kMetScreenCommandSelect: {
-        std::vector<JukeboxPlayListEntry *> &entries = mUnknownc4->entries;
+        std::vector<JukeboxPlayListEntry *> &entries = mPlayList->entries;
         if (entries.size() == 0) {
             return;
         }
-        const unsigned nSelected = mUnknown9c->getSelected();
-        mUnknownc4->RemoveEntry(nSelected);
+        const unsigned nSelected = mPlayListList->getSelected();
+        mPlayList->RemoveEntry(nSelected);
         const unsigned nCount = entries.size();
-        mUnknown9c->setItemCount(mUnknownc4->entries.size());
-        mUnknown9c->setSelected(nSelected < nCount ? nSelected : nCount - 1);
-        mUnknown9c->refresh();
+        mPlayListList->setItemCount(mPlayList->entries.size());
+        mPlayListList->setSelected(nSelected < nCount ? nSelected : nCount - 1);
+        mPlayListList->refresh();
         break;
     }
 
     case kCommandClearPlayList:
         // Yes, the binary empties the vector without releasing the entries.
-        mUnknownc4->entries.erase(mUnknownc4->entries.begin(), mUnknownc4->entries.end());
-        mUnknown9c->setItemCount(mUnknownc4->entries.size());
-        mUnknown9c->setSelected(kFirstRow);
-        mUnknown9c->refresh();
+        mPlayList->entries.erase(mPlayList->entries.begin(), mPlayList->entries.end());
+        mPlayListList->setItemCount(mPlayList->entries.size());
+        mPlayListList->setSelected(kFirstRow);
+        mPlayListList->refresh();
         break;
 
     case kCommandMoveUp: {
-        if (mUnknownc4->entries.size() == 0) {
+        if (mPlayList->entries.size() == 0) {
             return;
         }
-        const int nSelected = mUnknown9c->getSelected();
+        const int nSelected = mPlayListList->getSelected();
         if (nSelected == kFirstRow) {
             return;
         }
-        mUnknownc4->SwapEntries(nSelected, nSelected - 1);
-        mUnknown9c->scrollUp();
-        mUnknown9c->refresh();
+        mPlayList->SwapEntries(nSelected, nSelected - 1);
+        mPlayListList->scrollUp();
+        mPlayListList->refresh();
         break;
     }
 
     case kCommandMoveDown: {
-        const int nSelected = mUnknown9c->getSelected();
-        const int nCount = mUnknownc4->entries.size();
+        const int nSelected = mPlayListList->getSelected();
+        const int nCount = mPlayList->entries.size();
         if (nCount == 0 || nSelected == nCount - 1) {
             return;
         }
-        mUnknownc4->SwapEntries(nSelected, nSelected + 1);
-        mUnknown9c->scrollDown();
-        mUnknown9c->refresh();
+        mPlayList->SwapEntries(nSelected, nSelected + 1);
+        mPlayListList->scrollDown();
+        mPlayListList->refresh();
         break;
     }
 
@@ -208,58 +208,57 @@ void MetJukeboxEditPlaylistScreen::HandleCommand(const MetScreenCommand *pComman
 
 // 0x0022bfd8
 void MetJukeboxEditPlaylistScreen::ShowRemixDetails() {
-    mUnknowna4->SetText(HxStr(kNoText));
-    mUnknowna8->SetText(HxStr(kNoText));
-    mUnknownac->SetText(HxStr(kNoText));
-    mUnknownb0->SetText(HxStr(kNoText));
-    mUnknownb4->SetText(HxStr(kNoText));
+    mGenreText->SetText(HxStr(kNoText));
+    mTempoText->SetText(HxStr(kNoText));
+    mSongTitleText->SetText(HxStr(kNoText));
+    mDateText->SetText(HxStr(kNoText));
+    mRemixTitleText->SetText(HxStr(kNoText));
     for (int i = 0; i < kAppearanceTextCount; ++i) {
-        mUnknowncc[i]->SetText(HxStr(kNoText));
+        mAppearanceTexts[i]->SetText(HxStr(kNoText));
     }
 
-    mUnknown14c = 0;
-    if (mUnknownc4 == nullptr || mUnknownc4->entries.size() == 0) {
+    mPicturesPending = 0;
+    if (mPlayList == nullptr || mPlayList->entries.size() == 0) {
         return;
     }
-    const int nSelected = mUnknown9c->getSelected();
+    const int nSelected = mPlayListList->getSelected();
     // Yes, the binary tests the playlist for emptiness a second time.
-    if (mUnknownc4->entries.empty()) {
+    if (mPlayList->entries.empty()) {
         return;
     }
-    JukeboxPlayListEntry *pEntry = mUnknownc4->entries[nSelected];
+    JukeboxPlayListEntry *pEntry = mPlayList->entries[nSelected];
     MetRemixRecord *pRecord = MetRemixManager::shared()->LookupRemix(pEntry->name);
 
-    mUnknowne0.Load(TexturePairRecord::LogoPath(pRecord->unknown00_));
-    mUnknown110.Load(TexturePairRecord::PicturePath(pRecord->unknown00_));
-    HxStr first = QueryConfigString(kDetailConfigCode1, TextOrEmpty(pRecord->unknown00_));
-    HxStr second = QueryConfigString(kDetailConfigCode2, TextOrEmpty(pRecord->unknown00_));
-    mUnknowna4->SetText(HxStr(TextOrEmpty(first)));
+    mLogoTextures.Load(TexturePairRecord::LogoPath(pRecord->levelName));
+    mPictureTextures.Load(TexturePairRecord::PicturePath(pRecord->levelName));
+    HxStr first = QueryConfigString(kDetailConfigCode1, TextOrEmpty(pRecord->levelName));
+    HxStr second = QueryConfigString(kDetailConfigCode2, TextOrEmpty(pRecord->levelName));
+    mGenreText->SetText(HxStr(TextOrEmpty(first)));
     second += HxStr(kTempoSuffix);
-    mUnknowna8->SetText(HxStr(TextOrEmpty(second)));
+    mTempoText->SetText(HxStr(TextOrEmpty(second)));
 
-    mUnknownb4->SetText(pRecord->name);
+    mRemixTitleText->SetText(pRecord->name);
     const int nAppearances = pRecord->appearances.size();
     for (int i = 0; i < nAppearances; ++i) {
-        mUnknowncc[i]->SetShowing(1);
-        mUnknowncc[i]->SetText(pRecord->appearances[i].mUnknown00);
+        mAppearanceTexts[i]->SetShowing(1);
+        mAppearanceTexts[i]->SetText(pRecord->appearances[i].mUserName);
     }
 
-    HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(pRecord->unknown00_));
-    const float flWrapWidth = mUnknownac->mWrapWidth;
-    if (flWrapWidth < mUnknownac->MeasureText(TextOrEmpty(third), third.mLen)) {
-        HxStr shorter =
-            QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(pRecord->unknown00_));
+    HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(pRecord->levelName));
+    const float flWrapWidth = mSongTitleText->mWrapWidth;
+    if (flWrapWidth < mSongTitleText->MeasureText(TextOrEmpty(third), third.mLen)) {
+        HxStr shorter = QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(pRecord->levelName));
         third = shorter;
     }
-    mUnknownac->SetText(third);
-    mUnknownb0->SetText(pRecord->unknown18_);
-    mUnknown14c = 1;
+    mSongTitleText->SetText(third);
+    mDateText->SetText(pRecord->dateTime);
+    mPicturesPending = 1;
 }
 
 // 0x0022c7f0
 void MetJukeboxEditPlaylistScreen::UpdateHelpText() {
     MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
-    MetHelpScreen::SetText(HxStr(kHelpText), mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(HxStr(kHelpText), mRenderer->mAnimationFrame);
 }
 
 // 0x00231228
@@ -268,7 +267,7 @@ MetJukeboxEditPlaylistScreen::~MetJukeboxEditPlaylistScreen() {
 
 // 0x002312e8
 int MetJukeboxEditPlaylistScreen::GetItemCount() {
-    return mUnknownc4->entries.size();
+    return mPlayList->entries.size();
 }
 
 // 0x00231300
@@ -278,13 +277,13 @@ MetJukeboxEditPlaylistScreen *MetJukeboxEditPlaylistScreen::New(MetRenderer *pRe
 }
 
 // 0x00231388
-void MetJukeboxEditPlaylistScreen::OnUnknownSlot33() {
-    mUnknowna0 = nullptr;
-    mUnknown9c->setItemCount(mUnknownc4->entries.size());
-    mUnknown9c->refresh();
+void MetJukeboxEditPlaylistScreen::OnEnterFinished() {
+    mCatalogue = nullptr;
+    mPlayListList->setItemCount(mPlayList->entries.size());
+    mPlayListList->refresh();
 }
 
 // 0x002313d0
-void MetJukeboxEditPlaylistScreen::OnUnknownSlot7() {
-    MetJukeboxBaseScreen::OnUnknownSlot7();
+void MetJukeboxEditPlaylistScreen::OnPanelActivated() {
+    MetJukeboxBaseScreen::OnPanelActivated();
 }

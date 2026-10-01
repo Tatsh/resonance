@@ -14,14 +14,14 @@ enum {
     kSdrRpcServer = 0x80000701,
     // The bind retry loop spins this many iterations before checking readiness.
     kSdrBindDelay = 10000,
-    // The selector for the first voice path uses this value.
-    kSdrCommand8160 = 0x8160,
-    // The selector for the second voice path uses this value.
-    kSdrCommand8170 = 0x8170,
-    // The selector for the block write path uses this value.
-    kSdrCommand8130 = 0x8130,
-    // The selector for the block read path uses this value.
-    kSdrCommand8140 = 0x8140,
+    // The selector that installs a transfer-completion handler for one DMA channel.
+    kSdrCommandSetTransIntrHandler = 0x8160,
+    // The selector that installs the SPU2 interrupt handler.
+    kSdrCommandSetSpu2IntrHandler = 0x8170,
+    // The selector that sends a core's effect attributes from a caller buffer.
+    kSdrCommandSetEffectAttr = 0x8130,
+    // The selector that reads a core's effect attributes into a caller buffer.
+    kSdrCommandGetEffectAttr = 0x8140,
     // The remote call sends this many bytes for the three main paths.
     kSdrSendSize = 0x40,
     // The default path receives this many bytes into the packet.
@@ -31,38 +31,27 @@ enum {
 // The packet stores the self reference with six forwarded words. Every call sends the whole
 // 0x40-byte packet.
 typedef struct {
-    // The field occupies offset 0x00.
-    int mUnknown00;
-    // The field occupies offset 0x04.
-    int mUnknown04;
-    // The field occupies offset 0x08.
-    int mUnknown08;
-    // The field occupies offset 0x0c.
-    int mUnknown0c;
-    // The field occupies offset 0x10.
-    int mUnknown10;
-    // The field occupies offset 0x14.
-    int mUnknown14;
-    // The field occupies offset 0x18.
-    int mUnknown18;
+    // The packet address before the call, and the reply word the IOP writes back over it.
+    int mResult;
+    // The six variadic argument words after the command, in call order.
+    int mArgument0;
+    int mArgument1;
+    int mArgument2;
+    int mArgument3;
+    int mArgument4;
+    int mArgument5;
     // The rest of the packet the remote call transfers.
-    unsigned char mUnknown1C[0x24];
+    unsigned char mReserved1C[0x24]; // +0x1C
 } SdrPacket;
 
-// The callback table stores six words for the voice paths.
+// The handlers and their arguments that the interrupt-handler commands record.
 typedef struct {
-    // The field occupies offset 0x00.
-    int mUnknown00;
-    // The field occupies offset 0x04.
-    int mUnknown04;
-    // The field occupies offset 0x08.
-    int mUnknown08;
-    // The field occupies offset 0x0c.
-    int mUnknown0c;
-    // The field occupies offset 0x10.
-    int mUnknown10;
-    // The field occupies offset 0x14.
-    int mUnknown14;
+    int mTransHandler0; // The transfer handler of DMA channel 0.
+    int mTransHandler1; // The transfer handler of DMA channel 1.
+    int mSpu2Handler; // The SPU2 interrupt handler.
+    int mTransArgument0; // The argument of the channel 0 transfer handler.
+    int mTransArgument1; // The argument of the channel 1 transfer handler.
+    int mSpu2Argument; // The argument of the SPU2 interrupt handler.
 } SdrCallbackTable;
 
 // 0x008e3e00
@@ -124,54 +113,54 @@ int sceSdRemote(int nControl, ...) {
         nFlag = 1;
         pfnEnd = g_pfnSdrEndFunction;
     }
-    pPacket->mUnknown00 = (int)(uintptr_t)pPacket;
+    pPacket->mResult = (int)(uintptr_t)pPacket;
 
     va_start(oArguments, nControl);
     nCommand = va_arg(oArguments, int);
-    pPacket->mUnknown04 = va_arg(oArguments, int);
-    pPacket->mUnknown08 = va_arg(oArguments, int);
-    pPacket->mUnknown0c = va_arg(oArguments, int);
-    pPacket->mUnknown10 = va_arg(oArguments, int);
-    pPacket->mUnknown14 = va_arg(oArguments, int);
-    pPacket->mUnknown18 = va_arg(oArguments, int);
+    pPacket->mArgument0 = va_arg(oArguments, int);
+    pPacket->mArgument1 = va_arg(oArguments, int);
+    pPacket->mArgument2 = va_arg(oArguments, int);
+    pPacket->mArgument3 = va_arg(oArguments, int);
+    pPacket->mArgument4 = va_arg(oArguments, int);
+    pPacket->mArgument5 = va_arg(oArguments, int);
     va_end(oArguments);
 
-    if (nCommand == kSdrCommand8160) {
-        if (pPacket->mUnknown04 == 0) {
-            pTable->mUnknown0c = pPacket->mUnknown0c;
-            pTable->mUnknown00 = pPacket->mUnknown08;
+    if (nCommand == kSdrCommandSetTransIntrHandler) {
+        if (pPacket->mArgument0 == 0) {
+            pTable->mTransArgument0 = pPacket->mArgument2;
+            pTable->mTransHandler0 = pPacket->mArgument1;
         } else {
-            pTable->mUnknown10 = pPacket->mUnknown0c;
-            pTable->mUnknown04 = pPacket->mUnknown08;
+            pTable->mTransArgument1 = pPacket->mArgument2;
+            pTable->mTransHandler1 = pPacket->mArgument1;
         }
     }
-    if (nCommand == kSdrCommand8170) {
-        pTable->mUnknown14 = pPacket->mUnknown08;
-        pTable->mUnknown08 = pPacket->mUnknown04;
+    if (nCommand == kSdrCommandSetSpu2IntrHandler) {
+        pTable->mSpu2Argument = pPacket->mArgument1;
+        pTable->mSpu2Handler = pPacket->mArgument0;
     }
-    if (nCommand == kSdrCommand8130) {
+    if (nCommand == kSdrCommandSetEffectAttr) {
         sceSifCallRpc(pClient,
-                      pPacket->mUnknown04 | kSdrCommand8130,
+                      pPacket->mArgument0 | kSdrCommandSetEffectAttr,
                       nFlag,
-                      (void *)(uintptr_t)pPacket->mUnknown08,
+                      (void *)(uintptr_t)pPacket->mArgument1,
                       kSdrSendSize,
                       NULL,
                       0,
                       pfnEnd,
                       pPacket);
-        nResult = pPacket->mUnknown00;
+        nResult = pPacket->mResult;
         return nResult;
     }
-    if (nCommand == kSdrCommand8140) {
+    if (nCommand == kSdrCommandGetEffectAttr) {
         sceSifCallRpc(pClient,
-                      pPacket->mUnknown04 | kSdrCommand8140,
+                      pPacket->mArgument0 | kSdrCommandGetEffectAttr,
                       nFlag,
                       pPacket,
                       kSdrSendSize,
-                      (void *)(uintptr_t)pPacket->mUnknown08,
+                      (void *)(uintptr_t)pPacket->mArgument1,
                       kSdrSendSize,
                       pfnEnd,
-                      (void *)(uintptr_t)pPacket->mUnknown08);
+                      (void *)(uintptr_t)pPacket->mArgument1);
         return nResult;
     }
     sceSifCallRpc(pClient,
@@ -183,6 +172,6 @@ int sceSdRemote(int nControl, ...) {
                   kSdrReceiveSize,
                   pfnEnd,
                   pPacket);
-    nResult = pPacket->mUnknown00;
+    nResult = pPacket->mResult;
     return nResult;
 }

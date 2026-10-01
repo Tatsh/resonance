@@ -52,11 +52,11 @@ static const char *const kHelpScreen = "MetHelpScreen";
 static const char *const kToggleSound = "SND_MET_FM_TOGGLE";
 
 // The two command codes above six this screen acts on. The input translator at `0x002e3738`
-// produces them, and code 7 sets mUnknown100 where code 8 sets mUnknownfc.
-constexpr int kCommandCode7 = 7;
-constexpr int kCommandCode8 = 8;
+// produces them, and code 7 sets mCopyPending where code 8 sets mDeletePending.
+constexpr int kCommandCopy = 7;
+constexpr int kCommandDelete = 8;
 
-// The first catalogue row, and what the back command leaves in MetScreen::mUnknown18.
+// The first catalogue row, and what the back command writes to MetScreen::mExitChoice.
 constexpr int kFirstRow = 0;
 constexpr int kExitBack = 0;
 
@@ -164,15 +164,15 @@ inline HxStr ConfigText(const char *pszKey) {
 MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
     : MetSaveRemix(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknownf4(nullptr), mUnknownfc(0), mUnknown100(0), mUnknown104(nullptr),
-      mUnknown138(nullptr), mUnknown13c(nullptr) {
-    mUnknown60 = 0;
-    mUnknown38.push_back(HxStr(kDeleteObjectName));
+      mList(nullptr), mDeletePending(0), mCopyPending(0), mCopyRecord(nullptr), mRowFont(nullptr),
+      mDimRowFont(nullptr) {
+    mShowsLoadedDrawables = 0;
+    mHelpKeys.push_back(HxStr(kDeleteObjectName));
 }
 
 // 0x003397a8
 MetRemixDelScreen::~MetRemixDelScreen() {
-    delete mUnknownf4;
+    delete mList;
 }
 
 // 0x00343f30
@@ -183,28 +183,27 @@ MetRemixDelScreen *MetRemixDelScreen::New(MetRenderer *pRenderer, int nPriority)
 // 0x0033a098
 void MetRemixDelScreen::EnterAndShow() {
     SetShowing(0);
-    mUnknowne0 = 0;
-    mUnknown104 = nullptr;
-    mUnknowndc = 1;
-    mUnknownf0 = &MetRemixManager::shared()->mRemixes[mUnknown108.mPortSlot];
-    if (mUnknownfc != 0 || mUnknown100 != 0) {
-        mUnknownf4->setSelected(kFirstRow);
+    mKeyboardPending = 0;
+    mCopyRecord = nullptr;
+    mCopying = 1;
+    mCatalogue = &MetRemixManager::shared()->mRemixes[mCardSlot.mPortSlot];
+    if (mDeletePending != 0 || mCopyPending != 0) {
+        mList->setSelected(kFirstRow);
     } else {
-        if (MetRemixManager::shared()->mListStatus[mUnknown108.mPortSlot] ==
-            kMemcardStatusUnknown) {
+        if (MetRemixManager::shared()->mListStatus[mCardSlot.mPortSlot] == kMemcardStatusUnknown) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kOkButton));
             const HxStr format(ConfigText(kNoCardText));
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown108.mSlotName)));
+            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
             MetMsgScreen::Show(
                 HxStr(kNoRemixDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
             return;
         }
-        if (mUnknownf0 == nullptr || mUnknownf0->size() == 0) {
+        if (mCatalogue == nullptr || mCatalogue->size() == 0) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kOkButton));
             const HxStr format(ConfigText(kNoRemixOnCardText));
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown108.mSlotName)));
+            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
             MetMsgScreen::Show(
                 HxStr(kNoRemixDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
             return;
@@ -216,19 +215,19 @@ void MetRemixDelScreen::EnterAndShow() {
         Rnd::Mesh *pDownArrow =
             dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kDownArrowMesh)));
         // Yes, the binary does not delete a list an earlier entry left behind.
-        mUnknownf4 = new ScrollingList(
+        mList = new ScrollingList(
             this, kRowPitch, kRowCount, pLine, pHighlight, pUpArrow, pDownArrow, kListContext);
     }
-    mUnknownfc = 0;
-    mUnknown100 = 0;
-    mUnknownf4->setItemCount(mUnknownf0->size());
-    mUnknownf4->refresh();
+    mDeletePending = 0;
+    mCopyPending = 0;
+    mList->setItemCount(mCatalogue->size());
+    mList->refresh();
     PushNamedScreen(HxStr(kHelpScreen));
     MetHelpScreen::SelectPreset(HxStr(kOnlyBackPreset));
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     HxStr format = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(
-        HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown108.mSlotName))));
+        HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
     PushNamedScreen(HxStr(kDataScreen));
     MetScreen::EnterAndShow();
 }
@@ -240,52 +239,52 @@ void MetRemixDelScreen::ResolveContainerViews() {
     HxStr title = QueryConfigString(kPromptConfigCode, kListTitleKey);
     pTitle->SetText(title);
     pTitle->SetShowing(1);
-    mUnknown138 = FindFont(kRowFont);
-    mUnknown13c = FindFont(kDimRowFont);
+    mRowFont = FindFont(kRowFont);
+    mDimRowFont = FindFont(kDimRowFont);
 }
 
 // 0x00339b30
 void MetRemixDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        if (mUnknownf4->getSelected() <= kFirstRow) {
+        if (mList->getSelected() <= kFirstRow) {
             return;
         }
-        mUnknownf4->scrollUp();
-        ShowRowOnDataScreen(mUnknownf4->getSelected());
+        mList->scrollUp();
+        ShowRowOnDataScreen(mList->getSelected());
         break;
     case kMetScreenCommandNext:
-        if (!(static_cast<unsigned>(mUnknownf4->getSelected()) < mUnknownf0->size() - 1)) {
+        if (!(static_cast<unsigned>(mList->getSelected()) < mCatalogue->size() - 1)) {
             return;
         }
-        mUnknownf4->scrollDown();
-        ShowRowOnDataScreen(mUnknownf4->getSelected());
+        mList->scrollDown();
+        ShowRowOnDataScreen(mList->getSelected());
         break;
     case kMetScreenCommandBack:
-        mUnknown18 = kExitBack;
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kDataScreen));
         BeginExit();
         break;
-    case kCommandCode7:
-        if (mUnknownf0->size() == 0) {
+    case kCommandCopy:
+        if (mCatalogue->size() == 0) {
             return;
         }
         PlaySoundByName(kToggleSound);
-        mUnknown100 = 1;
-        MetHelpScreen::SetText(HxStr(kNoText), mUnknown10->mUnknown68);
+        mCopyPending = 1;
+        MetHelpScreen::SetText(HxStr(kNoText), mRenderer->mAnimationFrame);
         ExitScreenByName(HxStr(kDataScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
         break;
-    case kCommandCode8:
-        if (mUnknownf0->size() == 0) {
+    case kCommandDelete:
+        if (mCatalogue->size() == 0) {
             return;
         }
         PlaySoundByName(kToggleSound);
-        mUnknownfc = 1;
-        MetHelpScreen::SetText(HxStr(kNoText), mUnknown10->mUnknown68);
+        mDeletePending = 1;
+        MetHelpScreen::SetText(HxStr(kNoText), mRenderer->mAnimationFrame);
         ExitScreenByName(HxStr(kDataScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
@@ -298,8 +297,8 @@ void MetRemixDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x0033cc78
 int MetRemixDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
-    if (static_cast<unsigned>(nItem) < mUnknownf0->size()) {
-        MetRemixRecord record((*mUnknownf0)[nItem]);
+    if (static_cast<unsigned>(nItem) < mCatalogue->size()) {
+        MetRemixRecord record((*mCatalogue)[nItem]);
         pText->SetText(HxStr(record.name));
     } else {
         pText->SetText(HxStr(kNoText));
@@ -313,10 +312,10 @@ int MetRemixDelScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
 }
 
 // 0x00344078
-void MetRemixDelScreen::OnUnknownSlot7() {
-    if (mUnknowne0 != 0) {
-        mUnknowne0 = 0;
-        OnUnknownSlot40();
+void MetRemixDelScreen::OnPanelActivated() {
+    if (mKeyboardPending != 0) {
+        mKeyboardPending = 0;
+        OnSaveAbandoned();
     }
 }
 
@@ -326,18 +325,18 @@ void MetRemixDelScreen::OnMsgScreenShown(const HxStr &) {
 }
 
 // 0x00344058
-void MetRemixDelScreen::OnUnknownSlot33() {
+void MetRemixDelScreen::OnEnterFinished() {
     ShowRowOnDataScreen(0);
 }
 
 // 0x0033e5c0
-void MetRemixDelScreen::OnUnknownSlot40() {
+void MetRemixDelScreen::OnSaveAbandoned() {
     PushNamedScreen(HxStr(kOwnScreenName));
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
 // 0x0033e6d8
-void MetRemixDelScreen::OnUnknownSlot41() {
+void MetRemixDelScreen::OnSaveDialogueClosed() {
     PushNamedScreen(HxStr(kOwnScreenName));
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
@@ -348,13 +347,13 @@ inline void MetRemixDelScreen::StartDelete() {
     const HxStr second(ConfigText(kDeleteProgressSecond));
     const HxStr text(FormatString(kDeleteProgressFormat,
                                   TextOrEmpty(first),
-                                  TextOrEmpty(mUnknown108.mSlotName),
+                                  TextOrEmpty(mCardSlot.mSlotName),
                                   TextOrEmpty(second)));
     MetMsgScreen::Show(
         HxStr(kDeleteDialogue), HxStr(kDeleteTitle), text, kNoButtons, buttons, this);
-    const MetRemixRecord record((*mUnknownf0)[mUnknownf4->getSelected()]);
+    const MetRemixRecord record((*mCatalogue)[mList->getSelected()]);
     MemcardManager::shared()->mUser = this;
-    MemcardManager::shared()->CreateDeleteRemixTask(mUnknown108.mPortSlot, record.name);
+    MemcardManager::shared()->CreateDeleteRemixTask(mCardSlot.mPortSlot, record.name);
 }
 
 // 0x0033b280
@@ -371,10 +370,10 @@ void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
         }
     } else if (name == kCopyAskDialogue) {
         if (nChoice == kChoiceYes) {
-            mUnknown104 = &(*mUnknownf0)[mUnknownf4->getSelected()];
-            mUnknown120 = NextCardSlot(mUnknown108);
+            mCopyRecord = &(*mCatalogue)[mList->getSelected()];
+            mCopyTarget = NextCardSlot(mCardSlot);
             MemcardManager::shared()->mUser = this;
-            MemcardManager::shared()->CreateLoadRemixTask(mUnknown108.mPortSlot, mUnknown104->name);
+            MemcardManager::shared()->CreateLoadRemixTask(mCardSlot.mPortSlot, mCopyRecord->name);
         } else {
             PushNamedScreen(HxStr(kHelpScreen));
             PushNamedScreen(HxStr(kTitleScreen));
@@ -393,14 +392,14 @@ void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             ActivateNamedPanel(HxStr(kOwnScreenName));
         }
     } else if (name == kDeleteDialogue) {
-        mUnknownf4->setItemCount(mUnknownf0->size());
-        mUnknownf4->refresh();
+        mList->setItemCount(mCatalogue->size());
+        mList->refresh();
         std::vector<HxStr> screens;
         screens.resize(kReturnScreenCount);
         screens[kReturnScreenSelf] = kOwnScreenName;
         screens[kReturnScreenHelp] = kHelpScreen;
         std::vector<MemcardConnectState> slots;
-        slots.push_back(mUnknown108);
+        slots.push_back(mCardSlot);
         MetRemixManager::shared()->ListRemixes(screens, slots, kNoPlayList);
     } else if (name == kCopyDialogue) {
         PushNamedScreen(HxStr(kTitleScreen));
@@ -415,7 +414,7 @@ void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
         PushNamedScreen(HxStr(kOwnScreenName));
         ActivateNamedPanel(HxStr(kOwnScreenName));
     } else if (name == kNoRemixDialogue) {
-        mUnknown10->RemoveScreen(this);
+        mRenderer->RemoveScreen(this);
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kCardTypeScreen));
@@ -426,21 +425,21 @@ void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
 }
 
 // 0x0033ce00
-void MetRemixDelScreen::OnUnknownSlot36() {
-    if (mUnknownfc == 0 && mUnknown100 == 0) {
-        delete mUnknownf4;
-        mUnknownf4 = nullptr;
+void MetRemixDelScreen::OnExitFinished() {
+    if (mDeletePending == 0 && mCopyPending == 0) {
+        delete mList;
+        mList = nullptr;
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kCardTypeScreen));
         ActivateNamedPanel(HxStr(kCardTypeScreen));
         return;
     }
-    if (mUnknown100 != 0) {
+    if (mCopyPending != 0) {
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kNoButton));
         buttons.push_back(HxStr(kYesButton));
         const HxStr format(ConfigText(kCopyAskDialogue));
-        const MemcardConnectState target(NextCardSlot(mUnknown108));
+        const MemcardConnectState target(NextCardSlot(mCardSlot));
         const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(target.mSlotName)));
         MetMsgScreen::Show(
             HxStr(kCopyAskDialogue), HxStr(kCopyTitle), text, kTwoButtons, buttons, this);
@@ -476,12 +475,12 @@ void MetRemixDelScreen::OnRemixLoaded([[maybe_unused]] int nPortSlot, int nStatu
     screens[kReturnScreenSelf] = kOwnScreenName;
     screens[kReturnScreenHelp] = kHelpScreen;
     MemcardManager::shared()->mUser = this;
-    RecordPendingSave(mUnknown120,
+    RecordPendingSave(mCopyTarget,
                       kAnyPad,
-                      mUnknown104->name,
-                      mUnknown104->unknown00_,
-                      mUnknown104->appearances,
-                      mUnknown104->unknown34_);
+                      mCopyRecord->name,
+                      mCopyRecord->levelName,
+                      mCopyRecord->appearances,
+                      mCopyRecord->albumNumber);
 }
 
 // 0x0033d768
@@ -495,7 +494,7 @@ void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStat
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kCancelButton));
         const HxStr format(ConfigText(kDeleteNoCardDialogue));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknown108.mSlotName)));
+        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
         MetMsgScreen::ShowActive(
             HxStr(kDeleteNoCardDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
         return;
@@ -511,10 +510,10 @@ void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStat
 }
 
 // 0x0033e7f0
-void MetRemixDelScreen::OnUnknownSlot42() {
-    mUnknowne0 = 1;
+void MetRemixDelScreen::OnDuplicateNameDeclined() {
+    mKeyboardPending = 1;
     MetKeyboardRequest request(
-        HxStr(kOwnScreenName), HxStr(kKeyboardPrompt), mUnknownb8, kAnyPad, this);
+        HxStr(kOwnScreenName), HxStr(kKeyboardPrompt), mRemixName, kAnyPad, this);
     request.mMaxWidth = kKeyboardMaxWidth;
     request.mMaxLength = kKeyboardMaxLength;
     request.mTicker = kKeyboardTicker;
@@ -523,7 +522,7 @@ void MetRemixDelScreen::OnUnknownSlot42() {
 
 // 0x00343fb8
 void MetRemixDelScreen::SetCardSlot(MemcardConnectState slot) {
-    mUnknown108 = slot;
+    mCardSlot = slot;
 }
 
 // 0x003440b8
@@ -531,18 +530,18 @@ void MetRemixDelScreen::ShowRowOnDataScreen(int nIndex) {
     // Yes, the binary takes the registered screen without a cast check.
     MetRemixDataScreen *pDataScreen =
         static_cast<MetRemixDataScreen *>(MetScreen::FindScreenByName(HxStr(kDataScreen)));
-    // Yes, the binary does not test mUnknownf0 for null here.
-    if (!(static_cast<unsigned>(nIndex) < mUnknownf0->size())) {
+    // Yes, the binary does not test mCatalogue for null here.
+    if (!(static_cast<unsigned>(nIndex) < mCatalogue->size())) {
         pDataScreen->SetRecordShowing(0);
     } else {
-        pDataScreen->ShowRecord(&(*mUnknownf0)[nIndex]);
+        pDataScreen->ShowRecord(&(*mCatalogue)[nIndex]);
     }
 }
 
 // 0x00344240
-void MetRemixDelScreen::OnUnknownSlot2(const HxStr &text) {
-    if (mUnknowne0 != 0) {
-        MetSaveRemix::OnUnknownSlot2(text);
-        mUnknowne0 = 0;
+void MetRemixDelScreen::OnKeyboardTextEntered(const HxStr &text) {
+    if (mKeyboardPending != 0) {
+        MetSaveRemix::OnKeyboardTextEntered(text);
+        mKeyboardPending = 0;
     }
 }

@@ -13,7 +13,7 @@ Message *PSJoinRequestPacket::New() {
 
 // 0x003f1f38
 void PSJoinRequestPacket::Print(std::ostream &stream) {
-    mUnknown14.Print(stream);
+    mAppearance.Print(stream);
 }
 
 // 0x003eeeb8
@@ -35,34 +35,34 @@ const char *PSJoinRequestPacket::Name() {
 
 // 0x003e5538
 void PSJoinRequestPacket::Save(OBStream &stream) {
-    int unknown04 = mUnknown04;
-    stream.Write(&unknown04, sizeof(unknown04));
+    int destination = mDestination;
+    stream.Write(&destination, sizeof(destination));
 
-    int unknown08 = mUnknown08;
-    stream.Write(&unknown08, sizeof(unknown08));
+    int destinationSystem = mDestinationSystem;
+    stream.Write(&destinationSystem, sizeof(destinationSystem));
 
-    int unknown0c = mUnknown0c;
-    stream.Write(&unknown0c, sizeof(unknown0c));
+    int clientId = mClientId;
+    stream.Write(&clientId, sizeof(clientId));
 
-    int unknown10 = mUnknown10;
-    stream.Write(&unknown10, sizeof(unknown10));
+    int targetClientId = mTargetClientId;
+    stream.Write(&targetClientId, sizeof(targetClientId));
 
-    mUnknown14.Save(stream);
+    mAppearance.Save(stream);
 
-    // Yes, the binary writes the word at +0x0c a second time.
-    int unknown0cAgain = mUnknown0c;
-    stream.Write(&unknown0cAgain, sizeof(unknown0cAgain));
+    // Yes, the binary writes the client identifier a second time.
+    int clientIdAgain = mClientId;
+    stream.Write(&clientIdAgain, sizeof(clientIdAgain));
 }
 
 // 0x003e5638
 void PSJoinRequestPacket::Load(IBStream &stream) {
-    stream.Read(&mUnknown04, sizeof(mUnknown04));
-    stream.Read(&mUnknown08, sizeof(mUnknown08));
-    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
-    stream.Read(&mUnknown10, sizeof(mUnknown10));
+    stream.Read(&mDestination, sizeof(mDestination));
+    stream.Read(&mDestinationSystem, sizeof(mDestinationSystem));
+    stream.Read(&mClientId, sizeof(mClientId));
+    stream.Read(&mTargetClientId, sizeof(mTargetClientId));
 
-    mUnknown14.Load(stream);
+    mAppearance.Load(stream);
 
-    // Yes, the binary reads the word at +0x0c a second time.
-    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
+    // Yes, the binary reads the client identifier a second time.
+    stream.Read(&mClientId, sizeof(mClientId));
 }

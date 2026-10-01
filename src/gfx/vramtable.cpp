@@ -93,7 +93,8 @@ void VramTable::Clear(int bClearPalettes) {
 
     for (pEntry = mpListHead[kVramListUsed]; pEntry != nullptr; pEntry = pEntry->mpNext) {
         if ((pEntry->mLockMask & kVramLockGenerationMask) != 0) {
-            LogPrintf("Clear() - resetting lock on entry %d\n",
+            LogPrintf("%s() - resetting lock on entry %d\n",
+                      __func__,
                       static_cast<int>(pEntry - g_vramEntries));
         }
         pEntry->mMemAddr = 0;

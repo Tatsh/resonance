@@ -68,7 +68,7 @@ struct Particle {
     Particle *mPrev;
     /** Next live particle, or null at the end of the list. +0x78 */
     Particle *mNext;
-    int mUnknown7c; // +0x7c
+    int mReserved7c; // +0x7c
 };
 
 } // namespace Rnd

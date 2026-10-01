@@ -44,7 +44,7 @@ public:
      *
      * Slot 9. The routine gives every bar of the step around nBar to mPlayer, totals the points of
      * the nRun bars ending at nBar, and sends a PhraseCapturedMsg (score, the multiplier
-     * Player::Slot16() reports for the first bar of the run, and the flag inverted) and a
+     * Player::GetMultiplier() reports for the first bar of the run, and the flag inverted) and a
      * SectionCapturedMsg for the step.
      *
      * @param nBar The last bar of the run.
@@ -53,7 +53,7 @@ public:
      *                   and the SectionCapturedMsg unchanged.
      * @ghidraAddress 0x001ad630
      */
-    virtual void Slot9(int nBar, int nRun, int nAutoCatch);
+    virtual void CapturePhrase(int nBar, int nRun, int nAutoCatch);
 
     /**
      * Report the caught power bar to this catcher's player.
@@ -65,14 +65,14 @@ public:
      * @param nBar The caught bar.
      * @ghidraAddress 0x001ad840
      */
-    virtual void Slot10(int nBar);
+    virtual void ReportCaughtPowerbar(int nBar);
 
     /**
      * Give every phrase of the track to one player.
      *
-     * CatchingSTG's slot 10 reaches it by casting its catcher to this class with `dynamic_cast`.
-     * The routine forwards the player to PhraseMgr::ResetOwners() and returns nothing. The title
-     * follows that callee and is inferred.
+     * CatchingSTG::GivePhrases() reaches it by casting its catcher to this class with
+     * `dynamic_cast`. The routine forwards the player to PhraseMgr::ResetOwners() and returns
+     * nothing. The title follows that callee and is inferred.
      *
      * @param nTick The song position the caller received, unread.
      * @param pPlayer The player the phrases go to.

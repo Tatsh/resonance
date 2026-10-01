@@ -75,11 +75,11 @@ GamePowerbarMgr::GamePowerbarMgr(PlayMap *pMap,
                                  const TrackData *pTrackData,
                                  int bRandomKind,
                                  int nTrack,
-                                 int nUnknown30,
+                                 int bMultiplayer,
                                  int nMinGap,
                                  int nMaxGap)
     : mTrackData(pTrackData), mMap(pMap), mDatabase(pDatabase), mTrack(nTrack),
-      mUnknown30(nUnknown30), mMinGap(nMinGap), mMaxGap(nMaxGap), mRandomKind(bRandomKind) {
+      mMultiplayer(bMultiplayer), mMinGap(nMinGap), mMaxGap(nMaxGap), mRandomKind(bRandomKind) {
     const Bar empty{0, kNoPowerbar};
     mBars.resize(mMap->mSteps.back(), empty);
 

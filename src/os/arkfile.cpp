@@ -697,8 +697,8 @@ int InitArk() {
     }
     for (int i = 0; i < kSessionArkCount; ++i) {
         if (ArkFile::Open(g_apSessionArkPaths[i]) == 0) {
-            std::cout << " ERROR: InitArk() - Failed opening ark file: " << g_apSessionArkPaths[i]
-                      << "\n";
+            std::cout << " ERROR: " << __func__
+                      << "() - Failed opening ark file: " << g_apSessionArkPaths[i] << "\n";
             return 0;
         }
     }

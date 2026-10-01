@@ -40,13 +40,13 @@ GamePowerupPlacer::~GamePowerupPlacer() {
 }
 
 // 0x001cccb0
-void GamePowerupPlacer::OnUnknownSlot6(int nStep) {
+void GamePowerupPlacer::MoveCursor(int nStep) {
     if (nStep == 0) {
         return;
     }
     const int nMove = -nStep;
     const int nBar = mApplication->GetSongClock()->SongTick() / Mid::MBT(kTicksPerBar).mTick;
-    const int nPlayerValue = mOwner->Slot4();
+    const int nPlayerValue = mOwner->GetTrack();
 
     if (mCursorBar == kNoCursor) {
         if (nMove != 1 || mCollection->HasSelection() == 0) {
@@ -77,23 +77,23 @@ void GamePowerupPlacer::OnUnknownSlot6(int nStep) {
 }
 
 // 0x001cce90
-void GamePowerupPlacer::OnUnknownSlot7() {
+void GamePowerupPlacer::AnnounceCursor() {
     if (mCursorBar == -1) {
         return;
     }
-    DisplayPointerMsg msg(mCursorBar, mOwner->Slot4(), mOwner);
+    DisplayPointerMsg msg(mCursorBar, mOwner->GetTrack(), mOwner);
     Send(&msg);
 }
 
 // 0x001ccf30
-void GamePowerupPlacer::OnUnknownSlot8() {
+void GamePowerupPlacer::DeployPowerup() {
     if (mCursorBar == kNoCursor) {
         return;
     }
-    if (mCursorBar >= Application::shared()->GetPlayMap()->Slot9()) {
+    if (mCursorBar >= Application::shared()->GetPlayMap()->GetEndBar()) {
         return;
     }
-    mCollection->Deploy(mOwner->Slot4(), mCursorBar);
+    mCollection->Deploy(mOwner->GetTrack(), mCursorBar);
 
     DisplayPointerMsg remove;
     remove.mPlayerValue = kNoCursor;
@@ -109,18 +109,18 @@ int GamePowerupPlacer::Tick(int nElapsedTicks) {
     const int nBar = tick.mTick / Mid::MBT(kTicksPerBar).mTick;
     if (mCursorBar != -1 && mCursorBar < nBar) {
         mCursorBar = nBar;
-        DisplayPointerMsg msg(mCursorBar, mOwner->Slot4(), mOwner);
+        DisplayPointerMsg msg(mCursorBar, mOwner->GetTrack(), mOwner);
         Send(&msg);
     }
     return 1;
 }
 
 // 0x001cde18
-void GamePowerupPlacer::OnUnknownSlot4() {
+void GamePowerupPlacer::Activate() {
     Start(kMBTInfinity);
 }
 
 // 0x001cde40
-void GamePowerupPlacer::OnUnknownSlot5() {
+void GamePowerupPlacer::Deactivate() {
     Stop();
 }

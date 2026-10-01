@@ -40,11 +40,11 @@ public:
      * at `0x00119a18` and `0x00119c50`.
      *
      * @param pPlayer The player the controller belongs to.
-     * @param nUnknown08 The word at `+0x08`, 1 at both builds.
+     * @param nPlayMode The word at `+0x08`, 1 at both builds. One build passes the game play mode.
      * @param position The song position of the reading.
      */
-    ButtonPowMsg(Player *pPlayer, int nUnknown08, Mid::MBT position)
-        : mPlayer(pPlayer), mUnknown08(nUnknown08), mPosition(position) {
+    ButtonPowMsg(Player *pPlayer, int nPlayMode, Mid::MBT position)
+        : mPlayer(pPlayer), mPlayMode(nPlayMode), mPosition(position) {
     }
 
     /**
@@ -100,7 +100,7 @@ public:
     Player *mPlayer;
 
 private:
-    int mUnknown08;     // +0x08
+    int mPlayMode;      // +0x08
     Mid::MBT mPosition; // +0x0c
 };
 

@@ -41,13 +41,13 @@ void NoteMsg::Print(std::ostream &stream) {
 
 // 0x003d80c0
 void NoteMsg::Save(OBStream &stream) {
-    unsigned char byte08 = mChannel;
-    unsigned char byte09 = mNote;
-    unsigned char byte0a = mVelocity;
+    unsigned char channel = mChannel;
+    unsigned char note = mNote;
+    unsigned char velocity = mVelocity;
     unsigned short length = static_cast<unsigned short>(mLength.mTick);
-    stream.WriteBytes(&byte08, sizeof(byte08))
-        .WriteBytes(&byte09, sizeof(byte09))
-        .WriteBytes(&byte0a, sizeof(byte0a))
+    stream.WriteBytes(&channel, sizeof(channel))
+        .WriteBytes(&note, sizeof(note))
+        .WriteBytes(&velocity, sizeof(velocity))
         .Write(&length, sizeof(length));
 }
 

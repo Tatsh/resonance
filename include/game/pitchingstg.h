@@ -54,7 +54,7 @@ public:
      *
      * @ghidraAddress 0x001c4cf0
      */
-    virtual void Slot2();
+    virtual void Start();
 
     /**
      * Stop the stage.
@@ -63,7 +63,7 @@ public:
      *
      * @ghidraAddress 0x001c4d28
      */
-    virtual void Slot3();
+    virtual void Stop();
 
     /**
      * Wire the stage's objects to the sources that drive it.
@@ -75,7 +75,7 @@ public:
      * @param pSecondary The source that receives the phrase manager and the producer.
      * @ghidraAddress 0x001c4798
      */
-    virtual void Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
+    virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
     /**
      * Attach the mixer to the synthesiser and give it its output sink.
@@ -85,7 +85,7 @@ public:
      * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
      * @ghidraAddress 0x001c4d60
      */
-    virtual void Slot6(MsgSink *pOutput);
+    virtual void SetMixerOutput(MsgSink *pOutput);
 
     /**
      * Register one sink with every source the stage provides.
@@ -95,7 +95,7 @@ public:
      * @param pSink The sink to register.
      * @ghidraAddress 0x001c4da0
      */
-    virtual void Slot7(MsgSink *pSink);
+    virtual void AddSinkToSources(MsgSink *pSink);
 
     /**
      * Install the sink the phrase manager reports phrase changes to.
@@ -105,7 +105,7 @@ public:
      * @param pSink The sink to install, ignored when null.
      * @ghidraAddress 0x001c4e30
      */
-    virtual void Slot8(MsgSink *pSink);
+    virtual void SetNetSink(MsgSink *pSink);
 
 private:
     Pitcher *mPitcher;          // +0x2c, a NotePitcher or a Scratcher, null for any other kind

@@ -338,51 +338,51 @@ int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
 
 // 0x00567920
 // Compute the two staging spans for one audio packet. Inferred.
-static void AudioPutSpans(AudioDec *pFields, int *pOut0, int *pOut1, int *pOut2, int *pOut3) {
-    if (pFields->state == 0) {
-        *pOut0 = (int)(uintptr_t)((unsigned char *)pFields + pFields->field2c + 4);
-        *pOut1 = 0x28 - pFields->field2c;
-        *pOut2 = (int)(uintptr_t)pFields->buffer;
-        *pOut3 = pFields->bufferSize;
+static void AudioPutSpans(AudioDec *pAudioDec, int *pFirstSpan, int *pFirstSize, int *pSecondSpan, int *pSecondSize) {
+    if (pAudioDec->state == 0) {
+        *pFirstSpan = (int)(uintptr_t)((unsigned char *)pAudioDec + pAudioDec->headerCount + 4);
+        *pFirstSize = 0x28 - pAudioDec->headerCount;
+        *pSecondSpan = (int)(uintptr_t)pAudioDec->buffer;
+        *pSecondSize = pAudioDec->bufferSize;
         return;
     }
     {
-        int nAvail = pFields->bufferSize - pFields->field34;
-        int nRemaining = pFields->bufferSize - pFields->field38;
+        int nAvail = pAudioDec->bufferSize - pAudioDec->put;
+        int nRemaining = pAudioDec->bufferSize - pAudioDec->count;
 
-        *pOut0 = (int)(uintptr_t)(pFields->buffer + pFields->field34);
+        *pFirstSpan = (int)(uintptr_t)(pAudioDec->buffer + pAudioDec->put);
         if (nAvail >= nRemaining) {
-            *pOut1 = nRemaining;
-            *pOut2 = 0;
-            *pOut3 = 0;
+            *pFirstSize = nRemaining;
+            *pSecondSpan = 0;
+            *pSecondSize = 0;
             return;
         }
-        *pOut1 = nAvail;
-        *pOut2 = (int)(uintptr_t)pFields->buffer;
-        *pOut3 = pFields->field34 - pFields->field38;
+        *pFirstSize = nAvail;
+        *pSecondSpan = (int)(uintptr_t)pAudioDec->buffer;
+        *pSecondSize = pAudioDec->put - pAudioDec->count;
     }
 }
 
 // 0x005679d0
 // Commit copied bytes into the staging counts. Inferred.
-static void AudioCommitCopied(AudioDec *pFields, int nCopied) {
-    if (pFields->state == 0) {
-        int nTake = 0x28 - pFields->field2c;
+static void AudioCommitCopied(AudioDec *pAudioDec, int nCopied) {
+    if (pAudioDec->state == 0) {
+        int nTake = 0x28 - pAudioDec->headerCount;
         int nSum;
 
         if ((unsigned int)nTake > (unsigned int)nCopied) {
             nTake = nCopied;
         }
-        nSum = pFields->field2c + nTake;
-        pFields->field2c = nSum;
+        nSum = pAudioDec->headerCount + nTake;
+        pAudioDec->headerCount = nSum;
         if ((unsigned int)nSum >= 0x28U) {
-            pFields->state = 1;
+            pAudioDec->state = 1;
         }
         nCopied -= nTake;
     }
-    pFields->field38 += nCopied;
-    pFields->field40 += nCopied;
-    pFields->field34 = (pFields->field34 + nCopied) % pFields->bufferSize;
+    pAudioDec->count += nCopied;
+    pAudioDec->totalBytes += nCopied;
+    pAudioDec->put = (pAudioDec->put + nCopied) % pAudioDec->bufferSize;
 }
 
 // 0x0059b0c8

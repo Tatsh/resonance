@@ -131,6 +131,6 @@ void NotePlayer::OnCommand(int nTick) {
 }
 
 // 0x001b41c0
-int NotePlayer::Slot4() {
+int NotePlayer::DisplacesSiblings() {
     return 0;
 }

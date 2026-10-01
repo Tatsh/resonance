@@ -43,13 +43,13 @@ public:
      * InputMap::OnControllerReading() calls, and the build at `0x00119e74` expand it on their
      * stacks. The four arguments are the four members in declaration order.
      *
-     * @param nUnknown04 The word Print() labels `b#`.
+     * @param nButton The button, labelled `b#` by Print().
      * @param pPlayer The player whose riff stops.
      * @param position The song position of the stop.
      * @param nTrack The player's track.
      */
-    StopRiffMsg(int nUnknown04, Player *pPlayer, Mid::MBT position, int nTrack)
-        : mUnknown04(nUnknown04), mPlayer(pPlayer), mPosition(position), mUnknown10(nTrack) {
+    StopRiffMsg(int nButton, Player *pPlayer, Mid::MBT position, int nTrack)
+        : mButton(nButton), mPlayer(pPlayer), mPosition(position), mTrack(nTrack) {
     }
 
     /**
@@ -96,10 +96,10 @@ public:
      */
     virtual void Print(std::ostream &stream);
 
-    int mUnknown04;     /*!< Labelled `b#` by Print(). +0x04 */
+    int mButton;        /*!< The button, labelled `b#` by Print(). +0x04 */
     Player *mPlayer;    /*!< The player whose riff stops. +0x08 */
     Mid::MBT mPosition; /*!< The song position of the stop. +0x0c */
-    int mUnknown10;     /*!< The player's track, from its slot 4. +0x10 */
+    int mTrack;         /*!< The player's track, from its slot 4. +0x10 */
 };
 
 /**

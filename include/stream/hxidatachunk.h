@@ -91,7 +91,7 @@ public:
      * @return The source stream.
      * @ghidraAddress 0x00145fd8
      */
-    HxStream *Unknown7() override;
+    HxStream *UnderlyingStream() override;
 
 private:
     HxDataChunkReader *mReader; // Reader to unlock on destruction, or null.

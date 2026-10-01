@@ -21,18 +21,18 @@
  *
  * Reset() sizes the three per-player vectors, and Gamer fills them when a game ends. The metagame
  * statistics screens read them back through the accessors, printing a score and a tally with `%d`
- * and a progress and a ratio, each scaled by 100, with `%3d%%`. GrooveWorld writes mUnknown14
+ * and a progress and a ratio, each scaled by 100, with `%3d%%`. GrooveWorld writes mRemixEdited
  * directly, which a friend declaration models; a public member fits the image equally well.
  */
 class GameStats {
-    // GrooveWorld::MarkStatsFlag() at 0x00195378 writes mUnknown14 directly.
+    // GrooveWorld::MarkStatsFlag() at 0x00195378 writes mRemixEdited directly.
     friend class GrooveWorld;
 
 public:
     /**
      * Start with every counter clear and all three vectors empty.
      *
-     * The constructor does not write mUnknown08, mProgress, or mUnknown14, so a tally starts with
+     * The constructor does not write mCheated, mProgress, or mRemixEdited. A tally starts with
      * three indeterminate fields.
      *
      * @ghidraAddress 0x0010f150
@@ -86,28 +86,28 @@ public:
 
     /**
      * @param nPlayer The player's index.
-     * @return The player's Player::Slot18() fraction at the end of the game.
+     * @return The player's Player::GetCaptureRatio() fraction at the end of the game.
      * @ghidraAddress 0x0010ff60
      */
     float GetRatio(int nPlayer);
 
     /**
      * @param nPlayer The player's index.
-     * @param flRatio The player's Player::Slot18() fraction.
+     * @param flRatio The player's Player::GetCaptureRatio() fraction.
      * @ghidraAddress 0x0010ff78
      */
     void SetRatio(int nPlayer, float flRatio);
 
     /**
      * @param nPlayer The player's index.
-     * @return The player's Player::Slot17() count at the end of the game.
+     * @return The player's Player::GetBestStreak() count at the end of the game.
      * @ghidraAddress 0x0010ff90
      */
     int GetTally(int nPlayer);
 
     /**
      * @param nPlayer The player's index.
-     * @param nTally The player's Player::Slot17() count.
+     * @param nTally The player's Player::GetBestStreak() count.
      * @ghidraAddress 0x0010ffa8
      */
     void SetTally(int nPlayer, int nTally);
@@ -129,27 +129,31 @@ public:
     int mCompleted;
 
     /**
-     * Copied from Gamer +0x98 when a solo game ends.
+     * Non-zero when a cheat ran during the solo game, copied from Gamer::mCheated.
      *
-     * Public because Gamer writes it directly at `0x00111ba8`, and the image has no accessor. Not
-     * written by the constructor. +0x08
+     * MetRenderer shows the stage-finish screen only for a completed game with this clear. Public
+     * because Gamer writes it directly at `0x00111ba8`, and the image has no accessor. Not written
+     * by the constructor. +0x08
      */
-    int mUnknown08;
+    int mCheated;
 
 private:
     // Not written by the constructor.
     float mProgress; // +0x0c
-    int mUnknown10;  // +0x10
+    // Zeroed by the constructor and Reset(), and not read by a recovered routine.
+    int mUnreadCounter; // +0x10
 
 public:
     /**
-     * Written by GrooveWorld. Not written by the constructor.
+     * Non-zero once the jam's phrases or remix effects changed. Not written by the constructor.
      *
-     * Public because MetRenderer::OnFreqEnded() reads it directly at `0x0036c138`, where a
-     * non-zero value sends a finished jam to the end screen rather than MetRemixTypeScreen, and the
-     * image has no accessor. +0x14
+     * GrooveWorld::MarkStatsFlag() sets it whenever PhraseMgr adds, installs, or clears a phrase
+     * and whenever JamEffectsMgr applies a statistics-counted effect. Public because
+     * MetRenderer::OnFreqEnded() reads it directly at `0x0036c138`, where a non-zero value sends a
+     * finished jam to the end screen rather than MetRemixTypeScreen, and the image has no accessor.
+     * +0x14
      */
-    int mUnknown14;
+    int mRemixEdited;
 
 private:
     std::vector<int> mScores;   // +0x18

@@ -22,7 +22,7 @@ static const char *const kContainerName = "net_options_butts";
 constexpr int kPromptConfigCode = 0x258;
 constexpr int kTitleConfigCode = 0x269;
 
-// MetScreen::mUnknown18 on exit, read back by OnUnknownSlot36().
+// MetScreen::mExitChoice on exit, read back by OnExitFinished().
 constexpr int kExitCancelled = 0;
 constexpr int kExitToButton = 2;
 
@@ -73,36 +73,36 @@ inline HxStr ConfigText(int nCode, const char *pszKey) {
 // 0x002071f0
 MetConfigOptionsButtonsScreen::MetConfigOptionsButtonsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr), mUnknown90(kFirstController) {
-    mUnknown8c = new MetButtonList();
+      mOptionButtons(nullptr), mControllerIndex(kFirstController) {
+    mOptionButtons = new MetButtonList();
 }
 
 // 0x002073c8
 void MetConfigOptionsButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mOptionButtons->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mOptionButtons->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mOptionButtons->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mOptionButtons->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
-        if (mUnknown8c->mUnknown00->mName == kControllerButton) {
-            mUnknown90 = pCommand->mPadIndex - 1;
+        if (mOptionButtons->mSelectedButton->mName == kControllerButton) {
+            mControllerIndex = pCommand->mPadIndex - 1;
         }
         ActivateNamedPanel(HxStr(""));
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kButtonFlashInterval,
-                            mUnknown8c->mUnknown00,
+                            mOptionButtons->mSelectedButton,
                             kButtonFlashCycles);
         break;
 
     case kMetScreenCommandBack:
-        mUnknown18 = kExitCancelled;
+        mExitChoice = kExitCancelled;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kRightGizmoScreen));
         BeginExit();
@@ -115,7 +115,7 @@ void MetConfigOptionsButtonsScreen::HandleCommand(const MetScreenCommand *pComma
 
 // 0x00207660
 void MetConfigOptionsButtonsScreen::EnterAndShow() {
-    const int bDiscButton = GlobalSettings::shared()->mGameOptions.mUnknown04;
+    const int bDiscButton = GlobalSettings::shared()->mGameOptions.mExpansionPack;
 
     // Yes, the binary does not test either frame view for null.
     dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kFiveButtonFrame)))
@@ -123,40 +123,40 @@ void MetConfigOptionsButtonsScreen::EnterAndShow() {
     dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kFourButtonFrame)))
         ->SetShowing(bDiscButton ^ 1);
 
-    mUnknown8c->Clear();
-    mUnknown38.clear();
+    mOptionButtons->Clear();
+    mHelpKeys.clear();
 
-    mUnknown8c->Add(HxStr(kGameButton), ConfigText(kPromptConfigCode, kGamePrompt));
-    mUnknown8c->Add(HxStr(kControllerButton), ConfigText(kPromptConfigCode, kControllerPrompt));
-    mUnknown8c->Add(HxStr(kMemoryButton), ConfigText(kPromptConfigCode, kMemoryPrompt));
-    mUnknown8c->Add(HxStr(kCreditsButton), ConfigText(kPromptConfigCode, kCreditsPrompt));
+    mOptionButtons->Add(HxStr(kGameButton), ConfigText(kPromptConfigCode, kGamePrompt));
+    mOptionButtons->Add(HxStr(kControllerButton), ConfigText(kPromptConfigCode, kControllerPrompt));
+    mOptionButtons->Add(HxStr(kMemoryButton), ConfigText(kPromptConfigCode, kMemoryPrompt));
+    mOptionButtons->Add(HxStr(kCreditsButton), ConfigText(kPromptConfigCode, kCreditsPrompt));
     if (bDiscButton) {
-        mUnknown8c->Add(HxStr(kDiscButton), ConfigText(kPromptConfigCode, kDiscPrompt));
+        mOptionButtons->Add(HxStr(kDiscButton), ConfigText(kPromptConfigCode, kDiscPrompt));
     }
 
-    mUnknown38.push_back(HxStr(kGamePrompt));
-    mUnknown38.push_back(HxStr(kControllerPrompt));
-    mUnknown38.push_back(HxStr(kMemoryPrompt));
-    mUnknown38.push_back(HxStr(kCreditsPrompt));
+    mHelpKeys.push_back(HxStr(kGamePrompt));
+    mHelpKeys.push_back(HxStr(kControllerPrompt));
+    mHelpKeys.push_back(HxStr(kMemoryPrompt));
+    mHelpKeys.push_back(HxStr(kCreditsPrompt));
     if (bDiscButton) {
-        mUnknown38.push_back(HxStr(kDiscPrompt));
+        mHelpKeys.push_back(HxStr(kDiscPrompt));
     }
 
-    mUnknown8c->SetSelected(kFirstButton);
-    mUnknown90 = kFirstController;
+    mOptionButtons->SetSelected(kFirstButton);
+    mControllerIndex = kFirstController;
     MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kTitleKey));
     MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mOptionButtons->mSelected], mRenderer->mAnimationFrame);
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MetScreen::EnterAndShow();
 }
 
 // 0x00207fc0
-void MetConfigOptionsButtonsScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+void MetConfigOptionsButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     HxStr name(pButton->mName);
     if (name == kControllerButton || name == kMemoryButton || name == kGameButton ||
         name == kCreditsButton || name == kDiscButton) {
-        mUnknown18 = kExitToButton;
+        mExitChoice = kExitToButton;
         ExitScreenByName(HxStr(kRightGizmoScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
@@ -167,9 +167,9 @@ void MetConfigOptionsButtonsScreen::OnUnknownSlot30(Rnd::Button *pButton) {
 }
 
 // 0x00208270
-void MetConfigOptionsButtonsScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitCancelled) {
-        if (MetFrontEndState::shared()->mUnknown24 == kPauseGameScreen) {
+void MetConfigOptionsButtonsScreen::OnExitFinished() {
+    if (mExitChoice == kExitCancelled) {
+        if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen) {
             ExitScreenByName(HxStr(kHelpScreen));
             PushNamedScreen(HxStr(kPauseGameScreen));
             ActivateNamedPanel(HxStr(kPauseGameScreen));
@@ -182,15 +182,15 @@ void MetConfigOptionsButtonsScreen::OnUnknownSlot36() {
         return;
     }
 
-    HxStr name(mUnknown8c->mUnknown00->mName);
+    HxStr name(mOptionButtons->mSelectedButton->mName);
     if (name == kControllerButton) {
         // Yes, the binary does not test the cast for null.
         dynamic_cast<MetConfigControllerScreen *>(FindScreenByName(HxStr(kControllerScreen)))
-            ->mUnknownc8 = mUnknown90;
+            ->mControllerIndex = mControllerIndex;
         PushNamedScreen(HxStr(kControllerScreen));
         ActivateNamedPanel(HxStr(kControllerScreen));
     } else if (name == kMemoryButton) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kThisScreen);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kThisScreen);
         PushNamedScreen(HxStr(kMemCardLoadScreen));
         ActivateNamedPanel(HxStr(kMemCardLoadScreen));
     } else if (name == kGameButton) {
@@ -225,5 +225,5 @@ MetConfigOptionsButtonsScreen *MetConfigOptionsButtonsScreen::New(MetRenderer *p
 
 // 0x0020c088
 MetConfigOptionsButtonsScreen::~MetConfigOptionsButtonsScreen() {
-    delete mUnknown8c;
+    delete mOptionButtons;
 }

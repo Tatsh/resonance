@@ -15,11 +15,11 @@
  * The constructor at `0x00240c28` takes only the renderer and the load priority, and supplies
  * `jbb` for the screen name, `metagame/Shared` for the directory, and `juke_butts` for the
  * container. It zeroes the members below and then allocates a MetButtonList of 0x18 bytes tagged
- * `MetButtonList` into mUnknown94.
+ * `MetButtonList` into mButtons.
  *
  * The destructor at `0x00246778` restores the vptr, frees the buffer at `+0x90` through the
  * untagged path, runs the MetScreen destructor, and releases the object with the tag `MsgSink`.
- * That free is the inlined HxStr destructor of mUnknown8c rather than a statement of the
+ * That free is the inlined HxStr destructor of mCommandTargetScreen rather than a statement of the
  * destructor's own, which is what identifies the eight bytes at `+0x8c` as an `HxStr`. The
  * constructor zeroing both of its words, and the destructor freeing the second word alone, are
  * the two halves of that evidence. An earlier reading recorded the four words as integers and
@@ -28,8 +28,8 @@
  * Nothing frees the button list, so it is never released.
  *
  * The four buttons each show one or two of five sub-screens (custom remixes, factory remixes, the
- * playlist editor, its lower-left panel, and its done panel), and mUnknown8c records the one that
- * receives the commands this screen does not consume.
+ * playlist editor, its lower-left panel, and its done panel), and mCommandTargetScreen records the
+ * one that receives the commands this screen does not consume.
  *
  * Nine slots differ from the MetScreen table.
  *
@@ -37,9 +37,9 @@
  *  - 5 `0x00241b08` EnterAndShow().
  *  - 9 `0x00242140` BeginExit().
  *  - 19 `0x002467e8` HandleCommand().
- *  - 26 `0x002468d8` OnUnknownSlot26(), overridden empty.
- *  - 33 `0x002468b8` OnUnknownSlot33().
- *  - 36 `0x00241120` OnUnknownSlot36().
+ *  - 26 `0x002468d8` UpdateIdle(), overridden empty.
+ *  - 33 `0x002468b8` OnEnterFinished().
+ *  - 36 `0x00241120` OnExitFinished().
  *  - 38 `0x00240e28` ResolveContainerViews().
  */
 class MetJukeboxTopButtonsScreen : public MetScreen {
@@ -73,11 +73,11 @@ public:
     /**
      * Enter, wait for the five sub-screens to load, push them, and show the first button's panel.
      *
-     * The title is the `met_jukebox_title` title. When MetFrontEndState::mUnknown18 is set, the
-     * value moves to MetFrontEndState::mUnknown1c, the help screen takes the `standard_title`
-     * layout and is pushed, and this screen becomes the renderer's active panel. The load wait
-     * pumps the asynchronous loaders until every sub-screen reports its container loaded, and
-     * MetRemixManager::PrunePlayList() runs before the sub-screens are pushed.
+     * The title is the `met_jukebox_title` title. When MetFrontEndState::mPendingTransition is set,
+     * the value moves to MetFrontEndState::mLastTransition, the help screen takes the
+     * `standard_title` layout and is pushed, and this screen becomes the renderer's active panel.
+     * The load wait pumps the asynchronous loaders until every sub-screen reports its container
+     * loaded, and MetRemixManager::PrunePlayList() runs before the sub-screens are pushed.
      *
      * @ghidraAddress 0x00241b08
      */
@@ -94,8 +94,8 @@ public:
      * Act on a command.
      *
      * Left and right step the button ring and show the new button's panel. Back records 0 in
-     * MetScreen::mUnknown18 and begins the exit. Every other command goes to the sub-screen that
-     * mUnknown8c records.
+     * MetScreen::mExitChoice and begins the exit. Every other command goes to the sub-screen that
+     * mCommandTargetScreen records.
      *
      * @param pCommand The command.
      * @ghidraAddress 0x002467e8
@@ -108,24 +108,24 @@ public:
      * @param flTime Not read.
      * @ghidraAddress 0x002468d8
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Show the selected button's panel.
      *
      * @ghidraAddress 0x002468b8
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Return to the remix type screen after a cancel.
      *
-     * When MetScreen::mUnknown18 is 0, the left gizmo, title, and remix type screens are pushed
+     * When MetScreen::mExitChoice is 0, the left gizmo, title, and remix type screens are pushed
      * and the remix type screen is activated. Any other value does nothing.
      *
      * @ghidraAddress 0x00241120
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views and add the four buttons.
@@ -139,10 +139,11 @@ public:
 
 private:
     // Hide the five sub-screens, show the ones the selected button owns, record the sub-screen
-    // that receives commands in mUnknown8c, and replace the title. 0x00241320
+    // that receives commands in mCommandTargetScreen, and replace the title. 0x00241320
     void ShowSelectedPanel();
 
-    HxStr mUnknown8c;          // +0x8c
-    MetButtonList *mUnknown94; // +0x94
-    int mUnknown98;            // +0x98
+    HxStr mCommandTargetScreen; // +0x8c
+    MetButtonList *mButtons;    // +0x94
+    // Zeroed by the constructor and never read or written again.
+    int mUnused; // +0x98
 };

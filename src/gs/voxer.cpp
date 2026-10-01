@@ -24,7 +24,7 @@
 
 namespace {
 
-// The value the constructor gives mPhraseBar and mUnknown60.
+// The value the constructor gives mPhraseBar and mUnreadSentinel.
 constexpr int kNoValue = -1;
 
 // The sustain controller the Voxer drives, and its two values.
@@ -60,31 +60,31 @@ Voxer::Voxer(PhraseMgr *pPhraseMgr,
              Sch::TickClock *pClock,
              const TrackData *pTrackData)
     : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrackData(pTrackData),
-      mUnknown44(pTrackData->mUnknown04), mUnknown48(pPhraseMgr->mBarTicks),
-      mChannel(pTrackData->mChannel), mUnknown50(&g_nullPlayer), mSustaining(0), mPhrase(nullptr),
-      mPhraseBar(kNoValue), mUnknown60(kNoValue) {
+      mTrack(pTrackData->mIndex), mBarTicks(pPhraseMgr->mBarTicks), mChannel(pTrackData->mChannel),
+      mPlayer(&g_nullPlayer), mSustaining(0), mPhrase(nullptr), mPhraseBar(kNoValue),
+      mUnreadSentinel(kNoValue) {
 }
 
 // 0x001d8370
 void Voxer::OnPitchRiff(PitchRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mUnknown44 || pMsg->mUnknown08 != mUnknown50) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer) {
         return;
     }
-    mHeldLevels.set(static_cast<unsigned int>(pMsg->mUnknown04) % kLevelBits);
-    UpdateSustain(pMsg->mUnknown0c.mTick);
-    AxeButtonMsg press(kButtonPressed, 0, mUnknown50);
+    mHeldLevels.set(static_cast<unsigned int>(pMsg->mButton) % kLevelBits);
+    UpdateSustain(pMsg->mPosition.mTick);
+    AxeButtonMsg press(kButtonPressed, 0, mPlayer);
     Send(&press);
 }
 
 // 0x001d8430
 void Voxer::OnStopRiff(StopRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mUnknown44 || pMsg->mPlayer != mUnknown50) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer) {
         return;
     }
-    mHeldLevels.reset(static_cast<unsigned int>(pMsg->mUnknown04) % kLevelBits);
+    mHeldLevels.reset(static_cast<unsigned int>(pMsg->mButton) % kLevelBits);
     UpdateSustain(pMsg->mPosition.mTick);
     if (!mHeldLevels.any()) {
-        AxeButtonMsg release(kButtonReleased, 0, mUnknown50);
+        AxeButtonMsg release(kButtonReleased, 0, mPlayer);
         Send(&release);
     }
 }
@@ -95,7 +95,7 @@ void Voxer::UpdateSustain(int nTick) {
     if (mSustaining == bHeld) {
         return;
     }
-    if (QueryBar(mQuantizer->Quantize(nTick) / mUnknown48) == 0) {
+    if (QueryBar(mQuantizer->Quantize(nTick) / mBarTicks) == 0) {
         PlaySoundByName(kInactiveSound);
         return;
     }
@@ -106,7 +106,7 @@ void Voxer::UpdateSustain(int nTick) {
                        bHeld != 0 ? kSustainHeld : kSustainReleased);
     mSustaining = bHeld;
     StartPhrase(nTick);
-    mPhrase->AddMuseMsg(Mid::MBT(nTick % mUnknown48).mTick, &sustain);
+    mPhrase->AddMuseMsg(Mid::MBT(nTick % mBarTicks).mTick, &sustain);
     Send(&sustain);
 }
 
@@ -124,7 +124,7 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) != mUnknown50) {
+        if (mPhraseMgr->GetPhraseOwner(nClear) != mPlayer) {
             continue;
         }
         bErased = 1;
@@ -141,7 +141,7 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
     }
     if (bAnnounce != 0) {
         PlaySoundByName(bWholeStep != 0 ? kEraseStepSound : kEraseBarSound);
-        ShowEraseEffectMsg effect(mUnknown50, mUnknown44, nFirstBar, nEndBar, kEraseEffectFlag);
+        ShowEraseEffectMsg effect(mPlayer, mTrack, nFirstBar, nEndBar, kEraseEffectFlag);
         Send(&effect);
     }
     OnInvalidateSeeker(nBar);
@@ -149,41 +149,41 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
 
 // 0x001d8840
 void Voxer::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mUnknown44 || pMsg->mUnknown08 != 0) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
     }
 
-    if (mHeldLevels.any() && mUnknown50->IsNull() == 0) {
+    if (mHeldLevels.any() && mPlayer->IsNull() == 0) {
         mHeldLevels.reset();
         UpdateSustain(pMsg->mPosition.mTick);
-        AxeButtonMsg release(kButtonReleased, 0, mUnknown50);
+        AxeButtonMsg release(kButtonReleased, 0, mPlayer);
         Send(&release);
     }
 
-    mUnknown50 = pMsg->mUnknown10;
-    if (mUnknown50->IsNull() != 0) {
+    mPlayer = pMsg->mPlayer;
+    if (mPlayer->IsNull() != 0) {
         return;
     }
     NowBarMsg nowBar;
-    nowBar.mUnknown04 = mUnknown44;
-    nowBar.mPlayer = mUnknown50;
+    nowBar.mTrack = mTrack;
+    nowBar.mPlayer = mPlayer;
     nowBar.mLane = kCenterLane;
     Send(&nowBar);
-    OnInvalidateSeeker(pMsg->mPosition.mTick / mUnknown48);
+    OnInvalidateSeeker(pMsg->mPosition.mTick / mBarTicks);
 }
 
 // 0x001d89d0
 void Voxer::StartPhrase(int nTick) {
-    const int nBar = nTick / mUnknown48;
+    const int nBar = nTick / mBarTicks;
     if (nBar == mPhraseBar) {
         return;
     }
 
     FinishPhrase(mPhraseBar);
-    BarStatusMsg status(nBar, mUnknown44, mUnknown50);
+    BarStatusMsg status(nBar, mTrack, mPlayer);
     Send(&status);
     mPhrase = new Phrase();
-    mPhrase->mPlayer = mUnknown50;
+    mPhrase->mPlayer = mPlayer;
     mPhraseBar = nBar;
     OnErase(nBar, 0, 0);
 }
@@ -195,8 +195,8 @@ void Voxer::FinishPhrase(int nBar) {
     }
 
     if (mSustaining != 0) {
-        const Mid::MBT lastTick = MakePosition(mUnknown48 - Mid::MBT(1).mTick);
-        const Mid::MBT barStart = MakePosition(mUnknown48 * nBar);
+        const Mid::MBT lastTick = MakePosition(mBarTicks - Mid::MBT(1).mTick);
+        const Mid::MBT barStart = MakePosition(mBarTicks * nBar);
         const Mid::MBT when = MakePosition(lastTick.mTick + barStart.mTick);
         StdMidiMsg release(
             when.mTick, kControlChange | mChannel, kSustainController, kSustainReleased);
@@ -209,7 +209,7 @@ void Voxer::FinishPhrase(int nBar) {
     mPhrase = nullptr;
 
     if (mSustaining != 0) {
-        const Mid::MBT nextBar = MakePosition(mUnknown48 * (nBar + 1));
+        const Mid::MBT nextBar = MakePosition(mBarTicks * (nBar + 1));
         StartPhrase(nextBar.mTick);
         StdMidiMsg hold(nextBar.mTick, kControlChange | mChannel, kSustainController, kSustainHeld);
         mPhrase->AddMuseMsg(Mid::MBT(0).mTick, &hold);
@@ -219,7 +219,7 @@ void Voxer::FinishPhrase(int nBar) {
 
 // 0x001d8dc8
 int Voxer::Tick(int nElapsedTicks) {
-    const int nBar = nElapsedTicks / mUnknown48;
+    const int nBar = nElapsedTicks / mBarTicks;
     if (nBar == 0) {
         StdMidiMsg release(
             kMBTInfinity, kControlChange | mChannel, kSustainController, kSustainReleased);
@@ -234,9 +234,9 @@ int Voxer::Tick(int nElapsedTicks) {
         mHeldLevels.reset();
         mSustaining = 0;
         StartPhrase(nElapsedTicks);
-        mPhrase->AddMuseMsg(Mid::MBT(nElapsedTicks % mUnknown48).mTick, &release);
+        mPhrase->AddMuseMsg(Mid::MBT(nElapsedTicks % mBarTicks).mTick, &release);
         Send(&release);
-        AxeButtonMsg button(kButtonReleased, 0, mUnknown50);
+        AxeButtonMsg button(kButtonReleased, 0, mPlayer);
         Send(&button);
     }
     return 1;
@@ -244,10 +244,10 @@ int Voxer::Tick(int nElapsedTicks) {
 
 // 0x001d8fb0
 void Voxer::OnInvalidateSeeker(int) {
-    if (mUnknown50->IsNull() != 0) {
+    if (mPlayer->IsNull() != 0) {
         return;
     }
-    SeekerMsg off(mUnknown50);
+    SeekerMsg off(mPlayer);
     Send(&off);
 }
 
@@ -264,13 +264,13 @@ void Voxer::HandleMessage(Message *pMsg) {
     }
     if (nType == static_cast<int>(g_nEraseMsgType)) {
         EraseMsg *pErase = static_cast<EraseMsg *>(pMsg);
-        if (pErase->mUnknown0c != mUnknown44) {
+        if (pErase->mTrack != mTrack) {
             return;
         }
-        if (mUnknown50 != pErase->mUnknown04) {
+        if (mPlayer != pErase->mPlayer) {
             return;
         }
-        OnErase(pErase->mUnknown08.mTick / mUnknown48, pErase->mUnknown10, 1);
+        OnErase(pErase->mPosition.mTick / mBarTicks, pErase->mDoubleTap, 1);
         return;
     }
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
@@ -279,8 +279,8 @@ void Voxer::HandleMessage(Message *pMsg) {
     }
     if (nType == static_cast<int>(g_nInvalidateSeekerMsgType)) {
         InvalidateSeekerMsg *pInvalidate = static_cast<InvalidateSeekerMsg *>(pMsg);
-        if (pInvalidate->mUnknown08 == mUnknown44) {
-            OnInvalidateSeeker(pInvalidate->mUnknown04);
+        if (pInvalidate->mTrack == mTrack) {
+            OnInvalidateSeeker(pInvalidate->mBar);
         }
     }
 }
@@ -291,19 +291,19 @@ Voxer::~Voxer() {
 
 // 0x001d9e40
 void Voxer::OnEraseMsg(EraseMsg *pMsg) {
-    if (pMsg->mUnknown0c != mUnknown44) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (mUnknown50 != pMsg->mUnknown04) {
+    if (mPlayer != pMsg->mPlayer) {
         return;
     }
-    OnErase(pMsg->mUnknown08.mTick / mUnknown48, pMsg->mUnknown10, 1);
+    OnErase(pMsg->mPosition.mTick / mBarTicks, pMsg->mDoubleTap, 1);
 }
 
 // 0x001d9e98
 void Voxer::OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg) {
-    if (pMsg->mUnknown08 == mUnknown44) {
-        OnInvalidateSeeker(pMsg->mUnknown04);
+    if (pMsg->mTrack == mTrack) {
+        OnInvalidateSeeker(pMsg->mBar);
     }
 }
 

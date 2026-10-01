@@ -28,14 +28,14 @@ MetaGameWorld::~MetaGameWorld() {
 }
 
 // 0x003d3288
-void MetaGameWorld::OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4) {
-    mCheatDetector->OnUnknownSlot2(nUnknown1, nUnknown2, nUnknown3, flUnknown4);
+void MetaGameWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue) {
+    mCheatDetector->OnControllerReading(nTag, nPadIndex, nButton, flValue);
 
     MetControllerReading reading;
-    reading.mTag = nUnknown1;
-    reading.mPadIndex = nUnknown2;
-    reading.mButton = nUnknown3;
-    reading.mValue = flUnknown4;
+    reading.mTag = nTag;
+    reading.mPadIndex = nPadIndex;
+    reading.mButton = nButton;
+    reading.mValue = flValue;
 
     RawControllerMsg message;
     message.mReading = reading;
@@ -64,19 +64,19 @@ RendererBase *MetaGameWorld::GetRenderer() {
 }
 
 // 0x003d4860
-void MetaGameWorld::OnUnknownForwarder003d4860() {
-    mRenderer->OnUnknownSlot4();
+void MetaGameWorld::StartFrontEnd() {
+    mRenderer->Start();
 }
 
 // 0x003d4890
-void MetaGameWorld::OnUnknownForwarder003d4890() {
-    mRenderer->OnUnknownSlot5();
+void MetaGameWorld::StopFrontEnd() {
+    mRenderer->Stop();
 }
 
 // 0x003d48c0
-int MetaGameWorld::OnUnknownQuery003d48c0() {
+int MetaGameWorld::IsAwaitingStart() {
     if (QueryConfigFlag(kNullRendererOption) != 0) {
         return 0;
     }
-    return static_cast<MetRenderer *>(mRenderer)->mUnknown60;
+    return static_cast<MetRenderer *>(mRenderer)->mTitlePromptShowing;
 }

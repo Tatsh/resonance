@@ -89,7 +89,7 @@ private:
 
     PlayMap *mPlayMap;
     Gamer *mGamer;
-    // Player::mId20 of the first local player.
+    // Player::mPlayerId of the first local player.
     int mLocalId;
     int mTrackCount;
     int mMaxOwned;

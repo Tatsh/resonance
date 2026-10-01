@@ -68,7 +68,8 @@ enum LevelConverterTrackType {
  * Every method name below that is not a Mid::Receiver override is inferred from its body.
  */
 class LevelConverter : public Mid::Receiver {
-    // GrooveWorld::FinishLoad() at 0x00194d00 sets mUnknown90 on its local converter directly.
+    // GrooveWorld::FinishLoad() at 0x00194d00 sets mIgnoreQuantization on its local converter
+    // directly.
     friend class GrooveWorld;
 
 public:
@@ -168,9 +169,9 @@ public:
      * Receive a controller change and forward it under MIDI status 0xb0.
      *
      * Harmony and gem-span tracks reject it. On a riff track, controller 0x66 sets the bar
-     * quantisation (1, 2, 4, 8, or 16) unless mUnknown90 is set, controller 7 (volume) is
+     * quantisation (1, 2, 4, 8, or 16) unless mIgnoreQuantization is set, controller 7 (volume) is
      * rejected, and controller 0x6a forwards whether its value is non-zero through
-     * LevelBuilder::OnUnknownForwarder001ec580(). Controller 0x6a is rejected on every other
+     * LevelBuilder::SetActive(). Controller 0x6a is rejected on every other
      * track, and controllers 0x68, 0x69, 0x6b, and 11 (expression) are rejected everywhere.
      *
      * @param nTick The event position, in MIDI ticks.
@@ -238,7 +239,7 @@ public:
      * Finish the track NewTrack() began.
      *
      * A harmony that was started goes to the builder. A riff track that opened no riff forwards
-     * two zeroes through LevelBuilder::OnUnknownForwarder001ec580(). An axe riff with no length and
+     * two zeroes through LevelBuilder::SetActive(). An axe riff with no length and
      * a note on with no note off are both reported, and otherwise a riff track empties the three
      * span collections.
      *
@@ -427,7 +428,7 @@ private:
     int mScoreTrack;        // +0x2c, the score track a named track writes to
     int mBackingTrackCount; // +0x30, cleared by Convert
     int mIntroTrackCount;   // +0x34, cleared by Convert
-    int mUnknown38;         // +0x38, cleared by Convert
+    int mUnusedTrackCount;  // +0x38, cleared by Convert with the two counts above, never read
     // Set, a note on waits in mPending for its note off and the pair goes to AddNote().
     int mPairNotes; // +0x3c
     // Set, a track's events go into the current riff. Clear, they go to the builder.
@@ -448,10 +449,10 @@ private:
     // The harmony the converter builds note by note through Harmony::AddNote() (0x001e7b90) and
     // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04). The constructor, NewTrack(),
     // and 0x001e7ac0 call its implicit default constructor, emitted at 0x001ea1e8.
-    Harmony mHarmony;       // +0x7c
-    Mid::MBT mHarmonyStart; // +0x88, the position mHarmony starts at, -1 before the first note
-    int mHasTempo;          // +0x8c, cleared by Convert and set to 1 by Tempo
-    int mUnknown90;         // +0x90
+    Harmony mHarmony;        // +0x7c
+    Mid::MBT mHarmonyStart;  // +0x88, the position mHarmony starts at, -1 before the first note
+    int mHasTempo;           // +0x8c, cleared by Convert and set to 1 by Tempo
+    int mIgnoreQuantization; // +0x90
     // The gem difficulty, from configuration code 0x38a on a catch track.
     int mDifficulty;                            // +0x94
     std::vector<Span> mSpans[kDifficultyCount]; // +0x98

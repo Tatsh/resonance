@@ -12,7 +12,7 @@
  * and `+0x14`, and the three pointers follow at `+0x18`, `+0x1c`, and `+0x20`.
  *
  * The class adds no virtual of its own and overrides six of HxStream's seven, retaining only
- * Unknown7(). The range belongs to the caller, and the destructor releases only the name.
+ * UnderlyingStream(). The range belongs to the caller, and the destructor releases only the name.
  *
  * Write() always reports a fatal error, which is what makes the stream read-only. One call site
  * constructs one, at `0x001e676c`.

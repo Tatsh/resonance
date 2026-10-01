@@ -57,16 +57,15 @@ class MetFade;
  * descriptor pins the total, and the figure is the lower bound the constructor's highest store
  * gives.
  *
- * Six of the eight RendererBase overrides have no recovered name, because RendererBase itself
- * supplies none. Each is documented under the placeholder the base declares it as, and what the
- * override does is recorded on the declaration.
+ * Six of the eight RendererBase overrides take the names RendererBase declares them under, and
+ * what each override does is recorded on its declaration.
  *
  * `0x00390088` and `0x00390090` are empty bodies that take the renderer. Every caller, from nine
  * screens and the renderer's own OnFreqEnded(), reaches the same single copy of each, so they are
- * ordinary members, OnUnknown00390088() and OnUnknown00390090().
+ * ordinary members, OnReturnFromGame() and OnReturnToMenus().
  */
 class MetRenderer : public MsgSource, public RendererBase, public FadeUser {
-    // MetaGameWorld::OnUnknownQuery003d48c0() at 0x003d48c0 reads mUnknown60 directly.
+    // MetaGameWorld::IsAwaitingStart() at 0x003d48c0 reads mTitlePromptShowing directly.
     friend class MetaGameWorld;
 
 public:
@@ -103,7 +102,7 @@ public:
      * A RawControllerMsg is decoded into a MetScreenCommand and delivered to the active panel. A
      * MetStartNetLaunchMsg and a LobbyConnectionLostMsg are forwarded to the active panel's
      * MsgSink::Handle(). A GameConnectionLostMsg is discarded. An IsRecordingMsg stores its payload
-     * in mUnknown78.
+     * in mRecording.
      *
      * @param pMsg The message to dispatch.
      * @ghidraAddress 0x0036c5d8
@@ -113,76 +112,76 @@ public:
     /**
      * Start the front end running.
      *
-     * RendererBase slot 4, whose verb the base does not supply. Clears the auto-repeat state, sets
-     * mUnknowna8, rewinds the animation frame to 1.0f, and records the current time as the frame
-     * base in mUnknown70.
+     * RendererBase slot 4, empty in the base. Clears the auto-repeat state, sets
+     * mRunning, rewinds the animation frame to 1.0f, and records the current time as the frame
+     * base in mPreviousFrameNs.
      *
      * @ghidraAddress 0x0036a900
      */
-    virtual void OnUnknownSlot4();
+    virtual void Start();
 
     /**
      * Stop the front end running.
      *
-     * RendererBase slot 5, whose verb the base does not supply. Clears mUnknowna8, resets the
+     * RendererBase slot 5, empty in the base. Clears mRunning, resets the
      * command repeater, empties the screen stack one element at a time from the front, releases
      * both scene views, clears the active panel, and stops `SND_MET_MUSIC1` unless
-     * MetFrontEndState::mUnknown18 is 2. The destructor calls the routine directly.
+     * MetFrontEndState::mPendingTransition is 2. The destructor calls the routine directly.
      *
      * @ghidraAddress 0x0036b0c0
      */
-    virtual void OnUnknownSlot5();
+    virtual void Stop();
 
     /**
      * Advance the front end by one frame, including the boot and disc-problem phases.
      *
      * RendererBase slot 7, where the base stores the `__pure_virtual` stub. Four phases, each
      * guarded by its own flag. The boot phase waits for the three container loads, runs
-     * OnUnknownSlot4() through the table, and makes `MetMemDetectStartup` the active panel. The
+     * Start() through the table, and makes `MetMemDetectStartup` the active panel. The
      * disc-problem phase starts the front-end music and promotes the pending panel. The third
      * phase shows or hides `met_disc_prob.view`. The frame phase advances the animation frame and
      * runs MetScreen::UpdateFrame() on every screen on the stack.
      *
      * @ghidraAddress 0x0036b190
      */
-    virtual void OnUnknownSlot7();
+    virtual void Update();
 
     /**
      * Draw the front-end scene, every screen, and the debug overlays.
      *
      * RendererBase slot 8, where the base stores the `__pure_virtual` stub. Draws nothing at all
-     * while mUnknowna8 is clear.
+     * while mRunning is clear.
      *
      * @ghidraAddress 0x00371670
      */
-    virtual void OnUnknownSlot8();
+    virtual void Draw();
 
     /**
      * Advance every screen's animation frame.
      *
-     * RendererBase slot 9, whose verb the base does not supply. The routine differs from
-     * OnUnknownSlot7()'s frame phase in exactly one respect: it runs
+     * RendererBase slot 9, empty in the base. The routine differs from
+     * Update()'s frame phase in exactly one respect: it runs
      * MetScreen::UpdateAnimationFrame() where the poll routine runs MetScreen::UpdateFrame().
      *
      * @ghidraAddress 0x0036b740
      */
-    virtual void OnUnknownSlot9();
+    virtual void UpdateSimple();
 
     /**
      * Draw the front-end scene and the debug overlays, and no screen.
      *
-     * RendererBase slot 10, whose verb the base does not supply. The routine is OnUnknownSlot8()
+     * RendererBase slot 10, empty in the base. The routine is Draw()
      * without the pre-pass and without the walk of the screen stack.
      *
      * @ghidraAddress 0x00371570
      */
-    virtual void OnUnknownSlot10();
+    virtual void DrawSimple();
 
     /**
      * Promote the pending panel and start it entering.
      *
-     * FadeUser slot 2. Does nothing while mUnknownc8 is set. The same five-step promotion appears
-     * twice more inside OnUnknownSlot7().
+     * FadeUser slot 2. Does nothing while mDiscProblemPending is set. The same five-step promotion
+     * appears twice more inside Update().
      *
      * @ghidraAddress 0x003715e0
      */
@@ -202,7 +201,7 @@ public:
     /**
      * Record one screen as the active panel.
      *
-     * Stores pScreen in mUnknown7c and then, when the auto-repeat table is present, clears it.
+     * Stores pScreen in mActivePanel and then, when the auto-repeat table is present, clears it.
      * The title is inferred from the field MetScreen slot 6 pairs the call with.
      *
      * @param pScreen The screen to record.
@@ -215,22 +214,26 @@ public:
      *
      * A two-instruction `jr ra` body that about ten screens call as they enter or return to the
      * title, among them MetSaveRemixScreen::EnterAndShow(), MetSoloEndRemixScreen::ReturnToTitle(),
-     * and MetSoloWinScreen's slot 36. The caller passes the renderer as the receiver. Its purpose
-     * is not recovered.
+     * and MetSoloWinScreen's slot 36. The caller passes the renderer as the receiver.
+     * OnFreqEnded() calls it on every path from a finished song to a front-end screen other than
+     * the end-of-game screen. The title records that return. The body supplies no further
+     * evidence.
      *
      * @ghidraAddress 0x00390088
      */
-    void OnUnknown00390088();
+    void OnReturnFromGame();
 
     /**
      * Do nothing.
      *
-     * A two-instruction `jr ra` body that the same screens call after OnUnknown00390088(). Its
-     * purpose is not recovered.
+     * A two-instruction `jr ra` body that the same screens call after OnReturnFromGame().
+     * OnFreqEnded() calls it on the paths that also clear GameParams::mLoadingGame and return to
+     * a selection menu, and MetMainScreen calls it alone as the solo and multiplayer menus open.
+     * The title records that return to the menus. The body supplies no further evidence.
      *
      * @ghidraAddress 0x00390090
      */
-    void OnUnknown00390090();
+    void OnReturnToMenus();
 
     /**
      * Resolve `Metagame_arena.view` and attach it to the background scene.
@@ -248,9 +251,9 @@ public:
 
     /**
      * Release the animatable, drawable, and transformable lists of the background scene at
-     * mUnknowna4.
+     * mBackgroundScene.
      *
-     * The title is inferred. OnUnknownSlot5() calls it, and so do MetSonyScreen's finishing
+     * The title is inferred. Stop() calls it, and so do MetSonyScreen's finishing
      * routine at `0x003ba620` and MetLoadGameScreen::OnFadeInDone() at `0x0028e02c` from outside
      * the class, which is why it is public. The image has no accessor to route those calls through.
      *
@@ -260,7 +263,7 @@ public:
 
     /**
      * Attach the three animatable, drawable, and transformable subobjects of one view to the
-     * screen scene at mUnknowna0.
+     * screen scene at mScreenScene.
      *
      * Each of the three is appended only when the scene does not already store it, which the three
      * membership tests at `0x00370ab8`, `0x00370b08`, and `0x00370b58` decide. A null view is
@@ -272,7 +275,7 @@ public:
     void AddScreenView(Rnd::View *pView);
 
     /**
-     * Attach one view to the background scene at mUnknowna4.
+     * Attach one view to the background scene at mBackgroundScene.
      *
      * The body is AddScreenView() against the other scene, instruction for instruction, including
      * the three membership tests and the null pass-through. The title is inferred.
@@ -283,7 +286,7 @@ public:
     void AddBackgroundView(Rnd::View *pView);
 
     /**
-     * Detach one view from the screen scene at mUnknowna0.
+     * Detach one view from the screen scene at mScreenScene.
      *
      * The counterpart of AddScreenView(). The transformable, drawable, and animatable subobjects
      * are removed in that order, and a null view is passed through to all three as null. The title
@@ -431,11 +434,11 @@ public:
      * MetScreen reads this field and passes it straight to its own enter and exit animation
      * virtuals at vtable slots 31 and 34, both of which take a float, and every screen that starts
      * a prompt or a title passes it on. The units are animation frames rather than seconds, which
-     * mUnknown64 fixes.
+     * mFrameRate fixes.
      *
      * +0x68
      */
-    float mUnknown68;
+    float mAnimationFrame;
 
     /**
      * Flag that MetScreen sets when it activates a named sub-screen and clears when it activates
@@ -447,17 +450,17 @@ public:
      *
      * +0x80
      */
-    int mUnknown80;
+    int mPanelActive;
 
 private:
     // 0x0036a680
     // Resolves the three scene views and the fade, and is reached only from
-    // OnUnknownSlot7()'s boot phase. The title is inferred from the three fields it writes.
+    // Update()'s boot phase. The title is inferred from the three fields it writes.
     void ResolveSceneViews();
 
     // 0x003719a0
     // Releases the animatable, drawable, and transformable lists of the screen scene
-    // at mUnknowna0. OnUnknownSlot5() is its one caller. The title is inferred.
+    // at mScreenScene. Stop() is its one caller. The title is inferred.
     void ClearScreenScene();
 
     // 0x0036b938
@@ -519,83 +522,83 @@ private:
 
 public:
     /**
-     * Zeroed by the constructor. MetaGameWorld::OnUnknownQuery003d48c0() reads it. Public because
+     * Zeroed by the constructor. MetaGameWorld::IsAwaitingStart() reads it. Public because
      * MetLogoScreen writes it directly, 1 in slot 33 at `0x002bae40` and 0 in slot 19 at
      * `0x002be4d8`, and the image has no accessor for it. +0x60
      */
-    int mUnknown60;
+    int mTitlePromptShowing;
 
 private:
     // Rate the animation frame advances at, in frames per second. The constructor sets 500.0f, and
-    // both frame routines compute `mUnknown68 += mUnknown64 * elapsedMilliseconds / 1000.0f`.
-    float mUnknown64; // +0x64
+    // both frame routines compute `mAnimationFrame += mFrameRate * elapsedMilliseconds / 1000.0f`.
+    float mFrameRate; // +0x64
     // +0x6c. The constructor does not write it and no reader is identified.
-    int mUnknown6c;
+    int mReserved;
     // Time the previous frame ran at, in nanoseconds since the watchdog's base. Both frame
     // routines difference it against the current time and then overwrite it.
-    long long mUnknown70; // +0x70
+    long long mPreviousFrameNs; // +0x70
     // Payload of the last IsRecordingMsg. HandleMessage() is the one writer.
-    int mUnknown78; // +0x78
+    int mRecording; // +0x78
     // The screen that receives decoded commands. SetActivePanel() is the named writer, and the two
     // promotion sequences write it directly.
-    MetScreen *mUnknown7c; // +0x7c
+    MetScreen *mActivePanel; // +0x7c
     // Every screen the front end is showing, in the order it was pushed. AddScreen() appends and
-    // RemoveScreen() erases, and both set mUnknown98 afterwards.
-    std::vector<MetScreen *> mUnknown84; // +0x84
+    // RemoveScreen() erases, and both set mScreensChanged afterwards.
+    std::vector<MetScreen *> mScreens; // +0x84
     // Translates a controller reading into a command. Allocated by the constructor as twelve bytes
     // and released by the destructor. The class name is inferred, for the reason its own header
     // records.
-    MetCommandMap *mUnknown90; // +0x90
+    MetCommandMap *mCommandMap; // +0x90
     // One auto-repeat record per controller. Allocated by the constructor as twelve bytes and
     // released by the destructor. The class name is inferred on the same basis.
-    MetCommandRepeater *mUnknown94; // +0x94
-    // Set by AddScreen() and RemoveScreen() once either has changed mUnknown84. Both frame
+    MetCommandRepeater *mCommandRepeater; // +0x94
+    // Set by AddScreen() and RemoveScreen() once either has changed mScreens. Both frame
     // routines abandon their walk of the stack when they observe it, because the change
     // invalidated the iterator they were holding.
-    int mUnknown98; // +0x98
+    int mScreensChanged; // +0x98
     // `met top view`, the front-end shell. Both draw routines draw it and both frame routines set
     // its frame.
-    Rnd::View *mUnknown9c; // +0x9c
+    Rnd::View *mTopView; // +0x9c
     // `metscreens.view`, the scene AddScreenView() attaches a screen's view to.
-    Rnd::View *mUnknowna0; // +0xa0
+    Rnd::View *mScreenScene; // +0xa0
     // `meta bg view`, the scene AddBackgroundView() attaches to.
-    Rnd::View *mUnknowna4; // +0xa4
+    Rnd::View *mBackgroundScene; // +0xa4
     // Set while the front end is running. Every draw and frame routine returns at once when it is
     // clear.
-    int mUnknowna8; // +0xa8
+    int mRunning; // +0xa8
     // Draw the subsystem timing graph. Filled from configuration code 0x397.
-    int mUnknownac; // +0xac
+    int mShowTimingGraph; // +0xac
     // Draw the render-statistics overlay. Filled from configuration code 0x3a2.
-    int mUnknownb0; // +0xb0
+    int mShowRenderStats; // +0xb0
     // +0xb4. The constructor sets 1 and no reader is identified.
-    int mUnknownb4;
+    int mUnreadFlag;
     // Set while the three boot container loads are outstanding. The poll routine clears it once
     // all three report complete.
-    int mUnknownb8; // +0xb8
+    int mBootLoadPending; // +0xb8
     // +0xbc. Zeroed by the constructor and read nowhere that has been identified.
-    int mUnknownbc;
+    int mUnreadValue;
     // +0xc0. The constructor creates the list's dummy node inline under the allocation tag
     // `stl_list` for a four-byte element, and the destructor clears the list through 0x00272ee8
     // and returns the node. Nothing that has been read appends to it or walks it, so the element
     // type is not recovered, and int stands in for the four-byte element.
-    std::list<int> mUnknownc0;
+    std::list<int> mUnusedList;
     // The screen the next fade promotes to the active panel.
-    MetScreen *mUnknownc4; // +0xc4
+    MetScreen *mPendingPanel; // +0xc4
     // Set while the disc-problem phase of the poll routine has work outstanding.
-    int mUnknownc8; // +0xc8
+    int mDiscProblemPending; // +0xc8
     // The fade, allocated by ResolveSceneViews() as forty-four bytes. The destructor releases it
     // with the scalar free rather than through a destructor, which is what a class with no virtual
     // and no member needing teardown compiles to.
-    MetFade *mUnknowncc; // +0xcc
+    MetFade *mFade; // +0xcc
     // Set while a fade is running. Both the poll routine and the fade-finished override return
     // early on it rather than promoting a panel.
-    int mUnknownd0; // +0xd0
+    int mFading; // +0xd0
 
 public:
     /**
      * Highest pad index HandleMessage() accepts a RawControllerMsg from. The constructor sets 4.
-     * The test is `mUnknownd4 < padIndex`, and index 4 is accepted while index 5 is not.
+     * The test is `mMaxPadIndex < padIndex`, and index 4 is accepted while index 5 is not.
      * MetMainScreen writes it at `0x002c6dc0` (slot 5) and `0x002c7520`. +0xd4
      */
-    int mUnknownd4;
+    int mMaxPadIndex;
 };

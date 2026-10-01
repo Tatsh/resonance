@@ -34,7 +34,7 @@ void PhraseDatabase::operator delete(void *pBlock) {
 // 0x001b72d8
 PhraseDatabase::PhraseDatabase(PlayMap *pMap) : mMap(pMap) {
     mPhrases.resize(pMap->mSteps.back());
-    mUnknown20.resize(pMap->mSteps.size() - 1);
+    mStepEffects.resize(pMap->mSteps.size() - 1);
 }
 
 // 0x001b75e8
@@ -64,11 +64,11 @@ void PhraseDatabase::Save(OBStream &stream) {
         stream << mPhrases[i];
     }
 
-    const int nValueCount = mUnknown20.size();
+    const int nValueCount = mStepEffects.size();
     stream.Write(&nValueCount, sizeof(nValueCount));
-    for (unsigned i = 0; i < mUnknown20.size(); ++i) {
+    for (unsigned i = 0; i < mStepEffects.size(); ++i) {
         // The unsigned long overload writes the low word.
-        stream << static_cast<unsigned long>(mUnknown20[i]);
+        stream << static_cast<unsigned long>(mStepEffects[i]);
     }
 }
 
@@ -87,9 +87,9 @@ void PhraseDatabase::Load(IBStream &stream) {
 
     stream.Read(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {
-        int nValue;
-        stream.Read(&nValue, sizeof(nValue));
-        mUnknown20[i] = nValue;
+        int nEffects;
+        stream.Read(&nEffects, sizeof(nEffects));
+        mStepEffects[i] = nEffects;
     }
 }
 
@@ -97,7 +97,7 @@ void PhraseDatabase::Load(IBStream &stream) {
 void PhraseDatabase::Clear() {
     std::for_each(mPhrases.begin(), mPhrases.end(), Attachment::ReleaseIfSet);
     std::fill(mPhrases.begin(), mPhrases.end(), static_cast<Phrase *>(nullptr));
-    std::fill(mUnknown20.begin(), mUnknown20.end(), 0LL);
+    std::fill(mStepEffects.begin(), mStepEffects.end(), 0LL);
 }
 
 // 0x001b8dc8
@@ -113,7 +113,7 @@ void PhraseDatabase::ClearOwners() {
 
 // 0x001b8e50
 Phrase *PhraseDatabase::GetPhraseAt(int nBar) {
-    return mPhrases[mMap->Slot5(nBar)];
+    return mPhrases[mMap->MapBar(nBar)];
 }
 
 // 0x001b8e98
@@ -123,7 +123,7 @@ Phrase *PhraseDatabase::GetPhrase(int nIndex) {
 
 // 0x001b8eb0
 void PhraseDatabase::SetPhraseAt(Phrase *pPhrase, int nTick) {
-    SetPhrase(pPhrase, mMap->Slot5(nTick));
+    SetPhrase(pPhrase, mMap->MapBar(nTick));
 }
 
 // 0x001b8f08
@@ -139,7 +139,7 @@ void PhraseDatabase::SetPhrase(Phrase *pPhrase, int nIndex) {
 
 // 0x001b8f78
 void PhraseDatabase::ClearPhraseAt(int nTick) {
-    ClearPhrase(mMap->Slot5(nTick));
+    ClearPhrase(mMap->MapBar(nTick));
 }
 
 // 0x001b8fc0
@@ -152,7 +152,7 @@ void PhraseDatabase::ClearPhrase(int nIndex) {
 
 // 0x001b9018
 void PhraseDatabase::SetOwnerAt(Player *pPlayer, int nTick) {
-    SetOwner(pPlayer, mMap->Slot5(nTick));
+    SetOwner(pPlayer, mMap->MapBar(nTick));
 }
 
 // 0x001b9070
@@ -176,7 +176,7 @@ Player *PhraseDatabase::GetOwner(int nIndex) {
 void PhraseDatabase::SetPhraseByte(int nIndex, char cValue) {
     Phrase *pPhrase = mPhrases[nIndex];
     if (pPhrase != nullptr) {
-        pPhrase->mUnknown28 = cValue;
+        pPhrase->mScore = cValue;
     }
 }
 
@@ -186,12 +186,12 @@ unsigned char PhraseDatabase::GetPhraseByte(int nIndex) {
     if (pPhrase == nullptr) {
         return 0;
     }
-    return pPhrase->mUnknown28;
+    return pPhrase->mScore;
 }
 
 // 0x001b91a0
 long long *PhraseDatabase::GetStepValue(int nBar) {
-    return &mUnknown20[mMap->FindStepIndex(mMap->Slot5(nBar))];
+    return &mStepEffects[mMap->FindStepIndex(mMap->MapBar(nBar))];
 }
 
 // 0x001b91f0

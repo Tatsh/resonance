@@ -26,7 +26,7 @@ class View;
  * The constructor at `0x001f65a0` takes only the renderer and the load priority, and supplies `as`
  * for the screen name, `metagame/_Solo` for the directory, and `arena_sel` for the container. It
  * pushes the object name `arenas` into the container object-name vector that MetScreen owns, and
- * allocates a MetButtonList into mUnknown8c.
+ * allocates a MetButtonList into mArenaButtons.
  *
  * The object is 0xd4 bytes, which the allocation in New() fixes rather than the constructor's
  * highest store.
@@ -42,8 +42,8 @@ class View;
  * a named sound. The class therefore silences both cycle sounds while overriding the slide sound
  * with a conditional one.
  *
- * An index below mUnknown98 is an unlocked arena, and mUnknown94 is the last button, the entry
- * for no arena. Both are selectable, and every other button is shown disabled.
+ * An index below mUnlockedCount is an unlocked arena, and mNoArenaIndex is the last button, the
+ * entry for no arena. Both are selectable, and every other button is shown disabled.
  */
 class MetArenasScreen : public MetScreen {
 public:
@@ -92,8 +92,8 @@ public:
      * Commands 1 and 2 step the ring and then run UpdateScreenshot(). Command 5 is accepted only
      * for a selectable index, and it then clears the prompt, activates the empty panel name, and
      * starts the selected button alternating with an interval of 30.0f and two cycles. Command 6
-     * clears the prompt, clears MetScreen::mUnknown18, exits `MetScreenTitleScreen`, and starts the
-     * exit animation.
+     * clears the prompt, clears MetScreen::mExitChoice, exits `MetScreenTitleScreen`, and starts
+     * the exit animation.
      *
      * @param pCommand The command to route.
      * @ghidraAddress 0x001f7310
@@ -130,57 +130,57 @@ public:
      * Advance the arena screenshot pair and hand the current texture to the panel mesh. Slot 26.
      *
      * The mesh `as_arena_panel.mesh` is hidden before the read. A read that reports a texture shows
-     * the mesh again and hands the texture to the first stage of mUnknown9c. A read that reports
-     * nothing returns with the mesh hidden, which is how the screen looks while the screenshot is
-     * still loading.
+     * the mesh again and hands the texture to the first stage of mScreenshotMat. A read that
+     * does not report a texture returns with the mesh hidden. The screen looks the same while
+     * the screenshot is still loading.
      *
      * @param flTime The current renderer frame position, which the body does not read.
      * @ghidraAddress 0x001f8af0
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Commit the chosen arena and depart, or activate the panel for a disabled entry. Slot 30.
      *
      * MetScreen slot 29 runs the slot once the selection has finished alternating. A selectable
      * index copies the game manager's GameParams, sets GameParams::mArenaName from the arena table,
-     * hands the copy back, sets MetScreen::mUnknown18 to 2, exits `MetHelpScreen` and
+     * hands the copy back, sets MetScreen::mExitChoice to 2, exits `MetHelpScreen` and
      * `MetScreenTitleScreen`, and starts the exit animation. Any other index activates the panel
      * named `MetArenasScreen`.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x001f8378
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Post the first prompt. Slot 33.
      *
      * MetScreen slot 32 runs the slot once the enter animation has finished. The prompt is
-     * MetScreen::mUnknown38's first element rather than the selected one, which is faithful.
+     * MetScreen::mHelpKeys's first element rather than the selected one, as in the binary.
      *
      * @ghidraAddress 0x001fc758
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Go on to whichever screen the departure was for. Slot 36.
      *
      * MetScreen slot 35 runs the slot once the exit animation has finished. With
-     * MetScreen::mUnknown18 clear the screen came from the remix load screen or from the stages,
+     * MetScreen::mExitChoice clear, the screen came from the remix load screen or from the stages,
      * and it goes back there. Otherwise it records `MetArenasScreen` as the return screen and goes
      * on to `MetLoadGameScreen`. Every path ends by selecting -1 on the ring.
      *
      * @ghidraAddress 0x001f8658
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the arena buttons, the screenshot material, and the button view. Slot 38.
      *
      * The four palette vectors take the materials and fonts of `as_01.but` (the unlocked look) and
      * `as_02.but` (the locked look). Buttons `as_01.but` through `as_09.but` join the ring. The
-     * routine ends by allocating the TexturePairRecord at mUnknown90 from `gArena1.tex` and
+     * routine ends by allocating the TexturePairRecord at mScreenshots from `gArena1.tex` and
      * `gArena2.tex`.
      *
      * @ghidraAddress 0x001f6a08
@@ -200,33 +200,33 @@ private:
     /**
      * Lay out the buttons for the arena table and the persona's unlock level.
      *
-     * The view `arena_%d_buts.view` for the table's size replaces the contents of mUnknowna0. Each
+     * The view `arena_%d_buts.view` for the table's size replaces the contents of mButtonView. Each
      * button takes the arena's display name and the unlocked or locked palette, and the last one
      * reads `arena_none`. The title is inferred.
      *
      * @param bUnlockAll Non-zero to unlock every arena. EnterAndShow() passes
-     * MetFrontEndState::mUnknown14.
+     * MetFrontEndState::mUnlockAll.
      * @ghidraAddress 0x001f7d40
      */
     void SetupArenaButtons(int bUnlockAll);
 
     // The arena button ring. The constructor allocates it and the destructor releases it. +0x8c
-    MetButtonList *mUnknown8c;
+    MetButtonList *mArenaButtons;
     // The two arena screenshot textures. Slot 38 allocates it and the destructor releases it.
     // +0x90
-    TexturePairRecord *mUnknown90;
+    TexturePairRecord *mScreenshots;
     // The index of the last button, the entry for no arena. +0x94
-    int mUnknown94;
+    int mNoArenaIndex;
     // The number of unlocked arenas. Every index below it is a selectable arena. +0x98
-    int mUnknown98;
+    int mUnlockedCount;
     // The screenshot material, `as_screenshot.mat`. +0x9c
-    Rnd::Mat *mUnknown9c;
+    Rnd::Mat *mScreenshotMat;
     // The view the arena buttons are drawn through, `arena_butts.view`. +0xa0
-    Rnd::View *mUnknowna0;
+    Rnd::View *mButtonView;
     // The unlocked palette, from `as_01.but`. +0xa4, +0xbc
-    std::vector<Rnd::Mat *> mUnknowna4;
+    std::vector<Rnd::Mat *> mUnlockedMats;
     // The locked palette, from `as_02.but`. +0xb0, +0xc8
-    std::vector<Rnd::Mat *> mUnknownb0;
-    std::vector<Rnd::Font *> mUnknownbc;
-    std::vector<Rnd::Font *> mUnknownc8;
+    std::vector<Rnd::Mat *> mLockedMats;
+    std::vector<Rnd::Font *> mUnlockedFonts;
+    std::vector<Rnd::Font *> mLockedFonts;
 };

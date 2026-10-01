@@ -39,7 +39,7 @@ void BGTrackGraph::operator delete(void *pBlock) {
 
 // 0x0013fb10
 BGTrackGraph::BGTrackGraph(int nTrack, int nUnmapped)
-    : mSequencer(nullptr), mUnknown04(kUnsetByte), mUnknown05(kUnsetByte), mTrack(nTrack),
+    : mSequencer(nullptr), mUnsetLowByte(kUnsetByte), mUnsetHighByte(kUnsetByte), mTrack(nTrack),
       mTrackData(nullptr), mUnmapped(nUnmapped), mMuseSynth(nullptr), mMixer(nullptr) {
     mMuseSynth = new MuseSynth(Application::shared()->GetSongClock());
     mDisabler = new MidiDisabler(kDisablerStartsEnabled);

@@ -287,24 +287,24 @@ private:
                                 const char *pszRelPath) const;
 
 public:
-    HxStr mPath;          /*!< The path the archive was mounted by. */
-    int mFile;            /*!< The archive's file, negative when the open failed. */
-    char mSig[4];         /*!< The header signature. */
-    int mVersion;         /*!< The header version, kArkVersion when accepted. */
-    int mDirOffset;       /*!< Archive offset of the file table. */
-    int mNumFiles;        /*!< Entries in the file table. */
-    int mRelPathOffset;   /*!< Archive offset of the relative path table. */
-    int mNumPaths;        /*!< Entries in the relative path table. */
-    int mStringTabOffset; /*!< Archive offset of the string table. */
-    int mNumStrings;      /*!< Entries in the string table. */
-    int mSizeHdrAndDir;   /*!< Archive offset one past the string table. */
-    int mSectorSize;      /*!< Bytes in one archive chunk. */
-    int mOptimized;       /*!< Set when the optimized block is present. */
-    int mOptimizedOffset; /*!< Archive offset of the optimized block. */
-    int mOptimizedCount;  /*!< Two-byte entries in the optimized block. */
-    int mHeaderUnknown40; // +0x040
-    int mHeaderUnknown44; // +0x044
-    int mHeaderUnknown48; // +0x048
+    HxStr mPath;           /*!< The path the archive was mounted by. */
+    int mFile;             /*!< The archive's file, negative when the open failed. */
+    char mSig[4];          /*!< The header signature. */
+    int mVersion;          /*!< The header version, kArkVersion when accepted. */
+    int mDirOffset;        /*!< Archive offset of the file table. */
+    int mNumFiles;         /*!< Entries in the file table. */
+    int mRelPathOffset;    /*!< Archive offset of the relative path table. */
+    int mNumPaths;         /*!< Entries in the relative path table. */
+    int mStringTabOffset;  /*!< Archive offset of the string table. */
+    int mNumStrings;       /*!< Entries in the string table. */
+    int mSizeHdrAndDir;    /*!< Archive offset one past the string table. */
+    int mSectorSize;       /*!< Bytes in one archive chunk. */
+    int mOptimized;        /*!< Set when the optimized block is present. */
+    int mOptimizedOffset;  /*!< Archive offset of the optimized block. */
+    int mOptimizedCount;   /*!< Two-byte entries in the optimized block. */
+    int mHeaderReserved40; // +0x040 zero in every shipped archive, and never read
+    int mHeaderReserved44; // +0x044 zero in every shipped archive, and never read
+    int mHeaderReserved48; // +0x048 zero in every shipped archive, and never read
     char mHeaderPath[kArkHeaderSize - 0x40]; /*!< The header path, lowercased by the mount. */
     void *mTables;                           /*!< The one block the three tables live in. */
     ArkFileEntry *mFiles;                    /*!< The file table, at the start of mTables. */

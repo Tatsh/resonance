@@ -70,18 +70,20 @@ public:
 
 public:
     /**
-     * Copied into NetPlayer `+0x48` by its handler at `0x00125f70`. +0x04
+     * The selected track. Copied into NetPlayer `+0x48` by its handler at `0x00125f70`. +0x04
      *
-     * GrooveWorld::CreateRenderer() at `0x0018caa8` writes the player's Slot4() result here.
+     * GrooveWorld::CreateRenderer() at `0x0018caa8` writes the player's GetTrack() result here,
+     * and LocalPlayer's handler copies it into the player's track.
      */
-    int mUnknown04;
+    int mTrack;
 
     /**
-     * Copied into NetPlayer `+0x4c` by the same handler. +0x08
+     * The place on the track. Copied into NetPlayer `+0x4c` by the same handler. +0x08
      *
      * GrooveWorld::CreateRenderer() writes zero here, and the song position and player below.
+     * LocalPlayer's handler copies it into the player's place.
      */
-    int mUnknown08;
+    int mPlace;
 
     /**
      * The song position of the selection. +0x0c
@@ -99,7 +101,7 @@ public:
      *
      * +0x10
      */
-    Player *mUnknown10;
+    Player *mPlayer;
 };
 
 /**

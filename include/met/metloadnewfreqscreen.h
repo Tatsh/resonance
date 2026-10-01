@@ -14,8 +14,8 @@
  * of its own.
  *
  * The class declares one data member and the object is therefore at least 0xac bytes rather than
- * the 0xa8 an earlier reading recorded. mUnknowna8 sits above the four bytes of the MetKBUser
- * vptr, and EnterAndShow(), OnKeyboardDismissed(), and OnUnknownSlot2() all address it.
+ * the 0xa8 an earlier reading recorded. mNameEntered sits above the four bytes of the MetKBUser
+ * vptr, and EnterAndShow(), OnKeyboardDismissed(), and OnKeyboardTextEntered() all address it.
  *
  * The constructor at `0x002a8418` takes only the renderer and the load priority and runs the
  * MetLoadFreqBaseScreen constructor at `0x00291e00`. The destructor at `0x002a8458` restores the
@@ -64,7 +64,7 @@ public:
      * Set the screen title and the prompt layout, then enter.
      *
      * Slot 5. The title comes from configuration code 0x269 under the key `create_char`, and the
-     * prompt layout is `standard_title`. mUnknowna8 is cleared on both paths. The
+     * prompt layout is `standard_title`. mNameEntered is cleared on both paths. The
      * MetLoadFreqBaseScreen body then runs as a direct call.
      *
      * @ghidraAddress 0x002a3890
@@ -75,7 +75,7 @@ public:
      * Exit the prompt screen alongside this one, then begin the exit.
      *
      * Slot 9. The prompt screen is exited only while a departure is already recorded in
-     * MetScreen::mUnknown18 and the first button is the selected one. The MetScreen body then runs
+     * MetScreen::mExitChoice and the first button is the selected one. The MetScreen body then runs
      * as a direct call on every path.
      *
      * @ghidraAddress 0x002a84c0
@@ -85,9 +85,9 @@ public:
     /**
      * Restore this screen after the keyboard closes.
      *
-     * Slot 11. A set mUnknowna8 records that OnUnknownSlot2() accepted a name, and the screen is
-     * then left as that path arranged it. A clear mUnknowna8 is the user cancelling, and this
-     * screen and the prompt screen are pushed again.
+     * Slot 11. A set mNameEntered records that OnKeyboardTextEntered() accepted a name, and the
+     * screen then stays as OnKeyboardTextEntered() arranged it. A clear mNameEntered is the user
+     * cancelling, and this screen and the prompt screen are pushed again.
      *
      * @ghidraAddress 0x002a3978
      */
@@ -133,7 +133,7 @@ public:
      * Slot 41. The selected identity goes to MetFreqMakerCanvasScreen::LoadPrefab() with no
      * randomisation, the editing mode is selected through MetFreqMakerButtonsScreen::SetEditing(),
      * MetFreqMakerButtonsScreen::mNewPersona is set, and `MetLoadNewFreqScreen` is recorded in
-     * MetFrontEndState::mUnknown24.
+     * MetFrontEndState::mReturnScreen.
      *
      * @ghidraAddress 0x002a3f80
      */
@@ -142,7 +142,7 @@ public:
     /**
      * Create a new identity in the FreQ maker.
      *
-     * Slot 43. `MetLoadNewFreqScreen` is recorded in MetFrontEndState::mUnknown24, and then
+     * Slot 43. `MetLoadNewFreqScreen` is recorded in MetFrontEndState::mReturnScreen, and then
      * MetLoadFreqBaseScreen::OnCreateButton() runs.
      *
      * @ghidraAddress 0x002a8670
@@ -175,7 +175,7 @@ public:
      *
      * MetKBUser slot 2, in the secondary table at `0x007f8388` with a `-164` adjustment. The
      * committed text replaces the selected identity's username, and an empty commit retains the
-     * username the identity already had by assigning it over the empty text first. mUnknowna8 is
+     * username the identity already had by assigning it over the empty text first. mNameEntered is
      * set to 1 before either assignment, which is what OnKeyboardDismissed() reads.
      *
      * A current date from FormatCurrentDateTime() replaces the identity's birthday at `+0x154`.
@@ -187,10 +187,10 @@ public:
      * @param text The text the user entered.
      * @ghidraAddress 0x002a4340
      */
-    virtual void OnUnknownSlot2(const HxStr &text);
+    virtual void OnKeyboardTextEntered(const HxStr &text);
 
 private:
-    // Set by OnUnknownSlot2() when the keyboard commits a name, cleared by EnterAndShow(), and
-    // read by OnKeyboardDismissed() to tell a commit from a cancellation. +0xa8
-    int mUnknowna8;
+    // Set by OnKeyboardTextEntered() when the keyboard commits a name, cleared by EnterAndShow(),
+    // and read by OnKeyboardDismissed() to tell a commit from a cancellation. +0xa8
+    int mNameEntered;
 };

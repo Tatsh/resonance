@@ -33,30 +33,30 @@ MultiCatcher::~MultiCatcher() {
 }
 
 // 0x001ad8e8
-void MultiCatcher::Slot9(int nFirst, int nSecond, int nThird) {
-    const int nMultiplier = nThird != 0 ? kAutoCatchMultiplier : mPlayer->Slot16(nFirst);
-    const int nRunBars = nSecond - 1;
-    const int nPowerbar = mPhraseMgr->GetPowerbar(nFirst);
-    const int nEnd = nFirst + 1;
-    const int nPoints = mTrackData->GetPoints(nFirst) * nMultiplier;
-    SetPhraseOwners(nFirst, nEnd, mPlayer);
+void MultiCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
+    const int nMultiplier = nAutoCatch != 0 ? kAutoCatchMultiplier : mPlayer->GetMultiplier(nBar);
+    const int nRunBars = nRun - 1;
+    const int nPowerbar = mPhraseMgr->GetPowerbar(nBar);
+    const int nEnd = nBar + 1;
+    const int nPoints = mTrackData->GetPoints(nBar) * nMultiplier;
+    SetPhraseOwners(nBar, nEnd, mPlayer);
 
-    PhraseCapturedMsg captured(nFirst,
+    PhraseCapturedMsg captured(nBar,
                                nEnd,
-                               nFirst - nRunBars,
+                               nBar - nRunBars,
                                nEnd,
                                mTrack,
                                mPlayer,
                                nPoints,
-                               mTrackData->GetUnknown08(nFirst),
-                               nThird ^ 1);
+                               mTrackData->GetCatchPoints(nBar),
+                               nAutoCatch ^ 1);
     Send(&captured);
 
-    SectionCapturedMsg section(nFirst, nEnd, mTrack, mPlayer, nThird);
+    SectionCapturedMsg section(nBar, nEnd, mTrack, mPlayer, nAutoCatch);
     Send(&section);
-    mPhraseMgr->SetPhraseByte(nFirst, static_cast<char>(nPoints));
+    mPhraseMgr->SetPhraseByte(nBar, static_cast<char>(nPoints));
 
-    if (nPowerbar != kNoPowerbar && nThird == 0) {
+    if (nPowerbar != kNoPowerbar && nAutoCatch == 0) {
         CaughtPowerbarMsg msg;
         msg.mKind = static_cast<HudItemKind>(nPowerbar);
         msg.mPlayer = mPlayer;
@@ -66,5 +66,5 @@ void MultiCatcher::Slot9(int nFirst, int nSecond, int nThird) {
 }
 
 // 0x001b0e00
-void MultiCatcher::Slot10(int) {
+void MultiCatcher::ReportCaughtPowerbar(int) {
 }

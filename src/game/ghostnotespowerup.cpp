@@ -17,7 +17,7 @@ constexpr int kDeployed = 1;
 // 0x001ca0e8
 int GhostNotesPowerup::Deploy(int, int, Player *pPlayer, int) {
     ToggleGhostMsg msg;
-    msg.mUnknown04 = pPlayer;
+    msg.mPlayer = pPlayer;
     msg.mOn = kGhostOn;
     pPlayer->Handle(&msg);
     return kDeployed;

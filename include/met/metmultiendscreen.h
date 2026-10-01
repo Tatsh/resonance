@@ -76,7 +76,7 @@ public:
      * Move along the button ring, or act on the selection.
      *
      * Slot 19. Unlike MetSoloLoseScreen's, the select path does not record anything in
-     * mUnknown18.
+     * mExitChoice.
      *
      * @param pCommand The command.
      * @ghidraAddress 0x002f5f90
@@ -115,7 +115,7 @@ public:
      * @param pButton Not read.
      * @ghidraAddress 0x002f6640
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Leave for the load screen or the stage select once the exit has finished.
@@ -127,17 +127,17 @@ public:
      *
      * @ghidraAddress 0x002f67d8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
 private:
-    MetButtonList *mUnknown8c; // +0x8c
-    // Never written by the constructor and not recovered.
-    int mUnknown90; // +0x90
+    MetButtonList *mButtonList; // +0x8c
+    int mReserved;              // +0x90, never written or read by the recovered routines.
     // The constructor empties the five vectors and the destructor releases them. No recovered
-    // routine reads them, and int stands in for the unrecovered four-byte element.
-    std::vector<int> mUnknown94; // +0x94
-    std::vector<int> mUnknowna0; // +0xa0
-    std::vector<int> mUnknownac; // +0xac
-    std::vector<int> mUnknownb8; // +0xb8
-    std::vector<int> mUnknownc4; // +0xc4
+    // routine reads them, and int stands in for the unrecovered four-byte element. The names follow
+    // the vectors at the same offsets in MetMultiStatsScreen, the layout this class matches.
+    std::vector<int> mScoreTexts;       // +0x94
+    std::vector<int> mNameTexts;        // +0xa0
+    std::vector<int> mPictureMaterials; // +0xac
+    std::vector<int> mPlayerMeshes;     // +0xb8
+    std::vector<int> mPlayerOrder;      // +0xc4
 };

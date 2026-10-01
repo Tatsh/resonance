@@ -20,8 +20,9 @@ public:
     /**
      * Retain only the reporting player.
      *
-     * Table slot 1. MuseSynth's body at `0x001aa908` performs no work unless the player reports
-     * non-zero from MusePlayer slot 4, and then deletes and unlinks every other player it owns.
+     * Table slot 1. MuseSynth's body at `0x001aa908` does not perform work unless the player
+     * reports non-zero from MusePlayer::DisplacesSiblings(), and then deletes and unlinks every
+     * other player it manages.
      * MultiMusePlayer's override at `0x001aa1f8` reports the same request to its own parent once,
      * the first time, before running MuseSynth's body.
      *

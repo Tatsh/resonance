@@ -29,7 +29,7 @@ public:
      * Construct the screen.
      *
      * The screen name is `cred`, the directory `metagame/Shared`, and the container `credit`.
-     * MetScreen::mUnknown60 is cleared.
+     * MetScreen::mShowsLoadedDrawables is cleared.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -111,14 +111,14 @@ public:
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x00214ee0
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Hide every credit and return to the options screens.
      *
      * @ghidraAddress 0x00211e40
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the view, the animation, and the camera, and build the roll.
@@ -131,8 +131,8 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    CreditsRoll *mUnknown8c;    // +0x8c, the scroller slot 38 builds
-    Rnd::TransAnim *mUnknown90; // +0x90, `Group_credit.tnm`
-    float mUnknown94;           // +0x94, the renderer time the screen entered at
-    float mUnknown98;           // +0x98, the end frame of mUnknown90
+    CreditsRoll *mCreditsRoll;  // +0x8c, the scroller slot 38 builds
+    Rnd::TransAnim *mAnimation; // +0x90, `Group_credit.tnm`
+    float mStartFrame;          // +0x94, the renderer time the screen entered at
+    float mEndFrame;            // +0x98, the end frame of mAnimation
 };

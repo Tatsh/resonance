@@ -52,7 +52,7 @@ public:
      * declaration order.
      *
      * @param nBar The bar the pointer rests on.
-     * @param nPlayerValue Whatever Player::Slot4() reports for the player.
+     * @param nPlayerValue Whatever Player::GetTrack() reports for the player.
      * @param pPlayer The player whose pointer moved.
      */
     DisplayPointerMsg(int nBar, int nPlayerValue, Player *pPlayer);
@@ -91,12 +91,12 @@ public:
     virtual void Print(std::ostream &stream);
 
     // The three names come from GamePowerupPlacer, the one producer of the message, which writes
-    // the bar its cursor rests on, whatever Player::Slot4() reports, and the player itself. The
-    // members are public because its two remove sites, 0x001ccdb8 in OnUnknownSlot6() and the
-    // one at 0x001ccfcc in OnUnknownSlot8(), store mPlayerValue and mPlayer directly and leave
-    // mBar unset.
+    // the bar its cursor rests on, whatever Player::GetTrack() reports, and the player itself. The
+    // members are public because its two remove sites, 0x001ccdb8 in MoveCursor() and the one at
+    // 0x001ccfcc in DeployPowerup(), store mPlayerValue and mPlayer directly and do not
+    // set mBar.
     int mBar;         /*!< The bar the pointer rests on. +0x04 */
-    int mPlayerValue; /*!< Whatever Player::Slot4() reports, or -1 to remove the pointer. +0x08 */
+    int mPlayerValue; /*!< Player::GetTrack() of the player, or -1 to remove the pointer. +0x08 */
     Player *mPlayer;  /*!< The player whose pointer moved. +0x0c */
 };
 

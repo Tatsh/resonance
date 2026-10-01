@@ -43,22 +43,22 @@ public:
     /**
      * Start the stage.
      *
-     * Slot 2. The routine starts the base and then schedules the catcher's commands through its
-     * slot 4.
+     * Slot 2. The routine starts the base and then schedules the catcher's commands through
+     * Catcher::Start().
      *
      * @ghidraAddress 0x001a04d8
      */
-    virtual void Slot2();
+    virtual void Start();
 
     /**
      * Stop the stage.
      *
-     * Slot 3. The routine withdraws the catcher's commands through its slot 5 and then stops the
-     * base.
+     * Slot 3. The routine withdraws the catcher's commands through Catcher::Stop() and then stops
+     * the base.
      *
      * @ghidraAddress 0x001a0518
      */
-    virtual void Slot3();
+    virtual void Stop();
 
     /**
      * Wire the stage's objects to the sources that drive it.
@@ -71,7 +71,7 @@ public:
      * @param pSecondary The source that receives the phrase manager and the catcher.
      * @ghidraAddress 0x0019fd88
      */
-    virtual void Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
+    virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
     /**
      * Register the mixer with one source.
@@ -81,7 +81,7 @@ public:
      * @param pSource The source to register with.
      * @ghidraAddress 0x001a0558
      */
-    virtual void Slot5(MsgSource *pSource);
+    virtual void AddMixerToSource(MsgSource *pSource);
 
     /**
      * Attach the mixer to the synthesiser and give it its output sink.
@@ -91,7 +91,7 @@ public:
      * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
      * @ghidraAddress 0x001a0588
      */
-    virtual void Slot6(MsgSink *pOutput);
+    virtual void SetMixerOutput(MsgSink *pOutput);
 
     /**
      * Register one sink with every source the stage provides.
@@ -101,7 +101,7 @@ public:
      * @param pSink The sink to register.
      * @ghidraAddress 0x001a05c8
      */
-    virtual void Slot7(MsgSink *pSink);
+    virtual void AddSinkToSources(MsgSink *pSink);
 
     /**
      * Install the sink the phrase manager reports phrase changes to.
@@ -111,19 +111,21 @@ public:
      * @param pSink The sink to install, ignored when null.
      * @ghidraAddress 0x001a0650
      */
-    virtual void Slot8(MsgSink *pSink);
+    virtual void SetNetSink(MsgSink *pSink);
 
     /**
      * Report whether the stage has nothing outstanding.
      *
-     * Slot 9. The routine forwards to the catcher's slot 6.
+     * Slot 9. The routine forwards to Catcher::IsPhraseRunEmpty().
      *
      * @return Non-zero when the catcher has nothing outstanding.
      * @ghidraAddress 0x001a06f0
      */
-    virtual int Slot9();
+    virtual int HasNothingPending();
 
     /**
+     * Give every phrase of the track to one player.
+     *
      * Slot 10. The routine casts the catcher to SingleCatcher with `dynamic_cast` and forwards
      * both arguments to SingleCatcher::ResetOwners(). The cast is unguarded, so a MultiCatcher
      * yields a null receiver and the forwarded call dereferences it.
@@ -135,15 +137,17 @@ public:
      * @param pPlayer The player the phrases go to.
      * @ghidraAddress 0x001a0668
      */
-    virtual void Slot10(int nTick, Player *pPlayer);
+    virtual void GivePhrases(int nTick, Player *pPlayer);
 
     /**
+     * Report that GivePhrases() acts on this stage.
+     *
      * Slot 11. Returns 1 where the base returns zero.
      *
      * @return Always 1.
      * @ghidraAddress 0x001a0428
      */
-    virtual int Slot11();
+    virtual int CanGivePhrases();
 
     /**
      * Rebuild the phrase manager's powerbar source.
@@ -152,7 +156,7 @@ public:
      *
      * @ghidraAddress 0x001a0720
      */
-    virtual void Slot12();
+    virtual void CreatePowerbarMgr();
 
 private:
     PhraseNeutralizer *mNeutralizer; // +0x2c

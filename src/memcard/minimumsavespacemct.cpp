@@ -32,7 +32,7 @@ MinimumSaveSpaceMCT::~MinimumSaveSpaceMCT() {
 // 0x00178328
 void MinimumSaveSpaceMCT::Execute() {
     mState = kMemcardTaskRunning;
-    mSpace = GlobalSettings::shared()->mUnknown6c - kMinimumSaveSpaceSettingsAllowance;
+    mSpace = GlobalSettings::shared()->mRequiredSaveSpace - kMinimumSaveSpaceSettingsAllowance;
     mPersonaPath = g_saveDirBase + g_personasDirSuffix + g_personasFileName;
     mSettingsPath = g_saveDirBase + g_globalSettingsDirSuffix + g_globalSettingsFileName;
     mStep = kMinimumSaveSpaceStepCheckInfo;

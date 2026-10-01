@@ -63,10 +63,10 @@ public:
      * @param flTime The frame.
      * @ghidraAddress 0x0027b3b0
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
-     * Forward to OnUnknownSlot26().
+     * Forward to UpdateIdle().
      *
      * Slot 27.
      *

@@ -36,7 +36,7 @@ public:
     /**
      * Report a captured section.
      *
-     * Inline, with no address of its own. SingleCatcher::Slot9() expands it on its stack at
+     * Inline, with no address of its own. SingleCatcher::CapturePhrase() expands it on its stack at
      * `0x001ad79c`. The five arguments are the five members in declaration order.
      *
      * @param nFirstBar The first bar of the section.

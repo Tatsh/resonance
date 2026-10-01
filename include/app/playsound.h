@@ -50,7 +50,7 @@ void PlaySoundByName(const char *pszName);
  *
  * Looks the name up through LookupSound() and sends a note-off for each of its notes to
  * Globals::GetSynth() on the last MIDI channel. The first note is skipped when it is 1, not when it
- * is -1 as for the second, which is what the binary compares against. MetRenderer::OnUnknownSlot5()
+ * is -1 as for the second. The binary compares against those values. MetRenderer::Stop()
  * is the one caller, and it stops `SND_MET_MUSIC1`. The title is inferred from the note-off.
  *
  * @param pszName The registered name.

@@ -29,17 +29,17 @@ const char *SCGameOverPacket::Name() {
 
 // 0x003f2a90
 void SCGameOverPacket::Print(std::ostream &stream) {
-    stream << mUnknown14;
+    stream << mResult;
 }
 
 // 0x003f2920
 void SCGameOverPacket::Save(OBStream &stream) {
     Packet::Save(stream);
-    stream << mUnknown14;
+    stream << mResult;
 }
 
 // 0x003f29e8
 void SCGameOverPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    stream >> mUnknown14;
+    stream >> mResult;
 }

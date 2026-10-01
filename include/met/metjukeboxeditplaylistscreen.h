@@ -15,11 +15,11 @@
  * The constructor at `0x0022acf8` takes only the renderer and the load priority. It runs the
  * MetJukeboxBaseScreen constructor at `0x0021dcc0` with `jbep` for the screen name,
  * `metagame/Shared` for the directory, and `juke_edit_playlist` for the container, and clears
- * mUnknownc8. The destructor at `0x00231228` releases the object with the tag `MsgSink` and does
+ * mCatalogueKey. The destructor at `0x00231228` releases the object with the tag `MsgSink` and does
  * nothing of its own.
  *
- * The screen builds only the playlist list, as mUnknown9c, and leaves mUnknown98 null. Its rows
- * and details come from the playlist rather than the catalogue.
+ * The screen builds only the playlist list, as mPlayListList, and mCatalogueList stays null. Its
+ * rows and details come from the playlist rather than the catalogue.
  *
  * Seven inherited slots differ from the MetJukeboxBaseScreen table beyond the destructor. They are
  * 7 `0x002313d0`, 19 `0x0022bdb8`, 33 `0x00231388`, 38 `0x0022ae78`, 39 `0x002312e8`,
@@ -61,7 +61,7 @@ public:
      *
      * @ghidraAddress 0x002313d0
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Edit the playlist.
@@ -79,17 +79,17 @@ public:
     /**
      * Forget the catalogue and refresh the playlist.
      *
-     * Slot 33. mUnknowna0 becomes null, and the playlist list takes the entry count.
+     * Slot 33. mCatalogue becomes null, and the playlist list takes the entry count.
      *
      * @ghidraAddress 0x00231388
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Resolve the base views, build the playlist list, and resolve every detail object.
      *
      * Slot 38. The list clones `jbep_remix_factory_01.view` with the highlight and both arrows,
-     * becomes mUnknown9c, and uses context 0. mUnknown98 stays null.
+     * becomes mPlayListList, and uses context 0. mCatalogueList stays null.
      *
      * @ghidraAddress 0x0022ae78
      */
@@ -98,7 +98,7 @@ public:
     /**
      * Report the number of entries in the playlist under edit.
      *
-     * Slot 39. The entry count of the playlist mUnknownc4 addresses, read without a null check.
+     * Slot 39. The entry count of the playlist mPlayList addresses, read without a null check.
      *
      * @return The row count.
      * @ghidraAddress 0x002312e8

@@ -163,16 +163,16 @@ public:
     static void Delete(BGTrackGraph *pGraph);
 
 private:
-    BarSequencer *mSequencer; // +0x00
-    unsigned char mUnknown04; // +0x04 0xff at construction
-    unsigned char mUnknown05; // +0x05 0xff at construction
-    int mTrack;               // +0x08
-    TrackData *mTrackData;    // +0x0c
-    int mUnknown10;           // +0x10 not written by the constructor
-    int mUnmapped;            // +0x14
-    MuseSynth *mMuseSynth;    // +0x18
-    MidiDisabler *mDisabler;  // +0x1c
-    Mixer *mMixer;            // +0x20
+    BarSequencer *mSequencer;     // +0x00
+    unsigned char mUnsetLowByte;  // +0x04 0xff at construction and never read
+    unsigned char mUnsetHighByte; // +0x05 0xff at construction and never read
+    int mTrack;                   // +0x08
+    TrackData *mTrackData;        // +0x0c
+    int mReserved;                // +0x10 never read or written
+    int mUnmapped;                // +0x14
+    MuseSynth *mMuseSynth;        // +0x18
+    MidiDisabler *mDisabler;      // +0x1c
+    Mixer *mMixer;                // +0x20
 };
 
 // 0x00193ff8

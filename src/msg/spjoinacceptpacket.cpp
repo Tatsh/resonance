@@ -35,8 +35,8 @@ const char *SPJoinAcceptPacket::Name() {
 // 0x003f1f58
 void SPJoinAcceptPacket::Print(std::ostream &stream) {
     std::ostream &rest = stream << " plid:" << mPlayerId << " destid:" << mDestId;
-    mUnknown1c.Print(rest);
-    mUnknown5c.Print(rest << " clr:" << mColorName << " thm:");
+    mParams.Print(rest);
+    mAppearance.Print(rest << " clr:" << mColorName << " thm:");
 }
 
 // 0x003e5718
@@ -46,14 +46,14 @@ void SPJoinAcceptPacket::Save(OBStream &stream) {
     int playerId = mPlayerId;
     int destId = mDestId;
     OBStream &rest = stream.Write(&playerId, sizeof(playerId)).Write(&destId, sizeof(destId));
-    mUnknown1c.Save(&rest);
+    mParams.Save(&rest);
 
     OBStream &tail = SaveHxStr(rest, mColorName);
-    mUnknown5c.Save(tail);
+    mAppearance.Save(tail);
 
-    int count = static_cast<int>(mUnknown70.size());
+    int count = static_cast<int>(mPlayers.size());
     tail.Write(&count, sizeof(count));
-    for (auto &info : mUnknown70) {
+    for (auto &info : mPlayers) {
         info.Save(tail);
     }
 }
@@ -63,27 +63,27 @@ void SPJoinAcceptPacket::Load(IBStream &stream) {
     Packet::Load(stream);
 
     IBStream &rest = stream.Read(&mPlayerId, sizeof(mPlayerId)).Read(&mDestId, sizeof(mDestId));
-    mUnknown1c.Load(&rest);
+    mParams.Load(&rest);
 
     IBStream &tail = LoadHxStr(rest, mColorName);
-    mUnknown5c.Load(tail);
+    mAppearance.Load(tail);
 
     int count;
     tail.Read(&count, sizeof(count));
-    mUnknown70.resize(count);
-    for (auto &info : mUnknown70) {
+    mPlayers.resize(count);
+    for (auto &info : mPlayers) {
         info.Load(tail);
     }
 }
 
 // 0x003ef390
 HxStr SPJoinAcceptPacket::GetUsername() {
-    return mUnknown5c.mUnknown00;
+    return mAppearance.mUserName;
 }
 
 // 0x003ef3c0
 GameParams SPJoinAcceptPacket::GetParams() {
-    return mUnknown1c;
+    return mParams;
 }
 
 // 0x003ef3f0
@@ -93,10 +93,10 @@ HxStr SPJoinAcceptPacket::GetColorName() {
 
 // 0x003ef420
 FreqAppearance SPJoinAcceptPacket::GetAppearance() {
-    return mUnknown5c;
+    return mAppearance;
 }
 
 // 0x003ef450
 void SPJoinAcceptPacket::AddPlayer(const PlayerInfo &player) {
-    mUnknown70.push_back(player);
+    mPlayers.push_back(player);
 }

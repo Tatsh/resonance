@@ -21,8 +21,8 @@
  * pointer, the inlined base destructor overwrites it, and the dead first store is dropped. The
  * compiler therefore generates it from an implicit declaration and the source owes no definition.
  *
- * The two routines the database titles `Slot3` at `0x00133528` and `0x00133530` are the same index
- * in two different tables, the `MsgSink` one and the primary one, rather than a titling collision.
+ * The two routines at `0x00133528` and `0x00133530` sit at the same index, 3, in two different
+ * tables, the `MsgSink` one and the primary one.
  */
 class NullPlayer : public Player {
 public:

@@ -107,13 +107,13 @@ constexpr int kLoadPlayList = 1;
 
 // Adds the first memory-card slot when a card is in use.
 inline void AddCardSlot(std::vector<MemcardConnectState> &slots) {
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         slots.push_back(GlobalSettings::shared()->mCardSlots[0]);
     }
 }
 
-// What MetScreen::mUnknown18 records for the exit hook to act on.
+// What MetScreen::mExitChoice records for the exit hook to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
 
@@ -126,16 +126,16 @@ constexpr int kSelectAlternateCycles = 2;
 // 0x00361d18
 MetRemixTypeScreen::MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr) {
-    mUnknown38.push_back(HxStr(kNewObjectName));
-    mUnknown38.push_back(HxStr(kLoadObjectName));
-    mUnknown38.push_back(HxStr(kJukeboxObjectName));
-    mUnknown8c = new MetButtonList;
+      mButtons(nullptr) {
+    mHelpKeys.push_back(HxStr(kNewObjectName));
+    mHelpKeys.push_back(HxStr(kLoadObjectName));
+    mHelpKeys.push_back(HxStr(kJukeboxObjectName));
+    mButtons = new MetButtonList;
 }
 
 // 0x003696c0
 MetRemixTypeScreen::~MetRemixTypeScreen() {
-    delete mUnknown8c;
+    delete mButtons;
 }
 
 // 0x00369638
@@ -146,14 +146,14 @@ MetRemixTypeScreen *MetRemixTypeScreen::New(MetRenderer *pRenderer, int nPriorit
 // 0x00362600
 void MetRemixTypeScreen::EnterAndShow() {
     SetShowing(0);
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState *pState = MetFrontEndState::shared();
-        pState->mUnknown1c = pState->mUnknown18;
-        pState->mUnknown18 = 0;
+        pState->mLastTransition = pState->mPendingTransition;
+        pState->mPendingTransition = 0;
         MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kHelpScreen));
-        mUnknown10->SetActivePanel(this);
+        mRenderer->SetActivePanel(this);
         GameParams params(*Application::shared()->GetGameManager()->GetParams());
         params.mLoadingGame = 0;
         Application::shared()->GetGameManager()->SetParams(params);
@@ -168,24 +168,24 @@ void MetRemixTypeScreen::EnterAndShow() {
         }
         mThreeButtonView->SetShowing(1);
         mTwoButtonView->SetShowing(0);
-        mUnknown30->ReleaseAnimsRefs();
-        mUnknown30->AddAnim(mThreeButtonAnim);
-        mUnknown30->SetFrame(mUnknown04);
-        mUnknown8c->Clear();
+        mEnterAnim->ReleaseAnimsRefs();
+        mEnterAnim->AddAnim(mThreeButtonAnim);
+        mEnterAnim->SetFrame(mAnimEndFrame);
+        mButtons->Clear();
         {
             HxStr objectName(kNewButton);
             HxStr label = QueryConfigString(kPromptConfigCode, kNewPrompt);
-            mUnknown8c->Add(objectName, label);
+            mButtons->Add(objectName, label);
         }
         {
             HxStr objectName(kLoadButton);
             HxStr label = QueryConfigString(kPromptConfigCode, kLoadPrompt);
-            mUnknown8c->Add(objectName, label);
+            mButtons->Add(objectName, label);
         }
         {
             HxStr objectName(kJukeboxButton);
             HxStr label = QueryConfigString(kPromptConfigCode, kJukeboxPrompt);
-            mUnknown8c->Add(objectName, label);
+            mButtons->Add(objectName, label);
         }
     } else {
         {
@@ -194,30 +194,30 @@ void MetRemixTypeScreen::EnterAndShow() {
         }
         mTwoButtonView->SetShowing(1);
         mThreeButtonView->SetShowing(0);
-        mUnknown30->ReleaseAnimsRefs();
-        mUnknown30->AddAnim(mTwoButtonAnim);
-        mUnknown30->SetFrame(mUnknown04);
-        mUnknown8c->Clear();
+        mEnterAnim->ReleaseAnimsRefs();
+        mEnterAnim->AddAnim(mTwoButtonAnim);
+        mEnterAnim->SetFrame(mAnimEndFrame);
+        mButtons->Clear();
         {
             HxStr objectName(kNewButton);
             HxStr label = QueryConfigString(kPromptConfigCode, kNewPrompt);
-            mUnknown8c->Add(objectName, label);
+            mButtons->Add(objectName, label);
         }
         {
             HxStr objectName(kLoadButton);
             HxStr label = QueryConfigString(kPromptConfigCode, kLoadPrompt);
-            mUnknown8c->Add(objectName, label);
+            mButtons->Add(objectName, label);
         }
     }
 
-    mUnknown14->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
-    mUnknown8c->SetSelected(kFirstButtonIndex);
+    mView->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
+    mButtons->SetSelected(kFirstButtonIndex);
     {
         HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);
     }
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtons->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
 
@@ -240,27 +240,27 @@ void MetRemixTypeScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
 void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtons->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtons->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtons->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtons->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mUnknown8c->mUnknown00,
+                            mButtons->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
         break;
@@ -271,28 +271,28 @@ void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x00362fa0
-void MetRemixTypeScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
-    mUnknown18 = kExitToButtonAction;
+void MetRemixTypeScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
+    mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
-    if (mUnknown8c->mSelected != kFirstButtonIndex) {
+    if (mButtons->mSelected != kFirstButtonIndex) {
         ExitScreenByName(HxStr(kHelpScreen));
     }
     BeginExit();
 }
 
 // 0x00363920
-void MetRemixTypeScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetRemixTypeScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kModeScreen));
         ActivateNamedPanel(HxStr(kModeScreen));
         return;
     }
 
-    switch (mUnknown8c->mSelected) {
+    switch (mButtons->mSelected) {
     case kNewButtonIndex:
     case kLoadButtonIndex:
-        if (MetFrontEndState::shared()->mUnknown0c != 0 &&
+        if (MetFrontEndState::shared()->mUsingMemcard != 0 &&
             Application::shared()->GetGameMode() == kGameModeSolo) {
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
             if (GlobalSettings::shared()->mCardSlots[0].mFree <
@@ -341,7 +341,7 @@ void MetRemixTypeScreen::ResolveContainerViews() {
 
 // 0x00363148
 void MetRemixTypeScreen::OpenSelectedButton() {
-    switch (mUnknown8c->mSelected) {
+    switch (mButtons->mSelected) {
     case kNewButtonIndex:
         PushNamedScreen(HxStr(kSoloStagesScreen));
         ActivateNamedPanel(HxStr(kSoloStagesScreen));

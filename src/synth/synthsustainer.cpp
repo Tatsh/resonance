@@ -33,16 +33,16 @@ void SynthSustainer::HandleMessage(Message *pMsg) {
 void SynthSustainer::HandleSustainNote(SustainNoteMsg *pMsg) {
     (void)std::find(mSustained.begin(),
                     mSustained.end(),
-                    pMsg->mUnknown08); // Yes, the binary discards this result.
-    if (std::find(mSounding.begin(), mSounding.end(), pMsg->mUnknown08) != mSounding.end()) {
-        mSustained.push_back(pMsg->mUnknown08);
+                    pMsg->mNote); // Yes, the binary discards this result.
+    if (std::find(mSounding.begin(), mSounding.end(), pMsg->mNote) != mSounding.end()) {
+        mSustained.push_back(pMsg->mNote);
     }
 }
 
 // 0x001d2160
 void SynthSustainer::HandleStdMidi(StdMidiMsg *pMsg) {
-    unsigned char nStatus = pMsg->mUnknown08;
-    unsigned char nNote = pMsg->mUnknown09;
+    unsigned char nStatus = pMsg->mStatus;
+    unsigned char nNote = pMsg->mData1;
 
     if ((nStatus & kMidiStatusMask) == kMidiNoteOff) {
         if (std::find(mSustained.begin(), mSustained.end(), nNote) != mSustained.end()) {

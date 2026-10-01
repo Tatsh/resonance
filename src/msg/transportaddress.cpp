@@ -5,11 +5,11 @@
 #include "stream/obstream.h"
 
 // 0x003f43a8
-TransportAddress::TransportAddress(const HxStr &unknown00,
-                                   const HxStr &unknown08,
-                                   const HxStr &unknown10,
-                                   int nUnknown18)
-    : mUnknown00(unknown00), mUnknown08(unknown08), mUnknown10(unknown10), mUnknown18(nUnknown18) {
+TransportAddress::TransportAddress(const HxStr &host,
+                                   const HxStr &address,
+                                   const HxStr &service,
+                                   int nPort)
+    : mHost(host), mAddress(address), mService(service), mPort(nPort) {
 }
 
 // 0x003f4478
@@ -19,28 +19,26 @@ TransportAddress::~TransportAddress() {
 
 // 0x003f4078
 void TransportAddress::Save(OBStream &stream) {
-    int nUnknown18 = mUnknown18; // The binary writes a stack copy of the word.
-    SaveHxStr(SaveHxStr(SaveHxStr(stream, mUnknown00), mUnknown08), mUnknown10)
-        .Write(&nUnknown18, sizeof(nUnknown18));
+    int nPort = mPort; // The binary writes a stack copy of the word.
+    SaveHxStr(SaveHxStr(SaveHxStr(stream, mHost), mAddress), mService).Write(&nPort, sizeof(nPort));
 }
 
 // 0x003f41d0
 void TransportAddress::Load(IBStream &stream) {
-    LoadHxStr(LoadHxStr(LoadHxStr(stream, mUnknown00), mUnknown08), mUnknown10)
-        .Read(&mUnknown18, sizeof(mUnknown18));
+    LoadHxStr(LoadHxStr(LoadHxStr(stream, mHost), mAddress), mService).Read(&mPort, sizeof(mPort));
 }
 
 // 0x003f4500
-HxStr TransportAddress::GetUnknown00() {
-    return mUnknown00;
+HxStr TransportAddress::GetHost() {
+    return mHost;
 }
 
 // 0x003f4528
-HxStr TransportAddress::GetUnknown08() {
-    return mUnknown08;
+HxStr TransportAddress::GetAddress() {
+    return mAddress;
 }
 
 // 0x003f4558
-HxStr TransportAddress::GetUnknown10() {
-    return mUnknown10;
+HxStr TransportAddress::GetService() {
+    return mService;
 }

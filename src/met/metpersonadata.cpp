@@ -41,9 +41,9 @@ constexpr int kExpertLastStage = 5;
 // 0x0032b760
 MetPersonaData::MetPersonaData() {
     mStats.RebuildLevelList();
-    mUnknown154 = kInitialBirthday;
-    mUnknown15c = 0;
-    mUnknown160 = kNoText;
+    mBirthday = kInitialBirthday;
+    mIsPrefab = 0;
+    mSavedName = kNoText;
 }
 
 // 0x0032b880
@@ -51,10 +51,10 @@ void MetPersonaData::Save(OBStream *pStream) {
     const int nVersion = kRecordVersion;
     OBStream &stream = pStream->Write(&nVersion, sizeof(nVersion));
     mStats.Save(stream);
-    mUnknown140.Save(stream);
-    const unsigned nLength = mUnknown154.mLen;
+    mAppearance.Save(stream);
+    const unsigned nLength = mBirthday.mLen;
     stream.Write(&nLength, sizeof(nLength));
-    stream.WriteBytes(mUnknown154.mStr != nullptr ? mUnknown154.mStr : g_szEmptyString, nLength);
+    stream.WriteBytes(mBirthday.mStr != nullptr ? mBirthday.mStr : g_szEmptyString, nLength);
 }
 
 // 0x0032b968
@@ -62,8 +62,8 @@ void MetPersonaData::Load(IBStream *pStream) {
     int nVersion;
     pStream->Read(&nVersion, sizeof(nVersion));
     mStats.Load(*pStream);
-    mUnknown140.Load(*pStream);
-    mUnknown160 = mUnknown140.mUnknown00;
+    mAppearance.Load(*pStream);
+    mSavedName = mAppearance.mUserName;
 
     if (nVersion <= kLastLegacyVersion) {
         // Yes, the binary constructs a controller mapping and a GameOptions record here only to
@@ -98,9 +98,9 @@ void MetPersonaData::Load(IBStream *pStream) {
     if (nVersion >= kBirthdayVersion) {
         unsigned nLength;
         pStream->Read(&nLength, sizeof(nLength));
-        mUnknown154.Alloc(nLength);
-        pStream->ReadBytes(mUnknown154.mStr != nullptr ? mUnknown154.mStr :
-                                                         const_cast<char *>(g_szEmptyString),
+        mBirthday.Alloc(nLength);
+        pStream->ReadBytes(mBirthday.mStr != nullptr ? mBirthday.mStr :
+                                                       const_cast<char *>(g_szEmptyString),
                            nLength);
     }
 
@@ -119,7 +119,7 @@ void MetPersonaData::operator delete(void *pBlock) {
 
 // 0x0032e230
 void MetPersonaData::SetName(const HxStr &name) {
-    mUnknown140.mUnknown00 = name;
+    mAppearance.mUserName = name;
 }
 
 // 0x0032e278
@@ -137,17 +137,17 @@ void MetPersonaData::UpdateSkillStatus() {
         nStatus = mStats.IsStageComplete(kDifficultyEasy, kEasyLastStage) != 0 ? kSkillStatusEasy :
                                                                                  kSkillStatusNone;
     }
-    mUnknown140.SetSkillStatus(nStatus);
+    mAppearance.SetSkillStatus(nStatus);
 }
 
 // 0x0032e488
 void MetPersonaData::AttachToBurnSlot(int nSlot) {
-    mUnknown140.AttachToBurnSlot(nSlot);
+    mAppearance.AttachToBurnSlot(nSlot);
 }
 
 // 0x0032e258
 int MetPersonaData::GetSkillStatus() {
-    return mUnknown140.GetSkillStatus();
+    return mAppearance.GetSkillStatus();
 }
 
 // 0x0032e380
@@ -155,18 +155,18 @@ void MetPersonaData::Print(std::ostream &stream) {
     stream << kStatsLabel;
     mStats.PrintLevels(stream);
     stream << kAppearanceLabel;
-    mUnknown140.Print(stream);
-    stream << kBirthdayLabel << mUnknown154 << kPrefabLabel << mUnknown15c;
+    mAppearance.Print(stream);
+    stream << kBirthdayLabel << mBirthday << kPrefabLabel << mIsPrefab;
 }
 
 // 0x0032e420
 MetPersonaData &MetPersonaData::operator=(const MetPersonaData &other) {
     if (&other != this) {
-        mUnknown140 = other.mUnknown140;
-        mUnknown160 = other.mUnknown160;
+        mAppearance = other.mAppearance;
+        mSavedName = other.mSavedName;
         mStats.Assign(other.mStats);
-        mUnknown154 = other.mUnknown154;
-        mUnknown15c = other.mUnknown15c;
+        mBirthday = other.mBirthday;
+        mIsPrefab = other.mIsPrefab;
     }
     return *this;
 }

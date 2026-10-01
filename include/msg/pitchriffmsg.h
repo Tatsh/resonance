@@ -43,13 +43,13 @@ public:
      * arguments are the four members in declaration order. The last is the track the player's
      * slot 4 reports.
      *
-     * @param nUnknown04 The word Print() labels `b#`.
+     * @param nButton The button, labelled `b#` by Print().
      * @param pPlayer The player whose riff starts.
      * @param position The song position of the start.
      * @param nTrack The player's track.
      */
-    PitchRiffMsg(int nUnknown04, Player *pPlayer, Mid::MBT position, int nTrack)
-        : mUnknown04(nUnknown04), mUnknown08(pPlayer), mUnknown0c(position), mUnknown10(nTrack) {
+    PitchRiffMsg(int nButton, Player *pPlayer, Mid::MBT position, int nTrack)
+        : mButton(nButton), mPlayer(pPlayer), mPosition(position), mTrack(nTrack) {
     }
 
     /**
@@ -100,10 +100,10 @@ public:
     // Public because Scratcher::HandleMessage() reads these directly, through a PitchRiffMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
     // fits equally well.
-    int mUnknown04;      // +0x04
-    Player *mUnknown08;  // +0x08
-    Mid::MBT mUnknown0c; // +0x0c
-    int mUnknown10;      // +0x10
+    int mButton;        // +0x04, labelled `b#` by Print()
+    Player *mPlayer;    // +0x08
+    Mid::MBT mPosition; // +0x0c
+    int mTrack;         // +0x10
 };
 
 /**

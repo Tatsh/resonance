@@ -50,8 +50,8 @@ constexpr int kCommandResume = 10;
 MetPauseSoloGameScreen::MetPauseSoloGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknownb0(0) {
-    mUnknown9c = kPanelName;
+      mLeavingForConfig(0) {
+    mReturnPanel = kPanelName;
 }
 
 // 0x0031ff38
@@ -60,7 +60,7 @@ void MetPauseSoloGameScreen::ResolveContainerViews() {
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
             Rnd::g_manager.Find(HxStr(FormatString(kOptionTextFormat, i))));
-        mUnknowna4.push_back(pOption);
+        mOptionTexts.push_back(pOption);
     }
 }
 
@@ -74,13 +74,13 @@ void MetPauseSoloGameScreen::HandleCommand(const MetScreenCommand *pCommand) {
         return;
     case kCommandController:
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknownb0 = 1;
-        mUnknown8c = kExitController;
+        mLeavingForConfig = 1;
+        mExitAction = kExitController;
         break;
     case kCommandGameOptions:
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknown8c = kExitGameOptions;
-        mUnknownb0 = 1;
+        mExitAction = kExitGameOptions;
+        mLeavingForConfig = 1;
         break;
     case kCommandIgnored:
     default:
@@ -96,37 +96,37 @@ void MetPauseSoloGameScreen::EnterAndShow() {
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
     HxStr heading = QueryConfigString(
-        kPromptConfigCode, params.mUnknown1c == kPlayModeJam ? kRemixHeadingKey : kGameHeadingKey);
+        kPromptConfigCode, params.mPlayMode == kPlayModeJam ? kRemixHeadingKey : kGameHeadingKey);
     pPaused->SetText(heading);
 
-    mUnknown90.clear();
-    QueryConfigStrings(&mUnknown90,
+    mOptionLabels.clear();
+    QueryConfigStrings(&mOptionLabels,
                        kLabelsConfigCode,
-                       params.mUnknown1c == kPlayModeGame ? kGameLabelsKey : kRemixLabelsKey);
+                       params.mPlayMode == kPlayModeGame ? kGameLabelsKey : kRemixLabelsKey);
     // Yes, the binary copies the labels here and again in the base slot.
     for (int i = 0; i < kOptionCount; ++i) {
-        mUnknowna4[i]->SetText(mUnknown90[i]);
+        mOptionTexts[i]->SetText(mOptionLabels[i]);
     }
     MetPauseBaseScreen::EnterAndShow();
-    mUnknownb0 = 0;
+    mLeavingForConfig = 0;
 }
 
 // 0x003205a8
-void MetPauseSoloGameScreen::OnUnknownSlot36() {
-    if (mUnknownb0 == 0) {
-        MetPauseBaseScreen::OnUnknownSlot36();
+void MetPauseSoloGameScreen::OnExitFinished() {
+    if (mLeavingForConfig == 0) {
+        MetPauseBaseScreen::OnExitFinished();
         return;
     }
 
     const char *pszConfigScreen;
-    if (mUnknown8c == kExitController) {
+    if (mExitAction == kExitController) {
         pszConfigScreen = kControllerScreen;
-    } else if (mUnknown8c == kExitGameOptions) {
+    } else if (mExitAction == kExitGameOptions) {
         pszConfigScreen = kGameOptionsScreen;
     } else {
         return;
     }
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kPanelName);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kPanelName);
     PushNamedScreen(HxStr(kTitleScreen));
     PushNamedScreen(HxStr(pszConfigScreen));
     PushNamedScreen(HxStr(kHelpScreen));

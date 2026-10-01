@@ -48,9 +48,9 @@ private:
     // 0x001c0980
     void PostTrackNeutralizedMsg(NeutralizeMsg *pMsg);
 
-    int mUnknown18[5];           // +0x18, not written by any recovered routine
-    int mTrack;                  // +0x2c, copied from TrackData::mUnknown04
+    int mReservedWords[5];       // +0x18, neither read nor written by any routine
+    int mTrack;                  // +0x2c, copied from TrackData::mIndex
     PhraseMgr *mPhraseMgr;       // +0x30
-    int mUnknown34;              // +0x34, not written by any recovered routine
+    int mReservedWord;           // +0x34, neither read nor written by any routine
     const TrackData *mTrackData; // +0x38
 };

@@ -99,7 +99,7 @@ public:
      * MetFreqMakerCanvasScreen::LoadPrefab() with no randomisation. The editing mode is then
      * selected through MetFreqMakerButtonsScreen::SetEditing(),
      * MetFreqMakerButtonsScreen::mNewPersona is cleared, and `MetLoadPreFabScreen` is recorded in
-     * MetFrontEndState::mUnknown24.
+     * MetFrontEndState::mReturnScreen.
      *
      * @ghidraAddress 0x002a9330
      */
@@ -110,7 +110,7 @@ public:
      *
      * Slot 43. With eight saved personas the help screen departs and the `freq_limit` dialogue
      * shows `nomem_freq_limit`. Otherwise `MetLoadPreFabScreen` is recorded in
-     * MetFrontEndState::mUnknown24 and MetLoadFreqBaseScreen::OnCreateButton() runs.
+     * MetFrontEndState::mReturnScreen and MetLoadFreqBaseScreen::OnCreateButton() runs.
      *
      * @ghidraAddress 0x002a9710
      */

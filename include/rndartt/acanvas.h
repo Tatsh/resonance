@@ -97,8 +97,8 @@ public:
      *
      * Copies the description. When asked to allocate, the copy gains a row stride derived from
      * its format, `(mWidth + 2) / 2` for kABitmapFormatLinear4 and mWidth times the matching entry
-     * of g_abBitmapBytesPerPixel otherwise, and a pixel rectangle allocated with the tag
-     * "abitmap.h" and line 0x47. The copy's mByteCount is not updated. The format code then
+     * of g_abBitmapBytesPerPixel otherwise, and a pixel rectangle allocated with the source file
+     * and line as its tag. The copy's mByteCount is not updated. The format code then
      * selects the subclass through the jump table at 0x00837d90.
      *
      * The byte count passed to the allocator is a 64-bit product of the height and the stride,

@@ -55,10 +55,10 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  *  - 3 `0x00107540` HandleMessage().
  *  - 4 `0x001065a8` DrawFrame().
  *  - 5 `0x0010bfa0` DrawFrameSimple().
- *  - 6 `0x0010c128` OnUnknownSlot6().
+ *  - 6 `0x0010c128` StartPlay().
  *  - 7 `0x0010c420` StartRecording().
  *  - 8 `0x0010c4b8` StartPlayback().
- *  - 9 `0x0010b870` GetUnknownfc().
+ *  - 9 `0x0010b870` GetWorldLoadFlag().
  *  - 10 `0x00105e80` AddPersona().
  *  - 11 `0x0010b888` GetPersonas().
  *  - 12 `0x0010be20` ClearPersonas().
@@ -67,7 +67,7 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  *  - 15 `0x0010b890` GetWorld().
  *  - 16 `0x0010b898` GetMetaWorld().
  *  - 17 `0x0010b8a0` GetPoller().
- *  - 18 `0x0010b8a8` GetUnknown18().
+ *  - 18 `0x0010b8a8` GetUnwrittenValue().
  *  - 19 `0x0010b8b0` GetStats().
  *  - 20 `0x0010c588` Save().
  *  - 21 `0x001072b0` Load().
@@ -103,9 +103,9 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  *
  * Four slots read or write the embedded settings rather than a member of this class. The offsets
  * `+0x84`, `+0x88`, and `+0x90` all fall inside the 0x38-byte GameParams subobject at `+0x68`, so
- * SetPlayMode() and GetPlayMode() drive `GameParams::mUnknown1c`, SetDifficulty() and
+ * SetPlayMode() and GetPlayMode() drive `GameParams::mPlayMode`, SetDifficulty() and
  * GetDifficulty() drive `GameParams::mDifficulty`, and SetGameMode() writes
- * `GameParams::mUnknown28`. Those three settings members are public for that reason, and a friend
+ * `GameParams::mNetGame`. Those three settings members are public for that reason, and a friend
  * declaration on GameParams would fit the image equally well.
  *
  * Every member of this class is private. Nothing outside the class touches one directly, and each
@@ -118,10 +118,10 @@ public:
      *
      * The constructor creates the InputPoller, registers itself as a sink of its own embedded
      * queue, and clears the poller's field at `+0x34`. Every word it does not set otherwise starts
-     * at zero, mUnknown18 at `0x00105f8c` included.
+     * at zero, mUnwrittenValue at `0x00105f8c` included.
      *
-     * mUnknownfc and mDrawSuppressed both start at 1. The second of the two is what makes the first
-     * frame after construction draw nothing until SetDrawEnabled() runs.
+     * mWorldLoadFlag and mDrawSuppressed both start at 1. mDrawSuppressed stops the first frame
+     * after construction from drawing until SetDrawEnabled() runs.
      *
      * @ghidraAddress 0x00105f50
      */
@@ -141,9 +141,9 @@ public:
      *
      * Slot 4. The queue is drained first. The routine then collects up to two renderers, the game
      * world's when it has one and the front-end world's when one exists, and runs RendererBase
-     * slots 6 and 7 on each. While mUnknowna8 is set, MemcardManager::Update() runs next. Unless
-     * drawing is suppressed, slot 8 then runs on each renderer between the display device's frame
-     * pair, inside the VU1 path.
+     * slots 6 and 7 on each. While mFrontEndActive is set, MemcardManager::Update() runs next.
+     * Unless drawing is suppressed, slot 8 then runs on each renderer between the display device's
+     * frame pair, inside the VU1 path.
      *
      * @ghidraAddress 0x001065a8
      */
@@ -168,7 +168,7 @@ public:
      *
      * @ghidraAddress 0x0010c128
      */
-    virtual void OnUnknownSlot6();
+    virtual void StartPlay();
 
     /**
      * Start recording the session.
@@ -192,20 +192,20 @@ public:
      * this manager, so a playback restores a saved session rather than feeding input back.
      *
      * @param file The recording to replay.
-     * @param nFlag Passed to the installed object unchanged.
+     * @param nUnusedFlag Passed unchanged to the installed object, and not read there.
      * @ghidraAddress 0x0010c4b8
      */
-    virtual void StartPlayback(const HxStr &file, int nFlag);
+    virtual void StartPlayback(const HxStr &file, int nUnusedFlag);
 
     /**
-     * Unrecovered. Slot 9.
+     * Report the flag the world load sets.
      *
-     * Returns mUnknownfc.
+     * Slot 9. No caller is recovered.
      *
-     * @return mUnknownfc.
+     * @return mWorldLoadFlag.
      * @ghidraAddress 0x0010b870
      */
-    virtual int GetUnknownfc();
+    virtual int GetWorldLoadFlag();
 
     /**
      * Copy one persona onto the roster.
@@ -254,7 +254,7 @@ public:
      * Slot 14. The routine runs InputPoller::Poll(), resolves the watchdog and discards it, and
      * reads the elapsed time through GetElapsedMilliseconds() and discards that too. When the poll
      * sent a reading out while a playback runs in a game world, the world queues its first exit
-     * mode through GrooveWorld::PostExitMode1(). MainLoop drives it from one of its two periodic
+     * mode through GrooveWorld::PostFinish(). MainLoop drives it from one of its two periodic
      * timers.
      *
      * @ghidraAddress 0x00106e28
@@ -292,14 +292,14 @@ public:
     virtual InputPoller *GetPoller();
 
     /**
-     * Unrecovered. Slot 18.
+     * Report a word that only the constructor writes.
      *
-     * Returns mUnknown18, which nothing recovered writes.
+     * Slot 18. No caller is recovered, and the word is zero for the life of the manager.
      *
-     * @return mUnknown18.
+     * @return mUnwrittenValue.
      * @ghidraAddress 0x0010b8a8
      */
-    virtual int GetUnknown18();
+    virtual int GetUnwrittenValue();
 
     /**
      * Resolve the tally.
@@ -315,7 +315,7 @@ public:
     /**
      * Write the manager to a stream.
      *
-     * Slot 20. Three words go out, mState, mUnknown08, and mGameMode, and the settings write
+     * Slot 20. Three words go out, mState, mSavedWord, and mGameMode, and the settings write
      * themselves afterwards through their own slot 2.
      *
      * @param pStream The stream to write to.
@@ -331,7 +331,7 @@ public:
      * roster is emptied and given one persona titled `freq player 1`, and the front end receives
      * IsRecordingMsg(1). The level is loaded through Renderer::LoadLevel(), and the world is
      * created and finished as FinishWorldLoad() does, whose body the binary expands here. The world
-     * then has mUnknown8c set, and the poller stops handing readings to it.
+     * then has mIsPlayback set, and the poller stops handing readings to it.
      *
      * @param pStream The stream to read from.
      * @ghidraAddress 0x001072b0
@@ -353,7 +353,7 @@ public:
      *
      * Slot 23. The mode is published under script symbol 0x262 as one of `none`, `solo`, `local`,
      * and `net`, in that value order, and any other value publishes the empty string. Those four
-     * literals are the whole evidence for the value set. The settings field mUnknown28 becomes the
+     * literals are the whole evidence for the value set. The settings field mNetGame becomes the
      * test for `net`, and the change counter advances.
      *
      * @param nMode The mode, 0 through 3.
@@ -418,7 +418,7 @@ public:
     /**
      * Record the play mode and publish it to the script layer.
      *
-     * Slot 29. The mode lands in the settings field mUnknown1c and is published under script symbol
+     * Slot 29. The mode lands in the settings field mPlayMode and is published under script symbol
      * 0x263 as one of `none`, `game`, and `jam`,
      * in that value order, and any other value publishes the empty string. Those three literals are
      * the whole evidence for the value set. The change counter advances.
@@ -441,7 +441,7 @@ public:
     /**
      * Resolve the play mode.
      *
-     * Slot 31. Returns the settings field mUnknown1c.
+     * Slot 31. Returns the settings field mPlayMode.
      *
      * @return The mode SetPlayMode() recorded.
      * @ghidraAddress 0x0010b8e8
@@ -482,10 +482,10 @@ protected:
     /**
      * Enter a local game.
      *
-     * Slot 34. Clears mUnknown100, or runs the front-end world's forwarder when it was clear,
-     * deactivates the poller, clears mUnknowna8, and sends the front end IsRecordingMsg(0). The
-     * world is then created and finished, its mUnknown8c cleared, and the poller hands it readings
-     * outside jukebox mode. A recorder starts recording, the watchdog is flushed, and a
+     * Slot 34. Clears mRestartPending, or runs the front-end world's forwarder when it was clear,
+     * deactivates the poller, clears mFrontEndActive, and sends the front end IsRecordingMsg(0).
+     * The world is then created and finished, its mIsPlayback cleared, and the poller hands it
+     * readings outside jukebox mode. A recorder starts recording, the watchdog is flushed, and a
      * DoGameSystemPlayCmd is posted on the watchdog timer to start play. The message itself is
      * ignored, and HandleMessage() passes it all the same.
      *
@@ -522,7 +522,7 @@ protected:
      *
      * Slot 37. Returns at once when not paused. Otherwise clears the pause and undoes each step
      * OnPauseGameSystem() took, handing the poller to the game world. It also rebuilds the world's
-     * input map while the world's mUnknown90 is zero. The message itself is ignored.
+     * input map while the world's mIsTutorial is zero. The message itself is ignored.
      *
      * @param pMsg The message, ignored.
      * @ghidraAddress 0x00106af8
@@ -564,7 +564,7 @@ private:
     void CreateWorld();
 
     // 0x0010c0c0
-    // Sets mUnknownfc, spins on the world's load report at 0x00194ca0 until it
+    // Sets mWorldLoadFlag, spins on the world's load report at 0x00194ca0 until it
     // finishes, completes the load, adds the players, prepares the level, and reconnects the
     // poller. Load() inlines the same sequence rather than calling this.
     void FinishWorldLoad();
@@ -587,13 +587,15 @@ private:
     // A state word. The two diagnostics StartRecording() and StartPlayback() trip both describe it
     // as the state, and both fire when it is non-zero. Load() is the only writer recovered, so its
     // value set is unrecovered.
-    int mState;                 // +0x04
-    int mUnknown08;             // +0x08
+    int mState; // +0x04
+    // A word Save() writes and Load() restores between mState and mGameMode. No other routine
+    // reads or writes it.
+    int mSavedWord;             // +0x08
     GrooveWorld *mpWorld;       // +0x0c
     InputPoller *mpPoller;      // +0x10
     MetaGameWorld *mpMetaWorld; // +0x14
     // Not written by the constructor and not written anywhere recovered.
-    int mUnknown18;                          // +0x18
+    int mUnwrittenValue;                     // +0x18
     std::vector<MetPersonaData *> mPersonas; // +0x1c
     GameStats mStats;                        // +0x28
     GameParams mParams;                      // +0x68
@@ -603,22 +605,23 @@ private:
     // Set by Start() and by EndGame() on a return to the front end, and cleared by
     // OnBeginGameLocal(). DrawFrame() runs MemcardManager::Update() while it is set, so memory-card
     // work advances only in the front end.
-    int mUnknowna8;           // +0xa8
+    int mFrontEndActive;      // +0xa8
     GameRecorder *mpRecorder; // +0xac the recorder StartRecording() installs
     GamePlayback *mpPlayback; // +0xb0 the playback StartPlayback() installs
     // The constructor clears both of its words and the destructor frees the buffer at +0xb8 only
     // when it is set, which is HxStr's own destruction. Nothing recovered writes it otherwise.
-    HxStr mUnknownb4; // +0xb4
+    HxStr mUnusedString; // +0xb4
     // Neither written by the constructor nor touched anywhere recovered. The field exists
     // because the queue starts at +0xc0 while the run of cleared fields ends at +0xb8, so four
     // bytes sit between them.
-    int mUnknownbc;  // +0xbc
-    MsgQueue mQueue; // +0xc0
-    // Set by FinishWorldLoad() and by Load(), and never cleared. GetUnknownfc() is its one reader.
-    int mUnknownfc; // +0xfc
+    int mPadBeforeQueue; // +0xbc
+    MsgQueue mQueue;     // +0xc0
+    // Set by the constructor, FinishWorldLoad(), and Load(), and never cleared.
+    // GetWorldLoadFlag() is its one reader.
+    int mWorldLoadFlag; // +0xfc
     // Set by EndGame() on a restart. OnBeginGameLocal() clears it, and while it is set, skips the
     // front-end world's forwarder.
-    int mUnknown100; // +0x100
+    int mRestartPending; // +0x100
     // Set by OnPauseGameSystem() and cleared by OnUnpauseGameSystem(), each of which returns early
     // on the value it would write.
     int mPaused; // +0x104

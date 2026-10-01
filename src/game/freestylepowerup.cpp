@@ -17,7 +17,7 @@ constexpr int kNoBar = 0;
 
 // 0x001c9a28
 int FreestylePowerup::Deploy(int, int nBar, Player *pPlayer, int) {
-    if (pPlayer->Slot5() != 0) {
+    if (pPlayer->GetPlace() != 0) {
         return 0;
     }
 
@@ -26,7 +26,7 @@ int FreestylePowerup::Deploy(int, int nBar, Player *pPlayer, int) {
     msg.mPlayer = pPlayer;
     pPlayer->Send(&msg);
 
-    if (msg.mUnknown04 != 0) {
+    if (msg.mResult != 0) {
         DeployedPowerupMsg deployed;
         deployed.mKind = kHudItemFreestyler;
         deployed.mPlayer = pPlayer;
@@ -42,7 +42,7 @@ int FreestylePowerup::Deploy(int, int nBar, Player *pPlayer, int) {
         failed.mPlayer = pPlayer;
         pPlayer->Send(&failed);
     }
-    return msg.mUnknown04;
+    return msg.mResult;
 }
 
 // 0x001c9a20

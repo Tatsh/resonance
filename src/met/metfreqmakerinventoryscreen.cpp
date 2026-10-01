@@ -94,7 +94,7 @@ enum PartCategory {
 // PartScale() results.
 constexpr float kSmallPartScale = 1.0f;
 constexpr float kLargePartScale = 2.0f;
-constexpr float kUnknownPartScale = -1.0f;
+constexpr float kUnrecognizedPartScale = -1.0f;
 
 // The part grid and the colour palette. The palette is sixteen cells wide and eight high, and a
 // palette position runs from 0 to 1 across it.
@@ -124,11 +124,11 @@ constexpr float kCrossOriginHeight = 140.0f;
 constexpr float kCrossOriginDepth = -0.1f;
 constexpr float kXfmTranslationW = 1.0f;
 
-// MetScreen::mUnknown58 in each state of the screen.
-constexpr float kConstructedUnknown58 = 3.0f;
-constexpr float kIdleUnknown58 = 1.0f;
-constexpr float kBrowsingUnknown58 = 0.5f;
-constexpr float kPlacingUnknown58 = 0.02f;
+// MetScreen::mRepeatScale in each state of the screen.
+constexpr float kConstructedRepeatScale = 3.0f;
+constexpr float kIdleRepeatScale = 1.0f;
+constexpr float kBrowsingRepeatScale = 0.5f;
+constexpr float kPlacingRepeatScale = 0.02f;
 
 // The commands slot 19 handles beyond the MetScreenCommandCode values. The codes are named
 // nowhere in the image, and the names are inferred from the canvas command each forwards.
@@ -231,7 +231,7 @@ MetFreqMakerInventoryScreen::MetFreqMakerInventoryScreen(MetRenderer *pRenderer,
       mWire16(nullptr), mWire30(nullptr), mLimitText(nullptr), mPaletteColumn(0), mPaletteRow(0),
       mViewsResolved(0), mCanvas(nullptr), mCrossOrigin(nullptr), mGridColumn(0), mGridRow(0),
       mMode(kModeNone) {
-    mUnknown58 = kConstructedUnknown58;
+    mRepeatScale = kConstructedRepeatScale;
     mMainInventoryView = new Rnd::View(HxStr(kMainInventoryViewName));
     mBodyView = new Rnd::View(HxStr(kBodyViewName));
     mHeadView = new Rnd::View(HxStr(kHeadViewName));
@@ -303,7 +303,7 @@ MetFreqMakerInventoryScreen::~MetFreqMakerInventoryScreen() {
     mBodyNames.clear();
     mDetailsNames.clear();
     mLogosNames.clear();
-    mUnknown58 = kIdleUnknown58;
+    mRepeatScale = kIdleRepeatScale;
     mMode = kModeNone;
     mCrossOrigin = nullptr;
 }
@@ -318,7 +318,7 @@ MetFreqMakerInventoryScreen *MetFreqMakerInventoryScreen::New(MetRenderer *pRend
 void MetFreqMakerInventoryScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     mMode = kModeNone;
-    mUnknown58 = kIdleUnknown58;
+    mRepeatScale = kIdleRepeatScale;
 }
 
 // 0x0026a3b0
@@ -368,7 +368,7 @@ void MetFreqMakerInventoryScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00272560
-void MetFreqMakerInventoryScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetFreqMakerInventoryScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 
@@ -378,7 +378,7 @@ void MetFreqMakerInventoryScreen::ResolveContainerViews() {
     std::map<HxStr, FreqPartTemplate *> parts(
         *MetFreqMakerAssetManager::shared()->GetPartsByName());
     HxStr name;
-    float flScale = kUnknownPartScale;
+    float flScale = kUnrecognizedPartScale;
     for (std::map<HxStr, FreqPartTemplate *>::iterator it = parts.begin(); it != parts.end();
          ++it) {
         FreqPartTemplate *pTemplate = it->second;
@@ -511,9 +511,9 @@ void MetFreqMakerInventoryScreen::PlayDeleteSound() {
 }
 
 // 0x00272600
-void MetFreqMakerInventoryScreen::OnUnknownSlot7() {
+void MetFreqMakerInventoryScreen::OnPanelActivated() {
     mMode = kModeInventory;
-    mUnknown58 = kBrowsingUnknown58;
+    mRepeatScale = kBrowsingRepeatScale;
     ShowPalette(0);
     ShowInventory(1);
     SetHighlight(kHighlightInventory);
@@ -603,7 +603,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
         if (mMode < kModeInventory) {
             mCanvas->PlaceCursor();
             mMode = kModeNone;
-            mUnknown58 = kIdleUnknown58;
+            mRepeatScale = kIdleRepeatScale;
             ShowPalette(0);
             ShowInventory(1);
             SetHighlight(kHighlightNone);
@@ -623,7 +623,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
             return;
         }
         mMode = kModePart;
-        mUnknown58 = kPlacingUnknown58;
+        mRepeatScale = kPlacingRepeatScale;
         SetHighlight(kHighlightCanvas);
         ShowDirections((mCurrentView == mEditView) ? kDirectionsColorPanel :
                                                      kDirectionsColorPanelShort);
@@ -634,7 +634,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
         }
         if (mMode < kModeInventory) {
             mMode = kModeInventory;
-            mUnknown58 = kBrowsingUnknown58;
+            mRepeatScale = kBrowsingRepeatScale;
             if (mCurrentView == mEditView) {
                 mCanvas->RevertSelection();
                 ShowEditPage();
@@ -651,7 +651,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
         }
         ActivateNamedPanel(HxStr(kButtonsScreenName));
         mMode = kModePart; // Yes, leaving the inventory enters the part mode.
-        mUnknown58 = kPlacingUnknown58;
+        mRepeatScale = kPlacingRepeatScale;
         ShowPalette(0);
         ShowInventory(1);
         SetHighlight(kHighlightNone);
@@ -670,14 +670,14 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
             ShowPalette(0);
             ShowInventory(1);
             SetHighlight(kHighlightCanvas);
-            mUnknown58 = kBrowsingUnknown58;
+            mRepeatScale = kBrowsingRepeatScale;
             ShowDirections((mCurrentView == mEditView) ? kDirectionsColorPanel :
                                                          kDirectionsColorPanelShort);
         } else if (mMode == kModeColor) {
             ShowPalette(1);
             ShowInventory(0);
             SetHighlight(kHighlightInventory);
-            mUnknown58 = kBrowsingUnknown58;
+            mRepeatScale = kBrowsingRepeatScale;
             ShowDirections(kDirectionsCanvas);
         }
         return;
@@ -689,7 +689,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
         ShowEditPage();
         UpdateGridCursor();
         mMode = kModeInventory;
-        mUnknown58 = kBrowsingUnknown58;
+        mRepeatScale = kBrowsingRepeatScale;
         SetHighlight(kHighlightInventory);
         ShowDirections(kDirectionsSelectStamp);
         PlayDeleteSound();
@@ -809,7 +809,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
 }
 
 // 0x00272a98
-void MetFreqMakerInventoryScreen::OnUnknownSlot33() {
+void MetFreqMakerInventoryScreen::OnEnterFinished() {
     ShowPalette(0);
     ShowInventory(0);
     mPaletteRow = kPaletteStartRow;
@@ -1186,6 +1186,6 @@ float MetFreqMakerInventoryScreen::PartScale(FreqPart *pPart) {
     case kPartCategoryLogos:
         return kLargePartScale;
     default:
-        return kUnknownPartScale;
+        return kUnrecognizedPartScale;
     }
 }

@@ -27,21 +27,21 @@ void sceVu0InversMatrix(float *pDst, const float *pSrc);
  * @param pB The right factor, four rows of four floats.
  * @ghidraAddress 0x005e7a58
  */
-void sceVu0Sub005e7a58(float *pDst, const float *pA, const float *pB);
+void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB);
 
 /**
  * Multiply two affine transforms in the first three words of every row.
  *
  * A member of the Sony libvu0 object, linked as shipped, whose published name is unknown. It is
- * sceVu0Sub005e7a58 under an `xyz` destination mask, so the fourth word of every destination row
- * receives whatever the vector register already held.
+ * sceVu0MulAffineMatrix under an `xyz` destination mask. The fourth word of every destination row
+ * therefore receives whatever the vector register already had.
  *
  * @param pDst Receives the product, four rows of four floats. It may alias either factor.
  * @param pA The left factor, four rows of four floats.
  * @param pB The right factor, four rows of four floats.
  * @ghidraAddress 0x005e7ab0
  */
-void sceVu0Sub005e7ab0(float *pDst, const float *pA, const float *pB);
+void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB);
 
 } // extern "C"
 

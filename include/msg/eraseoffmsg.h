@@ -70,7 +70,7 @@ public:
 private:
     Player *mPlayer;    // +0x04
     Mid::MBT mPosition; // +0x08
-    int mUnknown0c;     // +0x0c
+    int mTrack;         // +0x0c, with a title after the track EraseMsg stores at the same offset
 };
 
 /**

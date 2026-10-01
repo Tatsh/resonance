@@ -90,34 +90,34 @@ MetMultiStatsScreen::MetMultiStatsScreen(MetRenderer *pRenderer, int nPriority)
 void MetMultiStatsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     FillText(kSongHeading, kSongHeadingKey);
-    mUnknown8c = FindText(kSongValue);
-    mUnknown90 = FindText(kSkillValue);
+    mSongText = FindText(kSongValue);
+    mDifficultyText = FindText(kSkillValue);
     FillText(kGamePanel, kGamePanelKey);
     FillText(kSkillHeading, kSkillHeadingKey);
     FillText(kScoresPanel, kScoresPanelKey);
 
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         Rnd::Text *pScore = FindText(FormatString(kScoreTextFormat, nRow + 1));
-        mUnknown94.push_back(pScore);
+        mScoreTexts.push_back(pScore);
         pScore->SetText(HxStr(kNoText));
 
         Rnd::Text *pName = FindText(FormatString(kNameTextFormat, nRow + 1));
-        mUnknowna0.push_back(pName);
+        mNameTexts.push_back(pName);
         pName->SetText(HxStr(kNoText));
 
         Rnd::Mat *pMaterial = dynamic_cast<Rnd::Mat *>(
             Rnd::g_manager.Find(HxStr(FormatString(kPictureMaterialFormat, nRow + 1))));
-        mUnknownac.push_back(pMaterial);
+        mPictureMaterials.push_back(pMaterial);
 
         Rnd::Mesh *pMesh = dynamic_cast<Rnd::Mesh *>(
             Rnd::g_manager.Find(HxStr(FormatString(kMeshFormat, nRow + 1))));
-        mUnknownb8.push_back(pMesh);
+        mPlayerMeshes.push_back(pMesh);
     }
 
-    mUnknownd0.resize(kRowCount);
+    mPlayerColors.resize(kRowCount);
     // The binary expands this loop into one store per component.
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
-        mUnknownd0[nRow] = kPlayerColors[nRow];
+        mPlayerColors[nRow] = kPlayerColors[nRow];
     }
 }
 
@@ -137,27 +137,27 @@ void MetMultiStatsScreen::EnterAndShow() {
     } else {
         HxStr text = QueryConfigString(kSongNameConfigCode, TextOrEmpty(params.mLevelName));
         songName = text;
-        const float flWrapWidth = mUnknown8c->mWrapWidth;
-        if (flWrapWidth < mUnknown8c->MeasureText(TextOrEmpty(songName), songName.mLen)) {
+        const float flWrapWidth = mSongText->mWrapWidth;
+        if (flWrapWidth < mSongText->MeasureText(TextOrEmpty(songName), songName.mLen)) {
             HxStr shorter =
                 QueryConfigString(kShortSongNameConfigCode, TextOrEmpty(params.mLevelName));
             songName = shorter;
         }
     }
-    mUnknown8c->SetText(songName);
-    mUnknown90->SetText(DifficultyName(params.mDifficulty));
+    mSongText->SetText(songName);
+    mDifficultyText->SetText(DifficultyName(params.mDifficulty));
 
-    mUnknownc4.erase(mUnknownc4.begin(), mUnknownc4.end());
-    mUnknownc4.insert(mUnknownc4.begin(), kFirstPlayer);
+    mPlayerOrder.erase(mPlayerOrder.begin(), mPlayerOrder.end());
+    mPlayerOrder.insert(mPlayerOrder.begin(), kFirstPlayer);
     for (int nPlayer = 1; nPlayer < pStats->mPlayerCount; ++nPlayer) {
         const int nScore = pStats->GetScore(nPlayer);
-        for (std::vector<int>::iterator it = mUnknownc4.begin(); it != mUnknownc4.end(); ++it) {
+        for (std::vector<int>::iterator it = mPlayerOrder.begin(); it != mPlayerOrder.end(); ++it) {
             if (pStats->GetScore(*it) < nScore) {
-                mUnknownc4.insert(it, nPlayer);
+                mPlayerOrder.insert(it, nPlayer);
                 break;
             }
-            if (it + 1 == mUnknownc4.end()) {
-                mUnknownc4.push_back(nPlayer);
+            if (it + 1 == mPlayerOrder.end()) {
+                mPlayerOrder.push_back(nPlayer);
                 break;
             }
         }
@@ -165,11 +165,11 @@ void MetMultiStatsScreen::EnterAndShow() {
 
     std::vector<HxStr> names;
     std::vector<Rnd::Tex *> pictures;
-    if (params.mUnknown28 == 0) {
-        std::vector<MetPersonaData *> personas(MetFrontEndState::shared()->mUnknown00);
+    if (params.mNetGame == 0) {
+        std::vector<MetPersonaData *> personas(MetFrontEndState::shared()->mPersonas);
         for (std::vector<MetPersonaData *>::size_type i = 0; i < personas.size(); ++i) {
             MetPersonaData *pPersona = personas[i];
-            names.push_back(pPersona->mUnknown140.mUnknown00);
+            names.push_back(pPersona->mAppearance.mUserName);
             Rnd::Tex *pPicture = FreqAppearance::FindPersonaBurnTexture(i);
             pPersona->AttachToBurnSlot(i);
             pictures.push_back(pPicture);
@@ -178,22 +178,22 @@ void MetMultiStatsScreen::EnterAndShow() {
 
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         if (nRow < pStats->mPlayerCount) {
-            const int nPlayer = mUnknownc4[nRow];
-            if (params.mUnknown1c == kPlayModeGame) {
-                mUnknown94[nRow]->SetText(
+            const int nPlayer = mPlayerOrder[nRow];
+            if (params.mPlayMode == kPlayModeGame) {
+                mScoreTexts[nRow]->SetText(
                     HxStr(FormatString(kScoreFormat, pStats->GetScore(nPlayer))));
             } else {
-                mUnknown94[nRow]->SetText(HxStr(kNoText));
+                mScoreTexts[nRow]->SetText(HxStr(kNoText));
             }
             Rnd::Tex *pPicture = pictures[nPlayer];
-            mUnknownb8[nRow]->SetShowing(1);
-            mUnknownb8[nRow]->SetVertexColor(mUnknownd0[nPlayer]);
-            mUnknownac[nRow]->mStages[kBurnStage].SetTex(pPicture);
-            mUnknowna0[nRow]->SetText(names[nPlayer]);
+            mPlayerMeshes[nRow]->SetShowing(1);
+            mPlayerMeshes[nRow]->SetVertexColor(mPlayerColors[nPlayer]);
+            mPictureMaterials[nRow]->mStages[kBurnStage].SetTex(pPicture);
+            mNameTexts[nRow]->SetText(names[nPlayer]);
         } else {
-            mUnknown94[nRow]->SetText(HxStr(kNoText));
-            mUnknowna0[nRow]->SetText(HxStr(kNoText));
-            mUnknownb8[nRow]->SetShowing(0);
+            mScoreTexts[nRow]->SetText(HxStr(kNoText));
+            mNameTexts[nRow]->SetText(HxStr(kNoText));
+            mPlayerMeshes[nRow]->SetShowing(0);
         }
     }
 
@@ -206,5 +206,5 @@ MetMultiStatsScreen *MetMultiStatsScreen::New(MetRenderer *pRenderer, int nPrior
 }
 
 // 0x00306998
-void MetMultiStatsScreen::OnUnknownSlot36() {
+void MetMultiStatsScreen::OnExitFinished() {
 }

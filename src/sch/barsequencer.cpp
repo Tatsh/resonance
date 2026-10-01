@@ -10,8 +10,8 @@ namespace {
 // MIDI ticks in one bar, which is also the task's period.
 constexpr int kTicksPerBar = 1920;
 
-// The third TickTask constructor argument every recovered caller passes.
-constexpr int kTickTaskUnknown = 0;
+// The TickTask constructor's bAligned argument.
+constexpr int kTickTaskUnaligned = 0;
 
 // The value Tick() returns to keep the task running.
 constexpr int kKeepRunning = 1;
@@ -20,7 +20,7 @@ constexpr int kKeepRunning = 1;
 
 // 0x00100c70
 BarSequencer::BarSequencer(Sch::TickClock *pClock, TrackData *pTrack, MsgSink *pSink, int nUnmapped)
-    : TickTask(pClock, Mid::MBT(kTicksPerBar).mTick, kTickTaskUnknown), mTrack(pTrack),
+    : TickTask(pClock, Mid::MBT(kTicksPerBar).mTick, kTickTaskUnaligned), mTrack(pTrack),
       mSink(pSink), mClock(pClock), mUnmapped(nUnmapped), mSequencer(nullptr) {
 }
 

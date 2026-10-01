@@ -62,9 +62,9 @@ void MetJukeboxEditPlaylistScreenLowerLeft::HandleCommand(
 }
 
 // 0x0023ab70
-void MetJukeboxEditPlaylistScreenLowerLeft::OnUnknownSlot33() {
+void MetJukeboxEditPlaylistScreenLowerLeft::OnEnterFinished() {
 }
 
 // 0x0023ab78
-void MetJukeboxEditPlaylistScreenLowerLeft::OnUnknownSlot36() {
+void MetJukeboxEditPlaylistScreenLowerLeft::OnExitFinished() {
 }

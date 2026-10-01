@@ -20,7 +20,7 @@
 
 namespace {
 
-// Player::Slot2() of a player without a local slot.
+// Player::GetInputSlot() of a player without a local slot.
 constexpr int kNoLocalSlot = -1;
 
 constexpr float kUnsetFrame = 1e9f;
@@ -43,12 +43,12 @@ inline void ResetLocalXfm(Rnd::Transformable *pTrans, const Transform &identity)
 
 // 0x00440020
 TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
-    : mPlayerNum(pPlayer->Slot2() + 1), mCrippleFrame(kUnsetFrame),
+    : mPlayerNum(pPlayer->GetInputSlot() + 1), mCrippleFrame(kUnsetFrame),
       mCrippleActPath(FindObject<Rnd::TransAnim>("crip act path")), mActivatorFx(nullptr),
       mCrippleCamPath(FindObject<Rnd::TransAnim>("crip cam path")), mCamFx(nullptr),
       mCam(FindObject<Rnd::Cam>(FormatString("tnl cam%d", mPlayerNum))), mCamIntro(nullptr),
       mLocalView(FindObject<Rnd::View>(FormatString("tnl local%d.view", mPlayerNum))),
-      mTunnel(pTunnel), mUnknown28(0), mIndex(nIndex), mPlayer(pPlayer),
+      mTunnel(pTunnel), mUnusedWord(0), mIndex(nIndex), mPlayer(pPlayer),
       mActivator(nIndex, pPlayer->mColorName, this), mGridMarkers(pTunnel, mPlayerNum),
       mSabreTrail(nIndex, pPlayer->mColorName),
       mSeekerFade(nIndex, TnlColorFromName(HxStr(pPlayer->mColorName))) {
@@ -62,7 +62,7 @@ TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
     // The binary does not test either effect transform for null.
     mActivatorFx = FindObject<Rnd::Transformable>(FormatString("activator fx%d", mIndex));
     ResetLocalXfm(mActivatorFx, identity);
-    if (pPlayer->Slot2() != kNoLocalSlot) {
+    if (pPlayer->GetInputSlot() != kNoLocalSlot) {
         pSeeker->SetTrans(
             FindObject<Rnd::Transformable>(FormatString("tnl cam slide%d", mPlayerNum)));
         mCamFx = FindObject<Rnd::Transformable>(FormatString("tnl cam fx%d", mPlayerNum));

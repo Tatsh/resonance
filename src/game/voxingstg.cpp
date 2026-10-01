@@ -13,26 +13,26 @@ VoxingSTG::VoxingSTG(TrackData *pTrackData)
 
     if (mApplication->GetPlayMode() == kPlayModeJam) {
         mJamEffects = new JamEffectsMgr(
-            mUnknown00, mTrackData->mChannel, mApplication->GetPlayMap(), mPhraseMgr, mMuseSynth);
+            mTrack, mTrackData->mChannel, mApplication->GetPlayMap(), mPhraseMgr, mMuseSynth);
         mPhrasePlayer->SetJamEffectsMgr(mJamEffects);
     }
 }
 
 // 0x001da7f8
-void VoxingSTG::Slot2() {
-    ScoreTrackGraph::Slot2();
+void VoxingSTG::Start() {
+    ScoreTrackGraph::Start();
     mVoxer->Start(kMBTInfinity);
 }
 
 // 0x001da830
-void VoxingSTG::Slot3() {
+void VoxingSTG::Stop() {
     mVoxer->Stop();
-    ScoreTrackGraph::Slot3();
+    ScoreTrackGraph::Stop();
 }
 
 // 0x001da730
 VoxingSTG::~VoxingSTG() {
-    VoxingSTG::Slot3(); // The binary calls this class's own body rather than dispatching.
+    VoxingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mNewGemMaker;
     delete mOldGemMaker;
     delete mVoxer;
@@ -40,7 +40,7 @@ VoxingSTG::~VoxingSTG() {
 }
 
 // 0x001da230
-void VoxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void VoxingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mNewGemMaker);
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mVoxer);
@@ -66,13 +66,13 @@ void VoxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSec
 }
 
 // 0x001da868
-void VoxingSTG::Slot6(MsgSink *pOutput) {
+void VoxingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
 // 0x001da8a8
-void VoxingSTG::Slot7(MsgSink *pSink) {
+void VoxingSTG::AddSinkToSources(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mVoxer->AddSink(pSink);
     if (mJamEffects != nullptr) {
@@ -83,7 +83,7 @@ void VoxingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x001da978
-void VoxingSTG::Slot8(MsgSink *pSink) {
+void VoxingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;
     }

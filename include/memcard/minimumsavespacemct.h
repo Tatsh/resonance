@@ -95,8 +95,8 @@ public:
     /**
      * Build both paths, seed the measurement, and run the first step.
      *
-     * The body seeds mSpace from GlobalSettings::mUnknown6c less 100, builds both paths, clears
-     * mStep, and runs RunStep().
+     * The body seeds mSpace from GlobalSettings::mRequiredSaveSpace less 100, builds both paths,
+     * clears mStep, and runs RunStep().
      *
      * @ghidraAddress 0x00178328
      */

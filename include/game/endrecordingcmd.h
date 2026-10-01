@@ -75,11 +75,13 @@ public:
     virtual void Save(OBStream &stream);
 
     /**
-     * Slot 8, the one virtual this class adds. The body is empty.
+     * Do nothing. Slot 8, the one virtual this class adds.
+     *
+     * The body is empty and no caller is recovered.
      *
      * @ghidraAddress 0x0010efe0
      */
-    virtual void Slot8();
+    virtual void UnusedHook();
 
     /**
      * Identifier the class streams itself under. The word at `0x006693e8` starts as 6.

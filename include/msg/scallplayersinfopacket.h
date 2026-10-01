@@ -31,9 +31,14 @@ public:
      * Public because AppendEntry() takes one. The copy constructor at `0x0010a2e0` is the
      * compiler-generated one.
      */
-    struct Entry14 {
-        int mPid;                 /*!< Labelled ` pid:`. +0x00 */
-        int mUnknown04;           /*!< Transferred but not printed. +0x04 */
+    struct PlayerEntry {
+        int mPid; /*!< Labelled ` pid:`. +0x00 */
+        /**
+         * Transferred but not printed. +0x04
+         *
+         * The title is inferred from the `pid` and `clid` pair GemPacket prints.
+         */
+        int mClientId;
         std::vector<int> mTracks; /*!< Labelled ` tracks:`. +0x08 */
     };
 
@@ -108,10 +113,10 @@ public:
      * @param entry The entry to append.
      * @ghidraAddress 0x003f23a8
      */
-    void AppendEntry(const Entry14 &entry);
+    void AppendEntry(const PlayerEntry &entry);
 
 private:
-    std::vector<Entry14> mUnknown14; // +0x14
+    std::vector<PlayerEntry> mPlayers; // +0x14
 };
 
 /**

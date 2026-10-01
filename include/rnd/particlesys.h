@@ -406,7 +406,7 @@ public:
     float mSizeHigh;
 
 private:
-    unsigned char mUnknown168[0x08]; // +0x168
+    unsigned char mReserved168[0x08]; // +0x168 Alignment padding before mStartColorLow.
 
 public:
     /*!< Low end of the colour a particle spawns with. Public on the same evidence as
@@ -420,8 +420,8 @@ public:
     Color mEndColorHigh;
 
 private:
-    int mCollide;                   // Non-zero to collide with mCollidePlane.
-    unsigned char mUnknown1b4[0xc]; // +0x1b4 Never read or written by a recovered routine.
+    int mCollide;                    // Non-zero to collide with mCollidePlane.
+    unsigned char mReserved1b4[0xc]; // +0x1b4 Never read or written by a recovered routine.
     Plane mCollidePlane;
     Vector3 mForce;
 

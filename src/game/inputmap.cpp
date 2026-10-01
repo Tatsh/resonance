@@ -69,7 +69,7 @@ InputMap::InputMap(Globals *pGlobals, std::vector<Player *> *pPlayers) : mGlobal
     g_pInputMap = this;
     for (unsigned i = 0; i < kSlotCount; ++i) {
         for (unsigned j = 0; j < kRiffCount; ++j) {
-            mUnknown30[i][j] = 0;
+            mRiffActive[i][j] = 0;
         }
     }
 }
@@ -122,7 +122,7 @@ void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
 
     Player *pPlayer = nullptr;
     for (auto it = mPlayers->begin(); it != mPlayers->end(); ++it) {
-        if ((*it)->Slot2() == binding.mSlot) {
+        if ((*it)->GetInputSlot() == binding.mSlot) {
             pPlayer = *it;
             break;
         }
@@ -152,18 +152,18 @@ void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
         break;
     case kActionPitchRiff:
         if (flValue != 0.0) {
-            SendPitchRiff(pMsg->mPosition, pPlayer, pPlayer->Slot4(), binding.mExtra);
+            SendPitchRiff(pMsg->mPosition, pPlayer, pPlayer->GetTrack(), binding.mExtra);
         } else {
-            SendStopRiff(pMsg->mPosition, pPlayer, pPlayer->Slot4(), binding.mExtra);
+            SendStopRiff(pMsg->mPosition, pPlayer, pPlayer->GetTrack(), binding.mExtra);
         }
         break;
     case kActionAxisRegister: {
-        AxisRegisterMsg msg(pPlayer, flValue, pMsg->mPosition, pPlayer->Slot4());
+        AxisRegisterMsg msg(pPlayer, flValue, pMsg->mPosition, pPlayer->GetTrack());
         Send(&msg);
         break;
     }
     case kActionAxisFX: {
-        AxisFXMsg msg(pPlayer, flValue, pMsg->mPosition, pPlayer->Slot4());
+        AxisFXMsg msg(pPlayer, flValue, pMsg->mPosition, pPlayer->GetTrack());
         Send(&msg);
         break;
     }
@@ -176,7 +176,7 @@ void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
             } else {
                 const long long nNow = Application::shared()->GetWatchdogTimer()->Now();
                 const int bDoubleTap = (nNow - pPlayer->mLastEraseTime) < kDoubleTapNanoseconds;
-                EraseMsg msg(pPlayer, pMsg->mPosition, pPlayer->Slot4(), bDoubleTap);
+                EraseMsg msg(pPlayer, pMsg->mPosition, pPlayer->GetTrack(), bDoubleTap);
                 Send(&msg);
                 pPlayer->mLastEraseTime = nNow;
             }
@@ -184,13 +184,13 @@ void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
         break;
     case kActionAdvance:
         if (flValue != 0.0) {
-            AdvanceSectionMsg msg(pPlayer, pMsg->mPosition, pPlayer->Slot4());
+            AdvanceSectionMsg msg(pPlayer, pMsg->mPosition, pPlayer->GetTrack());
             Send(&msg);
         }
         break;
     case kActionLoop:
         if (flValue != 0.0) {
-            LoopToolMsg msg(pPlayer, pMsg->mPosition, pPlayer->Slot4());
+            LoopToolMsg msg(pPlayer, pMsg->mPosition, pPlayer->GetTrack());
             Send(&msg);
         }
         break;
@@ -229,7 +229,7 @@ void InputMap::SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int 
 
 // 0x0011d9b0
 void InputMap::SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff) {
-    pPlayer->Slot2(); // Yes, the binary discards this call's result.
+    pPlayer->GetInputSlot(); // Yes, the binary discards this call's result.
     PitchRiffMsg msg(nRiff, pPlayer, position, nTrack);
     Send(&msg);
 }
@@ -306,7 +306,7 @@ void InputMap::Rebuild() {
     }
     ForceFeedbackMgr *pForceFeedback = Application::shared()->GetWorld()->mForceFeedback;
     if (pForceFeedback != nullptr) {
-        pForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mUnknown08);
+        pForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mForceFeedback);
     }
 }
 
@@ -317,8 +317,8 @@ void InputMap::StopAllRiffs() {
         for (int nRiff = 0; nRiff < kRiffCount; ++nRiff) {
             Player *pPlayer = (*mPlayers)[i];
             StopRiffMsg msg;
-            msg.mUnknown10 = pPlayer->Slot4();
-            msg.mUnknown04 = nRiff;
+            msg.mTrack = pPlayer->GetTrack();
+            msg.mButton = nRiff;
             msg.mPlayer = pPlayer;
             msg.mPosition.mTick = nNow;
             Send(&msg);
@@ -327,7 +327,7 @@ void InputMap::StopAllRiffs() {
 
     for (unsigned i = 0; i < kSlotCount; ++i) {
         for (unsigned j = 0; j < kRiffCount; ++j) {
-            mUnknown30[i][j] = 0;
+            mRiffActive[i][j] = 0;
         }
     }
 }

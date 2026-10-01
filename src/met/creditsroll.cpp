@@ -246,7 +246,7 @@ MetPersonaData *CreditsRoll::FindPersona(const HxStr &name,
                                          const std::vector<MetPersonaData *> &identities) {
     const int nIdentities = identities.size();
     for (int i = 0; i < nIdentities; ++i) {
-        if (name == identities[i]->mUnknown140.mUnknown00) {
+        if (name == identities[i]->mAppearance.mUserName) {
             return identities[i];
         }
     }

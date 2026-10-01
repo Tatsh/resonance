@@ -3,7 +3,7 @@
 #include <iostream>
 
 // 0x003e1810
-GameConnectFailureMsg::GameConnectFailureMsg(const HxStr &unknown04) : mUnknown04(unknown04) {
+GameConnectFailureMsg::GameConnectFailureMsg(const HxStr &reason) : mReason(reason) {
 }
 
 // 0x003d7a58
@@ -28,5 +28,5 @@ const char *GameConnectFailureMsg::Name() {
 
 // 0x003e4048
 void GameConnectFailureMsg::Print(std::ostream &stream) {
-    stream << mUnknown04;
+    stream << mReason;
 }

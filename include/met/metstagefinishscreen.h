@@ -74,13 +74,13 @@ public:
      * score and the level as beaten in the first persona's CampaignStats, updates the persona's
      * skill status, and queues one message for each change the recording made. The level named
      * second of a two-level secret stage additionally queues `end_game_end_super_secret`. When the
-     * level was not beaten before or its high score was beaten, and MetFrontEndState::mUnknown14 is
+     * level was not beaten before or its high score was beaten, and MetFrontEndState::mUnlockAll is
      * clear, the persona is saved through MetPersonaSaverScreen::StartSave() with this screen to
      * return to, to the first card location GlobalSettings records when
-     * MetFrontEndState::mUnknown0c is set and to location `1` otherwise, and the body returns.
-     * Otherwise, when MetFrontEndState::mUnknown0c and mUnknown10 are both 1, the global settings
-     * are saved first through MetGlobalSettingsSaverScreen::StartSave(), and ShowMessages() runs in
-     * every other case.
+     * MetFrontEndState::mUsingMemcard is set and to location `1` otherwise, and the body returns.
+     * Otherwise, when MetFrontEndState::mUsingMemcard and mSettingsDirty are both 1, the global
+     * settings are saved first through MetGlobalSettingsSaverScreen::StartSave(), and
+     * ShowMessages() runs in every other case.
      *
      * @ghidraAddress 0x003be2a8
      */
@@ -152,7 +152,7 @@ public:
      * @param flTime The current frame position.
      * @ghidraAddress 0x003bf5e8
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Start this screen's exit animation. Slot 30.
@@ -160,7 +160,7 @@ public:
      * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x003c4390
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Select no button, record the time the first message appears, and clear the panel. Slot 33.
@@ -169,19 +169,19 @@ public:
      *
      * @ghidraAddress 0x003c42d8
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Hand over to the solo win screen. Slot 36.
      *
      * MetScreen slot 35 runs the slot once the exit animation has finished. The body clears
-     * mUnknowna8, passes mUnknownb4 to MetSoloWinScreen::SetDifficultyUnlocked(), pushes and
-     * activates `MetSoloWinScreen`, selects no button, empties the messages, and hides the four
-     * congratulation texts.
+     * mStageRecorded, passes mDifficultyUnlocked to MetSoloWinScreen::SetDifficultyUnlocked(),
+     * pushes and activates `MetSoloWinScreen`, selects no button, empties the messages, and hides
+     * the four congratulation texts.
      *
      * @ghidraAddress 0x003c0530
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views, add the continue button, and fill the four congratulation texts.
@@ -248,10 +248,10 @@ private:
     /**
      * Queue `end_game_easy_normal` when this stage unlocks the next difficulty.
      *
-     * Slot 5 at `0x003be4ac` is the one caller. The body clears mUnknownb4, and acts only when the
-     * unlock is new and the game's difficulty is below expert. The message receives the display
-     * name of the next difficulty, and mUnknownb4 is then set. The stage configuration code 0x25d
-     * is read for the game's level and the result discarded.
+     * Slot 5 at `0x003be4ac` is the one caller. The body clears mDifficultyUnlocked, and acts only
+     * when the unlock is new and the game's difficulty is below expert. The message receives the
+     * display name of the next difficulty, and mDifficultyUnlocked is then set. The stage
+     * configuration code 0x25d is read for the game's level and the result discarded.
      *
      * @param nWasUnlocked Non-zero when the difficulty was already unlocked.
      * @param nIsUnlocked Non-zero when the difficulty is unlocked now.
@@ -264,9 +264,9 @@ private:
      *
      * The body attaches `egc_<count>lines.view` beneath `egc_lines.view`, shows the four
      * congratulation texts, and writes each message into `egc_congrats_<count>lines_0<n>.txt`,
-     * hidden, appending each text to mUnknown98 for slot 26 to reveal. The continue button is
-     * hidden and disabled, and MetScreen::EnterAndShow() runs last. Slot 5 at `0x003bec68` is the
-     * one caller.
+     * hidden, appending each text to mMessageDrawables for slot 26 to reveal. The continue button
+     * is hidden and disabled, and MetScreen::EnterAndShow() runs last. Slot 5 at `0x003bec68` is
+     * the one caller.
      *
      * @ghidraAddress 0x003bef98
      */
@@ -306,19 +306,19 @@ private:
     void AddEndSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
 
     // The messages slot 26 shows, in the order slot 5 queued them. +0x8c
-    std::vector<HxStr> mUnknown8c;
+    std::vector<HxStr> mMessages;
     // One drawable per message, which slot 26 shows. The routine at 0x003bef98 fills it. +0x98
-    std::vector<Rnd::Drawable *> mUnknown98;
+    std::vector<Rnd::Drawable *> mMessageDrawables;
     // The one-button ring with the continue button. The constructor allocates it and the
     // destructor releases it. +0xa4
-    MetButtonList *mUnknowna4;
+    MetButtonList *mContinueButtons;
     // Set by slot 5 once the stage is recorded, which blocks a second recording, and cleared by
     // slot 36. +0xa8
-    int mUnknowna8;
+    int mStageRecorded;
     // Index of the next message slot 26 shows. +0xac
-    int mUnknownac;
+    int mNextMessage;
     // Frame position of the last step of the message sequence, or zero outside the sequence. +0xb0
-    float mUnknownb0;
+    float mLastStepTime;
     // Cleared by AddDifficultyUnlockMessage() and handed to MetSoloWinScreen by slot 36. +0xb4
-    int mUnknownb4;
+    int mDifficultyUnlocked;
 };

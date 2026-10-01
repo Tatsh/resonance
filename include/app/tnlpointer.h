@@ -152,6 +152,6 @@ private:
     int mSpinning;
     float mOffsetX;
     LinearRamp mDip;
-    float mUnknown3c; // +0x3c, set to 0.5 and never read by the recovered routines.
-    float mSpinStart; // 1e9 while no spin runs, -1e9 while a restart is pending.
+    float mCentreOffset; // +0x3c, set to 0.5 and never read by the recovered routines.
+    float mSpinStart;    // 1e9 while no spin runs, -1e9 while a restart is pending.
 };

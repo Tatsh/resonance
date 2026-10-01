@@ -4,21 +4,21 @@
 
 // 0x001b99c8
 PhraseEraser::PhraseEraser(
-    int nTrack, int nUnknown34, PhraseMgr *pPhraseMgr, int nUnknown38, int nUnknown28)
-    : mActive(0), mUnknown28(nUnknown28), mTrack(nTrack), mPhraseMgr(pPhraseMgr),
-      mUnknown34(nUnknown34), mUnknown38(nUnknown38) {
+    int nTrack, int nSecondArgument, PhraseMgr *pPhraseMgr, int nFourthArgument, int nFifthArgument)
+    : mActive(0), mFifthArgument(nFifthArgument), mTrack(nTrack), mPhraseMgr(pPhraseMgr),
+      mSecondArgument(nSecondArgument), mFourthArgument(nFourthArgument) {
 }
 
 // 0x001b9a60
 void PhraseEraser::OnEraseMsg(EraseMsg *pMsg) {
-    if (pMsg->mUnknown0c != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
     mActive = 1;
-    const int nBar = pMsg->mUnknown08.mTick / mPhraseMgr->mBarTicks;
+    const int nBar = pMsg->mPosition.mTick / mPhraseMgr->mBarTicks;
     mFirstBar = nBar;
     mLastBar = nBar;
-    mPlayer = pMsg->mUnknown04;
+    mPlayer = pMsg->mPlayer;
     EraseBar(nBar);
 }
 
@@ -32,13 +32,13 @@ void PhraseEraser::HandleMessage(Message *pMsg) {
         return;
     }
     EraseMsg *pErase = static_cast<EraseMsg *>(pMsg);
-    if (pErase->mUnknown0c != mTrack) {
+    if (pErase->mTrack != mTrack) {
         return;
     }
     mActive = 1;
-    const int nBar = pErase->mUnknown08.mTick / mPhraseMgr->mBarTicks;
+    const int nBar = pErase->mPosition.mTick / mPhraseMgr->mBarTicks;
     mFirstBar = nBar;
     mLastBar = nBar;
-    mPlayer = pErase->mUnknown04;
+    mPlayer = pErase->mPlayer;
     EraseBar(nBar);
 }

@@ -14,9 +14,9 @@
  *
  * The constructor at `0x0029bcf0` takes only the renderer and the load priority, runs the
  * MetLoadFreqBaseScreen constructor at `0x00291e00`, which supplies all three names, and writes
- * its own two vptrs and mUnknowna8. The destructor at `0x0029bd38` restores the primary vptr,
- * restores the MemcardUser vptr to `0x007daf78`, runs the MetLoadFreqBaseScreen destructor, and
- * releases the object with the tag `MsgSink`.
+ * its two vptrs and mFreqLimitPending. The destructor at `0x0029bd38` restores the primary
+ * vptr, restores the MemcardUser vptr to `0x007daf78`, runs the MetLoadFreqBaseScreen destructor,
+ * and releases the object with the tag `MsgSink`.
  *
  * Eleven slots differ from the MetLoadFreqBaseScreen table, and a diff of the two tables reads
  * slots 1, 5, 15, 33, 39, 40, 41, 43, 44, and 45 apart from the type function.
@@ -85,7 +85,7 @@ public:
      *
      * @ghidraAddress 0x0029bdc8
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Write the selected username into the first button and the edit label into the second.
@@ -115,7 +115,7 @@ public:
      * MetPersonaData to MetFreqMakerCanvasScreen::LoadPersona(), selects the editing mode through
      * MetFreqMakerButtonsScreen::SetEditing(), clears MetFreqMakerButtonsScreen::mNewPersona,
      * replaces the game manager's persona list with the selected identity, and records
-     * `MetLoadFreqScreen` in MetFrontEndState::mUnknown24.
+     * `MetLoadFreqScreen` in MetFrontEndState::mReturnScreen.
      *
      * @ghidraAddress 0x00297528
      */
@@ -127,9 +127,9 @@ public:
      * Slot 43. A list already holding eight or more identities is refused: the help screen is
      * exited and a message screen named `freq_limit` with one `OK` response shows the limit and the
      * first card slot's name. A first card slot with fewer free clusters than
-     * GlobalSettings::mUnknown74 is refused the same way, with the `freq_no_space` text, the slot
-     * name, and that minimum. OnMsgScreenDismissed() restores this screen after either refusal.
-     * Otherwise MetFreqCreateScreen is pushed and activated.
+     * GlobalSettings::mPersonaMinimumFreeClusters is refused the same way, with the
+     * `freq_no_space` text, the slot name, and that minimum. OnMsgScreenDismissed() restores this
+     * screen after either refusal. Otherwise MetFreqCreateScreen is pushed and activated.
      *
      * @ghidraAddress 0x00297c10
      */
@@ -155,7 +155,7 @@ public:
     virtual void BuildButtonList();
 
 private:
-    // Cleared by OnMsgScreenDismissed() and by the constructor, and read nowhere in the recovered
-    // part of the image. +0xa8
-    int mUnknowna8;
+    // Set to 1 by the constructor, cleared by OnMsgScreenDismissed() once the FreQ limit message
+    // closes, and read nowhere in the recovered part of the image. +0xa8
+    int mFreqLimitPending;
 };

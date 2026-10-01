@@ -30,6 +30,6 @@ const char *EraseMsg::Name() {
 // 0x003e3320
 // The colour name is copied into a temporary before it is written.
 void EraseMsg::Print(std::ostream &stream) {
-    mUnknown08.Print(stream);
-    stream << " " << HxStr(mUnknown04->mColorName);
+    mPosition.Print(stream);
+    stream << " " << HxStr(mPlayer->mColorName);
 }

@@ -114,7 +114,7 @@ public:
     /**
      * Replace the current remix record.
      *
-     * MetRemixLoadScreen::OnUnknownSlot36() is the caller. The title is inferred.
+     * MetRemixLoadScreen::OnExitFinished() is the caller. The title is inferred.
      *
      * @param record The record to copy.
      * @ghidraAddress 0x00361560
@@ -223,12 +223,12 @@ public:
      * Raise the load warning and start loading one remix.
      *
      * The warning text names the factory set or the first memory-card slot, and its wording
-     * follows the play mode. mUnknownf4 is set to exit the dialogue once the load completes, both
-     * screen lists are replaced, and the load runs through LoadRemix().
-     * MetRemixLoadScreen::OnUnknownSlot36() is the caller. The title is inferred.
+     * follows the play mode. mAfterLoadAction is set to exit the dialogue once the load completes,
+     * both screen lists are replaced, and the load runs through LoadRemix().
+     * MetRemixLoadScreen::OnExitFinished() is the caller. The title is inferred.
      *
-     * @param returnScreens The screens mUnknownac receives.
-     * @param restoreScreens The screens mUnknownb8 receives.
+     * @param returnScreens The screens mReturnScreens receives.
+     * @param restoreScreens The screens mRestoreScreens receives.
      * @param record The remix to load.
      * @param nFactory Non-zero for a factory remix.
      * @ghidraAddress 0x003548e8
@@ -246,7 +246,7 @@ public:
      * playlist without releasing its entries, and optionally queues a playlist load. The two
      * remix screens, MetMemCardTypeScreen, and MetRemixDelScreen call it. The title is inferred.
      *
-     * @param returnScreens The screens mUnknownac receives.
+     * @param returnScreens The screens mReturnScreens receives.
      * @param slots The locations to list, the factory set having a port and slot of -1.
      * @param bLoadPlayList Non-zero to also load the playlist from the first slot.
      * @ghidraAddress 0x00353350
@@ -268,7 +268,7 @@ public:
      * Hide the dialogue view instead of showing it. Slot 5.
      *
      * The whole body is one call. It dispatches Rnd::Drawable::SetShowing() with a zero argument on
-     * the Drawable subobject of MetScreen::mUnknown14, at `+0x18` within the view, which is the
+     * the Drawable subobject of MetScreen::mView, at `+0x18` within the view, the
      * same subobject MetScreen::Draw() forwards to. The view is dereferenced with no null check,
      * and nothing is shown, which suits a manager that registers as a screen only to receive
      * messages.
@@ -282,15 +282,15 @@ public:
      *
      * @ghidraAddress 0x00361550
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Act on the choice the user made in one of the manager's dialogues. Slot 15.
      *
-     * The dialogue name selects the reaction. Most dismissals restore the screens in mUnknownac. A
-     * failed or unformatted save retries the playlist save on the first choice, the format check
-     * queues a format on the second, a failed remix load abandons the jukebox game, and a finished
-     * format retries the save.
+     * The dialogue name selects the reaction. Most dismissals restore the screens in
+     * mReturnScreens. A failed or unformatted save retries the playlist save on the first choice,
+     * the format check queues a format on the second, a failed remix load abandons the jukebox
+     * game, and a finished format retries the save.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
@@ -329,8 +329,8 @@ public:
      * Record the remixes one card slot reported. MemcardUser slot 11.
      *
      * Records the status under the port and slot in mListStatus and counts one more listing in
-     * mUnknownd4. Once that count reaches mUnknownd8 while mUnknowndc is set, the `MetMsgScreen`
-     * dialogue is exited. The status branches against 0 and 3 lead to the same code.
+     * mListingsDone. Once that count reaches mListingsExpected while mPlayListReady is set, the
+     * `MetMsgScreen` dialogue is exited. The status branches against 0 and 3 lead to the same code.
      *
      * @param nPortSlot Which card port and slot reported.
      * @param nStatus Zero on success.
@@ -345,7 +345,7 @@ public:
      * declaration retains the base spelling.
      *
      * It opens by writing the status to the log through the literal at `0x00807a88`. A zero status
-     * starts the remix or exits `MetMsgScreen`, as mUnknownf4 selects. A non-zero status logs
+     * starts the remix or exits `MetMsgScreen`, as mAfterLoadAction selects. A non-zero status logs
      * `Failed to load remix from memory card slot %i.` and raises the `remix_load_failed`
      * dialogue. The port and slot argument reaches the diagnostic message and nothing else.
      *
@@ -358,9 +358,9 @@ public:
     /**
      * Act on the playlist load the card reported. MemcardUser slot 15.
      *
-     * Sets mUnknowndc on every path, and exits `MetMsgScreen` when the two counters mUnknownd4 and
-     * mUnknownd8 agree. The zero and non-zero status branches lead to the same code. The port and
-     * slot argument is not read.
+     * Sets mPlayListReady on every path, and exits `MetMsgScreen` when the two counters
+     * mListingsDone and mListingsExpected agree. The zero and non-zero status branches lead to the
+     * same code. The port and slot argument is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success.
@@ -372,9 +372,9 @@ public:
      * Act on the asynchronous read the file layer finished. AsyncCallback slot 2.
      *
      * A completed remix read is copied into the reset log and started, or its dialogue exited, as
-     * mUnknownf4 selects. A completed index read is parsed into records filed under the slot key
-     * mUnknowne8, the buffer is released, and the listing is counted as OnRemixesListed() counts
-     * it. Any other handle is ignored.
+     * mAfterLoadAction selects. A completed index read is parsed into records filed under the slot
+     * key mIndexSlot, the buffer is released, and the listing is counted as OnRemixesListed()
+     * counts it. Any other handle is ignored.
      *
      * @param nHandle The request the completion belongs to, compared against the word at `+0xe4`.
      * @param nFile The file the request read from.
@@ -415,18 +415,18 @@ private:
     // appearances, steps the playlist, and brings up MetLoadGameScreen. Both remix-load
     // completions call it. The title is inferred.
     void StartLoadedRemix();
-    // Saves the playlist again with a copy of mUnknownac as the return screens.
+    // Saves the playlist again with a copy of mReturnScreens as the return screens.
     // OnMsgScreenDismissed() expands it at each retry.
     inline void RetrySavePlayList();
     // 0x003613d8
     // Clamps into zero through the track count, which admits one past the end.
     void SetCurrentTrack(int nTrack);
     // 0x003610d0
-    // Pushes every screen named in mUnknownb8 and activates the first.
-    void PushUnknownb8Screens();
+    // Pushes every screen listed in mRestoreScreens and activates the first.
+    void PushRestoreScreens();
     // 0x00361170
-    // Pushes every screen named in mUnknownac and activates the first.
-    void PushUnknownacScreens();
+    // Pushes every screen listed in mReturnScreens and activates the first.
+    void PushReturnScreens();
 
     // 0x006c1110
     static MetRemixManager *sInstance;
@@ -449,30 +449,32 @@ public:
     std::map<int, int> mListStatus;
 
 private:
-    std::vector<HxStr> mUnknownac; // +0xac
-    std::vector<HxStr> mUnknownb8; // +0xb8
+    // The screens a dismissed manager dialogue brings back. +0xac
+    std::vector<HxStr> mReturnScreens;
+    // The screens restored after a jukebox track or a failed remix load. +0xb8
+    std::vector<HxStr> mRestoreScreens;
 
 public:
     /**
      * The jukebox playlist.
      *
      * Public because MetJukeboxBaseScreen::BindLists() and EnterAndShow() take its address, and
-     * MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30() reads its entry count, with no accessor
-     * in the image. +0xc4
+     * MetJukeboxEditPlaylistScreenDone::OnRepeatingSoundFinished() reads its entry count, with no
+     * accessor in the image. +0xc4
      */
     JukeboxPlayList mPlayList;
 
 private:
-    int mUnknownd4;    // +0xd4
-    int mUnknownd8;    // +0xd8
-    int mUnknowndc;    // +0xdc, starts at one
-    int mIndexRequest; // +0xe0
-    int mRemixRequest; // +0xe4, matched by Done()
+    int mListingsDone;     // +0xd4, listings received since ListRemixes()
+    int mListingsExpected; // +0xd8, sources ListRemixes() requested
+    int mPlayListReady;    // +0xdc, starts at one, clear while a playlist load is queued
+    int mIndexRequest;     // +0xe0
+    int mRemixRequest;     // +0xe4, matched by Done()
     // The mRemixes key Done() files the index under. Starts at -1.
-    int mUnknowne8;                  // +0xe8
+    int mIndexSlot;                  // +0xe8
     int mCurrentPlaylistTrack;       // +0xec
     int mShuffle;                    // +0xf0, RandomTrack() steps when set
-    int mUnknownf4;                  // +0xf4
+    int mAfterLoadAction;            // +0xf4, start the remix or exit the dialogue after a load
     std::vector<bool> mPlayedTracks; // +0xf8, one per playlist entry
     MetRemixRecord mRecord;          // +0x114
 };

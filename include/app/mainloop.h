@@ -31,13 +31,13 @@ public:
     /**
      * Create the frame loop and take over the long-operation callbacks.
      *
-     * @param nFlag The call site always passes 1. The flag selects virtual-base setup the
+     * @param nInCharge The call site always passes 1. The flag selects virtual-base setup the
      * compiler emits. The body does not use the flag.
      * @param pWatchdog The long-operation watchdog to service.
      * @param pGameManager The game manager to draw through.
      * @ghidraAddress 0x001ec998
      */
-    MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager);
+    MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameManager);
 
     /**
      * Drop the instance pointer and remove the poll callback.

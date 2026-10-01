@@ -14,7 +14,7 @@ public:
     /**
      * Enable freestyle for the player from a bar.
      *
-     * Nothing happens and zero is reported while Player::Slot5() is non-zero. Otherwise an
+     * The routine does nothing and reports zero while Player::GetPlace() is non-zero. Otherwise an
      * EnableFreestyleMsg goes out through the player's MsgSource. A handled message is followed by
      * a DeployedPowerupMsg with no bar range and a track of -1, and `SND_DEPLOY_FREESTYLER` plays.
      * An unhandled one is followed by a PowerupFailedMsg.

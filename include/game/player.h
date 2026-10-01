@@ -11,7 +11,7 @@ class FreqAppearance;
 class PhraseCapturedMsg;
 class UpdateScorePacket;
 
-/** What Player::Slot2() reports for a player with no input slot. */
+/** What Player::GetInputSlot() reports for a player with no input slot. */
 constexpr int kNoInputSlot = -1;
 
 /**
@@ -35,9 +35,6 @@ constexpr int kNoInputSlot = -1;
  * confirms by restoring a vptr at `+0x04` for `IDable<Player>`, at `+0x08` for `MsgSink`, and at
  * `+0x1c` for `MsgSource`, whose own `mSinks` vector it tears down at `+0x10`. This class's own
  * members start at `+0x20`, and the only one the destructor releases is the colour name at `+0x24`.
- *
- * A slot whose verb is unrecovered keeps its table index as its title, because the index is part
- * of the layout. The comment records the behaviour recovered instead.
  */
 class Player : public IDable<Player>, public MsgSink, public MsgSource {
 public:
@@ -47,7 +44,7 @@ public:
      * The score starts at 0 with a ceiling of 1, the juice at 0 with a ceiling of 1, and the last
      * erase time at 0.
      *
-     * @param nId The identifier, also recorded in mId20.
+     * @param nId The identifier, also recorded in mPlayerId.
      * @param colorName The player's colour name.
      * @param pAppearance The appearance the player is drawn with.
      * @ghidraAddress 0x0012f5c0
@@ -58,11 +55,15 @@ public:
     virtual ~Player();
 
     /**
-     * Slot 2. Returns -1. The verb is unrecovered.
+     * Report the controller slot that drives this player.
      *
+     * Slot 2. Returns kNoInputSlot here, and NetPlayer inherits it. LocalPlayer returns the slot
+     * its constructor received, and InputMap matches a controller reading against it.
+     *
+     * @return The input slot, or kNoInputSlot.
      * @ghidraAddress 0x00132c20
      */
-    virtual int Slot2();
+    virtual int GetInputSlot();
 
     /**
      * Test whether this player is the stand-in for an absent one.
@@ -76,72 +77,105 @@ public:
     virtual int IsNull();
 
     /**
-     * Slot 4. Returns -1.
+     * Report the track this player occupies.
      *
+     * Slot 4. Returns -1 here. LocalPlayer and NetPlayer return the track the last TrackSelectMsg
+     * for the player chose, and powerups deploy and riffs play on it.
+     *
+     * @return The track, or -1.
      * @ghidraAddress 0x00132c98
      */
-    virtual int Slot4();
+    virtual int GetTrack();
 
     /**
-     * Slot 5. Returns zero.
+     * Report the player's place on its track.
      *
+     * Slot 5. Returns zero here. LocalPlayer and NetPlayer return the second word of the last
+     * TrackSelectMsg for the player, the place that TrackSelectPacket includes beside the track.
+     *
+     * @return The place.
      * @ghidraAddress 0x00132ca0
      */
-    virtual int Slot5();
+    virtual int GetPlace();
 
     /**
-     * Slot 6. Returns zero.
+     * Report zero.
      *
+     * Slot 6. LocalPlayer's override also returns zero, and the image has no caller of the slot.
+     * The title records that the slot is unused.
+     *
+     * @return Always 0.
      * @ghidraAddress 0x00132ca8
      */
-    virtual int Slot6();
+    virtual int UnusedQuery();
 
     /**
-     * Slot 7. Empty.
+     * Do nothing.
+     *
+     * Slot 7. LocalPlayer's override is also empty, and the image has no caller of the slot. The
+     * title records that the slot is unused.
      *
      * @ghidraAddress 0x00132cb0
      */
-    virtual void Slot7();
+    virtual void UnusedHook();
 
     /**
-     * Slot 8. Empty here, so it ignores both arguments.
+     * Give the player a span of bars it plays freely.
      *
-     * The parameters are proven by `LocalPlayer::Slot8`, which stores the first at `+0x70` and the
-     * second at `+0x74`. An empty base body reveals nothing about its own parameter list.
+     * Slot 8. Empty here. LocalPlayer stores both bars, and IsFreestyleBar() tests a bar against
+     * them. Gamer passes the eight-bar span of an enable-freestyle powerup and the span a solo win
+     * grants, and a jam player's constructor passes a span that never ends.
      *
+     * @param nStartBar The first bar of the span.
+     * @param nEndBar The bar after the span.
      * @ghidraAddress 0x00132cb8
      */
-    virtual void Slot8(int first, int second);
+    virtual void SetFreestyleSpan(int nStartBar, int nEndBar);
 
     /**
-     * Slot 9. Returns zero, ignoring its argument.
+     * Test whether a bar lies in the player's freestyle span.
      *
-     * The parameter is proven by `LocalPlayer::Slot9`, which compares it against `+0x70`.
+     * Slot 9. Returns zero here, ignoring its argument. NotePitcher plays a bar inside the span
+     * without the track's usual requirement.
      *
+     * @param nBar The bar.
+     * @return Non-zero when the bar is in the span.
      * @ghidraAddress 0x00132cc0
      */
-    virtual int Slot9(int value);
+    virtual int IsFreestyleBar(int nBar);
 
     /**
-     * Slot 10. Returns zero.
+     * Report whether the player is looping.
      *
+     * Slot 10. Returns zero here. LocalPlayer returns the flag SetLooping() and ToggleLoop()
+     * maintain.
+     *
+     * @return Non-zero when looping.
      * @ghidraAddress 0x00132cc8
      */
-    virtual int Slot10();
+    virtual int IsLooping();
 
     /**
-     * Announce this player's juice amount.
+     * Announce the player's state.
      *
-     * Builds a `JuiceAmountMsg` on the stack naming this player, with mUnknown34 clamped to a
-     * maximum of 800, and sends it through the `MsgSource` subobject. The verb comes from the
-     * message class rather than from the slot.
+     * Slot 11. Here, builds a `JuiceAmountMsg` on the stack for this player, with mMaxJuice
+     * clamped to a maximum of 800, and sends it through the `MsgSource` subobject. LocalPlayer adds
+     * its track, powerups, score ceiling, ghost, and loop state.
      *
      * @ghidraAddress 0x0012f788
      */
-    virtual void Slot11();
+    virtual void AnnounceState();
 
-    /** @ghidraAddress 0x00132d30 */
-    virtual void Slot12();
+    /**
+     * Deactivate the powerup placer.
+     *
+     * Slot 12. Empty here. LocalPlayer runs PowerupPlacer::Deactivate(), the counterpart of the
+     * PowerupPlacer::Activate() that AnnounceState() runs. The image has no caller of the slot but
+     * CallDeactivatePlacer(), itself uncalled. The title is inferred from the forwarding alone.
+     *
+     * @ghidraAddress 0x00132d30
+     */
+    virtual void DeactivatePlacer();
 
     /**
      * Write a description of this player to stream.
@@ -156,63 +190,82 @@ public:
     virtual void Print(std::ostream &stream);
 
     /**
-     * Slot 14. Leaves the return register untouched, so the value it yields is indeterminate.
+     * Count one caught gem.
      *
-     * The return type is proven by `LocalPlayer::Slot14`, which computes `+0xb0` plus one into it.
-     * A base whose default yields an indeterminate value is faithful to the image rather than a
-     * reconstruction error, and it means the base is not meant to be called.
+     * Slot 14. Catcher runs it for every gem the player catches and discards the result. Does not
+     * touch the return register here. The value it yields is therefore indeterminate. LocalPlayer
+     * increments its count and returns the new value. A base whose default yields an indeterminate
+     * value is faithful to the image rather than a reconstruction error.
      *
+     * @return The new count.
      * @ghidraAddress 0x00132d70
      */
-    virtual int Slot14();
+    virtual int CountCaughtGem();
 
     /**
-     * Slot 15. Leaves the return register untouched, as Slot14 does.
+     * Count one missed gem.
      *
-     * The return type is proven by `LocalPlayer::Slot15`, which computes `+0xac` plus one into it.
+     * Slot 15. Catcher runs it when a gem passes uncaught. Does not touch the return register
+     * here, as with CountCaughtGem(). LocalPlayer increments its count and returns the new value.
      *
+     * @return The new count.
      * @ghidraAddress 0x00132d78
      */
-    virtual int Slot15();
+    virtual int CountMissedGem();
 
     /**
-     * Slot 16. Returns 1, ignoring its argument.
+     * Report the score multiplier a capture starting at a bar earns.
      *
-     * The parameter is proven by `LocalPlayer::Slot16`, which compares it against `+0x7c`.
+     * Slot 16. Returns 1 here, ignoring its argument. Catcher and Scratcher pass the result in a
+     * BeginPhraseCatchMsg.
      *
+     * @param nBar The bar.
+     * @return The multiplier.
      * @ghidraAddress 0x00132d80
      */
-    virtual int Slot16(int value);
+    virtual int GetMultiplier(int nBar);
 
     /**
-     * Slot 17. Returns zero.
+     * Report the best streak of consecutive captures.
      *
+     * Slot 17. Returns zero here. Gamer records it as the solo tally.
+     *
+     * @return The streak.
      * @ghidraAddress 0x00132d88
      */
-    virtual int Slot17();
+    virtual int GetBestStreak();
 
     /**
-     * Slot 18. Returns 0.0f, which is what fixes the return type.
+     * Report the proportion of captured phrases among those captured and muffed.
      *
+     * Slot 18. Returns 0.0f here. Gamer records it as the solo ratio.
+     *
+     * @return A fraction between 0 and 1.
      * @ghidraAddress 0x00132d90
      */
-    virtual float Slot18();
+    virtual float GetCaptureRatio();
 
     /**
-     * Slot 19. Returns zero.
+     * Report the game mode the player was built in.
      *
+     * Slot 19. Returns zero here.
+     *
+     * @return The game mode.
      * @ghidraAddress 0x00132da0
      */
-    virtual int Slot19();
+    virtual int GetGameMode();
 
     /**
-     * Slot 20. Returns 1, ignoring its argument.
+     * Record that a bar scored, reporting whether it had not scored before.
      *
-     * The parameter is proven by `LocalPlayer::Slot20`, which compares it against `+0x78`.
+     * Slot 20. Returns 1 here, ignoring its argument. Scratcher does not award points for a bar
+     * the slot reports zero for.
      *
+     * @param nBar The bar.
+     * @return Non-zero when the bar is later than every bar recorded before.
      * @ghidraAddress 0x00132db0
      */
-    virtual int Slot20(int value);
+    virtual int MarkBarScored(int nBar);
 
     /**
      * Receive one message.
@@ -239,7 +292,7 @@ public:
      *
      * +0x20
      */
-    int mId20;
+    int mPlayerId;
 
     /**
      * The player's colour name, such as `green` or `red`. +0x24
@@ -253,7 +306,7 @@ public:
     /**
      * Report the juice the player has banked.
      *
-     * The routine at `0x0012f970` clamps the value to 0 through mUnknown34, the maximum
+     * The routine at `0x0012f970` clamps the value to 0 through mMaxJuice, the maximum
      * JuiceAmountMsg announces, and the message accessor at `0x003e4198` divides it by that
      * announced maximum.
      *
@@ -265,7 +318,7 @@ public:
     /**
      * Report the player's score.
      *
-     * The routine at `0x0012f808` clamps the value to 0 through mUnknown3c. Renderer compares the
+     * The routine at `0x0012f808` clamps the value to 0 through mMaxScore. Renderer compares the
      * scores of every world player through this accessor to find the leader.
      *
      * @return The score.
@@ -339,11 +392,11 @@ public:
      * Inline, and TrackSelector::HandleMessage() expands it. The address is its uncalled
      * out-of-line copy. The title is inferred.
      *
-     * @return Non-zero when Slot2() reports a value other than -1.
+     * @return Non-zero when GetInputSlot() reports a value other than -1.
      * @ghidraAddress 0x00132c30
      */
     int HasInputSlot() {
-        return Slot2() != kNoInputSlot;
+        return GetInputSlot() != kNoInputSlot;
     }
 
     /**
@@ -374,32 +427,30 @@ public:
      *
      * Inline. The address is its uncalled out-of-line copy. The title is inferred.
      *
-     * @return FreqAppearance::mUnknown00 of mAppearance, by value.
+     * @return FreqAppearance::mUserName of mAppearance, by value.
      * @ghidraAddress 0x001330a8
      */
     HxStr GetUsername();
 
     /**
-     * Run Slot11() and report zero.
+     * Run AnnounceState() and report zero.
      *
-     * Inline. The address is its uncalled out-of-line copy. The title records the call because
-     * the purpose is unrecovered.
+     * Inline. The address is its uncalled out-of-line copy.
      *
      * @return Always 0.
      * @ghidraAddress 0x00132cd0
      */
-    int CallSlot11();
+    int CallAnnounceState();
 
     /**
-     * Run Slot12() and report zero.
+     * Run DeactivatePlacer() and report zero.
      *
-     * Inline. The address is its uncalled out-of-line copy. The title records the call because
-     * the purpose is unrecovered.
+     * Inline. The address is its uncalled out-of-line copy.
      *
      * @return Always 0.
      * @ghidraAddress 0x00132d00
      */
-    int CallSlot12();
+    int CallDeactivatePlacer();
 
 private:
     // 0x00133210
@@ -407,20 +458,21 @@ private:
     // packet names this player.
     void OnUpdateScore(UpdateScorePacket *pPacket);
 
-    // The persona's appearance. GrooveWorld::AddLocalPlayer() passes MetPersonaData::mUnknown140.
+    // The persona's appearance. GrooveWorld::AddLocalPlayer() passes MetPersonaData::mAppearance.
     const FreqAppearance *mAppearance; // +0x2c
     int mJuice;                        // +0x30
 
 protected:
-    // Slot11 clamps this to kJuiceMaximum before announcing it.
-    int mUnknown34; // +0x34
+    // The ceiling AddJuice() clamps mJuice to. AnnounceState() clamps it to kJuiceMaximum before
+    // announcing it.
+    int mMaxJuice; // +0x34
 
 private:
     int mScore; // +0x38
 
 protected:
-    // The ceiling AddScore() clamps mScore to. LocalPlayer::Slot11() announces it.
-    int mUnknown3c; // +0x3c
+    // The ceiling AddScore() clamps mScore to. LocalPlayer::AnnounceState() announces it.
+    int mMaxScore; // +0x3c
 
 public:
     /**

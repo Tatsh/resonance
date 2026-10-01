@@ -14,10 +14,10 @@ class VolumeEffector : public Effector {
 public:
     /**
      * @param nChannel The MIDI channel the controller change goes to.
-     * @param nValue The controller value while the effect is applied.
+     * @param nAppliedLevel The controller value while the effect is applied.
      * @ghidraAddress 0x001a1a10
      */
-    VolumeEffector(unsigned char nChannel, int nValue);
+    VolumeEffector(unsigned char nChannel, int nAppliedLevel);
 
     /**
      * Switch the effect off, then tear down the base.
@@ -35,7 +35,7 @@ public:
     virtual int Type();
 
     /**
-     * Send controller 0x2f with mValue while applied and with 0x7f otherwise.
+     * Send controller 0x2f with mAppliedLevel while applied and with 0x7f otherwise.
      *
      * A request that repeats the current position sends nothing.
      *
@@ -46,6 +46,6 @@ public:
 
 private:
     unsigned char mChannel; // +0x14
-    int mValue;             // +0x18
+    int mAppliedLevel;      // +0x18
     int mEnabled;           // +0x1c
 };

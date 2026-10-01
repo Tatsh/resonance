@@ -28,7 +28,7 @@ constexpr int kAsyncCallbackPriority = 1;
 // The priority InitAsync raises the calling thread to.
 constexpr int kAsyncCallerPriority = 2;
 
-// Written into every job's mUnknown0c. Thirty-two drive sectors of 2048 bytes
+// Written into every job's mSectorCount. Thirty-two drive sectors of 2048 bytes
 // are one kSectorCacheRowSize chunk.
 constexpr int kAsyncJobChunkSectors = 32;
 
@@ -251,7 +251,7 @@ void AsyncQueueRequest(AsyncRequest request) {
             pJob->mNext = nullptr;
             pJob->mSector = nChunk;
             pJob->mSectorOffset = nChunkOffset;
-            pJob->mUnknown0c = kAsyncJobChunkSectors;
+            pJob->mSectorCount = kAsyncJobChunkSectors;
             pJob->mBuffer = pDest;
             pJob->mLength = nChunkLength;
         }

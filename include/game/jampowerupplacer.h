@@ -43,7 +43,7 @@ public:
      *
      * @ghidraAddress 0x001cdfe0
      */
-    virtual void OnUnknownSlot8();
+    virtual void DeployPowerup();
 
 private:
     LocalPlayer *mOwner;             // +0x14

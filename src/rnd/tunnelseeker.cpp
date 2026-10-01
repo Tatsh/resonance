@@ -208,8 +208,8 @@ void TunnelSeeker::Save(Stream &stream) const {
     WriteObjectRef(stream, mTrans);
     stream.Write(&mTargetRing, sizeof(mTargetRing));
     WriteObjectRef(stream, mMesh);
-    const char chUnknown54 = mUnknown54;
-    stream.WriteBytes(&chUnknown54, 1)
+    const char chSavedFlag = mSavedFlag;
+    stream.WriteBytes(&chSavedFlag, 1)
         .Write(&mLane, sizeof(mLane))
         .Write(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
         .Write(&mTransFrameOffset, sizeof(mTransFrameOffset))
@@ -229,9 +229,9 @@ void TunnelSeeker::Load(Stream &stream) {
     ReadObjectRef(stream, mTrans);
     stream.Read(&mTargetRing, sizeof(mTargetRing));
     ReadObjectRef(stream, mMesh);
-    unsigned char chUnknown54;
-    stream.ReadBytes(&chUnknown54, 1);
-    mUnknown54 = chUnknown54 != 0;
+    unsigned char chSavedFlag;
+    stream.ReadBytes(&chSavedFlag, 1);
+    mSavedFlag = chSavedFlag != 0;
     stream.Read(&mLane, sizeof(mLane));
     if (g_nTunnelLoadVersion >= kFrameOffsetRevision) {
         stream.Read(&mMeshFrameOffset, sizeof(mMeshFrameOffset))

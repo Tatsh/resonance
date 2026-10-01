@@ -78,7 +78,7 @@ int Cmd::sCmdID;
 
 // 0x00199040
 AutoRiffer::AutoRiffer(Sch::TickClock *pClock, Quantizer *pQuantizer, const TrackData *pTrackData)
-    : mTrack(pTrackData->mUnknown04), mQuantizer(pQuantizer), mTrackData(pTrackData),
+    : mTrack(pTrackData->mIndex), mQuantizer(pQuantizer), mTrackData(pTrackData),
       mCurrentRiff(nullptr), mClock(pClock), mSynth(nullptr), mPhraseMaker(nullptr),
       mPlayer(&g_nullPlayer) {
     mCommand.mValue = kUnallocatedCommand;
@@ -87,14 +87,14 @@ AutoRiffer::AutoRiffer(Sch::TickClock *pClock, Quantizer *pQuantizer, const Trac
 
 // 0x00199160
 void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (pMsg->mUnknown08 != mPlayer) {
+    if (pMsg->mPlayer != mPlayer) {
         return;
     }
 
-    const int nTick = pMsg->mUnknown0c.mTick;
+    const int nTick = pMsg->mPosition.mTick;
     const int nQuantized = mQuantizer->Quantize(nTick);
     if (mPhraseMaker != nullptr &&
         mPhraseMaker->IsBarPlayable(nQuantized / Mid::MBT(kBarTicks).mTick) != 1) {
@@ -102,7 +102,7 @@ void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
         return;
     }
 
-    const int nLevel = pMsg->mUnknown04;
+    const int nLevel = pMsg->mButton;
     Riff *pRiff = mTrackData->GetRiff(nQuantized, nLevel);
     if (pRiff == nullptr) {
         return;
@@ -114,13 +114,13 @@ void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
     mLevelHeld[nLevel] = kHeld;
     PlayRiff(nTick);
 
-    AxeButtonMsg press(kPressed, 0, pMsg->mUnknown08);
+    AxeButtonMsg press(kPressed, 0, pMsg->mPlayer);
     mSource.Send(&press);
 }
 
 // 0x001992e0
 void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
     if (pMsg->mPlayer != mPlayer) {
@@ -132,7 +132,7 @@ void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
 
     const int nTick = pMsg->mPosition.mTick;
     const int nQuantized = mQuantizer->Quantize(nTick);
-    mLevelHeld[pMsg->mUnknown04] = kNotHeld;
+    mLevelHeld[pMsg->mButton] = kNotHeld;
     for (int nLevel = 0; nLevel < kLevelCount; ++nLevel) {
         if (mLevelHeld[nLevel] != kNotHeld) {
             mCurrentRiff = mTrackData->GetRiff(nQuantized, nLevel);
@@ -153,20 +153,20 @@ void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
 
 // 0x00199480
 void AutoRiffer::OnErase(EraseMsg *pMsg) {
-    if (pMsg->mUnknown0c != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (pMsg->mUnknown04 != mPlayer) {
+    if (pMsg->mPlayer != mPlayer) {
         return;
     }
-    if (!mPhraseMaker->IsBarPlayable(pMsg->mUnknown08.mTick / Mid::MBT(kBarTicks).mTick)) {
+    if (!mPhraseMaker->IsBarPlayable(pMsg->mPosition.mTick / Mid::MBT(kBarTicks).mTick)) {
         return;
     }
 
-    StopRiff(pMsg->mUnknown08.mTick);
+    StopRiff(pMsg->mPosition.mTick);
     AllNotesOffMsg notesOff;
     mSynth->Handle(&notesOff);
-    mPhraseMaker->Erase(pMsg->mUnknown04, pMsg->mUnknown08.mTick, pMsg->mUnknown10);
+    mPhraseMaker->Erase(pMsg->mPlayer, pMsg->mPosition.mTick, pMsg->mDoubleTap);
 }
 
 // 0x00199590
@@ -234,10 +234,10 @@ void AutoRiffer::HandleMessage(Message *pMsg) {
     }
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
-        if (pSelect->mUnknown04 != mTrack || pSelect->mUnknown08 != 0) {
+        if (pSelect->mTrack != mTrack || pSelect->mPlace != 0) {
             return;
         }
-        Player *pPlayer = pSelect->mUnknown10;
+        Player *pPlayer = pSelect->mPlayer;
         if (pPlayer != mPlayer || pPlayer->IsNull()) {
             StopRiff(pSelect->mPosition.mTick);
         }
@@ -260,10 +260,10 @@ void AutoRiffer::AddSink(MsgSink *pSink) {
 
 // 0x0019a898
 void AutoRiffer::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mTrack || pMsg->mUnknown08 != 0) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
     }
-    Player *pPlayer = pMsg->mUnknown10;
+    Player *pPlayer = pMsg->mPlayer;
     if (pPlayer != mPlayer || pPlayer->IsNull()) {
         StopRiff(pMsg->mPosition.mTick);
     }

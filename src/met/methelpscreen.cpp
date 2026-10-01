@@ -63,10 +63,10 @@ inline MetHelpScreen *FindHelpScreen() {
 // 0x003125b0
 MetHelpScreen::MetHelpScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(0.0f), mUnknown90(0.0f) {
-    mUnknownb0.w = kVectorPadding;
-    mUnknownd0.w = kVectorPadding;
-    mUnknown60 = 0;
+      mShowStart(0.0f), mHideStart(0.0f) {
+    mInfoOrigin.w = kVectorPadding;
+    mTitleOrigin.w = kVectorPadding;
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x00312770
@@ -81,62 +81,62 @@ void MetHelpScreen::ResolveContainerViews() {
         Rnd::Text *pText = FindText(FormatString(kInfoTextFormat, i + 1));
         pText->SetText(HxStr(kNoText));
         pText->SetShowing(1);
-        mUnknowna4.push_back(pText);
+        mInfoTexts.push_back(pText);
     }
-    std::memcpy(&mUnknownb0, mUnknowna4[0]->mLocalXfm[kTranslationRow], sizeof(mUnknownb0));
+    std::memcpy(&mInfoOrigin, mInfoTexts[0]->mLocalXfm[kTranslationRow], sizeof(mInfoOrigin));
 
     for (int i = 0; i < kTitleTextCount; ++i) {
         Rnd::Text *pText = FindText(FormatString(kTitleTextFormat, i + 1));
         pText->SetText(HxStr(kNoText));
         pText->SetShowing(1);
-        mUnknownc0.push_back(pText);
+        mTitleTexts.push_back(pText);
     }
-    std::memcpy(&mUnknownd0, mUnknownc0[0]->mLocalXfm[kTranslationRow], sizeof(mUnknownd0));
+    std::memcpy(&mTitleOrigin, mTitleTexts[0]->mLocalXfm[kTranslationRow], sizeof(mTitleOrigin));
 
-    mUnknowne8 = FindAnimation(kShowAnimation);
-    mUnknownf0 = FindAnimation(kHideAnimation);
-    if (mUnknowne8 != nullptr) {
-        mUnknownec = mUnknowne8->EndFrame();
+    mShowAnim = FindAnimation(kShowAnimation);
+    mHideAnim = FindAnimation(kHideAnimation);
+    if (mShowAnim != nullptr) {
+        mShowEnd = mShowAnim->EndFrame();
     }
-    if (mUnknownf0 != nullptr) {
-        mUnknownf4 = mUnknownf0->EndFrame();
+    if (mHideAnim != nullptr) {
+        mHideEnd = mHideAnim->EndFrame();
     }
 }
 
 // 0x00312df0
-void MetHelpScreen::OnUnknownSlot26(float flTime) {
+void MetHelpScreen::UpdateIdle(float flTime) {
     UpdateShow(flTime);
     UpdateHide(flTime);
 }
 
 // 0x00312f70
 void MetHelpScreen::PostText(const HxStr &text, float flTime) {
-    if (mUnknown94 == kNoText && text == kNoText) {
+    if (mShownText == kNoText && text == kNoText) {
         return;
     }
-    const bool bAnimating = mUnknown8c != 0.0f || mUnknown90 != 0.0f;
-    if (!bAnimating && text == mUnknown94) {
+    const bool bAnimating = mShowStart != 0.0f || mHideStart != 0.0f;
+    if (!bAnimating && text == mShownText) {
         return;
     }
-    if (mUnknown48 != 0) {
+    if (mViewsUnresolved != 0) {
         return;
     }
 
-    if (mUnknown94 == kNoText) {
-        mUnknown94 = text;
+    if (mShownText == kNoText) {
+        mShownText = text;
         StartShow(flTime);
     } else {
         StartHide(flTime);
-        mUnknown9c = text;
+        mWaitingText = text;
     }
 }
 
 // 0x003130e8
 void MetHelpScreen::ClearInfoTexts() {
-    for (std::vector<Rnd::Text *>::size_type i = 0; i < mUnknowna4.size(); ++i) {
-        mUnknowna4[i]->SetText(HxStr(kNoText));
+    for (std::vector<Rnd::Text *>::size_type i = 0; i < mInfoTexts.size(); ++i) {
+        mInfoTexts[i]->SetText(HxStr(kNoText));
     }
-    mUnknown14->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
+    mView->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
 }
 
 // 0x00313208
@@ -183,7 +183,7 @@ void MetHelpScreen::FillTexts(const HxStr &key,
     }
 
     if (nTitles == kFillInfoTexts) {
-        mUnknown14->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
+        mView->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
     }
 }
 
@@ -210,33 +210,33 @@ void MetHelpScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x00317480
-void MetHelpScreen::OnUnknownSlot36() {
+void MetHelpScreen::OnExitFinished() {
     ClearInfoTexts();
-    mUnknown94 = kNoText;
-    mUnknown9c = kNoText;
-    mUnknown90 = 0.0f;
+    mShownText = kNoText;
+    mWaitingText = kNoText;
+    mHideStart = 0.0f;
 }
 
 // 0x00317508
 void MetHelpScreen::StartShow(float flTime) {
-    if (mUnknown8c == 0.0f) {
-        mUnknown8c = flTime;
-        FillTexts(mUnknown94, mUnknowna4, mUnknownb0, kFillInfoTexts);
-        mUnknowne8->SetFrame(0.0f);
+    if (mShowStart == 0.0f) {
+        mShowStart = flTime;
+        FillTexts(mShownText, mInfoTexts, mInfoOrigin, kFillInfoTexts);
+        mShowAnim->SetFrame(0.0f);
     }
 }
 
 // 0x00317568
 void MetHelpScreen::UpdateShow(float flTime) {
-    if (mUnknown8c == 0.0f) {
+    if (mShowStart == 0.0f) {
         return;
     }
-    if (mUnknowne8 != nullptr) {
-        mUnknowne8->SetFrame(flTime - mUnknown8c);
+    if (mShowAnim != nullptr) {
+        mShowAnim->SetFrame(flTime - mShowStart);
     }
-    if (mUnknown8c + mUnknownec < flTime) {
-        mUnknown8c = 0.0f;
-        if (mUnknown9c != kNoText) {
+    if (mShowStart + mShowEnd < flTime) {
+        mShowStart = 0.0f;
+        if (mWaitingText != kNoText) {
             StartHide(flTime);
         }
     }
@@ -244,25 +244,25 @@ void MetHelpScreen::UpdateShow(float flTime) {
 
 // 0x00317600
 void MetHelpScreen::StartHide(float flTime) {
-    if (mUnknown90 == 0.0f) {
-        mUnknown90 = flTime;
-        mUnknownf0->SetFrame(0.0f);
+    if (mHideStart == 0.0f) {
+        mHideStart = flTime;
+        mHideAnim->SetFrame(0.0f);
     }
 }
 
 // 0x00317640
 void MetHelpScreen::UpdateHide(float flTime) {
-    if (mUnknown90 == 0.0f) {
+    if (mHideStart == 0.0f) {
         return;
     }
-    if (mUnknownf0 != nullptr) {
-        mUnknownf0->SetFrame(flTime - mUnknown90);
+    if (mHideAnim != nullptr) {
+        mHideAnim->SetFrame(flTime - mHideStart);
     }
-    if (mUnknown90 + mUnknownf4 < flTime) {
-        mUnknown90 = 0.0f;
-        mUnknown94 = mUnknown9c;
-        mUnknown9c = kNoText;
-        if (mUnknown94 != kNoText) {
+    if (mHideStart + mHideEnd < flTime) {
+        mHideStart = 0.0f;
+        mShownText = mWaitingText;
+        mWaitingText = kNoText;
+        if (mShownText != kNoText) {
             StartShow(flTime);
         } else {
             ClearInfoTexts();
@@ -272,8 +272,8 @@ void MetHelpScreen::UpdateHide(float flTime) {
 
 // 0x00317758
 void MetHelpScreen::ApplyPreset(const HxStr &name) {
-    mUnknowne0 = name;
-    if (mUnknown48 == 0) {
-        FillTexts(name, mUnknownc0, mUnknownd0, kFillTitleTexts);
+    mPreset = name;
+    if (mViewsUnresolved == 0) {
+        FillTexts(name, mTitleTexts, mTitleOrigin, kFillTitleTexts);
     }
 }

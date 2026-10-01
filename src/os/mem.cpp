@@ -480,7 +480,7 @@ void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int
     }
     MemLogBlock *pEntry = FindTrackedBlock(pOld);
     if (pEntry == nullptr) {
-        LogPrintf("MemLogSourceTrackRealloc(): can't find realloc for src: %s\n", pszSource);
+        LogPrintf("%s(): can't find realloc for src: %s\n", __func__, pszSource);
         TrackBlock(pszSource, pNew, nSize);
         return;
     }

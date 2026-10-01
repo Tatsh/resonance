@@ -227,7 +227,7 @@ constexpr int kArrowAlternateCycles = 1;
 constexpr float kSelectAlternateInterval = 30.0f;
 constexpr int kSelectAlternateCycles = 2;
 
-// The mUnknown18 values slot 30 and slot 36 test.
+// The mExitChoice values slot 30 and slot 36 test.
 constexpr int kExitBack = 0;
 constexpr int kExitSelected = 2;
 
@@ -305,7 +305,7 @@ inline GameParams CurrentParams() {
 
 // Adds the first memory-card slot when a card is in use.
 inline void AddCardSlot(std::vector<MemcardConnectState> &slots) {
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         slots.push_back(GlobalSettings::shared()->mCardSlots[0]);
     }
@@ -322,7 +322,7 @@ MetSoloStagesScreen::MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority)
       mLabelPair(HxStr(kFirstLabelTex), HxStr(kSecondLabelTex)) {
     mStageList = new MetButtonList();
     mIndicatorList = new MetButtonList();
-    mUnknown38.push_back(HxStr(kLevelsPrompt));
+    mHelpKeys.push_back(HxStr(kLevelsPrompt));
 }
 
 // 0x0039ef80
@@ -378,13 +378,13 @@ void MetSoloStagesScreen::ResolveContainerViews() {
     mLevelStateTexs.push_back(FindObject<Rnd::Tex>(kOpenStateTex));
     mLevelStateTexs.push_back(FindObject<Rnd::Tex>(kWonStateTex));
 
-    mUnknownf4 = 0;
+    mUnusedSecond = 0;
     mBlankTex = nullptr;
     mTvLabelTex = nullptr;
     mNextTvLabelTex = nullptr;
     mTvLogoTex = nullptr;
     mNextTvLogoTex = nullptr;
-    mUnknownf0 = 0;
+    mUnusedFirst = 0;
 }
 
 // 0x003a09d0
@@ -481,8 +481,8 @@ void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
     } else {
         mSecretUnlocked = 0;
         mSuperSecretUnlocked = 0;
-        const std::vector<MetPersonaData *> &personas = MetFrontEndState::shared()->mUnknown00;
-        for (unsigned i = 0; i < MetFrontEndState::shared()->mUnknown00.size(); ++i) {
+        const std::vector<MetPersonaData *> &personas = MetFrontEndState::shared()->mPersonas;
+        for (unsigned i = 0; i < MetFrontEndState::shared()->mPersonas.size(); ++i) {
             CampaignStats &stats = personas[i]->mStats;
             mSecretUnlocked = (mSecretUnlocked != 0) || (stats.IsSecretUnlocked() != 0);
             mSuperSecretUnlocked =
@@ -494,7 +494,7 @@ void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
 // 0x003a2190
 int MetSoloStagesScreen::IsStageUnavailable(int nStage) {
     const GameParams params(CurrentParams());
-    if (params.mUnknown1c == kPlayModeJam) {
+    if (params.mPlayMode == kPlayModeJam) {
         return 0;
     }
     if (((params.mDifficulty == kDifficultyEasy) && (nStage >= kEasyStageCount)) ||
@@ -532,12 +532,12 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     int nStagesComplete = 0;
     for (int i = 1; i < kNumberedStageCount; ++i) {
         if ((params.mDifficulty == kDifficultyEasy) && (i >= kEasyStageCount) &&
-            (params.mUnknown1c == kPlayModeGame)) {
+            (params.mPlayMode == kPlayModeGame)) {
             mStageLocked[i] = 1;
             continue;
         }
         if ((params.mDifficulty == kDifficultyNormal) && (i >= kNormalStageCount) &&
-            (params.mUnknown1c == kPlayModeGame)) {
+            (params.mPlayMode == kPlayModeGame)) {
             mStageLocked[i] = 1;
             continue;
         }
@@ -549,13 +549,13 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
         bool bComplete = false;
         if (Application::shared()->GetGameMode() == kGameModeSolo) {
             CampaignStats &stats = FirstPersonaStats();
-            bComplete = (params.mUnknown1c == kPlayModeGame) ?
+            bComplete = (params.mPlayMode == kPlayModeGame) ?
                             (stats.IsStageComplete(params.mDifficulty, i) != 0) :
                             (stats.IsStageCompleteAtAnyDifficulty(i) != 0);
         } else {
-            for (unsigned j = 0; j < MetFrontEndState::shared()->mUnknown00.size(); ++j) {
-                CampaignStats &stats = MetFrontEndState::shared()->mUnknown00[j]->mStats;
-                const int nComplete = (params.mUnknown1c == kPlayModeGame) ?
+            for (unsigned j = 0; j < MetFrontEndState::shared()->mPersonas.size(); ++j) {
+                CampaignStats &stats = MetFrontEndState::shared()->mPersonas[j]->mStats;
+                const int nComplete = (params.mPlayMode == kPlayModeGame) ?
                                           stats.IsStageComplete(params.mDifficulty, i) :
                                           stats.IsStageCompleteAtAnyDifficulty(i);
                 bComplete = bComplete | (nComplete != 0);
@@ -576,7 +576,7 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     if (mStageLocked[nStage] != 0) {
         nStage = nStagesComplete - 1;
     }
-    if ((params.mUnknown1c == kPlayModeGame) &&
+    if ((params.mPlayMode == kPlayModeGame) &&
         (Application::shared()->GetGameMode() == kGameModeSolo)) {
         CampaignStats &stats = FirstPersonaStats();
         if ((stats.IsDifficultyComplete(params.mDifficulty) == 0) &&
@@ -610,7 +610,7 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     UpdateArrows();
 
     unsigned nLevel = 0;
-    if ((params.mUnknown1c == kPlayModeGame) &&
+    if ((params.mPlayMode == kPlayModeGame) &&
         (Application::shared()->GetGameMode() == kGameModeSolo)) {
         for (; nLevel < mCurrentLevels->size(); ++nLevel) {
             const HxStr name((*mCurrentLevels)[nLevel].mName);
@@ -692,7 +692,7 @@ void MetSoloStagesScreen::ShowStageBonus(int nStage) {
     CampaignStats &stats = FirstPersonaStats();
     const int nScore = stats.GetStageScore(nDifficulty, nStage);
 
-    if ((params.mUnknown1c == kPlayModeJam) || (nAlbumValue == 0) ||
+    if ((params.mPlayMode == kPlayModeJam) || (nAlbumValue == 0) ||
         (Application::shared()->GetGameMode() == kGameModeLocal) ||
         (stats.GetStageScoreBeaten(nDifficulty, nStage) == 1)) {
         mStageBonusGroup->SetShowing(0);
@@ -734,8 +734,8 @@ int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
     if (Application::shared()->GetGameMode() == kGameModeSolo) {
         nBeaten = IsStageBeaten(stats, nDifficulty, nNextStage);
     } else {
-        for (unsigned i = 0; i < MetFrontEndState::shared()->mUnknown00.size(); ++i) {
-            MetPersonaData *pPersona = MetFrontEndState::shared()->mUnknown00[i];
+        for (unsigned i = 0; i < MetFrontEndState::shared()->mPersonas.size(); ++i) {
+            MetPersonaData *pPersona = MetFrontEndState::shared()->mPersonas[i];
             nBeaten =
                 (nBeaten != 0) || (IsStageBeaten(pPersona->mStats, nDifficulty, nNextStage) != 0);
         }
@@ -871,7 +871,7 @@ void MetSoloStagesScreen::StyleLevel(int bStageLocked, const HxStr &levelName) {
 
 // 0x003a3c68
 void MetSoloStagesScreen::ShowLevelDetails() {
-    if (mUnknown48 != 0) {
+    if (mViewsUnresolved != 0) {
         return;
     }
     const int nStage = mStageList->mSelected;
@@ -991,29 +991,29 @@ void MetSoloStagesScreen::StartScroll() {
 void MetSoloStagesScreen::EnterAndShow() {
     SetShowing(0);
     bool bSaveFirst = false;
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
-        bSaveFirst = MetFrontEndState::shared()->mUnknown10 != 0;
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
+        bSaveFirst = MetFrontEndState::shared()->mSettingsDirty != 0;
     }
     if (bSaveFirst) {
-        MetFrontEndState::shared()->mUnknown10 = 0;
+        MetFrontEndState::shared()->mSettingsDirty = 0;
         std::vector<HxStr> screens(1, HxStr());
         screens[0] = kOwnScreenName;
         MetGlobalSettingsSaverScreen::StartSave(screens);
-        mUnknown50 = 0;
+        mActivatePending = 0;
         return;
     }
 
-    mUnlockAll = MetFrontEndState::shared()->mUnknown14;
+    mUnlockAll = MetFrontEndState::shared()->mUnlockAll;
     RebuildLevelLists();
-    SetUpStages(MetFrontEndState::shared()->mUnknown14);
+    SetUpStages(MetFrontEndState::shared()->mUnlockAll);
 
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState *pState = MetFrontEndState::shared();
-        pState->mUnknown1c = pState->mUnknown18;
-        pState->mUnknown18 = 0;
+        pState->mLastTransition = pState->mPendingTransition;
+        pState->mPendingTransition = 0;
         MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
         PushNamedScreen(HxStr(kHelpScreen));
-        mUnknown10->SetActivePanel(this);
+        mRenderer->SetActivePanel(this);
         GameParams params(CurrentParams());
         params.mLoadingGame = 0;
         Application::shared()->GetGameManager()->SetParams(params);
@@ -1031,14 +1031,14 @@ void MetSoloStagesScreen::EnterAndShow() {
     } else {
         mode = ConfigText(kCaptionConfigCode, kMultiCaption);
     }
-    if (params.mUnknown1c == kPlayModeGame) {
+    if (params.mPlayMode == kPlayModeGame) {
         kind = ConfigText(kCaptionConfigCode, kGameCaption);
         difficulty = DifficultyName(params.mDifficulty);
     } else {
         kind = ConfigText(kCaptionConfigCode, kRemixCaption);
     }
     stages = ConfigText(kCaptionConfigCode, kStagesCaption);
-    if (params.mUnknown1c == kPlayModeGame) {
+    if (params.mPlayMode == kPlayModeGame) {
         title = FormatString(
             kGameTitleFormat, TextOf(mode), TextOf(kind), TextOf(difficulty), TextOf(stages));
     } else {
@@ -1063,7 +1063,7 @@ void MetSoloStagesScreen::EnterAndShow() {
     mStageButtonsView->ClearDraws();
     mStageButtonsView->ClearTransList();
     Rnd::View *pButtons;
-    if (params.mUnknown1c == kPlayModeGame) {
+    if (params.mPlayMode == kPlayModeGame) {
         pButtons = FindObject<Rnd::View>(kSixButtonView);
         mStageList->ButtonAt(kCustomStageIndex)->SetState(kButtonStateNormal);
     } else {
@@ -1109,9 +1109,9 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
     case kMetScreenCommandPrevious:
     case kMetScreenCommandNext:
         if (pCommand->mCommand == kMetScreenCommandPrevious) {
-            mStageList->OnUnknownSlot2();
+            mStageList->SelectPrevious();
         } else {
-            mStageList->OnUnknownSlot3();
+            mStageList->SelectNext();
         }
         RefreshStage();
         UpdateArrows();
@@ -1126,7 +1126,7 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
         ActivateNamedPanel(HxStr(kNoText));
         mScrollDirection = kScrollLeft;
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowAlternateInterval, mLeftArrow, kArrowAlternateCycles);
+            mRenderer->mAnimationFrame, kArrowAlternateInterval, mLeftArrow, kArrowAlternateCycles);
         break;
 
     case kMetScreenCommandRight:
@@ -1135,8 +1135,10 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
         }
         ActivateNamedPanel(HxStr(kNoText));
         mScrollDirection = kScrollRight;
-        StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowAlternateInterval, mRightArrow, kArrowAlternateCycles);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
+                            kArrowAlternateInterval,
+                            mRightArrow,
+                            kArrowAlternateCycles);
         break;
 
     case kMetScreenCommandSelect: {
@@ -1144,7 +1146,7 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
             return;
         }
         ActivateNamedPanel(HxStr(kNoText));
-        MetHelpScreen::SetText(HxStr(kNoText), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoText), mRenderer->mAnimationFrame);
         const int nStage = mStageList->mSelected;
         if (nStage != kCustomStageIndex) {
             const int nLevel = mSelectedLevel[nStage];
@@ -1154,17 +1156,17 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
             CallScriptTemplate(kSelectTemplate, kSelectTemplateArgument);
             Application::shared()->GetGameManager()->SetParams(params);
         }
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mStageList->mUnknown00,
+                            mStageList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
     }
 
     case kMetScreenCommandBack:
         ActivateNamedPanel(HxStr(kNoText));
-        MetHelpScreen::SetText(HxStr(kNoText), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoText), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
         break;
@@ -1196,7 +1198,7 @@ void MetSoloStagesScreen::PlayCycleRightSound(int nSelector) {
 }
 
 // 0x003a4df8
-void MetSoloStagesScreen::OnUnknownSlot26(float flTime) {
+void MetSoloStagesScreen::UpdateIdle(float flTime) {
     const bool bLogoAdvanced = mLogoPair.Advance() != 0;
     const bool bAdvanced = bLogoAdvanced | (mLabelPair.Advance() != 0);
 
@@ -1269,14 +1271,14 @@ void MetSoloStagesScreen::OnUnknownSlot26(float flTime) {
 }
 
 // 0x003a54b8
-void MetSoloStagesScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+void MetSoloStagesScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if ((pButton == mLeftArrow) || (pButton == mRightArrow)) {
         int &nLevel = mSelectedLevel[mStageList->mSelected];
         mIndicatorWires[nLevel]->SetShowing(0);
         if (pButton == mLeftArrow) {
-            mIndicatorList->OnUnknownSlot2();
+            mIndicatorList->SelectPrevious();
         } else {
-            mIndicatorList->OnUnknownSlot3();
+            mIndicatorList->SelectNext();
         }
         nLevel = mIndicatorList->mSelected;
         if (nLevel < kLevelWireCount) {
@@ -1291,24 +1293,24 @@ void MetSoloStagesScreen::OnUnknownSlot30(Rnd::Button *pButton) {
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         BeginExit();
-        mUnknown18 = kExitSelected;
+        mExitChoice = kExitSelected;
     } else {
         ActivateNamedPanel(HxStr(kOwnScreenName));
     }
 }
 
 // 0x003aee50
-void MetSoloStagesScreen::OnUnknownSlot33() {
+void MetSoloStagesScreen::OnEnterFinished() {
     mTvView->SetShowing(1);
     mScrollDirection = kScrollNone;
     LoadLevelTextures();
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
 // 0x003a6738
-void MetSoloStagesScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
-        if (Application::shared()->GetGameManager()->GetParams()->mUnknown1c == kPlayModeGame) {
+void MetSoloStagesScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
+        if (Application::shared()->GetGameManager()->GetParams()->mPlayMode == kPlayModeGame) {
             PushNamedScreen(HxStr(kLeftGizmoScreen));
             PushNamedScreen(HxStr(kGameSkillScreen));
             ActivateNamedPanel(HxStr(kGameSkillScreen));
@@ -1340,7 +1342,7 @@ void MetSoloStagesScreen::OnUnknownSlot36() {
         PushNamedScreen(HxStr(kLoadGameScreen));
         ActivateNamedPanel(HxStr(kLoadGameScreen));
     } else {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kArenasScreen));
         ActivateNamedPanel(HxStr(kArenasScreen));

@@ -36,9 +36,9 @@ MetMultiTipsBaseScreen::MetMultiTipsBaseScreen(MetRenderer *pRenderer,
                                                int nPage,
                                                const HxStr &previous,
                                                const HxStr &next)
-    : MetScreen(pRenderer, nPriority, name, HxStr(kDirectory), file), mUnknown8c(previous),
-      mUnknown94(next), mUnknown9c(nPage) {
-    mUnknown38.push_back(HxStr(kHelpPrompt));
+    : MetScreen(pRenderer, nPriority, name, HxStr(kDirectory), file), mPreviousScreen(previous),
+      mNextScreen(next), mPage(nPage) {
+    mHelpKeys.push_back(HxStr(kHelpPrompt));
 }
 
 // 0x00306ee0
@@ -46,20 +46,20 @@ void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(""));
-        mUnknown18 = kExitNext;
+        mExitChoice = kExitNext;
         BeginExit();
         break;
 
     case kMetScreenCommandBack:
         ActivateNamedPanel(HxStr(""));
-        mUnknown18 = kExitPrevious;
+        mExitChoice = kExitPrevious;
         BeginExit();
         break;
 
     case kCommandQuit:
         MetScreen::PlayLeaveSound(pCommand->mPadIndex);
         ActivateNamedPanel(HxStr(""));
-        mUnknown18 = kExitQuit;
+        mExitChoice = kExitQuit;
         BeginExit();
         break;
 
@@ -70,20 +70,20 @@ void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x003070f0
 void MetMultiTipsBaseScreen::EnterAndShow() {
-    HxStr title = ConfigText(kTitleConfigCode, kTitleKey) + FormatString(kPageFormat, mUnknown9c);
+    HxStr title = ConfigText(kTitleConfigCode, kTitleKey) + FormatString(kPageFormat, mPage);
     MetScreenTitleScreen::SetTitle(title);
     MetScreen::EnterAndShow();
     MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
 }
 
 // 0x003072a0
-void MetMultiTipsBaseScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitPrevious) {
-        PushNamedScreen(mUnknown8c);
-        ActivateNamedPanel(mUnknown8c);
-    } else if (mUnknown18 == kExitNext) {
-        PushNamedScreen(mUnknown94);
-        ActivateNamedPanel(mUnknown94);
+void MetMultiTipsBaseScreen::OnExitFinished() {
+    if (mExitChoice == kExitPrevious) {
+        PushNamedScreen(mPreviousScreen);
+        ActivateNamedPanel(mPreviousScreen);
+    } else if (mExitChoice == kExitNext) {
+        PushNamedScreen(mNextScreen);
+        ActivateNamedPanel(mNextScreen);
     } else {
         ReturnToPlayerCount();
     }
@@ -106,8 +106,8 @@ void MetMultiTipsBaseScreen::PlayHighSound(int) {
 }
 
 // 0x0030d7a8
-void MetMultiTipsBaseScreen::OnUnknownSlot33() {
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+void MetMultiTipsBaseScreen::OnEnterFinished() {
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
 // 0x0030d7d0

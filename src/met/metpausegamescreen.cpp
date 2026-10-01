@@ -40,7 +40,7 @@ constexpr int kTutorialPhase = 5;
 MetPauseGameScreen::MetPauseGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
-    mUnknown9c = kPanelName;
+    mReturnPanel = kPanelName;
 }
 
 // 0x0031c508
@@ -49,7 +49,7 @@ void MetPauseGameScreen::ResolveContainerViews() {
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
             Rnd::g_manager.Find(HxStr(FormatString(kOptionTextFormat, i))));
-        mUnknowna4.push_back(pOption);
+        mOptionTexts.push_back(pOption);
     }
 }
 
@@ -59,9 +59,9 @@ void MetPauseGameScreen::EnterAndShow() {
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
     const char *pszHeadingKey;
-    if (MetFrontEndState::shared()->mUnknown18 == kTutorialPhase) {
+    if (MetFrontEndState::shared()->mPendingTransition == kTutorialPhase) {
         pszHeadingKey = kTutorialHeadingKey;
-    } else if (params.mUnknown1c == kPlayModeJam) {
+    } else if (params.mPlayMode == kPlayModeJam) {
         pszHeadingKey = kRemixHeadingKey;
     } else {
         pszHeadingKey = kGameHeadingKey;
@@ -69,11 +69,11 @@ void MetPauseGameScreen::EnterAndShow() {
     HxStr heading = QueryConfigString(kPromptConfigCode, pszHeadingKey);
     pPaused->SetText(heading);
 
-    mUnknown90.clear();
-    const bool bGameLabels = MetFrontEndState::shared()->mUnknown18 == kTutorialPhase ||
-                             params.mUnknown1c == kPlayModeGame;
+    mOptionLabels.clear();
+    const bool bGameLabels = MetFrontEndState::shared()->mPendingTransition == kTutorialPhase ||
+                             params.mPlayMode == kPlayModeGame;
     QueryConfigStrings(
-        &mUnknown90, kLabelsConfigCode, bGameLabels ? kGameLabelsKey : kRemixLabelsKey);
+        &mOptionLabels, kLabelsConfigCode, bGameLabels ? kGameLabelsKey : kRemixLabelsKey);
     MetPauseBaseScreen::EnterAndShow();
 }
 

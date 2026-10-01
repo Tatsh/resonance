@@ -47,7 +47,7 @@ public:
      * @param nData2 The second data byte.
      */
     StdMidiMsg(int nTick, unsigned char nStatus, unsigned char nData1, unsigned char nData2)
-        : MuseMsg(nTick), mUnknown08(nStatus), mUnknown09(nData1), mUnknown0a(nData2) {
+        : MuseMsg(nTick), mStatus(nStatus), mData1(nData1), mData2(nData2) {
     }
 
     /**
@@ -126,13 +126,12 @@ public:
      * one, which four inlined constructions in the sequencer confirm by composing it as a kind
      * combined with a channel. The two that follow are the data bytes, and their meaning depends
      * on that kind: a control-change status makes them a controller number and a value, while a
-     * note status makes the first a note number. Two bands read them under those two different
-     * titles and both readings were right for the status each had in view, which is why the
-     * placeholders stand. A single title for either data byte would be wrong.
+     * note status makes the first a note number. Their titles use the MIDI specification's terms,
+     * the first and second data bytes, because a single meaning for either would be wrong.
      */
-    unsigned char mUnknown08;
-    unsigned char mUnknown09;
-    unsigned char mUnknown0a;
+    unsigned char mStatus;
+    unsigned char mData1;
+    unsigned char mData2;
 };
 
 /**

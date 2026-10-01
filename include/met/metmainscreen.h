@@ -58,9 +58,9 @@ public:
      * Enter the menu, first saving the global settings when a configuration screen changed them.
      *
      * Slot 5. The renderer accepts commands from every pad up to index 4 again and the screen is
-     * hidden. When MetFrontEndState::mUnknown18 and MetFrontEndState::mUnknown10 are both set,
-     * the second is cleared and MetGlobalSettingsSaverScreen::StartSave() runs with this screen as
-     * the one return screen. Otherwise EnterMenu() runs.
+     * hidden. When MetFrontEndState::mPendingTransition and MetFrontEndState::mSettingsDirty are
+     * both set, the second is cleared and MetGlobalSettingsSaverScreen::StartSave() runs with this
+     * screen as the one return screen. Otherwise EnterMenu() runs.
      *
      * @ghidraAddress 0x002c6dc0
      */
@@ -104,7 +104,7 @@ public:
      * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x002c6c20
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Select the starting button, return the game to no mode, and post the help text.
@@ -115,7 +115,7 @@ public:
      *
      * @ghidraAddress 0x002c72a0
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Bring up the next screen once this one has exited.
@@ -125,7 +125,7 @@ public:
      *
      * @ghidraAddress 0x002c73e0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views and add the four buttons with their labels and help texts.

@@ -100,9 +100,9 @@ constexpr int kStateExiting = 5;
 constexpr int kUnallocatedCommand = -2;
 constexpr int kRecordable = 1;
 
-// The fade Exit() applies, in milliseconds: the default, the length for exit mode 1 or a running
-// playback, and the length in jukebox mode. The screen fade runs 500 milliseconds longer, and
-// FinishSong() runs 600 milliseconds after the fade.
+// The fade Exit() applies, in milliseconds: the default, the length for the finish exit or a
+// running playback, and the length in jukebox mode. The screen fade runs 500 milliseconds longer,
+// and FinishSong() runs 600 milliseconds after the fade.
 constexpr int kExitFadeMs = 1000;
 constexpr int kExitFadeLongMs = 3000;
 constexpr int kExitFadeJukeboxMs = 5000;
@@ -111,8 +111,8 @@ constexpr int kExitFinishDelayMs = 600;
 constexpr long long kNsPerMs = 1000000;
 constexpr int kFadeOut = 0;
 
-// The joystick tag of a controller reading, the button OnUnknownSlot2() treats as pause, and the
-// bound below which a joystick button counts during a playback.
+// The joystick tag of a controller reading, the button OnControllerReading() treats as pause, and
+// the bound below which a joystick button counts during a playback.
 constexpr int kReadingTypeJoy = 0x6a6f7920;
 constexpr int kPauseButton = 10;
 constexpr int kJoyButtonLimit = 100;
@@ -126,16 +126,16 @@ constexpr int kFirstBar = 0;
 constexpr int kMetronomeLeadTicks = 3200;
 
 // The configuration codes PrepareLevel() reads: the sound-bank movie flag and its path, the start
-// offset in ticks, and the flag it stores in mUnknown90.
+// offset in ticks, and the tutorial flag it stores in mIsTutorial.
 constexpr int kSoundBankMovieFlagCode = 932;
 constexpr int kSoundBankMoviePathCode = 933;
 constexpr int kStartOffsetCode = 909;
-constexpr int kUnknown90FlagCode = 929;
+constexpr int kTutorialConfigCode = 929;
 
-// The Slot13() argument FinishSong() passes to the synthesiser.
-constexpr int kSynthSlot13Off = 0;
+// The synthesiser jam flag value FinishSong() passes; PrepareLevel() sets it from the play mode.
+constexpr int kJamModeOff = 0;
 
-// Player::Slot2() while the player has no seeker.
+// Player::GetInputSlot() while the player has no seeker.
 constexpr int kNoSeeker = -1;
 
 // Bytes of each text field of the log record FinishSong() writes and BuildGraphs() reads.
@@ -153,23 +153,20 @@ constexpr int kIntroTrackGraph = 1;
 // IBStream::Seek() origin that measures from the start of the buffer.
 constexpr int kSeekFromStart = 0;
 
-// The delay before exit mode 2 runs EndLevel(), in nanoseconds.
+// The delay before the quit exit runs EndLevel(), in nanoseconds.
 constexpr long long kEndLevelDelayNs = 500000000;
 
-// The clear colour exit mode 3 leaves on the display.
+// The clear colour the restart exit fills the display with.
 constexpr float kOpaque = 1.0f;
 
 // AsyncPollComplete() results.
 constexpr int kAsyncComplete = 0;
 constexpr int kAsyncPending = -1;
 
-// The tag FinishLoad() bills the release of the file buffer to.
-constexpr char kAllocTag[] = "GrooveWorld.cpp";
-
-// Exit modes PostExitMode1(), PostExitMode2(), and PostExitMode3() queue.
-constexpr int kExitMode1 = 1;
-constexpr int kExitMode2 = 2;
-constexpr int kExitMode3 = 3;
+// Exit modes PostFinish(), PostQuit(), and PostRestart() queue.
+constexpr int kExitModeFinish = 1;
+constexpr int kExitModeQuit = 2;
+constexpr int kExitModeRestart = 3;
 
 /**
  * Scheduler command that calls one member of the world.
@@ -230,8 +227,8 @@ public:
     }
 
     // 0x001949b8
-    ExitCmd(int nMode, int nUnknown10, int nUnknown14)
-        : mMode(nMode), mUnknown10(nUnknown10), mUnknown14(nUnknown14) {
+    ExitCmd(int nMode, int bContinueJukebox, int bRestart)
+        : mMode(nMode), mContinueJukebox(bContinueJukebox), mRestart(bRestart) {
     }
 
     // 0x00194988
@@ -241,7 +238,7 @@ public:
 
     // 0x001949e8
     virtual void Execute() {
-        Application::shared()->GetWorld()->Exit(mMode, mUnknown10, mUnknown14);
+        Application::shared()->GetWorld()->Exit(mMode, mContinueJukebox, mRestart);
     }
 
     // 0x00194a28
@@ -253,8 +250,8 @@ public:
     virtual void Save(OBStream &stream) {
         const int nMode = mMode;
         stream.Write(&nMode, sizeof(nMode));
-        stream << mUnknown10;
-        stream << mUnknown14;
+        stream << mContinueJukebox;
+        stream << mRestart;
     }
 
     // 0x00194ab8
@@ -262,8 +259,8 @@ public:
         int nMode;
         stream.Read(&nMode, sizeof(nMode));
         mMode = nMode;
-        stream >> mUnknown10;
-        stream >> mUnknown14;
+        stream >> mContinueJukebox;
+        stream >> mRestart;
     }
 
     // 0x0018beb0
@@ -277,9 +274,9 @@ public:
     static int sCmdID;
 
 private:
-    int mMode;      // +0x0c
-    int mUnknown10; // +0x10, one byte on the wire
-    int mUnknown14; // +0x14, one byte on the wire
+    int mMode;            // +0x0c
+    int mContinueJukebox; // +0x10, one byte on the wire
+    int mRestart;         // +0x14, one byte on the wire
 };
 
 constexpr int kExitCmdId = 7;
@@ -291,10 +288,10 @@ int ExitCmd::sCmdID = kExitCmdId;
 // 0x0018bef0
 GrooveWorld::GrooveWorld(Application *pApp, GameStats *pStats)
     : mApp(pApp), mInputMap(nullptr), mTrackSelector(nullptr), mJoiner(nullptr), mLevel(nullptr),
-      mUnknown1c(nullptr), mUnknown20(nullptr), mDelayer(nullptr), mRenderer(nullptr),
-      mGamer(nullptr), mStats(pStats), mUnknown5c(nullptr), mMuseSynth(nullptr),
-      mSongClock(nullptr), mCheatDetector(nullptr), mUnknown84(0), mUnknown88(0), mUnknown8c(0),
-      mUnknown90(0), mUnknown94(0), mState(0), mUnknownb8(1) {
+      mNetSource(nullptr), mNetSink(nullptr), mDelayer(nullptr), mRenderer(nullptr),
+      mGamer(nullptr), mStats(pStats), mOwnTrackGraph(nullptr), mMuseSynth(nullptr),
+      mSongClock(nullptr), mCheatDetector(nullptr), mIgnoreReadings(0), mRestart(0), mIsPlayback(0),
+      mIsTutorial(0), mExitMode(0), mState(0), mContinueJukebox(1) {
     mSongClock = new Sch::TickClock(mApp->GetWatchdog(), nullptr);
     mCheatDetector = new InputCheatDetectorGS(&g_gameCheatSequences);
     mForceFeedback = new ForceFeedbackMgr;
@@ -324,7 +321,7 @@ void GrooveWorld::PrepareLevel() {
     Ps2HardSynth *pSynth = mApp->GetSynth();
     pSynth->LoadBankSet5();
     pSynth->LoadBankSet6();
-    pSynth->Slot13(Application::shared()->GetPlayMode() == kPlayModeJam);
+    pSynth->SetRemixMode(Application::shared()->GetPlayMode() == kPlayModeJam);
     BuildGraphs();
     CreateRenderer();
     ConnectPlayers();
@@ -336,7 +333,7 @@ void GrooveWorld::PrepareLevel() {
     const Mid::MBT zero(0);
     const Mid::MBT start(std::min(kMBTMaximum, std::max(kMBTMinimum, zero.mTick - offset.mTick)));
     mSongClock->SetSongTick(start);
-    mUnknown90 = QueryConfigFlag(kUnknown90FlagCode);
+    mIsTutorial = QueryConfigFlag(kTutorialConfigCode);
     mState = kStatePrepared;
 }
 
@@ -348,11 +345,11 @@ void GrooveWorld::StartPlay() {
     CreateNoteDestroyer();
     StartNoteDestroyer();
     mState = kStatePlaying;
-    mApp->GetSynth()->Slot10();
+    mApp->GetSynth()->OnPlayStarted();
     std::for_each(
-        mUnknown50.begin(), mUnknown50.end(), std::mem_fn(&BGTrackGraph::CallBuildSequencer));
+        mIntroGraphs.begin(), mIntroGraphs.end(), std::mem_fn(&BGTrackGraph::CallBuildSequencer));
 
-    if (mUnknown90 == 0) {
+    if (mIsTutorial == 0) {
         FuncCmd *pEnable = new FuncCmd(this, &GrooveWorld::EnableInput);
         const Mid::MBT zero(0);
         const Mid::MBT lead(mLevel->GetTrack(kFirstTrack)->GetQuant(kFirstBar) / 2);
@@ -376,40 +373,40 @@ void GrooveWorld::StartPlay() {
     }
 
     mStats->Reset(mPlayers.size());
-    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallSlot11));
+    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallAnnounceState));
     mForceFeedback->SetJukeboxMode(Application::shared()->IsJukeboxMode());
-    mForceFeedback->SetUnknownFlag04(mUnknown8c);
-    mForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mUnknown08);
+    mForceFeedback->SetPlaybackMode(mIsPlayback);
+    mForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mForceFeedback);
     mForceFeedback->SetPlayerCount(mLocalPlayers.size());
     mForceFeedback->StartMetronome(Mid::MBT(kMetronomeLeadTicks));
 }
 
 // 0x0018ed98
-void GrooveWorld::OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4) {
+void GrooveWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue) {
     if (mState != kStatePlaying) {
         return;
     }
-    if (mUnknown90 == 0) {
-        mCheatDetector->OnUnknownSlot2(nUnknown1, nUnknown2, nUnknown3, flUnknown4);
+    if (mIsTutorial == 0) {
+        mCheatDetector->OnControllerReading(nTag, nPadIndex, nButton, flValue);
     }
     if (mApp->IsJukeboxMode()) {
-        if (nUnknown1 == kReadingTypeJoy && flUnknown4 > 0.0f && nUnknown3 == kPauseButton) {
-            mUnknownb8 = 0;
-            PostExit(kExitMode1, mUnknownb8, 0);
+        if (nTag == kReadingTypeJoy && flValue > 0.0f && nButton == kPauseButton) {
+            mContinueJukebox = 0;
+            PostExit(kExitModeFinish, mContinueJukebox, 0);
         }
         return;
     }
     if (mApp->GetGameManager()->IsPlaybackActive() == 1) {
-        if (nUnknown1 == kReadingTypeJoy && flUnknown4 > 0.0f && nUnknown3 < kJoyButtonLimit) {
-            PostExit(kExitMode1, mUnknownb8, 0);
+        if (nTag == kReadingTypeJoy && flValue > 0.0f && nButton < kJoyButtonLimit) {
+            PostExit(kExitModeFinish, mContinueJukebox, 0);
             return;
         }
-    } else if (nUnknown1 == kReadingTypeJoy && nUnknown3 == kPauseButton && flUnknown4 > 0.0f &&
-               !(mLocalPlayers.size() < static_cast<unsigned>(nUnknown2))) {
+    } else if (nTag == kReadingTypeJoy && nButton == kPauseButton && flValue > 0.0f &&
+               !(mLocalPlayers.size() < static_cast<unsigned>(nPadIndex))) {
         const int nGameMode = Application::shared()->GetGameMode();
         if (nGameMode == kGameModeSolo && Application::shared()->GetPlayMode() == nGameMode &&
             mStats->mCompleted != 0) {
-            PostExit(kExitMode1, mUnknownb8, 0);
+            PostExit(kExitModeFinish, mContinueJukebox, 0);
         } else {
             {
                 PauseGameSystemMsg pause;
@@ -418,10 +415,10 @@ void GrooveWorld::OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, fl
             mInputMap->StopAllRiffs();
         }
         return;
-    } else if (mUnknown84 != 0) {
+    } else if (mIgnoreReadings != 0) {
         return;
     }
-    const MetControllerReading reading{nUnknown1, nUnknown2, nUnknown3, flUnknown4};
+    const MetControllerReading reading{nTag, nPadIndex, nButton, flValue};
     ControllerCmd *pCommand = new ControllerCmd(reading);
     CmdID id;
     id.mValue = kUnallocatedCommand;
@@ -442,16 +439,16 @@ void GrooveWorld::ReplayControllerReading(const MetControllerReading *pReading) 
 }
 
 // 0x0018e368
-void GrooveWorld::PostExit(int nMode, int nUnknownb8, int nUnknown88) {
+void GrooveWorld::PostExit(int nMode, int bContinueJukebox, int bRestart) {
     if (mState != kStatePlaying) {
         return;
     }
     mState = kStateExiting;
-    if (mApp->GetGameManager()->IsPlaybackActive() != 0 || nUnknown88 != 0) {
-        Exit(nMode, nUnknownb8, nUnknown88);
+    if (mApp->GetGameManager()->IsPlaybackActive() != 0 || bRestart != 0) {
+        Exit(nMode, bContinueJukebox, bRestart);
         return;
     }
-    ExitCmd *pCommand = new ExitCmd(nMode, nUnknownb8, nUnknown88);
+    ExitCmd *pCommand = new ExitCmd(nMode, bContinueJukebox, bRestart);
     CmdID id;
     id.mValue = kUnallocatedCommand;
     Application::shared()->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
@@ -459,17 +456,17 @@ void GrooveWorld::PostExit(int nMode, int nUnknownb8, int nUnknown88) {
 }
 
 // 0x0018e478
-void GrooveWorld::Exit(int nMode, int nUnknownb8, int nUnknown88) {
-    mUnknown94 = nMode;
-    mUnknownb8 = nUnknownb8;
-    mUnknown88 = nUnknown88;
+void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
+    mExitMode = nMode;
+    mContinueJukebox = bContinueJukebox;
+    mRestart = bRestart;
     mInputMap->StopAllRiffs();
     mInputMap->DisableEntries();
     GameOverMsg over;
     mDelayer->Handle(&over);
 
     int bFadeSynth = 0;
-    if (mUnknown94 == kExitMode1 || mApp->GetGameManager()->IsPlaybackActive() != 0) {
+    if (mExitMode == kExitModeFinish || mApp->GetGameManager()->IsPlaybackActive() != 0) {
         bFadeSynth = 1;
     }
     int nFadeMs = kExitFadeMs;
@@ -523,12 +520,12 @@ void GrooveWorld::OnBumpPacket(Message *pMsg) {
 }
 
 // 0x00194b80
-void GrooveWorld::SetUnknown20And1c(MsgSink *pSink, MsgSource *pSource) {
-    mUnknown20 = pSink;
+void GrooveWorld::SetNetLink(MsgSink *pSink, MsgSource *pSource) {
+    mNetSink = pSink;
     if (mApp->GetGameMode() == kGameModeNet) {
-        mUnknown1c = pSource;
+        mNetSource = pSource;
     } else {
-        mUnknown1c = nullptr;
+        mNetSource = nullptr;
     }
 }
 
@@ -564,15 +561,15 @@ int GrooveWorld::IsLoadDone() {
 void GrooveWorld::FinishLoad() {
     LevelConverter converter;
     if (QueryConfigFlag(kLevelConverterOptionQuery) != 0) {
-        converter.mUnknown90 = 1;
+        converter.mIgnoreQuantization = 1;
     }
     converter.Convert(mLevelPath.mStr != nullptr ? mLevelPath.mStr : g_szEmptyString,
                       mLoadBuffer,
                       mLoadSize,
                       mLevel);
-    MemFreeTagged(mLoadBuffer, kAllocTag, __LINE__);
+    MemFreeTagged(mLoadBuffer, __FILE__, __LINE__);
 
-    mSongClock->SetTempoMap(mLevel->OnUnknownSlot7());
+    mSongClock->SetTempoMap(mLevel->GetTempoMap());
 
     mLoadHandle = 0;
     mState = kStateLoaded;
@@ -586,14 +583,14 @@ void GrooveWorld::ConnectPlayers() {
         Player *pPlayer = *it;
         mInputMap->AddSink(pPlayer);
         mTrackSelector->AddSink(pPlayer);
-        if (mUnknown1c != nullptr) {
-            mUnknown1c->AddSink(pPlayer);
+        if (mNetSource != nullptr) {
+            mNetSource->AddSink(pPlayer);
         }
         pPlayer->AddSink(mJoiner);
         pPlayer->AddSink(mGamer);
         pPlayer->AddSink(mTrackSelector);
-        if (mUnknown20 != nullptr) {
-            pPlayer->AddSink(mUnknown20);
+        if (mNetSink != nullptr) {
+            pPlayer->AddSink(mNetSink);
         }
     }
 }
@@ -602,14 +599,14 @@ void GrooveWorld::ConnectPlayers() {
 void GrooveWorld::DisconnectPlayers() {
     for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         Player *pPlayer = *it;
-        if (mUnknown20 != nullptr) {
-            pPlayer->RemoveSink(mUnknown20);
+        if (mNetSink != nullptr) {
+            pPlayer->RemoveSink(mNetSink);
         }
         pPlayer->RemoveSink(mGamer);
         pPlayer->RemoveSink(mJoiner);
         pPlayer->RemoveSink(mTrackSelector);
-        if (mUnknown1c != nullptr) {
-            mUnknown1c->RemoveSink(pPlayer);
+        if (mNetSource != nullptr) {
+            mNetSource->RemoveSink(pPlayer);
         }
         mTrackSelector->RemoveSink(pPlayer);
         mInputMap->RemoveSink(pPlayer);
@@ -634,7 +631,7 @@ void GrooveWorld::BuildGraphs() {
     mDelayer = new Delayer;
     mJoiner = new MsgJoiner;
     mInputMap = new InputMap(mApp, &mPlayers);
-    mInputMap->mUnknown00 = 1;
+    mInputMap->mGraphBuilt = 1;
     mInputMap->Rebuild();
     mInputMap->AddSink(mJoiner);
 
@@ -645,35 +642,35 @@ void GrooveWorld::BuildGraphs() {
 
     mMuseSynth = new MuseSynth(mSongClock);
     mMuseSynth->AddSink(mApp->GetSynth());
-    if (mUnknown1c != nullptr) {
-        mUnknown1c->AddSink(this);
+    if (mNetSource != nullptr) {
+        mNetSource->AddSink(this);
     }
 
     if (mLevel->OwnTrack() != nullptr) {
-        mUnknown5c = new BGTrackGraph(0, 0);
-        mUnknown5c->CreateMixer(mLevel->OwnTrack());
-        mUnknown5c->AddSynthSink(mDelayer);
+        mOwnTrackGraph = new BGTrackGraph(0, 0);
+        mOwnTrackGraph->CreateMixer(mLevel->OwnTrack());
+        mOwnTrackGraph->AddSynthSink(mDelayer);
     }
 
-    mGamer = new Gamer(mLevel->TrackCount(), mLevel->OnUnknownSlot9(), mStats);
+    mGamer = new Gamer(mLevel->TrackCount(), mLevel->GetEndBar(), mStats);
     mGamer->AddSink(mDelayer);
     if (mApp->GetGameMode() == kGameModeNet) {
-        mGamer->AddSink(mUnknown20);
+        mGamer->AddSink(mNetSink);
     }
     mInputMap->AddSink(mGamer);
 
     for (unsigned int i = 0; i < static_cast<unsigned int>(mLevel->BackingTrackCount()); ++i) {
         BGTrackGraph *pGraph = new BGTrackGraph(i, kBackingTrackGraph);
-        mUnknown44.push_back(pGraph);
+        mBackingGraphs.push_back(pGraph);
         pGraph->CreateMixer(mLevel->BackingTrackAt(i));
         pGraph->AttachMixerToSynth(mApp->GetSynth());
         pGraph->AttachMixerToSource(mGamer);
     }
-    mGamer->SetBackGraphs(&mUnknown44);
+    mGamer->SetBackGraphs(&mBackingGraphs);
 
     for (unsigned int i = 0; i < mLevel->mIntroTracks.size(); ++i) {
         BGTrackGraph *pGraph = new BGTrackGraph(i, kIntroTrackGraph);
-        mUnknown50.push_back(pGraph);
+        mIntroGraphs.push_back(pGraph);
         pGraph->CreateMixer(mLevel->IntroTrackAt(i));
         pGraph->AttachMixerToSynth(mApp->GetSynth());
     }
@@ -697,17 +694,17 @@ void GrooveWorld::BuildGraphs() {
         } else if (pTrack->mKind == kTrackModeVocal) {
             pGraph = new VoxingSTG(pTrack);
         } else {
-            Fatal("Unsupported STG for track %d", pTrack->mUnknown04);
+            Fatal("Unsupported STG for track %d", pTrack->mIndex);
         }
         mTrackGraphs.push_back(pGraph);
-        pGraph->Slot4(mJoiner, mUnknown1c, &mGamer->mTrackSources[i]);
-        pGraph->Slot5(mGamer);
-        pGraph->Slot7(mDelayer);
-        pGraph->Slot7(mGamer);
-        pGraph->Slot7(mTrackSelector);
-        pGraph->Slot6(mApp->GetSynth());
+        pGraph->ConnectSources(mJoiner, mNetSource, &mGamer->mTrackSources[i]);
+        pGraph->AddMixerToSource(mGamer);
+        pGraph->AddSinkToSources(mDelayer);
+        pGraph->AddSinkToSources(mGamer);
+        pGraph->AddSinkToSources(mTrackSelector);
+        pGraph->SetMixerOutput(mApp->GetSynth());
         if (mApp->GetGameMode() == kGameModeNet) {
-            pGraph->Slot8(mUnknown20);
+            pGraph->SetNetSink(mNetSink);
         }
     }
 
@@ -735,7 +732,7 @@ void GrooveWorld::BuildGraphs() {
                 ScoreTrackGraph *pGraph = mTrackGraphs[i];
                 if (mLevel->GetTrack(i)->mKind == kTrackModeCatch) {
                     pGraph->mTrackData->AddPhrases(pGraph->GetPhraseDatabase());
-                    pGraph->Slot12();
+                    pGraph->CreatePowerbarMgr();
                 }
                 pGraph->GetPhraseDatabase()->Clear();
             }
@@ -752,13 +749,13 @@ void GrooveWorld::CreateRenderer() {
         (*it)->AddSink(mRenderer);
 
         TrackSelectMsg select;
-        select.mUnknown04 = (*it)->Slot4();
-        select.mUnknown08 = 0;
+        select.mTrack = (*it)->GetTrack();
+        select.mPlace = 0;
         select.mPosition = Mid::MBT(0);
-        select.mUnknown10 = *it;
+        select.mPlayer = *it;
         mRenderer->Handle(&select);
 
-        if ((*it)->Slot2() == kNoSeeker) {
+        if ((*it)->GetInputSlot() == kNoSeeker) {
             SeekerMsg seeker(*it);
             mRenderer->Handle(&seeker);
         }
@@ -768,11 +765,11 @@ void GrooveWorld::CreateRenderer() {
 // 0x0018da60
 void GrooveWorld::DestroyGraphs() {
     std::for_each(mTrackGraphs.begin(), mTrackGraphs.end(), ScoreTrackGraph::Delete);
-    std::for_each(mUnknown44.begin(), mUnknown44.end(), BGTrackGraph::Delete);
-    std::for_each(mUnknown50.begin(), mUnknown50.end(), BGTrackGraph::Delete);
+    std::for_each(mBackingGraphs.begin(), mBackingGraphs.end(), BGTrackGraph::Delete);
+    std::for_each(mIntroGraphs.begin(), mIntroGraphs.end(), BGTrackGraph::Delete);
     mTrackGraphs.clear();
-    mUnknown44.clear();
-    mUnknown50.clear();
+    mBackingGraphs.clear();
+    mIntroGraphs.clear();
 
     mInputMap->RemoveSink(mJoiner);
     delete mMuseSynth;
@@ -787,23 +784,24 @@ void GrooveWorld::DestroyGraphs() {
     mDelayer = nullptr;
     delete mGamer;
     mGamer = nullptr;
-    delete mUnknown5c;
-    mUnknown5c = nullptr;
-    if (mUnknown1c != nullptr) {
-        mUnknown1c->ClearSinks();
+    delete mOwnTrackGraph;
+    mOwnTrackGraph = nullptr;
+    if (mNetSource != nullptr) {
+        mNetSource->ClearSinks();
     }
 }
 
 // 0x0018e238
 void GrooveWorld::StartSequencers() {
     std::for_each(
-        mUnknown50.begin(), mUnknown50.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
+        mIntroGraphs.begin(), mIntroGraphs.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
+    std::for_each(mBackingGraphs.begin(),
+                  mBackingGraphs.end(),
+                  std::mem_fn(&BGTrackGraph::CallBuildSequencer));
     std::for_each(
-        mUnknown44.begin(), mUnknown44.end(), std::mem_fn(&BGTrackGraph::CallBuildSequencer));
-    std::for_each(
-        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallSlot2));
-    if (mUnknown5c != nullptr) {
-        mUnknown5c->BuildSequencer();
+        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallStart));
+    if (mOwnTrackGraph != nullptr) {
+        mOwnTrackGraph->BuildSequencer();
     }
     mGamer->Start();
 }
@@ -813,7 +811,7 @@ void GrooveWorld::FinishSong() {
     if (QueryConfigFlag(kStreamedAudioQuery) != 0) {
         StopSoundBankMovie();
     }
-    Application::shared()->GetSynth()->Slot13(kSynthSlot13Off);
+    Application::shared()->GetSynth()->SetRemixMode(kJamModeOff);
     mGamer->Withdraw();
 
     if (Application::shared()->GetPlayMode() == kPlayModeJam) {
@@ -846,17 +844,18 @@ void GrooveWorld::FinishSong() {
     }
 
     std::for_each(
-        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallSlot3));
+        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallStop));
+    std::for_each(mBackingGraphs.begin(),
+                  mBackingGraphs.end(),
+                  std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
     std::for_each(
-        mUnknown44.begin(), mUnknown44.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
-    std::for_each(
-        mUnknown50.begin(), mUnknown50.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
-    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallSlot12));
-    if (mUnknown5c != nullptr) {
-        mUnknown5c->DeleteSequencer();
+        mIntroGraphs.begin(), mIntroGraphs.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
+    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallDeactivatePlacer));
+    if (mOwnTrackGraph != nullptr) {
+        mOwnTrackGraph->DeleteSequencer();
     }
 
-    if (mUnknown94 == kExitMode2) {
+    if (mExitMode == kExitModeQuit) {
         FuncCmd *pCommand = new FuncCmd(this, &GrooveWorld::EndLevel);
         mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{kEndLevelDelayNs});
         Attachment::ReleaseIfSet(pCommand);
@@ -867,18 +866,18 @@ void GrooveWorld::FinishSong() {
 
 // 0x0018eb70
 void GrooveWorld::EndLevel() {
-    if (mUnknown94 == kExitMode3) {
+    if (mExitMode == kExitModeRestart) {
         const Color black{0.0f, 0.0f, 0.0f, kOpaque};
         g_gfxDevice.SetClearColor(black);
     }
     mState = kStateEnded;
 
     EndGameMsg msg;
-    msg.mRestart = mUnknown88;
+    msg.mRestart = mRestart;
     mApp->GetGameManager()->QueueMessage(&msg);
 
-    if ((mUnknown94 == kExitMode1 || mUnknown94 == kExitMode2) &&
-        (!mApp->IsJukeboxMode() || mUnknownb8 == 0)) {
+    if ((mExitMode == kExitModeFinish || mExitMode == kExitModeQuit) &&
+        (!mApp->IsJukeboxMode() || mContinueJukebox == 0)) {
         SetBankLoadProgressHook(MainLoop::KeepAliveDraw);
         Application::shared()->GetSynth()->LoadBankSet4();
     }
@@ -936,7 +935,7 @@ void GrooveWorld::AddLocalPlayer(int nId,
         nTrack = QueryConfigValue(kSoloTrackConfigCode) - 1;
     }
     Player *pPlayer =
-        new LocalPlayer(nId, nInputSlot, colorName, &pPersona->mUnknown140, mSongClock, nTrack);
+        new LocalPlayer(nId, nInputSlot, colorName, &pPersona->mAppearance, mSongClock, nTrack);
     mPlayers.push_back(pPlayer);
     mLocalPlayers.push_back(pPlayer);
 }
@@ -944,7 +943,7 @@ void GrooveWorld::AddLocalPlayer(int nId,
 // 0x00194ef0
 void GrooveWorld::RemovePlayer(int nId) {
     for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
-        if ((*it)->mId20 == nId) {
+        if ((*it)->mPlayerId == nId) {
             mPlayers.erase(it);
             return;
         }
@@ -991,18 +990,18 @@ void GrooveWorld::EnableInput() {
 }
 
 // 0x00195170
-void GrooveWorld::PostExitMode1() {
-    PostExit(kExitMode1, mUnknownb8, 0);
+void GrooveWorld::PostFinish() {
+    PostExit(kExitModeFinish, mContinueJukebox, 0);
 }
 
 // 0x00195198
-void GrooveWorld::PostExitMode2() {
-    PostExit(kExitMode2, 0, 0);
+void GrooveWorld::PostQuit() {
+    PostExit(kExitModeQuit, 0, 0);
 }
 
 // 0x001951c0
-void GrooveWorld::PostExitMode3() {
-    PostExit(kExitMode3, 0, 1);
+void GrooveWorld::PostRestart() {
+    PostExit(kExitModeRestart, 0, 1);
 }
 
 // 0x001952a0
@@ -1012,7 +1011,7 @@ Sch::TickClock *GrooveWorld::GetSongClock() {
 
 // 0x001952a8
 PlayMap *GrooveWorld::GetPlayMap() {
-    return mLevel->OnUnknownSlot8();
+    return mLevel->GetPlayMap();
 }
 
 // 0x001952d8
@@ -1027,5 +1026,5 @@ RendererBase *GrooveWorld::GetRendererSink() {
 
 // 0x00195378
 void GrooveWorld::MarkStatsFlag() {
-    mStats->mUnknown14 = 1;
+    mStats->mRemixEdited = 1;
 }

@@ -22,8 +22,8 @@ class GamePowerbarMgr : public PowerbarMgr {
 public:
     /** One bar's entry in mBars. */
     struct Bar {
-        int mUnknown00; /*!< Zero in every entry the constructor creates. +0x00 */
-        int mPowerbar;  /*!< The powerbar, or -1 for none. +0x04 */
+        int mUnusedWord; /*!< Zero in every entry the constructor creates, and never read. +0x00 */
+        int mPowerbar;   /*!< The powerbar, or -1 for none. +0x04 */
     };
 
     /**
@@ -41,7 +41,7 @@ public:
      * @param pTrackData The track description.
      * @param bRandomKind Non-zero to choose between the two powerbars with even odds.
      * @param nTrack The track's index.
-     * @param nUnknown30 Stored in mUnknown30. SoloPowerbarMgr passes 0 and MultiPowerbarMgr 1.
+     * @param bMultiplayer Stored in mMultiplayer. SoloPowerbarMgr passes 0 and MultiPowerbarMgr 1.
      * @param nMinGap The shortest gap between two dealt bars.
      * @param nMaxGap The gap the draw stops below.
      * @ghidraAddress 0x001c4fb0
@@ -51,7 +51,7 @@ public:
                     const TrackData *pTrackData,
                     int bRandomKind,
                     int nTrack,
-                    int nUnknown30,
+                    int bMultiplayer,
                     int nMinGap,
                     int nMaxGap);
 
@@ -68,7 +68,7 @@ private:
     PhraseDatabase *mDatabase;   // +0x1c
     int mTrack;                  // +0x20
     std::vector<Bar> mBars;      // +0x24
-    int mUnknown30;              // +0x30
+    int mMultiplayer;            // +0x30 set by MultiPowerbarMgr, never read
     int mMinGap;                 // +0x34
     int mMaxGap;                 // +0x38
     int mRandomKind;             // +0x3c

@@ -20,13 +20,12 @@ MetFrontEndState::MetFrontEndState() {
 
 // 0x00215568
 MetFrontEndState::~MetFrontEndState() {
-    if (mUnknown00.size() != 0) {
-        for (std::vector<MetPersonaData *>::iterator it = mUnknown00.begin();
-             it != mUnknown00.end();
+    if (mPersonas.size() != 0) {
+        for (std::vector<MetPersonaData *>::iterator it = mPersonas.begin(); it != mPersonas.end();
              ++it) {
             delete *it;
         }
-        mUnknown00.erase(mUnknown00.begin(), mUnknown00.end());
+        mPersonas.erase(mPersonas.begin(), mPersonas.end());
     }
 }
 
@@ -48,13 +47,13 @@ void MetFrontEndState::Destroy() {
 
 // 0x00217fd8
 void MetFrontEndState::Reset() {
-    mUnknown14 = 0;
-    mUnknown18 = 0;
-    mUnknown1c = 0;
-    mUnknown20 = 0;
-    mUnknown0c = 0;
-    mUnknown2c = 0;
-    mUnknown10 = 0;
+    mUnlockAll = 0;
+    mPendingTransition = 0;
+    mLastTransition = 0;
+    mUnusedFlag = 0;
+    mUsingMemcard = 0;
+    mPlayerCount = 0;
+    mSettingsDirty = 0;
 }
 
 // 0x002156b0

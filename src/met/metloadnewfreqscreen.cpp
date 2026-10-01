@@ -64,7 +64,7 @@ constexpr int kKeyboardMaxWidth = 176;
 constexpr int kKeyboardMaxLength = 12;
 constexpr int kAnyPad = -1;
 
-// The screens OnUnknownSlot2() hands to the persona saver to return to, and their order.
+// The screens OnKeyboardTextEntered() hands to the persona saver to return to, and their order.
 static const char *const kNetPortalScreen = "MetNetPortalScreen";
 static const char *const kModeScreen = "MetModeScreen";
 static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
@@ -72,9 +72,9 @@ constexpr int kSaveReturnScreenCount = 3;
 constexpr int kSaveReturnFirst = 0;
 constexpr int kSaveReturnGizmo = 1;
 constexpr int kSaveReturnHelp = 2;
-// The two values OnUnknownSlot2() passes MetPersonaSaverScreen::StartSave() last.
-constexpr int kSaveUnknown9c = 1;
-constexpr int kSaveUnknown98 = 0;
+// The two values OnKeyboardTextEntered() passes MetPersonaSaverScreen::StartSave() last.
+constexpr int kSaveConfirmReplace = 1;
+constexpr int kSaveIsCopy = 0;
 
 // The dialogue OnMsgScreenDismissed() answers, which reports a rejected name.
 static const char *const kNameRejectedDialogue = "namenogood";
@@ -122,7 +122,7 @@ void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
 void MetLoadNewFreqScreen::EnterAndShow() {
     HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
-    mUnknowna8 = 0;
+    mNameEntered = 0;
 
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
 
@@ -131,7 +131,7 @@ void MetLoadNewFreqScreen::EnterAndShow() {
 
 // 0x002a84c0
 void MetLoadNewFreqScreen::BeginExit() {
-    if (mUnknown18 != 0 && mUnknown90->mSelected == kNameButtonIndex) {
+    if (mExitChoice != 0 && mButtonList->mSelected == kNameButtonIndex) {
         ExitScreenByName(HxStr(kHelpScreen));
     }
 
@@ -140,7 +140,7 @@ void MetLoadNewFreqScreen::BeginExit() {
 
 // 0x002a3978
 void MetLoadNewFreqScreen::OnKeyboardDismissed() {
-    if (mUnknowna8 != 0) {
+    if (mNameEntered != 0) {
         return;
     }
 
@@ -150,17 +150,17 @@ void MetLoadNewFreqScreen::OnKeyboardDismissed() {
 }
 
 // 0x002a4340
-void MetLoadNewFreqScreen::OnUnknownSlot2(const HxStr &text) {
-    mUnknowna8 = 1;
+void MetLoadNewFreqScreen::OnKeyboardTextEntered(const HxStr &text) {
+    mNameEntered = 1;
     HxStr name(text);
     if (name.mLen == 0) {
-        name = (*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00;
+        name = (*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName;
     }
-    MetPersonaData *pIdentity = (*mUnknown8c)[mUnknown94];
-    pIdentity->mUnknown140.mUnknown00 = name;
+    MetPersonaData *pIdentity = (*mIdentityList)[mSelectedIdentity];
+    pIdentity->mAppearance.mUserName = name;
     HxStr birthday;
     if (FormatCurrentDateTime(birthday)) {
-        pIdentity->mUnknown154 = birthday;
+        pIdentity->mBirthday = birthday;
     }
 
     GameManagerImpl *pManager = Application::shared()->GetGameManager();
@@ -178,8 +178,8 @@ void MetLoadNewFreqScreen::OnUnknownSlot2(const HxStr &text) {
         MetPersonaSaverScreen::StartSave(screens,
                                          pPersona,
                                          GlobalSettings::shared()->mCardSlots[0],
-                                         kSaveUnknown9c,
-                                         kSaveUnknown98);
+                                         kSaveConfirmReplace,
+                                         kSaveIsCopy);
     } else {
         std::vector<HxStr> screens;
         screens.resize(kSaveReturnScreenCount);
@@ -189,14 +189,14 @@ void MetLoadNewFreqScreen::OnUnknownSlot2(const HxStr &text) {
         MetPersonaSaverScreen::StartSave(screens,
                                          pPersona,
                                          GlobalSettings::shared()->mCardSlots[0],
-                                         kSaveUnknown9c,
-                                         kSaveUnknown98);
+                                         kSaveConfirmReplace,
+                                         kSaveIsCopy);
     }
 }
 
 // 0x002a85c0
 void MetLoadNewFreqScreen::UpdateNameLabel() {
-    Rnd::Text *pLabel = mUnknown90->ButtonAt(kNameButtonIndex)->mText;
+    Rnd::Text *pLabel = mButtonList->ButtonAt(kNameButtonIndex)->mText;
 
     HxStr label = QueryConfigString(kLabelConfigCode, kNameLabelKey);
     pLabel->SetText(label);
@@ -208,42 +208,42 @@ void MetLoadNewFreqScreen::PrepareFreqMakerForSelection() {
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
     MetFreqMakerButtonsScreen *pButtons =
         static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
-    pCanvas->LoadPrefab((*mUnknown8c)[mUnknown94], kNoRandomize);
+    pCanvas->LoadPrefab((*mIdentityList)[mSelectedIdentity], kNoRandomize);
     pButtons->SetEditing(kFreqMakerEditing);
     pButtons->mNewPersona = 1;
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadNewFreqScreen);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadNewFreqScreen);
 }
 
 // 0x002a8670
 void MetLoadNewFreqScreen::OnCreateButton() {
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadNewFreqScreen);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadNewFreqScreen);
     MetLoadFreqBaseScreen::OnCreateButton();
 }
 
 // 0x002a8590
 void MetLoadNewFreqScreen::AcquireIdentityList() {
-    mUnknown8c = MetFreqMakerAssetManager::shared()->GetIdentityList();
+    mIdentityList = MetFreqMakerAssetManager::shared()->GetIdentityList();
 }
 
 // 0x002a3b08
 void MetLoadNewFreqScreen::BuildButtonList() {
-    mUnknown90->Clear();
+    mButtonList->Clear();
 
     HxStr nameLabel = QueryConfigString(kLabelConfigCode, kNameLabelKey);
-    mUnknown90->Add(HxStr(kNameButtonObject), nameLabel);
+    mButtonList->Add(HxStr(kNameButtonObject), nameLabel);
 
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
-    mUnknown90->Add(HxStr(kEditButtonObject), editLabel);
+    mButtonList->Add(HxStr(kEditButtonObject), editLabel);
 
     HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
-    mUnknown90->Add(HxStr(kCreateButtonObject), createLabel);
+    mButtonList->Add(HxStr(kCreateButtonObject), createLabel);
 
     UpdateNameLabel();
 
-    mUnknown38.erase(mUnknown38.begin(), mUnknown38.end());
-    mUnknown38.push_back(HxStr(kNamePrompt));
-    mUnknown38.push_back(HxStr(kEditPrompt));
-    mUnknown38.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
+    mHelpKeys.push_back(HxStr(kNamePrompt));
+    mHelpKeys.push_back(HxStr(kEditPrompt));
+    mHelpKeys.push_back(HxStr(kCreatePrompt));
 
-    mUnknown90->SetSelected(kNameButtonIndex);
+    mButtonList->SetSelected(kNameButtonIndex);
 }

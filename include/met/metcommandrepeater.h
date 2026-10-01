@@ -14,7 +14,7 @@
  * The object is twelve bytes and its one member is a `std::vector` of four twenty-four-byte
  * records, one per controller from pad 1 to pad 4. A held navigation command arms its controller's
  * record, which then waits an initial three seconds before re-delivering the command at the
- * interval the active panel's MetScreen::mUnknown58 sets.
+ * interval the active panel's MetScreen::mRepeatScale sets.
  */
 class MetCommandRepeater {
 public:
@@ -62,9 +62,9 @@ public:
     /**
      * Re-deliver every armed command whose interval has elapsed.
      *
-     * The interval is MetScreen::mUnknown58 multiplied by 50, in milliseconds, read from the panel
-     * the routine is given rather than stored per record. A record whose initial delay is still
-     * positive has the milliseconds since it was last serviced subtracted from it instead of
+     * The interval is MetScreen::mRepeatScale multiplied by 50, in milliseconds, read from the
+     * panel the routine is given rather than stored per record. A record whose initial delay is
+     * still positive has the milliseconds since it was last serviced subtracted from it instead of
      * firing. A null panel is rejected at once.
      *
      * @param pPanel The screen the repeated commands are delivered to.
@@ -84,7 +84,7 @@ private:
         int mDelayMs;      // +0x00 the initial delay still to run
         int mButton;       // +0x04
         int mCommand;      // +0x08 zero while disarmed
-        int mUnknown0c;    // +0x0c padding before the eight-byte time
+        int mReserved;     // +0x0c padding before the eight-byte time
         long long mLastNs; // +0x10 when the record was last serviced
     };
 

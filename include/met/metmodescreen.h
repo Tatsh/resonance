@@ -74,7 +74,7 @@ public:
      *
      * Slot 19. Previous and next walk the button ring and refresh the help prompt. Select clears
      * the panel and the prompt and starts the selected button's alternation. Back clears the prompt
-     * and the panel, clears mUnknown18, exits the title and left gizmo screens, and begins the
+     * and the panel, clears mExitChoice, exits the title and left gizmo screens, and begins the
      * exit.
      *
      * @param pCommand The command.
@@ -101,12 +101,12 @@ public:
     /**
      * Leave the screen once a button's alternation finishes.
      *
-     * Slot 30. Stores 2 in mUnknown18, exits the title screen, and begins the exit.
+     * Slot 30. Stores 2 in mExitChoice, exits the title screen, and begins the exit.
      *
      * @param pButton The button that finished. Not read.
      * @ghidraAddress 0x002eb958
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Refresh the help prompt for the selected button.
@@ -115,17 +115,17 @@ public:
      *
      * @ghidraAddress 0x002eb920
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Go on to the next screen once the exit finishes.
      *
-     * Slot 36. A select, recorded by a non-zero mUnknown18, goes through GoToSelectedMode(). A back
-     * returns to the screen the game mode calls for.
+     * Slot 36. A select, recorded by a non-zero mExitChoice, goes through GoToSelectedMode(). A
+     * back returns to the screen the game mode calls for.
      *
      * @ghidraAddress 0x002e8008
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container's views, then add the game and jam buttons.
@@ -142,5 +142,5 @@ private:
     // remix type screen for a jam. The title is inferred.
     void GoToSelectedMode();
 
-    MetButtonList *mUnknown8c; // +0x8c
+    MetButtonList *mButtonList; // +0x8c
 };

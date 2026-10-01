@@ -266,12 +266,13 @@ public:
      * slot 10 rather than from any string in the image.
      *
      * @param nMip The mip level.
-     * @param nUnknown The second parameter, which no recovered implementation reads.
+     * @param nReserved The second parameter. No recovered implementation reads it. Every
+     *                  recovered caller passes 0.
      * @param nFlags Bit 1 requests a read-back from GS memory.
      * @return The canvas over the level, or null when the class has none.
      * @ghidraAddress 0x004e75a0
      */
-    virtual ACanvas *LockMipBitmap(int nMip, int nUnknown, int nFlags);
+    virtual ACanvas *LockMipBitmap(int nMip, int nReserved, int nFlags);
 
     /**
      * Release the mip level that LockMipBitmap() locked.
@@ -288,11 +289,11 @@ public:
      * Vtable slot 11. Empty in Rnd::Tex. The name is inferred as above.
      *
      * @param pPalette The replacement palette.
-     * @param nUnknown A second word no recovered implementation reads. Rnd::Movie's palette chunk
-     *                 handler passes -1 explicitly at `0x005cf55c`.
+     * @param nReserved A second word, unread by every recovered implementation. Rnd::Movie's
+     *                  palette chunk handler passes -1 explicitly at `0x005cf55c`.
      * @ghidraAddress 0x004e7600
      */
-    virtual void SetPalette(APalette *pPalette, int nUnknown);
+    virtual void SetPalette(APalette *pPalette, int nReserved);
 
     /**
      * Mark the texture's GS page as in use or free.

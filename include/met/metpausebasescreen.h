@@ -18,11 +18,12 @@ class Text;
  *
  * Four classes derive from the class, MetPauseGameScreen, MetPauseMultiRemixScreen,
  * MetPauseSoloGameScreen, and MetPauseSoloRemixScreen. Each passes its own directory and container
- * to the constructor and then records its class name in mUnknown9c, the panel a dismissed
- * confirmation reactivates. A derived slot 38 resolves the option texts into mUnknowna4, and a
- * derived slot 5 fills mUnknown90 with their labels before this class's slot 5 copies them across.
+ * to the constructor and then records its class name in mReturnPanel, the panel a dismissed
+ * confirmation reactivates. A derived slot 38 resolves the option texts into mOptionTexts, and a
+ * derived slot 5 fills mOptionLabels with their labels before this class's slot 5 copies them
+ * across.
  *
- * A command records the exit action in mUnknown8c and begins the exit. Slot 36 runs when the exit
+ * A command records the exit action in mExitAction and begins the exit. Slot 36 runs when the exit
  * finishes and either asks for confirmation of a quit or a restart or unpauses the game. Slot 15
  * acts on the confirmation.
  *
@@ -70,7 +71,7 @@ public:
                                    const HxStr &file);
 
     /**
-     * Copy each label in mUnknown90 to the option text at the same index, then enter.
+     * Copy each label in mOptionLabels to the option text at the same index, then enter.
      *
      * Slot 5.
      *
@@ -83,7 +84,7 @@ public:
      *
      * Slot 15. The first button reactivates the pause panel. The second queues an
      * UnpauseGameSystemMsg and then either records phase 4 in MetFrontEndState and runs
-     * GrooveWorld::PostExitMode2() for a quit, or runs GrooveWorld::PostExitMode3() for a restart.
+     * GrooveWorld::PostQuit() for a quit, or runs GrooveWorld::PostRestart() for a restart.
      *
      * @param name The confirmation that was dismissed.
      * @param nChoice The button chosen.
@@ -142,7 +143,7 @@ public:
      *
      * @ghidraAddress 0x00318418
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Play the multiplayer bank's slide sound, which slot 20 no longer plays.
@@ -165,8 +166,8 @@ protected:
         kExitController = 6,  /*!< Open the controller set-up, recorded by the solo screens only. */
     };
 
-    int mUnknown8c;                      // +0x8c, an ExitAction
-    std::vector<HxStr> mUnknown90;       // The option labels a derived slot 5 fills.
-    HxStr mUnknown9c;                    // The panel a dismissed confirmation reactivates.
-    std::vector<Rnd::Text *> mUnknowna4; // The option texts a derived slot 38 resolves.
+    int mExitAction;                       // +0x8c, an ExitAction
+    std::vector<HxStr> mOptionLabels;      // The option labels a derived slot 5 fills.
+    HxStr mReturnPanel;                    // The panel a dismissed confirmation reactivates.
+    std::vector<Rnd::Text *> mOptionTexts; // The option texts a derived slot 38 resolves.
 };

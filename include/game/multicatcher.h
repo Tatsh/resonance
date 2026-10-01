@@ -47,25 +47,26 @@ public:
     /**
      * Capture the phrase of one bar.
      *
-     * Slot 9. The bar's points, times Player::Slot16() for the bar (or 1 for an automatic
+     * Slot 9. The bar's points, times Player::GetMultiplier() for the bar (or 1 for an automatic
      * catch), become its score. The bar is given to mPlayer, a PhraseCapturedMsg whose run starts
-     * nSecond - 1 bars earlier and a SectionCapturedMsg are sent, and the score is stored as the
+     * nRun - 1 bars earlier and a SectionCapturedMsg are sent, and the score is stored as the
      * bar's phrase byte. A bar with a power bar also sends a CaughtPowerbarMsg, to the sinks and
      * to mPlayer, unless the catch was automatic.
      *
-     * @param nFirst The bar.
-     * @param nSecond The bars the run spans.
-     * @param nThird Non-zero for an automatic catch.
+     * @param nBar The bar.
+     * @param nRun The bars the run spans.
+     * @param nAutoCatch Non-zero for an automatic catch.
      * @ghidraAddress 0x001ad8e8
      */
-    virtual void Slot9(int nFirst, int nSecond, int nThird);
+    virtual void CapturePhrase(int nBar, int nRun, int nAutoCatch);
 
     /**
-     * Slot 10. The body is empty. The base declares the slot pure, so the empty body is a real
-     * override rather than an inherited default, and it is what makes this class concrete.
+     * Report nothing. Slot 10. The body is empty. The base declares the slot pure. The empty
+     * body is therefore a real override rather than an inherited default, and it makes this class
+     * concrete.
      *
      * @param nBar The caught bar, unread.
      * @ghidraAddress 0x001b0e00
      */
-    virtual void Slot10(int nBar);
+    virtual void ReportCaughtPowerbar(int nBar);
 };

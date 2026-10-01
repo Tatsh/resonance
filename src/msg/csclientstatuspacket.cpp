@@ -29,30 +29,30 @@ const char *CSClientStatusPacket::Name() {
 
 // 0x003f2120
 void CSClientStatusPacket::Print(std::ostream &stream) {
-    stream << "ClientStatus: " << mUnknown14;
+    stream << "ClientStatus: " << mStatus;
 }
 
 // 0x003e6090
 void CSClientStatusPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
-    int unknown14 = mUnknown14;
-    stream.Write(&unknown14, sizeof(unknown14));
+    int status = mStatus;
+    stream.Write(&status, sizeof(status));
 
-    // Yes, the binary moves the base word at +0x0c a second time.
-    int unknown0cAgain = mUnknown0c;
-    stream.Write(&unknown0cAgain, sizeof(unknown0cAgain));
+    // Yes, the binary moves the client identifier a second time.
+    int clientIdAgain = mClientId;
+    stream.Write(&clientIdAgain, sizeof(clientIdAgain));
 }
 
 // 0x003e6198
 void CSClientStatusPacket::Load(IBStream &stream) {
     Packet::Load(stream);
 
-    int unknown14 = 0;
-    stream.Read(&unknown14, sizeof(unknown14));
+    int status = 0;
+    stream.Read(&status, sizeof(status));
 
-    // Yes, the binary moves the base word at +0x0c a second time.
-    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
+    // Yes, the binary moves the client identifier a second time.
+    stream.Read(&mClientId, sizeof(mClientId));
 
-    mUnknown14 = unknown14;
+    mStatus = status;
 }

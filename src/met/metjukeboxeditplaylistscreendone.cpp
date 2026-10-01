@@ -59,22 +59,22 @@ MetJukeboxEditPlaylistScreenDone::MetJukeboxEditPlaylistScreenDone(MetRenderer *
                 HxStr(kContainerDirectory),
                 HxStr(kContainerFile)),
       // Yes, the binary clears the member and then overwrites it in the body below.
-      mUnknown8c(nullptr), mUnknown90(0), mUnknown94(0), mUnknown98(0) {
-    mUnknown8c = new MetButtonList;
+      mButtons(nullptr), mSaveChosen(0), mShuffle(0), mPlayChosen(0) {
+    mButtons = new MetButtonList;
 }
 
 // 0x00231908
 void MetJukeboxEditPlaylistScreenDone::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mUnknown8c->Add(HxStr(kRandomButton), HxStr(kRandomLabel));
-    mUnknown8c->Add(HxStr(kOrderButton), HxStr(kOrderLabel));
-    mUnknown8c->Add(HxStr(kSaveButton), HxStr(kSaveLabel));
-    mUnknown8c->SetSelected(kButtonRandom);
+    mButtons->Add(HxStr(kRandomButton), HxStr(kRandomLabel));
+    mButtons->Add(HxStr(kOrderButton), HxStr(kOrderLabel));
+    mButtons->Add(HxStr(kSaveButton), HxStr(kSaveLabel));
+    mButtons->SetSelected(kButtonRandom);
 }
 
 // 0x00231b50
-void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot36() {
-    if (mUnknown90 != 0) {
+void MetJukeboxEditPlaylistScreenDone::OnExitFinished() {
+    if (mSaveChosen != 0) {
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         std::vector<HxStr> screens;
@@ -82,27 +82,28 @@ void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot36() {
         screens.push_back(HxStr(kTitleScreen));
         screens.push_back(HxStr(kHelpScreen));
         MetRemixManager::shared()->SavePlayList(screens);
-    } else if (mUnknown98 != 0) {
+    } else if (mPlayChosen != 0) {
         std::vector<HxStr> screens(1);
         screens[0] = kTopButtonsScreen;
         ActivateNamedPanel(HxStr(""));
-        MetRemixManager::shared()->StartPlayList(screens, mUnknown94);
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kThisScreen);
+        MetRemixManager::shared()->StartPlayList(screens, mShuffle);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kThisScreen);
     }
-    mUnknown98 = 0;
-    mUnknown94 = 0;
-    mUnknown90 = 0;
+    mPlayChosen = 0;
+    mShuffle = 0;
+    mSaveChosen = 0;
 }
 
 // 0x002321f8
-void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
-    switch (mUnknown8c->mSelected) {
+void MetJukeboxEditPlaylistScreenDone::OnRepeatingSoundFinished(
+    [[maybe_unused]] Rnd::Button *pButton) {
+    switch (mButtons->mSelected) {
     case kButtonRandom:
         if (MetRemixManager::shared()->mPlayList.entries.size() == 0) {
             return;
         }
-        mUnknown94 = 1;
-        mUnknown98 = 1;
+        mShuffle = 1;
+        mPlayChosen = 1;
         ExitScreenByName(HxStr(kTopButtonsScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
@@ -112,15 +113,15 @@ void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30([[maybe_unused]] Rnd::But
         if (MetRemixManager::shared()->mPlayList.entries.size() == 0) {
             return;
         }
-        mUnknown98 = 1;
-        mUnknown94 = 0;
+        mPlayChosen = 1;
+        mShuffle = 0;
         ExitScreenByName(HxStr(kTopButtonsScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         break;
 
     case kButtonSave:
-        mUnknown90 = 1;
+        mSaveChosen = 1;
         ExitScreenByName(HxStr(kTopButtonsScreen));
         break;
 
@@ -133,7 +134,7 @@ void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot30([[maybe_unused]] Rnd::But
 void MetJukeboxEditPlaylistScreenDone::UpdateHelpText() {
     HxStr layout;
     HxStr text;
-    switch (mUnknown8c->mSelected) {
+    switch (mButtons->mSelected) {
     case kButtonRandom:
     case kButtonOrder:
         layout = kPlayLayout;
@@ -149,7 +150,7 @@ void MetJukeboxEditPlaylistScreenDone::UpdateHelpText() {
         break;
     }
     MetHelpScreen::SelectPreset(layout);
-    MetHelpScreen::SetText(text, mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(text, mRenderer->mAnimationFrame);
 }
 
 // 0x00237160
@@ -186,19 +187,19 @@ MetJukeboxEditPlaylistScreenDone::~MetJukeboxEditPlaylistScreenDone() {
 void MetJukeboxEditPlaylistScreenDone::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
+        mButtons->SelectPrevious();
         UpdateHelpText();
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
+        mButtons->SelectNext();
         UpdateHelpText();
         break;
 
     case kMetScreenCommandSelect:
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kButtonFlashInterval,
-                            mUnknown8c->mUnknown00,
+                            mButtons->mSelectedButton,
                             kButtonFlashCycles);
         break;
 
@@ -210,20 +211,20 @@ void MetJukeboxEditPlaylistScreenDone::HandleCommand(const MetScreenCommand *pCo
 // 0x00237330
 void MetJukeboxEditPlaylistScreenDone::EnterAndShow() {
     MetScreen::EnterAndShow();
-    mUnknown8c->SetSelected(kButtonRandom);
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
-        mUnknown8c->ButtonAt(kButtonSave)->SetState(kButtonStateNormal);
+    mButtons->SetSelected(kButtonRandom);
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
+        mButtons->ButtonAt(kButtonSave)->SetState(kButtonStateNormal);
     } else {
-        mUnknown8c->ButtonAt(kButtonSave)->SetState(kButtonStateDisabled);
+        mButtons->ButtonAt(kButtonSave)->SetState(kButtonStateDisabled);
     }
 }
 
 // 0x002373a8
-void MetJukeboxEditPlaylistScreenDone::OnUnknownSlot33() {
-    mUnknown8c->SetSelected(kButtonRandom);
-    mUnknown98 = 0;
-    mUnknown94 = 0;
-    mUnknown90 = 0;
+void MetJukeboxEditPlaylistScreenDone::OnEnterFinished() {
+    mButtons->SetSelected(kButtonRandom);
+    mPlayChosen = 0;
+    mShuffle = 0;
+    mSaveChosen = 0;
 }
 
 // 0x002373e0

@@ -40,11 +40,11 @@ public:
      * their stacks. The three arguments are the three members in declaration order.
      *
      * @param nPressed Non-zero when the button goes down.
-     * @param nUnknown08 The word at `+0x08`, 1 from Scratcher and 0 from every other builder.
+     * @param nRestartSpin The word at `+0x08`, 1 from Scratcher and 0 from every other builder.
      * @param pPlayer The player.
      */
-    AxeButtonMsg(int nPressed, int nUnknown08, Player *pPlayer)
-        : mPressed(nPressed), mUnknown08(nUnknown08), mPlayer(pPlayer) {
+    AxeButtonMsg(int nPressed, int nRestartSpin, Player *pPlayer)
+        : mPressed(nPressed), mRestartSpin(nRestartSpin), mPlayer(pPlayer) {
     }
 
     /**
@@ -81,9 +81,9 @@ public:
      */
     virtual const char *Name();
 
-    int mPressed;    /*!< Non-zero when the button goes down. +0x04 */
-    int mUnknown08;  /*!< Purpose unrecovered. +0x08 */
-    Player *mPlayer; /*!< The player. +0x0c */
+    int mPressed;     /*!< Non-zero when the button goes down. +0x04 */
+    int mRestartSpin; /*!< AppTunnel passes it to TnlPointer::Spin() on a press. +0x08 */
+    Player *mPlayer;  /*!< The player. +0x0c */
 };
 
 /**

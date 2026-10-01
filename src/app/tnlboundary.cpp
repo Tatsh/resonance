@@ -23,7 +23,7 @@ constexpr float kPassedFrames = 480.0f;
 
 // 0x0043fa18
 TnlBoundary::TnlBoundary(PlayMap *pPlayMap)
-    : mPlayMap(pPlayMap), mView(nullptr), mStep(0), mStepCount(pPlayMap->Slot10()) {
+    : mPlayMap(pPlayMap), mView(nullptr), mStep(0), mStepCount(pPlayMap->GetSectionCount()) {
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("boundary.view")));
     mText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("boundary msg")));
     PlaceOnPath(*mView, static_cast<float>(mStep * kFramesPerBar));
@@ -46,7 +46,7 @@ void TnlBoundary::SetFrame(float flFrame) {
 void TnlBoundary::UpdateText() {
     HxStr message("");
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {
-        const int nSection = mPlayMap->Slot13(mStep);
+        const int nSection = mPlayMap->GetAbsoluteSectionIndex(mStep);
         if (nSection == 0) {
             message = "START";
         } else if (nSection == mStepCount - 1) {

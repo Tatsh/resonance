@@ -51,6 +51,6 @@ private:
     AnimRange mRange;       // Run of "multfx.path".
     TnlEmitter mEmitter;    // "multfx.ps".
     TnlEmitter mAltEmitter; // "multfxa.ps".
-    int mUnknown50;         // +0x50, never written or read by the recovered routines.
+    int mReserved50;        // +0x50, never written or read by the recovered routines.
     int mActive;
 };

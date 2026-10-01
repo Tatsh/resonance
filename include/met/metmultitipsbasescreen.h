@@ -30,8 +30,8 @@
  *  - 22 `0x0030d7a0` PlayHighSound(), overridden empty.
  *  - 23 `0x0030d790` PlayCycleLeftSound(), overridden empty.
  *  - 24 `0x0030d798` PlayCycleRightSound(), overridden empty.
- *  - 33 `0x0030d7a8` OnUnknownSlot33().
- *  - 36 `0x003072a0` OnUnknownSlot36().
+ *  - 33 `0x0030d7a8` OnEnterFinished().
+ *  - 36 `0x003072a0` OnExitFinished().
  */
 class MetMultiTipsBaseScreen : public MetScreen {
 public:
@@ -64,7 +64,7 @@ public:
      *
      * Slot 19. Select moves to the next page, back to the previous one, and command 8 returns to
      * the player-count screen after playing the leave sound. Each clears the active panel,
-     * records its choice in MetScreen::mUnknown18, and begins the exit.
+     * records its choice in MetScreen::mExitChoice, and begins the exit.
      *
      * @param pCommand The command.
      * @ghidraAddress 0x00306ee0
@@ -92,11 +92,11 @@ public:
     /**
      * Post the first help prompt.
      *
-     * Slot 33. Posts the first entry of MetScreen::mUnknown38 at the renderer's current time.
+     * Slot 33. Posts the first entry of MetScreen::mHelpKeys at the renderer's current time.
      *
      * @ghidraAddress 0x0030d7a8
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Push the page the recorded choice leads to.
@@ -106,10 +106,10 @@ public:
      *
      * @ghidraAddress 0x003072a0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
 protected:
-    /** The exit a command recorded in MetScreen::mUnknown18. */
+    /** The exit a command recorded in MetScreen::mExitChoice. */
     enum Exit {
         kExitPrevious = 0, /*!< Back to the previous page. */
         kExitNext = 1,     /*!< On to the next page. */
@@ -149,7 +149,7 @@ protected:
     }
 
 private:
-    HxStr mUnknown8c; // +0x8c, the previous page
-    HxStr mUnknown94; // +0x94, the next page
-    int mUnknown9c;   // +0x9c, the page number
+    HxStr mPreviousScreen; // +0x8c, the previous page
+    HxStr mNextScreen;     // +0x94, the next page
+    int mPage;             // +0x9c, the page number
 };

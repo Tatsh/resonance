@@ -71,7 +71,7 @@ public:
      * Select the first button, title the row for creating or editing, label the save button, and
      * show the screen.
      *
-     * Slot 5. The save button reads `SAVE` when MetFrontEndState::mUnknown0c is set and `DONE`
+     * Slot 5. The save button reads `SAVE` when MetFrontEndState::mUsingMemcard is set and `DONE`
      * otherwise.
      *
      * @ghidraAddress 0x00258c80
@@ -97,14 +97,14 @@ public:
      *
      * @ghidraAddress 0x0025e1e0
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Act on the save-before-leaving dialogue.
      *
      * Slot 15. Only `check_if_changed` is handled. YES commits the persona on the canvas and
-     * saves it, returning to the screen MetFrontEndState::mUnknown24 records and the help screen.
-     * NO brings back those two screens without saving.
+     * saves it, returning to the screen MetFrontEndState::mReturnScreen records and the help
+     * screen. NO brings back those two screens without saving.
      *
      * @param name The dialogue name.
      * @param nChoice The index of the button chosen.
@@ -154,7 +154,7 @@ public:
      * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x00258f40
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Show the page and directions of the selected button.
@@ -163,7 +163,7 @@ public:
      *
      * @ghidraAddress 0x0025e1a0
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Take the action recorded on the way out, once the screen has exited.
@@ -171,11 +171,11 @@ public:
      * Slot 36. The inventory pages are hidden first. After the save button the persona is saved
      * and the mode screen, or the network portal in a network game, follows. After a back command
      * the save-before-leaving dialogue is raised when a save is possible and the canvas is
-     * modified, and otherwise the screen MetFrontEndState::mUnknown24 records returns.
+     * modified, and otherwise the screen MetFrontEndState::mReturnScreen records returns.
      *
      * @ghidraAddress 0x00259040
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views and add the nine buttons with their labels.
@@ -195,7 +195,7 @@ public:
      * @param text The name.
      * @ghidraAddress 0x0025a108
      */
-    virtual void OnUnknownSlot2(const HxStr &text);
+    virtual void OnKeyboardTextEntered(const HxStr &text);
 
     /**
      * Choose between editing an existing persona and creating a new one.
@@ -224,7 +224,7 @@ private:
     void ShowDirectionsForButton(Rnd::Button *pButton);
 
     // Resolve the canvas and hand its persona to MetPersonaSaverScreen::StartSave(). The card is
-    // the one GlobalSettings records when MetFrontEndState::mUnknown0c is set, and otherwise a
+    // the one GlobalSettings records when MetFrontEndState::mUsingMemcard is set, and otherwise a
     // stand-in slot named `1` on port 0. Slots 15 and 36 expand it.
     void StartPersonaSave(const std::vector<HxStr> &screens);
 

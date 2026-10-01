@@ -28,10 +28,14 @@
  * `0x0010baa0` while every hand-written member of the class sits in the `0x00133xxx` and
  * `0x00135xxx` runs, which places it in a different translation unit.
  *
- * mUnknown2c is the one member that none of Print(), Save(), or Load() touches. Only the
+ * mOriginalId is the one member that none of Print(), Save(), or Load() touches. Only the
  * four-argument constructor writes it.
  *
- * Two network packets embed one of these, SCPlayerJoinedPacket and ToAllNetManagersPacket.
+ * Two network packets embed one of these, SCPlayerJoinedPacket and ToAllNetManagersPacket. The
+ * image has no caller of the four-argument constructor. Every name below past the identifier,
+ * colour, and appearance is inferred from its type and its initial value alone. The first three
+ * follow the parameter order of Player's constructor and the `plid` and `clr` labels the join
+ * packets print.
  */
 class PlayerInfo {
 public:
@@ -51,23 +55,22 @@ public:
     /**
      * Construct an identity from its parts.
      *
-     * mUnknown24 starts at 1 and mUnknown28 at 0, and mUnknown2c receives the same value as
-     * mUnknown00.
+     * mActive starts at 1 and mReady at 0, and mOriginalId receives the same value as mPlayerId.
      *
      * Inline. The address is its uncalled out-of-line copy.
      *
-     * @param nUnknown00 The value stored in mUnknown00 and mUnknown2c.
-     * @param unknown04 The name stored in mUnknown04.
+     * @param nPlayerId The identifier stored in mPlayerId and mOriginalId.
+     * @param colorName The colour name stored in mColorName.
      * @param appearance The appearance to copy.
-     * @param nUnknown20 The value stored in mUnknown20.
+     * @param nTrack The value stored in mTrack.
      * @ghidraAddress 0x00135dd0
      */
-    PlayerInfo(unsigned nUnknown00,
-               const HxStr &unknown04,
+    PlayerInfo(unsigned nPlayerId,
+               const HxStr &colorName,
                const FreqAppearance &appearance,
-               int nUnknown20)
-        : mUnknown00(nUnknown00), mUnknown04(unknown04), mAppearance(appearance),
-          mUnknown20(nUnknown20), mUnknown24(1), mUnknown28(0), mUnknown2c(nUnknown00) {
+               int nTrack)
+        : mPlayerId(nPlayerId), mColorName(colorName), mAppearance(appearance), mTrack(nTrack),
+          mActive(1), mReady(0), mOriginalId(nPlayerId) {
     }
 
     /**
@@ -111,12 +114,12 @@ public:
 private:
     // Streamed through a different ostream overload than the int members below, and loaded and
     // stored as four bytes, which is what types it as unsigned rather than as int.
-    unsigned mUnknown00;         // +0x00
-    HxStr mUnknown04;            // +0x04
-    FreqAppearance mAppearance;  // +0x0c
-    int mUnknown20;              // +0x20
-    int mUnknown24;              // +0x24
-    int mUnknown28;              // +0x28
-    int mUnknown2c;              // +0x2c
-    std::vector<int> mUnknown30; // +0x30 element type not recovered
+    unsigned mPlayerId;         // +0x00
+    HxStr mColorName;           // +0x04
+    FreqAppearance mAppearance; // +0x0c
+    int mTrack;                 // +0x20
+    int mActive;                // +0x24
+    int mReady;                 // +0x28
+    int mOriginalId;            // +0x2c
+    std::vector<int> mEntries;  // +0x30 element type not recovered
 };

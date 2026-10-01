@@ -54,7 +54,7 @@ int viBufPutTs(ViBuf *buffer, ViTimeStamp *timeStamp) {
 
     WaitSema(buffer->mSemaId);
     if (buffer->mTimeStampCount < buffer->mTimeStampCapacity) {
-        sceDmaSub00613088(buffer, timeStamp);
+        viBufModifyPts(buffer, timeStamp);
         if (timeStamp->mFirst < 0 && timeStamp->mSecond < 0) {
             // Stamps with no time take no slot but still count as handled.
             result = 1;

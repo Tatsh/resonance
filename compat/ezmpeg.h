@@ -16,9 +16,9 @@ extern "C" {
 // set, and the two handler identifiers cutscene.c registers close the structure.
 typedef struct {
     sceMpeg mpeg;
-    unsigned char mUnknown48[0x60];
+    unsigned char vibuf[0x60]; // +0x48: the input ring, a ViBuf the decoder unit casts to.
     int state;
-    int mUnknownac;
+    int reserved; // +0xac: never read or written by the decoder unit.
     int hid_endimage;
     int hid_vblank;
 } VideoDec;
@@ -27,18 +27,18 @@ typedef struct {
 // side, and the two processor side regions live here with the counts the transfers advance.
 typedef struct {
     int state; // +0x00: stage of the transfer, idle, priming, streaming, or stopping.
-    unsigned char reserved04[0x28]; // +0x04: untouched by the decoder unit.
-    int field2c; // +0x2c: cleared on creation and on reset.
+    unsigned char header[0x28]; // +0x04: stream header, filled byte by byte before the samples.
+    int headerCount; // +0x2c: header bytes received so far.
     unsigned char *buffer; // +0x30: staging buffer on the Emotion Engine side.
-    int field34; // +0x34: base count the block size derives from.
-    int field38; // +0x38: pending count drained by each transfer.
+    int put; // +0x34: staging write offset.
+    int count; // +0x38: staged bytes not yet transferred, drained by each transfer.
     int bufferSize; // +0x3c: staging buffer size in bytes.
-    int field40; // +0x40: cleared on creation and on reset.
+    int totalBytes; // +0x40: bytes staged since the last reset.
     int iopBuffer; // +0x44: buffer address on the Input Output Processor side.
     int iopBufferSize; // +0x48: buffer size on the Input Output Processor side.
     int iopOffset; // +0x4c: write offset into the processor side buffer.
-    int field50; // +0x50: driver reply kept across the stop call.
-    int field54; // +0x54: count already handed to the processor side.
+    int iopPauseOffset; // +0x50: play offset the driver reported at the stop call.
+    int totalBytesSent; // +0x54: bytes handed to the processor side since the last reset.
     int iopExtra; // +0x58: second processor side region, holding the preset block.
 } AudioDec;
 
@@ -56,9 +56,9 @@ typedef struct {
 typedef struct {
     int isOnCD;
     int size;
-    unsigned char mUnknown08[0x28];
+    unsigned char cdFile[0x28]; // +0x08: the sceCdlFILE entry, then the IOP heap pointer at +0x2c.
     int fd;
-    int mUnknown34;
+    int reserved; // +0x34: never read or written by the stream unit.
 } StrFile;
 
 // The decoded-frame queue, 0x14 bytes. voBufIsFull() compares count with size. The display's
@@ -66,7 +66,7 @@ typedef struct {
 typedef struct {
     void *data;
     void *tag;
-    int mUnknown08;
+    int write; // Slot the decoder fills next.
     volatile int count;
     int size;
 } VoBuf;

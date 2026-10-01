@@ -42,7 +42,7 @@ public:
      *
      * SetupGsDrawContext() measures one in fractions of the display, and the debug overlay in GS
      * primitive pixels. The name and the fields are inferred. The type is four floats aligned to a
-     * word rather than a Color. Renderer::OnUnknownSlot8() copies one into mFeedbackRect with
+     * word rather than a Color. Renderer::Draw() copies one into mFeedbackRect with
      * unaligned doubleword loads and stores (ldl, sdl), whereas SetClearColor() copies its Color
      * with quadword loads and stores (lq, sq). The compiler emits a quadword access only for a
      * 16-byte aligned type.
@@ -363,7 +363,7 @@ public:
      * binds the frame buffer of the half not being drawn as a 1024 by 1024 texture. It then draws
      * one sprite over mFeedbackRect that samples the same rectangle of the texture, inset by
      * mFeedbackInset at both corners. The title covers only the register setup, although
-     * the routine also draws. Renderer::OnUnknownSlot8() calls it while g_nLsdMode is set.
+     * the routine also draws. Renderer::Draw() calls it while g_nLsdMode is set.
      *
      * @ghidraAddress 0x0049ccb8
      */
@@ -480,19 +480,19 @@ public:
     /**
      * Rectangle SetupGsDrawContext() draws and samples, in fractions of the display.
      *
-     * Renderer::OnUnknownSlot8() writes it directly, with no accessor, before each call. +0x46c
+     * Renderer::Draw() writes it directly, with no accessor, before each call. +0x46c
      */
     Rect mFeedbackRect;
     /**
      * Blend factor SetupGsDrawContext() writes into ALPHA_1 FIX after scaling it by 128.
      *
-     * Renderer::OnUnknownSlot8() writes it directly. +0x47c
+     * Renderer::Draw() writes it directly. +0x47c
      */
     float mFeedbackAlpha;
     /**
      * Inset of the texture window at both corners, in sixteenths of a texel.
      *
-     * Renderer::OnUnknownSlot8() writes it directly. +0x480
+     * Renderer::Draw() writes it directly. +0x480
      */
     int mFeedbackInset;
 

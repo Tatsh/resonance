@@ -24,7 +24,7 @@ NetJamEnableMgr::NetJamEnableMgr(int nTrackCount,
                                  const std::vector<int> *pOpenTracks,
                                  Gamer *pGamer)
     : mPlayMap(Application::shared()->GetPlayMap()), mGamer(pGamer),
-      mLocalId(Application::shared()->GetWorld()->mLocalPlayers[0]->mId20),
+      mLocalId(Application::shared()->GetWorld()->mLocalPlayers[0]->mPlayerId),
       mTrackCount(nTrackCount), mMaxOwned(nMaxOwned), mOpenTracks(*pOpenTracks),
       mSteps(&Application::shared()->GetPlayMap()->mSteps) {
     const int nSectionCount = mSteps->size() - 1;
@@ -67,7 +67,7 @@ void NetJamEnableMgr::SetBarOwner(int nTrack, int nBar, Player *) {
     const int nSection = FindSection(nBar);
     int &owner = mOwners[nSection][nTrack];
     const int nOldOwner = owner;
-    const int nNewOwner = mGamer->GetPhraseDatabase(nTrack)->GetOwner(nBar)->mId20;
+    const int nNewOwner = mGamer->GetPhraseDatabase(nTrack)->GetOwner(nBar)->mPlayerId;
     if (nOldOwner == nNewOwner) {
         return;
     }
@@ -93,5 +93,5 @@ int NetJamEnableMgr::QueryBar(int nTrack, int nBar) {
     if (mOpenTracks.size() < static_cast<unsigned>(mTrackCount)) {
         return std::find(mOpenTracks.begin(), mOpenTracks.end(), nTrack) != mOpenTracks.end();
     }
-    return IsTrackAvailable(nTrack, FindSection(mPlayMap->Slot5(nBar)));
+    return IsTrackAvailable(nTrack, FindSection(mPlayMap->MapBar(nBar)));
 }

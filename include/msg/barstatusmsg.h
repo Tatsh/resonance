@@ -23,7 +23,7 @@ class Player;
  * A flagged field is read through an inline getter that runs Has() for its flag and discards the
  * result before the load. Renderer::OnBarStatus() at `0x0042d068` and Print() both show that shape
  * at every read. Has() is the out-of-line member the getters call, and each getter also has one
- * uncalled out-of-line copy, recorded on its declaration. The bar, the track, mUnknown14, and
+ * uncalled out-of-line copy, recorded on its declaration. The bar, the track, mRefreshing, and
  * mFlags are read with no call at all, and the image has no accessor for them. Those four are
  * public.
  *
@@ -59,7 +59,7 @@ public:
      * Report a bar's player, with no other optional field set.
      *
      * Inline, with no address of its own. AxePhraseMaker::StartPhrase() expands it on its stack at
-     * `0x0019bdc4`. mUnknown14 and the effect mask start clear, and mEnabled and mPowerup are
+     * `0x0019bdc4`. mRefreshing and the effect mask start clear, and mEnabled and mPowerup are
      * left unset.
      *
      * @param nBar The bar.
@@ -67,7 +67,7 @@ public:
      * @param pPlayer The player whose track the bar belongs to.
      */
     BarStatusMsg(int nBar, int nTrack, Player *pPlayer)
-        : mBar(nBar), mTrack(nTrack), mPlayer(pPlayer), mUnknown14(0), mFlags(kFieldPlayer) {
+        : mBar(nBar), mTrack(nTrack), mPlayer(pPlayer), mRefreshing(0), mFlags(kFieldPlayer) {
     }
 
     /**
@@ -194,8 +194,13 @@ public:
      */
     int mEnabled;
 
-    /** Word Renderer::OnBarStatus() passes to AppTunnel::OnBarChanged(). +0x14 */
-    int mUnknown14;
+    /**
+     * Non-zero when PhraseMgr posted the message while refreshing bars. +0x14
+     *
+     * PhraseMgr::PostBarStatusMsg() copies its mRefreshing here, and Renderer::OnBarStatus()
+     * passes it to AppTunnel::OnBarChanged().
+     */
+    int mRefreshing;
 
     /**
      * The powerup kind on the bar. +0x18

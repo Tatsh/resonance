@@ -107,7 +107,7 @@ public:
      *
      * @ghidraAddress 0x001e5f10
      */
-    void RemoveUnknownEntries();
+    void RemoveStaleEntries();
 
     /**
      * Return one entry by position.

@@ -14,13 +14,13 @@ int NeutralizePowerup::Type() {
 // 0x001c9c40
 int NeutralizePowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     NeutralizeMsg msg;
-    msg.mUnknown04 = 0;
+    msg.mResult = 0;
     msg.mBar = nBar;
     msg.mTrack = nTrack;
     msg.mPlayer = pPlayer;
     pPlayer->Send(&msg);
 
-    if (msg.mUnknown04 != 0) {
+    if (msg.mResult != 0) {
         PlaySoundByName("SND_DEPLOY_NEUTRALIZER");
     } else {
         PowerupFailedMsg failed;
@@ -28,5 +28,5 @@ int NeutralizePowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
         failed.mPlayer = pPlayer;
         pPlayer->Send(&failed);
     }
-    return msg.mUnknown04;
+    return msg.mResult;
 }

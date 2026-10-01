@@ -32,14 +32,15 @@ public:
      * Report a multiplier powerup deployed by a player.
      *
      * Inline, with no address of its own. MultiplierPowerup::Deploy() expands it on its stack at
-     * `0x001ca238`, passing 4 as nUnknown0c.
+     * `0x001ca238`, passing 4 as nFactor.
      *
      * @param pPlayer The player who deployed the powerup.
      * @param nBar The bar the multiplier bonus starts at.
-     * @param nUnknown0c A value whose purpose is not recovered.
+     * @param nFactor The multiplier the powerup requests. No reader is recorded, and the title is
+     *                inferred from the value the one builder passes.
      */
-    MultiplierMsg(Player *pPlayer, int nBar, int nUnknown0c)
-        : mPlayer(pPlayer), mBar(nBar), mUnknown0c(nUnknown0c) {
+    MultiplierMsg(Player *pPlayer, int nBar, int nFactor)
+        : mPlayer(pPlayer), mBar(nBar), mFactor(nFactor) {
     }
 
     /**
@@ -89,7 +90,7 @@ public:
     int mBar;
 
 private:
-    int mUnknown0c; // +0x0c
+    int mFactor; // +0x0c
 };
 
 /**

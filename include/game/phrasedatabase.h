@@ -13,7 +13,7 @@ class PlayMap;
 class Player;
 
 /**
- * Store of one phrase per step of a play map, and one value per step.
+ * Store of one phrase per step of a play map, and one jam effect mask per step.
  *
  * `14PhraseDatabase` in the RTTI descriptor, with MsgSource as its one base. The object is 0x30
  * bytes: the MsgSource subobject over `+0x00` through `+0x13`, then the three members below. Its
@@ -21,9 +21,9 @@ class Player;
  * MsgSource::AddSink() and MsgSource::RemoveSink()). The class declares no virtual beyond the
  * destructor.
  *
- * The constructor sizes the phrase vector to the last step of the play map and the value vector to
+ * The constructor sizes the phrase vector to the last step of the play map and the mask vector to
  * one less than the step count. A phrase is addressed either by index or by a song position, which
- * PlayMap::Slot5() maps to an index.
+ * PlayMap::MapBar() maps to an index.
  *
  * Every member is private. Only this class's routines address them.
  */
@@ -105,7 +105,7 @@ public:
     void ClearOwners();
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The phrase of the mapped bar, or null.
      * @ghidraAddress 0x001b8e50
      */
@@ -178,24 +178,24 @@ public:
     Player *GetOwner(int nIndex);
 
     /**
-     * Set the byte at `+0x28` of the phrase at a step, when the step has one.
+     * Set Phrase::mScore of the phrase at a step, when the step has one.
      *
      * @param nIndex The step.
-     * @param cValue The byte.
+     * @param cValue The score.
      * @ghidraAddress 0x001b9158
      */
     void SetPhraseByte(int nIndex, char cValue);
 
     /**
      * @param nIndex The step.
-     * @return The byte at `+0x28` of the phrase at the step, or zero when the step has none.
+     * @return Phrase::mScore of the phrase at the step, or zero when the step has none.
      * @ghidraAddress 0x001b9178
      */
     unsigned char GetPhraseByte(int nIndex);
 
     /**
      * @param nBar The bar.
-     * @return The value of the step at or before the bar PlayMap::Slot5() maps nBar to.
+     * @return The jam effect mask of the step at or before the bar PlayMap::MapBar() maps nBar to.
      * @ghidraAddress 0x001b91a0
      */
     long long *GetStepValue(int nBar);
@@ -210,7 +210,7 @@ public:
     void Print(std::ostream &stream);
 
 private:
-    std::vector<Phrase *> mPhrases;    // +0x14, one per step, reference counted
-    std::vector<long long> mUnknown20; // +0x20, one per step boundary, four bytes on the wire
-    PlayMap *mMap;                     // +0x2c
+    std::vector<Phrase *> mPhrases;      // +0x14, one per step, reference counted
+    std::vector<long long> mStepEffects; // +0x20, jam effect masks, four bytes each on the wire
+    PlayMap *mMap;                       // +0x2c
 };

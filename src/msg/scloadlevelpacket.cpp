@@ -10,7 +10,7 @@ SCLoadLevelPacket::SCLoadLevelPacket() {
 }
 
 // 0x003f14b0
-SCLoadLevelPacket::SCLoadLevelPacket(const GameParams &params) : mUnknown14(params) {
+SCLoadLevelPacket::SCLoadLevelPacket(const GameParams &params) : mParams(params) {
 }
 
 // 0x003e5040
@@ -37,22 +37,22 @@ const char *SCLoadLevelPacket::Name() {
 
 // 0x003f2858
 void SCLoadLevelPacket::Print(std::ostream &stream) {
-    mUnknown14.Print(stream);
+    mParams.Print(stream);
 }
 
 // 0x003e8180
 void SCLoadLevelPacket::Save(OBStream &stream) {
     Packet::Save(stream);
-    mUnknown14.Save(&stream);
+    mParams.Save(&stream);
 }
 
 // 0x003f27a0
 void SCLoadLevelPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    mUnknown14.Load(&stream);
+    mParams.Load(&stream);
 }
 
 // 0x003f1528
 GameParams SCLoadLevelPacket::GetParams() {
-    return mUnknown14;
+    return mParams;
 }

@@ -25,9 +25,9 @@ static const char *const kPortFormat = "%d";
 constexpr int kDefaultNetPort = 2000;
 static const char *const kDefaultCardSlotName = "1";
 constexpr int kDefaultCardSlotPort = 0;
-constexpr int kDefaultUnknown6c = 256;
+constexpr int kDefaultRequiredSaveSpace = 256;
 constexpr int kDefaultMinimumFreeClusters = 60;
-constexpr int kDefaultUnknown74 = 24;
+constexpr int kDefaultPersonaMinimumFreeClusters = 24;
 
 // The labels Print() writes.
 static const char *const kNetAddressLabel = "Net IP Address";
@@ -94,9 +94,9 @@ GlobalSettings::GlobalSettings()
     slot.mFree = 0;
     mCardSlots.push_back(slot);
 
-    mUnknown6c = kDefaultUnknown6c;
+    mRequiredSaveSpace = kDefaultRequiredSaveSpace;
     mMinimumFreeClusters = kDefaultMinimumFreeClusters;
-    mUnknown74 = kDefaultUnknown74;
+    mPersonaMinimumFreeClusters = kDefaultPersonaMinimumFreeClusters;
 }
 
 // 0x00188370

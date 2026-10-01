@@ -52,7 +52,7 @@ constexpr double kTicksDenominator = 960.0;
 constexpr int kMovieBitsPerPixel = 8;
 
 // The second SetPalette() argument OnChunk() passes, which no implementation reads.
-constexpr int kSetPaletteUnknownArg = -1;
+constexpr int kSetPaletteReservedArg = -1;
 
 // The last time SetFrameSelf() converted.
 // 0x0077a59c
@@ -307,7 +307,7 @@ void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
     if (nTag == g_nPallTag) {
         const auto *pChunk = static_cast<MovieStream::PaletteChunk *>(pPayload);
         mPalette.SetEntries(pChunk->mEntries, 0, pChunk->mCount);
-        pTex->SetPalette(&mPalette, kSetPaletteUnknownArg);
+        pTex->SetPalette(&mPalette, kSetPaletteReservedArg);
     } else if (nTag == g_nFramTag) {
         auto *pChunk = static_cast<MovieStream::FrameChunk *>(pPayload);
         pChunk->mBitmap.mPixels = pChunk + 1;

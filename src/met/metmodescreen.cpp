@@ -61,7 +61,7 @@ constexpr int kTitleConfigCode = 0x269;
 constexpr int kGameButtonIndex = 0;
 constexpr int kJamButtonIndex = 1;
 
-// The values mUnknown18 records for an exit through a select and through a back.
+// The values mExitChoice records for an exit through a select and through a back.
 constexpr int kExitBySelect = 2;
 constexpr int kExitByBack = 0;
 
@@ -74,7 +74,7 @@ constexpr int kSelectAlternateCycles = 2;
 // 0x002e72c0
 MetModeScreen::MetModeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(new MetButtonList()) {
+      mButtonList(new MetButtonList()) {
 }
 
 // 0x002e7490
@@ -83,39 +83,39 @@ void MetModeScreen::ResolveContainerViews() {
 
     const HxStr gameButton(kGameButtonObject);
     HxStr gameLabel = QueryConfigString(kLabelConfigCode, kGameLabelKey);
-    mUnknown8c->Add(gameButton, gameLabel);
+    mButtonList->Add(gameButton, gameLabel);
 
     const HxStr jamButton(kJamButtonObject);
     HxStr jamLabel = QueryConfigString(kLabelConfigCode, kJamLabelKey);
-    mUnknown8c->Add(jamButton, jamLabel);
+    mButtonList->Add(jamButton, jamLabel);
 }
 
 // 0x002e7628
 void MetModeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mUnknown8c->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         ActivateNamedPanel(HxStr(kNoName));
-        mUnknown18 = kExitByBack;
+        mExitChoice = kExitByBack;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kLeftGizmoScreen));
         BeginExit();
@@ -130,21 +130,21 @@ void MetModeScreen::HandleCommand(const MetScreenCommand *pCommand) {
 void MetModeScreen::EnterAndShow() {
     HxStr prefix;
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    mUnknown8c->SetSelected(params.mUnknown1c == kPlayModeJam ? kJamButtonIndex : kGameButtonIndex);
+    mButtonList->SetSelected(params.mPlayMode == kPlayModeJam ? kJamButtonIndex : kGameButtonIndex);
 
-    mUnknown38.clear();
+    mHelpKeys.clear();
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
         HxStr solo = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
         prefix = solo;
-        mUnknown38.push_back(HxStr(kSoloGamePrompt));
-        mUnknown38.push_back(HxStr(kSoloJamPrompt));
+        mHelpKeys.push_back(HxStr(kSoloGamePrompt));
+        mHelpKeys.push_back(HxStr(kSoloJamPrompt));
     } else {
         HxStr multi = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
         prefix = multi;
-        mUnknown38.push_back(HxStr(kMultiGamePrompt));
-        mUnknown38.push_back(HxStr(kMultiJamPrompt));
+        mHelpKeys.push_back(HxStr(kMultiGamePrompt));
+        mHelpKeys.push_back(HxStr(kMultiJamPrompt));
     }
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
 
     HxStr mode = QueryConfigString(kTitleConfigCode, kModeTitleKey);
@@ -154,19 +154,19 @@ void MetModeScreen::EnterAndShow() {
 }
 
 // 0x002e8008
-void MetModeScreen::OnUnknownSlot36() {
-    if (mUnknown18 != kExitByBack) {
+void MetModeScreen::OnExitFinished() {
+    if (mExitChoice != kExitByBack) {
         GoToSelectedMode();
         return;
     }
 
     const int nGameMode = Application::shared()->GetGameManager()->GetGameMode();
     if (nGameMode == kGameModeLocal) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
         PushNamedScreen(HxStr(kCharacterPickScreen));
         ActivateNamedPanel(HxStr(kCharacterPickScreen));
     } else if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
-        if (MetFrontEndState::shared()->mUnknown0c != 0) {
+        if (MetFrontEndState::shared()->mUsingMemcard != 0) {
             PushNamedScreen(HxStr(kLoadFreqScreen));
             ActivateNamedPanel(HxStr(kLoadFreqScreen));
         } else {
@@ -178,7 +178,7 @@ void MetModeScreen::OnUnknownSlot36() {
 
 // 0x002e8398
 void MetModeScreen::GoToSelectedMode() {
-    switch (mUnknown8c->mSelected) {
+    switch (mButtonList->mSelected) {
     case kGameButtonIndex:
         Application::shared()->GetGameManager()->SetPlayMode(kPlayModeGame);
         PushNamedScreen(HxStr(kSkillScreen));
@@ -211,17 +211,17 @@ MetModeScreen *MetModeScreen::New(MetRenderer *pRenderer, int nPriority) {
 
 // 0x002eb8a0
 MetModeScreen::~MetModeScreen() {
-    delete mUnknown8c;
+    delete mButtonList;
 }
 
 // 0x002eb920
-void MetModeScreen::OnUnknownSlot33() {
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+void MetModeScreen::OnEnterFinished() {
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 
 // 0x002eb958
-void MetModeScreen::OnUnknownSlot30(Rnd::Button *) {
-    mUnknown18 = kExitBySelect;
+void MetModeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    mExitChoice = kExitBySelect;
     ExitScreenByName(HxStr(kTitleScreen));
     BeginExit();
 }

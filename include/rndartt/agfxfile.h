@@ -28,8 +28,8 @@ enum AGfxFileResult {
  * needs the table emits its own copy of it, at 0x0083d218, 0x0083d928, and 0x0083fe28.
  *
  * mFile and mDuration are written by the subclasses and mBounds by their header readers, so all
- * three are protected. mUnknown04 is written only by Open() and SetUnknown04(), and no reader of
- * it was located.
+ * three are protected. mUnreadWord is written only by Open() and SetUnreadWord(), and no reader
+ * of it was located.
  */
 class AGfxFile {
 public:
@@ -84,7 +84,7 @@ public:
      *
      * @param pFile The open file.
      */
-    explicit AGfxFile(FILE *pFile) : mFile(pFile), mUnknown04(-1) {
+    explicit AGfxFile(FILE *pFile) : mFile(pFile), mUnreadWord(-1) {
     }
 
     /**
@@ -95,16 +95,16 @@ public:
     virtual int ReadHeader() = 0;
 
     /**
-     * Set the word at offset 0x04.
+     * Set mUnreadWord.
      *
      * Inline, emitted once at 0x0061d4c0. No reader of the word was located, so its meaning is
      * not recovered.
      *
-     * @param nValue The value to store.
+     * @param nWord The value to store.
      * @ghidraAddress 0x0061d4c0
      */
-    virtual void SetUnknown04(int nValue) {
-        mUnknown04 = nValue;
+    virtual void SetUnreadWord(int nWord) {
+        mUnreadWord = nWord;
     }
 
     /**
@@ -142,7 +142,7 @@ protected:
     FILE *mFile; // +0x00 The open file.
 
 private:
-    int mUnknown04; // +0x04 Set to -1 on construction and by SetUnknown04().
+    int mUnreadWord; // +0x04 Set to -1 on construction and by SetUnreadWord().
 
 protected:
     ARect mBounds; // +0x08 The image rectangle the last header or image descriptor gave.

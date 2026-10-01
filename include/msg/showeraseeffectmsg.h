@@ -44,11 +44,12 @@ public:
      * @param nTrack The erased track.
      * @param nFirstBar The first erased bar.
      * @param nEndBar The bar one past the last erased bar.
-     * @param nUnknown14 Stored in the word at `+0x14`, whose purpose is not recovered.
+     * @param nEffectFlag Stored in the word at `+0x14`. Both builders pass 1, and neither handler
+     *                    reads it.
      */
-    ShowEraseEffectMsg(Player *pPlayer, int nTrack, int nFirstBar, int nEndBar, int nUnknown14)
+    ShowEraseEffectMsg(Player *pPlayer, int nTrack, int nFirstBar, int nEndBar, int nEffectFlag)
         : mPlayer(pPlayer), mTrack(nTrack), mFirstBar(nFirstBar), mEndBar(nEndBar),
-          mUnknown14(nUnknown14) {
+          mEffectFlag(nEffectFlag) {
     }
 
     /**
@@ -91,7 +92,7 @@ public:
     int mEndBar;     /*!< The bar one past the last erased bar. +0x10 */
 
 private:
-    int mUnknown14; // +0x14
+    int mEffectFlag; // +0x14
 };
 
 /**

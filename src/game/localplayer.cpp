@@ -43,7 +43,7 @@ constexpr int kNoBar = -1;
 constexpr int kJamPowerupsUnlimited = 1;
 constexpr int kJamFreestyleEndBar = 10000000;
 
-// The ceiling Slot11() caps the announced score ceiling at, as Player's announcements do.
+// The ceiling AnnounceState() caps the announced score ceiling at, as Player's announcements do.
 constexpr int kAnnouncedMaximum = 800;
 
 // Capture streaks and multipliers.
@@ -76,9 +76,9 @@ LocalPlayer::LocalPlayer(int nId,
     mPlayMode = Application::shared()->GetPlayMode();
     mGameMode = Application::shared()->GetGameMode();
     mLastMuffedBar = kNoBar;
-    mUnknown70 = 0;
-    mUnknown74 = 0;
-    mUnknown78 = kNoBar;
+    mFreestyleStartBar = 0;
+    mFreestyleEndBar = 0;
+    mLastScoredBar = kNoBar;
     mRunEndBar = kNoBar;
     mLastCaughtBar = kNoBar;
     mStreak = 0;
@@ -89,13 +89,13 @@ LocalPlayer::LocalPlayer(int nId,
     mMisses = 0;
     mCollection = nullptr;
     mPlacer = nullptr;
-    mUnknownac = 0;
-    mUnknownb0 = 0;
+    mMissedGems = 0;
+    mCaughtGems = 0;
 
     if (mPlayMode == kPlayModeJam) {
         mCollection = new PowerupCollection(this, kJamPowerupsUnlimited);
         mPlacer = new JamPowerupPlacer(this, mCollection);
-        LocalPlayer::Slot8(0, kJamFreestyleEndBar);
+        LocalPlayer::SetFreestyleSpan(0, kJamFreestyleEndBar);
     } else if (mGameMode >= kGameModeSolo && mGameMode <= kGameModeNet) {
         mCollection = new SinglePowerupCollection(this);
         mPlacer = new SimplifiedGamePowerupPlacer(this, mCollection);
@@ -113,62 +113,62 @@ LocalPlayer::~LocalPlayer() {
 }
 
 // 0x00121ea0
-int LocalPlayer::Slot2() {
+int LocalPlayer::GetInputSlot() {
     return mInputSlot;
 }
 
 // 0x00121e90
-int LocalPlayer::Slot4() {
+int LocalPlayer::GetTrack() {
     return mTrack;
 }
 
 // 0x00121e98
-int LocalPlayer::Slot5() {
+int LocalPlayer::GetPlace() {
     return mPlace;
 }
 
 // 0x00122890
-int LocalPlayer::Slot6() {
+int LocalPlayer::UnusedQuery() {
     return 0;
 }
 
 // 0x00121ea8
-void LocalPlayer::Slot7() {
+void LocalPlayer::UnusedHook() {
 }
 
 // 0x00122898
-void LocalPlayer::Slot8(int first, int second) {
-    mUnknown70 = first;
-    mUnknown74 = second;
+void LocalPlayer::SetFreestyleSpan(int nStartBar, int nEndBar) {
+    mFreestyleStartBar = nStartBar;
+    mFreestyleEndBar = nEndBar;
 }
 
 // 0x00121eb0
-int LocalPlayer::Slot10() {
+int LocalPlayer::IsLooping() {
     return mLooping;
 }
 
 // 0x0011e4e0
-void LocalPlayer::Slot11() {
-    Player::Slot11();
+void LocalPlayer::AnnounceState() {
+    Player::AnnounceState();
     const int nTick = Application::shared()->GetSongClock()->SongTick();
-    mPlacer->OnUnknownSlot4();
+    mPlacer->Activate();
 
     TrackSelectMsg trackSelect;
-    trackSelect.mUnknown04 = mTrack;
-    trackSelect.mUnknown08 = 0;
+    trackSelect.mTrack = mTrack;
+    trackSelect.mPlace = 0;
     trackSelect.mPosition.mTick = nTick;
-    trackSelect.mUnknown10 = this;
+    trackSelect.mPlayer = this;
     Send(&trackSelect);
 
     mCollection->AnnounceState();
 
     PointAmountMsg points;
     points.mPlayer = this;
-    points.mMaxScore = std::min(mUnknown3c, kAnnouncedMaximum);
+    points.mMaxScore = std::min(mMaxScore, kAnnouncedMaximum);
     Send(&points);
 
     ToggleGhostMsg ghost;
-    ghost.mUnknown04 = this;
+    ghost.mPlayer = this;
     ghost.mOn = mGhost;
     Send(&ghost);
 
@@ -184,8 +184,8 @@ void LocalPlayer::Slot11() {
 }
 
 // 0x001228c8
-void LocalPlayer::Slot12() {
-    mPlacer->OnUnknownSlot5();
+void LocalPlayer::DeactivatePlacer() {
+    mPlacer->Deactivate();
 }
 
 // 0x0011e810
@@ -202,31 +202,31 @@ void LocalPlayer::SetLooping(int bLooping, const Mid::MBT &position) {
 }
 
 // 0x0011e908
-void LocalPlayer::Slot22(int value) {
+void LocalPlayer::SetGhost(int bGhost) {
     if (mPlayMode != kPlayModeJam) {
         return;
     }
 
-    mGhost = value;
+    mGhost = bGhost;
 
     ToggleGhostMsg message;
-    message.mOn = value;
-    message.mUnknown04 = this;
+    message.mOn = bGhost;
+    message.mPlayer = this;
     Send(&message);
 }
 
 // 0x00121ec0
-int LocalPlayer::Slot14() {
-    return mUnknownb0 += 1;
+int LocalPlayer::CountCaughtGem() {
+    return mCaughtGems += 1;
 }
 
 // 0x00121ed0
-int LocalPlayer::Slot15() {
-    return mUnknownac += 1;
+int LocalPlayer::CountMissedGem() {
+    return mMissedGems += 1;
 }
 
 // 0x00122cc8
-float LocalPlayer::Slot18() {
+float LocalPlayer::GetCaptureRatio() {
     if (mCaptures == 0) {
         return 0.0f;
     }
@@ -234,35 +234,35 @@ float LocalPlayer::Slot18() {
 }
 
 // 0x00121ee0
-int LocalPlayer::Slot17() {
+int LocalPlayer::GetBestStreak() {
     return mBestStreak;
 }
 
 // 0x00121ee8
-int LocalPlayer::Slot19() {
+int LocalPlayer::GetGameMode() {
     return mGameMode;
 }
 
 // 0x001228a8
-int LocalPlayer::Slot9(int value) {
-    if (value < mUnknown70) {
+int LocalPlayer::IsFreestyleBar(int nBar) {
+    if (nBar < mFreestyleStartBar) {
         return 0;
     }
-    return value < mUnknown74;
+    return nBar < mFreestyleEndBar;
 }
 
 // 0x00122ca0
-int LocalPlayer::Slot16(int value) {
-    if (mRunEndBar < value) {
+int LocalPlayer::GetMultiplier(int nBar) {
+    if (mRunEndBar < nBar) {
         return mBonus + 1;
     }
     return mMultiplier + (mBonus + 1);
 }
 
 // 0x00122c00
-int LocalPlayer::Slot20(int value) {
-    if (mUnknown78 < value) {
-        mUnknown78 = value;
+int LocalPlayer::MarkBarScored(int nBar) {
+    if (mLastScoredBar < nBar) {
+        mLastScoredBar = nBar;
         return 1;
     }
     return 0;
@@ -329,7 +329,7 @@ inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
 // 0x001229d8
 inline void LocalPlayer::OnButtonPow(ButtonPowMsg *pMsg) {
     if (pMsg->mPlayer == this && mPlacer != nullptr) {
-        mPlacer->OnUnknownSlot8();
+        mPlacer->DeployPowerup();
     }
 }
 
@@ -436,16 +436,16 @@ void LocalPlayer::ToggleLoop(const Mid::MBT &position) {
 
 // 0x0011e980
 void LocalPlayer::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown10 != this) {
+    if (pMsg->mPlayer != this) {
         return;
     }
 
     const int nOldTrack = mTrack;
     const int nOldPlace = mPlace;
-    mTrack = pMsg->mUnknown04;
-    mPlace = pMsg->mUnknown08;
+    mTrack = pMsg->mTrack;
+    mPlace = pMsg->mPlace;
     if (mPlacer != nullptr) {
-        mPlacer->OnUnknownSlot7();
+        mPlacer->AnnounceCursor();
     }
 
     if (mTrack == nOldTrack && mPlace < nOldPlace) {
@@ -457,13 +457,13 @@ void LocalPlayer::OnTrackSelect(TrackSelectMsg *pMsg) {
 
 // 0x0011eaa8
 void LocalPlayer::OnToggleGhost(ToggleGhostMsg *pMsg) {
-    if (pMsg->mUnknown04 != this) {
+    if (pMsg->mPlayer != this) {
         return;
     }
 
     mGhost ^= 1;
     ToggleGhostMsg ghost;
-    ghost.mUnknown04 = this;
+    ghost.mPlayer = this;
     ghost.mOn = mGhost;
     Send(&ghost);
 }

@@ -64,7 +64,7 @@ enum MainButton {
     kOptionsButtonIndex = 3
 };
 
-// What MetScreen::mUnknown18 records for slot 36 to act on.
+// What MetScreen::mExitChoice records for slot 36 to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
 
@@ -72,7 +72,7 @@ constexpr int kExitToButtonAction = 2;
 constexpr float kSelectAlternateInterval = 30.0f;
 constexpr int kSelectAlternateCycles = 2;
 
-// MetRenderer::mUnknownd4 on the menu, and while the solo game is chosen.
+// MetRenderer::mMaxPadIndex on the menu, and while the solo game is chosen.
 constexpr int kMenuHighestPad = 4;
 constexpr int kSoloHighestPad = 1;
 
@@ -107,35 +107,35 @@ MetMainScreen *MetMainScreen::New(MetRenderer *pRenderer, int nPriority) {
 
 // 0x002c6dc0
 void MetMainScreen::EnterAndShow() {
-    mUnknown10->mUnknownd4 = kMenuHighestPad;
+    mRenderer->mMaxPadIndex = kMenuHighestPad;
     SetShowing(0);
     bool bSettingsChanged = false;
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
-        bSettingsChanged = MetFrontEndState::shared()->mUnknown10 != 0;
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
+        bSettingsChanged = MetFrontEndState::shared()->mSettingsDirty != 0;
     }
     if (!bSettingsChanged) {
         EnterMenu();
         return;
     }
-    MetFrontEndState::shared()->mUnknown10 = 0;
+    MetFrontEndState::shared()->mSettingsDirty = 0;
     std::vector<HxStr> screens;
     screens.resize(kSaveReturnScreenCount);
     screens[0] = kMainScreen;
     MetGlobalSettingsSaverScreen::StartSave(screens);
-    mUnknown50 = 0;
+    mActivatePending = 0;
 }
 
 // 0x002c7030
 void MetMainScreen::EnterMenu() {
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
-        int nTransition = MetFrontEndState::shared()->mUnknown18;
-        MetFrontEndState::shared()->mUnknown18 = 0;
-        MetFrontEndState::shared()->mUnknown1c = nTransition;
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kMainScreen);
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
+        int nTransition = MetFrontEndState::shared()->mPendingTransition;
+        MetFrontEndState::shared()->mPendingTransition = 0;
+        MetFrontEndState::shared()->mLastTransition = nTransition;
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kMainScreen);
         PushNamedScreen(HxStr(kTopLogoScreen));
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
         PushNamedScreen(HxStr(kHelpScreen));
-        mUnknown10->SetActivePanel(this);
+        mRenderer->SetActivePanel(this);
     }
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
     MetScreen::EnterAndShow();
@@ -145,27 +145,27 @@ void MetMainScreen::EnterMenu() {
 void MetMainScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mButtonList->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mButtonList->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mButtonList->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTopLogoScreen));
         ExitScreenByName(HxStr(kLeftGizmoSmallScreen));
         ExitScreenByName(HxStr(kTitleScreen));
@@ -187,8 +187,8 @@ void MetMainScreen::PlayCycleRightSound(int) {
 }
 
 // 0x002c6c20
-void MetMainScreen::OnUnknownSlot30(Rnd::Button *) {
-    mUnknown18 = kExitToButtonAction;
+void MetMainScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kLeftGizmoSmallScreen));
     ExitScreenByName(HxStr(kTopLogoScreen));
@@ -196,10 +196,10 @@ void MetMainScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x002c72a0
-void MetMainScreen::OnUnknownSlot33() {
-    if (MetFrontEndState::shared()->mUnknown24 == kLogoScreen ||
+void MetMainScreen::OnEnterFinished() {
+    if (MetFrontEndState::shared()->mReturnScreen == kLogoScreen ||
         mButtonList->mSelected == kNoButton) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kNoName);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
         if (GlobalSettings::shared()->mTutorialComplete == 0) {
             mButtonList->SetSelected(kTutorialButtonIndex);
         } else {
@@ -207,12 +207,12 @@ void MetMainScreen::OnUnknownSlot33() {
         }
     }
     Application::shared()->GetGameManager()->SetGameMode(kGameModeNone);
-    MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 
 // 0x002c73e0
-void MetMainScreen::OnUnknownSlot36() {
-    if (mUnknown18 != kExitBack) {
+void MetMainScreen::OnExitFinished() {
+    if (mExitChoice != kExitBack) {
         OpenSelectedButton();
         return;
     }
@@ -231,10 +231,10 @@ void MetMainScreen::OpenSelectedButton() {
         break;
 
     case kSoloButtonIndex:
-        mUnknown10->OnUnknown00390090();
+        mRenderer->OnReturnToMenus();
         Application::shared()->GetGameManager()->SetGameMode(kGameModeSolo);
-        mUnknown10->mUnknownd4 = kSoloHighestPad;
-        if (MetFrontEndState::shared()->mUnknown0c == 0) {
+        mRenderer->mMaxPadIndex = kSoloHighestPad;
+        if (MetFrontEndState::shared()->mUsingMemcard == 0) {
             PushNamedScreen(HxStr(kLoadPreFabScreen));
             ActivateNamedPanel(HxStr(kLoadPreFabScreen));
         } else if (MetPersonaData::loadList()->size() != 0) {
@@ -247,7 +247,7 @@ void MetMainScreen::OpenSelectedButton() {
         break;
 
     case kMultiButtonIndex:
-        mUnknown10->OnUnknown00390090();
+        mRenderer->OnReturnToMenus();
         Application::shared()->GetGameManager()->SetGameMode(kGameModeLocal);
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kLocNumPlayersScreen));
@@ -272,9 +272,9 @@ void MetMainScreen::ResolveContainerViews() {
     AddButton(mButtonList, kSoloButton, kSoloLabel);
     AddButton(mButtonList, kMultiButton, kMultiLabel);
     AddButton(mButtonList, kOptionsButton, kOptionsLabel);
-    mUnknown38.clear();
-    mUnknown38.push_back(HxStr(kTutorialHelp));
-    mUnknown38.push_back(HxStr(kSoloHelp));
-    mUnknown38.push_back(HxStr(kMultiHelp));
-    mUnknown38.push_back(HxStr(kOptionsHelp));
+    mHelpKeys.clear();
+    mHelpKeys.push_back(HxStr(kTutorialHelp));
+    mHelpKeys.push_back(HxStr(kSoloHelp));
+    mHelpKeys.push_back(HxStr(kMultiHelp));
+    mHelpKeys.push_back(HxStr(kOptionsHelp));
 }

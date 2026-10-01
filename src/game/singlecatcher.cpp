@@ -33,14 +33,14 @@ SingleCatcher::~SingleCatcher() {
 }
 
 // 0x001ad630
-void SingleCatcher::Slot9(int nBar, int nRun, int nAutoCatch) {
+void SingleCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
     const int nRunEnd = nBar + 1;
     const int nStepStart = mTrackData->StepStartBar(nBar);
     const int nStepEnd = mTrackData->FollowingStepBar(nBar);
     const int nRunStart = nBar - (nRun - 1);
     SetPhraseOwners(nStepStart, nStepEnd, mPlayer);
 
-    const int nMultiplier = mPlayer->Slot16(nRunStart);
+    const int nMultiplier = mPlayer->GetMultiplier(nRunStart);
     int nPoints = 0;
     for (int nRunBar = nRunStart; nRunBar < nRunEnd; ++nRunBar) {
         nPoints += mTrackData->GetPoints(nRunBar);
@@ -52,7 +52,7 @@ void SingleCatcher::Slot9(int nBar, int nRun, int nAutoCatch) {
                                mTrack,
                                mPlayer,
                                nPoints * nMultiplier,
-                               mTrackData->GetUnknown08(nStepStart),
+                               mTrackData->GetCatchPoints(nStepStart),
                                nAutoCatch ^ 1);
     Send(&captured);
 
@@ -61,7 +61,7 @@ void SingleCatcher::Slot9(int nBar, int nRun, int nAutoCatch) {
 }
 
 // 0x001ad840
-void SingleCatcher::Slot10(int nBar) {
+void SingleCatcher::ReportCaughtPowerbar(int nBar) {
     const int nPowerbar = mPhraseMgr->GetPowerbar(nBar);
     if (nPowerbar == kNoPowerbar) {
         return;

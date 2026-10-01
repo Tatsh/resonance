@@ -241,7 +241,7 @@ inline const char *TextOf(const HxStr &text) {
 MetFreqMakerDirectionsScreen::MetFreqMakerDirectionsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mPage(kBlankPage) {
-    mUnknown60 = 0;
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x00269e68
@@ -277,12 +277,12 @@ void MetFreqMakerDirectionsScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00269f00
-void MetFreqMakerDirectionsScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetFreqMakerDirectionsScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 
 // 0x00269fa0
-void MetFreqMakerDirectionsScreen::OnUnknownSlot36() {
+void MetFreqMakerDirectionsScreen::OnExitFinished() {
     mList->setEntriesShowing(0);
 }
 
@@ -299,7 +299,7 @@ void MetFreqMakerDirectionsScreen::ResolveContainerViews() {
 void MetFreqMakerDirectionsScreen::ShowPage(int nPage) {
     mPage = nPage;
     mList->refresh();
-    MetHelpScreen::SetText(g_freqMakerModeNames[nPage], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(g_freqMakerModeNames[nPage], mRenderer->mAnimationFrame);
     if (nPage == kSavePage) {
         MetHelpScreen::SelectPreset(HxStr(kSavePreset));
     } else if (nPage == kFreqFullPage) {

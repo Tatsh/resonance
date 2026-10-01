@@ -119,7 +119,7 @@ private:
     // 0x0019a898
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    int mTrack;                  // +0x04, copied from TrackData::mUnknown04
+    int mTrack;                  // +0x04, copied from TrackData::mIndex
     Quantizer *mQuantizer;       // +0x08
     const TrackData *mTrackData; // +0x0c
     Riff *mCurrentRiff;          // +0x10
@@ -131,9 +131,9 @@ public:
     /**
      * Synthesiser AxingSTG installs while it wires the stage up.
      *
-     * The constructor clears this member and the one below, and AxingSTG::Slot4() writes both from
-     * outside the class, which is what records them public. A friend declaration on AxingSTG fits
-     * the image equally well.
+     * The constructor clears this member and the one below, and AxingSTG::ConnectSources() writes
+     * both from outside the class. Those outside writes record them public. A friend declaration on
+     * AxingSTG fits the image equally well.
      *
      * +0x2c
      */

@@ -17,10 +17,12 @@ class Message;
  * `0x005381a8`, and the class is therefore abstract. Slot 3 is MsgSink::HandleMessage(), which this
  * class leaves pure. Slot 2 overrides MsgSink::Handle().
  *
- * No verb is recovered for any of the seven, so each is declared under a placeholder that records
- * its slot. The six MetRenderer overrides take no argument and return nothing, and Renderer's
- * three overrides agree, which is what fixes the signatures. The base bodies of slots 4, 5, 9, and
- * 10 are empty and read no argument register, so they reveal nothing on their own.
+ * Each of the seven takes its name from the overrides and from the callers. MetaGameWorld runs
+ * slots 4 and 5 to start and stop the front end, GameManagerImpl::DrawFrame() runs slots 6, 7, and
+ * 8 on every frame, and GameManagerImpl::DrawFrameSimple() runs slots 9 and 10. The six
+ * MetRenderer overrides take no argument and return nothing, and Renderer's three overrides agree.
+ * Those overrides fix the signatures. The base bodies of slots 4, 5, 9, and 10 are empty and do
+ * not read an argument register.
  */
 class RendererBase : public MsgSink {
 public:
@@ -101,7 +103,7 @@ public:
      * Accept a message into the queue.
      *
      * Slot 2. The message is stored rather than acted on, and reaches HandleMessage() only when
-     * OnUnknownSlot6() drains the queue. MetRenderer and Renderer both inherit this body.
+     * PollMessages() drains the queue. MetRenderer and Renderer both inherit this body.
      *
      * @param pMsg The message to store.
      * @ghidraAddress 0x00139f80
@@ -109,48 +111,57 @@ public:
     virtual void Handle(Message *pMsg);
 
     /**
-     * Unrecovered. Slot 4, with an empty body in this class.
+     * Start the renderer running. Slot 4, with an empty body in this class.
+     *
+     * MetaGameWorld's forwarder at `0x003d4860` is the caller.
      *
      * @ghidraAddress 0x00139f28
      */
-    virtual void OnUnknownSlot4();
+    virtual void Start();
 
     /**
-     * Unrecovered. Slot 5, with an empty body in this class.
+     * Stop the renderer running. Slot 5, with an empty body in this class.
+     *
+     * MetaGameWorld's forwarder at `0x003d4890` is a caller.
      *
      * @ghidraAddress 0x00139f30
      */
-    virtual void OnUnknownSlot5();
+    virtual void Stop();
 
     /**
-     * Deliver every queued message. Slot 6, whose verb is unrecovered.
+     * Deliver every queued message. Slot 6.
      *
      * The body drains the queue through MsgQueue::Poll(). MetRenderer inherits it, and Renderer's
      * override calls it explicitly.
      *
      * @ghidraAddress 0x00139fb0
      */
-    virtual void OnUnknownSlot6();
+    virtual void PollMessages();
 
-    /** Unrecovered. Slot 7, pure in this class. */
-    virtual void OnUnknownSlot7() = 0;
+    /** Advance the renderer by one frame. Slot 7, pure in this class. */
+    virtual void Update() = 0;
 
-    /** Unrecovered. Slot 8, pure in this class. */
-    virtual void OnUnknownSlot8() = 0;
+    /** Draw the frame. Slot 8, pure in this class. */
+    virtual void Draw() = 0;
 
     /**
-     * Unrecovered. Slot 9, with an empty body in this class.
+     * Advance the renderer by one frame without the full update. Slot 9, with an empty body in
+     * this class.
+     *
+     * GameManagerImpl::DrawFrameSimple() is the caller.
      *
      * @ghidraAddress 0x00139f38
      */
-    virtual void OnUnknownSlot9();
+    virtual void UpdateSimple();
 
     /**
-     * Unrecovered. Slot 10, with an empty body in this class.
+     * Draw the frame without the full draw. Slot 10, with an empty body in this class.
+     *
+     * GameManagerImpl::DrawFrameSimple() is the caller.
      *
      * @ghidraAddress 0x00139f40
      */
-    virtual void OnUnknownSlot10();
+    virtual void DrawSimple();
 
 private:
     // Destroyed by the destructor through MsgQueue::~MsgQueue() at 0x0054a7a0, which is what

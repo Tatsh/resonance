@@ -98,11 +98,11 @@ void MetFreqMakerCanvasScreen::PlayCycleRightSound(int) {
 }
 
 // 0x002620d0
-void MetFreqMakerCanvasScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetFreqMakerCanvasScreen::OnRepeatingSoundFinished(Rnd::Button *) {
 }
 
 // 0x0025e898
-void MetFreqMakerCanvasScreen::OnUnknownSlot36() {
+void MetFreqMakerCanvasScreen::OnExitFinished() {
     mAppearance.detachFrom(FindCanvasView());
 }
 
@@ -118,19 +118,19 @@ void MetFreqMakerCanvasScreen::ResolveContainerViews() {
 // 0x0025ea68
 void MetFreqMakerCanvasScreen::CommitPersona() {
     if (mPersona != nullptr) {
-        mPersona->mUnknown140.mDetail->clear();
-        mPersona->mUnknown140.mDetail->copyFrom(mAppearance);
-        mPersona->mUnknown140.mUnknown00 = mFreqName;
+        mPersona->mAppearance.mDetail->clear();
+        mPersona->mAppearance.mDetail->copyFrom(mAppearance);
+        mPersona->mAppearance.mUserName = mFreqName;
         Application::shared()->GetGameManager()->ClearPersonas();
         Application::shared()->GetGameManager()->AddPersona(*mPersona);
     } else {
         MetPersonaData *pPersona = new MetPersonaData();
-        pPersona->mUnknown140.mUnknown00 = mFreqName;
+        pPersona->mAppearance.mUserName = mFreqName;
         HxStr date;
         if (FormatCurrentDateTime(date)) {
-            pPersona->mUnknown154 = date;
+            pPersona->mBirthday = date;
         }
-        pPersona->mUnknown140.mDetail->copyFrom(mAppearance);
+        pPersona->mAppearance.mDetail->copyFrom(mAppearance);
         Application::shared()->GetGameManager()->ClearPersonas();
         Application::shared()->GetGameManager()->AddPersona(*pPersona);
         // The game manager keeps its own copy, and that copy becomes the persona being edited.
@@ -215,11 +215,11 @@ void MetFreqMakerCanvasScreen::LoadPersona(MetPersonaData *pPersona) {
     mAppearance.clear();
     mAppearance.resetCursor();
     if (pPersona != nullptr) {
-        mAppearance.copyFrom(*pPersona->mUnknown140.mDetail);
+        mAppearance.copyFrom(*pPersona->mAppearance.mDetail);
     }
     mFreqName = g_defaultFreqName;
     if (mPersona != nullptr) {
-        mFreqName = mPersona->mUnknown140.mUnknown00;
+        mFreqName = mPersona->mAppearance.mUserName;
     }
     SetFreqName(mFreqName);
     mModified = 0;
@@ -230,10 +230,10 @@ void MetFreqMakerCanvasScreen::LoadPrefab(MetPersonaData *pSource, int nRandomiz
     mPersona = nullptr;
     mAppearance.clear();
     mAppearance.resetCursor();
-    mAppearance.copyFrom(*pSource->mUnknown140.mDetail);
+    mAppearance.copyFrom(*pSource->mAppearance.mDetail);
     mFreqName = g_defaultFreqName;
     if (mPersona != nullptr) { // Yes, mPersona was cleared above, so the source name is never read.
-        mFreqName = pSource->mUnknown140.mUnknown00;
+        mFreqName = pSource->mAppearance.mUserName;
     }
     SetFreqName(mFreqName);
     if (nRandomize != 0) {

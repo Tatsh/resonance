@@ -75,7 +75,7 @@ public:
      * Powerup::Deploy(). PowerupPlacer's three subclasses all dispatch this slot with two
      * arguments, at `0x001ccf30`, `0x001cdeb8`, and `0x001cdfe0`.
      *
-     * @param nTrack Whatever Player::Slot4() reports for the deploying player, its track. The
+     * @param nTrack Whatever Player::GetTrack() reports for the deploying player, its track. The
      *               default in Player returns -1.
      * @param nBar The current bar, as the song tick divided by 1920.
      * @ghidraAddress 0x001ccb58

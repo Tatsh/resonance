@@ -56,7 +56,7 @@ public:
      *
      * @ghidraAddress 0x0030a4d8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views and fill the page's three texts from configuration code 0x258.

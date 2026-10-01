@@ -12,7 +12,7 @@ class Player;
  * allocation in Clone() report the same size, which measures the class twice.
  *
  * The payload layout comes from the run of field copies in Clone(). Both members are public, the
- * player because LocalPlayer::Slot22() writes it and the flag because Overlay reads it.
+ * player because LocalPlayer::SetGhost() writes it and the flag because Overlay reads it.
  *
  * The destructor at `0x0011d710` is compiler-generated and has no declaration here. The routine
  * at `0x0011d748` is a further emission of the type-information accessor.
@@ -57,17 +57,17 @@ public:
     /**
      * Player the message is about.
      *
-     * LocalPlayer::Slot22() at `0x0011e908` writes the player here before sending, which is what
+     * LocalPlayer::SetGhost() at `0x0011e908` writes the player here before sending. That write
      * types this member as a player rather than as a payload word.
      *
      * +0x04
      */
-    Player *mUnknown04;
+    Player *mPlayer;
 
     /**
      * Non-zero to light the player's track display, zero to darken it.
      *
-     * LocalPlayer::Slot22() at `0x0011e908` writes its argument here. Overlay::OnToggleGhost() at
+     * LocalPlayer::SetGhost() at `0x0011e908` writes its argument here. Overlay::OnToggleGhost() at
      * `0x0042aef8` reads it directly with no accessor in the image and selects one of two values
      * from the track display for each of the display's kind-11 components.
      *

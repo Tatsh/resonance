@@ -83,12 +83,12 @@ public:
      * first, making the lock read-modify-write. The level is recorded for UnlockMipBitmap().
      *
      * @param nMip The mip level.
-     * @param nUnknown The second parameter. This override does not read it.
+     * @param nReserved The second parameter. This override does not read it.
      * @param nFlags Bit 1 requests the read-back.
      * @return The canvas to draw into, or null.
      * @ghidraAddress 0x0059aa48
      */
-    virtual ACanvas *LockMipBitmap(int nMip, int nUnknown, int nFlags);
+    virtual ACanvas *LockMipBitmap(int nMip, int nReserved, int nFlags);
 
     /**
      * Take back the canvas LockMipBitmap() handed out.
@@ -108,10 +108,10 @@ public:
      * staging palette from the entries already present.
      *
      * @param pPalette The replacement palette, or null to rebuild from the current entries.
-     * @param nUnknown Not read.
+     * @param nReserved Not read.
      * @ghidraAddress 0x0059ab78
      */
-    virtual void SetPalette(APalette *pPalette, int nUnknown);
+    virtual void SetPalette(APalette *pPalette, int nReserved);
 
     /**
      * Pin the video memory block of mip 0 against eviction, or release the pin.
@@ -325,7 +325,7 @@ private:
     int mFirstPackedMip;
     // One bit per level awaiting upload, with the sign bit standing for a dirty CLUT.
     unsigned mDirtyMips;
-    unsigned long long mUnknown98; // +0x98 Inferred from the alignment of mClut.
+    unsigned long long mReserved98; // +0x98 Inferred from the alignment of mClut.
     // CLUT staging palette, in the GS CSM1 order. The upload sends it by DMA in whole
     // quadwords. The entries must therefore start on a quadword boundary.
     alignas(16) APalette mClut;

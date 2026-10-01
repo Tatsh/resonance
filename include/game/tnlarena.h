@@ -115,7 +115,7 @@ public:
      * Act on one message the renderer sends on.
      *
      * A PointAmountMsg runs ScreenAnim::UpdateLeaders(). A JuiceAmountMsg, only in game mode 1 and
-     * play mode 1 and only while mUnknown24 is -1, sets the level from the juice amount (2 above
+     * play mode 1 and only while mJuiceLock is -1, sets the level from the juice amount (2 above
      * 0.85, 0 below 0.2, and 1 otherwise) and passes it to ScreenAnim::SetLevel(). A WinMsg in game
      * mode 1 with a non-empty winner list passes one level higher.
      *
@@ -127,7 +127,7 @@ public:
     /**
      * Advance the screen animation to one song position.
      *
-     * Forwards to ScreenAnim::SetFrame(). Renderer::OnUnknownSlot7() is the caller, and the title
+     * Forwards to ScreenAnim::SetFrame(). Renderer::Update() is the caller, and the title
      * is inferred from it.
      *
      * @param flFrame The song position, in MIDI ticks.
@@ -148,7 +148,7 @@ private:
     // out-of-line copy has no caller.
     void OnWin(WinMsg *pMsg);
 
-    // Set mUnknown24 to 1, which stops HandleMessage() acting on a JuiceAmountMsg, and pass the
+    // Set mJuiceLock to 1 (HandleMessage() then ignores a JuiceAmountMsg), and pass the
     // neutral level. Nothing calls it or inlines it, and the title is inferred.
     void LockLevel();
 
@@ -161,7 +161,7 @@ public:
     ScreenAnim *mScreenAnim;
     // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while it still is. Public
     // because the test-arena script command sets it directly.
-    int mUnknown24; // +0x24
+    int mJuiceLock; // +0x24
 
 private:
     // Globals::GetGameMode() at construction.

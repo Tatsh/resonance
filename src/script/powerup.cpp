@@ -35,7 +35,7 @@ Py::Object ScriptAddPowerup(Py::Tuple args) {
         for (std::vector<Player *>::iterator it = pWorld->mPlayers.begin();
              it != pWorld->mPlayers.end();
              ++it) {
-            if ((*it)->Slot2() == static_cast<int>(nPlayer)) {
+            if ((*it)->GetInputSlot() == static_cast<int>(nPlayer)) {
                 CaughtPowerbarMsg message;
                 message.mKind = static_cast<HudItemKind>(nKind);
                 message.mPlayer = *it;

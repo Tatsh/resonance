@@ -52,7 +52,7 @@ static char g_szScfRomVersion[16];
 
 // Helpers defined below for the minute offset path.
 char *sceScfReadRomVersion(void);
-void sceScfSub005f3190(sceCdCLOCK *pClock);
+void sceScfClockFromBcd(sceCdCLOCK *pClock);
 
 // Month lengths for the day arithmetic below, read from the image.
 static const unsigned char kMonthLengths[12] = {
@@ -88,7 +88,7 @@ char *sceScfReadRomVersion(void) {
 }
 
 // 0x005f3138
-int sceScfCheckBcdByte(int nValue) {
+int sceScfBcdToBinary(int nValue) {
     unsigned int value = (unsigned int)nValue & 0xffu;
 
     assert(value <= 0x99u);
@@ -96,7 +96,7 @@ int sceScfCheckBcdByte(int nValue) {
 }
 
 // 0x005f30d0
-int sceScfCheckBcdBelowHundred(int nValue) {
+int sceScfBinaryToBcd(int nValue) {
     unsigned int value = (unsigned int)nValue & 0xffu;
 
     assert(value <= 99u);
@@ -105,7 +105,7 @@ int sceScfCheckBcdBelowHundred(int nValue) {
 }
 
 // 0x005f32a0
-void sceScfSub005f32a0(sceCdCLOCK *pClock) {
+void sceScfAdvanceDay(sceCdCLOCK *pClock) {
     unsigned char monthLengths[12];
     int i;
 
@@ -134,7 +134,7 @@ void sceScfSub005f32a0(sceCdCLOCK *pClock) {
 }
 
 // 0x005f3388
-void sceScfSub005f3388(sceCdCLOCK *pClock) {
+void sceScfRewindDay(sceCdCLOCK *pClock) {
     unsigned char monthLengths[12];
     int i;
 
@@ -164,29 +164,29 @@ void sceScfSub005f3388(sceCdCLOCK *pClock) {
 }
 
 // 0x005f3190
-void sceScfSub005f3190(sceCdCLOCK *pClock) {
+void sceScfClockFromBcd(sceCdCLOCK *pClock) {
     assert(pClock != NULL);
-    pClock->year = (unsigned char)sceScfCheckBcdByte(pClock->year);
-    pClock->month = (unsigned char)sceScfCheckBcdByte(pClock->month);
-    pClock->day = (unsigned char)sceScfCheckBcdByte(pClock->day);
-    pClock->hour = (unsigned char)sceScfCheckBcdByte(pClock->hour);
-    pClock->minute = (unsigned char)sceScfCheckBcdByte(pClock->minute);
-    pClock->second = (unsigned char)sceScfCheckBcdByte(pClock->second);
+    pClock->year = (unsigned char)sceScfBcdToBinary(pClock->year);
+    pClock->month = (unsigned char)sceScfBcdToBinary(pClock->month);
+    pClock->day = (unsigned char)sceScfBcdToBinary(pClock->day);
+    pClock->hour = (unsigned char)sceScfBcdToBinary(pClock->hour);
+    pClock->minute = (unsigned char)sceScfBcdToBinary(pClock->minute);
+    pClock->second = (unsigned char)sceScfBcdToBinary(pClock->second);
 }
 
 // 0x005f3218
-void sceScfSub005f3218(sceCdCLOCK *pClock) {
+void sceScfClockToBcd(sceCdCLOCK *pClock) {
     assert(pClock != NULL);
-    pClock->year = (unsigned char)sceScfCheckBcdBelowHundred(pClock->year);
-    pClock->month = (unsigned char)sceScfCheckBcdBelowHundred(pClock->month);
-    pClock->day = (unsigned char)sceScfCheckBcdBelowHundred(pClock->day);
-    pClock->hour = (unsigned char)sceScfCheckBcdBelowHundred(pClock->hour);
-    pClock->minute = (unsigned char)sceScfCheckBcdBelowHundred(pClock->minute);
-    pClock->second = (unsigned char)sceScfCheckBcdBelowHundred(pClock->second);
+    pClock->year = (unsigned char)sceScfBinaryToBcd(pClock->year);
+    pClock->month = (unsigned char)sceScfBinaryToBcd(pClock->month);
+    pClock->day = (unsigned char)sceScfBinaryToBcd(pClock->day);
+    pClock->hour = (unsigned char)sceScfBinaryToBcd(pClock->hour);
+    pClock->minute = (unsigned char)sceScfBinaryToBcd(pClock->minute);
+    pClock->second = (unsigned char)sceScfBinaryToBcd(pClock->second);
 }
 
 // 0x005f3460
-void sceScfSub005f3460(sceCdCLOCK *pClock) {
+void sceScfAdvanceHour(sceCdCLOCK *pClock) {
     unsigned int hour;
 
     assert(pClock != NULL);
@@ -196,18 +196,18 @@ void sceScfSub005f3460(sceCdCLOCK *pClock) {
         return;
     }
     pClock->hour = 0;
-    sceScfSub005f32a0(pClock);
+    sceScfAdvanceDay(pClock);
 }
 
 // 0x005f34d0
-void sceScfSub005f34d0(sceCdCLOCK *pClock) {
+void sceScfRewindHour(sceCdCLOCK *pClock) {
     unsigned int hour;
 
     assert(pClock != NULL);
     hour = pClock->hour;
     if (hour == 0) {
         pClock->hour = 0x17;
-        sceScfSub005f3388(pClock);
+        sceScfRewindDay(pClock);
         return;
     }
     pClock->hour = (unsigned char)(hour - 1u);
@@ -259,12 +259,12 @@ void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
 
     assert(pClock != NULL);
     assert((unsigned int)(nMinutes + kHalfDayMinutes) < (unsigned int)kOffsetRangeWidth);
-    sceScfSub005f3190(pClock);
+    sceScfClockFromBcd(pClock);
     nTotal = pClock->minute + nMinutes;
     if (nTotal < 0) {
         do {
             nTotal += kMinutesPerHour;
-            sceScfSub005f34d0(pClock);
+            sceScfRewindHour(pClock);
         } while (nTotal < 0);
         pClock->minute = (unsigned char)nTotal;
     } else if (nTotal < kHourThreshold) {
@@ -272,11 +272,11 @@ void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
     } else {
         do {
             nTotal -= kMinutesPerHour;
-            sceScfSub005f3460(pClock);
+            sceScfAdvanceHour(pClock);
         } while (nTotal >= kHourThreshold);
         pClock->minute = (unsigned char)nTotal;
     }
-    sceScfSub005f3218(pClock);
+    sceScfClockToBcd(pClock);
 }
 
 // 0x005f3650

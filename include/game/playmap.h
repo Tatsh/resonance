@@ -42,9 +42,8 @@
  * free with the literal `PlayMap` at `0x007d0dd0`, and a tag names the class that declares the
  * operator.
  *
- * Every slot below whose verb is unrecovered keeps its table index as its title. The index is part
- * of the class layout, so a slot is declared whether or not its purpose is known, and the comment
- * records the behaviour that was recovered instead.
+ * Each slot below records its table index. The index is part of the class layout, and the method
+ * titles are inferred from the bodies of the base and the three subclasses and from their callers.
  */
 class PlayMap {
 public:
@@ -90,147 +89,157 @@ public:
     /**
      * Slot 2. Appends one step, its distance from the previous step, and a label.
      *
-     * The body appends `nValue - mSteps.back()` to mSectionLengths, then nValue to mSteps, then the
-     * label to mSectionNames, so mSectionLengths stores the gap between consecutive steps and is
-     * one element behind mSteps until this call completes. Reading mSteps.back() is unconditional,
-     * so the first call requires a step to already be present.
+     * The body appends `nPosition - mSteps.back()` to mSectionLengths, then nPosition to mSteps,
+     * then the label to mSectionNames. mSectionLengths therefore stores the gap between consecutive
+     * steps and is one element behind mSteps until this call completes. Reading mSteps.back() is
+     * unconditional, and the first call requires a step to already be present.
      *
      * The second parameter is passed by value. The body copy-constructs it into mSectionNames
      * through HxStr::HxStr(const HxStr &) at `0x004b7b50` and then releases the parameter's own
      * buffer, which is this toolchain destroying a by-value class parameter in the callee.
      *
-     * @param nValue The step position.
+     * @param nPosition The step position.
      * @param strLabel The label, passed by value.
      * @ghidraAddress 0x001268b0
      */
-    virtual void Slot2(int nValue, HxStr strLabel);
+    virtual void AddStep(int nPosition, HxStr strLabel);
 
     /**
      * Slot 3. Stores its argument in mBarCount and does nothing else.
      *
+     * @param nBarCount The value to store.
      * @ghidraAddress 0x00127488
      */
-    virtual void Slot3(int nValue);
+    virtual void SetBarCount(int nBarCount);
 
     /**
-     * Slot 4. Empty in this class.
+     * Slot 4. Empty in this class. PlayMapRepeatRing resets its spans here.
      *
      * @ghidraAddress 0x00127398
      */
-    virtual void Slot4();
+    virtual void ResetSpans();
 
     /**
-     * Slot 5. Maps a position into the sequence, pure here and overridden by every subclass.
+     * Slot 5. Maps a bar to its position in the sequence, pure here and overridden by every
+     * subclass.
      *
-     * The signature is recovered from both sides. Slots 12 and 13 forward their own argument
-     * without touching a1 and then consume the result in v0, and each override reads that argument
-     * and returns a value. PlayMapRing at `0x0012e408` returns `(nValue + mBarCount) %
-     * mSteps.back()`, which is the wrap its name implies.
+     * The signature is recovered from both sides. GetPatternIndex() and GetAbsoluteSectionIndex()
+     * forward their own argument without touching a1 and then consume the result in v0, and each
+     * override reads that argument and returns a value. PlayMapRing at `0x0012e408` returns
+     * `(nBar + mBarCount) % mSteps.back()`, the wrap its name implies.
      *
-     * Slots 12 and 13 take the delta for this dispatch into a0 rather than a1, which is what
-     * preserves the forwarded argument and is the reason the argument is recoverable at all.
+     * GetPatternIndex() and GetAbsoluteSectionIndex() take the delta for this dispatch into a0
+     * rather than a1. Using a0 preserves the forwarded argument and is the reason the argument is
+     * recoverable at all.
      *
-     * @param nValue The position to map.
+     * @param nBar The bar to map.
      * @return The mapped position.
      */
-    virtual int Slot5(int nValue) = 0;
+    virtual int MapBar(int nBar) = 0;
 
     /**
-     * Slot 6. Collects the positions of one span into mUnknown2c, pure here.
+     * Slot 6. Collects the bars that play one position into mFoundBars, pure here.
      *
-     * The signature comes from PlayMapRing at `0x0012dad8`, which clears mUnknown2c, walks a value
-     * from the first argument upward in steps of mSteps.back() while it remains below the third,
-     * appends every value not below the second, and returns the vector itself. The return is the
-     * address of the member, which is a reference in the original.
+     * The signature comes from PlayMapRing at `0x0012dad8`. The override clears mFoundBars, walks
+     * a value from the first argument upward in steps of mSteps.back() while it remains below the
+     * third, appends every value not below the second, and returns the vector itself. The return is
+     * the address of the member, which is a reference in the original.
      *
      * @param nStart The first position.
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
-     * @return mUnknown2c.
+     * @return mFoundBars.
      */
-    virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd) = 0;
+    virtual std::vector<int> &FindBarsPlaying(int nStart, int nMin, int nEnd) = 0;
 
     /**
      * Slot 7. Returns its first argument unchanged.
      *
-     * The second parameter is proven by PlayMapLinear::Slot7(), which indexes its per-set table
-     * with it, and by PhraseMgr's routine at `0x001c0298`, which passes its track there.
+     * PlayMapLinear moves the position to the step linked with its own in a step ring. The second
+     * parameter is proven by PlayMapLinear::MapToLinkedStep() indexing its per-set table with it,
+     * and by PhraseMgr's routine at `0x001c0298` passing its track there.
      *
-     * @param nValue The position to map.
+     * @param nPosition The position to map.
      * @param nSet The set PlayMapLinear selects its table with. Not read here.
-     * @return nValue.
+     * @return nPosition.
      * @ghidraAddress 0x001273b8
      */
-    virtual int Slot7(int nValue, int nSet);
+    virtual int MapToLinkedStep(int nPosition, int nSet);
 
     /**
-     * Slot 8. Returns the last element of mSteps.
+     * Slot 8. Returns the last element of mSteps, the end of the positions the map has set out.
      *
      * @ghidraAddress 0x001273c0
      */
-    virtual int Slot8();
+    virtual int GetExtent();
 
     /**
-     * Slot 9. Forwards to slot 8 through the table rather than calling it directly.
+     * Slot 9. Forwards to GetExtent() through the table rather than calling it directly.
+     *
+     * Callers read the result as the last bar of the level.
      *
      * @ghidraAddress 0x001273d0
      */
-    virtual int Slot9();
+    virtual int GetEndBar();
 
     /**
-     * Slot 10. Returns the number of elements in mSteps.
+     * Slot 10. Returns the number of sections, one less than the number of elements in mSteps.
      *
      * @ghidraAddress 0x00127440
      */
-    virtual int Slot10();
+    virtual int GetSectionCount();
 
     /**
      * Slot 11. Returns its argument unchanged.
      *
+     * PlayMapLinear returns the section its recorded pattern plays at the index.
+     *
+     * @param nIndex The index into the pattern.
+     * @return nIndex.
      * @ghidraAddress 0x00127458
      */
-    virtual int Slot11(int nValue);
+    virtual int GetPatternSection(int nIndex);
 
     /**
-     * Slot 12. Reports the index of the step at or before the position slot 5 returns.
+     * Slot 12. Reports the index of the step at or before the position MapBar() returns.
      *
-     * The body forwards its argument to slot 5 through the table, searches mSteps for the value
+     * The body forwards its argument to MapBar() through the table, searches mSteps for the value
      * that returns with an upper bound, and reports the distance from the start to the element
-     * before the result. Slot 5 is pure here, so the search key comes from whichever subclass is
+     * before the result. MapBar() is pure here. The search key comes from whichever subclass is
      * running.
      *
-     * @param nValue The position to map through slot 5.
+     * @param nBar The bar to map through MapBar().
      * @return The step index.
      * @ghidraAddress 0x001276a0
      */
-    virtual int Slot12(int nValue);
+    virtual int GetPatternIndex(int nBar);
 
     /**
      * Slot 13. Reports the same step index with a multiple of the last step folded in.
      *
-     * The body performs the search slot 12 performs, forwarding the same argument to slot 5, and
-     * then adds `nTotal * (nValue - nValue % nTotal)` to the index, where nTotal is mSteps.back().
-     * Multiplying by nTotal after rounding nValue down to a multiple of nTotal scales the term by
-     * nTotal twice, which reads as an error and is what both the disassembly and the decompiler
-     * agree the binary computes.
+     * The body performs the search GetPatternIndex() performs, forwarding the same argument to
+     * MapBar(), and then adds `nTotal * (nBar - nBar % nTotal)` to the index, where nTotal is
+     * mSteps.back(). Multiplying by nTotal after rounding nBar down to a multiple of nTotal scales
+     * the term by nTotal twice. The doubling reads as an error, and both the disassembly and the
+     * decompiler agree the binary computes it.
      *
-     * @param nValue The position to map through slot 5 and to fold in.
+     * @param nBar The bar to map through MapBar() and to fold in.
      * @return The step index plus the folded term.
      * @ghidraAddress 0x00127700
      */
-    virtual int Slot13(int nValue);
+    virtual int GetAbsoluteSectionIndex(int nBar);
 
     /**
      * Slot 14. Returns zero, ignoring its argument.
      *
      * The parameter is proven by HudPosition's update at `0x0041b060`, which passes the current
-     * bar in a1, and by `PlayMapLinear::Slot14`, which reads it.
+     * bar in a1, and by `PlayMapLinear::IsLooping`, an override that reads it.
      *
-     * @param nValue The position.
+     * @param nBar The bar.
      * @return Zero here.
      * @ghidraAddress 0x00127460
      */
-    virtual int Slot14(int nValue);
+    virtual int IsLooping(int nBar);
 
     /**
      * Slot 15. Empty in this class, and it takes an argument the empty body cannot reveal.
@@ -239,10 +248,10 @@ public:
      * list. PlayMapRepeatRing's override at `0x0012bc48` multiplies a1 by a step gap before storing
      * the result, so the member takes an int.
      *
-     * @param nValue The multiplier the override applies to a step gap.
+     * @param nRepeats The multiplier the override applies to a step gap.
      * @ghidraAddress 0x00127468
      */
-    virtual void Slot15(int nValue);
+    virtual void CloseSpan(int nRepeats);
 
     /**
      * Slot 16. Returns zero, ignoring its argument.
@@ -253,7 +262,7 @@ public:
      * @param nBar The bar.
      * @ghidraAddress 0x00127470
      */
-    virtual int Slot16(int nBar);
+    virtual int EndLoop(int nBar);
 
     /**
      * Slot 17. Returns zero, ignoring its argument.
@@ -264,23 +273,23 @@ public:
      * @param nBar The bar.
      * @ghidraAddress 0x00127478
      */
-    virtual int Slot17(int nBar);
+    virtual int StartLoop(int nBar);
 
     /**
      * Slot 18. Returns zero, ignoring its argument.
      *
-     * Both overrides forward a1 to another slot of this table.
+     * Both overrides forward a1 to EndLoop() and StartLoop().
      *
      * @param nBar The bar.
      * @ghidraAddress 0x00127480
      */
-    virtual int Slot18(int nBar);
+    virtual int ToggleLoop(int nBar);
 
     /**
      * Report the index of the step at or before a position that has already been mapped.
      *
-     * Slot12() performs the same search on the result of Slot5(). This routine receives the
-     * mapped position directly. PhraseDatabase::GetStepValue() is the recovered caller.
+     * GetPatternIndex() performs the same search on the result of MapBar(). This routine receives
+     * the mapped position directly. PhraseDatabase::GetStepValue() is the recovered caller.
      *
      * @param nPosition The mapped position.
      * @return The index of the last step at or before nPosition, or -1 when every step follows it.
@@ -292,7 +301,7 @@ public:
      * Report whether a bar maps exactly onto a step.
      *
      * @param nBar The bar.
-     * @return Non-zero when Slot5() of the bar is an element of mSteps. A negative bar reports
+     * @return Non-zero when MapBar() of the bar is an element of mSteps. A negative bar reports
      *         zero.
      * @ghidraAddress 0x001274d8
      */
@@ -328,7 +337,7 @@ public:
     int FollowingStepBar(int nBar);
 
     /**
-     * The number of bars, which Slot3() stores.
+     * The number of bars SetBarCount() stores.
      *
      * Public because BGTrackGraph::BuildSequencer() reads it directly at `0x0013fc7c` as the bound
      * of its walk over the track's bars, and the image has no accessor. PlayMapRing adds it to a
@@ -340,32 +349,34 @@ public:
     /**
      * Ascending sequence of positions.
      *
-     * Slots 8, 10, 12, and 13 read the last element, the count, and an upper bound over this
-     * vector, and slot 2 appends to it. The element type is int, from the four-byte stride of every
-     * access. Public because the PhraseDatabase constructor at `0x001b72d8` reads its last element
-     * and its count directly and the image exposes no accessor. A friend declaration fits the image
-     * equally well. +0x04
+     * GetExtent(), GetSectionCount(), GetPatternIndex(), and GetAbsoluteSectionIndex() read the
+     * last element, the count, and an upper bound over this vector, and AddStep() appends to it.
+     * The element type is int, from the four-byte stride of every access. Public because the
+     * PhraseDatabase constructor at `0x001b72d8` reads its last element and its count directly and
+     * the image exposes no accessor. A friend declaration fits the image equally well. +0x04
      */
     std::vector<int> mSteps;
 
     /**
      * Length of each section, the gap between one step and the previous one. +0x10
      *
-     * Slot2() appends to it. Public because HudPosition's constructor at `0x00419f88` reads it
-     * directly, indexed by Slot11(), to size each section of the position display, and the image
-     * has no accessor for it.
+     * AddStep() appends to it. Public because HudPosition's constructor at `0x00419f88` reads it
+     * directly, indexed by GetPatternSection(), to size each section of the position display, and
+     * the image has no accessor for it.
      */
     std::vector<int> mSectionLengths;
 
     /**
-     * Label of each section, the one Slot2() receives with the step. +0x1c
+     * Label of each section, the one AddStep() receives with the step. +0x1c
      *
-     * Public because HudPosition's constructor reads it directly, indexed by Slot11(), for the
-     * section labels of the position display, and the image has no accessor for it.
+     * Public because HudPosition's constructor reads it directly, indexed by GetPatternSection(),
+     * for the section labels of the position display, and the image has no accessor for it.
      */
     std::vector<HxStr> mSectionNames;
 
 protected:
-    int mUnknown28;              // +0x28
-    std::vector<int> mUnknown2c; // +0x2c
+    // Zeroed by the constructor. No routine of the class or its subclasses reads it.
+    int mUnusedValue; // +0x28
+    // The bars FindBarsPlaying() collects and returns by reference.
+    std::vector<int> mFoundBars; // +0x2c
 };

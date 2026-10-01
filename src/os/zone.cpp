@@ -6,10 +6,6 @@
 #include "os/log.h"
 #include "os/mem.h"
 
-// The original tags pass "zone.cpp" with these line numbers: ZoneCreate at 139, FreeAllZones at
-// 74, ZoneDelete at 181, ZoneAlloc at 301 and 304, ZoneFree at 336, and ZoneGrabTemp at 399. The
-// calls below pass the rebuilt file and lines instead.
-
 namespace {
 
 // A zone's usable start is rounded up to a cache-line boundary, which is why

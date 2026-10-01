@@ -61,7 +61,7 @@ public:
      * @return 1.
      * @ghidraAddress 0x001a9ed0
      */
-    virtual int Slot4();
+    virtual int DisplacesSiblings();
 
     /**
      * @ghidraAddress 0x001aa1f8

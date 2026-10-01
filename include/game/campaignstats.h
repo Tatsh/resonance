@@ -345,7 +345,7 @@ public:
      * when no level has it, appends a new level through a stack LevelStats reset for it. Unlike
      * RebuildLevelList() the pass does not test IsAlbumLevel(). RecountAll() then follows, expanded
      * inline. Public because
-     * MetExpansionPakScreen::OnUnknownSlot26() calls it on every persona once the expansion disc
+     * MetExpansionPakScreen::UpdateIdle() calls it on every persona once the expansion disc
      * is mounted.
      *
      * @ghidraAddress 0x00142070

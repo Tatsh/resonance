@@ -64,9 +64,9 @@ public:
      * Slot 5. A loading game names the song from MetRemixManager's current record. Any other game
      * names it from configuration code 0x325, or code 0x327 when that is wider than the text
      * wraps at. The players are ordered by descending score through an insertion into
-     * mUnknownc4. Outside a net game, the persona names and burn textures come from
-     * MetFrontEndState::mUnknown00 in order, and each persona is attached to its burn slot. Scores
-     * show only when GameParams::mUnknown1c is 1. Rows past the player count are emptied and
+     * mPlayerOrder. Outside a net game, the persona names and burn textures come from
+     * MetFrontEndState::mPersonas in order, and each persona is attached to its burn slot. Scores
+     * show only when GameParams::mPlayMode is 1. Rows past the player count are emptied and
      * their meshes hidden.
      *
      * @ghidraAddress 0x00300268
@@ -78,7 +78,7 @@ public:
      *
      * @ghidraAddress 0x00306998
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views, the headings, and the four player rows.
@@ -93,12 +93,12 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    Rnd::Text *mUnknown8c;               // +0x8c, the song name
-    Rnd::Text *mUnknown90;               // +0x90, the difficulty
-    std::vector<Rnd::Text *> mUnknown94; // +0x94, the score texts
-    std::vector<Rnd::Text *> mUnknowna0; // +0xa0, the name texts
-    std::vector<Rnd::Mat *> mUnknownac;  // +0xac, the persona picture materials
-    std::vector<Rnd::Mesh *> mUnknownb8; // +0xb8, the tinted meshes
-    std::vector<int> mUnknownc4;         // +0xc4, the player indices by descending score
-    std::vector<Color> mUnknownd0;       // +0xd0, the player colours
+    Rnd::Text *mSongText;                      // +0x8c, the song name
+    Rnd::Text *mDifficultyText;                // +0x90, the difficulty
+    std::vector<Rnd::Text *> mScoreTexts;      // +0x94, the score texts
+    std::vector<Rnd::Text *> mNameTexts;       // +0xa0, the name texts
+    std::vector<Rnd::Mat *> mPictureMaterials; // +0xac, the persona picture materials
+    std::vector<Rnd::Mesh *> mPlayerMeshes;    // +0xb8, the tinted meshes
+    std::vector<int> mPlayerOrder;             // +0xc4, the player indices by descending score
+    std::vector<Color> mPlayerColors;          // +0xd0, the player colours
 };

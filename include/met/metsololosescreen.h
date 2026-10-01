@@ -63,7 +63,7 @@ public:
      * the retry button `egb_01.but` and the levels button `egb_02.but`, recording their two prompt
      * keys. When MetFrontEndState's `+0x0c` and `+0x10` flags are both 1, `+0x10` is cleared,
      * MetGlobalSettingsSaverScreen::StartSave() runs with this screen as the one to return to, and
-     * mUnknown50 is cleared. Otherwise ShowButtons() runs.
+     * mActivatePending is cleared. Otherwise ShowButtons() runs.
      *
      * @ghidraAddress 0x00399f88
      */
@@ -73,7 +73,7 @@ public:
      * Move along the button ring, or act on the selection. Slot 19.
      *
      * A previous or next command steps the button list and shows the selected button's prompt. A
-     * select command clears the active panel, records 2 in mUnknown18, alternates the selected
+     * select command clears the active panel, records 2 in mExitChoice, alternates the selected
      * button's state twice at 30-frame intervals, and clears the prompt.
      *
      * @param pCommand The command to handle.
@@ -111,19 +111,19 @@ public:
      * @param pButton Not read.
      * @ghidraAddress 0x0039a6e8
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Leave for the load screen or the stage select once the exit has finished. Slot 36.
      *
-     * With the retry button selected and mUnknown18 set by the select command, MetFrontEndState's
+     * With the retry button selected and mExitChoice set by the select command, MetFrontEndState's
      * return screen becomes this screen and `MetLoadGameScreen` is pushed and activated. Otherwise
      * the renderer resolves its arena view, runs its two empty hooks, and `MetSoloStagesScreen` is
      * pushed and activated. The selection is then cleared.
      *
      * @ghidraAddress 0x0039a880
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
 private:
     // 0x0039a4e8
@@ -134,5 +134,5 @@ private:
     void ShowButtons();
 
     // The retry and levels buttons. +0x8c
-    MetButtonList *mUnknown8c;
+    MetButtonList *mButtonList;
 };

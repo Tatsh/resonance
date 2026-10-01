@@ -25,10 +25,10 @@ SimplifiedGamePowerupPlacer::~SimplifiedGamePowerupPlacer() {
 }
 
 // 0x001cdeb8
-void SimplifiedGamePowerupPlacer::OnUnknownSlot8() {
+void SimplifiedGamePowerupPlacer::DeployPowerup() {
     const int nTick = Application::shared()->GetSongClock()->SongTick();
     const int nBar = nTick / Mid::MBT(kTicksPerBar).mTick;
-    if (nBar < Application::shared()->GetPlayMap()->Slot9()) {
-        mCollection->Deploy(mOwner->Slot4(), nBar);
+    if (nBar < Application::shared()->GetPlayMap()->GetEndBar()) {
+        mCollection->Deploy(mOwner->GetTrack(), nBar);
     }
 }

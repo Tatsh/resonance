@@ -34,7 +34,7 @@
  * declaration on this class would fit the image equally well as the promotion. The other three
  * have no traced reader and stay private.
  *
- * mUnknown14 is the one member that neither Save(), Load(), nor operator=() touches, and the
+ * mUnsavedString is the one member that neither Save(), Load(), nor operator=() touches, and the
  * compiler-generated copy constructor is the only routine in the image that copies it.
  *
  * This class is declared because several network packets embed one.
@@ -93,7 +93,7 @@ public:
     virtual void Load(IBStream *pStream);
 
     /**
-     * Copy every member except mUnknown14 from another instance.
+     * Copy every member except mUnsavedString from another instance.
      *
      * Self-assignment is not tested, and the routine returns this instance.
      *
@@ -104,7 +104,7 @@ public:
     GameParams &operator=(const GameParams &other);
 
     /**
-     * Compare every member except mUnknown14 with another instance, the set operator=() copies.
+     * Compare every member except mUnsavedString with another instance, the set operator=() copies.
      *
      * The level name and the arena are compared as strings and the other seven words as integers,
      * in declaration order, stopping at the first difference. The shipped program does not call it,
@@ -121,8 +121,8 @@ public:
      *
      * Not virtual. The labels are `GameParams:`, ` level=`, ` arena=`, ` friends=`, then ` game` or
      * ` jam` for a play mode of 1 or anything else, ` difficulty=`, ` constrain-jam` when
-     * mUnknown24 is set, and then `netgame=`, `loadinggame=`, and `jukeboxmode=`, each of the last
-     * three written with no separating space. SPJoinAcceptPacket, BSLoadLevelPacket, and
+     * mConstrainJam is set, and then `netgame=`, `loadinggame=`, and `jukeboxmode=`, each of the
+     * last three written with no separating space. SPJoinAcceptPacket, BSLoadLevelPacket, and
      * SCLoadLevelPacket call it from their own Print().
      *
      * @param stream The stream to write to.
@@ -146,21 +146,28 @@ public:
     HxStr mArenaName;
 
 private:
-    int mUnknown10;   // +0x10
-    HxStr mUnknown14; // +0x14
+    // Labelled `friends=` by Print(). +0x10
+    int mFriends;
+    // Neither saved, loaded, assigned, nor compared. Only the copy constructor and the destructor
+    // touch it. +0x14
+    HxStr mUnsavedString;
 
 public:
-    int mUnknown1c;  /*!< Driven by GameManagerImpl slots 29 and 31, the play mode. +0x1c */
+    int mPlayMode;   /*!< Driven by GameManagerImpl slots 29 and 31, the play mode. +0x1c */
     int mDifficulty; /*!< Driven by GameManagerImpl slots 28 and 30, the difficulty. +0x20 */
 
 private:
-    // A flag word. Load() normalises the transferred word to 0 or 1, and every access to this
-    // member and the three below, the constructor's clears included, is a full word (sw/lw). +0x24
-    int mUnknown24;
+    // Labelled ` constrain-jam` by Print() when set. Load() normalises the transferred word to 0
+    // or 1, and every access to this member and the three below, the constructor's clears
+    // included, is a full word (sw/lw). +0x24
+    int mConstrainJam;
 
 public:
-    /** Written by GameManagerImpl::SetGameMode() as the test for `net`, 0 or 1. +0x28 */
-    int mUnknown28;
+    /**
+     * Written by GameManagerImpl::SetGameMode() as the test for `net`, 0 or 1, and labelled
+     * `netgame=` by Print(). +0x28
+     */
+    int mNetGame;
 
     /**
      * Set while a saved game is loading, labelled `loadinggame=` by Print(). +0x2c
@@ -197,8 +204,8 @@ int GetDoWinSequence();
  * Enable or disable the win sequence.
  *
  * ScriptDoWinSequenceCheat() and PyInvokeDoWinSequenceCheat() pass 1, the MetRenderer constructor
- * and the routine at `0x0036bcb8` pass 0, and MetLoadGameScreen::Slot5() passes 1 or 0 by the
- * result of the call before it. The title is inferred.
+ * and the routine at `0x0036bcb8` pass 0, and MetLoadGameScreen::EnterAndShow() passes 1 or 0 by
+ * the result of the call before it. The title is inferred.
  *
  * @param nDoWinSequence Non-zero to enable the win sequence.
  * @ghidraAddress 0x00187b10

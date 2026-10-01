@@ -52,8 +52,7 @@ namespace Rnd {
  * DumpText() is a stub the original author never finished. It emits the three base dumps and then
  * the two literals "[Tunnel]\n" and "TODO\n", and writes no member at all. **No member of this
  * class has a name anywhere in the image**, because the text dump is the only routine that would
- * have supplied one. Members are titled by the role their routines give them, or by their offset
- * where no role is recovered.
+ * have supplied one. Member titles follow the role their routines give them.
  *
  * Load() accepts a bounded version range rather than an upper bound alone, which is the only class
  * in the renderer that does. It reports "Can't load new Tunnel" above the range and "Can't load
@@ -255,8 +254,8 @@ public:
     /**
      * Bring every slice of the current window up to the advanced slice.
      *
-     * Walks the mSliceCount slices starting at mUnknownbc and calls AdvanceRing() for each one
-     * whose mUnknown88 entry differs from its own index.
+     * Walks the mSliceCount slices starting at mWindowStartSlice and calls AdvanceRing() for each
+     * one whose mPlacedSlices entry differs from its index.
      *
      * @ghidraAddress 0x00476f48
      */
@@ -265,10 +264,10 @@ public:
     /**
      * Advance one slice and refresh the section frames.
      *
-     * A slice that differs from mUnknown7c retires the previous slice by writing the 99999999
-     * sentinel into its mUnknown88 entry, then reloads mUnknown80 and mUnknown84.
+     * A slice that differs from mPlacingSlice retires the previous slice by writing the 99999999
+     * sentinel into its mPlacedSlices entry, then reloads mPlacingFrame and mPlacingColumn.
      * SetRingSectionFrames() runs either way. The step counter then either expires, which records
-     * the slice as current, or decrements and accumulates one step into mUnknown80.
+     * the slice as current, or decrements and accumulates one step into mPlacingFrame.
      *
      * @param nSlice The slice to advance to.
      * @ghidraAddress 0x00476fe0
@@ -357,8 +356,8 @@ public:
      * Replace the path the tunnel follows.
      *
      * Moves the reference from the previous path to the new one, calls EndFrame() on a non-null
-     * path and discards the result, and fills mUnknown88 with the 99999999 sentinel so that every
-     * slice is rebuilt.
+     * path and discards the result, and fills mPlacedSlices with the 99999999 sentinel to force a
+     * rebuild of every slice.
      *
      * @param pPath The path, or null.
      * @ghidraAddress 0x004770d0
@@ -410,24 +409,24 @@ public:
      * Every seeker releases its references, BuildMesh() runs, and every seeker is attached again.
      * The program lists no caller.
      *
-     * @param flUnknown38 The value of mUnknown38.
+     * @param flRingRadius The value of mRingRadius.
      * @param nRingCount The ring count.
      * @param nSliceCount The slice count.
      * @param nLodCount The value of mLodCount.
-     * @param flUnknown48 The value of mUnknown48.
-     * @param flUnknown4c The value of mUnknown4c.
-     * @param flUnknown50 The value of mUnknown50.
-     * @param flUnknown54 The value of mUnknown54.
+     * @param flFloorPull The value of mFloorPull.
+     * @param flLaneEdgeGap The value of mLaneEdgeGap.
+     * @param flFloorEdgeWeight The value of mFloorEdgeWeight.
+     * @param flCellEdgeBlendPerStep The value of mCellEdgeBlendPerStep.
      * @ghidraAddress 0x00477160
      */
-    void Configure(float flUnknown38,
+    void Configure(float flRingRadius,
                    int nRingCount,
                    int nSliceCount,
                    int nLodCount,
-                   float flUnknown48,
-                   float flUnknown4c,
-                   float flUnknown50,
-                   float flUnknown54);
+                   float flFloorPull,
+                   float flLaneEdgeGap,
+                   float flFloorEdgeWeight,
+                   float flCellEdgeBlendPerStep);
 
     /**
      * Convert a frame to a slice.
@@ -497,9 +496,9 @@ private:
     void LoadSectionMaterials(Stream &stream);
 
     // Rebuild every generated mesh. The material and first vertex colour of each chain are kept
-    // across the rebuild. The ring transforms and lane profiles are regenerated from mUnknown38 and
-    // the four lane parameters, and mSliceSteps becomes 2 to the power of one less than mLodCount.
-    // 0x004699c0
+    // across the rebuild. The ring transforms and lane profiles are regenerated from mRingRadius
+    // and the four lane parameters, and mSliceSteps becomes 2 to the power of one less than
+    // mLodCount. 0x004699c0
     void BuildMesh();
 
     // Build one chain per slice, "[<name>_lat<slice>]", whose finest level holds a block of
@@ -519,11 +518,11 @@ private:
     // Empty the per-material section lists. 0x0046acf0.
     void ClearMaterialSectionLists();
 
-    // Place column mUnknown84 of the slice mUnknown7c. The path is evaluated at mUnknown80, every
-    // lane profile is carried through it into the slice mesh, and the edges of the neighbouring
-    // cells follow. The first and last columns also close the ends of each lane block. Column zero,
-    // the last one written, resynchronises the slice mesh and every cell mesh of the slice.
-    // 0x0046c638
+    // Place column mPlacingColumn of the slice mPlacingSlice. The path is evaluated at
+    // mPlacingFrame, every lane profile is passed through it into the slice mesh, and the edges of
+    // the neighbouring cells follow. The first and last columns also close the ends of each lane
+    // block. Column zero, the last one written, resynchronises the slice mesh and every cell mesh
+    // of the slice. 0x0046c638
     void SetRingSectionFrames();
 
     // A signed remainder moved into [0, nCount), the form every ring and slice lookup uses.
@@ -534,8 +533,8 @@ private:
 
     // The cross-section of one lane in the ring frame, a trough of three segments. mPoints[0] and
     // mPoints[3] are the lane edges, drawn from the ring translations towards the neighbouring
-    // rings by mUnknown4c. mPoints[1] and mPoints[2] blend each edge by mUnknown50 with the ring
-    // translation pulled towards the axis by mUnknown48. mNormals[i] is the unit normal of the
+    // rings by mLaneEdgeGap. mPoints[1] and mPoints[2] blend each edge by mFloorEdgeWeight with the
+    // ring translation pulled towards the axis by mFloorPull. mNormals[i] is the unit normal of the
     // segment from mPoints[i] to mPoints[i + 1] in the plane of the ring. The record is 0x70 bytes.
     struct LaneProfile {
         Vector3 mPoints[4];
@@ -543,21 +542,20 @@ private:
     };
 
     // No class derives from Rnd::Tunnel. The three seek records read its members as friends, and
-    // Renderer reads the two public counts. The order below is the recovered offset order.
-    // Every unknown title is the offset itself, because DumpText() is a stub. The initial value
-    // each member receives from the constructor is part of the evidence about it. A member with no
-    // recorded value is one the constructor does not write, or one it fills through a container
-    // allocation.
+    // Renderer reads the two public counts. The order below is the recovered offset order. The
+    // initial value each member receives from the constructor is part of the evidence about it. A
+    // member with no recorded value is one the constructor does not write, or one it fills through
+    // a container allocation.
 
-    float mUnknown38; // +0x38 Starts at 1.0f. The ring radius BuildMesh() places the rings at.
+    float mRingRadius; // +0x38 Starts at 1.0f. The ring radius BuildMesh() places the rings at.
 
 public:
-    /*!< The ring count, 3 at construction. It is the modulus of the inner index of mUnknowna4, the
-         modulus of the index of mUnknownc0, and the row stride of mUnknowna4. Public because the
+    /*!< The ring count, 3 at construction. It is the modulus of the inner index of mCellChains, the
+         modulus of the index of mRingXfms, and the row stride of mCellChains. Public because the
          Renderer constructor reads it at `0x0042c9c8` and the image has no accessor. */
     int mRingCount;
-    /*!< The slice count, 0 at construction. It is the modulus of the index of mUnknownb0, the
-         modulus of the outer index of mUnknowna4, and the length of the array mUnknown88
+    /*!< The slice count, 0 at construction. It is the modulus of the index of mSliceChains, the
+         modulus of the outer index of mCellChains, and the length of the array mPlacedSlices
          addresses. Public on the same evidence, read at `0x0042c9d4`. */
     int mSliceCount;
 
@@ -565,10 +563,11 @@ private:
     // +0x44 Starts at 2. The level count of every generated chain and the length of
     // mLodScreenSizes.
     int mLodCount;
-    float mUnknown48; // +0x48 Starts at 0.1f. The inward pull of the lane floor.
-    float mUnknown4c; // +0x4c Starts at 0.1f. The gap each lane edge keeps from the ring boundary.
-    float mUnknown50; // +0x50 Starts at 0.25f. The weight of the edge in the floor points.
-    float mUnknown54; // +0x54 Starts at 0.01f. The cell edge blend per slice step.
+    float mFloorPull; // +0x48 Starts at 0.1f. The inward pull of the lane floor.
+    // +0x4c Starts at 0.1f. The gap between each lane edge and the ring boundary.
+    float mLaneEdgeGap;
+    float mFloorEdgeWeight; // +0x50 Starts at 0.25f. The weight of the edge in the floor points.
+    float mCellEdgeBlendPerStep; // +0x54 Starts at 0.01f. The cell edge blend per slice step.
 public:
     /*!< The path the tunnel follows, 0 at construction, which ProjectSectionToCameraSpace() and
          GetPathXfm() evaluate through Rnd::TransAnim::EvalFrame(). A null path makes both write the
@@ -577,7 +576,9 @@ public:
     TransAnim *mPath;
 
 private:
-    int mUnknown5c; // +0x5c Starts at 0. Copy() carries it.
+    // +0x5c Starts at 0, and Copy() copies it where Save() writes mWindowStartSlice. No other
+    // routine reads it. The name is inferred from that position.
+    int mStartSlice;
 
 public:
     /*!< The slices at the far end of the window that DrawSelf() skips, 0 at construction. Save(),
@@ -610,20 +611,20 @@ public:
 private:
     // +0x7c Starts at 99999999, which is a hand-written sentinel in the same style as the
     // -9999999.0f Rnd::ParticleSys uses for an unset frame. The ring advance at 0x00476fe0 compares
-    // the requested slice against it and writes the same sentinel into the mUnknown88 entry of the
-    // slice it retires.
-    int mUnknown7c;
+    // the requested slice against it and writes the same sentinel into the mPlacedSlices entry of
+    // the slice it retires.
+    int mPlacingSlice;
     // +0x80 Starts at 0. The path frame of the column being placed. The ring advance reloads it
     // with the slice scaled by mSliceFrames and adds mSliceFrames / mSliceSteps per column.
-    float mUnknown80;
+    float mPlacingFrame;
     // +0x84 Starts at 0. The column being placed, which the ring advance counts down from
     // mSliceSteps.
-    int mUnknown84;
+    int mPlacingColumn;
     // +0x88 One slice identifier per slice, which the scroll at 0x00476f48 reads, the ring advance
     // writes, and SetPath() fills with the 99999999 sentinel.
-    std::vector<int> mUnknown88;
-    // +0x94 mUnknown54 times mSliceSteps, set by BuildMesh(). SetRingSectionFrames() blends the
-    // end vertices of each cell towards their neighbours by it.
+    std::vector<int> mPlacedSlices;
+    // +0x94 mCellEdgeBlendPerStep times mSliceSteps, set by BuildMesh(). SetRingSectionFrames()
+    // blends the end vertices of each cell towards their neighbours by it.
     float mCellEdgeBlend;
     // +0x98 Starts at 0, and BuildMesh() sets it to the reciprocal of mSliceFrames.
     float mSlicesPerFrame;
@@ -636,16 +637,16 @@ private:
     // lookup at 0x00477388, which then returns the finest level of the chain. The 0xc-byte stride
     // and the clear at 0x0046acf0 destroying each slot through the chain destructor at 0x00476a80
     // are what establish the element type.
-    std::vector<TunnelMeshChain> mUnknowna4;
+    std::vector<TunnelMeshChain> mCellChains;
     // +0xb0 One chain per slice, addressed as `[slice % mSliceCount]` by the lookup at 0x004773e8
-    // on the same evidence as mUnknowna4.
-    std::vector<TunnelMeshChain> mUnknownb0;
+    // on the same evidence as mCellChains.
+    std::vector<TunnelMeshChain> mSliceChains;
     // +0xbc Starts at 0. The first slice of the window the scroll at 0x00476f48 walks, which runs
     // mSliceCount slices from here.
-    int mUnknownbc;
+    int mWindowStartSlice;
     // +0xc0 One transform per ring. The tangent interpolation at 0x00477538 reads the translation
     // row of entry `i` and entry `(i + 1) % mRingCount` and blends the two on the vector unit.
-    std::vector<Transform> mUnknownc0;
+    std::vector<Transform> mRingXfms;
     // +0xcc One lane profile per ring, generated by BuildMesh().
     std::vector<LaneProfile> mLaneProfiles;
     // +0xd8 Drawables scheduled by frame, kept in ascending frame order by AddEvent(). Update()

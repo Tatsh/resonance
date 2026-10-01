@@ -45,14 +45,14 @@ void PhrasePacket::Save(OBStream &stream) {
 
     unsigned int tr = mTr;
     int b = mB;
-    int unknown0c = mUnknown0c;
+    int clientId = mClientId;
     (stream.Write(&tr, sizeof(tr)).Write(&b, sizeof(b)) << mPhrase)
-        .Write(&unknown0c, sizeof(unknown0c));
+        .Write(&clientId, sizeof(clientId));
 }
 
 // 0x003e6ca8
 void PhrasePacket::Load(IBStream &stream) {
     Packet::Load(stream);
     (stream.Read(&mTr, sizeof(mTr)).Read(&mB, sizeof(mB)) >> mPhrase)
-        .Read(&mUnknown0c, sizeof(mUnknown0c));
+        .Read(&mClientId, sizeof(mClientId));
 }

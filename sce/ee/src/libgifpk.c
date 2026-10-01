@@ -173,16 +173,15 @@ unsigned long long *sceGifPkReserve(sceGifPkData *pPacket, int nWords) {
 
 // 0x006223f8
 void sceGifPkRef(
-    sceGifPkData *pPacket, void *pData, int nQuadwords, int nUnknown3, int nUnknown4,
-    int nUnknown5) {
+    sceGifPkData *pPacket, void *pData, int nQuadwords, int nOption1, int nOption2, int nFlag) {
     unsigned int *tag;
 
     // Finalise any pending tag, then write a reference tag for the data and its length.
     sceGifPkTerminate(pPacket);
     tag = (unsigned int *)pPacket->mCurrent;
-    tag[0] = (unsigned int)nUnknown5 | (unsigned int)nQuadwords | kRefTagId;
+    tag[0] = (unsigned int)nFlag | (unsigned int)nQuadwords | kRefTagId;
     tag[1] = (unsigned int)(uintptr_t)pData & kRefAddressMask;
-    tag[2] = (unsigned int)nUnknown3;
-    tag[3] = (unsigned int)nUnknown4;
+    tag[2] = (unsigned int)nOption1;
+    tag[3] = (unsigned int)nOption2;
     pPacket->mCurrent = tag + 4;
 }

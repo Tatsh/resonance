@@ -157,32 +157,40 @@ public:
     virtual void AllDone();
 
     /**
-     * Unrecovered. Slot 12, and an empty default with no override anywhere.
+     * Do nothing.
+     *
+     * Slot 12, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
      * @ghidraAddress 0x001ea2c8
      */
-    virtual void OnUnknownSlot12();
+    virtual void UnusedFirstHook();
 
     /**
-     * Unrecovered. Slot 13, and an empty default with no override anywhere.
+     * Do nothing.
+     *
+     * Slot 13, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
      * @ghidraAddress 0x001ea2d0
      */
-    virtual void OnUnknownSlot13();
+    virtual void UnusedSecondHook();
 
     /**
-     * Unrecovered. Slot 14, and an empty default with no override anywhere.
+     * Do nothing.
+     *
+     * Slot 14, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
      * @ghidraAddress 0x001ea2d8
      */
-    virtual void OnUnknownSlot14();
+    virtual void UnusedThirdHook();
 
     /**
-     * Unrecovered. Slot 15, and an empty default with no override anywhere.
+     * Do nothing.
+     *
+     * Slot 15, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
      * @ghidraAddress 0x001ea2e0
      */
-    virtual void OnUnknownSlot15();
+    virtual void UnusedFourthHook();
 };
 
 } // namespace Mid

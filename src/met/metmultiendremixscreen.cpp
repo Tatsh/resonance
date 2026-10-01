@@ -129,13 +129,13 @@ void MetMultiEndRemixScreen::EnterAndShow() {
     mBpmText->SetText(HxStr(FormatString(kBpmFormat, TextOf(bpm))));
 
     for (int nSlot = 0; nSlot < kPlayerSlotCount; ++nSlot) {
-        if (static_cast<unsigned int>(nSlot) < MetFrontEndState::shared()->mUnknown00.size()) {
-            MetPersonaData *pPersona = MetFrontEndState::shared()->mUnknown00[nSlot];
+        if (static_cast<unsigned int>(nSlot) < MetFrontEndState::shared()->mPersonas.size()) {
+            MetPersonaData *pPersona = MetFrontEndState::shared()->mPersonas[nSlot];
             Rnd::Tex *pBurn = FreqAppearance::FindPersonaBurnTexture(nSlot);
             pPersona->AttachToBurnSlot(nSlot);
             mFreqMeshes[nSlot]->SetShowing(1);
             mPlayerMats[nSlot]->mStages[kBurnStage].SetTex(pBurn);
-            mNameTexts[nSlot]->SetText(pPersona->mUnknown140.mUnknown00);
+            mNameTexts[nSlot]->SetText(pPersona->mAppearance.mUserName);
         } else {
             mNameTexts[nSlot]->SetText(HxStr(kNoName));
             mFreqMeshes[nSlot]->SetShowing(0);
@@ -157,7 +157,7 @@ MetMultiEndRemixScreen *MetMultiEndRemixScreen::New(MetRenderer *pRenderer, int 
 }
 
 // 0x002f55c8
-void MetMultiEndRemixScreen::OnUnknownSlot26(float) {
+void MetMultiEndRemixScreen::UpdateIdle(float) {
     // Both Advance() results are discarded, as in the binary.
     mLogoTextures.Advance();
     mLogoMat->mStages[kPairStage].SetTex(mLogoTextures.Current());
@@ -166,5 +166,5 @@ void MetMultiEndRemixScreen::OnUnknownSlot26(float) {
 }
 
 // 0x002f5650
-void MetMultiEndRemixScreen::OnUnknownSlot36() {
+void MetMultiEndRemixScreen::OnExitFinished() {
 }

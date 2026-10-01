@@ -78,7 +78,7 @@ public:
     /**
      * Show the screen with no editing mode active.
      *
-     * Slot 5. MetScreen::mUnknown58 becomes 1.0f.
+     * Slot 5. MetScreen::mRepeatScale becomes 1.0f.
      *
      * @ghidraAddress 0x00272528
      */
@@ -94,7 +94,7 @@ public:
      *
      * @ghidraAddress 0x00272600
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Report the container load finished once the FreQ maker assets and the directions screen's
@@ -182,7 +182,7 @@ public:
      * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x00272560
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Resolve the base views, list every part template on its page, and resolve the screen's
@@ -206,7 +206,7 @@ public:
      *
      * @ghidraAddress 0x00272a98
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Show the head page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title

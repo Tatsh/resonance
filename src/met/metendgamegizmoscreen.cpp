@@ -39,6 +39,6 @@ void MetEndGameGizmoScreen::BeginExit() {
 }
 
 // 0x0027bf50
-void MetEndGameGizmoScreen::OnUnknownSlot33() {
+void MetEndGameGizmoScreen::OnEnterFinished() {
     dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(1);
 }

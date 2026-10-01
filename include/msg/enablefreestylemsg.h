@@ -14,7 +14,7 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Both members are public because
  * Gamer's freestyle handler at `0x00111080` reads them directly with no accessor in the image. It
  * dispatches Player slot 4 on mPlayer to find the track, runs the freestyle effect over mBar to
- * mBar + 8, and sets CmdMsg::mUnknown04 to 1.
+ * mBar + 8, and sets CmdMsg::mResult to 1.
  *
  * The word at `+0x04` belongs to CmdMsg, which New() zeroes. The two words after it belong to this
  * class, for the reason CmdMsg records.

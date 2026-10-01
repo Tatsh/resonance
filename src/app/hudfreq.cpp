@@ -39,10 +39,10 @@ HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulse
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mAnim = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s freq%d.tnm", pszLayout, pPlayer->mId20))));
+        Rnd::g_manager.Find(HxStr(FormatString("%s freq%d.tnm", pszLayout, pPlayer->mPlayerId))));
 
     mMat = dynamic_cast<Rnd::Mat *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mId20))));
+        Rnd::g_manager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mPlayerId))));
     mMat->SetEmissive(HudColorFromName(pPlayer->mColorName));
     mMat->mStages[kBurnStage].SetTex(pBurn);
 

@@ -81,8 +81,8 @@ typedef struct {
     unsigned int nIopAddress; // The pair of direct packet buffers on the IOP.
     unsigned int nDmaId;
     int nOpen;
-    int nReserved14; // +0x14, cleared by scePadPortInit().
-    int nReserved18; // +0x18, cleared by scePadPortInit().
+    int nUnusedFirst; // +0x14, cleared by scePadPortInit() and never read.
+    int nUnusedSecond; // +0x18, cleared by scePadPortInit() and never read.
 } PadPortState;
 
 // The server reads its arguments from and writes its reply to the same 128 bytes.
@@ -233,8 +233,8 @@ int scePadPortInit(int nMode) {
     for (nSlot = 0; nSlot < kPadSlotCount; ++nSlot) {
         for (nPort = 0; nPort < kPadPortCount; ++nPort) {
             g_aaPadPorts[nPort][nSlot].nOpen = 0;
-            g_aaPadPorts[nPort][nSlot].nReserved18 = 0;
-            g_aaPadPorts[nPort][nSlot].nReserved14 = 0;
+            g_aaPadPorts[nPort][nSlot].nUnusedSecond = 0;
+            g_aaPadPorts[nPort][nSlot].nUnusedFirst = 0;
         }
     }
     g_padRpc.nCommand = kPadCommandInit;

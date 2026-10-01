@@ -19,9 +19,8 @@
  * member. The destructor's whole body is the implicit teardown of the MsgSource base's vector and
  * the tagged release behind the deleting flag, which is why the definition below is empty.
  *
- * Slots 4, 5, and 6 retain their table indices as their titles, because the index is part of the
- * layout and no literal attests a verb for any of the three. Slots 4 and 5 have empty default
- * bodies here and Catcher overrides all three.
+ * No literal attests a verb for slots 4, 5, and 6. Their titles follow what Catcher's overrides
+ * do. Slots 4 and 5 have empty default bodies here and Catcher overrides all three.
  */
 class GenericCatcher : public MsgSink, public MsgSource {
 public:
@@ -36,25 +35,26 @@ public:
     virtual ~GenericCatcher();
 
     /**
-     * Slot 4. The default body is empty and Catcher overrides it with a body that schedules two
-     * commands on the tick clock.
+     * Start catching. Slot 4. The default body is empty and Catcher overrides it with a body that
+     * schedules two commands on the tick clock.
      *
      * @ghidraAddress 0x001b0c58
      */
-    virtual void Slot4();
+    virtual void Start();
 
     /**
-     * Slot 5. The default body is empty and Catcher overrides it with a body that withdraws the
-     * two scheduled commands.
+     * Stop catching. Slot 5. The default body is empty and Catcher overrides it with a body that
+     * withdraws the two scheduled commands.
      *
      * @ghidraAddress 0x001b0c60
      */
-    virtual void Slot5();
+    virtual void Stop();
 
     /**
-     * Slot 6, pure. Catcher reports whether its counter at `+0x60` is zero.
+     * Report whether no phrase run is in progress. Slot 6, pure. Catcher reports whether
+     * Catcher::mPhraseRunBars is zero.
      *
      * @return Non-zero when the catcher has nothing outstanding.
      */
-    virtual int Slot6() = 0;
+    virtual int IsPhraseRunEmpty() = 0;
 };

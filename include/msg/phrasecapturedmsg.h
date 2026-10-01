@@ -39,7 +39,7 @@ public:
     /**
      * Report a captured phrase.
      *
-     * Inline, with no address of its own. SingleCatcher::Slot9() expands it on its stack at
+     * Inline, with no address of its own. SingleCatcher::CapturePhrase() expands it on its stack at
      * `0x001ad750`. The nine arguments are the nine members in declaration order.
      *
      * @param nFirstBar The first bar of the phrase.
@@ -140,9 +140,9 @@ public:
     /**
      * Non-zero when the capture extends the player's streak of consecutive captures.
      *
-     * The inverse of SingleCatcher::Slot9's argument. Public because LocalPlayer::HandleMessage()
-     * reads it directly at `0x0011ee9c` and lengthens the streak only when it is set, and the
-     * image has no accessor. +0x24
+     * The inverse of SingleCatcher::CapturePhrase()'s automatic-catch argument. Public because
+     * LocalPlayer::HandleMessage() reads it directly at `0x0011ee9c` and lengthens the streak only
+     * when it is set, and the image has no accessor. +0x24
      */
     int mExtendsStreak;
 };

@@ -14,23 +14,21 @@ class OBStream;
  * destructor, Save(), and Load()).
  *
  * No routine of the class has a caller in the image, and no string names a field. The member
- * names are placeholders that record their offsets.
+ * titles are inferred from the class name and from the options labels `Net IP Address` and
+ * `Net Port` (an address paired with a port number).
  */
 class TransportAddress {
 public:
     /**
      * Construct from copies of the three strings and the word.
      *
-     * @param unknown00 The first string.
-     * @param unknown08 The second string.
-     * @param unknown10 The third string.
-     * @param nUnknown18 The word.
+     * @param host The first string.
+     * @param address The second string.
+     * @param service The third string.
+     * @param nPort The word.
      * @ghidraAddress 0x003f43a8
      */
-    TransportAddress(const HxStr &unknown00,
-                     const HxStr &unknown08,
-                     const HxStr &unknown10,
-                     int nUnknown18);
+    TransportAddress(const HxStr &host, const HxStr &address, const HxStr &service, int nPort);
 
     /**
      * Slot 1. The body frees the three string buffers, in reverse order, and nothing else.
@@ -65,7 +63,7 @@ public:
      * @return The first string.
      * @ghidraAddress 0x003f4500
      */
-    HxStr GetUnknown00();
+    HxStr GetHost();
 
     /**
      * Report a copy of the second string.
@@ -73,7 +71,7 @@ public:
      * @return The second string.
      * @ghidraAddress 0x003f4528
      */
-    HxStr GetUnknown08();
+    HxStr GetAddress();
 
     /**
      * Report a copy of the third string.
@@ -81,11 +79,11 @@ public:
      * @return The third string.
      * @ghidraAddress 0x003f4558
      */
-    HxStr GetUnknown10();
+    HxStr GetService();
 
 private:
-    HxStr mUnknown00; // +0x00
-    HxStr mUnknown08; // +0x08
-    HxStr mUnknown10; // +0x10
-    int mUnknown18;   // +0x18
+    HxStr mHost;    // +0x00
+    HxStr mAddress; // +0x08
+    HxStr mService; // +0x10
+    int mPort;      // +0x18
 };

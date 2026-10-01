@@ -4,7 +4,7 @@ namespace {
 
 // The arguments MultiPowerbarMgr fixes for GamePowerbarMgr.
 constexpr int kRandomKind = 0;
-constexpr int kUnknown30 = 1;
+constexpr int kMultiplayer = 1;
 constexpr int kMinGap = 6;
 constexpr int kMaxGap = 12;
 
@@ -16,5 +16,5 @@ MultiPowerbarMgr::MultiPowerbarMgr(PlayMap *pMap,
                                    const TrackData *pTrackData,
                                    int nTrack)
     : GamePowerbarMgr(
-          pMap, pDatabase, pTrackData, kRandomKind, nTrack, kUnknown30, kMinGap, kMaxGap) {
+          pMap, pDatabase, pTrackData, kRandomKind, nTrack, kMultiplayer, kMinGap, kMaxGap) {
 }

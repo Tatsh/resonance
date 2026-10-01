@@ -35,10 +35,10 @@ public:
     /**
      * Report a caught or missed gem.
      *
-     * Inline, with no address of its own. Catcher expands it on its stack for a miss in Slot7() at
-     * `0x001abf08` and PostCatchMsg() at `0x001ac470`, and for a catch in Slot8() at `0x001ac208`
-     * and SimulateRemoteGem() at `0x001ad004`. The seven arguments are the seven members in
-     * declaration order.
+     * Inline, with no address of its own. Catcher expands it on its stack for a miss in MissGem()
+     * at `0x001abf08` and PostCatchMsg() at `0x001ac470`, and for a catch in CatchGem() at
+     * `0x001ac208` and SimulateRemoteGem() at `0x001ad004`. The seven arguments are the seven
+     * members in declaration order.
      *
      * @param nTick The scheduler time of the gem.
      * @param nTrack The track the gem lies on.

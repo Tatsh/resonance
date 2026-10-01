@@ -12,7 +12,7 @@ class MetKBUser;
  * A plain record of 0x38 bytes with no RTTI and no string in the image naming it, so the name is
  * inferred from its one consumer, MetKeyboardScreen::Open(). A screen builds one on its stack,
  * adjusts the limits and the ticker text, and passes it to Open(), which copies every field except
- * mUnknown1c into the keyboard screen. MetSaveRemixScreen, MetRemixDelScreen, and
+ * mUnusedFlag into the keyboard screen. MetSaveRemixScreen, MetRemixDelScreen, and
  * MetLoadNewFreqScreen build one.
  */
 struct MetKeyboardRequest {
@@ -38,7 +38,7 @@ struct MetKeyboardRequest {
     HxStr mPrompt;       /*!< The prompt the keyboard shows. +0x08 */
     HxStr mText;         /*!< The text the entry starts from. +0x10 */
     MetKBUser *mUser;    /*!< The receiver of the committed text. +0x18 */
-    int mUnknown1c;      /*!< Starts at 1. MetKeyboardScreen::Open() does not read it. +0x1c */
+    int mUnusedFlag;     /*!< Starts at 1. MetKeyboardScreen::Open() does not read it. +0x1c */
     /**
      * The widest the entered text may measure, compared against Rnd::Text::MeasureText(). Starts
      * at 500. The name is inferred. +0x20

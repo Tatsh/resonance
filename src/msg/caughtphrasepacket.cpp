@@ -40,11 +40,11 @@ void CaughtPhrasePacket::Save(OBStream &stream) {
     int id = mPlayer.mId;
     unsigned int tr = mTr;
     int b = mB;
-    int unknown0c = mUnknown0c;
+    int clientId = mClientId;
     stream.Write(&id, sizeof(id))
         .Write(&tr, sizeof(tr))
         .Write(&b, sizeof(b))
-        .Write(&unknown0c, sizeof(unknown0c));
+        .Write(&clientId, sizeof(clientId));
 }
 
 // 0x003e6f00
@@ -53,5 +53,5 @@ void CaughtPhrasePacket::Load(IBStream &stream) {
     stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
         .Read(&mTr, sizeof(mTr))
         .Read(&mB, sizeof(mB))
-        .Read(&mUnknown0c, sizeof(mUnknown0c));
+        .Read(&mClientId, sizeof(mClientId));
 }

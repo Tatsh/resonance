@@ -28,8 +28,9 @@ constexpr unsigned char kSustainController = 46;
 // A sustain gem is drawn at the middle blend from end to end.
 constexpr float kSustainBlend = 0.5f;
 
-// The word DurGemMsg's +0x18 carries for every gem this maker sends.
-constexpr int kDurGemUnknown18 = 0;
+// The value DurGemMsg::mLive receives for every gem this maker sends from a recorded phrase.
+// AxeNewGemMaker's live note gems receive 1.
+constexpr int kRecordedGem = 0;
 
 // Saturates a tick to the finite range, as the inline Mid::MBT arithmetic does.
 inline int ClampTick(int nTick) {
@@ -42,7 +43,7 @@ int g_nNextStripId;
 
 // 0x001a31c8
 AxeOldGemMaker::AxeOldGemMaker(const TrackData *pTrackData)
-    : mTrack(pTrackData->mUnknown04), mPhrase(nullptr), mSustainStart(0) {
+    : mTrack(pTrackData->mIndex), mPhrase(nullptr), mSustainStart(0) {
 }
 
 // 0x001a32f0
@@ -61,22 +62,22 @@ void AxeOldGemMaker::PostDurGemMsg(NoteMsg *pMsg) {
     gem.mStartBlend = flBlend;
     gem.mEndFrame = Mid::MBT(ClampTick(mPosition.mTick + length.mTick)).mTick;
     gem.mEndBlend = flBlend;
-    gem.mUnknown18 = kDurGemUnknown18;
+    gem.mLive = kRecordedGem;
     gem.mPlayer = mPhrase->mPlayer;
     Send(&gem);
 }
 
 // 0x001a34e8
 void AxeOldGemMaker::OnStdMidi(StdMidiMsg *pMsg) {
-    if ((pMsg->mUnknown08 & kStatusKindMask) != kStatusControlChange ||
-        pMsg->mUnknown09 != kSustainController) {
+    if ((pMsg->mStatus & kStatusKindMask) != kStatusControlChange ||
+        pMsg->mData1 != kSustainController) {
         return;
     }
 
-    if (pMsg->mUnknown0a == 0 && mSustainStart.mTick == Mid::MBT(0).mTick) {
+    if (pMsg->mData2 == 0 && mSustainStart.mTick == Mid::MBT(0).mTick) {
         mSustainStart = mPosition;
     }
-    if (pMsg->mUnknown0a == 0 || mSustainStart.mTick == Mid::MBT(0).mTick) {
+    if (pMsg->mData2 == 0 || mSustainStart.mTick == Mid::MBT(0).mTick) {
         return;
     }
 
@@ -86,7 +87,7 @@ void AxeOldGemMaker::OnStdMidi(StdMidiMsg *pMsg) {
     gem.mStartBlend = kSustainBlend;
     gem.mEndFrame = mPosition.mTick;
     gem.mEndBlend = kSustainBlend;
-    gem.mUnknown18 = kDurGemUnknown18;
+    gem.mLive = kRecordedGem;
     gem.mPlayer = mPhrase->mPlayer;
     Send(&gem);
     mSustainStart = Mid::MBT(0);

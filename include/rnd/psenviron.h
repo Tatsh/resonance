@@ -49,7 +49,7 @@ struct PointLightRecord {
     Color mDiffuse; /*!< Copied from Rnd::Light::mDiffuse. */
     /** 1 when TransformLightRecords() found the light out of reach of the bounding sphere. +0x40 */
     int mCulled;
-    unsigned mUnknown44[3]; /*!< Pads the record to 0x50 bytes. +0x44 */
+    unsigned mReserved44[3]; /*!< Pads the record to 0x50 bytes. +0x44 */
 };
 
 /**

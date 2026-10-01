@@ -57,7 +57,7 @@ public:
      *
      * @ghidraAddress 0x00311a20
      */
-    virtual void OnUnknownSlot7();
+    virtual void Update();
 
     /**
      * Start the game once the ruleset's level has loaded, then pump the timers in the front end.
@@ -70,7 +70,7 @@ public:
      *
      * @ghidraAddress 0x0030f320
      */
-    virtual void OnUnknownSlot8();
+    virtual void Draw();
 
 private:
     /**
@@ -79,7 +79,7 @@ private:
      * The X button in the front end plays `SND_MET_SLIDE` and reads a sequence from script template
      * 0xcc as the level, the ruleset (`jam` or `game`), the difficulty, the player count, and the
      * arena, then starts the common and level loads for slot 8 to finish. In a game the X button
-     * queues an UnpauseGameSystemMsg and runs GrooveWorld::PostExitMode2(). Button 4 unloads the
+     * queues an UnpauseGameSystemMsg and runs GrooveWorld::PostQuit(). Button 4 unloads the
      * level and the common data. An unrecognised ruleset is fatal. The name is inferred.
      *
      * @param pMsg The controller message.
@@ -88,7 +88,7 @@ private:
     void OnRawController(RawControllerMsg *pMsg);
 
     /**
-     * Turn a ruleset into the play mode GameParams::mUnknown1c records.
+     * Turn a ruleset into the play mode GameParams::mPlayMode records.
      *
      * OnRawController() has this body expanded in place, and the out-of-line copy has no caller.
      * The name is inferred.
@@ -99,7 +99,7 @@ private:
      */
     static int ParseRuleset(const HxStr &ruleset);
 
-    GameParams mUnknown48; // +0x48, the settings the ruleset fills
-    int mUnknown80;        // +0x80, set while a ruleset load is pending
-    int mUnknown84;        // +0x84, the ruleset's player count
+    GameParams mParams; // +0x48, the settings the ruleset fills
+    int mLoadPending;   // +0x80, set while a ruleset load is pending
+    int mPlayerCount;   // +0x84, the ruleset's player count
 };

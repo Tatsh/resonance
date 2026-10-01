@@ -115,7 +115,7 @@ public:
      * @param pButton The arrow that finished alternating.
      * @ghidraAddress 0x002ccfb8
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Show the help text and select the `mc_opt` preset once the enter animation has finished.
@@ -124,7 +124,7 @@ public:
      *
      * @ghidraAddress 0x002d2018
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Bring up the next screen once this one has exited.
@@ -134,7 +134,7 @@ public:
      *
      * @ghidraAddress 0x002cd0e8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views, the two arrows, the two card texts, and the information view, and
@@ -239,13 +239,14 @@ private:
     Rnd::Text *mAvailableText;  // +0xac
     Rnd::Text *mSlotNumberText; // +0xb0
     Rnd::View *mInfoView;       // +0xb4
-    // Neither vector is read by a recovered routine, and the element type is not recovered.
-    std::vector<Rnd::Object *> mUnknownb8;   // +0xb8
-    std::vector<Rnd::Object *> mUnknownc4;   // +0xc4
-    int mSelected;                           // +0xd0, the index into mCards
-    int mUnknownd4;                          // +0xd4
-    std::vector<MemcardConnectState> mCards; // +0xd8
-    MetMemCardPickerUser *mPickerUser;       // +0xe4
+    // The constructor and the destructors are the only routines that touch either vector, and the
+    // element type is not recovered.
+    std::vector<Rnd::Object *> mUnusedObjects1; // +0xb8
+    std::vector<Rnd::Object *> mUnusedObjects2; // +0xc4
+    int mSelected;                              // +0xd0, the index into mCards
+    int mUnused;                                // +0xd4, zeroed by the constructor and never read
+    std::vector<MemcardConnectState> mCards;    // +0xd8
+    MetMemCardPickerUser *mPickerUser;          // +0xe4
 };
 
 inline void MetMemCardLoadScreen::OpenPicker(MetMemCardPickerUser *pUser) {

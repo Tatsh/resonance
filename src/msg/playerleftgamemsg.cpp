@@ -26,5 +26,5 @@ const char *PlayerLeftGameMsg::Name() {
 
 // 0x003e40a0
 void PlayerLeftGameMsg::Print(std::ostream &stream) {
-    stream << mUnknown04;
+    stream << mPlayerId;
 }

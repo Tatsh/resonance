@@ -50,7 +50,7 @@ public:
      *
      * Supplies `mcfl` for the screen name, `metagame/Shared` for the directory, and
      * `memcard_freq_load` for the container, records the help text `del_freq`, and clears
-     * MetScreen::mUnknown60.
+     * MetScreen::mShowsLoadedDrawables.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -91,7 +91,7 @@ public:
      *
      * @ghidraAddress 0x002bf750
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Act on the player's response to one of the screen's dialogues.
@@ -153,7 +153,7 @@ public:
      *
      * @ghidraAddress 0x002c01c0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views, title the two panels, and resolve the persona detail objects.
@@ -236,11 +236,11 @@ private:
 
     Rnd::Text *mNameText;     // +0x98
     Rnd::Mat *mFaceMat;       // +0x9c
-    int mUnknowna0;           // +0xa0
+    int mReserved1;           // +0xa0, never read or written
     Rnd::Mesh *mFreqMesh;     // +0xa4
     Rnd::Text *mBirthdayText; // +0xa8
     Rnd::Tex *mBurnTexture;   // +0xac
-    int mUnknownb0;           // +0xb0
+    int mReserved2;           // +0xb0, never read or written
     // Set while a confirmed deletion runs. +0xb4
     int mDeleting;
     ScrollingList *mList;          // +0xb8

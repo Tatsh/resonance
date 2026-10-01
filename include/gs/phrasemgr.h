@@ -35,14 +35,14 @@ class TickClock;
  * Every member below posts one message through its own MsgSource half, which is what the titles
  * describe. PostPhraseMsg() looks the phrase up through PhraseDatabase::GetPhraseAt() on
  * mDatabase, and when that lookup reports a phrase it builds a PhraseMsg with the argument at
- * `+0x04`, mUnknown30 at `+0x08`, and the phrase at `+0x0c`, and delivers it through
+ * `+0x04`, mTrack at `+0x08`, and the phrase at `+0x0c`, and delivers it through
  * MsgSource::Send().
  *
  * HandleMessage() dispatches six identities, three of them packets rather than messages. A
  * PhrasePacket, a CaughtPhrasePacket, and a GemPacket arrive from the network, and an
  * InvalidateTrackMsg, a RefreshNetMsg, and a GameBeginMsg arrive locally. The PhrasePacket and the
  * InvalidateTrackMsg paths both loop, clearing and posting bars through RefreshBar(), and the
- * PhrasePacket path is guarded on the packet's `+0x14` matching mUnknown30.
+ * PhrasePacket path is guarded on the packet's `+0x14` matching mTrack.
  *
  * The constructor fixes the member map from `+0x18` to the end. The MsgSource subobject occupies
  * `+0x04` through `+0x17`, so the region at `+0x10` the destructor tears down is that subobject's
@@ -98,7 +98,8 @@ public:
      *
      * kPlayModeGame on a riff or catch track, with configuration flag 0x3a1 clear, gets a
      * SoloPowerbarMgr in kGameModeSolo and a MultiPowerbarMgr in any other game mode. Every other
-     * combination gets a JamPowerbarMgr. The constructor and CatchingSTG's slot 12 call it.
+     * combination gets a JamPowerbarMgr. The constructor and CatchingSTG::CreatePowerbarMgr() call
+     * it.
      *
      * @ghidraAddress 0x001ba3d8
      */
@@ -500,7 +501,7 @@ private:
     PowerbarMgr *mPowerbarMgr; // +0x2c
     // Copied from the track description's `+0x04`. The track this manager serves. A PhrasePacket's
     // `+0x14` is matched against it, and PostPhraseMsg() copies it into the message's `+0x08`.
-    int mUnknown30;         // +0x30
+    int mTrack;             // +0x30
     int mBarTicks;          // +0x34
     int mConfig;            // +0x38
     int mWindowStart;       // +0x3c, the first bar RefreshBar() posts

@@ -39,7 +39,7 @@ constexpr float kBankTo = 300.0f;
 // 0x00418818
 HudPoints::HudPoints(int nIndex)
     : mFlash(0.0f), mPulse(0.0f), mPulseRest(0.0f), mMultiplier(kInitialMultiplier), mPoints(0),
-      mShowing(0), mHot(0), mUnknown38(0) {
+      mShowing(0), mHot(0), mUnusedWord(0) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitBlur = dynamic_cast<Rnd::Blur *>(

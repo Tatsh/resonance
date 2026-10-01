@@ -116,7 +116,7 @@ constexpr int kStepsPerCycle = 2;
 constexpr int kExitLogBufferSize = 128;
 
 // What RndAsyncLoader::Poll() reports once a load is finished, which PollContainerLoads() also
-// records in MetContainerLoad::mUnknown04.
+// records in MetContainerLoad::mFinished.
 constexpr int kLoadComplete = 1;
 
 // The zone the start-up screens load into.
@@ -213,13 +213,14 @@ MetScreen::MetScreen(MetRenderer *pRenderer,
                      const HxStr &name,
                      const HxStr &directory,
                      const HxStr &file)
-    : mUnknown08(0.0f), mUnknown0c(0.0f), mUnknown10(pRenderer), mUnknown14(nullptr), mUnknown18(2),
-      mUnknown1c(0), mUnknown20(name), mUnknown30(nullptr), mUnknown34(nullptr), mUnknown48(1),
-      mUnknown4c(0), mUnknown50(0), mUnknown54(0), mUnknown58(1.0f), mUnknown5c(1), mUnknown60(1),
-      mUnknown64(0.0f), mUnknown68(nullptr), mUnknown6c(0), mUnknown78(0), mUnknown7c(0),
-      mUnknown80(file), mUnknown88(nPriority) {
-    mUnknown28 = file + kContainerSuffix;
-    mUnknown10->AddSink(this);
+    : mEnterStartTime(0.0f), mExitStartTime(0.0f), mRenderer(pRenderer), mView(nullptr),
+      mExitChoice(2), mAcceptsCommands(0), mScreenName(name), mEnterAnim(nullptr),
+      mBackAnim(nullptr), mViewsUnresolved(1), mEnterPending(0), mActivatePending(0),
+      mIdleWhileAnimating(0), mRepeatScale(1.0f), mPlaysCommandSounds(1), mShowsLoadedDrawables(1),
+      mRepeatNextTime(0.0f), mRepeatButton(nullptr), mRepeatStep(0), mExitDone(0), mEnterDone(0),
+      mContainerName(file), mLoadPriority(nPriority) {
+    mContainerFile = file + kContainerSuffix;
+    mRenderer->AddSink(this);
     if (directory != "" && file != "") {
         // Yes, the binary calls the virtual directly rather than through slot 18, which is what a
         // virtual call from a constructor compiles to.
@@ -229,9 +230,9 @@ MetScreen::MetScreen(MetRenderer *pRenderer,
 
 // 0x0038a848
 MetScreen::~MetScreen() {
-    mUnknown10->RemoveScreen(this);
+    mRenderer->RemoveScreen(this);
     OnDestroying();
-    mUnknown10->RemoveSink(this);
+    mRenderer->RemoveSink(this);
 }
 
 // 0x00381e10
@@ -274,26 +275,27 @@ MetScreen *MetScreen::FindEndScreen([[maybe_unused]] MetRenderer *pRenderer, con
 void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] const HxStr &file) {
     HxStr dir = directory + kPathSeparator;
     // A screen whose container another screen already loads does not touch the existing load.
-    if (ContainerLoaderMap()[mUnknown28] != nullptr) {
+    if (ContainerLoaderMap()[mContainerFile] != nullptr) {
         return;
     }
     MetContainerLoad *pLoad = new MetContainerLoad;
-    pLoad->mLoader = new RndAsyncLoader(dir, mUnknown28, mUnknown88);
-    pLoad->mUnknown08 = 1;
-    pLoad->mUnknown04 = 0;
-    ContainerLoaderMap()[mUnknown28] = pLoad;
-    ContainerLoaderMap()[mUnknown28]->mUnknown04 = 0;
-    // Yes, the binary sets mUnknown08 and then immediately tests it, so the branch is always taken.
-    ContainerLoaderMap()[mUnknown28]->mUnknown08 = 1;
-    if (ContainerLoaderMap()[mUnknown28]->mUnknown08 != 0) {
-        ContainerLoaderMap()[mUnknown28]->mUnknown08 = 0;
-        ContainerLoaderMap()[mUnknown28]->mLoader->Enqueue();
+    pLoad->mLoader = new RndAsyncLoader(dir, mContainerFile, mLoadPriority);
+    pLoad->mEnqueuePending = 1;
+    pLoad->mFinished = 0;
+    ContainerLoaderMap()[mContainerFile] = pLoad;
+    ContainerLoaderMap()[mContainerFile]->mFinished = 0;
+    // Yes, the binary sets mEnqueuePending and then immediately tests it. The branch is always
+    // taken.
+    ContainerLoaderMap()[mContainerFile]->mEnqueuePending = 1;
+    if (ContainerLoaderMap()[mContainerFile]->mEnqueuePending != 0) {
+        ContainerLoaderMap()[mContainerFile]->mEnqueuePending = 0;
+        ContainerLoaderMap()[mContainerFile]->mLoader->Enqueue();
     }
 }
 
 // 0x0038b338
 int MetScreen::PollContainerLoad() {
-    MetContainerLoad *pLoad = ContainerLoaderMap()[mUnknown28];
+    MetContainerLoad *pLoad = ContainerLoaderMap()[mContainerFile];
     if (pLoad->mLoader == nullptr) {
         return 0;
     }
@@ -301,7 +303,7 @@ int MetScreen::PollContainerLoad() {
     if (pLoad->mLoader->Poll(&flProgress) != 1) {
         return 0;
     }
-    if (mUnknown48 != 0) {
+    if (mViewsUnresolved != 0) {
         ResolveContainerViews();
     }
     return 1;
@@ -311,43 +313,43 @@ int MetScreen::PollContainerLoad() {
 void MetScreen::ResolveAnimationViews() {
     {
         HxStr name(FormatString(kEnterAnimationFormat,
-                                mUnknown20.mStr != nullptr ? mUnknown20.mStr : g_szEmptyString));
+                                mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
         Rnd::Object *pObject = Rnd::g_manager.Find(name);
-        mUnknown30 = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
+        mEnterAnim = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     }
     {
         HxStr name(FormatString(kExitAnimationFormat,
-                                mUnknown20.mStr != nullptr ? mUnknown20.mStr : g_szEmptyString));
+                                mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
         Rnd::Object *pObject = Rnd::g_manager.Find(name);
-        mUnknown34 = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
+        mBackAnim = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     }
-    mUnknown04 = mUnknown30 != nullptr ? mUnknown30->EndFrame() : 0.0f;
+    mAnimEndFrame = mEnterAnim != nullptr ? mEnterAnim->EndFrame() : 0.0f;
 }
 
 // 0x0038b1b0
 void MetScreen::ResolveContainerViews() {
     ResolveAnimationViews();
-    HxStr name = mUnknown80 + kViewSuffix;
+    HxStr name = mContainerName + kViewSuffix;
     Rnd::Object *pObject = Rnd::g_manager.Find(name);
-    mUnknown14 = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
-    if (mUnknown14 != nullptr) {
-        mUnknown14->ReleaseAnimsRefs();
+    mView = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
+    if (mView != nullptr) {
+        mView->ReleaseAnimsRefs();
     } else {
         Fatal(" the screen %s doesn't have a valid view!\n",
-              mUnknown80.mStr != nullptr ? mUnknown80.mStr : g_szEmptyString);
+              mContainerName.mStr != nullptr ? mContainerName.mStr : g_szEmptyString);
     }
     SetShowing(0);
-    mUnknown48 = 0;
+    mViewsUnresolved = 0;
 }
 
 // 0x0038b490
 void MetScreen::SetShowing(int nShowing) {
     // Yes, the binary dereferences the view without a null check.
-    static_cast<Rnd::Drawable *>(mUnknown14)->SetShowing(nShowing);
-    if (mUnknown60 == 0) {
+    static_cast<Rnd::Drawable *>(mView)->SetShowing(nShowing);
+    if (mShowsLoadedDrawables == 0) {
         return;
     }
-    std::list<Rnd::Drawable *> draws(ContainerLoaderMap()[mUnknown28]->mLoader->mDrawables);
+    std::list<Rnd::Drawable *> draws(ContainerLoaderMap()[mContainerFile]->mLoader->mDrawables);
     for (std::list<Rnd::Drawable *>::iterator it = draws.begin(); it != draws.end(); ++it) {
         (*it)->SetShowing(nShowing);
     }
@@ -356,34 +358,34 @@ void MetScreen::SetShowing(int nShowing) {
 // 0x00390200
 void MetScreen::PushNamedScreen(const HxStr &name) {
     MetScreen *pScreen = FindScreenByName(name);
-    mUnknown10->AddScreen(pScreen);
+    mRenderer->AddScreen(pScreen);
     if (pScreen->PollContainerLoad() != 0) {
-        mUnknown10->AddScreenView(pScreen->mUnknown14);
+        mRenderer->AddScreenView(pScreen->mView);
         pScreen->EnterAndShow();
     } else {
-        pScreen->mUnknown4c = 1;
+        pScreen->mEnterPending = 1;
     }
 }
 
 // 0x003900a8
 void MetScreen::EnterAndShow() {
     SetShowing(1);
-    StartEnterAnimation(mUnknown10->mUnknown68);
+    StartEnterAnimation(mRenderer->mAnimationFrame);
 }
 
 // 0x0038b828
 void MetScreen::ActivateNamedPanel(const HxStr &name) {
     if (name == "") {
-        mUnknown10->mUnknown80 = 0;
+        mRenderer->mPanelActive = 0;
         return;
     }
     MetScreen *pScreen = FindScreenByName(name);
     if (pScreen->PollContainerLoad() != 0) {
-        mUnknown10->SetActivePanel(pScreen);
-        mUnknown10->mUnknown80 = 1;
-        pScreen->OnUnknownSlot7();
+        mRenderer->SetActivePanel(pScreen);
+        mRenderer->mPanelActive = 1;
+        pScreen->OnPanelActivated();
     } else {
-        pScreen->mUnknown50 = 1;
+        pScreen->mActivatePending = 1;
     }
 }
 
@@ -398,43 +400,43 @@ void MetScreen::ExitScreenByName(const HxStr &name) {
 
 // 0x00390100
 void MetScreen::BeginExit() {
-    StartExitAnimation(mUnknown10->mUnknown68);
+    StartExitAnimation(mRenderer->mAnimationFrame);
 }
 
 // 0x003905c0
 void MetScreen::StartEnterAnimation(float flTime) {
-    mUnknown08 = flTime;
-    mUnknown0c = 0.0f;
-    if (mUnknown30 != nullptr) {
-        mUnknown30->SetFrame(mUnknown04);
+    mEnterStartTime = flTime;
+    mExitStartTime = 0.0f;
+    if (mEnterAnim != nullptr) {
+        mEnterAnim->SetFrame(mAnimEndFrame);
     }
 }
 
 // 0x003905f0
 void MetScreen::UpdateEnterAnimation(float flTime) {
-    if (mUnknown7c != 0) {
-        mUnknown7c = 0;
-        mUnknown1c = 1;
-        mUnknown08 = 0.0f;
-        OnUnknownSlot33();
+    if (mEnterDone != 0) {
+        mEnterDone = 0;
+        mAcceptsCommands = 1;
+        mEnterStartTime = 0.0f;
+        OnEnterFinished();
     }
-    if (mUnknown08 == 0.0f) {
+    if (mEnterStartTime == 0.0f) {
         return;
     }
-    if (mUnknown30 != nullptr) {
-        mUnknown30->SetFrame(mUnknown08 + mUnknown04 - flTime);
+    if (mEnterAnim != nullptr) {
+        mEnterAnim->SetFrame(mEnterStartTime + mAnimEndFrame - flTime);
     }
-    if (mUnknown08 + mUnknown04 < flTime) {
-        mUnknown7c = 1;
+    if (mEnterStartTime + mAnimEndFrame < flTime) {
+        mEnterDone = 1;
     }
 }
 
 // 0x0038fdf8
-void MetScreen::OnUnknownSlot7() {
+void MetScreen::OnPanelActivated() {
 }
 
 // 0x00390130
-void MetScreen::OnUnknownSlot10() {
+void MetScreen::OnUnusedHook() {
 }
 
 // 0x00390138
@@ -463,7 +465,7 @@ void MetScreen::HandleCommand([[maybe_unused]] const MetScreenCommand *pCommand)
 }
 
 // 0x0038fe38
-void MetScreen::OnUnknownSlot26([[maybe_unused]] float flTime) {
+void MetScreen::UpdateIdle([[maybe_unused]] float flTime) {
 }
 
 // 0x0038fe40
@@ -478,45 +480,45 @@ void MetScreen::StartRepeatingSound(float flStartTime,
     if (pButton == nullptr) {
         return;
     }
-    mUnknown64 = flStartTime;
-    mUnknown70 = nCycles * kStepsPerCycle;
-    mUnknown74 = flInterval;
-    mUnknown6c = 0;
-    mUnknown68 = pButton;
+    mRepeatNextTime = flStartTime;
+    mRepeatSteps = nCycles * kStepsPerCycle;
+    mRepeatInterval = flInterval;
+    mRepeatStep = 0;
+    mRepeatButton = pButton;
     pButton->SetState(kAlternateState);
 }
 
 // 0x003904e0
 void MetScreen::UpdateRepeatingSound(float flTime) {
-    if (mUnknown64 == 0.0f) {
+    if (mRepeatNextTime == 0.0f) {
         return;
     }
-    if (!((mUnknown64 + mUnknown74) < flTime)) {
+    if (!((mRepeatNextTime + mRepeatInterval) < flTime)) {
         return;
     }
-    ++mUnknown6c;
-    mUnknown68->SetState((mUnknown6c & 1) != 0 ? kRestState : kAlternateState);
-    if (mUnknown6c < mUnknown70) {
-        mUnknown64 = flTime + mUnknown74;
+    ++mRepeatStep;
+    mRepeatButton->SetState((mRepeatStep & 1) != 0 ? kRestState : kAlternateState);
+    if (mRepeatStep < mRepeatSteps) {
+        mRepeatNextTime = flTime + mRepeatInterval;
         return;
     }
-    mUnknown68->SetState(kRestState);
-    OnUnknownSlot30(mUnknown68);
-    mUnknown68 = nullptr;
-    mUnknown64 = 0.0f;
-    mUnknown6c = 0;
+    mRepeatButton->SetState(kRestState);
+    OnRepeatingSoundFinished(mRepeatButton);
+    mRepeatButton = nullptr;
+    mRepeatNextTime = 0.0f;
+    mRepeatStep = 0;
 }
 
 // 0x0038fe48
-void MetScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
+void MetScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
 }
 
 // 0x0038fe50
-void MetScreen::OnUnknownSlot33() {
+void MetScreen::OnEnterFinished() {
 }
 
 // 0x0038fe58
-void MetScreen::OnUnknownSlot36() {
+void MetScreen::OnExitFinished() {
 }
 
 // 0x003907a8
@@ -555,10 +557,10 @@ void MetScreen::PlayErrorSound([[maybe_unused]] int nSelector) {
 
 // 0x0038b730
 void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
-    if (mUnknown1c == 0) {
+    if (mAcceptsCommands == 0) {
         return;
     }
-    if (mUnknown5c != 0) {
+    if (mPlaysCommandSounds != 0) {
         switch (pCommand->mCommand) {
         case kMetScreenCommandPrevious:
         case kMetScreenCommandNext:
@@ -585,72 +587,72 @@ void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
 
 // 0x00390788
 void MetScreen::Draw() {
-    mUnknown14->Drawable::Draw();
+    mView->Drawable::Draw();
 }
 
 // 0x003906a0
 void MetScreen::StartExitAnimation(float flTime) {
-    mUnknown0c = flTime;
-    mUnknown1c = 0;
-    mUnknown08 = 0.0f;
+    mExitStartTime = flTime;
+    mAcceptsCommands = 0;
+    mEnterStartTime = 0.0f;
 }
 
 // 0x00390380
 void MetScreen::UpdateAnimationFrame(float flTime) {
-    if (mUnknown4c != 0) {
+    if (mEnterPending != 0) {
         return;
     }
-    if (mUnknown08 == 0.0f && mUnknown0c == 0.0f) {
+    if (mEnterStartTime == 0.0f && mExitStartTime == 0.0f) {
         UpdateIdleAnimation(flTime);
     }
-    if (mUnknown08 != 0.0f && mUnknown30 != nullptr) {
-        const float flEnd = mUnknown08 + mUnknown04;
-        float flFrame = mUnknown08 + (mUnknown04 - flTime);
+    if (mEnterStartTime != 0.0f && mEnterAnim != nullptr) {
+        const float flEnd = mEnterStartTime + mAnimEndFrame;
+        float flFrame = mEnterStartTime + (mAnimEndFrame - flTime);
         if (flEnd < flFrame) {
             flFrame = flEnd;
         }
-        mUnknown30->SetFrame(flFrame);
+        mEnterAnim->SetFrame(flFrame);
     }
-    if (mUnknown0c != 0.0f && mUnknown30 != nullptr) {
-        float flFrame = flTime - mUnknown0c;
-        if (mUnknown0c + mUnknown04 < flFrame) {
+    if (mExitStartTime != 0.0f && mEnterAnim != nullptr) {
+        float flFrame = flTime - mExitStartTime;
+        if (mExitStartTime + mAnimEndFrame < flFrame) {
             // Yes, the clamp restores the start time rather than the end frame.
-            flFrame = mUnknown0c;
+            flFrame = mExitStartTime;
         }
-        mUnknown30->SetFrame(flFrame);
+        mEnterAnim->SetFrame(flFrame);
     }
 }
 
 // 0x0038b918
 void MetScreen::UpdateFrame(float flTime) {
-    if (mUnknown4c != 0) {
-        if (ContainerLoaderMap()[mUnknown28]->mUnknown04 != 0) {
-            if (mUnknown48 != 0) {
+    if (mEnterPending != 0) {
+        if (ContainerLoaderMap()[mContainerFile]->mFinished != 0) {
+            if (mViewsUnresolved != 0) {
                 ResolveContainerViews();
             }
-            mUnknown10->AddScreenView(mUnknown14);
+            mRenderer->AddScreenView(mView);
             EnterAndShow();
-            mUnknown4c = 0;
-            if (mUnknown50 != 0) {
-                mUnknown10->SetActivePanel(this);
-                mUnknown10->mUnknown80 = 1;
-                OnUnknownSlot7();
-                mUnknown50 = 0;
+            mEnterPending = 0;
+            if (mActivatePending != 0) {
+                mRenderer->SetActivePanel(this);
+                mRenderer->mPanelActive = 1;
+                OnPanelActivated();
+                mActivatePending = 0;
             }
             return;
         }
         float flProgress;
-        if (ContainerLoaderMap()[mUnknown28]->mLoader->Poll(&flProgress) != 1) {
+        if (ContainerLoaderMap()[mContainerFile]->mLoader->Poll(&flProgress) != 1) {
             return;
         }
-        ContainerLoaderMap()[mUnknown28]->mUnknown04 = 1;
+        ContainerLoaderMap()[mContainerFile]->mFinished = 1;
         return;
     }
     UpdateEnterAnimation(flTime);
-    if (mUnknown54 != 0) {
-        OnUnknownSlot26(flTime);
-    } else if (mUnknown08 == 0.0f && mUnknown0c == 0.0f) {
-        OnUnknownSlot26(flTime);
+    if (mIdleWhileAnimating != 0) {
+        UpdateIdle(flTime);
+    } else if (mEnterStartTime == 0.0f && mExitStartTime == 0.0f) {
+        UpdateIdle(flTime);
     }
     UpdateRepeatingSound(flTime);
     UpdateExitAnimation(flTime);
@@ -658,27 +660,27 @@ void MetScreen::UpdateFrame(float flTime) {
 
 // 0x003906b0
 void MetScreen::UpdateExitAnimation(float flTime) {
-    if (mUnknown78 != 0) {
-        mUnknown0c = 0.0f;
-        mUnknown78 = 0;
+    if (mExitDone != 0) {
+        mExitStartTime = 0.0f;
+        mExitDone = 0;
         // Yes, the binary compares the two start times right after clearing one of them, and the
         // clear also makes everything below this block unreachable on this path.
-        if (mUnknown08 != mUnknown0c) {
+        if (mEnterStartTime != mExitStartTime) {
             return;
         }
         SetShowing(0);
-        mUnknown10->RemoveScreen(this);
-        OnUnknownSlot36();
+        mRenderer->RemoveScreen(this);
+        OnExitFinished();
     }
-    if (mUnknown0c == 0.0f) {
+    if (mExitStartTime == 0.0f) {
         return;
     }
-    if (mUnknown30 != nullptr) {
-        // Yes, the exit animation drives the enter view and its end frame, not mUnknown34.
-        mUnknown30->SetFrame(flTime - mUnknown0c);
+    if (mEnterAnim != nullptr) {
+        // Yes, the exit animation drives the enter view and its end frame, not mBackAnim.
+        mEnterAnim->SetFrame(flTime - mExitStartTime);
     }
-    if (mUnknown0c + mUnknown04 < flTime) {
-        mUnknown78 = 1;
+    if (mExitStartTime + mAnimEndFrame < flTime) {
+        mExitDone = 1;
     }
 }
 
@@ -750,14 +752,14 @@ void MetScreen::PollContainerLoads() {
          it != ContainerLoaderMap().end();
          ++it) {
         MetContainerLoad *pLoad = it->second;
-        if (pLoad->mUnknown04 != 0) {
+        if (pLoad->mFinished != 0) {
             continue;
         }
         float flProgress;
         if (pLoad->mLoader->Poll(&flProgress) != kLoadComplete) {
             continue;
         }
-        pLoad->mUnknown04 = kLoadComplete;
+        pLoad->mFinished = kLoadComplete;
         std::list<Rnd::Drawable *> draws(pLoad->mLoader->mDrawables);
         for (std::list<Rnd::Drawable *>::iterator draw = draws.begin(); draw != draws.end();
              ++draw) {

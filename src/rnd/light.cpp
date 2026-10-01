@@ -115,7 +115,7 @@ void Light::SetAttenuation(float flConstant, float flLinear, float flQuadratic) 
 }
 
 // 0x00544818
-void Light::ApplyUnknown() {
+void Light::SyncLight() {
 }
 
 // 0x00540420
@@ -245,7 +245,7 @@ void Light::Load(Stream &stream) {
         mType = static_cast<LightType>(nType);
     }
 
-    ApplyUnknown();
+    SyncLight();
 }
 
 // 0x00545480
@@ -270,7 +270,7 @@ void Light::Copy(const Object *pSource, unsigned nFlags) {
     mQuadraticAtten = pSourceLight->mQuadraticAtten;
     mType = pSourceLight->mType;
 
-    ApplyUnknown();
+    SyncLight();
 }
 
 // 0x005448b8

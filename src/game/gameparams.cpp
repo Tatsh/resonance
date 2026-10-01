@@ -11,11 +11,11 @@ int g_nDoWinSequence;
 
 // 0x00187170
 GameParams::GameParams() {
-    mUnknown10 = 0;
-    mUnknown1c = 0;
+    mFriends = 0;
+    mPlayMode = 0;
     mDifficulty = 0;
-    mUnknown24 = 0;
-    mUnknown28 = 0;
+    mConstrainJam = 0;
+    mNetGame = 0;
     mLoadingGame = 0;
     mJukeboxMode = 0;
 }
@@ -26,88 +26,90 @@ GameParams::~GameParams() {
 
 // 0x001871b8
 void GameParams::Save(OBStream *pStream) {
-    unsigned length00 = mLevelName.mLen;
-    pStream->Write(&length00, sizeof(length00));
+    unsigned nLevelNameLength = mLevelName.mLen;
+    pStream->Write(&nLevelNameLength, sizeof(nLevelNameLength));
     // An empty string has no buffer, and the stream receives the shared empty string in place of a
     // null pointer.
-    pStream->WriteBytes(mLevelName.mStr != nullptr ? mLevelName.mStr : g_szEmptyString, length00);
+    pStream->WriteBytes(mLevelName.mStr != nullptr ? mLevelName.mStr : g_szEmptyString,
+                        nLevelNameLength);
 
-    unsigned length08 = mArenaName.mLen;
-    pStream->Write(&length08, sizeof(length08));
-    pStream->WriteBytes(mArenaName.mStr != nullptr ? mArenaName.mStr : g_szEmptyString, length08);
+    unsigned nArenaNameLength = mArenaName.mLen;
+    pStream->Write(&nArenaNameLength, sizeof(nArenaNameLength));
+    pStream->WriteBytes(mArenaName.mStr != nullptr ? mArenaName.mStr : g_szEmptyString,
+                        nArenaNameLength);
 
-    int unknown10 = mUnknown10;
-    pStream->Write(&unknown10, sizeof(unknown10));
+    int nFriends = mFriends;
+    pStream->Write(&nFriends, sizeof(nFriends));
 
-    int unknown1c = mUnknown1c;
-    pStream->Write(&unknown1c, sizeof(unknown1c));
+    int nPlayMode = mPlayMode;
+    pStream->Write(&nPlayMode, sizeof(nPlayMode));
 
     int difficulty = mDifficulty;
     pStream->Write(&difficulty, sizeof(difficulty));
 
-    int unknown24 = mUnknown24;
-    pStream->Write(&unknown24, sizeof(unknown24));
+    int nConstrainJam = mConstrainJam;
+    pStream->Write(&nConstrainJam, sizeof(nConstrainJam));
 
-    int unknown28 = mUnknown28;
-    pStream->Write(&unknown28, sizeof(unknown28));
+    int nNetGame = mNetGame;
+    pStream->Write(&nNetGame, sizeof(nNetGame));
 
-    int unknown2c = mLoadingGame;
-    pStream->Write(&unknown2c, sizeof(unknown2c));
+    int nLoadingGame = mLoadingGame;
+    pStream->Write(&nLoadingGame, sizeof(nLoadingGame));
 
-    int unknown30 = mJukeboxMode;
-    pStream->Write(&unknown30, sizeof(unknown30));
+    int nJukeboxMode = mJukeboxMode;
+    pStream->Write(&nJukeboxMode, sizeof(nJukeboxMode));
 }
 
 // 0x00187390
 void GameParams::Load(IBStream *pStream) {
-    unsigned length00;
-    pStream->Read(&length00, sizeof(length00));
-    mLevelName.Alloc(length00);
+    unsigned nLevelNameLength;
+    pStream->Read(&nLevelNameLength, sizeof(nLevelNameLength));
+    mLevelName.Alloc(nLevelNameLength);
     pStream->ReadBytes(mLevelName.mStr != nullptr ? mLevelName.mStr :
                                                     const_cast<char *>(g_szEmptyString),
-                       length00);
+                       nLevelNameLength);
 
-    unsigned length08;
-    pStream->Read(&length08, sizeof(length08));
-    mArenaName.Alloc(length08);
+    unsigned nArenaNameLength;
+    pStream->Read(&nArenaNameLength, sizeof(nArenaNameLength));
+    mArenaName.Alloc(nArenaNameLength);
     pStream->ReadBytes(mArenaName.mStr != nullptr ? mArenaName.mStr :
                                                     const_cast<char *>(g_szEmptyString),
-                       length08);
+                       nArenaNameLength);
 
-    pStream->Read(&mUnknown10, sizeof(mUnknown10));
+    pStream->Read(&mFriends, sizeof(mFriends));
 
-    // mUnknown1c arrives in a local and is copied across afterwards, where mUnknown10 and
+    // mPlayMode arrives in a local and is copied across afterwards, where mFriends and
     // mDifficulty are filled in place. Both are plain words, and the asymmetry matches the binary.
-    int unknown1c;
-    pStream->Read(&unknown1c, sizeof(unknown1c));
+    int nPlayMode;
+    pStream->Read(&nPlayMode, sizeof(nPlayMode));
 
     pStream->Read(&mDifficulty, sizeof(mDifficulty));
 
-    int unknown24;
-    pStream->Read(&unknown24, sizeof(unknown24));
+    int nConstrainJam;
+    pStream->Read(&nConstrainJam, sizeof(nConstrainJam));
 
-    int unknown28;
-    pStream->Read(&unknown28, sizeof(unknown28));
+    int nNetGame;
+    pStream->Read(&nNetGame, sizeof(nNetGame));
 
-    int unknown2c;
-    pStream->Read(&unknown2c, sizeof(unknown2c));
+    int nLoadingGame;
+    pStream->Read(&nLoadingGame, sizeof(nLoadingGame));
 
-    int unknown30;
-    pStream->Read(&unknown30, sizeof(unknown30));
+    int nJukeboxMode;
+    pStream->Read(&nJukeboxMode, sizeof(nJukeboxMode));
 
-    mUnknown1c = unknown1c;
-    mUnknown24 = unknown24 != 0;
-    mUnknown28 = unknown28 != 0;
-    mLoadingGame = unknown2c != 0;
-    mJukeboxMode = unknown30 != 0;
+    mPlayMode = nPlayMode;
+    mConstrainJam = nConstrainJam != 0;
+    mNetGame = nNetGame != 0;
+    mLoadingGame = nLoadingGame != 0;
+    mJukeboxMode = nJukeboxMode != 0;
 }
 
 // 0x00187570
 void GameParams::Print(std::ostream &stream) {
     stream << "GameParams:" << " level=" << mLevelName << " arena=" << mArenaName
-           << " friends=" << mUnknown10 << " " << (mUnknown1c == 1 ? " game" : " jam")
-           << " difficulty=" << mDifficulty << " " << (mUnknown24 ? " constrain-jam" : "")
-           << "netgame=" << mUnknown28 << "loadinggame=" << mLoadingGame
+           << " friends=" << mFriends << " " << (mPlayMode == 1 ? " game" : " jam")
+           << " difficulty=" << mDifficulty << " " << (mConstrainJam ? " constrain-jam" : "")
+           << "netgame=" << mNetGame << "loadinggame=" << mLoadingGame
            << "jukeboxmode=" << mJukeboxMode << std::endl;
 }
 
@@ -115,11 +117,11 @@ void GameParams::Print(std::ostream &stream) {
 GameParams &GameParams::operator=(const GameParams &other) {
     mLevelName = other.mLevelName;
     mArenaName = other.mArenaName;
-    mUnknown10 = other.mUnknown10;
-    mUnknown1c = other.mUnknown1c;
+    mFriends = other.mFriends;
+    mPlayMode = other.mPlayMode;
     mDifficulty = other.mDifficulty;
-    mUnknown24 = other.mUnknown24;
-    mUnknown28 = other.mUnknown28;
+    mConstrainJam = other.mConstrainJam;
+    mNetGame = other.mNetGame;
     mLoadingGame = other.mLoadingGame;
     mJukeboxMode = other.mJukeboxMode;
     return *this;
@@ -128,9 +130,9 @@ GameParams &GameParams::operator=(const GameParams &other) {
 // 0x00187b20
 bool GameParams::operator==(const GameParams &other) const {
     return mLevelName == other.mLevelName && mArenaName == other.mArenaName &&
-           mUnknown10 == other.mUnknown10 && mUnknown1c == other.mUnknown1c &&
-           mDifficulty == other.mDifficulty && mUnknown24 == other.mUnknown24 &&
-           mUnknown28 == other.mUnknown28 && mLoadingGame == other.mLoadingGame &&
+           mFriends == other.mFriends && mPlayMode == other.mPlayMode &&
+           mDifficulty == other.mDifficulty && mConstrainJam == other.mConstrainJam &&
+           mNetGame == other.mNetGame && mLoadingGame == other.mLoadingGame &&
            mJukeboxMode == other.mJukeboxMode;
 }
 

@@ -127,7 +127,7 @@ Py::Object ScriptStopGame(const Py::Tuple &args) {
     if (args.length() != 0) {
         throw Py::TypeError(HxStr("requires 0 args"));
     }
-    Application::shared()->GetWorld()->PostExitMode1();
+    Application::shared()->GetWorld()->PostFinish();
     return Py::Object();
 }
 
@@ -247,7 +247,7 @@ Py::Object ScriptFreezeJuice(const Py::Tuple &args) {
     const int nFreeze = Py::Int(args.getItem(0));
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
-        pWorld->mGamer->mUnknown1c = nFreeze != 0 ? 1 : 0;
+        pWorld->mGamer->mJuiceFrozen = nFreeze != 0 ? 1 : 0;
     }
     return Py::Object();
 }
@@ -680,7 +680,7 @@ Py::Object ScriptClock(Py::Tuple args) {
     if (command == "song_bar") {
         Sch::TickClock *pClock = Application::shared()->GetSongClock();
         const int nBar = pClock->SongTick() / kTicksPerMeasure;
-        return Py::Int(static_cast<long long>(Application::shared()->GetPlayMap()->Slot5(nBar)));
+        return Py::Int(static_cast<long long>(Application::shared()->GetPlayMap()->MapBar(nBar)));
     }
     throw Py::TypeError(HxStr("requires 1st arg: pause, start, step, tempo, tick"));
 }

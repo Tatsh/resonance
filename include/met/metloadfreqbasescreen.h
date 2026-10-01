@@ -25,28 +25,28 @@
  * read back byte for byte and agrees with the addresses recorded on the declarations below.
  *
  * Three buttons drive the screen and the interface follows from that. BuildButtonList() appends
- * `cid_01.but`, `cid_02.but`, and `cid_03.but` to mUnknown90 and rebuilds MetScreen::mUnknown38
- * with the prompts `id_name`, `cid_edit`, and `id_create`, in that order. OnUnknownSlot36() then
+ * `cid_01.but`, `cid_02.but`, and `cid_03.but` to mButtonList and rebuilds MetScreen::mHelpKeys
+ * with the prompts `id_name`, `cid_edit`, and `id_create`, in that order. OnExitFinished() then
  * dispatches button 0 to OnNameButton(), button 1 to OnEditButton(), and button 2 to
  * OnCreateButton(), which is what identifies all three. HandleCommand() posts the prompt at the
  * selected index through MetHelpScreen::SetText() on every navigation command.
  *
- * Selecting a button departs the screen before the action runs, and MetScreen::mUnknown18 records
+ * Selecting a button departs the screen before the action runs, and MetScreen::mExitChoice records
  * which of the two departures is under way. The select command alternates the selected button
- * through MetScreen::StartRepeatingSound(). OnUnknownSlot30() runs once that alternation finishes,
- * writes 2, and starts the exit animation. OnUnknownSlot36() runs once the exit animation
+ * through MetScreen::StartRepeatingSound(). OnRepeatingSoundFinished() runs once that alternation
+ * finishes, writes 2, and starts the exit animation. OnExitFinished() runs once the exit animation
  * finishes, and the 2 sends it to the selected button's action. The back command writes 0 instead,
- * and OnUnknownSlot36() then restores the main menu.
+ * and OnExitFinished() then restores the main menu.
  *
  * The constructor at `0x00291e00` takes only the renderer and the load priority, and supplies
  * `cid` for the screen name, `metagame/_Solo` for the directory, and `create_id` for the
  * container. All three children call it, so all three load the same container and differ only in
- * behaviour. It allocates a MetButtonList tagged `MetButtonList` into mUnknown90, zeroes
- * mUnknown94, waits for the FreQ maker assets, and resolves `persona_texburn_texture_1.tex` into
- * mBurnTexture. mUnknown98 and mUnknown9c are written by ResolveContainerViews() rather than by
- * the constructor.
+ * behaviour. It allocates a MetButtonList tagged `MetButtonList` into mButtonList, zeroes
+ * mSelectedIdentity, waits for the FreQ maker assets, and resolves
+ * `persona_texburn_texture_1.tex` into mBurnTexture. mLeftArrow and mRightArrow are written by
+ * ResolveContainerViews() rather than by the constructor.
  *
- * The destructor at `0x00296ae0` restores the vptr, deletes mUnknown90 through slot 1 of the
+ * The destructor at `0x00296ae0` restores the vptr, deletes mButtonList through slot 1 of the
  * MetButtonList table with the deleting `__in_chrg` value, runs the MetScreen destructor, and
  * releases the object with the tag `MsgSink`.
  *
@@ -112,7 +112,7 @@ public:
      *
      * Slot 23. The override tests neither the selector nor any recorded selector of its own. It
      * forwards to MetScreen with the same selector when MetButtonList::mSelected is zero and the
-     * identity list at mUnknown8c has at least kMinimumCyclableEntries entries.
+     * identity list at mIdentityList has at least kMinimumCyclableEntries entries.
      *
      * @param nSelector Passed through to MetScreen unchanged.
      * @ghidraAddress 0x00296b60
@@ -135,17 +135,17 @@ public:
      * Slot 30. The two cycle arrows also alternate, through the left and right commands, and a
      * call that reports either of them is ignored so that cycling the carousel does not depart the
      * screen. Any other object is the button the select command alternated, and the departure runs
-     * with MetScreen::mUnknown18 at 2 so that OnUnknownSlot36() acts on the button.
+     * with MetScreen::mExitChoice at 2 so that OnExitFinished() acts on the button.
      *
      * @param pButton The button slot 29 finished alternating.
      * @ghidraAddress 0x00292c60
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Act on the departure the exit animation has just finished.
      *
-     * Slot 36. MetScreen::mUnknown18 selects between the two halves. A zero is the back command,
+     * Slot 36. MetScreen::mExitChoice selects between the two halves. A zero is the back command,
      * and the main menu is restored by pushing MetLeftGizmoSmallScreen, MetTopLogoScreen, and
      * MetMainScreen and activating the last. Anything else is a selected button, and the selected
      * index picks one of OnNameButton(), OnEditButton(), and OnCreateButton(). An index outside 0
@@ -153,7 +153,7 @@ public:
      *
      * @ghidraAddress 0x00292da8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the two cycle arrows after the container load.
@@ -228,7 +228,7 @@ public:
     /**
      * Resolve the list of identities the carousel steps through.
      *
-     * Slot 44. The body is empty here and every child supplies mUnknown8c. MetLoadFreqScreen
+     * Slot 44. The body is empty here and every child supplies mIdentityList. MetLoadFreqScreen
      * takes MetPersonaData::loadList() and MetLoadNewFreqScreen takes the list the FreQ maker
      * asset manager vends. EnterAndShow() runs it before either of the other two build steps,
      * which is what fixes the order.
@@ -240,8 +240,8 @@ public:
     /**
      * Rebuild the button ring and the prompts that go with it.
      *
-     * Slot 45. mUnknown90 is emptied and the three `cid_0N.but` buttons are appended with an empty
-     * label each, MetScreen::mUnknown38 is emptied and `id_name`, `cid_edit`, and `id_create` are
+     * Slot 45. mButtonList is emptied and the three `cid_0N.but` buttons are appended with an empty
+     * label each, MetScreen::mHelpKeys is emptied and `id_name`, `cid_edit`, and `id_create` are
      * appended, and the selection is then moved to the first button.
      *
      * @ghidraAddress 0x00292810
@@ -276,14 +276,15 @@ protected:
     // GameManagerImpl::GetPersonas() returns a vector of exactly this element type. No routine of
     // this class writes the member, and both children write it from their AcquireIdentityList(),
     // which is why it is protected. +0x8c
-    std::vector<MetPersonaData *> *mUnknown8c;
+    std::vector<MetPersonaData *> *mIdentityList;
     // The button ring. Both children rebuild it in their BuildButtonList() and address the label
     // of one button in their UpdateNameLabel(), which is why it is protected. +0x90
-    MetButtonList *mUnknown90;
-    // Read by MetLoadFreqScreen::OnNameButton() and written by
-    // MetLoadNewFreqScreen::OnUnknownSlot11(), which is why it is protected. EnterAndShow() resets
-    // it once it has run past the end of a rebuilt list. +0x94
-    int mUnknown94;
+    MetButtonList *mButtonList;
+    // The index of the selected identity in mIdentityList. Read by
+    // MetLoadFreqScreen::OnNameButton() and MetLoadNewFreqScreen::OnKeyboardTextEntered(), and
+    // protected for those two readers. EnterAndShow() resets it once it has run past the end of a
+    // rebuilt list. +0x94
+    int mSelectedIdentity;
 
 private:
     /**
@@ -297,10 +298,10 @@ private:
      */
     void StepSelection(const MetScreenCommand *pCommand);
 
-    // Resolved by ResolveContainerViews() and null while the container has not loaded. +0x98 and
-    // +0x9c
-    Rnd::Button *mUnknown98;
-    Rnd::Button *mUnknown9c;
+    // The cycle arrows `cid_left.but` and `cid_right.but`, resolved by ResolveContainerViews() and
+    // null while the container has not loaded. +0x98 and +0x9c
+    Rnd::Button *mLeftArrow;
+    Rnd::Button *mRightArrow;
     // The texture `persona_texburn_texture_1.tex`, resolved by the constructor. +0xa0
     Rnd::Tex *mBurnTexture;
 };

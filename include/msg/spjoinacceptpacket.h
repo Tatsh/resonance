@@ -155,12 +155,12 @@ public:
     void AddPlayer(const PlayerInfo &player);
 
 private:
-    int mDestId;                        // +0x14
-    int mPlayerId;                      // +0x18
-    GameParams mUnknown1c;              // +0x1c
-    HxStr mColorName;                   // +0x54
-    FreqAppearance mUnknown5c;          // +0x5c
-    std::vector<PlayerInfo> mUnknown70; // +0x70
+    int mDestId;                      // +0x14
+    int mPlayerId;                    // +0x18
+    GameParams mParams;               // +0x1c
+    HxStr mColorName;                 // +0x54
+    FreqAppearance mAppearance;       // +0x5c
+    std::vector<PlayerInfo> mPlayers; // +0x70
 };
 
 /**

@@ -28,30 +28,30 @@
 class PlayMapRing : public PlayMap {
 public:
     /**
-     * Wraps the position into one turn of the ring.
+     * Wraps the bar into one turn of the ring.
      *
-     * The body returns `(nValue + mBarCount) % mSteps.back()`, so mSteps.back() is the length of
-     * one turn and mBarCount is the offset the ring starts at.
+     * The body returns `(nBar + mBarCount) % mSteps.back()`. mSteps.back() is therefore the length
+     * of one turn, and mBarCount is the offset the ring starts at.
      *
-     * @param nValue The position to wrap.
+     * @param nBar The bar to wrap.
      * @return The wrapped position.
      * @ghidraAddress 0x0012e408
      */
-    virtual int Slot5(int nValue);
+    virtual int MapBar(int nBar);
 
     /**
-     * Collects every position of one span into mUnknown2c.
+     * Collects every position of one span into mFoundBars.
      *
-     * The body clears mUnknown2c, then walks a value from nStart upward in steps of mSteps.back()
+     * The body clears mFoundBars, then walks a value from nStart upward in steps of mSteps.back()
      * while it remains below nEnd, appending each value that is not below nMin.
      *
      * @param nStart The first position.
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
-     * @return mUnknown2c.
+     * @return mFoundBars.
      * @ghidraAddress 0x0012dad8
      */
-    virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd);
+    virtual std::vector<int> &FindBarsPlaying(int nStart, int nMin, int nEnd);
 
     /**
      * Scales one turn of the ring by a repeat count.
@@ -61,5 +61,5 @@ public:
      * @return One turn scaled by the repeat count.
      * @ghidraAddress 0x0012e430
      */
-    virtual int Slot8();
+    virtual int GetExtent();
 };

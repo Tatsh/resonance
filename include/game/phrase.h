@@ -29,7 +29,7 @@ class Player;
  *
  * Every member is private. AxePhraseMaker::StartPhrase() and Voxer::StartPhrase() write mPlayer
  * at `0x0019bd7c` and `0x001d8aa8`, and AxeOldGemMaker reads mPlayer and mMuse at `0x001a3420`
- * and `0x001a3698`. PhraseDatabase writes mPlayer and reads and writes mUnknown28 directly,
+ * and `0x001a3698`. PhraseDatabase writes mPlayer and reads and writes mScore directly,
  * PhraseMgr::GetPhraseOwner() reads mPlayer, TrackData::AddPhrases() walks mGems directly,
  * PhrasePlayer reads mPlayer, mGems, and mMuse when it plays a bar, the image exposes no accessor,
  * and friend declarations model that access. Promoting the members to public fits the image equally
@@ -202,7 +202,7 @@ private:
     Player *mPlayer;                      // +0x14, labelled `pl: `
     MultiMuse *mMuse;                     // +0x18, created on first use
     std::vector<TickObj<float> > mValues; // +0x1c, labelled `X: `
-    char mUnknown28;                      // +0x28
+    char mScore;                          // +0x28, the points the phrase was captured for
 };
 
 /**

@@ -104,7 +104,7 @@ public:
      * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x002d2cf0
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Bring up the next screen once this one has exited.
@@ -116,7 +116,7 @@ public:
      *
      * @ghidraAddress 0x002d2e90
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views, allocate the button list, and add the two buttons.

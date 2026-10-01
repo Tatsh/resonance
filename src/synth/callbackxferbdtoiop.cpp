@@ -7,10 +7,6 @@
 #include "os/mem.h"
 #include "synth/midi_main.h"
 
-// The tag the release below bills to. It is the module's original file rather than this one,
-// because the whole of midi_main compiled as a single translation unit.
-constexpr char kMidiMainFileName[] = "midi_main.cpp";
-
 // Selector that hands one chunk to the driver.
 constexpr int kSoundSelectorXferChunk = 0x1070;
 
@@ -78,7 +74,7 @@ inline void CallbackXferBdToIop::XferChunk() {
         return;
     }
     // Yes, the binary finishes with the transfer still marked busy.
-    MemFreeTagged(g_pBdXferBuffer, kMidiMainFileName, __LINE__);
+    MemFreeTagged(g_pBdXferBuffer, __FILE__, __LINE__);
     FileClose(mFile);
     SubmitSoundDriverRequest(kSoundSelectorBankComplete,
                              reinterpret_cast<uintptr_t>(&g_bankCommand));

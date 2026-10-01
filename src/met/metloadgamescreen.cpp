@@ -54,11 +54,11 @@ static const char *const kTutorialScreen = "MetTutorialScreen";
 static const char *const kJukeboxDoneScreen = "MetJukeboxEditPlaylistScreenDone";
 static const char *const kNoScreen = "";
 
-// GameParams::mUnknown1c values.
+// GameParams::mPlayMode values.
 constexpr int kPlayModeGameValue = 1;
 constexpr int kPlayModeJamValue = 2;
 
-// MetFrontEndState::mUnknown18 values the level loads record.
+// MetFrontEndState::mPendingTransition values the level loads record.
 constexpr int kGamePhase = 1;
 constexpr int kTutorialPhase = 5;
 
@@ -92,7 +92,7 @@ inline HxStr Caption(const char *pszKey) {
 // 0x0028d2c8
 MetLoadGameScreen::MetLoadGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mPolling(0), mWaiting(0), mUnknown9c(0), mDeadlineNs(0), mFade(nullptr) {
+      mPolling(0), mWaiting(0), mDemoPlayback(0), mDeadlineNs(0), mFade(nullptr) {
     mFade = new MetFade(pRenderer);
 }
 
@@ -109,11 +109,11 @@ void MetLoadGameScreen::EnterAndShow() {
 
     if (params.mJukeboxMode == 0) {
         pLoading->SetText(Caption(kLoadingCaption));
-        if (mUnknown9c != 0) {
+        if (mDemoPlayback != 0) {
             mpEvent->SetText(Caption(kDemoCaption));
-        } else if (MetFrontEndState::shared()->mUnknown24 == kTutorialScreen) {
+        } else if (MetFrontEndState::shared()->mReturnScreen == kTutorialScreen) {
             mpEvent->SetText(Caption(kTutorialCaption));
-        } else if (params.mUnknown1c == kPlayModeJamValue) {
+        } else if (params.mPlayMode == kPlayModeJamValue) {
             mpEvent->SetText(Caption(kRemixCaption));
         } else {
             mpEvent->SetText(Caption(kGameCaption));
@@ -121,16 +121,16 @@ void MetLoadGameScreen::EnterAndShow() {
 
         MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
         int nDoWinSequence = 0;
-        if (params.mUnknown1c == kPlayModeGameValue &&
+        if (params.mPlayMode == kPlayModeGameValue &&
             Application::shared()->GetGameMode() == kGameModeSolo &&
-            MetFrontEndState::shared()->mUnknown24 != kTutorialScreen &&
+            MetFrontEndState::shared()->mReturnScreen != kTutorialScreen &&
             pPersona->mStats.IsLastLevelRemaining(params) != 0) {
             nDoWinSequence = 1;
         }
         SetDoWinSequence(nDoWinSequence);
         AssignBurnSlots();
-    } else if (MetFrontEndState::shared()->mUnknown24 == kJukeboxDoneScreen) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kNoScreen);
+    } else if (MetFrontEndState::shared()->mReturnScreen == kJukeboxDoneScreen) {
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kNoScreen);
         pLoading->SetText(Caption(kLoadingCaption));
         mpEvent->SetText(Caption(kJukeboxCaption));
     } else {
@@ -142,27 +142,27 @@ void MetLoadGameScreen::EnterAndShow() {
 }
 
 // 0x0028dc60
-void MetLoadGameScreen::OnUnknownSlot33() {
+void MetLoadGameScreen::OnEnterFinished() {
     Application::shared()->GetSynth()->FadeOut(kMusicFadeMs);
     mWaiting = 1;
     mDeadlineNs = WatchdogNowNs() + kLoadDelayNs;
 }
 
 // 0x0028dd38
-void MetLoadGameScreen::OnUnknownSlot26(float flTime) {
+void MetLoadGameScreen::UpdateIdle(float flTime) {
     if (mWaiting != 0 && mDeadlineNs < WatchdogNowNs()) {
         mWaiting = 0;
         Renderer::LoadCommon();
-        if (mUnknown9c != 0) {
+        if (mDemoPlayback != 0) {
             // Yes, the binary returns here without advancing the fade.
             mFade->FadeIn(kFadeInDuration, flTime, this, kFadeDropsView);
             return;
         }
 
         mPolling = 1;
-        if (Application::shared()->GetGameManager()->GetParams()->mUnknown28 != 0) {
+        if (Application::shared()->GetGameManager()->GetParams()->mNetGame != 0) {
             LoadNetLevel();
-        } else if (MetFrontEndState::shared()->mUnknown24 == kTutorialScreen) {
+        } else if (MetFrontEndState::shared()->mReturnScreen == kTutorialScreen) {
             LoadTutorialLevel();
         } else {
             LoadGameLevel();
@@ -190,17 +190,17 @@ void MetLoadGameScreen::LoadNetLevel() {
 
 // 0x0028e018
 void MetLoadGameScreen::OnFadeInDone() {
-    mUnknown10->ClearBackgroundScene();
-    if (mUnknown9c != 0) {
+    mRenderer->ClearBackgroundScene();
+    if (mDemoPlayback != 0) {
         GameManagerDoPlaybackMsg msg;
         Application::shared()->GetGameManager()->QueueMessage(&msg);
-        mUnknown9c = 0;
+        mDemoPlayback = 0;
     } else {
         BeginGameLocalMsg msg;
         Application::shared()->GetGameManager()->QueueMessage(&msg);
     }
-    mUnknown10->RemoveScreen(this);
-    MetFrontEndState::shared()->mUnknown10 = 0;
+    mRenderer->RemoveScreen(this);
+    MetFrontEndState::shared()->mSettingsDirty = 0;
     const Color black{0.0f, 0.0f, 0.0f, kOpaque};
     g_gfxDevice.SetClearColor(black);
     g_gfxDevice.FlipFrameBuffer();
@@ -208,7 +208,7 @@ void MetLoadGameScreen::OnFadeInDone() {
 
 // 0x0028e158
 void MetLoadGameScreen::AssignBurnSlots() {
-    if (mUnknown9c == 0) {
+    if (mDemoPlayback == 0) {
         std::vector<MetPersonaData *> personas(
             *Application::shared()->GetGameManager()->GetPersonas());
         for (int i = 0; i < static_cast<int>(personas.size()); ++i) {
@@ -237,16 +237,16 @@ MetLoadGameScreen::~MetLoadGameScreen() {
 // 0x00291ad0
 void MetLoadGameScreen::LoadGameLevel() {
     MetFrontEndState *pState = MetFrontEndState::shared();
-    pState->mUnknown1c = pState->mUnknown18;
-    pState->mUnknown18 = kGamePhase;
+    pState->mLastTransition = pState->mPendingTransition;
+    pState->mPendingTransition = kGamePhase;
     Renderer::LoadLevel(*Application::shared()->GetGameManager()->GetParams());
 }
 
 // 0x00291b28
 void MetLoadGameScreen::LoadTutorialLevel() {
     MetFrontEndState *pState = MetFrontEndState::shared();
-    pState->mUnknown1c = pState->mUnknown18;
-    pState->mUnknown18 = kTutorialPhase;
+    pState->mLastTransition = pState->mPendingTransition;
+    pState->mPendingTransition = kTutorialPhase;
     Renderer::LoadLevel(*Application::shared()->GetGameManager()->GetParams());
 }
 

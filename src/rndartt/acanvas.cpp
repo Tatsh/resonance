@@ -37,10 +37,6 @@ constexpr int kFixedOne = 1 << kACanvasFractionBits;
 constexpr int kEdgeForward = 1;
 constexpr int kEdgeBackward = -1;
 
-// This translation unit's copy of the tag ABitmap::ABitmap() also uses.
-// 0x00837d80
-const char *const kBitmapAllocTag = "abitmap.h";
-
 // One pointer to member per ABitmapFormat code. DrawGlyphNoClip() and DrawGlyph() both index the
 // first table by the glyph format code, BlitNoClip() and Blit() the first two by the source format
 // code, ReadRectNoClip() and ReadRect() the next two by the destination format code, and
@@ -169,7 +165,7 @@ ACanvas *ACanvas::CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels) {
                 static_cast<short>(copy.mWidth * g_abBitmapBytesPerPixel[copy.mFormat]);
         }
         copy.mPixels = MemAllocTagged(
-            static_cast<long long>(copy.mHeight) * copy.mBytesPerRow, kBitmapAllocTag, __LINE__);
+            static_cast<long long>(copy.mHeight) * copy.mBytesPerRow, __FILE__, __LINE__);
         if (copy.mPixels == nullptr) {
             return nullptr;
         }

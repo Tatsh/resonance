@@ -40,7 +40,7 @@ static const char *const kTitleScreen = "MetScreenTitleScreen";
 // This screen's own registry key, which SetDifficultyUnlocked() resolves.
 static const char *const kOwnScreenName = "MetSoloWinScreen";
 
-// The prompt layout OnUnknownSlot33() selects.
+// The prompt layout OnEnterFinished() selects.
 static const char *const kPromptLayout = "no_back_title";
 
 // The key the screen title is looked up under.
@@ -77,12 +77,12 @@ constexpr int kSelectAlternateCycles = 2;
 // 0x003b55a8
 MetSoloWinScreen::MetSoloWinScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown90(new MetButtonList()), mDifficultyUnlocked(0) {
+      mButtonList(new MetButtonList()), mDifficultyUnlocked(0) {
 }
 
 // 0x003b9ce8
 MetSoloWinScreen::~MetSoloWinScreen() {
-    delete mUnknown90;
+    delete mButtonList;
 }
 
 // 0x003b9b98
@@ -91,17 +91,17 @@ MetSoloWinScreen *MetSoloWinScreen::New(MetRenderer *pRenderer, int nPriority) {
 }
 
 // 0x003b6188
-void MetSoloWinScreen::OnUnknownSlot36() {
-    mUnknown10->ResolveArenaView(kResolveArenaView);
-    mUnknown10->OnUnknown00390088();
-    mUnknown10->OnUnknown00390090();
+void MetSoloWinScreen::OnExitFinished() {
+    mRenderer->ResolveArenaView(kResolveArenaView);
+    mRenderer->OnReturnFromGame();
+    mRenderer->OnReturnToMenus();
     if (mDifficultyUnlocked != 0) {
         mDifficultyUnlocked = 0;
         GameParams params(*Application::shared()->GetGameManager()->GetParams());
         ++params.mDifficulty;
         Application::shared()->GetGameManager()->SetParams(params);
     }
-    switch (mUnknown90->mSelected) {
+    switch (mButtonList->mSelected) {
     case kContinueButtonIndex:
         PushNamedScreen(HxStr(kSoloStagesScreen));
         ActivateNamedPanel(HxStr(kSoloStagesScreen));
@@ -113,33 +113,33 @@ void MetSoloWinScreen::OnUnknownSlot36() {
         break;
 
     default:
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
         PushNamedScreen(HxStr(kLoadGameScreen));
         ActivateNamedPanel(HxStr(kLoadGameScreen));
         break;
     }
-    mUnknown90->SetSelected(kNoSelection);
+    mButtonList->SetSelected(kNoSelection);
 }
 
 // 0x003b5968
 void MetSoloWinScreen::EnterAndShow() {
-    mUnknown90->Clear();
+    mButtonList->Clear();
 
     HxStr continueLabel = QueryConfigString(kPromptConfigCode, kContinuePrompt);
-    mUnknown90->Add(HxStr(kContinueButtonObject), continueLabel);
+    mButtonList->Add(HxStr(kContinueButtonObject), continueLabel);
 
     HxStr exitLabel = QueryConfigString(kPromptConfigCode, kExitPrompt);
-    mUnknown90->Add(HxStr(kExitButtonObject), exitLabel);
+    mButtonList->Add(HxStr(kExitButtonObject), exitLabel);
 
     HxStr restartLabel = QueryConfigString(kPromptConfigCode, kRestartPrompt);
-    mUnknown90->Add(HxStr(kRestartButtonObject), restartLabel);
+    mButtonList->Add(HxStr(kRestartButtonObject), restartLabel);
 
-    mUnknown90->SetSelected(kContinueButtonIndex);
+    mButtonList->SetSelected(kContinueButtonIndex);
 
-    mUnknown38.clear();
-    mUnknown38.push_back(HxStr(kContinuePrompt));
-    mUnknown38.push_back(HxStr(kExitPrompt));
-    mUnknown38.push_back(HxStr(kRestartPrompt));
+    mHelpKeys.clear();
+    mHelpKeys.push_back(HxStr(kContinuePrompt));
+    mHelpKeys.push_back(HxStr(kExitPrompt));
+    mHelpKeys.push_back(HxStr(kRestartPrompt));
 
     HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
@@ -155,22 +155,22 @@ void MetSoloWinScreen::EnterAndShow() {
 void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown90->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown90->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mUnknown90->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         break;
 
     default:
@@ -191,7 +191,7 @@ void MetSoloWinScreen::PlayCycleRightSound(int) {
 }
 
 // 0x003b5f88
-void MetSoloWinScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetSoloWinScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ExitScreenByName(HxStr(kSoloStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));
@@ -200,9 +200,9 @@ void MetSoloWinScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x003b9d80
-void MetSoloWinScreen::OnUnknownSlot33() {
+void MetSoloWinScreen::OnEnterFinished() {
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
-    MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 
 // 0x003b9c20

@@ -14,7 +14,7 @@
  * The screen loads `metagame/shared/net_options_butts.rnd` and resolves `net_options_butts.view`
  * along with the `nob_EE.anim` and `nob_BF.anim` animations. Its buttons open the game options,
  * the controller configuration, the memory card, and the credits, and a fifth button changes the
- * disc when GameOptions::mUnknown04 is set.
+ * disc when GameOptions::mExpansionPack is set.
  *
  * Eight slots differ from the MetScreen table.
  *
@@ -23,8 +23,8 @@
  *  - 19 `0x002073c8` HandleCommand().
  *  - 23 `0x0020bff0` PlayCycleLeftSound(), overridden empty.
  *  - 24 `0x0020bff8` PlayCycleRightSound(), overridden empty.
- *  - 30 `0x00207fc0` OnUnknownSlot30().
- *  - 36 `0x00208270` OnUnknownSlot36().
+ *  - 30 `0x00207fc0` OnRepeatingSoundFinished().
+ *  - 36 `0x00208270` OnExitFinished().
  */
 class MetConfigOptionsButtonsScreen : public MetScreen {
 public:
@@ -61,7 +61,7 @@ public:
      * Rebuild the buttons and their prompts, select the first, and enter.
      *
      * The disc button, its prompt, and the `nob_5group.view` frame appear only when
-     * GameOptions::mUnknown04 is set, and `nob_4group.view` appears otherwise. The title is the
+     * GameOptions::mExpansionPack is set, and `nob_4group.view` appears otherwise. The title is the
      * `config_option_buttons` title and the help layout is `standard_title`.
      *
      * @ghidraAddress 0x00207660
@@ -72,8 +72,8 @@ public:
      * Act on a command.
      *
      * Previous and next step the ring and post the new button's prompt. Select records the pad
-     * of a controller button press in mUnknown90, clears the active panel, and flashes the
-     * selected button. Back records 0 in MetScreen::mUnknown18, exits the title and right gizmo
+     * of a controller button press in mControllerIndex, clears the active panel, and flashes the
+     * selected button. Back records 0 in MetScreen::mExitChoice, exits the title and right gizmo
      * screens, and begins the exit.
      *
      * @param pCommand The command.
@@ -100,29 +100,29 @@ public:
     /**
      * Begin the exit once a button has finished flashing.
      *
-     * Every button records 2 in MetScreen::mUnknown18 and exits the right gizmo and title
+     * Every button records 2 in MetScreen::mExitChoice and exits the right gizmo and title
      * screens. The memory, credits, and disc buttons also exit the help screen.
      *
      * @param pButton The button that finished alternating.
      * @ghidraAddress 0x00207fc0
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Push the screen the selected button opens.
      *
-     * A cancel returns to the pause screen when MetFrontEndState::mUnknown24 names
+     * A cancel returns to the pause screen when MetFrontEndState::mReturnScreen is
      * `MetPauseSoloGameScreen`, and to the main menu otherwise. The controller button hands
-     * mUnknown90 to MetConfigControllerScreen::mUnknownc8, and the memory button records this
-     * screen in MetFrontEndState::mUnknown24 to return to.
+     * mControllerIndex to MetConfigControllerScreen::mControllerIndex, and the memory button
+     * records this screen in MetFrontEndState::mReturnScreen to return to.
      *
      * @ghidraAddress 0x00208270
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
 private:
-    MetButtonList *mUnknown8c; // +0x8c
+    MetButtonList *mOptionButtons; // +0x8c
     // The controller index the controller configuration screen edits, the pad index of the
     // select command less one. +0x90
-    int mUnknown90;
+    int mControllerIndex;
 };

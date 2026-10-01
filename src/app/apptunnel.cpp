@@ -82,8 +82,9 @@
 
 namespace {
 
-// Configuration code whose flag becomes g_nAppTunnelDisplayMode.
-constexpr int kDisplayModeConfigCode = 0x3a1;
+// Configuration code that reports whether the level is a tutorial, recorded in
+// g_nAppTunnelTutorial.
+constexpr int kTutorialConfigCode = 0x3a1;
 
 // Globals::GetTempo() divided by this is the rate "realtime.view" runs at.
 constexpr float kTempoToRate = 480000.0f;
@@ -298,16 +299,16 @@ inline void AppTunnel::GemFlash::Update() {
 AppTunnel::AppTunnel(Renderer *pRenderer)
     : mRenderer(pRenderer), mGameMode(Application::shared()->GetGameMode()),
       mPlayMode(Application::shared()->GetPlayMode()), mBoundary(nullptr), mCameraRig(nullptr),
-      mJukebox(0), mUnknowncc(0),
-      mUnknownd0(static_cast<float>(Application::shared()->GetTempo()) / kTempoToRate),
-      mShowCrates(0), mPlayMap(nullptr), mTrackCount(kTrackCount), mUnknown140(0), mUnknown148(0) {
+      mJukebox(0), mStaggerPanels(0),
+      mInitialTempoRate(static_cast<float>(Application::shared()->GetTempo()) / kTempoToRate),
+      mShowCrates(0), mPlayMap(nullptr), mTrackCount(kTrackCount), mNextStepBar(0), mUnusedWord(0) {
     g_pAppTunnel = this;
-    g_nAppTunnelDisplayMode = QueryConfigFlag(kDisplayModeConfigCode);
+    g_nAppTunnelTutorial = QueryConfigFlag(kTutorialConfigCode);
     CacheTunnelObjectByName();
     Rnd::Tunnel *pTunnel = GetCachedTunnelObject();
     mPlayMap = Application::shared()->GetPlayMap();
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {
-        mUnknowncc = 1;
+        mStaggerPanels = 1;
     }
     for (int i = 0; i < kTrackCount; ++i) {
         mTrackModes[i] =
@@ -316,10 +317,10 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
     std::vector<Player *> &players = Application::shared()->GetWorld()->mPlayers;
     const int nPlayers = players.size();
     const int nLocalPlayers = Application::shared()->GetWorld()->mLocalPlayers.size();
-    mUnknown144 = static_cast<float>(Application::shared()->GetTempo()) / kTempoToRate;
+    mTempoRate = static_cast<float>(Application::shared()->GetTempo()) / kTempoToRate;
 
-    FindObject<Rnd::Animatable>("realtime.view")->SetRate(mUnknown144);
-    GetCachedTunnelObject()->SetLaneChangeFrames(kLaneChangeFrames / mUnknown144);
+    FindObject<Rnd::Animatable>("realtime.view")->SetRate(mTempoRate);
+    GetCachedTunnelObject()->SetLaneChangeFrames(kLaneChangeFrames / mTempoRate);
     // Yes, the binary discards the count of removed events.
     (void)pTunnel->RemoveEventsInRange(kEarliestEventFrame, kLatestEventFrame);
 
@@ -535,7 +536,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         mFireFX.push_back(new TnlFireFX(HxStr(FormatString("firemult%d", i)), i));
     }
     for (int i = 0; i < kCrippleFXCount; ++i) {
-        mCrippleFX.push_back(new TnlCrippleFX(i, mUnknown144));
+        mCrippleFX.push_back(new TnlCrippleFX(i, mTempoRate));
     }
     for (int i = 0; i < kBumpFXCount; ++i) {
         mBumpFX.push_back(new TnlBumpFX(i));
@@ -621,10 +622,10 @@ inline TnlPlayer *AppTunnel::FindTnlPlayer(Player *pPlayer) {
 
 // 0x004465a0
 void AppTunnel::OnBarChanged(
-    int nTrack, int nBar, int nUnknown, Player *pPlayer, int nPowerup, int nEnabled) {
+    int nTrack, int nBar, int nRefreshing, Player *pPlayer, int nPowerup, int nEnabled) {
     int nNewPanel = 0;
-    if (mUnknowncc) {
-        nNewPanel = (nUnknown == 0);
+    if (mStaggerPanels) {
+        nNewPanel = (nRefreshing == 0);
     }
     const float flTick = mRenderer->mSongTick;
     if (flTick < 0.0f) {
@@ -647,7 +648,7 @@ void AppTunnel::OnBarChanged(
     } else {
         kind = (mode == kTrackModeVocal) ? TnlPanel::kKindVox : TnlPanel::kKindLane;
     }
-    const int nStep = mPlayMap->FindStepIndex(mPlayMap->Slot5(nBar));
+    const int nStep = mPlayMap->FindStepIndex(mPlayMap->MapBar(nBar));
     if (nNewPanel) {
         AddPanel(new TnlPanel(nTrack, nBar, pPlayer, nPowerup, kind, nEnabled, nStep),
                  flStartFrame);
@@ -701,7 +702,7 @@ void AppTunnel::OnGem(GemMsg *pMsg) {
                mJukebox) {
         nKind = mTrackEffectKinds[nTrack];
         bFlash = true;
-        if (mUnknowncc) {
+        if (mStaggerPanels) {
             flAppearFrame = flTick + ((flFrame - flTick) * kPanelLeadFraction);
         }
     } else if (nPowerup != -1) {
@@ -726,13 +727,13 @@ void AppTunnel::OnCatch(CatchMsg *pMsg) {
         GetCachedTunnelObject()->GetRingXfm(nTrack, &xfm, flFrame, flBlend);
         StartGemFlash(xfm.mTranslation);
         pPlayer->mSabreTrail.Pulse(flFrame, pMsg->mCaught, pMsg->mTotal);
-        if (g_nAppTunnelDisplayMode) {
+        if (g_nAppTunnelTutorial) {
             CallScriptTemplate(kCatchScriptTemplate);
         }
     } else {
         mGemManager->Add(
             TnlGem(mMissGemKind, nTrack, 0, false, flFrame, flBlend, kMissGemAppearFrame));
-        if (g_nAppTunnelDisplayMode) {
+        if (g_nAppTunnelTutorial) {
             CallScriptTemplate(kMissScriptTemplate);
         }
     }
@@ -748,22 +749,22 @@ void AppTunnel::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     if (mRenderer->GetCell(nTrack, nBar)->mPowerup == -1) {
         return;
     }
-    const int nStep = mPlayMap->FindStepIndex(mPlayMap->Slot5(nBar));
+    const int nStep = mPlayMap->FindStepIndex(mPlayMap->MapBar(nBar));
     TnlPanel panel(nTrack, nBar, &g_nullPlayer, -1, TnlPanel::kKindLane, 1, nStep);
     panel.Apply();
 }
 
 // 0x00447cc0
 void AppTunnel::OnPitch(PitchMsg *pMsg) {
-    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown10);
-    const int nGem = pMsg->mUnknown0c;
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
+    const int nGem = pMsg->mGem;
     const float flBlend = static_cast<float>(nGem) * kGemLaneScale + kGemLaneBase;
     Transform xfm;
     PadTransformRows(xfm);
-    GetCachedTunnelObject()->GetRingXfm(pMsg->mUnknown08, &xfm, mRenderer->mSongTick, flBlend);
+    GetCachedTunnelObject()->GetRingXfm(pMsg->mTrack, &xfm, mRenderer->mSongTick, flBlend);
     StartGemFlash(xfm.mTranslation);
     pPlayer->mActivator.mCatcher.Hit(nGem);
-    if (g_nAppTunnelDisplayMode) {
+    if (g_nAppTunnelTutorial) {
         CallScriptTemplate(kPitchScriptTemplate);
     }
 }
@@ -798,7 +799,7 @@ void AppTunnel::OnShowEraseEffect(ShowEraseEffectMsg *pMsg) {
                               flTick + flAhead / kErasePanelDivisor);
         }
     }
-    if (g_nAppTunnelDisplayMode) {
+    if (g_nAppTunnelTutorial) {
         CallScriptTemplate(kEraseScriptTemplate);
     }
 }
@@ -812,7 +813,7 @@ void AppTunnel::OnSectionCaptured(SectionCapturedMsg *pMsg) {
     float flPathStart = mRenderer->mSongTick;
     int nIndex = -1;
     if (mGameMode == kGameModeLocal) {
-        nIndex = pMsg->mPlayer->Slot2();
+        nIndex = pMsg->mPlayer->GetInputSlot();
         flPathStart -= kLocalCaptureLead;
     }
     // The binary copies the name before the lookup.
@@ -874,7 +875,7 @@ void AppTunnel::OnDeployedPowerup(DeployedPowerupMsg *pMsg) {
         const Color playerColor = TnlColorFromName(HxStr(pMsg->mPlayer->mColorName));
         StartFireFX(flPathStart, kFireIndex, pMsg->mTrack, blue, playerColor, flPathEnd);
         if (Application::shared()->GetWorld() != nullptr) {
-            Application::shared()->GetWorld()->mForceFeedback->PlayEffect0(pMsg->mPlayer);
+            Application::shared()->GetWorld()->mForceFeedback->PlayAutocatchEffect(pMsg->mPlayer);
         }
         break;
     }
@@ -890,7 +891,7 @@ void AppTunnel::OnDeployedPowerup(DeployedPowerupMsg *pMsg) {
             static_cast<float>(kBumperTargetOffset - nMaxLevel * kBumperTargetLevelStep);
         (void)StartBumpFX(pMsg->mTrack, HxStr(pMsg->mTarget->mColorName), 0, flTargetOffset);
         if (Application::shared()->GetWorld() != nullptr) {
-            Application::shared()->GetWorld()->mForceFeedback->PlayEffect1(pMsg->mTarget);
+            Application::shared()->GetWorld()->mForceFeedback->PlayBumpEffect(pMsg->mTarget);
         }
         break;
     }
@@ -1013,17 +1014,17 @@ void AppTunnel::HandleMessage(Message *pMsg) {
 
 // 0x00447328
 void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {
-    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown10);
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
     if (pPlayer == nullptr) {
         return;
     }
-    const int nTrack = pMsg->mUnknown04;
-    const int nLevel = pMsg->mUnknown08;
+    const int nTrack = pMsg->mTrack;
+    const int nLevel = pMsg->mPlace;
     GetCachedTunnelObject()->GetSeeker(pPlayer->mIndex)->SetTargetRing(nTrack);
     pPlayer->mActivator.MoveToTrack(nLevel, mTrackModes[nTrack], static_cast<float>(nTrack));
     pPlayer->mGridMarkers.SetTrack(nTrack);
-    if (g_nAppTunnelDisplayMode) {
-        CallScriptTemplate(kTrackSelectScriptTemplate, pMsg->mUnknown04);
+    if (g_nAppTunnelTutorial) {
+        CallScriptTemplate(kTrackSelectScriptTemplate, pMsg->mTrack);
     }
     mNowRing->SetPlayerMesh(pPlayer->mIndex, nTrack);
 }
@@ -1031,7 +1032,7 @@ void AppTunnel::OnTrackSelect(TrackSelectMsg *pMsg) {
 // 0x00448048
 void AppTunnel::OnAdvanceSectionToggle([[maybe_unused]] AdvanceSectionToggleMsg *pMsg) {
     mBoundary->UpdateText();
-    mUnknown140 = mPlayMap->FollowingStepBar(
+    mNextStepBar = mPlayMap->FollowingStepBar(
         static_cast<int>(mRenderer->mSongTick / static_cast<float>(kFramesPerBar)));
     for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         (*it)->mSabreTrail.Rebuild();
@@ -1096,7 +1097,7 @@ void AppTunnel::OnMultiplierState(MultiplierStateMsg *pMsg) {
 
 // 0x00449500
 void AppTunnel::OnPowerupFailed(PowerupFailedMsg *pMsg) {
-    const float flScaledTick = mRenderer->mSongTick * mUnknown144;
+    const float flScaledTick = mRenderer->mSongTick * mTempoRate;
     if (pMsg->mKind != kHudItemFreestyler) {
         return;
     }
@@ -1113,23 +1114,23 @@ void AppTunnel::OnPowerupFailed(PowerupFailedMsg *pMsg) {
 inline void AppTunnel::OnAxeButton(AxeButtonMsg *pMsg) {
     TnlPointer &pointer = FindTnlPlayer(pMsg->mPlayer)->mActivator.mPointer;
     if (pMsg->mPressed) {
-        pointer.Spin(pMsg->mUnknown08);
+        pointer.Spin(pMsg->mRestartSpin);
     } else {
         pointer.Reset();
     }
-    if (g_nAppTunnelDisplayMode) {
+    if (g_nAppTunnelTutorial) {
         CallScriptTemplate(kAxeButtonScriptTemplate);
     }
 }
 
 // 0x004580e8
 inline void AppTunnel::OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg) {
-    Application::shared()->GetWorld()->mForceFeedback->PlayEffect3(pMsg->mPlayer);
+    Application::shared()->GetWorld()->mForceFeedback->PlayNeutralizedEffect(pMsg->mPlayer);
 }
 
 // 0x00458120
 inline void AppTunnel::OnToggleGhost(ToggleGhostMsg *pMsg) {
-    FindTnlPlayer(pMsg->mUnknown04)->mActivator.SetGhost(pMsg->mOn);
+    FindTnlPlayer(pMsg->mPlayer)->mActivator.SetGhost(pMsg->mOn);
 }
 
 // 0x004581b8
@@ -1137,7 +1138,7 @@ inline void AppTunnel::OnJuiceAmount(JuiceAmountMsg *pMsg) {
     if ((mGameMode != kGameModeSolo) || (mPlayMode != kPlayModeGame)) {
         return;
     }
-    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mUnknown04);
+    TnlPlayer *pPlayer = FindTnlPlayer(pMsg->mPlayer);
     pPlayer->mActivator.mBlink = (pMsg->GetJuiceFraction() < kLowJuiceFraction);
 }
 
@@ -1163,7 +1164,7 @@ void AppTunnel::UpdateGhostFades() {
 
 // 0x00446960
 void AppTunnel::SetFrame(float flFrame) {
-    const float flScaledFrame = flFrame * mUnknown144;
+    const float flScaledFrame = flFrame * mTempoRate;
     for (Rnd::Particle *pParticle = mStringFlare->GetLiveParticles(); pParticle != nullptr;
          pParticle = pParticle->mNext) {
         pParticle->mCol.a -= kStringFlareFade;
@@ -1218,8 +1219,8 @@ void AppTunnel::SetFrame(float flFrame) {
     for (auto it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         (*it)->Update(flFrame, flScaledFrame);
     }
-    if (static_cast<float>(mUnknown140 * kFramesPerBar) < flFrame) {
-        mUnknown140 = mPlayMap->FollowingStepBar(mUnknown140);
+    if (static_cast<float>(mNextStepBar * kFramesPerBar) < flFrame) {
+        mNextStepBar = mPlayMap->FollowingStepBar(mNextStepBar);
     }
     UpdateGhostFades();
 }

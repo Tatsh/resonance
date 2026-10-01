@@ -85,102 +85,102 @@ MetRemixDataScreen::~MetRemixDataScreen() {
 // 0x00344d70
 void MetRemixDataScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mUnknownb0 = FindText(kSongTitleText);
-    mUnknownb4 = FindText(kDateText);
-    mUnknownb8 = FindMaterial(kPhotoMaterial);
-    mUnknownbc = FindMaterial(kLogoMaterial);
-    mUnknownc0 = FindText(kUnavailableText);
-    mUnknownc0->SetShowing(0);
-    mUnknownc4 = FindMesh(kLabelMesh);
-    mUnknownc8 = FindMesh(kLogoMesh);
+    mSongTitleText = FindText(kSongTitleText);
+    mDateText = FindText(kDateText);
+    mLabelMaterial = FindMaterial(kPhotoMaterial);
+    mLogoMaterial = FindMaterial(kLogoMaterial);
+    mUnavailableText = FindText(kUnavailableText);
+    mUnavailableText->SetShowing(0);
+    mLabelMesh = FindMesh(kLabelMesh);
+    mLogoMesh = FindMesh(kLogoMesh);
 
     for (int nRow = 1; nRow <= kRowCount; ++nRow) {
         Rnd::Text *pName = FindText(FormatString(kNameTextFormat, nRow));
-        mUnknown8c.push_back(pName);
+        mPlayerNames.push_back(pName);
         pName->SetText(HxStr(kNoText));
 
         Rnd::Mat *pPicture = FindMaterial(FormatString(kPlayerMaterialFormat, nRow));
-        mUnknown98.push_back(pPicture);
+        mPlayerPictures.push_back(pPicture);
 
         Rnd::Mesh *pMesh = FindMesh(FormatString(kPlayerMeshFormat, nRow));
-        mUnknowna4.push_back(pMesh);
+        mPlayerMeshes.push_back(pMesh);
     }
 }
 
 // 0x003455a8
 void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
-    if (mUnknown48 != 0) {
+    if (mViewsUnresolved != 0) {
         return;
     }
     SetRecordShowing(1);
 
-    if (pRecord->unknown34_ == GetAlbumJukeboxValue()) {
-        HxStr level(pRecord->unknown00_);
+    if (pRecord->albumNumber == GetAlbumJukeboxValue()) {
+        HxStr level(pRecord->levelName);
         HxStr songName = QueryConfigString(kSongNameConfigCode, TextOrEmpty(level));
-        const float flWrapWidth = mUnknownb0->mWrapWidth;
-        if (flWrapWidth < mUnknownb0->MeasureText(TextOrEmpty(songName), songName.mLen)) {
+        const float flWrapWidth = mSongTitleText->mWrapWidth;
+        if (flWrapWidth < mSongTitleText->MeasureText(TextOrEmpty(songName), songName.mLen)) {
             HxStr shorter = QueryConfigString(kShortSongNameConfigCode, TextOrEmpty(level));
             songName = shorter;
         }
-        mUnknownb0->SetText(songName);
+        mSongTitleText->SetText(songName);
         mLogoTextures.Load(TexturePairRecord::LogoPath(level));
         mLabelTextures.Load(TexturePairRecord::PicturePath(level));
-        mUnknownc0->SetShowing(0);
+        mUnavailableText->SetShowing(0);
     } else {
-        mUnknownc0->SetShowing(1);
+        mUnavailableText->SetShowing(1);
         HxStr notice = QueryConfigString(kPromptConfigCode, kUnavailableKey);
-        mUnknownc0->SetText(notice);
-        mUnknownb0->SetText(HxStr(kNoText));
-        mUnknownc4->SetShowing(0);
+        mUnavailableText->SetText(notice);
+        mSongTitleText->SetText(HxStr(kNoText));
+        mLabelMesh->SetShowing(0);
         mLabelTextures.CancelLoad();
         mLabelTextures.invalidate();
-        mUnknownc8->SetShowing(0);
+        mLogoMesh->SetShowing(0);
         mLogoTextures.CancelLoad();
         mLogoTextures.invalidate();
     }
 
-    mUnknownb4->SetText(pRecord->unknown18_);
+    mDateText->SetText(pRecord->dateTime);
     const int nCount = pRecord->appearances.size();
     for (int i = 0; i < nCount; ++i) {
-        mUnknowna4[i]->SetShowing(1);
+        mPlayerMeshes[i]->SetShowing(1);
         Rnd::Tex *pPicture = FreqAppearance::FindPersonaBurnTexture(i);
         pRecord->appearances[i].AttachToBurnSlot(i);
-        mUnknown98[i]->mStages[kPictureStage].SetTex(pPicture);
-        HxStr name(pRecord->appearances[i].mUnknown00);
-        mUnknown8c[i]->SetText(name);
+        mPlayerPictures[i]->mStages[kPictureStage].SetTex(pPicture);
+        HxStr name(pRecord->appearances[i].mUserName);
+        mPlayerNames[i]->SetText(name);
     }
     for (int i = nCount; i < kRowCount; ++i) {
-        mUnknowna4[i]->SetShowing(0);
-        mUnknown8c[i]->SetText(HxStr(kNoText));
+        mPlayerMeshes[i]->SetShowing(0);
+        mPlayerNames[i]->SetText(HxStr(kNoText));
     }
 }
 
 // 0x00345ba0
 void MetRemixDataScreen::SetRecordShowing(int nShowing) {
-    mUnknownb0->SetShowing(nShowing);
-    mUnknownb4->SetShowing(nShowing);
+    mSongTitleText->SetShowing(nShowing);
+    mDateText->SetShowing(nShowing);
     FindMesh(kLabelMesh)->SetShowing(nShowing);
     FindMesh(kLogoMesh)->SetShowing(nShowing);
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
-        mUnknowna4[nRow]->SetShowing(nShowing);
-        mUnknown8c[nRow]->SetShowing(nShowing);
+        mPlayerMeshes[nRow]->SetShowing(nShowing);
+        mPlayerNames[nRow]->SetShowing(nShowing);
     }
 }
 
 // 0x00345de8
-void MetRemixDataScreen::OnUnknownSlot26(float) {
+void MetRemixDataScreen::UpdateIdle(float) {
     mLogoTextures.Advance();
-    mUnknownc8->SetShowing(0);
+    mLogoMesh->SetShowing(0);
     if (mLogoTextures.Current() != nullptr) {
-        mUnknownc8->SetShowing(1);
-        mUnknownbc->mStages[kBaseStage].SetTex(mLogoTextures.Current());
+        mLogoMesh->SetShowing(1);
+        mLogoMaterial->mStages[kBaseStage].SetTex(mLogoTextures.Current());
     }
 
     mLabelTextures.Advance();
-    mUnknownc4->SetShowing(0);
+    mLabelMesh->SetShowing(0);
     if (mLabelTextures.Current() != nullptr) {
-        mUnknownc4->SetShowing(1);
-        mUnknownb8->mStages[kBaseStage].SetTex(mLabelTextures.Current());
+        mLabelMesh->SetShowing(1);
+        mLabelMaterial->mStages[kBaseStage].SetTex(mLabelTextures.Current());
     }
 }
 
@@ -193,14 +193,14 @@ MetRemixDataScreen *MetRemixDataScreen::New(MetRenderer *pRenderer, int nPriorit
 void MetRemixDataScreen::EnterAndShow() {
     SetRecordShowing(0);
     MetScreen::EnterAndShow();
-    mUnknownc0->SetShowing(0);
-    mUnknownc4->SetShowing(0);
+    mUnavailableText->SetShowing(0);
+    mLabelMesh->SetShowing(0);
     mLabelTextures.invalidate();
-    mUnknownc8->SetShowing(0);
+    mLogoMesh->SetShowing(0);
     mLogoTextures.invalidate();
 }
 
 // 0x00349ab8
-void MetRemixDataScreen::OnUnknownSlot36() {
-    mUnknownc0->SetShowing(0);
+void MetRemixDataScreen::OnExitFinished() {
+    mUnavailableText->SetShowing(0);
 }

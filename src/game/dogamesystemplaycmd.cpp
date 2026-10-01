@@ -26,7 +26,7 @@ int DoGameSystemPlayCmd::CmdID() {
 
 // 0x0010bd80
 void DoGameSystemPlayCmd::Execute() {
-    Application::shared()->GetGameManager()->OnUnknownSlot6();
+    Application::shared()->GetGameManager()->StartPlay();
 }
 
 // 0x0010bdd8

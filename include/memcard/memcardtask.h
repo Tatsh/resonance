@@ -83,15 +83,14 @@ public:
     virtual void Execute() = 0;
 
     /**
-     * Unrecovered. Slot 18.
+     * Do nothing.
      *
-     * The body is empty and every subclass in the image inherits it. Neither its purpose nor its
-     * argument list can be established. It is declared without arguments because no call site
-     * exists to prove any.
+     * Slot 18. The body is empty, every subclass in the image inherits it, and the image never
+     * calls it. It is declared without arguments because no call site exists to prove any.
      *
      * @ghidraAddress 0x00184530
      */
-    virtual void OnUnknown18();
+    virtual void UnusedHook();
 
     // MemcardManager::Update() reads mState to start an idle task and retire a finished one.
     friend class MemcardManager;

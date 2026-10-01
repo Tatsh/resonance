@@ -50,7 +50,7 @@ void TunnelSeekSection::Build(const HxStr &name, const TunnelMeshChain &template
 void TunnelSeekSection::Update(Tunnel *pTunnel, const Color &color) {
     const int nSlice = Tunnel::WrapIndex(mSlice, pTunnel->mSliceCount);
     const int nRing = Tunnel::WrapIndex(mRing, pTunnel->mRingCount);
-    const TunnelMeshChain &cell = pTunnel->mUnknowna4[nSlice * pTunnel->mRingCount + nRing];
+    const TunnelMeshChain &cell = pTunnel->mCellChains[nSlice * pTunnel->mRingCount + nRing];
     Mesh *pMesh = mMeshes.front();
     std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
     verts = cell.front()->mVertsOwner->mVerts;

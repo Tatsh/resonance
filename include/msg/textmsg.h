@@ -38,7 +38,7 @@ public:
      *
      * @param text The text to show.
      */
-    explicit TextMsg(const HxStr &text) : mText(text), mUnknown0c(0) {
+    explicit TextMsg(const HxStr &text) : mText(text), mTrackDisplay(0) {
     }
 
     /**
@@ -78,7 +78,9 @@ public:
     HxStr mText; /*!< The text the track display shows. +0x04 */
 
 private:
-    int mUnknown0c; // +0x0c
+    // The one builder stores zero, and Overlay::OnText() shows the text on its first track
+    // display without reading the word. The title is inferred from that pairing.
+    int mTrackDisplay; // +0x0c
 };
 
 /**

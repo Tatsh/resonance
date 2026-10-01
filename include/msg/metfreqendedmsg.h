@@ -58,12 +58,13 @@ public:
     virtual void Print(std::ostream &stream);
 
     /**
-     * Whether the finished game world's GrooveWorld::mUnknownb8 was zero.
+     * Whether the finished game world's GrooveWorld::mContinueJukebox was zero.
      *
      * GameManagerImpl::EndGame() sets it at `0x00106d5c` and `0x00106da8`, and MetRenderer's
-     * handler at `0x0036bd20` reads it. Public because both access it directly. +0x04
+     * handler at `0x0036bd20` reads it, resuming the jukebox in jukebox mode only while it is zero.
+     * Public because both access it directly. +0x04
      */
-    int mUnknownb8Clear;
+    int mStopJukebox;
 };
 
 /**

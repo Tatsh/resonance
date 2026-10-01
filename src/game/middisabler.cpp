@@ -49,7 +49,7 @@ void MidiDisabler::Disable() {
 // 0x001a6e60
 void MidiDisabler::PassStdMidi(StdMidiMsg *pMsg) {
     if (mEnabled == 0) {
-        const unsigned char nKind = pMsg->mUnknown08 & kStatusKindMask;
+        const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
         if (nKind == kStatusNoteOff || nKind == kStatusNoteOn) {
             return;
         }

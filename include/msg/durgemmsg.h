@@ -60,12 +60,13 @@ public:
     float mEndBlend;                /*!< The blend at the end. +0x14 */
 
     /**
-     * Purpose unrecovered. +0x18
+     * Non-zero for a gem a player is playing live. +0x18
      *
-     * AxeNewGemMaker::PostGemMessages() at `0x001a2f18` stores 1, and AxeOldGemMaker's
-     * PostDurGemMsg() at `0x001a32f0` and OnStdMidi() at `0x001a34e8` store zero.
+     * AxeNewGemMaker::PostGemMessages() at `0x001a2f18` and Scratcher store 1, and AxeOldGemMaker's
+     * PostDurGemMsg() at `0x001a32f0` and OnStdMidi() at `0x001a34e8` (both replaying a recorded
+     * phrase) store zero. No reader is recorded. The title rests on the writers alone.
      */
-    int mUnknown18;
+    int mLive;
 
     Player *mPlayer; /*!< The player the gem belongs to. +0x1c */
 };

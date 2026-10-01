@@ -50,7 +50,7 @@ constexpr unsigned short kGsSyncPathNoTimeout = 0;
 // from GS memory, and passes SetPalette() the second word Rnd::Movie also passes.
 constexpr int kTopMip = 0;
 constexpr int kLockReadBack = 2;
-constexpr int kPaletteUnknownWord = -1;
+constexpr int kUnreadPaletteArgument = -1;
 
 // The layout EncodeNonZeroBytes() writes.
 constexpr int kEncodedDataLength = 7;
@@ -68,12 +68,12 @@ constexpr unsigned char kDecodedZero = 1;
 
 // 0x001745b8
 FreqAppearance::FreqAppearance()
-    : mUnknown00("initial name"), mDetail(new FreqAppearanceDetail), mUnknown0c(0) {
+    : mUserName("initial name"), mDetail(new FreqAppearanceDetail), mSkillStatus(0) {
 }
 
 // 0x00174668
 FreqAppearance::FreqAppearance(const FreqAppearance &other)
-    : mUnknown00("initial name"), mDetail(new FreqAppearanceDetail), mUnknown0c(0) {
+    : mUserName("initial name"), mDetail(new FreqAppearanceDetail), mSkillStatus(0) {
     *this = other;
 }
 
@@ -87,15 +87,15 @@ void FreqAppearance::Save(OBStream &stream) {
     int version = kRecordVersion;
     stream.Write(&version, sizeof(version));
 
-    unsigned length = mUnknown00.mLen;
+    unsigned length = mUserName.mLen;
     stream.Write(&length, sizeof(length));
     // An empty username has no buffer, and the stream receives the shared empty string in place of
     // a null pointer.
-    stream.WriteBytes(mUnknown00.mStr != nullptr ? mUnknown00.mStr : g_szEmptyString, length);
+    stream.WriteBytes(mUserName.mStr != nullptr ? mUserName.mStr : g_szEmptyString, length);
 
     mDetail->save(stream);
 
-    int skillStatus = mUnknown0c;
+    int skillStatus = mSkillStatus;
     stream.Write(&skillStatus, sizeof(skillStatus));
 }
 
@@ -106,25 +106,25 @@ void FreqAppearance::Load(IBStream &stream) {
 
     unsigned length;
     stream.Read(&length, sizeof(length));
-    mUnknown00.Alloc(length);
+    mUserName.Alloc(length);
     stream.ReadBytes(
-        mUnknown00.mStr != nullptr ? mUnknown00.mStr : const_cast<char *>(g_szEmptyString), length);
+        mUserName.mStr != nullptr ? mUserName.mStr : const_cast<char *>(g_szEmptyString), length);
 
     mDetail->load(stream);
 
-    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
+    stream.Read(&mSkillStatus, sizeof(mSkillStatus));
 }
 
 // 0x00174878
 void FreqAppearance::Print(std::ostream &stream) {
     // The detail object is never written, so the two literals below arrive back to back.
-    stream << "username=" << mUnknown00 << " Freq=" << " SkillStatus=" << mUnknown0c;
+    stream << "username=" << mUserName << " Freq=" << " SkillStatus=" << mSkillStatus;
 }
 
 // 0x001748e0
 void FreqAppearance::operator=(const FreqAppearance &other) {
     if (&other != this) {
-        mUnknown00 = other.mUnknown00;
+        mUserName = other.mUserName;
         mDetail->clear();
         mDetail->copyFrom(*other.mDetail);
     }
@@ -200,7 +200,7 @@ void FreqAppearance::RenderBurnTextures() {
 
         pTarget->UnlockMipBitmap();
         pBurn->UnlockMipBitmap();
-        pBurn->SetPalette(nullptr, kPaletteUnknownWord);
+        pBurn->SetPalette(nullptr, kUnreadPaletteArgument);
         pCam->SetShowing(0);
     }
 }
@@ -231,9 +231,9 @@ void FreqAppearance::EncodeNonZeroBytes(const unsigned char *pSource, unsigned c
 // 0x00174930
 void FreqAppearance::Pack(Record *pRecord) {
     pRecord->mValid = true;
-    pRecord->mSkillStatus = mUnknown0c;
+    pRecord->mSkillStatus = mSkillStatus;
 
-    const char *pszName = mUnknown00.mStr != nullptr ? mUnknown00.mStr : g_szEmptyString;
+    const char *pszName = mUserName.mStr != nullptr ? mUserName.mStr : g_szEmptyString;
     int nLength = strlen(pszName);
     if (nLength > kRecordNameLength) {
         nLength = kRecordNameLength;
@@ -251,8 +251,8 @@ void FreqAppearance::Pack(Record *pRecord) {
 // 0x001749e8
 void FreqAppearance::Unpack(const Record &record) {
     if (record.mValid) {
-        mUnknown0c = record.mSkillStatus;
-        mUnknown00 = record.mName;
+        mSkillStatus = record.mSkillStatus;
+        mUserName = record.mName;
         mDetail->unpack(record.mParts, record.mPartCount);
     }
 }

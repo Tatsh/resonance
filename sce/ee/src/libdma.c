@@ -20,10 +20,10 @@
 #define DMAC_PCR (*(volatile unsigned int *)(uintptr_t)0x1000E020U)
 // The stall control register occupies 0x1000E030. The put path writes combined halfwords.
 #define DMAC_SQWC (*(volatile unsigned int *)(uintptr_t)0x1000E030U)
-// The register at 0x1000E040 receives word sixteen from the put path.
-#define DMAC_REG_E040 (*(volatile unsigned int *)(uintptr_t)0x1000E040U)
-// The register at 0x1000E050 receives word twelve from the put path.
-#define DMAC_REG_E050 (*(volatile unsigned int *)(uintptr_t)0x1000E050U)
+// The MFIFO ring buffer size (mask) register occupies 0x1000E040.
+#define DMAC_RBSR (*(volatile unsigned int *)(uintptr_t)0x1000E040U)
+// The MFIFO ring buffer offset (address) register occupies 0x1000E050.
+#define DMAC_RBOR (*(volatile unsigned int *)(uintptr_t)0x1000E050U)
 // The image transfer out channel control word occupies 0x1000B400.
 #define IPU_TO_CHCR (*(volatile unsigned int *)(uintptr_t)0x1000B400U)
 // The image transfer out channel address word occupies 0x1000B410.
@@ -48,15 +48,15 @@
 #define DMA_ENABLER (*(volatile unsigned int *)(uintptr_t)0x1000F520U)
 // The interrupt enable word occupies 0x1000F590.
 #define DMA_ENABLEW (*(volatile unsigned int *)(uintptr_t)0x1000F590U)
-// The put path indexes this table with the opening byte.
+// Maps a stall source channel number to its D_CTRL STS field value.
 // 0x0077fc70
-static const unsigned char FIRST_TABLE[] = {0, 0, 0, 3, 0, 1, 0, 0, 2, 0};
-// The put path indexes this table with the second byte.
+static const unsigned char STALL_SOURCE_TABLE[] = {0, 0, 0, 3, 0, 1, 0, 0, 2, 0};
+// Maps a stall drain channel number to its D_CTRL STD field value.
 // 0x0077fc80
-static const unsigned char SECOND_TABLE[] = {0, 1, 2, 0, 0, 0, 3, 0, 0, 0};
-// The put path indexes this table with the third byte.
+static const unsigned char STALL_DRAIN_TABLE[] = {0, 1, 2, 0, 0, 0, 3, 0, 0, 0};
+// Maps an MFIFO drain channel number to its D_CTRL MFD field value.
 // 0x0077fc90
-static const unsigned char THIRD_TABLE[] = {0, 2, 3, 0, 0, 0, 0, 0, 0, 0};
+static const unsigned char MFIFO_DRAIN_TABLE[] = {0, 2, 3, 0, 0, 0, 0, 0, 0, 0};
 
 // Spin budgets bound the busy waits.
 enum {
@@ -71,18 +71,18 @@ enum {
 // Channel register block. Offsets match the image. Gaps preserve the hardware spacing.
 typedef struct {
     volatile unsigned int mChcr; // The control word resides at offset 0x00.
-    unsigned char mUnknown04[12]; // Padding occupies offsets 0x04 to 0x0F.
+    unsigned char mReserved04[12]; // Padding occupies offsets 0x04 to 0x0F.
     volatile unsigned int mMadr; // The address word resides at offset 0x10.
-    unsigned char mUnknown14[12]; // Padding occupies offsets 0x14 to 0x1F.
+    unsigned char mReserved14[12]; // Padding occupies offsets 0x14 to 0x1F.
     volatile unsigned int mQwc; // The count word resides at offset 0x20.
-    unsigned char mUnknown24[12]; // Padding occupies offsets 0x24 to 0x2F.
+    unsigned char mReserved24[12]; // Padding occupies offsets 0x24 to 0x2F.
     volatile unsigned int mTadr; // The tag word resides at offset 0x30.
-    unsigned char mUnknown34[12]; // Padding occupies offsets 0x34 to 0x3F.
-    volatile unsigned int mUnknown40; // The word resides at offset 0x40.
-    unsigned char mUnknown44[12]; // Padding occupies offsets 0x44 to 0x4F.
-    volatile unsigned int mUnknown50; // The word resides at offset 0x50.
-    unsigned char mUnknown54[44]; // Padding occupies offsets 0x54 to 0x7F.
-    volatile unsigned int mUnknown80; // The word resides at offset 0x80.
+    unsigned char mReserved34[12]; // Padding occupies offsets 0x34 to 0x3F.
+    volatile unsigned int mAsr0; // The first tag address save word resides at offset 0x40.
+    unsigned char mReserved44[12]; // Padding occupies offsets 0x44 to 0x4F.
+    volatile unsigned int mAsr1; // The second tag address save word resides at offset 0x50.
+    unsigned char mReserved54[44]; // Padding occupies offsets 0x54 to 0x7F.
+    volatile unsigned int mSadr; // The scratchpad address word resides at offset 0x80.
 } DmaChannelRegs;
 
 // The register block of each channel, VIF0 through the scratchpad input.
@@ -110,16 +110,16 @@ static sceDmaEnv g_dmaSavedEnv;
 
 // Raw environment view. Offsets match the image. Members expose every byte the put path validates.
 typedef struct {
-    unsigned char mByte00; // The opening byte resides at offset 0x00.
-    unsigned char mByte01; // The second byte resides at offset 0x01.
-    unsigned char mByte02; // The third byte resides at offset 0x02.
-    unsigned char mByte03; // The fourth byte resides at offset 0x03.
-    unsigned short mHalf04; // The halfword resides at offset 0x04.
-    unsigned short mHalf06; // The channel mask resides at offset 0x06.
-    unsigned short mHalf08; // The halfword resides at offset 0x08.
-    unsigned short mHalf0A; // The halfword resides at offset 0x0A.
-    unsigned int mWord0C; // The word resides at offset 0x0C.
-    unsigned int mWord10; // The word resides at offset 0x10.
+    unsigned char mStallSource; // The stall source channel resides at offset 0x00.
+    unsigned char mStallDrain; // The stall drain channel resides at offset 0x01.
+    unsigned char mMfifoDrain; // The MFIFO drain channel resides at offset 0x02.
+    unsigned char mReleaseCycle; // The release cycle resides at offset 0x03.
+    unsigned short mExpress; // The express channel mask resides at offset 0x04.
+    unsigned short mNotify; // The notify channel mask resides at offset 0x06.
+    unsigned short mStallQwc; // The stall quadword count resides at offset 0x08.
+    unsigned short mTransferQwc; // The transfer quadword count resides at offset 0x0A.
+    unsigned int mRingBufferAddress; // The MFIFO ring buffer address resides at offset 0x0C.
+    unsigned int mRingBufferMask; // The MFIFO ring buffer mask resides at offset 0x10.
 } DmaEnvRaw;
 
 // Queue record. Offsets match the video input buffer. Saved words preserve channel positions.
@@ -141,7 +141,7 @@ typedef struct {
     int mSavedIpuBp; // The saved buffer pointer resides at offset 0x38.
     int mSavedIpuCtrl; // The saved control resides at offset 0x3C.
     int mSemaId; // The semaphore identifier resides at offset 0x40.
-    int mUnknown44; // The active flag resides at offset 0x44.
+    int mActive; // The active flag resides at offset 0x44.
     long long mTotalPut; // The lifetime total resides at offset 0x48.
     ViTimeStamp *mTimeStamps; // The stamp ring resides at offset 0x50.
     int mTimeStampCapacity; // The stamp capacity resides at offset 0x54.
@@ -187,12 +187,12 @@ int sceDmaReset(int nMode) {
             DmaChannelRegs *regs;
 
             regs = g_apDmacChannelRegs[index];
-            regs->mUnknown80 = 0U;
+            regs->mSadr = 0U;
             regs->mChcr = 0U;
             regs->mTadr = 0U;
             regs->mMadr = 0U;
-            regs->mUnknown50 = 0U;
-            regs->mUnknown40 = 0U;
+            regs->mAsr1 = 0U;
+            regs->mAsr0 = 0U;
         }
     }
     DMAC_STAT = 0xFF1FU;
@@ -221,34 +221,34 @@ int sceDmaPutEnv(sceDmaEnv *pEnv) {
     // Yes, the binary reads the other four registers here and discards them.
     (void)DMAC_PCR;
     (void)DMAC_SQWC;
-    (void)DMAC_REG_E050;
-    (void)DMAC_REG_E040;
-    if (raw->mByte00 > 9U) {
+    (void)DMAC_RBOR;
+    (void)DMAC_RBSR;
+    if (raw->mStallSource > 9U) {
         return -1;
     }
-    if (raw->mByte01 > 9U) {
+    if (raw->mStallDrain > 9U) {
         return -2;
     }
-    if (raw->mByte02 > 9U) {
+    if (raw->mMfifoDrain > 9U) {
         return -3;
     }
-    if (raw->mByte03 > 6U) {
+    if (raw->mReleaseCycle > 6U) {
         return -4;
     }
-    ctrl = (ctrl & 0xFFFFFFCFU) | ((unsigned int)FIRST_TABLE[raw->mByte00] << 4);
-    if (raw->mByte03 == 0U) {
-        ctrl = (ctrl & 0xFFFFFF31U) | ((unsigned int)SECOND_TABLE[raw->mByte01] << 6);
-        ctrl = ctrl | ((unsigned int)THIRD_TABLE[raw->mByte02] << 2);
+    ctrl = (ctrl & 0xFFFFFFCFU) | ((unsigned int)STALL_SOURCE_TABLE[raw->mStallSource] << 4);
+    if (raw->mReleaseCycle == 0U) {
+        ctrl = (ctrl & 0xFFFFFF31U) | ((unsigned int)STALL_DRAIN_TABLE[raw->mStallDrain] << 6);
+        ctrl = ctrl | ((unsigned int)MFIFO_DRAIN_TABLE[raw->mMfifoDrain] << 2);
     } else {
-        ctrl = (ctrl & 0xFFFFFF33U) | ((unsigned int)SECOND_TABLE[raw->mByte01] << 6);
-        ctrl = ctrl | ((unsigned int)THIRD_TABLE[raw->mByte02] << 2);
-        ctrl = (ctrl & 0xFFFFFCFFU) | 2U | ((unsigned int)(raw->mByte03 - 1U) << 8);
+        ctrl = (ctrl & 0xFFFFFF33U) | ((unsigned int)STALL_DRAIN_TABLE[raw->mStallDrain] << 6);
+        ctrl = ctrl | ((unsigned int)MFIFO_DRAIN_TABLE[raw->mMfifoDrain] << 2);
+        ctrl = (ctrl & 0xFFFFFCFFU) | 2U | ((unsigned int)(raw->mReleaseCycle - 1U) << 8);
     }
     DMAC_CTRL = ctrl;
-    DMAC_PCR = ((unsigned int)raw->mHalf04 << 16) | (unsigned int)raw->mHalf06;
-    DMAC_SQWC = ((unsigned int)raw->mHalf0A << 16) | (unsigned int)raw->mHalf08;
-    DMAC_REG_E050 = raw->mWord0C;
-    DMAC_REG_E040 = raw->mWord10;
+    DMAC_PCR = ((unsigned int)raw->mExpress << 16) | (unsigned int)raw->mNotify;
+    DMAC_SQWC = ((unsigned int)raw->mTransferQwc << 16) | (unsigned int)raw->mStallQwc;
+    DMAC_RBOR = raw->mRingBufferAddress;
+    DMAC_RBSR = raw->mRingBufferMask;
     g_dmaSavedEnv = *pEnv;
     return 0;
 }
@@ -369,7 +369,7 @@ void sceDmaCreateQueueSemaphore(
     sema.initCount = 1;
     semaId = CreateSema(&sema);
     queue->mSemaId = semaId;
-    sceDmaSub006126e8(buffer);
+    viBufReset(buffer);
     queue->mTotalPut = 0LL;
 }
 
@@ -398,14 +398,14 @@ int sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
 // 0x006126e8
 // Initialises the queue counts and builds the tag ring. The routine clears the buffered counts,
 // clears the stamp ring, programs the tag entries, and arms the transfer channels.
-int sceDmaSub006126e8(ViBuf *buffer) {
+int viBufReset(ViBuf *buffer) {
     DmaQueue *queue;
     int count;
     int i;
     int offset;
 
     queue = (DmaQueue *)buffer;
-    queue->mUnknown44 = 1;
+    queue->mActive = 1;
     queue->mReadSectors = 0;
     queue->mBufferedSectors = 0;
     queue->mBufferedBytes = 0;
@@ -484,7 +484,7 @@ int sceDmaSub006126e8(ViBuf *buffer) {
 // 0x00612890
 // Advances the queue after a stall and restarts the channel when work remains. The routine
 // reports an error for an inactive queue.
-int sceDmaSub00612890(ViBuf *buffer) {
+int viBufAddDMA(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
     unsigned int chcr;
@@ -500,7 +500,7 @@ int sceDmaSub00612890(ViBuf *buffer) {
 
     queue = (DmaQueue *)buffer;
     WaitSema(queue->mSemaId);
-    if (queue->mUnknown44 == 0) {
+    if (queue->mActive == 0) {
         ErrMessage("DMA ADD not active\n");
         return 0;
     }
@@ -620,14 +620,14 @@ int sceDmaSub00612890(ViBuf *buffer) {
 // 0x00612b40
 // Stops the transfer channels and saves the hardware positions. The routine disables interrupts
 // across the channel updates.
-int sceDmaSub00612b40(ViBuf *buffer) {
+int viBufStopDMA(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
     unsigned int ctrl;
 
     queue = (DmaQueue *)buffer;
     WaitSema(queue->mSemaId);
-    queue->mUnknown44 = 0;
+    queue->mActive = 0;
     (void)DIntr();
     enabler = DMA_ENABLER;
     DMA_ENABLEW = enabler | 0x10000U;
@@ -659,10 +659,10 @@ int sceDmaSub00612b40(ViBuf *buffer) {
 }
 
 // 0x00612cc0
-// Restarts both IPU channels from the positions sceDmaSub00612b40() saved. The input channel is
+// Restarts both IPU channels from the positions viBufStopDMA() saved. The input channel is
 // rewound by the words the IPU FIFO had, the read position and buffered count are corrected for
 // whatever the rewind crossed, the saved IPU command is reissued, and IPU_CTRL is restored.
-int sceDmaSub00612cc0(ViBuf *buffer) {
+int viBufRestartDMA(ViBuf *buffer) {
     DmaQueue *queue = (DmaQueue *)buffer;
     const unsigned int savedBp = (unsigned int)queue->mSavedIpuBp;
     const unsigned int command = savedBp & 0x7FU;
@@ -759,7 +759,7 @@ int sceDmaSub00612cc0(ViBuf *buffer) {
         (void)EIntr();
     }
     IPU_CTRL = (unsigned int)queue->mSavedIpuCtrl;
-    queue->mUnknown44 = 1;
+    queue->mActive = 1;
     SignalSema(queue->mSemaId);
     return 1;
 }
@@ -767,7 +767,7 @@ int sceDmaSub00612cc0(ViBuf *buffer) {
 // 0x00613088
 // Discards the stamps the reader has passed. The routine advances the stamp ring past
 // the supplied offset.
-void sceDmaSub00613088(ViBuf *buffer, ViTimeStamp *timeStamp) {
+void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp) {
     DmaQueue *queue;
     int capacity;
     int held;
@@ -854,7 +854,7 @@ void sceDmaSub00613088(ViBuf *buffer, ViTimeStamp *timeStamp) {
 // 0x006131e0
 // Retrieves the stamp for the completed span.
 // The routine scans the stamp ring for the matching entry.
-int sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
+int viBufGetTs(ViBuf *buffer, long long *pStamps) {
     DmaQueue *queue;
     unsigned int madr;
     unsigned int bp;
@@ -938,7 +938,7 @@ int sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
 // 0x00613798
 // Rounds the buffered byte count up to the sector boundary. The routine waits on the semaphore
 // across the update.
-void sceDmaSub00613798(ViBuf *buffer) {
+void viBufFlush(ViBuf *buffer) {
     DmaQueue *queue;
     int bytes;
     int rounded;

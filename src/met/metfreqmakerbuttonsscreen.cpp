@@ -81,8 +81,8 @@ constexpr int kExitNone = -1;
 constexpr int kExitBack = 0;
 constexpr int kExitSave = 1;
 
-// The MetScreen::mUnknown18 value slot 19 writes for every exit.
-constexpr int kExitUnknown18 = 0;
+// The MetScreen::mExitChoice value slot 19 writes for every exit.
+constexpr int kExitChoiceBack = 0;
 
 static const char *const kKeyboardScreen = "MetKeyboardScreen";
 static const char *const kHelpScreen = "MetHelpScreen";
@@ -195,7 +195,7 @@ void MetFreqMakerButtonsScreen::EnterAndShow() {
         MetScreenTitleScreen::SetTitle(title);
     }
     Rnd::Button *pSave = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kSaveButton)));
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         pSave->mText->SetText(HxStr(kSaveLabel));
     } else {
         pSave->mText->SetText(HxStr(kDoneLabel));
@@ -217,14 +217,14 @@ int MetFreqMakerButtonsScreen::PollContainerLoad() {
 }
 
 // 0x0025e1e0
-void MetFreqMakerButtonsScreen::OnUnknownSlot7() {
-    ShowPageForButton(mButtonList->mUnknown00);
+void MetFreqMakerButtonsScreen::OnPanelActivated() {
+    ShowPageForButton(mButtonList->mSelectedButton);
     int nCount = mButtonList->mButtons.size();
     for (int i = 0; i < nCount; ++i) {
         mButtonList->ButtonAt(i)->SetState(kButtonStateNormal);
     }
-    mButtonList->mUnknown00->SetState(kButtonStateSelected);
-    ShowDirectionsForButton(mButtonList->mUnknown00);
+    mButtonList->mSelectedButton->SetState(kButtonStateSelected);
+    ShowDirectionsForButton(mButtonList->mSelectedButton);
 }
 
 // Expanded into slots 15 and 36.
@@ -232,7 +232,7 @@ inline void MetFreqMakerButtonsScreen::StartPersonaSave(const std::vector<HxStr>
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)));
     int nNewPersona = mNewPersona == 1;
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         MetPersonaSaverScreen::StartSave(
             screens, pCanvas->mPersona, GlobalSettings::shared()->mCardSlots[0], nNewPersona, 0);
@@ -254,7 +254,7 @@ void MetFreqMakerButtonsScreen::OnMsgScreenDismissed(const HxStr &name, int nCho
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)))
             ->CommitPersona();
         std::vector<HxStr> screens;
-        screens.push_back(MetFrontEndState::shared()->mUnknown24);
+        screens.push_back(MetFrontEndState::shared()->mReturnScreen);
         screens.push_back(HxStr(kHelpScreen));
         StartPersonaSave(screens);
         break;
@@ -262,8 +262,8 @@ void MetFreqMakerButtonsScreen::OnMsgScreenDismissed(const HxStr &name, int nCho
 
     case kChoiceNo:
         PushNamedScreen(HxStr(kHelpScreen));
-        PushNamedScreen(MetFrontEndState::shared()->mUnknown24);
-        ActivateNamedPanel(MetFrontEndState::shared()->mUnknown24);
+        PushNamedScreen(MetFrontEndState::shared()->mReturnScreen);
+        ActivateNamedPanel(MetFrontEndState::shared()->mReturnScreen);
         break;
 
     default:
@@ -275,19 +275,19 @@ void MetFreqMakerButtonsScreen::OnMsgScreenDismissed(const HxStr &name, int nCho
 void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mButtonList->OnUnknownSlot2();
-        ShowPageForButton(mButtonList->mUnknown00);
-        ShowDirectionsForButton(mButtonList->mUnknown00);
+        mButtonList->SelectPrevious();
+        ShowPageForButton(mButtonList->mSelectedButton);
+        ShowDirectionsForButton(mButtonList->mSelectedButton);
         break;
 
     case kMetScreenCommandNext:
-        mButtonList->OnUnknownSlot3();
-        ShowPageForButton(mButtonList->mUnknown00);
-        ShowDirectionsForButton(mButtonList->mUnknown00);
+        mButtonList->SelectNext();
+        ShowPageForButton(mButtonList->mSelectedButton);
+        ShowDirectionsForButton(mButtonList->mSelectedButton);
         break;
 
     case kMetScreenCommandSelect: {
-        const HxStr &selected = mButtonList->mUnknown00->mName;
+        const HxStr &selected = mButtonList->mSelectedButton->mName;
         if (selected == kNameButton) {
             HxStr *pName =
                 static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)))
@@ -305,7 +305,7 @@ void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) 
                 ->CommitPersona();
             mExitAction = kExitSave;
             ActivateNamedPanel(HxStr(kNoName));
-            mUnknown18 = kExitUnknown18;
+            mExitChoice = kExitChoiceBack;
             ExitScreenByName(HxStr(kHelpScreen));
             ExitScreenByName(HxStr(kTitleScreen));
             ExitScreenByName(HxStr(kCanvasScreen));
@@ -327,9 +327,9 @@ void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) 
             }
         } else {
             ActivateNamedPanel(HxStr(kNoName));
-            StartRepeatingSound(mUnknown10->mUnknown68,
+            StartRepeatingSound(mRenderer->mAnimationFrame,
                                 kSelectAlternateInterval,
-                                mButtonList->mUnknown00,
+                                mButtonList->mSelectedButton,
                                 kSelectAlternateCycles);
         }
         break;
@@ -338,7 +338,7 @@ void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) 
     case kMetScreenCommandBack:
         mExitAction = kExitBack;
         ActivateNamedPanel(HxStr(kNoName));
-        mUnknown18 = kExitUnknown18;
+        mExitChoice = kExitChoiceBack;
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kCanvasScreen));
@@ -353,13 +353,13 @@ void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) 
 }
 
 // 0x0025e1a0
-void MetFreqMakerButtonsScreen::OnUnknownSlot33() {
-    ShowPageForButton(mButtonList->mUnknown00);
-    ShowDirectionsForButton(mButtonList->mUnknown00);
+void MetFreqMakerButtonsScreen::OnEnterFinished() {
+    ShowPageForButton(mButtonList->mSelectedButton);
+    ShowDirectionsForButton(mButtonList->mSelectedButton);
 }
 
 // 0x00259040
-void MetFreqMakerButtonsScreen::OnUnknownSlot36() {
+void MetFreqMakerButtonsScreen::OnExitFinished() {
     static_cast<MetFreqMakerInventoryScreen *>(FindScreenByName(HxStr(kInventoryScreen)))
         ->HidePages();
     switch (mExitAction) {
@@ -381,7 +381,7 @@ void MetFreqMakerButtonsScreen::OnUnknownSlot36() {
     case kExitBack: {
         MetFreqMakerCanvasScreen *pCanvas =
             static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)));
-        if (MetFrontEndState::shared()->mUnknown0c != 0 && pCanvas->mModified != 0) {
+        if (MetFrontEndState::shared()->mUsingMemcard != 0 && pCanvas->mModified != 0) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kYesButton));
             buttons.push_back(HxStr(kNoButton));
@@ -394,11 +394,11 @@ void MetFreqMakerButtonsScreen::OnUnknownSlot36() {
                                kTwoButtons,
                                buttons,
                                this);
-            MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+            MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         } else {
-            PushNamedScreen(MetFrontEndState::shared()->mUnknown24);
+            PushNamedScreen(MetFrontEndState::shared()->mReturnScreen);
             PushNamedScreen(HxStr(kHelpScreen));
-            ActivateNamedPanel(MetFrontEndState::shared()->mUnknown24);
+            ActivateNamedPanel(MetFrontEndState::shared()->mReturnScreen);
         }
         break;
     }
@@ -461,7 +461,7 @@ void MetFreqMakerButtonsScreen::ShowDirectionsForButton(Rnd::Button *pButton) {
             pDirections->ShowPage(kDirectionsMutate);
         }
     } else if (name == kSaveButton) {
-        if (MetFrontEndState::shared()->mUnknown0c != 0) {
+        if (MetFrontEndState::shared()->mUsingMemcard != 0) {
             pDirections->ShowPage(kDirectionsSave);
         } else {
             pDirections->ShowPage(kDirectionsAccept);
@@ -478,13 +478,13 @@ void MetFreqMakerButtonsScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00258f40
-void MetFreqMakerButtonsScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetFreqMakerButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kInventoryScreen));
     int nCount = mButtonList->mButtons.size();
     for (int i = 0; i < nCount; ++i) {
         mButtonList->ButtonAt(i)->SetState(kButtonStateDisabled);
     }
-    mButtonList->mUnknown00->SetState(kButtonStatePressed);
+    mButtonList->mSelectedButton->SetState(kButtonStatePressed);
 }
 
 // 0x00257b70
@@ -502,7 +502,7 @@ void MetFreqMakerButtonsScreen::ResolveContainerViews() {
 }
 
 // 0x0025a108
-void MetFreqMakerButtonsScreen::OnUnknownSlot2(const HxStr &text) {
+void MetFreqMakerButtonsScreen::OnKeyboardTextEntered(const HxStr &text) {
     if (text.mLen == 0) {
         return;
     }

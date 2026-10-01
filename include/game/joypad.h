@@ -56,7 +56,7 @@ public:
     /**
      * Restart the slot's setup state machine.
      *
-     * Clears PadRecord::mPhase and PadRecord::mUnknown124. InputPoller::ResetJoypads() is the
+     * Clears PadRecord::mPhase and PadRecord::mReadyLevel. InputPoller::ResetJoypads() is the
      * caller, expanded inline in InputPoller::FindJoypadConnections(). The title is inferred.
      *
      * @ghidraAddress 0x004ecb30
@@ -70,10 +70,10 @@ public:
      *
      * @param nPort The port, from 0.
      * @param nSlot The multitap slot, from 0.
-     * @param nUnknown128 Passed through.
+     * @param nDeadZone The analog dead zone, passed through.
      * @ghidraAddress 0x004ecb60
      */
-    void Open(int nPort, int nSlot, int nUnknown128);
+    void Open(int nPort, int nSlot, int nDeadZone);
 
     /**
      * Close the slot's pad through scePadPortClose().

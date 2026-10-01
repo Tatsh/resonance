@@ -18,9 +18,8 @@
  *
  * Slots 4 through 7 are each a two-instruction `jr ra` stub, so the defaults do nothing. Both
  * tables record the same four addresses rather than a copy each, which is what establishes that a
- * subclass inherits them rather than re-emitting an empty body of its own. LocalPlayer::Slot11
- * dispatches slot 4 and LocalPlayer::Slot12 dispatches slot 5, and against a JamPowerupPlacer both
- * therefore do nothing.
+ * subclass inherits them rather than re-emitting an empty body of its own. LocalPlayer dispatches
+ * Activate() and Deactivate(), and against a JamPowerupPlacer both therefore do nothing.
  */
 class PowerupPlacer : public MsgSource {
 public:
@@ -35,25 +34,26 @@ public:
     virtual ~PowerupPlacer();
 
     /**
-     * Unrecovered. Slot 4, and an empty default.
+     * Start placing as the owning player starts. Slot 4, and an empty default.
      *
-     * The parameter list is unrecovered. LocalPlayer::Slot11 is its one recovered caller.
+     * The owning LocalPlayer dispatches it while it starts, before it announces its track.
+     * GamePowerupPlacer's override starts its tick task.
      *
      * @ghidraAddress 0x001cd990
      */
-    virtual void OnUnknownSlot4();
+    virtual void Activate();
 
     /**
-     * Unrecovered. Slot 5, and an empty default.
+     * Stop placing. Slot 5, and an empty default.
      *
-     * The parameter list is unrecovered. LocalPlayer::Slot12 is its one recovered caller.
+     * GamePowerupPlacer's override stops its tick task.
      *
      * @ghidraAddress 0x001cd998
      */
-    virtual void OnUnknownSlot5();
+    virtual void Deactivate();
 
     /**
-     * Unrecovered. Slot 6, and an empty default.
+     * Move the placement cursor. Slot 6, and an empty default.
      *
      * The parameter comes from GamePowerupPlacer's override at `0x001cccb0`, which returns at once
      * for an argument of zero and otherwise negates it and adds it to a bar cursor. An empty
@@ -62,21 +62,24 @@ public:
      * @param nStep The step, whose meaning beyond a signed increment is unrecovered.
      * @ghidraAddress 0x001cd9a0
      */
-    virtual void OnUnknownSlot6(int nStep);
+    virtual void MoveCursor(int nStep);
 
     /**
-     * Unrecovered. Slot 7, and an empty default.
+     * Announce where the placement cursor rests. Slot 7, and an empty default.
+     *
+     * The owning LocalPlayer dispatches it after a track selection.
      *
      * @ghidraAddress 0x001cd9a8
      */
-    virtual void OnUnknownSlot7();
+    virtual void AnnounceCursor();
 
     /**
-     * Unrecovered. Slot 8, and the one slot of the five with a body.
+     * Deploy the owner's selected powerup. Slot 8, and the one slot of the five with a body.
      *
-     * JamPowerupPlacer overrides it at `0x001cdfe0`.
+     * The owning LocalPlayer dispatches it on a ButtonPowMsg. JamPowerupPlacer overrides it at
+     * `0x001cdfe0`.
      *
      * @ghidraAddress 0x001ce1b0
      */
-    virtual void OnUnknownSlot8();
+    virtual void DeployPowerup();
 };

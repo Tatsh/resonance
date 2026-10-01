@@ -26,7 +26,7 @@ class Text;
  * does. It zeroes `+0x94` through `+0xa8`, the pair at `+0xa0` in one 8-byte store, and then
  * builds mFade.
  *
- * It declares one virtual of its own at slot 39, at `0x0028e158`, and the name is not recovered.
+ * It declares one new virtual at slot 39, AssignBurnSlots() at `0x0028e158`.
  *
  * The object is 0xb0 bytes, the size New() requests. The last member, mFade, ends at `+0xac`, and
  * the eight-byte mDeadlineNs gives the class eight-byte alignment.
@@ -90,7 +90,7 @@ public:
      * @param flTime The current renderer time.
      * @ghidraAddress 0x0028dd38
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Start fading the music and arm the wait.
@@ -100,7 +100,7 @@ public:
      *
      * @ghidraAddress 0x0028dc60
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Resolve `event.txt` into mpEvent.
@@ -127,7 +127,7 @@ public:
      *
      * FadeUser slot. Clears the background scene, queues a GameManagerDoPlaybackMsg for an attract
      * run and a BeginGameLocalMsg otherwise, removes this screen from the renderer, clears
-     * MetFrontEndState::mUnknown10, and clears the display to black.
+     * MetFrontEndState::mSettingsDirty, and clears the display to black.
      *
      * @ghidraAddress 0x0028e018
      */
@@ -207,10 +207,13 @@ private:
 
 public:
     /**
+     * Set while the screen loads the attract-mode demo rather than a played level.
+     *
      * Written 1 by MetLogoScreen's slot 36 at `0x002baf20` before it pushes this screen for the
-     * attract mode. Public because that write goes through the screen pointer directly. +0x9c
+     * attract mode, and cleared by OnFadeInDone() once the playback message is queued. Public
+     * because that write goes through the screen pointer directly. +0x9c
      */
-    int mUnknown9c;
+    int mDemoPlayback;
 
 private:
     // The watchdog time slot 26 waits for, in nanoseconds. +0xa0

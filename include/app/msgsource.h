@@ -83,7 +83,7 @@ public:
      * Public because GrooveWorld::BuildGraphs() stores 1 into it on the new InputMap at
      * `0x0018ce18`, and the image has no accessor.
      */
-    int mUnknown00;
+    int mGraphBuilt;
 
 private:
     std::vector<MsgSink *> mSinks; // +0x04

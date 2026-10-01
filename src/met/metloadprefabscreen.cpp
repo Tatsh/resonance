@@ -95,32 +95,32 @@ void MetLoadPreFabScreen::EnterAndShow() {
 
 // 0x002a8b80
 void MetLoadPreFabScreen::BuildButtonList() {
-    mUnknown90->Clear();
-    mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
+    mButtonList->Clear();
+    mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
 
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
-    mUnknown90->Add(HxStr(kEditButtonObject), editLabel);
+    mButtonList->Add(HxStr(kEditButtonObject), editLabel);
 
     HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
-    mUnknown90->Add(HxStr(kCreateButtonObject), createLabel);
+    mButtonList->Add(HxStr(kCreateButtonObject), createLabel);
 
-    mUnknown38.erase(mUnknown38.begin(), mUnknown38.end());
-    mUnknown38.push_back(HxStr(kNamePrompt));
-    mUnknown38.push_back(HxStr(kEditPrompt));
-    mUnknown38.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
+    mHelpKeys.push_back(HxStr(kNamePrompt));
+    mHelpKeys.push_back(HxStr(kEditPrompt));
+    mHelpKeys.push_back(HxStr(kCreatePrompt));
 
-    mUnknown90->SetSelected(kNameButtonIndex);
+    mButtonList->SetSelected(kNameButtonIndex);
 }
 
 // 0x002a8fe0
 void MetLoadPreFabScreen::UpdateNameLabel() {
-    HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
-    mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
+    HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
+    mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
-    mUnknown90->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
+    mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
 // 0x002a91b8
@@ -133,7 +133,7 @@ void MetLoadPreFabScreen::AcquireIdentityList() {
          ++i) {
         mIdentities.push_back((*MetFreqMakerAssetManager::shared()->GetIdentityList())[i]);
     }
-    mUnknown8c = &mIdentities;
+    mIdentityList = &mIdentities;
 }
 
 // 0x002a9330
@@ -142,15 +142,15 @@ void MetLoadPreFabScreen::PrepareFreqMakerForSelection() {
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
     MetFreqMakerButtonsScreen *pButtons =
         static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
-    MetPersonaData *pPersona = (*mUnknown8c)[mUnknown94];
-    if (static_cast<unsigned>(mUnknown94) < MetPersonaData::savedList()->size()) {
+    MetPersonaData *pPersona = (*mIdentityList)[mSelectedIdentity];
+    if (static_cast<unsigned>(mSelectedIdentity) < MetPersonaData::savedList()->size()) {
         pCanvas->LoadPersona(pPersona);
     } else {
         pCanvas->LoadPrefab(pPersona, kNoRandomize);
     }
     pButtons->SetEditing(kFreqMakerEditing);
     pButtons->mNewPersona = 0;
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadPreFabScreen);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadPreFabScreen);
 }
 
 // 0x002a94f0
@@ -160,7 +160,7 @@ void MetLoadPreFabScreen::OnNameButton() {
         return;
     }
 
-    MetPersonaData *pPersona = (*mUnknown8c)[mUnknown94];
+    MetPersonaData *pPersona = (*mIdentityList)[mSelectedIdentity];
     Application::shared()->GetGameManager()->ClearPersonas();
     Application::shared()->GetGameManager()->AddPersona(*pPersona);
     PushNamedScreen(HxStr(kLeftGizmoScreen));
@@ -178,7 +178,7 @@ void MetLoadPreFabScreen::OnCreateButton() {
         MetMsgScreen::Show(
             HxStr(kFreqLimitMessage), HxStr(kFreqLimitTitle), text, kOneButton, buttons, this);
     } else {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadPreFabScreen);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadPreFabScreen);
         MetLoadFreqBaseScreen::OnCreateButton();
     }
 }

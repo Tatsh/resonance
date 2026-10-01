@@ -36,11 +36,11 @@ public:
     /**
      * Deploy the selected powerup on the owner's track at the current bar.
      *
-     * Does nothing from the level's last bar on, which PlayMap::Slot9() reports.
+     * Does nothing from the level's last bar on, as PlayMap::GetEndBar() reports it.
      *
      * @ghidraAddress 0x001cdeb8
      */
-    virtual void OnUnknownSlot8();
+    virtual void DeployPowerup();
 
 private:
     LocalPlayer *mOwner;             // +0x14

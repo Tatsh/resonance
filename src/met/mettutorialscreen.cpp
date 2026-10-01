@@ -40,12 +40,12 @@ static const char *const kTitleScreen = "MetScreenTitleScreen";
 static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
 static const char *const kHelpScreen = "MetHelpScreen";
 
-// Screens OnUnknownSlot36() pushes.
+// Screens OnExitFinished() pushes.
 static const char *const kLeftGizmoSmallScreen = "MetLeftGizmoSmallScreen";
 static const char *const kTopLogoScreen = "MetTopLogoScreen";
 static const char *const kMainScreen = "MetMainScreen";
 static const char *const kLoadGameScreen = "MetLoadGameScreen";
-// The registry key OnUnknownSlot36() records as the screen to return to.
+// The registry key OnExitFinished() records as the screen to return to.
 static const char *const kTutorialScreen = "MetTutorialScreen";
 
 // The level each button starts, matching the button order.
@@ -69,7 +69,7 @@ static const char *const kTitleKey = "tutorial";
 // Index EnterAndShow() selects, which is the first button.
 constexpr int kFirstButtonIndex = 0;
 
-// What MetScreen::mUnknown18 records for the exit hook to act on. The back command writes the
+// What MetScreen::mExitChoice records for the exit hook to act on. The back command writes the
 // first and the alternation-finished hook writes the second.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
@@ -83,10 +83,10 @@ constexpr int kSelectAlternateCycles = 2;
 // 0x003c7a88
 MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr) {
-    mUnknown8c = new MetButtonList();
-    mUnknown38.push_back(HxStr(kFirstPrompt));
-    mUnknown38.push_back(HxStr(kSecondPrompt));
+      mButtonList(nullptr) {
+    mButtonList = new MetButtonList();
+    mHelpKeys.push_back(HxStr(kFirstPrompt));
+    mHelpKeys.push_back(HxStr(kSecondPrompt));
 }
 
 // 0x003cc1a8
@@ -96,28 +96,28 @@ MetTutorialScreen *MetTutorialScreen::New(MetRenderer *pRenderer, int nPriority)
 
 // 0x003cc230
 MetTutorialScreen::~MetTutorialScreen() {
-    delete mUnknown8c;
+    delete mButtonList;
 }
 
 // 0x003c82a0
 void MetTutorialScreen::EnterAndShow() {
-    if (MetFrontEndState::shared()->mUnknown18 != 0) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kNoName);
+    if (MetFrontEndState::shared()->mPendingTransition != 0) {
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
         MetFrontEndState *pState = MetFrontEndState::shared();
-        pState->mUnknown1c = pState->mUnknown18;
-        pState->mUnknown18 = 0;
+        pState->mLastTransition = pState->mPendingTransition;
+        pState->mPendingTransition = 0;
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kHelpScreen));
-        mUnknown10->SetActivePanel(this);
+        mRenderer->SetActivePanel(this);
     }
-    mUnknown8c->SetSelected(kFirstButtonIndex);
+    mButtonList->SetSelected(kFirstButtonIndex);
 
     {
         HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
 
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
 
@@ -128,12 +128,12 @@ void MetTutorialScreen::ResolveContainerViews() {
     {
         HxStr objectName(kFirstButtonObject);
         HxStr label = QueryConfigString(kPromptConfigCode, kFirstPrompt);
-        mUnknown8c->Add(objectName, label);
+        mButtonList->Add(objectName, label);
     }
     {
         HxStr objectName(kSecondButtonObject);
         HxStr label = QueryConfigString(kPromptConfigCode, kSecondPrompt);
-        mUnknown8c->Add(objectName, label);
+        mButtonList->Add(objectName, label);
     }
 }
 
@@ -141,28 +141,28 @@ void MetTutorialScreen::ResolveContainerViews() {
 void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         ActivateNamedPanel(HxStr(kNoName));
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mUnknown8c->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         ActivateNamedPanel(HxStr(kNoName));
-        mUnknown18 = kExitBack;
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kLeftGizmoScreen));
         BeginExit();
@@ -182,8 +182,8 @@ void MetTutorialScreen::PlayCycleRightSound(int) {
 }
 
 // 0x003c84d8
-void MetTutorialScreen::OnUnknownSlot30(Rnd::Button *) {
-    mUnknown18 = kExitToButtonAction;
+void MetTutorialScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));
@@ -191,8 +191,8 @@ void MetTutorialScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x003c8678
-void MetTutorialScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetTutorialScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
         PushNamedScreen(HxStr(kTopLogoScreen));
         PushNamedScreen(HxStr(kMainScreen));
@@ -202,11 +202,11 @@ void MetTutorialScreen::OnUnknownSlot36() {
 
     Application::shared()->GetGameManager()->SetGameMode(kGameModeSolo);
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    if (mUnknown8c->mSelected == kFirstButtonIndex) {
-        params.mUnknown1c = kPlayModeGame;
+    if (mButtonList->mSelected == kFirstButtonIndex) {
+        params.mPlayMode = kPlayModeGame;
         params.mLevelName = kFirstButtonLevel;
     } else {
-        params.mUnknown1c = kPlayModeJam;
+        params.mPlayMode = kPlayModeJam;
         params.mLevelName = kSecondButtonLevel;
     }
     params.mArenaName = (*GetArenaList())[0].mName;
@@ -220,7 +220,7 @@ void MetTutorialScreen::OnUnknownSlot36() {
     Application::shared()->GetGameManager()->ClearPersonas();
     Application::shared()->GetGameManager()->AddPersona(*pIdentity);
 
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kTutorialScreen);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kTutorialScreen);
     PushNamedScreen(HxStr(kLoadGameScreen));
     ActivateNamedPanel(HxStr(kLoadGameScreen));
 }

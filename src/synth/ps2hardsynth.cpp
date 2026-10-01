@@ -128,18 +128,18 @@ void Ps2HardSynth::SelectBank(unsigned char nChannel, unsigned char nBank) {
 }
 
 // 0x003f6700
-void Ps2HardSynth::Slot12(int bEnable) {
-    SubmitDriverSelector110(bEnable ^ 1); // The driver command takes the opposite sense.
+void Ps2HardSynth::SetStereo(int bStereo) {
+    SubmitDriverSetMono(bStereo ^ 1);
 }
 
 // 0x003f6740
-void Ps2HardSynth::Slot13(int nValue) {
-    SubmitDriverSelector100(nValue);
+void Ps2HardSynth::SetRemixMode(int bRemix) {
+    SubmitDriverSetRemix(bRemix);
 }
 
 // 0x003f6720
-void Ps2HardSynth::Slot14(int nValue) {
-    SubmitDriverSelectorF0(nValue);
+void Ps2HardSynth::SetPaused(int bPaused) {
+    SubmitDriverSetPaused(bPaused);
 }
 
 // 0x003f4c50

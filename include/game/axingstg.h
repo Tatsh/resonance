@@ -45,7 +45,7 @@ public:
     /**
      * Stop the stage and release everything the constructor built.
      *
-     * Slot 1. The routine stops the stage through a direct call to this class's own Slot3(), then
+     * Slot 1. The routine stops the stage through a direct call to this class's own Stop(), then
      * releases the periodical post and the eight objects it built, in an order that is not the
      * order of their offsets.
      *
@@ -61,7 +61,7 @@ public:
      *
      * @ghidraAddress 0x0019e720
      */
-    virtual void Slot2();
+    virtual void Start();
 
     /**
      * Stop the stage.
@@ -71,7 +71,7 @@ public:
      *
      * @ghidraAddress 0x0019e798
      */
-    virtual void Slot3();
+    virtual void Stop();
 
     /**
      * Wire the stage's objects to the sources that drive it.
@@ -83,7 +83,7 @@ public:
      * @param pSecondary The source that receives the phrase manager and the phrase maker.
      * @ghidraAddress 0x0019df58
      */
-    virtual void Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
+    virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
     /**
      * Attach the mixer to the base's synthesiser and give it its output sink.
@@ -93,7 +93,7 @@ public:
      * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
      * @ghidraAddress 0x0019e810
      */
-    virtual void Slot6(MsgSink *pOutput);
+    virtual void SetMixerOutput(MsgSink *pOutput);
 
     /**
      * Register one sink with every source the stage provides.
@@ -103,7 +103,7 @@ public:
      * @param pSink The sink to register.
      * @ghidraAddress 0x0019e850
      */
-    virtual void Slot7(MsgSink *pSink);
+    virtual void AddSinkToSources(MsgSink *pSink);
 
     /**
      * Install the sink the phrase manager reports phrase changes to.
@@ -113,12 +113,12 @@ public:
      * @param pSink The sink to install, ignored when null.
      * @ghidraAddress 0x0019e928
      */
-    virtual void Slot8(MsgSink *pSink);
+    virtual void SetNetSink(MsgSink *pSink);
 
 private:
     AutoRiffer *mAutoRiffer;      // +0x2c
     PitchPicker *mPitchPicker;    // +0x30
-    int mUnknown34;               // +0x34, the constructor does not write it
+    int mReserved;                // +0x34, never read or written
     AxisControl *mAxisControl;    // +0x38
     AxeNewGemMaker *mNewGemMaker; // +0x3c
     AxeOldGemMaker *mOldGemMaker; // +0x40

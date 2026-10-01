@@ -30,32 +30,32 @@ const char *GameChatPacket::Name() {
 
 // 0x003f28e8
 void GameChatPacket::Print(std::ostream &stream) {
-    stream << mUnknown14 << mUnknown1c;
+    stream << mSender << mText;
 }
 
 // 0x003e8458
 void GameChatPacket::Save(OBStream &stream) {
     Packet::Save(stream);
-    SaveHxStr(SaveHxStr(stream, mUnknown14), mUnknown1c);
+    SaveHxStr(SaveHxStr(stream, mSender), mText);
 }
 
 // 0x003e85c8
 void GameChatPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    LoadHxStr(LoadHxStr(stream, mUnknown14), mUnknown1c);
+    LoadHxStr(LoadHxStr(stream, mSender), mText);
 }
 
 // 0x003f1a28
-GameChatPacket::GameChatPacket(const HxStr &first, const HxStr &second)
-    : mUnknown14(first), mUnknown1c(second) {
+GameChatPacket::GameChatPacket(const HxStr &sender, const HxStr &text)
+    : mSender(sender), mText(text) {
 }
 
 // 0x003f1ae0
-HxStr GameChatPacket::GetUnknown14() {
-    return mUnknown14;
+HxStr GameChatPacket::GetSender() {
+    return mSender;
 }
 
 // 0x003f1b10
-HxStr GameChatPacket::GetUnknown1c() {
-    return mUnknown1c;
+HxStr GameChatPacket::GetText() {
+    return mText;
 }

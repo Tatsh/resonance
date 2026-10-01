@@ -764,7 +764,7 @@ void PsTex::StaticInit() {
 }
 
 // 0x0059aa48
-ACanvas *PsTex::LockMipBitmap(int nMip, [[maybe_unused]] int nUnknown, int nFlags) {
+ACanvas *PsTex::LockMipBitmap(int nMip, [[maybe_unused]] int nReserved, int nFlags) {
     WaitForMipsLoaded();
     if (static_cast<unsigned>(nMip) >= mLoadedBitmaps.size() || mLoadedBitmaps[nMip] == nullptr) {
         return nullptr;
@@ -794,7 +794,7 @@ void PsTex::UnlockMipBitmap() {
 }
 
 // 0x0059ab78
-void PsTex::SetPalette(APalette *pPalette, [[maybe_unused]] int nUnknown) {
+void PsTex::SetPalette(APalette *pPalette, [[maybe_unused]] int nReserved) {
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
         return;
     }

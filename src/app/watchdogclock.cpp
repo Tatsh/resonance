@@ -4,7 +4,7 @@
 
 namespace {
 
-// The factor Advance() scales its argument by before dividing by the double at +0x00.
+// The factor Advance() scales its argument by before dividing by mNsPerUnit.
 constexpr double kAdvanceScale = 1000000.0;
 
 // Nanoseconds in one second. Divided by GetMillisecondsPerSecond(), it gives the nanoseconds in one
@@ -17,7 +17,7 @@ constexpr double kNanosecondsPerSecond = 1000000000.0;
 WatchdogClock::WatchdogClock() {
     mPausedRunMs = 0;
     mRunning = 1;
-    mUnknown00 = kNanosecondsPerSecond / static_cast<double>(GetMillisecondsPerSecond());
+    mNsPerUnit = kNanosecondsPerSecond / static_cast<double>(GetMillisecondsPerSecond());
     const long long nNowMs = GetElapsedMilliseconds();
     mOriginMs = nNowMs;
     mStartMs = nNowMs;
@@ -25,7 +25,7 @@ WatchdogClock::WatchdogClock() {
 
 // 0x00512538
 void WatchdogClock::Mark(long long nNanoseconds) {
-    const long long nMarkMs = static_cast<long long>(nNanoseconds / mUnknown00);
+    const long long nMarkMs = static_cast<long long>(nNanoseconds / mNsPerUnit);
     if (mRunning != 0) {
         mStartMs = GetElapsedMilliseconds() - nMarkMs;
     } else {
@@ -41,7 +41,7 @@ long long WatchdogClock::Now() {
     } else {
         nRunMs = mPausedRunMs;
     }
-    return static_cast<long long>(nRunMs * mUnknown00);
+    return static_cast<long long>(nRunMs * mNsPerUnit);
 }
 
 // 0x00512680
@@ -69,5 +69,5 @@ void WatchdogClock::Resume() {
 // 0x00512788
 void WatchdogClock::Advance(int nAmount) {
     Pause();
-    mPausedRunMs += static_cast<long long>(nAmount * kAdvanceScale / mUnknown00);
+    mPausedRunMs += static_cast<long long>(nAmount * kAdvanceScale / mNsPerUnit);
 }

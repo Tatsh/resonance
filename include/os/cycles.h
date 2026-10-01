@@ -60,7 +60,7 @@ extern float g_flMillisecondsPerCycle;
  *
  * @ghidraAddress 0x007082b8
  */
-extern int g_nUnknownCycleWord;
+extern int g_nUnusedCycleCounter;
 
 /**
  * Start the cycle state from the current counter reading.

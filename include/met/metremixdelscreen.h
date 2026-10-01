@@ -35,16 +35,17 @@ class Font;
  * The constructor at `0x003394a0` takes only the renderer and the load priority. It runs the
  * MetSaveRemix constructor at `0x00372120` with `mcrd` for the screen name, `metagame/Shared` for
  * the directory, and `memcard_remix_del` for the container, writes its four vptrs, zeroes
- * mUnknownf4, mUnknownfc, mUnknown100, and mUnknown104, default-constructs the two
- * MemcardConnectState records, zeroes mUnknown138 and mUnknown13c, clears MetScreen::mUnknown60,
- * and pushes `mem_del_remix` into the container object-name vector MetScreen declares at `+0x38`.
+ * mList, mDeletePending, mCopyPending, and mCopyRecord, default-constructs the two
+ * MemcardConnectState records, zeroes mRowFont and mDimRowFont, clears
+ * MetScreen::mShowsLoadedDrawables, and pushes `mem_del_remix` into the container object-name
+ * vector MetScreen declares at `+0x38`.
  *
  * An earlier reading recorded the span from `+0x10c` to `+0x137` as reserved, on the grounds that
  * the constructor addresses a nested object through a register it could not resolve. The two
  * registers are `+0x108` and `+0x120`, exactly 0x18 apart, and each receives the identical
  * five-store run from the same empty literal at `0x00805ca8`. Both are MemcardConnectState records.
  *
- * The destructor at `0x003397a8` restores the four vptrs, deletes mUnknownf4 through slot 1 of a
+ * The destructor at `0x003397a8` restores the four vptrs, deletes mList through slot 1 of a
  * table at `+0x94` of the object itself, which is where ScrollingList places its vptr, releases
  * the two record names in reverse order as compiler-generated member teardown, restores the
  * ListDataProvider vptr to `0x007ec830`, runs the MetSaveRemix destructor, and releases the object
@@ -73,8 +74,8 @@ class Font;
  * Both pure virtuals of the four-entry ListDataProvider table are supplied here, ProvideText() at
  * `0x0033cc78` and ProvideMesh() at `0x00343f10`.
  *
- * Slot 5 writes MetSaveRemix::mUnknowndc, which that class still declares private. The member
- * belongs in the protected section on the same reasoning that already moved mUnknowne0 there.
+ * Slot 5 writes MetSaveRemix::mCopying. MetSaveRemix declares the member protected on the same
+ * reasoning that moved mKeyboardPending there.
  */
 class MetRemixDelScreen :
     public MetSaveRemix,
@@ -108,16 +109,16 @@ public:
     /**
      * Hide the screen and request the remix catalogue. Slot 5.
      *
-     * It hides itself through slot 17 with a zero argument, clears MetSaveRemix::mUnknowne0 and
-     * mUnknown104, writes one into MetSaveRemix::mUnknowndc, and points mUnknownf0 at the
-     * MetRemixManager catalogue for mUnknown108.
+     * It hides itself through slot 17 with a zero argument, clears MetSaveRemix::mKeyboardPending
+     * and mCopyRecord, writes one into MetSaveRemix::mCopying, and points mCatalogue at the
+     * MetRemixManager catalogue for mCardSlot.
      *
-     * Returning from a confirmation, with mUnknownfc or mUnknown100 set, it reselects the first
-     * row of the existing list. Otherwise it raises the one-button `no_remix` dialogue when the
-     * card's listing status is 15 or the catalogue is empty, and creates a new ScrollingList when
-     * it is not, without deleting any list an earlier entry left. It then clears both flags,
+     * Returning from a confirmation, with mDeletePending or mCopyPending set, it reselects the
+     * first row of the existing list. Otherwise it raises the one-button `no_remix` dialogue when
+     * the card's listing status is 15 or the catalogue is empty, and creates a new ScrollingList
+     * when it is not, without deleting any list from an earlier entry. It then clears both flags,
      * refills and redraws the list, pushes the help screen with the `only_back_title` preset and
-     * the first prompt of MetScreen::mUnknown38, sets the title to `mem_del_type` formatted with
+     * the first prompt of MetScreen::mHelpKeys, sets the title to `mem_del_type` formatted with
      * the slot name, pushes the data screen, and runs the MetScreen body.
      *
      * @ghidraAddress 0x0033a098
@@ -127,23 +128,23 @@ public:
     /**
      * Run the pending keyboard action once the panel has finished activating. Slot 7.
      *
-     * MetScreen slot 6 is its one caller. A set MetSaveRemix::mUnknowne0 records that slot 42
+     * MetScreen slot 6 is its one caller. A set MetSaveRemix::mKeyboardPending records that slot 42
      * requested the on-screen keyboard, and the flag is cleared before slot 40 runs so that the
      * request runs once.
      *
      * @ghidraAddress 0x00344078
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Act on whichever of the screen's dialogues was dismissed. Slot 15.
      *
      * The name is compared against each dialogue in turn. YES on `del_remix_ask` and RETRY on
      * `del_fail_nocard` raise the button-less `del_remix` progress dialogue and queue the delete
-     * of the selected row. YES on `remix_copy_ask` records the selected row in mUnknown104 and the
-     * next card in mUnknown120 and queues the load of the row for a copy. `del_remix` refills the
-     * list and asks MetRemixManager to list mUnknown108 again. `no_remix` removes this screen from
-     * the renderer and returns to the card-type screen. Every other answer of this screen's
+     * of the selected row. YES on `remix_copy_ask` records the selected row in mCopyRecord and the
+     * next card in mCopyTarget and queues the load of the row for a copy. `del_remix` refills the
+     * list and requests that MetRemixManager list mCardSlot again. `no_remix` removes this screen
+     * from the renderer and returns to the card-type screen. Every other answer of this screen's
      * dialogues returns to the list, and a name this screen did not raise goes to the
      * MetSaveRemix body.
      *
@@ -173,10 +174,10 @@ public:
      * `0x002e3738` produces and that MetScreen::DeliverCommand() passes through unchanged, and this
      * screen is one of the few that acts on them.
      *
-     * Codes 1 and 2 move along the list at mUnknownf4 and show the new row on the data screen,
-     * without testing mUnknownf0 for null. Code 6 departs the screen. Codes 7 and 8 do nothing
-     * with an empty catalogue, and otherwise play the toggle sound, set mUnknown100 or mUnknownfc
-     * respectively, clear the help text, and depart the screen.
+     * Codes 1 and 2 move along the list at mList and show the new row on the data screen,
+     * without testing mCatalogue for null. Code 6 departs the screen. Codes 7 and 8 do nothing
+     * with an empty catalogue, and otherwise play the toggle sound, set mCopyPending or
+     * mDeletePending respectively, clear the help text, and depart the screen.
      *
      * @param pCommand The command the renderer translated from an input message.
      * @ghidraAddress 0x00339b30
@@ -217,28 +218,28 @@ public:
      *
      * @ghidraAddress 0x00344058
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Release the list and depart once the exit animation has finished. Slot 36.
      *
-     * With neither mUnknownfc nor mUnknown100 set, it deletes the ScrollingList at mUnknownf4,
+     * With neither mDeletePending nor mCopyPending set, it deletes the ScrollingList at mList,
      * pushes `MetLeftGizmoScreen` and `MetMemCardTypeScreen`, and activates the latter. With
-     * mUnknown100 set, it raises the `remix_copy_ask` confirmation, formatted with the slot name
-     * NextCardSlot() gives for mUnknown108. With only mUnknownfc set, it raises the `del_remix_ask`
-     * confirmation. Both confirmations offer `NO` and `YES`.
+     * mCopyPending set, it raises the `remix_copy_ask` confirmation, formatted with the slot name
+     * NextCardSlot() gives for mCardSlot. With only mDeletePending set, it raises the
+     * `del_remix_ask` confirmation. Both confirmations offer `NO` and `YES`.
      *
      * @ghidraAddress 0x0033ce00
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the list title and the rest of the container objects. Slot 38.
      *
      * It runs the MetSaveRemix slot 38 body, which is MetScreen's, resolves the Rnd::Text
      * `mcrd_listpan_title.txt`, sets it to the configuration string `mcrf_remix`, and shows it.
-     * It then resolves the Rnd::Font objects `font1_pink_2` into mUnknown138 and
-     * `font1_pinkgrey_2` into mUnknown13c. The title is not tested for null.
+     * It then resolves the Rnd::Font objects `font1_pink_2` into mRowFont and
+     * `font1_pinkgrey_2` into mDimRowFont. The title is not tested for null.
      *
      * @ghidraAddress 0x00339880
      */
@@ -252,7 +253,7 @@ public:
      *
      * @ghidraAddress 0x0033e5c0
      */
-    virtual void OnUnknownSlot40();
+    virtual void OnSaveAbandoned();
 
     /**
      * Bring this screen back and make it the active panel again. Slot 41.
@@ -262,15 +263,15 @@ public:
      *
      * @ghidraAddress 0x0033e6d8
      */
-    virtual void OnUnknownSlot41();
+    virtual void OnSaveDialogueClosed();
 
     /**
      * Request a remix name from the on-screen keyboard. Slot 42.
      *
-     * It sets MetSaveRemix::mUnknowne0 so that slot 7 runs slot 40 once
-     * the keyboard has finished, and then builds a MetKeyboardRequest with this screen's own
+     * It sets MetSaveRemix::mKeyboardPending so that slot 7 runs slot 40 once the keyboard has
+     * finished, and then builds a MetKeyboardRequest with this screen's
      * registry key as the screen to return to, `Remix name` as the prompt,
-     * MetSaveRemix::mUnknownb8 as the initial text, -1 for any controller, and this object's own
+     * MetSaveRemix::mRemixName as the initial text, -1 for any controller, and this object's
      * MetKBUser subobject as the receiver, and passes it to MetKeyboardScreen::Open().
      *
      * This override replaces the MetSaveRemix body, which is an alias for the empty slot 40 rather
@@ -278,14 +279,14 @@ public:
      *
      * @ghidraAddress 0x0033e7f0
      */
-    virtual void OnUnknownSlot42();
+    virtual void OnDuplicateNameDeclined();
 
     /**
      * Fill the catalogue from the card. MemcardUser slot 12.
      *
      * A non-zero status raises the one-button `remix_copy_fail` dialogue with the
      * `copy_fail_general` text. A zero status makes this screen MemcardManager::mUser and hands the
-     * row at mUnknown104 to MetSaveRemix::RecordPendingSave() with mUnknown120 as the target and
+     * row at mCopyRecord to MetSaveRemix::RecordPendingSave() with mCopyTarget as the target and
      * -1 as the selector, passing the row's name, its first string, its appearances, and its last
      * word. It also builds a two-entry list of this screen's registry key and `MetHelpScreen` that
      * nothing reads. The port and slot argument is not read.
@@ -301,7 +302,7 @@ public:
      *
      * A zero status exits `MetMsgScreen` and does nothing else. A status of 15 raises the
      * `del_fail_nocard` dialogue with `RETRY` and `CANCEL`, its text formatted with the slot name
-     * of mUnknown108. Every other status raises the one-button `del_remix` dialogue with the
+     * of mCardSlot. Every other status raises the one-button `del_remix` dialogue with the
      * `del_fail` text. The port and slot argument is not read.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
@@ -313,21 +314,21 @@ public:
     /**
      * Forward the entered name to the saver once. MetKBUser slot 2.
      *
-     * A clear MetSaveRemix::mUnknowne0 discards the text, which is how a keyboard result that this
-     * screen did not request is ignored.
+     * A clear MetSaveRemix::mKeyboardPending discards the text. The discard ignores a keyboard
+     * result that this screen did not request.
      *
      * @param text The remix name the user entered.
      * @ghidraAddress 0x00344240
      */
-    virtual void OnUnknownSlot2(const HxStr &text);
+    virtual void OnKeyboardTextEntered(const HxStr &text);
 
     /**
-     * Show the second string of one row of mUnknownf0.
+     * Show the second string of one row of mCatalogue.
      *
-     * An index past the end of mUnknownf0 empties the text instead. The column and the context are
+     * An index past the end of mCatalogue empties the text instead. The column and the context are
      * not read.
      *
-     * @param nItem The row of mUnknownf0.
+     * @param nItem The row of mCatalogue.
      * @param nColumn The cell index, which the body does not read.
      * @param pText The cell.
      * @param nContext The list context, which the body does not read.
@@ -349,7 +350,7 @@ public:
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
     /**
-     * Record the card the screen works on in mUnknown108.
+     * Record the card the screen works on in mCardSlot.
      *
      * MetMemCardTypeScreen's slot 36 is the caller. The title is inferred.
      *
@@ -366,23 +367,25 @@ private:
 
     // 0x003440b8
     // Shows one catalogue row on the data screen. Slot 33 and the shared tail of codes 1 and 2 in
-    // slot 19 are its callers. An index past the end hides the record instead, and mUnknownf0 is
+    // slot 19 are its callers. An index past the end hides the record instead, and mCatalogue is
     // not tested for null.
     void ShowRowOnDataScreen(int nIndex);
 
-    // The row catalogue the ListDataProvider override at `0x0033cc78` indexes. Never written by any
-    // routine of this class, so it is filled from outside. +0xf0
-    std::vector<MetRemixRecord> *mUnknownf0;
+    // The row catalogue the ListDataProvider override at `0x0033cc78` indexes. Slot 5 points it at
+    // the MetRemixManager list for mCardSlot. +0xf0
+    std::vector<MetRemixRecord> *mCatalogue;
     // Deleted by the destructor and by slot 36. +0xf4
-    ScrollingList *mUnknownf4;
-    int mUnknownf8;  // +0xf8, not written by the constructor
-    int mUnknownfc;  // +0xfc
-    int mUnknown100; // +0x100
+    ScrollingList *mList;
+    int mReserved; // +0xf8, never read or written
+    // Set by code 8, the request to delete the selected row. +0xfc
+    int mDeletePending;
+    // Set by code 7, the request to copy the selected row to the next card. +0x100
+    int mCopyPending;
     // The catalogue row MemcardUser slot 12 hands to RecordPendingSave(). +0x104
-    MetRemixRecord *mUnknown104;
-    // Two memory-card locations the screen tracks. +0x108 and +0x120
-    MemcardConnectState mUnknown108;
-    MemcardConnectState mUnknown120;
-    Rnd::Font *mUnknown138; // +0x138, `font1_pink_2`, resolved by slot 38
-    Rnd::Font *mUnknown13c; // +0x13c, `font1_pinkgrey_2`, resolved by slot 38
+    MetRemixRecord *mCopyRecord;
+    // The card the screen lists, and the card a copy writes to. +0x108 and +0x120
+    MemcardConnectState mCardSlot;
+    MemcardConnectState mCopyTarget;
+    Rnd::Font *mRowFont;    // +0x138, `font1_pink_2`, resolved by slot 38
+    Rnd::Font *mDimRowFont; // +0x13c, `font1_pinkgrey_2`, resolved by slot 38
 };

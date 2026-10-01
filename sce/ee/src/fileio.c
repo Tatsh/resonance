@@ -53,9 +53,9 @@ enum {
     kFsKindRead = 2,
     kFsKindDirent = 11,
     kFsKindStat = 12,
-    kFsKindCopy23 = 23,
-    kFsKindCopy25 = 25,
-    kFsKindCopy26 = 26,
+    kFsKindDevctl = 23,
+    kFsKindReadlink = 25,
+    kFsKindIoctl2 = 26,
 
     kFsErrorNotBound = -1,
     kFsErrorBadHandle = -9,
@@ -127,8 +127,10 @@ typedef struct {
     int mIopFd;
     int mRequest;
     unsigned char mArg[kFsIoctlArgSize];
-    int mHandle;
-    int mReserved418;
+    // The reply buffer and its size. sceIoctl2() at 0x0056bbc0 fills them and sceIoctl()
+    // clears them.
+    int mReplyBuffer;
+    int mReplySize;
     int nArgSize;
 } FsIoctlPacket;
 
@@ -330,9 +332,9 @@ static void FsCompletionHandler(void *pData, void *pArg) {
     case kFsKindStat:
         memcpy(pResult->mBody.mFixed.pDest, (const void *)pResult->mBody.mFixed.mData, kFsStatSize);
         break;
-    case kFsKindCopy23:
-    case kFsKindCopy25:
-    case kFsKindCopy26: {
+    case kFsKindDevctl:
+    case kFsKindReadlink:
+    case kFsKindIoctl2: {
         unsigned int nSize = pResult->mBody.mCopy.nSize;
 
         if (nSize > kFsCopyLimit) {
@@ -740,8 +742,8 @@ int sceIoctl(int nDescriptor, int nRequest, void *pArg) {
         FsUnlock();
         return kFsErrorBadHandle;
     }
-    g_fsPacket.mIoctl.mHandle = 0;
-    g_fsPacket.mIoctl.mReserved418 = 0;
+    g_fsPacket.mIoctl.mReplyBuffer = 0;
+    g_fsPacket.mIoctl.mReplySize = 0;
     if (nRequest == kFsIoctlLastResult) {
         *(int *)pArg = *(volatile int *)UNCACHED_SEG(&g_fsResult.mBody.mData[0]);
         FsUnlock();

@@ -49,13 +49,13 @@ constexpr int kPromptConfigCode = 0x258;
 // The configuration code of the expansion disc's title, read with no key.
 constexpr int kExpansionTitleConfigCode = 0x515;
 
-// The states mUnknowna8 takes beyond the DiscSwap::Step values.
+// The states mState takes beyond the DiscSwap::Step values.
 constexpr int kStateIdle = 0;
 constexpr int kStateReleased = 1;
 constexpr int kStateRetryMount = 8;
 constexpr int kStateLastFailure = 13;
 
-// MetScreen::mUnknown18 on exit, read back by OnFadeOutDone().
+// MetScreen::mExitChoice on exit, read back by OnFadeOutDone().
 constexpr int kExitCancelled = 0;
 constexpr int kExitDone = 2;
 
@@ -93,31 +93,31 @@ MetExpansionPakScreen::MetExpansionPakScreen(MetRenderer *pRenderer, int nPriori
 }
 
 // 0x00218518
-void MetExpansionPakScreen::OnUnknownSlot26(float flTime) {
+void MetExpansionPakScreen::UpdateIdle(float flTime) {
     mFade->Update(flTime);
-    if (mUnknownb4 != 0) {
+    if (mFinished != 0) {
         return;
     }
 
-    if (mUnknowna8 == kStateIdle && mUnknownac != 0) {
-        mUnknowna8 = mUnknown90.ReleaseDisc();
+    if (mState == kStateIdle && mPrepareShown != 0) {
+        mState = mDiscSwap.ReleaseDisc();
     }
-    if (mUnknowna8 == kStateReleased) {
-        mUnknown90.BeginEject();
-        mUnknowna8 = mUnknown90.PollEject();
+    if (mState == kStateReleased) {
+        mDiscSwap.BeginEject();
+        mState = mDiscSwap.PollEject();
         return;
     }
-    if (mUnknowna8 == DiscSwap::kStepEjecting) {
-        mUnknowna8 = mUnknown90.PollEject();
+    if (mState == DiscSwap::kStepEjecting) {
+        mState = mDiscSwap.PollEject();
     }
-    if (mUnknowna8 == DiscSwap::kStepTrayOpen && mUnknownbc == 0) {
+    if (mState == DiscSwap::kStepTrayOpen && mMsgScreenExited == 0) {
         ExitScreenByName(HxStr(kMsgScreen));
-        mUnknownbc = 1;
+        mMsgScreenExited = 1;
         return;
     }
-    if (mUnknownb0 == 0 && mUnknowna8 == DiscSwap::kStepTrayOpen && mUnknownbc != 0) {
-        mUnknowna8 = mUnknown90.CheckDisc();
-        if (mUnknowna8 == DiscSwap::kStepDiscReady) {
+    if (mLoadShown == 0 && mState == DiscSwap::kStepTrayOpen && mMsgScreenExited != 0) {
+        mState = mDiscSwap.CheckDisc();
+        if (mState == DiscSwap::kStepDiscReady) {
             std::vector<HxStr> buttons;
             MetMsgScreen::Show(HxStr(kLoadMessage),
                                HxStr(kMessageTitle),
@@ -128,31 +128,30 @@ void MetExpansionPakScreen::OnUnknownSlot26(float flTime) {
         }
         return;
     }
-    if (mUnknownb0 != 0 && mUnknowna8 == DiscSwap::kStepTrayOpen) {
-        mUnknown90.BeginInsert();
-        mUnknowna8 = mUnknown90.PollInsert();
+    if (mLoadShown != 0 && mState == DiscSwap::kStepTrayOpen) {
+        mDiscSwap.BeginInsert();
+        mState = mDiscSwap.PollInsert();
         return;
     }
-    if (mUnknowna8 == DiscSwap::kStepClosing) {
-        mUnknowna8 = mUnknown90.PollInsert();
+    if (mState == DiscSwap::kStepClosing) {
+        mState = mDiscSwap.PollInsert();
     }
-    if (mUnknowna8 == DiscSwap::kStepCloseFailed) {
-        mUnknowna8 = mUnknown90.MountDisc();
+    if (mState == DiscSwap::kStepCloseFailed) {
+        mState = mDiscSwap.MountDisc();
     }
-    if (mUnknowna8 == DiscSwap::kStepDiscReady) {
-        mUnknowna8 = mUnknown90.MountDisc();
+    if (mState == DiscSwap::kStepDiscReady) {
+        mState = mDiscSwap.MountDisc();
     }
-    if ((mUnknowna8 == kStateRetryMount || mUnknowna8 == DiscSwap::kStepNotReady) &&
-        mUnknownb0 != 0) {
-        mUnknowna8 = mUnknown90.MountDisc();
+    if ((mState == kStateRetryMount || mState == DiscSwap::kStepNotReady) && mLoadShown != 0) {
+        mState = mDiscSwap.MountDisc();
         return;
     }
-    if (mUnknowna8 >= DiscSwap::kStepBadDisc && mUnknowna8 <= kStateLastFailure) {
-        mUnknownb0 = 0;
-        mUnknownac = 1;
-        mUnknownb8 = 1;
-        mUnknownbc = 0;
-        mUnknowna8 = kStateIdle;
+    if (mState >= DiscSwap::kStepBadDisc && mState <= kStateLastFailure) {
+        mLoadShown = 0;
+        mPrepareShown = 1;
+        mRetry = 1;
+        mMsgScreenExited = 0;
+        mState = kStateIdle;
         std::vector<HxStr> buttons;
         MetMsgScreen::Show(HxStr(kPrepareMessage),
                            HxStr(kMessageTitle),
@@ -161,13 +160,13 @@ void MetExpansionPakScreen::OnUnknownSlot26(float flTime) {
                            buttons,
                            this);
     }
-    if (mUnknowna8 != DiscSwap::kStepMounted) {
+    if (mState != DiscSwap::kStepMounted) {
         return;
     }
 
     RebuildStageLists();
     RebuildArenaLists();
-    mUnknownb4 = 1;
+    mFinished = 1;
 
     std::vector<MetPersonaData *> personas(*MetFreqMakerAssetManager::shared()->GetIdentityList());
     MergeLevelLists(personas);
@@ -191,7 +190,7 @@ void MetExpansionPakScreen::OnUnknownSlot26(float flTime) {
 void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kPrepareMessage) {
         std::vector<HxStr> buttons;
-        if (mUnknownb8 == 0) {
+        if (mRetry == 0) {
             buttons.push_back(HxStr(kContinueButton));
             buttons.push_back(HxStr(kCancelButton));
             MetMsgScreen::Show(HxStr(kCheckMessage),
@@ -214,7 +213,7 @@ void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
     }
 
     if (name == kCheckMessage) {
-        mUnknownb0 = 0;
+        mLoadShown = 0;
         // Yes, the binary shows the same dialogue on both branches.
         if (nChoice == kChoiceFirst) {
             std::vector<HxStr> buttons;
@@ -237,12 +236,12 @@ void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
     }
 
     if (name == kDoneMessage) {
-        mUnknown18 = kExitDone;
+        mExitChoice = kExitDone;
         BeginExit();
         return;
     }
 
-    mUnknown18 = kExitCancelled;
+    mExitChoice = kExitCancelled;
     BeginExit();
 }
 
@@ -259,8 +258,8 @@ void MetExpansionPakScreen::OnFadeInDone() {
 
 // 0x0021a128
 void MetExpansionPakScreen::OnFadeOutDone() {
-    mUnknown10->RemoveScreen(this);
-    if (mUnknown18 == kExitCancelled) {
+    mRenderer->RemoveScreen(this);
+    if (mExitChoice == kExitCancelled) {
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kRightGizmoScreen));
         PushNamedScreen(HxStr(kOptionsButtonsScreen));
@@ -291,29 +290,29 @@ void MetExpansionPakScreen::ResolveContainerViews() {
 
 // 0x0021d948
 void MetExpansionPakScreen::EnterAndShow() {
-    mUnknowna8 = kStateIdle;
-    mUnknown90.Reset();
-    mUnknownac = 0;
-    mUnknownb0 = 0;
-    mUnknownb4 = 0;
-    mUnknownb8 = 0;
-    mUnknownbc = 0;
-    mFade->FadeIn(kFadeDuration, mUnknown10->mUnknown68, this, kRetainView);
+    mState = kStateIdle;
+    mDiscSwap.Reset();
+    mPrepareShown = 0;
+    mLoadShown = 0;
+    mFinished = 0;
+    mRetry = 0;
+    mMsgScreenExited = 0;
+    mFade->FadeIn(kFadeDuration, mRenderer->mAnimationFrame, this, kRetainView);
 }
 
 // 0x0021d9a8
 void MetExpansionPakScreen::BeginExit() {
-    mFade->FadeOut(kFadeDuration, mUnknown10->mUnknown68, this, kReleaseView);
+    mFade->FadeOut(kFadeDuration, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
 // 0x0021d9e0
 void MetExpansionPakScreen::OnMsgScreenShown(const HxStr &name) {
     if (name == kPrepareMessage) {
-        mUnknownac = 1;
+        mPrepareShown = 1;
         return;
     }
 
     if (name == kLoadMessage) {
-        mUnknownb0 = 1;
+        mLoadShown = 1;
     }
 }

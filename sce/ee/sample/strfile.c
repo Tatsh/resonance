@@ -21,7 +21,7 @@ enum {
     kStreamBanks = 5,
     // Eighty sectors of 2048 bytes with sixteen bytes of slack for alignment.
     kIopHeapSize = 0x28010,
-    // Offset within StrFile::mUnknown08 of the stored IOP heap pointer (+0x2c).
+    // Offset within StrFile::cdFile of the stored IOP heap pointer (+0x2c).
     kHeapSlot = 0x24,
     // A sector holds 2048 bytes, so sector counts shift by eleven bits.
     kSectorShift = 11,
@@ -74,9 +74,9 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
         void *pHeap = sceSifAllocIopHeap(kIopHeapSize);
         uintptr_t nAligned = ((uintptr_t)pHeap + 15) >> 4 << 4;
         sceCdStInit(kStreamSectors, kStreamBanks, (unsigned int)nAligned);
-        *(void **)&pFile->mUnknown08[kHeapSlot] = pHeap;
+        *(void **)&pFile->cdFile[kHeapSlot] = pHeap;
 
-        sceCdlFILE *pEntry = (sceCdlFILE *)&pFile->mUnknown08[0];
+        sceCdlFILE *pEntry = (sceCdlFILE *)&pFile->cdFile[0];
         if (sceCdSearchFile(pEntry, szPath) == 0) {
             LogPrintf("Cannot open '%s'(sceCdSearchFile)\n", szPath);
             return 0;
@@ -115,7 +115,7 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
 int strFileClose(StrFile* pFile) {
     if (pFile->isOnCD != 0) {
         sceCdStStop();
-        void *pHeap = *(void **)&pFile->mUnknown08[kHeapSlot];
+        void *pHeap = *(void **)&pFile->cdFile[kHeapSlot];
         sceSifFreeIopHeap(pHeap);
     } else {
         sceClose(pFile->fd);

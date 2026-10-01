@@ -37,7 +37,7 @@ constexpr int kCommandResume = 10;
 MetPauseMultiRemixScreen::MetPauseMultiRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
-    mUnknown9c = kPanelName;
+    mReturnPanel = kPanelName;
 }
 
 // 0x00327f30
@@ -46,7 +46,7 @@ void MetPauseMultiRemixScreen::ResolveContainerViews() {
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
             Rnd::g_manager.Find(HxStr(FormatString(kOptionTextFormat, i))));
-        mUnknowna4.push_back(pOption);
+        mOptionTexts.push_back(pOption);
     }
 }
 
@@ -59,11 +59,11 @@ void MetPauseMultiRemixScreen::EnterAndShow() {
     HxStr heading = QueryConfigString(kPromptConfigCode, kHeadingKey);
     pPaused->SetText(heading);
 
-    mUnknown90.clear();
-    QueryConfigStrings(&mUnknown90, kLabelsConfigCode, kLabelsKey);
+    mOptionLabels.clear();
+    QueryConfigStrings(&mOptionLabels, kLabelsConfigCode, kLabelsKey);
     // Yes, the binary copies the labels here and again in the base slot.
-    for (std::vector<HxStr>::size_type i = 0; i < mUnknown90.size(); ++i) {
-        mUnknowna4[i]->SetText(mUnknown90[i]);
+    for (std::vector<HxStr>::size_type i = 0; i < mOptionLabels.size(); ++i) {
+        mOptionTexts[i]->SetText(mOptionLabels[i]);
     }
     MetPauseBaseScreen::EnterAndShow();
 }

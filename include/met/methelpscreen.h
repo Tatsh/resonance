@@ -24,7 +24,7 @@ class Text;
  * A prompt is posted through SetText(). The screen fills the six info texts from script template
  * 0x268 and plays `so_TT_01.anim` to show them. A new prompt arriving while one is shown plays
  * `so_TT_02.anim` to hide the old one first, and the new one is shown when the hide finishes.
- * OnUnknownSlot26() advances both animations. The four title texts are filled the same way from
+ * UpdateIdle() advances both animations. The four title texts are filled the same way from
  * the layout SelectPreset() chooses.
  */
 class MetHelpScreen : public MetScreen {
@@ -33,7 +33,7 @@ public:
      * Construct the screen.
      *
      * The screen name is `so`, the directory `metagame/shared`, and the container `options_sl`.
-     * MetScreen::mUnknown60 is cleared.
+     * MetScreen::mShowsLoadedDrawables is cleared.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -96,7 +96,7 @@ public:
      *
      * An empty prompt over an empty one, the prompt already shown while no animation runs, and a
      * screen whose views are not resolved yet are all ignored. With nothing shown the prompt is
-     * shown at once. Otherwise the hide animation starts and the prompt waits in mUnknown9c.
+     * shown at once. Otherwise the hide animation starts and the prompt waits in mWaitingText.
      *
      * @param text The prompt to display.
      * @param flTime The renderer time to post the prompt at.
@@ -122,7 +122,7 @@ public:
      * @param flTime The renderer time.
      * @ghidraAddress 0x00312df0
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Empty the info texts, forget both prompts, and stop the hide animation.
@@ -131,7 +131,7 @@ public:
      *
      * @ghidraAddress 0x00317480
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views, the six info texts, the four title texts, and both animations.
@@ -173,7 +173,7 @@ private:
                    int nTitles);
 
     /**
-     * Show mUnknown94 and start the show animation, unless it already runs.
+     * Show mShownText and start the show animation, unless it already runs.
      *
      * PostText() and UpdateHide() have the body expanded in place, and this copy has no caller.
      *
@@ -185,7 +185,7 @@ private:
     /**
      * Advance the show animation, starting the hide when it finishes with a prompt waiting.
      *
-     * OnUnknownSlot26() has the body expanded in place, and this copy has no caller.
+     * UpdateIdle() has the body expanded in place, and this copy has no caller.
      *
      * @param flTime The renderer time.
      * @ghidraAddress 0x00317568
@@ -203,24 +203,24 @@ private:
     /**
      * Advance the hide animation, then show the waiting prompt or empty the texts.
      *
-     * OnUnknownSlot26() has the body expanded in place, and this copy has no caller.
+     * UpdateIdle() has the body expanded in place, and this copy has no caller.
      *
      * @param flTime The renderer time.
      * @ghidraAddress 0x00317640
      */
     void UpdateHide(float flTime);
 
-    float mUnknown8c;                    // Time the show animation started, zero while idle.
-    float mUnknown90;                    // Time the hide animation started, zero while idle.
-    HxStr mUnknown94;                    // The prompt shown.
-    HxStr mUnknown9c;                    // The prompt waiting for the hide to finish.
-    std::vector<Rnd::Text *> mUnknowna4; // The six info texts.
-    Vector3 mUnknownb0;                  // Resting translation of the first info text.
-    std::vector<Rnd::Text *> mUnknownc0; // The four title texts.
-    Vector3 mUnknownd0;                  // Resting translation of the first title text.
-    HxStr mUnknowne0;                    // The layout ApplyPreset() last recorded.
-    Rnd::Animatable *mUnknowne8;         // `so_TT_01.anim`, the show animation.
-    float mUnknownec;                    // End frame of the show animation.
-    Rnd::Animatable *mUnknownf0;         // `so_TT_02.anim`, the hide animation.
-    float mUnknownf4;                    // End frame of the hide animation.
+    float mShowStart;                     // Time the show animation started, zero while idle.
+    float mHideStart;                     // Time the hide animation started, zero while idle.
+    HxStr mShownText;                     // The prompt shown.
+    HxStr mWaitingText;                   // The prompt waiting for the hide to finish.
+    std::vector<Rnd::Text *> mInfoTexts;  // The six info texts.
+    Vector3 mInfoOrigin;                  // Resting translation of the first info text.
+    std::vector<Rnd::Text *> mTitleTexts; // The four title texts.
+    Vector3 mTitleOrigin;                 // Resting translation of the first title text.
+    HxStr mPreset;                        // The layout ApplyPreset() last recorded.
+    Rnd::Animatable *mShowAnim;           // `so_TT_01.anim`, the show animation.
+    float mShowEnd;                       // End frame of the show animation.
+    Rnd::Animatable *mHideAnim;           // `so_TT_02.anim`, the hide animation.
+    float mHideEnd;                       // End frame of the hide animation.
 };

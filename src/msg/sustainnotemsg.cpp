@@ -34,16 +34,16 @@ void SustainNoteMsg::Print(std::ostream &stream) {
     position.mTick = mTick;
     position.Print(stream);
     stream << ' ';
-    stream << static_cast<char>(mUnknown08);
+    stream << static_cast<char>(mNote);
 }
 
 // 0x003e3a70
 void SustainNoteMsg::Save(OBStream &stream) {
-    unsigned char note = mUnknown08;
+    unsigned char note = mNote;
     stream.WriteBytes(&note, sizeof(note));
 }
 
 // 0x003e3ab0
 void SustainNoteMsg::Load(IBStream &stream) {
-    stream.ReadBytes(&mUnknown08, sizeof(mUnknown08));
+    stream.ReadBytes(&mNote, sizeof(mNote));
 }

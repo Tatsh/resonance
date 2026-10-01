@@ -231,7 +231,7 @@ void InputCheatDetector::RegisterCheats() {
 }
 
 // 0x001dc658
-void InputCheatDetector::OnUnknownSlot2(int nType, int nSlot, int nButton, float flValue) {
+void InputCheatDetector::OnControllerReading(int nType, int nSlot, int nButton, float flValue) {
     if (!(nButton < kFirstNonButton) || nType != kJoystickType || !(flValue >= kPressThreshold)) {
         return;
     }

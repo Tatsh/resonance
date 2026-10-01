@@ -85,7 +85,7 @@ Py::Object ScriptEnableAllTracksCheat([[maybe_unused]] const Py::Tuple &args) {
             for (int nTrack = 0; nTrack < kCheatTrackCount; ++nTrack) {
                 pWorld->mGamer->mEnableMgr->SetFreeUntil(nTrack, 0, -1);
             }
-            pWorld->mGamer->mUnknown98 = 1;
+            pWorld->mGamer->mCheated = 1;
         }
     }
     return Py::Object();
@@ -100,7 +100,7 @@ Py::Object ScriptActivateListenMode([[maybe_unused]] const Py::Tuple &args) {
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr && Application::shared()->GetPlayMode() != kPlayModeJam) {
         pWorld->mGamer->EndWithScore(0);
-        pWorld->mGamer->mUnknown98 = 1;
+        pWorld->mGamer->mCheated = 1;
     }
     return Py::Object();
 }
@@ -131,8 +131,8 @@ PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
         PlayActivateSound();
         GrooveWorld *pWorld = Application::shared()->GetWorld();
         if (pWorld != nullptr) {
-            pWorld->mGamer->mUnknown1c = 1;
-            pWorld->mGamer->mUnknown98 = 1;
+            pWorld->mGamer->mJuiceFrozen = 1;
+            pWorld->mGamer->mCheated = 1;
         }
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {
@@ -277,7 +277,7 @@ PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
             dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
         if (pRenderer->IsLogoScreenActive() != 0) {
             PlayActivateSound();
-            GlobalSettings::shared()->mGameOptions.mUnknown04 ^= 1;
+            GlobalSettings::shared()->mGameOptions.mExpansionPack ^= 1;
         }
         return Py::new_reference_to(Py::Object());
     } catch (Py::Exception &) {

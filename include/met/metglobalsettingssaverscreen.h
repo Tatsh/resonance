@@ -167,7 +167,7 @@ public:
      * Hand the return screens to the registered saver and show it, or the screens themselves.
      *
      * The saver is resolved under `MetGlobalSettingsSaverScreen` and narrowed with dynamic_cast,
-     * and the result is used without a null test. When MetFrontEndState::mUnknown0c is set, the
+     * and the result is used without a null test. When MetFrontEndState::mUsingMemcard is set, the
      * screen registered under `MetSonyScreen` pushes the saver. Otherwise it pushes every screen
      * of the list and activates the first. Seven front-end screens call it, MetStageFinishScreen
      * among them.

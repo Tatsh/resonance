@@ -74,7 +74,7 @@ public:
      * @param nBar The bar.
      * @ghidraAddress 0x0019d990
      */
-    virtual void Slot4(int nBar);
+    virtual void OnPeriod(int nBar);
 
     /**
      * Report the song position periods are counted from. Slot 5.
@@ -82,7 +82,7 @@ public:
      * @return 6 always, after a discarded finiteness test on the same value.
      * @ghidraAddress 0x0019d438
      */
-    virtual int Slot5();
+    virtual int GetPeriodOrigin();
 
     /**
      * Report whether a bar can be played.
@@ -90,8 +90,8 @@ public:
      * AutoRiffer is the recovered caller.
      *
      * @param nBar The bar.
-     * @return Non-zero when TrackData::QueryBar() accepts the bar and Player::Slot9() reports
-     *         non-zero for it.
+     * @return Non-zero when TrackData::QueryBar() accepts the bar and Player::IsFreestyleBar()
+     *         reports non-zero for it.
      * @ghidraAddress 0x0019da58
      */
     int IsBarPlayable(int nBar);

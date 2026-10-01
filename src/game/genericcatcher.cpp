@@ -9,9 +9,9 @@ GenericCatcher::~GenericCatcher() {
 }
 
 // 0x001b0c58
-void GenericCatcher::Slot4() {
+void GenericCatcher::Start() {
 }
 
 // 0x001b0c60
-void GenericCatcher::Slot5() {
+void GenericCatcher::Stop() {
 }

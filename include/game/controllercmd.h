@@ -41,7 +41,7 @@ public:
     /**
      * Record one controller reading to replay.
      *
-     * Inline, with no address of its own. GrooveWorld::OnUnknownSlot2() expands it when it
+     * Inline, with no address of its own. GrooveWorld::OnControllerReading() expands it when it
      * queues a reading.
      *
      * @param reading The reading.

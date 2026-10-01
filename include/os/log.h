@@ -110,11 +110,11 @@ void AlertScriptTemplate(int nTemplate, ...);
  *
  * @param format The format string.
  * @param args The arguments for it.
- * @param nUnknown Undetermined. The body never reads it, and the one caller passes 1.
+ * @param nUnused A word the body never reads. Warn passes 1, and every other caller passes 0.
  * @return The formatted message.
  * @ghidraAddress 0x005e4178
  */
-HxStr FormatMessage(const HxStr &format, va_list args, int nUnknown);
+HxStr FormatMessage(const HxStr &format, va_list args, int nUnused);
 
 /**
  * Format a message, passing zero as the word FormatMessage() does not read.

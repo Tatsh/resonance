@@ -33,9 +33,9 @@ public:
     }
 
     /**
-     * Unrecovered. Slot 3, with an empty body.
+     * Do nothing. Slot 3.
      *
      * @ghidraAddress 0x003d4788
      */
-    virtual void OnUnknownSlot3();
+    virtual void UnusedHook();
 };

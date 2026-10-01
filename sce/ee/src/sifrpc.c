@@ -89,8 +89,8 @@ typedef struct {
     int nPacketId;
     RpcPacket *pPackets;
     int nPacketCount;
-    int nUnused0c;
-    int nUnused10;
+    int nUnusedFirst; // Cleared by sceSifInitRpc() and never read.
+    int nUnusedSecond; // Cleared by sceSifInitRpc() and never read.
     RpcPacket *pReplies;
     int nReplyCount;
     RpcPacket *pClientPackets;
@@ -286,8 +286,8 @@ void sceSifInitRpc(unsigned int mode) {
     g_rpcState.nPacketId = 1;
     g_rpcState.pPackets = UNCACHED_SEG(g_aRpcPackets);
     g_rpcState.nPacketCount = kRpcPacketCount;
-    g_rpcState.nUnused0c = 0;
-    g_rpcState.nUnused10 = 0;
+    g_rpcState.nUnusedFirst = 0;
+    g_rpcState.nUnusedSecond = 0;
     g_rpcState.pReplies = UNCACHED_SEG(g_aRpcReplies);
     g_rpcState.nReplyCount = kRpcPacketCount;
     g_rpcState.pClientPackets = UNCACHED_SEG(g_aRpcClientPackets);

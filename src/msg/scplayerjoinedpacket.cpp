@@ -33,17 +33,17 @@ const char *SCPlayerJoinedPacket::Name() {
 
 // 0x003f2100
 void SCPlayerJoinedPacket::Print(std::ostream &stream) {
-    mUnknown14.Print(stream);
+    mPlayerInfo.Print(stream);
 }
 
 // 0x003e5fb8
 void SCPlayerJoinedPacket::Save(OBStream &stream) {
     Packet::Save(stream);
-    mUnknown14.Save(stream);
+    mPlayerInfo.Save(stream);
 }
 
 // 0x003f2048
 void SCPlayerJoinedPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    mUnknown14.Load(stream);
+    mPlayerInfo.Load(stream);
 }

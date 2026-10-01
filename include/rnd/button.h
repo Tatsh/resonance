@@ -219,8 +219,8 @@ public:
     /**
      * The palette entry SetState() last selected.
      *
-     * Public rather than private, because MetButtonList::OnUnknownSlot2() at `0x001fcc40` and
-     * MetButtonList::OnUnknownSlot3() at `0x001fcd10` read it directly to pass over a disabled
+     * Public rather than private, because MetButtonList::SelectPrevious() at `0x001fcc40` and
+     * MetButtonList::SelectNext() at `0x001fcd10` read it directly to pass over a disabled
      * button, and the image has no accessor to route that read through. +0x1c
      */
     int mState;

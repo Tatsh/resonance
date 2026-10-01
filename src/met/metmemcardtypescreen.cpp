@@ -48,7 +48,7 @@ constexpr int kTitleConfigCode = 0x269;
 constexpr int kNoSelection = -1;
 constexpr int kRemixButtonIndex = 0;
 
-// What MetScreen::mUnknown18 records for slot 36 to act on.
+// What MetScreen::mExitChoice records for slot 36 to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
 
@@ -77,8 +77,8 @@ inline void AddButton(MetButtonList *pList, const char *pszObjectName, const cha
 MetMemCardTypeScreen::MetMemCardTypeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
-    mUnknown38.push_back(HxStr(kRemixKey));
-    mUnknown38.push_back(HxStr(kFreqKey));
+    mHelpKeys.push_back(HxStr(kRemixKey));
+    mHelpKeys.push_back(HxStr(kFreqKey));
 }
 
 // 0x002d84d0
@@ -105,7 +105,7 @@ void MetMemCardTypeScreen::EnterAndShow() {
     const HxStr title(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     MetScreenTitleScreen::SetTitle(title);
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
-    MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
 
@@ -113,27 +113,27 @@ void MetMemCardTypeScreen::EnterAndShow() {
 void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mButtonList->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mButtonList->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mButtonList->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kLeftGizmoScreen));
         BeginExit();
         break;
@@ -144,8 +144,8 @@ void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x002d2cf0
-void MetMemCardTypeScreen::OnUnknownSlot30(Rnd::Button *) {
-    mUnknown18 = kExitToButtonAction;
+void MetMemCardTypeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));
@@ -153,8 +153,8 @@ void MetMemCardTypeScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x002d2e90
-void MetMemCardTypeScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetMemCardTypeScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kMemCardLoadScreen));
         ActivateNamedPanel(HxStr(kMemCardLoadScreen));
         return;

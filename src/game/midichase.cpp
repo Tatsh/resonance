@@ -34,17 +34,17 @@ void MidiChase::HandleMessage(Message *pMsg) {
     }
 
     StdMidiMsg *pMidi = static_cast<StdMidiMsg *>(pMsg);
-    mChannel = pMidi->mUnknown08 & kStatusChannelMask;
-    switch (pMidi->mUnknown08 & kStatusKindMask) {
+    mChannel = pMidi->mStatus & kStatusChannelMask;
+    switch (pMidi->mStatus & kStatusKindMask) {
     case kStatusProgramChange:
-        mProgram = pMidi->mUnknown09;
+        mProgram = pMidi->mData1;
         break;
     case kStatusControlChange:
-        mControllers[pMidi->mUnknown09] = pMidi->mUnknown0a;
+        mControllers[pMidi->mData1] = pMidi->mData2;
         break;
     case kStatusPitchBend:
-        mBendLow = pMidi->mUnknown09;
-        mBendHigh = pMidi->mUnknown0a;
+        mBendLow = pMidi->mData1;
+        mBendHigh = pMidi->mData2;
         break;
     default:
         break;

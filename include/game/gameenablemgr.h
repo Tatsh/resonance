@@ -119,7 +119,7 @@ public:
      * Report whether one bar of one track may be caught.
      *
      * A bar before the track's free-until bar may always be caught. Otherwise the bar is mapped
-     * through PlayMap::Slot5() and the requirements are tested against the owners there.
+     * through PlayMap::MapBar() and the requirements are tested against the owners there.
      *
      * @param nTrack The track.
      * @param nBar The bar.

@@ -7,7 +7,7 @@
 
 namespace {
 
-// MIDI ticks in one bar, which OnUnknownSlot8() divides the song position by.
+// MIDI ticks in one bar, the divisor DeployPowerup() applies to the song position.
 constexpr int kTicksPerBar = 1920;
 
 } // namespace
@@ -23,8 +23,8 @@ JamPowerupPlacer::~JamPowerupPlacer() {
 }
 
 // 0x001cdfe0
-void JamPowerupPlacer::OnUnknownSlot8() {
+void JamPowerupPlacer::DeployPowerup() {
     const int nBar =
         Application::shared()->GetSongClock()->SongTick() / Mid::MBT(kTicksPerBar).mTick;
-    mCollection->Deploy(mOwner->Slot4(), nBar);
+    mCollection->Deploy(mOwner->GetTrack(), nBar);
 }

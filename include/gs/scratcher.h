@@ -30,12 +30,13 @@ class TickClock;
  * 2.
  *
  * Tick() is what fixes mBarDivisor. It divides the elapsed tick count by that member, sends the
- * result through SendSeekerMsg(), and then, while mUnknown54 is set, tests the track description
- * against the same bar and dispatches a slot on the synthesiser that Globals::GetSynth() returns.
+ * result through SendSeekerMsg(), and then, while mSwitchesBanks is set, tests the track
+ * description against the same bar and dispatches a slot on the synthesiser that
+ * Globals::GetSynth() returns.
  *
  * The constructor fixes the member map. It copies the bar length from the phrase manager's `+0x34`
  * into mBarDivisor and the track's identity and MIDI channel out of the track description, starts
- * both player references at the stand-in player, and sizes mUnknown74 to three zeroed elements.
+ * both player references at the stand-in player, and sizes mReadings to three zeroed elements.
  */
 class Scratcher : public Pitcher {
 public:
@@ -62,8 +63,8 @@ public:
      * Advance to the bar the elapsed tick count falls in.
      *
      * Divides the elapsed count by mBarDivisor and sends that bar through SendSeekerMsg(). While
-     * mUnknown54 is set and the bar starts a step, it then selects the synthesiser bank of that
-     * step for the channel in mUnknown58, as AxePhraseMaker::Slot4() does.
+     * mSwitchesBanks is set and the bar starts a step, it then selects the synthesiser bank of that
+     * step for the channel in mChannel, as AxePhraseMaker::OnPeriod() does.
      *
      * @param nElapsedTicks Ticks since the epoch.
      * @return 1 always.
@@ -76,7 +77,7 @@ protected:
      * Turn an axis reading for this track and player into scratches.
      *
      * The routine sends a NowBarMsg at lane one minus the value, then tracks the reading's
-     * movement against the ring of past readings in mUnknown74 and replays the last gem through
+     * movement against the ring of past readings in mReadings and replays the last gem through
      * OnPitchRiff() at a step of up to 3 in either direction.
      *
      * @param pMsg The message.
@@ -90,7 +91,7 @@ protected:
      * The bar, or with the message's last word set every bar of its step, is cleared wherever the
      * message's player owns it, and clearing the message's own bar also sends an AllNotesOffMsg.
      * When anything was cleared, `SND_ERASE_SECTION` or `SND_ERASE` plays, a ShowEraseEffectMsg
-     * naming mUnknown5c goes out, and SendSeekerMsg() runs for the bar.
+     * identifying mPlayer goes out, and SendSeekerMsg() runs for the bar.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001d0038
@@ -122,7 +123,7 @@ protected:
     void OnPitchRiff(int nGem, int nStep, int nTick);
 
     /**
-     * Turn mUnknown5c's seeker off, unless mUnknown5c is the stand-in.
+     * Turn mPlayer's seeker off, unless mPlayer is the stand-in.
      *
      * @param nBar Not read.
      * @ghidraAddress 0x001d08e0
@@ -158,30 +159,35 @@ private:
     const TrackData *mTrackData; // +0x40, the object Tick() tests the current bar against
     // Copied from the track description's `+0x04`. Matched against a PitchRiffMsg's `+0x10` and
     // an InvalidateSeekerMsg's `+0x08`, so it identifies the track this Scratcher serves.
-    int mUnknown44; // +0x44
+    int mTrack; // +0x44
     // Copied from the phrase manager's `+0x34`. Turns an elapsed tick count into a bar index.
     int mBarDivisor;        // +0x48
     Sch::TickClock *mClock; // +0x4c
-    int mUnknown50;         // +0x50, starts at kIDableUnregistered
+    // An IDable identifier, kIDableUnregistered from the constructor. The class's routines do not
+    // read it.
+    int mId; // +0x50
     // Tick() performs its second half only while this is set. The constructor derives it from two
     // configuration queries.
-    int mUnknown54; // +0x54
+    int mSwitchesBanks; // +0x54
     // The track description's MIDI channel byte, and the argument Tick() hands to the synthesiser
     // slot.
-    int mUnknown58; // +0x58
+    int mChannel; // +0x58
     // Starts at g_nullPlayer. Matched against a PitchRiffMsg's `+0x08`, which msg/pitchriffmsg.h
     // types as an int.
-    Player *mUnknown5c;  // +0x5c
-    Mid::MBT mUnknown60; // +0x60, the position of the last scratch, kMBTInfinity at first
-    Player *mUnknown64;  // +0x64, the player of the last scratch, g_nullPlayer at first
-    int mUnknown68;      // +0x68, the gem of the last PitchRiffMsg, which PostNowBarMsg() replays
-    int mUnknown6c;      // +0x6c, the bar last announced, -1 at first
-    int mUnknown70;      // +0x70, the scratch direction PostNowBarMsg() last detected
-    // +0x74. The constructor builds three elements from an int zero through the float fill
-    // instantiation at 0x001d1f90, which converts each with cvt.s.w.
-    std::vector<float> mUnknown74;
-    int mUnknown80;      // +0x80, the newest slot of mUnknown74, not written by the constructor
-    Mid::MBT mUnknown84; // +0x84, where the last scratch gem ends
-    float mUnknown88;    // +0x88, the blend the last scratch gem ends at
-    int mUnknown8c;      // +0x8c, the step of the last scratch
+    Player *mPlayer; // +0x5c
+    // The position of the last scratch, kMBTInfinity at first.
+    Mid::MBT mLastScratchPosition; // +0x60
+    // The player of the last scratch, g_nullPlayer at first.
+    Player *mLastScratchPlayer; // +0x64
+    // The gem of the last PitchRiffMsg. PostNowBarMsg() replays it.
+    int mLastGem;          // +0x68
+    int mAnnouncedBar;     // +0x6c, the bar last announced, -1 at first
+    int mScratchDirection; // +0x70, the scratch direction PostNowBarMsg() last detected
+    // The ring of past axis positions. The constructor builds three elements from an int zero
+    // through the float fill instantiation at 0x001d1f90. The fill converts each with cvt.s.w.
+    std::vector<float> mReadings; // +0x74
+    int mNewestReading;     // +0x80, the newest slot of mReadings, not written by the constructor
+    Mid::MBT mLastGemEnd;   // +0x84, where the last scratch gem ends
+    float mLastGemEndBlend; // +0x88, the blend the last scratch gem ends at
+    int mLastStep;          // +0x8c, the step of the last scratch
 };

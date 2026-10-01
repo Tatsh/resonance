@@ -30,13 +30,13 @@
  *
  * The byte at `+0x20` is a `char`, not a `bool`. ListRemixesMCT::OnFileLoaded() loads the GameOK
  * byte with `lb` at `0x0017ef30` and stores it unchanged with `sb` at `0x0017ef78`, with no
- * normalisation to 0 or 1 in between. No member name is attested anywhere in the image, so every
- * identifier below follows the required style.
+ * normalisation to 0 or 1 in between. The member names follow the RemixIndex element fields that
+ * ListRemixesMCT::OnFileLoaded() copies into them.
  */
 struct MetRemixRecord {
     MetRemixRecord()
-        : unknown00_(""), name(""), unknown10_(""), unknown18_(""), unknown20_(1), factory(0),
-          unknown34_(0) {
+        : levelName(""), name(""), fileName(""), dateTime(""), gameOk(1), factory(0),
+          albumNumber(0) {
     }
 
     /**
@@ -45,37 +45,45 @@ struct MetRemixRecord {
      * ListRemixesMCT::OnFileLoaded() at `0x0017ece0` is the only site, and no out-of-line copy
      * exists. factory starts at zero.
      *
-     * @param unknown00 Copied into unknown00_.
+     * @param levelNameIn Copied into levelName.
      * @param nameIn Copied into name.
-     * @param unknown10 Copied into unknown10_.
-     * @param unknown18 Copied into unknown18_.
-     * @param cUnknown20 Stored in unknown20_.
+     * @param fileNameIn Copied into fileName.
+     * @param dateTimeIn Copied into dateTime.
+     * @param cGameOk Stored in gameOk.
      * @param appearancesIn Copied into appearances.
-     * @param nUnknown34 Stored in unknown34_.
+     * @param nAlbumNumber Stored in albumNumber.
      */
-    MetRemixRecord(HxStr unknown00,
+    MetRemixRecord(HxStr levelNameIn,
                    HxStr nameIn,
-                   HxStr unknown10,
-                   HxStr unknown18,
-                   char cUnknown20,
+                   HxStr fileNameIn,
+                   HxStr dateTimeIn,
+                   char cGameOk,
                    std::vector<FreqAppearance> appearancesIn,
-                   int nUnknown34)
-        : unknown00_(unknown00), name(nameIn), unknown10_(unknown10), unknown18_(unknown18),
-          unknown20_(cUnknown20), factory(0), appearances(appearancesIn), unknown34_(nUnknown34) {
+                   int nAlbumNumber)
+        : levelName(levelNameIn), name(nameIn), fileName(fileNameIn), dateTime(dateTimeIn),
+          gameOk(cGameOk), factory(0), appearances(appearancesIn), albumNumber(nAlbumNumber) {
     }
 
-    HxStr unknown00_; /*!< Starts as a copy of the empty string. +0x00 */
+    /**
+     * The level the remix was recorded on. It keys the song's logo, picture, and configuration
+     * texts and becomes the level name when the remix plays. +0x00
+     */
+    HxStr levelName;
     /**
      * The remix name, which JukeboxPlayList::AddEntry() copies into a playlist entry and
      * MetSaveRemix::OnRemixesListed() compares against the name being saved. +0x08
      */
     HxStr name;
-    HxStr unknown10_; /*!< Starts as a copy of the empty string. +0x10 */
-    HxStr unknown18_; /*!< Starts as a copy of the empty string. +0x18 */
-    char unknown20_;  /*!< Starts as 1. +0x20 */
+    /** The memory card file MetRemixManager loads the remix from. +0x10 */
+    HxStr fileName;
+    /** The date and time the remix was saved, shown in the jukebox date text. +0x18 */
+    HxStr dateTime;
+    /** The GameOK byte of the remix index entry. Starts as 1. +0x20 */
+    char gameOk;
     /** Non-zero for a factory remix. JukeboxPlayList::AddEntry() copies it. +0x24 */
     int factory;
     /** Appearances of the players who recorded the remix. +0x28 */
     std::vector<FreqAppearance> appearances;
-    int unknown34_; /*!< Starts at zero. +0x34 */
+    /** The album the remix belongs to, compared against GetAlbumJukeboxValue(). +0x34 */
+    int albumNumber;
 };

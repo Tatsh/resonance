@@ -231,7 +231,7 @@ public:
      * @param flTime The current renderer time.
      * @ghidraAddress 0x0028c708
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Apply the pending key and then start the base's alternation.
@@ -260,7 +260,7 @@ public:
      * @param pButton The button slot 29 finished with, ignored.
      * @ghidraAddress 0x00283968
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Set the ticker from the recorded text.
@@ -269,19 +269,19 @@ public:
      *
      * @ghidraAddress 0x0028c808
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Report the entered text and depart.
      *
      * Slot 36. Stops the caret blink and restores the selected key's button. When
-     * MetScreen::mUnknown18 is set, every trailing space is stripped from the entered text and the
+     * MetScreen::mExitChoice is set, every trailing space is stripped from the entered text and the
      * text goes to mUser. The screen recorded in mReturnScreen is then told the keyboard was
      * dismissed and made the active panel, and the shift state returns to regular.
      *
      * @ghidraAddress 0x00283aa0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the three key panels and the four text objects.
@@ -492,8 +492,8 @@ private:
     HxStr mPendingKey;
     // The number of characters before the caret. +0xd4
     int mCaret;
-    // Not written by the constructor.
-    unsigned char mUnknownd8[0x08]; // +0xd8
+    // Never read or written by any routine of the class.
+    unsigned char mReserved[0x08]; // +0xd8
     // Offset of the caret from the character it precedes. +0xe0
     Vector3 mCursorOffset;
     // Offset of the macro caption from the character it follows. +0xf0

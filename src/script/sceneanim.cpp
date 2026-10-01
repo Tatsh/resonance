@@ -122,7 +122,7 @@ Py::Object ScriptAnimMinmax(Py::Tuple args) {
 // 0x00408910
 Py::Object ScriptTestArena([[maybe_unused]] Py::Tuple args) {
     if (g_pTnlArena != nullptr) {
-        g_pTnlArena->mUnknown24 = 1;
+        g_pTnlArena->mJuiceLock = 1;
         g_pTnlArena->mScreenAnim->SetLevel(1);
     }
     return Py::Object();

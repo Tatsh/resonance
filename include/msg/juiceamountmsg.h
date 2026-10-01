@@ -74,13 +74,13 @@ public:
     int GetJuice();
 
     /**
-     * Report the player's juice as a fraction of mUnknown08.
+     * Report the player's juice as a fraction of mMaxJuice.
      *
      * Both values are converted to float before the division. Six sites call it, among them
      * Overlay::OnJuiceAmount() twice, TnlArena::HandleMessage(), and AppTunnel::HandleMessage().
      * The name is inferred.
      *
-     * @return The juice divided by mUnknown08.
+     * @return The juice divided by mMaxJuice.
      * @ghidraAddress 0x003e4198
      */
     float GetJuiceFraction();
@@ -89,15 +89,15 @@ public:
     /**
      * Player the message is about.
      *
-     * Player::Slot11() at `0x0012f788` writes the player here before sending, which is what types
-     * this member as a player rather than as a payload word.
+     * Player::AnnounceState() at `0x0012f788` writes the player here before sending. That write
+     * types this member as a player rather than as a payload word.
      *
      * +0x04
      */
-    Player *mUnknown04;
+    Player *mPlayer;
 
-    /** Written by the same site from a value clamped to a maximum of 800. +0x08 */
-    int mUnknown08;
+    /** The player's mMaxJuice, clamped by the same site to a maximum of 800. +0x08 */
+    int mMaxJuice;
 };
 
 /**

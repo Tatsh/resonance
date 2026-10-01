@@ -71,8 +71,8 @@ public:
      * Build the three buttons, title the screen, and push the three companion panels. Slot 5.
      *
      * The prompt keys the buttons are labelled from are the same three strings the class pushes
-     * into MetScreen::mUnknown38, so the prompt the help screen displays for a button is the key
-     * its label was looked up under rather than the label itself.
+     * into MetScreen::mHelpKeys. The prompt the help screen displays for a button is therefore the
+     * key its label was looked up under rather than the label itself.
      *
      * @ghidraAddress 0x003b5968
      */
@@ -123,7 +123,7 @@ public:
      * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x003b5f88
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Select the prompt layout with no back button and post the selected button's prompt. Slot 33.
@@ -132,7 +132,7 @@ public:
      *
      * @ghidraAddress 0x003b9d80
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Commit the session result and go on to whichever screen the selection chose. Slot 36.
@@ -142,12 +142,12 @@ public:
      * cleared and committed by handing the game manager a copy of its GameParams with the
      * difficulty raised by one. Selection 0 continues to `MetSoloStagesScreen`, selection 1
      * returns to `MetMainScreen`, and any other selection goes to `MetLoadGameScreen` after
-     * recording this screen's own name in MetFrontEndState::mUnknown24. Every path then clears the
-     * selection.
+     * recording this screen's name in MetFrontEndState::mReturnScreen. Every path then clears
+     * the selection.
      *
      * @ghidraAddress 0x003b6188
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Record on the registered solo win screen whether the finished stage unlocked a difficulty.
@@ -163,7 +163,7 @@ public:
 
 private:
     // The three-button ring. The constructor allocates it and the destructor releases it. +0x90
-    MetButtonList *mUnknown90;
+    MetButtonList *mButtonList;
     // Set while a difficulty unlocked by the finished stage still needs committing.
     // SetDifficultyUnlocked() writes it from MetStageFinishScreen slot 36, the constructor clears
     // it, and slot 36 clears it again after committing. +0x94

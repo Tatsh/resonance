@@ -103,8 +103,8 @@ MetMemDetectScreen::MetMemDetectScreen(MetRenderer *pRenderer,
                                        const HxStr &name,
                                        const HxStr &directory,
                                        const HxStr &file)
-    : MetScreen(pRenderer, nPriority, name, directory, file), mUnknown90(0), mUnknown94(0),
-      mUnknown98(0), mAutosaveNoticeTime(0) {
+    : MetScreen(pRenderer, nPriority, name, directory, file), mUnused1(0), mUnused2(0),
+      mPersonaLoadRequested(0), mAutosaveNoticeTime(0) {
 }
 
 // 0x002deb08
@@ -145,7 +145,7 @@ void MetMemDetectScreen::OnAllConnectStates() {
         return;
     }
 
-    MetFrontEndState::shared()->mUnknown0c = 1;
+    MetFrontEndState::shared()->mUsingMemcard = 1;
     if (slot.mFormatted) {
         std::vector<HxStr> buttons;
         MetMsgScreen::Show(HxStr(kDetectMessage),
@@ -172,7 +172,7 @@ void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
     std::vector<HxStr> buttons;
     switch (nStatus) {
     case kCardStatusFormatted: {
-        MetFrontEndState::shared()->mUnknown0c = 1;
+        MetFrontEndState::shared()->mUsingMemcard = 1;
         buttons.push_back(HxStr(kContinueButton));
         const HxStr format(ConfigText(kFormatSuccessMessage));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
@@ -183,7 +183,7 @@ void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
     }
 
     case kCardStatusAlreadyFormatted: {
-        MetFrontEndState::shared()->mUnknown0c = 1;
+        MetFrontEndState::shared()->mUsingMemcard = 1;
         buttons.push_back(HxStr(kContinueButton));
         const HxStr format(ConfigText(kFormatAlreadyMessage));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
@@ -210,13 +210,13 @@ void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
 void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kNoCardMessage) {
         if (nChoice == kChoiceSecond) {
-            MetFrontEndState::shared()->mUnknown0c = 0;
+            MetFrontEndState::shared()->mUsingMemcard = 0;
             OnDetectFinished();
         } else {
             StartDetect();
         }
     } else if (name == kNoCardOkMessage) {
-        MetFrontEndState::shared()->mUnknown0c = 0;
+        MetFrontEndState::shared()->mUsingMemcard = 0;
         OnDetectFinished();
     } else if (name == kFormatCheckMessage) {
         if (nChoice == kChoiceSecond) {
@@ -228,7 +228,7 @@ void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             MetMsgScreen::Show(
                 HxStr(kFormatGoMessage), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
         } else {
-            MetFrontEndState::shared()->mUnknown0c = 0;
+            MetFrontEndState::shared()->mUsingMemcard = 0;
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kNoButton));
             buttons.push_back(HxStr(kYesButton));
@@ -249,15 +249,15 @@ void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
                                  kNoButtons,
                                  buttons,
                                  this);
-        mAutosaveNoticeTime = mUnknown10->mUnknown68;
+        mAutosaveNoticeTime = mRenderer->mAnimationFrame;
     } else if (name == kFormatAlreadyMessage) {
         StartDetect();
     } else if (name == kFormatFailMessage) {
-        MetFrontEndState::shared()->mUnknown0c = 0;
+        MetFrontEndState::shared()->mUsingMemcard = 0;
         StartDetect();
     } else if (name == kNoSpaceMessage) {
         if (nChoice != kChoiceFirst) {
-            MetFrontEndState::shared()->mUnknown0c = 0;
+            MetFrontEndState::shared()->mUsingMemcard = 0;
             OnDetectFinished();
         } else {
             StartDetect();
@@ -280,7 +280,7 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     std::vector<HxStr> buttons;
     if (GlobalSettings::shared()->mCardSlots[0].mFree < nSpace) {
-        if (nSpace == GlobalSettings::shared()->mUnknown6c) {
+        if (nSpace == GlobalSettings::shared()->mRequiredSaveSpace) {
             buttons.push_back(HxStr(kRetryButton));
             buttons.push_back(HxStr(kContinueButton));
             const HxStr format(ConfigText(kNoSpaceKey));
@@ -306,13 +306,13 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
                                  kNoButtons,
                                  buttons,
                                  this);
-        mAutosaveNoticeTime = mUnknown10->mUnknown68;
+        mAutosaveNoticeTime = mRenderer->mAnimationFrame;
     }
 }
 
 // 0x002db328
 void MetMemDetectScreen::StartLoadPersonas() {
-    mUnknown98 = 1;
+    mPersonaLoadRequested = 1;
     std::vector<HxStr> buttons;
     MetPersonaData::ClearLoadList();
     const HxStr format(ConfigText(kLoadKey));
@@ -343,7 +343,7 @@ void MetMemDetectScreen::StartSaveSpaceCheck() {
 }
 
 // 0x002dec10
-void MetMemDetectScreen::OnUnknownSlot26(float flTime) {
+void MetMemDetectScreen::UpdateIdle(float flTime) {
     if (mAutosaveNoticeTime != 0 && mAutosaveNoticeTime + kAutosaveNoticeDuration < flTime) {
         mAutosaveNoticeTime = 0;
         ExitScreenByName(HxStr(kMsgScreen));

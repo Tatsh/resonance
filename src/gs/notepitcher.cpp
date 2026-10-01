@@ -23,11 +23,11 @@
 
 namespace {
 
-// The value the constructor gives mUnknown48 and mUnknown54.
+// The value the constructor gives mLastErasePosition and mCapturedBar.
 constexpr int kNoValue = -1;
 
-// The value the constructor gives mUnknown5c.
-constexpr int kUnknown5cInitial = 2;
+// The value the constructor gives mStepBars.
+constexpr int kInitialStepBars = 2;
 
 // PostSeekerMsgSecond() searches this many bars for one the player may play.
 constexpr int kSeekerSearchBars = 8;
@@ -60,25 +60,25 @@ NotePitcher::NotePitcher(PhraseMgr *pPhraseMgr,
                          Sch::TickClock *pClock,
                          const TrackData *pTrackData,
                          int bPlayModeOne,
-                         int nUnknown1,
-                         int nUnknown2)
-    : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer),
-      mUnknown40(pTrackData->mUnknown04), mUnknown44(&g_nullPlayer), mUnknown48(kNoValue),
-      mBarDivisor(kMBTInfinity), mUnknown54(kNoValue), mPlayModeOne(bPlayModeOne),
-      mUnknown5c(kUnknown5cInitial), mUnknown60(nUnknown1), mUnknown64(nUnknown2),
-      mTrackData(pTrackData), mClock(pClock) {
+                         int bAllowOwnedBars,
+                         int nUnreadOption)
+    : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mIndex),
+      mPlayer(&g_nullPlayer), mLastErasePosition(kNoValue), mBarDivisor(kMBTInfinity),
+      mCapturedBar(kNoValue), mPlayModeOne(bPlayModeOne), mStepBars(kInitialStepBars),
+      mAllowOwnedBars(bAllowOwnedBars), mUnreadOption(nUnreadOption), mTrackData(pTrackData),
+      mClock(pClock) {
     // The divisor is stored twice, the placeholder and then the bar length.
     mBarDivisor = mPhraseMgr->mBarTicks;
 }
 
 // 0x001b1f10
 void NotePitcher::PostPitchMsg(PitchRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mUnknown40 || pMsg->mUnknown08 != mUnknown44) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer) {
         return;
     }
 
-    const int nTick = mQuantizer->Quantize(pMsg->mUnknown0c.mTick);
-    if (CanPlayBar(nTick / mBarDivisor, mUnknown54) == 0) {
+    const int nTick = mQuantizer->Quantize(pMsg->mPosition.mTick);
+    if (CanPlayBar(nTick / mBarDivisor, mCapturedBar) == 0) {
         PlaySoundByName(kInactiveSound);
         return;
     }
@@ -86,7 +86,7 @@ void NotePitcher::PostPitchMsg(PitchRiffMsg *pMsg) {
         return;
     }
 
-    const int nGem = pMsg->mUnknown04;
+    const int nGem = pMsg->mButton;
     Riff *pRiff = mTrackData->GetRiff(nTick, nGem);
     if (pRiff == nullptr) {
         return;
@@ -96,24 +96,24 @@ void NotePitcher::PostPitchMsg(PitchRiffMsg *pMsg) {
     PostPhraseCapturedMsg(nGem, nTick);
 
     PitchMsg pitch;
-    pitch.mUnknown04 = nTick;
-    pitch.mUnknown08 = mUnknown40;
-    pitch.mUnknown0c = nGem;
-    pitch.mUnknown10 = mUnknown44;
+    pitch.mTick = nTick;
+    pitch.mTrack = mTrack;
+    pitch.mGem = nGem;
+    pitch.mPlayer = mPlayer;
     Send(&pitch);
     // The position is stored without the finiteness check.
-    mUnknown4c.mTick = nTick;
+    mLastPitchPosition.mTick = nTick;
 }
 
 // 0x001b20b0
 void NotePitcher::PostAllNotesOffMsg(EraseMsg *pMsg) {
-    if (pMsg->mUnknown0c != mUnknown40 || pMsg->mUnknown04 != mUnknown44 || mPlayModeOne != 0) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer || mPlayModeOne != 0) {
         return;
     }
 
     int bErased = 0;
-    const int nBar = pMsg->mUnknown08.mTick / mBarDivisor;
-    const int bWholeStep = pMsg->mUnknown10 != 0;
+    const int nBar = pMsg->mPosition.mTick / mBarDivisor;
+    const int bWholeStep = pMsg->mDoubleTap != 0;
     int nFirstBar;
     int nEndBar;
     if (bWholeStep != 0) {
@@ -125,7 +125,7 @@ void NotePitcher::PostAllNotesOffMsg(EraseMsg *pMsg) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) != mUnknown44) {
+        if (mPhraseMgr->GetPhraseOwner(nClear) != mPlayer) {
             continue;
         }
         bErased = 1;
@@ -138,25 +138,25 @@ void NotePitcher::PostAllNotesOffMsg(EraseMsg *pMsg) {
 
     if (bErased != 0) {
         PlaySoundByName(bWholeStep != 0 ? kEraseStepSound : kEraseBarSound);
-        ShowEraseEffectMsg effect(mUnknown44, mUnknown40, nFirstBar, nEndBar, bWholeStep);
+        ShowEraseEffectMsg effect(mPlayer, mTrack, nFirstBar, nEndBar, bWholeStep);
         Send(&effect);
-        PostSeekerMsgSecond(pMsg->mUnknown08.mTick / mBarDivisor, 0);
+        PostSeekerMsgSecond(pMsg->mPosition.mTick / mBarDivisor, 0);
     }
-    mUnknown48 = pMsg->mUnknown08;
+    mLastErasePosition = pMsg->mPosition;
 }
 
 // 0x001b22f0
 void NotePitcher::PostSeekerMsg(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mUnknown40 || pMsg->mUnknown08 != 0) {
+    if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
     }
 
-    if (pMsg->mUnknown10->IsNull() != 0) {
-        SeekerMsg off(mUnknown44);
+    if (pMsg->mPlayer->IsNull() != 0) {
+        SeekerMsg off(mPlayer);
         Send(&off);
     }
-    mUnknown44 = pMsg->mUnknown10;
-    if (pMsg->mUnknown10->IsNull() == 0) {
+    mPlayer = pMsg->mPlayer;
+    if (pMsg->mPlayer->IsNull() == 0) {
         PostSeekerMsgSecond(pMsg->mPosition.mTick / mBarDivisor, 1);
     }
 }
@@ -164,17 +164,17 @@ void NotePitcher::PostSeekerMsg(TrackSelectMsg *pMsg) {
 // 0x001b2400
 void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
     const int nBar = nTick / mBarDivisor;
-    if (mUnknown54 != nBar) {
-        mUnknown54 = nBar;
+    if (mCapturedBar != nBar) {
+        mCapturedBar = nBar;
         if (mPlayModeOne != 0 && mPhraseMgr->GetPhraseOwner(nBar)->IsNull() == 0) {
             mPhraseMgr->ClearPhrase(nBar, 0);
         }
-        PhraseCapturedMsg captured(mUnknown54,
-                                   mUnknown54 + 1,
-                                   mUnknown54,
-                                   mUnknown54 + 1,
-                                   mUnknown40,
-                                   mUnknown44,
+        PhraseCapturedMsg captured(mCapturedBar,
+                                   mCapturedBar + 1,
+                                   mCapturedBar,
+                                   mCapturedBar + 1,
+                                   mTrack,
+                                   mPlayer,
                                    mTrackData->GetPoints(nBar),
                                    kNoJuice,
                                    kNoStreak);
@@ -182,34 +182,34 @@ void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
     }
 
     const Mid::MBT offset(nTick % mBarDivisor);
-    if (mUnknown44->Slot10() == 0) {
-        (void)CanPlayBar(nBar, mUnknown54); // Yes, the binary discards this call's result.
-        mPhraseMgr->AddGem(nGem, kGemTrans, mUnknown54, offset.mTick, mUnknown44, kGemFlag);
+    if (mPlayer->IsLooping() == 0) {
+        (void)CanPlayBar(nBar, mCapturedBar); // Yes, the binary discards this call's result.
+        mPhraseMgr->AddGem(nGem, kGemTrans, mCapturedBar, offset.mTick, mPlayer, kGemFlag);
     } else {
-        const int nFirstBar = mTrackData->StepStartBar(mUnknown54);
-        const int nEndBar = mTrackData->FollowingStepBar(mUnknown54);
-        for (int nOther = nFirstBar + ((mUnknown54 - nFirstBar) % mUnknown5c); nOther < nEndBar;
-             nOther += mUnknown5c) {
-            if (nOther != mUnknown54 && CanPlayBar(nOther, nOther) != 0 &&
-                mPhraseMgr->PhrasesMatch(mUnknown54, nOther) != 0) {
-                mPhraseMgr->AddGem(nGem, kGemTrans, nOther, offset.mTick, mUnknown44, kGemFlag);
+        const int nFirstBar = mTrackData->StepStartBar(mCapturedBar);
+        const int nEndBar = mTrackData->FollowingStepBar(mCapturedBar);
+        for (int nOther = nFirstBar + ((mCapturedBar - nFirstBar) % mStepBars); nOther < nEndBar;
+             nOther += mStepBars) {
+            if (nOther != mCapturedBar && CanPlayBar(nOther, nOther) != 0 &&
+                mPhraseMgr->PhrasesMatch(mCapturedBar, nOther) != 0) {
+                mPhraseMgr->AddGem(nGem, kGemTrans, nOther, offset.mTick, mPlayer, kGemFlag);
             }
         }
-        if (CanPlayBar(mUnknown54, mUnknown54) != 0) {
-            mPhraseMgr->AddGem(nGem, kGemTrans, mUnknown54, offset.mTick, mUnknown44, kGemFlag);
+        if (CanPlayBar(mCapturedBar, mCapturedBar) != 0) {
+            mPhraseMgr->AddGem(nGem, kGemTrans, mCapturedBar, offset.mTick, mPlayer, kGemFlag);
         }
     }
 
-    mPhraseMgr->ReplayBar(mUnknown54, MakePosition(offset.mTick + Mid::MBT(1).mTick).mTick);
+    mPhraseMgr->ReplayBar(mCapturedBar, MakePosition(offset.mTick + Mid::MBT(1).mTick).mTick);
 }
 
 // 0x001b2710
 void NotePitcher::PostSeekerMsgSecond(int nBar, int bForce) {
-    if (mUnknown44->IsNull() != 0) {
+    if (mPlayer->IsNull() != 0) {
         return;
     }
-    if (bForce == 0 && mUnknown44->Slot5() != 0) {
-        SeekerMsg off(mUnknown44);
+    if (bForce == 0 && mPlayer->GetPlace() != 0) {
+        SeekerMsg off(mPlayer);
         Send(&off);
         return;
     }
@@ -218,19 +218,19 @@ void NotePitcher::PostSeekerMsgSecond(int nBar, int bForce) {
     }
 
     nBar = std::max(nBar, 0);
-    if (mUnknown44->Slot10() == 0) {
-        SeekerMsg off(mUnknown44);
+    if (mPlayer->IsLooping() == 0) {
+        SeekerMsg off(mPlayer);
         Send(&off);
         return;
     }
 
     for (int nSeek = nBar; nSeek < nBar + kSeekerSearchBars; ++nSeek) {
-        if (CanPlayBar(nSeek, mUnknown54) != 0) {
-            const int nStepBars = mUnknown5c;
-            SeekerMsg on(mUnknown44,
+        if (CanPlayBar(nSeek, mCapturedBar) != 0) {
+            const int nStepBars = mStepBars;
+            SeekerMsg on(mPlayer,
                          (nSeek / nStepBars) * nStepBars,
                          nStepBars,
-                         mUnknown40,
+                         mTrack,
                          kSeekerOn,
                          Mid::MBT(0));
             Send(&on);
@@ -238,7 +238,7 @@ void NotePitcher::PostSeekerMsgSecond(int nBar, int bForce) {
         }
     }
 
-    SeekerMsg off(mUnknown44);
+    SeekerMsg off(mPlayer);
     Send(&off);
 }
 
@@ -272,16 +272,16 @@ void NotePitcher::HandleMessage(Message *pMsg) {
     }
     if (nType == static_cast<int>(g_nInvalidateSeekerMsgType)) {
         InvalidateSeekerMsg *pInvalidate = static_cast<InvalidateSeekerMsg *>(pMsg);
-        if (pInvalidate->mUnknown08 == mUnknown40) {
-            PostSeekerMsgSecond(pInvalidate->mUnknown04, 0);
+        if (pInvalidate->mTrack == mTrack) {
+            PostSeekerMsgSecond(pInvalidate->mBar, 0);
         }
     }
 }
 
 // 0x001b3a38
 void NotePitcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
-    if (pMsg->mUnknown08 == mUnknown40) {
-        PostSeekerMsgSecond(pMsg->mUnknown04, 0);
+    if (pMsg->mTrack == mTrack) {
+        PostSeekerMsgSecond(pMsg->mBar, 0);
     }
 }
 
@@ -290,23 +290,23 @@ int NotePitcher::CanPlayBar(int nBar, int nCurrentBar) {
     if (mPlayModeOne != 0) {
         int bPlayable = 0;
         if (mTrackData->QueryBar(nBar) != 0) {
-            bPlayable = mUnknown44->Slot9(nBar) != 0;
+            bPlayable = mPlayer->IsFreestyleBar(nBar) != 0;
         }
         return bPlayable;
     }
 
     Player *pOwner = mPhraseMgr->GetPhraseOwner(nBar);
     int bPlayable = mTrackData->QueryBar(nBar);
-    if (mUnknown60 == 0) {
+    if (mAllowOwnedBars == 0) {
         bPlayable = bPlayable != 0 && (pOwner->IsNull() != 0 || nCurrentBar == nBar);
     }
     if (pOwner->IsNull() != 0) {
         return bPlayable;
     }
-    return bPlayable != 0 && pOwner == mUnknown44;
+    return bPlayable != 0 && pOwner == mPlayer;
 }
 
 // 0x001b3b88
 int NotePitcher::IsOtherTick(int nTick) {
-    return mUnknown4c.mTick != nTick;
+    return mLastPitchPosition.mTick != nTick;
 }

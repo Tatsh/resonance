@@ -33,26 +33,26 @@ const char *GemPacket::Name() {
 // 0x003f2878
 void GemPacket::Print(std::ostream &stream) {
     mFields.Print(stream);
-    stream << " tr:" << mTr << " clid:" << mUnknown0c;
+    stream << " tr:" << mTr << " clid:" << mClientId;
 }
 
 // 0x003e8258
-// The transfer of mUnknown0c repeats the one the Packet prefix already performed, and
+// The transfer of mClientId repeats the one the Packet prefix already performed, and
 // Load() reads the same word twice to match, so the word crosses the wire twice.
 void GemPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mFields.Save(stream);
 
     int tr = mTr;
-    int unknown0c = mUnknown0c;
-    stream.Write(&tr, sizeof(tr)).Write(&unknown0c, sizeof(unknown0c));
+    int clientId = mClientId;
+    stream.Write(&tr, sizeof(tr)).Write(&clientId, sizeof(clientId));
 }
 
 // 0x003e8368
 void GemPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mFields.Load(stream);
-    stream.Read(&mTr, sizeof(mTr)).Read(&mUnknown0c, sizeof(mUnknown0c));
+    stream.Read(&mTr, sizeof(mTr)).Read(&mClientId, sizeof(mClientId));
 }
 
 // 0x001a2560
@@ -65,7 +65,7 @@ void GemPacket::Fields::Save(OBStream &stream) {
         stream.Write(&gem, sizeof(gem)).Write(&trans, sizeof(trans)).Write(&bar, sizeof(bar));
     mLoc.Save(rest);
 
-    int id = mPlayer->mId20;
+    int id = mPlayer->mPlayerId;
     rest.Write(&id, sizeof(id));
 }
 
@@ -86,5 +86,5 @@ void GemPacket::Fields::Load(IBStream &stream) {
 void GemPacket::Fields::Print(std::ostream &stream) {
     stream << "gem: " << mGem << " trans:" << mTrans << " bar:" << mBar << " loc:";
     mLoc.Print(stream);
-    stream << " pid:" << mPlayer->mId20;
+    stream << " pid:" << mPlayer->mPlayerId;
 }

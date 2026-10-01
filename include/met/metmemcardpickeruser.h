@@ -30,5 +30,5 @@
  */
 class MetMemCardPickerUser {
 private:
-    int mUnknown00; // +0x00
+    int mReserved; // +0x00
 };

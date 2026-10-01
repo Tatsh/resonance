@@ -124,8 +124,8 @@ MetaGameWorld *Globals::GetMetaWorld() {
 }
 
 // 0x00118ec8
-int Globals::GetUnknown18() {
-    return mGameManager->GetUnknown18();
+int Globals::GetUnwrittenValue() {
+    return mGameManager->GetUnwrittenValue();
 }
 
 // 0x00118e78

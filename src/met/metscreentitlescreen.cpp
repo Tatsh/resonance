@@ -75,11 +75,11 @@ void MetScreenTitleScreen::BeginExit() {
 }
 
 // 0x00394100
-void MetScreenTitleScreen::OnUnknownSlot33() {
+void MetScreenTitleScreen::OnEnterFinished() {
 }
 
 // 0x00394128
-void MetScreenTitleScreen::OnUnknownSlot36() {
+void MetScreenTitleScreen::OnExitFinished() {
 }
 
 // 0x00390f88

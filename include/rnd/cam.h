@@ -458,7 +458,7 @@ protected:
      * @param sink The collector to append an intersection to.
      * @ghidraAddress 0x004ad820
      */
-    virtual void CollideUnknown(const Ray &ray, HitSink &sink);
+    virtual void CollideScreen(const Ray &ray, HitSink &sink);
 
     /**
      * Make this camera the one the frame is drawn through.

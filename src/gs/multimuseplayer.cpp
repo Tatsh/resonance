@@ -46,7 +46,7 @@ void MultiMusePlayer::Stop() {
 }
 
 // 0x001a9ed0
-int MultiMusePlayer::Slot4() {
+int MultiMusePlayer::DisplacesSiblings() {
     return 1;
 }
 

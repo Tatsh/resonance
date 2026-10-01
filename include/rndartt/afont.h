@@ -20,7 +20,7 @@ struct ABitmap;
 struct AFont {
     ABitmap **mGlyphs;    /*!< One glyph image per code from mFirstCharCode. +0x00 */
     short mGlyphCount;    /*!< The number of entries in mGlyphs. +0x04 */
-    short mUnknown06;     /*!< Purpose undetermined. +0x06 */
+    short mReserved06;    /*!< Neither consumer reads it. +0x06 */
     short mFirstCharCode; /*!< The character code mGlyphs[0] draws. +0x08 */
     short mLineHeight;    /*!< The row advance of a newline. +0x0a */
     short mBaseline;      /*!< Rows between the drawing origin and the glyph top. +0x0c */

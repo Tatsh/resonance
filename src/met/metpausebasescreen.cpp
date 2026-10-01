@@ -61,8 +61,8 @@ MetPauseBaseScreen::MetPauseBaseScreen(MetRenderer *pRenderer,
                                        const HxStr &name,
                                        const HxStr &directory,
                                        const HxStr &file)
-    : MetScreenMultiSoundBank(pRenderer, nPriority, name, directory, file), mUnknown8c(kExitNone),
-      mUnknown9c(kNoText) {
+    : MetScreenMultiSoundBank(pRenderer, nPriority, name, directory, file), mExitAction(kExitNone),
+      mReturnPanel(kNoText) {
 }
 
 // 0x00317e90
@@ -74,24 +74,24 @@ void MetPauseBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kCommandResume:
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknown8c = kExitResume;
+        mExitAction = kExitResume;
         break;
     case kMetScreenCommandBack:
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknown8c = kExitQuit;
+        mExitAction = kExitQuit;
         break;
     case kMetScreenCommandSelect: {
         bool bAllowed = false;
         if ((Application::shared()->GetPlayMode() == kPlayModeGame &&
              Application::shared()->GetGameMode() != kGameModeNet) ||
-            MetFrontEndState::shared()->mUnknown18 == kTutorialPhase) {
+            MetFrontEndState::shared()->mPendingTransition == kTutorialPhase) {
             bAllowed = true;
         }
         if (!bAllowed) {
             return;
         }
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknown8c = kExitRestart;
+        mExitAction = kExitRestart;
         break;
     }
     default:
@@ -105,17 +105,17 @@ void MetPauseBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
 void MetPauseBaseScreen::EnterAndShow() {
     // Yes, the binary copies the settings and never reads the copy.
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    for (std::vector<Rnd::Text *>::size_type i = 0; i < mUnknowna4.size(); ++i) {
-        mUnknowna4[i]->SetText(mUnknown90[i]);
+    for (std::vector<Rnd::Text *>::size_type i = 0; i < mOptionTexts.size(); ++i) {
+        mOptionTexts[i]->SetText(mOptionLabels[i]);
     }
     MetScreen::EnterAndShow();
 }
 
 // 0x00318418
-void MetPauseBaseScreen::OnUnknownSlot36() {
-    if (mUnknown8c == kExitQuit) {
+void MetPauseBaseScreen::OnExitFinished() {
+    if (mExitAction == kExitQuit) {
         ShowConfirmation(kQuitDialogue, kQuitTitle, kQuitText, this);
-    } else if (mUnknown8c == kExitRestart) {
+    } else if (mExitAction == kExitRestart) {
         ShowConfirmation(kRestartDialogue, kRestartTitle, kRestartText, this);
     } else {
         QueueUnpause();
@@ -126,22 +126,22 @@ void MetPauseBaseScreen::OnUnknownSlot36() {
 void MetPauseBaseScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kQuitDialogue) {
         if (nChoice == kChoiceNo) {
-            ActivateNamedPanel(mUnknown9c);
-            PushNamedScreen(mUnknown9c);
+            ActivateNamedPanel(mReturnPanel);
+            PushNamedScreen(mReturnPanel);
         } else if (nChoice == kChoiceYes) {
             QueueUnpause();
             MetFrontEndState *pState = MetFrontEndState::shared();
-            pState->mUnknown1c = pState->mUnknown18;
-            pState->mUnknown18 = kQuitPhase;
-            Application::shared()->GetGameManager()->GetWorld()->PostExitMode2();
+            pState->mLastTransition = pState->mPendingTransition;
+            pState->mPendingTransition = kQuitPhase;
+            Application::shared()->GetGameManager()->GetWorld()->PostQuit();
         }
     } else if (name == kRestartDialogue) {
         if (nChoice == kChoiceNo) {
-            ActivateNamedPanel(mUnknown9c);
-            PushNamedScreen(mUnknown9c);
+            ActivateNamedPanel(mReturnPanel);
+            PushNamedScreen(mReturnPanel);
         } else if (nChoice == kChoiceYes) {
             QueueUnpause();
-            Application::shared()->GetGameManager()->GetWorld()->PostExitMode3();
+            Application::shared()->GetGameManager()->GetWorld()->PostRestart();
         }
     }
 }

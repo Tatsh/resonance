@@ -57,12 +57,12 @@ enum {
 typedef struct {
     union {
         struct {
-            int nSize1;
-            int nSize2;
-            unsigned char *pDest1;
-            unsigned char *pDest2;
-            unsigned char abData1[kMcEndDataSize];
-            unsigned char abData2[kMcEndDataSize];
+            int nHeadSize;
+            int nTailSize;
+            unsigned char *pHead;
+            unsigned char *pTail;
+            unsigned char abHead[kMcEndDataSize];
+            unsigned char abTail[kMcEndDataSize];
         } read;
         struct {
             int nType;
@@ -340,11 +340,11 @@ static void McReadEnd(void *pParameter) {
     const McEndData *pEnd = UNCACHED_SEG(pParameter);
     int i;
 
-    for (i = 0; i < pEnd->read.nSize1; ++i) {
-        pEnd->read.pDest1[i] = pEnd->read.abData1[i];
+    for (i = 0; i < pEnd->read.nHeadSize; ++i) {
+        pEnd->read.pHead[i] = pEnd->read.abHead[i];
     }
-    for (i = 0; i < pEnd->read.nSize2; ++i) {
-        pEnd->read.pDest2[i] = pEnd->read.abData2[i];
+    for (i = 0; i < pEnd->read.nTailSize; ++i) {
+        pEnd->read.pTail[i] = pEnd->read.abTail[i];
     }
 }
 

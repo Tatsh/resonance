@@ -65,14 +65,14 @@ public:
      *
      * @ghidraAddress 0x0023ab70
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Slot 36, overridden empty.
      *
      * @ghidraAddress 0x0023ab78
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views.

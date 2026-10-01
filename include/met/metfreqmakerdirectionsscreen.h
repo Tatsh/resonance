@@ -34,8 +34,8 @@ public:
      * Construct the screen.
      *
      * Supplies `fm_directions` for the screen name, `metagame/persona` for the directory, and
-     * `freq_maker_directions` for the container, clears MetScreen::mUnknown60, and starts at the
-     * blank page.
+     * `freq_maker_directions` for the container, clears MetScreen::mShowsLoadedDrawables, and
+     * starts at the blank page.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -110,7 +110,7 @@ public:
      * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x00269f00
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Hide the list entries.
@@ -119,7 +119,7 @@ public:
      *
      * @ghidraAddress 0x00269fa0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views and build the seven-row directions list.

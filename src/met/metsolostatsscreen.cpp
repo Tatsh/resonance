@@ -140,7 +140,7 @@ void MetSoloStatsScreen::EnterAndShow() {
     MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
 
     HxStr name;
-    name = pPersona->mUnknown140.mUnknown00;
+    name = pPersona->mAppearance.mUserName;
     mFreqNameText->SetText(name);
     pPersona->AttachToBurnSlot(kFirstBurnTexture);
     mFreqMat->mStages[kFreqBurnStage].SetTex(mBurnTex);

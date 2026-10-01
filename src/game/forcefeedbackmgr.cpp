@@ -18,7 +18,7 @@ namespace {
 // The bits of ForceFeedbackMgr::mFlags. Any set bit suspends vibration.
 constexpr unsigned char kFlagTooManyPlayers = 0x01;
 constexpr unsigned char kFlagJukebox = 0x02;
-constexpr unsigned char kFlagUnknown04 = 0x04;
+constexpr unsigned char kFlagPlayback = 0x04;
 constexpr unsigned char kFlagPaused = 0x08;
 constexpr unsigned char kFlagStopped = 0x10;
 constexpr unsigned char kFlagDisabled = 0x20;
@@ -43,11 +43,11 @@ constexpr long long kHalfMillisecondNs = 500000;
 constexpr int kMotorLeadNs = 90000000;
 
 // The effect numbers the one-line wrappers pass.
-constexpr int kEffect0 = 0;
-constexpr int kEffect1 = 1;
+constexpr int kEffectAutocatch = 0;
+constexpr int kEffectBump = 1;
 constexpr int kEffectCripple = 2;
-constexpr int kEffect3 = 3;
-constexpr int kEffect4 = 4;
+constexpr int kEffectNeutralized = 3;
+constexpr int kEffectUnused = 4;
 
 // Motor states.
 constexpr int kMotorOff = 0;
@@ -298,7 +298,7 @@ inline void PostAt(Sch::TickClock *pClock, Sch::Command *pCommand, int nTick) {
 } // namespace
 
 // 0x0016dae0
-ForceFeedbackMgr::ForceFeedbackMgr() : mFlags(0), mUnknown28(0), mPulseLength{0} {
+ForceFeedbackMgr::ForceFeedbackMgr() : mFlags(0), mUnusedTime(0), mPulseLength{0} {
     LoadConfig();
     g_pForceFeedbackMgr = this;
 }
@@ -313,7 +313,7 @@ ForceFeedbackMgr::~ForceFeedbackMgr() {
 void ForceFeedbackMgr::LoadConfig() {
     std::vector<int> values;
     QueryConfigVector(&values, kMetronomeQuery);
-    mUnknown30 = values[0];
+    mMetronomeFirstSetting = values[0];
     if (kBarTicks / values[2] < values[1]) {
         values[1] = values[2];
     }
@@ -470,15 +470,15 @@ void ForceFeedbackMgr::SetJukeboxMode(int bJukebox) {
 }
 
 // 0x00170708
-void ForceFeedbackMgr::SetUnknownFlag04(int bSet) {
-    if (!bSet) {
-        mFlags &= ~kFlagUnknown04;
+void ForceFeedbackMgr::SetPlaybackMode(int bPlayback) {
+    if (!bPlayback) {
+        mFlags &= ~kFlagPlayback;
         return;
     }
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
     }
-    mFlags |= kFlagUnknown04;
+    mFlags |= kFlagPlayback;
 }
 
 // 0x001707c8
@@ -548,26 +548,26 @@ void ForceFeedbackMgr::ApplyMotors(int nPlayerSlot) {
 }
 
 // 0x00170b20
-void ForceFeedbackMgr::PlayEffect4(Player *pPlayer) {
-    PlayEffect(pPlayer->Slot2(), kEffect4);
+void ForceFeedbackMgr::PlayUnusedEffect(Player *pPlayer) {
+    PlayEffect(pPlayer->GetInputSlot(), kEffectUnused);
 }
 
 // 0x00170b68
-void ForceFeedbackMgr::PlayEffect1(Player *pPlayer) {
-    PlayEffect(pPlayer->Slot2(), kEffect1);
+void ForceFeedbackMgr::PlayBumpEffect(Player *pPlayer) {
+    PlayEffect(pPlayer->GetInputSlot(), kEffectBump);
 }
 
 // 0x00170bb0
-void ForceFeedbackMgr::PlayEffect0(Player *pPlayer) {
-    PlayEffect(pPlayer->Slot2(), kEffect0);
+void ForceFeedbackMgr::PlayAutocatchEffect(Player *pPlayer) {
+    PlayEffect(pPlayer->GetInputSlot(), kEffectAutocatch);
 }
 
 // 0x00170bf8
-void ForceFeedbackMgr::PlayEffect3(Player *pPlayer) {
-    PlayEffect(pPlayer->Slot2(), kEffect3);
+void ForceFeedbackMgr::PlayNeutralizedEffect(Player *pPlayer) {
+    PlayEffect(pPlayer->GetInputSlot(), kEffectNeutralized);
 }
 
 // 0x00170c40
 void ForceFeedbackMgr::PlayCrippleEffect(Player *pPlayer) {
-    PlayEffect(pPlayer->Slot2(), kEffectCripple);
+    PlayEffect(pPlayer->GetInputSlot(), kEffectCripple);
 }

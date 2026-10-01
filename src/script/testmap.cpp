@@ -20,7 +20,7 @@ constexpr int kTestMapResultSize = 61;
 Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long long nBar) {
     Py::Tuple probe(2);
     probe.setItem(0, Py::Int(nBar));
-    probe.setItem(1, Py::Int(pRing->Slot5(static_cast<int>(nBar))));
+    probe.setItem(1, Py::Int(pRing->MapBar(static_cast<int>(nBar))));
     return probe;
 }
 
@@ -31,19 +31,19 @@ Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long long nBar) {
 // 0x0012c448
 Py::Object ScriptTestMap([[maybe_unused]] Py::Tuple args) {
     PlayMapRepeatRing ring;
-    ring.Slot2(5, HxStr(""));
-    ring.Slot2(10, HxStr(""));
-    ring.Slot2(20, HxStr(""));
-    ring.Slot2(25, HxStr(""));
-    ring.Slot3(0);
-    ring.Slot16(2);
-    ring.Slot16(0xC);
-    ring.Slot16(0x2F);
-    ring.Slot16(0x31);
-    ring.Slot16(0x46);
-    ring.Slot17(0x49);
-    ring.Slot17(0x4A);
-    ring.Slot16(0x4B);
+    ring.AddStep(5, HxStr(""));
+    ring.AddStep(10, HxStr(""));
+    ring.AddStep(20, HxStr(""));
+    ring.AddStep(25, HxStr(""));
+    ring.SetBarCount(0);
+    ring.EndLoop(2);
+    ring.EndLoop(0xC);
+    ring.EndLoop(0x2F);
+    ring.EndLoop(0x31);
+    ring.EndLoop(0x46);
+    ring.StartLoop(0x49);
+    ring.StartLoop(0x4A);
+    ring.EndLoop(0x4B);
     Py::Tuple result(kTestMapResultSize);
     for (int i = 0; i < kTestMapProbeCount; ++i) {
         result.setItem(i * 3, BuildTestMapProbeList(&ring, i * 5 + 4));

@@ -20,10 +20,10 @@ void DeleteTrackData(TrackData *pTrack) {
 }
 
 // Configuration codes the constructor queries.
-constexpr int kPlayMapSlot17Query = 929;
+constexpr int kStartLoopQuery = 929;
 constexpr int kPlayMapStepsQuery = 918;
 constexpr int kPlayMapLabelsQuery = 928;
-constexpr int kPlayMapSlot20Query = 925;
+constexpr int kPlayMapSectionsQuery = 925;
 
 // The tempo a level starts with, 120 beats per minute.
 constexpr int kDefaultMicrosecondsPerQuarter = 500000;
@@ -31,8 +31,8 @@ constexpr int kDefaultMicrosecondsPerQuarter = 500000;
 // The constructor has PlayMapLinear's constructor run LoadStepRings().
 constexpr int kPlayMapLoadStepRings = 1;
 
-// The argument the constructor passes to PlayMap::Slot17() when kPlayMapSlot17Query is set.
-constexpr int kPlayMapSlot17Argument = 0xe;
+// The bar the constructor passes to PlayMap::StartLoop() when kStartLoopQuery is set.
+constexpr int kStartLoopBar = 0xe;
 
 // The index every track SelectTrack() creates is given.
 constexpr int kUnindexedTrack = -1;
@@ -65,36 +65,36 @@ PrintCollection(std::ostream &stream, const char *pszLabel, std::vector<TrackDat
 
 // 0x001ea838
 LevelBuilder::LevelBuilder(unsigned nTrackCount)
-    : mOwnTrack(nullptr), mCurrentTrack(nullptr), mUnknown30(nullptr) {
-    const int bSlot17 = QueryConfigFlag(kPlayMapSlot17Query);
-    mUnknown30 = new Sch::TempoMap(kDefaultMicrosecondsPerQuarter);
+    : mOwnTrack(nullptr), mCurrentTrack(nullptr), mTempoMap(nullptr) {
+    const int bStartLoop = QueryConfigFlag(kStartLoopQuery);
+    mTempoMap = new Sch::TempoMap(kDefaultMicrosecondsPerQuarter);
     PlayMapLinear *pMap = new PlayMapLinear(kPlayMapLoadStepRings);
-    mUnknown34 = pMap;
+    mPlayMap = pMap;
 
     std::vector<int> steps;
     QueryConfigVector(&steps, kPlayMapStepsQuery);
     std::vector<HxStr> labels;
     QueryConfigStrings(&labels, kPlayMapLabelsQuery);
     for (unsigned i = 0; i < steps.size(); ++i) {
-        mUnknown34->Slot2(steps[i], labels[i]);
+        mPlayMap->AddStep(steps[i], labels[i]);
     }
 
     mTracks.resize(nTrackCount, nullptr);
     for (unsigned i = 0; i < nTrackCount; ++i) {
-        mTracks[i] = new TrackData(i, mUnknown34);
+        mTracks[i] = new TrackData(i, mPlayMap);
     }
 
     {
-        std::vector<int> values;
-        QueryConfigVector(&values, kPlayMapSlot20Query);
-        for (auto it = values.begin(); it != values.end(); ++it) {
-            pMap->Slot20(*it);
+        std::vector<int> sections;
+        QueryConfigVector(&sections, kPlayMapSectionsQuery);
+        for (auto it = sections.begin(); it != sections.end(); ++it) {
+            pMap->AppendSection(*it);
         }
-        pMap->Slot19();
+        pMap->RecordPattern();
     }
 
-    if (bSlot17) {
-        mUnknown34->Slot17(kPlayMapSlot17Argument); // Yes, the binary discards the result.
+    if (bStartLoop) {
+        mPlayMap->StartLoop(kStartLoopBar); // Yes, the binary discards the result.
     }
 }
 
@@ -106,10 +106,10 @@ LevelBuilder::~LevelBuilder() {
     std::for_each(mBackingTracks.begin(), mBackingTracks.end(), DeleteTrackData);
     std::for_each(mIntroTracks.begin(), mIntroTracks.end(), DeleteTrackData);
     delete mOwnTrack;
-    if (mUnknown30 != nullptr) {
-        mUnknown30->Release();
+    if (mTempoMap != nullptr) {
+        mTempoMap->Release();
     }
-    delete mUnknown34;
+    delete mPlayMap;
 }
 
 // 0x001ec430
@@ -151,18 +151,18 @@ TrackData *LevelBuilder::IntroTrackAt(int nIndex) {
 }
 
 // 0x001ec478
-Sch::TempoMap *LevelBuilder::OnUnknownSlot7() {
-    return mUnknown30;
+Sch::TempoMap *LevelBuilder::GetTempoMap() {
+    return mTempoMap;
 }
 
 // 0x001ec480
-PlayMap *LevelBuilder::OnUnknownSlot8() {
-    return mUnknown34;
+PlayMap *LevelBuilder::GetPlayMap() {
+    return mPlayMap;
 }
 
 // 0x001ec738
-int LevelBuilder::OnUnknownSlot9() {
-    return mUnknown34->Slot8();
+int LevelBuilder::GetEndBar() {
+    return mPlayMap->GetExtent();
 }
 
 // 0x001eb200
@@ -172,17 +172,17 @@ void LevelBuilder::SelectTrack(int nKind, int nIndex) {
         mCurrentTrack = nullptr;
         break;
     case kLevelTrackBacking:
-        mCurrentTrack = SelectCollectionTrack(mBackingTracks, nIndex, mUnknown34);
+        mCurrentTrack = SelectCollectionTrack(mBackingTracks, nIndex, mPlayMap);
         break;
     case kLevelTrackIntro:
-        mCurrentTrack = SelectCollectionTrack(mIntroTracks, nIndex, mUnknown34);
+        mCurrentTrack = SelectCollectionTrack(mIntroTracks, nIndex, mPlayMap);
         break;
     case kLevelTrackScore:
         mCurrentTrack = mTracks[nIndex];
         break;
     case kLevelTrackOwn:
         if (mOwnTrack == nullptr) {
-            mOwnTrack = new TrackData(kUnindexedTrack, mUnknown34);
+            mOwnTrack = new TrackData(kUnindexedTrack, mPlayMap);
         }
         mCurrentTrack = mOwnTrack;
         break;
@@ -198,7 +198,7 @@ void LevelBuilder::Print(std::ostream &stream) {
 
 // 0x001ec498
 void LevelBuilder::SetBarCount(int nBarCount) {
-    mUnknown34->Slot3(nBarCount);
+    mPlayMap->SetBarCount(nBarCount);
 }
 
 // 0x001ec488
@@ -248,8 +248,8 @@ void LevelBuilder::AddHarmony(int nTick, const Harmony &harmony) {
 }
 
 // 0x001ec580
-void LevelBuilder::OnUnknownForwarder001ec580(int nFirst, int nSecond) {
-    mCurrentTrack->OnUnknown001d7758(nFirst, nSecond);
+void LevelBuilder::SetActive(int nTick, int bActive) {
+    mCurrentTrack->SetActive(nTick, bActive);
 }
 
 // 0x001ec5a0
@@ -266,8 +266,8 @@ void LevelBuilder::PrepareTracks() {
 
 // 0x001ec5f8
 void LevelBuilder::SetTempo([[maybe_unused]] int nTick, int nMicrosecondsPerQuarter) {
-    if (mUnknown30 != nullptr) {
-        mUnknown30->Release();
+    if (mTempoMap != nullptr) {
+        mTempoMap->Release();
     }
-    mUnknown30 = new Sch::TempoMap(nMicrosecondsPerQuarter);
+    mTempoMap = new Sch::TempoMap(nMicrosecondsPerQuarter);
 }

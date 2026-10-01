@@ -37,7 +37,7 @@ public:
     virtual int CmdID();
 
     /**
-     * Run GameManagerImpl::OnUnknownSlot6() on the application's game manager.
+     * Run GameManagerImpl::StartPlay() on the application's game manager.
      *
      * @ghidraAddress 0x0010bd80
      */

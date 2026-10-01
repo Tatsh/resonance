@@ -5,23 +5,23 @@
 
 // 0x003f1de8
 void Packet::Save(OBStream &stream) {
-    int unknown04 = mUnknown04;
-    stream.Write(&unknown04, sizeof(unknown04));
+    int destination = mDestination;
+    stream.Write(&destination, sizeof(destination));
 
-    int unknown08 = mUnknown08;
-    stream.Write(&unknown08, sizeof(unknown08));
+    int destinationSystem = mDestinationSystem;
+    stream.Write(&destinationSystem, sizeof(destinationSystem));
 
-    int unknown0c = mUnknown0c;
-    stream.Write(&unknown0c, sizeof(unknown0c));
+    int clientId = mClientId;
+    stream.Write(&clientId, sizeof(clientId));
 
-    int unknown10 = mUnknown10;
-    stream.Write(&unknown10, sizeof(unknown10));
+    int targetClientId = mTargetClientId;
+    stream.Write(&targetClientId, sizeof(targetClientId));
 }
 
 // 0x003f1ea0
 void Packet::Load(IBStream &stream) {
-    stream.Read(&mUnknown04, sizeof(mUnknown04));
-    stream.Read(&mUnknown08, sizeof(mUnknown08));
-    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
-    stream.Read(&mUnknown10, sizeof(mUnknown10));
+    stream.Read(&mDestination, sizeof(mDestination));
+    stream.Read(&mDestinationSystem, sizeof(mDestinationSystem));
+    stream.Read(&mClientId, sizeof(mClientId));
+    stream.Read(&mTargetClientId, sizeof(mTargetClientId));
 }

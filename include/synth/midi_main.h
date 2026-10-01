@@ -610,50 +610,52 @@ void ReleaseSoundBanks();
 void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
 /**
- * Submit sound-driver selector 0x110 with one word.
+ * Switch the sound driver between mono and stereo output.
  *
- * The meaning of the selector is unrecovered. Ps2HardSynth's slot 12 is the one caller and passes
- * its own argument inverted.
+ * Submits selector 0x110, the driver's mono command. Ps2HardSynth::SetStereo() is the one caller
+ * and passes its argument inverted.
  *
  * The body is one call to SubmitSoundDriverRequest().
  *
- * @param nValue The word.
+ * @param bMono Nonzero for mono output, zero for stereo.
  * @ghidraAddress 0x00464868
  */
-void SubmitDriverSelector110(int nValue);
+void SubmitDriverSetMono(int bMono);
 
 /**
- * Submit sound-driver selector 0x100 with one word.
+ * Switch the remix mode of the sound driver.
  *
- * The meaning of the selector is unrecovered. Ps2HardSynth's slot 13 is the one caller.
+ * Submits selector 0x100, the driver's remix command. Ps2HardSynth::SetRemixMode() is the one
+ * caller.
  *
  * The body is one call to SubmitSoundDriverRequest().
  *
- * @param nValue The word.
+ * @param bRemix Nonzero to enter remix mode, zero to exit it.
  * @ghidraAddress 0x00464888
  */
-void SubmitDriverSelector100(int nValue);
+void SubmitDriverSetRemix(int bRemix);
 
 /**
- * Submit sound-driver selector 0xf0 with one word.
+ * Pause or resume the sound driver.
  *
- * The meaning of the selector is unrecovered. Ps2HardSynth's slot 14 is the one caller.
+ * Submits selector 0xf0, the driver's pause command. Ps2HardSynth::SetPaused() is the one caller.
  *
  * The body is one call to SubmitSoundDriverRequest().
  *
- * @param nValue The word.
+ * @param bPaused Nonzero to pause, zero to resume.
  * @ghidraAddress 0x004648a8
  */
-void SubmitDriverSelectorF0(int nValue);
+void SubmitDriverSetPaused(int bPaused);
 
 /**
- * Submit sound-driver selector 0xc0 with no command block.
+ * Silence every channel of the sound driver.
  *
- * The meaning of the selector is unrecovered. ReleaseSoundBanks() is the one caller.
+ * Submits selector 0xc0, the driver's all-notes-off command, with no command block.
+ * ReleaseSoundBanks() is the one caller.
  *
  * @ghidraAddress 0x004649d8
  */
-void SubmitDriverSelectorC0();
+void SubmitDriverAllNotesOff();
 
 /**
  * Bind the MIDI stream input of Sony's component sound library.

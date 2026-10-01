@@ -158,9 +158,9 @@ int ExportCmd::sCmdID;
 PhraseMgr::PhraseMgr(
     Sch::TickClock *pClock, int nBarTicks, PlayMap *pMap, int nConfig, const TrackData *pTrackData)
     : mPhrasePlayer(nullptr), mNetSink(nullptr), mTrackData(pTrackData), mMap(pMap),
-      mPowerbarMgr(nullptr), mUnknown30(pTrackData->mUnknown04), mBarTicks(nBarTicks),
-      mConfig(nConfig), mWindowStart(0), mWindowEnd(0), mRefreshing(0), mExportLead(0),
-      mClock(pClock), mTrackKind(pTrackData->mKind) {
+      mPowerbarMgr(nullptr), mTrack(pTrackData->mIndex), mBarTicks(nBarTicks), mConfig(nConfig),
+      mWindowStart(0), mWindowEnd(0), mRefreshing(0), mExportLead(0), mClock(pClock),
+      mTrackKind(pTrackData->mKind) {
     mExportCommand.mValue = kUnallocatedCommand;
     mCommand.mValue = kUnallocatedCommand;
     mPlayMode = Application::shared()->GetPlayMode();
@@ -185,9 +185,9 @@ void PhraseMgr::CreatePowerbarMgr() {
         (mTrackKind == kTrackModeCatch || mTrackKind == kTrackModeRiff) &&
         !QueryConfigFlag(kDisplayModeQuery)) {
         if (nGameMode == kGameModeSolo) {
-            mPowerbarMgr = new SoloPowerbarMgr(mMap, mDatabase, mTrackData, mUnknown30);
+            mPowerbarMgr = new SoloPowerbarMgr(mMap, mDatabase, mTrackData, mTrack);
         } else {
-            mPowerbarMgr = new MultiPowerbarMgr(mMap, mDatabase, mTrackData, mUnknown30);
+            mPowerbarMgr = new MultiPowerbarMgr(mMap, mDatabase, mTrackData, mTrack);
         }
         return;
     }
@@ -196,7 +196,7 @@ void PhraseMgr::CreatePowerbarMgr() {
 
 inline void PhraseMgr::RefreshWindowBarOfStep(int nStep) {
     for (int nBar = mWindowStart; nBar < mWindowEnd; ++nBar) {
-        if (mMap->Slot5(nBar) == nStep) {
+        if (mMap->MapBar(nBar) == nStep) {
             RefreshBar(nBar, 1);
             break;
         }
@@ -206,7 +206,7 @@ inline void PhraseMgr::RefreshWindowBarOfStep(int nStep) {
 // 0x001ba540
 void PhraseMgr::OnCaughtPhrasePacket(Message *pMsg) {
     CaughtPhrasePacket *pPacket = static_cast<CaughtPhrasePacket *>(pMsg);
-    if (static_cast<int>(pPacket->mTr) != mUnknown30) {
+    if (static_cast<int>(pPacket->mTr) != mTrack) {
         return;
     }
 
@@ -224,14 +224,14 @@ void PhraseMgr::OnCaughtPhrasePacket(Message *pMsg) {
             mTrackData->SetOwner(pPrevious, nStep);
         }
         RefreshWindowBarOfStep(nStep);
-        nStep = mMap->Slot7(nStep, mUnknown30);
+        nStep = mMap->MapToLinkedStep(nStep, mTrack);
     } while (nStep != nFirstStep);
 }
 
 // 0x001ba6d0
 void PhraseMgr::PostGemMsg(Message *pMsg) {
     GemPacket *pPacket = static_cast<GemPacket *>(pMsg);
-    if (pPacket->mTr != mUnknown30) {
+    if (pPacket->mTr != mTrack) {
         return;
     }
 
@@ -248,32 +248,32 @@ void PhraseMgr::PostGemMsg(Message *pMsg) {
         pPhrase->AddGem(gem.mLoc.mTick, gem.mGem, gem.mTrans);
 
         for (int nBar = mWindowStart; nBar < mWindowEnd; ++nBar) {
-            if (mMap->Slot5(nBar) == nStep) {
+            if (mMap->MapBar(nBar) == nStep) {
                 const Mid::MBT start(ClampPosition(mBarTicks * nBar));
                 GemMsg msg(Mid::MBT(ClampPosition(gem.mLoc.mTick + start.mTick)),
-                           mUnknown30,
+                           mTrack,
                            gem.mGem,
                            gem.mPlayer);
                 Send(&msg);
                 break;
             }
         }
-        nStep = mMap->Slot7(nStep, mUnknown30);
+        nStep = mMap->MapToLinkedStep(nStep, mTrack);
     } while (nStep != nFirstStep);
 }
 
 // 0x001ba928
 void PhraseMgr::OnRefreshNet(Message *pMsg) {
     RefreshNetMsg *pRefresh = static_cast<RefreshNetMsg *>(pMsg);
-    if (pRefresh->mTrack != mUnknown30 || mNetSink == nullptr) {
+    if (pRefresh->mTrack != mTrack || mNetSink == nullptr) {
         return;
     }
 
     for (int nBar = pRefresh->mFirstBar; nBar < pRefresh->mEndBar; ++nBar) {
-        const int nStep = mMap->Slot5(nBar);
+        const int nStep = mMap->MapBar(nBar);
         Phrase *pPhrase = mDatabase->GetPhrase(nStep);
         CaughtPhrasePacket packet(
-            pPhrase != nullptr ? pPhrase->mPlayer : &g_nullPlayer, mUnknown30, nStep);
+            pPhrase != nullptr ? pPhrase->mPlayer : &g_nullPlayer, mTrack, nStep);
         mNetSink->Handle(&packet);
     }
 }
@@ -282,7 +282,7 @@ void PhraseMgr::OnRefreshNet(Message *pMsg) {
 void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner, int bPost) {
     Application::shared()->GetWorld()->MarkStatsFlag();
 
-    const int nStep = mMap->Slot5(nBar);
+    const int nStep = mMap->MapBar(nBar);
     Phrase *pPhrase = mDatabase->GetPhrase(nStep);
     if (pPhrase == nullptr) {
         SetPhraseOwner(pOwner, nBar);
@@ -297,19 +297,19 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
         fields.mBar = nStep;
         fields.mLoc.mTick = nTick;
         fields.mPlayer = pOwner;
-        GemPacket packet(fields, mUnknown30);
+        GemPacket packet(fields, mTrack);
         mNetSink->Handle(&packet);
     }
 
     if (bPost != 0) {
-        const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
+        const std::vector<int> &bars = mMap->FindBarsPlaying(nStep, nBar, mWindowEnd);
         for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
             const int nWindowBar = *it;
             const Mid::MBT start(ClampPosition(mBarTicks * nWindowBar));
             const Mid::MBT position(ClampPosition(nTick + start.mTick));
             if (nReplaced != kNoReplacedGem) {
                 {
-                    ClearGemMsg clear(position, mUnknown30, nReplaced);
+                    ClearGemMsg clear(position, mTrack, nReplaced);
                     Send(&clear);
                 }
                 if (mTrackKind == kTrackModeRiff) {
@@ -322,7 +322,7 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
                             const Mid::MBT otherStart(ClampPosition(mBarTicks * nWindowBar));
                             GemMsg ghost(
                                 Mid::MBT(ClampPosition(other->mPosition.mTick + otherStart.mTick)),
-                                mUnknown30,
+                                mTrack,
                                 other->mValue,
                                 pOwner,
                                 kGhostGem);
@@ -335,16 +335,16 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
                     }
                 }
             }
-            GemMsg msg(position, mUnknown30, nGem, pOwner);
+            GemMsg msg(position, mTrack, nGem, pOwner);
             Send(&msg);
         }
     }
-    (void)mMap->Slot7(nStep, mUnknown30); // Yes, the binary discards this step.
+    (void)mMap->MapToLinkedStep(nStep, mTrack); // Yes, the binary discards this step.
 }
 
 // 0x001bafa8
 void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
-    const int nFirstStep = mMap->Slot5(nBar);
+    const int nFirstStep = mMap->MapBar(nBar);
     int nStep = nFirstStep;
     do {
         Player *pPrevious = mDatabase->GetOwner(nStep);
@@ -354,15 +354,15 @@ void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
             mTrackData->SetOwner(pPrevious, nStep);
         }
         if (mNetSink != nullptr) {
-            CaughtPhrasePacket packet(pPlayer, mUnknown30, nStep);
+            CaughtPhrasePacket packet(pPlayer, mTrack, nStep);
             mNetSink->Handle(&packet);
         }
 
-        const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
+        const std::vector<int> &bars = mMap->FindBarsPlaying(nStep, nBar, mWindowEnd);
         for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
             RefreshBar(*it, 0);
         }
-        nStep = mMap->Slot7(nStep, mUnknown30);
+        nStep = mMap->MapToLinkedStep(nStep, mTrack);
     } while (mPlayMode == kPlayModeGame && nStep != nFirstStep);
 }
 
@@ -370,14 +370,14 @@ void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
 void PhraseMgr::InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh) {
     Application::shared()->GetWorld()->MarkStatsFlag();
 
-    const int nStep = mMap->Slot5(nBar);
+    const int nStep = mMap->MapBar(nBar);
     Player *pPrevious = mDatabase->GetOwner(nStep);
     mDatabase->SetPhrase(pPhrase, nStep);
     if (pPrevious != pPhrase->mPlayer) {
         mTrackData->SetOwner(pPrevious, nStep);
     }
     if (mNetSink != nullptr) {
-        CaughtPhrasePacket packet(pPhrase->mPlayer, mUnknown30, nStep);
+        CaughtPhrasePacket packet(pPhrase->mPlayer, mTrack, nStep);
         mNetSink->Handle(&packet);
     }
     if (bRefresh != 0) {
@@ -389,7 +389,7 @@ void PhraseMgr::InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh) {
 void PhraseMgr::ClearPhrase(int nBar, int bAll) {
     Application::shared()->GetWorld()->MarkStatsFlag();
 
-    const int nFirstStep = mMap->Slot5(nBar);
+    const int nFirstStep = mMap->MapBar(nBar);
     int nStep = nFirstStep;
     do {
         Player *pPrevious = mDatabase->GetOwner(nStep);
@@ -398,15 +398,15 @@ void PhraseMgr::ClearPhrase(int nBar, int bAll) {
             mTrackData->SetOwner(pPrevious, nStep);
         }
         if (mNetSink != nullptr) {
-            CaughtPhrasePacket packet(&g_nullPlayer, mUnknown30, nStep);
+            CaughtPhrasePacket packet(&g_nullPlayer, mTrack, nStep);
             mNetSink->Handle(&packet);
         }
 
-        const std::vector<int> &bars = mMap->Slot6(nStep, nBar, mWindowEnd);
+        const std::vector<int> &bars = mMap->FindBarsPlaying(nStep, nBar, mWindowEnd);
         for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
             RefreshBar(*it, 1);
         }
-        nStep = mMap->Slot7(nStep, mUnknown30);
+        nStep = mMap->MapToLinkedStep(nStep, mTrack);
     } while (mPlayMode == kPlayModeGame && bAll != 0 && nStep != nFirstStep);
 }
 
@@ -416,8 +416,8 @@ int PhraseMgr::PhrasesMatch(int nFirstBar, int nSecondBar) {
         return 1;
     }
 
-    const int nFirstStep = mMap->Slot5(nFirstBar);
-    const int nSecondStep = mMap->Slot5(nSecondBar);
+    const int nFirstStep = mMap->MapBar(nFirstBar);
+    const int nSecondStep = mMap->MapBar(nSecondBar);
     Phrase *pFirst = mDatabase->GetPhrase(nFirstStep);
     Phrase *pSecond = mDatabase->GetPhrase(nSecondStep);
     if (pFirst == nullptr) {
@@ -470,7 +470,7 @@ void PhraseMgr::OnExportCommand(int nBar) {
 
 // 0x001bb9f8
 void PhraseMgr::PostBarStatusMsg(int nBar) {
-    const int nStep = mMap->Slot5(nBar);
+    const int nStep = mMap->MapBar(nBar);
     (void)Mid::MBT(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
     const int nEnabled = mTrackData->QueryBar(nBar);
     (void)mTrackData->GetQuant(nBar); // Yes, the binary discards this result.
@@ -480,10 +480,10 @@ void PhraseMgr::PostBarStatusMsg(int nBar) {
 
     BarStatusMsg msg;
     msg.mBar = nBar;
-    msg.mTrack = mUnknown30;
+    msg.mTrack = mTrack;
     msg.mPlayer = pPhrase != nullptr ? pPhrase->mPlayer : &g_nullPlayer;
     msg.mEnabled = nEnabled;
-    msg.mUnknown14 = mRefreshing;
+    msg.mRefreshing = mRefreshing;
     msg.mPowerup = nPowerup;
     msg.mEffects = BarStatusMsg::Effects(*pEffects);
     msg.mFlags = kAllBarStatusFields;
@@ -499,7 +499,7 @@ void PhraseMgr::RefreshBar(int nBar, int bClear) {
     if (bClear != 0) {
         ClearGemsMsg clear;
         clear.mBar = nBar;
-        clear.mTrack = mUnknown30;
+        clear.mTrack = mTrack;
         Send(&clear);
     }
     PostBarStatusMsg(nBar);
@@ -560,18 +560,18 @@ void PhraseMgr::PostDurGemMsg(int nBar) {
         const Mid::MBT barStart(ClampPosition(mBarTicks * nBar));
         if (it->mTrans != 0) {
             DurGemMsg msg;
-            msg.mLane = mUnknown30;
+            msg.mLane = mTrack;
             msg.mStartFrame = Mid::MBT(ClampPosition(barStart.mTick + nStartTick)).mTick;
             msg.mStartBlend = flStartBlend;
             msg.mEndFrame = Mid::MBT(ClampPosition(barStart.mTick + nEndTick)).mTick;
             msg.mEndBlend = flEndBlend;
-            msg.mUnknown18 = 0;
+            msg.mLive = 0;
             msg.mPlayer = pPhrase->mPlayer;
             Send(&msg);
         }
         if (bJoinedToPrevious == 0) {
             GemMsg msg(Mid::MBT(ClampPosition(barStart.mTick + nStartTick)),
-                       mUnknown30,
+                       mTrack,
                        kRunHeadGem,
                        pPhrase->mPlayer);
             Send(&msg);
@@ -594,7 +594,7 @@ void PhraseMgr::PostGemMsgSecond(int nBar) {
          ++gem) {
         const Mid::MBT start(ClampPosition(mBarTicks * nBar));
         GemMsg msg(Mid::MBT(ClampPosition(start.mTick + gem->mPosition.mTick)),
-                   mUnknown30,
+                   mTrack,
                    gem->mGem,
                    pPhrase->mPlayer);
         Send(&msg);
@@ -619,7 +619,7 @@ void PhraseMgr::PostGemMsgThird(int nBar, int bGhost) {
     for (std::vector<TickObj<int> >::const_iterator gem = gems.begin(); gem != gems.end(); ++gem) {
         const Mid::MBT start(ClampPosition(mBarTicks * nBar));
         GemMsg msg(Mid::MBT(ClampPosition(gem->mPosition.mTick + start.mTick)),
-                   mUnknown30,
+                   mTrack,
                    gem->mValue,
                    pPlayer,
                    bGhost);
@@ -636,7 +636,7 @@ void PhraseMgr::PostPhraseMsg(int nPhrase) {
 
     PhraseMsg msg;
     msg.mBar = nPhrase;
-    msg.mTrack = mUnknown30;
+    msg.mTrack = mTrack;
     msg.mPhrase = pPhrase;
     Send(&msg);
 }
@@ -691,7 +691,7 @@ int PhraseMgr::BarToTick(int nBar) {
 
 // 0x001c0010
 void PhraseMgr::OnPhrasePacket(PhrasePacket *pPacket) {
-    if (static_cast<int>(pPacket->mTr) != mUnknown30) {
+    if (static_cast<int>(pPacket->mTr) != mTrack) {
         return;
     }
 
@@ -712,14 +712,14 @@ void PhraseMgr::OnPhrasePacket(PhrasePacket *pPacket) {
 
 // 0x001c0110
 void PhraseMgr::OnInvalidateTrack(InvalidateTrackMsg *pMsg) {
-    if (pMsg->mTrack != mUnknown30) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
 
     const int nFirstStep = pMsg->mFirstBar;
     const int nEndStep = pMsg->mEndBar;
     for (int nBar = mWindowStart; nBar < mWindowEnd; ++nBar) {
-        const int nStep = mMap->Slot5(nBar);
+        const int nStep = mMap->MapBar(nBar);
         if (nStep >= nFirstStep && nStep < nEndStep) {
             RefreshBar(nBar, 1);
         }
@@ -733,7 +733,7 @@ Phrase *PhraseMgr::GetPhraseAt(int nBar) {
 
 // 0x001c01e8
 int PhraseMgr::GetPowerbar(int nBar) {
-    return mPowerbarMgr->GetPowerbar(mMap->Slot5(nBar));
+    return mPowerbarMgr->GetPowerbar(mMap->MapBar(nBar));
 }
 
 // 0x001c0248
@@ -752,17 +752,17 @@ Player *PhraseMgr::GetPhraseOwner(int nBar) {
 
 // 0x001c0298
 void PhraseMgr::SetPhraseByte(int nBar, char cValue) {
-    const int nFirst = mMap->Slot5(nBar);
+    const int nFirst = mMap->MapBar(nBar);
     int nIndex = nFirst;
     do {
         mDatabase->SetPhraseByte(nIndex, cValue);
-        nIndex = mMap->Slot7(nIndex, mUnknown30);
+        nIndex = mMap->MapToLinkedStep(nIndex, mTrack);
     } while (nIndex != nFirst);
 }
 
 // 0x001c0338
 unsigned char PhraseMgr::GetPhraseByte(int nBar) {
-    return mDatabase->GetPhraseByte(mMap->Slot5(nBar));
+    return mDatabase->GetPhraseByte(mMap->MapBar(nBar));
 }
 
 // 0x001c0380

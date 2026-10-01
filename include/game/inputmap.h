@@ -147,7 +147,7 @@ public:
      *
      * Empties the map, then binds every slot of each port's ControllerConfig in GlobalSettings to
      * that port's player slot, with the slot's action code and riff index. It then passes
-     * GameOptions::mUnknown08 to the world's ForceFeedbackMgr, when the world has one.
+     * GameOptions::mForceFeedback to the world's ForceFeedbackMgr, when the world has one.
      * GameManagerImpl::OnUnpauseGameSystem() and GrooveWorld call it. The title is inferred.
      *
      * @ghidraAddress 0x0011a230
@@ -157,7 +157,7 @@ public:
     /**
      * Stop the three riffs of every player at the current song position.
      *
-     * Sends one StopRiffMsg per player and riff, then clears mUnknown30. The title is inferred.
+     * Sends one StopRiffMsg per player and riff, then clears mRiffActive. The title is inferred.
      *
      * @ghidraAddress 0x00119dd0
      */
@@ -179,7 +179,7 @@ private:
         kActionPitchRiff = 0x72706368,
     };
 
-    // The player slots and the riffs per slot mUnknown30 covers.
+    // The player slots and the riffs per slot mRiffActive covers.
     enum {
         kSlotCount = 4,
         kRiffCount = 3,
@@ -187,15 +187,15 @@ private:
 
     // 0x00119518
     // Turns one reading into the message its binding's action identifies, for the
-    // player whose Slot2() matches the binding's slot. An axis binding first quantises the value
-    // to a step of -1, 0, or 1 and drops the reading unless the step changed.
+    // player whose GetInputSlot() matches the binding's slot. An axis binding first quantises the
+    // value to a step of -1, 0, or 1 and drops the reading unless the step changed.
     void OnControllerReading(RawControllerMsg *pMsg);
 
     // 0x0011da68
     void SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
     // 0x0011d9b0
-    // Sends a PitchRiffMsg after a Player::Slot2() call whose result it discards.
+    // Sends a PitchRiffMsg after a Player::GetInputSlot() call whose result it discards.
     void SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
     // 0x00119f58
@@ -211,8 +211,9 @@ private:
     std::list<Binding> mBindings;
     std::map<int, std::list<Binding>::iterator> mBindingMap;
     std::vector<Player *> *mPlayers;
-    // One word per slot and riff. The constructor and StopAllRiffs() zero every word.
-    int mUnknown30[kSlotCount][kRiffCount];
+    // One word per slot and riff, cleared whenever the riffs stop. The constructor and
+    // StopAllRiffs() zero every word, and the image has no reader.
+    int mRiffActive[kSlotCount][kRiffCount];
 };
 
 /**

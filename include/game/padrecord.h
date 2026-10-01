@@ -25,11 +25,11 @@ public:
     /** Frames of the DMA area scePadPortOpen() receives. */
     static constexpr int kDmaFrameCount = 2;
 
-    /** Entries of mUnknown130, which Open() clears one byte at a time. */
-    static constexpr int kUnknownByteCount = 4;
+    /** Entries of mLastAxes. Open() clears them one byte at a time. */
+    static constexpr int kLastAxisCount = 4;
 
-    /** Entries of mUnknown134, which Open() clears one halfword at a time. */
-    static constexpr int kUnknownShortCount = 4;
+    /** Entries of mAxisDeltas. Open() clears them one halfword at a time. */
+    static constexpr int kAxisDeltaCount = 4;
 
     /**
      * Reset the record and open the pad at nPort and nSlot.
@@ -40,18 +40,18 @@ public:
      *
      * @param nPort The port, from 0.
      * @param nSlot The multitap slot, from 0.
-     * @param nUnknown128 Stored in mUnknown128.
+     * @param nDeadZone Stored in mDeadZone.
      * @ghidraAddress 0x005bcf58
      */
-    void Open(int nPort, int nSlot, int nUnknown128);
+    void Open(int nPort, int nSlot, int nDeadZone);
 
     /**
      * Advance the pad's setup state machine and decode the latest report.
      *
      * mPhase indexes a 78-entry jump table at `0x00834430` that walks the pad through analog
-     * mode, actuator alignment, and pressure-sensitive mode, and mUnknown124 records how far it
+     * mode, actuator alignment, and pressure-sensitive mode, and mReadyLevel records how far it
      * has got. Each non-null output receives one value of the decoded report, the analog values
-     * centred on zero and zeroed inside the mUnknown128 dead zone. A pad that is not stable
+     * centred on zero and zeroed inside the mDeadZone dead zone. A pad that is not stable
      * reports only mButtons and zero axes. The title is inferred.
      *
      * @param pButtons Receives the button word at mButtons, or null.
@@ -61,7 +61,7 @@ public:
      * @param pAxis3 Receives the fourth analog byte, or null.
      * @param pPressures Receives the pressure bytes, or null.
      * @param pPressureDeltas Receives each pressure less its baseline, or null.
-     * @return mUnknown124, from 0 (no report) to 3 (pressure-sensitive), or 0 when the pad is not
+     * @return mReadyLevel, from 0 (no report) to 3 (pressure-sensitive), or 0 when the pad is not
      *         stable or the read fails.
      * @ghidraAddress 0x005bc998
      */
@@ -76,7 +76,7 @@ public:
     /**
      * Drive the two vibration motors.
      *
-     * Does nothing until mUnknown124 reaches 2. Otherwise the small motor runs whenever nSmallMotor
+     * Does nothing until mReadyLevel reaches 2. Otherwise the small motor runs whenever nSmallMotor
      * is positive, and the big motor takes nBigMotor as its level. The title is inferred.
      *
      * @param nSmallMotor Positive to run the small motor.
@@ -91,10 +91,10 @@ public:
     /** The decoded button word Read() reports. +0x100 */
     unsigned int mButtons;
 
-    // Cleared by Open(). Read() ORs new bits into mUnknown104. +0x104 to +0x10c
-    unsigned int mUnknown104;
-    unsigned int mUnknown108;
-    unsigned int mUnknown10c;
+    // Cleared by Open(), and written by Read() and never read. +0x104 to +0x10c
+    unsigned int mHeldButtonsSeen; // every button held since Open()
+    unsigned int mToggledButtons;  // each new press toggles its bit
+    unsigned int mPreviousButtons; // mButtons before the latest report
 
     /** The port Open() received. +0x110 */
     int mPort;
@@ -102,25 +102,25 @@ public:
     /** The multitap slot Open() received. +0x114 */
     int mSlot;
 
-    short mUnknown118; // +0x118, cleared by Open()
+    short mRawButtons; // +0x118, the latest report's button word, cleared by Open()
 
     /**
      * Index into Read()'s setup state machine. Open() and Joypad::Reset() clear it. +0x11c
      */
     int mPhase;
 
-    int mUnknown120; // +0x120, cleared by Open()
+    int mReportMode; // +0x120, the latest report's mode byte, cleared by Open()
 
     /**
      * Setup progress Read() records. SetVibration() acts only from 2, and Joypad::Reset() clears
      * it. +0x124
      */
-    int mUnknown124;
+    int mReadyLevel;
 
-    int mUnknown128;                              // +0x128, Open()'s third argument
-    int mUnknown12c;                              // +0x12c, cleared by Open()
-    unsigned char mUnknown130[kUnknownByteCount]; // +0x130, cleared by Open()
-    short mUnknown134[kUnknownShortCount];        // +0x134, cleared by Open(), written by Read()
+    int mDeadZone;                           // +0x128, Open()'s third argument
+    int mReadCount;                          // +0x12c, cleared by Open(), counted by Read()
+    unsigned char mLastAxes[kLastAxisCount]; // +0x130, cleared by Open(), written by Read()
+    short mAxisDeltas[kAxisDeltaCount];      // +0x134, cleared by Open(), written by Read()
 
     /** The pressure baseline Read() subtracts. +0x13c */
     unsigned char mPressureBaseline[kPressureByteCount];

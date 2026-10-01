@@ -113,7 +113,7 @@ public:
     GameParams GetParams();
 
 private:
-    GameParams mUnknown14; // +0x14
+    GameParams mParams; // +0x14
 };
 
 /**

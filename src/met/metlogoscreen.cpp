@@ -102,7 +102,7 @@ MetLogoScreen::MetLogoScreen(MetRenderer *pRenderer, int nPriority)
       mBlinkTime(0), mAttractEnabled(0), mLastActivityNs(kNoActivity) {
     mAttractDelaySeconds = QueryConfigValue(kAttractDelayConfigCode);
     mAttractStarted = 0;
-    mUnknown60 = 0;
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x002be418
@@ -117,7 +117,7 @@ MetLogoScreen *MetLogoScreen::New(MetRenderer *pRenderer, int nPriority) {
 // 0x002be670
 void MetLogoScreen::RecordUnlock() {
     PlayActivateSound();
-    MetFrontEndState::shared()->mUnknown14 = 1;
+    MetFrontEndState::shared()->mUnlockAll = 1;
 }
 
 void MetLogoScreen::UpdateBlink(float flTime) {
@@ -131,9 +131,9 @@ void MetLogoScreen::UpdateBlink(float flTime) {
 // 0x002ba6d0
 void MetLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
-    mUnknown14 = FindObject<Rnd::View>(HxStr(kLogoView));
-    mUnknown14->ReleaseAnimsRefs();
-    mUnknown48 = 0;
+    mView = FindObject<Rnd::View>(HxStr(kLogoView));
+    mView->ReleaseAnimsRefs();
+    mViewsUnresolved = 0;
     mStartText = FindObject<Rnd::Text>(HxStr(kStartText));
     mWaveView = FindObject<Rnd::View>(HxStr(kWaveView));
 
@@ -157,7 +157,7 @@ void MetLogoScreen::ResolveContainerViews() {
 }
 
 // 0x002bac40
-void MetLogoScreen::OnUnknownSlot26(float flTime) {
+void MetLogoScreen::UpdateIdle(float flTime) {
     const long long llNowNs = WatchdogNowNs();
     if (Application::shared()->GetGameManager()->GetPoller()->mPressedThisPoll) {
         mLastActivityNs = llNowNs;
@@ -174,22 +174,23 @@ void MetLogoScreen::OnUnknownSlot26(float flTime) {
 }
 
 // 0x002bae40
-void MetLogoScreen::OnUnknownSlot33() {
+void MetLogoScreen::OnEnterFinished() {
     mLastActivityNs = WatchdogNowNs();
     mAttractEnabled = QueryConfigFlag(kAttractEnabledConfigCode);
     mBlinkTime = kBlinkStart;
-    mUnknown10->mUnknown60 = 1;
+    mRenderer->mTitlePromptShowing = 1;
     PlaySoundByName(kFrequencySound);
 }
 
 // 0x002baf20
-void MetLogoScreen::OnUnknownSlot36() {
+void MetLogoScreen::OnExitFinished() {
     if (mAttractStarted) {
         mAttractStarted = 0;
-        static_cast<MetLoadGameScreen *>(FindScreenByName(HxStr(kLoadGameScreen)))->mUnknown9c = 1;
+        static_cast<MetLoadGameScreen *>(FindScreenByName(HxStr(kLoadGameScreen)))->mDemoPlayback =
+            1;
         PushNamedScreen(HxStr(kLoadGameScreen));
     } else {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
         PushNamedScreen(HxStr(kTopLogoScreen));
@@ -205,7 +206,7 @@ void MetLogoScreen::OnUnknownSlot36() {
 void MetLogoScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandSelect || pCommand->mCommand == kCommandStart) {
         PlaySoundByName(kSlideSound);
-        mUnknown10->mUnknown60 = 0;
+        mRenderer->mTitlePromptShowing = 0;
         mBlinkTime = 0;
         BeginExit();
     }

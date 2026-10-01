@@ -19,8 +19,8 @@ constexpr int kNoCount = -123;
 // Frame the constructor starts with.
 constexpr float kNoFrame = 1.0e9f;
 
-// Configuration code that disables the countdown.
-constexpr int kDisplayModeConfigCode = 0x3a1;
+// Configuration code that reports whether the level is a tutorial. A tutorial has no countdown.
+constexpr int kTutorialConfigCode = 0x3a1;
 
 // MIDI ticks in one bar, and how far ahead of the frame a bar boundary counts.
 constexpr float kTicksPerBar = 1920.0f;
@@ -50,7 +50,7 @@ HudCountdown::HudCountdown(int nIndex, int nTargetBar)
     mBlur->SetShowing(0);
 
     if (Application::shared()->GetPlayMode() == kPlayModeGame &&
-        QueryConfigFlag(kDisplayModeConfigCode) == 0) {
+        QueryConfigFlag(kTutorialConfigCode) == 0) {
         mDisabled = 0;
     } else {
         mDisabled = 1;

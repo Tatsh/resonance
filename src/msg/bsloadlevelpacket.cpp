@@ -10,8 +10,8 @@ BSLoadLevelPacket::BSLoadLevelPacket() {
 }
 
 // 0x003f1220
-BSLoadLevelPacket::BSLoadLevelPacket(const GameParams &params) : mUnknown14(params) {
-    mUnknown0c = 0;
+BSLoadLevelPacket::BSLoadLevelPacket(const GameParams &params) : mParams(params) {
+    mClientId = 0;
 }
 
 // 0x003e4f98
@@ -38,27 +38,27 @@ const char *BSLoadLevelPacket::Name() {
 
 // 0x003f2780
 void BSLoadLevelPacket::Print(std::ostream &stream) {
-    mUnknown14.Print(stream);
+    mParams.Print(stream);
 }
 
 // 0x003e7fa0
 // The word at +0x0c crosses the wire twice.
 void BSLoadLevelPacket::Save(OBStream &stream) {
     Packet::Save(stream);
-    mUnknown14.Save(&stream);
+    mParams.Save(&stream);
 
-    int unknown0c = mUnknown0c;
-    stream.Write(&unknown0c, sizeof(unknown0c));
+    int clientId = mClientId;
+    stream.Write(&clientId, sizeof(clientId));
 }
 
 // 0x003e80a0
 void BSLoadLevelPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    mUnknown14.Load(&stream);
-    stream.Read(&mUnknown0c, sizeof(mUnknown0c));
+    mParams.Load(&stream);
+    stream.Read(&mClientId, sizeof(mClientId));
 }
 
 // 0x003f1290
 GameParams BSLoadLevelPacket::GetParams() {
-    return mUnknown14;
+    return mParams;
 }

@@ -31,11 +31,11 @@ public:
      * The structure emits no RTTI. The name is inferred.
      */
     struct Point {
-        Vector3 mPos;   /*!< Camera-space position of the point. */
-        float mFrame;   /*!< Song position of the point, in frames. */
-        float mLane;    /*!< Position across the track, 0 through 1. */
-        int mGem;       /*!< Non-zero for a point at a gem, zero for a filler point. */
-        int mUnknown1c; /*!< Never written. AddPoint() copies the word from uninitialised stack. */
+        Vector3 mPos;    /*!< Camera-space position of the point. */
+        float mFrame;    /*!< Song position of the point, in frames. */
+        float mLane;     /*!< Position across the track, 0 through 1. */
+        int mGem;        /*!< Non-zero for a point at a gem, zero for a filler point. */
+        int mReserved1c; /*!< Never written. AddPoint() copies the word from uninitialised stack. */
     };
 
     /**
@@ -149,5 +149,5 @@ private:
     float mGlowFloor;
     float mGlowSize;
     Rnd::ParticleSys *mGlow;
-    int mUnknown44; // +0x44, never accessed by the recovered routines.
+    int mReserved44; // +0x44, never accessed by the recovered routines.
 };

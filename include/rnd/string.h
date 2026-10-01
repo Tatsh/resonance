@@ -86,7 +86,7 @@ public:
         Vector2 mDir;    /*!< Unit screen direction towards the next point. +0x38 */
         Vector2 mNormal; /*!< Perpendicular of mDir, (-mDir.y, mDir.x). +0x40 */
         int mClipped;    /*!< Set while the point sits behind the near plane. +0x48 */
-        int mUnknown4c;  /*!< Purpose not recovered. +0x4c */
+        int mReserved4c; /*!< No recovered routine reads or writes it. +0x4c */
     };
 
     /**

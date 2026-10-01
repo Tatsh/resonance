@@ -48,7 +48,7 @@ void MetCommandRepeater::Update(MetScreen *pPanel, const long long *pNowNanoseco
         return;
     }
 
-    const int nIntervalMs = static_cast<int>(pPanel->mUnknown58 * kIntervalScaleMs);
+    const int nIntervalMs = static_cast<int>(pPanel->mRepeatScale * kIntervalScaleMs);
     for (int nIndex = 0; nIndex < kControllerCount; ++nIndex) {
         Record &record = mRecords[nIndex];
         if (record.mCommand == 0) {

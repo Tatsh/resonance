@@ -140,7 +140,7 @@ public:
      * @param flTime The renderer's current frame.
      * @ghidraAddress 0x003ba2f0
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Play the intro movie once and hand the renderer on. Slot 36.
@@ -152,7 +152,7 @@ public:
      *
      * @ghidraAddress 0x003ba4c8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container objects and hide the screen. Slot 38.

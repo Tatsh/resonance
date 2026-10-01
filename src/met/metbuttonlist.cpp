@@ -35,7 +35,7 @@ MetButtonList::~MetButtonList() {
 }
 
 // 0x001fcc40
-void MetButtonList::OnUnknownSlot2() {
+void MetButtonList::SelectPrevious() {
     const int nStart = mSelected;
     int bDone = 0;
     unsigned nDisabled = 0;
@@ -55,12 +55,12 @@ void MetButtonList::OnUnknownSlot2() {
             bDone = 1;
         }
     } while (!bDone);
-    mUnknown00 = mButtons[mSelected];
-    OnUnknownSlot4(nStart, mSelected);
+    mSelectedButton = mButtons[mSelected];
+    OnSelectionChanged(nStart, mSelected);
 }
 
 // 0x001fcd10
-void MetButtonList::OnUnknownSlot3() {
+void MetButtonList::SelectNext() {
     const int nStart = mSelected;
     int bDone = 0;
     unsigned nDisabled = 0;
@@ -80,12 +80,12 @@ void MetButtonList::OnUnknownSlot3() {
             bDone = 1;
         }
     } while (!bDone);
-    mUnknown00 = mButtons[mSelected];
-    OnUnknownSlot4(nStart, mSelected);
+    mSelectedButton = mButtons[mSelected];
+    OnSelectionChanged(nStart, mSelected);
 }
 
 // 0x001feed8
-void MetButtonList::OnUnknownSlot4(int nPreviousIndex, int nIndex) {
+void MetButtonList::OnSelectionChanged(int nPreviousIndex, int nIndex) {
     if (nPreviousIndex == nIndex) {
         return;
     }
@@ -118,14 +118,14 @@ void MetButtonList::SetSelected(int nIndex) {
     if (nIndex == kNoSelection) {
         mButtons[mSelected]->SetState(kButtonStateNormal);
     } else if (mSelected != nIndex) {
-        OnUnknownSlot4(mSelected, nIndex);
+        OnSelectionChanged(mSelected, nIndex);
     } else {
         // Yes, the binary keeps this branch, which the test above makes unreachable.
         mButtons[nIndex]->SetState(kButtonStateSelected);
     }
     mSelected = nIndex;
     // Yes, the sentinel path reads one element below the first.
-    mUnknown00 = mButtons.begin()[nIndex];
+    mSelectedButton = mButtons.begin()[nIndex];
 }
 
 // 0x001fef40

@@ -4,7 +4,7 @@
 GameStats::GameStats() {
     mPlayerCount = 0;
     mCompleted = 0;
-    mUnknown10 = 0;
+    mUnreadCounter = 0;
 }
 
 // 0x0010b648
@@ -14,11 +14,11 @@ GameStats::~GameStats() {
 // 0x0010f1a8
 void GameStats::Reset(int nPlayers) {
     mCompleted = 0;
-    mUnknown08 = 0;
+    mCheated = 0;
     mPlayerCount = nPlayers;
-    mUnknown10 = 0;
+    mUnreadCounter = 0;
     mProgress = 0.0f;
-    mUnknown14 = 0;
+    mRemixEdited = 0;
 
     mScores.reserve(nPlayers);
     mRatios.reserve(nPlayers);

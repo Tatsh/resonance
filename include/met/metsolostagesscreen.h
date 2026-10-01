@@ -48,7 +48,7 @@ public:
      *
      * Allocates the two button lists, builds the logo and label texture pairs from
      * `gSongLogo1.tex` with `gSongLogo2.tex` and `gSongLabel1.tex` with `gSongLabel2.tex`, and
-     * appends the prompt key `levels` to mUnknown38.
+     * appends the prompt key `levels` to mHelpKeys.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -80,7 +80,7 @@ public:
      *
      * The screen hides first. When MetFrontEndState's `+0x18` and `+0x10` flags are both set,
      * `+0x10` is cleared, MetGlobalSettingsSaverScreen::StartSave() runs with this screen as the
-     * one to return to, mUnknown50 is cleared, and nothing else runs.
+     * one to return to, mActivatePending is cleared, and no other code runs.
      *
      * Otherwise the level lists and the stage buttons are rebuilt with MetFrontEndState's `+0x14`
      * flag as the unlock-everything switch. A set `+0x18` flag moves to `+0x1c`, selects the help
@@ -150,7 +150,7 @@ public:
      * @param flTime The renderer's current frame.
      * @ghidraAddress 0x003a4df8
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Finish a scroll or a selection once its button stops alternating. Slot 30.
@@ -162,14 +162,14 @@ public:
      * @param pButton The button whose alternation finished.
      * @ghidraAddress 0x003a54b8
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Show the television and load the selected level's textures. Slot 33.
      *
      * @ghidraAddress 0x003aee50
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Push the next screens once the exit finishes. Slot 36.
@@ -181,7 +181,7 @@ public:
      *
      * @ghidraAddress 0x003a6738
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container objects. Slot 38.
@@ -316,8 +316,8 @@ private:
     Rnd::Tex *mBlankTex;
     Rnd::Tex *mTvLogoTex;     // +0xe8 The logo the television shows.
     Rnd::Tex *mNextTvLogoTex; // +0xec The logo a scroll brings in.
-    int mUnknownf0;           // +0xf0 Cleared by slot 38, with no reader.
-    int mUnknownf4;           // +0xf4 Cleared by slot 38, with no reader.
+    int mUnusedFirst;         // +0xf0 Cleared by slot 38, with no reader.
+    int mUnusedSecond;        // +0xf4 Cleared by slot 38, with no reader.
     // The status textures, locked, open, and won, from the three `lvlstate_*.bmp` bitmaps. +0xf8
     std::vector<Rnd::Tex *> mLevelStateTexs;
     std::vector<StatusSlot> mStatusSlots; // +0x104 The left and right status panels.

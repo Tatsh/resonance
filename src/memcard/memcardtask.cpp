@@ -8,7 +8,7 @@ MemcardTask::MemcardTask(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int 
 }
 
 // 0x00184530
-void MemcardTask::OnUnknown18() {
+void MemcardTask::UnusedHook() {
 }
 
 // 0x00185998

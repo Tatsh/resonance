@@ -50,7 +50,7 @@ private:
     // 0x001a2f18
     void PostGemMessages(StdMidiMsg *pMsg);
 
-    int mTrack;                  // +0x18, copied from TrackData::mUnknown04
+    int mTrack;                  // +0x18, copied from TrackData::mIndex
     const TrackData *mTrackData; // +0x1c, not read by any recovered routine
     int mStripId;                // +0x20, the open sustain strip, or zero
     float mValue;                // +0x24, the axis value, 0.5 at first

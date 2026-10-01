@@ -196,7 +196,7 @@ public:
      * Read the record back from a stream.
      *
      * Slot 3. The counterpart of Save(), reaching slot 6 of IBStream, which is
-     * `Read(void *, int)`. mUnknown160 takes the username just read. A record of version 0 or
+     * `Read(void *, int)`. mSavedName takes the username just read. A record of version 0 or
      * below then has a button list, a GameOptions record, and a list of numbered strings, all read
      * and discarded, and a record of version 2 or above has the birthday. The skill status is
      * recomputed last through UpdateSkillStatus(), expanded in place.
@@ -221,7 +221,7 @@ public:
      * Hang this persona's avatar in one of the four persona burn slots.
      *
      * Forwards to FreqAppearance::AttachToBurnSlot() on the embedded appearance.
-     * MetTutorialScreen::OnUnknownSlot36() is a caller.
+     * MetTutorialScreen::OnExitFinished() is a caller.
      *
      * @param nSlot The burn slot, 0 through 3.
      * @ghidraAddress 0x0032e488
@@ -278,15 +278,17 @@ public:
      * username out of it directly and the image has no accessor to route that read through. A
      * friend declaration fits the image equally well. +0x140
      */
-    FreqAppearance mUnknown140;
-    HxStr mUnknown154; // +0x154, the birthday Print() labels, starting as `0/0/00, 12:00`
+    FreqAppearance mAppearance;
+    HxStr mBirthday; // +0x154, the birthday Print() labels, starting as `0/0/00, 12:00`
 
     /**
      * Set to 1 by MetFreqLoader's parser on every pre-fab persona it reads. +0x15c
      *
      * Public because that parser writes it directly, and the image has no accessor.
      */
-    int mUnknown15c;
+    int mIsPrefab;
 
-    HxStr mUnknown160; // +0x160, the username as Load() last read it
+    // +0x160, the username as Load() last read it. MetPersonaSaverScreen compares it against the
+    // present username to detect a rename.
+    HxStr mSavedName;
 };

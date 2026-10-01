@@ -146,6 +146,6 @@ int GameEnableMgr::QueryBar(int nTrack, int nBar) {
     }
 
     int owned[kOwnedTrackCount];
-    FindOwnedTracks(owned, mPlayMap->Slot5(nBar));
+    FindOwnedTracks(owned, mPlayMap->MapBar(nBar));
     return IsTrackEnabled(nTrack, owned);
 }

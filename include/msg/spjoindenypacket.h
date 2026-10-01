@@ -38,11 +38,11 @@ public:
      *
      * The image lists no caller for the out-of-line body.
      *
-     * @param nUnknown14 The word stored at `+0x14`.
-     * @param unknown18 The string copied into `+0x18`.
+     * @param nReasonCode The word stored at `+0x14`.
+     * @param reason The string copied into `+0x18`.
      * @ghidraAddress 0x003ef628
      */
-    SPJoinDenyPacket(int nUnknown14, const HxStr &unknown18);
+    SPJoinDenyPacket(int nReasonCode, const HxStr &reason);
 
     /**
      * Produce a packet with an empty string on the heap.
@@ -104,8 +104,9 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    int mUnknown14;   // +0x14
-    HxStr mUnknown18; // +0x18
+    // Both titles are inferred from the class name, a refusal of a join request.
+    int mReasonCode; // +0x14
+    HxStr mReason;   // +0x18
 };
 
 /**

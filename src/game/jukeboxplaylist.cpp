@@ -94,7 +94,7 @@ void JukeboxPlayList::clear() {
 }
 
 // 0x001e5f10
-void JukeboxPlayList::RemoveUnknownEntries() {
+void JukeboxPlayList::RemoveStaleEntries() {
     auto it = entries.begin();
     while (it != entries.end()) {
         if (MetRemixManager::shared()->FindRecord((*it)->name) != nullptr) {

@@ -19,7 +19,7 @@ extern VoBuf voBuf;
 extern VideoDec videoDec;
 
 enum {
-    kDecodePictureMode = 0x546,
+    kPictureBufferMacroblocks = 0x546,
     kTagFirstFieldOffset = 0x40,
     kTagSecondFieldOffset = 0x20240,
     kTagEntrySize = 0x40440,
@@ -48,13 +48,13 @@ static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData);
 static int decode(VideoDec *pVideoDec) {
     int result = 1;
     void *pPicture;
-    int contextWordZero;
-    int contextWordOne;
+    int width;
+    int height;
     int slotIndex;
     int tagOffset;
     int dataOffset;
 
-    while (sceMpegGetContextWordZero(pVideoDec) == 0) {
+    while (sceMpegIsEnd(pVideoDec) == 0) {
         if (pVideoDec->state == VD_STATE_ABORT) {
             LogPrintf("decode thread: aborted\n");
             result = -1;
@@ -63,12 +63,12 @@ static int decode(VideoDec *pVideoDec) {
         while ((pPicture = voBufGetData(&voBuf)) == NULL) {
             switchThread();
         }
-        if (sceMpegSub005e07b0(pVideoDec, pPicture, kDecodePictureMode) < 0) {
+        if (sceMpegGetPicture(pVideoDec, pPicture, kPictureBufferMacroblocks) < 0) {
             ErrMessage("sceMpegGetPicture() decode error");
         }
         if (pVideoDec->mpeg.frameCount == 0) {
-            contextWordZero = pVideoDec->mpeg.width;
-            contextWordOne = pVideoDec->mpeg.height;
+            width = pVideoDec->mpeg.width;
+            height = pVideoDec->mpeg.height;
             slotIndex = 0;
             tagOffset = 0;
             dataOffset = 0;
@@ -77,10 +77,10 @@ static int decode(VideoDec *pVideoDec) {
                     unsigned char *pTag = (unsigned char *)voBuf.tag + tagOffset;
                     unsigned char *pData = (unsigned char *)voBuf.data + dataOffset;
 
-                    setImageTag(pTag + kTagFirstFieldOffset, pData, 0, contextWordZero,
-                                contextWordOne);
-                    setImageTag(pTag + kTagSecondFieldOffset, pData, 1, contextWordZero,
-                                contextWordOne);
+                    setImageTag(pTag + kTagFirstFieldOffset, pData, 0, width,
+                                height);
+                    setImageTag(pTag + kTagSecondFieldOffset, pData, 1, width,
+                                height);
                     tagOffset += kTagEntrySize;
                     dataOffset += kFrameDataSize;
                     ++slotIndex;
@@ -90,12 +90,12 @@ static int decode(VideoDec *pVideoDec) {
         voBufIncCount(&voBuf);
         switchThread();
     }
-    sceMpegSub005e08e8(pVideoDec);
+    sceMpegReset(pVideoDec);
     return result;
 }
 
 // 0x005692f0
-static void MpegDecoderRoutine005692f0(VideoDec *pVideoDec) {
+static void videoDecReset(VideoDec *pVideoDec) {
     pVideoDec->state = 0;
 }
 
@@ -114,14 +114,14 @@ void videoDecCreate(VideoDec *pVideoDec,
     sceMpegSetCallbackSlot(pVideoDec, 2, mpegStopDMA, NULL);
     sceMpegSetCallbackSlot(pVideoDec, 3, mpegRestartDMA, NULL);
     sceMpegSetCallbackSlot(pVideoDec, 5, mpegTS, NULL);
-    MpegDecoderRoutine005692f0(pVideoDec);
+    videoDecReset(pVideoDec);
     sceDmaCreateQueueSemaphore(inputBuf(pVideoDec), pData, pTag, nTagSize, pTimeStamps, nTimeStamps);
 }
 
 // 0x005693f8
 int videoDecDelete(VideoDec *pVideoDec) {
     sceDmaDeleteQueueSemaphore(inputBuf(pVideoDec));
-    sceMpegReturnOne(pVideoDec);
+    sceMpegDelete(pVideoDec);
     return 1;
 }
 
@@ -152,8 +152,8 @@ int videoDecInputSpaceCount(VideoDec *pVideoDec) {
 }
 
 // 0x005694b0
-void videoDecReset(VideoDec *pVideoDec, int nArgA, int nArgB, int nArgC) {
-    sceMpegSub005e0890(pVideoDec, nArgA, nArgB, nArgC);
+void videoDecSetDecodeMode(VideoDec *pVideoDec, int nIntra, int nPredicted, int nBidirectional) {
+    sceMpegSetDecodeMode(pVideoDec, nIntra, nPredicted, nBidirectional);
 }
 
 // 0x005694d0
@@ -183,7 +183,7 @@ int videoDecFlush(VideoDec *pVideoDec) {
     copied = cpy2area(pUncachedPut, putSize, pUncachedWrapped, wrappedSize, endCode,
                       kFlushWriteSize, NULL, 0);
     viBufEndPut(inputBuf(&videoDec), copied);
-    sceDmaSub00613798(inputBuf(pVideoDec));
+    viBufFlush(inputBuf(pVideoDec));
     if (pVideoDec->state != 0) {
         return 1;
     }
@@ -196,7 +196,7 @@ int videoDecIsFlushed(VideoDec *pVideoDec) {
     if (viBufCount(inputBuf(pVideoDec)) != 0) {
         return 0;
     }
-    return sceMpegIsContextWordFourClear(pVideoDec) != 0;
+    return sceMpegIsRefBuffEmpty(pVideoDec) != 0;
 }
 
 // 0x00569600
@@ -239,7 +239,7 @@ int videoDecPutTs(VideoDec *pVideoDec,
 
 // 0x005696a0
 void videoDecMain(VideoDec *pVideoDec) {
-    sceDmaSub006126e8(inputBuf(pVideoDec));
+    viBufReset(inputBuf(pVideoDec));
     voBufReset(&voBuf);
     decode(pVideoDec);
     // The worker waits here until the display has drained the queue.
@@ -265,7 +265,7 @@ static int mpegNodata(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pCallbackData;
     (void)pData;
     switchThread();
-    sceDmaSub00612890(inputBuf(&videoDec));
+    viBufAddDMA(inputBuf(&videoDec));
     return 1;
 }
 
@@ -274,7 +274,7 @@ static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pCallbackData;
     (void)pData;
-    sceDmaSub00612b40(inputBuf(&videoDec));
+    viBufStopDMA(inputBuf(&videoDec));
     return 1;
 }
 
@@ -283,7 +283,7 @@ static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pCallbackData;
     (void)pData;
-    sceDmaSub00612cc0(inputBuf(&videoDec));
+    viBufRestartDMA(inputBuf(&videoDec));
     return 1;
 }
 
@@ -294,7 +294,7 @@ static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
 
     (void)pMpeg;
     (void)pData;
-    sceDmaSub006131e0(inputBuf(&videoDec), stamps);
+    viBufGetTs(inputBuf(&videoDec), stamps);
     pDest = (long long *)pCallbackData;
     pDest[1] = stamps[0];
     pDest[2] = stamps[1];

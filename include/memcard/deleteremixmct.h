@@ -157,8 +157,8 @@ private:
     // The remix to remove, as the constructor received it. +0x40
     HxStr mRemixName;
 
-    // +0x48
-    HxStr mUnknown48;
+    // Constructed empty and destroyed, and never otherwise read or written. +0x48
+    HxStr mUnusedString;
 
     // The inner read of each index. The destructor deletes it. +0x50
     LoadFileMCT *mLoadTask;

@@ -74,7 +74,7 @@ private:
     friend class TnlArrow;
     friend class TnlCrippleFX;
 
-    int mPlayerNum; // Player::Slot2() plus 1.
+    int mPlayerNum; // Player::GetInputSlot() plus 1.
     float mCrippleFrame;
     Rnd::TransAnim *mCrippleActPath;  // "crip act path".
     Rnd::Transformable *mActivatorFx; // "activator fx%d".
@@ -84,7 +84,7 @@ private:
     Rnd::TransAnim *mCamIntro;        // "tnl cam intro<local player count>.tnm".
     Rnd::View *mLocalView;            // "tnl local%d.view".
     AppTunnel *mTunnel;
-    int mUnknown28; // +0x28, zeroed and never read by the recovered routines.
+    int mUnusedWord; // +0x28, zeroed and never read by the recovered routines.
     int mIndex;
     Player *mPlayer;
     TnlActivator mActivator;
@@ -97,6 +97,6 @@ public:
     TnlSeekerFade mSeekerFade;
 
 private:
-    int mUnknown198; // +0x198, never accessed by the recovered routines.
-    int mUnknown19c; // +0x19c, never accessed by the recovered routines.
+    int mReserved198; // +0x198, never accessed by the recovered routines.
+    int mReserved19c; // +0x19c, never accessed by the recovered routines.
 };

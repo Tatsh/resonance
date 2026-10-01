@@ -53,7 +53,7 @@ void TnlPointer::MeshPair::SetAlpha(float flAlpha) {
 // 0x0043a810
 TnlPointer::TnlPointer(const HxStr &colorName)
     : mLastTime(0.0f), mSpinFrame(0.0f), mSpinning(0), mOffsetX(kCentreOffset),
-      mUnknown3c(kCentreOffset), mSpinStart(kUnsetTime) {
+      mCentreOffset(kCentreOffset), mSpinStart(kUnsetTime) {
     const HxStr prefix = HxStr("ptr_") + colorName[0];
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(prefix));
     mSpinView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(prefix + "_spin.view"));

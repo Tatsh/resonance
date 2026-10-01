@@ -173,13 +173,13 @@ void Renderer::HandleMessage(Message *pMsg) {
 }
 
 // 0x00432460
-void Renderer::OnUnknownSlot6() {
+void Renderer::PollMessages() {
     mSongTick = static_cast<float>(mSongClock->SongTick());
-    RendererBase::OnUnknownSlot6();
+    RendererBase::PollMessages();
 }
 
 // 0x004324a0
-void Renderer::OnUnknownSlot7() {
+void Renderer::Update() {
     mTunnel->SetFrame(mSongTick);
     mOverlay->SetFrame(mSongTick);
     mArena->SetFrame(mSongTick);
@@ -192,7 +192,7 @@ void Renderer::OnUnknownSlot7() {
 }
 
 // 0x0042d258
-void Renderer::OnUnknownSlot8() {
+void Renderer::Draw() {
     mOuterView->Draw();
 
     if (g_nLsdMode != 0) {
@@ -397,7 +397,7 @@ void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     }
     if (bTunnelChanged) {
         mTunnel->OnBarChanged(
-            nTrack, nBar, pMsg->mUnknown14, pCell->mPlayer, pCell->mPowerup, pCell->mEnabled);
+            nTrack, nBar, pMsg->mRefreshing, pCell->mPlayer, pCell->mPowerup, pCell->mEnabled);
     }
 }
 

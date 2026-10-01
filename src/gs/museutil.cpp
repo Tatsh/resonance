@@ -58,9 +58,9 @@ private:
     // 0x001ab620
     void OnStdMidi(StdMidiMsg *pMsg) {
         StdMidiMsg shifted(*pMsg);
-        const unsigned char nKind = pMsg->mUnknown08 & kStatusKindMask;
+        const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
         if (nKind == kStatusNoteOn || nKind == kStatusNoteOff) {
-            shifted.mUnknown09 = static_cast<unsigned char>(shifted.mUnknown09 + mTrans);
+            shifted.mData1 = static_cast<unsigned char>(shifted.mData1 + mTrans);
         }
         mResult->Add(&shifted, mPosition.mTick, kAppendFirst);
     }

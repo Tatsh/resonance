@@ -120,14 +120,14 @@ inline void PlaceOnRing(Rnd::Transformable &trans, int nRing, float flFrame, flo
 }
 
 /**
- * Result of configuration code 0x3a1 when AppTunnel was constructed.
+ * Non-zero when AppTunnel was constructed for a tutorial level, from configuration code 0x3a1.
  *
  * AppTunnel's constructor writes it at `0x00442344`. A non-zero value stops TnlActivator::Update()
  * from blinking the activator and catcher materials.
  *
  * @ghidraAddress 0x006e42a4
  */
-extern int g_nAppTunnelDisplayMode;
+extern int g_nAppTunnelTutorial;
 
 /**
  * The brightness the lane floor colours are scaled by.

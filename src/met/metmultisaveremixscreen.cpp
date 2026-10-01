@@ -57,9 +57,9 @@ MetMultiSaveRemixScreen::~MetMultiSaveRemixScreen() {
 void MetMultiSaveRemixScreen::EnterAndShow() {
     SetShowing(0);
     PushNamedScreen(HxStr(kEndRemixScreen));
-    mUnknown10->SetActivePanel(this);
+    mRenderer->SetActivePanel(this);
 
-    mPlayerCount = static_cast<int>(MetFrontEndState::shared()->mUnknown00.size());
+    mPlayerCount = static_cast<int>(MetFrontEndState::shared()->mPersonas.size());
     mSaveCount = 0;
     for (int nPlayer = kMaxPlayers - 1; nPlayer >= 0; --nPlayer) {
         mCardReady[nPlayer] = 0;
@@ -88,7 +88,7 @@ void MetMultiSaveRemixScreen::EnterAndShow() {
 }
 
 // 0x002fa7c0
-void MetMultiSaveRemixScreen::OnUnknownSlot36() {
+void MetMultiSaveRemixScreen::OnExitFinished() {
     if (mSaveCount == 0) {
         ReturnToRemixType();
         return;
@@ -101,11 +101,11 @@ void MetMultiSaveRemixScreen::OnUnknownSlot36() {
         if (mCardReady[nPlayer] == kCardReady) {
             mReadyPlayers.push_back(nPlayer);
         }
-        appearances.push_back(MetFrontEndState::shared()->mUnknown00[nPlayer]->mUnknown140);
+        appearances.push_back(MetFrontEndState::shared()->mPersonas[nPlayer]->mAppearance);
     }
 
     const int nFirstPlayer = mReadyPlayers[0];
-    MetPersonaData *pPersona = MetFrontEndState::shared()->mUnknown00[mReadyPlayers[0]];
+    MetPersonaData *pPersona = MetFrontEndState::shared()->mPersonas[mReadyPlayers[0]];
     (void)GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MetSaveRemixScreen::Open(pPersona,
                              nFirstPlayer + kFirstPad,
@@ -113,15 +113,15 @@ void MetMultiSaveRemixScreen::OnUnknownSlot36() {
                              GlobalSettings::shared()->mCardSlots[0],
                              appearances,
                              kClearSaveName);
-    mUnknowne8 = 0;
+    mEndScreenExited = 0;
     mSaveIndex = 0;
 }
 
 // 0x002facc0
-void MetMultiSaveRemixScreen::OnUnknownSlot2(int) {
+void MetMultiSaveRemixScreen::OnSaveFinished(int) {
     ++mSaveIndex;
     if (static_cast<std::vector<int>::size_type>(mSaveIndex) == mReadyPlayers.size()) {
-        if (mUnknowne8 == 0) {
+        if (mEndScreenExited == 0) {
             ExitScreenByName(HxStr(kEndRemixScreen));
         }
         ReturnToRemixType();
@@ -129,16 +129,16 @@ void MetMultiSaveRemixScreen::OnUnknownSlot2(int) {
     }
 
     const int nPlayer = mReadyPlayers[mSaveIndex];
-    MetPersonaData *pPersona = MetFrontEndState::shared()->mUnknown00[nPlayer];
-    if (mUnknowne8 != 0) {
+    MetPersonaData *pPersona = MetFrontEndState::shared()->mPersonas[nPlayer];
+    if (mEndScreenExited != 0) {
         PushNamedScreen(HxStr(kEndRemixScreen));
-        mUnknowne8 = 0;
+        mEndScreenExited = 0;
     }
 
     std::vector<FreqAppearance> appearances;
     appearances.reserve(mPlayerCount);
     for (int nIndex = 0; nIndex < mPlayerCount; ++nIndex) {
-        appearances.push_back(MetFrontEndState::shared()->mUnknown00[nIndex]->mUnknown140);
+        appearances.push_back(MetFrontEndState::shared()->mPersonas[nIndex]->mAppearance);
     }
     // Yes, the binary picks the card slot by the save index rather than by the player.
     MetSaveRemixScreen::Open(pPersona,
@@ -150,9 +150,9 @@ void MetMultiSaveRemixScreen::OnUnknownSlot2(int) {
 }
 
 // 0x002fb248
-void MetMultiSaveRemixScreen::OnUnknownSlot4(int nFlag) {
-    mUnknowne8 = nFlag ^ 1;
-    if (nFlag != 0) {
+void MetMultiSaveRemixScreen::SetOwnerScreenShowing(int bShowing) {
+    mEndScreenExited = bShowing ^ 1;
+    if (bShowing != 0) {
         PushNamedScreen(HxStr(kEndRemixScreen));
     } else {
         ExitScreenByName(HxStr(kEndRemixScreen));
@@ -161,9 +161,9 @@ void MetMultiSaveRemixScreen::OnUnknownSlot4(int nFlag) {
 
 // 0x002fb350
 void MetMultiSaveRemixScreen::ReturnToRemixType() {
-    mUnknown10->ResolveArenaView(kResolveArenaView);
-    mUnknown10->OnUnknown00390088();
-    mUnknown10->OnUnknown00390090();
+    mRenderer->ResolveArenaView(kResolveArenaView);
+    mRenderer->OnReturnFromGame();
+    mRenderer->OnReturnToMenus();
     PushNamedScreen(HxStr(kRemixTypeScreen));
     ActivateNamedPanel(HxStr(kRemixTypeScreen));
 }
@@ -174,7 +174,7 @@ MetMultiSaveRemixScreen *MetMultiSaveRemixScreen::New(MetRenderer *pRenderer, in
 }
 
 // 0x002fee48
-void MetMultiSaveRemixScreen::OnUnknownSlot3() {
-    mUnknowne8 = 1;
+void MetMultiSaveRemixScreen::OnHelpRequested() {
+    mEndScreenExited = 1;
     ExitScreenByName(HxStr(kEndRemixScreen));
 }

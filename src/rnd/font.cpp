@@ -31,7 +31,7 @@ constexpr int kBlankCellDivisor = 4;
 
 // Mip level the glyph scan measures, and the two further arguments it locks that level with.
 constexpr int kGlyphMipLevel = 0;
-constexpr int kGlyphMipLockUnknown = 0;
+constexpr int kGlyphMipLockReserved = 0;
 constexpr int kGlyphMipLockFlags = 1;
 
 // Stage of the material whose texture supplies the atlas.
@@ -57,13 +57,13 @@ constexpr char kDefaultChars[] = " !\"#$%&'()*+,-./0123456789:;<=>?@"
  *
  * The title is inferred. The record is 12 bytes, which the 0x20-byte tree node of the map it
  * arrives in and the 12-byte zero fill at `0x004cea9c` both pin, and the reader establishes the
- * three types. Every value is discarded as soon as Load() has read the map, so what the two floats
- * addressed is unrecovered.
+ * three types. Every value is discarded as soon as Load() has read the map. The titles of the two
+ * floats are inferred from the per-character material they follow, whose glyph they would size.
  */
 struct LegacyCharInfo {
     Mat *mMat;
-    float mUnknown04;
-    float mUnknown08;
+    float mWidth;
+    float mHeight;
 };
 
 const char *NameText(const Object *pObject) {
@@ -125,8 +125,8 @@ Stream &operator>>(Stream &stream, LegacyCharInfo &info) {
     HxStr matName(nullptr);
     stream.ReadString(matName);
     info.mMat = dynamic_cast<Mat *>(g_manager.Find(matName));
-    stream.Read(&info.mUnknown04, sizeof(info.mUnknown04));
-    stream.Read(&info.mUnknown08, sizeof(info.mUnknown08));
+    stream.Read(&info.mWidth, sizeof(info.mWidth));
+    stream.Read(&info.mHeight, sizeof(info.mHeight));
     return stream;
 }
 
@@ -386,7 +386,8 @@ void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
     if (mMat != nullptr && !mMat->mStages.empty()) {
         pTex = mMat->mStages[kAtlasStage].mTex;
         if (pTex != nullptr) {
-            pCanvas = pTex->LockMipBitmap(kGlyphMipLevel, kGlyphMipLockUnknown, kGlyphMipLockFlags);
+            pCanvas =
+                pTex->LockMipBitmap(kGlyphMipLevel, kGlyphMipLockReserved, kGlyphMipLockFlags);
         }
     }
 

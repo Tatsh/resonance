@@ -48,7 +48,7 @@ void Phrase::operator delete(void *pBlock) {
 }
 
 // 0x001b4940
-Phrase::Phrase() : mPlayer(&g_nullPlayer), mMuse(nullptr), mUnknown28(0) {
+Phrase::Phrase() : mPlayer(&g_nullPlayer), mMuse(nullptr), mScore(0) {
 }
 
 // 0x001b4998
@@ -137,7 +137,7 @@ void Phrase::Save(OBStream &stream) {
         stream << *it;
     }
 
-    const int nPlayer = mPlayer->mId20;
+    const int nPlayer = mPlayer->mPlayerId;
     stream.Write(&nPlayer, sizeof(nPlayer));
 
     if (mMuse != nullptr) {

@@ -5,8 +5,8 @@
 #include "msg/trackselectpacket.h"
 
 // 0x00122f10
-NetPlayer::NetPlayer(int nId, int nUnknown48, const HxStr &name, const FreqAppearance *pAppearance)
-    : Player(nId, name, pAppearance), mUnknown48(nUnknown48), mUnknown4c(0) {
+NetPlayer::NetPlayer(int nId, int nTrack, const HxStr &name, const FreqAppearance *pAppearance)
+    : Player(nId, name, pAppearance), mTrack(nTrack), mPlace(0) {
 }
 
 // 0x00125a98
@@ -17,13 +17,13 @@ NetPlayer::~NetPlayer() {
 }
 
 // 0x00125c48
-int NetPlayer::Slot4() {
-    return mUnknown48;
+int NetPlayer::GetTrack() {
+    return mTrack;
 }
 
 // 0x00125c50
-int NetPlayer::Slot5() {
-    return mUnknown4c;
+int NetPlayer::GetPlace() {
+    return mPlace;
 }
 
 // 0x00122f78
@@ -33,8 +33,8 @@ void NetPlayer::OnTrackSelectPacket(TrackSelectPacket *pPacket) {
     }
 
     RemoteTrackSelectMsg message;
-    message.mUnknown04 = pPacket->mTrack;
-    message.mUnknown08 = pPacket->mPlace;
+    message.mTrack = pPacket->mTrack;
+    message.mPlace = pPacket->mPlace;
     message.mPosition = pPacket->mPosition;
     message.mPlayer = pPacket->mPlayer;
     Send(&message);
@@ -47,9 +47,9 @@ void NetPlayer::HandleMessage(Message *message) {
         OnTrackSelectPacket(static_cast<TrackSelectPacket *>(message));
     } else if (static_cast<unsigned int>(nType) == g_dwTrackSelectMsgType) {
         TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(message);
-        if (pSelect->mUnknown10 == this) {
-            mUnknown48 = pSelect->mUnknown04;
-            mUnknown4c = pSelect->mUnknown08;
+        if (pSelect->mPlayer == this) {
+            mTrack = pSelect->mTrack;
+            mPlace = pSelect->mPlace;
         }
     } else {
         Player::HandleMessage(message);

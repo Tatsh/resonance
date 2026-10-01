@@ -17,7 +17,7 @@
 
 namespace {
 
-// The answer Player::Slot4() reports for a player that occupies no channel.
+// The answer Player::GetTrack() reports for a player that occupies no channel.
 constexpr int kNoChannel = -1;
 
 // MIDI ticks in one bar.
@@ -49,8 +49,8 @@ const SelfTestRegistration sSelfTestRegistration;
 
 // Queries a player's channel and step, discarding both answers.
 void ProbePlayer(Player *pPlayer) {
-    pPlayer->Slot4();
-    pPlayer->Slot5();
+    pPlayer->GetTrack();
+    pPlayer->GetPlace();
 }
 
 } // namespace
@@ -64,7 +64,7 @@ TrackSelector::TrackSelector(const std::vector<Player *> &players)
         }
     }
     for (unsigned nIndex = 0; nIndex < players.size(); ++nIndex) {
-        const int nChannel = players[nIndex]->Slot4();
+        const int nChannel = players[nIndex]->GetTrack();
 
         if (nChannel != kNoChannel) {
             InsertLightForDrawable(players[nIndex], nChannel, 0);
@@ -87,10 +87,10 @@ void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPa
                                                     mGrid[nChannel][nSlot + 1];
         if (pNext != mGrid[nChannel][nSlot]) {
             TrackSelectMsg message;
-            message.mUnknown04 = nChannel;
-            message.mUnknown08 = nSlot;
+            message.mTrack = nChannel;
+            message.mPlace = nSlot;
             message.mPosition = Mid::MBT(nPayload);
-            message.mUnknown10 = pNext;
+            message.mPlayer = pNext;
             Send(&message);
             mGrid[nChannel][nSlot] = pNext;
         }
@@ -103,10 +103,10 @@ void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nP
         if (mGrid[nChannel][nSlot] == &g_nullPlayer) {
             mGrid[nChannel][nSlot] = pPlayer;
             TrackSelectMsg message;
-            message.mUnknown04 = nChannel;
-            message.mUnknown08 = nSlot;
+            message.mTrack = nChannel;
+            message.mPlace = nSlot;
             message.mPosition = Mid::MBT(nPayload);
-            message.mUnknown10 = pPlayer;
+            message.mPlayer = pPlayer;
             Send(&message);
             return;
         }
@@ -119,7 +119,7 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
     Player *pPlayer = pPacket->mPlayer;
     const Mid::MBT position(
         std::min(std::max(pPacket->mBar * Mid::MBT(kTicksPerBar).mTick, kMBTMinimum), kMBTMaximum));
-    if (pPlayer->Slot5() == 0) {
+    if (pPlayer->GetPlace() == 0) {
         return 0;
     }
 
@@ -133,7 +133,7 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
         message.mTrack = nChannel;
         Send(&message);
     }
-    while (pPlayer->Slot5() != 0) {
+    while (pPlayer->GetPlace() != 0) {
         RebindLightIfChanged(mGrid[nChannel][0], nChannel, position.mTick);
     }
     pPacket->mResult = 1;
@@ -171,7 +171,7 @@ inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
 // 0x0013f6d8
 inline void TrackSelector::OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
-    RebindLightColumn(pPlayer, pPlayer->Slot4(), pMsg->mUnknown04, pMsg->mPosition.mTick);
+    RebindLightColumn(pPlayer, pPlayer->GetTrack(), pMsg->mTrack, pMsg->mPosition.mTick);
 }
 
 // 0x0013b868
@@ -273,7 +273,7 @@ void TrackSelector::RebindLightIfChanged(Player *pPlayer, int nChannel, int nPay
 
 // 0x0013f840
 int TrackSelector::AddLightToChannel(Player *pPlayer, int nPayload, int nDelta) {
-    const int nChannel = pPlayer->Slot4();
+    const int nChannel = pPlayer->GetTrack();
     const int nTarget = (nChannel + nDelta + mChannelCount) % mChannelCount;
 
     RemoveLightFromColumn(pPlayer, nChannel, nPayload);

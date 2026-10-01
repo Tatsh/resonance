@@ -38,10 +38,10 @@ public:
     /**
      * Construct a mixer on one channel.
      *
-     * The routine reads mOwnsPan from configuration code 0x398, mUnknown10 from code 0x399, and
-     * mTrackLevels from code 0x39f, sets mLevel and all four gain factors to 127, mUnknown50 to
-     * -1, and mSelection to g_nullPlayer, and zeroes mUnknown28 twice over. mUnknown54 takes
-     * PlayMap::Slot9() of Globals::GetPlayMap(). It does not write mOutput.
+     * The routine reads mOwnsPan from configuration code 0x398, mBoostVolume from code 0x399, and
+     * mTrackLevels from code 0x39f, sets mLevel and all four gain factors to 127, mTracksOnBar to
+     * -1, and mSelection to g_nullPlayer, and zeroes mZeroedBytes twice over. mEndBar takes
+     * PlayMap::GetEndBar() of Globals::GetPlayMap(). It does not write mOutput.
      *
      * @param nTrack The track this mixer serves. BGTrackGraph passes -1, which matches no track.
      * @param nChannel The MIDI channel every message it emits is sent on.
@@ -114,7 +114,7 @@ protected:
      * React to a TrackSelectMsg.
      *
      * A message for mTrack installs its player as mSelection and recomputes the gain. Then, for
-     * any track, a selection whose Player::Slot2() reports zero takes the message's track as
+     * any track, a selection whose Player::GetInputSlot() reports zero takes the message's track as
      * mLastSection and, when mOwnsPan is set, sends the pan.
      *
      * @param pMsg The TrackSelectMsg.
@@ -125,7 +125,7 @@ protected:
     /**
      * React to a TracksOnMsg.
      *
-     * Stores the message's bar in mUnknown50 and its track count in mLevelIndex, and recomputes
+     * Stores the message's bar in mTracksOnBar and its track count in mLevelIndex, and recomputes
      * the gain.
      *
      * @param pMsg The TracksOnMsg.
@@ -168,8 +168,9 @@ public:
 private:
     unsigned char mChannel; // +0x08
     int mTrack;             // +0x0c the constructor's first argument
-    // Read from configuration code 0x399 as one byte. No recovered routine reads it back.
-    unsigned char mUnknown10; // +0x10
+    // Read from configuration code 0x399 (the script template `level_boost_volume`) as one byte.
+    // No recovered routine reads it back.
+    unsigned char mBoostVolume; // +0x10
     // Whether the mixer generates the pan itself, read from configuration code 0x398. Two readers
     // agree on the sense. OnTrackSelect() sends the pan only when it is set, and an incoming pan
     // controller is discarded only when it is set.
@@ -182,7 +183,7 @@ private:
     unsigned char mLevel; // +0x20
     // Sixteen bytes the constructor zeroes twice over, once before the configuration reads and
     // once after. No recovered routine reads any of them.
-    unsigned char mUnknown28[16]; // +0x28
+    unsigned char mZeroedBytes[16]; // +0x28
     // Whether the channel is muted. SetGainFactor() computes the level but does not send it while
     // this is set, and SetMuted() sends zero on the way in and mLevel on the way out.
     int mMuted; // +0x38
@@ -192,8 +193,8 @@ private:
     int mLevelIndex;               // +0x40 index into mTrackLevels, taken from a TracksOnMsg
     // Per-track levels, read from configuration code 0x39f by the constructor.
     std::vector<int> mTrackLevels; // +0x44
-    int mUnknown50;                // +0x50 set to -1 by the constructor, then a TracksOnMsg's bar
-    // PlayMap::Slot9() of the play map, read once by the constructor. No recovered routine reads
-    // it back.
-    int mUnknown54; // +0x54
+    int mTracksOnBar;              // +0x50 set to -1 by the constructor, then a TracksOnMsg's bar
+    // PlayMap::GetEndBar() of the play map, the bar count the game measures progress against, read
+    // once by the constructor. No recovered routine reads it back.
+    int mEndBar; // +0x54
 };

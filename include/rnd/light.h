@@ -142,18 +142,17 @@ public:
     virtual void SetAttenuation(float flConstant, float flLinear, float flQuadratic);
 
     /**
-     * Sixth virtual of this class, whose purpose is unrecovered.
+     * Hook run after the whole state of the light changes at once.
      *
      * Vtable slot 8 of the Rnd::Transformable table. The body is empty and no class overrides it.
      * Two call sites are recovered, and both are a tail call on `this` with no argument. Load()
      * ends with one at `0x00540e80` and Copy() ends with another at `0x0054545c`, which fixes the
-     * signature as a no-argument void and makes the slot a hook run after the whole state of the
-     * light changes at once. Nothing in the image records a better title, and every subclass that
-     * would supply a body is absent from this build.
+     * signature as a no-argument void. The title is inferred from those two call sites, and every
+     * subclass that would supply a body is absent from this build.
      *
      * @ghidraAddress 0x00544818
      */
-    virtual void ApplyUnknown();
+    virtual void SyncLight();
 
     /**
      * Report the class key a `.rnd` file writes for a light.
@@ -206,7 +205,7 @@ public:
      *
      * The three colours move as one quadword each. The source is narrowed through `dynamic_cast`
      * and the result is used with no null test. A pSource that is not a light therefore faults
-     * here. ApplyUnknown() finishes the routine.
+     * here. SyncLight() finishes the routine.
      *
      * @param pSource The object to copy from.
      * @param nFlags The set of fields to copy, passed straight to the base.
@@ -218,7 +217,7 @@ public:
      * Replace the three colours, the six scalars, and the type from stream.
      *
      * A revision above 1 produces the report "Can't load new Light" and no further reading. A
-     * revision of 0 predates the type word and retains mType unchanged. ApplyUnknown() finishes the
+     * revision of 0 predates the type word and retains mType unchanged. SyncLight() finishes the
      * routine.
      *
      * @param stream The stream to read from.

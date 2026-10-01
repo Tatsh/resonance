@@ -83,7 +83,7 @@ constexpr int kRowCount = 13;
 constexpr int kListContext = 0;
 constexpr int kFirstRow = 0;
 
-// MetScreen::mUnknown18 records how the screen was left.
+// MetScreen::mExitChoice records how the screen departed.
 constexpr int kExitBack = 0;
 constexpr int kExitLoad = 2;
 
@@ -100,16 +100,16 @@ inline std::vector<MetRemixRecord> *Catalogue(int nKey) {
 
 inline HxStr FactoryTitle(const GameParams &params) {
     HxStr title = QueryConfigString(kTitleConfigCode,
-                                    params.mUnknown1c == kPlayModeJam ? kFactoryRemixTitleKey :
-                                                                        kFactoryCustomTitleKey);
+                                    params.mPlayMode == kPlayModeJam ? kFactoryRemixTitleKey :
+                                                                       kFactoryCustomTitleKey);
     return title;
 }
 
 inline HxStr CardTitle(const GameParams &params) {
     HxStr slotName = FirstCardSlotName();
     HxStr format = QueryConfigString(kTitleConfigCode,
-                                     params.mUnknown1c == kPlayModeJam ? kCardRemixTitleKey :
-                                                                         kCardCustomTitleKey);
+                                     params.mPlayMode == kPlayModeJam ? kCardRemixTitleKey :
+                                                                        kCardCustomTitleKey);
     return HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
 }
 
@@ -118,64 +118,64 @@ inline HxStr CardTitle(const GameParams &params) {
 // 0x00349dc0
 MetRemixLoadScreen::MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown94(nullptr), mUnknowna0(nullptr), mUnknowna4(nullptr), mUnknowna8(nullptr) {
-    mUnknown60 = 0;
-    mUnknowna8 = new MetButtonList;
+      mList(nullptr), mThisDiscFont(nullptr), mOtherFont(nullptr), mButtons(nullptr) {
+    mShowsLoadedDrawables = 0;
+    mButtons = new MetButtonList;
 }
 
 // 0x00349fc8
 void MetRemixLoadScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mUnknowna8->Clear();
+    mButtons->Clear();
     {
         HxStr label = QueryConfigString(kPromptConfigCode, kSavedLabelKey);
-        mUnknowna8->Add(HxStr(kSavedButton), label);
+        mButtons->Add(HxStr(kSavedButton), label);
     }
     {
         HxStr label = QueryConfigString(kPromptConfigCode, kFactoryLabelKey);
-        mUnknowna8->Add(HxStr(kFactoryButton), label);
+        mButtons->Add(HxStr(kFactoryButton), label);
     }
-    mUnknowna0 = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kMatchingFont)));
-    mUnknowna4 = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kOtherFont)));
+    mThisDiscFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kMatchingFont)));
+    mOtherFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kOtherFont)));
 }
 
 // 0x0034a2a8
 void MetRemixLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        if (mUnknown90 == nullptr || mUnknown94->getSelected() <= kFirstRow) {
+        if (mRemixes == nullptr || mList->getSelected() <= kFirstRow) {
             return;
         }
-        mUnknown94->scrollUp();
-        ShowRowOnDataScreen(mUnknown94->getSelected());
+        mList->scrollUp();
+        ShowRowOnDataScreen(mList->getSelected());
         break;
     case kMetScreenCommandNext:
-        if (mUnknown90 == nullptr ||
-            !(static_cast<unsigned>(mUnknown94->getSelected()) < mUnknown90->size() - 1)) {
+        if (mRemixes == nullptr ||
+            !(static_cast<unsigned>(mList->getSelected()) < mRemixes->size() - 1)) {
             return;
         }
-        mUnknown94->scrollDown();
-        ShowRowOnDataScreen(mUnknown94->getSelected());
+        mList->scrollDown();
+        ShowRowOnDataScreen(mList->getSelected());
         break;
     case kMetScreenCommandLeft:
-        mUnknowna8->OnUnknownSlot2();
+        mButtons->SelectPrevious();
         OnButtonRingMoved();
         break;
     case kMetScreenCommandRight:
-        mUnknowna8->OnUnknownSlot3();
+        mButtons->SelectNext();
         OnButtonRingMoved();
         break;
     case kMetScreenCommandSelect: {
-        if (mUnknown90 == nullptr || mUnknown90->size() == 0) {
+        if (mRemixes == nullptr || mRemixes->size() == 0) {
             return;
         }
-        const MetRemixRecord &record = (*mUnknown90)[mUnknown94->getSelected()];
-        if (record.unknown34_ != GetAlbumJukeboxValue()) {
+        const MetRemixRecord &record = (*mRemixes)[mList->getSelected()];
+        if (record.albumNumber != GetAlbumJukeboxValue()) {
             PlayErrorSound(pCommand->mPadIndex);
             return;
         }
-        MetHelpScreen::SetText(HxStr(kNoText), mUnknown10->mUnknown68);
-        mUnknown18 = kExitLoad;
+        MetHelpScreen::SetText(HxStr(kNoText), mRenderer->mAnimationFrame);
+        mExitChoice = kExitLoad;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kDataScreen));
@@ -183,8 +183,8 @@ void MetRemixLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
         break;
     }
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoText), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoText), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kDataScreen));
         BeginExit();
@@ -199,80 +199,80 @@ void MetRemixLoadScreen::ShowRowOnDataScreen(unsigned nIndex) {
     // Yes, the binary takes the registered screen without a cast check.
     MetRemixDataScreen *pDataScreen =
         static_cast<MetRemixDataScreen *>(MetScreen::FindScreenByName(HxStr(kDataScreen)));
-    if (mUnknown90 == nullptr || !(nIndex < mUnknown90->size())) {
+    if (mRemixes == nullptr || !(nIndex < mRemixes->size())) {
         pDataScreen->SetRecordShowing(0);
     } else {
-        pDataScreen->ShowRecord(&(*mUnknown90)[nIndex]);
+        pDataScreen->ShowRecord(&(*mRemixes)[nIndex]);
     }
 }
 
 // 0x0034a838
 void MetRemixLoadScreen::OnButtonRingMoved() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    if (mUnknowna8->mSelected == kSavedButtonIndex) {
-        mUnknown90 = Catalogue(kCardRemixKey);
+    if (mButtons->mSelected == kSavedButtonIndex) {
+        mRemixes = Catalogue(kCardRemixKey);
         MetScreenTitleScreen::ReplaceTitle(CardTitle(params));
     } else {
-        mUnknown90 = Catalogue(MetRemixManager::kFactorySlot);
+        mRemixes = Catalogue(MetRemixManager::kFactorySlot);
         MetScreenTitleScreen::ReplaceTitle(FactoryTitle(params));
     }
-    mUnknown94->setItemCount(mUnknown90 != nullptr ? mUnknown90->size() : 0);
-    mUnknown94->refresh();
-    mUnknown94->setSelected(kFirstRow);
+    mList->setItemCount(mRemixes != nullptr ? mRemixes->size() : 0);
+    mList->refresh();
+    mList->setSelected(kFirstRow);
     ShowRowOnDataScreen(kFirstRow);
 }
 
 // 0x0034b568
 void MetRemixLoadScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    mUnknown38.clear();
-    mUnknown38.push_back(
-        HxStr(params.mUnknown1c == kPlayModeJam ? kCardRemixTitleKey : kCardCustomTitleKey));
-    mUnknowna8->ButtonAt(kSavedButtonIndex)->SetShowing(1);
-    mUnknowna8->ButtonAt(kFactoryButtonIndex)->SetShowing(1);
+    mHelpKeys.clear();
+    mHelpKeys.push_back(
+        HxStr(params.mPlayMode == kPlayModeJam ? kCardRemixTitleKey : kCardCustomTitleKey));
+    mButtons->ButtonAt(kSavedButtonIndex)->SetShowing(1);
+    mButtons->ButtonAt(kFactoryButtonIndex)->SetShowing(1);
 
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
-        mUnknown90 = Catalogue(kCardRemixKey);
-        mUnknowna8->SetSelected(kSavedButtonIndex);
-        if (mUnknown90->size() != 0) {
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
+        mRemixes = Catalogue(kCardRemixKey);
+        mButtons->SetSelected(kSavedButtonIndex);
+        if (mRemixes->size() != 0) {
             MetScreenTitleScreen::SetTitle(CardTitle(params));
         } else {
-            mUnknowna8->SetSelected(kFactoryButtonIndex);
-            mUnknown90 = Catalogue(MetRemixManager::kFactorySlot);
+            mButtons->SetSelected(kFactoryButtonIndex);
+            mRemixes = Catalogue(MetRemixManager::kFactorySlot);
             MetScreenTitleScreen::SetTitle(FactoryTitle(params));
         }
     } else {
-        mUnknowna8->SetSelected(kFactoryButtonIndex);
-        mUnknown90 = Catalogue(MetRemixManager::kFactorySlot);
+        mButtons->SetSelected(kFactoryButtonIndex);
+        mRemixes = Catalogue(MetRemixManager::kFactorySlot);
         MetScreenTitleScreen::SetTitle(FactoryTitle(params));
     }
 
-    if (mUnknown94 == nullptr) {
+    if (mList == nullptr) {
         Rnd::View *pLine = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kLineView)));
         Rnd::Mesh *pHighlight =
             dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kHighlightMesh)));
         Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kUpArrowMesh)));
         Rnd::Mesh *pDownArrow =
             dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kDownArrowMesh)));
-        mUnknown94 = new ScrollingList(
+        mList = new ScrollingList(
             this, kRowPitch, kRowCount, pLine, pHighlight, pUpArrow, pDownArrow, kListContext);
     } else {
-        mUnknown94->setEntriesShowing(1);
+        mList->setEntriesShowing(1);
     }
-    mUnknown94->setItemCount(mUnknown90->size());
-    mUnknown94->setSelected(kFirstRow);
-    mUnknown94->refresh();
+    mList->setItemCount(mRemixes->size());
+    mList->setSelected(kFirstRow);
+    mList->refresh();
     MetScreen::EnterAndShow();
 }
 
 // 0x0034cbd0
-void MetRemixLoadScreen::OnUnknownSlot36() {
-    mUnknowna8->ButtonAt(kSavedButtonIndex)->SetShowing(0);
-    mUnknowna8->ButtonAt(kFactoryButtonIndex)->SetShowing(0);
+void MetRemixLoadScreen::OnExitFinished() {
+    mButtons->ButtonAt(kSavedButtonIndex)->SetShowing(0);
+    mButtons->ButtonAt(kFactoryButtonIndex)->SetShowing(0);
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
 
-    if (mUnknown18 == kExitBack) {
-        if (params.mUnknown1c == kPlayModeJam) {
+    if (mExitChoice == kExitBack) {
+        if (params.mPlayMode == kPlayModeJam) {
             PushNamedScreen(HxStr(kLeftGizmoScreen));
             PushNamedScreen(HxStr(kRemixTypeScreen));
             ActivateNamedPanel(HxStr(kRemixTypeScreen));
@@ -281,8 +281,8 @@ void MetRemixLoadScreen::OnUnknownSlot36() {
             ActivateNamedPanel(HxStr(kSoloStagesScreen));
         }
     } else {
-        MetRemixRecord record((*mUnknown90)[mUnknown94->getSelected()]);
-        params.mLevelName = record.unknown00_;
+        MetRemixRecord record((*mRemixes)[mList->getSelected()]);
+        params.mLevelName = record.levelName;
         params.mLoadingGame = 1;
         CallScriptTemplate(kLoadingGameTemplate, kLoadingGameArgument);
         MetRemixManager::shared()->SetRecord(record);
@@ -297,12 +297,12 @@ void MetRemixLoadScreen::OnUnknownSlot36() {
             Application::shared()->GetGameManager()->SetParams(arenaParams);
             nextScreens.push_back(HxStr(kLoadGameScreen));
         } else {
-            MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+            MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
             nextScreens.push_back(HxStr(kArenasScreen));
             nextScreens.push_back(HxStr(kHelpScreen));
         }
 
-        const int nFactory = mUnknowna8->mSelected == kFactoryButtonIndex;
+        const int nFactory = mButtons->mSelected == kFactoryButtonIndex;
         std::vector<HxStr> restoreScreens;
         restoreScreens.push_back(HxStr(kOwnScreenName));
         restoreScreens.push_back(HxStr(kTitleScreen));
@@ -311,19 +311,19 @@ void MetRemixLoadScreen::OnUnknownSlot36() {
         MetRemixManager::shared()->BeginRemixLoad(nextScreens, restoreScreens, record, nFactory);
     }
 
-    if (mUnknown94 != nullptr) {
-        mUnknown94->setEntriesShowing(0);
+    if (mList != nullptr) {
+        mList->setEntriesShowing(0);
     }
 }
 
 // 0x0034d8b0
 int MetRemixLoadScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     // The catalogue pointer is not tested for null here, unlike in the two sound overrides.
-    if (static_cast<unsigned>(nItem) < mUnknown90->size()) {
-        MetRemixRecord record((*mUnknown90)[nItem]);
+    if (static_cast<unsigned>(nItem) < mRemixes->size()) {
+        MetRemixRecord record((*mRemixes)[nItem]);
         HxStr name(record.name);
         pText->SetText(name);
-        pText->SetFont(record.unknown34_ == GetAlbumJukeboxValue() ? mUnknowna0 : mUnknowna4);
+        pText->SetFont(record.albumNumber == GetAlbumJukeboxValue() ? mThisDiscFont : mOtherFont);
     } else {
         pText->SetText(HxStr(kNoText));
     }
@@ -342,28 +342,28 @@ MetRemixLoadScreen *MetRemixLoadScreen::New(MetRenderer *pRenderer, int nPriorit
 
 // 0x00352618
 MetRemixLoadScreen::~MetRemixLoadScreen() {
-    delete mUnknown94;
-    mUnknown94 = nullptr;
-    delete mUnknowna8;
+    delete mList;
+    mList = nullptr;
+    delete mButtons;
 }
 
 // 0x003526d0
 void MetRemixLoadScreen::PlaySlideSound(int nSelector) {
-    if (mUnknown90 != nullptr && mUnknown90->size() != 0) {
+    if (mRemixes != nullptr && mRemixes->size() != 0) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
 // 0x00352720
 void MetRemixLoadScreen::PlayHighSound(int nSelector) {
-    if (mUnknown90 != nullptr && mUnknown90->size() != 0) {
+    if (mRemixes != nullptr && mRemixes->size() != 0) {
         MetScreen::PlayHighSound(nSelector);
     }
 }
 
 // 0x00352770
-void MetRemixLoadScreen::OnUnknownSlot33() {
+void MetRemixLoadScreen::OnEnterFinished() {
     ShowRowOnDataScreen(kFirstRow);
     MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }

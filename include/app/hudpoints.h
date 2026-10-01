@@ -131,7 +131,7 @@ private:
     Rnd::Text *mMultiplierText; // `ptsmult<n>.txt`
     Rnd::Mat *mPlainMat;        // `HUD ptstmp.mat`
     Rnd::Mat *mHotMat;          // `HUD ptstmphot.mat`
-    int mUnknown38;             // +0x38
+    int mUnusedWord;            // +0x38 Zeroed by the constructor and never read.
     // The exit animation.
     AnimRange mExit;
 };

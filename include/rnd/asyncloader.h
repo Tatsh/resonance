@@ -94,10 +94,10 @@ public:
     /**
      * Abandon this request and release everything it has loaded, leaving it ready to start again.
      *
-     * Runs Cancel(), then, unless the request is still pending, deletes every object in mUnknown08
-     * through its destructor, clears the three lists, and marks the request pending, not
-     * read, and not finished. The destructor runs it first, and Renderer::UnloadCommon() runs it
-     * before each delete as well. The title is inferred.
+     * Runs Cancel(), then, unless the request is still pending, deletes every object in
+     * mLoadedObjects through its destructor, clears the three lists, and marks the request
+     * pending, not read, and not finished. The destructor runs it first, and
+     * Renderer::UnloadCommon() runs it before each delete as well. The title is inferred.
      *
      * @ghidraAddress 0x003f8240
      */
@@ -179,16 +179,16 @@ public:
     std::list<Rnd::Drawable *> mDrawables;
 
 private:
-    // Copy Rnd::g_manager.mLoaded into mUnknown08, then append every `Tex` in mLoaded and then in
-    // mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is the one
+    // Copy Rnd::g_manager.mLoaded into mLoadedObjects, then append every `Tex` in mLoaded and then
+    // in mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is the one
     // caller, and the name is inferred.
     // 0x003f8460
     void HarvestLoadedObjects();
 
     // Every object the request loaded, copied from Rnd::g_manager.mLoaded.
-    std::list<Rnd::Object *> mUnknown08; // +0x08
-    HxStr mDirectory;                    // +0x0c
-    HxStr mFile;                         // +0x14
+    std::list<Rnd::Object *> mLoadedObjects; // +0x08
+    HxStr mDirectory;                        // +0x0c
+    HxStr mFile;                             // +0x14
 
 public:
     /**

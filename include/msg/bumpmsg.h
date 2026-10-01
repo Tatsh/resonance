@@ -62,8 +62,9 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    int mUnknown08;  // +0x08
-    int mUnknown0c;  // +0x0c
+    // Both titles follow the bar and track that BumpPacket includes in the same order.
+    int mBar;        // +0x08
+    int mTrack;      // +0x0c
     Player *mPlayer; // +0x10
 };
 

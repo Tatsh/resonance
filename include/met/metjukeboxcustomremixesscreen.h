@@ -14,7 +14,8 @@
  *
  * The constructor at `0x00224f40` takes only the renderer and the load priority. It runs the
  * MetJukeboxBaseScreen constructor at `0x0021dcc0` with `jbs` for the screen name,
- * `metagame/Shared` for the directory, and `juke_saved` for the container, and clears mUnknownc8.
+ * `metagame/Shared` for the directory, and `juke_saved` for the container, and clears
+ * mCatalogueKey.
  *
  * The destructor at `0x0022a850` releases the object with the tag `MsgSink` and does nothing of
  * its own.
@@ -66,7 +67,7 @@ public:
     /**
      * Report the number of saved remixes.
      *
-     * Slot 39. The size of the catalogue mUnknowna0 addresses, read without a null check.
+     * Slot 39. The size of the catalogue mCatalogue addresses, read without a null check.
      *
      * @return The row count.
      * @ghidraAddress 0x0022a910

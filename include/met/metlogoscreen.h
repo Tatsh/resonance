@@ -40,7 +40,7 @@ public:
      *
      * Supplies `fl` for the screen name, `metagame/Shared` for the directory, and
      * `freq_logo_panel` for the container, reads the attract delay from configuration code
-     * 0x26c, and clears MetScreen::mUnknown60.
+     * 0x26c, and clears MetScreen::mShowsLoadedDrawables.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -77,7 +77,8 @@ public:
     /**
      * Start the game on the select command or command 10.
      *
-     * Slot 19. Plays `SND_MET_SLIDE`, clears MetRenderer::mUnknown60 and the blink, and exits.
+     * Slot 19. Plays `SND_MET_SLIDE`, clears MetRenderer::mTitlePromptShowing and the blink, and
+     * exits.
      *
      * @param pCommand The command.
      * @ghidraAddress 0x002be4d8
@@ -144,7 +145,7 @@ public:
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x002bac40
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Blink the start text and play the wave.
@@ -161,11 +162,11 @@ public:
      * has finished.
      *
      * Slot 33. Reads whether the attract mode is enabled from configuration code 0x26b and sets
-     * MetRenderer::mUnknown60.
+     * MetRenderer::mTitlePromptShowing.
      *
      * @ghidraAddress 0x002bae40
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Bring up the attract mode or the main menu once the screen has exited, and hide the legal
@@ -175,13 +176,13 @@ public:
      *
      * @ghidraAddress 0x002baf20
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the animation views, the container view, the start text, the wave view, the version
      * text, and the four legal texts, and hide the screen.
      *
-     * Slot 38. The base slot does not run, and the screen resolves MetScreen::mUnknown14 itself.
+     * Slot 38. The base slot does not run, and the screen resolves MetScreen::mView itself.
      *
      * @ghidraAddress 0x002ba6d0
      */
@@ -191,7 +192,7 @@ protected:
     /**
      * Record an unlock of the stages.
      *
-     * Slot 3. A MetUnlockStagesMsg plays the activate sound and sets MetFrontEndState::mUnknown14.
+     * Slot 3. A MetUnlockStagesMsg plays the activate sound and sets MetFrontEndState::mUnlockAll.
      * Every other message is ignored.
      *
      * @param pMsg The message.
@@ -201,7 +202,7 @@ protected:
 
 private:
     // 0x002be670
-    // Plays the activate sound and sets MetFrontEndState::mUnknown14. Slot 3 expands it, and the
+    // Plays the activate sound and sets MetFrontEndState::mUnlockAll. Slot 3 expands it, and the
     // address is its uncalled out-of-line copy. The title is inferred.
     static void RecordUnlock();
 
@@ -213,7 +214,7 @@ private:
     float mBlinkTime;                     // +0x90, the time of the next toggle, or 0 while idle
     Rnd::View *mWaveView;                 // +0x94
     std::vector<Rnd::Text *> mLegalTexts; // +0x98
-    int mUnknowna4;                       // +0xa4, not written by a recovered routine
+    int mReserved;                        // +0xa4, never read or written
     int mAttractEnabled;                  // +0xa8, from configuration code 0x26b
     int mAttractDelaySeconds;             // +0xac, from configuration code 0x26c
     int mAttractStarted;                  // +0xb0

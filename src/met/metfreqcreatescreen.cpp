@@ -64,7 +64,7 @@ constexpr int kPrefabButtonIndex = 0;
 constexpr int kCreateButtonIndex = 1;
 constexpr int kNoSelection = -1;
 
-// What MetScreen::mUnknown18 records for slot 36 to act on.
+// What MetScreen::mExitChoice records for slot 36 to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
 
@@ -112,7 +112,7 @@ MetFreqCreateScreen *MetFreqCreateScreen::New(MetRenderer *pRenderer, int nPrior
 void MetFreqCreateScreen::EnterAndShow() {
     mIdentities = MetFreqMakerAssetManager::shared()->GetIdentityList();
     mButtonList->SetSelected(kPrefabButtonIndex);
-    MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     RefreshSelection();
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
     {
@@ -127,13 +127,13 @@ void MetFreqCreateScreen::EnterAndShow() {
 void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mButtonList->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mButtonList->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandLeft:
@@ -141,7 +141,7 @@ void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
             return;
         }
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kAlternateInterval, mLeftArrow, kAlternateCycles);
+            mRenderer->mAnimationFrame, kAlternateInterval, mLeftArrow, kAlternateCycles);
         StepSelection(pCommand);
         break;
 
@@ -150,20 +150,22 @@ void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
             return;
         }
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kAlternateInterval, mRightArrow, kAlternateCycles);
+            mRenderer->mAnimationFrame, kAlternateInterval, mRightArrow, kAlternateCycles);
         StepSelection(pCommand);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(
-            mUnknown10->mUnknown68, kAlternateInterval, mButtonList->mUnknown00, kAlternateCycles);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
+                            kAlternateInterval,
+                            mButtonList->mSelectedButton,
+                            kAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kLeftGizmoScreen));
         BeginExit();
@@ -189,23 +191,23 @@ void MetFreqCreateScreen::PlayCycleRightSound(int nSelector) {
 }
 
 // 0x0029ce58
-void MetFreqCreateScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+void MetFreqCreateScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if (pButton == mLeftArrow || pButton == mRightArrow) {
         return;
     }
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
-    mUnknown18 = kExitToButtonAction;
+    mExitChoice = kExitToButtonAction;
     BeginExit();
 }
 
 // 0x0029cfa0
-void MetFreqCreateScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetFreqCreateScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kLoadFreqScreen));
         ActivateNamedPanel(HxStr(kLoadFreqScreen));
     } else {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kFreqCreateScreen);
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kFreqCreateScreen);
         MetFreqMakerCanvasScreen *pCanvas = static_cast<MetFreqMakerCanvasScreen *>(
             FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
         MetFreqMakerButtonsScreen *pButtons = static_cast<MetFreqMakerButtonsScreen *>(
@@ -242,9 +244,9 @@ void MetFreqCreateScreen::ResolveContainerViews() {
     mRightArrow->SetState(kArrowShownState);
     mButtonList->Add(HxStr(kPrefabButtonObject), ConfigText(kPromptConfigCode, kPrefabPrompt));
     mButtonList->Add(HxStr(kCreateButtonObject), ConfigText(kPromptConfigCode, kCreatePrompt));
-    mUnknown38.clear();
-    mUnknown38.push_back(HxStr(kPrefabPrompt));
-    mUnknown38.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.clear();
+    mHelpKeys.push_back(HxStr(kPrefabPrompt));
+    mHelpKeys.push_back(HxStr(kCreatePrompt));
 }
 
 // 0x0029cb30

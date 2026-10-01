@@ -11,8 +11,8 @@
  * empty. Three uncalled routines at `0x00558db8`, `0x00558dc0`, and `0x00558dc8` sit between
  * Reset() and the destructor and each return zero, and position alone does not tie them to this
  * class. The InputPoller constructor is the only caller of shared(), and it stores the pointer in
- * InputPoller::mUnknown28, which nothing reads again. No routine loads either byte, so their
- * signedness is unknown.
+ * InputPoller::mBytePairs. No routine reads the member again. No routine loads either byte, and
+ * their signedness is unknown.
  */
 struct BytePairStatic {
     /**

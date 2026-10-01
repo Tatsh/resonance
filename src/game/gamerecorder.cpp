@@ -55,7 +55,7 @@ void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
         pszMode = " (net ";
         break;
     }
-    const char *pszPlay = params.mUnknown1c == kPlayModeGame ? "game " : "jam ";
+    const char *pszPlay = params.mPlayMode == kPlayModeGame ? "game " : "jam ";
     HxStr difficulty;
     switch (params.mDifficulty) {
     case kDifficultyEasy:

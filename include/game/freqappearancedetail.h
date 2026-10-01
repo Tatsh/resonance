@@ -350,5 +350,5 @@ public:
     Rnd::View *mView;
 
 private:
-    unsigned char mUnknowna8[0x8]; // +0xa8
+    unsigned char mTailPadding[0x8]; // +0xa8, pads the object to 0xb0 bytes
 };

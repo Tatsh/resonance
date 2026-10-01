@@ -30,7 +30,7 @@ public:
      * Public because AppendEntry() takes one by value. The names are attested by the labels
      * `(id:` and ` stat:` that Print() writes ahead of the two words.
      */
-    struct Entry14 {
+    struct ClientStatus {
         int mId;     /*!< Labelled `(id:`. +0x00 */
         int mStatus; /*!< Labelled ` stat:`. +0x04 */
     };
@@ -103,10 +103,10 @@ public:
      * @param entry The entry to append.
      * @ghidraAddress 0x003f2218
      */
-    void AppendEntry(Entry14 entry);
+    void AppendEntry(ClientStatus entry);
 
 private:
-    std::vector<Entry14> mUnknown14; // +0x14
+    std::vector<ClientStatus> mClients; // +0x14
 };
 
 /**

@@ -64,7 +64,7 @@ struct AsyncJob {
     AsyncJob *mNext;   /*!< The next job, null at the end of a chain. +0x00 */
     AsyncJob *mPrev;   /*!< The previous job, null at the head of a chain. +0x04 */
     int mSector;       /*!< The 64 KiB chunk of the file the job transfers. +0x08 */
-    int mUnknown0c;    /*!< Always 32, the drive sectors a chunk occupies. No reader. +0x0c */
+    int mSectorCount;  /*!< Always 32, the drive sectors a chunk occupies. No reader. +0x0c */
     void *mBuffer;     /*!< The destination the copy writes to. +0x10 */
     int mSectorOffset; /*!< Byte offset inside the chunk the transfer starts at. +0x14 */
     int mLength;       /*!< Bytes to copy. +0x18 */
@@ -276,7 +276,7 @@ void AsyncPumpCompletedRequests();
 /**
  * Report whether the disc is ready to read.
  *
- * This build always reports 1. MetRenderer::OnUnknownSlot7() is the one caller, and it shows
+ * This build always reports 1. MetRenderer::Update() is the one caller, and it shows
  * `met_disc_prob.view` while the report is 0. The name is inferred from that view.
  *
  * @return 1.

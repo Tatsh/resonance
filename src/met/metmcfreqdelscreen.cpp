@@ -97,7 +97,7 @@ constexpr int kChoiceYes = 1;
 constexpr int kCommandCopy = 7;
 constexpr int kCommandDelete = 8;
 
-// What MetScreen::mUnknown18 records for slot 36 to act on.
+// What MetScreen::mExitChoice records for slot 36 to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitToCopy = 1;
 constexpr int kExitToDelete = 2;
@@ -111,18 +111,18 @@ constexpr int kListContext = 0;
 constexpr int kBurnSlot = 0;
 constexpr int kBurnStage = 1;
 
-// The two StartSave() flags a copy passes.
-constexpr int kCopySaveFlag9c = 1;
-constexpr int kCopySaveFlag98 = 1;
+// The nConfirmReplace and nIsCopy arguments a copy passes to StartSave().
+constexpr int kCopyConfirmReplace = 1;
+constexpr int kCopyIsCopy = 1;
 
 // The connect status of a present card.
 constexpr int kCardPresent = 0;
 
-// The load results OnPersonasLoaded() treats as a loaded card. The meanings of 3 and 11 are not
-// recovered.
+// The load results OnPersonasLoaded() treats as a loaded card. The values are those of
+// kMemcardStatusOk, kMemcardStatusNoEntry, and kMemcardStatusNoFile.
 constexpr int kLoadStatusLoaded = 0;
-constexpr int kLoadStatusAccepted3 = 3;
-constexpr int kLoadStatusAccepted11 = 11;
+constexpr int kLoadStatusNoEntry = 3;
+constexpr int kLoadStatusNoFile = 11;
 
 // The text a row past the end of the list shows.
 static const char *const kNoText = "";
@@ -157,8 +157,8 @@ inline void DeletePersonas(std::vector<MetPersonaData *> &personas) {
 MetMCFreqDelScreen::MetMCFreqDelScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mDeleting(0), mList(nullptr), mCopyPersona(nullptr), mLoadPending(0) {
-    mUnknown60 = 0;
-    mUnknown38.push_back(HxStr(kHelpKey));
+    mShowsLoadedDrawables = 0;
+    mHelpKeys.push_back(HxStr(kHelpKey));
 }
 
 // 0x002beca8
@@ -212,8 +212,8 @@ void MetMCFreqDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
         break;
@@ -223,7 +223,7 @@ void MetMCFreqDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
             break;
         }
         PlaySoundByName(kToggleSound);
-        mUnknown18 = kExitToCopy;
+        mExitChoice = kExitToCopy;
         mCopyPersona = mPersonas[mList->getSelected()];
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kHelpScreen));
@@ -235,7 +235,7 @@ void MetMCFreqDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
             break;
         }
         PlaySoundByName(kToggleSound);
-        mUnknown18 = kExitToDelete;
+        mExitChoice = kExitToDelete;
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
@@ -247,7 +247,7 @@ void MetMCFreqDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x002bf750
-void MetMCFreqDelScreen::OnUnknownSlot7() {
+void MetMCFreqDelScreen::OnPanelActivated() {
     if (!mLoadPending) {
         return;
     }
@@ -280,7 +280,7 @@ void MetMCFreqDelScreen::ShowList() {
         HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
     PushNamedScreen(HxStr(kHelpScreen));
     MetHelpScreen::SelectPreset(HxStr(kOnlyBackPreset));
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
     mLoadPending = 0;
 }
@@ -291,12 +291,12 @@ void MetMCFreqDelScreen::ShowSelection() {
     if (mPersonas.size() != 0) {
         MetPersonaData *pPersona = mPersonas[mList->getSelected()];
         mNameText->SetShowing(1);
-        mNameText->SetText(pPersona->mUnknown140.mUnknown00);
+        mNameText->SetText(pPersona->mAppearance.mUserName);
         mFreqMesh->SetShowing(1);
         pPersona->AttachToBurnSlot(kBurnSlot);
         mFaceMat->mStages[kBurnStage].SetTex(mBurnTexture);
         mBirthdayText->SetShowing(1);
-        mBirthdayText->SetText(pPersona->mUnknown154);
+        mBirthdayText->SetText(pPersona->mBirthday);
         pInfo->SetShowing(1);
     } else {
         mNameText->SetShowing(0);
@@ -307,8 +307,8 @@ void MetMCFreqDelScreen::ShowSelection() {
 }
 
 // 0x002c01c0
-void MetMCFreqDelScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitToDelete) {
+void MetMCFreqDelScreen::OnExitFinished() {
+    if (mExitChoice == kExitToDelete) {
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kNoButton));
         buttons.push_back(HxStr(kYesButton));
@@ -318,7 +318,7 @@ void MetMCFreqDelScreen::OnUnknownSlot36() {
                            kTwoButtons,
                            buttons,
                            this);
-    } else if (mUnknown18 == kExitToCopy) {
+    } else if (mExitChoice == kExitToCopy) {
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kNoButton));
         buttons.push_back(HxStr(kYesButton));
@@ -353,14 +353,14 @@ void MetMCFreqDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             std::vector<HxStr> screens;
             screens.push_back(HxStr(kOwnScreenName));
             MetPersonaSaverScreen::StartSave(
-                screens, mCopyPersona, next, kCopySaveFlag9c, kCopySaveFlag98);
+                screens, mCopyPersona, next, kCopyConfirmReplace, kCopyIsCopy);
             mCopyPersona = nullptr;
         } else {
             PushNamedScreen(HxStr(kOwnScreenName));
             ActivateNamedPanel(HxStr(kOwnScreenName));
         }
     } else if (name == kLoadFailedMessage || name == kNoFreqMessage) {
-        mUnknown10->RemoveScreen(this);
+        mRenderer->RemoveScreen(this);
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kMemCardTypeScreen));
@@ -374,8 +374,8 @@ void MetMCFreqDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
 
 // 0x002c1510
 void MetMCFreqDelScreen::OnPersonasLoaded(int, int nStatus) {
-    if (nStatus != kLoadStatusLoaded && nStatus != kLoadStatusAccepted3 &&
-        nStatus != kLoadStatusAccepted11) {
+    if (nStatus != kLoadStatusLoaded && nStatus != kLoadStatusNoEntry &&
+        nStatus != kLoadStatusNoFile) {
         const HxStr format(ConfigText(kDialogueConfigCode, kLoadFailKey));
         const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
         std::vector<HxStr> buttons;
@@ -432,7 +432,7 @@ void MetMCFreqDelScreen::EnterAndShow() {
 // 0x002c5c28
 int MetMCFreqDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     if (static_cast<unsigned>(nItem) < mPersonas.size()) {
-        pText->SetText(mPersonas[nItem]->mUnknown140.mUnknown00);
+        pText->SetText(mPersonas[nItem]->mAppearance.mUserName);
     } else {
         pText->SetText(HxStr(kNoText));
     }

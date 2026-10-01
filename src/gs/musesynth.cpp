@@ -95,7 +95,7 @@ void MuseSynth::StartMultiMusePlayer(Message *pMsg) {
 
 // 0x001aa908
 void MuseSynth::RetainOnly(MusePlayer *pPlayer) {
-    if (pPlayer->Slot4() == 0) {
+    if (pPlayer->DisplacesSiblings() == 0) {
         return;
     }
 

@@ -64,7 +64,7 @@ inline void ScaleBlock(Rnd::Mesh *pBlock, float flScale) {
 
 // 0x00419f88
 HudPosition::HudPosition(PlayMap *pPlayMap)
-    : mPlayMap(pPlayMap), mCurrentSection(kNoSection), mBar(kNoBar), mUnknown3c(0) {
+    : mPlayMap(pPlayMap), mCurrentSection(kNoSection), mBar(kNoBar), mUnusedWord(0) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mView = dynamic_cast<Rnd::View *>(
@@ -89,13 +89,13 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
     Rnd::Text *pLabelTemplate =
         dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("HUD pos.txt")));
 
-    const int nSections = mPlayMap->Slot10();
+    const int nSections = mPlayMap->GetSectionCount();
     int nStartBar = 0;
     Rnd::Text *pFirstLabel = nullptr;
     float flX = 0.0f;
     const float flFrame = static_cast<float>(kPositionWidth / nSections) - kBlockMargin;
     for (int i = 0; i < nSections; ++i) {
-        const int nIndex = mPlayMap->Slot11(i);
+        const int nIndex = mPlayMap->GetPatternSection(i);
         const int nBarCount = mPlayMap->mSectionLengths[nIndex];
 
         Rnd::Mesh *pBlock = Rnd::NewMeshThroughHook(NextHudName());
@@ -143,7 +143,7 @@ HudPosition::~HudPosition() {
 void HudPosition::Update() {
     int nCurrent = kNoSection;
     if (mBar >= 0) {
-        nCurrent = mPlayMap->Slot12(mBar);
+        nCurrent = mPlayMap->GetPatternIndex(mBar);
     }
 
     mCurrentSection = kNoSection;
@@ -165,7 +165,7 @@ void HudPosition::Update() {
         }
     }
 
-    if (mCurrentSection != kNoSection && mPlayMap->Slot14(mBar) != 0) {
+    if (mCurrentSection != kNoSection && mPlayMap->IsLooping(mBar) != 0) {
         const Section &current = mSections[mCurrentSection];
         std::memcpy(mRepeatView->mLocalXfm[kXfmRowTranslation],
                     current.mBlock->mLocalXfm[kXfmRowTranslation],

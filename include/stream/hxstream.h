@@ -104,13 +104,12 @@ public:
      * Report the stream this one reads through, if any.
      *
      * Vtable slot 7. The default reports null and HxMemStream retains it. HxIDataChunk overrides
-     * it at `0x00145fd8` and reports the stream its chunk lies in. That override types the result
-     * but is not enough to title the slot.
+     * it at `0x00145fd8` and reports the stream its chunk lies in.
      *
      * @return The underlying stream, or null by default.
      * @ghidraAddress 0x00145f40
      */
-    virtual HxStream *Unknown7();
+    virtual HxStream *UnderlyingStream();
 
     /**
      * Move nSize bytes into pDest, reversing their order when the stream swaps bytes.
@@ -170,7 +169,8 @@ public:
     HxStream &ReadString(HxStr &str);
 
     /**
-     * Follow Unknown7() from this stream until a stream reports none, and report that stream.
+     * Follow UnderlyingStream() from this stream until a stream reports none, and report that
+     * stream.
      *
      * The shipped program does not call it. The title is inferred.
      *

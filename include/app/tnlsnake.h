@@ -85,7 +85,7 @@ private:
     Rnd::Mesh *mHead;
     Rnd::View *mView; // "tnl transparent".
     int mRing;
-    int mUnknown1c; // +0x1c, never written or read by the recovered routines.
+    int mReserved1c; // +0x1c, never written or read by the recovered routines.
     Color mColor;
     float mPhase;
     float mAmplitude;

@@ -38,8 +38,8 @@ class Text;
  *  - 19 `0x00200ba8` HandleCommand().
  *  - 20 through 24 at `0x002068b0`, `0x00206970`, `0x00206940`, `0x002068e0`, and `0x00206910`,
  *    which replace the five MetScreenMultiSoundBank sounds.
- *  - 33 `0x002069d0` OnUnknownSlot33().
- *  - 36 `0x00201790` OnUnknownSlot36().
+ *  - 33 `0x002069d0` OnEnterFinished().
+ *  - 36 `0x00201790` OnExitFinished().
  *  - 38 `0x001fff40` ResolveContainerViews().
  *
  * The translation unit's static initialiser at `0x002065a0` constructs the three button-name
@@ -51,7 +51,7 @@ public:
      * Construct the controller configuration screen.
      *
      * The screen name is `psx`, the directory `metagame/shared`, and the container `psx_config`.
-     * The nine row keys are appended to MetScreen::mUnknown38, and the names of the ten button
+     * The nine row keys are appended to MetScreen::mHelpKeys, and the names of the ten button
      * meshes and nine value texts are recorded for ResolveContainerViews().
      *
      * @param pRenderer The front-end renderer this screen registers on.
@@ -82,7 +82,7 @@ public:
      *
      * The title reads the localised player label, the one-based controller number, and the
      * localised options label. The help screen takes the first row's prompt and the
-     * `cc_save_back` layout when MetFrontEndState::mUnknown0c is set, otherwise
+     * `cc_save_back` layout when MetFrontEndState::mUsingMemcard is set, otherwise
      * `standard_title`.
      *
      * @ghidraAddress 0x00201478
@@ -100,7 +100,7 @@ public:
      * Act on a dismissed dialogue.
      *
      * `missingconfigvals` makes this screen the active panel again. `nomemcard` records 0 in
-     * MetScreen::mUnknown18 and begins the exit. The choice is not read.
+     * MetScreen::mExitChoice and begins the exit. The choice is not read.
      *
      * @param name The dialogue name.
      * @param nChoice The chosen button.
@@ -167,20 +167,20 @@ public:
      *
      * @ghidraAddress 0x002069d0
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Push the screens that follow this one.
      *
-     * Entered from the pause menu, the pause screen recorded in MetFrontEndState::mUnknown24 is
-     * pushed and activated again, and the record is cleared. MetFrontEndState::mUnknown10 becomes
-     * 1 when MetFrontEndState::mUnknown0c is 1 and the exit was not a cancel. Otherwise a cancel
-     * returns to `MetConfigOptionsButtonsScreen` and a store saves the global settings through
-     * MetGlobalSettingsSaverScreen.
+     * Entered from the pause menu, the pause screen recorded in MetFrontEndState::mReturnScreen is
+     * pushed and activated again, and the record is cleared. MetFrontEndState::mSettingsDirty
+     * becomes 1 when MetFrontEndState::mUsingMemcard is 1 and the exit was not a cancel. Otherwise
+     * a cancel returns to `MetConfigOptionsButtonsScreen` and a store saves the global settings
+     * through MetGlobalSettingsSaverScreen.
      *
      * @ghidraAddress 0x00201790
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the rows, the two instruction texts, the button meshes, and the value texts.
@@ -232,24 +232,24 @@ private:
     // not read.
     char NextButtonCode(int nRow, char code) const;
 
-    MetButtonList *mUnknown90;           // +0x90
-    std::vector<Rnd::Mesh *> mUnknown94; // +0x94, the button highlight meshes
-    std::vector<HxStr> mUnknowna0;       // +0xa0, the names of mUnknown94
-    std::vector<Rnd::Text *> mUnknownac; // +0xac, the row value texts
-    std::vector<HxStr> mUnknownb8;       // +0xb8, the names of mUnknownac
-    char mUnknownc4;                     // +0xc4, the first button code, `a`
-    char mUnknownc5;                     // +0xc5, the last button code, `h`, never read
+    MetButtonList *mRows;                    // +0x90
+    std::vector<Rnd::Mesh *> mButtonMeshes;  // +0x94, the button highlight meshes
+    std::vector<HxStr> mButtonMeshNames;     // +0xa0, the names of mButtonMeshes
+    std::vector<Rnd::Text *> mRowValueTexts; // +0xac, the row value texts
+    std::vector<HxStr> mRowValueTextNames;   // +0xb8, the names of mRowValueTexts
+    char mFirstButtonCode;                   // +0xc4, the first button code, `a`
+    char mLastButtonCode;                    // +0xc5, the last button code, `h`, never read
 
 public:
     /**
      * Index of the controller this screen configures, from 0.
      *
-     * The constructor writes 0. MetConfigOptionsButtonsScreen::OnUnknownSlot36() writes its
+     * The constructor writes 0. MetConfigOptionsButtonsScreen::OnExitFinished() writes its
      * selected row here at `0x00208574` before pushing this screen, and the image has no setter
      * to route that write through. +0xc8
      */
-    int mUnknownc8;
+    int mControllerIndex;
 
 private:
-    int mUnknowncc; // +0xcc, never read or written
+    int mReserved; // +0xcc, never read or written
 };

@@ -66,10 +66,10 @@ inline long long FrameClockNs(Watchdog *pWatchdog) {
 MainLoop *g_pMainLoop;
 
 // 0x001ec998
-MainLoop::MainLoop(int nFlag, Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
+MainLoop::MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
     // The call passes 1. The value selects virtual-base setup the compiler emits. The body
     // does not use the flag.
-    (void)nFlag;
+    (void)nInCharge;
     mRunning = 0;
     mNextBankPollNs = 0;
     mNextWatchdogPollNs = 0;

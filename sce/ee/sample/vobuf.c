@@ -21,7 +21,7 @@ void voBufCreate(VoBuf *pVoBuf, void *pData, void *pTag, int nFrames) {
     pVoBuf->data = pData;
     pVoBuf->tag = pTag;
     pVoBuf->size = nFrames;
-    pVoBuf->mUnknown08 = 0;
+    pVoBuf->write = 0;
     if (nFrames <= 0) {
         return;
     }
@@ -38,7 +38,7 @@ void voBufCreate(VoBuf *pVoBuf, void *pData, void *pTag, int nFrames) {
 // 0x005d3fe8
 void voBufReset(VoBuf *pVoBuf) {
     pVoBuf->count = 0;
-    pVoBuf->mUnknown08 = 0;
+    pVoBuf->write = 0;
 }
 
 // 0x005d3ff8
@@ -49,9 +49,9 @@ int voBufIsFull(VoBuf *pVoBuf) {
 // 0x005d4010
 void voBufIncCount(VoBuf *pVoBuf) {
     DIntr();
-    *(int *)((unsigned char *)pVoBuf->tag + pVoBuf->mUnknown08 * kTagEntrySize) = kTagDecoded;
+    *(int *)((unsigned char *)pVoBuf->tag + pVoBuf->write * kTagEntrySize) = kTagDecoded;
     ++pVoBuf->count;
-    pVoBuf->mUnknown08 = (pVoBuf->mUnknown08 + 1) % pVoBuf->size;
+    pVoBuf->write = (pVoBuf->write + 1) % pVoBuf->size;
     EIntr();
 }
 
@@ -60,7 +60,7 @@ void *voBufGetData(VoBuf *pVoBuf) {
     if (pVoBuf->count == pVoBuf->size) {
         return NULL;
     }
-    return (unsigned char *)pVoBuf->data + pVoBuf->mUnknown08 * kFrameDataSize;
+    return (unsigned char *)pVoBuf->data + pVoBuf->write * kFrameDataSize;
 }
 
 // 0x005d40c0
@@ -75,7 +75,7 @@ void *voBufGetTag(VoBuf *pVoBuf) {
     if (pVoBuf->count == 0) {
         return NULL;
     }
-    readIndex = (pVoBuf->mUnknown08 - pVoBuf->count + pVoBuf->size) % pVoBuf->size;
+    readIndex = (pVoBuf->write - pVoBuf->count + pVoBuf->size) % pVoBuf->size;
     return (unsigned char *)pVoBuf->tag + readIndex * kTagEntrySize;
 }
 

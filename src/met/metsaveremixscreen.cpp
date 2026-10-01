@@ -44,12 +44,13 @@ static const char *const kSaveRemixScreen = "MetSaveRemixScreen";
 static const char *const kLoadGameScreen = "MetLoadGameScreen";
 static const char *const kEmptyText = "";
 
-// The arguments slots 40 and 41 pass to MetRemixSaver::OnUnknownSlot2(), which neither override
-// reads.
-constexpr int kSlot40SaverArgument = 0;
-constexpr int kSlot41SaverArgument = 1;
+// The arguments OnSaveAbandoned() and OnSaveDialogueClosed() pass to
+// MetRemixSaver::OnSaveFinished(). Neither override reads them.
+constexpr int kSaverAbandoned = 0;
+constexpr int kSaverDialogueClosed = 1;
 
-// The flag slots 7 and 15 pass to MetRemixSaver::OnUnknownSlot4() when the save screen returns.
+// The flag slots 7 and 15 pass to MetRemixSaver::SetOwnerScreenShowing() when the save screen
+// returns.
 constexpr int kSaverReturned = 1;
 
 // The screens the save screen exits or brings back.
@@ -66,7 +67,7 @@ static const char *const kSaveCopyButton = "save_copy.but";
 static const char *const kDiscardDialogue = "discard_remix";
 constexpr int kChoiceDiscard = 1;
 
-// What MetScreen::mUnknown18 records for the exit hook to act on.
+// What MetScreen::mExitChoice records for the exit hook to act on.
 constexpr int kExitDiscard = 0;
 constexpr int kExitToHelp = 2;
 
@@ -78,21 +79,22 @@ constexpr int kCommandDecline = 8;
 constexpr float kSelectAlternateInterval = 30.0f;
 constexpr int kSelectAlternateCycles = 2;
 
-// The flag HandleCommand() passes to MetRemixSaver::OnUnknownSlot4() when the save is declined,
-// and the argument slot 36 passes to OnUnknownSlot2() after a back exit.
+// The flag HandleCommand() passes to MetRemixSaver::SetOwnerScreenShowing() when the save is
+// declined, and the argument slot 36 passes to OnSaveFinished() after a back exit.
 constexpr int kSaverDeclined = 0;
 constexpr int kSaverBack = 0;
 
 // The sound select and decline play.
 static const char *const kToggleSound = "SND_MET_FM_TOGGLE";
 
-// The keyboard request HandleCommand() and slot 42 build. The two prompts differ in case.
+// The keyboard request HandleCommand() and OnDuplicateNameDeclined() build. The two prompts differ
+// in case.
 static const char *const kCommandKeyboardPrompt = "Remix Name";
-static const char *const kSlot42KeyboardPrompt = "Remix name";
+static const char *const kDuplicateKeyboardPrompt = "Remix name";
 static const char *const kKeyboardTicker = "met_save_remix_screen_ticker_tape";
 constexpr int kKeyboardMaxWidth = 228;
 constexpr int kKeyboardMaxLength = 32;
-constexpr int kKeyboardUnknown1c = 1;
+constexpr int kKeyboardUnusedFlag = 1;
 constexpr int kAnyPad = -1;
 
 // Configuration codes and keys EnterAndShow() and slot 36 read.
@@ -142,11 +144,11 @@ inline HxStr ConfigText(int nCode, const char *pszArgument) {
 MetSaveRemixScreen::MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetSaveRemix(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknowne8(nullptr), mPersona(nullptr), mUnknown100(0) {
-    mUnknowne8 = new MetButtonList;
-    mUnknown38.push_back(HxStr(kSaveObjectName));
-    mUnknown5c = 0;
-    mUnknowne0 = 0;
+      mButtonList(nullptr), mPersona(nullptr), mDeclined(0) {
+    mButtonList = new MetButtonList;
+    mHelpKeys.push_back(HxStr(kSaveObjectName));
+    mPlaysCommandSounds = 0;
+    mKeyboardPending = 0;
 }
 
 // 0x003817e0
@@ -156,7 +158,7 @@ MetSaveRemixScreen *MetSaveRemixScreen::New(MetRenderer *pRenderer, int nPriorit
 
 // 0x00381868
 MetSaveRemixScreen::~MetSaveRemixScreen() {
-    delete mUnknowne8;
+    delete mButtonList;
 }
 
 // 0x0037a9e0
@@ -172,9 +174,9 @@ void MetSaveRemixScreen::Open(MetPersonaData *pPersona,
     pScreen->SetOwnerPad(nPad);
     pScreen->SetSaver(pSaver);
     pScreen->SetAppearances(appearances);
-    pScreen->mUnknown94 = slot;
+    pScreen->mTargetSlot = slot;
     if (bClearName != 0) {
-        pScreen->SetUnknown104(HxStr(kEmptyText));
+        pScreen->SetEnteredName(HxStr(kEmptyText));
     }
     MetScreen *pLoadGame = MetScreen::FindScreenByName(HxStr(kLoadGameScreen));
     pLoadGame->PushNamedScreen(HxStr(kSaveRemixScreen));
@@ -188,51 +190,51 @@ void MetSaveRemixScreen::SetPersona(MetPersonaData *pPersona) {
 
 // 0x00381918
 void MetSaveRemixScreen::SetOwnerPad(int nPad) {
-    mUnknownc8 = nPad;
+    mOwnerPad = nPad;
 }
 
 // 0x00381920
 void MetSaveRemixScreen::SetSaver(MetRemixSaver *pSaver) {
-    mUnknownfc = pSaver;
+    mSaver = pSaver;
 }
 
 // 0x00381928
 void MetSaveRemixScreen::SetAppearances(const std::vector<FreqAppearance> &appearances) {
-    mUnknownac = appearances;
+    mAppearances = appearances;
 }
 
 // 0x00381948
-void MetSaveRemixScreen::SetUnknown104(const HxStr &text) {
-    mUnknown104 = text;
+void MetSaveRemixScreen::SetEnteredName(const HxStr &text) {
+    mEnteredName = text;
 }
 
 // 0x00381968
 void MetSaveRemixScreen::PlaySlideSound(int nSelector) {
-    if (nSelector == mUnknownc8) {
+    if (nSelector == mOwnerPad) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
 // 0x00381990
-void MetSaveRemixScreen::OnUnknownSlot2(const HxStr &text) {
+void MetSaveRemixScreen::OnKeyboardTextEntered(const HxStr &text) {
     mRemixNameText->SetText(text); // The binary dereferences the text object with no null check.
-    if (mUnknowne0 != 0) {
-        MetSaveRemix::OnUnknownSlot2(text);
-        mUnknowne0 = 0;
+    if (mKeyboardPending != 0) {
+        MetSaveRemix::OnKeyboardTextEntered(text);
+        mKeyboardPending = 0;
     }
 }
 
 // 0x003819f0
-void MetSaveRemixScreen::OnUnknownSlot40() {
-    if (mUnknownfc != nullptr) {
-        mUnknownfc->OnUnknownSlot2(kSlot40SaverArgument);
+void MetSaveRemixScreen::OnSaveAbandoned() {
+    if (mSaver != nullptr) {
+        mSaver->OnSaveFinished(kSaverAbandoned);
     }
 }
 
 // 0x00381a28
-void MetSaveRemixScreen::OnUnknownSlot41() {
-    if (mUnknownfc != nullptr) {
-        mUnknownfc->OnUnknownSlot2(kSlot41SaverArgument);
+void MetSaveRemixScreen::OnSaveDialogueClosed() {
+    if (mSaver != nullptr) {
+        mSaver->OnSaveFinished(kSaverDialogueClosed);
     }
 }
 
@@ -242,14 +244,14 @@ void MetSaveRemixScreen::ResolveContainerViews() {
     mFreqNameText = FindText(kFreqNameTextObject);
     mInstructionsText = FindText(kInstructionsTextObject);
     mRemixNameText = FindText(kRemixNameTextObject);
-    mUnknowne8->Add(HxStr(kSaveCopyButton), HxStr(kEmptyText));
+    mButtonList->Add(HxStr(kSaveCopyButton), HxStr(kEmptyText));
 }
 
 // 0x0037c110
-void MetSaveRemixScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
-    mUnknown18 = kExitToHelp;
-    if (mUnknownfc != nullptr) {
-        mUnknownfc->OnUnknownSlot3();
+void MetSaveRemixScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
+    mExitChoice = kExitToHelp;
+    if (mSaver != nullptr) {
+        mSaver->OnHelpRequested();
     }
     ExitScreenByName(HxStr(kHelpScreen));
     ExitScreenByName(HxStr(kTitleScreen));
@@ -263,49 +265,49 @@ void MetSaveRemixScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
         return;
     }
     if (nChoice == kChoiceDiscard) {
-        mUnknown18 = kExitDiscard;
-        mUnknown100 = 0;
-        OnUnknownSlot36();
+        mExitChoice = kExitDiscard;
+        mDeclined = 0;
+        OnExitFinished();
     } else {
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kSaveRemixScreen));
-        mUnknownfc->OnUnknownSlot4(kSaverReturned);
+        mSaver->SetOwnerScreenShowing(kSaverReturned);
         ActivateNamedPanel(HxStr(kSaveRemixScreen));
     }
 }
 
 // 0x0037b718
-void MetSaveRemixScreen::OnUnknownSlot7() {
-    if (mUnknowne0 == 0) {
-        MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+void MetSaveRemixScreen::OnPanelActivated() {
+    if (mKeyboardPending == 0) {
+        MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
         return;
     }
-    mUnknowne0 = 0;
-    if (mUnknownfc != nullptr) {
+    mKeyboardPending = 0;
+    if (mSaver != nullptr) {
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kSaveRemixScreen));
-        mUnknownfc->OnUnknownSlot4(kSaverReturned);
+        mSaver->SetOwnerScreenShowing(kSaverReturned);
         ActivateNamedPanel(HxStr(kSaveRemixScreen));
     }
 }
 
 // 0x0037b258
 void MetSaveRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
-    if (mUnknownc8 != pCommand->mPadIndex) {
+    if (mOwnerPad != pCommand->mPadIndex) {
         return;
     }
     switch (pCommand->mCommand) {
     case kMetScreenCommandSelect:
         if (mRemixNameText->mPreWrapText.mLen != 0) {
-            mUnknown104 = mRemixNameText->mPreWrapText;
+            mEnteredName = mRemixNameText->mPreWrapText;
             ActivateNamedPanel(HxStr(kEmptyText));
-            StartRepeatingSound(mUnknown10->mUnknown68,
+            StartRepeatingSound(mRenderer->mAnimationFrame,
                                 kSelectAlternateInterval,
-                                mUnknowne8->mUnknown00,
+                                mButtonList->mSelectedButton,
                                 kSelectAlternateCycles);
             PlaySlideSound(pCommand->mPadIndex);
         } else {
-            PlayErrorSound(mUnknownc8);
+            PlayErrorSound(mOwnerPad);
         }
         break;
 
@@ -313,9 +315,9 @@ void MetSaveRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
         MetKeyboardRequest request(HxStr(kSaveRemixScreen),
                                    HxStr(kCommandKeyboardPrompt),
                                    mRemixNameText->mPreWrapText,
-                                   mUnknownc8,
+                                   mOwnerPad,
                                    this);
-        request.mUnknown1c = kKeyboardUnknown1c;
+        request.mUnusedFlag = kKeyboardUnusedFlag;
         request.mMaxWidth = kKeyboardMaxWidth;
         request.mMaxLength = kKeyboardMaxLength;
         request.mTicker = kKeyboardTicker;
@@ -327,8 +329,8 @@ void MetSaveRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
     case kCommandDecline:
         ActivateNamedPanel(HxStr(kEmptyText));
         PlaySoundByName(kToggleSound);
-        mUnknown100 = 1;
-        mUnknownfc->OnUnknownSlot4(kSaverDeclined);
+        mDeclined = 1;
+        mSaver->SetOwnerScreenShowing(kSaverDeclined);
         ExitScreenByName(HxStr(kHelpScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
@@ -340,10 +342,10 @@ void MetSaveRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
 }
 
 // 0x0037ccc8
-void MetSaveRemixScreen::OnUnknownSlot42() {
-    mUnknowne0 = 1;
+void MetSaveRemixScreen::OnDuplicateNameDeclined() {
+    mKeyboardPending = 1;
     MetKeyboardRequest request(
-        HxStr(kSaveRemixScreen), HxStr(kSlot42KeyboardPrompt), mUnknownb8, kAnyPad, this);
+        HxStr(kSaveRemixScreen), HxStr(kDuplicateKeyboardPrompt), mRemixName, kAnyPad, this);
     request.mMaxWidth = kKeyboardMaxWidth;
     request.mMaxLength = kKeyboardMaxLength;
     request.mTicker = kKeyboardTicker;
@@ -352,31 +354,31 @@ void MetSaveRemixScreen::OnUnknownSlot42() {
 
 // 0x0037b8e8
 void MetSaveRemixScreen::EnterAndShow() {
-    mUnknowndc = 0;
-    mUnknowne0 = 0;
-    mUnknown10->SetActivePanel(this);
-    mUnknown10->OnUnknown00390088();
-    mUnknowne8->SetSelected(kFirstButtonIndex);
+    mCopying = 0;
+    mKeyboardPending = 0;
+    mRenderer->SetActivePanel(this);
+    mRenderer->OnReturnFromGame();
+    mButtonList->SetSelected(kFirstButtonIndex);
 
     const HxStr playerFormat(ConfigText(kDialogueConfigCode, kPlayerKey));
-    const HxStr player(FormatString(kPlayerFormat, TextOrEmpty(playerFormat), mUnknownc8));
+    const HxStr player(FormatString(kPlayerFormat, TextOrEmpty(playerFormat), mOwnerPad));
     FindText(kPlayerPanelObject)->SetText(player);
 
     if (mPersona == nullptr) {
         mPersona = MetFrontEndState::shared()->GetFirstPersona();
     }
     mFreqNameText->SetText(
-        HxStr(FormatString(kPersonaFormat, TextOrEmpty(mPersona->mUnknown140.mUnknown00))));
+        HxStr(FormatString(kPersonaFormat, TextOrEmpty(mPersona->mAppearance.mUserName))));
 
     const HxStr command(ConfigText(kDialogueConfigCode, kCommandKey));
     const HxStr instructions(
-        FormatString(kCommandFormat, TextOrEmpty(command), TextOrEmpty(mUnknown94.mSlotName)));
+        FormatString(kCommandFormat, TextOrEmpty(command), TextOrEmpty(mTargetSlot.mSlotName)));
     mInstructionsText->SetText(instructions);
 
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     HxStr name;
-    if (mUnknown104 != kEmptyText) {
-        mRemixNameText->SetText(mUnknown104);
+    if (mEnteredName != kEmptyText) {
+        mRemixNameText->SetText(mEnteredName);
     } else if (params.mLoadingGame != 0) {
         MetRemixRecord record(*MetRemixManager::shared()->GetRecord());
         name = record.name;
@@ -396,15 +398,15 @@ void MetSaveRemixScreen::EnterAndShow() {
         mRemixNameText->SetText(HxStr(TextOrEmpty(numbered)));
     }
 
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     MetHelpScreen::SelectPreset(HxStr(kHelpPreset));
     MetScreen::EnterAndShow();
 }
 
 // 0x0037c260
-void MetSaveRemixScreen::OnUnknownSlot36() {
-    if (mUnknown100 != 0) {
-        mUnknown100 = 0;
+void MetSaveRemixScreen::OnExitFinished() {
+    if (mDeclined != 0) {
+        mDeclined = 0;
         HxStr text;
         GameParams params(*Application::shared()->GetGameManager()->GetParams());
         if (params.mLoadingGame != 0) {
@@ -417,22 +419,22 @@ void MetSaveRemixScreen::OnUnknownSlot36() {
         buttons.push_back(HxStr(kYesButton));
         MetMsgScreen::Show(
             HxStr(kDiscardDialogue), HxStr(kWarningTitle), text, kTwoButtons, buttons, this);
-        MetMsgScreen::SetOwnerPad(mUnknownc8);
+        MetMsgScreen::SetOwnerPad(mOwnerPad);
         return;
     }
 
-    if (mUnknown18 == kExitDiscard) {
-        if (mUnknownfc != nullptr) {
-            mUnknownfc->OnUnknownSlot2(kSaverBack);
+    if (mExitChoice == kExitDiscard) {
+        if (mSaver != nullptr) {
+            mSaver->OnSaveFinished(kSaverBack);
         }
         return;
     }
 
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    RecordPendingSave(mUnknown94,
-                      mUnknownc8,
+    RecordPendingSave(mTargetSlot,
+                      mOwnerPad,
                       HxStr(TextOrEmpty(mRemixNameText->mPreWrapText)),
                       params.mLevelName,
-                      mUnknownac,
+                      mAppearances,
                       QueryConfigValue(kAlbumNumberConfigCode));
 }

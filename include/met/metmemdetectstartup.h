@@ -115,7 +115,7 @@ public:
      * @param flTime The renderer's current animation frame position.
      * @ghidraAddress 0x002df250
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Show the detection notice and run the base probe.

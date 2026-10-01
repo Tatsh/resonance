@@ -42,7 +42,7 @@ class TrackData;
  * The object is 0x9c bytes, which GrooveWorld allocates at `0x0018cfc0`. The RTTI name of the
  * unit's file-local command embeds the constructor's mangled name, which fixes its three parameter
  * types as two integers and a GameStats pointer. The members are declared in recovered offset
- * order. Those whose purpose is undetermined keep their offset as their title.
+ * order.
  */
 class Gamer : public MsgSink, public MsgSource {
 public:
@@ -54,7 +54,7 @@ public:
      * playback with every input binding off except the first slot's two rotations.
      *
      * @param nTrackCount The level's track count.
-     * @param nEndBar The level's last bar, from its slot 9.
+     * @param nEndBar The level's last bar, from LevelData::GetEndBar().
      * @param pStats The session statistics.
      * @ghidraAddress 0x00110138
      */
@@ -194,8 +194,8 @@ public:
      * Calls Fatal() with `Only call Gamer::EnablePlayerFreestyle() from tutorial.` outside the
      * tutorial, which is what attests the title.
      *
-     * @param nStartBar The first bar, passed to Player::Slot8().
-     * @param nEndBar The end bar, passed to Player::Slot8().
+     * @param nStartBar The first bar, passed to Player::SetFreestyleSpan().
+     * @param nEndBar The end bar, passed to Player::SetFreestyleSpan().
      * @ghidraAddress 0x00116a98
      */
     void EnablePlayerFreestyle(int nStartBar, int nEndBar);
@@ -223,7 +223,7 @@ public:
     void EndWithScore(int nScore);
 
     /**
-     * Advance to the bar of a position, with PlayMap::Slot18() of that bar as the advance.
+     * Advance to the bar of a position, with PlayMap::ToggleLoop() of that bar as the advance.
      *
      * Public because the advance-section script command calls it with no accessor in the image.
      * The title is inferred.
@@ -235,8 +235,8 @@ public:
 
 private:
     // 0x00116920
-    // Outside jam or in a network game, and outside the tutorial, ignores the
-    // message. Otherwise advances at the message's position unless the player's Slot2() is set.
+    // Outside jam or in a network game, and outside the tutorial, ignores the message. Otherwise
+    // advances at the message's position unless the player's GetInputSlot() is non-zero.
     void OnAdvanceSection(AdvanceSectionMsg *pMsg);
 
     // 0x001169a8
@@ -266,9 +266,9 @@ private:
     void ScheduleBar(int nBar);
 
     // 0x001116c8
-    // Sends an AdvanceSectionToggleMsg for the bar, then an InvalidateTrackMsg from
-    // the following step's mapped position through mUnknown3c further and an InvalidateSeekerMsg
-    // through each track's source, and runs script template 1013. The title is inferred.
+    // Sends an AdvanceSectionToggleMsg for the bar, then an InvalidateTrackMsg from the following
+    // step's mapped position through mInvalidateBars further and an InvalidateSeekerMsg through
+    // each track's source, and runs script template 1013. The title is inferred.
     void AdvanceTo(int nBar, int nAdvance);
 
     // 0x00111c90
@@ -288,7 +288,7 @@ private:
     void DeclareWinners();
 
     // 0x00111b78
-    // Records player 0's score, Slot17() count, and Slot18() fraction in mStats, with
+    // Records player 0's score, best streak, and capture ratio in mStats, with
     // the fraction of the song reached. The title is inferred.
     void RecordSoloStats(int bCompleted, int nBar);
 
@@ -303,27 +303,34 @@ private:
 
 public:
     /**
-     * Practice-mode flag the practice cheat sets. +0x1c
+     * Non-zero while the per-bar juice charge is suspended. +0x1c
      *
-     * Public because the practice cheat writes it through GrooveWorld::mGamer with no accessor
-     * in the image.
+     * OnBar() charges juice only while it is zero. Public because the practice cheat and the
+     * freeze-juice script command write it through GrooveWorld::mGamer with no accessor in the
+     * image.
      */
-    int mUnknown1c;
+    int mJuiceFrozen;
 
 private:
-    int mUnknown20;                           // +0x20
-    int mEndBar;                              // +0x24 the bar the game ends at
-    int mEndState;                            // +0x28 an EndState
-    int mPlayMode;                            // +0x2c
-    int mGameMode;                            // +0x30
-    int mJukeboxMode;                         // +0x34
-    int mUnknown38;                           // +0x38
-    int mUnknown3c;                           // +0x3c
-    int mTrackCount;                          // +0x40
-    int mUnknown44;                           // +0x44
-    int mUnknown48;                           // +0x48
-    int mPlaybackOn;                          // +0x4c
-    int mUnknown50;                           // +0x50
+    // Never read or written by a recovered routine, the constructor included.
+    int mReserved;    // +0x20
+    int mEndBar;      // +0x24 the bar the game ends at
+    int mEndState;    // +0x28 an EndState
+    int mPlayMode;    // +0x2c
+    int mGameMode;    // +0x30
+    int mJukeboxMode; // +0x34
+    // The bar OnBar() last ran for. No recovered routine reads it.
+    int mCurrentBar; // +0x38
+    // Bars past the following step that AdvanceTo() invalidates, from configuration code 702.
+    int mInvalidateBars; // +0x3c
+    int mTrackCount;     // +0x40
+    // The constructor writes 2 here and 0 in the next word, and no recovered routine reads the two.
+    int mUnreadSetting; // +0x44
+    int mUnreadFlag;    // +0x48
+    int mPlaybackOn;    // +0x4c
+    // Whether the section at the playback toggle repeats, as PlayMap slot 14 reports it, and 1 once
+    // playback stops. No recovered routine reads it.
+    int mSectionRepeats;                      // +0x50
     Globals *mGlobals;                        // +0x54
     GameStats *mStats;                        // +0x58
     Mid::MBT mBarLength;                      // +0x5c
@@ -342,9 +349,10 @@ public:
     std::vector<MsgSource> mTrackSources;
 
 private:
-    int mUnknown84;    // +0x84
-    int mFreeEndBar;   // +0x88 the end bar non-catch tracks are free until
-    PlayMap *mPlayMap; // +0x8c
+    // The end of the last freestyle span given to a player. No recovered routine reads it.
+    int mFreestyleEndBar; // +0x84
+    int mFreeEndBar;      // +0x88 the end bar non-catch tracks are free until
+    PlayMap *mPlayMap;    // +0x8c
 
 public:
     /**
@@ -360,10 +368,11 @@ private:
 
 public:
     /**
-     * Cheat-armed flag the cheats set. +0x98
+     * Non-zero once a cheat ran during the game. +0x98
      *
-     * Public because the practice, listen-mode, and enable-all-tracks cheats write it through
-     * GrooveWorld::mGamer with no accessor in the image.
+     * RecordSoloStats() copies it into GameStats::mCheated. Public because the practice,
+     * listen-mode, and enable-all-tracks cheats write it through GrooveWorld::mGamer with no
+     * accessor in the image.
      */
-    int mUnknown98;
+    int mCheated;
 };

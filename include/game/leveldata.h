@@ -88,11 +88,11 @@ public:
      * LevelBuilder returns the word at its own `+0x30`. Its constructor fills that word with a
      * 0x28-byte object built by `0x0052d118` with 500000 microseconds per quarter note, which is
      * the Sch::TempoMap constructor, and GrooveWorld::FinishLoad() hands the result to
-     * Sch::TickClock::SetTempoMap(). The verb remains unrecovered.
+     * Sch::TickClock::SetTempoMap().
      *
      * @return The tempo map.
      */
-    virtual Sch::TempoMap *OnUnknownSlot7() = 0;
+    virtual Sch::TempoMap *GetTempoMap() = 0;
 
     /**
      * Report the level's play map. Slot 8, and pure.
@@ -100,20 +100,20 @@ public:
      * LevelBuilder returns the word at its own `+0x34`. The LevelBuilder constructor at
      * `0x001ea838` fills that word with a 0x74-byte allocation under the tag `PlayMap`, constructed
      * by `0x00127a80` with PlayMapLinear's table at `0x007d1060` written to its `+0x38`, and the
-     * destructor deletes it through table slot 1. The verb remains unrecovered.
+     * destructor deletes it through table slot 1.
      *
      * @return The play map.
      */
-    virtual PlayMap *OnUnknownSlot8() = 0;
+    virtual PlayMap *GetPlayMap() = 0;
 
     /**
-     * Slot 9, and pure. The verb is unrecovered.
+     * Report the level's end bar. Slot 9, and pure.
      *
-     * LevelBuilder returns what slot 8 of its play map reports, the last element of the play
-     * map's steps. GrooveWorld::BuildGraphs() at `0x0018cce8` passes the result to Gamer's
-     * constructor as the end bar.
+     * LevelBuilder returns what PlayMap::GetExtent() of its play map reports.
+     * GrooveWorld::BuildGraphs() at `0x0018cce8` passes the result to Gamer's constructor as the
+     * end bar.
      *
-     * @return The play map's slot 8 value.
+     * @return The play map's extent.
      */
-    virtual int OnUnknownSlot9() = 0;
+    virtual int GetEndBar() = 0;
 };

@@ -81,10 +81,10 @@ void RndAsyncLoader::Unload() {
         return;
     }
 
-    for (auto it = mUnknown08.begin(); it != mUnknown08.end(); ++it) {
+    for (auto it = mLoadedObjects.begin(); it != mLoadedObjects.end(); ++it) {
         delete *it;
     }
-    mUnknown08.clear();
+    mLoadedObjects.clear();
     mObjects.clear();
     mDrawables.clear();
     mFinished = 0;
@@ -118,7 +118,7 @@ void RndAsyncLoader::Enqueue() {
 
 // 0x003f8460
 void RndAsyncLoader::HarvestLoadedObjects() {
-    mUnknown08 = Rnd::g_manager.mLoaded;
+    mLoadedObjects = Rnd::g_manager.mLoaded;
 
     for (auto it = Rnd::g_manager.mLoaded.begin(); it != Rnd::g_manager.mLoaded.end(); ++it) {
         if ((*it)->ClassName() == "Tex") {
@@ -155,7 +155,7 @@ void RndAsyncLoader::PollAsyncLoads() {
 
         const int nLength = GetUncompressedFileLength(NameText(path));
         if (nLength == 0) {
-            Fatal("RndAsyncLoader::Poll(): couldn't find: %s\n", NameText(path));
+            Fatal("RndAsyncLoader::%s(): couldn't find: %s\n", __func__, NameText(path));
         }
         if (static_cast<unsigned>(ZoneGetAvail(nLength)) < static_cast<unsigned>(nLength)) {
             break;

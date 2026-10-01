@@ -48,7 +48,7 @@ const char *StdMidiMsg::Name() {
 // 0x003d7ec0
 void StdMidiMsg::Print(std::ostream &stream) {
     HxStr kind;
-    switch (mUnknown08 & kStatusKindMask) {
+    switch (mStatus & kStatusKindMask) {
     case kStatusNoteOff:
         kind = "off";
         break;
@@ -78,15 +78,15 @@ void StdMidiMsg::Print(std::ostream &stream) {
     Mid::MBT position;
     position.mTick = mTick;
     position.Print(stream);
-    stream << ' ' << kind << ' ' << static_cast<int>(mUnknown09) << ' '
-           << static_cast<int>(mUnknown0a) << " n" << (mUnknown08 & kStatusChannelMask);
+    stream << ' ' << kind << ' ' << static_cast<int>(mData1) << ' ' << static_cast<int>(mData2)
+           << " n" << (mStatus & kStatusChannelMask);
 }
 
 // 0x003e3658
 void StdMidiMsg::Save(OBStream &stream) {
-    unsigned char status = mUnknown08;
-    unsigned char data1 = mUnknown09;
-    unsigned char data2 = mUnknown0a;
+    unsigned char status = mStatus;
+    unsigned char data1 = mData1;
+    unsigned char data2 = mData2;
     stream.WriteBytes(&status, sizeof(status))
         .WriteBytes(&data1, sizeof(data1))
         .WriteBytes(&data2, sizeof(data2));
@@ -94,7 +94,7 @@ void StdMidiMsg::Save(OBStream &stream) {
 
 // 0x003e36e8
 void StdMidiMsg::Load(IBStream &stream) {
-    stream.ReadBytes(&mUnknown08, sizeof(mUnknown08))
-        .ReadBytes(&mUnknown09, sizeof(mUnknown09))
-        .ReadBytes(&mUnknown0a, sizeof(mUnknown0a));
+    stream.ReadBytes(&mStatus, sizeof(mStatus))
+        .ReadBytes(&mData1, sizeof(mData1))
+        .ReadBytes(&mData2, sizeof(mData2));
 }

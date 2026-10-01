@@ -18,8 +18,8 @@ class Button;
  * bytes, and the 39-entry vtable is at `0x007eaea8`, the same length as the MetScreen table, so
  * the class declares no virtual of its own.
  *
- * Two rows edit a working copy of GameOptions. The audio row switches GameOptions::mUnknown00
- * between `STEREO` and `MONO`, and the force-feedback row switches GameOptions::mUnknown08
+ * Two rows edit a working copy of GameOptions. The audio row switches GameOptions::mStereo
+ * between `STEREO` and `MONO`, and the force-feedback row switches GameOptions::mForceFeedback
  * between `ON` and `OFF`.
  *
  * Six slots differ from the MetScreenMultiSoundBank table.
@@ -27,7 +27,7 @@ class Button;
  *  - 1 `0x0020ce20` the destructor.
  *  - 5 `0x0020d310` EnterAndShow().
  *  - 19 `0x0020cf70` HandleCommand().
- *  - 36 `0x0020d5a8` OnUnknownSlot36().
+ *  - 36 `0x0020d5a8` OnExitFinished().
  *  - 38 `0x0020c800` ResolveContainerViews().
  *
  * The five sounds the base swapped for the multiplayer bank stay as MetScreenMultiSoundBank
@@ -39,7 +39,7 @@ public:
      * Construct the in-game options screen.
      *
      * The screen name is `nop`, the directory `metagame/shared`, and the container
-     * `net_options_pangame`. The two row keys are appended to MetScreen::mUnknown38.
+     * `net_options_pangame`. The two row keys are appended to MetScreen::mHelpKeys.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
@@ -86,7 +86,7 @@ public:
     /**
      * Push the screens that follow this one.
      *
-     * Entered from the pause menu, the pause screen recorded in MetFrontEndState::mUnknown24 is
+     * Entered from the pause menu, the pause screen recorded in MetFrontEndState::mReturnScreen is
      * pushed and activated again, after the help screen exits for the remix pause screen, and
      * the record is cleared. Otherwise a cancel returns to `MetConfigOptionsButtonsScreen`, and
      * any other exit stores the options into GlobalSettings and saves them through
@@ -94,7 +94,7 @@ public:
      *
      * @ghidraAddress 0x0020d5a8
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the two labels, the two rows, and the four arrow buttons.
@@ -119,8 +119,8 @@ private:
     // applies the force-feedback setting to the world when one exists.
     void ApplyOptions();
 
-    MetButtonList *mUnknown8c;             // +0x8c
-    std::vector<Rnd::Button *> mUnknown90; // +0x90, the left arrows
-    std::vector<Rnd::Button *> mUnknown9c; // +0x9c, the right arrows
-    GameOptions mUnknowna8;                // +0xa8, the working copy
+    MetButtonList *mRows;                    // +0x8c
+    std::vector<Rnd::Button *> mLeftArrows;  // +0x90
+    std::vector<Rnd::Button *> mRightArrows; // +0x9c
+    GameOptions mOptions;                    // +0xa8, the working copy
 };

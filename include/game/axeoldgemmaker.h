@@ -117,7 +117,7 @@ private:
     // 0x001a3600
     void OnPhrase(PhraseMsg *pMsg);
 
-    int mTrack;             // +0x18, copied from TrackData::mUnknown04
+    int mTrack;             // +0x18, copied from TrackData::mIndex
     Mid::MBT mPosition;     // +0x1c, the position of the entry being replayed
     Phrase *mPhrase;        // +0x20, the phrase being replayed, or null
     Mid::MBT mSustainStart; // +0x24, zero while the pedal is not held

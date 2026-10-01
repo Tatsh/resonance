@@ -74,8 +74,8 @@ public:
 private:
     Rnd::TransAnim *mPath;  // "fx.path".
     Rnd::View *mView;       // "<name>.view".
-    int mUnknown08;         // +0x08, never written or read by the recovered routines.
-    int mUnknown0c;         // +0x0c, never written or read by the recovered routines.
+    int mReserved08;        // +0x08, never written or read by the recovered routines.
+    int mReserved0c;        // +0x0c, never written or read by the recovered routines.
     TnlEmitter mEmitter;    // "<name>.ps".
     TnlEmitter mAltEmitter; // "<name>a.ps", for an index of -1 only.
     float mPathStartFrame;

@@ -18,7 +18,7 @@ MetGizmoPanel::~MetGizmoPanel() {
 }
 
 // 0x0027b3b0
-void MetGizmoPanel::OnUnknownSlot26(float flTime) {
+void MetGizmoPanel::UpdateIdle(float flTime) {
     int nCount = mViews.size();
     for (int i = 0; i < nCount; ++i) {
         mViews[i]->SetFrame(flTime);
@@ -27,7 +27,7 @@ void MetGizmoPanel::OnUnknownSlot26(float flTime) {
 
 // 0x0027b388
 void MetGizmoPanel::UpdateIdleAnimation(float flTime) {
-    OnUnknownSlot26(flTime);
+    UpdateIdle(flTime);
 }
 
 // 0x00276d90

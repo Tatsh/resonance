@@ -36,7 +36,7 @@ public:
      * @param nBar The bar.
      * @param nTrack The track.
      */
-    InvalidateSeekerMsg(int nBar, int nTrack) : mUnknown04(nBar), mUnknown08(nTrack) {
+    InvalidateSeekerMsg(int nBar, int nTrack) : mBar(nBar), mTrack(nTrack) {
     }
 
     /**
@@ -78,8 +78,8 @@ public:
     // NotePitcher::HandleMessage() reads these directly, through a InvalidateSeekerMsg pointer from
     // outside the hierarchy, and the image exposes no accessor. A friend declaration fits equally
     // well.
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
+    int mBar;   // +0x04
+    int mTrack; // +0x08
 };
 
 /**

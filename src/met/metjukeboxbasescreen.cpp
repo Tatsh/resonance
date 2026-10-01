@@ -47,7 +47,7 @@ static const char *const kFullText = "met_jukebox_base_screen_error_ticker_tape"
 
 static const char *const kTempoSuffix = " bpm";
 
-// The configuration codes the detail texts are read under, keyed by the record's first string.
+// The configuration codes the detail texts are read under, keyed by the record's level name.
 constexpr int kDetailConfigCode1 = 0x321;
 constexpr int kDetailConfigCode2 = 0x322;
 constexpr int kDetailConfigCode3 = 0x325;
@@ -74,62 +74,63 @@ MetJukeboxBaseScreen::MetJukeboxBaseScreen(MetRenderer *pRenderer,
                                            const HxStr &name,
                                            const HxStr &directory,
                                            const HxStr &file)
-    : MetScreen(pRenderer, nPriority, name, directory, file), mUnknown90(kScrollingListRowPitch),
-      mUnknown94(kScrollingListRowCount), mUnknown98(nullptr), mUnknown9c(nullptr),
-      mUnknowna0(nullptr), mUnknowna4(nullptr), mUnknowna8(nullptr), mUnknownac(nullptr),
-      mUnknownb0(nullptr), mUnknownb4(nullptr), mUnknownb8(nullptr), mUnknownbc(nullptr),
-      mUnknownc0(nullptr), mUnknownc4(nullptr), mUnknownc8(0), mUnknownd8(nullptr),
-      mUnknowndc(nullptr), mUnknowne0(HxStr(kSongLogoTexture1), HxStr(kSongLogoTexture2)),
-      mUnknown110(HxStr(kSongLabelTexture1), HxStr(kSongLabelTexture2)), mUnknown140(nullptr),
-      mUnknown144(nullptr), mUnknown148(nullptr), mUnknown14c(0) {
-    mUnknown60 = 0;
+    : MetScreen(pRenderer, nPriority, name, directory, file), mListRowPitch(kScrollingListRowPitch),
+      mListRowCount(kScrollingListRowCount), mCatalogueList(nullptr), mPlayListList(nullptr),
+      mCatalogue(nullptr), mGenreText(nullptr), mTempoText(nullptr), mSongTitleText(nullptr),
+      mDateText(nullptr), mRemixTitleText(nullptr), mPlayListCaption(nullptr),
+      mPictureMaterial(nullptr), mLogoMaterial(nullptr), mPlayList(nullptr), mCatalogueKey(0),
+      mAvailableFont(nullptr), mUnavailableFont(nullptr),
+      mLogoTextures(HxStr(kSongLogoTexture1), HxStr(kSongLogoTexture2)),
+      mPictureTextures(HxStr(kSongLabelTexture1), HxStr(kSongLabelTexture2)), mPictureMesh(nullptr),
+      mLogoMesh(nullptr), mWarningText(nullptr), mPicturesPending(0) {
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x0021dfc0
 MetJukeboxBaseScreen::~MetJukeboxBaseScreen() {
-    delete mUnknown98;
-    delete mUnknown9c;
+    delete mCatalogueList;
+    delete mPlayListList;
 }
 
 // 0x0021e0f0
 void MetJukeboxBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mUnknownd8 = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kSelectedFont)));
-    mUnknowndc = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kUnselectedFont)));
+    mAvailableFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kSelectedFont)));
+    mUnavailableFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kUnselectedFont)));
 }
 
 // 0x0021e268
 void MetJukeboxBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown98->scrollUp();
+        mCatalogueList->scrollUp();
         ShowRemixDetails();
         UpdateHelpText();
         break;
 
     case kMetScreenCommandNext:
-        mUnknown98->scrollDown();
+        mCatalogueList->scrollDown();
         ShowRemixDetails();
         UpdateHelpText();
         break;
 
     case kMetScreenCommandSelect: {
         UpdateHelpText();
-        std::vector<MetRemixRecord> *pRecords = mUnknowna0;
+        std::vector<MetRemixRecord> *pRecords = mCatalogue;
         if (pRecords->size() == 0) {
             return;
         }
-        if (mUnknownc4->entries.size() < static_cast<unsigned>(g_nMaxPlayListEntries)) {
-            MetRemixRecord &record = (*pRecords)[mUnknown98->getSelected()];
-            if (record.unknown34_ != GetAlbumJukeboxValue()) {
+        if (mPlayList->entries.size() < static_cast<unsigned>(g_nMaxPlayListEntries)) {
+            MetRemixRecord &record = (*pRecords)[mCatalogueList->getSelected()];
+            if (record.albumNumber != GetAlbumJukeboxValue()) {
                 return;
             }
-            mUnknownc4->AddEntry(record);
-            mUnknown9c->setItemCount(mUnknownc4->entries.size());
-            mUnknown9c->setSelected(mUnknownc4->entries.size() - 1);
+            mPlayList->AddEntry(record);
+            mPlayListList->setItemCount(mPlayList->entries.size());
+            mPlayListList->setSelected(mPlayList->entries.size() - 1);
         }
-        mUnknown98->refresh();
-        mUnknown9c->refresh();
+        mCatalogueList->refresh();
+        mPlayListList->refresh();
         break;
     }
 
@@ -140,55 +141,56 @@ void MetJukeboxBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x0021e3f8
 void MetJukeboxBaseScreen::BindLists() {
-    mUnknownc4 = &MetRemixManager::shared()->mPlayList;
-    mUnknowna0 = &MetRemixManager::shared()->mRemixes[mUnknownc8];
-    if (mUnknown98 != nullptr) {
-        mUnknown98->setItemCount(mUnknowna0->size());
+    mPlayList = &MetRemixManager::shared()->mPlayList;
+    mCatalogue = &MetRemixManager::shared()->mRemixes[mCatalogueKey];
+    if (mCatalogueList != nullptr) {
+        mCatalogueList->setItemCount(mCatalogue->size());
     }
-    mUnknown9c->setItemCount(mUnknownc4->entries.size());
-    mUnknown9c->setSelected(mUnknownc4->entries.size() - 1);
+    mPlayListList->setItemCount(mPlayList->entries.size());
+    mPlayListList->setSelected(mPlayList->entries.size() - 1);
 }
 
 // 0x0021e908
 void MetJukeboxBaseScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
-    mUnknowna4->SetShowing(1);
-    mUnknowna8->SetShowing(1);
-    mUnknownac->SetShowing(1);
-    mUnknownb0->SetShowing(1);
-    mUnknownb4->SetShowing(1);
+    mGenreText->SetShowing(1);
+    mTempoText->SetShowing(1);
+    mSongTitleText->SetShowing(1);
+    mDateText->SetShowing(1);
+    mRemixTitleText->SetShowing(1);
 
-    mUnknownc4 = &MetRemixManager::shared()->mPlayList;
-    mUnknowna0 = &MetRemixManager::shared()->mRemixes[mUnknownc8];
-    if (mUnknown98 != nullptr) {
-        mUnknown98->setSelected(kFirstRow);
-        mUnknown98->setItemCount(mUnknowna0->size());
+    mPlayList = &MetRemixManager::shared()->mPlayList;
+    mCatalogue = &MetRemixManager::shared()->mRemixes[mCatalogueKey];
+    if (mCatalogueList != nullptr) {
+        mCatalogueList->setSelected(kFirstRow);
+        mCatalogueList->setItemCount(mCatalogue->size());
     }
-    mUnknown9c->setItemCount(mUnknownc4->entries.size());
-    mUnknown9c->setSelected(mUnknownc4->entries.size() - 1);
-    if (mUnknown98 != nullptr) {
-        mUnknown98->refresh();
+    mPlayListList->setItemCount(mPlayList->entries.size());
+    mPlayListList->setSelected(mPlayList->entries.size() - 1);
+    if (mCatalogueList != nullptr) {
+        mCatalogueList->refresh();
     }
-    mUnknown9c->refresh();
+    mPlayListList->refresh();
 
-    mUnknown140->SetShowing(0);
-    mUnknown144->SetShowing(0);
+    mPictureMesh->SetShowing(0);
+    mLogoMesh->SetShowing(0);
     ShowRemixDetails();
 }
 
 // 0x0021ef30
 int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nContext) {
     if (nContext == kCatalogueContext) {
-        if (static_cast<unsigned>(nItem) < mUnknowna0->size()) {
-            const MetRemixRecord &record = (*mUnknowna0)[nItem];
+        if (static_cast<unsigned>(nItem) < mCatalogue->size()) {
+            const MetRemixRecord &record = (*mCatalogue)[nItem];
             pText->SetText(record.name);
-            pText->SetFont(record.unknown34_ == GetAlbumJukeboxValue() ? mUnknownd8 : mUnknowndc);
+            pText->SetFont(record.albumNumber == GetAlbumJukeboxValue() ? mAvailableFont :
+                                                                          mUnavailableFont);
         } else {
             pText->SetText(HxStr(kNoText));
         }
     } else if (nContext == kPlayListContext) {
         // Yes, the binary copies the whole entry vector to read one entry.
-        std::vector<JukeboxPlayListEntry *> entries(mUnknownc4->entries);
+        std::vector<JukeboxPlayListEntry *> entries(mPlayList->entries);
         if (static_cast<unsigned>(nItem) < entries.size()) {
             pText->SetText(entries[nItem]->name);
         } else {
@@ -200,119 +202,119 @@ int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nCon
 
 // 0x0021f3e8
 void MetJukeboxBaseScreen::ShowRemixDetails() {
-    mUnknowna4->SetText(HxStr(kNoText));
-    mUnknowna8->SetText(HxStr(kNoText));
-    mUnknownac->SetText(HxStr(kNoText));
-    mUnknownb0->SetText(HxStr(kNoText));
-    mUnknownb4->SetText(HxStr(kNoText));
+    mGenreText->SetText(HxStr(kNoText));
+    mTempoText->SetText(HxStr(kNoText));
+    mSongTitleText->SetText(HxStr(kNoText));
+    mDateText->SetText(HxStr(kNoText));
+    mRemixTitleText->SetText(HxStr(kNoText));
     for (int i = 0; i < kAppearanceTextCount; ++i) {
-        mUnknowncc[i]->SetText(HxStr(kNoText));
+        mAppearanceTexts[i]->SetText(HxStr(kNoText));
     }
-    mUnknown148->SetShowing(0);
+    mWarningText->SetShowing(0);
 
-    mUnknown14c = 0;
-    if (mUnknowna0 == nullptr || mUnknowna0->size() == 0) {
+    mPicturesPending = 0;
+    if (mCatalogue == nullptr || mCatalogue->size() == 0) {
         return;
     }
 
-    MetRemixRecord &record = (*mUnknowna0)[mUnknown98->getSelected()];
-    const int bOtherAlbum = record.unknown34_ != GetAlbumJukeboxValue();
+    MetRemixRecord &record = (*mCatalogue)[mCatalogueList->getSelected()];
+    const int bOtherAlbum = record.albumNumber != GetAlbumJukeboxValue();
     if (bOtherAlbum) {
-        mUnknown148->SetShowing(1);
-        mUnknown140->SetShowing(0);
-        mUnknown144->SetShowing(0);
+        mWarningText->SetShowing(1);
+        mPictureMesh->SetShowing(0);
+        mLogoMesh->SetShowing(0);
     } else {
-        mUnknowne0.Load(TexturePairRecord::LogoPath(record.unknown00_));
-        mUnknown110.Load(TexturePairRecord::PicturePath(record.unknown00_));
-        HxStr first = QueryConfigString(kDetailConfigCode1, TextOrEmpty(record.unknown00_));
-        HxStr second = QueryConfigString(kDetailConfigCode2, TextOrEmpty(record.unknown00_));
-        mUnknowna4->SetText(HxStr(TextOrEmpty(first)));
+        mLogoTextures.Load(TexturePairRecord::LogoPath(record.levelName));
+        mPictureTextures.Load(TexturePairRecord::PicturePath(record.levelName));
+        HxStr first = QueryConfigString(kDetailConfigCode1, TextOrEmpty(record.levelName));
+        HxStr second = QueryConfigString(kDetailConfigCode2, TextOrEmpty(record.levelName));
+        mGenreText->SetText(HxStr(TextOrEmpty(first)));
         second += HxStr(kTempoSuffix);
-        mUnknowna8->SetText(HxStr(TextOrEmpty(second)));
+        mTempoText->SetText(HxStr(TextOrEmpty(second)));
     }
 
-    mUnknownb4->SetText(record.name);
+    mRemixTitleText->SetText(record.name);
     const int nAppearances = record.appearances.size();
     for (int i = 0; i < nAppearances; ++i) {
-        mUnknowncc[i]->SetShowing(1);
-        mUnknowncc[i]->SetText(record.appearances[i].mUnknown00);
+        mAppearanceTexts[i]->SetShowing(1);
+        mAppearanceTexts[i]->SetText(record.appearances[i].mUserName);
     }
 
     if (!bOtherAlbum) {
-        HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(record.unknown00_));
-        const float flWrapWidth = mUnknownac->mWrapWidth;
-        if (flWrapWidth < mUnknownac->MeasureText(TextOrEmpty(third), third.mLen)) {
+        HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(record.levelName));
+        const float flWrapWidth = mSongTitleText->mWrapWidth;
+        if (flWrapWidth < mSongTitleText->MeasureText(TextOrEmpty(third), third.mLen)) {
             HxStr shorter =
-                QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(record.unknown00_));
+                QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(record.levelName));
             third = shorter;
         }
-        mUnknownac->SetText(third);
+        mSongTitleText->SetText(third);
     }
 
-    mUnknownb0->SetText(record.unknown18_);
+    mDateText->SetText(record.dateTime);
     if (!bOtherAlbum) {
-        mUnknown14c = 1;
+        mPicturesPending = 1;
     }
 }
 
 // 0x0021fc88
-void MetJukeboxBaseScreen::OnUnknownSlot26([[maybe_unused]] float flTime) {
-    if (!mUnknown14->GetShowing() || mUnknown14c == 0) {
+void MetJukeboxBaseScreen::UpdateIdle([[maybe_unused]] float flTime) {
+    if (!mView->GetShowing() || mPicturesPending == 0) {
         return;
     }
 
     int bLabelShown = 0;
     int bLogoShown = 0;
 
-    if (mUnknowne0.Advance()) {
-        mUnknown144->SetShowing(0);
-        Rnd::Tex *pTex = mUnknowne0.Current();
+    if (mLogoTextures.Advance()) {
+        mLogoMesh->SetShowing(0);
+        Rnd::Tex *pTex = mLogoTextures.Current();
         if (pTex != nullptr) {
             const int nCount = GetItemCount();
             int bJukeboxAlbum = 1;
-            if (mUnknown98 != nullptr) {
-                bJukeboxAlbum =
-                    (*mUnknowna0)[mUnknown98->getSelected()].unknown34_ == GetAlbumJukeboxValue();
+            if (mCatalogueList != nullptr) {
+                bJukeboxAlbum = (*mCatalogue)[mCatalogueList->getSelected()].albumNumber ==
+                                GetAlbumJukeboxValue();
             }
             if (nCount > 0 && bJukeboxAlbum) {
                 bLogoShown = 1;
-                mUnknown144->SetShowing(1);
-                mUnknownc0->mStages[0].SetTex(pTex);
+                mLogoMesh->SetShowing(1);
+                mLogoMaterial->mStages[0].SetTex(pTex);
             }
         }
     }
 
-    if (mUnknown110.Advance()) {
-        mUnknown140->SetShowing(0);
-        Rnd::Tex *pTex = mUnknown110.Current();
+    if (mPictureTextures.Advance()) {
+        mPictureMesh->SetShowing(0);
+        Rnd::Tex *pTex = mPictureTextures.Current();
         if (pTex != nullptr) {
             const int nCount = GetItemCount();
             int bJukeboxAlbum = 1;
-            if (mUnknown98 != nullptr) {
-                bJukeboxAlbum =
-                    (*mUnknowna0)[mUnknown98->getSelected()].unknown34_ == GetAlbumJukeboxValue();
+            if (mCatalogueList != nullptr) {
+                bJukeboxAlbum = (*mCatalogue)[mCatalogueList->getSelected()].albumNumber ==
+                                GetAlbumJukeboxValue();
             }
             if (nCount > 0 && bJukeboxAlbum) {
                 bLabelShown = 1;
-                mUnknown140->SetShowing(1);
-                mUnknownbc->mStages[0].SetTex(pTex);
+                mPictureMesh->SetShowing(1);
+                mPictureMaterial->mStages[0].SetTex(pTex);
             }
         }
     }
 
     if (bLabelShown && bLogoShown) {
-        mUnknown14c = 0;
+        mPicturesPending = 0;
     }
 }
 
 // 0x0021fe98
 void MetJukeboxBaseScreen::UpdateHelpText() {
-    if (mUnknownc4->entries.size() < static_cast<unsigned>(g_nMaxPlayListEntries)) {
+    if (mPlayList->entries.size() < static_cast<unsigned>(g_nMaxPlayListEntries)) {
         MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
-        MetHelpScreen::SetText(HxStr(kHelpText), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kHelpText), mRenderer->mAnimationFrame);
     } else {
         MetHelpScreen::SelectPreset(HxStr(kFullLayout));
-        MetHelpScreen::SetText(HxStr(kFullText), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kFullText), mRenderer->mAnimationFrame);
     }
 }
 
@@ -337,28 +339,28 @@ void MetJukeboxBaseScreen::PlayCycleRightSound(int) {
 }
 
 // 0x00224990
-void MetJukeboxBaseScreen::OnUnknownSlot33() {
+void MetJukeboxBaseScreen::OnEnterFinished() {
     BindLists();
-    if (mUnknown98 != nullptr) {
-        mUnknown98->refresh();
+    if (mCatalogueList != nullptr) {
+        mCatalogueList->refresh();
     }
-    mUnknown9c->refresh();
+    mPlayListList->refresh();
 }
 
 // 0x002249e0
-void MetJukeboxBaseScreen::OnUnknownSlot36() {
-    mUnknowna4->SetShowing(0);
-    mUnknowna8->SetShowing(0);
-    mUnknownac->SetShowing(0);
-    mUnknownb0->SetShowing(0);
-    mUnknownb4->SetShowing(0);
+void MetJukeboxBaseScreen::OnExitFinished() {
+    mGenreText->SetShowing(0);
+    mTempoText->SetShowing(0);
+    mSongTitleText->SetShowing(0);
+    mDateText->SetShowing(0);
+    mRemixTitleText->SetShowing(0);
 }
 
 // 0x00224a90
-void MetJukeboxBaseScreen::OnUnknownSlot7() {
-    OnUnknownSlot33();
+void MetJukeboxBaseScreen::OnPanelActivated() {
+    OnEnterFinished();
     UpdateHelpText();
-    mUnknown9c->setShowing(1);
+    mPlayListList->setShowing(1);
 }
 
 // 0x00224ae8
@@ -369,26 +371,26 @@ int MetJukeboxBaseScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
 // 0x00224af0
 void MetJukeboxBaseScreen::SetShowing(int nShowing) {
     MetScreen::SetShowing(nShowing);
-    if (mUnknown48 != 0) {
+    if (mViewsUnresolved != 0) {
         return;
     }
     BindLists();
-    mUnknowne0.invalidate();
-    mUnknown110.invalidate();
+    mLogoTextures.invalidate();
+    mPictureTextures.invalidate();
     if (nShowing != 0) {
         ShowRemixDetails();
     } else {
         // Yes, the binary hides this list without the null check it applies to the same pointer
         // two statements below.
-        mUnknown9c->setShowing(0);
+        mPlayListList->setShowing(0);
     }
-    if (mUnknown98 != nullptr) {
-        mUnknown98->setEntriesShowing(nShowing);
+    if (mCatalogueList != nullptr) {
+        mCatalogueList->setEntriesShowing(nShowing);
     }
-    if (mUnknown9c != nullptr) {
-        mUnknown9c->setEntriesShowing(nShowing);
+    if (mPlayListList != nullptr) {
+        mPlayListList->setEntriesShowing(nShowing);
     }
-    if (mUnknownb8 != nullptr) {
-        mUnknownb8->SetShowing(nShowing);
+    if (mPlayListCaption != nullptr) {
+        mPlayListCaption->SetShowing(nShowing);
     }
 }

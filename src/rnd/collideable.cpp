@@ -140,9 +140,9 @@ void Collideable::Collide(const Ray &ray, HitSink &sink) {
 }
 
 // 0x00502ab8
-void Collideable::CollideUnknown(const Ray &ray, HitSink &sink) {
+void Collideable::CollideScreen(const Ray &ray, HitSink &sink) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
-        (*it)->CollideUnknown(ray, sink);
+        (*it)->CollideScreen(ray, sink);
     }
 }
 

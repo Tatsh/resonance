@@ -71,7 +71,7 @@ constexpr int kNameButtonIndex = 0;
 constexpr int kEditButtonIndex = 1;
 constexpr int kCreateButtonIndex = 2;
 
-// What MetScreen::mUnknown18 records for the exit hook to act on. The back command writes the
+// What MetScreen::mExitChoice records for the exit hook to act on. The back command writes the
 // first and the alternation-finished hook writes the second.
 constexpr int kExitToMainMenu = 0;
 constexpr int kExitToButtonAction = 2;
@@ -94,8 +94,8 @@ constexpr float kArrowAlternateInterval = 30.0f;
 MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
-    mUnknown94 = 0;
-    mUnknown90 = new MetButtonList;
+    mSelectedIdentity = 0;
+    mButtonList = new MetButtonList;
     MetFreqMakerAssetManager::shared()->WaitForLoad();
     // Yes, the binary polls once more after the wait has already run the load to completion, and
     // discards the result.
@@ -105,7 +105,7 @@ MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriori
 
 // 0x00296ae0
 MetLoadFreqBaseScreen::~MetLoadFreqBaseScreen() {
-    delete mUnknown90;
+    delete mButtonList;
 }
 
 // 0x00296a58
@@ -119,11 +119,11 @@ void MetLoadFreqBaseScreen::EnterAndShow() {
     BuildButtonList();
     UpdateCycleArrows();
 
-    if (static_cast<unsigned>(mUnknown94) >= mUnknown8c->size()) {
-        mUnknown94 = 0;
+    if (static_cast<unsigned>(mSelectedIdentity) >= mIdentityList->size()) {
+        mSelectedIdentity = 0;
     }
 
-    MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     RefreshSelection();
     PushNamedScreen(HxStr(kLeftGizmoScreen));
     MetScreen::EnterAndShow();
@@ -133,45 +133,47 @@ void MetLoadFreqBaseScreen::EnterAndShow() {
 void MetLoadFreqBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown90->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown90->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown90->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandLeft:
-        if (mUnknown90->mSelected != kCarouselSelected) {
+        if (mButtonList->mSelected != kCarouselSelected) {
             return;
         }
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowAlternateInterval, mUnknown98, kArrowAlternateCycles);
+            mRenderer->mAnimationFrame, kArrowAlternateInterval, mLeftArrow, kArrowAlternateCycles);
         StepSelection(pCommand);
         break;
 
     case kMetScreenCommandRight:
-        if (mUnknown90->mSelected != kCarouselSelected) {
+        if (mButtonList->mSelected != kCarouselSelected) {
             return;
         }
-        StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowAlternateInterval, mUnknown9c, kArrowAlternateCycles);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
+                            kArrowAlternateInterval,
+                            mRightArrow,
+                            kArrowAlternateCycles);
         StepSelection(pCommand);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kArrowAlternateInterval,
-                            mUnknown90->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kArrowAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitToMainMenu;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitToMainMenu;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kLeftGizmoScreen));
         BeginExit();
@@ -184,41 +186,41 @@ void MetLoadFreqBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x00296b60
 void MetLoadFreqBaseScreen::PlayCycleLeftSound(int nSelector) {
-    if (mUnknown90->mSelected == kCarouselSelected &&
-        mUnknown8c->size() >= kMinimumCyclableEntries) {
+    if (mButtonList->mSelected == kCarouselSelected &&
+        mIdentityList->size() >= kMinimumCyclableEntries) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
 // 0x00296bb0
 void MetLoadFreqBaseScreen::PlayCycleRightSound(int nSelector) {
-    if (mUnknown90->mSelected == kCarouselSelected &&
-        mUnknown8c->size() >= kMinimumCyclableEntries) {
+    if (mButtonList->mSelected == kCarouselSelected &&
+        mIdentityList->size() >= kMinimumCyclableEntries) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
 // 0x00292c60
-void MetLoadFreqBaseScreen::OnUnknownSlot30(Rnd::Button *pButton) {
-    if (pButton == mUnknown98 || pButton == mUnknown9c) {
+void MetLoadFreqBaseScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
+    if (pButton == mLeftArrow || pButton == mRightArrow) {
         return;
     }
 
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
-    mUnknown18 = kExitToButtonAction;
+    mExitChoice = kExitToButtonAction;
     BeginExit();
 }
 
 // 0x00292da8
-void MetLoadFreqBaseScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitToMainMenu) {
+void MetLoadFreqBaseScreen::OnExitFinished() {
+    if (mExitChoice == kExitToMainMenu) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
         PushNamedScreen(HxStr(kTopLogoScreen));
         PushNamedScreen(HxStr(kMainScreen));
         ActivateNamedPanel(HxStr(kMainScreen));
     } else {
-        switch (mUnknown90->mSelected) {
+        switch (mButtonList->mSelected) {
         case kNameButtonIndex:
             OnNameButton();
             break;
@@ -233,7 +235,7 @@ void MetLoadFreqBaseScreen::OnUnknownSlot36() {
         }
     }
 
-    mUnknown90->SetSelected(-1);
+    mButtonList->SetSelected(-1);
 }
 
 // 0x00292000
@@ -241,16 +243,16 @@ void MetLoadFreqBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     Rnd::Object *pLeft = Rnd::g_manager.Find(HxStr(kLeftArrowObject));
-    mUnknown98 = pLeft != nullptr ? dynamic_cast<Rnd::Button *>(pLeft) : nullptr;
+    mLeftArrow = pLeft != nullptr ? dynamic_cast<Rnd::Button *>(pLeft) : nullptr;
 
     Rnd::Object *pRight = Rnd::g_manager.Find(HxStr(kRightArrowObject));
-    mUnknown9c = pRight != nullptr ? dynamic_cast<Rnd::Button *>(pRight) : nullptr;
+    mRightArrow = pRight != nullptr ? dynamic_cast<Rnd::Button *>(pRight) : nullptr;
 }
 
 // 0x00292620
 void MetLoadFreqBaseScreen::UpdateNameLabel() {
-    HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
-    mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
+    HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
+    mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 }
 
 // 0x00296a50
@@ -273,7 +275,7 @@ void MetLoadFreqBaseScreen::PrepareFreqMakerForSelection() {
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
     MetFreqMakerButtonsScreen *pButtons =
         static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
-    pCanvas->LoadPrefab((*mUnknown8c)[mUnknown94], kNoRandomize);
+    pCanvas->LoadPrefab((*mIdentityList)[mSelectedIdentity], kNoRandomize);
     pButtons->SetEditing(kFreqMakerEditing);
     pButtons->mNewPersona = 0;
 }
@@ -301,36 +303,36 @@ void MetLoadFreqBaseScreen::AcquireIdentityList() {
 
 // 0x00292810
 void MetLoadFreqBaseScreen::BuildButtonList() {
-    mUnknown90->Clear();
-    mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoName));
-    mUnknown90->Add(HxStr(kEditButtonObject), HxStr(kNoName));
-    mUnknown90->Add(HxStr(kCreateButtonObject), HxStr(kNoName));
+    mButtonList->Clear();
+    mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoName));
+    mButtonList->Add(HxStr(kEditButtonObject), HxStr(kNoName));
+    mButtonList->Add(HxStr(kCreateButtonObject), HxStr(kNoName));
 
-    mUnknown38.erase(mUnknown38.begin(), mUnknown38.end());
-    mUnknown38.push_back(HxStr(kNamePrompt));
-    mUnknown38.push_back(HxStr(kEditPrompt));
-    mUnknown38.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
+    mHelpKeys.push_back(HxStr(kNamePrompt));
+    mHelpKeys.push_back(HxStr(kEditPrompt));
+    mHelpKeys.push_back(HxStr(kCreatePrompt));
 
-    mUnknown90->SetSelected(kNameButtonIndex);
+    mButtonList->SetSelected(kNameButtonIndex);
 }
 
 // 0x00296c88
 void MetLoadFreqBaseScreen::UpdateCycleArrows() {
-    const int nShowing = mUnknown8c->size() >= kMinimumCyclableEntries ? 1 : 0;
+    const int nShowing = mIdentityList->size() >= kMinimumCyclableEntries ? 1 : 0;
 
-    mUnknown98->SetShowing(nShowing);
-    mUnknown9c->SetShowing(nShowing);
+    mLeftArrow->SetShowing(nShowing);
+    mRightArrow->SetShowing(nShowing);
 
     if (nShowing != 0) {
-        mUnknown98->SetState(kArrowShownState);
-        mUnknown9c->SetState(kArrowShownState);
+        mLeftArrow->SetState(kArrowShownState);
+        mRightArrow->SetState(kArrowShownState);
     }
 }
 
 // 0x00292508
 void MetLoadFreqBaseScreen::RefreshSelection() {
     Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kPreviewMaterial)));
-    (*mUnknown8c)[mUnknown94]->AttachToBurnSlot(kPreviewBurnSlot);
+    (*mIdentityList)[mSelectedIdentity]->AttachToBurnSlot(kPreviewBurnSlot);
     pMat->mStages[kPreviewStage].SetTex(mBurnTexture);
     UpdateNameLabel();
 }
@@ -338,17 +340,17 @@ void MetLoadFreqBaseScreen::RefreshSelection() {
 // 0x00296c00
 void MetLoadFreqBaseScreen::StepSelection(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandLeft) {
-        int nIndex = mUnknown94 - 1;
+        int nIndex = mSelectedIdentity - 1;
         if (nIndex < 0) {
-            nIndex = static_cast<int>(mUnknown8c->size()) - 1;
+            nIndex = static_cast<int>(mIdentityList->size()) - 1;
         }
-        mUnknown94 = nIndex;
+        mSelectedIdentity = nIndex;
     } else {
-        int nIndex = mUnknown94 + 1;
-        if (nIndex >= static_cast<int>(mUnknown8c->size())) {
+        int nIndex = mSelectedIdentity + 1;
+        if (nIndex >= static_cast<int>(mIdentityList->size())) {
             nIndex = 0;
         }
-        mUnknown94 = nIndex;
+        mSelectedIdentity = nIndex;
     }
 
     RefreshSelection();

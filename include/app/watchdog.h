@@ -271,7 +271,7 @@ private:
     WatchdogPlayback *mPlayback; // +0x14
     long long mNowNs;            // +0x18 the due tick of the command most recently run
     int mBlocked;                // +0x48 blocks every queueing path while set
-    int mUnknown4c;              // +0x4c
+    int mReserved4c;             // +0x4c never accessed
 };
 
 /**

@@ -32,7 +32,7 @@ constexpr int kOpenForWriting = 1;
 } // namespace
 
 inline FailSink::FailSink()
-    : mReportProc(DefaultFailReport), mUnknown08(1), mDumpLevel(0), mLogStream(nullptr) {
+    : mReportProc(DefaultFailReport), mInitializedFlag(1), mDumpLevel(0), mLogStream(nullptr) {
 }
 
 inline FailSink::~FailSink() {

@@ -29,7 +29,7 @@ inline Rnd::View *FindView(const HxStr &name) {
 MetTopLogoScreen::MetTopLogoScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
-    mUnknown60 = 0;
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x003c7710
@@ -42,15 +42,15 @@ MetTopLogoScreen::~MetTopLogoScreen() {
 }
 
 // 0x003c77f0
-void MetTopLogoScreen::OnUnknownSlot26(float flTime) {
-    mUnknown8c->SetFrame(flTime);
+void MetTopLogoScreen::UpdateIdle(float flTime) {
+    mWaveView->SetFrame(flTime);
 }
 
 // 0x003c4868
 void MetTopLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
-    mUnknown14 = FindView(HxStr(kPanelView));
-    mUnknown14->ReleaseAnimsRefs(); // The binary does not test the view for null.
-    mUnknown48 = 0;
-    mUnknown8c = FindView(HxStr(kWaveView));
+    mView = FindView(HxStr(kPanelView));
+    mView->ReleaseAnimsRefs(); // The binary does not test the view for null.
+    mViewsUnresolved = 0;
+    mWaveView = FindView(HxStr(kWaveView));
 }

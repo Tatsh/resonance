@@ -108,5 +108,5 @@ private:
     int mCurrentSection;
     // The bar Update() last styled for. Starts at -99999.
     int mBar;
-    int mUnknown3c; // +0x3c
+    int mUnusedWord; // +0x3c Zeroed by the constructor and never read.
 };

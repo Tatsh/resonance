@@ -36,11 +36,11 @@ public:
      *
      * The image lists no caller. The title is inferred.
      *
-     * @param first The string for mUnknown14.
-     * @param second The string for mUnknown1c.
+     * @param sender The string for mSender.
+     * @param text The string for mText.
      * @ghidraAddress 0x003f1a28
      */
-    GameChatPacket(const HxStr &first, const HxStr &second);
+    GameChatPacket(const HxStr &sender, const HxStr &text);
 
     /**
      * Produce a packet with two empty strings on the heap.
@@ -108,24 +108,26 @@ public:
      *
      * The image lists no caller. The title is inferred.
      *
-     * @return A copy of mUnknown14.
+     * @return A copy of mSender.
      * @ghidraAddress 0x003f1ae0
      */
-    HxStr GetUnknown14();
+    HxStr GetSender();
 
     /**
      * Report the second string.
      *
      * The image lists no caller. The title is inferred.
      *
-     * @return A copy of mUnknown1c.
+     * @return A copy of mText.
      * @ghidraAddress 0x003f1b10
      */
-    HxStr GetUnknown1c();
+    HxStr GetText();
 
 private:
-    HxStr mUnknown14; // +0x14
-    HxStr mUnknown1c; // +0x1c
+    // Print() writes the two strings with nothing between them. Both titles are inferred from the
+    // class name, a chat line and the player who sent it.
+    HxStr mSender; // +0x14
+    HxStr mText;   // +0x1c
 };
 
 /**

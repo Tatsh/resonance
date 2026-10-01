@@ -101,7 +101,7 @@ constexpr int kButtonStatePressed = 2;
 // The select view's showing flag while a player's character is locked in.
 constexpr int kLockedShowing = 1;
 
-// What MetScreen::mUnknown18 records for slot 36 to act on.
+// What MetScreen::mExitChoice records for slot 36 to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitForward = 2;
 
@@ -141,10 +141,10 @@ inline void AppendPersonas(std::vector<MetPersonaData *> &list,
 
 // Show one player's name, or the player number when the persona has no username.
 inline void ShowPlayerName(Rnd::Button *pButton, MetPersonaData *pPersona, int nPlayer) {
-    if (pPersona->mUnknown140.mUnknown00 == kNoName) {
+    if (pPersona->mAppearance.mUserName == kNoName) {
         pButton->mText->SetText(HxStr(FormatString(kPlayerLabelFormat, nPlayer + 1)));
     } else {
-        pButton->mText->SetText(pPersona->mUnknown140.mUnknown00);
+        pButton->mText->SetText(pPersona->mAppearance.mUserName);
     }
 }
 
@@ -154,9 +154,9 @@ inline void ShowPlayerName(Rnd::Button *pButton, MetPersonaData *pPersona, int n
 MetLocPickCharScreen::MetLocPickCharScreen(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mReadyCount(0), mPlayerCount(0), mExitCountdown(0), mCardIndex(0), mUnknown124(0),
-      mUnknown128(0) {
-    mUnknown38.push_back(HxStr(kHelpKey));
+      mReadyCount(0), mPlayerCount(0), mExitCountdown(0), mCardIndex(0), mUnusedFirst(0),
+      mUnusedSecond(0) {
+    mHelpKeys.push_back(HxStr(kHelpKey));
 }
 
 // 0x002b19b0
@@ -225,13 +225,13 @@ void MetLocPickCharScreen::HandleCommand(const MetScreenCommand *pCommand) {
                 mChosenPersonas[i] = mPersonas[mChoices[i]];
             }
             ActivateNamedPanel(HxStr(kNoName));
-            MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+            MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
             mExitCountdown = kExitDelayFrames;
-            MetPersonaData::CopyList(&MetFrontEndState::shared()->mUnknown00, &mChosenPersonas);
+            MetPersonaData::CopyList(&MetFrontEndState::shared()->mPersonas, &mChosenPersonas);
             Application::shared()->GetGameManager()->ClearPersonas();
-            for (unsigned int i = 0; i < MetFrontEndState::shared()->mUnknown00.size(); ++i) {
-                MetPersonaData *pPersona = MetFrontEndState::shared()->mUnknown00[i];
-                pPersona->mUnknown140.mUnknown00 = mNameButtons[i]->mText->mPreWrapText;
+            for (unsigned int i = 0; i < MetFrontEndState::shared()->mPersonas.size(); ++i) {
+                MetPersonaData *pPersona = MetFrontEndState::shared()->mPersonas[i];
+                pPersona->mAppearance.mUserName = mNameButtons[i]->mText->mPreWrapText;
                 Application::shared()->GetGameManager()->AddPersona(*pPersona);
             }
         }
@@ -245,8 +245,8 @@ void MetLocPickCharScreen::HandleCommand(const MetScreenCommand *pCommand) {
                 --mReadyCount;
             }
         } else {
-            MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-            mUnknown18 = kExitBack;
+            MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+            mExitChoice = kExitBack;
             ExitScreenByName(HxStr(kTitleScreen));
             BeginExit();
         }
@@ -276,7 +276,7 @@ void MetLocPickCharScreen::CyclePersona(const MetScreenCommand *pCommand) {
 
 // 0x002b29e8
 void MetLocPickCharScreen::EnterAndShow() {
-    if (!(MetFrontEndState::shared()->mUnknown24 == kLocNumPlayScreen)) {
+    if (!(MetFrontEndState::shared()->mReturnScreen == kLocNumPlayScreen)) {
         ShowPickers();
         return;
     }
@@ -286,7 +286,7 @@ void MetLocPickCharScreen::EnterAndShow() {
     mCardPersonaStarts.clear();
     mShowOnDismiss = 0;
     mLoadingCards = 0;
-    if (MetFrontEndState::shared()->mUnknown0c) {
+    if (MetFrontEndState::shared()->mUsingMemcard) {
         StartDetect();
         return;
     }
@@ -298,7 +298,7 @@ void MetLocPickCharScreen::EnterAndShow() {
 void MetLocPickCharScreen::SelectPersona(MetPersonaData *pPersona, int nPlayer) {
     unsigned int i;
     for (i = 0; i < mPersonas.size(); ++i) {
-        if (pPersona->mUnknown140.mUnknown00 == mPersonas[i]->mUnknown140.mUnknown00) {
+        if (pPersona->mAppearance.mUserName == mPersonas[i]->mAppearance.mUserName) {
             break;
         }
     }
@@ -314,30 +314,30 @@ void MetLocPickCharScreen::ShowPickers() {
     HxStr title;
     title = ConfigText(kTitleConfigCode, kMultiTitleKey); // Yes, the binary never reads it.
 
-    const int nPlayers = MetFrontEndState::shared()->mUnknown2c;
+    const int nPlayers = MetFrontEndState::shared()->mPlayerCount;
     mChosenPersonas.clear();
     mChosenPersonas.resize(nPlayers);
 
     if (nPlayers != mPlayerCount) {
-        mUnknown14->ReleaseAnimsRefs();
-        mUnknown14->ClearDraws();
-        mUnknown14->ClearTransList();
+        mView->ReleaseAnimsRefs();
+        mView->ClearDraws();
+        mView->ClearTransList();
         mPlayerCount = nPlayers;
         Rnd::View *pLayout =
             FindObject<Rnd::View>(HxStr(FormatString(kLayoutViewFormat, nPlayers)));
-        mUnknown14->AddAnim(pLayout);
-        mUnknown14->AddTrans(pLayout);
-        std::list<Rnd::Drawable *> &draws = mUnknown14->GetDraws();
-        mUnknown14->AddDraw(pLayout, draws.empty() ? nullptr : draws.front());
-        mUnknown30 = FindObject<Rnd::View>(HxStr(FormatString(kEnterAnimFormat, nPlayers)));
-        mUnknown04 = mUnknown30->EndFrame();
+        mView->AddAnim(pLayout);
+        mView->AddTrans(pLayout);
+        std::list<Rnd::Drawable *> &draws = mView->GetDraws();
+        mView->AddDraw(pLayout, draws.empty() ? nullptr : draws.front());
+        mEnterAnim = FindObject<Rnd::View>(HxStr(FormatString(kEnterAnimFormat, nPlayers)));
+        mAnimEndFrame = mEnterAnim->EndFrame();
     }
 
     AppendPersonas(mPersonas, *MetFreqMakerAssetManager::shared()->GetIdentityList());
 
-    if (MetFrontEndState::shared()->mUnknown24 == kModeScreen) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kNoName);
-        std::vector<MetPersonaData *> personas(MetFrontEndState::shared()->mUnknown00);
+    if (MetFrontEndState::shared()->mReturnScreen == kModeScreen) {
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
+        std::vector<MetPersonaData *> personas(MetFrontEndState::shared()->mPersonas);
         for (int i = 0; i < mPlayerCount; ++i) {
             SelectPersona(personas[i], i);
         }
@@ -386,14 +386,14 @@ void MetLocPickCharScreen::ShowPickers() {
     MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kPickTitleKey));
     PushNamedScreen(HxStr(kHelpScreen));
     MetScreen::EnterAndShow();
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
 // 0x002b3e18
-void MetLocPickCharScreen::OnUnknownSlot36() {
+void MetLocPickCharScreen::OnExitFinished() {
     PushNamedScreen(HxStr(kLeftGizmoScreen));
-    if (mUnknown18 == kExitBack) {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kLocNumPlayersScreen));
         ActivateNamedPanel(HxStr(kLocNumPlayersScreen));
     } else {
@@ -405,7 +405,7 @@ void MetLocPickCharScreen::OnUnknownSlot36() {
 // 0x002b4068
 void MetLocPickCharScreen::StartDetect() {
     const HxStr format(ConfigText(kDialogueConfigCode, kDetectMultiKey));
-    const HxStr text(FormatString(TextOrEmpty(format), MetFrontEndState::shared()->mUnknown2c));
+    const HxStr text(FormatString(TextOrEmpty(format), MetFrontEndState::shared()->mPlayerCount));
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(
         HxStr(kDetectMessage), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
@@ -427,7 +427,7 @@ void MetLocPickCharScreen::OnNoCard() {
 
 // 0x002b4738
 void MetLocPickCharScreen::OnDetectFinished() {
-    if (!MetFrontEndState::shared()->mUnknown0c) {
+    if (!MetFrontEndState::shared()->mUsingMemcard) {
         AppendPersonas(mPersonas, *MetPersonaData::savedList());
         ShowPickers();
         return;
@@ -513,21 +513,21 @@ void MetLocPickCharScreen::PlayCycleRightSound(int nSelector) {
 }
 
 // 0x002ba038
-void MetLocPickCharScreen::OnUnknownSlot26(float flTime) {
+void MetLocPickCharScreen::UpdateIdle(float flTime) {
     if (mExitCountdown != 0) {
         mExitCountdown -= 1.0f;
         if (mExitCountdown == 0) {
-            mUnknown18 = kExitForward;
+            mExitChoice = kExitForward;
             ExitScreenByName(HxStr(kTitleScreen));
             BeginExit();
         }
     }
-    MetMemDetectScreen::OnUnknownSlot26(flTime);
+    MetMemDetectScreen::UpdateIdle(flTime);
 }
 
 // 0x002ba148
 void MetLocPickCharScreen::StartLoadPersonas() {
-    mUnknown98 = 1;
+    mPersonaLoadRequested = 1;
     StartSaveSpaceCheck();
 }
 

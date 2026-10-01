@@ -25,7 +25,7 @@ namespace {
 // The level the constructor starts at and the destructor passes before deleting the animation.
 constexpr int kNeutralLevel = 1;
 
-// mUnknown24 at construction, and the value LockLevel() stores.
+// mJuiceLock at construction, and the value LockLevel() stores.
 constexpr int kNoJuiceLock = -1;
 constexpr int kJuiceLocked = 1;
 
@@ -58,7 +58,7 @@ void Rnd::Mat::GetMeshReferrers(std::vector<Mesh *> &meshes) {
 TnlArena::TnlArena(Renderer *) {
     mGameMode = Application::shared()->GetGameMode();
     mLevel = kNeutralLevel;
-    mUnknown24 = kNoJuiceLock;
+    mJuiceLock = kNoJuiceLock;
     g_pTnlArena = this;
 
     const int nPlain = QueryConfigFlag(kDisplayModeConfigCode);
@@ -98,7 +98,7 @@ TnlArena::TnlArena(Renderer *) {
 // 0x00406120
 TnlArena::PlayerMaterial::PlayerMaterial(Player *pPlayer) : mPlayer(pPlayer) {
     mMat = dynamic_cast<Rnd::Mat *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mId20))));
+        Rnd::g_manager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mPlayerId))));
 }
 
 // 0x0040c938
@@ -142,7 +142,7 @@ inline void TnlArena::OnPointAmount([[maybe_unused]] PointAmountMsg *pMsg) {
 
 // 0x0040ca00
 inline void TnlArena::OnJuiceAmount(JuiceAmountMsg *pMsg) {
-    if (mUnknown24 != kNoJuiceLock) {
+    if (mJuiceLock != kNoJuiceLock) {
         return;
     }
     if (mGameMode != kGameModeSolo || Application::shared()->GetPlayMode() != kPlayModeGame) {
@@ -168,7 +168,7 @@ inline void TnlArena::OnWin(WinMsg *pMsg) {
 
 // 0x0040c988
 void TnlArena::LockLevel() {
-    mUnknown24 = kJuiceLocked;
+    mJuiceLock = kJuiceLocked;
     mScreenAnim->SetLevel(kNeutralLevel);
 }
 

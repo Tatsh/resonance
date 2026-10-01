@@ -15,8 +15,8 @@ constexpr unsigned char kControllerFull = 0x7f;
 } // namespace
 
 // 0x001a1a10
-VolumeEffector::VolumeEffector(unsigned char nChannel, int nValue)
-    : mChannel(nChannel), mValue(nValue), mEnabled(0) {
+VolumeEffector::VolumeEffector(unsigned char nChannel, int nAppliedLevel)
+    : mChannel(nChannel), mAppliedLevel(nAppliedLevel), mEnabled(0) {
 }
 
 // 0x001a1a68
@@ -35,7 +35,8 @@ void VolumeEffector::Enable(int bEnabled) {
         return;
     }
     mEnabled = bEnabled;
-    const unsigned char nValue = bEnabled ? static_cast<unsigned char>(mValue) : kControllerFull;
+    const unsigned char nValue =
+        bEnabled ? static_cast<unsigned char>(mAppliedLevel) : kControllerFull;
     StdMidiMsg msg(kMBTInfinity, kStatusControlChange | mChannel, kVolumeController, nValue);
     Send(&msg);
 }

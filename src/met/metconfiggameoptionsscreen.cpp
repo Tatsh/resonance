@@ -36,7 +36,7 @@ enum Row {
     kRowCount = 2,
 };
 
-// MetScreen::mUnknown18 on exit, read back by OnUnknownSlot36().
+// MetScreen::mExitChoice on exit, read back by OnExitFinished().
 constexpr int kExitCancelled = 0;
 constexpr int kExitApplied = 2;
 
@@ -91,10 +91,10 @@ inline Rnd::Button *FindArrow(const char *pszFormat, int nNumber) {
 MetConfigGameOptionsScreen::MetConfigGameOptionsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr) {
-    mUnknown8c = new MetButtonList();
-    mUnknown38.push_back(HxStr(kAudioRowKey));
-    mUnknown38.push_back(HxStr(kForceFeedbackRowKey));
+      mRows(nullptr) {
+    mRows = new MetButtonList();
+    mHelpKeys.push_back(HxStr(kAudioRowKey));
+    mHelpKeys.push_back(HxStr(kForceFeedbackRowKey));
 }
 
 // 0x0020c800
@@ -107,48 +107,47 @@ void MetConfigGameOptionsScreen::ResolveContainerViews() {
     dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kForceFeedbackLabel)))
         ->SetText(ConfigText(kPromptConfigCode, kForceFeedbackLabelKey));
 
-    mUnknown8c->Add(HxStr(kAudioButton), ConfigText(kPromptConfigCode, kAudioRowKey));
-    mUnknown8c->Add(HxStr(kForceFeedbackButton),
-                    ConfigText(kPromptConfigCode, kForceFeedbackRowKey));
+    mRows->Add(HxStr(kAudioButton), ConfigText(kPromptConfigCode, kAudioRowKey));
+    mRows->Add(HxStr(kForceFeedbackButton), ConfigText(kPromptConfigCode, kForceFeedbackRowKey));
 
-    mUnknown90.resize(kRowCount);
-    mUnknown9c.resize(kRowCount);
+    mLeftArrows.resize(kRowCount);
+    mRightArrows.resize(kRowCount);
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
-        mUnknown90[nRow] = FindArrow(kLeftArrowFormat, nRow + 1);
-        mUnknown9c[nRow] = FindArrow(kRightArrowFormat, nRow + 1);
+        mLeftArrows[nRow] = FindArrow(kLeftArrowFormat, nRow + 1);
+        mRightArrows[nRow] = FindArrow(kRightArrowFormat, nRow + 1);
     }
 }
 
 // 0x0020ce20
 MetConfigGameOptionsScreen::~MetConfigGameOptionsScreen() {
-    delete mUnknown8c;
+    delete mRows;
 }
 
 // 0x0020cf70
 void MetConfigGameOptionsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mRows->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mRows->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mRows->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mRows->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandLeft: {
-        const int nRow = mUnknown8c->mSelected;
+        const int nRow = mRows->mSelected;
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowFlashInterval, mUnknown90[nRow], kArrowFlashCycles);
+            mRenderer->mAnimationFrame, kArrowFlashInterval, mLeftArrows[nRow], kArrowFlashCycles);
         ToggleOption(nRow);
         break;
     }
 
     case kMetScreenCommandRight: {
-        const int nRow = mUnknown8c->mSelected;
+        const int nRow = mRows->mSelected;
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowFlashInterval, mUnknown9c[nRow], kArrowFlashCycles);
+            mRenderer->mAnimationFrame, kArrowFlashInterval, mRightArrows[nRow], kArrowFlashCycles);
         ToggleOption(nRow);
         break;
     }
@@ -156,16 +155,16 @@ void MetConfigGameOptionsScreen::HandleCommand(const MetScreenCommand *pCommand)
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(""));
         ApplyOptions();
-        mUnknown18 = kExitApplied;
+        mExitChoice = kExitApplied;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kHelpScreen));
         BeginExit();
         break;
 
     case kMetScreenCommandBack:
-        mUnknown18 = kExitCancelled;
-        if (MetFrontEndState::shared()->mUnknown24 == kPauseGameScreen ||
-            MetFrontEndState::shared()->mUnknown24 == kPauseRemixScreen) {
+        mExitChoice = kExitCancelled;
+        if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen ||
+            MetFrontEndState::shared()->mReturnScreen == kPauseRemixScreen) {
             ExitScreenByName(HxStr(kHelpScreen));
             ExitScreenByName(HxStr(kTitleScreen));
         }
@@ -179,32 +178,32 @@ void MetConfigGameOptionsScreen::HandleCommand(const MetScreenCommand *pCommand)
 
 // 0x0020d310
 void MetConfigGameOptionsScreen::EnterAndShow() {
-    mUnknown8c->SetSelected(kFirstRow);
+    mRows->SetSelected(kFirstRow);
     MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kTitleKey));
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mRows->mSelected], mRenderer->mAnimationFrame);
     MetHelpScreen::SelectPreset(HxStr(kTabPreset));
-    mUnknowna8 = GlobalSettings::shared()->mGameOptions;
+    mOptions = GlobalSettings::shared()->mGameOptions;
     UpdateOptionLabels();
     MetScreenMultiSoundBank::EnterAndShow();
 }
 
 // 0x0020d448
 void MetConfigGameOptionsScreen::UpdateOptionLabels() {
-    mUnknown8c->ButtonAt(kRowAudio)->mText->SetText(
-        HxStr(mUnknowna8.mUnknown00 != 0 ? kStereoText : kMonoText));
-    mUnknown8c->ButtonAt(kRowForceFeedback)
-        ->mText->SetText(HxStr(mUnknowna8.mUnknown08 != 0 ? kOnText : kOffText));
+    mRows->ButtonAt(kRowAudio)->mText->SetText(
+        HxStr(mOptions.mStereo != 0 ? kStereoText : kMonoText));
+    mRows->ButtonAt(kRowForceFeedback)
+        ->mText->SetText(HxStr(mOptions.mForceFeedback != 0 ? kOnText : kOffText));
 }
 
 // 0x0020d5a8
-void MetConfigGameOptionsScreen::OnUnknownSlot36() {
-    if (MetFrontEndState::shared()->mUnknown24 == kPauseGameScreen ||
-        MetFrontEndState::shared()->mUnknown24 == kPauseRemixScreen) {
-        if (MetFrontEndState::shared()->mUnknown0c == kFrontEndFlagSet &&
-            mUnknown18 != kExitCancelled) {
-            MetFrontEndState::shared()->mUnknown10 = kFrontEndFlagSet;
+void MetConfigGameOptionsScreen::OnExitFinished() {
+    if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen ||
+        MetFrontEndState::shared()->mReturnScreen == kPauseRemixScreen) {
+        if (MetFrontEndState::shared()->mUsingMemcard == kFrontEndFlagSet &&
+            mExitChoice != kExitCancelled) {
+            MetFrontEndState::shared()->mSettingsDirty = kFrontEndFlagSet;
         }
-        if (MetFrontEndState::shared()->mUnknown24 == kPauseGameScreen) {
+        if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen) {
             PushNamedScreen(HxStr(kPauseGameScreen));
             ActivateNamedPanel(HxStr(kPauseGameScreen));
         } else {
@@ -212,18 +211,18 @@ void MetConfigGameOptionsScreen::OnUnknownSlot36() {
             PushNamedScreen(HxStr(kPauseRemixScreen));
             ActivateNamedPanel(HxStr(kPauseRemixScreen));
         }
-        MetFrontEndState::shared()->mUnknown24 = HxStr("");
+        MetFrontEndState::shared()->mReturnScreen = HxStr("");
         return;
     }
 
-    if (mUnknown18 == kExitCancelled) {
+    if (mExitChoice == kExitCancelled) {
         PushNamedScreen(HxStr(kRightGizmoScreen));
         PushNamedScreen(HxStr(kOptionsButtonsScreen));
         ActivateNamedPanel(HxStr(kOptionsButtonsScreen));
         return;
     }
 
-    GlobalSettings::shared()->mGameOptions = mUnknowna8;
+    GlobalSettings::shared()->mGameOptions = mOptions;
     std::vector<HxStr> screens;
     screens.push_back(HxStr(kOptionsButtonsScreen));
     screens.push_back(HxStr(kRightGizmoScreen));
@@ -239,20 +238,20 @@ MetConfigGameOptionsScreen *MetConfigGameOptionsScreen::New(MetRenderer *pRender
 // 0x00211578
 void MetConfigGameOptionsScreen::ToggleOption(int nRow) {
     if (nRow == kRowAudio) {
-        mUnknowna8.mUnknown00 ^= 1;
+        mOptions.mStereo ^= 1;
     } else if (nRow == kRowForceFeedback) {
-        mUnknowna8.mUnknown08 ^= 1;
+        mOptions.mForceFeedback ^= 1;
     }
     UpdateOptionLabels();
 }
 
 // 0x002115c8
 void MetConfigGameOptionsScreen::ApplyOptions() {
-    GlobalSettings::shared()->mGameOptions = mUnknowna8;
-    Application::shared()->GetSynth()->Slot12(mUnknowna8.mUnknown00);
+    GlobalSettings::shared()->mGameOptions = mOptions;
+    Application::shared()->GetSynth()->SetStereo(mOptions.mStereo);
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
-        pWorld->mForceFeedback->SetEnabled(mUnknowna8.mUnknown08);
+        pWorld->mForceFeedback->SetEnabled(mOptions.mForceFeedback);
         pWorld->mForceFeedback->StartMetronome(Mid::MBT(0));
     }
 }

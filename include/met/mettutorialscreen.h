@@ -20,7 +20,7 @@ class Object;
  * The constructor at `0x003c7a88` takes only the renderer and the load priority, and supplies
  * `tut` for the screen name, `metagame/Shared` for the directory, and `tutorial` for the
  * container. It allocates the two-button ring and pushes the prompts `tut_g` and `tut_r` into
- * MetScreen::mUnknown38, one per button.
+ * MetScreen::mHelpKeys, one per button.
  *
  * The object is 0x90 bytes, which the allocation in New() fixes.
  *
@@ -62,11 +62,11 @@ public:
     /**
      * Push the companion screens on a first entry, select the first button, and enter. Slot 5.
      *
-     * When MetFrontEndState::mUnknown18 is set, the body empties the return screen name, moves
-     * the flag into mUnknown1c, pushes `MetLeftGizmoScreen` and `MetHelpScreen`, and records this
-     * screen as the renderer's active panel. Every entry then selects the first button, titles the
-     * screen from configuration code 0x269 under `tutorial`, and posts the selected button's
-     * prompt.
+     * When MetFrontEndState::mPendingTransition is set, the body empties the return screen name,
+     * moves the flag into mLastTransition, pushes `MetLeftGizmoScreen` and `MetHelpScreen`, and
+     * records this screen as the renderer's active panel. Every entry then selects the first
+     * button, labels the screen from configuration code 0x269 under `tutorial`, and posts the
+     * selected button's prompt.
      *
      * @ghidraAddress 0x003c82a0
      */
@@ -77,7 +77,7 @@ public:
      *
      * Commands 1 and 2 step the ring and post the selected button's prompt. Command 5 clears the
      * prompt and the active panel and starts the selection alternating. Command 6 clears the
-     * prompt and the active panel, records 0 in MetScreen::mUnknown18, exits
+     * prompt and the active panel, records 0 in MetScreen::mExitChoice, exits
      * `MetScreenTitleScreen` and `MetLeftGizmoScreen`, and starts this screen's exit animation.
      * Every other command is discarded.
      *
@@ -103,7 +103,7 @@ public:
     virtual void PlayCycleRightSound(int nSelector);
 
     /**
-     * Record 2 in MetScreen::mUnknown18, exit the three companion screens, and start this
+     * Record 2 in MetScreen::mExitChoice, exit the three companion screens, and start this
      * screen's exit animation. Slot 30.
      *
      * MetScreen slot 29 runs the slot once the selection has finished alternating. The companion
@@ -112,10 +112,10 @@ public:
      * @param pButton The button slot 29 finished with, which the body does not read.
      * @ghidraAddress 0x003c84d8
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
-     * Act on the exit recorded in MetScreen::mUnknown18 once the exit animation has finished.
+     * Act on the exit recorded in MetScreen::mExitChoice once the exit animation has finished.
      * Slot 36.
      *
      * After the back command, the body pushes `MetLeftGizmoSmallScreen`, `MetTopLogoScreen`, and
@@ -123,11 +123,11 @@ public:
      * on the first arena at the easiest difficulty, as the `tutorial` level in game mode for the
      * first button and as `tutorialrmx` in jam mode for the second. It hangs a random FreQ maker
      * identity in burn slot 0, makes that identity the one persona, records this screen as
-     * MetFrontEndState::mUnknown24, and pushes and activates `MetLoadGameScreen`.
+     * MetFrontEndState::mReturnScreen, and pushes and activates `MetLoadGameScreen`.
      *
      * @ghidraAddress 0x003c8678
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views and add the two buttons. Slot 38.
@@ -141,5 +141,5 @@ public:
 
 private:
     // The two-button ring. The constructor allocates it and the destructor releases it. +0x8c
-    MetButtonList *mUnknown8c;
+    MetButtonList *mButtonList;
 };

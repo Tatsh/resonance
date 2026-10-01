@@ -103,7 +103,7 @@ public:
      * effect, each pulse turns both motors on at twice the period times the pulse index and off
      * again, and a closing SetPowerupFBCmd clears the mark after one period.
      *
-     * @param nPlayerSlot The player's slot, as Player::Slot2() reports it.
+     * @param nPlayerSlot The player's slot, as Player::GetInputSlot() reports it.
      * @param nEffect The effect number, an index into mEffects.
      * @ghidraAddress 0x0016e848
      */
@@ -138,14 +138,14 @@ public:
     void SetJukeboxMode(int bJukebox);
 
     /**
-     * Stop every motor and set the flag at bit 2, or clear the flag.
+     * Stop every motor and set the playback flag, or clear the flag.
      *
-     * GrooveWorld passes its word at `+0x8c`.
+     * GrooveWorld passes GrooveWorld::mIsPlayback.
      *
-     * @param bSet Non-zero to set the flag.
+     * @param bPlayback Non-zero while a recording plays back.
      * @ghidraAddress 0x00170708
      */
-    void SetUnknownFlag04(int bSet);
+    void SetPlaybackMode(int bPlayback);
 
     /**
      * Clear the disabled flag, or stop every motor and set it.
@@ -206,36 +206,42 @@ public:
     void ApplyMotors(int nPlayerSlot);
 
     /**
-     * Play effect 4 on a player's controller. The image has no caller.
+     * Play effect 4, configuration 0x4b6, on a player's controller. The image has no caller.
      *
      * @param pPlayer The player.
      * @ghidraAddress 0x00170b20
      */
-    void PlayEffect4(Player *pPlayer);
+    void PlayUnusedEffect(Player *pPlayer);
 
     /**
-     * Play effect 1 on a player's controller. The routine at `0x00448d58` calls it.
+     * Play the effect a bumper hit produces, effect 1, on the target's controller.
      *
-     * @param pPlayer The player.
+     * AppTunnel's powerup routine at `0x00448d58` calls it for a bumper.
+     *
+     * @param pPlayer The player that was bumped.
      * @ghidraAddress 0x00170b68
      */
-    void PlayEffect1(Player *pPlayer);
+    void PlayBumpEffect(Player *pPlayer);
 
     /**
-     * Play effect 0 on a player's controller. The routine at `0x00448d58` calls it.
+     * Play the effect an autocatcher produces, effect 0, on a player's controller.
      *
-     * @param pPlayer The player.
+     * AppTunnel's powerup routine at `0x00448d58` calls it for an autocatcher.
+     *
+     * @param pPlayer The player that used the autocatcher.
      * @ghidraAddress 0x00170bb0
      */
-    void PlayEffect0(Player *pPlayer);
+    void PlayAutocatchEffect(Player *pPlayer);
 
     /**
-     * Play effect 3 on a player's controller. AppTunnel::HandleMessage() calls it.
+     * Play the effect a neutralized track produces, effect 3, on a player's controller.
      *
-     * @param pPlayer The player.
+     * AppTunnel's handler of PlayersTrackNeutralizedMsg calls it.
+     *
+     * @param pPlayer The player whose track was neutralized.
      * @ghidraAddress 0x00170bf8
      */
-    void PlayEffect3(Player *pPlayer);
+    void PlayNeutralizedEffect(Player *pPlayer);
 
     /**
      * Play the effect a crippler hit produces, effect 2, on a player's controller.
@@ -256,11 +262,11 @@ private:
     unsigned char mFlags;         // +0x00, any set bit suspends vibration
     std::vector<Slot> mSlots;     // +0x04
     std::vector<Effect> mEffects; // +0x10
-    int mUnknown1c;               // +0x1c, not written by the constructor
-    int mUnknown20;               // +0x20, not written by the constructor
-    Mid::MBT mUnknown24;          // +0x24
-    long long mUnknown28;         // +0x28, zero on construction
-    int mUnknown30;               // +0x30, the first metronome setting
+    int mReserved1c;              // +0x1c, never read or written
+    int mReserved20;              // +0x20, never read or written
+    Mid::MBT mUnusedPosition;     // +0x24, constructed and never read
+    long long mUnusedTime;        // +0x28, zero on construction and never read
+    int mMetronomeFirstSetting;   // +0x30, the first metronome setting, never read
     Sch::Tick mPulseLength;       // +0x38, in nanoseconds
     Mid::MBT mBeatPeriod;         // +0x40, the bar divided by the third metronome setting
 };

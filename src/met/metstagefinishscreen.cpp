@@ -108,7 +108,7 @@ constexpr int kFirstPlayer = 0;
 constexpr int kSecretStage = 6;
 constexpr unsigned kSecretStageLevelCount = 2;
 
-// The card location EnterAndShow() saves to when MetFrontEndState::mUnknown0c is clear.
+// The card location EnterAndShow() saves to when MetFrontEndState::mUsingMemcard is clear.
 static const char *const kDefaultCardSlotName = "1";
 constexpr int kDefaultCardSlotPort = 0;
 
@@ -137,9 +137,9 @@ inline Rnd::View *FindView(const HxStr &name) {
 // 0x003bdbb8
 MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknowna8(0), mUnknownac(0), mUnknownb0(0.0f), mUnknownb4(0) {
-    mUnknowna4 = new MetButtonList();
-    mUnknown60 = 0;
+      mStageRecorded(0), mNextMessage(0), mLastStepTime(0.0f), mDifficultyUnlocked(0) {
+    mContinueButtons = new MetButtonList();
+    mShowsLoadedDrawables = 0;
 }
 
 // 0x003c4250
@@ -149,7 +149,7 @@ MetStageFinishScreen *MetStageFinishScreen::New(MetRenderer *pRenderer, int nPri
 
 // 0x003bded8
 MetStageFinishScreen::~MetStageFinishScreen() {
-    delete mUnknowna4;
+    delete mContinueButtons;
 }
 
 // 0x003be068
@@ -159,7 +159,7 @@ void MetStageFinishScreen::ResolveContainerViews() {
     {
         HxStr objectName(kContinueButtonObject);
         HxStr label = QueryConfigString(kPromptConfigCode, kContinuePrompt);
-        mUnknowna4->Add(objectName, label);
+        mContinueButtons->Add(objectName, label);
     }
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
@@ -172,7 +172,7 @@ void MetStageFinishScreen::ResolveContainerViews() {
 // 0x003be2a8
 void MetStageFinishScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    if (mUnknowna8 == 0 && !params.mLoadingGame) {
+    if (mStageRecorded == 0 && !params.mLoadingGame) {
         MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
         CampaignStats *pStats = &pPersona->mStats;
         GameStats *pGameStats = Application::shared()->GetGameManager()->GetStats();
@@ -214,13 +214,13 @@ void MetStageFinishScreen::EnterAndShow() {
         }
         AddEndSuperSecretUnlockMessage(nWasEndBeaten, nIsEndBeaten);
 
-        mUnknowna8 = 1;
+        mStageRecorded = 1;
         if ((nWasBeaten == 0 || nOldHighScore < pGameStats->GetScore(kFirstPlayer)) &&
-            MetFrontEndState::shared()->mUnknown14 == 0) {
+            MetFrontEndState::shared()->mUnlockAll == 0) {
             std::vector<HxStr> screens;
             screens.resize(1);
             screens[0] = kPanelName;
-            if (MetFrontEndState::shared()->mUnknown0c != 0) {
+            if (MetFrontEndState::shared()->mUsingMemcard != 0) {
                 GlobalSettings::shared(); // Yes, the binary discards this call's result.
                 MetPersonaSaverScreen::StartSave(
                     screens, pPersona, GlobalSettings::shared()->mCardSlots[0], 0, 0);
@@ -234,9 +234,9 @@ void MetStageFinishScreen::EnterAndShow() {
         }
     }
 
-    if (MetFrontEndState::shared()->mUnknown0c == kFrontEndFlagSet &&
-        MetFrontEndState::shared()->mUnknown10 == kFrontEndFlagSet) {
-        MetFrontEndState::shared()->mUnknown10 = 0;
+    if (MetFrontEndState::shared()->mUsingMemcard == kFrontEndFlagSet &&
+        MetFrontEndState::shared()->mSettingsDirty == kFrontEndFlagSet) {
+        MetFrontEndState::shared()->mSettingsDirty = 0;
         std::vector<HxStr> screens;
         screens.push_back(HxStr(kPanelName));
         MetGlobalSettingsSaverScreen::StartSave(screens);
@@ -247,15 +247,15 @@ void MetStageFinishScreen::EnterAndShow() {
 
 // 0x003bf788
 void MetStageFinishScreen::HandleCommand(const MetScreenCommand *pCommand) {
-    if (mUnknownb0 != 0.0f || pCommand->mCommand != kMetScreenCommandSelect) {
+    if (mLastStepTime != 0.0f || pCommand->mCommand != kMetScreenCommandSelect) {
         return;
     }
     ActivateNamedPanel(HxStr(kNoName));
-    StartRepeatingSound(mUnknown10->mUnknown68,
+    StartRepeatingSound(mRenderer->mAnimationFrame,
                         kSelectAlternateInterval,
-                        mUnknowna4->mUnknown00,
+                        mContinueButtons->mSelectedButton,
                         kSelectAlternateCycles);
-    MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
 }
 
 // 0x003c4228
@@ -279,35 +279,35 @@ void MetStageFinishScreen::PlayErrorSound(int) {
 }
 
 // 0x003bf5e8
-void MetStageFinishScreen::OnUnknownSlot26(float flTime) {
-    if (mUnknownb0 == 0.0f || !(mUnknownb0 + kMessageInterval < flTime)) {
+void MetStageFinishScreen::UpdateIdle(float flTime) {
+    if (mLastStepTime == 0.0f || !(mLastStepTime + kMessageInterval < flTime)) {
         return;
     }
-    if (static_cast<unsigned>(mUnknownac) < mUnknown8c.size()) {
-        mUnknown98[mUnknownac]->SetShowing(1);
+    if (static_cast<unsigned>(mNextMessage) < mMessages.size()) {
+        mMessageDrawables[mNextMessage]->SetShowing(1);
     }
-    ++mUnknownac;
+    ++mNextMessage;
     // The button shows one interval after the last message, which matches the binary.
-    if (mUnknown8c.size() < static_cast<unsigned>(mUnknownac)) {
-        mUnknowna4->ButtonAt(kContinueButtonIndex)->SetShowing(1);
-        mUnknowna4->ButtonAt(kContinueButtonIndex)->SetState(kButtonNormalState);
-        mUnknowna4->SetSelected(kContinueButtonIndex);
-        mUnknownb0 = 0.0f;
+    if (mMessages.size() < static_cast<unsigned>(mNextMessage)) {
+        mContinueButtons->ButtonAt(kContinueButtonIndex)->SetShowing(1);
+        mContinueButtons->ButtonAt(kContinueButtonIndex)->SetState(kButtonNormalState);
+        mContinueButtons->SetSelected(kContinueButtonIndex);
+        mLastStepTime = 0.0f;
         ActivateNamedPanel(HxStr(kPanelName));
     } else {
-        mUnknownb0 = flTime;
+        mLastStepTime = flTime;
     }
 }
 
 // 0x003c4390
-void MetStageFinishScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetStageFinishScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
 // 0x003c42d8
-void MetStageFinishScreen::OnUnknownSlot33() {
-    mUnknowna4->SetSelected(kNoButton);
-    mUnknownb0 = mUnknown10->mUnknown68;
+void MetStageFinishScreen::OnEnterFinished() {
+    mContinueButtons->SetSelected(kNoButton);
+    mLastStepTime = mRenderer->mAnimationFrame;
     ActivateNamedPanel(HxStr(kNoName));
 }
 
@@ -317,7 +317,7 @@ void MetStageFinishScreen::AddHighScoreMessage(int nPreviousScore, int nScore) {
         return;
     }
     HxStr message = QueryConfigString(kPromptConfigCode, kHighScoreKey);
-    mUnknown8c.push_back(message);
+    mMessages.push_back(message);
 }
 
 // 0x003bf9b8
@@ -329,7 +329,7 @@ void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int n
     const ArenaListEntry &arena = (*GetArenaList())[nCompleted - 1];
     HxStr arenaName = QueryConfigString(kArenaNameConfigCode, TextOf(arena.mName));
     HxStr message(FormatString(TextOf(format), TextOf(arenaName)));
-    mUnknown8c.push_back(message);
+    mMessages.push_back(message);
 }
 
 // 0x003bfc48
@@ -347,17 +347,17 @@ void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComp
         HxStr difficultyName = DifficultyName(nDifficulty);
         HxStr format = QueryConfigString(kPromptConfigCode, kLastStageKey);
         HxStr message(FormatString(TextOf(format), TextOf(difficultyName)));
-        mUnknown8c.push_back(message);
+        mMessages.push_back(message);
     } else {
         HxStr format = QueryConfigString(kPromptConfigCode, kStageKey);
         HxStr message(FormatString(TextOf(format), nStage + 1));
-        mUnknown8c.push_back(message);
+        mMessages.push_back(message);
     }
 }
 
 // 0x003c0008
 void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
-    mUnknownb4 = 0;
+    mDifficultyUnlocked = 0;
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
@@ -369,14 +369,14 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
         HxStr format = QueryConfigString(kPromptConfigCode, kDifficultyUnlockKey);
         HxStr difficultyName = DifficultyName(params.mDifficulty + 1);
         message = FormatString(TextOf(format), TextOf(difficultyName));
-        mUnknown8c.push_back(message);
-        mUnknownb4 = 1;
+        mMessages.push_back(message);
+        mDifficultyUnlocked = 1;
     }
 }
 
 // 0x003bef98
 void MetStageFinishScreen::ShowMessages() {
-    if (mUnknown8c.size() == 0) {
+    if (mMessages.size() == 0) {
         BeginExit();
         return;
     }
@@ -384,7 +384,7 @@ void MetStageFinishScreen::ShowMessages() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
 
-    HxStr linesName(FormatString(kLinesViewFormat, mUnknown8c.size()));
+    HxStr linesName(FormatString(kLinesViewFormat, mMessages.size()));
     Rnd::View *pCountLines = FindView(linesName);
     Rnd::View *pLines = FindView(HxStr(kLinesView));
     // The binary does not test the container view for null.
@@ -395,31 +395,31 @@ void MetStageFinishScreen::ShowMessages() {
         FindText(HxStr(FormatString(kCongratulationTextFormat, i)))->SetShowing(1);
     }
 
-    mUnknown98.clear();
-    HxStr prefix(FormatString(kMessageTextPrefixFormat, mUnknown8c.size()));
-    for (unsigned i = 0; i < mUnknown8c.size(); ++i) {
+    mMessageDrawables.clear();
+    HxStr prefix(FormatString(kMessageTextPrefixFormat, mMessages.size()));
+    for (unsigned i = 0; i < mMessages.size(); ++i) {
         HxStr name(FormatString(kMessageTextFormat, TextOf(prefix), i + 1));
         Rnd::Text *pText = FindText(name);
-        pText->SetText(mUnknown8c[i]);
+        pText->SetText(mMessages[i]);
         pText->SetShowing(0);
-        mUnknown98.push_back(pText);
+        mMessageDrawables.push_back(pText);
     }
 
-    mUnknowna4->ButtonAt(kContinueButtonIndex)->SetShowing(0);
-    mUnknowna4->ButtonAt(kContinueButtonIndex)->SetState(kButtonDisabledState);
-    mUnknowna4->SetSelected(kContinueButtonIndex);
-    mUnknownac = 0;
+    mContinueButtons->ButtonAt(kContinueButtonIndex)->SetShowing(0);
+    mContinueButtons->ButtonAt(kContinueButtonIndex)->SetState(kButtonDisabledState);
+    mContinueButtons->SetSelected(kContinueButtonIndex);
+    mNextMessage = 0;
     MetScreen::EnterAndShow();
 }
 
 // 0x003c0530
-void MetStageFinishScreen::OnUnknownSlot36() {
-    mUnknowna8 = 0;
-    MetSoloWinScreen::SetDifficultyUnlocked(mUnknownb4);
+void MetStageFinishScreen::OnExitFinished() {
+    mStageRecorded = 0;
+    MetSoloWinScreen::SetDifficultyUnlocked(mDifficultyUnlocked);
     PushNamedScreen(HxStr(kSoloWinScreen));
     ActivateNamedPanel(HxStr(kSoloWinScreen));
-    mUnknowna4->SetSelected(kNoButton);
-    mUnknown8c.clear();
+    mContinueButtons->SetSelected(kNoButton);
+    mMessages.clear();
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
         FindText(HxStr(FormatString(kCongratulationTextFormat, i)))->SetShowing(0);
     }
@@ -431,7 +431,7 @@ void MetStageFinishScreen::AddStageScoreBeatMessage(int nWasBeaten, int nIsBeate
         return;
     }
     HxStr message = QueryConfigString(kPromptConfigCode, kStageScoreBeatKey);
-    mUnknown8c.push_back(message);
+    mMessages.push_back(message);
 }
 
 // 0x003c02c0
@@ -440,7 +440,7 @@ void MetStageFinishScreen::AddSecretUnlockMessage(int nWasUnlocked, int nIsUnloc
         return;
     }
     HxStr message = QueryConfigString(kPromptConfigCode, kSecretKey);
-    mUnknown8c.push_back(message);
+    mMessages.push_back(message);
 }
 
 // 0x003c0390
@@ -449,7 +449,7 @@ void MetStageFinishScreen::AddSuperSecretUnlockMessage(int nWasUnlocked, int nIs
         return;
     }
     HxStr message = QueryConfigString(kPromptConfigCode, kSuperSecretKey);
-    mUnknown8c.push_back(message);
+    mMessages.push_back(message);
 }
 
 // 0x003c0460
@@ -458,5 +458,5 @@ void MetStageFinishScreen::AddEndSuperSecretUnlockMessage(int nWasUnlocked, int 
         return;
     }
     HxStr message = QueryConfigString(kPromptConfigCode, kEndSuperSecretKey);
-    mUnknown8c.push_back(message);
+    mMessages.push_back(message);
 }

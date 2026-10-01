@@ -49,7 +49,7 @@ public:
      * @param nDoubleTap Non-zero when the press follows the previous one closely.
      */
     EraseMsg(Player *pPlayer, Mid::MBT position, int nTrack, int nDoubleTap)
-        : mUnknown04(pPlayer), mUnknown08(position), mUnknown0c(nTrack), mUnknown10(nDoubleTap) {
+        : mPlayer(pPlayer), mPosition(position), mTrack(nTrack), mDoubleTap(nDoubleTap) {
     }
 
     /**
@@ -100,10 +100,10 @@ public:
     // Public because Voxer::HandleMessage(), Scratcher::HandleMessage(), and
     // NotePitcher::HandleMessage() reads these directly, through a EraseMsg pointer from outside
     // the hierarchy, and the image exposes no accessor. A friend declaration fits equally well.
-    Player *mUnknown04;  // +0x04
-    Mid::MBT mUnknown08; // +0x08
-    int mUnknown0c;      // +0x0c
-    int mUnknown10;      // +0x10
+    Player *mPlayer;    // +0x04
+    Mid::MBT mPosition; // +0x08
+    int mTrack;         // +0x0c
+    int mDoubleTap;     // +0x10
 };
 
 /**

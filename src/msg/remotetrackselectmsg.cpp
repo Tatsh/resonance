@@ -30,6 +30,6 @@ const char *RemoteTrackSelectMsg::Name() {
 // 0x003e3bd0
 // The colour name is copied into a temporary before it is written.
 void RemoteTrackSelectMsg::Print(std::ostream &stream) {
-    mPosition.Print(stream << HxStr(mPlayer->mColorName) << " tr#" << mUnknown04 << "/"
-                           << mUnknown08 << " ");
+    mPosition.Print(stream << HxStr(mPlayer->mColorName) << " tr#" << mTrack << "/" << mPlace
+                           << " ");
 }

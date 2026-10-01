@@ -14,8 +14,8 @@ HudTrack::HudTrack(Player *pPlayer, int nIndex)
                        g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString,
                        nIndex))),
       mLoop(nIndex), mTrackLabel(nIndex), mEffects(nIndex), mPoints(nIndex),
-      mCountdown(nIndex, Application::shared()->GetPlayMap()->Slot9()), mUnknowne0(0), mTrack(0),
-      mUnknownec(0), mPlayer(pPlayer) {
+      mCountdown(nIndex, Application::shared()->GetPlayMap()->GetEndBar()), mBlockedCatches(0),
+      mTrack(0), mDeployedPowerup(0), mPlayer(pPlayer) {
 }
 
 // 0x0042ab08

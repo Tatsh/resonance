@@ -175,14 +175,14 @@ public:
     MetaGameWorld *GetMetaWorld();
 
     /**
-     * Forward GameManagerImpl::GetUnknown18(), whose meaning is unrecovered.
+     * Forward GameManagerImpl::GetUnwrittenValue().
      *
      * Reads mGameManager directly. The image records no caller.
      *
-     * @return GameManagerImpl::GetUnknown18().
+     * @return GameManagerImpl::GetUnwrittenValue().
      * @ghidraAddress 0x00118ec8
      */
-    int GetUnknown18();
+    int GetUnwrittenValue();
 
     /**
      * Report the game manager's play mode.

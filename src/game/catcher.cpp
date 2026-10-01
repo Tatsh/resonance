@@ -22,22 +22,22 @@
 
 namespace {
 
-// Slot 4 searches for the first gem from the position before the song starts.
+// Start() searches for the first gem from the position before the song starts.
 constexpr int kBeforeSongStart = -1;
 
 // The handle value of a command the clock has not queued yet.
 constexpr int kUnallocatedCommand = -2;
 
-// The position the constructor gives mUnknown44 and mUnknown48.
+// The position the constructor gives mLastCaughtPosition and mLastMissedPosition.
 constexpr int kNoPosition = -1;
 
-// The bar the constructor gives mUnknown64.
+// The bar the constructor gives mLastMuffedBar.
 constexpr int kNoBar = -1;
 
-// The value the constructor gives mUnknown40.
-constexpr int kUnknown40Initial = 1;
+// The value the constructor gives mEnabled.
+constexpr int kEnabledInitially = 1;
 
-// Player::Slot2() reports this for a player without a slot.
+// Player::GetInputSlot() reports this for a player without a slot.
 constexpr int kNoPlayerSlot = -1;
 
 // One bar and one beat at 480 ticks per quarter note.
@@ -50,8 +50,8 @@ constexpr int kSeekerScanBars = 32;
 // The seeker states PostSeekerRangeMsg() records and sends.
 constexpr int kSeekerOn = 1;
 
-// OnAutoCatch() plays its bar through slot 9 with both flags set, and marks the message handled.
-// PostCaughtBarMsg() clears the third.
+// OnAutoCatch() plays its bar through CapturePhrase() with both flags set, and marks the message
+// handled. PostCaughtBarMsg() clears the third.
 constexpr int kAutoCatchFlag = 1;
 constexpr int kNoAutoCatchFlag = 0;
 constexpr int kMessageHandled = 1;
@@ -67,7 +67,7 @@ constexpr int kCatchMiss = 0;
 constexpr int kCatchHit = 1;
 constexpr int kNoProgress = 0;
 
-// The four player slots Player::Slot2() reports, each with its own miss sound.
+// The four player slots Player::GetInputSlot() reports, each with a separate miss sound.
 constexpr int kPlayerSlot1 = 0;
 constexpr int kPlayerSlot2 = 1;
 constexpr int kPlayerSlot3 = 2;
@@ -171,10 +171,11 @@ Catcher::Catcher(PhraseMgr *pPhraseMgr,
                  Sch::Tick catchWindow)
     : mQuantizer(pQuantizer), mPhraseMgr(pPhraseMgr), mTrackData(pTrackData),
       mPlayer(&g_nullPlayer), mClock(pClock), mSeekerBarCount(nSeekerBarCount),
-      mCatchWindow(static_cast<int>(catchWindow.mValue)), mUnknown40(kUnknown40Initial),
-      mUnknown44(kNoPosition), mUnknown48(kNoPosition), mTrack(pTrackData->mUnknown04),
-      mUnknown50(0), mUnknown54(0), mUnknown58(0), mUnknown5c(0), mUnknown60(0), mUnknown64(kNoBar),
-      mSeekerEnabled(0), mRemotePlayer(&g_nullPlayer), mRemoteSuccess(0), mRemotePosition(0) {
+      mCatchWindow(static_cast<int>(catchWindow.mValue)), mEnabled(kEnabledInitially),
+      mLastCaughtPosition(kNoPosition), mLastMissedPosition(kNoPosition),
+      mTrack(pTrackData->mIndex), mCaughtGems(0), mMissedGems(0), mMuffedGems(0), mLastEndedBar(0),
+      mPhraseRunBars(0), mLastMuffedBar(kNoBar), mSeekerEnabled(0), mRemotePlayer(&g_nullPlayer),
+      mRemoteSuccess(0), mRemotePosition(0) {
     mPostGemCommand.mValue = kUnallocatedCommand;
     mGemCommand.mValue = kUnallocatedCommand;
     mTicksPerBar.mTick = pPhraseMgr->mBarTicks;
@@ -182,12 +183,12 @@ Catcher::Catcher(PhraseMgr *pPhraseMgr,
 
 // 0x001abc10
 Catcher::~Catcher() {
-    Slot5();
+    Stop();
 }
 
 // 0x001abe50
-void Catcher::Slot7(int nTick, int nGem) {
-    switch (mPlayer->Slot2()) {
+void Catcher::MissGem(int nTick, int nGem) {
+    switch (mPlayer->GetInputSlot()) {
     case kPlayerSlot1:
         PlaySoundByName("SND_MISS_PLAYER1");
         break;
@@ -208,26 +209,26 @@ void Catcher::Slot7(int nTick, int nGem) {
     Send(&msg);
 
     const int nBar = nTick / mTicksPerBar.mTick;
-    if (nBar == mUnknown5c || mUnknown60 > 0) {
+    if (nBar == mLastEndedBar || mPhraseRunBars > 0) {
         // The tick is stored without the finiteness check.
-        mUnknown48.mTick = nTick;
-        mUnknown60 = 0;
-        ++mUnknown54;
-        PostPhraseMuffedMsg(nBar, mUnknown48);
+        mLastMissedPosition.mTick = nTick;
+        mPhraseRunBars = 0;
+        ++mMissedGems;
+        PostPhraseMuffedMsg(nBar, mLastMissedPosition);
         UpdateSeeker(nBar);
     }
 }
 
 // 0x001abfd8
-void Catcher::Slot8(int nTick, int nGem) {
+void Catcher::CatchGem(int nTick, int nGem) {
     // The tick is stored without the finiteness check.
-    mUnknown44.mTick = nTick;
-    ++mUnknown50;
+    mLastCaughtPosition.mTick = nTick;
+    ++mCaughtGems;
 
     const int nBar = nTick / mTicksPerBar.mTick;
     const Mid::MBT barStart = MakePosition(mTicksPerBar.mTick * nBar);
-    if (mUnknown48.mTick < barStart.mTick) {
-        mUnknown54 = 0;
+    if (mLastMissedPosition.mTick < barStart.mTick) {
+        mMissedGems = 0;
     }
 
     MultiMuseMsg riffMsg(mTrackData->GetRiff(nTick, nGem));
@@ -236,18 +237,18 @@ void Catcher::Slot8(int nTick, int nGem) {
     int nPoints = 0;
     int nCaught = 0;
     int nTotal = 0;
-    if (mUnknown54 == 0 && mUnknown58 == 0) {
+    if (mMissedGems == 0 && mMuffedGems == 0) {
         const int nEndBar = mSeekerEndBar;
-        nCaught = mUnknown50;
+        nCaught = mCaughtGems;
         if (!(mTrackData->FollowingStepBar(nBar) < nEndBar)) {
-            for (int nPhraseBar = nBar - mUnknown60; nPhraseBar < nEndBar; ++nPhraseBar) {
+            for (int nPhraseBar = nBar - mPhraseRunBars; nPhraseBar < nEndBar; ++nPhraseBar) {
                 const int nGems = static_cast<int>(mTrackData->GetGems(nPhraseBar)->size());
                 nPoints += mTrackData->GetPoints(nPhraseBar);
                 nTotal += nGems;
                 nCaught += (nPhraseBar < nBar) * nGems;
             }
             if (nCaught == 1) {
-                BeginPhraseCatchMsg beginMsg(mPlayer, nPoints, mPlayer->Slot16(nBar));
+                BeginPhraseCatchMsg beginMsg(mPlayer, nPoints, mPlayer->GetMultiplier(nBar));
                 Send(&beginMsg);
             }
         }
@@ -262,7 +263,7 @@ void Catcher::Slot8(int nTick, int nGem) {
     GemMsg gemMsg(position, mTrack, nGem, mPlayer);
     Send(&gemMsg);
 
-    mPlayer->Slot14(); // Yes, the binary discards this call's result.
+    mPlayer->CountCaughtGem(); // Yes, the binary discards this call's result.
 
     const int nNextBar = FindNextGemTick(nTick) / mTicksPerBar.mTick;
     if (nNextBar != nBar) {
@@ -293,18 +294,18 @@ int Catcher::SnapToNearestGem(int nTick) {
 
 // 0x001ac370
 void Catcher::PostCatchMsg(PitchRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (pMsg->mUnknown08 != mPlayer) {
-        pMsg->mUnknown08->Slot5(); // Yes, the binary discards this call's result.
+    if (pMsg->mPlayer != mPlayer) {
+        pMsg->mPlayer->GetPlace(); // Yes, the binary discards this call's result.
         PlaySoundByName("SND_INACTIVE");
         return;
     }
 
-    const int nTick = pMsg->mUnknown0c.mTick;
+    const int nTick = pMsg->mPosition.mTick;
     const int nSnapped = SnapToNearestGem(nTick);
-    const int nGem = pMsg->mUnknown04;
+    const int nGem = pMsg->mButton;
     if (!IsBarFree(nSnapped / mTicksPerBar.mTick)) {
         PlaySoundByName("SND_INACTIVE");
         CatchMsg msg(nTick, mTrack, nGem, kCatchMiss, mPlayer, kNoProgress, kNoProgress);
@@ -313,39 +314,39 @@ void Catcher::PostCatchMsg(PitchRiffMsg *pMsg) {
     }
 
     const int nGemAt = mTrackData->GetGemAt(nSnapped);
-    if (nGemAt != kNoGem && nGemAt == nGem && mUnknown44.mTick != nSnapped) {
-        Slot8(nSnapped, nGem);
+    if (nGemAt != kNoGem && nGemAt == nGem && mLastCaughtPosition.mTick != nSnapped) {
+        CatchGem(nSnapped, nGem);
     } else {
-        Slot7(nTick, nGem);
+        MissGem(nTick, nGem);
     }
 }
 
 // 0x001ac550
 void Catcher::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mTrack) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (pMsg->mUnknown08 != 0) {
+    if (pMsg->mPlace != 0) {
         return;
     }
 
     const int nBar = pMsg->mPosition.mTick / mTicksPerBar.mTick;
-    Player *pNewPlayer = pMsg->mUnknown10;
-    if (!mPlayer->IsNull() && mPlayer != pNewPlayer && mPlayer->Slot2() != kNoPlayerSlot) {
+    Player *pNewPlayer = pMsg->mPlayer;
+    if (!mPlayer->IsNull() && mPlayer != pNewPlayer && mPlayer->GetInputSlot() != kNoPlayerSlot) {
         PostSeekerMsg();
     }
     mPlayer = pNewPlayer;
-    mUnknown44 = Mid::MBT(kNoPosition);
-    mUnknown60 = 0;
-    mUnknown58 += mUnknown50;
+    mLastCaughtPosition = Mid::MBT(kNoPosition);
+    mPhraseRunBars = 0;
+    mMuffedGems += mCaughtGems;
 
     if (!mPlayer->IsNull()) {
-        mUnknown50 = 0;
+        mCaughtGems = 0;
         UpdateSeeker(nBar);
         return;
     }
-    if (mUnknown50 > 0 || nBar < mUnknown5c) {
-        mUnknown64 = nBar;
+    if (mCaughtGems > 0 || nBar < mLastEndedBar) {
+        mLastMuffedBar = nBar;
     }
 }
 
@@ -361,9 +362,9 @@ void Catcher::OnAutoCatch(AutoCatchMsg *pMsg) {
 
     Player *pSavedPlayer = mPlayer;
     mPlayer = pMsg->mPlayer;
-    Slot9(nBar, kAutoCatchFlag, kAutoCatchFlag);
+    CapturePhrase(nBar, kAutoCatchFlag, kAutoCatchFlag);
     mPlayer = pSavedPlayer;
-    pMsg->mUnknown04 = kMessageHandled;
+    pMsg->mResult = kMessageHandled;
     UpdateSeeker(nBar);
 
     const int nNow = Application::shared()->GetSongClock()->SongTick();
@@ -375,28 +376,28 @@ void Catcher::OnAutoCatch(AutoCatchMsg *pMsg) {
 
 // 0x001ac7e8
 void Catcher::PostCaughtBarMsg(int nBar, int nNextBar) {
-    if ((mUnknown54 + mUnknown58) != 0) {
+    if ((mMissedGems + mMuffedGems) != 0) {
         return;
     }
 
-    ++mUnknown60;
+    ++mPhraseRunBars;
     CaughtBarMsg msg(mPlayer, nBar);
     mPlayer->Handle(&msg);
-    Slot10(nBar);
+    ReportCaughtPowerbar(nBar);
 
     int nLastBar = nBar;
     if ((nBar + 1) < nNextBar) {
         nLastBar = std::min(nNextBar - 1, mTrackData->FollowingStepBar(nBar) - 1);
-        mUnknown60 += nLastBar - nBar;
-        if (!(mUnknown60 < mSeekerBarCount)) {
-            nLastBar -= mUnknown60 - mSeekerBarCount;
-            mUnknown60 = mSeekerBarCount;
+        mPhraseRunBars += nLastBar - nBar;
+        if (!(mPhraseRunBars < mSeekerBarCount)) {
+            nLastBar -= mPhraseRunBars - mSeekerBarCount;
+            mPhraseRunBars = mSeekerBarCount;
         }
     }
 
     if (mSeekerEnabled != 0 && (nLastBar + 1) == mSeekerEndBar) {
-        Slot9(nLastBar, mUnknown60, kNoAutoCatchFlag);
-        mUnknown60 = 0;
+        CapturePhrase(nLastBar, mPhraseRunBars, kNoAutoCatchFlag);
+        mPhraseRunBars = 0;
         UpdateSeeker(nLastBar);
     }
 }
@@ -404,22 +405,22 @@ void Catcher::PostCaughtBarMsg(int nBar, int nNextBar) {
 // 0x001ac958
 void Catcher::EndBar(int nBar) {
     if (mTrackData->IsStepStart(nBar)) {
-        mUnknown60 = 0;
+        mPhraseRunBars = 0;
     }
 
-    if ((mUnknown54 + mUnknown58) > 0 || mUnknown50 == 0) {
-        mUnknown60 = 0;
-        if (mUnknown50 > 0) {
+    if ((mMissedGems + mMuffedGems) > 0 || mCaughtGems == 0) {
+        mPhraseRunBars = 0;
+        if (mCaughtGems > 0) {
             // Beat-sized, not bar-sized. That is what the binary computes.
             const Mid::MBT position = MakePosition(nBar * Mid::MBT(kBeatTicks).mTick);
             PostPhraseMuffedMsg(nBar - 1, position);
         }
     }
 
-    mUnknown5c = nBar;
-    mUnknown58 = 0;
-    mUnknown50 = 0;
-    mUnknown54 = 0;
+    mLastEndedBar = nBar;
+    mMuffedGems = 0;
+    mCaughtGems = 0;
+    mMissedGems = 0;
 }
 
 // 0x001aca48
@@ -431,7 +432,8 @@ int Catcher::FindNextGemTick(int nTick) {
         return next.mTick;
     }
 
-    const Mid::MBT span = MakePosition((mTrackData->mUnknown30 - 1) * Mid::MBT(kBarTicks).mTick);
+    const Mid::MBT span =
+        MakePosition((mTrackData->mGemSearchBars - 1) * Mid::MBT(kBarTicks).mTick);
     next = MakePosition(nTick + span.mTick);
     return next.mTick;
 }
@@ -472,7 +474,7 @@ int Catcher::PostGemDelay(int nTick) {
 
 // 0x001ace78
 void Catcher::SimulateRemoteGem(int nTick) {
-    if (mRemotePlayer != &g_nullPlayer && mRemotePlayer->Slot2() == kNoPlayerSlot) {
+    if (mRemotePlayer != &g_nullPlayer && mRemotePlayer->GetInputSlot() == kNoPlayerSlot) {
         const Mid::MBT window = MakePosition(mRemotePosition.mTick + Mid::MBT(kBarTicks).mTick);
         if (!(window.mTick < nTick) &&
             static_cast<float>(std::rand() % kRandomScale) < mRemoteSuccess * kRandomScale) {
@@ -506,21 +508,21 @@ void Catcher::UpdateSeeker(int nBar) {
     if (mPlayer->IsNull()) {
         return;
     }
-    if (mPlayer->Slot2() == kNoPlayerSlot) {
+    if (mPlayer->GetInputSlot() == kNoPlayerSlot) {
         return;
     }
-    if (mPlayer->Slot5()) {
+    if (mPlayer->GetPlace()) {
         PostSeekerMsg();
     }
 
-    const int nStart = (mUnknown64 < nBar) ? nBar : (mUnknown64 + 1);
+    const int nStart = (mLastMuffedBar < nBar) ? nBar : (mLastMuffedBar + 1);
     int nStepBar = mTrackData->NextStepBar(nStart);
     for (int nScanBar = nStart; nScanBar < (nStart + kSeekerScanBars); ++nScanBar) {
         if (!IsBarFree(nScanBar)) {
             continue;
         }
 
-        const int nFirstBar = nScanBar - mUnknown60;
+        const int nFirstBar = nScanBar - mPhraseRunBars;
         const int nEndBar = nScanBar + mSeekerBarCount;
         while (!(nFirstBar < nStepBar)) {
             nStepBar = mTrackData->FollowingStepBar(nStepBar);
@@ -544,17 +546,17 @@ void Catcher::UpdateSeeker(int nBar) {
 
 // 0x001ad3b0
 void Catcher::PostPhraseMuffedMsg(int nBar, Mid::MBT position) {
-    if (nBar == mUnknown64) {
+    if (nBar == mLastMuffedBar) {
         return;
     }
-    mUnknown64 = nBar;
+    mLastMuffedBar = nBar;
     if (mPlayer->IsNull()) {
         return;
     }
 
     int nTried = 0;
     if (IsBarFree(nBar)) {
-        nTried = (mUnknown54 + mUnknown50) > 0;
+        nTried = (mMissedGems + mCaughtGems) > 0;
     }
     PhraseMuffedMsg msg(mTrack, mPlayer, position, nTried);
     Send(&msg);
@@ -610,13 +612,13 @@ int Catcher::IsBarFree(int nBar) {
 
 // 0x001b1578
 void Catcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
-    if (pMsg->mUnknown08 == mTrack) {
-        UpdateSeeker(pMsg->mUnknown04);
+    if (pMsg->mTrack == mTrack) {
+        UpdateSeeker(pMsg->mBar);
     }
 }
 
 // 0x001b15a8
-void Catcher::Slot4() {
+void Catcher::Start() {
     SchedulePostGemCommand(Mid::MBT(kBeforeSongStart).mTick);
     if (Application::shared()->GetGameMode() == kGameModeNet) {
         ScheduleGemCommand(Mid::MBT(kBeforeSongStart).mTick);
@@ -624,7 +626,7 @@ void Catcher::Slot4() {
 }
 
 // 0x001b1610
-void Catcher::Slot5() {
+void Catcher::Stop() {
     mClock->Withdraw(mPostGemCommand);
     if (Application::shared()->GetGameMode() == kGameModeNet) {
         mClock->Withdraw(mGemCommand);
@@ -633,17 +635,17 @@ void Catcher::Slot5() {
 
 // 0x001b1828
 void Catcher::ProcessGemCommand(int nTick) {
-    if (mUnknown44.mTick != nTick) {
-        mUnknown60 = 0;
-        ++mUnknown58;
+    if (mLastCaughtPosition.mTick != nTick) {
+        mPhraseRunBars = 0;
+        ++mMuffedGems;
 
         // The position is passed without the finiteness check.
         Mid::MBT position;
         position.mTick = nTick;
         PostPhraseMuffedMsg(nTick / mTicksPerBar.mTick, position);
-        UpdateSeeker(mUnknown64);
+        UpdateSeeker(mLastMuffedBar);
         if (mPlayer != nullptr) {
-            mPlayer->Slot15();
+            mPlayer->CountMissedGem();
         }
     }
 
@@ -664,6 +666,6 @@ void Catcher::SetPhraseOwners(int nFirstBar, int nEndBar, Player *pPlayer) {
 }
 
 // 0x001b19a0
-int Catcher::Slot6() {
-    return mUnknown60 == 0;
+int Catcher::IsPhraseRunEmpty() {
+    return mPhraseRunBars == 0;
 }

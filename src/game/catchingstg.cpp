@@ -46,30 +46,30 @@ CatchingSTG::CatchingSTG(TrackData *pTrackData)
                                     Sch::Tick{window.mTick});
     }
 
-    mPhraseMgr->mExportLead = Mid::MBT((mUnknown00 * kExportLeadStep) + kExportLeadStep);
+    mPhraseMgr->mExportLead = Mid::MBT((mTrack * kExportLeadStep) + kExportLeadStep);
 }
 
 // 0x001a0450
 CatchingSTG::~CatchingSTG() {
-    CatchingSTG::Slot3(); // The binary calls this class's own body rather than dispatching.
+    CatchingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mCatcher;
     delete mNeutralizer;
 }
 
 // 0x001a04d8
-void CatchingSTG::Slot2() {
-    ScoreTrackGraph::Slot2();
-    mCatcher->Slot4();
+void CatchingSTG::Start() {
+    ScoreTrackGraph::Start();
+    mCatcher->Start();
 }
 
 // 0x001a0518
-void CatchingSTG::Slot3() {
-    mCatcher->Slot5();
-    ScoreTrackGraph::Slot3();
+void CatchingSTG::Stop() {
+    mCatcher->Stop();
+    ScoreTrackGraph::Stop();
 }
 
 // 0x0019fd88
-void CatchingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void CatchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mCatcher);
     pPrimary->AddSink(mNeutralizer);
@@ -91,37 +91,37 @@ void CatchingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pS
 }
 
 // 0x001a0558
-void CatchingSTG::Slot5(MsgSource *pSource) {
+void CatchingSTG::AddMixerToSource(MsgSource *pSource) {
     pSource->AddSink(mMixer);
 }
 
 // 0x001a0588
-void CatchingSTG::Slot6(MsgSink *pOutput) {
+void CatchingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
 // 0x001a05c8
-void CatchingSTG::Slot7(MsgSink *pSink) {
+void CatchingSTG::AddSinkToSources(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mCatcher->AddSink(pSink);
     mNeutralizer->AddSink(pSink);
 }
 
 // 0x001a0650
-void CatchingSTG::Slot8(MsgSink *pSink) {
+void CatchingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;
     }
 }
 
 // 0x001a06f0
-int CatchingSTG::Slot9() {
-    return mCatcher->Slot6();
+int CatchingSTG::HasNothingPending() {
+    return mCatcher->IsPhraseRunEmpty();
 }
 
 // 0x001a0668
-void CatchingSTG::Slot10(int nTick, Player *pPlayer) {
+void CatchingSTG::GivePhrases(int nTick, Player *pPlayer) {
     // Yes, the binary discards this call's result. It is what remains of a compiled-away assertion.
     mApplication->GetGameMode();
 
@@ -130,11 +130,11 @@ void CatchingSTG::Slot10(int nTick, Player *pPlayer) {
 }
 
 // 0x001a0428
-int CatchingSTG::Slot11() {
+int CatchingSTG::CanGivePhrases() {
     return 1;
 }
 
 // 0x001a0720
-void CatchingSTG::Slot12() {
+void CatchingSTG::CreatePowerbarMgr() {
     mPhraseMgr->CreatePowerbarMgr();
 }

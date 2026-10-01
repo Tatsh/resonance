@@ -58,35 +58,35 @@ constexpr int kResolveArenaView = 0;
 // 0x002f58d0
 MetMultiEndScreen::MetMultiEndScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown8c(nullptr) {
-    mUnknown8c = new MetButtonList();
+      mButtonList(nullptr) {
+    mButtonList = new MetButtonList();
 }
 
 // 0x002f5d20
 MetMultiEndScreen::~MetMultiEndScreen() {
-    delete mUnknown8c;
+    delete mButtonList;
 }
 
 // 0x002f5f90
 void MetMultiEndScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mUnknown8c->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mUnknown8c->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mUnknown8c->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         break;
 
     default:
@@ -96,19 +96,19 @@ void MetMultiEndScreen::HandleCommand(const MetScreenCommand *pCommand) {
 
 // 0x002f6158
 void MetMultiEndScreen::EnterAndShow() {
-    mUnknown8c->Clear();
+    mButtonList->Clear();
 
     const HxStr againButton(kAgainButtonObject);
     HxStr againLabel = QueryConfigString(kPromptConfigCode, kAgainPrompt);
-    mUnknown8c->Add(againButton, againLabel);
+    mButtonList->Add(againButton, againLabel);
 
     const HxStr newButton(kNewButtonObject);
     HxStr newLabel = QueryConfigString(kPromptConfigCode, kNewPrompt);
-    mUnknown8c->Add(newButton, newLabel);
+    mButtonList->Add(newButton, newLabel);
 
-    mUnknown38.clear();
-    mUnknown38.push_back(HxStr(kAgainPrompt));
-    mUnknown38.push_back(HxStr(kNewPrompt));
+    mHelpKeys.clear();
+    mHelpKeys.push_back(HxStr(kAgainPrompt));
+    mHelpKeys.push_back(HxStr(kNewPrompt));
 
     {
         HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
@@ -117,14 +117,14 @@ void MetMultiEndScreen::EnterAndShow() {
     MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
     PushNamedScreen(HxStr(kHelpScreen));
     PushNamedScreen(HxStr(kMultiStatsScreen));
-    mUnknown10->SetActivePanel(this);
-    mUnknown8c->SetSelected(kAgainButtonIndex);
-    MetHelpScreen::SetText(mUnknown38[mUnknown8c->mSelected], mUnknown10->mUnknown68);
+    mRenderer->SetActivePanel(this);
+    mButtonList->SetSelected(kAgainButtonIndex);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
 
 // 0x002f6640
-void MetMultiEndScreen::OnUnknownSlot30(Rnd::Button *) {
+void MetMultiEndScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ExitScreenByName(HxStr(kMultiStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));
@@ -132,19 +132,19 @@ void MetMultiEndScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x002f67d8
-void MetMultiEndScreen::OnUnknownSlot36() {
-    if (mUnknown8c->mSelected == kAgainButtonIndex) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kOwnScreenName);
+void MetMultiEndScreen::OnExitFinished() {
+    if (mButtonList->mSelected == kAgainButtonIndex) {
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
         PushNamedScreen(HxStr(kLoadGameScreen));
         ActivateNamedPanel(HxStr(kLoadGameScreen));
     } else {
-        mUnknown10->ResolveArenaView(kResolveArenaView);
-        mUnknown10->OnUnknown00390088();
-        mUnknown10->OnUnknown00390090();
+        mRenderer->ResolveArenaView(kResolveArenaView);
+        mRenderer->OnReturnFromGame();
+        mRenderer->OnReturnToMenus();
         PushNamedScreen(HxStr(kSoloStagesScreen));
         ActivateNamedPanel(HxStr(kSoloStagesScreen));
     }
-    mUnknown8c->SetSelected(kNoSelection);
+    mButtonList->SetSelected(kNoSelection);
 }
 
 // 0x002f9d98

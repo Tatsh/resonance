@@ -319,8 +319,8 @@ private:
     void AcquireTransRefs();
 
     std::list<Transformable *> mTransList; // +0x04
-    int mUnknown08;                        // +0x08
-    int mUnknown0c;                        // +0x0c
+    int mReserved08;                       // +0x08
+    int mReserved0c;                       // +0x0c
 };
 
 /**

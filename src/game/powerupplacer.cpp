@@ -12,21 +12,21 @@ PowerupPlacer::~PowerupPlacer() {
 }
 
 // 0x001cd990
-void PowerupPlacer::OnUnknownSlot4() {
+void PowerupPlacer::Activate() {
 }
 
 // 0x001cd998
-void PowerupPlacer::OnUnknownSlot5() {
+void PowerupPlacer::Deactivate() {
 }
 
 // 0x001cd9a0
-void PowerupPlacer::OnUnknownSlot6(int) {
+void PowerupPlacer::MoveCursor(int) {
 }
 
 // 0x001cd9a8
-void PowerupPlacer::OnUnknownSlot7() {
+void PowerupPlacer::AnnounceCursor() {
 }
 
 // 0x001ce1b0
-void PowerupPlacer::OnUnknownSlot8() {
+void PowerupPlacer::DeployPowerup() {
 }

@@ -107,9 +107,9 @@ constexpr int kTabWidth = 3;
 // The length the tab key tests against the limit, which is one short of kTabWidth.
 constexpr unsigned kTabLengthMargin = 2;
 
-// MetScreen::mUnknown18 when the text is committed.
+// MetScreen::mExitChoice when the text is committed.
 constexpr int kExitCommit = 2;
-// MetScreen::mUnknown18 when the keyboard departs without committing.
+// MetScreen::mExitChoice when the keyboard departs without committing.
 constexpr int kExitCancel = 0;
 
 // The command codes slot 19 recognises beyond the six MetScreenCommandCode values.
@@ -442,8 +442,8 @@ constexpr int kResolvedColumn = 6;
 
 // What the constructor leaves in mMacrosDisabled and in two MetScreen members.
 constexpr int kMacrosDisabled = 1;
-constexpr float kBaseUnknown58 = 1.0f;
-constexpr int kBaseUnknown5c = 0;
+constexpr float kInitialRepeatScale = 1.0f;
+constexpr int kInitialPlaysCommandSounds = 0;
 
 inline Rnd::Text *FindText(const char *pszName) {
     Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
@@ -468,8 +468,8 @@ MetKeyboardScreen::MetKeyboardScreen(MetRenderer *pRenderer, int nPriority)
     mCursorOffset.w = kVectorPadding;
     mMacroOffset.w = kVectorPadding;
     GetDefaultMacros(); // Yes, the binary discards this call's result.
-    mUnknown58 = kBaseUnknown58;
-    mUnknown5c = kBaseUnknown5c;
+    mRepeatScale = kInitialRepeatScale;
+    mPlaysCommandSounds = kInitialPlaysCommandSounds;
 }
 
 // 0x00282e30
@@ -581,13 +581,13 @@ void MetKeyboardScreen::HandleCommand(const MetScreenCommand *pCommand) {
         // The binary resolves the selected key twice rather than once.
         SetPendingCommand(*CurrentKey());
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kPressInterval, FindKeyButton(*CurrentKey()), kPressCycles);
+            mRenderer->mAnimationFrame, kPressInterval, FindKeyButton(*CurrentKey()), kPressCycles);
         ActivateNamedPanel(HxStr(kNoName));
         break;
 
     case kMetScreenCommandBack:
         mBlinkTime = kBlinkOff;
-        mUnknown18 = kExitCancel;
+        mExitChoice = kExitCancel;
         BeginExit();
         break;
 
@@ -640,7 +640,7 @@ void MetKeyboardScreen::EnterAndShow() {
 }
 
 // 0x00283968
-void MetKeyboardScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
+void MetKeyboardScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
     if (mPendingKey.mLen == 0) {
         return;
     }
@@ -652,11 +652,11 @@ void MetKeyboardScreen::OnUnknownSlot30([[maybe_unused]] Rnd::Button *pButton) {
 }
 
 // 0x00283aa0
-void MetKeyboardScreen::OnUnknownSlot36() {
+void MetKeyboardScreen::OnExitFinished() {
     mBlinkTime = kBlinkOff;
     UnhighlightKey(HxStr(*CurrentKey()));
 
-    if (mUnknown18 != 0) {
+    if (mExitChoice != 0) {
         bool bTrimming = true;
         while (bTrimming) {
             if (static_cast<unsigned>(mText.ReverseFind(' ')) == g_nHxStrNoPosition) {
@@ -670,7 +670,7 @@ void MetKeyboardScreen::OnUnknownSlot36() {
                 }
             }
         }
-        mUser->OnUnknownSlot2(mText);
+        mUser->OnKeyboardTextEntered(mText);
     }
 
     FindScreenByName(mReturnScreen)->OnKeyboardDismissed();
@@ -756,7 +756,7 @@ inline void MetKeyboardScreen::SetTickerText(const HxStr &text) {
     static HxStr sTicker(kNoName);
     if (!(sTicker == text)) {
         sTicker = text;
-        MetHelpScreen::SetText(sTicker, mUnknown10->mUnknown68);
+        MetHelpScreen::SetText(sTicker, mRenderer->mAnimationFrame);
     }
 }
 
@@ -798,7 +798,8 @@ inline void MetKeyboardScreen::InsertText(const HxStr &text, unsigned nPos) {
 
 inline void MetKeyboardScreen::PressKey(const HxStr &key) {
     SetPendingCommand(key);
-    StartRepeatingSound(mUnknown10->mUnknown68, kPressInterval, FindKeyButton(key), kPressCycles);
+    StartRepeatingSound(
+        mRenderer->mAnimationFrame, kPressInterval, FindKeyButton(key), kPressCycles);
     ActivateNamedPanel(HxStr(kNoName));
 }
 
@@ -1203,7 +1204,7 @@ void MetKeyboardScreen::StartRepeatingSound(float flStartTime,
 }
 
 // 0x0028c708
-void MetKeyboardScreen::OnUnknownSlot26(float flTime) {
+void MetKeyboardScreen::UpdateIdle(float flTime) {
     if (mBlinkTime == kBlinkOff || !(mBlinkTime + kBlinkInterval < flTime)) {
         return;
     }
@@ -1222,7 +1223,7 @@ void MetKeyboardScreen::ResetCaret() {
 }
 
 // 0x0028c808
-void MetKeyboardScreen::OnUnknownSlot33() {
+void MetKeyboardScreen::OnEnterFinished() {
     SetTickerText(mTicker);
 }
 
@@ -1239,7 +1240,7 @@ HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
 // 0x0028cda8
 void MetKeyboardScreen::OnEnter() {
     mLastAction = kActionAccepted;
-    mUnknown18 = kExitCommit;
+    mExitChoice = kExitCommit;
     BeginExit();
     mpTextEntryWindow->SetText(mText);
     UpdateCursor();

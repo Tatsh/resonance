@@ -117,34 +117,34 @@ int g_nReturnToLogo = 1;
 // phase is not recovered.
 constexpr int kPlainPausePhase = 5;
 
-// The frame rate the constructor starts mUnknown64 at, in frames per second.
+// The frame rate the constructor starts mFrameRate at, in frames per second.
 constexpr float kFrameRate = 500.0f;
 
-// The highest pad index HandleMessage() accepts, which the constructor records in mUnknownd4.
+// The highest pad index HandleMessage() accepts. The constructor records it in mMaxPadIndex.
 constexpr int kHighestPadIndex = 4;
 
 // Configuration codes of the two debug overlays the constructor reads.
 constexpr int kTimingGraphConfigCode = 0x397;
 constexpr int kRenderStatsConfigCode = 0x3a2;
 
-// The three scene views ResolveSceneViews() resolves, and the view OnUnknownSlot7() shows while
+// The three scene views ResolveSceneViews() resolves, and the view Update() shows while
 // the disc cannot be read.
 static const char *const kTopView = "met top view";
 static const char *const kBackgroundView = "meta bg view";
 static const char *const kScreensView = "metscreens.view";
 static const char *const kDiscProblemView = "met_disc_prob.view";
 
-// The first screen OnUnknownSlot7() activates once the boot containers have loaded.
+// The first screen Update() activates once the boot containers have loaded.
 static const char *const kStartupScreen = "MetMemDetectStartup";
 
-// The front-end state phase in which OnUnknownSlot5() leaves the music playing. The meaning of
+// The front-end state phase in which Stop() lets the music play on. The meaning of
 // the phase is not recovered.
 constexpr int kNoMusicStopPhase = 2;
 
-// The music OnUnknownSlot5() stops.
+// The music Stop() stops.
 static const char *const kFrontEndMusic = "SND_MET_MUSIC1";
 
-// The full scale OnUnknownSlot8() and OnUnknownSlot10() give the subsystem timing graph.
+// The full scale Draw() and DrawSimple() give the subsystem timing graph.
 constexpr int kTimingGraphFullScaleMs = 50;
 
 // The arena view ResolveArenaView() attaches.
@@ -183,41 +183,42 @@ RndAsyncLoader *MetRenderer::sSharedTexLoader;
 RndAsyncLoader *MetRenderer::sArenaLoader;
 
 // 0x0036a900
-void MetRenderer::OnUnknownSlot4() {
-    if (mUnknown94 != nullptr) {
-        mUnknown94->Reset();
+void MetRenderer::Start() {
+    if (mCommandRepeater != nullptr) {
+        mCommandRepeater->Reset();
     }
 
-    mUnknowna8 = 1;
-    mUnknown68 = kFirstFrame;
-    mUnknown70 = FrameClockNs(Application::shared()->GetWatchdog());
+    mRunning = 1;
+    mAnimationFrame = kFirstFrame;
+    mPreviousFrameNs = FrameClockNs(Application::shared()->GetWatchdog());
     QueryConfigValue(kStartUpConfigCode); // Yes, the binary discards the result.
 }
 
 // 0x00369fb0
 MetRenderer::MetRenderer()
-    : mUnknown68(0.0f), mUnknown80(1), mUnknown60(0), mUnknown64(kFrameRate), mUnknown70(0),
-      mUnknown78(0), mUnknown7c(nullptr), mUnknown90(nullptr), mUnknown94(nullptr), mUnknown98(0),
-      mUnknown9c(nullptr), mUnknowna8(0), mUnknownac(0), mUnknownb0(0), mUnknownb4(1),
-      mUnknownb8(0), mUnknownbc(0), mUnknownc4(nullptr), mUnknownc8(0), mUnknowncc(nullptr),
-      mUnknownd0(0), mUnknownd4(kHighestPadIndex) {
+    : mAnimationFrame(0.0f), mPanelActive(1), mTitlePromptShowing(0), mFrameRate(kFrameRate),
+      mPreviousFrameNs(0), mRecording(0), mActivePanel(nullptr), mCommandMap(nullptr),
+      mCommandRepeater(nullptr), mScreensChanged(0), mTopView(nullptr), mRunning(0),
+      mShowTimingGraph(0), mShowRenderStats(0), mUnreadFlag(1), mBootLoadPending(0),
+      mUnreadValue(0), mPendingPanel(nullptr), mDiscProblemPending(0), mFade(nullptr), mFading(0),
+      mMaxPadIndex(kHighestPadIndex) {
     sInstance = this;
     MetFreqMakerAssetManager::Create();
     MetFreqMakerAssetManager::shared()->StartAssetLoad();
     MetFrontEndState::Create();
     GlobalSettings::Create();
-    mUnknown94 = new MetCommandRepeater;
-    mUnknown90 = new MetCommandMap;
+    mCommandRepeater = new MetCommandRepeater;
+    mCommandMap = new MetCommandMap;
     SeedR250(FrameIntervalMs(FrameClockNs(Application::shared()->GetWatchdog()), 0));
     RebuildStageLists();
     RebuildArenaLists();
     MetPersonaData::ClearSavedList();
     MetPersonaData::ClearLoadList();
     CreateCommonLoaders();
-    mUnknownb8 = 1;
+    mBootLoadPending = 1;
     EnqueueCommonLoaders();
-    mUnknownac = QueryConfigFlag(kTimingGraphConfigCode);
-    mUnknownb0 = QueryConfigFlag(kRenderStatsConfigCode);
+    mShowTimingGraph = QueryConfigFlag(kTimingGraphConfigCode);
+    mShowRenderStats = QueryConfigFlag(kRenderStatsConfigCode);
     const Color black{0.0f, 0.0f, 0.0f, kOpaque};
     g_gfxDevice.SetClearColor(black);
     SetDoWinSequence(0);
@@ -225,13 +226,13 @@ MetRenderer::MetRenderer()
 
 // 0x0036a460
 MetRenderer::~MetRenderer() {
-    delete mUnknown94;
-    mUnknown94 = nullptr;
-    delete mUnknown90;
-    mUnknown90 = nullptr;
-    delete mUnknowncc;
-    mUnknowncc = nullptr;
-    OnUnknownSlot5();
+    delete mCommandRepeater;
+    mCommandRepeater = nullptr;
+    delete mCommandMap;
+    mCommandMap = nullptr;
+    delete mFade;
+    mFade = nullptr;
+    Stop();
     UnloadCommonLoaders();
     UnloadArenaLoader();
     sInstance = nullptr;
@@ -242,74 +243,74 @@ MetRenderer::~MetRenderer() {
 }
 
 // 0x0036b0c0
-void MetRenderer::OnUnknownSlot5() {
-    mUnknowna8 = 0;
-    if (mUnknown94 != nullptr) {
-        mUnknown94->Reset();
+void MetRenderer::Stop() {
+    mRunning = 0;
+    if (mCommandRepeater != nullptr) {
+        mCommandRepeater->Reset();
     }
-    while (mUnknown84.begin() != mUnknown84.end()) {
-        mUnknown84.erase(mUnknown84.begin());
+    while (mScreens.begin() != mScreens.end()) {
+        mScreens.erase(mScreens.begin());
     }
     ClearScreenScene();
     ClearBackgroundScene();
-    mUnknown7c = nullptr;
-    if (MetFrontEndState::shared()->mUnknown18 != kNoMusicStopPhase) {
+    mActivePanel = nullptr;
+    if (MetFrontEndState::shared()->mPendingTransition != kNoMusicStopPhase) {
         StopSoundByName(kFrontEndMusic);
     }
 }
 
 // 0x0036b740
-void MetRenderer::OnUnknownSlot9() {
-    if (mUnknowna8 == 0) {
+void MetRenderer::UpdateSimple() {
+    if (mRunning == 0) {
         return;
     }
 
     const long long nNowNs = FrameClockNs(Application::shared()->GetWatchdog());
-    const int nIntervalMs = FrameIntervalMs(nNowNs, mUnknown70);
+    const int nIntervalMs = FrameIntervalMs(nNowNs, mPreviousFrameNs);
 
-    mUnknown70 = nNowNs;
-    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecondFloat;
+    mPreviousFrameNs = nNowNs;
+    mAnimationFrame += mFrameRate * static_cast<float>(nIntervalMs) / kMillisecondsPerSecondFloat;
 
-    for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end(); ++it) {
-        (*it)->UpdateAnimationFrame(mUnknown68);
+    for (std::vector<MetScreen *>::iterator it = mScreens.begin(); it != mScreens.end(); ++it) {
+        (*it)->UpdateAnimationFrame(mAnimationFrame);
 
-        if (mUnknowna8 == 0) {
+        if (mRunning == 0) {
             return;
         }
 
         // A screen that pushed or popped another one invalidated the iterator, so the walk is
         // abandoned rather than restarted. The screens past the change are not advanced this
         // frame.
-        if (mUnknown98 != 0) {
-            mUnknown98 = 0;
+        if (mScreensChanged != 0) {
+            mScreensChanged = 0;
             break;
         }
     }
 
-    mUnknown9c->SetFrame(mUnknown68);
-    mUnknown9c->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
+    mTopView->SetFrame(mAnimationFrame);
+    mTopView->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
 // 0x003715e0
 void MetRenderer::OnFadeOutDone() {
-    mUnknownd0 = 0;
+    mFading = 0;
 
-    if (mUnknownc8 != 0) {
+    if (mDiscProblemPending != 0) {
         return;
     }
 
-    MetScreen *const pPending = mUnknownc4;
+    MetScreen *const pPending = mPendingPanel;
 
-    if (mUnknown94 != nullptr) {
-        mUnknown94->Reset();
+    if (mCommandRepeater != nullptr) {
+        mCommandRepeater->Reset();
     }
 
-    mUnknown7c = pPending;
-    mUnknown80 = 1;
-    AddScreen(mUnknown7c);
-    mUnknown7c->PollContainerLoad(); // Yes, the binary discards the result.
-    mUnknown7c->mUnknown4c = 1;
-    mUnknown7c->mUnknown50 = 1;
+    mActivePanel = pPending;
+    mPanelActive = 1;
+    AddScreen(mActivePanel);
+    mActivePanel->PollContainerLoad(); // Yes, the binary discards the result.
+    mActivePanel->mEnterPending = 1;
+    mActivePanel->mActivatePending = 1;
 }
 
 // 0x003715d8
@@ -318,137 +319,137 @@ void MetRenderer::OnFadeInDone() {
 
 // 0x003714c8
 void MetRenderer::SetActivePanel(MetScreen *pScreen) {
-    mUnknown7c = pScreen;
+    mActivePanel = pScreen;
 
-    if (mUnknown94 != nullptr) {
-        mUnknown94->Reset();
+    if (mCommandRepeater != nullptr) {
+        mCommandRepeater->Reset();
     }
 }
 
 // 0x00390088
-void MetRenderer::OnUnknown00390088() {
+void MetRenderer::OnReturnFromGame() {
 }
 
 // 0x00390090
-void MetRenderer::OnUnknown00390090() {
+void MetRenderer::OnReturnToMenus() {
 }
 
 // 0x003719e0
 void MetRenderer::AddScreen(MetScreen *pScreen) {
-    if (std::find(mUnknown84.begin(), mUnknown84.end(), pScreen) != mUnknown84.end()) {
+    if (std::find(mScreens.begin(), mScreens.end(), pScreen) != mScreens.end()) {
         return;
     }
 
-    mUnknown84.push_back(pScreen);
-    mUnknown98 = 1;
+    mScreens.push_back(pScreen);
+    mScreensChanged = 1;
 }
 
 // 0x003717b0
 void MetRenderer::AddScreenView(Rnd::View *pView) {
-    if (!ContainsRef(mUnknowna0->GetDraws(), pView)) {
-        mUnknowna0->AddDraw(pView, nullptr);
+    if (!ContainsRef(mScreenScene->GetDraws(), pView)) {
+        mScreenScene->AddDraw(pView, nullptr);
     }
-    if (!ContainsRef(mUnknowna0->mTransList, pView)) {
-        mUnknowna0->AddTrans(pView);
+    if (!ContainsRef(mScreenScene->mTransList, pView)) {
+        mScreenScene->AddTrans(pView);
     }
-    if (!ContainsRef(mUnknowna0->mAnims, pView)) {
-        mUnknowna0->AddAnim(pView);
+    if (!ContainsRef(mScreenScene->mAnims, pView)) {
+        mScreenScene->AddAnim(pView);
     }
 }
 
 // 0x003718b8
 void MetRenderer::AddBackgroundView(Rnd::View *pView) {
-    if (!ContainsRef(mUnknowna4->GetDraws(), pView)) {
-        mUnknowna4->AddDraw(pView, nullptr);
+    if (!ContainsRef(mBackgroundScene->GetDraws(), pView)) {
+        mBackgroundScene->AddDraw(pView, nullptr);
     }
-    if (!ContainsRef(mUnknowna4->mTransList, pView)) {
-        mUnknowna4->AddTrans(pView);
+    if (!ContainsRef(mBackgroundScene->mTransList, pView)) {
+        mBackgroundScene->AddTrans(pView);
     }
-    if (!ContainsRef(mUnknowna4->mAnims, pView)) {
-        mUnknowna4->AddAnim(pView);
+    if (!ContainsRef(mBackgroundScene->mAnims, pView)) {
+        mBackgroundScene->AddAnim(pView);
     }
 }
 
 // 0x00371858
 void MetRenderer::RemoveScreenView(Rnd::View *pView) {
-    mUnknowna0->RemoveTrans(pView);
-    mUnknowna0->RemoveDraw(pView);
-    mUnknowna0->RemoveAnim(pView);
+    mScreenScene->RemoveTrans(pView);
+    mScreenScene->RemoveDraw(pView);
+    mScreenScene->RemoveAnim(pView);
 }
 
 // 0x003719a0
 void MetRenderer::ClearScreenScene() {
-    mUnknowna0->ReleaseAnimsRefs();
-    mUnknowna0->ClearDraws();
-    mUnknowna0->ClearTransList();
+    mScreenScene->ReleaseAnimsRefs();
+    mScreenScene->ClearDraws();
+    mScreenScene->ClearTransList();
 }
 
 // 0x00371960
 void MetRenderer::ClearBackgroundScene() {
-    mUnknowna4->ReleaseAnimsRefs();
-    mUnknowna4->ClearDraws();
-    mUnknowna4->ClearTransList();
+    mBackgroundScene->ReleaseAnimsRefs();
+    mBackgroundScene->ClearDraws();
+    mBackgroundScene->ClearTransList();
 }
 
 // 0x003714f8
 void MetRenderer::ActivatePanel(MetScreen *pScreen) {
-    mUnknown7c = pScreen;
-    if (mUnknown94 != nullptr) {
-        mUnknown94->Reset();
+    mActivePanel = pScreen;
+    if (mCommandRepeater != nullptr) {
+        mCommandRepeater->Reset();
     }
-    mUnknown80 = 1;
-    AddScreen(mUnknown7c);
-    mUnknown7c->PollContainerLoad(); // Yes, the binary discards the result.
-    mUnknown7c->mUnknown4c = 1;
-    mUnknown7c->mUnknown50 = 1;
+    mPanelActive = 1;
+    AddScreen(mActivePanel);
+    mActivePanel->PollContainerLoad(); // Yes, the binary discards the result.
+    mActivePanel->mEnterPending = 1;
+    mActivePanel->mActivatePending = 1;
 }
 
 // 0x00371730
 void MetRenderer::MoveScreenViewToFront(Rnd::View *pView) {
-    if (!ContainsRef(mUnknowna0->GetDraws(), pView)) {
+    if (!ContainsRef(mScreenScene->GetDraws(), pView)) {
         AddScreenView(pView);
         return;
     }
-    mUnknowna0->RemoveDraw(pView);
-    mUnknowna0->AddDraw(pView, nullptr);
+    mScreenScene->RemoveDraw(pView);
+    mScreenScene->AddDraw(pView, nullptr);
 }
 
 // 0x0036b8c8
 void MetRenderer::UnlockAllStages() {
-    if (mUnknown7c != nullptr) {
+    if (mActivePanel != nullptr) {
         MetUnlockStagesMsg msg;
-        mUnknown7c->Handle(&msg);
+        mActivePanel->Handle(&msg);
     }
 }
 
 // 0x00371b58
 int MetRenderer::IsLogoScreenActive() {
-    return dynamic_cast<MetLogoScreen *>(mUnknown7c) != nullptr;
+    return dynamic_cast<MetLogoScreen *>(mActivePanel) != nullptr;
 }
 
 // 0x00371cb0
 void MetRenderer::ForwardToPanel(Message *pMsg) {
-    if (mUnknown7c != nullptr) {
-        mUnknown7c->Handle(pMsg);
+    if (mActivePanel != nullptr) {
+        mActivePanel->Handle(pMsg);
     }
 }
 
 // 0x00371cf0
 void MetRenderer::ForwardToPanelUnchecked(Message *pMsg) {
-    mUnknown7c->Handle(pMsg);
+    mActivePanel->Handle(pMsg);
 }
 
 // 0x00371ba8
 inline void MetRenderer::OnRawController(RawControllerMsg *pMsg) {
-    if (mUnknowna8 == 0) {
+    if (mRunning == 0) {
         return;
     }
     MetControllerReading &reading = pMsg->mReading;
-    if (mUnknownd4 < reading.mPadIndex) {
+    if (mMaxPadIndex < reading.mPadIndex) {
         return;
     }
     MetScreenCommand command;
-    if (mUnknown90->Translate(&reading, &command) == 0) {
+    if (mCommandMap->Translate(&reading, &command) == 0) {
         return;
     }
     if (reading.mTag == kReadingTagJoystick) {
@@ -462,14 +463,14 @@ inline void MetRenderer::OnRawController(RawControllerMsg *pMsg) {
         case kRepeatCommandFirst + 1:
         case kRepeatCommandFirst + 2:
         case kRepeatCommandLast:
-            mUnknown94->Arm(&command, reading.mButton, command.mPadIndex);
+            mCommandRepeater->Arm(&command, reading.mButton, command.mPadIndex);
             break;
         default:
             break;
         }
     }
-    if (mUnknown7c != nullptr && mUnknown80 != 0 && command.mCommand != kMetScreenCommandNone) {
-        mUnknown7c->DeliverCommand(&command);
+    if (mActivePanel != nullptr && mPanelActive != 0 && command.mCommand != kMetScreenCommandNone) {
+        mActivePanel->DeliverCommand(&command);
     }
 }
 
@@ -477,10 +478,10 @@ inline void MetRenderer::OnRawController(RawControllerMsg *pMsg) {
 MetScreen *MetRenderer::SelectEndScreen() {
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
     MetScreen *pScreen;
-    if (params.mUnknown1c == kPlayModeJam) {
+    if (params.mPlayMode == kPlayModeJam) {
         // Yes, the binary looks each discarded screen up only for the fatal check.
         MetScreen::FindEndScreen(this, HxStr("MetSaveRemixScreen"));
-        if (Application::shared()->GetGameManager()->GetParams()->mUnknown28) {
+        if (Application::shared()->GetGameManager()->GetParams()->mNetGame) {
             pScreen = MetScreen::FindEndScreen(this, HxStr("MetNetEndRemixScreen"));
         } else if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
             pScreen = MetScreen::FindEndScreen(this, HxStr("MetSoloEndRemixScreen"));
@@ -488,13 +489,13 @@ MetScreen *MetRenderer::SelectEndScreen() {
             MetScreen::FindEndScreen(this, HxStr("MetMultiEndRemixScreen"));
             pScreen = MetScreen::FindEndScreen(this, HxStr("MetMultiSaveRemixScreen"));
         }
-    } else if (Application::shared()->GetGameManager()->GetParams()->mUnknown28) {
+    } else if (Application::shared()->GetGameManager()->GetParams()->mNetGame) {
         MetScreen::FindEndScreen(this, HxStr("MetMultiStatsScreen"));
         pScreen = MetScreen::FindEndScreen(this, HxStr("MetNetEndScreen"));
     } else if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
         GameStats *pStats = Application::shared()->GetGameManager()->GetStats();
         MetScreen::FindEndScreen(this, HxStr("MetSoloStatsScreen"));
-        if (pStats->mCompleted != 0 && pStats->mUnknown08 == 0) {
+        if (pStats->mCompleted != 0 && pStats->mCheated == 0) {
             pScreen = MetScreen::FindEndScreen(this, HxStr("MetStageFinishScreen"));
         } else {
             pScreen = MetScreen::FindEndScreen(this, HxStr("MetSoloLoseScreen"));
@@ -597,33 +598,33 @@ void MetRenderer::ResolveArenaView(int nSkipResolve) {
 }
 
 // 0x00371670
-void MetRenderer::OnUnknownSlot8() {
-    if (mUnknowna8 == 0) {
+void MetRenderer::Draw() {
+    if (mRunning == 0) {
         return;
     }
     FreqAppearance::RenderBurnTextures();
-    mUnknown9c->Rnd::Drawable::Draw();
-    for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end(); ++it) {
+    mTopView->Rnd::Drawable::Draw();
+    for (std::vector<MetScreen *>::iterator it = mScreens.begin(); it != mScreens.end(); ++it) {
         (*it)->OnDrawPass();
     }
-    if (mUnknownac != 0) {
+    if (mShowTimingGraph != 0) {
         g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
     }
-    if (mUnknownb0 != 0) {
+    if (mShowRenderStats != 0) {
         g_gfxDevice.DrawRenderStatsOverlay();
     }
 }
 
 // 0x00371570
-void MetRenderer::OnUnknownSlot10() {
-    if (mUnknowna8 == 0) {
+void MetRenderer::DrawSimple() {
+    if (mRunning == 0) {
         return;
     }
-    mUnknown9c->Rnd::Drawable::Draw();
-    if (mUnknownac != 0) {
+    mTopView->Rnd::Drawable::Draw();
+    if (mShowTimingGraph != 0) {
         g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
     }
-    if (mUnknownb0 != 0) {
+    if (mShowRenderStats != 0) {
         g_gfxDevice.DrawRenderStatsOverlay();
     }
 }
@@ -642,7 +643,7 @@ void MetRenderer::HandleMessage(Message *pMsg) {
     } else if (nType == g_nLobbyConnectionLostMsgType) {
         ForwardToPanelUnchecked(pMsg);
     } else if (nType == g_nIsRecordingMsgType) {
-        mUnknown78 = static_cast<IsRecordingMsg *>(pMsg)->mIsRecording;
+        mRecording = static_cast<IsRecordingMsg *>(pMsg)->mIsRecording;
     } else if (nType == g_nMetFreqEndedMsgType) {
         OnFreqEnded(pMsg);
     } else {
@@ -652,8 +653,8 @@ void MetRenderer::HandleMessage(Message *pMsg) {
 
 // 0x0036b938
 void MetRenderer::OnStartPause([[maybe_unused]] Message *pMsg) {
-    OnUnknownSlot4();
-    if (MetFrontEndState::shared()->mUnknown18 == kPlainPausePhase) {
+    Start();
+    if (MetFrontEndState::shared()->mPendingTransition == kPlainPausePhase) {
         ActivatePanel(MetScreen::FindScreenByName(HxStr("MetPauseGameScreen")));
     } else if (Application::shared()->GetGameMode() == kGameModeLocal) {
         if (Application::shared()->GetPlayMode() == kPlayModeGame) {
@@ -676,10 +677,10 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
     SetDoWinSequence(0);
 
-    if (params.mJukeboxMode == 1 && pEnded->mUnknownb8Clear == 0) {
+    if (params.mJukeboxMode == 1 && pEnded->mStopJukebox == 0) {
         const Color black{0.0f, 0.0f, 0.0f, kOpaque};
         g_gfxDevice.SetClearColor(black);
-        OnUnknownSlot4();
+        Start();
         AddScreen(MetScreen::FindScreenByName(HxStr("MetRemixManager")));
         MetRemixManager::shared()->PlayCurrentTrack();
         return;
@@ -687,62 +688,62 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
 
     const Color blue{0.0f, 0.0f, kClearBlue, kOpaque};
     g_gfxDevice.SetClearColor(blue);
-    mUnknownc8 = 1;
-    mUnknownc4 = nullptr;
+    mDiscProblemPending = 1;
+    mPendingPanel = nullptr;
 
-    if (mUnknown78 != 0 || g_nReturnToLogo != 0) {
-        mUnknown78 = 0;
+    if (mRecording != 0 || g_nReturnToLogo != 0) {
+        mRecording = 0;
         g_nReturnToLogo = 0;
-        OnUnknown00390088();
-        mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetLogoScreen"));
+        OnReturnFromGame();
+        mPendingPanel = MetScreen::FindScreenByName(HxStr("MetLogoScreen"));
     } else if (params.mLevelName == kTutorialLevel || params.mLevelName == kTutorialRemixLevel) {
-        OnUnknown00390088();
+        OnReturnFromGame();
         if (GlobalSettings::shared()->mTutorialComplete == 0) {
             GlobalSettings::shared()->mTutorialComplete = 1;
-            if (MetFrontEndState::shared()->mUnknown0c != 0) {
-                MetFrontEndState::shared()->mUnknown10 = 1;
+            if (MetFrontEndState::shared()->mUsingMemcard != 0) {
+                MetFrontEndState::shared()->mSettingsDirty = 1;
             }
         }
-        mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetMainScreen"));
-    } else if (params.mUnknown1c == kPlayModeJam) {
+        mPendingPanel = MetScreen::FindScreenByName(HxStr("MetMainScreen"));
+    } else if (params.mPlayMode == kPlayModeJam) {
         GameStats *pStats = Application::shared()->GetGameManager()->GetStats();
         if (params.mJukeboxMode != 0) {
             GameParams cleared(*Application::shared()->GetGameManager()->GetParams());
             cleared.mLoadingGame = 0;
             Application::shared()->GetGameManager()->SetParams(cleared);
             CallScriptTemplate(kJukeboxTemplate, kJukeboxStopArgument);
-            OnUnknown00390088();
-            OnUnknown00390090();
+            OnReturnFromGame();
+            OnReturnToMenus();
             MetRemixManager::shared()->LeaveJukeboxMode();
-            mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetJukeboxTopButtonsScreen"));
-        } else if (MetFrontEndState::shared()->mUnknown0c != 0 && pStats->mUnknown14 != 0) {
-            mUnknownc4 = SelectEndScreen();
+            mPendingPanel = MetScreen::FindScreenByName(HxStr("MetJukeboxTopButtonsScreen"));
+        } else if (MetFrontEndState::shared()->mUsingMemcard != 0 && pStats->mRemixEdited != 0) {
+            mPendingPanel = SelectEndScreen();
         } else {
-            OnUnknown00390088();
-            OnUnknown00390090();
-            mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetRemixTypeScreen"));
+            OnReturnFromGame();
+            OnReturnToMenus();
+            mPendingPanel = MetScreen::FindScreenByName(HxStr("MetRemixTypeScreen"));
             GameParams cleared(*Application::shared()->GetGameManager()->GetParams());
             cleared.mLoadingGame = 0;
             Application::shared()->GetGameManager()->SetParams(cleared);
             CallScriptTemplate(kJukeboxTemplate, kJukeboxStopArgument);
         }
-    } else if (pEnded->mUnknownb8Clear != 0) {
-        OnUnknown00390088();
-        if (params.mUnknown28 != 1) {
-            OnUnknown00390090();
-            mUnknownc4 = MetScreen::FindScreenByName(HxStr("MetSoloStagesScreen"));
+    } else if (pEnded->mStopJukebox != 0) {
+        OnReturnFromGame();
+        if (params.mNetGame != 1) {
+            OnReturnToMenus();
+            mPendingPanel = MetScreen::FindScreenByName(HxStr("MetSoloStagesScreen"));
             GameParams cleared(*Application::shared()->GetGameManager()->GetParams());
             cleared.mLoadingGame = 0;
             Application::shared()->GetGameManager()->SetParams(cleared);
             CallScriptTemplate(kJukeboxTemplate, kJukeboxStopArgument);
         }
     } else {
-        mUnknownc4 = SelectEndScreen();
+        mPendingPanel = SelectEndScreen();
     }
 
-    mUnknownd0 = 1;
-    OnUnknownSlot4();
-    mUnknowncc->FadeOut(kFreqEndedFadeFrames, mUnknown68, this, 0);
+    mFading = 1;
+    Start();
+    mFade->FadeOut(kFreqEndedFadeFrames, mAnimationFrame, this, 0);
     ResolveArenaView(0);
 }
 
@@ -753,24 +754,24 @@ void MetRenderer::ResolveSceneViews() {
     sMetagameLoader->Poll(&flProgress);
     sFontsLoader->Poll(&flProgress);
     sSharedTexLoader->Poll(&flProgress);
-    mUnknown9c = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kTopView)));
-    mUnknowna4 = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kBackgroundView)));
-    mUnknowna0 = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kScreensView)));
+    mTopView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kTopView)));
+    mBackgroundScene = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kBackgroundView)));
+    mScreenScene = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kScreensView)));
     MetScreen::CreateStartupScreens(this);
-    mUnknowncc = new MetFade(this);
+    mFade = new MetFade(this);
 }
 
 // 0x0036b190
-void MetRenderer::OnUnknownSlot7() {
-    if (mUnknownb8 != 0) {
+void MetRenderer::Update() {
+    if (mBootLoadPending != 0) {
         float flProgress;
         const int bMetagame = sMetagameLoader->Poll(&flProgress);
         const int bFonts = sFontsLoader->Poll(&flProgress);
         const int bSharedTex = sSharedTexLoader->Poll(&flProgress);
         if (bMetagame != 0 && bFonts != 0 && bSharedTex != 0) {
-            mUnknownb8 = 0;
+            mBootLoadPending = 0;
             ResolveSceneViews();
-            OnUnknownSlot4();
+            Start();
             CreateArenaLoader();
             ActivatePanel(MetScreen::FindScreenByName(HxStr(kStartupScreen)));
             const Color black{0.0f, 0.0f, 0.0f, kOpaque};
@@ -778,22 +779,22 @@ void MetRenderer::OnUnknownSlot7() {
         }
     }
 
-    if (mUnknownc8 != 0) {
+    if (mDiscProblemPending != 0) {
         if (IsBankXferBusy() != 0) {
             AsyncPumpCompletedRequests();
         } else {
             Application::shared()->GetSynth()->AllNotesOff();
-            mUnknownc8 = 0;
+            mDiscProblemPending = 0;
             PlaySoundByName(kFrontEndMusic);
             const Color blue{0.0f, 0.0f, kClearBlue, kOpaque};
             g_gfxDevice.SetClearColor(blue);
-            if (mUnknownd0 == 0) {
-                ActivatePanel(mUnknownc4);
+            if (mFading == 0) {
+                ActivatePanel(mPendingPanel);
             }
         }
     }
 
-    if (mUnknownb8 == 0) {
+    if (mBootLoadPending == 0) {
         if (IsMediaReady() == 0) {
             Rnd::Drawable *pProblem =
                 dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kDiscProblemView)));
@@ -805,52 +806,51 @@ void MetRenderer::OnUnknownSlot7() {
         pProblem->SetShowing(0);
     }
 
-    if (mUnknowna8 == 0) {
+    if (mRunning == 0) {
         return;
     }
     MetScreen::PollContainerLoads();
 
     const long long nNowNs = FrameClockNs(Application::shared()->GetWatchdog());
-    const int nIntervalMs = FrameIntervalMs(nNowNs, mUnknown70);
-    mUnknown70 = nNowNs;
-    mUnknown68 += mUnknown64 * static_cast<float>(nIntervalMs) / kMillisecondsPerSecondFloat;
+    const int nIntervalMs = FrameIntervalMs(nNowNs, mPreviousFrameNs);
+    mPreviousFrameNs = nNowNs;
+    mAnimationFrame += mFrameRate * static_cast<float>(nIntervalMs) / kMillisecondsPerSecondFloat;
 
-    if (mUnknownd0 != 0) {
-        mUnknowncc->Update(mUnknown68);
+    if (mFading != 0) {
+        mFade->Update(mAnimationFrame);
     } else {
-        for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end();
-             ++it) {
-            (*it)->UpdateFrame(mUnknown68);
-            if (mUnknowna8 == 0) {
+        for (std::vector<MetScreen *>::iterator it = mScreens.begin(); it != mScreens.end(); ++it) {
+            (*it)->UpdateFrame(mAnimationFrame);
+            if (mRunning == 0) {
                 return;
             }
             // A screen that pushed or popped another one invalidated the iterator.
-            if (mUnknown98 != 0) {
-                mUnknown98 = 0;
+            if (mScreensChanged != 0) {
+                mScreensChanged = 0;
                 break;
             }
         }
-        if (mUnknowna8 == 0) {
+        if (mRunning == 0) {
             return;
         }
-        if (mUnknown80 != 0) {
-            mUnknown94->Update(mUnknown7c, &nNowNs);
+        if (mPanelActive != 0) {
+            mCommandRepeater->Update(mActivePanel, &nNowNs);
         }
     }
-    mUnknown9c->SetFrame(mUnknown68);
-    mUnknown9c->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
+    mTopView->SetFrame(mAnimationFrame);
+    mTopView->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
 // 0x00371a78
 void MetRenderer::RemoveScreen(MetScreen *pScreen) {
-    for (std::vector<MetScreen *>::iterator it = mUnknown84.begin(); it != mUnknown84.end(); ++it) {
+    for (std::vector<MetScreen *>::iterator it = mScreens.begin(); it != mScreens.end(); ++it) {
         if (*it == pScreen) {
-            Rnd::View *pView = pScreen->mUnknown14;
-            mUnknowna0->RemoveTrans(pView);
-            mUnknowna0->RemoveDraw(pView);
-            mUnknowna0->RemoveAnim(pView);
-            mUnknown84.erase(it);
-            mUnknown98 = 1;
+            Rnd::View *pView = pScreen->mView;
+            mScreenScene->RemoveTrans(pView);
+            mScreenScene->RemoveDraw(pView);
+            mScreenScene->RemoveAnim(pView);
+            mScreens.erase(it);
+            mScreensChanged = 1;
             return;
         }
     }

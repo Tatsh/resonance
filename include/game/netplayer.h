@@ -16,47 +16,44 @@ class TrackSelectPacket;
  * and every other primary slot, which makes it a thin specialisation rather than a parallel
  * implementation.
  *
- * Two of its own members are recovered, the values slots 4 and 5 return, where the base returns
- * -1 and 0 instead. Nothing between `+0x2c` and `+0x47` is recovered. Its destructor restores the
- * base tables and releases the pointer the base declares at `+0x28`, all of which is the inlined
- * base destructor, so its own body is empty.
- *
- * A slot whose verb is unrecovered keeps its table index as its title, because the index is part
- * of the layout.
+ * Two members are recovered, the track and place slots 4 and 5 return, where the base returns -1
+ * and 0 instead. The bytes from `+0x2c` to `+0x47` are unrecovered. Its destructor restores the
+ * base tables and releases the pointer the base declares at `+0x28`. That work is the inlined base
+ * destructor, and the destructor body is empty.
  */
 class NetPlayer : public Player {
 public:
     /**
      * Construct a player that a remote machine drives.
      *
-     * Runs Player's constructor with nId, name, and pAppearance, then stores nUnknown48 in
-     * mUnknown48 and clears mUnknown4c. GrooveWorld::AddNetPlayer() is the recovered caller,
-     * and it passes its own identifier as both nId and nUnknown48.
+     * Runs Player's constructor with nId, name, and pAppearance, then stores nTrack in mTrack and
+     * clears mPlace. GrooveWorld::AddNetPlayer() is the recovered caller, and it passes its own
+     * identifier as both nId and nTrack.
      *
      * @param nId The player's identifier.
-     * @param nUnknown48 The value Slot4() reports until a message replaces it.
+     * @param nTrack The track GetTrack() reports until a message replaces it.
      * @param name The player's name.
      * @param pAppearance The appearance the player is drawn with.
      * @ghidraAddress 0x00122f10
      */
-    NetPlayer(int nId, int nUnknown48, const HxStr &name, const FreqAppearance *pAppearance);
+    NetPlayer(int nId, int nTrack, const HxStr &name, const FreqAppearance *pAppearance);
 
     /** @ghidraAddress 0x00125a98 */
     virtual ~NetPlayer();
 
     /**
-     * Slot 4. Replaces the base implementation, which returns -1.
+     * Report the track the last selection chose. The base implementation returns -1 instead.
      *
      * @ghidraAddress 0x00125c48
      */
-    virtual int Slot4();
+    virtual int GetTrack();
 
     /**
-     * Slot 5. Replaces the base implementation, which returns zero.
+     * Report the place the last selection chose. The base implementation returns zero instead.
      *
      * @ghidraAddress 0x00125c50
      */
-    virtual int Slot5();
+    virtual int GetPlace();
 
     /**
      * Receive one message.
@@ -76,10 +73,8 @@ private:
     // Passes a selection packet naming this player on to the sinks as a RemoteTrackSelectMsg.
     void OnTrackSelectPacket(TrackSelectPacket *pPacket);
 
-    // The two payload words of a TrackSelectMsg addressed to this player, copied from the
-    // message's +0x04 and +0x08 by HandleMessage and reported by Slot4 and Slot5. The base
-    // returns -1 and 0 for the same two slots, so a remote player reports what a message
-    // announced where a local one computes it.
-    int mUnknown48; // +0x48 returned by Slot4
-    int mUnknown4c; // +0x4c returned by Slot5
+    // The track and place of a TrackSelectMsg addressed to this player, copied from the message's
+    // +0x04 and +0x08 by HandleMessage.
+    int mTrack; // +0x48
+    int mPlace; // +0x4c
 };

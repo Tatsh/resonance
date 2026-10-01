@@ -162,7 +162,7 @@ void Synth::LoadBankSet6() {
 }
 
 // 0x0013a1e8
-void Synth::Slot7() {
+void Synth::UnusedHook() {
 }
 
 // 0x0013a1f0
@@ -170,7 +170,7 @@ void Synth::UnloadBanks() {
 }
 
 // 0x0013a1f8
-void Synth::Slot10() {
+void Synth::OnPlayStarted() {
 }
 
 // 0x0013a200
@@ -179,15 +179,15 @@ void Synth::SelectBank([[maybe_unused]] unsigned char nChannel,
 }
 
 // 0x0013a208
-void Synth::Slot12([[maybe_unused]] int bEnable) {
+void Synth::SetStereo([[maybe_unused]] int bStereo) {
 }
 
 // 0x0013a210
-void Synth::Slot13([[maybe_unused]] int nValue) {
+void Synth::SetRemixMode([[maybe_unused]] int bRemix) {
 }
 
 // 0x0013a218
-void Synth::Slot14([[maybe_unused]] int nValue) {
+void Synth::SetPaused([[maybe_unused]] int bPaused) {
 }
 
 // 0x0013a220
@@ -214,7 +214,7 @@ void Synth::SetChannelVolume(unsigned char nVolume) {
 // The address below is the out-of-line copy.
 // 0x0013a360
 inline void Synth::OnStdMidi(StdMidiMsg *pMsg) {
-    SendMidi(pMsg->mUnknown08, pMsg->mUnknown09, pMsg->mUnknown0a);
+    SendMidi(pMsg->mStatus, pMsg->mData1, pMsg->mData2);
 }
 
 // 0x0013a570

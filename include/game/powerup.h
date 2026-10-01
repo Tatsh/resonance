@@ -66,7 +66,7 @@ public:
      * t0. NeutralizePowerup stores a1 where PhraseNeutralizer compares the track and a2 where it
      * reads the bar. No implementation reads the fourth argument.
      *
-     * @param nTrack The deploying player's track, from Player::Slot4().
+     * @param nTrack The deploying player's track, from Player::GetTrack().
      * @param nBar The current bar.
      * @param pPlayer The deploying player.
      * @param nUnused Zero at both call sites.

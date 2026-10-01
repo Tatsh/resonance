@@ -77,15 +77,16 @@ public:
     virtual const char *Name();
 
     /**
-     * Unrecovered. Slot 8, the one virtual this class introduces.
+     * Report that this message is an all-notes-off message. Slot 8, the one virtual this class
+     * introduces.
      *
-     * The body returns 1. The image records no direct caller, and the verb, the parameter list,
-     * and the meaning of the result are all unrecovered.
+     * The body returns 1. The image records no direct caller. The title is inferred from a
+     * constant result on a virtual only this class declares.
      *
      * @return 1.
      * @ghidraAddress 0x0019a690
      */
-    virtual int OnUnknownSlot8();
+    virtual int IsAllNotesOff();
 };
 
 /**

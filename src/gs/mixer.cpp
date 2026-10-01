@@ -30,10 +30,10 @@ constexpr unsigned char kSectionPan[] = {0x40, 0x60, kMaxLevel, 0x60, 0x40, 0x20
 
 // The three configuration codes the constructor reads.
 constexpr int kOwnsPanConfigCode = 920;
-constexpr int kUnknown10ConfigCode = 921;
+constexpr int kBoostVolumeConfigCode = 921;
 constexpr int kTrackLevelsConfigCode = 927;
 
-// The value the constructor gives mUnknown50.
+// The value the constructor gives mTracksOnBar.
 constexpr int kNoValue = -1;
 
 // The gain factor RecomputeGain() drives, and the factor it uses once the song is completed.
@@ -44,13 +44,14 @@ constexpr unsigned char kCompletedGain = 115;
 
 // 0x001a7110
 Mixer::Mixer(int nTrack, unsigned char nChannel)
-    : mChannel(nChannel), mTrack(nTrack), mLastSection(0), mSelection(&g_nullPlayer), mUnknown28(),
-      mLevelIndex(0), mUnknown50(kNoValue) {
+    : mChannel(nChannel), mTrack(nTrack), mLastSection(0), mSelection(&g_nullPlayer),
+      mZeroedBytes(), mLevelIndex(0), mTracksOnBar(kNoValue) {
     mOwnsPan = QueryConfigFlag(kOwnsPanConfigCode);
-    mUnknown10 = static_cast<unsigned char>(QueryConfigValue(kUnknown10ConfigCode));
-    mUnknown54 = Application::shared()->GetPlayMap()->Slot9();
+    mBoostVolume = static_cast<unsigned char>(QueryConfigValue(kBoostVolumeConfigCode));
+    mEndBar = Application::shared()->GetPlayMap()->GetEndBar();
     mMuted = 0;
-    std::fill(mUnknown28, mUnknown28 + sizeof(mUnknown28), 0); // Yes, the binary zeroes it again.
+    // Yes, the binary zeroes it again.
+    std::fill(mZeroedBytes, mZeroedBytes + sizeof(mZeroedBytes), 0);
     mLevel = kMaxLevel;
     std::fill(mGainFactors, mGainFactors + sizeof(mGainFactors), kMaxLevel);
     QueryConfigVector(&mTrackLevels, kTrackLevelsConfigCode);
@@ -69,9 +70,9 @@ void Mixer::SendPan() {
     }
 
     StdMidiMsg msg;
-    msg.mUnknown08 = kStatusControlChange | mChannel;
-    msg.mUnknown09 = kControllerPan;
-    msg.mUnknown0a = nPan;
+    msg.mStatus = kStatusControlChange | mChannel;
+    msg.mData1 = kControllerPan;
+    msg.mData2 = nPan;
     mOutput->Handle(&msg);
 }
 
@@ -91,9 +92,9 @@ void Mixer::SetGainFactor(int nIndex, unsigned char nFactor) {
     }
 
     StdMidiMsg msg;
-    msg.mUnknown08 = kStatusControlChange | mChannel;
-    msg.mUnknown09 = kControllerExpression;
-    msg.mUnknown0a = mLevel;
+    msg.mStatus = kStatusControlChange | mChannel;
+    msg.mData1 = kControllerExpression;
+    msg.mData2 = mLevel;
     mOutput->Handle(&msg);
 }
 
@@ -105,9 +106,9 @@ void Mixer::SetMuted(int bMuted) {
     if (bWasMuted != 0) {
         if (bMuted == 0) {
             StdMidiMsg msg;
-            msg.mUnknown08 = kStatusControlChange | mChannel;
-            msg.mUnknown09 = kControllerExpression;
-            msg.mUnknown0a = mLevel;
+            msg.mStatus = kStatusControlChange | mChannel;
+            msg.mData1 = kControllerExpression;
+            msg.mData2 = mLevel;
             mOutput->Handle(&msg);
         }
         return;
@@ -118,22 +119,22 @@ void Mixer::SetMuted(int bMuted) {
     }
 
     StdMidiMsg msg;
-    msg.mUnknown08 = kStatusControlChange | mChannel;
-    msg.mUnknown09 = kControllerExpression;
-    msg.mUnknown0a = 0;
+    msg.mStatus = kStatusControlChange | mChannel;
+    msg.mData1 = kControllerExpression;
+    msg.mData2 = 0;
     mOutput->Handle(&msg);
 }
 
 // 0x001a75d8
 void Mixer::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 == mTrack) {
-        mSelection = pMsg->mUnknown10;
+    if (pMsg->mTrack == mTrack) {
+        mSelection = pMsg->mPlayer;
         RecomputeGain();
     }
-    if (mSelection->Slot2() != 0) {
+    if (mSelection->GetInputSlot() != 0) {
         return;
     }
-    mLastSection = pMsg->mUnknown04;
+    mLastSection = pMsg->mTrack;
     if (mOwnsPan != 0) {
         SendPan();
     }
@@ -141,7 +142,7 @@ void Mixer::OnTrackSelect(TrackSelectMsg *pMsg) {
 
 // 0x001a76d0
 void Mixer::OnTracksOn(TracksOnMsg *pMsg) {
-    mUnknown50 = pMsg->mBar;
+    mTracksOnBar = pMsg->mBar;
     mLevelIndex = pMsg->mTracks;
     RecomputeGain();
 }
@@ -161,13 +162,13 @@ void Mixer::RecomputeGain() {
 
 // 0x001a8390
 void Mixer::ApplyControlChange(StdMidiMsg *pMsg) {
-    const unsigned char nController = pMsg->mUnknown09;
+    const unsigned char nController = pMsg->mData1;
     if (nController >= kControllerFirstGain && nController <= kControllerLastGain) {
-        SetGainFactor(nController - kControllerFirstGain, pMsg->mUnknown0a);
+        SetGainFactor(nController - kControllerFirstGain, pMsg->mData2);
         return;
     }
     if (nController == kControllerMute) {
-        SetMuted(pMsg->mUnknown0a != 0);
+        SetMuted(pMsg->mData2 != 0);
         return;
     }
     if (nController == kControllerExpression) {
@@ -184,7 +185,7 @@ void Mixer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
         StdMidiMsg *pMidi = static_cast<StdMidiMsg *>(pMsg);
-        if ((pMidi->mUnknown08 & 0xf0) == kStatusControlChange) {
+        if ((pMidi->mStatus & 0xf0) == kStatusControlChange) {
             ApplyControlChange(pMidi);
             return;
         }

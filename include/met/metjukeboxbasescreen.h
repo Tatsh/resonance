@@ -31,8 +31,8 @@ class Text;
  *
  * Three classes derive from the class, MetJukeboxCustomRemixesScreen,
  * MetJukeboxEditPlaylistScreen, and MetJukeboxFactoryRemixesScreen. None of the three declares a
- * data member. Each writes mUnknownc8 in its own constructor, which is what promotes that member
- * to protected.
+ * data member. Each writes mCatalogueKey in its constructor, and those writes make mCatalogueKey
+ * protected.
  *
  * Two vtables belong to the class. The primary table at `0x007ec6d0` has 43 entries, four more
  * than the MetScreen table, so the class declares four virtuals of its own at slots 39 through 42.
@@ -53,7 +53,7 @@ class Text;
  *
  *  - 1 `0x0021dfc0` the destructor.
  *  - 5 `0x0021e908` EnterAndShow().
- *  - 7 `0x00224a90` OnUnknownSlot7().
+ *  - 7 `0x00224a90` OnPanelActivated().
  *  - 17 `0x00224af0` SetShowing().
  *  - 19 `0x0021e268` HandleCommand().
  *  - 20 `0x00224968` PlaySlideSound(), overridden empty.
@@ -61,9 +61,9 @@ class Text;
  *  - 22 `0x00224978` PlayHighSound(), overridden empty.
  *  - 23 `0x00224980` PlayCycleLeftSound(), overridden empty.
  *  - 24 `0x00224988` PlayCycleRightSound(), overridden empty.
- *  - 26 `0x0021fc88` OnUnknownSlot26().
- *  - 33 `0x00224990` OnUnknownSlot33().
- *  - 36 `0x002249e0` OnUnknownSlot36().
+ *  - 26 `0x0021fc88` UpdateIdle().
+ *  - 33 `0x00224990` OnEnterFinished().
+ *  - 36 `0x002249e0` OnExitFinished().
  *  - 38 `0x0021e0f0` ResolveContainerViews().
  *  - 39 `0x005381a8` the pure virtual the three children supply.
  *  - 40 `0x0021f3e8` ShowRemixDetails().
@@ -82,7 +82,7 @@ public:
     /**
      * Construct the screen with no list and no resolved object.
      *
-     * The five drawables from mUnknowna4 through mUnknownb4 start null and slot 5 runs
+     * The five drawables from mGenreText through mRemixTitleText start null and slot 5 runs
      * Rnd::Drawable::SetShowing() on each without a null check, so a screen whose slot 38 has not
      * run yet faults there.
      *
@@ -119,11 +119,11 @@ public:
     /**
      * Refresh the details and the help text, then show the playlist.
      *
-     * Slot 7. Runs slot 33, then slot 41, then shows mUnknown9c.
+     * Slot 7. Runs slot 33, then slot 41, then shows mPlayListList.
      *
      * @ghidraAddress 0x00224a90
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Act on a command.
@@ -143,22 +143,22 @@ public:
      *
      * Each TexturePairRecord that advances hides its mesh, and shows it again with the new
      * texture on the first stage of its material when the list has rows and the selected remix
-     * belongs to the jukebox album. mUnknown14c is cleared once both pictures are shown.
+     * belongs to the jukebox album. mPicturesPending is cleared once both pictures are shown.
      *
      * @param flTime The renderer's current animation frame position, which the body does not read.
      * @ghidraAddress 0x0021fc88
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Bind the lists again and refresh both.
      *
-     * Slot 33. Runs slot 42, then refreshes mUnknown98 when it exists and mUnknown9c without a
-     * null check.
+     * Slot 33. Runs slot 42, then refreshes mCatalogueList when it exists and mPlayListList without
+     * a null check.
      *
      * @ghidraAddress 0x00224990
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Hide the five detail texts.
@@ -167,13 +167,13 @@ public:
      *
      * @ghidraAddress 0x002249e0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views and the two fonts.
      *
      * Slot 38. The MetScreen body runs first, then `font1_pink_2` and `font1_pinkgrey_2` are
-     * resolved into mUnknownd8 and mUnknowndc.
+     * resolved into mAvailableFont and mUnavailableFont.
      *
      * @ghidraAddress 0x0021e0f0
      */
@@ -183,9 +183,10 @@ public:
      * Show or hide the view, both scrolling lists, and the list frame.
      *
      * Slot 17. The base implementation runs first and the rest of the body is skipped while the
-     * container load has not finished, which MetScreen::mUnknown48 records. This read is the
-     * evidence that makes that member protected. Hiding the screen passes zero to mUnknown9c
-     * without a null check, so a screen hidden before slot 38 has run faults.
+     * container load has not finished. MetScreen::mViewsUnresolved records the unfinished load,
+     * and this read is the evidence that makes MetScreen::mViewsUnresolved protected. Hiding the
+     * screen passes zero to mPlayListList without a null check, so a screen hidden before slot 38
+     * has run faults.
      *
      * @param nShowing Non-zero to draw the screen.
      * @ghidraAddress 0x00224af0
@@ -248,15 +249,16 @@ public:
     /**
      * Fill the detail texts from the selected catalogue row.
      *
-     * Slot 40. Every detail text is emptied, the lock mesh mUnknown148 is hidden, and mUnknown14c
-     * is cleared. An empty or absent catalogue stops there. A remix from another album shows the
-     * lock mesh and hides both song pictures. Otherwise both TexturePairRecord members load the
-     * song's logo and picture paths, and the first two texts take the configuration values of
-     * codes 0x321 and 0x322 for the record's first string, the second followed by ` bpm`. Every
-     * remix shows its name, the first string of each player appearance, and its `+0x18` string.
+     * Slot 40. Every detail text is emptied, the warning text mWarningText is hidden, and
+     * mPicturesPending is cleared. An empty or absent catalogue stops there. A remix from another
+     * album shows the warning and hides both song pictures. Otherwise both TexturePairRecord
+     * members load the song's logo and picture paths, and the genre and tempo texts take the
+     * configuration values of codes 0x321 and 0x322 for the record's level name, the tempo
+     * followed by ` bpm`. Every remix shows its name, the user name of each player appearance,
+     * and its date.
      * A remix of the jukebox album also shows the value of code 0x325, or of code 0x327 when the
-     * first is wider than the text wraps at, and sets mUnknown14c. The selected row is read
-     * without testing mUnknown98 for null. The title is inferred.
+     * first is wider than the text wraps at, and sets mPicturesPending. The selected row is read
+     * without testing mCatalogueList for null. The title is inferred.
      *
      * @ghidraAddress 0x0021f3e8
      */
@@ -277,8 +279,8 @@ public:
     /**
      * Bind the catalogue and the playlist from the shared MetRemixManager.
      *
-     * Slot 42. mUnknownc4 becomes the manager's playlist and mUnknowna0 the manager's remix list
-     * for the slot mUnknownc8 identifies, inserted empty when absent. The row counts are pushed
+     * Slot 42. mPlayList becomes the manager's playlist and mCatalogue the manager's remix list
+     * for the slot mCatalogueKey identifies, inserted empty when absent. The row counts are pushed
      * into both scrolling lists, and the playlist selection moves to its last entry. SetShowing()
      * runs it before anything else it does. The title is inferred.
      *
@@ -289,11 +291,12 @@ public:
     /**
      * Show one row of whichever list the context selects.
      *
-     * Context 0 is the remix catalogue at mUnknowna0. Its row shows the record's second string, in
-     * mUnknownd8 when the record's unknown34_ matches GetAlbumJukeboxValue() and in mUnknowndc
-     * otherwise. Context 1 is the playlist at mUnknownc4. The body copies the whole entry vector
-     * first and shows the indexed name from the copy. An index past the end empties the text in
-     * both contexts, and any other context leaves the cell as it is. The column is not read.
+     * Context 0 is the remix catalogue at mCatalogue. Its row shows the record's name, in
+     * mAvailableFont when the record's albumNumber matches GetAlbumJukeboxValue() and in
+     * mUnavailableFont otherwise. Context 1 is the playlist at mPlayList. The body copies the whole
+     * entry vector first and shows the indexed name from the copy. An index past the end empties
+     * the text in both contexts, and any other context does not change the cell. The column is not
+     * read.
      *
      * @param nItem The row.
      * @param nColumn The cell index, which the body does not read.
@@ -319,39 +322,40 @@ public:
 protected:
     // The row pitch and the visible row count the child slot 38 hands to the ScrollingList
     // constructor.
-    int mUnknown90; // +0x90, starts at 16
-    int mUnknown94; // +0x94, starts at 10
-    // The two lists the child slot 38 allocates, the first over the 0x38-byte records mUnknowna0
-    // addresses and the second over the four-byte entries mUnknownc4 addresses.
-    ScrollingList *mUnknown98; // +0x98
-    ScrollingList *mUnknown9c; // +0x9c
+    int mListRowPitch; // +0x90, starts at 16
+    int mListRowCount; // +0x94, starts at 10
+    // The two lists the child slot 38 allocates, the first over the 0x38-byte records mCatalogue
+    // addresses and the second over the four-byte entries mPlayList addresses.
+    ScrollingList *mCatalogueList; // +0x98
+    ScrollingList *mPlayListList;  // +0x9c
     // The catalogue slots 39 and 42 count rows from. Slot 42 sets it from the shared
     // MetRemixManager and the base constructor starts it null.
-    std::vector<MetRemixRecord> *mUnknowna0; // +0xa0
+    std::vector<MetRemixRecord> *mCatalogue; // +0xa0
     // The five detail texts slot 40 fills.
-    Rnd::Text *mUnknowna4; // +0xa4
-    Rnd::Text *mUnknowna8; // +0xa8
-    Rnd::Text *mUnknownac; // +0xac
-    Rnd::Text *mUnknownb0; // +0xb0
-    Rnd::Text *mUnknownb4; // +0xb4
-    Rnd::Text *mUnknownb8; // +0xb8, the playlist caption SetShowing() hides with the screen
-    Rnd::Mat *mUnknownbc;  // +0xbc, the song picture material
-    Rnd::Mat *mUnknownc0;  // +0xc0, the song logo material
+    Rnd::Text *mGenreText;       // +0xa4
+    Rnd::Text *mTempoText;       // +0xa8
+    Rnd::Text *mSongTitleText;   // +0xac
+    Rnd::Text *mDateText;        // +0xb0
+    Rnd::Text *mRemixTitleText;  // +0xb4
+    Rnd::Text *mPlayListCaption; // +0xb8, the playlist caption SetShowing() hides with the screen
+    Rnd::Mat *mPictureMaterial;  // +0xbc, the song picture material
+    Rnd::Mat *mLogoMaterial;     // +0xc0, the song logo material
     // The playlist the edit screen counts rows from. Slot 42 sets it to the instance embedded at
     // `+0xc4` of the shared MetRemixManager.
-    JukeboxPlayList *mUnknownc4; // +0xc4
-    // Distinguishes the three jukebox lists. Zero for the saved and edit screens and -1 for the
-    // factory screen. Each of the three children writes it in its own constructor.
-    int mUnknownc8;                      // +0xc8
-    std::vector<Rnd::Text *> mUnknowncc; // +0xcc, the player appearance texts
+    JukeboxPlayList *mPlayList; // +0xc4
+    // The MetRemixManager::mRemixes key of the catalogue the screen lists. Zero for the saved and
+    // edit screens and -1 for the factory screen. Each of the three children writes it in its
+    // constructor.
+    int mCatalogueKey;                         // +0xc8
+    std::vector<Rnd::Text *> mAppearanceTexts; // +0xcc, the player appearance texts
     // The two fonts slot 38 resolves, `font1_pink_2` and `font1_pinkgrey_2`. ProvideText() hands
     // them to Rnd::Text::SetFont(), which is what types both.
-    Rnd::Font *mUnknownd8;         // +0xd8
-    Rnd::Font *mUnknowndc;         // +0xdc
-    TexturePairRecord mUnknowne0;  // +0xe0, the song logo pair
-    TexturePairRecord mUnknown110; // +0x110, the song label pair
-    Rnd::Mesh *mUnknown140;        // +0x140, the song picture mesh
-    Rnd::Mesh *mUnknown144;        // +0x144, the song logo mesh
-    Rnd::Text *mUnknown148;        // +0x148, the warning slot 40 shows for another album
-    int mUnknown14c;               // +0x14c, set while the song pictures are still to show
+    Rnd::Font *mAvailableFont;          // +0xd8
+    Rnd::Font *mUnavailableFont;        // +0xdc
+    TexturePairRecord mLogoTextures;    // +0xe0, the song logo pair
+    TexturePairRecord mPictureTextures; // +0x110, the song label pair, loaded from the picture path
+    Rnd::Mesh *mPictureMesh;            // +0x140, the song picture mesh
+    Rnd::Mesh *mLogoMesh;               // +0x144, the song logo mesh
+    Rnd::Text *mWarningText;            // +0x148, the warning slot 40 shows for another album
+    int mPicturesPending;               // +0x14c, set while the song pictures are still to show
 };

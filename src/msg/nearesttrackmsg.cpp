@@ -26,9 +26,9 @@ const char *NearestTrackMsg::Name() {
 
 // 0x003e3d50
 void NearestTrackMsg::Print(std::ostream &stream) {
-    if (mUnknown04 == -1) {
+    if (mTrack == -1) {
         stream << "reset";
     } else {
-        stream << mUnknown04;
+        stream << mTrack;
     }
 }

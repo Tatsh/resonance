@@ -82,20 +82,37 @@ public:
     MetPersonaData *GetFirstPersona();
 
     /** Personas this object owns. The destructor deletes each one. +0x00 */
-    std::vector<MetPersonaData *> mUnknown00;
-    /** Tested by about a dozen screens and cleared by MetMemDetectScreen. +0x0c */
-    int mUnknown0c;
-    /** Set by the configuration screens and cleared by MetMainScreen::EnterAndShow(). +0x10 */
-    int mUnknown10;
-    /** Set to 1 by MetLogoScreen slot 3. MetArenasScreen slot 5 reads it. +0x14 */
-    int mUnknown14;
-    /** Cleared by MetTutorialScreen slot 5 after it copies the value into mUnknown1c. +0x18 */
-    int mUnknown18;
-    /** The previous value of mUnknown18. +0x1c */
-    int mUnknown1c;
-    int mUnknown20; /*!< Cleared by Reset(). No reader is identified. +0x20 */
+    std::vector<MetPersonaData *> mPersonas;
+    /**
+     * Set while the game saves to a memory card. MetMemDetectScreen sets it once a card is found
+     * and clears it when the user continues without one, and about a dozen screens test it before
+     * offering a save. +0x0c
+     */
+    int mUsingMemcard;
+    /**
+     * Set by the configuration screens when a setting changed while mUsingMemcard is set, and
+     * cleared by MetMainScreen::EnterAndShow() once it has saved. +0x10
+     */
+    int mSettingsDirty;
+    /**
+     * Set to 1 by MetLogoScreen::RecordUnlock(). MetArenasScreen slot 5 and MetSoloStagesScreen
+     * read it to unlock every arena and stage. +0x14
+     */
+    int mUnlockAll;
+    /**
+     * How the front end was departed for a game (the tutorial, a game, or a quit from the pause
+     * screen). The screen entered on return acts on it and clears it after copying the value into
+     * mLastTransition. +0x18
+     */
+    int mPendingTransition;
+    /** The previous value of mPendingTransition. +0x1c */
+    int mLastTransition;
+    int mUnusedFlag; /*!< Cleared by Reset(). No reader is identified. +0x20 */
     /** The name of the screen to return to, which several exit hooks record. +0x24 */
-    HxStr mUnknown24;
-    /** Written by MetLocNumPlayScreen slot 36 and read back by its slot 5. +0x2c */
-    int mUnknown2c;
+    HxStr mReturnScreen;
+    /**
+     * The number of players MetLocNumPlayScreen slot 36 recorded and its slot 5 selects again.
+     * +0x2c
+     */
+    int mPlayerCount;
 };

@@ -92,7 +92,7 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    PlayerInfo mUnknown14; // +0x14
+    PlayerInfo mPlayerInfo; // +0x14
 };
 
 /**

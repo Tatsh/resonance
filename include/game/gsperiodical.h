@@ -17,8 +17,8 @@ class TickClock;
  * The class title is therefore inferred from the file name rather than attested by a descriptor.
  *
  * The object is 0x14 bytes and AxingSTG builds one with the global `operator new(0x14)`. The
- * constructor writes kMBTInfinity to mOrigin, then overwrites it with the origin the phrase maker's
- * slot 5 reports, which is the constant 6 for AxePhraseMaker.
+ * constructor writes kMBTInfinity to mOrigin, then overwrites it with the origin
+ * PhraseMaker::GetPeriodOrigin() reports. AxePhraseMaker reports the constant 6.
  *
  * Every song position the class computes is clamped to the finite range and passed through the
  * discarded finiteness test, which is the expansion of an inline position type rather than
@@ -54,7 +54,7 @@ public:
     /**
      * Report the period that has elapsed at a song position and queue the next run.
      *
-     * The phrase maker's slot 4 receives the distance from the origin divided by the period.
+     * PhraseMaker::OnPeriod() receives the distance from the origin divided by the period.
      * PeriodicalCmd::Execute() is the one caller.
      *
      * @param nTick The song position the run was queued for, in MIDI ticks.
@@ -66,7 +66,7 @@ private:
     // 0x001b4548
     void PostAt(int nTick);
 
-    int mOrigin;               // +0x00, the phrase maker's slot 5
+    int mOrigin;               // +0x00, from PhraseMaker::GetPeriodOrigin()
     int mPeriod;               // +0x04
     Sch::TickClock *mClock;    // +0x08
     CmdID mCommand;            // +0x0c, starts -2

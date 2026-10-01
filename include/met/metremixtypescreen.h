@@ -23,7 +23,7 @@ class View;
  * owns, `smrt_new`, `smrt_load`, and `smrt_jukebox`, and then allocates a MetButtonList tagged
  * `MetButtonList` into the one member below.
  *
- * The destructor at `0x003696c0` restores the vptr, deletes mUnknown8c through slot 1 of the
+ * The destructor at `0x003696c0` restores the vptr, deletes mButtons through slot 1 of the
  * MetButtonList table with the deleting `__in_chrg` value, runs the MetScreen destructor, and
  * releases the object with the tag `MsgSink`.
  *
@@ -104,7 +104,7 @@ public:
      * @param pButton The button whose alternation finished, which is not read.
      * @ghidraAddress 0x00362fa0
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Move on once the screen has exited.
@@ -118,7 +118,7 @@ public:
      *
      * @ghidraAddress 0x00363920
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container views and the two button-layout views and animations.
@@ -153,7 +153,7 @@ private:
     // the card and the disc for the load button. Other selections do nothing.
     void OpenSelectedButton();
 
-    MetButtonList *mUnknown8c;        // +0x8c
+    MetButtonList *mButtons;          // +0x8c
     Rnd::View *mTwoButtonView;        // +0x90, `smrt_2but.view`
     Rnd::View *mThreeButtonView;      // +0x94, `smrt_3but.view`
     Rnd::TransAnim *mTwoButtonAnim;   // +0x98, `smrt_2but.tnm`

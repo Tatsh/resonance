@@ -97,8 +97,8 @@ void GameManagerImpl::DestroyWorld() {
 }
 
 // 0x0010b870
-int GameManagerImpl::GetUnknownfc() {
-    return mUnknownfc;
+int GameManagerImpl::GetWorldLoadFlag() {
+    return mWorldLoadFlag;
 }
 
 // 0x00105e80
@@ -139,8 +139,8 @@ InputPoller *GameManagerImpl::GetPoller() {
 }
 
 // 0x0010b8a8
-int GameManagerImpl::GetUnknown18() {
-    return mUnknown18;
+int GameManagerImpl::GetUnwrittenValue() {
+    return mUnwrittenValue;
 }
 
 // 0x0010b8b0
@@ -151,7 +151,7 @@ GameStats *GameManagerImpl::GetStats() {
 // 0x0010c588
 void GameManagerImpl::Save(OBStream *pStream) {
     pStream->Write(&mState, sizeof(mState))
-        .Write(&mUnknown08, sizeof(mUnknown08))
+        .Write(&mSavedWord, sizeof(mSavedWord))
         .Write(&mGameMode, sizeof(mGameMode));
     mParams.Save(pStream);
 }
@@ -180,7 +180,7 @@ void GameManagerImpl::SetGameMode(int nMode) {
         break;
     }
     CallScriptTemplate(kScriptTemplateGameMode, pszName);
-    mParams.mUnknown28 = nMode == kGameModeNet;
+    mParams.mNetGame = nMode == kGameModeNet;
     ++mChangeCount;
 }
 
@@ -204,7 +204,7 @@ void GameManagerImpl::SetParams(const GameParams &params) {
     CheckState(); // Yes, the binary discards this call's result.
     mParams = params;
     // The two modes are republished from the settings just copied in, not from the argument.
-    SetPlayMode(mParams.mUnknown1c);
+    SetPlayMode(mParams.mPlayMode);
     SetDifficulty(mParams.mDifficulty);
     ++mChangeCount;
     CheckState(); // Yes, the binary discards this call's result.
@@ -221,7 +221,7 @@ void GameManagerImpl::SetDifficulty(int nDifficulty) {
 // 0x0010c348
 void GameManagerImpl::SetPlayMode(int nMode) {
     const char *pszName = "";
-    mParams.mUnknown1c = nMode;
+    mParams.mPlayMode = nMode;
     switch (nMode) {
     case kPlayModeNone:
         pszName = "none";
@@ -244,7 +244,7 @@ int GameManagerImpl::GetDifficulty() {
 
 // 0x0010b8e8
 int GameManagerImpl::GetPlayMode() {
-    return mParams.mUnknown1c;
+    return mParams.mPlayMode;
 }
 
 // 0x0010b878
@@ -273,12 +273,12 @@ void GameManagerImpl::HandleMessage(Message *pMsg) {
 
 // 0x00105f50
 GameManagerImpl::GameManagerImpl()
-    : mState(0), mUnknown08(0), mpWorld(nullptr), mpMetaWorld(nullptr), mUnknown18(0), mGameMode(0),
-      mChangeCount(0), mUnknowna8(0), mpRecorder(nullptr), mpPlayback(nullptr), mUnknownfc(1),
-      mUnknown100(0), mPaused(0), mDrawSuppressed(1) {
+    : mState(0), mSavedWord(0), mpWorld(nullptr), mpMetaWorld(nullptr), mUnwrittenValue(0),
+      mGameMode(0), mChangeCount(0), mFrontEndActive(0), mpRecorder(nullptr), mpPlayback(nullptr),
+      mWorldLoadFlag(1), mRestartPending(0), mPaused(0), mDrawSuppressed(1) {
     mQueue.AddSink(this);
     mpPoller = new InputPoller;
-    mpPoller->ClearUnknown34();
+    mpPoller->ClearUnusedFlag();
     CheckState(); // Yes, the binary discards this call's result.
 }
 
@@ -311,7 +311,7 @@ void GameManagerImpl::CreateWorld() {
 void GameManagerImpl::Start() {
     mpMetaWorld = new MetaGameWorld;
     mpPoller->SetController(mpMetaWorld);
-    mUnknowna8 = 1;
+    mFrontEndActive = 1;
     mpPoller->SetActive(1);
 }
 
@@ -329,7 +329,7 @@ void GameManagerImpl::OnPauseGameSystem(Message *) {
     mpPoller->SetPaused(1);
     Application::shared()->GetSynth()->SendMidi(
         kStatusControlChangeChannel16, kControllerAllNotesOff, 0);
-    Application::shared()->GetSynth()->Slot14(1);
+    Application::shared()->GetSynth()->SetPaused(1);
     if (mpWorld != nullptr) {
         mpWorld->mForceFeedback->SetPaused(1);
     }
@@ -346,7 +346,7 @@ void GameManagerImpl::OnEndGame(Message *pMsg) {
 // 0x00106c08
 void GameManagerImpl::EndGame(int bRestart) {
     CheckState(); // Yes, the binary discards this call's result.
-    const int nUnknownb8 = mpWorld->mUnknownb8;
+    const int nWorldExitFlag = mpWorld->mContinueJukebox;
     Application::shared()->GetWatchdog()->Snapshot();
     mpPoller->DetachController(mpWorld);
     delete mpWorld;
@@ -362,15 +362,15 @@ void GameManagerImpl::EndGame(int bRestart) {
     }
 
     if (bRestart != 0) {
-        mUnknown100 = 1;
+        mRestartPending = 1;
         BeginGameLocalMsg begin;
         QueueMessage(&begin);
     } else {
         mpPoller->SetController(mpMetaWorld);
         mpPoller->SetActive(1);
-        mUnknowna8 = 1;
+        mFrontEndActive = 1;
         MetFreqEndedMsg ended;
-        ended.mUnknownb8Clear = nUnknownb8 == 0;
+        ended.mStopJukebox = nWorldExitFlag == 0;
         mpMetaWorld->GetRenderer()->Handle(&ended);
     }
     CheckState(); // Yes, the binary discards this call's result.
@@ -383,13 +383,13 @@ void GameManagerImpl::OnUnpauseGameSystem(Message *) {
     }
 
     mPaused = 0;
-    mpMetaWorld->OnUnknownForwarder003d4890();
+    mpMetaWorld->StopFrontEnd();
     mpPoller->SetController(mpWorld);
     mpPoller->SetPaused(0);
-    if (GetWorld()->mUnknown90 == 0) {
+    if (GetWorld()->mIsTutorial == 0) {
         GetWorld()->mInputMap->Rebuild();
     }
-    Application::shared()->GetSynth()->Slot14(0);
+    Application::shared()->GetSynth()->SetPaused(0);
     if (mpWorld != nullptr) {
         mpWorld->mForceFeedback->SetPaused(0);
     }
@@ -400,7 +400,7 @@ void GameManagerImpl::OnUnpauseGameSystem(Message *) {
 
 // 0x0010c0c0
 void GameManagerImpl::FinishWorldLoad() {
-    mUnknownfc = 1;
+    mWorldLoadFlag = 1;
     while (mpWorld->IsLoadDone() == 0) {
     }
     mpWorld->FinishLoad();
@@ -422,10 +422,10 @@ void GameManagerImpl::DrawFrame() {
         roots[nRootCount++] = mpMetaWorld->GetRenderer();
     }
     for (int i = 0; i < nRootCount; ++i) {
-        roots[i]->OnUnknownSlot6();
-        roots[i]->OnUnknownSlot7();
+        roots[i]->PollMessages();
+        roots[i]->Update();
     }
-    if (mUnknowna8 != 0) {
+    if (mFrontEndActive != 0) {
         MemcardManager::shared()->Update();
     }
     if (mDrawSuppressed != 0) {
@@ -435,7 +435,7 @@ void GameManagerImpl::DrawFrame() {
     g_gfxDevice.BeginFrame();
     g_gfxDevice.EnterVu1Path();
     for (int i = 0; i < nRootCount; ++i) {
-        roots[i]->OnUnknownSlot8();
+        roots[i]->Draw();
     }
     g_gfxDevice.LeaveVu1Path();
     g_gfxDevice.PresentFrame(kNoBufferSwap);
@@ -446,10 +446,10 @@ void GameManagerImpl::DrawFrameSimple() {
     if (mpMetaWorld == nullptr || mpWorld != nullptr || mDrawSuppressed != 0) {
         return;
     }
-    mpMetaWorld->GetRenderer()->OnUnknownSlot9();
+    mpMetaWorld->GetRenderer()->UpdateSimple();
     g_gfxDevice.BeginFrame();
     g_gfxDevice.EnterVu1Path();
-    mpMetaWorld->GetRenderer()->OnUnknownSlot10();
+    mpMetaWorld->GetRenderer()->DrawSimple();
     g_gfxDevice.LeaveVu1Path();
     g_gfxDevice.PresentFrame(kNoBufferSwap);
 }
@@ -460,20 +460,20 @@ void GameManagerImpl::PollPlayback() {
     Application::shared()->GetWatchdog(); // Yes, the binary discards this call's result.
     GetElapsedMilliseconds();             // Yes, the binary discards the reading.
     if (mpPoller->GetPressedThisPoll() != 0 && mpPlayback != nullptr && mpWorld != nullptr) {
-        mpWorld->PostExitMode1();
+        mpWorld->PostFinish();
     }
 }
 
 // 0x00106720
 void GameManagerImpl::OnBeginGameLocal(Message *) {
     CheckState(); // Yes, the binary discards this call's result.
-    if (mUnknown100 != 0) {
-        mUnknown100 = 0;
+    if (mRestartPending != 0) {
+        mRestartPending = 0;
     } else {
-        mpMetaWorld->OnUnknownForwarder003d4890();
+        mpMetaWorld->StopFrontEnd();
     }
     mpPoller->SetActive(0);
-    mUnknowna8 = 0;
+    mFrontEndActive = 0;
     {
         IsRecordingMsg recording;
         recording.mIsRecording = 0;
@@ -482,7 +482,7 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
 
     CreateWorld();
     FinishWorldLoad();
-    mpWorld->mUnknown8c = 0;
+    mpWorld->mIsPlayback = 0;
     mpPoller->SetGameInputEnabled(!Application::shared()->IsJukeboxMode());
     if (mpRecorder != nullptr) {
         mpRecorder->BeginRecording(mGameMode, mParams);
@@ -504,21 +504,21 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
 void GameManagerImpl::Load(IBStream *pStream) {
     int nState;
     pStream->Read(&nState, sizeof(nState));
-    int nUnknown08;
-    pStream->Read(&nUnknown08, sizeof(nUnknown08));
+    int nSavedWord;
+    pStream->Read(&nSavedWord, sizeof(nSavedWord));
     int nGameMode;
     pStream->Read(&nGameMode, sizeof(nGameMode));
     mParams.Load(pStream);
     mState = nState;
-    mUnknown08 = nUnknown08;
+    mSavedWord = nSavedWord;
     mGameMode = nGameMode;
     SetGameMode(nGameMode);
-    SetPlayMode(mParams.mUnknown1c);
+    SetPlayMode(mParams.mPlayMode);
     SetDifficulty(mParams.mDifficulty);
 
     ClearPersonas();
     MetPersonaData persona;
-    persona.mUnknown140.mUnknown00 = HxStr("freq player 1");
+    persona.mAppearance.mUserName = HxStr("freq player 1");
     AddPersona(persona);
     {
         IsRecordingMsg recording;
@@ -529,12 +529,12 @@ void GameManagerImpl::Load(IBStream *pStream) {
     Renderer::LoadLevel(mParams);
     CreateWorld();
     FinishWorldLoad(); // The binary expands this body inline here.
-    mpWorld->mUnknown8c = 1;
+    mpWorld->mIsPlayback = 1;
     mpPoller->SetGameInputEnabled(0);
 }
 
 // 0x0010c128
-void GameManagerImpl::OnUnknownSlot6() {
+void GameManagerImpl::StartPlay() {
     mpWorld->StartPlay();
 }
 
@@ -572,7 +572,7 @@ void GameManagerImpl::StartRecording() {
 }
 
 // 0x0010c4b8
-void GameManagerImpl::StartPlayback(const HxStr &file, int nFlag) {
+void GameManagerImpl::StartPlayback(const HxStr &file, int nUnusedFlag) {
     if (mState != 0) {
         Fatal(kCannotRecreateGame);
     }
@@ -583,8 +583,8 @@ void GameManagerImpl::StartPlayback(const HxStr &file, int nFlag) {
         delete mpRecorder;
     }
     mpRecorder = nullptr;
-    mpMetaWorld->OnUnknownForwarder003d4890();
-    mpPlayback = new GamePlayback(file, this, nFlag);
+    mpMetaWorld->StopFrontEnd();
+    mpPlayback = new GamePlayback(file, this, nUnusedFlag);
 }
 
 // 0x0010bee0

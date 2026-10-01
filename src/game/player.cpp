@@ -12,7 +12,7 @@
 
 namespace {
 
-// Ceiling Slot11 applies to the value it publishes.
+// Ceiling AnnounceState() applies to the value it publishes.
 constexpr int kJuiceMaximum = 800;
 
 // The ceiling the constructor gives both the score and the juice.
@@ -27,12 +27,13 @@ constexpr char kLocalText[] = " local}";
 
 // 0x0012f5c0
 Player::Player(int nId, const HxStr &colorName, const FreqAppearance *pAppearance)
-    : IDable<Player>(nId), mId20(nId), mColorName(colorName), mAppearance(pAppearance), mJuice(0),
-      mUnknown34(kInitialCeiling), mScore(0), mUnknown3c(kInitialCeiling), mLastEraseTime(0) {
+    : IDable<Player>(nId), mPlayerId(nId), mColorName(colorName), mAppearance(pAppearance),
+      mJuice(0), mMaxJuice(kInitialCeiling), mScore(0), mMaxScore(kInitialCeiling),
+      mLastEraseTime(0) {
 }
 
 // 0x00132c20
-int Player::Slot2() {
+int Player::GetInputSlot() {
     return -1;
 }
 
@@ -42,49 +43,49 @@ int Player::IsNull() {
 }
 
 // 0x00132c98
-int Player::Slot4() {
+int Player::GetTrack() {
     return -1;
 }
 
 // 0x00132ca0
-int Player::Slot5() {
+int Player::GetPlace() {
     return 0;
 }
 
 // 0x00132ca8
-int Player::Slot6() {
+int Player::UnusedQuery() {
     return 0;
 }
 
 // 0x00132cb0
-void Player::Slot7() {
+void Player::UnusedHook() {
 }
 
 // 0x00132cb8
-void Player::Slot8(int, int) {
+void Player::SetFreestyleSpan(int, int) {
 }
 
 // 0x00132cc0
-int Player::Slot9(int) {
+int Player::IsFreestyleBar(int) {
     return 0;
 }
 
 // 0x00132cc8
-int Player::Slot10() {
+int Player::IsLooping() {
     return 0;
 }
 
 // 0x0012f788
-void Player::Slot11() {
+void Player::AnnounceState() {
     JuiceAmountMsg message;
-    message.mUnknown04 = this;
-    message.mUnknown08 = mUnknown34 < kJuiceMaximum ? mUnknown34 : kJuiceMaximum;
+    message.mPlayer = this;
+    message.mMaxJuice = mMaxJuice < kJuiceMaximum ? mMaxJuice : kJuiceMaximum;
 
     Send(&message);
 }
 
 // 0x00132d30
-void Player::Slot12() {
+void Player::DeactivatePlacer() {
 }
 
 // 0x00133110
@@ -94,8 +95,8 @@ void Player::Print(std::ostream &stream) {
         return;
     }
 
-    stream << kOpenText << mId20;
-    if (Slot2() == kNoInputSlot) {
+    stream << kOpenText << mPlayerId;
+    if (GetInputSlot() == kNoInputSlot) {
         stream << kNetText;
     } else {
         stream << kLocalText;
@@ -103,39 +104,39 @@ void Player::Print(std::ostream &stream) {
 }
 
 // 0x00132d70
-int Player::Slot14() {
+int Player::CountCaughtGem() {
     // The image leaves the return register untouched here, so the value is indeterminate.
     return 0;
 }
 
 // 0x00132d78
-int Player::Slot15() {
+int Player::CountMissedGem() {
     // The image leaves the return register untouched here, so the value is indeterminate.
     return 0;
 }
 
 // 0x00132d80
-int Player::Slot16(int) {
+int Player::GetMultiplier(int) {
     return 1;
 }
 
 // 0x00132d88
-int Player::Slot17() {
+int Player::GetBestStreak() {
     return 0;
 }
 
 // 0x00132d90
-float Player::Slot18() {
+float Player::GetCaptureRatio() {
     return 0.0f;
 }
 
 // 0x00132da0
-int Player::Slot19() {
+int Player::GetGameMode() {
     return 0;
 }
 
 // 0x00132db0
-int Player::Slot20(int) {
+int Player::MarkBarScored(int) {
     return 1;
 }
 
@@ -151,20 +152,20 @@ int Player::GetJuice() {
 
 // 0x001330e8
 void Player::SetScore(int nScore, int nMaxScore) {
-    mUnknown3c = nMaxScore;
+    mMaxScore = nMaxScore;
     mScore = nScore;
 }
 
 // 0x00133100
 void Player::SetJuice(int nJuice, int nMaxJuice) {
-    mUnknown34 = nMaxJuice;
+    mMaxJuice = nMaxJuice;
     mJuice = nJuice;
 }
 
 // 0x0012f808
 void Player::AddScore(int nDelta, int bNotify) {
     const int nOldScore = mScore;
-    mScore = std::max(0, std::min(mScore + nDelta, mUnknown3c));
+    mScore = std::max(0, std::min(mScore + nDelta, mMaxScore));
     if (mScore == nOldScore) {
         return;
     }
@@ -172,11 +173,11 @@ void Player::AddScore(int nDelta, int bNotify) {
     PointAmountMsg message;
     message.mPlayer = this;
     // Yes, the binary caps the score ceiling at the juice maximum too.
-    message.mMaxScore = std::min(mUnknown3c, kJuiceMaximum);
+    message.mMaxScore = std::min(mMaxScore, kJuiceMaximum);
     Send(&message);
 
     if (bNotify != 0) {
-        UpdateScorePacket packet(mId20, nDelta);
+        UpdateScorePacket packet(mPlayerId, nDelta);
         Send(&packet);
     }
 }
@@ -190,18 +191,18 @@ void Player::AwardCapture(PhraseCapturedMsg *pMsg) {
 // 0x0012f970
 void Player::AddJuice(int nAmount, int bNotify) {
     const int nOldJuice = mJuice;
-    mJuice = std::max(0, std::min(mJuice + nAmount, mUnknown34));
+    mJuice = std::max(0, std::min(mJuice + nAmount, mMaxJuice));
     if (mJuice == nOldJuice) {
         return;
     }
 
     JuiceAmountMsg message;
-    message.mUnknown04 = this;
-    message.mUnknown08 = std::min(mUnknown34, kJuiceMaximum);
+    message.mPlayer = this;
+    message.mMaxJuice = std::min(mMaxJuice, kJuiceMaximum);
     Send(&message);
 
     if (bNotify != 0) {
-        UpdateScorePacket packet(mId20, nAmount);
+        UpdateScorePacket packet(mPlayerId, nAmount);
         Send(&packet);
     }
 }
@@ -219,27 +220,27 @@ inline HxStr Player::GetColorName() {
 // 0x001330a8
 // The out-of-line copy.
 inline HxStr Player::GetUsername() {
-    return mAppearance->mUnknown00;
+    return mAppearance->mUserName;
 }
 
 // 0x00132cd0
 // The out-of-line copy.
-int Player::CallSlot11() {
-    Slot11();
+int Player::CallAnnounceState() {
+    AnnounceState();
     return 0;
 }
 
 // 0x00132d00
 // The out-of-line copy.
-int Player::CallSlot12() {
-    Slot12();
+int Player::CallDeactivatePlacer() {
+    DeactivatePlacer();
     return 0;
 }
 
 // 0x00133210
 // The out-of-line copy.
 inline void Player::OnUpdateScore(UpdateScorePacket *pPacket) {
-    if (pPacket->mPlayerId == mId20) {
+    if (pPacket->mPlayerId == mPlayerId) {
         AddScore(pPacket->mScoreDelta, 0);
     }
 }

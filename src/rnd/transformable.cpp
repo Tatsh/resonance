@@ -380,7 +380,7 @@ int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
                 pParent->mWorldXfm, mLocalXfm[kXfmTranslationRow], mWorldXfm[kXfmTranslationRow]);
             memcpy(mWorldXfm, mLocalXfm, sizeof(mWorldXfm[0]) * kXfmBasisRowCount);
         } else {
-            sceVu0Sub005e7ab0(mWorldXfm[0], pParent->mWorldXfm[0], mLocalXfm[0]);
+            sceVu0MulAffineMatrixXyz(mWorldXfm[0], pParent->mWorldXfm[0], mLocalXfm[0]);
         }
 
         if (mBillboard == kBillboardNone) {

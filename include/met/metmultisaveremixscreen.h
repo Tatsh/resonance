@@ -85,43 +85,44 @@ public:
      * Slot 36. With no ready card it goes straight to ReturnToRemixType(). Otherwise it records the
      * ready players in mReadyPlayers, gathers every player's appearance, and opens
      * MetSaveRemixScreen for the first ready player on the first card slot, clearing the entered
-     * name, then resets mSaveIndex and mUnknowne8.
+     * name, then resets mSaveIndex and mEndScreenExited.
      *
      * @ghidraAddress 0x002fa7c0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Go on to the next save, or finish.
      *
      * Slot 2 of the MetRemixSaver table. After the last save the end-of-remix screen is exited
-     * unless mUnknowne8 is set, and ReturnToRemixType() runs. Otherwise the end-of-remix screen is
-     * pushed again when mUnknowne8 is set, and MetSaveRemixScreen opens for the next ready player
-     * on the card slot the save index selects, keeping the entered name.
+     * unless mEndScreenExited is set, and ReturnToRemixType() runs. Otherwise the end-of-remix
+     * screen is pushed again when mEndScreenExited is set, and MetSaveRemixScreen opens for the
+     * next ready player on the card slot the save index selects, retaining the entered name.
      *
-     * @param nUnknown Not read.
+     * @param bCompleted Not read.
      * @ghidraAddress 0x002facc0
      */
-    virtual void OnUnknownSlot2(int nUnknown);
+    virtual void OnSaveFinished(int bCompleted);
 
     /**
-     * Set mUnknowne8 and exit the end-of-remix screen.
+     * Set mEndScreenExited and exit the end-of-remix screen.
      *
      * Slot 3 of the MetRemixSaver table.
      *
      * @ghidraAddress 0x002fee48
      */
-    virtual void OnUnknownSlot3();
+    virtual void OnHelpRequested();
 
     /**
-     * Store the negation of a flag in mUnknowne8, and push or exit the end-of-remix screen on it.
+     * Store the negation of a flag in mEndScreenExited, and push or exit the end-of-remix screen on
+     * it.
      *
      * Slot 4 of the MetRemixSaver table.
      *
-     * @param nFlag Non-zero to push the end-of-remix screen.
+     * @param bShowing Non-zero to push the end-of-remix screen.
      * @ghidraAddress 0x002fb248
      */
-    virtual void OnUnknownSlot4(int nFlag);
+    virtual void SetOwnerScreenShowing(int bShowing);
 
     /**
      * Silence the leave sound.
@@ -166,10 +167,12 @@ private:
     // The players MetFrontEndState holds, at most this many.
     static constexpr int kMaxPlayers = 4;
 
-    std::vector<Rnd::Object *> mUnknown90; // +0x90
-    std::vector<Rnd::Object *> mUnknown9c; // +0x9c
-    std::vector<Rnd::Object *> mUnknowna8; // +0xa8
-    std::vector<Rnd::Object *> mUnknownb4; // +0xb4
+    // Four vectors the constructor and the destructor build and release, and that no other routine
+    // of the class reads or writes.
+    std::vector<Rnd::Object *> mUnusedObjects1; // +0x90
+    std::vector<Rnd::Object *> mUnusedObjects2; // +0x9c
+    std::vector<Rnd::Object *> mUnusedObjects3; // +0xa8
+    std::vector<Rnd::Object *> mUnusedObjects4; // +0xb4
     // The number of players, from MetFrontEndState. +0xc0
     int mPlayerCount;
     // 1 for each player whose memory card is formatted. +0xc4
@@ -180,6 +183,7 @@ private:
     std::vector<int> mReadyPlayers;
     // The index into mReadyPlayers of the save in progress. +0xe4
     int mSaveIndex;
-    // Set by slot 3 and by the negation slot 4 stores, and read by slot 2. +0xe8
-    int mUnknowne8;
+    // Set once the end-of-remix screen has been exited for the help screen or a declined save.
+    // Slot 3 sets it, slot 4 stores the negation of its argument in it, and slot 2 reads it. +0xe8
+    int mEndScreenExited;
 };

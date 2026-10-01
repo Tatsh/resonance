@@ -18,7 +18,7 @@ class Player;
  * the player's identifier after ` p#`.
  *
  * mPlayer and mTrack are public because Gamer's crippler handler at `0x00111230` reads them
- * directly with no accessor in the image, and sets CmdMsg::mUnknown04 to 1 when victims exist.
+ * directly with no accessor in the image, and sets CmdMsg::mResult to 1 when victims exist.
  *
  * The destructor at `0x003e2668` is compiler-generated and has no declaration here.
  */

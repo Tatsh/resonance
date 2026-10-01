@@ -45,8 +45,10 @@ public:
      * @param pClock The clock the producer schedules against.
      * @param pTrackData The track description.
      * @param bPlayModeOne Non-zero when the game manager reports play mode 1.
-     * @param nUnknown1 PitchingSTG passes 1.
-     * @param nUnknown2 PitchingSTG passes zero.
+     * @param bAllowOwnedBars Non-zero to let the player replay a bar it is already the owner of.
+     *                        PitchingSTG
+     *                        passes 1.
+     * @param nUnreadOption Stored and never read. PitchingSTG passes zero.
      * @ghidraAddress 0x001b1ce0
      */
     NotePitcher(PhraseMgr *pPhraseMgr,
@@ -54,8 +56,8 @@ public:
                 Sch::TickClock *pClock,
                 const TrackData *pTrackData,
                 int bPlayModeOne,
-                int nUnknown1,
-                int nUnknown2);
+                int bAllowOwnedBars,
+                int nUnreadOption);
 
     /**
      * @ghidraAddress 0x001b39c0
@@ -81,7 +83,7 @@ protected:
      * The message's position is quantised. A bar CanPlayBar() rejects plays `SND_INACTIVE`.
      * Otherwise, at a new position, the riff TrackData::GetRiff() reports goes out as a
      * MultiMuseMsg, PostPhraseCapturedMsg() records the gem, a PitchMsg follows, and the position
-     * is stored in mUnknown4c.
+     * is stored in mLastPitchPosition.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001b1f10
@@ -92,9 +94,10 @@ protected:
      * Erase this player's phrases at an EraseMsg's position, outside play mode 1.
      *
      * The bar, or with the message's last word set every bar of its step, is cleared wherever
-     * mUnknown44 owns it, and clearing the message's own bar also sends an AllNotesOffMsg. When
+     * mPlayer is its owner, and clearing the message's bar also sends an AllNotesOffMsg. When
      * anything was cleared, `SND_ERASE_SECTION` or `SND_ERASE` plays, a ShowEraseEffectMsg goes
-     * out, and the seeker is posted again. The position is stored in mUnknown48 either way.
+     * out, and the seeker is posted again. The position is stored in mLastErasePosition in both
+     * cases.
      *
      * @param pMsg The message.
      * @ghidraAddress 0x001b20b0
@@ -115,12 +118,12 @@ protected:
     /**
      * Record a caught gem.
      *
-     * A new bar becomes mUnknown54 and is announced with a PhraseCapturedMsg worth the bar's
+     * A new bar becomes mCapturedBar and is announced with a PhraseCapturedMsg worth the bar's
      * points. In play mode 1 a phrase another player owns there is cleared first. Unless
-     * Player::Slot10() reports non-zero, the gem goes to PhraseMgr::AddGem() for mUnknown54 alone.
-     * Otherwise it goes to every bar of the step that CanPlayBar() accepts and whose phrase
-     * PhraseMgr::PhrasesMatch() pairs with mUnknown54, and then to mUnknown54 itself. The bar is
-     * then replayed from one tick after the gem.
+     * Player::IsLooping() reports non-zero, the gem goes to PhraseMgr::AddGem() for mCapturedBar
+     * alone. Otherwise it goes to every bar of the step that CanPlayBar() accepts and whose phrase
+     * PhraseMgr::PhrasesMatch() pairs with mCapturedBar, and then to mCapturedBar itself. The bar
+     * is then replayed from one tick after the gem.
      *
      * @param nGem The gem, the PitchRiffMsg's first word.
      * @param nTick The quantised song position.
@@ -129,15 +132,16 @@ protected:
     void PostPhraseCapturedMsg(int nGem, int nTick);
 
     /**
-     * Post the seeker for mUnknown44 at the first playable bar of the eight from nBar.
+     * Post the seeker for mPlayer at the first playable bar of the eight from nBar.
      *
-     * Nothing is sent for the stand-in player. Without bForce, a player whose Player::Slot5()
-     * reports non-zero has its seeker turned off. Outside play mode 1, a player whose
-     * Player::Slot10() reports zero, or a search that finds no bar CanPlayBar() accepts, also
-     * turns the seeker off. A found bar posts a seeker over the mUnknown5c bars of its step.
+     * The routine does not send a message for the stand-in player. Without bForce, a player whose
+     * Player::GetPlace() reports non-zero has its seeker turned off. Outside play mode 1, a player
+     * whose Player::IsLooping() reports zero, or a search that does not find a bar CanPlayBar()
+     * accepts, also turns the seeker off. A found bar posts a seeker over the mStepBars bars of its
+     * step.
      *
      * @param nBar The bar to search from, clamped to zero.
-     * @param bForce Non-zero to skip the Player::Slot5() test.
+     * @param bForce Non-zero to skip the Player::GetPlace() test.
      * @ghidraAddress 0x001b2710
      */
     void PostSeekerMsgSecond(int nBar, int bForce);
@@ -157,13 +161,15 @@ private:
     // 0x001b3a38
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
-    // Returns non-zero when nTick differs from mUnknown4c. PostPitchMsg() calls it at 0x001b1fa4.
+    // Returns non-zero when nTick differs from mLastPitchPosition. PostPitchMsg() calls it at
+    // 0x001b1fa4.
     // 0x001b3b88
     int IsOtherTick(int nTick);
 
-    // Reports whether mUnknown44 may play nBar. In play mode 1 that is TrackData::QueryBar() and
-    // Player::Slot9(). Otherwise the bar needs TrackData::QueryBar() and, unless mUnknown60 is set,
-    // no owner or nCurrentBar equal to nBar. An owned bar must also belong to mUnknown44.
+    // Reports whether mPlayer may play nBar. In play mode 1 that is TrackData::QueryBar() and
+    // Player::IsFreestyleBar(). Otherwise the bar needs TrackData::QueryBar() and, unless
+    // mAllowOwnedBars is set, must lack an owner or equal nCurrentBar. An owned bar must also
+    // belong to mPlayer.
     // PostSeekerMsgSecond() expands it inline, and PostPitchMsg() and PostPhraseCapturedMsg() call
     // the out-of-line copy. The title is inferred.
     // 0x001b3a68
@@ -173,18 +179,18 @@ private:
     Quantizer *mQuantizer; // +0x3c
     // Copied from the track description's `+0x04`. Matched against an InvalidateSeekerMsg's
     // `+0x08`, so it identifies the track this pitcher serves.
-    int mUnknown40;      // +0x40
-    Player *mUnknown44;  // +0x44, starts at g_nullPlayer
-    Mid::MBT mUnknown48; // +0x48, MBT(-1), stored and then tested at 0x001b1e60
-    Mid::MBT mUnknown4c; // +0x4c, starts at kMBTInfinity
+    int mTrack;                  // +0x40
+    Player *mPlayer;             // +0x44, starts at g_nullPlayer
+    Mid::MBT mLastErasePosition; // +0x48, MBT(-1), stored and then tested at 0x001b1e60
+    Mid::MBT mLastPitchPosition; // +0x4c, starts at kMBTInfinity
     // Copied from the phrase manager's `+0x34` after an initial kMBTInfinity. Turns an elapsed
     // tick count into a bar index.
     int mBarDivisor;             // +0x50
-    int mUnknown54;              // +0x54, starts at -1
+    int mCapturedBar;            // +0x54, the bar last announced as captured, -1 at first
     int mPlayModeOne;            // +0x58, the constructor's fifth argument
-    int mUnknown5c;              // +0x5c, starts at 2
-    int mUnknown60;              // +0x60, the constructor's sixth argument
-    int mUnknown64;              // +0x64, the constructor's seventh argument
+    int mStepBars;               // +0x5c, the spacing of a step's bars, 2 at first
+    int mAllowOwnedBars;         // +0x60, the constructor's sixth argument
+    int mUnreadOption;           // +0x64, the constructor's seventh argument, never read
     const TrackData *mTrackData; // +0x68
     Sch::TickClock *mClock;      // +0x6c
 };

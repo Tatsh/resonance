@@ -40,12 +40,11 @@ class Player;
  * `0x001cf760`, `0x001cf768`, and `0x001cf778` sit in this class's own table at slots 5, 9, 10,
  * 11, and 12, and AxingSTG, PitchingSTG, and VoxingSTG inherit all five.
  *
- * Every slot whose verb is unrecovered retains its table index as its title, because the index is
- * part of the layout. The comment records the behaviour recovered instead. Slot 2 and slot 3 are
- * the start and the stop of a stage, which the four overrides establish between them: each slot 2
- * override sends controller 0x52 with value 0x7f on the track's channel and each slot 3 override
- * sends the same controller with value zero, and every other pairing in the four classes is
- * symmetric in the same way.
+ * Each slot's comment records its table index. Start() and Stop() (slots 2 and 3) are the start
+ * and the stop of a stage, as the four overrides establish between them. Each Start() override
+ * sends controller 0x52 with value 0x7f on the track's channel and each Stop() override sends the
+ * same controller with value zero, and every other pairing in the four classes is symmetric in the
+ * same way.
  *
  * Every data member apart from mTrackData is protected. The four derived classes read seven of
  * the ten directly and no accessor for any of them exists in the image.
@@ -87,16 +86,16 @@ public:
      *
      * @ghidraAddress 0x001cf088
      */
-    virtual void Slot2();
+    virtual void Start();
 
     /**
      * Stop the stage.
      *
-     * Slot 3. Withdraws the phrase manager's commands and deletes the sequencer Slot2() built.
+     * Slot 3. Withdraws the phrase manager's commands and deletes the sequencer Start() built.
      *
      * @ghidraAddress 0x001cf918
      */
-    virtual void Slot3();
+    virtual void Stop();
 
     /**
      * Wire the stage's objects to the sources that drive it.
@@ -109,7 +108,8 @@ public:
      * @param pOptional A further source, ignored when null.
      * @param pSecondary The source every override registers the phrase manager with.
      */
-    virtual void Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) = 0;
+    virtual void
+    ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) = 0;
 
     /**
      * Register the mixer with one source.
@@ -120,7 +120,7 @@ public:
      * @param pSource The source to register with.
      * @ghidraAddress 0x001cf750
      */
-    virtual void Slot5(MsgSource *pSource);
+    virtual void AddMixerToSource(MsgSource *pSource);
 
     /**
      * Attach the mixer to the synthesiser and give it its output sink.
@@ -131,7 +131,7 @@ public:
      *
      * @param pOutput The sink the mixer sends to.
      */
-    virtual void Slot6(MsgSink *pOutput) = 0;
+    virtual void SetMixerOutput(MsgSink *pOutput) = 0;
 
     /**
      * Register one sink with every source the stage provides.
@@ -141,7 +141,7 @@ public:
      *
      * @param pSink The sink to register.
      */
-    virtual void Slot7(MsgSink *pSink) = 0;
+    virtual void AddSinkToSources(MsgSink *pSink) = 0;
 
     /**
      * Install the sink the phrase manager reports phrase changes to.
@@ -152,53 +152,59 @@ public:
      *
      * @param pSink The sink to install, ignored when null.
      */
-    virtual void Slot8(MsgSink *pSink) = 0;
+    virtual void SetNetSink(MsgSink *pSink) = 0;
 
     /**
      * Report whether the stage has nothing outstanding.
      *
-     * Slot 9. The default reports that it has not. CatchingSTG is the only class that overrides
-     * it, and its override forwards to Catcher's slot 6, which reports whether the catcher's
-     * counter at `+0x60` is zero.
+     * Slot 9. The default reports that nothing is outstanding. CatchingSTG is the only class that
+     * overrides it, and its override forwards to Catcher::IsPhraseRunEmpty(). That routine
+     * reports whether the catcher's counter at `+0x60` is zero. Gamer ends the game for a player
+     * out of juice only once every stage reports non-zero.
      *
      * @return Non-zero when nothing is outstanding.
      * @ghidraAddress 0x001cf758
      */
-    virtual int Slot9();
+    virtual int HasNothingPending();
 
     /**
      * Give every phrase of the track to one player.
      *
      * Slot 10. The default body is empty. CatchingSTG is the only class that overrides it, and its
      * override forwards both arguments to SingleCatcher::ResetOwners(). The Gamer routine at
-     * `0x001123b0` calls the slot for every track whose slot 11 reports non-zero, with the
-     * winning player, and discards the return register.
+     * `0x001123b0` calls the slot for every track whose CanGivePhrases() reports non-zero, with
+     * the winning player, and discards the return register.
      *
      * @param nTick The song position the caller received. No implementation reads it.
      * @param pPlayer The player the phrases go to.
      * @ghidraAddress 0x001cf760
      */
-    virtual void Slot10(int nTick, Player *pPlayer);
+    virtual void GivePhrases(int nTick, Player *pPlayer);
 
     /**
-     * Slot 11. The default returns zero and CatchingSTG returns 1, which is the whole of the
-     * recovered behaviour on both sides.
+     * Report whether GivePhrases() acts on this stage.
+     *
+     * Slot 11. The default returns zero and CatchingSTG, the one class whose GivePhrases() has a
+     * body, returns 1. Gamer tests it before each GivePhrases() call.
      *
      * @return Zero here.
      * @ghidraAddress 0x001cf768
      */
-    virtual int Slot11();
+    virtual int CanGivePhrases();
 
     /**
+     * Create the phrase manager's powerbar manager.
+     *
      * Slot 12. The default body is empty. CatchingSTG is the only class that overrides it, and its
-     * override calls one routine on the phrase manager.
+     * override runs PhraseMgr::CreatePowerbarMgr(). GrooveWorld::BuildGraphs() calls it for each
+     * catch track after loading saved phrases.
      *
      * @ghidraAddress 0x001cf778
      */
-    virtual void Slot12();
+    virtual void CreatePowerbarMgr();
 
     /**
-     * Run Slot2() and report zero.
+     * Run Start() and report zero.
      *
      * Inline. GrooveWorld::StartSequencers() reaches it through a pointer to member, and the
      * address is its uncalled out-of-line copy.
@@ -206,10 +212,10 @@ public:
      * @return Always 0.
      * @ghidraAddress 0x001cf6b8
      */
-    int CallSlot2();
+    int CallStart();
 
     /**
-     * Run Slot3() and report zero.
+     * Run Stop() and report zero.
      *
      * Inline. GrooveWorld::FinishSong() reaches it through a pointer to member, and the address is
      * its uncalled out-of-line copy.
@@ -217,7 +223,7 @@ public:
      * @return Always 0.
      * @ghidraAddress 0x001cf6e8
      */
-    int CallSlot3();
+    int CallStop();
 
     /**
      * Delete a stage, which may be null.
@@ -230,7 +236,7 @@ public:
     static void Delete(ScoreTrackGraph *pGraph);
 
 protected:
-    int mUnknown00; // +0x00, copied from TrackData::mUnknown04
+    int mTrack; // +0x00, the track's index, copied from TrackData::mIndex
 
 public:
     /**
@@ -246,23 +252,23 @@ protected:
     PhrasePlayer *mPhrasePlayer; // +0x0c, 0x30 bytes, built at 0x001c17d8
     Quantizer *mQuantizer;       // +0x10, four bytes, built at 0x001ce670
     MuseSynth *mMuseSynth;       // +0x14, 0x30 bytes, built at 0x001aa4d8
-    int mUnknown18;              // +0x18
+    int mUnused;                 // +0x18, cleared by the constructor and never read
     Mixer *mMixer;               // +0x1c, 0x58 bytes, built at 0x001a7110
     Application *mApplication;   // +0x20, from Application::shared()
-    BarSequencer *mSequencer;    // +0x24, built by Slot2() and deleted by Slot3()
+    BarSequencer *mSequencer;    // +0x24, built by Start() and deleted by Stop()
 };
 
 // 0x001cf6b8
 // The out-of-line copy.
-inline int ScoreTrackGraph::CallSlot2() {
-    Slot2();
+inline int ScoreTrackGraph::CallStart() {
+    Start();
     return 0;
 }
 
 // 0x001cf6e8
 // The out-of-line copy.
-inline int ScoreTrackGraph::CallSlot3() {
-    Slot3();
+inline int ScoreTrackGraph::CallStop() {
+    Stop();
     return 0;
 }
 

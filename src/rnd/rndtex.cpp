@@ -246,7 +246,7 @@ void Tex::Load(Stream &stream) {
 
 // 0x004e75a0
 ACanvas *Tex::LockMipBitmap([[maybe_unused]] int nMip,
-                            [[maybe_unused]] int nUnknown,
+                            [[maybe_unused]] int nReserved,
                             [[maybe_unused]] int nFlags) {
     return nullptr;
 }
@@ -256,7 +256,7 @@ void Tex::UnlockMipBitmap() {
 }
 
 // 0x004e7600
-void Tex::SetPalette([[maybe_unused]] APalette *pPalette, [[maybe_unused]] int nUnknown) {
+void Tex::SetPalette([[maybe_unused]] APalette *pPalette, [[maybe_unused]] int nReserved) {
 }
 
 // 0x004e7608

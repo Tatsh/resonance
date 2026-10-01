@@ -50,7 +50,7 @@ inline PitchPicker::NoteMapping MakeMapping(unsigned char nNote, unsigned char n
 // 0x001c29c8
 PitchPicker::PitchPicker(const TrackData *pTrackData)
     : mTrackData(pTrackData), mAxis(kAxisCenter), mSustainTick(kNoSustainTick), mRiffLow(kMiddleC),
-      mRiffHigh(kMiddleC), mTrack(pTrackData->mUnknown04), mPlayer(&g_nullPlayer) {
+      mRiffHigh(kMiddleC), mTrack(pTrackData->mIndex), mPlayer(&g_nullPlayer) {
 }
 
 // 0x001c2c60
@@ -61,7 +61,7 @@ void PitchPicker::FindRiffRange(MultiMuseMsg *pMsg) {
 // 0x001c2d40
 void PitchPicker::PostSustainNoteMsg(SustainNoteMsg *pMsg) {
     mSustainTick.mTick = pMsg->mTick; // The tick is stored without the finiteness check.
-    SustainNoteMsg sustain(pMsg->mTick, GetSustainPitch(pMsg->mTick, pMsg->mUnknown08));
+    SustainNoteMsg sustain(pMsg->mTick, GetSustainPitch(pMsg->mTick, pMsg->mNote));
     Send(&sustain);
 }
 
@@ -124,21 +124,21 @@ void PitchPicker::HandleMessage(Message *pMsg) {
         }
     } else if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
-        if (pSelect->mUnknown04 == mTrack && pSelect->mUnknown08 == 0) {
-            mPlayer = pSelect->mUnknown10;
+        if (pSelect->mTrack == mTrack && pSelect->mPlace == 0) {
+            mPlayer = pSelect->mPlayer;
         }
     }
 }
 
 // 0x001c43b0
 void PitchPicker::OnStdMidi(StdMidiMsg *pMsg) {
-    const unsigned char nStatus = pMsg->mUnknown08;
+    const unsigned char nStatus = pMsg->mStatus;
     switch (nStatus & kStatusKindMask) {
     case kStatusNoteOff:
-        PostNoteOff(pMsg->mTick, nStatus, pMsg->mUnknown09);
+        PostNoteOff(pMsg->mTick, nStatus, pMsg->mData1);
         break;
     case kStatusNoteOn:
-        PostNoteOn(pMsg->mTick, nStatus, pMsg->mUnknown09, pMsg->mUnknown0a);
+        PostNoteOn(pMsg->mTick, nStatus, pMsg->mData1, pMsg->mData2);
         break;
     default:
         Send(pMsg);

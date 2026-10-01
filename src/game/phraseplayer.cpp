@@ -95,7 +95,7 @@ void PhrasePlayer::PlayBarGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MB
 
     MultiMuse *pMuse = new MultiMuse;
     const std::vector<TickObj<int> > *pGems = mTrackData->GetGems(nBar);
-    const int nStep = mPhraseMgr->mMap->Slot5(nBar);
+    const int nStep = mPhraseMgr->mMap->MapBar(nBar);
     for (std::vector<TickObj<int> >::const_iterator it = pGems->begin(); it != pGems->end(); ++it) {
         const int nTick = it->mPosition.mTick;
         if (nTick < from.mTick) {

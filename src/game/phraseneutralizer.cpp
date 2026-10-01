@@ -10,7 +10,7 @@ namespace {
 // A neutraliser clears this many bars, starting at the bar after the message's.
 constexpr int kNeutralizedBars = 4;
 
-// Every table indexed by Player::mId20 has one slot per player.
+// Every table indexed by Player::mPlayerId has one slot per player.
 constexpr int kMaxPlayers = 4;
 
 // The flags the owner's score change and the phrase clear pass.
@@ -24,7 +24,7 @@ constexpr int kNeutralizeHandled = 1;
 
 // 0x001c0918
 PhraseNeutralizer::PhraseNeutralizer(const TrackData *pTrackData, PhraseMgr *pPhraseMgr)
-    : mTrack(pTrackData->mUnknown04), mPhraseMgr(pPhraseMgr), mTrackData(pTrackData) {
+    : mTrack(pTrackData->mIndex), mPhraseMgr(pPhraseMgr), mTrackData(pTrackData) {
 }
 
 // 0x001c0980
@@ -44,17 +44,17 @@ void PhraseNeutralizer::PostTrackNeutralizedMsg(NeutralizeMsg *pMsg) {
             continue;
         }
         bCleared = true;
-        const int nValue = mPhraseMgr->GetPhraseByte(nBar);
-        pOwner->AddScore(-nValue, kNotifyScore);
+        const int nScore = mPhraseMgr->GetPhraseByte(nBar);
+        pOwner->AddScore(-nScore, kNotifyScore);
         mPhraseMgr->ClearPhrase(nBar, kClearAll);
-        anLost[pOwner->mId20] -= nValue;
-        apLosers[pOwner->mId20] = pOwner;
+        anLost[pOwner->mPlayerId] -= nScore;
+        apLosers[pOwner->mPlayerId] = pOwner;
     }
     if (!bCleared) {
         return;
     }
 
-    pMsg->mUnknown04 = kNeutralizeHandled;
+    pMsg->mResult = kNeutralizeHandled;
     DeployedPowerupMsg deployed(
         kHudItemNeutralizer, pMsg->mPlayer, nullptr, nFirstBar, kNeutralizedBars, mTrack);
     Send(&deployed);

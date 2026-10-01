@@ -29,5 +29,5 @@ const char *CrippleMsg::Name() {
 // 0x003e4290
 void CrippleMsg::Print(std::ostream &stream) {
     stream << "tr#" << mTrack;
-    stream << " p#" << mPlayer->mId20;
+    stream << " p#" << mPlayer->mPlayerId;
 }

@@ -67,7 +67,7 @@ void MetFreqLoader::ParseIdentities(const void *pBuffer, int nLength) {
     for (int i = 0; i < nCount; ++i) {
         MetPersonaData *pPersona = new MetPersonaData();
         pPersona->Load(&stream);
-        pPersona->mUnknown15c = kParsedIdentity;
+        pPersona->mIsPrefab = kParsedIdentity;
         pPersona->mStats.RebuildLevelList();
         mIdentities->push_back(pPersona);
     }

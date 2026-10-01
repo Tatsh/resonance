@@ -99,8 +99,8 @@ constexpr int kSlotBits = 2;
 // sceMtapGetConnection() reports 1 when a multitap is present.
 constexpr int kMultitapConnected = 1;
 
-// The value Setup() passes as Joypad::Open()'s third argument.
-constexpr int kJoypadOpenUnknown128 = 4;
+// The analog dead zone Setup() passes to Joypad::Open().
+constexpr int kJoypadDeadZone = 4;
 
 // Players are numbered from 1, and 0 marks a Joypad with no player.
 constexpr int kNoPlayer = 0;
@@ -133,9 +133,9 @@ public:
 
 // 0x001ded98
 InputPoller::InputPoller()
-    : mNextJoypadId(0), mUnknown28(BytePairStatic::shared()), mUnknown30(0), mUnknown34(1),
+    : mNextJoypadId(0), mBytePairs(BytePairStatic::shared()), mUnusedWord(0), mUnusedFlag(1),
       mPressedThisPoll(0), mActive(1), mMultitap0(0), mMultitap1(0), mPaused(0),
-      mGameInputEnabled(1), mUnknown50(0), mController(nullptr) {
+      mGameInputEnabled(1), mBusyJoypadSeen(0), mController(nullptr) {
     Init();
 }
 
@@ -169,13 +169,13 @@ void InputPoller::Init() {
 void InputPoller::Setup() {
     for (int nSlot = 0; nSlot < kSlotsPerPort; ++nSlot) {
         Joypad *pJoypad = new Joypad((kPort0 << kSlotBits) | nSlot);
-        pJoypad->Open(kPort0, nSlot, kJoypadOpenUnknown128);
+        pJoypad->Open(kPort0, nSlot, kJoypadDeadZone);
         pJoypad->mId = mNextJoypadId;
         ++mNextJoypadId;
         mJoypads.push_back(pJoypad);
         Entry entry;
         for (int i = kControlCount - 1; i >= 0; --i) {
-            entry.mUnknown00[i] = 0;
+            entry.mControlStates[i] = 0;
         }
         for (int i = kAxisCount - 1; i >= 0; --i) {
             entry.mAxes[i] = 0;
@@ -186,13 +186,13 @@ void InputPoller::Setup() {
     }
 
     Joypad *pJoypad = new Joypad(kPort1Joypad);
-    pJoypad->Open(kPort1, 0, kJoypadOpenUnknown128);
+    pJoypad->Open(kPort1, 0, kJoypadDeadZone);
     pJoypad->mId = mNextJoypadId;
     ++mNextJoypadId;
     mJoypads.push_back(pJoypad);
     Entry entry;
     for (int i = kControlCount - 1; i >= 0; --i) {
-        entry.mUnknown00[i] = 0;
+        entry.mControlStates[i] = 0;
     }
     for (int i = kAxisCount - 1; i >= 0; --i) {
         entry.mAxes[i] = 0;
@@ -314,7 +314,7 @@ void InputPoller::ReadControllers() {
     FindJoypadConnections();
     GameManagerImpl *pGameManager = Application::shared()->GetGameManager();
     GrooveWorld *pWorld = Application::shared()->GetWorld();
-    mUnknown50 = 0;
+    mBusyJoypadSeen = 0;
 
     for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it, ++nIndex) {
         unsigned int dwButtons;
@@ -337,7 +337,7 @@ void InputPoller::ReadControllers() {
             continue;
         }
         if (nResult == kReadBusy) {
-            mUnknown50 = nResult;
+            mBusyJoypadSeen = nResult;
             continue;
         }
         if (nResult < kReadReady) {
@@ -366,7 +366,8 @@ void InputPoller::ReadControllers() {
             if (!(dwPressed & g_adwControlMasks[nControl])) {
                 ++nControl;
                 if (dwReleased & g_adwControlMasks[nControl - 1]) {
-                    mController->OnUnknownSlot2(kReadingTypeJoy, nPlayer, nControl, kReleasedValue);
+                    mController->OnControllerReading(
+                        kReadingTypeJoy, nPlayer, nControl, kReleasedValue);
                 }
                 continue;
             }
@@ -384,7 +385,8 @@ void InputPoller::ReadControllers() {
                     CallScriptTemplate(kDebugKeyTemplate, nControl);
                 }
             } else {
-                mController->OnUnknownSlot2(kReadingTypeJoy, nPlayer, nControl + 1, kPressedValue);
+                mController->OnControllerReading(
+                    kReadingTypeJoy, nPlayer, nControl + 1, kPressedValue);
                 ++nControl;
             }
             mPressedThisPoll = 1;
@@ -398,7 +400,8 @@ void InputPoller::ReadControllers() {
             }
             entry.mAxes[nAxis] = nPosition;
             const float flValue = static_cast<float>((nPosition + kAxisOffset) / kAxisRange);
-            mController->OnUnknownSlot2(kReadingTypeJoy, nPlayer, g_anAxisControls[nAxis], flValue);
+            mController->OnControllerReading(
+                kReadingTypeJoy, nPlayer, g_anAxisControls[nAxis], flValue);
         }
     }
 }
@@ -406,11 +409,11 @@ void InputPoller::ReadControllers() {
 // 0x001e1c28
 void InputPoller::Poll() {
     ReadControllers();
-    OnUnknown001e1c58();
+    FinishPoll();
 }
 
 // 0x001e1c58
-void InputPoller::OnUnknown001e1c58() {
+void InputPoller::FinishPoll() {
 }
 
 // 0x001e1998

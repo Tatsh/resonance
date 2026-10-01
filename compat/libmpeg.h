@@ -15,7 +15,7 @@ typedef struct {
     int width; /**< +0x00. Picture width. */
     int height; /**< +0x04. Picture height. */
     int frameCount; /**< +0x08. Count of decoded frames. */
-    int mUnknown0C; /**< +0x0c. Not initialised at creation. */
+    int alignmentPadding; /**< +0x0c. Aligns the stamps; never read or written. */
     long long pts; /**< +0x10. Presentation time stamp, or -1 when absent. */
     long long dts; /**< +0x18. Decoding time stamp, or -1 when absent. */
     unsigned long long flags; /**< +0x20. Picture header flags. */
@@ -23,7 +23,7 @@ typedef struct {
     long long dts2nd; /**< +0x30. Second field decoding time stamp, or -1. */
     unsigned long long flags2nd; /**< +0x38. Second field picture header flags. */
     void *pContext; /**< +0x40. Decoder context. Inferred. */
-    int mUnknown44; /**< +0x44. */
+    int tailPadding; /**< +0x44. Pads the structure to 0x48 bytes; never read or written. */
 } sceMpeg;
 
 // Stream types, of which the game registers two.
@@ -58,14 +58,15 @@ int sceMpegDemuxPss(sceMpeg *pMpeg, unsigned char *pStart, int nSize);
 int sceMpegDemuxPssRing(
     sceMpeg *pMpeg, unsigned char *pStart, int nSize, unsigned char *pBuffer, int nBufferSize);
 
-// Reads word zero of the decoder context. The decode worker spins on it.
-int sceMpegGetContextWordZero(void *pDecoder);
+// Reports whether the decoder has met the sequence end code. The decode worker spins on it.
+int sceMpegIsEnd(void *pDecoder);
 
-// Decodes one picture with the given mode, negative when the picture is rejected.
-int sceMpegSub005e07b0(void *pDecoder, void *pPicture, int nMode);
+// Decodes pictures until one is output, colour converted into the buffer of nMacroblocks
+// macroblocks at pPicture. Negative when the picture buffer is misaligned.
+int sceMpegGetPicture(void *pDecoder, void *pPicture, int nMacroblocks);
 
-// Drains the decoder after the input ends.
-void sceMpegSub005e08e8(void *pDecoder);
+// Resets the decoder state and the IPU after the input ends.
+void sceMpegReset(void *pDecoder);
 
 // Creates the decoder context over the work area and returns the committed write pointer,
 // which the sample ignores. The work area starts with seven callback slots, the stream table
@@ -79,14 +80,14 @@ void *sceMpegSetCallbackSlot(void *pDecoder, int nSlot, void *pfnCallback, void 
 // returning the callback result or zero when any link is missing.
 int sceMpegInvokeCallbackSlot(void *pDecoder, void *pEntry);
 
-// Reports one. Inferred.
-int sceMpegReturnOne(void *pDecoder);
+// Deletes the decoder, which has nothing to release, and reports one.
+int sceMpegDelete(void *pDecoder);
 
-// Resets the decoder with three values.
-void sceMpegSub005e0890(void *pDecoder, int nArgA, int nArgB, int nArgC);
+// Sets how many pictures of each coding type to decode, -1 for all of them.
+void sceMpegSetDecodeMode(void *pDecoder, int nIntra, int nPredicted, int nBidirectional);
 
-// Reports whether word four of the decoder context is clear.
-int sceMpegIsContextWordFourClear(void *pDecoder);
+// Reports whether no picture has been decoded since the last flush.
+int sceMpegIsRefBuffEmpty(void *pDecoder);
 
 // Registers a stream callback for the given type and channel. A duplicate key overwrites the
 // entry in place, still bumps the count, and returns the previous callback; a fresh entry
@@ -107,21 +108,22 @@ void sceMpegRewindWritePointer(void *pRing);
 // when the buffer ends first or the alignment is zero.
 void *sceMpegCheckWorkAreaSize(void *pRing, int nNeed, int nAlign);
 
-// Decodes one picture like sceMpegSub005e07b0 but leaves the busy word clear.
-int sceMpegSub005e07f8(void *pDecoder, void *pPicture, int nMode);
+// Decodes one picture like sceMpegGetPicture() but copies the raw macroblocks without colour
+// conversion.
+int sceMpegGetPictureRAW8(void *pDecoder, void *pPicture, int nMacroblocks);
 
-// Arms a picture with scaled strides: the second clear word takes nB shifted by four, the mode
-// takes nA times nB, and the first clear word takes nA shifted by four.
-int sceMpegSub005e0840(void *pDecoder, void *pPicture, int nA, int nB);
+// Decodes one picture like sceMpegGetPictureRAW8() into a buffer of nMbWidth by nMbHeight
+// macroblocks, which bounds the picture by width and height instead of by count.
+int sceMpegGetPictureRAW8xy(void *pDecoder, void *pPicture, int nMbWidth, int nMbHeight);
 
-// Sets IPU control bit twenty-three and resets the IPU table from the IPU base address.
-void sceMpegDisableIpuControlBit(void);
+// Selects the IPU's MPEG-1 mode and places the two motion compensation buffers in the scratchpad.
+void sceMpegResetMcBuffers(void);
 
-// Drains the IPU fifo for the decoder.
-void sceMpegSub0060ddc8(void *pDecoder);
+// Stops the IPU transfer channels and resets the IPU for the decoder.
+void sceMpegResetIpuChannels(void *pDecoder);
 
-// Enables IPU control bit twenty-three.
-void sceIpuEnableControlBitTwentyThree(void);
+// Assumes an MPEG-1 stream until a sequence extension arrives.
+void sceMpegSelectMpeg1(void);
 
 // Reports a decoder error with the given message, through the slot callback when one is
 // installed and through the error line otherwise.
@@ -133,11 +135,13 @@ void sceMpegPrintErrorLine(const char *pMessage);
 // Reports a picture error with the given format and arguments.
 void sceMpegReportErrorFormatted(const char *pFormat, ...);
 
-// Polls the picture engine and returns its state.
-int sceMpegSub0060ba60(void);
+// Parses headers up to the next picture header and returns its picture_coding_type, or 0 at
+// the sequence end code.
+int sceMpegNextPictureHeader(void);
 
-// Finishes decoder initialisation and returns its status.
-int sceMpegSub0061da40(void);
+// Resets the IPU and loads the default quantiser matrices, the colour lookup table, and the
+// threshold, returning the final IPU control word.
+int sceIpuResetAndLoadTables(void);
 
 #ifdef __cplusplus
 }

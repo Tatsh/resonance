@@ -41,11 +41,11 @@ class TickClock;
 class Voxer : public Pitcher {
 public:
     /**
-     * @param pPhraseMgr The phrase manager for the track. Its `+0x34` is copied into mUnknown48.
+     * @param pPhraseMgr The phrase manager for the track. Its `+0x34` is copied into mBarTicks.
      * @param pQuantizer The quantiser for the track.
      * @param pClock The clock the TickTask base is posted against.
      * @param pTrackData The track description, which arrives in `t0`. Its `+0x04` is copied into
-     *                   mUnknown44 and its `+0x08` byte into mChannel.
+     *                   mTrack and its `+0x08` byte into mChannel.
      * @ghidraAddress 0x001d81b8
      */
     Voxer(PhraseMgr *pPhraseMgr,
@@ -109,10 +109,10 @@ protected:
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
     /**
-     * Erase mUnknown50's phrases around a bar.
+     * Erase mPlayer's phrases around a bar.
      *
-     * The bar, or with bWholeStep set every bar of its step, is cleared wherever mUnknown50 owns
-     * it, and clearing nBar itself also releases the sustain controller at position
+     * The bar, or with bWholeStep set every bar of its step, is cleared wherever mPlayer is its
+     * owner, and clearing nBar itself also releases the sustain controller at position
      * kMBTInfinity. When anything was cleared, bAnnounce plays `SND_ERASE_SECTION` or `SND_ERASE`
      * and sends a ShowEraseEffectMsg, and the seeker is turned off either way.
      *
@@ -124,7 +124,7 @@ protected:
     void OnErase(int nBar, int bWholeStep, int bAnnounce);
 
     /**
-     * Turn mUnknown50's seeker off, unless mUnknown50 is the stand-in.
+     * Turn mPlayer's seeker off, unless mPlayer is the stand-in.
      *
      * @param nBar Not read.
      * @ghidraAddress 0x001d8fb0
@@ -161,7 +161,7 @@ private:
     void UpdateSustain(int nTick);
 
     // Unless the bar of nTick is mPhraseBar, finishes the phrase, sends a BarStatusMsg, starts a
-    // new Phrase for mUnknown50 there, and silently erases the bar. The title is inferred.
+    // new Phrase for mPlayer there, and silently erases the bar. The title is inferred.
     // 0x001d89d0
     void StartPhrase(int nTick);
 
@@ -178,19 +178,19 @@ private:
     const TrackData *mTrackData; // +0x40
     // Matched against an EraseMsg's `+0x0c` and an InvalidateSeekerMsg's `+0x08`, so it identifies
     // the track this Voxer serves.
-    int mUnknown44; // +0x44 copied from the track description's `+0x04`
+    int mTrack; // +0x44 copied from the track description's `+0x04`
     // Divisor that turns an elapsed tick count into a bar index.
-    int mUnknown48;         // +0x48 copied from the phrase manager's `+0x34`
+    int mBarTicks;          // +0x48 copied from the phrase manager's `+0x34`
     unsigned char mChannel; // +0x4c copied from the track description's `+0x08`
     // Matched against an EraseMsg's `+0x04`, and defaulted to g_nullPlayer, which Mixer also
     // defaults its own selection to.
-    Player *mUnknown50; // +0x50
+    Player *mPlayer; // +0x50
     // Non-zero while the sustain controller is down, which is while any level is held.
-    int mSustaining; // +0x54
-    Phrase *mPhrase; // +0x58, the phrase being recorded, or null
-    int mPhraseBar;  // +0x5c, the bar mPhrase records, -1 at first
-    int mUnknown60;  // +0x60 set to -1 on construction
-    int mUnknown64;  // +0x64 not written by the constructor
+    int mSustaining;     // +0x54
+    Phrase *mPhrase;     // +0x58, the phrase being recorded, or null
+    int mPhraseBar;      // +0x5c, the bar mPhrase records, -1 at first
+    int mUnreadSentinel; // +0x60 set to -1 on construction and never read
+    int mReserved;       // +0x64 never read or written by the class's routines
     // One bit per PitchRiffMsg level held down. The constructor clears it as one doubleword.
     std::bitset<kLevelBits> mHeldLevels; // +0x68
 };

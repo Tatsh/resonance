@@ -25,8 +25,8 @@ constexpr unsigned char kSustainController = 46;
 // A note-on draws a gem this many ticks long.
 constexpr int kNoteGemTicks = 80;
 
-// The word DurGemMsg's +0x18 carries for a live note's gem.
-constexpr int kDurGemUnknown18 = 1;
+// The value DurGemMsg::mLive receives for a live note's gem. AxeOldGemMaker's gems receive zero.
+constexpr int kLiveNoteGem = 1;
 
 // A sustain strip is drawn at the middle blend.
 constexpr float kSustainBlend = 0.5f;
@@ -44,14 +44,14 @@ inline int ClampTick(int nTick) {
 
 // 0x001a2da0
 AxeNewGemMaker::AxeNewGemMaker(const TrackData *pTrackData)
-    : mTrack(pTrackData->mUnknown04), mTrackData(pTrackData), mStripId(0), mValue(kAxisCenter),
+    : mTrack(pTrackData->mIndex), mTrackData(pTrackData), mStripId(0), mValue(kAxisCenter),
       mPlayer(&g_nullPlayer) {
 }
 
 // 0x001a2f18
 void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
     const int nTick = pMsg->mTick;
-    const unsigned char nKind = pMsg->mUnknown08 & kStatusKindMask;
+    const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
 
     if (nKind == kStatusNoteOn) {
         const float flBlend = AxeOldGemMaker::BlendForAxis(mValue);
@@ -61,16 +61,16 @@ void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
         gem.mStartBlend = flBlend;
         gem.mEndFrame = Mid::MBT(ClampTick(nTick + Mid::MBT(kNoteGemTicks).mTick)).mTick;
         gem.mEndBlend = flBlend;
-        gem.mUnknown18 = kDurGemUnknown18;
+        gem.mLive = kLiveNoteGem;
         gem.mPlayer = mPlayer;
         Send(&gem);
         return;
     }
-    if (nKind != kStatusControlChange || pMsg->mUnknown09 != kSustainController) {
+    if (nKind != kStatusControlChange || pMsg->mData1 != kSustainController) {
         return;
     }
 
-    if (pMsg->mUnknown0a == 0 && mStripId == 0) {
+    if (pMsg->mData2 == 0 && mStripId == 0) {
         SusGemMsg open;
         open.mStripId = AxeOldGemMaker::NextStripId();
         open.mStop = kStripOpen;
@@ -81,7 +81,7 @@ void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
         mStripId = open.mStripId;
         Send(&open);
     }
-    if (pMsg->mUnknown0a == 0 || mStripId == 0) {
+    if (pMsg->mData2 == 0 || mStripId == 0) {
         return;
     }
 
@@ -101,8 +101,8 @@ void AxeNewGemMaker::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
-        if (pSelect->mUnknown04 == mTrack && pSelect->mUnknown08 == 0) {
-            mPlayer = pSelect->mUnknown10;
+        if (pSelect->mTrack == mTrack && pSelect->mPlace == 0) {
+            mPlayer = pSelect->mPlayer;
         }
     } else if (nType == g_nAxisRegisterMsgType) {
         AxisRegisterMsg *pAxis = static_cast<AxisRegisterMsg *>(pMsg);

@@ -31,5 +31,5 @@ const char *StopRiffMsg::Name() {
 // The colour name is copied into a temporary before it is written.
 void StopRiffMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);
-    stream << " " << HxStr(mPlayer->mColorName) << " b#" << mUnknown04;
+    stream << " " << HxStr(mPlayer->mColorName) << " b#" << mButton;
 }

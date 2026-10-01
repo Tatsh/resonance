@@ -260,7 +260,7 @@ public:
      * @ghidraAddress 0x00174478
      */
     void SetSkillStatus(int nStatus) {
-        mUnknown0c = nStatus;
+        mSkillStatus = nStatus;
     }
 
     /**
@@ -273,7 +273,7 @@ public:
      * @ghidraAddress 0x001747a0
      */
     int GetSkillStatus() const {
-        return mUnknown0c;
+        return mSkillStatus;
     }
 
 public:
@@ -284,7 +284,7 @@ public:
      * an HxStr straight from `+0x00` of the embedded appearance and the image has no accessor to
      * route that read through. A friend declaration fits the image equally well. +0x00
      */
-    HxStr mUnknown00;
+    HxStr mUserName;
 
 private:
     // 0x001744f8
@@ -303,5 +303,5 @@ public:
     FreqAppearanceDetail *mDetail;
 
 private:
-    int mUnknown0c; // +0x0c the skill status
+    int mSkillStatus; // +0x0c
 };

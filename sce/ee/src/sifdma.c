@@ -15,11 +15,11 @@ enum {
 
 // Issue kernel call nNumber with two argument words and return the result word. The kernel may
 // change every register the calling convention does not preserve.
-static inline int sifSyscall(int nNumber, int nArg0, int nArg1) {
+static inline int sifSyscall(int nNumber, int nFirstArgument, int nSecondArgument) {
     register int v0 __asm__("$2");
     register int v1 __asm__("$3") = nNumber;
-    register int a0 __asm__("$4") = nArg0;
-    register int a1 __asm__("$5") = nArg1;
+    register int a0 __asm__("$4") = nFirstArgument;
+    register int a1 __asm__("$5") = nSecondArgument;
 
     __asm__ volatile("syscall"
                      : "=r"(v0), "+r"(v1), "+r"(a0), "+r"(a1)

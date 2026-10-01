@@ -16,9 +16,9 @@ class Player;
  * after ` p#`, followed by the bar at `+0x08`.
  *
  * The three members are public because code outside the class accesses them directly with no
- * accessor in the image. AutocatchPowerup::Slot2() at `0x001c9628` writes all three into a stack
+ * accessor in the image. AutocatchPowerup::Deploy() at `0x001c9628` writes all three into a stack
  * message. Catcher::OnAutoCatch() at `0x001ac688` compares mTrack with its own track, plays mBar
- * for mPlayer, and sets CmdMsg::mUnknown04 to mark the message handled.
+ * for mPlayer, and sets CmdMsg::mResult to mark the message handled.
  *
  * The destructor at `0x003e2460` is compiler-generated and has no declaration here.
  */

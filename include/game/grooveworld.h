@@ -59,8 +59,8 @@ class TickClock;
  * constructor installs. mState steps through 1 while the level file loads, 2 once it is
  * converted, 4 while the world accepts controller readings, and 6 on one shutdown path.
  *
- * GameManagerImpl reads mInputMap from three of its handlers, writes mUnknown8c from its load path
- * and its begin-game handler, and reads mUnknown90 from its unpause handler. `0x0018dc88` and
+ * GameManagerImpl reads mInputMap from three of its handlers, writes mIsPlayback from its load path
+ * and its begin-game handler, and reads mIsTutorial from its unpause handler. `0x0018dc88` and
  * `0x0018de38` both run once the world is ready.
  */
 class GrooveWorld : public MsgSink, public RawController {
@@ -71,9 +71,9 @@ public:
     /**
      * Construct an empty world.
      *
-     * It clears every member except the three load-buffer words, sets mUnknownb8 to 1, and creates
-     * the song clock on the application's Watchdog with no tempo map, the cheat detector over
-     * g_gameCheatSequences, and the force-feedback manager.
+     * It clears every member except the three load-buffer words, sets mContinueJukebox to 1, and
+     * creates the song clock on the application's Watchdog with no tempo map, the cheat detector
+     * over g_gameCheatSequences, and the force-feedback manager.
      *
      * @param pApp The application.
      * @param pStats The game manager's statistics.
@@ -102,20 +102,21 @@ public:
      * Report a controller reading. Slot 2 of the secondary table.
      *
      * The body returns at once unless mState is 4, and passes the reading to the cheat detector
-     * unless mUnknown90 is set. In jukebox mode a joystick press of button 10 clears mUnknownb8
-     * and posts exit mode 1, and every other reading is dropped. While a playback runs, a
-     * joystick press of any button below 100 posts exit mode 1. Otherwise a joystick press of
-     * button 10 from a local pad posts exit mode 1 once a solo game song is complete, and queues
-     * a PauseGameSystemMsg and stops the riffs in any other case. Every remaining reading is
-     * queued as a ControllerCmd for replay, unless mUnknown84 is set outside a playback.
+     * unless mIsTutorial is set. In jukebox mode a joystick press of button 10 clears
+     * mContinueJukebox and posts the finish exit, and every other reading is dropped. While a
+     * playback runs, a joystick press of any button below 100 posts the finish exit. Otherwise a
+     * joystick press of button 10 from a local pad posts the finish exit once a solo game song is
+     * complete, and queues a PauseGameSystemMsg and stops the riffs in any other case. Every
+     * remaining reading is queued as a ControllerCmd for replay, unless mIgnoreReadings is set
+     * outside a playback.
      *
-     * @param nUnknown1 The first word of the reading.
-     * @param nUnknown2 The second word of the reading.
-     * @param nUnknown3 The third word of the reading.
-     * @param flUnknown4 The float of the reading.
+     * @param nTag The device tag, a four-character code.
+     * @param nPadIndex The controller that produced the reading, from 1.
+     * @param nButton The button or axis control number.
+     * @param flValue The reading's value.
      * @ghidraAddress 0x0018ed98
      */
-    virtual void OnUnknownSlot2(int nUnknown1, int nUnknown2, int nUnknown3, float flUnknown4);
+    virtual void OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue);
 
     /**
      * Hand one recorded controller reading to the input map.
@@ -133,35 +134,35 @@ public:
      * Queue an ExitCmd built from three values.
      *
      * Does nothing unless mState is 4, and otherwise sets mState to 5. While a playback runs, or
-     * when nUnknown88 is set, it runs Exit() at once. Otherwise it queues the ExitCmd on the
-     * application's watchdog timer with no delay, as a recordable command. PostExitMode1(),
-     * PostExitMode2(), and PostExitMode3() are the recovered callers.
+     * when bRestart is set, it runs Exit() at once. Otherwise it queues the ExitCmd on the
+     * application's watchdog timer with no delay, as a recordable command. PostFinish(),
+     * PostQuit(), and PostRestart() are the recovered callers.
      *
-     * @param nMode The value Exit() stores in mUnknown94.
-     * @param nUnknownb8 The value Exit() stores in mUnknownb8.
-     * @param nUnknown88 The value Exit() stores in mUnknown88.
+     * @param nMode The value Exit() stores in mExitMode.
+     * @param bContinueJukebox The value Exit() stores in mContinueJukebox.
+     * @param bRestart The value Exit() stores in mRestart.
      * @ghidraAddress 0x0018e368
      */
-    void PostExit(int nMode, int nUnknownb8, int nUnknown88);
+    void PostExit(int nMode, int bContinueJukebox, int bRestart);
 
     /**
      * Leave the game in one of three modes.
      *
-     * It stores nMode in mUnknown94, nUnknownb8 in mUnknownb8, and nUnknown88 in mUnknown88,
-     * stops the riffs and disables the input map, and sends a GameOverMsg to the delayer. The fade
-     * is 5000 milliseconds in jukebox mode, 3000 for exit mode 1 or a running playback, and 1000
-     * otherwise, and the screen fade sent to the delayer runs 500 longer. The synthesiser fades
-     * out over the same length for exit mode 1 or a playback. Otherwise the notes stop at once,
-     * the watchdog takes a snapshot, and the song clock pauses. It then stops the force feedback
-     * and queues FinishSong() 600 milliseconds after the fade. ExitCmd::Execute() is the recovered
-     * caller.
+     * It stores nMode in mExitMode, bContinueJukebox in mContinueJukebox, and bRestart in
+     * mRestart, stops the riffs and disables the input map, and sends a GameOverMsg to the delayer.
+     * The fade is 5000 milliseconds in jukebox mode, 3000 for the finish exit or a running
+     * playback, and 1000 otherwise, and the screen fade sent to the delayer runs 500 longer. The
+     * synthesiser fades out over the same length for the finish exit or a playback. Otherwise the
+     * notes stop at once, the watchdog takes a snapshot, and the song clock pauses. It then stops
+     * the force feedback and queues FinishSong() 600 milliseconds after the fade.
+     * ExitCmd::Execute() is the recovered caller.
      *
      * @param nMode The exit mode.
-     * @param nUnknownb8 Stored in mUnknownb8.
-     * @param nUnknown88 Stored in mUnknown88.
+     * @param bContinueJukebox Stored in mContinueJukebox.
+     * @param bRestart Stored in mRestart.
      * @ghidraAddress 0x0018e478
      */
-    void Exit(int nMode, int nUnknownb8, int nUnknown88);
+    void Exit(int nMode, int bContinueJukebox, int bRestart);
 
     /**
      * Hand a CripplePacket to the delayer.
@@ -187,13 +188,14 @@ public:
     /**
      * Install the sink and the source the gamer is wired to.
      *
-     * The source is retained only in game mode 3, and a null pointer is stored otherwise.
+     * The source is retained only in game mode 3, and a null pointer is stored otherwise. The image
+     * has no caller, and the network role of both is inferred from that game mode.
      *
-     * @param pSink The sink stored in mUnknown20.
-     * @param pSource The source stored in mUnknown1c in game mode 3.
+     * @param pSink The sink stored in mNetSink.
+     * @param pSource The source stored in mNetSource in game mode 3.
      * @ghidraAddress 0x00194b80
      */
-    void SetUnknown20And1c(MsgSink *pSink, MsgSource *pSource);
+    void SetNetLink(MsgSink *pSink, MsgSource *pSource);
 
     /**
      * Create the level and begin reading its MIDI file asynchronously.
@@ -230,9 +232,10 @@ public:
      * Resets the synthesiser through its slots 5 and 6, sets its jam flag from the play mode,
      * runs BuildGraphs(), CreateRenderer(), and ConnectPlayers(), starts the streamed audio named
      * by configuration code 0x3a5 when code 0x3a4 is set, and reads the start offset from code
-     * 0x38d, which becomes the negated song start clamped to the finite range. It then stores
-     * configuration flag 0x3a1 in mUnknown90 and sets mState to 3. GameManagerImpl's
-     * FinishWorldLoad() and Load() call it after FinishLoad(). The title is inferred.
+     * 0x38d as the negated song start clamped to the finite range. It then stores the
+     * tutorial flag, configuration code 0x3a1, in mIsTutorial and sets mState to 3.
+     * GameManagerImpl's FinishWorldLoad() and Load() call it after FinishLoad(). The title is
+     * inferred.
      *
      * @ghidraAddress 0x0018dc88
      */
@@ -242,14 +245,14 @@ public:
      * Starts play on a prepared level.
      *
      * Disables the input map entries, flushes the watchdog, resumes mSongClock, starts the note
-     * destroyer, and sets mState to 4. It runs synthesiser slot 10 and builds the mUnknown50
-     * sequencers. Unless mUnknown90 is set, it posts EnableInput() half a quantum of the first
+     * destroyer, and sets mState to 4. It runs synthesiser slot 10 and builds the mIntroGraphs
+     * sequencers. Unless mIsTutorial is set, it posts EnableInput() half a quantum of the first
      * track ahead of the song start, and it always posts StartSequencers() at the start. It
      * sends a GameBeginMsg to the delayer and the joiner and a one-second FadeGameMsg that fades
      * in to the delayer, resets the statistics for the player count, runs Player slot 11 on
-     * every player, and configures the force feedback manager (jukebox mode, mUnknown8c, the
+     * every player, and configures the force feedback manager (jukebox mode, mIsPlayback, the
      * settings flag, the local player count, and a metronome 3200 ticks ahead).
-     * GameManagerImpl's OnUnknownSlot6() is the only caller. The title is inferred.
+     * GameManagerImpl::StartPlay() is the only caller. The title is inferred.
      *
      * @ghidraAddress 0x0018de38
      */
@@ -270,7 +273,7 @@ public:
      * Create a player this console drives and append it to mPlayers and mLocalPlayers.
      *
      * The track is nId, except in solo mode, where it is configuration code 0x3a6 minus 1. The
-     * player receives the persona's appearance (MetPersonaData::mUnknown140). The title is
+     * player receives the persona's appearance (MetPersonaData::mAppearance). The title is
      * inferred.
      *
      * @param nId The player's identifier.
@@ -286,7 +289,7 @@ public:
     /**
      * Remove the first player with an identifier from mPlayers, without destroying it.
      *
-     * @param nId The identifier to match against Player::mId20.
+     * @param nId The identifier to match against Player::mPlayerId.
      * @ghidraAddress 0x00194ef0
      */
     void RemovePlayer(int nId);
@@ -323,25 +326,32 @@ public:
     void EnableInput();
 
     /**
-     * Queue exit mode 1 with the current mUnknownb8.
+     * Queue the finish exit, mode 1, with the current mContinueJukebox.
+     *
+     * Gamer posts it at the end of a song, the stop-game script command posts it, and
+     * GameManagerImpl posts it when a press interrupts a playback.
      *
      * @ghidraAddress 0x00195170
      */
-    void PostExitMode1();
+    void PostFinish();
 
     /**
-     * Queue exit mode 2.
+     * Queue the quit exit, mode 2.
+     *
+     * The pause menu's quit item posts it.
      *
      * @ghidraAddress 0x00195198
      */
-    void PostExitMode2();
+    void PostQuit();
 
     /**
-     * Queue exit mode 3 with a final argument of 1.
+     * Queue the restart exit, mode 3, with mRestart set.
+     *
+     * The pause menu's restart item posts it.
      *
      * @ghidraAddress 0x001951c0
      */
-    void PostExitMode3();
+    void PostRestart();
 
     /**
      * Tear the world down ahead of destruction.
@@ -403,8 +413,8 @@ private:
     /**
      * Wire every player into the world's message graph.
      *
-     * Each player becomes a sink of mInputMap, mTrackSelector, and mUnknown1c when set, and
-     * mJoiner, mGamer, mTrackSelector, and mUnknown20 when set become sinks of the player.
+     * Each player becomes a sink of mInputMap, mTrackSelector, and mNetSource when set, and
+     * mJoiner, mGamer, mTrackSelector, and mNetSink when set become sinks of the player.
      * PrepareLevel() is the caller. The title is inferred.
      *
      * @ghidraAddress 0x0018c828
@@ -415,7 +425,7 @@ private:
      * Undo ConnectPlayers().
      *
      * The player's own sinks are removed first, mGamer ahead of mJoiner, and the player is then
-     * removed from mUnknown1c, mTrackSelector, and mInputMap in that order. The title is inferred.
+     * removed from mNetSource, mTrackSelector, and mInputMap in that order. The title is inferred.
      *
      * @ghidraAddress 0x0018c960
      */
@@ -434,7 +444,7 @@ private:
      * Create the in-game renderer and introduce every player to it.
      *
      * The renderer becomes a sink of mDelayer and of each player. Each player then sends it a
-     * TrackSelectMsg, and a SeekerMsg as well while the player's Slot2() reports -1.
+     * TrackSelectMsg, and a SeekerMsg as well while the player's GetInputSlot() reports -1.
      * PrepareLevel() is the caller.
      *
      * @ghidraAddress 0x0018caa8
@@ -477,7 +487,7 @@ private:
      * Stop every stage and sequencer at the end of the song and schedule EndLevel().
      *
      * In jam mode the song name and every stage's phrases are first written to the reset log,
-     * behind a length word patched in last. Exit mode 2 posts EndLevel() half a second later,
+     * behind a length word patched in last. The quit exit posts EndLevel() half a second later,
      * and every other mode runs it at once. The world queues it as a FuncCmd, through the pointer
      * to member at `0x007dc2a0`. The title is inferred.
      *
@@ -488,10 +498,10 @@ private:
     /**
      * Report the end of the game to the game manager.
      *
-     * Clears the display to black in exit mode 3, sets mState to 6, and queues an EndGameMsg that
-     * carries mUnknown88. Exit modes 1 and 2 then install the bank-load progress hook and run the
-     * synthesiser's LoadBankSet4(), except in a jukebox session with mUnknownb8 set. The title is
-     * inferred.
+     * Clears the display to black on the restart exit, sets mState to 6, and queues an EndGameMsg
+     * that includes mRestart. The finish and quit exits then install the bank-load progress hook
+     * and run the synthesiser's LoadBankSet4(), except in a jukebox session with mContinueJukebox
+     * set. The title is inferred.
      *
      * @ghidraAddress 0x0018eb70
      */
@@ -548,10 +558,12 @@ private:
     // The MIDI level. BuildGraphs() halts with `MIDI level file has not been loaded.` while it is
     // null.
     LevelBuilder *mLevel; // +0x18
-    // Registered with in game mode 3 only.
-    MsgSource *mUnknown1c; // +0x1c
-    MsgSink *mUnknown20;   // +0x20
-    Delayer *mDelayer;     // +0x24
+    // The network packet source the players and the world listen to. Registered with in game mode
+    // 3 only.
+    MsgSource *mNetSource; // +0x1c
+    // The network packet sink the players and, in game mode 3, the gamer send to.
+    MsgSink *mNetSink; // +0x20
+    Delayer *mDelayer; // +0x24
     // The in-game renderer. CreateRenderer() creates it.
     Renderer *mRenderer; // +0x28
 
@@ -583,13 +595,16 @@ public:
     std::vector<ScoreTrackGraph *> mTrackGraphs; // +0x38
 
 private:
-    std::vector<BGTrackGraph *> mUnknown44; // +0x44
-    // The element type is fixed by DestroyGraphs() and StartSequencers(). Both run one
-    // std::for_each instantiation over this vector and mUnknown44.
-    std::vector<BGTrackGraph *> mUnknown50; // +0x50
-    BGTrackGraph *mUnknown5c;               // +0x5c
-    MuseSynth *mMuseSynth;                  // +0x60
-    Sch::TickClock *mSongClock;             // +0x64
+    // One graph per backing track. The gamer receives the vector through SetBackGraphs().
+    std::vector<BGTrackGraph *> mBackingGraphs; // +0x44
+    // One graph per intro track. The element type is fixed by DestroyGraphs() and
+    // StartSequencers(). Both run one std::for_each instantiation over this vector and
+    // mBackingGraphs.
+    std::vector<BGTrackGraph *> mIntroGraphs; // +0x50
+    // The graph of the level's own track, when the level has one.
+    BGTrackGraph *mOwnTrackGraph; // +0x5c
+    MuseSynth *mMuseSynth;        // +0x60
+    Sch::TickClock *mSongClock;   // +0x64
 
 public:
     /**
@@ -611,25 +626,33 @@ public:
 
 private:
     InputCheatDetectorGS *mCheatDetector; // +0x80
-    int mUnknown84;                       // +0x84
-    int mUnknown88;                       // +0x88
+    // Non-zero to drop controller readings outside a playback instead of queueing them. Only the
+    // constructor writes it, with zero.
+    int mIgnoreReadings; // +0x84
+    // Non-zero when the exit restarts the game. EndLevel() passes it in the EndGameMsg.
+    int mRestart; // +0x88
 
 public:
     /**
-     * A word GameManagerImpl::OnBeginGameLocal() clears at `0x001067c4` and
-     * GameManagerImpl::Load() sets at `0x001074b8`. Public because both write it directly, and
-     * the image has no accessor for it. No reader is recovered. +0x8c
+     * Non-zero while the world plays back a recording. +0x8c
+     *
+     * GameManagerImpl::OnBeginGameLocal() clears it at `0x001067c4`, and GameManagerImpl::Load()
+     * (run by GamePlayback) sets it at `0x001074b8`. StartPlay() passes it to the force
+     * feedback manager. Public because both GameManagerImpl routines write it directly, and the
+     * image has no accessor for it.
      */
-    int mUnknown8c;
+    int mIsPlayback;
 
     /**
-     * A word GameManagerImpl::OnUnpauseGameSystem() reads directly at `0x00106b54`. It rebuilds
-     * mInputMap only while the word is zero. The image has no accessor for it. +0x90
+     * Non-zero in a tutorial level, from the tutorial configuration flag 0x3a1. +0x90
+     *
+     * GameManagerImpl::OnUnpauseGameSystem() reads it directly at `0x00106b54` and rebuilds
+     * mInputMap only while it is zero. The image has no accessor for it.
      */
-    int mUnknown90;
+    int mIsTutorial;
 
 private:
-    int mUnknown94;    // +0x94, the exit mode
+    int mExitMode;     // +0x94
     int mState;        // +0x98
     HxStr mLevelPath;  // +0x9c
     void *mLoadBuffer; // +0xa4, the raw MIDI file
@@ -647,10 +670,12 @@ public:
     HxStr mSongName;
 
     /**
-     * A word that starts at 1 and that PostExitMode1() posts with the exit.
+     * Non-zero while a jukebox session goes on to its next song. Starts at 1. +0xb8
      *
-     * Public because GameManagerImpl::EndGame() reads it directly at `0x00106c30` and announces
-     * MetFreqEndedMsg(1) only while it is zero. The image has no accessor for it. +0xb8
+     * A pause press in jukebox mode clears it, PostFinish() posts it with the exit, and EndLevel()
+     * skips the synthesiser's LoadBankSet4() while it is set in jukebox mode. Public because
+     * GameManagerImpl::EndGame() reads it directly at `0x00106c30` and announces
+     * MetFreqEndedMsg(1) only while it is zero. The image has no accessor for it.
      */
-    int mUnknownb8;
+    int mContinueJukebox;
 };

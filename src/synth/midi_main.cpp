@@ -20,13 +20,9 @@
 #include "script/configquery.h"
 #include "synth/callbackxferhdtoiop.h"
 
-// The tag both allocations below bill to. It is the module's original file rather than this one,
-// because the whole of midi_main compiled as a single translation unit.
-constexpr char kMidiMainFileName[] = "midi_main.cpp";
-
-// Selector submitted by SynthCommand's third command and by the tail of the voice report. What it
-// asks the driver to do is unrecovered, so the title records the selector rather than an effect.
-constexpr int kSoundSelectorUnknownD0 = 0xd0;
+// The driver's diagnostic request, submitted by SynthCommand's third command and by the tail of the
+// voice report.
+constexpr int kSoundSelectorInfo = 0xd0;
 
 // libsdr's trampoline routes a zero first argument through its callback thread. Every call site in
 // the game passes 1, which is the SDK's own `blocking` argument.
@@ -69,12 +65,12 @@ constexpr int kSifRpcStillRunning = 1;
 // The words the driver replies with, and the request a value-carrying selector sends from.
 constexpr int kSoundDriverReplyWords = 16;
 
-// Selectors InitSynthDriver() and the three forwarders submit. Their effects are unrecovered, and
-// InitSynthDriver() keeps the reply to the first as the IOP address PollSynthEvents() writes to.
+// Selectors InitSynthDriver() and the three forwarders submit. InitSynthDriver() retains the reply
+// to the first as the IOP address PollSynthEvents() writes to.
 constexpr int kSoundSelectorAllocEventBuffer = 0x8010;
-constexpr int kSoundSelectorUnknown110 = 0x110;
-constexpr int kSoundSelectorUnknown100 = 0x100;
-constexpr int kSoundSelectorUnknownF0 = 0xf0;
+constexpr int kSoundSelectorMono = 0x110;
+constexpr int kSoundSelectorRemix = 0x100;
+constexpr int kSoundSelectorPause = 0xf0;
 
 // The argument InitSynthDriver() passes with kSoundSelectorAllocEventBuffer.
 constexpr uintptr_t kMidiEventBufferRequest = 0x4000;
@@ -336,8 +332,7 @@ int StartBdBankXfer(const char *pszPath) {
         return -1;
     }
     const int nFile = FileOpen(pszName, 0);
-    g_pBdXferBuffer =
-        MemAllocTagged(kBankChunkSize + kBankBufferAlignment - 1, kMidiMainFileName, __LINE__);
+    g_pBdXferBuffer = MemAllocTagged(kBankChunkSize + kBankBufferAlignment - 1, __FILE__, __LINE__);
     const uintptr_t nRaw = reinterpret_cast<uintptr_t>(g_pBdXferBuffer) + kBankBufferAlignment - 1;
     char *pReadBuffer =
         reinterpret_cast<char *>(nRaw & ~static_cast<uintptr_t>(kBankBufferAlignment - 1));
@@ -370,7 +365,7 @@ int StartHdBankXfer(const char *pszPath, int nPlacement) {
         LogPrintf("\nCan't alloc heap \n");
         return -1;
     }
-    g_pHdXferBuffer = MemAllocTagged(nLength + kBankBufferAlignment, kMidiMainFileName, __LINE__);
+    g_pHdXferBuffer = MemAllocTagged(nLength + kBankBufferAlignment, __FILE__, __LINE__);
     const uintptr_t nRaw = reinterpret_cast<uintptr_t>(g_pHdXferBuffer) + kBankBufferAlignment - 1;
     char *pReadBuffer =
         reinterpret_cast<char *>(nRaw & ~static_cast<uintptr_t>(kBankBufferAlignment - 1));
@@ -418,7 +413,7 @@ void SynthCommand(int nCommand) {
         DumpSynthVoices(1);
         break;
     case 2:
-        SubmitSoundDriverRequest(kSoundSelectorUnknownD0, 0);
+        SubmitSoundDriverRequest(kSoundSelectorInfo, 0);
         break;
     default:
         LogPrintf("Unrecognized synth cmd %d\n", nCommand);
@@ -470,7 +465,7 @@ void DumpSynthVoices(int bActiveOnly) {
                       (nVMixER & nBit) != 0);
         }
     }
-    SubmitSoundDriverRequest(kSoundSelectorUnknownD0, 0);
+    SubmitSoundDriverRequest(kSoundSelectorInfo, 0);
     LogPrintf("Using %d voices total\n", nActive);
 }
 
@@ -671,28 +666,28 @@ void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char
                    nStatus | (nData1 << kMidiData1Shift) | (nData2 << kMidiData2Shift));
 }
 
-// Selector ReleaseSoundBanks() submits through SubmitDriverSelectorC0(). Its effect is
-// unrecovered.
-constexpr int kSoundSelectorUnknownC0 = 0xc0;
+// The driver's all-notes-off command. ReleaseSoundBanks() submits it through
+// SubmitDriverAllNotesOff().
+constexpr int kSoundSelectorAllNotesOff = 0xc0;
 
 // 0x004649d8
-void SubmitDriverSelectorC0() {
-    SubmitSoundDriverRequest(kSoundSelectorUnknownC0, 0);
+void SubmitDriverAllNotesOff() {
+    SubmitSoundDriverRequest(kSoundSelectorAllNotesOff, 0);
 }
 
 // 0x00464868
-void SubmitDriverSelector110(int nValue) {
-    SubmitSoundDriverRequest(kSoundSelectorUnknown110, nValue);
+void SubmitDriverSetMono(int bMono) {
+    SubmitSoundDriverRequest(kSoundSelectorMono, bMono);
 }
 
 // 0x00464888
-void SubmitDriverSelector100(int nValue) {
-    SubmitSoundDriverRequest(kSoundSelectorUnknown100, nValue);
+void SubmitDriverSetRemix(int bRemix) {
+    SubmitSoundDriverRequest(kSoundSelectorRemix, bRemix);
 }
 
 // 0x004648a8
-void SubmitDriverSelectorF0(int nValue) {
-    SubmitSoundDriverRequest(kSoundSelectorUnknownF0, nValue);
+void SubmitDriverSetPaused(int bPaused) {
+    SubmitSoundDriverRequest(kSoundSelectorPause, bPaused);
 }
 
 // 0x004648c8
@@ -717,7 +712,7 @@ void WaitForBankTransfers() {
 
 // 0x00464660
 void ReleaseSoundBanks() {
-    SubmitDriverSelectorC0();
+    SubmitDriverAllNotesOff();
     ReleaseAllBankSlots();
     delete g_pBdXfer;
     g_pBdXfer = nullptr;

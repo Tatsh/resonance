@@ -211,7 +211,7 @@ inline void LevelConverter::ReportError(int nTick, const char *pszMessage) {
 // 0x001e6278
 // The three HxStr members, the positions, and the six collections are default-constructed by the
 // expansions the compiler places ahead of and around these stores.
-LevelConverter::LevelConverter() : mUnknown90(0), mDifficulty(0) {
+LevelConverter::LevelConverter() : mIgnoreQuantization(0), mDifficulty(0) {
 }
 
 // 0x001e9ee0
@@ -259,7 +259,7 @@ void LevelConverter::Convert(const char *pszPath,
     mScoreTrack = 0;
     mBackingTrackCount = 0;
     mIntroTrackCount = 0;
-    mUnknown38 = 0;
+    mUnusedTrackCount = 0;
     mHasTempo = 0;
     if (QueryConfigFlag(kBankSelectDisableQuery)) {
         mBankSelect = 0;
@@ -386,7 +386,7 @@ void LevelConverter::Controller(int nTick,
             if (nValue == kQuantizationWhole || nValue == kQuantizationHalf ||
                 nValue == kQuantizationQuarter || nValue == kQuantizationEighth ||
                 nValue == kQuantizationSixteenth) {
-                if (mUnknown90 == 0) {
+                if (mIgnoreQuantization == 0) {
                     mBuilder->SetQuant(nTick, nValue);
                 }
             } else {
@@ -399,7 +399,7 @@ void LevelConverter::Controller(int nTick,
             return;
         }
         if (nController == kControllerActiveness) {
-            mBuilder->OnUnknownForwarder001ec580(nTick, nValue != 0);
+            mBuilder->SetActive(nTick, nValue != 0);
             return;
         }
     } else if (nController == kControllerActiveness) {
@@ -483,7 +483,7 @@ void LevelConverter::EndTrack() {
         mBuilder->AddHarmony(mHarmonyStart.mTick, mHarmony);
     }
     if (mRiffTrack && !mRiffOpened) {
-        mBuilder->OnUnknownForwarder001ec580(Mid::MBT(0).mTick, 0);
+        mBuilder->SetActive(Mid::MBT(0).mTick, 0);
     }
     if (mRiff != nullptr && mTrackType == kTrackTypeAxe &&
         mRiff->mLength.mTick == Mid::MBT(0).mTick) {
@@ -774,7 +774,7 @@ void LevelConverter::AddNote(int nTick,
         return;
     }
     if (mBankSelect != 0) {
-        PlayMap *pMap = mBuilder->OnUnknownSlot8();
+        PlayMap *pMap = mBuilder->GetPlayMap();
         const int nBar = pMap->FindStepIndex(nTick / Mid::MBT(kTicksPerBar).mTick);
         if (nBar != mLastBankBar) {
             mLastBankBar = nBar;
@@ -887,7 +887,7 @@ void LevelConverter::EmitRiffProgram(int nTick) {
     }
     mProgramSent = 1;
     if (mBankSelect != 0 && mTrackType != kTrackTypeAxe && mTrackType != kTrackTypeScratch) {
-        PlayMap *pMap = mBuilder->OnUnknownSlot8();
+        PlayMap *pMap = mBuilder->GetPlayMap();
         const int nBar = pMap->FindStepIndex(nTick / Mid::MBT(kTicksPerBar).mTick);
         mRiff->AddMidiMsg(ClampMBT(nTick - mRiffStart.mTick).mTick,
                           kMidiControlChange,

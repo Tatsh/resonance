@@ -21,32 +21,32 @@ PitchingSTG::PitchingSTG(TrackData *pTrackData)
 
     if (mApplication->GetPlayMode() == kPlayModeJam) {
         mJamEffects = new JamEffectsMgr(
-            mUnknown00, mTrackData->mChannel, mApplication->GetPlayMap(), mPhraseMgr, mMuseSynth);
+            mTrack, mTrackData->mChannel, mApplication->GetPlayMap(), mPhraseMgr, mMuseSynth);
         mPhrasePlayer->SetJamEffectsMgr(mJamEffects);
     }
 }
 
 // 0x001c4cf0
-void PitchingSTG::Slot2() {
-    ScoreTrackGraph::Slot2();
+void PitchingSTG::Start() {
+    ScoreTrackGraph::Start();
     mPitcher->Start(kMBTInfinity); // Unguarded, as in the binary, for a track of any other kind.
 }
 
 // 0x001c4d28
-void PitchingSTG::Slot3() {
+void PitchingSTG::Stop() {
     mPitcher->Stop();
-    ScoreTrackGraph::Slot3();
+    ScoreTrackGraph::Stop();
 }
 
 // 0x001c4c68
 PitchingSTG::~PitchingSTG() {
-    PitchingSTG::Slot3(); // The binary calls this class's own body rather than dispatching.
+    PitchingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mPitcher;
     delete mJamEffects;
 }
 
 // 0x001c4798
-void PitchingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void PitchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mPitcher);
     pPrimary->AddSink(mPhraseMgr);
@@ -69,13 +69,13 @@ void PitchingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pS
 }
 
 // 0x001c4d60
-void PitchingSTG::Slot6(MsgSink *pOutput) {
+void PitchingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
 // 0x001c4da0
-void PitchingSTG::Slot7(MsgSink *pSink) {
+void PitchingSTG::AddSinkToSources(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mPitcher->AddSink(pSink);
     if (mJamEffects != nullptr) {
@@ -84,7 +84,7 @@ void PitchingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x001c4e30
-void PitchingSTG::Slot8(MsgSink *pSink) {
+void PitchingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;
     }

@@ -60,5 +60,5 @@ public:
      *
      * @ghidraAddress 0x0027bf50
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 };

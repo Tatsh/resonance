@@ -43,6 +43,6 @@ void MetRightGizmoScreen::BeginExit() {
 }
 
 // 0x0027bbb0
-void MetRightGizmoScreen::OnUnknownSlot33() {
+void MetRightGizmoScreen::OnEnterFinished() {
     dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(1);
 }

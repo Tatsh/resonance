@@ -732,7 +732,7 @@ void Mat::Load(Stream &stream) {
 }
 
 // 0x004db958
-void Mat::SyncMat([[maybe_unused]] int nUnknown) {
+void Mat::SyncMat([[maybe_unused]] int nStage) {
 }
 
 // 0x004dcd88

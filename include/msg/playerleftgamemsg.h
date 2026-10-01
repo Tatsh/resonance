@@ -61,7 +61,7 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    int mUnknown04; // +0x04
+    int mPlayerId; // +0x04, with a title after the player the class name reports as leaving
 };
 
 /**

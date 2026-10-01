@@ -29,5 +29,5 @@ const char *AutoCatchMsg::Name() {
 // 0x003e4208
 void AutoCatchMsg::Print(std::ostream &stream) {
     stream << "tr#" << mTrack;
-    stream << " p#" << mPlayer->mId20 << " " << mBar;
+    stream << " p#" << mPlayer->mPlayerId << " " << mBar;
 }

@@ -53,10 +53,10 @@ public:
     /**
      * Construct an empty builder.
      *
-     * It creates the tempo map at mUnknown30 at 500000 microseconds per quarter note and the
-     * PlayMapLinear at mUnknown34. The map takes its steps and labels from configuration codes
-     * 0x396 and 0x3a0 and its slot 20 values from code 0x39d. The builder then creates
-     * nTrackCount score tracks, and runs PlayMap slot 17 with 0xe when code 0x3a1 is set.
+     * It creates the tempo map at mTempoMap at 500000 microseconds per quarter note and the
+     * PlayMapLinear at mPlayMap. The map takes its steps and labels from configuration codes
+     * 0x396 and 0x3a0 and its sections from code 0x39d. The builder then creates nTrackCount
+     * score tracks, and runs PlayMap::StartLoop() with bar 0xe when code 0x3a1 is set.
      * GrooveWorld::StartLoad() passes the configuration value the query at `0x00509110` reports
      * for the identifier 0x384.
      *
@@ -98,20 +98,20 @@ public:
     /**
      * @ghidraAddress 0x001ec478
      */
-    virtual Sch::TempoMap *OnUnknownSlot7();
+    virtual Sch::TempoMap *GetTempoMap();
 
     /**
      * @ghidraAddress 0x001ec480
      */
-    virtual PlayMap *OnUnknownSlot8();
+    virtual PlayMap *GetPlayMap();
 
     /**
-     * Report the play map's slot 8 value.
+     * Report the play map's extent.
      *
-     * @return The value.
+     * @return PlayMap::GetExtent() of the play map.
      * @ghidraAddress 0x001ec738
      */
-    virtual int OnUnknownSlot9();
+    virtual int GetEndBar();
 
     /**
      * Return one gameplay track, without dispatch.
@@ -130,7 +130,7 @@ public:
      *
      * A score track must already exist. A backing or intro collection grows to include nIndex.
      * An empty slot, like an absent own track, receives a new TrackData with the index -1 over the
-     * play map at mUnknown34. The title is inferred.
+     * play map at mPlayMap. The title is inferred.
      *
      * @param nKind The collection, a LevelTrackKind.
      * @param nIndex The position in the collection. The none and own kinds do not read it.
@@ -150,7 +150,7 @@ public:
     void Print(std::ostream &stream);
 
     /**
-     * Forward a bar count to the play map through its slot 3.
+     * Forward a bar count to PlayMap::SetBarCount().
      *
      * GrooveWorld::BuildGraphs() at `0x0018cd44` passes zero. The title is inferred.
      *
@@ -272,15 +272,16 @@ public:
     void AddHarmony(int nTick, const Harmony &harmony);
 
     /**
-     * Forward to TrackData::OnUnknown001d7758() on the current track.
+     * Forward an activeness change to TrackData::SetActive() on the current track.
      *
-     * LevelConverter::EndTrack() calls it with two zeroes.
+     * LevelConverter::Controller() calls it for controller 0x6a with whether the value is
+     * non-zero, and LevelConverter::EndTrack() calls it with two zeroes. The title is inferred.
      *
-     * @param nFirst The first argument, forwarded unchanged.
-     * @param nSecond The second argument, forwarded unchanged.
+     * @param nTick The event position, in MIDI ticks.
+     * @param bActive Whether the controller value was non-zero.
      * @ghidraAddress 0x001ec580
      */
-    void OnUnknownForwarder001ec580(int nFirst, int nSecond);
+    void SetActive(int nTick, int bActive);
 
     /**
      * Replace the tempo map at `+0x30` with one built from a tempo meta event.
@@ -326,7 +327,7 @@ private:
     // The track the forwarding members append to. The destructor does not release it.
     TrackData *mCurrentTrack; // +0x2c
     // Released by the destructor through Attachment::Release(). SetTempo() replaces it.
-    Sch::TempoMap *mUnknown30; // +0x30
+    Sch::TempoMap *mTempoMap; // +0x30
     // Deleted by the destructor through its own table slot 1.
-    PlayMap *mUnknown34; // +0x34
+    PlayMap *mPlayMap; // +0x34
 };

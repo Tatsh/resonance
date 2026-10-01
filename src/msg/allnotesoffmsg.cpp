@@ -23,6 +23,6 @@ const char *AllNotesOffMsg::Name() {
 }
 
 // 0x0019a690
-int AllNotesOffMsg::OnUnknownSlot8() {
+int AllNotesOffMsg::IsAllNotesOff() {
     return 1;
 }

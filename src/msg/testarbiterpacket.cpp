@@ -30,32 +30,32 @@ const char *TestArbiterPacket::Name() {
 
 // 0x003f2ab8
 void TestArbiterPacket::Print(std::ostream &stream) {
-    stream << mUnknown14 << mUnknown1c;
+    stream << mSender << mText;
 }
 
 // 0x003e8720
 void TestArbiterPacket::Save(OBStream &stream) {
     Packet::Save(stream);
-    SaveHxStr(SaveHxStr(stream, mUnknown14), mUnknown1c);
+    SaveHxStr(SaveHxStr(stream, mSender), mText);
 }
 
 // 0x003e8890
 void TestArbiterPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    LoadHxStr(LoadHxStr(stream, mUnknown14), mUnknown1c);
+    LoadHxStr(LoadHxStr(stream, mSender), mText);
 }
 
 // 0x003f1cd0
-TestArbiterPacket::TestArbiterPacket(const HxStr &first, const HxStr &second)
-    : mUnknown14(first), mUnknown1c(second) {
+TestArbiterPacket::TestArbiterPacket(const HxStr &sender, const HxStr &text)
+    : mSender(sender), mText(text) {
 }
 
 // 0x003f1d88
-HxStr TestArbiterPacket::GetUnknown14() {
-    return mUnknown14;
+HxStr TestArbiterPacket::GetSender() {
+    return mSender;
 }
 
 // 0x003f1db8
-HxStr TestArbiterPacket::GetUnknown1c() {
-    return mUnknown1c;
+HxStr TestArbiterPacket::GetText() {
+    return mText;
 }

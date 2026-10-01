@@ -32,16 +32,17 @@ public:
     /**
      * Receive the text the keyboard screen committed. Slot 2.
      *
-     * The name is not recovered. The one parameter is, from three of the overrides. The
-     * MetSaveRemix override at `0x0037a650` passes it to HxStr::Assign as the source of an
-     * assignment into its own `+0xb8`, which fixes it as a `const HxStr &` rather than an integer
-     * or an object pointer. The MetSaveRemixScreen override at `0x00381990` forwards the same
-     * register to a Rnd::Text through Rnd::Text::SetText(), and the MetRemixDelScreen override at
-     * `0x00344240` forwards it to the MetSaveRemix override unchanged. Three of the seven overrides
-     * in the image were read.
+     * The name is not recovered and the title is inferred from MetKeyboardScreen::OnExitFinished(),
+     * the one caller. That caller passes the committed text. The one parameter is recovered from
+     * three of the overrides. The MetSaveRemix override at `0x0037a650` passes it to HxStr::Assign
+     * as the source of an assignment into its `+0xb8`. That assignment fixes it as a
+     * `const HxStr &` rather than an integer or an object pointer. The MetSaveRemixScreen override
+     * at `0x00381990` forwards the same register to a Rnd::Text through Rnd::Text::SetText(), and
+     * the MetRemixDelScreen override at `0x00344240` forwards it to the MetSaveRemix override
+     * unchanged. Three of the seven overrides in the image were read.
      *
      * @param text The text the user entered.
      * @ghidraAddress 0x005381a8
      */
-    virtual void OnUnknownSlot2(const HxStr &text) = 0;
+    virtual void OnKeyboardTextEntered(const HxStr &text) = 0;
 };

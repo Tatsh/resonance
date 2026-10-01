@@ -116,20 +116,20 @@ public:
      * @param pButton The button whose alternation finished.
      * @ghidraAddress 0x0029ce58
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Bring up the next screen once this one has exited.
      *
      * Slot 36. After a back command MetLoadFreqScreen returns. Otherwise `MetFreqCreateScreen` is
-     * recorded in MetFrontEndState::mUnknown24, the persona is marked new, the canvas takes the
+     * recorded in MetFrontEndState::mReturnScreen, the persona is marked new, the canvas takes the
      * selected pre-fab for the first button or an empty persona for the second, the game manager's
      * persona list is cleared, and the four FreQ maker screens come up with the buttons screen
      * active. The button selection is cleared on both paths.
      *
      * @ghidraAddress 0x0029cfa0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views and the two arrows, and add the two buttons with their help texts.

@@ -28,15 +28,15 @@ const char *JuiceAmountMsg::Name() {
 
 // 0x003e4178
 int JuiceAmountMsg::GetJuice() {
-    return mUnknown04->GetJuice();
+    return mPlayer->GetJuice();
 }
 
 // 0x003e4198
 float JuiceAmountMsg::GetJuiceFraction() {
-    return static_cast<float>(mUnknown04->GetJuice()) / static_cast<float>(mUnknown08);
+    return static_cast<float>(mPlayer->GetJuice()) / static_cast<float>(mMaxJuice);
 }
 
 // 0x003e41d8
 void JuiceAmountMsg::Print(std::ostream &stream) {
-    mUnknown04->Print(stream);
+    mPlayer->Print(stream);
 }

@@ -75,7 +75,7 @@ public:
     /**
      * Advance the display to one song position.
      *
-     * Renderer::OnUnknownSlot7() is the caller. The bar is the position divided by 1920 ticks, and
+     * Renderer::Update() is the caller. The bar is the position divided by 1920 ticks, and
      * a change of bar is recorded in mCurrentBar and relights every track display's effect lamps
      * from the renderer's cell for the new bar. The time the text animations run against is the
      * position scaled by mMsPerTick. While the game manager plays a recording back, the panel
@@ -130,11 +130,11 @@ private:
     // 0x0041fdd8
     // TrackSelectMsg. Shows the track's instrument name on the selecting player's
     // label, records the track, lights the effect lamps from the renderer's cell for the current
-    // bar, and banks the player's points unless mUnknown44 is set.
+    // bar, and banks the player's points unless mTutorial is set.
     void OnTrackSelect(Message *pMsg);
 
     // 0x0042aec8
-    // inlined. GameOverMsg. Runs script template 1001 when mUnknown44 is set.
+    // inlined. GameOverMsg. Runs script template 1001 when mTutorial is set.
     void OnGameOver();
 
     // 0x0041e020
@@ -147,7 +147,7 @@ private:
     // 0x0041e9b8
     // ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
     // kPlayModeGame, and selects its effect lamp name otherwise. Runs script template 1016 when
-    // mUnknown44 is set.
+    // mTutorial is set.
     void OnChoosePowerup(Message *pMsg);
 
     // 0x0041eba0
@@ -157,7 +157,8 @@ private:
 
     // 0x0041eda8
     // DeployedPowerupMsg. In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the
-    // display's mUnknownec, and shows `YOU GOT\nBUMPED!` on the target's display for a bumper.
+    // display's mDeployedPowerup, and shows `YOU GOT\nBUMPED!` on the target's display for a
+    // bumper.
     void OnDeployedPowerup(Message *pMsg);
 
     // 0x0042aff0
@@ -171,7 +172,7 @@ private:
     void OnJuiceAmount(Message *pMsg);
 
     // 0x0042b068
-    // inlined. PhraseCapturedMsg. Runs script template 1005 when mUnknown44 is set.
+    // inlined. PhraseCapturedMsg. Runs script template 1005 when mTutorial is set.
     // Otherwise, in kPlayModeGame before the bar in mLastBar, shows the capturing player's
     // points leaving.
     void OnPhraseCaptured(Message *pMsg);
@@ -183,11 +184,11 @@ private:
     // 0x0041f708
     // LoopToggleMsg. Outside kPlayModeGame, shows the player's loop indicator and,
     // once the song is under way, `LOOP ON` or `LOOP OFF`. Runs script template 1011 when
-    // mUnknown44 is set.
+    // mTutorial is set.
     void OnLoopToggle(Message *pMsg);
 
     // 0x0041f440
-    // AdvanceSectionToggleMsg. Without mUnknown44, restyles the section blocks and,
+    // AdvanceSectionToggleMsg. Without mTutorial, restyles the section blocks and,
     // outside playback, shows `ADVANCE TO\nNEXT SECTION` or `REPEAT\nSECTION` on every display.
     void OnAdvanceSectionToggle(Message *pMsg);
 
@@ -204,28 +205,28 @@ private:
 
     // 0x0042aef8
     // inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
-    // kHudItemGuides lamp. Runs script template 1021 when mUnknown44 is set.
+    // kHudItemGuides lamp. Runs script template 1021 when mTutorial is set.
     void OnToggleGhost(Message *pMsg);
 
     // 0x0042b130
-    // inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mUnknown44
+    // inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mTutorial
     // is set. The message is not read.
     void OnJamEffect();
 
     // 0x0041fed8
     // CatchMsg. In kPlayModeGame before the last bar, pulses the points readout to
-    // the share of the phrase caught. In an easy solo game without mUnknown44, counts catches on
+    // the share of the phrase caught. In an easy solo game without mTutorial, counts catches on
     // bars that cannot be captured and shows `ROTATE TO\nNEW TRACK` at the third.
     void OnCatch(Message *pMsg);
 
     // 0x0042b178
-    // inlined. PhraseMuffedMsg. In kPlayModeGame without mUnknown44, banks the
+    // inlined. PhraseMuffedMsg. In kPlayModeGame without mTutorial, banks the
     // player's points.
     void OnPhraseMuffed(Message *pMsg);
 
     // 0x004201c0
     // BeginPhraseCatchMsg. In kPlayModeGame before the last bar and without
-    // mUnknown44, shows the phrase's points and multiplier on the player's readout.
+    // mTutorial, shows the phrase's points and multiplier on the player's readout.
     void OnBeginPhraseCatch(Message *pMsg);
 
     // 0x0042b1f8
@@ -238,7 +239,7 @@ private:
     void OnPlayersTrackNeutralized(Message *pMsg);
 
     // 0x00420408
-    // MultiplierStateMsg. Without mUnknown44 and before the last bar, shows the base
+    // MultiplierStateMsg. Without mTutorial and before the last bar, shows the base
     // plus the bonus multiplier and selects the hot material while a bonus applies.
     void OnMultiplierState(Message *pMsg);
 
@@ -277,8 +278,8 @@ private:
     int mGameMode;
     // Globals::GetPlayMode() at construction.
     int mPlayMode;
-    // Configuration code 0x3a1.
-    int mUnknown44; // +0x44
+    // Non-zero in a tutorial level, from configuration code 0x3a1.
+    int mTutorial;
     // The state of the last PlaybackToggleMsg. The constructor starts it at 0.
     int mPlaybackOn;
     // The bar SetFrame() last saw. The constructor starts it at -123123.
@@ -286,7 +287,7 @@ private:
     // Milliseconds per MIDI tick at the tempo in force at construction. SetFrame() times the text
     // animations with it.
     float mMsPerTick;
-    // The last bar of the level, PlayMap::Slot9().
+    // The last bar of the level, PlayMap::GetEndBar().
     int mLastBar;
     // The session difficulty, GameManagerImpl::GetDifficulty() at construction.
     int mDifficulty;

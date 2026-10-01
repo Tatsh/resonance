@@ -28,8 +28,7 @@ void sceGifPkCloseGifTag(sceGifPkData *pPacket);
 void sceGifPkTerminate(sceGifPkData *pPacket);
 unsigned long long *sceGifPkReserve(sceGifPkData *pPacket, int nWords);
 void sceGifPkRef(
-    sceGifPkData *pPacket, void *pData, int nQuadwords, int nUnknown3, int nUnknown4,
-    int nUnknown5);
+    sceGifPkData *pPacket, void *pData, int nQuadwords, int nOption1, int nOption2, int nFlag);
 
 #ifdef __cplusplus
 }

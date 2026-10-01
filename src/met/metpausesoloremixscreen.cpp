@@ -47,8 +47,8 @@ constexpr int kCommandResume = 10;
 MetPauseSoloRemixScreen::MetPauseSoloRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknownb0(0) {
-    mUnknown9c = kPanelName;
+      mOpensConfigScreen(0) {
+    mReturnPanel = kPanelName;
 }
 
 // 0x00323f58
@@ -57,7 +57,7 @@ void MetPauseSoloRemixScreen::ResolveContainerViews() {
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
             Rnd::g_manager.Find(HxStr(FormatString(kOptionTextFormat, i))));
-        mUnknowna4.push_back(pOption);
+        mOptionTexts.push_back(pOption);
     }
 }
 
@@ -70,13 +70,13 @@ void MetPauseSoloRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
         return;
     case kCommandController:
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknownb0 = 1;
-        mUnknown8c = kExitController;
+        mOpensConfigScreen = 1;
+        mExitAction = kExitController;
         break;
     case kCommandGameOptions:
         PlayPauseSound(pCommand->mPadIndex);
-        mUnknown8c = kExitGameOptions;
-        mUnknownb0 = 1;
+        mExitAction = kExitGameOptions;
+        mOpensConfigScreen = 1;
         break;
     default:
         return;
@@ -94,32 +94,32 @@ void MetPauseSoloRemixScreen::EnterAndShow() {
     HxStr heading = QueryConfigString(kPromptConfigCode, kHeadingKey);
     pPaused->SetText(heading);
 
-    mUnknown90.clear();
-    QueryConfigStrings(&mUnknown90, kLabelsConfigCode, kLabelsKey);
+    mOptionLabels.clear();
+    QueryConfigStrings(&mOptionLabels, kLabelsConfigCode, kLabelsKey);
     // Yes, the binary copies the labels here and again in the base slot.
-    for (std::vector<HxStr>::size_type i = 0; i < mUnknown90.size(); ++i) {
-        mUnknowna4[i]->SetText(mUnknown90[i]);
+    for (std::vector<HxStr>::size_type i = 0; i < mOptionLabels.size(); ++i) {
+        mOptionTexts[i]->SetText(mOptionLabels[i]);
     }
     MetPauseBaseScreen::EnterAndShow();
-    mUnknownb0 = 0;
+    mOpensConfigScreen = 0;
 }
 
 // 0x00324580
-void MetPauseSoloRemixScreen::OnUnknownSlot36() {
-    if (mUnknownb0 == 0) {
-        MetPauseBaseScreen::OnUnknownSlot36();
+void MetPauseSoloRemixScreen::OnExitFinished() {
+    if (mOpensConfigScreen == 0) {
+        MetPauseBaseScreen::OnExitFinished();
         return;
     }
 
     const char *pszConfigScreen;
-    if (mUnknown8c == kExitController) {
+    if (mExitAction == kExitController) {
         pszConfigScreen = kControllerScreen;
-    } else if (mUnknown8c == kExitGameOptions) {
+    } else if (mExitAction == kExitGameOptions) {
         pszConfigScreen = kGameOptionsScreen;
     } else {
         return;
     }
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kPanelName);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kPanelName);
     PushNamedScreen(HxStr(kHelpScreen));
     PushNamedScreen(HxStr(kTitleScreen));
     PushNamedScreen(HxStr(pszConfigScreen));

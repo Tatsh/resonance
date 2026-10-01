@@ -35,18 +35,18 @@ int videoDecInputCount(VideoDec *pVideoDec);
 int videoDecInputSpaceCount(VideoDec *pVideoDec);
 
 /**
- * Reset the decoder with the given values.
+ * Set how many pictures of each coding type the decoder decodes.
  *
- * The three values are forwarded to the decoder reset primitive, which records them in the
- * decoder context.
+ * The three limits are forwarded to sceMpegSetDecodeMode(). That routine records them in the
+ * decoder context. A limit of -1 decodes every picture of that type.
  *
  * @param pVideoDec The decoder.
- * @param nArgA The first value.
- * @param nArgB The second value.
- * @param nArgC The third value.
+ * @param nIntra The intra picture limit.
+ * @param nPredicted The predicted picture limit.
+ * @param nBidirectional The bidirectional picture limit.
  * @ghidraAddress 0x005694b0
  */
-void videoDecReset(VideoDec *pVideoDec, int nArgA, int nArgB, int nArgC);
+void videoDecSetDecodeMode(VideoDec *pVideoDec, int nIntra, int nPredicted, int nBidirectional);
 
 /**
  * Expose the free input regions for writing.

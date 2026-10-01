@@ -21,7 +21,7 @@ unsigned g_nLastCycleDelta;
 
 float g_flMillisecondsPerCycle;
 
-int g_nUnknownCycleWord;
+int g_nUnusedCycleCounter;
 
 // 0x004fefb0
 void ResetCycleCounter() {
@@ -29,6 +29,6 @@ void ResetCycleCounter() {
     (void)ReadCycleCount(); // Yes, the binary discards this reading.
     g_nLastCycleDelta = 0;
     g_nLastCycleCount = ReadCycleCount();
-    g_nUnknownCycleWord = 0;
+    g_nUnusedCycleCounter = 0;
     g_llTotalCycles = 0;
 }

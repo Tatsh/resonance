@@ -63,7 +63,7 @@ public:
      * Show the choice last made and start the enter animation.
      *
      * Slot 5. The title is `m_num_p`, the renderer accepts four controllers, and the button for
-     * MetFrontEndState::mUnknown2c players is selected, the first when the recorded count is
+     * MetFrontEndState::mPlayerCount players is selected, the first when the recorded count is
      * outside two through four. The prompt layout is `standard_title` and the help text follows
      * the selection.
      *
@@ -85,7 +85,7 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * @param nSelector The value the override compares against its own recorded selector.
+     * @param nSelector Not read. The body is empty.
      * @ghidraAddress 0x002b0f70
      */
     virtual void PlayCycleLeftSound(int nSelector);
@@ -93,7 +93,7 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @param nSelector The value the override compares against its own recorded selector.
+     * @param nSelector Not read. The body is empty.
      * @ghidraAddress 0x002b0f78
      */
     virtual void PlayCycleRightSound(int nSelector);
@@ -107,18 +107,18 @@ public:
      * @param pButton The button that alternated, ignored.
      * @ghidraAddress 0x002ae350
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Go on to the screen the exit chose.
      *
      * Slot 36. Back returns to the main menu. A player count records itself in
-     * MetFrontEndState::mUnknown2c and the renderer's controller limit and goes on to
+     * MetFrontEndState::mPlayerCount and the renderer's controller limit and goes on to
      * MetLocPickCharScreen. The tips button goes on to MetMultiTips1Screen.
      *
      * @ghidraAddress 0x002ae4f0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Build the four buttons.

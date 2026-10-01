@@ -32,8 +32,8 @@ public:
     /**
      * Install the built-in report handler with no log open and a dump level of zero.
      *
-     * mUnknown08 starts at 1, and mAbortProc is not written. The body is inlined into the unit's
-     * static initialiser at `0x004ddef8`.
+     * mInitializedFlag starts at 1, and mAbortProc is not written. The body is inlined into the
+     * unit's static initialiser at `0x004ddef8`.
      */
     FailSink();
 
@@ -117,7 +117,7 @@ public:
 
 private:
     FailReportProc mReportProc; // +0x04
-    int mUnknown08;             // +0x08
+    int mInitializedFlag;       // +0x08 set to 1 by the constructor and never read
 
 public:
     /**

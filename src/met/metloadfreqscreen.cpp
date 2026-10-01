@@ -21,8 +21,8 @@
 
 namespace {
 
-// mUnknowna8 as the constructor leaves it.
-constexpr int kInitialUnknowna8 = 1;
+// mFreqLimitPending as the constructor sets it.
+constexpr int kInitialFreqLimitPending = 1;
 
 // The three buttons BuildButtonList() appends, in ring order.
 static const char *const kNameButtonObject = "cid_01.but";
@@ -96,7 +96,7 @@ inline HxStr ConfigText(const char *pszKey) {
 // 0x0029bcf0
 MetLoadFreqScreen::MetLoadFreqScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
-    mUnknowna8 = kInitialUnknowna8;
+    mFreqLimitPending = kInitialFreqLimitPending;
 }
 
 // 0x0029bd38
@@ -106,7 +106,7 @@ MetLoadFreqScreen::~MetLoadFreqScreen() {
 // 0x00297c10
 void MetLoadFreqScreen::OnCreateButton() {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
-    if (mUnknown8c->size() >= kMaxIdentities) {
+    if (mIdentityList->size() >= kMaxIdentities) {
         ExitScreenByName(HxStr(kHelpScreen));
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kOkButton));
@@ -119,7 +119,8 @@ void MetLoadFreqScreen::OnCreateButton() {
             HxStr(kFreqLimitMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
         return;
     }
-    if (GlobalSettings::shared()->mCardSlots[0].mFree < GlobalSettings::shared()->mUnknown74) {
+    if (GlobalSettings::shared()->mCardSlots[0].mFree <
+        GlobalSettings::shared()->mPersonaMinimumFreeClusters) {
         ExitScreenByName(HxStr(kHelpScreen));
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kOkButton));
@@ -127,7 +128,7 @@ void MetLoadFreqScreen::OnCreateButton() {
         const HxStr text(
             FormatString(TextOrEmpty(format),
                          TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
-                         GlobalSettings::shared()->mUnknown74));
+                         GlobalSettings::shared()->mPersonaMinimumFreeClusters));
         MetMsgScreen::Show(
             HxStr(kFreqLimitMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
         return;
@@ -162,29 +163,29 @@ void MetLoadFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
 
     PushNamedScreen(HxStr(kLoadFreqScreen));
     PushNamedScreen(HxStr(kHelpScreen));
-    mUnknowna8 = 0;
+    mFreqLimitPending = 0;
     ActivateNamedPanel(HxStr(kLoadFreqScreen));
 }
 
 // 0x0029bdc8
-void MetLoadFreqScreen::OnUnknownSlot33() {
+void MetLoadFreqScreen::OnEnterFinished() {
     PlaySoundByName(kSelectFreqSound);
 }
 
 // 0x002976f8
 void MetLoadFreqScreen::UpdateNameLabel() {
-    HxStr username((*mUnknown8c)[mUnknown94]->mUnknown140.mUnknown00);
-    mUnknown90->ButtonAt(kNameButtonIndex)->mText->SetText(username);
+    HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
+    mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
-    mUnknown90->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
+    mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
 // 0x002978d0
 void MetLoadFreqScreen::OnNameButton() {
-    MetPersonaData *pPersona = (*mUnknown8c)[mUnknown94];
+    MetPersonaData *pPersona = (*mIdentityList)[mSelectedIdentity];
 
     Application::shared()->GetGameManager()->ClearPersonas();
     Application::shared()->GetGameManager()->AddPersona(*pPersona);
@@ -206,35 +207,35 @@ void MetLoadFreqScreen::PrepareFreqMakerForSelection() {
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
     MetFreqMakerButtonsScreen *pButtons =
         static_cast<MetFreqMakerButtonsScreen *>(FindScreenByName(HxStr(kFreqMakerButtonsScreen)));
-    MetPersonaData *pPersona = (*mUnknown8c)[mUnknown94];
+    MetPersonaData *pPersona = (*mIdentityList)[mSelectedIdentity];
     pCanvas->LoadPersona(pPersona);
     pButtons->SetEditing(kFreqMakerEditing);
     pButtons->mNewPersona = 0;
     Application::shared()->GetGameManager()->ClearPersonas();
     Application::shared()->GetGameManager()->AddPersona(*pPersona);
-    MetFrontEndState::shared()->mUnknown24 = HxStr(kLoadFreqScreen);
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadFreqScreen);
 }
 
 // 0x0029bda0
 void MetLoadFreqScreen::AcquireIdentityList() {
-    mUnknown8c = MetPersonaData::loadList();
+    mIdentityList = MetPersonaData::loadList();
 }
 
 // 0x00296fe8
 void MetLoadFreqScreen::BuildButtonList() {
-    mUnknown90->Clear();
-    mUnknown90->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
+    mButtonList->Clear();
+    mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
 
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
-    mUnknown90->Add(HxStr(kEditButtonObject), editLabel);
+    mButtonList->Add(HxStr(kEditButtonObject), editLabel);
 
     HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
-    mUnknown90->Add(HxStr(kCreateButtonObject), createLabel);
+    mButtonList->Add(HxStr(kCreateButtonObject), createLabel);
 
-    mUnknown38.erase(mUnknown38.begin(), mUnknown38.end());
-    mUnknown38.push_back(HxStr(kNamePrompt));
-    mUnknown38.push_back(HxStr(kEditPrompt));
-    mUnknown38.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
+    mHelpKeys.push_back(HxStr(kNamePrompt));
+    mHelpKeys.push_back(HxStr(kEditPrompt));
+    mHelpKeys.push_back(HxStr(kCreatePrompt));
 
-    mUnknown90->SetSelected(kNameButtonIndex);
+    mButtonList->SetSelected(kNameButtonIndex);
 }

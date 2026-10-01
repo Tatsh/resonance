@@ -24,7 +24,7 @@ public:
      *
      * @param nIndex The track display number that fills `<layout> countdown<n>`.
      * @param nTargetBar The bar the countdown runs to. HudTrack's constructor reads it from
-     *        PlayMap::Slot9() of Globals::GetPlayMap(), the last bar of the level.
+     *        PlayMap::GetEndBar() of Globals::GetPlayMap(), the last bar of the level.
      * @ghidraAddress 0x004191b8
      */
     HudCountdown(int nIndex, int nTargetBar);

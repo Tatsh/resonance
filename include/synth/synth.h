@@ -79,14 +79,14 @@ public:
     virtual void LoadBankSet6();
 
     /**
-     * Table slot 7, verb unrecovered.
+     * Do nothing.
      *
-     * The body is empty here and no implementation overrides it, so nothing in the image reveals
-     * what the member does or what it takes.
+     * Table slot 7. The body is empty here, no implementation overrides it, and the image never
+     * calls it. The image does not reveal its purpose.
      *
      * @ghidraAddress 0x0013a1e8
      */
-    virtual void Slot7();
+    virtual void UnusedHook();
 
     /**
      * Release every loaded bank.
@@ -115,13 +115,14 @@ public:
     virtual void SendMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2) = 0;
 
     /**
-     * Table slot 10, verb unrecovered.
+     * Respond to the start of play.
      *
-     * The body is empty here and no implementation overrides it.
+     * Table slot 10. The body is empty here and no implementation overrides it. GrooveWorld calls
+     * it once play starts.
      *
      * @ghidraAddress 0x0013a1f8
      */
-    virtual void Slot10();
+    virtual void OnPlayStarted();
 
     /**
      * Select a bank on one channel.
@@ -137,38 +138,37 @@ public:
     virtual void SelectBank(unsigned char nChannel, unsigned char nBank);
 
     /**
-     * Table slot 12, verb unrecovered.
+     * Switch between stereo and mono output.
      *
-     * The body is empty here. Ps2HardSynth's override at `0x003f6700` submits sound-driver
-     * selector 0x110 with the argument inverted, so the member and the driver command disagree on
-     * which sense is the enabled one.
+     * Table slot 12. The body is empty here. Ps2HardSynth's override at `0x003f6700` submits the
+     * sound driver's mono command with the argument inverted.
      *
-     * @param bEnable The flag the override inverts.
+     * @param bStereo Nonzero for stereo output, zero for mono.
      * @ghidraAddress 0x0013a208
      */
-    virtual void Slot12(int bEnable);
+    virtual void SetStereo(int bStereo);
 
     /**
-     * Table slot 13, verb unrecovered.
+     * Switch the remix mode of the sound driver.
      *
-     * The body is empty here. Ps2HardSynth's override at `0x003f6740` submits sound-driver
-     * selector 0x100 with the argument unchanged.
+     * Table slot 13. The body is empty here. Ps2HardSynth's override at `0x003f6740` submits the
+     * sound driver's remix command with the argument unchanged.
      *
-     * @param nValue The value the override forwards.
+     * @param bRemix Nonzero in jam mode, zero otherwise.
      * @ghidraAddress 0x0013a210
      */
-    virtual void Slot13(int nValue);
+    virtual void SetRemixMode(int bRemix);
 
     /**
-     * Table slot 14, verb unrecovered.
+     * Pause or resume the sound driver.
      *
-     * The body is empty here. Ps2HardSynth's override at `0x003f6720` submits sound-driver
-     * selector 0xf0 with the argument unchanged.
+     * Table slot 14. The body is empty here. Ps2HardSynth's override at `0x003f6720` submits the
+     * sound driver's pause command with the argument unchanged.
      *
-     * @param nValue The value the override forwards.
+     * @param bPaused Nonzero to pause, zero to resume.
      * @ghidraAddress 0x0013a218
      */
-    virtual void Slot14(int nValue);
+    virtual void SetPaused(int bPaused);
 
     /**
      * Silence every channel.

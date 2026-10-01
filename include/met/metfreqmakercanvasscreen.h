@@ -122,7 +122,7 @@ public:
      * @param pButton The button slot 29 finished with.
      * @ghidraAddress 0x002620d0
      */
-    virtual void OnUnknownSlot30(Rnd::Button *pButton);
+    virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Unhang the avatar view from `fm_canvas.view`.
@@ -131,7 +131,7 @@ public:
      *
      * @ghidraAddress 0x0025e898
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the base views, hang the avatar view from `fm_canvas.view`, and record that it is
@@ -298,7 +298,7 @@ public:
     MetPersonaData *mPersona;
 
 private:
-    unsigned char mUnknown94[0xc];    // +0x94
+    unsigned char mReserved[0xc];     // +0x94, never read or written
     FreqAppearanceDetail mAppearance; // +0xa0, the avatar under edit
 
 public:

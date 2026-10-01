@@ -40,5 +40,5 @@ void EndRecordingCmd::Save(OBStream &) {
 }
 
 // 0x0010efe0
-void EndRecordingCmd::Slot8() {
+void EndRecordingCmd::UnusedHook() {
 }

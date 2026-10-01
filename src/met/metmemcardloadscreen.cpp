@@ -86,7 +86,7 @@ constexpr unsigned int kMinimumCyclableCards = 2;
 // The command that closes the list and probes again.
 constexpr int kCommandProbeAgain = 7;
 
-// What MetScreen::mUnknown18 records for slot 36 to act on.
+// What MetScreen::mExitChoice records for slot 36 to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitProbeAgain = 1;
 constexpr int kExitToCardType = 2;
@@ -130,8 +130,8 @@ inline void AppendCardAt(std::vector<MemcardConnectState> &cards, int nPortSlot)
 MetMemCardLoadScreen::MetMemCardLoadScreen(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mLeftArrow(nullptr), mRightArrow(nullptr), mSelected(0), mUnknownd4(0), mPickerUser(nullptr) {
-    mUnknown38.push_back(HxStr(kCardKey));
+      mLeftArrow(nullptr), mRightArrow(nullptr), mSelected(0), mUnused(0), mPickerUser(nullptr) {
+    mHelpKeys.push_back(HxStr(kCardKey));
 }
 
 // 0x002cbcc8
@@ -164,7 +164,7 @@ void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
         }
         ActivateNamedPanel(HxStr(kNoName));
         StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowAlternateInterval, mLeftArrow, kArrowAlternateCycles);
+            mRenderer->mAnimationFrame, kArrowAlternateInterval, mLeftArrow, kArrowAlternateCycles);
         break;
 
     case kMetScreenCommandRight:
@@ -172,8 +172,10 @@ void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
             break;
         }
         ActivateNamedPanel(HxStr(kNoName));
-        StartRepeatingSound(
-            mUnknown10->mUnknown68, kArrowAlternateInterval, mRightArrow, kArrowAlternateCycles);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
+                            kArrowAlternateInterval,
+                            mRightArrow,
+                            kArrowAlternateCycles);
         break;
 
     case kMetScreenCommandSelect:
@@ -181,8 +183,8 @@ void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
             break;
         }
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitToCardType;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitToCardType;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kRightGizmoScreen));
         ExitScreenByName(HxStr(kHelpScreen));
@@ -190,15 +192,15 @@ void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kRightGizmoScreen));
         BeginExit();
         break;
 
     case kCommandProbeAgain:
-        mUnknown18 = kExitProbeAgain;
+        mExitChoice = kExitProbeAgain;
         mSelected = 0;
         ExitScreenByName(HxStr(kTitleScreen));
         ExitScreenByName(HxStr(kRightGizmoScreen));
@@ -214,8 +216,8 @@ void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
 // 0x002cc9c0
 void MetMemCardLoadScreen::EnterAndShow() {
     SetShowing(0);
-    if (MetFrontEndState::shared()->mUnknown24 == kConfigOptionsScreen) {
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kNoName);
+    if (MetFrontEndState::shared()->mReturnScreen == kConfigOptionsScreen) {
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
         mPickerUser = this; // Yes, the binary stores this before Present() stores it again.
         Present(this, false);
     } else {
@@ -251,7 +253,7 @@ void MetMemCardLoadScreen::ShowSelection() {
 }
 
 // 0x002ccfb8
-void MetMemCardLoadScreen::OnUnknownSlot30(Rnd::Button *pButton) {
+void MetMemCardLoadScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     const int nCards = mCards.size();
     if (pButton == mLeftArrow) {
         mSelected = mSelected - 1 > -1 ? mSelected - 1 : nCards - 1;
@@ -263,12 +265,12 @@ void MetMemCardLoadScreen::OnUnknownSlot30(Rnd::Button *pButton) {
 }
 
 // 0x002cd0e8
-void MetMemCardLoadScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetMemCardLoadScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kRightGizmoScreen));
         PushNamedScreen(HxStr(kConfigOptionsScreen));
         ActivateNamedPanel(HxStr(kConfigOptionsScreen));
-    } else if (mUnknown18 == kExitProbeAgain) {
+    } else if (mExitChoice == kExitProbeAgain) {
         mPickerUser = this; // Yes, the binary stores this before Present() stores it again.
         Present(this, false);
     } else {
@@ -349,7 +351,7 @@ void MetMemCardLoadScreen::Present(MetMemCardPickerUser *pUser, bool bShowNow) {
         PushNamedScreen(HxStr(kOwnScreenName));
         ActivateNamedPanel(HxStr(kOwnScreenName));
     } else {
-        if (mUnknown14 != nullptr) {
+        if (mView != nullptr) {
             SetShowing(0);
         }
         StartDetect();
@@ -365,7 +367,7 @@ void MetMemCardLoadScreen::StartDetect() {
                        kNoButtons,
                        buttons,
                        this);
-    mUnknown10->AddScreen(this);
+    mRenderer->AddScreen(this);
     MetMemDetectScreen::StartDetect();
 }
 
@@ -404,7 +406,7 @@ void MetMemCardLoadScreen::UpdateArrows() {
 }
 
 // 0x002d2018
-void MetMemCardLoadScreen::OnUnknownSlot33() {
-    MetHelpScreen::SetText(mUnknown38[0], mUnknown10->mUnknown68);
+void MetMemCardLoadScreen::OnEnterFinished() {
+    MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     MetHelpScreen::SelectPreset(HxStr(kOptionsPreset));
 }

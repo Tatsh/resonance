@@ -34,14 +34,14 @@
 
 namespace {
 
-// The value the constructor gives mUnknown6c.
+// The value the constructor gives mAnnouncedBar.
 constexpr int kNoValue = -1;
 
-// mUnknown74 starts with this many elements, each built from the int zero.
-constexpr int kUnknown74Count = 3;
-constexpr int kUnknown74Initial = 0;
+// mReadings starts with this many elements, each built from the int zero.
+constexpr int kReadingCount = 3;
+constexpr int kInitialReading = 0;
 
-// The two configuration codes that decide mUnknown54.
+// The two configuration codes that decide mSwitchesBanks.
 constexpr int kBankSwitchConfigCode = 0x3a4;
 constexpr int kBankSwitchOverrideConfigCode = 0x3a1;
 
@@ -61,7 +61,7 @@ constexpr int kHalfBeatTicks = 480;
 constexpr int kScratchGemTicks = 60;
 
 // The word DurGemMsg's +0x18 carries for a scratch gem, and the gem every scratch reports.
-constexpr int kScratchDurGemUnknown18 = 1;
+constexpr int kScratchDurGemLive = 1;
 constexpr int kScratchGem = 1;
 
 // AxeButtonMsg's state for a press, which a scratch sends in both of its first two words.
@@ -102,65 +102,65 @@ Scratcher::Scratcher(PhraseMgr *pPhraseMgr,
                      Sch::TickClock *pClock,
                      const TrackData *pTrackData)
     : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrackData(pTrackData),
-      mUnknown44(pTrackData->mUnknown04), mBarDivisor(pPhraseMgr->mBarTicks), mClock(pClock),
-      mUnknown50(kIDableUnregistered), mUnknown5c(&g_nullPlayer), mUnknown64(&g_nullPlayer),
-      mUnknown68(0), mUnknown6c(kNoValue), mUnknown70(0),
-      mUnknown74(kUnknown74Count, kUnknown74Initial), mUnknown84(0), mUnknown88(0.0f),
-      mUnknown8c(0) {
-    mUnknown54 = 0;
+      mTrack(pTrackData->mIndex), mBarDivisor(pPhraseMgr->mBarTicks), mClock(pClock),
+      mId(kIDableUnregistered), mPlayer(&g_nullPlayer), mLastScratchPlayer(&g_nullPlayer),
+      mLastGem(0), mAnnouncedBar(kNoValue), mScratchDirection(0),
+      mReadings(kReadingCount, kInitialReading), mLastGemEnd(0), mLastGemEndBlend(0.0f),
+      mLastStep(0) {
+    mSwitchesBanks = 0;
     if (QueryConfigFlag(kBankSwitchConfigCode) != 0) {
-        mUnknown54 = QueryConfigFlag(kBankSwitchOverrideConfigCode) == 0;
+        mSwitchesBanks = QueryConfigFlag(kBankSwitchOverrideConfigCode) == 0;
     }
-    mUnknown58 = pTrackData->mChannel;
+    mChannel = pTrackData->mChannel;
 }
 
 // 0x001cfd20
 void Scratcher::PostNowBarMsg(AxisRegisterMsg *pMsg) {
-    if (pMsg->mTrack != mUnknown44 || mUnknown5c != pMsg->mPlayer) {
+    if (pMsg->mTrack != mTrack || mPlayer != pMsg->mPlayer) {
         return;
     }
     NowBarMsg nowBar;
-    nowBar.mUnknown04 = pMsg->mTrack;
-    nowBar.mPlayer = mUnknown5c;
+    nowBar.mTrack = pMsg->mTrack;
+    nowBar.mPlayer = mPlayer;
     nowBar.mLane = 1.0f - pMsg->mValue;
     Send(&nowBar);
 
     const float flPosition = static_cast<float>((pMsg->mValue - kAxisMidpoint) * kAxisToPosition);
-    const unsigned int nReadings = mUnknown74.size();
+    const unsigned int nReadings = mReadings.size();
 
-    if (flPosition > kScratchThreshold && mUnknown70 != kScratchForward) {
-        mUnknown70 = kScratchForward;
-        const float flOldest = mUnknown74[(nReadings + mUnknown80) % nReadings];
+    if (flPosition > kScratchThreshold && mScratchDirection != kScratchForward) {
+        mScratchDirection = kScratchForward;
+        const float flOldest = mReadings[(nReadings + mNewestReading) % nReadings];
         const int nSpeed = static_cast<int>((flPosition - flOldest) * kSpeedScale);
-        OnPitchRiff(mUnknown68, std::max(std::min(nSpeed, kMaxStep), 1), pMsg->mPosition.mTick);
+        OnPitchRiff(mLastGem, std::max(std::min(nSpeed, kMaxStep), 1), pMsg->mPosition.mTick);
     }
-    if (flPosition < -kScratchThreshold && mUnknown70 != kScratchBackward) {
-        mUnknown70 = kScratchBackward;
-        const float flOldest = mUnknown74[(nReadings + mUnknown80) % nReadings];
+    if (flPosition < -kScratchThreshold && mScratchDirection != kScratchBackward) {
+        mScratchDirection = kScratchBackward;
+        const float flOldest = mReadings[(nReadings + mNewestReading) % nReadings];
         const int nSpeed = static_cast<int>((flPosition - flOldest) * kSpeedScale);
         // Yes, the binary negates the speed and then subtracts four.
         const int nStep = -nSpeed - kBackwardStepBias;
-        OnPitchRiff(mUnknown68, std::max(std::min(nStep, -1), -kMaxStep), pMsg->mPosition.mTick);
+        OnPitchRiff(mLastGem, std::max(std::min(nStep, -1), -kMaxStep), pMsg->mPosition.mTick);
     }
     if (flPosition > -kDeadZone && flPosition < kDeadZone) {
-        mUnknown70 = kScratchNone;
+        mScratchDirection = kScratchNone;
     }
 
-    mUnknown80 = (mUnknown80 + 1) % nReadings;
-    mUnknown74[mUnknown80] = flPosition;
+    mNewestReading = (mNewestReading + 1) % nReadings;
+    mReadings[mNewestReading] = flPosition;
 }
 
 // 0x001d0038
 void Scratcher::EraseGemRange(EraseMsg *pMsg) {
-    if (pMsg->mUnknown0c != mUnknown44) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
 
     int bErased = 0;
-    const int nBar = pMsg->mUnknown08.mTick / mBarDivisor;
+    const int nBar = pMsg->mPosition.mTick / mBarDivisor;
     int nFirstBar;
     int nEndBar;
-    if (pMsg->mUnknown10 != 0) {
+    if (pMsg->mDoubleTap != 0) {
         nFirstBar = mTrackData->StepStartBar(nBar);
         nEndBar = mTrackData->FollowingStepBar(nFirstBar);
     } else {
@@ -169,7 +169,7 @@ void Scratcher::EraseGemRange(EraseMsg *pMsg) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) != pMsg->mUnknown04) {
+        if (mPhraseMgr->GetPhraseOwner(nClear) != pMsg->mPlayer) {
             continue;
         }
         bErased = 1;
@@ -183,30 +183,30 @@ void Scratcher::EraseGemRange(EraseMsg *pMsg) {
     if (bErased == 0) {
         return;
     }
-    PlaySoundByName(pMsg->mUnknown10 != 0 ? kEraseStepSound : kEraseBarSound);
-    // The effect names mUnknown5c, not the player the message erased for.
-    ShowEraseEffectMsg effect(mUnknown5c, mUnknown44, nFirstBar, nEndBar, kEraseEffectFlag);
+    PlaySoundByName(pMsg->mDoubleTap != 0 ? kEraseStepSound : kEraseBarSound);
+    // The effect identifies mPlayer, not the player the message erased for.
+    ShowEraseEffectMsg effect(mPlayer, mTrack, nFirstBar, nEndBar, kEraseEffectFlag);
     Send(&effect);
-    SendSeekerMsg(pMsg->mUnknown08.mTick / mBarDivisor);
+    SendSeekerMsg(pMsg->mPosition.mTick / mBarDivisor);
 }
 
 // 0x001d0248
 void Scratcher::OnTrackSelect(TrackSelectMsg *pMsg) {
-    if (pMsg->mUnknown04 != mUnknown44) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (pMsg->mUnknown10->IsNull() == 0) {
+    if (pMsg->mPlayer->IsNull() == 0) {
         NowBarMsg nowBar;
-        nowBar.mUnknown04 = mUnknown44;
-        nowBar.mPlayer = pMsg->mUnknown10;
+        nowBar.mTrack = mTrack;
+        nowBar.mPlayer = pMsg->mPlayer;
         nowBar.mLane = kCenterLane;
         Send(&nowBar);
     }
-    if (pMsg->mUnknown08 != 0) {
+    if (pMsg->mPlace != 0) {
         return;
     }
-    mUnknown5c = pMsg->mUnknown10;
-    if (mUnknown5c->IsNull() == 0) {
+    mPlayer = pMsg->mPlayer;
+    if (mPlayer->IsNull() == 0) {
         SendSeekerMsg(pMsg->mPosition.mTick / mBarDivisor);
     }
 }
@@ -214,16 +214,16 @@ void Scratcher::OnTrackSelect(TrackSelectMsg *pMsg) {
 // 0x001d0358
 void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     const int nBar = nTick / mBarDivisor;
-    const int nLastBar = mUnknown60.mTick / Mid::MBT(kBarTicks).mTick;
-    if (QueryBar(nBar) == 0 || (nLastBar == nBar && mUnknown64 != mUnknown5c)) {
+    const int nLastBar = mLastScratchPosition.mTick / Mid::MBT(kBarTicks).mTick;
+    if (QueryBar(nBar) == 0 || (nLastBar == nBar && mLastScratchPlayer != mPlayer)) {
         PlaySoundByName(kInactiveSound);
         return;
     }
-    if (mUnknown60.mTick == nTick) {
+    if (mLastScratchPosition.mTick == nTick) {
         return;
     }
-    mUnknown60.mTick = nTick;
-    mUnknown64 = mUnknown5c;
+    mLastScratchPosition.mTick = nTick;
+    mLastScratchPlayer = mPlayer;
 
     Riff *pRiff = mTrackData->GetRiff(nTick, nGem);
     if (pRiff == nullptr) {
@@ -236,84 +236,83 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     }
     Attachment::ReleaseIfSet(pShifted);
 
-    if (mUnknown6c != nBar) {
-        mUnknown6c = nBar;
+    if (mAnnouncedBar != nBar) {
+        mAnnouncedBar = nBar;
         if (mPhraseMgr->GetPhraseOwner(nBar)->IsNull() == 0) {
             mPhraseMgr->ClearPhrase(nBar, 0);
         }
         int nPoints = mTrackData->GetPoints(nBar);
-        if (mUnknown5c->Slot20(nBar) == 0) {
+        if (mPlayer->MarkBarScored(nBar) == 0) {
             nPoints = 0;
         }
         {
-            BeginPhraseCatchMsg begin(mUnknown5c, nPoints, mUnknown5c->Slot16(nBar));
+            BeginPhraseCatchMsg begin(mPlayer, nPoints, mPlayer->GetMultiplier(nBar));
             Send(&begin);
         }
-        PhraseCapturedMsg captured(
-            nBar, nBar + 1, nBar, nBar + 1, mUnknown44, mUnknown5c, nPoints, 0, 0);
+        PhraseCapturedMsg captured(nBar, nBar + 1, nBar, nBar + 1, mTrack, mPlayer, nPoints, 0, 0);
         Send(&captured);
     }
 
     const Mid::MBT offset(nTick % mBarDivisor);
-    mPhraseMgr->AddGem(nGem, nStep, nBar, offset.mTick, mUnknown5c, 0);
+    mPhraseMgr->AddGem(nGem, nStep, nBar, offset.mTick, mPlayer, 0);
 
     // A scratch against the last one's direction, less than half a beat after that gem ends,
     // draws its gem from where the last one ended.
-    const Mid::MBT limit(ClampTick(mUnknown84.mTick + Mid::MBT(kHalfBeatTicks).mTick));
+    const Mid::MBT limit(ClampTick(mLastGemEnd.mTick + Mid::MBT(kHalfBeatTicks).mTick));
     int bContinues = 0;
     if (nTick < limit.mTick) {
-        bContinues = (nStep * mUnknown8c) < 0;
+        bContinues = (nStep * mLastStep) < 0;
     }
     int nStart = nTick;
     float flStartBlend = kCenterLane;
     if (bContinues != 0) {
-        nStart = mUnknown84.mTick;
-        flStartBlend = mUnknown88;
+        nStart = mLastGemEnd.mTick;
+        flStartBlend = mLastGemEndBlend;
     }
-    mUnknown8c = nStep;
-    mUnknown84 = Mid::MBT(ClampTick(nTick + Mid::MBT(kScratchGemTicks).mTick));
-    mUnknown88 = AxeOldGemMaker::BlendForStep(nStep);
+    mLastStep = nStep;
+    mLastGemEnd = Mid::MBT(ClampTick(nTick + Mid::MBT(kScratchGemTicks).mTick));
+    mLastGemEndBlend = AxeOldGemMaker::BlendForStep(nStep);
 
     if (nStep != 0) {
         (void)AxeOldGemMaker::NextStripId(); // Yes, the binary discards the new identity.
         DurGemMsg gem;
-        gem.mLane = mUnknown44;
+        gem.mLane = mTrack;
         gem.mStartFrame = nStart;
         gem.mStartBlend = flStartBlend;
-        gem.mEndFrame = mUnknown84.mTick;
-        gem.mEndBlend = mUnknown88;
-        gem.mUnknown18 = kScratchDurGemUnknown18;
-        gem.mPlayer = mUnknown5c;
+        gem.mEndFrame = mLastGemEnd.mTick;
+        gem.mEndBlend = mLastGemEndBlend;
+        gem.mLive = kScratchDurGemLive;
+        gem.mPlayer = mPlayer;
         Send(&gem);
     }
     if (bContinues == 0) {
         {
             GemMsg gem;
             gem.mPosition.mTick = nTick;
-            gem.mTrack = mUnknown44;
+            gem.mTrack = mTrack;
             gem.mGem = kScratchGem;
-            gem.mPlayer = mUnknown5c;
+            gem.mPlayer = mPlayer;
             gem.mGhost = 0;
             Send(&gem);
         }
 
         PitchMsg pitch;
-        pitch.mUnknown04 = nTick;
-        pitch.mUnknown08 = mUnknown44;
-        pitch.mUnknown0c = kScratchGem;
-        pitch.mUnknown10 = mUnknown5c;
+        pitch.mTick = nTick;
+        pitch.mTrack = mTrack;
+        pitch.mGem = kScratchGem;
+        pitch.mPlayer = mPlayer;
         Send(&pitch);
     }
-    AxeButtonMsg press(kButtonPressed, kButtonPressed, mUnknown5c);
+    AxeButtonMsg press(kButtonPressed, kButtonPressed, mPlayer);
     Send(&press);
 }
 
 // 0x001d08e0
 void Scratcher::SendSeekerMsg(int) {
-    if (mUnknown5c->IsNull() != 0) {
+    if (mPlayer->IsNull() != 0) {
         return;
     }
-    SeekerMsg off(mUnknown5c);
+    SeekerMsg off(mPlayer);
     Send(&off);
 }
 
@@ -326,14 +325,14 @@ void Scratcher::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_nPitchRiffMsgType)) {
         PitchRiffMsg *pRiff = static_cast<PitchRiffMsg *>(pMsg);
-        if (pRiff->mUnknown10 != mUnknown44) {
+        if (pRiff->mTrack != mTrack) {
             return;
         }
-        if (mUnknown5c != pRiff->mUnknown08) {
+        if (mPlayer != pRiff->mPlayer) {
             return;
         }
-        mUnknown68 = pRiff->mUnknown04;
-        OnPitchRiff(pRiff->mUnknown04, 0, pRiff->mUnknown0c.mTick);
+        mLastGem = pRiff->mButton;
+        OnPitchRiff(pRiff->mButton, 0, pRiff->mPosition.mTick);
         return;
     }
     if (nType == static_cast<int>(g_nEraseMsgType)) {
@@ -346,8 +345,8 @@ void Scratcher::HandleMessage(Message *pMsg) {
     }
     if (nType == static_cast<int>(g_nInvalidateSeekerMsgType)) {
         InvalidateSeekerMsg *pInvalidate = static_cast<InvalidateSeekerMsg *>(pMsg);
-        if (pInvalidate->mUnknown08 == mUnknown44) {
-            SendSeekerMsg(pInvalidate->mUnknown04);
+        if (pInvalidate->mTrack == mTrack) {
+            SendSeekerMsg(pInvalidate->mBar);
         }
         return;
     }
@@ -358,20 +357,20 @@ void Scratcher::HandleMessage(Message *pMsg) {
 
 // 0x001d1cc8
 void Scratcher::OnPitchRiffMsg(PitchRiffMsg *pMsg) {
-    if (pMsg->mUnknown10 != mUnknown44) {
+    if (pMsg->mTrack != mTrack) {
         return;
     }
-    if (mUnknown5c != pMsg->mUnknown08) {
+    if (mPlayer != pMsg->mPlayer) {
         return;
     }
-    mUnknown68 = pMsg->mUnknown04;
-    OnPitchRiff(pMsg->mUnknown04, 0, pMsg->mUnknown0c.mTick);
+    mLastGem = pMsg->mButton;
+    OnPitchRiff(pMsg->mButton, 0, pMsg->mPosition.mTick);
 }
 
 // 0x001d1d18
 void Scratcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
-    if (pMsg->mUnknown08 == mUnknown44) {
-        SendSeekerMsg(pMsg->mUnknown04);
+    if (pMsg->mTrack == mTrack) {
+        SendSeekerMsg(pMsg->mBar);
     }
 }
 
@@ -384,8 +383,8 @@ int Scratcher::QueryBar(int nBar) {
 int Scratcher::Tick(int nElapsedTicks) {
     const int nBar = nElapsedTicks / mBarDivisor;
     SendSeekerMsg(nBar);
-    if (mUnknown54 != 0 && mTrackData->IsStepStart(nBar) != 0) {
-        Application::shared()->GetSynth()->SelectBank(mUnknown58, mTrackData->FindStepIndex(nBar));
+    if (mSwitchesBanks != 0 && mTrackData->IsStepStart(nBar) != 0) {
+        Application::shared()->GetSynth()->SelectBank(mChannel, mTrackData->FindStepIndex(nBar));
     }
     return 1;
 }

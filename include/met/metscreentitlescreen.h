@@ -72,14 +72,14 @@ public:
      *
      * @ghidraAddress 0x00394100
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Do nothing. Slot 36.
      *
      * @ghidraAddress 0x00394128
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the title text `fst_title.txt` into mTitleText. Slot 38.

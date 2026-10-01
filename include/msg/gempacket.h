@@ -52,7 +52,7 @@ public:
          * Write the five values to a stream.
          *
          * The player arrives on the wire as its identifier rather than as a pointer, and the
-         * value written is mPlayer->mId20.
+         * value written is mPlayer->mPlayerId.
          *
          * @param stream The stream to write to.
          * @ghidraAddress 0x001a2560

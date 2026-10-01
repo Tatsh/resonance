@@ -196,7 +196,7 @@ inline int CategoryOfLetter(char cLetter) {
 
 // 0x00250b18
 MetFreqMakerAssetManager::MetFreqMakerAssetManager()
-    : mUnknown00(0), mPrefabLoader(nullptr), mTeamFreqLoader(nullptr), mAssetLoader(nullptr),
+    : mReserved(0), mPrefabLoader(nullptr), mTeamFreqLoader(nullptr), mAssetLoader(nullptr),
       mLoaded(0), mMaterialTemplate(nullptr), mMeshTemplate(nullptr), mPaletteTex(nullptr),
       mMeshCount(0) {
     HxStr teamFreqPath;

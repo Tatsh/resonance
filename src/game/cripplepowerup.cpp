@@ -22,13 +22,13 @@ int CripplePowerup::Type() {
 // 0x001c9830
 int CripplePowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     CrippleMsg msg;
-    msg.mUnknown04 = 0;
+    msg.mResult = 0;
     msg.mPlayer = pPlayer;
     msg.mTrack = nTrack;
     msg.mBar = nBar;
     pPlayer->Send(&msg);
 
-    if (msg.mUnknown04 != 0) {
+    if (msg.mResult != 0) {
         DeployedPowerupMsg deployed;
         deployed.mKind = kHudItemCrippler;
         deployed.mPlayer = pPlayer;
@@ -44,5 +44,5 @@ int CripplePowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
         failed.mPlayer = pPlayer;
         pPlayer->Send(&failed);
     }
-    return msg.mUnknown04;
+    return msg.mResult;
 }

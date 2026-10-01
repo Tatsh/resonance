@@ -38,12 +38,12 @@ int Joypad::Read(unsigned int *pButtons,
 // 0x004ecb30
 void Joypad::Reset() {
     sRecords[mIndex].mPhase = 0;
-    sRecords[mIndex].mUnknown124 = 0;
+    sRecords[mIndex].mReadyLevel = 0;
 }
 
 // 0x004ecb60
-void Joypad::Open(int nPort, int nSlot, int nUnknown128) {
-    sRecords[mIndex].Open(nPort, nSlot, nUnknown128);
+void Joypad::Open(int nPort, int nSlot, int nDeadZone) {
+    sRecords[mIndex].Open(nPort, nSlot, nDeadZone);
 }
 
 // 0x004ecb90

@@ -69,15 +69,30 @@ protected:
      * selects which peers receive the packet and the second which subsystem on each peer, but no
      * literal in the image labels either one.
      *
-     * @param nUnknown04 The word stored at `+0x04`.
-     * @param nUnknown08 The word stored at `+0x08`.
+     * @param nDestination The peers that receive the packet.
+     * @param nDestinationSystem The subsystem on each receiving peer.
      */
-    Packet(int nUnknown04, int nUnknown08)
-        : mUnknown04(nUnknown04), mUnknown08(nUnknown08), mUnknown0c(-1), mUnknown10(-1) {
+    Packet(int nDestination, int nDestinationSystem)
+        : mDestination(nDestination), mDestinationSystem(nDestinationSystem), mClientId(-1),
+          mTargetClientId(-1) {
     }
 
-    int mUnknown04; // +0x04
-    int mUnknown08; // +0x08
-    int mUnknown0c; // +0x0c
-    int mUnknown10; // +0x10
+    int mDestination;       /*!< The peers that receive the packet. +0x04 */
+    int mDestinationSystem; /*!< The subsystem on each receiving peer. +0x08 */
+
+    /**
+     * The client the packet concerns, or -1 until set. +0x0c
+     *
+     * GemPacket::Print() labels it `clid:`, and six packets transfer it a second time after their
+     * payload.
+     */
+    int mClientId;
+
+    /**
+     * A second client identifier, -1 until set. +0x10
+     *
+     * The image does not write or read it outside the transfers. The title is inferred from the
+     * -1 default it shares with mClientId.
+     */
+    int mTargetClientId;
 };

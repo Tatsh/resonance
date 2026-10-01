@@ -398,7 +398,7 @@ private:
     // name selects, and the colour and randomisation flags the next two characters set.
     FreqPartTemplate *RegisterPart(Rnd::Object *pObject);
 
-    int mUnknown00;                                   // +0x00, starts at 0
+    int mReserved;                                    // +0x00, starts at 0, no reader identified
     MetFreqLoader *mPrefabLoader;                     // +0x04, owned
     MetFreqLoader *mTeamFreqLoader;                   // +0x08, owned
     RndAsyncLoader *mAssetLoader;                     // +0x0c, created by StartAssetLoad()

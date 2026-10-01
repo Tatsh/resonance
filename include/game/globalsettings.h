@@ -169,10 +169,15 @@ public:
      * them. +0x60
      */
     std::vector<MemcardConnectState> mCardSlots;
-    /** Starts at 256. MinimumSaveSpaceMCT reads it. +0x6c */
-    int mUnknown6c;
     /**
-     * The free space a remix save needs. Starts at 60. MetRemixTypeScreen::OnUnknownSlot36()
+     * The free space the game needs on the first card. Starts at 256. +0x6c
+     *
+     * MinimumSaveSpaceMCT seeds its measurement from it, and MetMemDetectScreen raises the
+     * no-space message when the reported requirement equals it.
+     */
+    int mRequiredSaveSpace;
+    /**
+     * The free space a remix save needs. Starts at 60. MetRemixTypeScreen::OnExitFinished()
      * (`0x00363920`) raises `warn_remix_no_space` when the first card slot's
      * MemcardConnectState::mFree is below it. The name is inferred from that comparison and from
      * the matching kSaveFileMinimumFreeClusters. +0x70
@@ -186,7 +191,7 @@ public:
      * target card's MemcardConnectState::mFree against it and write it into the copy warning, and
      * the image has no accessor.
      */
-    int mUnknown74;
+    int mPersonaMinimumFreeClusters;
 
     /**
      * Non-zero to offer the team FreQ identities instead of the pre-fab ones. Starts at 0. +0x78

@@ -35,9 +35,9 @@ public:
     /**
      * Report the start of a phrase catch.
      *
-     * Inline, with no address of its own. Catcher::Slot8() at `0x001ac1c0` and the Scratcher member
-     * at `0x001d0530` expand it on their stacks. The three arguments are the three members in
-     * declaration order.
+     * Inline, with no address of its own. Catcher::CatchGem() at `0x001ac1c0` and the Scratcher
+     * member at `0x001d0530` expand it on their stacks. The three arguments are the three members
+     * in declaration order.
      *
      * @param pPlayer The player starting the phrase.
      * @param nPoints The points the phrase is worth.

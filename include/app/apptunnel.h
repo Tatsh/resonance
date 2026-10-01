@@ -127,7 +127,7 @@ public:
      *
      * Fades the string flares, shrinks the gem flashes, retires finished panels and fired
      * triggers, and advances every helper and effect. The fire effects' views, the arrows, and the
-     * players also receive the position scaled by the tempo rate. Renderer::OnUnknownSlot7() is the
+     * players also receive the position scaled by the tempo rate. Renderer::Update() is the
      * caller. The title is inferred from that caller, which hands the same value to
      * Rnd::Animatable::SetFrame() on its three views.
      *
@@ -152,27 +152,27 @@ public:
      * Update the tunnel section of one bar whose state a BarStatusMsg changed.
      *
      * Nothing happens once the renderer's song tick is more than a quarter bar past the end of
-     * the bar. In kPlayModeGame, with nUnknown zero and a song tick that is not negative, a new
+     * the bar. In kPlayModeGame, with nRefreshing zero and a song tick that is not negative, a new
      * TnlPanel starts a quarter of the way from the song tick to the start of the bar. Otherwise
      * a TnlPanel is built on the stack and applied at once. A jukebox game always passes 0 as the
      * panel's showing flag. The title is inferred.
      *
      * @param nTrack The track.
      * @param nBar The bar.
-     * @param nUnknown The word at `+0x14` of the BarStatusMsg.
+     * @param nRefreshing Non-zero when PhraseMgr posted the BarStatusMsg while refreshing bars.
      * @param pPlayer The cell's player.
      * @param nPowerup The cell's `mPowerup`.
      * @param nEnabled The cell's `mEnabled`.
      * @ghidraAddress 0x004465a0
      */
-    void
-    OnBarChanged(int nTrack, int nBar, int nUnknown, Player *pPlayer, int nPowerup, int nEnabled);
+    void OnBarChanged(
+        int nTrack, int nBar, int nRefreshing, Player *pPlayer, int nPowerup, int nEnabled);
 
     /**
      * Turn the now ring for one local view before the renderer draws it.
      *
      * The body is TnlNowRing::SetRotation() with the view index as the step, inlined.
-     * Renderer::OnUnknownSlot8() is the caller. The title is inferred.
+     * Renderer::Draw() is the caller. The title is inferred.
      *
      * @param nView The index of the local view.
      * @param flFrame The song position, in MIDI ticks. The body does not read it.
@@ -371,7 +371,7 @@ private:
     // selected track. 0x00447328.
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // AdvanceSectionToggleMsg: rewrite the boundary text, move mUnknown140 to the next step,
+    // On AdvanceSectionToggleMsg, rewrite the boundary text, move mNextStepBar to the next step,
     // rebuild every sabre trail, and replay OnBarChanged() over the window. The message is not
     // read. 0x00448048.
     void OnAdvanceSectionToggle(AdvanceSectionToggleMsg *pMsg);
@@ -455,9 +455,12 @@ private:
     // One "saved tnl cam%d" per local player, a copy of "tnl cam%d" at construction.
     std::vector<Rnd::Cam *> mSavedCams;
     TnlCameraRig *mCameraRig;
-    int mJukebox;     // +0xc8 Set in a jam in jukebox mode, which skips the camera intro.
-    int mUnknowncc;   // +0xcc Set in kPlayModeGame.
-    float mUnknownd0; // +0xd0 Globals::GetTempo() divided by 480000.
+    int mJukebox; // +0xc8 Set in a jam in jukebox mode. The camera intro is then skipped.
+    // Set in kPlayModeGame. New panels and far gems then appear ahead of their bar rather than
+    // at once.
+    int mStaggerPanels;
+    // Globals::GetTempo() divided by 480000, written by the constructor and never read.
+    float mInitialTempoRate;
     // One "gem_ghost%d.mat" per track.
     std::vector<Rnd::Mat *> mGhostMats;
     // Per track, the "gem_scratch" effect kind for a scratch track, else the kind of the track's
@@ -483,9 +486,9 @@ private:
     TrackMode mTrackModes[kTrackCount];
     PlayMap *mPlayMap;
     int mTrackCount;                  // kTrackCount at construction.
-    int mUnknown140;                  // +0x140
-    float mUnknown144;                // +0x144 Globals::GetTempo() divided by 480000.
-    int mUnknown148;                  // +0x148
+    int mNextStepBar;                 // The bar at which SetFrame() advances to the next step.
+    float mTempoRate;                 // Globals::GetTempo() divided by 480000.
+    int mUnusedWord;                  // +0x148 Zeroed by the constructor and never read.
     unsigned char mReserved14c[0x14]; // +0x14c
     Rnd::Light *mLatLight;            // "lat light1".
     unsigned char mReserved164[0x0c]; // +0x164

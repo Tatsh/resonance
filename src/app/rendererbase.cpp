@@ -25,22 +25,22 @@ void RendererBase::Handle(Message *pMsg) {
 }
 
 // 0x00139f28
-void RendererBase::OnUnknownSlot4() {
+void RendererBase::Start() {
 }
 
 // 0x00139f30
-void RendererBase::OnUnknownSlot5() {
+void RendererBase::Stop() {
 }
 
 // 0x00139fb0
-void RendererBase::OnUnknownSlot6() {
+void RendererBase::PollMessages() {
     mQueue.Poll();
 }
 
 // 0x00139f38
-void RendererBase::OnUnknownSlot9() {
+void RendererBase::UpdateSimple() {
 }
 
 // 0x00139f40
-void RendererBase::OnUnknownSlot10() {
+void RendererBase::DrawSimple() {
 }

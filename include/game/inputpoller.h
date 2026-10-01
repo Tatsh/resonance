@@ -100,7 +100,7 @@ public:
     /**
      * Read the controllers once.
      *
-     * Runs ReadControllers() and then OnUnknown001e1c58(). GameManagerImpl::PollPlayback() is the
+     * Runs ReadControllers() and then FinishPoll(). GameManagerImpl::PollPlayback() is the
      * caller. The title is inferred.
      *
      * @ghidraAddress 0x001e1c28
@@ -121,26 +121,26 @@ public:
     }
 
     /**
-     * Set mUnknown34 to 1, the value the constructor starts it at.
+     * Set mUnusedFlag to 1, the value the constructor starts it at.
      *
      * The body is inline. The one out-of-line copy has no caller. The title is inferred.
      *
      * @ghidraAddress 0x001e1958
      */
-    void SetUnknown34() {
-        mUnknown34 = 1;
+    void SetUnusedFlag() {
+        mUnusedFlag = 1;
     }
 
     /**
-     * Clear mUnknown34.
+     * Clear mUnusedFlag.
      *
      * The body is inline. GameManagerImpl's constructor expands it at `0x00106024`, and the one
      * out-of-line copy has no caller. The title is inferred.
      *
      * @ghidraAddress 0x001e1968
      */
-    void ClearUnknown34() {
-        mUnknown34 = 0;
+    void ClearUnusedFlag() {
+        mUnusedFlag = 0;
     }
 
     /**
@@ -151,29 +151,29 @@ public:
      *
      * @ghidraAddress 0x001e1970
      */
-    void OnUnknown001e1970() {
+    void EmptyStubA() {
     }
 
     /**
      * Do nothing.
      *
-     * Recorded on the same evidence as OnUnknown001e1970(). The title is inferred.
+     * Recorded on the same evidence as EmptyStubA(). The title is inferred.
      *
      * @ghidraAddress 0x001e1978
      */
-    void OnUnknown001e1978() {
+    void EmptyStubB() {
     }
 
     /**
-     * Report mUnknown50.
+     * Report mBusyJoypadSeen.
      *
      * The body is inline, and the one out-of-line copy has no caller. The title is inferred.
      *
-     * @return The word at `+0x50`.
+     * @return Non-zero when the last read found a Joypad still at the digital setup level.
      * @ghidraAddress 0x001e1980
      */
-    int GetUnknown50() {
-        return mUnknown50;
+    int GetBusyJoypadSeen() {
+        return mBusyJoypadSeen;
     }
 
     /**
@@ -242,8 +242,8 @@ private:
      * axis control and its position scaled to 0 through 1. The four face buttons send only
      * the first of them pressed while any stays held. A Joypad that reports 0 during a game pauses
      * the game when its player is one of the world's local players, and one that reports 1 sets
-     * mUnknown50. The routine returns at the first ready Joypad that has no player. The title is
-     * inferred.
+     * mBusyJoypadSeen. The routine returns at the first ready Joypad that has no player. The title
+     * is inferred.
      *
      * @ghidraAddress 0x001dfab0
      */
@@ -254,7 +254,7 @@ private:
      *
      * @ghidraAddress 0x001e1c58
      */
-    void OnUnknown001e1c58();
+    void FinishPoll();
 
     /**
      * Restart every Joypad's setup state machine.
@@ -285,9 +285,9 @@ private:
     // One record per Joypad, the last reading it sent. The class emits no RTTI, has no constructor
     // or destructor of its own, and is copied into the vector byte for byte, so no name survives.
     struct Entry {
-        int mUnknown00[kControlCount]; // +0x00, zeroed by Setup() and never read
-        char mAxes[kAxisCount];        // +0x40
-        unsigned int mButtons;         // +0x44
+        int mControlStates[kControlCount]; // +0x00, zeroed by Setup() and never read
+        char mAxes[kAxisCount];            // +0x40
+        unsigned int mButtons;             // +0x44
         // Set while a face button's press has gone out, cleared once all four are up.
         int mFaceButtonHeld; // +0x48
     };
@@ -297,12 +297,14 @@ private:
     int mNextJoypadId;               // +0x18
     std::vector<Joypad *> mJoypads;  // +0x1c
     // Set from BytePairStatic::shared() and never read again.
-    BytePairStatic *mUnknown28; // +0x28
-    std::list<int> mUnknown2c;  // +0x2c element type not recovered, 16-byte node
-    int mUnknown30;             // +0x30
-    // Starts at 1. SetUnknown34() and ClearUnknown34() are the only recovered writers, and its
-    // purpose is unrecovered.
-    int mUnknown34; // +0x34
+    BytePairStatic *mBytePairs; // +0x28
+    // Built by the constructor and destroyed by the destructor, with no other use.
+    std::list<int> mUnusedList; // +0x2c element type not recovered, 16-byte node
+    // Zeroed by the constructor and never read.
+    int mUnusedWord; // +0x30
+    // Starts at 1. SetUnusedFlag() and ClearUnusedFlag() are the only recovered writers, and the
+    // image has no reader.
+    int mUnusedFlag; // +0x34
 
 public:
     /**
@@ -323,7 +325,7 @@ private:
     // Starts at 1. The reading routine at 0x001dfab0 tests it at 0x001dfb7c before it hands a
     // reading to a game world. +0x4c
     int mGameInputEnabled;
-    int mUnknown50; // +0x50, set when a Joypad's read reports 1
+    int mBusyJoypadSeen; // +0x50, set when a Joypad's read reports 1
     // The receiver of the readings, which SetController() installs.
     RawController *mController; // +0x54
 };

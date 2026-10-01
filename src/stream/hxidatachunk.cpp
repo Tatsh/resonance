@@ -88,6 +88,6 @@ HxStream &HxIDataChunk::Read(void *pDest, int nSize) {
 }
 
 // 0x00145fd8
-HxStream *HxIDataChunk::Unknown7() {
+HxStream *HxIDataChunk::UnderlyingStream() {
     return mSource;
 }

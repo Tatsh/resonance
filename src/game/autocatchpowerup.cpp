@@ -9,7 +9,7 @@
 
 namespace {
 
-// Player::Slot19() reports this for a player whose autocatch covers one bar.
+// Player::GetGameMode() reports this for a player whose autocatch covers one bar.
 constexpr int kSingleBarPlayer = 1;
 
 // The bars the powerup covers in each case.
@@ -20,7 +20,8 @@ constexpr int kAutocatchBars = 4;
 
 // 0x001c95b0
 int AutocatchPowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
-    const int nBarCount = (pPlayer->Slot19() == kSingleBarPlayer) ? kSingleBar : kAutocatchBars;
+    const int nBarCount =
+        (pPlayer->GetGameMode() == kSingleBarPlayer) ? kSingleBar : kAutocatchBars;
     int bCaught = 0;
     for (int i = 0; i < nBarCount; ++i) {
         AutoCatchMsg msg;
@@ -28,7 +29,7 @@ int AutocatchPowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
         msg.mTrack = nTrack;
         msg.mPlayer = pPlayer;
         pPlayer->Send(&msg);
-        bCaught = (bCaught != 0 || msg.mUnknown04 != 0);
+        bCaught = (bCaught != 0 || msg.mResult != 0);
     }
 
     if (bCaught != 0) {

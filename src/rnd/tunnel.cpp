@@ -38,7 +38,7 @@ constexpr int kTunnelOldestRevision = 33;
 // Before this revision a discarded word follows the path name.
 constexpr int kPathWordDroppedRevision = 34;
 // The first revision that stores mCulledFarSlices.
-constexpr int kUnknown60Revision = 35;
+constexpr int kCulledFarSlicesRevision = 35;
 // The first revisions that store the counts of the cell grid and the slice grid.
 constexpr int kCellCountRevision = 36;
 constexpr int kSliceCountRevision = 37;
@@ -290,7 +290,7 @@ void LoadChainMaterials(Stream &stream, std::vector<TunnelMeshChain> &chains, in
 
 // 0x00476a10
 void Tunnel::Collide(const Ray &ray, HitSink &sink) {
-    for (TunnelMeshChain &chain : mUnknowna4) {
+    for (TunnelMeshChain &chain : mCellChains) {
         chain.Collide(ray, sink);
     }
 }
@@ -361,20 +361,20 @@ void Tunnel::Save(Stream &stream) {
     stream.Write(&nRevision, sizeof(nRevision));
     Drawable::Save(stream);
     Animatable::Save(stream);
-    stream.Write(&mUnknown38, sizeof(mUnknown38));
+    stream.Write(&mRingRadius, sizeof(mRingRadius));
     stream.Write(&mRingCount, sizeof(mRingCount));
     stream.Write(&mSliceCount, sizeof(mSliceCount));
     stream.Write(&mLodCount, sizeof(mLodCount));
-    stream.Write(&mUnknown48, sizeof(mUnknown48));
-    stream.Write(&mUnknown4c, sizeof(mUnknown4c));
-    stream.Write(&mUnknown50, sizeof(mUnknown50));
-    stream.Write(&mUnknown54, sizeof(mUnknown54));
+    stream.Write(&mFloorPull, sizeof(mFloorPull));
+    stream.Write(&mLaneEdgeGap, sizeof(mLaneEdgeGap));
+    stream.Write(&mFloorEdgeWeight, sizeof(mFloorEdgeWeight));
+    stream.Write(&mCellEdgeBlendPerStep, sizeof(mCellEdgeBlendPerStep));
     WriteObjectRef(stream, mPath);
     stream.Write(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
     WriteFloatVector(stream, mLodScreenSizes);
     WriteEventList(stream, mEvents);
     WriteSeekerVector(stream, mSeekers);
-    stream.Write(&mUnknownbc, sizeof(mUnknownbc));
+    stream.Write(&mWindowStartSlice, sizeof(mWindowStartSlice));
     stream.Write(&mCulledFarSlices, sizeof(mCulledFarSlices));
     SaveSectionMaterials(stream);
 }
@@ -393,14 +393,14 @@ void Tunnel::Load(Stream &stream) {
     Drawable::Load(stream);
     Animatable::Load(stream);
     ReleaseRefs();
-    stream.Read(&mUnknown38, sizeof(mUnknown38));
+    stream.Read(&mRingRadius, sizeof(mRingRadius));
     stream.Read(&mRingCount, sizeof(mRingCount));
     stream.Read(&mSliceCount, sizeof(mSliceCount));
     stream.Read(&mLodCount, sizeof(mLodCount));
-    stream.Read(&mUnknown48, sizeof(mUnknown48));
-    stream.Read(&mUnknown4c, sizeof(mUnknown4c));
-    stream.Read(&mUnknown50, sizeof(mUnknown50));
-    stream.Read(&mUnknown54, sizeof(mUnknown54));
+    stream.Read(&mFloorPull, sizeof(mFloorPull));
+    stream.Read(&mLaneEdgeGap, sizeof(mLaneEdgeGap));
+    stream.Read(&mFloorEdgeWeight, sizeof(mFloorEdgeWeight));
+    stream.Read(&mCellEdgeBlendPerStep, sizeof(mCellEdgeBlendPerStep));
     ReadObjectRef(stream, mPath);
     if (g_nTunnelLoadVersion < kPathWordDroppedRevision) {
         int nDiscarded;
@@ -410,8 +410,8 @@ void Tunnel::Load(Stream &stream) {
     ReadFloatVector(stream, mLodScreenSizes);
     ReadEventList(stream, mEvents);
     ReadSeekerVector(stream, mSeekers);
-    stream.Read(&mUnknownbc, sizeof(mUnknownbc));
-    if (g_nTunnelLoadVersion >= kUnknown60Revision) {
+    stream.Read(&mWindowStartSlice, sizeof(mWindowStartSlice));
+    if (g_nTunnelLoadVersion >= kCulledFarSlicesRevision) {
         stream.Read(&mCulledFarSlices, sizeof(mCulledFarSlices));
     }
     Update();
@@ -420,30 +420,30 @@ void Tunnel::Load(Stream &stream) {
 
 // 0x00468a78
 void Tunnel::SaveSectionMaterials(Stream &stream) {
-    const int nCellCount = mUnknowna4.size();
+    const int nCellCount = mCellChains.size();
     stream.Write(&nCellCount, sizeof(nCellCount));
-    for (const TunnelMeshChain &chain : mUnknowna4) {
+    for (const TunnelMeshChain &chain : mCellChains) {
         SaveChainMaterial(stream, chain);
     }
-    const int nSliceCount = mUnknownb0.size();
+    const int nSliceCount = mSliceChains.size();
     stream.Write(&nSliceCount, sizeof(nSliceCount));
-    for (const TunnelMeshChain &chain : mUnknownb0) {
+    for (const TunnelMeshChain &chain : mSliceChains) {
         SaveChainMaterial(stream, chain);
     }
 }
 
 // 0x00468da0
 void Tunnel::LoadSectionMaterials(Stream &stream) {
-    int nCellCount = mUnknowna4.size();
-    int nSliceCount = mUnknownb0.size();
+    int nCellCount = mCellChains.size();
+    int nSliceCount = mSliceChains.size();
     if (g_nTunnelLoadVersion >= kCellCountRevision) {
         stream.Read(&nCellCount, sizeof(nCellCount));
     }
-    LoadChainMaterials(stream, mUnknowna4, nCellCount);
+    LoadChainMaterials(stream, mCellChains, nCellCount);
     if (g_nTunnelLoadVersion >= kSliceCountRevision) {
         stream.Read(&nSliceCount, sizeof(nSliceCount));
     }
-    LoadChainMaterials(stream, mUnknownb0, nSliceCount);
+    LoadChainMaterials(stream, mSliceChains, nSliceCount);
 }
 
 // 0x00476788
@@ -453,20 +453,20 @@ void Tunnel::Copy(const Object *pSource, unsigned nFlags) {
     Drawable::Copy(pSource, nFlags);
     Animatable::Copy(pSource, nFlags);
     ReleaseRefs();
-    mUnknown38 = pTunnel->mUnknown38;
+    mRingRadius = pTunnel->mRingRadius;
     mRingCount = pTunnel->mRingCount;
     mSliceCount = pTunnel->mSliceCount;
     mLodCount = pTunnel->mLodCount;
-    mUnknown48 = pTunnel->mUnknown48;
-    mUnknown4c = pTunnel->mUnknown4c;
-    mUnknown50 = pTunnel->mUnknown50;
-    mUnknown54 = pTunnel->mUnknown54;
+    mFloorPull = pTunnel->mFloorPull;
+    mLaneEdgeGap = pTunnel->mLaneEdgeGap;
+    mFloorEdgeWeight = pTunnel->mFloorEdgeWeight;
+    mCellEdgeBlendPerStep = pTunnel->mCellEdgeBlendPerStep;
     mPath = pTunnel->mPath;
     mLaneChangeFrames = pTunnel->mLaneChangeFrames;
     mLodScreenSizes = pTunnel->mLodScreenSizes;
     mEvents = pTunnel->mEvents;
     mSeekers = pTunnel->mSeekers;
-    mUnknown5c = pTunnel->mUnknown5c;
+    mStartSlice = pTunnel->mStartSlice;
     mCulledFarSlices = pTunnel->mCulledFarSlices;
     Update();
 }
@@ -483,7 +483,7 @@ void Tunnel::SetPath(TransAnim *pPath) {
     if (mPath != nullptr) {
         (void)mPath->EndFrame(); // Yes, the binary discards the result.
     }
-    std::fill(mUnknown88.begin(), mUnknown88.end(), kNoSlice);
+    std::fill(mPlacedSlices.begin(), mPlacedSlices.end(), kNoSlice);
 }
 
 // 0x004775b0
@@ -529,22 +529,22 @@ void Tunnel::ResizeSeekers(unsigned nCount) {
 }
 
 // 0x00477160
-void Tunnel::Configure(float flUnknown38,
+void Tunnel::Configure(float flRingRadius,
                        int nRingCount,
                        int nSliceCount,
                        int nLodCount,
-                       float flUnknown48,
-                       float flUnknown4c,
-                       float flUnknown50,
-                       float flUnknown54) {
-    mUnknown38 = flUnknown38;
+                       float flFloorPull,
+                       float flLaneEdgeGap,
+                       float flFloorEdgeWeight,
+                       float flCellEdgeBlendPerStep) {
+    mRingRadius = flRingRadius;
     mRingCount = nRingCount;
     mSliceCount = nSliceCount;
     mLodCount = nLodCount;
-    mUnknown48 = flUnknown48;
-    mUnknown4c = flUnknown4c;
-    mUnknown50 = flUnknown50;
-    mUnknown54 = flUnknown54;
+    mFloorPull = flFloorPull;
+    mLaneEdgeGap = flLaneEdgeGap;
+    mFloorEdgeWeight = flFloorEdgeWeight;
+    mCellEdgeBlendPerStep = flCellEdgeBlendPerStep;
     for (TunnelSeeker &seeker : mSeekers) {
         seeker.ReleaseRefs();
     }
@@ -561,11 +561,11 @@ int Tunnel::FrameToSlice(float flFrame) {
 
 // 0x00466620
 Tunnel::Tunnel(const HxStr &name)
-    : Object(name), mUnknown38(1.0f), mRingCount(3), mSliceCount(0), mLodCount(2), mUnknown48(0.1f),
-      mUnknown4c(0.1f), mUnknown50(0.25f), mUnknown54(0.01f), mPath(nullptr), mUnknown5c(0),
-      mCulledFarSlices(0), mLaneChangeFrames(480.0f), mDrawLattice(1), mDrawPanels(1),
-      mUnknown7c(kNoSlice), mUnknown80(0.0f), mUnknown84(0), mSlicesPerFrame(0.0f),
-      mSliceFrames(0.0f), mUnknownbc(0) {
+    : Object(name), mRingRadius(1.0f), mRingCount(3), mSliceCount(0), mLodCount(2),
+      mFloorPull(0.1f), mLaneEdgeGap(0.1f), mFloorEdgeWeight(0.25f), mCellEdgeBlendPerStep(0.01f),
+      mPath(nullptr), mStartSlice(0), mCulledFarSlices(0), mLaneChangeFrames(480.0f),
+      mDrawLattice(1), mDrawPanels(1), mPlacingSlice(kNoSlice), mPlacingFrame(0.0f),
+      mPlacingColumn(0), mSlicesPerFrame(0.0f), mSliceFrames(0.0f), mWindowStartSlice(0) {
     mSeekers.reserve(kInitialSeekerCapacity);
     mLodScreenSizes.resize(mLodCount, 0.0f);
     std::fill(mLodScreenSizes.begin(), mLodScreenSizes.end(), 0);
@@ -606,7 +606,7 @@ void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend
         pOut->mTranslation.w = 1.0f;
         return;
     }
-    const Transform &ring = mUnknownc0[nRing];
+    const Transform &ring = mRingXfms[nRing];
     pOut->mBasisX = ring.mBasisX;
     pOut->mBasisY = ring.mBasisY;
     pOut->mBasisZ = ring.mBasisZ;
@@ -620,22 +620,22 @@ void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend
 
 // 0x00468850
 int Tunnel::DrawSelf() {
-    const int nEnd = mUnknownbc + mSliceCount - mCulledFarSlices;
+    const int nEnd = mWindowStartSlice + mSliceCount - mCulledFarSlices;
     if (mDrawLattice != 0) {
-        for (int nSlice = nEnd - 1; nSlice >= mUnknownbc; --nSlice) {
+        for (int nSlice = nEnd - 1; nSlice >= mWindowStartSlice; --nSlice) {
             const int nIndex = nSlice % mSliceCount;
-            if (mUnknown88[nIndex] != kNoSlice) {
-                mUnknownb0[nIndex].Draw(nSlice * mSliceFrames - mFilteredFrame);
+            if (mPlacedSlices[nIndex] != kNoSlice) {
+                mSliceChains[nIndex].Draw(nSlice * mSliceFrames - mFilteredFrame);
             }
         }
     }
     if (mDrawPanels != 0) {
-        for (int nSlice = nEnd - 1; nSlice >= mUnknownbc; --nSlice) {
+        for (int nSlice = nEnd - 1; nSlice >= mWindowStartSlice; --nSlice) {
             const float flDistance = nSlice * mSliceFrames - mFilteredFrame;
             const int nIndex = nSlice % mSliceCount;
-            if (mUnknown88[nIndex] == nSlice) {
+            if (mPlacedSlices[nIndex] == nSlice) {
                 for (int nRing = 0; nRing < mRingCount; ++nRing) {
-                    mUnknowna4[nIndex * mRingCount + nRing].Draw(flDistance);
+                    mCellChains[nIndex * mRingCount + nRing].Draw(flDistance);
                 }
                 for (TunnelSeeker &seeker : mSeekers) {
                     seeker.DrawSection(nSlice, flDistance);
@@ -655,9 +655,9 @@ void Tunnel::SetFrameSelf(float flFrame) {
     for (const TunnelSeeker &seeker : mSeekers) {
         flEarliestOffset = std::min(flEarliestOffset, seeker.mTransFrameOffset);
     }
-    mUnknownbc = static_cast<int>(floorf((flFrame + flEarliestOffset) * mSlicesPerFrame));
-    if (mUnknownbc < 0) {
-        mUnknownbc = 0;
+    mWindowStartSlice = static_cast<int>(floorf((flFrame + flEarliestOffset) * mSlicesPerFrame));
+    if (mWindowStartSlice < 0) {
+        mWindowStartSlice = 0;
     }
     ScrollRings();
     if (mPath == nullptr) {
@@ -675,7 +675,7 @@ void Tunnel::SetFrameSelf(float flFrame) {
         mPath->EvalFrame(flFrame + seeker.mLookFrameOffset, &look.mBasisX.x, 1);
 
         // Turn the look frame about its vertical axis to the seeker's lane and aim the
-        // transformable from its own path point at the lane, mUnknown38 out from the axis.
+        // transformable from its own path point at the lane, mRingRadius out from the axis.
         Transform aim;
         SetPaddingWords(aim);
         const float flAngle = -seeker.UpdateLane() * 2.0f * kPi / mRingCount;
@@ -694,12 +694,12 @@ void Tunnel::SetFrameSelf(float flFrame) {
         aim.mTranslation.y = 0.0f;
         aim.mTranslation.z = 0.0f;
         aim.mTranslation.w = 1.0f;
-        sceVu0Sub005e7ab0(&aim.mBasisX.x, &look.mBasisX.x, &aim.mBasisX.x);
+        sceVu0MulAffineMatrixXyz(&aim.mBasisX.x, &look.mBasisX.x, &aim.mBasisX.x);
 
         Vector3 lanePoint;
         lanePoint.x = 0.0f;
         lanePoint.y = 0.0f;
-        lanePoint.z = -mUnknown38;
+        lanePoint.z = -mRingRadius;
         lanePoint.w = 1.0f;
         XfmPoint(aim, lanePoint, aim.mTranslation);
         Vector3 direction;
@@ -716,30 +716,30 @@ void Tunnel::SetFrameSelf(float flFrame) {
 
 // 0x004699c0
 void Tunnel::BuildMesh() {
-    std::vector<Mat *> cellMats(mUnknowna4.size(), nullptr);
-    std::vector<Color> cellColors(mUnknowna4.size());
-    for (unsigned i = 0; i < mUnknowna4.size(); ++i) {
-        cellMats[i] = mUnknowna4[i].front()->mMat;
-        cellColors[i] = mUnknowna4[i].front()->mVertsOwner->mVerts.front().mColor;
+    std::vector<Mat *> cellMats(mCellChains.size(), nullptr);
+    std::vector<Color> cellColors(mCellChains.size());
+    for (unsigned i = 0; i < mCellChains.size(); ++i) {
+        cellMats[i] = mCellChains[i].front()->mMat;
+        cellColors[i] = mCellChains[i].front()->mVertsOwner->mVerts.front().mColor;
     }
-    std::vector<Mat *> sliceMats(mUnknownb0.size(), nullptr);
-    std::vector<Color> sliceColors(mUnknownb0.size());
-    for (unsigned i = 0; i < mUnknownb0.size(); ++i) {
-        sliceMats[i] = mUnknownb0[i].front()->mMat;
-        sliceColors[i] = mUnknownb0[i].front()->mVertsOwner->mVerts.front().mColor;
+    std::vector<Mat *> sliceMats(mSliceChains.size(), nullptr);
+    std::vector<Color> sliceColors(mSliceChains.size());
+    for (unsigned i = 0; i < mSliceChains.size(); ++i) {
+        sliceMats[i] = mSliceChains[i].front()->mMat;
+        sliceColors[i] = mSliceChains[i].front()->mVertsOwner->mVerts.front().mColor;
     }
     ClearMaterialSectionLists();
 
     mSliceFrames = kSliceFrames;
     mSlicesPerFrame = 1.0f / kSliceFrames;
-    mUnknown88.resize(mSliceCount, 0);
-    std::fill(mUnknown88.begin(), mUnknown88.end(), kNoSlice);
+    mPlacedSlices.resize(mSliceCount, 0);
+    std::fill(mPlacedSlices.begin(), mPlacedSlices.end(), kNoSlice);
 
     // Yes, the binary fills the new elements from blanks with only their padding words written.
     // The loops below overwrite everything else.
     Transform blankXfm;
     SetPaddingWords(blankXfm);
-    mUnknownc0.resize(mRingCount, blankXfm);
+    mRingXfms.resize(mRingCount, blankXfm);
     LaneProfile blankProfile;
     for (Vector3 &point : blankProfile.mPoints) {
         point.w = 1.0f;
@@ -753,7 +753,7 @@ void Tunnel::BuildMesh() {
     const float flHalfRing = kPi / mRingCount;
     float flAngle = 0.0f;
     for (int nRing = 0; nRing < mRingCount; ++nRing) {
-        Transform &xfm = mUnknownc0[nRing];
+        Transform &xfm = mRingXfms[nRing];
         const float flCos = cosf(flAngle);
         const float flSin = sinf(flAngle);
         xfm.mBasisX.x = flCos;
@@ -766,27 +766,33 @@ void Tunnel::BuildMesh() {
         xfm.mBasisZ.z = xfm.mBasisX.x;
         xfm.mBasisZ.y = 0.0f;
         flAngle -= flHalfRing;
-        xfm.mTranslation.x = mUnknown38 * sinf(flAngle);
+        xfm.mTranslation.x = mRingRadius * sinf(flAngle);
         xfm.mTranslation.y = 0.0f;
-        xfm.mTranslation.z = -mUnknown38 * cosf(flAngle);
+        xfm.mTranslation.z = -mRingRadius * cosf(flAngle);
         flAngle += flHalfRing * 3.0f;
     }
 
     for (int nRing = 0; nRing < mRingCount; ++nRing) {
         LaneProfile &profile = mLaneProfiles[nRing];
         LerpRingSectionTangent(
-            WrapIndex(nRing - 1, mRingCount), &profile.mPoints[0], 1.0f - mUnknown4c);
-        LerpRingSectionTangent(nRing, &profile.mPoints[3], mUnknown4c);
+            WrapIndex(nRing - 1, mRingCount), &profile.mPoints[0], 1.0f - mLaneEdgeGap);
+        LerpRingSectionTangent(nRing, &profile.mPoints[3], mLaneEdgeGap);
         Vector3 center;
         center.w = 1.0f;
         LerpRingSectionTangent(nRing, &center, 0.0f);
         Vector3 floorCenter;
         floorCenter.w = 1.0f;
-        Vec3Scale(&center.x, 1.0f - mUnknown48, &floorCenter.x);
-        BlendVector(
-            profile.mPoints[0], mUnknown50, floorCenter, 1.0f - mUnknown50, profile.mPoints[1]);
-        BlendVector(
-            profile.mPoints[3], mUnknown50, floorCenter, 1.0f - mUnknown50, profile.mPoints[2]);
+        Vec3Scale(&center.x, 1.0f - mFloorPull, &floorCenter.x);
+        BlendVector(profile.mPoints[0],
+                    mFloorEdgeWeight,
+                    floorCenter,
+                    1.0f - mFloorEdgeWeight,
+                    profile.mPoints[1]);
+        BlendVector(profile.mPoints[3],
+                    mFloorEdgeWeight,
+                    floorCenter,
+                    1.0f - mFloorEdgeWeight,
+                    profile.mPoints[2]);
         for (int nSegment = 0; nSegment < kLaneSegmentCount; ++nSegment) {
             Vector3 delta;
             delta.w = 1.0f;
@@ -801,30 +807,30 @@ void Tunnel::BuildMesh() {
     }
 
     mSliceSteps = 1 << (mLodCount - 1);
-    mCellEdgeBlend = mUnknown54 * mSliceSteps;
+    mCellEdgeBlend = mCellEdgeBlendPerStep * mSliceSteps;
     BuildSliceMeshes();
     BuildCellMeshes();
     // Yes, the binary passes the member to its own setter, which assigns it to itself.
     ApplyMeshLodScreenSizes(mLodScreenSizes);
 
-    for (unsigned i = 0; i < mUnknowna4.size(); ++i) {
+    for (unsigned i = 0; i < mCellChains.size(); ++i) {
         if (i < cellMats.size()) {
-            mUnknowna4[i].front()->SetMaterialChain(cellMats[i]);
-            mUnknowna4[i].front()->SetVertexColor(cellColors[i]);
+            mCellChains[i].front()->SetMaterialChain(cellMats[i]);
+            mCellChains[i].front()->SetVertexColor(cellColors[i]);
         }
     }
-    for (unsigned i = 0; i < mUnknownb0.size(); ++i) {
+    for (unsigned i = 0; i < mSliceChains.size(); ++i) {
         if (i < sliceMats.size()) {
-            mUnknownb0[i].front()->SetMaterialChain(sliceMats[i]);
-            mUnknownb0[i].front()->SetVertexColor(sliceColors[i]);
+            mSliceChains[i].front()->SetMaterialChain(sliceMats[i]);
+            mSliceChains[i].front()->SetVertexColor(sliceColors[i]);
         }
     }
 }
 
 // 0x0046adc0
 void Tunnel::BuildSliceMeshes() {
-    mUnknownb0.resize(mSliceCount, TunnelMeshChain());
-    if (mUnknownb0.empty()) {
+    mSliceChains.resize(mSliceCount, TunnelMeshChain());
+    if (mSliceChains.empty()) {
         return;
     }
 
@@ -833,9 +839,9 @@ void Tunnel::BuildSliceMeshes() {
     const int nCapStart = kLaneSegmentCount * nPanelVerts;
     const int nBlockVerts = nCapStart + 2 * kCapVerts;
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
-    for (unsigned nSlice = 0; nSlice < mUnknownb0.size(); ++nSlice) {
+    for (unsigned nSlice = 0; nSlice < mSliceChains.size(); ++nSlice) {
         RunLongOperationDrawProc();
-        TunnelMeshChain &chain = mUnknownb0[nSlice];
+        TunnelMeshChain &chain = mSliceChains[nSlice];
         chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nSlice)), mLodCount, true);
         chain.SetVertexCount(nBlockVerts * mRingCount);
         Mesh *pMesh = chain.front();
@@ -852,7 +858,7 @@ void Tunnel::BuildSliceMeshes() {
     }
 
     // The triangles are built once, on the chain of the first slice.
-    TunnelMeshChain &first = mUnknownb0.front();
+    TunnelMeshChain &first = mSliceChains.front();
     for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
         RunLongOperationDrawProc();
         const int nStep = 1 << nLevel;
@@ -877,18 +883,18 @@ void Tunnel::BuildSliceMeshes() {
         }
     }
     first.Sync();
-    for (unsigned nSlice = 1; nSlice < mUnknownb0.size(); ++nSlice) {
+    for (unsigned nSlice = 1; nSlice < mSliceChains.size(); ++nSlice) {
         RunLongOperationDrawProc();
-        mUnknownb0[nSlice].ShareFaces(first);
+        mSliceChains[nSlice].ShareFaces(first);
         // Yes, the binary synchronises every level a second time.
-        mUnknownb0[nSlice].Sync();
+        mSliceChains[nSlice].Sync();
     }
 }
 
 // 0x0046b830
 void Tunnel::BuildLaneMeshes() {
-    mUnknownb0.resize(mRingCount * mSliceCount, TunnelMeshChain());
-    if (mUnknownb0.empty()) {
+    mSliceChains.resize(mRingCount * mSliceCount, TunnelMeshChain());
+    if (mSliceChains.empty()) {
         return;
     }
 
@@ -896,8 +902,8 @@ void Tunnel::BuildLaneMeshes() {
     const int nCapStart = kFlatLaneRows * nColumns;
     const int nBlockVerts = nCapStart + 2 * kCapVerts;
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
-    for (unsigned nLane = 0; nLane < mUnknownb0.size(); ++nLane) {
-        TunnelMeshChain &chain = mUnknownb0[nLane];
+    for (unsigned nLane = 0; nLane < mSliceChains.size(); ++nLane) {
+        TunnelMeshChain &chain = mSliceChains[nLane];
         chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nLane)), mLodCount, true);
         chain.SetVertexCount(nBlockVerts);
         Mesh *pMesh = chain.front();
@@ -908,7 +914,7 @@ void Tunnel::BuildLaneMeshes() {
         pMesh->SetVertexColor(white);
     }
 
-    TunnelMeshChain &first = mUnknownb0.front();
+    TunnelMeshChain &first = mSliceChains.front();
     for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
         const int nStep = 1 << nLevel;
         Mesh *pMesh = first[nLevel];
@@ -926,25 +932,25 @@ void Tunnel::BuildLaneMeshes() {
                        nCapStart + kCapVerts + 3);
     }
     first.Sync();
-    for (unsigned nLane = 1; nLane < mUnknownb0.size(); ++nLane) {
-        mUnknownb0[nLane].ShareFaces(first);
+    for (unsigned nLane = 1; nLane < mSliceChains.size(); ++nLane) {
+        mSliceChains[nLane].ShareFaces(first);
         // Yes, the binary synchronises every level a second time.
-        mUnknownb0[nLane].Sync();
+        mSliceChains[nLane].Sync();
     }
 }
 
 // 0x0046c0e8
 void Tunnel::BuildCellMeshes() {
-    mUnknowna4.resize(mRingCount * mSliceCount, TunnelMeshChain());
-    if (mUnknowna4.empty()) {
+    mCellChains.resize(mRingCount * mSliceCount, TunnelMeshChain());
+    if (mCellChains.empty()) {
         return;
     }
 
     const int nColumns = mSliceSteps + 1;
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
-    for (unsigned nCell = 0; nCell < mUnknowna4.size(); ++nCell) {
+    for (unsigned nCell = 0; nCell < mCellChains.size(); ++nCell) {
         RunLongOperationDrawProc();
-        TunnelMeshChain &chain = mUnknowna4[nCell];
+        TunnelMeshChain &chain = mCellChains[nCell];
         chain.Build(HxStr(FormatString(kCellNameFormat, NameText(this), nCell)), mLodCount, true);
         chain.SetVertexCount(kPanelRows * nColumns);
         Mesh *pMesh = chain.front();
@@ -953,14 +959,14 @@ void Tunnel::BuildCellMeshes() {
     }
 
     // The triangles are built once, on the chain of the first cell.
-    TunnelMeshChain &first = mUnknowna4.front();
+    TunnelMeshChain &first = mCellChains.front();
     for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
         RunLongOperationDrawProc();
         first[nLevel]->AddQuadStrip(0, nColumns, nColumns, 1 << nLevel);
     }
-    for (unsigned nCell = 1; nCell < mUnknowna4.size(); ++nCell) {
+    for (unsigned nCell = 1; nCell < mCellChains.size(); ++nCell) {
         RunLongOperationDrawProc();
-        mUnknowna4[nCell].ShareFaces(first);
+        mCellChains[nCell].ShareFaces(first);
     }
 }
 
@@ -968,7 +974,7 @@ void Tunnel::BuildCellMeshes() {
 void Tunnel::SetRingSectionFrames() {
     Transform xfm;
     SetPaddingWords(xfm);
-    GetPathXfm(&xfm, mUnknown80);
+    GetPathXfm(&xfm, mPlacingFrame);
 
     const int nColumns = mSliceSteps + 1;
     const int nPanelVerts = kPanelRows * nColumns;
@@ -976,14 +982,14 @@ void Tunnel::SetRingSectionFrames() {
     const int nBlockVerts = nCapStart + 2 * kCapVerts;
     for (int nRing = 0; nRing < mRingCount; ++nRing) {
         const int nBase = nRing * nBlockVerts;
-        Mesh *pSlice = GetRingSection(mUnknown7c);
+        Mesh *pSlice = GetRingSection(mPlacingSlice);
         std::vector<MeshVert> &verts = pSlice->mVertsOwner->mVerts;
         const LaneProfile &profile = mLaneProfiles[nRing];
 
-        // Column mUnknown84 of the two rows of each panel.
-        const int nLeft = nBase + kLanePanelLeftWall * nPanelVerts + mUnknown84;
-        const int nFloor = nBase + kLanePanelFloor * nPanelVerts + mUnknown84;
-        const int nRight = nBase + kLanePanelRightWall * nPanelVerts + mUnknown84;
+        // Column mPlacingColumn of the two rows of each panel.
+        const int nLeft = nBase + kLanePanelLeftWall * nPanelVerts + mPlacingColumn;
+        const int nFloor = nBase + kLanePanelFloor * nPanelVerts + mPlacingColumn;
+        const int nRight = nBase + kLanePanelRightWall * nPanelVerts + mPlacingColumn;
         XfmPoint(xfm, profile.mPoints[0], verts[nLeft].mPoint);
         XfmPoint(xfm, profile.mPoints[1], verts[nLeft + nColumns].mPoint);
         XfmPoint(xfm, profile.mPoints[2], verts[nRight].mPoint);
@@ -999,17 +1005,17 @@ void Tunnel::SetRingSectionFrames() {
 
         // The cell to the right of the lane starts at its right edge, and the cell to its left
         // ends at its left edge.
-        Mesh *pCell = GetRingSection(nRing, mUnknown7c);
-        Mesh *pPreviousCell = GetRingSection(WrapIndex(nRing - 1, mRingCount), mUnknown7c);
+        Mesh *pCell = GetRingSection(nRing, mPlacingSlice);
+        Mesh *pPreviousCell = GetRingSection(WrapIndex(nRing - 1, mRingCount), mPlacingSlice);
         std::vector<MeshVert> &cellVerts = pCell->mVertsOwner->mVerts;
         std::vector<MeshVert> &previousVerts = pPreviousCell->mVertsOwner->mVerts;
-        cellVerts[mUnknown84].mPoint = verts[nRight + nColumns].mPoint;
-        previousVerts[mUnknown84 + nColumns].mPoint = verts[nLeft].mPoint;
+        cellVerts[mPlacingColumn].mPoint = verts[nRight + nColumns].mPoint;
+        previousVerts[mPlacingColumn + nColumns].mPoint = verts[nLeft].mPoint;
 
         const Vector3 &floorNormal = verts[nFloor].mNorm;
         const int nCap = nBase + nCapStart;
         const int nPreviousCap = WrapIndex(nBase - nBlockVerts, verts.size()) + nCapStart;
-        if (mUnknown84 == 0) {
+        if (mPlacingColumn == 0) {
             verts[nCap].mPoint = verts[nRight + nColumns].mPoint;
             verts[nPreviousCap + 2].mPoint = verts[nLeft].mPoint;
             BlendVector(cellVerts[1].mPoint,
@@ -1040,7 +1046,7 @@ void Tunnel::SetRingSectionFrames() {
             verts[nCap + 1].mNorm = floorNormal;
             verts[nPreviousCap + 2].mNorm = floorNormal;
             verts[nPreviousCap + 3].mNorm = floorNormal;
-        } else if (mUnknown84 == mSliceSteps) {
+        } else if (mPlacingColumn == mSliceSteps) {
             verts[nCap + kCapVerts + 1].mPoint = verts[nRight + nColumns].mPoint;
             verts[nPreviousCap + kCapVerts + 3].mPoint = verts[nLeft].mPoint;
             verts[nCap + kCapVerts].mNorm = floorNormal;
@@ -1050,10 +1056,10 @@ void Tunnel::SetRingSectionFrames() {
         }
     }
 
-    if (mUnknown84 == 0) {
-        GetRingSection(mUnknown7c)->SyncAll();
+    if (mPlacingColumn == 0) {
+        GetRingSection(mPlacingSlice)->SyncAll();
         for (int nRing = 0; nRing < mRingCount; ++nRing) {
-            GetRingSection(nRing, mUnknown7c)->SyncAll();
+            GetRingSection(nRing, mPlacingSlice)->SyncAll();
         }
     }
 }
@@ -1066,7 +1072,7 @@ void Tunnel::SetLaneDividerColor(int nRing, int nSlice, const Color &color) {
     const int nBlockVerts = nCapStart + 2 * kCapVerts;
     const int nBase = WrapIndex(nRing, mRingCount) * nBlockVerts;
     const int nNextBase = WrapIndex(nBase + nBlockVerts, nBlockVerts * mRingCount);
-    Mesh *pMesh = mUnknownb0[WrapIndex(nSlice, mSliceCount)].front();
+    Mesh *pMesh = mSliceChains[WrapIndex(nSlice, mSliceCount)].front();
     std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
     FillColor(verts, nBase + kLanePanelRightWall * nPanelVerts, nPanelVerts, color);
     FillColor(verts, nNextBase + kLanePanelLeftWall * nPanelVerts, nPanelVerts, color);
@@ -1081,7 +1087,7 @@ void Tunnel::SetLaneFloorColor(const Color &color) {
     const int nCapStart = kLaneSegmentCount * nPanelVerts;
     const int nBlockVerts = nCapStart + 2 * kCapVerts;
     for (int nSlice = 0; nSlice < mSliceCount; ++nSlice) {
-        Mesh *pMesh = mUnknownb0[nSlice].front();
+        Mesh *pMesh = mSliceChains[nSlice].front();
         std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
         for (int nRing = 0; nRing < mRingCount; ++nRing) {
             // The image also tests nBlockVerts * mRingCount for zero with a divide trap here, and
@@ -1120,18 +1126,18 @@ void Tunnel::DumpText(FailSink &sink) {
 // 0x0046d180
 void Tunnel::ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes) {
     mLodScreenSizes = screenSizes;
-    for (TunnelMeshChain &chain : mUnknowna4) {
+    for (TunnelMeshChain &chain : mCellChains) {
         chain.SetScreenSizes(mLodScreenSizes);
     }
-    for (TunnelMeshChain &chain : mUnknownb0) {
+    for (TunnelMeshChain &chain : mSliceChains) {
         chain.SetScreenSizes(mLodScreenSizes);
     }
 }
 
 // 0x0046acf0
 void Tunnel::ClearMaterialSectionLists() {
-    mUnknownb0.clear();
-    mUnknowna4.clear();
+    mSliceChains.clear();
+    mCellChains.clear();
 }
 
 // 0x0046db80
@@ -1155,7 +1161,7 @@ void Tunnel::ProjectSectionToCameraSpace(
         pOut->mTranslation.w = 1.0f;
         return;
     }
-    const Transform &ring = mUnknownc0[nRing];
+    const Transform &ring = mRingXfms[nRing];
     pOut->mBasisX = ring.mBasisX;
     pOut->mBasisY = ring.mBasisY;
     pOut->mBasisZ = ring.mBasisZ;
@@ -1165,8 +1171,7 @@ void Tunnel::ProjectSectionToCameraSpace(
     Vec3Scale(&ring.mTranslation.x, flTangentScale, &current.x);
     Vector3 next;
     next.w = 1.0f;
-    Vec3Scale(
-        &mUnknownc0[WrapIndex(nRing + 1, mRingCount)].mTranslation.x, flTangentScale, &next.x);
+    Vec3Scale(&mRingXfms[WrapIndex(nRing + 1, mRingCount)].mTranslation.x, flTangentScale, &next.x);
     // A VU0 multiply and accumulate in the image, as in LerpRingSectionTangent().
     const float flComplement = 1.0f - flRingBlend;
     pOut->mTranslation.x = next.x * flRingBlend + current.x * flComplement;
@@ -1186,20 +1191,20 @@ void Tunnel::ProjectSectionToCameraSpace(
 
 // 0x004773e8
 Mesh *Tunnel::GetRingSection(int nSlice) {
-    return mUnknownb0[WrapIndex(nSlice, mSliceCount)].front();
+    return mSliceChains[WrapIndex(nSlice, mSliceCount)].front();
 }
 
 // 0x00477388
 Mesh *Tunnel::GetRingSection(int nRing, int nSlice) {
-    return mUnknowna4[WrapIndex(nSlice, mSliceCount) * mRingCount + WrapIndex(nRing, mRingCount)]
+    return mCellChains[WrapIndex(nSlice, mSliceCount) * mRingCount + WrapIndex(nRing, mRingCount)]
         .front();
 }
 
 // 0x00477538
 // A VU0 multiply and accumulate in the image, vmulax then vmaddx over xyz.
 void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
-    const Vector3 &next = mUnknownc0[WrapIndex(nRing + 1, mRingCount)].mTranslation;
-    const Vector3 &current = mUnknownc0[nRing].mTranslation;
+    const Vector3 &next = mRingXfms[WrapIndex(nRing + 1, mRingCount)].mTranslation;
+    const Vector3 &current = mRingXfms[nRing].mTranslation;
     const float flComplement = 1.0f - flWeight;
     pOut->x = next.x * flWeight + current.x * flComplement;
     pOut->y = next.y * flWeight + current.y * flComplement;
@@ -1209,8 +1214,8 @@ void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
 
 // 0x00476f48
 void Tunnel::ScrollRings() {
-    for (int nSlice = mUnknownbc; nSlice < mUnknownbc + mSliceCount; ++nSlice) {
-        if (mUnknown88[WrapIndex(nSlice, mSliceCount)] != nSlice) {
+    for (int nSlice = mWindowStartSlice; nSlice < mWindowStartSlice + mSliceCount; ++nSlice) {
+        if (mPlacedSlices[WrapIndex(nSlice, mSliceCount)] != nSlice) {
             AdvanceRing(nSlice);
             return;
         }
@@ -1220,19 +1225,19 @@ void Tunnel::ScrollRings() {
 // 0x00476fe0
 void Tunnel::AdvanceRing(int nSlice) {
     const int nIndex = WrapIndex(nSlice, mSliceCount);
-    if (nSlice != mUnknown7c) {
-        mUnknown88[nIndex] = kNoSlice;
-        mUnknown7c = nSlice;
-        mUnknown84 = mSliceSteps;
-        mUnknown80 = nSlice * mSliceFrames;
+    if (nSlice != mPlacingSlice) {
+        mPlacedSlices[nIndex] = kNoSlice;
+        mPlacingSlice = nSlice;
+        mPlacingColumn = mSliceSteps;
+        mPlacingFrame = nSlice * mSliceFrames;
     }
     SetRingSectionFrames();
-    if (mUnknown84 == 0) {
-        mUnknown88[nIndex] = nSlice;
-        mUnknown7c = kNoSlice;
+    if (mPlacingColumn == 0) {
+        mPlacedSlices[nIndex] = nSlice;
+        mPlacingSlice = kNoSlice;
     } else {
-        --mUnknown84;
-        mUnknown80 += mSliceFrames / mSliceSteps;
+        --mPlacingColumn;
+        mPlacingFrame += mSliceFrames / mSliceSteps;
     }
 }
 

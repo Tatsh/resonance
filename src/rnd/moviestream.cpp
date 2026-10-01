@@ -328,7 +328,7 @@ int MovieStream::ParseHeader(char *pBuffer, int nBytes) {
     char *pChunk = pBuffer + pHeader->mSize + sizeof(ChunkHeader);
     for (pHeader = reinterpret_cast<ChunkHeader *>(pChunk); pHeader->mTag == g_nMovtTag;
          pHeader = reinterpret_cast<ChunkHeader *>(pChunk)) {
-        memcpy(mTracks[pHeader->mTrackId].mUnknown00, pHeader + 1, sizeof(Track));
+        memcpy(&mTracks[pHeader->mTrackId], pHeader + 1, sizeof(Track));
         pChunk += pHeader->mSize + sizeof(ChunkHeader);
     }
 

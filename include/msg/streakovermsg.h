@@ -53,7 +53,7 @@ public:
     virtual const char *Name();
 
 private:
-    int mUnknown04; // +0x04
+    int mStreak; // +0x04, with a title after the streak the class name reports as over
 };
 
 /**

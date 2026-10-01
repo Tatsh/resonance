@@ -54,11 +54,11 @@ void MetMultiTips1Screen::ResolveContainerViews() {
 }
 
 // 0x00307bc8
-void MetMultiTips1Screen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitPrevious) {
+void MetMultiTips1Screen::OnExitFinished() {
+    if (mExitChoice == kExitPrevious) {
         ReturnToPlayerCount();
     } else {
-        MetMultiTipsBaseScreen::OnUnknownSlot36();
+        MetMultiTipsBaseScreen::OnExitFinished();
     }
 }
 

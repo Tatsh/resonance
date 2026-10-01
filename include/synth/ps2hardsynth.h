@@ -74,17 +74,17 @@ public:
     /**
      * @ghidraAddress 0x003f6700
      */
-    virtual void Slot12(int bEnable);
+    virtual void SetStereo(int bStereo);
 
     /**
      * @ghidraAddress 0x003f6740
      */
-    virtual void Slot13(int nValue);
+    virtual void SetRemixMode(int bRemix);
 
     /**
      * @ghidraAddress 0x003f6720
      */
-    virtual void Slot14(int nValue);
+    virtual void SetPaused(int bPaused);
 
     /**
      * @ghidraAddress 0x003f4c50

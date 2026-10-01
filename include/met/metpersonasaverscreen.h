@@ -23,12 +23,12 @@
  *
  * The constructor at `0x0032ece0` takes only the renderer and the load priority, and supplies
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the
- * container. It zeroes mUnknown98, mUnknown9c, and mUnknownbc, and default-constructs the vectors
- * and mUnknownc0.
+ * container. It zeroes mIsCopy, mConfirmReplace, and mRefreshingSettingsCard, and
+ * default-constructs the vectors and mTargetSlot.
  *
- * A request runs as a chain of memory-card tasks. OnUnknownSlot7() starts CommitSave(), which
- * asks for the target card's state. OnConnectState() checks the card and loads its roster,
- * OnPersonasLoaded() merges the persona into the roster and saves it, and OnPersonasSaved()
+ * A request runs as a chain of memory-card tasks. OnPanelActivated() starts CommitSave(), and
+ * CommitSave() requests the target card's state. OnConnectState() checks the card and loads its
+ * roster, OnPersonasLoaded() merges the persona into the roster and saves it, and OnPersonasSaved()
  * refreshes the load list. Every failure raises a MetMsgScreen dialogue that
  * OnMsgScreenDismissed() acts on.
  */
@@ -64,29 +64,30 @@ public:
      * Hand a save request to the registered saver screen and show it over MetLoadGameScreen.
      *
      * The saver is resolved under `MetPersonaSaverScreen` and narrowed with dynamic_cast, and the
-     * result is used without a null test. After SetSaveRequest(), mUnknown98 takes nUnknown98,
-     * mUnknown9c takes nUnknown9c, and mUnknown94 is cleared. The screen registered under
+     * result is used without a null test. After SetSaveRequest(), mIsCopy takes nIsCopy,
+     * mConfirmReplace takes nConfirmReplace, and mIsDelete is cleared. The screen registered under
      * `MetLoadGameScreen` then pushes the saver and activates it. MetStageFinishScreen, the FreQ
      * maker, and the memory-card screens call it.
      *
      * @param screens The registry keys of the screens to return to.
      * @param pPersona The persona to save.
      * @param slot The card location.
-     * @param nUnknown9c Stored in mUnknown9c.
-     * @param nUnknown98 Stored in mUnknown98.
+     * @param nConfirmReplace Non-zero to prompt before saving over a persona of the same name.
+     * @param nIsCopy Non-zero for a copy to another card.
      * @ghidraAddress 0x0032e858
      */
     static void StartSave(const std::vector<HxStr> &screens,
                           MetPersonaData *pPersona,
                           const MemcardConnectState &slot,
-                          int nUnknown9c,
-                          int nUnknown98);
+                          int nConfirmReplace,
+                          int nIsCopy);
 
     /**
      * Hand a delete request to the registered saver screen and show it over MetLoadGameScreen.
      *
-     * The same sequence as StartSave(), except that mUnknown94 is set to 1 and mUnknown98 and
-     * mUnknown9c are cleared. MetMCFreqDelScreen's slot 15 is the caller. The title is inferred.
+     * The same sequence as StartSave(), except that mIsDelete is set to 1 and mIsCopy and
+     * mConfirmReplace are cleared. MetMCFreqDelScreen's slot 15 is the caller. The title is
+     * inferred.
      *
      * @param screens The registry keys of the screens to return to.
      * @param pPersona The persona to delete.
@@ -109,17 +110,17 @@ public:
     /**
      * Start the request. Slot 7.
      *
-     * Clears mUnknownbc and runs CommitSave().
+     * Clears mRefreshingSettingsCard and runs CommitSave().
      *
      * @ghidraAddress 0x003390f0
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Leave for the screens the request named. Slot 9.
      *
-     * The screen is removed from the renderer, each screen in mUnknownac is pushed, and the first
-     * is made the active panel.
+     * The screen is removed from the renderer, each screen in mReturnScreens is pushed, and the
+     * first is made the active panel.
      *
      * @ghidraAddress 0x00339110
      */
@@ -151,11 +152,12 @@ public:
     /**
      * Check the target card, then load its roster. MemcardUser slot 2.
      *
-     * After a save to the settings card (mUnknownbc set), the state is recorded as the first
-     * GlobalSettings::mCardSlots entry and MetMsgScreen exits. A save or copy to a card with less
-     * free space than GlobalSettings::mUnknown74 raises a no-space dialogue. Otherwise the roster
-     * is loaded into mPersonas and the progress dialogue for the save, the delete, or the copy is
-     * raised. An unformatted card raises `mem_format_check`, and a failed enquiry `mem_check`.
+     * After a save to the settings card (mRefreshingSettingsCard set), the state is recorded as the
+     * first GlobalSettings::mCardSlots entry and MetMsgScreen exits. A save or copy to a card with
+     * less free space than GlobalSettings::mPersonaMinimumFreeClusters raises a no-space dialogue.
+     * Otherwise the roster is loaded into mPersonas and the progress dialogue for the save, the
+     * delete, or the copy is raised. An unformatted card raises `mem_format_check`, and a failed
+     * enquiry `mem_check`.
      *
      * @param state The card's state, passed by value.
      * @param nStatus The enquiry status.
@@ -179,9 +181,9 @@ public:
      * Report a finished roster save. MemcardUser slot 7.
      *
      * Success on the settings card copies the roster into MetPersonaData::loadList(), sets
-     * mUnknownbc, and asks for the card's state again. Success elsewhere exits MetMsgScreen. A full
-     * card raises a no-space dialogue, status 15 the no-card dialogue, and any other status
-     * `save_fail_no_space` with the `save_fail_general` text.
+     * mRefreshingSettingsCard, and requests the card's state again. Success elsewhere exits
+     * MetMsgScreen. A full card raises a no-space dialogue, status 15 the no-card dialogue, and any
+     * other status `save_fail_no_space` with the `save_fail_general` text.
      *
      * @param nPortSlot The packed port and slot the roster went to.
      * @param nStatus The save status.
@@ -196,8 +198,8 @@ public:
      * the persona was last loaded under and by its present name. A delete removes the old entry,
      * or raises `mem_check` when there is none. A renamed persona whose new name is taken raises
      * `new_name_required`. A persona whose name is taken replaces that entry, after asking when
-     * mUnknown9c is set. Any other persona is appended, unless CheckPersonaLimit() refuses. Neither
-     * argument is read.
+     * mConfirmReplace is set. Any other persona is appended, unless CheckPersonaLimit() refuses.
+     * Neither argument is read.
      *
      * @param nPortSlot The packed port and slot, which is not read.
      * @param nStatus The load status, which is not read.
@@ -214,7 +216,7 @@ public:
      * @param text The text the user entered.
      * @ghidraAddress 0x003391a8
      */
-    virtual void OnUnknownSlot2(const HxStr &text);
+    virtual void OnKeyboardTextEntered(const HxStr &text);
 
     /**
      * Silence the cycle-left sound.
@@ -238,7 +240,7 @@ private:
     /**
      * Send the request to the card, or keep the persona in memory.
      *
-     * A copy, a non-zero mUnknownc0.mPortSlot, a non-zero MetFrontEndState::mUnknown0c, or a
+     * A copy, a non-zero mTargetSlot.mPortSlot, a non-zero MetFrontEndState::mUsingMemcard, or a
      * missing persona asks MemcardManager for the target's state. Otherwise the persona replaces
      * the pre-fab identity or the saved persona of the same name, or is appended to
      * MetPersonaData::savedList() as a copy, and the screen leaves. The name is inferred.
@@ -288,8 +290,8 @@ private:
     /**
      * Take the screens to return to, the persona to save, and the card location.
      *
-     * The screen list replaces mUnknownac, the persona goes to mUnknownb8, and the location is
-     * copied into mUnknownc0. StartSave() and StartDelete() are the callers.
+     * The screen list replaces mReturnScreens, the persona goes to mPersona, and the location is
+     * copied into mTargetSlot. StartSave() and StartDelete() are the callers.
      *
      * @param screens The registry keys of the screens to return to.
      * @param pPersona The persona to save.
@@ -302,21 +304,21 @@ private:
 
     // 1 for a delete request from StartDelete(), cleared by StartSave(). The constructor does not
     // write it. +0x94
-    int mUnknown94;
+    int mIsDelete;
     // Non-zero for a copy to another card. Written by StartSave() from its last argument. +0x98
-    int mUnknown98;
+    int mIsCopy;
     // Non-zero to ask before saving over a persona of the same name. Written by StartSave() from
     // its fourth argument. +0x9c
-    int mUnknown9c;
+    int mConfirmReplace;
     // The roster loaded from the target card. ClearPersonas() deletes every element. +0xa0
     std::vector<MetPersonaData *> mPersonas;
     // The registry keys of the screens to return to after the request. +0xac
-    std::vector<HxStr> mUnknownac;
+    std::vector<HxStr> mReturnScreens;
     // The persona to save, which SetSaveRequest() records. Not written by the constructor. +0xb8
-    MetPersonaData *mUnknownb8;
+    MetPersonaData *mPersona;
     // Set while the settings card's state is being read again after a save. +0xbc
-    int mUnknownbc;
+    int mRefreshingSettingsCard;
     // The card location to save to. The constructor's inline MemcardConnectState construction
     // stores mType, mFormatted, and mFree out of offset order. +0xc0
-    MemcardConnectState mUnknownc0;
+    MemcardConnectState mTargetSlot;
 };

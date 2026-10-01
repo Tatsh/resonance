@@ -25,8 +25,8 @@
  *
  * The four declared virtuals are the destructor at `0x001fca30`, the two navigation routines at
  * `0x001fcc40` and `0x001fcd10`, and the selection-change notification at `0x001feed8`. None of
- * the four has a recovered name, so all four are recorded rather than declared apart from the
- * destructor.
+ * the four has a recovered name, and the titles of the three after the destructor are inferred
+ * from what the bodies do.
  *
  * The constructor at `0x001fc9f8` is inline. It writes the vptr, zeroes the first word and the
  * vector, and sets mSelected to -1, which is the sentinel for no selection that the
@@ -60,7 +60,7 @@ public:
      *
      * @ghidraAddress 0x001fc9f8
      */
-    MetButtonList() : mUnknown00(nullptr), mSelected(-1) {
+    MetButtonList() : mSelectedButton(nullptr), mSelected(-1) {
     }
 
     /**
@@ -71,38 +71,37 @@ public:
     virtual ~MetButtonList();
 
     /**
-     * Step the selection one way along the ring.
+     * Move the selection to the previous enabled button, wrapping from the first to the last.
      *
-     * Slot 2. The verb is unrecovered, and which of the two directions this slot moves is not
-     * recovered either. MetMainScreen at `0x002c6820` routes one navigation command here and the
-     * other to OnUnknownSlot3(), and MetLoadFreqBaseScreen::HandleCommand() routes
-     * kMetScreenCommandPrevious here on the same pairing. The declaration exists so that the
-     * recovered slot order is preserved.
+     * Slot 2. The body steps mSelected down by one. MetMainScreen at `0x002c6820` and
+     * MetLoadFreqBaseScreen::HandleCommand() route kMetScreenCommandPrevious here.
      *
      * @ghidraAddress 0x001fcc40
      */
-    virtual void OnUnknownSlot2();
+    virtual void SelectPrevious();
 
     /**
-     * Step the selection the other way along the ring.
+     * Move the selection to the next enabled button, wrapping from the last to the first.
      *
-     * Slot 3. Recorded on the same evidence as OnUnknownSlot2().
+     * Slot 3. The body steps mSelected up by one, and the screens route kMetScreenCommandNext
+     * here.
      *
      * @ghidraAddress 0x001fcd10
      */
-    virtual void OnUnknownSlot3();
+    virtual void SelectNext();
 
     /**
      * Respond to the selection moving.
      *
-     * Slot 4. The verb is unrecovered. SetSelected() is the one caller, and it passes the index
-     * that was selected and the index that is now selected, in that order.
+     * Slot 4. SetSelected() and both navigation slots call it with the index that was selected
+     * and the index that is now selected, in that order. The body puts the previous button back
+     * into state 0 and the new one into state 1.
      *
      * @param nPreviousIndex The index the selection had.
      * @param nIndex The index the selection now has.
      * @ghidraAddress 0x001feed8
      */
-    virtual void OnUnknownSlot4(int nPreviousIndex, int nIndex);
+    virtual void OnSelectionChanged(int nPreviousIndex, int nIndex);
 
     /**
      * Release every button reference and empty mButtons.
@@ -155,7 +154,7 @@ public:
      * The sentinel -1 puts the previously selected button back into state 0 and selects nothing.
      * Any other index runs the selection-change notification in vtable slot 4.
      *
-     * The routine then stores `mButtons[nIndex]` into mUnknown00 on every path, including the
+     * The routine then stores `mButtons[nIndex]` into mSelectedButton on every path, including the
      * sentinel path, where the index is -1 and the read is one element below the first. That is
      * what the binary does.
      *
@@ -183,7 +182,7 @@ public:
      * straight to MetScreen::StartRepeatingSound() and the image has no accessor to route that
      * read through. A friend declaration fits the image equally well. +0x00
      */
-    Rnd::Button *mUnknown00;
+    Rnd::Button *mSelectedButton;
 
     /**
      * The buttons in list order.

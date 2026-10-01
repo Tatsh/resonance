@@ -116,7 +116,7 @@ public:
      * Limit the registered message screen to one controller.
      *
      * Writes mOwnerPad of the screen registered as `MetMsgScreen`, which Show() and ShowActive()
-     * reset to -1. Every caller passes MetSaveRemix::mUnknownc8, the index of the controller that
+     * reset to -1. Every caller passes MetSaveRemix::mOwnerPad, the index of the controller that
      * owns the save. The result of the cast is not checked. The title is inferred.
      *
      * @param nPad The controller index.
@@ -272,14 +272,14 @@ public:
      * @param flTime The renderer's current time.
      * @ghidraAddress 0x002f0540
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Mark the dialogue as showing and tell the owner. Slot 33.
      *
      * @ghidraAddress 0x002f0500
      */
-    virtual void OnUnknownSlot33();
+    virtual void OnEnterFinished();
 
     /**
      * Mark the dialogue as gone and report the choice to the owner. Slot 36.
@@ -288,7 +288,7 @@ public:
      *
      * @ghidraAddress 0x002f05d0
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Build the button lists and resolve the dialogue's text objects and button view. Slot 38.

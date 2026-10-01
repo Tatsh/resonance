@@ -42,7 +42,7 @@ public:
      * Report a gem played on a track.
      *
      * Inline, with no address of its own. Every stack build in the image expands it. Most clear
-     * mGhost (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::Slot8() at `0x001ac25c`,
+     * mGhost (Catcher::SimulateRemoteGem() at `0x001ad048`, Catcher::CatchGem() at `0x001ac25c`,
      * PhraseMgr::PostGemMsg() at `0x001ba86c`, and PhraseMgr::AddGem() at `0x001baed0`), and
      * PhraseMgr::AddGem()'s build at `0x001bae48` passes a flag of its own.
      *

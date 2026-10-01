@@ -68,7 +68,7 @@ private:
 
     Rnd::View *mView;               // "cripfx<n>.view".
     Rnd::TransAnim *mPath;          // "cripfx<n>.path".
-    int mUnknown08;                 // +0x08, never written or read by the recovered routines.
+    int mReserved08;                // +0x08, never written or read by the recovered routines.
     Rnd::ParticleSys *mParticleSys; // "cripfx<n>.ps".
     std::vector<TnlPlayer *> mTargets;
     State mState;

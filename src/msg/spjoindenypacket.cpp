@@ -7,8 +7,8 @@
 #include "stream/obstream.h"
 
 // 0x003ef628
-SPJoinDenyPacket::SPJoinDenyPacket(int nUnknown14, const HxStr &unknown18)
-    : mUnknown14(nUnknown14), mUnknown18(unknown18) {
+SPJoinDenyPacket::SPJoinDenyPacket(int nReasonCode, const HxStr &reason)
+    : mReasonCode(nReasonCode), mReason(reason) {
 }
 
 // 0x003e4ca0
@@ -35,19 +35,19 @@ const char *SPJoinDenyPacket::Name() {
 
 // 0x003f2000
 void SPJoinDenyPacket::Print(std::ostream &stream) {
-    stream << mUnknown14 << " " << mUnknown18;
+    stream << mReasonCode << " " << mReason;
 }
 
 // 0x003e5d58
 void SPJoinDenyPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
-    int unknown14 = mUnknown14;
-    SaveHxStr(stream.Write(&unknown14, sizeof(unknown14)), mUnknown18);
+    int reasonCode = mReasonCode;
+    SaveHxStr(stream.Write(&reasonCode, sizeof(reasonCode)), mReason);
 }
 
 // 0x003e5e98
 void SPJoinDenyPacket::Load(IBStream &stream) {
     Packet::Load(stream);
-    LoadHxStr(stream.Read(&mUnknown14, sizeof(mUnknown14)), mUnknown18);
+    LoadHxStr(stream.Read(&mReasonCode, sizeof(mReasonCode)), mReason);
 }

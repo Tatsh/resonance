@@ -176,28 +176,28 @@ public:
     virtual void OnRemixDeleted(int nPortSlot, int nStatus);
 
     /**
-     * Unrecovered. Slot 17.
+     * Do nothing.
      *
-     * No task in the image reports through this slot and no subclass overrides it. Neither its
-     * purpose nor its argument list can be established. The two arguments are declared to match
+     * Slot 17. No task in the image reports through this slot and no subclass overrides it. Its
+     * purpose and argument list cannot be established. The two arguments are declared to match
      * every neighbouring slot.
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
      * @ghidraAddress 0x00184510
      */
-    virtual void OnUnknown17(int nPortSlot, int nStatus);
+    virtual void UnusedFirstReport(int nPortSlot, int nStatus);
 
     /**
-     * Unrecovered. Slot 18.
+     * Do nothing.
      *
-     * Recorded on the same evidence as OnUnknown17().
+     * Slot 18. Recorded on the same evidence as UnusedFirstReport().
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
      * @ghidraAddress 0x00184518
      */
-    virtual void OnUnknown18(int nPortSlot, int nStatus);
+    virtual void UnusedSecondReport(int nPortSlot, int nStatus);
 
     /**
      * Report a finished load of one file. Slot 19, from `LoadFileMCT`.

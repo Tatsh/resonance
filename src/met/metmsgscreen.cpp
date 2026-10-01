@@ -210,7 +210,7 @@ void MetMsgScreen::EnterAndShow() {
 // 0x002f0588
 void MetMsgScreen::BeginExit() {
     if (mButtonCount == kNoButtons) {
-        mExitTime = mUnknown10->mUnknown68 + kNoButtonExitDelay;
+        mExitTime = mRenderer->mAnimationFrame + kNoButtonExitDelay;
     } else {
         MetScreen::BeginExit();
     }
@@ -227,13 +227,13 @@ void MetMsgScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandLeft:
         if (mButtonList != nullptr) {
-            mButtonList->OnUnknownSlot2();
+            mButtonList->SelectPrevious();
         }
         break;
 
     case kMetScreenCommandRight:
         if (mButtonList != nullptr) {
-            mButtonList->OnUnknownSlot3();
+            mButtonList->SelectNext();
         }
         break;
 
@@ -272,7 +272,7 @@ void MetMsgScreen::PlayCycleRightSound(int nSelector) {
 }
 
 // 0x002f0540
-void MetMsgScreen::OnUnknownSlot26(float flTime) {
+void MetMsgScreen::UpdateIdle(float flTime) {
     if (mExitTime != kNoExitTime && mExitTime < flTime) {
         mExitTime = kNoExitTime;
         MetScreen::BeginExit();
@@ -280,7 +280,7 @@ void MetMsgScreen::OnUnknownSlot26(float flTime) {
 }
 
 // 0x002f0500
-void MetMsgScreen::OnUnknownSlot33() {
+void MetMsgScreen::OnEnterFinished() {
     mShowing = 1;
     if (mOwner != nullptr) {
         mOwner->OnMsgScreenShown(mName);
@@ -288,7 +288,7 @@ void MetMsgScreen::OnUnknownSlot33() {
 }
 
 // 0x002f05d0
-void MetMsgScreen::OnUnknownSlot36() {
+void MetMsgScreen::OnExitFinished() {
     mShowing = 0;
     if (mOwner != nullptr) {
         mOwner->OnMsgScreenDismissed(mName, mChoice);

@@ -62,7 +62,7 @@ MetJukeboxCustomRemixesScreen::MetJukeboxCustomRemixesScreen(MetRenderer *pRende
                            HxStr(kScreenName),
                            HxStr(kContainerDirectory),
                            HxStr(kContainerFile)) {
-    mUnknownc8 = 0;
+    mCatalogueKey = 0;
 }
 
 // 0x002250c0
@@ -73,45 +73,45 @@ void MetJukeboxCustomRemixesScreen::ResolveContainerViews() {
     Rnd::Mesh *pHighlight = dynamic_cast<Rnd::Mesh *>(Find(kHighlight));
     Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Find(kUpArrow));
     Rnd::Mesh *pDownArrow = dynamic_cast<Rnd::Mesh *>(Find(kDownArrow));
-    mUnknown98 = new ScrollingList(this,
-                                   mUnknown90,
-                                   mUnknown94,
-                                   pCatalogueRow,
-                                   pHighlight,
-                                   pUpArrow,
-                                   pDownArrow,
-                                   kCatalogueContext);
+    mCatalogueList = new ScrollingList(this,
+                                       mListRowPitch,
+                                       mListRowCount,
+                                       pCatalogueRow,
+                                       pHighlight,
+                                       pUpArrow,
+                                       pDownArrow,
+                                       kCatalogueContext);
 
     Rnd::View *pPlayListRow = dynamic_cast<Rnd::View *>(Find(kPlayListRow));
-    mUnknown9c = new ScrollingList(this,
-                                   mUnknown90,
-                                   kPlayListRowCount,
-                                   pPlayListRow,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr,
-                                   kPlayListContext);
+    mPlayListList = new ScrollingList(this,
+                                      mListRowPitch,
+                                      kPlayListRowCount,
+                                      pPlayListRow,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      kPlayListContext);
 
-    mUnknowna4 = dynamic_cast<Rnd::Text *>(Find(kDetailText1));
-    mUnknowna8 = dynamic_cast<Rnd::Text *>(Find(kDetailText2));
-    mUnknownac = dynamic_cast<Rnd::Text *>(Find(kDetailText3));
-    mUnknownb0 = dynamic_cast<Rnd::Text *>(Find(kDetailText4));
-    mUnknownb4 = dynamic_cast<Rnd::Text *>(Find(kDetailText5));
-    mUnknownbc = dynamic_cast<Rnd::Mat *>(Find(kPictureMaterial));
-    mUnknownc0 = dynamic_cast<Rnd::Mat *>(Find(kLogoMaterial));
+    mGenreText = dynamic_cast<Rnd::Text *>(Find(kDetailText1));
+    mTempoText = dynamic_cast<Rnd::Text *>(Find(kDetailText2));
+    mSongTitleText = dynamic_cast<Rnd::Text *>(Find(kDetailText3));
+    mDateText = dynamic_cast<Rnd::Text *>(Find(kDetailText4));
+    mRemixTitleText = dynamic_cast<Rnd::Text *>(Find(kDetailText5));
+    mPictureMaterial = dynamic_cast<Rnd::Mat *>(Find(kPictureMaterial));
+    mLogoMaterial = dynamic_cast<Rnd::Mat *>(Find(kLogoMaterial));
 
-    mUnknowncc.resize(kAppearanceTextCount);
+    mAppearanceTexts.resize(kAppearanceTextCount);
     // The binary expands this loop into one call per text.
     for (int i = 0; i < kAppearanceTextCount; ++i) {
-        mUnknowncc[i] = dynamic_cast<Rnd::Text *>(Find(kAppearanceTexts[i]));
+        mAppearanceTexts[i] = dynamic_cast<Rnd::Text *>(Find(kAppearanceTexts[i]));
     }
 
-    mUnknown140 = dynamic_cast<Rnd::Mesh *>(Find(kPictureMesh));
-    mUnknown144 = dynamic_cast<Rnd::Mesh *>(Find(kLogoMesh));
-    mUnknown148 = dynamic_cast<Rnd::Text *>(Find(kWarningText));
+    mPictureMesh = dynamic_cast<Rnd::Mesh *>(Find(kPictureMesh));
+    mLogoMesh = dynamic_cast<Rnd::Mesh *>(Find(kLogoMesh));
+    mWarningText = dynamic_cast<Rnd::Text *>(Find(kWarningText));
     HxStr warning = QueryConfigString(kPromptConfigCode, kWarningPrompt);
-    mUnknown148->SetText(warning);
-    mUnknownb8 = dynamic_cast<Rnd::Text *>(Find(kPlayListCaption));
+    mWarningText->SetText(warning);
+    mPlayListCaption = dynamic_cast<Rnd::Text *>(Find(kPlayListCaption));
 }
 
 // 0x0022a850
@@ -120,7 +120,7 @@ MetJukeboxCustomRemixesScreen::~MetJukeboxCustomRemixesScreen() {
 
 // 0x0022a910
 int MetJukeboxCustomRemixesScreen::GetItemCount() {
-    return mUnknowna0->size();
+    return mCatalogue->size();
 }
 
 // 0x0022a938

@@ -95,7 +95,7 @@ public:
     virtual void Print(std::ostream &stream);
 
 private:
-    FreqAppearance mUnknown14; // +0x14
+    FreqAppearance mAppearance; // +0x14
 };
 
 /**

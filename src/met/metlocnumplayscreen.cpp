@@ -52,7 +52,7 @@ constexpr int kPlayerCountButtons = 3;
 // The controllers MetRenderer accepts while the screen shows.
 constexpr int kMaxControllers = 4;
 
-// MetScreen::mUnknown18 values.
+// MetScreen::mExitChoice values.
 constexpr int kExitBack = 0;
 constexpr int kExitChoice = 2;
 
@@ -67,10 +67,10 @@ MetLocNumPlayScreen::MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
     mButtonList = new MetButtonList;
-    mUnknown38.push_back(HxStr(kTwoPlayerKey));
-    mUnknown38.push_back(HxStr(kThreePlayerKey));
-    mUnknown38.push_back(HxStr(kFourPlayerKey));
-    mUnknown38.push_back(HxStr(kTipsKey));
+    mHelpKeys.push_back(HxStr(kTwoPlayerKey));
+    mHelpKeys.push_back(HxStr(kThreePlayerKey));
+    mHelpKeys.push_back(HxStr(kFourPlayerKey));
+    mHelpKeys.push_back(HxStr(kTipsKey));
 }
 
 // 0x002adbf0
@@ -94,27 +94,27 @@ void MetLocNumPlayScreen::ResolveContainerViews() {
 void MetLocNumPlayScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
-        mButtonList->OnUnknownSlot2();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectPrevious();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandNext:
-        mButtonList->OnUnknownSlot3();
-        MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+        mButtonList->SelectNext();
+        MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
         break;
 
     case kMetScreenCommandSelect:
         ActivateNamedPanel(HxStr(kNoName));
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        StartRepeatingSound(mUnknown10->mUnknown68,
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        StartRepeatingSound(mRenderer->mAnimationFrame,
                             kSelectAlternateInterval,
-                            mButtonList->mUnknown00,
+                            mButtonList->mSelectedButton,
                             kSelectAlternateCycles);
         break;
 
     case kMetScreenCommandBack:
-        MetHelpScreen::SetText(HxStr(kNoName), mUnknown10->mUnknown68);
-        mUnknown18 = kExitBack;
+        MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
+        mExitChoice = kExitBack;
         ExitScreenByName(HxStr(kLeftGizmoScreen));
         ExitScreenByName(HxStr(kTitleScreen));
         BeginExit();
@@ -130,21 +130,21 @@ void MetLocNumPlayScreen::EnterAndShow() {
     HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
-    mUnknown10->mUnknownd4 = kMaxControllers;
-    int nIndex = MetFrontEndState::shared()->mUnknown2c - kFewestPlayers;
+    mRenderer->mMaxPadIndex = kMaxControllers;
+    int nIndex = MetFrontEndState::shared()->mPlayerCount - kFewestPlayers;
     if (nIndex < 0 || nIndex >= kPlayerCountButtons) {
         nIndex = 0;
     }
     mButtonList->SetSelected(nIndex);
 
     MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
-    MetHelpScreen::SetText(mUnknown38[mButtonList->mSelected], mUnknown10->mUnknown68);
+    MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
 
 // 0x002ae350
-void MetLocNumPlayScreen::OnUnknownSlot30(Rnd::Button *) {
-    mUnknown18 = kExitChoice;
+void MetLocNumPlayScreen::OnRepeatingSoundFinished(Rnd::Button *) {
+    mExitChoice = kExitChoice;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
     ExitScreenByName(HxStr(kHelpScreen));
@@ -152,8 +152,8 @@ void MetLocNumPlayScreen::OnUnknownSlot30(Rnd::Button *) {
 }
 
 // 0x002ae4f0
-void MetLocNumPlayScreen::OnUnknownSlot36() {
-    if (mUnknown18 == kExitBack) {
+void MetLocNumPlayScreen::OnExitFinished() {
+    if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kTopLogoScreen));
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
         PushNamedScreen(HxStr(kMainScreen));
@@ -163,9 +163,9 @@ void MetLocNumPlayScreen::OnUnknownSlot36() {
 
     const int nSelected = mButtonList->mSelected;
     if (nSelected < kPlayerCountButtons) {
-        MetFrontEndState::shared()->mUnknown2c = nSelected + kFewestPlayers;
-        mUnknown10->mUnknownd4 = nSelected + kFewestPlayers;
-        MetFrontEndState::shared()->mUnknown24 = HxStr(kLocNumPlayScreen);
+        MetFrontEndState::shared()->mPlayerCount = nSelected + kFewestPlayers;
+        mRenderer->mMaxPadIndex = nSelected + kFewestPlayers;
+        MetFrontEndState::shared()->mReturnScreen = HxStr(kLocNumPlayScreen);
         PushNamedScreen(HxStr(kLocPickCharScreen));
         ActivateNamedPanel(HxStr(kLocPickCharScreen));
     } else {

@@ -34,7 +34,7 @@ struct TunnelSeeker {
     /**
      * Construct a seeker with no tunnel.
      *
-     * mTransFrameOffset starts at -500. mUnknown54 is left unset.
+     * mTransFrameOffset starts at -500. mSavedFlag is not set.
      *
      * @ghidraAddress 0x00477768
      */
@@ -245,7 +245,7 @@ struct TunnelSeeker {
     /**
      * Write the seeker.
      *
-     * The order is mTrans by name, mTargetRing, mMesh by name, mUnknown54 as one byte, mLane, the
+     * The order is mTrans by name, mTargetRing, mMesh by name, mSavedFlag as one byte, mLane, the
      * three frame offsets, the strip run, the strip material by name, and the strip colour.
      *
      * @param stream The stream to write to.
@@ -264,9 +264,11 @@ struct TunnelSeeker {
      */
     void Load(Stream &stream);
 
-    TunnelSeekStrip mStrip;  /*!< The highlighted run of slices. */
-    Transformable *mTrans;   /*!< The transformable the seeker drives. */
-    int mUnknown54;          /*!< A flag, stored as one byte. No reader is located. +0x54 */
+    TunnelSeekStrip mStrip; /*!< The highlighted run of slices. */
+    Transformable *mTrans;  /*!< The transformable the seeker drives. */
+    /*!< A flag Save() and Load() move as one byte and the copy assignment copies. No other
+         routine reads it. +0x54 */
+    int mSavedFlag;
     int mTargetRing;         /*!< The ring the lane moves towards. */
     float mMeshFrameOffset;  /*!< The path frame offset of the mesh. */
     float mTransFrameOffset; /*!< The path frame offset of the transformable. */

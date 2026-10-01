@@ -110,7 +110,7 @@ void MetGlobalSettingsSaverScreen::StartSave(const std::vector<HxStr> &screens) 
     pSaver->SetReturnScreens(screens);
 
     MetScreen *pSony = MetScreen::FindScreenByName(HxStr(kSonyScreen));
-    if (MetFrontEndState::shared()->mUnknown0c != 0) {
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         pSony->PushNamedScreen(HxStr(kOwnScreenName));
         return;
     }
@@ -141,7 +141,7 @@ inline void MetGlobalSettingsSaverScreen::RequestConnectState() {
 
 // 0x002820f8
 void MetGlobalSettingsSaverScreen::BeginExit() {
-    mUnknown10->RemoveScreen(this);
+    mRenderer->RemoveScreen(this);
     int nCount = mReturnScreens.size();
     for (int i = 0; i < nCount; ++i) {
         PushNamedScreen(mReturnScreens[i]);

@@ -41,8 +41,8 @@ class Text;
  * `0x00395918`, and all three are declared below with the spelling the base gives them.
  *
  * Slots 2, 3, 4, 7, and 36 all route through one private helper or one of the two navigation
- * virtuals, and mUnknownb8 is the flag that selects between them. Slot 3 sets it, slot 4 stores the
- * negation of its argument in it, and slots 2 and 36 branch on it.
+ * virtuals, and mScreenExited is the flag that selects between them. Slot 3 sets it, slot 4 stores
+ * the negation of its argument in it, and slots 2 and 36 branch on it.
  */
 class MetSoloEndRemixScreen : public MetScreen, public MetRemixSaver {
 public:
@@ -77,7 +77,7 @@ public:
      *
      * When MetFrontEndState's `+0x0c` and `+0x10` flags are both 1, `+0x10` is cleared,
      * MetGlobalSettingsSaverScreen::StartSave() runs with this screen as the one to return to, and
-     * mUnknown50 is cleared. Otherwise ShowResults() fills and shows the screen.
+     * mActivatePending is cleared. Otherwise ShowResults() fills and shows the screen.
      *
      * @ghidraAddress 0x00394e10
      */
@@ -91,7 +91,7 @@ public:
      *
      * @ghidraAddress 0x003997d0
      */
-    virtual void OnUnknownSlot7();
+    virtual void OnPanelActivated();
 
     /**
      * Advance both texture pairs and show each one's current texture. Slot 26.
@@ -102,18 +102,18 @@ public:
      * @param flTime The current renderer time, which the body does not read.
      * @ghidraAddress 0x00399748
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Run the departure sequence once, unless a save is still pending. Slot 36.
      *
-     * MetScreen slot 35 runs this slot once the exit animation has finished. A set mUnknownb8
+     * MetScreen slot 35 runs this slot once the exit animation has finished. A set mScreenExited
      * records that slot 3 or slot 4 has already requested the departure, and the sequence then does
      * not run a second time.
      *
      * @ghidraAddress 0x00399870
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container objects this screen drives. Slot 38.
@@ -130,13 +130,13 @@ public:
     /**
      * Depart the screen, or run the departure sequence when one is already pending.
      *
-     * MetRemixSaver slot 2. A clear mUnknownb8 starts the exit animation and lets slot 36 run the
-     * sequence once the animation has finished. A set mUnknownb8 runs the sequence at once.
+     * MetRemixSaver slot 2. A clear mScreenExited starts the exit animation and lets slot 36 run
+     * the sequence once the animation has finished. A set mScreenExited runs the sequence at once.
      *
-     * @param nUnknown Not read.
+     * @param bCompleted Not read.
      * @ghidraAddress 0x003998c8
      */
-    virtual void OnUnknownSlot2(int nUnknown);
+    virtual void OnSaveFinished(int bCompleted);
 
     /**
      * Record that the departure sequence has been requested and start the exit animation.
@@ -145,7 +145,7 @@ public:
      *
      * @ghidraAddress 0x00399898
      */
-    virtual void OnUnknownSlot3();
+    virtual void OnHelpRequested();
 
     /**
      * Show or exit this screen and record which of the two happened.
@@ -154,10 +154,10 @@ public:
      * for an argument of 0 or 1, because the binary computes it with `xori` against 1 rather than
      * with a comparison.
      *
-     * @param nFlag Non-zero to bring the screen back onto the stack, zero to exit it.
+     * @param bShowing Non-zero to bring the screen back onto the stack, zero to exit it.
      * @ghidraAddress 0x00395918
      */
-    virtual void OnUnknownSlot4(int nFlag);
+    virtual void SetOwnerScreenShowing(int bShowing);
 
 private:
     // 0x00395a20
@@ -186,12 +186,13 @@ private:
     Rnd::Tex *mBurnTex;       // +0xac The first persona burn texture.
     Rnd::Mat *mLogoMat;       // +0xb0 "ers_logo.mat"
     Rnd::Mat *mPhotoMat;      // +0xb4 "ers_photo.mat"
-    // Set once the departure has been requested. Slot 3 sets it, slot 4 stores the negation of its
-    // argument in it, and slots 2 and 36 branch on it. The constructor never writes it, so a screen
-    // whose slot 36 runs before either setter reads an indeterminate value.
-    int mUnknownb8; // +0xb8
+    // Set once this screen has exited the stack for the help screen or a declined save. Slot 3
+    // sets it, slot 4 stores the negation of its argument in it, and slots 2 and 36 branch on it.
+    // The constructor never writes it. A screen whose slot 36 runs before either setter therefore
+    // reads an indeterminate value.
+    int mScreenExited; // +0xb8
     // The two texture pairs the screen flips between, built from the song logo and the song label
     // pairs in that order.
-    TexturePairRecord mUnknownbc; // +0xbc
-    TexturePairRecord mUnknownec; // +0xec
+    TexturePairRecord mLogoTextures;  // +0xbc
+    TexturePairRecord mLabelTextures; // +0xec
 };

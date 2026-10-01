@@ -45,7 +45,7 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param nNote The byte at `+0x08`.
      */
-    SustainNoteMsg(int nTick, unsigned char nNote) : MuseMsg(nTick), mUnknown08(nNote) {
+    SustainNoteMsg(int nTick, unsigned char nNote) : MuseMsg(nTick), mNote(nNote) {
     }
 
     /**
@@ -111,15 +111,14 @@ public:
     virtual void Load(IBStream &stream);
 
     /**
-     * Undetermined, and the one byte the message carries. +0x08
+     * The note number, and the one byte the message includes. +0x08
      *
      * Public because SynthSustainer::HandleSustainNote() at `0x001d20a0` reads it through a
      * SustainNoteMsg pointer from outside the hierarchy, searching two held-note lists for it and
      * appending it to one. The image exposes no accessor. A friend declaration fits equally well.
-     * The value is a note number on that evidence, but nothing in the image titles it, so the
-     * placeholder stands.
+     * That use is the evidence for the title. No string in the image supplies one.
      */
-    unsigned char mUnknown08;
+    unsigned char mNote;
 };
 
 /**

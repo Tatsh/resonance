@@ -30,7 +30,7 @@ inline Color MakeColor(float flR, float flG, float flB) {
 } // namespace
 
 // 0x006e42a4
-int g_nAppTunnelDisplayMode;
+int g_nAppTunnelTutorial;
 
 // 0x006e42b0
 float g_flTunnelBrightness = 1.0f;

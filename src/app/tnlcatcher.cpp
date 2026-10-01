@@ -34,7 +34,7 @@ T *FindObject(const HxStr &name) {
 
 // 0x00439958
 TnlCatcher::TnlCatcher(const HxStr &colorName)
-    : mView(nullptr), mTarget(0), mMultiplied(0), mUnknown30(0), mUpdateCount(kIdleCount),
+    : mView(nullptr), mTarget(0), mMultiplied(0), mUnusedWord(0), mUpdateCount(kIdleCount),
       mHitCount(kIdleCount) {
     const HxStr letter(1, colorName[0]);
     mView = FindObject<Rnd::View>(HxStr("catcher_") + letter);

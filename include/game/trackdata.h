@@ -39,12 +39,12 @@ enum TrackMode {
  * The LevelBuilder allocation measures the object at 0x54 bytes. The constructor sizes mBars to the
  * last step of the play map, one Bar per bar of the level, and every position the class accepts
  * is split into a bar and an offset within the bar by Locate() or LocateMapped(), the second
- * mapping the bar through PlayMap::Slot5() first.
+ * mapping the bar through PlayMap::MapBar() first.
  *
  * The destructor deletes every riff set and every harmony the track created. A bar refers to them
  * only through its sorted lists.
  *
- * The members mUnknown04, mChannel, and mKind are public because every stage class reads them
+ * The members mIndex, mChannel, and mKind are public because every stage class reads them
  * directly and no accessor exists. Overlay reads mInstrument the same way. The rest are private.
  *
  * The queries are const. The mangled Catcher constructor attests a `const TrackData *`, every stage
@@ -52,7 +52,7 @@ enum TrackMode {
  * through the const pointer.
  */
 class TrackData {
-    // Catcher::FindNextGemTick() at 0x001aca48 reads mUnknown30 directly.
+    // Catcher::FindNextGemTick() at 0x001aca48 reads mGemSearchBars directly.
     friend class Catcher;
     // LevelBuilder::SetInstrument() at 0x001ec5d0 assigns mName directly.
     friend class LevelBuilder;
@@ -86,7 +86,7 @@ public:
      * One bar of a track, with its scoring values and the sorted lists of what starts in it.
      *
      * The record is 0x3c bytes, the element stride of TrackData::mBars. Print() labels every member
-     * except mUnknown08. The type name is inferred. The record has no descriptor, allocation tag,
+     * except mCatchPoints. The type name is inferred. The record has no descriptor, allocation tag,
      * or literal, and its allocations are billed to the vector.
      */
     struct Bar {
@@ -112,9 +112,9 @@ public:
          */
         void Print(std::ostream &stream);
 
-        int mQuant;                                  /*!< Labelled `quant = `. +0x00 */
-        int mPoints;                                 /*!< Labelled `points = `. +0x04 */
-        int mUnknown08;                              /*!< Set by ScoreBars(). +0x08 */
+        int mQuant;       /*!< Labelled `quant = `. +0x00 */
+        int mPoints;      /*!< Labelled `points = `. +0x04 */
+        int mCatchPoints; /*!< The level's catch points, set by ScoreBars(). +0x08 */
         std::vector<TickObj<Harmony *> > mHarmonies; /*!< Labelled `harms: `. +0x0c */
         std::vector<TickObj<RiffSet *> > mRiffSets;  /*!< Labelled `riffs: `. +0x18 */
         std::vector<TickObj<MuseMsg *> > mMidi;      /*!< Labelled `midi: `, owned. +0x24 */
@@ -124,7 +124,7 @@ public:
     /**
      * Construct an empty track over a play map.
      *
-     * @param nIndex The track's index, stored in mUnknown04.
+     * @param nIndex The track's index, stored in mIndex.
      * @param pMap The play map whose last step sizes mBars.
      * @ghidraAddress 0x001d35a8
      */
@@ -231,7 +231,7 @@ public:
     int FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const;
 
     /**
-     * Find the first gem at or after a song position within mUnknown30 bars.
+     * Find the first gem at or after a song position within mGemSearchBars bars.
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pTick Receives the gem's song position.
@@ -260,7 +260,7 @@ public:
     void Locate(int nTick, Bar *&pBar, Mid::MBT &offset);
 
     /**
-     * Split a song position into its bar, mapped through PlayMap::Slot5(), and the offset.
+     * Split a song position into its bar, mapped through PlayMap::MapBar(), and the offset.
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pBar Receives the bar.
@@ -291,13 +291,15 @@ public:
     void SetQuant(int nTick, int nQuant);
 
     /**
-     * Do nothing. LevelBuilder's forwarder at `0x001ec580` calls it with two zeroes.
+     * Do nothing. LevelBuilder::SetActive() forwards an activeness controller change here.
      *
-     * @param nFirst The first argument, not read.
-     * @param nSecond The second argument, not read.
+     * The title is inferred from the forwarder's callers.
+     *
+     * @param nTick The event position, not read.
+     * @param bActive Whether the controller value was non-zero, not read.
      * @ghidraAddress 0x001d7758
      */
-    void OnUnknown001d7758(int nFirst, int nSecond);
+    void SetActive(int nTick, int bActive);
 
     /**
      * Report a player for a bar to the gamer, with this track's index.
@@ -324,7 +326,7 @@ public:
     Riff *GetRiff(int nTick, int nLevel) const;
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @param nBar The bar, mapped through PlayMap::MapBar().
      * @param nOffset The offset within the bar.
      * @param nLevel The difficulty level.
      * @return The riff of that level in the riff set in force at the offset, or null.
@@ -349,7 +351,7 @@ public:
     int GetGemAt(int nTick) const;
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's quantisation.
      * @ghidraAddress 0x001d79a8
      */
@@ -393,18 +395,18 @@ public:
     int QueryBar(int nBar) const;
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's points.
      * @ghidraAddress 0x001d7a78
      */
     int GetPoints(int nBar) const;
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
-     * @return The bar's mUnknown08.
+     * @param nBar The bar, mapped through PlayMap::MapBar().
+     * @return The bar's mCatchPoints.
      * @ghidraAddress 0x001d7aa0
      */
-    int GetUnknown08(int nBar) const;
+    int GetCatchPoints(int nBar) const;
 
     /**
      * @param nBar The index into mBars, not mapped.
@@ -421,14 +423,14 @@ public:
     const std::vector<TickObj<int> > *GetGemsInBar(int nBar) const;
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's MIDI messages.
      * @ghidraAddress 0x001d7af8
      */
     const std::vector<TickObj<MuseMsg *> > *GetMidi(int nBar) const;
 
     /**
-     * @param nBar The bar, mapped through PlayMap::Slot5().
+     * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's gems.
      * @ghidraAddress 0x001d7b20
      */
@@ -453,7 +455,7 @@ public:
     void LocateMapped(int nTick, const Bar *&pBar) const;
 
     /**
-     * Find a bar by its bar number, mapped through PlayMap::Slot5().
+     * Find a bar by its bar number, mapped through PlayMap::MapBar().
      *
      * @param nBar The bar.
      * @param pBar Receives the bar.
@@ -468,12 +470,12 @@ public:
      */
     int FindStepIndex(int nBar) const;
 
-    Gamer *mGamer;  /*!< The gamer the track reports to. Not written by the constructor. +0x00 */
-    int mUnknown04; /*!< The track's index. Copied into ScoreTrackGraph's first member. +0x04 */
-    unsigned char mChannel;    /*!< MIDI channel the stage sends controller changes on. +0x08 */
-    unsigned char mUnknown09;  /*!< +0x09 */
-    unsigned short mUnknown0a; /*!< +0x0a */
-    int mKind;                 /*!< A TrackMode. 2 selects a NotePitcher and 3 a Scratcher. +0x0c */
+    Gamer *mGamer; /*!< The gamer the track reports to. Not written by the constructor. +0x00 */
+    int mIndex;    /*!< The track's index. Copied into ScoreTrackGraph's first member. +0x04 */
+    unsigned char mChannel;      /*!< MIDI channel the stage sends controller changes on. +0x08 */
+    unsigned char mPaddingByte;  /*!< No recovered routine accesses it. +0x09 */
+    unsigned short mPaddingHalf; /*!< No recovered routine accesses it. +0x0a */
+    int mKind; /*!< A TrackMode. 2 selects a NotePitcher and 3 a Scratcher. +0x0c */
 
     /**
      * Instrument index from 0 to 5. +0x10
@@ -497,7 +499,7 @@ private:
     PlayMap *mMap;                          // +0x1c
     std::vector<Bar> mBars;                 // +0x20
     int mBarLength;                         // +0x2c, 1920 ticks
-    int mUnknown30;                         // +0x30, the bars FindGemAtOrAfter() searches, 4
+    int mGemSearchBars;                     // +0x30, the bars FindGemAtOrAfter() searches, 4
     RiffSet *mCurrentRiffSet;               // +0x34
     int mCurrentRiffTick;                   // +0x38, starts at -1
     std::vector<RiffSet *> mRiffSetsOwned;  // +0x3c

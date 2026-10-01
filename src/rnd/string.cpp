@@ -332,7 +332,7 @@ int String::DrawSelf() {
         aflToCam[nRow][kXfmRowFloatCount - 1] = 1.0f;
     }
     sceVu0InversMatrix(aflInverse[0], pCam->mWorldXfm[0]);
-    sceVu0Sub005e7ab0(aflToCam[0], aflInverse[0], mWorldXfm[0]);
+    sceVu0MulAffineMatrixXyz(aflToCam[0], aflInverse[0], mWorldXfm[0]);
 
     const float flNear = pCam->GetNearPlane() + kNearPlaneMargin;
     int bAllClipped = 1;

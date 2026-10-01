@@ -74,14 +74,14 @@ public:
      * @param flTime Not read.
      * @ghidraAddress 0x002f55c8
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Empty in this class. Slot 36.
      *
      * @ghidraAddress 0x002f5650
      */
-    virtual void OnUnknownSlot36();
+    virtual void OnExitFinished();
 
     /**
      * Resolve the container's views, label the remix panel, and find the tempo and genre texts,

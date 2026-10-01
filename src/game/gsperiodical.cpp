@@ -64,7 +64,7 @@ int PeriodicalCmd::sCmdID;
 GsPeriodical::GsPeriodical(Sch::TickClock *pClock, PhraseMaker *pPhraseMaker, int nPeriod)
     : mOrigin(kMBTInfinity), mPeriod(nPeriod), mClock(pClock), mPhraseMaker(pPhraseMaker) {
     mCommand.mValue = kUnallocatedCommand;
-    mOrigin = pPhraseMaker->Slot5();
+    mOrigin = pPhraseMaker->GetPeriodOrigin();
 }
 
 // 0x001b4548
@@ -79,7 +79,7 @@ void GsPeriodical::PostAt(int nTick) {
 // 0x001b45d0
 void GsPeriodical::Run(int nTick) {
     const Mid::MBT offset(ClampPosition(nTick - mOrigin));
-    mPhraseMaker->Slot4(offset.mTick / mPeriod);
+    mPhraseMaker->OnPeriod(offset.mTick / mPeriod);
 
     const Mid::MBT next(ClampPosition(nTick + mPeriod));
     PostAt(next.mTick);

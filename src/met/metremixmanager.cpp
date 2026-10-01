@@ -50,7 +50,7 @@ constexpr int kListStatusPending = 15;
 // ListRemixes() builds its warning from the factory text and the card text when both apply.
 constexpr int kBothSources = 2;
 
-// What Done() does once a remix read completes, as mUnknownf4 records it.
+// What Done() does once a remix read completes, as mAfterLoadAction records it.
 constexpr int kAfterLoadStart = 0;
 constexpr int kAfterLoadExit = 1;
 
@@ -145,7 +145,7 @@ inline const char *FirstCardSlotText() {
 }
 
 // Replaces a list of screen names by clearing, resizing, and then assigning, which is the sequence
-// every writer of mUnknownac and mUnknownb8 expands.
+// every writer of mReturnScreens and mRestoreScreens expands.
 inline void ReplaceScreens(std::vector<HxStr> &screens, const std::vector<HxStr> &source) {
     screens.clear();
     screens.resize(source.size());
@@ -168,8 +168,8 @@ MetRemixManager *MetRemixManager::sInstance;
 // 0x00352b80
 MetRemixManager::MetRemixManager(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknownd4(0), mUnknownd8(0), mUnknowndc(1), mIndexRequest(0), mRemixRequest(0),
-      mUnknowne8(-1), mCurrentPlaylistTrack(0), mShuffle(0), mUnknownf4(0) {
+      mListingsDone(0), mListingsExpected(0), mPlayListReady(1), mIndexRequest(0), mRemixRequest(0),
+      mIndexSlot(-1), mCurrentPlaylistTrack(0), mShuffle(0), mAfterLoadAction(0) {
 }
 
 // 0x00355070
@@ -286,8 +286,8 @@ void MetRemixManager::RandomTrack() {
     }
     mPlayedTracks[nTrack] = true; // Yes, the binary marks track -1 when none was picked.
     SetCurrentTrack(nTrack);
-    LogPrintf("MetRemixManager::RandomTrack() - mCurrentPlaylistTrack = %i.\n",
-              mCurrentPlaylistTrack);
+    LogPrintf(
+        "MetRemixManager::%s() - mCurrentPlaylistTrack = %i.\n", __func__, mCurrentPlaylistTrack);
 }
 
 // 0x00361300
@@ -318,7 +318,7 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
                                   std::vector<MemcardConnectState> slots,
                                   int bLoadPlayList) {
     CacheSharedInstance(); // Yes, the binary resolves its own instance first and ignores it.
-    ReplaceScreens(mUnknownac, returnScreens);
+    ReplaceScreens(mReturnScreens, returnScreens);
     const std::vector<HxStr> buttons;
 
     std::vector<int> cardSlots;
@@ -361,13 +361,13 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     MemcardManager::shared()->mUser = this;
     mRemixes.clear();
     mListStatus.clear();
-    mUnknownd4 = 0;
+    mListingsDone = 0;
     mCurrentPlaylistTrack = 0;
     const int nSlots = slots.size();
-    mUnknownd8 = nSlots;
+    mListingsExpected = nSlots;
     for (int i = 0; i < nSlots; ++i) {
         if (slots[i].mPortSlot == kFactorySlot) {
-            mUnknowne8 = slots[i].mPortSlot;
+            mIndexSlot = slots[i].mPortSlot;
             mRemixes[slots[i].mPortSlot]; // Yes, the binary only creates the factory entry here.
             LoadIndex();
             mListStatus[slots[i].mPortSlot] = kListStatusOk;
@@ -381,7 +381,7 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     // Yes, the binary empties the playlist without releasing its entries.
     mPlayList.entries.clear();
     if (bLoadPlayList != 0) {
-        mUnknowndc = 0;
+        mPlayListReady = 0;
         MemcardManager::shared()->CreateLoadJukeboxPlayListTask(
             0, &mPlayList, QueryConfigValue(kPlayListIndexCode));
     }
@@ -411,19 +411,19 @@ void MetRemixManager::BeginRemixLoad(const std::vector<HxStr> &returnScreens,
         text = FormatString(PathOrEmpty(format), PathOrEmpty(slotName));
     }
     MetMsgScreen::Show(HxStr(kLoadRemixDataDialogue), HxStr(kWarningTitle), text, 0, buttons, this);
-    mUnknownf4 = kAfterLoadExit;
-    ReplaceScreens(mUnknownac, returnScreens);
-    ReplaceScreens(mUnknownb8, restoreScreens);
+    mAfterLoadAction = kAfterLoadExit;
+    ReplaceScreens(mReturnScreens, returnScreens);
+    ReplaceScreens(mRestoreScreens, restoreScreens);
     LoadRemix(record, nFactory);
 }
 
 // 0x00355ff0
 void MetRemixManager::OnRemixLoaded(int nPortSlot, int nStatus) {
-    LogPrintf(" in MetRemixManager::LoadRemixCB(). Return code = %i.\n", nStatus);
+    LogPrintf(" in MetRemixManager::%s(). Return code = %i.\n", __func__, nStatus);
     if (nStatus == 0) {
-        if (mUnknownf4 == kAfterLoadStart) {
+        if (mAfterLoadAction == kAfterLoadStart) {
             StartLoadedRemix();
-        } else if (mUnknownf4 == kAfterLoadExit) {
+        } else if (mAfterLoadAction == kAfterLoadExit) {
             ExitScreenByName(HxStr(kMsgScreen));
         }
         return;
@@ -440,23 +440,23 @@ void MetRemixManager::OnRemixLoaded(int nPortSlot, int nStatus) {
 
 inline void MetRemixManager::RetrySavePlayList() {
     std::vector<HxStr> screens;
-    screens = mUnknownac;
+    screens = mReturnScreens;
     SavePlayList(screens);
 }
 
 // 0x003555c0
 void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kLoadRemixDataDialogue) {
-        PushUnknownacScreens();
+        PushReturnScreens();
     } else if (name == kMemLoadDialogue) {
-        PushUnknownacScreens();
-        mUnknownd8 = -1;
-        mUnknownd4 = -1;
+        PushReturnScreens();
+        mListingsExpected = -1;
+        mListingsDone = -1;
     } else if (name == kMemSaveDialogue || name == kPlayListSaveFailedDialogue) {
-        PushUnknownacScreens();
+        PushReturnScreens();
     } else if (name == kPlayListSaveRetryDialogue) {
         if (nChoice != kChoiceFirst) {
-            PushUnknownacScreens();
+            PushReturnScreens();
         } else {
             RetrySavePlayList();
         }
@@ -467,12 +467,12 @@ void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
         Application::shared()->GetGameManager()->SetParams(params);
         if (params.mJukeboxMode == 1) {
             Application::shared()->GetSynth()->LoadBankSet4();
-            mUnknown10->OnUnknownSlot5();
+            mRenderer->Stop();
             MetFreqEndedMsg msg;
-            msg.mUnknownb8Clear = params.mJukeboxMode;
-            mUnknown10->Handle(&msg);
+            msg.mStopJukebox = params.mJukeboxMode;
+            mRenderer->Handle(&msg);
         } else {
-            PushUnknownb8Screens();
+            PushRestoreScreens();
         }
     } else if (name == kFormatCheckDialogue) {
         if (nChoice == kChoiceSecond) {
@@ -490,7 +490,7 @@ void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
         RetrySavePlayList();
     } else if (name == kFormatFailDialogue) {
         if (nChoice != kChoiceFirst) {
-            PushUnknownacScreens();
+            PushReturnScreens();
         } else {
             RetrySavePlayList();
         }
@@ -590,7 +590,7 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
 
 // 0x00356508
 void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
-    ReplaceScreens(mUnknownac, returnScreens);
+    ReplaceScreens(mReturnScreens, returnScreens);
     const std::vector<HxStr> buttons;
     HxStr format = QueryConfigString(kDialogueConfigCode, kMemSaveDialogue);
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
@@ -603,9 +603,9 @@ void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
 
 // 0x003593d0
 void MetRemixManager::StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle) {
-    mUnknownb8.clear();
-    mUnknownb8.push_back(HxStr(kTopButtonsScreen));
-    mUnknownb8.push_back(HxStr(kHelpScreen));
+    mRestoreScreens.clear();
+    mRestoreScreens.push_back(HxStr(kTopButtonsScreen));
+    mRestoreScreens.push_back(HxStr(kHelpScreen));
     mPlayedTracks.resize(mPlayList.entries.size());
     std::fill(mPlayedTracks.begin(), mPlayedTracks.end(), false);
     SetCurrentTrack(0);
@@ -613,7 +613,7 @@ void MetRemixManager::StartPlayList(const std::vector<HxStr> &returnScreens, int
     if (nShuffle != 0) {
         RandomTrack();
     }
-    ReplaceScreens(mUnknownac, returnScreens);
+    ReplaceScreens(mReturnScreens, returnScreens);
     LoadCurrentTrack();
 }
 
@@ -623,9 +623,9 @@ void MetRemixManager::StartLoadedRemix() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     const int nArena = RandomInt(0, GetArenaList()->size() - 1);
     params.mArenaName = (*GetArenaList())[nArena].mName;
-    params.mUnknown1c = kPlayModeJam;
+    params.mPlayMode = kPlayModeJam;
     params.mJukeboxMode = 1;
-    params.mLevelName = pRecord->unknown00_;
+    params.mLevelName = pRecord->levelName;
     params.mLoadingGame = 1;
     CallScriptTemplate(kJukeboxStartTemplate, kJukeboxStartArgument);
     Application::shared()->GetGameManager()->SetParams(params);
@@ -649,64 +649,64 @@ void MetRemixManager::LeaveJukeboxMode() {
 }
 
 // 0x003610d0
-void MetRemixManager::PushUnknownb8Screens() {
-    const int nScreens = mUnknownb8.size();
+void MetRemixManager::PushRestoreScreens() {
+    const int nScreens = mRestoreScreens.size();
     for (int i = 0; i < nScreens; ++i) {
-        PushNamedScreen(mUnknownb8[i]);
+        PushNamedScreen(mRestoreScreens[i]);
     }
     if (nScreens > 0) {
-        ActivateNamedPanel(mUnknownb8[0]);
+        ActivateNamedPanel(mRestoreScreens[0]);
     }
 }
 
 // 0x00361170
-void MetRemixManager::PushUnknownacScreens() {
-    const int nScreens = mUnknownac.size();
+void MetRemixManager::PushReturnScreens() {
+    const int nScreens = mReturnScreens.size();
     for (int i = 0; i < nScreens; ++i) {
-        PushNamedScreen(mUnknownac[i]);
+        PushNamedScreen(mReturnScreens[i]);
     }
     if (nScreens > 0) {
-        ActivateNamedPanel(mUnknownac[0]);
+        ActivateNamedPanel(mReturnScreens[0]);
     }
 }
 
 // 0x003612a0
 void MetRemixManager::PrunePlayList() {
-    mPlayList.RemoveUnknownEntries();
+    mPlayList.RemoveStaleEntries();
 }
 
 // 0x00361518
 void MetRemixManager::EnterAndShow() {
-    mUnknown14->SetShowing(0);
+    mView->SetShowing(0);
 }
 
 // 0x00361550
-void MetRemixManager::OnUnknownSlot36() {
+void MetRemixManager::OnExitFinished() {
 }
 
 // 0x003553e8
 void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
     mListStatus[nPortSlot] = nStatus;
-    ++mUnknownd4;
+    ++mListingsDone;
     // Yes, the binary repeats the same exit on both sides of the status test.
     if (nStatus == kListStatusOk || nStatus == kListStatusNoRemixes) {
-        if (mUnknownd4 == mUnknownd8 && mUnknowndc != 0) {
+        if (mListingsDone == mListingsExpected && mPlayListReady != 0) {
             ExitScreenByName(HxStr(kMsgScreen));
         }
-    } else if (mUnknownd4 == mUnknownd8 && mUnknowndc != 0) {
+    } else if (mListingsDone == mListingsExpected && mPlayListReady != 0) {
         ExitScreenByName(HxStr(kMsgScreen));
     }
 }
 
 // 0x003563e0
 void MetRemixManager::OnJukeboxPlayListLoaded([[maybe_unused]] int nPortSlot, int nStatus) {
-    mUnknowndc = 1;
+    mPlayListReady = 1;
     // Yes, the binary repeats the same exit on both sides of the status test.
     if (nStatus != 0) {
-        if (mUnknownd4 == mUnknownd8) {
+        if (mListingsDone == mListingsExpected) {
             ExitScreenByName(HxStr(kMsgScreen));
         }
-    } else if (mUnknownd4 == mUnknownd8) {
+    } else if (mListingsDone == mListingsExpected) {
         ExitScreenByName(HxStr(kMsgScreen));
     }
 }
@@ -722,9 +722,9 @@ void MetRemixManager::Done(int nHandle,
         pLog->WriteBytes(pBuffer, nLength);
         pLog->Seek(0, kSeekFromStart);
         mRemixRequest = 0;
-        if (mUnknownf4 == kAfterLoadStart) {
+        if (mAfterLoadAction == kAfterLoadStart) {
             StartLoadedRemix();
-        } else if (mUnknownf4 == kAfterLoadExit) {
+        } else if (mAfterLoadAction == kAfterLoadExit) {
             ExitScreenByName(HxStr(kMsgScreen));
         }
         return;
@@ -749,12 +749,12 @@ void MetRemixManager::Done(int nHandle,
                               it->appearances,
                               it->AlbumNum);
         record.factory = 1;
-        mRemixes[mUnknowne8].push_back(record);
+        mRemixes[mIndexSlot].push_back(record);
     }
     MemFreeTagged(pBuffer, __FILE__, __LINE__);
-    mUnknowne8 = kFactorySlot;
+    mIndexSlot = kFactorySlot;
     mIndexRequest = 0;
-    if (++mUnknownd4 == mUnknownd8 && mUnknowndc != 0) {
+    if (++mListingsDone == mListingsExpected && mPlayListReady != 0) {
         ExitScreenByName(HxStr(kMsgScreen));
     }
 }
@@ -767,7 +767,7 @@ MetRemixRecord *MetRemixManager::LookupRemix(const HxStr &name) {
 // 0x00361418
 inline void MetRemixManager::LoadRemix(const MetRemixRecord &record, int nFactory) {
     if (nFactory != 0) {
-        LoadRemixFile(record.unknown10_);
+        LoadRemixFile(record.fileName);
         return;
     }
     MemcardManager::shared()->mUser = this;
@@ -776,7 +776,7 @@ inline void MetRemixManager::LoadRemix(const MetRemixRecord &record, int nFactor
 
 // 0x00361480
 void MetRemixManager::LoadCurrentTrack() {
-    mUnknownf4 = 0;
+    mAfterLoadAction = 0;
     JukeboxPlayListEntry *pEntry = mPlayList.GetEntry(mCurrentPlaylistTrack);
     LoadRemix(*FindRecord(pEntry->name), pEntry->factory);
 }

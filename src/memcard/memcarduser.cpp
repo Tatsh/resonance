@@ -70,11 +70,11 @@ void MemcardUser::OnRemixDeleted([[maybe_unused]] int nPortSlot, [[maybe_unused]
 }
 
 // 0x00184510
-void MemcardUser::OnUnknown17([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
+void MemcardUser::UnusedFirstReport([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
 }
 
 // 0x00184518
-void MemcardUser::OnUnknown18([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
+void MemcardUser::UnusedSecondReport([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
 }
 
 // 0x00184520

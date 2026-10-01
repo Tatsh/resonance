@@ -5,7 +5,7 @@ enum {
 };
 
 // 0x005e7a58
-void sceVu0Sub005e7a58(float *pDst, const float *pA, const float *pB) {
+void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB) {
     // The image pins the rows of pA in vector registers and streams the rows of pB, so either
     // factor may alias the destination. The copy below preserves that behaviour.
     float aflBasis[16];
@@ -47,7 +47,7 @@ void sceVu0Sub005e7a58(float *pDst, const float *pA, const float *pB) {
 }
 
 // 0x005e7ab0
-void sceVu0Sub005e7ab0(float *pDst, const float *pA, const float *pB) {
+void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB) {
     // The image pins the rows of pA in vector registers and streams the rows of pB, so either
     // factor may alias the destination. The copy below preserves that behaviour.
     float aflBasis[16];

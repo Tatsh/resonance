@@ -121,7 +121,6 @@ caughtpowerbarmsg
 cdread
 cdreadstm
 cdrom
-cdvdman
 ceval
 chcr
 chdir
@@ -213,7 +212,6 @@ discswap
 dispfb
 displaypointermsg
 dmac
-dmacman
 dmacnt
 dmaend
 docstrings
@@ -460,7 +458,6 @@ idablebase
 ifdef
 ifndef
 immediates
-imsifrpc
 ingame
 initfunc
 initps
@@ -481,7 +478,6 @@ invers
 iobmemstream
 iobpreallocmemstream
 iobstream
-ioman
 iopcontrol
 iopfixup
 iopheap
@@ -583,7 +579,6 @@ longop
 looptogglemsg
 looptoolmsg
 lsax
-lsce
 lsdmode
 lseek
 lshift
@@ -885,7 +880,6 @@ pcgth
 pcpyld
 pcre
 pcremodule
-pcsx
 pdata
 pextlb
 pextub
@@ -931,6 +925,7 @@ pointamountmsg
 popen
 posixmodule
 posixpath
+postgap
 powb
 powerup
 powerupcollection
@@ -989,6 +984,8 @@ rangeobject
 rawcontroller
 rawcontrollermsg
 raytest
+rbor
+rbsr
 rdonly
 rdparty
 readbuf
@@ -1275,18 +1272,7 @@ unformatop
 unicodectype
 unicodeobject
 unistd
-unknowna
-unknownac
-unknownb
-unknownbc
-unknownc
-unknowncc
-unknownd
-unknowndc
-unknowne
-unknownec
-unknownf
-unknownfc
+unlabeled
 unlockstages
 unmute
 unmuted
@@ -1298,7 +1284,6 @@ uordblks
 updatescorepacket
 updateworldxfm
 usbd
-usbkeybd
 utime
 vars
 vclipw

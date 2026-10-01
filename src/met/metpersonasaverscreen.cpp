@@ -31,7 +31,7 @@ static const char *const kOwnScreenName = "MetPersonaSaverScreen";
 static const char *const kLoadGameScreen = "MetLoadGameScreen";
 static const char *const kMsgScreen = "MetMsgScreen";
 
-// What StartDelete() records in mUnknown94.
+// What StartDelete() records in mIsDelete.
 constexpr int kDeleteRequest = 1;
 
 // Configuration code the dialogue texts are read under.
@@ -111,7 +111,7 @@ constexpr int kAnyPad = -1;
 constexpr int kNameMaxLength = 12;
 constexpr int kNameMaxWidth = 176;
 
-// The value mUnknown94, mUnknown98, mUnknown9c, and mUnknownbc take while set.
+// The value mIsDelete, mIsCopy, mConfirmReplace, and mRefreshingSettingsCard take while set.
 constexpr int kFlagSet = 1;
 
 constexpr int kNotFound = -1;
@@ -140,8 +140,9 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy) {
         buttons.push_back(HxStr(kRetryButton));
         buttons.push_back(HxStr(kCancelButton));
         HxStr format = QueryConfigString(kDialogueConfigCode, kCopyNoSpaceText);
-        HxStr text(FormatString(
-            TextOrEmpty(format), TextOrEmpty(slotName), GlobalSettings::shared()->mUnknown74));
+        HxStr text(FormatString(TextOrEmpty(format),
+                                TextOrEmpty(slotName),
+                                GlobalSettings::shared()->mPersonaMinimumFreeClusters));
         MetMsgScreen::ShowActive(
             HxStr(kCopyNoSpaceDialogue), HxStr(kWarningTitle), text, kTwoButtons, buttons, pOwner);
     }
@@ -176,11 +177,8 @@ inline void ShowNoCard(MetScreen *pOwner, const HxStr &slotName, int nDelete, in
 
 // The FreQ name keyboard OnMsgScreenDismissed() opens from two dialogues.
 inline void OpenNameKeyboard(MetPersonaData *pPersona, MetKBUser *pUser) {
-    MetKeyboardRequest request(HxStr(kOwnScreenName),
-                               HxStr(kNamePrompt),
-                               pPersona->mUnknown140.mUnknown00,
-                               kAnyPad,
-                               pUser);
+    MetKeyboardRequest request(
+        HxStr(kOwnScreenName), HxStr(kNamePrompt), pPersona->mAppearance.mUserName, kAnyPad, pUser);
     request.mMaxLength = kNameMaxLength;
     request.mMaxWidth = kNameMaxWidth;
     request.mTicker = kNoText;
@@ -193,16 +191,16 @@ inline void OpenNameKeyboard(MetPersonaData *pPersona, MetKBUser *pUser) {
 void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
                                       MetPersonaData *pPersona,
                                       const MemcardConnectState &slot,
-                                      int nUnknown9c,
-                                      int nUnknown98) {
+                                      int nConfirmReplace,
+                                      int nIsCopy) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
     MetPersonaSaverScreen *pSaver =
         pScreen != nullptr ? dynamic_cast<MetPersonaSaverScreen *>(pScreen) : nullptr;
     // The binary does not test the result for null.
     pSaver->SetSaveRequest(screens, pPersona, slot);
-    pSaver->mUnknown98 = nUnknown98;
-    pSaver->mUnknown9c = nUnknown9c;
-    pSaver->mUnknown94 = 0;
+    pSaver->mIsCopy = nIsCopy;
+    pSaver->mConfirmReplace = nConfirmReplace;
+    pSaver->mIsDelete = 0;
 
     MetScreen *pLoadGame = MetScreen::FindScreenByName(HxStr(kLoadGameScreen));
     pLoadGame->PushNamedScreen(HxStr(kOwnScreenName));
@@ -218,9 +216,9 @@ void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
         pScreen != nullptr ? dynamic_cast<MetPersonaSaverScreen *>(pScreen) : nullptr;
     // The binary does not test the result for null.
     pSaver->SetSaveRequest(screens, pPersona, slot);
-    pSaver->mUnknown9c = 0;
-    pSaver->mUnknown98 = 0;
-    pSaver->mUnknown94 = kDeleteRequest;
+    pSaver->mConfirmReplace = 0;
+    pSaver->mIsCopy = 0;
+    pSaver->mIsDelete = kDeleteRequest;
 
     MetScreen *pLoadGame = MetScreen::FindScreenByName(HxStr(kLoadGameScreen));
     pLoadGame->PushNamedScreen(HxStr(kOwnScreenName));
@@ -230,7 +228,7 @@ void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
 // 0x0032ece0
 MetPersonaSaverScreen::MetPersonaSaverScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mUnknown98(0), mUnknown9c(0), mUnknownbc(0) {
+      mIsCopy(0), mConfirmReplace(0), mRefreshingSettingsCard(0) {
 }
 
 // 0x0032f020
@@ -240,23 +238,23 @@ MetPersonaSaverScreen::~MetPersonaSaverScreen() {
 
 // 0x0032f1e0
 void MetPersonaSaverScreen::CommitSave() {
-    if (mUnknown98 != 0 || mUnknownc0.mPortSlot != 0 ||
-        MetFrontEndState::shared()->mUnknown0c != 0 || mUnknownb8 == nullptr) {
+    if (mIsCopy != 0 || mTargetSlot.mPortSlot != 0 ||
+        MetFrontEndState::shared()->mUsingMemcard != 0 || mPersona == nullptr) {
         MemcardManager::shared()->mUser = this;
-        MemcardManager::shared()->CreateGetConnectStateTask(mUnknownc0.mPortSlot);
+        MemcardManager::shared()->CreateGetConnectStateTask(mTargetSlot.mPortSlot);
         return;
     }
 
     bool bFound = false;
-    if (mUnknownb8->mUnknown15c != 0) {
+    if (mPersona->mIsPrefab != 0) {
         for (std::vector<MetPersonaData *>::size_type i = 0;
              i < MetFreqMakerAssetManager::shared()->GetIdentityList()->size();
              ++i) {
-            HxStr name((*MetFreqMakerAssetManager::shared()->GetIdentityList())[i]
-                           ->mUnknown140.mUnknown00);
-            if (name == mUnknownb8->mUnknown140.mUnknown00) {
+            HxStr name(
+                (*MetFreqMakerAssetManager::shared()->GetIdentityList())[i]->mAppearance.mUserName);
+            if (name == mPersona->mAppearance.mUserName) {
                 bFound = true;
-                *(*MetFreqMakerAssetManager::shared()->GetIdentityList())[i] = *mUnknownb8;
+                *(*MetFreqMakerAssetManager::shared()->GetIdentityList())[i] = *mPersona;
                 break;
             }
         }
@@ -266,11 +264,11 @@ void MetPersonaSaverScreen::CommitSave() {
         for (std::vector<MetPersonaData *>::size_type i = 0;
              i < MetPersonaData::savedList()->size();
              ++i) {
-            if ((*MetPersonaData::savedList())[i]->mUnknown140.mUnknown00 ==
-                mUnknownb8->mUnknown140.mUnknown00) {
+            if ((*MetPersonaData::savedList())[i]->mAppearance.mUserName ==
+                mPersona->mAppearance.mUserName) {
                 bFound = true;
-                if (mUnknownb8 != (*MetPersonaData::savedList())[i]) {
-                    *(*MetPersonaData::savedList())[i] = *mUnknownb8;
+                if (mPersona != (*MetPersonaData::savedList())[i]) {
+                    *(*MetPersonaData::savedList())[i] = *mPersona;
                 }
                 break;
             }
@@ -279,7 +277,7 @@ void MetPersonaSaverScreen::CommitSave() {
 
     if (!bFound) {
         MetPersonaData *pCopy = new MetPersonaData;
-        *pCopy = *mUnknownb8;
+        *pCopy = *mPersona;
         MetPersonaData::savedList()->push_back(pCopy);
     }
     BeginExit();
@@ -297,7 +295,7 @@ void MetPersonaSaverScreen::ClearPersonas() {
 // 0x0032f5a0
 void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatus) {
     if (nStatus != kMemcardStatusOk) {
-        ShowNoCard(this, mUnknownc0.mSlotName, mUnknown94, mUnknown98);
+        ShowNoCard(this, mTargetSlot.mSlotName, mIsDelete, mIsCopy);
         return;
     }
 
@@ -307,50 +305,50 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
         buttons.push_back(HxStr(kYesButton));
         HxStr format;
         HxStr text;
-        if (mUnknown98 == 0) {
+        if (mIsCopy == 0) {
             format = ConfigText(kSaveFailFormatText);
         } else {
             format = ConfigText(kCopyFailFormatText);
         }
-        text = FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName));
+        text = FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
         MetMsgScreen::Show(
             HxStr(kFormatCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
         return;
     }
 
-    if (mUnknownbc != 0) {
+    if (mRefreshingSettingsCard != 0) {
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         GlobalSettings::shared()->mCardSlots[0] = state;
-        mUnknownbc = 0;
+        mRefreshingSettingsCard = 0;
         ExitScreenByName(HxStr(kMsgScreen));
         return;
     }
 
-    if (mUnknown94 == 0 && state.mFree < GlobalSettings::shared()->mUnknown74) {
-        ShowNoSpace(this, mUnknownc0.mSlotName, mUnknown98);
+    if (mIsDelete == 0 && state.mFree < GlobalSettings::shared()->mPersonaMinimumFreeClusters) {
+        ShowNoSpace(this, mTargetSlot.mSlotName, mIsCopy);
         return;
     }
 
     MemcardManager::shared()->mUser = this;
     ClearPersonas();
-    MemcardManager::shared()->CreateLoadPersonasTask(mUnknownc0.mPortSlot, &mPersonas);
+    MemcardManager::shared()->CreateLoadPersonasTask(mTargetSlot.mPortSlot, &mPersonas);
 
     std::vector<HxStr> buttons;
     HxStr format;
     HxStr text;
     HxStr title;
-    if (mUnknown98 == 0) {
+    if (mIsCopy == 0) {
         title = ConfigText(kSaveTitleKey);
         format = ConfigText(kSaveText);
         text = FormatString(TextOrEmpty(format), TextOrEmpty(state.mSlotName));
         MetMsgScreen::Show(HxStr(kSaveDialogue), title, text, kNoButtons, buttons, this);
-    } else if (mUnknown94 != 0) {
+    } else if (mIsDelete != 0) {
         std::vector<HxStr> noButtons;
         HxStr first = QueryConfigString(kDialogueConfigCode, kDeleteFirstText);
         HxStr second = QueryConfigString(kDialogueConfigCode, kDeleteSecondText);
         HxStr deleting(FormatString(kDeleteFormat,
                                     TextOrEmpty(first),
-                                    TextOrEmpty(mUnknownc0.mSlotName),
+                                    TextOrEmpty(mTargetSlot.mSlotName),
                                     TextOrEmpty(second)));
         MetMsgScreen::Show(
             HxStr(kDeletingDialogue), HxStr(kWarningTitle), deleting, kNoButtons, noButtons, this);
@@ -374,7 +372,7 @@ void MetPersonaSaverScreen::OnCardFormatted(int, int nStatus) {
         HxStr format = QueryConfigString(kDialogueConfigCode,
                                          nStatus == kMemcardStatusOk ? kFormatSuccessText :
                                                                        kFormatAlreadyText);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
+        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
         MetMsgScreen::ShowActive(
             HxStr(kFormatDoneDialogue), HxStr(kWarningTitle), text, kOneButton, buttons, this);
         break;
@@ -400,7 +398,7 @@ int MetPersonaSaverScreen::CheckPersonaLimit() {
     std::vector<HxStr> buttons;
     buttons.push_back(HxStr(kOkButton));
     HxStr format = QueryConfigString(kDialogueConfigCode, kLimitText);
-    HxStr text(FormatString(TextOrEmpty(format), kMaxPersonas, TextOrEmpty(mUnknownc0.mSlotName)));
+    HxStr text(FormatString(TextOrEmpty(format), kMaxPersonas, TextOrEmpty(mTargetSlot.mSlotName)));
     MetMsgScreen::Show(HxStr(kLimitDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
     return 0;
 }
@@ -410,14 +408,14 @@ void MetPersonaSaverScreen::SyncActivePersona() {
     std::vector<MetPersonaData *> roster(*Application::shared()->GetGameManager()->GetPersonas());
     MetPersonaData *pActive = roster.size() != 0 ? roster[0] : nullptr;
     if (pActive != nullptr) {
-        *pActive = *mUnknownb8;
+        *pActive = *mPersona;
     }
 }
 
 // 0x00332428
 void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
-    MetPersonaData *pPersona = mUnknownb8;
-    if (pPersona->mUnknown140.mUnknown00 == kNoText) {
+    MetPersonaData *pPersona = mPersona;
+    if (pPersona->mAppearance.mUserName == kNoText) {
         std::vector<HxStr> buttons;
         buttons.push_back(HxStr(kOkButton));
         HxStr text = QueryConfigString(kDialogueConfigCode, kNoNameText);
@@ -426,12 +424,12 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
         return;
     }
 
-    if (mUnknown98 != 0) {
-        mUnknownb8->mUnknown160 = mUnknownb8->mUnknown140.mUnknown00;
+    if (mIsCopy != 0) {
+        mPersona->mSavedName = mPersona->mAppearance.mUserName;
     }
     int bRenamed = 0;
-    if (!(mUnknownb8->mUnknown160 == kNoText)) {
-        bRenamed = mUnknownb8->mUnknown160 != mUnknownb8->mUnknown140.mUnknown00;
+    if (!(mPersona->mSavedName == kNoText)) {
+        bRenamed = mPersona->mSavedName != mPersona->mAppearance.mUserName;
     }
 
     // The entry saved under the persona's previous name, and the entry already using its name.
@@ -439,24 +437,24 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
     int nNameIndex = kNotFound;
     for (std::vector<MetPersonaData *>::size_type i = 0; i < mPersonas.size(); ++i) {
         // Yes, the binary discards this comparison.
-        (void)(mPersonas[i]->mUnknown160 == mPersonas[i]->mUnknown140.mUnknown00);
-        if (mPersonas[i]->mUnknown160 == mUnknownb8->mUnknown160) {
+        (void)(mPersonas[i]->mSavedName == mPersonas[i]->mAppearance.mUserName);
+        if (mPersonas[i]->mSavedName == mPersona->mSavedName) {
             nOldIndex = i;
         }
-        if (mPersonas[i]->mUnknown160 == mUnknownb8->mUnknown140.mUnknown00) {
+        if (mPersonas[i]->mSavedName == mPersona->mAppearance.mUserName) {
             nNameIndex = i;
         }
     }
 
-    if (mUnknown94 != 0) {
+    if (mIsDelete != 0) {
         if (nOldIndex == kNotFound) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kRetryButton));
             buttons.push_back(HxStr(kContinueButton));
             HxStr format = QueryConfigString(kDialogueConfigCode, kDeleteNotFoundText);
             HxStr text(FormatString(TextOrEmpty(format),
-                                    TextOrEmpty(mUnknownb8->mUnknown140.mUnknown00),
-                                    TextOrEmpty(mUnknownc0.mSlotName)));
+                                    TextOrEmpty(mPersona->mAppearance.mUserName),
+                                    TextOrEmpty(mTargetSlot.mSlotName)));
             MetMsgScreen::Show(
                 HxStr(kMemCheckDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
             return;
@@ -468,43 +466,43 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
             std::vector<HxStr> buttons;
             buttons.push_back(HxStr(kOkButton));
             HxStr format = QueryConfigString(kDialogueConfigCode, kNewNameText);
-            HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
+            HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
             MetMsgScreen::Show(
                 HxStr(kNameRequiredDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
             return;
         }
         if (nOldIndex != nNameIndex) {
-            mUnknownb8->mUnknown160 = mUnknownb8->mUnknown140.mUnknown00;
-            *mPersonas[nOldIndex] = *mUnknownb8;
+            mPersona->mSavedName = mPersona->mAppearance.mUserName;
+            *mPersonas[nOldIndex] = *mPersona;
             SyncActivePersona();
         } else {
             if (CheckPersonaLimit() == 0) {
                 return;
             }
-            mUnknownb8->mUnknown160 = mUnknownb8->mUnknown140.mUnknown00;
+            mPersona->mSavedName = mPersona->mAppearance.mUserName;
             MetPersonaData *pCopy = new MetPersonaData;
-            *pCopy = *mUnknownb8;
+            *pCopy = *mPersona;
             mPersonas.push_back(pCopy);
         }
     } else if (nNameIndex != kNotFound) {
-        if (mUnknown9c != 0) {
+        if (mConfirmReplace != 0) {
             AskToReplace();
             return;
         }
-        *mPersonas[nNameIndex] = *mUnknownb8;
+        *mPersonas[nNameIndex] = *mPersona;
         SyncActivePersona();
     } else {
         if (CheckPersonaLimit() == 0) {
             return;
         }
-        mUnknownb8->mUnknown160 = mUnknownb8->mUnknown140.mUnknown00;
+        mPersona->mSavedName = mPersona->mAppearance.mUserName;
         MetPersonaData *pCopy = new MetPersonaData;
-        *pCopy = *mUnknownb8;
+        *pCopy = *mPersona;
         mPersonas.push_back(pCopy);
     }
 
     MemcardManager::shared()->mUser = this;
-    MemcardManager::shared()->CreateSavePersonasTask(mUnknownc0.mPortSlot, mPersonas);
+    MemcardManager::shared()->CreateSavePersonasTask(mTargetSlot.mPortSlot, mPersonas);
 }
 
 // 0x00333210
@@ -522,15 +520,15 @@ void MetPersonaSaverScreen::OnPersonasSaved(int nPortSlot, int nStatus) {
             *pCopy = *mPersonas[i];
             MetPersonaData::loadList()->push_back(pCopy);
         }
-        mUnknownbc = kFlagSet;
+        mRefreshingSettingsCard = kFlagSet;
         MemcardManager::shared()->mUser = this;
-        MemcardManager::shared()->CreateGetConnectStateTask(mUnknownc0.mPortSlot);
+        MemcardManager::shared()->CreateGetConnectStateTask(mTargetSlot.mPortSlot);
         break;
     case kMemcardStatusCardFull:
-        ShowNoSpace(this, mUnknownc0.mSlotName, mUnknown98);
+        ShowNoSpace(this, mTargetSlot.mSlotName, mIsCopy);
         break;
     case kMemcardStatusUnknown:
-        ShowNoCard(this, mUnknownc0.mSlotName, mUnknown94, mUnknown98);
+        ShowNoCard(this, mTargetSlot.mSlotName, mIsDelete, mIsCopy);
         break;
     default: {
         std::vector<HxStr> buttons;
@@ -558,9 +556,9 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
             CommitSave();
             return;
         }
-        MemcardManager::shared()->CreateFormatTask(mUnknownc0.mPortSlot);
+        MemcardManager::shared()->CreateFormatTask(mTargetSlot.mPortSlot);
         HxStr format = QueryConfigString(kDialogueConfigCode, kFormatGoText);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
+        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
         std::vector<HxStr> noButtons;
         MetMsgScreen::Show(
             HxStr(kFormatGoDialogue), HxStr(kWarningTitle), text, kNoButtons, noButtons, this);
@@ -585,15 +583,15 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
         }
     } else if (name == kReplaceDialogue) {
         if (nChoice == kChoiceSecond) {
-            mUnknown9c = 0;
+            mConfirmReplace = 0;
             CommitSave();
         } else {
-            OpenNameKeyboard(mUnknownb8, this);
+            OpenNameKeyboard(mPersona, this);
         }
     } else if (name == kLimitDialogue) {
         BeginExit();
     } else if (name == kNameRequiredDialogue) {
-        OpenNameKeyboard(mUnknownb8, this);
+        OpenNameKeyboard(mPersona, this);
     } else {
         BeginExit();
     }
@@ -602,7 +600,7 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
 // 0x003350f8
 void MetPersonaSaverScreen::AskToReplace() {
     HxStr format = QueryConfigString(kDialogueConfigCode, kReplaceText);
-    HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mUnknownc0.mSlotName)));
+    HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
     std::vector<HxStr> buttons;
     buttons.push_back(HxStr(kNoButton));
     buttons.push_back(HxStr(kYesButton));
@@ -619,9 +617,9 @@ MetPersonaSaverScreen *MetPersonaSaverScreen::New(MetRenderer *pRenderer, int nP
 void MetPersonaSaverScreen::SetSaveRequest(const std::vector<HxStr> &screens,
                                            MetPersonaData *pPersona,
                                            const MemcardConnectState &slot) {
-    mUnknownac = screens;
-    mUnknownb8 = pPersona;
-    mUnknownc0 = slot;
+    mReturnScreens = screens;
+    mPersona = pPersona;
+    mTargetSlot = slot;
 }
 
 // 0x003390a0
@@ -635,22 +633,22 @@ void MetPersonaSaverScreen::EnterAndShow() {
 }
 
 // 0x003390f0
-void MetPersonaSaverScreen::OnUnknownSlot7() {
-    mUnknownbc = 0;
+void MetPersonaSaverScreen::OnPanelActivated() {
+    mRefreshingSettingsCard = 0;
     CommitSave();
 }
 
 // 0x00339110
 void MetPersonaSaverScreen::BeginExit() {
-    mUnknown10->RemoveScreen(this);
-    const int nCount = mUnknownac.size();
+    mRenderer->RemoveScreen(this);
+    const int nCount = mReturnScreens.size();
     for (int i = 0; i < nCount; ++i) {
-        PushNamedScreen(mUnknownac[i]);
+        PushNamedScreen(mReturnScreens[i]);
     }
-    ActivateNamedPanel(mUnknownac[0]);
+    ActivateNamedPanel(mReturnScreens[0]);
 }
 
 // 0x003391a8
-void MetPersonaSaverScreen::OnUnknownSlot2(const HxStr &text) {
-    mUnknownb8->SetName(text);
+void MetPersonaSaverScreen::OnKeyboardTextEntered(const HxStr &text) {
+    mPersona->SetName(text);
 }

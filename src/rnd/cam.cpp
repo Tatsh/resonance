@@ -177,14 +177,14 @@ void Cam::SetTargetTex(Tex *pTex) {
 }
 
 // 0x004ad820
-void Cam::CollideUnknown(const Ray &ray, HitSink &sink) {
+void Cam::CollideScreen(const Ray &ray, HitSink &sink) {
     if (mShowing != 0 && mScreenRect.x < ray.mStart[0] &&
         ray.mStart[0] < mScreenRect.x + mScreenRect.w && mScreenRect.y < ray.mStart[1] &&
         ray.mStart[1] < mScreenRect.y + mScreenRect.h) {
         const Hit hit{this, 0.0f};
         sink.mHits.push_back(hit);
     }
-    Collideable::CollideUnknown(ray, sink);
+    Collideable::CollideScreen(ray, sink);
 }
 
 // 0x004ad980

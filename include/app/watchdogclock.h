@@ -62,7 +62,7 @@ public:
      * Stop the clock and move its paused running time forward.
      *
      * Pause() is inlined first. The running time then grows by nAmount times one million divided
-     * by the double at `+0x00`. HxScript::Clock() is the caller. The title is inferred.
+     * by mNsPerUnit. HxScript::Clock() is the caller. The title is inferred.
      *
      * @param nAmount The amount to advance by.
      * @ghidraAddress 0x00512788
@@ -73,9 +73,9 @@ public:
     long long mOriginMs;
 
 private:
-    double mUnknown00;      // +0x00
+    double mNsPerUnit;      // +0x00 nanoseconds in one clock unit
     long long mStartMs;     // +0x08 the reading the running time is measured from
     int mRunning;           // +0x18 set to 1 on construction, cleared while paused
-    int mUnknown1c;         // +0x1c
+    int mReserved1c;        // +0x1c never accessed
     long long mPausedRunMs; // +0x20 the running time at the last pause, cleared on construction
 };

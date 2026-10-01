@@ -17,9 +17,9 @@ class View;
  *
  * The constructor at `0x003c46f8` takes only the renderer and the load priority, and supplies `lp`
  * for the screen name, `metagame/Shared` for the directory, and `freq_logo_panel` for the
- * container. It clears MetScreen::mUnknown60 and does not write mUnknown8c. The screen loads the
- * same container as MetLogoScreen under the screen name `lp` rather than `fl`, and it is one of
- * only three classes that inherit slot 5 unchanged.
+ * container. It clears MetScreen::mShowsLoadedDrawables and does not write mWaveView. The screen
+ * loads the same container as MetLogoScreen under the screen name `lp` rather than `fl`, and it is
+ * one of only three classes that inherit slot 5 unchanged.
  *
  * The object is 0x90 bytes, which the allocation in New() fixes.
  *
@@ -63,14 +63,15 @@ public:
      * @param flTime The current frame position.
      * @ghidraAddress 0x003c77f0
      */
-    virtual void OnUnknownSlot26(float flTime);
+    virtual void UpdateIdle(float flTime);
 
     /**
      * Resolve the logo panel and the wave animation. Slot 38.
      *
      * The body does not run MetScreen::ResolveContainerViews(). It resolves the animation views,
-     * resolves `logo_panel.view` into MetScreen::mUnknown14 and releases its animation references
-     * without a null test, clears MetScreen::mUnknown48, and resolves `wave.view` into mUnknown8c.
+     * resolves `logo_panel.view` into MetScreen::mView and releases its animation references
+     * without a null test, clears MetScreen::mViewsUnresolved, and resolves `wave.view` into
+     * mWaveView.
      *
      * @ghidraAddress 0x003c4868
      */
@@ -78,5 +79,5 @@ public:
 
 private:
     // The wave animation slot 26 advances. Not written by the constructor. +0x8c
-    Rnd::View *mUnknown8c;
+    Rnd::View *mWaveView;
 };

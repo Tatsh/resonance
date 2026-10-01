@@ -10,9 +10,9 @@ typedef struct {
     int nRows;
     unsigned short *pBuffer;
     unsigned char nAttribute;
-    unsigned char mPadding0d[3];
-    int mUnknown10;
-    int mUnknown14;
+    unsigned char mReserved0d[3]; // +0x0d
+    int nCursorColumn;
+    int nCursorRow;
     unsigned int mContext[16];
 } DevConsole;
 
@@ -104,8 +104,8 @@ void sceDevConsClear(int nConsole) {
         *pCell++ = kClearCell;
         --nRemaining;
     }
-    pConsole->mUnknown14 = 0;
-    pConsole->mUnknown10 = 0;
+    pConsole->nCursorRow = 0;
+    pConsole->nCursorColumn = 0;
 }
 
 // 0x00622610

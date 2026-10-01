@@ -375,7 +375,7 @@ int GetUncompressedFileLength(const char *pszPath) {
 
 // 0x0062db60
 // Prints a system error for the input name.
-void GzipRoutine0062db60(const char *pszName) {
+void GzipPrintSystemError(const char *pszName) {
     if (pszName != nullptr && *pszName != '\0') {
         fputs(pszName, stderr);
         fputs(": ", stderr);
@@ -399,7 +399,7 @@ int GzipPrintStreamError(const char *pszMessage) {
 // Reports running out of input bytes and reports one.
 int GzipReportUnexpectedEof() {
     if (errno != 0) {
-        GzipRoutine0062db60(g_szGzipInputName);
+        GzipPrintSystemError(g_szGzipInputName);
     } else {
         fprintf(stderr, kUnexpectedEofFormat, g_szGzipInputName);
     }

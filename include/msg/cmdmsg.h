@@ -37,7 +37,7 @@ public:
      *
      * Inline. Every construction of a derived class stores zero at `+0x04`.
      */
-    CmdMsg() : mUnknown04(0) {
+    CmdMsg() : mResult(0) {
     }
 
     /**
@@ -48,5 +48,5 @@ public:
      *
      * +0x04
      */
-    int mUnknown04;
+    int mResult;
 };

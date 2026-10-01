@@ -43,7 +43,7 @@ AxingSTG::AxingSTG(TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
 
 // 0x0019de08
 AxingSTG::~AxingSTG() {
-    AxingSTG::Slot3(); // The binary calls this class's own body rather than dispatching.
+    AxingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mPeriodical;
     delete mAxeSynth;
     delete mPhraseMaker;
@@ -56,29 +56,29 @@ AxingSTG::~AxingSTG() {
 }
 
 // 0x0019e720
-void AxingSTG::Slot2() {
+void AxingSTG::Start() {
     if (mApplication->GetGameManager()->GetPlayMode() == kPlayModeAnnouncing) {
         const unsigned char nStatus =
             static_cast<unsigned char>(kMidiControlChange | mTrackData->mChannel);
         mApplication->GetSynth()->SendMidi(nStatus, kStageActiveController, kControllerOn);
     }
-    ScoreTrackGraph::Slot2();
+    ScoreTrackGraph::Start();
     mPeriodical->Post();
 }
 
 // 0x0019e798
-void AxingSTG::Slot3() {
+void AxingSTG::Stop() {
     if (mApplication->GetGameManager()->GetPlayMode() == kPlayModeAnnouncing) {
         const unsigned char nStatus =
             static_cast<unsigned char>(kMidiControlChange | mTrackData->mChannel);
         mApplication->GetSynth()->SendMidi(nStatus, kStageActiveController, kControllerOff);
     }
     mPeriodical->Withdraw();
-    ScoreTrackGraph::Slot3();
+    ScoreTrackGraph::Stop();
 }
 
 // 0x0019df58
-void AxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void AxingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mPhraseMaker);
     pPrimary->AddSink(mNewGemMaker);
@@ -116,13 +116,13 @@ void AxingSTG::Slot4(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSeco
 }
 
 // 0x0019e810
-void AxingSTG::Slot6(MsgSink *pOutput) {
+void AxingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
 // 0x0019e850
-void AxingSTG::Slot7(MsgSink *pSink) {
+void AxingSTG::AddSinkToSources(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mPhraseMaker->AddSink(pSink);
     mOldGemMaker->AddSink(pSink);
@@ -132,7 +132,7 @@ void AxingSTG::Slot7(MsgSink *pSink) {
 }
 
 // 0x0019e928
-void AxingSTG::Slot8(MsgSink *pSink) {
+void AxingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;
     }

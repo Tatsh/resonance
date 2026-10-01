@@ -109,7 +109,7 @@ private:
     Rnd::Tex *mMultTex;                // "act_mult_<c>.tex".
     Rnd::Animatable *mMultMovie;       // "act_mult_<c>.mov".
     int mMultiplied;
-    int mUnknown30; // +0x30, zeroed and never read by the recovered routines.
+    int mUnusedWord; // +0x30, zeroed and never read by the recovered routines.
     int mUpdateCount;
     int mHitCount; // Updates since the last hit.
 };

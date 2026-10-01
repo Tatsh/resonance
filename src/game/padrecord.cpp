@@ -48,7 +48,7 @@ enum Phase {
     kPhaseDone = 99
 };
 
-// Levels of mUnknown124: digital only, analog, and analog with pressure-sensitive buttons.
+// Levels of mReadyLevel: digital only, analog, and analog with pressure-sensitive buttons.
 constexpr int kReadyDigital = 1;
 constexpr int kReadyAnalog = 2;
 constexpr int kReadyPressure = 3;
@@ -73,7 +73,7 @@ constexpr unsigned kButtonMask = 0xffff;
 // The value an analog byte reads at rest.
 constexpr int kAnalogCentre = 0x80;
 
-// Entries of mUnknown130 and mUnknown134, one per analog axis.
+// Entries of mLastAxes and mAxisDeltas, one per analog axis.
 enum Axis { kAxisLeftX = 0, kAxisLeftY = 1, kAxisRightX = 2, kAxisRightY = 3 };
 
 // Byte of the unused alignment entries.
@@ -86,7 +86,7 @@ constexpr unsigned char kBigMotorByte = 1;
 // Actuator entries of the small and big motors.
 enum ActuatorIndex { kSmallMotor = 0, kBigMotor = 1 };
 
-// mUnknown124 from which SetVibration() drives the motors.
+// mReadyLevel from which SetVibration() drives the motors.
 constexpr int kVibrationReady = 2;
 
 } // namespace
@@ -94,7 +94,7 @@ constexpr int kVibrationReady = 2;
 int PadRecord::sPadLibraryStarted;
 
 // 0x005bcf58
-void PadRecord::Open(int nPort, int nSlot, int nUnknown128) {
+void PadRecord::Open(int nPort, int nSlot, int nDeadZone) {
     for (int i = 0; i < kActuatorByteCount; ++i) {
         mActDirect[i] = 0;
         mActAlign[i] = kActuatorUnused;
@@ -107,25 +107,25 @@ void PadRecord::Open(int nPort, int nSlot, int nUnknown128) {
     mPort = nPort;
     mSlot = nSlot;
     mPhase = 0;
-    mUnknown118 = 0;
-    mUnknown12c = 0;
-    mUnknown120 = 0;
+    mRawButtons = 0;
+    mReadCount = 0;
+    mReportMode = 0;
     if (sPadLibraryStarted == 0) {
         scePadInit(0);
         sPadLibraryStarted = 1;
     }
-    for (auto &byte : mUnknown130) {
+    for (auto &byte : mLastAxes) {
         byte = 0;
     }
-    for (auto &value : mUnknown134) {
+    for (auto &value : mAxisDeltas) {
         value = 0;
     }
     scePadPortOpen(nPort, nSlot, mDmaArea);
-    mUnknown128 = nUnknown128;
+    mDeadZone = nDeadZone;
     mButtons = 0;
-    mUnknown104 = 0;
-    mUnknown108 = 0;
-    mUnknown10c = 0;
+    mHeldButtonsSeen = 0;
+    mToggledButtons = 0;
+    mPreviousButtons = 0;
 }
 
 // The setup step for the current phase.
@@ -144,7 +144,7 @@ inline void PadRecord::AdvancePhase(int nState) {
             nId = nExtendedId;
         }
         if (nId == kPadIdAnalog) {
-            mUnknown124 = kReadyDigital;
+            mReadyLevel = kReadyDigital;
             mPhase = kPhaseAnalogProbe;
         } else if (nId == kPadIdDualShock2) {
             mPhase = kPhaseActuatorAlign;
@@ -171,7 +171,7 @@ inline void PadRecord::AdvancePhase(int nState) {
         }
         if (scePadGetReqState(mPort, mSlot) == kReqStateComplete) {
             mPhase = kPhaseProbe;
-            mUnknown124 = kReadyAnalog;
+            mReadyLevel = kReadyAnalog;
         }
         break;
     case kPhaseActuatorAlign:
@@ -211,7 +211,7 @@ inline void PadRecord::AdvancePhase(int nState) {
         }
         if (scePadGetReqState(mPort, mSlot) == kReqStateComplete) {
             mPhase = kPhaseDone;
-            mUnknown124 = kReadyPressure;
+            mReadyLevel = kReadyPressure;
         }
         break;
     default:
@@ -231,11 +231,11 @@ int PadRecord::Read(unsigned int *pButtons,
     int nLeftY = 0;
     int nRightX = 0;
     int nRightY = 0;
-    ++mUnknown12c;
+    ++mReadCount;
     const int nState = scePadGetState(mPort, mSlot);
     if (nState == kPadStateDisconnected) {
         mPhase = kPhaseProbe;
-        mUnknown124 = 0;
+        mReadyLevel = 0;
     }
     if (static_cast<unsigned>(mPhase) < kPhaseTableSize) {
         AdvancePhase(nState);
@@ -260,50 +260,50 @@ int PadRecord::Read(unsigned int *pButtons,
         return 0;
     }
 
-    // With mUnknown124 at zero the report is never read, and the tail below still reads it.
+    // With mReadyLevel at zero the report is never read, and the tail below still reads it.
     unsigned char abReport[kReportSize];
-    if (mUnknown124 > 0) {
-        mUnknown10c = mButtons;
+    if (mReadyLevel > 0) {
+        mPreviousButtons = mButtons;
         if (scePadRead(mPort, mSlot, abReport) == 0) {
             return 0;
         }
         const unsigned nNow =
             ~((abReport[kReportButtonsHigh] << kBitsPerByte) | abReport[kReportButtonsLow]) &
             kButtonMask;
-        const unsigned nPrevious = static_cast<unsigned short>(mUnknown118);
-        mUnknown118 = static_cast<short>(nNow);
-        mUnknown108 ^= nNow & ~nPrevious;
-        mUnknown104 |= static_cast<unsigned short>(mUnknown118);
-        mButtons = static_cast<unsigned short>(mUnknown118);
+        const unsigned nPrevious = static_cast<unsigned short>(mRawButtons);
+        mRawButtons = static_cast<short>(nNow);
+        mToggledButtons ^= nNow & ~nPrevious;
+        mHeldButtonsSeen |= static_cast<unsigned short>(mRawButtons);
+        mButtons = static_cast<unsigned short>(mRawButtons);
     }
 
-    if (mUnknown124 >= kReadyAnalog) {
+    if (mReadyLevel >= kReadyAnalog) {
         nRightX = abReport[kReportRightX] - kAnalogCentre;
         nRightY = abReport[kReportRightY] - kAnalogCentre;
         nLeftX = abReport[kReportLeftX] - kAnalogCentre;
         nLeftY = abReport[kReportLeftY] - kAnalogCentre;
-        mUnknown134[kAxisLeftX] =
-            static_cast<short>(nLeftX - static_cast<signed char>(mUnknown130[kAxisLeftX]));
-        mUnknown134[kAxisLeftY] =
-            static_cast<short>(nLeftY - static_cast<signed char>(mUnknown130[kAxisLeftY]));
-        mUnknown134[kAxisRightX] =
-            static_cast<short>(nRightX - static_cast<signed char>(mUnknown130[kAxisRightX]));
-        mUnknown134[kAxisRightY] =
-            static_cast<short>(nRightY - static_cast<signed char>(mUnknown130[kAxisRightY]));
-        mUnknown130[kAxisLeftX] = static_cast<unsigned char>(nLeftX);
-        mUnknown130[kAxisLeftY] = static_cast<unsigned char>(nLeftY);
-        mUnknown130[kAxisRightX] = static_cast<unsigned char>(nRightX);
-        mUnknown130[kAxisRightY] = static_cast<unsigned char>(nRightY);
-        if (std::abs(nLeftX) < mUnknown128) {
+        mAxisDeltas[kAxisLeftX] =
+            static_cast<short>(nLeftX - static_cast<signed char>(mLastAxes[kAxisLeftX]));
+        mAxisDeltas[kAxisLeftY] =
+            static_cast<short>(nLeftY - static_cast<signed char>(mLastAxes[kAxisLeftY]));
+        mAxisDeltas[kAxisRightX] =
+            static_cast<short>(nRightX - static_cast<signed char>(mLastAxes[kAxisRightX]));
+        mAxisDeltas[kAxisRightY] =
+            static_cast<short>(nRightY - static_cast<signed char>(mLastAxes[kAxisRightY]));
+        mLastAxes[kAxisLeftX] = static_cast<unsigned char>(nLeftX);
+        mLastAxes[kAxisLeftY] = static_cast<unsigned char>(nLeftY);
+        mLastAxes[kAxisRightX] = static_cast<unsigned char>(nRightX);
+        mLastAxes[kAxisRightY] = static_cast<unsigned char>(nRightY);
+        if (std::abs(nLeftX) < mDeadZone) {
             nLeftX = 0;
         }
-        if (std::abs(nLeftY) < mUnknown128) {
+        if (std::abs(nLeftY) < mDeadZone) {
             nLeftY = 0;
         }
-        if (std::abs(nRightX) < mUnknown128) {
+        if (std::abs(nRightX) < mDeadZone) {
             nRightX = 0;
         }
-        if (std::abs(nRightY) < mUnknown128) {
+        if (std::abs(nRightY) < mDeadZone) {
             nRightY = 0;
         }
     }
@@ -324,7 +324,7 @@ int PadRecord::Read(unsigned int *pButtons,
         *pAxis3 = static_cast<unsigned char>(nRightY);
     }
 
-    if (abReport[kReportStatus] == kReportOk && mUnknown124 == kReadyPressure) {
+    if (abReport[kReportStatus] == kReportOk && mReadyLevel == kReadyPressure) {
         for (int i = 0; i < kPressureByteCount; ++i) {
             const unsigned char nPressure = abReport[kReportPressures + i];
             if (pPressureDeltas != nullptr) {
@@ -336,13 +336,13 @@ int PadRecord::Read(unsigned int *pButtons,
             mPressureBaseline[i] = nPressure;
         }
     }
-    mUnknown120 = abReport[kReportMode];
-    return mUnknown124;
+    mReportMode = abReport[kReportMode];
+    return mReadyLevel;
 }
 
 // 0x005bd0b0
 void PadRecord::SetVibration(int nSmallMotor, int nBigMotor) {
-    if (mUnknown124 < kVibrationReady) {
+    if (mReadyLevel < kVibrationReady) {
         return;
     }
     mActDirect[kSmallMotor] = nSmallMotor > 0;

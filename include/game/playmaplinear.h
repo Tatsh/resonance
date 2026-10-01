@@ -16,9 +16,10 @@
  * `0x001ea8f0` measures. Its own members follow the base at `+0x3c`.
  *
  * The map plays a list of sections, each an index into the base's steps paired with a repeat count.
- * Slot20() appends one section, and Slot19() records the list as the pattern GrowPastLimit()
- * appends again whenever a position runs past the end. A repeat count of kRepeatForever marks a
- * section that loops until Slot16() ends it at a bar, and Slot17() sets a section looping again.
+ * AppendSection() appends one section, and RecordPattern() records the list as the pattern
+ * GrowPastLimit() appends again whenever a position runs past the end. A repeat count of
+ * kRepeatForever marks a section that loops until EndLoop() ends it at a bar, and StartLoop() sets
+ * a section looping again.
  *
  * The unit registers SelfTest() with TestRegistry under the name `PlayMapLinear`.
  */
@@ -27,8 +28,8 @@ public:
     /**
      * Construct an empty linear map.
      *
-     * Runs the PlayMap constructor, sizes mUnknown68 to kSetCount empty tables, and reserves eight
-     * elements in mUnknown3c and mUnknown48. A non-zero bLoadStepRings then runs LoadStepRings().
+     * Runs the PlayMap constructor, sizes mStepRings to kSetCount empty tables, and reserves eight
+     * elements in mWindow and mWindowStarts. A non-zero bLoadStepRings then runs LoadStepRings().
      * LevelBuilder's constructor passes 1, and SelfTest() passes 0.
      *
      * @param bLoadStepRings Whether to fill the partner tables from the script.
@@ -40,16 +41,16 @@ public:
     virtual ~PlayMapLinear();
 
     /**
-     * Map a position to its offset within the base's steps.
+     * Map a bar to its offset within the base's steps.
      *
-     * Finds the window entry the position falls in and returns that section's first step plus the
-     * position's distance into the entry, wrapped to the section's length.
+     * Finds the window entry the bar falls in and returns that section's first step plus the bar's
+     * distance into the entry, wrapped to the section's length.
      *
-     * @param nValue The position to map.
+     * @param nBar The bar to map.
      * @return The mapped position.
      * @ghidraAddress 0x0012ad58
      */
-    virtual int Slot5(int nValue);
+    virtual int MapBar(int nBar);
 
     /**
      * Collect every position between two bounds that plays the same step offset as a position.
@@ -61,23 +62,23 @@ public:
      * @param nStart The position whose section and offset are matched.
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
-     * @return mUnknown2c.
+     * @return mFoundBars.
      * @ghidraAddress 0x00128d08
      */
-    virtual std::vector<int> &Slot6(int nStart, int nMin, int nEnd);
+    virtual std::vector<int> &FindBarsPlaying(int nStart, int nMin, int nEnd);
 
     /**
      * Carry a position from its step to the partner step the table for one set records.
      *
      * The position's step comes from PlayMap::FindStepIndex(). Without a record for that step in
-     * mUnknown68[nSet] the position comes back unchanged.
+     * mStepRings[nSet] the position comes back unchanged.
      *
-     * @param nValue The position to map.
-     * @param nSet The index into mUnknown68.
+     * @param nPosition The position to map.
+     * @param nSet The index into mStepRings.
      * @return The mapped position.
      * @ghidraAddress 0x0012ae88
      */
-    virtual int Slot7(int nValue, int nSet);
+    virtual int MapToLinkedStep(int nPosition, int nSet);
 
     /**
      * Report the position at which the window ends.
@@ -86,51 +87,51 @@ public:
      *         or zero when the window is empty.
      * @ghidraAddress 0x0012ae38
      */
-    virtual int Slot8();
+    virtual int GetExtent();
 
     /**
-     * @return The window end Slot19() recorded.
+     * @return The window end RecordPattern() recorded.
      * @ghidraAddress 0x0012aa60
      */
-    virtual int Slot9();
+    virtual int GetEndBar();
 
     /**
      * @return The number of sections in the recorded pattern.
      * @ghidraAddress 0x0012aa68
      */
-    virtual int Slot10();
+    virtual int GetSectionCount();
 
     /**
-     * @param nValue The index into the recorded pattern.
+     * @param nIndex The index into the recorded pattern.
      * @return The section at that index.
      * @ghidraAddress 0x0012aa80
      */
-    virtual int Slot11(int nValue);
+    virtual int GetPatternSection(int nIndex);
 
     /**
-     * Report the index within the recorded pattern of the window entry a position falls in.
+     * Report the index within the recorded pattern of the window entry a bar falls in.
      *
-     * @param nValue The position.
+     * @param nBar The bar.
      * @return The window index modulo the pattern length.
      * @ghidraAddress 0x0012af30
      */
-    virtual int Slot12(int nValue);
+    virtual int GetPatternIndex(int nBar);
 
     /**
-     * Report the absolute index of the window entry a position falls in.
+     * Report the absolute index of the window entry a bar falls in.
      *
-     * @param nValue The position.
+     * @param nBar The bar.
      * @return The window index plus the count of entries the trim has dropped.
      * @ghidraAddress 0x0012afb8
      */
-    virtual int Slot13(int nValue);
+    virtual int GetAbsoluteSectionIndex(int nBar);
 
     /**
-     * @param nValue The position.
-     * @return 1 when the window entry the position falls in repeats forever, and 0 otherwise.
+     * @param nBar The bar.
+     * @return 1 when the window entry the bar falls in repeats forever, and 0 otherwise.
      * @ghidraAddress 0x0012b028
      */
-    virtual int Slot14(int nValue);
+    virtual int IsLooping(int nBar);
 
     /**
      * End the looping section at a bar.
@@ -142,7 +143,7 @@ public:
      * @return 1 when the entry was looping, and 0 otherwise.
      * @ghidraAddress 0x00128ed8
      */
-    virtual int Slot16(int nBar);
+    virtual int EndLoop(int nBar);
 
     /**
      * Set the section a bar falls in looping forever, and move every later entry to follow it.
@@ -151,7 +152,7 @@ public:
      * @return Always 1.
      * @ghidraAddress 0x00129038
      */
-    virtual int Slot17(int nBar);
+    virtual int StartLoop(int nBar);
 
     /**
      * Toggle the loop on the section a bar falls in.
@@ -160,14 +161,16 @@ public:
      * @return 1 when a loop was ended, and 0 when one was started.
      * @ghidraAddress 0x0012b0a8
      */
-    virtual int Slot18(int nBar);
+    virtual int ToggleLoop(int nBar);
 
     /**
      * Record the sections appended so far as the pattern, and the window end with it.
      *
+     * Slot 19.
+     *
      * @ghidraAddress 0x0012aa18
      */
-    virtual void Slot19();
+    virtual void RecordPattern();
 
     /**
      * Slot 20. Append one section, played once, at the end of the window.
@@ -177,7 +180,7 @@ public:
      * @param nSection The index of the section's first step.
      * @ghidraAddress 0x00128c38
      */
-    virtual void Slot20(int nSection);
+    virtual void AppendSection(int nSection);
 
     /**
      * Exercise the map on four steps and seven sections.
@@ -201,10 +204,10 @@ public:
     static int RunSelfTest();
 
 protected:
-    /** The number of partner tables in mUnknown68. */
+    /** The number of partner tables in mStepRings. */
     static constexpr int kSetCount = 8;
 
-    /** The repeat count that marks a section looping until Slot16() ends it. */
+    /** The repeat count that marks a section looping until EndLoop() ends it. */
     static constexpr int kRepeatForever = 10000;
 
     /** One section of the window, a step index paired with its repeat count. Eight bytes. */
@@ -214,7 +217,7 @@ protected:
     };
 
     /**
-     * One partner record, a step paired with the step Slot7() carries it to. Eight bytes.
+     * One partner record, a step paired with the step MapToLinkedStep() moves it to. Eight bytes.
      *
      * A type distinct from Entry, because the two vectors grow through separate insertion routines
      * (`0x0012a238` for Entry and `0x00129d68` for this record).
@@ -225,7 +228,7 @@ protected:
     };
 
     /**
-     * Fill mUnknown68 from the script.
+     * Fill mStepRings from the script.
      *
      * Each of the kSetCount tables evaluates the script template 0x3a3 through EvalScriptTemplate()
      * with its index, which yields a sequence of step rings. Each ring pairs every step with the
@@ -236,38 +239,41 @@ protected:
     void LoadStepRings();
 
     /**
-     * Advance the window until slot 8 passes the limit, then drop what it has passed.
+     * Advance the window until GetExtent() passes the limit, then drop what it has passed.
      *
-     * Every one of slots 5, 6, 12, 13, 14, 16, and 17 calls it with its own argument before doing
-     * anything else. The growth half appends one start to mUnknown48 from slot 8's result and one
-     * Entry to mUnknown3c per section of the pattern, and the test is at the top of the loop so the
-     * body can run zero times. Slot 8 is dispatched through the table rather than called directly.
+     * Every one of MapBar(), FindBarsPlaying(), GetPatternIndex(), GetAbsoluteSectionIndex(),
+     * IsLooping(), EndLoop(), and StartLoop() calls it with its own argument before doing anything
+     * else. The growth half appends one start to mWindowStarts from the result of GetExtent() and
+     * one Entry to mWindow per section of the pattern. The test is at the top of the loop, and
+     * the body can run zero times. GetExtent() is dispatched through the table rather than called
+     * directly.
      *
-     * The trim half drops as many leading elements from mUnknown3c and mUnknown48 as the pattern
-     * holds, and adds that count to mUnknown54. Its guard compares a byte offset against an element
-     * count, which both the disassembly and the decompiler agree on, so the trim fires only once
-     * mUnknown3c is more than eight times the length of the pattern.
+     * The trim half drops as many leading elements from mWindow and mWindowStarts as the pattern
+     * has, and adds that count to mTrimmedCount. Its guard compares a byte offset against an
+     * element count, and both the disassembly and the decompiler agree on the comparison. The trim
+     * therefore fires only once mWindow is more than eight times the length of the pattern.
      *
-     * @param nLimit The value slot 8 must exceed for the growth to stop.
+     * @param nLimit The value GetExtent() must exceed for the growth to stop.
      * @ghidraAddress 0x00129150
      */
     void GrowPastLimit(int nLimit);
 
     /**
-     * Grow the window past a position and report the index of the entry it falls in.
+     * Grow the window past a bar and report the index of the entry it falls in.
      *
-     * Inline. Slots 12, 13, 14, 16, and 17 expand it, and Slot5() and SelfTest() call the
-     * out-of-line copy at `0x0012ade8`.
+     * Inline. GetPatternIndex(), GetAbsoluteSectionIndex(), IsLooping(), EndLoop(), and
+     * StartLoop() expand it, and MapBar() and SelfTest() call the out-of-line copy at
+     * `0x0012ade8`.
      *
-     * @param nValue The position.
-     * @return The index of the last window entry starting at or before the position.
+     * @param nBar The bar.
+     * @return The index of the last window entry starting at or before the bar.
      */
-    int WindowIndex(int nValue);
+    int WindowIndex(int nBar);
 
     /**
      * Recompute the start of every window entry from an index onward.
      *
-     * Inline, and expanded in Slot16() and Slot17(). Each start is the previous start plus the
+     * Inline, and expanded in EndLoop() and StartLoop(). Each start is the previous start plus the
      * previous section's length times its repeat count.
      *
      * @param nFirst The first index to recompute.
@@ -275,15 +281,15 @@ protected:
     void RestartFrom(std::vector<int>::size_type nFirst);
 
     // The window, one entry per section played.
-    std::vector<Entry> mUnknown3c; // +0x3c
+    std::vector<Entry> mWindow; // +0x3c
     // The start position of each window entry.
-    std::vector<int> mUnknown48; // +0x48
+    std::vector<int> mWindowStarts; // +0x48
     // Running count of elements the trim has dropped from the front of the two vectors above.
-    int mUnknown54; // +0x54
-    // The pattern Slot19() records and GrowPastLimit() appends again.
-    std::vector<Entry> mUnknown58; // +0x58
-    // The window end Slot19() records.
-    int mUnknown64; // +0x64
+    int mTrimmedCount; // +0x54
+    // The pattern RecordPattern() records and GrowPastLimit() appends again.
+    std::vector<Entry> mPattern; // +0x58
+    // The window end RecordPattern() records.
+    int mPatternEnd; // +0x64
     // One partner table per set.
-    std::vector<std::vector<StepPair> > mUnknown68; // +0x68
+    std::vector<std::vector<StepPair> > mStepRings; // +0x68
 };

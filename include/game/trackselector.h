@@ -42,9 +42,9 @@ constexpr int kTrackSelectorSlotCount = 4;
  * here is against that object rather than against zero. The Player translation unit's static
  * initialiser at `0x00132618` builds it, alongside the `IDable<Player>` table at `0x0066f920`.
  *
- * A player's own channel comes from Player::Slot4(), primary table slot 4, and the constructor
- * skips a player whose answer is -1. Player::Slot2() reports the payload word the message paths
- * check before acting, and Player::Slot5() drives the walk RebuildChannelGrid() performs.
+ * A player's channel comes from Player::GetTrack(), primary table slot 4, and the constructor
+ * skips a player whose answer is -1. Player::GetInputSlot() reports the payload word the message
+ * paths check before acting, and Player::GetPlace() drives the walk RebuildChannelGrid() performs.
  *
  * An earlier pass titled this class's routines for a renderer light manager, and the RTTI harvest
  * still records `RndLightManager__GetTypeInfo` as this descriptor's accessor. No descriptor among
@@ -66,7 +66,7 @@ public:
     /**
      * Build the grid over a roster of players.
      *
-     * Every slot of every column starts as the NullPlayer, and each player whose Player::Slot4()
+     * Every slot of every column starts as the NullPlayer, and each player whose Player::GetTrack()
      * reports a channel other than -1 is then inserted into that channel with a zero payload.
      *
      * @param players The roster. Only its size and its elements are read.
@@ -83,7 +83,8 @@ public:
      * Act on a message.
      *
      * Slot 3 of the MsgSink table. A RotLeftMsg rotates the addressed player one channel down and
-     * a RotRightMsg one channel up, both only when Player::Slot2() reports a value other than -1.
+     * a RotRightMsg one channel up, both only when Player::GetInputSlot() reports a value other
+     * than -1.
      * A BumpPacket rebuilds a column, a RemoteTrackSelectMsg rebinds one channel, and a
      * PhraseMuffedMsg is forwarded to the sink the addressed player provides. Every other message
      * is discarded.
@@ -131,10 +132,9 @@ private:
     void InsertLightForDrawable(Player *pPlayer, int nChannel, int nPayload);
 
     // Rebind a column from a BumpPacket. When the packet's player reports a step through
-    // Player::Slot5(), announce a bumper with a DeployedPowerupMsg, rebind the head of the column
-    // for as long as the player keeps reporting one, and mark the packet handled. The position is
-    // the packet's bar in ticks, clamped to the finite range.
-    // 0x0013b6a8
+    // Player::GetPlace(), announce a bumper with a DeployedPowerupMsg, rebind the head of the
+    // column for as long as the player continues reporting one, and mark the packet handled. The
+    // position is the packet's bar in ticks, clamped to the finite range. 0x0013b6a8
     int RebuildChannelGrid(BumpPacket *pPacket);
 
     // The four handlers below are inline, and HandleMessage() expands each. The addresses are

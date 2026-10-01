@@ -75,7 +75,7 @@ struct APolygon {
         unsigned int mColor;     /*!< The fill colour in the canvas pixel format. +0x00 */
         const ABitmap *mTexture; /*!< The texture of a textured fill. +0x00 */
     };
-    short mUnknown04;                                /*!< No reader was located. +0x04 */
+    short mReserved04;                               /*!< No reader was located. +0x04 */
     short mVertexCount;                              /*!< Vertices in mIndices. +0x06 */
     const APoint *mPoints;                           /*!< The shared vertex positions. +0x08 */
     unsigned char mIndices[kAPolygonMaxVertexCount]; /*!< Positions into mPoints. +0x0c */

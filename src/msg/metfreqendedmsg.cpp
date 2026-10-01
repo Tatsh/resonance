@@ -26,5 +26,5 @@ const char *MetFreqEndedMsg::Name() {
 
 // 0x003e44f0
 void MetFreqEndedMsg::Print(std::ostream &stream) {
-    stream << "MetFreqEndedMsg " << mUnknownb8Clear;
+    stream << "MetFreqEndedMsg " << mStopJukebox;
 }

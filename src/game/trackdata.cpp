@@ -42,7 +42,7 @@ constexpr unsigned kFlatPointModeCount = 3;
 
 // Configuration codes this file queries.
 constexpr int kFlatPointsQuery = 917;
-constexpr int kBarUnknown08Query = 907;
+constexpr int kCatchPointsQuery = 907;
 constexpr int kScoreWeightsQuery = 935;
 constexpr int kScoreThresholdsQuery = 936;
 
@@ -160,9 +160,9 @@ void TrackData::Bar::Print(std::ostream &stream) {
 
 // 0x001d35a8
 TrackData::TrackData(int nIndex, PlayMap *pMap)
-    : mUnknown04(nIndex), mKind(kTrackModeRiff), mMap(pMap), mBars(pMap->mSteps.back()) {
+    : mIndex(nIndex), mKind(kTrackModeRiff), mMap(pMap), mBars(pMap->mSteps.back()) {
     mBarLength = Mid::MBT(kBarLength).mTick;
-    mUnknown30 = kGemSearchBars;
+    mGemSearchBars = kGemSearchBars;
     mCurrentRiffSet = nullptr;
     mCurrentRiffTick = Mid::MBT(kNoRiffTick).mTick;
 }
@@ -273,13 +273,13 @@ void TrackData::AddNoteMsg(
 
 // 0x001d4308
 void TrackData::ScoreBars() {
-    if (mUnknown04 == kSkippedTrack) {
+    if (mIndex == kSkippedTrack) {
         return;
     }
 
     const int nFlatPoints = QueryConfigValue(kFlatPointsQuery);
     (void)Application::shared()->GetGameMode(); // Yes, the binary discards this call's result.
-    const int nUnknown08 = QueryConfigValue(kBarUnknown08Query);
+    const int nCatchPoints = QueryConfigValue(kCatchPointsQuery);
 
     for (unsigned i = 0; i != mBars.size(); ++i) {
         int nPoints = nFlatPoints;
@@ -287,7 +287,7 @@ void TrackData::ScoreBars() {
             nPoints = ScoreGems(mBars[i].mGems);
         }
         mBars[i].mPoints = nPoints;
-        mBars[i].mUnknown08 = nUnknown08;
+        mBars[i].mCatchPoints = nCatchPoints;
     }
 }
 
@@ -323,7 +323,7 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
 int TrackData::FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const {
     const Bar *pBar;
     Mid::MBT offset;
-    for (int nBarsSearched = 0; nBarsSearched < mUnknown30;) {
+    for (int nBarsSearched = 0; nBarsSearched < mGemSearchBars;) {
         LocateMapped(nTick, pBar, offset);
         if (pBar->mGems.size() != 0) {
             const auto it = FindAtOrAfter(pBar->mGems, offset.mTick);
@@ -360,7 +360,7 @@ void TrackData::Print(std::ostream &stream) {
         break;
     }
 
-    stream << "TrackData[" << mUnknown04 << "]" << std::endl;
+    stream << "TrackData[" << mIndex << "]" << std::endl;
     stream << "Chan = " << static_cast<int>(mChannel) << ". Mode = " << pszMode << std::endl;
 
     for (int i = 0; static_cast<unsigned>(i) < mBars.size(); ++i) {
@@ -381,7 +381,7 @@ void TrackData::Locate(int nTick, Bar *&pBar, Mid::MBT &offset) {
 // 0x001d4c58
 void TrackData::LocateMapped(int nTick, const Bar *&pBar, Mid::MBT &offset) const {
     const int nBar = nTick / mBarLength;
-    const int nMappedBar = mMap->Slot5(nBar);
+    const int nMappedBar = mMap->MapBar(nBar);
     const Mid::MBT start = MakePosition(mBarLength * nBar);
     offset = MakePosition(nTick - start.mTick);
     pBar = &mBars[nMappedBar];
@@ -390,7 +390,7 @@ void TrackData::LocateMapped(int nTick, const Bar *&pBar, Mid::MBT &offset) cons
 // 0x001d4d90
 void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
     const int nStepCount = mMap->mSteps.back();
-    const int nUnknown08 = QueryConfigValue(kBarUnknown08Query);
+    const int nCatchPoints = QueryConfigValue(kCatchPointsQuery);
 
     for (int i = 0; i < nStepCount; ++i) {
         Phrase *pPhrase = pDatabase->GetPhrase(i);
@@ -404,7 +404,7 @@ void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
         }
 
         mBars[i].mPoints = ScoreGems(mBars[i].mGems);
-        mBars[i].mUnknown08 = nUnknown08;
+        mBars[i].mCatchPoints = nCatchPoints;
     }
 }
 
@@ -421,12 +421,12 @@ void TrackData::SetQuant(int nTick, int nQuant) {
 }
 
 // 0x001d7758
-void TrackData::OnUnknown001d7758([[maybe_unused]] int nFirst, [[maybe_unused]] int nSecond) {
+void TrackData::SetActive([[maybe_unused]] int nTick, [[maybe_unused]] int bActive) {
 }
 
 // 0x001d7760
 void TrackData::SetOwner(Player *pPlayer, int nBar) const {
-    mGamer->SetBarOwner(mUnknown04, nBar, pPlayer);
+    mGamer->SetBarOwner(mIndex, nBar, pPlayer);
 }
 
 // 0x001d7788
@@ -519,7 +519,7 @@ int TrackData::FollowingStepBar(int nBar) const {
 
 // 0x001d7a50
 int TrackData::QueryBar(int nBar) const {
-    return mGamer->QueryBar(mUnknown04, nBar);
+    return mGamer->QueryBar(mIndex, nBar);
 }
 
 // 0x001d7a78
@@ -530,10 +530,10 @@ int TrackData::GetPoints(int nBar) const {
 }
 
 // 0x001d7aa0
-int TrackData::GetUnknown08(int nBar) const {
+int TrackData::GetCatchPoints(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
-    return pBar->mUnknown08;
+    return pBar->mCatchPoints;
 }
 
 // 0x001d7ac8
@@ -574,12 +574,12 @@ void TrackData::LocateMapped(int nTick, const Bar *&pBar) const {
 
 // 0x001d7b98
 void TrackData::GetBar(int nBar, const Bar *&pBar) const {
-    pBar = &mBars[mMap->Slot5(nBar)];
+    pBar = &mBars[mMap->MapBar(nBar)];
 }
 
 // 0x001d7bf0
 int TrackData::FindStepIndex(int nBar) const {
-    return mMap->FindStepIndex(mMap->Slot5(nBar));
+    return mMap->FindStepIndex(mMap->MapBar(nBar));
 }
 
 // 0x001d2e08

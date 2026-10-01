@@ -92,7 +92,7 @@ public:
     virtual void Load(IBStream &stream);
 
 private:
-    int mUnknown14; // +0x14
+    int mStatus; /*!< The client's status, labelled `ClientStatus: ` by Print(). +0x14 */
 };
 
 /**

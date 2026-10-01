@@ -100,12 +100,12 @@ private:
 
     const TrackData *mTrackData;            // +0x18
     int mAxis;                              // +0x1c, the axis position scaled to 0..1024
-    int mUnknown20;                         // +0x20, not written by any recovered routine
+    int mReserved;                          // +0x20, never read or written
     std::vector<NoteMapping> mHeldNotes;    // +0x24
     std::vector<NoteMapping> mSustainNotes; // +0x30
     Mid::MBT mSustainTick;                  // +0x3c
     int mRiffLow;                           // +0x40
     int mRiffHigh;                          // +0x44
-    int mTrack;                             // +0x48, copied from TrackData::mUnknown04
+    int mTrack;                             // +0x48, copied from TrackData::mIndex
     Player *mPlayer;                        // +0x4c, g_nullPlayer until a TrackSelectMsg
 };
