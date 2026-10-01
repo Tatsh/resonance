@@ -7,6 +7,8 @@
 #include <sifcmd.h>
 #include <sifrpc.h>
 
+#include "os/log.h"
+
 enum {
     kMcServerId = 0x80000400,
 };
@@ -142,7 +144,7 @@ int sceMcInitLibrary(void) {
     sceSifInitRpc(0);
     for (;;) {
         if (sceSifBindRpc(&g_mcClient, kMcServerId, 0) < 0) {
-            printf("bind error libmc \n");
+            LogPrintf("bind error libmc \n");
             for (;;) {
             }
         }
@@ -169,12 +171,12 @@ int sceMcInitLibrary(void) {
         return nResult + kMcErrorRpcBias;
     }
     if (g_mcResult.nServerVersion < kMcMinimumServerVersion) {
-        printf("libmc: too old release of mcserv.irx\n");
+        LogPrintf("libmc: too old release of mcserv.irx\n");
         g_mcClient.serve = NULL;
         return kMcErrorOldServer;
     }
     if (g_mcResult.nManagerVersion < kMcMinimumManagerVersion) {
-        printf("libmc: too old release of mcman.irx\n");
+        LogPrintf("libmc: too old release of mcman.irx\n");
         g_mcClient.serve = NULL;
         return kMcErrorOldManager;
     }

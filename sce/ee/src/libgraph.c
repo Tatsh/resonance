@@ -6,6 +6,8 @@
 #include <eetypes.h>
 #include <libgraph.h>
 
+#include "os/log.h"
+
 // Plain C reconstruction of the Sony libgraph entry points used by the game,
 // translated from the disassembly. Register words are packed exactly as the
 // machine code packs them, while kernel services go through ps2sdk.
@@ -25,7 +27,7 @@
 // The VIF1 error mask register.
 #define VIF1_ERR (*(volatile unsigned int *)(uintptr_t)0x10003C20U)
 // The VIF1 data FIFO, read and written a whole quadword at a time.
-#define VIF1_FIFO (*(volatile u_long128 *)(uintptr_t)0x10005000U)
+#define VIF1_FIFO ((volatile u_long128 *)(uintptr_t)0x10005000U)
 // The GIF control register.
 #define GIF_CTRL (*(volatile unsigned int *)(uintptr_t)0x10003000U)
 // The GIF status register. Bits 10 and 11 report path activity.
@@ -193,8 +195,8 @@ void sceGsResetPath(void) {
     clip |= 0x200U;
     __asm__ volatile("ctc2 %0, $vi28" ::"r"(clip));
     __sync_synchronize();
-    VIF1_FIFO = g_dwVif1InitPacket.mQuads[0];
-    VIF1_FIFO = g_dwVif1InitPacket.mQuads[1];
+    ee_store_quadword(VIF1_FIFO, g_dwVif1InitPacket.mQuads[0]);
+    ee_store_quadword(VIF1_FIFO, g_dwVif1InitPacket.mQuads[1]);
     GIF_CTRL = 1U;
 }
 
@@ -222,7 +224,7 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
         status = GS_CSR;
         state->gsVersion = (short)((status >> 16) & 0xFFULL);
         GsPutIMR(0xFF00ULL);
-        state->fieldMode = (short)(nFieldMode > 0);
+        state->fieldMode = (short)(nFieldMode != 0);
         if (state->vblankHandler != NULL) {
             DisableIntc(INTC_VBLANK_S);
             RemoveIntcHandler(INTC_VBLANK_S, state->handlerId);
@@ -234,7 +236,7 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
             return;
         }
         state = sceGsGetGParam();
-        state->fieldMode = (short)(nFieldMode > 0);
+        state->fieldMode = (short)(nFieldMode != 0);
         state->interlaceMode = nInterlace;
         state->outputMode = nOutputMode;
         state->gsVersion = (short)((GS_CSR >> 16) & 0xFFULL);
@@ -337,7 +339,7 @@ void sceGsSetDefDispEnv(
     } else if (output == kGsPal) {
         pDisp->display = MakeDisplayWord(state, nWidth, nHeight, nDx, nDy, 0x290, 0x48, 0x24);
     } else {
-        printf("sceGsDefDispEnv:Not support displaymode for %d!!\n", output);
+        LogPrintf("sceGsDefDispEnv:Not support displaymode for %d!!\n", output);
     }
     pDisp->bgcolor = 0ULL;
 }
@@ -478,14 +480,14 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     // Interlaced frame mode and progressive output place the second buffer after the first.
     if (!(state->interlaceMode == kGsInterlace && state->fieldMode == kGsFrameMode) &&
         state->interlaceMode != 0) {
-        return 0;
+        return state->interlaceMode;
     }
     pages >>= 1;
     pDBuff->disp[1].dispfb =
         (pDBuff->disp[1].dispfb & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
     pDBuff->draw0.frame1 =
         (pDBuff->draw0.frame1 & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
-    return 0;
+    return pages & 0x1FF;
 }
 
 // 0x00612600
@@ -501,7 +503,7 @@ int sceGsPutDrawEnv(sceGifTag *pGifTag) {
         spins = 0U;
         while ((GIF_CHCR & 0x100U) != 0U) {
             if (kChannelSpinLimit < spins) {
-                printf("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
+                LogPrintf("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -568,7 +570,7 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
         }
     }
     if (0x7FFF < count) {
-        printf("sceGsSetDefLoadImage: too big size\r\n");
+        LogPrintf("sceGsSetDefLoadImage: too big size\r\n");
         return 0;
     }
     // The hardware clears both tag slots before the masked words go in.
@@ -586,7 +588,8 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
     pLoadImage->mWords[4] = position;
     size = ((unsigned long long)nRrw) | (((unsigned long long)nRrh) << 32);
     pLoadImage->mWords[6] = size;
-    pLoadImage->mWords[0] = 0x1000000000008004ULL;
+    // The first tag has no end-of-packet bit; only the image tag in word ten sets it.
+    pLoadImage->mWords[0] = 0x1000000000000004ULL;
     pLoadImage->mWords[1] = 0xEULL;
     pLoadImage->mWords[3] = 0x50ULL;
     pLoadImage->mWords[5] = 0x51ULL;
@@ -608,7 +611,7 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     if ((GIF_CHCR & 0x100U) != 0U) {
         while ((GIF_CHCR & 0x100U) != 0U) {
             if (kChannelSpinLimit < spins) {
-                printf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
+                LogPrintf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -624,7 +627,7 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     GIF_CHCR = 0x101U;
     while ((GIF_CHCR & 0x100U) != 0U) {
         if (kChannelSpinLimit < spins) {
-            printf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
+            LogPrintf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
             return -1;
         }
         spins++;
@@ -691,7 +694,7 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
 static inline int StoreImageWaitFifo(int *pSpins) {
     while ((VIF1_STAT & 0x1F000000U) == 0U) {
         if ((unsigned int)kChannelSpinLimit < (unsigned int)*pSpins) {
-            printf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
+            LogPrintf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
             GS_CSR = 0x100ULL;
             GS_BUSDIR = 0ULL;
             GIF_CTRL = 1U;
@@ -806,7 +809,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     if ((VIF1_CHCR & 0x100U) != 0U) {
         while ((VIF1_CHCR & 0x100U) != 0U) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                printf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
+                LogPrintf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -824,7 +827,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     VIF1_CHCR = 0x101U;
     while ((VIF1_CHCR & 0x100U) != 0U) {
         if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-            printf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
+            LogPrintf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
             return -1;
         }
         spins++;
@@ -832,8 +835,8 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     if ((GS_CSR & 2ULL) == 0ULL) {
         while ((GS_CSR & 2ULL) == 0ULL) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                printf("sceGsExecStoreImage: GS does not terminate\r\n");
-                VIF1_FIFO = g_vif1StorePacket;
+                LogPrintf("sceGsExecStoreImage: GS does not terminate\r\n");
+                ee_store_quadword(VIF1_FIFO, g_vif1StorePacket);
                 return -1;
             }
             spins++;
@@ -851,7 +854,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         VIF1_CHCR = 0x100U;
         while ((VIF1_CHCR & 0x100U) != 0U) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                printf("sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n");
+                LogPrintf("sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n");
                 GS_CSR = 0x100ULL;
                 GS_BUSDIR = 0ULL;
                 GIF_CTRL = 1U;
@@ -869,7 +872,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             if (StoreImageWaitFifo(&spins) != 0) {
                 return -1;
             }
-            pTail[i] = VIF1_FIFO;
+            pTail[i] = ee_load_quadword(VIF1_FIFO);
         }
     }
     if (ragged != 0) {
@@ -883,7 +886,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         if (StoreImageWaitFifo(&spins) != 0) {
             return -1;
         }
-        last.quad = VIF1_FIFO;
+        last.quad = ee_load_quadword(VIF1_FIFO);
         for (i = 0; i < ragged; ++i) {
             pBytes[i] = last.bytes[i];
         }
@@ -891,14 +894,14 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             if (StoreImageWaitFifo(&spins) != 0) {
                 return -1;
             }
-            last.quad = VIF1_FIFO; // The binary drains the padding and discards it.
+            last.quad = ee_load_quadword(VIF1_FIFO); // The binary drains the padding and discards it.
         }
     }
     VIF1_STAT = 0U;
     GS_BUSDIR = 0ULL;
     GsPutIMR(saved);
     GS_CSR = 2ULL;
-    VIF1_FIFO = g_vif1StorePacket;
+    ee_store_quadword(VIF1_FIFO, g_vif1StorePacket);
     return 0;
 }
 
@@ -968,17 +971,17 @@ int sceGsSyncPath(int nMode, unsigned short nTimeout) {
     return 0;
 
 timeout:
-    printf(stage);
-    printf("\t<D1_CHCR=%08x:", VIF1_CHCR);
-    printf("D1_TADR=%08x:", VIF1_TADR);
-    printf("D1_MADR=%08x:", VIF1_MADR);
-    printf("D1_QWC=%08x>\r\n", VIF1_QWC);
-    printf("\t<D2_CHCR=%08x:", GIF_CHCR);
-    printf("D2_TADR=%08x:", GIF_TADR);
-    printf("D2_MADR=%08x:", GIF_MADR);
-    printf("D2_QWC=%08x>\r\n", GIF_QWC);
-    printf("\t<VIF1_STAT=%08x:", VIF1_STAT);
-    printf("GIF_STAT=%08x>\r\n", GIF_STAT);
+    LogPrintf(stage);
+    LogPrintf("\t<D1_CHCR=%08x:", VIF1_CHCR);
+    LogPrintf("D1_TADR=%08x:", VIF1_TADR);
+    LogPrintf("D1_MADR=%08x:", VIF1_MADR);
+    LogPrintf("D1_QWC=%08x>\r\n", VIF1_QWC);
+    LogPrintf("\t<D2_CHCR=%08x:", GIF_CHCR);
+    LogPrintf("D2_TADR=%08x:", GIF_TADR);
+    LogPrintf("D2_MADR=%08x:", GIF_MADR);
+    LogPrintf("D2_QWC=%08x>\r\n", GIF_QWC);
+    LogPrintf("\t<VIF1_STAT=%08x:", VIF1_STAT);
+    LogPrintf("GIF_STAT=%08x>\r\n", GIF_STAT);
     return -1;
 }
 

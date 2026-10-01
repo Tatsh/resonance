@@ -34,7 +34,7 @@ set(RESONANCE_SONYLIB_SRCS
     src/libvu0.c
     src/loadfile.c
     src/msin.c
-    src/scf.c
+    src/libscf.c
     src/sifcmd.c
     src/sifdma.c
     src/sifrpc.c
@@ -47,5 +47,5 @@ target_compile_options(resonance_sonylibs PRIVATE -UNDEBUG)
 target_include_directories(resonance_sonylibs PRIVATE "${CMAKE_SOURCE_DIR}/sce/ee/include")
 
 # The system layer the compiler's C and C++ runtime needs, over the reconstructed kernel.
-add_library(resonance_runtime STATIC runtime/newlib.c runtime/pthread.c)
+add_library(resonance_runtime STATIC runtime/newlib.c runtime/pthread.c runtime/softfloat.c)
 target_link_libraries(resonance_runtime PRIVATE resonance_common)

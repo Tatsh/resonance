@@ -7,6 +7,8 @@
 #include <ezmpeg/vibuf.h>
 #include <libdma.h>
 
+#include "os/log.h"
+
 // Sony libdma is reproduced here from the disassembly.
 // Register words match the disassembly packing.
 
@@ -180,8 +182,7 @@ int sceDmaReset(int nMode) {
     unsigned char clearEnv[20];
 
     oldCtrl = DMAC_CTRL;
-    index = kChannelCount - 1;
-    do {
+    for (index = 0; index < kChannelCount; index++) {
         if (g_anDmacChannelEnabled[index] != 0) {
             DmaChannelRegs *regs;
 
@@ -193,8 +194,7 @@ int sceDmaReset(int nMode) {
             regs->mUnknown50 = 0U;
             regs->mUnknown40 = 0U;
         }
-        index--;
-    } while (index >= 0);
+    }
     DMAC_STAT = 0xFF1FU;
     stat = DMAC_STAT;
     DMAC_STAT = stat & 0xFF1F0000U;
@@ -218,6 +218,11 @@ int sceDmaPutEnv(sceDmaEnv *pEnv) {
 
     raw = (DmaEnvRaw *)pEnv;
     ctrl = DMAC_CTRL;
+    // Yes, the binary reads the other four registers here and discards them.
+    (void)DMAC_PCR;
+    (void)DMAC_SQWC;
+    (void)DMAC_REG_E050;
+    (void)DMAC_REG_E040;
     if (raw->mByte00 > 9U) {
         return -1;
     }
@@ -269,7 +274,7 @@ void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
         timeout = kBusySpin;
         do {
             if (timeout < 0) {
-                printf("libdma: sync timeout\n");
+                LogPrintf("libdma: sync timeout\n");
                 if (((channel->mChcr >> 8) & 1U) != 0U) {
                     channel->mChcr &= 0xFFFFFEFFU;
                 }
@@ -298,7 +303,7 @@ void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
         timeout = kBusySpin;
         do {
             if (timeout < 0) {
-                printf("libdma: sync timeout\n");
+                LogPrintf("libdma: sync timeout\n");
                 if (((channel->mChcr >> 8) & 1U) != 0U) {
                     channel->mChcr &= 0xFFFFFEFFU;
                 }
@@ -333,7 +338,7 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     while ((word & 0x100U) != 0U) {
         timeout--;
         if (timeout < 0) {
-            printf("libdma: sync timeout\n");
+            LogPrintf("libdma: sync timeout\n");
             if (((channel->mChcr >> 8) & 1U) != 0U) {
                 channel->mChcr &= 0xFFFFFEFFU;
             }
@@ -371,7 +376,7 @@ void sceDmaCreateQueueSemaphore(
 // 0x00613400
 // Stops the transfer channels and deletes the guarding semaphore. The routine disables interrupts
 // across the channel updates.
-void sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
+int sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
 
@@ -387,12 +392,13 @@ void sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
     IPU_TO_MADR = 0U;
     IPU_TO_TADR = 0U;
     DeleteSema(queue->mSemaId);
+    return 1;
 }
 
 // 0x006126e8
 // Initialises the queue counts and builds the tag ring. The routine clears the buffered counts,
 // clears the stamp ring, programs the tag entries, and arms the transfer channels.
-void sceDmaSub006126e8(ViBuf *buffer) {
+int sceDmaSub006126e8(ViBuf *buffer) {
     DmaQueue *queue;
     int count;
     int i;
@@ -472,12 +478,13 @@ void sceDmaSub006126e8(ViBuf *buffer) {
         DMA_ENABLEW = enabler & 0xFFFEFFFFU;
     }
     (void)EIntr();
+    return 1;
 }
 
 // 0x00612890
 // Advances the queue after a stall and restarts the channel when work remains. The routine
 // reports an error for an inactive queue.
-void sceDmaSub00612890(ViBuf *buffer) {
+int sceDmaSub00612890(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
     unsigned int chcr;
@@ -495,7 +502,7 @@ void sceDmaSub00612890(ViBuf *buffer) {
     WaitSema(queue->mSemaId);
     if (queue->mUnknown44 == 0) {
         ErrMessage("DMA ADD not active\n");
-        return;
+        return 0;
     }
     (void)DIntr();
     enabler = DMA_ENABLER;
@@ -520,10 +527,8 @@ void sceDmaSub00612890(ViBuf *buffer) {
     readPos = queue->mReadSectors;
     {
         int delta;
-        unsigned int total;
 
-        total = madr + (unsigned int)capacity - (unsigned int)readPos;
-        delta = (int)(total % (unsigned int)capacity);
+        delta = (int)(madr + (unsigned int)capacity - (unsigned int)readPos) % capacity;
         buffered = queue->mBufferedSectors - delta;
         delta = (readPos + delta) % capacity;
         queue->mBufferedSectors = buffered;
@@ -555,7 +560,6 @@ void sceDmaSub00612890(ViBuf *buffer) {
             unsigned int entry;
 
             entry = (unsigned int)(last * 0x800) + dataBase;
-            entry &= 0x0FFFFFFFU;
             packed = (unsigned long long)entry << 32;
             packed |= 0x30000080ULL;
             slots = (DmaTag *)(uintptr_t)tagBase;
@@ -582,7 +586,6 @@ void sceDmaSub00612890(ViBuf *buffer) {
                     kind = 3U;
                 }
                 entry = (unsigned int)(slot * 0x800) + dataBase;
-                entry &= 0x0FFFFFFFU;
                 packed = (unsigned long long)entry << 32;
                 packed |= (unsigned long long)kind << 28;
                 packed |= 0x80ULL;
@@ -598,7 +601,7 @@ void sceDmaSub00612890(ViBuf *buffer) {
     buffered = queue->mBufferedSectors;
     queue->mBufferedSectors = buffered + tags;
     if (buffered + tags != 0) {
-        if (tags != 0) {
+        if (tags > 0) {
             chcr &= 0x0FFFFFFFU;
             chcr |= 0x30000000U;
         }
@@ -611,12 +614,13 @@ void sceDmaSub00612890(ViBuf *buffer) {
         (void)EIntr();
     }
     SignalSema(queue->mSemaId);
+    return 1;
 }
 
 // 0x00612b40
 // Stops the transfer channels and saves the hardware positions. The routine disables interrupts
 // across the channel updates.
-void sceDmaSub00612b40(ViBuf *buffer) {
+int sceDmaSub00612b40(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
     unsigned int ctrl;
@@ -651,6 +655,7 @@ void sceDmaSub00612b40(ViBuf *buffer) {
     queue->mSavedIpuBp = (int)IPU_BP;
     queue->mSavedIpuCtrl = (int)IPU_CTRL;
     SignalSema(queue->mSemaId);
+    return 1;
 }
 
 // 0x00612cc0
@@ -805,29 +810,27 @@ void sceDmaSub00613088(ViBuf *buffer, ViTimeStamp *timeStamp) {
                 }
                 avail = slot->mSize;
                 total = (timeStamp->mOffset + want - base) % capacity;
-                if (avail >= 0) {
-                    span = total;
-                    if (avail < total) {
-                        span = avail;
+                span = total;
+                if (avail < total) {
+                    span = avail;
+                }
+                slot->mSize = avail - span;
+                slot->mOffset = (base + span) % capacity;
+                if (avail - span == 0) {
+                    if (slot->mFirst < 0LL) {
+                        held = queue->mTimeStampCount;
+                    } else {
+                        slot->mSize = 0;
+                        slot->mFirst = -1LL;
+                        slot->mSecond = -1LL;
+                        slot->mOffset = 0;
+                        held = queue->mTimeStampCount;
                     }
-                    slot->mSize = avail - span;
-                    slot->mOffset = (base + span) % capacity;
-                    if (avail - span == 0) {
-                        if (slot->mFirst < 0LL) {
-                            held = queue->mTimeStampCount;
-                        } else {
-                            slot->mSize = 0;
-                            slot->mFirst = -1LL;
-                            slot->mSecond = -1LL;
-                            slot->mOffset = 0;
-                            held = queue->mTimeStampCount;
-                        }
-                        held--;
-                        if (held < 0) {
-                            held = 0;
-                        }
-                        queue->mTimeStampCount = held;
+                    held--;
+                    if (held < 0) {
+                        held = 0;
                     }
+                    queue->mTimeStampCount = held;
                 }
             } else {
                 valid = 0;
@@ -851,7 +854,7 @@ void sceDmaSub00613088(ViBuf *buffer, ViTimeStamp *timeStamp) {
 // 0x006131e0
 // Retrieves the stamp for the completed span.
 // The routine scans the stamp ring for the matching entry.
-void sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
+int sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
     DmaQueue *queue;
     unsigned int madr;
     unsigned int bp;
@@ -900,7 +903,7 @@ void sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
                 bias = (int)((bp >> 16 & 3U) + (bp >> 8 & 0xFU)) * -0x10;
                 adjust = (int)((saved & 0x7FU) >> 3);
                 span = (int)madr + bias + adjust + stride - baseData;
-                span %= stride;
+                span = (int)((unsigned int)span % (unsigned int)stride);
                 span += stride;
                 span -= slots->mOffset;
                 span %= stride;
@@ -910,8 +913,6 @@ void sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
                     pStamps[1] = slots->mSecond;
                     slots->mFirst = -1LL;
                     slots->mSecond = -1LL;
-                    slots->mOffset = 0;
-                    slots->mSize = 0;
                     {
                         int left;
 
@@ -931,6 +932,7 @@ void sceDmaSub006131e0(ViBuf *buffer, long long *pStamps) {
         }
     }
     SignalSema(queue->mSemaId);
+    return 1;
 }
 
 // 0x00613798
@@ -947,7 +949,7 @@ void sceDmaSub00613798(ViBuf *buffer) {
     bytes = queue->mBufferedBytes;
     rounded = bytes + 0x7FF;
     aligned = bytes + 0xFFE;
-    if (bytes < 0) {
+    if (rounded >= 0) {
         aligned = rounded;
     }
     queue->mBufferedBytes = (aligned >> 11) << 11;

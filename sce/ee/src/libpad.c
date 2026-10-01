@@ -7,6 +7,8 @@
 #include <sifdev.h>
 #include <sifrpc.h>
 
+#include "os/log.h"
+
 enum {
     kPadServerId = 0x80000100,
 };
@@ -171,7 +173,7 @@ static void PadSendDirect(int nPort, int nSlot) {
 
     if (sceSifDmaStat(pState->nDmaId) >= 0) {
         if (g_nPadVerbose) {
-            printf("libpad: tPadDma Structure Invalid\n");
+            LogPrintf("libpad: tPadDma Structure Invalid\n");
         }
         return;
     }
@@ -183,7 +185,7 @@ static void PadSendDirect(int nPort, int nSlot) {
     dma.mode = 0;
     nDmaId = sceSifSetDma(&dma, 1);
     if (nDmaId == 0 && g_nPadVerbose) {
-        printf("libpad: tPadDma Structure Invalid\n");
+        LogPrintf("libpad: tPadDma Structure Invalid\n");
     }
     pState->nDmaId = nDmaId;
 }
@@ -210,8 +212,8 @@ int scePadInit(int nMode) {
     nVersion = scePadGetModVersion();
     if ((nVersion >> kPadVersionShift) != kPadModVersionMajor) {
         if (g_nPadVerbose) {
-            printf("libpad: Module version mismatch ");
-            printf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
+            LogPrintf("libpad: Module version mismatch ");
+            LogPrintf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
                    kPadModVersionMajor,
                    kPadModVersionMinor,
                    nVersion >> kPadVersionShift,
@@ -262,7 +264,7 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
 
     if (((uintptr_t)pFrames & kPadFrameAlignMask) != 0) {
         if (g_nPadVerbose) {
-            printf("libpad: buffer addr is not 64 byte align. %08x\n",
+            LogPrintf("libpad: buffer addr is not 64 byte align. %08x\n",
                    (unsigned int)(uintptr_t)pFrames);
         }
         return 0;
@@ -270,7 +272,7 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
     pState = &g_aaPadPorts[nPort][nSlot];
     if (pState->nOpen == 1) {
         if (g_nPadVerbose) {
-            printf("libpad: pad port is already open [%d][%d]\n", nPort, nSlot);
+            LogPrintf("libpad: pad port is already open [%d][%d]\n", nPort, nSlot);
         }
         return 0;
     }

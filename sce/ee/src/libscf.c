@@ -6,6 +6,8 @@
 #include <libscf.h>
 #include <sifdev.h>
 
+#include "os/log.h"
+
 enum {
     // Minutes in one hour.
     kMinutesPerHour = 60,
@@ -15,8 +17,9 @@ enum {
     kHalfDayMinutes = 1440,
     // Twice the largest magnitude plus one gives the accepted range width.
     kOffsetRangeWidth = 2881,
-    // Minutes in one hour set the threshold for a carry into the hour field.
-    kHourThreshold = 60,
+    // The lowest minute total that carries into the hour field. A total of exactly 60 stays in the
+    // minute field, as in the binary.
+    kHourThreshold = 61,
     // The version field starts after this many bits in the configuration word.
     kVersionShift = 13,
     // The version field uses this mask after the shift.
@@ -74,11 +77,11 @@ char *sceScfReadRomVersion(void) {
     }
     fd = sceOpen("rom0:ROMVER", SCE_RDONLY);
     if (fd == -1) {
-        printf("Can't open rom0:ROMVER\n");
+        LogPrintf("Can't open rom0:ROMVER\n");
     }
     // The binary reads even when the open failed.
     if (sceRead(fd, g_szScfRomVersion, kRomVersionReadSize) == -1) {
-        printf("Can't read rom error\n");
+        LogPrintf("Can't read rom error\n");
     }
     sceClose(fd);
     return g_szScfRomVersion;
@@ -225,7 +228,7 @@ int sceScfGetTimezone(void) {
         return kTokyoMinutes;
     }
     nTimezone = (int)nConfig >> kTimezoneShift;
-    printf("Timezone=%d\n", nTimezone);
+    LogPrintf("Timezone=%d\n", nTimezone);
     return nTimezone;
 }
 
@@ -246,7 +249,7 @@ int sceScfGetSummerTime(void) {
     }
     GetOsdConfigParam2(&nDetail, 1, 1);
     nSummer = (nDetail >> kDaylightShift) & 1;
-    printf("SummerTime=%d\n", nSummer);
+    LogPrintf("SummerTime=%d\n", nSummer);
     return nSummer;
 }
 
@@ -260,7 +263,7 @@ void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
     nTotal = pClock->minute + nMinutes;
     if (nTotal < 0) {
         do {
-            nTotal += kHourThreshold;
+            nTotal += kMinutesPerHour;
             sceScfSub005f34d0(pClock);
         } while (nTotal < 0);
         pClock->minute = (unsigned char)nTotal;
@@ -268,7 +271,7 @@ void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
         pClock->minute = (unsigned char)nTotal;
     } else {
         do {
-            nTotal -= kHourThreshold;
+            nTotal -= kMinutesPerHour;
             sceScfSub005f3460(pClock);
         } while (nTotal >= kHourThreshold);
         pClock->minute = (unsigned char)nTotal;

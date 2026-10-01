@@ -212,7 +212,7 @@ sceCdBindServer(sceSifClientData *pClient, unsigned int nServer, const char *psz
     for (;;) {
         if (sceSifBindRpc(pClient, nServer, 0) < 0) {
             if (g_nCdDebug > 0) {
-                printf(pszBindError);
+                scePrintf(pszBindError);
             }
         } else if (pClient->serve != NULL) {
             return;
@@ -293,7 +293,7 @@ static void sceCdCallbackThread(void *pArgument) {
             ExitDeleteThread();
         }
         if (g_nCdDebug > 0) {
-            printf(
+            scePrintf(
                 "sceCdCbfunc= %d sceCdCbfunc_num= %d\n", (int)g_pfnCdCallback, g_nCdCallbackReport);
         }
         if (g_pfnCdCallback != NULL && g_nCdCallbackReport != 0) {
@@ -435,7 +435,7 @@ int sceCdSearchFile(sceCdlFILE *fp, const char *name) {
     }
     g_cdSearchFilePacket.pDest = &g_cdSearchFilePacket;
     if (g_nCdDebug > 0) {
-        printf("ee call cmd search %s\n", g_cdSearchFilePacket.mName);
+        scePrintf("ee call cmd search %s\n", g_cdSearchFilePacket.mName);
     }
     sceSifWriteBackDCache(&g_cdSearchFilePacket, sizeof(g_cdSearchFilePacket));
     if (sceSifCallRpc(&g_cdSearchFileClient,
@@ -452,9 +452,9 @@ int sceCdSearchFile(sceCdlFILE *fp, const char *name) {
     }
     *fp = *(sceCdlFILE *)UNCACHED_SEG(&g_cdSearchFilePacket.mFile);
     if (g_nCdDebug > 0) {
-        printf("search name %s\n", fp->name);
-        printf("search size %d\n", fp->size);
-        printf("search loc lbn %d\n", fp->lsn);
+        scePrintf("search name %s\n", fp->name);
+        scePrintf("search size %d\n", fp->size);
+        scePrintf("search loc lbn %d\n", fp->lsn);
     }
     nResult = sceCdReceivedWord(g_anCdSearchFileReceive);
     SignalSema(g_nCdNCmdSemaId);
@@ -467,7 +467,7 @@ static int sceCdCheckNCmd(int nCommand) {
     sceCdSemaInit();
     if (PollSema(g_nCdNCmdSemaId) != g_nCdNCmdSemaId) {
         if (g_nCdDebug > 0) {
-            printf("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", nCommand, g_nCdNCmdCurrent);
+            scePrintf("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", nCommand, g_nCdNCmdCurrent);
         }
         return 0;
     }
@@ -514,7 +514,7 @@ static int sceCdNCmdDiskReady(void) {
 int sceCdSync(int mode) {
     if (mode == SCECdBlock) {
         if (g_nCdDebug > 0) {
-            printf("N cmd wait\n");
+            scePrintf("N cmd wait\n");
         }
         while (g_bCdCallbackPending != 0 || sceSifCheckStatRpc(&g_cdNCmdClient.rpcd) != 0) {
             sceCdSleepTicks(kSyncSleepTicks);
@@ -531,7 +531,7 @@ int sceCdSync(int mode) {
 int sceCdSyncS(int mode) {
     if (mode == SCECdBlock) {
         if (g_nCdDebug > 0) {
-            printf("S cmd wait\n");
+            scePrintf("S cmd wait\n");
         }
         while (sceSifCheckStatRpc(&g_cdSCmdClient.rpcd) != 0) {
             sceCdSleepTicks(kSyncSleepTicks);
@@ -547,7 +547,7 @@ static int sceCdCheckSCmd(int nCommand) {
     sceCdSemaInit();
     if (PollSema(g_nCdSCmdSemaId) != g_nCdSCmdSemaId) {
         if (g_nCdDebug > 0) {
-            printf("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", nCommand, g_nCdSCmdCurrent);
+            scePrintf("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", nCommand, g_nCdSCmdCurrent);
         }
         return 0;
     }
@@ -591,7 +591,7 @@ int sceCdInit(int init_mode) {
         nBind = sceSifBindRpc(&g_cdInitClient, kCdServerInit, 0);
         if (nBind < 0) {
             if (g_nCdDebug > 0) {
-                printf("Libcdvd bind err %d CD_Init %d\n", nBind, g_nCdInitCount);
+                scePrintf("Libcdvd bind err %d CD_Init %d\n", nBind, g_nCdInitCount);
             }
         } else if (g_cdInitClient.serve != NULL) {
             break;
@@ -630,7 +630,7 @@ int sceCdInit(int init_mode) {
 
     if (init_mode == SCECdEXIT) {
         if (g_nCdDebug > 0) {
-            printf("Libcdvd Exit\n");
+            scePrintf("Libcdvd Exit\n");
         }
         sceCdSemaExit();
         g_nCdNCmdSemaId = kNoSemaphore;
@@ -648,7 +648,7 @@ int sceCdDiskReady(int mode) {
     int nResult;
 
     if (g_nCdDebug > 0) {
-        printf("DiskReady 0\n");
+        scePrintf("DiskReady 0\n");
     }
     sceCdSemaInit();
     if (PollSema(g_nCdSCmdSemaId) != g_nCdSCmdSemaId) {
@@ -673,7 +673,7 @@ int sceCdDiskReady(int mode) {
                           NULL,
                           NULL) >= 0) {
             if (g_nCdDebug > 0) {
-                printf("DiskReady ended\n");
+                scePrintf("DiskReady ended\n");
             }
             nResult = sceCdReceivedWord(g_anCdSCmdReceive);
             SignalSema(g_nCdSCmdSemaId);
@@ -834,12 +834,12 @@ int sceCdRead(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mod
     sceSifWriteBackDCache(pPacket, sizeof(*pPacket));
     sceSifWriteBackDCache((void *)&g_nCdReadProgress, sizeof(g_nCdReadProgress));
     if (g_nCdDebug > 0) {
-        printf("call cdread cmd\n");
+        scePrintf("call cdread cmd\n");
     }
     nStarted = sceCdNCmdCallAsync(
         kNCmdFuncRead, SCECdFuncRead, pPacket, sizeof(*pPacket), sceCdReadEnd, &g_cdReadEdges);
     if (nStarted != 0 && g_nCdDebug > 0) {
-        printf("cdread end\n");
+        scePrintf("cdread end\n");
     }
     return nStarted;
 }
@@ -886,7 +886,7 @@ int sceCdReadClock(sceCdCLOCK *rtc) {
         return 0;
     }
     if (g_nCdDebug > 0) {
-        printf("Libcdvd call Clock read 1\n");
+        scePrintf("Libcdvd call Clock read 1\n");
     }
     if (sceCdSCmdCall(
             kSCmdFuncReadClock, NULL, 0, kReplyClockWords * sizeof(g_anCdSCmdReceive[0])) < 0) {
@@ -895,7 +895,7 @@ int sceCdReadClock(sceCdCLOCK *rtc) {
     }
     *rtc = *(sceCdCLOCK *)UNCACHED_SEG(&g_anCdSCmdReceive[kReplyClock]);
     if (g_nCdDebug > 0) {
-        printf("Libcdvd call Clock read 2\n");
+        scePrintf("Libcdvd call Clock read 2\n");
     }
     nResult = sceCdReceivedWord(g_anCdSCmdReceive);
     SignalSema(g_nCdSCmdSemaId);
@@ -914,7 +914,7 @@ static int sceCdStream(
         return 0;
     }
     if (g_nCdDebug > 0) {
-        printf("call cdreadstm call\n");
+        scePrintf("call cdreadstm call\n");
     }
     pPacket->nLsn = nLsn;
     pPacket->nSectors = nSectors;
@@ -926,7 +926,7 @@ static int sceCdStream(
         pPacket->mMode.datapattern = pMode->datapattern;
     }
     if (g_nCdDebug > 0) {
-        printf("call cdreadstm cmd\n");
+        scePrintf("call cdreadstm cmd\n");
     }
     sceSifWriteBackDCache(pPacket, sizeof(*pPacket));
     if (sceSifCallRpc(&g_cdNCmdClient,
@@ -942,7 +942,7 @@ static int sceCdStream(
         return 0;
     }
     if (g_nCdDebug > 0) {
-        printf("cdread end\n");
+        scePrintf("cdread end\n");
     }
     nResult = sceCdReceivedWord(g_anCdNCmdReceive);
     SignalSema(g_nCdNCmdSemaId);
@@ -988,7 +988,7 @@ int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigne
     unsigned int nError;
 
     if (g_nCdDebug > 0) {
-        printf("sceCdStRead call read size= %d mode= %d\n", size, mode);
+        scePrintf("sceCdStRead call read size= %d mode= %d\n", size, mode);
     }
     if (g_nCdStreamActive == 0) {
         return 0;
@@ -1008,7 +1008,7 @@ int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigne
         if (nError != 0) {
             nLastError = nError;
             if (g_nCdDebug > 0) {
-                printf("sceCdStRead BLK Read cur_size= %d read_size= %d req_size= %d err 0x%x\n",
+                scePrintf("sceCdStRead BLK Read cur_size= %d read_size= %d req_size= %d err 0x%x\n",
                        nRead,
                        nPass,
                        size,
@@ -1019,7 +1019,7 @@ int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigne
         }
     } while (nRead != size && (nError == 0 || nPass != 0));
     if (g_nCdDebug > 0) {
-        printf("sceCdStRead BLK Read Ended\n");
+        scePrintf("sceCdStRead BLK Read Ended\n");
     }
     *err = nLastError;
     return (int)nRead;
@@ -1029,7 +1029,7 @@ int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigne
 int sceCdStPause(void) {
     g_nCdStreamActive = 0;
     if (g_nCdDebug > 0) {
-        printf("sceCdStPause call\n");
+        scePrintf("sceCdStPause call\n");
     }
     return sceCdStream(0, 0, NULL, kStreamPause, &g_cdStreamDefaultMode);
 }
@@ -1038,7 +1038,7 @@ int sceCdStPause(void) {
 int sceCdStResume(void) {
     g_nCdStreamActive = 1;
     if (g_nCdDebug > 0) {
-        printf("sceCdStResume call\n");
+        scePrintf("sceCdStResume call\n");
     }
     return sceCdStream(0, 0, NULL, kStreamResume, &g_cdStreamDefaultMode);
 }
@@ -1046,7 +1046,7 @@ int sceCdStResume(void) {
 // 0x00611ff0
 int sceCdStStat(void) {
     if (g_nCdDebug > 0) {
-        printf("sceCdStStat call\n");
+        scePrintf("sceCdStStat call\n");
     }
     return sceCdStream(0, 0, NULL, kStreamStat, &g_cdStreamDefaultMode);
 }

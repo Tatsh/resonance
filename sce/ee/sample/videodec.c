@@ -9,6 +9,7 @@
 #include "ezmpeg/disp.h"
 #include "ezmpeg/vibuf.h"
 #include "ezmpeg/vobuf.h"
+#include "os/log.h"
 
 // The decoded frame queue, which the playback driver owns. The worker stages pictures into it.
 extern VoBuf voBuf;
@@ -55,14 +56,13 @@ static int decode(VideoDec *pVideoDec) {
 
     while (sceMpegGetContextWordZero(pVideoDec) == 0) {
         if (pVideoDec->state == VD_STATE_ABORT) {
-            printf("decode thread: aborted");
+            LogPrintf("decode thread: aborted\n");
             result = -1;
             break;
         }
-        do {
+        while ((pPicture = voBufGetData(&voBuf)) == NULL) {
             switchThread();
-            pPicture = voBufGetData(&voBuf);
-        } while (pPicture == NULL);
+        }
         if (sceMpegSub005e07b0(pVideoDec, pPicture, kDecodePictureMode) < 0) {
             ErrMessage("sceMpegGetPicture() decode error");
         }
@@ -255,7 +255,7 @@ static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pData;
     pMessage = *(char **)((unsigned char *)pCallbackData + 4);
-    printf("%s", pMessage);
+    LogPrintf("%s\n", pMessage);
     return 1;
 }
 

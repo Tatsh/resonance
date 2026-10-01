@@ -108,7 +108,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     case kDeci2EventRead:
     case kDeci2EventReadDone:
         if (nParam != 0) {
-            if (pState->nReceived + nParam > kTtyBufferSize) {
+            if ((unsigned int)(pState->nReceived + nParam) > kTtyBufferSize) {
                 PrintfToSioRaw("TTY: packet size larger than expect\n");
             }
             nDone = sceDeci2ExRecv(

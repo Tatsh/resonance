@@ -103,7 +103,7 @@ int audioDecCreate(AudioDec *pAudioDec,
                    int nBufferSize,
                    int nIopBufferSize);
 int audioDecDelete(AudioDec *pAudioDec);
-void audioDecSendToIOP(AudioDec *pAudioDec);
+int audioDecSendToIOP(AudioDec *pAudioDec);
 int audioDecIsPreset(AudioDec *pAudioDec);
 void audioDecStart(AudioDec *pAudioDec);
 void audioDecReset(AudioDec *pAudioDec);

@@ -7,6 +7,8 @@
 #include <libsdr.h>
 #include <sifrpc.h>
 
+#include "os/log.h"
+
 enum {
     // The sound driver RPC server uses this identifier for the bind call.
     kSdrRpcServer = 0x80000701,
@@ -87,7 +89,7 @@ int sceSdRemoteInit(void) {
     for (;;) {
         nBind = sceSifBindRpc(pClient, kSdrRpcServer, 0);
         if (nBind < 0) {
-            printf("sceSdRemoteInit() RPC bind error!\n");
+            LogPrintf("sceSdRemoteInit() RPC bind error!\n");
             return -1;
         }
         nDelay = kSdrBindDelay;

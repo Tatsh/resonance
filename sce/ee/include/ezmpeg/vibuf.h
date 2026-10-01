@@ -131,33 +131,37 @@ void sceDmaCreateQueueSemaphore(
  * Delete the queue semaphore of the input record.
  *
  * @param buffer The input record.
+ * @return 1.
  * @ghidraAddress 0x00613400
  */
-void sceDmaDeleteQueueSemaphore(ViBuf *buffer);
+int sceDmaDeleteQueueSemaphore(ViBuf *buffer);
 
 /**
  * Stage the input DMA for the decoder worker.
  *
  * @param buffer The input record.
+ * @return 1.
  * @ghidraAddress 0x006126e8
  */
-void sceDmaSub006126e8(ViBuf *buffer);
+int sceDmaSub006126e8(ViBuf *buffer);
 
 /**
  * Kick the input DMA after a stall.
  *
  * @param buffer The input record.
+ * @return 1, or 0 when the queue is not active.
  * @ghidraAddress 0x00612890
  */
-void sceDmaSub00612890(ViBuf *buffer);
+int sceDmaSub00612890(ViBuf *buffer);
 
 /**
  * Stop the input DMA, saving its position.
  *
  * @param buffer The input record.
+ * @return 1.
  * @ghidraAddress 0x00612b40
  */
-void sceDmaSub00612b40(ViBuf *buffer);
+int sceDmaSub00612b40(ViBuf *buffer);
 
 /**
  * Restart the input DMA from the saved position.
@@ -173,9 +177,10 @@ int sceDmaSub00612cc0(ViBuf *buffer);
  *
  * @param buffer The input record.
  * @param pStamps Receives two stamp words. Inferred.
+ * @return 1.
  * @ghidraAddress 0x006131e0
  */
-void sceDmaSub006131e0(ViBuf *buffer, long long *pStamps);
+int sceDmaSub006131e0(ViBuf *buffer, long long *pStamps);
 
 /**
  * Queue one stamp that the reader has passed.

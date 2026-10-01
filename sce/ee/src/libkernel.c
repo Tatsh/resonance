@@ -694,13 +694,15 @@ static void VPrintfToConsole(const char *pszFormat, va_list args) {
             break;
         case 'e':
         case 'f': {
-            // The binary read a single-precision value. This compiler passes a double.
-            double real = va_arg(args, double);
+            // The binary read a single-precision value. This compiler passes the value as a
+            // double, and the value is rounded to single precision before the zero test and the
+            // print.
+            const float flReal = (float)va_arg(args, double);
 
-            if (real == 0.0) {
+            if (flReal == 0.0f) {
                 g_pfnPutChar('0');
             } else {
-                PrintFloat(real);
+                PrintFloat(flReal);
             }
             ++p;
             break;

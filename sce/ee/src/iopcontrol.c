@@ -7,6 +7,8 @@
 #include <sifdev.h>
 #include <sifrpc.h>
 
+#include "os/log.h"
+
 // The argument prefix that makes the IOP boot loader load a replacement image.
 static const char kUdnlPrefix[] = "rom0:UDNL ";
 static const char kTooLongFormat[] = "too long parameter '%s'\n";
@@ -67,7 +69,7 @@ int sceSifRebootIop(const char *imgname) {
     char szArg[SIF_CMD_RESET_ARG_MAX];
 
     if (strlen(imgname) + sizeof(kUdnlPrefix) > SIF_CMD_RESET_ARG_MAX) {
-        printf(kTooLongFormat, imgname);
+        LogPrintf(kTooLongFormat, imgname);
         return 0;
     }
     sceSifInitRpc(0);

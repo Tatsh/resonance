@@ -4,7 +4,10 @@
 #include <stdio.h>
 
 #include <eekernel.h>
+#include <eetypes.h>
 #include <libmpeg.h>
+
+#include "os/log.h"
 
 // Layout facts recovered from the disassembly of the routines in this file. The decoder
 // (sceMpeg) lives in the caller and points at the work area through pContext (+0x40). The work
@@ -18,6 +21,7 @@ enum {
     kMaxStreamCallbacks = 0x40,
     kStreamEntrySize = 0x18,
     kMinWorkSize = 0x118,
+    kErrorMessageSize = 256,
     kStreamAllocSize = 0x600,
     kStreamAllocAlign = 8,
     kSlotCount = 7,
@@ -741,10 +745,10 @@ static int sceMpegSub0060e020(void) {
     sceMpegSub0060e000(&g_mpegSeqAreas[0], g_mpeg2c0c, g_mpeg2c10);
     sceMpegSub0060e000(&g_mpegSeqAreas[1], g_mpeg2c0c, g_mpeg2c10);
     sceMpegSub0060e000(&g_mpegSeqAreas[2], g_mpeg2c0c, g_mpeg2c10);
-    sceMpegSub0060e000(&g_mpegSeqAreas[3], g_mpeg2c0c, g_mpeg2c10);
-    sceMpegSub0060e000(&g_mpegSeqAreas[4], g_mpeg2c0c, g_mpeg2c10);
-    sceMpegSub0060e000(&g_mpegSeqAreas[5], g_mpeg2c0c, g_mpeg2c10);
     half = g_mpeg2c10 / 2;
+    sceMpegSub0060e000(&g_mpegSeqAreas[3], g_mpeg2c0c, half);
+    sceMpegSub0060e000(&g_mpegSeqAreas[4], g_mpeg2c0c, half);
+    sceMpegSub0060e000(&g_mpegSeqAreas[5], g_mpeg2c0c, half);
     sceMpegSub0060e000(&g_mpegSeqAreas[6], g_mpeg2c0c, half);
     sceMpegSub0060e000(&g_mpegSeqAreas[7], g_mpeg2c0c, half);
     return sceMpegSub0060e000(&g_mpegSeqAreas[8], g_mpeg2c0c, half);
@@ -784,7 +788,7 @@ int sceMpegSub0060e668(void) {
     g_mpeg2c24 = (int)((verticalExt << 12) | ((unsigned int)g_mpeg2c24 & 0xfff));
     g_mpeg2c38 += (int)(bitRateExt << 18);
     g_mpeg2c3c += (int)(bufferExt << 10);
-    return 0;
+    return g_mpeg2c24;
 }
 
 // 0x0060e7d0
@@ -797,10 +801,10 @@ int sceMpegSub0060e7d0(void) {
         g_mpeg2c68 = sceMpegSub0060b820(8);
         g_mpeg2c6c = sceMpegSub0060b820(8);
     }
-    g_mpeg2c70 = sceMpegSub0060b820(0xe);
+    g_mpeg2c70 = sceMpegSub0060b820(14);
     sceMpegSub0060b820(1); // The marker bit.
-    g_mpeg2c74 = sceMpegSub0060b820(0xe);
-    return 0;
+    g_mpeg2c74 = sceMpegSub0060b820(14);
+    return g_mpeg2c74;
 }
 
 // 0x0060c138
@@ -913,6 +917,7 @@ int sceMpegSub0060bd08(void) {
         g_mpeg2cd8 = sceMpegSub0060b820(1);
         g_mpeg2cdc = sceMpegSub0060b820(7);
         g_mpeg2ce0 = sceMpegSub0060b820(8);
+        return g_mpeg2ce0;
     }
     return 0;
 }
@@ -1246,10 +1251,6 @@ void *sceMpegCheckWorkAreaSize(void *pRing, int nNeed, int nAlign) {
     unsigned int needed;
 
     ring = (MpegRing *)pRing;
-    if (nAlign == 0) {
-        sceMpegRaiseError("work area size is too small");
-        return NULL;
-    }
     write = (unsigned int)ring->mWrite;
     size = (unsigned int)ring->mSize;
     base = (unsigned int)ring->mBase;
@@ -1289,12 +1290,12 @@ void sceMpegRaiseError(const char *pFormat) {
 
 // 0x0060de90
 void sceMpegPrintErrorLine(const char *pMessage) {
-    printf("[MPEG ERROR]%s\n", pMessage);
+    LogPrintf("[MPEG ERROR]%s\n", pMessage);
 }
 
 // 0x0060dea0
 void sceMpegReportErrorFormatted(const char *pFormat, ...) {
-    char buffer[0x110];
+    char buffer[kErrorMessageSize];
     va_list args;
 
     va_start(args, pFormat);
@@ -1411,57 +1412,91 @@ int sceMpegSub0061d9d8(int nMode) {
     return (int)EIntr();
 }
 
-// IPU command words copied by the initialiser, read from the image.
-static const unsigned long long kIpuInitCommandsA[6] = {
-    0x1616131013101008ULL, 0x1b1a181a16161616ULL, 0x1b1b1a1a1a1a1b1bULL,
-    0x1d2222221d1d1d1bULL, 0x20201d1d1b1b1d1dULL, 0x2223232526252222ULL,
+// One IPU input-FIFO quadword, addressable as bytes.
+typedef union {
+    unsigned char mBytes[16];
+    u_long128 mQuad;
+} IpuQuad;
+
+// 0x007a5ae0
+// The intra quantiser matrix, four quadwords, then the flat non-intra row the initialiser sends
+// four times.
+static const IpuQuad kIpuQuantRows[5] = {
+    {{0x08, 0x10, 0x10, 0x13, 0x10, 0x13, 0x16, 0x16,
+      0x16, 0x16, 0x16, 0x16, 0x1a, 0x18, 0x1a, 0x1b}},
+    {{0x1b, 0x1b, 0x1a, 0x1a, 0x1a, 0x1a, 0x1b, 0x1b,
+      0x1b, 0x1d, 0x1d, 0x1d, 0x22, 0x22, 0x22, 0x1d}},
+    {{0x1d, 0x1d, 0x1b, 0x1b, 0x1d, 0x1d, 0x20, 0x20,
+      0x22, 0x22, 0x25, 0x26, 0x25, 0x23, 0x23, 0x22}},
+    {{0x23, 0x26, 0x26, 0x28, 0x28, 0x28, 0x30, 0x30,
+      0x2e, 0x2e, 0x38, 0x38, 0x3a, 0x45, 0x45, 0x53}},
+    {{0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+      0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}},
 };
-static const unsigned long long kIpuInitCommandsB[2] = {
-    0x3e0084204210000ULL, 0x1ce718c614a51084ULL,
+
+// 0x007a5b30
+// The colour lookup table for vector quantisation.
+static const IpuQuad kIpuVqTable[2] = {
+    {{0x00, 0x00, 0x21, 0x04, 0x42, 0x08, 0xe0, 0x03,
+      0x84, 0x10, 0xa5, 0x14, 0xc6, 0x18, 0xe7, 0x1c}},
+    {{0x1f, 0x00, 0x29, 0x25, 0x4a, 0x29, 0x00, 0x7c,
+      0x8c, 0x31, 0xad, 0x35, 0xff, 0x7f, 0xce, 0x39}},
 };
+
+enum {
+    kIpuCmdBclr = 0x00000000,
+    kIpuCmdSetIqIntra = 0x50000000,
+    kIpuCmdSetIqNonIntra = 0x58000000,
+    kIpuCmdSetVq = 0x60000000,
+    kIpuCmdSetTh = (int)0x90000000u,
+    kIpuCtrlReset = 0x40000000,
+    kIpuQuantRowsPerMatrix = 4,
+};
+
+#define IPU_CMD_REG (*(volatile unsigned int *)(uintptr_t)0x10002000)
+#define IPU_CTRL_REG (*(volatile unsigned int *)(uintptr_t)0x10002010)
+#define IPU_IN_FIFO ((volatile u_long128 *)(uintptr_t)0x10007010)
+
+// Waits until the IPU is idle and returns the control word that ended the wait.
+static inline int IpuWaitIdle(void) {
+    int value;
+
+    do {
+        value = (int)IPU_CTRL_REG;
+    } while (value < 0);
+    return value;
+}
 
 // 0x0061da40
+// Resets the IPU and loads both quantiser matrices, the colour lookup table, and the threshold.
 int sceMpegSub0061da40(void) {
-    volatile unsigned int *pReg;
-    volatile unsigned long long *pFifo;
-    int value;
     int i;
-    static const int kCommandWords[6] = {0, 1, 2, 3, 4, 4};
 
     sceMpegSub0061d9d8(1);
-    pReg = (volatile unsigned int *)(uintptr_t)0x10002010;
-    *pReg = 0x40000000u;
-    while ((int)*pReg < 0) {
+    IPU_CTRL_REG = kIpuCtrlReset;
+    (void)IpuWaitIdle();
+    IPU_CMD_REG = kIpuCmdBclr;
+    (void)IpuWaitIdle();
+    for (i = 0; i < kIpuQuantRowsPerMatrix; ++i) {
+        ee_store_quadword(IPU_IN_FIFO, kIpuQuantRows[i].mQuad);
     }
-    pReg = (volatile unsigned int *)(uintptr_t)0x10002000;
-    *pReg = 0u;
-    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
+    for (i = 0; i < kIpuQuantRowsPerMatrix; ++i) {
+        ee_store_quadword(IPU_IN_FIFO, kIpuQuantRows[kIpuQuantRowsPerMatrix].mQuad);
     }
-    pFifo = (volatile unsigned long long *)(uintptr_t)0x10007010;
-    for (i = 0; i < 6; ++i) {
-        pFifo[0] = kIpuInitCommandsA[kCommandWords[i]];
-    }
-    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0x60000000u;
-    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
-    }
-    pFifo[0] = kIpuInitCommandsB[0];
-    pFifo[0] = kIpuInitCommandsB[1];
-    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0x58000000u;
-    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
-    }
-    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0x90000000u;
-    while ((int)*(volatile unsigned int *)(uintptr_t)0x10002010 < 0) {
-    }
-    *(volatile unsigned int *)(uintptr_t)0x10002010 = 0x40000000u;
-    pReg = (volatile unsigned int *)(uintptr_t)0x10002010;
-    while ((int)*pReg < 0) {
-    }
-    *(volatile unsigned int *)(uintptr_t)0x10002000 = 0u;
-    pReg = (volatile unsigned int *)(uintptr_t)0x10002010;
-    while ((int)*pReg < 0) {
-    }
-    value = (int)*pReg;
-    return value;
+    IPU_CMD_REG = kIpuCmdSetIqIntra;
+    (void)IpuWaitIdle();
+    IPU_CMD_REG = kIpuCmdSetIqNonIntra;
+    (void)IpuWaitIdle();
+    ee_store_quadword(IPU_IN_FIFO, kIpuVqTable[0].mQuad);
+    ee_store_quadword(IPU_IN_FIFO, kIpuVqTable[1].mQuad);
+    IPU_CMD_REG = kIpuCmdSetVq;
+    (void)IpuWaitIdle();
+    IPU_CMD_REG = (unsigned int)kIpuCmdSetTh;
+    (void)IpuWaitIdle();
+    IPU_CTRL_REG = kIpuCtrlReset;
+    (void)IpuWaitIdle();
+    IPU_CMD_REG = kIpuCmdBclr;
+    return IpuWaitIdle();
 }
 
 // 0x005caa58
@@ -1556,10 +1591,9 @@ int sceMpegInit(void) {
     value = *pStatus;
     value = value & 0xfffeffffu;
     *pStatusSet = value;
-    pClearA = (volatile unsigned int *)(uintptr_t)0x1000b020;
-    // The first clear falls in the call delay slot, so it lands before the reenable body.
-    *pClearA = 0;
     EIntr();
+    pClearA = (volatile unsigned int *)(uintptr_t)0x1000b020;
+    *pClearA = 0;
     pClearB = (volatile unsigned int *)(uintptr_t)0x1000b420;
     *pClearB = 0;
     return sceMpegSub0061da40();
@@ -3493,7 +3527,8 @@ static int sceMpegSub0060b418(int nTable) {
     command = ((unsigned int)nTable << kIpuVdecTableShift) | kIpuCommandVdec;
     *(volatile unsigned int *)(uintptr_t)kIpuCommandAddress = command;
     result = *pResult;
-    g_mpegIpuBusyFlag = (int)g_mpegNibbleTable[command >> 28];
+    // Yes, the binary shifts the command arithmetically here, unlike sceMpegSub0060b820().
+    g_mpegIpuBusyFlag = (int)g_mpegNibbleTable[(int)command >> 28];
     count = 0;
     while (result < 0) {
         if (count++ >= kIpuWatchdogLimit) {
@@ -4808,7 +4843,7 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     work = (uintptr_t)pWork;
     aligned = (work + (uintptr_t)kAlignMask) & ~(uintptr_t)kAlignMask;
     rest = nWorkSize - (int)(aligned - work);
-    if (rest < kMinWorkSize) {
+    if ((unsigned int)rest < kMinWorkSize) {
         sceMpegRaiseError("The size of work area is too small");
         return NULL;
     }
@@ -4897,7 +4932,7 @@ int sceMpegInvokeCallbackSlot(void *pDecoder, void *pEntry) {
         return 0;
     }
     work = (MpegWork *)((sceMpeg *)pDecoder)->pContext;
-    if (work->mStreamTable == NULL) {
+    if (work == NULL) {
         return 0;
     }
     entry = (StreamEntry *)pEntry;
@@ -4967,11 +5002,8 @@ sceMpegCallback sceMpegAddStrCallback(
     if (index >= kMaxStreamCallbacks) {
         return found;
     }
-    if (nType >= 0 && nType < 10) {
-        templateBits = g_streamTemplates[nType][1];
-    } else {
-        templateBits = 0;
-    }
+    // Yes, the image indexes the template table with no bounds check on the stream type.
+    templateBits = g_streamTemplates[nType][1];
     entry = &table[index];
     entry->key = key;
     entry->templateBits = templateBits;

@@ -137,7 +137,7 @@ void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     sceGifPkEnd(&packet, 0, 0, 0);
     sceGifPkOpenGsAD(&packet, &g_packetHeaders[0]);
     const unsigned long long clearColour =
-        (unsigned long long)(nRed | (nGreen << 8) | (nBlue << 16));
+        (unsigned long long)((long long)nRed | ((long long)nGreen << 8) | ((long long)nBlue << 16));
     sceGifPkAddGsAD(&packet, 0, 6);
     sceGifPkAddGsAD(&packet, 1, clearColour);
     sceGifPkAddGsAD(&packet, 5, 0);
@@ -309,7 +309,7 @@ int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     // The bytes up to the ring end move first, and the rest wraps to the ring base.
     unsigned char *ringEnd = readBuffer->data + readBuffer->size;
     int contiguous = (int)(ringEnd - packet->data);
-    if ((int)packet->len < contiguous) {
+    if (packet->len < (unsigned int)contiguous) {
         contiguous = (int)packet->len;
     }
     int remaining = (int)packet->len - contiguous;
@@ -370,12 +370,12 @@ static void AudioCommitCopied(AudioDec *pFields, int nCopied) {
         int nTake = 0x28 - pFields->field2c;
         int nSum;
 
-        if (nTake > nCopied) {
+        if ((unsigned int)nTake > (unsigned int)nCopied) {
             nTake = nCopied;
         }
         nSum = pFields->field2c + nTake;
         pFields->field2c = nSum;
-        if (nSum >= 0x28) {
+        if ((unsigned int)nSum >= 0x28U) {
             pFields->state = 1;
         }
         nCopied -= nTake;

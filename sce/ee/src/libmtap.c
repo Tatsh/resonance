@@ -4,6 +4,8 @@
 #include <libmtap.h>
 #include <sifrpc.h>
 
+#include "os/log.h"
+
 enum {
     kMtapServerId = 0x80000901,
 };
@@ -90,8 +92,8 @@ int sceMtapInit(void) {
 
     nVersion = sceMtapGetModVersion();
     if ((nVersion >> kMtapVersionShift) != kMtapModVersionMajor) {
-        printf("libmtap: Module version mismatch ");
-        printf("[libmtap.a = %d.%d, mtapman.irx = %d.%d]\n",
+        LogPrintf("libmtap: Module version mismatch ");
+        LogPrintf("[libmtap.a = %d.%d, mtapman.irx = %d.%d]\n",
                kMtapModVersionMajor,
                kMtapModVersionMinor,
                nVersion >> kMtapVersionShift,

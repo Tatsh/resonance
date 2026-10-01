@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "os/log.h"
+
 enum {
     kPresetSize = 0x800,
     kFullLevel = 0x3fff,
@@ -131,13 +133,14 @@ static void setIopLoop(int nValue) {
 }
 
 // 0x00567670
-void audioDecSendToIOP(AudioDec *pAudioDec) {
+int audioDecSendToIOP(AudioDec *pAudioDec) {
     // Move the staged bytes to the processor side, following the transfer stage. The idle and
     // stopping stages transfer nothing, the priming stage offers the whole free span, and the
-    // streaming stage asks the driver for the write position first.
-    const int pending = pAudioDec->field38;
-    const int total = pAudioDec->field34 - pending + pAudioDec->bufferSize;
-    const int aligned = pending / kBlockStep * kBlockStep;
+    // streaming stage queries the driver for the write position first. The staged counts are read
+    // after the driver call.
+    int pending;
+    int total;
+    int aligned;
     // Both writers below fill every slot, but the stage chain leaves the array untouched on its
     // early exits, so the staging starts cleared.
     int span[4] = {0, 0, 0, 0};
@@ -157,7 +160,7 @@ void audioDecSendToIOP(AudioDec *pAudioDec) {
         span[3] = 0;
     } else if (pAudioDec->state < 2) {
         if (pAudioDec->state == 0) {
-            return;
+            return 0;
         }
     } else if (pAudioDec->state == 2) {
         const int position = sceSdRemote(1, 0x8100, 1);
@@ -169,8 +172,11 @@ void audioDecSendToIOP(AudioDec *pAudioDec) {
                      pAudioDec,
                      (position & kPositionMask) - pAudioDec->iopBuffer);
     } else if (pAudioDec->state == 3) {
-        return;
+        return 0;
     }
+    pending = pAudioDec->field38;
+    total = pAudioDec->field34 - pending + pAudioDec->bufferSize;
+    aligned = pending / kBlockStep * kBlockStep;
     ready = span[1];
     extra = span[3];
     rest = total % pAudioDec->bufferSize;
@@ -195,6 +201,7 @@ void audioDecSendToIOP(AudioDec *pAudioDec) {
     pAudioDec->field38 -= transferred;
     pAudioDec->field54 += transferred;
     pAudioDec->iopOffset = writePos % pAudioDec->iopBufferSize;
+    return transferred;
 }
 
 // 0x00567820
@@ -217,12 +224,12 @@ int audioDecCreate(AudioDec *pAudioDec,
     pAudioDec->iopBufferSize = nIopBufferSize;
     pAudioDec->iopBuffer = (int)(uintptr_t)sceSifAllocIopHeap(nIopBufferSize);
     if (pAudioDec->iopBuffer < 0) {
-        printf("Cannot allocate IOP memory\n");
+        LogPrintf("Cannot allocate IOP memory\n");
         return 0;
     }
     pAudioDec->iopExtra = (int)(uintptr_t)sceSifAllocIopHeap(kPresetSize);
     if (pAudioDec->iopExtra < 0) {
-        printf("Cannot allocate IOP memory\n");
+        LogPrintf("Cannot allocate IOP memory\n");
         return 0;
     }
     memset(g_presetData, 0, kPresetSize);
