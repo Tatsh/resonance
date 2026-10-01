@@ -27,6 +27,7 @@
       ".git/**",
       ".yarn/**/*.cjs",
       ".vscode/extensions.json",
+      ".wiswa-ci/**",
       "3rdparty/**",
       "dist/**",
       "man/**",
