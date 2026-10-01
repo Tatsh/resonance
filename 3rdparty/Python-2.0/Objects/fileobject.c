@@ -235,7 +235,7 @@ file_close(PyFileObject *f, PyObject *args)
 	if (sts == EOF)
 		return PyErr_SetFromErrno(PyExc_IOError);
 	if (sts != 0)
-		return PyInt_FromLong((long)sts);
+		return PyInt_FromLong((Py_LONG)sts);
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -271,7 +271,7 @@ _portable_fseek(FILE *fp, off_t offset, int whence)
 			   the low-level tell() can be used correctly */
 			if (fseek(fp, 0, SEEK_END) != 0)
 				return -1;
-			if ((pos = TELL64(fileno(fp))) == -1L)
+			if ((pos = TELL64(fileno(fp))) == -1LL)
 				return -1;
 			offset += pos;
 			break;
@@ -398,7 +398,7 @@ file_truncate(PyFileObject *f, PyObject *args)
 #ifdef MS_WIN32
 	/* can use _chsize; if, however, the newsize overflows 32-bits then
 	   _chsize is *not* adequate; in this case, an OverflowError is raised */
-	if (newsize > LONG_MAX) {
+	if (newsize > PY_LONG_MAX) {
 		PyErr_SetString(PyExc_OverflowError,
 			"the new size is too long for _chsize (it is limited to 32-bit values)");
 		return NULL;
@@ -463,7 +463,7 @@ file_fileno(PyFileObject *f, PyObject *args)
 		return err_closed();
 	if (!PyArg_NoArgs(args))
 		return NULL;
-	return PyInt_FromLong((long) fileno(f->f_fp));
+	return PyInt_FromLong((Py_LONG) fileno(f->f_fp));
 }
 
 static PyObject *
@@ -491,7 +491,7 @@ file_flush(PyFileObject *f, PyObject *args)
 static PyObject *
 file_isatty(PyFileObject *f, PyObject *args)
 {
-	long res;
+	Py_LONG res;
 	if (f->f_fp == NULL)
 		return err_closed();
 	if (!PyArg_NoArgs(args))
@@ -519,7 +519,7 @@ static size_t
 new_buffersize(PyFileObject *f, size_t currentsize)
 {
 #ifdef HAVE_FSTAT
-	long pos, end;
+	Py_LONG pos, end;
 	struct stat st;
 	if (fstat(fileno(f->f_fp), &st) == 0) {
 		end = st.st_size;
@@ -532,7 +532,7 @@ new_buffersize(PyFileObject *f, size_t currentsize)
 		   works.  We can't use the lseek() value either, because we
 		   need to take the amount of buffered data into account.
 		   (Yet another reason why stdio stinks. :-) */
-		pos = lseek(fileno(f->f_fp), 0L, SEEK_CUR);
+		pos = lseek(fileno(f->f_fp), 0LL, SEEK_CUR);
 		if (pos >= 0)
 			pos = ftell(f->f_fp);
 		if (pos < 0)
@@ -556,7 +556,7 @@ new_buffersize(PyFileObject *f, size_t currentsize)
 static PyObject *
 file_read(PyFileObject *f, PyObject *args)
 {
-	long bytesrequested = -1;
+	Py_LONG bytesrequested = -1;
 	size_t bytesread, buffersize, chunksize;
 	PyObject *v;
 	
@@ -631,7 +631,7 @@ file_readinto(PyFileObject *f, PyObject *args)
 		ndone += nnow;
 		ntodo -= nnow;
 	}
-	return PyInt_FromLong((long)ndone);
+	return PyInt_FromLong((Py_LONG)ndone);
 }
 
 
@@ -790,7 +790,7 @@ file_readline(PyFileObject *f, PyObject *args)
 static PyObject *
 file_readlines(PyFileObject *f, PyObject *args)
 {
-	long sizehint = 0;
+	Py_LONG sizehint = 0;
 	PyObject *list;
 	PyObject *line;
 	char small_buffer[SMALLCHUNK];
@@ -1084,7 +1084,7 @@ file_getattr(PyFileObject *f, char *name)
 		return res;
 	PyErr_Clear();
 	if (strcmp(name, "closed") == 0)
-		return PyInt_FromLong((long)(f->f_fp == 0));
+		return PyInt_FromLong((Py_LONG)(f->f_fp == 0));
 	return PyMember_Get((char *)f, file_memberlist, name);
 }
 
@@ -1136,7 +1136,7 @@ PyFile_SoftSpace(PyObject *f, int newflag)
 				oldflag = PyInt_AsLong(v);
 			Py_DECREF(v);
 		}
-		v = PyInt_FromLong((long)newflag);
+		v = PyInt_FromLong((Py_LONG)newflag);
 		if (v == NULL)
 			PyErr_Clear();
 		else {

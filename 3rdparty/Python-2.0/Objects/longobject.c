@@ -55,13 +55,13 @@ _PyLong_New(int size)
 /* Create a new long int object from a C long int */
 
 PyObject *
-PyLong_FromLong(long ival)
+PyLong_FromLong(Py_LONG ival)
 {
 	/* Assume a C long fits in at most 5 'digits' */
 	/* Works on both 32- and 64-bit machines */
 	PyLongObject *v = _PyLong_New(5);
 	if (v != NULL) {
-		unsigned long t = ival;
+		unsigned Py_LONG t = ival;
 		int i;
 		if (ival < 0) {
 			t = -ival;
@@ -79,13 +79,13 @@ PyLong_FromLong(long ival)
 /* Create a new long int object from a C unsigned long int */
 
 PyObject *
-PyLong_FromUnsignedLong(unsigned long ival)
+PyLong_FromUnsignedLong(unsigned Py_LONG ival)
 {
 	/* Assume a C long fits in at most 5 'digits' */
 	/* Works on both 32- and 64-bit machines */
 	PyLongObject *v = _PyLong_New(5);
 	if (v != NULL) {
-		unsigned long t = ival;
+		unsigned Py_LONG t = ival;
 		int i;
 		for (i = 0; i < 5; i++) {
 			v->ob_digit[i] = (digit) (t & MASK);
@@ -116,14 +116,14 @@ PyLong_FromDouble(double dval)
 	}
 	frac = frexp(dval, &expo); /* dval = frac*2**expo; 0.0 <= frac < 1.0 */
 	if (expo <= 0)
-		return PyLong_FromLong(0L);
+		return PyLong_FromLong(0LL);
 	ndig = (expo-1) / SHIFT + 1; /* Number of 'digits' in result */
 	v = _PyLong_New(ndig);
 	if (v == NULL)
 		return NULL;
 	frac = ldexp(frac, (expo-1) % SHIFT + 1);
 	for (i = ndig; --i >= 0; ) {
-		long bits = (long)frac;
+		Py_LONG bits = (Py_LONG)frac;
 		v->ob_digit[i] = (digit) bits;
 		frac = frac - (double)bits;
 		frac = ldexp(frac, SHIFT);
@@ -136,12 +136,12 @@ PyLong_FromDouble(double dval)
 /* Get a C long int from a long int object.
    Returns -1 and sets an error condition if overflow occurs. */
 
-long
+Py_LONG
 PyLong_AsLong(PyObject *vv)
 {
 	/* This version by Tim Peters */
 	register PyLongObject *v;
-	unsigned long x, prev;
+	unsigned Py_LONG x, prev;
 	int i, sign;
 
 	if (vv == NULL || !PyLong_Check(vv)) {
@@ -167,9 +167,9 @@ PyLong_AsLong(PyObject *vv)
 	 * trouble iff sign bit set && (positive || some bit set other
 	 * than the sign bit).
 	 */
-	if ((long)x < 0 && (sign > 0 || (x << 1) != 0))
+	if ((Py_LONG)x < 0 && (sign > 0 || (x << 1) != 0))
 		goto overflow;
-	return (long)x * sign;
+	return (Py_LONG)x * sign;
 
  overflow:
 	PyErr_SetString(PyExc_OverflowError,
@@ -180,16 +180,16 @@ PyLong_AsLong(PyObject *vv)
 /* Get a C long int from a long int object.
    Returns -1 and sets an error condition if overflow occurs. */
 
-unsigned long
+unsigned Py_LONG
 PyLong_AsUnsignedLong(PyObject *vv)
 {
 	register PyLongObject *v;
-	unsigned long x, prev;
+	unsigned Py_LONG x, prev;
 	int i;
 	
 	if (vv == NULL || !PyLong_Check(vv)) {
 		PyErr_BadInternalCall();
-		return (unsigned long) -1;
+		return (unsigned Py_LONG) -1;
 	}
 	v = (PyLongObject *)vv;
 	i = v->ob_size;
@@ -197,7 +197,7 @@ PyLong_AsUnsignedLong(PyObject *vv)
 	if (i < 0) {
 		PyErr_SetString(PyExc_OverflowError,
 			   "can't convert negative value to unsigned long");
-		return (unsigned long) -1;
+		return (unsigned Py_LONG) -1;
 	}
 	while (--i >= 0) {
 		prev = x;
@@ -205,7 +205,7 @@ PyLong_AsUnsignedLong(PyObject *vv)
 		if ((x >> SHIFT) != prev) {
 			PyErr_SetString(PyExc_OverflowError,
 				"long int too long to convert");
-			return (unsigned long) -1;
+			return (unsigned Py_LONG) -1;
 		}
 	}
 	return x;
@@ -218,7 +218,7 @@ PyLong_AsDouble(PyObject *vv)
 {
 	register PyLongObject *v;
 	double x;
-	double multiplier = (double) (1L << SHIFT);
+	double multiplier = (double) (1LL << SHIFT);
 	int i, sign;
 	
 	if (vv == NULL || !PyLong_Check(vv)) {
@@ -244,8 +244,10 @@ PyLong_AsDouble(PyObject *vv)
 PyObject *
 PyLong_FromVoidPtr(void *p)
 {
-#if SIZEOF_VOID_P == SIZEOF_LONG
-	return PyInt_FromLong((long)p);
+	/* The port takes the pointer-sized-long branch although its pointers are four bytes. The
+	   pointer register widens sign-extended, and every pointer becomes an int. */
+#if 1
+	return PyInt_FromLong((Py_LONG)(int)p);
 #else
 	/* optimize null pointers */
 	if ( p == NULL )
@@ -268,13 +270,20 @@ PyLong_AsVoidPtr(PyObject *vv)
 	   PyExc_SystemError, "bad argument to internal function"
 	*/
 
-#if SIZEOF_VOID_P == SIZEOF_LONG
-	long x;
+	/* The port takes the pointer-sized-long branch here too, and narrows the value to the pointer
+	   before the error test. A value whose low word is -1 triggers the PyErr_Occurred check. */
+#if 1
+	Py_LONG x;
+	void *p;
 
 	if ( PyInt_Check(vv) )
 		x = PyInt_AS_LONG(vv);
 	else
 		x = PyLong_AsLong(vv);
+	p = (void *)(int)x;
+	if (p == (void *)-1 && PyErr_Occurred())
+		return NULL;
+	return p;
 #else
 	/* we can assume that HAVE_LONG_LONG is true. if not, then the
 	   configuration process should have bailed (having big pointers
@@ -307,13 +316,13 @@ PyLong_FromLongLong(LONG_LONG ival)
 {
 #if SIZEOF_LONG_LONG == SIZEOF_LONG
 	/* In case the compiler is faking it. */
-	return PyLong_FromLong( (long)ival );
+	return PyLong_FromLong( (Py_LONG)ival );
 #else
-	if ((LONG_LONG)LONG_MIN <= ival && ival <= (LONG_LONG)LONG_MAX) {
-		return PyLong_FromLong( (long)ival );
+	if ((LONG_LONG)PY_LONG_MIN <= ival && ival <= (LONG_LONG)PY_LONG_MAX) {
+		return PyLong_FromLong( (Py_LONG)ival );
 	}
-	else if (0 <= ival && ival <= (unsigned LONG_LONG)ULONG_MAX) {
-		return PyLong_FromUnsignedLong( (unsigned long)ival );
+	else if (0 <= ival && ival <= (unsigned LONG_LONG)PY_ULONG_MAX) {
+		return PyLong_FromUnsignedLong( (unsigned Py_LONG)ival );
 	}
 	else {
 		/* Assume a C LONG_LONG fits in at most 10 'digits'.
@@ -348,10 +357,10 @@ PyLong_FromUnsignedLongLong(unsigned LONG_LONG ival)
 {
 #if SIZEOF_LONG_LONG == SIZEOF_LONG
 	/* In case the compiler is faking it. */
-	return PyLong_FromUnsignedLong( (unsigned long)ival );
+	return PyLong_FromUnsignedLong( (unsigned Py_LONG)ival );
 #else
-	if( ival <= (unsigned LONG_LONG)ULONG_MAX ) {
-		return PyLong_FromUnsignedLong( (unsigned long)ival );
+	if( ival <= (unsigned LONG_LONG)PY_ULONG_MAX ) {
+		return PyLong_FromUnsignedLong( (unsigned Py_LONG)ival );
 	}
 	else {
 		/* Assume a C long fits in at most 10 'digits'. */
@@ -768,7 +777,7 @@ long_divrem(PyLongObject *a, PyLongObject *b,
 		z = divrem1(a, b->ob_digit[0], &rem);
 		if (z == NULL)
 			return -1;
-		*prem = (PyLongObject *) PyLong_FromLong((long)rem);
+		*prem = (PyLongObject *) PyLong_FromLong((Py_LONG)rem);
 	}
 	else {
 		z = x_divrem(a, b, prem);
@@ -932,10 +941,10 @@ long_compare(PyLongObject *a, PyLongObject *b)
 	return sign < 0 ? -1 : sign > 0 ? 1 : 0;
 }
 
-static long
+static Py_LONG
 long_hash(PyLongObject *v)
 {
-	long x;
+	Py_LONG x;
 	int i, sign;
 
 	/* This is designed so that Python ints and longs with the
@@ -1180,7 +1189,7 @@ l_divmod(PyLongObject *v, PyLongObject *w,
 			Py_DECREF(div);
 			return -1;
 		}
-		one = (PyLongObject *) PyLong_FromLong(1L);
+		one = (PyLongObject *) PyLong_FromLong(1LL);
 		if (one == NULL ||
 		    (temp = (PyLongObject *) long_sub(div, one)) == NULL) {
 			Py_DECREF(mod);
@@ -1252,7 +1261,7 @@ long_pow(PyLongObject *a, PyLongObject *b, PyLongObject *c)
 					"zero to a negative power");
 		return NULL;
 	}
-	z = (PyLongObject *)PyLong_FromLong(1L);
+	z = (PyLongObject *)PyLong_FromLong(1LL);
 	Py_INCREF(a);
 	for (i = 0; i < size_b; ++i) {
 		digit bi = b->ob_digit[i];
@@ -1325,7 +1334,7 @@ long_invert(PyLongObject *v)
 	/* Implement ~x as -(x+1) */
 	PyLongObject *x;
 	PyLongObject *w;
-	w = (PyLongObject *)PyLong_FromLong(1L);
+	w = (PyLongObject *)PyLong_FromLong(1LL);
 	if (w == NULL)
 		return NULL;
 	x = (PyLongObject *) long_add(v, w);
@@ -1385,7 +1394,7 @@ static PyObject *
 long_rshift(PyLongObject *a, PyLongObject *b)
 {
 	PyLongObject *z;
-	long shiftby;
+	Py_LONG shiftby;
 	int newsize, wordshift, loshift, hishift, i, j;
 	digit lomask, himask;
 	
@@ -1403,7 +1412,7 @@ long_rshift(PyLongObject *a, PyLongObject *b)
 	}
 	
 	shiftby = PyLong_AsLong((PyObject *)b);
-	if (shiftby == -1L && PyErr_Occurred())
+	if (shiftby == -1LL && PyErr_Occurred())
 		return NULL;
 	if (shiftby < 0) {
 		PyErr_SetString(PyExc_ValueError, "negative shift count");
@@ -1438,18 +1447,18 @@ long_lshift(PyLongObject *a, PyLongObject *b)
 {
 	/* This version due to Tim Peters */
 	PyLongObject *z;
-	long shiftby;
+	Py_LONG shiftby;
 	int oldsize, newsize, wordshift, remshift, i, j;
 	twodigits accum;
 	
 	shiftby = PyLong_AsLong((PyObject *)b);
-	if (shiftby == -1L && PyErr_Occurred())
+	if (shiftby == -1LL && PyErr_Occurred())
 		return NULL;
 	if (shiftby < 0) {
 		PyErr_SetString(PyExc_ValueError, "negative shift count");
 		return NULL;
 	}
-	if ((long)(int)shiftby != shiftby) {
+	if ((Py_LONG)(int)shiftby != shiftby) {
 		PyErr_SetString(PyExc_ValueError,
 				"outrageous left shift count");
 		return NULL;
@@ -1621,7 +1630,7 @@ long_coerce(PyObject **pv, PyObject **pw)
 static PyObject *
 long_int(PyObject *v)
 {
-	long x;
+	Py_LONG x;
 	x = PyLong_AsLong(v);
 	if (PyErr_Occurred())
 		return NULL;

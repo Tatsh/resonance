@@ -110,7 +110,7 @@ regobj_match(regexobject *re, PyObject *args)
 		Py_INCREF(argstring);
 		re->re_lastok = argstring;
 	}
-	return PyInt_FromLong((long)result); /* Length of the match or -1 */
+	return PyInt_FromLong((Py_LONG)result); /* Length of the match or -1 */
 }
 
 static PyObject *
@@ -152,7 +152,7 @@ regobj_search(regexobject *re, PyObject *args)
 		Py_INCREF(argstring);
 		re->re_lastok = argstring;
 	}
-	return PyInt_FromLong((long)result); /* Position of the match or -1 */
+	return PyInt_FromLong((Py_LONG)result); /* Position of the match or -1 */
 }
 
 /* get the group from the regex where index can be a string (group name) or
@@ -625,7 +625,7 @@ regex_set_syntax(PyObject *self, PyObject *args)
 	cache_pat = NULL;
 	Py_XDECREF(cache_prog);
 	cache_prog = NULL;
-	return PyInt_FromLong((long)syntax);
+	return PyInt_FromLong((Py_LONG)syntax);
 }
 
 static PyObject *
@@ -633,7 +633,7 @@ regex_get_syntax(PyObject *self, PyObject *args)
 {
 	if (!PyArg_Parse(args, ""))
 		return NULL;
-	return PyInt_FromLong((long)re_syntax);
+	return PyInt_FromLong((Py_LONG)re_syntax);
 }
 
 

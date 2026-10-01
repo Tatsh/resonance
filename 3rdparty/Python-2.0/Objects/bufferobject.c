@@ -11,7 +11,7 @@ typedef struct {
 	int b_size;
 	int b_readonly;
 #ifdef CACHE_HASH
-	long b_hash;
+	Py_LONG b_hash;
 #endif
 } PyBufferObject;
 
@@ -208,12 +208,12 @@ buffer_repr(PyBufferObject *self)
 	return PyString_FromString(buf);
 }
 
-static long
+static Py_LONG
 buffer_hash(PyBufferObject *self)
 {
 	register int len;
 	register unsigned char *p;
-	register long x;
+	register Py_LONG x;
 
 #ifdef CACHE_HASH
 	if ( self->b_hash != -1 )

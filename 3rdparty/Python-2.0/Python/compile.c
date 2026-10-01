@@ -123,10 +123,10 @@ code_compare(PyCodeObject *co, PyCodeObject *cp)
 	return cmp;
 }
 
-static long
+static Py_LONG
 code_hash(PyCodeObject *co)
 {
-	long h, h0, h1, h2, h3, h4;
+	Py_LONG h, h0, h1, h2, h3, h4;
 	h0 = PyObject_Hash(co->co_name);
 	if (h0 == -1) return -1;
 	h1 = PyObject_Hash(co->co_code);
@@ -622,7 +622,7 @@ static int
 com_add(struct compiling *c, PyObject *list, PyObject *dict, PyObject *v)
 {
 	PyObject *w, *t, *np=NULL;
-	long n;
+	Py_LONG n;
 
 	t = Py_BuildValue("(OO)", v, v->ob_type);
 	if (t == NULL)
@@ -769,7 +769,7 @@ parsenumber(struct compiling *co, char *s)
 {
 	extern double atof(const char *);
 	char *end;
-	long x;
+	Py_LONG x;
 	double dx;
 #ifndef WITHOUT_COMPLEX
 	Py_complex c;
@@ -784,7 +784,7 @@ parsenumber(struct compiling *co, char *s)
 	if (*end == 'l' || *end == 'L')
 		return PyLong_FromString(s, (char **)0, 0);
 	if (s[0] == '0')
-		x = (long) PyOS_strtoul(s, &end, 0);
+		x = (Py_LONG) PyOS_strtoul(s, &end, 0);
 	else
 		x = PyOS_strtol(s, &end, 0);
 	if (*end == '\0') {
@@ -996,7 +996,7 @@ com_list_for(struct compiling *c, node *n, node *e, char *t)
 
 	/* list_iter: for v in expr [list_iter] */
 	com_node(c, CHILD(n, 3)); /* expr */
-	v = PyInt_FromLong(0L);
+	v = PyInt_FromLong(0LL);
 	if (v == NULL)
 		c->c_errors++;
 	com_addoparg(c, LOAD_CONST, com_addconst(c, v));
@@ -2642,7 +2642,7 @@ com_for_stmt(struct compiling *c, node *n)
 	com_addfwref(c, SETUP_LOOP, &break_anchor);
 	block_push(c, SETUP_LOOP);
 	com_node(c, CHILD(n, 3));
-	v = PyInt_FromLong(0L);
+	v = PyInt_FromLong(0LL);
 	if (v == NULL)
 		c->c_errors++;
 	com_addoparg(c, LOAD_CONST, com_addconst(c, v));

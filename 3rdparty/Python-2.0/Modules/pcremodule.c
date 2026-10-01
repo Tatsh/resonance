@@ -598,7 +598,7 @@ static PyMethodDef pcre_methods[] = {
 static void
 insint(PyObject *d, char *name, int value)
 {
-	PyObject *v = PyInt_FromLong((long) value);
+	PyObject *v = PyInt_FromLong((Py_LONG) value);
 	if (v == NULL) {
 		/* Don't bother reporting this error */
 		PyErr_Clear();

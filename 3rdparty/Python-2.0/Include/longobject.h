@@ -13,11 +13,11 @@ extern DL_IMPORT(PyTypeObject) PyLong_Type;
 
 #define PyLong_Check(op) ((op)->ob_type == &PyLong_Type)
 
-extern DL_IMPORT(PyObject *) PyLong_FromLong(long);
-extern DL_IMPORT(PyObject *) PyLong_FromUnsignedLong(unsigned long);
+extern DL_IMPORT(PyObject *) PyLong_FromLong(Py_LONG);
+extern DL_IMPORT(PyObject *) PyLong_FromUnsignedLong(unsigned Py_LONG);
 extern DL_IMPORT(PyObject *) PyLong_FromDouble(double);
-extern DL_IMPORT(long) PyLong_AsLong(PyObject *);
-extern DL_IMPORT(unsigned long) PyLong_AsUnsignedLong(PyObject *);
+extern DL_IMPORT(Py_LONG) PyLong_AsLong(PyObject *);
+extern DL_IMPORT(unsigned Py_LONG) PyLong_AsUnsignedLong(PyObject *);
 extern DL_IMPORT(double) PyLong_AsDouble(PyObject *);
 extern DL_IMPORT(PyObject *) PyLong_FromVoidPtr(void *);
 extern DL_IMPORT(void *) PyLong_AsVoidPtr(PyObject *);
@@ -25,8 +25,8 @@ extern DL_IMPORT(void *) PyLong_AsVoidPtr(PyObject *);
 #ifdef HAVE_LONG_LONG
 
 /* Hopefully this is portable... */
-#ifndef ULONG_MAX
-#define ULONG_MAX 4294967295U
+#ifndef PY_ULONG_MAX
+#define PY_ULONG_MAX 4294967295U
 #endif
 #ifndef LONGLONG_MAX
 #define LONGLONG_MAX 9223372036854775807LL

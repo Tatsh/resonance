@@ -62,12 +62,12 @@ extern time_t PyOS_GetLastModificationTime(char *, FILE *);
 /* XXX Perhaps the magic number should be frozen and a version field
    added to the .pyc file header? */
 /* New way to come up with the magic number: (YEAR-1995), MONTH, DAY */
-#define MAGIC (50823 | ((long)'\r'<<16) | ((long)'\n'<<24))
+#define MAGIC (50823 | ((Py_LONG)'\r'<<16) | ((Py_LONG)'\n'<<24))
 
 /* Magic word as global; note that _PyImport_Init() can change the
    value of this global to accommodate for alterations of how the
    compiler works which are enabled by command line switches. */
-static long pyc_magic = MAGIC;
+static Py_LONG pyc_magic = MAGIC;
 
 /* See _PyImport_FixupExtension() below */
 static PyObject *extensions = NULL;
@@ -146,13 +146,13 @@ _PyImport_Fini(void)
 #include "pythread.h"
 
 static PyThread_type_lock import_lock = 0;
-static long import_lock_thread = -1;
+static Py_LONG import_lock_thread = -1;
 static int import_lock_level = 0;
 
 static void
 lock_import(void)
 {
-	long me = PyThread_get_thread_ident();
+	Py_LONG me = PyThread_get_thread_ident();
 	if (me == -1)
 		return; /* Too bad */
 	if (import_lock == NULL)
@@ -173,7 +173,7 @@ lock_import(void)
 static void
 unlock_import(void)
 {
-	long me = PyThread_get_thread_ident();
+	Py_LONG me = PyThread_get_thread_ident();
 	if (me == -1)
 		return; /* Too bad */
 	if (import_lock_thread != me)
@@ -355,7 +355,7 @@ PyImport_Cleanup(void)
 
 /* Helper for pythonrun.c -- return magic number */
 
-long
+Py_LONG
 PyImport_GetMagicNumber(void)
 {
 	return pyc_magic;
@@ -538,11 +538,11 @@ make_compiled_pathname(char *pathname, char *buf, size_t buflen)
    Doesn't set an exception. */
 
 static FILE *
-check_compiled_module(char *pathname, long mtime, char *cpathname)
+check_compiled_module(char *pathname, Py_LONG mtime, char *cpathname)
 {
 	FILE *fp;
-	long magic;
-	long pyc_mtime;
+	Py_LONG magic;
+	Py_LONG pyc_mtime;
 
 	fp = fopen(cpathname, "rb");
 	if (fp == NULL)
@@ -593,7 +593,7 @@ read_compiled_module(char *cpathname, FILE *fp)
 static PyObject *
 load_compiled_module(char *name, char *cpathname, FILE *fp)
 {
-	long magic;
+	Py_LONG magic;
 	PyCodeObject *co;
 	PyObject *m;
 
@@ -670,7 +670,7 @@ open_exclusive(char *filename)
    remove the file. */
 
 static void
-write_compiled_module(PyCodeObject *co, char *cpathname, long mtime)
+write_compiled_module(PyCodeObject *co, char *cpathname, Py_LONG mtime)
 {
 	FILE *fp;
 
@@ -683,7 +683,7 @@ write_compiled_module(PyCodeObject *co, char *cpathname, long mtime)
 	}
 	PyMarshal_WriteLongToFile(pyc_magic, fp);
 	/* First write a 0 for mtime */
-	PyMarshal_WriteLongToFile(0L, fp);
+	PyMarshal_WriteLongToFile(0LL, fp);
 	PyMarshal_WriteObjectToFile((PyObject *)co, fp);
 	if (ferror(fp)) {
 		if (Py_VerboseFlag)
@@ -694,7 +694,7 @@ write_compiled_module(PyCodeObject *co, char *cpathname, long mtime)
 		return;
 	}
 	/* Now write the true mtime */
-	fseek(fp, 4L, 0);
+	fseek(fp, 4LL, 0);
 	PyMarshal_WriteLongToFile(mtime, fp);
 	fflush(fp);
 	fclose(fp);
@@ -853,6 +853,10 @@ find_module(char *realname, PyObject *path, char *buf, size_t buflen,
 	struct filedescr *fdp = NULL;
 	FILE *fp = NULL;
 	struct stat statbuf;
+	/* The port never opens a candidate that begins with one of these
+	   Windows default path entries (0x00766920, used at 0x0057cbc8). */
+	static char *skip_prefixes[] = {".\\DLLs;", "cdrom0:\\.\\DLLs;", NULL};
+	char **skip;
 	static struct filedescr fd_frozen = {"", "", PY_FROZEN};
 	static struct filedescr fd_builtin = {"", "", C_BUILTIN};
 	static struct filedescr fd_package = {"", "", PKG_DIRECTORY};
@@ -987,7 +991,13 @@ find_module(char *realname, PyObject *path, char *buf, size_t buflen,
 			strcpy(buf+len, fdp->suffix);
 			if (Py_VerboseFlag > 1)
 				PySys_WriteStderr("# trying %s\n", buf);
-			fp = fopen(buf, fdp->mode);
+			for (skip = skip_prefixes; *skip != NULL; skip++)
+				if (memcmp(*skip, buf, strlen(*skip)) == 0)
+					break;
+			if (*skip != NULL)
+				fp = NULL;
+			else
+				fp = fopen(buf, fdp->mode);
 			if (fp != NULL)
 				break;
 		}
@@ -2052,7 +2062,7 @@ imp_is_frozen(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "s:is_frozen", &name))
 		return NULL;
 	p = find_frozen(name);
-	return PyInt_FromLong((long) (p == NULL ? 0 : p->size));
+	return PyInt_FromLong((Py_LONG) (p == NULL ? 0 : p->size));
 }
 
 static FILE *
@@ -2274,7 +2284,7 @@ setint(PyObject *d, char *name, int value)
 	PyObject *v;
 	int err;
 
-	v = PyInt_FromLong((long)value);
+	v = PyInt_FromLong((Py_LONG)value);
 	err = PyDict_SetItemString(d, name, v);
 	Py_XDECREF(v);
 	return err;

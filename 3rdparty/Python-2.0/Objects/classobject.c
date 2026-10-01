@@ -488,7 +488,7 @@ instance_dealloc(register PyInstanceObject *inst)
 	PyObject *del;
 	static PyObject *delstr;
 #ifdef Py_REF_DEBUG
-	extern long _Py_RefTotal;
+	extern Py_LONG _Py_RefTotal;
 #endif
 	/* Temporarily resurrect the object. */
 #ifdef Py_TRACE_REFS
@@ -760,7 +760,7 @@ static int
 instance_compare(PyObject *inst, PyObject *other)
 {
 	PyObject *result;
-	long outcome;
+	Py_LONG outcome;
 	result = instance_compare1(inst, other);
 	if (result == NULL)
 		return -1;
@@ -779,12 +779,12 @@ instance_compare(PyObject *inst, PyObject *other)
 	return 0;
 }
 
-static long
+static Py_LONG
 instance_hash(PyInstanceObject *inst)
 {
 	PyObject *func;
 	PyObject *res;
-	long outcome;
+	Py_LONG outcome;
 	static PyObject *hashstr, *cmpstr;
 
 	if (hashstr == NULL)
@@ -963,11 +963,11 @@ sliceobj_from_intint(int i, int j)
 {
 	PyObject *start, *end, *res;
 
-	start = PyInt_FromLong((long)i);
+	start = PyInt_FromLong((Py_LONG)i);
 	if (!start)
 		return NULL;
 	
-	end = PyInt_FromLong((long)j);
+	end = PyInt_FromLong((Py_LONG)j);
 	if (!end) {
 		Py_DECREF(start);
 		return NULL;
@@ -1197,7 +1197,7 @@ PyInstance_DoBinOp(PyObject *v, PyObject *w, char *opname, char *ropname,
 	if (strcmp(opname, "__cmp__") == 0) {
 		Py_uintptr_t iv = (Py_uintptr_t)v;
 		Py_uintptr_t iw = (Py_uintptr_t)w;
-		long c = (iv < iw) ? -1 : (iv > iw) ? 1 : 0;
+		Py_LONG c = (iv < iw) ? -1 : (iv > iw) ? 1 : 0;
 		return PyInt_FromLong(c);
 	}
 	sprintf(buf, "%s nor %s defined for these operands", opname, ropname);
@@ -1363,7 +1363,7 @@ static int
 instance_nonzero(PyInstanceObject *self)
 {
 	PyObject *func, *res;
-	long outcome;
+	Py_LONG outcome;
 	static PyObject *nonzerostr;
 
 	if (nonzerostr == NULL)
@@ -1686,10 +1686,10 @@ instancemethod_repr(PyMethodObject *a)
 	return PyString_FromString(buf);
 }
 
-static long
+static Py_LONG
 instancemethod_hash(PyMethodObject *a)
 {
-	long x, y;
+	Py_LONG x, y;
 	if (a->im_self == NULL)
 		x = PyObject_Hash(Py_None);
 	else

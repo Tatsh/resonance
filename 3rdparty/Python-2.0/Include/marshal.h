@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-DL_IMPORT(void) PyMarshal_WriteLongToFile(long, FILE *);
+DL_IMPORT(void) PyMarshal_WriteLongToFile(Py_LONG, FILE *);
 DL_IMPORT(void) PyMarshal_WriteShortToFile(int, FILE *);
 DL_IMPORT(void) PyMarshal_WriteObjectToFile(PyObject *, FILE *);
 DL_IMPORT(PyObject *) PyMarshal_WriteObjectToString(PyObject *);
 
-DL_IMPORT(long) PyMarshal_ReadLongFromFile(FILE *);
+DL_IMPORT(Py_LONG) PyMarshal_ReadLongFromFile(FILE *);
 DL_IMPORT(int) PyMarshal_ReadShortFromFile(FILE *);
 DL_IMPORT(PyObject *) PyMarshal_ReadObjectFromFile(FILE *);
 DL_IMPORT(PyObject *) PyMarshal_ReadObjectFromString(char *, int);

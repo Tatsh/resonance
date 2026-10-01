@@ -379,7 +379,7 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 	case 'b': /* unsigned byte -- very short int */
 		{
 			char *p = va_arg(*p_va, char *);
-			long ival = PyInt_AsLong(arg);
+			Py_LONG ival = PyInt_AsLong(arg);
 			if (ival == -1 && PyErr_Occurred())
 				return "integer<b>";
 			else if (ival < 0) {
@@ -400,7 +400,7 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 	case 'B': /* byte sized bitfield - both signed and unsigned values allowed */
 		{
 			char *p = va_arg(*p_va, char *);
-			long ival = PyInt_AsLong(arg);
+			Py_LONG ival = PyInt_AsLong(arg);
 			if (ival == -1 && PyErr_Occurred())
 				return "integer<b>";
 			else if (ival < SCHAR_MIN) {
@@ -421,7 +421,7 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 	case 'h': /* signed short int */
 		{
 			short *p = va_arg(*p_va, short *);
-			long ival = PyInt_AsLong(arg);
+			Py_LONG ival = PyInt_AsLong(arg);
 			if (ival == -1 && PyErr_Occurred())
 				return "integer<h>";
 			else if (ival < SHRT_MIN) {
@@ -442,7 +442,7 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 	case 'H': /* short int sized bitfield, both signed and unsigned allowed */
 		{
 			unsigned short *p = va_arg(*p_va, unsigned short *);
-			long ival = PyInt_AsLong(arg);
+			Py_LONG ival = PyInt_AsLong(arg);
 			if (ival == -1 && PyErr_Occurred())
 				return "integer<H>";
 			else if (ival < SHRT_MIN) {
@@ -463,7 +463,7 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 	case 'i': /* signed int */
 		{
 			int *p = va_arg(*p_va, int *);
-			long ival = PyInt_AsLong(arg);
+			Py_LONG ival = PyInt_AsLong(arg);
 			if (ival == -1 && PyErr_Occurred())
 				return "integer<i>";
 			else if (ival > INT_MAX) {
@@ -482,8 +482,8 @@ convertsimple1(PyObject *arg, char **p_format, va_list *p_va)
 		}
 	case 'l': /* long int */
 		{
-			long *p = va_arg(*p_va, long *);
-			long ival = PyInt_AsLong(arg);
+			Py_LONG *p = va_arg(*p_va, Py_LONG *);
+			Py_LONG ival = PyInt_AsLong(arg);
 			if (ival == -1 && PyErr_Occurred())
 				return "integer<l>";
 			else
@@ -1201,7 +1201,7 @@ skipitem(char **p_format, va_list *p_va)
 	
 	case 'l': /* long int */
 		{
-			(void) va_arg(*p_va, long *);
+			(void) va_arg(*p_va, Py_LONG *);
 			break;
 		}
 	

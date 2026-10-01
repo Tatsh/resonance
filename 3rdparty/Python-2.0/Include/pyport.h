@@ -70,7 +70,7 @@ typedef uintptr_t Py_uintptr_t;
 #elif SIZEOF_VOID_P <= SIZEOF_INT
 typedef unsigned int Py_uintptr_t;
 #elif SIZEOF_VOID_P <= SIZEOF_LONG
-typedef unsigned long Py_uintptr_t;
+typedef unsigned Py_LONG Py_uintptr_t;
 #elif defined(HAVE_LONG_LONG) && (SIZEOF_VOID_P <= SIZEOF_LONG_LONG)
 typedef unsigned LONG_LONG Py_uintptr_t;
 #else
@@ -336,7 +336,7 @@ extern double hypot(double, double);
 
 #ifndef FD_SET
 
-typedef long fd_mask;
+typedef Py_LONG fd_mask;
 
 #define NFDBITS	(sizeof(fd_mask) * NBBY)	/* bits per mask */
 #ifndef howmany
@@ -363,25 +363,25 @@ typedef	struct fd_set {
 #define INT_MAX 2147483647
 #endif
 
-#ifndef LONG_MAX
+#ifndef PY_LONG_MAX
 #if SIZEOF_LONG == 4
-#define LONG_MAX 0X7FFFFFFFL
+#define PY_LONG_MAX 0X7FFFFFFFLL
 #elif SIZEOF_LONG == 8
-#define LONG_MAX 0X7FFFFFFFFFFFFFFFL
+#define PY_LONG_MAX 0X7FFFFFFFFFFFFFFFLL
 #else
 #error "could not set LONG_MAX in pyport.h"
 #endif
 #endif
 
-#ifndef LONG_MIN
-#define LONG_MIN (-LONG_MAX-1)
+#ifndef PY_LONG_MIN
+#define PY_LONG_MIN (-PY_LONG_MAX-1)
 #endif
 
-#ifndef LONG_BIT
-#define LONG_BIT (8 * SIZEOF_LONG)
+#ifndef PY_LONG_BIT
+#define PY_LONG_BIT (8 * SIZEOF_LONG)
 #endif
 
-#if LONG_BIT != 8 * SIZEOF_LONG
+#if PY_LONG_BIT != 8 * SIZEOF_LONG
 /* 04-Oct-2000 LONG_BIT is apparently (mis)defined as 64 on some recent
  * 32-bit platforms using gcc.  We try to catch that here at compile-time
  * rather than waiting for integer multiplication to trigger bogus
@@ -397,8 +397,8 @@ typedef	struct fd_set {
  * limits.h header file.
  * 10-Feb-1995 bwarsaw@cnri.reston.va.us
  */
-#undef LONG_MIN
-#define LONG_MIN (-LONG_MAX-1)
+#undef PY_LONG_MIN
+#define PY_LONG_MIN (-PY_LONG_MAX-1)
 #endif
 #endif
 

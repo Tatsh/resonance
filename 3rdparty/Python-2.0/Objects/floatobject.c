@@ -14,8 +14,10 @@
 #endif
 
 #if defined(HUGE_VAL) && !defined(CHECK)
+/* The port compared -HUGE_VAL against x with the operands in this order. The comparison reports a
+   NaN as out of range (float_pow at 0x0047b1f8). */
 #define CHECK(x) if (errno != 0) ; \
-	else if (-HUGE_VAL <= (x) && (x) <= HUGE_VAL) ; \
+	else if (freq_compare_double(-HUGE_VAL, (x)) <= 0 && (x) <= HUGE_VAL) ; \
 	else errno = ERANGE
 #endif
 
@@ -315,7 +317,7 @@ float_compare(PyFloatObject *v, PyFloatObject *w)
 }
 
 
-static long
+static Py_LONG
 float_hash(PyFloatObject *v)
 {
 	return _Py_HashDouble(v->ob_fval);
@@ -422,11 +424,11 @@ float_divmod(PyFloatObject *v, PyFloatObject *w)
 	return Py_BuildValue("(dd)", floordiv, mod);
 }
 
-static double powu(double x, long n)
+static double powu(double x, Py_LONG n)
 {
 	double r = 1.;
 	double p = x;
-	long mask = 1;
+	Py_LONG mask = 1;
 	while (mask > 0 && n >= mask) {
 		if (n & mask)
 			r *= p;
@@ -440,7 +442,7 @@ static PyObject *
 float_pow(PyFloatObject *v, PyObject *w, PyFloatObject *z)
 {
 	double iv, iw, ix;
-	long intw;
+	Py_LONG intw;
  /* XXX Doesn't handle overflows if z!=None yet; it may never do so :(
   * The z parameter is really only going to be useful for integers and
   * long integers.  Maybe something clever with logarithms could be done.
@@ -448,7 +450,7 @@ float_pow(PyFloatObject *v, PyObject *w, PyFloatObject *z)
   */
 	iv = v->ob_fval;
 	iw = ((PyFloatObject *)w)->ob_fval;
-	intw = (long)iw;
+	intw = (Py_LONG)iw;
 
 	/* Sort out special cases here instead of relying on pow() */
 	if (iw == 0) { 		/* x**0 is 1, even 0**0 */
@@ -472,7 +474,7 @@ float_pow(PyFloatObject *v, PyObject *w, PyFloatObject *z)
 		return PyFloat_FromDouble(0.0);
 	}
 
-	if (iw == intw && intw > LONG_MIN) {
+	if (iw == intw && intw > PY_LONG_MIN) {
 		/* ruled out LONG_MIN because -LONG_MIN isn't representable */
 		errno = 0;
 		PyFPE_START_PROTECT("pow", return NULL)
@@ -546,7 +548,7 @@ static int
 float_coerce(PyObject **pv, PyObject **pw)
 {
 	if (PyInt_Check(*pw)) {
-		long x = PyInt_AsLong(*pw);
+		Py_LONG x = PyInt_AsLong(*pw);
 		*pw = PyFloat_FromDouble((double)x);
 		Py_INCREF(*pv);
 		return 0;
@@ -563,13 +565,13 @@ static PyObject *
 float_int(PyObject *v)
 {
 	double x = PyFloat_AsDouble(v);
-	if (x < 0 ? (x = ceil(x)) < (double)LONG_MIN
-	          : (x = floor(x)) > (double)LONG_MAX) {
+	if (x < 0 ? (x = ceil(x)) < (double)PY_LONG_MIN
+	          : (x = floor(x)) > (double)PY_LONG_MAX) {
 		PyErr_SetString(PyExc_OverflowError,
 				"float too large to convert");
 		return NULL;
 	}
-	return PyInt_FromLong((long)x);
+	return PyInt_FromLong((Py_LONG)x);
 }
 
 static PyObject *

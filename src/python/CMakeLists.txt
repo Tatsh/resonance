@@ -92,7 +92,6 @@ target_compile_definitions(
           HAVE_UNISTD_H=1
           HAVE_UTIME_H=1
           SIZEOF_INT=4
-          SIZEOF_LONG=4
           SIZEOF_VOID_P=4
           SIZEOF_SHORT=2
           SIZEOF_DOUBLE=8)

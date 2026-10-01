@@ -41,33 +41,33 @@ PyMember_Get(char *addr, struct memberlist *mlist, char *name)
 			addr += l->offset;
 			switch (l->type) {
 			case T_BYTE:
-				v = PyInt_FromLong((long)
+				v = PyInt_FromLong((Py_LONG)
 						 (((*(char*)addr & 0xff)
 						   ^ 0x80) - 0x80));
 				break;
 			case T_UBYTE:
-				v = PyInt_FromLong((long) *(char*)addr & 0xff);
+				v = PyInt_FromLong((Py_LONG) *(char*)addr & 0xff);
 				break;
 			case T_SHORT:
-				v = PyInt_FromLong((long) *(short*)addr);
+				v = PyInt_FromLong((Py_LONG) *(short*)addr);
 				break;
 			case T_USHORT:
-				v = PyInt_FromLong((long)
+				v = PyInt_FromLong((Py_LONG)
 						 *(unsigned short*)addr);
 				break;
 			case T_INT:
-				v = PyInt_FromLong((long) *(int*)addr);
+				v = PyInt_FromLong((Py_LONG) *(int*)addr);
 				break;
 			case T_UINT:
-				v = PyInt_FromLong((long)
+				v = PyInt_FromLong((Py_LONG)
 						   *(unsigned int*)addr);
 				break;
 			case T_LONG:
-				v = PyInt_FromLong(*(long*)addr);
+				v = PyInt_FromLong(*(Py_LONG*)addr);
 				break;
 			case T_ULONG:
 				v = PyLong_FromDouble((double)
-						   *(unsigned long*)addr);
+						   *(unsigned Py_LONG*)addr);
 				break;
 			case T_FLOAT:
 				v = PyFloat_FromDouble((double)*(float*)addr);
@@ -180,13 +180,13 @@ PyMember_Set(char *addr, struct memberlist *mlist, char *name, PyObject *v)
 					PyErr_BadArgument();
 					return -1;
 				}
-				*(long*)addr = PyInt_AsLong(v);
+				*(Py_LONG*)addr = PyInt_AsLong(v);
 				break;
 			case T_ULONG:
 				if (PyInt_Check(v))
-					*(long*)addr = PyInt_AsLong(v);
+					*(Py_LONG*)addr = PyInt_AsLong(v);
 				else if (PyLong_Check(v))
-					*(long*)addr = PyLong_AsLong(v);
+					*(Py_LONG*)addr = PyLong_AsLong(v);
 				else {
 					PyErr_BadArgument();
 					return -1;

@@ -12,9 +12,55 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "os/log.h"
+
+/* The port's failed assertion logs a fixed line through the game's log and aborts, without the
+   expression, file, or line. getarrayitem's check, inlined into array_tolist at 0x006564a0, calls
+   LogPrintf (0x0053dde0) with "Assertion failed\n" and then abort (0x005e64c8). The C library's
+   assert macro is redefined at every inclusion of its header, but it identifies its failure
+   routine at each use. The routine is therefore redirected instead of the macro. */
+#ifndef __cplusplus
+#define __assert_func py_assert_failed
+static void py_assert_failed(const char *file, int line, const char *function,
+                             const char *expression) __attribute__((noreturn, unused));
+static void py_assert_failed(const char *file, int line, const char *function,
+                             const char *expression) {
+    (void)file;
+    (void)line;
+    (void)function;
+    (void)expression;
+    LogPrintf("Assertion failed\n");
+    abort();
+}
+#endif
+
+/* The port's printf is the game's log. fixstate passes "XXX too many states!" and "XXX too high
+   nonterminal number!" to LogPrintf at 0x005d9fb0 and 0x005da014, and the Parser assertion in
+   PyGrammar_FindDFA calls LogPrintf at 0x00629b64 before abort. fprintf is unchanged (0x0061c1fc). */
+#ifndef __cplusplus
+#define printf LogPrintf
+#endif
+
 /* The port's module search default is empty (0x0082c9f0). A dot entry would arrive at the archive
    lookup as a `./` path, and the lookup treats a `./` path as fatal. */
 #define PYTHONPATH ""
+
+/* The port routed the C library allocator to the interpreter heap in every interpreter file, with
+   the call site's file and line. The bare calls in cStringIO.c (Heap::Realloc at 0x00656ce8),
+   regexmodule.c (Heap::Free at 0x00652090), regexpr.c (Heap::Alloc in re_compile_pattern at
+   0x00662034), getpathp.c (Heap::Alloc at 0x0056a278), and _sre.c (the mark stack at 0x00640954)
+   all include their file's tag. The library prototypes above are already declared, and C++
+   includers retain the plain functions. */
+#ifndef __cplusplus
+#define malloc(n) PyCore_MALLOC(n)
+#define realloc(p, n) PyCore_REALLOC((p), (n))
+#define free(p) PyCore_FREE(p)
+#endif
+
+/* The port's three-way double compare with its operands in source order, from the runtime. The
+   interpreter's comparisons of a constant against a double call it where the original result for an
+   unordered operand would otherwise be lost (see the runtime's soft-float file). */
+int freq_compare_double(double a, double b);
 
 /* The Windows headers supply this for the path module upstream. */
 #define min(a, b) ((a) < (b) ? (a) : (b))

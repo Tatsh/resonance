@@ -570,12 +570,12 @@ string_compare(PyStringObject *a, PyStringObject *b)
 	return (len_a < len_b) ? -1 : (len_a > len_b) ? 1 : 0;
 }
 
-static long
+static Py_LONG
 string_hash(PyStringObject *a)
 {
 	register int len;
 	register unsigned char *p;
-	register long x;
+	register Py_LONG x;
 
 #ifdef CACHE_HASH
 	if (a->ob_shash != -1)
@@ -875,7 +875,7 @@ string_join(PyStringObject *self, PyObject *args)
 
 
 
-static long
+static Py_LONG
 string_find_internal(PyStringObject *self, PyObject *args, int dir)
 {
 	const char *s = PyString_AS_STRING(self), *sub;
@@ -908,20 +908,20 @@ string_find_internal(PyStringObject *self, PyObject *args, int dir)
 
 	if (dir > 0) {
 		if (n == 0 && i <= last)
-			return (long)i;
+			return (Py_LONG)i;
 		last -= n;
 		for (; i <= last; ++i)
 			if (s[i] == sub[0] && memcmp(&s[i], sub, n) == 0)
-				return (long)i;
+				return (Py_LONG)i;
 	}
 	else {
 		int j;
 	    
         	if (n == 0 && i <= last)
-			return (long)last;
+			return (Py_LONG)last;
 		for (j = last-n; j >= i; --j)
 			if (s[j] == sub[0] && memcmp(&s[j], sub, n) == 0)
-				return (long)j;
+				return (Py_LONG)j;
 	}
 	
 	return -1;
@@ -940,7 +940,7 @@ Return -1 on failure.";
 static PyObject *
 string_find(PyStringObject *self, PyObject *args)
 {
-	long result = string_find_internal(self, args, +1);
+	Py_LONG result = string_find_internal(self, args, +1);
 	if (result == -2)
 		return NULL;
 	return PyInt_FromLong(result);
@@ -955,7 +955,7 @@ Like S.find() but raise ValueError when the substring is not found.";
 static PyObject *
 string_index(PyStringObject *self, PyObject *args)
 {
-	long result = string_find_internal(self, args, +1);
+	Py_LONG result = string_find_internal(self, args, +1);
 	if (result == -2)
 		return NULL;
 	if (result == -1) {
@@ -979,7 +979,7 @@ Return -1 on failure.";
 static PyObject *
 string_rfind(PyStringObject *self, PyObject *args)
 {
-	long result = string_find_internal(self, args, -1);
+	Py_LONG result = string_find_internal(self, args, -1);
 	if (result == -2)
 		return NULL;
 	return PyInt_FromLong(result);
@@ -994,7 +994,7 @@ Like S.rfind() but raise ValueError when the substring is not found.";
 static PyObject *
 string_rindex(PyStringObject *self, PyObject *args)
 {
-	long result = string_find_internal(self, args, -1);
+	Py_LONG result = string_find_internal(self, args, -1);
 	if (result == -2)
 		return NULL;
 	if (result == -1) {
@@ -1254,7 +1254,7 @@ string_count(PyStringObject *self, PyObject *args)
 		i = 0;
 	m = last + 1 - n;
 	if (n == 0)
-		return PyInt_FromLong((long) (m-i));
+		return PyInt_FromLong((Py_LONG) (m-i));
 
 	r = 0;
 	while (i < m) {
@@ -1265,7 +1265,7 @@ string_count(PyStringObject *self, PyObject *args)
 			i++;
 		}
 	}
-	return PyInt_FromLong((long) r);
+	return PyInt_FromLong((Py_LONG) r);
 }
 
 
@@ -2616,12 +2616,12 @@ formatint(char *buf, size_t buflen, int flags,
 	   worst case length = 3 + 19 (worst len of INT_MAX on 64-bit machine)
 	   + 1 + 1 = 24 */
 	char fmt[64];	/* plenty big enough! */
-	long x;
+	Py_LONG x;
 	if (!PyArg_Parse(v, "l;int argument required", &x))
 		return -1;
 	if (prec < 0)
 		prec = 1;
-	sprintf(fmt, "%%%s.%dl%c", (flags&F_ALT) ? "#" : "", prec, type);
+	sprintf(fmt, "%%%s.%dll%c", (flags&F_ALT) ? "#" : "", prec, type);
 	/* buf = '+'/'-'/'0'/'0x' + '[0-9]'*max(prec, len(x in octal))
 	   worst case buf = '0x' + [0-9]*prec, where prec >= 11 */
 	if (buflen <= 13 || buflen <= (size_t)2 + (size_t)prec) {

@@ -258,7 +258,7 @@ sys_getrefcount(PyObject *self, PyObject *args)
 static PyObject *
 sys_gettotalrefcount(PyObject *self, PyObject *args)
 {
-	extern long _Py_RefTotal;
+	extern Py_LONG _Py_RefTotal;
 	if (!PyArg_ParseTuple(args, ":gettotalrefcount"))
 		return NULL;
 	return PyInt_FromLong(_Py_RefTotal);
@@ -496,7 +496,7 @@ _PySys_Init(void)
 	{
 		/* Assumes that longs are at least 2 bytes long.
 		   Should be safe! */
-		unsigned long number = 1;
+		unsigned Py_LONG number = 1;
 		char *value;
 
 		s = (char *) &number;

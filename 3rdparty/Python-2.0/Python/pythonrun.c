@@ -214,7 +214,7 @@ Py_Finalize(void)
 #endif
 
 #ifdef Py_REF_DEBUG
-	fprintf(stderr, "[%ld refs]\n", _Py_RefTotal);
+	fprintf(stderr, "[%lld refs]\n", _Py_RefTotal);
 #endif
 
 #ifdef Py_TRACE_REFS
@@ -479,7 +479,7 @@ PyRun_InteractiveLoop(FILE *fp, char *filename)
 	for (;;) {
 		ret = PyRun_InteractiveOne(fp, filename);
 #ifdef Py_REF_DEBUG
-		fprintf(stderr, "[%ld refs]\n", _Py_RefTotal);
+		fprintf(stderr, "[%lld refs]\n", _Py_RefTotal);
 #endif
 		if (ret == E_EOF)
 			return 0;
@@ -566,17 +566,11 @@ PyRun_SimpleFileEx(FILE *fp, char *filename, int closeit)
 	    || PyMac_getfiletype(filename) == 'APPL'
 #endif /* macintosh */
 		) {
-		/* Try to run a pyc file. First, re-open in binary */
+		/* The port does not run a compiled file. It closes the file when
+		   asked and fails without setting an error (0x0054ec54). */
 		if (closeit)
 			fclose(fp);
-		if( (fp = fopen(filename, "rb")) == NULL ) {
-			fprintf(stderr, "python: Can't reopen .pyc file\n");
-			return -1;
-		}
-		/* Turn on optimization if a .pyo file is given */
-		if (strcmp(ext, ".pyo") == 0)
-			Py_OptimizeFlag = 1;
-		v = run_pyc_file(fp, filename, d, d);
+		return -1;
 	} else {
 		v = PyRun_FileEx(fp, filename, Py_file_input, d, d, closeit);
 	}
@@ -593,7 +587,7 @@ PyRun_SimpleFileEx(FILE *fp, char *filename, int closeit)
 int
 PyRun_SimpleString(char *command)
 {
-	PyObject *m, *d, *v;
+	PyObject *m, *d, *v, *f;
 	m = PyImport_AddModule("__main__");
 	if (m == NULL)
 		return -1;
@@ -603,6 +597,11 @@ PyRun_SimpleString(char *command)
 		PyErr_Print();
 		return -1;
 	}
+	/* The port writes the result and a newline to sys.stdout, without testing the file or
+	   either write's result. */
+	f = PySys_GetObject("stdout");
+	PyFile_WriteObject(v, f, Py_PRINT_RAW);
+	PyFile_WriteString("\n", f);
 	Py_DECREF(v);
 	if (Py_FlushLine())
 		PyErr_Clear();
@@ -613,7 +612,7 @@ static int
 parse_syntax_error(PyObject *err, PyObject **message, char **filename,
 		   int *lineno, int *offset, char **text)
 {
-	long hold;
+	Py_LONG hold;
 	PyObject *v;
 
 	/* old style errors */
@@ -895,8 +894,8 @@ run_pyc_file(FILE *fp, char *filename, PyObject *globals, PyObject *locals)
 {
 	PyCodeObject *co;
 	PyObject *v;
-	long magic;
-	long PyImport_GetMagicNumber(void);
+	Py_LONG magic;
+	Py_LONG PyImport_GetMagicNumber(void);
 
 	magic = PyMarshal_ReadLongFromFile(fp);
 	if (magic != PyImport_GetMagicNumber()) {

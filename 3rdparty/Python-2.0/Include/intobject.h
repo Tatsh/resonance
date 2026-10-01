@@ -22,7 +22,7 @@ extern "C" {
 
 typedef struct {
     PyObject_HEAD
-    long ob_ival;
+    Py_LONG ob_ival;
 } PyIntObject;
 
 extern DL_IMPORT(PyTypeObject) PyInt_Type;
@@ -31,9 +31,9 @@ extern DL_IMPORT(PyTypeObject) PyInt_Type;
 
 extern DL_IMPORT(PyObject *) PyInt_FromString(char*, char**, int);
 extern DL_IMPORT(PyObject *) PyInt_FromUnicode(Py_UNICODE*, int, int);
-extern DL_IMPORT(PyObject *) PyInt_FromLong(long);
-extern DL_IMPORT(long) PyInt_AsLong(PyObject *);
-extern DL_IMPORT(long) PyInt_GetMax(void);
+extern DL_IMPORT(PyObject *) PyInt_FromLong(Py_LONG);
+extern DL_IMPORT(Py_LONG) PyInt_AsLong(PyObject *);
+extern DL_IMPORT(Py_LONG) PyInt_GetMax(void);
 
 
 /*
@@ -59,8 +59,8 @@ extern DL_IMPORT(PyIntObject) _Py_ZeroStruct, _Py_TrueStruct; /* Don't use these
  * into the main Python shared library/DLL.  Guido thinks I'm weird for
  * building it this way.  :-)  [cjh]
  */
-extern DL_IMPORT(unsigned long) PyOS_strtoul(char *, char **, int);
-extern DL_IMPORT(long) PyOS_strtol(char *, char **, int);
+extern DL_IMPORT(unsigned Py_LONG) PyOS_strtoul(char *, char **, int);
+extern DL_IMPORT(Py_LONG) PyOS_strtol(char *, char **, int);
 
 #ifdef __cplusplus
 }

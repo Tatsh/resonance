@@ -190,7 +190,7 @@ typedef int (*setattrfunc)(PyObject *, char *, PyObject *);
 typedef int (*setattrofunc)(PyObject *, PyObject *, PyObject *);
 typedef int (*cmpfunc)(PyObject *, PyObject *);
 typedef PyObject *(*reprfunc)(PyObject *);
-typedef long (*hashfunc)(PyObject *);
+typedef Py_LONG (*hashfunc)(PyObject *);
 
 typedef struct _typeobject {
 	PyObject_VAR_HEAD
@@ -224,7 +224,7 @@ typedef struct _typeobject {
 	PyBufferProcs *tp_as_buffer;
 	
 	/* Flags to define presence of optional/expanded features */
-	long tp_flags;
+	Py_LONG tp_flags;
 
 	char *tp_doc; /* Documentation string */
 
@@ -235,8 +235,8 @@ typedef struct _typeobject {
 	inquiry tp_clear;
 
 	/* More spares */
-	long tp_xxx7;
-	long tp_xxx8;
+	Py_LONG tp_xxx7;
+	Py_LONG tp_xxx8;
 
 #ifdef COUNT_ALLOCS
 	/* these must be last */
@@ -262,7 +262,7 @@ extern DL_IMPORT(int) PyObject_HasAttrString(PyObject *, char *);
 extern DL_IMPORT(PyObject *) PyObject_GetAttr(PyObject *, PyObject *);
 extern DL_IMPORT(int) PyObject_SetAttr(PyObject *, PyObject *, PyObject *);
 extern DL_IMPORT(int) PyObject_HasAttr(PyObject *, PyObject *);
-extern DL_IMPORT(long) PyObject_Hash(PyObject *);
+extern DL_IMPORT(Py_LONG) PyObject_Hash(PyObject *);
 extern DL_IMPORT(int) PyObject_IsTrue(PyObject *);
 extern DL_IMPORT(int) PyObject_Not(PyObject *);
 extern DL_IMPORT(int) PyCallable_Check(PyObject *);
@@ -277,8 +277,8 @@ extern DL_IMPORT(void) Py_ReprLeave(PyObject *);
 extern PyObject *_PyCompareState_Key;
 
 /* Helpers for hash functions */
-extern DL_IMPORT(long) _Py_HashDouble(double);
-extern DL_IMPORT(long) _Py_HashPointer(void*);
+extern DL_IMPORT(Py_LONG) _Py_HashDouble(double);
+extern DL_IMPORT(Py_LONG) _Py_HashPointer(void*);
 
 /* Flag bits for printing: */
 #define Py_PRINT_RAW	1	/* No string quotes etc. */
@@ -307,20 +307,20 @@ given type object has a specified feature.
 */
 
 /* PyBufferProcs contains bf_getcharbuffer */
-#define Py_TPFLAGS_HAVE_GETCHARBUFFER  (1L<<0)
+#define Py_TPFLAGS_HAVE_GETCHARBUFFER  (1LL<<0)
 
 /* PySequenceMethods contains sq_contains */
-#define Py_TPFLAGS_HAVE_SEQUENCE_IN (1L<<1)
+#define Py_TPFLAGS_HAVE_SEQUENCE_IN (1LL<<1)
 
 /* Objects which participate in garbage collection (see objimp.h) */
 #ifdef WITH_CYCLE_GC
-#define Py_TPFLAGS_GC (1L<<2)
+#define Py_TPFLAGS_GC (1LL<<2)
 #else
 #define Py_TPFLAGS_GC 0
 #endif
 
 /* PySequenceMethods and PyNumberMethods contain in-place operators */
-#define Py_TPFLAGS_HAVE_INPLACEOPS (1L<<3)
+#define Py_TPFLAGS_HAVE_INPLACEOPS (1LL<<3)
 
 #define Py_TPFLAGS_DEFAULT  (Py_TPFLAGS_HAVE_GETCHARBUFFER | \
                              Py_TPFLAGS_HAVE_SEQUENCE_IN | \
@@ -386,7 +386,7 @@ extern DL_IMPORT(void) inc_count(PyTypeObject *);
 
 #ifdef Py_REF_DEBUG
 
-extern DL_IMPORT(long) _Py_RefTotal;
+extern DL_IMPORT(Py_LONG) _Py_RefTotal;
 
 #ifndef Py_TRACE_REFS
 #ifdef COUNT_ALLOCS

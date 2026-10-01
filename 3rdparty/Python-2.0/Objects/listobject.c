@@ -906,7 +906,7 @@ struct SamplesortStackNode {
    is undesirable, so cutoff values are canned in the "cutoff" table
    below:  cutoff[i] is the smallest N such that k == CUTOFFBASE + i. */
 #define CUTOFFBASE 4
-static long cutoff[] = {
+static Py_LONG cutoff[] = {
 	43,        /* smallest N such that k == 4 */
 	106,       /* etc */
 	250,
@@ -1343,7 +1343,7 @@ listindex(PyListObject *self, PyObject *args)
 		return NULL;
 	for (i = 0; i < self->ob_size; i++) {
 		if (PyObject_Compare(self->ob_item[i], v) == 0)
-			return PyInt_FromLong((long)i);
+			return PyInt_FromLong((Py_LONG)i);
 		if (PyErr_Occurred())
 			return NULL;
 	}
@@ -1366,7 +1366,7 @@ listcount(PyListObject *self, PyObject *args)
 		if (PyErr_Occurred())
 			return NULL;
 	}
-	return PyInt_FromLong((long)count);
+	return PyInt_FromLong((Py_LONG)count);
 }
 
 static PyObject *

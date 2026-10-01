@@ -48,6 +48,40 @@
    types.py therefore takes its NameError branch. */
 #define WITHOUT_COMPLEX
 
+/* fileobject.c sizes reads without fstat. file_read at 0x005f5138 inlines new_buffersize as the
+   chunk arithmetic alone, and the file's code does not call fstat, lseek, or ftell. */
+#define DONT_HAVE_FSTAT
+
+/* The port's build stamp. Py_GetBuildInfo at 0x006371f0 formats build 0 with "Oct 12 2001"
+   (0x00841af0) and "12:05:12" (0x00841b00) for sys.version. */
+#define DATE "Oct 12 2001"
+#define TIME "12:05:12"
+
+/* The port's compiler stamp. Py_GetCompiler at 0x0063f1d0 returns "\n[GCC 2.95.2 v2]"
+   (0x00842480). Py_GetVersion places the string in sys.version. */
+#define COMPILER "\n[GCC 2.95.2 v2]"
+
+/* The port's compiler gave the C long 64 bits. The image shows the width in PyInt_AsLong at
+   0x00581c00 (an ld of ob_ival) and int_add at 0x00581d98 (a daddu with a 64-bit overflow test).
+   The n32 toolchain retains a 32-bit long and rejects -mlong64. The interpreter therefore writes
+   its long as Py_LONG, and the width that upstream reads from the host follows Py_LONG. int_lshift
+   at 0x00581f38 compares the shift count against 64. The limits are 32-bit nonetheless.
+   PyInt_GetMax at 0x00581cc8 returns 0x7fffffff, and sysmodule.c stores the result as maxint. The
+   port's C library header retained the 32-bit values. */
+#define Py_LONG long long
+#define SIZEOF_LONG 8
+#define PY_LONG_BIT 64
+#define PY_LONG_MAX 0x7fffffffLL
+#define PY_LONG_MIN (-PY_LONG_MAX - 1)
+#define PY_ULONG_MAX 0xffffffffULL
+
+/* Upstream's PC/config.h defines the 64-bit integer type and its width, and the port's
+   configuration descends from it. PyLong_AsVoidPtr at 0x00577718 inlines PyLong_AsLong, sign test
+   included. PyLong_AsLongLong forwards to PyLong_AsLong only when the two widths match. */
+#define HAVE_LONG_LONG 1
+#define LONG_LONG long long
+#define SIZEOF_LONG_LONG 8
+
 #ifdef __cplusplus
 #include "os/heap.h"
 

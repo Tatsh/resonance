@@ -68,7 +68,7 @@ c_setitem(arrayobject *ap, int i, PyObject *v)
 static PyObject *
 b_getitem(arrayobject *ap, int i)
 {
-	long x = ((char *)ap->ob_item)[i];
+	Py_LONG x = ((char *)ap->ob_item)[i];
 	if (x >= 128)
 		x -= 256;
 	return PyInt_FromLong(x);
@@ -101,7 +101,7 @@ b_setitem(arrayobject *ap, int i, PyObject *v)
 static PyObject *
 BB_getitem(arrayobject *ap, int i)
 {
-	long x = ((unsigned char *)ap->ob_item)[i];
+	Py_LONG x = ((unsigned char *)ap->ob_item)[i];
 	return PyInt_FromLong(x);
 }
 
@@ -120,7 +120,7 @@ BB_setitem(arrayobject *ap, int i, PyObject *v)
 static PyObject *
 h_getitem(arrayobject *ap, int i)
 {
-	return PyInt_FromLong((long) ((short *)ap->ob_item)[i]);
+	return PyInt_FromLong((Py_LONG) ((short *)ap->ob_item)[i]);
 }
 
 static int
@@ -138,7 +138,7 @@ h_setitem(arrayobject *ap, int i, PyObject *v)
 static PyObject *
 HH_getitem(arrayobject *ap, int i)
 {
-	return PyInt_FromLong((long) ((unsigned short *)ap->ob_item)[i]);
+	return PyInt_FromLong((Py_LONG) ((unsigned short *)ap->ob_item)[i]);
 }
 
 static int
@@ -167,7 +167,7 @@ HH_setitem(arrayobject *ap, int i, PyObject *v)
 static PyObject *
 i_getitem(arrayobject *ap, int i)
 {
-	return PyInt_FromLong((long) ((int *)ap->ob_item)[i]);
+	return PyInt_FromLong((Py_LONG) ((int *)ap->ob_item)[i]);
 }
 
 static int
@@ -186,20 +186,20 @@ static PyObject *
 II_getitem(arrayobject *ap, int i)
 {
 	return PyLong_FromUnsignedLong(
-		(unsigned long) ((unsigned int *)ap->ob_item)[i]);
+		(unsigned Py_LONG) ((unsigned int *)ap->ob_item)[i]);
 }
 
 static int
 II_setitem(arrayobject *ap, int i, PyObject *v)
 {
-	unsigned long x;
+	unsigned Py_LONG x;
 	if (PyLong_Check(v)) {
 		x = PyLong_AsUnsignedLong(v);
-		if (x == (unsigned long) -1 && PyErr_Occurred())
+		if (x == (unsigned Py_LONG) -1 && PyErr_Occurred())
 			return -1;
 	}
 	else {
-		long y;
+		Py_LONG y;
 		if (!PyArg_Parse(v, "l;array item must be integer", &y))
 			return -1;
 		if (y < 0) {
@@ -207,7 +207,7 @@ II_setitem(arrayobject *ap, int i, PyObject *v)
 				"unsigned int is less than minimum");
 			return -1;
 		}
-		x = (unsigned long)y;
+		x = (unsigned Py_LONG)y;
 
 	}
 	if (x > UINT_MAX) {
@@ -224,37 +224,37 @@ II_setitem(arrayobject *ap, int i, PyObject *v)
 static PyObject *
 l_getitem(arrayobject *ap, int i)
 {
-	return PyInt_FromLong(((long *)ap->ob_item)[i]);
+	return PyInt_FromLong(((Py_LONG *)ap->ob_item)[i]);
 }
 
 static int
 l_setitem(arrayobject *ap, int i, PyObject *v)
 {
-	long x;
+	Py_LONG x;
 	if (!PyArg_Parse(v, "l;array item must be integer", &x))
 		return -1;
 	if (i >= 0)
-		     ((long *)ap->ob_item)[i] = x;
+		     ((Py_LONG *)ap->ob_item)[i] = x;
 	return 0;
 }
 
 static PyObject *
 LL_getitem(arrayobject *ap, int i)
 {
-	return PyLong_FromUnsignedLong(((unsigned long *)ap->ob_item)[i]);
+	return PyLong_FromUnsignedLong(((unsigned Py_LONG *)ap->ob_item)[i]);
 }
 
 static int
 LL_setitem(arrayobject *ap, int i, PyObject *v)
 {
-	unsigned long x;
+	unsigned Py_LONG x;
 	if (PyLong_Check(v)) {
 		x = PyLong_AsUnsignedLong(v);
-		if (x == (unsigned long) -1 && PyErr_Occurred())
+		if (x == (unsigned Py_LONG) -1 && PyErr_Occurred())
 			return -1;
 	}
 	else {
-		long y;
+		Py_LONG y;
 		if (!PyArg_Parse(v, "l;array item must be integer", &y))
 			return -1;
 		if (y < 0) {
@@ -262,17 +262,17 @@ LL_setitem(arrayobject *ap, int i, PyObject *v)
 				"unsigned long is less than minimum");
 			return -1;
 		}
-		x = (unsigned long)y;
+		x = (unsigned Py_LONG)y;
 
 	}
-	if (x > ULONG_MAX) {
+	if (x > PY_ULONG_MAX) {
 		PyErr_SetString(PyExc_OverflowError,
 			"unsigned long is greater than maximum");
 		return -1;
 	}
 
 	if (i >= 0)
-		((unsigned long *)ap->ob_item)[i] = x;
+		((unsigned Py_LONG *)ap->ob_item)[i] = x;
 	return 0;
 }
 
@@ -319,8 +319,8 @@ static struct arraydescr descriptors[] = {
 	{'H', sizeof(short), HH_getitem, HH_setitem},
 	{'i', sizeof(int), i_getitem, i_setitem},
 	{'I', sizeof(int), II_getitem, II_setitem},
-	{'l', sizeof(long), l_getitem, l_setitem},
-	{'L', sizeof(long), LL_getitem, LL_setitem},
+	{'l', sizeof(Py_LONG), l_getitem, l_setitem},
+	{'L', sizeof(Py_LONG), LL_getitem, LL_setitem},
 	{'f', sizeof(float), f_getitem, f_setitem},
 	{'d', sizeof(double), d_getitem, d_setitem},
 	{'\0', 0, 0, 0} /* Sentinel */
@@ -642,7 +642,7 @@ array_count(arrayobject *self, PyObject *args)
 		if (PyErr_Occurred())
 			return NULL;
 	}
-	return PyInt_FromLong((long)count);
+	return PyInt_FromLong((Py_LONG)count);
 }
 
 static char count_doc [] =
@@ -662,7 +662,7 @@ array_index(arrayobject *self, PyObject *args)
 		PyObject *selfi = getarrayitem((PyObject *)self, i);
 		if (PyObject_Compare(selfi, v) == 0) {
 			Py_DECREF(selfi);
-			return PyInt_FromLong((long)i);
+			return PyInt_FromLong((Py_LONG)i);
 		}
 		Py_DECREF(selfi);
 		if (PyErr_Occurred())
@@ -806,7 +806,7 @@ array_buffer_info(arrayobject *self, PyObject *args)
 		return NULL;
 
 	PyTuple_SET_ITEM(retval, 0, PyLong_FromVoidPtr(self->ob_item));
-	PyTuple_SET_ITEM(retval, 1, PyInt_FromLong((long)(self->ob_size)));
+	PyTuple_SET_ITEM(retval, 1, PyInt_FromLong((Py_LONG)(self->ob_size)));
 
 	return retval;
 }
@@ -1167,7 +1167,7 @@ array_getattr(arrayobject *a, char *name)
 		return PyString_FromStringAndSize(&tc, 1);
 	}
 	if (strcmp(name, "itemsize") == 0) {
-		return PyInt_FromLong((long)a->ob_descr->itemsize);
+		return PyInt_FromLong((Py_LONG)a->ob_descr->itemsize);
 	}
 	if (strcmp(name, "__members__") == 0) {
 		PyObject *list = PyList_New(2);

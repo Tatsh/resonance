@@ -5,15 +5,15 @@
 
 typedef struct {
 	PyObject_HEAD
-	long	start;
-	long	step;
-	long	len;
+	Py_LONG	start;
+	Py_LONG	step;
+	Py_LONG	len;
 	int	reps;
 } rangeobject;
 
 
 PyObject *
-PyRange_New(long start, long len, long step, int reps)
+PyRange_New(Py_LONG start, Py_LONG len, Py_LONG step, int reps)
 {
 	rangeobject *obj = PyObject_NEW(rangeobject, &PyRange_Type);
 
@@ -59,15 +59,15 @@ range_repr(rangeobject *r)
 	char buf2[250];
 
 	if (r->start == 0 && r->step == 1)
-		sprintf(buf1, "xrange(%ld)", r->start + r->len * r->step);
+		sprintf(buf1, "xrange(%lld)", r->start + r->len * r->step);
 
 	else if (r->step == 1)
-		sprintf(buf1, "xrange(%ld, %ld)",
+		sprintf(buf1, "xrange(%lld, %lld)",
 			r->start,
 			r->start + r->len * r->step);
 
 	else
-		sprintf(buf1, "xrange(%ld, %ld, %ld)",
+		sprintf(buf1, "xrange(%lld, %lld, %lld)",
 			r->start,
 			r->start + r->len * r->step,
 			r->step);
@@ -188,7 +188,7 @@ range_getattr(rangeobject *r, char *name)
 static int
 range_contains(rangeobject *r, PyObject *obj)
 {
-	long num = PyInt_AsLong(obj);
+	Py_LONG num = PyInt_AsLong(obj);
 
 	if (num < 0 && PyErr_Occurred())
 		return -1;

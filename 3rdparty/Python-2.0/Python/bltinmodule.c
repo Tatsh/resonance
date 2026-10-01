@@ -147,7 +147,7 @@ builtin_callable(PyObject *self, PyObject *args)
 
 	if (!PyArg_ParseTuple(args, "O:callable", &v))
 		return NULL;
-	return PyInt_FromLong((long)PyCallable_Check(v));
+	return PyInt_FromLong((Py_LONG)PyCallable_Check(v));
 }
 
 static char callable_doc[] =
@@ -265,7 +265,7 @@ is true.  If function is None, return a list of items that are true.";
 static PyObject *
 builtin_chr(PyObject *self, PyObject *args)
 {
-	long x;
+	Py_LONG x;
 	char s[1];
 
 	if (!PyArg_ParseTuple(args, "l:chr", &x))
@@ -288,7 +288,7 @@ Return a string of one character with ordinal i; 0 <= i < 256.";
 static PyObject *
 builtin_unichr(PyObject *self, PyObject *args)
 {
-	long x;
+	Py_LONG x;
 	Py_UNICODE s[1];
 
 	if (!PyArg_ParseTuple(args, "l:unichr", &x))
@@ -318,7 +318,7 @@ builtin_cmp(PyObject *self, PyObject *args)
 		return NULL;
 	if (PyObject_Cmp(a, b, &c) < 0)
 		return NULL;
-	return PyInt_FromLong((long)c);
+	return PyInt_FromLong((Py_LONG)c);
 }
 
 static char cmp_doc[] =
@@ -1132,7 +1132,7 @@ static PyObject *
 builtin_hash(PyObject *self, PyObject *args)
 {
 	PyObject *v;
-	long x;
+	Py_LONG x;
 
 	if (!PyArg_ParseTuple(args, "O:hash", &v))
 		return NULL;
@@ -1317,7 +1317,7 @@ static PyObject *
 builtin_len(PyObject *self, PyObject *args)
 {
 	PyObject *v;
-	long res;
+	Py_LONG res;
 
 	if (!PyArg_ParseTuple(args, "O:len", &v))
 		return NULL;
@@ -1526,7 +1526,7 @@ static PyObject *
 builtin_ord(PyObject *self, PyObject *args)
 {
 	PyObject *obj;
-	long ord;
+	Py_LONG ord;
 	int size;
 
 	if (!PyArg_ParseTuple(args, "O:ord", &obj))
@@ -1535,11 +1535,11 @@ builtin_ord(PyObject *self, PyObject *args)
 	if (PyString_Check(obj)) {
 		size = PyString_GET_SIZE(obj);
 		if (size == 1)
-			ord = (long)((unsigned char)*PyString_AS_STRING(obj));
+			ord = (Py_LONG)((unsigned char)*PyString_AS_STRING(obj));
 	} else if (PyUnicode_Check(obj)) {
 		size = PyUnicode_GET_SIZE(obj);
 		if (size == 1)
-			ord = (long)*PyUnicode_AS_UNICODE(obj);
+			ord = (Py_LONG)*PyUnicode_AS_UNICODE(obj);
 	} else {
 		PyErr_Format(PyExc_TypeError,
 			     "expected string or Unicode character, " \
@@ -1582,8 +1582,8 @@ equivalent to (x**y) % z, but may be more efficient (e.g. for longs).";
  * required.  Return a value < 0 if & only if the true value is too
  * large to fit in a signed long.
  */
-static long
-get_len_of_range(long lo, long hi, long step)
+static Py_LONG
+get_len_of_range(Py_LONG lo, Py_LONG hi, Py_LONG step)
 {
 	/* -------------------------------------------------------------
 	If lo >= hi, the range is empty.
@@ -1597,12 +1597,12 @@ get_len_of_range(long lo, long hi, long step)
 	hi-lo-1 = M-(-M-1)-1 = 2*M.  Therefore unsigned long has enough
 	precision to compute the RHS exactly.
 	---------------------------------------------------------------*/
-	long n = 0;
+	Py_LONG n = 0;
 	if (lo < hi) {
-		unsigned long uhi = (unsigned long)hi;
-		unsigned long ulo = (unsigned long)lo;
-		unsigned long diff = uhi - ulo - 1;
-		n = (long)(diff / (unsigned long)step + 1);
+		unsigned Py_LONG uhi = (unsigned Py_LONG)hi;
+		unsigned Py_LONG ulo = (unsigned Py_LONG)lo;
+		unsigned Py_LONG diff = uhi - ulo - 1;
+		n = (Py_LONG)(diff / (unsigned Py_LONG)step + 1);
 	}
 	return n;
 }
@@ -1610,8 +1610,8 @@ get_len_of_range(long lo, long hi, long step)
 static PyObject *
 builtin_range(PyObject *self, PyObject *args)
 {
-	long ilow = 0, ihigh = 0, istep = 1;
-	long bign;
+	Py_LONG ilow = 0, ihigh = 0, istep = 1;
+	Py_LONG bign;
 	int i, n;
 
 	PyObject *v;
@@ -1637,7 +1637,7 @@ builtin_range(PyObject *self, PyObject *args)
 	else
 		bign = get_len_of_range(ihigh, ilow, -istep);
 	n = (int)bign;
-	if (bign < 0 || (long)n != bign) {
+	if (bign < 0 || (Py_LONG)n != bign) {
 		PyErr_SetString(PyExc_OverflowError,
 				"range() has too many items");
 		return NULL;
@@ -1670,8 +1670,8 @@ These are exactly the valid indices for a list of 4 elements.";
 static PyObject *
 builtin_xrange(PyObject *self, PyObject *args)
 {
-	long ilow = 0, ihigh = 0, istep = 1;
-	long n;
+	Py_LONG ilow = 0, ihigh = 0, istep = 1;
+	Py_LONG n;
 
 	if (PyTuple_Size(args) <= 1) {
 		if (!PyArg_ParseTuple(args,

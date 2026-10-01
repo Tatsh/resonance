@@ -497,20 +497,20 @@ _pystat_fromstructstat(STRUCT_STAT st)
 	if (v == NULL)
 		return NULL;
 
-	PyTuple_SetItem(v, 0, PyInt_FromLong((long)st.st_mode));
+	PyTuple_SetItem(v, 0, PyInt_FromLong((Py_LONG)st.st_mode));
 #ifdef HAVE_LARGEFILE_SUPPORT
 	PyTuple_SetItem(v, 1, PyLong_FromLongLong((LONG_LONG)st.st_ino));
 #else
-	PyTuple_SetItem(v, 1, PyInt_FromLong((long)st.st_ino));
+	PyTuple_SetItem(v, 1, PyInt_FromLong((Py_LONG)st.st_ino));
 #endif
 #if defined(HAVE_LONG_LONG) && !defined(MS_WINDOWS)
 	PyTuple_SetItem(v, 2, PyLong_FromLongLong((LONG_LONG)st.st_dev));
 #else
-	PyTuple_SetItem(v, 2, PyInt_FromLong((long)st.st_dev));
+	PyTuple_SetItem(v, 2, PyInt_FromLong((Py_LONG)st.st_dev));
 #endif
-	PyTuple_SetItem(v, 3, PyInt_FromLong((long)st.st_nlink));
-	PyTuple_SetItem(v, 4, PyInt_FromLong((long)st.st_uid));
-	PyTuple_SetItem(v, 5, PyInt_FromLong((long)st.st_gid));
+	PyTuple_SetItem(v, 3, PyInt_FromLong((Py_LONG)st.st_nlink));
+	PyTuple_SetItem(v, 4, PyInt_FromLong((Py_LONG)st.st_uid));
+	PyTuple_SetItem(v, 5, PyInt_FromLong((Py_LONG)st.st_gid));
 #ifdef HAVE_LARGEFILE_SUPPORT
 	PyTuple_SetItem(v, 6, PyLong_FromLongLong((LONG_LONG)st.st_size));
 #else
@@ -521,9 +521,9 @@ _pystat_fromstructstat(STRUCT_STAT st)
 	PyTuple_SetItem(v, 8, PyLong_FromLongLong((LONG_LONG)st.st_mtime));
 	PyTuple_SetItem(v, 9, PyLong_FromLongLong((LONG_LONG)st.st_ctime));
 #else
-	PyTuple_SetItem(v, 7, PyInt_FromLong((long)st.st_atime));
-	PyTuple_SetItem(v, 8, PyInt_FromLong((long)st.st_mtime));
-	PyTuple_SetItem(v, 9, PyInt_FromLong((long)st.st_ctime));
+	PyTuple_SetItem(v, 7, PyInt_FromLong((Py_LONG)st.st_atime));
+	PyTuple_SetItem(v, 8, PyInt_FromLong((Py_LONG)st.st_mtime));
+	PyTuple_SetItem(v, 9, PyInt_FromLong((Py_LONG)st.st_ctime));
 #endif
 
 	if (PyErr_Occurred()) {
@@ -543,15 +543,17 @@ posix_do_stat(PyObject *self, PyObject *args, char *format,
 	char *path;
 	int res;
 
-#ifdef MS_WIN32
+	/* The port retains the Windows path length check and trailing separator copy here, with a
+	   MAX_PATH of 250, although MS_WIN32 is not defined. */
+#ifndef MAX_PATH
+#define MAX_PATH	250
+#endif
       int pathlen;
       char pathcopy[MAX_PATH];
-#endif /* MS_WIN32 */
 
 	if (!PyArg_ParseTuple(args, format, &path))
 		return NULL;
 
-#ifdef MS_WIN32
 	pathlen = strlen(path);
 	/* the library call can blow up if the file name is too long! */
 	if (pathlen > MAX_PATH) {
@@ -571,7 +573,6 @@ posix_do_stat(PyObject *self, PyObject *args, char *format,
 			path = pathcopy;
 		}
 	}
-#endif /* MS_WIN32 */
 
 	Py_BEGIN_ALLOW_THREADS
 	res = (*statfunc)(path, &st);
@@ -601,7 +602,7 @@ posix_access(PyObject *self, PyObject *args)
 	Py_BEGIN_ALLOW_THREADS
 	res = access(path, mode);
 	Py_END_ALLOW_THREADS
-	return(PyInt_FromLong(res == 0 ? 1L : 0L));
+	return(PyInt_FromLong(res == 0 ? 1LL : 0LL));
 }
 
 #ifndef F_OK
@@ -800,6 +801,8 @@ posix_listdir(PyObject *self, PyObject *args)
 {
 	/* XXX Should redo this putting the (now four) versions of opendir
 	   in separate files instead of having them all here... */
+	/* The port does not list a directory. It returns a new empty list without reading its arguments. */
+	return PyList_New(0);
 #if defined(MS_WIN32) && !defined(HAVE_OPENDIR)
 
 	char *name;
@@ -1072,7 +1075,7 @@ posix_nice(PyObject *self, PyObject *args)
 	value = nice(increment);
 	if (value == -1)
 		return posix_error();
-	return PyInt_FromLong((long) value);
+	return PyInt_FromLong((Py_LONG) value);
 }
 #endif /* HAVE_NICE */
 
@@ -1119,7 +1122,7 @@ static PyObject *
 posix_system(PyObject *self, PyObject *args)
 {
 	char *command;
-	long sts;
+	Py_LONG sts;
 	if (!PyArg_ParseTuple(args, "s:system", &command))
 		return NULL;
 	Py_BEGIN_ALLOW_THREADS
@@ -1143,7 +1146,7 @@ posix_umask(PyObject *self, PyObject *args)
 	i = umask(i);
 	if (i < 0)
 		return posix_error();
-	return PyInt_FromLong((long)i);
+	return PyInt_FromLong((Py_LONG)i);
 }
 
 
@@ -1199,7 +1202,7 @@ static PyObject *
 posix_utime(PyObject *self, PyObject *args)
 {
 	char *path;
-	long atime, mtime;
+	Py_LONG atime, mtime;
 	int res;
 	PyObject* arg;
 
@@ -1520,7 +1523,7 @@ posix_spawnv(PyObject *self, PyObject *args)
 		return posix_error();
 	else
 #if SIZEOF_LONG == SIZEOF_VOID_P
-		return Py_BuildValue("l", (long) spawnval);
+		return Py_BuildValue("l", (Py_LONG) spawnval);
 #else
 		return Py_BuildValue("L", (LONG_LONG) spawnval);
 #endif
@@ -1628,7 +1631,7 @@ posix_spawnve(PyObject *self, PyObject *args)
 		(void) posix_error();
 	else
 #if SIZEOF_LONG == SIZEOF_VOID_P
-		res = Py_BuildValue("l", (long) spawnval);
+		res = Py_BuildValue("l", (Py_LONG) spawnval);
 #else
 		res = Py_BuildValue("L", (LONG_LONG) spawnval);
 #endif
@@ -1664,7 +1667,7 @@ posix_fork(PyObject *self, PyObject *args)
 		return posix_error();
 	if (pid == 0)
 		PyOS_AfterFork();
-	return PyInt_FromLong((long)pid);
+	return PyInt_FromLong((Py_LONG)pid);
 }
 #endif
 
@@ -1745,7 +1748,7 @@ posix_getegid(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":getegid"))
 		return NULL;
-	return PyInt_FromLong((long)getegid());
+	return PyInt_FromLong((Py_LONG)getegid());
 }
 #endif
 
@@ -1760,7 +1763,7 @@ posix_geteuid(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":geteuid"))
 		return NULL;
-	return PyInt_FromLong((long)geteuid());
+	return PyInt_FromLong((Py_LONG)geteuid());
 }
 #endif
 
@@ -1775,7 +1778,7 @@ posix_getgid(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":getgid"))
 		return NULL;
-	return PyInt_FromLong((long)getgid());
+	return PyInt_FromLong((Py_LONG)getgid());
 }
 #endif
 
@@ -1789,7 +1792,7 @@ posix_getpid(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":getpid"))
 		return NULL;
-	return PyInt_FromLong((long)getpid());
+	return PyInt_FromLong((Py_LONG)getpid());
 }
 
 
@@ -1822,7 +1825,7 @@ posix_getgroups(PyObject *self, PyObject *args)
                 PyObject *o;
                 int i;
                 for (i = 0; i < n; ++i) {
-                    o = PyInt_FromLong((long)grouplist[i]);
+                    o = PyInt_FromLong((Py_LONG)grouplist[i]);
                     if (o == NULL) {
                         Py_DECREF(result);
                         result = NULL;
@@ -1848,9 +1851,9 @@ posix_getpgrp(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, ":getpgrp"))
 		return NULL;
 #ifdef GETPGRP_HAVE_ARG
-	return PyInt_FromLong((long)getpgrp(0));
+	return PyInt_FromLong((Py_LONG)getpgrp(0));
 #else /* GETPGRP_HAVE_ARG */
-	return PyInt_FromLong((long)getpgrp());
+	return PyInt_FromLong((Py_LONG)getpgrp());
 #endif /* GETPGRP_HAVE_ARG */
 }
 #endif /* HAVE_GETPGRP */
@@ -1888,7 +1891,7 @@ posix_getppid(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":getppid"))
 		return NULL;
-	return PyInt_FromLong((long)getppid());
+	return PyInt_FromLong((Py_LONG)getppid());
 }
 #endif
 
@@ -1925,7 +1928,7 @@ posix_getuid(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":getuid"))
 		return NULL;
-	return PyInt_FromLong((long)getuid());
+	return PyInt_FromLong((Py_LONG)getuid());
 }
 #endif
 
@@ -2380,7 +2383,7 @@ _PyPopen(char *cmdstring, int mode, int n)
 	BOOL fSuccess;
 	int fd1, fd2, fd3;
 	FILE *f1, *f2, *f3;
-	long file_count;
+	Py_LONG file_count;
 	PyObject *f;
 
 	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -2437,7 +2440,7 @@ _PyPopen(char *cmdstring, int mode, int n)
 		 switch (mode & (_O_RDONLY | _O_TEXT | _O_BINARY | _O_WRONLY)) {
 		 case _O_WRONLY | _O_TEXT:
 			 /* Case for writing to child Stdin in text mode. */
-			 fd1 = _open_osfhandle((long)hChildStdinWrDup, mode);
+			 fd1 = _open_osfhandle((Py_LONG)hChildStdinWrDup, mode);
 			 f1 = _fdopen(fd1, "w");
 			 f = PyFile_FromFile(f1, cmdstring, "w", _PyPclose);
 			 PyFile_SetBufSize(f, 0);
@@ -2448,7 +2451,7 @@ _PyPopen(char *cmdstring, int mode, int n)
 
 		 case _O_RDONLY | _O_TEXT:
 			 /* Case for reading from child Stdout in text mode. */
-			 fd1 = _open_osfhandle((long)hChildStdoutRdDup, mode);
+			 fd1 = _open_osfhandle((Py_LONG)hChildStdoutRdDup, mode);
 			 f1 = _fdopen(fd1, "r");
 			 f = PyFile_FromFile(f1, cmdstring, "r", _PyPclose);
 			 PyFile_SetBufSize(f, 0);
@@ -2459,7 +2462,7 @@ _PyPopen(char *cmdstring, int mode, int n)
 
 		 case _O_RDONLY | _O_BINARY:
 			 /* Case for readinig from child Stdout in binary mode. */
-			 fd1 = _open_osfhandle((long)hChildStdoutRdDup, mode);
+			 fd1 = _open_osfhandle((Py_LONG)hChildStdoutRdDup, mode);
 			 f1 = _fdopen(fd1, "rb");
 			 f = PyFile_FromFile(f1, cmdstring, "rb", _PyPclose);
 			 PyFile_SetBufSize(f, 0);
@@ -2470,7 +2473,7 @@ _PyPopen(char *cmdstring, int mode, int n)
 
 		 case _O_WRONLY | _O_BINARY:
 			 /* Case for writing to child Stdin in binary mode. */
-			 fd1 = _open_osfhandle((long)hChildStdinWrDup, mode);
+			 fd1 = _open_osfhandle((Py_LONG)hChildStdinWrDup, mode);
 			 f1 = _fdopen(fd1, "wb");
 			 f = PyFile_FromFile(f1, cmdstring, "wb", _PyPclose);
 			 PyFile_SetBufSize(f, 0);
@@ -2496,9 +2499,9 @@ _PyPopen(char *cmdstring, int mode, int n)
 			 m2 = "wb";
 		 }
 
-		 fd1 = _open_osfhandle((long)hChildStdinWrDup, mode);
+		 fd1 = _open_osfhandle((Py_LONG)hChildStdinWrDup, mode);
 		 f1 = _fdopen(fd1, m2);
-		 fd2 = _open_osfhandle((long)hChildStdoutRdDup, mode);
+		 fd2 = _open_osfhandle((Py_LONG)hChildStdoutRdDup, mode);
 		 f2 = _fdopen(fd2, m1);
 		 p1 = PyFile_FromFile(f1, cmdstring, m2, _PyPclose);
 		 PyFile_SetBufSize(p1, 0);
@@ -2526,11 +2529,11 @@ _PyPopen(char *cmdstring, int mode, int n)
 			 m2 = "wb";
 		 }
 
-		 fd1 = _open_osfhandle((long)hChildStdinWrDup, mode);
+		 fd1 = _open_osfhandle((Py_LONG)hChildStdinWrDup, mode);
 		 f1 = _fdopen(fd1, m2);
-		 fd2 = _open_osfhandle((long)hChildStdoutRdDup, mode);
+		 fd2 = _open_osfhandle((Py_LONG)hChildStdoutRdDup, mode);
 		 f2 = _fdopen(fd2, m1);
-		 fd3 = _open_osfhandle((long)hChildStderrRdDup, mode);
+		 fd3 = _open_osfhandle((Py_LONG)hChildStderrRdDup, mode);
 		 f3 = _fdopen(fd3, m1);
 		 p1 = PyFile_FromFile(f1, cmdstring, m2, _PyPclose);
 		 p2 = PyFile_FromFile(f2, cmdstring, m1, _PyPclose);
@@ -2707,7 +2710,7 @@ static int _PyPclose(FILE *file)
 	DWORD exit_code;
 	HANDLE hProcess;
 	PyObject *procObj, *hProcessObj, *intObj, *fileObj;
-	long file_count;
+	Py_LONG file_count;
 #ifdef WITH_THREAD
 	PyInterpreterState* pInterpreterState;
 	PyThreadState* pThreadState;
@@ -3077,7 +3080,7 @@ posix_symlink(PyObject *self, PyObject *args)
 #endif /* HZ */
 	
 #if defined(PYCC_VACPP) && defined(PYOS_OS2)
-static long
+static Py_LONG
 system_uptime(void)
 {
     ULONG     value = 0;
@@ -3211,7 +3214,7 @@ posix_tcgetpgrp(PyObject *self, PyObject *args)
 	pgid = tcgetpgrp(fd);
 	if (pgid < 0)
 		return posix_error();
-	return PyInt_FromLong((long)pgid);
+	return PyInt_FromLong((Py_LONG)pgid);
 }
 #endif /* HAVE_TCGETPGRP */
 
@@ -3255,7 +3258,7 @@ posix_open(PyObject *self, PyObject *args)
 	Py_END_ALLOW_THREADS
 	if (fd < 0)
 		return posix_error_with_filename(file);
-	return PyInt_FromLong((long)fd);
+	return PyInt_FromLong((Py_LONG)fd);
 }
 
 
@@ -3294,7 +3297,7 @@ posix_dup(PyObject *self, PyObject *args)
 	Py_END_ALLOW_THREADS
 	if (fd < 0)
 		return posix_error();
-	return PyInt_FromLong((long)fd);
+	return PyInt_FromLong((Py_LONG)fd);
 }
 
 
@@ -3413,7 +3416,7 @@ posix_write(PyObject *self, PyObject *args)
 	Py_END_ALLOW_THREADS
 	if (size < 0)
 		return posix_error();
-	return PyInt_FromLong((long)size);
+	return PyInt_FromLong((Py_LONG)size);
 }
 
 
@@ -3965,28 +3968,28 @@ posix_fstatvfs(PyObject *self, PyObject *args)
 		return posix_error();
 #if !defined(HAVE_LARGEFILE_SUPPORT)
 	return Py_BuildValue("(llllllllll)",
-		    (long) st.f_bsize,
-		    (long) st.f_frsize,
-		    (long) st.f_blocks,
-		    (long) st.f_bfree,
-		    (long) st.f_bavail,
-		    (long) st.f_files,
-		    (long) st.f_ffree,
-		    (long) st.f_favail,
-		    (long) st.f_flag,
-		    (long) st.f_namemax);
+		    (Py_LONG) st.f_bsize,
+		    (Py_LONG) st.f_frsize,
+		    (Py_LONG) st.f_blocks,
+		    (Py_LONG) st.f_bfree,
+		    (Py_LONG) st.f_bavail,
+		    (Py_LONG) st.f_files,
+		    (Py_LONG) st.f_ffree,
+		    (Py_LONG) st.f_favail,
+		    (Py_LONG) st.f_flag,
+		    (Py_LONG) st.f_namemax);
 #else
 	return Py_BuildValue("(llLLLLLLll)",
-		    (long) st.f_bsize,
-		    (long) st.f_frsize,
+		    (Py_LONG) st.f_bsize,
+		    (Py_LONG) st.f_frsize,
 		    (LONG_LONG) st.f_blocks,
 		    (LONG_LONG) st.f_bfree,
 		    (LONG_LONG) st.f_bavail,
 		    (LONG_LONG) st.f_files,
 		    (LONG_LONG) st.f_ffree,
 		    (LONG_LONG) st.f_favail,
-		    (long) st.f_flag,
-		    (long) st.f_namemax);
+		    (Py_LONG) st.f_flag,
+		    (Py_LONG) st.f_namemax);
 #endif
 }
 #endif /* HAVE_FSTATVFS */
@@ -4015,28 +4018,28 @@ posix_statvfs(PyObject *self, PyObject *args)
 		return posix_error_with_filename(path);
 #if !defined(HAVE_LARGEFILE_SUPPORT)
 	return Py_BuildValue("(llllllllll)",
-		    (long) st.f_bsize,
-		    (long) st.f_frsize,
-		    (long) st.f_blocks,
-		    (long) st.f_bfree,
-		    (long) st.f_bavail,
-		    (long) st.f_files,
-		    (long) st.f_ffree,
-		    (long) st.f_favail,
-		    (long) st.f_flag,
-		    (long) st.f_namemax);
+		    (Py_LONG) st.f_bsize,
+		    (Py_LONG) st.f_frsize,
+		    (Py_LONG) st.f_blocks,
+		    (Py_LONG) st.f_bfree,
+		    (Py_LONG) st.f_bavail,
+		    (Py_LONG) st.f_files,
+		    (Py_LONG) st.f_ffree,
+		    (Py_LONG) st.f_favail,
+		    (Py_LONG) st.f_flag,
+		    (Py_LONG) st.f_namemax);
 #else	/* HAVE_LARGEFILE_SUPPORT */
 	return Py_BuildValue("(llLLLLLLll)",
-		    (long) st.f_bsize,
-		    (long) st.f_frsize,
+		    (Py_LONG) st.f_bsize,
+		    (Py_LONG) st.f_frsize,
 		    (LONG_LONG) st.f_blocks,
 		    (LONG_LONG) st.f_bfree,
 		    (LONG_LONG) st.f_bavail,
 		    (LONG_LONG) st.f_files,
 		    (LONG_LONG) st.f_ffree,
 		    (LONG_LONG) st.f_favail,
-		    (long) st.f_flag,
-		    (long) st.f_namemax);
+		    (Py_LONG) st.f_flag,
+		    (Py_LONG) st.f_namemax);
 #endif
 }
 #endif /* HAVE_STATVFS */
@@ -4136,7 +4139,7 @@ posix_tmpnam(PyObject *self, PyObject *args)
  */
 struct constdef {
     char *name;
-    long value;
+    Py_LONG value;
 };
 
 /* The image keeps the two messages below with no registered caller, so the helper is
@@ -4255,7 +4258,7 @@ posix_fpathconf(PyObject *self, PyObject *args)
 
     if (PyArg_ParseTuple(args, "iO&:fpathconf", &fd,
                          conv_path_confname, &name)) {
-        long limit;
+        Py_LONG limit;
 
         errno = 0;
         limit = fpathconf(fd, name);
@@ -4284,7 +4287,7 @@ posix_pathconf(PyObject *self, PyObject *args)
 
     if (PyArg_ParseTuple(args, "sO&:pathconf", &path,
                          conv_path_confname, &name)) {
-        long limit;
+        Py_LONG limit;
 
         errno = 0;
         limit = pathconf(path, name);
@@ -5149,28 +5152,28 @@ win32_startfile(PyObject *self, PyObject *args)
 }
 #endif
 
-/* The port registers twelve methods with no doc strings, in the order of the name run in the
-   image. The remaining entries are upstream only; with no table entry referencing them, the
-   compiler discards their bodies along with the doc strings. */
+/* The port registers twelve methods, in the order of the table at 0x007c7010, each with its
+   upstream doc string. The remaining entries are upstream only; with no table entry referencing
+   them, the compiler discards their bodies along with the doc strings. */
 static PyMethodDef posix_methods[] = {
-	{"listdir",	posix_listdir, METH_VARARGS, NULL},
-	{"lstat",	posix_lstat, METH_VARARGS, NULL},
-	{"stat",	posix_stat, METH_VARARGS, NULL},
-	{"getpid",	posix_getpid, METH_VARARGS, NULL},
-	{"open",	posix_open, METH_VARARGS, NULL},
-	{"close",	posix_close, METH_VARARGS, NULL},
-	{"lseek",	posix_lseek, METH_VARARGS, NULL},
-	{"read",	posix_read, METH_VARARGS, NULL},
-	{"write",	posix_write, METH_VARARGS, NULL},
-	{"fstat",	posix_fstat, METH_VARARGS, NULL},
-	{"isatty",	posix_isatty, METH_VARARGS, NULL},
-	{"abort",	posix_abort, METH_VARARGS, NULL},
+	{"listdir",	posix_listdir, METH_VARARGS, posix_listdir__doc__},
+	{"lstat",	posix_lstat, METH_VARARGS, posix_lstat__doc__},
+	{"stat",	posix_stat, METH_VARARGS, posix_stat__doc__},
+	{"getpid",	posix_getpid, METH_VARARGS, posix_getpid__doc__},
+	{"open",	posix_open, METH_VARARGS, posix_open__doc__},
+	{"close",	posix_close, METH_VARARGS, posix_close__doc__},
+	{"lseek",	posix_lseek, METH_VARARGS, posix_lseek__doc__},
+	{"read",	posix_read, METH_VARARGS, posix_read__doc__},
+	{"write",	posix_write, METH_VARARGS, posix_write__doc__},
+	{"fstat",	posix_fstat, METH_VARARGS, posix_fstat__doc__},
+	{"isatty",	posix_isatty, METH_VARARGS, posix_isatty__doc__},
+	{"abort",	posix_abort, METH_VARARGS, posix_abort__doc__},
 	{NULL,		NULL}		 /* Sentinel */
 };
 
 
 static int
-ins(PyObject *d, char *symbol, long value)
+ins(PyObject *d, char *symbol, Py_LONG value)
 {
         PyObject* v = PyInt_FromLong(value);
         if (!v || PyDict_SetItemString(d, symbol, v) < 0)
@@ -5239,82 +5242,89 @@ static int insertvalues(PyObject *d)
 }
 #endif
 
+/* The port does not insert NGROUPS_MAX, WNOHANG, O_DSYNC, or O_RSYNC. Its all_ins at 0x006514d0
+   inserts the other fifteen names this build's headers define, in upstream order. */
+#undef NGROUPS_MAX
+#undef WNOHANG
+#undef O_DSYNC
+#undef O_RSYNC
+
 static int
 all_ins(PyObject *d)
 {
 #ifdef F_OK
-        if (ins(d, "F_OK", (long)F_OK)) return -1;
+        if (ins(d, "F_OK", (Py_LONG)F_OK)) return -1;
 #endif        
 #ifdef R_OK
-        if (ins(d, "R_OK", (long)R_OK)) return -1;
+        if (ins(d, "R_OK", (Py_LONG)R_OK)) return -1;
 #endif        
 #ifdef W_OK
-        if (ins(d, "W_OK", (long)W_OK)) return -1;
+        if (ins(d, "W_OK", (Py_LONG)W_OK)) return -1;
 #endif        
 #ifdef X_OK
-        if (ins(d, "X_OK", (long)X_OK)) return -1;
+        if (ins(d, "X_OK", (Py_LONG)X_OK)) return -1;
 #endif        
 #ifdef NGROUPS_MAX
-        if (ins(d, "NGROUPS_MAX", (long)NGROUPS_MAX)) return -1;
+        if (ins(d, "NGROUPS_MAX", (Py_LONG)NGROUPS_MAX)) return -1;
 #endif
 #ifdef TMP_MAX
-        if (ins(d, "TMP_MAX", (long)TMP_MAX)) return -1;
+        if (ins(d, "TMP_MAX", (Py_LONG)TMP_MAX)) return -1;
 #endif
 #ifdef WNOHANG
-        if (ins(d, "WNOHANG", (long)WNOHANG)) return -1;
+        if (ins(d, "WNOHANG", (Py_LONG)WNOHANG)) return -1;
 #endif        
 #ifdef O_RDONLY
-        if (ins(d, "O_RDONLY", (long)O_RDONLY)) return -1;
+        if (ins(d, "O_RDONLY", (Py_LONG)O_RDONLY)) return -1;
 #endif
 #ifdef O_WRONLY
-        if (ins(d, "O_WRONLY", (long)O_WRONLY)) return -1;
+        if (ins(d, "O_WRONLY", (Py_LONG)O_WRONLY)) return -1;
 #endif
 #ifdef O_RDWR
-        if (ins(d, "O_RDWR", (long)O_RDWR)) return -1;
+        if (ins(d, "O_RDWR", (Py_LONG)O_RDWR)) return -1;
 #endif
 #ifdef O_NDELAY
-        if (ins(d, "O_NDELAY", (long)O_NDELAY)) return -1;
+        if (ins(d, "O_NDELAY", (Py_LONG)O_NDELAY)) return -1;
 #endif
 #ifdef O_NONBLOCK
-        if (ins(d, "O_NONBLOCK", (long)O_NONBLOCK)) return -1;
+        if (ins(d, "O_NONBLOCK", (Py_LONG)O_NONBLOCK)) return -1;
 #endif
 #ifdef O_APPEND
-        if (ins(d, "O_APPEND", (long)O_APPEND)) return -1;
+        if (ins(d, "O_APPEND", (Py_LONG)O_APPEND)) return -1;
 #endif
 #ifdef O_DSYNC
-        if (ins(d, "O_DSYNC", (long)O_DSYNC)) return -1;
+        if (ins(d, "O_DSYNC", (Py_LONG)O_DSYNC)) return -1;
 #endif
 #ifdef O_RSYNC
-        if (ins(d, "O_RSYNC", (long)O_RSYNC)) return -1;
+        if (ins(d, "O_RSYNC", (Py_LONG)O_RSYNC)) return -1;
 #endif
 #ifdef O_SYNC
-        if (ins(d, "O_SYNC", (long)O_SYNC)) return -1;
+        if (ins(d, "O_SYNC", (Py_LONG)O_SYNC)) return -1;
 #endif
 #ifdef O_NOCTTY
-        if (ins(d, "O_NOCTTY", (long)O_NOCTTY)) return -1;
+        if (ins(d, "O_NOCTTY", (Py_LONG)O_NOCTTY)) return -1;
 #endif
 #ifdef O_CREAT
-        if (ins(d, "O_CREAT", (long)O_CREAT)) return -1;
+        if (ins(d, "O_CREAT", (Py_LONG)O_CREAT)) return -1;
 #endif
 #ifdef O_EXCL
-        if (ins(d, "O_EXCL", (long)O_EXCL)) return -1;
+        if (ins(d, "O_EXCL", (Py_LONG)O_EXCL)) return -1;
 #endif
 #ifdef O_TRUNC
-        if (ins(d, "O_TRUNC", (long)O_TRUNC)) return -1;
+        if (ins(d, "O_TRUNC", (Py_LONG)O_TRUNC)) return -1;
 #endif
 #ifdef O_BINARY
-        if (ins(d, "O_BINARY", (long)O_BINARY)) return -1;
+        if (ins(d, "O_BINARY", (Py_LONG)O_BINARY)) return -1;
 #endif
 #ifdef O_TEXT
-        if (ins(d, "O_TEXT", (long)O_TEXT)) return -1;
+        if (ins(d, "O_TEXT", (Py_LONG)O_TEXT)) return -1;
 #endif
 
 #ifdef HAVE_SPAWNV
-        if (ins(d, "P_WAIT", (long)_P_WAIT)) return -1;
-        if (ins(d, "P_NOWAIT", (long)_P_NOWAIT)) return -1;
-        if (ins(d, "P_OVERLAY", (long)_OLD_P_OVERLAY)) return -1;
-        if (ins(d, "P_NOWAITO", (long)_P_NOWAITO)) return -1;
-        if (ins(d, "P_DETACH", (long)_P_DETACH)) return -1;
+        if (ins(d, "P_WAIT", (Py_LONG)_P_WAIT)) return -1;
+        if (ins(d, "P_NOWAIT", (Py_LONG)_P_NOWAIT)) return -1;
+        if (ins(d, "P_OVERLAY", (Py_LONG)_OLD_P_OVERLAY)) return -1;
+        if (ins(d, "P_NOWAITO", (Py_LONG)_P_NOWAITO)) return -1;
+        if (ins(d, "P_DETACH", (Py_LONG)_P_DETACH)) return -1;
 #endif
 
 #if defined(PYOS_OS2)
@@ -5345,7 +5355,7 @@ INITFUNC(void)
 	
 	m = Py_InitModule4(MODNAME,
 			   posix_methods,
-			   (char *)NULL,
+			   posix__doc__,
 			   (PyObject *)NULL,
 			   PYTHON_API_VERSION);
 	d = PyModule_GetDict(m);

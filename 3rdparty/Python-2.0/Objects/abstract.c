@@ -92,7 +92,7 @@ PyObject_GetItem(PyObject *o, PyObject *key)
 		if (PyInt_Check(key))
 			return PySequence_GetItem(o, PyInt_AsLong(key));
 		else if (PyLong_Check(key)) {
-			long key_value = PyLong_AsLong(key);
+			Py_LONG key_value = PyLong_AsLong(key);
 			if (key_value == -1 && PyErr_Occurred())
 				return NULL;
 			return PySequence_GetItem(o, key_value);
@@ -120,7 +120,7 @@ PyObject_SetItem(PyObject *o, PyObject *key, PyObject *value)
 		if (PyInt_Check(key))
 			return PySequence_SetItem(o, PyInt_AsLong(key), value);
 		else if (PyLong_Check(key)) {
-			long key_value = PyLong_AsLong(key);
+			Py_LONG key_value = PyLong_AsLong(key);
 			if (key_value == -1 && PyErr_Occurred())
 				return -1;
 			return PySequence_SetItem(o, key_value, value);
@@ -150,7 +150,7 @@ PyObject_DelItem(PyObject *o, PyObject *key)
 		if (PyInt_Check(key))
 			return PySequence_DelItem(o, PyInt_AsLong(key));
 		else if (PyLong_Check(key)) {
-			long key_value = PyLong_AsLong(key);
+			Py_LONG key_value = PyLong_AsLong(key);
 			if (key_value == -1 && PyErr_Occurred())
 				return -1;
 			return PySequence_DelItem(o, key_value);
@@ -460,7 +460,7 @@ PyNumber_Multiply(PyObject *v, PyObject *w)
 	}
 	m = tp->tp_as_sequence;
 	if (m && m->sq_repeat) {
-		long mul_value;
+		Py_LONG mul_value;
 
 		if (PyInt_Check(w)) {
 			mul_value = PyInt_AsLong(w);
@@ -900,7 +900,7 @@ PyNumber_InPlaceMultiply(PyObject *v, PyObject *w)
 		return (*f)(v, w);
 	else if (v->ob_type->tp_as_sequence != NULL && HASINPLACE(v) &&
 		 (g = v->ob_type->tp_as_sequence->sq_inplace_repeat) != NULL) {
-		long mul_value;
+		Py_LONG mul_value;
 
 		if (PyInt_Check(w)) {
 			mul_value = PyInt_AsLong(w);
@@ -932,7 +932,7 @@ PyNumber_InPlaceMultiply(PyObject *v, PyObject *w)
 	}
 	else if (v->ob_type->tp_as_sequence != NULL &&
 		 (g = v->ob_type->tp_as_sequence->sq_repeat) != NULL) {
-		long mul_value;
+		Py_LONG mul_value;
 
 		if (PyInt_Check(w)) {
 			mul_value = PyInt_AsLong(w);
@@ -1412,10 +1412,10 @@ static PyObject *
 sliceobj_from_intint(int i, int j)
 {
 	PyObject *start, *end, *slice;
-	start = PyInt_FromLong((long)i);
+	start = PyInt_FromLong((Py_LONG)i);
 	if (!start)
 		return NULL;
-	end = PyInt_FromLong((long)j);
+	end = PyInt_FromLong((Py_LONG)j);
 	if (!end) {
 		Py_DECREF(start);
 		return NULL;

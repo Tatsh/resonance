@@ -17,7 +17,7 @@
 Table of irreducible polynomials to efficiently cycle through
 GF(2^n)-{0}, 2<=n<=30.
 */
-static long polys[] = {
+static Py_LONG polys[] = {
 	4 + 3,
 	8 + 3,
 	16 + 3,
@@ -60,11 +60,11 @@ is either NULL or dummy.  A dummy key value cannot be replaced by
 NULL, since otherwise other keys may be lost.
 */
 typedef struct {
-	long me_hash;
+	Py_LONG me_hash;
 	PyObject *me_key;
 	PyObject *me_value;
 #ifdef USE_CACHE_ALIGNED
-	long	aligner;
+	Py_LONG	aligner;
 #endif
 } dictentry;
 
@@ -84,22 +84,22 @@ struct dictobject {
 	int ma_size;
 	int ma_poly;
 	dictentry *ma_table;
-	dictentry *(*ma_lookup)(dictobject *mp, PyObject *key, long hash);
+	dictentry *(*ma_lookup)(dictobject *mp, PyObject *key, Py_LONG hash);
 };
 
 /* forward declarations */
 static dictentry *
-lookdict_string(dictobject *mp, PyObject *key, long hash);
+lookdict_string(dictobject *mp, PyObject *key, Py_LONG hash);
 
 #ifdef SHOW_CONVERSION_COUNTS
-static long created = 0L;
-static long converted = 0L;
+static Py_LONG created = 0LL;
+static Py_LONG converted = 0LL;
 
 static void
 show_counts(void)
 {
-	fprintf(stderr, "created %ld string dicts\n", created);
-	fprintf(stderr, "converted %ld to normal dicts\n", converted);
+	fprintf(stderr, "created %lld string dicts\n", created);
+	fprintf(stderr, "converted %lld to normal dicts\n", converted);
 	fprintf(stderr, "%.2f%% conversion rate\n", (100.0*converted)/created);
 }
 #endif
@@ -155,7 +155,7 @@ a dictentry* for which the me_value field is NULL.  Exceptions are never
 reported by this function, and outstanding exceptions are maintained.
 */
 static dictentry *
-lookdict(dictobject *mp, PyObject *key, register long hash)
+lookdict(dictobject *mp, PyObject *key, register Py_LONG hash)
 {
 	register int i;
 	register unsigned incr;
@@ -200,7 +200,7 @@ lookdict(dictobject *mp, PyObject *key, register long hash)
 	}
 	/* Derive incr from hash, just to make it more arbitrary. Note that
 	   incr must not be 0, or we will get into an infinite loop.*/
-	incr = (hash ^ ((unsigned long)hash >> 3)) & mask;
+	incr = (hash ^ ((unsigned Py_LONG)hash >> 3)) & mask;
 	if (!incr)
 		incr = mask;
 	for (;;) {
@@ -260,7 +260,7 @@ lookdict(dictobject *mp, PyObject *key, register long hash)
  * is too expensive.
  */
 static dictentry *
-lookdict_string(dictobject *mp, PyObject *key, register long hash)
+lookdict_string(dictobject *mp, PyObject *key, register Py_LONG hash)
 {
 	register int i;
 	register unsigned incr;
@@ -298,7 +298,7 @@ lookdict_string(dictobject *mp, PyObject *key, register long hash)
 	}
 	/* Derive incr from hash, just to make it more arbitrary. Note that
 	   incr must not be 0, or we will get into an infinite loop.*/
-	incr = (hash ^ ((unsigned long)hash >> 3)) & mask;
+	incr = (hash ^ ((unsigned Py_LONG)hash >> 3)) & mask;
 	if (!incr)
 		incr = mask;
 	for (;;) {
@@ -332,7 +332,7 @@ Used both by the internal resize routine and by the public insert routine.
 Eats a reference to key and one to value.
 */
 static void
-insertdict(register dictobject *mp, PyObject *key, long hash, PyObject *value)
+insertdict(register dictobject *mp, PyObject *key, Py_LONG hash, PyObject *value)
 {
 	PyObject *old_value;
 	register dictentry *ep;
@@ -412,7 +412,7 @@ dictresize(dictobject *mp, int minused)
 PyObject *
 PyDict_GetItem(PyObject *op, PyObject *key)
 {
-	long hash;
+	Py_LONG hash;
 	dictobject *mp = (dictobject *)op;
 	if (!PyDict_Check(op)) {
 		return NULL;
@@ -437,7 +437,7 @@ int
 PyDict_SetItem(register PyObject *op, PyObject *key, PyObject *value)
 {
 	register dictobject *mp;
-	register long hash;
+	register Py_LONG hash;
 	if (!PyDict_Check(op)) {
 		PyErr_BadInternalCall();
 		return -1;
@@ -482,7 +482,7 @@ int
 PyDict_DelItem(PyObject *op, PyObject *key)
 {
 	register dictobject *mp;
-	register long hash;
+	register Py_LONG hash;
 	register dictentry *ep;
 	PyObject *old_value, *old_key;
 
@@ -671,7 +671,7 @@ static PyObject *
 dict_subscript(dictobject *mp, register PyObject *key)
 {
 	PyObject *v;
-	long hash;
+	Py_LONG hash;
 	if (mp->ma_table == NULL) {
 		PyErr_SetObject(PyExc_KeyError, key);
 		return NULL;
@@ -990,7 +990,7 @@ dict_compare(dictobject *a, dictobject *b)
 	res = 0;
 	for (i = 0; i < n; i++) {
 		PyObject *akey, *bkey, *aval, *bval;
-		long ahash, bhash;
+		Py_LONG ahash, bhash;
 		akey = PyList_GetItem(akeys, i);
 		bkey = PyList_GetItem(bkeys, i);
 		res = PyObject_Compare(akey, bkey);
@@ -1037,8 +1037,8 @@ static PyObject *
 dict_has_key(register dictobject *mp, PyObject *args)
 {
 	PyObject *key;
-	long hash;
-	register long ok;
+	Py_LONG hash;
+	register Py_LONG ok;
 	if (!PyArg_ParseTuple(args, "O:has_key", &key))
 		return NULL;
 #ifdef CACHE_HASH
@@ -1061,7 +1061,7 @@ dict_get(register dictobject *mp, PyObject *args)
 	PyObject *key;
 	PyObject *failobj = Py_None;
 	PyObject *val = NULL;
-	long hash;
+	Py_LONG hash;
 
 	if (!PyArg_ParseTuple(args, "O|O:get", &key, &failobj))
 		return NULL;
@@ -1093,7 +1093,7 @@ dict_setdefault(register dictobject *mp, PyObject *args)
 	PyObject *key;
 	PyObject *failobj = Py_None;
 	PyObject *val = NULL;
-	long hash;
+	Py_LONG hash;
 
 	if (!PyArg_ParseTuple(args, "O|O:setdefault", &key, &failobj))
 		return NULL;

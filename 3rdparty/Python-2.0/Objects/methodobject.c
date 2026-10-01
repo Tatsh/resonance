@@ -128,10 +128,10 @@ meth_compare(PyCFunctionObject *a, PyCFunctionObject *b)
 		return 1;
 }
 
-static long
+static Py_LONG
 meth_hash(PyCFunctionObject *a)
 {
-	long x,y;
+	Py_LONG x,y;
 	if (a->m_self == NULL)
 		x = 0;
 	else {

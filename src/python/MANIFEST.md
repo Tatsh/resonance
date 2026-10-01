@@ -98,12 +98,14 @@ function in `ARK/ROOT/gscripts/hx/hxutl.py` rather than a C symbol.
 The shipped library subset is `codeop`, `code`, `linecache`, `ntpath`, `os`, `stat`, `string`,
 `traceback`, `types`, and `whrandom`. `posixpath.py` is absent, which forces the `ntpath` branch.
 
-`find_module` needs no modification either, and the reason is structural. Upstream 2.0 does not
-stat to find a module. It walks `_PyImport_Filetab` and calls `fopen(buf, fdp->mode)` once per
-suffix, taking the first that opens, so a device with no file metadata is already served by the
-`fopen` redirect and nothing else is required. That is also why the absent
-`Can't find file for module` proves nothing about the search: it belongs to the case-check path,
-not to the loop that does the finding.
+`find_module` does not need modification for the device, and the reason is structural. Its one
+port edit, a skipped prefix list described under the edits below, does not concern the device.
+Upstream 2.0 does not stat to find a module. It walks `_PyImport_Filetab` and calls
+`fopen(buf, fdp->mode)` once per suffix, taking the first that opens. The `fopen` redirect
+therefore already serves a device with no file metadata, and the device does not require another
+change. The same structure is also why the absent `Can't find file for module` does not prove
+anything about the search. The literal belongs to the case-check path, not to the loop that does
+the finding.
 
 `stat` appears in `find_module` for one purpose only, the `S_ISDIR` test that recognises a package
 directory, and nothing in the shipped data exercises it. There is no `__init__.py` anywhere, and
@@ -200,12 +202,70 @@ tree, and executes the code, and it makes no call to `check_compiled_module`,
 `read_compiled_module`, or `write_compiled_module`. The static helpers then have no caller, and
 their literals are absent from the image.
 
+`Python/pythonrun.c` has `PyRun_SimpleFileEx` refuse a `.pyc` or `.pyo` file. Retail at
+`0x0054ebc8` matches either extension, closes the file when `closeit` is set, and returns -1 without
+reopening the file, printing, or setting an error. `run_pyc_file` is then never called.
+
+`Python/pythonrun.c` also has `PyRun_SimpleString` write its result to `sys.stdout` before releasing
+the result. Retail at `0x0054eac0` fetches `stdout` (`0x0082a190`) with `PySys_GetObject`, calls
+`PyFile_WriteObject` with `Py_PRINT_RAW` and then `PyFile_WriteString` with `\n` (`0x0082a198`),
+without testing the file or either result.
+
+`Python/import.c` also has `find_module` skip the `fopen` for a candidate path that begins with
+`.\DLLs;` or `cdrom0:\.\DLLs;`. Retail `find_module` at `0x0057c860` walks the null-terminated
+table at `0x00766920` before each `fopen`, compares each prefix against the candidate with `memcmp`
+over the prefix's `strlen`, and records a null file on a match.
+
 `Python/pythonrun.c` calls `PyHeap_Init()` at the top of `Py_Initialize()`, before the first
 allocation. The allocator section above describes the heap.
 
 `Modules/posixmodule.c` registers under the console name. `INITFUNC` is `initps2` and `MODNAME` is
 `"ps2"`, and `"posix"` is absent from the image. The method table is reduced as described under
-the `ps2` method table below.
+the `ps2` method table below. Its `listdir` returns a new empty list without reading its arguments.
+Retail `posix_listdir` at `0x00651a98` is only a call to `PyList_New(0)`.
+
+`Modules/posixmodule.c` also retains upstream's Windows path handling in `posix_do_stat` although
+`MS_WIN32` is not defined. Retail `posix_do_stat` at `0x006513a0` measures the path with `strlen`,
+fails a path longer than 250 bytes with `errno` 91 through `PyErr_SetFromErrno`, and copies a path
+ending in `\` or `/` into a stack buffer without the separator, sparing `/`, `\`, and a drive
+root such as `c:/`. The edit removes the two `MS_WIN32` guards there and gives `MAX_PATH` its value
+of 250.
+
+`Modules/posixmodule.c` also omits `NGROUPS_MAX`, `WNOHANG`, `O_DSYNC`, and `O_RSYNC` from the
+module dictionary. Retail `all_ins` at `0x006514d0` inserts fifteen names, `F_OK` through `TMP_MAX`
+and `O_RDONLY` through `O_TRUNC`, with values that match this build's headers. It does not insert
+the four that newlib defines. The edit undefines the four before `all_ins`.
+
+The bare `malloc`, `realloc`, and `free` calls of every interpreter file arrive at the interpreter
+heap with the call site's file and line. `PC/pycompat.h` therefore routes all three to the
+`PyCore_*` macros for C translation units, after the C library prototypes. No vendored file is
+edited for the routing. Retail
+evidence covers each file with such calls: `_sre.c`'s mark stack at `0x00640954`, `0x0064098c`, and
+`0x006409ac`; `cPickle.c` at `0x0064a798` (`Pdata_grow` inlined into `load_binintx`);
+`cStringIO.c` at `0x00656b70`, `0x00656ce8`, `0x006578dc`, and `0x00657aac`; `regexmodule.c`'s
+`reg_dealloc` at `0x00652090`; `regexpr.c`'s `re_compile_pattern` at `0x00662034`; and
+`getpathp.c` at `0x0056a278`. The `posixmodule.c` calls are in functions this build does not
+compile.
+
+`Modules/pypcre.c` initialises `pcre_malloc` and `pcre_free` with two small functions over the
+interpreter heap, because a function-like macro does not redirect a function name used as a value.
+Retail has the two as separate functions at `0x00661040` and `0x00661070`. They call `Heap::Alloc`
+and `Heap::Free` with the `pypcre.c` tag.
+
+`Modules/cStringIO.c` raises its two `MemoryError`s with `python out of memory` (`0x008452e0`)
+rather than upstream's `out of memory`. Retail passes the string from `O_cwrite` at `0x00657834`,
+from `newOobject` at `0x00657ad8`, and from the inlined copies at `0x00656d08` and `0x00656ff8`.
+
+The interpreter's `printf` is the game's `LogPrintf`. `PC/pycompat.h` sets the redirect for C
+translation units. Retail `fixstate` passes `XXX too many states!` and
+`XXX too high nonterminal number!` to `LogPrintf` at `0x005d9fb0` and `0x005da014`, and the
+`Parser/assert.h` check in `PyGrammar_FindDFA` calls `LogPrintf` at `0x00629b64` before `abort`.
+`fprintf` is unchanged, as at `0x0061c1fc`.
+
+`PC/config.h` sets `DATE` and `TIME` to the port's build stamp. Retail `Py_GetBuildInfo` at
+`0x006371f0` formats build 0 with `Oct 12 2001` and `12:05:12` for `sys.version`. `PC/config.h`
+also sets `COMPILER` to `\n[GCC 2.95.2 v2]`, the string `Py_GetCompiler` at `0x0063f1d0` returns
+for `sys.version`.
 
 `Include/stringobject.h` and `Include/unicodeobject.h` drop the `register` storage class from nine
 parameter declarations. The C++ standard no longer allows the storage class there. The keyword was
@@ -218,6 +278,34 @@ shipped `types.py` therefore takes its `NameError` branch. `complexobject.c` is 
 `PC/pycompat.h` sets the `PYTHONPATH` default to the empty string at `0x0082c9f0`. A `.` entry
 would arrive at the archive lookup as a `./` path. `ArkFile::MapPathToArkIndex()` treats a `./`
 path as fatal in retail and in the reconstruction.
+
+Every compiled file and every header under `Include/` writes the C `long` as `Py_LONG`.
+`PC/config.h` defines `Py_LONG` as `long long` together with `SIZEOF_LONG` 8, a `PY_LONG_BIT` of
+64, and the matching limits. The port's compiler gave `long` 64 bits. `PyInt_AsLong` at
+`0x00581c00` loads `ob_ival` with `ld`, `int_add` at `0x00581d98` adds with `daddu` and tests for
+64-bit overflow, and `int_lshift` at `0x00581f38` compares the shift count against 64. The
+toolchain this tree builds with retains a 32-bit `long` and rejects `-mlong64`. The rewrite
+therefore covers the type, the `LONG_MAX`, `LONG_MIN`, `ULONG_MAX`, and `LONG_BIT` limits, `L`
+literal suffixes, `%ld` formats (including the `%%%s.%dl%c` template that `formatint` in
+`stringobject.c` and `unicodeobject.c` expands at run time, retail `0x0072e8e0` and `0x00733280`),
+and the `atol`, `strtol`, `strtoul`, and `labs` calls. Comments are unchanged. `PC/config.h` also
+defines `HAVE_LONG_LONG`, as upstream's `PC/config.h` does.
+
+`Objects/longobject.c` has `PyLong_FromVoidPtr` and `PyLong_AsVoidPtr` take upstream's
+`SIZEOF_VOID_P == SIZEOF_LONG` branches although the port's pointers are four bytes and
+`SIZEOF_VOID_P` stays 4. Retail `PyLong_FromVoidPtr` at `0x0057ace8` is a call to `PyInt_FromLong`
+with the pointer register passed through unchanged. The pointer widens sign-extended, and every
+pointer becomes an int. Retail `PyLong_AsVoidPtr` at `0x00577718` reads an int's `ob_ival` or calls
+`PyLong_AsLong`, narrows the result to the pointer, and consults `PyErr_Occurred` when the narrowed
+value is -1.
+
+The port's soft-float library compared doubles through one three-way compare with the operands in
+source order, and the compare reports an unordered pair as greater. The toolchain moves a constant
+to the right of a comparison before any later pass runs. A NaN against a constant written first
+would otherwise give the opposite result. The four such comparisons call `freq_compare_double`
+from the runtime instead: `CHECK` in `Objects/floatobject.c` (`float_pow` at `0x0047b1f8`), and the
+`0.5 <= f` frexp range tests in `Modules/cPickle.c` and twice in `Modules/structmodule.c`. A NaN is
+therefore out of range there, as in retail.
 
 `ceval.c` needs no edit. `pythonrun.c` has one unexplained literal, and inventing an edit around it
 would pass the acceptance test without being evidence. Any cut including the unexplained literal
@@ -239,10 +327,12 @@ Four literals resist all four headings, and they are recorded rather than papere
 `ceval.c` lacks `standard sequence type does not support step size other than one`, which is
 unguarded and in no static function.
 
-`pythonrun.c` lacks `python: Can't reopen .pyc file` from the compiled-module branch of
-`PyRun_SimpleFileEx`, which is consistent with that branch being cut but not proof of it. Its other
-two absences, `) == 0 || strcmp(ext,` and `, v = PyString_FromString(`, are not literals at all but
-code fragments the extractor mis-split across a quote boundary.
+`pythonrun.c` lacks `python: Can't reopen .pyc file` because the port cut the compiled-module
+branch of `PyRun_SimpleFileEx`. Retail at `0x0054ebc8` closes the file and returns -1 for a `.pyc`
+or `.pyo` name, and the edit is recorded under the edits to the vendored source. The literal is
+therefore explained and no longer belongs under this heading. Its other two absences,
+`) == 0 || strcmp(ext,` and `, v = PyString_FromString(`, are not literals at all but code fragments
+the extractor mis-split across a quote boundary.
 
 `posixmodule.c` lacks `Second argument must be a 2-tuple of numbers.` from `posix_utime`, which
 sits under no guard at all.
@@ -353,11 +443,11 @@ no process control beyond `abort`. It also explains the third surviving literal,
 a real method here.
 
 The trim is a table, not deletions. The edit reduces `posix_methods[]` to the twelve entries above,
-in the order of the run, with null doc
-pointers: twelve long doc strings would each clear the fourteen-character bar, so the image's
-three surviving literals prove the entries carry none. The module doc goes null for the same
-reason. With no entry referencing them, the compiler discards the other eighty-two bodies with
-their doc strings, which is what removes their literals. The two configuration messages survive
+in the order of the run, each with its upstream doc string. The table at `0x007c7010` points every
+entry at its doc (`listdir` at `0x007c6a88` through `abort` at `0x007c6f68`), and `initps2` at
+`0x00651f20` passes `posix__doc__` (`0x007c6980`) to `Py_InitModule4`. No entry references the
+other eighty-two bodies, and the compiler discards them with their doc strings. Discarding the
+bodies removes their literals. The two configuration messages survive
 because their shared helper is retained with `used` even though the trimmed table references
 nothing that calls it; the image keeps those literals with no registered caller, so the helper
 stays.

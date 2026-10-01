@@ -141,6 +141,6 @@ PyTypeObject PyCObject_Type = {
     (reprfunc)0,			/*tp_str*/
 
     /* Space for future expansion */
-    0L,0L,0L,0L,
+    0LL,0LL,0LL,0LL,
     PyCObject_Type__doc__ 		/* Documentation string */
 };

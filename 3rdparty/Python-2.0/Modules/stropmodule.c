@@ -308,15 +308,15 @@ strop_find(PyObject *self, PyObject *args)
 		i = 0;
 
 	if (n == 0 && i <= last)
-		return PyInt_FromLong((long)i);
+		return PyInt_FromLong((Py_LONG)i);
 
 	last -= n;
 	for (; i <= last; ++i)
 		if (s[i] == sub[0] &&
 		    (n == 1 || memcmp(&s[i+1], &sub[1], n-1) == 0))
-			return PyInt_FromLong((long)i);
+			return PyInt_FromLong((Py_LONG)i);
 
-	return PyInt_FromLong(-1L);
+	return PyInt_FromLong(-1LL);
 }
 
 
@@ -351,14 +351,14 @@ strop_rfind(PyObject *self, PyObject *args)
 		i = 0;
 
 	if (n == 0 && i <= last)
-		return PyInt_FromLong((long)last);
+		return PyInt_FromLong((Py_LONG)last);
 
 	for (j = last-n; j >= i; --j)
 		if (s[j] == sub[0] &&
 		    (n == 1 || memcmp(&s[j+1], &sub[1], n-1) == 0))
-			return PyInt_FromLong((long)j);
+			return PyInt_FromLong((Py_LONG)j);
 
-	return PyInt_FromLong(-1L);
+	return PyInt_FromLong(-1LL);
 }
 
 
@@ -657,7 +657,7 @@ strop_count(PyObject *self, PyObject *args)
 		i = 0;
 	m = last + 1 - n;
 	if (n == 0)
-		return PyInt_FromLong((long) (m-i));
+		return PyInt_FromLong((Py_LONG) (m-i));
 
 	r = 0;
 	while (i < m) {
@@ -668,7 +668,7 @@ strop_count(PyObject *self, PyObject *args)
 			i++;
 		}
 	}
-	return PyInt_FromLong((long) r);
+	return PyInt_FromLong((Py_LONG) r);
 }
 
 
@@ -731,7 +731,7 @@ strop_atoi(PyObject *self, PyObject *args)
 {
 	char *s, *end;
 	int base = 10;
-	long x;
+	Py_LONG x;
 	char buffer[256]; /* For errors */
 
 	if (!PyArg_ParseTuple(args, "s|i:atoi", &s, &base))
@@ -746,7 +746,7 @@ strop_atoi(PyObject *self, PyObject *args)
 		s++;
 	errno = 0;
 	if (base == 0 && s[0] == '0')
-		x = (long) PyOS_strtoul(s, &end, base);
+		x = (Py_LONG) PyOS_strtoul(s, &end, base);
 	else
 		x = PyOS_strtol(s, &end, base);
 	if (end == s || !isalnum(end[-1]))

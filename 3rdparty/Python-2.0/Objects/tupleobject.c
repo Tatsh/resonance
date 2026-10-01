@@ -214,13 +214,13 @@ tuplecompare(register PyTupleObject *v, register PyTupleObject *w)
 	return v->ob_size - w->ob_size;
 }
 
-static long
+static Py_LONG
 tuplehash(PyTupleObject *v)
 {
-	register long x, y;
+	register Py_LONG x, y;
 	register int len = v->ob_size;
 	register PyObject **p;
-	x = 0x345678L;
+	x = 0x345678LL;
 	p = v->ob_item;
 	while (--len >= 0) {
 		y = PyObject_Hash(*p++);

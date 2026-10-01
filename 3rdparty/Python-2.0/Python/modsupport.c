@@ -247,13 +247,13 @@ do_mkvalue(char **p_format, va_list *p_va)
 		case 'B':
 		case 'h':
 		case 'i':
-			return PyInt_FromLong((long)va_arg(*p_va, int));
+			return PyInt_FromLong((Py_LONG)va_arg(*p_va, int));
 			
 		case 'H':
-			return PyInt_FromLong((long)va_arg(*p_va, unsigned int));
+			return PyInt_FromLong((Py_LONG)va_arg(*p_va, unsigned int));
 
 		case 'l':
-			return PyInt_FromLong((long)va_arg(*p_va, long));
+			return PyInt_FromLong((Py_LONG)va_arg(*p_va, Py_LONG));
 
 #ifdef HAVE_LONG_LONG
 		case 'L':
@@ -473,7 +473,7 @@ PyModule_AddObject(PyObject *m, char *name, PyObject *o)
 }
 
 int 
-PyModule_AddIntConstant(PyObject *m, char *name, long value)
+PyModule_AddIntConstant(PyObject *m, char *name, Py_LONG value)
 {
 	return PyModule_AddObject(m, name, PyInt_FromLong(value));
 }

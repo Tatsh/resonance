@@ -185,10 +185,10 @@ func_compare(PyFunctionObject *f, PyFunctionObject *g)
 	return PyObject_Compare(f->func_code, g->func_code);
 }
 
-static long
+static Py_LONG
 func_hash(PyFunctionObject *f)
 {
-	long h,x;
+	Py_LONG h,x;
 	h = PyObject_Hash(f->func_code);
 	if (h == -1) return h;
 	x = _Py_HashPointer(f->func_globals);

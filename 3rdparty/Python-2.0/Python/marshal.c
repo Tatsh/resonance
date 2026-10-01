@@ -86,7 +86,7 @@ w_short(int x, WFILE *p)
 }
 
 static void
-w_long(long x, WFILE *p)
+w_long(Py_LONG x, WFILE *p)
 {
 	w_byte((int)( x      & 0xff), p);
 	w_byte((int)((x>> 8) & 0xff), p);
@@ -96,7 +96,7 @@ w_long(long x, WFILE *p)
 
 #if SIZEOF_LONG > 4
 static void
-w_long64(long x, WFILE *p)
+w_long64(Py_LONG x, WFILE *p)
 {
 	w_long(x, p);
 	w_long(x>>32, p);
@@ -124,9 +124,9 @@ w_object(PyObject *v, WFILE *p)
 	        w_byte(TYPE_ELLIPSIS, p);
 	}
 	else if (PyInt_Check(v)) {
-		long x = PyInt_AS_LONG((PyIntObject *)v);
+		Py_LONG x = PyInt_AS_LONG((PyIntObject *)v);
 #if SIZEOF_LONG > 4
-		long y = x>>31;
+		Py_LONG y = x>>31;
 		if (y && y != -1) {
 			w_byte(TYPE_INT64, p);
 			w_long64(x, p);
@@ -142,7 +142,7 @@ w_object(PyObject *v, WFILE *p)
 		PyLongObject *ob = (PyLongObject *)v;
 		w_byte(TYPE_LONG, p);
 		n = ob->ob_size;
-		w_long((long)n, p);
+		w_long((Py_LONG)n, p);
 		if (n < 0)
 			n = -n;
 		for (i = 0; i < n; i++)
@@ -182,7 +182,7 @@ w_object(PyObject *v, WFILE *p)
 	else if (PyString_Check(v)) {
 		w_byte(TYPE_STRING, p);
 		n = PyString_GET_SIZE(v);
-		w_long((long)n, p);
+		w_long((Py_LONG)n, p);
 		w_string(PyString_AS_STRING(v), n, p);
 	}
 	else if (PyUnicode_Check(v)) {
@@ -195,14 +195,14 @@ w_object(PyObject *v, WFILE *p)
 		}
 		w_byte(TYPE_UNICODE, p);
 		n = PyString_GET_SIZE(utf8);
-		w_long((long)n, p);
+		w_long((Py_LONG)n, p);
 		w_string(PyString_AS_STRING(utf8), n, p);
 		Py_DECREF(utf8);
 	}
 	else if (PyTuple_Check(v)) {
 		w_byte(TYPE_TUPLE, p);
 		n = PyTuple_Size(v);
-		w_long((long)n, p);
+		w_long((Py_LONG)n, p);
 		for (i = 0; i < n; i++) {
 			w_object(PyTuple_GET_ITEM(v, i), p);
 		}
@@ -210,7 +210,7 @@ w_object(PyObject *v, WFILE *p)
 	else if (PyList_Check(v)) {
 		w_byte(TYPE_LIST, p);
 		n = PyList_GET_SIZE(v);
-		w_long((long)n, p);
+		w_long((Py_LONG)n, p);
 		for (i = 0; i < n; i++) {
 			w_object(PyList_GET_ITEM(v, i), p);
 		}
@@ -252,7 +252,7 @@ w_object(PyObject *v, WFILE *p)
 		char *s;
 		w_byte(TYPE_STRING, p);
 		n = (*pb->bf_getreadbuffer)(v, 0, (void **)&s);
-		w_long((long)n, p);
+		w_long((Py_LONG)n, p);
 		w_string(s, n, p);
 	}
 	else {
@@ -264,7 +264,7 @@ w_object(PyObject *v, WFILE *p)
 }
 
 void
-PyMarshal_WriteLongToFile(long x, FILE *fp)
+PyMarshal_WriteLongToFile(Py_LONG x, FILE *fp)
 {
 	WFILE wf;
 	wf.fp = fp;
@@ -312,37 +312,37 @@ r_short(RFILE *p)
 	return x;
 }
 
-static long
+static Py_LONG
 r_long(RFILE *p)
 {
-	register long x;
+	register Py_LONG x;
 	register FILE *fp = p->fp;
 	if (fp) {
 		x = getc(fp);
-		x |= (long)getc(fp) << 8;
-		x |= (long)getc(fp) << 16;
-		x |= (long)getc(fp) << 24;
+		x |= (Py_LONG)getc(fp) << 8;
+		x |= (Py_LONG)getc(fp) << 16;
+		x |= (Py_LONG)getc(fp) << 24;
 	}
 	else {
 		x = rs_byte(p);
-		x |= (long)rs_byte(p) << 8;
-		x |= (long)rs_byte(p) << 16;
-		x |= (long)rs_byte(p) << 24;
+		x |= (Py_LONG)rs_byte(p) << 8;
+		x |= (Py_LONG)rs_byte(p) << 16;
+		x |= (Py_LONG)rs_byte(p) << 24;
 	}
 #if SIZEOF_LONG > 4
 	/* Sign extension for 64-bit machines */
-	x |= -(x & 0x80000000L);
+	x |= -(x & 0x80000000LL);
 #endif
 	return x;
 }
 
-static long
+static Py_LONG
 r_long64(RFILE *p)
 {
-	register long x;
+	register Py_LONG x;
 	x = r_long(p);
 #if SIZEOF_LONG > 4
-	x = (x & 0xFFFFFFFFL) | (r_long(p) << 32);
+	x = (x & 0xFFFFFFFFLL) | (r_long(p) << 32);
 #else
 	if (r_long(p) != 0) {
 		PyObject *f = PySys_GetObject("stderr");
@@ -359,7 +359,7 @@ static PyObject *
 r_object(RFILE *p)
 {
 	PyObject *v, *v2;
-	long i, n;
+	Py_LONG i, n;
 	int type = r_byte(p);
 	
 	switch (type) {
@@ -612,7 +612,7 @@ r_object(RFILE *p)
 	}
 }
 
-long
+Py_LONG
 PyMarshal_ReadLongFromFile(FILE *fp)
 {
 	RFILE rf;

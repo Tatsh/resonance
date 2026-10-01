@@ -173,7 +173,7 @@ Pdata_dealloc(Pdata *self) {
 static PyTypeObject PdataType = {
     PyObject_HEAD_INIT(NULL) 0, "Pdata", sizeof(Pdata), 0,
     (destructor)Pdata_dealloc,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0L,0L,0L,0L, ""
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0LL,0LL,0LL,0LL, ""
 };
 
 #define Pdata_Check(O) ((O)->ob_type == &PdataType)
@@ -640,7 +640,7 @@ pystrndup(char *s, int l) {
 static int
 get(Picklerobject *self, PyObject *id) {
     PyObject *value, *mv;
-    long c_value;
+    Py_LONG c_value;
     char s[30];
     size_t len;
 
@@ -660,7 +660,7 @@ get(Picklerobject *self, PyObject *id) {
 
     if (!self->bin) {
         s[0] = GET;
-        sprintf(s + 1, "%ld\n", c_value);
+        sprintf(s + 1, "%lld\n", c_value);
         len = strlen(s);
     }
     else if (Pdata_Check(self->file)) {
@@ -890,7 +890,7 @@ save_none(Picklerobject *self, PyObject *args) {
 static int
 save_int(Picklerobject *self, PyObject *args) {
     char c_str[32];
-    long l = PyInt_AS_LONG((PyIntObject *)args);
+    Py_LONG l = PyInt_AS_LONG((PyIntObject *)args);
     int len = 0;
 
     if (!self->bin
@@ -902,7 +902,7 @@ save_int(Picklerobject *self, PyObject *args) {
                    we can use python long parsing code to restore,
                    if necessary. */
         c_str[0] = INT;
-        sprintf(c_str + 1, "%ld\n", l);
+        sprintf(c_str + 1, "%lld\n", l);
         if ((*self->write_func)(self, c_str, strlen(c_str)) < 0)
             return -1;
     }
@@ -974,7 +974,7 @@ save_float(Picklerobject *self, PyObject *args) {
     if (self->bin) {
         int s, e;
         double f;
-        long fhi, flo;
+        Py_LONG fhi, flo;
         char str[9], *p = str;
 
         *p = BINFLOAT;
@@ -990,7 +990,8 @@ save_float(Picklerobject *self, PyObject *args) {
         f = frexp(x, &e);
 
         /* Normalize f to be in the range [1.0, 2.0) */
-        if (0.5 <= f && f < 1.0) {
+        /* The port compared 0.5 against f in this order. A NaN fraction fails the comparison. */
+        if (freq_compare_double(0.5, f) <= 0 && f < 1.0) {
             f *= 2.0;
             e--;
         }
@@ -1021,10 +1022,10 @@ save_float(Picklerobject *self, PyObject *args) {
 
         /* fhi receives the high 28 bits; flo the low 24 bits (== 52 bits) */
         f *= 268435456.0; /* 2**28 */
-        fhi = (long) floor(f); /* Truncate */
+        fhi = (Py_LONG) floor(f); /* Truncate */
         f -= (double)fhi;
         f *= 16777216.0; /* 2**24 */
-        flo = (long) floor(f + 0.5); /* Round */
+        flo = (Py_LONG) floor(f + 0.5); /* Round */
 
         /* First byte */
         *p = (s<<7) | (e>>4);
@@ -1950,7 +1951,7 @@ Pickle_clear_memo(Picklerobject *self, PyObject *args) {
 static PyObject *
 Pickle_getvalue(Picklerobject *self, PyObject *args) {
   int l, i, rsize, ssize, clear=1, lm;
-  long ik;
+  Py_LONG ik;
   PyObject *k, *r;
   char *s, *p, *have_get;
   Pdata *data;
@@ -2357,7 +2358,7 @@ static PyTypeObject Picklertype = {
     (reprfunc)0,          /*tp_str*/
 
     /* Space for future expansion */
-    0L,0L,0L,0L,
+    0LL,0LL,0LL,0LL,
     Picklertype__doc__ /* Documentation string */
 };
 
@@ -2427,14 +2428,14 @@ load_int(Unpicklerobject *self) {
     PyObject *py_int = 0;
     char *endptr, *s;
     int len, res = -1;
-    long l;
+    Py_LONG l;
 
     if ((len = (*self->readline_func)(self, &s)) < 0) return -1;
     if (len < 2) return bad_readline();
     UNLESS (s=pystrndup(s,len)) return -1;
 
     errno = 0;
-    l = strtol(s, &endptr, 0);
+    l = strtoll(s, &endptr, 0);
 
     if (errno || (*endptr != '\n') || (endptr[1] != '\0')) {
         /* Hm, maybe we've got something long.  Let's try reading
@@ -2463,15 +2464,15 @@ finally:
 }
 
 
-static long 
+static Py_LONG 
 calc_binint(char *s, int  x) {
     unsigned char c;
     int i;
-    long l;
+    Py_LONG l;
 
-    for (i = 0, l = 0L; i < x; i++) {
+    for (i = 0, l = 0LL; i < x; i++) {
         c = (unsigned char)s[i];
-        l |= (long)c << (i * 8);
+        l |= (Py_LONG)c << (i * 8);
     }
 
     return l;
@@ -2481,7 +2482,7 @@ calc_binint(char *s, int  x) {
 static int
 load_binintx(Unpicklerobject *self, char *s, int  x) {
     PyObject *py_int = 0;
-    long l;
+    Py_LONG l;
 
     l = calc_binint(s, x);
 
@@ -2586,7 +2587,7 @@ static int
 load_binfloat(Unpicklerobject *self) {
     PyObject *py_float = 0;
     int s, e;
-    long fhi, flo;
+    Py_LONG fhi, flo;
     double x;
     char *p;
 
@@ -2700,7 +2701,7 @@ insecure:
 static int
 load_binstring(Unpicklerobject *self) {
     PyObject *py_string = 0;
-    long l;
+    Py_LONG l;
     char *s;
 
     if ((*self->read_func)(self, &s, 4) < 0) return -1;
@@ -2761,7 +2762,7 @@ finally:
 static int
 load_binunicode(Unpicklerobject *self) {
     PyObject *unicode;
-    long l;
+    Py_LONG l;
     char *s;
 
     if ((*self->read_func)(self, &s, 4) < 0) return -1;
@@ -3171,7 +3172,7 @@ load_binget(Unpicklerobject *self) {
     if ((*self->read_func)(self, &s, 1) < 0) return -1;
 
     key = (unsigned char)s[0];
-    UNLESS (py_key = PyInt_FromLong((long)key)) return -1;
+    UNLESS (py_key = PyInt_FromLong((Py_LONG)key)) return -1;
     
     value = PyDict_GetItem(self->memo, py_key);
     if (! value) {
@@ -3192,21 +3193,21 @@ load_long_binget(Unpicklerobject *self) {
     PyObject *py_key = 0, *value = 0;
     unsigned char c;
     char *s;
-    long key;
+    Py_LONG key;
     int rc;
 
     if ((*self->read_func)(self, &s, 4) < 0) return -1;
 
     c = (unsigned char)s[0];
-    key = (long)c;
+    key = (Py_LONG)c;
     c = (unsigned char)s[1];
-    key |= (long)c << 8;
+    key |= (Py_LONG)c << 8;
     c = (unsigned char)s[2];
-    key |= (long)c << 16;
+    key |= (Py_LONG)c << 16;
     c = (unsigned char)s[3];
-    key |= (long)c << 24;
+    key |= (Py_LONG)c << 24;
 
-    UNLESS (py_key = PyInt_FromLong((long)key)) return -1;
+    UNLESS (py_key = PyInt_FromLong((Py_LONG)key)) return -1;
     
     value = PyDict_GetItem(self->memo, py_key);
     if (! value) {
@@ -3251,7 +3252,7 @@ load_binput(Unpicklerobject *self) {
 
     key = (unsigned char)s[0];
 
-    UNLESS (py_key = PyInt_FromLong((long)key)) return -1;
+    UNLESS (py_key = PyInt_FromLong((Py_LONG)key)) return -1;
     value=self->stack->data[len-1];
     len=PyDict_SetItem(self->memo, py_key, value);
     Py_DECREF(py_key);
@@ -3262,7 +3263,7 @@ load_binput(Unpicklerobject *self) {
 static int
 load_long_binput(Unpicklerobject *self) {
     PyObject *py_key = 0, *value = 0;
-    long key;
+    Py_LONG key;
     unsigned char c;
     char *s;
     int len;
@@ -3271,13 +3272,13 @@ load_long_binput(Unpicklerobject *self) {
     UNLESS (len=self->stack->length) return stackUnderflow();
 
     c = (unsigned char)s[0];
-    key = (long)c;
+    key = (Py_LONG)c;
     c = (unsigned char)s[1];
-    key |= (long)c << 8;
+    key |= (Py_LONG)c << 8;
     c = (unsigned char)s[2];
-    key |= (long)c << 16;
+    key |= (Py_LONG)c << 16;
     c = (unsigned char)s[3];
-    key |= (long)c << 24;
+    key |= (Py_LONG)c << 24;
 
     UNLESS (py_key = PyInt_FromLong(key)) return -1;
     value=self->stack->data[len-1];
@@ -4349,7 +4350,7 @@ static PyTypeObject Unpicklertype = {
     (reprfunc)0,          /*tp_str*/
 
     /* Space for future expansion */
-    0L,0L,0L,0L,
+    0LL,0LL,0LL,0LL,
     Unpicklertype__doc__ /* Documentation string */
 };
 

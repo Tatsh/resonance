@@ -34,12 +34,12 @@
 #include <errno.h>
 #endif
 
-unsigned long
+unsigned Py_LONG
 PyOS_strtoul(register char *str, char **ptr, int base)
 {
-    register unsigned long	result;	/* return value of the function */
+    register unsigned Py_LONG	result;	/* return value of the function */
     register int		c;	/* current input character */
-    register unsigned long	temp;	/* used in overflow testing */
+    register unsigned Py_LONG	temp;	/* used in overflow testing */
     int				ovf;	/* true if overflow occurred */
 
     result = 0;
@@ -102,7 +102,7 @@ PyOS_strtoul(register char *str, char **ptr, int base)
 	result = result * base + c;
 #ifndef MPW
 	if(base == 10) {
-		if(((long)(result - c) / base != (long)temp))	/* overflow */
+		if(((Py_LONG)(result - c) / base != (Py_LONG)temp))	/* overflow */
 			ovf = 1;
 	}
 	else {
@@ -118,16 +118,16 @@ PyOS_strtoul(register char *str, char **ptr, int base)
 	*ptr = str;
     if (ovf)
     {
-	result = (unsigned long) ~0L;
+	result = (unsigned Py_LONG) ~0LL;
 	errno = ERANGE;
     }
     return result;
 }
 
-long
+Py_LONG
 PyOS_strtol(char *str, char **ptr, int base)
 {
-	long result;
+	Py_LONG result;
 	char sign;
 	
 	while (*str && isspace(Py_CHARMASK(*str)))
@@ -137,7 +137,7 @@ PyOS_strtol(char *str, char **ptr, int base)
 	if (sign == '+' || sign == '-')
 		str++;
 	
-	result = (long) PyOS_strtoul(str, ptr, base);
+	result = (Py_LONG) PyOS_strtoul(str, ptr, base);
 	
 	/* Signal overflow if the result appears negative,
 	   except for the largest negative integer */

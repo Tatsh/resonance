@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-DL_IMPORT(long) PyImport_GetMagicNumber(void);
+DL_IMPORT(Py_LONG) PyImport_GetMagicNumber(void);
 DL_IMPORT(PyObject *) PyImport_ExecCodeModule(char *name, PyObject *co);
 DL_IMPORT(PyObject *) PyImport_ExecCodeModuleEx(
 	char *name, PyObject *co, char *pathname);

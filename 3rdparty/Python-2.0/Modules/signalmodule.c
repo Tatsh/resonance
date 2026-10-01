@@ -70,7 +70,7 @@
 #ifdef WITH_THREAD
 #include <sys/types.h> /* For pid_t */
 #include "pythread.h"
-static long main_thread;
+static Py_LONG main_thread;
 static pid_t main_pid;
 #endif
 
@@ -337,7 +337,7 @@ initsignal(void)
         if (!x || PyDict_SetItemString(d, "SIG_IGN", x) < 0)
                 goto finally;
 
-        x = PyInt_FromLong((long)NSIG);
+        x = PyInt_FromLong((Py_LONG)NSIG);
         if (!x || PyDict_SetItemString(d, "NSIG", x) < 0)
                 goto finally;
         Py_DECREF(x);

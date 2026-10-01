@@ -16,7 +16,7 @@ DL_IMPORT(void) PyThread_init_thread(void);
 DL_IMPORT(int) PyThread_start_new_thread(void (*)(void *), void *);
 DL_IMPORT(void) PyThread_exit_thread(void);
 DL_IMPORT(void) PyThread__PyThread_exit_thread(void);
-DL_IMPORT(long) PyThread_get_thread_ident(void);
+DL_IMPORT(Py_LONG) PyThread_get_thread_ident(void);
 
 DL_IMPORT(PyThread_type_lock) PyThread_allocate_lock(void);
 DL_IMPORT(void) PyThread_free_lock(PyThread_type_lock);

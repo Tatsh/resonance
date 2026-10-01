@@ -39,7 +39,7 @@ functions should be applied to nil objects.
 typedef struct {
     PyObject_VAR_HEAD
 #ifdef CACHE_HASH
-    long ob_shash;
+    Py_LONG ob_shash;
 #endif
 #ifdef INTERN_STRINGS
     PyObject *ob_sinterned;

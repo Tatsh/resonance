@@ -19,7 +19,7 @@ extern "C" {
 
 typedef unsigned short digit;
 typedef unsigned int wdigit; /* digit widened to parameter size */
-#define BASE_TWODIGITS_TYPE long
+#define BASE_TWODIGITS_TYPE Py_LONG
 typedef unsigned BASE_TWODIGITS_TYPE twodigits;
 typedef BASE_TWODIGITS_TYPE stwodigits; /* signed variant of twodigits */
 

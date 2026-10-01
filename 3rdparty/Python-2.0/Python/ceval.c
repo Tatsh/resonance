@@ -68,10 +68,10 @@ static void format_exc_check_arg(PyObject *, char *, PyObject *);
 /* Dynamic execution profile */
 #ifdef DYNAMIC_EXECUTION_PROFILE
 #ifdef DXPAIRS
-static long dxpairs[257][256];
+static Py_LONG dxpairs[257][256];
 #define dxp dxpairs[256]
 #else
-static long dxp[256];
+static Py_LONG dxp[256];
 #endif
 #endif
 
@@ -86,7 +86,7 @@ static long dxp[256];
 extern int _PyThread_Started; /* Flag for Py_Exit */
 
 static PyThread_type_lock interpreter_lock = 0;
-static long main_thread = 0;
+static Py_LONG main_thread = 0;
 
 void
 PyEval_InitThreads(void)
@@ -874,7 +874,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 			v = POP();
 			if (PyInt_Check(v) && PyInt_Check(w)) {
 				/* INLINE: int + int */
-				register long a, b, i;
+				register Py_LONG a, b, i;
 				a = PyInt_AS_LONG(v);
 				b = PyInt_AS_LONG(w);
 				i = a + b;
@@ -899,7 +899,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 			v = POP();
 			if (PyInt_Check(v) && PyInt_Check(w)) {
 				/* INLINE: int - int */
-				register long a, b, i;
+				register Py_LONG a, b, i;
 				a = PyInt_AS_LONG(v);
 				b = PyInt_AS_LONG(w);
 				i = a - b;
@@ -924,7 +924,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 			v = POP();
 			if (PyList_Check(v) && PyInt_Check(w)) {
 				/* INLINE: list[int] */
-				long i = PyInt_AsLong(w);
+				Py_LONG i = PyInt_AsLong(w);
 				if (i < 0)
 					i += PyList_GET_SIZE(v);
 				if (i < 0 ||
@@ -1041,7 +1041,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 			v = POP();
 			if (PyInt_Check(v) && PyInt_Check(w)) {
 				/* INLINE: int + int */
-				register long a, b, i;
+				register Py_LONG a, b, i;
 				a = PyInt_AS_LONG(v);
 				b = PyInt_AS_LONG(w);
 				i = a + b;
@@ -1066,7 +1066,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 			v = POP();
 			if (PyInt_Check(v) && PyInt_Check(w)) {
 				/* INLINE: int - int */
-				register long a, b, i;
+				register Py_LONG a, b, i;
 				a = PyInt_AS_LONG(v);
 				b = PyInt_AS_LONG(w);
 				i = a - b;
@@ -1629,7 +1629,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 			v = POP();
 			if (PyInt_Check(v) && PyInt_Check(w)) {
 				/* INLINE: cmp(int, int) */
-				register long a, b;
+				register Py_LONG a, b;
 				register int res;
 				a = PyInt_AS_LONG(v);
 				b = PyInt_AS_LONG(w);
@@ -2123,7 +2123,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 				else {
 					if (why == WHY_RETURN)
 						PUSH(retval);
-					v = PyInt_FromLong((long)why);
+					v = PyInt_FromLong((Py_LONG)why);
 					PUSH(v);
 				}
 				why = WHY_NOT;
@@ -2813,7 +2813,7 @@ int
 _PyEval_SliceIndex(PyObject *v, int *pi)
 {
 	if (v != NULL) {
-		long x;
+		Py_LONG x;
 		if (PyInt_Check(v)) {
 			x = PyInt_AsLong(v);
 		} else if (PyLong_Check(v)) {
@@ -2833,7 +2833,7 @@ _PyEval_SliceIndex(PyObject *v, int *pi)
 				   the error. */
 
 				/* Create a long integer with a value of 0 */
-				long_zero = PyLong_FromLong( 0L );
+				long_zero = PyLong_FromLong( 0LL );
 				if (long_zero == NULL) return 0;
 
 				/* Check sign */
@@ -3118,7 +3118,7 @@ format_exc_check_arg(PyObject *exc, char *format_str, PyObject *obj)
 #ifdef DYNAMIC_EXECUTION_PROFILE
 
 PyObject *
-getarray(long a[256])
+getarray(Py_LONG a[256])
 {
 	int i;
 	PyObject *l = PyList_New(256);

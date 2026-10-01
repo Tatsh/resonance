@@ -13,7 +13,7 @@
 #include "traceback.h"
 
 #if defined( Py_TRACE_REFS ) || defined( Py_REF_DEBUG )
-DL_IMPORT(long) _Py_RefTotal;
+DL_IMPORT(Py_LONG) _Py_RefTotal;
 #endif
 
 /* Object allocation routines used by NEWOBJ and NEWVAROBJ macros.
@@ -311,7 +311,7 @@ PyObject_Str(PyObject *v)
 static PyObject *
 do_cmp(PyObject *v, PyObject *w)
 {
-	long c;
+	Py_LONG c;
 	/* __rcmp__ actually won't be called unless __cmp__ isn't defined,
 	   because the check in cmpobject() reverses the objects first.
 	   This is intentional -- it makes no sense to define cmp(x,y)
@@ -534,13 +534,13 @@ PyObject_Compare(PyObject *v, PyObject *w)
    All the utility functions (_Py_Hash*()) return "-1" to signify an error.
 */
 
-long
+Py_LONG
 _Py_HashDouble(double v)
 {
 	double intpart, fractpart;
 	int expo;
-	long hipart;
-	long x;		/* the final hash value */
+	Py_LONG hipart;
+	Py_LONG x;		/* the final hash value */
 	/* This is designed so that Python numbers of different types
 	 * that compare equal hash to the same value; otherwise comparisons
 	 * of mapping keys will turn out weird.
@@ -557,7 +557,7 @@ _Py_HashDouble(double v)
 #endif
 	if (fractpart == 0.0) {
 		/* This must return the same hash as an equal int or long. */
-		if (intpart > LONG_MAX || -intpart > LONG_MAX) {
+		if (intpart > PY_LONG_MAX || -intpart > PY_LONG_MAX) {
 			/* Convert to long and use its hash. */
 			PyObject *plong;	/* converted to Python long */
 			if (Py_IS_INFINITY(intpart))
@@ -571,7 +571,7 @@ _Py_HashDouble(double v)
 			return x;
 		}
 		/* Fits in a C long == a Python int, so is its own hash. */
-		x = (long)intpart;
+		x = (Py_LONG)intpart;
 		if (x == -1)
 			x = -2;
 		return x;
@@ -590,23 +590,23 @@ _Py_HashDouble(double v)
 	 */
 	v = frexp(v, &expo);
 	v *= 2147483648.0;	/* 2**31 */
-	hipart = (long)v;	/* take the top 32 bits */
+	hipart = (Py_LONG)v;	/* take the top 32 bits */
 	v = (v - (double)hipart) * 2147483648.0; /* get the next 32 bits */
-	x = hipart + (long)v + (expo << 15);
+	x = hipart + (Py_LONG)v + (expo << 15);
 	if (x == -1)
 		x = -2;
 	return x;
 }
 
-long
+Py_LONG
 _Py_HashPointer(void *p)
 {
 #if SIZEOF_LONG >= SIZEOF_VOID_P
-	return (long)p;
+	return (Py_LONG)p;
 #else
 	/* convert to a Python long and hash that */
 	PyObject* longobj;
-	long x;
+	Py_LONG x;
 	
 	if ((longobj = PyLong_FromVoidPtr(p)) == NULL) {
 		x = -1;
@@ -621,7 +621,7 @@ finally:
 }
 
 
-long
+Py_LONG
 PyObject_Hash(PyObject *v)
 {
 	PyTypeObject *tp = v->ob_type;

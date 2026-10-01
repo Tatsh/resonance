@@ -1299,7 +1299,7 @@ PyObject *PyUnicode_DecodeUnicodeEscape(const char *s,
             if (*s == '{') {
                 const char *start = s + 1;
                 const char *endBrace = start;
-                unsigned long j;
+                unsigned Py_LONG j;
 
                 /* look for either the closing brace, or we
                  * exceed the maximum length of the unicode character names
@@ -1358,7 +1358,7 @@ store:
                 *p++ = (Py_UNICODE) chr;
             else if (chr <= 0x10ffff) {
                 /* UCS-4 character.  store as two surrogate characters */
-                chr -= 0x10000L;
+                chr -= 0x10000LL;
                 *p++ = 0xD800 + (Py_UNICODE) (chr >> 10);
                 *p++ = 0xDC00 + (Py_UNICODE) (chr & ~0xFC00);
             } else {
@@ -1963,7 +1963,7 @@ PyObject *PyUnicode_DecodeCharmap(const char *s,
 	PyObject *w, *x;
 
 	/* Get mapping (char ordinal -> integer, Unicode char or None) */
-	w = PyInt_FromLong((long)ch);
+	w = PyInt_FromLong((Py_LONG)ch);
 	if (w == NULL)
 	    goto onError;
 	x = PyObject_GetItem(mapping, w);
@@ -1980,7 +1980,7 @@ PyObject *PyUnicode_DecodeCharmap(const char *s,
 
 	/* Apply mapping */
 	if (PyInt_Check(x)) {
-	    long value = PyInt_AS_LONG(x);
+	    Py_LONG value = PyInt_AS_LONG(x);
 	    if (value < 0 || value > 65535) {
 		PyErr_SetString(PyExc_TypeError,
 				"character mapping must be in range(65536)");
@@ -2079,7 +2079,7 @@ PyObject *PyUnicode_EncodeCharmap(const Py_UNICODE *p,
 	PyObject *w, *x;
 
 	/* Get mapping (Unicode ordinal -> string char, integer or None) */
-	w = PyInt_FromLong((long)ch);
+	w = PyInt_FromLong((Py_LONG)ch);
 	if (w == NULL)
 	    goto onError;
 	x = PyObject_GetItem(mapping, w);
@@ -2101,7 +2101,7 @@ PyObject *PyUnicode_EncodeCharmap(const Py_UNICODE *p,
 
 	/* Apply mapping */
 	if (PyInt_Check(x)) {
-	    long value = PyInt_AS_LONG(x);
+	    Py_LONG value = PyInt_AS_LONG(x);
 	    if (value < 0 || value > 255) {
 		PyErr_SetString(PyExc_TypeError,
 				"character mapping must be in range(256)");
@@ -3206,7 +3206,7 @@ unicode_compare(PyUnicodeObject *str1, PyUnicodeObject *str2)
     
     while (len1 > 0 && len2 > 0) {
         Py_UNICODE c1, c2;     
-	long diff;
+	Py_LONG diff;
 
         c1 = *s1++;
         c2 = *s2++;
@@ -3216,7 +3216,7 @@ unicode_compare(PyUnicodeObject *str1, PyUnicodeObject *str2)
             c2 += utf16Fixup[c2>>11];
         
         /* now c1 and c2 are in UTF-32-compatible order */
-        diff = (long)c1 - (long)c2;
+        diff = (Py_LONG)c1 - (Py_LONG)c2;
         if (diff)
             return (diff < 0) ? -1 : (diff != 0);
         len1--; len2--;
@@ -3239,9 +3239,9 @@ unicode_compare(PyUnicodeObject *str1, PyUnicodeObject *str2)
     len2 = str2->length;
     
     while (len1 > 0 && len2 > 0) {
-	register long diff;
+	register Py_LONG diff;
 
-        diff = (long)*s1++ - (long)*s2++;
+        diff = (Py_LONG)*s1++ - (Py_LONG)*s2++;
         if (diff)
             return (diff < 0) ? -1 : (diff != 0);
         len1--; len2--;
@@ -3410,7 +3410,7 @@ unicode_count(PyUnicodeObject *self, PyObject *args)
     if (end < 0)
         end = 0;
 
-    result = PyInt_FromLong((long) count(self, start, end, substring));
+    result = PyInt_FromLong((Py_LONG) count(self, start, end, substring));
 
     Py_DECREF(substring);
     return result;
@@ -3538,7 +3538,7 @@ unicode_getitem(PyUnicodeObject *self, int index)
     return (PyObject*) PyUnicode_FromUnicode(&self->str[index], 1);
 }
 
-static long
+static Py_LONG
 unicode_hash(PyUnicodeObject *self)
 {
     /* Since Unicode objects compare equal to their ASCII string
@@ -3549,7 +3549,7 @@ unicode_hash(PyUnicodeObject *self)
 
     register int len;
     register Py_UNICODE *p;
-    register long x;
+    register Py_LONG x;
 
     if (self->hash != -1)
 	return self->hash;
@@ -4693,7 +4693,7 @@ formatint(Py_UNICODE *buf,
        worst case length = 3 + 19 (worst len of INT_MAX on 64-bit machine)
        + 1 + 1 = 24*/
     char fmt[64]; /* plenty big enough! */
-    long x;
+    Py_LONG x;
 
     x = PyInt_AsLong(v);
     if (x == -1 && PyErr_Occurred())
@@ -4707,7 +4707,7 @@ formatint(Py_UNICODE *buf,
             "formatted integer is too long (precision too long?)");
         return -1;
     }
-    sprintf(fmt, "%%%s.%dl%c", (flags & F_ALT) ? "#" : "", prec, type);
+    sprintf(fmt, "%%%s.%dll%c", (flags & F_ALT) ? "#" : "", prec, type);
     return usprintf(buf, fmt, x);
 }
 
@@ -4731,7 +4731,7 @@ formatchar(Py_UNICODE *buf,
 
     else {
 	/* Integer input truncated to a character */
-        long x;
+        Py_LONG x;
 	x = PyInt_AsLong(v);
 	if (x == -1 && PyErr_Occurred())
 	    goto onError;

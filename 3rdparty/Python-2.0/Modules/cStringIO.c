@@ -405,7 +405,8 @@ O_cwrite(PyObject *self, char *c, int  l) {
                    (char*)realloc(
                         ((Oobject*)self)->buf,
                         (((Oobject*)self)->buf_size) *sizeof(char))) {
-                    PyErr_SetString(PyExc_MemoryError,"out of memory");
+                    /* The port identifies the interpreter in both memory errors (0x008452e0). */
+                    PyErr_SetString(PyExc_MemoryError,"python out of memory");
                     ((Oobject*)self)->buf_size=((Oobject*)self)->pos=0;
                     return -1;
               }
@@ -522,7 +523,7 @@ O_getattr(Oobject *self, char *name) {
 
 static int
 O_setattr(Oobject *self, char *name, PyObject *value) {
-	long x;
+	Py_LONG x;
 	if (strcmp(name, "softspace") != 0) {
 		PyErr_SetString(PyExc_AttributeError, name);
 		return -1;
@@ -559,7 +560,7 @@ static PyTypeObject Otype = {
   (reprfunc)0,		/*tp_str*/
   
   /* Space for future expansion */
-  0L,0L,0L,0L,
+  0LL,0LL,0LL,0LL,
   Otype__doc__ 		/* Documentation string */
 };
 
@@ -575,7 +576,8 @@ newOobject(int  size) {
         self->softspace = 0;
 
         UNLESS (self->buf=malloc(size*sizeof(char))) {
-                  PyErr_SetString(PyExc_MemoryError,"out of memory");
+                  /* The port identifies the interpreter here too (0x008452e0). */
+                  PyErr_SetString(PyExc_MemoryError,"python out of memory");
                   self->buf_size = 0;
                   return NULL;
           }
@@ -675,7 +677,7 @@ static PyTypeObject Itype = {
   (reprfunc)0,		/*tp_str*/
   
   /* Space for future expansion */
-  0L,0L,0L,0L,
+  0LL,0LL,0LL,0LL,
   Itype__doc__ 		/* Documentation string */
 };
 
