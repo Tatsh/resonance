@@ -215,10 +215,10 @@ static int g_anFsReceive[16] __attribute__((aligned(64)));
 static FsResult g_fsResult __attribute__((aligned(64)));
 
 // 0x008e39c0
-static FsHandle g_aFsHandles[kFsHandleCount];
+static FsHandle g_aFsHandles[kFsHandleCount] __attribute__((aligned(64)));
 
 // 0x008e3bc0
-static sceSifClientData g_fsClient;
+static sceSifClientData g_fsClient __attribute__((aligned(64)));
 
 // 0x008e3be8, the version the server reported when the client bound it.
 static char g_abFsServerVersion[4];

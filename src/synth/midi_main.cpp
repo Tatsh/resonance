@@ -91,8 +91,9 @@ constexpr int kMidiStreamHeaderSize = 2 * sizeof(unsigned int);
 // The frame size PollSynthStream() asks the synth movie to read.
 constexpr int kSynthStreamReadSize = 0x4000;
 
+// The SIF records here start on cache lines, as the image places them.
 // 0x008e5bc0
-sceSifClientData g_soundDriverClient;
+alignas(64) sceSifClientData g_soundDriverClient;
 
 // Set while a request sent without waiting is still running on the driver.
 // 0x00780878
@@ -104,7 +105,7 @@ alignas(64) unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
 // The descriptor XferToIop() hands to the SIF DMA.
 // 0x008e5be8
-sceSifDmaData g_xferToIopDma;
+alignas(16) sceSifDmaData g_xferToIopDma;
 
 // Set once InitSynthDriver() has brought the driver up.
 // 0x006e9b88
@@ -175,7 +176,7 @@ int g_anBankIopAddress[kBankIopAddressCount];
 int g_nBankIopIndex;
 
 // 0x00894c40
-char g_szHdBankPath[kHdBankPathSize];
+alignas(64) char g_szHdBankPath[kHdBankPathSize];
 
 // 0x006e9bb8
 std::vector<BankSlot> g_bankSlots;
@@ -505,7 +506,7 @@ struct HardEffectCommand {
 };
 
 // 0x00894d40
-HardEffectCommand g_hardEffectCommand;
+alignas(64) HardEffectCommand g_hardEffectCommand;
 
 // 0x00462340
 void ConfigureSpu2Effects(int bEnable) {
@@ -601,7 +602,7 @@ constexpr int kMidiData1Shift = 8;
 constexpr int kMidiData2Shift = 16;
 
 // 0x00894760
-sceCslCtx g_midiInputContext;
+alignas(64) sceCslCtx g_midiInputContext;
 
 // 0x00894778
 sceCslBuffGrp g_aMidiInputGroups[kMidiInputGroupCount];

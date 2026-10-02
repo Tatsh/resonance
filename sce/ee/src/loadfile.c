@@ -86,7 +86,7 @@ static const char *g_pszLoadFileAltVersion = "....";
 static LoadFileArgs g_loadFileArgs __attribute__((aligned(64)));
 
 // 0x008e5e80
-static sceSifClientData g_loadFileClient;
+static sceSifClientData g_loadFileClient __attribute__((aligned(64)));
 
 // 0x008e5ea8, the version the server reported when the client bound it.
 static char g_abLoadFileServerVersion[kVersionSize];

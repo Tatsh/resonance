@@ -37,7 +37,7 @@ typedef struct {
 static int g_nHeapBound = -1;
 
 // 0x008e5180
-static sceSifClientData g_heapClient;
+static sceSifClientData g_heapClient __attribute__((aligned(64)));
 
 // 0x008e51c0. SIF DMA needs the 64-byte alignment retail gives it.
 static int g_nHeapReceive __attribute__((aligned(64)));

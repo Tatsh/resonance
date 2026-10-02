@@ -58,7 +58,7 @@ typedef struct {
 static SdrPacket g_sdrPacket __attribute__((aligned(64)));
 
 // 0x008e3e40
-static sceSifClientData g_sdrClient;
+static sceSifClientData g_sdrClient __attribute__((aligned(64)));
 
 // 0x007b2754
 static SdrCallbackTable g_sdrCallbackTable;
