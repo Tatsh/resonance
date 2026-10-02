@@ -165,6 +165,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   with `Cannot find ID 4 in Command Factory List`. The recorded demo uses `ControllerCmd`,
   `DoGameSystemPlayCmd`, `EndRecordingCmd`, and `ExitCmd`, and the four command classes are now
   registered with the command factory.
+- All 114 message and packet classes register with the message factory as in the original.
+  Messages read from a stream (for example the muse data of a phrase) no longer fail with
+  `Cannot find ID %ld in Message Factory List`.
 
 ## [0.0.1] - 2026-00-00
 

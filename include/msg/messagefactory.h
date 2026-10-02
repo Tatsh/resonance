@@ -9,7 +9,8 @@ typedef Message *(*MessageFactoryProc)();
  * Registrar that adds one message class to the factory list Message::NewMessage() searches.
  *
  * The translation unit at `0x003d9818` constructs 92 of these as file-scope objects, one for each
- * concrete message, passing the identity Message::Type() reports and the class's static New().
+ * concrete message, and the unit at `0x003ed2e0` constructs 22 more for the packets. Each passes
+ * the identity Message::Type() reports and the class's static New().
  * The class is not polymorphic, emits no RTTI descriptor, and writes no member, and the title is
  * inferred from the diagnostic `Cannot find ID %ld in Message Factory List`.
  */

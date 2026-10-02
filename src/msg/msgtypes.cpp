@@ -1,3 +1,119 @@
+#include "msg/advancesectionmsg.h"
+#include "msg/advancesectiontogglemsg.h"
+#include "msg/allnotesoffmsg.h"
+#include "msg/autocatchmsg.h"
+#include "msg/axebuttonmsg.h"
+#include "msg/axisfxmsg.h"
+#include "msg/axisregistermsg.h"
+#include "msg/axisxpowmsg.h"
+#include "msg/axisypowmsg.h"
+#include "msg/barstatusmsg.h"
+#include "msg/begingamelocalmsg.h"
+#include "msg/beginphrasecatchmsg.h"
+#include "msg/bsloadlevelpacket.h"
+#include "msg/bumpmsg.h"
+#include "msg/bumppacket.h"
+#include "msg/buttonpowmsg.h"
+#include "msg/catchmsg.h"
+#include "msg/catchprogresspacket.h"
+#include "msg/caughtbarmsg.h"
+#include "msg/caughtphrasepacket.h"
+#include "msg/caughtpowerbarmsg.h"
+#include "msg/choosepowerupmsg.h"
+#include "msg/cleargemmsg.h"
+#include "msg/cleargemsmsg.h"
+#include "msg/contctrlmsg.h"
+#include "msg/cripplemsg.h"
+#include "msg/cripplepacket.h"
+#include "msg/csclientstatuspacket.h"
+#include "msg/csinitiateplaypacket.h"
+#include "msg/deployedpowerupmsg.h"
+#include "msg/displaypointermsg.h"
+#include "msg/durgemmsg.h"
+#include "msg/enablefreestylemsg.h"
+#include "msg/endgamemsg.h"
+#include "msg/erasemsg.h"
+#include "msg/eraseoffmsg.h"
+#include "msg/fadegamemsg.h"
+#include "msg/freestylefxmsg.h"
+#include "msg/gamebeginmsg.h"
+#include "msg/gamechatpacket.h"
+#include "msg/gameconnectfailuremsg.h"
+#include "msg/gameconnectionlostmsg.h"
+#include "msg/gameconnectsuccessmsg.h"
+#include "msg/gamemanagerdoplaybackmsg.h"
+#include "msg/gameovermsg.h"
+#include "msg/gemmsg.h"
+#include "msg/gempacket.h"
+#include "msg/invalidateseekermsg.h"
+#include "msg/invalidatetrackmsg.h"
+#include "msg/isrecordingmsg.h"
+#include "msg/jameffectmsg.h"
+#include "msg/juiceamountmsg.h"
+#include "msg/leavegamemsg.h"
+#include "msg/lobbyconnectionlostmsg.h"
+#include "msg/looptogglemsg.h"
+#include "msg/looptoolmsg.h"
+#include "msg/messagefactory.h"
+#include "msg/metfreqendedmsg.h"
+#include "msg/metstartnetlaunchmsg.h"
+#include "msg/metstartpausemsg.h"
+#include "msg/metunlockstagesmsg.h"
+#include "msg/multimusemsg.h"
+#include "msg/multipliermsg.h"
+#include "msg/multiplierstatemsg.h"
+#include "msg/nearesttrackmsg.h"
+#include "msg/neutralizemsg.h"
+#include "msg/notemsg.h"
+#include "msg/nowbarmsg.h"
+#include "msg/pausegamesystemmsg.h"
+#include "msg/phrasecapturedmsg.h"
+#include "msg/phrasemsg.h"
+#include "msg/phrasemuffedmsg.h"
+#include "msg/phrasepacket.h"
+#include "msg/pitchmsg.h"
+#include "msg/pitchriffmsg.h"
+#include "msg/playbackmodemsg.h"
+#include "msg/playbacktogglemsg.h"
+#include "msg/playerleftgamemsg.h"
+#include "msg/playerstrackneutralizedmsg.h"
+#include "msg/pointamountmsg.h"
+#include "msg/powerupcountmsg.h"
+#include "msg/powerupfailedmsg.h"
+#include "msg/psjoinrequestpacket.h"
+#include "msg/rawcontrollermsg.h"
+#include "msg/refreshnetmsg.h"
+#include "msg/remixfxmsg.h"
+#include "msg/remotetrackselectmsg.h"
+#include "msg/rotleftmsg.h"
+#include "msg/rotrightmsg.h"
+#include "msg/scallclientsstatuspacket.h"
+#include "msg/scallplayersinfopacket.h"
+#include "msg/scgameoverpacket.h"
+#include "msg/scloadlevelpacket.h"
+#include "msg/scplayerjoinedpacket.h"
+#include "msg/scriptmsg.h"
+#include "msg/scstartplayingpacket.h"
+#include "msg/sectioncapturedmsg.h"
+#include "msg/seekermsg.h"
+#include "msg/showeraseeffectmsg.h"
+#include "msg/spjoinacceptpacket.h"
+#include "msg/spjoindenypacket.h"
+#include "msg/stdmidimsg.h"
+#include "msg/stopriffmsg.h"
+#include "msg/streakovermsg.h"
+#include "msg/susgemmsg.h"
+#include "msg/sustainnotemsg.h"
+#include "msg/testarbiterpacket.h"
+#include "msg/textmsg.h"
+#include "msg/toggleghostmsg.h"
+#include "msg/trackselectmsg.h"
+#include "msg/trackselectpacket.h"
+#include "msg/tracksonmsg.h"
+#include "msg/unpausegamesystemmsg.h"
+#include "msg/updatescorepacket.h"
+#include "msg/winmsg.h"
+
 // Message and packet type identities. Every concrete message reports one of these from its
 // Type() method, and the factory constructs by the same identity. The declarations are in the
 // headers of their message classes under include/msg/.
@@ -234,3 +350,259 @@ int g_nUnpauseGameSystemMsgType = 435;
 int g_nUpdateScorePacketType = 615;
 // 0x006d034c
 int g_nWinMsgType = 421;
+
+namespace {
+
+// The static initialiser at 0x003d9818 constructs the message registrars in this order.
+// 0x006d0120
+const MessageFactory kRawControllerMsgFactory(g_nRawControllerMsgType, RawControllerMsg::New);
+// 0x006d0128
+const MessageFactory kRotLeftMsgFactory(g_nRotLeftMsgType, RotLeftMsg::New);
+// 0x006d0130
+const MessageFactory kRotRightMsgFactory(g_nRotRightMsgType, RotRightMsg::New);
+// 0x006d0138
+const MessageFactory kPitchRiffMsgFactory(g_nPitchRiffMsgType, PitchRiffMsg::New);
+// 0x006d0140
+const MessageFactory kStopRiffMsgFactory(g_nStopRiffMsgType, StopRiffMsg::New);
+// 0x006d0148
+const MessageFactory kPlaybackModeMsgFactory(g_nPlaybackModeMsgType, PlaybackModeMsg::New);
+// 0x006d0150
+const MessageFactory kAxisRegisterMsgFactory(g_nAxisRegisterMsgType, AxisRegisterMsg::New);
+// 0x006d0158
+const MessageFactory kAxisFXMsgFactory(g_nAxisFXMsgType, AxisFXMsg::New);
+// 0x006d0160
+const MessageFactory kAxisYPowMsgFactory(g_nAxisYPowMsgType, AxisYPowMsg::New);
+// 0x006d0168
+const MessageFactory kAxisXPowMsgFactory(g_nAxisXPowMsgType, AxisXPowMsg::New);
+// 0x006d0170
+const MessageFactory kButtonPowMsgFactory(g_nButtonPowMsgType, ButtonPowMsg::New);
+// 0x006d0178
+const MessageFactory kEraseMsgFactory(g_nEraseMsgType, EraseMsg::New);
+// 0x006d0180
+const MessageFactory kEraseOffMsgFactory(g_nEraseOffMsgType, EraseOffMsg::New);
+// 0x006d0188
+const MessageFactory kAdvanceSectionMsgFactory(g_nAdvanceSectionMsgType, AdvanceSectionMsg::New);
+// 0x006d0190
+const MessageFactory kLoopToolMsgFactory(g_nLoopToolMsgType, LoopToolMsg::New);
+// 0x006d0198
+const MessageFactory kToggleGhostMsgFactory(g_nToggleGhostMsgType, ToggleGhostMsg::New);
+// 0x006d01a0
+const MessageFactory kMultiplierMsgFactory(g_nMultiplierMsgType, MultiplierMsg::New);
+// 0x006d01a8
+const MessageFactory kMultiplierStateMsgFactory(g_nMultiplierStateMsgType, MultiplierStateMsg::New);
+// 0x006d01b0
+const MessageFactory kStreakOverMsgFactory(g_nStreakOverMsgType, StreakOverMsg::New);
+// 0x006d01b8
+const MessageFactory kCaughtBarMsgFactory(g_nCaughtBarMsgType, CaughtBarMsg::New);
+// 0x006d01c8
+const MessageFactory kStdMidiMsgFactory(g_dwStdMidiMsgType, StdMidiMsg::New);
+// 0x006d01d0
+const MessageFactory kNoteMsgFactory(g_dwNoteMsgType, NoteMsg::New);
+// 0x006d01d8
+const MessageFactory kAllNotesOffMsgFactory(g_dwAllNotesOffMsgType, AllNotesOffMsg::New);
+// 0x006d01e0
+const MessageFactory kMultiMuseMsgFactory(g_dwMultiMuseMsgType, MultiMuseMsg::New);
+// 0x006d01e8
+const MessageFactory kSustainNoteMsgFactory(g_dwSustainNoteMsgType, SustainNoteMsg::New);
+// 0x006d01f0
+const MessageFactory kTrackSelectMsgFactory(g_dwTrackSelectMsgType, TrackSelectMsg::New);
+// 0x006d01f8
+const MessageFactory kRemoteTrackSelectMsgFactory(g_nRemoteTrackSelectMsgType,
+                                                  RemoteTrackSelectMsg::New);
+// 0x006d0200
+const MessageFactory kSeekerMsgFactory(g_nSeekerMsgType, SeekerMsg::New);
+// 0x006d0208
+const MessageFactory kCaughtPowerbarMsgFactory(g_nCaughtPowerbarMsgType, CaughtPowerbarMsg::New);
+// 0x006d0210
+const MessageFactory kChoosePowerupMsgFactory(g_nChoosePowerupMsgType, ChoosePowerupMsg::New);
+// 0x006d0218
+const MessageFactory kPowerupCountMsgFactory(g_nPowerupCountMsgType, PowerupCountMsg::New);
+// 0x006d0220
+const MessageFactory kDeployedPowerupMsgFactory(g_nDeployedPowerupMsgType, DeployedPowerupMsg::New);
+// 0x006d0228
+const MessageFactory kPowerupFailedMsgFactory(g_nPowerupFailedMsgType, PowerupFailedMsg::New);
+// 0x006d0230
+const MessageFactory kRemixFXMsgFactory(g_nRemixFXMsgType, RemixFXMsg::New);
+// 0x006d0238
+const MessageFactory kNearestTrackMsgFactory(g_nNearestTrackMsgType, NearestTrackMsg::New);
+// 0x006d0240
+const MessageFactory kDisplayPointerMsgFactory(g_nDisplayPointerMsgType, DisplayPointerMsg::New);
+// 0x006d0248
+const MessageFactory kTextMsgFactory(g_nTextMsgType, TextMsg::New);
+// 0x006d0250
+const MessageFactory kScriptMsgFactory(g_nScriptMsgType, ScriptMsg::New);
+// 0x006d0258
+const MessageFactory kLoopToggleMsgFactory(g_nLoopToggleMsgType, LoopToggleMsg::New);
+// 0x006d0260
+const MessageFactory kAdvanceSectionToggleMsgFactory(g_nAdvanceSectionToggleMsgType,
+                                                     AdvanceSectionToggleMsg::New);
+// 0x006d0268
+const MessageFactory kShowEraseEffectMsgFactory(g_nShowEraseEffectMsgType, ShowEraseEffectMsg::New);
+// 0x006d0270
+const MessageFactory kPlaybackToggleMsgFactory(g_nPlaybackToggleMsgType, PlaybackToggleMsg::New);
+// 0x006d0278
+const MessageFactory kInvalidateSeekerMsgFactory(g_nInvalidateSeekerMsgType,
+                                                 InvalidateSeekerMsg::New);
+// 0x006d0280
+const MessageFactory kInvalidateTrackMsgFactory(g_nInvalidateTrackMsgType, InvalidateTrackMsg::New);
+// 0x006d0288
+const MessageFactory kRefreshNetMsgFactory(g_nRefreshNetMsgType, RefreshNetMsg::New);
+// 0x006d0290
+const MessageFactory kBeginPhraseCatchMsgFactory(g_nBeginPhraseCatchMsgType,
+                                                 BeginPhraseCatchMsg::New);
+// 0x006d0298
+const MessageFactory kTracksOnMsgFactory(g_dwTracksOnMsgType, TracksOnMsg::New);
+// 0x006d02a0
+const MessageFactory kFreestyleFXMsgFactory(g_nFreestyleFXMsgType, FreestyleFXMsg::New);
+// 0x006d02a8
+const MessageFactory kPhraseCapturedMsgFactory(g_nPhraseCapturedMsgType, PhraseCapturedMsg::New);
+// 0x006d02b0
+const MessageFactory kSectionCapturedMsgFactory(g_nSectionCapturedMsgType, SectionCapturedMsg::New);
+// 0x006d02b8
+const MessageFactory kBarStatusMsgFactory(g_nBarStatusMsgType, BarStatusMsg::New);
+// 0x006d02c0
+const MessageFactory kClearGemsMsgFactory(g_nClearGemsMsgType, ClearGemsMsg::New);
+// 0x006d02c8
+const MessageFactory kClearGemMsgFactory(g_nClearGemMsgType, ClearGemMsg::New);
+// 0x006d02d0
+const MessageFactory kGemMsgFactory(g_nGemMsgType, GemMsg::New);
+// 0x006d02d8
+const MessageFactory kDurGemMsgFactory(g_nDurGemMsgType, DurGemMsg::New);
+// 0x006d02e0
+const MessageFactory kSusGemMsgFactory(g_nSusGemMsgType, SusGemMsg::New);
+// 0x006d02e8
+const MessageFactory kCatchMsgFactory(g_nCatchMsgType, CatchMsg::New);
+// 0x006d02f0
+const MessageFactory kPitchMsgFactory(g_nPitchMsgType, PitchMsg::New);
+// 0x006d02f8
+const MessageFactory kContCtrlMsgFactory(g_nContCtrlMsgType, ContCtrlMsg::New);
+// 0x006d0300
+const MessageFactory kNowBarMsgFactory(g_nNowBarMsgType, NowBarMsg::New);
+// 0x006d0308
+const MessageFactory kAxeButtonMsgFactory(g_nAxeButtonMsgType, AxeButtonMsg::New);
+// 0x006d0310
+const MessageFactory kPhraseMuffedMsgFactory(g_nPhraseMuffedMsgType, PhraseMuffedMsg::New);
+// 0x006d0318
+const MessageFactory kEnableFreestyleMsgFactory(g_nEnableFreestyleMsgType, EnableFreestyleMsg::New);
+// 0x006d0320
+const MessageFactory kNeutralizeMsgFactory(g_nNeutralizeMsgType, NeutralizeMsg::New);
+// 0x006d0328
+const MessageFactory kPlayersTrackNeutralizedMsgFactory(g_nPlayersTrackNeutralizedMsgType,
+                                                        PlayersTrackNeutralizedMsg::New);
+// 0x006d0330
+const MessageFactory kJamEffectMsgFactory(g_nJamEffectMsgType, JamEffectMsg::New);
+// 0x006d0338
+const MessageFactory kJuiceAmountMsgFactory(g_nJuiceAmountMsgType, JuiceAmountMsg::New);
+// 0x006d0340
+const MessageFactory kPointAmountMsgFactory(g_nPointAmountMsgType, PointAmountMsg::New);
+// 0x006d0348
+const MessageFactory kGameBeginMsgFactory(g_nGameBeginMsgType, GameBeginMsg::New);
+// 0x006d0350
+const MessageFactory kWinMsgFactory(g_nWinMsgType, WinMsg::New);
+// 0x006d0358
+const MessageFactory kGameOverMsgFactory(g_nGameOverMsgType, GameOverMsg::New);
+// 0x006d0360
+const MessageFactory kLeaveGameMsgFactory(g_nLeaveGameMsgType, LeaveGameMsg::New);
+// 0x006d0368
+const MessageFactory kFadeGameMsgFactory(g_nFadeGameMsgType, FadeGameMsg::New);
+// 0x006d0370
+const MessageFactory kPhraseMsgFactory(g_nPhraseMsgType, PhraseMsg::New);
+// 0x006d0378
+const MessageFactory kBumpMsgFactory(g_nBumpMsgType, BumpMsg::New);
+// 0x006d0380
+const MessageFactory kGameConnectSuccessMsgFactory(g_nGameConnectSuccessMsgType,
+                                                   GameConnectSuccessMsg::New);
+// 0x006d0388
+const MessageFactory kGameConnectFailureMsgFactory(g_nGameConnectFailureMsgType,
+                                                   GameConnectFailureMsg::New);
+// 0x006d0390
+const MessageFactory kGameConnectionLostMsgFactory(g_nGameConnectionLostMsgType,
+                                                   GameConnectionLostMsg::New);
+// 0x006d0398
+const MessageFactory kLobbyConnectionLostMsgFactory(g_nLobbyConnectionLostMsgType,
+                                                    LobbyConnectionLostMsg::New);
+// 0x006d03a0
+const MessageFactory kPlayerLeftGameMsgFactory(g_nPlayerLeftGameMsgType, PlayerLeftGameMsg::New);
+// 0x006d03a8
+const MessageFactory kBeginGameLocalMsgFactory(g_nBeginGameLocalMsgType, BeginGameLocalMsg::New);
+// 0x006d03b0
+const MessageFactory kEndGameMsgFactory(g_nEndGameMsgType, EndGameMsg::New);
+// 0x006d03b8
+const MessageFactory kPauseGameSystemMsgFactory(g_nPauseGameSystemMsgType, PauseGameSystemMsg::New);
+// 0x006d03c0
+const MessageFactory kUnpauseGameSystemMsgFactory(g_nUnpauseGameSystemMsgType,
+                                                  UnpauseGameSystemMsg::New);
+// 0x006d03c8
+const MessageFactory kGameManagerDoPlaybackMsgFactory(g_nGameManagerDoPlaybackMsgType,
+                                                      GameManagerDoPlaybackMsg::New);
+// 0x006d03d0
+const MessageFactory kAutoCatchMsgFactory(g_nAutoCatchMsgType, AutoCatchMsg::New);
+// 0x006d03d8
+const MessageFactory kCrippleMsgFactory(g_nCrippleMsgType, CrippleMsg::New);
+// 0x006d03e0
+const MessageFactory kMetStartNetLaunchMsgFactory(g_nMetStartNetLaunchMsgType,
+                                                  MetStartNetLaunchMsg::New);
+// 0x006d03e8
+const MessageFactory kMetStartPauseMsgFactory(g_nMetStartPauseMsgType, MetStartPauseMsg::New);
+// 0x006d03f0
+const MessageFactory kIsRecordingMsgFactory(g_nIsRecordingMsgType, IsRecordingMsg::New);
+// 0x006d03f8
+const MessageFactory kMetFreqEndedMsgFactory(g_nMetFreqEndedMsgType, MetFreqEndedMsg::New);
+// 0x006d0400
+const MessageFactory kMetUnlockStagesMsgFactory(g_nMetUnlockStagesMsgType, MetUnlockStagesMsg::New);
+
+// The static initialiser at 0x003ed2e0 constructs the packet registrars in this order.
+// 0x006d7370
+const MessageFactory kPSJoinRequestPacketFactory(g_nPSJoinRequestPacketType,
+                                                 PSJoinRequestPacket::New);
+// 0x006d7378
+const MessageFactory kSPJoinAcceptPacketFactory(g_nSPJoinAcceptPacketType, SPJoinAcceptPacket::New);
+// 0x006d7380
+const MessageFactory kSPJoinDenyPacketFactory(g_nSPJoinDenyPacketType, SPJoinDenyPacket::New);
+// 0x006d7388
+const MessageFactory kSCPlayerJoinedPacketFactory(g_nSCPlayerJoinedPacketType,
+                                                  SCPlayerJoinedPacket::New);
+// 0x006d7390
+const MessageFactory kCSClientStatusPacketFactory(g_nCSClientStatusPacketType,
+                                                  CSClientStatusPacket::New);
+// 0x006d7398
+const MessageFactory kSCAllClientsStatusPacketFactory(g_nSCAllClientsStatusPacketType,
+                                                      SCAllClientsStatusPacket::New);
+// 0x006d73a0
+const MessageFactory kCSInitiatePlayPacketFactory(g_nCSInitiatePlayPacketType,
+                                                  CSInitiatePlayPacket::New);
+// 0x006d73a8
+const MessageFactory kSCAllPlayersInfoPacketFactory(g_nSCAllPlayersInfoPacketType,
+                                                    SCAllPlayersInfoPacket::New);
+// 0x006d73b0
+const MessageFactory kSCStartPlayingPacketFactory(g_nSCStartPlayingPacketType,
+                                                  SCStartPlayingPacket::New);
+// 0x006d73b8
+const MessageFactory kBSLoadLevelPacketFactory(g_nBSLoadLevelPacketType, BSLoadLevelPacket::New);
+// 0x006d73c0
+const MessageFactory kSCLoadLevelPacketFactory(g_nSCLoadLevelPacketType, SCLoadLevelPacket::New);
+// 0x006d73c8
+const MessageFactory kSCGameOverPacketFactory(g_nSCGameOverPacketType, SCGameOverPacket::New);
+// 0x006d73d0
+const MessageFactory kGemPacketFactory(g_nGemPacketType, GemPacket::New);
+// 0x006d73d8
+const MessageFactory kPhrasePacketFactory(g_nPhrasePacketType, PhrasePacket::New);
+// 0x006d73e0
+const MessageFactory kCaughtPhrasePacketFactory(g_nCaughtPhrasePacketType, CaughtPhrasePacket::New);
+// 0x006d73e8
+const MessageFactory kUpdateScorePacketFactory(g_nUpdateScorePacketType, UpdateScorePacket::New);
+// 0x006d73f0
+const MessageFactory kTrackSelectPacketFactory(g_nTrackSelectPacketType, TrackSelectPacket::New);
+// 0x006d73f8
+const MessageFactory kCatchProgressPacketFactory(g_nCatchProgressPacketType,
+                                                 CatchProgressPacket::New);
+// 0x006d7400
+const MessageFactory kCripplePacketFactory(g_nCripplePacketType, CripplePacket::New);
+// 0x006d7408
+const MessageFactory kBumpPacketFactory(g_nBumpPacketType, BumpPacket::New);
+// 0x006d7410
+const MessageFactory kGameChatPacketFactory(g_nGameChatPacketType, GameChatPacket::New);
+// 0x006d7418
+const MessageFactory kTestArbiterPacketFactory(g_nTestArbiterPacketType, TestArbiterPacket::New);
+
+} // namespace

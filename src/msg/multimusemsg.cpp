@@ -5,7 +5,7 @@
 #include "mid/mbt.h"
 
 // 0x003d6e08
-MultiMuseMsg *MultiMuseMsg::New() {
+Message *MultiMuseMsg::New() {
     return new MultiMuseMsg(nullptr);
 }
 

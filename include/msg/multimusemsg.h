@@ -40,7 +40,7 @@ public:
      * @return The new message.
      * @ghidraAddress 0x003d6e08
      */
-    static MultiMuseMsg *New();
+    static Message *New();
 
     /**
      * @param pMuse The sequence, retained when it is not null. It is stored either way.
