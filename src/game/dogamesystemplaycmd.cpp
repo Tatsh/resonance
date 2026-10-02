@@ -4,10 +4,15 @@
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
+#include "sch/commandfactory.h"
 
 namespace {
 
 constexpr int kDoGameSystemPlayCmdId = 4;
+
+// 0x006682c0
+const Sch::CommandFactory kDoGameSystemPlayCmdFactory(kDoGameSystemPlayCmdId,
+                                                      DoGameSystemPlayCmd::New);
 
 } // namespace
 

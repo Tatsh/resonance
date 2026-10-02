@@ -62,6 +62,7 @@
 #include "os/mem.h"
 #include "os/zone.h"
 #include "sch/command.h"
+#include "sch/commandfactory.h"
 #include "sch/tick.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
@@ -282,6 +283,9 @@ private:
 constexpr int kExitCmdId = 7;
 
 int ExitCmd::sCmdID = kExitCmdId;
+
+// 0x0067f250
+const Sch::CommandFactory kExitCmdFactory(kExitCmdId, ExitCmd::NewCmd);
 
 } // namespace
 

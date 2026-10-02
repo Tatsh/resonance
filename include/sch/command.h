@@ -54,10 +54,10 @@ namespace Sch {
  * Execute() and Print() are inferred from their bodies alone, and no string in the image
  * identifies either.
  *
- * Nothing registers a factory in the shipped build. The Sch::CommandFactory constructor receives a
- * literal zero for the identifier at all twenty-seven of its call sites, and it returns without
- * touching the list whenever the identifier is zero. The factory list is therefore permanently
- * empty and every path behind it is unreachable.
+ * Four classes register a factory, and recorded demos load their commands through the registered
+ * factories. ControllerCmd, DoGameSystemPlayCmd, EndRecordingCmd, and ExitCmd register under their
+ * identifiers. The other twenty-two Sch::CommandFactory call sites pass a zero identifier, for
+ * which the constructor returns without an insertion.
  */
 class Command : public Attachment {
 public:
@@ -132,9 +132,8 @@ public:
      * Produce a command of the identified class through the factory list.
      *
      * The compiler inlined this body into `operator>>`, and the standalone copy at the address
-     * below has no caller in the image. An unregistered identifier produces a null result. Every
-     * path in the shipped build then reports a null result through Fatal(), because the factory
-     * list is always empty.
+     * below has no caller in the image. An unregistered identifier produces a null result, and
+     * `operator>>` reports it through Fatal().
      *
      * @param nCmdID The identifier to construct for.
      * @return The new command, or null when the identifier is zero or unregistered.

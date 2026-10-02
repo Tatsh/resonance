@@ -3,10 +3,14 @@
 #include <iostream>
 
 #include "game/gamerecorder.h"
+#include "sch/commandfactory.h"
 
 namespace {
 
 constexpr int kEndRecordingCmdId = 6;
+
+// 0x006693f0
+const Sch::CommandFactory kEndRecordingCmdFactory(kEndRecordingCmdId, EndRecordingCmd::New);
 
 constexpr char kDescription[] = "{EndRecordingCmd}";
 

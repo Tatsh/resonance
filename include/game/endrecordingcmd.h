@@ -15,7 +15,7 @@ class OBStream;
  * Sch::Command::Load() at `0x00539f28`, and adds one virtual of its own at slot 8, which is empty.
  * GameRecorder::ScheduleEnd() allocates the 0x10-byte object with the untagged allocator and
  * expands the constructor. The static initialiser of the unit registers New() under identifier 6
- * with the factory registrar, which is not reconstructed.
+ * with the factory registrar.
  *
  * The destructor at `0x0010ef30` is implicitly declared.
  */

@@ -15,8 +15,9 @@ typedef Command *(*CommandFactoryProc)();
  * and writes no member, and the title is inferred from the diagnostic `Cannot find ID %ld in
  * Command Factory List`.
  *
- * Nothing registers a factory in the shipped build. Every one of the twenty-seven call sites
- * passes a literal zero identifier, and a zero identifier returns before the list is touched.
+ * Four of the twenty-six call sites pass a non-zero identifier (ControllerCmd 2,
+ * DoGameSystemPlayCmd 4, EndRecordingCmd 6, and ExitCmd 7). The others pass zero, for which the
+ * constructor returns before the list is touched.
  */
 class CommandFactory {
 public:

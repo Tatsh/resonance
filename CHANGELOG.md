@@ -161,6 +161,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Materials loaded from files acquire their textures in `Mat::Load` and `Mat::Refresh`.
 - Capped line strings draw every face instead of half.
 - Memory card saves no longer treat a negative free space count as a full card.
+- The attract-mode demo plays again after a wait on the title screen. It stopped at a black screen
+  with `Cannot find ID 4 in Command Factory List`. The recorded demo uses `ControllerCmd`,
+  `DoGameSystemPlayCmd`, `EndRecordingCmd`, and `ExitCmd`, and the four command classes are now
+  registered with the command factory.
 
 ## [0.0.1] - 2026-00-00
 

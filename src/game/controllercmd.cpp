@@ -4,6 +4,7 @@
 
 #include "app/application.h"
 #include "game/grooveworld.h"
+#include "sch/commandfactory.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -19,6 +20,9 @@ constexpr char kTagClose = ']';
 constexpr int kTagByteCount = 6;
 
 constexpr int kControllerCmdId = 2;
+
+// 0x0067f240
+const Sch::CommandFactory kControllerCmdFactory(kControllerCmdId, ControllerCmd::NewCmd);
 
 } // namespace
 

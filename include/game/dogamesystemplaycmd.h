@@ -13,8 +13,7 @@ class OBStream;
  * `DoGameSystemPlayCmd` is one of the five ordinary Sch::Command subclasses. Its table is at
  * `0x007cd520` with eight entries, and it overrides Save() and Load() with empty bodies of its own.
  * It carries no payload, so the object is the 0x0c-byte base. The static initialiser at
- * `0x0010b530` registers New() under identifier 4 with the factory registrar, which is not
- * reconstructed.
+ * `0x0010b530` registers New() under identifier 4 with the factory registrar.
  *
  * The destructor at `0x0010bd08` is implicitly declared.
  */
