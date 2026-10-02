@@ -87,6 +87,9 @@ int main() {
     BootLogCheckpoint("IOP rebooted");
 #endif
     InitAsync();
+#ifdef ENABLE_PATCHES
+    BootLogCheckpoint("async file layer started");
+#endif
 
     g_failSink.SetReportHandler(RecordFailMessage);
     g_failSink.mAbortProc = HaltOnFailure;

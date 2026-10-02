@@ -16,6 +16,10 @@
 #include "os/seccache.h"
 #include "os/zone.h"
 
+#ifdef ENABLE_PATCHES
+#include "os/bootlog.h"
+#endif
+
 namespace {
 
 // The drive callback thread's stack, which lives in .bss rather than on the
@@ -143,8 +147,10 @@ int g_nAsyncOpError = 0;
 // 0x00892590
 int g_nAsyncOpLsn = 0;
 
+// The kernel saves the callback thread's 128-bit registers on this stack, so it starts on a
+// quadword boundary at least. The image places it on a 32-byte boundary.
 // 0x008925a0
-char g_abAsyncCallbackStack[kAsyncCallbackStackSize] = {};
+alignas(64) char g_abAsyncCallbackStack[kAsyncCallbackStackSize] = {};
 
 } // namespace
 
@@ -174,11 +180,23 @@ void InitAsync() {
     }
 
     if (UsingCdMedia() != 0) {
+#ifdef ENABLE_PATCHES
+        BootLogCheckpoint("async: starting the CD callback thread");
+#endif
         sceCdInitEeCB(kAsyncCallbackPriority, g_abAsyncCallbackStack, kAsyncCallbackStackSize);
+#ifdef ENABLE_PATCHES
+        BootLogCheckpoint("async: CD callback thread started");
+#endif
         g_nAsyncCallbackThread = GetThreadId();
         // The priority change applies to the calling thread, not to the callback thread.
         ChangeThreadPriority(g_nAsyncCallbackThread, kAsyncCallerPriority);
+#ifdef ENABLE_PATCHES
+        BootLogCheckpoint("async: main thread priority changed");
+#endif
         g_pfnAsyncPrevCdCallback = sceCdCallback(AsyncMediaEventCallback);
+#ifdef ENABLE_PATCHES
+        BootLogCheckpoint("async: CD callback installed");
+#endif
         g_bAsyncThreaded = 1;
     }
 
