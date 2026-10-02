@@ -97,3 +97,15 @@ target_compile_definitions(
           SIZEOF_DOUBLE=8)
 target_compile_options(
   resonance_python PRIVATE "-include${CMAKE_SOURCE_DIR}/src/python/PC/pycompat.h")
+
+# Upstream CPython 2.0 is compiled as released. These warnings concern its style, not the port.
+set(_python_upstream_srcs ${RESONANCE_PYTHON_SRCS})
+list(FILTER _python_upstream_srcs INCLUDE REGEX "/3rdparty/Python-2\\.0/")
+set(_python_upstream_warning_flags
+    -Wno-unused-but-set-variable
+    -Wno-unused-function
+    -Wno-unused-parameter
+    -Wno-unused-value
+    -Wno-unused-variable)
+set_property(SOURCE ${_python_upstream_srcs} PROPERTY COMPILE_OPTIONS
+                                                      ${_python_upstream_warning_flags})
