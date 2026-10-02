@@ -10,7 +10,9 @@ jobs:
       image: 'ghcr.io/ps2dev/ps2dev:latest'
     steps:
       - name: 'Install build dependencies'
-        run: apk add --no-cache build-base cmake git gmp-dev mpc1-dev mpfr-dev ninja python3
+        run: |
+          apk add --no-cache build-base cmake git gmp-dev imagemagick mpc1-dev mpfr-dev ninja \
+            python3
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
           persist-credentials: false
@@ -61,6 +63,41 @@ jobs:
           find build -name 'resonance' -type f | sort
           test "$OBJECTS" -gt 0
           test "$IRX" -gt 0
+      - name: 'Package release assets'
+        run: |
+          # A tag build is versioned by its tag. Branch and pull request builds have no version, so
+          # the commit identifies them instead.
+          if [ "$GITHUB_REF_TYPE" = 'tag' ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            # The checkout belongs to another user inside the container.
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
+            VERSION="$(git rev-parse --short=7 HEAD)"
+          fi
+          if [ -z "$VERSION" ]; then
+            echo '::error::Could not determine the version.'
+            exit 1
+          fi
+          ELF="$(find build/src -maxdepth 1 -name 'resonance' -type f -print -quit)"
+          IRX="$(find build -name 'EZMIDI.IRX' -type f -print -quit)"
+          test -n "$ELF" || { echo '::error::The executable was not built.'; exit 1; }
+          test -n "$IRX" || { echo '::error::EZMIDI.IRX was not built.'; exit 1; }
+          rm -rf release
+          mkdir release
+          # The executable is the NTSC (SCUS-97125) build. The module keeps the name the disc
+          # loads it by and its symbols, as the original does.
+          mips64r5900el-ps2-elf-objcopy --strip-debug "$ELF" \
+            "release/resonance-${VERSION}-NTSC.elf"
+          cp "$IRX" release/EZMIDI.IRX
+          ls -l release
+      - name: 'Upload release assets'
+        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
+        with:
+          # The artifact keeps an unversioned name so release.yml can request it by a fixed name.
+          # The versioned file names it includes are what reach the release page.
+          name: release-assets
+          path: 'release/*'
+          if-no-files-found: error
       - name: 'Upload archives'
         if: always()
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
@@ -86,6 +123,8 @@ name: 'Build'
 'on':
   push:
     branches: ['master']
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches: ['master']
 permissions:

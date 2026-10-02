@@ -1,0 +1,273 @@
+jobs:
+  publish-release:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          HEAD_SHA: '${{ github.event.workflow_run.head_sha }}'
+          REPO: '${{ github.repository }}'
+          TRIGGER_CONCLUSION: '${{ github.event.workflow_run.conclusion }}'
+        id: 'guard'
+        name: 'Check trigger conditions'
+        run: |
+          if [[ "$TRIGGER_CONCLUSION" != 'success' ]]; then
+            echo "Triggering workflow concluded with '${TRIGGER_CONCLUSION}', nothing to do."
+            echo 'proceed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # A failed listing must not read as "no tag". Nothing retries once every workflow has
+          # finished, so a silent skip loses the release.
+          if ! tags_tsv=$(gh api "repos/${REPO}/git/matching-refs/tags/v" \
+              --jq '.[] | [.ref, .object.type, .object.sha] | @tsv'); then
+            echo '::error::Could not list the repository tags.'
+            exit 1
+          fi
+          tag=''
+          while IFS=$'\t' read -r ref obj_type obj_sha; do
+            [[ -z "$ref" ]] && continue
+            # Signed release tags are annotated, so dereferencing is the normal path.
+            if [[ "$obj_type" == 'commit' ]]; then
+              target_sha="$obj_sha"
+            elif ! target_sha=$(gh api "repos/${REPO}/git/tags/${obj_sha}" \
+                --jq '.object.sha'); then
+              echo "::error::Could not dereference annotated tag ${ref}."
+              exit 1
+            fi
+            if [[ "$target_sha" == "$HEAD_SHA" ]]; then
+              tag="${ref#refs/tags/}"
+              break
+            fi
+          done <<< "$tags_tsv"
+          if [[ -z "$tag" ]]; then
+            echo "No v* tag points at ${HEAD_SHA}, nothing to do."
+            echo 'proceed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Found release tag ${tag} for SHA ${HEAD_SHA}."
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo 'proceed=true' >> "$GITHUB_OUTPUT"
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          HEAD_SHA: '${{ github.event.workflow_run.head_sha }}'
+          REPO: '${{ github.repository }}'
+          TAG: '${{ steps.guard.outputs.tag }}'
+        id: 'check'
+        if: "steps.guard.outputs.proceed == 'true'"
+        name: 'Check all required workflows succeeded'
+        run: |
+          all_success=true
+          for workflow in Build clang-format markdownlint Prettier Spelling; do
+            # A failed listing must stay distinguishable from "no runs exist", which is treated as
+            # optional. Conflating the two lets an API outage waive every gate at once.
+            if ! runs=$(gh run list --repo "$REPO" --workflow "$workflow" --commit "$HEAD_SHA" \
+                --json status,conclusion); then
+              echo "::error::Could not list runs for workflow '$workflow'."
+              exit 1
+            fi
+            if ! run_count=$(jq 'length' <<< "$runs"); then
+              echo "::error::Could not parse the run list for workflow '$workflow'."
+              exit 1
+            fi
+            # jq prints nothing on empty input, and an empty count compares equal to zero.
+            if [[ ! "$run_count" =~ ^[0-9]+$ ]]; then
+              echo "::error::Unexpected run count '${run_count}' for workflow '$workflow'."
+              exit 1
+            fi
+            if [[ "$run_count" -eq 0 ]]; then
+              echo "Workflow '$workflow' did not run for this commit; treating as optional."
+              continue
+            fi
+            # A tag push runs some workflows again at the same SHA. The tree is identical across
+            # the runs, so one success is enough.
+            if jq -e 'any(.[]; .conclusion == "success" or .conclusion == "skipped"
+                or .conclusion == "neutral")' <<< "$runs" > /dev/null; then
+              continue
+            fi
+            if jq -e 'any(.[]; .status != "completed")' <<< "$runs" > /dev/null; then
+              echo "Workflow '$workflow' still pending."
+              all_success=false
+              continue
+            fi
+            echo "::error::Workflow '$workflow' has no successful run for ${HEAD_SHA}."
+            exit 1
+          done
+          if [[ "$all_success" != 'true' ]]; then
+            echo 'Not all workflows have completed yet.'
+            exit 0
+          fi
+          echo "All required workflows succeeded for ${TAG}."
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          REPO: '${{ github.repository }}'
+          TAG: '${{ steps.guard.outputs.tag }}'
+        if: "steps.check.outputs.ready == 'true'"
+        name: 'Ensure the release exists'
+        run: |
+          if gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
+            echo "Release ${TAG} already exists."
+            exit 0
+          fi
+          version="${TAG#v}"
+          gh api "repos/${REPO}/contents/CHANGELOG.md?ref=${TAG}" \
+            -H 'Accept: application/vnd.github.raw' > changelog-at-tag.md
+          # The changelog is wrapped at 100 columns, and a release body renders a single newline
+          # as a line break. Each bullet is joined onto one line.
+          awk -v ver="$version" '
+            function flush() {
+              if (buf != "") {
+                if (pending) { print ""; pending = 0 }
+                print buf
+                buf = ""
+              }
+            }
+            index($0, "## [" ver "]") == 1 { found = 1; next }
+            !found { next }
+            index($0, "## [") == 1 { exit }
+            /^\[[^][]+\]:[[:space:]]/ { exit }
+            !started && $0 == "" { next }
+            {
+              started = 1
+              line = $0
+              sub(/^### /, "## ", line)
+              if (line ~ /^[[:space:]]*$/) { flush(); pending = 1; next }
+              if (line ~ /^[[:space:]]*[-*+] / || line ~ /^#/) { flush(); buf = line; next }
+              if (buf != "") { sub(/^[[:space:]]+/, "", line); buf = buf " " line; next }
+              buf = line
+            }
+            END { flush() }
+          ' changelog-at-tag.md > release-notes.md
+          if [[ ! -s release-notes.md ]]; then
+            echo "::error::CHANGELOG.md at ${TAG} has no section for ${version}."
+            exit 1
+          fi
+          printf '\n**Full Changelog**: https://github.com/%s/commits/%s\n' "$REPO" "$TAG" \
+            >> release-notes.md
+          echo "Creating draft release ${TAG}."
+          # Several workflows finishing at once can race here. Losing the race is fine as long as
+          # the release exists afterwards.
+          gh release create "$TAG" --repo "$REPO" --draft --title "$TAG" \
+            --notes-file release-notes.md || gh release view "$TAG" --repo "$REPO" > /dev/null
+      - env:
+          ARTIFACT: 'release-assets'
+          GH_TOKEN: '${{ github.token }}'
+          HEAD_SHA: '${{ github.event.workflow_run.head_sha }}'
+          REPO: '${{ github.repository }}'
+          TAG: '${{ steps.guard.outputs.tag }}'
+        if: "steps.check.outputs.ready == 'true'"
+        name: 'Attach the executable and EZMIDI.IRX to the release'
+        run: |
+          run_id=$(gh run list --repo "$REPO" --workflow Build --commit "$HEAD_SHA" \
+            --json databaseId,conclusion \
+            --jq 'map(select(.conclusion == "success")) | .[0].databaseId // empty')
+          if [[ -z "$run_id" ]]; then
+            echo "::error::No successful Build run found for ${HEAD_SHA}."
+            exit 1
+          fi
+          gh run download "$run_id" --repo "$REPO" --name "$ARTIFACT" --dir artifact
+          elf=$(find artifact -type f -name 'resonance-*-NTSC.elf' -print -quit)
+          irx=$(find artifact -type f -name 'EZMIDI.IRX' -print -quit)
+          if [[ -z "$elf" || -z "$irx" ]]; then
+            echo "::error::Artifact ${ARTIFACT} lacks the executable or EZMIDI.IRX."
+            exit 1
+          fi
+          # A branch run at the same commit names the executable after the commit, so the file
+          # is renamed to the release version.
+          release_elf="artifact/resonance-${TAG#v}-NTSC.elf"
+          if [[ "$elf" != "$release_elf" ]]; then
+            mv "$elf" "$release_elf"
+          fi
+          echo "Uploading ${release_elf} and ${irx} to release ${TAG}."
+          gh release upload "$TAG" "$release_elf" "$irx" --repo "$REPO" --clobber
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          REPO: '${{ github.repository }}'
+          TAG: '${{ steps.guard.outputs.tag }}'
+        if: "steps.check.outputs.ready == 'true'"
+        name: 'Verify the assets are attached'
+        run: |
+          version="${TAG#v}"
+          assets=$(gh release view "$TAG" --repo "$REPO" --json assets \
+            --jq '[.assets[].name] | join(" ")')
+          echo "Assets on ${TAG}: ${assets:-<none>}"
+          for asset in "resonance-${version}-NTSC.elf" EZMIDI.IRX; do
+            if [[ " ${assets} " != *" ${asset} "* ]]; then
+              echo "::error::${asset} is not attached to ${TAG}; refusing to publish it."
+              exit 1
+            fi
+          done
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          REPO: '${{ github.repository }}'
+          TAG: '${{ steps.guard.outputs.tag }}'
+        if: "steps.check.outputs.ready == 'true'"
+        name: 'Publish release'
+        run: 'gh release edit "$TAG" --repo "$REPO" --draft=false'
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          REPO: '${{ github.repository }}'
+          RUN_ID: '${{ github.run_id }}'
+        if: 'always()'
+        name: 'Delete prior non-publishing Release runs'
+        run: |
+          delete_run() {
+            local id="$1" reason="$2"
+            echo "Deleting prior Release run ${id} (${reason})."
+            gh run delete --repo "$REPO" "$id" || true
+          }
+          published_step_skipped() {
+            local id="$1"
+            local step_conclusion
+            step_conclusion=$(gh api "repos/${REPO}/actions/runs/${id}/jobs" \
+              --jq '[.jobs[].steps[] | select(.name == "Publish release")][0].conclusion' \
+              2>/dev/null || echo '')
+            [[ "$step_conclusion" == 'skipped' ]]
+          }
+          # This step runs after the release is published, so a failure here must not mark a
+          # successful release as failed.
+          prior_runs=$(gh run list --repo "$REPO" --workflow 'Release' \
+            --json databaseId,status,conclusion --limit 100 || echo '[]')
+          jq -r --arg self "$RUN_ID" \
+              '.[] | select((.databaseId|tostring) != $self) | select(.status == "completed")
+                | [.databaseId, .conclusion] | @tsv' \
+              <<< "$prior_runs" \
+            | while IFS=$'\t' read -r id conclusion; do
+                [[ -z "$id" ]] && continue
+                case "$conclusion" in
+                  skipped|cancelled|neutral)
+                    delete_run "$id" "$conclusion"
+                    ;;
+                  success)
+                    if published_step_skipped "$id"; then
+                      delete_run "$id" 'success without publish'
+                    fi
+                    ;;
+                esac
+              done
+      - env:
+          GH_TOKEN: '${{ github.token }}'
+          REPO: '${{ github.repository }}'
+          RUN_ID: '${{ github.run_id }}'
+        if: "steps.guard.outputs.proceed != 'true' || steps.check.outputs.ready != 'true'"
+        name: 'Cancel this run so it can be cleaned up'
+        run: |
+          echo 'This run did not publish; cancelling so a later run can remove it.'
+          gh run cancel --repo "$REPO" "$RUN_ID" || true
+          sleep 30
+name: 'Release'
+'on':
+  workflow_run:
+    types:
+      - 'completed'
+    workflows:
+      - 'Build'
+      - 'clang-format'
+      - 'markdownlint'
+      - 'Prettier'
+      - 'Spelling'
+permissions:
+  actions: 'write'
+  contents: 'write'

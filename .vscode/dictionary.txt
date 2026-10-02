@@ -269,6 +269,7 @@ erasepower
 eret
 errnomodule
 erss
+esac
 esbenp
 etext
 evoll
@@ -1249,6 +1250,7 @@ tnlutil
 toggleghostmsg
 togglemode
 toolstream
+tostring
 totbytes
 tpcpyud
 trackdata
