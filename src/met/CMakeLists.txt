@@ -118,4 +118,32 @@ if(ENABLE_PATCHES)
     VERBATIM)
   add_dependencies(resonance_met resonance_build_info)
   target_include_directories(resonance_met PRIVATE "${CMAKE_BINARY_DIR}/generated")
+
+  # The credits of patched builds open with this entry. The avatar is fetched once, when the
+  # header is first generated, and is blank when it cannot be fetched.
+  set(RESONANCE_CREDITS_GITHUB_USER
+      "Tatsh"
+      CACHE STRING "GitHub user whose avatar the first credit shows.")
+  set(RESONANCE_CREDITS_TEXT
+      "Reconstruction:\\nAndrew Udvare\\ngithub.com/Tatsh"
+      CACHE STRING "Text of the first credit. \\n breaks a line.")
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  find_program(RESONANCE_MAGICK magick)
+  set(_credits_magick "${RESONANCE_MAGICK}")
+  if(NOT RESONANCE_MAGICK)
+    message(STATUS "ImageMagick was not found. The first credit's avatar is blank.")
+    set(_credits_magick "")
+  endif()
+  set(_credits_avatar "${CMAKE_BINARY_DIR}/generated/creditsavatar.h")
+  add_custom_command(
+    OUTPUT "${_credits_avatar}"
+    COMMAND
+      Python3::Interpreter "${CMAKE_SOURCE_DIR}/scripts/credits-avatar.py" "${_credits_avatar}"
+      --magick "${_credits_magick}" --user "${RESONANCE_CREDITS_GITHUB_USER}" --text
+      "${RESONANCE_CREDITS_TEXT}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/scripts/credits-avatar.py"
+    COMMENT "Writing ${_credits_avatar}"
+    VERBATIM)
+  add_custom_target(resonance_credits_avatar DEPENDS "${_credits_avatar}")
+  add_dependencies(resonance_met resonance_credits_avatar)
 endif()

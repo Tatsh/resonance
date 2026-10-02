@@ -80,6 +80,22 @@ public:
      */
     void Build();
 
+#ifdef ENABLE_PATCHES
+    /**
+     * Open the credits with one more entry, a text and a picture showing a texture.
+     *
+     * The entry copies the layout of the first team credit and takes the first credit's place.
+     * Every other credit moves one entry further along the roll. The entry becomes credit 0. The
+     * persona credit numbers are unchanged. Build() must run first.
+     *
+     * @param text The entry's text.
+     * @param pTexels The picture's RGBA texels, with alpha on the GS scale.
+     * @param nSize The width and height of the picture in texels.
+     * @return How far the other credits moved, or 0 when the template credits are missing.
+     */
+    float AddLeadingCredit(const HxStr &text, const unsigned char *pTexels, int nSize);
+#endif
+
 private:
     // Where a credit lies against the visible band. The values are bits, and the classifiers
     // combine them.

@@ -1,5 +1,6 @@
 #include "met/creditsroll.h"
 
+#include <cmath>
 #include <stdio.h>
 
 #include "game/freqappearance.h"
@@ -14,6 +15,12 @@
 #include "rnd/meshvert.h"
 #include "rnd/text.h"
 #include "rnd/transformable.h"
+
+#ifdef ENABLE_PATCHES
+#include "rnd/tex.h"
+#include "rndartt/abitmap.h"
+#include "rndartt/acanvas.h"
+#endif
 
 namespace {
 
@@ -284,3 +291,108 @@ void CreditsRoll::SetShowing(Rnd::Mesh *pPicture, Rnd::Text *pText, int nShowing
         pText->SetShowing(nShowing);
     }
 }
+
+#ifdef ENABLE_PATCHES
+namespace {
+
+// kTemplateCredit is the first team credit, a text beside a persona picture. The new entry copies
+// its layout, and the distance from it to the credit after it is one entry's step.
+constexpr int kTemplateCredit = 5;
+constexpr int kLeadingCredit = 0;
+constexpr int kAvatarBitsPerPixel = 32;
+constexpr int kVectorComponents = 3;
+
+constexpr char kLeadingTextName[] = "ctxt_000";
+constexpr char kLeadingPictureName[] = "cpic_000";
+constexpr char kLeadingMatName[] = "cpic_000.mat";
+constexpr char kLeadingTexName[] = "cpic_000.tex";
+
+inline float *Translation(Rnd::Transformable *pTrans) {
+    return pTrans->mLocalXfm[kXfmRowTranslation];
+}
+
+// Move a transform by an offset and mark it for recomposition.
+inline void Translate(Rnd::Transformable *pTrans, const float *pOffset, float flScale) {
+    float *pPosition = Translation(pTrans);
+    for (int i = 0; i < kVectorComponents; ++i) {
+        pPosition[i] += pOffset[i] * flScale;
+    }
+    pTrans->mDirty = 1;
+}
+
+} // namespace
+
+float CreditsRoll::AddLeadingCredit(const HxStr &text, const unsigned char *pTexels, int nSize) {
+    Rnd::Text *pTemplateText = GetText(kTemplateCredit);
+    Rnd::Mesh *pTemplatePicture = GetPicture(kTemplateCredit);
+    Rnd::Text *pNextText = GetText(kTemplateCredit + 1);
+    Rnd::Text *pFirstText = GetText(firstIndex_);
+    if (pTemplateText == nullptr || pTemplatePicture == nullptr || pNextText == nullptr ||
+        pFirstText == nullptr) {
+        return 0.0f;
+    }
+
+    // Measure one entry's step along the roll and how many steps separate the template from the
+    // first credit. The new entry retains the template's layout across the roll.
+    float afStep[kVectorComponents];
+    float flStepSquared = 0.0f;
+    float flAlong = 0.0f;
+    for (int i = 0; i < kVectorComponents; ++i) {
+        afStep[i] = Translation(pNextText)[i] - Translation(pTemplateText)[i];
+        flStepSquared += afStep[i] * afStep[i];
+        flAlong += (Translation(pFirstText)[i] - Translation(pTemplateText)[i]) * afStep[i];
+    }
+    if (flStepSquared == 0.0f) {
+        return 0.0f;
+    }
+    const float flSteps = flAlong / flStepSquared;
+
+    Rnd::Text *pText = Rnd::NewTextThroughHook(HxStr(kLeadingTextName));
+    pText->Copy(pTemplateText, 0);
+    pText->SetText(text);
+    Translate(pText, afStep, flSteps);
+
+    Rnd::Tex *pTex = Rnd::NewTexThroughHook(HxStr(kLeadingTexName));
+    pTex->SetBitmapConfig(nSize, nSize, kAvatarBitsPerPixel, HxStr(""), pTex->mMipSelect, 0);
+    pTex->ReloadBitmaps();
+    if (ACanvas *pCanvas = pTex->LockMipBitmap(0, 0, 0)) {
+        const ABitmap avatar(
+            const_cast<unsigned char *>(pTexels), kABitmapFormatLinear32, false, nSize, nSize, 0);
+        pCanvas->Blit(avatar, 0, 0);
+        pTex->UnlockMipBitmap();
+    }
+
+    Rnd::Mat *pMat = Rnd::NewMatThroughHook(HxStr(kLeadingMatName));
+    pMat->Copy(pTemplatePicture->mMat, 0);
+    pMat->mStages[kBurnStage].SetTex(pTex);
+
+    Rnd::Mesh *pPicture = Rnd::NewMeshThroughHook(HxStr(kLeadingPictureName));
+    pPicture->Copy(pTemplatePicture, Rnd::Mesh::kCopyShareVerts | Rnd::Mesh::kCopyShareFaces);
+    pPicture->SetMaterial(pMat);
+    Translate(pPicture, afStep, flSteps);
+
+    // Every other credit moves one step further along the roll.
+    for (Rnd::Text *pOther : texts_) {
+        if (pOther != nullptr) {
+            Translate(pOther, afStep, 1.0f);
+        }
+    }
+    for (Rnd::Mesh *pOther : pictures_) {
+        if (pOther != nullptr) {
+            Translate(pOther, afStep, 1.0f);
+        }
+    }
+
+    static_cast<Rnd::Drawable *>(pTemplateText)->Parent()->AddDraw(pText);
+    static_cast<Rnd::Transformable *>(pTemplateText)->Parent()->AddTrans(pText);
+    static_cast<Rnd::Drawable *>(pTemplatePicture)->Parent()->AddDraw(pPicture);
+    static_cast<Rnd::Transformable *>(pTemplatePicture)->Parent()->AddTrans(pPicture);
+    SetShowing(pPicture, pText, 0);
+
+    texts_.insert(texts_.begin(), pText);
+    pictures_.insert(pictures_.begin(), pPicture);
+    firstIndex_ = kLeadingCredit;
+    firstVisible_ = kLeadingCredit;
+    return std::sqrt(flStepSquared);
+}
+#endif

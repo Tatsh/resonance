@@ -5,6 +5,7 @@
 
 namespace Rnd {
 class TransAnim;
+class View;
 } // namespace Rnd
 
 /**
@@ -131,8 +132,21 @@ public:
     virtual void ResolveContainerViews();
 
 private:
+#ifdef ENABLE_PATCHES
+    // Open the roll with the reconstruction's credit and lengthen the scroll to match.
+    void AddLeadingCredit();
+#endif
+
     CreditsRoll *mCreditsRoll;  // +0x8c, the scroller slot 38 builds
     Rnd::TransAnim *mAnimation; // +0x90, `Group_credit.tnm`
     float mStartFrame;          // +0x94, the renderer time the screen entered at
     float mEndFrame;            // +0x98, the end frame of mAnimation
+#ifdef ENABLE_PATCHES
+    // mGroup is the roll's group, and mGroupStep is how far it moves per frame. Past
+    // mAnimationEndFrame the group continues to move until mEndFrame. mEndFrame is later by the
+    // frames the leading credit's distance takes.
+    Rnd::View *mGroup = nullptr;
+    float mAnimationEndFrame = 0.0f;
+    float mGroupStep[3] = {};
+#endif
 };

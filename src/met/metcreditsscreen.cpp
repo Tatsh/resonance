@@ -7,6 +7,12 @@
 #include "rnd/transanim.h"
 #include "rnd/view.h"
 
+#ifdef ENABLE_PATCHES
+#include <cmath>
+
+#include "creditsavatar.h"
+#endif
+
 namespace {
 
 static const char *const kScreenName = "cred";
@@ -26,6 +32,13 @@ constexpr float kExitDelayFrames = 100.0f;
 static const char *const kHelpScreen = "MetHelpScreen";
 static const char *const kRightGizmoScreen = "MetRightGizmoScreen";
 static const char *const kOptionsButtonsScreen = "MetConfigOptionsButtonsScreen";
+
+#ifdef ENABLE_PATCHES
+// The roll's animation moves the view with this name.
+static const char *const kGroupName = "Group_credit.view";
+constexpr int kXfmRowTranslation = 3;
+constexpr int kVectorComponents = 3;
+#endif
 
 } // namespace
 
@@ -50,7 +63,42 @@ void MetCreditsScreen::ResolveContainerViews() {
     Rnd::Cam *pCam = dynamic_cast<Rnd::Cam *>(Rnd::g_manager.Find(HxStr(kCameraName)));
     mCreditsRoll = new CreditsRoll(HxStr(kPicturePrefix), HxStr(kTextPrefix), pCam, kFirstCredit);
     mCreditsRoll->Build();
+#ifdef ENABLE_PATCHES
+    AddLeadingCredit();
+#endif
 }
+
+#ifdef ENABLE_PATCHES
+void MetCreditsScreen::AddLeadingCredit() {
+    mAnimationEndFrame = mEndFrame;
+    mGroup = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kGroupName)));
+    const float flDistance = mCreditsRoll->AddLeadingCredit(
+        HxStr(RESONANCE_CREDITS_TEXT), kCreditsAvatarTexels, RESONANCE_CREDITS_AVATAR_SIZE);
+    if (mGroup == nullptr || flDistance == 0.0f || mAnimationEndFrame <= 0.0f) {
+        return;
+    }
+
+    // The animation moves the group at a steady speed. The extra distance adds frames at the same
+    // speed.
+    float afStart[kVectorComponents];
+    float flTravelSquared = 0.0f;
+    mAnimation->SetFrame(0.0f);
+    for (int i = 0; i < kVectorComponents; ++i) {
+        afStart[i] = mGroup->mLocalXfm[kXfmRowTranslation][i];
+    }
+    mAnimation->SetFrame(mAnimationEndFrame);
+    for (int i = 0; i < kVectorComponents; ++i) {
+        const float flTravel = mGroup->mLocalXfm[kXfmRowTranslation][i] - afStart[i];
+        mGroupStep[i] = flTravel / mAnimationEndFrame;
+        flTravelSquared += flTravel * flTravel;
+    }
+    mAnimation->SetFrame(0.0f);
+    if (flTravelSquared == 0.0f) {
+        return;
+    }
+    mEndFrame += flDistance / (std::sqrt(flTravelSquared) / mAnimationEndFrame);
+}
+#endif
 
 // 0x00211e40
 void MetCreditsScreen::OnExitFinished() {
@@ -101,6 +149,17 @@ void MetCreditsScreen::EnterAndShow() {
 void MetCreditsScreen::UpdateIdle(float flTime) {
     const float flFrame = flTime - mStartFrame;
     mAnimation->SetFrame(flFrame);
+#ifdef ENABLE_PATCHES
+    // Past its last key the animation does not move the group. The group is moved here for the
+    // frames the leading credit added.
+    if (mGroup != nullptr && mAnimationEndFrame < flFrame) {
+        const float flExtra = (flFrame < mEndFrame ? flFrame : mEndFrame) - mAnimationEndFrame;
+        for (int i = 0; i < kVectorComponents; ++i) {
+            mGroup->mLocalXfm[kXfmRowTranslation][i] += mGroupStep[i] * flExtra;
+        }
+        mGroup->mDirty = 1;
+    }
+#endif
     if (mEndFrame + kExitDelayFrames < flFrame) {
         BeginExit();
     } else {
