@@ -110,6 +110,7 @@ bumppowerup
 buttonpowmsg
 bytepairstatic
 cacceler
+calcsize
 callbackxferbdtoiop
 callbackxferhdtoiop
 campaignstats
@@ -405,6 +406,7 @@ hblks
 hdbd
 heapdump
 heff
+hhiiiiihhhhhh
 hialloc
 hibytes
 hilite
@@ -484,6 +486,7 @@ iobstream
 iopcontrol
 iopfixup
 iopheap
+iopmod
 ioprp
 isatty
 isce
@@ -824,6 +827,7 @@ ngroups
 njgb
 nlfilebuf
 noat
+nobits
 nocard
 nodefaultlibs
 nodisc
@@ -889,6 +893,8 @@ pextlb
 pextub
 phdrs
 phello
+phnum
+phoff
 phrasecapturedmsg
 phrasedatabase
 phraseeraser
@@ -944,6 +950,7 @@ preapproved
 primaddr
 prmodecont
 prmodecontaddr
+progbits
 pscam
 psenviron
 psgr
@@ -1099,7 +1106,9 @@ setmat
 shellcheck
 shellformat
 shiftjis
+shnum
 shoemake
+shoff
 showeraseeffectmsg
 sifcmd
 sifdev
