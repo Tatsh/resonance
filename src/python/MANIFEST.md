@@ -456,7 +456,7 @@ bodies go with the other discards; only the shared helper's two messages remain.
 
 ## PyCXX
 
-The binding layer under `include/script/cxx/` is the port's modified PyCXX. The PyCXX 5.2 series
+The binding layer under `src/script/cxx/` is the port's modified PyCXX. The PyCXX 5.2 series
 is contemporary with development and still supports Python 2.0. Later series dropped Python 2.0
 support. The exact patch the port used is unrecoverable, because its version marker is likely a
 header comment that compilation discards. The headers use the game's `HxStr` in place of

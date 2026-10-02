@@ -7,7 +7,6 @@
       "defines": ["VERSION=\"unknown\""],
       "includePath": [
         "${workspaceFolder}/compat/**",
-        "${workspaceFolder}/include/**",
         "${workspaceFolder}/sce/**/include/**",
         "${workspaceFolder}/src/**",
         "${workspaceFolder}/.wiswa-ci/**/include/**"

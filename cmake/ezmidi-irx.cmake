@@ -31,7 +31,7 @@ set(EZMIDI_BUILD_DIR "${CMAKE_BINARY_DIR}/ezmidi")
 set(EZMIDI_LINKFILE "${CMAKE_SOURCE_DIR}/sce/iop/iop.ld")
 file(MAKE_DIRECTORY "${EZMIDI_BUILD_DIR}")
 
-file(GLOB EZMIDI_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/include/ezmidi/*.h"
+file(GLOB EZMIDI_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/ezmidi/*.h"
      "${CMAKE_SOURCE_DIR}/sce/iop/include/*.h")
 
 set(EZMIDI_IOP_FLAGS
@@ -43,7 +43,7 @@ set(EZMIDI_IOP_FLAGS
     -msoft-float
     -mno-explicit-relocs
     -I${CMAKE_SOURCE_DIR}/sce/iop/include
-    -I${CMAKE_SOURCE_DIR}/include)
+    -I${CMAKE_SOURCE_DIR}/src)
 
 # The units follow the shipped module: the entry first, the RPC server, the synthesiser, and the
 # import stubs last.

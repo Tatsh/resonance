@@ -116,7 +116,7 @@
 
 // Message and packet type identities. Every concrete message reports one of these from its
 // Type() method, and the factory constructs by the same identity. The declarations are in the
-// headers of their message classes under include/msg/.
+// headers of their message classes under src/msg/.
 
 // 0x006d01d4
 unsigned int g_dwAllNotesOffMsgType = 203;

@@ -41,7 +41,7 @@ namespace Rnd {
  * "emissiveKeys: ", "specularKeys:", and "alphaKeys:" in offset order. And SetFrameSelf() hands
  * each interpolated result to the material through vtable slot 10, slot 9, slot 11, slot 13, and
  * slot 12 respectively, which are Rnd::Mat::SetDiffuse(), SetAmbient(), SetEmissive(),
- * SetSpecular(), and SetAlpha() in the declaration order of include/rnd/mat.h. The two readings
+ * SetSpecular(), and SetAlpha() in the declaration order of src/rnd/mat.h. The two readings
  * agreeing matters, because an earlier pass had mDiffuseKeys and mEmissiveKeys the other way
  * round.
  *

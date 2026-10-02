@@ -37,9 +37,11 @@ if(BUILD_DOCS OR BUILD_DOCS_ONLY)
   # Every reconstructed routine records the address it was recovered from with this tag.
   set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
   set(DOXYGEN_ALIASES [[ghidraAddress="\par Ghidra address:^^"]])
-  set(DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/build/*")
+  set(DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/build/*" "*/src/python/*")
+  # Headers sit beside their implementations under src, and only headers are documented.
+  set(DOXYGEN_FILE_PATTERNS "*.h")
   find_package(Doxygen REQUIRED COMPONENTS dot)
-  doxygen_add_docs(docs README.md include ALL)
+  doxygen_add_docs(docs README.md src ALL)
   if(INSTALL_DOCS)
     install(
       DIRECTORY "${CMAKE_BINARY_DIR}/html"

@@ -17,7 +17,7 @@ target_compile_definitions(resonance_common INTERFACE _EE)
 # The reconstructed Sony headers sit under sce/ee/include, and compat declares the rest of the Sony
 # interfaces the game calls.
 target_include_directories(
-  resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/sce/ee/include"
+  resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/sce/ee/include"
                              "${CMAKE_SOURCE_DIR}/compat")
 
 set(RESONANCE_SUBSYSTEMS
