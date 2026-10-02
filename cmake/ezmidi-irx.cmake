@@ -59,15 +59,27 @@ foreach(_src ${EZMIDI_SRCS})
   list(APPEND EZMIDI_OBJS "${_obj}")
 endforeach()
 
+# The shipped module retains its symbol table, so the built one does too unless this is set.
+option(EZMIDI_IRX_STRIP "Remove the symbols EZMIDI.IRX does not need." OFF)
+# srxfixup writes a module without symbols through -o and one with them through -r.
+set(_ezmidi_fixup_input "${EZMIDI_BUILD_DIR}/EZMIDI.elf")
+set(_ezmidi_fixup_output -r)
+set(_ezmidi_strip_command "")
+if(EZMIDI_IRX_STRIP)
+  set(_ezmidi_fixup_input "${EZMIDI_BUILD_DIR}/EZMIDI.stripped.elf")
+  set(_ezmidi_fixup_output -o)
+  set(_ezmidi_strip_command COMMAND ${EZMIDI_IOP_STRIP} --strip-unneeded -o
+                            "${_ezmidi_fixup_input}" "${EZMIDI_BUILD_DIR}/EZMIDI.elf")
+endif()
+
 add_custom_command(
   OUTPUT "${EZMIDI_BUILD_DIR}/EZMIDI.IRX"
   COMMAND ${EZMIDI_IOP_CC} -T${EZMIDI_LINKFILE} -nostdlib -o "${EZMIDI_BUILD_DIR}/EZMIDI.elf"
           ${EZMIDI_OBJS} -Wl,-r -Wl,-dc
-  COMMAND ${EZMIDI_IOP_STRIP} --strip-unneeded -o "${EZMIDI_BUILD_DIR}/EZMIDI.stripped.elf"
-          "${EZMIDI_BUILD_DIR}/EZMIDI.elf"
+  ${_ezmidi_strip_command}
   # The shipped module starts .text with its entry point, as the built module does.
-  COMMAND ${EZMIDI_IOP_FIXUP} --rb --irx1 --allow-zero-text -o "${EZMIDI_BUILD_DIR}/EZMIDI.IRX"
-          "${EZMIDI_BUILD_DIR}/EZMIDI.stripped.elf"
+  COMMAND ${EZMIDI_IOP_FIXUP} --rb --irx1 --allow-zero-text ${_ezmidi_fixup_output}
+          "${EZMIDI_BUILD_DIR}/EZMIDI.IRX" "${_ezmidi_fixup_input}"
   DEPENDS ${EZMIDI_OBJS} "${EZMIDI_LINKFILE}"
   COMMENT "Linking EZMIDI.IRX"
   VERBATIM)
