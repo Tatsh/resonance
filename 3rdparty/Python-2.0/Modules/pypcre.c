@@ -312,9 +312,11 @@ do
       case OP_EXACT:       /* Fall through */
       tcode++;
 
+      /* fall through */
       case OP_CHARS:       /* Fall through */
       tcode++;
 
+      /* fall through */
       case OP_PLUS:
       case OP_MINPLUS:
       start_bits[tcode[1]/8] |= (1 << (tcode[1]&7));
@@ -1993,6 +1995,7 @@ for (;; ptr++)
     The first character is guaranteed not to be whitespace or # when the
     extended flag is set. */
 
+    /* fall through */
     NORMAL_CHAR:
     default:
     previous = code;
@@ -2224,9 +2227,11 @@ do
     case OP_EXACT:       /* Fall through */
     charoffset++;
 
+    /* fall through */
     case OP_CHARS:       /* Fall through */
     charoffset++;
 
+    /* fall through */
     case OP_PLUS:
     case OP_MINPLUS:
     if (c < 0) c = code[charoffset]; else if (c != code[charoffset]) return -1;

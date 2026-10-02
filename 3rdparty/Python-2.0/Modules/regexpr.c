@@ -976,6 +976,7 @@ static int re_optimize(regexp_t bufp)
 			}
 			/* fall through */
 		}
+		/* fall through */
 		case Cupdate_failure_jump:
 		case Cjump:
 		case Cdummy_failure_jump:
@@ -1714,6 +1715,7 @@ int re_match(regexp_t bufp, unsigned char *string, int size, int pos,
 		/* fall to next case */
 	}
 	/* treat Cstar_jump just like Cjump if it hasn't been optimized */
+	/* fall through */
 	case Cstar_jump:
 	case Cjump:
 	{

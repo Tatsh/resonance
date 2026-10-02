@@ -1257,6 +1257,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 		case PRINT_ITEM_TO:
 			w = stream = POP();
 			/* fall through to PRINT_ITEM */
+			/* fall through */
 
 		case PRINT_ITEM:
 			v = POP();
@@ -1291,6 +1292,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 		case PRINT_NEWLINE_TO:
 			w = stream = POP();
 			/* fall through to PRINT_NEWLINE */
+			/* fall through */
 
 		case PRINT_NEWLINE:
 			if (stream == NULL || stream == Py_None) {
@@ -1327,6 +1329,7 @@ eval_code2(PyCodeObject *co, PyObject *globals, PyObject *locals,
 				/* Fallthrough */
 			case 1:
 				w = POP(); /* exc */
+				/* Fallthrough */
 			case 0: /* Fallthrough */
 				why = do_raise(w, v, u);
 				break;

@@ -1756,6 +1756,7 @@ save(Picklerobject *self, PyObject *args, int  pers_save) {
                 goto finally;
             }
 
+            /* fall through */
         case 'u':
             if ((type == &PyUnicode_Type) && (PyString_GET_SIZE(args) < 2)) {
                 res = save_unicode(self, args, 0);

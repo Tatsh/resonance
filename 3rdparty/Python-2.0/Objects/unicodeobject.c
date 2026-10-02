@@ -1345,6 +1345,7 @@ PyObject *PyUnicode_DecodeUnicodeEscape(const char *s,
                     &s, &x, errors,
                     "Missing opening brace for Unicode Character Name escape"))
                 goto onError;
+            /* fall through */
 ucnFallthrough:
             /* fall through on purpose */
 		default:
