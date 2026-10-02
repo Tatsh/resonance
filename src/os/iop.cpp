@@ -55,14 +55,6 @@ constexpr int kLoadFailureStatus = 1;
 // records.
 constexpr int kIopModuleCount = 10;
 
-#ifdef ENABLE_PATCHES
-// The table opens with sio2man, mcman, and mcserv.
-constexpr int kMemoryCardModuleCount = 3;
-
-// Counts the modules at the head of the table that are already loaded.
-int g_nPreloadedIopModules = 0;
-#endif
-
 // 0x00702660
 // Labelled g_abIopModules in the program, because the naming policy there has no prefix
 // for a typed aggregate. The table sits in .data rather than in .rodata, so the original declared
@@ -131,12 +123,7 @@ inline void LoadAllIopModules(unsigned nSources) {
     AsyncCheck(1);
 
     const IopModule *const pEnd = &g_iopModules[kIopModuleCount];
-#ifdef ENABLE_PATCHES
-    for (const IopModule *pModule = &g_iopModules[g_nPreloadedIopModules]; pModule < pEnd;
-         ++pModule) {
-#else
     for (const IopModule *pModule = g_iopModules; pModule < pEnd; ++pModule) {
-#endif
         LoadIopModule(pModule, nSources);
     }
 }
@@ -220,28 +207,6 @@ void LoadIopModules() {
     InitMultitapPorts();
     InitMemoryCardLibrary();
 }
-
-#ifdef ENABLE_PATCHES
-void PreloadMemoryCardModules() {
-    unsigned nSources = kIopModuleSourceHost;
-    switch (GetHostMode()) {
-    case kHostModeCdHost:
-        nSources = kIopModuleSourceDisc | kIopModuleSourceHost;
-        break;
-    case kHostModeCdOnly:
-        nSources = kIopModuleSourceDisc;
-        break;
-    case kHostModeHostOnly:
-        break;
-    }
-
-    sceSifInitRpc(0);
-    for (int i = g_nPreloadedIopModules; i < kMemoryCardModuleCount; ++i) {
-        LoadIopModule(&g_iopModules[i], nSources);
-        g_nPreloadedIopModules = i + 1;
-    }
-}
-#endif
 
 // 0x005e1210
 void RegisterHardEffectCommands() {

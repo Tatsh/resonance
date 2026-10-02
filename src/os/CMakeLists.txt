@@ -2,7 +2,6 @@ set(RESONANCE_OS_SRCS
     arkfile.cpp
     assert.cpp
     async.cpp
-    bootlog.cpp
     asynccallback.cpp
     bytepairstatic.cpp
     circbuff.cpp
@@ -31,9 +30,3 @@ set(RESONANCE_OS_SRCS
 
 add_library(resonance_os STATIC ${RESONANCE_OS_SRCS})
 target_link_libraries(resonance_os PRIVATE resonance_common)
-
-# The boot log of patched builds records the commit and the build time.
-if(ENABLE_PATCHES)
-  add_dependencies(resonance_os resonance_build_info)
-  target_include_directories(resonance_os PRIVATE "${CMAKE_BINARY_DIR}/generated")
-endif()

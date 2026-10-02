@@ -4,15 +4,10 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "os/hostmode.h"
 #include "os/mem.h"
 #include "script/scripttemplatemap.h"
-
-#ifdef ENABLE_PATCHES
-#include "os/bootlog.h"
-#endif
 
 namespace {
 
@@ -47,11 +42,6 @@ void LogPrintf(const char *pszFormat, ...) {
     va_start(args, pszFormat);
     vfprintf(stdout, pszFormat, args);
     va_end(args);
-#ifdef ENABLE_PATCHES
-    va_start(args, pszFormat);
-    BootLogAppendV(pszFormat, args);
-    va_end(args);
-#endif
 }
 
 // 0x0052e3e8
@@ -73,9 +63,6 @@ void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine) {
     // releases the frozen buffer. A string stream produces the same text without the leak.
     std::ostringstream report;
     report << "Assertion failed " << pszFile << ":" << nLine << ": " << pszMessage;
-#ifdef ENABLE_PATCHES
-    BootLogCheckpoint("%s", report.str().c_str());
-#endif
     ShowScreenMessage(report.str().c_str(), kAssertionMessageDuration);
     exit(0);
 }
@@ -91,28 +78,12 @@ void AlertScriptTemplate(int nTemplate, ...) {
 
 // 0x0052e868
 void Fatal(const char *pszFormat, ...) {
-#ifdef ENABLE_PATCHES
-    // The message goes to the card before the heap report. The heap report can fault on a console.
-    va_list args;
-    va_start(args, pszFormat);
-    vsprintf(g_szFatalMessage, pszFormat, args);
-    va_end(args);
-    int nMessageLength = static_cast<int>(strlen(g_szFatalMessage));
-    if (nMessageLength != 0 && g_szFatalMessage[nMessageLength - 1] == '\n') {
-        --nMessageLength;
-    }
-    BootLogCheckpoint("fatal error '%.*s'", nMessageLength, g_szFatalMessage);
-    BootLogShowFatalScreen();
-
-    MemCloseLogAndReport();
-#else
     MemCloseLogAndReport();
 
     va_list args;
     va_start(args, pszFormat);
     vsprintf(g_szFatalMessage, pszFormat, args);
     va_end(args);
-#endif
 
     for (;;) {
     }
@@ -136,9 +107,6 @@ void ShowReportedMessage(const HxStr &text, int nDuration) {
 
 // 0x004663d8
 void ShowAlertMessage(const HxStr &text) {
-#ifdef ENABLE_PATCHES
-    BootLogCheckpoint("alert '%s'", text.mStr != nullptr ? text.mStr : g_szEmptyString);
-#endif
     ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, kAlertMessageDuration);
     std::cout << "Alert! " << text << std::endl;
 }

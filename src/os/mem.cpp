@@ -10,10 +10,6 @@
 #include "os/log.h"
 #include "os/zone.h"
 
-#ifdef ENABLE_PATCHES
-#include "os/bootlog.h"
-#endif
-
 // The linker script defines these three, and each carries its value in its address: the base of
 // the stack, its size, and the end of the loaded image.
 extern "C" char _stack[];
@@ -614,9 +610,6 @@ void MemOpenLog(const char *pszPath) {
 
 // 0x004a7d30
 void MemCloseLogAndReport() {
-#ifdef ENABLE_PATCHES
-    BootLogCheckpoint("exiting with the memory report");
-#endif
     if (g_pMemLogFile != nullptr) {
         fclose(g_pMemLogFile);
         g_pMemLogFile = nullptr;

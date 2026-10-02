@@ -24,7 +24,6 @@
 
 #ifdef ENABLE_PATCHES
 #include "buildinfo.h"
-#include "os/bootlog.h"
 #endif
 
 namespace {
@@ -153,7 +152,6 @@ void MetLogoScreen::ResolveContainerViews() {
     // The title screen never draws the version text, so the build tag heads the first legal text.
     Rnd::Text *pFirstLegal = mLegalTexts.front();
     pFirstLegal->SetText(HxStr(kBuildTag) + "\n" + pFirstLegal->mPreWrapText);
-    BootLogCheckpoint("title screen built");
 #endif
     SetShowing(0);
 }

@@ -20,9 +20,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `RESONANCE.ELF` in the build directory.
 - With `ENABLE_PATCHES`, the title screen shows the project URL, the short commit hash, and the
   build time above the legal text.
-- With `ENABLE_PATCHES`, the game writes a boot log to `RESONANCE/BOOT.TXT` on the memory card in
-  slot 1. It records each start-up stage, the game's log text, a heartbeat every five seconds for
-  ten minutes, and any fatal error, assertion, or alert. A fatal error also turns the screen red.
 - With `ENABLE_PATCHES`, the credits open with an entry for the reconstruction, with a GitHub
   avatar fetched at build time. `RESONANCE_CREDITS_TEXT` and `RESONANCE_CREDITS_GITHUB_USER` set
   the text and the user. Without ImageMagick or network access, the avatar is blank.
