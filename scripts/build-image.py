@@ -6,6 +6,11 @@ MODE2/2352 bin and its cue sheet like the original CD. An ISO input is the origi
 sectors without their Mode 2 framing. Burned as it is, an ISO makes a Mode 1 disc, and the
 console's CD driver cannot read files from one.
 
+The input may instead be the disc root, the directory with `SYSTEM.CNF`. An ISO9660 volume is
+then built from the files of the disc root, with the identifiers of the original disc. A directory
+does not include the boot logo that the original disc stores in its first 12 sectors. The 12 logo
+sectors come from a separate file or stay zero.
+
 Every output sector is encoded afresh as a Mode 2 Form 1 data sector from its 2048 data bytes,
 and a two-second postgap follows the volume. A payload fitting its original extent overwrites
 the extent. A larger payload moves to sectors appended after the volume. The directory record
@@ -15,9 +20,11 @@ and the volume size move with the payload. Every other data byte retains its sec
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple, Self
+from typing import TYPE_CHECKING, BinaryIO, NamedTuple, Self
 import argparse
+import bisect
 import contextlib
+import datetime
 import io
 import json
 import logging
@@ -84,6 +91,13 @@ _ECC_Q_STRIDE = 88
 _ECC_POLYNOMIAL = 0x11D
 _EDC_POLYNOMIAL = 0xD8018001
 _DATA_SUBHEADER = bytes((0, 0, 8, 0)) * 2
+# The first 12 sectors of a PlayStation 2 disc store the encrypted boot logo the console checks.
+_LOGO_SECTORS = 12
+_PATH_TABLE_LBA = 18
+_SYSTEM_CNF = 'SYSTEM.CNF'
+_SYSTEM_IDENTIFIER = b'PLAYSTATION'
+_ISO_NAME_MAX = 30
+_ISO_NAME_RE = re.compile(r'[A-Z0-9_]+(?:\.[A-Z0-9_]*)?')
 _CUE_TEMPLATE = 'FILE "{name}" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n'
 
 type _Replacements = dict[str, bytes]
@@ -485,6 +499,339 @@ class _SourceImage:
             offset += length
 
 
+def _both_endian(value: int, width: int) -> bytes:
+    return value.to_bytes(width, 'little') + value.to_bytes(width, 'big')
+
+
+def _sectors_for(size: int) -> int:
+    return (size + _SECTOR_DATA - 1) // _SECTOR_DATA
+
+
+def _record_date(stamp: float) -> bytes:
+    moment = datetime.datetime.fromtimestamp(stamp, tz=datetime.UTC)
+    return bytes((moment.year - 1900, moment.month, moment.day, moment.hour, moment.minute,
+                  moment.second, 0))
+
+
+def _volume_date(stamp: float) -> bytes:
+    moment = datetime.datetime.fromtimestamp(stamp, tz=datetime.UTC)
+    return moment.strftime('%Y%m%d%H%M%S00').encode() + b'\x00'
+
+
+def _iso_name(path: Path) -> str:
+    """
+    Convert a file or directory name to its ISO9660 identifier.
+
+    Parameters
+    ----------
+    path : Path
+        Entry in the disc root.
+
+    Returns
+    -------
+    str
+        Upper-case identifier, with the `;1` version suffix for a file.
+
+    Raises
+    ------
+    DiscImageError
+        The name has characters ISO9660 does not allow or is too long.
+    """
+    name = path.name.upper()
+    if not _ISO_NAME_RE.fullmatch(name) or len(name) > _ISO_NAME_MAX:
+        message = f'Name not valid on an ISO9660 disc: {path}.'
+        raise DiscImageError(message)
+    return name if path.is_dir() else f'{name};1'
+
+
+class _DirectoryEntry(NamedTuple):
+    """One file or directory placed in the volume."""
+
+    iso_name: str
+    """Identifier in its parent directory."""
+    lba: int
+    """First sector."""
+    mtime: float
+    """Modification time of the source."""
+    path: Path
+    """Source path."""
+    size: int
+    """Data length in bytes. A directory's length is its record extent."""
+
+
+class _DirectoryVolume:
+    """An ISO9660 volume built from the files of a disc root directory."""
+
+    def __enter__(self) -> Self:
+        """
+        Return the open volume.
+
+        Returns
+        -------
+        Self
+            The open volume.
+        """
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None,
+                 traceback: TracebackType | None) -> None:
+        """Close the open source files."""
+        self.close()
+
+    def __init__(self, root: Path, system_area: bytes | None) -> None:
+        """
+        Build the volume layout.
+
+        The primary volume descriptor, the terminator, and the path tables take the sectors the
+        original disc gives them. The directories follow in path table order, and then the files
+        in the same order. Metadata sectors are built in memory, and file sectors are read from
+        the source files on demand.
+
+        Parameters
+        ----------
+        root : Path
+            Disc root directory with `SYSTEM.CNF`.
+        system_area : bytes | None
+            The 12 sectors of boot logo data. The sectors are zero when omitted.
+
+        Raises
+        ------
+        DiscImageError
+            The directory is not a disc root, a name is not valid, or the system area has the
+            wrong size.
+        """
+        if not any(entry.name.upper() == _SYSTEM_CNF for entry in root.iterdir()):
+            message = f'{root} lacks {_SYSTEM_CNF} and is not the root of a PlayStation 2 disc.'
+            raise DiscImageError(message)
+        if system_area is not None and len(system_area) != _LOGO_SECTORS * _SECTOR_DATA:
+            message = f'The system area must be {_LOGO_SECTORS * _SECTOR_DATA} bytes.'
+            raise DiscImageError(message)
+        if system_area is None:
+            log.warning('No system area given. The boot logo sectors are zero, and a console may '
+                        'refuse the disc.')
+        self._handles: dict[Path, BinaryIO] = {}
+        self._system_area = system_area or bytes(_LOGO_SECTORS * _SECTOR_DATA)
+        # Breadth-first order is path table order. Children sort by identifier.
+        directories = [root]
+        parents = [0]
+        children: dict[Path, list[Path]] = {}
+        index = 0
+        while index < len(directories):
+            listing = sorted(directories[index].iterdir(), key=_iso_name)
+            children[directories[index]] = listing
+            for entry in listing:
+                if entry.is_dir():
+                    directories.append(entry)
+                    parents.append(index + 1)
+            index += 1
+        path_table = sum(8 + len(self._dir_identifier(directory, root)) + (
+            len(self._dir_identifier(directory, root)) & 1) for directory in directories)
+        table_sectors = _sectors_for(path_table)
+        next_lba = _PATH_TABLE_LBA + 4 * table_sectors
+        self._dirs: dict[Path, _DirectoryEntry] = {}
+        for directory in directories:
+            extent = self._extent_size(children[directory])
+            self._dirs[directory] = _DirectoryEntry(
+                iso_name=_iso_name(directory) if directory != root else '\x00', lba=next_lba,
+                mtime=directory.stat().st_mtime, path=directory, size=extent)
+            next_lba += _sectors_for(extent)
+        self._files: list[_DirectoryEntry] = []
+        self._parent_of: dict[str, Path] = {}
+        for directory in directories:
+            for entry in children[directory]:
+                if entry.is_dir():
+                    continue
+                stat = entry.stat()
+                placed = _DirectoryEntry(iso_name=_iso_name(entry), lba=next_lba,
+                                         mtime=stat.st_mtime, path=entry, size=stat.st_size)
+                self._files.append(placed)
+                self._parent_of.setdefault(placed.iso_name.split(';')[0], directory)
+                next_lba += _sectors_for(stat.st_size)
+        self._file_starts = [entry.lba for entry in self._files]
+        self._volume_sectors = next_lba
+        self._metadata: dict[int, bytes] = {}
+        newest = max(entry.mtime for entry in (*self._dirs.values(), *self._files))
+        self._write_descriptors(root, path_table, table_sectors, newest)
+        self._write_path_tables(root, directories, parents, table_sectors)
+        for directory in directories:
+            self._write_directory(root, directory, children[directory])
+
+    def close(self) -> None:
+        """Close the open source files."""
+        for handle in self._handles.values():
+            handle.close()
+        self._handles.clear()
+
+    def find(self, name: str) -> _LocatedFile:
+        """
+        Locate a file by name anywhere in the tree.
+
+        Parameters
+        ----------
+        name : str
+            File name without the version suffix.
+
+        Returns
+        -------
+        _LocatedFile
+            Extent and parent directory of the match.
+
+        Raises
+        ------
+        DiscImageError
+            The file is missing.
+        """
+        for entry in self._files:
+            if entry.iso_name.split(';')[0] == name:
+                parent = self._dirs[self._parent_of[name]]
+                return _LocatedFile(lba=entry.lba, parent_lba=parent.lba,
+                                    parent_size=parent.size, size=entry.size)
+        message = f'File missing from the directory: {name}.'
+        raise DiscImageError(message)
+
+    def read_sector(self, lba: int) -> bytes:
+        """
+        Produce the data bytes of one sector.
+
+        Parameters
+        ----------
+        lba : int
+            Sector number from the start of the volume.
+
+        Returns
+        -------
+        bytes
+            The 2048 data bytes.
+        """
+        if lba < _LOGO_SECTORS:
+            return self._system_area[lba * _SECTOR_DATA:(lba + 1) * _SECTOR_DATA]
+        if (data := self._metadata.get(lba)) is not None:
+            return data
+        position = bisect.bisect_right(self._file_starts, lba) - 1
+        if position >= 0:
+            entry = self._files[position]
+            offset = (lba - entry.lba) * _SECTOR_DATA
+            if offset < entry.size:
+                if (handle := self._handles.get(entry.path)) is None:
+                    handle = self._handles[entry.path] = entry.path.open('rb')
+                handle.seek(offset)
+                return handle.read(_SECTOR_DATA).ljust(_SECTOR_DATA, b'\x00')
+        return bytes(_SECTOR_DATA)
+
+    def volume_sectors(self) -> int:
+        """
+        Report the sector count of the volume.
+
+        Returns
+        -------
+        int
+            Sectors in the volume.
+        """
+        return self._volume_sectors
+
+    @staticmethod
+    def _dir_identifier(directory: Path, root: Path) -> bytes:
+        return b'\x00' if directory == root else _iso_name(directory).encode()
+
+    @staticmethod
+    def _extent_size(listing: Sequence[Path]) -> int:
+        # The two self and parent records come first. A record never crosses a sector boundary.
+        used = 0
+        for name_length in (1, 1, *(len(_iso_name(entry)) for entry in listing)):
+            length = 33 + name_length + (1 - name_length % 2)
+            if used % _SECTOR_DATA + length > _SECTOR_DATA:
+                used = (used // _SECTOR_DATA + 1) * _SECTOR_DATA
+            used += length
+        return _sectors_for(used) * _SECTOR_DATA
+
+    def _record(self, identifier: bytes, entry: _DirectoryEntry, *, is_dir: bool) -> bytes:
+        length = 33 + len(identifier) + (1 - len(identifier) % 2)
+        record = bytearray(length)
+        record[0] = length
+        record[2:10] = _both_endian(entry.lba, 4)
+        record[10:18] = _both_endian(entry.size, 4)
+        record[18:25] = _record_date(entry.mtime)
+        record[25] = 0x02 if is_dir else 0x00
+        record[28:32] = _both_endian(1, 2)
+        record[32] = len(identifier)
+        record[33:33 + len(identifier)] = identifier
+        return bytes(record)
+
+    def _write_descriptors(self, root: Path, path_table: int, table_sectors: int,
+                           newest: float) -> None:
+        descriptor = bytearray(_SECTOR_DATA)
+        descriptor[0] = 1
+        descriptor[1:6] = _PVD_MAGIC
+        descriptor[6] = 1
+        descriptor[8:40] = _SYSTEM_IDENTIFIER.ljust(32)
+        descriptor[40:72] = b' ' * 32
+        descriptor[80:88] = _both_endian(self._volume_sectors, 4)
+        descriptor[120:124] = _both_endian(1, 2)
+        descriptor[124:128] = _both_endian(1, 2)
+        descriptor[128:132] = _both_endian(_SECTOR_DATA, 2)
+        descriptor[132:140] = _both_endian(path_table, 4)
+        for copy in range(2):
+            little = _PATH_TABLE_LBA + copy * table_sectors
+            big = _PATH_TABLE_LBA + (2 + copy) * table_sectors
+            struct.pack_into('<I', descriptor, 140 + copy * 4, little)
+            struct.pack_into('>I', descriptor, 148 + copy * 4, big)
+        descriptor[156:190] = self._record(b'\x00', self._dirs[root], is_dir=True)
+        descriptor[190:702] = b' ' * 512
+        descriptor[574:702] = _SYSTEM_IDENTIFIER.ljust(128)
+        descriptor[702:813] = b' ' * 111
+        descriptor[813:830] = _volume_date(newest)
+        for start in (830, 847, 864):
+            descriptor[start:start + 17] = b'0' * 16 + b'\x00'
+        descriptor[881] = 1
+        self._metadata[_PVD_SECTOR] = bytes(descriptor)
+        terminator = bytearray(_SECTOR_DATA)
+        terminator[0] = 0xFF
+        terminator[1:6] = _PVD_MAGIC
+        terminator[6] = 1
+        self._metadata[_PVD_SECTOR + 1] = bytes(terminator)
+
+    def _write_path_tables(self, root: Path, directories: Sequence[Path], parents: Sequence[int],
+                           table_sectors: int) -> None:
+        for copy, order in enumerate(('<', '<', '>', '>')):
+            table = bytearray()
+            for directory, parent in zip(directories, parents, strict=True):
+                identifier = self._dir_identifier(directory, root)
+                table += bytes((len(identifier), 0))
+                table += struct.pack(f'{order}IH', self._dirs[directory].lba, max(parent, 1))
+                table += identifier + b'\x00' * (len(identifier) & 1)
+            padded = bytes(table).ljust(table_sectors * _SECTOR_DATA, b'\x00')
+            for index in range(table_sectors):
+                self._metadata[_PATH_TABLE_LBA + copy * table_sectors + index] = padded[
+                    index * _SECTOR_DATA:(index + 1) * _SECTOR_DATA]
+
+    def _write_directory(self, root: Path, directory: Path, listing: Sequence[Path]) -> None:
+        own = self._dirs[directory]
+        parent = self._dirs[directory.parent if directory != root else root]
+        records = [self._record(b'\x00', own, is_dir=True),
+                   self._record(b'\x01', parent, is_dir=True)]
+        by_path = {entry.path: entry for entry in self._files}
+        for entry in listing:
+            if entry.is_dir():
+                records.append(self._record(_iso_name(entry).encode(), self._dirs[entry],
+                                            is_dir=True))
+            else:
+                placed = by_path[entry]
+                records.append(self._record(placed.iso_name.encode(), placed, is_dir=False))
+        extent = bytearray(own.size)
+        used = 0
+        for record in records:
+            if used % _SECTOR_DATA + len(record) > _SECTOR_DATA:
+                used = (used // _SECTOR_DATA + 1) * _SECTOR_DATA
+            extent[used:used + len(record)] = record
+            used += len(record)
+        for index in range(_sectors_for(own.size)):
+            self._metadata[own.lba + index] = bytes(
+                extent[index * _SECTOR_DATA:(index + 1) * _SECTOR_DATA])
+
+
+type _Volume = _SourceImage | _DirectoryVolume
+
+
 def _request_headers(token: str | None) -> dict[str, str]:
     """
     Authorisation headers for the GitHub API.
@@ -736,7 +1083,7 @@ class _Plan(NamedTuple):
     """Output sector by target file name."""
 
 
-def _plan_overlays(source: _SourceImage, replacements: _Replacements) -> _Plan:
+def _plan_overlays(source: _Volume, replacements: _Replacements) -> _Plan:
     """
     Place each payload and collect the sectors that change.
 
@@ -746,8 +1093,8 @@ def _plan_overlays(source: _SourceImage, replacements: _Replacements) -> _Plan:
 
     Parameters
     ----------
-    source : _SourceImage
-        Open original image.
+    source : _Volume
+        Open original image or disc root.
     replacements : _Replacements
         Payloads by target file name.
 
@@ -798,14 +1145,14 @@ def _plan_overlays(source: _SourceImage, replacements: _Replacements) -> _Plan:
     return _Plan(overlays=overlays, volume_sectors=append_lba, written=written)
 
 
-def _write_image(source: _SourceImage, replacements: _Replacements, output: Path) -> int:
+def _write_image(source: _Volume, replacements: _Replacements, output: Path) -> int:
     """
     Encode the raw MODE2/2352 image and write its cue sheet.
 
     Parameters
     ----------
-    source : _SourceImage
-        Open original image.
+    source : _Volume
+        Open original image or disc root.
     replacements : _Replacements
         Payloads by target file name.
     output : Path
@@ -864,7 +1211,7 @@ class _Options(NamedTuple):
     ezmidi_irx: Path | None
     """Local module file, bypassing the artifact download."""
     input_image: Path
-    """Original image in cue, bin, or ISO form."""
+    """Original image in cue, bin, or ISO form, or the disc root directory."""
     output_cue: Path
     """Destination cue sheet path. The bin is written beside it."""
     overwrite: bool
@@ -875,6 +1222,8 @@ class _Options(NamedTuple):
     """Local executable file, bypassing the artifact download."""
     run_id: int | None
     """Actions run to fetch. The latest successful run is used when omitted."""
+    system_area: Path | None
+    """Boot logo sectors for a disc root input."""
     token: str | None
     """GitHub token. GITHUB_TOKEN or GH_TOKEN provides the value when the flag is absent."""
 
@@ -909,8 +1258,19 @@ def _run(options: _Options) -> int:
                                                             == options.input_image.resolve()):
         message = 'Output must differ from the input.'
         raise DiscImageError(message)
+    if options.input_image.is_dir() and image.resolve().is_relative_to(
+            options.input_image.resolve()):
+        message = 'Output must lie outside the disc root.'
+        raise DiscImageError(message)
     replacements = _resolve_payloads(options)
-    with _SourceImage(options.input_image) as source:
+    source: _Volume
+    if options.input_image.is_dir():
+        system_area = (options.system_area.read_bytes()
+                       if options.system_area is not None else None)
+        source = _DirectoryVolume(options.input_image, system_area)
+    else:
+        source = _SourceImage(options.input_image)
+    with source:
         return _write_image(source, replacements, options.output_cue)
 
 
@@ -982,6 +1342,32 @@ def _existing_file(value: str) -> Path:
     return path
 
 
+def _existing_path(value: str) -> Path:
+    """
+    Convert an argument to the path of an existing file or directory.
+
+    Parameters
+    ----------
+    value : str
+        Argument text.
+
+    Returns
+    -------
+    Path
+        The path.
+
+    Raises
+    ------
+    argparse.ArgumentTypeError
+        The path does not exist.
+    """
+    path = Path(value)
+    if not path.exists():
+        message = f'No such file or directory: {value}.'
+        raise argparse.ArgumentTypeError(message)
+    return path
+
+
 def _build_parser() -> argparse.ArgumentParser:
     """
     Describe the command line.
@@ -994,8 +1380,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description='Rebuild a FreQuency CD image with replacement binaries. The raw MODE2/2352 '
         'bin is written beside the cue sheet, with the same name and a .bin suffix.')
-    parser.add_argument('input_image', help='Original image in cue, bin, or ISO form.',
-                        type=_existing_file)
+    parser.add_argument('input_image',
+                        help='Original image in cue, bin, or ISO form, or the disc root directory '
+                        '(the directory with SYSTEM.CNF).',
+                        type=_existing_path)
     parser.add_argument('output_cue', help='Destination cue sheet path.', type=Path)
     parser.add_argument('--debug', action='store_true', help='Enable debug logging.')
     parser.add_argument('--ezmidi-irx', help='Local module file, bypassing the artifact download.',
@@ -1009,6 +1397,10 @@ def _build_parser() -> argparse.ArgumentParser:
                         type=_existing_file)
     parser.add_argument('--run-id', help='Actions run to fetch. The latest successful run is used '
                         'when omitted.', type=int)
+    parser.add_argument('--system-area',
+                        help='The first 12 sectors of the original disc (24576 bytes, the boot '
+                        'logo), for a disc root input. The sectors are zero otherwise.',
+                        type=_existing_file)
     parser.add_argument('--token', help='GitHub token. GITHUB_TOKEN or GH_TOKEN provides the value '
                         'when the flag is absent.')
     return parser
@@ -1033,7 +1425,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                         level=logging.DEBUG if args.debug else logging.INFO)
     options = _Options(debug=args.debug, ezmidi_irx=args.ezmidi_irx, input_image=args.input_image,
                        output_cue=args.output_cue, overwrite=args.overwrite, repo=args.repo,
-                       resonance_bin=args.resonance_bin, run_id=args.run_id, token=args.token)
+                       resonance_bin=args.resonance_bin, run_id=args.run_id,
+                       system_area=args.system_area, token=args.token)
     outputs = (options.output_cue, options.output_cue.with_suffix('.bin'))
     existed = {path for path in outputs if path.exists()}
     try:

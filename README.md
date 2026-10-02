@@ -41,6 +41,11 @@ like the original disc, with the built executable and EZMIDI.IRX in place of the
 original may be a cue, a bin, or an ISO. Without `RESONANCE_DISC_IMAGE`, the build produces the
 executable and the module only.
 
+`RESONANCE_DISC_IMAGE` may also be the disc root, the directory with `SYSTEM.CNF`. A copy of the
+disc files lacks the boot logo that the original disc stores in its first 12 sectors. A console may
+refuse a disc without the boot logo. Set `RESONANCE_DISC_SYSTEM_AREA` to a file with the 24576
+bytes of the first 12 sectors of the original disc to include the boot logo.
+
 ## Provenance and licence
 
 This is an independent reverse-engineering effort for preservation and study. It includes no code
