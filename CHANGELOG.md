@@ -15,7 +15,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   image with the built executable and `EZMIDI.IRX`, through `scripts/build-image.py`. Set
   `RESONANCE_DISC_IMAGE` to an original disc image (cue, bin, or ISO) to enable it. Every sector is
   encoded as Mode 2 Form 1. A burned ISO is a Mode 1 disc, and the game cannot read its files on a
-  console.
+  console. The image receives the executable without its debug information, which fits the
+  original's extent, unless `RESONANCE_IMAGE_STRIP` is off. The stripped copy is also written to
+  `RESONANCE.ELF` in the build directory.
 - With `ENABLE_PATCHES`, the title screen shows the project URL, the short commit hash, and the
   build time above the legal text.
 - With `ENABLE_PATCHES`, the game writes a boot log to `RESONANCE/BOOT.TXT` on the memory card in

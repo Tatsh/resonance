@@ -11,6 +11,9 @@ set(RESONANCE_DISC_IMAGE
 set(RESONANCE_IMAGE_OUTPUT
     "${CMAKE_BINARY_DIR}/resonance.cue"
     CACHE FILEPATH "Cue sheet the image target writes. The bin is written beside it.")
+# The console loads only the program segment, so the debug information is dead weight on the disc.
+# The stripped executable fits the original's extent and is written in place.
+option(RESONANCE_IMAGE_STRIP "Put an executable without debug information on the image." ON)
 
 if(NOT RESONANCE_DISC_IMAGE)
   message(STATUS "Set RESONANCE_DISC_IMAGE to an original disc image to enable the image target.")
@@ -26,14 +29,25 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 get_filename_component(_resonance_image_dir "${RESONANCE_IMAGE_OUTPUT}" DIRECTORY)
 get_filename_component(_resonance_image_stem "${RESONANCE_IMAGE_OUTPUT}" NAME_WLE)
 set(_resonance_irx "$<TARGET_PROPERTY:ezmidi_irx,IRX_FILE>")
+set(_resonance_executable "$<TARGET_FILE:${CMAKE_PROJECT_NAME}>")
+if(RESONANCE_IMAGE_STRIP)
+  set(_resonance_executable "${CMAKE_BINARY_DIR}/RESONANCE.ELF")
+  add_custom_command(
+    OUTPUT "${_resonance_executable}"
+    COMMAND "${CMAKE_OBJCOPY}" --strip-debug $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+            "${_resonance_executable}"
+    DEPENDS ${CMAKE_PROJECT_NAME}
+    COMMENT "Writing ${_resonance_executable}"
+    VERBATIM)
+endif()
 add_custom_command(
   OUTPUT "${RESONANCE_IMAGE_OUTPUT}" "${_resonance_image_dir}/${_resonance_image_stem}.bin"
   COMMAND
     Python3::Interpreter "${CMAKE_SOURCE_DIR}/scripts/build-image.py" "${RESONANCE_DISC_IMAGE}"
-    "${RESONANCE_IMAGE_OUTPUT}" --overwrite --resonance-bin $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+    "${RESONANCE_IMAGE_OUTPUT}" --overwrite --resonance-bin "${_resonance_executable}"
     --ezmidi-irx "${_resonance_irx}"
-  DEPENDS ${CMAKE_PROJECT_NAME} ezmidi_irx "${_resonance_irx}" "${RESONANCE_DISC_IMAGE}"
-          "${CMAKE_SOURCE_DIR}/scripts/build-image.py"
+  DEPENDS ${CMAKE_PROJECT_NAME} ezmidi_irx "${_resonance_executable}" "${_resonance_irx}"
+          "${RESONANCE_DISC_IMAGE}" "${CMAKE_SOURCE_DIR}/scripts/build-image.py"
   COMMENT "Writing ${RESONANCE_IMAGE_OUTPUT}"
   VERBATIM)
 add_custom_target(image DEPENDS "${RESONANCE_IMAGE_OUTPUT}")

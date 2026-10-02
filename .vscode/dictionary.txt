@@ -851,6 +851,7 @@ nullptr
 numpydoc
 obfilestream
 objc
+objcopy
 objimpl
 objs
 obmalloc
