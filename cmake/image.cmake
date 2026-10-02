@@ -6,10 +6,8 @@
 # The script needs requests. Point Python3_EXECUTABLE at an interpreter that has it when the
 # default one does not.
 
-set(RESONANCE_DISC_IMAGE
-    ""
-    CACHE PATH "Original FreQuency disc image (cue, bin, or ISO), or the disc root directory, \
-that the image target rebuilds.")
+# RESONANCE_DISC_IMAGE is defined in disc-region.cmake. disc-region.cmake reads it before the
+# compile definitions are set.
 set(RESONANCE_DISC_SYSTEM_AREA
     ""
     CACHE FILEPATH "First 12 sectors (the boot logo) of the original disc, for a disc root \
@@ -40,8 +38,11 @@ else()
   set(_resonance_disc_inputs "${RESONANCE_DISC_IMAGE}")
 endif()
 set(_resonance_system_area_args)
+if(VIDEO_STANDARD STREQUAL "PAL")
+  list(APPEND _resonance_system_area_args --pal)
+endif()
 if(RESONANCE_DISC_SYSTEM_AREA)
-  set(_resonance_system_area_args --system-area "${RESONANCE_DISC_SYSTEM_AREA}")
+  list(APPEND _resonance_system_area_args --system-area "${RESONANCE_DISC_SYSTEM_AREA}")
   list(APPEND _resonance_disc_inputs "${RESONANCE_DISC_SYSTEM_AREA}")
 endif()
 

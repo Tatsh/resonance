@@ -44,6 +44,10 @@ set(EZMIDI_IOP_FLAGS
     -mno-explicit-relocs
     -I${CMAKE_SOURCE_DIR}/sce/iop/include
     -I${CMAKE_SOURCE_DIR}/src)
+# A custom command compiles the module and does not receive the directory definitions.
+if(VIDEO_STANDARD STREQUAL "PAL")
+  list(APPEND EZMIDI_IOP_FLAGS -DVIDEO_STANDARD_PAL)
+endif()
 
 # The units follow the shipped module: the entry first, the RPC server, the synthesiser, and the
 # import stubs last.

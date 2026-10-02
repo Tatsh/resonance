@@ -5,9 +5,22 @@ option(BUILD_DOCS "Build documentation alongside the sources." OFF)
 option(BUILD_DOCS_ONLY "Build documentation and nothing else." OFF)
 option(INSTALL_DOCS "Install documentation." OFF)
 option(ENABLE_PATCHES "Include patch-only code in the build." ON)
+set(VIDEO_STANDARD
+    "NTSC"
+    CACHE STRING "Release to build, NTSC for North America or PAL for Europe. PAL includes every \
+change of the European release.")
+set_property(CACHE VIDEO_STANDARD PROPERTY STRINGS NTSC PAL)
+string(TOUPPER "${VIDEO_STANDARD}" VIDEO_STANDARD)
+if(NOT VIDEO_STANDARD MATCHES "^(NTSC|PAL)$")
+  message(FATAL_ERROR "VIDEO_STANDARD must be NTSC or PAL.")
+endif()
+include(cmake/disc-region.cmake)
 
 if(ENABLE_PATCHES)
   add_compile_definitions(ENABLE_PATCHES)
+endif()
+if(VIDEO_STANDARD STREQUAL "PAL")
+  add_compile_definitions(VIDEO_STANDARD_PAL)
 endif()
 
 # The reconstruction is checked as C++17. The target toolchain accepts a later standard, and raising

@@ -1,7 +1,8 @@
 """Rebuild a FreQuency disc image with replacement binaries.
 
 The entry point reads an original FreQuency image in cue, bin, or ISO form, exchanges the
-`SCUS_971.25` executable and the `EZMIDI.IRX` module for fresh builds, and writes a raw
+executable that `SYSTEM.CNF` boots (`SCUS_971.25` in North America, `SCES_507.91` in Europe) and
+the `EZMIDI.IRX` module for fresh builds, and writes a raw
 MODE2/2352 bin and its cue sheet like the original CD. An ISO input is the original's data
 sectors without their Mode 2 framing. Burned as it is, an ISO makes a Mode 1 disc, and the
 console's CD driver cannot read files from one.
@@ -69,8 +70,10 @@ _RESONANCE_ARTIFACT = 'resonance'
 _EZMIDI_ARTIFACT = 'release-assets'
 _RESONANCE_MEMBER = 'resonance'
 _EZMIDI_MEMBER = 'EZMIDI.IRX'
-_TARGET_EXECUTABLE = 'SCUS_971.25'
+_KNOWN_EXECUTABLES = {'SCES_507.91': 'PAL', 'SCUS_971.25': 'NTSC-U/C'}
+_PAL_EXECUTABLE = 'SCES_507.91'
 _TARGET_MODULE = 'EZMIDI.IRX'
+_BOOT2_RE = re.compile(r'^\s*BOOT2\s*=\s*cdrom0:\\(?P<name>[^;\s]+)', re.IGNORECASE | re.MULTILINE)
 _ELF_MAGIC = b'\x7fELF'
 _CUE_FILE_RE = re.compile(r'FILE\s+"(?P<name>[^"]+)"', re.IGNORECASE)
 _CUE_TRACK_RE = re.compile(r'TRACK\s+(?P<number>\d+)\s+(?P<mode>\S+)', re.IGNORECASE)
@@ -1216,6 +1219,8 @@ class _Options(NamedTuple):
     """Destination cue sheet path. The bin is written beside it."""
     overwrite: bool
     """Replace the output file when present."""
+    pal: bool
+    """The executable is a PAL build. A PAL build pairs only with the European disc."""
     repo: str
     """Repository holding the build artifacts."""
     resonance_bin: Path | None
@@ -1262,7 +1267,7 @@ def _run(options: _Options) -> int:
             options.input_image.resolve()):
         message = 'Output must lie outside the disc root.'
         raise DiscImageError(message)
-    replacements = _resolve_payloads(options)
+    executable, module = _resolve_payloads(options)
     source: _Volume
     if options.input_image.is_dir():
         system_area = (options.system_area.read_bytes()
@@ -1271,10 +1276,100 @@ def _run(options: _Options) -> int:
     else:
         source = _SourceImage(options.input_image)
     with source:
-        return _write_image(source, replacements, options.output_cue)
+        target = _boot_executable(source)
+        if options.pal != (target == _PAL_EXECUTABLE):
+            message = (f'The original boots {target}. A PAL build requires the European disc, '
+                       'and an NTSC build requires the North American disc.')
+            raise DiscImageError(message)
+        log.info('Original is the %s release (%s).', _KNOWN_EXECUTABLES[target], target)
+        return _write_image(source, {target: executable, _TARGET_MODULE: module},
+                            options.output_cue)
 
 
-def _resolve_payloads(options: _Options) -> _Replacements:
+def _boot_executable(source: _Volume) -> str:
+    """
+    Read the name of the executable the disc boots.
+
+    Parameters
+    ----------
+    source : _Volume
+        Open original image or disc root.
+
+    Returns
+    -------
+    str
+        File name from the `BOOT2` line of `SYSTEM.CNF`, without the version suffix.
+
+    Raises
+    ------
+    DiscImageError
+        `SYSTEM.CNF` does not have a `BOOT2` line, or the line identifies an unknown executable.
+    """
+    found = source.find(_SYSTEM_CNF)
+    data = b''.join(source.read_sector(found.lba + index)
+                    for index in range(_sectors_for(found.size)))[:found.size]
+    return _parse_boot2(data)
+
+
+def _identify(input_image: Path) -> str:
+    """
+    Read the name of the executable an original disc boots, without building anything.
+
+    Parameters
+    ----------
+    input_image : Path
+        Original image in cue, bin, or ISO form, or the disc root directory.
+
+    Returns
+    -------
+    str
+        File name from the `BOOT2` line of `SYSTEM.CNF`, without the version suffix.
+
+    Raises
+    ------
+    DiscImageError
+        The disc cannot be read, or `SYSTEM.CNF` does not boot a known release.
+    """
+    if input_image.is_dir():
+        for entry in input_image.iterdir():
+            if entry.name.upper() == _SYSTEM_CNF:
+                return _parse_boot2(entry.read_bytes())
+        message = f'{input_image} lacks {_SYSTEM_CNF} and is not the root of a PlayStation 2 disc.'
+        raise DiscImageError(message)
+    with _SourceImage(input_image) as source:
+        return _boot_executable(source)
+
+
+def _parse_boot2(data: bytes) -> str:
+    """
+    Read the executable name from the text of `SYSTEM.CNF`.
+
+    Parameters
+    ----------
+    data : bytes
+        Contents of `SYSTEM.CNF`.
+
+    Returns
+    -------
+    str
+        File name from the `BOOT2` line, without the version suffix.
+
+    Raises
+    ------
+    DiscImageError
+        The text does not have a `BOOT2` line, or the line identifies an unknown executable.
+    """
+    if (match := _BOOT2_RE.search(data.decode('ascii', 'replace'))) is None:
+        message = f'{_SYSTEM_CNF} has no BOOT2 line.'
+        raise DiscImageError(message)
+    name = match['name'].upper()
+    if name not in _KNOWN_EXECUTABLES:
+        message = f'{_SYSTEM_CNF} boots {name}. No known FreQuency release boots it.'
+        raise DiscImageError(message)
+    return name
+
+
+def _resolve_payloads(options: _Options) -> tuple[bytes, bytes]:
     """
     Fetch or read both replacement payloads.
 
@@ -1285,8 +1380,8 @@ def _resolve_payloads(options: _Options) -> _Replacements:
 
     Returns
     -------
-    _Replacements
-        Payloads by target file name.
+    tuple[bytes, bytes]
+        The executable and the module.
 
     Raises
     ------
@@ -1313,7 +1408,7 @@ def _resolve_payloads(options: _Options) -> _Replacements:
     else:
         archive = _download_artifact(options.repo, resolved, _EZMIDI_ARTIFACT, str(effective))
         module = _extract_member(archive, _EZMIDI_MEMBER)
-    return {_TARGET_EXECUTABLE: executable, _TARGET_MODULE: module}
+    return executable, module
 
 
 def _existing_file(value: str) -> Path:
@@ -1384,7 +1479,13 @@ def _build_parser() -> argparse.ArgumentParser:
                         help='Original image in cue, bin, or ISO form, or the disc root directory '
                         '(the directory with SYSTEM.CNF).',
                         type=_existing_path)
-    parser.add_argument('output_cue', help='Destination cue sheet path.', type=Path)
+    parser.add_argument('output_cue', help='Destination cue sheet path. Required unless '
+                        '--identify is given.', nargs='?', type=Path)
+    parser.add_argument('--identify', action='store_true',
+                        help='Print the name of the executable the original boots, and exit.')
+    parser.add_argument('--pal', action='store_true',
+                        help='The executable is a PAL build. The European disc (SCES_507.91) '
+                        'requires the flag, and the North American disc refuses it.')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging.')
     parser.add_argument('--ezmidi-irx', help='Local module file, bypassing the artifact download.',
                         type=_existing_file)
@@ -1420,12 +1521,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     int
         The exit status, 0 on success and 1 on failure.
     """
-    args = _build_parser().parse_args(argv)
+    parser = _build_parser()
+    args = parser.parse_args(argv)
     logging.basicConfig(format='%(levelname)s: %(message)s',
                         level=logging.DEBUG if args.debug else logging.INFO)
+    if args.identify:
+        try:
+            print(_identify(args.input_image))  # ruff: ignore[print]
+        except (DiscImageError, OSError):
+            log.exception('Cannot identify the original.')
+            return 1
+        return 0
+    if args.output_cue is None:
+        parser.error('the output cue sheet is required')
     options = _Options(debug=args.debug, ezmidi_irx=args.ezmidi_irx, input_image=args.input_image,
-                       output_cue=args.output_cue, overwrite=args.overwrite, repo=args.repo,
-                       resonance_bin=args.resonance_bin, run_id=args.run_id,
+                       output_cue=args.output_cue, overwrite=args.overwrite, pal=args.pal,
+                       repo=args.repo, resonance_bin=args.resonance_bin, run_id=args.run_id,
                        system_area=args.system_area, token=args.token)
     outputs = (options.output_cue, options.output_cue.with_suffix('.bin'))
     existed = {path for path in outputs if path.exists()}
