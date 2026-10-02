@@ -6,10 +6,10 @@
 /**
  * Read-only HxStream over a caller-supplied byte range.
  *
- * `11HxMemStream` in the RTTI descriptor at `0x008f00c0`, single inheritance from HxStream at
- * offset 0. The type function is at `0x00405c80` and its vtable is at `0x00816e08`. The object is
- * 0x24 bytes: the HxStream subobject occupies `+0x00` through `+0x0f`, the name occupies `+0x10`
- * and `+0x14`, and the three pointers follow at `+0x18`, `+0x1c`, and `+0x20`.
+ * Its RTTI descriptor is at `0x008f00c0`. It has single inheritance from HxStream at offset 0. The
+ * type function is at `0x00405c80` and its vtable is at `0x00816e08`. The object is 0x24 bytes: the
+ * HxStream subobject occupies `+0x00` through `+0x0f`, the name occupies `+0x10` and `+0x14`, and
+ * the three pointers follow at `+0x18`, `+0x1c`, and `+0x20`.
  *
  * The class adds no virtual of its own and overrides six of HxStream's seven, retaining only
  * UnderlyingStream(). The range belongs to the caller, and the destructor releases only the name.

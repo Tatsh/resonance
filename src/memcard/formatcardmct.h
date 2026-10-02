@@ -13,10 +13,10 @@ constexpr int kMemcardStatusAlreadyFormatted = 13;
 /**
  * Format or unformat the card in one slot.
  *
- * `13FormatCardMCT` in the RTTI descriptor at `0x008ef290`, single inheritance from `MemcardTask`
- * at offset 0. An instance is 0x20 bytes and the vtable is at `0x007dabb8`. The accessor at
- * `0x00184c90` belongs to this class rather than to `MemcardTask`, which the descriptor it guards
- * on at entry establishes, and `rtti.json` attributes to `MemcardTask` in error.
+ * Its RTTI descriptor is at `0x008ef290`. It has single inheritance from `MemcardTask` at offset 0.
+ * An instance is 0x20 bytes and the vtable is at `0x007dabb8`. The accessor at `0x00184c90` belongs
+ * to this class rather than to `MemcardTask`. The descriptor it guards on at entry establishes the
+ * owning class.
  *
  * The task enquires first and refuses to act on a card that reports itself formatted, which is
  * what kMemcardStatusAlreadyFormatted is for. Otherwise it queues a format, or an unformat when

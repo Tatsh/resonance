@@ -9,12 +9,12 @@ class Globals;
 /**
  * Message sink that runs the script text a message supplies.
  *
- * `10ScriptSink` in the RTTI descriptor at `0x00901e60`, with MsgSink as its one base. The object
- * is eight bytes: the compiler-generated vptr lands at offset 0 and the Globals back pointer
- * occupies `+0x04`. Globals::InitServices() at `0x001170d0` allocates eight bytes, stores the
- * Globals pointer at `+0x04`, and writes the vptr, and CreateInstance() does the same. The table at
- * `0x007cee50` runs GetTypeInfo, the destructor, the inherited MsgSink::Handle(), then the
- * override below.
+ * Its RTTI descriptor is at `0x00901e60`. It has MsgSink as its one base. The object is eight
+ * bytes. The compiler-generated vptr lands at offset 0, and the Globals back pointer occupies
+ * `+0x04`. Globals::InitServices() at `0x001170d0` allocates eight bytes, stores the Globals
+ * pointer at `+0x04`, and writes the vptr, and CreateInstance() does the same. The table at
+ * `0x007cee50` runs GetTypeInfo, the destructor, the inherited MsgSink::Handle(), then the override
+ * below.
  *
  * Globals creates the single instance in Init() and destroys it in Shutdown(). The sink accepts
  * every message, acts only on one identity, and is registered broadly.
@@ -35,7 +35,7 @@ public:
      * Build a sink on the heap.
      *
      * The body is the same allocation and construction Globals::InitServices() inlines. No caller
-     * is recovered. The title comes from the program and is inferred.
+     * is recovered. The name is inferred.
      *
      * @param pOwner The globals the sink belongs to.
      * @return The new sink.

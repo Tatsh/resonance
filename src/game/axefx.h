@@ -17,8 +17,8 @@ class TickClock;
 /**
  * Stick-driven controller effect for a guitar track.
  *
- * `5AxeFX` in the RTTI descriptor at `0x00902a40`, over MsgSink at offset 0, MsgSource at offset 4,
- * and FilterLover at offset 0x18. The primary table is at `0x007dd820`, the MsgSource table at
+ * Its RTTI descriptor is at `0x00902a40`. It is built over MsgSink at offset 0, MsgSource at offset
+ * 4, and FilterLover at offset 0x18. The primary table is at `0x007dd820`, the MsgSource table at
  * `0x007dd7f8`, and the FilterLover table at `0x007dd7d8`. No routine in the image calls the
  * constructor, so the class is compiled but never built. The last member is at `+0x50`.
  *

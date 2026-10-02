@@ -9,10 +9,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `17PhraseCapturedMsg` in the RTTI descriptor at `0x008ef830`, with Message as its one base. The
- * object is 0x28 bytes and its vtable is at `0x008126f0`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008ef830`. It has Message as its one base. The object is 0x28 bytes
+ * and its vtable is at `0x008126f0`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() labels five of the
  * nine words: a bar range at `+0x04` and `+0x08`, the track at `+0x14`, the score at `+0x1c`, and

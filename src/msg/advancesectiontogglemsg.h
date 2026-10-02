@@ -6,9 +6,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `23AdvanceSectionToggleMsg` in the RTTI descriptor at `0x008ef7a0`, with Message as its one
- * base. The object is 0xc bytes and its vtable is at `0x007ce768`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008ef7a0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007ce768`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). mAdvance is public because
  * Overlay::OnAdvanceSectionToggle() at `0x0041f440` reads it directly with no accessor in the

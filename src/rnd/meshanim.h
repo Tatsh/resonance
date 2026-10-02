@@ -21,22 +21,22 @@ namespace Rnd {
 /**
  * Per-vertex animation of one mesh.
  *
- * `Q23Rnd8MeshAnim` in the RTTI descriptor at `0x008ef4a0`, with `Rnd::Animatable` as its one
- * public base at offset 0. The Animatable subobject is 0x18 bytes and the members below start
- * after it. The shared Rnd::Object subobject sits at `+0x2c`, which the Object sub-vtable at
- * `0x0081e2c0` pins from outside by recording a `this` adjustment of -0x2c in every entry, and
- * the creator at `0x00493a00` allocates 0x48 bytes for the whole object. The primary vtable is at
- * `0x0081e308` and has four entries, GetTypeInfo, EndFrame(), the inherited
- * Rnd::Animatable::StartAnim(), and SetFrameSelf(), followed by an all-zero terminator.
+ * Its RTTI descriptor is at `0x008ef4a0`. It has `Rnd::Animatable` as its one public base at offset
+ * 0. The Animatable subobject is 0x18 bytes and the members below start after it. The shared
+ * Rnd::Object subobject sits at `+0x2c`. The Object sub-vtable at `0x0081e2c0` pins the offset
+ * from outside by recording a `this` adjustment of -0x2c in every entry, and the creator at
+ * `0x00493a00` allocates 0x48 bytes for the whole object. The primary vtable is at `0x0081e308`
+ * and has four entries, GetTypeInfo, EndFrame(), the inherited Rnd::Animatable::StartAnim(), and
+ * SetFrameSelf(), followed by an all-zero terminator.
  *
  * Three channels animate the mesh, one for the vertex positions, one for the first texture
- * coordinate, and one for the vertex colours. The text dump titles them "vertPointsKeys:",
+ * coordinate, and one for the vertex colours. The text dump labels them "vertPointsKeys:",
  * "vertTexsKeys:", and "vertColorsKeys:", which is where the member names come from. Each channel
  * is a `std::list` of keyframes, and one keyframe stores a whole vector of per-vertex values plus
  * the frame it applies at. A mesh anim whose keys belong to another mesh anim reads that object's
  * channels instead of its own, the same sharing arrangement Rnd::Mesh uses for its geometry.
  *
- * The two object references are titled "light:" and " keysOwner:" by the dump. The first label is
+ * The dump labels the two object references "light:" and " keysOwner:". The first label is
  * wrong in the shipped program: Replace() at `0x00486ae8` and Copy() at `0x00487288` both narrow
  * the incoming object with the Rnd::Mesh type descriptor at `0x00492528` before storing it, and
  * SetFrameSelf() reads `mVertsOwner` at `+0x130` and the vertex vector at `+0xe8` through it, so
@@ -245,7 +245,7 @@ private:
 
     // Data members follow the recovered offset order, and the access specifiers interleave.
 
-    // The mesh whose vertices this animation drives. The dump titles it "light:"; see the class
+    // The mesh whose vertices this animation drives. The dump labels it "light:"; see the class
     // documentation for why the label is wrong.
     Mesh *mMesh; // +0x18
 

@@ -191,7 +191,7 @@ void ShowAlertMessage(const HxStr &text);
  *
  * The text is already formatted at every call site, so the routine is not variadic. Both the name
  * and the second argument's unit are inferred: the three callers pass a duration of 300, 600, and a
- * forwarded parameter, and nothing in the image titles either the routine or the value.
+ * forwarded parameter, and the image does not identify the routine or the value.
  *
  * @param pszText The message.
  * @param nDuration How long to show it.

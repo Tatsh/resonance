@@ -10,9 +10,8 @@ namespace Py {
 /**
  * Base of every C++ object the binding exposes to Python as an extension object.
  *
- * `Q22Py19PythonExtensionBase` in the RTTI descriptor at `0x008effc0`, with `_object` at offset 0
- * as its one base. Its accessor is at `0x005aba90`, and the mangled name string sits at
- * `0x00833418`.
+ * Its RTTI descriptor is at `0x008effc0`. It has `_object` at offset 0 as its one base. Its
+ * accessor is at `0x005aba90`, and the mangled name string sits at `0x00833418`.
  *
  * The base is the interpreter's own `PyObject` structure, which is what makes an instance usable
  * from Python without a separate header block. Released PyCXX instead places the header inside

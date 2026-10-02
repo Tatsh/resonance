@@ -10,10 +10,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12MultiMuseMsg` in the RTTI descriptor at `0x008eec98`, with MuseMsg as its one base. The object
- * is 0xc bytes and its vtable is at `0x00812df8`. Clone() delegates to the copy constructor at
- * `0x003e38a8` rather than copying inline, which is why this class is recovered alongside the
- * packets rather than with its three MuseMsg siblings.
+ * Its RTTI descriptor is at `0x008eec98`. It has MuseMsg as its one base. The object is 0xc bytes
+ * and its vtable is at `0x00812df8`. Clone() delegates to the copy constructor at `0x003e38a8`
+ * rather than copying inline.
  *
  * The word at `+0x08` is what settles MuseMsg's payload. This class copies a word there while
  * NoteMsg and StdMidiMsg copy bytes, and a single word store cannot straddle a base and a derived
@@ -127,9 +126,7 @@ public:
 /**
  * Identity that MultiMuseMsg::Type() reports.
  *
- * This word belongs to MultiMuseMsg because MultiMuseMsg::Type() at `0x003dc608` returns it. The
- * program still titles it `g_dwMsgIdAddLightPoint`, which describes a handler comparing against it
- * rather than the class reporting it, so the two disagree until that label is corrected.
+ * This word belongs to MultiMuseMsg because MultiMuseMsg::Type() at `0x003dc608` returns it.
  *
  * @ghidraAddress 0x006d01dc
  */

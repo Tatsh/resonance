@@ -9,9 +9,8 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `26PlayersTrackNeutralizedMsg` in the RTTI descriptor at `0x008eed28`, with CmdMsg as its one
- * base. The object is 0x10 bytes and its vtable is at `0x00812270`. The word at `+0x04` belongs
- * to CmdMsg.
+ * Its RTTI descriptor is at `0x008eed28`. It has CmdMsg as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x00812270`. The word at `+0x04` belongs to CmdMsg.
  *
  * PhraseNeutralizer::PostTrackNeutralizedMsg() builds the message at `0x001c0b2c`, once per
  * affected player, with a per-player total at `+0x08` and the player at `+0x0c`. Print() writes

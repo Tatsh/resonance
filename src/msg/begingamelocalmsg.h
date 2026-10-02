@@ -5,9 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `17BeginGameLocalMsg` in the RTTI descriptor at `0x00901b50`, with Message as its one base. The
- * object is 0x4 bytes and its vtable is at `0x007cd568`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00901b50`. It has Message as its one base. The object is 0x4 bytes
+ * and its vtable is at `0x007cd568`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so

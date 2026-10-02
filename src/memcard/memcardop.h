@@ -46,9 +46,9 @@ enum MemcardStatus {
 /**
  * One queued memory-card operation.
  *
- * `9MemcardOp` in the RTTI descriptor at `0x0086f608`, with no base class, which is why the vptr
- * sits after the data at offset 0x18 rather than at offset 0. An instance is 0x1c bytes and the
- * vtable is at `0x0082c050`.
+ * Its RTTI descriptor is at `0x0086f608`. It has no base class. The vptr therefore sits after the
+ * data at offset 0x18 rather than at offset 0. An instance is 0x1c bytes and the vtable is at
+ * `0x0082c050`.
  *
  * Fourteen classes derive from this one, one per libmc entry point, and each of them supplies the
  * three virtuals below. `Memcard` owns the queue, constructs an operation on the heap for every

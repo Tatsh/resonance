@@ -13,8 +13,8 @@
 /**
  * Sequence of messages, each at a song position.
  *
- * `9MultiMuse` in the RTTI descriptor at `0x008ef088`, with Attachment as its one base. The object
- * is 0x14 bytes, which the allocation in MultiMuseMsg::Load() measures: the reference count at
+ * Its RTTI descriptor is at `0x008ef088`. It has Attachment as its one base. The allocation in
+ * MultiMuseMsg::Load() measures the object at 0x14 bytes. Its layout is the reference count at
  * `+0x00`, the vptr at `+0x04`, and the vector over `+0x08` through `+0x13`. Its vtable is at
  * `0x007dfb78` and runs four entries, slot 2 retaining Attachment::Destroy().
  *

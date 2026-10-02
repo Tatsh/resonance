@@ -7,9 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12CaughtBarMsg` in the RTTI descriptor at `0x008f07a0`, with Message as its one base. The
- * object is 0xc bytes and its vtable is at `0x007e09e0`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008f07a0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007e09e0`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The two names come from
  * Catcher::PostCaughtBarMsg(), the one builder, which stores the catcher's player and the caught

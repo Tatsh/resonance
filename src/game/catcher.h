@@ -18,10 +18,10 @@
 /**
  * Catcher that scores the gems one track presents.
  *
- * `7Catcher` in the RTTI descriptor at `0x00902010`, with GenericCatcher as its only base at
- * offset 0. Its primary table is at `0x007e0c38` with eleven entries and its MsgSource subobject
- * table at `0x007e0c10` with four. Two classes derive from it, MultiCatcher and SingleCatcher, and
- * both retain eleven entries, so neither introduces a virtual.
+ * Its RTTI descriptor is at `0x00902010`. It has GenericCatcher as its only base at offset 0. Its
+ * primary table is at `0x007e0c38` with eleven entries and its MsgSource subobject table at
+ * `0x007e0c10` with four. Two classes derive from it, MultiCatcher and SingleCatcher, and both
+ * retain eleven entries. Neither introduces a virtual.
  *
  * The class supplies MsgSink::HandleMessage() and GenericCatcher's Start(), Stop(), and
  * IsPhraseRunEmpty(), and it introduces four virtuals at slots 7 through 10.
@@ -31,8 +31,7 @@
  * and adds one word.
  *
  * The constructor's parameter list is attested rather than inferred. The anonymous-namespace marker
- * for the file-local command class `GemCmd` records the enclosing constructor's mangled signature
- * as `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, which is
+ * for the file-local command class `GemCmd` records the enclosing constructor's signature,
  * `Catcher(PhraseMgr *, Quantizer *, const TrackData *, Sch::TickClock *, int, Sch::Tick)`. A
  * second marker records `PostGemCmd` in the same translation unit. Both are the commands Start()
  * schedules.
@@ -49,10 +48,9 @@
  * The two file-local commands, PostGemCmd and GemCmd, sit in the anonymous namespace the RTTI
  * records for this unit and call ProcessGemCommand() and SimulateRemoteGem().
  *
- * The table diff corrects an earlier attribution. `0x001adb78`, `0x001b15a8`, `0x001b1610`,
- * `0x001b19a0`, `0x001abe50`, and `0x001abfd8` were titled for MultiCatcher and sit in this
- * class's own table at slots 3, 4, 5, 6, 7, and 8. SingleCatcher's table holds the same six
- * addresses at the same indices, which confirms it independently of MultiCatcher's.
+ * `0x001adb78`, `0x001b15a8`, `0x001b1610`, `0x001b19a0`, `0x001abe50`, and `0x001abfd8` sit in
+ * this class's table at slots 3, 4, 5, 6, 7, and 8. SingleCatcher's table has the same six
+ * addresses at the same indices.
  */
 class Catcher : public GenericCatcher {
 public:

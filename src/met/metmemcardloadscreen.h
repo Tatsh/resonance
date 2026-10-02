@@ -16,9 +16,8 @@ class View;
 /**
  * Screen that picks a memory card to load from.
  *
- * `20MetMemCardLoadScreen` in the RTTI descriptor at `0x00901f20`, with two public non-virtual
- * bases at fixed offsets, MetMemDetectScreen at `+0x00` and MetMemCardPickerUser at `+160`. New()
- * allocates 0xe8 bytes.
+ * Its RTTI descriptor is at `0x00901f20`. It has two public non-virtual bases at fixed offsets,
+ * MetMemDetectScreen at `+0x00` and MetMemCardPickerUser at `+160`. New() allocates 0xe8 bytes.
  *
  * The class emits **two** vtables, the 44-entry primary at `0x007fbde8` and the 21-entry
  * MemcardUser table at `0x007fbd38` that adjusts `this` by `-140`. It emits none for
@@ -216,8 +215,8 @@ public:
 
 private:
     // 0x002ccab8
-    // Titles the panel, refreshes the card list, the arrows, and the selection, and enters. The
-    // title is inferred.
+    // Sets the panel heading, refreshes the card list, the arrows, and the selection, and enters.
+    // The title is inferred.
     void ShowCards();
 
     // 0x002ccc48

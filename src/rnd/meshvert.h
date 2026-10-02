@@ -10,9 +10,9 @@ namespace Rnd {
  * One vertex of a Rnd::Mesh.
  *
  * The structure is not polymorphic and emits no RTTI descriptor. Its member names come from the
- * labels its own text dump writes ("\n\tp:", "\n\tn:", "\n\tc:", "\n\tt1:", and " t2:") and from
- * the Rnd::MeshAnim dump, which titles the three animated channels "vertPointsKeys",
- * "vertTexsKeys", and "vertColorsKeys". A vertex is 0x40 bytes, and the two padded vectors at the
+ * labels its text dump writes ("\n\tp:", "\n\tn:", "\n\tc:", "\n\tt1:", and " t2:") and from the
+ * Rnd::MeshAnim dump labels for the three animated channels ("vertPointsKeys", "vertTexsKeys", and
+ * "vertColorsKeys"). A vertex is 0x40 bytes, and the two padded vectors at the
  * front make the whole record four quadwords for the vector unit.
  *
  * Serialisation writes fourteen floats per vertex in member order, the three components of each

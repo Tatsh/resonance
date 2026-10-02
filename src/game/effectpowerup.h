@@ -5,10 +5,9 @@
 /**
  * Powerup that toggles one jam effect on a track.
  *
- * `13EffectPowerup` in the RTTI descriptor at `0x008efb50`, with Powerup as its one base. The
- * factory's shared arm builds it for the six effect kinds, kHudItemVolume through kHudItemChorus,
- * with an eight-byte allocation and the table at `0x007e4068`. The destructor at `0x001c9f08` is
- * implicitly declared.
+ * Its RTTI descriptor is at `0x008efb50`. It has Powerup as its one base. The factory's shared arm
+ * builds it for the six effect kinds, kHudItemVolume through kHudItemChorus, with an eight-byte
+ * allocation and the table at `0x007e4068`. The destructor at `0x001c9f08` is implicitly declared.
  */
 class EffectPowerup : public Powerup {
 public:

@@ -11,9 +11,9 @@ class Player;
 /**
  * Listener that records the bar a player erases on one track.
  *
- * `12PhraseEraser` in the RTTI descriptor at `0x00901f20`, over MsgSource at offset 0 and MsgSink
- * at offset 20. The primary table is at `0x007e1f98` and the MsgSink table at `0x007e1f70`, which
- * adjusts `this` by `-20` and fills slot 3 with HandleMessage(). No routine in the image calls the
+ * Its RTTI descriptor is at `0x00901f20`. It is built over MsgSource at offset 0 and MsgSink at
+ * offset 20. The primary table is at `0x007e1f98`. The MsgSink table at `0x007e1f70` adjusts `this`
+ * by `-20` and fills slot 3 with HandleMessage(). No routine in the image calls the
  * constructor, so the class is compiled but never built. The last member read or written is at
  * `+0x38`, and no allocation measures the object.
  *

@@ -16,7 +16,7 @@ class Player;
 /**
  * Chooser of which pitch a guitar track's input resolves to.
  *
- * `11PitchPicker` in the RTTI descriptor at `0x008eef88`, over MsgSink at offset 0 and MsgSource at
+ * Its RTTI descriptor is at `0x008eef88`. It is built over MsgSink at offset 0 and MsgSource at
  * offset 4. Its primary table is at `0x007e3418` with four entries and its MsgSource subobject
  * table at `0x007e33f0` with four, which adjusts `this` by `-4`. The object is 0x50 bytes, which
  * AxingSTG's tagged allocation measures.

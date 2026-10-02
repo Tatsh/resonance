@@ -15,10 +15,9 @@ class Text;
 /**
  * Panel that shows the stored data of one remix.
  *
- * `18MetRemixDataScreen` in the RTTI descriptor at `0x00901c00`, with MetScreen as its one public
- * non-virtual base at offset 0. The object is 0x12c bytes and the 39-entry vtable is at
- * `0x00806a38`, the same length as the MetScreen table, so the class declares no virtual of its
- * own.
+ * Its RTTI descriptor is at `0x00901c00`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0x12c bytes and the 39-entry vtable is at `0x00806a38`, the same length
+ * as the MetScreen table, and the class declares no new virtual.
  *
  * The panel shows the song name, the recording date, the song's logo and picture, and up to four
  * player rows of a name, a persona picture, and a mesh. MetRemixDelScreen and MetRemixLoadScreen

@@ -11,10 +11,10 @@ class OBStream;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `7NoteMsg` in the RTTI descriptor at `0x008f0000`, with MuseMsg as its one base. The object is
- * 0x10 bytes and its vtable is at `0x00812e90`. The members below are the whole of the class:
- * everything recovered comes from them, and no other routine in the image refers to this type by
- * anything but its vtable. The fields through `+0x07` belong to MuseMsg and are declared there.
+ * Its RTTI descriptor is at `0x008f0000`. It has MuseMsg as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x00812e90`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable. The fields through
+ * `+0x07` belong to MuseMsg and are declared there.
  *
  * The payload layout comes from the run of field copies in Clone(). AxePhraseMaker::OnStdMidi()
  * builds one on its stack at `0x0019bad4` from its channel, a held note's number and velocity,

@@ -7,8 +7,8 @@ namespace Rnd {
 /**
  * Stream over a refilling transport.
  *
- * `Q23Rnd10ToolStream` in the RTTI descriptor at `0x008eefe8`, single inheritance from
- * `Rnd::Stream` at offset 0. Its vtable is at `0x00826118`.
+ * Its RTTI descriptor is at `0x008eefe8`. It has single inheritance from `Rnd::Stream` at offset 0.
+ * Its vtable is at `0x00826118`.
  *
  * The stream reads a source that arrives in instalments. ReadBytes() spins on Eof() until data is
  * present, copies what the buffer already holds, then calls Flush() to refill and spins again,

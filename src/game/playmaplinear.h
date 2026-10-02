@@ -250,8 +250,8 @@ protected:
      *
      * The trim half drops as many leading elements from mWindow and mWindowStarts as the pattern
      * has, and adds that count to mTrimmedCount. Its guard compares a byte offset against an
-     * element count, and both the disassembly and the decompiler agree on the comparison. The trim
-     * therefore fires only once mWindow is more than eight times the length of the pattern.
+     * element count. The trim therefore fires only once mWindow is more than eight times the length
+     * of the pattern.
      *
      * @param nLimit The value GetExtent() must exceed for the growth to stop.
      * @ghidraAddress 0x00129150

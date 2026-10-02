@@ -10,8 +10,8 @@ class OBStream;
 /**
  * Bidirectional stream over a growing byte buffer.
  *
- * `12IOBMemStream` in the RTTI descriptor at `0x008f00d0`, single inheritance from IOBStream at
- * offset 0. The type function is at `0x004ed780` and builds IOBStream's descriptor inline first.
+ * Its RTTI descriptor is at `0x008f00d0`. It has single inheritance from IOBStream at offset 0. The
+ * type function is at `0x004ed780` and builds IOBStream's descriptor inline first.
  *
  * The object is 0x20 bytes. Two vtable pointers occupy `+0x00` and `+0x04`, addressing
  * `0x008241a0` for the IBStream subobject and `0x00824170` for the OBStream subobject, whose

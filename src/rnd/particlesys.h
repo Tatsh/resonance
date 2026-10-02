@@ -26,10 +26,10 @@ namespace Rnd {
 /**
  * Emitter that spawns, integrates, and draws a population of particles.
  *
- * `Q23Rnd11ParticleSys` in the RTTI descriptor at `0x008ef650`, with three public non-virtual
- * bases: `Rnd::Animatable` at `+0x00`, `Rnd::Transformable` at `+0x20`, and `Rnd::Drawable` at
- * `+0xd0`. All three derive virtually from `Rnd::Object`, so one shared Object subobject sits at
- * `+0x200` and the factory allocates 0x220 bytes.
+ * Its RTTI descriptor is at `0x008ef650`. It has three public non-virtual bases: `Rnd::Animatable`
+ * at `+0x00`, `Rnd::Transformable` at `+0x20`, and `Rnd::Drawable` at `+0xd0`. All three derive
+ * virtually from `Rnd::Object`. One shared Object subobject sits at `+0x200` and the factory
+ * allocates 0x220 bytes.
  *
  * Four vtables belong to the class, each identified by its own GetTypeInfo slot addressing
  * `0x0052b2d8`. The Object subobject table at `0x00827b60` adjusts by `-0x200`, the Drawable table
@@ -313,7 +313,7 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
     /**
-     * Resize the particle owner's pool, the count the dump titles "numParticles:".
+     * Resize the particle owner's pool, the count the dump labels "numParticles:".
      *
      * The owner's references are dropped around the resize and taken again, which rethreads the
      * pool onto the free list and empties every sharer's live list. New records are copies of one

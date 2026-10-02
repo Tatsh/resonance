@@ -16,9 +16,9 @@ class Font;
 /**
  * Screen that lists the remixes on a memory card or the factory remixes for loading.
  *
- * `18MetRemixLoadScreen` in the RTTI descriptor at `0x00901c10`, with two public non-virtual bases
- * at fixed offsets, MetScreen at `+0x00` and ListDataProvider at `+140`. The object is 0xac bytes,
- * which New() confirms by requesting exactly that many with the tag `MsgSink`.
+ * Its RTTI descriptor is at `0x00901c10`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00` and ListDataProvider at `+140`. New() confirms the object size of 0xac
+ * bytes by requesting exactly that many with the tag `MsgSink`.
  *
  * The 39-entry primary vtable is at `0x00807300`, the same length as the MetScreen table, so the
  * class declares no virtual of its own, and the four-entry ListDataProvider table at `0x008072d8`

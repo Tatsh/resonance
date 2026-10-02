@@ -24,11 +24,11 @@ struct JukeboxPlayListEntry {
 /**
  * Ordered list of the remixes queued in the jukebox.
  *
- * `15JukeboxPlayList` in the RTTI descriptor at `0x0086f7a0`, a leaf class with no base. The class
- * name is the RTTI spelling verbatim. Following the g++ 2.x layout for a class with no base, the
- * vptr sits after the data members at `+0x0c`, and the object is 0x10 bytes, so the vector below is
- * the whole of its state. The four-entry vtable at `0x007e6d90` runs the compiler-generated
- * GetTypeInfo at `0x001e5ca8`, the destructor, and the two stream members.
+ * Its RTTI descriptor is at `0x0086f7a0`. It is a leaf class with no base. The class name is the
+ * RTTI spelling verbatim. Following the g++ 2.x layout for a class with no base, the vptr sits
+ * after the data members at `+0x0c`, and the object is 0x10 bytes. The vector below is the whole
+ * state. The four-entry vtable at `0x007e6d90` runs the compiler-generated GetTypeInfo at
+ * `0x001e5ca8`, the destructor, and the two stream members.
  *
  * MetRemixManager embeds one at `+0xc4`, and its constructor expands the inline constructor below.
  * MetJukeboxEditPlaylistScreen addresses that embedded instance through its own `+0xc4` and counts

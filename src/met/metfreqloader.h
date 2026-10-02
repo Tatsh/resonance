@@ -10,10 +10,10 @@ class MetPersonaData;
 /**
  * Asynchronous reader of one pre-fab persona file.
  *
- * `13MetFreqLoader` in the RTTI descriptor at `0x008f2a90`, deriving publicly from AsyncCallback
- * at offset 0. The vtable is at `0x007f7d78`, and the object is 0x1c bytes, which the two
- * allocations in MetFreqMakerAssetManager's constructor fix. The embedded source file name
- * `MetFreqLoader.cpp` is billed with the buffer release in Done().
+ * Its RTTI descriptor is at `0x008f2a90`. It derives publicly from AsyncCallback at offset 0. The
+ * vtable is at `0x007f7d78`. The two allocations in MetFreqMakerAssetManager's constructor fix the
+ * object at 0x1c bytes. The embedded source file name `MetFreqLoader.cpp` is
+ * billed with the buffer release in Done().
  *
  * Start() queues a read of the file, Done() parses every persona in the completed buffer into the
  * list the loader was given, and IsLoaded() pumps the asynchronous layer and reports completion.

@@ -15,11 +15,11 @@ namespace Rnd {
 /**
  * PlayStation 2 texture, owner of the GS residency of its mip levels.
  *
- * `Q23Rnd5PsTex` in the RTTI descriptor at `0x008efec0`, with Rnd::Tex as its one public base at
- * offset 0. The vtable is at `0x008318c0` and has the same sixteen entries as the Rnd::Tex table.
- * Slot 0 is the compiler-generated type_info accessor at `0x0059a4c8`, slot 1 the destructor, slots
- * 2 through 7 the Rnd::Object virtuals, and slots 8 through 15 the eight Rnd::Tex declares. This
- * class overrides slots 9 through 15 and supplies its own destructor.
+ * Its RTTI descriptor is at `0x008efec0`. It has Rnd::Tex as its one public base at offset 0. The
+ * vtable is at `0x008318c0` and has the same sixteen entries as the Rnd::Tex table. Slot 0 is the
+ * compiler-generated type_info accessor at `0x0059a4c8`, slot 1 the destructor, slots 2 through 7
+ * the Rnd::Object virtuals, and slots 8 through 15 the eight Rnd::Tex declares. This class
+ * overrides slots 9 through 15 and supplies its own destructor.
  *
  * Slot 8 is a special case. The Rnd::PsTex table points at `0x0059a8c8` where the Rnd::Tex table
  * points at `0x004e73c8`, and the two bodies are identical. Both invoke the slot 13 virtual and

@@ -10,9 +10,9 @@ class PowerupCollectionI;
 /**
  * Powerup placer that walks a bar cursor forward with the song and deploys at the bar it rests on.
  *
- * `17GamePowerupPlacer` in the RTTI descriptor at `0x008f0130`, over two bases, PowerupPlacer at
- * offset 0 and TickTask at offset 20. It is the one class in this family with two bases, and it
- * therefore has two tables. The primary table at `0x007e4c50` has nine entries, the same length as
+ * Its RTTI descriptor is at `0x008f0130`. It is built over two bases, PowerupPlacer at offset 0 and
+ * TickTask at offset 20. It is the one class in this family with two bases, and it therefore has
+ * two tables. The primary table at `0x007e4c50` has nine entries, the same length as
  * PowerupPlacer's, so the class adds no virtual on that side. The secondary table at `0x007e4c20`
  * has five entries with a slot 0 delta of -20 and serves the TickTask subobject.
  *

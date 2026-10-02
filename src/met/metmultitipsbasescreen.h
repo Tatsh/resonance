@@ -6,10 +6,10 @@
 /**
  * Base of the five loading-tip screens.
  *
- * `22MetMultiTipsBaseScreen` in the RTTI descriptor at `0x008ef920`, with MetScreen as its one
- * public non-virtual base at offset 0. The 39-entry vtable is at `0x00801610`, the same length as
- * the MetScreen table, so the class declares no virtual of its own. The object is 0xa0 bytes, the
- * size every child's New() requests.
+ * Its RTTI descriptor is at `0x008ef920`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The 39-entry vtable is at `0x00801610`, the same length as the MetScreen table, and the
+ * class declares no new virtual. The object is 0xa0 bytes, the size every child's New()
+ * requests.
  *
  * Five classes derive from the class, MetMultiTips1Screen through MetMultiTips5Screen. Each child
  * has an accessor-sized GetTypeInfo of its own at `0x0030d880`, `0x0030da10`, `0x0030dba0`,

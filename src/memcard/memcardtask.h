@@ -17,10 +17,10 @@ constexpr int kMemcardTaskFinished = 2;
 /**
  * One multi-step piece of memory-card work, driven by the operations it queues.
  *
- * `11MemcardTask` in the RTTI descriptor at `0x008ef670`, single inheritance from
- * `MemcardCBHandler` at offset 0. An instance is 0x1c bytes. No vtable for this class is emitted
- * anywhere in the image, which is what establishes that it is abstract, and the two virtuals every
- * subclass overrides are therefore declared pure here.
+ * Its RTTI descriptor is at `0x008ef670`. It has single inheritance from `MemcardCBHandler` at
+ * offset 0. An instance is 0x1c bytes. No vtable for this class is emitted anywhere in the image.
+ * The class is therefore abstract, and the two virtuals every subclass overrides are declared pure
+ * here.
  *
  * A task is a `MemcardCBHandler` and therefore receives the completion of every operation it
  * queues. It drives itself forward from inside those reports. `SaveFileMCT` for example creates the

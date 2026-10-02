@@ -23,11 +23,10 @@ class TickClock;
 /**
  * Pitcher that drives the scratch track.
  *
- * `9Scratcher` in the RTTI descriptor at `0x00901fe0`, with Pitcher as its one base. Its three
- * tables are at `0x007e57b8`, `0x007e5790`, and `0x007e5760`, and it overrides exactly the two
- * slots Pitcher leaves pure. PitchingSTG's tagged allocation measures the object at 0x90 bytes,
- * and PitchingSTG builds one of these when the track's kind word is 3 and a NotePitcher when it is
- * 2.
+ * Its RTTI descriptor is at `0x00901fe0`. It has Pitcher as its one base. Its three tables are at
+ * `0x007e57b8`, `0x007e5790`, and `0x007e5760`, and it overrides exactly the two slots Pitcher
+ * declares pure. PitchingSTG's tagged allocation measures the object at 0x90 bytes, and PitchingSTG
+ * builds one of these when the track's kind word is 3 and a NotePitcher when it is 2.
  *
  * Tick() is what fixes mBarDivisor. It divides the elapsed tick count by that member, sends the
  * result through SendSeekerMsg(), and then, while mSwitchesBanks is set, tests the track

@@ -14,8 +14,8 @@ class Text;
 /**
  * End-of-game statistics for a multiplayer session.
  *
- * `19MetMultiStatsScreen` in the RTTI descriptor at `0x008eedd8`, with MetScreen as its one public
- * non-virtual base at offset 0. The object is 0xdc bytes, the size New() requests.
+ * Its RTTI descriptor is at `0x008eedd8`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0xdc bytes, the size New() requests.
  *
  * The 39-entry primary vtable is at `0x008003c0`, the same length as the MetScreen table, so the
  * class declares no virtual of its own.

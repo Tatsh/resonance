@@ -6,10 +6,10 @@
 /**
  * Network packet the game sends between game systems.
  *
- * `19PSJoinRequestPacket` in the RTTI descriptor at `0x008ef0b0`, with ToHostPacket as its one
- * base. The object is 0x28 bytes and its vtable is at `0x008148d8`. The payload comes from the
- * copy constructor at `0x003f2dc0`, which Clone() delegates to, and it accounts for the
- * allocation exactly. The four words Packet owns are declared there rather than here.
+ * Its RTTI descriptor is at `0x008ef0b0`. It has ToHostPacket as its one base. The object is 0x28
+ * bytes and its vtable is at `0x008148d8`. The payload comes from the copy constructor at
+ * `0x003f2dc0`. Clone() delegates to it, and the payload accounts for the allocation exactly. The
+ * four words Packet provides are declared there rather than here.
  *
  * Its vtable has eight entries and a zero terminator at index 8. Slots 6 and 7 are its own
  * overrides rather than the inherited Packet ones at `0x003f1de8` and `0x003f1ea0`. Neither

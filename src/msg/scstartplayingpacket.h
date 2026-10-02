@@ -10,11 +10,11 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `20SCStartPlayingPacket` in the RTTI descriptor at `0x00902160`, with
- * ToAllGameControllersPacket as its one base. The object is 0x14 bytes and its vtable is at
- * `0x00814698`. The payload comes from the copy constructor at `0x003f3720`, which Clone()
- * delegates to, so the offsets and widths are recovered but the purpose of each field is not. The
- * four words Packet owns are declared there rather than here.
+ * Its RTTI descriptor is at `0x00902160`. It has ToAllGameControllersPacket as its one base. The
+ * object is 0x14 bytes and its vtable is at `0x00814698`. The payload comes from the copy
+ * constructor at `0x003f3720`. Clone() delegates to it. The offsets and widths are recovered, but
+ * the purpose of each field is not. The four words Packet provides are declared there rather than
+ * here.
  *
  * The class adds no payload. Its allocation is exactly the 0x14 bytes Packet occupies, which is
  * what measures Packet.

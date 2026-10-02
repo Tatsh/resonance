@@ -5,10 +5,8 @@
 /**
  * Holder of the track description the beat-quantising paths consult.
  *
- * The class emits no RTTI, because it is not polymorphic. Its title is attested by the mangled
- * signature of `Catcher::Catcher()`,
- * `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, where `P9Quantizer`
- * is the second parameter.
+ * The class emits no RTTI, because it is not polymorphic. Its name is attested by the signature of
+ * `Catcher::Catcher()` the image records, whose second parameter is `Quantizer *`.
  *
  * The object is four bytes. `ScoreTrackGraph` builds one with the global `operator new(4)`, and the
  * constructor at `0x001ce670` stores its argument and returns.

@@ -9,8 +9,8 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12AutoCatchMsg` in the RTTI descriptor at `0x008f0010`, with CmdMsg as its one base. The
- * object is 0x14 bytes and its vtable is at `0x00811c88`. The word at `+0x04` belongs to CmdMsg.
+ * Its RTTI descriptor is at `0x008f0010`. It has CmdMsg as its one base. The object is 0x14 bytes
+ * and its vtable is at `0x00811c88`. The word at `+0x04` belongs to CmdMsg.
  *
  * Print() labels `+0x0c` as a track number and writes the identifier of the player at `+0x10`
  * after ` p#`, followed by the bar at `+0x08`.

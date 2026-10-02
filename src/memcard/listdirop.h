@@ -11,8 +11,8 @@ constexpr int kListDirMaxEntries = 20;
 /**
  * Listing of one directory on a card.
  *
- * `9ListDirOp` in the RTTI descriptor at `0x008f47c0`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x34 bytes and the vtable is at `0x0082bd90`.
+ * Its RTTI descriptor is at `0x008f47c0`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x34 bytes and the vtable is at `0x0082bd90`.
  *
  * Every listing writes into the one shared table at `0x00726a40`. A second listing therefore
  * overwrites the first, and mEntries addresses that table rather than storage of its own.

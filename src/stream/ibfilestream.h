@@ -9,9 +9,9 @@ class HxStr;
 /**
  * Input stream over a C library `FILE`.
  *
- * `12IBFileStream` in the RTTI descriptor at `0x00901bc0`, single inheritance from IBStream at
- * offset 0. The type function is at `0x004ed888`. The object is 8 bytes and its vtable is at
- * `0x00824248`, which runs to slot 8 and adds nothing of its own. Two call sites construct one.
+ * Its RTTI descriptor is at `0x00901bc0`. It has single inheritance from IBStream at offset 0. The
+ * type function is at `0x004ed888`. The object is 8 bytes. Its vtable at `0x00824248` runs to slot
+ * 8 and does not add an entry. Two call sites construct one.
  *
  * Every transfer goes to `fread` with a one-byte element size, and the end and failure tests read
  * bits 0x20 and 0x40 of the `FILE` flags rather than calling `feof` and `ferror`, which is the

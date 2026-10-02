@@ -10,8 +10,8 @@ namespace Py {
 /**
  * Handle on a Python dictionary.
  *
- * `Q22Py4Dict` in the RTTI descriptor at `0x00902190`, with `Py::MapBase<Py::Object>` at offset 0
- * as its one base. Its accessor is at `0x0050d1a0`.
+ * Its RTTI descriptor is at `0x00902190`. It has `Py::MapBase<Py::Object>` at offset 0 as its one
+ * base. Its accessor is at `0x0050d1a0`.
  *
  * The vtable at `0x00825818`, copied at `0x00833248`, has five entries, and only the type
  * function, the destructor, and accepts() differ from the base table. Both setItem() slots repeat

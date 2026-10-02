@@ -18,12 +18,12 @@ class Font;
 /**
  * Screen that deletes a remix from a memory card.
  *
- * `17MetRemixDelScreen` in the RTTI descriptor at `0x008ef690`, with three public non-virtual
- * bases at fixed offsets, MetSaveRemix at `+0x00`, ListDataProvider at `+232`, and
- * MetMemCardPickerUser at `+236`. The object is 0x140 bytes, which the factory at `0x00343f30`
- * pins by requesting exactly that many with the tag `MsgSink`. That factory is one inlined
- * `new MetRemixDelScreen(renderer, priority)` expression emitted out of line, and the tag is
- * MsgSink's rather than this class's, because MsgSink is the base that declares `operator new`.
+ * Its RTTI descriptor is at `0x008ef690`. It has three public non-virtual bases at fixed offsets,
+ * MetSaveRemix at `+0x00`, ListDataProvider at `+232`, and MetMemCardPickerUser at `+236`. The
+ * factory at `0x00343f30` pins the object at 0x140 bytes by requesting exactly that many with the
+ * tag `MsgSink`. That factory is one inlined `new MetRemixDelScreen(renderer, priority)`
+ * expression emitted out of line, and the tag is MsgSink's rather than this class's, because
+ * MsgSink is the base that declares `operator new`.
  *
  * Four vtables belong to the class, the 43-entry primary at `0x008061d8`, the four-entry
  * ListDataProvider table at `0x008060e0` that adjusts `this` by `-232`, the three-entry MetKBUser
@@ -40,10 +40,9 @@ class Font;
  * MetScreen::mShowsLoadedDrawables, and pushes `mem_del_remix` into the container object-name
  * vector MetScreen declares at `+0x38`.
  *
- * An earlier reading recorded the span from `+0x10c` to `+0x137` as reserved, on the grounds that
- * the constructor addresses a nested object through a register it could not resolve. The two
- * registers are `+0x108` and `+0x120`, exactly 0x18 apart, and each receives the identical
- * five-store run from the same empty literal at `0x00805ca8`. Both are MemcardConnectState records.
+ * The constructor addresses the span from `+0x108` to `+0x137` through two registers set to
+ * `+0x108` and `+0x120`, exactly 0x18 apart, and each receives the identical five-store run from
+ * the same empty literal at `0x00805ca8`. Both are MemcardConnectState records.
  *
  * The destructor at `0x003397a8` restores the four vptrs, deletes mList through slot 1 of a
  * table at `+0x94` of the object itself, which is where ScrollingList places its vptr, releases

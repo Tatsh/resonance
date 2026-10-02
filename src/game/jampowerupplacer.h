@@ -9,9 +9,9 @@ class PowerupCollectionI;
 /**
  * Powerup placer a LocalPlayer owns.
  *
- * `16JamPowerupPlacer` in the RTTI descriptor at `0x008eff40`, with PowerupPlacer as its one base
- * at offset 0, which in turn derives from MsgSource. Its table is at `0x007e4b80` and has nine
- * entries with a zero terminator at index 9.
+ * Its RTTI descriptor is at `0x008eff40`. It has PowerupPlacer as its one base at offset 0.
+ * PowerupPlacer in turn derives from MsgSource. Its table is at `0x007e4b80` and has nine entries
+ * with a zero terminator at index 9.
  *
  * Of those nine it overrides only the destructor at slot 1 and slot 8. Slots 2 and 3 retain the
  * MsgSource pair and slots 4 through 7 retain the empty PowerupPlacer defaults, at the same four

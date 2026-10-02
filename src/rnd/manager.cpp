@@ -48,7 +48,7 @@ constexpr int kInternalObjectDumpLevel = 2;
 constexpr int kOpenForReading = 0;
 constexpr int kOpenForWriting = 1;
 
-// Profile timer records Init() titles, from the first to one past the last.
+// Profile timer records Init() labels, from the first to one past the last.
 constexpr int kFirstRendererTimer = 14;
 
 // Read() calls the long-operation draw hook once per this many table entries.

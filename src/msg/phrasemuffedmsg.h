@@ -10,10 +10,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `15PhraseMuffedMsg` in the RTTI descriptor at `0x00902280`, with Message as its one base. The
- * object is 0x14 bytes and its vtable is at `0x00812348`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x00902280`. It has Message as its one base. The object is 0x14 bytes
+ * and its vtable is at `0x00812348`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() labels `+0x04` as a
  * track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands

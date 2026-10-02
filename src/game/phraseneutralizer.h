@@ -10,12 +10,12 @@
 /**
  * Neutraliser of the phrases a catching track has already captured.
  *
- * `17PhraseNeutralizer` in the RTTI descriptor at `0x008ff3f0`, over MsgSource at offset 0 and
- * MsgSink at offset 20. Its primary table is at `0x007e2e88` with four entries and its MsgSink
- * subobject table at `0x007e2e60`, which adjusts `this` by `-20` and fills slot 3 with
- * HandleMessage(). MsgSource coming first is why CatchingSTG's wiring adjusts by `+0x14` when it
- * registers this object as a sink and guards the adjustment against a null pointer. The object is
- * 0x3c bytes, which CatchingSTG's tagged allocation measures.
+ * Its RTTI descriptor is at `0x008ff3f0`. It is built over MsgSource at offset 0 and MsgSink at
+ * offset 20. Its primary table is at `0x007e2e88` with four entries. Its MsgSink subobject table at
+ * `0x007e2e60` adjusts `this` by `-20` and fills slot 3 with HandleMessage(). MsgSource coming
+ * first is why CatchingSTG's wiring adjusts by `+0x14` when it registers this object as a sink and
+ * guards the adjustment against a null pointer. CatchingSTG's tagged allocation measures the object
+ * at 0x3c bytes.
  *
  * The destructor at `0x001c1478` is implicitly declared. It restores the base tables, frees
  * MsgSource's vector, and releases the object under MsgSink's tag.

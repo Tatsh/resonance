@@ -9,8 +9,8 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `7BumpMsg` in the RTTI descriptor at `0x008ef350`, with CmdMsg as its one base. The object is
- * 0x14 bytes and its vtable is at `0x00811fa0`. The word at `+0x04` belongs to CmdMsg.
+ * Its RTTI descriptor is at `0x008ef350`. It has CmdMsg as its one base. The object is 0x14 bytes
+ * and its vtable is at `0x00811fa0`. The word at `+0x04` belongs to CmdMsg.
  *
  * Print() writes the colour name of the player at `+0x10`, which types that word. The words at
  * `+0x08` and `+0x0c` are not printed, and no producer of the message has been traced.

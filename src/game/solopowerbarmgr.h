@@ -5,8 +5,8 @@
 /**
  * Powerbar source for a single player, dealing one of two powerbars at even odds.
  *
- * `15SoloPowerbarMgr` in the RTTI, with GamePowerbarMgr as its one base and no members of its own.
- * Its table is at `0x007e3978`. PhraseMgr creates one in game mode 1.
+ * It has GamePowerbarMgr as its one base and no further members. Its table is at `0x007e3978`.
+ * PhraseMgr creates one in game mode 1.
  *
  * The deleting destructor at `0x001c6518` is implicitly declared.
  */

@@ -27,10 +27,10 @@ namespace Rnd {
 /**
  * Indexed triangle mesh with one material.
  *
- * `Q23Rnd4Mesh` in the RTTI descriptor at `0x008eed58`, with three public non-virtual bases:
- * `Rnd::Drawable` at `+0x00`, `Rnd::Transformable` at `+0x20`, and `Rnd::Collideable` at `+0xd0`.
- * All three derive virtually from `Rnd::Object`, so one shared Object subobject sits at `+0x150`
- * and the whole object is 0x16c bytes; the factory rounds the allocation to 0x170.
+ * Its RTTI descriptor is at `0x008eed58`. It has three public non-virtual bases: `Rnd::Drawable` at
+ * `+0x00`, `Rnd::Transformable` at `+0x20`, and `Rnd::Collideable` at `+0xd0`. All three derive
+ * virtually from `Rnd::Object`. One shared Object subobject sits at `+0x150` and the whole object
+ * is 0x16c bytes; the factory rounds the allocation to 0x170.
  *
  * Geometry is shared rather than copied. A mesh whose mVertsOwner is another mesh draws that
  * mesh's vertices, and its own vertex vector is released after a load or a copy. The same applies
@@ -45,7 +45,7 @@ namespace Rnd {
  */
 class Mesh : public Drawable, public Transformable, public Collideable {
 public:
-    /** Depth buffer read and write mode, as the text dump titles the values. */
+    /** Depth buffer read and write mode, as the text dump labels the values. */
     enum ZMode {
         kZModeDisable = 0,    /*!< No depth test and no depth write. */
         kZModeZReadOnly = 1,  /*!< Depth test against Z, no write. */
@@ -54,7 +54,7 @@ public:
         kZModeWReadWrite = 4  /*!< Depth test against W and write. */
     };
 
-    /** Depth comparison, as the text dump titles the values. */
+    /** Depth comparison, as the text dump labels the values. */
     enum ZFunc {
         kZFuncNever = 0,
         kZFuncLess = 1,

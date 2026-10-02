@@ -40,7 +40,7 @@ constexpr int kAtlasStage = 0;
 // SetAtlas() raises a row or column count below one cell to one.
 constexpr float kMinAtlasCells = 1.0f;
 
-// Titles the weight and the family are dumped under. The binary stores each table as a global of
+// Labels the weight and the family are dumped under. The binary stores each table as a global of
 // pointers and passes the entry to Print() rather than to Format(), with no bound check. Both
 // tables sit in the same literal pool as g_fontClassName, the weight table at 0x006fecc0 and the
 // family table at 0x006fecd0.

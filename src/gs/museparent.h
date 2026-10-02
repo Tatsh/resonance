@@ -5,9 +5,9 @@ class MusePlayer;
 /**
  * Owner a MusePlayer reports back to.
  *
- * `10MuseParent` in the RTTI descriptor at `0x0086f798`, with no base list. The class declares no
- * data member and no virtual destructor, so its subobject is the compiler-generated vptr alone and
- * is four bytes. MuseSynth places it at `+0x04` and is the one implementation recovered.
+ * Its RTTI descriptor is at `0x0086f798`. It has no base list. The class declares no data member
+ * and no virtual destructor. Its subobject is the four-byte compiler-generated vptr alone.
+ * MuseSynth places it at `+0x04` and is the one implementation recovered.
  *
  * The table has three entries. Slot 0 is the type function and the two that follow are the
  * class's own virtuals. There is no destructor slot, which is what proves the class declares none.

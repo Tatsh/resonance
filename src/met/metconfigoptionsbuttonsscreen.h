@@ -6,10 +6,9 @@
 /**
  * Row of buttons along the network options screen.
  *
- * `29MetConfigOptionsButtonsScreen` in the RTTI descriptor at `0x008eeda8`, with MetScreen as its
- * one public non-virtual base at offset 0. The object is 0x94 bytes and the 39-entry vtable is at
- * `0x007ea688`, the same length as the MetScreen table, so the class declares no virtual of its
- * own.
+ * Its RTTI descriptor is at `0x008eeda8`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0x94 bytes and the 39-entry vtable is at `0x007ea688`, the same length as
+ * the MetScreen table, and the class declares no new virtual.
  *
  * The screen loads `metagame/shared/net_options_butts.rnd` and resolves `net_options_butts.view`
  * along with the `nob_EE.anim` and `nob_BF.anim` animations. Its buttons open the game options,

@@ -12,10 +12,10 @@ class Player;
 /**
  * Network packet the game sends between game systems.
  *
- * `9GemPacket` in the RTTI descriptor at `0x008ef710`, with ToAllOtherGameSystemsPacket as its
- * one base. The object is 0x2c bytes and its vtable is at `0x00814380`, with eight entries and a
- * zero terminator at index 8. Slot 1 is the compiler-generated destructor, slots 2 through 4
- * supply the three pure slots Packet leaves open, and slots 5, 6, and 7 override Message::Print(),
+ * Its RTTI descriptor is at `0x008ef710`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x2c bytes and its vtable is at `0x00814380`, with eight entries and a zero terminator
+ * at index 8. Slot 1 is the compiler-generated destructor, slots 2 through 4 supply the three pure
+ * slots Packet does not implement, and slots 5, 6, and 7 override Message::Print(),
  * Packet::Save(), and Packet::Load(). The four words Packet provides are declared there rather
  * than here.
  *

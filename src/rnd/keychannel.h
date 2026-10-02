@@ -55,7 +55,7 @@ struct FloatKey {
  *
  * The record is the same 0x20 bytes as Rnd::ColorKey, with the frame at `+0x10`, but the writer at
  * `0x004dac80` and the reader at `0x004db3d0` move three components and then the frame, and the
- * element dump at `0x004da880` titles them "(x:", " y:", and " z:". The fourth word of the value is
+ * element dump at `0x004da880` labels them "(x:", " y:", and " z:". The fourth word of the value is
  * the Vector3 padding. The title is inferred on the same basis as Rnd::ColorKey.
  */
 struct Vector3Key {

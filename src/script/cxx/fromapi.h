@@ -7,10 +7,10 @@ namespace Py {
 /**
  * Temporary owner of a new reference returned by the CPython API.
  *
- * `Q22Py7FromAPI` in the RTTI descriptor at `0x0086f6b8`, with no base. The vtable at `0x007d1220`
- * has two entries, the compiler-generated type function at `0x0012b548` and the destructor at
- * `0x0012b588`. The object is eight bytes, the reference at `+0x00` and the vptr after it at
- * `+0x04`, which is where this compiler places the vptr of a class with no base.
+ * Its RTTI descriptor is at `0x0086f6b8`. It has no base. The vtable at `0x007d1220` has two
+ * entries, the compiler-generated type function at `0x0012b548` and the destructor at `0x0012b588`.
+ * The object is eight bytes, the reference at `+0x00` and the vptr after it at `+0x04`. This
+ * compiler places the vptr of a class with no base after the data.
  *
  * This class is how the port adopts an owned reference, and it replaces the `owned` constructor
  * flag of released PyCXX, which the image does not have. Every recovered adoption follows one

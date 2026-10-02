@@ -14,10 +14,10 @@ class GameParams;
 /**
  * Persisted progress across the whole campaign.
  *
- * `13CampaignStats` in the RTTI descriptor at `0x007d3d98`, with no base, so the compiler places
- * the vptr after the data at `+0x13c` and the class is 0x140 bytes. Its vtable is at `0x007d3d70`
- * and runs the type function, the destructor, Save(), and Load(). MetPersonaData embeds one
- * instance at offset 0, which is what fixes the size from the outside as well.
+ * Its RTTI descriptor is at `0x007d3d98`. It has no base. The compiler places the vptr after the
+ * data at `+0x13c`, and the class is 0x140 bytes. Its vtable is at `0x007d3d70` and runs the type
+ * function, the destructor, Save(), and Load(). MetPersonaData embeds one instance at offset 0 and
+ * fixes the size from the outside as well.
  *
  * Sixty per-stage counters span `+0x10` to `+0xff`, each row six stages wide, and ResetCounters()
  * zeroes them in one loop. They are the level count of each stage, then three-by-six blocks, one

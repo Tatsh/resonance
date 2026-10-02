@@ -18,10 +18,10 @@ enum HxStreamSeekOrigin {
 /**
  * Seekable data source interface, unrelated to IBStream and OBStream.
  *
- * `8HxStream` in the RTTI descriptor at `0x0086f6c8`, with no base. The class has three data words
- * and stores its vtable pointer after them at `+0x0c`, which is where a class with no base puts
- * it, so the object is 0x10 bytes. Its vtable is at `0x00816d60`, emitted once per translation
- * unit that needs it, and the seven slots below are the whole interface.
+ * Its RTTI descriptor is at `0x0086f6c8`. It has no base. The class has three data words and stores
+ * its vtable pointer after them at `+0x0c`, the position for a class with no base. The object is
+ * 0x10 bytes. Its vtable is at `0x00816d60`, emitted once per translation unit that needs
+ * it, and the seven slots below are the whole interface.
  *
  * Every slot has a body here, and each does nothing beyond producing a neutral result, so the
  * class is an interface with defaults rather than an abstract one. Two subclasses are attested,

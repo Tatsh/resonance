@@ -14,10 +14,10 @@ class WatchdogRecorder;
 /**
  * Scheduler that runs queued commands when their due time arrives.
  *
- * The class is not polymorphic and has no RTTI, and no literal in the image identifies it. The
- * title here is retained from an earlier pass rather than attested. The image does not include the
- * strings `Watchdog` or `Scheduler`, and its four `Sch` names (Sch::Command, Sch::TempoMap,
- * Sch::TickClock, and Sch::TimedCommand) do not include a scheduler.
+ * The class is not polymorphic and has no RTTI, and no literal in the image identifies it. Its name
+ * is inferred. The image does not include the strings `Watchdog` or `Scheduler`, and its four `Sch`
+ * names (Sch::Command, Sch::TempoMap, Sch::TickClock, and Sch::TimedCommand) do not include a
+ * scheduler.
  *
  * The sequel Amplitude (SCUS_972.58) is the best evidence for a replacement title. Its RTTI records
  * a class `Scheduler` with the nested types `Scheduler::CommandInfo`, `Scheduler::ByCommand`,
@@ -91,8 +91,7 @@ public:
      * Start recording every recordable command queued from now on.
      *
      * Installs a WatchdogRecorder over the stream, sets mStreamMode to 1, and resets the clock and
-     * the current time to zero. GameRecorder is the caller. The title is retained from an earlier
-     * pass.
+     * the current time to zero. GameRecorder is the caller. The name is inferred.
      *
      * @param stream The stream the recording is written to.
      * @ghidraAddress 0x004ac8c0
@@ -139,8 +138,8 @@ public:
      * Build a wrapper for a command while recording, and discard it.
      *
      * While recording, a wrapper is built on the stack with the current time and a fresh handle,
-     * and then destroyed without being queued or recorded. The image has no caller. The title is
-     * retained from an earlier pass.
+     * and then destroyed without being queued or recorded. The image has no caller. The name is
+     * inferred.
      *
      * @param pCommand The command.
      * @ghidraAddress 0x004ac808
@@ -152,7 +151,7 @@ public:
      *
      * The command is marked queued, and the wrapper is queued with a reference of the queue's own
      * unless queueing is blocked. The due tick is the one the recording stored. WatchdogPlayback's
-     * start routine is the caller. The title is retained from an earlier pass.
+     * start routine is the caller. The name is inferred.
      *
      * @param pCommand The wrapper to queue.
      * @ghidraAddress 0x004ac7b0
@@ -242,8 +241,7 @@ public:
      * Empty the command queue, releasing every wrapper it held.
      *
      * The queue is copied, emptied, and the copy's wrappers are released one by one, so a release
-     * that reaches back into the scheduler finds the queue already empty. The title is retained
-     * from an earlier pass.
+     * that reaches back into the scheduler finds the queue already empty. The name is inferred.
      *
      * @ghidraAddress 0x004a9a78
      */

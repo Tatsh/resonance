@@ -12,9 +12,9 @@ class Mat;
 /**
  * Arena screens for a solo game, driven by the player's juice.
  *
- * `14SoloScreenAnim` in the RTTI descriptor at `0x008ef510`, deriving publicly from ScreenAnim at
- * offset 0. Its type function is at `0x0040c6c0` and its table at `0x008172a8`. The object is 0x1c
- * bytes. It inherits UpdateLeaders().
+ * Its RTTI descriptor is at `0x008ef510`. It derives publicly from ScreenAnim at offset 0. Its type
+ * function is at `0x0040c6c0` and its table at `0x008172a8`. The object is 0x1c bytes. It inherits
+ * UpdateLeaders().
  *
  * Level 0 shows `noise.mat` on every screen, level 1 the screens' own materials, and level 2
  * alternates the player's material with the screens' own materials every mPeriod ticks.

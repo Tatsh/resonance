@@ -6,8 +6,8 @@
 /**
  * Enquire about one card slot and report what it holds.
  *
- * `18GetConnectStateMCT` in the RTTI descriptor at `0x008ef6a0`, single inheritance from
- * `MemcardTask` at offset 0. An instance is 0x34 bytes and the vtable is at `0x007dad98`.
+ * Its RTTI descriptor is at `0x008ef6a0`. It has single inheritance from `MemcardTask` at offset 0.
+ * An instance is 0x34 bytes and the vtable is at `0x007dad98`.
  *
  * The task is the thinnest of the family. It queues one `CheckInfo`, translates the result into
  * mConnectState, and reports that record by value. The slot's display text comes from

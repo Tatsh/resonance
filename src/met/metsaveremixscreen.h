@@ -17,17 +17,16 @@ class Text;
 /**
  * Solo screen that writes a finished remix to a memory card.
  *
- * `18MetSaveRemixScreen` in the RTTI descriptor at `0x008ef8c0`, with MetSaveRemix as its one
- * public non-virtual base at offset 0. Its own members start at `+0xe8`, which fixes the size of
- * MetSaveRemix, and the object is 0x10c bytes, which the factory at `0x003817e0` pins by requesting
- * exactly that many with the tag `MsgSink`. That factory is one inlined
- * `new MetSaveRemixScreen(renderer, priority)` expression emitted out of line, and the tag is
- * MsgSink's rather than this class's, because MsgSink is the base that declares `operator new`.
- * Three vtables belong to the class, the
- * 43-entry primary at `0x0080a690`, the 21-entry MemcardUser table at `0x0080a5e0` that adjusts
- * `this` by `-140`, and the three-entry MetKBUser table at `0x0080a5c0` that adjusts it by `-144`.
- * The primary is the same length as the MetSaveRemix table, so the class declares no virtual of
- * its own. The MemcardUser table overrides no slot of its own and inherits the four MetSaveRemix
+ * Its RTTI descriptor is at `0x008ef8c0`. It has MetSaveRemix as its one public non-virtual base at
+ * offset 0. Its members start at `+0xe8`, fixing the size of MetSaveRemix. The factory at
+ * `0x003817e0` pins the object at 0x10c bytes by requesting exactly that many with the tag
+ * `MsgSink`. That factory is one inlined `new MetSaveRemixScreen(renderer, priority)`
+ * expression emitted out of line, and the tag is MsgSink's rather than this class's, because
+ * MsgSink is the base that declares `operator new`. Three vtables belong to the class, the 43-entry
+ * primary at `0x0080a690`, the 21-entry MemcardUser table at `0x0080a5e0` that adjusts `this` by
+ * `-140`, and the three-entry MetKBUser table at `0x0080a5c0` that adjusts it by `-144`. The
+ * primary is the same length as the MetSaveRemix table, and the class declares no new virtual. The
+ * MemcardUser table overrides no slot and inherits the four MetSaveRemix
  * supplies.
  *
  * The constructor at `0x0037ace0` takes only the renderer and the load priority. It runs the

@@ -8,8 +8,7 @@ namespace Py {
 /**
  * Base of an extension module the binding registers with the interpreter.
  *
- * `Q22Py19ExtensionModuleBase` in the RTTI descriptor at `0x0086f650`, with no base. Its accessor
- * is at `0x005aba10`.
+ * Its RTTI descriptor is at `0x0086f650`. It has no base. Its accessor is at `0x005aba10`.
  *
  * The object is 0x20 bytes, the module name at `+0x00`, the method table at `+0x08`, and the vptr
  * after both at `+0x1c`. The vtable at `0x008331f8` has two entries, the type function and the

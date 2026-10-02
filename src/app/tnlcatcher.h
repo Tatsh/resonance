@@ -57,7 +57,7 @@ public:
     /**
      * Put one target on the "tar dn" material and restart the hit count.
      *
-     * Does nothing while the view is hidden. The program lists no caller.
+     * Does nothing while the view is hidden. The image has no caller.
      *
      * @param nTarget The target, 0 through 2.
      * @ghidraAddress 0x00455330
@@ -75,7 +75,7 @@ public:
     /**
      * Parent the view to another view for both transform and drawing.
      *
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @param pParent The parent view.
      * @ghidraAddress 0x004552d8
@@ -85,7 +85,7 @@ public:
     /**
      * Advance the multiplier movie, the hit count, and the view.
      *
-     * The view frame is written only when flFrame is not negative. The program lists no caller.
+     * The view frame is written only when flFrame is not negative. The image has no caller.
      *
      * @param flFrame The scaled song position TnlActivator::Update() receives.
      * @ghidraAddress 0x00455418

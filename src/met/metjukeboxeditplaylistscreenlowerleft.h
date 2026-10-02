@@ -5,10 +5,10 @@
 /**
  * Detail panel in the lower left of the jukebox playlist editor.
  *
- * `37MetJukeboxEditPlaylistScreenLowerLeft` in the RTTI descriptor at `0x008ef2d0`, with MetScreen
- * as its one public non-virtual base at offset 0. The class declares no data member, so the object
- * is the 0x8c bytes of MetScreen alone, and the 39-entry vtable at `0x007ee758` is the same length
- * as the MetScreen table, so it declares no virtual of its own either.
+ * Its RTTI descriptor is at `0x008ef2d0`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The class declares no data member, and the object is the 0x8c bytes of MetScreen alone.
+ * The 39-entry vtable at `0x007ee758` is the same length as the MetScreen table, and the class
+ * declares no new virtual.
  *
  * The constructor at `0x00237758` takes only the renderer and the load priority, and supplies
  * `jbed` for the screen name, `metagame/Shared` for the directory, and `juke_edit_data` for the

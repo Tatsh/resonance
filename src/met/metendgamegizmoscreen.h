@@ -5,10 +5,9 @@
 /**
  * Gizmo panel of the end-game screens.
  *
- * `21MetEndGameGizmoScreen` in the RTTI descriptor at `0x00901ef0`, with MetGizmoPanel as its one
- * public non-virtual base at offset 0. The class declares no data member. The 39-entry vtable at
- * `0x007f3e40` is the same length as the MetGizmoPanel table, and the class declares no new
- * virtual.
+ * Its RTTI descriptor is at `0x00901ef0`. It has MetGizmoPanel as its one public non-virtual base
+ * at offset 0. The class declares no data member. The 39-entry vtable at `0x007f3e40` is the same
+ * length as the MetGizmoPanel table, and the class declares no new virtual.
  *
  * Apart from the type function and the destructor, the slots that differ from the MetGizmoPanel
  * table are 9 and 33.

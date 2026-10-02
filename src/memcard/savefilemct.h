@@ -41,9 +41,9 @@ constexpr int kIconTitleBufferSize = 64;
 /**
  * Write one payload to a card, together with the save directory and its browser icon.
  *
- * `11SaveFileMCT` in the RTTI descriptor at `0x008ef590`, single inheritance from `MemcardTask` at
- * offset 0. An instance is 0x40c bytes, which `SavePersonasMCT::~SavePersonasMCT()` pins by placing
- * its own first member at 0x40c. The vtable is at `0x007daed8`.
+ * Its RTTI descriptor is at `0x008ef590`. It has single inheritance from `MemcardTask` at offset 0.
+ * `SavePersonasMCT::~SavePersonasMCT()` pins an instance at 0x40c bytes by placing the first
+ * SavePersonasMCT member at 0x40c. The vtable is at `0x007daed8`.
  *
  * The task is a nine-step sequence, driven one step per operation report. It creates the
  * directory, writes `icon.sys`, writes `freq1.ico`, writes a two-byte marker file under the

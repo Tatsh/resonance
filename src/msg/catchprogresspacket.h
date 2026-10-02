@@ -13,10 +13,10 @@ class Player;
 /**
  * Network packet the game sends between game systems.
  *
- * `19CatchProgressPacket` in the RTTI descriptor at `0x00902060`, with
- * ToAllOtherGameSystemsPacket as its one base. The object is 0x28 bytes and its vtable is at
- * `0x00814530`. The payload comes from the copy constructor at `0x003f38d0`, which Clone()
- * delegates to. The four words Packet provides are declared there rather than here.
+ * Its RTTI descriptor is at `0x00902060`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x28 bytes and its vtable is at `0x00814530`. The payload comes from the copy
+ * constructor at `0x003f38d0`. Clone() delegates to it. The four words Packet provides are
+ * declared there rather than here.
  *
  * The member at `+0x1c` is a Mid::MBT. Print() hands it to Mid::MBT::Print() after the label ` @`,
  * and New() initialises it to kMBTInfinity. The transfer through the emission at `0x004acf28`

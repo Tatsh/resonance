@@ -15,12 +15,10 @@ namespace Sch {
 /**
  * Pausable view of scheduler time, together with the tempo that maps it to a song position.
  *
- * The class is not polymorphic and emits no RTTI, so its title comes from the one mangled signature
- * that mentions it. The RTTI records `Catcher`'s constructor as
- * `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, which makes
- * `Sch::TickClock` the original title of a type passed by pointer. That signature identifies this
- * class rather than its base, because Catcher's handler at `0x001ac760` calls SongTick(), and
- * SongTick() reads mTempoMap.
+ * The class is not polymorphic and does not emit RTTI. Its name comes from the one recorded
+ * signature that mentions it. `Catcher`'s constructor takes a `Sch::TickClock *`. That signature
+ * identifies this class rather than its base, because Catcher's handler at `0x001ac760` calls
+ * SongTick(), and SongTick() reads mTempoMap.
  *
  * An instance is 0x1c bytes. The base subobject occupies `+0x00` through `+0x17` and this class
  * adds one pointer at `+0x18`, which the constructor at `0x004a79f8` is the last write of and
@@ -42,11 +40,10 @@ namespace Sch {
  * and its `+0x0c` selects between recording and playback of the queued stream.
  *
  * Every post below wraps the command in a Sch::TimedCommand, hands the wrapper to one of the
- * scheduler's two queueing paths, and then gives back its own reference, which leaves the queue as
- * the only owner. The member titles are inferred from those bodies. The script command `clock` at
- * `0x00150d88` supplies the words `tempo`, `tick`, and `song_bar`, which is what titles SongTick();
- * the bare title `Tick` would hide the type `Sch::Tick` inside this class, so the song part is
- * spelled out.
+ * scheduler's two queueing paths, and then gives back its reference. The queue is then the only
+ * owner. The member titles are inferred from those bodies. The script command `clock` at
+ * `0x00150d88` supplies the words `tempo`, `tick`, and `song_bar`, the source of the name
+ * SongTick(). The bare name `Tick` would hide the type `Sch::Tick` inside this class.
  */
 class TickClock : public WatchdogTimer {
 public:

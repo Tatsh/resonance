@@ -5,10 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12LeaveGameMsg` in the RTTI descriptor at `0x008ef730`, with Message as its one base. The
- * object is 0x4 bytes and its vtable is at `0x00812078`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008ef730`. It has Message as its one base. The object is 0x4 bytes
+ * and its vtable is at `0x00812078`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
@@ -22,8 +21,7 @@ public:
      * Produce a message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. The body is byte-identical to
-     * Clone(), because the class has no payload, and the program had titled it as a copy of
-     * Clone() until the registration identified it.
+     * Clone(), because the class has no payload.
      *
      * @return The message.
      * @ghidraAddress 0x003d7940

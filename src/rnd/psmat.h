@@ -11,10 +11,10 @@ namespace Rnd {
 /**
  * PlayStation 2 material, which drives the GS register state.
  *
- * `Q23Rnd5PsMat` in the RTTI descriptor at `0x008efe50`, with `Rnd::Mat` as its one public base at
- * offset 0 and no member of its own. The sixteen-entry vtable at `0x00830f98` differs from the
- * `Rnd::Mat` table at `0x00822dd8` in six slots, the destructor at slot 1 and the five colour
- * setters at slots 9 through 13.
+ * Its RTTI descriptor is at `0x008efe50`. It has `Rnd::Mat` as its one public base at offset 0 and
+ * no member. The sixteen-entry vtable at `0x00830f98` differs from the `Rnd::Mat` table
+ * at `0x00822dd8` in six slots, the destructor at slot 1 and the five colour setters at slots 9
+ * through 13.
  *
  * Every override below performs the base assignment and then clears Rnd::g_pSelectedMat, which
  * forces the next draw to re-emit the material registers.

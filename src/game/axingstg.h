@@ -17,10 +17,10 @@
 /**
  * Gameplay stage for a guitar track.
  *
- * `8AxingSTG` in the RTTI descriptor at `0x008efe70`, with ScoreTrackGraph as its only base at
- * offset 0. Its table is at `0x007ddf88` and runs thirteen entries, the same as the base's, so the
- * class introduces no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12
- * from the base. The object is 0x54 bytes.
+ * Its RTTI descriptor is at `0x008efe70`. It has ScoreTrackGraph as its only base at offset 0. Its
+ * table is at `0x007ddf88` and runs thirteen entries, the same as the base's. The class introduces
+ * no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12 from the
+ * base. The object is 0x54 bytes.
  *
  * The constructor builds nine objects. The GsPeriodical goes through the plain allocator and the
  * other eight through the tagged allocator. It also calls MuseSynth::CreateSustainer() on the
@@ -29,10 +29,8 @@
  * The member at `+0x34` is the one the constructor never writes. It is declared so that the two
  * members around it retain their offsets, and no reader for it was found.
  *
- * Three of this class's members were titled for renderer classes by an earlier pass. AutoRiffer
- * was `RndSpotShadowMeshPass`, AxisControl was `RndSpotShadowCam`, and AxePhraseMaker was
- * `RndSpotShadowMap`. No descriptor among the 574 in the image bears any of the three titles, and
- * each real name comes from the descriptor its table's slot 0 accessor guards on.
+ * The names of three of its members (AutoRiffer, AxisControl, and AxePhraseMaker) come from the
+ * descriptor that the slot 0 accessor of each one's table guards on.
  */
 class AxingSTG : public ScoreTrackGraph {
 public:

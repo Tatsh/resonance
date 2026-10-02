@@ -18,9 +18,9 @@ class Type;
 /**
  * Reference-counted handle on any Python object, and the root of the PyCXX object hierarchy.
  *
- * `Q22Py6Object` in the RTTI descriptor at `0x0086f6f8`, with no base. The object is eight bytes,
- * the reference at `+0x00` and the vptr after it at `+0x04`, which is where this compiler places
- * the vptr of a class with no base.
+ * Its RTTI descriptor is at `0x0086f6f8`. It has no base. The object is eight bytes, the reference
+ * at `+0x00` and the vptr after it at `+0x04`. This compiler places the vptr of a class with no
+ * base after the data.
  *
  * The vtable at `0x007cdd00` has three entries, and several translation units emit a private copy
  * of the same three.

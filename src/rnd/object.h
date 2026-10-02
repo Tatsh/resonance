@@ -22,9 +22,9 @@ constexpr unsigned kCopyChildLists = 0x200;
 /**
  * Base of every object the renderer can load, resolve by name, and serialise.
  *
- * `Q23Rnd6Object` in the RTTI descriptor at `0x0086f678`, a leaf class with no base. Every
- * renderer mix-in (Animatable, Collideable, Drawable, Transformable) derives from this class
- * virtually, which places the subobject at the end of the most derived object.
+ * Its RTTI descriptor is at `0x0086f678`. It is a leaf class with no base. Every renderer mix-in
+ * (Animatable, Collideable, Drawable, Transformable) derives from this class virtually. The
+ * subobject therefore sits at the end of the most derived object.
  *
  * The class is 0x1c bytes. Following the g++ 2.x layout for a class with no base, the vptr sits
  * after the data members at `+0x18`, and the eight-entry vtable is at `0x00829010`.

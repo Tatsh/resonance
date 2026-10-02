@@ -8,8 +8,8 @@ class StdMidiMsg;
 /**
  * Abstract base of the game's sound output.
  *
- * `5Synth` in the RTTI descriptor at `0x008ef430`, with MsgSink as its one base. Its own vtable is
- * at `0x007d2ee0` and runs seventeen entries, slots 0 through 16. Slot 9 addresses the shared
+ * Its RTTI descriptor is at `0x008ef430`. It has MsgSink as its one base. Its own vtable is at
+ * `0x007d2ee0` and runs seventeen entries, slots 0 through 16. Slot 9 addresses the shared
  * pure-virtual stub at `0x005381a8`, which is what makes the class abstract. Two classes implement
  * it. Ps2HardSynth drives the hardware, and the file-local `Synth::Setup::NullSynth` at
  * `0x008eecf8` supplies an empty body for slot 9 at `0x0013a478` and inherits everything else. A

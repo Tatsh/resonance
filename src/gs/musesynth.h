@@ -16,9 +16,9 @@ class SynthSustainer;
 /**
  * Owner of the players that are sounding, and the sink that starts them.
  *
- * `9MuseSynth` in the RTTI descriptor at `0x00902290`, with MsgSink at offset 0 and MuseParent at
- * offset 4. The object is 0x30 bytes, which MultiMusePlayer's MusePlayer base at offset 48
- * confirms. Its primary table is at `0x007e0008` and its MuseParent table at `0x007dffe8`.
+ * Its RTTI descriptor is at `0x00902290`. It has MsgSink at offset 0 and MuseParent at offset 4.
+ * MultiMusePlayer's MusePlayer base at offset 48 confirms the object size of 0x30 bytes. Its
+ * primary table is at `0x007e0008` and its MuseParent table at `0x007dffe8`.
  *
  * It is a MsgSink that creates a player per message. A NoteMsg creates a 0x20-byte NotePlayer
  * through the constructor at `0x001b4328`, a MultiMuseMsg creates a MultiMusePlayer, and an
@@ -31,10 +31,7 @@ class SynthSustainer;
  * sink with that splitter, so a caller that wants the sound registers once here rather than with
  * each player.
  *
- * The name comes from the RTTI descriptor and is not the invented `Rnd::LightMsgSplitter` that the
- * type-function harvest recorded for the accessor. Neither is this class a light manager: the two
- * members previously titled AddDirectionalLight() and AddPointLight() are the NoteMsg and the
- * MultiMuseMsg handler, and ClearLights() is the AllNotesOffMsg handler.
+ * The name comes from the RTTI descriptor.
  */
 class MuseSynth : public MsgSink, public MuseParent {
 public:

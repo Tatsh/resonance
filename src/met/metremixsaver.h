@@ -3,9 +3,9 @@
 /**
  * Mix-in for a screen that writes a remix to a memory card.
  *
- * `13MetRemixSaver` in the RTTI descriptor at `0x0086f5a8`, a leaf class with no base. The class
- * declares no data member, so the subobject is the four bytes of the compiler-generated vptr at
- * offset 0, the same width that MetMCFreqDelScreen proves for a mix-in of this shape.
+ * Its RTTI descriptor is at `0x0086f5a8`. It is a leaf class with no base. The class declares no
+ * data member. The subobject is therefore the four-byte compiler-generated vptr at offset 0, the
+ * same width that MetMCFreqDelScreen proves for a mix-in of this shape.
  *
  * Two classes derive from the class, MetMultiSaveRemixScreen and MetSoloEndRemixScreen, both
  * placing the subobject at `+140`.
@@ -13,7 +13,7 @@
  * The vtable at `0x007ffcd0` has five entries. Slot 0 is the compiler-generated GetTypeInfo at
  * `0x002fecb0` and is not source. Slot 1 is the destructor, and slots 2, 3, and 4 all store the
  * `__pure_virtual` handler at `0x005381a8`, so all three declared virtuals are pure and the class
- * is abstract. An earlier reading counted six entries by including the terminator.
+ * is abstract.
  *
  * The two derived tables at `0x007ffb60` and `0x0080c4c0` each have five entries, adjust `this` by
  * `-140` in every entry, and supply the three pure virtuals. Their signatures come from those six

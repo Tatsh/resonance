@@ -24,9 +24,9 @@ enum LightType { kLightTypePoint = 0, kLightTypeDirectional = 1, kLightTypeSpot 
 /**
  * Light in a scene.
  *
- * `Q23Rnd5Light` in the RTTI descriptor at `0x008efe60`, with `Rnd::Transformable` as its only
- * public non-virtual base at offset 0. The class is 0x120 bytes and the virtual `Rnd::Object`
- * subobject sits at `0x100`, which the constructor proves by writing that address into the
+ * Its RTTI descriptor is at `0x008efe60`. It has `Rnd::Transformable` as its only public
+ * non-virtual base at offset 0. The class is 0x120 bytes and the virtual `Rnd::Object` subobject
+ * sits at `0x100`. The constructor proves the offset by writing that address into the
  * virtual-base pointer. The four bytes between the last member and that subobject are a reserved
  * run rather than a field.
  *

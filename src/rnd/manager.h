@@ -187,9 +187,9 @@ public:
      * other three. The last three are each tested on their own, so a file below version 4 runs all
      * four gates in turn.
      *
-     * Two of the old titles identify no class in the shipped registry. Nothing named `DrawRect`
-     * survives, and `TexMovie` is the earlier title of Rnd::Movie, which is what makes a movie the
-     * texture-streaming class it is.
+     * Two of the old type names do not identify a class in the shipped registry. The registry has
+     * no `DrawRect`, and `TexMovie` is the earlier type name of Rnd::Movie. That earlier type name
+     * is what makes a movie the texture-streaming class it is.
      *
      * @param name The type name to rewrite in place.
      * @ghidraAddress 0x0051be08

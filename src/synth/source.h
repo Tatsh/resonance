@@ -5,17 +5,16 @@
 /**
  * Reference-counted control signal sampled against elapsed time.
  *
- * `6Source` in the RTTI descriptor at `0x008ef3b0`, with Attachment as its only base at offset 0.
- * The object is Attachment's eight bytes and adds Sample() as slot 3 of the table it shares with
- * Attachment. The six subclass tables all fill slot 3 and no factory builds a plain Source, and
- * the slot is modelled as pure on that evidence.
+ * Its RTTI descriptor is at `0x008ef3b0`. It has Attachment as its only base at offset 0. The
+ * object is Attachment's eight bytes and adds Sample() as slot 3 of the table it shares with
+ * Attachment. The six subclass tables all fill slot 3 and no factory builds a plain Source, and the
+ * slot is modelled as pure on that evidence.
  *
  * `source.cpp` defines six subclasses in its anonymous namespace, which the RTTI records under the
  * `_GLOBAL_$N$source.cpp` prefix: Sine, Square, Tri, Ramp, Fade, and HoldAndFadeDown. The static
  * factories below are the only way the image builds any of them. Each allocates through the plain
  * allocator and returns the object with one reference. The implicit destructors of the six
- * subclasses and their type_info accessors are compiler-generated and recorded only in the program
- * database.
+ * subclasses and their type_info accessors are compiler-generated.
  */
 class Source : public Attachment {
 public:

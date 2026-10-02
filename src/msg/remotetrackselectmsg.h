@@ -10,10 +10,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `20RemoteTrackSelectMsg` in the RTTI descriptor at `0x00901d00`, with Message as its one base.
- * The object is 0x14 bytes and its vtable is at `0x00812d20`. The members below are the whole of
- * the class: everything recovered comes from them, and no other routine in the image refers to
- * this type by anything but its vtable.
+ * Its RTTI descriptor is at `0x00901d00`. It has Message as its one base. The object is 0x14 bytes
+ * and its vtable is at `0x00812d20`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered. NetPlayer builds the message field by field on the stack, and TrackSelector reads

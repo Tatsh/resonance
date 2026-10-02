@@ -19,10 +19,10 @@ class TickClock;
 /**
  * Task that sends one track's MIDI a bar at a time.
  *
- * `12BarSequencer` in the RTTI descriptor at `0x008ef5f0`, deriving publicly from TickTask at
- * offset 0. Its type function is at `0x00100bb8` and its table at `0x007cc808` keeps
- * Attachment::Destroy(). The task runs once a bar, and each run replaces the Sequencer it owns
- * with one over the bar's MIDI and posts it against the clock.
+ * Its RTTI descriptor is at `0x008ef5f0`. It derives publicly from TickTask at offset 0. Its type
+ * function is at `0x00100bb8` and its table at `0x007cc808` retains Attachment::Destroy(). The
+ * task runs once a bar, and each run replaces its Sequencer with one over the bar's MIDI and posts
+ * the new one against the clock.
  *
  * ScoreTrackGraph and the routine at `0x0013fc48` construct it.
  */

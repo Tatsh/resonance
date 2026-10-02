@@ -7,8 +7,8 @@ class MetButtonList;
 /**
  * Main menu.
  *
- * `13MetMainScreen` in the RTTI descriptor at `0x008f00e0`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008f00e0`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable at `0x007fb4f8` is the same length as the MetScreen table, and the
  * class declares no new virtual.

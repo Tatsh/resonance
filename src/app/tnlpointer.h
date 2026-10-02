@@ -34,7 +34,7 @@ public:
         /**
          * Resolve both meshes.
          *
-         * The program lists no caller. The constructor inlines the body.
+         * The image has no caller. The constructor inlines the body.
          *
          * @param iconName The icon mesh.
          * @param baseName The base mesh.
@@ -45,7 +45,7 @@ public:
         /**
          * Show or hide both meshes.
          *
-         * The program lists no caller. SetKind() inlines the body.
+         * The image has no caller. SetKind() inlines the body.
          *
          * @param nShowing Non-zero to show.
          * @ghidraAddress 0x004555e0
@@ -55,7 +55,7 @@ public:
         /**
          * Set the alpha of the icon mesh's material.
          *
-         * The program lists no caller. SetAlpha() inlines the body.
+         * The image has no caller. SetAlpha() inlines the body.
          *
          * @param flAlpha The alpha.
          * @ghidraAddress 0x00455640
@@ -95,7 +95,7 @@ public:
     /**
      * Drop the pointer at once and spin it.
      *
-     * Does nothing while the pointer view is hidden. The program lists no caller.
+     * Does nothing while the pointer view is hidden. The image has no caller.
      *
      * @param nRestart Non-zero to restart the 300-unit spin period at the next Update().
      * @ghidraAddress 0x00455768
@@ -105,7 +105,7 @@ public:
     /**
      * Set the sideways offset of the spin view from a lane position.
      *
-     * The offset is `(flLane - 0.5) * -0.5`, computed in double precision. The program lists no
+     * The offset is `(flLane - 0.5) * -0.5`, computed in double precision. The image has no
      * caller.
      *
      * @param flLane The lane position, 0 through 1.
@@ -116,7 +116,7 @@ public:
     /**
      * Set the alpha of every icon mesh's material.
      *
-     * The program lists no caller. TnlActivator::Update() inlines the body.
+     * The image has no caller. TnlActivator::Update() inlines the body.
      *
      * @param flAlpha The alpha.
      * @ghidraAddress 0x004556c8
@@ -126,7 +126,7 @@ public:
     /**
      * Parent the pointer view to another view for both transform and drawing.
      *
-     * The program lists no caller. TnlActivator's constructor inlines the body.
+     * The image has no caller. TnlActivator's constructor inlines the body.
      *
      * @param pParent The parent view.
      * @ghidraAddress 0x00455670
@@ -136,7 +136,7 @@ public:
     /**
      * Advance the dip ramp and the spin.
      *
-     * The program lists no caller. TnlActivator::Update() inlines the body.
+     * The image has no caller. TnlActivator::Update() inlines the body.
      *
      * @param flTime The scaled song position TnlActivator::Update() receives.
      * @ghidraAddress 0x00455860

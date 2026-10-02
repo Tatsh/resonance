@@ -9,12 +9,11 @@
 /**
  * Player that turns one MultiMuse into messages over time.
  *
- * `15MultiMusePlayer` in the RTTI descriptor at `0x00901c50`, with MuseSynth at offset 0 and
- * MusePlayer at offset 48. The object is 0x50 bytes, which the allocation in
- * MuseSynth::StartMultiMusePlayer() measures. It has three tables: the primary at `0x007dfd58`,
- * the MuseParent one at `0x007dfd38`, and the MusePlayer one at `0x007dfd08`. The slot indices
- * restart in each, so both MuseParent slot 2 and MusePlayer slot 2 are members of this class and
- * the two share a title only in the program.
+ * Its RTTI descriptor is at `0x00901c50`. It has MuseSynth at offset 0 and MusePlayer at offset 48.
+ * The allocation in MuseSynth::StartMultiMusePlayer() measures the object at 0x50 bytes. It has
+ * three tables: the primary at `0x007dfd58`, the MuseParent one at `0x007dfd38`, and the MusePlayer
+ * one at `0x007dfd08`. The slot indices restart in each table. MuseParent slot 2 and MusePlayer
+ * slot 2 are therefore both members of this class.
  *
  * It is both a player and a MuseSynth. Start() posts a scheduler command over its sequence, and
  * each message that command dispatches arrives back through the MuseSynth half, which creates a

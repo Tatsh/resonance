@@ -26,12 +26,12 @@ struct Ray {
 /**
  * Mix-in for an object that can be hit-tested.
  *
- * `Q23Rnd11Collideable` in the RTTI descriptor at `0x008ef440`, with `Rnd::Object` as a public
- * virtual base at offset 0. The subobject is 0xc bytes. The compiler places the virtual-base
- * pointer at `+0x00` and, following the g++ 2.x layout for a class with no non-virtual base, the
- * vptr at `+0x08`. The one declared member therefore sits at `+0x04`. For a standalone Collideable
- * the `Rnd::Object` subobject sits at `+0x0c`. The `-0xc` adjustment on every entry of the second
- * vtable confirms that placement.
+ * Its RTTI descriptor is at `0x008ef440`. It has `Rnd::Object` as a public virtual base at offset
+ * 0. The subobject is 0xc bytes. The compiler places the virtual-base pointer at `+0x00` and,
+ * following the g++ 2.x layout for a class with no non-virtual base, the vptr at `+0x08`. The one
+ * declared member therefore sits at `+0x04`. For a standalone Collideable the `Rnd::Object`
+ * subobject sits at `+0x0c`. The `-0xc` adjustment on every entry of the second vtable confirms
+ * that placement.
  *
  * Two vtables belong to the class. The three-entry table at `0x008250d8` is addressed by the vptr
  * at `+0x08` and stores the two virtuals declared here. The nine-entry table at `0x008250f8` is

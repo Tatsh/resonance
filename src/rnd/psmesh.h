@@ -12,9 +12,9 @@ namespace Rnd {
 /**
  * PlayStation 2 mesh, which draws through VU1 and the GS.
  *
- * `Q23Rnd6PsMesh` in the RTTI descriptor at `0x008efd60`, with `Rnd::Mesh` as its one public base
- * at offset 0. The shared Rnd::Object subobject moves to `+0x160` and the factory allocates 0x180
- * bytes, so the two lists below occupy `+0x150` through `+0x15f`.
+ * Its RTTI descriptor is at `0x008efd60`. It has `Rnd::Mesh` as its one public base at offset 0.
+ * The shared Rnd::Object subobject moves to `+0x160` and the factory allocates 0x180 bytes. The two
+ * lists below therefore occupy `+0x150` through `+0x15f`.
  *
  * The subclass supplies the drawing the base class omits. Its Sync() converts the face vector into
  * triangle strips, and Refresh() runs the base fix-up and then clamps every vertex colour.

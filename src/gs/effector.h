@@ -22,11 +22,10 @@ enum EffectorType {
 /**
  * One switchable audio effect that a powerup applies to a player's track.
  *
- * `8Effector` in the RTTI descriptor at `0x008eff60`, with MsgSource as its one base. The class
- * declares no data member. An instance is therefore the 0x14 bytes of the base, and the vptr stays
- * where MsgSource put it at `+0x10`. Two measurements fix the size. GhostNotesEffector adds no
- * field and the factory allocates 0x14 bytes for it, and VolumeEffector places its first field at
- * `+0x14`.
+ * Its RTTI descriptor is at `0x008eff60`. It has MsgSource as its one base. The class declares no
+ * data member. An instance is therefore the 0x14 bytes of the base, and the vptr stays where
+ * MsgSource put it at `+0x10`. Two measurements fix the size. GhostNotesEffector adds no field and
+ * the factory allocates 0x14 bytes for it, and VolumeEffector places its first field at `+0x14`.
  *
  * The table at `0x007de948` runs GetTypeInfo, the destructor, MsgSource::AddSink() and
  * MsgSource::RemoveSink() inherited unchanged, then the two virtuals below. Slot 4 addresses the

@@ -5,9 +5,9 @@
 /**
  * Linear addressing for a canvas of 24-bit pixels.
  *
- * The name comes from the RTTI descriptor at 0x008ef240, whose mangled form is `12ACanvasLin24` and
- * whose single public base is ACanvas24 at offset zero. It is the last of the four layout classes,
- * and like the others it derives from its format class rather than from ACanvas.
+ * Its RTTI descriptor is at 0x008ef240, and its single public base is ACanvas24 at offset zero. It
+ * is the last of the four layout classes, and like the others it derives from its format class
+ * rather than from ACanvas.
  *
  * Its table at 0x0083c878 runs the same 85 entries as its base's and overrides fifteen. Four are
  * the pure slots ACanvas24 leaves, which makes the class concrete: the alpha builder at 12, the

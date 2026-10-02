@@ -12,10 +12,10 @@
 /**
  * Gameplay stage for a track whose input is a pitch.
  *
- * `11PitchingSTG` in the RTTI descriptor at `0x00902240`, with ScoreTrackGraph as its only base at
- * offset 0. Its table is at `0x007e3648` and runs thirteen entries, the same as the base's, so the
- * class introduces no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12
- * from the base. The object is 0x34 bytes.
+ * Its RTTI descriptor is at `0x00902240`. It has ScoreTrackGraph as its only base at offset 0. Its
+ * table is at `0x007e3648` and runs thirteen entries, the same as the base's. The class introduces
+ * no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12 from the
+ * base. The object is 0x34 bytes.
  *
  * The constructor picks the producer from the track's kind word, a NotePitcher for 2 and a
  * Scratcher for 3, and it builds neither for any other value. It builds the jam effects manager

@@ -11,8 +11,8 @@ class Text;
 /**
  * Transition screen shown while a game loads.
  *
- * `17MetLoadGameScreen` in the RTTI descriptor at `0x00901f00`, with two public non-virtual bases
- * at fixed offsets, MetScreen at `+0x00`, and FadeUser at `+140`.
+ * Its RTTI descriptor is at `0x00901f00`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, and FadeUser at `+140`.
  *
  * The 40-entry primary vtable is at `0x007f5f18`, one entry longer than the MetScreen table, so
  * the class declares one virtual of its own, at slot 39.

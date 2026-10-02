@@ -9,9 +9,9 @@ namespace Rnd {
 /**
  * PlayStation 2 particle system, which submits its particles to the GS.
  *
- * `Q23Rnd13PsParticleSys` in the RTTI descriptor at `0x008f1250`, with `Rnd::ParticleSys` as its
- * one public base at offset 0 and no member of its own. The factory allocates 0x220 bytes, the
- * same as the base, which is what shows the subclass adds no data.
+ * Its RTTI descriptor is at `0x008f1250`. It has `Rnd::ParticleSys` as its one public base at
+ * offset 0 and no member. The factory allocates 0x220 bytes, the same as the base. The equal size
+ * shows the subclass does not add data.
  *
  * The subclass overrides exactly two virtuals, the destructor in the Object subobject table at
  * `0x0083a250` and DrawSelf() in the Drawable table at `0x0083a298`. Every other slot of all four

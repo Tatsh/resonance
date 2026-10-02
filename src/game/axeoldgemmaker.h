@@ -24,8 +24,8 @@ extern int g_nNextStripId;
 /**
  * Producer of the gems a guitar or vocal track presents, in its earlier form.
  *
- * `14AxeOldGemMaker` in the RTTI descriptor at `0x008ef220`, over MsgSink at offset 0 and MsgSource
- * at offset 4. Its primary table is at `0x007dedf0` with four entries and its MsgSource subobject
+ * Its RTTI descriptor is at `0x008ef220`. It is built over MsgSink at offset 0 and MsgSource at
+ * offset 4. Its primary table is at `0x007dedf0` with four entries and its MsgSource subobject
  * table at `0x007dedc8` with four. The object is 0x28 bytes, which the tagged allocations in
  * AxingSTG and VoxingSTG both measure.
  *

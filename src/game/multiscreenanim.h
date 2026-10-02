@@ -12,9 +12,9 @@ class Mat;
 /**
  * Arena screens for a game of several players, cycling through the leaders' materials.
  *
- * `15MultiScreenAnim` in the RTTI descriptor at `0x00901bb0`, deriving publicly from ScreenAnim at
- * offset 0. Its type function is at `0x0040c618` and its table at `0x008172d8`. The object is 0x20
- * bytes. It inherits SetLevel().
+ * Its RTTI descriptor is at `0x00901bb0`. It derives publicly from ScreenAnim at offset 0. Its type
+ * function is at `0x0040c618` and its table at `0x008172d8`. The object is 0x20 bytes. It inherits
+ * SetLevel().
  *
  * The screens cycle in steps of mPeriod ticks, eight steps to a cycle. Each even step shows the
  * material of one leader in turn, and every other step shows the screens' own materials. A single

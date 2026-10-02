@@ -7,7 +7,7 @@
 /**
  * Base of the per-instrument phrase makers.
  *
- * `11PhraseMaker` in the RTTI descriptor at `0x008f0300`, over MsgSink at offset 0 and MsgSource at
+ * Its RTTI descriptor is at `0x008f0300`. It is built over MsgSink at offset 0 and MsgSource at
  * offset 4. AxePhraseMaker derives from it at offset 0.
  *
  * The primary table at `0x007ddc88` runs six entries. Slot 3, MsgSink::HandleMessage(), and slot

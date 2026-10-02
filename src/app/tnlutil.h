@@ -29,7 +29,7 @@ Color TnlColorFromName(const HxStr &name);
  * Map a player colour name to a darker form of TnlColorFromName().
  *
  * The primary components are 0.7 rather than 1, "purple" gives `(0.5, 0, 0.7)`, and "null" gives
- * grey 0.7. Every other name gives cyan, and the alpha is always 1. The program lists no caller.
+ * grey 0.7. Every other name gives cyan, and the alpha is always 1. The image has no caller.
  *
  * @param name The colour name, taken by value.
  * @return The colour.

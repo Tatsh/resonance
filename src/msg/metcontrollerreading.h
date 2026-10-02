@@ -14,9 +14,9 @@ class OBStream;
  * MetCommandMap::Translate(). The record sits at `+0x04` of the message, so the three words
  * MetRenderer reads at message offsets 4, 8, and 0x0c are mTag, mPadIndex, and mButton.
  *
- * The name is inferred. The record has no RTTI, and the program titles its two stream operators
- * `ControllerReading`. Its three routines sit together at `0x00100f40` through `0x00101120`,
- * directly after the Sequencer template's members, which places them in one translation unit.
+ * The name is inferred, because the record has no RTTI. Its three routines sit together at
+ * `0x00100f40` through `0x00101120`, directly after the Sequencer template's members and in the
+ * same translation unit.
  *
  * Every member is public, because MetRenderer, MetCommandMap, GrooveWorld, and ControllerCmd all
  * read the record directly and the image exposes no accessor.

@@ -5,9 +5,9 @@
 /**
  * Cheat detector for the front end.
  *
- * `21InputCheatDetectorMet` in the RTTI descriptor at `0x008efcb0`, with InputCheatDetector as its
- * one public base at offset 0. It adds no member, and MetaGameWorld allocates it at 8 bytes. Its
- * vtable at `0x00810ee8` has four entries and a zero terminator at index 4: the type function at
+ * Its RTTI descriptor is at `0x008efcb0`. It has InputCheatDetector as its one public base at
+ * offset 0. It adds no member, and MetaGameWorld allocates it at 8 bytes. Its vtable at
+ * `0x00810ee8` has four entries and a zero terminator at index 4: the type function at
  * `0x003d4708`, the destructor at `0x003d4758`, InputCheatDetector's slot 2 at `0x001dc658`
  * inherited, and its own slot 3 at `0x003d4788`.
  *

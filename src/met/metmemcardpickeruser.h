@@ -3,9 +3,9 @@
 /**
  * Mix-in for a screen that receives the outcome of the memory-card picker.
  *
- * `20MetMemCardPickerUser` in the RTTI descriptor at `0x0086f768`, a leaf class with no base. The
- * subobject is four bytes, which MetMCFreqDelScreen fixes by listing MemcardUser at `+140`,
- * ListDataProvider at `+144`, and MetMemCardPickerUser at `+148`.
+ * Its RTTI descriptor is at `0x0086f768`. It is a leaf class with no base. MetMCFreqDelScreen
+ * fixes the four-byte subobject by listing MemcardUser at `+140`, ListDataProvider at
+ * `+144`, and MetMemCardPickerUser at `+148`.
  *
  * Alone among the mix-ins of this subsystem the class declares no virtual function, so it has no
  * vptr and the four bytes are one data member. Four independent observations agree on that.

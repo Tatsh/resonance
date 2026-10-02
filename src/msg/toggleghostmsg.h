@@ -7,9 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `14ToggleGhostMsg` in the RTTI descriptor at `0x008ef0f0`, with Message as its one base. The
- * object is 0xc bytes and its vtable is at `0x007cf4e8`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008ef0f0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007cf4e8`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Both members are public, the
  * player because LocalPlayer::SetGhost() writes it and the flag because Overlay reads it.

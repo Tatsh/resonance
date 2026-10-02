@@ -5,9 +5,9 @@
 /**
  * Powerup that lets a player freestyle over the song.
  *
- * `16FreestylePowerup` in the RTTI descriptor at `0x008eee88`, with Powerup as its one base. The
- * factory builds it for kHudItemFreestyler with a four-byte allocation and the table at
- * `0x007e40e0`. The destructor at `0x001c9970` is implicitly declared.
+ * Its RTTI descriptor is at `0x008eee88`. It has Powerup as its one base. The factory builds it for
+ * kHudItemFreestyler with a four-byte allocation and the table at `0x007e40e0`. The destructor at
+ * `0x001c9970` is implicitly declared.
  */
 class FreestylePowerup : public Powerup {
 public:

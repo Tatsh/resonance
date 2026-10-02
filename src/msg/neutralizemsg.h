@@ -9,8 +9,8 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `13NeutralizeMsg` in the RTTI descriptor at `0x008eecb8`, with CmdMsg as its one base. The
- * object is 0x14 bytes and its vtable is at `0x008122b8`. The word at `+0x04` belongs to CmdMsg.
+ * Its RTTI descriptor is at `0x008eecb8`. It has CmdMsg as its one base. The object is 0x14 bytes
+ * and its vtable is at `0x008122b8`. The word at `+0x04` belongs to CmdMsg.
  *
  * NeutralizePowerup builds the message at `0x001c9c64` from the three arguments of its slot 2,
  * storing the second at `+0x08`, the first at `+0x0c`, and the player at `+0x10`. Print() writes

@@ -11,9 +11,9 @@ class Player;
 /**
  * Enable policy of a game, which ties each track to the tracks that must be owned first.
  *
- * `13GameEnableMgr` in the RTTI descriptor at `0x008efc00`, deriving publicly from EnableMgr at
- * offset 0. Its type function is at `0x00105208` and its table at `0x007ccbc0`. The object is 0x30
- * bytes, and the destructor at `0x00104ca0` is implicitly declared.
+ * Its RTTI descriptor is at `0x008efc00`. It derives publicly from EnableMgr at offset 0. Its type
+ * function is at `0x00105208` and its table at `0x007ccbc0`. The object is 0x30 bytes, and the
+ * destructor at `0x00104ca0` is implicitly declared.
  *
  * A track is enabled for a bar when every track in its requirement list has an owner at that bar,
  * and never when the list holds -1. The requirement lists come from a configuration code, one

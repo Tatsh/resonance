@@ -3,12 +3,11 @@
 /**
  * Base of every object that reads a controller directly.
  *
- * `13RawController` in the RTTI descriptor at `0x0086f658`, with no base. Its vtable at
- * `0x007dc698` has three entries and a zero terminator at index 3, the type function at
- * `0x001935e8`, the destructor at `0x00193628`, and one slot filled with the pure-virtual stub at
- * `0x005381a8`. That stub is the same address MsgSink's own table records for its pure
- * HandleMessage(), which is what establishes the third slot as pure rather than as a body of its
- * own.
+ * Its RTTI descriptor is at `0x0086f658`. It has no base. Its vtable at `0x007dc698` has three
+ * entries and a zero terminator at index 3, the type function at `0x001935e8`, the destructor at
+ * `0x00193628`, and one slot filled with the pure-virtual stub at `0x005381a8`. That stub is the
+ * same address MsgSink's table records for its pure HandleMessage(). The shared address establishes
+ * the third slot as pure rather than as a distinct body.
  *
  * GrooveWorld, MetaGameWorld, and InputCheatDetector all derive from the class, and each overrides
  * the third slot. GrooveWorld places its subobject at `+0x04` and its secondary table at

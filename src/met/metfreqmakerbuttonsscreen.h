@@ -14,8 +14,8 @@ class Button;
 /**
  * Button row of the FreQ maker.
  *
- * `25MetFreqMakerButtonsScreen` in the RTTI descriptor at `0x00902a50`, with two public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00`, and MetKBUser at `+140`.
+ * Its RTTI descriptor is at `0x00902a50`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, and MetKBUser at `+140`.
  *
  * The 39-entry primary vtable at `0x007f1560` is the same length as the MetScreen table, and the
  * class declares no new virtual. The three-entry MetKBUser table at `0x007f1540` adjusts `this` by

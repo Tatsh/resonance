@@ -5,16 +5,16 @@
 /**
  * Base of the objects that place a powerup for a player.
  *
- * `13PowerupPlacer` in the RTTI descriptor at `0x008efc10`, with MsgSource as its one base at
- * offset 0. Its own table is at `0x007e4da0` and has nine entries with a zero terminator at index
- * 9. Slots 2 and 3 retain the MsgSource pair at `0x0054a270` and `0x0054a2f0`, and the five slots
- * after them are this class's own.
+ * Its RTTI descriptor is at `0x008efc10`. It has MsgSource as its one base at offset 0. Its own
+ * table is at `0x007e4da0` and has nine entries with a zero terminator at index 9. Slots 2 and 3
+ * retain the MsgSource pair at `0x0054a270` and `0x0054a2f0`, and the five slots after them are
+ * this class's own.
  *
  * The class adds no data member. Its constructor at `0x001cd958` stores the table pointer at
  * `+0x10` and does nothing else, which places the object at the same 0x14 bytes MsgSource occupies.
  *
- * Two subclasses are attested, JamPowerupPlacer and a `17GamePowerupPlacer` whose mangled name sits
- * beside this one at `0x007e4ca0`. The second has no header yet.
+ * Two subclasses are attested, JamPowerupPlacer and GamePowerupPlacer, whose type name sits beside
+ * this one at `0x007e4ca0`. The second has no header yet.
  *
  * Slots 4 through 7 are each a two-instruction `jr ra` stub, so the defaults do nothing. Both
  * tables record the same four addresses rather than a copy each, which is what establishes that a

@@ -18,12 +18,12 @@ namespace Rnd {
 /**
  * Keyframed animation of the three colours of one Rnd::Light.
  *
- * `Q23Rnd9LightAnim` in the RTTI descriptor at `0x008ef1f0`, with `Rnd::Animatable` as its one
- * public base at offset 0. The shared `Rnd::Object` subobject sits at `+0x2c`, an offset the
- * `-0x2c` adjustment on every entry of the Object subobject table confirms. The members below
- * therefore occupy `+0x18` through `+0x2b`, and the Animatable subobject is the 0x18 bytes ahead
- * of them. The creator at `0x005452d0` allocates exactly 0x48 bytes, the sum of that 0x2c and the
- * 0x1c of the Object subobject with no surplus.
+ * Its RTTI descriptor is at `0x008ef1f0`. It has `Rnd::Animatable` as its one public base at offset
+ * 0. The shared `Rnd::Object` subobject sits at `+0x2c`, an offset the `-0x2c` adjustment on every
+ * entry of the Object subobject table confirms. The members below therefore occupy `+0x18` through
+ * `+0x2b`, and the Animatable subobject is the 0x18 bytes ahead of them. The creator at
+ * `0x005452d0` allocates exactly 0x48 bytes, the sum of that 0x2c and the 0x1c of the Object
+ * subobject with no surplus.
  *
  * Two vtables belong to the class, each with the accessor at `0x00544940` in slot 0. The Object
  * subobject table at `0x00829448` stores the seven Object overrides and the destructor, and the
@@ -31,7 +31,7 @@ namespace Rnd {
  * 2 still addresses the base StartAnim() at `0x0049a3b8`. Restarting an animation therefore does
  * nothing of its own here.
  *
- * Three channels drive the light, and the text dump titles them "ambientKeys:", "diffuseKeys:",
+ * Three channels drive the light, and the text dump labels them "ambientKeys:", "diffuseKeys:",
  * and "specularKeys:". SetFrameSelf() hands the three interpolated results to
  * Rnd::Light::SetColors() in that order, which is independent confirmation of that parameter
  * order. Each channel is a `std::list` of Rnd::ColorKey, the same arrangement Rnd::MatAnim and

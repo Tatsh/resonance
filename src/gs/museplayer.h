@@ -7,11 +7,11 @@ class MsgSink;
 /**
  * Something that turns one muse into messages over time.
  *
- * `10MusePlayer` in the RTTI descriptor at `0x0086f788`, with no base list. One data word sits
- * ahead of the compiler-generated vptr, which places the vptr at `+0x04` and makes the subobject
- * eight bytes. MultiMusePlayer places it at `+0x30` and is the one implementation recovered; the
- * 0x20-byte NotePlayer that MuseSynth creates for a NoteMsg is the other, and its constructor at
- * `0x001b4328` takes seven arguments.
+ * Its RTTI descriptor is at `0x0086f788`. It has no base list. One data word sits ahead of the
+ * compiler-generated vptr. The vptr is therefore at `+0x04`, and the subobject is eight bytes.
+ * MultiMusePlayer places it at `+0x30` and is the one implementation recovered; the 0x20-byte
+ * NotePlayer that MuseSynth creates for a NoteMsg is the other, and its constructor at `0x001b4328`
+ * takes seven arguments.
  *
  * The class table at `0x007dfe68` runs five entries. Slots 2 through 4 point to the pure-virtual
  * stub at `0x005381a8`, so the class is never instantiated alone. The constructor and destructor

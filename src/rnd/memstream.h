@@ -12,9 +12,9 @@ constexpr int kMemStreamReserve = 0x1000;
 /**
  * Stream over a buffer the stream owns and grows.
  *
- * `Q23Rnd9MemStream` in the RTTI descriptor at `0x008ef190`, single inheritance from `Rnd::Stream`
- * at offset 0. The object is 0x1c bytes and its vtable is at `0x00826178`. The end and failure
- * states are stored rather than derived, which is what separates this class from `Rnd::BufStream`.
+ * Its RTTI descriptor is at `0x008ef190`. It has single inheritance from `Rnd::Stream` at offset 0.
+ * The object is 0x1c bytes and its vtable is at `0x00826178`. The end and failure states are stored
+ * rather than derived. Storing them separates this class from `Rnd::BufStream`.
  */
 class MemStream : public Stream {
 public:

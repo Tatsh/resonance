@@ -15,12 +15,12 @@ namespace Rnd {
 /**
  * Mix-in for an object driven by a frame number.
  *
- * `Q23Rnd10Animatable` in the RTTI descriptor at `0x008eed68`, with `Rnd::Object` as a public
- * virtual base at offset 0. The subobject is 0x18 bytes. The compiler places the virtual-base
- * pointer at `+0x00` and, following the g++ 2.x layout for a class with no non-virtual base, the
- * vptr at `+0x14`. The declared members therefore occupy `+0x04` through `+0x13`. For a standalone
- * Animatable the `Rnd::Object` subobject sits at `+0x18`. The `-0x18` adjustment on every entry of
- * the second vtable confirms that placement.
+ * Its RTTI descriptor is at `0x008eed68`. It has `Rnd::Object` as a public virtual base at offset
+ * 0. The subobject is 0x18 bytes. The compiler places the virtual-base pointer at `+0x00` and,
+ * following the g++ 2.x layout for a class with no non-virtual base, the vptr at `+0x14`. The
+ * declared members therefore occupy `+0x04` through `+0x13`. For a standalone Animatable the
+ * `Rnd::Object` subobject sits at `+0x18`. The `-0x18` adjustment on every entry of the second
+ * vtable confirms that placement.
  *
  * The size is also pinned from outside the class, which is the stronger argument. `Rnd::TransAnim`
  * and `Rnd::View` each derive from this class at offset 0 and place `Rnd::Drawable` at offset 0x18,
@@ -67,9 +67,9 @@ public:
     /**
      * One stage of the frame-number filter chain.
      *
-     * `Q33Rnd10Animatable6Filter` in the RTTI descriptor at `0x0086f710`, a leaf class with no
-     * base. No accessor of its own builds that descriptor. Every derived accessor initialises it
-     * inline before its own, and the copy at `0x0040f540` builds it alone.
+     * Its RTTI descriptor is at `0x0086f710`. It is a leaf class with no base. No accessor of its
+     * own builds that descriptor. Every derived accessor initialises it inline before its own, and
+     * the copy at `0x0040f540` builds it alone.
      *
      * The class declares no data member. A derived filter therefore stores its vptr at `+0x00` and
      * its parameters from `+0x04`. Every vtable in the family is eight entries, and the declaration
@@ -159,8 +159,8 @@ public:
     /**
      * Filter stage that applies an affine map.
      *
-     * `Q33Rnd10Animatable11ScaleOffset` in the RTTI descriptor at `0x008ef018`, deriving publicly
-     * from Filter at offset 0. The object is 0xc bytes, and its vtable is at `0x0081e980`.
+     * Its RTTI descriptor is at `0x008ef018`. It derives publicly from Filter at offset 0. The
+     * object is 0xc bytes, and its vtable is at `0x0081e980`.
      */
     class ScaleOffset : public Filter {
     public:
@@ -252,8 +252,8 @@ public:
     /**
      * Filter stage that wraps or clamps the value into a range.
      *
-     * `Q33Rnd10Animatable10MinMaxLoop` in the RTTI descriptor at `0x008eee98`, deriving publicly
-     * from Filter at offset 0. The object is 0x10 bytes, and its vtable is at `0x0081e938`.
+     * Its RTTI descriptor is at `0x008eee98`. It derives publicly from Filter at offset 0. The
+     * object is 0x10 bytes, and its vtable is at `0x0081e938`.
      */
     class MinMaxLoop : public Filter {
     public:
@@ -341,8 +341,8 @@ public:
     /**
      * Filter stage that limits how far the value may move in one frame.
      *
-     * `Q33Rnd10Animatable9ZeroOrder` in the RTTI descriptor at `0x00902040`, deriving publicly from
-     * Filter at offset 0. The object is 0xc bytes, and its vtable is at `0x0081e8f0`.
+     * Its RTTI descriptor is at `0x00902040`. It derives publicly from Filter at offset 0. The
+     * object is 0xc bytes, and its vtable is at `0x0081e8f0`.
      *
      * The stage is stateful. mLevel is both a parameter and the running output, and each Apply()
      * advances it towards the incoming value by at most mMaxDelta.
@@ -431,8 +431,8 @@ public:
     /**
      * Filter stage that moves the value a fixed fraction of the way towards its input.
      *
-     * `Q33Rnd10Animatable10FirstOrder` in the RTTI descriptor at `0x008eef08`, deriving publicly
-     * from Filter at offset 0. The object is 0xc bytes, and its vtable is at `0x0081e8a8`.
+     * Its RTTI descriptor is at `0x008eef08`. It derives publicly from Filter at offset 0. The
+     * object is 0xc bytes, and its vtable is at `0x0081e8a8`.
      *
      * The stage is stateful in the same way as ZeroOrder. mLevel is the running output.
      */
@@ -519,8 +519,8 @@ public:
     /**
      * Filter stage that drives the value with a spring and a damper.
      *
-     * `Q33Rnd10Animatable11SecondOrder` in the RTTI descriptor at `0x008eefa8`, deriving publicly
-     * from Filter at offset 0. The object is 0x14 bytes, and its vtable is at `0x0081e860`.
+     * Its RTTI descriptor is at `0x008eefa8`. It derives publicly from Filter at offset 0. The
+     * object is 0x14 bytes, and its vtable is at `0x0081e860`.
      *
      * The stage is stateful in two members. mLevel is the running output and mVel the running
      * velocity. Each Apply() accelerates the velocity towards the incoming value and then
@@ -902,9 +902,8 @@ public:
      *
      * Every derived destructor invokes this before its own teardown. The tail at `0x0049a9c0`
      * passes the address of mAnims to the list clear at `0x0045edc8`, whose body returns every
-     * node to the pool and re-self-links the dummy node. An earlier reading had the list surviving
-     * the call. ReleaseAnimsAndFilters() at `0x00494cb0` is the routine that walks mAnims without
-     * emptying it, and the two bodies are otherwise alike.
+     * node to the pool and re-self-links the dummy node. ReleaseAnimsAndFilters() at `0x00494cb0`
+     * is the routine that walks mAnims without emptying it, and the two bodies are otherwise alike.
      *
      * Public because Rnd::MetScreen::ResolveContainerViews() calls it at `0x0038b294` on the
      * Rnd::View it just resolved, and MetScreen derives from MsgSink rather than from this class.

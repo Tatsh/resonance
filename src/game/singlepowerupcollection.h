@@ -8,9 +8,9 @@ class Powerup;
 /**
  * Store of one powerup at a time, which a new one replaces.
  *
- * `23SinglePowerupCollection` in the RTTI descriptor at `0x008efed0`, with PowerupCollectionI as
- * its one base at offset 0. Its table is at `0x007e4850` and has ten entries with a zero
- * terminator at index 10, the same length as the base table, so the class adds no virtual.
+ * Its RTTI descriptor is at `0x008efed0`. It has PowerupCollectionI as its one base at offset 0.
+ * Its table is at `0x007e4850` and has ten entries with a zero terminator at index 10, the same
+ * length as the base table. The class adds no virtual.
  *
  * It overrides the destructor and four of the base's six slots. Slots 5 and 6, SelectRelative()
  * and Select(), point at two-instruction bodies of their own at `0x001cc9f0` and `0x001cc9f8`, and

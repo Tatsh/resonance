@@ -16,11 +16,9 @@ class Renderer;
 /**
  * Head-up display the in-game renderer draws over the tunnel.
  *
- * `7Overlay` in the RTTI descriptor at `0x008efd80`, with MsgSink as its one public base at offset
- * 0. Its type function is at `0x00429580`. The class sits in `app/` beside Renderer, its one
- * constructor caller. An earlier pass called the constructor `HudDisplay__Construct`, and no
- * descriptor among the 574 in the image bears that name. The table the constructor installs has
- * this class's type function in slot 0.
+ * Its RTTI descriptor is at `0x008efd80`. It has MsgSink as its one public base at offset 0. Its
+ * type function is at `0x00429580`. The class sits in `app/` beside Renderer, its one constructor
+ * caller. The table the constructor installs has this class's type function in slot 0.
  *
  * The table at `0x008194a8` has four entries, the same length as MsgSink's table at `0x007ccc40`,
  * and the class therefore introduces no virtual. It overrides the destructor at slot 1 and
@@ -307,9 +305,7 @@ extern Overlay *g_pOverlay;
  *
  * Overlay's constructor sets it before any HUD class resolves an object, and every HUD class
  * formats it into the names it resolves. The translation unit's static initialiser at `0x00429348`
- * constructs it. The Ghidra program labels it `g_abHudLayoutName`, the prefix its naming check
- * requires for an aggregate. It also labels the string pointer inside it, at `0x006dfdf4`, as
- * `g_szPlayerName`, and that label is wrong.
+ * constructs it. Its string pointer is at `0x006dfdf4`.
  *
  * @ghidraAddress 0x006dfdf0
  */

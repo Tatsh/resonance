@@ -93,7 +93,7 @@ void *ZoneAlloc(unsigned nSize);
 /**
  * Take the shared temporary buffer.
  *
- * The buffer is the whole of the zone titled `temp`, or a 128 KiB tagged
+ * The buffer is the whole of the zone called `temp`, or a 128 KiB tagged
  * allocation when zones are switched off. It is claimed once and stays claimed
  * until ZoneReleaseTemp() runs, and a second claim is fatal.
  *

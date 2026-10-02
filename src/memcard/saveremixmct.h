@@ -19,12 +19,12 @@ constexpr int kRemixSaveMinimumFreeClusters = 60;
 /**
  * Write one remix to a card and add it to the index of the directory it lands in.
  *
- * `12SaveRemixMCT` in the RTTI descriptor at `0x008ef5e0`, with two public non-virtual bases,
- * `MemcardTask` at offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the
- * 19-entry primary at `0x007da938` and the 21-entry `MemcardUser` table at `0x007da888`, whose
- * first two entries and whose slots 19 and 20 adjust `this` back by 28. An instance is 0xa4 bytes,
- * from the constructor's own highest store at `+0xa0`. Nothing derives from the class, so that is a
- * lower bound rather than a settled size.
+ * Its RTTI descriptor is at `0x008ef5e0`. It has two public non-virtual bases, `MemcardTask` at
+ * offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the 19-entry primary at
+ * `0x007da938` and the 21-entry `MemcardUser` table at `0x007da888`, whose first two entries and
+ * whose slots 19 and 20 adjust `this` back by 28. An instance is 0xa4 bytes, from the constructor's
+ * highest store at `+0xa0`. Nothing derives from the class. The size 0xa4 is therefore a lower
+ * bound rather than a settled size.
  *
  * The task enquires about the card, rejects a card with fewer than kRemixSaveMinimumFreeClusters
  * free clusters, lists `/BASCUS-97125r*`, and then reads the index out of each remix save directory

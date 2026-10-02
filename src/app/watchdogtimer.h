@@ -12,16 +12,16 @@ class Command;
 /**
  * Time base a scheduler measures its due times against, and the base class of Sch::TickClock.
  *
- * The class is not polymorphic and has no RTTI, and no literal titles it. The title here is
- * retained from an earlier pass rather than attested, and it understates the class: this 0x18-byte
- * object is the base of Sch::TickClock, and the bodies at `0x004a7828`, `0x004a7848`, `0x004a7878`,
- * and `0x004a77c0` are single bodies shared between the two rather than routines of a monitor.
+ * The class is not polymorphic and has no RTTI, and no literal identifies it. Its name is inferred.
+ * The name understates the class. This 0x18-byte object is the base of Sch::TickClock, and the
+ * bodies at `0x004a7828`, `0x004a7848`, `0x004a7878`, and `0x004a77c0` are single bodies shared
+ * between the two rather than routines of a monitor.
  *
  * The image does not include the strings `Watchdog`, `Scheduler`, or `Timer`, and its only `Sch`
  * names are the command classes, the tempo map, the tick, and the clock itself. The sequel
  * Amplitude (SCUS_972.58) is the best evidence for a replacement title. Its RTTI records a class
- * `Timer` (`5Timer` and `P5Timer` in template and pointer type names) beside a class `Scheduler`
- * with nested `CommandInfo`, `ByCommand`, `ByID`, and `CancelPred` types. Amplitude has no `Sch`
+ * `Timer`, also used in template and pointer types, beside a class `Scheduler` with nested
+ * `CommandInfo`, `ByCommand`, `ByID`, and `CancelPred` types. Amplitude has no `Sch`
  * namespace, no TimedCommand, and no TempoMap. Together with this image's `Sch` namespace, that
  * record makes `Sch::Timer` the likely original title of this class. The title is inferred rather
  * than attested, and it is not applied yet.

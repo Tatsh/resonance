@@ -9,8 +9,8 @@ class MetPersonaData;
 /**
  * Load the FreQ roster from a card.
  *
- * `15LoadPersonasMCT` in the RTTI, single inheritance from `LoadFileMCT` at offset 0. An instance
- * is 0x3c bytes and the vtable is at `0x007da3f8`.
+ * It has single inheritance from `LoadFileMCT` at offset 0. An instance is 0x3c bytes and the
+ * vtable is at `0x007da3f8`.
  *
  * Execute() reads the roster file into g_abRemixStagingBuffer through the inherited load sequence.
  * Finish() then rebuilds each persona from the buffer and appends it to mRoster before reporting.

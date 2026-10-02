@@ -6,11 +6,11 @@
 /**
  * Screen that loads a saved FreQ identity from a memory card.
  *
- * `17MetLoadFreqScreen` in the RTTI descriptor at `0x00901f10`, with two public non-virtual bases
- * at fixed offsets, MetLoadFreqBaseScreen at `+0x00` and MemcardUser at `+164`. The object is 0xac
- * bytes. The 47-entry primary vtable is at `0x007f6fc0` and the 21-entry MemcardUser table at
- * `0x007f6f10` adjusts `this` by `-164`. The primary is the same length as the
- * MetLoadFreqBaseScreen table, so the class declares no virtual of its own.
+ * Its RTTI descriptor is at `0x00901f10`. It has two public non-virtual bases at fixed offsets,
+ * MetLoadFreqBaseScreen at `+0x00` and MemcardUser at `+164`. The object is 0xac bytes. The
+ * 47-entry primary vtable is at `0x007f6fc0` and the 21-entry MemcardUser table at `0x007f6f10`
+ * adjusts `this` by `-164`. The primary is the same length as the MetLoadFreqBaseScreen table, and
+ * the class declares no new virtual.
  *
  * The constructor at `0x0029bcf0` takes only the renderer and the load priority, runs the
  * MetLoadFreqBaseScreen constructor at `0x00291e00`, which supplies all three names, and writes

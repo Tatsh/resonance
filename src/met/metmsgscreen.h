@@ -16,8 +16,8 @@ class View;
 /**
  * Dialogue that shows one message.
  *
- * `12MetMsgScreen` in the RTTI descriptor at `0x008f0100`, with MetScreenMultiSoundBank as its one
- * public non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008f0100`. It has MetScreenMultiSoundBank as its one public
+ * non-virtual base at offset 0.
  *
  * The 39-entry primary vtable is at `0x007fe668`, the same length as the MetScreenMultiSoundBank
  * table, so the class declares no virtual of its own.

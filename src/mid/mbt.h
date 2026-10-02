@@ -48,10 +48,10 @@ namespace Mid {
  * The object is four bytes and the class is not polymorphic, so it emits no vtable and no RTTI. The
  * image never records this type's name, and the name Mid::MBT is retained by convention only.
  *
- * The image's `Q23Mid3MBT` descriptor belongs to a different, unused class. That class is 0x10
- * bytes, with a one-based measure at `+0x0`, a one-based beat at `+0x4`, the tick within the beat
- * at `+0x8`, and a vptr at `+0xc`. Its vtable at `0x008110e8` has the accessor at `0x003d63f8` in
- * slot 0 and a Print() at `0x003d67f0` in slot 1 that writes `[measure:beat:tick]`. Its inline
+ * The image's RTTI descriptor for `Mid::MBT` belongs to a different, unused class. That class is
+ * 0x10 bytes, with a one-based measure at `+0x0`, a one-based beat at `+0x4`, the tick within the
+ * beat at `+0x8`, and a vptr at `+0xc`. Its vtable at `0x008110e8` has the accessor at `0x003d63f8`
+ * in slot 0 and a Print() at `0x003d67f0` in slot 1 that writes `[measure:beat:tick]`. Its inline
  * constructor at `0x003d6798` splits a tick count by beats per measure and ticks per beat. No code
  * refers to the constructor, the Print(), or the vtable. The tree cannot declare both classes under
  * the one name Mid::MBT, so only this four-byte word is reconstructed.

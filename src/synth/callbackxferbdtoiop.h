@@ -8,11 +8,11 @@ constexpr int kBankChunkSize = 0x2000;
 /**
  * Receiver that streams a BD sound bank into the sound driver one chunk at a time.
  *
- * `19CallbackXferBdToIop` in the RTTI descriptor at `0x008eeed8`, with AsyncCallback as its one
- * public base at offset 0. The vtable at `0x0081cf10` has the base's three slots and no more, so
- * the class adds no virtual of its own and declares no destructor; slot 1 addresses a copy of the
- * base destructor. An instance is 0x20 bytes, which the allocation at `0x00462018` measures rather
- * than the field range implying.
+ * Its RTTI descriptor is at `0x008eeed8`. It has AsyncCallback as its one public base at offset 0.
+ * The vtable at `0x0081cf10` has the base's three slots and no more. The class does not add a
+ * virtual or declare a destructor; slot 1 addresses a copy of the base destructor. An instance is
+ * 0x20 bytes. The allocation at `0x00462018` measures that size, and the field range does not
+ * imply it.
  *
  * The transfer is a loop of asynchronous reads of at most 0x2000 bytes. Each completion moves the
  * chunk just read into a staging buffer on the IOP, submits it to the driver, and queues the read

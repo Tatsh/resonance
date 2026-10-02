@@ -9,12 +9,11 @@
 /**
  * Dialogue that writes a multiplayer remix to a memory card.
  *
- * `23MetMultiSaveRemixScreen` in the RTTI descriptor at `0x008ef530`, with two public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00` and MetRemixSaver at `+140`. The 39-entry primary
- * vtable is at `0x007ffb90`, the same length as the MetScreen table, so the class declares no
- * virtual of its own, and the five-entry MetRemixSaver table at `0x007ffb60` adjusts `this` by
- * `-140` in every entry. That table is where this screen supplies the three MetRemixSaver pure
- * virtuals.
+ * Its RTTI descriptor is at `0x008ef530`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00` and MetRemixSaver at `+140`. The 39-entry primary vtable is at `0x007ffb90`,
+ * the same length as the MetScreen table, and the class declares no new virtual. The five-entry
+ * MetRemixSaver table at `0x007ffb60` adjusts `this` by `-140` in every entry. That table is where
+ * this screen supplies the three MetRemixSaver pure virtuals.
  *
  * The constructor at `0x002fa0b0` takes only the renderer and the load priority, and supplies
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the

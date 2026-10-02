@@ -20,15 +20,13 @@
 /**
  * Phrase maker for a guitar track.
  *
- * `14AxePhraseMaker` in the RTTI descriptor at `0x008f2a50`, with PhraseMaker as its only base at
- * offset 0. Its primary table is at `0x007ddc50` with six entries and its MsgSource subobject table
- * at `0x007ddc28` with four, so the class introduces two virtuals of its own. The object is 0x50
- * bytes, which AxingSTG's tagged allocation measures.
+ * Its RTTI descriptor is at `0x008f2a50`. It has PhraseMaker as its only base at offset 0. Its
+ * primary table is at `0x007ddc50` with six entries and its MsgSource subobject table at
+ * `0x007ddc28` with four. The class introduces two virtuals. The object is 0x50 bytes, measured by
+ * AxingSTG's tagged allocation.
  *
- * An earlier pass titled this class's constructor `RndSpotShadowMap__Construct`. No descriptor
- * among the 574 in the image bears that title. Slot 0 of the table at `0x007ddc50` addresses the
- * accessor at `0x0019d390`, which guards on the descriptor at `0x008f2a50`, and that is what
- * settles the name.
+ * Slot 0 of the table at `0x007ddc50` addresses the accessor at `0x0019d390`. The accessor guards
+ * on the descriptor at `0x008f2a50`, and the descriptor settles the class name.
  *
  * The maker records what the player plays over a bar into a fresh Phrase and installs it in the
  * phrase manager when the bar ends. A note-on is held until its note-off (or the end of the bar)

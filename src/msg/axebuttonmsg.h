@@ -7,9 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12AxeButtonMsg` in the RTTI descriptor at `0x008ef450`, with Message as its one base. The
- * object is 0x10 bytes and its vtable is at `0x007dd3f0`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008ef450`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x007dd3f0`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The stack builds fix the
  * player at `+0x0c`. Scratcher's build at `0x001d07f4` stores the same scratcher word that its

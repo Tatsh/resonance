@@ -11,10 +11,10 @@ class Text;
 /**
  * Base of the four pause screens.
  *
- * `18MetPauseBaseScreen` in the RTTI descriptor at `0x00902300`, with MetScreenMultiSoundBank as
- * its one public non-virtual base at offset 0. The vtable is at `0x00802be8` and has 40 entries,
- * one more than the MetScreen table, so the class declares exactly one virtual of its own at slot
- * 39. New() allocates 0xb0 bytes.
+ * Its RTTI descriptor is at `0x00902300`. It has MetScreenMultiSoundBank as its one public
+ * non-virtual base at offset 0. The vtable is at `0x00802be8` and has 40 entries, one more than the
+ * MetScreen table, and the class declares exactly one new virtual at slot 39. New() allocates 0xb0
+ * bytes.
  *
  * Four classes derive from the class, MetPauseGameScreen, MetPauseMultiRemixScreen,
  * MetPauseSoloGameScreen, and MetPauseSoloRemixScreen. Each passes its own directory and container

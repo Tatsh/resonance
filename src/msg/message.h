@@ -10,7 +10,7 @@ class OBStream;
 /**
  * Base of every event the game passes between a MsgSource and a MsgSink.
  *
- * `7Message` in the RTTI descriptor at `0x0086f638`, with no base and no data members, so the
+ * Its RTTI descriptor is at `0x0086f638`. It has no base and no data members. The
  * compiler-generated vptr lands at offset 0 and every derived message adds its payload after it.
  * The RTTI lists 124 derived classes, among them ScriptMsg, GemMsg, LeaveGameMsg, and Packet.
  *
@@ -45,7 +45,7 @@ public:
      *
      * Defined in the class, because 69 byte-identical copies exist, one in every translation unit
      * that allocates a message, and no call to any of them remains outside those units. The address
-     * below is the first copy, and the program marks the rest as copies of it.
+     * below is the first copy.
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
@@ -130,7 +130,7 @@ public:
      * hands the temporary to OBStream::Write(), chaining on the stream the call returns, which is
      * how PSJoinRequestPacket's override at `0x003e5538` writes its four words and then delegates
      * its FreqAppearance member to that class's own slot 2. The verb is inferred from the shape
-     * and from the position ahead of the reading half, since nothing in the image titles either
+     * and from the position ahead of the reading half. No string in the image identifies either
      * slot.
      *
      * @param stream The stream to write to.

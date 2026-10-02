@@ -31,10 +31,8 @@ enum TrackMode {
  * Converted events of one track of a level.
  *
  * The class emits no RTTI descriptor and is not polymorphic. Its name is attested rather than
- * inferred. The RTTI records Catcher's constructor signature as
- * `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, whose fourth
- * parameter demangles to `const TrackData *`, and the LevelBuilder constructor allocates it under
- * the tag `TrackData`.
+ * inferred. The image records Catcher's constructor signature, whose third parameter is
+ * `const TrackData *`, and the LevelBuilder constructor allocates it under the tag `TrackData`.
  *
  * The LevelBuilder allocation measures the object at 0x54 bytes. The constructor sizes mBars to the
  * last step of the play map, one Bar per bar of the level, and every position the class accepts

@@ -12,9 +12,9 @@ class TickClock;
 /**
  * Effect that chops a channel's level with a square wave while it is applied.
  *
- * `15StutterEffector` in the RTTI descriptor at `0x008eef48`, with TickTask at offset 0 and
- * Effector at offset 0x20. Its tables are at `0x007de708` for TickTask and `0x007de6d0` for the
- * Effector subobject. The object is 0x48 bytes, which the factory's allocation measures.
+ * Its RTTI descriptor is at `0x008eef48`. It has TickTask at offset 0 and Effector at offset 0x20.
+ * Its tables are at `0x007de708` for TickTask and `0x007de6d0` for the Effector subobject. The
+ * factory's allocation measures the object at 0x48 bytes.
  *
  * The task runs every half period, aligned. Each run samples mOscillator and sends controller 0x30
  * between 127 and mFloor. Applying the effect runs the task at once, sends controller 0x50 with

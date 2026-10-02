@@ -12,10 +12,10 @@
 /**
  * Gameplay stage for a vocal track.
  *
- * `9VoxingSTG` in the RTTI descriptor at `0x008efe80`, with ScoreTrackGraph as its only base at
- * offset 0. Its table is at `0x007e6460` and runs thirteen entries, the same as the base's, so the
- * class introduces no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12
- * from the base. The object is 0x3c bytes.
+ * Its RTTI descriptor is at `0x008efe80`. It has ScoreTrackGraph as its only base at offset 0. Its
+ * table is at `0x007e6460` and runs thirteen entries, the same as the base's. The class introduces
+ * no virtual. It overrides eight slots and inherits slots 5, 9, 10, 11, and 12 from the
+ * base. The object is 0x3c bytes.
  *
  * The constructor builds the producer and both gem makers unconditionally, and the jam effects
  * manager only in play mode 2. The two members it clears first are the producer and the jam

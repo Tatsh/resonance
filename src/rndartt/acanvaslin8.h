@@ -5,10 +5,9 @@
 /**
  * Linear addressing for a canvas of eight-bit indexed pixels.
  *
- * The name comes from the RTTI descriptor at 0x008f09c0, whose mangled form is `11ACanvasLin8` and
- * whose single public base is ACanvas8 at offset zero. Like ACanvasLin4 it derives from the format
- * class rather than from ACanvas, so its base supplies the colour conversions and this class
- * supplies everything that depends on how pixels are addressed.
+ * Its RTTI descriptor is at 0x008f09c0, and its single public base is ACanvas8 at offset zero. Like
+ * ACanvasLin4 it derives from the format class rather than from ACanvas. Its base supplies the
+ * colour conversions and this class supplies everything that depends on how pixels are addressed.
  *
  * Its table at 0x0083f818 runs the same 85 entries as its base's and overrides eighteen, where the
  * four-bit sibling overrides eight. Three are the pure slots ACanvas8 leaves, which makes the class
@@ -105,10 +104,8 @@ public:
     /**
      * Slot 79.
      *
-     * The program titled this routine for the four-bit sibling until the table diff placed it
-     * here: it occupies slot 79 of this class's table and appears in none of the 85 entries of the
-     * sibling's, which does not override the slot at all. It sits just below this class's main
-     * block, so the earlier attribution rested on adjacency.
+     * The routine occupies slot 79 of this class's table and does not appear in the 85 entries of
+     * the four-bit sibling's table. The sibling does not override the slot.
      *
      * @ghidraAddress 0x006284a0
      */

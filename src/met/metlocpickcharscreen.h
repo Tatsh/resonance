@@ -18,11 +18,10 @@ class View;
 /**
  * Local-multiplayer screen that picks a character.
  *
- * `20MetLocPickCharScreen` in the RTTI descriptor at `0x00901bf0`, with MetMemDetectScreen as its
- * one public non-virtual base at offset 0. New() allocates 0x140 bytes. The 44-entry primary vtable
- * is at `0x007f9a88` and the 21-entry MemcardUser table at `0x007f99d8` adjusts `this` by `-140`.
- * The primary is the same length as the MetMemDetectScreen table, and the class declares no new
- * virtual.
+ * Its RTTI descriptor is at `0x00901bf0`. It has MetMemDetectScreen as its one public non-virtual
+ * base at offset 0. New() allocates 0x140 bytes. The 44-entry primary vtable is at `0x007f9a88` and
+ * the 21-entry MemcardUser table at `0x007f99d8` adjusts `this` by `-140`. The primary is the same
+ * length as the MetMemDetectScreen table, and the class declares no new virtual.
  *
  * Each player cycles through mPersonas with the left and right commands and locks a character in
  * with the select command. The list starts with the personas on every formatted card after a

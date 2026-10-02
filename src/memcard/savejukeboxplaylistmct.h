@@ -9,9 +9,8 @@ class JukeboxPlayList;
 /**
  * Save one jukebox playlist to a card.
  *
- * `22SaveJukeboxPlayListMCT` in the RTTI, single inheritance from `SaveFileMCT` at offset 0. An
- * instance is 0x430 bytes, from MemcardManager::CreateSaveJukeboxPlayListTask()'s allocation, and
- * the vtable is at `0x007da9d8`.
+ * It has single inheritance from `SaveFileMCT` at offset 0. An instance is 0x430 bytes, from
+ * MemcardManager::CreateSaveJukeboxPlayListTask()'s allocation, and the vtable is at `0x007da9d8`.
  *
  * The constructor serialises the playlist into g_abRemixStagingBuffer through mStream at once.
  * Execute() then points the inherited save sequence at that buffer, under a file name that carries

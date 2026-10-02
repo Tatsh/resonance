@@ -5,8 +5,7 @@
 /**
  * Colour conversion for a canvas of 8-bit indexed pixels.
  *
- * The name comes from the RTTI descriptor at 0x008ef130, whose mangled form is `8ACanvas8` and
- * whose single public base is ACanvas at offset zero.
+ * Its RTTI descriptor is at 0x008ef130, and its single public base is ACanvas at offset zero.
  *
  * THE CLASS IS ABSTRACT. Its table at 0x00841678 runs the same 85 entries as ACanvas's, so it adds
  * no virtual, and of the base's 22 pure slots it leaves three pointing at the shared pure-virtual
@@ -33,10 +32,8 @@
  * table slots whose bodies are byte for byte the same single store, and the same holds for the two
  * getters.
  *
- * Every slot below is mapped from the table rather than from its routine title, by comparing each
- * entry against ACanvas's table at 0x00837dc8 at the same index. That matters here: the titles the
- * program carries suggest a different set of members from the one the slots prove, and the base
- * declares both spellings.
+ * Every slot below is mapped from the table, by comparing each entry against ACanvas's table at
+ * 0x00837dc8 at the same index. The base declares both spellings.
  *
  * No body is written yet. The conversion bodies are recoverable and the three pure slots are not
  * this class's to supply.
@@ -113,9 +110,8 @@ public:
     /**
      * Slot 31.
      *
-     * The program titles this routine after the 32-bit format, and the base's slot 31 is the
-     * colourless read rather than a format-specific one, so the title is not the member. Slot 21
-     * is the same case on the store side.
+     * The base's slot 31 is the colourless read rather than a format-specific one. Slot 21 is the
+     * same case on the store side.
      *
      * @ghidraAddress 0x00636270
      */

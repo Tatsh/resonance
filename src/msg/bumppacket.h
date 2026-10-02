@@ -12,10 +12,10 @@ class Player;
 /**
  * Network packet the game sends between game systems.
  *
- * `10BumpPacket` in the RTTI descriptor at `0x008ef700`, with ToAllOtherGameSystemsPacket as its
- * one base. The object is 0x28 bytes and its vtable is at `0x008144a0`. The payload comes from
- * the copy constructor at `0x003f3b58`, which Clone() delegates to. The four words Packet
- * provides are declared there rather than here.
+ * Its RTTI descriptor is at `0x008ef700`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x28 bytes and its vtable is at `0x008144a0`. The payload comes from the copy
+ * constructor at `0x003f3b58`. Clone() delegates to it. The four words Packet provides are
+ * declared there rather than here.
  *
  * Print() labels `+0x1c` as a bar and `+0x20` as a track. mResult at `+0x24` is zeroed by New()
  * and is neither transferred nor printed.

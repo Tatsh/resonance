@@ -5,12 +5,12 @@
 /**
  * Jukebox playlist editor.
  *
- * `28MetJukeboxEditPlaylistScreen` in the RTTI descriptor at `0x008ef4e0`, with
- * MetJukeboxBaseScreen as its one public non-virtual base at offset 0. The class declares no data
- * member, so the object is the 0x150 bytes of MetJukeboxBaseScreen alone. The 43-entry primary
- * vtable is at `0x007ed8d0`, the same length as the MetJukeboxBaseScreen table, so the class
- * declares no virtual of its own. The four-entry ListDataProvider table at `0x007ed8a8` adjusts
- * `this` by `-140` in every entry and overrides slot 2 at `0x0022ba08`.
+ * Its RTTI descriptor is at `0x008ef4e0`. It has MetJukeboxBaseScreen as its one public non-virtual
+ * base at offset 0. The class declares no data member, and the object is the 0x150 bytes of
+ * MetJukeboxBaseScreen alone. The 43-entry primary vtable is at `0x007ed8d0`, the same length as
+ * the MetJukeboxBaseScreen table, and the class declares no new virtual. The four-entry
+ * ListDataProvider table at `0x007ed8a8` adjusts `this` by `-140` in every entry and overrides slot
+ * 2 at `0x0022ba08`.
  *
  * The constructor at `0x0022acf8` takes only the renderer and the load priority. It runs the
  * MetJukeboxBaseScreen constructor at `0x0021dcc0` with `jbep` for the screen name,
@@ -23,8 +23,7 @@
  *
  * Seven inherited slots differ from the MetJukeboxBaseScreen table beyond the destructor. They are
  * 7 `0x002313d0`, 19 `0x0022bdb8`, 33 `0x00231388`, 38 `0x0022ae78`, 39 `0x002312e8`,
- * 40 `0x0022bfd8`, and 41 `0x0022c7f0`. Slot 42 is inherited unchanged, which an earlier reading
- * recorded as an override.
+ * 40 `0x0022bfd8`, and 41 `0x0022c7f0`. Slot 42 is inherited unchanged.
  */
 class MetJukeboxEditPlaylistScreen : public MetJukeboxBaseScreen {
 public:

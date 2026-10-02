@@ -25,8 +25,7 @@ public:
     /**
      * Show or hide the indicator, `<layout> loop<n>.mesh`.
      *
-     * The routine is titled `UnidentifiedBody00429d30Copy2` in the program, which files it as a
-     * duplicate emission. The constructor is its one caller. The title is inferred.
+     * The constructor is its one caller. The name is inferred.
      *
      * @param nShowing Non-zero to show.
      * @ghidraAddress 0x00429e38

@@ -12,12 +12,12 @@
 /**
  * Remove one saved remix from a card and rewrite the index it was listed in.
  *
- * `14DeleteRemixMCT` in the RTTI descriptor at `0x00902370`, with two public non-virtual bases,
- * `MemcardTask` at offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the
- * 19-entry primary at `0x007da698` and the 21-entry `MemcardUser` table at `0x007da5e8`, whose
- * first two entries and whose slots 19 and 20 adjust `this` back by 28. Slot 20 needs a thunk here
- * and not in LoadRemixMCT, because this class overrides it. An instance is 0x7c bytes, from the
- * constructor's own highest store at `+0x78`. Nothing derives from the class, so that is a lower
+ * Its RTTI descriptor is at `0x00902370`. It has two public non-virtual bases, `MemcardTask` at
+ * offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the 19-entry primary at
+ * `0x007da698` and the 21-entry `MemcardUser` table at `0x007da5e8`, whose first two entries and
+ * whose slots 19 and 20 adjust `this` back by 28. Slot 20 needs a thunk here and not in
+ * LoadRemixMCT, because this class overrides it. An instance is 0x7c bytes, from the constructor's
+ * highest store at `+0x78`. Nothing derives from the class. The size 0x7c is therefore a lower
  * bound.
  *
  * The task enquires about the card, lists `/BASCUS-97125r*`, reads each index to find the remix,

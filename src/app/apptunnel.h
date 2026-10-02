@@ -69,9 +69,9 @@ struct Particle;
 /**
  * Game-side driver of the tunnel the in-game renderer draws.
  *
- * `9AppTunnel` in the RTTI descriptor at `0x008f0860`, with MsgSink as its one public base at
- * offset 0. Its type function is at `0x00453ff8`. The class sits in `app/` beside Renderer, its one
- * constructor caller, and it is a game-side class rather than a Rnd one.
+ * Its RTTI descriptor is at `0x008f0860`. It has MsgSink as its one public base at offset 0. Its
+ * type function is at `0x00453ff8`. The class sits in `app/` beside Renderer, its one constructor
+ * caller, and it is a game-side class rather than a Rnd one.
  *
  * The table at `0x0081ba38` has four entries, the same length as MsgSink's table at `0x007ccc40`,
  * and the class therefore introduces no virtual. It overrides the destructor at slot 1 and

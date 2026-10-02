@@ -8,9 +8,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `8CatchMsg` in the RTTI descriptor at `0x00901e00`, with Message as its one base. The object is
- * 0x20 bytes and its vtable is at `0x007e0a28`. The allocation in New() and the allocation in
- * Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00901e00`. It has Message as its one base. The object is 0x20 bytes
+ * and its vtable is at `0x007e0a28`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Every member is public because
  * code outside the class reads it directly with no accessor in the image. AppTunnel's catch

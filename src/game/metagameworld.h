@@ -8,11 +8,11 @@ class RendererBase;
 /**
  * Owner of the front-end world, outside a game session.
  *
- * `13MetaGameWorld` in the RTTI descriptor at `0x00901c90`, with RawController as its one public
- * base at offset 0. The object is 0xc bytes, which the allocation in GameManagerImpl::Start()
- * fixes, so the inherited vptr at `+0x00` is followed by two members of its own. Its vtable at
- * `0x00810f58` has three entries and a zero terminator at index 3, the type function at
- * `0x003d45e8`, the destructor at `0x003d4790`, and the RawController override below.
+ * Its RTTI descriptor is at `0x00901c90`. It has RawController as its one public base at offset 0.
+ * The allocation in GameManagerImpl::Start() fixes the object at 0xc bytes. The inherited vptr at
+ * `+0x00` is followed by two members. Its vtable at `0x00810f58` has three entries and a zero
+ * terminator at index 3, the type function at `0x003d45e8`, the destructor at `0x003d4790`, and the
+ * RawController override below.
  *
  * The world owns the front-end renderer at `+0x04` and a cheat detector at `+0x08`. A controller
  * reading reaches the detector first and then the renderer, as a RawControllerMsg.
@@ -63,8 +63,7 @@ public:
      *
      * An out-of-line accessor with eighteen callers, among them GameManagerImpl::DrawFrame() and
      * the script cheats, several of which cast the result to MetRenderer. The body is
-     * byte-identical to every other two-instruction accessor of a pointer at `+0x04`, which is why
-     * the program titled it after one of them.
+     * byte-identical to every other two-instruction accessor of a pointer at `+0x04`.
      *
      * @return The renderer.
      * @ghidraAddress 0x003d4858

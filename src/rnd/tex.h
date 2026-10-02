@@ -21,10 +21,10 @@ namespace Rnd {
 /**
  * Texture, as a bitmap path plus the load state of its mip levels.
  *
- * `Q23Rnd3Tex` in the RTTI descriptor at `0x008ef140`, with `Rnd::Object` as its one public
- * non-virtual base at offset 0. The class factory allocates 0x58 bytes, so the texture's own
- * members occupy `+0x1c` through `+0x57`. The implementation file is `rndtex.cpp`, attested by its
- * own assert strings, and the bitmap header it includes is `C:/FREQ/src/rndartt/abitmap.h`.
+ * Its RTTI descriptor is at `0x008ef140`. It has `Rnd::Object` as its one public non-virtual base
+ * at offset 0. The class factory allocates 0x58 bytes. The texture's members therefore occupy
+ * `+0x1c` through `+0x57`. The implementation file is `rndtex.cpp`, attested by its assert strings,
+ * and the bitmap header it includes is `C:/FREQ/src/rndartt/abitmap.h`.
  *
  * A texture owns no pixels. The mip levels load asynchronously into the handle vector, and the
  * hardware residency belongs to the PlayStation 2 subclass Rnd::PsTex, whose GS slot state extends
@@ -243,7 +243,7 @@ public:
      *
      * Vtable slot 8. The body is FreeLoadedBitmaps() followed by AllocateBitmapFromStream().
      * Rnd::PsTex's table addresses a byte-identical per-unit copy at `0x0059a8c8`. Rnd::Movie's
-     * SetFrameSelf() calls it after SetBitmapConfig(). The name is the analysis program's.
+     * SetFrameSelf() calls it after SetBitmapConfig(). The name is inferred.
      *
      * @ghidraAddress 0x004e73c8
      */

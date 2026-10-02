@@ -5,10 +5,9 @@
 /**
  * Effect that sets a channel's volume controller while it is applied.
  *
- * `14VolumeEffector` in the RTTI descriptor at `0x008ef6c0`, with Effector as its one base. The
- * object is 0x20 bytes, which the factory's allocation at `0x001a0e64` measures. Its table is at
- * `0x007de810`.
- * The factory reads the controller value from configuration code 0x392.
+ * Its RTTI descriptor is at `0x008ef6c0`. It has Effector as its one base. The factory's
+ * allocation at `0x001a0e64` measures the object at 0x20 bytes. Its table is at `0x007de810`. The
+ * factory reads the controller value from configuration code 0x392.
  */
 class VolumeEffector : public Effector {
 public:

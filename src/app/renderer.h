@@ -26,10 +26,10 @@ class TickClock;
 /**
  * In-game renderer that drives the tunnel, the overlay, and the arena for one game.
  *
- * `8Renderer` in the RTTI descriptor at `0x008efc70`, with two public non-virtual bases, MsgSource
- * at `+0x00` and RendererBase at `+0x14`. Its type function is at `0x00431f18`. The class sits in
- * `app/` beside RendererBase on sibling convention alone. No file path, assert, or anonymous
- * namespace marker in the image places it.
+ * Its RTTI descriptor is at `0x008efc70`. It has two public non-virtual bases, MsgSource at `+0x00`
+ * and RendererBase at `+0x14`. Its type function is at `0x00431f18`. The class sits in `app/`
+ * beside RendererBase on sibling convention alone. No file path, assert, or anonymous namespace
+ * marker in the image places it.
  *
  * The base offsets follow from the base sizes in the same way as for MetRenderer. MsgSource is 0x14
  * bytes and RendererBase is 0x48, and the first member of this class is therefore at `+0x5c`. The
@@ -343,17 +343,12 @@ extern RndAsyncLoader *g_pLevelLoader;
 /**
  * Arena name g_pArenaLoader was started for, empty when none.
  *
- * The Ghidra program labels it `g_abArenaName`, the prefix its naming check requires for an
- * aggregate.
- *
  * @ghidraAddress 0x006e2528
  */
 extern HxStr g_arenaName;
 
 /**
  * Level name g_pLevelLoader was started for, empty when none.
- *
- * The Ghidra program labels it `g_abLevelName`, for the reason recorded on g_arenaName.
  *
  * @ghidraAddress 0x006e2530
  */

@@ -8,9 +8,9 @@ namespace Py {
 /**
  * Python-visible wrapper that points back at an extension module's C++ object.
  *
- * `Q22Py22ExtensionModuleBasePtr` in the RTTI descriptor at `0x00902360`, with
- * `Py::PythonExtension<Py::ExtensionModuleBasePtr>` at offset 0 as its one base. Its accessor is
- * at `0x005abdb8`, and the mangled name string sits at `0x00833488`.
+ * Its RTTI descriptor is at `0x00902360`. It has `Py::PythonExtension<Py::ExtensionModuleBasePtr>`
+ * at offset 0 as its one base. Its accessor is at `0x005abdb8`, and the mangled name string sits at
+ * `0x00833488`.
  *
  * The class passes itself as its base's template parameter, which is how PyCXX gives an extension
  * type its own Python type object. Released PyCXX hides the same wrapper inside `Extensions.hxx`

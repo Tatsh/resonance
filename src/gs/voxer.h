@@ -23,11 +23,11 @@ class TickClock;
 /**
  * Pitcher that drives the vocal track.
  *
- * `5Voxer` in the RTTI descriptor at `0x008f0830`, with Pitcher as its one base. Its three tables
- * are at `0x007e61a8`, `0x007e6180`, and `0x007e6150`, and it overrides exactly the two slots
- * Pitcher leaves pure: HandleMessage() in the primary table and Tick() in the TickTask table.
- * VoxingSTG's tagged allocation measures the object at 0x70 bytes, and VoxingSTG builds exactly
- * one of these without branching.
+ * Its RTTI descriptor is at `0x008f0830`. It has Pitcher as its one base. Its three tables are at
+ * `0x007e61a8`, `0x007e6180`, and `0x007e6150`, and it overrides exactly the two slots Pitcher
+ * declares pure: HandleMessage() in the primary table and Tick() in the TickTask table. VoxingSTG's
+ * tagged allocation measures the object at 0x70 bytes, and VoxingSTG builds exactly one of these
+ * without branching.
  *
  * The constructor takes four arguments, the fourth in `t0`, and fixes the layout of the derived
  * part. It constructs the TickTask base with a period of 1920 ticks, which is one measure at 480

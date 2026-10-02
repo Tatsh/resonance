@@ -491,7 +491,7 @@ enum HardEffectSttEntry {
 constexpr int kSpu2EffectDepthShift = 8;
 
 // The command block ConfigureSpu2Effects() fills and submits under kSoundSelectorHardEffect. The
-// driver reads the whole 0x80-byte block. The fields are titled from the template each is read
+// driver reads the whole 0x80-byte block. The fields are named after the template each is read
 // from, and their meaning to the driver is unrecovered.
 struct HardEffectCommand {
     short mSttWords[2];            // +0x00 stt entries 0 and 2

@@ -5,11 +5,10 @@ namespace Mid {
 /**
  * Sink a Standard MIDI File reader delivers one event at a time to.
  *
- * `Q23Mid8Receiver` in the RTTI descriptor at `0x0086f5f0`, a leaf with no base list. The class has
- * no data member, so the vptr sits at `+0x00` and the object is four bytes. Its table is at
- * `0x007e7740` and has sixteen entries with a zero terminator at index 16. Every one of the
- * fourteen virtuals below is a two-instruction `jr ra` default, so an unoverridden slot does
- * nothing.
+ * Its RTTI descriptor is at `0x0086f5f0`. It is a leaf with no base list. The class has no data
+ * member. The vptr sits at `+0x00`, and the object is four bytes. Its table is at `0x007e7740` and
+ * has sixteen entries with a zero terminator at index 16. Every one of the fourteen virtuals below
+ * is a two-instruction `jr ra` default. An unoverridden slot does nothing.
  *
  * LevelConverter is the one subclass in the image, and it overrides slots 2 through 10.
  * Mid::FileReader is the one caller, and its call sites fix slots 2 through 11. Slots 3 through 7

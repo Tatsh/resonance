@@ -5,10 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `15NearestTrackMsg` in the RTTI descriptor at `0x008ef820`, with Message as its one base. The
- * object is 0x8 bytes and its vtable is at `0x00812ae0`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008ef820`. It has Message as its one base. The object is 0x8 bytes
+ * and its vtable is at `0x00812ae0`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(), so the offsets and widths are
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so

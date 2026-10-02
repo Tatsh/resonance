@@ -35,9 +35,9 @@ enum ACanvasClipCode {
 /**
  * Drawing surface over an ABitmap, with a clip rectangle.
  *
- * The name comes from the RTTI descriptor at 0x0086f660, whose mangled form is `7ACanvas`. The
- * descriptor records no base class. The virtual function table pointer sits after the data
- * members at offset 0x20, the position the toolchain uses for a class with no base.
+ * Its RTTI descriptor is at 0x0086f660 and lacks a base class. The virtual function table
+ * pointer sits after the data members at offset 0x20, the position the toolchain uses for a class
+ * with no base.
  *
  * The table at 0x00837dc8 has 85 slots and terminates on the all zero entry at 0x00838070. Slot 0
  * is the type function at 0x005ead28 and slot 1 is the destructor. 22 of the remaining slots point
@@ -69,8 +69,7 @@ enum ACanvasClipCode {
  * native form a value in the canvas storage width. On a 32 bit canvas the 8888 and native forms
  * coincide, and ACanvas32 implements the native pair by forwarding to the 8888 pair.
  *
- * The analysis program titles the 8888 accessors PutPixel32 and GetPixel32, because a Ghidra
- * symbol cannot be overloaded. The names here are the overload set the toolchain compiled.
+ * The 8888 accessors are an overload set, as the toolchain compiled them.
  *
  * Both data members are public. Rnd::Font::ComputeCharUV() reads mBitmap.mWidth and
  * mBitmap.mHeight from outside the hierarchy and the image supplies no accessor, so the access
@@ -116,7 +115,7 @@ public:
      * Construct a canvas over a fresh pixel rectangle shaped like a bitmap.
      *
      * Rewrites a format code of kABitmapFormatRle8 to kABitmapFormatLinear8 in a copy, then calls
-     * CreateForBitmap() with allocation requested. The program lists no caller.
+     * CreateForBitmap() with allocation requested. The image has no caller.
      *
      * @param bitmap The description to copy.
      * @return The new canvas, or null.
@@ -129,7 +128,7 @@ public:
      *
      * Builds the rectangle through the sub-rectangle ABitmap constructor and selects the subclass
      * through the jump table at 0x00837db0. Unlike CreateForBitmap(), a kABitmapFormatLinear4
-     * rectangle gets an ACanvasLin8, and kABitmapFormatRle8 gets no canvas. The program lists no
+     * rectangle gets an ACanvasLin8, and kABitmapFormatRle8 gets no canvas. The image has no
      * caller.
      *
      * @param source The bitmap whose pixels the canvas draws into.
@@ -1062,7 +1061,7 @@ protected:
      * consumed through ARleReader::SkipRows(), so the reader then addresses the first row that
      * remains. The row fields are not written when no column remains.
      *
-     * The program lists no caller. BlitRle8(), BlitRemapRle8(), and BlitBlendRle8() each compile
+     * The image has no caller. BlitRle8(), BlitRemapRle8(), and BlitBlendRle8() each compile
      * an inlined copy.
      *
      * @param source The source bitmap.
@@ -1119,7 +1118,7 @@ protected:
     /**
      * Intersect a rectangle with the clip rectangle in place.
      *
-     * Non-virtual and orphaned: the program lists no caller.
+     * Non-virtual, and the image has no caller.
      *
      * @param pRect The rectangle to clip.
      * @return Zero when the intersection is empty.
@@ -1241,7 +1240,7 @@ protected:
      * Copy a source bitmap through a remap table, choosing the arm by source format.
      *
      * Non-virtual, and orphaned in the shipped image: it fills no slot of this class's table and
-     * the program lists no caller and no data reference. Format code 0 goes to BlitRemap4(), code 1
+     * the image has no caller and no data reference. Format code 0 goes to BlitRemap4(), code 1
      * to BlitRemap8(), and code 5 to BlitRemapRle8NoClip(). Every other code returns without
      * drawing, so only the three indexed formats are handled.
      *
@@ -1628,8 +1627,7 @@ protected:
  * Read by ACanvas8::SetColorIndex() and every other slot that resolves a palette index, always
  * after the bitmap palette is found null.
  *
- * Every reference the analysis program lists is a read, 40 of them, and the listing may be
- * truncated at that count. No writer was located, so the fallback may be permanently null.
+ * No writer was located. The fallback may be permanently null.
  *
  * @ghidraAddress 0x0086f6f0
  */

@@ -39,11 +39,11 @@ class TickClock;
 /**
  * Owner of the world a game session runs in.
  *
- * `11GrooveWorld` in the RTTI descriptor at `0x008eff70`, with MsgSink as a public base at offset 0
- * and RawController as a public base at `+0x04`. The object is 0xbc bytes, which the allocation in
- * GameManagerImpl::CreateWorld() fixes. The translation unit is `GrooveWorld.cpp`, which the
- * tagged release at `0x00194d5c` records with line 302, and ControllerCmd and the file-local
- * FuncCmd and ExitCmd share it.
+ * Its RTTI descriptor is at `0x008eff70`. It has MsgSink as a public base at offset 0 and
+ * RawController as a public base at `+0x04`. The allocation in GameManagerImpl::CreateWorld() fixes
+ * the object at 0xbc bytes. The tagged release at `0x00194d5c` records the translation unit as
+ * `GrooveWorld.cpp` with line 302. ControllerCmd and the file-local FuncCmd and ExitCmd share the
+ * unit.
  *
  * Two vtables belong to the class, and the secondary one precedes the primary one in memory. The
  * RawController subobject addresses `0x007dc628`, whose three entries each adjust `this` by `-4`,

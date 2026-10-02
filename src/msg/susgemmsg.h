@@ -8,9 +8,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `9SusGemMsg` in the RTTI descriptor at `0x00902270`, with Message as its one base. The object is
- * 0x1c bytes and its vtable is at `0x008124f8`. The allocation in New() and the allocation in
- * Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00902270`. It has Message as its one base. The object is 0x1c bytes
+ * and its vtable is at `0x008124f8`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * A second, identical vtable at `0x007decf0` is emitted in the gem makers' unit, and
  * AxeNewGemMaker::PostGemMessages() stores it at `0x001a3094` and `0x001a3110`.

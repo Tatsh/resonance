@@ -16,11 +16,11 @@ class RawControllerMsg;
 /**
  * Translator from controller readings to the players of one game world.
  *
- * `8InputMap` in the RTTI descriptor, with MsgSource at offset 0 and MsgSink at `+0x14`. Its two
- * tables are at `0x007cf6c0` and `0x007cf698`, the second adjusting `this` by `-20`. GrooveWorld
- * creates the one instance with a 0x60-byte allocation and the constructor at `0x00119160`, which
- * receives the application and the address of the world's player vector. The instance records
- * itself in g_pInputMap.
+ * It has MsgSource at offset 0 and MsgSink at `+0x14`. Its two tables are at `0x007cf6c0` and
+ * `0x007cf698`, the second adjusting `this` by `-20`. GrooveWorld creates the one instance with a
+ * 0x60-byte allocation and the constructor at `0x00119160`. The constructor receives the
+ * application and the address of the world's player vector. The instance records itself in
+ * g_pInputMap.
  *
  * Each Binding ties one player slot to one action. mBindingMap keys every physical control, built
  * by MakeKey() from a device, a port, and a button, to the binding it drives. A RawControllerMsg

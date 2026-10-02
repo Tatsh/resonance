@@ -7,9 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `18ShowEraseEffectMsg` in the RTTI descriptor at `0x00901df0`, with Message as its one base. The
- * object is 0x18 bytes and its vtable is at `0x007ddb50`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00901df0`. It has Message as its one base. The object is 0x18 bytes
+ * and its vtable is at `0x007ddb50`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Scratcher::EraseGemRange()
  * builds it on the stack at `0x001d0194` with the erased range as a first bar and an end bar one

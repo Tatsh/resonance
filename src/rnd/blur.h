@@ -19,8 +19,8 @@ namespace Rnd {
 /**
  * Motion trail that redraws one drawable at the transforms it recently occupied.
  *
- * `Q23Rnd4Blur` in the RTTI descriptor at `0x008ef068`, whose name string is at `0x00821b28` and
- * whose single base entry at `0x00821b38` records `Rnd::Drawable` at offset 0, non-virtual and
+ * Its RTTI descriptor is at `0x008ef068`, its name string at `0x00821b28`, and its single base
+ * entry at `0x00821b38` records `Rnd::Drawable` at offset 0, non-virtual and
  * public. The class is 0x4c bytes, which the factory at `0x004c3570` proves by allocating exactly
  * that much, and the `Rnd::Object` virtual base subobject sits at `0x30`, which the constructor
  * proves by writing that address into the virtual-base pointer at `+0x00`.
@@ -33,8 +33,8 @@ namespace Rnd {
  * The member titles come from the text DumpText() writes: "[Blur]", "mesh:", " length:",
  * " rate:", "falloff:", and " text:".
  *
- * Ghidra shipped the name `RndBlur__*` on seventeen routines between `0x004b9a68` and `0x004bf858`
- * that belong to `Rnd::String` instead. This class owns only the routines listed below.
+ * The seventeen routines between `0x004b9a68` and `0x004bf858` belong to `Rnd::String`. Only the
+ * routines listed below belong to this class.
  */
 class Blur : public Drawable {
 public:

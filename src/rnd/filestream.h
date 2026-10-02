@@ -11,8 +11,8 @@ namespace Rnd {
 /**
  * Stream over a C library `FILE`.
  *
- * `Q23Rnd10FileStream` in the RTTI descriptor at `0x008eefd8`, single inheritance from
- * `Rnd::Stream` at offset 0. The object is 8 bytes and its vtable is at `0x008261d8`.
+ * Its RTTI descriptor is at `0x008eefd8`. It has single inheritance from `Rnd::Stream` at offset 0.
+ * The object is 8 bytes and its vtable is at `0x008261d8`.
  *
  * Every transfer goes straight to `fread` or `fwrite` with a one-byte element size, and the end
  * and failure tests read bits 0x20 and 0x40 of the `FILE` flags rather than calling `feof` and

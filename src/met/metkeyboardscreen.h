@@ -18,8 +18,8 @@ class Button;
 /**
  * On-screen keyboard.
  *
- * `17MetKeyboardScreen` in the RTTI descriptor at `0x008f29f0`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008f29f0`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable is at `0x007f5390`, the same length as the MetScreen table, so the
  * class declares no virtual of its own.

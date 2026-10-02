@@ -10,7 +10,7 @@
 /**
  * Task the scheduler runs again every fixed number of MIDI ticks.
  *
- * `8TickTask` in the RTTI descriptor at `0x00901b80`, with Attachment as its one base, and titled
+ * Its RTTI descriptor is at `0x00901b80`. It has Attachment as its one base, and it is named
  * after `AppTickTask.cpp`, the translation unit its file-local `Cmd` class records. Its vtable is
  * at `0x007d30c8` and runs five entries. Slot 2 retains Attachment::Destroy() and slot 4 addresses
  * the shared pure-virtual stub at `0x005381a8`, which is what makes the class abstract.

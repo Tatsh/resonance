@@ -8,10 +8,10 @@
 /**
  * Abstract tick-driven task that both receives and sends messages.
  *
- * `7Pitcher` in the RTTI descriptor at `0x00901c60`, with MsgSink at offset 0, MsgSource at offset
- * 4, and TickTask at offset 24. The class declares no data member of its own, which its destructor
- * proves by tearing down only the two subobjects, so it is 0x38 bytes and every derived class's
- * data starts at `+0x38`.
+ * Its RTTI descriptor is at `0x00901c60`. It has MsgSink at offset 0, MsgSource at offset 4, and
+ * TickTask at offset 24. The class declares no data member, and its destructor tears down only the
+ * two subobjects. The object is therefore 0x38 bytes, and every derived class's data starts at
+ * `+0x38`.
  *
  * Its three tables are at `0x007e1520`, `0x007e14f8`, and `0x007e14c8`. Two slots address the
  * shared pure-virtual stub: MsgSink::HandleMessage() in the primary table and TickTask::Tick() in

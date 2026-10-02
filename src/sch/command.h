@@ -12,15 +12,14 @@ namespace Sch {
 /**
  * Base of every action the scheduler performs on behalf of another subsystem.
  *
- * `Q23Sch7Command` in the RTTI descriptor at `0x008f0950`, deriving publicly from Attachment at
- * offset 0. The base subobject supplies the reference count at `+0x00` and the vtable pointer at
- * `+0x04`, this class adds one word at `+0x08`, and an instance is 0x0c bytes. Every derived class
- * starts its own data at `+0x0c`. Three independent measurements agree on that boundary. The
- * inlined construction at `0x0013a9a8` allocates 0x10 bytes and writes the reference count, the
- * word at `+0x08`, the vtable pointer, and one derived pointer at `+0x0c`; `ExitCmd::Save()` at
- * `0x00194a50` streams `+0x0c`, `+0x10`, and `+0x14`; and `GsPeriodical::PeriodicalCmd::Execute()`
- * at `0x001b4820` reads `+0x0c` and `+0x10`. The layout closes arithmetically with no unaccounted
- * byte.
+ * Its RTTI descriptor is at `0x008f0950`. It derives publicly from Attachment at offset 0. The base
+ * subobject supplies the reference count at `+0x00` and the vtable pointer at `+0x04`, this class
+ * adds one word at `+0x08`, and an instance is 0x0c bytes. Every derived class starts its own data
+ * at `+0x0c`. Three independent measurements agree on that boundary. The inlined construction at
+ * `0x0013a9a8` allocates 0x10 bytes and writes the reference count, the word at `+0x08`, the vtable
+ * pointer, and one derived pointer at `+0x0c`; `ExitCmd::Save()` at `0x00194a50` streams `+0x0c`,
+ * `+0x10`, and `+0x14`; and `GsPeriodical::PeriodicalCmd::Execute()` at `0x001b4820` reads `+0x0c`
+ * and `+0x10`. The layout closes arithmetically with no unaccounted byte.
  *
  * The vtable at `0x008288c0` runs eight entries and then a zero entry. The interface is therefore
  * complete rather than partial:
@@ -44,11 +43,11 @@ namespace Sch {
  *
  * Two of the six member titles are recovered and four are inferred. Save() and Load() follow from
  * their bodies, and both bodies stream one field after another in the same order through the two
- * stream interfaces. CmdID() follows from the static member the RTTI records as
- * `_13ControllerCmd$sCmdID` and from the two diagnostics `Streamed Command ID %ld` and `Cannot
+ * stream interfaces. CmdID() follows from the static member
+ * `ControllerCmd::sCmdID` and from the two diagnostics `Streamed Command ID %ld` and `Cannot
  * find ID %ld in Command Factory List`; every slot-3 body returns one per-class word. The image
- * initialises four of the twenty-four words to a non-zero identifier, and the program records a
- * single reader and no writer for each of the four: ControllerCmd 2 at `0x0067f238`,
+ * initialises four of the twenty-four words to a non-zero identifier, and each of the four has a
+ * single reader and no writer: ControllerCmd 2 at `0x0067f238`,
  * DoGameSystemPlayCmd 4 at `0x006682b8`, EndRecordingCmd 6 at `0x006693e8`, and ExitCmd 7 at
  * `0x0067f24c`. The other twenty words are initialised to zero.
  * Execute() and Print() are inferred from their bodies alone, and no string in the image

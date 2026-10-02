@@ -17,10 +17,10 @@ class Player;
 /**
  * Shared base of the four per-instrument gameplay stages.
  *
- * `15ScoreTrackGraph` in the RTTI descriptor at `0x0086f640`, built through the built-in descriptor
- * constructor with no base list. Four classes derive from it and the RTTI records each with this
- * class at offset 0: AxingSTG at `0x008efe70`, CatchingSTG at `0x00902230`, PitchingSTG at
- * `0x00902240`, and VoxingSTG at `0x008efe80`. The shared base is recovered from those four
+ * Its RTTI descriptor is at `0x0086f640`, built through the built-in descriptor constructor with
+ * no base list. Four classes derive from it, and the RTTI records each with this class at offset 0:
+ * AxingSTG at `0x008efe70`, CatchingSTG at `0x00902230`, PitchingSTG at `0x00902240`, and VoxingSTG
+ * at `0x008efe80`. The shared base is recovered from those four
  * descriptors and from the table walk rather than inferred from the names.
  *
  * Its table is at `0x007e5148` and runs thirteen entries to the zero terminator, and all four
@@ -35,10 +35,9 @@ class Player;
  * player, mixer, and synthesiser go through the tagged allocator under the tag `MsgSink`, and the
  * quantiser through the plain allocator.
  *
- * An earlier pass titled the five default bodies for AxingSTG, which owns none of them. The table
- * diff against each derived table is what corrects the attribution: `0x001cf750`, `0x001cf758`,
- * `0x001cf760`, `0x001cf768`, and `0x001cf778` sit in this class's own table at slots 5, 9, 10,
- * 11, and 12, and AxingSTG, PitchingSTG, and VoxingSTG inherit all five.
+ * The five default bodies at `0x001cf750`, `0x001cf758`, `0x001cf760`, `0x001cf768`, and
+ * `0x001cf778` sit in this class's table at slots 5, 9, 10, 11, and 12, and AxingSTG, PitchingSTG,
+ * and VoxingSTG inherit all five.
  *
  * Each slot's comment records its table index. Start() and Stop() (slots 2 and 3) are the start
  * and the stop of a stage, as the four overrides establish between them. Each Start() override

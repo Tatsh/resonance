@@ -19,12 +19,12 @@ namespace Rnd {
 /**
  * Root of a loadable scene.
  *
- * `Q23Rnd4View` in the RTTI descriptor at `0x008ef120`. The descriptor lists four public
- * non-virtual bases and fixes their subobject offsets, `Rnd::Animatable` at `+0x00`,
- * `Rnd::Drawable` at `+0x18`, `Rnd::Transformable` at `+0x30`, and `Rnd::Collideable` at `+0xe0`.
- * The shared `Rnd::Object` virtual base sits at `+0x100`, and the constructor writes that address
- * into the virtual-base pointer of all four subobjects. View's own four fields occupy `+0xf0`
- * through `+0xff` and start zeroed.
+ * Its RTTI descriptor is at `0x008ef120`. The descriptor lists four public non-virtual bases and
+ * fixes their subobject offsets, `Rnd::Animatable` at `+0x00`, `Rnd::Drawable` at `+0x18`,
+ * `Rnd::Transformable` at `+0x30`, and `Rnd::Collideable` at `+0xe0`. The shared `Rnd::Object`
+ * virtual base sits at `+0x100`, and the constructor writes that address into the virtual-base
+ * pointer of all four subobjects. View's own four fields occupy `+0xf0` through `+0xff` and start
+ * zeroed.
  *
  * Five vtables belong to the class, one per subobject plus the one the `Rnd::Object` subobject
  * vptr addresses. They are `0x00823628` (Animatable), `0x00823600` (Drawable), `0x008235e0`
@@ -145,7 +145,7 @@ private:
     void RemoveObjectRefs();
 
 public:
-    // Declared in recovered offset order. Each flag is titled from the class key of the factory
+    // Declared in recovered offset order. Each flag is named after the class key of the factory
     // that sets it. Every writer is one of those factories and no reader was located, so the four
     // are public because nothing in the image constrains them further.
 

@@ -20,11 +20,11 @@ class Text;
 /**
  * Selectable widget, as one mesh and one text run plus a palette for each.
  *
- * `Q23Rnd6Button` in the RTTI descriptor at `0x008efde0`, with `Rnd::Object` as its only public
- * non-virtual base at offset 0. The class is 0x40 bytes, which the factory at `0x005346f8` pins by
- * requesting exactly that many. The Rnd::Object vptr therefore sits at `+0x18` and this class's
- * members run from `+0x1c` to `+0x3f` with no padding. The eight-entry vtable is at `0x008282d8`,
- * which is the Rnd::Object set exactly; the class declares no virtual of its own.
+ * Its RTTI descriptor is at `0x008efde0`. It has `Rnd::Object` as its only public non-virtual base
+ * at offset 0. The factory at `0x005346f8` pins the class at 0x40 bytes by requesting exactly
+ * that many. The Rnd::Object vptr therefore sits at `+0x18` and this class's members run from
+ * `+0x1c` to `+0x3f` with no padding. The eight-entry vtable at `0x008282d8` is the Rnd::Object
+ * set exactly, and the class does not declare a virtual.
  *
  * The member titles come from the text DumpText() writes, "state: ", " mesh: ", " text: ",
  * "mats: ", and "fonts: ".

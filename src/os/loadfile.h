@@ -83,9 +83,7 @@ void AppendPathComponent(const char *pszComponent, char *pszPath);
 /**
  * Close an open file, whether it is an ark stream or a loose file.
  *
- * The whole body forwards to the SDK primitive at 0x0056af88 with the argument passed through. The
- * Ghidra program titles it ReleaseLoadFileHandle rather than this name, because the bridge's naming
- * policy rejects a title sharing every token of FileClose(). Its plate comment records the pairing.
+ * The whole body forwards to the SDK primitive at 0x0056af88 with the argument passed through.
  *
  * @param nFile The file to close.
  * @ghidraAddress 0x0055c438
@@ -139,8 +137,7 @@ extern "C" void InflateGzFileWhole(int nFile, void *pBuffer);
  * that: the stored bytes sit against the end of the destination and the inflate runs forward over
  * the whole of it.
  *
- * The routine still carries a placeholder title in the Ghidra program. The name here is inferred
- * from its arguments and from the gzip state it writes.
+ * The name is inferred from its arguments and from the gzip state it writes.
  *
  * @param pSource The stored bytes.
  * @param nSourceLength The number of stored bytes.

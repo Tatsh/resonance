@@ -12,7 +12,7 @@ class OBStream;
 /**
  * One advertised network game: where it is hosted and the settings it plays.
  *
- * `8GameInfo` in the RTTI descriptor built by the type function at `0x001879c8`, with no base. The
+ * Its RTTI descriptor is built by the type function at `0x001879c8`, and it has no base. The
  * members are a TransportAddress at `+0x00`, a word at `+0x20`, a string at `+0x24`, a GameParams
  * at `+0x2c`, and a word at `+0x64`, and the vptr follows at `+0x68`. Its table at `0x007db578`
  * has four entries (the type function, the destructor, Save(), and Load()). The member titles

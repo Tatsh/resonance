@@ -8,8 +8,8 @@ class MetButtonList;
 /**
  * Screen that picks what kind of saved data to delete from a memory card, remixes or FreQs.
  *
- * `20MetMemCardTypeScreen` in the RTTI descriptor at `0x00901f30`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x00901f30`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable at `0x007fc488` is the same length as the MetScreen table, and the
  * class declares no new virtual.

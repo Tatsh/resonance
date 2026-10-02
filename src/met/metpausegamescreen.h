@@ -5,10 +5,10 @@
 /**
  * Pause screen.
  *
- * `18MetPauseGameScreen` in the RTTI descriptor at `0x00902310`, with MetPauseBaseScreen as its one
- * public non-virtual base at offset 0. The 40-entry vtable at `0x00803280` is the same length as
- * the MetPauseBaseScreen table, so the class declares no virtual of its own. New() allocates 0xb0
- * bytes, the size of the base, so the class adds no member.
+ * Its RTTI descriptor is at `0x00902310`. It has MetPauseBaseScreen as its one public non-virtual
+ * base at offset 0. The 40-entry vtable at `0x00803280` is the same length as the
+ * MetPauseBaseScreen table, and the class declares no new virtual. New() allocates 0xb0 bytes, the
+ * size of the base, and the class adds no member.
  *
  * The destructor at `0x0031fac8` is compiler-generated.
  */

@@ -9,9 +9,9 @@ class Message;
 /**
  * Receiver of engine messages.
  *
- * `7MsgSink` in the RTTI descriptor at `0x0086f780`, built from the length-prefixed literal at
- * `0x007cccb0` with no base list. The class declares no data member, and the compiler-generated
- * vptr therefore lands at offset 0 over a four-byte subobject. Player corroborates the size by
+ * Its RTTI descriptor is at `0x0086f780`, built from the length-prefixed literal at `0x007cccb0`
+ * with no base list. The class declares no data member, and the compiler-generated vptr therefore
+ * lands at offset 0 over a four-byte subobject. Player corroborates the size by
  * placing its MsgSink base at `+0x08` and its MsgSource base at `+0x0c`. 134 classes derive from
  * MsgSink and 40 of them derive directly.
  *

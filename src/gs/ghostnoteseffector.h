@@ -5,9 +5,9 @@
 /**
  * Effect that reports its identity and does no work of its own.
  *
- * `18GhostNotesEffector` in the RTTI descriptor at `0x008f0110`, with Effector as its one base. The
- * class declares no data member, and the factory at `0x001a0df0` allocates 0x14 bytes for it. That
- * allocation is the size of the base alone, and it therefore fixes the size of the base as well.
+ * Its RTTI descriptor is at `0x008f0110`. It has Effector as its one base. The class declares no
+ * data member, and the factory at `0x001a0df0` allocates 0x14 bytes for it. That allocation is the
+ * size of the base alone, and it therefore fixes the size of the base as well.
  *
  * The table at `0x007de7a0` runs GetTypeInfo, the destructor, the two inherited MsgSource
  * registration routines, then Type() and Enable().

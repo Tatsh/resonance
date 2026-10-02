@@ -9,8 +9,7 @@
  * One level in a stage's list.
  *
  * RebuildStageLists() builds one per level name, with mOrder from configuration code 0x25e. The
- * record is 12 bytes, the stride every routine over the lists uses. The name is a placeholder,
- * taken from the program's titles for the sort routines that order the lists.
+ * record is 12 bytes, the stride every routine over the lists uses. The name is a placeholder.
  */
 struct StageListEntry {
     HxStr mName; /*!< The level's name. +0x00 */

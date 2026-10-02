@@ -5,10 +5,9 @@
 /**
  * Source of the powerbar a bar of one track awards when its phrase is caught.
  *
- * `11PowerbarMgr` in the RTTI, with MsgSource as its one base at offset 0 and no members of its
- * own, so the object is the 0x14-byte MsgSource subobject. Its table at `0x007e2c70` keeps
- * MsgSource's AddSink() and RemoveSink() and adds GetPowerbar() at slot 4, which addresses the
- * shared pure-virtual stub.
+ * It has MsgSource as its one base at offset 0 and no further members. The object is the 0x14-byte
+ * MsgSource subobject. Its table at `0x007e2c70` retains MsgSource's AddSink() and RemoveSink() and
+ * adds GetPowerbar() at slot 4. Slot 4 addresses the shared pure-virtual stub.
  *
  * PhraseMgr creates the one it keeps at `+0x2c`, and PhraseMgr::GetPowerbar() forwards to it.
  *

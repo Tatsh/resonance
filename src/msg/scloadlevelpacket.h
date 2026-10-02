@@ -11,9 +11,9 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `17SCLoadLevelPacket` in the RTTI descriptor at `0x008ef610`, with ToAllGameControllersPacket
- * as its one base. The object is 0x4c bytes and its vtable is at `0x00814410`. The payload comes
- * from the copy constructor at `0x003f3c48`, which Clone() delegates to, and it accounts for the
+ * Its RTTI descriptor is at `0x008ef610`. It has ToAllGameControllersPacket as its one base. The
+ * object is 0x4c bytes and its vtable is at `0x00814410`. The payload comes from the copy
+ * constructor at `0x003f3c48`. Clone() delegates to it, and the payload accounts for the
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * Save() and Load() transfer the game settings through GameParams' own virtual Save() and Load()

@@ -8,8 +8,8 @@ namespace Py {
 /**
  * Handle on a one-character Python string, and the element type of Py::String.
  *
- * `Q22Py4Char` in the RTTI descriptor at `0x009020d0`, with Py::Object at offset 0 as its one
- * base. Its accessor is at `0x004c7cc8`.
+ * Its RTTI descriptor is at `0x009020d0`. It has Py::Object at offset 0 as its one base. Its
+ * accessor is at `0x004c7cc8`.
  *
  * The vtable at `0x00821f90` has three entries, the same shape as Py::Object.
  *

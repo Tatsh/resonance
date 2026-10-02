@@ -5,9 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `14FreestyleFXMsg` in the RTTI descriptor at `0x00902260`, with Message as its one base. The
- * object is 0x10 bytes and its vtable is at `0x007ce648`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00902260`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x007ce648`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The names come from Gamer's
  * two builds, which store a track, a first bar, and an end bar (the first bar plus 8 at

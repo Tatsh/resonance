@@ -10,9 +10,9 @@
 /**
  * Ring of front-end buttons with one of them selected.
  *
- * `13MetButtonList` in the RTTI descriptor at `0x0086f5f8`, a leaf class with no base. Following
- * the g++ 2.x layout for a class with no base, the vptr sits after the data members at `+0x14`,
- * and the object is 0x18 bytes. The five-entry vtable is at `0x007e90f8`.
+ * Its RTTI descriptor is at `0x0086f5f8`. It is a leaf class with no base. Following the g++ 2.x
+ * layout for a class with no base, the vptr sits after the data members at `+0x14`, and the object
+ * is 0x18 bytes. The five-entry vtable is at `0x007e90f8`.
  *
  * The class supplies its own allocation function, which tags every instance with the literal
  * `MetButtonList` at `0x007e8e10`. That is the one place in the foundation where a Met class
@@ -107,8 +107,7 @@ public:
      * Release every button reference and empty mButtons.
      *
      * The body is the vector clear over mButtons, reached as `this + 4`, with the per-element
-     * release at `0x00520be0`. Ghidra titles the address as a duplicate body, which is what a
-     * clear over a four-byte element compiles to in every class that has one.
+     * release at `0x00520be0`. Every class with a vector of four-byte elements shares this body.
      *
      * @ghidraAddress 0x001fedb0
      */

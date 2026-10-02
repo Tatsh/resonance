@@ -9,23 +9,20 @@
  * Dialogue that swaps the game disc for an expansion disc of more songs and loads the expansion
  * disc archives.
  *
- * `21MetExpansionPakScreen` in the RTTI descriptor at `0x008efdd0`, with two public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00`, and FadeUser at `+140`.
+ * Its RTTI descriptor is at `0x008efdd0`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, and FadeUser at `+140`.
  *
- * The 39-entry primary vtable is at `0x007ebf30`, the same length as the MetScreen table, so the
- * class declares no virtual of its own. A diff against the MetScreen table at `0x0080b6a0` reads
+ * The 39-entry primary vtable is at `0x007ebf30`, the same length as the MetScreen table. The
+ * class declares no new virtual. A diff against the MetScreen table at `0x0080b6a0` reads
  * ten overrides, slots 1, 5, 9, 15, 16, 23, 24, 26, and 38 apart from the type function.
  *
  * The four-entry FadeUser table at `0x007ebf08` adjusts `this` by `-140` in every entry, and its
- * slots 2 and 3 are at `0x0021a128` and `0x00219e80`. An earlier reading recorded both addresses
- * as primary slots 2 and 3. They are not in the primary table at all, and the table diff is what
- * settles that.
+ * slots 2 and 3 are at `0x0021a128` and `0x00219e80`. Neither address is in the primary table.
  *
  * The constructor at `0x00218320` takes only the renderer and the load priority, and supplies
  * `dlg` for the screen name, `metagame/Shared` for the directory, and `dialogue` for the
  * container. It writes `+0x8c`, which is the FadeUser vptr, clears mFade, and then allocates a
- * MetFade over the cleared pointer. An earlier reading of the routine stopped before that
- * allocation.
+ * MetFade over the cleared pointer.
  *
  * The object is exactly 0xc4 bytes. Nothing derives from the class, so no base offset in any
  * descriptor pins the total, and the size comes instead from the `new` expression emitted out of

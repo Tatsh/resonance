@@ -3,10 +3,10 @@
 /**
  * Receiver notified once a queued asynchronous read has finished.
  *
- * The class name comes from the RTTI descriptor `13AsyncCallback`, whose type_info sits at
- * 0x0086f8a8. Both subclasses in the image, MovieAsyncCallback and MovieStreamingAsyncCallback,
- * derive publicly at offset 0 and supply the one pure virtual. An instance is four bytes, which is
- * the vptr alone. The interface therefore stores nothing and needs no constructor.
+ * Its RTTI type_info is at 0x0086f8a8. Both subclasses in the image, MovieAsyncCallback and
+ * MovieStreamingAsyncCallback, derive publicly at offset 0 and supply the one pure virtual. An
+ * instance is four bytes, the vptr alone. The interface therefore does not store data or
+ * need a constructor.
  *
  * A request records its receiver, and the pump at 0x0045f8d8 invokes the receiver once off the
  * completed list, immediately before the request's node is erased. The report arrives on whichever

@@ -9,10 +9,10 @@
 /**
  * One riff of a track at one difficulty level, as a sequence of MIDI messages.
  *
- * `4Riff` in the RTTI descriptor, with MultiMuse as its one base. Its vtable at `0x007e4f78` runs
- * four entries: the type function, the destructor at `0x001cead0`, the retained
- * Attachment::Destroy(), and the Print() override below. The object is 0x1c bytes, the 0x14-byte
- * MultiMuse followed by the two members below.
+ * It has MultiMuse as its one base. Its vtable at `0x007e4f78` runs four entries: the type
+ * function, the destructor at `0x001cead0`, the retained Attachment::Destroy(), and the Print()
+ * override below. The object is 0x1c bytes, the 0x14-byte MultiMuse followed by the two members
+ * below.
  *
  * mId is the difficulty level the riff belongs to. RiffSet stores a riff at the index mId names,
  * and Print() labels it `riff[id=`.

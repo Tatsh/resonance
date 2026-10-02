@@ -10,10 +10,9 @@ namespace Sch {
 /**
  * Scheduler time, as a signed 64-bit count.
  *
- * The type has no RTTI descriptor, because it is not polymorphic. Its title comes from the mangled
- * constructor signature of `Catcher`. The RTTI records that signature as
- * `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, and `Sch::Tick` is
- * therefore the original title of a named type passed by value.
+ * The type has no RTTI descriptor, because it is not polymorphic. Its name comes from the
+ * constructor signature of `Catcher` the image records. That signature passes a `Sch::Tick` by
+ * value.
  *
  * The width is fixed by the code that moves one around. `Sch::TimedCommand` stores two of them,
  * and its constructor at `0x005d32f8` writes both with `sd`, while the scheduler run loop at

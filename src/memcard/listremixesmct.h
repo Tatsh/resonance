@@ -13,13 +13,12 @@ struct MetRemixRecord;
 /**
  * Enumerate every remix saved on one card.
  *
- * `14ListRemixesMCT` in the RTTI descriptor at `0x00902a10`, with two public non-virtual bases,
- * `MemcardTask` at offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the
- * 19-entry primary at `0x007da548` and the 21-entry `MemcardUser` table at `0x007da498`, whose
- * first two and whose slot 19 entries adjust `this` back by 28. An instance is 0x64 bytes, which
- * the constructor's own highest store at `+0x60` bounds from below; nothing derives from the class,
- * so no derived first member pins the size from outside and 0x64 is a lower bound rather than a
- * settled size.
+ * Its RTTI descriptor is at `0x00902a10`. It has two public non-virtual bases, `MemcardTask` at
+ * offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the 19-entry primary at
+ * `0x007da548` and the 21-entry `MemcardUser` table at `0x007da498`, whose first two and whose slot
+ * 19 entries adjust `this` back by 28. The constructor's highest store at `+0x60` bounds an
+ * instance from below at 0x64 bytes. Nothing derives from the class, and no derived first member
+ * pins the size from outside. The size 0x64 is therefore a lower bound rather than a settled size.
  *
  * The task enquires about the card, lists `/BASCUS-97125r*` to find every remix save directory, and
  * then reads the index file out of each one through a `LoadFileMCT` of its own, receiving that

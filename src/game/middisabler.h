@@ -10,10 +10,10 @@ class StdMidiMsg;
 /**
  * Filter that stops a track's notes while it is disabled and passes everything else.
  *
- * `12MidiDisabler` in the RTTI descriptor, with MsgSource at offset 0 and MsgSink at `+0x14`. Its
- * tables are at `0x007df530` and `0x007df508`, the second adjusting `this` by `-20`. The unit spans
- * `0x001a6a58` through `0x001a6fb8`. BGTrackGraph's constructor creates the one instance each
- * background track has, with the constructor expanded inline.
+ * It has MsgSource at offset 0 and MsgSink at `+0x14`. Its tables are at `0x007df530` and
+ * `0x007df508`, the second adjusting `this` by `-20`. The unit spans `0x001a6a58` through
+ * `0x001a6fb8`. BGTrackGraph's constructor creates the one instance each background track has, with
+ * the constructor expanded inline.
  *
  * While mEnabled is clear, HandleMessage() drops every NoteMsg and every StdMidiMsg whose status
  * is a note-off or a note-on, and forwards the rest.

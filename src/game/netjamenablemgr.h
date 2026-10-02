@@ -11,10 +11,9 @@ class Player;
 /**
  * Enable policy of a network jam, which limits how many tracks one player may own per section.
  *
- * `15NetJamEnableMgr` in the RTTI descriptor at `0x00901ff0`, deriving publicly from EnableMgr at
- * offset 0. Its type function is at `0x001058e0` and its table at `0x007ccb28`. The object is
- * 0x34 bytes. It inherits SetFreeUntil() and DisableTrack(), and the destructor at `0x00104e70` is
- * implicitly declared.
+ * Its RTTI descriptor is at `0x00901ff0`. It derives publicly from EnableMgr at offset 0. Its type
+ * function is at `0x001058e0` and its table at `0x007ccb28`. The object is 0x34 bytes. It inherits
+ * SetFreeUntil() and DisableTrack(), and the destructor at `0x00104e70` is implicitly declared.
  *
  * The policy records the owner of every track in every play-map section. The local player may
  * take a free track while it owns fewer than mMaxOwned tracks in the section, and always keeps the

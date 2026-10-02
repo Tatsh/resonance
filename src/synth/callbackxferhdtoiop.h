@@ -6,9 +6,9 @@
 /**
  * Receiver that moves an HD sound bank into the sound driver in one transfer.
  *
- * `19CallbackXferHdToIop` in the RTTI descriptor at `0x008eeee8`, with AsyncCallback as its one
- * public base at offset 0. The vtable at `0x0081cf80` has the base's three slots and no more, so
- * the class adds no virtual of its own and declares no destructor. An instance is 8 bytes.
+ * Its RTTI descriptor is at `0x008eeee8`. It has AsyncCallback as its one public base at offset 0.
+ * The vtable at `0x0081cf80` has the base's three slots and no more. The class does not add a
+ * virtual or declare a destructor. An instance is 8 bytes.
  *
  * Unlike the BD transfer this is not chunked. The one completion moves the whole buffer to the IOP,
  * releases it, and clears the flag that a BD transfer defers to, then resumes the deferred BD

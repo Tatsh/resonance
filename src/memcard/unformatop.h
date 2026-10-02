@@ -5,9 +5,8 @@
 /**
  * Unformat of the card in one slot.
  *
- * `10UnformatOp` in the RTTI descriptor at `0x008efa60`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x1c bytes, the size of the base alone, and the vtable is at
- * `0x0082bdf0`.
+ * Its RTTI descriptor is at `0x008efa60`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x1c bytes, the size of the base alone, and the vtable is at `0x0082bdf0`.
  *
  * FormatCardMCT queues an unformat immediately before a format, which is how the game clears a
  * card that reports itself as formatted but unusable.

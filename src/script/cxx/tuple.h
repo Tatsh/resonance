@@ -10,8 +10,8 @@ namespace Py {
 /**
  * Handle on a Python tuple.
  *
- * `Q22Py5Tuple` in the RTTI descriptor at `0x00901d80`, with `Py::SeqBase<Py::Object>` at offset 0
- * as its one base. Its accessor is at `0x004c67e8`.
+ * Its RTTI descriptor is at `0x00901d80`. It has `Py::SeqBase<Py::Object>` at offset 0 as its one
+ * base. Its accessor is at `0x004c67e8`.
  *
  * The vtable at `0x00821c18` has nine entries, and only the type function, the destructor, accepts
  * (), and slot 8 differ from the base table.

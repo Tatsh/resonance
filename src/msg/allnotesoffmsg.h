@@ -5,9 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `14AllNotesOffMsg` in the RTTI descriptor at `0x008effe0`, with MuseMsg as its one base. The
- * object is 0x8 bytes and its vtable is at `0x007dd438`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008effe0`. It has MuseMsg as its one base. The object is 0x8 bytes
+ * and its vtable is at `0x007dd438`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The fields through `+0x07` belong to MuseMsg and are declared there.
  *

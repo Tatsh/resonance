@@ -7,8 +7,8 @@ namespace Py {
 /**
  * Builder for the CPython type object of an extension type.
  *
- * `Q22Py10PythonType` in the RTTI descriptor at `0x0086f588`, with no base. Its accessor is at
- * `0x005aba50`, and the mangled name string sits at `0x00833400`.
+ * Its RTTI descriptor is at `0x0086f588`. It has no base. Its accessor is at `0x005aba50`, and the
+ * mangled name string sits at `0x00833400`.
  *
  * The object is 0x18 bytes, the five table pointers at `+0x00` to `+0x10` and the vptr after them
  * at `+0x14`. The vtable at `0x008331e0` has two entries, the type function at `0x005aba50` and

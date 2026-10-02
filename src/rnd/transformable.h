@@ -17,12 +17,11 @@ constexpr int kXfmRowFloatCount = 4;
 /**
  * Mix-in for an object with a local and a world transform.
  *
- * `Q23Rnd13Transformable` in the RTTI descriptor at `0x008ef770`, with `Rnd::Object` as a public
- * virtual base at offset 0. The subobject is 0xac bytes: the virtual-base pointer at `+0x00`,
- * mTransList at `+0x04`, two unrecovered fields at `+0x08` and `+0x0c`, the two transforms, the
- * origin, mDirty at `+0xa0`, mBillboard at `+0xa4`, and the vptr at `+0xa8`.
- * `Rnd::View` confirms the vptr offset by placing its Transformable subobject at `+0x30` and
- * writing that vptr to View + 0xd8.
+ * Its RTTI descriptor is at `0x008ef770`. It has `Rnd::Object` as a public virtual base at offset
+ * 0. The subobject is 0xac bytes: the virtual-base pointer at `+0x00`, mTransList at `+0x04`, two
+ * unrecovered fields at `+0x08` and `+0x0c`, the two transforms, the origin, mDirty at `+0xa0`,
+ * mBillboard at `+0xa4`, and the vptr at `+0xa8`. `Rnd::View` confirms the vptr offset by placing
+ * its Transformable subobject at `+0x30` and writing that vptr to View + 0xd8.
  *
  * Each transform is four consecutive 16-byte rows of an x, a y, and a z float followed by
  * four bytes of padding, which is the layout the VU units read. The member titles come from the

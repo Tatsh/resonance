@@ -7,10 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `16ChoosePowerupMsg` in the RTTI descriptor at `0x008ef810`, with Message as its one base. The
- * object is 0x10 bytes and its vtable is at `0x00812c48`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008ef810`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x00812c48`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). mOwner and mType are public
  * because Overlay::OnChoosePowerup() at `0x0041e9b8` reads both directly with no accessor in the

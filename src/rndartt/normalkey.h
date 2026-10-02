@@ -11,8 +11,8 @@ struct Color;
  * Two colours of the same hue at different brightness share the three ratios and differ only in
  * mScale. The palette quantiser at `0x00557af8` collects one key per distinct hue, builds a ramp of
  * sixteen shades per key into the destination palette at `0x00557970`, and maps each source pixel
- * to the nearest key's ramp. The class is not polymorphic and emits no RTTI, and no string in the
- * image identifies it. The name follows the analysis program's names for its routines.
+ * to the nearest key's ramp. The class is not polymorphic and does not emit RTTI, and the image
+ * does not include a string that identifies it. The name is inferred.
  */
 struct NormalKey {
     /**
@@ -20,8 +20,7 @@ struct NormalKey {
      *
      * The greatest channel becomes mScale and its ratio 1, and a tie goes to the later channel.
      * When blue wins after green was at least red, and blue is zero, the key has a scale of zero
-     * and three ratios of 1. Blue winning over a greater red is not tested for zero. The name is
-     * the analysis program's.
+     * and three ratios of 1. Blue winning over a greater red is not tested for zero.
      *
      * @param flRed The red channel.
      * @param flGreen The green channel.
@@ -35,7 +34,7 @@ struct NormalKey {
      *
      * A key matches when the sum of the absolute differences of the three ratios is under 0.02.
      * The first match is replaced by the new key when the new key is brighter, and otherwise the
-     * set is unchanged. Without a match the key is appended. The name is the analysis program's.
+     * set is unchanged. Without a match the key is appended.
      *
      * @param keys The set of keys.
      * @param color The colour. Its alpha is not read.

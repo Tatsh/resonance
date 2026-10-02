@@ -38,11 +38,11 @@ enum FogMode {
 /**
  * Lighting and fog a subtree is drawn under.
  *
- * `Q23Rnd7Environ` in the RTTI descriptor at `0x008ef500`, with `Rnd::Drawable` as its only public
- * non-virtual base at offset 0. The class is 0x80 bytes, which the allocator at `0x00519308`
- * proves by requesting exactly that much under the tag "Rnd::Environ". The virtual `Rnd::Object`
- * subobject sits at `0x60`, which the constructor proves by writing that address into the
- * virtual-base pointer, and the four bytes after it are tail padding.
+ * Its RTTI descriptor is at `0x008ef500`. It has `Rnd::Drawable` as its only public non-virtual
+ * base at offset 0. The allocator at `0x00519308` proves the class is 0x80 bytes by requesting
+ * exactly that much under the tag "Rnd::Environ". The constructor places the virtual `Rnd::Object`
+ * subobject at `0x60` by writing that address into the virtual-base pointer, and the four bytes
+ * after the subobject are tail padding.
  *
  * Both colour members are quadword aligned in the original, which is what produces the reserved
  * runs at `0x18` and `0x3c`.

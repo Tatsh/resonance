@@ -5,10 +5,10 @@
 /**
  * Effect that switches one MIDI controller fully on while it is applied.
  *
- * `17MidiOnOffEffector` in the RTTI descriptor at `0x008efe20`, with Effector as its one base. The
- * object is 0x24 bytes and its table is at `0x007de7d8`. The factory builds one for each of the
- * three EffectorType values from kEffectorTypeMidiOnOffFirst on, with controllers 0x52, 0x53, and
- * 0x51, and the object reports the type it was built for.
+ * Its RTTI descriptor is at `0x008efe20`. It has Effector as its one base. The object is 0x24 bytes
+ * and its table is at `0x007de7d8`. The factory builds one for each of the three EffectorType
+ * values from kEffectorTypeMidiOnOffFirst on, with controllers 0x52, 0x53, and 0x51, and the object
+ * reports the type it was built for.
  */
 class MidiOnOffEffector : public Effector {
 public:

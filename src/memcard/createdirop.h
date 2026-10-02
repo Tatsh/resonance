@@ -6,8 +6,8 @@
 /**
  * Creation of one directory on a card.
  *
- * `11CreateDirOp` in the RTTI descriptor at `0x008efbb0`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x24 bytes and the vtable is at `0x0082bdc0`.
+ * Its RTTI descriptor is at `0x008efbb0`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x24 bytes and the vtable is at `0x0082bdc0`.
  */
 class CreateDirOp : public MemcardOp {
 public:

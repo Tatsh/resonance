@@ -10,10 +10,10 @@ class WatchdogTimer;
 /**
  * Task the scheduler runs again every fixed number of nanoseconds.
  *
- * `8TimeTask` in the RTTI descriptor, with Attachment as its one base, and titled after
- * `AppTimeTask.cpp`, the translation unit its file-local `Cmd` class records. It is the
- * nanosecond counterpart of TickTask. Its vtable is at `0x007d31a8`, and slot 4, Tick(), is pure.
- * `Synth::Setup::SynthFade` is the one recovered subclass.
+ * It has Attachment as its one base, and it is named after `AppTimeTask.cpp`, the translation unit
+ * its file-local `Cmd` class records. It is the nanosecond counterpart of TickTask. Its vtable is
+ * at `0x007d31a8`, and slot 4, Tick(), is pure. `Synth::Setup::SynthFade` is the one recovered
+ * subclass.
  *
  * The object is 0x28 bytes. The Attachment base supplies the reference count at `+0x00` and the
  * vptr at `+0x04`.

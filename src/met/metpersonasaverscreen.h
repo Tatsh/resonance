@@ -12,9 +12,8 @@
 /**
  * Dialogue that writes a persona to a memory card, copies it to another card, or deletes it.
  *
- * `21MetPersonaSaverScreen` in the RTTI descriptor at `0x008f0060`, with three public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00`, MemcardUser at `+140`, and MetKBUser at `+144`.
- * New() allocates 0xd8 bytes.
+ * Its RTTI descriptor is at `0x008f0060`. It has three public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, MemcardUser at `+140`, and MetKBUser at `+144`. New() allocates 0xd8 bytes.
  *
  * The 39-entry primary vtable is at `0x00805600`, the same length as the MetScreen table, so the
  * class declares no virtual of its own. The twenty-one-entry MemcardUser table at `0x00805550`

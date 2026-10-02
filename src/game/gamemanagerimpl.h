@@ -36,11 +36,10 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
 /**
  * Owner of the running game.
  *
- * `15GameManagerImpl` in the RTTI descriptor at `0x008f0090`, deriving from `11GameManager` at
+ * Its RTTI descriptor is at `0x008f0090`. It derives from GameManager, whose descriptor is at
  * `0x008ef6b0`, which derives in turn from the builtin MsgSink descriptor at `0x0086f780`. The
  * object is 0x10c bytes, its constructor is at `0x00105f50`, and its table at `0x007cd5f8` has 39
- * entries followed by the zero terminator. An earlier reading of this class recorded 36, and the
- * read of the terminator corrects it.
+ * entries followed by the zero terminator.
  *
  * The split between GameManager and GameManagerImpl cannot be recovered. No vtable in the image
  * addresses a GameManager subobject, the accessor at `0x0010b7c8` builds both descriptors and
@@ -328,7 +327,7 @@ public:
      *
      * Slot 21. The three words come back in the order Save() wrote them and the settings read
      * themselves through their own slot 3. The three setters then run on the restored values, the
-     * roster is emptied and given one persona titled `freq player 1`, and the front end receives
+     * roster is emptied and given one persona called `freq player 1`, and the front end receives
      * IsRecordingMsg(1). The level is loaded through Renderer::LoadLevel(), and the world is
      * created and finished as FinishWorldLoad() does, whose body the binary expands here. The world
      * then has mIsPlayback set, and the poller stops handing readings to it.

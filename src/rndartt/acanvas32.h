@@ -11,8 +11,7 @@ constexpr unsigned int kACanvas32AlphaOpaque = 0xff000000;
 /**
  * Colour conversion for a canvas of 32 bit pixels.
  *
- * The name comes from the RTTI descriptor at 0x0086f6b0, whose mangled form is `9ACanvas32` and
- * whose single public base is ACanvas at offset zero.
+ * Its RTTI descriptor is at 0x0086f6b0, and its single public base is ACanvas at offset zero.
  *
  * The class supplies every colour format in terms of the two 8888 accessors ACanvasLin32 provides,
  * so it has no addressing of its own. Its whole translation unit sits between 0x0062f668 and

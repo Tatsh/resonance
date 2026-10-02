@@ -21,9 +21,9 @@ class Text;
 /**
  * Screen that lists the saved FreQs on a memory card, to copy one to the other card or delete one.
  *
- * `18MetMCFreqDelScreen` in the RTTI descriptor at `0x00901ea0`, with four public non-virtual bases
- * at fixed offsets, MetScreen at `+0x00`, MemcardUser at `+140`, ListDataProvider at `+144`, and
- * MetMemCardPickerUser at `+148`. New() allocates 0xe8 bytes.
+ * Its RTTI descriptor is at `0x00901ea0`. It has four public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, MemcardUser at `+140`, ListDataProvider at `+144`, and MetMemCardPickerUser
+ * at `+148`. New() allocates 0xe8 bytes.
  *
  * The 39-entry primary vtable is at `0x007fabe0`, the same length as the MetScreen table, and the
  * class declares no new virtual. The twenty-one-entry MemcardUser table at `0x007fab30` adjusts
@@ -225,7 +225,7 @@ public:
 
 private:
     // 0x002bfa88
-    // Builds the list on first use, fills it from mPersonas, titles the panel with the card, and
+    // Builds the list on first use, fills it from mPersonas, heads the panel with the card, and
     // enters. The title is inferred.
     void ShowList();
 

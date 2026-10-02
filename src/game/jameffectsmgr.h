@@ -14,11 +14,11 @@ class PlayMap;
 /**
  * Manager of the jam effects a track applies to its voices.
  *
- * `13JamEffectsMgr` in the RTTI descriptor at `0x008f0490`, over MsgSink at offset 0 and MsgSource
- * at offset 4. The primary table is at `0x007df298` and the MsgSource subobject table at
- * `0x007df270`, which adjusts `this` by `-4`. The object is 0x34 bytes, which the tagged
- * allocations in PitchingSTG and VoxingSTG both measure. Both build one only when the game manager
- * reports play mode 2, and both then hand it to the phrase player.
+ * Its RTTI descriptor is at `0x008f0490`. It is built over MsgSink at offset 0 and MsgSource at
+ * offset 4. The primary table is at `0x007df298`. The MsgSource subobject table at `0x007df270`
+ * adjusts `this` by `-4`. The tagged allocations in PitchingSTG and VoxingSTG both measure the
+ * object at 0x34 bytes. Both build one only when the game manager reports play
+ * mode 2, and both then hand it to the phrase player.
  *
  * The constructor builds one Effector for every type configuration code 0x389 lists, each wired
  * to the sink the stage supplies. A JamEffectMsg toggles one effect for one step of the phrase

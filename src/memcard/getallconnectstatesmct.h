@@ -11,8 +11,8 @@ constexpr int kMemcardMaxEnumeratedSlots = 8;
 /**
  * Enquire about every slot a multi-tap makes available and collect the answers.
  *
- * `22GetAllConnectStatesMCT` in the RTTI descriptor at `0x008ef6b0`, single inheritance from
- * `MemcardTask` at offset 0. An instance is 0x48 bytes and the vtable is at `0x007dacf8`.
+ * Its RTTI descriptor is at `0x008ef6b0`. It has single inheritance from `MemcardTask` at offset 0.
+ * An instance is 0x48 bytes and the vtable is at `0x007dacf8`.
  *
  * Execute() queues one `CheckInfo` per slot, decides how many from `sceMtapGetConnection()`, and
  * records the expected count. Each report appends one MemcardConnectState to the vector the task

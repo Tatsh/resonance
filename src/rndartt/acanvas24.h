@@ -5,8 +5,7 @@
 /**
  * Colour conversion for a canvas of 24-bit pixels.
  *
- * The name comes from the RTTI descriptor at 0x008f0910, whose mangled form is `9ACanvas24` and
- * whose single public base is ACanvas at offset zero.
+ * Its RTTI descriptor is at 0x008f0910, and its single public base is ACanvas at offset zero.
  *
  * THE CLASS IS ABSTRACT, and the set it leaves pure differs from every sibling's. Its table at
  * 0x00840a28 runs the same 85 entries as ACanvas's, so it adds no virtual, and it fills 18 of the
@@ -89,9 +88,8 @@ public:
     /**
      * Slot 21.
      *
-     * The program titles this routine after the 32-bit format, and the base's slot 21 is the
-     * colourless store rather than a format-specific one, so the title is not the member. Slot 31
-     * is the same case on the read side, and both traps appear in ACanvas8 as well.
+     * The base's slot 21 is the colourless store rather than a format-specific one. Slot 31 is the
+     * same case on the read side, and both traps appear in ACanvas8 as well.
      *
      * @ghidraAddress 0x00630558
      */
@@ -106,7 +104,7 @@ public:
     /** Slot 27. @ghidraAddress 0x00630598 */
     virtual unsigned short GetPixel15NoClip(int nX, int nY);
 
-    /** Slot 31. Titled after the 32-bit format; the slot is the colourless read.
+    /** Slot 31. The slot is the colourless read.
      *  @ghidraAddress 0x006305f0 */
     virtual unsigned int GetPixelNoClip(int nX, int nY);
 

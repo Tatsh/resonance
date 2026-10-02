@@ -5,9 +5,7 @@
 /**
  * Colour conversion for a canvas of 1555 pixels.
  *
- * The name comes from the RTTI descriptor at 0x008f0970, whose mangled form is `9ACanvas15` and
- * whose single public base is ACanvas at offset zero. The address recorded here previously,
- * 0x008ef130, is ACanvas8's descriptor rather than this one's.
+ * Its RTTI descriptor is at 0x008f0970, and its single public base is ACanvas at offset zero.
  *
  * THE CLASS IS ABSTRACT. Its table at 0x00840748 runs the same 85 entries as ACanvas's, and of the
  * base's 22 pure slots it leaves FOUR still pointing at the shared pure-virtual stub: 12, 13, 17,

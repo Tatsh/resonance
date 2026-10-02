@@ -110,12 +110,11 @@ enum MetScreenCommandCode {
 /**
  * Base of every front-end screen.
  *
- * `9MetScreen` in the RTTI descriptor at `0x008eed98`, with MsgSink as its one public non-virtual
- * base at offset 0. The object is 0x8c bytes, which MetMemDetectScreen, MetSaveRemix,
- * MetSoloWinScreen, and seven further classes fix by placing their second base at `+140`. The
- * vtable is at `0x0080b6a0`. A walk of the table reads 39 entries, slots 0 to 38, followed by an
- * all-zero terminating entry at `0x0080b838` and then the next class's table at `0x0080b840`. The
- * terminator is not a slot.
+ * Its RTTI descriptor is at `0x008eed98`. It has MsgSink as its one public non-virtual base at
+ * offset 0. MetMemDetectScreen, MetSaveRemix, MetSoloWinScreen, and seven further classes fix the
+ * object at 0x8c bytes by placing their second base at `+140`. The vtable is at `0x0080b6a0`.
+ * A walk of the table reads 39 entries, slots 0 to 38, followed by an all-zero terminating entry at
+ * `0x0080b838` and then the next class's table at `0x0080b840`. The terminator is not a slot.
  *
  * Thirty-two classes derive directly from the class, and five intermediate classes sit between it
  * and their own children, MetGizmoPanel, MetJukeboxBaseScreen, MetMultiTipsBaseScreen,
@@ -136,8 +135,7 @@ enum MetScreenCommandCode {
  * to 500, and hands the result to Rnd::Animatable::SetFrame(). That is what makes the arithmetic
  * here coherent: mEnterStartTime and mExitStartTime store frame positions, mAnimEndFrame stores the
  * enter animation's end frame from Rnd::View::EndFrame(), and UpdateEnterAnimation() subtracts one
- * from the sum of the other two. An earlier reading described the argument as a time in seconds.
- * That reading would have mixed units across the subtraction.
+ * from the sum of the other two.
  *
  * The 39 entries follow in table order. Slot 0 is the compiler-generated GetTypeInfo at
  * `0x0038fd78` and is not source. An entry marked empty is a two-instruction `jr ra` stub. Each
@@ -218,9 +216,8 @@ public:
      *
      * The load starts only when HxStr::DiffersFromLiteral reports both directory and file different
      * from the empty literal. BeginContainerLoad() is invoked with a direct call rather than
-     * through vtable slot 18, which is what a virtual call from a constructor compiles to. An
-     * earlier reading recorded a dispatched call and a registration that happens last, and both are
-     * wrong. MsgSource::AddSink() runs before the load starts, not after it.
+     * through vtable slot 18, the form a virtual call from a constructor compiles to.
+     * MsgSource::AddSink() runs before the load starts.
      *
      * mAnimEndFrame, mRepeatSteps, and mRepeatInterval are not written. A screen therefore starts
      * with three indeterminate fields. Slot 38 writes mAnimEndFrame and slot 28 writes the other
@@ -463,8 +460,7 @@ public:
      * both-times-zero condition that UpdateAnimationFrame() uses for slot 27, which is what pairs
      * the two idle hooks across the renderer's two passes.
      *
-     * An earlier reading titled this routine for the deferred half alone and recorded the
-     * mEnterPending test inverted. The animation half is the common path, not the exceptional one.
+     * The animation half is the common path, not the exceptional one.
      *
      * Declared public for the same reason as DeliverCommand().
      *

@@ -8,8 +8,8 @@ namespace Py {
 /**
  * Handle on a Python float.
  *
- * `Q22Py5Float` in the RTTI descriptor at `0x00902170`, with Py::Object at offset 0 as its one
- * base. Its accessor is at `0x00454290` and its destructor at `0x00454218`.
+ * Its RTTI descriptor is at `0x00902170`. It has Py::Object at offset 0 as its one base. Its
+ * accessor is at `0x00454290` and its destructor at `0x00454218`.
  *
  * Three translation units emit a copy of its vtable, the same shape as Py::Object, and each copy's
  * accepts() slot points at the one body at `0x0040c418`. The slots are at `0x0081734c`,

@@ -15,10 +15,9 @@ class Tex;
 /**
  * Appearance of a player's avatar.
  *
- * `14FreqAppearance` in the RTTI descriptor at `0x0086f580`, with no base, so the compiler places
- * the vptr after the data at `+0x10` and the class is 0x14 bytes. Its vtable at `0x007d98a0` has
- * four entries and a zero terminator at index 4, the type function, the destructor, and the two
- * transfer members.
+ * Its RTTI descriptor is at `0x0086f580`. It has no base. The compiler places the vptr after the
+ * data at `+0x10`, and the class is 0x14 bytes. Its vtable at `0x007d98a0` has four entries and a
+ * zero terminator at index 4, the type function, the destructor, and the two transfer members.
  *
  * The purpose of two of the three members is recovered from the diagnostic literals Print() writes.
  * `username=` precedes the string at `+0x00`, so that member is the player username, and

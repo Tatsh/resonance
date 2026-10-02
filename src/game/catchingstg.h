@@ -10,10 +10,10 @@
 /**
  * Gameplay stage for a track whose gems are caught rather than played.
  *
- * `11CatchingSTG` in the RTTI descriptor at `0x00902230`, with ScoreTrackGraph as its only base at
- * offset 0. Its table is at `0x007de4a0` and runs thirteen entries, the same as the base's, so the
- * class introduces no virtual. It is the one stage that overrides every slot, and the five defaults
- * the other three inherit are all replaced here. The object is 0x34 bytes.
+ * Its RTTI descriptor is at `0x00902230`. It has ScoreTrackGraph as its only base at offset 0. Its
+ * table is at `0x007de4a0` and runs thirteen entries, the same as the base's. The class introduces
+ * no virtual. It is the one stage that overrides every slot, and the five defaults the
+ * other three inherit are all replaced here. The object is 0x34 bytes.
  *
  * The constructor builds a PhraseNeutralizer and then one catcher, a SingleCatcher in game mode 1
  * and a MultiCatcher in every other mode. The catch window it hands the catcher is configuration

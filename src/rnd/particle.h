@@ -31,7 +31,7 @@ namespace Rnd {
  * because a GS sprite takes a centre and a half extent rather than two corners.
  */
 struct Particle {
-    /** Colour, as the dump label "\n\tcol:" titles it. +0x00 */
+    /** Colour, labelled "\n\tcol:" in the dump. +0x00 */
     Color mCol;
     /** Rate of colour change per frame. +0x10 */
     Color mColVel;

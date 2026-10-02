@@ -8,9 +8,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `18DeployedPowerupMsg` in the RTTI descriptor at `0x008ef7c0`, with Message as its one base. The
- * object is 0x1c bytes and its vtable is at `0x007d0080`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008ef7c0`. It has Message as its one base. The object is 0x1c bytes
+ * and its vtable is at `0x007d0080`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The first three words are
  * public because Overlay::OnDeployedPowerup() at `0x0041eda8` reads them directly with no accessor

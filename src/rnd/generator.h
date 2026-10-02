@@ -46,8 +46,8 @@ constexpr int kPathVarAxisCount = 3;
 /**
  * Emitter that spawns copies of one drawable along an animated path.
  *
- * `Q23Rnd9Generator` in the RTTI descriptor at `0x008ef5e0`, whose name string is at `0x0081c640`
- * and whose three base entries record `Rnd::Animatable` at `+0x00`, `Rnd::Transformable` at
+ * Its RTTI descriptor is at `0x008ef5e0`, its name string at `0x0081c640`, and its three base
+ * entries record `Rnd::Animatable` at `+0x00`, `Rnd::Transformable` at
  * `+0x20`, and `Rnd::Drawable` at `+0xd0`, each non-virtual and public. All three derive virtually
  * from `Rnd::Object`, so one shared Object subobject sits at `+0x140`, which the constructor
  * proves by writing `this + 0x140` into the virtual-base pointer of each of the three subobjects.
@@ -74,9 +74,9 @@ constexpr int kPathVarAxisCount = 3;
  * than inferred: "path:", " mesh:", " birthFrontOnly:", "birthSquareDist:", " birthCam:",
  * "rateGenLow:", " rateGenHigh:", "scaleGenLow:", " scaleGenHigh:", "pathVarMax:(", "view:",
  * " animateFromStart:", "multiMesh:", " particleSys:", "instances:", "pathEndFrame:", and
- * " pathStartFrame:". The two members the dump omits but SetFrameSelf() uses are titled from what
- * SetFrameSelf() does with them, and each one records that inference. The two the dump omits and
- * no routine uses retain their offsets as titles.
+ * " pathStartFrame:". The names of the two members the dump omits but SetFrameSelf() uses follow
+ * what SetFrameSelf() does with them, and each one records that inference. The two the dump omits
+ * and no routine uses are named after their offsets.
  *
  * The concrete type of each of the six object references comes from the narrowing cast Load()
  * performs through the `dynamic_cast` helper at `0x005570e0`, whose target type function
@@ -193,8 +193,8 @@ public:
      * Does nothing while mParticleSys is null. Otherwise it releases every live particle, then
      * allocates one particle per live instance and randomises the colour and the size of each one.
      * Only the instance count is read. The loop never visits an instance, and an allocation that
-     * fails skips the randomisation and continues rather than ending the loop, which corrects an
-     * earlier reading of `0x0045aa0c`. mParticleCursor receives the allocation result whether or
+     * fails skips the randomisation at `0x0045aa0c` and continues rather than ending the loop.
+     * mParticleCursor receives the allocation result whether or
      * not it succeeded, because that store sits in the delay slot of the test.
      *
      * @ghidraAddress 0x0045a998
@@ -244,7 +244,7 @@ public:
     /**
      * Count the live instances.
      *
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @return The length of the instance list.
      * @ghidraAddress 0x0045e2a8
@@ -255,7 +255,7 @@ public:
      * Make a mesh the drawn subject.
      *
      * Releases the reference on the previous mesh, takes one on the new one, and clears mView,
-     * mMultiMesh, and mParticleSys, releasing each. The program lists no caller, and the title is
+     * mMultiMesh, and mParticleSys, releasing each. The image has no caller, and the title is
      * inferred.
      *
      * @param pMesh The mesh, which may be null.
@@ -266,7 +266,7 @@ public:
     /**
      * Make a view the drawn subject, clearing mMesh, mMultiMesh, and mParticleSys.
      *
-     * The program lists no caller, and the title is inferred.
+     * The image has no caller, and the title is inferred.
      *
      * @param pView The view, which may be null.
      * @ghidraAddress 0x0045e738
@@ -276,7 +276,7 @@ public:
     /**
      * Make a multi-mesh the drawn subject, clearing mMesh, mView, and mParticleSys.
      *
-     * The program lists no caller, and the title is inferred.
+     * The image has no caller, and the title is inferred.
      *
      * @param pMultiMesh The multi-mesh, which may be null.
      * @ghidraAddress 0x0045e7d8
@@ -286,8 +286,8 @@ public:
     /**
      * Make a particle system the drawn subject, clearing mMesh, mView, and mMultiMesh.
      *
-     * Calls Regenerate() afterwards, so every live instance gains a particle. The program lists
-     * no caller, and the title is inferred.
+     * Calls Regenerate() afterwards. Every live instance then gains a particle. The image has no
+     * caller, and the title is inferred.
      *
      * @param pParticleSys The particle system, which may be null.
      * @ghidraAddress 0x0045e878
@@ -297,7 +297,7 @@ public:
     /**
      * Set the camera the birth culling measures against.
      *
-     * The program lists no caller, and the title is inferred.
+     * The image has no caller, and the title is inferred.
      *
      * @param pCam The camera, which may be null.
      * @ghidraAddress 0x0045ea18

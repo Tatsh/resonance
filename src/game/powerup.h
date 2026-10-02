@@ -9,11 +9,11 @@ class Player;
 /**
  * Base of the thirteen powerups a player can store and deploy.
  *
- * `7Powerup` in the RTTI descriptor at `0x0086f690`, a leaf with no base list. The object is four
- * bytes of vtable pointer and the class has no data member, which the factory confirms by
- * allocating four bytes for the subclasses that add nothing. Its table at `0x007e4690` has four
- * entries with a zero terminator at index 4, and slots 2 and 3 both address the shared
- * pure-virtual stub at `0x005381a8`, so the class is abstract.
+ * Its RTTI descriptor is at `0x0086f690`. It is a leaf with no base list. The object is four bytes
+ * of vtable pointer, and the class has no data member. The factory confirms the size by allocating
+ * four bytes for the subclasses that add nothing. Its table at `0x007e4690` has four entries with a
+ * zero terminator at index 4. Slots 2 and 3 both address the shared pure-virtual stub at
+ * `0x005381a8`, and the class is therefore abstract.
  *
  * The two method names are inferred from the bodies of the subclasses and of the two collections
  * that use them. No method name survives anywhere in the image.

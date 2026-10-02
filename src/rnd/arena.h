@@ -24,8 +24,8 @@ namespace Rnd {
 /**
  * Loop of views the renderer walks as one continuous space.
  *
- * `Q23Rnd5Arena` in the RTTI descriptor at `0x008f0440`, whose name string is at `0x008342f8` and
- * whose four base entries record `Rnd::Animatable` at `+0x00`, `Rnd::Collideable` at `+0x18`,
+ * Its RTTI descriptor is at `0x008f0440`, its name string at `0x008342f8`, and its four base
+ * entries record `Rnd::Animatable` at `+0x00`, `Rnd::Collideable` at `+0x18`,
  * `Rnd::Transformable` at `+0x30`, and `Rnd::Drawable` at `+0xe0`, each non-virtual and public.
  * All four derive virtually from `Rnd::Object`, so one shared Object subobject sits at `+0x130`,
  * which the constructor proves by writing `this + 0x130` into the virtual-base pointer of each of

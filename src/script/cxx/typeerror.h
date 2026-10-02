@@ -9,9 +9,8 @@ namespace Py {
 /**
  * Exception for a value of the wrong Python type, mirroring Python's TypeError.
  *
- * `Q22Py9TypeError` in the RTTI descriptor at `0x008ef380`, with Py::StandardError at offset 0 as
- * its one base. Its accessor is at `0x00148458`, and the emission at `0x004c69e0` is an
- * unreferenced copy.
+ * Its RTTI descriptor is at `0x008ef380`. It has Py::StandardError at offset 0 as its one base. Its
+ * accessor is at `0x00148458`, and the emission at `0x004c69e0` is an unreferenced copy.
  *
  * The object is one byte and stores nothing. The reason string is pushed into the CPython error
  * indicator by the constructor and is not retained, so a handler recovers it through

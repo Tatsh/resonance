@@ -5,9 +5,8 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `15MetFreqEndedMsg` in the RTTI descriptor at `0x00901d50`, with Message as its one base. The
- * object is 0x8 bytes and its vtable is at `0x00811b20`. The members below are the whole of the
- * class: everything recovered comes from them.
+ * Its RTTI descriptor is at `0x00901d50`. It has Message as its one base. The object is 0x8 bytes
+ * and its vtable is at `0x00811b20`. The members below are the whole of the class.
  *
  * The payload layout comes from the run of field copies in Clone().
  *

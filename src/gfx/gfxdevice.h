@@ -132,7 +132,7 @@ public:
     /**
      * Bring up the display and the drawing subsystems.
      *
-     * Titles g_profileTimers records 8 to 13 "setup", "vram", "billboard", "vert", "prim", and
+     * Labels g_profileTimers records 8 to 13 "setup", "vram", "billboard", "vert", "prim", and
      * "sync", records the display geometry with mnPixelBytes as nBitDepth / 8, points the packet
      * buffer at the first scratchpad half, and runs InitDisplayMode(). It then installs the
      * PlayStation 2 creators for meshes, cameras, materials, textures, environments, particle

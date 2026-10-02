@@ -20,8 +20,8 @@ class Mat;
 /**
  * Game-side controller of the arena screens around the tunnel.
  *
- * `8TnlArena` in the RTTI descriptor at `0x008ef930`, with MsgSink as its one public base at offset
- * 0. Its type function is at `0x0040c138`. It is a game-side tunnel class rather than a Rnd one.
+ * Its RTTI descriptor is at `0x008ef930`. It has MsgSink as its one public base at offset 0. Its
+ * type function is at `0x0040c138`. It is a game-side tunnel class rather than a Rnd one.
  *
  * The table at `0x00817390` has four entries, the same length as MsgSink's table at `0x007ccc40`,
  * and the class therefore introduces no virtual. It overrides the destructor at slot 1 and

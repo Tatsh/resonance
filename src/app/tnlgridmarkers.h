@@ -81,7 +81,7 @@ public:
     /**
      * Move every marker onto another track at its current song position.
      *
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @param nTrack The tunnel track.
      * @ghidraAddress 0x004550c8

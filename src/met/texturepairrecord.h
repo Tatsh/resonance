@@ -14,9 +14,8 @@ class Tex;
  * The class is not polymorphic and emits no RTTI, so no descriptor, no vtable, and no allocation
  * tag identifies it. Most instances are by-value members of a front-end screen, and
  * MetArenasScreen allocates its one from the untagged heap, so the tag lever does not apply. The
- * class name is inferred and agrees with the title the Ghidra program already records for the
- * constructor. No method name and no member name is attested anywhere in the image, so every
- * identifier below follows the required style rather than a recovered spelling.
+ * class name is inferred. No method name and no member name is attested anywhere in the image.
+ * Every identifier below follows the required style rather than a recovered spelling.
  *
  * Six screens embed a pair of these records, and each pair is built from the texture names
  * `gSongLogo1.tex` with `gSongLogo2.tex` and `gSongLabel1.tex` with `gSongLabel2.tex`.

@@ -7,10 +7,9 @@
 /**
  * Row of buttons along the top of the jukebox.
  *
- * `26MetJukeboxTopButtonsScreen` in the RTTI descriptor at `0x008ef910`, with MetScreen as its one
- * public non-virtual base at offset 0. The object is 0x9c bytes and the 39-entry vtable is at
- * `0x007ef8b0`, the same length as the MetScreen table, so the class declares no virtual of its
- * own.
+ * Its RTTI descriptor is at `0x008ef910`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0x9c bytes and the 39-entry vtable is at `0x007ef8b0`, the same length as
+ * the MetScreen table, and the class declares no new virtual.
  *
  * The constructor at `0x00240c28` takes only the renderer and the load priority, and supplies
  * `jbb` for the screen name, `metagame/Shared` for the directory, and `juke_butts` for the
@@ -22,8 +21,7 @@
  * That free is the inlined HxStr destructor of mCommandTargetScreen rather than a statement of the
  * destructor's own, which is what identifies the eight bytes at `+0x8c` as an `HxStr`. The
  * constructor zeroing both of its words, and the destructor freeing the second word alone, are
- * the two halves of that evidence. An earlier reading recorded the four words as integers and
- * could not attribute the free.
+ * the two halves of that evidence.
  *
  * Nothing frees the button list, so it is never released.
  *

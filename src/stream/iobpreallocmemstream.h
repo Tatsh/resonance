@@ -6,11 +6,10 @@
 /**
  * Bidirectional stream over a caller-supplied byte buffer.
  *
- * `20IOBPreallocMemStream` in the RTTI descriptor at `0x008ef160`. The base list at `0x008242c8`
- * records two bases, IBStream at offset 0 and OBStream at offset 4, both public and non-virtual.
- * IOBStream shares that base list and is not in the chain, so this class is a sibling of
- * IOBStream rather than a subclass, which the disassembly of the type function at `0x004eda70`
- * confirms.
+ * Its RTTI descriptor is at `0x008ef160`. The base list at `0x008242c8` records two bases, IBStream
+ * at offset 0 and OBStream at offset 4, both public and non-virtual. IOBStream shares that base
+ * list and is not in the chain. This class is therefore a sibling of IOBStream rather than a
+ * subclass, and the type function at `0x004eda70` confirms it.
  *
  * The object is 0x20 bytes. Two vtable pointers occupy `+0x00` and `+0x04`, addressing
  * `0x00824110` for the IBStream subobject and `0x008240e0` for the OBStream subobject, whose
@@ -92,8 +91,8 @@ public:
      * Report the caller-owned buffer.
      *
      * IBStream vtable slot 10, the second virtual this class adds. GrooveWorld::FinishSong()
-     * dispatches it at `0x0018e91c` to write the log's length back into its first word. Ghidra
-     * reports no reference beyond the vtable entry, because the one call is through the table.
+     * dispatches it at `0x0018e91c` to write the log's length back into its first word. The one
+     * call goes through the table. The vtable entry is its only direct reference.
      *
      * @return The buffer passed to the constructor.
      * @ghidraAddress 0x004edb60

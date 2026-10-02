@@ -14,10 +14,10 @@ namespace Rnd {
 /**
  * Mix-in for an object that draws itself and then a list of other drawables.
  *
- * `Q23Rnd8Drawable` in the RTTI descriptor at `0x008ef320`, with `Rnd::Object` as a public virtual
- * base at offset 0. The subobject is 0x14 bytes. The compiler places the virtual-base pointer at
- * `+0x00` and, following the g++ 2.x layout for a class with no non-virtual base, the vptr at
- * `+0x10`, so the declared members occupy `+0x04` through `+0x0f`. For a standalone Drawable the
+ * Its RTTI descriptor is at `0x008ef320`. It has `Rnd::Object` as a public virtual base at offset
+ * 0. The subobject is 0x14 bytes. The compiler places the virtual-base pointer at `+0x00` and,
+ * following the g++ 2.x layout for a class with no non-virtual base, the vptr at `+0x10`. The
+ * declared members therefore occupy `+0x04` through `+0x0f`. For a standalone Drawable the
  * `Rnd::Object` subobject sits at `+0x14`.
  *
  * Two vtables belong to the class. The four-entry table at `0x00825498` is addressed by
@@ -179,7 +179,7 @@ public:
     /**
      * Resolve a registry key to a drawable.
      *
-     * A key that resolves to an object of another class produces null. The program lists no
+     * A key that resolves to an object of another class produces null. The image has no
      * caller.
      *
      * @param name The registry key to resolve.

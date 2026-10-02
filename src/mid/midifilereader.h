@@ -27,7 +27,7 @@ class Receiver;
  *
  * The destructor at `0x003d6450` is compiler-generated and destroys mPending. The uncalled routines
  * at `0x003d6798` and `0x003d67f0` in the same unit are the constructor and Print() of the unused
- * class that the image's `Q23Mid3MBT` descriptor names, recorded on Mid::MBT in `mid/mbt.h`.
+ * class that the image's `Mid::MBT` descriptor identifies, recorded on Mid::MBT in `mid/mbt.h`.
  *
  * Every member is public, because LevelConverter stores mCompare directly and the image exposes no
  * accessor.

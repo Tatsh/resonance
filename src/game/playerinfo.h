@@ -11,10 +11,9 @@
 /**
  * A player's identity and settings.
  *
- * `10PlayerInfo` in the RTTI descriptor at `0x0086f738`, with no base, so the compiler places the
- * vptr after the data at `+0x3c` and the class is 0x40 bytes. Its vtable at `0x007d2820` has five
- * entries and a zero terminator at index 5, the type function, the destructor, and the three
- * members below.
+ * Its RTTI descriptor is at `0x0086f738`. It has no base. The compiler places the vptr after the
+ * data at `+0x3c`, and the class is 0x40 bytes. Its vtable at `0x007d2820` has five entries and a
+ * zero terminator at index 5, the type function, the destructor, and the three members below.
  *
  * The layout comes from the copy constructor at `0x0010baa0` and the destructor together. The copy
  * constructor copies every member in order, and the destructor releases the vector, the appearance,

@@ -7,9 +7,8 @@
 /**
  * First memory-card probe, run during start-up.
  *
- * `19MetMemDetectStartup` in the RTTI descriptor at `0x008eff90`, with two public non-virtual
- * bases at fixed offsets, MetMemDetectScreen at `+0x00` and FadeUser at `+160`. The object is 0xb0
- * bytes.
+ * Its RTTI descriptor is at `0x008eff90`. It has two public non-virtual bases at fixed offsets,
+ * MetMemDetectScreen at `+0x00` and FadeUser at `+160`. The object is 0xb0 bytes.
  *
  * Three vtables belong to the class, the 44-entry primary at `0x007fd518`, the four-entry FadeUser
  * table at `0x007fd440` that adjusts `this` by `-160`, and the 21-entry MemcardUser table at

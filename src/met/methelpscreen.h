@@ -13,9 +13,9 @@ class Text;
 /**
  * Help and options screen, which also shows the prompt line every other screen posts.
  *
- * `13MetHelpScreen` in the RTTI descriptor at `0x009021e0`, with MetScreen as its one public
- * non-virtual base at offset 0. New() allocates 0x100 bytes, the highest member ending at `+0xf8`
- * and the quadword-aligned Vector3 members rounding the total up.
+ * Its RTTI descriptor is at `0x009021e0`. It has MetScreen as its one public non-virtual base at
+ * offset 0. New() allocates 0x100 bytes, the highest member ending at `+0xf8` and the
+ * quadword-aligned Vector3 members rounding the total up.
  *
  * The 39-entry primary vtable is at `0x00802420`, the same length as the MetScreen table, so the
  * class declares no virtual of its own. It is one of only three classes that inherit slot 5

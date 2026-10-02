@@ -11,13 +11,13 @@
 /**
  * Read one saved remix off a card.
  *
- * `12LoadRemixMCT` in the RTTI descriptor at `0x008ef048`, with two public non-virtual bases,
- * `MemcardTask` at offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the
- * 19-entry primary at `0x007da7e8` and the 21-entry `MemcardUser` table at `0x007da738`. Only the
- * first two entries and slot 19 of the second table adjust `this`; slot 20 is the inherited
- * `MemcardUser::OnFileSaved()` body and therefore needs no thunk. An instance is 0x6c bytes, from
- * the constructor's own highest store at `+0x68`. Nothing derives from the class, so that is a
- * lower bound rather than a settled size.
+ * Its RTTI descriptor is at `0x008ef048`. It has two public non-virtual bases, `MemcardTask` at
+ * offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the 19-entry primary at
+ * `0x007da7e8` and the 21-entry `MemcardUser` table at `0x007da738`. Only the first two entries and
+ * slot 19 of the second table adjust `this`; slot 20 is the inherited `MemcardUser::OnFileSaved()`
+ * body and therefore needs no thunk. An instance is 0x6c bytes, from the constructor's highest
+ * store at `+0x68`. Nothing derives from the class. The size 0x6c is therefore a lower bound rather
+ * than a settled size.
  *
  * The task enquires about the card, lists `/BASCUS-97125r*`, and then reads the index out of each
  * remix save directory through a `LoadFileMCT` of its own until it finds the requested remix. It

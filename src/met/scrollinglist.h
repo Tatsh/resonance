@@ -17,9 +17,9 @@ class View;
 /**
  * Scrolling list of rows driven by a ListDataProvider.
  *
- * `13ScrollingList` in the RTTI descriptor at `0x0086f6a0`, a leaf class with no base. The class
- * name is the RTTI spelling verbatim. No method name and no member name is attested anywhere in
- * the image, so every name below is inferred from the routine's behaviour.
+ * Its RTTI descriptor is at `0x0086f6a0`. It is a leaf class with no base. The class name is the
+ * RTTI spelling verbatim. No method name and no member name is attested anywhere in the image.
+ * Every name below is inferred from the routine's behaviour.
  *
  * Following the g++ 2.x layout for a class with no base, the vptr sits after the data members at
  * `+0x94`, and the object is 0xa0 bytes, which the `operator new` argument at each call site

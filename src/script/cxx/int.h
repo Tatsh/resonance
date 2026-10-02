@@ -8,8 +8,8 @@ namespace Py {
 /**
  * Handle on a Python integer.
  *
- * `Q22Py3Int` in the RTTI descriptor at `0x008efd90`, with Py::Object at offset 0 as its one base.
- * Its accessor is at `0x004c63f8`.
+ * Its RTTI descriptor is at `0x008efd90`. It has Py::Object at offset 0 as its one base. Its
+ * accessor is at `0x004c63f8`.
  *
  * The vtable at `0x00821d58` has three entries, the same shape as Py::Object.
  *

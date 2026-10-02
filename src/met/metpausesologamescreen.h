@@ -5,10 +5,10 @@
 /**
  * Pause screen of a solo game.
  *
- * `22MetPauseSoloGameScreen` in the RTTI descriptor at `0x008ef540`, with MetPauseBaseScreen as its
- * one public non-virtual base at offset 0. The 40-entry vtable at `0x00803918` is the same length
- * as the MetPauseBaseScreen table, so the class declares no virtual of its own. New() allocates
- * 0xb4 bytes, four more than the base, for mLeavingForConfig.
+ * Its RTTI descriptor is at `0x008ef540`. It has MetPauseBaseScreen as its one public non-virtual
+ * base at offset 0. The 40-entry vtable at `0x00803918` is the same length as the
+ * MetPauseBaseScreen table, and the class declares no new virtual. New() allocates 0xb4 bytes, four
+ * more than the base, for mLeavingForConfig.
  *
  * Beyond the base's commands, the screen can leave for the game options or the controller set-up.
  *

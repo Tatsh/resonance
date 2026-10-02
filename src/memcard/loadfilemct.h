@@ -23,8 +23,8 @@ enum LoadFileState {
 /**
  * Read one file from a card into a caller-supplied buffer.
  *
- * `11LoadFileMCT` in the RTTI descriptor at `0x0090e2b0`, single inheritance from `MemcardTask` at
- * offset 0. An instance is 0x38 bytes and the vtable is at `0x007dae38`.
+ * Its RTTI descriptor is at `0x0090e2b0`. It has single inheritance from `MemcardTask` at offset 0.
+ * An instance is 0x38 bytes and the vtable is at `0x007dae38`.
  *
  * The task enquires about the card, opens the file, reads it, and closes it, advancing one step
  * per operation report. Three subclasses exist, `LoadPersonasMCT`, `LoadGlobalSettingsMCT` and

@@ -10,13 +10,13 @@ class Message;
 /**
  * Relay that stores a copy of every message it accepts and forwards to its own sinks.
  *
- * `8MsgQueue` in the RTTI descriptor at `0x00902220`, deriving from MsgSource at offset 0 and from
- * MsgSink at `+0x14`, which the base records in the descriptor give directly. The object is 0x3c
- * bytes, fixed by GameManagerImpl embedding one at `+0xc0` and writing its own next member at
- * `+0xfc`. Two vtables belong to the class. The table at `0x00829b18` is addressed by the
- * MsgSource subobject and inherits both of that base's virtuals unchanged; the table at
- * `0x00829af0` is addressed by the MsgSink subobject, adjusts `this` by `-0x14` on every entry it
- * overrides, and inherits MsgSink::Handle() with no adjustment at all.
+ * Its RTTI descriptor is at `0x00902220`. It derives from MsgSource at offset 0 and from MsgSink at
+ * `+0x14`. The base records in the descriptor give both offsets directly. The object is 0x3c bytes,
+ * fixed by GameManagerImpl embedding one at `+0xc0` and writing its next member at `+0xfc`. Two
+ * vtables belong to the class. The table at `0x00829b18` is addressed by the MsgSource subobject
+ * and inherits both of that base's virtuals unchanged; the table at `0x00829af0` is addressed by
+ * the MsgSink subobject, adjusts `this` by `-0x14` on every entry it overrides, and inherits
+ * MsgSink::Handle() with no adjustment at all.
  *
  * Deriving from both mix-ins is the whole design. A message arrives through the MsgSink side,
  * which stores a copy, and arrives at its readers through the inherited MsgSource sink list.
@@ -27,10 +27,9 @@ class Message;
  * Message's virtual destructor, which is what establishes the ownership and in turn establishes
  * that Message::Clone() returns a heap copy.
  *
- * Poll() at `0x0054aa58` is the drain, and an earlier reading of this class stated that no drain
- * member existed. It also resolves what the pair of vectors is for. Poll() points mTarget at the
- * vector it is not iterating, so a message that a sink stores while receiving an earlier one lands
- * in the other vector and the iteration is undisturbed.
+ * Poll() at `0x0054aa58` is the drain, and it shows what the pair of vectors is for. Poll() points
+ * mTarget at the vector it is not iterating. A message that a sink stores while receiving an
+ * earlier one lands in the other vector, and the iteration is undisturbed.
  */
 class MsgQueue : public MsgSource, public MsgSink {
 public:

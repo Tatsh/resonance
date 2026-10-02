@@ -10,8 +10,8 @@ class SequencerCmd;
 /**
  * Base of the template that dispatches a range of timed messages against a clock.
  *
- * `16GenericSequencer` in the RTTI descriptor at `0x0086f708`, with no base list. It is the base
- * the one Sequencer instantiation in the image derives from at offset 0.
+ * Its RTTI descriptor is at `0x0086f708`. It has no base list. It is the base the one Sequencer
+ * instantiation in the image derives from at offset 0.
  *
  * Its shape comes from the instantiation's table at `0x007cc7e8`, which runs three entries: the
  * type function, Dispatch(), and the destructor. The destructor is therefore declared second,

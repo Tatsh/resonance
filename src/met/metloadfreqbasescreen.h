@@ -12,10 +12,10 @@
 /**
  * Base of the three screens that pick a saved FreQ identity.
  *
- * `21MetLoadFreqBaseScreen` in the RTTI descriptor at `0x008f2a30`, with MetScreen as its one
- * public non-virtual base at offset 0. The object is 0xa4 bytes, and two children fix that
- * independently, MetLoadFreqScreen by placing MemcardUser at `+164` and MetLoadNewFreqScreen by
- * placing MetKBUser at `+164`.
+ * Its RTTI descriptor is at `0x008f2a30`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0xa4 bytes, and two children fix the size independently,
+ * MetLoadFreqScreen by placing MemcardUser at `+164` and MetLoadNewFreqScreen by placing MetKBUser
+ * at `+164`.
  *
  * Three classes derive from the class, MetLoadFreqScreen, MetLoadNewFreqScreen, and
  * MetLoadPreFabScreen.

@@ -10,14 +10,13 @@ class RawControllerMsg;
 /**
  * Front-end renderer that draws nothing, chosen in place of MetRenderer by a configuration option.
  *
- * `15MetNullRenderer` in the RTTI descriptor at `0x008eff00`, with RendererBase as its one public
- * base at offset 0. MetaGameWorld::CreateRenderer() allocates it at 0x88 bytes under the
- * `MsgSink` tag when PythonEvt::QueryOption() reports option 0xcb set. Its vtable at
- * `0x00801d58` has eleven entries, the same length as RendererBase's. Against that table it
- * overrides the destructor and slots 3, 7, and 8, the three RendererBase leaves pure, which is
- * what makes the class concrete. Slots 4 and 5 have two-instruction empty bodies of their own at
- * `0x00311a10` and `0x00311a18`, the base's empty bodies re-emitted rather than overrides, and are
- * not declared.
+ * Its RTTI descriptor is at `0x008eff00`. It has RendererBase as its one public base at offset 0.
+ * MetaGameWorld::CreateRenderer() allocates it at 0x88 bytes under the `MsgSink` tag when
+ * PythonEvt::QueryOption() reports option 0xcb set. Its vtable at `0x00801d58` has eleven entries,
+ * the same length as RendererBase's. Against that table it overrides the destructor and slots 3, 7,
+ * and 8, the three slots RendererBase declares pure. Slots 4 and 5 have two-instruction empty
+ * bodies at `0x00311a10` and `0x00311a18`, the base's empty bodies re-emitted rather than
+ * overrides, and are not declared.
  *
  * In place of the front-end screens, the X button evaluates a ruleset script template and loads
  * the level it describes, and slot 8 starts a local game once the load finishes.

@@ -9,8 +9,8 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `16RawControllerMsg` in the RTTI descriptor at `0x008efce0`, with Message as its one base. The
- * object is 0x18 bytes and its vtable is at `0x00813478`.
+ * Its RTTI descriptor is at `0x008efce0`. It has Message as its one base. The object is 0x18 bytes
+ * and its vtable is at `0x00813478`.
  *
  * The payload is one controller reading at `+0x04` and a song position at `+0x14`. Clone() copies
  * the reading as two eight-byte pairs and the position as one word, Print() hands the reading to

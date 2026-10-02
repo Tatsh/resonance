@@ -24,8 +24,8 @@ namespace Rnd {
 /**
  * Screen-aligned ribbon drawn through a list of world-space points.
  *
- * `Q23Rnd6String` in the RTTI descriptor at `0x008efd50`, whose name string is at `0x00821700` and
- * whose three base entries at `0x00821710` record `Rnd::Drawable` at offset 0,
+ * Its RTTI descriptor is at `0x008efd50`, its name string at `0x00821700`, and its three base
+ * entries at `0x00821710` record `Rnd::Drawable` at offset 0,
  * `Rnd::Transformable` at offset 32, and `Rnd::Collideable` at offset 208, each non-virtual and
  * public. All three derive virtually from `Rnd::Object`. One shared Object subobject therefore sits
  * at `+0x110`. The class is 0x130 bytes, a size the factory at `0x004bedc8` pins by allocating
@@ -52,9 +52,8 @@ namespace Rnd {
  * " foldAngle:", " hasCaps:", "linePairs:", and "mesh:", and from the per-point labels "\n\tv:"
  * and "\n\tc:". Load() rejects a version of 3 or above with "Can't load new String".
  *
- * Ghidra shipped the name `RndBlur__*` on the routines of this class, and one worklist also
- * attributed the path predicate at `0x004e7cd8` to it. Neither attribution is supported by the
- * vtables or by the type-info accessor at `0x004bed30`.
+ * The path predicate at `0x004e7cd8` does not belong to this class; the vtables and the type-info
+ * accessor at `0x004bed30` exclude it.
  */
 class String : public Drawable, public Transformable, public Collideable {
 public:

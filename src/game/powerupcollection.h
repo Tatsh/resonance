@@ -10,10 +10,10 @@ class LocalPlayer;
 /**
  * Store of one powerup of every configured kind, with a count for each.
  *
- * `17PowerupCollection` in the RTTI descriptor at `0x008ef460`, with PowerupCollectionI as its one
- * base at offset 0. Its table is at `0x007e48a8` and has ten entries with a zero terminator at
- * index 10, the same length as the base table, so the class adds no virtual. It overrides the
- * destructor and all six of the base's own slots.
+ * Its RTTI descriptor is at `0x008ef460`. It has PowerupCollectionI as its one base at offset 0.
+ * Its table is at `0x007e48a8` and has ten entries with a zero terminator at index 10, the same
+ * length as the base table. The class adds no virtual. It overrides the destructor and all six of
+ * the slots the base introduces.
  *
  * The object is 0x2c bytes. The base occupies the first 0x14 including the inherited vptr at
  * `+0x10`, and the four members below follow it.

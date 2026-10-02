@@ -9,7 +9,7 @@
  *
  * Record 0 is the overflow bucket. It receives the byte count of every
  * allocation whose tag did not fit in records 1 through 23, and
- * MemBeginAccounting() titles it `Other_Sources`.
+ * MemBeginAccounting() labels it `Other_Sources`.
  */
 constexpr int kMemTagCount = 24;
 
@@ -38,7 +38,7 @@ constexpr int kMemStlTagSize = 128;
  *
  * The request is raised to one byte when it is zero. The allocation is billed
  * to the tag `UNK[]`, and a failure is fatal. Its exception tables carry the
- * `throw(std::bad_alloc)` specification. The program's label is `MemAlloc`.
+ * `throw(std::bad_alloc)` specification.
  *
  * @param nSize The block size in bytes.
  * @return The block.
@@ -53,7 +53,7 @@ void *operator new[](size_t nSize);
  * to the tag `UNK`, and a failure is fatal. The log line and the failure
  * message both omit a tag, and the message reads
  * `NEW ALLOCATION FAILURE, size: %d`. Its exception tables carry the
- * `throw(std::bad_alloc)` specification. The program's label is `MemAllocScalar`.
+ * `throw(std::bad_alloc)` specification.
  *
  * @param nSize The block size in bytes.
  * @return The block.
@@ -144,7 +144,7 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine);
  * Release an array block, the game's replacement global `operator delete[]`.
  *
  * The log line identifies the path as `del(UNK[],%p)`. Its exception tables carry the empty
- * `throw()` specification. The program's label is `MemFree`.
+ * `throw()` specification.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a92c8
@@ -156,7 +156,6 @@ void operator delete[](void *pBlock) noexcept;
  *
  * The log line identifies the path as `del(UNK,%p)`. HxStr::Alloc() is the one
  * caller inside the string class. Its exception tables carry the empty `throw()` specification.
- * The program's label is `MemFreeScalar`.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004a9230
@@ -273,7 +272,7 @@ void MemLogPrint(const char *pszText);
 /**
  * Clear the per-tag accounting table and start charging it.
  *
- * Record 0 is titled `Other_Sources`. Rnd::AsyncLoader's poll brackets a load with this and
+ * Record 0 is labelled `Other_Sources`. Rnd::AsyncLoader's poll brackets a load with this and
  * MemEndAccounting(). The name is inferred.
  *
  * @ghidraAddress 0x004a8e88
@@ -283,7 +282,7 @@ void MemBeginAccounting();
 /**
  * Stop charging the accounting table and format its totals.
  *
- * The report begins `Memory Allocated: %d` and adds one line per titled record. Record 0 appears
+ * The report begins `Memory Allocated: %d` and adds one line per labelled record. Record 0 appears
  * only when it has been charged. A line that would leave less than 0x40 bytes of the buffer is
  * replaced by `...REPORT TOO LONG FOR BUFFER!` and ends the report. The name is inferred.
  *
@@ -349,8 +348,7 @@ void DumpHeapMemoryLog(int nIndex);
  *
  * The routine behaves as newlib's `malloc`, toolchain C library linked as shipped. It loads the
  * reentrancy structure at 0x007819cc and calls `_malloc_r` at 0x0059b528. It is not the Heap class
- * in `os/heap.h`, which is the arena the embedded Python allocates from. The program's label is
- * `LibcMalloc`.
+ * in `os/heap.h`, the arena the embedded Python allocates from.
  *
  * @param nSize The block size in bytes.
  * @return The block, or null when the request cannot be met.
@@ -368,8 +366,7 @@ void *HeapAlloc(size_t nSize);
  * Give a block back to the backing allocator.
  *
  * The routine behaves as newlib's `free`, toolchain C library linked as shipped. It loads the
- * same reentrancy structure and tail-calls `_free_r` at 0x005da3b0. The program's label is
- * `LibcFreeBlock`.
+ * same reentrancy structure and tail-calls `_free_r` at 0x005da3b0.
  *
  * @param pBlock The block to release.
  * @ghidraAddress 0x004bfd70

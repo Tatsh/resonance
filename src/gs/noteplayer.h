@@ -9,11 +9,10 @@
 /**
  * Player that sounds one note for a fixed length and then releases it.
  *
- * `10NotePlayer` in the RTTI descriptor, with MusePlayer as its one base. Its table at
- * `0x007e17b8` runs the type function, the destructor, and the three MusePlayer verbs. The object
- * is 0x20 bytes, which MuseSynth::StartNotePlayer() measures. That routine passes a NoteMsg's
- * bytes at `+0x09`, `+0x0a`, and `+0x08`, its word at `+0x0c`, the MuseParent half of the synth,
- * and the synth's clock.
+ * It has MusePlayer as its one base. Its table at `0x007e17b8` runs the type function, the
+ * destructor, and the three MusePlayer verbs. MuseSynth::StartNotePlayer() measures the object at
+ * 0x20 bytes. That routine passes a NoteMsg's bytes at `+0x09`, `+0x0a`,
+ * and `+0x08`, its word at `+0x0c`, the MuseParent half of the synth, and the synth's clock.
  *
  * Start() sends the note-on and schedules the file-local command `Cmd` of `GsNotePlayer.cpp`
  * (`Q233_GLOBAL_$N$GsNotePlayer.cppdKuhgb3Cmd` in the RTTI) at the end of the note. That command

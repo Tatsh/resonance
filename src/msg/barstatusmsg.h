@@ -9,10 +9,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12BarStatusMsg` in the RTTI descriptor at `0x008ef420`, with Message as its one base. The
- * object is 0x30 bytes and its vtable is at `0x00812660`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008ef420`. It has Message as its one base. The object is 0x30 bytes
+ * and its vtable is at `0x00812660`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). The purpose of each field comes
  * from the Print() override at `0x003d8670`, which streams `b#<bar> tr#<track>` and then one

@@ -19,11 +19,11 @@ namespace Rnd {
 /**
  * Keyframed animation of one Rnd::ParticleSys.
  *
- * `Q23Rnd15ParticleSysAnim` in the RTTI descriptor at `0x008f0eb0`, with `Rnd::Animatable` as its
- * one public base at offset 0. The shared Object subobject sits at `+0x30`, which the `-0x30`
- * adjustment on every entry of the Object subobject table confirms, so the members below occupy
- * `+0x18` through `+0x2f` and the Animatable subobject is the 0x18 bytes ahead of them. The creator
- * allocates exactly 0x4c bytes, which is that layout with nothing left over.
+ * Its RTTI descriptor is at `0x008f0eb0`. It has `Rnd::Animatable` as its one public base at offset
+ * 0. The shared Object subobject sits at `+0x30`, an offset the `-0x30` adjustment on every entry
+ * of the Object subobject table confirms. The members below therefore occupy `+0x18` through
+ * `+0x2f`, and the Animatable subobject is the 0x18 bytes ahead of them. The creator allocates
+ * exactly 0x4c bytes, the layout with no surplus.
  *
  * Two vtables belong to the class, each identified by its own GetTypeInfo slot addressing
  * `0x0052b7f0`. The Object subobject table at `0x00827a80` stores the seven Object overrides, and
@@ -31,7 +31,7 @@ namespace Rnd {
  * Slot 2 still addresses the base StartAnim() at `0x0049a3b8`, so restarting an animation does
  * nothing of its own here.
  *
- * Three channels drive the system, and the text dump titles them "startColorKeys:",
+ * Three channels drive the system, and the text dump labels them "startColorKeys:",
  * "endColorKeys:", and "emitRateKeys:". The two colour channels are `std::list` of Rnd::ColorKey
  * and share the dump routine at `0x004d8de8`. The emission rate channel is a `std::list` of
  * Rnd::FloatKey and has its own dump at `0x004d8f08`. EndFrame() reads the frame of the two colour

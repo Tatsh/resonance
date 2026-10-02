@@ -8,9 +8,8 @@
 /**
  * Scheduler command that runs a gamer's per-bar update.
  *
- * The class has its own type-info accessor at `0x00116b70`, which the RTTI harvest has no entry
- * for, so the name is inferred from what Execute() does. Print() writes the literal `{Gamer}` at
- * `0x007ce588`.
+ * The class has its own type-info accessor at `0x00116b70`. The name is inferred from what
+ * Execute() does. Print() writes the literal `{Gamer}` at `0x007ce588`.
  *
  * Its table at `0x007ce600` has eight entries. This class supplies slots 3, 4, and 5,
  * and inherits the rest, slot 1 being the `Sch::Command` destructor at `0x00116b48` and the

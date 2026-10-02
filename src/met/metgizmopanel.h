@@ -12,9 +12,9 @@ class View;
 /**
  * Base of the four gizmo panels that frame the front end.
  *
- * `13MetGizmoPanel` in the RTTI descriptor at `0x00901c30`, with MetScreen as its one public
- * non-virtual base at offset 0. The 39-entry vtable at `0x007f4340` is the same length as the
- * MetScreen table, and the class declares no new virtual.
+ * Its RTTI descriptor is at `0x00901c30`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The 39-entry vtable at `0x007f4340` is the same length as the MetScreen table, and the
+ * class declares no new virtual.
  *
  * Four classes derive from the class, MetEndGameGizmoScreen, MetLeftGizmoScreen,
  * MetLeftGizmoSmallScreen, and MetRightGizmoScreen. Each child fills mViewNames after the

@@ -5,11 +5,11 @@
 /**
  * Interface of the store a player draws powerups from.
  *
- * `18PowerupCollectionI` in the RTTI descriptor at `0x008f0030`, with MsgSource as its one base at
- * offset 0. The trailing letter belongs to the name the descriptor records rather than being a
- * suffix this tree added. Its table is at `0x007e49d8` and has ten entries with a zero terminator
- * at index 10. Slots 2 and 3 retain the MsgSource pair at `0x0054a270` and `0x0054a2f0`, and the
- * six slots after them are this class's own.
+ * Its RTTI descriptor is at `0x008f0030`. It has MsgSource as its one base at offset 0. The
+ * trailing letter belongs to the name the descriptor records rather than being a suffix this tree
+ * added. Its table is at `0x007e49d8` and has ten entries with a zero terminator at index 10. Slots
+ * 2 and 3 retain the MsgSource pair at `0x0054a270` and `0x0054a2f0`, and the six slots after them
+ * are this class's own.
  *
  * The class adds no data member. Its constructor stores the table pointer at `+0x10` and does
  * nothing else, so the object is the same 0x14 bytes MsgSource occupies. The destructor restores

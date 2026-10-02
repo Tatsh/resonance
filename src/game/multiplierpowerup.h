@@ -5,9 +5,9 @@
 /**
  * Powerup that multiplies the player's score for a stretch of bars.
  *
- * `17MultiplierPowerup` in the RTTI descriptor at `0x008f08b0`, with Powerup as its one base. The
- * factory builds it for kHudItemMultiplier with a four-byte allocation and the table at
- * `0x007e4018`. The destructor at `0x001ca160` is implicitly declared.
+ * Its RTTI descriptor is at `0x008f08b0`. It has Powerup as its one base. The factory builds it for
+ * kHudItemMultiplier with a four-byte allocation and the table at `0x007e4018`. The destructor at
+ * `0x001ca160` is implicitly declared.
  */
 class MultiplierPowerup : public Powerup {
 public:

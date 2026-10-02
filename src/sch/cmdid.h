@@ -64,8 +64,7 @@ public:
      *
      * The counter at `0x0077d2e8` advances past every reserved value it meets. The reserved values
      * are the set at `0x008e4f08`, which a replayed recording fills and whose cursor at
-     * `0x008e4f18` walks forward alongside the counter. The title is retained from an earlier
-     * pass.
+     * `0x008e4f18` walks forward alongside the counter. The name is inferred.
      *
      * @return The value.
      * @ghidraAddress 0x005e4dc8

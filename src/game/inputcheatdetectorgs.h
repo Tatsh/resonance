@@ -5,11 +5,11 @@
 /**
  * Cheat detector for a game session.
  *
- * `20InputCheatDetectorGS` in the RTTI descriptor at `0x008ef5c0`, with InputCheatDetector as its
- * one public base at offset 0. It adds no member, and GrooveWorld allocates it at 8 bytes. Its
- * vtable at `0x007dc408` has four entries and a zero terminator at index 4: the type function at
- * `0x00194058`, the destructor at `0x001940a8`, InputCheatDetector's slot 2 at `0x001dc658`
- * inherited, and its own slot 3 at `0x001940d8`.
+ * Its RTTI descriptor is at `0x008ef5c0`. It has InputCheatDetector as its one public base at
+ * offset 0. It adds no member, and GrooveWorld allocates it at 8 bytes. Its vtable at `0x007dc408`
+ * has four entries and a zero terminator at index 4: the type function at `0x00194058`, the
+ * destructor at `0x001940a8`, InputCheatDetector's slot 2 at `0x001dc658` inherited, and its own
+ * slot 3 at `0x001940d8`.
  *
  * The destructor at `0x001940a8` stores RawController's table and releases the object. It is the
  * implicitly declared destructor, re-emitted in GrooveWorld's translation unit, so this class owes

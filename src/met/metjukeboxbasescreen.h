@@ -21,10 +21,9 @@ class Text;
 /**
  * Base of the three jukebox screens.
  *
- * `20MetJukeboxBaseScreen` in the RTTI descriptor at `0x00902330`, with two public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00` and ListDataProvider at `+140`. The class therefore
- * starts its own members at `+144`, and the object is 0x150 bytes, which the constructor fixes by
- * writing `+0x14c` as its last member.
+ * Its RTTI descriptor is at `0x00902330`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00` and ListDataProvider at `+140`. The class therefore starts its members at
+ * `+144`. The constructor fixes the object at 0x150 bytes by writing `+0x14c` as its last member.
  *
  * The constructor is at `0x0021dcc0`. It takes the renderer, the load priority, and the three
  * names, and all three children run it rather than inlining it.

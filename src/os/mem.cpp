@@ -30,7 +30,7 @@ constexpr int kMemLogSourceCount = 128;
 constexpr int kMemLogSourceNameLimit = 40;
 
 // One row of the per-source report MemLogSourceReport() prints, 0x40 bytes. The counters are
-// titled from the report's column heading.
+// named after the report's column heading.
 struct MemLogSource {
     char mName[kMemLogSourceNameLimit]; // +0x00
     int mAllocCount;                    // +0x28 totalloc

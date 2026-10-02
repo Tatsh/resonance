@@ -10,10 +10,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12ButtonPowMsg` in the RTTI descriptor at `0x008eec88`, with Message as its one base. The
- * object is 0x10 bytes and its vtable is at `0x008131a8`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008eec88`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x008131a8`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
  * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The

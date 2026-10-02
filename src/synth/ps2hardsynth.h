@@ -6,10 +6,9 @@
 /**
  * The game's hardware synthesiser.
  *
- * `12Ps2HardSynth` in the RTTI descriptor at `0x009021d0`, with Synth as its one base, so the
- * inherited MsgSink vptr sits at offset 0 and the class is 0xc bytes. Its vtable is at
- * `0x00814fc0` and has eighteen slots, one more than the seventeen Synth declares, so the class
- * adds a single virtual of its own at slot 17.
+ * Its RTTI descriptor is at `0x009021d0`. It has Synth as its one base. The inherited MsgSink vptr
+ * sits at offset 0 and the class is 0xc bytes. Its vtable is at `0x00814fc0` and has eighteen
+ * slots, one more than the seventeen Synth declares. The class adds a single virtual at slot 17.
  *
  * It answers ten of Synth's slots and inherits slots 7, 10, and 16 unchanged. The class is thin.
  * Every override reaches the driver at `0x00461a88` through `0x00465200`, which owns the voices and

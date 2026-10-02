@@ -38,10 +38,10 @@ enum LevelConverterTrackType {
 /**
  * Converter that reads a Standard MIDI File and fills a LevelBuilder from its events.
  *
- * `14LevelConverter` in the RTTI descriptor at `0x008ef230`, with Mid::Receiver as its one base at
- * offset 0. Its table is at `0x007e76b8` and has sixteen entries with a zero terminator at index
- * 16, the same length as the base table, so the class adds no virtual. It overrides slots 2
- * through 10 and inherits slots 11 through 15.
+ * Its RTTI descriptor is at `0x008ef230`. It has Mid::Receiver as its one base at offset 0. Its
+ * table is at `0x007e76b8` and has sixteen entries with a zero terminator at index 16, the same
+ * length as the base table. The class adds no virtual. It overrides slots 2 through 10 and
+ * inherits slots 11 through 15.
  *
  * Slot 11 is worth stating separately. The derived table records `0x001ea360` where the base
  * records `0x001ea2c0`, and both are the same two instructions. This toolchain re-emits an inline

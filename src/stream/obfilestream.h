@@ -9,9 +9,9 @@ class HxStr;
 /**
  * Output stream over a C library `FILE`.
  *
- * `12OBFileStream` in the RTTI descriptor at `0x00901bd0`, single inheritance from OBStream at
- * offset 0. The type function is at `0x004ed900`. The object is 8 bytes and its vtable is at
- * `0x00824208`, which runs to slot 6. One call site constructs one.
+ * Its RTTI descriptor is at `0x00901bd0`. It has single inheritance from OBStream at offset 0. The
+ * type function is at `0x004ed900`. The object is 8 bytes. Its vtable at `0x00824208` runs to slot
+ * 6. One call site constructs one.
  *
  * Two slots are added beyond OBStream's four, in the order the declarations below give. The
  * destructor is one of them, because OBStream declares none, so a stream of this class destroyed

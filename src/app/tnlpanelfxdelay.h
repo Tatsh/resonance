@@ -7,10 +7,9 @@ class AppTunnel;
 /**
  * A panel effect AppTunnel starts on one ring section at a later frame.
  *
- * `15TnlPanelFXDelay` in the RTTI descriptor, deriving from TnlTrigger. Its type function is at
- * `0x00457180` and its vtable at `0x0081b9c0`. The object is 0x14 bytes. The destructor at
- * `0x00457150` is compiler-generated. AppTunnel builds one per bar of a panel run at `0x004481d0`
- * and `0x00448d58`, with the constructor inlined.
+ * It derives from TnlTrigger. Its type function is at `0x00457180` and its vtable at `0x0081b9c0`.
+ * The object is 0x14 bytes. The destructor at `0x00457150` is compiler-generated. AppTunnel builds
+ * one per bar of a panel run at `0x004481d0` and `0x00448d58`, with the constructor inlined.
  */
 class TnlPanelFXDelay : public TnlTrigger {
 public:

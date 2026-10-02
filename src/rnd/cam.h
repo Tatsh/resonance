@@ -23,11 +23,11 @@ namespace Rnd {
 /**
  * Camera.
  *
- * `Q23Rnd3Cam` in the RTTI descriptor at `0x008eeeb8`, with three public non-virtual bases:
- * `Rnd::Drawable` at offset 0, `Rnd::Transformable` at `0x20`, and `Rnd::Collideable` at `0xd0`.
- * The class is 0x330 bytes. The factory at `0x004b2470` proves that size by allocating exactly
- * that much under the tag "Rnd::Cam". The virtual `Rnd::Object` subobject sits at `0x310`, which
- * the constructor proves by writing that address into all three virtual-base pointers.
+ * Its RTTI descriptor is at `0x008eeeb8`. It has three public non-virtual bases: `Rnd::Drawable` at
+ * offset 0, `Rnd::Transformable` at `0x20`, and `Rnd::Collideable` at `0xd0`. The class is 0x330
+ * bytes. The factory at `0x004b2470` proves that size by allocating exactly that much under the tag
+ * "Rnd::Cam". The virtual `Rnd::Object` subobject sits at `0x310`. The constructor proves the
+ * offset by writing that address into all three virtual-base pointers.
  *
  * Each matrix and each frustum member is quadword aligned in the original. The four bytes between
  * the end of the `Rnd::Collideable` subobject at `0xdc` and the first matrix at `0xe0` are the
@@ -35,8 +35,8 @@ namespace Rnd {
  *
  * The member titles come from the text DumpText() writes: "nearPlane:", " farPlane:", " fov:",
  * "yRatio:", "screenRect:", "zRange:", " targetTex:", " localProject:", "worldProject:", and
- * "invWorldProject:". Both frustum members are titled from the same dump. The two matrices the
- * dump omits are titled from what builds them. That is, `0xe0` is the inverse of the world
+ * "invWorldProject:". Both frustum member names come from the same dump. The names of the two
+ * matrices the dump omits come from what builds them. That is, `0xe0` is the inverse of the world
  * transform and `0x160` is the inverse of the local projection.
  *
  * Four vtables belong to the class. The six-entry table at `0x00820958` is addressed by the
@@ -72,9 +72,10 @@ public:
     /**
      * Rectangle the projected image is placed in.
      *
-     * Titled from the single dump label "screenRect:" the four components are written under, which
-     * are "(x:", " y:", " w:", and " h:". The extents are fractions of the render target rather
-     * than pixels, which Rnd::PsCam::ScreenToPixels() proves by scaling them by the target size.
+     * Named after the single dump label "screenRect:" the four components are written under. The
+     * component labels are "(x:", " y:", " w:", and " h:". The extents are fractions of the render
+     * target rather than pixels. Rnd::PsCam::ScreenToPixels() proves it by scaling them by the
+     * target size.
      * The type is nested because no other class stores a rectangle in this shape.
      */
     struct Rect {

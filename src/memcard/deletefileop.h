@@ -6,8 +6,8 @@
 /**
  * Deletion of one file or directory on a card.
  *
- * `12DeleteFileOp` in the RTTI descriptor at `0x008efbe0`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x24 bytes and the vtable is at `0x0082bc40`.
+ * Its RTTI descriptor is at `0x008efbe0`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x24 bytes and the vtable is at `0x0082bc40`.
  */
 class DeleteFileOp : public MemcardOp {
 public:

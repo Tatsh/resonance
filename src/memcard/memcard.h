@@ -9,9 +9,9 @@ class MemcardOp;
 /**
  * Queue of memory-card operations, with one entry point per libmc call.
  *
- * `7Memcard` in the RTTI descriptor at `0x0086f630`, with no base class, which is why the vptr
- * sits after the data at offset 4 rather than at offset 0. An instance is eight bytes and the
- * vtable is at `0x0082c030`, with three slots.
+ * Its RTTI descriptor is at `0x0086f630`. It has no base class. The vptr therefore sits after the
+ * data at offset 4 rather than at offset 0. An instance is eight bytes and the vtable is at
+ * `0x0082c030`, with three slots.
  *
  * Every entry point below constructs one MemcardOp subclass on the heap and appends it to the
  * queue. Nothing is issued at that moment. Update() drives the head of the queue, one libmc call

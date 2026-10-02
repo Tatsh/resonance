@@ -15,8 +15,8 @@ class MetPersonaData;
 /**
  * Canvas of the FreQ maker, the screen the avatar under edit is drawn on.
  *
- * `24MetFreqMakerCanvasScreen` in the RTTI descriptor at `0x00902a60`, with two public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00`, and MemcardUser at `+140`.
+ * Its RTTI descriptor is at `0x00902a60`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, and MemcardUser at `+140`.
  *
  * The 39-entry primary vtable is at `0x007f1cd8`, the same length as the MetScreen table, so the
  * class declares no virtual of its own.

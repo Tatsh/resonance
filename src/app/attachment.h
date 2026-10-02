@@ -3,12 +3,11 @@
 /**
  * Reference-counted root of the engine's polymorphic object graph.
  *
- * `10Attachment` in the RTTI descriptor at `0x0086f5a0`, with no base. The class supplies the
- * virtual destructor that every derived class shares, so a derived class that declares its own
- * virtuals receives a second vptr of its own rather than extending this vtable. The one data word
- * is declared first, which places the vptr after it at `+0x04` and makes the class eight bytes.
- * The destructor is declared ahead of Destroy(), so the table at `0x00821728` runs GetTypeInfo,
- * the destructor, then Destroy().
+ * Its RTTI descriptor is at `0x0086f5a0`. It has no base. The class supplies the virtual destructor
+ * that every derived class shares. A derived class that declares further virtuals receives a second
+ * vptr rather than extending this vtable. The one data word is declared first. The vptr therefore
+ * sits after it at `+0x04`, and the class is eight bytes. The destructor is declared ahead of
+ * Destroy(). The table at `0x00821728` runs GetTypeInfo, the destructor, then Destroy().
  *
  * A fresh object starts with one reference. Release() gives one back, and the last release
  * dispatches Destroy(), which deletes the object through the virtual destructor.

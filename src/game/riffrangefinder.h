@@ -7,8 +7,8 @@
 /**
  * Visitor that finds the lowest and highest note of a sequence.
  *
- * `15RiffRangeFinder` in the RTTI descriptor at `0x008ef058`, with MsgSink as its only base at
- * offset 0. The object is 0xc bytes. PitchPicker::FindRiffRange() builds one on its stack.
+ * Its RTTI descriptor is at `0x008ef058`. It has MsgSink as its only base at offset 0. The object
+ * is 0xc bytes. PitchPicker::FindRiffRange() builds one on its stack.
  *
  * The destructor at `0x001c4200` is implicitly declared. It restores MsgSink's table and, for the
  * deleting variant, releases the object under MsgSink's tag.

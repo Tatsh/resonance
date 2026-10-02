@@ -5,10 +5,10 @@
 /**
  * One page of the multiplayer loading tips.
  *
- * `19MetMultiTips5Screen` in the RTTI descriptor at `0x008eee28`, with MetMultiTipsBaseScreen as
- * its one public non-virtual base at offset 0. The class declares no data member, and the 39-entry
- * vtable at `0x00800fd0` is the same length as the MetMultiTipsBaseScreen table, so it declares no
- * virtual of its own either.
+ * Its RTTI descriptor is at `0x008eee28`. It has MetMultiTipsBaseScreen as its one public
+ * non-virtual base at offset 0. The class declares no data member. The 39-entry vtable at
+ * `0x00800fd0` is the same length as the MetMultiTipsBaseScreen table, and the class declares no
+ * new virtual.
  *
  * The constructor at `0x00309fa0` takes only the renderer and the load priority. It runs the
  * MetMultiTipsBaseScreen constructor at `0x00306cd8` with `tp5` for the screen

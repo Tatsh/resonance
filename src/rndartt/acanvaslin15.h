@@ -5,10 +5,10 @@
 /**
  * Linear addressing for a canvas of 1555 pixels.
  *
- * The name comes from the RTTI descriptor at 0x008ef2a0, whose mangled form is `12ACanvasLin15` and
- * whose single public base is ACanvas15 at offset zero. Like the other layout classes it derives
- * from the format class, so its base converts every other colour format into 1555 and this class
- * supplies everything that depends on where a pixel sits in memory.
+ * Its RTTI descriptor is at 0x008ef2a0, and its single public base is ACanvas15 at offset zero.
+ * Like the other layout classes it derives from the format class. Its base converts every other
+ * colour format into 1555, and this class supplies everything that depends on where a pixel sits
+ * in memory.
  *
  * Its table at 0x0083cb58 runs the same 85 entries as its base's and overrides sixteen. Four are
  * the pure slots ACanvas15 leaves, which makes the class concrete: the alpha builder at 12, the

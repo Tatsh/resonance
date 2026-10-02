@@ -5,8 +5,8 @@
 /**
  * Move of the read and write position of an open memory-card file.
  *
- * `6SeekOp` in the RTTI descriptor at `0x008ef330`, single inheritance from `MemcardOp` at offset
- * 0. An instance is 0x2c bytes and the vtable is at `0x0082bd00`.
+ * Its RTTI descriptor is at `0x008ef330`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x2c bytes and the vtable is at `0x0082bd00`.
  *
  * The constructor never writes MemcardOp::mPortSlot, which makes this class and CloseOp the two
  * operations that address a descriptor alone. `Memcard::Seek()` has no caller in the image, so

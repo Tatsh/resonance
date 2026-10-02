@@ -8,9 +8,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `15PlaybackModeMsg` in the RTTI descriptor at `0x009022a0`, with Message as its one base. The
- * object is 0xc bytes and its vtable is at `0x007cf578`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x009022a0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007cf578`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The types come from
  * InputMap::OnControllerReading(), the one builder, which stores the resolved player and the

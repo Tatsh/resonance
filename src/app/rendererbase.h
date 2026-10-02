@@ -8,9 +8,9 @@ class Message;
 /**
  * Base of every renderer, with a message queue and a router of its own.
  *
- * `12RendererBase` in the RTTI descriptor, deriving from MsgSink at offset 0, with its own type
- * function at `0x00139e88`. Three classes derive from it: MetRenderer, MetNullRenderer, and
- * Renderer. Each of their constructors calls this class's constructor directly.
+ * It derives from MsgSink at offset 0, with its own type function at `0x00139e88`. Three classes
+ * derive from it: MetRenderer, MetNullRenderer, and Renderer. Each of their constructors calls this
+ * class's constructor directly.
  *
  * The table at `0x007d2d20` runs eleven entries against MsgSink's four, so slots 4 through 10 are
  * the seven virtuals this class introduces. Slots 3, 7, and 8 address the pure-virtual stub at
@@ -29,9 +29,9 @@ public:
     /**
      * Sink that forwards every message it receives to one other sink.
      *
-     * `Q212RendererBase6Router` in the RTTI descriptor at `0x00901fa0`, recorded as single
-     * inheritance from MsgSink at offset 0. The object is eight bytes: the four-byte MsgSink
-     * subobject, whose table pointer sits at offset 0, followed by the target at `+0x04`.
+     * Its RTTI descriptor is at `0x00901fa0`, recorded as single inheritance from MsgSink at
+     * offset 0. The object is eight bytes: the four-byte MsgSink subobject, whose table pointer
+     * sits at offset 0, followed by the target at `+0x04`.
      *
      * 172 tables in the image place the shared MsgSink::Handle() body at slot 2. This class and
      * RendererBase are the two that override it, and the tables of RendererBase's subclasses

@@ -5,9 +5,9 @@
 /**
  * Receiver of the first read of every movie stream.
  *
- * `18MovieAsyncCallback` in the RTTI, deriving publicly from AsyncCallback at offset 0. One
- * instance at `0x00767940` serves every Rnd::MovieStream. Its destructor at `0x00580708` and its
- * type accessor at `0x00580738` are compiler-generated.
+ * It derives publicly from AsyncCallback at offset 0. One instance at `0x00767940` serves every
+ * Rnd::MovieStream. Its destructor at `0x00580708` and its type accessor at `0x00580738` are
+ * compiler-generated.
  */
 class MovieAsyncCallback : public AsyncCallback {
 public:

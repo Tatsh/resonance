@@ -9,10 +9,10 @@
 /**
  * Settings a game session is started with.
  *
- * `10GameParams` in the RTTI descriptor at `0x0086f628`, with no base, so the compiler places the
- * vptr after the data at `+0x34` and the class is 0x38 bytes. Its vtable at `0x007db5a0` has four
- * entries and a zero terminator at index 4, so the destructor and the two transfer members are the
- * whole set of virtuals.
+ * Its RTTI descriptor is at `0x0086f628`. It has no base. The compiler places the vptr after the
+ * data at `+0x34`, and the class is 0x38 bytes. Its vtable at `0x007db5a0` has four entries and a
+ * zero terminator at index 4. The destructor and the two transfer members are the whole set of
+ * virtuals.
  *
  * The layout comes from the constructor, the destructor, and the copy constructor together. The
  * constructor zeroes every word from `+0x00` to `+0x30` in ascending order, the destructor releases

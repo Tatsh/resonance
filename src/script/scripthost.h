@@ -85,8 +85,8 @@ void RunScript(const HxStr &script);
  * the machine, so the text it returns is unreachable on the normal path. The plain return is
  * `no python exception found`. A std::exception escaping the report is caught and its what() text
  * returned after the prefix `python error: `. The handler matches the type_info that
- * `0x004ad6b8` builds from `9exception`, and it calls the vtable entry at `+0x10`, which is
- * what() in the g++ 2.9x layout.
+ * `0x004ad6b8` builds for `std::exception`, and it calls the vtable entry at `+0x10`, the
+ * what() slot in the g++ 2.9x layout.
  *
  * @return The text.
  * @ghidraAddress 0x00508f30

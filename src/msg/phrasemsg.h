@@ -9,10 +9,9 @@ class Phrase;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `9PhraseMsg` in the RTTI descriptor at `0x00901d30`, with Message as its one base. The object
- * is 0x10 bytes and its vtable is at `0x00811fe8`. The members below are the whole of the class:
- * everything recovered comes from them, and no other routine in the image refers to this type by
- * anything but its vtable.
+ * Its RTTI descriptor is at `0x00901d30`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x00811fe8`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). PhraseMgr::PostPhraseMsg()
  * fills the three words with its argument, a manager word, and the phrase it looked up, which

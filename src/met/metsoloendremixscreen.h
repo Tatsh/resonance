@@ -13,13 +13,13 @@ class Text;
 /**
  * End-of-remix screen for a solo session.
  *
- * `21MetSoloEndRemixScreen` in the RTTI descriptor at `0x008f07f0`, with two public non-virtual
- * bases at fixed offsets, MetScreen at `+0x00` and MetRemixSaver at `+140`. The object is 0x11c
- * bytes, which the factory at `0x00399630` confirms by requesting exactly that many with the tag
- * `MsgSink`. The 39-entry primary vtable is at `0x0080c4f0`, the same length as the MetScreen
- * table, so the class declares no virtual of its own, and the five-entry MetRemixSaver table at
- * `0x0080c4c0` adjusts `this` by `-140` in every entry. That table is where this screen supplies
- * the three MetRemixSaver pure virtuals.
+ * Its RTTI descriptor is at `0x008f07f0`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00` and MetRemixSaver at `+140`. The factory at `0x00399630` confirms the object
+ * size of 0x11c bytes by requesting exactly that many with the tag `MsgSink`. The 39-entry primary
+ * vtable is at `0x0080c4f0`, the same length as the MetScreen table, and the class declares no new
+ * virtual. The five-entry MetRemixSaver table at `0x0080c4c0` adjusts `this` by `-140` in every
+ * entry. That table is where this screen supplies the three MetRemixSaver pure
+ * virtuals.
  *
  * The constructor at `0x003943f8` takes only the renderer and the load priority, and supplies
  * `erss` for the screen name, `metagame/_Solo` for the directory, and `end_remix` for the
@@ -32,10 +32,10 @@ class Text;
  * compiler-generated member destruction or a vptr restore, so the definition is empty.
  *
  * Seven entries of the primary table differ from the MetScreen table, which a diff of the two
- * tables settles rather than the title each routine carries. They are 0 `0x003995b0`, the
+ * tables settles. They are 0 `0x003995b0`, the
  * compiler-generated GetTypeInfo, 1 `0x003996b8` the destructor, 5 `0x00394e10`, 7 `0x003997d0`,
  * 26 `0x00399748`, 36 `0x00399870`, and 38 `0x00394728`. All five behaviour slots are declared
- * below. An earlier reading counted five entries by omitting the type function and the destructor.
+ * below.
  *
  * The three MetRemixSaver pure virtuals are supplied at `0x003998c8`, `0x00399898`, and
  * `0x00395918`, and all three are declared below with the spelling the base gives them.

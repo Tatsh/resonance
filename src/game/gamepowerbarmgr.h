@@ -11,10 +11,10 @@ class TrackData;
 /**
  * Powerbar source that deals a powerbar to scattered bars of a track once, at construction.
  *
- * `15GamePowerbarMgr` in the RTTI, with PowerbarMgr as its one base. Its table is at `0x007e3878`.
- * The object is 0x40 bytes, which the allocations in PhraseMgr's routine at `0x001ba3d8` measure
- * for both subclasses. SoloPowerbarMgr and MultiPowerbarMgr differ only in the constant arguments
- * their constructors pass here.
+ * It has PowerbarMgr as its one base. Its table is at `0x007e3878`. The allocations in PhraseMgr's
+ * routine at `0x001ba3d8` measure the object at 0x40 bytes for both subclasses.
+ * SoloPowerbarMgr and MultiPowerbarMgr differ only in the constant arguments their constructors
+ * pass here.
  *
  * The deleting destructor at `0x001c6090` is implicitly declared.
  */

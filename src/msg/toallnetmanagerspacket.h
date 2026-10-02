@@ -5,9 +5,8 @@
 /**
  * Routing category for a packet, which selects who receives it.
  *
- * `22ToAllNetManagersPacket` in the RTTI descriptor at `0x008f0790`, with Packet as its one base.
- * It has no vtable of its own, and its RTTI accessor is shared with a concrete packet, so a
- * per-name scan credits that packet's vtable to this name as well.
+ * Its RTTI descriptor is at `0x008f0790`. It has Packet as its one base. The class emits no vtable,
+ * and its RTTI accessor is shared with a concrete packet.
  *
  * The class adds no payload. Its one derived class, SCPlayerJoinedPacket, starts its own payload
  * at `+0x14`.

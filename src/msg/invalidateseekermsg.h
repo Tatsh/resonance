@@ -5,9 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `19InvalidateSeekerMsg` in the RTTI descriptor at `0x008ef3d0`, with Message as its one base.
- * The object is 0xc bytes and its vtable is at `0x007ce720`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008ef3d0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007ce720`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The word at `+0x04` is a bar
  * and the word at `+0x08` a track, which the builds and every reader agree on. The readers compare

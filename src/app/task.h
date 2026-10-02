@@ -14,7 +14,7 @@ enum TaskState {
 /**
  * Cooperative unit of work that the run ring polls once per pass.
  *
- * `4Task` in the RTTI descriptor at `0x008f07d0`, deriving virtually from Attachment. The virtual
+ * Its RTTI descriptor is at `0x008f07d0`. It derives virtually from Attachment. The virtual
  * base places the Attachment subobject at the end of the most derived object, at `+0x0c` for a
  * standalone Task, and the compiler-generated pointer to it at `+0x00`. Because the only base is
  * virtual, the class also receives a vptr of its own, at `+0x08`, for the five virtuals it

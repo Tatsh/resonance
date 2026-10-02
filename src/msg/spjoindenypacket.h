@@ -11,11 +11,11 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `16SPJoinDenyPacket` in the RTTI descriptor at `0x008efe30`, with ToSingleNetManagerPacket as
- * its one base. The object is 0x20 bytes and its vtable is at `0x00814848`. The payload comes
- * from the copy constructor at `0x003f3130`, which Clone() delegates to, so the offsets and
- * widths are recovered but the purpose of each field is not. The four words Packet owns are
- * declared there rather than here.
+ * Its RTTI descriptor is at `0x008efe30`. It has ToSingleNetManagerPacket as its one base. The
+ * object is 0x20 bytes and its vtable is at `0x00814848`. The payload comes from the copy
+ * constructor at `0x003f3130`. Clone() delegates to it. The offsets and widths are recovered, but
+ * the purpose of each field is not. The four words Packet provides are declared there rather than
+ * here.
  *
  * This class shares its RTTI accessor and vtable with ToSingleNetManagerPacket, its own base,
  * which has no implementation of its own. The vtable belongs to this class.

@@ -14,10 +14,10 @@ class TracksOnMsg;
 /**
  * Per-track MIDI mixer that sits between a track graph and the synthesiser.
  *
- * `5Mixer` in the RTTI descriptor at `0x008f0770`, with MsgSink as its one base, so the inherited
- * vptr sits at offset 0. The object is 0x58 bytes, which the allocations in
- * BGTrackGraph::CreateMixer() and ScoreTrackGraph's constructor both measure. Its vtable is at
- * `0x007df900` and runs four entries.
+ * Its RTTI descriptor is at `0x008f0770`. It has MsgSink as its one base, and the inherited vptr
+ * sits at offset 0. The allocations in BGTrackGraph::CreateMixer() and ScoreTrackGraph's
+ * constructor both measure the object at 0x58 bytes. Its vtable is at `0x007df900` and runs four
+ * entries.
  *
  * It is a MIDI filter on one channel. Every message it emits is a StdMidiMsg built on the stack
  * and handed to mOutput, with the channel taken from mChannel. A StdMidiMsg arriving with a
@@ -27,11 +27,7 @@ class TracksOnMsg;
  * 127 cubed, which normalises a product of four 7-bit values back into a 7-bit value, and sends
  * that as controller 11. Four independent gains therefore scale one channel's expression.
  *
- * This class is not a light manager, and the three members previously titled
- * EmitSectionBrightnessPulse(), SetColorByte(), and UpdateColorFromGameState() are the pan
- * emitter, the gain setter, and the gain recomputation. The name comes from the RTTI descriptor
- * and is not the invented `Rnd::MidiLight` that the type-function harvest recorded for the
- * accessor.
+ * The name comes from the RTTI descriptor.
  */
 class Mixer : public MsgSink {
 public:

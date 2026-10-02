@@ -5,12 +5,12 @@
 /**
  * Jukebox list of the remixes that shipped with the game.
  *
- * `30MetJukeboxFactoryRemixesScreen` in the RTTI descriptor at `0x008eee68`, with
- * MetJukeboxBaseScreen as its one public non-virtual base at offset 0. The class declares no data
- * member, so the object is the 0x150 bytes of MetJukeboxBaseScreen alone. The 43-entry primary
- * vtable is at `0x007eeff0`, the same length as the MetJukeboxBaseScreen table, so the class
- * declares no virtual of its own. The four-entry ListDataProvider table at `0x007eefc8` adjusts
- * `this` by `-140` in every entry and overrides no inherited entry.
+ * Its RTTI descriptor is at `0x008eee68`. It has MetJukeboxBaseScreen as its one public non-virtual
+ * base at offset 0. The class declares no data member, and the object is the 0x150 bytes of
+ * MetJukeboxBaseScreen alone. The 43-entry primary vtable is at `0x007eeff0`, the same length as
+ * the MetJukeboxBaseScreen table, and the class declares no new virtual. The four-entry
+ * ListDataProvider table at `0x007eefc8` adjusts `this` by `-140` in every entry and overrides no
+ * inherited entry.
  *
  * The constructor at `0x0023ae58` takes only the renderer and the load priority. It runs the
  * MetJukeboxBaseScreen constructor at `0x0021dcc0` with `jbf` for the screen name,
@@ -22,7 +22,7 @@
  * Two inherited slots differ from the MetJukeboxBaseScreen table beyond the destructor. Slot 38 at
  * `0x0023afd8` extends the base view resolution, and slot 39 at `0x00240840` supplies the pure
  * virtual with a body byte-for-byte identical to the MetJukeboxCustomRemixesScreen override. Slots
- * 40, 41, and 42 are inherited unchanged, which an earlier reading recorded as overrides.
+ * 40, 41, and 42 are inherited unchanged.
  */
 class MetJukeboxFactoryRemixesScreen : public MetJukeboxBaseScreen {
 public:

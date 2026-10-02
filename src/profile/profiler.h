@@ -5,7 +5,7 @@
 #include "os/hxstr.h"
 
 /**
- * One titled interval the profiler accumulates, 0x14 bytes.
+ * One labelled interval the profiler accumulates, 0x14 bytes.
  *
  * The class is not polymorphic and has no RTTI, so its title is inferred. The static initialiser
  * at `0x0053d700` builds each record by copying a temporary whose first word it never writes, so
@@ -27,7 +27,7 @@ struct ProfileTimer {
 /**
  * The timers the game accumulates into during a frame, twenty records.
  *
- * MainLoop titles the first four, and GfxDevice::DrawSubsystemTimingGraph() draws one bar per
+ * MainLoop labels the first four, and GfxDevice::DrawSubsystemTimingGraph() draws one bar per
  * record.
  *
  * @ghidraAddress 0x00720378

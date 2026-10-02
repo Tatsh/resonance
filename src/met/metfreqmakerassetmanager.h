@@ -22,10 +22,10 @@ class Tex;
 /**
  * Owner of the art and sound assets the FreQ maker works from.
  *
- * `24MetFreqMakerAssetManager` in the RTTI descriptor at `0x0086f7a8`, a leaf class with no base.
- * Following the g++ 2.x layout for a class with no base, the vptr sits after the data members at
- * `+0x80`, so the object is 0x84 bytes. The two-entry vtable is at `0x007f0908`, which makes the
- * destructor the one virtual the class declares.
+ * Its RTTI descriptor is at `0x0086f7a8`. It is a leaf class with no base. Following the g++ 2.x
+ * layout for a class with no base, the vptr sits after the data members at `+0x80`, and the
+ * object is 0x84 bytes. The two-entry vtable at `0x007f0908` makes the destructor the one virtual
+ * the class declares.
  *
  * The manager loads `MetaGame/persona/freq_maker_inventory_assets.rnd` in the background. Once the
  * load completes, PollLoad() builds one FreqPartTemplate for each part texture it produced, and the

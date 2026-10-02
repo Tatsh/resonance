@@ -13,10 +13,9 @@ class Button;
 /**
  * Screen that edits the in-game options.
  *
- * `26MetConfigGameOptionsScreen` in the RTTI descriptor at `0x00901ee0`, with
- * MetScreenMultiSoundBank as its one public non-virtual base at offset 0. New() allocates 0xb4
- * bytes, and the 39-entry vtable is at `0x007eaea8`, the same length as the MetScreen table, so
- * the class declares no virtual of its own.
+ * Its RTTI descriptor is at `0x00901ee0`. It has MetScreenMultiSoundBank as its one public
+ * non-virtual base at offset 0. New() allocates 0xb4 bytes, and the 39-entry vtable is at
+ * `0x007eaea8`, the same length as the MetScreen table, and the class declares no new virtual.
  *
  * Two rows edit a working copy of GameOptions. The audio row switches GameOptions::mStereo
  * between `STEREO` and `MONO`, and the force-feedback row switches GameOptions::mForceFeedback

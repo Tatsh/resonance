@@ -10,11 +10,11 @@
 /**
  * Catcher that scores a whole range of bars at once.
  *
- * `12MultiCatcher` in the RTTI descriptor at `0x008ef518`, with Catcher as its only base at offset
- * 0. Its primary table is at `0x007e0b28` with eleven entries and its MsgSource subobject table at
- * `0x007e0b00` with four. The table is the same length as the base's, so the class introduces no
- * virtual and overrides only the destructor and the base's two pure slots. The object is 0x80
- * bytes, the same as the base, so it adds no data member.
+ * Its RTTI descriptor is at `0x008ef518`. It has Catcher as its only base at offset 0. Its primary
+ * table is at `0x007e0b28` with eleven entries and its MsgSource subobject table at `0x007e0b00`
+ * with four. The table is the same length as the base's. The class introduces no virtual and
+ * overrides only the destructor and the base's two pure slots. The object is 0x80 bytes, the same
+ * as the base. It adds no data member.
  *
  * The constructor's whole body is the base construction and the two table stores, and it supplies
  * 1 for the base's `int` parameter. The destructor's whole body is the base teardown and the

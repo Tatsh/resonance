@@ -11,8 +11,8 @@ namespace Py {
 /**
  * Handle on a Python list.
  *
- * `Q22Py4List` in the RTTI descriptor at `0x00902180`, with `Py::SeqBase<Py::Object>` at offset 0
- * as its one base.
+ * Its RTTI descriptor is at `0x00902180`. It has `Py::SeqBase<Py::Object>` at offset 0 as its one
+ * base.
  *
  * The MetHelpScreen translation unit carries a private copy of the nine-entry vtable at
  * `0x00802560`, with the type function at `0x00316f20`. Against the `SeqBase<Object>` table it

@@ -15,11 +15,10 @@ class Player;
 /**
  * Store of one phrase per step of a play map, and one jam effect mask per step.
  *
- * `14PhraseDatabase` in the RTTI descriptor, with MsgSource as its one base. The object is 0x30
- * bytes: the MsgSource subobject over `+0x00` through `+0x13`, then the three members below. Its
- * vtable at `0x007e1db0` runs four entries (the type function, the destructor, and the retained
- * MsgSource::AddSink() and MsgSource::RemoveSink()). The class declares no virtual beyond the
- * destructor.
+ * It has MsgSource as its one base. The object is 0x30 bytes: the MsgSource subobject over `+0x00`
+ * through `+0x13`, then the three members below. Its vtable at `0x007e1db0` runs four entries (the
+ * type function, the destructor, and the retained MsgSource::AddSink() and
+ * MsgSource::RemoveSink()). The class declares no virtual beyond the destructor.
  *
  * The constructor sizes the phrase vector to the last step of the play map and the mask vector to
  * one less than the step count. A phrase is addressed either by index or by a song position, which

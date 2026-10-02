@@ -16,8 +16,8 @@ constexpr int kTunnelSeekNoSlice = -9999;
  * One section of a Rnd::TunnelSeekStrip, a copy of the tunnel's cell geometry placed on one slice.
  *
  * The record is not polymorphic and has no RTTI, and the image retains no title for it. The name is
- * inferred from the format "[%s_seek%d.%d]" that titles its meshes, which names the strip index and
- * then this section's index.
+ * inferred from the format "[%s_seek%d.%d]" that labels its meshes with the strip index and then
+ * this section's index.
  *
  * The record is 0x20 bytes, the element size of the section vector of Rnd::TunnelSeekStrip. Its
  * destructor is the implicit one, emitted at 0x00478018, which deletes the meshes through

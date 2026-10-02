@@ -14,10 +14,10 @@
 /**
  * Settings shared by every player and saved to the memory card apart from any persona.
  *
- * `14GlobalSettings` in the RTTI descriptor, a leaf class with no base. Following the g++ 2.x
- * layout for a class with no base, the vptr sits after the data at `+0x7c`, and the object is 0x80
- * bytes, which the allocation in Create() fixes. The vtable at `0x007db970` runs the type function
- * at `0x0018b948`, the destructor, Save(), and Load().
+ * It is a leaf class with no base. Following the g++ 2.x layout for a class with no base, the vptr
+ * sits after the data at `+0x7c`. The allocation in Create() fixes the object at 0x80 bytes. The
+ * vtable at `0x007db970` runs the type function at `0x0018b948`, the destructor, Save(), and
+ * Load().
  *
  * The one instance lives at `0x0067ea38`. MetRenderer's constructor creates it through Create(),
  * and about a hundred routines reach it through shared().

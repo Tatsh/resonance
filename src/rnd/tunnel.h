@@ -28,12 +28,12 @@ namespace Rnd {
 /**
  * Procedural tunnel the game flies the player through.
  *
- * `Q23Rnd6Tunnel` in the RTTI descriptor at `0x008efdb0`, with three public non-virtual bases:
- * `Rnd::Drawable` at `+0x00`, `Rnd::Animatable` at `+0x14`, and `Rnd::Collideable` at `+0x2c`. All
- * three derive virtually from `Rnd::Object`, so one shared Object subobject sits at `+0xe8`. The
- * creator allocates exactly 0x104 bytes, which is `0xe8` plus the 0x1c-byte Object subobject with
- * nothing left over, and the three base sizes of 0x14, 0x18, and 0xc account for everything ahead
- * of `+0x38`. The members of the class itself therefore occupy `+0x38` through `+0xe7`.
+ * Its RTTI descriptor is at `0x008efdb0`. It has three public non-virtual bases: `Rnd::Drawable` at
+ * `+0x00`, `Rnd::Animatable` at `+0x14`, and `Rnd::Collideable` at `+0x2c`. All three derive
+ * virtually from `Rnd::Object`. One shared Object subobject sits at `+0xe8`. The creator allocates
+ * exactly 0x104 bytes, `0xe8` plus the 0x1c-byte Object subobject with no surplus, and the three
+ * base sizes of 0x14, 0x18, and 0xc account for everything ahead of
+ * `+0x38`. The members of the class itself therefore occupy `+0x38` through `+0xe7`.
  *
  * This is the only render tunnel in the build. The four other `Tnl`-prefixed classes,
  * `TnlArena`, `TnlTrigger`, `TnlPanelFXDelay`, and `AppTunnel`, all derive from `MsgSink` and
@@ -322,7 +322,7 @@ public:
     /**
      * Remove the first event with an identifier and drop its reference.
      *
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @param nId The identifier to match.
      * @return One when an event matched, zero otherwise.
@@ -343,7 +343,7 @@ public:
     /**
      * Call a function once for every event, in frame order.
      *
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @param pfnVisit The function, given the drawable, the frame, the identifier, and pUser.
      * @param pUser Passed through to pfnVisit.
@@ -407,7 +407,7 @@ public:
      * Set the shape parameters and rebuild the geometry.
      *
      * Every seeker releases its references, BuildMesh() runs, and every seeker is attached again.
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @param flRingRadius The value of mRingRadius.
      * @param nRingCount The ring count.
@@ -431,7 +431,7 @@ public:
     /**
      * Convert a frame to a slice.
      *
-     * The frame is scaled by mSlicesPerFrame and rounded down. The program lists no caller.
+     * The frame is scaled by mSlicesPerFrame and rounded down. The image has no caller.
      *
      * @param flFrame The frame.
      * @return The slice.
@@ -507,8 +507,8 @@ private:
     void BuildSliceMeshes();
 
     // Build one chain per lane of each slice, "[<name>_lat<lane>]", holding one flat grid of four
-    // rows and two end caps, with the triangles built on the first chain and shared. The program
-    // lists no caller, and BuildMesh() calls BuildSliceMeshes() instead. 0x0046b830.
+    // rows and two end caps, with the triangles built on the first chain and shared. The image has
+    // no caller, and BuildMesh() calls BuildSliceMeshes() instead. 0x0046b830.
     void BuildLaneMeshes();
 
     // Build one chain per cell, "[<name>_pan<cell>]", with two rows of mSliceSteps + 1 vertices.

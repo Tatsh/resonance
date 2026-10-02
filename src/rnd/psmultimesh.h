@@ -9,11 +9,11 @@ namespace Rnd {
 /**
  * PlayStation 2 multi-mesh, which submits one GIF packet run per instance.
  *
- * `Q23Rnd11PsMultiMesh` in the RTTI descriptor at `0x008ef490`, with `Rnd::MultiMesh` as its one
- * public base at offset 0. The class declares no data member, so it is the same 0x38 bytes the
- * base occupies and the creator at `0x005b5c28` allocates exactly that. Its two vtables at
- * `0x00833d80` and `0x00833dc8` differ from the Rnd::MultiMesh pair only in the type info
- * accessor, the destructor, and DrawSelf().
+ * Its RTTI descriptor is at `0x008ef490`. It has `Rnd::MultiMesh` as its one public base at offset
+ * 0. The class does not declare a data member. It is the same 0x38 bytes the base occupies, and
+ * the creator at `0x005b5c28` allocates exactly that. Its two vtables at `0x00833d80` and
+ * `0x00833dc8` differ from the Rnd::MultiMesh pair only in the type info accessor, the destructor,
+ * and DrawSelf().
  */
 class PsMultiMesh : public MultiMesh {
 public:

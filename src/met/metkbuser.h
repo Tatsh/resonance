@@ -5,10 +5,9 @@ class HxStr;
 /**
  * Mix-in for a screen that receives text from the front-end keyboard.
  *
- * `9MetKBUser` in the RTTI descriptor at `0x0086f598`, a leaf class with no base. The class
- * declares no data member, so the subobject is the four bytes of the compiler-generated vptr at
- * offset 0, which MetPersonaSaverScreen fixes by placing MemcardUser at `+140` and MetKBUser at
- * `+144`.
+ * Its RTTI descriptor is at `0x0086f598`. It is a leaf class with no base. The class declares no
+ * data member. The subobject is therefore the four-byte compiler-generated vptr at offset 0.
+ * MetPersonaSaverScreen fixes the width by placing MemcardUser at `+140` and MetKBUser at `+144`.
  *
  * Four classes derive from the class, MetFreqMakerButtonsScreen and MetPersonaSaverScreen and
  * MetSaveRemix at `+144`, and MetLoadNewFreqScreen at `+164`.

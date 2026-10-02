@@ -5,10 +5,10 @@
 /**
  * Running tally a game session accumulates.
  *
- * `9GameStats` in the RTTI descriptor at `0x0086f620`, with no base, so the compiler places the
- * vptr after the data at `+0x3c` and the class is 0x40 bytes. Its vtable is at `0x007cd738` and has
- * two entries, the compiler-generated type function and the destructor, so the destructor is the
- * only virtual the class declares.
+ * Its RTTI descriptor is at `0x0086f620`. It has no base. The compiler places the vptr after the
+ * data at `+0x3c`, and the class is 0x40 bytes. Its vtable is at `0x007cd738` and has two entries,
+ * the compiler-generated type function and the destructor. The destructor is the only virtual the
+ * class declares.
  *
  * The size, the vptr offset, and the three vectors all fall out of the constructor at `0x0010f150`
  * and the destructor at `0x0010b648` together. The destructor releases the three vectors in reverse

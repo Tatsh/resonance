@@ -80,7 +80,7 @@ struct TunnelSeekStrip {
     /**
      * Generate the sections for a tunnel.
      *
-     * Creates three sections titled "[<tunnel>_seek<index>.<section>]" from the first cell of the
+     * Creates three sections called "[<tunnel>_seek<index>.<section>]" from the first cell of the
      * tunnel mesh grid, hands mMat to the finest mesh of each, copies the tunnel step counters,
      * takes a reference on mMat on behalf of the tunnel, and then calls Refresh().
      *

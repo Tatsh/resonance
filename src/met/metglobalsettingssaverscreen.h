@@ -9,11 +9,11 @@
 /**
  * Dialogue screen that writes the global settings to a memory card.
  *
- * `28MetGlobalSettingsSaverScreen` in the RTTI descriptor at `0x008eedc8`, with two public
- * non-virtual bases at fixed offsets, MetScreen at `+0x00` and MemcardUser at `+140`. The object
- * is 0x9c bytes. Its primary 39-entry vtable is at `0x007f4b08`, the same length as the MetScreen
- * table, and the class declares no new virtual. The 21-entry MemcardUser table at `0x007f4a58`
- * adjusts `this` by `-140` in every entry it overrides.
+ * Its RTTI descriptor is at `0x008eedc8`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00` and MemcardUser at `+140`. The object is 0x9c bytes. Its primary 39-entry
+ * vtable is at `0x007f4b08`, the same length as the MetScreen table, and the class declares no new
+ * virtual. The 21-entry MemcardUser table at `0x007f4a58` adjusts `this` by `-140` in every entry
+ * it overrides.
  *
  * Entering the screen asks the memory card manager for the state of the card GlobalSettings
  * records. The card replies through the three MemcardUser overrides. Each raises a MetMsgScreen

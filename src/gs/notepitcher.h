@@ -20,17 +20,16 @@ class TickClock;
 /**
  * Pitcher that drives a note track.
  *
- * `11NotePitcher` in the RTTI descriptor at `0x008eef68`, with Pitcher as its one base. Its three
- * tables are at `0x007e14a0`, `0x007e1478`, and `0x007e1448`, and it overrides exactly the two
- * slots Pitcher leaves pure. PitchingSTG's tagged allocation measures the object at 0x70 bytes,
- * and PitchingSTG builds one of these when the track's kind word is 2 and a Scratcher when it is 3.
+ * Its RTTI descriptor is at `0x008eef68`. It has Pitcher as its one base. Its three tables are at
+ * `0x007e14a0`, `0x007e1478`, and `0x007e1448`, and it overrides exactly the two slots Pitcher
+ * declares pure. PitchingSTG's tagged allocation measures the object at 0x70 bytes, and PitchingSTG
+ * builds one of these when the track's kind word is 2 and a Scratcher when it is 3.
  *
  * It ignores an EraseOffMsg rather than forwarding it, which is the one message the three Pitcher
  * subclasses treat differently from each other.
  *
- * The titles of the routines HandleMessage() and Tick() dispatch to come from the message each
- * routine posts rather than from the message it receives. That is the naming the program already
- * had, and it is retained here.
+ * The names of the routines HandleMessage() and Tick() dispatch to come from the message each
+ * routine posts rather than from the message it receives.
  */
 class NotePitcher : public Pitcher {
 public:

@@ -10,9 +10,9 @@
 /**
  * Message filter that suppresses note-offs for the notes a sustain request covers.
  *
- * `14SynthSustainer` in the RTTI descriptor at `0x008f2a70`, deriving from MsgSink at offset 0, so
- * the base vptr lands at `+0x00` and the class is 0x20 bytes. Its vtable is at `0x007e5b00` and
- * runs the type function, the destructor, the inherited MsgSink::Handle(), and HandleMessage().
+ * Its RTTI descriptor is at `0x008f2a70`. It derives from MsgSink at offset 0. The base vptr lands
+ * at `+0x00` and the class is 0x20 bytes. Its vtable is at `0x007e5b00` and runs the type
+ * function, the destructor, the inherited MsgSink::Handle(), and HandleMessage().
  *
  * Two sets of note numbers drive the filter. The sounding set records every note a note-on has let
  * through, and the sustained set records every note a SustainNoteMsg has requested the filter
@@ -20,8 +20,7 @@
  * from the sustained set instead of going downstream, and every other MIDI message goes
  * downstream unchanged.
  *
- * An earlier pass titled this class's constructor for a renderer class, and no descriptor among
- * the 574 in the image bears that title. The descriptor at `0x008f2a70` is what settles the name.
+ * The descriptor at `0x008f2a70` is what settles the name.
  */
 class SynthSustainer : public MsgSink {
 public:

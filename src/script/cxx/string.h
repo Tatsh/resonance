@@ -10,8 +10,8 @@ namespace Py {
 /**
  * Handle on a Python string.
  *
- * `Q22Py6String` in the RTTI descriptor at `0x008f0990`, with `Py::SeqBase<Py::Char>` at offset 0
- * as its one base. Its accessor is at `0x004c65d8`.
+ * Its RTTI descriptor is at `0x008f0990`. It has `Py::SeqBase<Py::Char>` at offset 0 as its one
+ * base. Its accessor is at `0x004c65d8`.
  *
  * The vtable at `0x00821cb8` has nine entries, and the type function, the destructor, accepts(),
  * and slot 4 differ from the base table.

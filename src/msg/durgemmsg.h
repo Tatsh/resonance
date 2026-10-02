@@ -8,9 +8,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `9DurGemMsg` in the RTTI descriptor at `0x00901ce0`, with Message as its one base. The object is
- * 0x20 bytes and its vtable is at `0x007ded38`. The allocation in New() and the allocation in
- * Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00901ce0`. It has Message as its one base. The object is 0x20 bytes
+ * and its vtable is at `0x007ded38`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Every member but the word at
  * `+0x18` is public because AppTunnel::HandleMessage() at `0x004497e0` reads them directly with no

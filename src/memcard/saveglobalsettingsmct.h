@@ -9,9 +9,8 @@ class GlobalSettings;
 /**
  * Save the global settings to a card.
  *
- * `21SaveGlobalSettingsMCT` in the RTTI, single inheritance from `SaveFileMCT` at offset 0. An
- * instance is 0x42c bytes, from MemcardManager::CreateSaveGlobalSettingsTask()'s allocation, and
- * the vtable is at `0x007daa78`.
+ * It has single inheritance from `SaveFileMCT` at offset 0. An instance is 0x42c bytes, from
+ * MemcardManager::CreateSaveGlobalSettingsTask()'s allocation, and the vtable is at `0x007daa78`.
  *
  * The constructor serialises the settings into g_abRemixStagingBuffer through mStream at once.
  * Execute() then points the inherited save sequence at that buffer and starts it with a card

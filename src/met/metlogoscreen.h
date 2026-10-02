@@ -14,8 +14,8 @@ class View;
 /**
  * Panel that draws the game logo and waits for the player to start.
  *
- * `13MetLogoScreen` in the RTTI descriptor at `0x008efe00`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008efe00`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable is at `0x007fa208`, the same length as the MetScreen table, and the
  * class declares no new virtual. It and MetMsgScreen are the only two classes that override slot

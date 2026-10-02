@@ -11,11 +11,10 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `22SCAllPlayersInfoPacket` in the RTTI descriptor at `0x008f2a80`, with
- * ToAllOtherNetManagersPacket as its one base. The object is 0x20 bytes and its vtable is at
- * `0x008146e0`. The payload comes from the copy constructor at `0x003f34e8`, which Clone()
- * delegates to, and it accounts for the allocation exactly. The four words Packet provides are
- * declared there rather than here.
+ * Its RTTI descriptor is at `0x008f2a80`. It has ToAllOtherNetManagersPacket as its one base. The
+ * object is 0x20 bytes and its vtable is at `0x008146e0`. The payload comes from the copy
+ * constructor at `0x003f34e8`. Clone() delegates to it, and the payload accounts for the
+ * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * The vector at `+0x14` is deep-copied, so the class owns its elements. Each element is 0x14 bytes,
  * a player identifier, an unlabelled word, and a vector of track numbers, which Print() labels

@@ -9,9 +9,9 @@ namespace Py {
 /**
  * Exception for an unresolved name, mirroring Python's NameError.
  *
- * `Q22Py9NameError` in the RTTI descriptor at `0x008ef390`, with Py::StandardError at offset 0 as
- * its one base. Its accessor is at `0x0015feb0`, and the emission at `0x005ae670` is an
- * unreferenced copy. The `hx.test` command throws it for an unknown test name.
+ * Its RTTI descriptor is at `0x008ef390`. It has Py::StandardError at offset 0 as its one base. Its
+ * accessor is at `0x0015feb0`, and the emission at `0x005ae670` is an unreferenced copy. The
+ * `hx.test` command throws it for an unknown test name.
  */
 class NameError : public StandardError {
 public:

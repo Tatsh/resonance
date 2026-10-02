@@ -18,10 +18,10 @@ class Player;
  * One phrase of a track, with its gems, its player, and the messages and values scheduled across
  * it.
  *
- * `6Phrase` in the RTTI descriptor, with Attachment as its one base. The allocation in
- * `operator>>(IBStream &, Phrase *&)` measures the object at 0x2c bytes. Its vtable at
- * `0x007e1b68` runs three entries (the type function, the destructor, and the retained
- * Attachment::Destroy()). The destructor is the only virtual the class declares.
+ * It has Attachment as its one base. The allocation in `operator>>(IBStream &, Phrase *&)` measures
+ * the object at 0x2c bytes. Its vtable at `0x007e1b68` runs three entries (the type function, the
+ * destructor, and the retained Attachment::Destroy()). The destructor is the only virtual the class
+ * declares.
  *
  * The constructor and the destructor together account for every byte of the member map. Print()
  * labels three of the members `gems: `, `pl: `, and `X: `, and Save() and Load() transfer the

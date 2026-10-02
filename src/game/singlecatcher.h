@@ -10,11 +10,11 @@
 /**
  * Catcher that scores one bar at a time.
  *
- * `13SingleCatcher` in the RTTI descriptor at `0x008f0be0`, with Catcher as its only base at offset
- * 0. Its primary table is at `0x007e0bb0` with eleven entries and its MsgSource subobject table at
- * `0x007e0b88` with four. The table is the same length as the base's, so the class introduces no
- * virtual and overrides only the destructor and the base's two pure slots. The object is 0x84
- * bytes against the base's 0x80, so it adds one word, mLastStep.
+ * Its RTTI descriptor is at `0x008f0be0`. It has Catcher as its only base at offset 0. Its primary
+ * table is at `0x007e0bb0` with eleven entries and its MsgSource subobject table at `0x007e0b88`
+ * with four. The table is the same length as the base's. The class introduces no virtual and
+ * overrides only the destructor and the base's two pure slots. The object is 0x84 bytes against the
+ * base's 0x80. It adds one word, mLastStep.
  */
 class SingleCatcher : public Catcher {
 public:

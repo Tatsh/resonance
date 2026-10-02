@@ -5,8 +5,8 @@
 /**
  * Enquiry about the card in one slot.
  *
- * `11CheckInfoOp` in the RTTI descriptor at `0x008efba0`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x28 bytes and the vtable is at `0x0082be80`.
+ * Its RTTI descriptor is at `0x008efba0`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x28 bytes and the vtable is at `0x0082be80`.
  *
  * Issue() calls `sceMcGetInfo()`, which fills all three result members at once.
  */

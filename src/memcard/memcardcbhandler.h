@@ -18,8 +18,8 @@ class WriteOp;
 /**
  * Receiver notified once a queued memory-card operation has finished.
  *
- * `16MemcardCBHandler` in the RTTI descriptor at `0x0086f748`, with no base class and no data
- * members. An instance is four bytes, which is the vptr alone, and the vtable is at `0x007db028`.
+ * Its RTTI descriptor is at `0x0086f748`. It has no base class and no data members. An instance is
+ * the four-byte vptr alone, and the vtable is at `0x007db028`.
  *
  * The interface declares one method per MemcardOp subclass, in the order the operations appear
  * below, and every body is a single `jr ra`. An implementation therefore overrides only the

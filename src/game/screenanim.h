@@ -3,10 +3,10 @@
 /**
  * Animation of the arena screens that TnlArena drives.
  *
- * `10ScreenAnim` in the RTTI descriptor at `0x0086f728`, a root class with no base. Its type
- * function is at `0x0040c4e0` and its table at `0x00817308` has five entries. The object is the
- * four-byte vptr alone. TnlArena builds this class itself when configuration code 0x3a1 is set, so
- * that every hook does nothing, and builds SoloScreenAnim or MultiScreenAnim otherwise.
+ * Its RTTI descriptor is at `0x0086f728`. It is a root class with no base. Its type function is at
+ * `0x0040c4e0` and its table at `0x00817308` has five entries. The object is the four-byte vptr
+ * alone. TnlArena builds this class itself when configuration code 0x3a1 is set, and builds
+ * SoloScreenAnim or MultiScreenAnim otherwise. Every hook of this class does nothing.
  *
  * The out-of-line copies of the members sit in the TnlArena unit. The hook titles are inferred
  * from the two derived classes and from TnlArena's calls.

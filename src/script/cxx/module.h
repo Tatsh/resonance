@@ -11,8 +11,8 @@ namespace Py {
 /**
  * Handle on a Python module.
  *
- * `Q22Py6Module` in the RTTI descriptor at `0x008f0930`, with Py::Object at offset 0 as its one
- * base. Its accessor is at `0x005ab958`.
+ * Its RTTI descriptor is at `0x008f0930`. It has Py::Object at offset 0 as its one base. Its
+ * accessor is at `0x005ab958`.
  *
  * The vtable at `0x008257d8`, copied at `0x00833228`, has three entries, and slot 2 repeats
  * Py::Object's own address.

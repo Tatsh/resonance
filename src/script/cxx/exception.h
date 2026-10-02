@@ -5,9 +5,8 @@ namespace Py {
 /**
  * Root of the PyCXX exception hierarchy.
  *
- * `Q22Py9Exception` in the RTTI descriptor at `0x0086f5c8`, with no base. The descriptor exists
- * for the exception tables rather than for polymorphism, because the class has no vtable anywhere
- * in the image.
+ * Its RTTI descriptor is at `0x0086f5c8`. It has no base. The descriptor exists for the exception
+ * tables rather than for polymorphism, because the class has no vtable anywhere in the image.
  *
  * The class is empty, and that is measured rather than assumed. Every `throw Exception()` in the
  * image reserves one byte for the thrown object and writes no field into it. Py::Object::validate()

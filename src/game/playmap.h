@@ -23,8 +23,7 @@
  * The subclasses fill those two and then extend the table rather than overriding past its end:
  * `PlayMapRing` adds nothing and keeps nineteen entries, `PlayMapRepeatRing` adds one for twenty,
  * and `PlayMapLinear` adds two for twenty-one. None of the three retains a slot pointing at the
- * pure-virtual stub, so all three are concrete, which also settles a question raised while they
- * were recovered: no fourth subclass is missing, and the harvest records exactly these three.
+ * pure-virtual stub. All three are concrete.
  *
  * The object is 0x3c bytes with the vptr at `+0x38`. A leaf class with no base places its vptr
  * after its data members under this toolchain, which is why the pointer is last rather than first.
@@ -220,8 +219,7 @@ public:
      * The body performs the search GetPatternIndex() performs, forwarding the same argument to
      * MapBar(), and then adds `nTotal * (nBar - nBar % nTotal)` to the index, where nTotal is
      * mSteps.back(). Multiplying by nTotal after rounding nBar down to a multiple of nTotal scales
-     * the term by nTotal twice. The doubling reads as an error, and both the disassembly and the
-     * decompiler agree the binary computes it.
+     * the term by nTotal twice. The doubling reads as an error, but the binary computes it.
      *
      * @param nBar The bar to map through MapBar() and to fold in.
      * @return The step index plus the folded term.

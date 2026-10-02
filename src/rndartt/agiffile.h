@@ -5,9 +5,8 @@
 /**
  * Reader for GIF files.
  *
- * The name comes from the RTTI descriptor whose mangled form is `8AGifFile`, with the single
- * public base AGfxFile at offset zero. Its table at 0x0083fdd0 overrides slots 1, 3, 4, and 5, and
- * the class adds no member. AGfxFile::Open() allocates 0x18 bytes for it.
+ * Its single public base is AGfxFile at offset zero. Its table at 0x0083fdd0 overrides slots 1, 3,
+ * 4, and 5, and the class does not add a member. AGfxFile::Open() allocates 0x18 bytes for it.
  *
  * Every piece of decoding state lives in file-scope statics rather than in the object: the
  * logical screen descriptor, the current image descriptor and graphic control block, the

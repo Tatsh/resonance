@@ -30,8 +30,8 @@ constexpr int kTrackSelectorSlotCount = 4;
 /**
  * Grid of which players occupy which track channel.
  *
- * `13TrackSelector` in the RTTI descriptor at `0x008ef688`, over MsgSink at offset 0 and MsgSource
- * at offset 4. Two tables belong to it, the primary at `0x007d37d8` with four entries and the
+ * Its RTTI descriptor is at `0x008ef688`. It is built over MsgSink at offset 0 and MsgSource at
+ * offset 4. Two tables belong to it, the primary at `0x007d37d8` with four entries and the
  * MsgSource subobject table at `0x007d37b0` with four and a `-4` adjustment on every entry. Both
  * run to the same length as their bases, so the class introduces no virtual of its own and
  * overrides only the destructor and HandleMessage().
@@ -46,11 +46,8 @@ constexpr int kTrackSelectorSlotCount = 4;
  * skips a player whose answer is -1. Player::GetInputSlot() reports the payload word the message
  * paths check before acting, and Player::GetPlace() drives the walk RebuildChannelGrid() performs.
  *
- * An earlier pass titled this class's routines for a renderer light manager, and the RTTI harvest
- * still records `RndLightManager__GetTypeInfo` as this descriptor's accessor. No descriptor among
- * the 574 in the image bears that title. The accessor is at `0x0013f0f0` and guards on the
- * descriptor at `0x008ef688`, which is what settles the name. The three private helpers below
- * retain the titles that pass gave them, because a rename would break every reference to them.
+ * The accessor at `0x0013f0f0` guards on the descriptor at `0x008ef688`, and the descriptor settles
+ * the class name.
  *
  * RemoveLightFromColumn(), InsertLightForDrawable(), and RebuildChannelGrid() each build a message
  * field by field on the stack and send it, so the message classes carry public fields rather than

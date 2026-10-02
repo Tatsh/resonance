@@ -20,14 +20,13 @@ namespace Rnd {
 /**
  * Animation of the colours and the texture stages of one material.
  *
- * `Q23Rnd7MatAnim` in the RTTI descriptor at `0x008ef4b0`, with `Rnd::Animatable` as its one
- * public base at offset 0. The Animatable subobject is 0x18 bytes, which its constructor pins from
- * inside by storing the primary vtable pointer at `+0x14` and the two Animatable lists at `+0x04`
- * and `+0x08`. The members below therefore start at `+0x18`, the MatAnim subobject is 0x40 bytes,
- * and the shared Rnd::Object subobject sits at `+0x40`. The creator at `0x004dcb00` allocates
- * exactly 0x5c bytes, which is that 0x40 plus the 0x1c of the Object subobject with nothing left
- * over, and the `-0x40` adjustment on every entry of the Object subobject table confirms the
- * offset from outside.
+ * Its RTTI descriptor is at `0x008ef4b0`. It has `Rnd::Animatable` as its one public base at offset
+ * 0. The constructor pins the Animatable subobject at 0x18 bytes from inside by storing the primary
+ * vtable pointer at `+0x14` and the two Animatable lists at `+0x04` and `+0x08`. The members below
+ * therefore start at `+0x18`, the MatAnim subobject is 0x40 bytes, and the shared Rnd::Object
+ * subobject sits at `+0x40`. The creator at `0x004dcb00` allocates exactly 0x5c bytes, the 0x40
+ * plus the 0x1c of the Object subobject with no surplus. The `-0x40` adjustment on every entry of
+ * the Object subobject table confirms the offset from outside.
  *
  * Two vtables belong to the class, each with the type function at `0x004dbf10` in slot 0. The
  * Object subobject table at `0x00822d68` stores the destructor and the seven Object overrides, and
@@ -37,13 +36,11 @@ namespace Rnd {
  *
  * Five channels animate the four material colours and the alpha, and the stage vector animates the
  * texture stages one for one against the material's own stages. Two independent readings agree on
- * which colour each channel drives. The text dump titles them " diffuseKeys:", "ambientKeys",
+ * which colour each channel drives. The text dump labels them " diffuseKeys:", "ambientKeys",
  * "emissiveKeys: ", "specularKeys:", and "alphaKeys:" in offset order. And SetFrameSelf() hands
  * each interpolated result to the material through vtable slot 10, slot 9, slot 11, slot 13, and
  * slot 12 respectively, which are Rnd::Mat::SetDiffuse(), SetAmbient(), SetEmissive(),
- * SetSpecular(), and SetAlpha() in the declaration order of src/rnd/mat.h. The two readings
- * agreeing matters, because an earlier pass had mDiffuseKeys and mEmissiveKeys the other way
- * round.
+ * SetSpecular(), and SetAlpha() in the declaration order of src/rnd/mat.h.
  *
  * Keys are shared rather than copied, the same arrangement Rnd::MeshAnim uses with mKeysOwner.
  * EndFrame() and SetFrameSelf() read the channels of mKeysOwner rather than their own.
@@ -69,7 +66,7 @@ public:
      * walk in SetFrameSelf() runs it against `mMat->mStages` with the material's stage count as
      * the bound. The three vector channels are Rnd::Vector3Key records. Their writer, reader, and
      * dump move three components and the frame, and SetFrameSelf() blends them through
-     * `vmulax.xyz` rather than `vmulax.xyzw`. The dump titles the channels " transKeys:",
+     * `vmulax.xyz` rather than `vmulax.xyzw`. The dump labels the channels " transKeys:",
      * " scaleKeys:", " rotKeys:", " texKeys:", and " matAnim:" in offset order.
      *
      * The record has behaviour, so it is a class with private members rather than a plain data

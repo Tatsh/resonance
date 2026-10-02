@@ -8,8 +8,8 @@ namespace Py {
 /**
  * Handle on any callable Python object.
  *
- * `Q22Py8Callable` in the RTTI descriptor at `0x00902a30`, with Py::Object at offset 0 as its one
- * base. Its accessor is at `0x0050d2e8`.
+ * Its RTTI descriptor is at `0x00902a30`. It has Py::Object at offset 0 as its one base. Its
+ * accessor is at `0x0050d2e8`.
  *
  * The vtable at `0x008257f8` has three entries, the same shape as Py::Object.
  *

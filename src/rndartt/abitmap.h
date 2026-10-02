@@ -82,18 +82,17 @@ extern int g_nSkipColorSwap;
  * and mPixels for the copy. Every clipped copy slot of ACanvas copies exactly 0x18 bytes of its
  * argument onto its stack, mutates the copy, and passes the copy on, which confirms the size.
  *
- * The five bit-fields were modelled as one halfword mFlags in an earlier pass. The constructor
- * settles them, because it writes the low eight bits with a byte store and the four bit code and
- * the two flag bits with read, modify, and write cycles over the enclosing halfword. Reading that
- * halfword with a word load, as both the constructor and ACanvas::Blit4NoClip() do, is a toolchain
- * choice over a 16 bit container rather than evidence of a wider member. The neighbouring mWidth
- * survives every such cycle because the read precedes the write.
+ * The constructor settles the five bit-fields, because it writes the low eight bits with a byte
+ * store and the four bit code and the two flag bits with read, modify, and write cycles over the
+ * enclosing halfword. Reading that halfword with a word load, as both the constructor and
+ * ACanvas::Blit4NoClip() do, is a toolchain choice over a 16 bit container rather than evidence of
+ * a wider member. The neighbouring mWidth is intact after every such cycle because the read
+ * precedes the write.
  *
- * A second model of this record exists in the analysis program, 0x420 bytes with an APalette
- * placed inline at offset 0x18. That model does not fit the record ACanvas stores at offset zero.
- * An ACanvas is 0x28 bytes and its offsets 0x18 through 0x1f are the clip rectangle. A base and
- * derived pair reconciles the two, the 0x18 byte head described here being the base and the
- * 0x420 byte form adding the inline palette.
+ * A 0x420-byte form of this record, with an APalette inline at offset 0x18, does not fit the record
+ * ACanvas stores at offset zero. An ACanvas is 0x28 bytes and its offsets 0x18 through 0x1f are the
+ * clip rectangle. A base and derived pair reconciles the two, the 0x18 byte head described here
+ * being the base and the 0x420 byte form adding the inline palette.
  *
  * One copy of the record does not fit the 0x18 byte size. ACanvas::DrawGlyph() copies 0x1c bytes
  * of the glyph it is about to draw and then passes the copy where an ABitmap is expected. Either

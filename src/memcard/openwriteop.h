@@ -6,8 +6,8 @@
 /**
  * Open of one memory-card file for writing, creating it when it is absent.
  *
- * `11OpenWriteOp` in the RTTI descriptor at `0x008efb30`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x28 bytes and the vtable is at `0x0082bcd0`.
+ * Its RTTI descriptor is at `0x008efb30`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x28 bytes and the vtable is at `0x0082bcd0`.
  *
  * Issue() passes `sceMcFileCreateFile | sceMcFileAttrWriteable` as the open mode, which is the one
  * difference from OpenReadOp.

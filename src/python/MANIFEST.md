@@ -25,7 +25,7 @@ compiled in. It misses a file that never allocates.
 Neither test alone is sufficient. `Objects/sliceobject.c` and `Parser/node.c` have no testable
 literal at all and are invisible to the first test, while the tag list proves both are present.
 
-Two of the 45 harvested tag names are **not** Python. `cutscene.c` and `libscf.c` are game files
+Two of the 45 tag names are **not** Python. `cutscene.c` and `libscf.c` are game files
 that allocate through the same tagged allocator, and they belong with the game rather than here.
 
 ## Port differences
@@ -68,9 +68,10 @@ They are reconstructed in [PC/config.h](PC/config.h). The `_PyImport_Inittab` re
 host file: the module table is `PC/config.c`, so the sibling header is where the port's compiler
 settings go.
 
-`Py_Initialize` builds that heap over the whole of the zone titled `python`, which the start-up
-table sizes at 2400 KiB, above the 2 MiB fallback the call passes, so the fallback never applies on
-the shipped configuration. Exhaustion is fatal and reports `Python heap is out of memory!`.
+`Py_Initialize` builds that heap over the whole of the zone named `python`. The start-up table
+sizes the zone at 2400 KiB, above the 2 MiB fallback the call passes. The fallback therefore never
+applies on the shipped configuration. Exhaustion is fatal and reports
+`Python heap is out of memory!`.
 
 ### Script loading, where the port does nothing at all
 
@@ -150,8 +151,7 @@ does not change which upstream blocks compile in.
 
 ### The trim is configuration, not code
 
-An earlier reading of this called the trim four deletions of upstream code. That was wrong, and the
-correction matters because it changes how invasive the fork is. Almost every absence is an upstream
+Almost every absence is an upstream
 `#ifdef` the port does not define. The file is therefore byte-identical upstream, and no edit
 exists to write. The undefined macros are listed with their evidence in
 [PC/config.h](PC/config.h).
@@ -177,12 +177,12 @@ a fragment opens with a close paren or a comma, so it was never one literal.
 **The suite exits non-zero, and it should.** Three literals remain unexplained out of the 165
 absent, and the test reports that rather than absorbing them, which is the point of having it.
 
-| File                    | Absent     | Account                                     | Verdict       |
-| ----------------------- | ---------- | ------------------------------------------- | ------------- |
-| `Python/import.c`       | 10 of 47   | 6 guarded, 2 comment, 2 dropped by the edit | accounted for |
-| `Python/ceval.c`        | 10 of 60   | 9 guarded, 1 unexplained                    | 1 open        |
-| `Python/pythonrun.c`    | 5 of 36    | 2 guarded, 2 artefact, 1 unexplained        | 1 open        |
-| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained                  | 1 open        |
+| File                    | Absent     | Account                                 | Verdict       |
+| ----------------------- | ---------- | --------------------------------------- | ------------- |
+| `Python/import.c`       | 10 of 47   | 6 guarded, 2 comment, 2 cut by the edit | accounted for |
+| `Python/ceval.c`        | 10 of 60   | 9 guarded, 1 unexplained                | 1 open        |
+| `Python/pythonrun.c`    | 5 of 36    | 2 guarded, 2 artefact, 1 unexplained    | 1 open        |
+| `Modules/posixmodule.c` | 140 of 143 | 139 guarded, 1 unexplained              | 1 open        |
 
 Every guard was read off the literal's own enclosing block rather than assumed. The confstr,
 sysconf, and pathconf table entries are guarded by an underscore plus the entry name, which is

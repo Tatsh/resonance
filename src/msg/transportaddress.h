@@ -8,10 +8,10 @@ class OBStream;
 /**
  * Network address a packet transport serialises: three strings and one word.
  *
- * `16TransportAddress` in the RTTI descriptor at `0x0086f6e8`, with no base. The three strings
- * come first, then the word, then the vptr at `+0x1c` (the position of a vptr in a class with no
- * base). Its table at `0x00814e10` has four entries (the type function at `0x003f4330`, the
- * destructor, Save(), and Load()).
+ * Its RTTI descriptor is at `0x0086f6e8`. It has no base. The three strings come first, then the
+ * word, then the vptr at `+0x1c` (the position of a vptr in a class with no base). Its table at
+ * `0x00814e10` has four entries (the type function at `0x003f4330`, the destructor, Save(), and
+ * Load()).
  *
  * No routine of the class has a caller in the image, and no string names a field. The member
  * titles are inferred from the class name and from the options labels `Net IP Address` and

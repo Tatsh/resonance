@@ -6,10 +6,9 @@
 /**
  * Confirmation buttons for the jukebox playlist editor.
  *
- * `32MetJukeboxEditPlaylistScreenDone` in the RTTI descriptor at `0x008eebf8`, with MetScreen as
- * its one public non-virtual base at offset 0. The object is 0x9c bytes and the 39-entry vtable is
- * at `0x007ee0f8`, the same length as the MetScreen table, so the class declares no virtual of its
- * own.
+ * Its RTTI descriptor is at `0x008eebf8`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0x9c bytes and the 39-entry vtable is at `0x007ee0f8`, the same length as
+ * the MetScreen table, and the class declares no new virtual.
  *
  * The constructor at `0x00231728` takes only the renderer and the load priority, and supplies
  * `jbd` for the screen name, `metagame/Shared` for the directory, and `juke_done_butts` for the

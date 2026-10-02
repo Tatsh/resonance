@@ -6,16 +6,15 @@
 /**
  * Screen that creates a new FreQ identity and takes its name from the keyboard.
  *
- * `20MetLoadNewFreqScreen` in the RTTI descriptor at `0x008f08d0`, with two public non-virtual
- * bases at fixed offsets, MetLoadFreqBaseScreen at `+0x00` and MetKBUser at `+164`. The 47-entry
- * primary vtable is at `0x007f83a8` and the three-entry MetKBUser table at `0x007f8388` adjusts
- * `this` by `-164`. That table is where this screen supplies the one MetKBUser pure virtual. The
- * primary is the same length as the MetLoadFreqBaseScreen table, so the class declares no virtual
- * of its own.
+ * Its RTTI descriptor is at `0x008f08d0`. It has two public non-virtual bases at fixed offsets,
+ * MetLoadFreqBaseScreen at `+0x00` and MetKBUser at `+164`. The 47-entry primary vtable is at
+ * `0x007f83a8` and the three-entry MetKBUser table at `0x007f8388` adjusts `this` by `-164`. That
+ * table is where this screen supplies the one MetKBUser pure virtual. The primary is the same
+ * length as the MetLoadFreqBaseScreen table, and the class declares no new virtual.
  *
- * The class declares one data member and the object is therefore at least 0xac bytes rather than
- * the 0xa8 an earlier reading recorded. mNameEntered sits above the four bytes of the MetKBUser
- * vptr, and EnterAndShow(), OnKeyboardDismissed(), and OnKeyboardTextEntered() all address it.
+ * The class declares one data member and the object is therefore at least 0xac bytes.
+ * mNameEntered sits above the four bytes of the MetKBUser vptr, and EnterAndShow(),
+ * OnKeyboardDismissed(), and OnKeyboardTextEntered() all address it.
  *
  * The constructor at `0x002a8418` takes only the renderer and the load priority and runs the
  * MetLoadFreqBaseScreen constructor at `0x00291e00`. The destructor at `0x002a8458` restores the

@@ -22,13 +22,13 @@ constexpr int kLogBufferSize = 0x19000;
 /**
  * Abstract owner of the process-wide services.
  *
- * `7Globals` in the RTTI descriptor at `0x0086f5d0`, with no base. The compiler therefore places
- * the vptr after the seven declared pointers, at `+0x1c`, which makes the class 0x20 bytes. The
- * destructor is declared first and takes vtable slot 1 of the table at `0x007cee78`; the two pure
- * virtuals follow it in slots 2 and 3, both pointing at the shared pure-virtual handler.
+ * Its RTTI descriptor is at `0x0086f5d0`. It has no base. The compiler therefore places the vptr
+ * after the seven declared pointers, at `+0x1c`, and the class is 0x20 bytes. The destructor
+ * is declared first and takes vtable slot 1 of the table at `0x007cee78`; the two pure virtuals
+ * follow it in slots 2 and 3, both pointing at the shared pure-virtual handler.
  *
- * Application is the only class in the image that derives from it, and the two overrides are
- * titled by the two exception templates the script layer registers,
+ * Application is the only class in the image that derives from it, and the names of the two
+ * overrides come from the two exception templates the script layer registers,
  * `An exception was thrown by the function Application::Run().` and
  * `An exception was thrown by the function Application::ExitInstance().`
  *

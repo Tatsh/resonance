@@ -17,10 +17,9 @@ namespace Sch {
 /**
  * One queued command, together with the time the scheduler is to run it at.
  *
- * `Q23Sch12TimedCommand` in the RTTI descriptor at `0x008ef760`, deriving publicly from Attachment
- * at offset 0. Despite the shared prefix of the two titles, this class does not derive from
- * Sch::Command; the two are siblings under Attachment, and this one refers to a command rather than
- * being one.
+ * Its RTTI descriptor is at `0x008ef760`. It derives publicly from Attachment at offset 0. Despite
+ * the shared prefix of the two names, this class does not derive from Sch::Command; the two are
+ * siblings under Attachment, and this one refers to a command rather than being one.
  *
  * The vtable at `0x00835f08` runs three entries and then a zero entry. The class therefore
  * declares one virtual of its own:
@@ -40,8 +39,9 @@ namespace Sch {
  * Print() at `0x005d30b0` recovers the original word for four members. It writes `[`, then
  * mDueTick, then the literal ` local:` at `0x00835ef0`, then mLocalTick, then either ` abs` at
  * `0x00835ee0` or ` delta` at `0x00835ee8`, then ` id:` at `0x00835ef8`, then mCmdID, then a space,
- * then the command, then `]`. Those four literals are what titles mDueTick, mLocalTick, mDelta,
- * and mCmdID; mOrder alone is titled from behaviour, because Print() does not write it.
+ * then the command, then `]`. The names of mDueTick, mLocalTick, mDelta, and mCmdID come from
+ * those four literals; the name of mOrder alone comes from behaviour, because Print() does not
+ * write it.
  */
 class TimedCommand : public Attachment {
 public:

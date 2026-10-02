@@ -5,8 +5,8 @@
 /**
  * Write to an open memory-card file.
  *
- * `7WriteOp` in the RTTI descriptor at `0x008f4840`, single inheritance from `MemcardOp` at offset
- * 0. An instance is 0x2c bytes and the vtable is at `0x0082bd30`.
+ * Its RTTI descriptor is at `0x008f4840`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x2c bytes and the vtable is at `0x0082bd30`.
  *
  * Issue() addresses the descriptor rather than the card. MemcardOp::mPortSlot is therefore
  * recorded and never read.

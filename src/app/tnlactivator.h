@@ -82,7 +82,7 @@ public:
     /**
      * Hide or restore the rotation view and the ghost together.
      *
-     * mGhost is restored after the inner SetGhost() call. The program lists no caller.
+     * mGhost is restored after the inner SetGhost() call. The image has no caller.
      *
      * @param nSuppressed Non-zero to hide both.
      * @ghidraAddress 0x00455af8
@@ -94,7 +94,7 @@ public:
      *
      * Track n sits at `(1 - n / 8)` of a full turn. The seeker offset ramp moves toward a third of
      * nLevel, the pointer shows the pair of nKind, and the catcher shows for kinds 2 and 5 only.
-     * The program lists no caller.
+     * The image has no caller.
      *
      * @param nLevel The level. A non-zero level hides the ghost.
      * @param nKind The instrument kind.

@@ -14,10 +14,9 @@ class Text;
 /**
  * End-of-remix screen for a multiplayer session.
  *
- * `22MetMultiEndRemixScreen` in the RTTI descriptor at `0x008f07e0`, with MetScreen as its one
- * public non-virtual base at offset 0. The object is 0x120 bytes, the size New() allocates, and the
- * 39-entry vtable is at `0x007fed80`, the same length as the MetScreen table, so the class declares
- * no virtual of its own.
+ * Its RTTI descriptor is at `0x008f07e0`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The object is 0x120 bytes, the size New() allocates, and the 39-entry vtable is at
+ * `0x007fed80`, the same length as the MetScreen table, and the class declares no new virtual.
  *
  * The constructor at `0x002f0918` takes only the renderer and the load priority, and supplies
  * `erm` for the screen name, `metagame/Shared` for the directory, and `end_multi_remix` for the

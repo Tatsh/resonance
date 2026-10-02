@@ -103,8 +103,7 @@ void ReadRow(Stream &stream, Vector3 &row) {
 }
 
 // 0x004eb6a0
-// Ghidra titled this routine WriteInstances, which is wrong. Load() is its only caller and every
-// transfer goes through the read slot of the stream.
+// Load() is its only caller and every transfer goes through the read slot of the stream.
 Stream &ReadTransformList(Stream &stream, std::list<Transform> &transforms) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));

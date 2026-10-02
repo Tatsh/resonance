@@ -18,9 +18,9 @@ struct MetRemixRecord;
 /**
  * Game-wide owner of the memory-card queue and of the tasks that drive it.
  *
- * The class is not polymorphic, emits no RTTI, and has no embedded file path, so the title is
- * inferred, retained from the task factory at `0x001f37f8` that an earlier pass titled on the same
- * evidence. The one instance is the function-local static that shared() vends at `0x00891a80`.
+ * The class is not polymorphic, emits no RTTI, and has no embedded file path. The name is
+ * inferred from the task factory at `0x001f37f8`. The one instance is the function-local static
+ * that shared() vends at `0x00891a80`.
  *
  * The fifteen routines from `0x001f2ae0` to `0x001f3b80` each build one MemcardTask subclass, stamp
  * it with mUser, mCard, and the next ticket, and append it to mTasks. Update() starts the task at

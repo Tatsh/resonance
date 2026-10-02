@@ -27,10 +27,10 @@ enum LevelTrackKind {
 /**
  * Accumulator a MIDI conversion fills, and the one implementation of LevelData.
  *
- * `12LevelBuilder` in the RTTI descriptor at `0x008efc40`, with LevelData as its one base at
- * offset 0. Its table is at `0x007e79f8` and has ten entries with a zero terminator at index 10,
- * the same length as the base table, so the class adds no virtual. It implements all eight of
- * LevelData's pure slots and supplies the destructor.
+ * Its RTTI descriptor is at `0x008efc40`. It has LevelData as its one base at offset 0. Its table
+ * is at `0x007e79f8` and has ten entries with a zero terminator at index 10, the same length as the
+ * base table. The class adds no virtual. It implements all eight of LevelData's pure slots and
+ * supplies the destructor.
  *
  * LevelConverter drives it. LevelConverter::Convert() stores the builder at its own `+0x50`, each
  * MIDI event handler forwards to AddEvent() with the status byte for the event, and

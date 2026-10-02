@@ -6,9 +6,9 @@
 /**
  * Persisted result for one skill setting of one level.
  *
- * `10SkillStats` in the RTTI descriptor at `0x007d3db8`, with no base, so the compiler places the
- * vptr after the data at `+0x08` and the class is 0x0c bytes. Its vtable is at `0x007d3d20` and
- * runs the type function, the destructor, Save(), and Load().
+ * Its RTTI descriptor is at `0x007d3db8`. It has no base. The compiler places the vptr after the
+ * data at `+0x08`, and the class is 0x0c bytes. Its vtable is at `0x007d3d20` and runs the type
+ * function, the destructor, Save(), and Load().
  *
  * LevelStats stores exactly three of these and Save() at `0x00142760` writes all three without a
  * loop, so the count is fixed in the source rather than computed.

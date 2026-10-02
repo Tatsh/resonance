@@ -8,7 +8,7 @@ struct HxDataChunkId;
 /**
  * Input stream over the payload of one RIFF or Standard MIDI File chunk.
  *
- * `12HxIDataChunk` in the RTTI, derived from HxStream. Its vtable is at `0x007d3ed8`. Offsets and
+ * It derives from HxStream. Its vtable is at `0x007d3ed8`. Offsets and
  * sizes are relative to the payload. The payload lies in another stream between mStart and mEnd.
  * Both constructors set mFatalOnEnd and copy HxStream::mSwapBytes from that stream.
  *

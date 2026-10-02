@@ -14,10 +14,10 @@ class Message;
 /**
  * Sink that notes whether any note sounds past a position.
  *
- * `10NoteFinder` in the RTTI descriptor at `0x008eeef8`, deriving publicly from MsgSink at offset
- * 0. Its type function is at `0x001055c0` and its table at `0x007ccb98` keeps MsgSink::Handle().
- * The object is 0xc bytes. LocalJamEnableMgr::QueryBar() builds one on its stack and searches the
- * MIDI of one or two bars with it. The destructor at `0x00105588` is implicitly declared.
+ * Its RTTI descriptor is at `0x008eeef8`. It derives publicly from MsgSink at offset 0. Its type
+ * function is at `0x001055c0` and its table at `0x007ccb98` retains MsgSink::Handle(). The object
+ * is 0xc bytes. LocalJamEnableMgr::QueryBar() builds one on its stack and searches the MIDI of one
+ * or two bars with it. The destructor at `0x00105588` is implicitly declared.
  */
 class NoteFinder : public MsgSink {
 public:

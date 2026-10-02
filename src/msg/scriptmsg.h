@@ -6,15 +6,14 @@
 /**
  * Message with a line of script text for a sink to run.
  *
- * `9ScriptMsg` in the RTTI descriptor at `0x00901cd0`, with Message as its one base. The object
- * is 0xc bytes and its vtable is at `0x007d6730`. It overrides Clone(), Type(), and Name(), and
- * retains Message's Print(), Save(), and Load().
+ * Its RTTI descriptor is at `0x00901cd0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007d6730`. It overrides Clone(), Type(), and Name(), and retains
+ * Message's Print(), Save(), and Load().
  *
  * The payload is one HxStr. Clone() copy-constructs `+0x04` through HxStr::HxStr(const HxStr &),
  * the destructor at `0x0015a5f0` releases the buffer at `+0x08` with the inlined HxStr
  * destructor, and New() zeroes both words, so the text ScriptSink reads at `+0x08` is the
- * string's buffer. That destructor is compiler-generated and has no declaration here, and the
- * registration unit's copies of it and of Clone() are marked as duplicates in the program.
+ * string's buffer. The destructor is compiler-generated and has no declaration here.
  */
 class ScriptMsg : public Message {
 public:

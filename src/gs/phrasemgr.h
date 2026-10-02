@@ -23,14 +23,13 @@ class TickClock;
 /**
  * Owner of the gem phrases on one track, and the seam between the network and the gems.
  *
- * `9PhraseMgr` in the RTTI descriptor at `0x00901fd0`, with MsgSink at offset 0 and MsgSource at
- * offset 4, and titled after `GsPhraseMgr.cpp`, the translation unit its two file-local classes
- * record. Those two are `Cmd` at `0x008f0960` and `ExportCmd` at `0x009021f0`, both deriving from
+ * Its RTTI descriptor is at `0x00901fd0`. It has MsgSink at offset 0 and MsgSource at offset 4, and
+ * it is named after `GsPhraseMgr.cpp`, the translation unit its two file-local classes record.
+ * Those two are `Cmd` at `0x008f0960` and `ExportCmd` at `0x009021f0`, both deriving from
  * Sch::Command. Its primary table is at `0x007e28d0` and its MsgSource table at `0x007e28a8`, and
  * each runs four entries. ScoreTrackGraph's tagged allocation measures the object at 0x60 bytes.
- * The mangled signature of `Catcher::Catcher()`,
- * `__7CatcherP9PhraseMgrP9QuantizerPC9TrackDataPQ23Sch9TickClockiGQ23Sch4Tick`, also records the
- * title, and every stage passes the manager it retains to the catcher it builds.
+ * The signature of `Catcher::Catcher()` also records the class name, and every stage passes the
+ * manager it retains to the catcher it builds.
  *
  * Every member below posts one message through its own MsgSource half, which is what the titles
  * describe. PostPhraseMsg() looks the phrase up through PhraseDatabase::GetPhraseAt() on

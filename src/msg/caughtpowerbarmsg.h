@@ -8,10 +8,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `17CaughtPowerbarMsg` in the RTTI descriptor at `0x008eeca8`, with Message as its one base. The
- * object is 0xc bytes and its vtable is at `0x00812c90`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008eeca8`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x00812c90`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Both members are public
  * because Overlay::OnCaughtPowerbar() at `0x0041eba0` reads them directly with no accessor in the

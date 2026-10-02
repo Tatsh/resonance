@@ -11,9 +11,8 @@ class MetPersonaData;
 /**
  * Save the FreQ roster to a card.
  *
- * `15SavePersonasMCT` in the RTTI, single inheritance from `SaveFileMCT` at offset 0. An instance
- * is 0x42c bytes, from MemcardManager::CreateSavePersonasTask()'s allocation, and the vtable is at
- * `0x007dab18`.
+ * It has single inheritance from `SaveFileMCT` at offset 0. An instance is 0x42c bytes, from
+ * MemcardManager::CreateSavePersonasTask()'s allocation, and the vtable is at `0x007dab18`.
  *
  * The constructor serialises the roster into g_abRemixStagingBuffer through mStream at once, so
  * the save writes the roster as it stood when the task was queued. Execute() then points the

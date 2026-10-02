@@ -172,11 +172,9 @@ constexpr int kExitModeRestart = 3;
 /**
  * Scheduler command that calls one member of the world.
  *
- * `Q234_GLOBAL_$N$_13ControllerCmd$sCmdID7FuncCmd` in the RTTI, with Sch::Command as its one base.
- * The anonymous-namespace marker records this translation unit through its first global,
- * ControllerCmd::sCmdID. Its vtable at `0x007dc378` retains Sch::Command::Save() and Load(). The
- * GrooveWorld routines that queue one allocate 0x18 bytes and expand the constructor inline,
- * storing the world at `+0x0c` and an eight-byte pointer to member function at `+0x10`.
+ * It has Sch::Command as its one base. Its vtable at `0x007dc378` retains Sch::Command::Save() and
+ * Load(). The GrooveWorld routines that queue one allocate 0x18 bytes and expand the constructor
+ * inline, storing the world at `+0x0c` and an eight-byte pointer to member function at `+0x10`.
  *
  * The destructor at `0x001947d8` is implicitly declared. It stores the base table pointer and runs
  * Attachment's destructor, which is what the compiler generates.
@@ -214,10 +212,10 @@ int FuncCmd::sCmdID;
 /**
  * Scheduler command that makes the world leave the game.
  *
- * `Q234_GLOBAL_$N$_13ControllerCmd$sCmdID7ExitCmd` in the RTTI, with Sch::Command as its one base,
- * in the same translation unit as FuncCmd. Its vtable at `0x007dc330` overrides every slot the
- * base declares apart from Attachment::Destroy(). Both constructors have out-of-line copies and no
- * caller in the image, and the GrooveWorld routine at `0x0018e368` expands the second inline.
+ * It has Sch::Command as its one base and sits in the same translation unit as FuncCmd. Its vtable
+ * at `0x007dc330` overrides every slot the base declares apart from Attachment::Destroy(). Both
+ * constructors have out-of-line copies and no caller in the image, and the GrooveWorld routine at
+ * `0x0018e368` expands the second inline.
  *
  * The destructor at `0x00194910` is implicitly declared, for the reason recorded on FuncCmd.
  */

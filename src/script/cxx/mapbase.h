@@ -11,10 +11,8 @@ namespace Py {
 /**
  * Handle on any Python mapping, and the base of Py::Dict.
  *
- * One instantiation exists in the image, `Q22Pyt7MapBase1ZQ22Py6Object`, the descriptor at
- * `0x009029a0`, deriving from Py::Object at offset 0. The harvest does not demangle the name,
- * because its demangler does not handle the template form, so the name comes from the mangled
- * field instead.
+ * One instantiation exists in the image, `Py::MapBase<Py::Object>`, with its descriptor at
+ * `0x009029a0`, deriving from Py::Object at offset 0.
  *
  * The vtable at `0x00825848`, copied at `0x00833278`, has five entries, the three Py::Object slots
  * plus two of its own.

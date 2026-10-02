@@ -7,9 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `12JamEffectMsg` in the RTTI descriptor at `0x008f07b0`, with Message as its one base. The
- * object is 0x14 bytes and its vtable is at `0x007e4528`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008f07b0`. It has Message as its one base. The object is 0x14 bytes
+ * and its vtable is at `0x007e4528`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Every field is public, because
  * JamEffectsMgr::PostRemixFxMsg() at `0x001a54d8` reads all four directly and the image has no

@@ -5,9 +5,8 @@
 /**
  * Reader for Truevision TGA files.
  *
- * The name comes from the RTTI descriptor whose mangled form is `8ATgaFile`, with the single
- * public base AGfxFile at offset zero. Its table at 0x0083d8d0 overrides slots 1, 3, 4, and 5.
- * AGfxFile::Open() allocates 0x30 bytes for it.
+ * Its single public base is AGfxFile at offset zero. Its table at 0x0083d8d0 overrides slots 1, 3,
+ * 4, and 5. AGfxFile::Open() allocates 0x30 bytes for it.
  *
  * The reader accepts uncompressed and run length encoded true colour images with no colour map,
  * image types 2 and 10, and always produces a kABitmapFormatLinear32 bitmap. A pixel depth other

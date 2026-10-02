@@ -11,10 +11,9 @@ class OBStream;
 /**
  * Scheduler command that replays one controller reading into the game world.
  *
- * `13ControllerCmd` in the RTTI descriptor, with Sch::Command as its one base. Its vtable at
- * `0x007dc3c0` runs eight entries and overrides every slot the base declares apart from
- * Attachment::Destroy(). The allocation at `0x0018be70` measures the object at 0x1c bytes, which
- * is the 0x0c-byte base followed by one sixteen-byte reading.
+ * It has Sch::Command as its one base. Its vtable at `0x007dc3c0` runs eight entries and overrides
+ * every slot the base declares apart from Attachment::Destroy(). The allocation at `0x0018be70`
+ * measures the object at 0x1c bytes, the 0x0c-byte base followed by one sixteen-byte reading.
  *
  * The static member sCmdID is attested by the RTTI, which records it as the first global of the
  * translation unit in the anonymous-namespace markers of ExitCmd and FuncCmd. Those two classes

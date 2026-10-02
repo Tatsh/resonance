@@ -5,10 +5,10 @@
 /**
  * Screen that swaps five of its six sounds for the in-game multiplayer bank.
  *
- * `23MetScreenMultiSoundBank` in the RTTI descriptor at `0x008efda0`, with MetScreen as its one
- * public non-virtual base at offset 0. The class declares no data member, which
- * MetConfigControllerScreen proves by placing its MemcardUser base at `+140`, the same offset a
- * direct MetScreen child uses. The 39-entry vtable is at `0x0080b560`.
+ * Its RTTI descriptor is at `0x008efda0`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The class declares no data member. MetConfigControllerScreen proves the absence by
+ * placing its MemcardUser base at `+140`, the same offset a direct MetScreen child uses. The
+ * 39-entry vtable is at `0x0080b560`.
  *
  * Three classes derive from the class, MetConfigGameOptionsScreen, MetMsgScreen, and
  * MetPauseBaseScreen.

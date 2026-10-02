@@ -15,15 +15,13 @@ class StdMidiMsg;
 /**
  * Translator of analogue stick movement into track control.
  *
- * `11AxisControl` in the RTTI descriptor at `0x00901ba0`, over MsgSink at offset 0 and MsgSource at
+ * Its RTTI descriptor is at `0x00901ba0`. It is built over MsgSink at offset 0 and MsgSource at
  * offset 4. Its primary table is at `0x007de2b8` with four entries and its MsgSource subobject
  * table at `0x007de290` with four. The object is 0x38 bytes, which AxingSTG's tagged allocation
  * measures.
  *
- * An earlier pass titled this class's constructor `RndSpotShadowCam__Construct`. No descriptor
- * among the 574 in the image bears that title. Slot 0 of the table at `0x007de2b8` addresses the
- * accessor at `0x0019f868`, which guards on the descriptor at `0x00901ba0`, and that is what
- * settles the name.
+ * Slot 0 of the table at `0x007de2b8` addresses the accessor at `0x0019f868`. The accessor guards
+ * on the descriptor at `0x00901ba0`, and the descriptor settles the class name.
  *
  * The stick's position reaches the class as an AxisRegisterMsg. The coarse position becomes a
  * NowBarMsg lane for the display, and a note played on a sustained tick bends the pitch with the

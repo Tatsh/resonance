@@ -5,9 +5,9 @@
 /**
  * Powerup that neutralises the phrases other players captured on a track.
  *
- * `17NeutralizePowerup` in the RTTI descriptor at `0x00901f70`, with Powerup as its one base. The
- * factory builds it for kHudItemNeutralizer with a four-byte allocation and the table at
- * `0x007e40b8`. The destructor at `0x001c9b88` is implicitly declared.
+ * Its RTTI descriptor is at `0x00901f70`. It has Powerup as its one base. The factory builds it for
+ * kHudItemNeutralizer with a four-byte allocation and the table at `0x007e40b8`. The destructor at
+ * `0x001c9b88` is implicitly declared.
  */
 class NeutralizePowerup : public Powerup {
 public:

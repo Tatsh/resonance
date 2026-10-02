@@ -8,8 +8,8 @@ class MetButtonList;
 /**
  * End-of-game button row shown after a solo win.
  *
- * `16MetSoloWinScreen` in the RTTI descriptor at `0x008ef190`, with two public non-virtual bases at
- * fixed offsets, MetScreen at `+0x00`, and MemcardUser at `+140`.
+ * Its RTTI descriptor is at `0x008ef190`. It has two public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, and MemcardUser at `+140`.
  *
  * The 39-entry primary vtable is at `0x0080ea80`, the same length as the MetScreen table, so the
  * class declares no virtual of its own.

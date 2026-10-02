@@ -5,11 +5,11 @@ class Player;
 /**
  * Policy that decides which tracks a player may catch at each bar.
  *
- * `9EnableMgr` in the RTTI descriptor at `0x0086f750`, a root class with no data beyond its vptr.
- * Its type function is at `0x00105060` and its table at `0x007ccc68` has six entries. Slots 2 and 5
- * are pure. Gamer owns one at `+0x90`, builds it for the session mode, and forwards
- * Gamer::SetBarOwner() to slot 2 and Gamer::QueryBar() to slot 5. GameEnableMgr,
- * LocalJamEnableMgr, and NetJamEnableMgr derive from it.
+ * Its RTTI descriptor is at `0x0086f750`. It is a root class with no data beyond its vptr. Its type
+ * function is at `0x00105060` and its table at `0x007ccc68` has six entries. Slots 2 and 5 are
+ * pure. Gamer stores one at `+0x90`, builds it for the session mode, and forwards
+ * Gamer::SetBarOwner() to slot 2 and Gamer::QueryBar() to slot 5. GameEnableMgr, LocalJamEnableMgr,
+ * and NetJamEnableMgr derive from it.
  *
  * Every slot title is inferred from the overrides and from Gamer's calls.
  */

@@ -5,10 +5,10 @@
 /**
  * Pause screen of a solo remix.
  *
- * `23MetPauseSoloRemixScreen` in the RTTI descriptor at `0x008ef550`, with MetPauseBaseScreen as
- * its one public non-virtual base at offset 0. The 40-entry vtable at `0x00803fc0` is the same
- * length as the MetPauseBaseScreen table, so the class declares no virtual of its own. New()
- * allocates 0xb4 bytes, four more than the base, for mOpensConfigScreen.
+ * Its RTTI descriptor is at `0x008ef550`. It has MetPauseBaseScreen as its one public non-virtual
+ * base at offset 0. The 40-entry vtable at `0x00803fc0` is the same length as the
+ * MetPauseBaseScreen table, and the class declares no new virtual. New() allocates 0xb4 bytes, four
+ * more than the base, for mOpensConfigScreen.
  *
  * Beyond the base's commands, the screen can leave for the game options or the controller set-up.
  * It has no restart.

@@ -20,9 +20,9 @@ class MetFade;
 /**
  * Front-end renderer that owns the screen stack and drives every MetScreen.
  *
- * `11MetRenderer` in the RTTI descriptor at `0x008eef98`, with three public non-virtual bases at
- * fixed offsets, MsgSource at `+0x00`, RendererBase at `+0x14`, and FadeUser at `+0x5c`. Its
- * GetTypeInfo is at `0x00370f98`.
+ * Its RTTI descriptor is at `0x008eef98`. It has three public non-virtual bases at fixed offsets,
+ * MsgSource at `+0x00`, RendererBase at `+0x14`, and FadeUser at `+0x5c`. Its GetTypeInfo is at
+ * `0x00370f98`.
  *
  * MetScreen stores its renderer at `+0x10` and registers itself on it as a message sink through
  * MsgSource::AddSink() during construction, which is how the pointer is known to address the

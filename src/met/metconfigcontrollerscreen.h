@@ -17,11 +17,11 @@ class Text;
 /**
  * Screen that assigns the controller buttons.
  *
- * `25MetConfigControllerScreen` in the RTTI descriptor at `0x008efbf0`, with two public
- * non-virtual bases at fixed offsets, MetScreenMultiSoundBank at `+0x00` and MemcardUser at
- * `+140`. New() allocates 0xd0 bytes. Its primary 39-entry vtable is at `0x007e9cd8`, the same
- * length as the MetScreen table, so the class declares no virtual of its own, and the 21-entry
- * MemcardUser table at `0x007e9c28` adjusts `this` by `-140` in every entry.
+ * Its RTTI descriptor is at `0x008efbf0`. It has two public non-virtual bases at fixed offsets,
+ * MetScreenMultiSoundBank at `+0x00` and MemcardUser at `+140`. New() allocates 0xd0 bytes. Its
+ * primary 39-entry vtable is at `0x007e9cd8`, the same length as the MetScreen table, and the class
+ * declares no new virtual. The 21-entry MemcardUser table at `0x007e9c28` adjusts `this` by `-140`
+ * in every entry.
  *
  * The screen lists nine configuration rows, one per action, and each row shows one button code.
  * The codes `a` through `h` are square, triangle, circle, cross, L1, L2, R1, and R2, and `o`

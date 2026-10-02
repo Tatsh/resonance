@@ -20,10 +20,10 @@ namespace Rnd {
 /**
  * Animation that streams a compressed video file into a set of textures.
  *
- * `Q23Rnd5Movie` in the RTTI descriptor at `0x008efc90`, with Rnd::Animatable as its only public
- * non-virtual base at offset 0. Rnd::Manager::RemapLegacyClassName() rewrites the earlier title
- * `TexMovie` to `Movie` for any file below format version 5, which is what identifies the class as
- * the texture-streaming one rather than a video surface of its own.
+ * Its RTTI descriptor is at `0x008efc90`. It has Rnd::Animatable as its only public non-virtual
+ * base at offset 0. Rnd::Manager::RemapLegacyClassName() rewrites the earlier title `TexMovie` to
+ * `Movie` for any file below format version 5. The rewrite identifies the class as the
+ * texture-streaming one rather than a separate video surface.
  *
  * The object is 0x458 bytes, which the factory at `0x005d20b8` pins by requesting exactly that
  * many under the tag "Rnd::Movie" at `0x00835ba8`. Rnd::Animatable derives from Rnd::Object

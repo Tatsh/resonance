@@ -11,14 +11,14 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `17TestArbiterPacket` in the RTTI descriptor at `0x00902070`, with ToArbiterPacket as its one
- * base. The object is 0x24 bytes and its vtable is at `0x008142f0`. The payload comes from the
- * copy constructor at `0x003f3e58`, which Clone() delegates to, and it accounts for the
- * allocation exactly. The four words Packet owns are declared there rather than here.
+ * Its RTTI descriptor is at `0x00902070`. It has ToArbiterPacket as its one base. The object is
+ * 0x24 bytes and its vtable is at `0x008142f0`. The payload comes from the copy constructor at
+ * `0x003f3e58`. Clone() delegates to it, and the payload accounts for the allocation exactly. The
+ * four words Packet provides are declared there rather than here.
  *
- * The layout matches GameChatPacket's, and Save() and Load() here are byte-identical to that
- * class's. The program had titled both as copies of GameChatPacket's, but slots 6 and 7 of this
- * class's table address them, so they are this class's members.
+ * The layout matches GameChatPacket's, and Save() and Load() here are byte-identical to the
+ * GameChatPacket routines. Slots 6 and 7 of this class's table address them. They are therefore
+ * this class's members.
  *
  * The destructor at `0x003f1b40` is compiler-generated and has no declaration here.
  */

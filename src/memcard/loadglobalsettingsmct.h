@@ -8,9 +8,8 @@ class GlobalSettings;
 /**
  * Load the global settings from a card.
  *
- * `21LoadGlobalSettingsMCT` in the RTTI, single inheritance from `LoadFileMCT` at offset 0. An
- * instance is 0x5c bytes, from MemcardManager::CreateLoadGlobalSettingsTask()'s allocation, and
- * the vtable is at `0x007da358`.
+ * It has single inheritance from `LoadFileMCT` at offset 0. An instance is 0x5c bytes, from
+ * MemcardManager::CreateLoadGlobalSettingsTask()'s allocation, and the vtable is at `0x007da358`.
  *
  * Execute() reads the settings file into g_abRemixStagingBuffer, over which mStream sits, through
  * the inherited load sequence. Finish() then fills mSettings from mStream before reporting.

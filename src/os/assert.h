@@ -7,7 +7,7 @@
  * report goes to `stderr`, taken from the reentrancy structure at 0x007819cc, through the format
  * `assertion "%s" failed: file "%s", line %d`, which is that library's text verbatim. It then
  * tail-calls abort, which raises signal 6, calls exit, and spins forever. This declaration exists
- * because the game calls it, and the program's label is `LibcAssert`.
+ * because the game calls it.
  *
  * The identification is strong rather than verified. The format string, the argument order, and the
  * three-parameter signature were matched against newlib from knowledge of that library and not

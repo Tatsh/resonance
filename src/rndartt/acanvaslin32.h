@@ -5,9 +5,9 @@
 /**
  * Canvas over a linear rectangle of 32 bit pixels.
  *
- * The name comes from the RTTI descriptor at 0x0086f5f0, whose mangled form is `12ACanvasLin32`
- * and whose single public base is ACanvas32 at offset zero. Its virtual function table is at
- * 0x0083c360 and terminates on the zero entry at 0x0083c610, matching the 85 slots of ACanvas.
+ * Its RTTI descriptor is at 0x0086f5f0, and its single public base is ACanvas32 at offset zero. Its
+ * virtual function table is at 0x0083c360 and terminates on the zero entry at 0x0083c610, matching
+ * the 85 slots of ACanvas.
  *
  * ACanvas::CreateForBitmap() constructs one for kABitmapFormatLinear32 through branch 4 of the
  * jump table at 0x00837d90.

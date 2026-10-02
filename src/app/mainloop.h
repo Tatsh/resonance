@@ -9,9 +9,9 @@ class Watchdog;
 /**
  * The game's frame loop.
  *
- * `8MainLoop` in the RTTI descriptor at `0x00901f80`, deriving from Task. The declared members
- * occupy `+0x0c` through `+0x37`, and the virtual Attachment base closes the object at `+0x38`.
- * The allocation is 0x40 bytes. The MainLoop table is at `0x007e7ce0`.
+ * Its RTTI descriptor is at `0x00901f80`. It derives from Task. The declared members occupy `+0x0c`
+ * through `+0x37`, and the virtual Attachment base closes the object at `+0x38`. The allocation is
+ * 0x40 bytes. The MainLoop table is at `0x007e7ce0`.
  *
  * Globals::Init() creates the single instance and Globals::RunMainLoop() drives it. Every member
  * below is private, because the only code that reads one is a member of this class.

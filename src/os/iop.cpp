@@ -56,9 +56,8 @@ constexpr int kLoadFailureStatus = 1;
 constexpr int kIopModuleCount = 10;
 
 // 0x00702660
-// Labelled g_abIopModules in the program, because the naming policy there has no prefix
-// for a typed aggregate. The table sits in .data rather than in .rodata, so the original declared
-// it without const.
+// The table sits in .data rather than in .rodata. The original therefore declared it without
+// const.
 IopModule g_iopModules[kIopModuleCount] = {{"sio2man", 0, nullptr},
                                            {"mcman", 0, nullptr},
                                            {"mcserv", 0, nullptr},
@@ -117,8 +116,6 @@ inline void RebootIopWithImage() {
 }
 
 // 0x004dfcc8
-// Named WalkIopModuleTable in the program, whose naming guard refuses this spelling as
-// a token superset of LoadIopModules.
 inline void LoadAllIopModules(unsigned nSources) {
     AsyncCheck(1);
 

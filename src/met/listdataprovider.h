@@ -8,10 +8,10 @@ class Text;
 /**
  * Mix-in for an object that supplies the rows of a scrolling list to the screen that draws it.
  *
- * `16ListDataProvider` in the RTTI descriptor at `0x0086f760`, a leaf class with no base. The
- * class declares no data member, so the subobject is the four bytes of the compiler-generated vptr
- * at offset 0. MetMCFreqDelScreen proves the width directly, listing MemcardUser at `+140`,
- * ListDataProvider at `+144`, and MetMemCardPickerUser at `+148`.
+ * Its RTTI descriptor is at `0x0086f760`. It is a leaf class with no base. The class declares no
+ * data member. The subobject is therefore the four-byte compiler-generated vptr at offset 0.
+ * MetMCFreqDelScreen proves the width directly, listing MemcardUser at `+140`, ListDataProvider at
+ * `+144`, and MetMemCardPickerUser at `+148`.
  *
  * Five classes derive from the class. MetFreqMakerDirectionsScreen, MetJukeboxBaseScreen, and
  * MetRemixLoadScreen place the subobject at `+140`, MetMCFreqDelScreen at `+144`, and

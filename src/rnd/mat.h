@@ -22,9 +22,9 @@ namespace Rnd {
 /**
  * Surface description a Rnd::Mesh draws with.
  *
- * `Q23Rnd3Mat` in the RTTI descriptor at `0x008ef0e0`, with `Rnd::Object` as its one public
- * non-virtual base at offset 0. The Object subobject is 0x1c bytes, so the material's own members
- * start at `+0x1c` and the whole object is 0xa0 bytes.
+ * Its RTTI descriptor is at `0x008ef0e0`. It has `Rnd::Object` as its one public non-virtual base
+ * at offset 0. The Object subobject is 0x1c bytes. The material's members start at `+0x1c` and the
+ * whole object is 0xa0 bytes.
  *
  * A material combines the four lighting colours, the flags that pick per-vertex colours over the
  * material colours, and a vector of texture stages. The stage vector is what binds textures; the
@@ -36,7 +36,7 @@ namespace Rnd {
 class Mat : public Object {
 public:
     /**
-     * Frame buffer blend, as the text dump titles the values.
+     * Frame buffer blend, as the text dump labels the values.
      *
      * The same enumeration types a texture stage, where the default is kBlendModeMultiply.
      */
@@ -56,7 +56,7 @@ public:
         kBlendModeSrcAlphaCutout = 12
     };
 
-    /** Face winding the rasteriser discards, as the text dump titles the values. */
+    /** Face winding the rasteriser discards, as the text dump labels the values. */
     enum CullMode {
         kCullModeCw = 0,  /*!< Discard clockwise faces. */
         kCullModeCcw = 1, /*!< Discard counter-clockwise faces. */

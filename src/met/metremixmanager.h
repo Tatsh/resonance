@@ -16,10 +16,10 @@ struct MemcardConnectState;
 /**
  * Manager of the remix catalogue, which also presents itself as a dialogue screen.
  *
- * `15MetRemixManager` in the RTTI descriptor at `0x008efc50`, with three public non-virtual bases
- * at fixed offsets, MetScreen at `+0x00`, MemcardUser at `+140`, and AsyncCallback at `+144`. Its
- * own file is `MetRemixManager.cpp`, which its asserts record at `0x00807bb0`, and it is one of
- * only two classes in the subsystem whose file name survives in the image.
+ * Its RTTI descriptor is at `0x008efc50`. It has three public non-virtual bases at fixed offsets,
+ * MetScreen at `+0x00`, MemcardUser at `+140`, and AsyncCallback at `+144`. Its asserts
+ * record its file, `MetRemixManager.cpp`, at `0x00807bb0`. It is one of only two classes in the
+ * subsystem whose file name remains in the image.
  *
  * The object is 0x14c bytes, which the factory at `0x00361020` pins by requesting exactly that
  * many with the tag `MsgSink`. The figure agrees with the recovered member map below, whose last

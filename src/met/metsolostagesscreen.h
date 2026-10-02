@@ -23,8 +23,8 @@ class View;
 /**
  * Screen that picks a solo stage and a level within it.
  *
- * `19MetSoloStagesScreen` in the RTTI descriptor at `0x008f0070`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008f0070`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable is at `0x0080d910`, the same length as the MetScreen table, so the
  * class declares no virtual of its own.

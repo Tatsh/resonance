@@ -51,7 +51,7 @@ constexpr unsigned kHeapFlagOwnsBlock = 0x8000;
  * two free-list words. A free node uses all four.
  *
  * The run ends at a tail node whose mNext is null and which is never allocated from. The stats
- * line titles these records nodes, which is where the name comes from.
+ * line calls these records nodes, the source of the name.
  */
 struct HeapNode {
     uintptr_t mPrevAndFree; /*!< Preceding node, bit 0 set while free. +0x00 */
@@ -63,13 +63,13 @@ struct HeapNode {
 /**
  * Boundary-tagged heap over one contiguous block.
  *
- * Titled after `Heap.cpp`, the file its allocation tag and its out-of-memory report record. The
+ * Named after `Heap.cpp`, the file its allocation tag and its out-of-memory report record. The
  * class is not polymorphic and has no RTTI, so it has no vptr. The 40-byte header sits at the
  * front of the block it manages, and the nodes follow it, which is why Create() reports the block
  * pointer as the heap.
  *
  * The one instance in the image is the arena the embedded Python allocates from, and
- * Py_Initialize() is its only builder. That routine selects the zone titled `python`, asks
+ * Py_Initialize() is its only builder. That routine selects the zone called `python`, queries
  * ZoneGetAvail() for the space left in it with a 2 MiB fallback, takes all of it in one
  * ZoneAlloc(), and builds the heap over that block with kHeapFlagFirstFit and
  * kHeapFlagFatalWhenFull, which is why exhaustion reports `Python heap is out of memory!` and
@@ -216,7 +216,7 @@ private:
 };
 
 /**
- * The one interpreter heap, built by Py_Initialize() over the whole of the zone titled
+ * The one interpreter heap, built by Py_Initialize() over the whole of the zone called
  * `python`.
  *
  * @ghidraAddress 0x00723998

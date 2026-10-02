@@ -7,7 +7,7 @@
 /**
  * Heap-allocated NUL-terminated string.
  *
- * Titled after `HxStr.cpp`, the file recorded by its own asserts. The member `mStr` comes from the
+ * Named after `HxStr.cpp`, the file recorded by its own asserts. The member `mStr` comes from the
  * text of the assert `mStr != 0`, and `mLen` from `pos <= mLen`. The class is not polymorphic and
  * has no RTTI, so it has no vptr. Its destructor is inlined at every call site in the image, which
  * is why it is defined here.

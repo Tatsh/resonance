@@ -5,9 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `17PlaybackToggleMsg` in the RTTI descriptor at `0x00901db0`, with Message as its one base. The
- * object is 0x8 bytes and its vtable is at `0x007ce6d8`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x00901db0`. It has Message as its one base. The object is 0x8 bytes
+ * and its vtable is at `0x007ce6d8`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). mOn is public because
  * Overlay::OnPlaybackToggle() at `0x0041f9a8` reads it directly with no accessor in the image. It

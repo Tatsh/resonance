@@ -8,14 +8,13 @@
 /**
  * Controller reader that matches button sequences against a table of cheats.
  *
- * `18InputCheatDetector` in the RTTI descriptor at `0x008f2a40`, with RawController as its one
- * public base at offset 0. The object is 8 bytes, which both allocations fix (GrooveWorld's
- * constructor at `0x0018c00c` and MetaGameWorld's at `0x003d313c`), so the inherited vptr at
- * `+0x00` is followed by one member of its own. Its vtable at `0x007e6778` has four entries and a
- * zero terminator at index 4: the type function at `0x001dea88`, the destructor at `0x001deb00`,
- * the RawController override at `0x001dc658`, and slot 3, filled with the pure-virtual stub at
- * `0x005381a8`. The class is abstract, and InputCheatDetectorGS and InputCheatDetectorMet complete
- * it.
+ * Its RTTI descriptor is at `0x008f2a40`. It has RawController as its one public base at offset 0.
+ * Both allocations (GrooveWorld's constructor at `0x0018c00c` and MetaGameWorld's at `0x003d313c`)
+ * fix the object at 8 bytes. The inherited vptr at `+0x00` is followed by one member. Its vtable at
+ * `0x007e6778` has four entries and a zero terminator at index 4: the type function at
+ * `0x001dea88`, the destructor at `0x001deb00`, the RawController override at `0x001dc658`, and
+ * slot 3, filled with the pure-virtual stub at `0x005381a8`. The class is abstract, and
+ * InputCheatDetectorGS and InputCheatDetectorMet complete it.
  *
  * The destructor at `0x001deb00` stores RawController's table and releases the object, which is
  * the implicitly declared destructor, so this class owes no definition.

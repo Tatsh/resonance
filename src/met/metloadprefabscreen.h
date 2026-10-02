@@ -9,10 +9,9 @@ class MetPersonaData;
 /**
  * Screen that picks one of the pre-built FreQ identities.
  *
- * `19MetLoadPreFabScreen` in the RTTI descriptor at `0x008ef4f0`, with MetLoadFreqBaseScreen as
- * its one public non-virtual base at offset 0. The object is 0xb0 bytes and the 47-entry vtable at
- * `0x007f8c28` is the same length as the MetLoadFreqBaseScreen table, so the class declares no
- * virtual of its own.
+ * Its RTTI descriptor is at `0x008ef4f0`. It has MetLoadFreqBaseScreen as its one public
+ * non-virtual base at offset 0. The object is 0xb0 bytes and the 47-entry vtable at `0x007f8c28` is
+ * the same length as the MetLoadFreqBaseScreen table, and the class declares no new virtual.
  *
  * The constructor at `0x002a8a58` takes only the renderer and the load priority, runs the
  * MetLoadFreqBaseScreen constructor at `0x00291e00`, writes its own vptr, and empties the one

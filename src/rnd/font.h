@@ -52,11 +52,11 @@ enum FontFamily {
 /**
  * Glyph atlas, either a host font description or a grid of cells inside a material texture.
  *
- * `Q23Rnd4Font` in the RTTI descriptor at `0x008ef4c0`, with `Rnd::Object` as its only public
- * non-virtual base at offset 0. The class is 0x60 bytes, which the factory at `0x004cf060` pins by
- * requesting exactly that many. The Rnd::Object vptr therefore sits at `+0x18` and this class's
- * members run from `+0x1c` to `+0x5f` with no padding. The ten-entry vtable is at `0x008225d8`,
- * eight Rnd::Object slots followed by the pair of Builtin accessors this class declares.
+ * Its RTTI descriptor is at `0x008ef4c0`. It has `Rnd::Object` as its only public non-virtual base
+ * at offset 0. The factory at `0x004cf060` pins the class at 0x60 bytes by requesting exactly
+ * that many. The Rnd::Object vptr therefore sits at `+0x18` and this class's members run from
+ * `+0x1c` to `+0x5f` with no padding. The ten-entry vtable is at `0x008225d8`, eight
+ * Rnd::Object slots followed by the pair of Builtin accessors this class declares.
  *
  * The member titles come from the text DumpText() writes, "type:", " height:", " weight:",
  * "italic:", " family:", " name:", " mat:", " rows:", " cols:", "size:", and " space:".

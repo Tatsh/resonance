@@ -6,11 +6,10 @@
 /**
  * Bidirectional byte stream interface.
  *
- * `9IOBStream` in the RTTI descriptor at `0x008ef570`. The base list at `0x008242c8` records two
- * bases, IBStream at offset 0 and OBStream at offset 4, both public and non-virtual. The
- * descriptor is built only inside IOBMemStream's type function at `0x004ed780`, and no vtable in
- * the image addresses a type function for it, so the class is abstract and is never instantiated
- * on its own.
+ * Its RTTI descriptor is at `0x008ef570`. The base list at `0x008242c8` records two bases, IBStream
+ * at offset 0 and OBStream at offset 4, both public and non-virtual. The descriptor is built only
+ * inside IOBMemStream's type function at `0x004ed780`, and no vtable in the image addresses a type
+ * function for it. The class is therefore abstract and is never instantiated alone.
  *
  * Recovery stops at the two bases. IOBMemStream is the only subclass, and its primary vtable adds
  * three slots beyond the eight IBStream declares. Whether those three were declared here or on

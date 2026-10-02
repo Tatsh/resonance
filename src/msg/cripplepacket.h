@@ -13,9 +13,9 @@ class Player;
 /**
  * Network packet the game sends between game systems.
  *
- * `13CripplePacket` in the RTTI descriptor at `0x008f0940`, with ToAllOtherGameSystemsPacket as
- * its one base. The object is 0x28 bytes and its vtable is at `0x008144e8`. The payload comes
- * from the copy constructor at `0x003f3938`, which Clone() delegates to, and it accounts for the
+ * Its RTTI descriptor is at `0x008f0940`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x28 bytes and its vtable is at `0x008144e8`. The payload comes from the copy
+ * constructor at `0x003f3938`. Clone() delegates to it, and the payload accounts for the
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * The packet carries one player reference and a vector of further references. Load() resizes the

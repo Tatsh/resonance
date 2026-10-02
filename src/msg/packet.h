@@ -5,16 +5,16 @@
 /**
  * Abstract base of every network packet.
  *
- * `6Packet` in the RTTI descriptor at `0x009021a0`, with Message as its one base. Its vtable at
+ * Its RTTI descriptor is at `0x009021a0`. It has Message as its one base. Its vtable at
  * `0x00814920` has eight entries and a zero terminator at index 8. Slots 2, 3, and 4 address the
  * pure-virtual handler, so the class implements none of Clone(), Type(), or Name() and is never
  * instantiated. Slot 5 retains Message::Print(). Slots 6 and 7 are the class's own overrides.
  *
- * Slot 0 of that table constructs the descriptor above from the mangled name `6Packet` at
+ * Slot 0 of that table constructs the descriptor above from this class's type name at
  * `0x00814aa0`, which is what establishes the table as this class's rather than as a derived
- * class's. Both overrides were titled against CSInitiatePlayPacket, whose own table at
- * `0x00814728` records the same two addresses because that class adds no payload and inherits the
- * pair. The 22 concrete packet classes all inherit both.
+ * class's. CSInitiatePlayPacket's table at `0x00814728` records the same two addresses because
+ * CSInitiatePlayPacket adds no payload and inherits the pair. The 22 concrete packet classes all
+ * inherit both.
  *
  * Both members are very likely inline in this header in the original, and the definitions in
  * `packet.cpp` are the out-of-line emission that fills the table slots. Every one of the twenty

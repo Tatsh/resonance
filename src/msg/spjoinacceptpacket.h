@@ -15,9 +15,9 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `18SPJoinAcceptPacket` in the RTTI descriptor at `0x008ef110`, with ToSingleNetManagerPacket as
- * its one base. The object is 0x7c bytes and its vtable is at `0x00814890`. The payload comes
- * from the copy constructor at `0x003f2e48`, which Clone() delegates to, and it accounts for the
+ * Its RTTI descriptor is at `0x008ef110`. It has ToSingleNetManagerPacket as its one base. The
+ * object is 0x7c bytes and its vtable is at `0x00814890`. The payload comes from the copy
+ * constructor at `0x003f2e48`. Clone() delegates to it, and the payload accounts for the
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * Print() labels the words at `+0x18` and `+0x14` as `plid` and `destid`, the string at `+0x54` as

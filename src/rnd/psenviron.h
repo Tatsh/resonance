@@ -18,8 +18,8 @@ namespace Rnd {
 /**
  * One directional light as the vertex lighting path consumes it.
  *
- * The record is not polymorphic and emits no RTTI descriptor. The name is the analysis program's
- * and is inferred. PsEnviron::DrawSelf() fills every member except mTransformedDirection.
+ * The record is not polymorphic and does not emit an RTTI descriptor. The name is inferred.
+ * PsEnviron::DrawSelf() fills every member except mTransformedDirection.
  */
 struct DirectionalLightRecord {
     Vector3 mDirection; /*!< Negated second row of the light's world transform. */
@@ -32,8 +32,8 @@ struct DirectionalLightRecord {
 /**
  * One point light as the vertex lighting path consumes it.
  *
- * The record is not polymorphic and emits no RTTI descriptor. The name is the analysis program's
- * and is inferred. PsEnviron::DrawSelf() fills mPosition, mAmbient, and mDiffuse.
+ * The record is not polymorphic and does not emit an RTTI descriptor. The name is inferred.
+ * PsEnviron::DrawSelf() fills mPosition, mAmbient, and mDiffuse.
  */
 struct PointLightRecord {
     /*!< Translation row of the light's world transform, with Rnd::Light::mRange in the padding
@@ -107,10 +107,10 @@ int SelectLightForVertex(GifQuadword *pLight,
 /**
  * Lighting and fog a subtree is drawn under, PlayStation 2.
  *
- * `Q23Rnd9PsEnviron` in the RTTI descriptor at `0x008ef250`, with `Rnd::Environ` as its only
- * public non-virtual base at offset 0. The class adds no data member. Its allocator at
- * `0x005b27b0` requests the same 0x80 bytes the base does, under the same "Rnd::Environ" tag, and
- * its constructor writes nothing beyond the two vtable pointers.
+ * Its RTTI descriptor is at `0x008ef250`. It has `Rnd::Environ` as its only public non-virtual base
+ * at offset 0. The class does not add a data member. Its allocator at `0x005b27b0` requests the
+ * same 0x80 bytes the base does, under the same "Rnd::Environ" tag, and its constructor writes only
+ * the two vtable pointers.
  *
  * Two vtables belong to the class. The four-entry table at `0x00833968` is addressed by the
  * `Rnd::Drawable` vptr at `0x10`, and the eight-entry table at `0x00833920` by the `Rnd::Object`
@@ -226,16 +226,12 @@ extern float g_flFogOffset;
 /**
  * Directional lights of the current environment, rebuilt by PsEnviron::DrawSelf().
  *
- * The program's label is `g_abDirectionalLightRecords`.
- *
  * @ghidraAddress 0x00776120
  */
 extern std::vector<DirectionalLightRecord> g_directionalLightRecords;
 
 /**
  * Point lights of the current environment, rebuilt by PsEnviron::DrawSelf().
- *
- * The program's label is `g_abPointLightRecords`.
  *
  * @ghidraAddress 0x00776130
  */

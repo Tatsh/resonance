@@ -5,8 +5,8 @@
 /**
  * Receiver notified once a memory-card task has finished.
  *
- * `11MemcardUser` in the RTTI descriptor at `0x0086f618`, with no base class and no data members.
- * An instance is four bytes, which is the vptr alone, and the vtable is at `0x007daf78`.
+ * Its RTTI descriptor is at `0x0086f618`. It has no base class and no data members. An instance is
+ * the four-byte vptr alone, and the vtable is at `0x007daf78`.
  *
  * The interface declares one method per `MemcardTask` subclass, and every body is a single
  * `jr ra`. An implementation overrides only the tasks it starts. Each method is pinned to its

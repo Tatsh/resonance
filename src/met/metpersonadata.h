@@ -13,19 +13,18 @@
 /**
  * Saved record of one player persona.
  *
- * `14MetPersonaData` in the RTTI descriptor at `0x0086f610`, a leaf class with no base. Following
- * the g++ 2.x layout for a class with no base, the vptr sits after the data members, here at
- * `+0x168`, so the object is 0x16c bytes. The four-entry vtable is at `0x00804bd8`.
+ * Its RTTI descriptor is at `0x0086f610`. It is a leaf class with no base. Following the g++ 2.x
+ * layout for a class with no base, the vptr sits after the data members, here at `+0x168`, and
+ * the object is 0x16c bytes. The four-entry vtable is at `0x00804bd8`.
  *
  * The class supplies both its own allocation and its own release function, and both tag the block
  * with the literal `MetPersonaData` at `0x00804a78`.
  *
- * Two of its members are objects with virtuals of their own, and an earlier reading recorded both
- * as unidentified reserved spans. Both are now settled on four matching facts each. The member at
- * offset 0 is a CampaignStats, 0x140 bytes with its vptr at `+0x13c`, built by
- * CampaignStats::CampaignStats() at `0x00140580` and torn down by its destructor at `0x00140768`.
- * The member at `+0x140` is a FreqAppearance, 0x14 bytes with its vptr at `+0x10`, built at
- * `0x001745b8` and torn down by the destructor its vtable slot 1 records at `0x00174730`.
+ * Two of its members are objects with virtuals. The member at offset 0 is a CampaignStats, 0x140
+ * bytes with its vptr at `+0x13c`, built by CampaignStats::CampaignStats() at `0x00140580` and
+ * torn down by its destructor at `0x00140768`. The member at `+0x140` is a FreqAppearance, 0x14
+ * bytes with its vptr at `+0x10`, built at `0x001745b8` and torn down by the destructor its vtable
+ * slot 1 records at `0x00174730`.
  *
  * Vtable slots 2 and 3, at `0x0032b880` and `0x0032b968`, are a matched pair. Slot 2 hands the
  * constant 4-byte value 2 to its argument through the argument's vtable slot 4 and then forwards
@@ -33,10 +32,9 @@
  * slot 6 and forwards to slot 3 of both members. The pair is therefore the persist-and-restore
  * pair with a record version of 2.
  *
- * An earlier reading recorded the argument's class as unidentified. The two slot numbers settle it.
- * Slot 4 of OBStream is `Write(const void *, int)` and slot 6 of IBStream is `Read(void *, int)`,
- * and GameManagerImpl calls both of those slots on both of those classes from its own
- * persist-and-restore pair.
+ * The two slot numbers identify the argument's class. Slot 4 of OBStream is `Write(const void *,
+ * int)` and slot 6 of IBStream is `Read(void *, int)`. GameManagerImpl calls both slots on both
+ * stream classes from its persist-and-restore pair.
  */
 class MetPersonaData {
 public:

@@ -8,11 +8,10 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `21GameConnectFailureMsg` in the RTTI descriptor at `0x008efd20`, with Message as its one base.
- * The object is 0xc bytes and its vtable is at `0x00811f10`, so the whole payload is the single
- * HxStr at `+0x04`. Clone() copies it inline through HxStr::HxStr(const HxStr &) rather than
- * delegating, and the cleanup block that follows is the compiler unwinding that copy if it
- * throws.
+ * Its RTTI descriptor is at `0x008efd20`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x00811f10`. The whole payload is the single HxStr at `+0x04`. Clone()
+ * copies it inline through HxStr::HxStr(const HxStr &) rather than delegating, and the cleanup
+ * block that follows is the compiler unwinding the copy if it throws.
  *
  * The destructor at `0x003e1618` is compiler-generated and has no declaration here. So is the
  * routine at `0x003e1868`, which copy-constructs the string of one object into another without

@@ -19,15 +19,12 @@
 /**
  * Producer of the automatic riff a guitar track plays when it is not being played.
  *
- * `10AutoRiffer` in the RTTI descriptor at `0x008eef38`, deriving from MsgSink at offset 0, so the
- * base vptr lands at `+0x00` and this class's own members start at `+0x04`. Its table is at
- * `0x007dd488` with four entries. The object is 0x4c bytes, which AxingSTG's tagged allocation
- * measures.
+ * Its RTTI descriptor is at `0x008eef38`. It derives from MsgSink at offset 0. The base vptr lands
+ * at `+0x00`, and this class's members start at `+0x04`. Its table is at `0x007dd488` with four
+ * entries. The object is 0x4c bytes, measured by AxingSTG's tagged allocation.
  *
- * An earlier pass titled this class's constructor `RndSpotShadowMeshPass__Ctor`. No descriptor
- * among the 574 in the image bears that title. Slot 0 of the table at `0x007dd488` addresses the
- * accessor at `0x0019a490`, which guards on the descriptor at `0x008eef38`, and that is what
- * settles the name.
+ * Slot 0 of the table at `0x007dd488` addresses the accessor at `0x0019a490`. The accessor guards
+ * on the descriptor at `0x008eef38`, and the descriptor settles the class name.
  *
  * The source at `+0x30` is a data member rather than a base. The constructor constructs it at that
  * offset, and every caller calls MsgSource::AddSink() on it directly rather than through a vptr.

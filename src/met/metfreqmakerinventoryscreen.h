@@ -20,8 +20,8 @@ class View;
 /**
  * Inventory of the FreQ maker, the part browser and colour palette beside the canvas.
  *
- * `27MetFreqMakerInventoryScreen` in the RTTI descriptor at `0x008ef8a0`, with MetScreen as its one
- * public non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008ef8a0`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 44-entry primary vtable is at `0x007f3308`, five entries longer than the MetScreen table, so
  * the class declares five virtuals, at slots 39 through 43. The titles of those five are inferred

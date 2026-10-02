@@ -5,10 +5,10 @@
 /**
  * The FreQuency application.
  *
- * `11Application` in the RTTI descriptor at `0x008f0870`, deriving from Globals. Its vtable is at
- * `0x007dcf68` and it adds no data members, so the constructor is the base constructor alone and
- * the compiler inlined it into the static initialiser at `0x00198c58` that creates the instance
- * before main() runs.
+ * Its RTTI descriptor is at `0x008f0870`. It derives from Globals. Its vtable is at `0x007dcf68`
+ * and it adds no data members. The constructor is the base constructor alone, and the compiler
+ * inlined it into the static initialiser at `0x00198c58` that creates the instance before main()
+ * runs.
  *
  * The instance has file-scope linkage. Its only three references in the image all sit in this
  * translation unit, at `0x00198c7c` and `0x00198c9c` in the static initialiser and at

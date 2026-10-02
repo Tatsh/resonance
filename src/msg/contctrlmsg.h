@@ -8,10 +8,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `11ContCtrlMsg` in the RTTI descriptor at `0x008efd00`, with Message as its one base. The
- * object is 0x10 bytes and its vtable is at `0x00812420`. The members below are the whole of the
- * class: everything recovered comes from them, and no other routine in the image refers to this
- * type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008efd00`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x00812420`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). New() initialises `+0x04` to
  * kMBTInfinity, the one store it makes, which marks that word as a position. Print() writes only

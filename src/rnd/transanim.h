@@ -29,11 +29,11 @@ constexpr unsigned kCopyShareFrames = 0x100;
 /**
  * Animation that drives one transformable from three keyframe channels.
  *
- * `Q23Rnd9TransAnim` in the RTTI descriptor at `0x008ef240`, with `Rnd::Animatable` as a public
- * non-virtual base at offset 0 and `Rnd::Drawable` as a public non-virtual base at offset 0x18.
- * Those two offsets pin the Animatable subobject at 0x18 bytes and place this class's own members
- * from `+0x2c`, Drawable occupying 0x14 bytes from `+0x18`. `Rnd::View` repeats both offsets, so
- * the Animatable size is fixed from outside the class rather than from a constructor's stores.
+ * Its RTTI descriptor is at `0x008ef240`. It has `Rnd::Animatable` as a public non-virtual base at
+ * offset 0 and `Rnd::Drawable` as a public non-virtual base at offset 0x18. Those two offsets pin
+ * the Animatable subobject at 0x18 bytes and place this class's members from `+0x2c`, Drawable
+ * occupying 0x14 bytes from `+0x18`. `Rnd::View` repeats both offsets. The Animatable size is
+ * therefore fixed from outside the class rather than from a constructor's stores.
  *
  * The three channels are independent. mTransKeys and mScaleKeys store vector keyframes and
  * mRotKeys quaternion keyframes, and each channel has its own interpolation mode. The member
@@ -54,7 +54,7 @@ public:
         kInterpTCB = 1     /*!< Kochanek-Bartels spline through the stored tangents. */
     };
 
-    /** Floats of a keyframe's shape triple, titled from the dumpers at `0x004f9160`. */
+    /** Floats of a keyframe's shape triple, labelled by the dumpers at `0x004f9160`. */
     enum ShapeComponent {
         kShapeTension = 0,    /*!< Kochanek-Bartels tension, dumped as "t:". */
         kShapeContinuity = 1, /*!< Kochanek-Bartels continuity, dumped as "c:". */
@@ -158,7 +158,7 @@ public:
      *
      * The same 0x50 bytes as TransKey, and the same node placement. The value is a quaternion
      * rather than a vector, so all four floats are read, written, and dumped. The dumper at
-     * `0x004f9160` titles the value "q:" and its components "x:", "y:", "z:", and "w:".
+     * `0x004f9160` labels the value "q:" and its components "x:", "y:", "z:", and "w:".
      */
     struct RotKey {
         /**

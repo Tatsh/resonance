@@ -12,11 +12,10 @@ enum SeekOrigin { kSeekSet = 0, kSeekCur = 1, kSeekEnd = 2 };
 /**
  * Byte stream that every renderer object serialises itself through.
  *
- * `Q23Rnd6Stream` in the RTTI descriptor at `0x0086f670`, a leaf class with no base and no data
- * member. A stream stores its vtable pointer at offset 0 and every field belongs to a subclass.
- * The class emits no standalone `GetTypeInfo` accessor, because each subclass accessor initialises
- * this descriptor inline before its own; the base list in `rtti.json` attributes
- * `RndBufStream__GetTypeInfo` to it, which is an extraction artefact rather than a real accessor.
+ * Its RTTI descriptor is at `0x0086f670`. It is a leaf class with no base and no data member. A
+ * stream stores its vtable pointer at offset 0 and every field belongs to a subclass. The class
+ * does not emit a standalone `GetTypeInfo` accessor, because each subclass accessor initialises
+ * this descriptor inline before its own.
  *
  * The four subclasses attested by RTTI are `Rnd::FileStream`, `Rnd::MemStream`, `Rnd::BufStream`,
  * and `Rnd::ToolStream`, all single inheritance at offset 0. Every vtable in the family is eleven

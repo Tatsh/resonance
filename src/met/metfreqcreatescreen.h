@@ -14,8 +14,8 @@ class Tex;
 /**
  * Screen that creates a new FreQ, either from a pre-fab identity or from scratch.
  *
- * `19MetFreqCreateScreen` in the RTTI descriptor at `0x00901aa0`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x00901aa0`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable at `0x007f7808` is the same length as the MetScreen table, and the
  * class declares no new virtual.

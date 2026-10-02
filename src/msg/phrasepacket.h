@@ -11,10 +11,10 @@ class Phrase;
 /**
  * Network packet the game sends between game systems.
  *
- * `12PhrasePacket` in the RTTI descriptor at `0x00902130`, with ToAllOtherGameSystemsPacket as
- * its one base. The object is 0x20 bytes and its vtable is at `0x00814650`. The payload comes
- * from the copy constructor at `0x003f3760`, which Clone() delegates to. The four words Packet
- * provides are declared there rather than here.
+ * Its RTTI descriptor is at `0x00902130`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x20 bytes and its vtable is at `0x00814650`. The payload comes from the copy
+ * constructor at `0x003f3760`. Clone() delegates to it. The four words Packet provides are
+ * declared there rather than here.
  *
  * Print() labels `+0x14` as `tr` and `+0x1c` as `b`, and writes the first through the unsigned
  * integer inserter. The phrase at `+0x18` crosses the wire through the Phrase stream operators,

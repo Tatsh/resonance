@@ -7,9 +7,8 @@ class APalette;
 /**
  * Reader and writer for Windows bitmap files.
  *
- * The name comes from the RTTI descriptor whose mangled form is `8ABmpFile`, with the single
- * public base AGfxFile at offset zero. Its table at 0x0083d1c0 overrides slots 1, 3, 4, and 5.
- * AGfxFile::Open() allocates 0x3c bytes for it.
+ * Its single public base is AGfxFile at offset zero. Its table at 0x0083d1c0 overrides slots 1, 3,
+ * 4, and 5. AGfxFile::Open() allocates 0x3c bytes for it.
  *
  * The reader accepts a 40 byte information header with one plane at 4, 8, 16, or 24 bits per
  * pixel, uncompressed or run length encoded. A 24 bit file is read into a

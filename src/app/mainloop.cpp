@@ -35,7 +35,7 @@ constexpr long long kKeepAliveIntervalMs = 18;
 // The length is not recovered. The label it receives is eleven characters.
 constexpr int kFrameLabelSize = 32;
 
-// The profiler's timer slots that the frame loop titles.
+// The profiler's timer slots that the frame loop labels.
 enum AppTimer { kAppTimerPreDraw = 0, kAppTimerDraw = 1, kAppTimerAsync = 2, kAppTimerBank = 3 };
 
 long long s_qwElapsedMs;

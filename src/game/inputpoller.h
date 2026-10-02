@@ -10,11 +10,11 @@ struct BytePairStatic;
 /**
  * Reader of the physical controllers.
  *
- * `11InputPoller` in the RTTI descriptor at `0x0086f6d8`, with no base, so the vptr lands after the
- * data at `+0x58` and the class is 0x5c bytes. Its vtable at `0x007e69b8` has two entries and a
- * zero terminator at index 2, the type function and the destructor at `0x001df080`, so the
- * destructor is the only virtual the class declares. The size comes from the allocation in the
- * GameManagerImpl constructor.
+ * Its RTTI descriptor is at `0x0086f6d8`. It has no base. The vptr lands after the data at
+ * `+0x58`, and the class is 0x5c bytes. Its vtable at `0x007e69b8` has two entries and a zero
+ * terminator at index 2, the type function and the destructor at `0x001df080`. The destructor is
+ * the only virtual the class declares. The size comes from the allocation in the GameManagerImpl
+ * constructor.
  *
  * The translation unit is `InputPollerPS2.cpp`, which the anonymous-namespace marker
  * `Q235_GLOBAL_$N$InputPollerPS2.cppXFKhgb24FindJoypadConnectionsCmd` at `0x007e6ae8` records. That

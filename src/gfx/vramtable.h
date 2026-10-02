@@ -657,8 +657,6 @@ extern const int g_anBitsPerPixelTable[kABitmapFormatCount];
 /**
  * The video memory cache.
  *
- * The program's label is `g_abVramTable`, because the bridge requires an aggregate prefix there.
- *
  * @ghidraAddress 0x0070d400
  */
 extern VramTable g_vramTable;
@@ -666,16 +664,12 @@ extern VramTable g_vramTable;
 /**
  * Every block table record.
  *
- * The program's label is `g_abVramEntries`.
- *
  * @ghidraAddress 0x0070d468
  */
 extern VramTableEntry g_vramEntries[kVramTableEntries];
 
 /**
  * Every palette table record.
- *
- * The program's label is `g_abVramPalEntries`.
  *
  * @ghidraAddress 0x00714468
  */
@@ -747,16 +741,12 @@ extern int g_nVramLoadBlocksLastFrame;
 /**
  * Transfer descriptor VramTableEntry::UploadImage() reuses.
  *
- * The program's label is `g_abVramUploadLoadImage`.
- *
  * @ghidraAddress 0x0089de60
  */
 extern sceGsLoadImage g_vramUploadLoadImage;
 
 /**
  * Transfer descriptor VramTableEntry::UploadSubImage() reuses.
- *
- * The program's label is `g_abVramUploadSubLoadImage`.
  *
  * @ghidraAddress 0x0089dec0
  */
@@ -765,8 +755,6 @@ extern sceGsLoadImage g_vramUploadSubLoadImage;
 /**
  * Transfer descriptor VramPalEntry::UploadClut() reuses.
  *
- * The program's label is `g_abVramPalLoadImage`.
- *
  * @ghidraAddress 0x0089df20
  */
 extern sceGsLoadImage g_vramPalLoadImage;
@@ -774,16 +762,12 @@ extern sceGsLoadImage g_vramPalLoadImage;
 /**
  * Transfer descriptor VramTable::WipeVram() reuses.
  *
- * The program's label is `g_abVramWipeLoadImage`.
- *
  * @ghidraAddress 0x0089de00
  */
 extern sceGsLoadImage g_vramWipeLoadImage;
 
 /**
  * Transfer descriptor VramTable::ReadBackBitmap() reuses, and therefore VramTable::Screendump().
- *
- * The program's label is `g_abScreendumpStoreImage`.
  *
  * @ghidraAddress 0x0089dd90
  */

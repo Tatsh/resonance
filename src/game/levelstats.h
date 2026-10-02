@@ -11,9 +11,9 @@
 /**
  * Persisted result for one level, across every skill setting.
  *
- * `10LevelStats` in the RTTI descriptor at `0x007d3da8`, with no base, so the compiler places the
- * vptr after the data at `+0x18` and the class is 0x1c bytes. Its vtable is at `0x007d3d48` and
- * runs the type function, the destructor, Save(), and Load().
+ * Its RTTI descriptor is at `0x007d3da8`. It has no base. The compiler places the vptr after the
+ * data at `+0x18`, and the class is 0x1c bytes. Its vtable is at `0x007d3d48` and runs the type
+ * function, the destructor, Save(), and Load().
  *
  * CampaignStats stores a vector of these and resolves one by name, so mName is the record's key.
  *

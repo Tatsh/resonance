@@ -12,9 +12,9 @@ class TickClock;
 /**
  * Effect that sweeps a channel's filter controller with a triangle wave while it is applied.
  *
- * `11WahEffector` in the RTTI descriptor at `0x008f2a60`, with TickTask at offset 0 and Effector at
- * offset 0x20. Its tables are at `0x007de770` for TickTask and `0x007de738` for the Effector
- * subobject. The object is 0x48 bytes, which the factory's allocation measures.
+ * Its RTTI descriptor is at `0x008f2a60`. It has TickTask at offset 0 and Effector at offset 0x20.
+ * Its tables are at `0x007de770` for TickTask and `0x007de738` for the Effector subobject. The
+ * factory's allocation measures the object at 0x48 bytes.
  *
  * The task runs every 60 ticks and is not aligned. Each run samples mOscillator and sends
  * controller 0x4a with mDepth scaled by the sample. Switching the effect sends controller 0x51.

@@ -9,9 +9,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `6WinMsg` in the RTTI descriptor at `0x008f09d0`, with Message as its one base. The object is
- * 0x10 bytes and its vtable is at `0x007ce690`. The allocation in New() and the allocation in
- * Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008f09d0`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x007ce690`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). The vector at `+0x04` comes
  * from the copy constructor at `0x00116eb8`, which allocates one element for every element of the

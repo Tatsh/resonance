@@ -288,7 +288,7 @@ constexpr int kGsRegScissor1 = 0x40;
 constexpr int kGsRegDither = 0x45;
 constexpr int kGsRegColClamp = 0x46;
 
-// Init() titles six consecutive records of g_profileTimers for the device's own intervals.
+// Init() labels six consecutive records of g_profileTimers for the device's intervals.
 constexpr int kFirstDeviceTimer = 8;
 const char *const kapszDeviceTimerNames[] = {"setup", "vram", "billboard", "vert", "prim", "sync"};
 constexpr int kBitsPerPixelByte = 8;

@@ -7,10 +7,10 @@ namespace Sch {
 /**
  * Affine map between a song position in MIDI ticks and scheduler time in nanoseconds.
  *
- * `Q23Sch8TempoMap` in the RTTI descriptor at `0x008f2a10`, deriving publicly from Attachment at
- * offset 0. The descriptor address is verified against the accessor at `0x0052d260`, which guards
- * on `0x008f2a10` and then calls TypeInfo::ConstructSingleInheritance() with the mangled name at
- * `0x00827ca0` and Attachment's own descriptor at `0x0086f5a0`.
+ * Its RTTI descriptor is at `0x008f2a10`. It derives publicly from Attachment at offset 0. The
+ * descriptor address is verified against the accessor at `0x0052d260`. The accessor guards on
+ * `0x008f2a10` and then calls TypeInfo::ConstructSingleInheritance() with the mangled name at
+ * `0x00827ca0` and the Attachment descriptor at `0x0086f5a0`.
  *
  * The vtable at `0x00827cb0` runs three entries and then a zero entry, so the class declares no
  * virtual of its own:

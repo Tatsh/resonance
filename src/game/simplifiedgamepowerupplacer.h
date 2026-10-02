@@ -8,10 +8,9 @@ class PowerupCollectionI;
 /**
  * Powerup placer a LocalPlayer owns outside jam.
  *
- * `27SimplifiedGamePowerupPlacer` in the RTTI descriptor, with PowerupPlacer as its one base. Its
- * table is at `0x007e4bd0` and has nine entries. Like JamPowerupPlacer it overrides only the
- * destructor and slot 8, and retains the base defaults for slots 4 through 7. Its unit spans
- * `0x001cdb20` through `0x001cdf84`.
+ * It has PowerupPlacer as its one base. Its table is at `0x007e4bd0` and has nine entries. Like
+ * JamPowerupPlacer it overrides only the destructor and slot 8, and retains the base defaults for
+ * slots 4 through 7. Its unit spans `0x001cdb20` through `0x001cdf84`.
  *
  * The object is 0x1c bytes. LocalPlayer's constructor at `0x0011e198` allocates one in game modes 1
  * through 3 and stores the pointer at its own `+0xa8`, with the SinglePowerupCollection it built

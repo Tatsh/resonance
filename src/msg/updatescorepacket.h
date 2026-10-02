@@ -7,11 +7,11 @@
 /**
  * Network packet the game sends between game systems.
  *
- * `17UpdateScorePacket` in the RTTI descriptor at `0x008efcc0`, with ToAllOtherGameSystemsPacket
- * as its one base. The object is 0x1c bytes and its vtable is at `0x008145c0`. The payload comes
- * from the copy constructor at `0x003f3818`, which Clone() delegates to, so the offsets and
- * widths are recovered but the purpose of each field is not. The four words Packet owns are
- * declared there rather than here.
+ * Its RTTI descriptor is at `0x008efcc0`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x1c bytes and its vtable is at `0x008145c0`. The payload comes from the copy
+ * constructor at `0x003f3818`. Clone() delegates to it. The offsets and widths are recovered, but
+ * the purpose of each field is not. The four words Packet provides are declared there rather than
+ * here.
  *
  * Its vtable has eight entries and a zero terminator at index 8. Slots 5, 6, and 7 are all its own
  * overrides. Both transfer members open by expanding the Packet pair inline rather than calling it,

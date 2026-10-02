@@ -16,10 +16,9 @@ enum StreamSeekOrigin {
 /**
  * Input half of the byte stream interface.
  *
- * `8IBStream` in the RTTI descriptor at `0x0086f5e0`, with no base. The class has no data member,
- * so the object is four bytes of vtable pointer, and every field belongs to a subclass. The
- * descriptor emits no standalone accessor, because each derived accessor builds it inline before
- * its own.
+ * Its RTTI descriptor is at `0x0086f5e0`. It has no base. The class has no data member. The object
+ * is four bytes of vtable pointer, and every field belongs to a subclass. The descriptor does not
+ * emit a standalone accessor, because each derived accessor builds it inline before its own.
  *
  * Three implementations are attested. IBFileStream derives from this class alone, while
  * IOBStream and IOBPreallocMemStream derive from this class at offset 0 and from OBStream at

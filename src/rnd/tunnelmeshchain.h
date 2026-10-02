@@ -50,7 +50,7 @@ public:
      * Replace the chain with nCount newly created meshes.
      *
      * The existing meshes are deleted first. The meshes are created from the last level down,
-     * each through g_pfnNewMesh(), titled "[<name>.<level>]" when bInternal is set and
+     * each through g_pfnNewMesh(), called "[<name>.<level>]" when bInternal is set and
      * "<name>.<level>" otherwise, and each one takes the previously created mesh as its mNext.
      * Every mesh draws with kZModeZReadWrite and kZFuncLess, and every mesh with a coarser link
      * has its screen size threshold cleared.

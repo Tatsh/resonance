@@ -18,16 +18,15 @@ namespace Rnd {
 /**
  * Draws one mesh many times, once per recorded instance transform.
  *
- * `Q23Rnd9MultiMesh` in the RTTI descriptor at `0x008ef150`, with `Rnd::Drawable` as its one
- * public base at offset 0. The Drawable subobject is 0x14 bytes and the shared Rnd::Object
- * subobject sits at `+0x1c`, which the Object sub-vtable at `0x00823e70` pins from outside by
- * recording a `this` adjustment of -0x1c in every entry. The creator allocates 0x38 bytes, which
- * the 0x1c of Rnd::Object accounts for exactly. The Object sub-vtable has eight entries and the
+ * Its RTTI descriptor is at `0x008ef150`. It has `Rnd::Drawable` as its one public base at offset
+ * 0. The Drawable subobject is 0x14 bytes and the shared Rnd::Object subobject sits at `+0x1c`.
+ * The Object sub-vtable at `0x00823e70` pins the offset from outside by recording a `this`
+ * adjustment of -0x1c in every entry. The creator allocates 0x38 bytes, and the 0x1c of
+ * Rnd::Object accounts for the remainder exactly. The Object sub-vtable has eight entries and the
  * Drawable sub-vtable at `0x00823eb8` has four, each followed by an all-zero terminator.
  *
- * An instance is a bare Rnd::Transform of 0x40 bytes. An earlier reading of this class put two
- * undetermined words in front of the transform and made the record 0x50 bytes. Both were wrong,
- * and the 0x50 was the size of the list node rather than of the record. The constructor at
+ * An instance is a bare Rnd::Transform of 0x40 bytes, and 0x50 is the size of the list node
+ * rather than of the record. The constructor at
  * `0x004e8a98` gives the node pool an element size of 0x40 and then allocates a 0x50-byte node,
  * which places the payload at node + 0x10 rather than at the node + 0x08 a four-byte payload
  * would use. The reader at `0x004eb6a0` confirms the layout from the other side by building a
@@ -261,9 +260,8 @@ extern HxStr g_multiMeshClassName;
  * Point g_pfnNewMultiMesh at NewMultiMesh() and register the "MultiMesh" class with Rnd::Manager.
  *
  * An inline function. Neither out-of-line copy has a caller. The second, byte-identical copy at
- * `0x005b5be8` lies in the Rnd::PsMultiMesh translation unit, and Ghidra wrongly attributes it to
- * Rnd::PsMultiMesh. GfxDevice::Terminate() expands the body. Every copy installs the portable
- * creator rather than the PlayStation 2 one.
+ * `0x005b5be8` lies in the Rnd::PsMultiMesh translation unit. GfxDevice::Terminate() expands the
+ * body. Every copy installs the portable creator rather than the PlayStation 2 one.
  *
  * Rnd::Manager::Init() also expands this inline.
  *

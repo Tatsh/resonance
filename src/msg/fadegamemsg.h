@@ -5,9 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `11FadeGameMsg` in the RTTI descriptor at `0x008ef3e0`, with Message as its one base. The object
- * is 0xc bytes and its vtable is at `0x007dc430`. The allocation in New() and the allocation in
- * Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008ef3e0`. It has Message as its one base. The object is 0xc bytes
+ * and its vtable is at `0x007dc430`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Both members are public
  * because Overlay::OnFadeGame() at `0x0042b1f8` reads them directly with no accessor in the image.

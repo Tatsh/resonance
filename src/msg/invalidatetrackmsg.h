@@ -5,10 +5,9 @@
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `18InvalidateTrackMsg` in the RTTI descriptor at `0x008ef400`, with Message as its one base.
- * The object is 0x10 bytes and its vtable is at `0x00812858`. The members below are the whole of
- * the class: everything recovered comes from them, and no other routine in the image refers to
- * this type by anything but its vtable.
+ * Its RTTI descriptor is at `0x008ef400`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x00812858`. The members below are the whole of the class. No other
+ * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). Print() labels mTrack as a
  * track number and mFirstBar through mEndBar as a range of song bars. The end is one past the

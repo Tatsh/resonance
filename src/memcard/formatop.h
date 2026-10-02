@@ -5,9 +5,8 @@
 /**
  * Format of the card in one slot.
  *
- * `8FormatOp` in the RTTI descriptor at `0x008f0270`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x1c bytes, the size of the base alone, and the vtable is at
- * `0x0082be20`.
+ * Its RTTI descriptor is at `0x008f0270`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x1c bytes, the size of the base alone, and the vtable is at `0x0082be20`.
  */
 class FormatOp : public MemcardOp {
 public:

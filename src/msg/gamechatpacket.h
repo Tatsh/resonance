@@ -11,10 +11,10 @@ class OBStream;
 /**
  * Network packet the game sends between game systems.
  *
- * `14GameChatPacket` in the RTTI descriptor at `0x008efd70`, with ToAllOtherNetManagersPacket as
- * its one base. The object is 0x24 bytes and its vtable is at `0x00814338`. The payload comes
- * from the copy constructor at `0x003f3d88`, which Clone() delegates to, and it accounts for the
- * allocation exactly. The four words Packet owns are declared there rather than here.
+ * Its RTTI descriptor is at `0x008efd70`. It has ToAllOtherNetManagersPacket as its one base. The
+ * object is 0x24 bytes and its vtable is at `0x00814338`. The payload comes from the copy
+ * constructor at `0x003f3d88`. Clone() delegates to it, and the payload accounts for the
+ * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * Each string crosses the wire as a four-byte length followed by that many bytes of text with no
  * terminator. Save() and Load() have second emissions at `0x003e8720` and `0x003e8890`.

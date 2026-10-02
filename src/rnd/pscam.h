@@ -15,10 +15,10 @@ namespace Rnd {
 /**
  * Camera, PlayStation 2.
  *
- * `Q23Rnd5PsCam` in the RTTI descriptor at `0x008efdc0`, with `Rnd::Cam` as its only public
- * non-virtual base at offset 0. The class adds no data member. Its allocator at `0x00588500`
- * requests the same 0x330 bytes the base does, under the same "Rnd::Cam" tag, and its constructor
- * writes nothing beyond the four vtable pointers.
+ * Its RTTI descriptor is at `0x008efdc0`. It has `Rnd::Cam` as its only public non-virtual base at
+ * offset 0. The class does not add a data member. Its allocator at `0x00588500` requests the same
+ * 0x330 bytes the base does, under the same "Rnd::Cam" tag, and its constructor writes only the
+ * four vtable pointers.
  *
  * Four vtables belong to the class. The seven-entry table at `0x0082f2e0` is addressed by the
  * `Rnd::Drawable` vptr at `0x10`, the three-entry table at `0x0082f2c0` by the

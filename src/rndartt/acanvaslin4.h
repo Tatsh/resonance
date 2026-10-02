@@ -5,10 +5,10 @@
 /**
  * Linear addressing for a canvas of four-bit indexed pixels.
  *
- * The name comes from the RTTI descriptor at 0x008f0920, whose mangled form is `11ACanvasLin4` and
- * whose single public base is ACanvas8 at offset zero. It derives from the FORMAT class rather than
- * from ACanvas, which is the two-level shape the whole family uses: ACanvas8 supplies the colour
- * conversions and leaves pure what depends on how pixels are packed, and this class supplies that.
+ * Its RTTI descriptor is at 0x008f0920, and its single public base is ACanvas8 at offset zero. It
+ * derives from the FORMAT class rather than from ACanvas, the two-level shape the whole family
+ * uses. ACanvas8 supplies the colour conversions and does not implement what depends on how pixels
+ * are packed, and this class supplies the packing.
  *
  * Its table at 0x0083f4d8 runs the same 85 entries as its base's and overrides eight. Three are the
  * pure slots ACanvas8 leaves, which makes this class the first concrete one in the chain. The other
@@ -93,14 +93,9 @@ private:
      *
      * Non-virtual, and it fills no slot of any table in this family, which was checked against all
      * 85 entries of ACanvas, ACanvas8, ACanvasLin4, and ACanvasLin8. Its three callers are this
-     * class's own three block copies, each of them confirmed by the table position it occupies, so
-     * the attribution rests on a caller set entirely inside one class rather than on the title it
-     * carries.
+     * class's own three block copies, each of them confirmed by the table position it occupies.
      *
-     * The program titled it for an alpha mask build. All three callers instead feed it a row of
-     * one byte per pixel and a destination position, which is what the retitle records. The fifth
-     * argument arrives in a register the decompiler does not bind, so the prototype read as taking
-     * no arguments at all.
+     * All three callers feed it a row of one byte per pixel and a destination position.
      *
      * Three defects in the binary account for every oddity in the body. The bulk loop packs two
      * source bytes into one destination byte with a bitwise OR, while both per pixel paths combine

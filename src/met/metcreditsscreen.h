@@ -11,10 +11,9 @@ class View;
 /**
  * Credits roll.
  *
- * `16MetCreditsScreen` in the RTTI descriptor at `0x008ef890`, with MetScreen as its one public
- * non-virtual base at offset 0. New() allocates 0x9c bytes. The 39-entry primary vtable is at
- * `0x007eb4d0`, the same length as the MetScreen table, so the class declares no virtual of its
- * own.
+ * Its RTTI descriptor is at `0x008ef890`. It has MetScreen as its one public non-virtual base at
+ * offset 0. New() allocates 0x9c bytes. The 39-entry primary vtable is at `0x007eb4d0`, the same
+ * length as the MetScreen table, and the class declares no new virtual.
  *
  * The screen plays the `Group_credit.tnm` animation from the moment it enters and drives the
  * CreditsRoll along with it. The screen exits 100 frames after the animation's end, or when the

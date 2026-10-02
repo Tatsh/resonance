@@ -11,7 +11,7 @@
 /**
  * Voice and sound-bank driver that Ps2HardSynth is a thin class over.
  *
- * Titled after `midi_main.cpp`, the string at `0x0081cc98` that the module bills its heap releases
+ * Named after `midi_main.cpp`, the string at `0x0081cc98` that the module bills its heap releases
  * to. The module spans `0x00461a88` through `0x00465200`, the zone allocator ending just below it,
  * and has the attested behaviour of the sound subsystem: the SPU2 voices, the sound banks, and the
  * script-facing command dispatcher. Neither Synth nor Ps2HardSynth has any of it.

@@ -97,7 +97,7 @@ void *ZoneAlloc(unsigned nSize) {
 
     Zone *pZone = &g_adZones[g_nCurrentZone];
     if (pZone->mBlock == nullptr) {
-        // The shipped message titles the wrong routine.
+        // The shipped message identifies the wrong routine.
         LogPrintf("ZoneReset: zone %d is not allocated!\n", g_nCurrentZone);
         return nullptr;
     }

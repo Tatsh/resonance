@@ -10,10 +10,9 @@ namespace Py {
 /**
  * Handle on any Python sequence, and the base of Py::List, Py::Tuple, and Py::String.
  *
- * Two instantiations exist in the image. `Q22Pyt7SeqBase1ZQ22Py6Object` is the descriptor at
- * `0x00902990`, and `Q22Pyt7SeqBase1ZQ22Py4Char` is the descriptor at `0x00902000`. Both derive
- * from Py::Object at offset 0. The harvest demangles neither, because its demangler does not
- * handle the template form, so both names come from the mangled field instead.
+ * Two instantiations exist in the image. `Py::SeqBase<Py::Object>` has its descriptor at
+ * `0x00902990`, and `Py::SeqBase<Py::Char>` has its descriptor at `0x00902000`. Both derive from
+ * Py::Object at offset 0.
  *
  * The vtable has nine entries, the three Py::Object slots plus six of its own. The six below are
  * declared in table order, and that order is itself corroboration: released PyCXX declares

@@ -5,8 +5,8 @@
 /**
  * Close of an open memory-card file.
  *
- * `7CloseOp` in the RTTI descriptor at `0x008ee460`, single inheritance from `MemcardOp` at offset
- * 0. An instance is 0x20 bytes and the vtable is at `0x0082bc70`.
+ * Its RTTI descriptor is at `0x008ee460`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x20 bytes and the vtable is at `0x0082bc70`.
  *
  * The constructor never writes MemcardOp::mPortSlot, which makes this class and SeekOp the two
  * operations that address a descriptor alone.

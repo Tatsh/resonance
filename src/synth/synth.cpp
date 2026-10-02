@@ -36,7 +36,7 @@ constexpr long long kFadeEpochNow = 0;
 /**
  * The synthesiser that discards every message, for a build with no sound hardware.
  *
- * `Q224_GLOBAL_$N$Setup__5Synth9NullSynth` in the RTTI, with Synth as its one base. The vtable at
+ * File-local to Synth::Setup() in the RTTI, with Synth as its one base. The vtable at
  * `0x007d2e50` fills the pure SendMidi() with an empty body and inherits every other slot. The
  * object is Synth's four bytes.
  */
@@ -66,7 +66,7 @@ public:
 /**
  * Task that fades every channel's volume to silence.
  *
- * `Q224_GLOBAL_$N$Setup__5Synth9SynthFade` in the RTTI, with TimeTask as its one base. The vtable
+ * File-local to Synth::Setup() in the RTTI, with TimeTask as its one base. The vtable
  * is at `0x007d3000`, and the object is 0x38 bytes. Synth::FadeOut() is the one builder.
  */
 class SynthFade : public TimeTask {

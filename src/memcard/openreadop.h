@@ -6,8 +6,8 @@
 /**
  * Open of one memory-card file for reading.
  *
- * `10OpenReadOp` in the RTTI descriptor at `0x008efb40`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x28 bytes and the vtable is at `0x0082bca0`.
+ * Its RTTI descriptor is at `0x008efb40`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x28 bytes and the vtable is at `0x0082bca0`.
  *
  * Issue() passes `sceMcFileAttrReadable` as the open mode, which is the one difference from
  * OpenWriteOp.

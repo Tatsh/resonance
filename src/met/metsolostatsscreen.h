@@ -11,8 +11,8 @@ class Text;
 /**
  * End-of-game statistics for a solo session.
  *
- * `18MetSoloStatsScreen` in the RTTI descriptor at `0x008f0080`, with MetScreen as its one public
- * non-virtual base at offset 0.
+ * Its RTTI descriptor is at `0x008f0080`. It has MetScreen as its one public non-virtual base at
+ * offset 0.
  *
  * The 39-entry primary vtable is at `0x0080e218`, the same length as the MetScreen table, so the
  * class declares no virtual of its own.

@@ -36,9 +36,9 @@ inline PyMethodDef method(const char *pszMethodName,
 /**
  * Accumulator for the method table of an extension module.
  *
- * `Q22Py11MethodTable` in the RTTI descriptor at `0x0086f688`, with no base. The object is 0x14
- * bytes, the vector at `+0x00`, the flattened table at `+0x0c`, and the vptr after both at
- * `+0x10`, which is where this compiler places the vptr of a class with no base.
+ * Its RTTI descriptor is at `0x0086f688`. It has no base. The object is 0x14 bytes, the vector at
+ * `+0x00`, the flattened table at `+0x0c`, and the vptr after both at `+0x10`. This compiler places
+ * the vptr of a class with no base after the data.
  *
  * The vtable at `0x00833210` has two entries.
  *

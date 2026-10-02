@@ -31,8 +31,8 @@ constexpr int kMinimumSaveSpaceNewFile = 50;
 /**
  * Measure the space a full save would need on one card.
  *
- * `19MinimumSaveSpaceMCT` in the RTTI descriptor at `0x008ef280`, single inheritance from
- * `MemcardTask` at offset 0. An instance is 0x38 bytes and the vtable is at `0x007dac58`.
+ * Its RTTI descriptor is at `0x008ef280`. It has single inheritance from `MemcardTask` at offset 0.
+ * An instance is 0x38 bytes and the vtable is at `0x007dac58`.
  *
  * The task probes rather than counts. It tries to open the roster file and the settings file in
  * turn and charges kMinimumSaveSpaceExistingFile for each one that opens and

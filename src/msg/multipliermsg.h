@@ -7,9 +7,9 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `13MultiplierMsg` in the RTTI descriptor at `0x008eec78`, with Message as its one base. The
- * object is 0x10 bytes and its vtable is at `0x007e44e0`. The allocation in New() and the
- * allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008eec78`. It has Message as its one base. The object is 0x10 bytes
+ * and its vtable is at `0x007e44e0`. The allocation in New() and the allocation in Clone() report
+ * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(), and the stack build in
  * MultiplierPowerup::Deploy() fixes the meaning of the first two words. LocalPlayer's handler reads

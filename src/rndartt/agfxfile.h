@@ -18,10 +18,9 @@ enum AGfxFileResult {
 /**
  * Image file reader and writer, one subclass per file format.
  *
- * The name comes from the RTTI descriptor whose mangled form is `8AGfxFile`, which records no base
- * class. ABmpFile, ATgaFile, and AGifFile derive from it. The virtual function table pointer sits
- * after the data members at offset 0x14, and the object is 0x18 bytes, the size AGifFile
- * allocates with no member of its own.
+ * Its RTTI descriptor lacks a base class. ABmpFile, ATgaFile, and AGifFile derive from it. The
+ * virtual function table pointer sits after the data members at offset 0x14, and the object is 0x18
+ * bytes, the size AGifFile allocates with no added member.
  *
  * The table has six slots. Slot 0 is the type function, and slots 1, 3, and 5 point at the shared
  * pure virtual stub. Slot 2 and the destructor at slot 4 are inline, so every translation unit that
@@ -40,9 +39,8 @@ public:
      * ABmpFile, `TGA` gives ATgaFile, and `GIF` gives AGifFile. Each is allocated through the
      * plain allocator and receives the open file.
      *
-     * An unrecognised extension leaves the result null and then writes mDuration through it,
-     * which dereferences null, and the open file is not closed. The program lists one caller,
-     * WriteBitmap().
+     * An unrecognised extension retains the null result and then writes mDuration through it,
+     * dereferencing null. The open file is not closed. WriteBitmap() is the one caller.
      *
      * @param pszPath The file to open.
      * @param pnError Receives kAGfxFileOk, or kAGfxFileOpenFailed when the file cannot be opened.

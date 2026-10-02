@@ -9,9 +9,9 @@ class MuseMsg;
 /**
  * Collector of a MIDI channel's controller state, for replaying it before playback starts.
  *
- * `9MidiChase` in the RTTI descriptor, with MsgSink as its one base. Its unit spans `0x001a6488`
- * through `0x001a6960`. BGTrackGraph::BuildSequencer() builds one on its stack, feeds it every
- * bar of the track, and has it replay what it collected into the synthesiser.
+ * It has MsgSink as its one base. Its unit spans `0x001a6488` through `0x001a6960`.
+ * BGTrackGraph::BuildSequencer() builds one on its stack, feeds it every bar of the track, and has
+ * it replay what it collected into the synthesiser.
  *
  * Every byte of state starts at kUnset, which Replay() treats as nothing collected.
  */

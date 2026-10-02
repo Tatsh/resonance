@@ -6,8 +6,8 @@
 /**
  * Enquiry about the free directory entries under one path.
  *
- * `10EntSpaceOp` in the RTTI descriptor at `0x008ef048`, single inheritance from `MemcardOp` at
- * offset 0. An instance is 0x28 bytes and the vtable is at `0x0082be50`.
+ * Its RTTI descriptor is at `0x008ef048`. It has single inheritance from `MemcardOp` at offset 0.
+ * An instance is 0x28 bytes and the vtable is at `0x0082be50`.
  *
  * Issue() calls `sceMcGetEntSpace()`, whose result is the free entry count rather than a status, so
  * InterpretResult() treats every value that is not negative as success. The count survives only in

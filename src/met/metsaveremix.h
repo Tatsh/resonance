@@ -23,19 +23,19 @@
  * Three vtables belong to the class. The primary table at `0x00809c00` has 43 entries, four more
  * than the MetScreen table, so the class declares four virtuals of its own at slots 39 through 42
  * at `0x00372488`, `0x0037a618`, `0x0037a620`, and `0x0037a628`. Slots 40 and 41 are
- * two-instruction `jr ra` stubs. Slot 42 is not, and an earlier reading recorded all three as
- * stubs. Its body dispatches straight back through slot 40 of the primary table with no argument,
- * so slot 42 is a public alias for the empty slot 40. The 21-entry MemcardUser table at
- * `0x00809b50` adjusts `this` by `-140` and overrides its slots 2, 5, 8, and 11 at `0x00372c10`,
- * `0x00373808`, `0x00374b58`, and `0x00374208`. The three-entry MetKBUser table at `0x00809b30`
- * adjusts `this` by `-144` and overrides its slot 2 at `0x0037a650`.
+ * two-instruction `jr ra` stubs. Slot 42 is not. Its body dispatches back through slot 40 of the
+ * primary table with no argument. Slot 42 is therefore a public alias for the empty slot 40. The
+ * 21-entry MemcardUser table at `0x00809b50` adjusts `this` by `-140` and overrides its slots 2, 5,
+ * 8, and 11 at `0x00372c10`, `0x00373808`, `0x00374b58`, and `0x00374208`. The three-entry
+ * MetKBUser table at `0x00809b30` adjusts `this` by `-144` and overrides its slot 2 at
+ * `0x0037a650`.
  *
  * All four slots the class declares are declared below. Slot 39 takes six arguments in a1 through
- * t2, and the two that could not be typed before are now settled from other bands:
+ * t2, and two of their types come from other classes:
  * MemcardConnectState is the 0x18-byte record whose five fields mirror this class's own `+0x94`
- * through `+0xa8`, and FreqAppearance is the 0x14-byte element of the vector at `+0xac`, RTTI
- * name `14FreqAppearance`. The 0x38-byte element of the vector at `+0xcc` is MetRemixRecord, whose
- * name is inferred.
+ * through `+0xa8`, and FreqAppearance is the 0x14-byte element of the vector at `+0xac`, a name the
+ * RTTI records. The 0x38-byte element of the vector at `+0xcc` is MetRemixRecord, whose name is
+ * inferred.
  *
  * The constructor at `0x00372120` takes the renderer, the load priority, and the three names, and
  * forwards all five to MetScreen. Everything it does after the three vptr writes is member
@@ -43,9 +43,9 @@
  * from the empty string at `0x00809840`, and the destructor frees its buffer for that reason. Its
  * words at `+0xa0` and `+0xa4` start at -1 and its word at `+0xa8` at zero. Both vectors and the
  * two strings at `+0xb8` and `+0xc0` start empty, mOwnerPad, mRefreshFirstCardSlot, mCopying, and
- * mAlbumNumber start at zero, and mKeyboardPending is never written. An earlier reading described
- * `+0x94` and a nested object reached through `+0x0c` as unresolved; the three words are `+0xa0`,
- * `+0xa4`, and `+0xa8` reached through a register set to `this + 0x94`, and all three are literals.
+ * mAlbumNumber start at zero, and mKeyboardPending is never written. The three words at `+0xa0`,
+ * `+0xa4`, and `+0xa8` are reached through a register set to `this + 0x94`, and all three receive
+ * literals.
  *
  * Every one of those stores is a member initialiser, and the MemcardConnectState default
  * constructor produces the -1, empty-string, -1, -1, zero run at `+0x94` exactly, which is
@@ -56,9 +56,8 @@
  * mAppearances and deallocates that buffer, frees the name of mTargetSlot, restores the MetKBUser
  * vptr to `0x007f16a0` and the MemcardUser vptr to `0x007daf78`, runs the MetScreen destructor, and
  * releases the object with the tag `MsgSink`. Every one of those steps is compiler-generated
- * member destruction or a vptr restore, so the definition is empty. An earlier reading described
- * the first step as a call to a routine at `0x00183fd0`, which is the element destructor rather
- * than a statement of this destructor.
+ * member destruction or a vptr restore. The definition is therefore empty. The routine at
+ * `0x00183fd0` is the element destructor rather than a statement of this destructor.
  *
  * One inherited slot differs from the MetScreen table, slot 15 at `0x00375590`. That override
  * compares an `HxStr` argument in a1 against a literal and then tests a second argument in a2
@@ -143,7 +142,7 @@ public:
      *
      * Dispatches through OnSaveAbandoned() and does nothing else. It is therefore an alias for the
      * empty slot 40 rather than a separate stub. Both subclasses override it to request a new name
-     * from the on-screen keyboard. An earlier reading recorded it as a third stub.
+     * from the on-screen keyboard.
      *
      * @ghidraAddress 0x0037a628
      */
@@ -239,7 +238,7 @@ public:
 
 private:
     // 0x00372760
-    // Raises the `save_remix` dialogue, titled `save_title` with the `mem_save` text
+    // Raises the `save_remix` dialogue, headed `save_title` with the `mem_save` text
     // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.
     void BeginSave();
 

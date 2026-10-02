@@ -8,9 +8,8 @@ class JukeboxPlayList;
 /**
  * Load one jukebox playlist from a card.
  *
- * `22LoadJukeboxPlayListMCT` in the RTTI, single inheritance from `LoadFileMCT` at offset 0. An
- * instance is 0x60 bytes, from MemcardManager::CreateLoadJukeboxPlayListTask()'s allocation, and
- * the vtable is at `0x007da2b8`.
+ * It has single inheritance from `LoadFileMCT` at offset 0. An instance is 0x60 bytes, from
+ * MemcardManager::CreateLoadJukeboxPlayListTask()'s allocation, and the vtable is at `0x007da2b8`.
  *
  * Execute() reads `<g_jukeboxFileName><mIndex>.dat` into g_abRemixStagingBuffer, over which
  * mStream sits, through the inherited load sequence. Finish() then fills mPlayList from mStream

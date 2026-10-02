@@ -7,10 +7,10 @@ class Player;
 /**
  * Event the game passes between a MsgSource and a MsgSink.
  *
- * `19BeginPhraseCatchMsg` in the RTTI descriptor at `0x008f09b0`, with Message as its one base.
- * The object is 0x10 bytes. New(), Clone(), and every stack build install the vtable at
- * `0x007ddb08`. An identical table at `0x007e0a70` has no reference in the image. The allocation in
- * New() and the allocation in Clone() report the same size, which measures the class twice.
+ * Its RTTI descriptor is at `0x008f09b0`. It has Message as its one base. The object is 0x10 bytes.
+ * New(), Clone(), and every stack build install the vtable at `0x007ddb08`. An identical table at
+ * `0x007e0a70` has no reference in the image. The allocation in New() and the allocation in Clone()
+ * report the same size.
  *
  * The destructor at `0x0019d738` is compiler-generated and has no declaration here. The routines
  * at `0x001b0f40`, `0x001d1b78`, and `0x003de7a8` are further emissions of Clone() in other

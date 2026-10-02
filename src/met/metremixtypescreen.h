@@ -11,11 +11,10 @@ class View;
 /**
  * Screen that chooses what kind of remix to work on.
  *
- * `18MetRemixTypeScreen` in the RTTI descriptor at `0x00901c20`, with MetScreen as its one public
- * non-virtual base at offset 0. The object is 0xa0 bytes, which the factory at `0x00369638` fixes
- * by requesting exactly that many, and the 39-entry vtable is at
- * `0x00808760`, the same length as the MetScreen table, so the class declares no virtual of its
- * own.
+ * Its RTTI descriptor is at `0x00901c20`. It has MetScreen as its one public non-virtual base at
+ * offset 0. The factory at `0x00369638` fixes the object at 0xa0 bytes by requesting exactly that
+ * many. The 39-entry vtable is at `0x00808760`, the same length as the MetScreen table, and the
+ * class declares no new virtual.
  *
  * The constructor at `0x00361d18` takes only the renderer and the load priority, and supplies
  * `smrt` for the screen name, `metagame/Shared` for the directory, and `sm_remixtype` for the

@@ -12,10 +12,10 @@ class Player;
 /**
  * Network packet the game sends between game systems.
  *
- * `18CaughtPhrasePacket` in the RTTI descriptor at `0x009021b0`, with ToAllOtherGameSystemsPacket
- * as its one base. The object is 0x24 bytes and its vtable is at `0x00814608`. The payload comes
- * from the copy constructor at `0x003f37b8`, which Clone() delegates to. The four words Packet
- * provides are declared there rather than here.
+ * Its RTTI descriptor is at `0x009021b0`. It has ToAllOtherGameSystemsPacket as its one base. The
+ * object is 0x24 bytes and its vtable is at `0x00814608`. The payload comes from the copy
+ * constructor at `0x003f37b8`. Clone() delegates to it. The four words Packet provides are
+ * declared there rather than here.
  *
  * Print() labels `+0x1c` as `tr` and `+0x20` as `b`, and writes the first through the unsigned
  * integer inserter. The player reference at `+0x14` is transferred but not printed.

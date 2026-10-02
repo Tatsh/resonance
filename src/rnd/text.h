@@ -38,8 +38,8 @@ enum TextAlign {
 /**
  * Run of text drawn as a quad per glyph.
  *
- * `Q23Rnd4Text` in the RTTI descriptor at `0x008ef4d0`, with three public non-virtual bases whose
- * offsets the descriptor fixes: `Rnd::Drawable` at `+0x00`, `Rnd::Collideable` at `+0x14`, and
+ * Its RTTI descriptor is at `0x008ef4d0`. It has three public non-virtual bases whose offsets the
+ * descriptor fixes: `Rnd::Drawable` at `+0x00`, `Rnd::Collideable` at `+0x14`, and
  * `Rnd::Transformable` at `+0x20`. All three derive virtually from `Rnd::Object`, so one shared
  * Object subobject sits at `+0x110`, which the constructor proves by writing that address into all
  * three virtual-base pointers.

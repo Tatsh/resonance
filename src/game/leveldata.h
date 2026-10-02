@@ -10,7 +10,7 @@ class TempoMap;
 /**
  * Read-only interface the game reads one converted level through.
  *
- * `9LevelData` in the RTTI descriptor at `0x0086f600`, a leaf with no base list, built through
+ * Its RTTI descriptor is at `0x0086f600`. It is a leaf with no base list, built through
  * TypeInfo__ConstructBuiltin. The class has no data member, so the vptr sits at `+0x00` and the
  * object is four bytes. Its table is at `0x007e7a50` and has ten entries with a zero terminator at
  * index 10. Slots 2 through 9 all address the shared pure-virtual stub at `0x005381a8`, so the

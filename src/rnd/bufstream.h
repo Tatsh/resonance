@@ -7,8 +7,8 @@ namespace Rnd {
 /**
  * Stream over a fixed buffer the caller owns.
  *
- * `Q23Rnd9BufStream` in the RTTI descriptor at `0x008ef1e0`, single inheritance from `Rnd::Stream`
- * at offset 0. The object is 0x14 bytes and its vtable is at `0x008260c0`.
+ * Its RTTI descriptor is at `0x008ef1e0`. It has single inheritance from `Rnd::Stream` at offset 0.
+ * The object is 0x14 bytes and its vtable is at `0x008260c0`.
  *
  * The buffer neither grows nor is released here. A transfer that would pass mSize is shortened to
  * the remainder and sets mFail, so an overrun reports itself rather than corrupting memory. Slot
