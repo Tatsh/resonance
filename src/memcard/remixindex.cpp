@@ -93,7 +93,10 @@ void RemixIndex::ReadFromStream(IBStream &stream) {
     for (int nIndex = 0; nIndex < nCount; ++nIndex) {
         // Yes, the binary copies the fresh element's uninitialised names, GameOK, and Version
         // before Load() fills them.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         elements.push_back(RemixIndexElement());
+#pragma GCC diagnostic pop
         elements[nIndex].Load(stream);
     }
 }

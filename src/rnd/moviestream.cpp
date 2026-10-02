@@ -328,7 +328,8 @@ int MovieStream::ParseHeader(char *pBuffer, int nBytes) {
     char *pChunk = pBuffer + pHeader->mSize + sizeof(ChunkHeader);
     for (pHeader = reinterpret_cast<ChunkHeader *>(pChunk); pHeader->mTag == g_nMovtTag;
          pHeader = reinterpret_cast<ChunkHeader *>(pChunk)) {
-        memcpy(&mTracks[pHeader->mTrackId], pHeader + 1, sizeof(Track));
+        // The payload is the track's bytes. The constructor only exists to match the image.
+        memcpy(static_cast<void *>(&mTracks[pHeader->mTrackId]), pHeader + 1, sizeof(Track));
         pChunk += pHeader->mSize + sizeof(ChunkHeader);
     }
 

@@ -401,6 +401,9 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
 
     void *pNew = HeapRealloc(pBlock, nSize);
     if (g_bMemLogging != 0) {
+        // The log prints the released block's address and never dereferences it.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuse-after-free"
         fprintf(g_pMemLogFile,
                 "realloc(%s_%d,%d,0x%p,0x%p)\n",
                 TagBasename(pszTag),
@@ -408,6 +411,7 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
                 nSize,
                 pBlock,
                 pNew);
+#pragma GCC diagnostic pop
         strcpy(g_szStlAllocTag, kStlUnknownTag);
     }
     if (pNew == nullptr) {

@@ -1353,11 +1353,13 @@ winget
 winmsg
 wiswa
 wiswa's
+wmaybe
 wnohang
 wnonnull
 writeop
 wstringop
 wuninitialized
+wuse
 xdecref
 xfms
 xgkick

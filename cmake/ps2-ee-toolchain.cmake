@@ -26,7 +26,9 @@ find_program(
 set(_ee_flags "-D_EE -O2 -G0 -fno-isolate-erroneous-paths-dereference")
 string(APPEND _ee_flags " -fno-delete-null-pointer-checks -fwrapv")
 set(CMAKE_C_FLAGS_INIT "${_ee_flags}")
-set(CMAKE_CXX_FLAGS_INIT "${_ee_flags}")
+# The game was built as C++98. C++98 has no sized operator delete. Every deletion calls the
+# unsized operator delete the game defines.
+set(CMAKE_CXX_FLAGS_INIT "${_ee_flags} -fno-sized-deallocation")
 set(CMAKE_ASM_FLAGS_INIT "-D_EE -G0")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

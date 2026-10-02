@@ -103,7 +103,7 @@ int g_bAsyncInitialised = 0;
 int g_nAsyncHostMedia = 0;
 
 // 0x006e9140
-AsyncOp g_asyncCurrentOp = {-1, -1, -1};
+AsyncOp g_asyncCurrentOp{-1, -1, -1, nullptr, 0, 0, 0};
 
 // 0x006e915c
 int g_bAsyncThreaded = 0;
