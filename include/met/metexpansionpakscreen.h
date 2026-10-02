@@ -6,7 +6,8 @@
 #include "met/metscreen.h"
 
 /**
- * Dialogue shown when the expansion hardware is absent.
+ * Dialogue that swaps the game disc for an expansion disc of more songs and loads the expansion
+ * disc archives.
  *
  * `21MetExpansionPakScreen` in the RTTI descriptor at `0x008efdd0`, with two public non-virtual
  * bases at fixed offsets, MetScreen at `+0x00`, and FadeUser at `+140`.
