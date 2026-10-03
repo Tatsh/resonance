@@ -27,18 +27,16 @@ class TickClock;
  * In-game renderer that drives the tunnel, the overlay, and the arena for one game.
  *
  * Its RTTI descriptor is at `0x008efc70`. It has two public non-virtual bases, MsgSource at `+0x00`
- * and RendererBase at `+0x14`. Its type function is at `0x00431f18`. The class sits in `app/`
- * beside RendererBase on sibling convention alone. No file path, assert, or anonymous namespace
- * marker in the image places it.
+ * and RendererBase at `+0x14`. Its type function is at `0x00431f18`.
  *
  * The base offsets follow from the base sizes in the same way as for MetRenderer. MsgSource is 0x14
  * bytes and RendererBase is 0x48, and the first member of this class is therefore at `+0x5c`. The
  * object is 0xa8 bytes, the size the allocation at `0x0018cadc` requests under the MsgSink tag.
- * That routine, at `0x0018caa8`, is the constructor's one caller and stores the result at `+0x28`
- * of the world.
+ * The allocating routine, at `0x0018caa8`, is the constructor's one caller and stores the result at
+ * `+0x28` of the world.
  *
  * Two tables belong to the class. The MsgSource table at `0x0081a110` has four entries, the same
- * length as MsgSource's own, and only the destructor differs. The RendererBase table at
+ * length as MsgSource's table, and only the destructor differs. The RendererBase table at
  * `0x0081a0b0` has eleven entries and adjusts `this` by `-20`. A diff against RendererBase's table
  * at `0x007d2d20` reads overrides at slots 1, 3, 6, 7, and 8, and inheritance at slots 2, 4, 5, 9,
  * and 10. Slots 3, 7, and 8 are pure in the base, and this class makes the renderer concrete.
@@ -158,9 +156,11 @@ public:
      *
      * Rewinds the zone `rndCommon`, starts `tunnel/tunnel_new.rnd`, `tunnel/launch.rnd`, and
      * `hud/hud.rnd`, passing the zone's index as each loader's third argument, and enqueues all
-     * three.
+     * three. The European release also starts `hud/game_fonts<suffix>.rnd`, the suffix being
+     * GetFontLanguageSuffix(), and enqueues that load first.
      *
-     * @ghidraAddress 0x0042b7a0
+     * @ghidraAddress NTSC-U/C: 0x0042b7a0
+     * @ghidraAddress PAL: 0x00466d60
      */
     static void LoadCommon();
 
@@ -168,9 +168,10 @@ public:
      * Release the level loads and then the three common loads.
      *
      * Each common loader is unloaded and then deleted, `hud/hud.rnd` first, and its global is
-     * cleared.
+     * cleared. The European release unloads its font load after `hud/hud.rnd`.
      *
-     * @ghidraAddress 0x0042bb38
+     * @ghidraAddress NTSC-U/C: 0x0042bb38
+     * @ghidraAddress PAL: 0x004673e8
      */
     static void UnloadCommon();
 
@@ -195,12 +196,13 @@ public:
     static void UnloadLevel();
 
     /**
-     * Poll the three common loads.
+     * Poll the common loads, three or, in the European release, four.
      *
-     * @param pflProgress Receives the mean progress of the three loads. Not written when the loads
-     *        have not started.
-     * @return 1 when all three are done, and 0 otherwise.
-     * @ghidraAddress 0x00432080
+     * @param pflProgress Receives the mean progress of the loads. Not written when the loads have
+     *        not started.
+     * @return 1 when all are done, and 0 otherwise.
+     * @ghidraAddress NTSC-U/C: 0x00432080
+     * @ghidraAddress PAL: 0x0046dd38
      */
     static int PollCommon(float *pflProgress);
 
@@ -217,7 +219,7 @@ public:
     /**
      * Report whether one arena and level are loaded.
      *
-     * No caller survives in the image.
+     * The image has no caller.
      *
      * @param arena The arena name to compare.
      * @param level The level name to compare.
@@ -308,23 +310,37 @@ extern int g_nLsdMode;
 /**
  * Loader for `tunnel/tunnel_new.rnd`.
  *
- * @ghidraAddress 0x006e2510
+ * @ghidraAddress NTSC-U/C: 0x006e2510
+ * @ghidraAddress PAL: 0x00725e18
  */
 extern RndAsyncLoader *g_pTunnelLoader;
 
 /**
  * Loader for `tunnel/launch.rnd`.
  *
- * @ghidraAddress 0x006e2514
+ * @ghidraAddress NTSC-U/C: 0x006e2514
+ * @ghidraAddress PAL: 0x00725e1c
  */
 extern RndAsyncLoader *g_pLaunchLoader;
 
 /**
  * Loader for `hud/hud.rnd`.
  *
- * @ghidraAddress 0x006e2518
+ * @ghidraAddress NTSC-U/C: 0x006e2518
+ * @ghidraAddress PAL: 0x00725e20
  */
 extern RndAsyncLoader *g_pHudLoader;
+
+#ifdef VIDEO_STANDARD_PAL
+/**
+ * Loader for `hud/game_fonts<suffix>.rnd`, the fonts of the language GetLanguage() reports.
+ *
+ * The European release added the loader. The name is inferred.
+ *
+ * @ghidraAddress PAL: 0x00725e24
+ */
+extern RndAsyncLoader *g_pGameFontsLoader;
+#endif
 
 /**
  * Loader for the arena Renderer::LoadLevel() last started.

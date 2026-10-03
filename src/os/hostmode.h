@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libscf.h>
+
 #include "os/hxstr.h"
 
 /**
@@ -36,15 +38,16 @@ int UsingArkFiles();
  * Whether data is being read from the disc.
  *
  * The flag is one word of a block of nine boot options at 0x0070bf10 that each have an accessor of
- * this shape. The retail configurator at 0x0050f030, which InitIop() calls first, writes the block
+ * this shape. The retail configurator at 0x0050f030 (InitIop() calls it first) writes the block
  * in one pass and sets this word to 1 in the same instruction run that sets GetHostMode() to
- * kHostModeCdOnly and UsingArkFiles() to 1. The `.data` default is zero, which is the
- * host-development configuration. It is a separate word from the one UsingArkFiles() reads at
+ * kHostModeCdOnly and UsingArkFiles() to 1. The `.data` default is zero, the host-development
+ * configuration. It is a separate word from the one UsingArkFiles() reads at
  * 0x0070bf14.
  *
  * Both uses agree with that reading. InitAsync() starts the worker thread only when this reports
  * the disc, because a host-link read needs no latency hiding, and ArkFile::Open() searches the
- * path for a device prefix only then, because a prefix such as `cdrom0:` exists on no host path.
+ * path for a device prefix only then, because a prefix such as `cdrom0:` does not exist on any host
+ * path.
  *
  * @return Non-zero when data is read from the disc.
  * @ghidraAddress 0x0050efd0
@@ -67,8 +70,9 @@ int MidiErrorLogEnabled();
  * Whether Warn() reports anything.
  *
  * Another word of the same boot-option block, at 0x0070bf18. Warn() is the only reader of either
- * the word or this accessor, and it reports nothing unless the answer is 1, which is what fixes
- * the meaning of the word. The `.data` value is 1, and ConfigureRetailBoot() clears it.
+ * the word or this accessor, and it does not report anything unless the value is 1. The test
+ * against 1 fixes the meaning of the word. The `.data` value is 1, and ConfigureRetailBoot() clears
+ * it.
  *
  * @return 1 when warnings are reported.
  * @ghidraAddress 0x0050efb0
@@ -79,7 +83,7 @@ int WarningsEnabled();
  * Whether a reported message also goes to the screen.
  *
  * Another word of the same boot-option block, at 0x0070bf1c. ReportMessage() is the only reader of
- * either the word or this accessor, and it skips the on-screen half unless the answer is 1. No
+ * either the word or this accessor, and it skips the on-screen half unless the value is 1. No
  * routine writes the word, and its `.data` value is 1.
  *
  * @return 1 when messages go to the screen.
@@ -90,9 +94,8 @@ int ScreenMessagesEnabled();
 /**
  * Root the game composes every data path against.
  *
- * The shipped build returns the empty string, so every composed path is relative. The routine
- * shares a translation unit with GetHostMode() and UsingArkFiles(), which is what places it here
- * rather than with any one of its ten callers across six subsystems.
+ * The shipped build returns the empty string. Every composed path is therefore relative. The
+ * routine shares a translation unit with GetHostMode() and UsingArkFiles().
  *
  * @return The root, empty in the shipped build.
  * @ghidraAddress 0x0050ef30
@@ -113,7 +116,7 @@ HxStr GetFreqRoot();
 HxStr MakeFreqPath(const HxStr &name);
 
 /**
- * Whether a held modifier turns a controller button into a debug script hook.
+ * Whether a pressed modifier turns a controller button into a debug script hook.
  *
  * The boot-option word at 0x0070bf24. InputPoller::Poll() is the one reader. While it reports
  * non-zero, a button pressed with the modifier bits runs script template 0x3f2 instead of the
@@ -170,6 +173,29 @@ int GetLanguage();
  * @ghidraAddress PAL: 0x0054e5b8
  */
 void SetLanguage(int nLanguage);
+
+/**
+ * Report the suffix of the font containers for GetLanguage().
+ *
+ * English and an unknown code have no suffix. Each loader of a font container inlines the
+ * choice. The name is inferred.
+ *
+ * @return `_fr`, `_sp`, `_ger`, `_it`, or an empty string.
+ */
+inline const char *GetFontLanguageSuffix() {
+    switch (GetLanguage()) {
+    case SCE_FRENCH_LANGUAGE:
+        return "_fr";
+    case SCE_SPANISH_LANGUAGE:
+        return "_sp";
+    case SCE_GERMAN_LANGUAGE:
+        return "_ger";
+    case SCE_ITALIAN_LANGUAGE:
+        return "_it";
+    default:
+        return "";
+    }
+}
 #endif
 
 /**
@@ -186,8 +212,8 @@ HxStr GetVersionString();
 /**
  * Report whether a file can be opened for reading through the file service.
  *
- * The file is opened read-only and closed again at once. No call site survives in the shipped
- * program, and the name is inferred.
+ * The file is opened read-only and closed again at once. The shipped program has no call site,
+ * and the name is inferred.
  *
  * @param pszPath The path to test.
  * @return True when the open succeeded.
@@ -198,8 +224,8 @@ bool FileExists(const char *pszPath);
 /**
  * Release every zone, the counterpart of InitBootConfig().
  *
- * The body is one call to ReleaseAllZoneSlots(). No call site survives in the shipped program,
- * and the name is inferred from the counterpart.
+ * The body is one call to ReleaseAllZoneSlots(). The shipped program has no call site, and the
+ * name is inferred from the counterpart.
  *
  * @ghidraAddress 0x0050f0a8
  */

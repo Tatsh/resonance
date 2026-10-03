@@ -35,6 +35,8 @@
 #include "msg/rawcontrollermsg.h"
 #include "os/async.h"
 #include "os/cycles.h"
+#include "os/formatstring.h"
+#include "os/hostmode.h"
 #include "os/hxstr.h"
 #include "os/r250.h"
 #include "os/zone.h"
@@ -78,7 +80,7 @@ constexpr int kReadingTagJoystick = 0x6a6f7920;
 constexpr int kRepeatCommandFirst = 0x10;
 constexpr int kRepeatCommandLast = 0x13;
 
-// Whether a scene list holds the matching subobject of a view. The list's element type selects
+// Whether a scene list includes the matching subobject of a view. The list's element type selects
 // the subobject the comparison converts the view to.
 template <class T>
 inline bool ContainsRef(const std::list<T *> &list, Rnd::View *const &pView) {
@@ -98,7 +100,7 @@ template bool ContainsRef<Rnd::Animatable>(const std::list<Rnd::Animatable *> &l
                                            Rnd::View *const &pView);
 
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
-// recorded when the run started. MainLoop has its own copy of the same inline.
+// recorded when the run started. MainLoop has a copy of the same inline.
 inline long long FrameClockNs(Watchdog *pWatchdog) {
     return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
@@ -158,7 +160,7 @@ constexpr float kFreqEndedFadeFrames = 360.0f;
 static const char *const kTutorialLevel = "tutorial";
 static const char *const kTutorialRemixLevel = "tutorialrmx";
 
-// The script template OnFreqEnded() runs on leaving a jam, and its one argument.
+// The script template OnFreqEnded() runs on exiting a jam, and its one argument.
 constexpr int kJukeboxTemplate = 0x267;
 static const char *const kJukeboxStopArgument = "0";
 
@@ -282,7 +284,7 @@ void MetRenderer::UpdateSimple() {
             return;
         }
 
-        // A screen that pushed or popped another one invalidated the iterator, so the walk is
+        // A screen that pushed or popped another one invalidated the iterator. The walk is
         // abandoned rather than restarted. The screens past the change are not advanced this
         // frame.
         if (mScreensChanged != 0) {
@@ -511,11 +513,17 @@ MetScreen *MetRenderer::SelectEndScreen() {
     return pScreen;
 }
 
-// 0x00369b08
+// NTSC-U/C: 0x00369b08, PAL: 0x00397d88
 void MetRenderer::CreateCommonLoaders() {
     const int nZone = FindZoneByName(kLoaderZone);
     sMetagameLoader = new RndAsyncLoader(HxStr("MetaGame/"), HxStr("metagame.rnd"), nZone);
+#ifdef VIDEO_STANDARD_PAL
+    sFontsLoader = new RndAsyncLoader(HxStr("metagame/fonts/"),
+                                      HxStr(FormatString("fonts%s.rnd", GetFontLanguageSuffix())),
+                                      nZone);
+#else
     sFontsLoader = new RndAsyncLoader(HxStr("metagame/fonts/"), HxStr("fonts.rnd"), nZone);
+#endif
     sSharedTexLoader =
         new RndAsyncLoader(HxStr("metagame/shared/"), HxStr("shared_tex.rnd"), nZone);
 }

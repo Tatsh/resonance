@@ -16,6 +16,7 @@
 #include "msg/gamebeginmsg.h"
 #include "msg/pointamountmsg.h"
 #include "os/formatstring.h"
+#include "os/hostmode.h"
 #include "os/hxstr.h"
 #include "os/zone.h"
 #include "rnd/asyncloader.h"
@@ -33,7 +34,11 @@ namespace {
 constexpr int kGameBeginScriptTemplate = 1000;
 
 // Loads PollCommon() averages over.
+#ifdef VIDEO_STANDARD_PAL
+constexpr int kCommonLoadCount = 4;
+#else
 constexpr int kCommonLoadCount = 3;
+#endif
 
 // Loads PollLevel() and IsLevelLoaded() poll.
 constexpr int kLevelLoadCount = 2;
@@ -66,12 +71,16 @@ constexpr int kNoPowerup = -1;
 Renderer *g_pRenderer;
 // 0x006e2538
 int g_nLsdMode;
-// 0x006e2510
+// NTSC-U/C: 0x006e2510, PAL: 0x00725e18
 RndAsyncLoader *g_pTunnelLoader;
-// 0x006e2514
+// NTSC-U/C: 0x006e2514, PAL: 0x00725e1c
 RndAsyncLoader *g_pLaunchLoader;
-// 0x006e2518
+// NTSC-U/C: 0x006e2518, PAL: 0x00725e20
 RndAsyncLoader *g_pHudLoader;
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x00725e24
+RndAsyncLoader *g_pGameFontsLoader;
+#endif
 // 0x006e251c
 RndAsyncLoader *g_pArenaLoader;
 // 0x006e2520
@@ -135,7 +144,7 @@ Renderer::Renderer()
     mCellsPerRow = pTunnel->mSliceCount;
     mRowCount = pTunnel->mRingCount;
 
-    // Only the mask of the fill value is initialised, by its own constructor.
+    // Only the mask of the fill value is initialised, by the mask's constructor.
     Cell fill;
     mCells.resize(mCellsPerRow * mRowCount, fill);
     for (int i = 0; i < mCellsPerRow * mRowCount; ++i) {
@@ -230,7 +239,7 @@ Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
     return &mCells[nTrack * mCellsPerRow + nSlice];
 }
 
-// 0x0042b7a0
+// NTSC-U/C: 0x0042b7a0, PAL: 0x00466d60
 void Renderer::LoadCommon() {
     if (g_pTunnelLoader != nullptr) {
         return;
@@ -240,13 +249,20 @@ void Renderer::LoadCommon() {
     ZoneResetZone(nZone);
     g_pTunnelLoader = new RndAsyncLoader(HxStr("tunnel/"), HxStr("tunnel_new.rnd"), nZone);
     g_pLaunchLoader = new RndAsyncLoader(HxStr("tunnel/"), HxStr("launch.rnd"), nZone);
+#ifdef VIDEO_STANDARD_PAL
+    g_pGameFontsLoader = new RndAsyncLoader(
+        HxStr("hud/"), HxStr(FormatString("game_fonts%s.rnd", GetFontLanguageSuffix())), nZone);
+#endif
     g_pHudLoader = new RndAsyncLoader(HxStr("hud/"), HxStr("hud.rnd"), nZone);
+#ifdef VIDEO_STANDARD_PAL
+    g_pGameFontsLoader->Enqueue();
+#endif
     g_pTunnelLoader->Enqueue();
     g_pLaunchLoader->Enqueue();
     g_pHudLoader->Enqueue();
 }
 
-// 0x0042bb38
+// NTSC-U/C: 0x0042bb38, PAL: 0x004673e8
 void Renderer::UnloadCommon() {
     UnloadLevel();
 
@@ -255,6 +271,13 @@ void Renderer::UnloadCommon() {
         delete g_pHudLoader;
         g_pHudLoader = nullptr;
     }
+#ifdef VIDEO_STANDARD_PAL
+    if (g_pGameFontsLoader != nullptr) {
+        g_pGameFontsLoader->Unload();
+        delete g_pGameFontsLoader;
+        g_pGameFontsLoader = nullptr;
+    }
+#endif
     if (g_pLaunchLoader != nullptr) {
         g_pLaunchLoader->Unload();
         delete g_pLaunchLoader;
@@ -312,7 +335,7 @@ void Renderer::UnloadLevel() {
     g_arenaName = "";
 }
 
-// 0x00432080
+// NTSC-U/C: 0x00432080, PAL: 0x0046dd38
 int Renderer::PollCommon(float *pflProgress) {
     if (g_pTunnelLoader == nullptr) {
         return 0;
@@ -321,10 +344,18 @@ int Renderer::PollCommon(float *pflProgress) {
     float aflProgress[kCommonLoadCount];
     const int nTunnelDone = g_pTunnelLoader->Poll(&aflProgress[0]);
     const int nLaunchDone = g_pLaunchLoader->Poll(&aflProgress[1]);
+#ifdef VIDEO_STANDARD_PAL
+    const int nFontsDone = g_pGameFontsLoader->Poll(&aflProgress[2]);
+    const int nHudDone = g_pHudLoader->Poll(&aflProgress[3]);
+    *pflProgress = (aflProgress[0] + aflProgress[1] + aflProgress[2] + aflProgress[3]) /
+                   static_cast<float>(kCommonLoadCount);
+    return nTunnelDone != 0 && nLaunchDone != 0 && nFontsDone != 0 && nHudDone != 0;
+#else
     const int nHudDone = g_pHudLoader->Poll(&aflProgress[2]);
     *pflProgress =
         (aflProgress[0] + aflProgress[1] + aflProgress[2]) / static_cast<float>(kCommonLoadCount);
     return nTunnelDone != 0 && nLaunchDone != 0 && nHudDone != 0;
+#endif
 }
 
 // 0x004321a8
