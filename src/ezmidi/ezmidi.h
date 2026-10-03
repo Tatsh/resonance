@@ -64,6 +64,10 @@ typedef struct {
     unsigned int echo_pad;               /*!< Padding. */
     unsigned short rnd_nopause_channels; /*!< Channels that continue playing while paused. */
     unsigned short rnd_pad;              /*!< Padding. */
+#ifdef VIDEO_STANDARD_PAL
+    char *gatherIopAddr[2]; /*!< IOP buffers of the error-gather log, unread by the module. */
+    char *gatherEEAddr[2];  /*!< EE buffers of the error-gather log, unread by the module. */
+#endif
 } sSynthConfig;
 
 #ifdef __cplusplus

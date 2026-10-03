@@ -502,7 +502,14 @@ struct HardEffectCommand {
     unsigned char mChorusShape[2]; // +0x18
     unsigned char mReserved1a[6];  // +0x1a
     short mNoPauseChannels;        // +0x20
+#ifdef VIDEO_STANDARD_PAL
+    unsigned char mReserved22[2];   // +0x22
+    unsigned int mGatherIopAddr[2]; // +0x24 IOP buffers of the error-gather log
+    char *mGatherEEAddr[2];         // +0x2c EE buffers of the error-gather log
+    unsigned char mReserved34[0x4c];
+#else
     unsigned char mReserved22[0x5e];
+#endif
 };
 
 // 0x00894d40
