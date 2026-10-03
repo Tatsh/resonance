@@ -59,7 +59,6 @@
           cppStandard: 'gnu++23',
           defines: ['VERSION="unknown"'],
           includePath: [
-            '${workspaceFolder}/compat/**',
             '${workspaceFolder}/sce/**/include/**',
             '${workspaceFolder}/src/**',
             '${workspaceFolder}/.wiswa-ci/**/include/**',

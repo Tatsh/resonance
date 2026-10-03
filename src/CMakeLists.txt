@@ -14,11 +14,8 @@ target_compile_options(resonance_common INTERFACE -Wall -Wextra -Wno-unknown-pra
 # _EE selects the Emotion Engine side of the headers serving both processors.
 target_compile_definitions(resonance_common INTERFACE _EE)
 
-# The reconstructed Sony headers sit under sce/ee/include, and compat declares the rest of the Sony
-# interfaces the game calls.
-target_include_directories(
-  resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/sce/ee/include"
-                             "${CMAKE_SOURCE_DIR}/compat")
+target_include_directories(resonance_common INTERFACE "${CMAKE_SOURCE_DIR}/src"
+                                                     "${CMAKE_SOURCE_DIR}/sce/ee/include")
 
 set(RESONANCE_SUBSYSTEMS
     app
