@@ -23,14 +23,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00277628
+     * @ghidraAddress NTSC-U/C: 0x00277628
+     * @ghidraAddress PAL: 0x002900b0
      */
     MetRightGizmoScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Release the screen. The body is empty, and MetGizmoPanel's destructor is expanded in it.
      *
-     * @ghidraAddress 0x0027b9b8
+     * @ghidraAddress NTSC-U/C: 0x0027b9b8
+     * @ghidraAddress PAL: 0x002946a0
      */
     virtual ~MetRightGizmoScreen();
 
@@ -40,7 +42,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0027bb28
+     * @ghidraAddress NTSC-U/C: 0x0027bb28
+     * @ghidraAddress PAL: 0x00294828
      */
     static MetRightGizmoScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -49,7 +52,8 @@ public:
      *
      * Slot 9. The view is resolved by name again rather than read from mViews.
      *
-     * @ghidraAddress 0x0027bc38
+     * @ghidraAddress NTSC-U/C: 0x0027bc38
+     * @ghidraAddress PAL: 0x00294938
      */
     virtual void BeginExit();
 
@@ -58,7 +62,8 @@ public:
      *
      * Slot 33. The view is resolved by name again rather than read from mViews.
      *
-     * @ghidraAddress 0x0027bbb0
+     * @ghidraAddress NTSC-U/C: 0x0027bbb0
+     * @ghidraAddress PAL: 0x002948b0
      */
     virtual void OnEnterFinished();
 };

@@ -30,12 +30,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00390e10
+     * @ghidraAddress NTSC-U/C: 0x00390e10
+     * @ghidraAddress PAL: 0x003c2908
      */
     MetScreenTitleScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00393fa0
+     * @ghidraAddress NTSC-U/C: 0x00393fa0
+     * @ghidraAddress PAL: 0x003c5a18
      */
     virtual ~MetScreenTitleScreen();
 
@@ -47,14 +49,16 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00393d78
+     * @ghidraAddress NTSC-U/C: 0x00393d78
+     * @ghidraAddress PAL: 0x003c5990
      */
     static MetScreenTitleScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Show the recorded title and then the screen. Slot 5.
      *
-     * @ghidraAddress 0x003940b8
+     * @ghidraAddress NTSC-U/C: 0x003940b8
+     * @ghidraAddress PAL: 0x003c5b60
      */
     virtual void EnterAndShow();
 
@@ -63,21 +67,24 @@ public:
      *
      * The override runs MetScreen::BeginExit() and nothing else.
      *
-     * @ghidraAddress 0x00394108
+     * @ghidraAddress NTSC-U/C: 0x00394108
+     * @ghidraAddress PAL: 0x003c5bb0
      */
     virtual void BeginExit();
 
     /**
      * Do nothing. Slot 33.
      *
-     * @ghidraAddress 0x00394100
+     * @ghidraAddress NTSC-U/C: 0x00394100
+     * @ghidraAddress PAL: 0x003c5ba8
      */
     virtual void OnEnterFinished();
 
     /**
      * Do nothing. Slot 36.
      *
-     * @ghidraAddress 0x00394128
+     * @ghidraAddress NTSC-U/C: 0x00394128
+     * @ghidraAddress PAL: 0x003c5bd0
      */
     virtual void OnExitFinished();
 
@@ -86,7 +93,8 @@ public:
      *
      * Runs the MetScreen slot 38 body first.
      *
-     * @ghidraAddress 0x00390f88
+     * @ghidraAddress NTSC-U/C: 0x00390f88
+     * @ghidraAddress PAL: 0x003c2ae8
      */
     virtual void ResolveContainerViews();
 
@@ -99,7 +107,8 @@ public:
      * one class.
      *
      * @param title The title to display.
-     * @ghidraAddress 0x00393e00
+     * @ghidraAddress NTSC-U/C: 0x00393e00
+     * @ghidraAddress PAL: 0x003c2728
      */
     static void SetTitle(const HxStr &title);
 
@@ -110,7 +119,8 @@ public:
      * which shows it through EnterAndShow(). SetTitle() is the one caller.
      *
      * @param title The title to display.
-     * @ghidraAddress 0x00394010
+     * @ghidraAddress NTSC-U/C: 0x00394010
+     * @ghidraAddress PAL: 0x003c5a98
      */
     void ApplyTitle(const HxStr &title);
 
@@ -122,7 +132,8 @@ public:
      * inferred.
      *
      * @param title The title to display.
-     * @ghidraAddress 0x00393ed0
+     * @ghidraAddress NTSC-U/C: 0x00393ed0
+     * @ghidraAddress PAL: 0x003c2818
      */
     static void ReplaceTitle(const HxStr &title);
 
@@ -133,7 +144,8 @@ public:
      * pushed again. The name is inferred.
      *
      * @param title The title to display.
-     * @ghidraAddress 0x00394130
+     * @ghidraAddress NTSC-U/C: 0x00394130
+     * @ghidraAddress PAL: 0x003c5bd8
      */
     void ReplaceTitleText(const HxStr &title);
 

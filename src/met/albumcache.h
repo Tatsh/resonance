@@ -13,7 +13,8 @@
  *
  * @param name The level's name, which the body does not read.
  * @return 1.
- * @ghidraAddress 0x003f7a30
+ * @ghidraAddress NTSC-U/C: 0x003f7a30
+ * @ghidraAddress PAL: 0x00430240
  */
 int IsAlbumLevel(const HxStr &name);
 
@@ -26,7 +27,8 @@ int IsAlbumLevel(const HxStr &name);
  *
  * @param name The level's name.
  * @return The stage.
- * @ghidraAddress 0x003f7a38
+ * @ghidraAddress NTSC-U/C: 0x003f7a38
+ * @ghidraAddress PAL: 0x00430248
  */
 int GetAlbumLevelStage(const HxStr &name);
 
@@ -39,7 +41,8 @@ int GetAlbumLevelStage(const HxStr &name);
  * @param nLevel The level, counted from 0.
  * @param nDifficulty The difficulty, 0 through 2.
  * @return The value.
- * @ghidraAddress 0x003f7a58
+ * @ghidraAddress NTSC-U/C: 0x003f7a58
+ * @ghidraAddress PAL: 0x00430268
  */
 int GetAlbumLevelValue(int nLevel, int nDifficulty);
 
@@ -49,7 +52,8 @@ int GetAlbumLevelValue(int nLevel, int nDifficulty);
  * MetJukeboxBaseScreen is the caller. The title is inferred.
  *
  * @return The value.
- * @ghidraAddress 0x003f7ad8
+ * @ghidraAddress NTSC-U/C: 0x003f7ad8
+ * @ghidraAddress PAL: 0x004302e8
  */
 int GetAlbumJukeboxValue();
 
@@ -61,6 +65,7 @@ int GetAlbumJukeboxValue();
  * `clear_album_cache` at `0x003f6860`, which the file-scope ScriptFunc at `0x00892370` registers,
  * repeats the same three steps inline.
  *
- * @ghidraAddress 0x003f79a8
+ * @ghidraAddress NTSC-U/C: 0x003f79a8
+ * @ghidraAddress PAL: 0x004301b8
  */
 void ClearAlbumCache();

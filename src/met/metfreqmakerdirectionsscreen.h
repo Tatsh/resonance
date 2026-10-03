@@ -39,14 +39,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00262810
+     * @ghidraAddress NTSC-U/C: 0x00262810
+     * @ghidraAddress PAL: 0x00279790
      */
     MetFreqMakerDirectionsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Release the screen. The scrolling list is not deleted.
      *
-     * @ghidraAddress 0x00269e68
+     * @ghidraAddress NTSC-U/C: 0x00269e68
+     * @ghidraAddress PAL: 0x00281770
      */
     virtual ~MetFreqMakerDirectionsScreen();
 
@@ -58,7 +60,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00269de0
+     * @ghidraAddress NTSC-U/C: 0x00269de0
+     * @ghidraAddress PAL: 0x002816e8
      */
     static MetFreqMakerDirectionsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -67,7 +70,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x00269ed0
+     * @ghidraAddress NTSC-U/C: 0x00269ed0
+     * @ghidraAddress PAL: 0x002817d8
      */
     virtual void EnterAndShow();
 
@@ -77,7 +81,8 @@ public:
      * Slot 14.
      *
      * @return Non-zero once both loads have finished.
-     * @ghidraAddress 0x00269fc0
+     * @ghidraAddress NTSC-U/C: 0x00269fc0
+     * @ghidraAddress PAL: 0x002818e8
      */
     virtual int PollContainerLoad();
 
@@ -87,7 +92,8 @@ public:
      * Slot 23. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00269dd0
+     * @ghidraAddress NTSC-U/C: 0x00269dd0
+     * @ghidraAddress PAL: 0x002816d8
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -97,7 +103,8 @@ public:
      * Slot 24. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00269dd8
+     * @ghidraAddress NTSC-U/C: 0x00269dd8
+     * @ghidraAddress PAL: 0x002816e0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -108,7 +115,8 @@ public:
      * Slot 30.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x00269f00
+     * @ghidraAddress NTSC-U/C: 0x00269f00
+     * @ghidraAddress PAL: 0x00281808
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -117,7 +125,8 @@ public:
      *
      * Slot 36.
      *
-     * @ghidraAddress 0x00269fa0
+     * @ghidraAddress NTSC-U/C: 0x00269fa0
+     * @ghidraAddress PAL: 0x002818c8
      */
     virtual void OnExitFinished();
 
@@ -162,7 +171,8 @@ public:
      * @param pText The cell.
      * @param nContext The list context, which the body does not read.
      * @return Always 1.
-     * @ghidraAddress 0x00262c28
+     * @ghidraAddress NTSC-U/C: 0x00262c28
+     * @ghidraAddress PAL: 0x00279e28
      */
     virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
 
@@ -174,7 +184,8 @@ public:
      * @param pMesh The cell, which the body does not read.
      * @param nContext The list context, which the body does not read.
      * @return Always 0.
-     * @ghidraAddress 0x0026a020
+     * @ghidraAddress NTSC-U/C: 0x0026a020
+     * @ghidraAddress PAL: 0x00281948
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
@@ -185,7 +196,7 @@ private:
     void LoadPageTexts();
 #endif
 
-    // 0x0026a008
+    // NTSC-U/C: 0x0026a008, PAL: 0x00281930
     // The cell at one row and column of a page table. The body does not read this object.
     const HxStr &PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]);
 

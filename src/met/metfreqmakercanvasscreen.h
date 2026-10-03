@@ -52,7 +52,8 @@ public:
     MetFreqMakerCanvasScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00262030
+     * @ghidraAddress NTSC-U/C: 0x00262030
+     * @ghidraAddress PAL: 0x002787c0
      */
     virtual ~MetFreqMakerCanvasScreen();
 
@@ -64,7 +65,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00261fa8
+     * @ghidraAddress NTSC-U/C: 0x00261fa8
+     * @ghidraAddress PAL: 0x00278738
      */
     static MetFreqMakerCanvasScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -73,7 +75,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x0025e978
+     * @ghidraAddress NTSC-U/C: 0x0025e978
+     * @ghidraAddress PAL: 0x00274dd0
      */
     virtual void EnterAndShow();
 
@@ -83,7 +86,8 @@ public:
      * Slot 14.
      *
      * @return Non-zero once both loads have finished.
-     * @ghidraAddress 0x002620d8
+     * @ghidraAddress NTSC-U/C: 0x002620d8
+     * @ghidraAddress PAL: 0x00278878
      */
     virtual int PollContainerLoad();
 
@@ -93,7 +97,8 @@ public:
      * Slot 19. The body is empty.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002620c8
+     * @ghidraAddress NTSC-U/C: 0x002620c8
+     * @ghidraAddress PAL: 0x00278868
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -103,7 +108,8 @@ public:
      * Slot 23. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00261f80
+     * @ghidraAddress NTSC-U/C: 0x00261f80
+     * @ghidraAddress PAL: 0x00278710
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -113,7 +119,8 @@ public:
      * Slot 24. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00261f88
+     * @ghidraAddress NTSC-U/C: 0x00261f88
+     * @ghidraAddress PAL: 0x00278718
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -123,7 +130,8 @@ public:
      * Slot 30. The body is empty.
      *
      * @param pButton The button slot 29 finished with.
-     * @ghidraAddress 0x002620d0
+     * @ghidraAddress NTSC-U/C: 0x002620d0
+     * @ghidraAddress PAL: 0x00278870
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -132,7 +140,8 @@ public:
      *
      * Slot 36.
      *
-     * @ghidraAddress 0x0025e898
+     * @ghidraAddress NTSC-U/C: 0x0025e898
+     * @ghidraAddress PAL: 0x00274cd0
      */
     virtual void OnExitFinished();
 
@@ -156,7 +165,8 @@ public:
      * the game manager keeps becomes the persona being edited. The canvas is then marked
      * unmodified. MetFreqMakerButtonsScreen's slots 15 and 19 call it. The title is inferred.
      *
-     * @ghidraAddress 0x0025ea68
+     * @ghidraAddress NTSC-U/C: 0x0025ea68
+     * @ghidraAddress PAL: 0x00275158
      */
     void CommitPersona();
 
@@ -166,7 +176,8 @@ public:
      * The canvas is marked modified. The title is inferred.
      *
      * @param name The new name.
-     * @ghidraAddress 0x0025ec80
+     * @ghidraAddress NTSC-U/C: 0x0025ec80
+     * @ghidraAddress PAL: 0x002753a0
      */
     void SetFreqName(const HxStr &name);
 
@@ -174,7 +185,8 @@ public:
      * Start placing a part of one template. The title is inferred.
      *
      * @param name The template name.
-     * @ghidraAddress 0x00262120
+     * @ghidraAddress NTSC-U/C: 0x00262120
+     * @ghidraAddress PAL: 0x002788c0
      */
     void SelectTemplate(const HxStr &name);
 
@@ -182,14 +194,16 @@ public:
      * Place the previewed part, or stop editing the selected one, and mark the canvas modified.
      * The title is inferred.
      *
-     * @ghidraAddress 0x00262140
+     * @ghidraAddress NTSC-U/C: 0x00262140
+     * @ghidraAddress PAL: 0x002788e0
      */
     void PlaceCursor();
 
     /**
      * Return the placement state to its unset values. The title is inferred.
      *
-     * @ghidraAddress 0x00262170
+     * @ghidraAddress NTSC-U/C: 0x00262170
+     * @ghidraAddress PAL: 0x00278910
      */
     void ResetCursor();
 
@@ -199,7 +213,8 @@ public:
      * The inventory screen forwards the commands. The title is inferred.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00262190
+     * @ghidraAddress NTSC-U/C: 0x00262190
+     * @ghidraAddress PAL: 0x00278930
      */
     void HandleCanvasCommand(const MetScreenCommand *pCommand);
 
@@ -208,7 +223,8 @@ public:
      *
      * @param color The colour.
      * @param palettePosition The palette position the colour came from.
-     * @ghidraAddress 0x00262250
+     * @ghidraAddress NTSC-U/C: 0x00262250
+     * @ghidraAddress PAL: 0x002789f0
      */
     void SetColor(const Color &color, const Vector2 &palettePosition);
 
@@ -216,7 +232,8 @@ public:
      * Report the parts of the avatar. The title is inferred.
      *
      * @return The part list.
-     * @ghidraAddress 0x00262270
+     * @ghidraAddress NTSC-U/C: 0x00262270
+     * @ghidraAddress PAL: 0x00278a10
      */
     std::list<FreqPart *> &GetParts();
 
@@ -225,7 +242,8 @@ public:
      *
      * @param nIndex The part's position in the part list.
      * @return The part, or null for an index outside the list.
-     * @ghidraAddress 0x00262290
+     * @ghidraAddress NTSC-U/C: 0x00262290
+     * @ghidraAddress PAL: 0x00278a30
      */
     FreqPart *SelectPart(int nIndex);
 
@@ -258,7 +276,8 @@ public:
     /**
      * Restore the selected part from the copy taken when it was selected. The title is inferred.
      *
-     * @ghidraAddress 0x00262440
+     * @ghidraAddress NTSC-U/C: 0x00262440
+     * @ghidraAddress PAL: 0x00278a58
      */
     void RevertSelection();
 
@@ -266,7 +285,8 @@ public:
      * Report the avatar's name. The title is inferred.
      *
      * @return The name.
-     * @ghidraAddress 0x00262460
+     * @ghidraAddress NTSC-U/C: 0x00262460
+     * @ghidraAddress PAL: 0x00278a78
      */
     HxStr *GetFreqName();
 
@@ -274,14 +294,16 @@ public:
      * Delete one part and mark the canvas modified. The title is inferred.
      *
      * @param nIndex The part's position in the part list.
-     * @ghidraAddress 0x00262468
+     * @ghidraAddress NTSC-U/C: 0x00262468
+     * @ghidraAddress PAL: 0x00278a80
      */
     void DeletePart(int nIndex);
 
     /**
      * Randomise the avatar and mark the canvas modified. The title is inferred.
      *
-     * @ghidraAddress 0x00262498
+     * @ghidraAddress NTSC-U/C: 0x00262498
+     * @ghidraAddress PAL: 0x00278ab0
      */
     void Randomize();
 
@@ -290,7 +312,8 @@ public:
      * is inferred.
      *
      * @param nIndex The part's position in the part list.
-     * @ghidraAddress 0x002624c8
+     * @ghidraAddress NTSC-U/C: 0x002624c8
+     * @ghidraAddress PAL: 0x00278ae0
      */
     void RecentrePart(int nIndex);
 

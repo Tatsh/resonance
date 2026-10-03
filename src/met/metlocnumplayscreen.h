@@ -51,12 +51,14 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002b0f80
+     * @ghidraAddress NTSC-U/C: 0x002b0f80
+     * @ghidraAddress PAL: 0x002cfd48
      */
     static MetLocNumPlayScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002b1008
+     * @ghidraAddress NTSC-U/C: 0x002b1008
+     * @ghidraAddress PAL: 0x002cfdd0
      */
     virtual ~MetLocNumPlayScreen();
 
@@ -80,7 +82,8 @@ public:
      * alternation. Back departs to the main menu with the left gizmo and title screens.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002adef0
+     * @ghidraAddress NTSC-U/C: 0x002adef0
+     * @ghidraAddress PAL: 0x002cc9b0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -88,7 +91,8 @@ public:
      * Silence the cycle-left sound.
      *
      * @param nSelector Not read. The body is empty.
-     * @ghidraAddress 0x002b0f70
+     * @ghidraAddress NTSC-U/C: 0x002b0f70
+     * @ghidraAddress PAL: 0x002cfd38
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -96,7 +100,8 @@ public:
      * Silence the cycle-right sound.
      *
      * @param nSelector Not read. The body is empty.
-     * @ghidraAddress 0x002b0f78
+     * @ghidraAddress NTSC-U/C: 0x002b0f78
+     * @ghidraAddress PAL: 0x002cfd40
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -107,7 +112,8 @@ public:
      * screens.
      *
      * @param pButton The button that alternated, ignored.
-     * @ghidraAddress 0x002ae350
+     * @ghidraAddress NTSC-U/C: 0x002ae350
+     * @ghidraAddress PAL: 0x002ccee0
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -118,7 +124,8 @@ public:
      * MetFrontEndState::mPlayerCount and the renderer's controller limit and goes on to
      * MetLocPickCharScreen. The tips button goes on to MetMultiTips1Screen.
      *
-     * @ghidraAddress 0x002ae4f0
+     * @ghidraAddress NTSC-U/C: 0x002ae4f0
+     * @ghidraAddress PAL: 0x002cd0e0
      */
     virtual void OnExitFinished();
 

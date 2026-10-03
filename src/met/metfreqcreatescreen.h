@@ -44,14 +44,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0029c130
+     * @ghidraAddress NTSC-U/C: 0x0029c130
+     * @ghidraAddress PAL: 0x002b9950
      */
     MetFreqCreateScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x002a0b08
+     * @ghidraAddress NTSC-U/C: 0x002a0b08
+     * @ghidraAddress PAL: 0x002be8a8
      */
     virtual ~MetFreqCreateScreen();
 
@@ -63,7 +65,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002a0a80
+     * @ghidraAddress NTSC-U/C: 0x002a0a80
+     * @ghidraAddress PAL: 0x002be820
      */
     static MetFreqCreateScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -85,7 +88,8 @@ public:
      * selected, and each starts its arrow's alternation first.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0029c7a0
+     * @ghidraAddress NTSC-U/C: 0x0029c7a0
+     * @ghidraAddress PAL: 0x002ba0f0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -95,7 +99,8 @@ public:
      * Slot 23.
      *
      * @param nSelector Passed through to MetScreen::PlayCycleLeftSound().
-     * @ghidraAddress 0x002a0b88
+     * @ghidraAddress NTSC-U/C: 0x002a0b88
+     * @ghidraAddress PAL: 0x002be928
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -105,7 +110,8 @@ public:
      * Slot 24.
      *
      * @param nSelector Passed through to MetScreen::PlayCycleRightSound().
-     * @ghidraAddress 0x002a0bb8
+     * @ghidraAddress NTSC-U/C: 0x002a0bb8
+     * @ghidraAddress PAL: 0x002be958
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -115,7 +121,8 @@ public:
      * Slot 30. An arrow's alternation is passed over.
      *
      * @param pButton The button whose alternation finished.
-     * @ghidraAddress 0x0029ce58
+     * @ghidraAddress NTSC-U/C: 0x0029ce58
+     * @ghidraAddress PAL: 0x002ba8b8
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -126,9 +133,11 @@ public:
      * recorded in MetFrontEndState::mReturnScreen, the persona is marked new, the canvas takes the
      * selected pre-fab for the first button or an empty persona for the second, the game manager's
      * persona list is cleared, and the four FreQ maker screens come up with the buttons screen
-     * active. The button selection is cleared on both paths.
+     * active. The button selection is cleared on both paths. After a back command the European
+     * release returns to MetLoadNewFreqScreen instead when the load list is empty.
      *
-     * @ghidraAddress 0x0029cfa0
+     * @ghidraAddress NTSC-U/C: 0x0029cfa0
+     * @ghidraAddress PAL: 0x002baa40
      */
     virtual void OnExitFinished();
 
@@ -143,11 +152,11 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x0029cb30
+    // NTSC-U/C: 0x0029cb30, PAL: 0x002ba518
     // Step the carousel one identity, wrapping at both ends, and refresh the preview.
     void StepSelection(const MetScreenCommand *pCommand);
 
-    // 0x0029cbb8
+    // NTSC-U/C: 0x0029cbb8, PAL: 0x002ba5a0
     // Burn the selected identity into `cf_char.mat`.
     void RefreshSelection();
 

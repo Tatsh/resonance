@@ -42,7 +42,8 @@ public:
      * @param name The screen name.
      * @param directory The directory the container loads from.
      * @param file The container name, without the `.rnd` suffix.
-     * @ghidraAddress 0x002deab8
+     * @ghidraAddress NTSC-U/C: 0x002deab8
+     * @ghidraAddress PAL: 0x003017e0
      */
     MetMemDetectScreen(MetRenderer *pRenderer,
                        int nPriority,
@@ -51,7 +52,8 @@ public:
                        const HxStr &file);
 
     /**
-     * @ghidraAddress 0x002deb08
+     * @ghidraAddress NTSC-U/C: 0x002deb08
+     * @ghidraAddress PAL: 0x00301830
      */
     virtual ~MetMemDetectScreen();
 
@@ -61,7 +63,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002d89c8
+     * @ghidraAddress NTSC-U/C: 0x002d89c8
+     * @ghidraAddress PAL: 0x002fb180
      */
     static MetMemDetectScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -87,7 +90,8 @@ public:
      * Slot 26.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x002dec10
+     * @ghidraAddress NTSC-U/C: 0x002dec10
+     * @ghidraAddress PAL: 0x00301938
      */
     virtual void UpdateIdle(float flTime);
 
@@ -145,7 +149,8 @@ public:
      *
      * @param nPortSlot The card the personas came from. The body does not read it.
      * @param nStatus The result. The body does not read it.
-     * @ghidraAddress 0x002deb98
+     * @ghidraAddress NTSC-U/C: 0x002deb98
+     * @ghidraAddress PAL: 0x003018c0
      */
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
@@ -156,7 +161,8 @@ public:
      *
      * @param nPortSlot The card the settings came from. The body does not read it.
      * @param nStatus The result. The body does not read it.
-     * @ghidraAddress 0x002deb70
+     * @ghidraAddress NTSC-U/C: 0x002deb70
+     * @ghidraAddress PAL: 0x00301898
      */
     virtual void OnGlobalSettingsLoaded(int nPortSlot, int nStatus);
 
@@ -189,7 +195,8 @@ public:
      * Slot 41. The body is empty. The title is inferred from the `mem_check` dialogue that
      * MetLocPickCharScreen raises in its override.
      *
-     * @ghidraAddress 0x002deaa8
+     * @ghidraAddress NTSC-U/C: 0x002deaa8
+     * @ghidraAddress PAL: 0x003016c0
      */
     virtual void OnNoCard() {
     }
@@ -199,7 +206,8 @@ public:
      *
      * Slot 42. The body is empty. The title is inferred.
      *
-     * @ghidraAddress 0x002deab0
+     * @ghidraAddress NTSC-U/C: 0x002deab0
+     * @ghidraAddress PAL: 0x003016c8
      */
     virtual void OnDetectFinished() {
     }
@@ -224,7 +232,8 @@ public:
      *
      * Slot 43. Queues the check with this screen as the receiver. The title is inferred.
      *
-     * @ghidraAddress 0x002debc0
+     * @ghidraAddress NTSC-U/C: 0x002debc0
+     * @ghidraAddress PAL: 0x003018e8
      */
     virtual void StartSaveSpaceCheck();
 

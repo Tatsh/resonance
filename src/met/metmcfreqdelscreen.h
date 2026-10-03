@@ -62,7 +62,8 @@ public:
     /**
      * Delete the list and every listed persona.
      *
-     * @ghidraAddress 0x002beca8
+     * @ghidraAddress NTSC-U/C: 0x002beca8
+     * @ghidraAddress PAL: 0x002dea70
      */
     virtual ~MetMCFreqDelScreen();
 
@@ -72,7 +73,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002c5b60
+     * @ghidraAddress NTSC-U/C: 0x002c5b60
+     * @ghidraAddress PAL: 0x002e62d0
      */
     static MetMCFreqDelScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -81,7 +83,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x002c5be8
+     * @ghidraAddress NTSC-U/C: 0x002c5be8
+     * @ghidraAddress PAL: 0x002e6358
      */
     virtual void EnterAndShow();
 
@@ -104,7 +107,8 @@ public:
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The chosen button, counted from zero.
-     * @ghidraAddress 0x002c0ad8
+     * @ghidraAddress NTSC-U/C: 0x002c0ad8
+     * @ghidraAddress PAL: 0x002e0dc0
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -114,7 +118,8 @@ public:
      * Slot 19. The select command does nothing.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002bf3a8
+     * @ghidraAddress NTSC-U/C: 0x002bf3a8
+     * @ghidraAddress PAL: 0x002df258
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -123,7 +128,8 @@ public:
      *
      * Slot 20. The body is empty.
      *
-     * @ghidraAddress 0x002c5b58
+     * @ghidraAddress NTSC-U/C: 0x002c5b58
+     * @ghidraAddress PAL: 0x002e62c8
      */
     virtual void PlaySlideSound(int) {
     }
@@ -133,7 +139,8 @@ public:
      *
      * Slot 23. The body is empty.
      *
-     * @ghidraAddress 0x002c5b48
+     * @ghidraAddress NTSC-U/C: 0x002c5b48
+     * @ghidraAddress PAL: 0x002e62b8
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -143,7 +150,8 @@ public:
      *
      * Slot 24. The body is empty.
      *
-     * @ghidraAddress 0x002c5b50
+     * @ghidraAddress NTSC-U/C: 0x002c5b50
+     * @ghidraAddress PAL: 0x002e62c0
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -203,7 +211,8 @@ public:
      * @param pText The cell.
      * @param nContext The list context. The body does not read it.
      * @return Always 1.
-     * @ghidraAddress 0x002c5c28
+     * @ghidraAddress NTSC-U/C: 0x002c5c28
+     * @ghidraAddress PAL: 0x002e6398
      */
     virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
 
@@ -215,7 +224,8 @@ public:
      * @param pMesh The cell. The body does not read it.
      * @param nContext The list context. The body does not read it.
      * @return Always 1.
-     * @ghidraAddress 0x002c5b40
+     * @ghidraAddress NTSC-U/C: 0x002c5b40
+     * @ghidraAddress PAL: 0x002e62b0
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
@@ -225,7 +235,8 @@ public:
      * MetMemCardTypeScreen's slot 36 is the caller. The title is inferred.
      *
      * @param slot The card.
-     * @ghidraAddress 0x002c5d10
+     * @ghidraAddress NTSC-U/C: 0x002c5d10
+     * @ghidraAddress PAL: 0x002e64a0
      */
     void SetCardSlot(MemcardConnectState slot);
 

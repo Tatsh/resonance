@@ -33,12 +33,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00211970
+     * @ghidraAddress NTSC-U/C: 0x00211970
+     * @ghidraAddress PAL: 0x0021b348
      */
     MetCreditsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00214e00
+     * @ghidraAddress NTSC-U/C: 0x00214e00
+     * @ghidraAddress PAL: 0x0021e9e8
      */
     virtual ~MetCreditsScreen();
 
@@ -50,7 +52,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00214d78
+     * @ghidraAddress NTSC-U/C: 0x00214d78
+     * @ghidraAddress PAL: 0x0021e960
      */
     static MetCreditsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -61,7 +64,8 @@ public:
      * completion are set directly, the renderer time is recorded as the animation start, and
      * slot 33 runs.
      *
-     * @ghidraAddress 0x00214e70
+     * @ghidraAddress NTSC-U/C: 0x00214e70
+     * @ghidraAddress PAL: 0x0021ea58
      */
     virtual void EnterAndShow();
 
@@ -69,7 +73,8 @@ public:
      * Begin the exit on the back command. Every other command is ignored.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00214f68
+     * @ghidraAddress NTSC-U/C: 0x00214f68
+     * @ghidraAddress PAL: 0x0021eb50
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -77,7 +82,8 @@ public:
      * Play nothing.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x00214d58
+     * @ghidraAddress NTSC-U/C: 0x00214d58
+     * @ghidraAddress PAL: 0x0021e940
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -85,7 +91,8 @@ public:
      * Play nothing.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x00214d60
+     * @ghidraAddress NTSC-U/C: 0x00214d60
+     * @ghidraAddress PAL: 0x0021e948
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -93,7 +100,8 @@ public:
      * Play nothing.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x00214d68
+     * @ghidraAddress NTSC-U/C: 0x00214d68
+     * @ghidraAddress PAL: 0x0021e950
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -101,7 +109,8 @@ public:
      * Play nothing.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x00214d70
+     * @ghidraAddress NTSC-U/C: 0x00214d70
+     * @ghidraAddress PAL: 0x0021e958
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -109,14 +118,16 @@ public:
      * Advance the animation and the roll.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x00214ee0
+     * @ghidraAddress NTSC-U/C: 0x00214ee0
+     * @ghidraAddress PAL: 0x0021eac8
      */
     virtual void UpdateIdle(float flTime);
 
     /**
      * Hide every credit and return to the options screens.
      *
-     * @ghidraAddress 0x00211e40
+     * @ghidraAddress NTSC-U/C: 0x00211e40
+     * @ghidraAddress PAL: 0x0021b910
      */
     virtual void OnExitFinished();
 
@@ -126,7 +137,8 @@ public:
      * An inline expansion of MetScreen::ResolveContainerViews() for the fixed view name
      * `credit.view`, without the null test, the diagnostic, or the call to hide the screen.
      *
-     * @ghidraAddress 0x00211ae8
+     * @ghidraAddress NTSC-U/C: 0x00211ae8
+     * @ghidraAddress PAL: 0x0021b520
      */
     virtual void ResolveContainerViews();
 

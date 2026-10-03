@@ -56,7 +56,7 @@ static const char *const kPersonaNameFormat = "freq player%d";
 
 } // namespace
 
-// 0x0030e2c8
+// NTSC-U/C: 0x0030e2c8, PAL: 0x00333f20
 MetNullRenderer::MetNullRenderer() : mLoadPending(0) {
     SeedR250(kRandomSeed);
     MetFreqMakerAssetManager::Create();
@@ -66,12 +66,12 @@ MetNullRenderer::MetNullRenderer() : mLoadPending(0) {
     RebuildStageLists();
 }
 
-// 0x0030e400
+// NTSC-U/C: 0x0030e400, PAL: 0x00334090
 MetNullRenderer::~MetNullRenderer() {
     MetFreqMakerAssetManager::Destroy();
 }
 
-// 0x0030e4c0
+// NTSC-U/C: 0x0030e4c0, PAL: 0x00334188
 void MetNullRenderer::OnRawController(RawControllerMsg *pMsg) {
     const MetControllerReading &reading = pMsg->mReading;
     if (reading.mTag != kReadingTagJoystick || !(reading.mValue > 0.0f)) {
@@ -111,7 +111,7 @@ void MetNullRenderer::OnRawController(RawControllerMsg *pMsg) {
     }
 }
 
-// 0x0030f320
+// NTSC-U/C: 0x0030f320, PAL: 0x00335038
 void MetNullRenderer::Draw() {
     float flCommonProgress;
     float flLevelProgress;
@@ -137,11 +137,11 @@ void MetNullRenderer::Draw() {
     }
 }
 
-// 0x00311a20
+// NTSC-U/C: 0x00311a20, PAL: 0x00337780
 void MetNullRenderer::Update() {
 }
 
-// 0x00311f80
+// NTSC-U/C: 0x00311f80, PAL: 0x00337ce0
 int MetNullRenderer::ParseRuleset(const HxStr &ruleset) {
     if (ruleset == kJamRuleset) {
         return kPlayModeJam;
@@ -153,7 +153,7 @@ int MetNullRenderer::ParseRuleset(const HxStr &ruleset) {
     return kPlayModeNone; // Yes, the binary returns after Fatal().
 }
 
-// 0x00311ff0
+// NTSC-U/C: 0x00311ff0, PAL: 0x00337d50
 void MetNullRenderer::HandleMessage(Message *pMsg) {
     if (pMsg->Type() == g_nRawControllerMsgType) {
         OnRawController(static_cast<RawControllerMsg *>(pMsg));

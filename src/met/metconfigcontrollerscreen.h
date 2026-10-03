@@ -62,7 +62,8 @@ public:
     MetConfigControllerScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002008e8
+     * @ghidraAddress NTSC-U/C: 0x002008e8
+     * @ghidraAddress PAL: 0x00208cb0
      */
     virtual ~MetConfigControllerScreen();
 
@@ -74,7 +75,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00206828
+     * @ghidraAddress NTSC-U/C: 0x00206828
+     * @ghidraAddress PAL: 0x0020f6f0
      */
     static MetConfigControllerScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -95,7 +97,8 @@ public:
     /**
      * Hide every button highlight and begin the exit.
      *
-     * @ghidraAddress 0x002069a0
+     * @ghidraAddress NTSC-U/C: 0x002069a0
+     * @ghidraAddress PAL: 0x0020f868
      */
     virtual void BeginExit();
 
@@ -107,7 +110,8 @@ public:
      *
      * @param name The dialogue name.
      * @param nChoice The chosen button.
-     * @ghidraAddress 0x00206bb0
+     * @ghidraAddress NTSC-U/C: 0x00206bb0
+     * @ghidraAddress PAL: 0x0020f9f8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -130,7 +134,8 @@ public:
      * Play the slide sound for this screen's controller only.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x002068b0
+     * @ghidraAddress NTSC-U/C: 0x002068b0
+     * @ghidraAddress PAL: 0x0020f778
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -138,7 +143,8 @@ public:
      * Play the leave sound for this screen's controller only.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x00206970
+     * @ghidraAddress NTSC-U/C: 0x00206970
+     * @ghidraAddress PAL: 0x0020f838
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -146,7 +152,8 @@ public:
      * Play the emphasised-selection sound for this screen's controller only.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x00206940
+     * @ghidraAddress NTSC-U/C: 0x00206940
+     * @ghidraAddress PAL: 0x0020f808
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -154,7 +161,8 @@ public:
      * Play the cycle-left sound for this screen's controller only.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x002068e0
+     * @ghidraAddress NTSC-U/C: 0x002068e0
+     * @ghidraAddress PAL: 0x0020f7a8
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -162,14 +170,16 @@ public:
      * Play the cycle-right sound for this screen's controller only.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x00206910
+     * @ghidraAddress NTSC-U/C: 0x00206910
+     * @ghidraAddress PAL: 0x0020f7d8
      */
     virtual void PlayCycleRightSound(int nSelector);
 
     /**
      * Clear a duplicate of the selected row and highlight its button.
      *
-     * @ghidraAddress 0x002069d0
+     * @ghidraAddress NTSC-U/C: 0x002069d0
+     * @ghidraAddress PAL: 0x0020f898
      */
     virtual void OnEnterFinished();
 
@@ -182,7 +192,8 @@ public:
      * a cancel returns to `MetConfigOptionsButtonsScreen` and a store saves the global settings
      * through MetGlobalSettingsSaverScreen.
      *
-     * @ghidraAddress 0x00201790
+     * @ghidraAddress NTSC-U/C: 0x00201790
+     * @ghidraAddress PAL: 0x00209fa0
      */
     virtual void OnExitFinished();
 
@@ -212,11 +223,11 @@ private:
     // Shows one mapping in the value texts.
     void ShowConfig(ControllerConfig &config);
 
-    // 0x00206a08
+    // NTSC-U/C: 0x00206a08, PAL: 0x0020f8d0
     // Shows the highlight mesh of one button and hides the others. -1 hides every mesh.
     void SetButtonHighlights(int nButton);
 
-    // 0x00206aa0
+    // NTSC-U/C: 0x00206aa0, PAL: 0x0020f968
     // Stores the value texts into this controller's mapping. Always returns 1, and the one caller
     // discards it.
     int StoreConfig();
@@ -225,16 +236,16 @@ private:
     // Maps a value text to a button index, or -1.
     int ButtonIndexForText(const HxStr &text) const;
 
-    // 0x00206ca8
+    // NTSC-U/C: 0x00206ca8, PAL: 0x0020fb10
     // Reports whether every row has a button.
     bool AllRowsAssigned() const;
 
-    // 0x00206d88
+    // NTSC-U/C: 0x00206d88, PAL: 0x0020fb88
     // The code before one code in a row's range. Returns 0 for a stick row. `this` is passed and
     // not read.
     char PreviousButtonCode(int nRow, char code) const;
 
-    // 0x00206e30
+    // NTSC-U/C: 0x00206e30, PAL: 0x0020fc30
     // The code after one code in a row's range. Returns 0 for a stick row. `this` is passed and
     // not read.
     char NextButtonCode(int nRow, char code) const;

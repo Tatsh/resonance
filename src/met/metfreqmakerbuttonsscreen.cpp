@@ -170,7 +170,7 @@ AddButton(MetButtonList *pList, const char *pszObjectName, MetStringId nId, cons
 
 } // namespace
 
-// 0x00257968
+// NTSC-U/C: 0x00257968, PAL: 0x0026d0b0
 MetFreqMakerButtonsScreen::MetFreqMakerButtonsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr), mExitAction(kExitNone) {
@@ -178,12 +178,12 @@ MetFreqMakerButtonsScreen::MetFreqMakerButtonsScreen(MetRenderer *pRenderer, int
     mEditing = kEditing;
 }
 
-// 0x0025e108
+// NTSC-U/C: 0x0025e108, PAL: 0x00274358
 MetFreqMakerButtonsScreen::~MetFreqMakerButtonsScreen() {
     delete mButtonList;
 }
 
-// 0x0025e080
+// NTSC-U/C: 0x0025e080, PAL: 0x002742d0
 MetFreqMakerButtonsScreen *MetFreqMakerButtonsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetFreqMakerButtonsScreen(pRenderer, nPriority);
 }
@@ -209,7 +209,7 @@ void MetFreqMakerButtonsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00259fa0
+// NTSC-U/C: 0x00259fa0, PAL: 0x0026ffc0
 int MetFreqMakerButtonsScreen::PollContainerLoad() {
     bool loaded = MetFreqMakerAssetManager::shared()->PollLoad();
     loaded = (FindScreenByName(HxStr(kDirectionsScreen))->PollContainerLoad() != 0) && loaded;
@@ -221,7 +221,7 @@ int MetFreqMakerButtonsScreen::PollContainerLoad() {
     return MetScreen::PollContainerLoad(); // Yes, the binary polls the base load a second time.
 }
 
-// 0x0025e1e0
+// NTSC-U/C: 0x0025e1e0, PAL: 0x00274430
 void MetFreqMakerButtonsScreen::OnPanelActivated() {
     ShowPageForButton(mButtonList->mSelectedButton);
     int nCount = mButtonList->mButtons.size();
@@ -367,7 +367,7 @@ void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) 
     }
 }
 
-// 0x0025e1a0
+// NTSC-U/C: 0x0025e1a0, PAL: 0x002743f0
 void MetFreqMakerButtonsScreen::OnEnterFinished() {
     ShowPageForButton(mButtonList->mSelectedButton);
     ShowDirectionsForButton(mButtonList->mSelectedButton);
@@ -450,7 +450,7 @@ void MetFreqMakerButtonsScreen::OnExitFinished() {
     }
 }
 
-// 0x0025a3e0
+// NTSC-U/C: 0x0025a3e0, PAL: 0x002704c8
 void MetFreqMakerButtonsScreen::ShowPageForButton(Rnd::Button *pButton) {
     MetFreqMakerInventoryScreen *pInventory =
         static_cast<MetFreqMakerInventoryScreen *>(FindScreenByName(HxStr(kInventoryScreen)));
@@ -473,7 +473,7 @@ void MetFreqMakerButtonsScreen::ShowPageForButton(Rnd::Button *pButton) {
     }
 }
 
-// 0x0025a5e0
+// NTSC-U/C: 0x0025a5e0, PAL: 0x00270710
 void MetFreqMakerButtonsScreen::ShowDirectionsForButton(Rnd::Button *pButton) {
     MetFreqMakerDirectionsScreen *pDirections =
         static_cast<MetFreqMakerDirectionsScreen *>(FindScreenByName(HxStr(kDirectionsScreen)));
@@ -511,15 +511,15 @@ void MetFreqMakerButtonsScreen::ShowDirectionsForButton(Rnd::Button *pButton) {
     }
 }
 
-// 0x0025e070
+// NTSC-U/C: 0x0025e070, PAL: 0x002742c0
 void MetFreqMakerButtonsScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x0025e078
+// NTSC-U/C: 0x0025e078, PAL: 0x002742c8
 void MetFreqMakerButtonsScreen::PlayCycleRightSound(int) {
 }
 
-// 0x00258f40
+// NTSC-U/C: 0x00258f40, PAL: 0x0026ebf8
 void MetFreqMakerButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kInventoryScreen));
     int nCount = mButtonList->mButtons.size();
@@ -543,7 +543,7 @@ void MetFreqMakerButtonsScreen::ResolveContainerViews() {
     AddButton(mButtonList, kSaveButton, kMetStrFqmakSave, kSavePrompt);
 }
 
-// 0x0025a108
+// NTSC-U/C: 0x0025a108, PAL: 0x00270168
 void MetFreqMakerButtonsScreen::OnKeyboardTextEntered(const HxStr &text) {
     if (text.mLen == 0) {
         return;
@@ -553,7 +553,7 @@ void MetFreqMakerButtonsScreen::OnKeyboardTextEntered(const HxStr &text) {
     ActivateNamedPanel(HxStr(kButtonsScreen));
 }
 
-// 0x0025e288
+// NTSC-U/C: 0x0025e288, PAL: 0x002744d8
 void MetFreqMakerButtonsScreen::SetEditing(int nEditing) {
     mEditing = nEditing;
     if (PollContainerLoad()) {

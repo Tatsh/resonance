@@ -52,14 +52,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0026a498
+     * @ghidraAddress NTSC-U/C: 0x0026a498
+     * @ghidraAddress PAL: 0x00281df8
      */
     MetFreqMakerInventoryScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the seven views and every part mesh, and empty the five name lists.
      *
-     * @ghidraAddress 0x0026c230
+     * @ghidraAddress NTSC-U/C: 0x0026c230
+     * @ghidraAddress PAL: 0x00284210
      */
     virtual ~MetFreqMakerInventoryScreen();
 
@@ -71,7 +73,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00272440
+     * @ghidraAddress NTSC-U/C: 0x00272440
+     * @ghidraAddress PAL: 0x0028a8d0
      */
     static MetFreqMakerInventoryScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -80,7 +83,8 @@ public:
      *
      * Slot 5. MetScreen::mRepeatScale becomes 1.0f.
      *
-     * @ghidraAddress 0x00272528
+     * @ghidraAddress NTSC-U/C: 0x00272528
+     * @ghidraAddress PAL: 0x0028a9b8
      */
     virtual void EnterAndShow();
 
@@ -92,7 +96,8 @@ public:
      * part under the grid cursor, and on every other page the palette colour is applied and the
      * template under the grid cursor is previewed.
      *
-     * @ghidraAddress 0x00272600
+     * @ghidraAddress NTSC-U/C: 0x00272600
+     * @ghidraAddress PAL: 0x0028aab0
      */
     virtual void OnPanelActivated();
 
@@ -103,7 +108,8 @@ public:
      * Slot 14. The directions screen is polled whether or not the assets are resident.
      *
      * @return Non-zero once all three loads have finished.
-     * @ghidraAddress 0x0026a3b0
+     * @ghidraAddress NTSC-U/C: 0x0026a3b0
+     * @ghidraAddress PAL: 0x00281cf0
      */
     virtual int PollContainerLoad();
 
@@ -119,7 +125,8 @@ public:
      * the image.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0026c928
+     * @ghidraAddress NTSC-U/C: 0x0026c928
+     * @ghidraAddress PAL: 0x002849b8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -129,7 +136,8 @@ public:
      * Slot 20.
      *
      * @param nSelector Passed through to MetScreen::PlaySlideSound().
-     * @ghidraAddress 0x00272b78
+     * @ghidraAddress NTSC-U/C: 0x00272b78
+     * @ghidraAddress PAL: 0x0028b028
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -139,7 +147,8 @@ public:
      * Slot 21.
      *
      * @param nSelector Passed through to MetScreen::PlayLeaveSound().
-     * @ghidraAddress 0x00272bb8
+     * @ghidraAddress NTSC-U/C: 0x00272bb8
+     * @ghidraAddress PAL: 0x0028b068
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -149,7 +158,8 @@ public:
      * Slot 22.
      *
      * @param nSelector The selector, which the body does not read.
-     * @ghidraAddress 0x00272c38
+     * @ghidraAddress NTSC-U/C: 0x00272c38
+     * @ghidraAddress PAL: 0x0028b0e8
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -159,7 +169,8 @@ public:
      * Slot 23.
      *
      * @param nSelector The selector, which the body does not read.
-     * @ghidraAddress 0x00272c68
+     * @ghidraAddress NTSC-U/C: 0x00272c68
+     * @ghidraAddress PAL: 0x0028b118
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -169,7 +180,8 @@ public:
      * Slot 24.
      *
      * @param nSelector The selector, which the body does not read.
-     * @ghidraAddress 0x00272c98
+     * @ghidraAddress NTSC-U/C: 0x00272c98
+     * @ghidraAddress PAL: 0x0028b148
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -180,7 +192,8 @@ public:
      * Slot 30.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x00272560
+     * @ghidraAddress NTSC-U/C: 0x00272560
+     * @ghidraAddress PAL: 0x0028a9f0
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -207,7 +220,8 @@ public:
      *
      * Slot 33.
      *
-     * @ghidraAddress 0x00272a98
+     * @ghidraAddress NTSC-U/C: 0x00272a98
+     * @ghidraAddress PAL: 0x0028af48
      */
     virtual void OnEnterFinished();
 
@@ -262,7 +276,8 @@ public:
      * mCurrentView becomes null and mCurrentRowCount -1. MetFreqMakerButtonsScreen's routine at
      * `0x0025a3e0` and its slot 36 call it. The title is inferred.
      *
-     * @ghidraAddress 0x0026db88
+     * @ghidraAddress NTSC-U/C: 0x0026db88
+     * @ghidraAddress PAL: 0x00285d98
      */
     void HidePages();
 
@@ -284,7 +299,8 @@ public:
      *
      * Slot 39. The title is inferred.
      *
-     * @ghidraAddress 0x00272cc8
+     * @ghidraAddress NTSC-U/C: 0x00272cc8
+     * @ghidraAddress PAL: 0x0028b178
      */
     virtual void PlayMoveSound();
 
@@ -293,7 +309,8 @@ public:
      *
      * Slot 40. The title is inferred.
      *
-     * @ghidraAddress 0x00272bf8
+     * @ghidraAddress NTSC-U/C: 0x00272bf8
+     * @ghidraAddress PAL: 0x0028b0a8
      */
     virtual void PlayFlipSound();
 
@@ -302,7 +319,8 @@ public:
      *
      * Slot 41. The title is inferred.
      *
-     * @ghidraAddress 0x00272c18
+     * @ghidraAddress NTSC-U/C: 0x00272c18
+     * @ghidraAddress PAL: 0x0028b0c8
      */
     virtual void PlayModeToggleSound();
 
@@ -311,7 +329,8 @@ public:
      *
      * Slot 42. The title is inferred.
      *
-     * @ghidraAddress 0x00272b38
+     * @ghidraAddress NTSC-U/C: 0x00272b38
+     * @ghidraAddress PAL: 0x0028afe8
      */
     virtual void PlayToggleSound();
 
@@ -320,7 +339,8 @@ public:
      *
      * Slot 43. The title is inferred.
      *
-     * @ghidraAddress 0x00272b58
+     * @ghidraAddress NTSC-U/C: 0x00272b58
+     * @ghidraAddress PAL: 0x0028b008
      */
     virtual void PlayDeleteSound();
 
@@ -331,17 +351,17 @@ private:
     // The panel SetHighlight() draws with its highlight material. The names are inferred.
     enum Highlight { kHighlightCanvas = 0, kHighlightInventory = 1, kHighlightNone = 2 };
 
-    // 0x0026e9e0
+    // NTSC-U/C: 0x0026e9e0, PAL: 0x00286d28
     // Show or hide `fm_spectrum.view`, mCrossOrigin, and `COLOR.txt`.
     void ShowPalette(int nShowing);
 
-    // 0x0026e690
+    // NTSC-U/C: 0x0026e690, PAL: 0x00286978
     // Show or hide the inventory decorations and the main view. The wires and the
     // limit text are hidden first, and when shown, the edit page shows mLimitText and mWire16 and
     // every other page shows mWire30.
     void ShowInventory(int nShowing);
 
-    // 0x0026ebb8
+    // NTSC-U/C: 0x0026ebb8, PAL: 0x00286f40
     // Choose the materials of `canvas_2.mesh` and `fm_inventory.mesh`. A value outside
     // Highlight clears both materials.
     void SetHighlight(int nHighlight);
@@ -353,77 +373,77 @@ private:
     // mesh under the grid cursor. Slot 19 expands it for each palette move.
     void ApplyPaletteToCurrentMesh();
 
-    // 0x0026e448
+    // NTSC-U/C: 0x0026e448, PAL: 0x002866f0
     // Hide `fm_inventory_hisquare.mesh`.
     void HideGridCursor();
 
-    // 0x0026e528
+    // NTSC-U/C: 0x0026e528, PAL: 0x002867f0
     // Move `fm_inventory_hisquare.mesh` to the grid cursor and show it.
     void UpdateGridCursor();
 
-    // 0x0026eff0
+    // NTSC-U/C: 0x0026eff0, PAL: 0x002873f0
     // Show one directions page, or the full page for the select page once the canvas
     // has its maximum of parts and the edit page is not shown.
     void ShowDirections(int nPage);
 
-    // 0x0026f100
+    // NTSC-U/C: 0x0026f100, PAL: 0x00287520
     // Report whether the grid cursor is on a template, or on the edit page on a part.
     bool IsCurrentCellFilled();
 
-    // 0x0026f1b0
+    // NTSC-U/C: 0x0026f1b0, PAL: 0x002875d0
     // The name list of the page shown, or null when the grid cursor is past its end.
     std::vector<HxStr> *GetCurrentPageNames();
 
-    // 0x002726e8
+    // NTSC-U/C: 0x002726e8, PAL: 0x0028ab98
     // Apply the palette colour and preview the template under the grid cursor.
     void PreviewCurrentTemplate();
 
-    // 0x00272868
+    // NTSC-U/C: 0x00272868, PAL: 0x0028ad18
     // The palette position at the centre of the palette cursor's cell.
     void GetPalettePosition(Vector2 &position);
 
-    // 0x00272918
+    // NTSC-U/C: 0x00272918, PAL: 0x0028adc8
     // Move `fm_cross_origin.view` to one palette position.
     void MoveCrossOrigin(const Vector2 &position);
 
-    // 0x00272800
+    // NTSC-U/C: 0x00272800, PAL: 0x0028acb0
     // Move `fm_cross_origin.view` to one palette position. The routine is never called.
     void MoveCrossOrigin(float flX, float flY);
 
-    // 0x00272828
+    // NTSC-U/C: 0x00272828, PAL: 0x0028acd8
     // Move `fm_cross_origin.view` to the palette cursor.
     void UpdateCrossOrigin();
 
-    // 0x002727d0
+    // NTSC-U/C: 0x002727d0, PAL: 0x0028ac80
     // The colour at one palette position.
     Color *PaletteColorAt(const Vector2 &position);
 
-    // 0x002724c8
+    // NTSC-U/C: 0x002724c8, PAL: 0x0028a958
     // Report the colour under the palette cursor and apply it on the canvas.
     void ApplyPaletteColor(Color &color);
 
-    // 0x00272988
+    // NTSC-U/C: 0x00272988, PAL: 0x0028ae38
     // Put the palette cursor on the cell a part's colour came from, or on the centre
     // for a part with no palette position.
     void SetPaletteFromPart(FreqPart *pPart);
 
-    // 0x00272a68
+    // NTSC-U/C: 0x00272a68, PAL: 0x0028af18
     // Select the part under the grid cursor on the canvas.
     FreqPart *SelectCurrentPart();
 
-    // 0x00272790
+    // NTSC-U/C: 0x00272790, PAL: 0x0028ac40
     // Delete the part under the grid cursor from the canvas.
     void DeleteCurrentPart();
 
-    // 0x002727c0
+    // NTSC-U/C: 0x002727c0, PAL: 0x0028ac70
     // Empty. Slot 19 runs it when the grid cursor cannot move above row 0.
     void OnGridTopReached();
 
-    // 0x002727c8
+    // NTSC-U/C: 0x002727c8, PAL: 0x0028ac78
     // Empty. Slot 19 runs it when the grid cursor cannot move below the last row.
     void OnGridBottomReached();
 
-    // 0x00272d20
+    // NTSC-U/C: 0x00272d20, PAL: 0x0028b1d0
     // The scale a part's template category is drawn at on the grid.
     float PartScale(FreqPart *pPart);
 

@@ -73,7 +73,8 @@ public:
      * @param name The screen name.
      * @param directory The directory the container loads from.
      * @param file The container name, without the `.rnd` suffix.
-     * @ghidraAddress 0x00372120
+     * @ghidraAddress NTSC-U/C: 0x00372120
+     * @ghidraAddress PAL: 0x003a0c30
      */
     MetSaveRemix(MetRenderer *pRenderer,
                  int nPriority,
@@ -82,7 +83,8 @@ public:
                  const HxStr &file);
 
     /**
-     * @ghidraAddress 0x00372248
+     * @ghidraAddress NTSC-U/C: 0x00372248
+     * @ghidraAddress PAL: 0x003a0d60
      */
     virtual ~MetSaveRemix();
 
@@ -107,7 +109,8 @@ public:
      * @param levelName Assigned to mLevelName.
      * @param appearances Assigned to mAppearances.
      * @param nAlbumNumber Assigned to mAlbumNumber.
-     * @ghidraAddress 0x00372488
+     * @ghidraAddress NTSC-U/C: 0x00372488
+     * @ghidraAddress PAL: 0x003a0fd0
      */
     virtual void RecordPendingSave(const MemcardConnectState &selection,
                                    int nOwnerPad,
@@ -123,7 +126,8 @@ public:
      * `mem_check`, `mem_remix_2many`, and the two no-space dialogues, and OnDuplicateNameDeclined()
      * runs it as well.
      *
-     * @ghidraAddress 0x0037a618
+     * @ghidraAddress NTSC-U/C: 0x0037a618
+     * @ghidraAddress PAL: 0x003aa0c8
      */
     virtual void OnSaveAbandoned();
 
@@ -133,7 +137,8 @@ public:
      *
      * A two-instruction `jr ra` stub.
      *
-     * @ghidraAddress 0x0037a620
+     * @ghidraAddress NTSC-U/C: 0x0037a620
+     * @ghidraAddress PAL: 0x003aa0d0
      */
     virtual void OnSaveDialogueClosed();
 
@@ -144,7 +149,8 @@ public:
      * empty slot 40 rather than a separate stub. Both subclasses override it to request a new name
      * from the on-screen keyboard.
      *
-     * @ghidraAddress 0x0037a628
+     * @ghidraAddress NTSC-U/C: 0x0037a628
+     * @ghidraAddress PAL: 0x003aa200
      */
     virtual void OnDuplicateNameDeclined();
 
@@ -159,7 +165,8 @@ public:
      * dialogue to the controller mOwnerPad identifies.
      *
      * @param text The remix name the user entered.
-     * @ghidraAddress 0x0037a650
+     * @ghidraAddress NTSC-U/C: 0x0037a650
+     * @ghidraAddress PAL: 0x003aa228
      */
     virtual void OnKeyboardTextEntered(const HxStr &text);
 
@@ -171,7 +178,8 @@ public:
      * formatted card either records the state as the first GlobalSettings::mCardSlots entry and
      * exits MetMsgScreen when mRefreshFirstCardSlot is set, or empties mCardRemixes, queues a
      * listing of the target card into it, and raises the save dialogue. Every dialogue is limited
-     * to the controller mOwnerPad identifies.
+     * to the controller mOwnerPad identifies. The European release also raises
+     * `mem_format_check` for an enquiry that fails with kMemcardStatusNotFormatted.
      *
      * @param state The card's state, passed by value and destroyed on return.
      * @param nStatus The enquiry status, kMemcardStatusOk on success.

@@ -74,23 +74,23 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// 0x003b55a8
+// NTSC-U/C: 0x003b55a8, PAL: 0x003e9c00
 MetSoloWinScreen::MetSoloWinScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(new MetButtonList()), mDifficultyUnlocked(0) {
 }
 
-// 0x003b9ce8
+// NTSC-U/C: 0x003b9ce8, PAL: 0x003ee6f8
 MetSoloWinScreen::~MetSoloWinScreen() {
     delete mButtonList;
 }
 
-// 0x003b9b98
+// NTSC-U/C: 0x003b9b98, PAL: 0x003ee670
 MetSoloWinScreen *MetSoloWinScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloWinScreen(pRenderer, nPriority);
 }
 
-// 0x003b6188
+// NTSC-U/C: 0x003b6188, PAL: 0x003eaa48
 void MetSoloWinScreen::OnExitFinished() {
     mRenderer->ResolveArenaView(kResolveArenaView);
     mRenderer->OnReturnFromGame();
@@ -152,7 +152,7 @@ void MetSoloWinScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x003b57a0
+// NTSC-U/C: 0x003b57a0, PAL: 0x003e9e60
 void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -179,19 +179,19 @@ void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x003b9b90
+// NTSC-U/C: 0x003b9b90, PAL: 0x003ee668
 void MetSoloWinScreen::PlayLeaveSound(int) {
 }
 
-// 0x003b9b80
+// NTSC-U/C: 0x003b9b80, PAL: 0x003ee658
 void MetSoloWinScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x003b9b88
+// NTSC-U/C: 0x003b9b88, PAL: 0x003ee660
 void MetSoloWinScreen::PlayCycleRightSound(int) {
 }
 
-// 0x003b5f88
+// NTSC-U/C: 0x003b5f88, PAL: 0x003ea7c8
 void MetSoloWinScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ExitScreenByName(HxStr(kSoloStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
@@ -206,7 +206,7 @@ void MetSoloWinScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 
-// 0x003b9c20
+// NTSC-U/C: 0x003b9c20, PAL: 0x003e9b18
 void MetSoloWinScreen::SetDifficultyUnlocked(int nUnlocked) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
     MetSoloWinScreen *pWinScreen =

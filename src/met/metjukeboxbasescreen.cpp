@@ -59,7 +59,7 @@ constexpr int kAppearanceTextCount = 4;
 
 constexpr int kFirstRow = 0;
 
-// 0x0069ad78
+// NTSC-U/C: 0x0069ad78, PAL: 0x006dcf10
 // The most entries the playlist takes.
 int g_nMaxPlayListEntries = 50;
 
@@ -69,7 +69,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 } // namespace
 
-// 0x0021dcc0
+// NTSC-U/C: 0x0021dcc0, PAL: 0x00230830
 MetJukeboxBaseScreen::MetJukeboxBaseScreen(MetRenderer *pRenderer,
                                            int nPriority,
                                            const HxStr &name,
@@ -87,20 +87,20 @@ MetJukeboxBaseScreen::MetJukeboxBaseScreen(MetRenderer *pRenderer,
     mShowsLoadedDrawables = 0;
 }
 
-// 0x0021dfc0
+// NTSC-U/C: 0x0021dfc0, PAL: 0x00230bb0
 MetJukeboxBaseScreen::~MetJukeboxBaseScreen() {
     delete mCatalogueList;
     delete mPlayListList;
 }
 
-// 0x0021e0f0
+// NTSC-U/C: 0x0021e0f0, PAL: 0x00230ce0
 void MetJukeboxBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mAvailableFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kSelectedFont)));
     mUnavailableFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kUnselectedFont)));
 }
 
-// 0x0021e268
+// NTSC-U/C: 0x0021e268, PAL: 0x00230ea0
 void MetJukeboxBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -140,7 +140,7 @@ void MetJukeboxBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x0021e3f8
+// NTSC-U/C: 0x0021e3f8, PAL: 0x00231030
 void MetJukeboxBaseScreen::BindLists() {
     mPlayList = &MetRemixManager::shared()->mPlayList;
     mCatalogue = &MetRemixManager::shared()->mRemixes[mCatalogueKey];
@@ -151,7 +151,7 @@ void MetJukeboxBaseScreen::BindLists() {
     mPlayListList->setSelected(mPlayList->entries.size() - 1);
 }
 
-// 0x0021e908
+// NTSC-U/C: 0x0021e908, PAL: 0x00231540
 void MetJukeboxBaseScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     mGenreText->SetShowing(1);
@@ -178,7 +178,7 @@ void MetJukeboxBaseScreen::EnterAndShow() {
     ShowRemixDetails();
 }
 
-// 0x0021ef30
+// NTSC-U/C: 0x0021ef30, PAL: 0x00231b68
 int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nContext) {
     if (nContext == kCatalogueContext) {
         if (static_cast<unsigned>(nItem) < mCatalogue->size()) {
@@ -201,7 +201,7 @@ int MetJukeboxBaseScreen::ProvideText(int nItem, int, Rnd::Text *pText, int nCon
     return 1;
 }
 
-// 0x0021f3e8
+// NTSC-U/C: 0x0021f3e8, PAL: 0x00232060
 void MetJukeboxBaseScreen::ShowRemixDetails() {
     mGenreText->SetText(HxStr(kNoText));
     mTempoText->SetText(HxStr(kNoText));
@@ -258,7 +258,7 @@ void MetJukeboxBaseScreen::ShowRemixDetails() {
     }
 }
 
-// 0x0021fc88
+// NTSC-U/C: 0x0021fc88, PAL: 0x00232a80
 void MetJukeboxBaseScreen::UpdateIdle([[maybe_unused]] float flTime) {
     if (!mView->GetShowing() || mPicturesPending == 0) {
         return;
@@ -321,27 +321,27 @@ void MetJukeboxBaseScreen::UpdateHelpText() {
     }
 }
 
-// 0x00224968
+// NTSC-U/C: 0x00224968, PAL: 0x002378f8
 void MetJukeboxBaseScreen::PlaySlideSound(int) {
 }
 
-// 0x00224970
+// NTSC-U/C: 0x00224970, PAL: 0x00237900
 void MetJukeboxBaseScreen::PlayLeaveSound(int) {
 }
 
-// 0x00224978
+// NTSC-U/C: 0x00224978, PAL: 0x00237908
 void MetJukeboxBaseScreen::PlayHighSound(int) {
 }
 
-// 0x00224980
+// NTSC-U/C: 0x00224980, PAL: 0x00237910
 void MetJukeboxBaseScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x00224988
+// NTSC-U/C: 0x00224988, PAL: 0x00237918
 void MetJukeboxBaseScreen::PlayCycleRightSound(int) {
 }
 
-// 0x00224990
+// NTSC-U/C: 0x00224990, PAL: 0x00237920
 void MetJukeboxBaseScreen::OnEnterFinished() {
     BindLists();
     if (mCatalogueList != nullptr) {
@@ -350,7 +350,7 @@ void MetJukeboxBaseScreen::OnEnterFinished() {
     mPlayListList->refresh();
 }
 
-// 0x002249e0
+// NTSC-U/C: 0x002249e0, PAL: 0x00237970
 void MetJukeboxBaseScreen::OnExitFinished() {
     mGenreText->SetShowing(0);
     mTempoText->SetShowing(0);
@@ -359,19 +359,19 @@ void MetJukeboxBaseScreen::OnExitFinished() {
     mRemixTitleText->SetShowing(0);
 }
 
-// 0x00224a90
+// NTSC-U/C: 0x00224a90, PAL: 0x00237a20
 void MetJukeboxBaseScreen::OnPanelActivated() {
     OnEnterFinished();
     UpdateHelpText();
     mPlayListList->setShowing(1);
 }
 
-// 0x00224ae8
+// NTSC-U/C: 0x00224ae8, PAL: 0x00237a78
 int MetJukeboxBaseScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 0;
 }
 
-// 0x00224af0
+// NTSC-U/C: 0x00224af0, PAL: 0x00237a80
 void MetJukeboxBaseScreen::SetShowing(int nShowing) {
     MetScreen::SetShowing(nShowing);
     if (mViewsUnresolved != 0) {

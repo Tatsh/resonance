@@ -1,5 +1,5 @@
 #include "met/listdataprovider.h"
 
-// 0x002247f0
+// NTSC-U/C: 0x002247f0, PAL: 0x00237758
 ListDataProvider::~ListDataProvider() {
 }

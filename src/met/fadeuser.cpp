@@ -1,5 +1,5 @@
 #include "met/fadeuser.h"
 
-// 0x0021d760
+// NTSC-U/C: 0x0021d760, PAL: 0x002302b8
 FadeUser::~FadeUser() {
 }

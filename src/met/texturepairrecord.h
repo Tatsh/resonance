@@ -37,7 +37,8 @@ public:
      *
      * @param first The first texture name.
      * @param second The second texture name.
-     * @ghidraAddress 0x00246de0
+     * @ghidraAddress NTSC-U/C: 0x00246de0
+     * @ghidraAddress PAL: 0x0025bf20
      */
     TexturePairRecord(const HxStr &first, const HxStr &second);
 
@@ -46,7 +47,8 @@ public:
      *
      * MetArenasScreen's destructor and MetJukeboxBaseScreen's run the deleting form.
      *
-     * @ghidraAddress 0x001fc568
+     * @ghidraAddress NTSC-U/C: 0x001fc568
+     * @ghidraAddress PAL: 0x002039d0
      */
     ~TexturePairRecord();
 
@@ -56,7 +58,8 @@ public:
      * Writes one to mInvalid and does nothing else. The method name is inferred from the one field
      * the routine writes and from its call sites, which run it whenever a screen becomes visible.
      *
-     * @ghidraAddress 0x002498c0
+     * @ghidraAddress NTSC-U/C: 0x002498c0
+     * @ghidraAddress PAL: 0x0025ebd0
      */
     void invalidate();
 
@@ -66,7 +69,8 @@ public:
      * Clears mLoading and does nothing else. MetRemixDataScreen::ShowRecord() runs it before
      * invalidate() when a record cannot be shown. The name is inferred.
      *
-     * @ghidraAddress 0x00249800
+     * @ghidraAddress NTSC-U/C: 0x00249800
+     * @ghidraAddress PAL: 0x0025eb10
      */
     void CancelLoad();
 
@@ -75,7 +79,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x00246ef0
+     * @ghidraAddress NTSC-U/C: 0x00246ef0
+     * @ghidraAddress PAL: 0x0025c040
      */
     void ResolveTextures();
 
@@ -86,7 +91,8 @@ public:
      * and the load runs with no zone current. The title is inferred.
      *
      * @param path The bitmap path.
-     * @ghidraAddress 0x00249760
+     * @ghidraAddress NTSC-U/C: 0x00249760
+     * @ghidraAddress PAL: 0x0025ea70
      */
     void Load(const HxStr &path);
 
@@ -96,7 +102,8 @@ public:
      * The title is inferred.
      *
      * @return The current texture, or null while the record is invalid.
-     * @ghidraAddress 0x00249808
+     * @ghidraAddress NTSC-U/C: 0x00249808
+     * @ghidraAddress PAL: 0x0025eb18
      */
     Rnd::Tex *Current();
 
@@ -107,7 +114,8 @@ public:
      *
      * @return 1 when the textures were swapped, and 0 when no load was pending or it is still
      *         running.
-     * @ghidraAddress 0x00249850
+     * @ghidraAddress NTSC-U/C: 0x00249850
+     * @ghidraAddress PAL: 0x0025eb60
      */
     int Advance();
 
@@ -118,7 +126,8 @@ public:
      *
      * @param name The song's level name.
      * @return The path.
-     * @ghidraAddress 0x00247038
+     * @ghidraAddress NTSC-U/C: 0x00247038
+     * @ghidraAddress PAL: 0x0025c188
      */
     static HxStr LogoPath(const HxStr &name);
 
@@ -129,7 +138,8 @@ public:
      *
      * @param name The song's level name.
      * @return The path.
-     * @ghidraAddress 0x00247250
+     * @ghidraAddress NTSC-U/C: 0x00247250
+     * @ghidraAddress PAL: 0x0025c428
      */
     static HxStr PicturePath(const HxStr &name);
 
@@ -141,7 +151,8 @@ public:
      *
      * @param name The arena name.
      * @return The path.
-     * @ghidraAddress 0x00247468
+     * @ghidraAddress NTSC-U/C: 0x00247468
+     * @ghidraAddress PAL: 0x0025c6c8
      */
     static HxStr ArenaPath(const HxStr &name);
 

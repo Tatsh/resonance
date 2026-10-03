@@ -80,12 +80,12 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 } // namespace
 
-// 0x002a8a58
+// NTSC-U/C: 0x002a8a58, PAL: 0x002c6ec8
 MetLoadPreFabScreen::MetLoadPreFabScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
-// 0x002ad450
+// NTSC-U/C: 0x002ad450, PAL: 0x002cbd60
 // Everything in the body is the teardown of mIdentities and the base.
 MetLoadPreFabScreen::~MetLoadPreFabScreen() {
 }
@@ -135,7 +135,7 @@ void MetLoadPreFabScreen::UpdateNameLabel() {
     mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
-// 0x002a91b8
+// NTSC-U/C: 0x002a91b8, PAL: 0x002c7770
 void MetLoadPreFabScreen::AcquireIdentityList() {
     mIdentities.erase(mIdentities.begin(), mIdentities.end());
     for (unsigned int i = 0; i < MetPersonaData::savedList()->size(); ++i) {
@@ -148,7 +148,7 @@ void MetLoadPreFabScreen::AcquireIdentityList() {
     mIdentityList = &mIdentities;
 }
 
-// 0x002a9330
+// NTSC-U/C: 0x002a9330, PAL: 0x002c78e8
 void MetLoadPreFabScreen::PrepareFreqMakerForSelection() {
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
@@ -165,7 +165,7 @@ void MetLoadPreFabScreen::PrepareFreqMakerForSelection() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadPreFabScreen);
 }
 
-// 0x002a94f0
+// NTSC-U/C: 0x002a94f0, PAL: 0x002c7b08
 void MetLoadPreFabScreen::OnNameButton() {
     if (Application::shared()->GetGameManager()->GetGameMode() == kNetworkGameMode) {
         Fatal(kNetModeError);
@@ -217,7 +217,7 @@ void MetLoadPreFabScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     ActivateNamedPanel(HxStr(kLoadPreFabScreen));
 }
 
-// 0x002ad3c8
+// NTSC-U/C: 0x002ad3c8, PAL: 0x002cbcd8
 MetScreen *MetLoadPreFabScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadPreFabScreen(pRenderer, nPriority);
 }

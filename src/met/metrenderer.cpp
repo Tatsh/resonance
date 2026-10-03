@@ -87,15 +87,15 @@ inline bool ContainsRef(const std::list<T *> &list, Rnd::View *const &pView) {
     return std::find(list.begin(), list.end(), pView) != list.end();
 }
 
-// 0x00370ab8
+// NTSC-U/C: 0x00370ab8, PAL: 0x0039f590
 template bool ContainsRef<Rnd::Drawable>(const std::list<Rnd::Drawable *> &list,
                                          Rnd::View *const &pView);
 
-// 0x00370b08
+// NTSC-U/C: 0x00370b08, PAL: 0x0039f5e0
 template bool ContainsRef<Rnd::Transformable>(const std::list<Rnd::Transformable *> &list,
                                               Rnd::View *const &pView);
 
-// 0x00370b58
+// NTSC-U/C: 0x00370b58, PAL: 0x0039f630
 template bool ContainsRef<Rnd::Animatable>(const std::list<Rnd::Animatable *> &list,
                                            Rnd::View *const &pView);
 
@@ -110,7 +110,7 @@ inline int FrameIntervalMs(long long nNowNs, long long nThenNs) {
     return static_cast<int>((nNowNs - nThenNs + kHalfMillisecondNs) / kNanosecondsPerMillisecond);
 }
 
-// 0x006c359c
+// NTSC-U/C: 0x006c359c, PAL: 0x0070660c
 // Set to send the next finished game back to the logo screen. OnFreqEnded() is the one reader and
 // clears it, and no routine in the image sets it. It starts set. Only the first finished game
 // therefore returns to the logo screen. The name is inferred.
@@ -160,6 +160,25 @@ constexpr float kFreqEndedFadeFrames = 360.0f;
 static const char *const kTutorialLevel = "tutorial";
 static const char *const kTutorialRemixLevel = "tutorialrmx";
 
+#ifdef VIDEO_STANDARD_PAL
+// The European release gives the tutorial level names of each language a suffix.
+enum TutorialLevelKind {
+    kTutorialLevelGame = 1,
+    kTutorialLevelRemix = 2,
+};
+
+// PAL: 0x00397ba0
+// Build the tutorial level name of a kind for the current language.
+inline HxStr TutorialLevelName(int nKind) {
+    HxStr name;
+    name = nKind == kTutorialLevelGame ? kTutorialLevel : kTutorialRemixLevel;
+    HxStr suffix;
+    suffix = LocalizedAssetSuffix();
+    name += suffix;
+    return name;
+}
+#endif
+
 // The script template OnFreqEnded() runs on exiting a jam, and its one argument.
 constexpr int kJukeboxTemplate = 0x267;
 static const char *const kJukeboxStopArgument = "0";
@@ -170,22 +189,22 @@ constexpr float kOpaque = 1.0f;
 
 } // namespace
 
-// 0x006c3598
+// NTSC-U/C: 0x006c3598, PAL: 0x00706608
 MetRenderer *MetRenderer::sInstance;
 
-// 0x006c3600
+// NTSC-U/C: 0x006c3600, PAL: 0x00706670
 RndAsyncLoader *MetRenderer::sMetagameLoader;
 
-// 0x006c3608
+// NTSC-U/C: 0x006c3608, PAL: 0x00706678
 RndAsyncLoader *MetRenderer::sFontsLoader;
 
-// 0x006c360c
+// NTSC-U/C: 0x006c360c, PAL: 0x0070667c
 RndAsyncLoader *MetRenderer::sSharedTexLoader;
 
-// 0x006c3610
+// NTSC-U/C: 0x006c3610, PAL: 0x00706680
 RndAsyncLoader *MetRenderer::sArenaLoader;
 
-// 0x0036a900
+// NTSC-U/C: 0x0036a900, PAL: 0x00398de0
 void MetRenderer::Start() {
     if (mCommandRepeater != nullptr) {
         mCommandRepeater->Reset();
@@ -230,7 +249,7 @@ MetRenderer::MetRenderer()
     SetDoWinSequence(0);
 }
 
-// 0x0036a460
+// NTSC-U/C: 0x0036a460, PAL: 0x003988e0
 MetRenderer::~MetRenderer() {
     delete mCommandRepeater;
     mCommandRepeater = nullptr;
@@ -248,7 +267,7 @@ MetRenderer::~MetRenderer() {
     MetFreqMakerAssetManager::Destroy();
 }
 
-// 0x0036b0c0
+// NTSC-U/C: 0x0036b0c0, PAL: 0x00399748
 void MetRenderer::Stop() {
     mRunning = 0;
     if (mCommandRepeater != nullptr) {
@@ -265,7 +284,7 @@ void MetRenderer::Stop() {
     }
 }
 
-// 0x0036b740
+// NTSC-U/C: 0x0036b740, PAL: 0x00399e28
 void MetRenderer::UpdateSimple() {
     if (mRunning == 0) {
         return;
@@ -297,7 +316,7 @@ void MetRenderer::UpdateSimple() {
     mTopView->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
-// 0x003715e0
+// NTSC-U/C: 0x003715e0, PAL: 0x003a00d8
 void MetRenderer::OnFadeOutDone() {
     mFading = 0;
 
@@ -319,11 +338,11 @@ void MetRenderer::OnFadeOutDone() {
     mActivePanel->mActivatePending = 1;
 }
 
-// 0x003715d8
+// NTSC-U/C: 0x003715d8, PAL: 0x003a00d0
 void MetRenderer::OnFadeInDone() {
 }
 
-// 0x003714c8
+// NTSC-U/C: 0x003714c8, PAL: 0x0039ffc0
 void MetRenderer::SetActivePanel(MetScreen *pScreen) {
     mActivePanel = pScreen;
 
@@ -332,15 +351,15 @@ void MetRenderer::SetActivePanel(MetScreen *pScreen) {
     }
 }
 
-// 0x00390088
+// NTSC-U/C: 0x00390088, PAL: 0x003c1958
 void MetRenderer::OnReturnFromGame() {
 }
 
-// 0x00390090
+// NTSC-U/C: 0x00390090, PAL: 0x003c1960
 void MetRenderer::OnReturnToMenus() {
 }
 
-// 0x003719e0
+// NTSC-U/C: 0x003719e0, PAL: 0x003a04d8
 void MetRenderer::AddScreen(MetScreen *pScreen) {
     if (std::find(mScreens.begin(), mScreens.end(), pScreen) != mScreens.end()) {
         return;
@@ -350,7 +369,7 @@ void MetRenderer::AddScreen(MetScreen *pScreen) {
     mScreensChanged = 1;
 }
 
-// 0x003717b0
+// NTSC-U/C: 0x003717b0, PAL: 0x003a02a8
 void MetRenderer::AddScreenView(Rnd::View *pView) {
     if (!ContainsRef(mScreenScene->GetDraws(), pView)) {
         mScreenScene->AddDraw(pView, nullptr);
@@ -363,7 +382,7 @@ void MetRenderer::AddScreenView(Rnd::View *pView) {
     }
 }
 
-// 0x003718b8
+// NTSC-U/C: 0x003718b8, PAL: 0x003a03b0
 void MetRenderer::AddBackgroundView(Rnd::View *pView) {
     if (!ContainsRef(mBackgroundScene->GetDraws(), pView)) {
         mBackgroundScene->AddDraw(pView, nullptr);
@@ -376,28 +395,28 @@ void MetRenderer::AddBackgroundView(Rnd::View *pView) {
     }
 }
 
-// 0x00371858
+// NTSC-U/C: 0x00371858, PAL: 0x003a0350
 void MetRenderer::RemoveScreenView(Rnd::View *pView) {
     mScreenScene->RemoveTrans(pView);
     mScreenScene->RemoveDraw(pView);
     mScreenScene->RemoveAnim(pView);
 }
 
-// 0x003719a0
+// NTSC-U/C: 0x003719a0, PAL: 0x003a0498
 void MetRenderer::ClearScreenScene() {
     mScreenScene->ReleaseAnimsRefs();
     mScreenScene->ClearDraws();
     mScreenScene->ClearTransList();
 }
 
-// 0x00371960
+// NTSC-U/C: 0x00371960, PAL: 0x003a0458
 void MetRenderer::ClearBackgroundScene() {
     mBackgroundScene->ReleaseAnimsRefs();
     mBackgroundScene->ClearDraws();
     mBackgroundScene->ClearTransList();
 }
 
-// 0x003714f8
+// NTSC-U/C: 0x003714f8, PAL: 0x0039fff0
 void MetRenderer::ActivatePanel(MetScreen *pScreen) {
     mActivePanel = pScreen;
     if (mCommandRepeater != nullptr) {
@@ -410,7 +429,7 @@ void MetRenderer::ActivatePanel(MetScreen *pScreen) {
     mActivePanel->mActivatePending = 1;
 }
 
-// 0x00371730
+// NTSC-U/C: 0x00371730, PAL: 0x003a0228
 void MetRenderer::MoveScreenViewToFront(Rnd::View *pView) {
     if (!ContainsRef(mScreenScene->GetDraws(), pView)) {
         AddScreenView(pView);
@@ -420,7 +439,7 @@ void MetRenderer::MoveScreenViewToFront(Rnd::View *pView) {
     mScreenScene->AddDraw(pView, nullptr);
 }
 
-// 0x0036b8c8
+// NTSC-U/C: 0x0036b8c8, PAL: 0x00399fb0
 void MetRenderer::UnlockAllStages() {
     if (mActivePanel != nullptr) {
         MetUnlockStagesMsg msg;
@@ -428,24 +447,24 @@ void MetRenderer::UnlockAllStages() {
     }
 }
 
-// 0x00371b58
+// NTSC-U/C: 0x00371b58, PAL: 0x003a0650
 int MetRenderer::IsLogoScreenActive() {
     return dynamic_cast<MetLogoScreen *>(mActivePanel) != nullptr;
 }
 
-// 0x00371cb0
+// NTSC-U/C: 0x00371cb0, PAL: 0x003a07a8
 void MetRenderer::ForwardToPanel(Message *pMsg) {
     if (mActivePanel != nullptr) {
         mActivePanel->Handle(pMsg);
     }
 }
 
-// 0x00371cf0
+// NTSC-U/C: 0x00371cf0, PAL: 0x003a07e8
 void MetRenderer::ForwardToPanelUnchecked(Message *pMsg) {
     mActivePanel->Handle(pMsg);
 }
 
-// 0x00371ba8
+// NTSC-U/C: 0x00371ba8, PAL: 0x003a06a0
 inline void MetRenderer::OnRawController(RawControllerMsg *pMsg) {
     if (mRunning == 0) {
         return;
@@ -480,7 +499,7 @@ inline void MetRenderer::OnRawController(RawControllerMsg *pMsg) {
     }
 }
 
-// 0x0036aae0
+// NTSC-U/C: 0x0036aae0, PAL: 0x00398fe0
 MetScreen *MetRenderer::SelectEndScreen() {
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
     MetScreen *pScreen;
@@ -528,7 +547,7 @@ void MetRenderer::CreateCommonLoaders() {
         new RndAsyncLoader(HxStr("metagame/shared/"), HxStr("shared_tex.rnd"), nZone);
 }
 
-// 0x00369e50
+// NTSC-U/C: 0x00369e50, PAL: 0x00398288
 void MetRenderer::CreateArenaLoader() {
     const int nZone = FindZoneByName(kLoaderZone);
     sArenaLoader = new RndAsyncLoader(HxStr("MetaGame/Arena/"), HxStr("meta_arena.rnd"), nZone);
@@ -536,12 +555,12 @@ void MetRenderer::CreateArenaLoader() {
     StartArenaLoad();
 }
 
-// 0x003712d8
+// NTSC-U/C: 0x003712d8, PAL: 0x0039fdd0
 void MetRenderer::StartArenaLoad() {
     EnqueueArenaLoader();
 }
 
-// 0x00371270
+// NTSC-U/C: 0x00371270, PAL: 0x0039fd68
 void MetRenderer::EnqueueCommonLoaders() {
     if (sMetagameLoader->mPending != 0) {
         sMetagameLoader->Enqueue();
@@ -554,26 +573,26 @@ void MetRenderer::EnqueueCommonLoaders() {
     }
 }
 
-// 0x00371438
+// NTSC-U/C: 0x00371438, PAL: 0x0039ff30
 void MetRenderer::EnqueueArenaLoader() {
     if (sArenaLoader->mPending != 0) {
         sArenaLoader->Enqueue();
     }
 }
 
-// 0x003712f8
+// NTSC-U/C: 0x003712f8, PAL: 0x0039fdf0
 void MetRenderer::UnloadCommonLoaders() {
     sMetagameLoader->Unload();
     sFontsLoader->Unload();
     sSharedTexLoader->Unload();
 }
 
-// 0x00371490
+// NTSC-U/C: 0x00371490, PAL: 0x0039ff88
 void MetRenderer::UnloadArenaLoader() {
     sArenaLoader->Unload();
 }
 
-// 0x00371338
+// NTSC-U/C: 0x00371338, PAL: 0x0039fe30
 int MetRenderer::PollCommonLoaders(float *pfProgress) {
     *pfProgress = 0.0f;
     float flProgress;
@@ -587,7 +606,7 @@ int MetRenderer::PollCommonLoaders(float *pfProgress) {
     return bDone && bSharedTex;
 }
 
-// 0x003713f0
+// NTSC-U/C: 0x003713f0, PAL: 0x0039fee8
 int MetRenderer::PollArenaLoader(float *pfProgress) {
     *pfProgress = 0.0f;
     float flProgress;
@@ -596,7 +615,7 @@ int MetRenderer::PollArenaLoader(float *pfProgress) {
     return bDone;
 }
 
-// 0x0036a9e0
+// NTSC-U/C: 0x0036a9e0, PAL: 0x00398ec0
 void MetRenderer::ResolveArenaView(int nSkipResolve) {
     Rnd::View *pView = nullptr;
     if (nSkipResolve == 0) {
@@ -609,7 +628,7 @@ void MetRenderer::ResolveArenaView(int nSkipResolve) {
     }
 }
 
-// 0x00371670
+// NTSC-U/C: 0x00371670, PAL: 0x003a0168
 void MetRenderer::Draw() {
     if (mRunning == 0) {
         return;
@@ -627,7 +646,7 @@ void MetRenderer::Draw() {
     }
 }
 
-// 0x00371570
+// NTSC-U/C: 0x00371570, PAL: 0x003a0068
 void MetRenderer::DrawSimple() {
     if (mRunning == 0) {
         return;
@@ -641,7 +660,7 @@ void MetRenderer::DrawSimple() {
     }
 }
 
-// 0x0036c5d8
+// NTSC-U/C: 0x0036c5d8, PAL: 0x0039afd8
 void MetRenderer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nRawControllerMsgType) {
@@ -663,7 +682,7 @@ void MetRenderer::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x0036b938
+// NTSC-U/C: 0x0036b938, PAL: 0x0039a020
 void MetRenderer::OnStartPause([[maybe_unused]] Message *pMsg) {
     Start();
     if (MetFrontEndState::shared()->mPendingTransition == kPlainPausePhase) {
@@ -683,7 +702,7 @@ void MetRenderer::OnStartPause([[maybe_unused]] Message *pMsg) {
     }
 }
 
-// 0x0036bcb8
+// NTSC-U/C: 0x0036bcb8, PAL: 0x0039a400
 void MetRenderer::OnFreqEnded(Message *pMsg) {
     MetFreqEndedMsg *pEnded = static_cast<MetFreqEndedMsg *>(pMsg);
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
@@ -708,7 +727,12 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
         g_nReturnToLogo = 0;
         OnReturnFromGame();
         mPendingPanel = MetScreen::FindScreenByName(HxStr("MetLogoScreen"));
+#ifdef VIDEO_STANDARD_PAL
+    } else if (params.mLevelName == TutorialLevelName(kTutorialLevelGame) ||
+               params.mLevelName == TutorialLevelName(kTutorialLevelRemix)) {
+#else
     } else if (params.mLevelName == kTutorialLevel || params.mLevelName == kTutorialRemixLevel) {
+#endif
         OnReturnFromGame();
         if (GlobalSettings::shared()->mTutorialComplete == 0) {
             GlobalSettings::shared()->mTutorialComplete = 1;
@@ -728,7 +752,11 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
             OnReturnToMenus();
             MetRemixManager::shared()->LeaveJukeboxMode();
             mPendingPanel = MetScreen::FindScreenByName(HxStr("MetJukeboxTopButtonsScreen"));
+#ifdef VIDEO_STANDARD_PAL
+        } else if (pStats->mRemixEdited != 0) {
+#else
         } else if (MetFrontEndState::shared()->mUsingMemcard != 0 && pStats->mRemixEdited != 0) {
+#endif
             mPendingPanel = SelectEndScreen();
         } else {
             OnReturnFromGame();
@@ -759,7 +787,7 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
     ResolveArenaView(0);
 }
 
-// 0x0036a680
+// NTSC-U/C: 0x0036a680, PAL: 0x00398b00
 void MetRenderer::ResolveSceneViews() {
     // Yes, the binary polls the three boot loaders again and discards every result.
     float flProgress;
@@ -773,7 +801,7 @@ void MetRenderer::ResolveSceneViews() {
     mFade = new MetFade(this);
 }
 
-// 0x0036b190
+// NTSC-U/C: 0x0036b190, PAL: 0x00399818
 void MetRenderer::Update() {
     if (mBootLoadPending != 0) {
         float flProgress;
@@ -853,7 +881,7 @@ void MetRenderer::Update() {
     mTopView->UpdateWorldXfm(nullptr, 0); // Yes, the binary discards the result.
 }
 
-// 0x00371a78
+// NTSC-U/C: 0x00371a78, PAL: 0x003a0570
 void MetRenderer::RemoveScreen(MetScreen *pScreen) {
     for (std::vector<MetScreen *>::iterator it = mScreens.begin(); it != mScreens.end(); ++it) {
         if (*it == pScreen) {

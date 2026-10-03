@@ -51,12 +51,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003943f8
+     * @ghidraAddress NTSC-U/C: 0x003943f8
+     * @ghidraAddress PAL: 0x003c5eb8
      */
     MetSoloEndRemixScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003996b8
+     * @ghidraAddress NTSC-U/C: 0x003996b8
+     * @ghidraAddress PAL: 0x003cb810
      */
     virtual ~MetSoloEndRemixScreen();
 
@@ -68,7 +70,8 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00399630
+     * @ghidraAddress NTSC-U/C: 0x00399630
+     * @ghidraAddress PAL: 0x003cb788
      */
     static MetSoloEndRemixScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -79,7 +82,8 @@ public:
      * MetGlobalSettingsSaverScreen::StartSave() runs with this screen as the one to return to, and
      * mActivatePending is cleared. Otherwise ShowResults() fills and shows the screen.
      *
-     * @ghidraAddress 0x00394e10
+     * @ghidraAddress NTSC-U/C: 0x00394e10
+     * @ghidraAddress PAL: 0x003c6ad8
      */
     virtual void EnterAndShow();
 
@@ -89,7 +93,8 @@ public:
      * Activates the panel registered under `MetSaveRemixScreen` and does nothing else. MetScreen
      * slot 6 is its one caller.
      *
-     * @ghidraAddress 0x003997d0
+     * @ghidraAddress NTSC-U/C: 0x003997d0
+     * @ghidraAddress PAL: 0x003cb928
      */
     virtual void OnPanelActivated();
 
@@ -100,7 +105,8 @@ public:
      * of mPhotoMat. The float argument the slot receives is not read.
      *
      * @param flTime The current renderer time, which the body does not read.
-     * @ghidraAddress 0x00399748
+     * @ghidraAddress NTSC-U/C: 0x00399748
+     * @ghidraAddress PAL: 0x003cb8a0
      */
     virtual void UpdateIdle(float flTime);
 
@@ -111,7 +117,8 @@ public:
      * records that slot 3 or slot 4 has already requested the departure, and the sequence then does
      * not run a second time.
      *
-     * @ghidraAddress 0x00399870
+     * @ghidraAddress NTSC-U/C: 0x00399870
+     * @ghidraAddress PAL: 0x003cb9e8
      */
     virtual void OnExitFinished();
 
@@ -135,7 +142,8 @@ public:
      * the sequence once the animation has finished. A set mScreenExited runs the sequence at once.
      *
      * @param bCompleted Not read.
-     * @ghidraAddress 0x003998c8
+     * @ghidraAddress NTSC-U/C: 0x003998c8
+     * @ghidraAddress PAL: 0x003cba40
      */
     virtual void OnSaveFinished(int bCompleted);
 
@@ -144,7 +152,8 @@ public:
      *
      * MetRemixSaver slot 3.
      *
-     * @ghidraAddress 0x00399898
+     * @ghidraAddress NTSC-U/C: 0x00399898
+     * @ghidraAddress PAL: 0x003cba10
      */
     virtual void OnHelpRequested();
 
@@ -156,12 +165,13 @@ public:
      * with a comparison.
      *
      * @param bShowing Non-zero to bring the screen back onto the stack, zero to exit it.
-     * @ghidraAddress 0x00395918
+     * @ghidraAddress NTSC-U/C: 0x00395918
+     * @ghidraAddress PAL: 0x003c78a8
      */
     virtual void SetOwnerScreenShowing(int bShowing);
 
 private:
-    // 0x00395a20
+    // NTSC-U/C: 0x00395a20, PAL: 0x003c79e0
     // Resolves the arena view, runs the renderer's two empty hooks, pushes `MetHelpScreen`,
     // `MetScreenTitleScreen`, and `MetRemixTypeScreen`, and activates `MetRemixTypeScreen` as the
     // panel. Slots 2 and 36 are its two callers.

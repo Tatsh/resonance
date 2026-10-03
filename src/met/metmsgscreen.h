@@ -45,14 +45,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002ec290
+     * @ghidraAddress NTSC-U/C: 0x002ec290
+     * @ghidraAddress PAL: 0x0030f9d8
      */
     MetMsgScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the two-button list and then the one-button list.
      *
-     * @ghidraAddress 0x002ec450
+     * @ghidraAddress NTSC-U/C: 0x002ec450
+     * @ghidraAddress PAL: 0x0030fc00
      */
     virtual ~MetMsgScreen();
 
@@ -62,7 +64,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002f02c0
+     * @ghidraAddress NTSC-U/C: 0x002f02c0
+     * @ghidraAddress PAL: 0x00313d38
      */
     static MetMsgScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -82,7 +85,8 @@ public:
      * @param nButtons The number of buttons, which picks the one-button or two-button layout.
      * @param buttons The button labels, or an empty list to retain the current labels.
      * @param pOwner The screen the dialogue reports to.
-     * @ghidraAddress 0x002ebc98
+     * @ghidraAddress NTSC-U/C: 0x002ebc98
+     * @ghidraAddress PAL: 0x0030f1d8
      */
     static void Show(const HxStr &name,
                      const HxStr &title,
@@ -103,7 +107,8 @@ public:
      * @param nButtons The number of buttons.
      * @param buttons The button labels, or an empty list to retain the current labels.
      * @param pOwner The screen the dialogue reports to.
-     * @ghidraAddress 0x002ebf40
+     * @ghidraAddress NTSC-U/C: 0x002ebf40
+     * @ghidraAddress PAL: 0x0030f4f8
      */
     static void ShowActive(const HxStr &name,
                            const HxStr &title,
@@ -120,7 +125,8 @@ public:
      * started the save. The result of the cast is not checked. The title is inferred.
      *
      * @param nPad The controller index.
-     * @ghidraAddress 0x002f0348
+     * @ghidraAddress NTSC-U/C: 0x002f0348
+     * @ghidraAddress PAL: 0x0030f8f0
      */
     static void SetOwnerPad(int nPad);
 
@@ -130,7 +136,8 @@ public:
      * An empty list does nothing. The title is inferred.
      *
      * @param buttons The new labels.
-     * @ghidraAddress 0x002ec5d8
+     * @ghidraAddress NTSC-U/C: 0x002ec5d8
+     * @ghidraAddress PAL: 0x0030fdc0
      */
     void SetButtons(const std::vector<HxStr> &buttons);
 
@@ -142,7 +149,8 @@ public:
      * fewer than three, fewer than six, or more text lines, labels the buttons of the list the
      * count selects and selects the first, and sets mChoice to -1. The title is inferred.
      *
-     * @ghidraAddress 0x002ecd10
+     * @ghidraAddress NTSC-U/C: 0x002ecd10
+     * @ghidraAddress PAL: 0x00310640
      */
     void Refresh();
 
@@ -152,7 +160,8 @@ public:
      * Inline. Show() and ShowActive() expand it, and `0x002f0230` is its uncalled out-of-line copy.
      *
      * @param name The new name.
-     * @ghidraAddress 0x002f0230
+     * @ghidraAddress NTSC-U/C: 0x002f0230
+     * @ghidraAddress PAL: 0x00313ca8
      */
     void SetName(const HxStr &name) {
         mName = name;
@@ -164,7 +173,8 @@ public:
      * Inline. `0x002f0250` is its uncalled out-of-line copy.
      *
      * @param title The new title.
-     * @ghidraAddress 0x002f0250
+     * @ghidraAddress NTSC-U/C: 0x002f0250
+     * @ghidraAddress PAL: 0x00313cc8
      */
     void SetTitle(const HxStr &title) {
         mTitle = title;
@@ -176,7 +186,8 @@ public:
      * Inline. `0x002f0270` is its uncalled out-of-line copy.
      *
      * @param text The new text.
-     * @ghidraAddress 0x002f0270
+     * @ghidraAddress NTSC-U/C: 0x002f0270
+     * @ghidraAddress PAL: 0x00313ce8
      */
     void SetText(const HxStr &text) {
         mText = text;
@@ -188,14 +199,16 @@ public:
      * Slot 3. The type is read through Message::Type() and not used.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x002f0640
+     * @ghidraAddress NTSC-U/C: 0x002f0640
+     * @ghidraAddress PAL: 0x00313ff0
      */
     virtual void HandleMessage(Message *pMsg);
 
     /**
      * Clear the showing flag, refresh the dialogue, and show the screen. Slot 5.
      *
-     * @ghidraAddress 0x002f04d0
+     * @ghidraAddress NTSC-U/C: 0x002f04d0
+     * @ghidraAddress PAL: 0x00313e80
      */
     virtual void EnterAndShow();
 
@@ -206,7 +219,8 @@ public:
      * which slot 26 then waits for. Any other dialogue exits at once through
      * MetScreen::BeginExit().
      *
-     * @ghidraAddress 0x002f0588
+     * @ghidraAddress NTSC-U/C: 0x002f0588
+     * @ghidraAddress PAL: 0x00313f38
      */
     virtual void BeginExit();
 
@@ -219,7 +233,8 @@ public:
      * active panel, and exits.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002ecba0
+     * @ghidraAddress NTSC-U/C: 0x002ecba0
+     * @ghidraAddress PAL: 0x003104b0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -227,14 +242,16 @@ public:
      * Play the slide sound when the dialogue has buttons and accepts nSelector. Slot 20.
      *
      * @param nSelector The controller index the sound is for.
-     * @ghidraAddress 0x002f0410
+     * @ghidraAddress NTSC-U/C: 0x002f0410
+     * @ghidraAddress PAL: 0x00313dc0
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
      * Silence the leave sound. Slot 21, a two-instruction stub.
      *
-     * @ghidraAddress 0x002f02b8
+     * @ghidraAddress NTSC-U/C: 0x002f02b8
+     * @ghidraAddress PAL: 0x00313d30
      */
     virtual void PlayLeaveSound(int) {
     }
@@ -242,7 +259,8 @@ public:
     /**
      * Silence the high sound. Slot 22, a two-instruction stub.
      *
-     * @ghidraAddress 0x002f02b0
+     * @ghidraAddress NTSC-U/C: 0x002f02b0
+     * @ghidraAddress PAL: 0x00313d28
      */
     virtual void PlayHighSound(int) {
     }
@@ -251,7 +269,8 @@ public:
      * Play the cycle-left sound when the dialogue has two buttons and accepts nSelector. Slot 23.
      *
      * @param nSelector The controller index the sound is for.
-     * @ghidraAddress 0x002f0450
+     * @ghidraAddress NTSC-U/C: 0x002f0450
+     * @ghidraAddress PAL: 0x00313e00
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -259,7 +278,8 @@ public:
      * Play the cycle-right sound when the dialogue has two buttons and accepts nSelector. Slot 24.
      *
      * @param nSelector The controller index the sound is for.
-     * @ghidraAddress 0x002f0490
+     * @ghidraAddress NTSC-U/C: 0x002f0490
+     * @ghidraAddress PAL: 0x00313e40
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -270,14 +290,16 @@ public:
      * MetScreen::BeginExit() directly.
      *
      * @param flTime The renderer's current time.
-     * @ghidraAddress 0x002f0540
+     * @ghidraAddress NTSC-U/C: 0x002f0540
+     * @ghidraAddress PAL: 0x00313ef0
      */
     virtual void UpdateIdle(float flTime);
 
     /**
      * Mark the dialogue as showing and tell the owner. Slot 33.
      *
-     * @ghidraAddress 0x002f0500
+     * @ghidraAddress NTSC-U/C: 0x002f0500
+     * @ghidraAddress PAL: 0x00313eb0
      */
     virtual void OnEnterFinished();
 
@@ -286,7 +308,8 @@ public:
      *
      * The owner's OnMsgScreenDismissed() receives mName and mChoice.
      *
-     * @ghidraAddress 0x002f05d0
+     * @ghidraAddress NTSC-U/C: 0x002f05d0
+     * @ghidraAddress PAL: 0x00313f80
      */
     virtual void OnExitFinished();
 
@@ -297,12 +320,13 @@ public:
      * `dlg1_01.but`, each with an empty label. `dlg_warning.txt` receives the title,
      * `dlg_message.txt` the message, and `dlg_buts.view` the button layout.
      *
-     * @ghidraAddress 0x002ec6f8
+     * @ghidraAddress NTSC-U/C: 0x002ec6f8
+     * @ghidraAddress PAL: 0x0030ff00
      */
     virtual void ResolveContainerViews();
 
 private:
-    // 0x002f0610
+    // NTSC-U/C: 0x002f0610, PAL: 0x00313fc0
     // Inline, and HandleMessage() expands it. The address is its uncalled out-of-line copy.
     void ForwardToOwner(Message *pMsg) {
         mOwner->Handle(pMsg);

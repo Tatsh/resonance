@@ -13,7 +13,7 @@ enum { kGizmoViewIndex, kKaleidoscopeViewIndex, kViewCount };
 
 } // namespace
 
-// 0x00276ed8
+// NTSC-U/C: 0x00276ed8, PAL: 0x0028f830
 MetLeftGizmoScreen::MetLeftGizmoScreen(MetRenderer *pRenderer, int nPriority)
     : MetGizmoPanel(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
@@ -22,11 +22,11 @@ MetLeftGizmoScreen::MetLeftGizmoScreen(MetRenderer *pRenderer, int nPriority)
     mViewNames[kKaleidoscopeViewIndex] = kKaleidoscopeView;
 }
 
-// 0x0027b4b8
+// NTSC-U/C: 0x0027b4b8, PAL: 0x00294170
 MetLeftGizmoScreen::~MetLeftGizmoScreen() {
 }
 
-// 0x0027b628
+// NTSC-U/C: 0x0027b628, PAL: 0x002942f8
 MetLeftGizmoScreen *MetLeftGizmoScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLeftGizmoScreen(pRenderer, nPriority);
 }

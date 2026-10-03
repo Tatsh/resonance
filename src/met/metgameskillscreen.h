@@ -33,14 +33,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00273140
+     * @ghidraAddress NTSC-U/C: 0x00273140
+     * @ghidraAddress PAL: 0x0028b620
      */
     MetGameSkillScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x00276ad0
+     * @ghidraAddress NTSC-U/C: 0x00276ad0
+     * @ghidraAddress PAL: 0x0028f410
      */
     virtual ~MetGameSkillScreen();
 
@@ -52,7 +54,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00276a48
+     * @ghidraAddress NTSC-U/C: 0x00276a48
+     * @ghidraAddress PAL: 0x0028f388
      */
     static MetGameSkillScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -75,7 +78,8 @@ public:
      * Slot 19.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00273558
+     * @ghidraAddress NTSC-U/C: 0x00273558
+     * @ghidraAddress PAL: 0x0028bb38
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -85,7 +89,8 @@ public:
      * Slot 23. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00276a38
+     * @ghidraAddress NTSC-U/C: 0x00276a38
+     * @ghidraAddress PAL: 0x0028f378
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -95,7 +100,8 @@ public:
      * Slot 24. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00276a40
+     * @ghidraAddress NTSC-U/C: 0x00276a40
+     * @ghidraAddress PAL: 0x0028f380
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -106,7 +112,8 @@ public:
      * Slot 30.
      *
      * @param pButton The button whose alternation finished, which is not read.
-     * @ghidraAddress 0x00273f28
+     * @ghidraAddress NTSC-U/C: 0x00273f28
+     * @ghidraAddress PAL: 0x0028c670
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -116,7 +123,8 @@ public:
      * Slot 36. After a back command the mode screen is brought up. Otherwise the selected index
      * is written to GameParams::mDifficulty and the solo stages screen is brought up.
      *
-     * @ghidraAddress 0x00274058
+     * @ghidraAddress NTSC-U/C: 0x00274058
+     * @ghidraAddress PAL: 0x0028c7e8
      */
     virtual void OnExitFinished();
 

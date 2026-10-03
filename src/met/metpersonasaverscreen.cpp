@@ -68,7 +68,11 @@ static const char *const kSaveText = "mem_save";
 static const char *const kCopyText = "mem_copy12";
 static const char *const kDeleteFirstText = "freq_mid_del1";
 static const char *const kDeleteSecondText = "freq_mid_del2";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kDeleteFormat = "%s%s%s";
+#else
 static const char *const kDeleteFormat = "%s %s %s";
+#endif
 static const char *const kSaveNoSpaceText = "save_fail_nospace";
 static const char *const kCopyNoSpaceText = "copy_fail_nospace";
 static const char *const kSaveFailFormatText = "save_fail_format";
@@ -253,7 +257,7 @@ inline void OpenNameKeyboard(MetPersonaData *pPersona, MetKBUser *pUser) {
 
 } // namespace
 
-// 0x0032e858
+// NTSC-U/C: 0x0032e858, PAL: 0x00356da0
 void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
                                       MetPersonaData *pPersona,
                                       const MemcardConnectState &slot,
@@ -273,7 +277,7 @@ void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
     pLoadGame->ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// 0x0032eaa8
+// NTSC-U/C: 0x0032eaa8, PAL: 0x00357068
 void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
                                         MetPersonaData *pPersona,
                                         const MemcardConnectState &slot) {
@@ -291,18 +295,18 @@ void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
     pLoadGame->ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// 0x0032ece0
+// NTSC-U/C: 0x0032ece0, PAL: 0x00357320
 MetPersonaSaverScreen::MetPersonaSaverScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mIsCopy(0), mConfirmReplace(0), mRefreshingSettingsCard(0) {
 }
 
-// 0x0032f020
+// NTSC-U/C: 0x0032f020, PAL: 0x003576d0
 MetPersonaSaverScreen::~MetPersonaSaverScreen() {
     ClearPersonas();
 }
 
-// 0x0032f1e0
+// NTSC-U/C: 0x0032f1e0, PAL: 0x003578b8
 void MetPersonaSaverScreen::CommitSave() {
     if (mIsCopy != 0 || mTargetSlot.mPortSlot != 0 ||
         MetFrontEndState::shared()->mUsingMemcard != 0 || mPersona == nullptr) {
@@ -349,7 +353,7 @@ void MetPersonaSaverScreen::CommitSave() {
     BeginExit();
 }
 
-// 0x0032f4d0
+// NTSC-U/C: 0x0032f4d0, PAL: 0x00357bd8
 void MetPersonaSaverScreen::ClearPersonas() {
     // Yes, the binary re-reads the size on every iteration rather than caching it.
     for (unsigned index = 0; index < mPersonas.size(); ++index) {
@@ -510,7 +514,7 @@ int MetPersonaSaverScreen::CheckPersonaLimit() {
     return 0;
 }
 
-// 0x00332130
+// NTSC-U/C: 0x00332130, PAL: 0x0035aeb0
 void MetPersonaSaverScreen::SyncActivePersona() {
     std::vector<MetPersonaData *> roster(*Application::shared()->GetGameManager()->GetPersonas());
     MetPersonaData *pActive = roster.size() != 0 ? roster[0] : nullptr;
@@ -841,12 +845,12 @@ void MetPersonaSaverScreen::AskToReplace() {
                        this);
 }
 
-// 0x00338f98
+// NTSC-U/C: 0x00338f98, PAL: 0x00362f70
 MetPersonaSaverScreen *MetPersonaSaverScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetPersonaSaverScreen(pRenderer, nPriority);
 }
 
-// 0x00339020
+// NTSC-U/C: 0x00339020, PAL: 0x00362ff8
 void MetPersonaSaverScreen::SetSaveRequest(const std::vector<HxStr> &screens,
                                            MetPersonaData *pPersona,
                                            const MemcardConnectState &slot) {
@@ -855,23 +859,23 @@ void MetPersonaSaverScreen::SetSaveRequest(const std::vector<HxStr> &screens,
     mTargetSlot = slot;
 }
 
-// 0x003390a0
+// NTSC-U/C: 0x003390a0, PAL: 0x00363078
 void MetPersonaSaverScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// 0x003390c0
+// NTSC-U/C: 0x003390c0, PAL: 0x00363098
 void MetPersonaSaverScreen::EnterAndShow() {
     SetShowing(0); // Yes, the binary does not run MetScreen::EnterAndShow().
 }
 
-// 0x003390f0
+// NTSC-U/C: 0x003390f0, PAL: 0x003630c8
 void MetPersonaSaverScreen::OnPanelActivated() {
     mRefreshingSettingsCard = 0;
     CommitSave();
 }
 
-// 0x00339110
+// NTSC-U/C: 0x00339110, PAL: 0x003630e8
 void MetPersonaSaverScreen::BeginExit() {
     mRenderer->RemoveScreen(this);
     const int nCount = mReturnScreens.size();
@@ -881,7 +885,7 @@ void MetPersonaSaverScreen::BeginExit() {
     ActivateNamedPanel(mReturnScreens[0]);
 }
 
-// 0x003391a8
+// NTSC-U/C: 0x003391a8, PAL: 0x00363180
 void MetPersonaSaverScreen::OnKeyboardTextEntered(const HxStr &text) {
     mPersona->SetName(text);
 }

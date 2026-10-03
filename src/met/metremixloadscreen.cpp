@@ -16,6 +16,7 @@
 #include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/formatstring.h"
+#include "os/hostmode.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/font.h"
@@ -107,17 +108,30 @@ inline HxStr FactoryTitle(const GameParams &params) {
     return title;
 }
 
-inline HxStr CardTitle(const GameParams &params) {
+// The European release shows the Spanish title without the card name, and the French one too when
+// bPlainInFrench is set.
+inline HxStr CardTitle(const GameParams &params, [[maybe_unused]] bool bPlainInFrench) {
     HxStr slotName = FirstCardSlotName();
     HxStr format = params.mPlayMode == kPlayModeJam ?
                        MetConfigText(kMetStrTMemLoadRemix, kTitleConfigCode, kCardRemixTitleKey) :
                        MetConfigText(kMetStrTMemLoadCustom, kTitleConfigCode, kCardCustomTitleKey);
-    return HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+    HxStr title(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+#ifdef VIDEO_STANDARD_PAL
+    if (GetLanguage() == SCE_SPANISH_LANGUAGE ||
+        (bPlainInFrench && GetLanguage() == SCE_FRENCH_LANGUAGE)) {
+        title = format;
+    }
+#endif
+    return title;
 }
+
+// OnButtonRingMoved() shows the French title without the card name, and EnterAndShow() with it.
+constexpr bool kRingTitlePlainInFrench = true;
+constexpr bool kEnterTitlePlainInFrench = false;
 
 } // namespace
 
-// 0x00349dc0
+// NTSC-U/C: 0x00349dc0, PAL: 0x00375678
 MetRemixLoadScreen::MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mList(nullptr), mThisDiscFont(nullptr), mOtherFont(nullptr), mButtons(nullptr) {
@@ -141,7 +155,7 @@ void MetRemixLoadScreen::ResolveContainerViews() {
     mOtherFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kOtherFont)));
 }
 
-// 0x0034a2a8
+// NTSC-U/C: 0x0034a2a8, PAL: 0x00375c68
 void MetRemixLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -196,7 +210,7 @@ void MetRemixLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x0034a748
+// NTSC-U/C: 0x0034a748, PAL: 0x003761d0
 void MetRemixLoadScreen::ShowRowOnDataScreen(unsigned nIndex) {
     // Yes, the binary takes the registered screen without a cast check.
     MetRemixDataScreen *pDataScreen =
@@ -213,7 +227,7 @@ void MetRemixLoadScreen::OnButtonRingMoved() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     if (mButtons->mSelected == kSavedButtonIndex) {
         mRemixes = Catalogue(kCardRemixKey);
-        MetScreenTitleScreen::ReplaceTitle(CardTitle(params));
+        MetScreenTitleScreen::ReplaceTitle(CardTitle(params, kRingTitlePlainInFrench));
     } else {
         mRemixes = Catalogue(MetRemixManager::kFactorySlot);
         MetScreenTitleScreen::ReplaceTitle(FactoryTitle(params));
@@ -238,7 +252,7 @@ void MetRemixLoadScreen::EnterAndShow() {
         mRemixes = Catalogue(kCardRemixKey);
         mButtons->SetSelected(kSavedButtonIndex);
         if (mRemixes->size() != 0) {
-            MetScreenTitleScreen::SetTitle(CardTitle(params));
+            MetScreenTitleScreen::SetTitle(CardTitle(params, kEnterTitlePlainInFrench));
         } else {
             mButtons->SetSelected(kFactoryButtonIndex);
             mRemixes = Catalogue(MetRemixManager::kFactorySlot);
@@ -268,7 +282,7 @@ void MetRemixLoadScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x0034cbd0
+// NTSC-U/C: 0x0034cbd0, PAL: 0x00378920
 void MetRemixLoadScreen::OnExitFinished() {
     mButtons->ButtonAt(kSavedButtonIndex)->SetShowing(0);
     mButtons->ButtonAt(kFactoryButtonIndex)->SetShowing(0);
@@ -319,7 +333,7 @@ void MetRemixLoadScreen::OnExitFinished() {
     }
 }
 
-// 0x0034d8b0
+// NTSC-U/C: 0x0034d8b0, PAL: 0x00379888
 int MetRemixLoadScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     // The catalogue pointer is not tested for null here, unlike in the two sound overrides.
     if (static_cast<unsigned>(nItem) < mRemixes->size()) {
@@ -333,31 +347,31 @@ int MetRemixLoadScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     return 1;
 }
 
-// 0x00352588
+// NTSC-U/C: 0x00352588, PAL: 0x0037e6f8
 int MetRemixLoadScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 1;
 }
 
-// 0x00352590
+// NTSC-U/C: 0x00352590, PAL: 0x0037e700
 MetRemixLoadScreen *MetRemixLoadScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixLoadScreen(pRenderer, nPriority);
 }
 
-// 0x00352618
+// NTSC-U/C: 0x00352618, PAL: 0x0037e788
 MetRemixLoadScreen::~MetRemixLoadScreen() {
     delete mList;
     mList = nullptr;
     delete mButtons;
 }
 
-// 0x003526d0
+// NTSC-U/C: 0x003526d0, PAL: 0x0037e840
 void MetRemixLoadScreen::PlaySlideSound(int nSelector) {
     if (mRemixes != nullptr && mRemixes->size() != 0) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// 0x00352720
+// NTSC-U/C: 0x00352720, PAL: 0x0037e890
 void MetRemixLoadScreen::PlayHighSound(int nSelector) {
     if (mRemixes != nullptr && mRemixes->size() != 0) {
         MetScreen::PlayHighSound(nSelector);

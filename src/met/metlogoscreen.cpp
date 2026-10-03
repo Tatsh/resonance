@@ -73,6 +73,16 @@ constexpr int kLegalTextCount = 4;
 // The command beyond MetScreenCommandCode that also starts the game.
 constexpr int kCommandStart = 10;
 
+#ifdef VIDEO_STANDARD_PAL
+// The MetScreen::mExitChoice values OnExitFinished() acts on.
+constexpr int kExitFadeIn = 0;
+constexpr int kExitToMainMenu = 2;
+
+// The fade OnExitFinished() runs. The fade view stays attached when the fade finishes.
+constexpr float kFadeInFrames = 360.0f;
+constexpr int kFadeRetainView = 1;
+#endif
+
 // The interval between two toggles of the start text, in frames.
 constexpr float kBlinkFrames = 120.0f;
 // The value slot 33 gives mBlinkTime to start the blink on the next frame.
@@ -97,25 +107,31 @@ inline long long WatchdogNowNs() {
 
 } // namespace
 
-// 0x002ba4a0
+// NTSC-U/C: 0x002ba4a0, PAL: 0x002d9c10
 MetLogoScreen::MetLogoScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mBlinkTime(0), mAttractEnabled(0), mLastActivityNs(kNoActivity) {
     mAttractDelaySeconds = QueryConfigValue(kAttractDelayConfigCode);
     mAttractStarted = 0;
     mShowsLoadedDrawables = 0;
+#ifdef VIDEO_STANDARD_PAL
+    mFade = new MetFade(pRenderer);
+#endif
 }
 
-// 0x002be418
+// NTSC-U/C: 0x002be418, PAL: 0x002da698
 MetLogoScreen::~MetLogoScreen() {
+#ifdef VIDEO_STANDARD_PAL
+    delete mFade;
+#endif
 }
 
-// 0x002be390
+// NTSC-U/C: 0x002be390, PAL: 0x002de138
 MetLogoScreen *MetLogoScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLogoScreen(pRenderer, nPriority);
 }
 
-// 0x002be670
+// NTSC-U/C: 0x002be670, PAL: 0x002de378
 void MetLogoScreen::RecordUnlock() {
     PlayActivateSound();
     MetFrontEndState::shared()->mUnlockAll = 1;
@@ -163,7 +179,7 @@ void MetLogoScreen::ResolveContainerViews() {
     SetShowing(0);
 }
 
-// 0x002bac40
+// NTSC-U/C: 0x002bac40, PAL: 0x002da778
 void MetLogoScreen::UpdateIdle(float flTime) {
     const long long llNowNs = WatchdogNowNs();
     if (Application::shared()->GetGameManager()->GetPoller()->mPressedThisPoll) {
@@ -178,9 +194,12 @@ void MetLogoScreen::UpdateIdle(float flTime) {
         }
     }
     UpdateBlink(flTime);
+#ifdef VIDEO_STANDARD_PAL
+    mFade->Update(flTime);
+#endif
 }
 
-// 0x002bae40
+// NTSC-U/C: 0x002bae40, PAL: 0x002da988
 void MetLogoScreen::OnEnterFinished() {
     mLastActivityNs = WatchdogNowNs();
     mAttractEnabled = QueryConfigFlag(kAttractEnabledConfigCode);
@@ -189,37 +208,49 @@ void MetLogoScreen::OnEnterFinished() {
     PlaySoundByName(kFrequencySound);
 }
 
-// 0x002baf20
+// NTSC-U/C: 0x002baf20, PAL: 0x002daa68
 void MetLogoScreen::OnExitFinished() {
     if (mAttractStarted) {
         mAttractStarted = 0;
         static_cast<MetLoadGameScreen *>(FindScreenByName(HxStr(kLoadGameScreen)))->mDemoPlayback =
             1;
         PushNamedScreen(HxStr(kLoadGameScreen));
+#ifdef VIDEO_STANDARD_PAL
+    } else if (mExitChoice == kExitToMainMenu) {
+#else
     } else {
+#endif
         MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
         PushNamedScreen(HxStr(kHelpScreen));
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
         PushNamedScreen(HxStr(kTopLogoScreen));
         PushNamedScreen(HxStr(kMainScreen));
         ActivateNamedPanel(HxStr(kMainScreen));
+#ifdef VIDEO_STANDARD_PAL
+    } else if (mExitChoice == kExitFadeIn) {
+        mFade->FadeIn(kFadeInFrames, mRenderer->mAnimationFrame, this, kFadeRetainView);
+        mRenderer->AddScreen(this);
+#endif
     }
     for (int i = 0; i < kLegalTextCount; ++i) {
         mLegalTexts[i]->SetShowing(0);
     }
 }
 
-// 0x002be4d8
+// NTSC-U/C: 0x002be4d8, PAL: 0x002de1c0
 void MetLogoScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandSelect || pCommand->mCommand == kCommandStart) {
         PlaySoundByName(kSlideSound);
         mRenderer->mTitlePromptShowing = 0;
+#ifdef VIDEO_STANDARD_PAL
+        mExitChoice = kExitToMainMenu;
+#endif
         mBlinkTime = 0;
         BeginExit();
     }
 }
 
-// 0x002be540
+// NTSC-U/C: 0x002be540, PAL: 0x002de248
 void MetLogoScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     for (int i = 0; i < kLegalTextCount; ++i) {
@@ -227,14 +258,21 @@ void MetLogoScreen::EnterAndShow() {
     }
 }
 
-// 0x002be5a8
+// NTSC-U/C: 0x002be5a8, PAL: 0x002de2b0
 void MetLogoScreen::UpdateIdleAnimation(float flTime) {
     UpdateBlink(flTime);
 }
 
-// 0x002be6a0
+// NTSC-U/C: 0x002be6a0, PAL: 0x002de3c8
 void MetLogoScreen::HandleMessage(Message *pMsg) {
     if (pMsg->Type() == g_nMetUnlockStagesMsgType) {
         RecordUnlock();
     }
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x002de3a8
+void MetLogoScreen::OnFadeInDone() {
+    mRenderer->RemoveScreen(this);
+}
+#endif

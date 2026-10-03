@@ -46,12 +46,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0028d2c8
+     * @ghidraAddress NTSC-U/C: 0x0028d2c8
+     * @ghidraAddress PAL: 0x002a8f20
      */
     MetLoadGameScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00291a50
+     * @ghidraAddress NTSC-U/C: 0x00291a50
+     * @ghidraAddress PAL: 0x002ad968
      */
     virtual ~MetLoadGameScreen();
 
@@ -61,7 +63,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The screen.
-     * @ghidraAddress 0x002919c8
+     * @ghidraAddress NTSC-U/C: 0x002919c8
+     * @ghidraAddress PAL: 0x002ad8e0
      */
     static MetScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -85,7 +88,8 @@ public:
      * loads both report done. The fade advances on every call.
      *
      * @param flTime The current renderer time.
-     * @ghidraAddress 0x0028dd38
+     * @ghidraAddress NTSC-U/C: 0x0028dd38
+     * @ghidraAddress PAL: 0x002a9b28
      */
     virtual void UpdateIdle(float flTime);
 
@@ -95,7 +99,8 @@ public:
      * Slot 33. The music fades over two seconds, and mDeadlineNs is set 2.1 seconds past the
      * watchdog time.
      *
-     * @ghidraAddress 0x0028dc60
+     * @ghidraAddress NTSC-U/C: 0x0028dc60
+     * @ghidraAddress PAL: 0x002a9a50
      */
     virtual void OnEnterFinished();
 
@@ -104,7 +109,8 @@ public:
      *
      * Slot 38. Runs MetScreen::ResolveContainerViews() first.
      *
-     * @ghidraAddress 0x0028d4c0
+     * @ghidraAddress NTSC-U/C: 0x0028d4c0
+     * @ghidraAddress PAL: 0x002a9180
      */
     virtual void ResolveContainerViews();
 
@@ -115,7 +121,8 @@ public:
      * order. An attract run instead picks one prefabricated identity at random, gives it slot 0,
      * and makes it the game manager's only persona. The title is inferred.
      *
-     * @ghidraAddress 0x0028e158
+     * @ghidraAddress NTSC-U/C: 0x0028e158
+     * @ghidraAddress PAL: 0x002a9fb8
      */
     virtual void AssignBurnSlots();
 
@@ -126,7 +133,8 @@ public:
      * run and a BeginGameLocalMsg otherwise, removes this screen from the renderer, clears
      * MetFrontEndState::mSettingsDirty, and clears the display to black.
      *
-     * @ghidraAddress 0x0028e018
+     * @ghidraAddress NTSC-U/C: 0x0028e018
+     * @ghidraAddress PAL: 0x002a9e78
      */
     virtual void OnFadeInDone();
 
@@ -146,7 +154,8 @@ public:
      * Every one of the five overrides below is a two-instruction stub, so each was written inline
      * with an empty body. A transition screen plays no navigation sound.
      *
-     * @ghidraAddress 0x00291620
+     * @ghidraAddress NTSC-U/C: 0x00291620
+     * @ghidraAddress PAL: 0x002ad518
      */
     virtual void PlaySlideSound(int) {
     }
@@ -154,7 +163,8 @@ public:
     /**
      * Silence the leave sound.
      *
-     * @ghidraAddress 0x00291628
+     * @ghidraAddress NTSC-U/C: 0x00291628
+     * @ghidraAddress PAL: 0x002ad520
      */
     virtual void PlayLeaveSound(int) {
     }
@@ -162,7 +172,8 @@ public:
     /**
      * Silence the high sound.
      *
-     * @ghidraAddress 0x00291630
+     * @ghidraAddress NTSC-U/C: 0x00291630
+     * @ghidraAddress PAL: 0x002ad528
      */
     virtual void PlayHighSound(int) {
     }
@@ -170,7 +181,8 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * @ghidraAddress 0x00291638
+     * @ghidraAddress NTSC-U/C: 0x00291638
+     * @ghidraAddress PAL: 0x002ad530
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -178,21 +190,22 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x00291640
+     * @ghidraAddress NTSC-U/C: 0x00291640
+     * @ghidraAddress PAL: 0x002ad538
      */
     virtual void PlayCycleRightSound(int) {
     }
 
 private:
-    // 0x0028df18
+    // NTSC-U/C: 0x0028df18, PAL: 0x002a9d08
     // Load the level of the net game. The game settings are copied first.
     void LoadNetLevel();
 
-    // 0x00291ad0
+    // NTSC-U/C: 0x00291ad0, PAL: 0x002ada08
     // Record game phase 1 and load the level.
     void LoadGameLevel();
 
-    // 0x00291b28
+    // NTSC-U/C: 0x00291b28, PAL: 0x002ada60
     // Record the tutorial phase and load the level.
     void LoadTutorialLevel();
 

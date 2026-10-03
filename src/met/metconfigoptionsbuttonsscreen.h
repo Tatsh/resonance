@@ -35,12 +35,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002071f0
+     * @ghidraAddress NTSC-U/C: 0x002071f0
+     * @ghidraAddress PAL: 0x00210008
      */
     MetConfigOptionsButtonsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0020c088
+     * @ghidraAddress NTSC-U/C: 0x0020c088
+     * @ghidraAddress PAL: 0x002154b8
      */
     virtual ~MetConfigOptionsButtonsScreen();
 
@@ -52,7 +54,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0020c000
+     * @ghidraAddress NTSC-U/C: 0x0020c000
+     * @ghidraAddress PAL: 0x00215430
      */
     static MetConfigOptionsButtonsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -79,7 +82,8 @@ public:
      * screens, and begins the exit.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002073c8
+     * @ghidraAddress NTSC-U/C: 0x002073c8
+     * @ghidraAddress PAL: 0x00210240
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -87,7 +91,8 @@ public:
      * Play nothing.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x0020bff0
+     * @ghidraAddress NTSC-U/C: 0x0020bff0
+     * @ghidraAddress PAL: 0x00215420
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -95,7 +100,8 @@ public:
      * Play nothing.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x0020bff8
+     * @ghidraAddress NTSC-U/C: 0x0020bff8
+     * @ghidraAddress PAL: 0x00215428
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -106,7 +112,8 @@ public:
      * screens. The memory, credits, and disc buttons also exit the help screen.
      *
      * @param pButton The button that finished alternating.
-     * @ghidraAddress 0x00207fc0
+     * @ghidraAddress NTSC-U/C: 0x00207fc0
+     * @ghidraAddress PAL: 0x00211070
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 

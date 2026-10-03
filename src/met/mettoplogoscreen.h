@@ -35,7 +35,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003c46f8
+     * @ghidraAddress NTSC-U/C: 0x003c46f8
+     * @ghidraAddress PAL: 0x003fb828
      */
     MetTopLogoScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -48,12 +49,14 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003c7710
+     * @ghidraAddress NTSC-U/C: 0x003c7710
+     * @ghidraAddress PAL: 0x003fe980
      */
     static MetTopLogoScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003c7798
+     * @ghidraAddress NTSC-U/C: 0x003c7798
+     * @ghidraAddress PAL: 0x003fea08
      */
     virtual ~MetTopLogoScreen();
 
@@ -61,7 +64,8 @@ public:
      * Advance the wave animation to the current frame. Slot 26.
      *
      * @param flTime The current frame position.
-     * @ghidraAddress 0x003c77f0
+     * @ghidraAddress NTSC-U/C: 0x003c77f0
+     * @ghidraAddress PAL: 0x003fea60
      */
     virtual void UpdateIdle(float flTime);
 
@@ -73,7 +77,8 @@ public:
      * without a null test, clears MetScreen::mViewsUnresolved, and resolves `wave.view` into
      * mWaveView.
      *
-     * @ghidraAddress 0x003c4868
+     * @ghidraAddress NTSC-U/C: 0x003c4868
+     * @ghidraAddress PAL: 0x003fba00
      */
     virtual void ResolveContainerViews();
 

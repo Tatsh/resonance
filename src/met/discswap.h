@@ -34,7 +34,8 @@ public:
      * Clears the poll count, sets the poll limit to 1800, records whether the game reads from the
      * disc alone, clears the no-disc flag, and caches configuration value 0x514.
      *
-     * @ghidraAddress 0x0016a048
+     * @ghidraAddress NTSC-U/C: 0x0016a048
+     * @ghidraAddress PAL: 0x0016c248
      */
     void Reset();
 
@@ -47,14 +48,16 @@ public:
      * one. The record itself is not read.
      *
      * @return Non-zero when no archive was left to unmount.
-     * @ghidraAddress 0x0016a098
+     * @ghidraAddress NTSC-U/C: 0x0016a098
+     * @ghidraAddress PAL: 0x0016c298
      */
     int ReleaseDisc();
 
     /**
      * Restart the eject sequence.
      *
-     * @ghidraAddress 0x0016a168
+     * @ghidraAddress NTSC-U/C: 0x0016a168
+     * @ghidraAddress PAL: 0x0016c368
      */
     void BeginEject();
 
@@ -66,7 +69,8 @@ public:
      *
      * @return kStepEjecting while the sequence runs, kStepEjectFailed when a request is refused,
      * and kStepTrayOpen once the tray is open.
-     * @ghidraAddress 0x00169e50
+     * @ghidraAddress NTSC-U/C: 0x00169e50
+     * @ghidraAddress PAL: 0x0016c050
      */
     int PollEject();
 
@@ -75,7 +79,8 @@ public:
      *
      * The body is identical to BeginEject(), but the two are separate routines in the image.
      *
-     * @ghidraAddress 0x0016a170
+     * @ghidraAddress NTSC-U/C: 0x0016a170
+     * @ghidraAddress PAL: 0x0016c370
      */
     void BeginInsert();
 
@@ -87,7 +92,8 @@ public:
      *
      * @return kStepClosing while the sequence runs, kStepCloseFailed when the tray-close request
      * is refused, and the classification once the drive is ready.
-     * @ghidraAddress 0x00169f08
+     * @ghidraAddress NTSC-U/C: 0x00169f08
+     * @ghidraAddress PAL: 0x0016c108
      */
     int PollInsert();
 
@@ -95,7 +101,8 @@ public:
      * Classify the disc once the drive is ready, without moving the tray.
      *
      * @return kStepTrayOpen while the drive is not ready, otherwise the classification.
-     * @ghidraAddress 0x0016a0e8
+     * @ghidraAddress NTSC-U/C: 0x0016a0e8
+     * @ghidraAddress PAL: 0x0016c2e8
      */
     int CheckDisc();
 
@@ -104,7 +111,8 @@ public:
      *
      * @return kStepNotReady when the drive is not ready, kStepBadDisc when the mount fails, and
      * kStepMounted otherwise.
-     * @ghidraAddress 0x0016a178
+     * @ghidraAddress NTSC-U/C: 0x0016a178
+     * @ghidraAddress PAL: 0x0016c378
      */
     int MountDisc();
 

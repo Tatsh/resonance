@@ -65,7 +65,7 @@ inline Rnd::View *FindView(const HxStr &name) {
 
 } // namespace
 
-// 0x002ec290
+// NTSC-U/C: 0x002ec290, PAL: 0x0030f9d8
 MetMsgScreen::MetMsgScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -73,18 +73,18 @@ MetMsgScreen::MetMsgScreen(MetRenderer *pRenderer, int nPriority)
       mChoice(kNoSelection), mShowing(0), mOwnerPad(kNoPad) {
 }
 
-// 0x002ec450
+// NTSC-U/C: 0x002ec450, PAL: 0x0030fc00
 MetMsgScreen::~MetMsgScreen() {
     delete mTwoButtonList;
     delete mOneButtonList;
 }
 
-// 0x002f02c0
+// NTSC-U/C: 0x002f02c0, PAL: 0x00313d38
 MetMsgScreen *MetMsgScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMsgScreen(pRenderer, nPriority);
 }
 
-// 0x002ebc98
+// NTSC-U/C: 0x002ebc98, PAL: 0x0030f1d8
 void MetMsgScreen::Show(const HxStr &name,
                         const HxStr &title,
                         const HxStr &text,
@@ -111,7 +111,7 @@ void MetMsgScreen::Show(const HxStr &name,
     }
 }
 
-// 0x002ebf40
+// NTSC-U/C: 0x002ebf40, PAL: 0x0030f4f8
 void MetMsgScreen::ShowActive(const HxStr &name,
                               const HxStr &title,
                               const HxStr &text,
@@ -139,12 +139,12 @@ void MetMsgScreen::ShowActive(const HxStr &name,
     }
 }
 
-// 0x002f0348
+// NTSC-U/C: 0x002f0348, PAL: 0x0030f8f0
 void MetMsgScreen::SetOwnerPad(int nPad) {
     dynamic_cast<MetMsgScreen *>(MetScreen::FindScreenByName(HxStr(kMsgScreen)))->mOwnerPad = nPad;
 }
 
-// 0x002ec5d8
+// NTSC-U/C: 0x002ec5d8, PAL: 0x0030fdc0
 void MetMsgScreen::SetButtons(const std::vector<HxStr> &buttons) {
     if (buttons.size() == 0) {
         return;
@@ -155,7 +155,7 @@ void MetMsgScreen::SetButtons(const std::vector<HxStr> &buttons) {
     }
 }
 
-// 0x002ecd10
+// NTSC-U/C: 0x002ecd10, PAL: 0x00310640
 void MetMsgScreen::Refresh() {
     mButtonView->ClearDraws();
     Rnd::View *pButtons = FindView(HxStr(FormatString(kButtonViewFormat, mButtonCount)));
@@ -194,20 +194,20 @@ void MetMsgScreen::Refresh() {
     mChoice = kNoSelection;
 }
 
-// 0x002f0640
+// NTSC-U/C: 0x002f0640, PAL: 0x00313ff0
 void MetMsgScreen::HandleMessage(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
     ForwardToOwner(pMsg);
 }
 
-// 0x002f04d0
+// NTSC-U/C: 0x002f04d0, PAL: 0x00313e80
 void MetMsgScreen::EnterAndShow() {
     mShowing = 0;
     Refresh();
     MetScreen::EnterAndShow();
 }
 
-// 0x002f0588
+// NTSC-U/C: 0x002f0588, PAL: 0x00313f38
 void MetMsgScreen::BeginExit() {
     if (mButtonCount == kNoButtons) {
         mExitTime = mRenderer->mAnimationFrame + kNoButtonExitDelay;
@@ -216,7 +216,7 @@ void MetMsgScreen::BeginExit() {
     }
 }
 
-// 0x002ecba0
+// NTSC-U/C: 0x002ecba0, PAL: 0x003104b0
 void MetMsgScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (mButtonCount == kNoButtons) {
         return;
@@ -250,28 +250,28 @@ void MetMsgScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002f0410
+// NTSC-U/C: 0x002f0410, PAL: 0x00313dc0
 void MetMsgScreen::PlaySlideSound(int nSelector) {
     if (mButtonCount != kNoButtons && (mOwnerPad == nSelector || mOwnerPad == kNoPad)) {
         MetScreenMultiSoundBank::PlaySlideSound(nSelector);
     }
 }
 
-// 0x002f0450
+// NTSC-U/C: 0x002f0450, PAL: 0x00313e00
 void MetMsgScreen::PlayCycleLeftSound(int nSelector) {
     if (mButtonCount >= kTwoButtons && (mOwnerPad == nSelector || mOwnerPad == kNoPad)) {
         MetScreenMultiSoundBank::PlayCycleLeftSound(nSelector);
     }
 }
 
-// 0x002f0490
+// NTSC-U/C: 0x002f0490, PAL: 0x00313e40
 void MetMsgScreen::PlayCycleRightSound(int nSelector) {
     if (mButtonCount >= kTwoButtons && (mOwnerPad == nSelector || mOwnerPad == kNoPad)) {
         MetScreenMultiSoundBank::PlayCycleRightSound(nSelector);
     }
 }
 
-// 0x002f0540
+// NTSC-U/C: 0x002f0540, PAL: 0x00313ef0
 void MetMsgScreen::UpdateIdle(float flTime) {
     if (mExitTime != kNoExitTime && mExitTime < flTime) {
         mExitTime = kNoExitTime;
@@ -279,7 +279,7 @@ void MetMsgScreen::UpdateIdle(float flTime) {
     }
 }
 
-// 0x002f0500
+// NTSC-U/C: 0x002f0500, PAL: 0x00313eb0
 void MetMsgScreen::OnEnterFinished() {
     mShowing = 1;
     if (mOwner != nullptr) {
@@ -287,7 +287,7 @@ void MetMsgScreen::OnEnterFinished() {
     }
 }
 
-// 0x002f05d0
+// NTSC-U/C: 0x002f05d0, PAL: 0x00313f80
 void MetMsgScreen::OnExitFinished() {
     mShowing = 0;
     if (mOwner != nullptr) {
@@ -295,7 +295,7 @@ void MetMsgScreen::OnExitFinished() {
     }
 }
 
-// 0x002ec6f8
+// NTSC-U/C: 0x002ec6f8, PAL: 0x0030ff00
 void MetMsgScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mTwoButtonList = new MetButtonList;

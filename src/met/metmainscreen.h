@@ -33,14 +33,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002c60d0
+     * @ghidraAddress NTSC-U/C: 0x002c60d0
+     * @ghidraAddress PAL: 0x002e6898
      */
     MetMainScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x002cb570
+     * @ghidraAddress NTSC-U/C: 0x002cb570
+     * @ghidraAddress PAL: 0x002ec458
      */
     virtual ~MetMainScreen();
 
@@ -50,7 +52,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002cb4e8
+     * @ghidraAddress NTSC-U/C: 0x002cb4e8
+     * @ghidraAddress PAL: 0x002ec3d0
      */
     static MetMainScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -62,7 +65,8 @@ public:
      * both set, the second is cleared and MetGlobalSettingsSaverScreen::StartSave() runs with this
      * screen as the one return screen. Otherwise EnterMenu() runs.
      *
-     * @ghidraAddress 0x002c6dc0
+     * @ghidraAddress NTSC-U/C: 0x002c6dc0
+     * @ghidraAddress PAL: 0x002e7850
      */
     virtual void EnterAndShow();
 
@@ -72,7 +76,8 @@ public:
      * Slot 19.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002c6820
+     * @ghidraAddress NTSC-U/C: 0x002c6820
+     * @ghidraAddress PAL: 0x002e7180
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -82,7 +87,8 @@ public:
      * Slot 23. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x002cb4d8
+     * @ghidraAddress NTSC-U/C: 0x002cb4d8
+     * @ghidraAddress PAL: 0x002ec3c0
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -92,7 +98,8 @@ public:
      * Slot 24. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x002cb4e0
+     * @ghidraAddress NTSC-U/C: 0x002cb4e0
+     * @ghidraAddress PAL: 0x002ec3c8
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -102,7 +109,8 @@ public:
      * Slot 30.
      *
      * @param pButton The button whose alternation finished, which is not read.
-     * @ghidraAddress 0x002c6c20
+     * @ghidraAddress NTSC-U/C: 0x002c6c20
+     * @ghidraAddress PAL: 0x002e7650
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -124,7 +132,8 @@ public:
      * Slot 36. After a back command the selection is cleared and MetLogoScreen returns. Otherwise
      * OpenSelectedButton() runs.
      *
-     * @ghidraAddress 0x002c73e0
+     * @ghidraAddress NTSC-U/C: 0x002c73e0
+     * @ghidraAddress PAL: 0x002e8000
      */
     virtual void OnExitFinished();
 
@@ -147,7 +156,7 @@ private:
     // inferred.
     void EnterMenu();
 
-    // 0x002c7520
+    // NTSC-U/C: 0x002c7520, PAL: 0x002e8180
     // Open the screen the chosen button leads to. Solo goes to MetLoadPreFabScreen
     // while no save is possible, and otherwise to MetLoadFreqScreen or, with no saved identity,
     // MetLoadNewFreqScreen. The title is inferred.

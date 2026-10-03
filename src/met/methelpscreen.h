@@ -38,12 +38,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003125b0
+     * @ghidraAddress NTSC-U/C: 0x003125b0
+     * @ghidraAddress PAL: 0x00338418
      */
     MetHelpScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00312770
+     * @ghidraAddress NTSC-U/C: 0x00312770
+     * @ghidraAddress PAL: 0x00338640
      */
     virtual ~MetHelpScreen();
 
@@ -53,7 +55,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00317210
+     * @ghidraAddress NTSC-U/C: 0x00317210
+     * @ghidraAddress PAL: 0x0033d4c8
      */
     static MetHelpScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -92,7 +95,8 @@ public:
      * The titles are filled only once the container views are resolved.
      *
      * @param name The layout name.
-     * @ghidraAddress 0x00317758
+     * @ghidraAddress NTSC-U/C: 0x00317758
+     * @ghidraAddress PAL: 0x0033d960
      */
     void ApplyPreset(const HxStr &name);
 
@@ -105,7 +109,8 @@ public:
      *
      * @param text The prompt to display.
      * @param flTime The renderer time to post the prompt at.
-     * @ghidraAddress 0x00312f70
+     * @ghidraAddress NTSC-U/C: 0x00312f70
+     * @ghidraAddress PAL: 0x00338f20
      */
     void PostText(const HxStr &text, float flTime);
 
@@ -115,7 +120,8 @@ public:
      * Slot 19.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00317448
+     * @ghidraAddress NTSC-U/C: 0x00317448
+     * @ghidraAddress PAL: 0x0033d650
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -125,7 +131,8 @@ public:
      * Slot 26.
      *
      * @param flTime The renderer time.
-     * @ghidraAddress 0x00312df0
+     * @ghidraAddress NTSC-U/C: 0x00312df0
+     * @ghidraAddress PAL: 0x00338da0
      */
     virtual void UpdateIdle(float flTime);
 
@@ -134,7 +141,8 @@ public:
      *
      * Slot 36. The show animation's start time is not cleared.
      *
-     * @ghidraAddress 0x00317480
+     * @ghidraAddress NTSC-U/C: 0x00317480
+     * @ghidraAddress PAL: 0x0033d688
      */
     virtual void OnExitFinished();
 
@@ -146,7 +154,8 @@ public:
      * animations are `so_TT_01.anim` and `so_TT_02.anim`, whose end frames are recorded when they
      * resolve. No text is tested for null.
      *
-     * @ghidraAddress 0x003128d0
+     * @ghidraAddress NTSC-U/C: 0x003128d0
+     * @ghidraAddress PAL: 0x003387d0
      */
     virtual void ResolveContainerViews();
 
@@ -154,7 +163,8 @@ private:
     /**
      * Empty every info text and recompose the root view's world transform.
      *
-     * @ghidraAddress 0x003130e8
+     * @ghidraAddress NTSC-U/C: 0x003130e8
+     * @ghidraAddress PAL: 0x00339098
      */
     void ClearInfoTexts();
 
@@ -206,7 +216,8 @@ private:
      * PostText() and UpdateHide() have the body expanded in place, and this copy has no caller.
      *
      * @param flTime The renderer time.
-     * @ghidraAddress 0x00317508
+     * @ghidraAddress NTSC-U/C: 0x00317508
+     * @ghidraAddress PAL: 0x0033d710
      */
     void StartShow(float flTime);
 
@@ -216,7 +227,8 @@ private:
      * UpdateIdle() has the body expanded in place, and this copy has no caller.
      *
      * @param flTime The renderer time.
-     * @ghidraAddress 0x00317568
+     * @ghidraAddress NTSC-U/C: 0x00317568
+     * @ghidraAddress PAL: 0x0033d770
      */
     void UpdateShow(float flTime);
 
@@ -224,7 +236,8 @@ private:
      * Start the hide animation, unless it already runs.
      *
      * @param flTime The renderer time.
-     * @ghidraAddress 0x00317600
+     * @ghidraAddress NTSC-U/C: 0x00317600
+     * @ghidraAddress PAL: 0x0033d808
      */
     void StartHide(float flTime);
 
@@ -234,7 +247,8 @@ private:
      * UpdateIdle() has the body expanded in place, and this copy has no caller.
      *
      * @param flTime The renderer time.
-     * @ghidraAddress 0x00317640
+     * @ghidraAddress NTSC-U/C: 0x00317640
+     * @ghidraAddress PAL: 0x0033d848
      */
     void UpdateHide(float flTime);
 

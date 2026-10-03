@@ -44,14 +44,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00257968
+     * @ghidraAddress NTSC-U/C: 0x00257968
+     * @ghidraAddress PAL: 0x0026d0b0
      */
     MetFreqMakerButtonsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x0025e108
+     * @ghidraAddress NTSC-U/C: 0x0025e108
+     * @ghidraAddress PAL: 0x00274358
      */
     virtual ~MetFreqMakerButtonsScreen();
 
@@ -63,7 +65,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0025e080
+     * @ghidraAddress NTSC-U/C: 0x0025e080
+     * @ghidraAddress PAL: 0x002742d0
      */
     static MetFreqMakerButtonsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -87,7 +90,8 @@ public:
      * them have finished.
      *
      * @return Non-zero once every load has finished.
-     * @ghidraAddress 0x00259fa0
+     * @ghidraAddress NTSC-U/C: 0x00259fa0
+     * @ghidraAddress PAL: 0x0026ffc0
      */
     virtual int PollContainerLoad();
 
@@ -96,7 +100,8 @@ public:
      *
      * Slot 7. Every button returns to state 0 and the selected button takes state 1.
      *
-     * @ghidraAddress 0x0025e1e0
+     * @ghidraAddress NTSC-U/C: 0x0025e1e0
+     * @ghidraAddress PAL: 0x00274430
      */
     virtual void OnPanelActivated();
 
@@ -135,7 +140,8 @@ public:
      * Slot 23. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0025e070
+     * @ghidraAddress NTSC-U/C: 0x0025e070
+     * @ghidraAddress PAL: 0x002742c0
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -145,7 +151,8 @@ public:
      * Slot 24. The body is empty.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0025e078
+     * @ghidraAddress NTSC-U/C: 0x0025e078
+     * @ghidraAddress PAL: 0x002742c8
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -156,7 +163,8 @@ public:
      * button stays in its pressed state.
      *
      * @param pButton The button whose alternation finished, which is not read.
-     * @ghidraAddress 0x00258f40
+     * @ghidraAddress NTSC-U/C: 0x00258f40
+     * @ghidraAddress PAL: 0x0026ebf8
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -165,7 +173,8 @@ public:
      *
      * Slot 33.
      *
-     * @ghidraAddress 0x0025e1a0
+     * @ghidraAddress NTSC-U/C: 0x0025e1a0
+     * @ghidraAddress PAL: 0x002743f0
      */
     virtual void OnEnterFinished();
 
@@ -201,7 +210,8 @@ public:
      * this screen becomes the active panel again. An empty name does nothing.
      *
      * @param text The name.
-     * @ghidraAddress 0x0025a108
+     * @ghidraAddress NTSC-U/C: 0x0025a108
+     * @ghidraAddress PAL: 0x00270168
      */
     virtual void OnKeyboardTextEntered(const HxStr &text);
 
@@ -213,7 +223,8 @@ public:
      * is inferred.
      *
      * @param nEditing 1 to edit, 0 to create.
-     * @ghidraAddress 0x0025e288
+     * @ghidraAddress NTSC-U/C: 0x0025e288
+     * @ghidraAddress PAL: 0x002744d8
      */
     void SetEditing(int nEditing);
 
@@ -222,12 +233,12 @@ private:
     // Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
     void UpdateRandomizeLabel();
 
-    // 0x0025a3e0
+    // NTSC-U/C: 0x0025a3e0, PAL: 0x002704c8
     // Show the inventory page a part button selects, or hide the pages for the edit,
     // name, randomise, and save buttons. The directions screen is resolved and not used.
     void ShowPageForButton(Rnd::Button *pButton);
 
-    // 0x0025a5e0
+    // NTSC-U/C: 0x0025a5e0, PAL: 0x00270710
     // Show the directions page for a button, or the blank page for no button.
     void ShowDirectionsForButton(Rnd::Button *pButton);
 

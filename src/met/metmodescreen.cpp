@@ -72,7 +72,7 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// 0x002e72c0
+// NTSC-U/C: 0x002e72c0, PAL: 0x0030a2f0
 MetModeScreen::MetModeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(new MetButtonList()) {
@@ -91,7 +91,7 @@ void MetModeScreen::ResolveContainerViews() {
     mButtonList->Add(jamButton, jamLabel);
 }
 
-// 0x002e7628
+// NTSC-U/C: 0x002e7628, PAL: 0x0030a728
 void MetModeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -154,7 +154,7 @@ void MetModeScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x002e8008
+// NTSC-U/C: 0x002e8008, PAL: 0x0030b2f8
 void MetModeScreen::OnExitFinished() {
     if (mExitChoice != kExitByBack) {
         GoToSelectedMode();
@@ -177,7 +177,7 @@ void MetModeScreen::OnExitFinished() {
     }
 }
 
-// 0x002e8398
+// NTSC-U/C: 0x002e8398, PAL: 0x0030b748
 void MetModeScreen::GoToSelectedMode() {
     switch (mButtonList->mSelected) {
     case kGameButtonIndex:
@@ -197,30 +197,30 @@ void MetModeScreen::GoToSelectedMode() {
     }
 }
 
-// 0x002eb808
+// NTSC-U/C: 0x002eb808, PAL: 0x0030ed10
 void MetModeScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x002eb810
+// NTSC-U/C: 0x002eb810, PAL: 0x0030ed18
 void MetModeScreen::PlayCycleRightSound(int) {
 }
 
-// 0x002eb818
+// NTSC-U/C: 0x002eb818, PAL: 0x0030ed20
 MetModeScreen *MetModeScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetModeScreen(pRenderer, nPriority);
 }
 
-// 0x002eb8a0
+// NTSC-U/C: 0x002eb8a0, PAL: 0x0030eda8
 MetModeScreen::~MetModeScreen() {
     delete mButtonList;
 }
 
-// 0x002eb920
+// NTSC-U/C: 0x002eb920, PAL: 0x0030ee28
 void MetModeScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 
-// 0x002eb958
+// NTSC-U/C: 0x002eb958, PAL: 0x0030ee60
 void MetModeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitBySelect;
     ExitScreenByName(HxStr(kTitleScreen));

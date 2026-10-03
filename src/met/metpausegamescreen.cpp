@@ -37,14 +37,14 @@ constexpr int kTutorialPhase = 5;
 
 } // namespace
 
-// 0x0031c368
+// NTSC-U/C: 0x0031c368, PAL: 0x00342550
 MetPauseGameScreen::MetPauseGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
     mReturnPanel = kPanelName;
 }
 
-// 0x0031c508
+// NTSC-U/C: 0x0031c508, PAL: 0x00342750
 void MetPauseGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
@@ -90,7 +90,7 @@ void MetPauseGameScreen::EnterAndShow() {
     MetPauseBaseScreen::EnterAndShow();
 }
 
-// 0x0031fa40
+// NTSC-U/C: 0x0031fa40, PAL: 0x003463f8
 MetPauseGameScreen *MetPauseGameScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetPauseGameScreen(pRenderer, nPriority);
 }

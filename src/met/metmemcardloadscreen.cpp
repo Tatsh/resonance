@@ -147,11 +147,11 @@ MetMemCardLoadScreen::MetMemCardLoadScreen(MetRenderer *pRenderer, int nPriority
     mHelpKeys.push_back(MetText(kMetStrHMclCard, kCardKey));
 }
 
-// 0x002cbcc8
+// NTSC-U/C: 0x002cbcc8, PAL: 0x002ecc50
 MetMemCardLoadScreen::~MetMemCardLoadScreen() {
 }
 
-// 0x002d1e28
+// NTSC-U/C: 0x002d1e28, PAL: 0x002f4000
 MetMemCardLoadScreen *MetMemCardLoadScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemCardLoadScreen(pRenderer, nPriority);
 }
@@ -173,7 +173,7 @@ void MetMemCardLoadScreen::ResolveContainerViews() {
     mAvailableText = FindObject<Rnd::Text>(kAvailableText);
 }
 
-// 0x002cc328
+// NTSC-U/C: 0x002cc328, PAL: 0x002ed610
 void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandLeft:
@@ -295,7 +295,7 @@ void MetMemCardLoadScreen::ShowSelection() {
     }
 }
 
-// 0x002ccfb8
+// NTSC-U/C: 0x002ccfb8, PAL: 0x002eea70
 void MetMemCardLoadScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     const int nCards = mCards.size();
     if (pButton == mLeftArrow) {
@@ -307,7 +307,7 @@ void MetMemCardLoadScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// 0x002cd0e8
+// NTSC-U/C: 0x002cd0e8, PAL: 0x002eebc0
 void MetMemCardLoadScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kRightGizmoScreen));
@@ -376,7 +376,7 @@ void MetMemCardLoadScreen::OnDetectFinished() {
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// 0x002cde00
+// NTSC-U/C: 0x002cde00, PAL: 0x002efb38
 void MetMemCardLoadScreen::RefreshCards() {
     mCards.clear();
     if (GlobalSettings::shared()->mCardSlots.size() != 0) {
@@ -397,7 +397,7 @@ void MetMemCardLoadScreen::RefreshCards() {
     }
 }
 
-// 0x002ce160
+// NTSC-U/C: 0x002ce160, PAL: 0x002efea8
 void MetMemCardLoadScreen::Present(MetMemCardPickerUser *pUser, bool bShowNow) {
     mPickerUser = pUser;
     if (bShowNow) {
@@ -448,28 +448,28 @@ void MetMemCardLoadScreen::ShowFormatCheck(const MemcardConnectState &) {
 }
 #endif
 
-// 0x002d1eb0
+// NTSC-U/C: 0x002d1eb0, PAL: 0x002f4088
 void MetMemCardLoadScreen::PlayCycleLeftSound(int nSelector) {
     if (mCards.size() >= kMinimumCyclableCards) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
-// 0x002d1ef8
+// NTSC-U/C: 0x002d1ef8, PAL: 0x002f40d0
 void MetMemCardLoadScreen::PlayCycleRightSound(int nSelector) {
     if (mCards.size() >= kMinimumCyclableCards) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
-// 0x002d1f40
+// NTSC-U/C: 0x002d1f40, PAL: 0x002f4118
 void MetMemCardLoadScreen::PlaySlideSound(int nSelector) {
     if (!mCards.empty()) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// 0x002d1f88
+// NTSC-U/C: 0x002d1f88, PAL: 0x002f4160
 void MetMemCardLoadScreen::UpdateArrows() {
     if (mCards.size() >= kMinimumCyclableCards) {
         mLeftArrow->SetShowing(1);

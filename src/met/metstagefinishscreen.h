@@ -45,7 +45,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003bdbb8
+     * @ghidraAddress NTSC-U/C: 0x003bdbb8
+     * @ghidraAddress PAL: 0x003f2908
      */
     MetStageFinishScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -58,12 +59,14 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003c4250
+     * @ghidraAddress NTSC-U/C: 0x003c4250
+     * @ghidraAddress PAL: 0x003f96d0
      */
     static MetStageFinishScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003bded8
+     * @ghidraAddress NTSC-U/C: 0x003bded8
+     * @ghidraAddress PAL: 0x003f2c98
      */
     virtual ~MetStageFinishScreen();
 
@@ -82,7 +85,8 @@ public:
      * settings are saved first through MetGlobalSettingsSaverScreen::StartSave(), and
      * ShowMessages() runs in every other case.
      *
-     * @ghidraAddress 0x003be2a8
+     * @ghidraAddress NTSC-U/C: 0x003be2a8
+     * @ghidraAddress PAL: 0x003f30e8
      */
     virtual void EnterAndShow();
 
@@ -94,7 +98,8 @@ public:
      * back button.
      *
      * @param pCommand The command to route.
-     * @ghidraAddress 0x003bf788
+     * @ghidraAddress NTSC-U/C: 0x003bf788
+     * @ghidraAddress PAL: 0x003f4840
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -102,7 +107,8 @@ public:
      * Play no leave sound. Slot 21.
      *
      * @param nSelector The pad index of the command, which the body does not read.
-     * @ghidraAddress 0x003c4228
+     * @ghidraAddress NTSC-U/C: 0x003c4228
+     * @ghidraAddress PAL: 0x003f96a8
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -110,7 +116,8 @@ public:
      * Play no high sound. Slot 22.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003c4230
+     * @ghidraAddress NTSC-U/C: 0x003c4230
+     * @ghidraAddress PAL: 0x003f96b0
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -118,7 +125,8 @@ public:
      * Play no left cycle sound. Slot 23.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003c4238
+     * @ghidraAddress NTSC-U/C: 0x003c4238
+     * @ghidraAddress PAL: 0x003f96b8
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -126,7 +134,8 @@ public:
      * Play no right cycle sound. Slot 24.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003c4240
+     * @ghidraAddress NTSC-U/C: 0x003c4240
+     * @ghidraAddress PAL: 0x003f96c0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -134,7 +143,8 @@ public:
      * Play no error sound. Slot 25.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003c4248
+     * @ghidraAddress NTSC-U/C: 0x003c4248
+     * @ghidraAddress PAL: 0x003f96c8
      */
     virtual void PlayErrorSound(int nSelector);
 
@@ -150,7 +160,8 @@ public:
      * interval after the last message rather than with it.
      *
      * @param flTime The current frame position.
-     * @ghidraAddress 0x003bf5e8
+     * @ghidraAddress NTSC-U/C: 0x003bf5e8
+     * @ghidraAddress PAL: 0x003f4680
      */
     virtual void UpdateIdle(float flTime);
 
@@ -158,7 +169,8 @@ public:
      * Start this screen's exit animation. Slot 30.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x003c4390
+     * @ghidraAddress NTSC-U/C: 0x003c4390
+     * @ghidraAddress PAL: 0x003f9830
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -167,7 +179,8 @@ public:
      *
      * MetScreen slot 32 runs the slot once the enter animation has finished.
      *
-     * @ghidraAddress 0x003c42d8
+     * @ghidraAddress NTSC-U/C: 0x003c42d8
+     * @ghidraAddress PAL: 0x003f9758
      */
     virtual void OnEnterFinished();
 
@@ -179,7 +192,8 @@ public:
      * pushes and activates `MetSoloWinScreen`, selects no button, empties the messages, and hides
      * the four congratulation texts.
      *
-     * @ghidraAddress 0x003c0530
+     * @ghidraAddress NTSC-U/C: 0x003c0530
+     * @ghidraAddress PAL: 0x003f5820
      */
     virtual void OnExitFinished();
 
@@ -274,7 +288,8 @@ private:
      * is hidden and disabled, and MetScreen::EnterAndShow() runs last. Slot 5 at `0x003bec68` is
      * the one caller.
      *
-     * @ghidraAddress 0x003bef98
+     * @ghidraAddress NTSC-U/C: 0x003bef98
+     * @ghidraAddress PAL: 0x003f3f70
      */
     void ShowMessages();
 

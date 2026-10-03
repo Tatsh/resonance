@@ -30,7 +30,8 @@ public:
     /**
      * Build the five empty held-direction records.
      *
-     * @ghidraAddress 0x002e33f0
+     * @ghidraAddress NTSC-U/C: 0x002e33f0
+     * @ghidraAddress PAL: 0x003063b0
      */
     MetCommandMap();
 
@@ -39,7 +40,8 @@ public:
      *
      * Inline. The address is its out-of-line copy in MetRenderer's translation unit.
      *
-     * @ghidraAddress 0x00371138
+     * @ghidraAddress NTSC-U/C: 0x00371138
+     * @ghidraAddress PAL: 0x0039fc30
      */
     ~MetCommandMap() {
     }
@@ -57,12 +59,13 @@ public:
      * @param pReading The reading, which is the RawControllerMsg payload rather than the message.
      * @param pCommand The command the reading translates to.
      * @return Non-zero unless the command is -1.
-     * @ghidraAddress 0x002e3738
+     * @ghidraAddress NTSC-U/C: 0x002e3738
+     * @ghidraAddress PAL: 0x003066f8
      */
     int Translate(const MetControllerReading *pReading, MetScreenCommand *pCommand);
 
 private:
-    // 0x002e3ac0
+    // NTSC-U/C: 0x002e3ac0, PAL: 0x00306a80
     // Translates one analogue reading. A value below 0.1 yields nNegative and one above 0.9 yields
     // nPositive, each only once until the stick returns to the centre, where the direction is
     // released and 0 is returned. A direction already held returns -1.

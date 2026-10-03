@@ -95,7 +95,7 @@ inline HxStr ConfigText(MetStringId nId, const char *pszKey) {
 
 } // namespace
 
-// 0x00372120
+// NTSC-U/C: 0x00372120, PAL: 0x003a0c30
 MetSaveRemix::MetSaveRemix(MetRenderer *pRenderer,
                            int nPriority,
                            const HxStr &name,
@@ -105,11 +105,11 @@ MetSaveRemix::MetSaveRemix(MetRenderer *pRenderer,
       mRefreshFirstCardSlot(0), mCopying(0), mAlbumNumber(0) {
 }
 
-// 0x00372248
+// NTSC-U/C: 0x00372248, PAL: 0x003a0d60
 MetSaveRemix::~MetSaveRemix() {
 }
 
-// 0x00372488
+// NTSC-U/C: 0x00372488, PAL: 0x003a0fd0
 void MetSaveRemix::RecordPendingSave(const MemcardConnectState &selection,
                                      int nOwnerPad,
                                      HxStr remixName,
@@ -127,7 +127,7 @@ void MetSaveRemix::RecordPendingSave(const MemcardConnectState &selection,
     MemcardManager::shared()->CreateGetConnectStateTask(selection.mPortSlot);
 }
 
-// 0x0037a650
+// NTSC-U/C: 0x0037a650, PAL: 0x003aa228
 void MetSaveRemix::OnKeyboardTextEntered(const HxStr &text) {
     mRemixName = text;
     MemcardManager::shared()->mUser = this;
@@ -136,23 +136,29 @@ void MetSaveRemix::OnKeyboardTextEntered(const HxStr &text) {
     MetMsgScreen::SetOwnerPad(mOwnerPad);
 }
 
-// 0x0037a618
+// NTSC-U/C: 0x0037a618, PAL: 0x003aa0c8
 void MetSaveRemix::OnSaveAbandoned() {
 }
 
-// 0x0037a620
+// NTSC-U/C: 0x0037a620, PAL: 0x003aa0d0
 void MetSaveRemix::OnSaveDialogueClosed() {
 }
 
-// 0x0037a628
+// NTSC-U/C: 0x0037a628, PAL: 0x003aa200
 void MetSaveRemix::OnDuplicateNameDeclined() {
     OnSaveAbandoned();
 }
 
 // NTSC-U/C: 0x00372c10, PAL: 0x003a1840
 void MetSaveRemix::OnConnectState(MemcardConnectState state, int nStatus) {
+#ifdef VIDEO_STANDARD_PAL
+    // The European release also offers to format a card the enquiry reports as unformatted.
+    if (nStatus == kMemcardStatusOk || nStatus == kMemcardStatusNotFormatted) {
+        if (nStatus == kMemcardStatusOk && state.mFormatted != 0) {
+#else
     if (nStatus == kMemcardStatusOk) {
         if (state.mFormatted != 0) {
+#endif
             if (mRefreshFirstCardSlot != 0) {
                 GlobalSettings::shared(); // Yes, the binary discards this call's result.
                 GlobalSettings::shared()->mCardSlots[0] = state;

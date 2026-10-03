@@ -155,7 +155,7 @@ MetMCFreqDelScreen::MetMCFreqDelScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHDelFreq, kHelpKey));
 }
 
-// 0x002beca8
+// NTSC-U/C: 0x002beca8, PAL: 0x002dea70
 MetMCFreqDelScreen::~MetMCFreqDelScreen() {
     if (mList != nullptr) {
         delete mList;
@@ -164,7 +164,7 @@ MetMCFreqDelScreen::~MetMCFreqDelScreen() {
     DeletePersonas(mPersonas);
 }
 
-// 0x002c5b60
+// NTSC-U/C: 0x002c5b60, PAL: 0x002e62d0
 MetMCFreqDelScreen *MetMCFreqDelScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMCFreqDelScreen(pRenderer, nPriority);
 }
@@ -188,7 +188,7 @@ void MetMCFreqDelScreen::ResolveContainerViews() {
     mBirthdayText = FindObject<Rnd::Text>(kBirthdayText);
 }
 
-// 0x002bf3a8
+// NTSC-U/C: 0x002bf3a8, PAL: 0x002df258
 void MetMCFreqDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -341,7 +341,7 @@ void MetMCFreqDelScreen::OnExitFinished() {
     }
 }
 
-// 0x002c0ad8
+// NTSC-U/C: 0x002c0ad8, PAL: 0x002e0dc0
 void MetMCFreqDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kDeleteMessage) {
         if (nChoice == kChoiceYes) {
@@ -437,18 +437,18 @@ void MetMCFreqDelScreen::OnConnectState(MemcardConnectState, int nStatus) {
                        this);
 }
 
-// 0x002c5b40
+// NTSC-U/C: 0x002c5b40, PAL: 0x002e62b0
 int MetMCFreqDelScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 1;
 }
 
-// 0x002c5be8
+// NTSC-U/C: 0x002c5be8, PAL: 0x002e6358
 void MetMCFreqDelScreen::EnterAndShow() {
     SetShowing(0);
     mLoadPending = 1;
 }
 
-// 0x002c5c28
+// NTSC-U/C: 0x002c5c28, PAL: 0x002e6398
 int MetMCFreqDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     if (static_cast<unsigned>(nItem) < mPersonas.size()) {
         pText->SetText(mPersonas[nItem]->mAppearance.mUserName);
@@ -458,7 +458,7 @@ int MetMCFreqDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     return 1;
 }
 
-// 0x002c5d10
+// NTSC-U/C: 0x002c5d10, PAL: 0x002e64a0
 void MetMCFreqDelScreen::SetCardSlot(MemcardConnectState slot) {
     mCardSlot = slot;
     mLoadPending = 0;

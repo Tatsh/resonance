@@ -82,16 +82,16 @@ static const char *const kNameRejectedDialogue = "namenogood";
 
 } // namespace
 
-// 0x002a8418
+// NTSC-U/C: 0x002a8418, PAL: 0x002c68e8
 MetLoadNewFreqScreen::MetLoadNewFreqScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
-// 0x002a8458
+// NTSC-U/C: 0x002a8458, PAL: 0x002c6938
 MetLoadNewFreqScreen::~MetLoadNewFreqScreen() {
 }
 
-// 0x002a8390
+// NTSC-U/C: 0x002a8390, PAL: 0x002c6860
 MetScreen *MetLoadNewFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadNewFreqScreen(pRenderer, nPriority);
 }
@@ -133,7 +133,7 @@ void MetLoadNewFreqScreen::EnterAndShow() {
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
-// 0x002a84c0
+// NTSC-U/C: 0x002a84c0, PAL: 0x002c17b8
 void MetLoadNewFreqScreen::BeginExit() {
     if (mExitChoice != 0 && mButtonList->mSelected == kNameButtonIndex) {
         ExitScreenByName(HxStr(kHelpScreen));
@@ -142,7 +142,7 @@ void MetLoadNewFreqScreen::BeginExit() {
     MetScreen::BeginExit();
 }
 
-// 0x002a3978
+// NTSC-U/C: 0x002a3978, PAL: 0x002c18a8
 void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     if (mNameEntered != 0) {
         return;
@@ -153,7 +153,7 @@ void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
 }
 
-// 0x002a4340
+// NTSC-U/C: 0x002a4340, PAL: 0x002c2548
 void MetLoadNewFreqScreen::OnKeyboardTextEntered(const HxStr &text) {
     mNameEntered = 1;
     HxStr name(text);
@@ -206,7 +206,7 @@ void MetLoadNewFreqScreen::UpdateNameLabel() {
     pLabel->SetText(label);
 }
 
-// 0x002a3f80
+// NTSC-U/C: 0x002a3f80, PAL: 0x002c2000
 void MetLoadNewFreqScreen::PrepareFreqMakerForSelection() {
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
@@ -228,7 +228,7 @@ void MetLoadNewFreqScreen::OnCreateButton() {
 #endif
 }
 
-// 0x002a8590
+// NTSC-U/C: 0x002a8590, PAL: 0x002c69a8
 void MetLoadNewFreqScreen::AcquireIdentityList() {
     mIdentityList = MetFreqMakerAssetManager::shared()->GetIdentityList();
 }

@@ -39,7 +39,8 @@ public:
      * @param name The screen name.
      * @param directory The directory the container loads from.
      * @param file The container name, without the `.rnd` suffix.
-     * @ghidraAddress 0x0038ff58
+     * @ghidraAddress NTSC-U/C: 0x0038ff58
+     * @ghidraAddress PAL: 0x003c1828
      */
     MetScreenMultiSoundBank(MetRenderer *pRenderer,
                             int nPriority,
@@ -48,37 +49,43 @@ public:
                             const HxStr &file);
 
     /**
-     * @ghidraAddress 0x0038fe60
+     * @ghidraAddress NTSC-U/C: 0x0038fe60
+     * @ghidraAddress PAL: 0x003c1730
      */
     virtual ~MetScreenMultiSoundBank();
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x003907b0
+     * @ghidraAddress NTSC-U/C: 0x003907b0
+     * @ghidraAddress PAL: 0x003c2080
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x003907f0
+     * @ghidraAddress NTSC-U/C: 0x003907f0
+     * @ghidraAddress PAL: 0x003c20c0
      */
     virtual void PlayLeaveSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00390830
+     * @ghidraAddress NTSC-U/C: 0x00390830
+     * @ghidraAddress PAL: 0x003c2100
      */
     virtual void PlayHighSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x00390870
+     * @ghidraAddress NTSC-U/C: 0x00390870
+     * @ghidraAddress PAL: 0x003c2140
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x003908b0
+     * @ghidraAddress NTSC-U/C: 0x003908b0
+     * @ghidraAddress PAL: 0x003c2180
      */
     virtual void PlayCycleRightSound(int nSelector);
 };

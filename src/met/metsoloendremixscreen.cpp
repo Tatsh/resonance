@@ -110,7 +110,7 @@ T *FindObject(const char *pszName) {
 
 } // namespace
 
-// 0x00399630
+// NTSC-U/C: 0x00399630, PAL: 0x003cb788
 MetSoloEndRemixScreen *MetSoloEndRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloEndRemixScreen(pRenderer, nPriority);
 }
@@ -137,7 +137,7 @@ void MetSoloEndRemixScreen::ResolveContainerViews() {
     mPhotoMat = FindObject<Rnd::Mat>(kPhotoMat);
 }
 
-// 0x00395a20
+// NTSC-U/C: 0x00395a20, PAL: 0x003c79e0
 void MetSoloEndRemixScreen::ReturnToTitle() {
     mRenderer->ResolveArenaView(kResolveArenaView);
     mRenderer->OnReturnFromGame();
@@ -148,7 +148,7 @@ void MetSoloEndRemixScreen::ReturnToTitle() {
     ActivateNamedPanel(HxStr(kRemixTypeScreenName));
 }
 
-// 0x00394e10
+// NTSC-U/C: 0x00394e10, PAL: 0x003c6ad8
 void MetSoloEndRemixScreen::EnterAndShow() {
     if ((MetFrontEndState::shared()->mUsingMemcard == kFrontEndFlagSet) &&
         (MetFrontEndState::shared()->mSettingsDirty == kFrontEndFlagSet)) {
@@ -226,7 +226,7 @@ void MetSoloEndRemixScreen::ShowResults() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00399748
+// NTSC-U/C: 0x00399748, PAL: 0x003cb8a0
 void MetSoloEndRemixScreen::UpdateIdle([[maybe_unused]] float flTime) {
     // Both Advance() results are discarded, as in the binary.
     mLogoTextures.Advance();
@@ -235,30 +235,30 @@ void MetSoloEndRemixScreen::UpdateIdle([[maybe_unused]] float flTime) {
     mPhotoMat->mStages[0].SetTex(mLabelTextures.Current());
 }
 
-// 0x003943f8
+// NTSC-U/C: 0x003943f8, PAL: 0x003c5eb8
 MetSoloEndRemixScreen::MetSoloEndRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLogoTextures(HxStr(kSongLogoFirstTexture), HxStr(kSongLogoSecondTexture)),
       mLabelTextures(HxStr(kSongLabelFirstTexture), HxStr(kSongLabelSecondTexture)) {
 }
 
-// 0x003996b8
+// NTSC-U/C: 0x003996b8, PAL: 0x003cb810
 MetSoloEndRemixScreen::~MetSoloEndRemixScreen() {
 }
 
-// 0x003997d0
+// NTSC-U/C: 0x003997d0, PAL: 0x003cb928
 void MetSoloEndRemixScreen::OnPanelActivated() {
     ActivateNamedPanel(HxStr(kSaveScreenName));
 }
 
-// 0x00399870
+// NTSC-U/C: 0x00399870, PAL: 0x003cb9e8
 void MetSoloEndRemixScreen::OnExitFinished() {
     if (mScreenExited == 0) {
         ReturnToTitle();
     }
 }
 
-// 0x003998c8
+// NTSC-U/C: 0x003998c8, PAL: 0x003cba40
 void MetSoloEndRemixScreen::OnSaveFinished([[maybe_unused]] int bCompleted) {
     if (mScreenExited == 0) {
         BeginExit();
@@ -267,13 +267,13 @@ void MetSoloEndRemixScreen::OnSaveFinished([[maybe_unused]] int bCompleted) {
     }
 }
 
-// 0x00399898
+// NTSC-U/C: 0x00399898, PAL: 0x003cba10
 void MetSoloEndRemixScreen::OnHelpRequested() {
     mScreenExited = 1;
     BeginExit();
 }
 
-// 0x00395918
+// NTSC-U/C: 0x00395918, PAL: 0x003c78a8
 void MetSoloEndRemixScreen::SetOwnerScreenShowing(int bShowing) {
     // The binary negates with `xori` against 1, which is what a bool argument compiles to, so only
     // 0 and 1 round-trip through the member.

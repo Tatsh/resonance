@@ -135,7 +135,7 @@ inline Rnd::View *FindView(const HxStr &name) {
 
 } // namespace
 
-// 0x003bdbb8
+// NTSC-U/C: 0x003bdbb8, PAL: 0x003f2908
 MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mStageRecorded(0), mNextMessage(0), mLastStepTime(0.0f), mDifficultyUnlocked(0) {
@@ -143,12 +143,12 @@ MetStageFinishScreen::MetStageFinishScreen(MetRenderer *pRenderer, int nPriority
     mShowsLoadedDrawables = 0;
 }
 
-// 0x003c4250
+// NTSC-U/C: 0x003c4250, PAL: 0x003f96d0
 MetStageFinishScreen *MetStageFinishScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetStageFinishScreen(pRenderer, nPriority);
 }
 
-// 0x003bded8
+// NTSC-U/C: 0x003bded8, PAL: 0x003f2c98
 MetStageFinishScreen::~MetStageFinishScreen() {
     delete mContinueButtons;
 }
@@ -170,7 +170,7 @@ void MetStageFinishScreen::ResolveContainerViews() {
     }
 }
 
-// 0x003be2a8
+// NTSC-U/C: 0x003be2a8, PAL: 0x003f30e8
 void MetStageFinishScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     if (mStageRecorded == 0 && !params.mLoadingGame) {
@@ -246,7 +246,7 @@ void MetStageFinishScreen::EnterAndShow() {
     }
 }
 
-// 0x003bf788
+// NTSC-U/C: 0x003bf788, PAL: 0x003f4840
 void MetStageFinishScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (mLastStepTime != 0.0f || pCommand->mCommand != kMetScreenCommandSelect) {
         return;
@@ -259,27 +259,27 @@ void MetStageFinishScreen::HandleCommand(const MetScreenCommand *pCommand) {
     MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
 }
 
-// 0x003c4228
+// NTSC-U/C: 0x003c4228, PAL: 0x003f96a8
 void MetStageFinishScreen::PlayLeaveSound(int) {
 }
 
-// 0x003c4230
+// NTSC-U/C: 0x003c4230, PAL: 0x003f96b0
 void MetStageFinishScreen::PlayHighSound(int) {
 }
 
-// 0x003c4238
+// NTSC-U/C: 0x003c4238, PAL: 0x003f96b8
 void MetStageFinishScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x003c4240
+// NTSC-U/C: 0x003c4240, PAL: 0x003f96c0
 void MetStageFinishScreen::PlayCycleRightSound(int) {
 }
 
-// 0x003c4248
+// NTSC-U/C: 0x003c4248, PAL: 0x003f96c8
 void MetStageFinishScreen::PlayErrorSound(int) {
 }
 
-// 0x003bf5e8
+// NTSC-U/C: 0x003bf5e8, PAL: 0x003f4680
 void MetStageFinishScreen::UpdateIdle(float flTime) {
     if (mLastStepTime == 0.0f || !(mLastStepTime + kMessageInterval < flTime)) {
         return;
@@ -300,12 +300,12 @@ void MetStageFinishScreen::UpdateIdle(float flTime) {
     }
 }
 
-// 0x003c4390
+// NTSC-U/C: 0x003c4390, PAL: 0x003f9830
 void MetStageFinishScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x003c42d8
+// NTSC-U/C: 0x003c42d8, PAL: 0x003f9758
 void MetStageFinishScreen::OnEnterFinished() {
     mContinueButtons->SetSelected(kNoButton);
     mLastStepTime = mRenderer->mAnimationFrame;
@@ -376,7 +376,7 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
     }
 }
 
-// 0x003bef98
+// NTSC-U/C: 0x003bef98, PAL: 0x003f3f70
 void MetStageFinishScreen::ShowMessages() {
     if (mMessages.size() == 0) {
         BeginExit();
@@ -414,7 +414,7 @@ void MetStageFinishScreen::ShowMessages() {
     MetScreen::EnterAndShow();
 }
 
-// 0x003c0530
+// NTSC-U/C: 0x003c0530, PAL: 0x003f5820
 void MetStageFinishScreen::OnExitFinished() {
     mStageRecorded = 0;
     MetSoloWinScreen::SetDifficultyUnlocked(mDifficultyUnlocked);

@@ -26,7 +26,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00323db8
+     * @ghidraAddress NTSC-U/C: 0x00323db8
+     * @ghidraAddress PAL: 0x0034b340
      */
     MetPauseSoloRemixScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -36,7 +37,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00327a38
+     * @ghidraAddress NTSC-U/C: 0x00327a38
+     * @ghidraAddress PAL: 0x0034f870
      */
     static MetPauseSoloRemixScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -61,7 +63,8 @@ public:
      * Every other code, a select among them, is ignored.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x003240a8
+     * @ghidraAddress NTSC-U/C: 0x003240a8
+     * @ghidraAddress PAL: 0x0034b6c0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -73,7 +76,8 @@ public:
      * `MetHelpScreen`, `MetScreenTitleScreen`, and the configuration screen are pushed before the
      * configuration screen is made the active panel.
      *
-     * @ghidraAddress 0x00324580
+     * @ghidraAddress NTSC-U/C: 0x00324580
+     * @ghidraAddress PAL: 0x0034bec8
      */
     virtual void OnExitFinished();
 
@@ -82,7 +86,8 @@ public:
      *
      * Slot 38. MetScreen::ResolveContainerViews() runs first. No text is tested for null.
      *
-     * @ghidraAddress 0x00323f58
+     * @ghidraAddress NTSC-U/C: 0x00323f58
+     * @ghidraAddress PAL: 0x0034b548
      */
     virtual void ResolveContainerViews();
 

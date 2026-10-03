@@ -36,7 +36,7 @@ MetMultiTipsBaseScreen::MetMultiTipsBaseScreen(MetRenderer *pRenderer,
     mHelpKeys.push_back(MetText(kMetStrHMultiTipHelp, kHelpPrompt));
 }
 
-// 0x00306ee0
+// NTSC-U/C: 0x00306ee0, PAL: 0x0032b958
 void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandSelect:
@@ -72,7 +72,7 @@ void MetMultiTipsBaseScreen::EnterAndShow() {
     MetHelpScreen::SelectPreset(MetText(kMetStrHMultiTipsTab, kHelpLayout));
 }
 
-// 0x003072a0
+// NTSC-U/C: 0x003072a0, PAL: 0x0032bde0
 void MetMultiTipsBaseScreen::OnExitFinished() {
     if (mExitChoice == kExitPrevious) {
         PushNamedScreen(mPreviousScreen);
@@ -85,28 +85,28 @@ void MetMultiTipsBaseScreen::OnExitFinished() {
     }
 }
 
-// 0x0030d710
+// NTSC-U/C: 0x0030d710, PAL: 0x00333240
 MetMultiTipsBaseScreen::~MetMultiTipsBaseScreen() {
 }
 
-// 0x0030d790
+// NTSC-U/C: 0x0030d790, PAL: 0x003332e8
 void MetMultiTipsBaseScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x0030d798
+// NTSC-U/C: 0x0030d798, PAL: 0x003332f0
 void MetMultiTipsBaseScreen::PlayCycleRightSound(int) {
 }
 
-// 0x0030d7a0
+// NTSC-U/C: 0x0030d7a0, PAL: 0x003332f8
 void MetMultiTipsBaseScreen::PlayHighSound(int) {
 }
 
-// 0x0030d7a8
+// NTSC-U/C: 0x0030d7a8, PAL: 0x00333300
 void MetMultiTipsBaseScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
-// 0x0030d7d0
+// NTSC-U/C: 0x0030d7d0, PAL: 0x00333328
 void MetMultiTipsBaseScreen::BeginExit() {
     ExitScreenByName(HxStr(kTitleScreen));
     MetScreen::BeginExit();

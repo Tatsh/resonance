@@ -66,12 +66,14 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The screen.
-     * @ghidraAddress 0x001fc690
+     * @ghidraAddress NTSC-U/C: 0x001fc690
+     * @ghidraAddress PAL: 0x00203b20
      */
     static MetArenasScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x001f70f0
+     * @ghidraAddress NTSC-U/C: 0x001f70f0
+     * @ghidraAddress PAL: 0x001fdc98
      */
     virtual ~MetArenasScreen();
 
@@ -99,7 +101,8 @@ public:
      * the exit animation.
      *
      * @param pCommand The command to route.
-     * @ghidraAddress 0x001f7310
+     * @ghidraAddress NTSC-U/C: 0x001f7310
+     * @ghidraAddress PAL: 0x001fdeb8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -109,7 +112,8 @@ public:
      * The base implementation is called directly rather than dispatched.
      *
      * @param nSelector The controller index.
-     * @ghidraAddress 0x001fc718
+     * @ghidraAddress NTSC-U/C: 0x001fc718
+     * @ghidraAddress PAL: 0x00203ba8
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -117,7 +121,8 @@ public:
      * Play no left cycle sound. Slot 23.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x001fc680
+     * @ghidraAddress NTSC-U/C: 0x001fc680
+     * @ghidraAddress PAL: 0x00203b10
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -125,7 +130,8 @@ public:
      * Play no right cycle sound. Slot 24.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x001fc688
+     * @ghidraAddress NTSC-U/C: 0x001fc688
+     * @ghidraAddress PAL: 0x00203b18
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -138,7 +144,8 @@ public:
      * the screenshot is still loading.
      *
      * @param flTime The current renderer frame position, which the body does not read.
-     * @ghidraAddress 0x001f8af0
+     * @ghidraAddress NTSC-U/C: 0x001f8af0
+     * @ghidraAddress PAL: 0x001ffe58
      */
     virtual void UpdateIdle(float flTime);
 
@@ -152,7 +159,8 @@ public:
      * named `MetArenasScreen`.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x001f8378
+     * @ghidraAddress NTSC-U/C: 0x001f8378
+     * @ghidraAddress PAL: 0x001ff518
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -162,7 +170,8 @@ public:
      * MetScreen slot 32 runs the slot once the enter animation has finished. The prompt is
      * MetScreen::mHelpKeys's first element rather than the selected one, as in the binary.
      *
-     * @ghidraAddress 0x001fc758
+     * @ghidraAddress NTSC-U/C: 0x001fc758
+     * @ghidraAddress PAL: 0x00203be8
      */
     virtual void OnEnterFinished();
 
@@ -174,7 +183,8 @@ public:
      * and it goes back there. Otherwise it records `MetArenasScreen` as the return screen and goes
      * on to `MetLoadGameScreen`. Every path ends by selecting -1 on the ring.
      *
-     * @ghidraAddress 0x001f8658
+     * @ghidraAddress NTSC-U/C: 0x001f8658
+     * @ghidraAddress PAL: 0x001ff8a0
      */
     virtual void OnExitFinished();
 
@@ -186,7 +196,8 @@ public:
      * routine ends by allocating the TexturePairRecord at mScreenshots from `gArena1.tex` and
      * `gArena2.tex`.
      *
-     * @ghidraAddress 0x001f6a08
+     * @ghidraAddress NTSC-U/C: 0x001f6a08
+     * @ghidraAddress PAL: 0x001fd4a8
      */
     virtual void ResolveContainerViews();
 
@@ -196,7 +207,8 @@ private:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x001f75c8
+     * @ghidraAddress NTSC-U/C: 0x001f75c8
+     * @ghidraAddress PAL: 0x001fe1f0
      */
     void UpdateScreenshot();
 

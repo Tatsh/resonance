@@ -19,7 +19,8 @@ class MetFade;
  * The constructor at `0x003ba0f8` takes only the renderer and the load priority, and supplies
  * `sony` for the screen name, `metagame/Shared` for the directory, and `sony_pres` for the
  * container. It writes `+0x8c`, which is the FadeUser vptr, clears the four members, and
- * allocates mFade.
+ * allocates mFade. The European release supplies `esony` for the screen name and `esony_pres`
+ * followed by LocalizedAssetSuffix() for the container.
  *
  * The object is 0xa0 bytes, the size New() allocates.
  *
@@ -38,12 +39,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003ba0f8
+     * @ghidraAddress NTSC-U/C: 0x003ba0f8
+     * @ghidraAddress PAL: 0x003eed00
      */
     MetSonyScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003bd7a8
+     * @ghidraAddress NTSC-U/C: 0x003bd7a8
+     * @ghidraAddress PAL: 0x003f24e0
      */
     virtual ~MetSonyScreen();
 
@@ -55,7 +58,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003bd720
+     * @ghidraAddress NTSC-U/C: 0x003bd720
+     * @ghidraAddress PAL: 0x003f2458
      */
     static MetSonyScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -64,7 +68,8 @@ public:
      *
      * FadeUser slot 2, through the FadeUser table entry that adjusts `this` by `-140`.
      *
-     * @ghidraAddress 0x003bd908
+     * @ghidraAddress NTSC-U/C: 0x003bd908
+     * @ghidraAddress PAL: 0x003f2640
      */
     virtual void OnFadeOutDone();
 
@@ -73,7 +78,8 @@ public:
      *
      * FadeUser slot 3, through the FadeUser table entry that adjusts `this` by `-140`.
      *
-     * @ghidraAddress 0x003bd8b8
+     * @ghidraAddress NTSC-U/C: 0x003bd8b8
+     * @ghidraAddress PAL: 0x003f25f0
      */
     virtual void OnFadeInDone();
 
@@ -81,7 +87,8 @@ public:
      * Play nothing. Slot 20.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x003bd6f8
+     * @ghidraAddress NTSC-U/C: 0x003bd6f8
+     * @ghidraAddress PAL: 0x003f2430
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -89,7 +96,8 @@ public:
      * Play nothing. Slot 21.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x003bd700
+     * @ghidraAddress NTSC-U/C: 0x003bd700
+     * @ghidraAddress PAL: 0x003f2438
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -97,7 +105,8 @@ public:
      * Play nothing. Slot 22.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x003bd708
+     * @ghidraAddress NTSC-U/C: 0x003bd708
+     * @ghidraAddress PAL: 0x003f2440
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -105,7 +114,8 @@ public:
      * Play nothing. Slot 23.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x003bd710
+     * @ghidraAddress NTSC-U/C: 0x003bd710
+     * @ghidraAddress PAL: 0x003f2448
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -113,7 +123,8 @@ public:
      * Play nothing. Slot 24.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x003bd718
+     * @ghidraAddress NTSC-U/C: 0x003bd718
+     * @ghidraAddress PAL: 0x003f2450
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -123,7 +134,8 @@ public:
      * Records mHidden and the renderer's current frame in mEnterTime. The MetScreen body is not
      * run.
      *
-     * @ghidraAddress 0x003bd868
+     * @ghidraAddress NTSC-U/C: 0x003bd868
+     * @ghidraAddress PAL: 0x003f25a0
      */
     virtual void EnterAndShow();
 
@@ -138,7 +150,8 @@ public:
      * through a flag at `0x006cc138`.
      *
      * @param flTime The renderer's current frame.
-     * @ghidraAddress 0x003ba2f0
+     * @ghidraAddress NTSC-U/C: 0x003ba2f0
+     * @ghidraAddress PAL: 0x003eef50
      */
     virtual void UpdateIdle(float flTime);
 
@@ -150,19 +163,21 @@ public:
      * mode is initialised again. MetFrontEndState's return screen then becomes this screen, and
      * Finish() runs.
      *
-     * @ghidraAddress 0x003ba4c8
+     * @ghidraAddress NTSC-U/C: 0x003ba4c8
+     * @ghidraAddress PAL: 0x003ef148
      */
     virtual void OnExitFinished();
 
     /**
      * Resolve the container objects and hide the screen. Slot 38.
      *
-     * @ghidraAddress 0x003bd828
+     * @ghidraAddress NTSC-U/C: 0x003bd828
+     * @ghidraAddress PAL: 0x003f2560
      */
     virtual void ResolveContainerViews();
 
 private:
-    // 0x003ba620
+    // NTSC-U/C: 0x003ba620, PAL: 0x003ef2c0
     // Removes this screen from the renderer, clears its background scene, installs the main
     // loop's keep-alive draw as the bank-load progress hook, runs the synth's LoadBankSet4() and
     // the renderer's RendererBase slot 5, and hands the renderer a MetFreqEndedMsg with a payload

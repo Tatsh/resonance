@@ -44,7 +44,8 @@ public:
     MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003696c0
+     * @ghidraAddress NTSC-U/C: 0x003696c0
+     * @ghidraAddress PAL: 0x00397740
      */
     virtual ~MetRemixTypeScreen();
 
@@ -56,7 +57,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00369638
+     * @ghidraAddress NTSC-U/C: 0x00369638
+     * @ghidraAddress PAL: 0x003976b8
      */
     static MetRemixTypeScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -82,7 +84,8 @@ public:
      *
      * @param name The dialogue name.
      * @param nChoice The index of the button chosen.
-     * @ghidraAddress 0x00364478
+     * @ghidraAddress NTSC-U/C: 0x00364478
+     * @ghidraAddress PAL: 0x003922e8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -93,17 +96,20 @@ public:
      * selection alternation, and back exits toward the title screen.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00362348
+     * @ghidraAddress NTSC-U/C: 0x00362348
+     * @ghidraAddress PAL: 0x0038f978
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * Leave for the chosen button once the selection alternation finishes.
      *
-     * Slot 30. The help screen is exited only when a button other than the first is selected.
+     * Slot 30. The help screen is exited only when a button other than the first is selected. The
+     * European release always exits it.
      *
      * @param pButton The button whose alternation finished, which is not read.
-     * @ghidraAddress 0x00362fa0
+     * @ghidraAddress NTSC-U/C: 0x00362fa0
+     * @ghidraAddress PAL: 0x00390848
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -119,7 +125,8 @@ public:
      *
      * The European release raises the dialogue only when GlobalSettings::mCardSlots is not empty,
      * and formats GlobalSettings::mMinimumFreeClusters into the dialogue text. The German text
-     * also receives FirstCardSlotName() ahead of it.
+     * also receives FirstCardSlotName() ahead of it. After a back command it also pushes the help
+     * screen.
      *
      * @ghidraAddress NTSC-U/C: 0x00363920
      * @ghidraAddress PAL: 0x00391470
@@ -131,7 +138,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x00362098
+     * @ghidraAddress NTSC-U/C: 0x00362098
+     * @ghidraAddress PAL: 0x0038f648
      */
     virtual void ResolveContainerViews();
 
@@ -140,7 +148,8 @@ public:
      *
      * Both overrides are two-instruction stubs, so each was written inline with an empty body.
      *
-     * @ghidraAddress 0x00369628
+     * @ghidraAddress NTSC-U/C: 0x00369628
+     * @ghidraAddress PAL: 0x003976a8
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -148,15 +157,18 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x00369630
+     * @ghidraAddress NTSC-U/C: 0x00369630
+     * @ghidraAddress PAL: 0x003976b0
      */
     virtual void PlayCycleRightSound(int) {
     }
 
 private:
-    // 0x00363148
+    // NTSC-U/C: 0x00363148, PAL: 0x00390a48
     // Brings up the solo stages screen for the new button, or lists the remixes on
-    // the card and the disc for the load button. Other selections do nothing.
+    // the card and the disc for the load button. Other selections do nothing. The European release
+    // also pushes the help screen for the new button, and lists the first slot of port 0, as
+    // recorded or by the name `1`, whether or not the front end uses the card.
     void OpenSelectedButton();
 
     MetButtonList *mButtons;          // +0x8c

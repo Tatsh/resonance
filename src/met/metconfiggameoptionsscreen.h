@@ -48,7 +48,8 @@ public:
     MetConfigGameOptionsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0020ce20
+     * @ghidraAddress NTSC-U/C: 0x0020ce20
+     * @ghidraAddress PAL: 0x00216400
      */
     virtual ~MetConfigGameOptionsScreen();
 
@@ -60,7 +61,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002114f0
+     * @ghidraAddress NTSC-U/C: 0x002114f0
+     * @ghidraAddress PAL: 0x0021aeb0
      */
     static MetConfigGameOptionsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -83,7 +85,8 @@ public:
      * without applying them.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0020cf70
+     * @ghidraAddress NTSC-U/C: 0x0020cf70
+     * @ghidraAddress PAL: 0x00216550
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -96,7 +99,8 @@ public:
      * any other exit stores the options into GlobalSettings and saves them through
      * MetGlobalSettingsSaverScreen.
      *
-     * @ghidraAddress 0x0020d5a8
+     * @ghidraAddress NTSC-U/C: 0x0020d5a8
+     * @ghidraAddress PAL: 0x00216d38
      */
     virtual void OnExitFinished();
 
@@ -115,11 +119,11 @@ private:
     // Shows the working copy's two settings on the two rows.
     void UpdateOptionLabels();
 
-    // 0x00211578
+    // NTSC-U/C: 0x00211578, PAL: 0x0021af38
     // Switches one row's setting and shows it. Any other row only refreshes the labels.
     void ToggleOption(int nRow);
 
-    // 0x002115c8
+    // NTSC-U/C: 0x002115c8, PAL: 0x0021af88
     // Stores the working copy into GlobalSettings, applies the audio mode to the synthesiser, and
     // applies the force-feedback setting to the world when one exists.
     void ApplyOptions();

@@ -36,12 +36,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00231728
+     * @ghidraAddress NTSC-U/C: 0x00231728
+     * @ghidraAddress PAL: 0x00245060
      */
     MetJukeboxEditPlaylistScreenDone(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00237210
+     * @ghidraAddress NTSC-U/C: 0x00237210
+     * @ghidraAddress PAL: 0x0024b368
      */
     virtual ~MetJukeboxEditPlaylistScreenDone();
 
@@ -53,7 +55,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00237188
+     * @ghidraAddress NTSC-U/C: 0x00237188
+     * @ghidraAddress PAL: 0x0024b2e0
      */
     static MetJukeboxEditPlaylistScreenDone *New(MetRenderer *pRenderer, int nPriority);
 
@@ -62,9 +65,11 @@ public:
      * is set.
      *
      * Slot 5. The MetScreen body runs first. A clear flag puts the save button in
-     * state 3. MetButtonList passes over a button in state 3.
+     * state 3. MetButtonList passes over a button in state 3. The European release only selects
+     * the first button.
      *
-     * @ghidraAddress 0x00237330
+     * @ghidraAddress NTSC-U/C: 0x00237330
+     * @ghidraAddress PAL: 0x0024b3c0
      */
     virtual void EnterAndShow();
 
@@ -74,7 +79,8 @@ public:
      * Slot 17.
      *
      * @param nShowing Non-zero to draw the screen.
-     * @ghidraAddress 0x002373e0
+     * @ghidraAddress NTSC-U/C: 0x002373e0
+     * @ghidraAddress PAL: 0x0024b428
      */
     virtual void SetShowing(int nShowing);
 
@@ -82,40 +88,47 @@ public:
      * Act on a command.
      *
      * Slot 19. Previous and next step the ring and post the help text. Select flashes the
-     * selected button. Every other command is ignored.
+     * selected button. Every other command is ignored. On select, the European release first
+     * activates the panel with the empty name.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00237268
+     * @ghidraAddress NTSC-U/C: 0x00237268
+     * @ghidraAddress PAL: 0x00245590
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x00237160
+     * @ghidraAddress NTSC-U/C: 0x00237160
+     * @ghidraAddress PAL: 0x0024b2b8
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
      * @param nSelector The pad index of the command. The body does not read it.
-     * @ghidraAddress 0x00237168
+     * @ghidraAddress NTSC-U/C: 0x00237168
+     * @ghidraAddress PAL: 0x0024b2c0
      */
     virtual void PlayLeaveSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x00237170
+     * @ghidraAddress NTSC-U/C: 0x00237170
+     * @ghidraAddress PAL: 0x0024b2c8
      */
     virtual void PlayHighSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x00237178
+     * @ghidraAddress NTSC-U/C: 0x00237178
+     * @ghidraAddress PAL: 0x0024b2d0
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x00237180
+     * @ghidraAddress NTSC-U/C: 0x00237180
+     * @ghidraAddress PAL: 0x0024b2d8
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -124,10 +137,12 @@ public:
      *
      * Slot 30. Either play button requires a playlist with entries, records the play request and
      * the shuffle choice, and exits the top buttons, help, and title screens. The save button
-     * records the save request and exits the top buttons screen.
+     * records the save request and exits the top buttons screen. With an empty playlist, the
+     * European release activates the top buttons screen's panel.
      *
      * @param pButton The button that finished alternating. The body does not read it.
-     * @ghidraAddress 0x002321f8
+     * @ghidraAddress NTSC-U/C: 0x002321f8
+     * @ghidraAddress PAL: 0x00245ec0
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -136,7 +151,8 @@ public:
      *
      * Slot 33.
      *
-     * @ghidraAddress 0x002373a8
+     * @ghidraAddress NTSC-U/C: 0x002373a8
+     * @ghidraAddress PAL: 0x0024b3f0
      */
     virtual void OnEnterFinished();
 
@@ -148,7 +164,8 @@ public:
      * active panel, starts the playlist, and records this screen in
      * MetFrontEndState::mReturnScreen. The choice is then forgotten.
      *
-     * @ghidraAddress 0x00231b50
+     * @ghidraAddress NTSC-U/C: 0x00231b50
+     * @ghidraAddress PAL: 0x00245700
      */
     virtual void OnExitFinished();
 

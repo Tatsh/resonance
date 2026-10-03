@@ -91,7 +91,7 @@ void MetLocNumPlayScreen::ResolveContainerViews() {
     mButtonList->Add(HxStr(kTipsButton), tipsLabel);
 }
 
-// 0x002adef0
+// NTSC-U/C: 0x002adef0, PAL: 0x002cc9b0
 void MetLocNumPlayScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -143,7 +143,7 @@ void MetLocNumPlayScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x002ae350
+// NTSC-U/C: 0x002ae350, PAL: 0x002ccee0
 void MetLocNumPlayScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitChoice;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -152,7 +152,7 @@ void MetLocNumPlayScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x002ae4f0
+// NTSC-U/C: 0x002ae4f0, PAL: 0x002cd0e0
 void MetLocNumPlayScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kTopLogoScreen));
@@ -176,20 +176,20 @@ void MetLocNumPlayScreen::OnExitFinished() {
     }
 }
 
-// 0x002b0f70
+// NTSC-U/C: 0x002b0f70, PAL: 0x002cfd38
 void MetLocNumPlayScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x002b0f78
+// NTSC-U/C: 0x002b0f78, PAL: 0x002cfd40
 void MetLocNumPlayScreen::PlayCycleRightSound(int) {
 }
 
-// 0x002b0f80
+// NTSC-U/C: 0x002b0f80, PAL: 0x002cfd48
 MetLocNumPlayScreen *MetLocNumPlayScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLocNumPlayScreen(pRenderer, nPriority);
 }
 
-// 0x002b1008
+// NTSC-U/C: 0x002b1008, PAL: 0x002cfdd0
 MetLocNumPlayScreen::~MetLocNumPlayScreen() {
     delete mButtonList;
 }

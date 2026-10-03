@@ -30,14 +30,16 @@ public:
      * asset load, creates GlobalSettings, enables drawing on the game manager, and rebuilds the
      * stage lists.
      *
-     * @ghidraAddress 0x0030e2c8
+     * @ghidraAddress NTSC-U/C: 0x0030e2c8
+     * @ghidraAddress PAL: 0x00333f20
      */
     MetNullRenderer();
 
     /**
      * Destroy MetFreqMakerAssetManager through MetFreqMakerAssetManager::Destroy().
      *
-     * @ghidraAddress 0x0030e400
+     * @ghidraAddress NTSC-U/C: 0x0030e400
+     * @ghidraAddress PAL: 0x00334090
      */
     virtual ~MetNullRenderer();
 
@@ -47,14 +49,16 @@ public:
      * Only a RawControllerMsg is acted on, through OnRawController().
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00311ff0
+     * @ghidraAddress NTSC-U/C: 0x00311ff0
+     * @ghidraAddress PAL: 0x00337d50
      */
     virtual void HandleMessage(Message *pMsg);
 
     /**
      * Unrecovered. RendererBase slot 7, pure in the base, with an empty body here.
      *
-     * @ghidraAddress 0x00311a20
+     * @ghidraAddress NTSC-U/C: 0x00311a20
+     * @ghidraAddress PAL: 0x00337780
      */
     virtual void Update();
 
@@ -67,7 +71,8 @@ public:
      * becomes solo for one player and local otherwise, the settings are applied, and a
      * BeginGameLocalMsg is queued. MainLoop::PumpTimers() runs whenever there is no game world.
      *
-     * @ghidraAddress 0x0030f320
+     * @ghidraAddress NTSC-U/C: 0x0030f320
+     * @ghidraAddress PAL: 0x00335038
      */
     virtual void Draw();
 
@@ -82,7 +87,8 @@ private:
      * level and the common data. An unrecognised ruleset is fatal. The name is inferred.
      *
      * @param pMsg The controller message.
-     * @ghidraAddress 0x0030e4c0
+     * @ghidraAddress NTSC-U/C: 0x0030e4c0
+     * @ghidraAddress PAL: 0x00334188
      */
     void OnRawController(RawControllerMsg *pMsg);
 
@@ -94,7 +100,8 @@ private:
      *
      * @param ruleset The ruleset, `jam` or `game`.
      * @return 2 for `jam` and 1 for `game`. Any other text is fatal, after which 0 is returned.
-     * @ghidraAddress 0x00311f80
+     * @ghidraAddress NTSC-U/C: 0x00311f80
+     * @ghidraAddress PAL: 0x00337ce0
      */
     static int ParseRuleset(const HxStr &ruleset);
 

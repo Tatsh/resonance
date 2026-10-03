@@ -86,7 +86,7 @@ inline void MergeLevelLists(const std::vector<MetPersonaData *> &personas) {
 
 } // namespace
 
-// 0x00218320
+// NTSC-U/C: 0x00218320, PAL: 0x0022a848
 MetExpansionPakScreen::MetExpansionPakScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mFade(nullptr) {
@@ -261,7 +261,7 @@ void MetExpansionPakScreen::OnFadeInDone() {
                        this);
 }
 
-// 0x0021a128
+// NTSC-U/C: 0x0021a128, PAL: 0x0022cac0
 void MetExpansionPakScreen::OnFadeOutDone() {
     mRenderer->RemoveScreen(this);
     if (mExitChoice == kExitCancelled) {
@@ -278,22 +278,22 @@ void MetExpansionPakScreen::OnFadeOutDone() {
     }
 }
 
-// 0x0021d820
+// NTSC-U/C: 0x0021d820, PAL: 0x00230378
 MetExpansionPakScreen *MetExpansionPakScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetExpansionPakScreen(pRenderer, nPriority);
 }
 
-// 0x0021d8a8
+// NTSC-U/C: 0x0021d8a8, PAL: 0x00230400
 MetExpansionPakScreen::~MetExpansionPakScreen() {
     delete mFade;
 }
 
-// 0x0021d928
+// NTSC-U/C: 0x0021d928, PAL: 0x00230480
 void MetExpansionPakScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// 0x0021d948
+// NTSC-U/C: 0x0021d948, PAL: 0x002304a0
 void MetExpansionPakScreen::EnterAndShow() {
     mState = kStateIdle;
     mDiscSwap.Reset();
@@ -305,12 +305,12 @@ void MetExpansionPakScreen::EnterAndShow() {
     mFade->FadeIn(kFadeDuration, mRenderer->mAnimationFrame, this, kRetainView);
 }
 
-// 0x0021d9a8
+// NTSC-U/C: 0x0021d9a8, PAL: 0x00230500
 void MetExpansionPakScreen::BeginExit() {
     mFade->FadeOut(kFadeDuration, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
-// 0x0021d9e0
+// NTSC-U/C: 0x0021d9e0, PAL: 0x00230538
 void MetExpansionPakScreen::OnMsgScreenShown(const HxStr &name) {
     if (name == kPrepareMessage) {
         mPrepareShown = 1;

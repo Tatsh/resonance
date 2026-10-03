@@ -29,12 +29,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002a8a58
+     * @ghidraAddress NTSC-U/C: 0x002a8a58
+     * @ghidraAddress PAL: 0x002c6ec8
      */
     MetLoadPreFabScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002ad450
+     * @ghidraAddress NTSC-U/C: 0x002ad450
+     * @ghidraAddress PAL: 0x002cbd60
      */
     virtual ~MetLoadPreFabScreen();
 
@@ -46,7 +48,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The screen.
-     * @ghidraAddress 0x002ad3c8
+     * @ghidraAddress NTSC-U/C: 0x002ad3c8
+     * @ghidraAddress PAL: 0x002cbcd8
      */
     static MetScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -90,7 +93,8 @@ public:
      * Slot 40. The identity becomes the game manager's only persona, and the left gizmo and mode
      * select screens are pushed. Arriving at the screen in net mode is a fatal error.
      *
-     * @ghidraAddress 0x002a94f0
+     * @ghidraAddress NTSC-U/C: 0x002a94f0
+     * @ghidraAddress PAL: 0x002c7b08
      */
     virtual void OnNameButton();
 
@@ -104,7 +108,8 @@ public:
      * MetFreqMakerButtonsScreen::mNewPersona is cleared, and `MetLoadPreFabScreen` is recorded in
      * MetFrontEndState::mReturnScreen.
      *
-     * @ghidraAddress 0x002a9330
+     * @ghidraAddress NTSC-U/C: 0x002a9330
+     * @ghidraAddress PAL: 0x002c78e8
      */
     virtual void PrepareFreqMakerForSelection();
 
@@ -127,7 +132,8 @@ public:
      *
      * Slot 44. mIdentities is refilled and becomes the identity list.
      *
-     * @ghidraAddress 0x002a91b8
+     * @ghidraAddress NTSC-U/C: 0x002a91b8
+     * @ghidraAddress PAL: 0x002c7770
      */
     virtual void AcquireIdentityList();
 

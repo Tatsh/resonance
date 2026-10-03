@@ -89,12 +89,12 @@ MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHTutR, kSecondPrompt));
 }
 
-// 0x003cc1a8
+// NTSC-U/C: 0x003cc1a8, PAL: 0x00403a40
 MetTutorialScreen *MetTutorialScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetTutorialScreen(pRenderer, nPriority);
 }
 
-// 0x003cc230
+// NTSC-U/C: 0x003cc230, PAL: 0x00403ac8
 MetTutorialScreen::~MetTutorialScreen() {
     delete mButtonList;
 }
@@ -137,7 +137,7 @@ void MetTutorialScreen::ResolveContainerViews() {
     }
 }
 
-// 0x003c7f10
+// NTSC-U/C: 0x003c7f10, PAL: 0x003ff2a0
 void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -173,15 +173,15 @@ void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x003cc198
+// NTSC-U/C: 0x003cc198, PAL: 0x00403a30
 void MetTutorialScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x003cc1a0
+// NTSC-U/C: 0x003cc1a0, PAL: 0x00403a38
 void MetTutorialScreen::PlayCycleRightSound(int) {
 }
 
-// 0x003c84d8
+// NTSC-U/C: 0x003c84d8, PAL: 0x003ff998
 void MetTutorialScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -190,7 +190,7 @@ void MetTutorialScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x003c8678
+// NTSC-U/C: 0x003c8678, PAL: 0x003ffb98
 void MetTutorialScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
@@ -202,13 +202,30 @@ void MetTutorialScreen::OnExitFinished() {
 
     Application::shared()->GetGameManager()->SetGameMode(kGameModeSolo);
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
+#ifdef VIDEO_STANDARD_PAL
+    HxStr suffix;
+    suffix = LocalizedAssetSuffix();
+    HxStr level;
+#endif
     if (mButtonList->mSelected == kFirstButtonIndex) {
         params.mPlayMode = kPlayModeGame;
+#ifdef VIDEO_STANDARD_PAL
+        level = kFirstButtonLevel;
+#else
         params.mLevelName = kFirstButtonLevel;
+#endif
     } else {
         params.mPlayMode = kPlayModeJam;
+#ifdef VIDEO_STANDARD_PAL
+        level = kSecondButtonLevel;
+#else
         params.mLevelName = kSecondButtonLevel;
+#endif
     }
+#ifdef VIDEO_STANDARD_PAL
+    level += suffix;
+    params.mLevelName = level;
+#endif
     params.mArenaName = (*GetArenaList())[0].mName;
     params.mDifficulty = kTutorialDifficulty;
     Application::shared()->GetGameManager()->SetParams(params);

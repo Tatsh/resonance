@@ -46,7 +46,7 @@ constexpr int kReleaseView = 0;
 
 } // namespace
 
-// 0x002df058
+// NTSC-U/C: 0x002df058, PAL: 0x00301db8
 MetMemDetectStartup::MetMemDetectStartup(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -54,12 +54,12 @@ MetMemDetectStartup::MetMemDetectStartup(MetRenderer *pRenderer, int nPriority)
     mFade = new MetFade(pRenderer);
 }
 
-// 0x002e2eb8
+// NTSC-U/C: 0x002e2eb8, PAL: 0x00305e40
 MetMemDetectStartup::~MetMemDetectStartup() {
     delete mFade;
 }
 
-// 0x002e2e30
+// NTSC-U/C: 0x002e2e30, PAL: 0x00305db8
 MetMemDetectStartup *MetMemDetectStartup::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemDetectStartup(pRenderer, nPriority);
 }
@@ -100,7 +100,7 @@ void MetMemDetectStartup::StartDetect() {
     MetMemDetectScreen::StartDetect();
 }
 
-// 0x002e2f40
+// NTSC-U/C: 0x002e2f40, PAL: 0x00305ec8
 void MetMemDetectStartup::EnterAndShow() {
     mRenderer->AddScreenView(mView);
     Application::shared()->GetGameManager()->SetDrawEnabled(1);
@@ -108,28 +108,28 @@ void MetMemDetectStartup::EnterAndShow() {
     mEnterTime = mRenderer->mAnimationFrame;
 }
 
-// 0x002e2fb8
+// NTSC-U/C: 0x002e2fb8, PAL: 0x00305f40
 void MetMemDetectStartup::BeginExit() {
     PushNamedScreen(HxStr(kSonyScreen));
 }
 
-// 0x002e3058
+// NTSC-U/C: 0x002e3058, PAL: 0x00306000
 void MetMemDetectStartup::OnNoCard() {
     mNoCardTime = mRenderer->mAnimationFrame;
 }
 
-// 0x002e3068
+// NTSC-U/C: 0x002e3068, PAL: 0x00306010
 void MetMemDetectStartup::OnDetectFinished() {
     mFade->FadeIn(kFadeFrames, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
-// 0x002e30a0
+// NTSC-U/C: 0x002e30a0, PAL: 0x00306048
 void MetMemDetectStartup::OnFadeInDone() {
     SetShowing(0);
     BeginExit();
 }
 
-// 0x002e30f0
+// NTSC-U/C: 0x002e30f0, PAL: 0x00306098
 void MetMemDetectStartup::OnFadeOutDone() {
     StartDetect();
 }

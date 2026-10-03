@@ -39,14 +39,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00349dc0
+     * @ghidraAddress NTSC-U/C: 0x00349dc0
+     * @ghidraAddress PAL: 0x00375678
      */
     MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the list and the button list.
      *
-     * @ghidraAddress 0x00352618
+     * @ghidraAddress NTSC-U/C: 0x00352618
+     * @ghidraAddress PAL: 0x0037e788
      */
     virtual ~MetRemixLoadScreen();
 
@@ -56,7 +58,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00352590
+     * @ghidraAddress NTSC-U/C: 0x00352590
+     * @ghidraAddress PAL: 0x0037e700
      */
     static MetRemixLoadScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -87,7 +90,8 @@ public:
      * MetScreen::mExitChoice, exits the title and data screens, and begins the exit.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0034a2a8
+     * @ghidraAddress NTSC-U/C: 0x0034a2a8
+     * @ghidraAddress PAL: 0x00375c68
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -99,7 +103,8 @@ public:
      * MetRemixRecord independently of the list provider.
      *
      * @param nSelector The controller index, which the base body ignores.
-     * @ghidraAddress 0x003526d0
+     * @ghidraAddress NTSC-U/C: 0x003526d0
+     * @ghidraAddress PAL: 0x0037e840
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -109,7 +114,8 @@ public:
      * The same guard as slot 20.
      *
      * @param nSelector The controller index, which the base body ignores.
-     * @ghidraAddress 0x00352720
+     * @ghidraAddress NTSC-U/C: 0x00352720
+     * @ghidraAddress PAL: 0x0037e890
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -137,7 +143,8 @@ public:
      * this screen, the title, data, and help screens to restore, and whether the factory
      * catalogue was chosen. The list entries are hidden last.
      *
-     * @ghidraAddress 0x0034cbd0
+     * @ghidraAddress NTSC-U/C: 0x0034cbd0
+     * @ghidraAddress PAL: 0x00378920
      */
     virtual void OnExitFinished();
 
@@ -165,7 +172,8 @@ public:
      * @param pText The cell.
      * @param nContext The list context, which the body does not read.
      * @return Always 1.
-     * @ghidraAddress 0x0034d8b0
+     * @ghidraAddress NTSC-U/C: 0x0034d8b0
+     * @ghidraAddress PAL: 0x00379888
      */
     virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
 
@@ -177,7 +185,8 @@ public:
      * @param pMesh The cell, which the body does not read.
      * @param nContext The list context, which the body does not read.
      * @return Always 1.
-     * @ghidraAddress 0x00352588
+     * @ghidraAddress NTSC-U/C: 0x00352588
+     * @ghidraAddress PAL: 0x0037e6f8
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
@@ -188,7 +197,8 @@ private:
      * The data screen is taken from the registry without a cast check or a null test.
      *
      * @param nIndex The row.
-     * @ghidraAddress 0x0034a748
+     * @ghidraAddress NTSC-U/C: 0x0034a748
+     * @ghidraAddress PAL: 0x003761d0
      */
     void ShowRowOnDataScreen(unsigned nIndex);
 

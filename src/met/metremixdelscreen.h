@@ -92,7 +92,8 @@ public:
     MetRemixDelScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003397a8
+     * @ghidraAddress NTSC-U/C: 0x003397a8
+     * @ghidraAddress PAL: 0x00363830
      */
     virtual ~MetRemixDelScreen();
 
@@ -102,7 +103,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00343f30
+     * @ghidraAddress NTSC-U/C: 0x00343f30
+     * @ghidraAddress PAL: 0x0036f320
      */
     static MetRemixDelScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -133,7 +135,8 @@ public:
      * requested the on-screen keyboard, and the flag is cleared before slot 40 runs so that the
      * request runs once.
      *
-     * @ghidraAddress 0x00344078
+     * @ghidraAddress NTSC-U/C: 0x00344078
+     * @ghidraAddress PAL: 0x0036f488
      */
     virtual void OnPanelActivated();
 
@@ -162,7 +165,8 @@ public:
      * The argument is ignored. The panel is the one registered under `MetMsgScreen`.
      *
      * @param name The dialogue the message screen reports back, which the body does not read.
-     * @ghidraAddress 0x003441a0
+     * @ghidraAddress NTSC-U/C: 0x003441a0
+     * @ghidraAddress PAL: 0x0036f4c8
      */
     virtual void OnMsgScreenShown(const HxStr &name);
 
@@ -182,7 +186,8 @@ public:
      * mDeletePending respectively, clear the help text, and depart the screen.
      *
      * @param pCommand The command the renderer translated from an input message.
-     * @ghidraAddress 0x00339b30
+     * @ghidraAddress NTSC-U/C: 0x00339b30
+     * @ghidraAddress PAL: 0x00363c50
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -192,7 +197,8 @@ public:
      * All three overrides are two-instruction stubs, so each was written inline with an empty
      * body.
      *
-     * @ghidraAddress 0x00343f28
+     * @ghidraAddress NTSC-U/C: 0x00343f28
+     * @ghidraAddress PAL: 0x0036f318
      */
     virtual void PlaySlideSound(int) {
     }
@@ -200,7 +206,8 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * @ghidraAddress 0x00343f18
+     * @ghidraAddress NTSC-U/C: 0x00343f18
+     * @ghidraAddress PAL: 0x0036f308
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -208,7 +215,8 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x00343f20
+     * @ghidraAddress NTSC-U/C: 0x00343f20
+     * @ghidraAddress PAL: 0x0036f310
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -218,7 +226,8 @@ public:
      *
      * MetScreen slot 32 runs this slot once the enter animation has finished.
      *
-     * @ghidraAddress 0x00344058
+     * @ghidraAddress NTSC-U/C: 0x00344058
+     * @ghidraAddress PAL: 0x0036f468
      */
     virtual void OnEnterFinished();
 
@@ -255,7 +264,8 @@ public:
      * Pushes and then activates this screen's own registry key, `MetRemixDelScreen`. Slot 7 and
      * MetSaveRemix slot 42 are the two callers.
      *
-     * @ghidraAddress 0x0033e5c0
+     * @ghidraAddress NTSC-U/C: 0x0033e5c0
+     * @ghidraAddress PAL: 0x00369678
      */
     virtual void OnSaveAbandoned();
 
@@ -265,7 +275,8 @@ public:
      * The body is identical to slot 40's, instruction for instruction, and the two occupy separate
      * vtable slots.
      *
-     * @ghidraAddress 0x0033e6d8
+     * @ghidraAddress NTSC-U/C: 0x0033e6d8
+     * @ghidraAddress PAL: 0x003697d8
      */
     virtual void OnSaveDialogueClosed();
 
@@ -311,12 +322,33 @@ public:
      * of mCardSlot. Every other status raises the one-button `del_remix` dialogue with the
      * `del_fail` text. The port and slot argument is not read.
      *
-     * @param nPortSlot Which card port and slot reported, which the body does not read.
+     * The European release reads it. A zero status from the first slot of port 0 sets
+     * mRefreshCardPending and queries that slot's connect state instead of exiting `MetMsgScreen`,
+     * and OnConnectState() finishes the delete. GlobalSettings::shared() is called first and its
+     * result discarded.
+     *
+     * @param nPortSlot Which card port and slot reported.
      * @param nStatus Zero on success, and 15 for the failure the retry dialogue covers.
      * @ghidraAddress NTSC-U/C: 0x0033d768
      * @ghidraAddress PAL: 0x003685d8
      */
     virtual void OnRemixDeleted(int nPortSlot, int nStatus);
+
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Record the first card's state after a delete. MemcardUser slot override.
+     *
+     * A non-zero status, an unformatted card, or a clear mRefreshCardPending defers to
+     * MetSaveRemix::OnConnectState(). Otherwise the state replaces the first
+     * GlobalSettings::mCardSlots entry, mRefreshCardPending is cleared, and `MetMsgScreen` is
+     * exited. The North American release does not override it.
+     *
+     * @param state The reported state.
+     * @param nStatus Zero on success.
+     * @ghidraAddress PAL: 0x00368378
+     */
+    virtual void OnConnectState(MemcardConnectState state, int nStatus);
+#endif
 
     /**
      * Forward the entered name to the saver once. MetKBUser slot 2.
@@ -325,7 +357,8 @@ public:
      * result that this screen did not request.
      *
      * @param text The remix name the user entered.
-     * @ghidraAddress 0x00344240
+     * @ghidraAddress NTSC-U/C: 0x00344240
+     * @ghidraAddress PAL: 0x0036f588
      */
     virtual void OnKeyboardTextEntered(const HxStr &text);
 
@@ -340,7 +373,8 @@ public:
      * @param pText The cell.
      * @param nContext The list context, which the body does not read.
      * @return Always 1.
-     * @ghidraAddress 0x0033cc78
+     * @ghidraAddress NTSC-U/C: 0x0033cc78
+     * @ghidraAddress PAL: 0x003676d0
      */
     virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
 
@@ -352,7 +386,8 @@ public:
      * @param pMesh The cell, which the body does not read.
      * @param nContext The list context, which the body does not read.
      * @return Always 1.
-     * @ghidraAddress 0x00343f10
+     * @ghidraAddress NTSC-U/C: 0x00343f10
+     * @ghidraAddress PAL: 0x0036f300
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
@@ -362,7 +397,8 @@ public:
      * MetMemCardTypeScreen's slot 36 is the caller. The title is inferred.
      *
      * @param slot The card.
-     * @ghidraAddress 0x00343fb8
+     * @ghidraAddress NTSC-U/C: 0x00343fb8
+     * @ghidraAddress PAL: 0x0036f3a8
      */
     void SetCardSlot(MemcardConnectState slot);
 
@@ -372,7 +408,7 @@ private:
     // `del_fail_nocard`, and it has no address of its own.
     inline void StartDelete();
 
-    // 0x003440b8
+    // NTSC-U/C: 0x003440b8, PAL: 0x00365690
     // Shows one catalogue row on the data screen. Slot 33 and the shared tail of codes 1 and 2 in
     // slot 19 are its callers. An index past the end hides the record instead, and mCatalogue is
     // not tested for null.
@@ -388,7 +424,13 @@ private:
     int mDeletePending;
     // Set by code 7, the request to copy the selected row to the next card. +0x100
     int mCopyPending;
-    // The catalogue row MemcardUser slot 12 hands to RecordPendingSave(). +0x104
+#ifdef VIDEO_STANDARD_PAL
+    // Set while OnConnectState() waits for the first card's state after a delete. Cleared by the
+    // constructor, OnConnectState(), and OnPanelActivated(). +0x104
+    int mRefreshCardPending;
+#endif
+    // The catalogue row MemcardUser slot 12 hands to RecordPendingSave(). The European release
+    // places it and every later member four bytes further on. +0x104
     MetRemixRecord *mCopyRecord;
     // The card the screen lists, and the card a copy writes to. +0x108 and +0x120
     MemcardConnectState mCardSlot;

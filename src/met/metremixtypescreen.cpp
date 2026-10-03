@@ -122,6 +122,25 @@ inline void AddCardSlot(std::vector<MemcardConnectState> &slots) {
     }
 }
 
+#ifdef VIDEO_STANDARD_PAL
+// The location the European release lists saved remixes from, the first slot of port 0, whether or
+// not the front end uses the card.
+constexpr int kFirstPortSlot = 0;
+static const char *const kFirstPortSlotName = "1";
+
+inline void AddFirstCardSlot(std::vector<MemcardConnectState> &slots) {
+    if (GlobalSettings::shared()->mCardSlots.size() != 0 &&
+        GlobalSettings::shared()->mCardSlots[0].mPortSlot == kFirstPortSlot) {
+        slots.push_back(GlobalSettings::shared()->mCardSlots[0]);
+    } else {
+        MemcardConnectState slot;
+        slot.mSlotName = kFirstPortSlotName;
+        slot.mPortSlot = kFirstPortSlot;
+        slots.push_back(slot);
+    }
+}
+#endif
+
 // What MetScreen::mExitChoice records for the exit hook to act on.
 constexpr int kExitBack = 0;
 constexpr int kExitToButtonAction = 2;
@@ -148,12 +167,12 @@ MetRemixTypeScreen::MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority)
     mButtons = new MetButtonList;
 }
 
-// 0x003696c0
+// NTSC-U/C: 0x003696c0, PAL: 0x00397740
 MetRemixTypeScreen::~MetRemixTypeScreen() {
     delete mButtons;
 }
 
-// 0x00369638
+// NTSC-U/C: 0x00369638, PAL: 0x003976b8
 MetRemixTypeScreen *MetRemixTypeScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixTypeScreen(pRenderer, nPriority);
 }
@@ -236,7 +255,7 @@ void MetRemixTypeScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00364478
+// NTSC-U/C: 0x00364478, PAL: 0x003922e8
 void MetRemixTypeScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (!(name == kNoSpaceDialogue)) {
         return;
@@ -251,7 +270,7 @@ void MetRemixTypeScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// 0x00362348
+// NTSC-U/C: 0x00362348, PAL: 0x0038f978
 void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -285,14 +304,18 @@ void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x00362fa0
+// NTSC-U/C: 0x00362fa0, PAL: 0x00390848
 void MetRemixTypeScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
     ExitScreenByName(HxStr(kTitleScreen));
+#ifdef VIDEO_STANDARD_PAL
+    ExitScreenByName(HxStr(kHelpScreen));
+#else
     if (mButtons->mSelected != kFirstButtonIndex) {
         ExitScreenByName(HxStr(kHelpScreen));
     }
+#endif
     BeginExit();
 }
 
@@ -300,6 +323,9 @@ void MetRemixTypeScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *
 void MetRemixTypeScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kModeScreen));
+#ifdef VIDEO_STANDARD_PAL
+        PushNamedScreen(HxStr(kHelpScreen));
+#endif
         ActivateNamedPanel(HxStr(kModeScreen));
         return;
     }
@@ -369,7 +395,7 @@ void MetRemixTypeScreen::OnExitFinished() {
     }
 }
 
-// 0x00362098
+// NTSC-U/C: 0x00362098, PAL: 0x0038f648
 void MetRemixTypeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mTwoButtonView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kTwoButtonView)));
@@ -378,11 +404,14 @@ void MetRemixTypeScreen::ResolveContainerViews() {
     mThreeButtonAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kThreeButtonAnim)));
 }
 
-// 0x00363148
+// NTSC-U/C: 0x00363148, PAL: 0x00390a48
 void MetRemixTypeScreen::OpenSelectedButton() {
     switch (mButtons->mSelected) {
     case kNewButtonIndex:
         PushNamedScreen(HxStr(kSoloStagesScreen));
+#ifdef VIDEO_STANDARD_PAL
+        PushNamedScreen(HxStr(kHelpScreen));
+#endif
         ActivateNamedPanel(HxStr(kSoloStagesScreen));
         break;
 
@@ -394,7 +423,11 @@ void MetRemixTypeScreen::OpenSelectedButton() {
         screens[2] = kRemixDataScreen;
         screens[3] = kHelpScreen;
         std::vector<MemcardConnectState> slots;
+#ifdef VIDEO_STANDARD_PAL
+        AddFirstCardSlot(slots);
+#else
         AddCardSlot(slots);
+#endif
         MemcardConnectState disc;
         disc.mSlotName = kDiscSlotName;
         disc.mPortSlot = kDiscSlot;

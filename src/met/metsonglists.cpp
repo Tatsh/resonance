@@ -32,16 +32,16 @@ constexpr int kCardPort1 = 0;
 constexpr int kCardPort1SlotB = 1;
 constexpr int kCardPort2 = 0x100;
 
-// 0x006ce610
+// NTSC-U/C: 0x006ce610, PAL: 0x00711ca8
 std::vector<std::vector<StageListEntry>> g_stageLists(kStageCount);
 
-// 0x006ce620
+// NTSC-U/C: 0x006ce620, PAL: 0x00711cb8
 std::vector<ArenaListEntry> g_localArenaList;
 
-// 0x006ce630
+// NTSC-U/C: 0x006ce630, PAL: 0x00711cc8
 std::vector<ArenaListEntry> g_soloArenaList;
 
-// 0x003cc748
+// NTSC-U/C: 0x003cc748, PAL: 0x00404050
 // The static's guard is at 0x006ce608, the list at 0x00892360, and the exit destructor the
 // compiler emits for it at 0x003cc678.
 std::vector<HxStr> &LevelNameStorage() {
@@ -77,7 +77,7 @@ HxStr DifficultyName(int nDifficulty) {
     return name;
 }
 
-// 0x003cc7a0
+// NTSC-U/C: 0x003cc7a0, PAL: 0x004040a8
 void RebuildStageLists() {
     QueryConfigStrings(&LevelNameStorage(), kLevelListConfigCode);
 
@@ -103,7 +103,7 @@ void RebuildStageLists() {
     }
 }
 
-// 0x003ccab0
+// NTSC-U/C: 0x003ccab0, PAL: 0x004043e8
 void RebuildArenaLists() {
     std::vector<HxStr> soloNames;
     std::vector<HxStr> localNames;
@@ -131,17 +131,17 @@ void RebuildArenaLists() {
     std::sort(g_localArenaList.begin(), g_localArenaList.end());
 }
 
-// 0x003d06b8
+// NTSC-U/C: 0x003d06b8, PAL: 0x00408478
 std::vector<HxStr> &GetLevelNames() {
     return LevelNameStorage();
 }
 
-// 0x003d06d8
+// NTSC-U/C: 0x003d06d8, PAL: 0x00408498
 std::vector<StageListEntry> *GetStageList(int nStage) {
     return &g_stageLists[nStage - 1];
 }
 
-// 0x003d06f8
+// NTSC-U/C: 0x003d06f8, PAL: 0x004084b8
 std::vector<ArenaListEntry> *GetArenaList() {
     if (Application::shared()->GetGameMode() == kGameModeLocal) {
         return &g_localArenaList;
@@ -149,7 +149,7 @@ std::vector<ArenaListEntry> *GetArenaList() {
     return &g_soloArenaList;
 }
 
-// 0x003d0a40
+// NTSC-U/C: 0x003d0a40, PAL: 0x00408818
 MemcardConnectState NextCardSlot(const MemcardConnectState &slot) {
     MemcardConnectState next;
     if (slot.mPortSlot == kCardPort1) {

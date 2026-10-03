@@ -38,14 +38,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002e72c0
+     * @ghidraAddress NTSC-U/C: 0x002e72c0
+     * @ghidraAddress PAL: 0x0030a2f0
      */
     MetModeScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x002eb8a0
+     * @ghidraAddress NTSC-U/C: 0x002eb8a0
+     * @ghidraAddress PAL: 0x0030eda8
      */
     virtual ~MetModeScreen();
 
@@ -55,7 +57,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002eb818
+     * @ghidraAddress NTSC-U/C: 0x002eb818
+     * @ghidraAddress PAL: 0x0030ed20
      */
     static MetModeScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -79,7 +82,8 @@ public:
      * exit.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002e7628
+     * @ghidraAddress NTSC-U/C: 0x002e7628
+     * @ghidraAddress PAL: 0x0030a728
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -87,7 +91,8 @@ public:
      * Silence the cycle-left sound.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x002eb808
+     * @ghidraAddress NTSC-U/C: 0x002eb808
+     * @ghidraAddress PAL: 0x0030ed10
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -95,7 +100,8 @@ public:
      * Silence the cycle-right sound.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x002eb810
+     * @ghidraAddress NTSC-U/C: 0x002eb810
+     * @ghidraAddress PAL: 0x0030ed18
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -105,7 +111,8 @@ public:
      * Slot 30. Stores 2 in mExitChoice, exits the title screen, and begins the exit.
      *
      * @param pButton The button that finished. Not read.
-     * @ghidraAddress 0x002eb958
+     * @ghidraAddress NTSC-U/C: 0x002eb958
+     * @ghidraAddress PAL: 0x0030ee60
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -114,7 +121,8 @@ public:
      *
      * Slot 33.
      *
-     * @ghidraAddress 0x002eb920
+     * @ghidraAddress NTSC-U/C: 0x002eb920
+     * @ghidraAddress PAL: 0x0030ee28
      */
     virtual void OnEnterFinished();
 
@@ -124,7 +132,8 @@ public:
      * Slot 36. A select, recorded by a non-zero mExitChoice, goes through GoToSelectedMode(). A
      * back returns to the screen the game mode calls for.
      *
-     * @ghidraAddress 0x002e8008
+     * @ghidraAddress NTSC-U/C: 0x002e8008
+     * @ghidraAddress PAL: 0x0030b2f8
      */
     virtual void OnExitFinished();
 
@@ -139,7 +148,7 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x002e8398
+    // NTSC-U/C: 0x002e8398, PAL: 0x0030b748
     // Sets the play mode for the selected button and goes on to the skill screen for a game or the
     // remix type screen for a jam. The title is inferred.
     void GoToSelectedMode();

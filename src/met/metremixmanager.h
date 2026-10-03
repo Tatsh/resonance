@@ -72,12 +72,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00352b80
+     * @ghidraAddress NTSC-U/C: 0x00352b80
+     * @ghidraAddress PAL: 0x0037ed28
      */
     MetRemixManager(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00355070
+     * @ghidraAddress NTSC-U/C: 0x00355070
+     * @ghidraAddress PAL: 0x00381570
      */
     virtual ~MetRemixManager();
 
@@ -89,7 +91,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new manager.
-     * @ghidraAddress 0x00361020
+     * @ghidraAddress NTSC-U/C: 0x00361020
+     * @ghidraAddress PAL: 0x0038e4e0
      */
     static MetRemixManager *New(MetRenderer *pRenderer, int nPriority);
 
@@ -97,7 +100,8 @@ public:
      * Return the one instance, resolving it through the screen registry on first use.
      *
      * @return The registered manager, or null before it is registered.
-     * @ghidraAddress 0x00361000
+     * @ghidraAddress NTSC-U/C: 0x00361000
+     * @ghidraAddress PAL: 0x0038e4c0
      */
     static MetRemixManager *shared();
 
@@ -107,7 +111,8 @@ public:
      * The stats screens and MetSaveRemixScreen read it. The title is inferred.
      *
      * @return The record at `+0x114`.
-     * @ghidraAddress 0x00361558
+     * @ghidraAddress NTSC-U/C: 0x00361558
+     * @ghidraAddress PAL: 0x0038ea38
      */
     MetRemixRecord *GetRecord();
 
@@ -117,7 +122,8 @@ public:
      * MetRemixLoadScreen::OnExitFinished() is the caller. The title is inferred.
      *
      * @param record The record to copy.
-     * @ghidraAddress 0x00361560
+     * @ghidraAddress NTSC-U/C: 0x00361560
+     * @ghidraAddress PAL: 0x0038ea40
      */
     void SetRecord(const MetRemixRecord &record);
 
@@ -129,7 +135,8 @@ public:
      *
      * @param name The name compared against each record's second string.
      * @return The first matching record, or null.
-     * @ghidraAddress 0x00359230
+     * @ghidraAddress NTSC-U/C: 0x00359230
+     * @ghidraAddress PAL: 0x00386388
      */
     MetRemixRecord *FindRecord(const HxStr &name);
 
@@ -141,7 +148,8 @@ public:
      *
      * @param name The remix name.
      * @return The matching record, or null.
-     * @ghidraAddress 0x003612c0
+     * @ghidraAddress NTSC-U/C: 0x003612c0
+     * @ghidraAddress PAL: 0x0038e7a0
      */
     MetRemixRecord *LookupRemix(const HxStr &name);
 
@@ -150,7 +158,8 @@ public:
      *
      * MetJukeboxTopButtonsScreen is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x003612a0
+     * @ghidraAddress NTSC-U/C: 0x003612a0
+     * @ghidraAddress PAL: 0x0038e780
      */
     void PrunePlayList();
 
@@ -159,7 +168,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x003612e0
+     * @ghidraAddress NTSC-U/C: 0x003612e0
+     * @ghidraAddress PAL: 0x0038e7c0
      */
     void PlayCurrentTrack();
 
@@ -168,7 +178,8 @@ public:
      *
      * The step stops at the first track. The image records no caller. The title is inferred.
      *
-     * @ghidraAddress 0x00361300
+     * @ghidraAddress NTSC-U/C: 0x00361300
+     * @ghidraAddress PAL: 0x0038e7e0
      */
     void PreviousTrack();
 
@@ -178,7 +189,8 @@ public:
      * The step wraps from the last track to the first. Inline. StartLoadedRemix() expands it, and
      * the out-of-line copy has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x00361358
+     * @ghidraAddress NTSC-U/C: 0x00361358
+     * @ghidraAddress PAL: 0x0038e838
      */
     inline void NextTrack();
 
@@ -188,7 +200,8 @@ public:
      * Every track is marked unplayed again once all have played. The title and the member it
      * sets are attested by the log line the routine writes.
      *
-     * @ghidraAddress 0x0035a7e0
+     * @ghidraAddress NTSC-U/C: 0x0035a7e0
+     * @ghidraAddress PAL: 0x00387a40
      */
     void RandomTrack();
 
@@ -202,7 +215,8 @@ public:
      *
      * @param returnScreens The screens the caller wants restored.
      * @param nShuffle Non-zero to play in random order.
-     * @ghidraAddress 0x003593d0
+     * @ghidraAddress NTSC-U/C: 0x003593d0
+     * @ghidraAddress PAL: 0x00386528
      */
     void StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle);
 
@@ -264,7 +278,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x0035a6b0
+     * @ghidraAddress NTSC-U/C: 0x0035a6b0
+     * @ghidraAddress PAL: 0x003878a0
      */
     void LeaveJukeboxMode();
 
@@ -276,14 +291,16 @@ public:
      * same subobject MetScreen::Draw() forwards to. The view is dereferenced with no null check,
      * and nothing is shown. The manager registers as a screen only to receive messages.
      *
-     * @ghidraAddress 0x00361518
+     * @ghidraAddress NTSC-U/C: 0x00361518
+     * @ghidraAddress PAL: 0x0038e9f8
      */
     virtual void EnterAndShow();
 
     /**
      * Slot 36, overridden empty.
      *
-     * @ghidraAddress 0x00361550
+     * @ghidraAddress NTSC-U/C: 0x00361550
+     * @ghidraAddress PAL: 0x0038ea30
      */
     virtual void OnExitFinished();
 
@@ -348,7 +365,8 @@ public:
      *
      * @param nPortSlot Which card port and slot reported.
      * @param nStatus Zero on success.
-     * @ghidraAddress 0x003553e8
+     * @ghidraAddress NTSC-U/C: 0x003553e8
+     * @ghidraAddress PAL: 0x00381918
      */
     virtual void OnRemixesListed(int nPortSlot, int nStatus);
 
@@ -381,7 +399,8 @@ public:
      *
      * @param nPortSlot Which card port and slot reported. The body does not read it.
      * @param nStatus Zero on success.
-     * @ghidraAddress 0x003563e0
+     * @ghidraAddress NTSC-U/C: 0x003563e0
+     * @ghidraAddress PAL: 0x00382e70
      */
     virtual void OnJukeboxPlayListLoaded(int nPortSlot, int nStatus);
 
@@ -398,7 +417,8 @@ public:
      * @param pBuffer The bytes the request read.
      * @param nLength How many bytes arrived.
      * @param nStatus Zero on success.
-     * @ghidraAddress 0x00358310
+     * @ghidraAddress NTSC-U/C: 0x00358310
+     * @ghidraAddress PAL: 0x00385380
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 
@@ -411,23 +431,23 @@ public:
     static constexpr int kFactorySlot = -1;
 
 private:
-    // 0x003610a8
+    // NTSC-U/C: 0x003610a8, PAL: 0x0038e568
     static MetRemixManager *ResolveSharedInstance();
-    // 0x00361210
+    // NTSC-U/C: 0x00361210, PAL: 0x0038e6d0
     static void CacheSharedInstance();
-    // 0x00357f80
+    // NTSC-U/C: 0x00357f80, PAL: 0x00384f10
     // Starts reading the remix index file, recording the request in mIndexRequest.
     void LoadIndex();
-    // 0x003580f0
+    // NTSC-U/C: 0x003580f0, PAL: 0x003850d8
     // Starts reading one remix file, recording the request in mRemixRequest.
     void LoadRemixFile(const HxStr &fileName);
-    // 0x00361418
+    // NTSC-U/C: 0x00361418, PAL: 0x0038e8f8
     // A factory remix is read from its file and any other through the memory card.
     // LoadCurrentTrack() expands it inline.
     inline void LoadRemix(const MetRemixRecord &record, int nFactory);
-    // 0x00361480
+    // NTSC-U/C: 0x00361480, PAL: 0x0038e960
     void LoadCurrentTrack();
-    // 0x0035abf8
+    // NTSC-U/C: 0x0035abf8, PAL: 0x00387e58
     // Starts a jukebox game on the current track's remix in a random arena, burns the recorded
     // appearances, steps the playlist, and brings up MetLoadGameScreen. Both remix-load
     // completions call it. The title is inferred.
@@ -435,17 +455,17 @@ private:
     // Saves the playlist again with a copy of mReturnScreens as the return screens.
     // OnMsgScreenDismissed() expands it at each retry.
     inline void RetrySavePlayList();
-    // 0x003613d8
+    // NTSC-U/C: 0x003613d8, PAL: 0x0038e8b8
     // Clamps into zero through the track count. The range admits one past the end.
     void SetCurrentTrack(int nTrack);
-    // 0x003610d0
+    // NTSC-U/C: 0x003610d0, PAL: 0x0038e590
     // Pushes every screen listed in mRestoreScreens and activates the first.
     void PushRestoreScreens();
-    // 0x00361170
+    // NTSC-U/C: 0x00361170, PAL: 0x0038e630
     // Pushes every screen listed in mReturnScreens and activates the first.
     void PushReturnScreens();
 
-    // 0x006c1110
+    // NTSC-U/C: 0x006c1110, PAL: 0x00704108
     static MetRemixManager *sInstance;
 
 public:

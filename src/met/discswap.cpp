@@ -24,7 +24,7 @@ constexpr int kTrayRequestDone = 1;
 
 } // namespace
 
-// 0x0016a048
+// NTSC-U/C: 0x0016a048, PAL: 0x0016c248
 void DiscSwap::Reset() {
     polls_ = 0;
     pollLimit_ = kPollLimit;
@@ -33,7 +33,7 @@ void DiscSwap::Reset() {
     noDisc_ = 0;
 }
 
-// 0x0016a098
+// NTSC-U/C: 0x0016a098, PAL: 0x0016c298
 int DiscSwap::ReleaseDisc() {
     int nPending;
     int nCompleted;
@@ -46,12 +46,12 @@ int DiscSwap::ReleaseDisc() {
     return CloseArk() != 0;
 }
 
-// 0x0016a168
+// NTSC-U/C: 0x0016a168, PAL: 0x0016c368
 void DiscSwap::BeginEject() {
     phase_ = kPhaseStart;
 }
 
-// 0x00169e50
+// NTSC-U/C: 0x00169e50, PAL: 0x0016c050
 int DiscSwap::PollEject() {
     if (discOnly_ == 0) {
         phase_ = kPhaseOpened;
@@ -86,12 +86,12 @@ int DiscSwap::PollEject() {
     return kStepEjecting;
 }
 
-// 0x0016a170
+// NTSC-U/C: 0x0016a170, PAL: 0x0016c370
 void DiscSwap::BeginInsert() {
     phase_ = kPhaseStart;
 }
 
-// 0x00169f08
+// NTSC-U/C: 0x00169f08, PAL: 0x0016c108
 int DiscSwap::PollInsert() {
     if (discOnly_ == 0) {
         phase_ = kPhaseClassify;
@@ -131,7 +131,7 @@ int DiscSwap::PollInsert() {
     return ClassifyDisc();
 }
 
-// 0x0016a0e8
+// NTSC-U/C: 0x0016a0e8, PAL: 0x0016c2e8
 int DiscSwap::CheckDisc() {
     // Yes, the binary reports kStepTrayOpen when the game is not reading from the disc alone.
     if (discOnly_ == 0 || sceCdDiskReady(SCECdNonblock) != SCECdComplete) {
@@ -140,7 +140,7 @@ int DiscSwap::CheckDisc() {
     return ClassifyDisc();
 }
 
-// 0x0016a178
+// NTSC-U/C: 0x0016a178, PAL: 0x0016c378
 int DiscSwap::MountDisc() {
     if (discOnly_ != 0 && sceCdDiskReady(SCECdNonblock) != SCECdComplete) {
         return kStepNotReady;

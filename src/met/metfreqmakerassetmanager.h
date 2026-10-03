@@ -53,7 +53,8 @@ public:
      *
      * MetRenderer's and MetNullRenderer's constructors are the callers. The title is inferred.
      *
-     * @ghidraAddress 0x00254930
+     * @ghidraAddress NTSC-U/C: 0x00254930
+     * @ghidraAddress PAL: 0x00269ff8
      */
     static void Create();
 
@@ -63,7 +64,8 @@ public:
      * Fifty call sites across ten classes reach the instance this way.
      *
      * @return The instance, or null before Create().
-     * @ghidraAddress 0x00254950
+     * @ghidraAddress NTSC-U/C: 0x00254950
+     * @ghidraAddress PAL: 0x0026a018
      */
     static MetFreqMakerAssetManager *shared();
 
@@ -72,7 +74,8 @@ public:
      *
      * MetRenderer's and MetNullRenderer's destructors are the callers. The title is inferred.
      *
-     * @ghidraAddress 0x00254970
+     * @ghidraAddress NTSC-U/C: 0x00254970
+     * @ghidraAddress PAL: 0x0026a038
      */
     static void Destroy();
 
@@ -81,7 +84,8 @@ public:
      *
      * Create() is the only caller.
      *
-     * @ghidraAddress 0x00255158
+     * @ghidraAddress NTSC-U/C: 0x00255158
+     * @ghidraAddress PAL: 0x0026a820
      */
     static void CreateInstance();
 
@@ -90,7 +94,8 @@ public:
      *
      * The pointer Instance() reports is not cleared. Destroy() is the only caller.
      *
-     * @ghidraAddress 0x002551b8
+     * @ghidraAddress NTSC-U/C: 0x002551b8
+     * @ghidraAddress PAL: 0x0026a880
      */
     static void DestroyInstance();
 
@@ -100,7 +105,8 @@ public:
      * shared() and MetNullRenderer's constructor are the callers.
      *
      * @return The instance.
-     * @ghidraAddress 0x002551f0
+     * @ghidraAddress NTSC-U/C: 0x002551f0
+     * @ghidraAddress PAL: 0x0026a8b8
      */
     static MetFreqMakerAssetManager *Instance();
 
@@ -110,7 +116,8 @@ public:
      * The loaders read `pers_PS2.dat` and `teamfreq_pers_PS2.dat` under the pre-fab persona
      * directory of GetFreqRoot() into mPrefabIdentities and mTeamFreqIdentities.
      *
-     * @ghidraAddress 0x00250b18
+     * @ghidraAddress NTSC-U/C: 0x00250b18
+     * @ghidraAddress PAL: 0x00266050
      */
     MetFreqMakerAssetManager();
 
@@ -119,7 +126,8 @@ public:
      *
      * The templates, the asset load, and the prototypes are not released.
      *
-     * @ghidraAddress 0x00250808
+     * @ghidraAddress NTSC-U/C: 0x00250808
+     * @ghidraAddress PAL: 0x00265d40
      */
     virtual ~MetFreqMakerAssetManager();
 
@@ -134,7 +142,8 @@ public:
      * the persona loads.
      *
      * @return True once every asset is resident.
-     * @ghidraAddress 0x0024f798
+     * @ghidraAddress NTSC-U/C: 0x0024f798
+     * @ghidraAddress PAL: 0x00264bd8
      */
     bool PollLoad();
 
@@ -142,7 +151,8 @@ public:
      * Block until PollLoad() reports the assets resident, running
      * RndAsyncLoader::PollAsyncLoads() between attempts.
      *
-     * @ghidraAddress 0x00255200
+     * @ghidraAddress NTSC-U/C: 0x00255200
+     * @ghidraAddress PAL: 0x0026a8c8
      */
     void WaitForLoad();
 
@@ -155,7 +165,8 @@ public:
      * MetLoadNewFreqScreen::AcquireIdentityList().
      *
      * @return One of the two lists. It is never null.
-     * @ghidraAddress 0x00255090
+     * @ghidraAddress NTSC-U/C: 0x00255090
+     * @ghidraAddress PAL: 0x0026a758
      */
     std::vector<MetPersonaData *> *GetIdentityList();
 
@@ -168,7 +179,8 @@ public:
      * by name.
      *
      * @return The list. It is never null.
-     * @ghidraAddress 0x00255100
+     * @ghidraAddress NTSC-U/C: 0x00255100
+     * @ghidraAddress PAL: 0x0026a7c8
      */
     std::vector<MetPersonaData *> *GetAllIdentities();
 
@@ -177,7 +189,8 @@ public:
      *
      * PollLoad() runs it. The title is inferred.
      *
-     * @ghidraAddress 0x00254fd0
+     * @ghidraAddress NTSC-U/C: 0x00254fd0
+     * @ghidraAddress PAL: 0x0026a698
      */
     void StartIdentityLoads();
 
@@ -188,7 +201,8 @@ public:
      * GetIdentityList() and GetAllIdentities() expand the same body. The title is inferred.
      *
      * @return True once both lists are filled.
-     * @ghidraAddress 0x00255000
+     * @ghidraAddress NTSC-U/C: 0x00255000
+     * @ghidraAddress PAL: 0x0026a6c8
      */
     bool AreIdentitiesLoaded();
 
@@ -198,7 +212,8 @@ public:
      * The image has no caller. The title is inferred.
      *
      * @return True when both loaders report the assets resident.
-     * @ghidraAddress 0x00255048
+     * @ghidraAddress NTSC-U/C: 0x00255048
+     * @ghidraAddress PAL: 0x0026a710
      */
     bool AreLoadersReady();
 
@@ -210,7 +225,8 @@ public:
      *
      * @param nId The template identifier.
      * @return The template.
-     * @ghidraAddress 0x00254a18
+     * @ghidraAddress NTSC-U/C: 0x00254a18
+     * @ghidraAddress PAL: 0x0026a0e0
      */
     FreqPartTemplate *GetPart(int nId);
 
@@ -221,7 +237,8 @@ public:
      * The title is inferred.
      *
      * @return The name.
-     * @ghidraAddress 0x00254e50
+     * @ghidraAddress NTSC-U/C: 0x00254e50
+     * @ghidraAddress PAL: 0x0026a518
      */
     HxStr NextMeshName();
 
@@ -234,7 +251,8 @@ public:
      *
      * @param name The name of the new mesh.
      * @return The mesh.
-     * @ghidraAddress 0x00254a58
+     * @ghidraAddress NTSC-U/C: 0x00254a58
+     * @ghidraAddress PAL: 0x0026a120
      */
     Rnd::Mesh *CloneMesh(const HxStr &name);
 
@@ -252,7 +270,8 @@ public:
      * @param pScaleZ Receives the template's z scale.
      * @param flFactorX The further factor on the x row.
      * @param flFactorZ The further factor on the z row.
-     * @ghidraAddress 0x00254b30
+     * @ghidraAddress NTSC-U/C: 0x00254b30
+     * @ghidraAddress PAL: 0x0026a1f8
      */
     void ApplyPartScale(Rnd::Mesh *pMesh,
                         FreqPartTemplate *pTemplate,
@@ -269,7 +288,8 @@ public:
      *
      * @param position The palette position, each coordinate from 0 to 1.
      * @return The colour, in storage SampleTexture() shares between calls.
-     * @ghidraAddress 0x00254f30
+     * @ghidraAddress NTSC-U/C: 0x00254f30
+     * @ghidraAddress PAL: 0x0026a5f8
      */
     Color *ColorAt(const Vector2 &position);
 
@@ -284,7 +304,8 @@ public:
      * @param flU The horizontal coordinate, from 0 to 1.
      * @param flV The vertical coordinate, from 0 to 1.
      * @return The shared colour.
-     * @ghidraAddress 0x00250638
+     * @ghidraAddress NTSC-U/C: 0x00250638
+     * @ghidraAddress PAL: 0x00265b70
      */
     Color *SampleTexture(Rnd::Tex *pTex, float flU, float flV);
 
@@ -300,7 +321,8 @@ public:
      * @param flU The horizontal coordinate, from 0 to 1.
      * @param flV The vertical coordinate, from 0 to 1.
      * @return Always true.
-     * @ghidraAddress 0x00254cf8
+     * @ghidraAddress NTSC-U/C: 0x00254cf8
+     * @ghidraAddress PAL: 0x0026a3c0
      */
     bool PaintTexel(Rnd::Tex *pTex, const Color &color, float flU, float flV);
 
@@ -317,7 +339,8 @@ public:
      * @param flScaleY The factor on the y row.
      * @param flScaleZ The factor on the z row.
      * @return Always true.
-     * @ghidraAddress 0x00254c20
+     * @ghidraAddress NTSC-U/C: 0x00254c20
+     * @ghidraAddress PAL: 0x0026a2e8
      */
     bool ScaleMesh(
         Rnd::Mesh *pMesh, int nOrthonormalize, float flScaleX, float flScaleY, float flScaleZ);
@@ -328,7 +351,8 @@ public:
      * MetFreqMakerInventoryScreen's slot 38 is the one caller. The title is inferred.
      *
      * @return The map.
-     * @ghidraAddress 0x00254990
+     * @ghidraAddress NTSC-U/C: 0x00254990
+     * @ghidraAddress PAL: 0x0026a058
      */
     std::map<HxStr, FreqPartTemplate *> *GetPartsByName();
 
@@ -339,7 +363,8 @@ public:
      *
      * @param name The template name.
      * @return The template, or null when no template has the name.
-     * @ghidraAddress 0x002549b8
+     * @ghidraAddress NTSC-U/C: 0x002549b8
+     * @ghidraAddress PAL: 0x0026a080
      */
     FreqPartTemplate *FindPart(const HxStr &name);
 
@@ -353,7 +378,8 @@ public:
      *
      * @param nCategory The category.
      * @return The list.
-     * @ghidraAddress 0x00254ea0
+     * @ghidraAddress NTSC-U/C: 0x00254ea0
+     * @ghidraAddress PAL: 0x0026a568
      */
     std::list<FreqPartTemplate *> *TemplatesInCategory(int nCategory);
 
@@ -365,7 +391,8 @@ public:
      * `rndglobal` as its priority and enqueued. MetRenderer's and MetNullRenderer's constructors
      * and PollLoad() call it. The title is inferred.
      *
-     * @ghidraAddress 0x0024fce8
+     * @ghidraAddress NTSC-U/C: 0x0024fce8
+     * @ghidraAddress PAL: 0x00265170
      */
     void StartAssetLoad();
 
@@ -375,7 +402,8 @@ public:
      * Only the name map is emptied. The identifier vector and the category lists retain their
      * pointers. The image has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x0024fe58
+     * @ghidraAddress NTSC-U/C: 0x0024fe58
+     * @ghidraAddress PAL: 0x00265320
      */
     void ReleaseParts();
 
@@ -386,12 +414,13 @@ public:
      * The image has no caller, and PollLoad() expands the same copy. The title is inferred.
      *
      * @return The objects.
-     * @ghidraAddress 0x00250540
+     * @ghidraAddress NTSC-U/C: 0x00250540
+     * @ghidraAddress PAL: 0x00265a78
      */
     std::list<Rnd::Object *> GetLoadedObjects();
 
 private:
-    // 0x0024ff80
+    // NTSC-U/C: 0x0024ff80, PAL: 0x00265448
     // Build a part template over one loaded texture: a material named after it with
     // `.mat` appended, copied from mMaterialTemplate with the texture on its first stage, the
     // texture's bitmap size as its scale, the category the seventh character from the end of the
@@ -419,7 +448,8 @@ private:
  * Colour a freshly cloned FreQ maker mesh and a reset FreqPart start with, an opaque grey of
  * 0.75 in each channel.
  *
- * @ghidraAddress 0x006a0f40
+ * @ghidraAddress NTSC-U/C: 0x006a0f40
+ * @ghidraAddress PAL: 0x006e3220
  */
 extern Color g_freqMakerDefaultColor;
 
@@ -427,6 +457,7 @@ extern Color g_freqMakerDefaultColor;
  * Registry key of the palette texture MetFreqMakerAssetManager::ColorAt() samples,
  * `spectrum.bmp`.
  *
- * @ghidraAddress 0x006a0f60
+ * @ghidraAddress NTSC-U/C: 0x006a0f60
+ * @ghidraAddress PAL: 0x006e3240
  */
 extern HxStr g_spectrumTextureName;

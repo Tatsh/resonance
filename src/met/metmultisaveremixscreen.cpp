@@ -2,13 +2,17 @@
 
 #include <vector>
 
+#include "app/application.h"
 #include "game/freqappearance.h"
+#include "game/gamemanagerimpl.h"
 #include "game/globalsettings.h"
+#include "game/inputpoller.h"
 #include "memcard/memcardconnectstate.h"
 #include "met/metfrontendstate.h"
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metsaveremixscreen.h"
+#include "met/metsonglists.h"
 #include "os/hxstr.h"
 
 namespace {
@@ -24,12 +28,32 @@ static const char *const kContainerName = "dialogue";
 // Screens the class pushes, exits, and returns to by registry key.
 static const char *const kEndRemixScreen = "MetMultiEndRemixScreen";
 static const char *const kRemixTypeScreen = "MetRemixTypeScreen";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
+static const char *const kHelpScreen = "MetHelpScreen";
+#endif
 
 // The packed port and slot of the first slot of port 1, which EnterAndShow() credits to player 1.
 constexpr int kSecondPortFirstSlot = 0x100;
+#ifndef VIDEO_STANDARD_PAL
 constexpr int kSecondPortPlayer = 1;
+#endif
 // The mark EnterAndShow() records for a player whose card is ready.
 constexpr int kCardReady = 1;
+
+#ifdef VIDEO_STANDARD_PAL
+// The location each save goes to. The first save uses the first slot of port 0, and the save
+// index selects the multitap slot of port 0 after that. Without a multitap the second save uses
+// port 1.
+constexpr int kFirstPortSlot = 0;
+constexpr int kSecondSave = 1;
+constexpr int kThirdSave = 2;
+constexpr int kFourthSave = 3;
+static const char *const kSecondPortSlotName = "2";
+static const char *const kMultitapSlotBName = "1-B";
+static const char *const kMultitapSlotCName = "1-C";
+static const char *const kMultitapSlotDName = "1-D";
+#endif
 
 // The controller pads are numbered from one, the players from zero.
 constexpr int kFirstPad = 1;
@@ -38,22 +62,24 @@ constexpr int kFirstPad = 1;
 constexpr int kClearSaveName = 1;
 constexpr int kKeepSaveName = 0;
 
+#ifndef VIDEO_STANDARD_PAL
 // ReturnToRemixType() lets the renderer resolve the arena view rather than skipping it.
 constexpr int kResolveArenaView = 0;
+#endif
 
 } // namespace
 
-// 0x002fa0b0
+// NTSC-U/C: 0x002fa0b0, PAL: 0x0031e200
 MetMultiSaveRemixScreen::MetMultiSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mSaveCount(0) {
 }
 
-// 0x002fa280
+// NTSC-U/C: 0x002fa280, PAL: 0x0031e430
 MetMultiSaveRemixScreen::~MetMultiSaveRemixScreen() {
 }
 
-// 0x002fa4e8
+// NTSC-U/C: 0x002fa4e8, PAL: 0x0031e698
 void MetMultiSaveRemixScreen::EnterAndShow() {
     SetShowing(0);
     PushNamedScreen(HxStr(kEndRemixScreen));
@@ -65,6 +91,12 @@ void MetMultiSaveRemixScreen::EnterAndShow() {
         mCardReady[nPlayer] = 0;
     }
 
+#ifdef VIDEO_STANDARD_PAL
+    mSaveCount = mPlayerCount;
+    for (int nPlayer = 0; nPlayer < mSaveCount; ++nPlayer) {
+        mCardReady[nPlayer] = kCardReady;
+    }
+#else
     for (std::vector<MemcardConnectState>::size_type nSlot = 0;
          nSlot < GlobalSettings::shared()->mCardSlots.size();
          ++nSlot) {
@@ -80,6 +112,7 @@ void MetMultiSaveRemixScreen::EnterAndShow() {
             ++mSaveCount;
         }
     }
+#endif
 
     if (mSaveCount == 0) {
         ExitScreenByName(HxStr(kEndRemixScreen));
@@ -87,9 +120,13 @@ void MetMultiSaveRemixScreen::EnterAndShow() {
     BeginExit();
 }
 
-// 0x002fa7c0
+// NTSC-U/C: 0x002fa7c0, PAL: 0x0031e8a8
 void MetMultiSaveRemixScreen::OnExitFinished() {
     if (mSaveCount == 0) {
+#ifdef VIDEO_STANDARD_PAL
+        PushNamedScreen(HxStr(kLeftGizmoScreen));
+        PushNamedScreen(HxStr(kHelpScreen));
+#endif
         ReturnToRemixType();
         return;
     }
@@ -106,6 +143,13 @@ void MetMultiSaveRemixScreen::OnExitFinished() {
 
     const int nFirstPlayer = mReadyPlayers[0];
     MetPersonaData *pPersona = MetFrontEndState::shared()->mPersonas[mReadyPlayers[0]];
+#ifdef VIDEO_STANDARD_PAL
+    MemcardConnectState slot;
+    slot.mPortSlot = kFirstPortSlot;
+    slot.mSlotName = FirstCardSlotName();
+    MetSaveRemixScreen::Open(
+        pPersona, nFirstPlayer + kFirstPad, this, slot, appearances, kClearSaveName);
+#else
     (void)GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MetSaveRemixScreen::Open(pPersona,
                              nFirstPlayer + kFirstPad,
@@ -113,11 +157,12 @@ void MetMultiSaveRemixScreen::OnExitFinished() {
                              GlobalSettings::shared()->mCardSlots[0],
                              appearances,
                              kClearSaveName);
+#endif
     mEndScreenExited = 0;
     mSaveIndex = 0;
 }
 
-// 0x002facc0
+// NTSC-U/C: 0x002facc0, PAL: 0x0031efd0
 void MetMultiSaveRemixScreen::OnSaveFinished(int) {
     ++mSaveIndex;
     if (static_cast<std::vector<int>::size_type>(mSaveIndex) == mReadyPlayers.size()) {
@@ -140,6 +185,31 @@ void MetMultiSaveRemixScreen::OnSaveFinished(int) {
     for (int nIndex = 0; nIndex < mPlayerCount; ++nIndex) {
         appearances.push_back(MetFrontEndState::shared()->mPersonas[nIndex]->mAppearance);
     }
+#ifdef VIDEO_STANDARD_PAL
+    MemcardConnectState slot;
+    switch (mSaveIndex) {
+    case kSecondSave:
+        if (Application::shared()->GetGameManager()->GetPoller()->GetMultitap0()) {
+            slot.mSlotName = kMultitapSlotBName;
+            slot.mPortSlot = mSaveIndex;
+        } else {
+            slot.mSlotName = kSecondPortSlotName;
+            slot.mPortSlot = kSecondPortFirstSlot;
+        }
+        break;
+    case kThirdSave:
+        slot.mSlotName = kMultitapSlotCName;
+        slot.mPortSlot = mSaveIndex;
+        break;
+    case kFourthSave:
+        slot.mSlotName = kMultitapSlotDName;
+        slot.mPortSlot = mSaveIndex;
+        break;
+    default:
+        break;
+    }
+    MetSaveRemixScreen::Open(pPersona, nPlayer + kFirstPad, this, slot, appearances, kKeepSaveName);
+#else
     // Yes, the binary picks the card slot by the save index rather than by the player.
     MetSaveRemixScreen::Open(pPersona,
                              nPlayer + kFirstPad,
@@ -147,9 +217,10 @@ void MetMultiSaveRemixScreen::OnSaveFinished(int) {
                              GlobalSettings::shared()->mCardSlots[mSaveIndex],
                              appearances,
                              kKeepSaveName);
+#endif
 }
 
-// 0x002fb248
+// NTSC-U/C: 0x002fb248, PAL: 0x0031f6a8
 void MetMultiSaveRemixScreen::SetOwnerScreenShowing(int bShowing) {
     mEndScreenExited = bShowing ^ 1;
     if (bShowing != 0) {
@@ -159,21 +230,23 @@ void MetMultiSaveRemixScreen::SetOwnerScreenShowing(int bShowing) {
     }
 }
 
-// 0x002fb350
+// NTSC-U/C: 0x002fb350, PAL: 0x0031f7e0
 void MetMultiSaveRemixScreen::ReturnToRemixType() {
+#ifndef VIDEO_STANDARD_PAL
     mRenderer->ResolveArenaView(kResolveArenaView);
     mRenderer->OnReturnFromGame();
     mRenderer->OnReturnToMenus();
+#endif
     PushNamedScreen(HxStr(kRemixTypeScreen));
     ActivateNamedPanel(HxStr(kRemixTypeScreen));
 }
 
-// 0x002fedc0
+// NTSC-U/C: 0x002fedc0, PAL: 0x00323310
 MetMultiSaveRemixScreen *MetMultiSaveRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiSaveRemixScreen(pRenderer, nPriority);
 }
 
-// 0x002fee48
+// NTSC-U/C: 0x002fee48, PAL: 0x00323398
 void MetMultiSaveRemixScreen::OnHelpRequested() {
     mEndScreenExited = 1;
     ExitScreenByName(HxStr(kEndRemixScreen));

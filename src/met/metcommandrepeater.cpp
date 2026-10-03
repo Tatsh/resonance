@@ -37,12 +37,12 @@ inline int FrameIntervalMs(long long nNowNs, long long nThenNs) {
 
 } // namespace
 
-// 0x002e54b0
+// NTSC-U/C: 0x002e54b0, PAL: 0x00308470
 MetCommandRepeater::MetCommandRepeater() {
     mRecords.insert(mRecords.begin(), kControllerCount, Record());
 }
 
-// 0x002e55b0
+// NTSC-U/C: 0x002e55b0, PAL: 0x00308570
 void MetCommandRepeater::Update(MetScreen *pPanel, const long long *pNowNanoseconds) {
     if (pPanel == nullptr) {
         return;
@@ -72,7 +72,7 @@ void MetCommandRepeater::Update(MetScreen *pPanel, const long long *pNowNanoseco
     }
 }
 
-// 0x002e5790
+// NTSC-U/C: 0x002e5790, PAL: 0x00308750
 void MetCommandRepeater::Arm(const MetScreenCommand *pCommand, int nButton, int nPadIndex) {
     const int nIndex = nPadIndex - kFirstPad;
     if (pCommand->mCommand == 0 && mRecords[nIndex].mButton != nButton) {
@@ -86,11 +86,11 @@ void MetCommandRepeater::Arm(const MetScreenCommand *pCommand, int nButton, int 
     mRecords[nIndex].mDelayMs = kInitialDelayMs;
 }
 
-// 0x002e71c0
+// NTSC-U/C: 0x002e71c0, PAL: 0x0030a1f0
 MetCommandRepeater::~MetCommandRepeater() {
 }
 
-// 0x002e7298
+// NTSC-U/C: 0x002e7298, PAL: 0x0030a2c8
 void MetCommandRepeater::Reset() {
     for (int nIndex = 0; nIndex < kControllerCount; ++nIndex) {
         mRecords[nIndex].mCommand = 0;

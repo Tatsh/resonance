@@ -51,12 +51,14 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003cc1a8
+     * @ghidraAddress NTSC-U/C: 0x003cc1a8
+     * @ghidraAddress PAL: 0x00403a40
      */
     static MetTutorialScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003cc230
+     * @ghidraAddress NTSC-U/C: 0x003cc230
+     * @ghidraAddress PAL: 0x00403ac8
      */
     virtual ~MetTutorialScreen();
 
@@ -84,7 +86,8 @@ public:
      * Every other command is discarded.
      *
      * @param pCommand The command to route.
-     * @ghidraAddress 0x003c7f10
+     * @ghidraAddress NTSC-U/C: 0x003c7f10
+     * @ghidraAddress PAL: 0x003ff2a0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -92,7 +95,8 @@ public:
      * Play no left cycle sound. Slot 23.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003cc198
+     * @ghidraAddress NTSC-U/C: 0x003cc198
+     * @ghidraAddress PAL: 0x00403a30
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -100,7 +104,8 @@ public:
      * Play no right cycle sound. Slot 24.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003cc1a0
+     * @ghidraAddress NTSC-U/C: 0x003cc1a0
+     * @ghidraAddress PAL: 0x00403a38
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -112,7 +117,8 @@ public:
      * screens are `MetLeftGizmoScreen`, `MetScreenTitleScreen`, and `MetHelpScreen`.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x003c84d8
+     * @ghidraAddress NTSC-U/C: 0x003c84d8
+     * @ghidraAddress PAL: 0x003ff998
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -125,9 +131,11 @@ public:
      * on the first arena at the easiest difficulty, as the `tutorial` level in game mode for the
      * first button and as `tutorialrmx` in jam mode for the second. It hangs a random FreQ maker
      * identity in burn slot 0, makes that identity the one persona, records this screen as
-     * MetFrontEndState::mReturnScreen, and pushes and activates `MetLoadGameScreen`.
+     * MetFrontEndState::mReturnScreen, and pushes and activates `MetLoadGameScreen`. The European
+     * release appends LocalizedAssetSuffix() to the level name.
      *
-     * @ghidraAddress 0x003c8678
+     * @ghidraAddress NTSC-U/C: 0x003c8678
+     * @ghidraAddress PAL: 0x003ffb98
      */
     virtual void OnExitFinished();
 

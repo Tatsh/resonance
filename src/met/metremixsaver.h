@@ -26,7 +26,8 @@
 class MetRemixSaver {
 public:
     /**
-     * @ghidraAddress 0x002fecf0
+     * @ghidraAddress NTSC-U/C: 0x002fecf0
+     * @ghidraAddress PAL: 0x00323240
      */
     virtual ~MetRemixSaver();
 
@@ -40,7 +41,8 @@ public:
      * argument register.
      *
      * @param bCompleted 1 after a save dialogue closed, 0 otherwise. Neither override reads it.
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual void OnSaveFinished(int bCompleted) = 0;
 
@@ -50,7 +52,8 @@ public:
      * Both overrides, at `0x002fee48` and `0x00399898`, write one to the member the slot 4 override
      * clears and then dispatch through the primary table. Neither reads an argument register.
      *
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual void OnHelpRequested() = 0;
 
@@ -61,7 +64,8 @@ public:
      * into a member and branch on the same argument.
      *
      * @param bShowing 1 when the save screen returns, 0 when the save is declined.
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual void SetOwnerScreenShowing(int bShowing) = 0;
 };

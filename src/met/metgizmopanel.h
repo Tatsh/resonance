@@ -40,7 +40,8 @@ public:
      * @param name The screen name.
      * @param directory The directory the container loads from.
      * @param container The container name, without its `.rnd` suffix.
-     * @ghidraAddress 0x00276d38
+     * @ghidraAddress NTSC-U/C: 0x00276d38
+     * @ghidraAddress PAL: 0x0028f690
      */
     MetGizmoPanel(MetRenderer *pRenderer,
                   int nPriority,
@@ -51,7 +52,8 @@ public:
     /**
      * Release the two view vectors.
      *
-     * @ghidraAddress 0x0027b218
+     * @ghidraAddress NTSC-U/C: 0x0027b218
+     * @ghidraAddress PAL: 0x00293eb8
      */
     virtual ~MetGizmoPanel();
 
@@ -61,7 +63,8 @@ public:
      * Slot 26.
      *
      * @param flTime The frame.
-     * @ghidraAddress 0x0027b3b0
+     * @ghidraAddress NTSC-U/C: 0x0027b3b0
+     * @ghidraAddress PAL: 0x00294068
      */
     virtual void UpdateIdle(float flTime);
 
@@ -71,7 +74,8 @@ public:
      * Slot 27.
      *
      * @param flTime The frame.
-     * @ghidraAddress 0x0027b388
+     * @ghidraAddress NTSC-U/C: 0x0027b388
+     * @ghidraAddress PAL: 0x00294040
      */
     virtual void UpdateIdleAnimation(float flTime);
 
@@ -80,7 +84,8 @@ public:
      *
      * Slot 38. mViews is resized to the length of mViewNames first.
      *
-     * @ghidraAddress 0x00276d90
+     * @ghidraAddress NTSC-U/C: 0x00276d90
+     * @ghidraAddress PAL: 0x0028f6e8
      */
     virtual void ResolveContainerViews();
 

@@ -24,7 +24,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0031fd98
+     * @ghidraAddress NTSC-U/C: 0x0031fd98
+     * @ghidraAddress PAL: 0x00346768
      */
     MetPauseSoloGameScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -34,7 +35,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00323a60
+     * @ghidraAddress NTSC-U/C: 0x00323a60
+     * @ghidraAddress PAL: 0x0034afd0
      */
     static MetPauseSoloGameScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -60,7 +62,8 @@ public:
      * MetPauseBaseScreen::HandleCommand(). Code 9 is ignored.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00320088
+     * @ghidraAddress NTSC-U/C: 0x00320088
+     * @ghidraAddress PAL: 0x00346ae8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -72,7 +75,8 @@ public:
      * `MetScreenTitleScreen`, the configuration screen, and `MetHelpScreen` are pushed before the
      * configuration screen is made the active panel.
      *
-     * @ghidraAddress 0x003205a8
+     * @ghidraAddress NTSC-U/C: 0x003205a8
+     * @ghidraAddress PAL: 0x00347628
      */
     virtual void OnExitFinished();
 
@@ -81,7 +85,8 @@ public:
      *
      * Slot 38. MetScreen::ResolveContainerViews() runs first. No text is tested for null.
      *
-     * @ghidraAddress 0x0031ff38
+     * @ghidraAddress NTSC-U/C: 0x0031ff38
+     * @ghidraAddress PAL: 0x00346970
      */
     virtual void ResolveContainerViews();
 

@@ -38,14 +38,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0032ece0
+     * @ghidraAddress NTSC-U/C: 0x0032ece0
+     * @ghidraAddress PAL: 0x00357320
      */
     MetPersonaSaverScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the loaded roster.
      *
-     * @ghidraAddress 0x0032f020
+     * @ghidraAddress NTSC-U/C: 0x0032f020
+     * @ghidraAddress PAL: 0x003576d0
      */
     virtual ~MetPersonaSaverScreen();
 
@@ -55,7 +57,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00338f98
+     * @ghidraAddress NTSC-U/C: 0x00338f98
+     * @ghidraAddress PAL: 0x00362f70
      */
     static MetPersonaSaverScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -73,7 +76,8 @@ public:
      * @param slot The card location.
      * @param nConfirmReplace Non-zero to prompt before saving over a persona of the same name.
      * @param nIsCopy Non-zero for a copy to another card.
-     * @ghidraAddress 0x0032e858
+     * @ghidraAddress NTSC-U/C: 0x0032e858
+     * @ghidraAddress PAL: 0x00356da0
      */
     static void StartSave(const std::vector<HxStr> &screens,
                           MetPersonaData *pPersona,
@@ -91,7 +95,8 @@ public:
      * @param screens The registry keys of the screens to return to.
      * @param pPersona The persona to delete.
      * @param slot The card location.
-     * @ghidraAddress 0x0032eaa8
+     * @ghidraAddress NTSC-U/C: 0x0032eaa8
+     * @ghidraAddress PAL: 0x00357068
      */
     static void StartDelete(const std::vector<HxStr> &screens,
                             MetPersonaData *pPersona,
@@ -102,7 +107,8 @@ public:
      *
      * The body is SetShowing(0) alone, and MetScreen::EnterAndShow() does not run.
      *
-     * @ghidraAddress 0x003390c0
+     * @ghidraAddress NTSC-U/C: 0x003390c0
+     * @ghidraAddress PAL: 0x00363098
      */
     virtual void EnterAndShow();
 
@@ -111,7 +117,8 @@ public:
      *
      * Clears mRefreshingSettingsCard and runs CommitSave().
      *
-     * @ghidraAddress 0x003390f0
+     * @ghidraAddress NTSC-U/C: 0x003390f0
+     * @ghidraAddress PAL: 0x003630c8
      */
     virtual void OnPanelActivated();
 
@@ -121,7 +128,8 @@ public:
      * The screen is removed from the renderer, each screen in mReturnScreens is pushed, and the
      * first is made the active panel.
      *
-     * @ghidraAddress 0x00339110
+     * @ghidraAddress NTSC-U/C: 0x00339110
+     * @ghidraAddress PAL: 0x003630e8
      */
     virtual void BeginExit();
 
@@ -151,7 +159,8 @@ public:
     /**
      * Resolve the container views. Slot 38, the MetScreen body alone.
      *
-     * @ghidraAddress 0x003390a0
+     * @ghidraAddress NTSC-U/C: 0x003390a0
+     * @ghidraAddress PAL: 0x00363078
      */
     virtual void ResolveContainerViews();
 
@@ -235,7 +244,8 @@ public:
      * is MetPersonaData::SetName() expanded in place.
      *
      * @param text The text the user entered.
-     * @ghidraAddress 0x003391a8
+     * @ghidraAddress NTSC-U/C: 0x003391a8
+     * @ghidraAddress PAL: 0x00363180
      */
     virtual void OnKeyboardTextEntered(const HxStr &text);
 
@@ -244,7 +254,8 @@ public:
      *
      * Both overrides are two-instruction stubs, written inline with an empty body.
      *
-     * @ghidraAddress 0x00338f88
+     * @ghidraAddress NTSC-U/C: 0x00338f88
+     * @ghidraAddress PAL: 0x00362dc8
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -252,7 +263,8 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x00338f90
+     * @ghidraAddress NTSC-U/C: 0x00338f90
+     * @ghidraAddress PAL: 0x00362dd0
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -266,7 +278,8 @@ private:
      * the pre-fab identity or the saved persona of the same name, or is appended to
      * MetPersonaData::savedList() as a copy, and the screen exits. The name is inferred.
      *
-     * @ghidraAddress 0x0032f1e0
+     * @ghidraAddress NTSC-U/C: 0x0032f1e0
+     * @ghidraAddress PAL: 0x003578b8
      */
     void CommitSave();
 
@@ -276,7 +289,8 @@ private:
      * Each element is released through slot 1 of the table its vptr at `+0x168` addresses, with
      * the deleting `__in_chrg` value. The title is inferred.
      *
-     * @ghidraAddress 0x0032f4d0
+     * @ghidraAddress NTSC-U/C: 0x0032f4d0
+     * @ghidraAddress PAL: 0x00357bd8
      */
     void ClearPersonas();
 
@@ -296,7 +310,8 @@ private:
      *
      * The name is inferred.
      *
-     * @ghidraAddress 0x00332130
+     * @ghidraAddress NTSC-U/C: 0x00332130
+     * @ghidraAddress PAL: 0x0035aeb0
      */
     void SyncActivePersona();
 
@@ -346,7 +361,8 @@ private:
      * @param screens The registry keys of the screens to return to.
      * @param pPersona The persona to save.
      * @param slot The card location.
-     * @ghidraAddress 0x00339020
+     * @ghidraAddress NTSC-U/C: 0x00339020
+     * @ghidraAddress PAL: 0x00362ff8
      */
     void SetSaveRequest(const std::vector<HxStr> &screens,
                         MetPersonaData *pPersona,

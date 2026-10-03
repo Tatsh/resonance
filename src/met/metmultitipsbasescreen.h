@@ -36,7 +36,8 @@
 class MetMultiTipsBaseScreen : public MetScreen {
 public:
     /**
-     * @ghidraAddress 0x0030d710
+     * @ghidraAddress NTSC-U/C: 0x0030d710
+     * @ghidraAddress PAL: 0x00333240
      */
     virtual ~MetMultiTipsBaseScreen();
 
@@ -56,7 +57,8 @@ public:
      *
      * Slot 9.
      *
-     * @ghidraAddress 0x0030d7d0
+     * @ghidraAddress NTSC-U/C: 0x0030d7d0
+     * @ghidraAddress PAL: 0x00333328
      */
     virtual void BeginExit();
 
@@ -68,25 +70,29 @@ public:
      * records its choice in MetScreen::mExitChoice, and begins the exit.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00306ee0
+     * @ghidraAddress NTSC-U/C: 0x00306ee0
+     * @ghidraAddress PAL: 0x0032b958
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0030d7a0
+     * @ghidraAddress NTSC-U/C: 0x0030d7a0
+     * @ghidraAddress PAL: 0x003332f8
      */
     virtual void PlayHighSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0030d790
+     * @ghidraAddress NTSC-U/C: 0x0030d790
+     * @ghidraAddress PAL: 0x003332e8
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0030d798
+     * @ghidraAddress NTSC-U/C: 0x0030d798
+     * @ghidraAddress PAL: 0x003332f0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -95,7 +101,8 @@ public:
      *
      * Slot 33. Posts the first entry of MetScreen::mHelpKeys at the renderer's current time.
      *
-     * @ghidraAddress 0x0030d7a8
+     * @ghidraAddress NTSC-U/C: 0x0030d7a8
+     * @ghidraAddress PAL: 0x00333300
      */
     virtual void OnEnterFinished();
 
@@ -105,7 +112,8 @@ public:
      * Slot 36. A back pushes the previous page, a select the next page, and anything else returns
      * to the player-count screen.
      *
-     * @ghidraAddress 0x003072a0
+     * @ghidraAddress NTSC-U/C: 0x003072a0
+     * @ghidraAddress PAL: 0x0032bde0
      */
     virtual void OnExitFinished();
 

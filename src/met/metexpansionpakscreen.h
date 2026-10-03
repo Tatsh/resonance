@@ -45,12 +45,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00218320
+     * @ghidraAddress NTSC-U/C: 0x00218320
+     * @ghidraAddress PAL: 0x0022a848
      */
     MetExpansionPakScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0021d8a8
+     * @ghidraAddress NTSC-U/C: 0x0021d8a8
+     * @ghidraAddress PAL: 0x00230400
      */
     virtual ~MetExpansionPakScreen();
 
@@ -62,7 +64,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0021d820
+     * @ghidraAddress NTSC-U/C: 0x0021d820
+     * @ghidraAddress PAL: 0x00230378
      */
     static MetExpansionPakScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -73,7 +76,8 @@ public:
      * from the renderer's stack. A cancel returns to the options screens, and any other exit
      * returns to the main menu.
      *
-     * @ghidraAddress 0x0021a128
+     * @ghidraAddress NTSC-U/C: 0x0021a128
+     * @ghidraAddress PAL: 0x0022cac0
      */
     virtual void OnFadeOutDone();
 
@@ -95,7 +99,8 @@ public:
      * `0x0016a048`, and the fade starts on mFade over 360.0 units from MetRenderer::mAnimationFrame
      * with this screen's FadeUser subobject as the receiver. The MetScreen body does not run.
      *
-     * @ghidraAddress 0x0021d948
+     * @ghidraAddress NTSC-U/C: 0x0021d948
+     * @ghidraAddress PAL: 0x002304a0
      */
     virtual void EnterAndShow();
 
@@ -106,7 +111,8 @@ public:
      * rather than `0x0016d750`, and with a zero where EnterAndShow() passes a one. The MetScreen
      * body does not run, so the fade rather than the base drives the departure.
      *
-     * @ghidraAddress 0x0021d9a8
+     * @ghidraAddress NTSC-U/C: 0x0021d9a8
+     * @ghidraAddress PAL: 0x00230500
      */
     virtual void BeginExit();
 
@@ -132,7 +138,8 @@ public:
      * mLoadShown. Any other name is not recorded.
      *
      * @param name The message screen that appeared.
-     * @ghidraAddress 0x0021d9e0
+     * @ghidraAddress NTSC-U/C: 0x0021d9e0
+     * @ghidraAddress PAL: 0x00230538
      */
     virtual void OnMsgScreenShown(const HxStr &name);
 
@@ -142,7 +149,8 @@ public:
      * Slot 23. Both overrides are two-instruction stubs, so each was written inline with an empty
      * body.
      *
-     * @ghidraAddress 0x0021d810
+     * @ghidraAddress NTSC-U/C: 0x0021d810
+     * @ghidraAddress PAL: 0x0022a290
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -152,7 +160,8 @@ public:
      *
      * Slot 24.
      *
-     * @ghidraAddress 0x0021d818
+     * @ghidraAddress NTSC-U/C: 0x0021d818
+     * @ghidraAddress PAL: 0x0022a298
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -179,7 +188,8 @@ public:
      * else. That is what the binary does. The slot is filled with a routine that adds no
      * behaviour.
      *
-     * @ghidraAddress 0x0021d928
+     * @ghidraAddress NTSC-U/C: 0x0021d928
+     * @ghidraAddress PAL: 0x00230480
      */
     virtual void ResolveContainerViews();
 

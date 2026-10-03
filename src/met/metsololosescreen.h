@@ -33,14 +33,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00399be8
+     * @ghidraAddress NTSC-U/C: 0x00399be8
+     * @ghidraAddress PAL: 0x003cbd78
      */
     MetSoloLoseScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x0039e010
+     * @ghidraAddress NTSC-U/C: 0x0039e010
+     * @ghidraAddress PAL: 0x003d0580
      */
     virtual ~MetSoloLoseScreen();
 
@@ -52,7 +54,8 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0039df88
+     * @ghidraAddress NTSC-U/C: 0x0039df88
+     * @ghidraAddress PAL: 0x003d04f8
      */
     static MetSoloLoseScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -78,7 +81,8 @@ public:
      * button's state twice at 30-frame intervals, and clears the prompt.
      *
      * @param pCommand The command to handle.
-     * @ghidraAddress 0x00399db8
+     * @ghidraAddress NTSC-U/C: 0x00399db8
+     * @ghidraAddress PAL: 0x003cbfb0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -86,7 +90,8 @@ public:
      * Play nothing. Slot 21.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x0039df80
+     * @ghidraAddress NTSC-U/C: 0x0039df80
+     * @ghidraAddress PAL: 0x003d04f0
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -94,7 +99,8 @@ public:
      * Play nothing. Slot 23.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x0039df70
+     * @ghidraAddress NTSC-U/C: 0x0039df70
+     * @ghidraAddress PAL: 0x003d04e0
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -102,7 +108,8 @@ public:
      * Play nothing. Slot 24.
      *
      * @param nSelector Not read.
-     * @ghidraAddress 0x0039df78
+     * @ghidraAddress NTSC-U/C: 0x0039df78
+     * @ghidraAddress PAL: 0x003d04e8
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -110,7 +117,8 @@ public:
      * Exit the stats, title, and help screens and start this screen's exit. Slot 30.
      *
      * @param pButton Not read.
-     * @ghidraAddress 0x0039a6e8
+     * @ghidraAddress NTSC-U/C: 0x0039a6e8
+     * @ghidraAddress PAL: 0x003cca58
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -122,7 +130,8 @@ public:
      * the renderer resolves its arena view, runs its two empty hooks, and `MetSoloStagesScreen` is
      * pushed and activated. The selection is then cleared.
      *
-     * @ghidraAddress 0x0039a880
+     * @ghidraAddress NTSC-U/C: 0x0039a880
+     * @ghidraAddress PAL: 0x003ccc50
      */
     virtual void OnExitFinished();
 

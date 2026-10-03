@@ -43,7 +43,8 @@ public:
      *
      * @param nSize The object size, which the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x0032e1e8
+     * @ghidraAddress NTSC-U/C: 0x0032e1e8
+     * @ghidraAddress PAL: 0x003566f0
      */
     void *operator new(size_t nSize);
 
@@ -51,7 +52,8 @@ public:
      * Release an instance to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x0032e208
+     * @ghidraAddress NTSC-U/C: 0x0032e208
+     * @ghidraAddress PAL: 0x00356710
      */
     void operator delete(void *pBlock);
 
@@ -61,7 +63,8 @@ public:
      * The campaign's level list is rebuilt from the configuration, the birthday starts as
      * `0/0/00, 12:00`, and the pre-fab flag is clear.
      *
-     * @ghidraAddress 0x0032b760
+     * @ghidraAddress NTSC-U/C: 0x0032b760
+     * @ghidraAddress PAL: 0x00353bf0
      */
     MetPersonaData();
 
@@ -79,7 +82,8 @@ public:
      * descriptor, literal, or file path in the image attributes either address.
      *
      * @return The list. It is never null.
-     * @ghidraAddress 0x00218118
+     * @ghidraAddress NTSC-U/C: 0x00218118
+     * @ghidraAddress PAL: 0x00221da0
      */
     static std::vector<MetPersonaData *> *loadList() {
         return &LoadListStorage();
@@ -96,7 +100,8 @@ public:
      * share.
      *
      * @return The list. It is never null.
-     * @ghidraAddress 0x00218078
+     * @ghidraAddress NTSC-U/C: 0x00218078
+     * @ghidraAddress PAL: 0x00221d00
      */
     static std::vector<MetPersonaData *> *savedList() {
         return &SavedListStorage();
@@ -109,7 +114,8 @@ public:
      * `atexit`.
      *
      * @return The list.
-     * @ghidraAddress 0x00215ca0
+     * @ghidraAddress NTSC-U/C: 0x00215ca0
+     * @ghidraAddress PAL: 0x0021f900
      */
     static std::vector<MetPersonaData *> &LoadListStorage();
 
@@ -120,7 +126,8 @@ public:
      * `atexit`.
      *
      * @return The list.
-     * @ghidraAddress 0x00215b88
+     * @ghidraAddress NTSC-U/C: 0x00215b88
+     * @ghidraAddress PAL: 0x0021f7e8
      */
     static std::vector<MetPersonaData *> &SavedListStorage();
 
@@ -130,7 +137,8 @@ public:
      * MetRenderer's constructor, MetLocPickCharScreen, MetMemDetectScreen, and
      * MetPersonaSaverScreen call it. The list is resolved afresh for every read.
      *
-     * @ghidraAddress 0x00215cf8
+     * @ghidraAddress NTSC-U/C: 0x00215cf8
+     * @ghidraAddress PAL: 0x0021f958
      */
     static void ClearLoadList();
 
@@ -139,7 +147,8 @@ public:
      *
      * MetRenderer's constructor is the one caller.
      *
-     * @ghidraAddress 0x00215be0
+     * @ghidraAddress NTSC-U/C: 0x00215be0
+     * @ghidraAddress PAL: 0x0021f840
      */
     static void ClearSavedList();
 
@@ -151,13 +160,15 @@ public:
      *
      * @param pDestination The list to replace.
      * @param pSource The records to copy.
-     * @ghidraAddress 0x002159f8
+     * @ghidraAddress NTSC-U/C: 0x002159f8
+     * @ghidraAddress PAL: 0x0021f658
      */
     static void CopyList(std::vector<MetPersonaData *> *pDestination,
                          const std::vector<MetPersonaData *> *pSource);
 
     /**
-     * @ghidraAddress 0x0032e278
+     * @ghidraAddress NTSC-U/C: 0x0032e278
+     * @ghidraAddress PAL: 0x00356780
      */
     virtual ~MetPersonaData();
 
@@ -171,7 +182,8 @@ public:
      *
      * @param other The record to copy.
      * @return This record.
-     * @ghidraAddress 0x0032e420
+     * @ghidraAddress NTSC-U/C: 0x0032e420
+     * @ghidraAddress PAL: 0x00356950
      */
     MetPersonaData &operator=(const MetPersonaData &other);
 
@@ -186,7 +198,8 @@ public:
      * and GameManagerImpl::Save() calls the same slot on the same class.
      *
      * @param pStream The stream to write to.
-     * @ghidraAddress 0x0032b880
+     * @ghidraAddress NTSC-U/C: 0x0032b880
+     * @ghidraAddress PAL: 0x00353d40
      */
     virtual void Save(OBStream *pStream);
 
@@ -200,7 +213,8 @@ public:
      * recomputed last through UpdateSkillStatus(), expanded in place.
      *
      * @param pStream The stream to read from.
-     * @ghidraAddress 0x0032b968
+     * @ghidraAddress NTSC-U/C: 0x0032b968
+     * @ghidraAddress PAL: 0x00353e28
      */
     virtual void Load(IBStream *pStream);
 
@@ -211,7 +225,8 @@ public:
      * only that stage is complete, 2 when stage 4 is complete on normal, 1 when stage 3 is complete
      * on easy, and 0 otherwise. MetStageFinishScreen slot 5 is the caller.
      *
-     * @ghidraAddress 0x0032e308
+     * @ghidraAddress NTSC-U/C: 0x0032e308
+     * @ghidraAddress PAL: 0x00356838
      */
     void UpdateSkillStatus();
 
@@ -222,7 +237,8 @@ public:
      * MetTutorialScreen::OnExitFinished() is a caller.
      *
      * @param nSlot The burn slot, 0 through 3.
-     * @ghidraAddress 0x0032e488
+     * @ghidraAddress NTSC-U/C: 0x0032e488
+     * @ghidraAddress PAL: 0x003569b8
      */
     void AttachToBurnSlot(int nSlot);
 
@@ -233,7 +249,8 @@ public:
      * caller.
      *
      * @return The status, 0 through 4.
-     * @ghidraAddress 0x0032e258
+     * @ghidraAddress NTSC-U/C: 0x0032e258
+     * @ghidraAddress PAL: 0x00356760
      */
     int GetSkillStatus();
 
@@ -244,7 +261,8 @@ public:
      * inferred.
      *
      * @param name The new username.
-     * @ghidraAddress 0x0032e230
+     * @ghidraAddress NTSC-U/C: 0x0032e230
+     * @ghidraAddress PAL: 0x00356738
      */
     void SetName(const HxStr &name);
 
@@ -256,7 +274,8 @@ public:
      * caller.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0032e380
+     * @ghidraAddress NTSC-U/C: 0x0032e380
+     * @ghidraAddress PAL: 0x003568b0
      */
     void Print(std::ostream &stream);
 

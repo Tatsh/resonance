@@ -47,12 +47,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002fa0b0
+     * @ghidraAddress NTSC-U/C: 0x002fa0b0
+     * @ghidraAddress PAL: 0x0031e200
      */
     MetMultiSaveRemixScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002fa280
+     * @ghidraAddress NTSC-U/C: 0x002fa280
+     * @ghidraAddress PAL: 0x0031e430
      */
     virtual ~MetMultiSaveRemixScreen();
 
@@ -62,7 +64,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002fedc0
+     * @ghidraAddress NTSC-U/C: 0x002fedc0
+     * @ghidraAddress PAL: 0x00323310
      */
     static MetMultiSaveRemixScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -72,9 +75,11 @@ public:
      *
      * Slot 5. A card at a port-0 slot below the player count marks that player, and a card at the
      * first slot of port 1 marks player 1. When no card is ready the end-of-remix screen is exited
-     * again. The screen then begins its exit.
+     * again. The screen then begins its exit. The European release does not read the cards and
+     * marks every player.
      *
-     * @ghidraAddress 0x002fa4e8
+     * @ghidraAddress NTSC-U/C: 0x002fa4e8
+     * @ghidraAddress PAL: 0x0031e698
      */
     virtual void EnterAndShow();
 
@@ -84,9 +89,12 @@ public:
      * Slot 36. With no ready card it goes straight to ReturnToRemixType(). Otherwise it records the
      * ready players in mReadyPlayers, gathers every player's appearance, and opens
      * MetSaveRemixScreen for the first ready player on the first card slot, clearing the entered
-     * name, then resets mSaveIndex and mEndScreenExited.
+     * name, then resets mSaveIndex and mEndScreenExited. The European release pushes the left
+     * gizmo and help screens before ReturnToRemixType(), and saves the first player to the first
+     * slot of port 0 under the name FirstCardSlotName() reports.
      *
-     * @ghidraAddress 0x002fa7c0
+     * @ghidraAddress NTSC-U/C: 0x002fa7c0
+     * @ghidraAddress PAL: 0x0031e8a8
      */
     virtual void OnExitFinished();
 
@@ -96,10 +104,14 @@ public:
      * Slot 2 of the MetRemixSaver table. After the last save the end-of-remix screen is exited
      * unless mEndScreenExited is set, and ReturnToRemixType() runs. Otherwise the end-of-remix
      * screen is pushed again when mEndScreenExited is set, and MetSaveRemixScreen opens for the
-     * next ready player on the card slot the save index selects, retaining the entered name.
+     * next ready player on the card slot the save index selects, retaining the entered name. The
+     * European release builds the location from the save index instead. The second save goes to
+     * multitap slot `1-B` with a multitap on port 0 and to port `2` without one, the third and
+     * fourth go to `1-C` and `1-D`, and any later save gets the default location.
      *
      * @param bCompleted Not read.
-     * @ghidraAddress 0x002facc0
+     * @ghidraAddress NTSC-U/C: 0x002facc0
+     * @ghidraAddress PAL: 0x0031efd0
      */
     virtual void OnSaveFinished(int bCompleted);
 
@@ -108,7 +120,8 @@ public:
      *
      * Slot 3 of the MetRemixSaver table.
      *
-     * @ghidraAddress 0x002fee48
+     * @ghidraAddress NTSC-U/C: 0x002fee48
+     * @ghidraAddress PAL: 0x00323398
      */
     virtual void OnHelpRequested();
 
@@ -119,7 +132,8 @@ public:
      * Slot 4 of the MetRemixSaver table.
      *
      * @param bShowing Non-zero to push the end-of-remix screen.
-     * @ghidraAddress 0x002fb248
+     * @ghidraAddress NTSC-U/C: 0x002fb248
+     * @ghidraAddress PAL: 0x0031f6a8
      */
     virtual void SetOwnerScreenShowing(int bShowing);
 
@@ -128,7 +142,8 @@ public:
      *
      * All four overrides are two-instruction stubs, so each was written inline with an empty body.
      *
-     * @ghidraAddress 0x002fedb8
+     * @ghidraAddress NTSC-U/C: 0x002fedb8
+     * @ghidraAddress PAL: 0x00323308
      */
     virtual void PlayLeaveSound(int) {
     }
@@ -136,7 +151,8 @@ public:
     /**
      * Silence the high sound.
      *
-     * @ghidraAddress 0x002fedb0
+     * @ghidraAddress NTSC-U/C: 0x002fedb0
+     * @ghidraAddress PAL: 0x00323300
      */
     virtual void PlayHighSound(int) {
     }
@@ -144,7 +160,8 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * @ghidraAddress 0x002feda0
+     * @ghidraAddress NTSC-U/C: 0x002feda0
+     * @ghidraAddress PAL: 0x003232f0
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -152,15 +169,17 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x002feda8
+     * @ghidraAddress NTSC-U/C: 0x002feda8
+     * @ghidraAddress PAL: 0x003232f8
      */
     virtual void PlayCycleRightSound(int) {
     }
 
 private:
-    // 0x002fb350
+    // NTSC-U/C: 0x002fb350, PAL: 0x0031f7e0
     // Resolves the arena view, runs the renderer's two hooks, and pushes and activates
-    // `MetRemixTypeScreen`. Slots 2 and 36 are its callers, and the title is inferred.
+    // `MetRemixTypeScreen`. Slots 2 and 36 are its callers, and the title is inferred. The
+    // European release only pushes and activates the screen.
     void ReturnToRemixType();
 
     // The players MetFrontEndState holds, at most this many.

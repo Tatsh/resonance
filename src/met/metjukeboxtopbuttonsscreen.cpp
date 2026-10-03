@@ -68,7 +68,7 @@ inline void ShowScreen(const char *pszName, int nShowing) {
 
 } // namespace
 
-// 0x00240c28
+// NTSC-U/C: 0x00240c28, PAL: 0x002556d8
 MetJukeboxTopButtonsScreen::MetJukeboxTopButtonsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer,
                 nPriority,
@@ -79,11 +79,11 @@ MetJukeboxTopButtonsScreen::MetJukeboxTopButtonsScreen(MetRenderer *pRenderer, i
     mButtons = new MetButtonList;
 }
 
-// 0x00246778
+// NTSC-U/C: 0x00246778, PAL: 0x0025b890
 MetJukeboxTopButtonsScreen::~MetJukeboxTopButtonsScreen() {
 }
 
-// 0x002466f0
+// NTSC-U/C: 0x002466f0, PAL: 0x0025b808
 MetJukeboxTopButtonsScreen *MetJukeboxTopButtonsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetJukeboxTopButtonsScreen(pRenderer, nPriority);
 }
@@ -99,7 +99,7 @@ void MetJukeboxTopButtonsScreen::ResolveContainerViews() {
     mButtons->SetSelected(kSavedRemixesButton);
 }
 
-// 0x00241120
+// NTSC-U/C: 0x00241120, PAL: 0x00255d20
 void MetJukeboxTopButtonsScreen::OnExitFinished() {
     if (mExitChoice == kExitCancelled) {
         PushNamedScreen(HxStr(kLeftGizmoScreen));
@@ -195,7 +195,7 @@ void MetJukeboxTopButtonsScreen::EnterAndShow() {
     ShowSelectedPanel();
 }
 
-// 0x00242140
+// NTSC-U/C: 0x00242140, PAL: 0x002570e8
 void MetJukeboxTopButtonsScreen::BeginExit() {
     MetScreen::BeginExit();
     ExitScreenByName(HxStr(kCustomRemixesScreen));
@@ -205,7 +205,7 @@ void MetJukeboxTopButtonsScreen::BeginExit() {
     ExitScreenByName(HxStr(kDoneScreen));
 }
 
-// 0x002467e8
+// NTSC-U/C: 0x002467e8, PAL: 0x0025b910
 void MetJukeboxTopButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandLeft:
@@ -229,11 +229,11 @@ void MetJukeboxTopButtonsScreen::HandleCommand(const MetScreenCommand *pCommand)
     }
 }
 
-// 0x002468b8
+// NTSC-U/C: 0x002468b8, PAL: 0x0025b9e0
 void MetJukeboxTopButtonsScreen::OnEnterFinished() {
     ShowSelectedPanel();
 }
 
-// 0x002468d8
+// NTSC-U/C: 0x002468d8, PAL: 0x0025ba00
 void MetJukeboxTopButtonsScreen::UpdateIdle(float) {
 }

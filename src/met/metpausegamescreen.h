@@ -22,7 +22,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0031c368
+     * @ghidraAddress NTSC-U/C: 0x0031c368
+     * @ghidraAddress PAL: 0x00342550
      */
     MetPauseGameScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -32,7 +33,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0031fa40
+     * @ghidraAddress NTSC-U/C: 0x0031fa40
+     * @ghidraAddress PAL: 0x003463f8
      */
     static MetPauseGameScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -56,7 +58,8 @@ public:
      *
      * Slot 38. MetScreen::ResolveContainerViews() runs first. No text is tested for null.
      *
-     * @ghidraAddress 0x0031c508
+     * @ghidraAddress NTSC-U/C: 0x0031c508
+     * @ghidraAddress PAL: 0x00342750
      */
     virtual void ResolveContainerViews();
 };

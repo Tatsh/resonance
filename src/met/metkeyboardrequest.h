@@ -26,7 +26,8 @@ struct MetKeyboardRequest {
      * @param text The text the entry starts from.
      * @param nPad The one controller the keyboard accepts, or -1 for any.
      * @param pUser The receiver of the committed text.
-     * @ghidraAddress 0x0028cf18
+     * @ghidraAddress NTSC-U/C: 0x0028cf18
+     * @ghidraAddress PAL: 0x002a25f8
      */
     MetKeyboardRequest(const HxStr &returnScreen,
                        const HxStr &prompt,

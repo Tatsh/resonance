@@ -13,12 +13,12 @@ MetFrontEndState *g_pFrontEndState = nullptr;
 
 } // namespace
 
-// 0x00215488
+// NTSC-U/C: 0x00215488, PAL: 0x0021f0b8
 MetFrontEndState::MetFrontEndState() {
     Reset();
 }
 
-// 0x00215568
+// NTSC-U/C: 0x00215568, PAL: 0x0021f1b0
 MetFrontEndState::~MetFrontEndState() {
     if (mPersonas.size() != 0) {
         for (std::vector<MetPersonaData *>::iterator it = mPersonas.begin(); it != mPersonas.end();
@@ -29,23 +29,23 @@ MetFrontEndState::~MetFrontEndState() {
     }
 }
 
-// 0x00217f30
+// NTSC-U/C: 0x00217f30, PAL: 0x00221bb8
 MetFrontEndState *MetFrontEndState::shared() {
     return g_pFrontEndState;
 }
 
-// 0x00217f40
+// NTSC-U/C: 0x00217f40, PAL: 0x00221bc8
 void MetFrontEndState::Create() {
     g_pFrontEndState = new MetFrontEndState();
 }
 
-// 0x00217fa0
+// NTSC-U/C: 0x00217fa0, PAL: 0x00221c28
 void MetFrontEndState::Destroy() {
     delete g_pFrontEndState;
     g_pFrontEndState = nullptr;
 }
 
-// 0x00217fd8
+// NTSC-U/C: 0x00217fd8, PAL: 0x00221c60
 void MetFrontEndState::Reset() {
     mUnlockAll = 0;
     mPendingTransition = 0;
@@ -56,7 +56,7 @@ void MetFrontEndState::Reset() {
     mSettingsDirty = 0;
 }
 
-// 0x002156b0
+// NTSC-U/C: 0x002156b0, PAL: 0x0021f310
 MetPersonaData *MetFrontEndState::GetFirstPersona() {
     // Yes, the binary copies the whole vector to read its first element.
     std::vector<MetPersonaData *> personas(*Application::shared()->GetGameManager()->GetPersonas());
@@ -66,7 +66,7 @@ MetPersonaData *MetFrontEndState::GetFirstPersona() {
     return personas[0];
 }
 
-// 0x002159f8
+// NTSC-U/C: 0x002159f8, PAL: 0x0021f658
 void MetPersonaData::CopyList(std::vector<MetPersonaData *> *pDestination,
                               const std::vector<MetPersonaData *> *pSource) {
     if (pDestination->size() != 0) {
@@ -85,13 +85,13 @@ void MetPersonaData::CopyList(std::vector<MetPersonaData *> *pDestination,
     }
 }
 
-// 0x00215b88
+// NTSC-U/C: 0x00215b88, PAL: 0x0021f7e8
 std::vector<MetPersonaData *> &MetPersonaData::SavedListStorage() {
     static std::vector<MetPersonaData *> list;
     return list;
 }
 
-// 0x00215be0
+// NTSC-U/C: 0x00215be0, PAL: 0x0021f840
 void MetPersonaData::ClearSavedList() {
     if (SavedListStorage().size() == 0) {
         return;
@@ -104,13 +104,13 @@ void MetPersonaData::ClearSavedList() {
     SavedListStorage().erase(SavedListStorage().begin(), SavedListStorage().end());
 }
 
-// 0x00215ca0
+// NTSC-U/C: 0x00215ca0, PAL: 0x0021f900
 std::vector<MetPersonaData *> &MetPersonaData::LoadListStorage() {
     static std::vector<MetPersonaData *> list;
     return list;
 }
 
-// 0x00215cf8
+// NTSC-U/C: 0x00215cf8, PAL: 0x0021f958
 void MetPersonaData::ClearLoadList() {
     if (LoadListStorage().size() == 0) {
         return;

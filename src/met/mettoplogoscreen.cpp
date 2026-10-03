@@ -25,28 +25,28 @@ inline Rnd::View *FindView(const HxStr &name) {
 
 } // namespace
 
-// 0x003c46f8
+// NTSC-U/C: 0x003c46f8, PAL: 0x003fb828
 MetTopLogoScreen::MetTopLogoScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
     mShowsLoadedDrawables = 0;
 }
 
-// 0x003c7710
+// NTSC-U/C: 0x003c7710, PAL: 0x003fe980
 MetTopLogoScreen *MetTopLogoScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetTopLogoScreen(pRenderer, nPriority);
 }
 
-// 0x003c7798
+// NTSC-U/C: 0x003c7798, PAL: 0x003fea08
 MetTopLogoScreen::~MetTopLogoScreen() {
 }
 
-// 0x003c77f0
+// NTSC-U/C: 0x003c77f0, PAL: 0x003fea60
 void MetTopLogoScreen::UpdateIdle(float flTime) {
     mWaveView->SetFrame(flTime);
 }
 
-// 0x003c4868
+// NTSC-U/C: 0x003c4868, PAL: 0x003fba00
 void MetTopLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mView = FindView(HxStr(kPanelView));

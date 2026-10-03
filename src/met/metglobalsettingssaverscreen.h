@@ -40,14 +40,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0027c4f8
+     * @ghidraAddress NTSC-U/C: 0x0027c4f8
+     * @ghidraAddress PAL: 0x00295210
      */
     MetGlobalSettingsSaverScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Release the screen. The body is empty.
      *
-     * @ghidraAddress 0x0027c680
+     * @ghidraAddress NTSC-U/C: 0x0027c680
+     * @ghidraAddress PAL: 0x00295400
      */
     virtual ~MetGlobalSettingsSaverScreen();
 
@@ -59,7 +61,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00281fc0
+     * @ghidraAddress NTSC-U/C: 0x00281fc0
+     * @ghidraAddress PAL: 0x0029bd18
      */
     static MetGlobalSettingsSaverScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -68,7 +71,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x00282088
+     * @ghidraAddress NTSC-U/C: 0x00282088
+     * @ghidraAddress PAL: 0x0029bde0
      */
     virtual void EnterAndShow();
 
@@ -78,7 +82,8 @@ public:
      *
      * Slot 9.
      *
-     * @ghidraAddress 0x002820f8
+     * @ghidraAddress NTSC-U/C: 0x002820f8
+     * @ghidraAddress PAL: 0x0029be00
      */
     virtual void BeginExit();
 
@@ -104,7 +109,8 @@ public:
      *
      * Slot 23. Both overrides are two-instruction stubs.
      *
-     * @ghidraAddress 0x00281fb0
+     * @ghidraAddress NTSC-U/C: 0x00281fb0
+     * @ghidraAddress PAL: 0x0029bbf8
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -114,7 +120,8 @@ public:
      *
      * Slot 24.
      *
-     * @ghidraAddress 0x00281fb8
+     * @ghidraAddress NTSC-U/C: 0x00281fb8
+     * @ghidraAddress PAL: 0x0029bc00
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -124,7 +131,8 @@ public:
      *
      * Slot 38. The body only forwards to MetScreen::ResolveContainerViews().
      *
-     * @ghidraAddress 0x00282068
+     * @ghidraAddress NTSC-U/C: 0x00282068
+     * @ghidraAddress PAL: 0x0029bdc0
      */
     virtual void ResolveContainerViews();
 
@@ -183,15 +191,16 @@ public:
      * and the result is used without a null test. When MetFrontEndState::mUsingMemcard is set, the
      * screen registered under `MetSonyScreen` pushes the saver. Otherwise it pushes every screen
      * of the list and activates the first. Seven front-end screens call it, MetStageFinishScreen
-     * among them.
+     * among them. The European release always pushes the saver.
      *
      * @param screens The registry keys of the screens to return to.
-     * @ghidraAddress 0x0027c2e0
+     * @ghidraAddress NTSC-U/C: 0x0027c2e0
+     * @ghidraAddress PAL: 0x00295010
      */
     static void StartSave(const std::vector<HxStr> &screens);
 
 private:
-    // 0x00282048
+    // NTSC-U/C: 0x00282048, PAL: 0x0029bda0
     // Replace mReturnScreens with the screens to return to.
     void SetReturnScreens(const std::vector<HxStr> &screens);
 

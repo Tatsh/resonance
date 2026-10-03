@@ -90,7 +90,8 @@ public:
      * @param name The screen name.
      * @param directory The directory the container loads from.
      * @param file The container name, without the `.rnd` suffix.
-     * @ghidraAddress 0x0021dcc0
+     * @ghidraAddress NTSC-U/C: 0x0021dcc0
+     * @ghidraAddress PAL: 0x00230830
      */
     MetJukeboxBaseScreen(MetRenderer *pRenderer,
                          int nPriority,
@@ -101,7 +102,8 @@ public:
     /**
      * Release the two scrolling lists.
      *
-     * @ghidraAddress 0x0021dfc0
+     * @ghidraAddress NTSC-U/C: 0x0021dfc0
+     * @ghidraAddress PAL: 0x00230bb0
      */
     virtual ~MetJukeboxBaseScreen();
 
@@ -111,7 +113,8 @@ public:
      * Slot 5. The MetScreen body runs first. The playlist selection moves to its last entry, both
      * lists are refreshed, the two song pictures are hidden, and slot 40 fills the details.
      *
-     * @ghidraAddress 0x0021e908
+     * @ghidraAddress NTSC-U/C: 0x0021e908
+     * @ghidraAddress PAL: 0x00231540
      */
     virtual void EnterAndShow();
 
@@ -120,7 +123,8 @@ public:
      *
      * Slot 7. Runs slot 33, then slot 41, then shows mPlayListList.
      *
-     * @ghidraAddress 0x00224a90
+     * @ghidraAddress NTSC-U/C: 0x00224a90
+     * @ghidraAddress PAL: 0x00237a20
      */
     virtual void OnPanelActivated();
 
@@ -133,7 +137,8 @@ public:
      * ignored.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0021e268
+     * @ghidraAddress NTSC-U/C: 0x0021e268
+     * @ghidraAddress PAL: 0x00230ea0
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -145,7 +150,8 @@ public:
      * belongs to the jukebox album. mPicturesPending is cleared once both pictures are shown.
      *
      * @param flTime The renderer's current animation frame position, which the body does not read.
-     * @ghidraAddress 0x0021fc88
+     * @ghidraAddress NTSC-U/C: 0x0021fc88
+     * @ghidraAddress PAL: 0x00232a80
      */
     virtual void UpdateIdle(float flTime);
 
@@ -155,7 +161,8 @@ public:
      * Slot 33. Runs slot 42, then refreshes mCatalogueList when it exists and mPlayListList without
      * a null check.
      *
-     * @ghidraAddress 0x00224990
+     * @ghidraAddress NTSC-U/C: 0x00224990
+     * @ghidraAddress PAL: 0x00237920
      */
     virtual void OnEnterFinished();
 
@@ -164,7 +171,8 @@ public:
      *
      * Slot 36.
      *
-     * @ghidraAddress 0x002249e0
+     * @ghidraAddress NTSC-U/C: 0x002249e0
+     * @ghidraAddress PAL: 0x00237970
      */
     virtual void OnExitFinished();
 
@@ -174,7 +182,8 @@ public:
      * Slot 38. The MetScreen body runs first, then `font1_pink_2` and `font1_pinkgrey_2` are
      * resolved into mAvailableFont and mUnavailableFont.
      *
-     * @ghidraAddress 0x0021e0f0
+     * @ghidraAddress NTSC-U/C: 0x0021e0f0
+     * @ghidraAddress PAL: 0x00230ce0
      */
     virtual void ResolveContainerViews();
 
@@ -188,7 +197,8 @@ public:
      * has run faults.
      *
      * @param nShowing Non-zero to draw the screen.
-     * @ghidraAddress 0x00224af0
+     * @ghidraAddress NTSC-U/C: 0x00224af0
+     * @ghidraAddress PAL: 0x00237a80
      */
     virtual void SetShowing(int nShowing);
 
@@ -196,7 +206,8 @@ public:
      * Overridden empty, so a jukebox screen plays no slide sound.
      *
      * @param nSelector Declared by the slot and ignored.
-     * @ghidraAddress 0x00224968
+     * @ghidraAddress NTSC-U/C: 0x00224968
+     * @ghidraAddress PAL: 0x002378f8
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -204,7 +215,8 @@ public:
      * Overridden empty, so a jukebox screen plays no departure sound.
      *
      * @param nSelector The pad index of the command, which the body does not read.
-     * @ghidraAddress 0x00224970
+     * @ghidraAddress NTSC-U/C: 0x00224970
+     * @ghidraAddress PAL: 0x00237900
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -212,7 +224,8 @@ public:
      * Overridden empty, so a jukebox screen plays no emphasis sound.
      *
      * @param nSelector Declared by the slot and ignored.
-     * @ghidraAddress 0x00224978
+     * @ghidraAddress NTSC-U/C: 0x00224978
+     * @ghidraAddress PAL: 0x00237908
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -220,7 +233,8 @@ public:
      * Overridden empty, so a jukebox screen plays no left-cycle sound.
      *
      * @param nSelector Declared by the slot and ignored.
-     * @ghidraAddress 0x00224980
+     * @ghidraAddress NTSC-U/C: 0x00224980
+     * @ghidraAddress PAL: 0x00237910
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -228,7 +242,8 @@ public:
      * Overridden empty, so a jukebox screen plays no right-cycle sound.
      *
      * @param nSelector Declared by the slot and ignored.
-     * @ghidraAddress 0x00224988
+     * @ghidraAddress NTSC-U/C: 0x00224988
+     * @ghidraAddress PAL: 0x00237918
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -241,7 +256,8 @@ public:
      * ListDataProvider role of the class.
      *
      * @return The row count.
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual int GetItemCount() = 0;
 
@@ -259,7 +275,8 @@ public:
      * first is wider than the text wraps at, and sets mPicturesPending. The selected row is read
      * without testing mCatalogueList for null. The title is inferred.
      *
-     * @ghidraAddress 0x0021f3e8
+     * @ghidraAddress NTSC-U/C: 0x0021f3e8
+     * @ghidraAddress PAL: 0x00232060
      */
     virtual void ShowRemixDetails();
 
@@ -285,7 +302,8 @@ public:
      * into both scrolling lists, and the playlist selection moves to its last entry. SetShowing()
      * runs it before anything else it does. The title is inferred.
      *
-     * @ghidraAddress 0x0021e3f8
+     * @ghidraAddress NTSC-U/C: 0x0021e3f8
+     * @ghidraAddress PAL: 0x00231030
      */
     virtual void BindLists();
 
@@ -304,7 +322,8 @@ public:
      * @param pText The cell.
      * @param nContext 0 for the catalogue and 1 for the playlist.
      * @return Always 1.
-     * @ghidraAddress 0x0021ef30
+     * @ghidraAddress NTSC-U/C: 0x0021ef30
+     * @ghidraAddress PAL: 0x00231b68
      */
     virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
 
@@ -316,7 +335,8 @@ public:
      * @param pMesh The cell, which the body does not read.
      * @param nContext The list context, which the body does not read.
      * @return Always 0.
-     * @ghidraAddress 0x00224ae8
+     * @ghidraAddress NTSC-U/C: 0x00224ae8
+     * @ghidraAddress PAL: 0x00237a78
      */
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 

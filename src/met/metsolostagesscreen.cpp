@@ -194,6 +194,10 @@ constexpr int kFullLevelListCount = 6;
 constexpr int kLastRegularLevel = 4;
 constexpr int kFirstSecretIndicator = 5;
 constexpr int kSecondSecretIndicator = 6;
+#ifdef VIDEO_STANDARD_PAL
+// The first stage, counted from one.
+constexpr int kFirstStageNumber = 1;
+#endif
 constexpr int kSecondSecretLevelCount = 2;
 constexpr int kEasyStageCount = 3;
 constexpr int kNormalStageCount = 4;
@@ -362,14 +366,14 @@ MetSoloStagesScreen::MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHLevels, kLevelsPrompt));
 }
 
-// 0x0039ef80
+// NTSC-U/C: 0x0039ef80, PAL: 0x003d1628
 MetSoloStagesScreen::~MetSoloStagesScreen() {
     delete mStageList;
     delete mIndicatorList;
     ClearLevelLists();
 }
 
-// 0x003aeb28
+// NTSC-U/C: 0x003aeb28, PAL: 0x003e2af8
 MetSoloStagesScreen *MetSoloStagesScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloStagesScreen(pRenderer, nPriority);
 }
@@ -473,7 +477,7 @@ void MetSoloStagesScreen::BuildButtons() {
     AppendStyles(mClosedStyles, kClosedStyleButton);
 }
 
-// 0x003a1c88
+// NTSC-U/C: 0x003a1c88, PAL: 0x003d4a20
 void MetSoloStagesScreen::ClearLevelLists() {
     for (int i = 0; i < kNumberedStageCount; ++i) {
         std::vector<StageListEntry>::iterator it = mStageLevels[i].begin();
@@ -489,7 +493,7 @@ void MetSoloStagesScreen::ClearLevelLists() {
     mCustomLevels.clear();
 }
 
-// 0x003a75a8
+// NTSC-U/C: 0x003a75a8, PAL: 0x003db260
 void MetSoloStagesScreen::RebuildLevelLists() {
     ClearLevelLists();
     for (int i = 0; i < kNumberedStageCount; ++i) {
@@ -501,7 +505,7 @@ void MetSoloStagesScreen::RebuildLevelLists() {
     }
 }
 
-// 0x003a79f0
+// NTSC-U/C: 0x003a79f0, PAL: 0x003db6d0
 void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
     const std::vector<StageListEntry> secretLevels(*GetStageList(kSecretLevelStage));
     for (unsigned i = 0; i < secretLevels.size(); ++i) {
@@ -539,7 +543,7 @@ void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
     }
 }
 
-// 0x003a2190
+// NTSC-U/C: 0x003a2190, PAL: 0x003d4fd8
 int MetSoloStagesScreen::IsStageUnavailable(int nStage) {
     const GameParams params(CurrentParams());
     if (params.mPlayMode == kPlayModeJam) {
@@ -553,12 +557,12 @@ int MetSoloStagesScreen::IsStageUnavailable(int nStage) {
     return 0;
 }
 
-// 0x003aed00
+// NTSC-U/C: 0x003aed00, PAL: 0x003e2cd0
 inline int MetSoloStagesScreen::IsStageSelectable(int nStage) {
     return (mStageLocked[nStage] == 0) && (IsLevelLocked(mSelectedLevel[nStage]) == 0);
 }
 
-// 0x003aebb0
+// NTSC-U/C: 0x003aebb0, PAL: 0x003e2b80
 inline int MetSoloStagesScreen::IsStageBeaten(CampaignStats &stats, int nDifficulty, int nStage) {
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {
         return stats.GetStageScoreBeaten(nDifficulty, nStage);
@@ -571,7 +575,7 @@ inline int MetSoloStagesScreen::IsStageBeaten(CampaignStats &stats, int nDifficu
     return 0;
 }
 
-// 0x003a7f38
+// NTSC-U/C: 0x003a7f38, PAL: 0x003dbc38
 void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     mStageList->SetSelected(kNoSelection);
     const GameParams params(CurrentParams());
@@ -678,7 +682,7 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     ShowLevelDetails();
 }
 
-// 0x003a26c0
+// NTSC-U/C: 0x003a26c0, PAL: 0x003d5690
 void MetSoloStagesScreen::ApplyStageStyles() {
     for (int i = 0; i < static_cast<int>(mStageList->mButtons.size()); ++i) {
         Rnd::Button *pButton = mStageList->ButtonAt(i);
@@ -692,7 +696,7 @@ void MetSoloStagesScreen::ApplyStageStyles() {
     }
 }
 
-// 0x003a1f38
+// NTSC-U/C: 0x003a1f38, PAL: 0x003d4d10
 void MetSoloStagesScreen::RefreshStage() {
     mIndicatorList->SetSelected(kNoSelection);
     const int nStage = mStageList->mSelected;
@@ -732,7 +736,7 @@ void MetSoloStagesScreen::RefreshStage() {
     ShowStageBonus(nStage + 1);
 }
 
-// 0x003a2368
+// NTSC-U/C: 0x003a2368, PAL: 0x003d5278
 void MetSoloStagesScreen::ShowStageBonus(int nStage) {
     const GameParams params(CurrentParams());
     const int nDifficulty = Application::shared()->GetGameManager()->GetParams()->mDifficulty;
@@ -751,7 +755,7 @@ void MetSoloStagesScreen::ShowStageBonus(int nStage) {
     mStageBeatText->SetText(HxStr(FormatString(kCountFormat, nAlbumValue)));
 }
 
-// 0x003a2878
+// NTSC-U/C: 0x003a2878, PAL: 0x003d5848
 int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
     if (mUnlockAll != 0) {
         return 0;
@@ -769,7 +773,13 @@ int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
     }
 
     const int nLevelCount = mCurrentLevels->size();
-    if (nLevelCount >= kFullLevelListCount) {
+#ifdef VIDEO_STANDARD_PAL
+    // The European release applies the secret-level rules to the last numbered stage only.
+    const bool bSecretStage = nNextStage == kStage5;
+#else
+    const bool bSecretStage = true;
+#endif
+    if (bSecretStage && (nLevelCount >= kFullLevelListCount)) {
         if (nLevel == kFirstSecretIndicator) {
             return mSecretUnlocked ^ 1;
         }
@@ -789,7 +799,8 @@ int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
         }
     }
 
-    if ((nLevelCount >= kFullLevelListCount) && (nLevel == kLastRegularLevel) && (nBeaten == 0)) {
+    if (bSecretStage && (nLevelCount >= kFullLevelListCount) && (nLevel == kLastRegularLevel) &&
+        (nBeaten == 0)) {
         nLocked = 1;
     } else if (nLevel == nLevelCount - 1) {
         nLocked = (nBeaten == 0);
@@ -797,7 +808,7 @@ int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
     return nLocked;
 }
 
-// 0x003a2d58
+// NTSC-U/C: 0x003a2d58, PAL: 0x003d5e60
 void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
     CampaignStats &stats = FirstPersonaStats();
     const GameParams params(CurrentParams());
@@ -824,6 +835,12 @@ void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
         mIndicatorList->ButtonAt(i)->SetState(kButtonStateDisabled);
         mIndicatorList->ButtonAt(i)->SetShowing(0);
     }
+#ifdef VIDEO_STANDARD_PAL
+    // Yes, the European release does not change the secret indicators on the first stage.
+    if (mStageList->mSelected + 1 == kFirstStageNumber) {
+        return;
+    }
+#endif
     mIndicatorList->ButtonAt(kFirstSecretIndicator)->SetShowing(0);
     mIndicatorList->ButtonAt(kSecondSecretIndicator)->SetShowing(0);
     if (mSecretUnlocked == 0) {
@@ -834,14 +851,14 @@ void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
     }
 }
 
-// 0x003aec70
+// NTSC-U/C: 0x003aec70, PAL: 0x003e2c40
 void MetSoloStagesScreen::ShowIndicators(int nShowing) {
     for (int i = 0; i < static_cast<int>(mIndicatorList->mButtons.size()); ++i) {
         mIndicatorList->ButtonAt(i)->SetShowing(nShowing);
     }
 }
 
-// 0x003a3238
+// NTSC-U/C: 0x003a3238, PAL: 0x003d63d0
 void MetSoloStagesScreen::ShowLevelTexts(int nShowing) {
     mLabelText->SetShowing(nShowing);
     mGenreText->SetShowing(nShowing);
@@ -872,7 +889,7 @@ void MetSoloStagesScreen::ShowWarning(bool bShow) {
     mTvView->SetShowing(!bShow);
 }
 
-// 0x003a3510
+// NTSC-U/C: 0x003a3510, PAL: 0x003d66d0
 void MetSoloStagesScreen::StyleLevel(int bStageLocked, const HxStr &levelName) {
     const int nLocked = IsLevelLocked(mSelectedLevel[mStageList->mSelected]);
     Color color;
@@ -974,7 +991,7 @@ void MetSoloStagesScreen::ShowLevelDetails() {
     }
 }
 
-// 0x003a4438
+// NTSC-U/C: 0x003a4438, PAL: 0x003d78b0
 void MetSoloStagesScreen::UpdateArrows() {
     if (mLeftArrow != nullptr) {
         mLeftArrow->SetState(kButtonStateNormal);
@@ -996,7 +1013,7 @@ void MetSoloStagesScreen::UpdateArrows() {
     }
 }
 
-// 0x003a4640
+// NTSC-U/C: 0x003a4640, PAL: 0x003d7af8
 void MetSoloStagesScreen::LoadLevelTextures() {
     const int nStage = mStageList->mSelected;
     if (IsStageUnavailable(nStage) != 0) {
@@ -1018,7 +1035,7 @@ void MetSoloStagesScreen::LoadLevelTextures() {
     }
 }
 
-// 0x003a52f8
+// NTSC-U/C: 0x003a52f8, PAL: 0x003d89b8
 void MetSoloStagesScreen::StartScroll() {
     if (IsStageUnavailable(mStageList->mSelected) != 0) {
         mScrollLeftTime = 0.0f;
@@ -1165,7 +1182,7 @@ void MetSoloStagesScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x003a6690
+// NTSC-U/C: 0x003a6690, PAL: 0x003da0a8
 void MetSoloStagesScreen::BeginExit() {
     mTvLabelTex = mBlankTex;
     mTvLogoTex = mBlankTex;
@@ -1177,7 +1194,7 @@ void MetSoloStagesScreen::BeginExit() {
     MetScreen::BeginExit();
 }
 
-// 0x003a4810
+// NTSC-U/C: 0x003a4810, PAL: 0x003d7d28
 void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -1250,28 +1267,28 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x003aed40
+// NTSC-U/C: 0x003aed40, PAL: 0x003e2d10
 void MetSoloStagesScreen::PlaySlideSound(int nSelector) {
     if (IsStageSelectable(mStageList->mSelected) != 0) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// 0x003aedb0
+// NTSC-U/C: 0x003aedb0, PAL: 0x003e2d80
 void MetSoloStagesScreen::PlayCycleLeftSound(int nSelector) {
     if (IsStageUnavailable(mStageList->mSelected) == 0) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
-// 0x003aee00
+// NTSC-U/C: 0x003aee00, PAL: 0x003e2dd0
 void MetSoloStagesScreen::PlayCycleRightSound(int nSelector) {
     if (IsStageUnavailable(mStageList->mSelected) == 0) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
-// 0x003a4df8
+// NTSC-U/C: 0x003a4df8, PAL: 0x003d8440
 void MetSoloStagesScreen::UpdateIdle(float flTime) {
     const bool bLogoAdvanced = mLogoPair.Advance() != 0;
     const bool bAdvanced = bLogoAdvanced | (mLabelPair.Advance() != 0);
@@ -1344,7 +1361,7 @@ void MetSoloStagesScreen::UpdateIdle(float flTime) {
     }
 }
 
-// 0x003a54b8
+// NTSC-U/C: 0x003a54b8, PAL: 0x003d8b98
 void MetSoloStagesScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if ((pButton == mLeftArrow) || (pButton == mRightArrow)) {
         int &nLevel = mSelectedLevel[mStageList->mSelected];
@@ -1373,7 +1390,7 @@ void MetSoloStagesScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     }
 }
 
-// 0x003aee50
+// NTSC-U/C: 0x003aee50, PAL: 0x003e2e20
 void MetSoloStagesScreen::OnEnterFinished() {
     mTvView->SetShowing(1);
     mScrollDirection = kScrollNone;
@@ -1381,7 +1398,7 @@ void MetSoloStagesScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
-// 0x003a6738
+// NTSC-U/C: 0x003a6738, PAL: 0x003da150
 void MetSoloStagesScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         if (Application::shared()->GetGameManager()->GetParams()->mPlayMode == kPlayModeGame) {

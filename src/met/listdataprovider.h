@@ -30,7 +30,8 @@ class Text;
 class ListDataProvider {
 public:
     /**
-     * @ghidraAddress 0x002247f0
+     * @ghidraAddress NTSC-U/C: 0x002247f0
+     * @ghidraAddress PAL: 0x00237758
      */
     virtual ~ListDataProvider();
 

@@ -60,7 +60,8 @@ public:
     /**
      * Delete the two button lists and empty the level lists.
      *
-     * @ghidraAddress 0x0039ef80
+     * @ghidraAddress NTSC-U/C: 0x0039ef80
+     * @ghidraAddress PAL: 0x003d1628
      */
     virtual ~MetSoloStagesScreen();
 
@@ -72,7 +73,8 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003aeb28
+     * @ghidraAddress NTSC-U/C: 0x003aeb28
+     * @ghidraAddress PAL: 0x003e2af8
      */
     static MetSoloStagesScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -102,7 +104,8 @@ public:
     /**
      * Blank the television and exit. Slot 9.
      *
-     * @ghidraAddress 0x003a6690
+     * @ghidraAddress NTSC-U/C: 0x003a6690
+     * @ghidraAddress PAL: 0x003da0a8
      */
     virtual void BeginExit();
 
@@ -116,7 +119,8 @@ public:
      * intervals. A back command exits with `MetScreenTitleScreen`.
      *
      * @param pCommand The command to handle.
-     * @ghidraAddress 0x003a4810
+     * @ghidraAddress NTSC-U/C: 0x003a4810
+     * @ghidraAddress PAL: 0x003d7d28
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -124,7 +128,8 @@ public:
      * Play the slide sound when the selected stage is selectable. Slot 20.
      *
      * @param nSelector The selector MetScreen::PlaySlideSound() receives.
-     * @ghidraAddress 0x003aed40
+     * @ghidraAddress NTSC-U/C: 0x003aed40
+     * @ghidraAddress PAL: 0x003e2d10
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -132,7 +137,8 @@ public:
      * Play the cycle-left sound when the selected stage is available. Slot 23.
      *
      * @param nSelector The selector MetScreen::PlayCycleLeftSound() receives.
-     * @ghidraAddress 0x003aedb0
+     * @ghidraAddress NTSC-U/C: 0x003aedb0
+     * @ghidraAddress PAL: 0x003e2d80
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -140,7 +146,8 @@ public:
      * Play the cycle-right sound when the selected stage is available. Slot 24.
      *
      * @param nSelector The selector MetScreen::PlayCycleRightSound() receives.
-     * @ghidraAddress 0x003aee00
+     * @ghidraAddress NTSC-U/C: 0x003aee00
+     * @ghidraAddress PAL: 0x003e2dd0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -153,7 +160,8 @@ public:
      * frames and then shows the new level.
      *
      * @param flTime The renderer's current frame.
-     * @ghidraAddress 0x003a4df8
+     * @ghidraAddress NTSC-U/C: 0x003a4df8
+     * @ghidraAddress PAL: 0x003d8440
      */
     virtual void UpdateIdle(float flTime);
 
@@ -165,14 +173,16 @@ public:
      * stage is open, and otherwise reactivates this screen.
      *
      * @param pButton The button whose alternation finished.
-     * @ghidraAddress 0x003a54b8
+     * @ghidraAddress NTSC-U/C: 0x003a54b8
+     * @ghidraAddress PAL: 0x003d8b98
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
     /**
      * Show the television and load the selected level's textures. Slot 33.
      *
-     * @ghidraAddress 0x003aee50
+     * @ghidraAddress NTSC-U/C: 0x003aee50
+     * @ghidraAddress PAL: 0x003e2e20
      */
     virtual void OnEnterFinished();
 
@@ -184,7 +194,8 @@ public:
      * goes to `MetLoadGameScreen` with the last arena when GameManagerImpl::GetPersonas() lists
      * three or more personas, and to `MetArenasScreen` otherwise.
      *
-     * @ghidraAddress 0x003a6738
+     * @ghidraAddress NTSC-U/C: 0x003a6738
+     * @ghidraAddress PAL: 0x003da150
      */
     virtual void OnExitFinished();
 
@@ -220,35 +231,37 @@ private:
     // Builds both button lists, the wire meshes, the icon materials, and the stage-button styles.
     void BuildButtons();
 
-    // 0x003a1c88
+    // NTSC-U/C: 0x003a1c88, PAL: 0x003d4a20
     // Empties the five stage level lists and the custom list, one element at a time.
     void ClearLevelLists();
 
-    // 0x003a1f38
+    // NTSC-U/C: 0x003a1f38, PAL: 0x003d4d10
     // Points mCurrentLevels at the selected stage's list and shows its indicators and wires.
     void RefreshStage();
 
-    // 0x003a2190
+    // NTSC-U/C: 0x003a2190, PAL: 0x003d4fd8
     // Reports whether the stage is unavailable in a remix or at the current difficulty.
     int IsStageUnavailable(int nStage);
 
-    // 0x003a2368
+    // NTSC-U/C: 0x003a2368, PAL: 0x003d5278
     // Shows the stage bonus and the score still needed to beat the stage.
     void ShowStageBonus(int nStage);
 
-    // 0x003a26c0
+    // NTSC-U/C: 0x003a26c0, PAL: 0x003d5690
     // Styles every stage button as open or closed.
     void ApplyStageStyles();
 
-    // 0x003a2878
-    // Reports whether a level of the selected stage is locked.
+    // NTSC-U/C: 0x003a2878, PAL: 0x003d5848
+    // Reports whether a level of the selected stage is locked. The European release applies the
+    // secret-level rules to the fifth stage only.
     int IsLevelLocked(int nLevel);
 
-    // 0x003a2d58
-    // Styles each indicator button as won, open, or locked.
+    // NTSC-U/C: 0x003a2d58, PAL: 0x003d5e60
+    // Styles each indicator button as won, open, or locked. The European release does not hide or
+    // disable the secret indicators while the first stage is selected.
     void RefreshIndicators(int bStageLocked);
 
-    // 0x003a3238
+    // NTSC-U/C: 0x003a3238, PAL: 0x003d63d0
     // Shows or hides the level texts and the two status meshes.
     void ShowLevelTexts(int nShowing);
 
@@ -256,7 +269,7 @@ private:
     // Shows the stage warning in place of the television, or the reverse.
     void ShowWarning(bool bShow);
 
-    // 0x003a3510
+    // NTSC-U/C: 0x003a3510, PAL: 0x003d66d0
     // Colours the television and the level texts for a locked, open, or won level.
     void StyleLevel(int bStageLocked, const HxStr &levelName);
 
@@ -264,41 +277,41 @@ private:
     // Fills the level texts for the selected level.
     void ShowLevelDetails();
 
-    // 0x003a4438
+    // NTSC-U/C: 0x003a4438, PAL: 0x003d78b0
     // Moves the highlight to the selected stage's arrow buttons.
     void UpdateArrows();
 
-    // 0x003a4640
+    // NTSC-U/C: 0x003a4640, PAL: 0x003d7af8
     // Starts the logo and label loads for the selected level.
     void LoadLevelTextures();
 
-    // 0x003a52f8
+    // NTSC-U/C: 0x003a52f8, PAL: 0x003d89b8
     // Starts a scroll of the television panel.
     void StartScroll();
 
-    // 0x003a75a8
+    // NTSC-U/C: 0x003a75a8, PAL: 0x003db260
     // Copies the level lists from MetSongLists, adding the stage 6 list to the fifth stage.
     void RebuildLevelLists();
 
-    // 0x003a79f0
+    // NTSC-U/C: 0x003a79f0, PAL: 0x003db6d0
     // Records which of the two secret levels are open.
     void UpdateSecretLevels(int bUnlockAll);
 
-    // 0x003a7f38
+    // NTSC-U/C: 0x003a7f38, PAL: 0x003dbc38
     // Opens or closes each stage and selects the first stage and level still to play.
     void SetUpStages(int bUnlockAll);
 
-    // 0x003aebb0
+    // NTSC-U/C: 0x003aebb0, PAL: 0x003e2b80
     // Reports whether a persona has beaten a stage, at the difficulty in a game and at any
     // difficulty otherwise. IsLevelLocked() expands it inline, and this out-of-line copy has no
     // caller.
     int IsStageBeaten(CampaignStats &stats, int nDifficulty, int nStage);
 
-    // 0x003aec70
+    // NTSC-U/C: 0x003aec70, PAL: 0x003e2c40
     // Shows or hides every indicator button.
     void ShowIndicators(int nShowing);
 
-    // 0x003aed00
+    // NTSC-U/C: 0x003aed00, PAL: 0x003e2cd0
     // Reports whether a stage and its recorded level are open. Slots 19 and 20 expand it inline,
     // and this out-of-line copy has no caller.
     int IsStageSelectable(int nStage);

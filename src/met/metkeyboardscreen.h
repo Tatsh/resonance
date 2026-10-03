@@ -62,12 +62,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00282660
+     * @ghidraAddress NTSC-U/C: 0x00282660
+     * @ghidraAddress PAL: 0x0029c3e0
      */
     MetKeyboardScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00282e30
+     * @ghidraAddress NTSC-U/C: 0x00282e30
+     * @ghidraAddress PAL: 0x0029dbe0
      */
     virtual ~MetKeyboardScreen();
 
@@ -79,7 +81,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The screen.
-     * @ghidraAddress 0x0028c358
+     * @ghidraAddress NTSC-U/C: 0x0028c358
+     * @ghidraAddress PAL: 0x002a8040
      */
     static MetScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -89,7 +92,8 @@ public:
      * No call site exists. The title is inferred.
      *
      * @param returnScreen The registry key of the screen.
-     * @ghidraAddress 0x0028c2c0
+     * @ghidraAddress NTSC-U/C: 0x0028c2c0
+     * @ghidraAddress PAL: 0x002a7f88
      */
     static void SetKeyboardReturnScreen(const HxStr &returnScreen);
 
@@ -101,7 +105,8 @@ public:
      * DefaultMacro() for its index. The constructor and GlobalSettings' constructor both run it.
      *
      * @return The list.
-     * @ghidraAddress 0x00284d30
+     * @ghidraAddress NTSC-U/C: 0x00284d30
+     * @ghidraAddress PAL: 0x0029ffd8
      */
     static std::vector<HxStr> *GetDefaultMacros();
 
@@ -130,7 +135,8 @@ public:
      * The title is inferred.
      *
      * @param request The request.
-     * @ghidraAddress 0x00282468
+     * @ghidraAddress NTSC-U/C: 0x00282468
+     * @ghidraAddress PAL: 0x0029c188
      */
     static void Open(const MetKeyboardRequest &request);
 
@@ -141,7 +147,8 @@ public:
      * ResolveContainerViews() and MetFreqMakerButtonsScreen::HandleCommand() call it. The title is
      * inferred.
      *
-     * @ghidraAddress 0x00283c10
+     * @ghidraAddress NTSC-U/C: 0x00283c10
+     * @ghidraAddress PAL: 0x0029eb08
      */
     void ResetKeyStates();
 
@@ -153,7 +160,8 @@ public:
      * to restore the regular layout and the highlight, starts the caret blink, and runs
      * MetScreen::EnterAndShow().
      *
-     * @ghidraAddress 0x00283868
+     * @ghidraAddress NTSC-U/C: 0x00283868
+     * @ghidraAddress PAL: 0x0029e6f8
      */
     virtual void EnterAndShow();
 
@@ -178,7 +186,8 @@ public:
      * and the right arrow. Codes 20 and 21 act on SHIFT and CAPS at once rather than pressing them.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00283268
+     * @ghidraAddress NTSC-U/C: 0x00283268
+     * @ghidraAddress PAL: 0x0029e060
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -189,7 +198,8 @@ public:
      * matches or the screen accepts every selector.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0028c518
+     * @ghidraAddress NTSC-U/C: 0x0028c518
+     * @ghidraAddress PAL: 0x002a8200
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -199,7 +209,8 @@ public:
      * Slot 22. Plays `SND_MET_KEY2`, restricted the same way as slot 20.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0028c4e0
+     * @ghidraAddress NTSC-U/C: 0x0028c4e0
+     * @ghidraAddress PAL: 0x002a81c8
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -209,7 +220,8 @@ public:
      * Slot 23. Plays `SND_MET_KEY2`, restricted the same way as slot 20.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0028c470
+     * @ghidraAddress NTSC-U/C: 0x0028c470
+     * @ghidraAddress PAL: 0x002a8158
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -219,7 +231,8 @@ public:
      * Slot 24. Plays `SND_MET_KEY2`, restricted the same way as slot 20.
      *
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0028c4a8
+     * @ghidraAddress NTSC-U/C: 0x0028c4a8
+     * @ghidraAddress PAL: 0x002a8190
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -231,7 +244,8 @@ public:
      * time rather than from its previous value.
      *
      * @param flTime The current renderer time.
-     * @ghidraAddress 0x0028c708
+     * @ghidraAddress NTSC-U/C: 0x0028c708
+     * @ghidraAddress PAL: 0x002a8408
      */
     virtual void UpdateIdle(float flTime);
 
@@ -246,7 +260,8 @@ public:
      * @param flInterval The interval between steps.
      * @param pButton The button whose state alternates.
      * @param nCycles The number of full cycles to run.
-     * @ghidraAddress 0x0028c5e0
+     * @ghidraAddress NTSC-U/C: 0x0028c5e0
+     * @ghidraAddress PAL: 0x002a82e0
      */
     virtual void
     StartRepeatingSound(float flStartTime, float flInterval, Rnd::Button *pButton, int nCycles);
@@ -260,7 +275,8 @@ public:
      * `MetKeyboardScreen`. The argument the base passes is ignored.
      *
      * @param pButton The button slot 29 finished with, ignored.
-     * @ghidraAddress 0x00283968
+     * @ghidraAddress NTSC-U/C: 0x00283968
+     * @ghidraAddress PAL: 0x0029e7f8
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -269,7 +285,8 @@ public:
      *
      * Slot 33.
      *
-     * @ghidraAddress 0x0028c808
+     * @ghidraAddress NTSC-U/C: 0x0028c808
+     * @ghidraAddress PAL: 0x002a8508
      */
     virtual void OnEnterFinished();
 
@@ -281,7 +298,8 @@ public:
      * text goes to mUser. The screen recorded in mReturnScreen is then told the keyboard was
      * dismissed and made the active panel, and the shift state returns to regular.
      *
-     * @ghidraAddress 0x00283aa0
+     * @ghidraAddress NTSC-U/C: 0x00283aa0
+     * @ghidraAddress PAL: 0x0029e970
      */
     virtual void OnExitFinished();
 
@@ -299,7 +317,7 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x00282ef0
+    // NTSC-U/C: 0x00282ef0, PAL: 0x0029dce8
     // Apply one key by name. The named keys go to their handlers, the twelve function keys insert
     // their macro, and every other name is typed as its first character.
     void DispatchKeyName(const HxStr &name);
@@ -312,25 +330,25 @@ private:
     void LocalizeKeyLabels();
 #endif
 
-    // 0x00283f38
+    // NTSC-U/C: 0x00283f38, PAL: 0x0029eee8
     // Highlight the selected key's button and show its macro when it is a function key. Nothing
     // happens on a function key while macros are disabled.
     void HighlightCurrentKey();
 
-    // 0x00284788
+    // NTSC-U/C: 0x00284788, PAL: 0x0029f948
     // Step the selection right until the key name changes, wrapping within the row.
     void MoveRight();
 
-    // 0x002848e0
+    // NTSC-U/C: 0x002848e0, PAL: 0x0029fae0
     // Step the selection left until the key name changes, wrapping within the row.
     void MoveLeft();
 
-    // 0x00284a30
+    // NTSC-U/C: 0x00284a30, PAL: 0x0029fc70
     // Step the selection down until the key name changes, wrapping within the column, and past
     // the function keys while macros are disabled.
     void MoveDown();
 
-    // 0x00284bb0
+    // NTSC-U/C: 0x00284bb0, PAL: 0x0029fe28
     // Step the selection up, as MoveDown() steps it down.
     void MoveUp();
 
@@ -342,28 +360,28 @@ private:
     // Append the default macro of one function key to the text when it fits.
     void InsertMacro(int nIndex);
 
-    // 0x00285378
+    // NTSC-U/C: 0x00285378, PAL: 0x002a0748
     // Inline, with this out-of-line copy.
     // Find the button of a key. A single letter uses its case-specific button.
     Rnd::Button *FindKeyButton(const HxStr &key);
 
-    // 0x00285b08
+    // NTSC-U/C: 0x00285b08, PAL: 0x002a10c8
     // Toggle shift, which caps also releases.
     void OnShift();
 
-    // 0x00285e28
+    // NTSC-U/C: 0x00285e28, PAL: 0x002a13e8
     // Delete the character before the caret.
     void OnBackspace();
 
-    // 0x00285fa0
+    // NTSC-U/C: 0x00285fa0, PAL: 0x002a1560
     // Move the caret left.
     void OnCaretLeft();
 
-    // 0x00286120
+    // NTSC-U/C: 0x00286120, PAL: 0x002a16e0
     // Move the caret right.
     void OnCaretRight();
 
-    // 0x002862b0
+    // NTSC-U/C: 0x002862b0, PAL: 0x002a1870
     // Toggle caps lock, which also releases shift.
     void OnCaps();
 
@@ -375,7 +393,7 @@ private:
     // Insert one space when it fits.
     void OnSpace();
 
-    // 0x00286ab0
+    // NTSC-U/C: 0x00286ab0, PAL: 0x002a21c0
     // Delete the character at the caret.
     void OnDelete();
 
@@ -383,70 +401,70 @@ private:
     // Insert the first character of a key name when it fits.
     void OnCharacter(const HxStr &key);
 
-    // 0x0028c3e8
+    // NTSC-U/C: 0x0028c3e8, PAL: 0x002a80d0
     // Inline, with this out-of-line copy.
     // Show the caret beside the character it precedes.
     void UpdateCursor();
 
-    // 0x0028c7c0
+    // NTSC-U/C: 0x0028c7c0, PAL: 0x002a84c0
     // Hide the caret and restart its blink.
     void ResetCaret();
 
-    // 0x0028c828
+    // NTSC-U/C: 0x0028c828, PAL: 0x002a8528
     // Empty in the image. Slot 36 calls it last. The title is inferred.
     void OnDeparted();
 
-    // 0x0028c870
+    // NTSC-U/C: 0x0028c870, PAL: 0x002a8570
     // Inline, with this out-of-line copy.
     // The name of the selected key.
     HxStr *CurrentKey();
 
-    // 0x0028c898
+    // NTSC-U/C: 0x0028c898, PAL: 0x002a8598
     // Inline, with this out-of-line copy.
     // Put a key's button back in its resting state, latched for an active shift or caps key.
     void UnhighlightKey(const HxStr &key);
 
-    // 0x0028c9c8
+    // NTSC-U/C: 0x0028c9c8, PAL: 0x002a86c8
     // Inline, with this out-of-line copy and no call site.
     // Remove one character of the text.
     void RemoveChar(int nIndex);
 
-    // 0x0028c9e8
+    // NTSC-U/C: 0x0028c9e8, PAL: 0x002a86e8
     // Inline, with this out-of-line copy and no call site.
     // Append to the text.
     void AppendText(const HxStr &text);
 
-    // 0x0028ca08
+    // NTSC-U/C: 0x0028ca08, PAL: 0x002a8708
     // Inline, with this out-of-line copy and no call site.
     // Insert into the text at a position, or append past its end.
     void InsertText(const HxStr &text, unsigned nPos);
 
-    // 0x0028ca58
+    // NTSC-U/C: 0x0028ca58, PAL: 0x002a8758
     // Inline, with this out-of-line copy.
     // The horizontal position the end of the text is laid out at, truncated.
     int TextEndX();
 
-    // 0x0028caf8
+    // NTSC-U/C: 0x0028caf8, PAL: 0x002a87f8
     // Inline, with this out-of-line copy.
     // Clear the macro caption.
     void HideMacro();
 
-    // 0x0028cc50
+    // NTSC-U/C: 0x0028cc50, PAL: 0x002a8978
     // Whether a key is one of the twelve function keys.
     bool IsMacroKey(const HxStr &key);
 
-    // 0x0028ccb8
+    // NTSC-U/C: 0x0028ccb8, PAL: 0x002a89e0
     // Record the key a press is applying.
     void SetPendingCommand(const HxStr &key);
 
-    // 0x0028cd00
+    // NTSC-U/C: 0x0028cd00, PAL: 0x002a8a38
     // Inline, with this out-of-line copy.
     // Replace the shared ticker text with the argument and repost it at the renderer's current
     // time, doing nothing when the text has not changed. The text is a function-local static
     // HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0, and 0x0028ccd8 is its destructor.
     void SetTickerText(const HxStr &text);
 
-    // 0x0028cda8
+    // NTSC-U/C: 0x0028cda8, PAL: 0x002a8ae0
     // Commit the text and depart.
     void OnEnter();
 
@@ -454,31 +472,31 @@ private:
     // five sites, with no out-of-line copy.
     void PressKey(const HxStr &key);
 
-    // 0x0028ce70
+    // NTSC-U/C: 0x0028ce70, PAL: 0x002a8ba8
     // Insert the macro of one function key and move the caret past it.
     void OnMacro(int nIndex);
 
-    // 0x0028c830
+    // NTSC-U/C: 0x0028c830, PAL: 0x002a8530
     // Assigns the entered text. Open() is the one caller.
     void SetText(const HxStr &text);
 
-    // 0x0028c850
+    // NTSC-U/C: 0x0028c850, PAL: 0x002a8550
     // Assigns the prompt. Open() is the one caller.
     void SetPrompt(const HxStr &prompt);
 
-    // 0x0028cad0
+    // NTSC-U/C: 0x0028cad0, PAL: 0x002a87d0
     // Records the receiver of the committed text. Open() is the one caller.
     void SetUser(MetKBUser *pUser);
 
-    // 0x0028c3e0
+    // NTSC-U/C: 0x0028c3e0, PAL: 0x002a80c8
     // Records the one controller the keyboard accepts. Open() is the one caller.
     void SetSelector(int nSelector);
 
-    // 0x0028cad8
+    // NTSC-U/C: 0x0028cad8, PAL: 0x002a87d8
     // Assigns the ticker text slot 33 posts. Open() is the one caller.
     void SetTicker(const HxStr &ticker);
 
-    // 0x0028cab0
+    // NTSC-U/C: 0x0028cab0, PAL: 0x002a87b0
     // Assigns the registry key of the screen slot 36 departs to.
     void SetReturnScreen(const HxStr &returnScreen);
 

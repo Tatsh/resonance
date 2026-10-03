@@ -16,12 +16,14 @@ public:
     /**
      * Start with the first and third settings on and the second off.
      *
-     * @ghidraAddress 0x0032e780
+     * @ghidraAddress NTSC-U/C: 0x0032e780
+     * @ghidraAddress PAL: 0x00356cc8
      */
     GameOptions();
 
     /**
-     * @ghidraAddress 0x0032e798
+     * @ghidraAddress NTSC-U/C: 0x0032e798
+     * @ghidraAddress PAL: 0x00356ce0
      */
     ~GameOptions();
 
@@ -29,7 +31,8 @@ public:
      * Write the second, the third, and the first setting, in that order.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0032e7c8
+     * @ghidraAddress NTSC-U/C: 0x0032e7c8
+     * @ghidraAddress PAL: 0x00356d10
      */
     void Save(OBStream &stream);
 
@@ -37,7 +40,8 @@ public:
      * Read the settings back in the order Save() wrote them.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x0032e810
+     * @ghidraAddress NTSC-U/C: 0x0032e810
+     * @ghidraAddress PAL: 0x00356d58
      */
     void Load(IBStream &stream);
 

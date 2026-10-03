@@ -48,7 +48,7 @@ enum CanvasCommand {
 constexpr float kRandomizePasses = 10.0f;
 
 #ifndef VIDEO_STANDARD_PAL
-// 0x00891af0
+// NTSC-U/C: 0x00891af0
 // The name a new avatar starts with. The European release reads it from its text table instead.
 HxStr g_defaultFreqName("player1");
 #endif
@@ -75,18 +75,18 @@ MetFreqMakerCanvasScreen::MetFreqMakerCanvasScreen(MetRenderer *pRenderer, int n
       mPersona(nullptr), mModified(0), mFreqName(DefaultFreqName()), mViewAttached(0) {
 }
 
-// 0x00262030
+// NTSC-U/C: 0x00262030, PAL: 0x002787c0
 MetFreqMakerCanvasScreen::~MetFreqMakerCanvasScreen() {
     mViewAttached = 0;
     mPersona = nullptr;
 }
 
-// 0x00261fa8
+// NTSC-U/C: 0x00261fa8, PAL: 0x00278738
 MetFreqMakerCanvasScreen *MetFreqMakerCanvasScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetFreqMakerCanvasScreen(pRenderer, nPriority);
 }
 
-// 0x0025e978
+// NTSC-U/C: 0x0025e978, PAL: 0x00274dd0
 void MetFreqMakerCanvasScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     Rnd::View *pView = FindCanvasView();
@@ -94,7 +94,7 @@ void MetFreqMakerCanvasScreen::EnterAndShow() {
     mAppearance.attachTo(pView);
 }
 
-// 0x002620d8
+// NTSC-U/C: 0x002620d8, PAL: 0x00278878
 int MetFreqMakerCanvasScreen::PollContainerLoad() {
     if (!MetFreqMakerAssetManager::shared()->PollLoad()) {
         return 0;
@@ -102,23 +102,23 @@ int MetFreqMakerCanvasScreen::PollContainerLoad() {
     return MetScreen::PollContainerLoad();
 }
 
-// 0x002620c8
+// NTSC-U/C: 0x002620c8, PAL: 0x00278868
 void MetFreqMakerCanvasScreen::HandleCommand(const MetScreenCommand *) {
 }
 
-// 0x00261f80
+// NTSC-U/C: 0x00261f80, PAL: 0x00278710
 void MetFreqMakerCanvasScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x00261f88
+// NTSC-U/C: 0x00261f88, PAL: 0x00278718
 void MetFreqMakerCanvasScreen::PlayCycleRightSound(int) {
 }
 
-// 0x002620d0
+// NTSC-U/C: 0x002620d0, PAL: 0x00278870
 void MetFreqMakerCanvasScreen::OnRepeatingSoundFinished(Rnd::Button *) {
 }
 
-// 0x0025e898
+// NTSC-U/C: 0x0025e898, PAL: 0x00274cd0
 void MetFreqMakerCanvasScreen::OnExitFinished() {
     mAppearance.detachFrom(FindCanvasView());
 }
@@ -136,7 +136,7 @@ void MetFreqMakerCanvasScreen::ResolveContainerViews() {
     mViewAttached = 1;
 }
 
-// 0x0025ea68
+// NTSC-U/C: 0x0025ea68, PAL: 0x00275158
 void MetFreqMakerCanvasScreen::CommitPersona() {
     if (mPersona != nullptr) {
         mPersona->mAppearance.mDetail->clear();
@@ -161,7 +161,7 @@ void MetFreqMakerCanvasScreen::CommitPersona() {
     mModified = 0;
 }
 
-// 0x0025ec80
+// NTSC-U/C: 0x0025ec80, PAL: 0x002753a0
 void MetFreqMakerCanvasScreen::SetFreqName(const HxStr &name) {
     mFreqName = name;
     Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kNameText)));
@@ -169,23 +169,23 @@ void MetFreqMakerCanvasScreen::SetFreqName(const HxStr &name) {
     mModified = 1;
 }
 
-// 0x00262120
+// NTSC-U/C: 0x00262120, PAL: 0x002788c0
 void MetFreqMakerCanvasScreen::SelectTemplate(const HxStr &name) {
     mAppearance.selectTemplate(name);
 }
 
-// 0x00262140
+// NTSC-U/C: 0x00262140, PAL: 0x002788e0
 void MetFreqMakerCanvasScreen::PlaceCursor() {
     mAppearance.placeCursor();
     mModified = 1;
 }
 
-// 0x00262170
+// NTSC-U/C: 0x00262170, PAL: 0x00278910
 void MetFreqMakerCanvasScreen::ResetCursor() {
     mAppearance.resetCursor();
 }
 
-// 0x00262190
+// NTSC-U/C: 0x00262190, PAL: 0x00278930
 void MetFreqMakerCanvasScreen::HandleCanvasCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kCanvasCommandBringForward:
@@ -214,17 +214,17 @@ void MetFreqMakerCanvasScreen::HandleCanvasCommand(const MetScreenCommand *pComm
     }
 }
 
-// 0x00262250
+// NTSC-U/C: 0x00262250, PAL: 0x002789f0
 void MetFreqMakerCanvasScreen::SetColor(const Color &color, const Vector2 &palettePosition) {
     mAppearance.setColor(color, palettePosition);
 }
 
-// 0x00262270
+// NTSC-U/C: 0x00262270, PAL: 0x00278a10
 std::list<FreqPart *> &MetFreqMakerCanvasScreen::GetParts() {
     return mAppearance.parts();
 }
 
-// 0x00262290
+// NTSC-U/C: 0x00262290, PAL: 0x00278a30
 FreqPart *MetFreqMakerCanvasScreen::SelectPart(int nIndex) {
     mModified = 1;
     return mAppearance.selectPart(nIndex);
@@ -266,29 +266,29 @@ void MetFreqMakerCanvasScreen::LoadPrefab(MetPersonaData *pSource, int nRandomiz
     mModified = 1;
 }
 
-// 0x00262440
+// NTSC-U/C: 0x00262440, PAL: 0x00278a58
 void MetFreqMakerCanvasScreen::RevertSelection() {
     mAppearance.revertSelection();
 }
 
-// 0x00262460
+// NTSC-U/C: 0x00262460, PAL: 0x00278a78
 HxStr *MetFreqMakerCanvasScreen::GetFreqName() {
     return &mFreqName;
 }
 
-// 0x00262468
+// NTSC-U/C: 0x00262468, PAL: 0x00278a80
 void MetFreqMakerCanvasScreen::DeletePart(int nIndex) {
     mAppearance.deletePart(nIndex);
     mModified = 1;
 }
 
-// 0x00262498
+// NTSC-U/C: 0x00262498, PAL: 0x00278ab0
 void MetFreqMakerCanvasScreen::Randomize() {
     mAppearance.randomize();
     mModified = 1;
 }
 
-// 0x002624c8
+// NTSC-U/C: 0x002624c8, PAL: 0x00278ae0
 void MetFreqMakerCanvasScreen::RecentrePart(int nIndex) {
     mAppearance.recentrePart(nIndex);
     mModified = 1;

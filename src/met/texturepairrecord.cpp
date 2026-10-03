@@ -29,22 +29,22 @@ inline HxStr BuildBitmapPath(const HxStr &name, const char *pszRandomPath, const
 
 } // namespace
 
-// 0x00246de0
+// NTSC-U/C: 0x00246de0, PAL: 0x0025bf20
 TexturePairRecord::TexturePairRecord(const HxStr &first, const HxStr &second)
     : mCurrent(0), mPending(1), mLoading(0), mResolved(0), mFirstName(first), mSecondName(second),
       mInvalid(0) {
 }
 
-// 0x001fc568
+// NTSC-U/C: 0x001fc568, PAL: 0x002039d0
 TexturePairRecord::~TexturePairRecord() {
 }
 
-// 0x002498c0
+// NTSC-U/C: 0x002498c0, PAL: 0x0025ebd0
 void TexturePairRecord::invalidate() {
     mInvalid = 1;
 }
 
-// 0x00246ef0
+// NTSC-U/C: 0x00246ef0, PAL: 0x0025c040
 void TexturePairRecord::ResolveTextures() {
     if (mResolved) {
         return;
@@ -54,7 +54,7 @@ void TexturePairRecord::ResolveTextures() {
     mTextures.push_back(dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(mSecondName)));
 }
 
-// 0x00249760
+// NTSC-U/C: 0x00249760, PAL: 0x0025ea70
 void TexturePairRecord::Load(const HxStr &path) {
     ResolveTextures();
     mLoading = 1;
@@ -66,12 +66,12 @@ void TexturePairRecord::Load(const HxStr &path) {
     ZoneSetCurrent(nZone);
 }
 
-// 0x00249800
+// NTSC-U/C: 0x00249800, PAL: 0x0025eb10
 void TexturePairRecord::CancelLoad() {
     mLoading = 0;
 }
 
-// 0x00249808
+// NTSC-U/C: 0x00249808, PAL: 0x0025eb18
 Rnd::Tex *TexturePairRecord::Current() {
     if (mInvalid) {
         return nullptr;
@@ -80,7 +80,7 @@ Rnd::Tex *TexturePairRecord::Current() {
     return mTextures[mCurrent];
 }
 
-// 0x00249850
+// NTSC-U/C: 0x00249850, PAL: 0x0025eb60
 int TexturePairRecord::Advance() {
     if (!mLoading) {
         return 0;
@@ -96,19 +96,19 @@ int TexturePairRecord::Advance() {
     return 1;
 }
 
-// 0x00247038
+// NTSC-U/C: 0x00247038, PAL: 0x0025c188
 HxStr TexturePairRecord::LogoPath(const HxStr &name) {
     return BuildBitmapPath(
         name, "\\MetaGame\\shared\\rand_logo.bmp", "\\Levels\\%s\\images\\%s_logo.bmp");
 }
 
-// 0x00247250
+// NTSC-U/C: 0x00247250, PAL: 0x0025c428
 HxStr TexturePairRecord::PicturePath(const HxStr &name) {
     return BuildBitmapPath(
         name, "\\MetaGame\\shared\\rand_pic.bmp", "\\Levels\\%s\\images\\%s_pic.bmp");
 }
 
-// 0x00247468
+// NTSC-U/C: 0x00247468, PAL: 0x0025c6c8
 HxStr TexturePairRecord::ArenaPath(const HxStr &name) {
     return BuildBitmapPath(name, "\\MetaGame\\shared\\rand_pic.bmp", "\\Arenas\\%s\\as_%s.bmp");
 }

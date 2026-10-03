@@ -65,14 +65,14 @@ static const char *const kExpansionPakScreen = "MetExpansionPakScreen";
 
 } // namespace
 
-// 0x002071f0
+// NTSC-U/C: 0x002071f0, PAL: 0x00210008
 MetConfigOptionsButtonsScreen::MetConfigOptionsButtonsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mOptionButtons(nullptr), mControllerIndex(kFirstController) {
     mOptionButtons = new MetButtonList();
 }
 
-// 0x002073c8
+// NTSC-U/C: 0x002073c8, PAL: 0x00210240
 void MetConfigOptionsButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -154,7 +154,7 @@ void MetConfigOptionsButtonsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00207fc0
+// NTSC-U/C: 0x00207fc0, PAL: 0x00211070
 void MetConfigOptionsButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     HxStr name(pButton->mName);
     if (name == kControllerButton || name == kMemoryButton || name == kGameButton ||
@@ -218,21 +218,21 @@ void MetConfigOptionsButtonsScreen::OnExitFinished() {
     }
 }
 
-// 0x0020bff0
+// NTSC-U/C: 0x0020bff0, PAL: 0x00215420
 void MetConfigOptionsButtonsScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
 }
 
-// 0x0020bff8
+// NTSC-U/C: 0x0020bff8, PAL: 0x00215428
 void MetConfigOptionsButtonsScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
 }
 
-// 0x0020c000
+// NTSC-U/C: 0x0020c000, PAL: 0x00215430
 MetConfigOptionsButtonsScreen *MetConfigOptionsButtonsScreen::New(MetRenderer *pRenderer,
                                                                   int nPriority) {
     return new MetConfigOptionsButtonsScreen(pRenderer, nPriority);
 }
 
-// 0x0020c088
+// NTSC-U/C: 0x0020c088, PAL: 0x002154b8
 MetConfigOptionsButtonsScreen::~MetConfigOptionsButtonsScreen() {
     delete mOptionButtons;
 }

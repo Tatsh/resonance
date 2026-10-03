@@ -80,7 +80,8 @@ HxStr DifficultyName(int nDifficulty);
  * for it, and sorts each list by mOrder. The MetRenderer and MetNullRenderer constructors and
  * MetExpansionPakScreen call it.
  *
- * @ghidraAddress 0x003cc7a0
+ * @ghidraAddress NTSC-U/C: 0x003cc7a0
+ * @ghidraAddress PAL: 0x004040a8
  */
 void RebuildStageLists();
 
@@ -91,7 +92,8 @@ void RebuildStageLists();
  * rebuilds each table with mOrder from configuration code 0x25f, and sorts both. The MetRenderer
  * constructor and MetExpansionPakScreen call it.
  *
- * @ghidraAddress 0x003ccab0
+ * @ghidraAddress NTSC-U/C: 0x003ccab0
+ * @ghidraAddress PAL: 0x004043e8
  */
 void RebuildArenaLists();
 
@@ -102,7 +104,8 @@ void RebuildArenaLists();
  * CampaignStats rebuilds and merges its level records from it.
  *
  * @return The names.
- * @ghidraAddress 0x003d06b8
+ * @ghidraAddress NTSC-U/C: 0x003d06b8
+ * @ghidraAddress PAL: 0x00408478
  */
 std::vector<HxStr> &GetLevelNames();
 
@@ -111,7 +114,8 @@ std::vector<HxStr> &GetLevelNames();
  *
  * @param nStage The stage, counted from 1.
  * @return The list.
- * @ghidraAddress 0x003d06d8
+ * @ghidraAddress NTSC-U/C: 0x003d06d8
+ * @ghidraAddress PAL: 0x00408498
  */
 std::vector<StageListEntry> *GetStageList(int nStage);
 
@@ -122,7 +126,8 @@ std::vector<StageListEntry> *GetStageList(int nStage);
  * the solo-stages, and the remix-load screens read it.
  *
  * @return The table.
- * @ghidraAddress 0x003d06f8
+ * @ghidraAddress NTSC-U/C: 0x003d06f8
+ * @ghidraAddress PAL: 0x004084b8
  */
 std::vector<ArenaListEntry> *GetArenaList();
 
@@ -135,7 +140,8 @@ std::vector<ArenaListEntry> *GetArenaList();
  *
  * @param slot The current location.
  * @return The next location.
- * @ghidraAddress 0x003d0a40
+ * @ghidraAddress NTSC-U/C: 0x003d0a40
+ * @ghidraAddress PAL: 0x00408818
  */
 MemcardConnectState NextCardSlot(const MemcardConnectState &slot);
 

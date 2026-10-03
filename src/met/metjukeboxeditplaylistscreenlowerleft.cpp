@@ -29,7 +29,7 @@ static const InstructionText kInstructionTexts[] = {
 
 } // namespace
 
-// 0x00237758
+// NTSC-U/C: 0x00237758, PAL: 0x0024b7b8
 MetJukeboxEditPlaylistScreenLowerLeft::MetJukeboxEditPlaylistScreenLowerLeft(MetRenderer *pRenderer,
                                                                              int nPriority)
     : MetScreen(pRenderer,
@@ -39,27 +39,27 @@ MetJukeboxEditPlaylistScreenLowerLeft::MetJukeboxEditPlaylistScreenLowerLeft(Met
                 HxStr(kContainerFile)) {
 }
 
-// 0x0023aa40
+// NTSC-U/C: 0x0023aa40, PAL: 0x0024f0d0
 void MetJukeboxEditPlaylistScreenLowerLeft::PlaySlideSound(int) {
 }
 
-// 0x0023aa48
+// NTSC-U/C: 0x0023aa48, PAL: 0x0024f0d8
 void MetJukeboxEditPlaylistScreenLowerLeft::PlayLeaveSound(int) {
 }
 
-// 0x0023aa50
+// NTSC-U/C: 0x0023aa50, PAL: 0x0024f0e0
 void MetJukeboxEditPlaylistScreenLowerLeft::PlayHighSound(int) {
 }
 
-// 0x0023aa58
+// NTSC-U/C: 0x0023aa58, PAL: 0x0024f0e8
 void MetJukeboxEditPlaylistScreenLowerLeft::PlayCycleLeftSound(int) {
 }
 
-// 0x0023aa60
+// NTSC-U/C: 0x0023aa60, PAL: 0x0024f0f0
 void MetJukeboxEditPlaylistScreenLowerLeft::PlayCycleRightSound(int) {
 }
 
-// 0x0023aa68
+// NTSC-U/C: 0x0023aa68, PAL: 0x0024f0f8
 MetJukeboxEditPlaylistScreenLowerLeft *
 MetJukeboxEditPlaylistScreenLowerLeft::New(MetRenderer *pRenderer, int nPriority) {
     return new MetJukeboxEditPlaylistScreenLowerLeft(pRenderer, nPriority);
@@ -77,19 +77,19 @@ void MetJukeboxEditPlaylistScreenLowerLeft::ResolveContainerViews() {
 #endif
 }
 
-// 0x0023ab10
+// NTSC-U/C: 0x0023ab10, PAL: 0x0024f180
 MetJukeboxEditPlaylistScreenLowerLeft::~MetJukeboxEditPlaylistScreenLowerLeft() {
 }
 
-// 0x0023ab68
+// NTSC-U/C: 0x0023ab68, PAL: 0x0024f1d8
 void MetJukeboxEditPlaylistScreenLowerLeft::HandleCommand(
     [[maybe_unused]] const MetScreenCommand *pCommand) {
 }
 
-// 0x0023ab70
+// NTSC-U/C: 0x0023ab70, PAL: 0x0024f1e0
 void MetJukeboxEditPlaylistScreenLowerLeft::OnEnterFinished() {
 }
 
-// 0x0023ab78
+// NTSC-U/C: 0x0023ab78, PAL: 0x0024f1e8
 void MetJukeboxEditPlaylistScreenLowerLeft::OnExitFinished() {
 }

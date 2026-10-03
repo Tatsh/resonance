@@ -40,7 +40,8 @@ public:
      * @param name The screen name.
      * @param directory The directory the container loads from.
      * @param file The container name.
-     * @ghidraAddress 0x00317d40
+     * @ghidraAddress NTSC-U/C: 0x00317d40
+     * @ghidraAddress PAL: 0x0033dc48
      */
     MetPauseBaseScreen(MetRenderer *pRenderer,
                        int nPriority,
@@ -49,7 +50,8 @@ public:
                        const HxStr &file);
 
     /**
-     * @ghidraAddress 0x00317e90
+     * @ghidraAddress NTSC-U/C: 0x00317e90
+     * @ghidraAddress PAL: 0x0033ddb0
      */
     virtual ~MetPauseBaseScreen();
 
@@ -62,7 +64,8 @@ public:
      * @param directory The directory the container loads from.
      * @param file The container name.
      * @return The new screen.
-     * @ghidraAddress 0x0031c038
+     * @ghidraAddress NTSC-U/C: 0x0031c038
+     * @ghidraAddress PAL: 0x00342208
      */
     static MetPauseBaseScreen *New(MetRenderer *pRenderer,
                                    int nPriority,
@@ -75,7 +78,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x00318278
+     * @ghidraAddress NTSC-U/C: 0x00318278
+     * @ghidraAddress PAL: 0x0033e200
      */
     virtual void EnterAndShow();
 
@@ -88,7 +92,8 @@ public:
      *
      * @param name The confirmation that was dismissed.
      * @param nChoice The button chosen.
-     * @ghidraAddress 0x00318b80
+     * @ghidraAddress NTSC-U/C: 0x00318b80
+     * @ghidraAddress PAL: 0x0033ec70
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -100,37 +105,43 @@ public:
      * clears the active panel first.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00318010
+     * @ghidraAddress NTSC-U/C: 0x00318010
+     * @ghidraAddress PAL: 0x0033df58
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x0031bff0
+     * @ghidraAddress NTSC-U/C: 0x0031bff0
+     * @ghidraAddress PAL: 0x003421c0
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
      * @param nSelector The pad index of the command. The body does not read it.
-     * @ghidraAddress 0x0031bff8
+     * @ghidraAddress NTSC-U/C: 0x0031bff8
+     * @ghidraAddress PAL: 0x003421c8
      */
     virtual void PlayLeaveSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x0031c000
+     * @ghidraAddress NTSC-U/C: 0x0031c000
+     * @ghidraAddress PAL: 0x003421d0
      */
     virtual void PlayHighSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x0031c008
+     * @ghidraAddress NTSC-U/C: 0x0031c008
+     * @ghidraAddress PAL: 0x003421d8
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its recorded selector.
-     * @ghidraAddress 0x0031c010
+     * @ghidraAddress NTSC-U/C: 0x0031c010
+     * @ghidraAddress PAL: 0x003421e0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -153,7 +164,8 @@ public:
      * Slot 39, the one virtual this class declares. The name is inferred.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x0031c018
+     * @ghidraAddress NTSC-U/C: 0x0031c018
+     * @ghidraAddress PAL: 0x003421e8
      */
     virtual void PlayPauseSound(int nSelector);
 

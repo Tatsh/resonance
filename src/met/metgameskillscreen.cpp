@@ -59,19 +59,19 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// 0x00273140
+// NTSC-U/C: 0x00273140, PAL: 0x0028b620
 MetGameSkillScreen::MetGameSkillScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
     mButtonList = new MetButtonList();
 }
 
-// 0x00276ad0
+// NTSC-U/C: 0x00276ad0, PAL: 0x0028f410
 MetGameSkillScreen::~MetGameSkillScreen() {
     delete mButtonList;
 }
 
-// 0x00276a48
+// NTSC-U/C: 0x00276a48, PAL: 0x0028f388
 MetGameSkillScreen *MetGameSkillScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetGameSkillScreen(pRenderer, nPriority);
 }
@@ -115,7 +115,7 @@ void MetGameSkillScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00273558
+// NTSC-U/C: 0x00273558, PAL: 0x0028bb38
 void MetGameSkillScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -149,15 +149,15 @@ void MetGameSkillScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x00276a38
+// NTSC-U/C: 0x00276a38, PAL: 0x0028f378
 void MetGameSkillScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x00276a40
+// NTSC-U/C: 0x00276a40, PAL: 0x0028f380
 void MetGameSkillScreen::PlayCycleRightSound(int) {
 }
 
-// 0x00273f28
+// NTSC-U/C: 0x00273f28, PAL: 0x0028c670
 void MetGameSkillScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -165,7 +165,7 @@ void MetGameSkillScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x00274058
+// NTSC-U/C: 0x00274058, PAL: 0x0028c7e8
 void MetGameSkillScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kModeScreen));

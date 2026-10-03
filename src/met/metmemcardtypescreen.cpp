@@ -85,17 +85,17 @@ MetMemCardTypeScreen::MetMemCardTypeScreen(MetRenderer *pRenderer, int nPriority
     mHelpKeys.push_back(MetText(kMetStrHMcrfFreq, kFreqKey));
 }
 
-// 0x002d84d0
+// NTSC-U/C: 0x002d84d0, PAL: 0x002fac40
 MetMemCardTypeScreen::~MetMemCardTypeScreen() {
     delete mButtonList;
 }
 
-// 0x002d8448
+// NTSC-U/C: 0x002d8448, PAL: 0x002fabb8
 MetMemCardTypeScreen *MetMemCardTypeScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemCardTypeScreen(pRenderer, nPriority);
 }
 
-// 0x002d8560
+// NTSC-U/C: 0x002d8560, PAL: 0x002face0
 void MetMemCardTypeScreen::SetCardSlot(MemcardConnectState slot) {
     mCardSlot = slot;
 }
@@ -113,7 +113,7 @@ void MetMemCardTypeScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x002d2898
+// NTSC-U/C: 0x002d2898, PAL: 0x002f4c70
 void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -147,7 +147,7 @@ void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002d2cf0
+// NTSC-U/C: 0x002d2cf0, PAL: 0x002f5188
 void MetMemCardTypeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -156,7 +156,7 @@ void MetMemCardTypeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x002d2e90
+// NTSC-U/C: 0x002d2e90, PAL: 0x002f5388
 void MetMemCardTypeScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kMemCardLoadScreen));

@@ -90,14 +90,14 @@ inline HxStr Caption(MetStringId nId, const char *pszKey) {
 
 } // namespace
 
-// 0x0028d2c8
+// NTSC-U/C: 0x0028d2c8, PAL: 0x002a8f20
 MetLoadGameScreen::MetLoadGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mPolling(0), mWaiting(0), mDemoPlayback(0), mDeadlineNs(0), mFade(nullptr) {
     mFade = new MetFade(pRenderer);
 }
 
-// 0x0028d4c0
+// NTSC-U/C: 0x0028d4c0, PAL: 0x002a9180
 void MetLoadGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mpEvent = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kEventText)));
@@ -152,14 +152,14 @@ void MetLoadGameScreen::LLEnter() {
     MetScreen::EnterAndShow();
 }
 
-// 0x0028dc60
+// NTSC-U/C: 0x0028dc60, PAL: 0x002a9a50
 void MetLoadGameScreen::OnEnterFinished() {
     Application::shared()->GetSynth()->FadeOut(kMusicFadeMs);
     mWaiting = 1;
     mDeadlineNs = WatchdogNowNs() + kLoadDelayNs;
 }
 
-// 0x0028dd38
+// NTSC-U/C: 0x0028dd38, PAL: 0x002a9b28
 void MetLoadGameScreen::UpdateIdle(float flTime) {
     if (mWaiting != 0 && mDeadlineNs < WatchdogNowNs()) {
         mWaiting = 0;
@@ -193,13 +193,13 @@ void MetLoadGameScreen::UpdateIdle(float flTime) {
     mFade->Update(flTime);
 }
 
-// 0x0028df18
+// NTSC-U/C: 0x0028df18, PAL: 0x002a9d08
 void MetLoadGameScreen::LoadNetLevel() {
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Renderer::LoadLevel(params);
 }
 
-// 0x0028e018
+// NTSC-U/C: 0x0028e018, PAL: 0x002a9e78
 void MetLoadGameScreen::OnFadeInDone() {
     mRenderer->ClearBackgroundScene();
     if (mDemoPlayback != 0) {
@@ -217,7 +217,7 @@ void MetLoadGameScreen::OnFadeInDone() {
     g_gfxDevice.FlipFrameBuffer();
 }
 
-// 0x0028e158
+// NTSC-U/C: 0x0028e158, PAL: 0x002a9fb8
 void MetLoadGameScreen::AssignBurnSlots() {
     if (mDemoPlayback == 0) {
         std::vector<MetPersonaData *> personas(
@@ -235,17 +235,17 @@ void MetLoadGameScreen::AssignBurnSlots() {
     }
 }
 
-// 0x002919c8
+// NTSC-U/C: 0x002919c8, PAL: 0x002ad8e0
 MetScreen *MetLoadGameScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadGameScreen(pRenderer, nPriority);
 }
 
-// 0x00291a50
+// NTSC-U/C: 0x00291a50, PAL: 0x002ad968
 MetLoadGameScreen::~MetLoadGameScreen() {
     delete mFade;
 }
 
-// 0x00291ad0
+// NTSC-U/C: 0x00291ad0, PAL: 0x002ada08
 void MetLoadGameScreen::LoadGameLevel() {
     MetFrontEndState *pState = MetFrontEndState::shared();
     pState->mLastTransition = pState->mPendingTransition;
@@ -253,7 +253,7 @@ void MetLoadGameScreen::LoadGameLevel() {
     Renderer::LoadLevel(*Application::shared()->GetGameManager()->GetParams());
 }
 
-// 0x00291b28
+// NTSC-U/C: 0x00291b28, PAL: 0x002ada60
 void MetLoadGameScreen::LoadTutorialLevel() {
     MetFrontEndState *pState = MetFrontEndState::shared();
     pState->mLastTransition = pState->mPendingTransition;

@@ -6,6 +6,7 @@
 #include "app/msgsource.h"
 #include "app/rendererbase.h"
 #include "met/fadeuser.h"
+#include "os/hostmode.h"
 #include "rnd/view.h"
 
 // MetScreen stores its renderer and the renderer stores its screens, so one of the two
@@ -77,7 +78,8 @@ public:
      * 0x397 and 0x3a2, sets the device clear colour to opaque black, and enqueues the three
      * container loads the boot phase of the poll routine waits on.
      *
-     * @ghidraAddress 0x00369fb0
+     * @ghidraAddress NTSC-U/C: 0x00369fb0
+     * @ghidraAddress PAL: 0x00398428
      */
     MetRenderer();
 
@@ -88,7 +90,8 @@ public:
      * than called, and the tagged release at the end passes `MsgSink` rather than the name of this
      * class, because MsgSink declares the allocation pair and this class inherits it.
      *
-     * @ghidraAddress 0x0036a460
+     * @ghidraAddress NTSC-U/C: 0x0036a460
+     * @ghidraAddress PAL: 0x003988e0
      */
     virtual ~MetRenderer();
 
@@ -105,7 +108,8 @@ public:
      * in mRecording.
      *
      * @param pMsg The message to dispatch.
-     * @ghidraAddress 0x0036c5d8
+     * @ghidraAddress NTSC-U/C: 0x0036c5d8
+     * @ghidraAddress PAL: 0x0039afd8
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -116,7 +120,8 @@ public:
      * mRunning, rewinds the animation frame to 1.0f, and records the current time as the frame
      * base in mPreviousFrameNs.
      *
-     * @ghidraAddress 0x0036a900
+     * @ghidraAddress NTSC-U/C: 0x0036a900
+     * @ghidraAddress PAL: 0x00398de0
      */
     virtual void Start();
 
@@ -128,7 +133,8 @@ public:
      * both scene views, clears the active panel, and stops `SND_MET_MUSIC1` unless
      * MetFrontEndState::mPendingTransition is 2. The destructor calls the routine directly.
      *
-     * @ghidraAddress 0x0036b0c0
+     * @ghidraAddress NTSC-U/C: 0x0036b0c0
+     * @ghidraAddress PAL: 0x00399748
      */
     virtual void Stop();
 
@@ -142,7 +148,8 @@ public:
      * phase shows or hides `met_disc_prob.view`. The frame phase advances the animation frame and
      * runs MetScreen::UpdateFrame() on every screen on the stack.
      *
-     * @ghidraAddress 0x0036b190
+     * @ghidraAddress NTSC-U/C: 0x0036b190
+     * @ghidraAddress PAL: 0x00399818
      */
     virtual void Update();
 
@@ -152,7 +159,8 @@ public:
      * RendererBase slot 8, where the base stores the `__pure_virtual` stub. Draws nothing at all
      * while mRunning is clear.
      *
-     * @ghidraAddress 0x00371670
+     * @ghidraAddress NTSC-U/C: 0x00371670
+     * @ghidraAddress PAL: 0x003a0168
      */
     virtual void Draw();
 
@@ -163,7 +171,8 @@ public:
      * Update()'s frame phase in exactly one respect: it runs
      * MetScreen::UpdateAnimationFrame() where the poll routine runs MetScreen::UpdateFrame().
      *
-     * @ghidraAddress 0x0036b740
+     * @ghidraAddress NTSC-U/C: 0x0036b740
+     * @ghidraAddress PAL: 0x00399e28
      */
     virtual void UpdateSimple();
 
@@ -173,7 +182,8 @@ public:
      * RendererBase slot 10, empty in the base. The routine is Draw()
      * without the pre-pass and without the walk of the screen stack.
      *
-     * @ghidraAddress 0x00371570
+     * @ghidraAddress NTSC-U/C: 0x00371570
+     * @ghidraAddress PAL: 0x003a0068
      */
     virtual void DrawSimple();
 
@@ -183,7 +193,8 @@ public:
      * FadeUser slot 2. Does nothing while mDiscProblemPending is set. The same five-step promotion
      * appears twice more inside Update().
      *
-     * @ghidraAddress 0x003715e0
+     * @ghidraAddress NTSC-U/C: 0x003715e0
+     * @ghidraAddress PAL: 0x003a00d8
      */
     virtual void OnFadeOutDone();
 
@@ -194,7 +205,8 @@ public:
      * class cannot be concrete while a slot points at that stub, so this empty body is what makes
      * the renderer instantiable.
      *
-     * @ghidraAddress 0x003715d8
+     * @ghidraAddress NTSC-U/C: 0x003715d8
+     * @ghidraAddress PAL: 0x003a00d0
      */
     virtual void OnFadeInDone();
 
@@ -205,7 +217,8 @@ public:
      * The title is inferred from the field MetScreen slot 6 pairs the call with.
      *
      * @param pScreen The screen to record.
-     * @ghidraAddress 0x003714c8
+     * @ghidraAddress NTSC-U/C: 0x003714c8
+     * @ghidraAddress PAL: 0x0039ffc0
      */
     void SetActivePanel(MetScreen *pScreen);
 
@@ -219,7 +232,8 @@ public:
      * the end-of-game screen. The title records that return. The body supplies no further
      * evidence.
      *
-     * @ghidraAddress 0x00390088
+     * @ghidraAddress NTSC-U/C: 0x00390088
+     * @ghidraAddress PAL: 0x003c1958
      */
     void OnReturnFromGame();
 
@@ -231,7 +245,8 @@ public:
      * a selection menu, and MetMainScreen calls it alone as the solo and multiplayer menus open.
      * The title records that return to the menus. The body supplies no further evidence.
      *
-     * @ghidraAddress 0x00390090
+     * @ghidraAddress NTSC-U/C: 0x00390090
+     * @ghidraAddress PAL: 0x003c1960
      */
     void OnReturnToMenus();
 
@@ -245,7 +260,8 @@ public:
      * MetSoloWinScreen. The image has no accessor to route those calls through.
      *
      * @param nSkipResolve Non-zero to attach nothing.
-     * @ghidraAddress 0x0036a9e0
+     * @ghidraAddress NTSC-U/C: 0x0036a9e0
+     * @ghidraAddress PAL: 0x00398ec0
      */
     void ResolveArenaView(int nSkipResolve);
 
@@ -257,7 +273,8 @@ public:
      * routine at `0x003ba620` and MetLoadGameScreen::OnFadeInDone() at `0x0028e02c` from outside
      * the class, which is why it is public. The image has no accessor to route those calls through.
      *
-     * @ghidraAddress 0x00371960
+     * @ghidraAddress NTSC-U/C: 0x00371960
+     * @ghidraAddress PAL: 0x003a0458
      */
     void ClearBackgroundScene();
 
@@ -270,7 +287,8 @@ public:
      * passed through to all three as null rather than rejected. The title is inferred.
      *
      * @param pView The view to attach.
-     * @ghidraAddress 0x003717b0
+     * @ghidraAddress NTSC-U/C: 0x003717b0
+     * @ghidraAddress PAL: 0x003a02a8
      */
     void AddScreenView(Rnd::View *pView);
 
@@ -281,7 +299,8 @@ public:
      * the three membership tests and the null pass-through. The title is inferred.
      *
      * @param pView The view to attach.
-     * @ghidraAddress 0x003718b8
+     * @ghidraAddress NTSC-U/C: 0x003718b8
+     * @ghidraAddress PAL: 0x003a03b0
      */
     void AddBackgroundView(Rnd::View *pView);
 
@@ -293,7 +312,8 @@ public:
      * is inferred.
      *
      * @param pView The view to detach.
-     * @ghidraAddress 0x00371858
+     * @ghidraAddress NTSC-U/C: 0x00371858
+     * @ghidraAddress PAL: 0x003a0350
      */
     void RemoveScreenView(Rnd::View *pView);
 
@@ -304,7 +324,8 @@ public:
      * vector the body appends to.
      *
      * @param pScreen The screen to append.
-     * @ghidraAddress 0x003719e0
+     * @ghidraAddress NTSC-U/C: 0x003719e0
+     * @ghidraAddress PAL: 0x003a04d8
      */
     void AddScreen(MetScreen *pScreen);
 
@@ -314,7 +335,8 @@ public:
      * A screen absent from the stack does nothing. The title is inferred.
      *
      * @param pScreen The screen to erase.
-     * @ghidraAddress 0x00371a78
+     * @ghidraAddress NTSC-U/C: 0x00371a78
+     * @ghidraAddress PAL: 0x003a0570
      */
     void RemoveScreen(MetScreen *pScreen);
 
@@ -325,7 +347,8 @@ public:
      * caller. The title is inferred.
      *
      * @param pScreen The screen to promote.
-     * @ghidraAddress 0x003714f8
+     * @ghidraAddress NTSC-U/C: 0x003714f8
+     * @ghidraAddress PAL: 0x0039fff0
      */
     void ActivatePanel(MetScreen *pScreen);
 
@@ -336,7 +359,8 @@ public:
      * records no caller. The title is inferred.
      *
      * @param pView The view to raise.
-     * @ghidraAddress 0x00371730
+     * @ghidraAddress NTSC-U/C: 0x00371730
+     * @ghidraAddress PAL: 0x003a0228
      */
     void MoveScreenViewToFront(Rnd::View *pView);
 
@@ -345,7 +369,8 @@ public:
      *
      * The `ActivateAllAccessMode` script command is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0036b8c8
+     * @ghidraAddress NTSC-U/C: 0x0036b8c8
+     * @ghidraAddress PAL: 0x00399fb0
      */
     void UnlockAllStages();
 
@@ -355,7 +380,8 @@ public:
      * The three cheat script commands test it. The title is inferred.
      *
      * @return Non-zero when the active panel is a MetLogoScreen.
-     * @ghidraAddress 0x00371b58
+     * @ghidraAddress NTSC-U/C: 0x00371b58
+     * @ghidraAddress PAL: 0x003a0650
      */
     int IsLogoScreenActive();
 
@@ -365,7 +391,8 @@ public:
      * The image records no caller. The title is inferred.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00371cb0
+     * @ghidraAddress NTSC-U/C: 0x00371cb0
+     * @ghidraAddress PAL: 0x003a07a8
      */
     void ForwardToPanel(Message *pMsg);
 
@@ -375,7 +402,8 @@ public:
      * The image records no caller. The title is inferred.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00371cf0
+     * @ghidraAddress NTSC-U/C: 0x00371cf0
+     * @ghidraAddress PAL: 0x003a07e8
      */
     void ForwardToPanelUnchecked(Message *pMsg);
 
@@ -386,7 +414,8 @@ public:
      *
      * @param pfProgress Receives the load's progress, between 0 and 1.
      * @return Non-zero once the load is complete.
-     * @ghidraAddress 0x003713f0
+     * @ghidraAddress NTSC-U/C: 0x003713f0
+     * @ghidraAddress PAL: 0x0039fee8
      */
     static int PollArenaLoader(float *pfProgress);
 
@@ -397,7 +426,8 @@ public:
      *
      * @param pfProgress Receives the mean of the three loads' progress.
      * @return Non-zero once all three are complete.
-     * @ghidraAddress 0x00371338
+     * @ghidraAddress NTSC-U/C: 0x00371338
+     * @ghidraAddress PAL: 0x0039fe30
      */
     static int PollCommonLoaders(float *pfProgress);
 
@@ -406,7 +436,8 @@ public:
      *
      * The image records no caller. The title is inferred.
      *
-     * @ghidraAddress 0x00371270
+     * @ghidraAddress NTSC-U/C: 0x00371270
+     * @ghidraAddress PAL: 0x0039fd68
      */
     static void EnqueueCommonLoaders();
 
@@ -415,7 +446,8 @@ public:
      *
      * The image records no caller. The title is inferred.
      *
-     * @ghidraAddress 0x003712f8
+     * @ghidraAddress NTSC-U/C: 0x003712f8
+     * @ghidraAddress PAL: 0x0039fdf0
      */
     static void UnloadCommonLoaders();
 
@@ -424,7 +456,8 @@ public:
      *
      * The image records no caller. The title is inferred.
      *
-     * @ghidraAddress 0x00371490
+     * @ghidraAddress NTSC-U/C: 0x00371490
+     * @ghidraAddress PAL: 0x0039ff88
      */
     static void UnloadArenaLoader();
 
@@ -453,48 +486,50 @@ public:
     int mPanelActive;
 
 private:
-    // 0x0036a680
+    // NTSC-U/C: 0x0036a680, PAL: 0x00398b00
     // Resolves the three scene views and the fade, and is reached only from
     // Update()'s boot phase. The title is inferred from the three fields it writes.
     void ResolveSceneViews();
 
-    // 0x003719a0
+    // NTSC-U/C: 0x003719a0, PAL: 0x003a0498
     // Releases the animatable, drawable, and transformable lists of the screen scene
     // at mScreenScene. Stop() is its one caller. The title is inferred.
     void ClearScreenScene();
 
-    // 0x0036b938
+    // NTSC-U/C: 0x0036b938, PAL: 0x0039a020
     // Handles a MetStartPauseMsg by activating the pause screen the game mode and play mode call
     // for.
     void OnStartPause(Message *pMsg);
 
-    // 0x0036bcb8
+    // NTSC-U/C: 0x0036bcb8, PAL: 0x0039a400
     // Handles a MetFreqEndedMsg by choosing the screen the next fade promotes and starting that
-    // fade.
+    // fade. The European release recognises the tutorial levels by their localised names, and
+    // offers the end-of-remix screen for an edited remix whether or not the front end uses the
+    // memory card.
     void OnFreqEnded(Message *pMsg);
 
-    // 0x0036aae0
+    // NTSC-U/C: 0x0036aae0, PAL: 0x00398fe0
     // Chooses the end-of-game screen from the game parameters, the game mode, and the solo
     // result. OnFreqEnded() is the caller. The title is inferred.
     MetScreen *SelectEndScreen();
 
-    // 0x00371ba8
+    // NTSC-U/C: 0x00371ba8, PAL: 0x003a06a0
     // Translates a raw controller reading into a command, arms its auto-repeat, and delivers it
     // to the active panel. HandleMessage() expands it inline.
     inline void OnRawController(RawControllerMsg *pMsg);
 
-    // 0x00369b08
+    // NTSC-U/C: 0x00369b08, PAL: 0x00397d88
     // Creates the metagame, fonts, and shared-texture loaders. The constructor is the caller.
     static void CreateCommonLoaders();
 
-    // 0x00369e50
+    // NTSC-U/C: 0x00369e50, PAL: 0x00398288
     // Creates the arena loader, builds the main-menu screens, and starts the arena load.
     static void CreateArenaLoader();
 
-    // 0x003712d8
+    // NTSC-U/C: 0x003712d8, PAL: 0x0039fdd0
     static void StartArenaLoad();
 
-    // 0x00371438
+    // NTSC-U/C: 0x00371438, PAL: 0x0039ff30
     // Enqueues the arena loader while it is pending.
     static void EnqueueArenaLoader();
 
@@ -506,18 +541,19 @@ public:
      * Public because MetSonyScreen::OnFadeOutDone() reads it directly, and the image has no
      * accessor.
      *
-     * @ghidraAddress 0x006c3598
+     * @ghidraAddress NTSC-U/C: 0x006c3598
+     * @ghidraAddress PAL: 0x00706608
      */
     static MetRenderer *sInstance;
 
 private:
-    // 0x006c3600
+    // NTSC-U/C: 0x006c3600, PAL: 0x00706670
     static RndAsyncLoader *sMetagameLoader;
-    // 0x006c3608
+    // NTSC-U/C: 0x006c3608, PAL: 0x00706678
     static RndAsyncLoader *sFontsLoader;
-    // 0x006c360c
+    // NTSC-U/C: 0x006c360c, PAL: 0x0070667c
     static RndAsyncLoader *sSharedTexLoader;
-    // 0x006c3610
+    // NTSC-U/C: 0x006c3610, PAL: 0x00706680
     static RndAsyncLoader *sArenaLoader;
 
 public:
@@ -602,3 +638,29 @@ public:
      */
     int mMaxPadIndex;
 };
+
+#ifdef VIDEO_STANDARD_PAL
+/**
+ * Report the suffix the European release appends to a localised asset name for GetLanguage().
+ *
+ * The tutorial level names and the MetSonyScreen container name take it. MetTutorialScreen and
+ * MetSonyScreen expand the choice inline, and so does the routine MetRenderer::OnFreqEnded()
+ * calls to recognise a finished tutorial. The name is inferred.
+ *
+ * @return `_ger`, `_fre`, `_ita`, `_spa`, or an empty string for English and an unknown code.
+ */
+inline const char *LocalizedAssetSuffix() {
+    switch (GetLanguage()) {
+    case SCE_GERMAN_LANGUAGE:
+        return "_ger";
+    case SCE_FRENCH_LANGUAGE:
+        return "_fre";
+    case SCE_ITALIAN_LANGUAGE:
+        return "_ita";
+    case SCE_SPANISH_LANGUAGE:
+        return "_spa";
+    default:
+        return "";
+    }
+}
+#endif

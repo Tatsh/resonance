@@ -64,18 +64,18 @@ constexpr int kResolveArenaView = 0;
 
 } // namespace
 
-// 0x00399be8
+// NTSC-U/C: 0x00399be8, PAL: 0x003cbd78
 MetSoloLoseScreen::MetSoloLoseScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(new MetButtonList()) {
 }
 
-// 0x0039e010
+// NTSC-U/C: 0x0039e010, PAL: 0x003d0580
 MetSoloLoseScreen::~MetSoloLoseScreen() {
     delete mButtonList;
 }
 
-// 0x0039df88
+// NTSC-U/C: 0x0039df88, PAL: 0x003d04f8
 MetSoloLoseScreen *MetSoloLoseScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloLoseScreen(pRenderer, nPriority);
 }
@@ -108,7 +108,7 @@ void MetSoloLoseScreen::EnterAndShow() {
     }
 }
 
-// 0x00399db8
+// NTSC-U/C: 0x00399db8, PAL: 0x003cbfb0
 void MetSoloLoseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -136,19 +136,19 @@ void MetSoloLoseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x0039df80
+// NTSC-U/C: 0x0039df80, PAL: 0x003d04f0
 void MetSoloLoseScreen::PlayLeaveSound([[maybe_unused]] int nSelector) {
 }
 
-// 0x0039df70
+// NTSC-U/C: 0x0039df70, PAL: 0x003d04e0
 void MetSoloLoseScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
 }
 
-// 0x0039df78
+// NTSC-U/C: 0x0039df78, PAL: 0x003d04e8
 void MetSoloLoseScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
 }
 
-// 0x0039a6e8
+// NTSC-U/C: 0x0039a6e8, PAL: 0x003cca58
 void MetSoloLoseScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
     ExitScreenByName(HxStr(kSoloStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
@@ -156,7 +156,7 @@ void MetSoloLoseScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *p
     BeginExit();
 }
 
-// 0x0039a880
+// NTSC-U/C: 0x0039a880, PAL: 0x003ccc50
 void MetSoloLoseScreen::OnExitFinished() {
     if ((mButtonList->mSelected == kRetryButtonIndex) && (mExitChoice != 0)) {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);

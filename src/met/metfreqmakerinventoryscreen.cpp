@@ -172,7 +172,7 @@ struct GridCell {
     int mRow;
 };
 
-// 0x00891af8
+// NTSC-U/C: 0x00891af8, PAL: 0x008d6200
 // The corners of the three visible rows of the grid, through 0x00891b17. No routine reads them.
 // The names are inferred.
 GridCell g_gridTopLeft(0, 0);
@@ -180,7 +180,7 @@ GridCell g_gridBottomLeft(0, 2);
 GridCell g_gridTopRight(7, 0);
 GridCell g_gridBottomRight(7, 2);
 
-// 0x00272268
+// NTSC-U/C: 0x00272268, PAL: 0x0028a6f8
 // Negate a value unless it is already negative. The product is taken in double precision. The
 // routine is never called.
 inline void ForceNonPositive(float &flValue) {
@@ -189,7 +189,7 @@ inline void ForceNonPositive(float &flValue) {
     }
 }
 
-// 0x002722c8
+// NTSC-U/C: 0x002722c8, PAL: 0x0028a758
 // Negate a value when it is negative. The product is taken in double precision. The routine is
 // never called.
 inline void ForceNonNegative(float &flValue) {
@@ -224,7 +224,7 @@ inline void PrependView(Rnd::View *pParent, Rnd::View *pChild) {
 
 } // namespace
 
-// 0x0026a498
+// NTSC-U/C: 0x0026a498, PAL: 0x00281df8
 MetFreqMakerInventoryScreen::MetFreqMakerInventoryScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mMainInventoryView(nullptr), mBodyView(nullptr), mHeadView(nullptr), mFaceView(nullptr),
@@ -283,7 +283,7 @@ MetFreqMakerInventoryScreen::MetFreqMakerInventoryScreen(MetRenderer *pRenderer,
     mGridColumn = 0;
 }
 
-// 0x0026c230
+// NTSC-U/C: 0x0026c230, PAL: 0x00284210
 MetFreqMakerInventoryScreen::~MetFreqMakerInventoryScreen() {
     delete mMainInventoryView;
     delete mBodyView;
@@ -309,20 +309,20 @@ MetFreqMakerInventoryScreen::~MetFreqMakerInventoryScreen() {
     mCrossOrigin = nullptr;
 }
 
-// 0x00272440
+// NTSC-U/C: 0x00272440, PAL: 0x0028a8d0
 MetFreqMakerInventoryScreen *MetFreqMakerInventoryScreen::New(MetRenderer *pRenderer,
                                                               int nPriority) {
     return new MetFreqMakerInventoryScreen(pRenderer, nPriority);
 }
 
-// 0x00272528
+// NTSC-U/C: 0x00272528, PAL: 0x0028a9b8
 void MetFreqMakerInventoryScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     mMode = kModeNone;
     mRepeatScale = kIdleRepeatScale;
 }
 
-// 0x0026a3b0
+// NTSC-U/C: 0x0026a3b0, PAL: 0x00281cf0
 int MetFreqMakerInventoryScreen::PollContainerLoad() {
     bool loaded = MetFreqMakerAssetManager::shared()->PollLoad();
     MetScreen *pDirections = FindScreenByName(HxStr(kDirectionsScreenName));
@@ -333,42 +333,42 @@ int MetFreqMakerInventoryScreen::PollContainerLoad() {
     return MetScreen::PollContainerLoad();
 }
 
-// 0x00272b78
+// NTSC-U/C: 0x00272b78, PAL: 0x0028b028
 void MetFreqMakerInventoryScreen::PlaySlideSound(int nSelector) {
     if (mMode == kModeInventory || mMode == kModeColor || mMode == kModePart) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// 0x00272bb8
+// NTSC-U/C: 0x00272bb8, PAL: 0x0028b068
 void MetFreqMakerInventoryScreen::PlayLeaveSound(int nSelector) {
     if (mMode == kModeInventory || mMode == kModeColor || mMode == kModePart) {
         MetScreen::PlayLeaveSound(nSelector);
     }
 }
 
-// 0x00272c38
+// NTSC-U/C: 0x00272c38, PAL: 0x0028b0e8
 void MetFreqMakerInventoryScreen::PlayHighSound(int) {
     if (mMode == kModeInventory) {
         PlaySoundByName(kPartSelectSound);
     }
 }
 
-// 0x00272c68
+// NTSC-U/C: 0x00272c68, PAL: 0x0028b118
 void MetFreqMakerInventoryScreen::PlayCycleLeftSound(int) {
     if (mMode == kModeInventory) {
         PlaySoundByName(kPartSelectSound);
     }
 }
 
-// 0x00272c98
+// NTSC-U/C: 0x00272c98, PAL: 0x0028b148
 void MetFreqMakerInventoryScreen::PlayCycleRightSound(int) {
     if (mMode == kModeInventory) {
         PlaySoundByName(kPartSelectSound);
     }
 }
 
-// 0x00272560
+// NTSC-U/C: 0x00272560, PAL: 0x0028a9f0
 void MetFreqMakerInventoryScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
@@ -486,7 +486,7 @@ void MetFreqMakerInventoryScreen::ResolveContainerViews() {
     UpdateCrossOrigin();
 }
 
-// 0x00272cc8
+// NTSC-U/C: 0x00272cc8, PAL: 0x0028b178
 void MetFreqMakerInventoryScreen::PlayMoveSound() {
     if (mMode == kModeColor) {
         PlaySoundByName(kColorMoveSound);
@@ -496,27 +496,27 @@ void MetFreqMakerInventoryScreen::PlayMoveSound() {
     }
 }
 
-// 0x00272bf8
+// NTSC-U/C: 0x00272bf8, PAL: 0x0028b0a8
 void MetFreqMakerInventoryScreen::PlayFlipSound() {
     PlaySoundByName(kFlipSound);
 }
 
-// 0x00272c18
+// NTSC-U/C: 0x00272c18, PAL: 0x0028b0c8
 void MetFreqMakerInventoryScreen::PlayModeToggleSound() {
     PlaySoundByName(kToggleSound);
 }
 
-// 0x00272b38
+// NTSC-U/C: 0x00272b38, PAL: 0x0028afe8
 void MetFreqMakerInventoryScreen::PlayToggleSound() {
     PlaySoundByName(kToggleSound);
 }
 
-// 0x00272b58
+// NTSC-U/C: 0x00272b58, PAL: 0x0028b008
 void MetFreqMakerInventoryScreen::PlayDeleteSound() {
     PlaySoundByName(kDeleteSound);
 }
 
-// 0x00272600
+// NTSC-U/C: 0x00272600, PAL: 0x0028aab0
 void MetFreqMakerInventoryScreen::OnPanelActivated() {
     mMode = kModeInventory;
     mRepeatScale = kBrowsingRepeatScale;
@@ -555,7 +555,7 @@ inline void MetFreqMakerInventoryScreen::ApplyPaletteToCurrentMesh() {
     }
 }
 
-// 0x0026c928
+// NTSC-U/C: 0x0026c928, PAL: 0x002849b8
 void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -814,7 +814,7 @@ void MetFreqMakerInventoryScreen::HandleCommand(const MetScreenCommand *pCommand
     }
 }
 
-// 0x00272a98
+// NTSC-U/C: 0x00272a98, PAL: 0x0028af48
 void MetFreqMakerInventoryScreen::OnEnterFinished() {
     ShowPalette(0);
     ShowInventory(0);
@@ -868,7 +868,7 @@ void MetFreqMakerInventoryScreen::ShowLogosPage() {
     ShowPartPage(mLogosView, mLogosRowCount, MetText(kMetStrFmInvLogos, kLogosHeading));
 }
 
-// 0x0026db88
+// NTSC-U/C: 0x0026db88, PAL: 0x00285d98
 void MetFreqMakerInventoryScreen::HidePages() {
     mHeadView->SetShowing(0);
     mFaceView->SetShowing(0);
@@ -941,12 +941,12 @@ void MetFreqMakerInventoryScreen::ShowEditPage() {
     FindObject<Rnd::Text>(kHeadingNameName)->SetText(MetText(kMetStrFmInvFreq, kEditHeading));
 }
 
-// 0x0026e448
+// NTSC-U/C: 0x0026e448, PAL: 0x002866f0
 void MetFreqMakerInventoryScreen::HideGridCursor() {
     FindObject<Rnd::Mesh>(kHighlightMeshName)->SetShowing(0);
 }
 
-// 0x0026e528
+// NTSC-U/C: 0x0026e528, PAL: 0x002867f0
 void MetFreqMakerInventoryScreen::UpdateGridCursor() {
     Rnd::Mesh *pCursor = FindObject<Rnd::Mesh>(kHighlightMeshName);
     const float translation[] = {
@@ -957,7 +957,7 @@ void MetFreqMakerInventoryScreen::UpdateGridCursor() {
     pCursor->SetShowing(1);
 }
 
-// 0x0026eff0
+// NTSC-U/C: 0x0026eff0, PAL: 0x002873f0
 void MetFreqMakerInventoryScreen::ShowDirections(int nPage) {
     MetFreqMakerDirectionsScreen *pDirections =
         static_cast<MetFreqMakerDirectionsScreen *>(FindScreenByName(HxStr(kDirectionsScreenName)));
@@ -970,7 +970,7 @@ void MetFreqMakerInventoryScreen::ShowDirections(int nPage) {
     pDirections->ShowPage(nShown);
 }
 
-// 0x0026f100
+// NTSC-U/C: 0x0026f100, PAL: 0x00287520
 bool MetFreqMakerInventoryScreen::IsCurrentCellFilled() {
     int nIndex = mGridRow * kGridColumnCount + mGridColumn;
     std::vector<HxStr> *pNames = nullptr;
@@ -991,7 +991,7 @@ bool MetFreqMakerInventoryScreen::IsCurrentCellFilled() {
     return static_cast<unsigned>(nIndex) < pNames->size();
 }
 
-// 0x0026f1b0
+// NTSC-U/C: 0x0026f1b0, PAL: 0x002875d0
 std::vector<HxStr> *MetFreqMakerInventoryScreen::GetCurrentPageNames() {
     int nIndex = mGridRow * kGridColumnCount + mGridColumn;
     std::vector<HxStr> *pNames;
@@ -1010,7 +1010,7 @@ std::vector<HxStr> *MetFreqMakerInventoryScreen::GetCurrentPageNames() {
     return (static_cast<unsigned>(nIndex) < pNames->size()) ? pNames : nullptr;
 }
 
-// 0x002726e8
+// NTSC-U/C: 0x002726e8, PAL: 0x0028ab98
 void MetFreqMakerInventoryScreen::PreviewCurrentTemplate() {
     mCanvas->ResetCursor();
     int nIndex = mGridRow * kGridColumnCount + mGridColumn;
@@ -1025,7 +1025,7 @@ void MetFreqMakerInventoryScreen::PreviewCurrentTemplate() {
     }
 }
 
-// 0x0026e9e0
+// NTSC-U/C: 0x0026e9e0, PAL: 0x00286d28
 void MetFreqMakerInventoryScreen::ShowPalette(int nShowing) {
     Rnd::View *pSpectrum = FindObject<Rnd::View>(kSpectrumViewName);
     Rnd::Text *pColorText = FindObject<Rnd::Text>(kColorTextName);
@@ -1034,7 +1034,7 @@ void MetFreqMakerInventoryScreen::ShowPalette(int nShowing) {
     pColorText->SetShowing(nShowing);
 }
 
-// 0x0026e690
+// NTSC-U/C: 0x0026e690, PAL: 0x00286978
 void MetFreqMakerInventoryScreen::ShowInventory(int nShowing) {
     mLimitText->SetShowing(0);
     mWire16->SetShowing(0);
@@ -1056,7 +1056,7 @@ void MetFreqMakerInventoryScreen::ShowInventory(int nShowing) {
     mMainInventoryView->SetShowing(nShowing);
 }
 
-// 0x0026ebb8
+// NTSC-U/C: 0x0026ebb8, PAL: 0x00286f40
 void MetFreqMakerInventoryScreen::SetHighlight(int nHighlight) {
     Rnd::Mesh *pCanvasMesh = FindObject<Rnd::Mesh>(kCanvasMeshName);
     HxStr canvasMaterialName("");
@@ -1090,13 +1090,13 @@ void MetFreqMakerInventoryScreen::SetHighlight(int nHighlight) {
     pInventoryMesh->SetMaterial(pInventoryMaterial);
 }
 
-// 0x00272868
+// NTSC-U/C: 0x00272868, PAL: 0x0028ad18
 void MetFreqMakerInventoryScreen::GetPalettePosition(Vector2 &position) {
     position.y = static_cast<float>(mPaletteRow) * kPaletteCellHeight + kPaletteCellHeight / 2;
     position.x = static_cast<float>(mPaletteColumn) * kPaletteCellWidth + kPaletteCellWidth / 2;
 }
 
-// 0x00272918
+// NTSC-U/C: 0x00272918, PAL: 0x0028adc8
 void MetFreqMakerInventoryScreen::MoveCrossOrigin(const Vector2 &position) {
     const float translation[] = {position.x * kCrossOriginWidth,
                                  kCrossOriginDepth,
@@ -1108,25 +1108,25 @@ void MetFreqMakerInventoryScreen::MoveCrossOrigin(const Vector2 &position) {
     mCrossOrigin->mDirty = 1;
 }
 
-// 0x00272800
+// NTSC-U/C: 0x00272800, PAL: 0x0028acb0
 void MetFreqMakerInventoryScreen::MoveCrossOrigin(float flX, float flY) {
     Vector2 position{flX, flY};
     MoveCrossOrigin(position);
 }
 
-// 0x00272828
+// NTSC-U/C: 0x00272828, PAL: 0x0028acd8
 void MetFreqMakerInventoryScreen::UpdateCrossOrigin() {
     Vector2 position{0, 0};
     GetPalettePosition(position);
     MoveCrossOrigin(position);
 }
 
-// 0x002727d0
+// NTSC-U/C: 0x002727d0, PAL: 0x0028ac80
 Color *MetFreqMakerInventoryScreen::PaletteColorAt(const Vector2 &position) {
     return MetFreqMakerAssetManager::shared()->ColorAt(position);
 }
 
-// 0x002724c8
+// NTSC-U/C: 0x002724c8, PAL: 0x0028a958
 void MetFreqMakerInventoryScreen::ApplyPaletteColor(Color &color) {
     Vector2 position{0, 0};
     GetPalettePosition(position);
@@ -1134,7 +1134,7 @@ void MetFreqMakerInventoryScreen::ApplyPaletteColor(Color &color) {
     mCanvas->SetColor(color, position);
 }
 
-// 0x00272988
+// NTSC-U/C: 0x00272988, PAL: 0x0028ae38
 void MetFreqMakerInventoryScreen::SetPaletteFromPart(FreqPart *pPart) {
     Vector2 position;
     if (pPart->mPalettePosition.x == kUnsetPalettePosition ||
@@ -1157,25 +1157,25 @@ void MetFreqMakerInventoryScreen::SetPaletteFromPart(FreqPart *pPart) {
     MoveCrossOrigin(cursor);
 }
 
-// 0x00272a68
+// NTSC-U/C: 0x00272a68, PAL: 0x0028af18
 FreqPart *MetFreqMakerInventoryScreen::SelectCurrentPart() {
     return mCanvas->SelectPart(mGridRow * kGridColumnCount + mGridColumn);
 }
 
-// 0x00272790
+// NTSC-U/C: 0x00272790, PAL: 0x0028ac40
 void MetFreqMakerInventoryScreen::DeleteCurrentPart() {
     mCanvas->DeletePart(mGridRow * kGridColumnCount + mGridColumn);
 }
 
-// 0x002727c0
+// NTSC-U/C: 0x002727c0, PAL: 0x0028ac70
 void MetFreqMakerInventoryScreen::OnGridTopReached() {
 }
 
-// 0x002727c8
+// NTSC-U/C: 0x002727c8, PAL: 0x0028ac78
 void MetFreqMakerInventoryScreen::OnGridBottomReached() {
 }
 
-// 0x00272d20
+// NTSC-U/C: 0x00272d20, PAL: 0x0028b1d0
 float MetFreqMakerInventoryScreen::PartScale(FreqPart *pPart) {
     switch (pPart->mTemplate->mCategory) {
     case kPartCategoryBody:

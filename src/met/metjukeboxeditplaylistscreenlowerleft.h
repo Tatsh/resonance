@@ -29,12 +29,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00237758
+     * @ghidraAddress NTSC-U/C: 0x00237758
+     * @ghidraAddress PAL: 0x0024b7b8
      */
     MetJukeboxEditPlaylistScreenLowerLeft(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0023ab10
+     * @ghidraAddress NTSC-U/C: 0x0023ab10
+     * @ghidraAddress PAL: 0x0024f180
      */
     virtual ~MetJukeboxEditPlaylistScreenLowerLeft();
 
@@ -46,7 +48,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0023aa68
+     * @ghidraAddress NTSC-U/C: 0x0023aa68
+     * @ghidraAddress PAL: 0x0024f0f8
      */
     static MetJukeboxEditPlaylistScreenLowerLeft *New(MetRenderer *pRenderer, int nPriority);
 
@@ -56,21 +59,24 @@ public:
      * Slot 19, overridden empty.
      *
      * @param pCommand The command, which the body does not read.
-     * @ghidraAddress 0x0023ab68
+     * @ghidraAddress NTSC-U/C: 0x0023ab68
+     * @ghidraAddress PAL: 0x0024f1d8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
      * Slot 33, overridden empty.
      *
-     * @ghidraAddress 0x0023ab70
+     * @ghidraAddress NTSC-U/C: 0x0023ab70
+     * @ghidraAddress PAL: 0x0024f1e0
      */
     virtual void OnEnterFinished();
 
     /**
      * Slot 36, overridden empty.
      *
-     * @ghidraAddress 0x0023ab78
+     * @ghidraAddress NTSC-U/C: 0x0023ab78
+     * @ghidraAddress PAL: 0x0024f1e8
      */
     virtual void OnExitFinished();
 
@@ -88,31 +94,36 @@ public:
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0023aa40
+     * @ghidraAddress NTSC-U/C: 0x0023aa40
+     * @ghidraAddress PAL: 0x0024f0d0
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
      * @param nSelector The pad index of the command, which the body does not read.
-     * @ghidraAddress 0x0023aa48
+     * @ghidraAddress NTSC-U/C: 0x0023aa48
+     * @ghidraAddress PAL: 0x0024f0d8
      */
     virtual void PlayLeaveSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0023aa50
+     * @ghidraAddress NTSC-U/C: 0x0023aa50
+     * @ghidraAddress PAL: 0x0024f0e0
      */
     virtual void PlayHighSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0023aa58
+     * @ghidraAddress NTSC-U/C: 0x0023aa58
+     * @ghidraAddress PAL: 0x0024f0e8
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
      * @param nSelector The value the override compares against its own recorded selector.
-     * @ghidraAddress 0x0023aa60
+     * @ghidraAddress NTSC-U/C: 0x0023aa60
+     * @ghidraAddress PAL: 0x0024f0f0
      */
     virtual void PlayCycleRightSound(int nSelector);
 };

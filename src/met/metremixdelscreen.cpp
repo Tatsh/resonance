@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "app/playsound.h"
+#include "game/globalsettings.h"
 #include "memcard/memcardmanager.h"
 #include "memcard/memcardop.h"
 #include "met/methelpscreen.h"
@@ -19,6 +20,7 @@
 #include "met/scrollinglist.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
+#include "os/log.h"
 #include "rnd/font.h"
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
@@ -111,7 +113,11 @@ static const char *const kYesButton = "YES";
 // name, and the dialogues slot 15 answers besides its own confirmations.
 static const char *const kDeleteProgressFirst = "remix_del1";
 static const char *const kDeleteProgressSecond = "remix_del2";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kDeleteProgressFormat = "%s%s%s";
+#else
 static const char *const kDeleteProgressFormat = "%s %s %s";
+#endif
 static const char *const kCopyDialogue = "remix_copy";
 constexpr int kNoButtons = 0;
 
@@ -121,6 +127,11 @@ constexpr int kChoiceRetry = 0;
 
 // The last argument ListRemixes() takes, which slot 15 leaves clear.
 constexpr int kNoPlayList = 0;
+
+#ifdef VIDEO_STANDARD_PAL
+// The card location whose state the European release refreshes after a delete.
+constexpr int kFirstPortSlot = 0;
+#endif
 
 // The dialogue MemcardUser slot 12 raises on a failed load, and its one button.
 static const char *const kCopyFailDialogue = "remix_copy_fail";
@@ -165,18 +176,21 @@ inline HxStr ConfigText(MetStringId nId, const char *pszKey) {
 MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
     : MetSaveRemix(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mList(nullptr), mDeletePending(0), mCopyPending(0), mCopyRecord(nullptr), mRowFont(nullptr),
-      mDimRowFont(nullptr) {
+      mList(nullptr), mDeletePending(0), mCopyPending(0),
+#ifdef VIDEO_STANDARD_PAL
+      mRefreshCardPending(0),
+#endif
+      mCopyRecord(nullptr), mRowFont(nullptr), mDimRowFont(nullptr) {
     mShowsLoadedDrawables = 0;
     mHelpKeys.push_back(MetText(kMetStrHMemDelRemix, kDeleteObjectName));
 }
 
-// 0x003397a8
+// NTSC-U/C: 0x003397a8, PAL: 0x00363830
 MetRemixDelScreen::~MetRemixDelScreen() {
     delete mList;
 }
 
-// 0x00343f30
+// NTSC-U/C: 0x00343f30, PAL: 0x0036f320
 MetRemixDelScreen *MetRemixDelScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixDelScreen(pRenderer, nPriority);
 }
@@ -252,7 +266,7 @@ void MetRemixDelScreen::ResolveContainerViews() {
     mDimRowFont = FindFont(kDimRowFont);
 }
 
-// 0x00339b30
+// NTSC-U/C: 0x00339b30, PAL: 0x00363c50
 void MetRemixDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -304,7 +318,7 @@ void MetRemixDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x0033cc78
+// NTSC-U/C: 0x0033cc78, PAL: 0x003676d0
 int MetRemixDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     if (static_cast<unsigned>(nItem) < mCatalogue->size()) {
         MetRemixRecord record((*mCatalogue)[nItem]);
@@ -315,36 +329,39 @@ int MetRemixDelScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     return 1;
 }
 
-// 0x00343f10
+// NTSC-U/C: 0x00343f10, PAL: 0x0036f300
 int MetRemixDelScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 1;
 }
 
-// 0x00344078
+// NTSC-U/C: 0x00344078, PAL: 0x0036f488
 void MetRemixDelScreen::OnPanelActivated() {
+#ifdef VIDEO_STANDARD_PAL
+    mRefreshCardPending = 0;
+#endif
     if (mKeyboardPending != 0) {
         mKeyboardPending = 0;
         OnSaveAbandoned();
     }
 }
 
-// 0x003441a0
+// NTSC-U/C: 0x003441a0, PAL: 0x0036f4c8
 void MetRemixDelScreen::OnMsgScreenShown(const HxStr &) {
     ActivateNamedPanel(HxStr(kMsgScreenName));
 }
 
-// 0x00344058
+// NTSC-U/C: 0x00344058, PAL: 0x0036f468
 void MetRemixDelScreen::OnEnterFinished() {
     ShowRowOnDataScreen(0);
 }
 
-// 0x0033e5c0
+// NTSC-U/C: 0x0033e5c0, PAL: 0x00369678
 void MetRemixDelScreen::OnSaveAbandoned() {
     PushNamedScreen(HxStr(kOwnScreenName));
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// 0x0033e6d8
+// NTSC-U/C: 0x0033e6d8, PAL: 0x003697d8
 void MetRemixDelScreen::OnSaveDialogueClosed() {
     PushNamedScreen(HxStr(kOwnScreenName));
     ActivateNamedPanel(HxStr(kOwnScreenName));
@@ -373,6 +390,10 @@ inline void MetRemixDelScreen::StartDelete() {
 void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kDeleteAskDialogue) {
         if (nChoice == kChoiceYes) {
+#ifdef VIDEO_STANDARD_PAL
+            // The European release logs only this path, while it builds the progress text.
+            LogPrintf("ok ay to delete remix\n");
+#endif
             StartDelete();
         } else {
             PushNamedScreen(HxStr(kHelpScreen));
@@ -503,6 +524,15 @@ void MetRemixDelScreen::OnRemixLoaded([[maybe_unused]] int nPortSlot, int nStatu
 // NTSC-U/C: 0x0033d768, PAL: 0x003685d8
 void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStatus) {
     if (nStatus == kMemcardStatusOk) {
+#ifdef VIDEO_STANDARD_PAL
+        if (nPortSlot == kFirstPortSlot) {
+            GlobalSettings::shared(); // Yes, the binary discards this call's result.
+            mRefreshCardPending = 1;
+            MemcardManager::shared()->mUser = this;
+            MemcardManager::shared()->CreateGetConnectStateTask(kFirstPortSlot);
+            return;
+        }
+#endif
         ExitScreenByName(HxStr(kMsgScreenName));
         return;
     }
@@ -530,6 +560,19 @@ void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStat
                              this);
 }
 
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x00368378
+void MetRemixDelScreen::OnConnectState(MemcardConnectState state, int nStatus) {
+    if (nStatus != kMemcardStatusOk || state.mFormatted == 0 || mRefreshCardPending == 0) {
+        MetSaveRemix::OnConnectState(state, nStatus);
+        return;
+    }
+    GlobalSettings::shared()->mCardSlots[0] = state;
+    mRefreshCardPending = 0;
+    ExitScreenByName(HxStr(kMsgScreenName));
+}
+#endif
+
 // NTSC-U/C: 0x0033e7f0, PAL: 0x00369938
 void MetRemixDelScreen::OnDuplicateNameDeclined() {
     mKeyboardPending = 1;
@@ -544,12 +587,12 @@ void MetRemixDelScreen::OnDuplicateNameDeclined() {
     MetKeyboardScreen::Open(request);
 }
 
-// 0x00343fb8
+// NTSC-U/C: 0x00343fb8, PAL: 0x0036f3a8
 void MetRemixDelScreen::SetCardSlot(MemcardConnectState slot) {
     mCardSlot = slot;
 }
 
-// 0x003440b8
+// NTSC-U/C: 0x003440b8, PAL: 0x00365690
 void MetRemixDelScreen::ShowRowOnDataScreen(int nIndex) {
     // Yes, the binary takes the registered screen without a cast check.
     MetRemixDataScreen *pDataScreen =
@@ -562,7 +605,7 @@ void MetRemixDelScreen::ShowRowOnDataScreen(int nIndex) {
     }
 }
 
-// 0x00344240
+// NTSC-U/C: 0x00344240, PAL: 0x0036f588
 void MetRemixDelScreen::OnKeyboardTextEntered(const HxStr &text) {
     if (mKeyboardPending != 0) {
         MetSaveRemix::OnKeyboardTextEntered(text);

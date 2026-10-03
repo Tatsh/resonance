@@ -111,7 +111,7 @@ inline void ShowNoSpaceWarning(MetScreen *pOwner, MetStringId nFormatId, int nCl
 
 } // namespace
 
-// 0x002deab8
+// NTSC-U/C: 0x002deab8, PAL: 0x003017e0
 MetMemDetectScreen::MetMemDetectScreen(MetRenderer *pRenderer,
                                        int nPriority,
                                        const HxStr &name,
@@ -121,11 +121,11 @@ MetMemDetectScreen::MetMemDetectScreen(MetRenderer *pRenderer,
       mPersonaLoadRequested(0), mAutosaveNoticeTime(0) {
 }
 
-// 0x002deb08
+// NTSC-U/C: 0x002deb08, PAL: 0x00301830
 MetMemDetectScreen::~MetMemDetectScreen() {
 }
 
-// 0x002d89c8
+// NTSC-U/C: 0x002d89c8, PAL: 0x002fb180
 MetMemDetectScreen *MetMemDetectScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemDetectScreen(
         pRenderer, nPriority, HxStr(kNoName), HxStr(kNoName), HxStr(kNoName));
@@ -420,17 +420,17 @@ void MetMemDetectScreen::StartLoadPersonas() {
         GlobalSettings::shared()->mCardSlots[0].mPortSlot, MetPersonaData::loadList());
 }
 
-// 0x002deb70
+// NTSC-U/C: 0x002deb70, PAL: 0x00301898
 void MetMemDetectScreen::OnGlobalSettingsLoaded(int, int) {
     StartLoadPersonas();
 }
 
-// 0x002deb98
+// NTSC-U/C: 0x002deb98, PAL: 0x003018c0
 void MetMemDetectScreen::OnPersonasLoaded(int, int) {
     StartSaveSpaceCheck();
 }
 
-// 0x002debc0
+// NTSC-U/C: 0x002debc0, PAL: 0x003018e8
 void MetMemDetectScreen::StartSaveSpaceCheck() {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MemcardManager::shared()->mUser = this;
@@ -438,7 +438,7 @@ void MetMemDetectScreen::StartSaveSpaceCheck() {
         GlobalSettings::shared()->mCardSlots[0].mPortSlot);
 }
 
-// 0x002dec10
+// NTSC-U/C: 0x002dec10, PAL: 0x00301938
 void MetMemDetectScreen::UpdateIdle(float flTime) {
     if (mAutosaveNoticeTime != 0 && mAutosaveNoticeTime + kAutosaveNoticeDuration < flTime) {
         mAutosaveNoticeTime = 0;

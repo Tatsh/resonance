@@ -37,7 +37,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002f0918
+     * @ghidraAddress NTSC-U/C: 0x002f0918
+     * @ghidraAddress PAL: 0x003142e0
      */
     MetMultiEndRemixScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -50,7 +51,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002f5540
+     * @ghidraAddress NTSC-U/C: 0x002f5540
+     * @ghidraAddress PAL: 0x00319300
      */
     static MetMultiEndRemixScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -72,14 +74,16 @@ public:
      * Slot 26. Both Advance() results are discarded.
      *
      * @param flTime Not read.
-     * @ghidraAddress 0x002f55c8
+     * @ghidraAddress NTSC-U/C: 0x002f55c8
+     * @ghidraAddress PAL: 0x00319388
      */
     virtual void UpdateIdle(float flTime);
 
     /**
      * Empty in this class. Slot 36.
      *
-     * @ghidraAddress 0x002f5650
+     * @ghidraAddress NTSC-U/C: 0x002f5650
+     * @ghidraAddress PAL: 0x00319410
      */
     virtual void OnExitFinished();
 

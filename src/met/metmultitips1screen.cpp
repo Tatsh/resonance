@@ -46,7 +46,7 @@ inline void FillText(const TipText &entry) {
 
 } // namespace
 
-// 0x00307480
+// NTSC-U/C: 0x00307480, PAL: 0x0032c020
 MetMultiTips1Screen::MetMultiTips1Screen(MetRenderer *pRenderer, int nPriority)
     : MetMultiTipsBaseScreen(pRenderer,
                              nPriority,
@@ -66,7 +66,7 @@ void MetMultiTips1Screen::ResolveContainerViews() {
     }
 }
 
-// 0x00307bc8
+// NTSC-U/C: 0x00307bc8, PAL: 0x0032cb48
 void MetMultiTips1Screen::OnExitFinished() {
     if (mExitChoice == kExitPrevious) {
         ReturnToPlayerCount();
@@ -75,11 +75,11 @@ void MetMultiTips1Screen::OnExitFinished() {
     }
 }
 
-// 0x0030d908
+// NTSC-U/C: 0x0030d908, PAL: 0x00333480
 MetMultiTips1Screen::~MetMultiTips1Screen() {
 }
 
-// 0x0030d988
+// NTSC-U/C: 0x0030d988, PAL: 0x00333528
 MetMultiTips1Screen *MetMultiTips1Screen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiTips1Screen(pRenderer, nPriority);
 }

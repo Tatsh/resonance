@@ -293,30 +293,30 @@ inline const char *TextOf(const HxStr &text) {
 
 } // namespace
 
-// 0x00262810
+// NTSC-U/C: 0x00262810, PAL: 0x00279790
 MetFreqMakerDirectionsScreen::MetFreqMakerDirectionsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mPage(kBlankPage) {
     mShowsLoadedDrawables = 0;
 }
 
-// 0x00269e68
+// NTSC-U/C: 0x00269e68, PAL: 0x00281770
 MetFreqMakerDirectionsScreen::~MetFreqMakerDirectionsScreen() {
 }
 
-// 0x00269de0
+// NTSC-U/C: 0x00269de0, PAL: 0x002816e8
 MetFreqMakerDirectionsScreen *MetFreqMakerDirectionsScreen::New(MetRenderer *pRenderer,
                                                                 int nPriority) {
     return new MetFreqMakerDirectionsScreen(pRenderer, nPriority);
 }
 
-// 0x00269ed0
+// NTSC-U/C: 0x00269ed0, PAL: 0x002817d8
 void MetFreqMakerDirectionsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     mList->setEntriesShowing(1);
 }
 
-// 0x00269fc0
+// NTSC-U/C: 0x00269fc0, PAL: 0x002818e8
 int MetFreqMakerDirectionsScreen::PollContainerLoad() {
     if (!MetFreqMakerAssetManager::shared()->PollLoad()) {
         return 0;
@@ -324,20 +324,20 @@ int MetFreqMakerDirectionsScreen::PollContainerLoad() {
     return MetScreen::PollContainerLoad();
 }
 
-// 0x00269dd0
+// NTSC-U/C: 0x00269dd0, PAL: 0x002816d8
 void MetFreqMakerDirectionsScreen::PlayCycleLeftSound(int) {
 }
 
-// 0x00269dd8
+// NTSC-U/C: 0x00269dd8, PAL: 0x002816e0
 void MetFreqMakerDirectionsScreen::PlayCycleRightSound(int) {
 }
 
-// 0x00269f00
+// NTSC-U/C: 0x00269f00, PAL: 0x00281808
 void MetFreqMakerDirectionsScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 
-// 0x00269fa0
+// NTSC-U/C: 0x00269fa0, PAL: 0x002818c8
 void MetFreqMakerDirectionsScreen::OnExitFinished() {
     mList->setEntriesShowing(0);
 }
@@ -387,13 +387,13 @@ void MetFreqMakerDirectionsScreen::ShowPage(int nPage) {
     }
 }
 
-// 0x0026a008
+// NTSC-U/C: 0x0026a008, PAL: 0x00281930
 const HxStr &
 MetFreqMakerDirectionsScreen::PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]) {
     return pTable[nRow][nColumn];
 }
 
-// 0x00262c28
+// NTSC-U/C: 0x00262c28, PAL: 0x00279e28
 int MetFreqMakerDirectionsScreen::ProvideText(int nItem, int nColumn, Rnd::Text *pText, int) {
     switch (mPage) {
     case kSelectStampPage:
@@ -460,7 +460,7 @@ int MetFreqMakerDirectionsScreen::ProvideText(int nItem, int nColumn, Rnd::Text 
     return 1;
 }
 
-// 0x0026a020
+// NTSC-U/C: 0x0026a020, PAL: 0x00281948
 int MetFreqMakerDirectionsScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 0;
 }

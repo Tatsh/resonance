@@ -132,10 +132,10 @@ constexpr int kJukeboxStartTemplate = 0x267;
 constexpr char kJukeboxStartArgument[] = "1";
 constexpr char kJukeboxStopArgument[] = "0";
 
-// 0x006c1100
+// NTSC-U/C: 0x006c1100, PAL: 0x007040f8
 HxStr g_remixIndexPath("Levels/remixes/ps2/index");
 
-// 0x006c1108
+// NTSC-U/C: 0x006c1108, PAL: 0x00704100
 HxStr g_remixDirectory("Levels/remixes/ps2/");
 
 inline const char *PathOrEmpty(const HxStr &path) {
@@ -171,7 +171,7 @@ inline void ReplaceScreens(std::vector<HxStr> &screens, const std::vector<HxStr>
     screens = source;
 }
 
-// 0x00361cb8
+// NTSC-U/C: 0x00361cb8, PAL: 0x0038f1c0
 inline int Clamp(int nLow, int nValue, int nHigh) {
     if (nValue < nLow) {
         return nLow;
@@ -181,37 +181,37 @@ inline int Clamp(int nLow, int nValue, int nHigh) {
 
 } // namespace
 
-// 0x006c1110
+// NTSC-U/C: 0x006c1110, PAL: 0x00704108
 MetRemixManager *MetRemixManager::sInstance;
 
-// 0x00352b80
+// NTSC-U/C: 0x00352b80, PAL: 0x0037ed28
 MetRemixManager::MetRemixManager(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mListingsDone(0), mListingsExpected(0), mPlayListReady(1), mIndexRequest(0), mRemixRequest(0),
       mIndexSlot(-1), mCurrentPlaylistTrack(0), mShuffle(0), mAfterLoadAction(0) {
 }
 
-// 0x00355070
+// NTSC-U/C: 0x00355070, PAL: 0x00381570
 MetRemixManager::~MetRemixManager() {
 }
 
-// 0x00361020
+// NTSC-U/C: 0x00361020, PAL: 0x0038e4e0
 MetRemixManager *MetRemixManager::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixManager(pRenderer, nPriority);
 }
 
-// 0x00361000
+// NTSC-U/C: 0x00361000, PAL: 0x0038e4c0
 MetRemixManager *MetRemixManager::shared() {
     return ResolveSharedInstance();
 }
 
-// 0x003610a8
+// NTSC-U/C: 0x003610a8, PAL: 0x0038e568
 MetRemixManager *MetRemixManager::ResolveSharedInstance() {
     CacheSharedInstance();
     return sInstance;
 }
 
-// 0x00361210
+// NTSC-U/C: 0x00361210, PAL: 0x0038e6d0
 void MetRemixManager::CacheSharedInstance() {
     if (sInstance == nullptr) {
         sInstance =
@@ -219,17 +219,17 @@ void MetRemixManager::CacheSharedInstance() {
     }
 }
 
-// 0x00361558
+// NTSC-U/C: 0x00361558, PAL: 0x0038ea38
 MetRemixRecord *MetRemixManager::GetRecord() {
     return &mRecord;
 }
 
-// 0x00361560
+// NTSC-U/C: 0x00361560, PAL: 0x0038ea40
 void MetRemixManager::SetRecord(const MetRemixRecord &record) {
     mRecord = record;
 }
 
-// 0x00359230
+// NTSC-U/C: 0x00359230, PAL: 0x00386388
 MetRemixRecord *MetRemixManager::FindRecord(const HxStr &name) {
     for (auto it = mRemixes.begin(); it != mRemixes.end(); ++it) {
         std::vector<MetRemixRecord> &records = it->second;
@@ -250,7 +250,7 @@ MetRemixRecord *MetRemixManager::FindRecord(const HxStr &name) {
     return nullptr;
 }
 
-// 0x00357f80
+// NTSC-U/C: 0x00357f80, PAL: 0x00384f10
 void MetRemixManager::LoadIndex() {
     const HxStr path = GetFreqRoot() + g_remixIndexPath;
     const int nZone = ZoneGetCurrent();
@@ -259,7 +259,7 @@ void MetRemixManager::LoadIndex() {
     ZoneSetCurrent(nZone);
 }
 
-// 0x003580f0
+// NTSC-U/C: 0x003580f0, PAL: 0x003850d8
 void MetRemixManager::LoadRemixFile(const HxStr &fileName) {
     const HxStr directory = GetFreqRoot() + g_remixDirectory;
     const HxStr path = directory + fileName;
@@ -269,12 +269,12 @@ void MetRemixManager::LoadRemixFile(const HxStr &fileName) {
     ZoneSetCurrent(nZone);
 }
 
-// 0x003613d8
+// NTSC-U/C: 0x003613d8, PAL: 0x0038e8b8
 void MetRemixManager::SetCurrentTrack(int nTrack) {
     mCurrentPlaylistTrack = Clamp(0, nTrack, mPlayList.entries.size());
 }
 
-// 0x0035a7e0
+// NTSC-U/C: 0x0035a7e0, PAL: 0x00387a40
 void MetRemixManager::RandomTrack() {
     const int nTracks = mPlayList.entries.size();
     int nUnplayed = 0;
@@ -309,7 +309,7 @@ void MetRemixManager::RandomTrack() {
         "MetRemixManager::%s() - mCurrentPlaylistTrack = %i.\n", __func__, mCurrentPlaylistTrack);
 }
 
-// 0x00361300
+// NTSC-U/C: 0x00361300, PAL: 0x0038e7e0
 void MetRemixManager::PreviousTrack() {
     if (mShuffle != 0) {
         RandomTrack();
@@ -318,7 +318,7 @@ void MetRemixManager::PreviousTrack() {
     mCurrentPlaylistTrack = std::max(0, mCurrentPlaylistTrack - 1);
 }
 
-// 0x00361358
+// NTSC-U/C: 0x00361358, PAL: 0x0038e838
 inline void MetRemixManager::NextTrack() {
     if (mShuffle != 0) {
         RandomTrack();
@@ -697,7 +697,7 @@ void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
         0, &mPlayList, QueryConfigValue(kPlayListIndexCode));
 }
 
-// 0x003593d0
+// NTSC-U/C: 0x003593d0, PAL: 0x00386528
 void MetRemixManager::StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle) {
     mRestoreScreens.clear();
     mRestoreScreens.push_back(HxStr(kTopButtonsScreen));
@@ -713,7 +713,7 @@ void MetRemixManager::StartPlayList(const std::vector<HxStr> &returnScreens, int
     LoadCurrentTrack();
 }
 
-// 0x0035abf8
+// NTSC-U/C: 0x0035abf8, PAL: 0x00387e58
 void MetRemixManager::StartLoadedRemix() {
     MetRemixRecord *pRecord = FindRecord(mPlayList.GetEntry(mCurrentPlaylistTrack)->name);
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
@@ -736,7 +736,7 @@ void MetRemixManager::StartLoadedRemix() {
     ActivateNamedPanel(HxStr(kLoadGameScreen));
 }
 
-// 0x0035a6b0
+// NTSC-U/C: 0x0035a6b0, PAL: 0x003878a0
 void MetRemixManager::LeaveJukeboxMode() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     params.mJukeboxMode = 0;
@@ -744,7 +744,7 @@ void MetRemixManager::LeaveJukeboxMode() {
     SetCurrentTrack(0);
 }
 
-// 0x003610d0
+// NTSC-U/C: 0x003610d0, PAL: 0x0038e590
 void MetRemixManager::PushRestoreScreens() {
     const int nScreens = mRestoreScreens.size();
     for (int i = 0; i < nScreens; ++i) {
@@ -755,7 +755,7 @@ void MetRemixManager::PushRestoreScreens() {
     }
 }
 
-// 0x00361170
+// NTSC-U/C: 0x00361170, PAL: 0x0038e630
 void MetRemixManager::PushReturnScreens() {
     const int nScreens = mReturnScreens.size();
     for (int i = 0; i < nScreens; ++i) {
@@ -766,21 +766,21 @@ void MetRemixManager::PushReturnScreens() {
     }
 }
 
-// 0x003612a0
+// NTSC-U/C: 0x003612a0, PAL: 0x0038e780
 void MetRemixManager::PrunePlayList() {
     mPlayList.RemoveStaleEntries();
 }
 
-// 0x00361518
+// NTSC-U/C: 0x00361518, PAL: 0x0038e9f8
 void MetRemixManager::EnterAndShow() {
     mView->SetShowing(0);
 }
 
-// 0x00361550
+// NTSC-U/C: 0x00361550, PAL: 0x0038ea30
 void MetRemixManager::OnExitFinished() {
 }
 
-// 0x003553e8
+// NTSC-U/C: 0x003553e8, PAL: 0x00381918
 void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
     mListStatus[nPortSlot] = nStatus;
     ++mListingsDone;
@@ -794,7 +794,7 @@ void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
     }
 }
 
-// 0x003563e0
+// NTSC-U/C: 0x003563e0, PAL: 0x00382e70
 void MetRemixManager::OnJukeboxPlayListLoaded([[maybe_unused]] int nPortSlot, int nStatus) {
     mPlayListReady = 1;
     // Yes, the binary repeats the same exit on both sides of the status test.
@@ -807,7 +807,7 @@ void MetRemixManager::OnJukeboxPlayListLoaded([[maybe_unused]] int nPortSlot, in
     }
 }
 
-// 0x00358310
+// NTSC-U/C: 0x00358310, PAL: 0x00385380
 void MetRemixManager::Done(int nHandle,
                            [[maybe_unused]] int nFile,
                            void *pBuffer,
@@ -855,12 +855,12 @@ void MetRemixManager::Done(int nHandle,
     }
 }
 
-// 0x003612c0
+// NTSC-U/C: 0x003612c0, PAL: 0x0038e7a0
 MetRemixRecord *MetRemixManager::LookupRemix(const HxStr &name) {
     return FindRecord(name);
 }
 
-// 0x00361418
+// NTSC-U/C: 0x00361418, PAL: 0x0038e8f8
 inline void MetRemixManager::LoadRemix(const MetRemixRecord &record, int nFactory) {
     if (nFactory != 0) {
         LoadRemixFile(record.fileName);
@@ -870,14 +870,14 @@ inline void MetRemixManager::LoadRemix(const MetRemixRecord &record, int nFactor
     MemcardManager::shared()->CreateLoadRemixTask(0, record.name);
 }
 
-// 0x00361480
+// NTSC-U/C: 0x00361480, PAL: 0x0038e960
 void MetRemixManager::LoadCurrentTrack() {
     mAfterLoadAction = 0;
     JukeboxPlayListEntry *pEntry = mPlayList.GetEntry(mCurrentPlaylistTrack);
     LoadRemix(*FindRecord(pEntry->name), pEntry->factory);
 }
 
-// 0x003612e0
+// NTSC-U/C: 0x003612e0, PAL: 0x0038e7c0
 void MetRemixManager::PlayCurrentTrack() {
     LoadCurrentTrack();
 }

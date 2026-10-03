@@ -35,11 +35,11 @@ constexpr int kBasisZRow = 2;
 // Part categories count from 1.
 constexpr int kFirstCategory = 1;
 
-// 0x006a0f30
+// NTSC-U/C: 0x006a0f30, PAL: 0x006e3210
 // The instance CreateInstance() allocates.
 MetFreqMakerAssetManager *g_pFreqMakerAssetManager = nullptr;
 
-// 0x006a0f70
+// NTSC-U/C: 0x006a0f70, PAL: 0x006e3250
 // The colour SampleTexture() reports.
 Color g_sampledColor;
 
@@ -67,47 +67,47 @@ constexpr unsigned kCloneCopyFlags = 0;
 
 // The unit's static initialiser at 0x00254690 builds the globals below in this order.
 
-// 0x006a0f40
+// NTSC-U/C: 0x006a0f40, PAL: 0x006e3220
 Color g_freqMakerDefaultColor = {0.75f, 0.75f, 0.75f, 1.0f};
 
 namespace {
 
-// 0x006a0f50
+// NTSC-U/C: 0x006a0f50, PAL: 0x006e3230
 // The material RegisterPart() copies into every part material.
 HxStr g_prototypeMaterialName("freq_maker_prototype_material");
 
-// 0x006a0f58
+// NTSC-U/C: 0x006a0f58, PAL: 0x006e3238
 // The mesh CloneMesh() copies into every part mesh.
 HxStr g_prototypeMeshName("freq_maker_prototype_mesh");
 
 } // namespace
 
-// 0x006a0f60
+// NTSC-U/C: 0x006a0f60, PAL: 0x006e3240
 HxStr g_spectrumTextureName("spectrum.bmp");
 
 namespace {
 
-// 0x006a0f68
+// NTSC-U/C: 0x006a0f68, PAL: 0x006e3248
 // A loaded texture PollLoad() does not make a part of.
 HxStr g_burnPrototypeName("persona_texburn_prototype_texture.tex");
 
-// 0x00891ac8
+// NTSC-U/C: 0x00891ac8, PAL: 0x008d61d8
 // The PC pre-fab persona file, which nothing reads.
 HxStr g_prefabPersonaPathPc("metagame/persona/pre_fab_personas/pers_PC.dat");
 
-// 0x00891ad0
+// NTSC-U/C: 0x00891ad0, PAL: 0x008d61e0
 // The pre-fab persona file mPrefabLoader reads.
 HxStr g_prefabPersonaPath("metagame/persona/pre_fab_personas/pers_PS2.dat");
 
-// 0x00891ad8
+// NTSC-U/C: 0x00891ad8, PAL: 0x008d61e8
 // The PC team FreQ persona file, which nothing reads.
 HxStr g_teamFreqPersonaPathPc("metagame/persona/pre_fab_personas/teamfreq_pers_PC.dat");
 
-// 0x00891ae0
+// NTSC-U/C: 0x00891ae0, PAL: 0x008d61f0
 // The team FreQ persona file mTeamFreqLoader reads.
 HxStr g_teamFreqPersonaPath("metagame/persona/pre_fab_personas/teamfreq_pers_PS2.dat");
 
-// 0x00891ae8
+// NTSC-U/C: 0x00891ae8, PAL: 0x008d61f8
 // A loaded texture PollLoad() does not make a part of.
 HxStr g_freqFrameName("freq_frame.bmp");
 
@@ -194,7 +194,7 @@ inline int CategoryOfLetter(char cLetter) {
 
 } // namespace
 
-// 0x00250b18
+// NTSC-U/C: 0x00250b18, PAL: 0x00266050
 MetFreqMakerAssetManager::MetFreqMakerAssetManager()
     : mReserved(0), mPrefabLoader(nullptr), mTeamFreqLoader(nullptr), mAssetLoader(nullptr),
       mLoaded(0), mMaterialTemplate(nullptr), mMeshTemplate(nullptr), mPaletteTex(nullptr),
@@ -207,13 +207,13 @@ MetFreqMakerAssetManager::MetFreqMakerAssetManager()
     mTeamFreqLoader = new MetFreqLoader(teamFreqPath, &mTeamFreqIdentities);
 }
 
-// 0x00250808
+// NTSC-U/C: 0x00250808, PAL: 0x00265d40
 MetFreqMakerAssetManager::~MetFreqMakerAssetManager() {
     delete mPrefabLoader;
     delete mTeamFreqLoader;
 }
 
-// 0x0024f798
+// NTSC-U/C: 0x0024f798, PAL: 0x00264bd8
 bool MetFreqMakerAssetManager::PollLoad() {
     if (mLoaded == 1) {
         return true;
@@ -255,7 +255,7 @@ bool MetFreqMakerAssetManager::PollLoad() {
     return true;
 }
 
-// 0x0024fce8
+// NTSC-U/C: 0x0024fce8, PAL: 0x00265170
 void MetFreqMakerAssetManager::StartAssetLoad() {
     if (mAssetLoader != nullptr) {
         return;
@@ -265,13 +265,13 @@ void MetFreqMakerAssetManager::StartAssetLoad() {
     mAssetLoader->Enqueue();
 }
 
-// 0x00250540
+// NTSC-U/C: 0x00250540, PAL: 0x00265a78
 std::list<Rnd::Object *> MetFreqMakerAssetManager::GetLoadedObjects() {
     PollLoad(); // Yes, the binary discards the result.
     return mAssetLoader->mObjects;
 }
 
-// 0x0024fe58
+// NTSC-U/C: 0x0024fe58, PAL: 0x00265320
 void MetFreqMakerAssetManager::ReleaseParts() {
     for (std::map<HxStr, FreqPartTemplate *>::iterator it = mPartsByName.begin();
          it != mPartsByName.end();
@@ -283,7 +283,7 @@ void MetFreqMakerAssetManager::ReleaseParts() {
     mLoaded = 0;
 }
 
-// 0x0024ff80
+// NTSC-U/C: 0x0024ff80, PAL: 0x00265448
 FreqPartTemplate *MetFreqMakerAssetManager::RegisterPart(Rnd::Object *pObject) {
     HxStr name;
     HxStr materialName;
@@ -315,29 +315,29 @@ FreqPartTemplate *MetFreqMakerAssetManager::RegisterPart(Rnd::Object *pObject) {
     return pTemplate;
 }
 
-// 0x00255158
+// NTSC-U/C: 0x00255158, PAL: 0x0026a820
 void MetFreqMakerAssetManager::CreateInstance() {
     g_pFreqMakerAssetManager = new MetFreqMakerAssetManager();
 }
 
-// 0x002551b8
+// NTSC-U/C: 0x002551b8, PAL: 0x0026a880
 void MetFreqMakerAssetManager::DestroyInstance() {
     delete g_pFreqMakerAssetManager; // Yes, the binary does not clear the pointer.
 }
 
-// 0x002551f0
+// NTSC-U/C: 0x002551f0, PAL: 0x0026a8b8
 MetFreqMakerAssetManager *MetFreqMakerAssetManager::Instance() {
     return g_pFreqMakerAssetManager;
 }
 
-// 0x00255200
+// NTSC-U/C: 0x00255200, PAL: 0x0026a8c8
 void MetFreqMakerAssetManager::WaitForLoad() {
     while (!PollLoad()) {
         RndAsyncLoader::PollAsyncLoads();
     }
 }
 
-// 0x00255090
+// NTSC-U/C: 0x00255090, PAL: 0x0026a758
 std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetIdentityList() {
     WaitForLoad();
     while (!AreIdentitiesLoaded()) {
@@ -346,7 +346,7 @@ std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetIdentityList() {
                                                               &mPrefabIdentities;
 }
 
-// 0x00255100
+// NTSC-U/C: 0x00255100, PAL: 0x0026a7c8
 std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetAllIdentities() {
     WaitForLoad();
     while (!AreIdentitiesLoaded()) {
@@ -354,48 +354,48 @@ std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetAllIdentities() {
     return &mTeamFreqIdentities;
 }
 
-// 0x00254fd0
+// NTSC-U/C: 0x00254fd0, PAL: 0x0026a698
 void MetFreqMakerAssetManager::StartIdentityLoads() {
     mPrefabLoader->Start();
     mTeamFreqLoader->Start();
 }
 
-// 0x00255000
+// NTSC-U/C: 0x00255000, PAL: 0x0026a6c8
 bool MetFreqMakerAssetManager::AreIdentitiesLoaded() {
     int nPrefabLoaded = mPrefabLoader->IsLoaded();
     int nTeamFreqLoaded = mTeamFreqLoader->IsLoaded();
     return nTeamFreqLoaded != 0 && nPrefabLoaded != 0;
 }
 
-// 0x00255048
+// NTSC-U/C: 0x00255048, PAL: 0x0026a710
 bool MetFreqMakerAssetManager::AreLoadersReady() {
     bool bPrefabReady = mPrefabLoader->PollAssets();
     bool bTeamFreqReady = mTeamFreqLoader->PollAssets();
     return bTeamFreqReady && bPrefabReady;
 }
 
-// 0x00254930
+// NTSC-U/C: 0x00254930, PAL: 0x00269ff8
 void MetFreqMakerAssetManager::Create() {
     CreateInstance();
 }
 
-// 0x00254950
+// NTSC-U/C: 0x00254950, PAL: 0x0026a018
 MetFreqMakerAssetManager *MetFreqMakerAssetManager::shared() {
     return Instance();
 }
 
-// 0x00254970
+// NTSC-U/C: 0x00254970, PAL: 0x0026a038
 void MetFreqMakerAssetManager::Destroy() {
     DestroyInstance();
 }
 
-// 0x00254990
+// NTSC-U/C: 0x00254990, PAL: 0x0026a058
 std::map<HxStr, FreqPartTemplate *> *MetFreqMakerAssetManager::GetPartsByName() {
     PollLoad(); // Yes, the binary discards the result.
     return &mPartsByName;
 }
 
-// 0x00250638
+// NTSC-U/C: 0x00250638, PAL: 0x00265b70
 Color *MetFreqMakerAssetManager::SampleTexture(Rnd::Tex *pTex, float flU, float flV) {
     g_sampledColor = kOpaqueBlack;
     ACanvas *pCanvas = pTex->LockMipBitmap(kTopMip, 0, kNoReadBack);
@@ -415,7 +415,7 @@ Color *MetFreqMakerAssetManager::SampleTexture(Rnd::Tex *pTex, float flU, float 
     return &g_sampledColor;
 }
 
-// 0x00254cf8
+// NTSC-U/C: 0x00254cf8, PAL: 0x0026a3c0
 bool MetFreqMakerAssetManager::PaintTexel(Rnd::Tex *pTex,
                                           const Color &color,
                                           float flU,
@@ -436,7 +436,7 @@ bool MetFreqMakerAssetManager::PaintTexel(Rnd::Tex *pTex,
     return true;
 }
 
-// 0x00254c20
+// NTSC-U/C: 0x00254c20, PAL: 0x0026a2e8
 bool MetFreqMakerAssetManager::ScaleMesh(
     Rnd::Mesh *pMesh, int nOrthonormalize, float flScaleX, float flScaleY, float flScaleZ) {
     float basis[kBasisRowCount][Rnd::kXfmRowFloatCount];
@@ -452,18 +452,18 @@ bool MetFreqMakerAssetManager::ScaleMesh(
     return true;
 }
 
-// 0x00254a18
+// NTSC-U/C: 0x00254a18, PAL: 0x0026a0e0
 FreqPartTemplate *MetFreqMakerAssetManager::GetPart(int nId) {
     PollLoad(); // Yes, the binary discards the result.
     return mParts[nId];
 }
 
-// 0x00254e50
+// NTSC-U/C: 0x00254e50, PAL: 0x0026a518
 HxStr MetFreqMakerAssetManager::NextMeshName() {
     return HxStr(FormatString(kMeshNameFormat, mMeshCount++));
 }
 
-// 0x00254a58
+// NTSC-U/C: 0x00254a58, PAL: 0x0026a120
 Rnd::Mesh *MetFreqMakerAssetManager::CloneMesh(const HxStr &name) {
     PollLoad(); // Yes, the binary discards the result.
     Rnd::Mesh *pMesh = Rnd::NewMeshThroughHook(name);
@@ -472,7 +472,7 @@ Rnd::Mesh *MetFreqMakerAssetManager::CloneMesh(const HxStr &name) {
     return pMesh;
 }
 
-// 0x00254b30
+// NTSC-U/C: 0x00254b30, PAL: 0x0026a1f8
 void MetFreqMakerAssetManager::ApplyPartScale(Rnd::Mesh *pMesh,
                                               FreqPartTemplate *pTemplate,
                                               float *pScaleX,
@@ -491,7 +491,7 @@ void MetFreqMakerAssetManager::ApplyPartScale(Rnd::Mesh *pMesh,
     pMesh->mDirty = 1;
 }
 
-// 0x00254f30
+// NTSC-U/C: 0x00254f30, PAL: 0x0026a5f8
 Color *MetFreqMakerAssetManager::ColorAt(const Vector2 &position) {
     if (mPaletteTex == nullptr) {
         mPaletteTex = dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(g_spectrumTextureName));
@@ -499,14 +499,14 @@ Color *MetFreqMakerAssetManager::ColorAt(const Vector2 &position) {
     return SampleTexture(mPaletteTex, position.x, position.y);
 }
 
-// 0x002549b8
+// NTSC-U/C: 0x002549b8, PAL: 0x0026a080
 FreqPartTemplate *MetFreqMakerAssetManager::FindPart(const HxStr &name) {
     PollLoad(); // Yes, the binary discards the result.
     std::map<HxStr, FreqPartTemplate *>::iterator it = mPartsByName.find(name);
     return it != mPartsByName.end() ? it->second : nullptr;
 }
 
-// 0x00254ea0
+// NTSC-U/C: 0x00254ea0, PAL: 0x0026a568
 std::list<FreqPartTemplate *> *MetFreqMakerAssetManager::TemplatesInCategory(int nCategory) {
     // The binary dispatches through a jump table with one entry for each category.
     if (nCategory < kFirstCategory || nCategory > kCategoryCount) {

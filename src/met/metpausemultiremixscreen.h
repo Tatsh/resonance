@@ -22,7 +22,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00327d90
+     * @ghidraAddress NTSC-U/C: 0x00327d90
+     * @ghidraAddress PAL: 0x0034fbe0
      */
     MetPauseMultiRemixScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -32,7 +33,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0032b3c8
+     * @ghidraAddress NTSC-U/C: 0x0032b3c8
+     * @ghidraAddress PAL: 0x00353840
      */
     static MetPauseMultiRemixScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -55,7 +57,8 @@ public:
      * Slot 19.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0032b4a8
+     * @ghidraAddress NTSC-U/C: 0x0032b4a8
+     * @ghidraAddress PAL: 0x00353920
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -64,7 +67,8 @@ public:
      *
      * Slot 38. MetScreen::ResolveContainerViews() runs first. No text is tested for null.
      *
-     * @ghidraAddress 0x00327f30
+     * @ghidraAddress NTSC-U/C: 0x00327f30
+     * @ghidraAddress PAL: 0x0034fde0
      */
     virtual void ResolveContainerViews();
 };

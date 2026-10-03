@@ -60,7 +60,7 @@ inline Rnd::Object *Find(const char *pszName) {
 
 } // namespace
 
-// 0x0023ae58
+// NTSC-U/C: 0x0023ae58, PAL: 0x0024f4e0
 MetJukeboxFactoryRemixesScreen::MetJukeboxFactoryRemixesScreen(MetRenderer *pRenderer,
                                                                int nPriority)
     : MetJukeboxBaseScreen(pRenderer,
@@ -124,16 +124,16 @@ void MetJukeboxFactoryRemixesScreen::ResolveContainerViews() {
 #endif
 }
 
-// 0x00240780
+// NTSC-U/C: 0x00240780, PAL: 0x00255218
 MetJukeboxFactoryRemixesScreen::~MetJukeboxFactoryRemixesScreen() {
 }
 
-// 0x00240840
+// NTSC-U/C: 0x00240840, PAL: 0x002552d8
 int MetJukeboxFactoryRemixesScreen::GetItemCount() {
     return mCatalogue->size();
 }
 
-// 0x00240868
+// NTSC-U/C: 0x00240868, PAL: 0x00255300
 MetJukeboxFactoryRemixesScreen *MetJukeboxFactoryRemixesScreen::New(MetRenderer *pRenderer,
                                                                     int nPriority) {
     return new MetJukeboxFactoryRemixesScreen(pRenderer, nPriority);

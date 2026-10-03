@@ -29,7 +29,8 @@ public:
      *
      * @param path The persona file.
      * @param pIdentities The list Done() appends the personas to.
-     * @ghidraAddress 0x002a3498
+     * @ghidraAddress NTSC-U/C: 0x002a3498
+     * @ghidraAddress PAL: 0x002c1288
      */
     MetFreqLoader(const HxStr &path, std::vector<MetPersonaData *> *pIdentities);
 
@@ -38,7 +39,8 @@ public:
      *
      * Vtable slot 1.
      *
-     * @ghidraAddress 0x002a3430
+     * @ghidraAddress NTSC-U/C: 0x002a3430
+     * @ghidraAddress PAL: 0x002c1210
      */
     virtual ~MetFreqLoader();
 
@@ -54,7 +56,8 @@ public:
      * @param pBuffer The buffer the read filled.
      * @param nLength The bytes read.
      * @param nStatus The completion status.
-     * @ghidraAddress 0x002a35d8
+     * @ghidraAddress NTSC-U/C: 0x002a35d8
+     * @ghidraAddress PAL: 0x002c13c8
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 
@@ -65,7 +68,8 @@ public:
      * is inferred.
      *
      * @return True once the assets are resident.
-     * @ghidraAddress 0x002a3500
+     * @ghidraAddress NTSC-U/C: 0x002a3500
+     * @ghidraAddress PAL: 0x002c12f0
      */
     bool PollAssets();
 
@@ -75,7 +79,8 @@ public:
      * The read is issued with no zone selected, and the previously selected zone is restored
      * after. The title is inferred.
      *
-     * @ghidraAddress 0x002a3528
+     * @ghidraAddress NTSC-U/C: 0x002a3528
+     * @ghidraAddress PAL: 0x002c1318
      */
     void Start();
 
@@ -85,12 +90,13 @@ public:
      * The title is inferred.
      *
      * @return Non-zero once the personas are parsed.
-     * @ghidraAddress 0x002a35a8
+     * @ghidraAddress NTSC-U/C: 0x002a35a8
+     * @ghidraAddress PAL: 0x002c1398
      */
     int IsLoaded();
 
 private:
-    // 0x002a0e30
+    // NTSC-U/C: 0x002a0e30, PAL: 0x002bebe8
     // Read a persona count and then each persona from the buffer, marking each one with
     // 1 at MetPersonaData +0x15c, rebuilding its campaign level list, and appending it to
     // mIdentities.

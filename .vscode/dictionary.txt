@@ -275,6 +275,7 @@ errnomodule
 erss
 esac
 esbenp
+esony
 etext
 evoll
 evolr

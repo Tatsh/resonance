@@ -39,7 +39,8 @@ public:
      *
      * @param nSize The object size, which the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x001fecc8
+     * @ghidraAddress NTSC-U/C: 0x001fecc8
+     * @ghidraAddress PAL: 0x00206198
      */
     void *operator new(size_t nSize);
 
@@ -49,7 +50,8 @@ public:
      * The out-of-line copy has no caller.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x001fece8
+     * @ghidraAddress NTSC-U/C: 0x001fece8
+     * @ghidraAddress PAL: 0x002061b8
      */
     void operator delete(void *pBlock);
 
@@ -58,7 +60,8 @@ public:
      *
      * Inline. MetArenasScreen's constructor calls the out-of-line copy.
      *
-     * @ghidraAddress 0x001fc9f8
+     * @ghidraAddress NTSC-U/C: 0x001fc9f8
+     * @ghidraAddress PAL: 0x00203ea0
      */
     MetButtonList() : mSelectedButton(nullptr), mSelected(-1) {
     }
@@ -66,7 +69,8 @@ public:
     /**
      * Release every button reference and the vector.
      *
-     * @ghidraAddress 0x001fca30
+     * @ghidraAddress NTSC-U/C: 0x001fca30
+     * @ghidraAddress PAL: 0x00203ed8
      */
     virtual ~MetButtonList();
 
@@ -76,7 +80,8 @@ public:
      * Slot 2. The body steps mSelected down by one. MetMainScreen at `0x002c6820` and
      * MetLoadFreqBaseScreen::HandleCommand() route kMetScreenCommandPrevious here.
      *
-     * @ghidraAddress 0x001fcc40
+     * @ghidraAddress NTSC-U/C: 0x001fcc40
+     * @ghidraAddress PAL: 0x002040e8
      */
     virtual void SelectPrevious();
 
@@ -86,7 +91,8 @@ public:
      * Slot 3. The body steps mSelected up by one, and the screens route kMetScreenCommandNext
      * here.
      *
-     * @ghidraAddress 0x001fcd10
+     * @ghidraAddress NTSC-U/C: 0x001fcd10
+     * @ghidraAddress PAL: 0x002041b8
      */
     virtual void SelectNext();
 
@@ -99,7 +105,8 @@ public:
      *
      * @param nPreviousIndex The index the selection had.
      * @param nIndex The index the selection now has.
-     * @ghidraAddress 0x001feed8
+     * @ghidraAddress NTSC-U/C: 0x001feed8
+     * @ghidraAddress PAL: 0x002063a8
      */
     virtual void OnSelectionChanged(int nPreviousIndex, int nIndex);
 
@@ -109,7 +116,8 @@ public:
      * The body is the vector clear over mButtons, reached as `this + 4`, with the per-element
      * release at `0x00520be0`. Every class with a vector of four-byte elements shares this body.
      *
-     * @ghidraAddress 0x001fedb0
+     * @ghidraAddress NTSC-U/C: 0x001fedb0
+     * @ghidraAddress PAL: 0x00206280
      */
     void Clear();
 
@@ -125,7 +133,8 @@ public:
      *
      * @param objectName The button object as written in the `.rnd` file.
      * @param labelText The text for the button's label child, or the empty string for none.
-     * @ghidraAddress 0x001fcb28
+     * @ghidraAddress NTSC-U/C: 0x001fcb28
+     * @ghidraAddress PAL: 0x00203fd0
      */
     void Add(const HxStr &objectName, const HxStr &labelText);
 
@@ -137,7 +146,8 @@ public:
      *
      * @param pButton The button, or null.
      * @param labelText The text for the button's label child, or the empty string for none.
-     * @ghidraAddress 0x001fed30
+     * @ghidraAddress NTSC-U/C: 0x001fed30
+     * @ghidraAddress PAL: 0x00206200
      */
     void Append(Rnd::Button *pButton, const HxStr &labelText) {
         mButtons.push_back(pButton);
@@ -158,7 +168,8 @@ public:
      * what the binary does.
      *
      * @param nIndex The index to select, or -1 for none.
-     * @ghidraAddress 0x001fee08
+     * @ghidraAddress NTSC-U/C: 0x001fee08
+     * @ghidraAddress PAL: 0x002062d8
      */
     void SetSelected(int nIndex);
 
@@ -167,7 +178,8 @@ public:
      *
      * @param nIndex The index, or -1.
      * @return The button, or null for the -1 sentinel. An index past the end is not checked.
-     * @ghidraAddress 0x001fef40
+     * @ghidraAddress NTSC-U/C: 0x001fef40
+     * @ghidraAddress PAL: 0x00206410
      */
     Rnd::Button *ButtonAt(int nIndex) const;
 

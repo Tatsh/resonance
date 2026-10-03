@@ -60,7 +60,7 @@ inline const char *NameOrEmpty(const HxStr &name) {
 
 } // namespace
 
-// 0x00164df8
+// NTSC-U/C: 0x00164df8, PAL: 0x00166ea8
 CreditsRoll::CreditsRoll(const HxStr &picturePrefix,
                          const HxStr &textPrefix,
                          Rnd::Cam *pCam,
@@ -70,7 +70,7 @@ CreditsRoll::CreditsRoll(const HxStr &picturePrefix,
     Reset();
 }
 
-// 0x00165110
+// NTSC-U/C: 0x00165110, PAL: 0x001671f8
 void CreditsRoll::Reset() {
     burnSlot_ = 0;
     firstVisible_ = firstIndex_;
@@ -81,7 +81,7 @@ void CreditsRoll::Reset() {
     }
 }
 
-// 0x00165268
+// NTSC-U/C: 0x00165268, PAL: 0x00167350
 int CreditsRoll::Update() {
     for (int nIndex = firstVisible_;; ++nIndex) {
         Rnd::Mesh *pPicture = GetPicture(nIndex);
@@ -120,7 +120,7 @@ int CreditsRoll::Update() {
     }
 }
 
-// 0x00165658
+// NTSC-U/C: 0x00165658, PAL: 0x00167760
 int CreditsRoll::ClassifyPicture(Rnd::Mesh *pPicture) {
     if (pPicture == nullptr) {
         return kBandAbsent;
@@ -153,7 +153,7 @@ int CreditsRoll::ClassifyPicture(Rnd::Mesh *pPicture) {
     return (nBands & kBandBelow) != 0 ? kBandBelow : kBandAbsent;
 }
 
-// 0x001658c8
+// NTSC-U/C: 0x001658c8, PAL: 0x001679d0
 int CreditsRoll::ClassifyText(Rnd::Text *pText) {
     if (pText == nullptr) {
         return kBandAbsent;
@@ -179,7 +179,7 @@ int CreditsRoll::ClassifyText(Rnd::Text *pText) {
     return kBandVisible;
 }
 
-// 0x00165b58
+// NTSC-U/C: 0x00165b58, PAL: 0x00167c60
 void CreditsRoll::HideAll() {
     const int nPictures = pictures_.size();
     for (int i = 0; i < nPictures; ++i) {
@@ -195,7 +195,7 @@ void CreditsRoll::HideAll() {
     }
 }
 
-// 0x00165c38
+// NTSC-U/C: 0x00165c38, PAL: 0x00167d40
 void CreditsRoll::Build() {
     int nCount = 0;
     for (int nIndex = firstIndex_;; ++nIndex, ++nCount) {
@@ -241,14 +241,21 @@ void CreditsRoll::Build() {
     personaNames_[35] = "Jeremy";
     personaNames_[36] = "DeVron";
     personaNames_[37] = "Daniel";
+#ifdef VIDEO_STANDARD_PAL
+    personaNames_[38] = "Jim";
+    personaNames_[41] = "Mike";
+    personaNames_[42] = "Kris";
+    personaNames_[43] = "Warburg";
+#else
     personaNames_[40] = "Mike";
     personaNames_[41] = "Kris";
     personaNames_[42] = "Warburg";
+#endif
 
     HideAll();
 }
 
-// 0x00169860
+// NTSC-U/C: 0x00169860, PAL: 0x0016ba48
 MetPersonaData *CreditsRoll::FindPersona(const HxStr &name,
                                          const std::vector<MetPersonaData *> &identities) {
     const int nIdentities = identities.size();
@@ -260,19 +267,19 @@ MetPersonaData *CreditsRoll::FindPersona(const HxStr &name,
     return nullptr;
 }
 
-// 0x00169900
+// NTSC-U/C: 0x00169900, PAL: 0x0016bae8
 Rnd::Mesh *CreditsRoll::GetPicture(int nIndex) {
     const unsigned nOffset = nIndex - firstIndex_;
     return nOffset < pictures_.size() ? pictures_[nOffset] : nullptr;
 }
 
-// 0x00169938
+// NTSC-U/C: 0x00169938, PAL: 0x0016bb20
 Rnd::Text *CreditsRoll::GetText(int nIndex) {
     const unsigned nOffset = nIndex - firstIndex_;
     return nOffset < texts_.size() ? texts_[nOffset] : nullptr;
 }
 
-// 0x00169970
+// NTSC-U/C: 0x00169970, PAL: 0x0016bb58
 int CreditsRoll::Classify(Rnd::Mesh *pPicture, Rnd::Text *pText) {
     const int nPicture = ClassifyPicture(pPicture);
     const int nText = ClassifyText(pText);
@@ -282,7 +289,7 @@ int CreditsRoll::Classify(Rnd::Mesh *pPicture, Rnd::Text *pText) {
     return nPicture == kBandAbsent ? nText : nPicture;
 }
 
-// 0x001699e8
+// NTSC-U/C: 0x001699e8, PAL: 0x0016bbd0
 void CreditsRoll::SetShowing(Rnd::Mesh *pPicture, Rnd::Text *pText, int nShowing) {
     if (pPicture != nullptr) {
         pPicture->SetShowing(nShowing);

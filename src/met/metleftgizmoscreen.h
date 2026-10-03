@@ -22,14 +22,16 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00276ed8
+     * @ghidraAddress NTSC-U/C: 0x00276ed8
+     * @ghidraAddress PAL: 0x0028f830
      */
     MetLeftGizmoScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
      * Release the screen. The body is empty, and MetGizmoPanel's destructor is expanded in it.
      *
-     * @ghidraAddress 0x0027b4b8
+     * @ghidraAddress NTSC-U/C: 0x0027b4b8
+     * @ghidraAddress PAL: 0x00294170
      */
     virtual ~MetLeftGizmoScreen();
 
@@ -41,7 +43,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0027b628
+     * @ghidraAddress NTSC-U/C: 0x0027b628
+     * @ghidraAddress PAL: 0x002942f8
      */
     static MetLeftGizmoScreen *New(MetRenderer *pRenderer, int nPriority);
 };

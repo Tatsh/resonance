@@ -77,7 +77,8 @@ public:
     MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00381868
+     * @ghidraAddress NTSC-U/C: 0x00381868
+     * @ghidraAddress PAL: 0x003b1ec0
      */
     virtual ~MetSaveRemixScreen();
 
@@ -87,7 +88,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003817e0
+     * @ghidraAddress NTSC-U/C: 0x003817e0
+     * @ghidraAddress PAL: 0x003b1e38
      */
     static MetSaveRemixScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -108,7 +110,8 @@ public:
      * @param slot The memory-card location to save to.
      * @param appearances The players' appearances, stored through SetAppearances().
      * @param bClearName Non-zero to empty mEnteredName through SetEnteredName().
-     * @ghidraAddress 0x0037a9e0
+     * @ghidraAddress NTSC-U/C: 0x0037a9e0
+     * @ghidraAddress PAL: 0x003aa5d0
      */
     static void Open(MetPersonaData *pPersona,
                      int nPad,
@@ -121,7 +124,8 @@ public:
      * Store the persona saving the remix.
      *
      * @param pPersona The persona.
-     * @ghidraAddress 0x00381910
+     * @ghidraAddress NTSC-U/C: 0x00381910
+     * @ghidraAddress PAL: 0x003b1f78
      */
     void SetPersona(MetPersonaData *pPersona);
 
@@ -129,7 +133,8 @@ public:
      * Store the controller the save belongs to in MetSaveRemix::mOwnerPad.
      *
      * @param nPad The controller index.
-     * @ghidraAddress 0x00381918
+     * @ghidraAddress NTSC-U/C: 0x00381918
+     * @ghidraAddress PAL: 0x003b1f80
      */
     void SetOwnerPad(int nPad);
 
@@ -137,7 +142,8 @@ public:
      * Store the screen slots 40 and 41 report back to.
      *
      * @param pSaver The screen.
-     * @ghidraAddress 0x00381920
+     * @ghidraAddress NTSC-U/C: 0x00381920
+     * @ghidraAddress PAL: 0x003b1f88
      */
     void SetSaver(MetRemixSaver *pSaver);
 
@@ -145,7 +151,8 @@ public:
      * Copy the players' appearances into MetSaveRemix::mAppearances.
      *
      * @param appearances The appearances.
-     * @ghidraAddress 0x00381928
+     * @ghidraAddress NTSC-U/C: 0x00381928
+     * @ghidraAddress PAL: 0x003b1f90
      */
     void SetAppearances(const std::vector<FreqAppearance> &appearances);
 
@@ -153,7 +160,8 @@ public:
      * Assign the name typed last, mEnteredName.
      *
      * @param text The new name.
-     * @ghidraAddress 0x00381948
+     * @ghidraAddress NTSC-U/C: 0x00381948
+     * @ghidraAddress PAL: 0x003b1fb0
      */
     void SetEnteredName(const HxStr &text);
 
@@ -186,7 +194,8 @@ public:
      * set, brings back the help and save screens, reports to the saver through
      * MetRemixSaver::SetOwnerScreenShowing() with 1, and makes the save screen the active panel.
      *
-     * @ghidraAddress 0x0037b718
+     * @ghidraAddress NTSC-U/C: 0x0037b718
+     * @ghidraAddress PAL: 0x003ab798
      */
     virtual void OnPanelActivated();
 
@@ -200,7 +209,8 @@ public:
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
-     * @ghidraAddress 0x0037cac8
+     * @ghidraAddress NTSC-U/C: 0x0037cac8
+     * @ghidraAddress PAL: 0x003ace68
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -228,7 +238,8 @@ public:
      * the band that compares the selector against a recorded value.
      *
      * @param nSelector Compared against MetSaveRemix::mOwnerPad, then passed through unchanged.
-     * @ghidraAddress 0x00381968
+     * @ghidraAddress NTSC-U/C: 0x00381968
+     * @ghidraAddress PAL: 0x003b1fd0
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -239,7 +250,8 @@ public:
      * body. Their declaration order puts leave before high, which is why their addresses do not
      * ascend with the slot numbers.
      *
-     * @ghidraAddress 0x003817d8
+     * @ghidraAddress NTSC-U/C: 0x003817d8
+     * @ghidraAddress PAL: 0x003b1d60
      */
     virtual void PlayLeaveSound(int) {
     }
@@ -247,7 +259,8 @@ public:
     /**
      * Silence the high sound.
      *
-     * @ghidraAddress 0x003817c0
+     * @ghidraAddress NTSC-U/C: 0x003817c0
+     * @ghidraAddress PAL: 0x003b1d48
      */
     virtual void PlayHighSound(int) {
     }
@@ -255,7 +268,8 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * @ghidraAddress 0x003817c8
+     * @ghidraAddress NTSC-U/C: 0x003817c8
+     * @ghidraAddress PAL: 0x003b1d50
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -263,7 +277,8 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x003817d0
+     * @ghidraAddress NTSC-U/C: 0x003817d0
+     * @ghidraAddress PAL: 0x003b1d58
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -276,7 +291,8 @@ public:
      * object it finished alternating, and this body does not read it.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x0037c110
+     * @ghidraAddress NTSC-U/C: 0x0037c110
+     * @ghidraAddress PAL: 0x003ac328
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -312,7 +328,8 @@ public:
      *
      * A null saver does nothing.
      *
-     * @ghidraAddress 0x003819f0
+     * @ghidraAddress NTSC-U/C: 0x003819f0
+     * @ghidraAddress PAL: 0x003b2058
      */
     virtual void OnSaveAbandoned();
 
@@ -321,7 +338,8 @@ public:
      *
      * The body differs from slot 40's in that one immediate and nothing else.
      *
-     * @ghidraAddress 0x00381a28
+     * @ghidraAddress NTSC-U/C: 0x00381a28
+     * @ghidraAddress PAL: 0x003b2090
      */
     virtual void OnSaveDialogueClosed();
 
@@ -347,7 +365,8 @@ public:
      * screen did not request.
      *
      * @param text The remix name the user entered.
-     * @ghidraAddress 0x00381990
+     * @ghidraAddress NTSC-U/C: 0x00381990
+     * @ghidraAddress PAL: 0x003b1ff8
      */
     virtual void OnKeyboardTextEntered(const HxStr &text);
 

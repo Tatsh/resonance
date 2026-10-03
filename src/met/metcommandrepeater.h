@@ -21,14 +21,16 @@ public:
     /**
      * Build four empty records.
      *
-     * @ghidraAddress 0x002e54b0
+     * @ghidraAddress NTSC-U/C: 0x002e54b0
+     * @ghidraAddress PAL: 0x00308470
      */
     MetCommandRepeater();
 
     /**
      * Release the vector.
      *
-     * @ghidraAddress 0x002e71c0
+     * @ghidraAddress NTSC-U/C: 0x002e71c0
+     * @ghidraAddress PAL: 0x0030a1f0
      */
     ~MetCommandRepeater();
 
@@ -39,7 +41,8 @@ public:
      * loop with no bound read from the vector. The count is therefore the literal four rather than
      * the vector's size.
      *
-     * @ghidraAddress 0x002e7298
+     * @ghidraAddress NTSC-U/C: 0x002e7298
+     * @ghidraAddress PAL: 0x0030a2c8
      */
     void Reset();
 
@@ -55,7 +58,8 @@ public:
      * @param pCommand The command that was delivered.
      * @param nButton The reading's mButton.
      * @param nPadIndex The reading's mPadIndex, counted from one.
-     * @ghidraAddress 0x002e5790
+     * @ghidraAddress NTSC-U/C: 0x002e5790
+     * @ghidraAddress PAL: 0x00308750
      */
     void Arm(const MetScreenCommand *pCommand, int nButton, int nPadIndex);
 
@@ -69,7 +73,8 @@ public:
      *
      * @param pPanel The screen the repeated commands are delivered to.
      * @param pNowNanoseconds The current time, which the caller has already computed.
-     * @ghidraAddress 0x002e55b0
+     * @ghidraAddress NTSC-U/C: 0x002e55b0
+     * @ghidraAddress PAL: 0x00308570
      */
     void Update(MetScreen *pPanel, const long long *pNowNanoseconds);
 

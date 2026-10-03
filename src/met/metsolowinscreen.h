@@ -45,12 +45,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003b55a8
+     * @ghidraAddress NTSC-U/C: 0x003b55a8
+     * @ghidraAddress PAL: 0x003e9c00
      */
     MetSoloWinScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003b9ce8
+     * @ghidraAddress NTSC-U/C: 0x003b9ce8
+     * @ghidraAddress PAL: 0x003ee6f8
      */
     virtual ~MetSoloWinScreen();
 
@@ -63,7 +65,8 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003b9b98
+     * @ghidraAddress NTSC-U/C: 0x003b9b98
+     * @ghidraAddress PAL: 0x003ee670
      */
     static MetSoloWinScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -87,7 +90,8 @@ public:
      * including command 6, so the screen cannot be departed with the back button.
      *
      * @param pCommand The command to route.
-     * @ghidraAddress 0x003b57a0
+     * @ghidraAddress NTSC-U/C: 0x003b57a0
+     * @ghidraAddress PAL: 0x003e9e60
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -95,7 +99,8 @@ public:
      * Play no leave sound. Slot 21.
      *
      * @param nSelector The pad index of the command, which the body does not read.
-     * @ghidraAddress 0x003b9b90
+     * @ghidraAddress NTSC-U/C: 0x003b9b90
+     * @ghidraAddress PAL: 0x003ee668
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -103,7 +108,8 @@ public:
      * Play no left cycle sound. Slot 23.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003b9b80
+     * @ghidraAddress NTSC-U/C: 0x003b9b80
+     * @ghidraAddress PAL: 0x003ee658
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -111,7 +117,8 @@ public:
      * Play no right cycle sound. Slot 24.
      *
      * @param nSelector The controller index, which the body does not read.
-     * @ghidraAddress 0x003b9b88
+     * @ghidraAddress NTSC-U/C: 0x003b9b88
+     * @ghidraAddress PAL: 0x003ee660
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -122,7 +129,8 @@ public:
      * pairs the button press with the departure. The Rnd::Object the slot receives is not read.
      *
      * @param pButton The button slot 29 finished with, which the body does not read.
-     * @ghidraAddress 0x003b5f88
+     * @ghidraAddress NTSC-U/C: 0x003b5f88
+     * @ghidraAddress PAL: 0x003ea7c8
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -147,7 +155,8 @@ public:
      * recording this screen's name in MetFrontEndState::mReturnScreen. Every path then clears
      * the selection.
      *
-     * @ghidraAddress 0x003b6188
+     * @ghidraAddress NTSC-U/C: 0x003b6188
+     * @ghidraAddress PAL: 0x003eaa48
      */
     virtual void OnExitFinished();
 
@@ -159,7 +168,8 @@ public:
      * 36 is the one caller.
      *
      * @param nUnlocked Non-zero when a difficulty was unlocked.
-     * @ghidraAddress 0x003b9c20
+     * @ghidraAddress NTSC-U/C: 0x003b9c20
+     * @ghidraAddress PAL: 0x003e9b18
      */
     static void SetDifficultyUnlocked(int nUnlocked);
 

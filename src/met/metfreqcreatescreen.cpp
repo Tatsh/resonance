@@ -42,6 +42,9 @@ static const char *const kTitleKey = "create_new_char";
 static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
 static const char *const kTitleScreen = "MetScreenTitleScreen";
 static const char *const kLoadFreqScreen = "MetLoadFreqScreen";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kLoadNewFreqScreen = "MetLoadNewFreqScreen";
+#endif
 static const char *const kFreqCreateScreen = "MetFreqCreateScreen";
 static const char *const kFreqMakerCanvasScreen = "MetFreqMakerCanvasScreen";
 static const char *const kFreqMakerButtonsScreen = "MetFreqMakerButtonsScreen";
@@ -80,7 +83,7 @@ constexpr int kNoRandomize = 0;
 
 } // namespace
 
-// 0x0029c130
+// NTSC-U/C: 0x0029c130, PAL: 0x002b9950
 MetFreqCreateScreen::MetFreqCreateScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
@@ -92,12 +95,12 @@ MetFreqCreateScreen::MetFreqCreateScreen(MetRenderer *pRenderer, int nPriority)
     mBurnTexture = FreqAppearance::FindPersonaBurnTexture(kBurnTextureIndex);
 }
 
-// 0x002a0b08
+// NTSC-U/C: 0x002a0b08, PAL: 0x002be8a8
 MetFreqCreateScreen::~MetFreqCreateScreen() {
     delete mButtonList;
 }
 
-// 0x002a0a80
+// NTSC-U/C: 0x002a0a80, PAL: 0x002be820
 MetFreqCreateScreen *MetFreqCreateScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetFreqCreateScreen(pRenderer, nPriority);
 }
@@ -117,7 +120,7 @@ void MetFreqCreateScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x0029c7a0
+// NTSC-U/C: 0x0029c7a0, PAL: 0x002ba0f0
 void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -170,21 +173,21 @@ void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002a0b88
+// NTSC-U/C: 0x002a0b88, PAL: 0x002be928
 void MetFreqCreateScreen::PlayCycleLeftSound(int nSelector) {
     if (mButtonList->mSelected == kPrefabButtonIndex) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
-// 0x002a0bb8
+// NTSC-U/C: 0x002a0bb8, PAL: 0x002be958
 void MetFreqCreateScreen::PlayCycleRightSound(int nSelector) {
     if (mButtonList->mSelected == kPrefabButtonIndex) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
-// 0x0029ce58
+// NTSC-U/C: 0x0029ce58, PAL: 0x002ba8b8
 void MetFreqCreateScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if (pButton == mLeftArrow || pButton == mRightArrow) {
         return;
@@ -195,11 +198,21 @@ void MetFreqCreateScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     BeginExit();
 }
 
-// 0x0029cfa0
+// NTSC-U/C: 0x0029cfa0, PAL: 0x002baa40
 void MetFreqCreateScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
+#ifdef VIDEO_STANDARD_PAL
+        if (MetPersonaData::loadList()->size() != 0) {
+            PushNamedScreen(HxStr(kLoadFreqScreen));
+            ActivateNamedPanel(HxStr(kLoadFreqScreen));
+        } else {
+            PushNamedScreen(HxStr(kLoadNewFreqScreen));
+            ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
+        }
+#else
         PushNamedScreen(HxStr(kLoadFreqScreen));
         ActivateNamedPanel(HxStr(kLoadFreqScreen));
+#endif
     } else {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kFreqCreateScreen);
         MetFreqMakerCanvasScreen *pCanvas = static_cast<MetFreqMakerCanvasScreen *>(
@@ -245,7 +258,7 @@ void MetFreqCreateScreen::ResolveContainerViews() {
     mHelpKeys.push_back(MetText(kMetStrHCreateFromScratch, kCreatePrompt));
 }
 
-// 0x0029cb30
+// NTSC-U/C: 0x0029cb30, PAL: 0x002ba518
 void MetFreqCreateScreen::StepSelection(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandLeft) {
         int nIndex = mSelectedIdentity - 1;
@@ -263,7 +276,7 @@ void MetFreqCreateScreen::StepSelection(const MetScreenCommand *pCommand) {
     RefreshSelection();
 }
 
-// 0x0029cbb8
+// NTSC-U/C: 0x0029cbb8, PAL: 0x002ba5a0
 void MetFreqCreateScreen::RefreshSelection() {
     Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kPreviewMaterial)));
     (*mIdentities)[mSelectedIdentity]->AttachToBurnSlot(kPreviewBurnSlot);

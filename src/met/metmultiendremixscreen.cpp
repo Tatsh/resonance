@@ -82,7 +82,7 @@ T *FindObject(const char *pszName) {
 
 } // namespace
 
-// 0x002f0918
+// NTSC-U/C: 0x002f0918, PAL: 0x003142e0
 MetMultiEndRemixScreen::MetMultiEndRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLogoTextures(HxStr(kSongLogoFirstTexture), HxStr(kSongLogoSecondTexture)),
@@ -113,7 +113,7 @@ void MetMultiEndRemixScreen::ResolveContainerViews() {
     }
 }
 
-// 0x002f1500
+// NTSC-U/C: 0x002f1500, PAL: 0x003150a8
 MetMultiEndRemixScreen::~MetMultiEndRemixScreen() {
 }
 
@@ -152,12 +152,12 @@ void MetMultiEndRemixScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x002f5540
+// NTSC-U/C: 0x002f5540, PAL: 0x00319300
 MetMultiEndRemixScreen *MetMultiEndRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiEndRemixScreen(pRenderer, nPriority);
 }
 
-// 0x002f55c8
+// NTSC-U/C: 0x002f55c8, PAL: 0x00319388
 void MetMultiEndRemixScreen::UpdateIdle(float) {
     // Both Advance() results are discarded, as in the binary.
     mLogoTextures.Advance();
@@ -166,6 +166,6 @@ void MetMultiEndRemixScreen::UpdateIdle(float) {
     mPhotoMat->mStages[kPairStage].SetTex(mLabelTextures.Current());
 }
 
-// 0x002f5650
+// NTSC-U/C: 0x002f5650, PAL: 0x00319410
 void MetMultiEndRemixScreen::OnExitFinished() {
 }

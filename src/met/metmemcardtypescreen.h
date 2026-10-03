@@ -43,7 +43,8 @@ public:
     /**
      * Delete the button list.
      *
-     * @ghidraAddress 0x002d84d0
+     * @ghidraAddress NTSC-U/C: 0x002d84d0
+     * @ghidraAddress PAL: 0x002fac40
      */
     virtual ~MetMemCardTypeScreen();
 
@@ -53,7 +54,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002d8448
+     * @ghidraAddress NTSC-U/C: 0x002d8448
+     * @ghidraAddress PAL: 0x002fabb8
      */
     static MetMemCardTypeScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -74,7 +76,8 @@ public:
      * Slot 19.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002d2898
+     * @ghidraAddress NTSC-U/C: 0x002d2898
+     * @ghidraAddress PAL: 0x002f4c70
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -83,7 +86,8 @@ public:
      *
      * Slot 23. The body is empty.
      *
-     * @ghidraAddress 0x002d8438
+     * @ghidraAddress NTSC-U/C: 0x002d8438
+     * @ghidraAddress PAL: 0x002faba8
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -93,7 +97,8 @@ public:
      *
      * Slot 24. The body is empty.
      *
-     * @ghidraAddress 0x002d8440
+     * @ghidraAddress NTSC-U/C: 0x002d8440
+     * @ghidraAddress PAL: 0x002fabb0
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -104,7 +109,8 @@ public:
      * Slot 30.
      *
      * @param pButton The button whose alternation finished, which is not read.
-     * @ghidraAddress 0x002d2cf0
+     * @ghidraAddress NTSC-U/C: 0x002d2cf0
+     * @ghidraAddress PAL: 0x002f5188
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -116,7 +122,8 @@ public:
      * returning to MetRemixDelScreen. The FreQ button hands the card to MetMCFreqDelScreen and
      * brings that screen up.
      *
-     * @ghidraAddress 0x002d2e90
+     * @ghidraAddress NTSC-U/C: 0x002d2e90
+     * @ghidraAddress PAL: 0x002f5388
      */
     virtual void OnExitFinished();
 
@@ -136,7 +143,8 @@ public:
      * MetMemCardLoadScreen's slot 36 is the caller. The title is inferred.
      *
      * @param slot The card.
-     * @ghidraAddress 0x002d8560
+     * @ghidraAddress NTSC-U/C: 0x002d8560
+     * @ghidraAddress PAL: 0x002face0
      */
     void SetCardSlot(MemcardConnectState slot);
 

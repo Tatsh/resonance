@@ -28,12 +28,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00307d68
+     * @ghidraAddress NTSC-U/C: 0x00307d68
+     * @ghidraAddress PAL: 0x0032cd48
      */
     MetMultiTips2Screen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0030da98
+     * @ghidraAddress NTSC-U/C: 0x0030da98
+     * @ghidraAddress PAL: 0x00333638
      */
     virtual ~MetMultiTips2Screen();
 
@@ -45,7 +47,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0030db18
+     * @ghidraAddress NTSC-U/C: 0x0030db18
+     * @ghidraAddress PAL: 0x003336e0
      */
     static MetMultiTips2Screen *New(MetRenderer *pRenderer, int nPriority);
 

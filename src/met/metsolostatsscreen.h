@@ -32,12 +32,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003af2e0
+     * @ghidraAddress NTSC-U/C: 0x003af2e0
+     * @ghidraAddress PAL: 0x003e32c8
      */
     MetSoloStatsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x003b5218
+     * @ghidraAddress NTSC-U/C: 0x003b5218
+     * @ghidraAddress PAL: 0x003e9770
      */
     virtual ~MetSoloStatsScreen();
 
@@ -49,7 +51,8 @@ public:
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x003b5190
+     * @ghidraAddress NTSC-U/C: 0x003b5190
+     * @ghidraAddress PAL: 0x003e96e8
      */
     static MetSoloStatsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -63,7 +66,8 @@ public:
      * the difficulty name, and the score, completion, phrase, and hottest fields take the first
      * player's GameStats figures, the two ratios as whole percentages.
      *
-     * @ghidraAddress 0x003b0378
+     * @ghidraAddress NTSC-U/C: 0x003b0378
+     * @ghidraAddress PAL: 0x003e4678
      */
     virtual void EnterAndShow();
 

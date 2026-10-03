@@ -32,12 +32,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0022acf8
+     * @ghidraAddress NTSC-U/C: 0x0022acf8
+     * @ghidraAddress PAL: 0x0023e0c0
      */
     MetJukeboxEditPlaylistScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00231228
+     * @ghidraAddress NTSC-U/C: 0x00231228
+     * @ghidraAddress PAL: 0x00244b48
      */
     virtual ~MetJukeboxEditPlaylistScreen();
 
@@ -49,7 +51,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00231300
+     * @ghidraAddress NTSC-U/C: 0x00231300
+     * @ghidraAddress PAL: 0x00244c20
      */
     static MetJukeboxEditPlaylistScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -58,7 +61,8 @@ public:
      *
      * Slot 7. The override adds no behaviour.
      *
-     * @ghidraAddress 0x002313d0
+     * @ghidraAddress NTSC-U/C: 0x002313d0
+     * @ghidraAddress PAL: 0x00244cf0
      */
     virtual void OnPanelActivated();
 
@@ -71,7 +75,8 @@ public:
      * that changes the list refreshes it and runs slot 40.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x0022bdb8
+     * @ghidraAddress NTSC-U/C: 0x0022bdb8
+     * @ghidraAddress PAL: 0x0023f3e8
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -80,7 +85,8 @@ public:
      *
      * Slot 33. mCatalogue becomes null, and the playlist list takes the entry count.
      *
-     * @ghidraAddress 0x00231388
+     * @ghidraAddress NTSC-U/C: 0x00231388
+     * @ghidraAddress PAL: 0x00244ca8
      */
     virtual void OnEnterFinished();
 
@@ -90,7 +96,8 @@ public:
      * Slot 38. The list clones `jbep_remix_factory_01.view` with the highlight and both arrows,
      * becomes mPlayListList, and uses context 0. mCatalogueList stays null.
      *
-     * @ghidraAddress 0x0022ae78
+     * @ghidraAddress NTSC-U/C: 0x0022ae78
+     * @ghidraAddress PAL: 0x0023e2a0
      */
     virtual void ResolveContainerViews();
 
@@ -100,7 +107,8 @@ public:
      * Slot 39. The entry count of the playlist mPlayList addresses, read without a null check.
      *
      * @return The row count.
-     * @ghidraAddress 0x002312e8
+     * @ghidraAddress NTSC-U/C: 0x002312e8
+     * @ghidraAddress PAL: 0x00244c08
      */
     virtual int GetItemCount();
 
@@ -111,7 +119,8 @@ public:
      * finds by the entry's name. There is no album test, so the lock text never shows, and the
      * result of the lookup is not tested for null.
      *
-     * @ghidraAddress 0x0022bfd8
+     * @ghidraAddress NTSC-U/C: 0x0022bfd8
+     * @ghidraAddress PAL: 0x0023f608
      */
     virtual void ShowRemixDetails();
 
@@ -139,7 +148,8 @@ public:
      * @param pText The cell.
      * @param nContext 0 for the playlist.
      * @return Always 1.
-     * @ghidraAddress 0x0022ba08
+     * @ghidraAddress NTSC-U/C: 0x0022ba08
+     * @ghidraAddress PAL: 0x0023f018
      */
     virtual int ProvideText(int nItem, int nColumn, Rnd::Text *pText, int nContext);
 };

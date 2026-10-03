@@ -38,12 +38,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002a8418
+     * @ghidraAddress NTSC-U/C: 0x002a8418
+     * @ghidraAddress PAL: 0x002c68e8
      */
     MetLoadNewFreqScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002a8458
+     * @ghidraAddress NTSC-U/C: 0x002a8458
+     * @ghidraAddress PAL: 0x002c6938
      */
     virtual ~MetLoadNewFreqScreen();
 
@@ -55,7 +57,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The screen.
-     * @ghidraAddress 0x002a8390
+     * @ghidraAddress NTSC-U/C: 0x002a8390
+     * @ghidraAddress PAL: 0x002c6860
      */
     static MetScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -78,7 +81,8 @@ public:
      * MetScreen::mExitChoice and the first button is the selected one. The MetScreen body then runs
      * as a direct call on every path.
      *
-     * @ghidraAddress 0x002a84c0
+     * @ghidraAddress NTSC-U/C: 0x002a84c0
+     * @ghidraAddress PAL: 0x002c17b8
      */
     virtual void BeginExit();
 
@@ -89,7 +93,8 @@ public:
      * screen then stays as OnKeyboardTextEntered() arranged it. A clear mNameEntered is the user
      * cancelling, and this screen and the prompt screen are pushed again.
      *
-     * @ghidraAddress 0x002a3978
+     * @ghidraAddress NTSC-U/C: 0x002a3978
+     * @ghidraAddress PAL: 0x002c18a8
      */
     virtual void OnKeyboardDismissed();
 
@@ -139,7 +144,8 @@ public:
      * MetFreqMakerButtonsScreen::mNewPersona is set, and `MetLoadNewFreqScreen` is recorded in
      * MetFrontEndState::mReturnScreen.
      *
-     * @ghidraAddress 0x002a3f80
+     * @ghidraAddress NTSC-U/C: 0x002a3f80
+     * @ghidraAddress PAL: 0x002c2000
      */
     virtual void PrepareFreqMakerForSelection();
 
@@ -160,7 +166,8 @@ public:
      *
      * Slot 44.
      *
-     * @ghidraAddress 0x002a8590
+     * @ghidraAddress NTSC-U/C: 0x002a8590
+     * @ghidraAddress PAL: 0x002c69a8
      */
     virtual void AcquireIdentityList();
 
@@ -192,7 +199,8 @@ public:
      * MetModeScreen otherwise, each followed by MetLeftGizmoScreen and MetHelpScreen.
      *
      * @param text The text the user entered.
-     * @ghidraAddress 0x002a4340
+     * @ghidraAddress NTSC-U/C: 0x002a4340
+     * @ghidraAddress PAL: 0x002c2548
      */
     virtual void OnKeyboardTextEntered(const HxStr &text);
 

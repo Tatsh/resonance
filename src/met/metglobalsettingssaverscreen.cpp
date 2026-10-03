@@ -84,23 +84,23 @@ inline const char *RecordedCardName() {
 
 } // namespace
 
-// 0x0027c4f8
+// NTSC-U/C: 0x0027c4f8, PAL: 0x00295210
 MetGlobalSettingsSaverScreen::MetGlobalSettingsSaverScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
 }
 
-// 0x0027c680
+// NTSC-U/C: 0x0027c680, PAL: 0x00295400
 MetGlobalSettingsSaverScreen::~MetGlobalSettingsSaverScreen() {
 }
 
-// 0x00281fc0
+// NTSC-U/C: 0x00281fc0, PAL: 0x0029bd18
 MetGlobalSettingsSaverScreen *MetGlobalSettingsSaverScreen::New(MetRenderer *pRenderer,
                                                                 int nPriority) {
     return new MetGlobalSettingsSaverScreen(pRenderer, nPriority);
 }
 
-// 0x0027c2e0
+// NTSC-U/C: 0x0027c2e0, PAL: 0x00295010
 void MetGlobalSettingsSaverScreen::StartSave(const std::vector<HxStr> &screens) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
     MetGlobalSettingsSaverScreen *pSaver =
@@ -109,6 +109,9 @@ void MetGlobalSettingsSaverScreen::StartSave(const std::vector<HxStr> &screens) 
     pSaver->SetReturnScreens(screens);
 
     MetScreen *pSony = MetScreen::FindScreenByName(HxStr(kSonyScreen));
+#ifdef VIDEO_STANDARD_PAL
+    pSony->PushNamedScreen(HxStr(kOwnScreenName));
+#else
     if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         pSony->PushNamedScreen(HxStr(kOwnScreenName));
         return;
@@ -118,14 +121,15 @@ void MetGlobalSettingsSaverScreen::StartSave(const std::vector<HxStr> &screens) 
         pSony->PushNamedScreen(screens[i]);
     }
     pSony->ActivateNamedPanel(screens[0]);
+#endif
 }
 
-// 0x00282048
+// NTSC-U/C: 0x00282048, PAL: 0x0029bda0
 void MetGlobalSettingsSaverScreen::SetReturnScreens(const std::vector<HxStr> &screens) {
     mReturnScreens = screens;
 }
 
-// 0x00282088
+// NTSC-U/C: 0x00282088, PAL: 0x0029bde0
 void MetGlobalSettingsSaverScreen::EnterAndShow() {
     RequestConnectState();
 }
@@ -151,7 +155,7 @@ inline void MetGlobalSettingsSaverScreen::RequestConnectState() {
 #endif
 }
 
-// 0x002820f8
+// NTSC-U/C: 0x002820f8, PAL: 0x0029be00
 void MetGlobalSettingsSaverScreen::BeginExit() {
     mRenderer->RemoveScreen(this);
     int nCount = mReturnScreens.size();
@@ -161,7 +165,7 @@ void MetGlobalSettingsSaverScreen::BeginExit() {
     ActivateNamedPanel(mReturnScreens[0]);
 }
 
-// 0x00282068
+// NTSC-U/C: 0x00282068, PAL: 0x0029bdc0
 void MetGlobalSettingsSaverScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }

@@ -38,7 +38,8 @@ public:
      * @param textPrefix The prefix of each text name.
      * @param pCam The camera the credits are projected through.
      * @param nFirstIndex The number of the first credit.
-     * @ghidraAddress 0x00164df8
+     * @ghidraAddress NTSC-U/C: 0x00164df8
+     * @ghidraAddress PAL: 0x00166ea8
      */
     CreditsRoll(const HxStr &picturePrefix,
                 const HxStr &textPrefix,
@@ -48,7 +49,8 @@ public:
     /**
      * Rewind to the first credit, forget which personas were drawn, and fetch the identity list.
      *
-     * @ghidraAddress 0x00165110
+     * @ghidraAddress NTSC-U/C: 0x00165110
+     * @ghidraAddress PAL: 0x001671f8
      */
     void Reset();
 
@@ -59,14 +61,16 @@ public:
      * stops at the first credit below the band.
      *
      * @return One while a credit remains below the band, and zero once the credits run out.
-     * @ghidraAddress 0x00165268
+     * @ghidraAddress NTSC-U/C: 0x00165268
+     * @ghidraAddress PAL: 0x00167350
      */
     int Update();
 
     /**
      * Hide every picture and every text.
      *
-     * @ghidraAddress 0x00165b58
+     * @ghidraAddress NTSC-U/C: 0x00165b58
+     * @ghidraAddress PAL: 0x00167c60
      */
     void HideAll();
 
@@ -76,7 +80,8 @@ public:
      * Numbers from the first index are tried until neither a picture nor a text of that number
      * exists. Missing members of a pair are stored as null.
      *
-     * @ghidraAddress 0x00165c38
+     * @ghidraAddress NTSC-U/C: 0x00165c38
+     * @ghidraAddress PAL: 0x00167d40
      */
     void Build();
 
@@ -109,21 +114,21 @@ private:
     // The four persona burn textures are used in turn.
     static constexpr int kBurnSlotCount = 4;
 
-    // 0x00165658
+    // NTSC-U/C: 0x00165658, PAL: 0x00167760
     int ClassifyPicture(Rnd::Mesh *pPicture);
-    // 0x001658c8
+    // NTSC-U/C: 0x001658c8, PAL: 0x001679d0
     int ClassifyText(Rnd::Text *pText);
-    // 0x00169970
+    // NTSC-U/C: 0x00169970, PAL: 0x0016bb58
     // The combined band of one credit.
     int Classify(Rnd::Mesh *pPicture, Rnd::Text *pText);
-    // 0x00169900
+    // NTSC-U/C: 0x00169900, PAL: 0x0016bae8
     Rnd::Mesh *GetPicture(int nIndex);
-    // 0x00169938
+    // NTSC-U/C: 0x00169938, PAL: 0x0016bb20
     Rnd::Text *GetText(int nIndex);
-    // 0x001699e8
+    // NTSC-U/C: 0x001699e8, PAL: 0x0016bbd0
     // The receiver is not read.
     void SetShowing(Rnd::Mesh *pPicture, Rnd::Text *pText, int nShowing);
-    // 0x00169860
+    // NTSC-U/C: 0x00169860, PAL: 0x0016ba48
     // Update() expands the same search inline.
     static inline MetPersonaData *FindPersona(const HxStr &name,
                                               const std::vector<MetPersonaData *> &identities);

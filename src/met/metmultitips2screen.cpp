@@ -43,7 +43,7 @@ inline void FillText(const TipText &entry) {
 
 } // namespace
 
-// 0x00307d68
+// NTSC-U/C: 0x00307d68, PAL: 0x0032cd48
 MetMultiTips2Screen::MetMultiTips2Screen(MetRenderer *pRenderer, int nPriority)
     : MetMultiTipsBaseScreen(pRenderer,
                              nPriority,
@@ -63,11 +63,11 @@ void MetMultiTips2Screen::ResolveContainerViews() {
     }
 }
 
-// 0x0030da98
+// NTSC-U/C: 0x0030da98, PAL: 0x00333638
 MetMultiTips2Screen::~MetMultiTips2Screen() {
 }
 
-// 0x0030db18
+// NTSC-U/C: 0x0030db18, PAL: 0x003336e0
 MetMultiTips2Screen *MetMultiTips2Screen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiTips2Screen(pRenderer, nPriority);
 }

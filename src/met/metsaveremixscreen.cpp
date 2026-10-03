@@ -155,17 +155,17 @@ MetSaveRemixScreen::MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     mKeyboardPending = 0;
 }
 
-// 0x003817e0
+// NTSC-U/C: 0x003817e0, PAL: 0x003b1e38
 MetSaveRemixScreen *MetSaveRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSaveRemixScreen(pRenderer, nPriority);
 }
 
-// 0x00381868
+// NTSC-U/C: 0x00381868, PAL: 0x003b1ec0
 MetSaveRemixScreen::~MetSaveRemixScreen() {
     delete mButtonList;
 }
 
-// 0x0037a9e0
+// NTSC-U/C: 0x0037a9e0, PAL: 0x003aa5d0
 void MetSaveRemixScreen::Open(MetPersonaData *pPersona,
                               int nPad,
                               MetRemixSaver *pSaver,
@@ -187,39 +187,39 @@ void MetSaveRemixScreen::Open(MetPersonaData *pPersona,
     pLoadGame->ActivateNamedPanel(HxStr(kSaveRemixScreen));
 }
 
-// 0x00381910
+// NTSC-U/C: 0x00381910, PAL: 0x003b1f78
 void MetSaveRemixScreen::SetPersona(MetPersonaData *pPersona) {
     mPersona = pPersona;
 }
 
-// 0x00381918
+// NTSC-U/C: 0x00381918, PAL: 0x003b1f80
 void MetSaveRemixScreen::SetOwnerPad(int nPad) {
     mOwnerPad = nPad;
 }
 
-// 0x00381920
+// NTSC-U/C: 0x00381920, PAL: 0x003b1f88
 void MetSaveRemixScreen::SetSaver(MetRemixSaver *pSaver) {
     mSaver = pSaver;
 }
 
-// 0x00381928
+// NTSC-U/C: 0x00381928, PAL: 0x003b1f90
 void MetSaveRemixScreen::SetAppearances(const std::vector<FreqAppearance> &appearances) {
     mAppearances = appearances;
 }
 
-// 0x00381948
+// NTSC-U/C: 0x00381948, PAL: 0x003b1fb0
 void MetSaveRemixScreen::SetEnteredName(const HxStr &text) {
     mEnteredName = text;
 }
 
-// 0x00381968
+// NTSC-U/C: 0x00381968, PAL: 0x003b1fd0
 void MetSaveRemixScreen::PlaySlideSound(int nSelector) {
     if (nSelector == mOwnerPad) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// 0x00381990
+// NTSC-U/C: 0x00381990, PAL: 0x003b1ff8
 void MetSaveRemixScreen::OnKeyboardTextEntered(const HxStr &text) {
     mRemixNameText->SetText(text); // The binary dereferences the text object with no null check.
     if (mKeyboardPending != 0) {
@@ -228,14 +228,14 @@ void MetSaveRemixScreen::OnKeyboardTextEntered(const HxStr &text) {
     }
 }
 
-// 0x003819f0
+// NTSC-U/C: 0x003819f0, PAL: 0x003b2058
 void MetSaveRemixScreen::OnSaveAbandoned() {
     if (mSaver != nullptr) {
         mSaver->OnSaveFinished(kSaverAbandoned);
     }
 }
 
-// 0x00381a28
+// NTSC-U/C: 0x00381a28, PAL: 0x003b2090
 void MetSaveRemixScreen::OnSaveDialogueClosed() {
     if (mSaver != nullptr) {
         mSaver->OnSaveFinished(kSaverDialogueClosed);
@@ -254,7 +254,7 @@ void MetSaveRemixScreen::ResolveContainerViews() {
     mButtonList->Add(HxStr(kSaveCopyButton), HxStr(kEmptyText));
 }
 
-// 0x0037c110
+// NTSC-U/C: 0x0037c110, PAL: 0x003ac328
 void MetSaveRemixScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
     mExitChoice = kExitToHelp;
     if (mSaver != nullptr) {
@@ -265,7 +265,7 @@ void MetSaveRemixScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *
     BeginExit();
 }
 
-// 0x0037cac8
+// NTSC-U/C: 0x0037cac8, PAL: 0x003ace68
 void MetSaveRemixScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (!(name == kDiscardDialogue)) {
         MetSaveRemix::OnMsgScreenDismissed(name, nChoice);
@@ -283,7 +283,7 @@ void MetSaveRemixScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// 0x0037b718
+// NTSC-U/C: 0x0037b718, PAL: 0x003ab798
 void MetSaveRemixScreen::OnPanelActivated() {
     if (mKeyboardPending == 0) {
         MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);

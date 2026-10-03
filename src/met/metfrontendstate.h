@@ -23,14 +23,16 @@ public:
     /**
      * Start with no persona, an empty screen name, and every flag clear.
      *
-     * @ghidraAddress 0x00215488
+     * @ghidraAddress NTSC-U/C: 0x00215488
+     * @ghidraAddress PAL: 0x0021f0b8
      */
     MetFrontEndState();
 
     /**
      * Delete every persona and release the screen name.
      *
-     * @ghidraAddress 0x00215568
+     * @ghidraAddress NTSC-U/C: 0x00215568
+     * @ghidraAddress PAL: 0x0021f1b0
      */
     ~MetFrontEndState();
 
@@ -38,7 +40,8 @@ public:
      * Report the instance Create() allocated.
      *
      * @return The instance, or null outside the lifetime of the front-end renderer.
-     * @ghidraAddress 0x00217f30
+     * @ghidraAddress NTSC-U/C: 0x00217f30
+     * @ghidraAddress PAL: 0x00221bb8
      */
     static MetFrontEndState *shared();
 
@@ -48,7 +51,8 @@ public:
      * MetRenderer's constructor is the one caller. An existing instance is overwritten rather than
      * released.
      *
-     * @ghidraAddress 0x00217f40
+     * @ghidraAddress NTSC-U/C: 0x00217f40
+     * @ghidraAddress PAL: 0x00221bc8
      */
     static void Create();
 
@@ -57,7 +61,8 @@ public:
      *
      * MetRenderer's destructor is the one caller.
      *
-     * @ghidraAddress 0x00217fa0
+     * @ghidraAddress NTSC-U/C: 0x00217fa0
+     * @ghidraAddress PAL: 0x00221c28
      */
     static void Destroy();
 
@@ -66,7 +71,8 @@ public:
      *
      * The persona vector and the screen name are not touched.
      *
-     * @ghidraAddress 0x00217fd8
+     * @ghidraAddress NTSC-U/C: 0x00217fd8
+     * @ghidraAddress PAL: 0x00221c60
      */
     void Reset();
 
@@ -77,7 +83,8 @@ public:
      * copy. It does not read this object.
      *
      * @return The persona, or null when the game manager records none.
-     * @ghidraAddress 0x002156b0
+     * @ghidraAddress NTSC-U/C: 0x002156b0
+     * @ghidraAddress PAL: 0x0021f310
      */
     MetPersonaData *GetFirstPersona();
 

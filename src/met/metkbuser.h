@@ -24,7 +24,8 @@ class HxStr;
 class MetKBUser {
 public:
     /**
-     * @ghidraAddress 0x0025dfb8
+     * @ghidraAddress NTSC-U/C: 0x0025dfb8
+     * @ghidraAddress PAL: 0x00274208
      */
     virtual ~MetKBUser();
 
@@ -41,7 +42,8 @@ public:
      * unchanged. Three of the seven overrides in the image were read.
      *
      * @param text The text the user entered.
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual void OnKeyboardTextEntered(const HxStr &text) = 0;
 };

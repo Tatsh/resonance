@@ -61,7 +61,8 @@ public:
      * @param pDownArrow The mesh shown while items lie below the page, or null.
      * @param nContext The value passed through to the provider. It is the one argument on the
      * stack.
-     * @ghidraAddress 0x003fcb00
+     * @ghidraAddress NTSC-U/C: 0x003fcb00
+     * @ghidraAddress PAL: 0x00435518
      */
     ScrollingList(ListDataProvider *pProvider,
                   int nRowPitch,
@@ -79,7 +80,8 @@ public:
      * name, gathers its animation, collision, draw, and transform descendants, removes duplicates,
      * and deletes each one and then the clone itself.
      *
-     * @ghidraAddress 0x003fd380
+     * @ghidraAddress NTSC-U/C: 0x003fd380
+     * @ghidraAddress PAL: 0x00435d98
      */
     virtual ~ScrollingList();
 
@@ -90,7 +92,8 @@ public:
      * ListDataProvider::ProvideMesh() when it is a Mesh and to ListDataProvider::ProvideText()
      * otherwise. The arrows are updated last.
      *
-     * @ghidraAddress 0x003fdd18
+     * @ghidraAddress NTSC-U/C: 0x003fdd18
+     * @ghidraAddress PAL: 0x004367a0
      */
     void refresh();
 
@@ -101,7 +104,8 @@ public:
      * low bit of mShowing, the selection and the cursor row each step up when they can, and the
      * highlight and the rows are refreshed.
      *
-     * @ghidraAddress 0x00400ec8
+     * @ghidraAddress NTSC-U/C: 0x00400ec8
+     * @ghidraAddress PAL: 0x00439998
      */
     void scrollUp();
 
@@ -111,7 +115,8 @@ public:
      * The body mirrors scrollUp() with two differences. The highlight is not tested for null, and
      * it is shown unconditionally rather than with the low bit of mShowing.
      *
-     * @ghidraAddress 0x00400f78
+     * @ghidraAddress NTSC-U/C: 0x00400f78
+     * @ghidraAddress PAL: 0x00439a48
      */
     void scrollDown();
 
@@ -123,7 +128,8 @@ public:
      * refreshed.
      *
      * @param nItemCount The number of items.
-     * @ghidraAddress 0x00401088
+     * @ghidraAddress NTSC-U/C: 0x00401088
+     * @ghidraAddress PAL: 0x00439b58
      */
     void setItemCount(int nItemCount);
 
@@ -131,7 +137,8 @@ public:
      * Report the selected item.
      *
      * @return The index of the selected item.
-     * @ghidraAddress 0x00401160
+     * @ghidraAddress NTSC-U/C: 0x00401160
+     * @ghidraAddress PAL: 0x00439c30
      */
     int getSelected();
 
@@ -142,7 +149,8 @@ public:
      * moved in both cases. The rows are not refreshed.
      *
      * @param nSelected The index of the item to select.
-     * @ghidraAddress 0x00401168
+     * @ghidraAddress NTSC-U/C: 0x00401168
+     * @ghidraAddress PAL: 0x00439c38
      */
     void setSelected(int nSelected);
 
@@ -153,7 +161,8 @@ public:
      * A null highlight is skipped.
      *
      * @param nShowing Non-zero to draw the list.
-     * @ghidraAddress 0x00401300
+     * @ghidraAddress NTSC-U/C: 0x00401300
+     * @ghidraAddress PAL: 0x00439dd0
      */
     void setShowing(int nShowing);
 
@@ -164,7 +173,8 @@ public:
      * the item count.
      *
      * @param nShowing Non-zero to draw each cell.
-     * @ghidraAddress 0x00401360
+     * @ghidraAddress NTSC-U/C: 0x00401360
+     * @ghidraAddress PAL: 0x00439e30
      */
     void setEntriesShowing(int nShowing);
 
@@ -175,20 +185,20 @@ private:
         Rnd::Mesh *mMesh;
     };
 
-    // 0x003fdec0
+    // NTSC-U/C: 0x003fdec0, PAL: 0x00436948
     // Clone the template into the row view for one index.
     Rnd::View *makeRow(int nIndex);
 
-    // 0x003fd858
+    // NTSC-U/C: 0x003fd858, PAL: 0x004362e0
     // Record the Text and Mesh children of one row view as its cells, and every Text
     // child in mTextCells as well.
     void buildRowCells(Rnd::View *pRow);
 
-    // 0x00401030
+    // NTSC-U/C: 0x00401030, PAL: 0x00439b00
     // Place the highlight mesh on the cursor row.
     void updateHighlight();
 
-    // 0x00401270
+    // NTSC-U/C: 0x00401270, PAL: 0x00439d40
     // Show each arrow when items lie beyond that end of the page.
     void updateArrows();
 

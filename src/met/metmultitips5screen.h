@@ -28,12 +28,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00309fa0
+     * @ghidraAddress NTSC-U/C: 0x00309fa0
+     * @ghidraAddress PAL: 0x0032f610
      */
     MetMultiTips5Screen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0030df48
+     * @ghidraAddress NTSC-U/C: 0x0030df48
+     * @ghidraAddress PAL: 0x00333b60
      */
     virtual ~MetMultiTips5Screen();
 
@@ -45,7 +47,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0030dfc8
+     * @ghidraAddress NTSC-U/C: 0x0030dfc8
+     * @ghidraAddress PAL: 0x00333c08
      */
     static MetMultiTips5Screen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -54,7 +57,8 @@ public:
      *
      * Slot 36. The last page has no next page to push.
      *
-     * @ghidraAddress 0x0030a4d8
+     * @ghidraAddress NTSC-U/C: 0x0030a4d8
+     * @ghidraAddress PAL: 0x0032fec8
      */
     virtual void OnExitFinished();
 

@@ -239,7 +239,8 @@ public:
      * @param name The screen name, from which the animation view names are formatted.
      * @param directory The directory the container loads from.
      * @param file The container name, without the `.rnd` suffix.
-     * @ghidraAddress 0x0038a450
+     * @ghidraAddress NTSC-U/C: 0x0038a450
+     * @ghidraAddress PAL: 0x003bb9a8
      */
     MetScreen(MetRenderer *pRenderer,
               int nPriority,
@@ -260,7 +261,8 @@ public:
      * `mRenderer->RemoveSink(this)`, in that order. RemoveSink() blocks it for the reason recorded
      * on the constructor.
      *
-     * @ghidraAddress 0x0038a848
+     * @ghidraAddress NTSC-U/C: 0x0038a848
+     * @ghidraAddress PAL: 0x003bbe10
      */
     virtual ~MetScreen();
 
@@ -273,7 +275,8 @@ public:
      * tree header plus the 8-byte key and the 4-byte pointer.
      *
      * @return The table.
-     * @ghidraAddress 0x00381e10
+     * @ghidraAddress NTSC-U/C: 0x00381e10
+     * @ghidraAddress PAL: 0x003b2490
      */
     static std::map<HxStr, MetContainerLoad *> &ContainerLoaderMap();
 
@@ -287,7 +290,8 @@ public:
      * is at `0x00382168`.
      *
      * @return The table.
-     * @ghidraAddress 0x003821e0
+     * @ghidraAddress NTSC-U/C: 0x003821e0
+     * @ghidraAddress PAL: 0x003b2860
      */
     static std::map<HxStr, MetScreenEntry> &ScreenRegistry();
 
@@ -296,7 +300,8 @@ public:
      *
      * @param name The registry key.
      * @return The screen, or null when no screen has registered under the key.
-     * @ghidraAddress 0x0038ff90
+     * @ghidraAddress NTSC-U/C: 0x0038ff90
+     * @ghidraAddress PAL: 0x003c1860
      */
     static MetScreen *FindScreenByName(const HxStr &name);
 
@@ -310,7 +315,8 @@ public:
      * @param pRenderer The front-end renderer, which is not read.
      * @param name The registry key.
      * @return The screen.
-     * @ghidraAddress 0x00390000
+     * @ghidraAddress NTSC-U/C: 0x00390000
+     * @ghidraAddress PAL: 0x003c18d0
      */
     static MetScreen *FindEndScreen(MetRenderer *pRenderer, const HxStr &name);
 
@@ -323,7 +329,8 @@ public:
      * one caller. The title is inferred.
      *
      * @param pRenderer The renderer the screens register on.
-     * @ghidraAddress 0x003848e0
+     * @ghidraAddress NTSC-U/C: 0x003848e0
+     * @ghidraAddress PAL: 0x003b50b0
      */
     static void CreateMainMenuScreens(MetRenderer *pRenderer);
 
@@ -335,7 +342,8 @@ public:
      * record's pointer, and erasing the entry. The MetContainerLoad records themselves are not
      * freed. MetRenderer's destructor is the one caller. The title is inferred.
      *
-     * @ghidraAddress 0x00383700
+     * @ghidraAddress NTSC-U/C: 0x00383700
+     * @ghidraAddress PAL: 0x003b3dc8
      */
     static void DestroyAllScreens();
 
@@ -347,7 +355,8 @@ public:
      * MetRenderer::ResolveSceneViews() is the one caller. The title is inferred.
      *
      * @param pRenderer The renderer the screens register on.
-     * @ghidraAddress 0x00384300
+     * @ghidraAddress NTSC-U/C: 0x00384300
+     * @ghidraAddress PAL: 0x003b49f0
      */
     static void CreateStartupScreens(MetRenderer *pRenderer);
 
@@ -360,7 +369,8 @@ public:
      * caller. The title is inferred.
      *
      * @param pRenderer The renderer the screens register on.
-     * @ghidraAddress 0x00385180
+     * @ghidraAddress NTSC-U/C: 0x00385180
+     * @ghidraAddress PAL: 0x003b5a98
      */
     static void CreateFrontEndScreens(MetRenderer *pRenderer);
 
@@ -370,7 +380,8 @@ public:
      * The image has no caller, and no recovered registration uses the category. The title is
      * inferred.
      *
-     * @ghidraAddress 0x003822c8
+     * @ghidraAddress NTSC-U/C: 0x003822c8
+     * @ghidraAddress PAL: 0x003b2948
      */
     static void DestroyCategory2Screens();
 
@@ -380,7 +391,8 @@ public:
      * The image has no caller, and no recovered registration uses the category. The title is
      * inferred.
      *
-     * @ghidraAddress 0x00382978
+     * @ghidraAddress NTSC-U/C: 0x00382978
+     * @ghidraAddress PAL: 0x003b3010
      */
     static void DestroyCategory1Screens();
 
@@ -390,7 +402,8 @@ public:
      *
      * The image has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x00383020
+     * @ghidraAddress NTSC-U/C: 0x00383020
+     * @ghidraAddress PAL: 0x003b36d8
      */
     static void DestroyNonDefaultScreens();
 
@@ -402,7 +415,8 @@ public:
      * Rnd::Drawable::SetShowing(). MetRenderer::Update() is the one caller. The title is
      * inferred.
      *
-     * @ghidraAddress 0x00381ef8
+     * @ghidraAddress NTSC-U/C: 0x00381ef8
+     * @ghidraAddress PAL: 0x003b2578
      */
     static void PollContainerLoads();
 
@@ -421,7 +435,8 @@ public:
      * no other route to it. A friend declaration fits the image equally well.
      *
      * @param pCommand The command the renderer translated from an input message.
-     * @ghidraAddress 0x0038b730
+     * @ghidraAddress NTSC-U/C: 0x0038b730
+     * @ghidraAddress PAL: 0x003bcea8
      */
     void DeliverCommand(const MetScreenCommand *pCommand);
 
@@ -435,7 +450,8 @@ public:
      * Declared public for the same reason as DeliverCommand().
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x00390380
+     * @ghidraAddress NTSC-U/C: 0x00390380
+     * @ghidraAddress PAL: 0x003c1c50
      */
     void UpdateAnimationFrame(float flTime);
 
@@ -465,7 +481,8 @@ public:
      * Declared public for the same reason as DeliverCommand().
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x0038b918
+     * @ghidraAddress NTSC-U/C: 0x0038b918
+     * @ghidraAddress PAL: 0x003bd090
      */
     void UpdateFrame(float flTime);
 
@@ -477,7 +494,8 @@ public:
      * in mEnterPending and is entered by a later call.
      *
      * @param name The registry key of the screen to push.
-     * @ghidraAddress 0x00390200
+     * @ghidraAddress NTSC-U/C: 0x00390200
+     * @ghidraAddress PAL: 0x003c1ad0
      */
     virtual void PushNamedScreen(const HxStr &name);
 
@@ -486,7 +504,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x003900a8
+     * @ghidraAddress NTSC-U/C: 0x003900a8
+     * @ghidraAddress PAL: 0x003c1978
      */
     virtual void EnterAndShow();
 
@@ -497,7 +516,8 @@ public:
      * screen whose slot 14 reports the load unfinished instead records 1 in its mActivatePending.
      *
      * @param name The registry key of the panel to activate, or an empty string for none.
-     * @ghidraAddress 0x0038b828
+     * @ghidraAddress NTSC-U/C: 0x0038b828
+     * @ghidraAddress PAL: 0x003bcfa0
      */
     virtual void ActivateNamedPanel(const HxStr &name);
 
@@ -509,7 +529,8 @@ public:
      * start the screen's interaction, for example MetFreqMakerInventoryScreen returning its grid
      * cursor to the first cell and MetRemixDelScreen running its pending keyboard action.
      *
-     * @ghidraAddress 0x0038fdf8
+     * @ghidraAddress NTSC-U/C: 0x0038fdf8
+     * @ghidraAddress PAL: 0x003c16c8
      */
     virtual void OnPanelActivated();
 
@@ -520,7 +541,8 @@ public:
      * without a null check, so a key that no screen registered under faults.
      *
      * @param name The registry key of the screen to exit.
-     * @ghidraAddress 0x003902d0
+     * @ghidraAddress NTSC-U/C: 0x003902d0
+     * @ghidraAddress PAL: 0x003c1ba0
      */
     virtual void ExitScreenByName(const HxStr &name);
 
@@ -529,7 +551,8 @@ public:
      *
      * Slot 9.
      *
-     * @ghidraAddress 0x00390100
+     * @ghidraAddress NTSC-U/C: 0x00390100
+     * @ghidraAddress PAL: 0x003c19d0
      */
     virtual void BeginExit();
 
@@ -543,7 +566,8 @@ public:
      * class, and the destructor's direct call to slot 13 has no counterpart here. Neither the
      * purpose nor the argument list is recovered.
      *
-     * @ghidraAddress 0x00390130
+     * @ghidraAddress NTSC-U/C: 0x00390130
+     * @ghidraAddress PAL: 0x003c1a00
      */
     virtual void OnUnusedHook();
 
@@ -557,7 +581,8 @@ public:
      * screens and re-activates its panel, which is what fixes the hook as a resumption rather than
      * a report of the entered text.
      *
-     * @ghidraAddress 0x00390138
+     * @ghidraAddress NTSC-U/C: 0x00390138
+     * @ghidraAddress PAL: 0x003c1a08
      */
     virtual void OnKeyboardDismissed();
 
@@ -570,7 +595,8 @@ public:
      * slot on each entry with no argument, and then draws the timing graph and the statistics
      * overlay.
      *
-     * @ghidraAddress 0x0038fe00
+     * @ghidraAddress NTSC-U/C: 0x0038fe00
+     * @ghidraAddress PAL: 0x003c16d0
      */
     virtual void OnDrawPass();
 
@@ -583,7 +609,8 @@ public:
      * direct rather than dispatched call is what a virtual invoked from a destructor compiles to,
      * because the dynamic type there is this class.
      *
-     * @ghidraAddress 0x003900a0
+     * @ghidraAddress NTSC-U/C: 0x003900a0
+     * @ghidraAddress PAL: 0x003c1970
      */
     virtual void OnDestroying();
 
@@ -594,7 +621,8 @@ public:
      * and the resolution happens once. The report does not depend on mViewsUnresolved.
      *
      * @return Non-zero once the container load has finished.
-     * @ghidraAddress 0x0038b338
+     * @ghidraAddress NTSC-U/C: 0x0038b338
+     * @ghidraAddress PAL: 0x003bca70
      */
     virtual int PollContainerLoad();
 
@@ -618,7 +646,8 @@ public:
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
-     * @ghidraAddress 0x0038fe20
+     * @ghidraAddress NTSC-U/C: 0x0038fe20
+     * @ghidraAddress PAL: 0x003c16f0
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -634,7 +663,8 @@ public:
      * panel.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
-     * @ghidraAddress 0x0038fe28
+     * @ghidraAddress NTSC-U/C: 0x0038fe28
+     * @ghidraAddress PAL: 0x003c16f8
      */
     virtual void OnMsgScreenShown(const HxStr &name);
 
@@ -651,7 +681,8 @@ public:
      * rather than a call. The view is dereferenced with no null check.
      *
      * @param nShowing Non-zero to draw the screen.
-     * @ghidraAddress 0x0038b490
+     * @ghidraAddress NTSC-U/C: 0x0038b490
+     * @ghidraAddress PAL: 0x003bcbe8
      */
     virtual void SetShowing(int nShowing);
 
@@ -665,7 +696,8 @@ public:
      *
      * @param directory The directory the container loads from.
      * @param file Declared and ignored.
-     * @ghidraAddress 0x0038aa00
+     * @ghidraAddress NTSC-U/C: 0x0038aa00
+     * @ghidraAddress PAL: 0x003bc008
      */
     virtual void BeginContainerLoad(const HxStr &directory, const HxStr &file);
 
@@ -681,7 +713,8 @@ public:
      * MetConfigControllerScreen fills it at `0x00200ba8` and MetKeyboardScreen at `0x00283268`.
      *
      * @param pCommand The command the renderer translated from an input message.
-     * @ghidraAddress 0x0038fe30
+     * @ghidraAddress NTSC-U/C: 0x0038fe30
+     * @ghidraAddress PAL: 0x003c1700
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -697,7 +730,8 @@ public:
      *
      * @param nSelector The controller index the command came from, which an override compares
      *                  against its own recorded selector.
-     * @ghidraAddress 0x00390140
+     * @ghidraAddress NTSC-U/C: 0x00390140
+     * @ghidraAddress PAL: 0x003c1a10
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -709,7 +743,8 @@ public:
      * first. The body does not read the selector.
      *
      * @param nSelector The pad index of the command.
-     * @ghidraAddress 0x00390160
+     * @ghidraAddress NTSC-U/C: 0x00390160
+     * @ghidraAddress PAL: 0x003c1a30
      */
     virtual void PlayLeaveSound(int nSelector);
 
@@ -721,7 +756,8 @@ public:
      *
      * @param nSelector The controller index the command came from, which an override compares
      *                  against its own recorded selector.
-     * @ghidraAddress 0x003901c0
+     * @ghidraAddress NTSC-U/C: 0x003901c0
+     * @ghidraAddress PAL: 0x003c1a90
      */
     virtual void PlayHighSound(int nSelector);
 
@@ -734,7 +770,8 @@ public:
      *
      * @param nSelector The controller index the command came from, which an override compares
      *                  against its own recorded selector.
-     * @ghidraAddress 0x00390180
+     * @ghidraAddress NTSC-U/C: 0x00390180
+     * @ghidraAddress PAL: 0x003c1a50
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -747,7 +784,8 @@ public:
      *
      * @param nSelector The controller index the command came from, which an override compares
      *                  against its own recorded selector.
-     * @ghidraAddress 0x003901a0
+     * @ghidraAddress NTSC-U/C: 0x003901a0
+     * @ghidraAddress PAL: 0x003c1a70
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -760,7 +798,8 @@ public:
      *
      * @param nSelector The controller index the command came from, which an override compares
      *                  against its own recorded selector.
-     * @ghidraAddress 0x003901e0
+     * @ghidraAddress NTSC-U/C: 0x003901e0
+     * @ghidraAddress PAL: 0x003c1ab0
      */
     virtual void PlayErrorSound(int nSelector);
 
@@ -777,7 +816,8 @@ public:
      * sum against it.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x0038fe38
+     * @ghidraAddress NTSC-U/C: 0x0038fe38
+     * @ghidraAddress PAL: 0x003c1708
      */
     virtual void UpdateIdle(float flTime);
 
@@ -793,7 +833,8 @@ public:
      * received.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x0038fe40
+     * @ghidraAddress NTSC-U/C: 0x0038fe40
+     * @ghidraAddress PAL: 0x003c1710
      */
     virtual void UpdateIdleAnimation(float flTime);
 
@@ -808,7 +849,8 @@ public:
      * @param flInterval The interval between steps.
      * @param pButton The button whose state alternates.
      * @param nCycles The number of full cycles to run.
-     * @ghidraAddress 0x00390498
+     * @ghidraAddress NTSC-U/C: 0x00390498
+     * @ghidraAddress PAL: 0x003c1d68
      */
     virtual void
     StartRepeatingSound(float flStartTime, float flInterval, Rnd::Button *pButton, int nCycles);
@@ -824,7 +866,8 @@ public:
      * fields that drive the alternation.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x003904e0
+     * @ghidraAddress NTSC-U/C: 0x003904e0
+     * @ghidraAddress PAL: 0x003c1db0
      */
     virtual void UpdateRepeatingSound(float flTime);
 
@@ -836,7 +879,8 @@ public:
      * `HxStr` at `+0x04` of the same argument.
      *
      * @param pButton The button slot 29 finished with.
-     * @ghidraAddress 0x0038fe48
+     * @ghidraAddress NTSC-U/C: 0x0038fe48
+     * @ghidraAddress PAL: 0x003c1718
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -846,7 +890,8 @@ public:
      * Slot 31. The exit animation start time is cleared, so the two animations never run together.
      *
      * @param flTime The frame position the animation starts at.
-     * @ghidraAddress 0x003905c0
+     * @ghidraAddress NTSC-U/C: 0x003905c0
+     * @ghidraAddress PAL: 0x003c1e90
      */
     virtual void StartEnterAnimation(float flTime);
 
@@ -857,7 +902,8 @@ public:
      * the end between the two.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x003905f0
+     * @ghidraAddress NTSC-U/C: 0x003905f0
+     * @ghidraAddress PAL: 0x003c1ec0
      */
     virtual void UpdateEnterAnimation(float flTime);
 
@@ -868,7 +914,8 @@ public:
      * finished, in the same call that sets mAcceptsCommands, and the MetConfigControllerScreen
      * override at `0x002069d0` does not read an argument.
      *
-     * @ghidraAddress 0x0038fe50
+     * @ghidraAddress NTSC-U/C: 0x0038fe50
+     * @ghidraAddress PAL: 0x003c1720
      */
     virtual void OnEnterFinished();
 
@@ -879,7 +926,8 @@ public:
      * pair with UpdateExitAnimation().
      *
      * @param flTime The frame position the animation starts at.
-     * @ghidraAddress 0x003906a0
+     * @ghidraAddress NTSC-U/C: 0x003906a0
+     * @ghidraAddress PAL: 0x003c1f70
      */
     virtual void StartExitAnimation(float flTime);
 
@@ -890,7 +938,8 @@ public:
      * screen is hidden, erased from the renderer's stack, and then slot 36 runs.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x003906b0
+     * @ghidraAddress NTSC-U/C: 0x003906b0
+     * @ghidraAddress PAL: 0x003c1f80
      */
     virtual void UpdateExitAnimation(float flTime);
 
@@ -902,7 +951,8 @@ public:
      * screen their exit led to, and the MetConfigControllerScreen override at `0x00201790` does
      * not read an argument.
      *
-     * @ghidraAddress 0x0038fe58
+     * @ghidraAddress NTSC-U/C: 0x0038fe58
+     * @ghidraAddress PAL: 0x003c1728
      */
     virtual void OnExitFinished();
 
@@ -912,7 +962,8 @@ public:
      * Slot 37. Forwards to Rnd::Drawable::Draw() on the Drawable subobject of mView, at
      * `+0x18` within the view. The name is inferred from the Rnd::Drawable routine it forwards to.
      *
-     * @ghidraAddress 0x00390788
+     * @ghidraAddress NTSC-U/C: 0x00390788
+     * @ghidraAddress PAL: 0x003c2058
      */
     virtual void Draw();
 
@@ -923,7 +974,8 @@ public:
      * container with no such object stops the machine through Fatal() with
      * `the screen %s doesn't have a valid view!`.
      *
-     * @ghidraAddress 0x0038b1b0
+     * @ghidraAddress NTSC-U/C: 0x0038b1b0
+     * @ghidraAddress PAL: 0x003bc8a8
      */
     virtual void ResolveContainerViews();
 
@@ -934,12 +986,13 @@ protected:
      * The override is empty, so a screen that wants messages overrides the slot again.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x003907a8
+     * @ghidraAddress NTSC-U/C: 0x003907a8
+     * @ghidraAddress PAL: 0x003c2078
      */
     virtual void HandleMessage(Message *pMsg);
 
 protected:
-    // 0x0038bd60
+    // NTSC-U/C: 0x0038bd60, PAL: 0x003bd538
     // Resolves the two animation views from the screen name and records the enter
     // animation's end frame. Slot 38 and MetTopLogoScreen's slot 38 call it, which is why it is
     // protected. The title is inferred from the two members it writes.

@@ -31,12 +31,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00224f40
+     * @ghidraAddress NTSC-U/C: 0x00224f40
+     * @ghidraAddress PAL: 0x00237ee8
      */
     MetJukeboxCustomRemixesScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x0022a850
+     * @ghidraAddress NTSC-U/C: 0x0022a850
+     * @ghidraAddress PAL: 0x0023dc00
      */
     virtual ~MetJukeboxCustomRemixesScreen();
 
@@ -48,7 +50,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x0022a938
+     * @ghidraAddress NTSC-U/C: 0x0022a938
+     * @ghidraAddress PAL: 0x0023dce8
      */
     static MetJukeboxCustomRemixesScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -71,7 +74,8 @@ public:
      * Slot 39. The size of the catalogue mCatalogue addresses, read without a null check.
      *
      * @return The row count.
-     * @ghidraAddress 0x0022a910
+     * @ghidraAddress NTSC-U/C: 0x0022a910
+     * @ghidraAddress PAL: 0x0023dcc0
      */
     virtual int GetItemCount();
 };

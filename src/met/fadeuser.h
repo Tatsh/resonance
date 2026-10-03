@@ -28,21 +28,24 @@
 class FadeUser {
 public:
     /**
-     * @ghidraAddress 0x0021d760
+     * @ghidraAddress NTSC-U/C: 0x0021d760
+     * @ghidraAddress PAL: 0x002302b8
      */
     virtual ~FadeUser();
 
     /**
      * Respond to a MetFade fade out having finished. Slot 2.
      *
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual void OnFadeOutDone() = 0;
 
     /**
      * Respond to a MetFade fade in having finished. Slot 3.
      *
-     * @ghidraAddress 0x005381a8
+     * @ghidraAddress NTSC-U/C: 0x005381a8
+     * @ghidraAddress PAL: 0x00577a68
      */
     virtual void OnFadeInDone() = 0;
 };

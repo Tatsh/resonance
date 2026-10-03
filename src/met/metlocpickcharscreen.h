@@ -49,7 +49,8 @@ public:
     MetLocPickCharScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002b19b0
+     * @ghidraAddress NTSC-U/C: 0x002b19b0
+     * @ghidraAddress PAL: 0x002d0808
      */
     virtual ~MetLocPickCharScreen();
 
@@ -59,7 +60,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002b9e60
+     * @ghidraAddress NTSC-U/C: 0x002b9e60
+     * @ghidraAddress PAL: 0x002d96c8
      */
     static MetLocPickCharScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -69,7 +71,8 @@ public:
      * Slot 5. After MetLocNumPlayScreen, a front end that uses a card runs StartDetect() instead,
      * and one without a card appends the saved personas.
      *
-     * @ghidraAddress 0x002b29e8
+     * @ghidraAddress NTSC-U/C: 0x002b29e8
+     * @ghidraAddress PAL: 0x002d1948
      */
     virtual void EnterAndShow();
 
@@ -80,7 +83,8 @@ public:
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The chosen button, counted from zero.
-     * @ghidraAddress 0x002ba178
+     * @ghidraAddress NTSC-U/C: 0x002ba178
+     * @ghidraAddress PAL: 0x002d98d0
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -90,7 +94,8 @@ public:
      * Slot 19. A command from a controller beyond mPlayerCount is ignored.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002b2370
+     * @ghidraAddress NTSC-U/C: 0x002b2370
+     * @ghidraAddress PAL: 0x002d1230
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -100,7 +105,8 @@ public:
      * Slot 20.
      *
      * @param nSelector The controller, counted from 1.
-     * @ghidraAddress 0x002b9fe8
+     * @ghidraAddress NTSC-U/C: 0x002b9fe8
+     * @ghidraAddress PAL: 0x002d9850
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -109,7 +115,8 @@ public:
      *
      * Slot 22. The body is empty.
      *
-     * @ghidraAddress 0x002b9e58
+     * @ghidraAddress NTSC-U/C: 0x002b9e58
+     * @ghidraAddress PAL: 0x002d96c0
      */
     virtual void PlayHighSound(int) {
     }
@@ -120,7 +127,8 @@ public:
      * Slot 23.
      *
      * @param nSelector The controller, counted from 1.
-     * @ghidraAddress 0x002b9f48
+     * @ghidraAddress NTSC-U/C: 0x002b9f48
+     * @ghidraAddress PAL: 0x002d97b0
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -130,7 +138,8 @@ public:
      * Slot 24.
      *
      * @param nSelector The controller, counted from 1.
-     * @ghidraAddress 0x002b9f98
+     * @ghidraAddress NTSC-U/C: 0x002b9f98
+     * @ghidraAddress PAL: 0x002d9800
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -141,7 +150,8 @@ public:
      * Slot 26.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x002ba038
+     * @ghidraAddress NTSC-U/C: 0x002ba038
+     * @ghidraAddress PAL: 0x002d2e60
      */
     virtual void UpdateIdle(float flTime);
 
@@ -151,7 +161,8 @@ public:
      * Slot 36. MetLeftGizmoScreen always comes up. A back command then returns to
      * MetLocNumPlayersScreen, and a finished pick moves on to MetModeScreen.
      *
-     * @ghidraAddress 0x002b3e18
+     * @ghidraAddress NTSC-U/C: 0x002b3e18
+     * @ghidraAddress PAL: 0x002d2f90
      */
     virtual void OnExitFinished();
 
@@ -161,7 +172,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x002b1e00
+     * @ghidraAddress NTSC-U/C: 0x002b1e00
+     * @ghidraAddress PAL: 0x002d0c58
      */
     virtual void ResolveContainerViews();
 
@@ -180,7 +192,8 @@ public:
      *
      * Slot 40. Sets mPersonaLoadRequested as the base does.
      *
-     * @ghidraAddress 0x002ba148
+     * @ghidraAddress NTSC-U/C: 0x002ba148
+     * @ghidraAddress PAL: 0x002d98a0
      */
     virtual void StartLoadPersonas();
 
@@ -221,12 +234,12 @@ public:
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
 private:
-    // 0x002b27f8
+    // NTSC-U/C: 0x002b27f8, PAL: 0x002d1738
     // Steps one player's choice through mPersonas and shows the new character. The title is
     // inferred.
     void CyclePersona(const MetScreenCommand *pCommand);
 
-    // 0x002b2e08
+    // NTSC-U/C: 0x002b2e08, PAL: 0x002d1d68
     // Points a player's choice at the entry of mPersonas with the persona's username, or at a
     // random entry when there is none. The title is inferred.
     void SelectPersona(MetPersonaData *pPersona, int nPlayer);

@@ -47,12 +47,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00240c28
+     * @ghidraAddress NTSC-U/C: 0x00240c28
+     * @ghidraAddress PAL: 0x002556d8
      */
     MetJukeboxTopButtonsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00246778
+     * @ghidraAddress NTSC-U/C: 0x00246778
+     * @ghidraAddress PAL: 0x0025b890
      */
     virtual ~MetJukeboxTopButtonsScreen();
 
@@ -64,7 +66,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002466f0
+     * @ghidraAddress NTSC-U/C: 0x002466f0
+     * @ghidraAddress PAL: 0x0025b808
      */
     static MetJukeboxTopButtonsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -85,7 +88,8 @@ public:
     /**
      * Begin the exit and exit all five sub-screens.
      *
-     * @ghidraAddress 0x00242140
+     * @ghidraAddress NTSC-U/C: 0x00242140
+     * @ghidraAddress PAL: 0x002570e8
      */
     virtual void BeginExit();
 
@@ -97,7 +101,8 @@ public:
      * mCommandTargetScreen records.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002467e8
+     * @ghidraAddress NTSC-U/C: 0x002467e8
+     * @ghidraAddress PAL: 0x0025b910
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -105,14 +110,16 @@ public:
      * Do nothing.
      *
      * @param flTime Not read.
-     * @ghidraAddress 0x002468d8
+     * @ghidraAddress NTSC-U/C: 0x002468d8
+     * @ghidraAddress PAL: 0x0025ba00
      */
     virtual void UpdateIdle(float flTime);
 
     /**
      * Show the selected button's panel.
      *
-     * @ghidraAddress 0x002468b8
+     * @ghidraAddress NTSC-U/C: 0x002468b8
+     * @ghidraAddress PAL: 0x0025b9e0
      */
     virtual void OnEnterFinished();
 
@@ -122,7 +129,8 @@ public:
      * When MetScreen::mExitChoice is 0, the left gizmo, title, and remix type screens are pushed
      * and the remix type screen is activated. Any other value does nothing.
      *
-     * @ghidraAddress 0x00241120
+     * @ghidraAddress NTSC-U/C: 0x00241120
+     * @ghidraAddress PAL: 0x00255d20
      */
     virtual void OnExitFinished();
 

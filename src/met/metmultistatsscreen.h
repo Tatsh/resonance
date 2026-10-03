@@ -37,12 +37,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002ff228
+     * @ghidraAddress NTSC-U/C: 0x002ff228
+     * @ghidraAddress PAL: 0x003237b0
      */
     MetMultiStatsScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002fff90
+     * @ghidraAddress NTSC-U/C: 0x002fff90
+     * @ghidraAddress PAL: 0x00324740
      */
     virtual ~MetMultiStatsScreen();
 
@@ -54,7 +56,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00306910
+     * @ghidraAddress NTSC-U/C: 0x00306910
+     * @ghidraAddress PAL: 0x0032b320
      */
     static MetMultiStatsScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -69,14 +72,16 @@ public:
      * show only when GameParams::mPlayMode is 1. Rows past the player count are emptied and
      * their meshes hidden.
      *
-     * @ghidraAddress 0x00300268
+     * @ghidraAddress NTSC-U/C: 0x00300268
+     * @ghidraAddress PAL: 0x00324a18
      */
     virtual void EnterAndShow();
 
     /**
      * Slot 36, overridden empty.
      *
-     * @ghidraAddress 0x00306998
+     * @ghidraAddress NTSC-U/C: 0x00306998
+     * @ghidraAddress PAL: 0x0032b3a8
      */
     virtual void OnExitFinished();
 

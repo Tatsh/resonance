@@ -47,12 +47,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002df058
+     * @ghidraAddress NTSC-U/C: 0x002df058
+     * @ghidraAddress PAL: 0x00301db8
      */
     MetMemDetectStartup(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002e2eb8
+     * @ghidraAddress NTSC-U/C: 0x002e2eb8
+     * @ghidraAddress PAL: 0x00305e40
      */
     virtual ~MetMemDetectStartup();
 
@@ -64,7 +66,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002e2e30
+     * @ghidraAddress NTSC-U/C: 0x002e2e30
+     * @ghidraAddress PAL: 0x00305db8
      */
     static MetMemDetectStartup *New(MetRenderer *pRenderer, int nPriority);
 
@@ -73,7 +76,8 @@ public:
      *
      * FadeUser slot 2, through the FadeUser table entry that adjusts `this` by `-160`.
      *
-     * @ghidraAddress 0x002e30f0
+     * @ghidraAddress NTSC-U/C: 0x002e30f0
+     * @ghidraAddress PAL: 0x00306098
      */
     virtual void OnFadeOutDone();
 
@@ -82,7 +86,8 @@ public:
      *
      * FadeUser slot 3, through the FadeUser table entry that adjusts `this` by `-160`.
      *
-     * @ghidraAddress 0x002e30a0
+     * @ghidraAddress NTSC-U/C: 0x002e30a0
+     * @ghidraAddress PAL: 0x00306048
      */
     virtual void OnFadeInDone();
 
@@ -92,7 +97,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x002e2f40
+     * @ghidraAddress NTSC-U/C: 0x002e2f40
+     * @ghidraAddress PAL: 0x00305ec8
      */
     virtual void EnterAndShow();
 
@@ -101,7 +107,8 @@ public:
      *
      * Slot 9. The override does not run the base exit.
      *
-     * @ghidraAddress 0x002e2fb8
+     * @ghidraAddress NTSC-U/C: 0x002e2fb8
+     * @ghidraAddress PAL: 0x00305f40
      */
     virtual void BeginExit();
 
@@ -132,7 +139,8 @@ public:
      *
      * Slot 41.
      *
-     * @ghidraAddress 0x002e3058
+     * @ghidraAddress NTSC-U/C: 0x002e3058
+     * @ghidraAddress PAL: 0x00306000
      */
     virtual void OnNoCard();
 
@@ -141,7 +149,8 @@ public:
      *
      * Slot 42.
      *
-     * @ghidraAddress 0x002e3068
+     * @ghidraAddress NTSC-U/C: 0x002e3068
+     * @ghidraAddress PAL: 0x00306010
      */
     virtual void OnDetectFinished();
 
@@ -151,7 +160,8 @@ public:
      * All six sound overrides are two-instruction stubs, each written inline with an empty body.
      * This is the one screen in the subsystem that silences every MetScreen sound.
      *
-     * @ghidraAddress 0x002e2e00
+     * @ghidraAddress NTSC-U/C: 0x002e2e00
+     * @ghidraAddress PAL: 0x00305ca0
      */
     virtual void PlaySlideSound(int) {
     }
@@ -159,7 +169,8 @@ public:
     /**
      * Silence the leave sound.
      *
-     * @ghidraAddress 0x002e2e08
+     * @ghidraAddress NTSC-U/C: 0x002e2e08
+     * @ghidraAddress PAL: 0x00305ca8
      */
     virtual void PlayLeaveSound(int) {
     }
@@ -167,7 +178,8 @@ public:
     /**
      * Silence the high sound.
      *
-     * @ghidraAddress 0x002e2e10
+     * @ghidraAddress NTSC-U/C: 0x002e2e10
+     * @ghidraAddress PAL: 0x00305cb0
      */
     virtual void PlayHighSound(int) {
     }
@@ -175,7 +187,8 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * @ghidraAddress 0x002e2e18
+     * @ghidraAddress NTSC-U/C: 0x002e2e18
+     * @ghidraAddress PAL: 0x00305cb8
      */
     virtual void PlayCycleLeftSound(int) {
     }
@@ -183,7 +196,8 @@ public:
     /**
      * Silence the cycle-right sound.
      *
-     * @ghidraAddress 0x002e2e20
+     * @ghidraAddress NTSC-U/C: 0x002e2e20
+     * @ghidraAddress PAL: 0x00305cc0
      */
     virtual void PlayCycleRightSound(int) {
     }
@@ -191,7 +205,8 @@ public:
     /**
      * Silence the error sound.
      *
-     * @ghidraAddress 0x002e2e28
+     * @ghidraAddress NTSC-U/C: 0x002e2e28
+     * @ghidraAddress PAL: 0x00305cc8
      */
     virtual void PlayErrorSound(int) {
     }

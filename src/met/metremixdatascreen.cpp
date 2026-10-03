@@ -75,14 +75,14 @@ inline Rnd::Mesh *FindMesh(const char *pszName) {
 
 } // namespace
 
-// 0x00344740
+// NTSC-U/C: 0x00344740, PAL: 0x0036faa0
 MetRemixDataScreen::MetRemixDataScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLogoTextures(HxStr(kSongLogoFirst), HxStr(kSongLogoSecond)),
       mLabelTextures(HxStr(kSongLabelFirst), HxStr(kSongLabelSecond)) {
 }
 
-// 0x00344bd0
+// NTSC-U/C: 0x00344bd0, PAL: 0x0036fff8
 MetRemixDataScreen::~MetRemixDataScreen() {
 }
 
@@ -162,7 +162,7 @@ void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
     }
 }
 
-// 0x00345ba0
+// NTSC-U/C: 0x00345ba0, PAL: 0x00371338
 void MetRemixDataScreen::SetRecordShowing(int nShowing) {
     mSongTitleText->SetShowing(nShowing);
     mDateText->SetShowing(nShowing);
@@ -174,7 +174,7 @@ void MetRemixDataScreen::SetRecordShowing(int nShowing) {
     }
 }
 
-// 0x00345de8
+// NTSC-U/C: 0x00345de8, PAL: 0x003715c8
 void MetRemixDataScreen::UpdateIdle(float) {
     mLogoTextures.Advance();
     mLogoMesh->SetShowing(0);
@@ -191,12 +191,12 @@ void MetRemixDataScreen::UpdateIdle(float) {
     }
 }
 
-// 0x00349998
+// NTSC-U/C: 0x00349998, PAL: 0x00375238
 MetRemixDataScreen *MetRemixDataScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixDataScreen(pRenderer, nPriority);
 }
 
-// 0x00349a20
+// NTSC-U/C: 0x00349a20, PAL: 0x003752c0
 void MetRemixDataScreen::EnterAndShow() {
     SetRecordShowing(0);
     MetScreen::EnterAndShow();
@@ -207,7 +207,7 @@ void MetRemixDataScreen::EnterAndShow() {
     mLogoTextures.invalidate();
 }
 
-// 0x00349ab8
+// NTSC-U/C: 0x00349ab8, PAL: 0x00375358
 void MetRemixDataScreen::OnExitFinished() {
     mUnavailableText->SetShowing(0);
 }

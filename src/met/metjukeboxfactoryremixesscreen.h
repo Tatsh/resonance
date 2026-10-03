@@ -31,12 +31,14 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0023ae58
+     * @ghidraAddress NTSC-U/C: 0x0023ae58
+     * @ghidraAddress PAL: 0x0024f4e0
      */
     MetJukeboxFactoryRemixesScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x00240780
+     * @ghidraAddress NTSC-U/C: 0x00240780
+     * @ghidraAddress PAL: 0x00255218
      */
     virtual ~MetJukeboxFactoryRemixesScreen();
 
@@ -48,7 +50,8 @@ public:
      * vtable slot each occupies is what separates them.
      *
      * @return The row count.
-     * @ghidraAddress 0x00240840
+     * @ghidraAddress NTSC-U/C: 0x00240840
+     * @ghidraAddress PAL: 0x002552d8
      */
     virtual int GetItemCount();
 
@@ -60,7 +63,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x00240868
+     * @ghidraAddress NTSC-U/C: 0x00240868
+     * @ghidraAddress PAL: 0x00255300
      */
     static MetJukeboxFactoryRemixesScreen *New(MetRenderer *pRenderer, int nPriority);
 

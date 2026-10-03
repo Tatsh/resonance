@@ -15,7 +15,7 @@ static const char *const kCycleRightSound = "SND_MET_CYCLE_R";
 static const char *const kInGameActionSound = "SND_MET_MULTI_INGAME_ACTION";
 static const char *const kInGameNavigationSound = "SND_MET_MULTI_INGAME_NAVIGATION";
 
-// 0x003908f0
+// NTSC-U/C: 0x003908f0, PAL: 0x003c21c0
 // Whether a game world exists, which is when the screen is shown over a running game and the
 // in-game bank applies.
 bool HasGameWorld() {
@@ -24,7 +24,7 @@ bool HasGameWorld() {
 
 } // namespace
 
-// 0x0038ff58
+// NTSC-U/C: 0x0038ff58, PAL: 0x003c1828
 MetScreenMultiSoundBank::MetScreenMultiSoundBank(MetRenderer *pRenderer,
                                                  int nPriority,
                                                  const HxStr &name,
@@ -33,31 +33,31 @@ MetScreenMultiSoundBank::MetScreenMultiSoundBank(MetRenderer *pRenderer,
     : MetScreen(pRenderer, nPriority, name, directory, file) {
 }
 
-// 0x0038fe60
+// NTSC-U/C: 0x0038fe60, PAL: 0x003c1730
 MetScreenMultiSoundBank::~MetScreenMultiSoundBank() {
 }
 
-// 0x003907b0
+// NTSC-U/C: 0x003907b0, PAL: 0x003c2080
 void MetScreenMultiSoundBank::PlaySlideSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameActionSound : kSlideSound);
 }
 
-// 0x003907f0
+// NTSC-U/C: 0x003907f0, PAL: 0x003c20c0
 void MetScreenMultiSoundBank::PlayLeaveSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameActionSound : kLeaveSound);
 }
 
-// 0x00390830
+// NTSC-U/C: 0x00390830, PAL: 0x003c2100
 void MetScreenMultiSoundBank::PlayHighSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameNavigationSound : kHighSound);
 }
 
-// 0x00390870
+// NTSC-U/C: 0x00390870, PAL: 0x003c2140
 void MetScreenMultiSoundBank::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameNavigationSound : kCycleLeftSound);
 }
 
-// 0x003908b0
+// NTSC-U/C: 0x003908b0, PAL: 0x003c2180
 void MetScreenMultiSoundBank::PlayCycleRightSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameNavigationSound : kCycleRightSound);
 }

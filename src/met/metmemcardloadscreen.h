@@ -52,7 +52,8 @@ public:
     MetMemCardLoadScreen(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * @ghidraAddress 0x002cbcc8
+     * @ghidraAddress NTSC-U/C: 0x002cbcc8
+     * @ghidraAddress PAL: 0x002ecc50
      */
     virtual ~MetMemCardLoadScreen();
 
@@ -62,7 +63,8 @@ public:
      * @param pRenderer The front-end renderer the screen registers on.
      * @param nPriority The load priority.
      * @return The new screen.
-     * @ghidraAddress 0x002d1e28
+     * @ghidraAddress NTSC-U/C: 0x002d1e28
+     * @ghidraAddress PAL: 0x002f4000
      */
     static MetMemCardLoadScreen *New(MetRenderer *pRenderer, int nPriority);
 
@@ -72,7 +74,8 @@ public:
      * Inline. `0x002d1d88` is its uncalled out-of-line copy. The title is inferred.
      *
      * @param pUser The requester.
-     * @ghidraAddress 0x002d1d88
+     * @ghidraAddress NTSC-U/C: 0x002d1d88
+     * @ghidraAddress PAL: 0x002f3f40
      */
     static void OpenPicker(MetMemCardPickerUser *pUser);
 
@@ -84,7 +87,8 @@ public:
      * @param pUser The requester, recorded in mPickerUser.
      * @param bShowNow True to push and activate the screen, false to hide it while it has a
      *                 container view and run StartDetect().
-     * @ghidraAddress 0x002ce160
+     * @ghidraAddress NTSC-U/C: 0x002ce160
+     * @ghidraAddress PAL: 0x002efea8
      */
     void Present(MetMemCardPickerUser *pUser, bool bShowNow);
 
@@ -107,7 +111,8 @@ public:
      * command only while at least one is.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002cc328
+     * @ghidraAddress NTSC-U/C: 0x002cc328
+     * @ghidraAddress PAL: 0x002ed610
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -117,7 +122,8 @@ public:
      * Slot 30. The selection wraps at both ends.
      *
      * @param pButton The arrow that finished alternating.
-     * @ghidraAddress 0x002ccfb8
+     * @ghidraAddress NTSC-U/C: 0x002ccfb8
+     * @ghidraAddress PAL: 0x002eea70
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
 
@@ -137,7 +143,8 @@ public:
      * Slot 36. A back command returns to MetConfigOptionsButtonsScreen, command 7 probes again
      * through Present(), and a chosen card goes to MetMemCardTypeScreen.
      *
-     * @ghidraAddress 0x002cd0e8
+     * @ghidraAddress NTSC-U/C: 0x002cd0e8
+     * @ghidraAddress PAL: 0x002eebc0
      */
     virtual void OnExitFinished();
 
@@ -158,7 +165,8 @@ public:
      * Slot 20.
      *
      * @param nSelector Passed through to MetScreen unchanged.
-     * @ghidraAddress 0x002d1f40
+     * @ghidraAddress NTSC-U/C: 0x002d1f40
+     * @ghidraAddress PAL: 0x002f4118
      */
     virtual void PlaySlideSound(int nSelector);
 
@@ -167,7 +175,8 @@ public:
      *
      * Slot 22. The body is empty.
      *
-     * @ghidraAddress 0x002d1d80
+     * @ghidraAddress NTSC-U/C: 0x002d1d80
+     * @ghidraAddress PAL: 0x002f3f38
      */
     virtual void PlayHighSound(int) {
     }
@@ -178,7 +187,8 @@ public:
      * Slot 23.
      *
      * @param nSelector Passed through to MetScreen unchanged.
-     * @ghidraAddress 0x002d1eb0
+     * @ghidraAddress NTSC-U/C: 0x002d1eb0
+     * @ghidraAddress PAL: 0x002f4088
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
@@ -188,7 +198,8 @@ public:
      * Slot 24.
      *
      * @param nSelector Passed through to MetScreen unchanged.
-     * @ghidraAddress 0x002d1ef8
+     * @ghidraAddress NTSC-U/C: 0x002d1ef8
+     * @ghidraAddress PAL: 0x002f40d0
      */
     virtual void PlayCycleRightSound(int nSelector);
 
@@ -259,11 +270,11 @@ private:
     // inferred.
     void ShowSelection();
 
-    // 0x002cde00
+    // NTSC-U/C: 0x002cde00, PAL: 0x002efb38
     // Rebuilds mCards from GlobalSettings::mCardSlots and clamps mSelected. The title is inferred.
     void RefreshCards();
 
-    // 0x002d1f88
+    // NTSC-U/C: 0x002d1f88, PAL: 0x002f4160
     // Shows both arrows while at least two cards are listed, and hides them otherwise. The title
     // is inferred.
     void UpdateArrows();
