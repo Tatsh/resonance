@@ -27,12 +27,14 @@ public:
     /**
      * Construct a filter with both sets empty and no downstream sink.
      *
-     * @ghidraAddress 0x001d2060
+     * @ghidraAddress NTSC-U/C: 0x001d2060
+     * @ghidraAddress PAL: 0x001d7f18
      */
     SynthSustainer();
 
     /**
-     * @ghidraAddress 0x001d2860
+     * @ghidraAddress NTSC-U/C: 0x001d2860
+     * @ghidraAddress PAL: 0x001d8718
      */
     virtual ~SynthSustainer();
 
@@ -44,17 +46,18 @@ protected:
      * message is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d2a10
+     * @ghidraAddress NTSC-U/C: 0x001d2a10
+     * @ghidraAddress PAL: 0x001d88c8
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // Add the requested note to the sustained set unless it is already sounding.
-    // 0x001d20a0
+    // NTSC-U/C: 0x001d20a0, PAL: 0x001d7f58
     void HandleSustainNote(SustainNoteMsg *pMsg);
 
     // Filter a raw MIDI message against the two sets.
-    // 0x001d2160
+    // NTSC-U/C: 0x001d2160, PAL: 0x001d8018
     void HandleStdMidi(StdMidiMsg *pMsg);
 
     std::vector<unsigned char> mSounding;  // +0x04, notes a note-on has let through

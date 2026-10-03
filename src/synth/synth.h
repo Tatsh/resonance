@@ -41,7 +41,8 @@ class StdMidiMsg;
 class Synth : public MsgSink {
 public:
     /**
-     * @ghidraAddress 0x0013a398
+     * @ghidraAddress NTSC-U/C: 0x0013a398
+     * @ghidraAddress PAL: 0x0013ace0
      */
     virtual ~Synth();
 
@@ -54,7 +55,8 @@ public:
      * three bank sets this is remains unrecovered, because the configuration codes are numeric and
      * no table in the image maps a code to a name.
      *
-     * @ghidraAddress 0x0013a1d0
+     * @ghidraAddress NTSC-U/C: 0x0013a1d0
+     * @ghidraAddress PAL: 0x0013ab18
      */
     virtual void LoadBankSet4();
 
@@ -64,7 +66,8 @@ public:
      * Table slot 5. The body here is empty. Ps2HardSynth's override at `0x003f4960` loads the pair
      * under codes 507 and 508 at placement 1 and then resets.
      *
-     * @ghidraAddress 0x0013a1d8
+     * @ghidraAddress NTSC-U/C: 0x0013a1d8
+     * @ghidraAddress PAL: 0x0013ab20
      */
     virtual void LoadBankSet5();
 
@@ -74,7 +77,8 @@ public:
      * Table slot 6. The body here is empty. Ps2HardSynth's override at `0x003f4af0` loads the pair
      * under codes 504 and 505 at the rotating placement, turns the reverb on, and then resets.
      *
-     * @ghidraAddress 0x0013a1e0
+     * @ghidraAddress NTSC-U/C: 0x0013a1e0
+     * @ghidraAddress PAL: 0x0013ab28
      */
     virtual void LoadBankSet6();
 
@@ -84,7 +88,8 @@ public:
      * Table slot 7. The body is empty here, no implementation overrides it, and the image never
      * calls it. The image does not reveal its purpose.
      *
-     * @ghidraAddress 0x0013a1e8
+     * @ghidraAddress NTSC-U/C: 0x0013a1e8
+     * @ghidraAddress PAL: 0x0013ab30
      */
     virtual void UnusedHook();
 
@@ -95,7 +100,8 @@ public:
      * the driver routine at `0x00464660`, which waits for the transfers in flight, releases the
      * streaming voice, and clears both stored bank paths.
      *
-     * @ghidraAddress 0x0013a1f0
+     * @ghidraAddress NTSC-U/C: 0x0013a1f0
+     * @ghidraAddress PAL: 0x0013ab38
      */
     virtual void UnloadBanks();
 
@@ -120,7 +126,8 @@ public:
      * Table slot 10. The body is empty here and no implementation overrides it. GrooveWorld calls
      * it once play starts.
      *
-     * @ghidraAddress 0x0013a1f8
+     * @ghidraAddress NTSC-U/C: 0x0013a1f8
+     * @ghidraAddress PAL: 0x0013ab40
      */
     virtual void OnPlayStarted();
 
@@ -133,7 +140,8 @@ public:
      *
      * @param nChannel The channel.
      * @param nBank The bank, sent as the low half of the bank select.
-     * @ghidraAddress 0x0013a200
+     * @ghidraAddress NTSC-U/C: 0x0013a200
+     * @ghidraAddress PAL: 0x0013ab48
      */
     virtual void SelectBank(unsigned char nChannel, unsigned char nBank);
 
@@ -144,7 +152,8 @@ public:
      * sound driver's mono command with the argument inverted.
      *
      * @param bStereo Nonzero for stereo output, zero for mono.
-     * @ghidraAddress 0x0013a208
+     * @ghidraAddress NTSC-U/C: 0x0013a208
+     * @ghidraAddress PAL: 0x0013ab50
      */
     virtual void SetStereo(int bStereo);
 
@@ -155,7 +164,8 @@ public:
      * sound driver's remix command with the argument unchanged.
      *
      * @param bRemix Nonzero in jam mode, zero otherwise.
-     * @ghidraAddress 0x0013a210
+     * @ghidraAddress NTSC-U/C: 0x0013a210
+     * @ghidraAddress PAL: 0x0013ab58
      */
     virtual void SetRemixMode(int bRemix);
 
@@ -166,7 +176,8 @@ public:
      * sound driver's pause command with the argument unchanged.
      *
      * @param bPaused Nonzero to pause, zero to resume.
-     * @ghidraAddress 0x0013a218
+     * @ghidraAddress NTSC-U/C: 0x0013a218
+     * @ghidraAddress PAL: 0x0013ab60
      */
     virtual void SetPaused(int bPaused);
 
@@ -176,7 +187,8 @@ public:
      * Table slot 15. Sends controller 123 with value 0 on channels 0 through 15. Ps2HardSynth's
      * override at `0x003f4c50` calls this body first and then resets the rest of the channel state.
      *
-     * @ghidraAddress 0x0013a220
+     * @ghidraAddress NTSC-U/C: 0x0013a220
+     * @ghidraAddress PAL: 0x0013ab68
      */
     virtual void AllNotesOff();
 
@@ -186,7 +198,8 @@ public:
      * Table slot 16. The same as AllNotesOff() over channels 0 through 14, which retains whatever
      * is sounding on channel 15. Neither implementation overrides it.
      *
-     * @ghidraAddress 0x0013a288
+     * @ghidraAddress NTSC-U/C: 0x0013a288
+     * @ghidraAddress PAL: 0x0013abd0
      */
     virtual void AllNotesOffExceptSfxChannel();
 
@@ -197,7 +210,8 @@ public:
      * and occupies no table slot. Ps2HardSynth's AllNotesOff() override calls it with 100.
      *
      * @param nVolume The volume, 0 through 127.
-     * @ghidraAddress 0x0013a2f0
+     * @ghidraAddress NTSC-U/C: 0x0013a2f0
+     * @ghidraAddress PAL: 0x0013ac38
      */
     void SetChannelVolume(unsigned char nVolume);
 
@@ -210,7 +224,8 @@ public:
      * anonymous namespace of the unit takes its `_GLOBAL_$N$Setup__5Synth` prefix from it, which is
      * what recovers the title.
      *
-     * @ghidraAddress 0x00139fd0
+     * @ghidraAddress NTSC-U/C: 0x00139fd0
+     * @ghidraAddress PAL: 0x0013a918
      */
     void Setup();
 
@@ -223,12 +238,13 @@ public:
      * MetLoadGameScreen's slot 33 are the callers. The title is inferred.
      *
      * @param nDurationMs The length of the fade, in milliseconds.
-     * @ghidraAddress 0x0013a480
+     * @ghidraAddress NTSC-U/C: 0x0013a480
+     * @ghidraAddress PAL: 0x0013adc8
      */
     void FadeOut(int nDurationMs);
 
 protected:
-    // 0x0013a360
+    // NTSC-U/C: 0x0013a360, PAL: 0x0013aca8
     // Inline, and HandleMessage() expands it. Sends the message's three bytes through SendMidi().
     void OnStdMidi(StdMidiMsg *pMsg);
 
@@ -239,7 +255,8 @@ protected:
      * Neither implementation overrides it.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0013a570
+     * @ghidraAddress NTSC-U/C: 0x0013a570
+     * @ghidraAddress PAL: 0x0013aeb8
      */
     virtual void HandleMessage(Message *pMsg);
 };

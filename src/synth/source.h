@@ -35,7 +35,8 @@ public:
      * @param flPeriod The period.
      * @param flPhase The starting phase, as a fraction of a whole turn.
      * @return The source.
-     * @ghidraAddress 0x00545e28
+     * @ghidraAddress NTSC-U/C: 0x00545e28
+     * @ghidraAddress PAL: 0x00586358
      */
     static Source *AllocateSineSource(float flPeriod, float flPhase);
 
@@ -47,7 +48,8 @@ public:
      *
      * @param flPeriod The period.
      * @return The source.
-     * @ghidraAddress 0x00545e98
+     * @ghidraAddress NTSC-U/C: 0x00545e98
+     * @ghidraAddress PAL: 0x005863c8
      */
     static Source *AllocateSquareSource(float flPeriod);
 
@@ -57,7 +59,8 @@ public:
      * @param flPeriod The period.
      * @param flPhase The starting phase, as a fraction of the period.
      * @return The source.
-     * @ghidraAddress 0x00545ee0
+     * @ghidraAddress NTSC-U/C: 0x00545ee0
+     * @ghidraAddress PAL: 0x00586410
      */
     static Source *AllocateTriSource(float flPeriod, float flPhase);
 
@@ -67,7 +70,8 @@ public:
      * @param flPeriod The period.
      * @param flPhase The starting phase, as a fraction of the period.
      * @return The source.
-     * @ghidraAddress 0x00545f50
+     * @ghidraAddress NTSC-U/C: 0x00545f50
+     * @ghidraAddress PAL: 0x00586480
      */
     static Source *AllocateRampSource(float flPeriod, float flPhase);
 
@@ -79,7 +83,8 @@ public:
      * @param bStopAtEnd Non-zero to report the source finished once the fade is over.
      * @param flDuration The length of the fade.
      * @return The source.
-     * @ghidraAddress 0x00545fc0
+     * @ghidraAddress NTSC-U/C: 0x00545fc0
+     * @ghidraAddress PAL: 0x005864f0
      */
     static Source *AllocateFadeOutSource(int bStopAtEnd, float flDuration);
 
@@ -91,7 +96,8 @@ public:
      * @param bStopAtEnd Non-zero to report the source finished once the fade is over.
      * @param flDuration The length of the fade.
      * @return The source.
-     * @ghidraAddress 0x00546020
+     * @ghidraAddress NTSC-U/C: 0x00546020
+     * @ghidraAddress PAL: 0x00586550
      */
     static Source *AllocateFadeInSource(int bStopAtEnd, float flDuration);
 
@@ -102,7 +108,8 @@ public:
      * @param flHold The time the signal holds 1.
      * @param flFade The length of the fade after the hold.
      * @return The source.
-     * @ghidraAddress 0x00546088
+     * @ghidraAddress NTSC-U/C: 0x00546088
+     * @ghidraAddress PAL: 0x005865b8
      */
     static Source *AllocateHoldAndFadeDownSource(int bStopAtEnd, float flHold, float flFade);
 };

@@ -165,19 +165,19 @@ enum {
     kHardSynthInfoToggleMono = 2,
 };
 
-// 0x6e80
+// NTSC-U/C: 0x6e80, PAL: 0x6e80
 static int gContextSet = 0;
-// 0x6e84
+// NTSC-U/C: 0x6e84, PAL: 0x6e84
 static int gXtraDbg = 0;
-// 0x6e88
+// NTSC-U/C: 0x6e88, PAL: 0x6e88
 static int gSynthFrame = 0;
-// 0x6e8c
+// NTSC-U/C: 0x6e8c, PAL: 0x6e8c
 static int gClockUse = 0;
-// 0x6e90
+// NTSC-U/C: 0x6e90, PAL: 0x6e90
 static int gPauseCount = 0;
-// 0x6e94
+// NTSC-U/C: 0x6e94, PAL: 0x6e94
 static int gChansChanged = 0;
-// 0x6e98
+// NTSC-U/C: 0x6e98, PAL: 0x6e98
 static sSynthConfig gSynthConfig = {
     .stt_speed = 1024,
     .stt_limit = 6144,
@@ -186,23 +186,23 @@ static sSynthConfig gSynthConfig = {
     .chorus_depth = {30, 20},
     .rnd_nopause_channels = 0x8000,
 };
-// 0x6ebc
+// NTSC-U/C: 0x6ebc, PAL: 0x6ecc
 static sSynthRun gSynthRun;
-// 0x6ec4
+// NTSC-U/C: 0x6ec4, PAL: 0x6ed4
 unsigned char *gpHd = NULL;
-// 0x6ec8
+// NTSC-U/C: 0x6ec8, PAL: 0x6ed8
 unsigned char *gpBd = NULL;
-// 0x6ed4
+// NTSC-U/C: 0x6ed4, PAL: 0x6ee4
 static int move_step = 512;
-// 0x6ed8
+// NTSC-U/C: 0x6ed8, PAL: 0x6ee8
 static unsigned short smooth_bits[] = {8, 17, 27, 31, 37, 0};
-// 0x6ee4
+// NTSC-U/C: 0x6ee4, PAL: 0x6ef4
 static int stt_type = kSttTypeStep;
-// 0x6ee8
+// NTSC-U/C: 0x6ee8, PAL: 0x6ef8
 static int stt_intercept = 1;
-// 0x6eec
+// NTSC-U/C: 0x6eec, PAL: 0x6efc
 static unsigned short vol_read_reg[] = {SD_VP_VOLXL, SD_VP_VOLXR};
-// 0x6ef0
+// NTSC-U/C: 0x6ef0, PAL: 0x6f00
 static unsigned int lin_time[] = {
     655320, 546100, 468085, 364066, 327660, 273050, 218440, 182033, 156028, 136525, 112986, 91016,
     79917,  68262,  56493,  44884,  39477,  33779,  27305,  21844,  19274,  17245,  14246,  11298,
@@ -210,57 +210,57 @@ static unsigned int lin_time[] = {
     1213,   1056,   885,    712,    618,    528,    442,    352,    297,    273,    218,    172,
     156,    131,    109,    88,     78,     65,     55,     44,     38,     33,     27,
 };
-// 0x6fdc
+// NTSC-U/C: 0x6fdc, PAL: 0x6fec
 int rate_L = 192;
-// 0x6fe0
+// NTSC-U/C: 0x6fe0, PAL: 0x6ff0
 int rate_R = 352;
-// 0x6ff0
+// NTSC-U/C: 0x6ff0, PAL: 0x7000
 int gReg_VMixR[HSYN_CORES];
-// 0x6ff8
+// NTSC-U/C: 0x6ff8, PAL: 0x7008
 int gVMixEL[HSYN_CORES];
-// 0x7000
+// NTSC-U/C: 0x7000, PAL: 0x7010
 int voice_alloc[HSYN_CORES];
-// 0x7008
+// NTSC-U/C: 0x7008, PAL: 0x7018
 int gVMixR[HSYN_CORES];
-// 0x7010
+// NTSC-U/C: 0x7010, PAL: 0x7020
 int gReg_VMixEL[HSYN_CORES];
-// 0x7018
+// NTSC-U/C: 0x7018, PAL: 0x7028
 int gVMixER[HSYN_CORES];
-// 0x7020
+// NTSC-U/C: 0x7020, PAL: 0x7030
 int gVMixL[HSYN_CORES];
-// 0x7028
+// NTSC-U/C: 0x7028, PAL: 0x7038
 int gReg_VMixER[HSYN_CORES];
-// 0x7030
+// NTSC-U/C: 0x7030, PAL: 0x7040
 int gEndX[HSYN_CORES];
-// 0x7038
+// NTSC-U/C: 0x7038, PAL: 0x7048
 int gReg_VMixL[HSYN_CORES];
-// 0x7040
+// NTSC-U/C: 0x7040, PAL: 0x7050
 static char hsBf_T[kMidiInputBuffers * kMidiBufferSize];
-// 0x7840
+// NTSC-U/C: 0x7840, PAL: 0x7850
 static char hsBf_R[kMidiBufferSize];
-// 0x7c40
+// NTSC-U/C: 0x7c40, PAL: 0x7c50
 static int gReg_kon[HSYN_CORES];
-// 0x7c48
+// NTSC-U/C: 0x7c48, PAL: 0x7c58
 static int gReg_koff[HSYN_CORES];
-// 0x7c50
+// NTSC-U/C: 0x7c50, PAL: 0x7c60
 static SysClock gClock;
-// 0x7c58
+// NTSC-U/C: 0x7c58, PAL: 0x7c68
 static int pan_2_vol[kPanPositions][2];
-// 0x8058
+// NTSC-U/C: 0x8058, PAL: 0x8068
 static int slot_2_mask[kSlotCodes];
-// 0x8158
+// NTSC-U/C: 0x8158, PAL: 0x8168
 static short chr_curve[kChorusCurveLength];
-// 0x8558
+// NTSC-U/C: 0x8558, PAL: 0x8568
 static TimerCtx gTimer;
-// 0x8564
+// NTSC-U/C: 0x8564, PAL: 0x8574
 static int gThid;
-// 0x85f0
+// NTSC-U/C: 0x85f0, PAL: 0x8600
 unsigned char *gaHds[HSYN_BANKS];
-// 0x8630
+// NTSC-U/C: 0x8630, PAL: 0x8640
 sSynNote gCurrentNotes[HSYN_NOTES];
-// 0x8e00
+// NTSC-U/C: 0x8e00, PAL: 0x8e10
 sSynChannel gChan[HSYN_CHANNELS];
-// 0x8f00
+// NTSC-U/C: 0x8f00, PAL: 0x8f10
 unsigned char *gaBds[HSYN_BANKS];
 
 // A bank header chunk. The header stores each chunk's position as a byte offset.
@@ -283,7 +283,7 @@ static inline sceCslMidiStream *ParseStream(void) {
     return (sceCslMidiStream *)hsBf_R;
 }
 
-// 0x0470
+// NTSC-U/C: 0x0470, PAL: 0x0470
 static void _build_voice2mask(void) {
     int core;
     int voice;
@@ -295,7 +295,7 @@ static void _build_voice2mask(void) {
     }
 }
 
-// 0x054c
+// NTSC-U/C: 0x054c, PAL: 0x054c
 static void _build_pantable(void) {
     int i;
 
@@ -305,7 +305,7 @@ static void _build_pantable(void) {
     }
 }
 
-// 0x0668
+// NTSC-U/C: 0x0668, PAL: 0x0668
 void _build_chorus(int iDepth) {
     int i;
 
@@ -324,7 +324,7 @@ void _build_chorus(int iDepth) {
     }
 }
 
-// 0x0868
+// NTSC-U/C: 0x0868, PAL: 0x0868
 int HandleTransIntr(int ch, void *common) {
     int *c = common;
 
@@ -333,7 +333,7 @@ int HandleTransIntr(int ch, void *common) {
     return 1;
 }
 
-// 0x08c8
+// NTSC-U/C: 0x08c8, PAL: 0x08c8
 int MemCpy_IOPtoSPU(void *pIOP, void *pSPU, int iBlockSize) {
     sceSdVoiceTrans(
         SD_CORE_0, SD_TRANS_MODE_WRITE | SD_TRANS_BY_DMA, pIOP, (unsigned int)pSPU, iBlockSize);
@@ -342,7 +342,7 @@ int MemCpy_IOPtoSPU(void *pIOP, void *pSPU, int iBlockSize) {
     return 0;
 }
 
-// 0x0954
+// NTSC-U/C: 0x0954, PAL: 0x0954
 int StartAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     (void)pIOP;
     (void)pSPU;
@@ -350,7 +350,7 @@ int StartAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     return -1;
 }
 
-// 0x098c
+// NTSC-U/C: 0x098c, PAL: 0x098c
 int StopAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     (void)pIOP;
     (void)pSPU;
@@ -358,7 +358,7 @@ int StopAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     return -1;
 }
 
-// 0x09c4
+// NTSC-U/C: 0x09c4, PAL: 0x09c4
 void _init_channels(void) {
     int i;
 
@@ -376,7 +376,7 @@ void _init_channels(void) {
     }
 }
 
-// 0x0b4c
+// NTSC-U/C: 0x0b4c, PAL: 0x0b4c
 void _init_banks(void) {
     int i;
 
@@ -385,12 +385,12 @@ void _init_banks(void) {
     }
 }
 
-// 0x0be4
+// NTSC-U/C: 0x0be4, PAL: 0x0be4
 void hs_prog_change(int iChan, int iProg) {
     gChan[iChan].iProg = iProg;
 }
 
-// 0x0c2c
+// NTSC-U/C: 0x0c2c, PAL: 0x0c2c
 int get_free_slot(int which_core) {
     static int last_voice[HSYN_CORES];
     int core;
@@ -413,7 +413,7 @@ int get_free_slot(int which_core) {
     return kNoSlot;
 }
 
-// 0x0e24
+// NTSC-U/C: 0x0e24, PAL: 0x0e24
 static int _find_note(int iChan, int iNote) {
     int i;
 
@@ -426,7 +426,7 @@ static int _find_note(int iChan, int iNote) {
     return kNoNote;
 }
 
-// 0x0f48
+// NTSC-U/C: 0x0f48, PAL: 0x0f48
 static int _free_note(sSynNote *pNote, int in_play) {
     (void)in_play;
     if (!(pNote->flag & HSYN_NOTE_ON)) {
@@ -436,7 +436,7 @@ static int _free_note(sSynNote *pNote, int in_play) {
     return 0;
 }
 
-// 0x0fc4
+// NTSC-U/C: 0x0fc4, PAL: 0x0fc4
 static sSynNote *_new_note(void) {
     int i;
 
@@ -448,7 +448,7 @@ static sSynNote *_new_note(void) {
     return NULL;
 }
 
-// 0x1094
+// NTSC-U/C: 0x1094, PAL: 0x1094
 static int _count_notes(void) {
     int i;
     int cnt = 0;
@@ -461,7 +461,7 @@ static int _count_notes(void) {
     return cnt;
 }
 
-// 0x114c
+// NTSC-U/C: 0x114c, PAL: 0x114c
 static int _search_for_slot(int which_core, int new_pri, int vol) {
     int slot = get_free_slot(which_core);
     int choice = kNoNote;
@@ -516,7 +516,7 @@ static int _search_for_slot(int which_core, int new_pri, int vol) {
     return slot;
 }
 
-// 0x1550
+// NTSC-U/C: 0x1550, PAL: 0x1550
 static void hs_tick_setup(void) {
     int i;
 
@@ -538,7 +538,7 @@ static void hs_tick_setup(void) {
     ++gSynthFrame;
 }
 
-// 0x1824
+// NTSC-U/C: 0x1824, PAL: 0x1824
 static void do_kOff(int slot) {
     gReg_koff[slot & kSlotCoreMask] |= slot_2_mask[slot];
     if (gReg_kon[slot & kSlotCoreMask] & slot_2_mask[slot]) {
@@ -546,7 +546,7 @@ static void do_kOff(int slot) {
     }
 }
 
-// 0x1964
+// NTSC-U/C: 0x1964, PAL: 0x1964
 static void do_kOn(int slot) {
     gReg_kon[slot & kSlotCoreMask] |= slot_2_mask[slot];
     if (gReg_koff[slot & kSlotCoreMask] & slot_2_mask[slot]) {
@@ -554,7 +554,7 @@ static void do_kOn(int slot) {
     }
 }
 
-// 0x1aa4
+// NTSC-U/C: 0x1aa4, PAL: 0x1aa4
 static void CheckEffBits(int iSet, int *effArr, int iSlot, int reg) {
     int mask = slot_2_mask[iSlot];
     int cureff = effArr[iSlot & kSlotCoreMask] & mask;
@@ -569,7 +569,7 @@ static void CheckEffBits(int iSet, int *effArr, int iSlot, int reg) {
     }
 }
 
-// 0x1c44
+// NTSC-U/C: 0x1c44, PAL: 0x1c44
 int _note_2_pitch(int base_note, int new_note, int detune, int samp_rate) {
     int scePitch = sceSdNote2Pitch(base_note, 0, new_note, detune);
 
@@ -580,7 +580,7 @@ int _note_2_pitch(int base_note, int new_note, int detune, int samp_rate) {
     return scePitch;
 }
 
-// 0x1d14
+// NTSC-U/C: 0x1d14, PAL: 0x1d14
 int _apply_channel_to_note(sSynNote *pNote, int do_set) {
     int i_vols[2];
     int pan;
@@ -635,7 +635,7 @@ int _apply_channel_to_note(sSynNote *pNote, int do_set) {
             pNote->t_vol[1] != i_vols[1]);
 }
 
-// 0x2240
+// NTSC-U/C: 0x2240, PAL: 0x2240
 int _fire_off_sample(int iSamp,
                      int iNote,
                      int iChan,
@@ -766,7 +766,7 @@ int _fire_off_sample(int iSamp,
     return pNote - gCurrentNotes;
 }
 
-// 0x2c6c
+// NTSC-U/C: 0x2c6c, PAL: 0x2c6c
 int hs_note_on(int iChan, int iNote, int iVol) {
     int i;
     int splitcnt;
@@ -831,7 +831,7 @@ int hs_note_on(int iChan, int iNote, int iVol) {
     return note1;
 }
 
-// 0x3250
+// NTSC-U/C: 0x3250, PAL: 0x3250
 int hs_kill_idx(sSynNote *pNote, int iAlreadyOff) {
     int slot = pNote->slot;
 
@@ -845,7 +845,7 @@ int hs_kill_idx(sSynNote *pNote, int iAlreadyOff) {
     return _free_note(pNote, 0);
 }
 
-// 0x33cc
+// NTSC-U/C: 0x33cc, PAL: 0x33cc
 int hs_idx_off(int noteidx) {
     int slot;
 
@@ -858,7 +858,7 @@ int hs_idx_off(int noteidx) {
     return 0;
 }
 
-// 0x34e0
+// NTSC-U/C: 0x34e0, PAL: 0x34e0
 int hs_note_off(int iChan, int iNote) {
     int noteidx = _find_note(iChan, iNote);
 
@@ -875,7 +875,7 @@ int hs_note_off(int iChan, int iNote) {
     return 0;
 }
 
-// 0x3654
+// NTSC-U/C: 0x3654, PAL: 0x3654
 int hs_check_playing(sSynNote *pNote) {
     int slot = pNote->slot;
 
@@ -899,7 +899,7 @@ int hs_check_playing(sSynNote *pNote) {
     return 0;
 }
 
-// 0x37fc
+// NTSC-U/C: 0x37fc, PAL: 0x37fc
 static int _pick_lin_val(int target_delta, unsigned char *frames) {
     int lo = 0;
     int hi = (sizeof(lin_time) / sizeof(lin_time[0])) - 1;
@@ -926,7 +926,7 @@ static int _pick_lin_val(int target_delta, unsigned char *frames) {
     return hi;
 }
 
-// 0x3a70
+// NTSC-U/C: 0x3a70, PAL: 0x3a70
 static int _move_vol_towards(sSynNote *pNote, int which) {
     int delta = 0;
     int resamp = 0;
@@ -1008,7 +1008,7 @@ static int _move_vol_towards(sSynNote *pNote, int which) {
     return 1;
 }
 
-// 0x4334
+// NTSC-U/C: 0x4334, PAL: 0x4334
 unsigned short _apply_chorus(unsigned short c_pitch,
                              unsigned short rate,
                              unsigned short depth,
@@ -1017,7 +1017,7 @@ unsigned short _apply_chorus(unsigned short c_pitch,
     return c_pitch + chr_curve[*pos >> kChorusPositionShift] * depth / kQ15One;
 }
 
-// 0x43f8
+// NTSC-U/C: 0x43f8, PAL: 0x43f8
 int hs_update_note_and_fx(sSynNote *pNote) {
     int changed = 0;
     int use_pitch;
@@ -1046,7 +1046,7 @@ int hs_update_note_and_fx(sSynNote *pNote) {
     return 0;
 }
 
-// 0x4654
+// NTSC-U/C: 0x4654, PAL: 0x4654
 int hs_reapply_channel(int iChan) {
     int i;
 
@@ -1059,13 +1059,13 @@ int hs_reapply_channel(int iChan) {
     return 0;
 }
 
-// 0x477c
+// NTSC-U/C: 0x477c, PAL: 0x477c
 int ShowSynthState(int iFlags) {
     (void)iFlags;
     return 0;
 }
 
-// 0x47ac
+// NTSC-U/C: 0x47ac, PAL: 0x47ac
 void ResetSynthState(void) {
     int i;
 
@@ -1078,7 +1078,7 @@ void ResetSynthState(void) {
     _init_banks();
 }
 
-// 0x4840
+// NTSC-U/C: 0x4840, PAL: 0x4840
 void _do_reg_out(void) {
     int i;
 
@@ -1109,7 +1109,7 @@ void _do_reg_out(void) {
     }
 }
 
-// 0x4bf4
+// NTSC-U/C: 0x4bf4, PAL: 0x4bf4
 void HardSynthAllNotesOff(int iChan, int do_now) {
     int i;
 
@@ -1139,7 +1139,7 @@ static inline void SetChannelFx(int chan, int value, int bit) {
     }
 }
 
-// 0x4d70
+// NTSC-U/C: 0x4d70, PAL: 0x4d70
 unsigned char *HandleMidiMessage(unsigned char *pMidiMsg) {
     int consumed = kMidiMessage;
     int chan = pMidiMsg[0] & kMidiChannelMask;
@@ -1233,12 +1233,12 @@ unsigned char *HandleMidiMessage(unsigned char *pMidiMsg) {
     return &pMidiMsg[consumed];
 }
 
-// 0x5744
+// NTSC-U/C: 0x5744, PAL: 0x5744
 int HardSynthLoadBD(int ipBd, int ipSpu, int iSize) {
     return MemCpy_IOPtoSPU((void *)ipBd, (void *)ipSpu, iSize);
 }
 
-// 0x579c
+// NTSC-U/C: 0x579c, PAL: 0x579c
 int HardSynthAttachHDtoBD(int port, int ipHd, int ipSpu, int bank) {
     (void)port;
     if (bank < 0 || bank >= HSYN_BANKS) {
@@ -1250,7 +1250,7 @@ int HardSynthAttachHDtoBD(int port, int ipHd, int ipSpu, int bank) {
     return 0;
 }
 
-// 0x586c
+// NTSC-U/C: 0x586c, PAL: 0x586c
 int HardSynthInvalidateBank(int bank) {
     int i;
 
@@ -1267,7 +1267,7 @@ int HardSynthInvalidateBank(int bank) {
     return 0;
 }
 
-// 0x5a28
+// NTSC-U/C: 0x5a28, PAL: 0x5a28
 void HardSynthInvalidateHd(unsigned char *pHd) {
     int bank;
 
@@ -1279,7 +1279,7 @@ void HardSynthInvalidateHd(unsigned char *pHd) {
     }
 }
 
-// 0x5acc
+// NTSC-U/C: 0x5acc, PAL: 0x5acc
 int HardSynthClearHDBD(void) {
     if (!gContextSet) {
         return -1;
@@ -1288,7 +1288,7 @@ int HardSynthClearHDBD(void) {
     return 0;
 }
 
-// 0x5b20
+// NTSC-U/C: 0x5b20, PAL: 0x5b20
 void MidiBufferSetup(void) {
     int buf;
 
@@ -1300,7 +1300,7 @@ void MidiBufferSetup(void) {
     }
 }
 
-// 0x5b7c
+// NTSC-U/C: 0x5b7c, PAL: 0x5b7c
 int HardSynthKillOld(void) {
     int i;
 
@@ -1312,7 +1312,7 @@ int HardSynthKillOld(void) {
     return 0;
 }
 
-// 0x5c54
+// NTSC-U/C: 0x5c54, PAL: 0x5c54
 int HardSynthUpdate(void) {
     int i;
 
@@ -1325,7 +1325,7 @@ int HardSynthUpdate(void) {
     return 0;
 }
 
-// 0x5d34
+// NTSC-U/C: 0x5d34, PAL: 0x5d34
 int HardSynthParseNew(unsigned char *pMidiBlock, int iBlockSize, int buf) {
     unsigned char *pBlock = pMidiBlock;
 
@@ -1339,7 +1339,7 @@ int HardSynthParseNew(unsigned char *pMidiBlock, int iBlockSize, int buf) {
     return 0;
 }
 
-// 0x5e00
+// NTSC-U/C: 0x5e00, PAL: 0x5e00
 static int scan_inbuf(int buf) {
     sceCslMidiStream *pBf = InputStream(buf);
     int size = pBf->validsize;
@@ -1357,7 +1357,7 @@ static int scan_inbuf(int buf) {
     return size;
 }
 
-// 0x5f00
+// NTSC-U/C: 0x5f00, PAL: 0x5f00
 static int hsyn_atick(void) {
     int size;
 
@@ -1380,7 +1380,7 @@ static int hsyn_atick(void) {
     return 0;
 }
 
-// 0x5fec
+// NTSC-U/C: 0x5fec, PAL: 0x5fec
 static unsigned int timer_handler(void *common) {
     TimerCtx *tc = common;
 
@@ -1388,7 +1388,7 @@ static unsigned int timer_handler(void *common) {
     return tc->count;
 }
 
-// 0x6054
+// NTSC-U/C: 0x6054, PAL: 0x6054
 static int make_thread(void) {
     struct ThreadParam param;
 
@@ -1400,7 +1400,7 @@ static int make_thread(void) {
     return CreateThread(&param);
 }
 
-// 0x60c8
+// NTSC-U/C: 0x60c8, PAL: 0x60c8
 static int set_timer(TimerCtx *pTimer) {
     SysClock clock;
     int timer_id;
@@ -1421,7 +1421,7 @@ static int set_timer(TimerCtx *pTimer) {
     return 0;
 }
 
-// 0x620c
+// NTSC-U/C: 0x620c, PAL: 0x620c
 static int start_timer(TimerCtx *timer) {
     if (StartHardTimer(timer->timer_id) != KE_OK) {
         return -1;
@@ -1429,7 +1429,7 @@ static int start_timer(TimerCtx *timer) {
     return 0;
 }
 
-// 0x6288
+// NTSC-U/C: 0x6288, PAL: 0x6288
 static int clear_timer(TimerCtx *timer) {
     if (FreeHardTimer(timer->timer_id) != KE_OK) {
         return -1;
@@ -1437,7 +1437,7 @@ static int clear_timer(TimerCtx *timer) {
     return 0;
 }
 
-// 0x6304
+// NTSC-U/C: 0x6304, PAL: 0x6304
 static int stop_timer(TimerCtx *timer) {
     int ret = StopHardTimer(timer->timer_id);
 
@@ -1447,7 +1447,7 @@ static int stop_timer(TimerCtx *timer) {
     return 0;
 }
 
-// 0x6390
+// NTSC-U/C: 0x6390, PAL: 0x6390
 int HardSynthPause(void) {
     int i;
 
@@ -1464,7 +1464,7 @@ int HardSynthPause(void) {
     return 0;
 }
 
-// 0x64e0
+// NTSC-U/C: 0x64e0, PAL: 0x64e0
 int HardSynthResume(void) {
     int i;
 
@@ -1481,20 +1481,20 @@ int HardSynthResume(void) {
     return 0;
 }
 
-// 0x6660
+// NTSC-U/C: 0x6660, PAL: 0x6660
 int HardSynthSetRemix(int parm) {
     gSynthRun.remix_mode = parm != 0;
     return 0;
 }
 
-// 0x66a4
+// NTSC-U/C: 0x66a4, PAL: 0x66a4
 int HardSynthSetMono(int parm) {
     gSynthRun.mono_mode = parm != 0;
     gChansChanged = kAllChannelMask;
     return 0;
 }
 
-// 0x66f4
+// NTSC-U/C: 0x66f4, PAL: 0x66f4
 void HardSynthConfig(sSynthConfig *pConfig) {
     int i;
 
@@ -1509,7 +1509,7 @@ void HardSynthConfig(sSynthConfig *pConfig) {
     }
 }
 
-// 0x6800
+// NTSC-U/C: 0x6800, PAL: 0x6800
 int HardSynthInit(void) {
     _init_channels();
     _init_banks();
@@ -1526,20 +1526,20 @@ int HardSynthInit(void) {
     return (int)hsBf_T; // The EE writes MIDI streams to this IOP address.
 }
 
-// 0x68d0
+// NTSC-U/C: 0x68d0, PAL: 0x68d0
 int HardSynthReset(void) {
     ResetSynthState();
     return 0;
 }
 
-// 0x690c
+// NTSC-U/C: 0x690c, PAL: 0x690c
 int HardSynthShutdown(void) {
     stop_timer(&gTimer);
     clear_timer(&gTimer);
     return 0;
 }
 
-// 0x6960
+// NTSC-U/C: 0x6960, PAL: 0x6960
 void HardSynthInfo(int what) {
     switch (what) {
     case kHardSynthInfoShowState:

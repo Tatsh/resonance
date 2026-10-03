@@ -17,7 +17,7 @@ public:
     Sine(float flRate, float flPhase) : mRate(flRate), mPhase(flPhase) {
     }
 
-    // 0x00546198
+    // NTSC-U/C: 0x00546198, PAL: 0x005866c8
     virtual int Sample(float flTime, float *pValue) {
         *pValue = (std::sin((mRate * flTime) + mPhase) * kSineHalfRange) + kSineHalfRange;
         return 1;
@@ -33,7 +33,7 @@ public:
     explicit Square(float flPeriod) : mPeriod(flPeriod) {
     }
 
-    // 0x00546290
+    // NTSC-U/C: 0x00546290, PAL: 0x005867c0
     virtual int Sample(float flTime, float *pValue) {
         // The binary compares with 0.5 rather than half the period.
         *pValue = std::fmod(flTime, mPeriod) < 0.5 ? 1.0f : 0.0f;
@@ -50,7 +50,7 @@ public:
         : mPeriod(flPeriod), mOffset(flOffset), mScale(flScale) {
     }
 
-    // 0x00546398
+    // NTSC-U/C: 0x00546398, PAL: 0x005868c8
     virtual int Sample(float flTime, float *pValue) {
         *pValue = std::fmod(flTime + mOffset, mPeriod) * mScale;
         if (*pValue > 1.0) {
@@ -71,7 +71,7 @@ public:
         : mPeriod(flPeriod), mOffset(flOffset), mScale(flScale) {
     }
 
-    // 0x005464c0
+    // NTSC-U/C: 0x005464c0, PAL: 0x005869f0
     virtual int Sample(float flTime, float *pValue) {
         *pValue = std::fmod(flTime + mOffset, mPeriod) * mScale;
         return 1;
@@ -89,7 +89,7 @@ public:
         : mDuration(flDuration), mTarget(flTarget), mStopAtEnd(bStopAtEnd) {
     }
 
-    // 0x005465b8
+    // NTSC-U/C: 0x005465b8, PAL: 0x00586ae8
     virtual int Sample(float flTime, float *pValue) {
         if (mDuration < flTime) {
             *pValue = mTarget;
@@ -115,7 +115,7 @@ public:
         : mHold(flHold), mFade(flFade), mStopAtEnd(bStopAtEnd) {
     }
 
-    // 0x00546708
+    // NTSC-U/C: 0x00546708, PAL: 0x00586c38
     virtual int Sample(float flTime, float *pValue) {
         if (flTime <= mHold) {
             *pValue = 1.0f;
@@ -137,37 +137,37 @@ private:
 
 } // namespace
 
-// 0x00545e28
+// NTSC-U/C: 0x00545e28, PAL: 0x00586358
 Source *Source::AllocateSineSource(float flPeriod, float flPhase) {
     return new Sine(kTwoPi / flPeriod, flPhase * kTwoPi);
 }
 
-// 0x00545e98
+// NTSC-U/C: 0x00545e98, PAL: 0x005863c8
 Source *Source::AllocateSquareSource(float flPeriod) {
     return new Square(flPeriod);
 }
 
-// 0x00545ee0
+// NTSC-U/C: 0x00545ee0, PAL: 0x00586410
 Source *Source::AllocateTriSource(float flPeriod, float flPhase) {
     return new Tri(flPeriod, flPhase * flPeriod, kTriangleSpan / flPeriod);
 }
 
-// 0x00545f50
+// NTSC-U/C: 0x00545f50, PAL: 0x00586480
 Source *Source::AllocateRampSource(float flPeriod, float flPhase) {
     return new Ramp(flPeriod, flPhase * flPeriod, 1.0f / flPeriod);
 }
 
-// 0x00545fc0
+// NTSC-U/C: 0x00545fc0, PAL: 0x005864f0
 Source *Source::AllocateFadeOutSource(int bStopAtEnd, float flDuration) {
     return new Fade(flDuration, 0.0f, bStopAtEnd);
 }
 
-// 0x00546020
+// NTSC-U/C: 0x00546020, PAL: 0x00586550
 Source *Source::AllocateFadeInSource(int bStopAtEnd, float flDuration) {
     return new Fade(flDuration, 1.0f, bStopAtEnd);
 }
 
-// 0x00546088
+// NTSC-U/C: 0x00546088, PAL: 0x005865b8
 Source *Source::AllocateHoldAndFadeDownSource(int bStopAtEnd, float flHold, float flFade) {
     return new HoldAndFadeDown(flHold, flFade, bStopAtEnd);
 }

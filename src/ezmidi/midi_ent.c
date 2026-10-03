@@ -9,10 +9,10 @@ enum {
     kMidiThreadPriority = 30,
 };
 
-// 0x6e60
+// NTSC-U/C: 0x6e60, PAL: 0x6e60
 ModuleInfo Module = {"ezmidi_driver", 0x0103};
 
-// 0x0000
+// NTSC-U/C: 0x0000, PAL: 0x0000
 int start(void) {
     struct ThreadParam param;
     int th;

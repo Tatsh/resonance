@@ -31,62 +31,74 @@ public:
      * CreatePs2HardSynth() expands the same body in place, and the image lists no caller for this
      * out-of-line copy.
      *
-     * @ghidraAddress 0x003f64e0
+     * @ghidraAddress NTSC-U/C: 0x003f64e0
+     * @ghidraAddress PAL: 0x0042ecc8
      */
     Ps2HardSynth();
 
     /**
-     * @ghidraAddress 0x003f6670
+     * @ghidraAddress NTSC-U/C: 0x003f6670
+     * @ghidraAddress PAL: 0x0042ee58
      */
     virtual ~Ps2HardSynth();
 
     /**
-     * @ghidraAddress 0x003f47b8
+     * @ghidraAddress NTSC-U/C: 0x003f47b8
+     * @ghidraAddress PAL: 0x0042ce70
      */
     virtual void LoadBankSet4();
 
     /**
-     * @ghidraAddress 0x003f4960
+     * @ghidraAddress NTSC-U/C: 0x003f4960
+     * @ghidraAddress PAL: 0x0042d058
      */
     virtual void LoadBankSet5();
 
     /**
-     * @ghidraAddress 0x003f4af0
+     * @ghidraAddress NTSC-U/C: 0x003f4af0
+     * @ghidraAddress PAL: 0x0042d1e8
      */
     virtual void LoadBankSet6();
 
     /**
-     * @ghidraAddress 0x003f6650
+     * @ghidraAddress NTSC-U/C: 0x003f6650
+     * @ghidraAddress PAL: 0x0042ee38
      */
     virtual void UnloadBanks();
 
     /**
-     * @ghidraAddress 0x003f66d8
+     * @ghidraAddress NTSC-U/C: 0x003f66d8
+     * @ghidraAddress PAL: 0x0042eec0
      */
     virtual void SendMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
     /**
-     * @ghidraAddress 0x003f65c8
+     * @ghidraAddress NTSC-U/C: 0x003f65c8
+     * @ghidraAddress PAL: 0x0042edb0
      */
     virtual void SelectBank(unsigned char nChannel, unsigned char nBank);
 
     /**
-     * @ghidraAddress 0x003f6700
+     * @ghidraAddress NTSC-U/C: 0x003f6700
+     * @ghidraAddress PAL: 0x0042eee8
      */
     virtual void SetStereo(int bStereo);
 
     /**
-     * @ghidraAddress 0x003f6740
+     * @ghidraAddress NTSC-U/C: 0x003f6740
+     * @ghidraAddress PAL: 0x0042ef28
      */
     virtual void SetRemixMode(int bRemix);
 
     /**
-     * @ghidraAddress 0x003f6720
+     * @ghidraAddress NTSC-U/C: 0x003f6720
+     * @ghidraAddress PAL: 0x0042ef08
      */
     virtual void SetPaused(int bPaused);
 
     /**
-     * @ghidraAddress 0x003f4c50
+     * @ghidraAddress NTSC-U/C: 0x003f4c50
+     * @ghidraAddress PAL: 0x0042d3c8
      */
     virtual void AllNotesOff();
 
@@ -102,7 +114,8 @@ public:
      * @param hdName The HD bank name, without a device prefix.
      * @param nTag The tag both banks are recorded with.
      * @param nPlacement Where the pair goes in sound memory.
-     * @ghidraAddress 0x003f4590
+     * @ghidraAddress NTSC-U/C: 0x003f4590
+     * @ghidraAddress PAL: 0x0042cbc8
      */
     virtual void LoadBankPair(const HxStr &bdName, const HxStr &hdName, int nTag, int nPlacement);
 
@@ -114,7 +127,8 @@ public:
      * three messages in place, and the image lists no caller for this out-of-line copy. The title
      * is inferred.
      *
-     * @ghidraAddress 0x003f6540
+     * @ghidraAddress NTSC-U/C: 0x003f6540
+     * @ghidraAddress PAL: 0x0042ed28
      */
     void SelectSfxProgram();
 
@@ -136,6 +150,7 @@ private:
  * and expands the Ps2HardSynth constructor in place.
  *
  * @return The new synthesiser.
- * @ghidraAddress 0x003f4db8
+ * @ghidraAddress NTSC-U/C: 0x003f4db8
+ * @ghidraAddress PAL: 0x0042d530
  */
 Ps2HardSynth *CreatePs2HardSynth();

@@ -56,7 +56,8 @@ public:
      * @param pBuffer The destination the read filled.
      * @param nLength The number of bytes the read requested.
      * @param nStatus Zero once the data is in place, or a positive failure code.
-     * @ghidraAddress 0x00464430
+     * @ghidraAddress NTSC-U/C: 0x00464430
+     * @ghidraAddress PAL: 0x004a1f10
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 
@@ -66,7 +67,8 @@ public:
      * CallbackXferHdToIop::Done() is the only caller. Performs no work while an HD transfer still
      * holds the shared command block, or while this transfer is not marked busy.
      *
-     * @ghidraAddress 0x00464da8
+     * @ghidraAddress NTSC-U/C: 0x00464da8
+     * @ghidraAddress PAL: 0x004a2768
      */
     void Resume();
 

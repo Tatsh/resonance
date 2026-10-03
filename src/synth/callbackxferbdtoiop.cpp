@@ -19,7 +19,7 @@ CallbackXferBdToIop::CallbackXferBdToIop(
       mDest(nDest), mRemaining(nLength), mBusy(0) {
 }
 
-// 0x00464430
+// NTSC-U/C: 0x00464430, PAL: 0x004a1f10
 void CallbackXferBdToIop::Done([[maybe_unused]] int nHandle,
                                [[maybe_unused]] int nFile,
                                [[maybe_unused]] void *pBuffer,
@@ -36,7 +36,7 @@ void CallbackXferBdToIop::Done([[maybe_unused]] int nHandle,
     XferChunk();
 }
 
-// 0x00464da8
+// NTSC-U/C: 0x00464da8, PAL: 0x004a2768
 void CallbackXferBdToIop::Resume() {
     if (g_nHdXferInFlight != 0) {
         return;

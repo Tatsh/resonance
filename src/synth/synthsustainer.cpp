@@ -10,16 +10,16 @@ constexpr unsigned char kMidiNoteOn = 0x90;
 
 } // namespace
 
-// 0x001d2060
+// NTSC-U/C: 0x001d2060, PAL: 0x001d7f18
 SynthSustainer::SynthSustainer() {
     mSink = nullptr;
 }
 
-// 0x001d2860
+// NTSC-U/C: 0x001d2860, PAL: 0x001d8718
 SynthSustainer::~SynthSustainer() {
 }
 
-// 0x001d2a10
+// NTSC-U/C: 0x001d2a10, PAL: 0x001d88c8
 void SynthSustainer::HandleMessage(Message *pMsg) {
     unsigned dwType = pMsg->Type();
     if (dwType == g_dwSustainNoteMsgType) {
@@ -29,7 +29,7 @@ void SynthSustainer::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x001d20a0
+// NTSC-U/C: 0x001d20a0, PAL: 0x001d7f58
 void SynthSustainer::HandleSustainNote(SustainNoteMsg *pMsg) {
     (void)std::find(mSustained.begin(),
                     mSustained.end(),
@@ -39,7 +39,7 @@ void SynthSustainer::HandleSustainNote(SustainNoteMsg *pMsg) {
     }
 }
 
-// 0x001d2160
+// NTSC-U/C: 0x001d2160, PAL: 0x001d8018
 void SynthSustainer::HandleStdMidi(StdMidiMsg *pMsg) {
     unsigned char nStatus = pMsg->mStatus;
     unsigned char nNote = pMsg->mData1;

@@ -6,6 +6,7 @@
 #include <msin.h>
 #include <sifdev.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "app/application.h"
@@ -92,108 +93,144 @@ constexpr int kMidiStreamHeaderSize = 2 * sizeof(unsigned int);
 constexpr int kSynthStreamReadSize = 0x4000;
 
 // The SIF records here start on cache lines, as the image places them.
-// 0x008e5bc0
+// NTSC-U/C: 0x008e5bc0, PAL: 0x0092abc0
 alignas(64) sceSifClientData g_soundDriverClient;
 
 // Set while a request sent without waiting is still running on the driver.
-// 0x00780878
+// NTSC-U/C: 0x00780878, PAL: 0x007c4590
 int g_bSoundRequestPending = 0;
 
 // The driver's reply, whose first word SubmitSoundDriverRequest() reports.
-// 0x008e5b80
+// NTSC-U/C: 0x008e5b80, PAL: 0x0092ab80
 alignas(64) unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
 // The descriptor XferToIop() hands to the SIF DMA.
-// 0x008e5be8
+// NTSC-U/C: 0x008e5be8, PAL: 0x0092abe8
 alignas(16) sceSifDmaData g_xferToIopDma;
 
 // Set once InitSynthDriver() has brought the driver up.
-// 0x006e9b88
+// NTSC-U/C: 0x006e9b88, PAL: 0x0072d54c
 int g_bSynthDriverReady = 0;
 
 // The IOP address of the driver's event buffers, from InitSynthDriver().
-// 0x006e9dc0
+// NTSC-U/C: 0x006e9dc0, PAL: 0x0072d780
 int g_nMidiEventIopAddress = 0;
 
 // The event buffer PollSynthEvents() writes next.
-// 0x006e9bd0
+// NTSC-U/C: 0x006e9bd0, PAL: 0x0072d590
 int g_nMidiEventBufferIndex = 0;
+
+#ifdef VIDEO_STANDARD_PAL
+// The driver gathers its errors into two logs, each a length word and then the text.
+constexpr int kHardSynthErrorLogCount = 2;
+constexpr int kHardSynthErrorLogSize = 0x400;
+
+// PollSynthEvents() writes the error logs out on every sixteenth call.
+constexpr int kHardSynthErrorLogPollMask = 0xf;
+
+constexpr int kHardSynthErrorFilePathSize = 0x100;
+
+struct HardSynthErrorLog {
+    int mLength;
+    char mText[kHardSynthErrorLogSize - sizeof(int)];
+};
+
+// The IOP buffers of the error logs. InitSynthDriver() takes them from the IOP heap.
+// NTSC-U/C: absent, PAL: 0x008d8e60
+int g_anHardSynthErrorLogIopAddress[kHardSynthErrorLogCount];
+
+// The EE copies of the error logs. PollSynthEvents() writes them to the error file.
+// NTSC-U/C: absent, PAL: 0x008d8e80
+alignas(64) HardSynthErrorLog g_aHardSynthErrorLogs[kHardSynthErrorLogCount];
+
+// The open error file, or null while the level specifies none or the file failed to open.
+// NTSC-U/C: absent, PAL: 0x0072d544
+FILE *g_pHardSynthErrorFile = nullptr;
+
+// The count of PollSynthEvents() calls. The count paces the error log writes.
+// NTSC-U/C: absent, PAL: 0x0072d594
+int g_nSynthEventPollCount = 0;
+
+// The path g_pHardSynthErrorFile was opened from.
+// NTSC-U/C: absent, PAL: 0x008d9680
+char g_szHardSynthErrorFilePath[kHardSynthErrorFilePathSize];
+#endif
 
 // SIF DMA moves whole quadwords. Both commands the driver receives start on the cache line the
 // original placed them on.
-// 0x00894cc0
+// NTSC-U/C: 0x00894cc0, PAL: 0x008d9cc0
 alignas(64) SoundDriverCommand g_chunkCommand;
 
-// 0x00894bc0
+// NTSC-U/C: 0x00894bc0, PAL: 0x008d9bc0
 alignas(64) SoundDriverCommand g_bankCommand;
 
-// 0x00894748
+// NTSC-U/C: 0x00894748, PAL: 0x008d8e48
 int g_anIopStagingAddress[kIopStagingBufferCount] = {};
 
-// 0x006e9b80
+// NTSC-U/C: 0x006e9b80, PAL: 0x0072d540
 int g_nIopStagingIndex = 0;
 
-// 0x006e9b84
+// NTSC-U/C: 0x006e9b84, PAL: 0x0072d548
 int g_nBankIopAddress = 0;
 
-// 0x006e9b90
+// NTSC-U/C: 0x006e9b90, PAL: 0x0072d550
 HxStr g_bdBankName;
 
-// 0x006e9b98
+// NTSC-U/C: 0x006e9b98, PAL: 0x0072d558
 HxStr g_hdBankName;
 
-// 0x006e9ba4
+// NTSC-U/C: 0x006e9ba4, PAL: 0x0072d564
 int g_nBankDestAddress = 0x5010;
 
-// 0x006e9bb4
+// NTSC-U/C: 0x006e9bb4, PAL: 0x0072d574
 int g_nSynthXferTag;
 
-// 0x006e9bc4
+// NTSC-U/C: 0x006e9bc4, PAL: 0x0072d584
 void (*g_pfnBankLoadProgress)();
 
-// 0x006e9dc8
+// NTSC-U/C: 0x006e9dc8, PAL: 0x0072d788
 int g_nHdXferInFlight;
 
-// 0x006e9dcc
+// NTSC-U/C: 0x006e9dcc, PAL: 0x0072d78c
 void *g_pHdXferBuffer;
 
-// 0x006e9dd0
+// NTSC-U/C: 0x006e9dd0, PAL: 0x0072d790
 void *g_pBdXferBuffer;
 
-// 0x006e9dd4
+// NTSC-U/C: 0x006e9dd4, PAL: 0x0072d794
 CallbackXferBdToIop *g_pBdXfer;
 
-// 0x006e9ba8
+// NTSC-U/C: 0x006e9ba8, PAL: 0x0072d568
 int g_anBankDestAddress[kBankDestBufferCount] = {0x1d6b0, 0xf2b38};
 
-// 0x006e9bb0
+// NTSC-U/C: 0x006e9bb0, PAL: 0x0072d570
 int g_nBankDestIndex = 1;
 
-// 0x00894750
+// NTSC-U/C: 0x00894750, PAL: 0x008d8e50
 int g_anBankIopAddress[kBankIopAddressCount];
 
-// 0x0089475c
+// NTSC-U/C: 0x0089475c, PAL: 0x008d8e5c
 int g_nBankIopIndex;
 
-// 0x00894c40
+// NTSC-U/C: 0x00894c40, PAL: 0x008d9c40
 alignas(64) char g_szHdBankPath[kHdBankPathSize];
 
-// 0x006e9bb8
+// NTSC-U/C: 0x006e9bb8, PAL: 0x0072d578
 std::vector<BankSlot> g_bankSlots;
 
 // The streamed audio, or null while none plays.
-// 0x006e9c58
+// NTSC-U/C: 0x006e9c58, PAL: 0x0072d618
 Rnd::MovieStream *g_pSynthStream;
 
 // The frame PollSynthStream() passes to g_pSynthStream.
-// 0x006e9c5c
+// NTSC-U/C: 0x006e9c5c, PAL: 0x0072d61c
 int g_nSynthStreamFrame;
 
 // The song tick StartSoundBankMovie() opened the movie at. Nothing reads it.
-// 0x006e9dc4
+// NTSC-U/C: 0x006e9dc4, PAL: 0x0072d784
 int g_nSoundBankMovieTick;
 
-// 0x00464378
+// NTSC-U/C: 0x00464378, PAL: 0x004a1e58
 void SetBankLoadProgressHook(void (*pfnProgress)()) {
     g_pfnBankLoadProgress = pfnProgress;
 }
@@ -208,7 +245,7 @@ constexpr int kSoundSelectorReleaseBank = 0x8130;
 // Tag a released slot is marked with.
 constexpr int kBankSlotTagNone = -1;
 
-// 0x00461a88
+// NTSC-U/C: 0x00461a88, PAL: 0x0049f148
 void RegisterBankSlot(int nTag, int nDest, int nIopAddress) {
     bool bClaimed = false;
     for (auto &slot : g_bankSlots) {
@@ -235,7 +272,7 @@ void RegisterBankSlot(int nTag, int nDest, int nIopAddress) {
     }
 }
 
-// 0x004642c8
+// NTSC-U/C: 0x004642c8, PAL: 0x004a1da8
 void ReleaseBankSlotAt(int nDest) {
     for (auto &slot : g_bankSlots) {
         if (slot.mDest == nDest) {
@@ -250,7 +287,7 @@ void ReleaseBankSlotAt(int nDest) {
     }
 }
 
-// 0x00461bb8
+// NTSC-U/C: 0x00461bb8, PAL: 0x0049f278
 void ReleaseAllBankSlots() {
     for (const auto &slot : g_bankSlots) {
         if (slot.mIopAddress != 0) {
@@ -260,7 +297,7 @@ void ReleaseAllBankSlots() {
     g_bankSlots.clear();
 }
 
-// 0x00464628
+// NTSC-U/C: 0x00464628, PAL: 0x004a2108
 int IsBankXferBusy() {
     if (g_nHdXferInFlight != 0) {
         return 1;
@@ -275,13 +312,13 @@ int IsBankXferBusy() {
 // the string.
 char g_szFourCc[2 * sizeof(int)];
 
-// 0x00464b50
+// NTSC-U/C: 0x00464b50, PAL: 0x004a2510
 char *FourCcToString(const void *pFourCc) {
     *reinterpret_cast<int *>(g_szFourCc) = *static_cast<const int *>(pFourCc);
     return g_szFourCc;
 }
 
-// 0x00464ba0
+// NTSC-U/C: 0x00464ba0, PAL: 0x004a2560
 void SetSynthStreamBar(int nBar) {
     if (g_pSynthStream != nullptr) {
         g_nSynthStreamFrame = nBar * kSynthStreamFramesPerBar;
@@ -298,7 +335,7 @@ inline void RotateBankIopAddress() {
     }
 }
 
-// 0x00461db8
+// NTSC-U/C: 0x00461db8, PAL: 0x0049f478
 int XferBankFromMemory(const void *pData, int nLength) {
     ReleaseBankSlotAt(g_nBankDestAddress);
     RotateBankIopAddress();
@@ -315,7 +352,7 @@ int XferBankFromMemory(const void *pData, int nLength) {
     return 0;
 }
 
-// 0x00461f28
+// NTSC-U/C: 0x00461f28, PAL: 0x0049f5e8
 int StartBdBankXfer(const char *pszPath) {
     AsyncCheck(1);
     g_bankCommand.mBankAddress = g_nBankIopAddress;
@@ -346,7 +383,7 @@ int StartBdBankXfer(const char *pszPath) {
     return nLength;
 }
 
-// 0x00461c68
+// NTSC-U/C: 0x00461c68, PAL: 0x0049f328
 int StartHdBankXfer(const char *pszPath, int nPlacement) {
     AsyncCheck(1);
     strcpy(g_szHdBankPath, pszPath);
@@ -374,7 +411,7 @@ int StartHdBankXfer(const char *pszPath, int nPlacement) {
     return 0;
 }
 
-// 0x004620b0
+// NTSC-U/C: 0x004620b0, PAL: 0x0049f770
 void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int nPlacement) {
     const int nPreviousDest = g_nBankDestAddress;
     g_nSynthXferTag = nTag;
@@ -403,7 +440,7 @@ void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int n
     g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
 }
 
-// 0x00464ad0
+// NTSC-U/C: 0x00464ad0, PAL: 0x004a2490
 // The command number stays in its second argument register from entry so that the
 // report below can print it.
 void SynthCommand(int nCommand) {
@@ -422,7 +459,7 @@ void SynthCommand(int nCommand) {
     }
 }
 
-// 0x00462558
+// NTSC-U/C: 0x00462558, PAL: 0x0049ffa0
 void DumpSynthVoices(int bActiveOnly) {
     int nActive = 0;
     for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
@@ -503,19 +540,19 @@ struct HardEffectCommand {
     unsigned char mReserved1a[6];  // +0x1a
     short mNoPauseChannels;        // +0x20
 #ifdef VIDEO_STANDARD_PAL
-    unsigned char mReserved22[2];   // +0x22
-    unsigned int mGatherIopAddr[2]; // +0x24 IOP buffers of the error-gather log
-    char *mGatherEEAddr[2];         // +0x2c EE buffers of the error-gather log
+    unsigned char mReserved22[2];                              // +0x22
+    unsigned int mGatherIopAddr[kHardSynthErrorLogCount];      // +0x24
+    HardSynthErrorLog *mGatherEEAddr[kHardSynthErrorLogCount]; // +0x2c
     unsigned char mReserved34[0x4c];
 #else
     unsigned char mReserved22[0x5e];
 #endif
 };
 
-// 0x00894d40
+// NTSC-U/C: 0x00894d40, PAL: 0x008d9d40
 alignas(64) HardEffectCommand g_hardEffectCommand;
 
-// 0x00462340
+// NTSC-U/C: 0x00462340, PAL: 0x0049fbd8
 void ConfigureSpu2Effects(int bEnable) {
     for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
         if (bEnable != 0 && QueryConfigFlag(kTemplateUseHardEffect, nCore) != 0) {
@@ -555,10 +592,48 @@ void ConfigureSpu2Effects(int bEnable) {
     command.mChorusShape[kSpu2EffectRight] =
         QueryConfigValue(kTemplateChorusShape, kSpu2EffectRight);
     command.mNoPauseChannels = QueryConfigValue(kTemplateNoPauseChannels);
+#ifdef VIDEO_STANDARD_PAL
+    char szErrorFilePath[kHardSynthErrorFilePathSize];
+    {
+        const HxStr errorFile = QueryConfigString(kTemplateHardSynthErrorFile);
+        strcpy(szErrorFilePath, errorFile.mStr != nullptr ? errorFile.mStr : g_szEmptyString);
+    }
+    if (strlen(szErrorFilePath) == 0) {
+        for (int nLog = 0; nLog < kHardSynthErrorLogCount; ++nLog) {
+            command.mGatherIopAddr[nLog] = 0;
+            command.mGatherEEAddr[nLog] = nullptr;
+        }
+    } else {
+        for (int nLog = 0; nLog < kHardSynthErrorLogCount; ++nLog) {
+            command.mGatherIopAddr[nLog] =
+                static_cast<unsigned int>(g_anHardSynthErrorLogIopAddress[nLog]);
+            command.mGatherEEAddr[nLog] = &g_aHardSynthErrorLogs[nLog];
+        }
+        if (strcmp(szErrorFilePath, g_szHardSynthErrorFilePath) == 0) {
+            if (g_pHardSynthErrorFile != nullptr) {
+                fflush(g_pHardSynthErrorFile);
+            }
+        } else {
+            if (g_pHardSynthErrorFile != nullptr) {
+                fclose(g_pHardSynthErrorFile);
+            }
+            strcpy(g_szHardSynthErrorFilePath, szErrorFilePath);
+            g_pHardSynthErrorFile = fopen(g_szHardSynthErrorFilePath, "w");
+            if (g_pHardSynthErrorFile == nullptr) {
+                LogPrintf("Couldn't open runtime hsyn error file %s\n", g_szHardSynthErrorFilePath);
+                g_szHardSynthErrorFilePath[0] = '\0';
+            } else {
+                fprintf(g_pHardSynthErrorFile,
+                        "HSyn Error Gather Log %s\n\n",
+                        g_szHardSynthErrorFilePath);
+            }
+        }
+    }
+#endif
     SubmitSoundDriverRequest(kSoundSelectorHardEffect, reinterpret_cast<uintptr_t>(&command));
 }
 
-// 0x004649f8
+// NTSC-U/C: 0x004649f8, PAL: 0x004a23b8
 void InitSpu2Cores() {
     sceSdRemoteInit(); // Yes, the binary discards this call's result.
     sceSdRemote(kSdRemoteBlocking, rSdInit, 0);
@@ -608,30 +683,30 @@ constexpr int kMidiChannelCount = 16;
 constexpr int kMidiData1Shift = 8;
 constexpr int kMidiData2Shift = 16;
 
-// 0x00894760
+// NTSC-U/C: 0x00894760, PAL: 0x008d9780
 alignas(64) sceCslCtx g_midiInputContext;
 
-// 0x00894778
+// NTSC-U/C: 0x00894778, PAL: 0x008d9798
 sceCslBuffGrp g_aMidiInputGroups[kMidiInputGroupCount];
 
-// 0x00894788
+// NTSC-U/C: 0x00894788, PAL: 0x008d97a8
 sceCslBuffCtx g_midiInputBuffer;
 
 // SIF DMA sends the buffer from its start. The original placed the buffer on a cache line.
-// 0x008947c0
+// NTSC-U/C: 0x008947c0, PAL: 0x008d97c0
 alignas(64) MidiStreamBuffer g_midiStreamBuffer;
 
 // The program each channel last received.
-// 0x006e9bd8
+// NTSC-U/C: 0x006e9bd8, PAL: 0x0072d598
 int g_anChannelProgram[kMidiChannelCount] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 // The bank each channel last received.
-// 0x006e9c18
+// NTSC-U/C: 0x006e9c18, PAL: 0x0072d5d8
 int g_anChannelBank[kMidiChannelCount] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-// 0x00462290
+// NTSC-U/C: 0x00462290, PAL: 0x0049fb28
 void InitSynthStreamInput() {
     g_midiStreamBuffer.mBufferSize = kMidiStreamBufferSize;
     g_midiInputContext.buffGrpNum = kMidiInputGroupCount;
@@ -653,7 +728,7 @@ void InitSynthStreamInput() {
     sceMSIn_PutMsg(&g_midiInputContext, kMidiInputPort, kMidiProgramChange);
 }
 
-// 0x00464928
+// NTSC-U/C: 0x00464928, PAL: 0x004a22e8
 void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char nData2) {
     const unsigned nType = nStatus & kMidiStatusTypeMask;
     if (nType == kMidiProgramChange) {
@@ -678,47 +753,61 @@ void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char
 // SubmitDriverAllNotesOff().
 constexpr int kSoundSelectorAllNotesOff = 0xc0;
 
-// 0x004649d8
+// NTSC-U/C: 0x004649d8, PAL: 0x004a2398
 void SubmitDriverAllNotesOff() {
     SubmitSoundDriverRequest(kSoundSelectorAllNotesOff, 0);
 }
 
-// 0x00464868
+// NTSC-U/C: 0x00464868, PAL: 0x004a2288
 void SubmitDriverSetMono(int bMono) {
     SubmitSoundDriverRequest(kSoundSelectorMono, bMono);
 }
 
-// 0x00464888
+// NTSC-U/C: 0x00464888, PAL: 0x004a22a8
 void SubmitDriverSetRemix(int bRemix) {
     SubmitSoundDriverRequest(kSoundSelectorRemix, bRemix);
 }
 
-// 0x004648a8
+// NTSC-U/C: 0x004648a8, PAL: 0x004a22c8
 void SubmitDriverSetPaused(int bPaused) {
     SubmitSoundDriverRequest(kSoundSelectorPause, bPaused);
 }
 
-// 0x004648c8
+// NTSC-U/C: 0x004648c8, PAL: 0x0049fa38
 void PollSynthEvents() {
-    if (g_midiStreamBuffer.mValidSize == 0) {
-        return;
+    if (g_midiStreamBuffer.mValidSize != 0) {
+        const int nBuffer = g_nMidiEventBufferIndex;
+        g_nMidiEventBufferIndex = (nBuffer + 1) & (kMidiEventBufferCount - 1);
+        XferToIop(g_nMidiEventIopAddress + nBuffer * kMidiEventBufferSize,
+                  &g_midiStreamBuffer,
+                  g_midiStreamBuffer.mValidSize + kMidiStreamHeaderSize);
+        g_midiStreamBuffer.mValidSize = 0;
     }
-    const int nBuffer = g_nMidiEventBufferIndex;
-    g_nMidiEventBufferIndex = (nBuffer + 1) & (kMidiEventBufferCount - 1);
-    XferToIop(g_nMidiEventIopAddress + nBuffer * kMidiEventBufferSize,
-              &g_midiStreamBuffer,
-              g_midiStreamBuffer.mValidSize + kMidiStreamHeaderSize);
-    g_midiStreamBuffer.mValidSize = 0;
+#ifdef VIDEO_STANDARD_PAL
+    if ((g_nSynthEventPollCount & kHardSynthErrorLogPollMask) == 0) {
+        for (auto &log : g_aHardSynthErrorLogs) {
+            if (log.mLength <= 0) {
+                continue;
+            }
+            if (g_pHardSynthErrorFile != nullptr) {
+                // Yes, the binary passes the log text as the format.
+                fprintf(g_pHardSynthErrorFile, log.mText);
+            }
+            log.mLength = 0;
+        }
+    }
+    ++g_nSynthEventPollCount;
+#endif
 }
 
-// 0x004645c8
+// NTSC-U/C: 0x004645c8, PAL: 0x004a20a8
 void WaitForBankTransfers() {
     while (IsBankXferBusy() != 0) {
         AsyncPumpCompletedRequests();
     }
 }
 
-// 0x00464660
+// NTSC-U/C: 0x00464660, PAL: 0x004a2140
 void ReleaseSoundBanks() {
     SubmitDriverAllNotesOff();
     ReleaseAllBankSlots();
@@ -729,7 +818,7 @@ void ReleaseSoundBanks() {
     g_hdBankName = "";
 }
 
-// 0x004647a8
+// NTSC-U/C: 0x004647a8, PAL: 0x0049f950
 void InitSynthDriver() {
     if (g_bSynthDriverReady != 0) {
         return;
@@ -749,22 +838,28 @@ void InitSynthDriver() {
         nAddress =
             static_cast<int>(reinterpret_cast<uintptr_t>(sceSifAllocIopHeap(kBankIopBufferSize)));
     }
+#ifdef VIDEO_STANDARD_PAL
+    for (int &nAddress : g_anHardSynthErrorLogIopAddress) {
+        nAddress = static_cast<int>(
+            reinterpret_cast<uintptr_t>(sceSifAllocIopHeap(kHardSynthErrorLogSize)));
+    }
+#endif
     g_bSynthDriverReady = 1;
     g_nBankIopIndex = kBankIopIndexAfterInit;
 }
 
-// 0x00464b48
+// NTSC-U/C: 0x00464b48, PAL: 0x004a2508
 void ShutdownSynthDriver() {
 }
 
-// 0x00464bc8
+// NTSC-U/C: 0x00464bc8, PAL: 0x004a2588
 void PollSynthStream() {
     if (g_pSynthStream != nullptr) {
         g_pSynthStream->Update(g_nSynthStreamFrame, kSynthStreamReadSize);
     }
 }
 
-// 0x00464b68
+// NTSC-U/C: 0x00464b68, PAL: 0x004a2528
 void StopSoundBankMovie() {
     if (g_pSynthStream != nullptr) {
         delete g_pSynthStream;
@@ -794,7 +889,7 @@ struct SndbChunk : Rnd::MovieStream::ChunkHeader {
     unsigned char mData[1];       // +0x20
 };
 
-// 0x004646e8
+// NTSC-U/C: 0x004646e8, PAL: 0x004a21c8
 // The body OnSoundBankMovieChunk() expands for an SNDB chunk. The out-of-line copy
 // has no caller.
 inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
@@ -810,7 +905,7 @@ inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
     return 0;
 }
 
-// 0x00462770
+// NTSC-U/C: 0x00462770, PAL: 0x004a01b8
 // The handler reads its chunk through the header rather than the payload argument.
 void OnSoundBankMovieChunk(Rnd::MovieStream::ChunkHeader *pHeader,
                            [[maybe_unused]] void *pPayload,
@@ -831,7 +926,7 @@ void OnSoundBankMovieChunk(Rnd::MovieStream::ChunkHeader *pHeader,
     }
 }
 
-// 0x00462908
+// NTSC-U/C: 0x00462908, PAL: 0x004a0350
 void StartSoundBankMovie(const char *pszPath) {
     // The binary expands StopSoundBankMovie() here rather than calling it.
     if (g_pSynthStream != nullptr) {
@@ -850,7 +945,7 @@ void StartSoundBankMovie(const char *pszPath) {
     g_pSynthStream->mLoopTicks = nTick;
 }
 
-// 0x005f9638
+// NTSC-U/C: 0x005f9638, PAL: 0x0063a348
 int BindSoundDriverRpc() {
     sceSifInitRpc(0);
     do {
@@ -866,7 +961,7 @@ int BindSoundDriverRpc() {
     return 1;
 }
 
-// 0x005f96c8
+// NTSC-U/C: 0x005f96c8, PAL: 0x0063a3d8
 int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     if (g_bSoundRequestPending != 0) {
         while (sceSifCheckStatRpc(&g_soundDriverClient.rpcd) == kSifRpcStillRunning) {
@@ -909,7 +1004,7 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     return g_anSoundDriverReply[0];
 }
 
-// 0x005f97d0
+// NTSC-U/C: 0x005f97d0, PAL: 0x0063a4e0
 int XferToIop(int nIopAddress, const void *pSource, int nLength) {
     g_xferToIopDma.data = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(pSource));
     g_xferToIopDma.addr = static_cast<unsigned int>(nIopAddress);

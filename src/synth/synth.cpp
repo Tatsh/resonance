@@ -46,9 +46,10 @@ public:
      * Build the synthesiser on the heap. Nothing in the image calls it.
      *
      * @return The new synthesiser.
-     * @ghidraAddress 0x0013a0c0
+     * @ghidraAddress NTSC-U/C: 0x0013a0c0
+     * @ghidraAddress PAL: 0x0013aa08
      */
-    // 0x0013a0c0
+    // NTSC-U/C: 0x0013a0c0, PAL: 0x0013aa08
     static Synth *New() {
         return new NullSynth;
     }
@@ -56,9 +57,10 @@ public:
     /**
      * Discard one MIDI message.
      *
-     * @ghidraAddress 0x0013a478
+     * @ghidraAddress NTSC-U/C: 0x0013a478
+     * @ghidraAddress PAL: 0x0013adc0
      */
-    // 0x0013a478
+    // NTSC-U/C: 0x0013a478, PAL: 0x0013adc0
     virtual void SendMidi(unsigned char, unsigned char, unsigned char) {
     }
 };
@@ -85,9 +87,10 @@ public:
     /**
      * Delete the Source.
      *
-     * @ghidraAddress 0x0013a6a8
+     * @ghidraAddress NTSC-U/C: 0x0013a6a8
+     * @ghidraAddress PAL: 0x0013aff0
      */
-    // 0x0013a6a8
+    // NTSC-U/C: 0x0013a6a8, PAL: 0x0013aff0
     virtual ~SynthFade() {
         delete mSource;
     }
@@ -97,9 +100,10 @@ public:
      *
      * @param nElapsedNs Nanoseconds since the fade started.
      * @return What the Source reports, so the task stops once the fade has finished.
-     * @ghidraAddress 0x0013a710
+     * @ghidraAddress NTSC-U/C: 0x0013a710
+     * @ghidraAddress PAL: 0x0013b058
      */
-    // 0x0013a710
+    // NTSC-U/C: 0x0013a710, PAL: 0x0013b058
     virtual int Tick(long long nElapsedNs) {
         const int nElapsedMs = static_cast<int>((nElapsedNs + kNsRounding) / kNsPerMs);
         float flLevel;
@@ -125,7 +129,7 @@ private:
 
 } // namespace
 
-// 0x00139fd0
+// NTSC-U/C: 0x00139fd0, PAL: 0x0013a918
 void Synth::Setup() {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         SendMidi(kStatusPitchBend | nChannel, 0, kPitchBendCentre);
@@ -136,7 +140,7 @@ void Synth::Setup() {
     }
 }
 
-// 0x0013a480
+// NTSC-U/C: 0x0013a480, PAL: 0x0013adc8
 void Synth::FadeOut(int nDurationMs) {
     SynthFade *pFade = new SynthFade(this, nDurationMs);
     pFade->Start(kFadeEpochNow);
@@ -145,66 +149,66 @@ void Synth::FadeOut(int nDurationMs) {
     }
 }
 
-// 0x0013a398
+// NTSC-U/C: 0x0013a398, PAL: 0x0013ace0
 Synth::~Synth() {
 }
 
-// 0x0013a1d0
+// NTSC-U/C: 0x0013a1d0, PAL: 0x0013ab18
 void Synth::LoadBankSet4() {
 }
 
-// 0x0013a1d8
+// NTSC-U/C: 0x0013a1d8, PAL: 0x0013ab20
 void Synth::LoadBankSet5() {
 }
 
-// 0x0013a1e0
+// NTSC-U/C: 0x0013a1e0, PAL: 0x0013ab28
 void Synth::LoadBankSet6() {
 }
 
-// 0x0013a1e8
+// NTSC-U/C: 0x0013a1e8, PAL: 0x0013ab30
 void Synth::UnusedHook() {
 }
 
-// 0x0013a1f0
+// NTSC-U/C: 0x0013a1f0, PAL: 0x0013ab38
 void Synth::UnloadBanks() {
 }
 
-// 0x0013a1f8
+// NTSC-U/C: 0x0013a1f8, PAL: 0x0013ab40
 void Synth::OnPlayStarted() {
 }
 
-// 0x0013a200
+// NTSC-U/C: 0x0013a200, PAL: 0x0013ab48
 void Synth::SelectBank([[maybe_unused]] unsigned char nChannel,
                        [[maybe_unused]] unsigned char nBank) {
 }
 
-// 0x0013a208
+// NTSC-U/C: 0x0013a208, PAL: 0x0013ab50
 void Synth::SetStereo([[maybe_unused]] int bStereo) {
 }
 
-// 0x0013a210
+// NTSC-U/C: 0x0013a210, PAL: 0x0013ab58
 void Synth::SetRemixMode([[maybe_unused]] int bRemix) {
 }
 
-// 0x0013a218
+// NTSC-U/C: 0x0013a218, PAL: 0x0013ab60
 void Synth::SetPaused([[maybe_unused]] int bPaused) {
 }
 
-// 0x0013a220
+// NTSC-U/C: 0x0013a220, PAL: 0x0013ab68
 void Synth::AllNotesOff() {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         SendMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
     }
 }
 
-// 0x0013a288
+// NTSC-U/C: 0x0013a288, PAL: 0x0013abd0
 void Synth::AllNotesOffExceptSfxChannel() {
     for (unsigned char nChannel = 0; nChannel < kSfxChannel; ++nChannel) {
         SendMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
     }
 }
 
-// 0x0013a2f0
+// NTSC-U/C: 0x0013a2f0, PAL: 0x0013ac38
 void Synth::SetChannelVolume(unsigned char nVolume) {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         SendMidi(kStatusControlChange | nChannel, kControllerChannelVolume, nVolume);
@@ -212,12 +216,12 @@ void Synth::SetChannelVolume(unsigned char nVolume) {
 }
 
 // The address below is the out-of-line copy.
-// 0x0013a360
+// NTSC-U/C: 0x0013a360, PAL: 0x0013aca8
 inline void Synth::OnStdMidi(StdMidiMsg *pMsg) {
     SendMidi(pMsg->mStatus, pMsg->mData1, pMsg->mData2);
 }
 
-// 0x0013a570
+// NTSC-U/C: 0x0013a570, PAL: 0x0013aeb8
 void Synth::HandleMessage(Message *pMsg) {
     if (pMsg->Type() != static_cast<int>(g_dwStdMidiMsgType)) {
         return;

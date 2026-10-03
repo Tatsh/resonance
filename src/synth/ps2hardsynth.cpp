@@ -41,12 +41,12 @@ constexpr int kPlacementRotating = 3;
 
 } // namespace
 
-// 0x003f64e0
+// NTSC-U/C: 0x003f64e0, PAL: 0x0042ecc8
 Ps2HardSynth::Ps2HardSynth() : mUseSfxBank(1), mAlternateBanksResident(0) {
     InitSynthDriver();
 }
 
-// 0x003f6540
+// NTSC-U/C: 0x003f6540, PAL: 0x0042ed28
 void Ps2HardSynth::SelectSfxProgram() {
     SendMidi(kStatusControlChange | kSfxChannel, kControllerBankSelectMsb, 0);
     SendMidi(
@@ -54,18 +54,18 @@ void Ps2HardSynth::SelectSfxProgram() {
     SendMidi(kStatusProgramChange | kSfxChannel, kSfxProgram, 0);
 }
 
-// 0x003f4db8
+// NTSC-U/C: 0x003f4db8, PAL: 0x0042d530
 Ps2HardSynth *CreatePs2HardSynth() {
     return new Ps2HardSynth;
 }
 
-// 0x003f6670
+// NTSC-U/C: 0x003f6670, PAL: 0x0042ee58
 Ps2HardSynth::~Ps2HardSynth() {
     ReleaseSoundBanks();
     ShutdownSynthDriver();
 }
 
-// 0x003f47b8
+// NTSC-U/C: 0x003f47b8, PAL: 0x0042ce70
 void Ps2HardSynth::LoadBankSet4() {
     UnloadBanks();
 
@@ -79,7 +79,7 @@ void Ps2HardSynth::LoadBankSet4() {
     SelectSfxProgram();
 }
 
-// 0x003f4960
+// NTSC-U/C: 0x003f4960, PAL: 0x0042d058
 void Ps2HardSynth::LoadBankSet5() {
     mUseSfxBank = 1;
 
@@ -92,7 +92,7 @@ void Ps2HardSynth::LoadBankSet5() {
     AllNotesOff();
 }
 
-// 0x003f4af0
+// NTSC-U/C: 0x003f4af0, PAL: 0x0042d1e8
 void Ps2HardSynth::LoadBankSet6() {
     mAlternateBanksResident = QueryConfigFlag(kAlternateBanksCode);
 
@@ -106,17 +106,17 @@ void Ps2HardSynth::LoadBankSet6() {
     AllNotesOff();
 }
 
-// 0x003f6650
+// NTSC-U/C: 0x003f6650, PAL: 0x0042ee38
 void Ps2HardSynth::UnloadBanks() {
     ReleaseSoundBanks();
 }
 
-// 0x003f66d8
+// NTSC-U/C: 0x003f66d8, PAL: 0x0042eec0
 void Ps2HardSynth::SendMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2) {
     SendMidiToDriver(nStatus, nData1, nData2);
 }
 
-// 0x003f65c8
+// NTSC-U/C: 0x003f65c8, PAL: 0x0042edb0
 void Ps2HardSynth::SelectBank(unsigned char nChannel, unsigned char nBank) {
     if (mAlternateBanksResident == 0) {
         return;
@@ -127,22 +127,22 @@ void Ps2HardSynth::SelectBank(unsigned char nChannel, unsigned char nBank) {
     SendMidi(nStatus, kControllerBankSelectLsb, nBank);
 }
 
-// 0x003f6700
+// NTSC-U/C: 0x003f6700, PAL: 0x0042eee8
 void Ps2HardSynth::SetStereo(int bStereo) {
     SubmitDriverSetMono(bStereo ^ 1);
 }
 
-// 0x003f6740
+// NTSC-U/C: 0x003f6740, PAL: 0x0042ef28
 void Ps2HardSynth::SetRemixMode(int bRemix) {
     SubmitDriverSetRemix(bRemix);
 }
 
-// 0x003f6720
+// NTSC-U/C: 0x003f6720, PAL: 0x0042ef08
 void Ps2HardSynth::SetPaused(int bPaused) {
     SubmitDriverSetPaused(bPaused);
 }
 
-// 0x003f4c50
+// NTSC-U/C: 0x003f4c50, PAL: 0x0042d3c8
 void Ps2HardSynth::AllNotesOff() {
     Synth::AllNotesOff();
 
@@ -159,7 +159,7 @@ void Ps2HardSynth::AllNotesOff() {
     SendMidi(kStatusProgramChange | kMuseChannel, kMuseProgram, 0);
 }
 
-// 0x003f4590
+// NTSC-U/C: 0x003f4590, PAL: 0x0042cbc8
 void Ps2HardSynth::LoadBankPair(const HxStr &bdName,
                                 const HxStr &hdName,
                                 int nTag,

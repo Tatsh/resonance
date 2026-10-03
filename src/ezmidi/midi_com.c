@@ -12,13 +12,13 @@ enum {
     kRpcArgumentWords = 32,
 };
 
-// 0x6e70
+// NTSC-U/C: 0x6e70, PAL: 0x6e70
 int ret = 0;
 
-// 0x8570
+// NTSC-U/C: 0x8570, PAL: 0x8580
 int gRpcArg[kRpcArgumentWords];
 
-// 0x018c
+// NTSC-U/C: 0x018c, PAL: 0x018c
 static void *midiFunc(unsigned int command, void *data, int size) {
     EZMIDI_BANK *pBank = NULL;
     int ch = command & EZMIDI_CMD_PORT_MASK;
@@ -73,7 +73,7 @@ static void *midiFunc(unsigned int command, void *data, int size) {
     return &ret;
 }
 
-// 0x00d0
+// NTSC-U/C: 0x00d0, PAL: 0x00d0
 int sce_midi_loop(void) {
     sceSifQueueData qd;
     sceSifServeData sd;

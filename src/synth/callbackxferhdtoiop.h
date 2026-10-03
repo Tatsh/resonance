@@ -27,7 +27,8 @@ public:
      * @param pBuffer The destination the read filled.
      * @param nLength The number of bytes the read requested.
      * @param nStatus Zero once the data is in place, or a positive failure code.
-     * @ghidraAddress 0x00464d10
+     * @ghidraAddress NTSC-U/C: 0x00464d10
+     * @ghidraAddress PAL: 0x004a26d0
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 
@@ -43,6 +44,7 @@ public:
  * The original had internal linkage, because the whole module compiled as one translation unit
  * named midi_main.cpp. Declaring it here is what splitting the module into a file per class costs.
  *
- * @ghidraAddress 0x006e9bc8
+ * @ghidraAddress NTSC-U/C: 0x006e9bc8
+ * @ghidraAddress PAL: 0x0072d588
  */
 extern CallbackXferHdToIop g_hdXfer;
