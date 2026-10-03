@@ -166,25 +166,36 @@ jobs:
             echo "::error::No successful Build run found for ${HEAD_SHA}."
             exit 1
           fi
+          # The unlabelled executable and the module are the Release build. The Debug executable
+          # is labelled in its file name.
           for standard in NTSC PAL; do
-            artifact="release-assets-${standard}"
-            gh run download "$run_id" --repo "$REPO" --name "$artifact" \
-              --dir "artifact/${standard}"
-            dir="artifact/${standard}"
-            elf=$(find "$dir" -type f -name "resonance-*-${standard}.elf" -print -quit)
-            irx=$(find "$dir" -type f -name "EZMIDI-${standard}.IRX" -print -quit)
-            if [[ -z "$elf" || -z "$irx" ]]; then
-              echo "::error::Artifact ${artifact} lacks the executable or the module."
-              exit 1
-            fi
-            # A branch run at the same commit names the executable after the commit, so the file
-            # is renamed to the release version.
-            release_elf="artifact/${standard}/resonance-${TAG#v}-${standard}.elf"
-            if [[ "$elf" != "$release_elf" ]]; then
-              mv "$elf" "$release_elf"
-            fi
-            echo "Uploading ${release_elf} and ${irx} to release ${TAG}."
-            gh release upload "$TAG" "$release_elf" "$irx" --repo "$REPO" --clobber
+            for label in '' '-Debug'; do
+              artifact="release-assets-${standard}${label}"
+              dir="artifact/${standard}${label}"
+              gh run download "$run_id" --repo "$REPO" --name "$artifact" --dir "$dir"
+              elf=$(find "$dir" -type f -name "resonance-*-${standard}${label}.elf" -print -quit)
+              if [[ -z "$elf" ]]; then
+                echo "::error::Artifact ${artifact} lacks the executable."
+                exit 1
+              fi
+              # A branch run at the same commit names the executable after the commit, so the
+              # file is renamed to the release version.
+              release_elf="${dir}/resonance-${TAG#v}-${standard}${label}.elf"
+              if [[ "$elf" != "$release_elf" ]]; then
+                mv "$elf" "$release_elf"
+              fi
+              files=("$release_elf")
+              if [[ -z "$label" ]]; then
+                irx=$(find "$dir" -type f -name "EZMIDI-${standard}.IRX" -print -quit)
+                if [[ -z "$irx" ]]; then
+                  echo "::error::Artifact ${artifact} lacks the module."
+                  exit 1
+                fi
+                files+=("$irx")
+              fi
+              echo "Uploading ${files[*]} to release ${TAG}."
+              gh release upload "$TAG" "${files[@]}" --repo "$REPO" --clobber
+            done
           done
       - env:
           GH_TOKEN: '${{ github.token }}'
@@ -197,8 +208,9 @@ jobs:
           assets=$(gh release view "$TAG" --repo "$REPO" --json assets \
             --jq '[.assets[].name] | join(" ")')
           echo "Assets on ${TAG}: ${assets:-<none>}"
-          for asset in "resonance-${version}-NTSC.elf" EZMIDI-NTSC.IRX \
-            "resonance-${version}-PAL.elf" EZMIDI-PAL.IRX; do
+          for asset in "resonance-${version}-NTSC.elf" "resonance-${version}-NTSC-Debug.elf" \
+            EZMIDI-NTSC.IRX "resonance-${version}-PAL.elf" "resonance-${version}-PAL-Debug.elf" \
+            EZMIDI-PAL.IRX; do
             if [[ " ${assets} " != *" ${asset} "* ]]; then
               echo "::error::${asset} is not attached to ${TAG}; refusing to publish it."
               exit 1

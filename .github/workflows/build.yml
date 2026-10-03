@@ -4,11 +4,12 @@ concurrency:
   group: build-${{ github.ref }}
 jobs:
   compile:
-    name: 'Compile (${{ matrix.video-standard }})'
+    name: 'Compile (${{ matrix.video-standard }}, ${{ matrix.build-type }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        build-type: ['Debug', 'Release']
         video-standard: ['NTSC', 'PAL']
     container:
       image: 'ghcr.io/ps2dev/ps2dev:latest@sha256:06ace7056f19de9bb96608fc261c050c770686a8cc79e0488ac07cc055131777'
@@ -34,9 +35,10 @@ jobs:
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="$PWD/cmake/ps2-ee-toolchain.cmake" \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
             -DVIDEO_STANDARD="$VIDEO_STANDARD"
         env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
           VIDEO_STANDARD: '${{ matrix.video-standard }}'
       - name: 'Compile'
         run: |
@@ -48,6 +50,7 @@ jobs:
         run: cmake --build build --target resonance
       - name: 'Package release assets'
         env:
+          BUILD_TYPE: '${{ matrix.build-type }}'
           VIDEO_STANDARD: '${{ matrix.video-standard }}'
         run: |
           # A tag build is versioned by its tag. Branch and pull request builds have no version, so
@@ -67,26 +70,37 @@ jobs:
           test -n "$IRX" || { echo '::error::EZMIDI.IRX was not built.'; exit 1; }
           rm -rf release
           mkdir release
+          # An unlabelled file is the Release build. Every other build type includes its type in the
+          # file name.
+          LABEL=''
+          if [ "$BUILD_TYPE" != 'Release' ]; then
+            LABEL="-${BUILD_TYPE}"
+          fi
           # NTSC is the North American (SCUS-97125) build and PAL the European (SCES-50791) build.
           # The two modules differ, so each carries its standard in the file name. The disc loads
-          # it as EZMIDI.IRX. The module retains its symbols, as the original does.
+          # it as EZMIDI.IRX. The module retains its symbols, as the original does. The module build
+          # ignores the build type, and only the Release artifact includes the module.
           mips64r5900el-ps2-elf-objcopy --strip-debug "$ELF" \
-            "release/resonance-${VERSION}-${VIDEO_STANDARD}.elf"
-          cp "$IRX" "release/EZMIDI-${VIDEO_STANDARD}.IRX"
+            "release/resonance-${VERSION}-${VIDEO_STANDARD}${LABEL}.elf"
+          if [ "$BUILD_TYPE" = 'Release' ]; then
+            cp "$IRX" "release/EZMIDI-${VIDEO_STANDARD}.IRX"
+          fi
           ls -l release
       - name: 'Upload release assets'
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
           # The artifact has an unversioned name so release.yml can request it by a fixed name.
           # The versioned file names it includes are what reach the release page.
-          name: 'release-assets-${{ matrix.video-standard }}'
+          name: >-
+            release-assets-${{ matrix.video-standard }}${{ matrix.build-type != 'Release' &&
+            format('-{0}', matrix.build-type) || '' }}
           path: 'release/*'
           if-no-files-found: error
       - name: 'Upload resonance'
         if: always()
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
-          name: 'resonance-${{ matrix.video-standard }}'
+          name: 'resonance-${{ matrix.video-standard }}-${{ matrix.build-type }}'
           path: 'build/**/resonance'
           if-no-files-found: warn
 name: 'Build'
