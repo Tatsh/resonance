@@ -54,20 +54,20 @@ typedef struct {
     int mSpu2Argument; // The argument of the SPU2 interrupt handler.
 } SdrCallbackTable;
 
-// 0x008e3e00
+// NTSC-U/C: 0x008e3e00, PAL: 0x00929180
 static SdrPacket g_sdrPacket __attribute__((aligned(64)));
 
-// 0x008e3e40
+// NTSC-U/C: 0x008e3e40, PAL: 0x009291c0
 static sceSifClientData g_sdrClient __attribute__((aligned(64)));
 
-// 0x007b2754
+// NTSC-U/C: 0x007b2754, PAL: 0x007f6454
 static SdrCallbackTable g_sdrCallbackTable;
 
 // The completion callback of a call made with a zero control word. The image never writes it.
-// 0x00765d38
+// NTSC-U/C: 0x00765d38, PAL: 0x007a8cd0
 static sceSifEndFunc g_pfnSdrEndFunction;
 
-// 0x00576fe0
+// NTSC-U/C: 0x00576fe0, PAL: 0x005b74a8
 int sceSdRemoteInit(void) {
     sceSifClientData *pClient = &g_sdrClient;
     int nBind;
@@ -94,7 +94,7 @@ int sceSdRemoteInit(void) {
     }
 }
 
-// 0x00577120
+// NTSC-U/C: 0x00577120, PAL: 0x005b75e8
 int sceSdRemote(int nControl, ...) {
     SdrPacket *pPacket = &g_sdrPacket;
     sceSifClientData *pClient = &g_sdrClient;

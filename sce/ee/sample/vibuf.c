@@ -9,7 +9,7 @@ enum {
     kSectorReserve = 2,
 };
 
-// 0x006134e8
+// NTSC-U/C: 0x006134e8, PAL: 0x00654078
 void viBufBeginPut(ViBuf *buffer,
                    unsigned char **firstPut,
                    int *firstSize,
@@ -38,7 +38,7 @@ void viBufBeginPut(ViBuf *buffer,
     SignalSema(buffer->mSemaId);
 }
 
-// 0x006135e0
+// NTSC-U/C: 0x006135e0, PAL: 0x00654170
 void viBufEndPut(ViBuf *buffer, int size) {
     WaitSema(buffer->mSemaId);
 
@@ -48,7 +48,7 @@ void viBufEndPut(ViBuf *buffer, int size) {
     SignalSema(buffer->mSemaId);
 }
 
-// 0x00613638
+// NTSC-U/C: 0x00613638, PAL: 0x006541c8
 int viBufPutTs(ViBuf *buffer, ViTimeStamp *timeStamp) {
     int result = 0;
 
@@ -74,7 +74,7 @@ int viBufPutTs(ViBuf *buffer, ViTimeStamp *timeStamp) {
     return result;
 }
 
-// 0x00613748
+// NTSC-U/C: 0x00613748, PAL: 0x006542d8
 int viBufCount(ViBuf *buffer) {
     WaitSema(buffer->mSemaId);
     const int count = (buffer->mBufferedSectors << kSectorShift) + buffer->mBufferedBytes;

@@ -39,7 +39,11 @@ enum {
     kImageQuadwords = 0x40,
     kReserveWords = 4,
     kFirstFieldOffset = 0x40,
+#ifdef VIDEO_STANDARD_PAL
+    kSecondFieldOffset = 0x26740,
+#else
     kSecondFieldOffset = 0x20240,
+#endif
     kTagDecoded = 2,
     kTagFirstFieldShown = 1,
     kTagEmpty = 0,
@@ -54,40 +58,53 @@ typedef struct {
 // The two GIF tag templates, each one address and data register per loop. The first ends the
 // packet and heads the display setup, and the second heads each transfer's registers. The loop
 // count is filled in when the tag closes.
-// 0x00835e78
+// NTSC-U/C: 0x00835e78, PAL: 0x00878b08
 static const PacketHeader g_packetHeaders[2] = {
     {0x1000000000008000ULL, 0xeULL},
     {0x1000000000000000ULL, 0xeULL},
 };
 
-// 0x0077b128
+// NTSC-U/C: 0x0077b128, PAL: 0x007beef4
 // Set while the display runs. The endimage handler leaves quietly outside that window.
 static int g_isDisplaying;
 
-// 0x0077b12c
+// NTSC-U/C: 0x0077b12c, PAL: 0x007beef8
 // Counts the endimage interrupts handled since the display started.
 static int g_endimageCount;
 
-// 0x0077b130
+// NTSC-U/C: 0x0077b130, PAL: 0x007beefc
 // Holds the shown tag state until the vertical blank handler releases the entry.
 static int g_frameShown;
 
-// 0x0077b134
+// NTSC-U/C: 0x0077b134, PAL: 0x007bef00
 // The field the last endimage interrupt observed.
 static int g_currentField;
 
-// 0x0077b138
+// NTSC-U/C: 0x0077b138, PAL: 0x007bef04
 // The outcome of the last path synchronisation in the endimage handler.
 static int g_syncResult;
 
-// 0x0070ce8c
+// NTSC-U/C: 0x0070ce8c, PAL: 0x00750d7c
 // Counts the endimage interrupts that found no filled tag entry.
 static int g_emptyCount;
 
 static const unsigned long long kImageTagHeader = 0x0800000000000040ULL;
+#ifdef VIDEO_STANDARD_PAL
+// The 576-line frame buffers end higher in local memory. The texture follows them there.
+static const unsigned long long kTextureBase = 0xaa8031b00ULL;
+static const unsigned long long kClearCorner = 0xb4002d00ULL;
+static const unsigned long long kSourceBufferWord = 0xc1b0ULL << 36;
+// The sprite's top edge and height, in sixteenths of a pixel.
+static const unsigned long long kSpriteTop = 0x7800ULL;
+static const unsigned long long kSpriteHeight = 0x1000ULL;
+#else
 static const unsigned long long kTextureBase = 0xaa8031800ULL;
 static const unsigned long long kClearCorner = 0x96002d00ULL;
 static const unsigned long long kSourceBufferWord = 0xc180ULL << 36;
+// The sprite's top edge and height, in sixteenths of a pixel.
+static const unsigned long long kSpriteTop = 0x7880ULL;
+static const unsigned long long kSpriteHeight = 0xf00ULL;
+#endif
 static const unsigned long long kTransferSizeWord = (0x10ULL << 32) | 0x10ULL;
 
 // A cached address becomes an uncached address by keeping the low 28 bits and setting bit 29.
@@ -96,7 +113,7 @@ static unsigned char *ToUncachedAddress(const void *pAddress) {
     return (unsigned char *)((nAddress & kPhysicalAddressMask) | kUncachedSegment);
 }
 
-// 0x005d2860
+// NTSC-U/C: 0x005d2860, PAL: 0x006148a8
 void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     void *pBuffer = memalign(kPacketAlign, kPacketBufferSize);
     sceDmaChan *pChannel = sceDmaGetChan(SCE_DMA_GIF);
@@ -151,7 +168,7 @@ void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     free(pBuffer);
 }
 
-// 0x005d2ab8
+// NTSC-U/C: 0x005d2ab8, PAL: 0x00614b00
 void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) {
     sceGifPkData packet;
     unsigned char *image = (unsigned char *)pImage;
@@ -207,12 +224,12 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) 
     sceGifPkAddGsAD(&packet, 6, kTextureBase);
     sceGifPkAddGsAD(&packet, 0, 0x116);
     const unsigned long long firstColour = 8ULL | (8ULL << 16);
-    const unsigned long long firstCorner = 0x6c00ULL | (0x7880ULL << 16);
+    const unsigned long long firstCorner = 0x6c00ULL | (kSpriteTop << 16);
     const unsigned long long secondColour =
         (8ULL + (unsigned long long)(nWidth * 16)) |
         ((8ULL + (unsigned long long)(nHeight * 16)) << 16);
     const unsigned long long secondCorner =
-        (0x6c00ULL + 0x2800ULL) | ((0x7880ULL + 0xf00ULL) << 16);
+        (0x6c00ULL + 0x2800ULL) | ((kSpriteTop + kSpriteHeight) << 16);
     sceGifPkAddGsAD(&packet, 3, firstColour);
     sceGifPkAddGsAD(&packet, 5, firstCorner);
     sceGifPkAddGsAD(&packet, 3, secondColour);
@@ -221,7 +238,7 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) 
     sceGifPkTerminate(&packet);
 }
 
-// 0x005d2e38
+// NTSC-U/C: 0x005d2e38, PAL: 0x00614e80
 int vblankHandler(int nCause) {
     (void)nCause;
     sceDmaChan *pChannel = sceDmaGetChan(SCE_DMA_GIF);
@@ -273,7 +290,7 @@ int vblankHandler(int nCause) {
     return 0;
 }
 
-// 0x005d3008
+// NTSC-U/C: 0x005d3008, PAL: 0x00615050
 void startDisplay(int nWaitField) {
     // Wait for the field to move off the requested one, so playback starts on its complement.
     while (sceGsSyncV(0) == nWaitField) {
@@ -283,13 +300,13 @@ void startDisplay(int nWaitField) {
     g_endimageCount = 0;
 }
 
-// 0x005d3050
+// NTSC-U/C: 0x005d3050, PAL: 0x00615098
 void endDisplay(void) {
     g_isDisplaying = 0;
     g_emptyCount = 0;
 }
 
-// 0x005d3068
+// NTSC-U/C: 0x005d3068, PAL: 0x006150b0
 int handler_endimage(int nCause) {
     (void)nCause;
     if (g_frameShown != 0) {
@@ -300,7 +317,7 @@ int handler_endimage(int nCause) {
     return 0;
 }
 
-// 0x0059afa0
+// NTSC-U/C: 0x0059afa0, PAL: 0x005de438
 int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     sceMpegCbDataStr *packet = (sceMpegCbDataStr *)pCallbackData;
@@ -336,7 +353,7 @@ int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     return copied > 0 ? 1 : 0;
 }
 
-// 0x00567920
+// NTSC-U/C: 0x00567920, PAL: 0x005a7de8
 // Compute the two staging spans for one audio packet. Inferred.
 static void AudioPutSpans(AudioDec *pAudioDec, int *pFirstSpan, int *pFirstSize, int *pSecondSpan, int *pSecondSize) {
     if (pAudioDec->state == 0) {
@@ -363,7 +380,7 @@ static void AudioPutSpans(AudioDec *pAudioDec, int *pFirstSpan, int *pFirstSize,
     }
 }
 
-// 0x005679d0
+// NTSC-U/C: 0x005679d0, PAL: 0x005a7e98
 // Commit copied bytes into the staging counts. Inferred.
 static void AudioCommitCopied(AudioDec *pAudioDec, int nCopied) {
     if (pAudioDec->state == 0) {
@@ -385,7 +402,7 @@ static void AudioCommitCopied(AudioDec *pAudioDec, int nCopied) {
     pAudioDec->put = (pAudioDec->put + nCopied) % pAudioDec->bufferSize;
 }
 
-// 0x0059b0c8
+// NTSC-U/C: 0x0059b0c8, PAL: 0x005de560
 int pcmCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     sceMpegCbDataStr *packet = (sceMpegCbDataStr *)pCallbackData;
     ReadBuf *readBuffer = (ReadBuf *)pData;

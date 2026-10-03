@@ -14,7 +14,8 @@ extern "C" {
  * empty at the first slot.
  *
  * @param pVoBuf The queue.
- * @ghidraAddress 0x005d3fe8
+ * @ghidraAddress NTSC-U/C: 0x005d3fe8
+ * @ghidraAddress PAL: 0x00616050
  */
 void voBufReset(VoBuf *pVoBuf);
 
@@ -26,7 +27,8 @@ void voBufReset(VoBuf *pVoBuf);
  * disabled across the update, and the vertical blank handler releases slots at display time.
  *
  * @param pVoBuf The queue.
- * @ghidraAddress 0x005d4010
+ * @ghidraAddress NTSC-U/C: 0x005d4010
+ * @ghidraAddress PAL: 0x00616078
  */
 void voBufIncCount(VoBuf *pVoBuf);
 
@@ -38,7 +40,8 @@ void voBufIncCount(VoBuf *pVoBuf);
  *
  * @param pVoBuf The queue.
  * @return The write slot, or a null pointer when the queue is full.
- * @ghidraAddress 0x005d4088
+ * @ghidraAddress NTSC-U/C: 0x005d4088
+ * @ghidraAddress PAL: 0x006160f0
  */
 void *voBufGetData(VoBuf *pVoBuf);
 
@@ -50,7 +53,8 @@ void *voBufGetData(VoBuf *pVoBuf);
  *
  * @param pVoBuf The queue.
  * @return The oldest filled entry, or a null pointer when the queue is empty.
- * @ghidraAddress 0x005d40d8
+ * @ghidraAddress NTSC-U/C: 0x005d40d8
+ * @ghidraAddress PAL: 0x00616140
  */
 void *voBufGetTag(VoBuf *pVoBuf);
 
@@ -61,7 +65,8 @@ void *voBufGetTag(VoBuf *pVoBuf);
  * the filled count never falls below zero.
  *
  * @param pVoBuf The queue.
- * @ghidraAddress 0x005d4130
+ * @ghidraAddress NTSC-U/C: 0x005d4130
+ * @ghidraAddress PAL: 0x00616198
  */
 void voBufDecCount(VoBuf *pVoBuf);
 

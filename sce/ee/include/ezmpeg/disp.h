@@ -26,7 +26,8 @@ extern "C" {
  * @param nField The field flag.
  * @param nWidth The image width.
  * @param nHeight The image height.
- * @ghidraAddress 0x005d2ab8
+ * @ghidraAddress NTSC-U/C: 0x005d2ab8
+ * @ghidraAddress PAL: 0x00614b00
  */
 void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight);
 

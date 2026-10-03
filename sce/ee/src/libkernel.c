@@ -96,7 +96,7 @@ typedef void (*PutCharFunction)(int c);
 // The fraction PrintFloat() prints has six digits.
 static const double kFractionScale = 1000000.0;
 
-// 0x00769820
+// NTSC-U/C: 0x00769820, PAL: 0x007ad578
 static SyscallEntry g_syscallPatchTable[kSyscallTableSize] = {
     {kSyscallKernelCopy, KernelCopyHandler},
     {kSyscallGetEntryAddress, kAlarmPatchBase},
@@ -108,22 +108,22 @@ static SyscallEntry g_syscallPatchTable[kSyscallTableSize] = {
     {kSyscallAlarmReturn, NULL},
 };
 
-// 0x006fc33c
+// NTSC-U/C: 0x006fc33c, PAL: 0x0073fd1c
 static int g_libcSemaphores[2];
 
-// 0x0077f988
+// NTSC-U/C: 0x0077f988, PAL: 0x007c3778
 static int g_nHelperThreadId;
 
-// 0x008e5350
+// NTSC-U/C: 0x008e5350, PAL: 0x0092a350
 static unsigned char g_helperStack[kHelperStackSize] __attribute__((aligned(16)));
 
-// 0x008e5750
+// NTSC-U/C: 0x008e5750, PAL: 0x0092a750
 static int g_nThreadRequestSema;
 
-// 0x008e5758
+// NTSC-U/C: 0x008e5758, PAL: 0x0092a758
 static ThreadRequestQueue g_threadRequests;
 
-// 0x008e6950
+// NTSC-U/C: 0x008e6950, PAL: 0x0092b950
 static unsigned char g_deci2WorkArea[kDeci2WorkAreaSize] __attribute__((aligned(16)));
 
 static inline int InterruptsEnabled(void) {
@@ -145,7 +145,7 @@ static inline int iGetThreadId(void) {
     return result;
 }
 
-// 0x005e4510
+// NTSC-U/C: 0x005e4510, PAL: 0x006266d0
 int DIntr(void) {
     if (!InterruptsEnabled()) {
         return 0;
@@ -157,7 +157,7 @@ int DIntr(void) {
     return 1;
 }
 
-// 0x005e4558
+// NTSC-U/C: 0x005e4558, PAL: 0x00626718
 int EIntr(void) {
     int bWasEnabled = InterruptsEnabled();
 
@@ -165,7 +165,7 @@ int EIntr(void) {
     return bWasEnabled;
 }
 
-// 0x00588f18
+// NTSC-U/C: 0x00588f18, PAL: 0x005cc190
 int DisableIntc(int cause) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -181,7 +181,7 @@ int DisableIntc(int cause) {
     return result;
 }
 
-// 0x00588f80
+// NTSC-U/C: 0x00588f80, PAL: 0x005cc1f8
 int EnableIntc(int cause) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -197,7 +197,7 @@ int EnableIntc(int cause) {
     return result;
 }
 
-// 0x00588fe8
+// NTSC-U/C: 0x00588fe8, PAL: 0x005cc260
 int DisableDmac(int channel) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -213,7 +213,7 @@ int DisableDmac(int channel) {
     return result;
 }
 
-// 0x00589050
+// NTSC-U/C: 0x00589050, PAL: 0x005cc2c8
 int EnableDmac(int channel) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -229,7 +229,7 @@ int EnableDmac(int channel) {
     return result;
 }
 
-// 0x00589158
+// NTSC-U/C: 0x00589158, PAL: 0x005cc3d0
 int KernelCopyHandler(unsigned int *dest, const unsigned int *src, unsigned int size) {
     unsigned int nWords = size >> 2;
     unsigned int i;
@@ -240,7 +240,7 @@ int KernelCopyHandler(unsigned int *dest, const unsigned int *src, unsigned int 
     return 0;
 }
 
-// 0x005891a0
+// NTSC-U/C: 0x005891a0, PAL: 0x005cc418
 void InstallSyscallPatch(void) {
     int i;
 
@@ -259,7 +259,7 @@ void InstallSyscallPatch(void) {
     }
 }
 
-// 0x004b8f98
+// NTSC-U/C: 0x004b8f98, PAL: 0x004f6f10
 static void InitLibcSemas(void) {
     struct SemaParam first;
     struct SemaParam second;
@@ -272,14 +272,14 @@ static void InitLibcSemas(void) {
     g_libcSemaphores[1] = CreateSema(&second);
 }
 
-// 0x004b8fe0
+// NTSC-U/C: 0x004b8fe0, PAL: 0x004f6f58
 void _InitSys(void) {
     InitLibcSemas();
     InstallSyscallPatch();
     (void)InitThread();
 }
 
-// 0x005f1fb0
+// NTSC-U/C: 0x005f1fb0, PAL: 0x006340f8
 static void HelperThreadMain(void *arg) {
     ThreadRequestQueue *pQueue = (ThreadRequestQueue *)arg;
 
@@ -308,7 +308,7 @@ static void HelperThreadMain(void *arg) {
     }
 }
 
-// 0x005f2088
+// NTSC-U/C: 0x005f2088, PAL: 0x006341d0
 int InitThread(void) {
     struct ThreadParam thread;
     struct SemaParam sema;
@@ -339,7 +339,7 @@ int InitThread(void) {
     return g_nHelperThreadId;
 }
 
-// 0x005f2160
+// NTSC-U/C: 0x005f2160, PAL: 0x006342a8
 // A request to wake the interrupted thread is queued for the helper thread instead of the kernel.
 int iWakeupThread(int thid) {
     int nSelf = iGetThreadId();
@@ -359,7 +359,7 @@ int iWakeupThread(int thid) {
     return nSelf;
 }
 
-// 0x00620730
+// NTSC-U/C: 0x00620730, PAL: 0x006612c0
 // Writes back every data cache line whose tag lies in the range. Cache operation 0x10 loads the tag
 // of a line into TagLo, and 0x14 writes the line back and invalidates it. Bit 0 of the index
 // selects the way.
@@ -390,7 +390,7 @@ static void SyncDCacheLines(uintptr_t start, uintptr_t end) {
     }
 }
 
-// 0x006207d8
+// NTSC-U/C: 0x006207d8, PAL: 0x00661368
 void SyncDCache(void *start, void *end) {
     int bEnabled = InterruptsEnabled();
 
@@ -404,7 +404,7 @@ void SyncDCache(void *start, void *end) {
     }
 }
 
-// 0x0061d7f8
+// NTSC-U/C: 0x0061d7f8, PAL: 0x0065e388
 int sceDeci2Open(unsigned short protocol,
                  void *opt,
                  void (*handler)(int event, int param, void *opt)) {
@@ -417,7 +417,7 @@ int sceDeci2Open(unsigned short protocol,
     return Deci2Call(kDeci2Open, args);
 }
 
-// 0x0061d868
+// NTSC-U/C: 0x0061d868, PAL: 0x0065e3f8
 int sceDeci2ReqSend(int s, char dest) {
     unsigned int args[kDeci2ArgCount];
 
@@ -426,7 +426,7 @@ int sceDeci2ReqSend(int s, char dest) {
     return Deci2Call(kDeci2ReqSend, args);
 }
 
-// 0x0061d898
+// NTSC-U/C: 0x0061d898, PAL: 0x0065e428
 int sceDeci2Poll(int s) {
     unsigned int args[kDeci2ArgCount];
 
@@ -434,7 +434,7 @@ int sceDeci2Poll(int s) {
     return Deci2Call(kDeci2Poll, args);
 }
 
-// 0x0061d8c0
+// NTSC-U/C: 0x0061d8c0, PAL: 0x0065e450
 int sceDeci2ExRecv(int s, void *buf, unsigned short len) {
     unsigned int args[kDeci2ArgCount];
 
@@ -444,7 +444,7 @@ int sceDeci2ExRecv(int s, void *buf, unsigned short len) {
     return Deci2Call(kDeci2ExRecv, args);
 }
 
-// 0x0061d8f8
+// NTSC-U/C: 0x0061d8f8, PAL: 0x0065e488
 int sceDeci2ExSend(int s, void *buf, unsigned short len) {
     unsigned int args[kDeci2ArgCount];
 
@@ -454,7 +454,7 @@ int sceDeci2ExSend(int s, void *buf, unsigned short len) {
     return Deci2Call(kDeci2ExSend, args);
 }
 
-// 0x0061d9b0
+// NTSC-U/C: 0x0061d9b0, PAL: 0x0065e540
 int kputs(char *s) {
     unsigned int args[kDeci2ArgCount];
 
@@ -462,13 +462,13 @@ int kputs(char *s) {
     return Deci2Call(kDeci2Kputs, args);
 }
 
-// 0x008e5bf8
+// NTSC-U/C: 0x008e5bf8, PAL: 0x0092abf8
 static char g_szConsoleLine[kConsoleLineSize];
 
-// 0x00780dc0
+// NTSC-U/C: 0x00780dc0, PAL: 0x007c4ad8
 static int g_nConsoleLineLength;
 
-// 0x005fa8c0
+// NTSC-U/C: 0x005fa8c0, PAL: 0x0063b5d0
 int PutSioByte(int c) {
     while ((*SIO_ISR & kSioIsrTxFull) != 0) {
     }
@@ -476,7 +476,7 @@ int PutSioByte(int c) {
     return c;
 }
 
-// 0x005fa8f8
+// NTSC-U/C: 0x005fa8f8, PAL: 0x0063b608
 // Collects a line for the DECI2 kernel console. A long line is sent in parts.
 static void PutConsoleLineChar(int c) {
     int nLength;
@@ -498,7 +498,7 @@ static void PutConsoleLineChar(int c) {
     g_szConsoleLine[nLength] = (char)c;
 }
 
-// 0x005fa9a8
+// NTSC-U/C: 0x005fa9a8, PAL: 0x0063b6b8
 static void PutSioCharCrlf(int c) {
     if (c == '\n') {
         PutSioByte('\r');
@@ -508,10 +508,10 @@ static void PutSioCharCrlf(int c) {
     PutSioByte(c);
 }
 
-// 0x00780dc4
+// NTSC-U/C: 0x00780dc4, PAL: 0x007c4adc
 static PutCharFunction g_pfnPutChar = PutSioCharCrlf;
 
-// 0x005fa9e0
+// NTSC-U/C: 0x005fa9e0, PAL: 0x0063b6f0
 // Converts the bits of a double to an integer. A fraction of three quarters or more rounds up, and
 // a value of 2^13 or more returns 9999.
 static int DoubleBitsToInt(unsigned long long bits) {
@@ -540,7 +540,7 @@ static int DoubleBitsToInt(unsigned long long bits) {
     return (int)mantissa;
 }
 
-// 0x005faa70
+// NTSC-U/C: 0x005faa70, PAL: 0x0063b780
 // Prints a value as 0.digits and a power of ten.
 static void PrintFloat(double value) {
     int nExponent = 0;
@@ -584,7 +584,7 @@ static const char *ApplyPadding(const char *pDigits, const char *pPad) {
     return pDigits;
 }
 
-// 0x005fabd8
+// NTSC-U/C: 0x005fabd8, PAL: 0x0063b8e8
 static void VPrintfToConsole(const char *pszFormat, va_list args) {
     char szDigits[kPrintfBufferSize];
     const char *p = pszFormat;
@@ -727,7 +727,7 @@ static void VPrintfToConsole(const char *pszFormat, va_list args) {
     }
 }
 
-// 0x005fb1a0
+// NTSC-U/C: 0x005fb1a0, PAL: 0x0063beb0
 void PrintfToSioRaw(const char *format, ...) {
     va_list args;
 
@@ -736,7 +736,7 @@ void PrintfToSioRaw(const char *format, ...) {
     va_end(args);
 }
 
-// 0x005fb1d8
+// NTSC-U/C: 0x005fb1d8, PAL: 0x0063bee8
 void scePrintf(const char *format, ...) {
     PutCharFunction pfnSaved = g_pfnPutChar;
     va_list args;

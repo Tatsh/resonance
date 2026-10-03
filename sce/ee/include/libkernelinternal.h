@@ -16,14 +16,16 @@ enum {
 /**
  * The alarm system calls, built to run at kernel address 0x80076000.
  *
- * @ghidraAddress 0x007690b8
+ * @ghidraAddress NTSC-U/C: 0x007690b8
+ * @ghidraAddress PAL: 0x007ace10
  */
 extern const unsigned char g_alarmPatch[kAlarmPatchSize];
 
 /**
  * The user-mode trampoline an alarm handler runs through, built to run at 0x00082000.
  *
- * @ghidraAddress 0x007697f8
+ * @ghidraAddress NTSC-U/C: 0x007697f8
+ * @ghidraAddress PAL: 0x007ad550
  */
 extern const unsigned char g_alarmTrampoline[kAlarmTrampolineSize];
 
@@ -32,7 +34,8 @@ extern const unsigned char g_alarmTrampoline[kAlarmTrampolineSize];
  *
  * @param cause Interrupt cause.
  * @return Kernel result.
- * @ghidraAddress 0x00536820
+ * @ghidraAddress NTSC-U/C: 0x00536820
+ * @ghidraAddress PAL: 0x005760e0
  */
 int _EnableIntc(int cause);
 
@@ -41,7 +44,8 @@ int _EnableIntc(int cause);
  *
  * @param cause Interrupt cause.
  * @return Kernel result.
- * @ghidraAddress 0x00536830
+ * @ghidraAddress NTSC-U/C: 0x00536830
+ * @ghidraAddress PAL: 0x005760f0
  */
 int _DisableIntc(int cause);
 
@@ -50,7 +54,8 @@ int _DisableIntc(int cause);
  *
  * @param channel DMA channel.
  * @return Kernel result.
- * @ghidraAddress 0x00536840
+ * @ghidraAddress NTSC-U/C: 0x00536840
+ * @ghidraAddress PAL: 0x00576100
  */
 int _EnableDmac(int channel);
 
@@ -59,7 +64,8 @@ int _EnableDmac(int channel);
  *
  * @param channel DMA channel.
  * @return Kernel result.
- * @ghidraAddress 0x00536850
+ * @ghidraAddress NTSC-U/C: 0x00536850
+ * @ghidraAddress PAL: 0x00576110
  */
 int _DisableDmac(int channel);
 
@@ -68,7 +74,8 @@ int _DisableDmac(int channel);
  *
  * @param thid Thread identifier.
  * @return Kernel result.
- * @ghidraAddress 0x00536a20
+ * @ghidraAddress NTSC-U/C: 0x00536a20
+ * @ghidraAddress PAL: 0x005762e0
  */
 int _iWakeupThread(int thid);
 

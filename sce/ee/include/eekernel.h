@@ -99,7 +99,8 @@ extern char _gp[];
  * @param interlace Non-zero for interlaced output.
  * @param omode Video mode (NTSC, PAL, or a progressive mode).
  * @param ffmd Non-zero to read a field at a time, zero to read a frame.
- * @ghidraAddress 0x005366e0
+ * @ghidraAddress NTSC-U/C: 0x005366e0
+ * @ghidraAddress PAL: 0x00575fa0
  */
 void SetGsCrt(short interlace, short omode, short ffmd);
 
@@ -107,7 +108,8 @@ void SetGsCrt(short interlace, short omode, short ffmd);
  * Ends the program and returns to the system.
  *
  * @param status Exit status.
- * @ghidraAddress 0x00536700
+ * @ghidraAddress NTSC-U/C: 0x00536700
+ * @ghidraAddress PAL: 0x00575fc0
  */
 void Exit(int status);
 
@@ -118,7 +120,8 @@ void Exit(int status);
  * @param handler Handler.
  * @param next Position in the handler list (0 first, -1 last).
  * @return Handler identifier, or a negative value on failure.
- * @ghidraAddress 0x005367c0
+ * @ghidraAddress NTSC-U/C: 0x005367c0
+ * @ghidraAddress PAL: 0x00576080
  */
 int AddIntcHandler(int cause, int (*handler)(int cause), int next);
 
@@ -128,7 +131,8 @@ int AddIntcHandler(int cause, int (*handler)(int cause), int next);
  * @param cause Interrupt cause (`INTC_*`).
  * @param hid Handler identifier from AddIntcHandler().
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x005367e0
+ * @ghidraAddress NTSC-U/C: 0x005367e0
+ * @ghidraAddress PAL: 0x005760a0
  */
 int RemoveIntcHandler(int cause, int hid);
 
@@ -139,7 +143,8 @@ int RemoveIntcHandler(int cause, int hid);
  * @param handler Handler.
  * @param next Position in the handler list (0 first, -1 last).
  * @return Handler identifier, or a negative value on failure.
- * @ghidraAddress 0x005367f0
+ * @ghidraAddress NTSC-U/C: 0x005367f0
+ * @ghidraAddress PAL: 0x005760b0
  */
 int AddDmacHandler(int channel, int (*handler)(int channel), int next);
 
@@ -149,7 +154,8 @@ int AddDmacHandler(int channel, int (*handler)(int channel), int next);
  * @param channel DMA channel (`DMAC_*`).
  * @param hid Handler identifier from AddDmacHandler().
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536810
+ * @ghidraAddress NTSC-U/C: 0x00536810
+ * @ghidraAddress PAL: 0x005760d0
  */
 int RemoveDmacHandler(int channel, int hid);
 
@@ -158,7 +164,8 @@ int RemoveDmacHandler(int channel, int hid);
  *
  * @param cause Interrupt cause (`INTC_*`).
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00588f80
+ * @ghidraAddress NTSC-U/C: 0x00588f80
+ * @ghidraAddress PAL: 0x005cc1f8
  */
 int EnableIntc(int cause);
 
@@ -167,7 +174,8 @@ int EnableIntc(int cause);
  *
  * @param cause Interrupt cause (`INTC_*`).
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00588f18
+ * @ghidraAddress NTSC-U/C: 0x00588f18
+ * @ghidraAddress PAL: 0x005cc190
  */
 int DisableIntc(int cause);
 
@@ -176,7 +184,8 @@ int DisableIntc(int cause);
  *
  * @param channel DMA channel (`DMAC_*`).
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00589050
+ * @ghidraAddress NTSC-U/C: 0x00589050
+ * @ghidraAddress PAL: 0x005cc2c8
  */
 int EnableDmac(int channel);
 
@@ -185,7 +194,8 @@ int EnableDmac(int channel);
  *
  * @param channel DMA channel (`DMAC_*`).
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00588fe8
+ * @ghidraAddress NTSC-U/C: 0x00588fe8
+ * @ghidraAddress PAL: 0x005cc260
  */
 int DisableDmac(int channel);
 
@@ -196,7 +206,8 @@ int DisableDmac(int channel);
  * @param handler Handler, given the alarm identifier, the target time, and @p arg.
  * @param arg Argument for the handler.
  * @return Alarm identifier, or a negative value when every alarm is in use.
- * @ghidraAddress 0x00536860
+ * @ghidraAddress NTSC-U/C: 0x00536860
+ * @ghidraAddress PAL: 0x00576120
  */
 int SetAlarm(unsigned short time,
              void (*handler)(int id, unsigned short time, void *arg),
@@ -207,7 +218,8 @@ int SetAlarm(unsigned short time,
  *
  * @param param Entry point, stack, global pointer, and priority.
  * @return Thread identifier, or a negative value on failure.
- * @ghidraAddress 0x005368e0
+ * @ghidraAddress NTSC-U/C: 0x005368e0
+ * @ghidraAddress PAL: 0x005761a0
  */
 int CreateThread(struct ThreadParam *param);
 
@@ -216,7 +228,8 @@ int CreateThread(struct ThreadParam *param);
  *
  * @param thid Thread identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x005368f0
+ * @ghidraAddress NTSC-U/C: 0x005368f0
+ * @ghidraAddress PAL: 0x005761b0
  */
 int DeleteThread(int thid);
 
@@ -226,14 +239,16 @@ int DeleteThread(int thid);
  * @param thid Thread identifier.
  * @param arg Argument for the entry point.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536900
+ * @ghidraAddress NTSC-U/C: 0x00536900
+ * @ghidraAddress PAL: 0x005761c0
  */
 int StartThread(int thid, void *arg);
 
 /**
  * Ends and deletes the calling thread. Does not return.
  *
- * @ghidraAddress 0x00536920
+ * @ghidraAddress NTSC-U/C: 0x00536920
+ * @ghidraAddress PAL: 0x005761e0
  */
 void ExitDeleteThread(void);
 
@@ -242,7 +257,8 @@ void ExitDeleteThread(void);
  *
  * @param thid Thread identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536930
+ * @ghidraAddress NTSC-U/C: 0x00536930
+ * @ghidraAddress PAL: 0x005761f0
  */
 int TerminateThread(int thid);
 
@@ -252,7 +268,8 @@ int TerminateThread(int thid);
  * @param thid Thread identifier, or 0 for the calling thread.
  * @param priority New priority.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536970
+ * @ghidraAddress NTSC-U/C: 0x00536970
+ * @ghidraAddress PAL: 0x00576230
  */
 int ChangeThreadPriority(int thid, int priority);
 
@@ -261,14 +278,16 @@ int ChangeThreadPriority(int thid, int priority);
  *
  * @param priority Priority whose queue rotates.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536990
+ * @ghidraAddress NTSC-U/C: 0x00536990
+ * @ghidraAddress PAL: 0x00576250
  */
 int RotateThreadReadyQueue(int priority);
 
 /**
  * Returns the identifier of the calling thread.
  *
- * @ghidraAddress 0x005369d0
+ * @ghidraAddress NTSC-U/C: 0x005369d0
+ * @ghidraAddress PAL: 0x00576290
  */
 int GetThreadId(void);
 
@@ -278,7 +297,8 @@ int GetThreadId(void);
  * @param thid Thread identifier, or 0 for the calling thread.
  * @param info Receives the status.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x005369e0
+ * @ghidraAddress NTSC-U/C: 0x005369e0
+ * @ghidraAddress PAL: 0x005762a0
  */
 int ReferThreadStatus(int thid, struct ThreadParam *info);
 
@@ -286,7 +306,8 @@ int ReferThreadStatus(int thid, struct ThreadParam *info);
  * Puts the calling thread to sleep until a wake-up request arrives.
  *
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536a00
+ * @ghidraAddress NTSC-U/C: 0x00536a00
+ * @ghidraAddress PAL: 0x005762c0
  */
 int SleepThread(void);
 
@@ -295,7 +316,8 @@ int SleepThread(void);
  *
  * @param thid Thread identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536a10
+ * @ghidraAddress NTSC-U/C: 0x00536a10
+ * @ghidraAddress PAL: 0x005762d0
  */
 int WakeupThread(int thid);
 
@@ -305,7 +327,8 @@ int WakeupThread(int thid);
  *
  * @param thid Thread identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x005f2160
+ * @ghidraAddress NTSC-U/C: 0x005f2160
+ * @ghidraAddress PAL: 0x006342a8
  */
 int iWakeupThread(int thid);
 
@@ -314,7 +337,8 @@ int iWakeupThread(int thid);
  *
  * @param thid Thread identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536a50
+ * @ghidraAddress NTSC-U/C: 0x00536a50
+ * @ghidraAddress PAL: 0x00576310
  */
 int SuspendThread(int thid);
 
@@ -323,14 +347,16 @@ int SuspendThread(int thid);
  * the calling thread to priority 1.
  *
  * @return Helper thread identifier, or -1 on failure or when the helper already runs.
- * @ghidraAddress 0x005f2088
+ * @ghidraAddress NTSC-U/C: 0x005f2088
+ * @ghidraAddress PAL: 0x006341d0
  */
 int InitThread(void);
 
 /**
  * Returns the end of the heap of the calling thread.
  *
- * @ghidraAddress 0x00536ac0
+ * @ghidraAddress NTSC-U/C: 0x00536ac0
+ * @ghidraAddress PAL: 0x00576380
  */
 void *EndOfHeap(void);
 
@@ -339,7 +365,8 @@ void *EndOfHeap(void);
  *
  * @param param Starting and largest counts.
  * @return Semaphore identifier, or a negative value on failure.
- * @ghidraAddress 0x00536ae0
+ * @ghidraAddress NTSC-U/C: 0x00536ae0
+ * @ghidraAddress PAL: 0x005763a0
  */
 int CreateSema(struct SemaParam *param);
 
@@ -348,7 +375,8 @@ int CreateSema(struct SemaParam *param);
  *
  * @param semid Semaphore identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536af0
+ * @ghidraAddress NTSC-U/C: 0x00536af0
+ * @ghidraAddress PAL: 0x005763b0
  */
 int DeleteSema(int semid);
 
@@ -357,7 +385,8 @@ int DeleteSema(int semid);
  *
  * @param semid Semaphore identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536b00
+ * @ghidraAddress NTSC-U/C: 0x00536b00
+ * @ghidraAddress PAL: 0x005763c0
  */
 int SignalSema(int semid);
 
@@ -366,7 +395,8 @@ int SignalSema(int semid);
  *
  * @param semid Semaphore identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536b10
+ * @ghidraAddress NTSC-U/C: 0x00536b10
+ * @ghidraAddress PAL: 0x005763d0
  */
 int iSignalSema(int semid);
 
@@ -375,7 +405,8 @@ int iSignalSema(int semid);
  *
  * @param semid Semaphore identifier.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x00536b20
+ * @ghidraAddress NTSC-U/C: 0x00536b20
+ * @ghidraAddress PAL: 0x005763e0
  */
 int WaitSema(int semid);
 
@@ -384,7 +415,8 @@ int WaitSema(int semid);
  *
  * @param semid Semaphore identifier.
  * @return Non-negative when the semaphore was taken, negative otherwise.
- * @ghidraAddress 0x00536b30
+ * @ghidraAddress NTSC-U/C: 0x00536b30
+ * @ghidraAddress PAL: 0x005763f0
  */
 int PollSema(int semid);
 
@@ -392,7 +424,8 @@ int PollSema(int semid);
  * Reads the packed OSD configuration word (language, time zone, and screen settings).
  *
  * @param config Receives the configuration word.
- * @ghidraAddress 0x00536b90
+ * @ghidraAddress NTSC-U/C: 0x00536b90
+ * @ghidraAddress PAL: 0x00576450
  */
 void GetOsdConfigParam(unsigned int *config);
 
@@ -402,7 +435,8 @@ void GetOsdConfigParam(unsigned int *config);
  * @param buffer Receives the bytes.
  * @param size Byte count.
  * @param offset Offset of the first byte.
- * @ghidraAddress 0x00536df0
+ * @ghidraAddress NTSC-U/C: 0x00536df0
+ * @ghidraAddress PAL: 0x005766b0
  */
 void GetOsdConfigParam2(void *buffer, int size, int offset);
 
@@ -410,7 +444,8 @@ void GetOsdConfigParam2(void *buffer, int size, int offset);
  * Writes back or discards the caches.
  *
  * @param operation Cache operation (`WRITEBACK_DCACHE`, `INVALIDATE_ICACHE`, and so on).
- * @ghidraAddress 0x00536d60
+ * @ghidraAddress NTSC-U/C: 0x00536d60
+ * @ghidraAddress PAL: 0x00576620
  */
 void FlushCache(int operation);
 
@@ -419,14 +454,16 @@ void FlushCache(int operation);
  *
  * @param start First address of the range.
  * @param end Last address of the range.
- * @ghidraAddress 0x006207d8
+ * @ghidraAddress NTSC-U/C: 0x006207d8
+ * @ghidraAddress PAL: 0x00661368
  */
 void SyncDCache(void *start, void *end);
 
 /**
  * Returns the GS interrupt mask.
  *
- * @ghidraAddress 0x00536e00
+ * @ghidraAddress NTSC-U/C: 0x00536e00
+ * @ghidraAddress PAL: 0x005766c0
  */
 unsigned long long GsGetIMR(void);
 
@@ -435,7 +472,8 @@ unsigned long long GsGetIMR(void);
  *
  * @param imr New mask.
  * @return Previous mask.
- * @ghidraAddress 0x00536e20
+ * @ghidraAddress NTSC-U/C: 0x00536e20
+ * @ghidraAddress PAL: 0x005766e0
  */
 unsigned long long GsPutIMR(unsigned long long imr);
 
@@ -444,7 +482,8 @@ unsigned long long GsPutIMR(unsigned long long imr);
  *
  * @param flag Set to 1 at the vertical blank.
  * @param csr Receives the GS status register at the vertical blank.
- * @ghidraAddress 0x00536e50
+ * @ghidraAddress NTSC-U/C: 0x00536e50
+ * @ghidraAddress PAL: 0x00576710
  */
 void SetVSyncFlag(unsigned int *flag, unsigned long long *csr);
 
@@ -453,7 +492,8 @@ void SetVSyncFlag(unsigned int *flag, unsigned long long *csr);
  *
  * @param number System call number.
  * @param address Handler address.
- * @ghidraAddress 0x00589138
+ * @ghidraAddress NTSC-U/C: 0x00589138
+ * @ghidraAddress PAL: 0x005cc3b0
  */
 void SetSyscall(int number, void *address);
 
@@ -465,7 +505,8 @@ void SetSyscall(int number, void *address);
  * @param src Source.
  * @param size Size in bytes, a multiple of 4.
  * @return 0.
- * @ghidraAddress 0x00589148
+ * @ghidraAddress NTSC-U/C: 0x00589148
+ * @ghidraAddress PAL: 0x005cc3c0
  */
 int KernelCopy(void *dest, const void *src, int size);
 
@@ -476,7 +517,8 @@ int KernelCopy(void *dest, const void *src, int size);
  * @param src Source.
  * @param size Size in bytes. A remainder below 4 is not copied.
  * @return 0.
- * @ghidraAddress 0x00589158
+ * @ghidraAddress NTSC-U/C: 0x00589158
+ * @ghidraAddress PAL: 0x005cc3d0
  */
 int KernelCopyHandler(unsigned int *dest, const unsigned int *src, unsigned int size);
 
@@ -486,7 +528,8 @@ int KernelCopyHandler(unsigned int *dest, const unsigned int *src, unsigned int 
  *
  * @param number System call number.
  * @return Handler address, or a null pointer.
- * @ghidraAddress 0x00589190
+ * @ghidraAddress NTSC-U/C: 0x00589190
+ * @ghidraAddress PAL: 0x005cc408
  */
 void *GetEntryAddress(int number);
 
@@ -494,7 +537,8 @@ void *GetEntryAddress(int number);
  * Installs the alarm system calls in the kernel. Does nothing when timer 3 already raises compare
  * interrupts.
  *
- * @ghidraAddress 0x005891a0
+ * @ghidraAddress NTSC-U/C: 0x005891a0
+ * @ghidraAddress PAL: 0x005cc418
  */
 void InstallSyscallPatch(void);
 
@@ -502,7 +546,8 @@ void InstallSyscallPatch(void);
  * Initialises the library at start-up. Creates the C library semaphores, installs the alarm
  * system calls, and starts the helper thread.
  *
- * @ghidraAddress 0x004b8fe0
+ * @ghidraAddress NTSC-U/C: 0x004b8fe0
+ * @ghidraAddress PAL: 0x004f6f58
  */
 void _InitSys(void);
 
@@ -510,7 +555,8 @@ void _InitSys(void);
  * Disables interrupts.
  *
  * @return Non-zero when interrupts were enabled.
- * @ghidraAddress 0x005e4510
+ * @ghidraAddress NTSC-U/C: 0x005e4510
+ * @ghidraAddress PAL: 0x006266d0
  */
 int DIntr(void);
 
@@ -518,7 +564,8 @@ int DIntr(void);
  * Enables interrupts.
  *
  * @return Non-zero when interrupts were already enabled.
- * @ghidraAddress 0x005e4558
+ * @ghidraAddress NTSC-U/C: 0x005e4558
+ * @ghidraAddress PAL: 0x00626718
  */
 int EIntr(void);
 
@@ -528,7 +575,8 @@ int EIntr(void);
  * @param function Service number.
  * @param args Argument words.
  * @return Service result.
- * @ghidraAddress 0x00536f10
+ * @ghidraAddress NTSC-U/C: 0x00536f10
+ * @ghidraAddress PAL: 0x005767d0
  */
 int Deci2Call(int function, unsigned int *args);
 
@@ -537,7 +585,8 @@ int Deci2Call(int function, unsigned int *args);
  *
  * @param c Byte.
  * @return @p c.
- * @ghidraAddress 0x005fa8c0
+ * @ghidraAddress NTSC-U/C: 0x005fa8c0
+ * @ghidraAddress PAL: 0x0063b5d0
  */
 int PutSioByte(int c);
 
@@ -547,7 +596,8 @@ int PutSioByte(int c);
  * prefixes, and a zero-padded width of up to 31 digits.
  *
  * @param format Format string.
- * @ghidraAddress 0x005fb1a0
+ * @ghidraAddress NTSC-U/C: 0x005fb1a0
+ * @ghidraAddress PAL: 0x0063beb0
  */
 void PrintfToSioRaw(const char *format, ...);
 
@@ -555,7 +605,8 @@ void PrintfToSioRaw(const char *format, ...);
  * Formats text to the DECI2 kernel console. Output is sent a line at a time.
  *
  * @param format Format string, as PrintfToSioRaw() accepts.
- * @ghidraAddress 0x005fb1d8
+ * @ghidraAddress NTSC-U/C: 0x005fb1d8
+ * @ghidraAddress PAL: 0x0063bee8
  */
 void scePrintf(const char *format, ...);
 

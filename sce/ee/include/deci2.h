@@ -14,7 +14,8 @@ extern "C" {
  * @param opt Pointer passed to @p handler.
  * @param handler Event handler, given the event, its parameter, and @p opt.
  * @return Socket, or a negative value on failure.
- * @ghidraAddress 0x0061d7f8
+ * @ghidraAddress NTSC-U/C: 0x0061d7f8
+ * @ghidraAddress PAL: 0x0065e388
  */
 int sceDeci2Open(unsigned short protocol,
                  void *opt,
@@ -26,7 +27,8 @@ int sceDeci2Open(unsigned short protocol,
  * @param s Socket.
  * @param dest Destination node.
  * @return Non-negative on success, negative on failure.
- * @ghidraAddress 0x0061d868
+ * @ghidraAddress NTSC-U/C: 0x0061d868
+ * @ghidraAddress PAL: 0x0065e3f8
  */
 int sceDeci2ReqSend(int s, char dest);
 
@@ -35,7 +37,8 @@ int sceDeci2ReqSend(int s, char dest);
  *
  * @param s Socket.
  * @return Kernel result.
- * @ghidraAddress 0x0061d898
+ * @ghidraAddress NTSC-U/C: 0x0061d898
+ * @ghidraAddress PAL: 0x0065e428
  */
 int sceDeci2Poll(int s);
 
@@ -46,7 +49,8 @@ int sceDeci2Poll(int s);
  * @param buf Destination.
  * @param len Byte count.
  * @return Bytes received, or a negative value on failure.
- * @ghidraAddress 0x0061d8c0
+ * @ghidraAddress NTSC-U/C: 0x0061d8c0
+ * @ghidraAddress PAL: 0x0065e450
  */
 int sceDeci2ExRecv(int s, void *buf, unsigned short len);
 
@@ -57,7 +61,8 @@ int sceDeci2ExRecv(int s, void *buf, unsigned short len);
  * @param buf Source.
  * @param len Byte count.
  * @return Bytes sent, or a negative value on failure.
- * @ghidraAddress 0x0061d8f8
+ * @ghidraAddress NTSC-U/C: 0x0061d8f8
+ * @ghidraAddress PAL: 0x0065e488
  */
 int sceDeci2ExSend(int s, void *buf, unsigned short len);
 
@@ -66,7 +71,8 @@ int sceDeci2ExSend(int s, void *buf, unsigned short len);
  *
  * @param s String.
  * @return Kernel result.
- * @ghidraAddress 0x0061d9b0
+ * @ghidraAddress NTSC-U/C: 0x0061d9b0
+ * @ghidraAddress PAL: 0x0065e540
  */
 int kputs(char *s);
 

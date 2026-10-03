@@ -45,7 +45,7 @@ enum {
 };
 
 // The timezone a tool console reports, in minutes east of UTC.
-// 0x0077fbf0
+// NTSC-U/C: 0x0077fbf0, PAL: 0x007a4678
 static short g_nScfDefaultTimezone = 540;
 
 // The language a tool console reports.
@@ -53,11 +53,11 @@ static short g_nScfDefaultTimezone = 540;
 static unsigned char g_nScfDefaultLanguage = SCE_JAPANESE_LANGUAGE;
 
 // The summer time flag a tool console reports.
-// 0x0077fbf6
+// NTSC-U/C: 0x0077fbf6, PAL: 0x007a467e
 static unsigned char g_nScfDefaultSummerTime = 0;
 
 // The contents of rom0:ROMVER, empty until the first read.
-// 0x0077fbf8
+// NTSC-U/C: 0x0077fbf8, PAL: 0x007a4680
 static char g_szScfRomVersion[16];
 
 // Helpers defined below for the minute offset path.
@@ -69,7 +69,7 @@ static const unsigned char kMonthLengths[12] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
 };
 
-// 0x005f2da8
+// NTSC-U/C: 0x005f2da8, PAL: 0x005a59b0
 // Reports whether the console runs a tool ROM, reading the ROM version first if needed.
 int sceScfEnsureRomVersionRead(void) {
     if (g_szScfRomVersion[0] == '\0') {
@@ -78,7 +78,7 @@ int sceScfEnsureRomVersionRead(void) {
     return g_szScfRomVersion[kRomRegionIndex] == kRomRegionTool;
 }
 
-// 0x005f2d08
+// NTSC-U/C: 0x005f2d08, PAL: 0x005a5910
 char *sceScfReadRomVersion(void) {
     int fd;
 
@@ -97,7 +97,7 @@ char *sceScfReadRomVersion(void) {
     return g_szScfRomVersion;
 }
 
-// 0x005f3138
+// NTSC-U/C: 0x005f3138, PAL: 0x005a5d40
 int sceScfBcdToBinary(int nValue) {
     unsigned int value = (unsigned int)nValue & 0xffu;
 
@@ -105,7 +105,7 @@ int sceScfBcdToBinary(int nValue) {
     return (int)((value - ((value >> 4) * 6u)) & 0xffu);
 }
 
-// 0x005f30d0
+// NTSC-U/C: 0x005f30d0, PAL: 0x005a5cd8
 int sceScfBinaryToBcd(int nValue) {
     unsigned int value = (unsigned int)nValue & 0xffu;
 
@@ -114,7 +114,7 @@ int sceScfBinaryToBcd(int nValue) {
     return (int)((value / 10u) * 6u + value);
 }
 
-// 0x005f32a0
+// NTSC-U/C: 0x005f32a0, PAL: 0x005a5ea8
 void sceScfAdvanceDay(sceCdCLOCK *pClock) {
     unsigned char monthLengths[12];
     int i;
@@ -143,7 +143,7 @@ void sceScfAdvanceDay(sceCdCLOCK *pClock) {
     pClock->month = 1;
 }
 
-// 0x005f3388
+// NTSC-U/C: 0x005f3388, PAL: 0x005a5f90
 void sceScfRewindDay(sceCdCLOCK *pClock) {
     unsigned char monthLengths[12];
     int i;
@@ -173,7 +173,7 @@ void sceScfRewindDay(sceCdCLOCK *pClock) {
     pClock->day = monthLengths[11];
 }
 
-// 0x005f3190
+// NTSC-U/C: 0x005f3190, PAL: 0x005a5d98
 void sceScfClockFromBcd(sceCdCLOCK *pClock) {
     assert(pClock != NULL);
     pClock->year = (unsigned char)sceScfBcdToBinary(pClock->year);
@@ -184,7 +184,7 @@ void sceScfClockFromBcd(sceCdCLOCK *pClock) {
     pClock->second = (unsigned char)sceScfBcdToBinary(pClock->second);
 }
 
-// 0x005f3218
+// NTSC-U/C: 0x005f3218, PAL: 0x005a5e20
 void sceScfClockToBcd(sceCdCLOCK *pClock) {
     assert(pClock != NULL);
     pClock->year = (unsigned char)sceScfBinaryToBcd(pClock->year);
@@ -195,7 +195,7 @@ void sceScfClockToBcd(sceCdCLOCK *pClock) {
     pClock->second = (unsigned char)sceScfBinaryToBcd(pClock->second);
 }
 
-// 0x005f3460
+// NTSC-U/C: 0x005f3460, PAL: 0x005a6068
 void sceScfAdvanceHour(sceCdCLOCK *pClock) {
     unsigned int hour;
 
@@ -209,7 +209,7 @@ void sceScfAdvanceHour(sceCdCLOCK *pClock) {
     sceScfAdvanceDay(pClock);
 }
 
-// 0x005f34d0
+// NTSC-U/C: 0x005f34d0, PAL: 0x005a60d8
 void sceScfRewindHour(sceCdCLOCK *pClock) {
     unsigned int hour;
 
@@ -223,7 +223,7 @@ void sceScfRewindHour(sceCdCLOCK *pClock) {
     pClock->hour = (unsigned char)(hour - 1u);
 }
 
-// 0x005f2ee8
+// NTSC-U/C: 0x005f2ee8, PAL: 0x005a5af0
 int sceScfGetTimezone(void) {
     unsigned int nConfig;
     unsigned int nVersion;
@@ -259,7 +259,7 @@ int sceScfGetLanguage(void) {
     return (int)((nConfig >> kLanguageShift) & (unsigned int)kLanguageMask);
 }
 
-// 0x005f2fd0
+// NTSC-U/C: 0x005f2fd0, PAL: 0x005a5bd8
 int sceScfGetSummerTime(void) {
     unsigned int nConfig;
     unsigned char nDetail;
@@ -280,7 +280,7 @@ int sceScfGetSummerTime(void) {
     return nSummer;
 }
 
-// 0x005f3538
+// NTSC-U/C: 0x005f3538, PAL: 0x005a6140
 void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
     int nTotal;
 
@@ -306,7 +306,7 @@ void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
     sceScfClockToBcd(pClock);
 }
 
-// 0x005f3650
+// NTSC-U/C: 0x005f3650, PAL: 0x005a6258
 void sceScfGetLocalTimefromRTC(sceCdCLOCK *pClock) {
     int nTimezone = sceScfGetTimezone();
     int nSummer = sceScfGetSummerTime();

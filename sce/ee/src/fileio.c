@@ -176,58 +176,60 @@ typedef struct {
     } mBody;
 } FsResult;
 
-// 0x0071ea7c, the version the library reports, the last four bytes of its build tag.
+// NTSC-U/C: 0x0071ea7c, PAL: 0x007624fc, the version the library reports, the last four bytes of
+// its build tag.
 static const char g_abFsLibraryVersion[4] = {'2', '3', '0', '0'};
 
-// 0x0082cad8, a second server version the check accepts.
+// NTSC-U/C: 0x0082cad8, PAL: 0x0086f728, a second server version the check accepts.
 static const char g_abFsAltVersion[4] = {'.', '.', '.', '.'};
 
-// 0x00762c18
+// NTSC-U/C: 0x00762c18, PAL: 0x007a5bb0
 static const char *g_pFsAltVersion = g_abFsAltVersion;
 
-// 0x00762b88, the semaphores of calls made without waiting, or -1 for a free slot.
+// NTSC-U/C: 0x00762b88, PAL: 0x007a5b20, the semaphores of calls made without waiting, or -1 for
+// a free slot.
 static int g_anFsPending[kFsPendingCount] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-// 0x00762c08
+// NTSC-U/C: 0x00762c08, PAL: 0x007a5ba0
 static int g_bFsBound;
 
-// 0x00762c0c, serialises calls.
+// NTSC-U/C: 0x00762c0c, PAL: 0x007a5ba4, serialises calls.
 static int g_nFsCallSema = -1;
 
-// 0x00762c10, guards the handle records.
+// NTSC-U/C: 0x00762c10, PAL: 0x007a5ba8, guards the handle records.
 static int g_nFsHandleSema = -1;
 
-// 0x00762c14, guards the pending slots.
+// NTSC-U/C: 0x00762c14, PAL: 0x007a5bac, guards the pending slots.
 static int g_nFsPendingSema = -1;
 
-// 0x008e28c0
+// NTSC-U/C: 0x008e28c0, PAL: 0x00927c40
 static void *g_pFsIoctlArg;
 
-// 0x008e2900
+// NTSC-U/C: 0x008e2900, PAL: 0x00927c80
 static FsPacket g_fsPacket __attribute__((aligned(64)));
 
-// 0x008e3540, the word the server returns when it accepts a call.
+// NTSC-U/C: 0x008e3540, PAL: 0x009288c0, the word the server returns when it accepts a call.
 static int g_anFsReceive[16] __attribute__((aligned(64)));
 
-// 0x008e3580
+// NTSC-U/C: 0x008e3580, PAL: 0x00928900
 static FsResult g_fsResult __attribute__((aligned(64)));
 
-// 0x008e39c0
+// NTSC-U/C: 0x008e39c0, PAL: 0x00928d40
 static FsHandle g_aFsHandles[kFsHandleCount] __attribute__((aligned(64)));
 
-// 0x008e3bc0
+// NTSC-U/C: 0x008e3bc0, PAL: 0x00928f40
 static sceSifClientData g_fsClient __attribute__((aligned(64)));
 
-// 0x008e3be8, the version the server reported when the client bound it.
+// NTSC-U/C: 0x008e3be8, PAL: 0x00928f68, the version the server reported when the client bound it.
 static char g_abFsServerVersion[4];
 
 static int FsReceivedWord(void) {
     return *(volatile int *)UNCACHED_SEG(&g_anFsReceive[0]);
 }
 
-// 0x0056aa08
+// NTSC-U/C: 0x0056aa08, PAL: 0x005aaed0
 static void FsCreateCallSema(void) {
     struct SemaParam param;
 
@@ -240,7 +242,7 @@ static void FsCreateCallSema(void) {
     g_nFsCallSema = CreateSema(&param);
 }
 
-// 0x0056a4f0
+// NTSC-U/C: 0x0056a4f0, PAL: 0x005aa9b8
 static void FsCreateTableSemaphores(void) {
     struct SemaParam param;
 
@@ -254,7 +256,7 @@ static void FsCreateTableSemaphores(void) {
     g_nFsPendingSema = CreateSema(&param);
 }
 
-// 0x0056aa58
+// NTSC-U/C: 0x0056aa58, PAL: 0x005aaf20
 // The binary passes the function number of each call, which the lock does not read.
 static int FsLock(int nFunction) {
     (void)nFunction;
@@ -263,12 +265,12 @@ static int FsLock(int nFunction) {
     return 0;
 }
 
-// 0x0056aa88
+// NTSC-U/C: 0x0056aa88, PAL: 0x005aaf50
 static int FsUnlock(void) {
     return SignalSema(g_nFsCallSema);
 }
 
-// 0x0056a550
+// NTSC-U/C: 0x0056a550, PAL: 0x005aaa18
 static FsHandle *FsAllocHandle(void) {
     FsHandle *pHandle;
 
@@ -285,7 +287,7 @@ static FsHandle *FsAllocHandle(void) {
     return NULL;
 }
 
-// 0x0056a5d8
+// NTSC-U/C: 0x0056a5d8, PAL: 0x005aaaa0
 static FsHandle *FsFindHandle(int nDescriptor) {
     FsCreateTableSemaphores();
     WaitSema(g_nFsHandleSema);
@@ -301,7 +303,7 @@ static int FsHandleIndex(const FsHandle *pHandle) {
     return (int)(pHandle - g_aFsHandles);
 }
 
-// 0x0056a648
+// NTSC-U/C: 0x0056a648, PAL: 0x005aab10
 static void FsCompletionHandler(void *pData, void *pArg) {
     volatile FsResult *pResult = (volatile FsResult *)UNCACHED_SEG(&g_fsResult);
     int nSema = pResult->mSema;
@@ -359,7 +361,7 @@ static void FsCompletionHandler(void *pData, void *pArg) {
     }
 }
 
-// 0x0056aa98
+// NTSC-U/C: 0x0056aa98, PAL: 0x005aaf60
 static int FsBind(void) {
     FsHandle *pHandle;
     // SIF DMA moves whole quadwords from an aligned address, and the send buffer must start on
@@ -407,7 +409,7 @@ static int FsBind(void) {
     return 0;
 }
 
-// 0x0056ac38
+// NTSC-U/C: 0x0056ac38, PAL: 0x005ab100
 // Reports a mismatch only when the server matches neither accepted version and the two accepted
 // versions also differ from each other.
 static int FsVersionMismatch(void) {
@@ -478,7 +480,7 @@ static int FsCall(int nFunction, int nPacketSize, int nSema, int bNoWait, const 
     return *pResult;
 }
 
-// 0x0056ad00
+// NTSC-U/C: 0x0056ad00, PAL: 0x005ab1c8
 int sceOpen(const char *pszPath, int nFlags, ...) {
     va_list args;
     int nMode;
@@ -554,7 +556,7 @@ int sceOpen(const char *pszPath, int nFlags, ...) {
     return FsHandleIndex(pHandle);
 }
 
-// 0x0056af88
+// NTSC-U/C: 0x0056af88, PAL: 0x005ab450
 int sceClose(int nDescriptor) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     int nSema;
@@ -602,7 +604,7 @@ int sceClose(int nDescriptor) {
     return nResult >= 0 ? 0 : nResult;
 }
 
-// 0x0056b108
+// NTSC-U/C: 0x0056b108, PAL: 0x005ab5d0
 int sceLseek(int nDescriptor, int nOffset, int nWhence) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     unsigned int nFlags;
@@ -636,7 +638,7 @@ int sceLseek(int nDescriptor, int nOffset, int nWhence) {
                   &nResult);
 }
 
-// 0x0056b340
+// NTSC-U/C: 0x0056b340, PAL: 0x005ab808
 int sceRead(int nDescriptor, void *pBuffer, int nBytes) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     unsigned int nFlags;
@@ -676,7 +678,7 @@ int sceRead(int nDescriptor, void *pBuffer, int nBytes) {
                   &nResult);
 }
 
-// 0x0056b5b0
+// NTSC-U/C: 0x0056b5b0, PAL: 0x005aba78
 int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     const unsigned char *pUncached;
@@ -726,7 +728,7 @@ int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
                   &nResult);
 }
 
-// 0x0056b870
+// NTSC-U/C: 0x0056b870, PAL: 0x005abd38
 int sceIoctl(int nDescriptor, int nRequest, void *pArg) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     int nSema;
@@ -783,7 +785,7 @@ int sceIoctl(int nDescriptor, int nRequest, void *pArg) {
     return FsCall(kFsFunctionIoctl, sizeof(FsIoctlPacket), nSema, 0, &nResult);
 }
 
-// 0x0056acc8
+// NTSC-U/C: 0x0056acc8, PAL: 0x005ab190
 int sceFsReset(void) {
     g_bFsBound = 0;
     memset(g_abFsServerVersion, 0, sizeof(g_abFsServerVersion));

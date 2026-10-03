@@ -20,7 +20,7 @@ enum {
 // enumeration constant.
 static const unsigned int kRefAddressMask = 0x9FFFFFFFU;
 
-// 0x0062dd28
+// NTSC-U/C: 0x0062dd28, PAL: 0x0066e8b8
 void sceGifPkInit(sceGifPkData *pPacket, void *pBuffer) {
     // Attach the packet to the buffer, and clear the pending tag.
     pPacket->mCurrent = pBuffer;
@@ -28,14 +28,14 @@ void sceGifPkInit(sceGifPkData *pPacket, void *pBuffer) {
     pPacket->mDmaTag = NULL;
 }
 
-// 0x0062dd38
+// NTSC-U/C: 0x0062dd38, PAL: 0x0066e8c8
 void sceGifPkReset(sceGifPkData *pPacket) {
     // Rewind the packet to its base, and clear the pending tag.
     pPacket->mCurrent = pPacket->mBase;
     pPacket->mDmaTag = NULL;
 }
 
-// 0x00622490
+// NTSC-U/C: 0x00622490, PAL: 0x006648f8
 void sceGifPkCnt(sceGifPkData *pPacket, int nLoop, int nEop, int nPre) {
     unsigned int *tag;
 
@@ -50,7 +50,7 @@ void sceGifPkCnt(sceGifPkData *pPacket, int nLoop, int nEop, int nPre) {
     pPacket->mCurrent = tag + 4;
 }
 
-// 0x00622380
+// NTSC-U/C: 0x00622380, PAL: 0x00662f10
 void sceGifPkEnd(sceGifPkData *pPacket, int nLoop, int nEop, int nPre) {
     unsigned int *tag;
 
@@ -65,7 +65,7 @@ void sceGifPkEnd(sceGifPkData *pPacket, int nLoop, int nEop, int nPre) {
     pPacket->mCurrent = tag + 4;
 }
 
-// 0x00625a00
+// NTSC-U/C: 0x00625a00, PAL: 0x00666590
 void sceGifPkOpenGsAD(sceGifPkData *pPacket, const void *pData) {
     unsigned long long *current;
     const unsigned long long *header;
@@ -80,7 +80,7 @@ void sceGifPkOpenGsAD(sceGifPkData *pPacket, const void *pData) {
     pPacket->mCurrent = current + 2;
 }
 
-// 0x0062dc30
+// NTSC-U/C: 0x0062dc30, PAL: 0x0066e7c0
 void sceGifPkAddGsAD(sceGifPkData *pPacket, int nAddress, unsigned long long nData) {
     unsigned long long *current;
 
@@ -91,7 +91,7 @@ void sceGifPkAddGsAD(sceGifPkData *pPacket, int nAddress, unsigned long long nDa
     pPacket->mCurrent = current + 2;
 }
 
-// 0x00613ca8
+// NTSC-U/C: 0x00613ca8, PAL: 0x00654838
 void sceGifPkCloseGifTag(sceGifPkData *pPacket) {
     unsigned char *previous;
     unsigned char *current;
@@ -138,7 +138,7 @@ void sceGifPkCloseGifTag(sceGifPkData *pPacket) {
     }
 }
 
-// 0x00620680
+// NTSC-U/C: 0x00620680, PAL: 0x00661210
 void sceGifPkTerminate(sceGifPkData *pPacket) {
     unsigned char *current;
     unsigned int *dmaTag;
@@ -161,7 +161,7 @@ void sceGifPkTerminate(sceGifPkData *pPacket) {
     pPacket->mCurrent = current;
 }
 
-// 0x0062f3e0
+// NTSC-U/C: 0x0062f3e0, PAL: 0x0066ff70
 unsigned long long *sceGifPkReserve(sceGifPkData *pPacket, int nWords) {
     unsigned long long *reserved;
 
@@ -171,7 +171,7 @@ unsigned long long *sceGifPkReserve(sceGifPkData *pPacket, int nWords) {
     return reserved;
 }
 
-// 0x006223f8
+// NTSC-U/C: 0x006223f8, PAL: 0x00662f88
 void sceGifPkRef(
     sceGifPkData *pPacket, void *pData, int nQuadwords, int nOption1, int nOption2, int nFlag) {
     unsigned int *tag;

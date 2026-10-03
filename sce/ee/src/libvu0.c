@@ -4,7 +4,7 @@ enum {
     kMatRowStride = 4,
 };
 
-// 0x005e7a58
+// NTSC-U/C: 0x005e7a58, PAL: 0x00629c40
 void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB) {
     // The image pins the rows of pA in vector registers and streams the rows of pB, so either
     // factor may alias the destination. The copy below preserves that behaviour.
@@ -46,7 +46,7 @@ void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB) {
     pDst[15] = flOutW + aflBasis[15];
 }
 
-// 0x005e7ab0
+// NTSC-U/C: 0x005e7ab0, PAL: 0x00629c98
 void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB) {
     // The image pins the rows of pA in vector registers and streams the rows of pB, so either
     // factor may alias the destination. The copy below preserves that behaviour.
@@ -78,7 +78,7 @@ void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB) {
     pDst[14] = ((aflBasis[2] * flX) + (aflBasis[6] * flY) + (aflBasis[10] * flZ)) + aflBasis[14];
 }
 
-// 0x005e7b08
+// NTSC-U/C: 0x005e7b08, PAL: 0x00629cf0
 void sceVu0InversMatrix(float *pDst, const float *pSrc) {
     // The image shuffles the source rows through registers before storing anything, so every
     // value below is read before the destination is written and the pointers may alias.
@@ -130,7 +130,7 @@ static const float kFoldedSineTable[4] = {
     -0.16666667f,
 };
 
-// 0x005e84e8
+// NTSC-U/C: 0x005e84e8, PAL: 0x0062a6d0
 static float foldedSine(float flFolded) {
     // The image keeps one partial product per vector lane and slides the accumulation window
     // across the lanes, so the lanes finish at the ninth, seventh, fifth, and third powers and
@@ -165,7 +165,7 @@ static float foldedSine(float flFolded) {
     return flSine;
 }
 
-// 0x005e84e0
+// NTSC-U/C: 0x005e84e0, PAL: 0x0062a6c8
 void _sceVu0ecossin(float flFolded, int nNegative, float *pOut) {
     // The rotation builders fold the angle about half pi and record whether it was negative, so
     // the folded sine below is the cosine of the original angle and the root below is the

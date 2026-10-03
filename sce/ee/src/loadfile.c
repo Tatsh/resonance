@@ -73,22 +73,22 @@ typedef struct {
     };
 } LoadFileArgs;
 
-// 0x0071ea7c, the server version the library was built for.
+// NTSC-U/C: 0x0071ea7c, PAL: 0x007624fc, the server version the library was built for.
 static const char g_abLoadFileLibraryVersion[kVersionSize] = {'2', '3', '0', '0'};
 
-// 0x00780dc8, negative until the client is bound.
+// NTSC-U/C: 0x00780dc8, PAL: 0x007c4ae0, negative until the client is bound.
 static int g_nLoadFileBound = -1;
 
-// 0x00780dcc, a second server version the library accepts.
+// NTSC-U/C: 0x00780dcc, PAL: 0x007c4ae4, a second server version the library accepts.
 static const char *g_pszLoadFileAltVersion = "....";
 
-// 0x008e5c80. SIF DMA needs the 64-byte alignment retail gives it.
+// NTSC-U/C: 0x008e5c80, PAL: 0x0092ac80. SIF DMA needs the 64-byte alignment retail gives it.
 static LoadFileArgs g_loadFileArgs __attribute__((aligned(64)));
 
-// 0x008e5e80
+// NTSC-U/C: 0x008e5e80, PAL: 0x0092ae80
 static sceSifClientData g_loadFileClient __attribute__((aligned(64)));
 
-// 0x008e5ea8, the version the server reported when the client bound it.
+// NTSC-U/C: 0x008e5ea8, PAL: 0x0092aea8, the version the server reported when the client bound it.
 static char g_abLoadFileServerVersion[kVersionSize];
 
 // Copy the module arguments into the block, at most kLoadArgSize bytes of them, and return the
@@ -102,7 +102,7 @@ static inline int copyModuleArgs(char *pDest, int nArgs, const char *pArgs) {
     return kLoadArgSize;
 }
 
-// 0x005fb238
+// NTSC-U/C: 0x005fb238, PAL: 0x0063bf48
 static int sceSifLoadFileBindRpc(void) {
     int nDelay;
 
@@ -136,7 +136,7 @@ static int sceSifLoadFileBindRpc(void) {
     return 0;
 }
 
-// 0x005fb338
+// NTSC-U/C: 0x005fb338, PAL: 0x0063c048
 // Reports a mismatch only when the server matches neither accepted version and the two accepted
 // versions also differ from each other.
 static int loadFileVersionMismatch(void) {
@@ -149,14 +149,14 @@ static int loadFileVersionMismatch(void) {
     return memcmp(g_abLoadFileLibraryVersion, g_pszLoadFileAltVersion, kVersionSize) != 0;
 }
 
-// 0x005fb3c8
+// NTSC-U/C: 0x005fb3c8, PAL: 0x0063c0d8
 int sceSifLoadFileReset(void) {
     g_nLoadFileBound = -1;
     memset(g_abLoadFileServerVersion, 0, kVersionSize);
     return 0;
 }
 
-// 0x005fb400
+// NTSC-U/C: 0x005fb400, PAL: 0x0063c110
 static int loadModuleBuffer(const void *pImage, int nArgs, const char *pArgs, int *pResult) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;
@@ -185,7 +185,7 @@ static int loadModuleBuffer(const void *pImage, int nArgs, const char *pArgs, in
     return g_loadFileArgs.nResult;
 }
 
-// 0x005fb608
+// NTSC-U/C: 0x005fb608, PAL: 0x0063c318
 int sceSifStopModule(int modid, int args, const char *argp, int *result) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;
@@ -214,7 +214,7 @@ int sceSifStopModule(int modid, int args, const char *argp, int *result) {
     return g_loadFileArgs.nResult;
 }
 
-// 0x005fb810
+// NTSC-U/C: 0x005fb810, PAL: 0x0063c520
 int sceSifUnloadModule(int modid) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;
@@ -237,7 +237,7 @@ int sceSifUnloadModule(int modid) {
     return g_loadFileArgs.nResult;
 }
 
-// 0x005fb8a0
+// NTSC-U/C: 0x005fb8a0, PAL: 0x0063c5b0
 int sceSifSearchModuleByName(const char *modulename) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;
@@ -261,7 +261,7 @@ int sceSifSearchModuleByName(const char *modulename) {
     return g_loadFileArgs.nResult;
 }
 
-// 0x005fb940
+// NTSC-U/C: 0x005fb940, PAL: 0x0063c650
 int sceSifSearchModuleByAddress(const void *addr) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;
@@ -284,19 +284,19 @@ int sceSifSearchModuleByAddress(const void *addr) {
     return g_loadFileArgs.nResult;
 }
 
-// 0x005fb9d0
+// NTSC-U/C: 0x005fb9d0, PAL: 0x0063c6e0
 int sceSifLoadModuleBuffer(const void *addr, int args, const char *argp) {
     int nResult;
 
     return loadModuleBuffer(addr, args, argp, &nResult);
 }
 
-// 0x005fb9f0
+// NTSC-U/C: 0x005fb9f0, PAL: 0x0063c700
 int sceSifLoadStartModuleBuffer(const void *addr, int args, const char *argp, int *result) {
     return loadModuleBuffer(addr, args, argp, result);
 }
 
-// 0x005fba10
+// NTSC-U/C: 0x005fba10, PAL: 0x0063c720
 static int
 loadModule(const char *pPath, int nArgs, const char *pArgs, int *pResult, int nFunction) {
     if (sceSifLoadFileBindRpc() < 0) {
@@ -328,19 +328,19 @@ loadModule(const char *pPath, int nArgs, const char *pArgs, int *pResult, int nF
     return g_loadFileArgs.nResult;
 }
 
-// 0x005fbc38
+// NTSC-U/C: 0x005fbc38, PAL: 0x0063c948
 int sceSifLoadModule(const char *filename, int args, const char *argp) {
     int nResult;
 
     return loadModule(filename, args, argp, &nResult, kLoadFileFunctionModule);
 }
 
-// 0x005fbc58
+// NTSC-U/C: 0x005fbc58, PAL: 0x0063c968
 int sceSifLoadStartModule(const char *filename, int args, const char *argp, int *result) {
     return loadModule(filename, args, argp, result, kLoadFileFunctionModule);
 }
 
-// 0x005fbc78
+// NTSC-U/C: 0x005fbc78, PAL: 0x0063c988
 static int loadElf(const char *pPath, const char *pSection, sceExecData *pData, int nFunction) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;
@@ -371,17 +371,17 @@ static int loadElf(const char *pPath, const char *pSection, sceExecData *pData, 
     return 0;
 }
 
-// 0x005fbd80
+// NTSC-U/C: 0x005fbd80, PAL: 0x0063ca90
 int sceSifLoadElfPart(const char *name, const char *secname, sceExecData *data) {
     return loadElf(name, secname, data, kLoadFileFunctionElf);
 }
 
-// 0x005fbda0
+// NTSC-U/C: 0x005fbda0, PAL: 0x0063cab0
 int sceSifLoadElf(const char *name, sceExecData *data) {
     return loadElf(name, "all", data, kLoadFileFunctionElf);
 }
 
-// 0x005fbdc8
+// NTSC-U/C: 0x005fbdc8, PAL: 0x0063cad8
 // Unlike the other calls, the value calls do not check the server version.
 int sceSifGetIopValue(unsigned int addr, void *value, int type) {
     if (sceSifLoadFileBindRpc() < 0) {
@@ -419,7 +419,7 @@ int sceSifGetIopValue(unsigned int addr, void *value, int type) {
     return 0;
 }
 
-// 0x005fbeb8
+// NTSC-U/C: 0x005fbeb8, PAL: 0x0063cbc8
 int sceSifSetIopValue(unsigned int addr, const void *value, int type) {
     if (sceSifLoadFileBindRpc() < 0) {
         return kLoadFileErrorBind;

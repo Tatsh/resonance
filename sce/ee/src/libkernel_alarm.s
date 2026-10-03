@@ -56,11 +56,11 @@
     .data
     .align 3
 
-# 0x007690b8
+# NTSC-U/C: 0x007690b8, PAL: 0x007ace10
     .globl g_alarmPatch
 g_alarmPatch:
 AlarmPatchStart:
-# 0x80076000
+# NTSC-U/C: 0x80076000, PAL: 0x80076000
 # Returns the kernel address of an alarm system call from the entry table, or zero.
     .org AlarmPatchStart + kAlarmGetEntryAddressOffset
 AlarmGetEntryAddress:
@@ -594,7 +594,7 @@ AlarmReturnFromHandler:
     .word kSyscallAlarmReturn, kAlarmPatchBase + kAlarmReturnFromHandlerOffset
     .org AlarmPatchStart + kAlarmPatchSize
 
-# 0x007697f8
+# NTSC-U/C: 0x007697f8, PAL: 0x007ad550
 # Calls an alarm handler in user mode on its own stack and returns to the kernel afterwards.
     .globl g_alarmTrampoline
 g_alarmTrampoline:

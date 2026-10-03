@@ -26,11 +26,11 @@ enum {
 };
 
 // The console slots. A null buffer marks a free slot.
-// 0x008e6980
+// NTSC-U/C: 0x008e6980, PAL: 0x0092b980
 static DevConsole g_devConsoles[kConsoleCount];
 
 // The console heap. An all-ones size in the first header marks the heap as not yet initialised.
-// 0x007a8530
+// NTSC-U/C: 0x007a8530, PAL: 0x007ec230
 static unsigned int g_anDevHeap[kHeapWords] __attribute__((aligned(16))) = {0xffffffffu};
 
 // Fill the console state words with their defaults, and record the GS primitive position.
@@ -40,13 +40,17 @@ static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsign
 // initialises the heap and its end marker.
 static void *heapAllocate(unsigned int nSize);
 
-// 0x0062bfd0
+// Return a block heapAllocate() handed out, merging it with a free neighbour on either side. A
+// null pointer, an uninitialised heap, and an empty heap are ignored.
+static void heapFree(void *pBlock);
+
+// NTSC-U/C: 0x0062bfd0, PAL: 0x0066cb60
 void sceDevVif0Reset(void) {
     *(volatile unsigned int *)0x10003810u = 1u;
     *(volatile unsigned int *)0x10003820u = 6u;
 }
 
-// 0x0061dc90
+// NTSC-U/C: 0x0061dc90, PAL: 0x0065e820
 void sceDevVu0Reset(void) {
     unsigned int nStatus;
 
@@ -55,7 +59,7 @@ void sceDevVu0Reset(void) {
     __asm__ volatile ("ctc2 %0, $vi28" : : "r" (nStatus));
 }
 
-// 0x00622710
+// NTSC-U/C: 0x00622710, PAL: 0x00663120
 void sceDevConsInit(void) {
     DevConsole *pConsoles = g_devConsoles;
     int nIndex;
@@ -65,7 +69,7 @@ void sceDevConsInit(void) {
     }
 }
 
-// 0x00622748
+// NTSC-U/C: 0x00622748, PAL: 0x00663158
 int sceDevConsOpen(
     unsigned int nGsX, unsigned int nGsY, unsigned int nColumns, unsigned int nRows) {
     DevConsole *pConsoles = g_devConsoles;
@@ -94,7 +98,17 @@ int sceDevConsOpen(
     return 0;
 }
 
-// 0x00622c98
+// NTSC-U/C: 0x00622848, PAL: 0x00663258
+void sceDevConsClose(int nConsole) {
+    DevConsole *pConsole = (DevConsole *)(uintptr_t)nConsole;
+
+    heapFree(pConsole->pBuffer);
+    pConsole->nRows = 0;
+    pConsole->pBuffer = NULL;
+    pConsole->nColumns = 0;
+}
+
+// NTSC-U/C: 0x00622c98, PAL: 0x006636a8
 void sceDevConsClear(int nConsole) {
     DevConsole *pConsole = (DevConsole *)(uintptr_t)nConsole;
     int nRemaining = pConsole->nColumns * pConsole->nRows - 1;
@@ -108,7 +122,7 @@ void sceDevConsClear(int nConsole) {
     pConsole->nCursorColumn = 0;
 }
 
-// 0x00622610
+// NTSC-U/C: 0x00622610, PAL: 0x00663020
 static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsigned int nGsY) {
     pContext[0] = nGsX;
     pContext[1] = nGsY;
@@ -128,7 +142,7 @@ static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsign
     pContext[15] = 0x80ffffffu;
 }
 
-// 0x00623b10
+// NTSC-U/C: 0x00623b10, PAL: 0x00664520
 static void *heapAllocate(unsigned int nSize) {
     unsigned int *pHeap = g_anDevHeap;
     unsigned int nWords = (nSize + 3u) >> 2;
@@ -180,4 +194,45 @@ static void *heapAllocate(unsigned int nSize) {
         }
     }
     return pResult;
+}
+
+// NTSC-U/C: 0x00623c90, PAL: 0x006646a0
+static void heapFree(void *pBlock) {
+    unsigned int *pHeap = g_anDevHeap;
+    unsigned int nPrevious = 0u;
+    unsigned int nIndex = 0u;
+
+    if ((*pHeap & 0x0fffffffu) == 0x0fffffffu || pBlock == NULL || (*pHeap >> 28) == 3u) {
+        return;
+    }
+    do {
+        unsigned int *pHeader = &pHeap[nIndex];
+        unsigned int nHeader = *pHeader;
+        const unsigned int nNext = nIndex + (nHeader & 0x0fffffffu) + 1u;
+
+        if (pBlock == pHeader + 1) {
+            const unsigned int nNextHeader = pHeap[nNext];
+            unsigned int *pPrevious = &pHeap[nPrevious];
+            unsigned int nPreviousHeader;
+
+            if ((nNextHeader >> 28) == 0u) {
+                nHeader = (nHeader & 0xf0000000u) |
+                          (((nHeader & 0x0fffffffu) + 1u + (nNextHeader & 0x0fffffffu)) &
+                           0x0fffffffu);
+                *pHeader = nHeader;
+            }
+            // The first block is its own predecessor.
+            nPreviousHeader = *pPrevious;
+            if ((nPreviousHeader >> 28) == 0u) {
+                *pPrevious = (nPreviousHeader & 0xf0000000u) |
+                             (((nPreviousHeader & 0x0fffffffu) + 1u + (nHeader & 0x0fffffffu)) &
+                              0x0fffffffu);
+                return;
+            }
+            *pHeader = nHeader & 0x0fffffffu;
+            return;
+        }
+        nPrevious = nIndex;
+        nIndex = nNext;
+    } while ((pHeap[nIndex] >> 28) != 3u);
 }

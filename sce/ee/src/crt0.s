@@ -12,7 +12,7 @@
 	.globl	_start
 	.type	_start, @function
 	.ent	_start
-# 0x00458688
+# NTSC-U/C: 0x00458688, PAL: 0x00495c10
 _start:
 	la	$2, _fbss
 	la	$3, _end
@@ -63,7 +63,7 @@ _start:
 	.globl	_root
 	.type	_root, @function
 	.ent	_root
-# 0x00458740
+# NTSC-U/C: 0x00458740, PAL: 0x00495cc8
 _root:
 	# The kernel runs _root when the main thread returns. _root calls ExitThread.
 	addiu	$3, $0, 35
@@ -75,7 +75,7 @@ _root:
 	.align	6
 	.globl	_args
 	.type	_args, @object
-# 0x00892440
+# NTSC-U/C: 0x00892440, PAL: 0x008d6b40
 # The kernel writes the argument count, sixteen argument pointers, and the argument strings here
 # for SetupThread.
 _args:

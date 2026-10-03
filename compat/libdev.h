@@ -25,6 +25,9 @@ int sceDevConsOpen(unsigned int nGsX, unsigned int nGsY, unsigned int nColumns, 
 // Fills every cell of a console with a space of attribute 7.
 void sceDevConsClear(int nConsole);
 
+// Frees a console's buffer to the console heap and clears its size and buffer fields.
+void sceDevConsClose(int nConsole);
+
 #ifdef __cplusplus
 }
 #endif

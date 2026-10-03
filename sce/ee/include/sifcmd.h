@@ -78,7 +78,8 @@ typedef struct {
  *
  * @param reg Register number, below 32.
  * @return The register value.
- * @ghidraAddress 0x005d3588
+ * @ghidraAddress NTSC-U/C: 0x005d3588
+ * @ghidraAddress PAL: 0x006155f0
  */
 int sceSifGetSreg(int reg);
 
@@ -88,7 +89,8 @@ int sceSifGetSreg(int reg);
  * @param reg Register number, below 32.
  * @param value Value.
  * @return @p value.
- * @ghidraAddress 0x005d35a0
+ * @ghidraAddress NTSC-U/C: 0x005d35a0
+ * @ghidraAddress PAL: 0x00615608
  */
 int sceSifSetSreg(int reg, int value);
 
@@ -96,14 +98,16 @@ int sceSifSetSreg(int reg, int value);
  * Initialise the command layer and tell the IOP where to send packets. A second call does
  * nothing.
  *
- * @ghidraAddress 0x005d35d0
+ * @ghidraAddress NTSC-U/C: 0x005d35d0
+ * @ghidraAddress PAL: 0x00615638
  */
 void sceSifInitCmd(void);
 
 /**
  * Stop the command layer and remove its SIF0 interrupt handler.
  *
- * @ghidraAddress 0x005d3850
+ * @ghidraAddress NTSC-U/C: 0x005d3850
+ * @ghidraAddress PAL: 0x006158b8
  */
 void sceSifExitCmd(void);
 
@@ -113,7 +117,8 @@ void sceSifExitCmd(void);
  * @param db Table.
  * @param size Number of slots.
  * @return The previous table.
- * @ghidraAddress 0x005d3888
+ * @ghidraAddress NTSC-U/C: 0x005d3888
+ * @ghidraAddress PAL: 0x006158f0
  */
 sceSifCmdData *sceSifSetCmdBuffer(sceSifCmdData *db, int size);
 
@@ -123,7 +128,8 @@ sceSifCmdData *sceSifSetCmdBuffer(sceSifCmdData *db, int size);
  * @param db Table.
  * @param size Number of slots.
  * @return The previous table.
- * @ghidraAddress 0x005d38a0
+ * @ghidraAddress NTSC-U/C: 0x005d38a0
+ * @ghidraAddress PAL: 0x00615908
  */
 sceSifCmdData *sceSifSetSysCmdBuffer(sceSifCmdData *db, int size);
 
@@ -133,7 +139,8 @@ sceSifCmdData *sceSifSetSysCmdBuffer(sceSifCmdData *db, int size);
  * @param fcode Command code. With #SIF_CMDC_SYSTEM set it indexes the system table.
  * @param handler Handler.
  * @param data Argument the handler receives.
- * @ghidraAddress 0x005d38b8
+ * @ghidraAddress NTSC-U/C: 0x005d38b8
+ * @ghidraAddress PAL: 0x00615920
  */
 void sceSifAddCmdHandler(unsigned int fcode, sceSifCmdHandler handler, void *data);
 
@@ -141,7 +148,8 @@ void sceSifAddCmdHandler(unsigned int fcode, sceSifCmdHandler handler, void *dat
  * Remove the handler of a command code.
  *
  * @param fcode Command code.
- * @ghidraAddress 0x005d38e8
+ * @ghidraAddress NTSC-U/C: 0x005d38e8
+ * @ghidraAddress PAL: 0x00615950
  */
 void sceSifRemoveCmdHandler(unsigned int fcode);
 
@@ -156,7 +164,8 @@ void sceSifRemoveCmdHandler(unsigned int fcode);
  * @param size_extra Size of the extra data, or zero for none.
  * @return A transfer identifier, or zero when the packet size is out of range or the DMA queue is
  *     full.
- * @ghidraAddress 0x005d3a48
+ * @ghidraAddress NTSC-U/C: 0x005d3a48
+ * @ghidraAddress PAL: 0x00615ab0
  */
 unsigned int sceSifSendCmd(unsigned int fcode,
                            void *packet,
@@ -175,7 +184,8 @@ unsigned int sceSifSendCmd(unsigned int fcode,
  * @param dest_extra IOP destination of the extra data.
  * @param size_extra Size of the extra data, or zero for none.
  * @return As sceSifSendCmd().
- * @ghidraAddress 0x005d3a88
+ * @ghidraAddress NTSC-U/C: 0x005d3a88
+ * @ghidraAddress PAL: 0x00615af0
  */
 unsigned int isceSifSendCmd(unsigned int fcode,
                             void *packet,
@@ -189,7 +199,8 @@ unsigned int isceSifSendCmd(unsigned int fcode,
  *
  * @param addr Start of the range.
  * @param size Size in bytes. Nothing happens when it is not positive.
- * @ghidraAddress 0x005d3bf0
+ * @ghidraAddress NTSC-U/C: 0x005d3bf0
+ * @ghidraAddress PAL: 0x00615c58
  */
 void sceSifWriteBackDCache(void *addr, int size);
 

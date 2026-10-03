@@ -21,7 +21,7 @@ enum {
 // The cleared block that creation uploads to the second processor side region.
 static unsigned char g_presetData[kPresetSize];
 
-// 0x00567e68
+// NTSC-U/C: 0x00567e68, PAL: 0x005a8330
 static int dmaToIop(int nIopDest, void *pSource, int nSize) {
     // Send one contiguous block to the processor side, then wait for completion.
     sceSifDmaData transfer;
@@ -41,7 +41,7 @@ static int dmaToIop(int nIopDest, void *pSource, int nSize) {
     return nSize;
 }
 
-// 0x00567c78
+// NTSC-U/C: 0x00567c78, PAL: 0x005a8140
 static void splitIopSpan(int *pWrite,
                          int *pWriteLen,
                          int *pWrap,
@@ -72,7 +72,7 @@ static void splitIopSpan(int *pWrite,
     }
 }
 
-// 0x00567d20
+// NTSC-U/C: 0x00567d20, PAL: 0x005a81e8
 static int sendWrappedToIop(int nIopDest,
                             int nFirstLen,
                             int nIopWrap,
@@ -114,7 +114,7 @@ static int sendWrappedToIop(int nIopDest,
     return nCount + nTrailing;
 }
 
-// 0x00567ee0
+// NTSC-U/C: 0x00567ee0, PAL: 0x005a83a8
 static void setupIopVoices(int nLevel) {
     // Apply the level to both voice pairs through the sound driver.
     int core;
@@ -125,14 +125,14 @@ static void setupIopVoices(int nLevel) {
     }
 }
 
-// 0x00567f48
+// NTSC-U/C: 0x00567f48, PAL: 0x005a8410
 static void setIopInputVolume(int nVolume) {
     // Set the left and right sound data input volume of the second core through the sound driver.
     sceSdRemote(1, 0x8010, 0xf81, nVolume);
     sceSdRemote(1, 0x8010, 0x1081, nVolume);
 }
 
-// 0x00567670
+// NTSC-U/C: 0x00567670, PAL: 0x005a7b38
 int audioDecSendToIOP(AudioDec *pAudioDec) {
     // Move the staged bytes to the processor side, following the transfer stage. The idle and
     // stopping stages transfer nothing, the priming stage offers the whole free span, and the
@@ -204,7 +204,7 @@ int audioDecSendToIOP(AudioDec *pAudioDec) {
     return transferred;
 }
 
-// 0x00567820
+// NTSC-U/C: 0x00567820, PAL: 0x005a7ce8
 int audioDecCreate(AudioDec *pAudioDec,
                    unsigned char *pBuffer,
                    int nBufferSize,
@@ -238,7 +238,7 @@ int audioDecCreate(AudioDec *pAudioDec,
     return 1;
 }
 
-// 0x005678e0
+// NTSC-U/C: 0x005678e0, PAL: 0x005a7da8
 int audioDecDelete(AudioDec *pAudioDec) {
     // Release both processor side regions and silence the voices.
     sceSifFreeIopHeap((void *)(uintptr_t)pAudioDec->iopBuffer);
@@ -247,13 +247,13 @@ int audioDecDelete(AudioDec *pAudioDec) {
     return 1;
 }
 
-// 0x00567a50
+// NTSC-U/C: 0x00567a50, PAL: 0x005a7f18
 int audioDecIsPreset(AudioDec *pAudioDec) {
     // Report whether the handed count has reached the processor side buffer size.
     return pAudioDec->totalBytesSent >= pAudioDec->iopBufferSize;
 }
 
-// 0x00567a68
+// NTSC-U/C: 0x00567a68, PAL: 0x005a7f30
 void audioDecStart(AudioDec *pAudioDec) {
     // Raise the input volume, hand the buffer range to the driver, and enter streaming.
     const int aligned = pAudioDec->iopBufferSize / kBlockStep * kBlockStep;
@@ -269,7 +269,7 @@ void audioDecStart(AudioDec *pAudioDec) {
     pAudioDec->state = 2;
 }
 
-// 0x00567ad8
+// NTSC-U/C: 0x00567ad8, PAL: 0x005a7fa0
 void audioDecReset(AudioDec *pAudioDec) {
     // Stop the driver, park its reply, and clear the decoder back to idle.
     int position;

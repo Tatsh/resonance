@@ -3,14 +3,14 @@
 
 #include <libvifpk.h>
 
-// 0x0061e7c8
+// NTSC-U/C: 0x0061e7c8, PAL: 0x0065f358
 void sceVif1PkInit(sceVif1Packet *pPacket, void *pBase) {
     pPacket->pCurrent = (unsigned int *)pBase;
     pPacket->mOtherWords[0] = 0u;
     pPacket->pBase = pBase;
 }
 
-// 0x0062dd48
+// NTSC-U/C: 0x0062dd48, PAL: 0x0066e8d8
 void sceVif1PkReset(sceVif1Packet *pPacket) {
     unsigned int *pBase = (unsigned int *)pPacket->pBase;
 
@@ -18,7 +18,7 @@ void sceVif1PkReset(sceVif1Packet *pPacket) {
     pPacket->pCurrent = pBase;
 }
 
-// 0x0061e7d8
+// NTSC-U/C: 0x0061e7d8, PAL: 0x0065f368
 void sceVif1PkCnt(sceVif1Packet *pPacket, unsigned int nOption) {
     unsigned int *pCurrent = sceVif1PkTerminate(pPacket);
 
@@ -29,7 +29,7 @@ void sceVif1PkCnt(sceVif1Packet *pPacket, unsigned int nOption) {
     pCurrent[1] = 0u;
 }
 
-// 0x0061fd08
+// NTSC-U/C: 0x0061fd08, PAL: 0x00660898
 void sceVif1PkOpenDirectCode(sceVif1Packet *pPacket, int bStall) {
     unsigned int *pCode;
     unsigned int nCode = 0x50000000u;
@@ -44,7 +44,7 @@ void sceVif1PkOpenDirectCode(sceVif1Packet *pPacket, int bStall) {
     *pCode = nCode;
 }
 
-// 0x0062a940
+// NTSC-U/C: 0x0062a940, PAL: 0x0066b4d0
 void sceVif1PkOpenGifTag(sceVif1Packet *pPacket, sceGifTag gifTag) {
     sceGifTag *pTag = (sceGifTag *)pPacket->pCurrent;
 
@@ -53,7 +53,7 @@ void sceVif1PkOpenGifTag(sceVif1Packet *pPacket, sceGifTag gifTag) {
     pPacket->mOtherWords[3] = (unsigned int)(uintptr_t)pTag;
 }
 
-// 0x0062f3f8
+// NTSC-U/C: 0x0062f3f8, PAL: 0x0066ff88
 unsigned int *sceVif1PkReserve(sceVif1Packet *pPacket, unsigned int nWords) {
     unsigned int *pResult = pPacket->pCurrent;
 
@@ -61,7 +61,7 @@ unsigned int *sceVif1PkReserve(sceVif1Packet *pPacket, unsigned int nWords) {
     return pResult;
 }
 
-// 0x00613d50
+// NTSC-U/C: 0x00613d50, PAL: 0x006548e0
 void sceVif1PkCloseGifTag(sceVif1Packet *pPacket) {
     unsigned int *pCurrent = pPacket->pCurrent;
     unsigned long long *pTag = (unsigned long long *)(uintptr_t)pPacket->mOtherWords[3];
@@ -89,7 +89,7 @@ void sceVif1PkCloseGifTag(sceVif1Packet *pPacket) {
     pPacket->pCurrent = pCurrent;
 }
 
-// 0x0062dd78
+// NTSC-U/C: 0x0062dd78, PAL: 0x0066e908
 void sceVif1PkCloseDirectCode(sceVif1Packet *pPacket) {
     unsigned int *pCode = (unsigned int *)(uintptr_t)pPacket->mOtherWords[1];
     unsigned int nQuads = (unsigned int)(pPacket->pCurrent - pCode - 1) / 4u;
@@ -98,7 +98,7 @@ void sceVif1PkCloseDirectCode(sceVif1Packet *pPacket) {
     *pCode += nQuads;
 }
 
-// 0x0061d720
+// NTSC-U/C: 0x0061d720, PAL: 0x0065e2b0
 void sceVif1PkEnd(sceVif1Packet *pPacket, unsigned int nOption) {
     unsigned int *pCurrent = sceVif1PkTerminate(pPacket);
 
@@ -109,7 +109,7 @@ void sceVif1PkEnd(sceVif1Packet *pPacket, unsigned int nOption) {
     pCurrent[1] = 0u;
 }
 
-// 0x006206d8
+// NTSC-U/C: 0x006206d8, PAL: 0x00661268
 unsigned int *sceVif1PkTerminate(sceVif1Packet *pPacket) {
     unsigned int *pCurrent = pPacket->pCurrent;
     unsigned int *pTag = (unsigned int *)(uintptr_t)pPacket->mOtherWords[0];
@@ -125,7 +125,7 @@ unsigned int *sceVif1PkTerminate(sceVif1Packet *pPacket) {
     return pCurrent;
 }
 
-// 0x00651fe8
+// NTSC-U/C: 0x00651fe8, PAL: 0x00692b78
 void sceVif1PkAlign(sceVif1Packet *pPacket, int nKind, int nSize) {
     unsigned int nKeep = ((unsigned int)nKind + 2u) & 31u;
     unsigned int nLow = 0xffffffffu >> ((32u - nKeep) & 31u);

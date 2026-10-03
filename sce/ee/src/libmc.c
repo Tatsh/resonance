@@ -99,35 +99,35 @@ typedef struct {
     char szName[kMcNameSize];
 } McNamePacket;
 
-// 0x00761730
+// NTSC-U/C: 0x00761730, PAL: 0x007a4660
 static int g_nMcCommand = 0;
-// 0x00761734
+// NTSC-U/C: 0x00761734, PAL: 0x007a4664
 static int g_nMcSemaId = -1;
 
-// 0x008e0180
+// NTSC-U/C: 0x008e0180, PAL: 0x00925140
 static sceSifClientData g_mcClient __attribute__((aligned(64)));
-// 0x008e01a8
+// NTSC-U/C: 0x008e01a8, PAL: 0x00925168
 static int *g_pnMcInfoType;
-// 0x008e01ac
+// NTSC-U/C: 0x008e01ac, PAL: 0x0092516c
 static int *g_pnMcInfoFree;
-// 0x008e01b0
+// NTSC-U/C: 0x008e01b0, PAL: 0x00925170
 static int *g_pnMcInfoFormat;
 // SIF DMA moves whole quadwords. The buffers below retain retail's placement (64-byte boundaries,
 // and a 16-byte boundary for the path packet).
-// 0x008e01c0
+// NTSC-U/C: 0x008e01c0, PAL: 0x00925180
 static sceMcTblGetDir g_mcFileInfo __attribute__((aligned(64)));
-// 0x008e0200
+// NTSC-U/C: 0x008e0200, PAL: 0x009251c0
 static McDescPacket g_mcDescPacket __attribute__((aligned(64)));
-// 0x008e0230
+// NTSC-U/C: 0x008e0230, PAL: 0x009251f0
 static McNamePacket g_mcNamePacket __attribute__((aligned(16)));
-// 0x008e0680
+// NTSC-U/C: 0x008e0680, PAL: 0x00925640
 static McEndData g_mcEndData __attribute__((aligned(64)));
-// 0x008e0740
+// NTSC-U/C: 0x008e0740, PAL: 0x00925700
 static char g_szMcCurrentDir[kMcNameSize] __attribute__((aligned(64)));
-// 0x008e1740
+// NTSC-U/C: 0x008e1740, PAL: 0x00926700
 static sceMcRpcResult g_mcResult __attribute__((aligned(64)));
 
-// 0x005659e8
+// NTSC-U/C: 0x005659e8, PAL: 0x005a4158
 int sceMcInitLibrary(void) {
     struct SemaParam param;
     int nResult;
@@ -183,7 +183,7 @@ int sceMcInitLibrary(void) {
     return g_mcResult.nResult;
 }
 
-// 0x00565ba0
+// NTSC-U/C: 0x00565ba0, PAL: 0x005a4310
 sceSifClientData *sceMcGetRpcState(sceMcRpcResult **ppResult, int **ppnCommand) {
     *ppResult = &g_mcResult;
     *ppnCommand = &g_nMcCommand;
@@ -248,7 +248,7 @@ static inline void McSetName(const char *pszName) {
     g_mcNamePacket.szName[kMcNameSize - 1] = '\0';
 }
 
-// 0x00565bd0
+// NTSC-U/C: 0x00565bd0, PAL: 0x005a4340
 int sceMcChangeThreadPriority(int nLevel) {
     int nResult;
 
@@ -259,7 +259,7 @@ int sceMcChangeThreadPriority(int nLevel) {
     return McEndCommand(McCallDesc(kMcFunctionChangePriority, NULL, NULL), sceMcFuncNoChgPrior);
 }
 
-// 0x00565c88
+// NTSC-U/C: 0x00565c88, PAL: 0x005a43f8
 int sceMcGetSlotMax(int nPort) {
     int nResult;
 
@@ -283,7 +283,7 @@ int sceMcGetSlotMax(int nPort) {
     return g_mcResult.nResult;
 }
 
-// 0x00565d48
+// NTSC-U/C: 0x00565d48, PAL: 0x005a44b8
 int sceMcOpen(int nPort, int nSlot, const char *pszName, int nMode) {
     int nResult;
 
@@ -301,7 +301,7 @@ int sceMcOpen(int nPort, int nSlot, const char *pszName, int nMode) {
     return McEndCommand(McCallName(kMcFunctionOpen, NULL, NULL), sceMcFuncNoOpen);
 }
 
-// 0x00565e80
+// NTSC-U/C: 0x00565e80, PAL: 0x005a45f0
 int sceMcMkDir(int nPort, int nSlot, const char *pszName) {
     const int nResult = sceMcOpen(nPort, nSlot, pszName, sceMcFileCreateDir);
 
@@ -311,7 +311,7 @@ int sceMcMkDir(int nPort, int nSlot, const char *pszName) {
     return nResult;
 }
 
-// 0x00565eb8
+// NTSC-U/C: 0x00565eb8, PAL: 0x005a4628
 int sceMcClose(int nFd) {
     int nResult;
 
@@ -322,7 +322,7 @@ int sceMcClose(int nFd) {
     return McEndCommand(McCallDesc(kMcFunctionClose, NULL, NULL), sceMcFuncNoClose);
 }
 
-// 0x00565f70
+// NTSC-U/C: 0x00565f70, PAL: 0x005a46e0
 int sceMcSeek(int nFd, int nOffset, int nMode) {
     int nResult;
 
@@ -335,7 +335,7 @@ int sceMcSeek(int nFd, int nOffset, int nMode) {
     return McEndCommand(McCallDesc(kMcFunctionSeek, NULL, NULL), sceMcFuncNoSeek);
 }
 
-// 0x00566048
+// NTSC-U/C: 0x00566048, PAL: 0x005a47b8
 static void McReadEnd(void *pParameter) {
     const McEndData *pEnd = UNCACHED_SEG(pParameter);
     int i;
@@ -348,7 +348,7 @@ static void McReadEnd(void *pParameter) {
     }
 }
 
-// 0x005660d8
+// NTSC-U/C: 0x005660d8, PAL: 0x005a4848
 int sceMcRead(int nFd, void *pBuffer, int nSize) {
     int nResult;
 
@@ -364,7 +364,7 @@ int sceMcRead(int nFd, void *pBuffer, int nSize) {
     return McEndCommand(McCallDesc(kMcFunctionRead, McReadEnd, &g_mcEndData), sceMcFuncNoRead);
 }
 
-// 0x005661f8
+// NTSC-U/C: 0x005661f8, PAL: 0x005a4968
 int sceMcWrite(int nFd, const void *pBuffer, int nSize) {
     const unsigned char *pbSource = pBuffer;
     unsigned int nHead;
@@ -395,7 +395,7 @@ int sceMcWrite(int nFd, const void *pBuffer, int nSize) {
     return McEndCommand(McCallDesc(kMcFunctionWrite, NULL, NULL), sceMcFuncNoWrite);
 }
 
-// 0x00566378
+// NTSC-U/C: 0x00566378, PAL: 0x005a4ae8
 static void McAlarmHandler(int nId, unsigned short nTime, void *pThread) {
     (void)nId;
     (void)nTime;
@@ -403,13 +403,13 @@ static void McAlarmHandler(int nId, unsigned short nTime, void *pThread) {
     ExitHandler();
 }
 
-// 0x005663a0
+// NTSC-U/C: 0x005663a0, PAL: 0x005a4b10
 static void McDelayThread(unsigned short nTicks) {
     SetAlarm(nTicks, McAlarmHandler, (void *)(intptr_t)GetThreadId());
     SleepThread();
 }
 
-// 0x005663e8
+// NTSC-U/C: 0x005663e8, PAL: 0x005a4b58
 int sceMcSync(int nMode, int *pnCommand, int *pnResult) {
     int nBusy;
 
@@ -437,7 +437,7 @@ int sceMcSync(int nMode, int *pnCommand, int *pnResult) {
     return sceMcExecFinish;
 }
 
-// 0x005664c8
+// NTSC-U/C: 0x005664c8, PAL: 0x005a4c38
 static void McGetInfoEnd(void *pParameter) {
     const McEndData *pEnd = UNCACHED_SEG(pParameter);
 
@@ -452,7 +452,7 @@ static void McGetInfoEnd(void *pParameter) {
     }
 }
 
-// 0x00566520
+// NTSC-U/C: 0x00566520, PAL: 0x005a4c90
 int sceMcGetInfo(int nPort, int nSlot, int *pnType, int *pnFree, int *pnFormat) {
     int nResult;
 
@@ -473,7 +473,7 @@ int sceMcGetInfo(int nPort, int nSlot, int *pnType, int *pnFree, int *pnFormat) 
                         sceMcFuncNoCardInfo);
 }
 
-// 0x005666a8
+// NTSC-U/C: 0x005666a8, PAL: 0x005a4e18
 int sceMcGetDir(int nPort,
                 int nSlot,
                 const char *pszName,
@@ -501,7 +501,7 @@ int sceMcGetDir(int nPort,
     return McEndCommand(McCallName(kMcFunctionGetDir, NULL, NULL), sceMcFuncNoGetDir);
 }
 
-// 0x00566800
+// NTSC-U/C: 0x00566800, PAL: 0x005a4f70
 static void McChdirEnd(void *pParameter) {
     char *pszDest = pParameter;
     const char *pszDirectory;
@@ -516,7 +516,7 @@ static void McChdirEnd(void *pParameter) {
     pszDest[nLength] = '\0';
 }
 
-// 0x00566888
+// NTSC-U/C: 0x00566888, PAL: 0x005a4ff8
 int sceMcChdir(int nPort, int nSlot, const char *pszNewDir, char *pszCurrentDir) {
     int nResult;
 
@@ -535,7 +535,7 @@ int sceMcChdir(int nPort, int nSlot, const char *pszNewDir, char *pszCurrentDir)
     return McEndCommand(McCallName(kMcFunctionChdir, McChdirEnd, pszCurrentDir), sceMcFuncNoChDir);
 }
 
-// 0x005669d8
+// NTSC-U/C: 0x005669d8, PAL: 0x005a5148
 int sceMcFormat(int nPort, int nSlot) {
     int nResult;
 
@@ -547,7 +547,7 @@ int sceMcFormat(int nPort, int nSlot) {
     return McEndCommand(McCallDesc(kMcFunctionFormat, NULL, NULL), sceMcFuncNoFormat);
 }
 
-// 0x00566aa0
+// NTSC-U/C: 0x00566aa0, PAL: 0x005a5210
 int sceMcDelete(int nPort, int nSlot, const char *pszName) {
     int nResult;
 
@@ -565,7 +565,7 @@ int sceMcDelete(int nPort, int nSlot, const char *pszName) {
     return McEndCommand(McCallName(kMcFunctionDelete, NULL, NULL), sceMcFuncNoDelete);
 }
 
-// 0x00566bc8
+// NTSC-U/C: 0x00566bc8, PAL: 0x005a5338
 int sceMcFlush(int nFd) {
     int nResult;
 
@@ -576,7 +576,7 @@ int sceMcFlush(int nFd) {
     return McEndCommand(McCallDesc(kMcFunctionFlush, NULL, NULL), sceMcFuncNoFlush);
 }
 
-// 0x00566c80
+// NTSC-U/C: 0x00566c80, PAL: 0x005a53f0
 int sceMcSetFileInfo(
     int nPort, int nSlot, const char *pszName, const sceMcTblGetDir *pInfo, unsigned int nValid) {
     int nResult;
@@ -598,7 +598,7 @@ int sceMcSetFileInfo(
     return McEndCommand(McCallName(kMcFunctionFileInfo, NULL, NULL), sceMcFuncNoFileInfo);
 }
 
-// 0x00566e58
+// NTSC-U/C: 0x00566e58, PAL: 0x005a55c8
 int sceMcRename(int nPort, int nSlot, const char *pszName, const char *pszNewName) {
     int nResult;
 
@@ -620,7 +620,7 @@ int sceMcRename(int nPort, int nSlot, const char *pszName, const char *pszNewNam
     return McEndCommand(McCallName(kMcFunctionFileInfo, NULL, NULL), sceMcFuncNoRename);
 }
 
-// 0x00566fc0
+// NTSC-U/C: 0x00566fc0, PAL: 0x005a5730
 int sceMcUnformat(int nPort, int nSlot) {
     int nResult;
 
@@ -632,7 +632,7 @@ int sceMcUnformat(int nPort, int nSlot) {
     return McEndCommand(McCallDesc(kMcFunctionUnformat, NULL, NULL), sceMcFuncNoUnformat);
 }
 
-// 0x00567088
+// NTSC-U/C: 0x00567088, PAL: 0x005a57f8
 int sceMcGetEntSpace(int nPort, int nSlot, const char *pszPath) {
     int nResult;
 

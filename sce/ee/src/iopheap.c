@@ -33,26 +33,26 @@ typedef struct {
     char szPath[kHeapPathSize];
 } HeapLoadArgs;
 
-// 0x0077d68c, negative until the client is bound.
+// NTSC-U/C: 0x0077d68c, PAL: 0x007c1484, negative until the client is bound.
 static int g_nHeapBound = -1;
 
-// 0x008e5180
+// NTSC-U/C: 0x008e5180, PAL: 0x0092a180
 static sceSifClientData g_heapClient __attribute__((aligned(64)));
 
-// 0x008e51c0. SIF DMA needs the 64-byte alignment retail gives it.
+// NTSC-U/C: 0x008e51c0, PAL: 0x0092a1c0. SIF DMA needs the 64-byte alignment retail gives it.
 static int g_nHeapReceive __attribute__((aligned(64)));
 
-// 0x008e5200. SIF DMA needs the 64-byte alignment retail gives it.
+// NTSC-U/C: 0x008e5200, PAL: 0x0092a200. SIF DMA needs the 64-byte alignment retail gives it.
 static union {
     unsigned int nSize;
     void *pAddr;
     HeapAllocSysMemoryArgs allocSysMemory;
 } g_heapSend __attribute__((aligned(64)));
 
-// 0x008e5240. SIF DMA needs the 64-byte alignment retail gives it.
+// NTSC-U/C: 0x008e5240, PAL: 0x0092a240. SIF DMA needs the 64-byte alignment retail gives it.
 static HeapLoadArgs g_heapLoad __attribute__((aligned(64)));
 
-// 0x005e5f88
+// NTSC-U/C: 0x005e5f88, PAL: 0x00628170
 int sceSifInitIopHeap(void) {
     int nDelay;
 
@@ -71,7 +71,7 @@ int sceSifInitIopHeap(void) {
     return 0;
 }
 
-// 0x005e6010
+// NTSC-U/C: 0x005e6010, PAL: 0x006281f8
 void *sceSifAllocIopHeap(unsigned int size) {
     if (g_nHeapBound < 0) {
         return NULL;
@@ -91,7 +91,7 @@ void *sceSifAllocIopHeap(unsigned int size) {
     return (void *)(uintptr_t)g_nHeapReceive;
 }
 
-// 0x005e6080
+// NTSC-U/C: 0x005e6080, PAL: 0x00628268
 void *sceSifAllocSysMemory(int type, unsigned int size, void *addr) {
     if (g_nHeapBound < 0) {
         return NULL;
@@ -113,7 +113,7 @@ void *sceSifAllocSysMemory(int type, unsigned int size, void *addr) {
     return (void *)(uintptr_t)g_nHeapReceive;
 }
 
-// 0x005e6100
+// NTSC-U/C: 0x005e6100, PAL: 0x006282e8
 int sceSifFreeIopHeap(void *addr) {
     if (g_nHeapBound < 0) {
         return 0;
@@ -133,12 +133,12 @@ int sceSifFreeIopHeap(void *addr) {
     return g_nHeapReceive;
 }
 
-// 0x005e6178
+// NTSC-U/C: 0x005e6178, PAL: 0x00628360
 int sceSifFreeSysMemory(void *addr) {
     return sceSifFreeIopHeap(addr);
 }
 
-// 0x005e6198
+// NTSC-U/C: 0x005e6198, PAL: 0x00628380
 int sceSifLoadIopHeap(const char *filename, void *addr) {
     int nLength;
 

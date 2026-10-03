@@ -19,7 +19,8 @@ extern "C" {
  *
  * @param pVideoDec The decoder.
  * @return The queued byte count.
- * @ghidraAddress 0x00569458
+ * @ghidraAddress NTSC-U/C: 0x00569458
+ * @ghidraAddress PAL: 0x005a9920
  */
 int videoDecInputCount(VideoDec *pVideoDec);
 
@@ -30,7 +31,8 @@ int videoDecInputCount(VideoDec *pVideoDec);
  *
  * @param pVideoDec The decoder.
  * @return The free byte count.
- * @ghidraAddress 0x00569478
+ * @ghidraAddress NTSC-U/C: 0x00569478
+ * @ghidraAddress PAL: 0x005a9940
  */
 int videoDecInputSpaceCount(VideoDec *pVideoDec);
 
@@ -44,7 +46,8 @@ int videoDecInputSpaceCount(VideoDec *pVideoDec);
  * @param nIntra The intra picture limit.
  * @param nPredicted The predicted picture limit.
  * @param nBidirectional The bidirectional picture limit.
- * @ghidraAddress 0x005694b0
+ * @ghidraAddress NTSC-U/C: 0x005694b0
+ * @ghidraAddress PAL: 0x005a9978
  */
 void videoDecSetDecodeMode(VideoDec *pVideoDec, int nIntra, int nPredicted, int nBidirectional);
 
@@ -59,7 +62,8 @@ void videoDecSetDecodeMode(VideoDec *pVideoDec, int nIntra, int nPredicted, int 
  * @param pPutSize The size of the free region.
  * @param ppWrappedPut The wrapped head, or a null pointer when nothing wraps.
  * @param pWrappedSize The size of the wrapped head.
- * @ghidraAddress 0x00569620
+ * @ghidraAddress NTSC-U/C: 0x00569620
+ * @ghidraAddress PAL: 0x005a9ae8
  */
 void videoDecBeginPut(VideoDec *pVideoDec,
                       unsigned char **ppPut,
@@ -72,7 +76,8 @@ void videoDecBeginPut(VideoDec *pVideoDec,
  *
  * @param pVideoDec The decoder.
  * @param nSize The number of bytes written.
- * @ghidraAddress 0x00569640
+ * @ghidraAddress NTSC-U/C: 0x00569640
+ * @ghidraAddress PAL: 0x005a9b08
  */
 void videoDecEndPut(VideoDec *pVideoDec, int nSize);
 
@@ -88,7 +93,8 @@ void videoDecEndPut(VideoDec *pVideoDec, int nSize);
  * @param pOffset The committed bytes.
  * @param nSize The number of committed bytes.
  * @return Non-zero when the stamp was queued.
- * @ghidraAddress 0x00569660
+ * @ghidraAddress NTSC-U/C: 0x00569660
+ * @ghidraAddress PAL: 0x005a9b28
  */
 int videoDecPutTs(VideoDec *pVideoDec,
                   long long nFirstStamp,
@@ -111,7 +117,8 @@ int videoDecPutTs(VideoDec *pVideoDec,
  * @param pSrcB Second source span.
  * @param nSrcB Second source length.
  * @return The copied byte count, or zero when the destinations are short.
- * @ghidraAddress 0x005697f0
+ * @ghidraAddress NTSC-U/C: 0x005697f0
+ * @ghidraAddress PAL: 0x005a9cb8
  */
 int cpy2area(unsigned char *pDestA,
              int nDestA,

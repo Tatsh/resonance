@@ -57,22 +57,22 @@ typedef struct {
     TtyQueue *pQueue;
 } TtyState;
 
-// 0x008e7d40
+// NTSC-U/C: 0x008e7d40, PAL: 0x0092cd40
 static TtyQueue g_ttyQueue;
 
-// 0x008e7e50
+// NTSC-U/C: 0x008e7e50, PAL: 0x0092ce50
 static TtyState g_ttyState;
 
-// 0x008e7e80
+// NTSC-U/C: 0x008e7e80, PAL: 0x0092ce80
 static TtyPacket g_ttySendPacket __attribute__((aligned(64)));
 
-// 0x008e7fc0
+// NTSC-U/C: 0x008e7fc0, PAL: 0x0092cfc0
 static TtyPacket g_ttyReceivePacket __attribute__((aligned(64)));
 
-// 0x0076f014
+// NTSC-U/C: 0x0076f014, PAL: 0x007b2d74
 static int g_bConsoleOpen;
 
-// 0x006277d8
+// NTSC-U/C: 0x006277d8, PAL: 0x00668368
 static TtyQueue *TtyQueueInit(int nCapacity) {
     g_ttyQueue.nCapacity = nCapacity;
     g_ttyQueue.pHead = g_ttyQueue.mData;
@@ -81,7 +81,7 @@ static TtyQueue *TtyQueueInit(int nCapacity) {
     return &g_ttyQueue;
 }
 
-// 0x00627800
+// NTSC-U/C: 0x00627800, PAL: 0x00668390
 static void TtyQueuePush(TtyQueue *pQueue) {
     ++pQueue->nCount;
     ++pQueue->pTail;
@@ -90,7 +90,7 @@ static void TtyQueuePush(TtyQueue *pQueue) {
     }
 }
 
-// 0x00627840
+// NTSC-U/C: 0x00627840, PAL: 0x006683d0
 static void TtyQueuePop(TtyQueue *pQueue) {
     --pQueue->nCount;
     ++pQueue->pHead;
@@ -99,7 +99,7 @@ static void TtyQueuePop(TtyQueue *pQueue) {
     }
 }
 
-// 0x00627880
+// NTSC-U/C: 0x00627880, PAL: 0x00668410
 static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     TtyState *pState = (TtyState *)pOpt;
     int nDone;
@@ -149,7 +149,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     }
 }
 
-// 0x00627c38
+// NTSC-U/C: 0x00627c38, PAL: 0x006687c8
 static int TtyOpen(void) {
     TtyPacket *pSend;
 
@@ -173,7 +173,7 @@ static int TtyOpen(void) {
     return 1;
 }
 
-// 0x00627a18
+// NTSC-U/C: 0x00627a18, PAL: 0x006685a8
 // Converts each newline to a carriage return and newline, and returns the number of source bytes
 // that fitted in the packet.
 static int TtyWrite(const char *pBuffer, int nLength) {
@@ -215,7 +215,7 @@ static int TtyWrite(const char *pBuffer, int nLength) {
     return nConsumed;
 }
 
-// 0x00627b68
+// NTSC-U/C: 0x00627b68, PAL: 0x006686f8
 // Returns once a newline or a carriage return arrives, or when the buffer is full.
 static int TtyRead(char *pBuffer, int nLength) {
     int nRead = 0;
@@ -236,7 +236,7 @@ static int TtyRead(char *pBuffer, int nLength) {
     return nRead;
 }
 
-// 0x00596480
+// NTSC-U/C: 0x00596480, PAL: 0x005d9888
 int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
     if (nFile != kConsoleOutput && nFile != kConsoleError) {
         return -1;
@@ -262,7 +262,7 @@ int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
     return TtyWrite((const char *)pBuffer, nLength);
 }
 
-// 0x00596500
+// NTSC-U/C: 0x00596500, PAL: 0x005d9908
 int LibcConsoleRead(int nFile, void *pBuffer, int nLength) {
     if (nFile != kConsoleInput) {
         return -1;
@@ -276,13 +276,13 @@ int LibcConsoleRead(int nFile, void *pBuffer, int nLength) {
     return TtyRead((char *)pBuffer, nLength);
 }
 
-// 0x005965a0
+// NTSC-U/C: 0x005965a0, PAL: 0x005d99a8
 int LibcConsoleClose(int nFile) {
     (void)nFile;
     return -1;
 }
 
-// 0x005965b0
+// NTSC-U/C: 0x005965b0, PAL: 0x005d99b8
 int LibcConsoleLseek(int nFile, int nOffset, int nOrigin) {
     (void)nFile;
     (void)nOffset;
@@ -290,13 +290,13 @@ int LibcConsoleLseek(int nFile, int nOffset, int nOrigin) {
     return -1;
 }
 
-// 0x00596668
+// NTSC-U/C: 0x00596668, PAL: 0x005d9a70
 int LibcConsoleIsatty(int nFile) {
     (void)nFile;
     return 1;
 }
 
-// 0x005963d0
+// NTSC-U/C: 0x005963d0, PAL: 0x005d97d8
 void LibcConsoleReset(void) {
     g_bConsoleOpen = 0;
 }

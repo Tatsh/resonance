@@ -13,10 +13,10 @@
 static const char kUdnlPrefix[] = "rom0:UDNL ";
 static const char kTooLongFormat[] = "too long parameter '%s'\n";
 
-// 0x008e4a80. SIF DMA needs the 64-byte alignment retail gives it.
+// NTSC-U/C: 0x008e4a80, PAL: 0x00929a80. SIF DMA needs the 64-byte alignment retail gives it.
 static sceSifCmdResetData g_resetPacket __attribute__((aligned(64)));
 
-// 0x005bc6e8
+// NTSC-U/C: 0x005bc6e8, PAL: 0x005fedc8
 // The argument is copied without its terminator and without a length check.
 int sceSifResetIop(const char *arg, int mode) {
     sceSifDmaData transfer;
@@ -50,12 +50,12 @@ int sceSifResetIop(const char *arg, int mode) {
     return 1;
 }
 
-// 0x005bc828
+// NTSC-U/C: 0x005bc828, PAL: 0x005fef08
 int sceSifIsAliveIop(void) {
     return (sceSifGetReg(SIF_REG_SMFLAG) & SIF_STAT_SIFINIT) != 0;
 }
 
-// 0x005bc850
+// NTSC-U/C: 0x005bc850, PAL: 0x005fef30
 int sceSifSyncIop(void) {
     if ((sceSifGetReg(SIF_REG_SMFLAG) & SIF_STAT_BOOTEND) == 0) {
         return 0;
@@ -64,7 +64,7 @@ int sceSifSyncIop(void) {
     return 1;
 }
 
-// 0x005bc888
+// NTSC-U/C: 0x005bc888, PAL: 0x005fef68
 int sceSifRebootIop(const char *imgname) {
     char szArg[SIF_CMD_RESET_ARG_MAX];
 

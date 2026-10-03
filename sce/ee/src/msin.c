@@ -10,7 +10,7 @@ enum {
     kStatusMask = 0xf0,
 };
 
-// 0x005e4600
+// NTSC-U/C: 0x005e4600, PAL: 0x006267c0
 static int putStreamBytes(sceCslCtx *pCtx,
                           unsigned int nPort,
                           unsigned char *pBytes,
@@ -44,7 +44,7 @@ static int putStreamBytes(sceCslCtx *pCtx,
     return 0;
 }
 
-// 0x005e4570
+// NTSC-U/C: 0x005e4570, PAL: 0x00626730
 int sceMSIn_Init(sceCslCtx *pCtx) {
     sceCslBuffGrp *pGroups;
     sceCslMidiStream *pStream;
@@ -83,7 +83,7 @@ int sceMSIn_Init(sceCslCtx *pCtx) {
     return 0;
 }
 
-// 0x005e4698
+// NTSC-U/C: 0x005e4698, PAL: 0x00626858
 int sceMSIn_PutMsg(sceCslCtx *pCtx, unsigned int nPort, unsigned int nMsg) {
     unsigned int nCopy = nMsg;
     int nCount;

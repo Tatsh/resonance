@@ -49,13 +49,13 @@
 // The interrupt enable word occupies 0x1000F590.
 #define DMA_ENABLEW (*(volatile unsigned int *)(uintptr_t)0x1000F590U)
 // Maps a stall source channel number to its D_CTRL STS field value.
-// 0x0077fc70
+// NTSC-U/C: 0x0077fc70, PAL: 0x00768e00
 static const unsigned char STALL_SOURCE_TABLE[] = {0, 0, 0, 3, 0, 1, 0, 0, 2, 0};
 // Maps a stall drain channel number to its D_CTRL STD field value.
-// 0x0077fc80
+// NTSC-U/C: 0x0077fc80, PAL: 0x00768e10
 static const unsigned char STALL_DRAIN_TABLE[] = {0, 1, 2, 0, 0, 0, 3, 0, 0, 0};
 // Maps an MFIFO drain channel number to its D_CTRL MFD field value.
-// 0x0077fc90
+// NTSC-U/C: 0x0077fc90, PAL: 0x00768e20
 static const unsigned char MFIFO_DRAIN_TABLE[] = {0, 2, 3, 0, 0, 0, 0, 0, 0, 0};
 
 // Spin budgets bound the busy waits.
@@ -86,7 +86,7 @@ typedef struct {
 } DmaChannelRegs;
 
 // The register block of each channel, VIF0 through the scratchpad input.
-// 0x0077fc08
+// NTSC-U/C: 0x0077fc08, PAL: 0x00768d98
 static DmaChannelRegs *g_apDmacChannelRegs[kChannelCount] = {
     (DmaChannelRegs *)(uintptr_t)0x10008000U,
     (DmaChannelRegs *)(uintptr_t)0x10009000U,
@@ -101,11 +101,11 @@ static DmaChannelRegs *g_apDmacChannelRegs[kChannelCount] = {
 
 // Whether the reset clears each channel. The three SIF channels are excluded, as the IOP link
 // runs over them.
-// 0x0077fc48
+// NTSC-U/C: 0x0077fc48, PAL: 0x00768dd8
 static int g_anDmacChannelEnabled[kChannelCount] = {1, 1, 1, 1, 1, 0, 0, 0, 1, 1};
 
 // The environment sceDmaPutEnv() last applied, which sceDmaGetEnv() copies out.
-// 0x0077fca0
+// NTSC-U/C: 0x0077fca0, PAL: 0x00768e30
 static sceDmaEnv g_dmaSavedEnv;
 
 // Raw environment view. Offsets match the image. Members expose every byte the put path validates.
@@ -155,7 +155,7 @@ typedef struct {
     unsigned long long mHigh; // The high word resides at offset 0x08.
 } DmaTag;
 
-// 0x005f36b8
+// NTSC-U/C: 0x005f36b8, PAL: 0x00596dd8
 // Clears a byte range one byte at a time.
 static void DmaClearBytes(unsigned char *pBytes, int nCount) {
     while (nCount-- > 0) {
@@ -163,7 +163,7 @@ static void DmaClearBytes(unsigned char *pBytes, int nCount) {
     }
 }
 
-// 0x005f36f0
+// NTSC-U/C: 0x005f36f0, PAL: 0x00596e10
 // Returns the channel block for the identifier. An out of range identifier yields a null pointer.
 sceDmaChan *sceDmaGetChan(int nChannel) {
     if ((unsigned int)nChannel < kChannelCount) {
@@ -172,7 +172,7 @@ sceDmaChan *sceDmaGetChan(int nChannel) {
     return NULL;
 }
 
-// 0x005f3718
+// NTSC-U/C: 0x005f3718, PAL: 0x00596e38
 // Resets every channel and returns the previous enable flag. The routine clears channel words
 // and status bits and applies a cleared environment.
 int sceDmaReset(int nMode) {
@@ -209,7 +209,7 @@ int sceDmaReset(int nMode) {
     return (int)(oldCtrl & 1U);
 }
 
-// 0x005f3808
+// NTSC-U/C: 0x005f3808, PAL: 0x00596f28
 // Validates the environment and writes the controller words.
 // Out of range fields produce negative results.
 int sceDmaPutEnv(sceDmaEnv *pEnv) {
@@ -253,14 +253,14 @@ int sceDmaPutEnv(sceDmaEnv *pEnv) {
     return 0;
 }
 
-// 0x005f39e0
+// NTSC-U/C: 0x005f39e0, PAL: 0x00597100
 // Copies the saved environment into the caller buffer and returns the caller buffer.
 sceDmaEnv *sceDmaGetEnv(sceDmaEnv *pEnv) {
     *pEnv = g_dmaSavedEnv;
     return pEnv;
 }
 
-// 0x005f3a40
+// NTSC-U/C: 0x005f3a40, PAL: 0x00597160
 // Waits for the channel to idle and starts a source chain transfer. A busy channel spins
 // with a timeout and reports an expiry.
 void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
@@ -289,7 +289,7 @@ void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
     channel->mChcr = (channel->mChcr & 0xFFFFFFF3U) | 0x105U;
 }
 
-// 0x005f3b18
+// NTSC-U/C: 0x005f3b18, PAL: 0x00597238
 // Waits for the channel to idle and starts a normal transfer. A busy channel spins with
 // a timeout and reports an expiry.
 void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
@@ -318,7 +318,7 @@ void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
     channel->mChcr = (channel->mChcr & 0xFFFFFFF3U) | 0x101U;
 }
 
-// 0x005f3f90
+// NTSC-U/C: 0x005f3f90, PAL: 0x005976b0
 // Polls the channel until the busy bit clears and reports zero. Probe mode returns the busy flag.
 int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     DmaChannelRegs *channel;
@@ -348,7 +348,7 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     return 0;
 }
 
-// 0x00613388
+// NTSC-U/C: 0x00613388, PAL: 0x00653f18
 // Prepares the queue record and creates the guarding semaphore.
 // The routine stores the data pointer, the tag pointer, the sizes,
 // and the stamp ring, then initialises the transfer path.
@@ -373,7 +373,7 @@ void sceDmaCreateQueueSemaphore(
     queue->mTotalPut = 0LL;
 }
 
-// 0x00613400
+// NTSC-U/C: 0x00613400, PAL: 0x00653f90
 // Stops the transfer channels and deletes the guarding semaphore. The routine disables interrupts
 // across the channel updates.
 int sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
@@ -395,7 +395,7 @@ int sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
     return 1;
 }
 
-// 0x006126e8
+// NTSC-U/C: 0x006126e8, PAL: 0x00653278
 // Initialises the queue counts and builds the tag ring. The routine clears the buffered counts,
 // clears the stamp ring, programs the tag entries, and arms the transfer channels.
 int viBufReset(ViBuf *buffer) {
@@ -481,7 +481,7 @@ int viBufReset(ViBuf *buffer) {
     return 1;
 }
 
-// 0x00612890
+// NTSC-U/C: 0x00612890, PAL: 0x00653420
 // Advances the queue after a stall and restarts the channel when work remains. The routine
 // reports an error for an inactive queue.
 int viBufAddDMA(ViBuf *buffer) {
@@ -617,7 +617,7 @@ int viBufAddDMA(ViBuf *buffer) {
     return 1;
 }
 
-// 0x00612b40
+// NTSC-U/C: 0x00612b40, PAL: 0x006536d0
 // Stops the transfer channels and saves the hardware positions. The routine disables interrupts
 // across the channel updates.
 int viBufStopDMA(ViBuf *buffer) {
@@ -658,7 +658,7 @@ int viBufStopDMA(ViBuf *buffer) {
     return 1;
 }
 
-// 0x00612cc0
+// NTSC-U/C: 0x00612cc0, PAL: 0x00653850
 // Restarts both IPU channels from the positions viBufStopDMA() saved. The input channel is
 // rewound by the words the IPU FIFO had, the read position and buffered count are corrected for
 // whatever the rewind crossed, the saved IPU command is reissued, and IPU_CTRL is restored.
@@ -764,7 +764,7 @@ int viBufRestartDMA(ViBuf *buffer) {
     return 1;
 }
 
-// 0x00613088
+// NTSC-U/C: 0x00613088, PAL: 0x00653c18
 // Discards the stamps the reader has passed. The routine advances the stamp ring past
 // the supplied offset.
 void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp) {
@@ -851,7 +851,7 @@ void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp) {
     }
 }
 
-// 0x006131e0
+// NTSC-U/C: 0x006131e0, PAL: 0x00653d70
 // Retrieves the stamp for the completed span.
 // The routine scans the stamp ring for the matching entry.
 int viBufGetTs(ViBuf *buffer, long long *pStamps) {
@@ -935,7 +935,7 @@ int viBufGetTs(ViBuf *buffer, long long *pStamps) {
     return 1;
 }
 
-// 0x00613798
+// NTSC-U/C: 0x00613798, PAL: 0x00654328
 // Rounds the buffered byte count up to the sector boundary. The routine waits on the semaphore
 // across the update.
 void viBufFlush(ViBuf *buffer) {

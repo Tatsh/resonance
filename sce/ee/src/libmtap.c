@@ -45,13 +45,13 @@ typedef union {
     unsigned char abRaw[kMtapRpcBufferSize];
 } __attribute__((aligned(64))) MtapRpcBuffer;
 
-// 0x0089e080
+// NTSC-U/C: 0x0089e080, PAL: 0x008e3040
 static sceSifClientData g_aMtapClients[kMtapClientCount] __attribute__((aligned(64)));
 // SIF DMA moves whole quadwords. The buffer retains retail's 64-byte placement.
-// 0x0089e180
+// NTSC-U/C: 0x0089e180, PAL: 0x008e3140
 static MtapRpcBuffer g_mtapRpc __attribute__((aligned(64)));
 
-// 0x0053a598
+// NTSC-U/C: 0x0053a598, PAL: 0x00579fe0
 static void sceMtapPrintfStub(const char *pszFormat, ...) {
     (void)pszFormat; // Yes, the binary's library prints its RPC errors through an empty routine.
 }
@@ -68,7 +68,7 @@ static inline int MtapCall(int nClient) {
                          NULL);
 }
 
-// 0x0053a5c0
+// NTSC-U/C: 0x0053a5c0, PAL: 0x0057a008
 int sceMtapInit(void) {
     int nVersion;
     int i;
@@ -103,7 +103,7 @@ int sceMtapInit(void) {
     return 1;
 }
 
-// 0x0053a840
+// NTSC-U/C: 0x0053a840, PAL: 0x0057a288
 int sceMtapPortOpen(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientPortOpen) < 0) {
@@ -113,7 +113,7 @@ int sceMtapPortOpen(int nPort) {
     return g_mtapRpc.port.nResult;
 }
 
-// 0x0053a8b0
+// NTSC-U/C: 0x0053a8b0, PAL: 0x0057a2f8
 int sceMtapPortClose(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientPortClose) < 0) {
@@ -123,7 +123,7 @@ int sceMtapPortClose(int nPort) {
     return g_mtapRpc.port.nResult;
 }
 
-// 0x0053a920
+// NTSC-U/C: 0x0053a920, PAL: 0x0057a368
 int sceMtapGetConnection(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientGetConnection) < 0) {
@@ -133,7 +133,7 @@ int sceMtapGetConnection(int nPort) {
     return g_mtapRpc.port.nResult;
 }
 
-// 0x0053a990
+// NTSC-U/C: 0x0053a990, PAL: 0x0057a3d8
 int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority) {
     g_mtapRpc.priority.nFirstPriority = nFirstPriority;
     g_mtapRpc.priority.nSecondPriority = nSecondPriority;
@@ -144,7 +144,7 @@ int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority) {
     return g_mtapRpc.priority.nResult;
 }
 
-// 0x0053aa00
+// NTSC-U/C: 0x0053aa00, PAL: 0x0057a448
 int sceMtapGetModVersion(void) {
     if (MtapCall(kMtapClientGetModVersion) < 0) {
         sceMtapPrintfStub("sceMtapGetModVersion: rpc error\n");

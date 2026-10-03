@@ -19,11 +19,19 @@ extern VoBuf voBuf;
 extern VideoDec videoDec;
 
 enum {
+#ifdef VIDEO_STANDARD_PAL
+    kPictureBufferMacroblocks = 0x654,
+    kTagFirstFieldOffset = 0x40,
+    kTagSecondFieldOffset = 0x26740,
+    kTagEntrySize = 0x4ce40,
+    kFrameDataSize = 0x195000,
+#else
     kPictureBufferMacroblocks = 0x546,
     kTagFirstFieldOffset = 0x40,
     kTagSecondFieldOffset = 0x20240,
     kTagEntrySize = 0x40440,
     kFrameDataSize = 0x151800,
+#endif
     kFlushWriteSize = 4,
     kFlushingState = 2,
     kPhysicalAddressMask = 0x0fffffff,
@@ -44,7 +52,7 @@ static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData);
 static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData);
 static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData);
 
-// 0x00569128
+// NTSC-U/C: 0x00569128, PAL: 0x005a95f0
 static int decode(VideoDec *pVideoDec) {
     int result = 1;
     void *pPicture;
@@ -94,12 +102,12 @@ static int decode(VideoDec *pVideoDec) {
     return result;
 }
 
-// 0x005692f0
+// NTSC-U/C: 0x005692f0, PAL: 0x005a97b8
 static void videoDecReset(VideoDec *pVideoDec) {
     pVideoDec->state = 0;
 }
 
-// 0x005692f8
+// NTSC-U/C: 0x005692f8, PAL: 0x005a97c0
 void videoDecCreate(VideoDec *pVideoDec,
                     unsigned char *pWork,
                     int nWorkSize,
@@ -118,29 +126,29 @@ void videoDecCreate(VideoDec *pVideoDec,
     sceDmaCreateQueueSemaphore(inputBuf(pVideoDec), pData, pTag, nTagSize, pTimeStamps, nTimeStamps);
 }
 
-// 0x005693f8
+// NTSC-U/C: 0x005693f8, PAL: 0x005a98c0
 int videoDecDelete(VideoDec *pVideoDec) {
     sceDmaDeleteQueueSemaphore(inputBuf(pVideoDec));
     sceMpegDelete(pVideoDec);
     return 1;
 }
 
-// 0x00569430
+// NTSC-U/C: 0x00569430, PAL: 0x005a98f8
 void videoDecAbort(VideoDec *pVideoDec) {
     pVideoDec->state = VD_STATE_ABORT;
 }
 
-// 0x00569440
+// NTSC-U/C: 0x00569440, PAL: 0x005a9908
 int videoDecGetState(VideoDec *pVideoDec) {
     return pVideoDec->state;
 }
 
-// 0x00569458
+// NTSC-U/C: 0x00569458, PAL: 0x005a9920
 int videoDecInputCount(VideoDec *pVideoDec) {
     return viBufCount(inputBuf(pVideoDec));
 }
 
-// 0x00569478
+// NTSC-U/C: 0x00569478, PAL: 0x005a9940
 int videoDecInputSpaceCount(VideoDec *pVideoDec) {
     unsigned char *pPut;
     int putSize;
@@ -151,12 +159,12 @@ int videoDecInputSpaceCount(VideoDec *pVideoDec) {
     return putSize + wrappedSize;
 }
 
-// 0x005694b0
+// NTSC-U/C: 0x005694b0, PAL: 0x005a9978
 void videoDecSetDecodeMode(VideoDec *pVideoDec, int nIntra, int nPredicted, int nBidirectional) {
     sceMpegSetDecodeMode(pVideoDec, nIntra, nPredicted, nBidirectional);
 }
 
-// 0x005694d0
+// NTSC-U/C: 0x005694d0, PAL: 0x005a9998
 int videoDecFlush(VideoDec *pVideoDec) {
     unsigned char endCode[kFlushWriteSize];
     unsigned char *pPut;
@@ -191,7 +199,7 @@ int videoDecFlush(VideoDec *pVideoDec) {
     return 1;
 }
 
-// 0x005695b0
+// NTSC-U/C: 0x005695b0, PAL: 0x005a9a78
 int videoDecIsFlushed(VideoDec *pVideoDec) {
     if (viBufCount(inputBuf(pVideoDec)) != 0) {
         return 0;
@@ -199,14 +207,14 @@ int videoDecIsFlushed(VideoDec *pVideoDec) {
     return sceMpegIsRefBuffEmpty(pVideoDec) != 0;
 }
 
-// 0x00569600
+// NTSC-U/C: 0x00569600, PAL: 0x005a9ac8
 int videoDecSetStream(
     VideoDec *pVideoDec, int nType, int nChannel, VideoDecCallback pfnCallback, void *pData) {
     sceMpegAddStrCallback(pVideoDec, nType, nChannel, pfnCallback, pData);
     return 1;
 }
 
-// 0x00569620
+// NTSC-U/C: 0x00569620, PAL: 0x005a9ae8
 void videoDecBeginPut(VideoDec *pVideoDec,
                       unsigned char **ppPut,
                       int *pPutSize,
@@ -215,12 +223,12 @@ void videoDecBeginPut(VideoDec *pVideoDec,
     viBufBeginPut(inputBuf(pVideoDec), ppPut, pPutSize, ppWrappedPut, pWrappedSize);
 }
 
-// 0x00569640
+// NTSC-U/C: 0x00569640, PAL: 0x005a9b08
 void videoDecEndPut(VideoDec *pVideoDec, int nSize) {
     viBufEndPut(inputBuf(pVideoDec), nSize);
 }
 
-// 0x00569660
+// NTSC-U/C: 0x00569660, PAL: 0x005a9b28
 int videoDecPutTs(VideoDec *pVideoDec,
                   long long nFirstStamp,
                   long long nSecondStamp,
@@ -237,7 +245,7 @@ int videoDecPutTs(VideoDec *pVideoDec,
     return viBufPutTs(inputBuf(&videoDec), &stamp);
 }
 
-// 0x005696a0
+// NTSC-U/C: 0x005696a0, PAL: 0x005a9b68
 void videoDecMain(VideoDec *pVideoDec) {
     viBufReset(inputBuf(pVideoDec));
     voBufReset(&voBuf);
@@ -248,7 +256,7 @@ void videoDecMain(VideoDec *pVideoDec) {
     pVideoDec->state = VD_STATE_END;
 }
 
-// 0x00569700
+// NTSC-U/C: 0x00569700, PAL: 0x005a9bc8
 static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     char *pMessage;
 
@@ -259,7 +267,7 @@ static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     return 1;
 }
 
-// 0x00569728
+// NTSC-U/C: 0x00569728, PAL: 0x005a9bf0
 static int mpegNodata(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pCallbackData;
@@ -269,7 +277,7 @@ static int mpegNodata(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     return 1;
 }
 
-// 0x00569758
+// NTSC-U/C: 0x00569758, PAL: 0x005a9c20
 static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pCallbackData;
@@ -278,7 +286,7 @@ static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     return 1;
 }
 
-// 0x00569780
+// NTSC-U/C: 0x00569780, PAL: 0x005a9c48
 static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pCallbackData;
@@ -287,7 +295,7 @@ static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     return 1;
 }
 
-// 0x005697a8
+// NTSC-U/C: 0x005697a8, PAL: 0x005a9c70
 static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     long long stamps[2];
     long long *pDest;
@@ -301,7 +309,7 @@ static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     return 1;
 }
 
-// 0x005697f0
+// NTSC-U/C: 0x005697f0, PAL: 0x005a9cb8
 // The short-source branch below reads past its source and reports a negative size, which the
 // analyser flags. The branch structure matches the image instruction for instruction, and the
 // branch only runs with a negative destination size, which never happens, so the diagnostics

@@ -103,14 +103,16 @@ typedef struct _sif_queue_data {
  * Initialise the RPC layer, and the command layer beneath it. A second call does nothing.
  *
  * @param mode Unused.
- * @ghidraAddress 0x00564a88
+ * @ghidraAddress NTSC-U/C: 0x00564a88
+ * @ghidraAddress PAL: 0x005a31f8
  */
 void sceSifInitRpc(unsigned int mode);
 
 /**
  * Stop the RPC layer and the command layer.
  *
- * @ghidraAddress 0x00564c28
+ * @ghidraAddress NTSC-U/C: 0x00564c28
+ * @ghidraAddress PAL: 0x005a3398
  */
 void sceSifExitRpc(void);
 
@@ -124,7 +126,8 @@ void sceSifExitRpc(void);
  * @param mode Call mode bits.
  * @return Zero, -1 when no packet is free, -2 when the request could not be sent, or -3 when no
  *     semaphore could be created.
- * @ghidraAddress 0x00564ea0
+ * @ghidraAddress NTSC-U/C: 0x00564ea0
+ * @ghidraAddress PAL: 0x005a3610
  */
 int sceSifGetOtherData(sceSifReceiveData *rd, void *src, void *dest, int size, unsigned int mode);
 
@@ -137,7 +140,8 @@ int sceSifGetOtherData(sceSifReceiveData *rd, void *src, void *dest, int size, u
  * @param mode Call mode bits.
  * @return Zero, -1 when no packet is free, -2 when the request could not be sent, or -3 when no
  *     semaphore could be created.
- * @ghidraAddress 0x005650f8
+ * @ghidraAddress NTSC-U/C: 0x005650f8
+ * @ghidraAddress PAL: 0x005a3868
  */
 int sceSifBindRpc(sceSifClientData *bd, unsigned int command, unsigned int mode);
 
@@ -155,7 +159,8 @@ int sceSifBindRpc(sceSifClientData *bd, unsigned int command, unsigned int mode)
  * @param endpara Argument of the completion callback.
  * @return Zero, -1 when no packet is free, -2 when the request could not be sent, or -3 when no
  *     semaphore could be created.
- * @ghidraAddress 0x005652c8
+ * @ghidraAddress NTSC-U/C: 0x005652c8
+ * @ghidraAddress PAL: 0x005a3a38
  */
 int sceSifCallRpc(sceSifClientData *bd,
                   unsigned int fno,
@@ -172,7 +177,8 @@ int sceSifCallRpc(sceSifClientData *bd,
  *
  * @param cd Request record of the request.
  * @return 1 while the request is in flight, otherwise 0.
- * @ghidraAddress 0x005654b8
+ * @ghidraAddress NTSC-U/C: 0x005654b8
+ * @ghidraAddress PAL: 0x005a3c28
  */
 int sceSifCheckStatRpc(sceSifRpcData *cd);
 
@@ -181,7 +187,8 @@ int sceSifCheckStatRpc(sceSifRpcData *cd);
  *
  * @param qd Queue.
  * @param key Thread to wake for a new request, or negative for none.
- * @ghidraAddress 0x005654f8
+ * @ghidraAddress NTSC-U/C: 0x005654f8
+ * @ghidraAddress PAL: 0x005a3c68
  */
 void sceSifSetRpcQueue(sceSifQueueData *qd, int key);
 
@@ -195,7 +202,8 @@ void sceSifSetRpcQueue(sceSifQueueData *qd, int key);
  * @param cfunc Cancel function.
  * @param cbuff Cancel buffer.
  * @param qd Queue.
- * @ghidraAddress 0x00565590
+ * @ghidraAddress NTSC-U/C: 0x00565590
+ * @ghidraAddress PAL: 0x005a3d00
  */
 void sceSifRegisterRpc(sceSifServeData *sd,
                        unsigned int command,
@@ -212,7 +220,8 @@ void sceSifRegisterRpc(sceSifServeData *sd,
  * @param qd Queue.
  * @return The server before @p sd in the queue, @p sd when it was first, or null when it was not
  *     found.
- * @ghidraAddress 0x00565660
+ * @ghidraAddress NTSC-U/C: 0x00565660
+ * @ghidraAddress PAL: 0x005a3dd0
  */
 sceSifServeData *sceSifRemoveRpc(sceSifServeData *sd, sceSifQueueData *qd);
 
@@ -221,7 +230,8 @@ sceSifServeData *sceSifRemoveRpc(sceSifServeData *sd, sceSifQueueData *qd);
  *
  * @param qd Queue.
  * @return The queue before @p qd, @p qd when it was first, or null when it was not found.
- * @ghidraAddress 0x005656f8
+ * @ghidraAddress NTSC-U/C: 0x005656f8
+ * @ghidraAddress PAL: 0x005a3e68
  */
 sceSifQueueData *sceSifRemoveRpcQueue(sceSifQueueData *qd);
 
@@ -230,7 +240,8 @@ sceSifQueueData *sceSifRemoveRpcQueue(sceSifQueueData *qd);
  *
  * @param qd Queue.
  * @return The server, or null when no request is pending.
- * @ghidraAddress 0x00565788
+ * @ghidraAddress NTSC-U/C: 0x00565788
+ * @ghidraAddress PAL: 0x005a3ef8
  */
 sceSifServeData *sceSifGetNextRequest(sceSifQueueData *qd);
 
@@ -238,7 +249,8 @@ sceSifServeData *sceSifGetNextRequest(sceSifQueueData *qd);
  * Run the request function of a server and send its reply to the IOP.
  *
  * @param sd Server with a pending request.
- * @ghidraAddress 0x005657e0
+ * @ghidraAddress NTSC-U/C: 0x005657e0
+ * @ghidraAddress PAL: 0x005a3f50
  */
 void sceSifExecRequest(sceSifServeData *sd);
 
@@ -246,7 +258,8 @@ void sceSifExecRequest(sceSifServeData *sd);
  * Serve the requests of a queue for ever, sleeping while no request is pending.
  *
  * @param qd Queue.
- * @ghidraAddress 0x005659a8
+ * @ghidraAddress NTSC-U/C: 0x005659a8
+ * @ghidraAddress PAL: 0x005a4118
  */
 void sceSifRpcLoop(sceSifQueueData *qd);
 

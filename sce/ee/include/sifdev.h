@@ -80,7 +80,8 @@ typedef struct {
 /**
  * Stop SIF DMA.
  *
- * @ghidraAddress 0x00536db0
+ * @ghidraAddress NTSC-U/C: 0x00536db0
+ * @ghidraAddress PAL: 0x00576670
  */
 void sceSifStopDma(void);
 
@@ -89,7 +90,8 @@ void sceSifStopDma(void);
  *
  * @param id Transfer identifier from sceSifSetDma().
  * @return Negative once the transfer has finished.
- * @ghidraAddress 0x00536e80
+ * @ghidraAddress NTSC-U/C: 0x00536e80
+ * @ghidraAddress PAL: 0x00576740
  */
 int sceSifDmaStat(unsigned int id);
 
@@ -98,7 +100,8 @@ int sceSifDmaStat(unsigned int id);
  *
  * @param id Transfer identifier from isceSifSetDma().
  * @return Negative once the transfer has finished.
- * @ghidraAddress 0x00536e90
+ * @ghidraAddress NTSC-U/C: 0x00536e90
+ * @ghidraAddress PAL: 0x00576750
  */
 int isceSifDmaStat(unsigned int id);
 
@@ -108,7 +111,8 @@ int isceSifDmaStat(unsigned int id);
  * @param sdd Transfers.
  * @param len Number of transfers.
  * @return A transfer identifier, or zero when the queue is full.
- * @ghidraAddress 0x00536ea0
+ * @ghidraAddress NTSC-U/C: 0x00536ea0
+ * @ghidraAddress PAL: 0x00576760
  */
 unsigned int sceSifSetDma(sceSifDmaData *sdd, int len);
 
@@ -118,21 +122,24 @@ unsigned int sceSifSetDma(sceSifDmaData *sdd, int len);
  * @param sdd Transfers.
  * @param len Number of transfers.
  * @return A transfer identifier, or zero when the queue is full.
- * @ghidraAddress 0x00536eb0
+ * @ghidraAddress NTSC-U/C: 0x00536eb0
+ * @ghidraAddress PAL: 0x00576770
  */
 unsigned int isceSifSetDma(sceSifDmaData *sdd, int len);
 
 /**
  * Start the SIF0 channel in chain mode, ready for the next packet from the IOP.
  *
- * @ghidraAddress 0x00536ec0
+ * @ghidraAddress NTSC-U/C: 0x00536ec0
+ * @ghidraAddress PAL: 0x00576780
  */
 void sceSifSetDChain(void);
 
 /**
  * Start the SIF0 channel in chain mode from an interrupt handler.
  *
- * @ghidraAddress 0x00536ed0
+ * @ghidraAddress NTSC-U/C: 0x00536ed0
+ * @ghidraAddress PAL: 0x00576790
  */
 void isceSifSetDChain(void);
 
@@ -142,7 +149,8 @@ void isceSifSetDChain(void);
  * @param reg Register number such as #SIF_REG_SMFLAG or #SIF_SYSREG_SUBADDR.
  * @param val Value.
  * @return A kernel-defined value.
- * @ghidraAddress 0x00536ee0
+ * @ghidraAddress NTSC-U/C: 0x00536ee0
+ * @ghidraAddress PAL: 0x005767a0
  */
 int sceSifSetReg(unsigned int reg, int val);
 
@@ -151,7 +159,8 @@ int sceSifSetReg(unsigned int reg, int val);
  *
  * @param reg Register number such as #SIF_REG_SMFLAG or #SIF_SYSREG_SUBADDR.
  * @return The register value.
- * @ghidraAddress 0x00536ef0
+ * @ghidraAddress NTSC-U/C: 0x00536ef0
+ * @ghidraAddress PAL: 0x005767b0
  */
 int sceSifGetReg(unsigned int reg);
 
@@ -159,7 +168,8 @@ int sceSifGetReg(unsigned int reg);
  * Bind the IOP heap service, retrying until the server exists.
  *
  * @return Zero, or -1 when the bind request could not be sent.
- * @ghidraAddress 0x005e5f88
+ * @ghidraAddress NTSC-U/C: 0x005e5f88
+ * @ghidraAddress PAL: 0x00628170
  */
 int sceSifInitIopHeap(void);
 
@@ -168,7 +178,8 @@ int sceSifInitIopHeap(void);
  *
  * @param size Size in bytes.
  * @return The IOP address, or null when the service is not bound or the call fails.
- * @ghidraAddress 0x005e6010
+ * @ghidraAddress NTSC-U/C: 0x005e6010
+ * @ghidraAddress PAL: 0x006281f8
  */
 void *sceSifAllocIopHeap(unsigned int size);
 
@@ -179,7 +190,8 @@ void *sceSifAllocIopHeap(unsigned int size);
  * @param size Size in bytes.
  * @param addr Requested address, for modes that take one.
  * @return The IOP address, or null when the service is not bound or the call fails.
- * @ghidraAddress 0x005e6080
+ * @ghidraAddress NTSC-U/C: 0x005e6080
+ * @ghidraAddress PAL: 0x00628268
  */
 void *sceSifAllocSysMemory(int type, unsigned int size, void *addr);
 
@@ -188,7 +200,8 @@ void *sceSifAllocSysMemory(int type, unsigned int size, void *addr);
  *
  * @param addr IOP address from sceSifAllocIopHeap().
  * @return The server's result, zero when the service is not bound, or -1 when the call fails.
- * @ghidraAddress 0x005e6100
+ * @ghidraAddress NTSC-U/C: 0x005e6100
+ * @ghidraAddress PAL: 0x006282e8
  */
 int sceSifFreeIopHeap(void *addr);
 
@@ -198,7 +211,8 @@ int sceSifFreeIopHeap(void *addr);
  *
  * @param addr IOP address.
  * @return As sceSifFreeIopHeap().
- * @ghidraAddress 0x005e6178
+ * @ghidraAddress NTSC-U/C: 0x005e6178
+ * @ghidraAddress PAL: 0x00628360
  */
 int sceSifFreeSysMemory(void *addr);
 
@@ -208,7 +222,8 @@ int sceSifFreeSysMemory(void *addr);
  * @param filename Path, cut to 251 characters.
  * @param addr IOP address to load at.
  * @return The server's result, zero when the service is not bound, or -1 when the call fails.
- * @ghidraAddress 0x005e6198
+ * @ghidraAddress NTSC-U/C: 0x005e6198
+ * @ghidraAddress PAL: 0x00628380
  */
 int sceSifLoadIopHeap(const char *filename, void *addr);
 
@@ -216,7 +231,8 @@ int sceSifLoadIopHeap(const char *filename, void *addr);
  * Forget the module loader binding. The next loader call binds the server again.
  *
  * @return Zero.
- * @ghidraAddress 0x005fb3c8
+ * @ghidraAddress NTSC-U/C: 0x005fb3c8
+ * @ghidraAddress PAL: 0x0063c0d8
  */
 int sceSifLoadFileReset(void);
 
@@ -227,7 +243,8 @@ int sceSifLoadFileReset(void);
  * @param args Size of @p argp in bytes. At most 252 bytes are sent.
  * @param argp Arguments, each terminated by a zero byte, or null.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fbc38
+ * @ghidraAddress NTSC-U/C: 0x005fbc38
+ * @ghidraAddress PAL: 0x0063c948
  */
 int sceSifLoadModule(const char *filename, int args, const char *argp);
 
@@ -239,7 +256,8 @@ int sceSifLoadModule(const char *filename, int args, const char *argp);
  * @param argp Arguments, each terminated by a zero byte, or null.
  * @param result Receives the result of the module entry point.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fbc58
+ * @ghidraAddress NTSC-U/C: 0x005fbc58
+ * @ghidraAddress PAL: 0x0063c968
  */
 int sceSifLoadStartModule(const char *filename, int args, const char *argp, int *result);
 
@@ -250,7 +268,8 @@ int sceSifLoadStartModule(const char *filename, int args, const char *argp, int 
  * @param args Size of @p argp in bytes. At most 252 bytes are sent.
  * @param argp Arguments, each terminated by a zero byte, or null.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fb9d0
+ * @ghidraAddress NTSC-U/C: 0x005fb9d0
+ * @ghidraAddress PAL: 0x0063c6e0
  */
 int sceSifLoadModuleBuffer(const void *addr, int args, const char *argp);
 
@@ -262,7 +281,8 @@ int sceSifLoadModuleBuffer(const void *addr, int args, const char *argp);
  * @param argp Arguments, each terminated by a zero byte, or null.
  * @param result Receives the result of the module entry point.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fb9f0
+ * @ghidraAddress NTSC-U/C: 0x005fb9f0
+ * @ghidraAddress PAL: 0x0063c700
  */
 int sceSifLoadStartModuleBuffer(const void *addr, int args, const char *argp, int *result);
 
@@ -274,7 +294,8 @@ int sceSifLoadStartModuleBuffer(const void *addr, int args, const char *argp, in
  * @param argp Arguments, each terminated by a zero byte, or null.
  * @param result Receives the result of the module stop routine.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fb608
+ * @ghidraAddress NTSC-U/C: 0x005fb608
+ * @ghidraAddress PAL: 0x0063c318
  */
 int sceSifStopModule(int modid, int args, const char *argp, int *result);
 
@@ -283,7 +304,8 @@ int sceSifStopModule(int modid, int args, const char *argp, int *result);
  *
  * @param modid Module identifier.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fb810
+ * @ghidraAddress NTSC-U/C: 0x005fb810
+ * @ghidraAddress PAL: 0x0063c520
  */
 int sceSifUnloadModule(int modid);
 
@@ -292,7 +314,8 @@ int sceSifUnloadModule(int modid);
  *
  * @param modulename Module name, cut to 251 characters.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fb8a0
+ * @ghidraAddress NTSC-U/C: 0x005fb8a0
+ * @ghidraAddress PAL: 0x0063c5b0
  */
 int sceSifSearchModuleByName(const char *modulename);
 
@@ -301,7 +324,8 @@ int sceSifSearchModuleByName(const char *modulename);
  *
  * @param addr IOP address.
  * @return The module identifier, or a negative value on failure.
- * @ghidraAddress 0x005fb940
+ * @ghidraAddress NTSC-U/C: 0x005fb940
+ * @ghidraAddress PAL: 0x0063c650
  */
 int sceSifSearchModuleByAddress(const void *addr);
 
@@ -312,7 +336,8 @@ int sceSifSearchModuleByAddress(const void *addr);
  * @param secname Section name, cut to 251 characters, or `all`.
  * @param data Receives the entry point and global pointer.
  * @return Zero, or a negative value on failure.
- * @ghidraAddress 0x005fbd80
+ * @ghidraAddress NTSC-U/C: 0x005fbd80
+ * @ghidraAddress PAL: 0x0063ca90
  */
 int sceSifLoadElfPart(const char *name, const char *secname, sceExecData *data);
 
@@ -322,7 +347,8 @@ int sceSifLoadElfPart(const char *name, const char *secname, sceExecData *data);
  * @param name Executable path, cut to 251 characters.
  * @param data Receives the entry point and global pointer.
  * @return Zero, or a negative value on failure.
- * @ghidraAddress 0x005fbda0
+ * @ghidraAddress NTSC-U/C: 0x005fbda0
+ * @ghidraAddress PAL: 0x0063cab0
  */
 int sceSifLoadElf(const char *name, sceExecData *data);
 
@@ -334,7 +360,8 @@ int sceSifLoadElf(const char *name, sceExecData *data);
  * @param value Receives the value.
  * @param type Width, one of #SIF_IOP_VALUE_BYTE, #SIF_IOP_VALUE_HALF, and #SIF_IOP_VALUE_WORD.
  * @return Zero, or a negative value on failure.
- * @ghidraAddress 0x005fbdc8
+ * @ghidraAddress NTSC-U/C: 0x005fbdc8
+ * @ghidraAddress PAL: 0x0063cad8
  */
 int sceSifGetIopValue(unsigned int addr, void *value, int type);
 
@@ -345,7 +372,8 @@ int sceSifGetIopValue(unsigned int addr, void *value, int type);
  * @param value Value to write.
  * @param type Width, one of #SIF_IOP_VALUE_BYTE, #SIF_IOP_VALUE_HALF, and #SIF_IOP_VALUE_WORD.
  * @return Zero, or a negative value on failure.
- * @ghidraAddress 0x005fbeb8
+ * @ghidraAddress NTSC-U/C: 0x005fbeb8
+ * @ghidraAddress PAL: 0x0063cbc8
  */
 int sceSifSetIopValue(unsigned int addr, const void *value, int type);
 
@@ -355,7 +383,8 @@ int sceSifSetIopValue(unsigned int addr, const void *value, int type);
  * @param arg Argument string of up to 80 characters, such as `rom0:UDNL <image>`.
  * @param mode Reset mode the IOP receives.
  * @return Nonzero once the command is queued, zero when the DMA queue is full.
- * @ghidraAddress 0x005bc6e8
+ * @ghidraAddress NTSC-U/C: 0x005bc6e8
+ * @ghidraAddress PAL: 0x005fedc8
  */
 int sceSifResetIop(const char *arg, int mode);
 
@@ -363,7 +392,8 @@ int sceSifResetIop(const char *arg, int mode);
  * Report whether SIF on the IOP has initialised.
  *
  * @return Nonzero once it has.
- * @ghidraAddress 0x005bc828
+ * @ghidraAddress NTSC-U/C: 0x005bc828
+ * @ghidraAddress PAL: 0x005fef08
  */
 int sceSifIsAliveIop(void);
 
@@ -372,7 +402,8 @@ int sceSifIsAliveIop(void);
  * console write opens it again.
  *
  * @return Nonzero once it has.
- * @ghidraAddress 0x005bc850
+ * @ghidraAddress NTSC-U/C: 0x005bc850
+ * @ghidraAddress PAL: 0x005fef30
  */
 int sceSifSyncIop(void);
 
@@ -383,7 +414,8 @@ int sceSifSyncIop(void);
  *     bytes.
  * @return Nonzero once the reboot request is sent, zero when the path is too long or the DMA
  *     queue is full.
- * @ghidraAddress 0x005bc888
+ * @ghidraAddress NTSC-U/C: 0x005bc888
+ * @ghidraAddress PAL: 0x005fef68
  */
 int sceSifRebootIop(const char *imgname);
 
