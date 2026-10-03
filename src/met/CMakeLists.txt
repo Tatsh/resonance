@@ -14,6 +14,7 @@ set(RESONANCE_MET_SRCS
     metconfiggameoptionsscreen.cpp
     metconfigoptionsbuttonsscreen.cpp
     metcreditsscreen.cpp
+    metdemostagesel.cpp
     metendgamegizmoscreen.cpp
     metexpansionpakscreen.cpp
     metfade.cpp

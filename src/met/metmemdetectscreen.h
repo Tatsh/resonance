@@ -6,15 +6,15 @@
 /**
  * Base of the screens that probe for a memory card before using one.
  *
- * `19MetMemDetectScreen` in the RTTI descriptor at `0x008eff50`, with two public non-virtual bases
- * at fixed offsets, MetScreen at `+0x00` and MemcardUser at `+140`. The object is 0xa0 bytes, and
- * two children fix that independently, MetMemDetectStartup by placing FadeUser at `+160` and
+ * Its RTTI descriptor is at `0x008eff50`. It has two public non-virtual bases at fixed offsets:
+ * MetScreen at `+0x00` and MemcardUser at `+140`. The object is 0xa0 bytes, and two children fix
+ * the size independently: MetMemDetectStartup by placing FadeUser at `+160` and
  * MetMemCardLoadScreen by placing MetMemCardPickerUser at `+160`.
  *
- * Three classes derive from the class, MetLocPickCharScreen, MetMemCardLoadScreen, and
+ * Three classes derive from the class: MetLocPickCharScreen, MetMemCardLoadScreen, and
  * MetMemDetectStartup.
  *
- * Two vtables belong to the class, the 44-entry primary at `0x007fccb8` and the 21-entry
+ * Two vtables belong to the class: the 44-entry primary at `0x007fccb8` and the 21-entry
  * MemcardUser table at `0x007fcc08` that adjusts `this` by `-140` in every entry. The primary is
  * five entries longer than the MetScreen table. The five new virtuals at slots 39 through 43 are
  * declared below in slot order.
@@ -108,12 +108,23 @@ public:
      *
      * MemcardUser slot 4.
      *
+     * The European release ignores nSpace. With nSkipWarning clear it raises `warn_game_no_space`
+     * when the card has fewer than 128 free clusters and nCampaign is 0, or fewer than 50 and
+     * nCampaign is 1, with that figure in the text. Otherwise it shows the autosave notice.
+     *
      * @param nPortSlot The card the check ran on. The body does not read it.
-     * @param nSpace The free clusters a save needs.
+     * @param nSpace The free clusters a save needs. The European release does not read it.
+     * @param nSkipWarning Non-zero to show the autosave notice without testing the card. European
+     *                     release only.
+     * @param nCampaign 1 to test against the campaign figure of 50. European release only.
      * @ghidraAddress NTSC-U/C: 0x002da868
      * @ghidraAddress PAL: 0x002fcd88
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnMinimumSaveSpace(int nPortSlot, int nSpace, int nSkipWarning, int nCampaign);
+#else
     virtual void OnMinimumSaveSpace(int nPortSlot, int nSpace);
+#endif
 
     /**
      * Report the result of formatting the card in port 1.

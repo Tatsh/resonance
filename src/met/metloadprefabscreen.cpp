@@ -195,7 +195,11 @@ void MetLoadPreFabScreen::OnCreateButton() {
                            this);
     } else {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadPreFabScreen);
+#ifdef VIDEO_STANDARD_PAL
+        OpenFreqMakerForCreate();
+#else
         MetLoadFreqBaseScreen::OnCreateButton();
+#endif
     }
 }
 

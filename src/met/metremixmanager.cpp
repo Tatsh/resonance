@@ -59,7 +59,7 @@ constexpr int kAfterLoadExit = 1;
 constexpr int kSeekFromStart = 0;
 
 // The configuration code the dialogue texts are read under, and the code of the playlist number
-// the save and load tasks carry.
+// the save and load tasks include.
 constexpr int kDialogueConfigCode = 600;
 constexpr int kPlayListIndexCode = 0x514;
 
@@ -336,7 +336,7 @@ inline void MetRemixManager::NextTrack() {
 void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
                                   std::vector<MemcardConnectState> slots,
                                   int bLoadPlayList) {
-    CacheSharedInstance(); // Yes, the binary resolves its own instance first and ignores it.
+    CacheSharedInstance(); // Yes, the binary resolves this instance first and ignores it.
     ReplaceScreens(mReturnScreens, returnScreens);
     const std::vector<HxStr> buttons;
 
@@ -600,7 +600,13 @@ void MetRemixManager::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatu
 }
 
 // NTSC-U/C: 0x003573e8, PAL: 0x003841e0
+#ifdef VIDEO_STANDARD_PAL
+void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot,
+                                             int nStatus,
+                                             int nKilobytes) {
+#else
 void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int nStatus) {
+#endif
     std::vector<HxStr> buttons;
     HxStr format;
     HxStr text;
@@ -646,7 +652,11 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         format = MetConfigText(kMetStrSaveFailNospace, kDialogueConfigCode, kSaveFailNoSpaceText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
+#ifdef VIDEO_STANDARD_PAL
+        text = FormatString(PathOrEmpty(format), FirstCardSlotText(), nKilobytes);
+#else
         text = FormatString(PathOrEmpty(format), FirstCardSlotText());
+#endif
         MetMsgScreen::Show(HxStr(kPlayListSaveRetryDialogue),
                            MetText(kMetStrMsgERROR, kErrorTitle),
                            text,

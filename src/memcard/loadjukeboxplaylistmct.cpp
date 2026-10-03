@@ -41,12 +41,16 @@ void LoadJukeboxPlayListMCT::Finish() {
     mUser->OnJukeboxPlayListLoaded(mPortSlot, mStatus);
 }
 
-// 0x001798e0
+// NTSC-U/C: 0x001798e0, PAL: 0x0017d860
 void LoadJukeboxPlayListMCT::Execute() {
     MemcardTask::mState = kMemcardTaskRunning;
     char szIndex[kIndexTextSize];
     sprintf(szIndex, "%d", mIndex);
+#ifdef VIDEO_STANDARD_PAL
+    mPath = g_saveDirBase + g_jukeboxDirSuffix + "/" + g_jukeboxFileName + szIndex + ".dat";
+#else
     mPath = g_saveDirBase + g_jukeboxDirSuffix + g_jukeboxFileName + szIndex + ".dat";
+#endif
     mBuffer = mStream.mBuffer;
     mLength = mStream.Capacity();
     SetState(kLoadFileStateOpen);

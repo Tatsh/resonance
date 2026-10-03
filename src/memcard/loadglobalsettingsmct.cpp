@@ -27,10 +27,14 @@ void LoadGlobalSettingsMCT::Finish() {
     mUser->OnGlobalSettingsLoaded(mPortSlot, mStatus);
 }
 
-// 0x00179600
+// NTSC-U/C: 0x00179600, PAL: 0x0017d418
 void LoadGlobalSettingsMCT::Execute() {
     MemcardTask::mState = kMemcardTaskRunning;
+#ifdef VIDEO_STANDARD_PAL
+    mPath = g_saveDirBase + g_globalSettingsDirSuffix + "/" + g_globalSettingsFileName;
+#else
     mPath = g_saveDirBase + g_globalSettingsDirSuffix + g_globalSettingsFileName;
+#endif
     mBuffer = mStream.mBuffer;
     mLength = mStream.Capacity();
     SetState(kLoadFileStateOpen);

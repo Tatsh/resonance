@@ -80,7 +80,7 @@ constexpr int kChoiceSecond = 1;
 // The packed port and slot of port 1, the card GlobalSettings::mCardSlots records.
 constexpr int kFirstCardPortSlot = 0;
 
-// The most remixes one card holds, which the `mem_remix_2many` text also receives.
+// The most remixes one card stores. The `mem_remix_2many` text also receives the count.
 constexpr int kMaxRemixes = 50;
 
 inline const char *TextOrEmpty(const HxStr &text) {
@@ -260,7 +260,11 @@ void MetSaveRemix::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) 
 }
 
 // NTSC-U/C: 0x00374b58, PAL: 0x003a4158
+#ifdef VIDEO_STANDARD_PAL
+void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus, int nKilobytes) {
+#else
 void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
+#endif
     switch (nStatus) {
     case kMemcardStatusOk:
 #ifdef VIDEO_STANDARD_PAL
@@ -297,7 +301,12 @@ void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
             buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
             buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
             const HxStr format(ConfigText(kMetStrSaveFailNospace, kSaveNoSpaceText));
+#ifdef VIDEO_STANDARD_PAL
+            const HxStr text(
+                FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName), nKilobytes));
+#else
             const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+#endif
             MetMsgScreen::ShowActive(HxStr(kSaveNoSpaceDialogue),
                                      MetText(kMetStrMsgERROR, kErrorTitle),
                                      text,
@@ -312,7 +321,7 @@ void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
     default: {
         std::vector<HxStr> buttons;
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
-        // Yes, the binary names this dialogue `save_fail_no_space` although its text is the
+        // Yes, the binary identifies this dialogue as `save_fail_no_space` although its text is the
         // general failure.
         MetMsgScreen::ShowActive(HxStr(kSaveNoSpaceDialogue),
                                  MetText(kMetStrMsgERROR, kErrorTitle),

@@ -19,7 +19,7 @@ namespace {
 // The screen name, directory, and container name New() passes.
 static const char *const kNoName = "";
 
-// Message screen names, which OnMsgScreenDismissed() matches. Most double as the text key.
+// Message screen names that OnMsgScreenDismissed() matches. Most double as the text key.
 static const char *const kDetectMessage = "mem_load";
 static const char *const kNoCardMessage = "mem_check";
 static const char *const kNoCardOkMessage = "mem_check12";
@@ -88,6 +88,26 @@ inline const char *TextOrEmpty(const HxStr &text) {
 inline const char *RecordedCardName() {
     return TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName);
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// The nCampaign values OnMinimumSaveSpace() tests, and the free clusters each requires.
+constexpr int kFullSaveCheck = 0;
+constexpr int kCampaignSaveCheck = 1;
+constexpr int kFullSaveClusters = 128;
+constexpr int kCampaignSaveClusters = 50;
+
+// The no-space warning the European OnMinimumSaveSpace() expands for both requirements.
+inline void ShowNoSpaceWarning(MetScreen *pOwner, MetStringId nFormatId, int nClusters) {
+    std::vector<HxStr> buttons;
+    buttons.push_back(GetMetString(kMetStrMsgRETRY));
+    buttons.push_back(GetMetString(kMetStrMsgCONTINUE));
+    const HxStr format(GetMetString(nFormatId));
+    const HxStr cardName(FirstCardSlotName());
+    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName), nClusters));
+    MetMsgScreen::ShowActive(
+        HxStr(kNoSpaceMessage), GetMetString(kMetStrMsgERROR), text, kTwoButtons, buttons, pOwner);
+}
+#endif
 
 } // namespace
 
@@ -313,7 +333,29 @@ void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
+#ifdef VIDEO_STANDARD_PAL
 // NTSC-U/C: 0x002da868, PAL: 0x002fcd88
+void MetMemDetectScreen::OnMinimumSaveSpace(int, int, int nSkipWarning, int nCampaign) {
+    GlobalSettings::shared(); // Yes, the binary discards this call's result.
+    std::vector<HxStr> buttons;
+    if (nSkipWarning == 0 && nCampaign == kFullSaveCheck &&
+        GlobalSettings::shared()->mCardSlots[0].mFree < kFullSaveClusters) {
+        ShowNoSpaceWarning(this, kMetStrMemNospace, kFullSaveClusters);
+    } else if (nSkipWarning == 0 && nCampaign == kCampaignSaveCheck &&
+               GlobalSettings::shared()->mCardSlots[0].mFree < kCampaignSaveClusters) {
+        ShowNoSpaceWarning(this, kMetStrMemNospaceForCampaign, kCampaignSaveClusters);
+    } else {
+        MetMsgScreen::ShowActive(HxStr(kAutosaveMessage),
+                                 GetMetString(kMetStrMsgWARNING),
+                                 GetMetString(kMetStrMemAutosave),
+                                 kNoButtons,
+                                 buttons,
+                                 this);
+        mAutosaveNoticeTime = mRenderer->mAnimationFrame;
+    }
+}
+#else
+// NTSC-U/C: 0x002da868
 void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     std::vector<HxStr> buttons;
@@ -357,6 +399,7 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
         mAutosaveNoticeTime = mRenderer->mAnimationFrame;
     }
 }
+#endif
 
 // NTSC-U/C: 0x002db328, PAL: 0x002fda28
 void MetMemDetectScreen::StartLoadPersonas() {

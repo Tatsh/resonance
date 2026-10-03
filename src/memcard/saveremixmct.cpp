@@ -29,6 +29,12 @@ static const char *const kPathSeparator = "/";
 // The index file inside each remix save directory.
 static const char *const kIndexFileName = "/index";
 
+#ifdef VIDEO_STANDARD_PAL
+// The index file name SaveFileMCT::mFiles receives. SaveFileMCT joins it to the directory with a
+// `/`.
+static const char *const kIndexSaveName = "index";
+#endif
+
 // dateTime when the clock cannot be read.
 static const char *const kDefaultDateTime = "FIXME: default date";
 
@@ -46,11 +52,13 @@ constexpr int kFreshIndexVersion = 1;
 // IOBPreallocMemStream::Seek() origin that measures from the start of the buffer.
 constexpr int kSeekFromStart = 0;
 
+#ifndef VIDEO_STANDARD_PAL
 // The payload is saved alone, and the rewritten index with its icon files.
 constexpr int kSkipIconFiles = 1;
 constexpr int kWriteIconFiles = 0;
+#endif
 
-// Where ReadTargetIndex() stamps the remix name into the payload, and the bytes it copies.
+// Where ReadTargetIndex() writes the remix name into the payload, and the bytes it copies.
 constexpr int kPayloadRemixNameOffset = 37;
 constexpr int kPayloadRemixNameSize = 32;
 
@@ -84,7 +92,7 @@ inline void FillElement(RemixIndexElement &element,
 
 } // namespace
 
-// 0x00179ec0
+// NTSC-U/C: 0x00179ec0, PAL: 0x0017e068
 SaveRemixMCT::SaveRemixMCT(MemcardUser *pUser,
                            Memcard *pCard,
                            int nPortSlot,
@@ -93,15 +101,24 @@ SaveRemixMCT::SaveRemixMCT(MemcardUser *pUser,
                            const std::vector<FreqAppearance> &appearances,
                            const HxStr &levelName,
                            int nAlbumNum)
-    : MemcardTask(pUser, pCard, nPortSlot, nCookie), mAlbumNum(nAlbumNum), mReplacing(0),
-      mRemixName(remixName), mAppearances(appearances), mLevelName(levelName),
-      mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize), mLoadTask(nullptr),
-      mSaveTask(nullptr) {
+#ifdef VIDEO_STANDARD_PAL
+    : SaveFileMCT(pUser, pCard, nPortSlot, nCookie),
+#else
+    : MemcardTask(pUser, pCard, nPortSlot, nCookie),
+#endif
+      mAlbumNum(nAlbumNum), mReplacing(0), mRemixName(remixName), mAppearances(appearances),
+      mLevelName(levelName), mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize),
+      mLoadTask(nullptr) {
+#ifndef VIDEO_STANDARD_PAL
+    mSaveTask = nullptr;
+#endif
 }
 
-// 0x001850a8
+// NTSC-U/C: 0x001850a8, PAL: 0x0018a898
 SaveRemixMCT::~SaveRemixMCT() {
+#ifndef VIDEO_STANDARD_PAL
     delete mSaveTask;
+#endif
     delete mLoadTask;
 }
 
@@ -132,7 +149,8 @@ void SaveRemixMCT::ListRemixDir() {
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
-// 0x00186a40
+#ifndef VIDEO_STANDARD_PAL
+// NTSC-U/C: 0x00186a40
 void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -147,6 +165,7 @@ void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
         Finish();
     }
 }
+#endif
 
 // 0x0017a430
 void SaveRemixMCT::OnListDir(ListDirOp *pOp) {
@@ -194,7 +213,7 @@ void SaveRemixMCT::ReadTargetIndex() {
     mLoadTask->Load(mTargetDir + kIndexFileName, mStream.mBuffer, mStream.Capacity());
 }
 
-// 0x0017ad70
+// NTSC-U/C: 0x0017ad70, PAL: 0x0017f260
 void SaveRemixMCT::OnFileLoaded(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk && mStep != kStepReadTargetIndex) {
@@ -209,7 +228,11 @@ void SaveRemixMCT::OnFileLoaded(int nStatus) {
         }
         mTargetIndexStatus = nStatus;
         mStep = kSaveRemixStepPayloadWritten;
+#ifdef VIDEO_STANDARD_PAL
+        WriteIndex();
+#else
         WritePayload();
+#endif
         return;
     }
 
@@ -239,7 +262,8 @@ void SaveRemixMCT::OnFileLoaded(int nStatus) {
     ReadTargetIndex();
 }
 
-// 0x0017ba98
+#ifndef VIDEO_STANDARD_PAL
+// NTSC-U/C: 0x0017ba98
 void SaveRemixMCT::WritePayload() {
     const HxStr dirNumber(TextOf(mTargetDir) + kRemixDirNumberOffset);
     const HxStr fileName = HxStr(kPathSeparator) + mPayloadFileName;
@@ -252,9 +276,23 @@ void SaveRemixMCT::WritePayload() {
     const int nLength = Application::shared()->GetLog()->Size();
     mSaveTask->Save(mTargetDir, fileText, title, pData, nLength, kSkipIconFiles);
 }
+#endif
 
-// 0x0017b318
+// NTSC-U/C: 0x0017b318, PAL: 0x0017f868
 void SaveRemixMCT::WriteIndex() {
+#ifdef VIDEO_STANDARD_PAL
+    mState = kMemcardTaskRunning;
+    const HxStr dirNumber(TextOf(mTargetDir) + kRemixDirNumberOffset);
+    mDirName = mTargetDir;
+    mIconTitle = g_remixIconTitle + dirNumber;
+    // Yes, the binary rebuilds the file name from its text rather than copying the string.
+    const HxStr fileText(TextOf(mPayloadFileName));
+    char *pData = Application::shared()->GetLog()->Buffer();
+    const int nLength = Application::shared()->GetLog()->Size();
+    const SaveFileEntry payload = {fileText, pData, nLength};
+    mFiles.push_back(payload);
+#endif
+
     RemixIndex index;
     mStream.Seek(0, kSeekFromStart);
     if (mTargetIndexStatus == kMemcardStatusOk) {
@@ -281,6 +319,11 @@ void SaveRemixMCT::WriteIndex() {
     mStream.Reset();
     index.WriteToStream(mStream);
     mStep = kSaveRemixStepWriteIndex;
+#ifdef VIDEO_STANDARD_PAL
+    const SaveFileEntry indexFile = {HxStr(kIndexSaveName), mStream.mBuffer, mStream.Size()};
+    mFiles.push_back(indexFile);
+    SaveFileMCT::Execute();
+#else
     const HxStr dirNumber(TextOf(mTargetDir) + kRemixDirNumberOffset);
     delete mSaveTask;
     mSaveTask = new SaveFileMCT(this, mCard, mPortSlot, mCookie);
@@ -290,9 +333,11 @@ void SaveRemixMCT::WriteIndex() {
                     mStream.mBuffer,
                     mStream.Size(),
                     kWriteIconFiles);
+#endif
 }
 
-// 0x00186ad8
+#ifndef VIDEO_STANDARD_PAL
+// NTSC-U/C: 0x00186ad8
 void SaveRemixMCT::OnFileSaved(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk) {
@@ -307,16 +352,25 @@ void SaveRemixMCT::OnFileSaved(int nStatus) {
     }
     Finish();
 }
+#endif
 
-// 0x00186b60
+// NTSC-U/C: 0x00186b60, PAL: 0x0018c338
 void SaveRemixMCT::Finish() {
     mState = kMemcardTaskFinished;
+#ifdef VIDEO_STANDARD_PAL
+    mUser->OnRemixSaved(mPortSlot, mStatus, mKilobytes);
+#else
     mUser->OnRemixSaved(mPortSlot, mStatus);
+#endif
 }
 
-// 0x00186a08
+// NTSC-U/C: 0x00186a08, PAL: 0x0018c310
 void SaveRemixMCT::Execute() {
     mState = kMemcardTaskRunning;
     mStep = 0;
+#ifdef VIDEO_STANDARD_PAL
+    ListRemixDir();
+#else
     mCard->CheckInfo(this, mPortSlot, mCookie);
+#endif
 }

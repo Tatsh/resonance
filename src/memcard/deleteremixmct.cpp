@@ -24,6 +24,12 @@ static const char *const kPathSeparator = "/";
 // The index file inside each remix save directory.
 static const char *const kIndexFileName = "/index";
 
+#ifdef VIDEO_STANDARD_PAL
+// The index file name SaveFileMCT::Save() receives. SaveFileMCT joins it to the directory with a
+// `/`.
+static const char *const kIndexSaveName = "index";
+#endif
+
 // Values of mStep.
 enum DeleteStep {
     kStepReadIndex = 1,
@@ -49,7 +55,7 @@ DeleteRemixMCT::DeleteRemixMCT(
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mRemixName(remixName), mLoadTask(nullptr),
       mSaveTask(nullptr), mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
     // The load at 0x0017cee4 reads the member rather than dispatching through
-    // IOBPreallocMemStream::Buffer(), which no call site in the image reaches.
+    // IOBPreallocMemStream::Buffer(). The image never calls Buffer().
     mBuffer = mStream.mBuffer;
 }
 
@@ -144,7 +150,7 @@ void DeleteRemixMCT::OnFileLoaded(int nStatus) {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mBuffer, mStream.Capacity());
 }
 
-// 0x0017dc68
+// NTSC-U/C: 0x0017dc68, PAL: 0x00182568
 void DeleteRemixMCT::DeleteNextFile() {
     int nStep = mStep;
     if (mStatus != kMemcardStatusOk) {
@@ -172,13 +178,17 @@ void DeleteRemixMCT::DeleteNextFile() {
         index.elements.erase(index.elements.begin() + i);
         mStream.Reset();
         index.WriteToStream(mStream);
-        // The directory number, which follows the save prefix in the directory name.
+        // The directory number follows the save prefix in the directory name.
         const HxStr dirNumber((mCurrentDir.mStr != nullptr ? mCurrentDir.mStr : g_szEmptyString) +
                               kRemixDirNumberOffset);
         delete mSaveTask;
         mSaveTask = new SaveFileMCT(this, mCard, mPortSlot, mCookie);
         mSaveTask->Save(mCurrentDir,
+#ifdef VIDEO_STANDARD_PAL
+                        HxStr(kIndexSaveName),
+#else
                         HxStr(kIndexFileName),
+#endif
                         g_remixIconTitle + dirNumber,
                         mStream.mBuffer,
                         mStream.Size(),

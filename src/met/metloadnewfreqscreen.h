@@ -23,13 +23,13 @@
  *
  * Twelve slots differ from the MetLoadFreqBaseScreen table, and a diff of the two tables reads
  * slots 1, 5, 9, 11, 15, 39, 40, 41, 43, 44, and 45 apart from the type function. This is the only
- * class in the subsystem that fills slot 11, which every other class inherits as a
+ * class in the subsystem that fills slot 11. Every other class inherits slot 11 as a
  * two-instruction stub.
  *
  * The screen labels all three buttons from configuration code 0x258, under the keys `nf_enter`,
  * `nf_edit`, and `nf_create`, and none of the three shows the selected username. The first button
- * opens the keyboard rather than committing a selection, which is the whole difference from
- * MetLoadFreqScreen.
+ * opens the keyboard rather than committing a selection. The keyboard button is the whole
+ * difference from MetLoadFreqScreen.
  */
 class MetLoadNewFreqScreen : public MetLoadFreqBaseScreen, public MetKBUser {
 public:
@@ -96,12 +96,14 @@ public:
     /**
      * Restore this screen after a message screen is dismissed.
      *
-     * Slot 15. Only `namenogood`, the rejected-name dialogue, is answered: the help screen and this
-     * screen are pushed again and this screen is activated.
+     * Slot 15. Only `namenogood`, the rejected-name dialogue, is handled. The help screen and this
+     * screen are pushed again and this screen is activated. The European release passes any other
+     * dialogue to MetLoadFreqBaseScreen.
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The response.
-     * @ghidraAddress 0x002a4910
+     * @ghidraAddress NTSC-U/C: 0x002a4910
+     * @ghidraAddress PAL: 0x002c2bc8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -145,9 +147,11 @@ public:
      * Create a new identity in the FreQ maker.
      *
      * Slot 43. `MetLoadNewFreqScreen` is recorded in MetFrontEndState::mReturnScreen, and then
-     * MetLoadFreqBaseScreen::OnCreateButton() runs.
+     * MetLoadFreqBaseScreen::OnCreateButton() runs. The European release is slot 49, and it runs
+     * MetLoadFreqBaseScreen::OpenFreqMakerForCreate() through the vtable instead.
      *
-     * @ghidraAddress 0x002a8670
+     * @ghidraAddress NTSC-U/C: 0x002a8670
+     * @ghidraAddress PAL: 0x002c6aa0
      */
     virtual void OnCreateButton();
 
@@ -164,8 +168,8 @@ public:
      * Rebuild the button ring with a label on each of the three buttons.
      *
      * Slot 45. All three labels come from configuration code 0x258, under the keys `nf_enter`,
-     * `nf_edit`, and `nf_create`. UpdateNameLabel() then runs before the prompt list is rebuilt,
-     * which overwrites the first label with the same `nf_enter` string. That is what the binary
+     * `nf_edit`, and `nf_create`. UpdateNameLabel() then runs before the prompt list is rebuilt
+     * and overwrites the first label with the same `nf_enter` string. That is what the binary
      * does. The three prompts are the same three the base appends.
      *
      * @ghidraAddress NTSC-U/C: 0x002a3b08
@@ -179,7 +183,7 @@ public:
      * MetKBUser slot 2, in the secondary table at `0x007f8388` with a `-164` adjustment. The
      * committed text replaces the selected identity's username, and an empty commit retains the
      * username the identity already had by assigning it over the empty text first. mNameEntered is
-     * set to 1 before either assignment, which is what OnKeyboardDismissed() reads.
+     * set to 1 before either assignment for OnKeyboardDismissed() to read.
      *
      * A current date from FormatCurrentDateTime() replaces the identity's birthday at `+0x154`.
      * The game manager's personas are then replaced by a copy of the identity, and the first of

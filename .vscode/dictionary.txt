@@ -84,6 +84,7 @@ bdec
 begingamelocalmsg
 beginphrasecatchmsg
 beis
+besces
 bgtrackgraph
 bgtz
 biggem
@@ -653,6 +654,7 @@ metconfiggameoptionsscreen
 metconfigoptionsbuttonsscreen
 metcontrollerreading
 metcreditsscreen
+metdemostagesel
 metendgamegizmoscreen
 metexpansionpakscreen
 metfade
@@ -1068,6 +1070,7 @@ saveicon
 savejukeboxplaylistmct
 savepersonasmct
 saveremixmct
+savespacecheckermct
 sbclaude
 sbss
 scallclientsstatuspacket
@@ -1205,6 +1208,7 @@ tagfile
 tatsh
 tdemo
 teamfreq
+teardowns
 tempomap
 testa
 testaaddr

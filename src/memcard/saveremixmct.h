@@ -13,8 +13,10 @@
 
 class ListDirOp;
 
-/** Free clusters a remix save needs, which the card enquiry reports through CheckInfoOp::mFree. */
+#ifndef VIDEO_STANDARD_PAL
+/** Free clusters a remix save needs, as the card enquiry reports them in CheckInfoOp::mFree. */
 constexpr int kRemixSaveMinimumFreeClusters = 60;
+#endif
 
 /**
  * Write one remix to a card and add it to the index of the directory it lands in.
@@ -23,7 +25,7 @@ constexpr int kRemixSaveMinimumFreeClusters = 60;
  * offset 0 and `MemcardUser` at offset 28. Two vtables belong to the class, the 19-entry primary at
  * `0x007da938` and the 21-entry `MemcardUser` table at `0x007da888`, whose first two entries and
  * whose slots 19 and 20 adjust `this` back by 28. An instance is 0xa4 bytes, from the constructor's
- * highest store at `+0xa0`. Nothing derives from the class. The size 0xa4 is therefore a lower
+ * highest store at `+0xa0`. No class derives from it. The size 0xa4 is therefore a lower
  * bound rather than a settled size.
  *
  * The task enquires about the card, rejects a card with fewer than kRemixSaveMinimumFreeClusters
@@ -32,12 +34,25 @@ constexpr int kRemixSaveMinimumFreeClusters = 60;
  * the same name becomes the target and the save replaces that entry. Otherwise ChooseTargetDir()
  * picks the first directory with room, or a fresh one. The task then reads the target's index
  * (step 2), writes the payload from the shared log stream (step 3), and finally rewrites the
- * target's index (step 4). It owns a LoadFileMCT and a SaveFileMCT, and receives both reports as a
- * `MemcardUser`, which is why it derives from both interfaces.
+ * target's index (step 4). It has a LoadFileMCT and a SaveFileMCT, and receives both reports as a
+ * `MemcardUser`. It therefore derives from both interfaces.
+ *
+ * The European release derives the class from `SaveFileMCT` at offset 0 instead of `MemcardTask`,
+ * with `MemcardUser` at offset 0x41c. The primary vtable is at `0x0081e7a8`, the `MemcardUser`
+ * table at `0x0081e6f8`, and an instance is 0x4a0 bytes, from
+ * MemcardManager::CreateSaveRemixTask()'s allocation. Execute() lists the remix directories at
+ * once, without the card enquiry and its free-cluster test. Once the target's index is read,
+ * WriteIndex() hands the payload and the rewritten index to the inherited save sequence together.
+ * That sequence checks the space both files need. The task has an inner LoadFileMCT and no inner
+ * SaveFileMCT.
  *
  * The method titles are inferred. No string in the image identifies any of them.
  */
+#ifdef VIDEO_STANDARD_PAL
+class SaveRemixMCT : public SaveFileMCT, public MemcardUser {
+#else
 class SaveRemixMCT : public MemcardTask, public MemcardUser {
+#endif
 public:
     /**
      * Construct an idle remix save.
@@ -53,7 +68,8 @@ public:
      * @param appearances The players' appearances, copied into mAppearances.
      * @param levelName The level the remix was built over, copied into mLevelName.
      * @param nAlbumNum The album number the index entry records.
-     * @ghidraAddress 0x00179ec0
+     * @ghidraAddress NTSC-U/C: 0x00179ec0
+     * @ghidraAddress PAL: 0x0017e068
      */
     SaveRemixMCT(MemcardUser *pUser,
                  Memcard *pCard,
@@ -67,7 +83,10 @@ public:
     /**
      * Delete the inner save and the inner read.
      *
-     * @ghidraAddress 0x001850a8
+     * The European release has no inner save.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001850a8
+     * @ghidraAddress PAL: 0x0018a898
      */
     virtual ~SaveRemixMCT();
 
@@ -89,20 +108,28 @@ public:
      * is refreshed in place. Otherwise a new entry is appended. mStream then receives the
      * rewritten index, and a fresh SaveFileMCT saves it with its icon files as `<dir>/index`.
      *
-     * @ghidraAddress 0x0017b318
+     * The European release first sets mState to kMemcardTaskRunning and adds the payload from the
+     * shared log stream to SaveFileMCT::mFiles. It then adds the rewritten index as `index` and
+     * runs SaveFileMCT::Execute() with mTargetDir as the directory.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0017b318
+     * @ghidraAddress PAL: 0x0017f868
      */
     void WriteIndex();
 
+#ifndef VIDEO_STANDARD_PAL
     /**
      * Start the listing unless the card cannot be read or has too little room.
      *
      * A card with fewer than kRemixSaveMinimumFreeClusters free clusters reports
-     * kMemcardStatusCardFull, which abandons the task rather than proceeding to the listing.
+     * kMemcardStatusCardFull and abandons the task rather than proceeding to the listing. The
+     * European release inherits SaveFileMCT::OnCheckInfo() instead.
      *
      * @param pOp The finished enquiry.
-     * @ghidraAddress 0x00186a40
+     * @ghidraAddress NTSC-U/C: 0x00186a40
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
+#endif
 
     /**
      * Collect the listed directories and start the index walk.
@@ -118,14 +145,18 @@ public:
     /**
      * Report the finished save through MemcardUser::OnRemixSaved().
      *
-     * @ghidraAddress 0x00186b60
+     * @ghidraAddress NTSC-U/C: 0x00186b60
+     * @ghidraAddress PAL: 0x0018c338
      */
     virtual void Finish();
 
     /**
      * Enquire about the card and start the save.
      *
-     * @ghidraAddress 0x00186a08
+     * The European release runs ListRemixDir() instead of the enquiry.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00186a08
+     * @ghidraAddress PAL: 0x0018c310
      */
     virtual void Execute();
 
@@ -136,25 +167,29 @@ public:
      * AppendDirInfo(), and each element's file number raises the directory's highestFileNumber.
      * An element named mRemixName makes this directory the target and its file name the payload
      * file name, and step 2 starts. Otherwise the next directory is read, or the target and payload
-     * file name are chosen and step 2 starts. In step 2 the read status, success or not, is kept
-     * in mTargetIndexStatus and step 3 writes the payload.
+     * file name are chosen and step 2 starts. In step 2 the read status, success or not, is
+     * recorded in mTargetIndexStatus and step 3 writes the payload. In the European release step 3
+     * runs WriteIndex() at once.
      *
      * @param nStatus The inner read's status.
-     * @ghidraAddress 0x0017ad70
+     * @ghidraAddress NTSC-U/C: 0x0017ad70
+     * @ghidraAddress PAL: 0x0017f260
      */
     virtual void OnFileLoaded(int nStatus);
 
+#ifndef VIDEO_STANDARD_PAL
     /**
-     * Advance past a finished write, or rewrite the index once the payload has landed.
+     * Advance past a finished write, or rewrite the index once the payload has been written.
      *
      * The status is recorded whether the write succeeded or not. A successful write at step 3 moves
      * to step 4 and rewrites the index, and every other successful write reports the task
      * finished.
      *
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00186ad8
+     * @ghidraAddress NTSC-U/C: 0x00186ad8
      */
     virtual void OnFileSaved(int nStatus);
+#endif
 
 private:
     // 0x00179c28
@@ -172,19 +207,24 @@ private:
     void ReadNextIndex();
 
     // 0x0017ab50
-    // Stamps mRemixName into the payload in the shared log stream, rewinds mStream, and reads the
+    // Writes mRemixName into the payload in the shared log stream, rewinds mStream, and reads the
     // target directory's index through a fresh inner LoadFileMCT.
     void ReadTargetIndex();
 
-    // 0x0017ba98
+#ifndef VIDEO_STANDARD_PAL
+    // NTSC-U/C: 0x0017ba98
     // Saves the payload in the shared log stream as `<target>/<mPayloadFileName>`, without icon
     // files, through a fresh inner SaveFileMCT.
     void WritePayload();
+#endif
 
-    // Selects the step the bodies run next. Execute() clears it. +0x20
+    // The European release places every member from here on 0x400 bytes further in.
+
+    // Selects the step the bodies run next. Execute() clears it. In the European release it hides
+    // SaveFileMCT::mStep. +0x20
     int mStep;
 
-    // The status of the step-2 read of the target's index, which WriteIndex() tests. +0x24
+    // The status of the step-2 read of the target's index, tested by WriteIndex(). +0x24
     int mTargetIndexStatus;
 
     // The directory the index is being read out of. +0x28
@@ -205,7 +245,7 @@ private:
     // The album number the index entry records. +0x58
     int mAlbumNum;
 
-    // Non-zero once an entry named mRemixName was found, so the save replaces it. +0x5c
+    // Non-zero once an entry named mRemixName was found. The save then replaces that entry. +0x5c
     int mReplacing;
 
     // The remix's name. +0x60
@@ -223,6 +263,8 @@ private:
     // The inner read. The destructor deletes it. +0x9c
     LoadFileMCT *mLoadTask;
 
+#ifndef VIDEO_STANDARD_PAL
     // The inner save. The destructor deletes it. +0xa0
     SaveFileMCT *mSaveTask;
+#endif
 };

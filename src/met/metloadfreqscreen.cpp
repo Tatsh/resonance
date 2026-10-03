@@ -94,18 +94,24 @@ inline HxStr ConfigText(const char *pszKey) {
 
 } // namespace
 
-// 0x0029bcf0
+// NTSC-U/C: 0x0029bcf0, PAL: 0x002b94b0
 MetLoadFreqScreen::MetLoadFreqScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
+#ifndef VIDEO_STANDARD_PAL
     mFreqLimitPending = kInitialFreqLimitPending;
+#endif
 }
 
-// 0x0029bd38
+// NTSC-U/C: 0x0029bd38, PAL: 0x002b94f0
 MetLoadFreqScreen::~MetLoadFreqScreen() {
 }
 
-// 0x00297c10
+// NTSC-U/C: 0x00297c10, PAL: 0x002b95a0
 void MetLoadFreqScreen::OnCreateButton() {
+#ifdef VIDEO_STANDARD_PAL
+    MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadFreqScreen);
+    MetLoadFreqBaseScreen::OnCreateButton();
+#else
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     if (mIdentityList->size() >= kMaxIdentities) {
         ExitScreenByName(HxStr(kHelpScreen));
@@ -136,9 +142,10 @@ void MetLoadFreqScreen::OnCreateButton() {
     }
     PushNamedScreen(HxStr(kFreqCreateScreen));
     ActivateNamedPanel(HxStr(kFreqCreateScreen));
+#endif
 }
 
-// 0x0029bc68
+// NTSC-U/C: 0x0029bc68, PAL: 0x002b9428
 MetScreen *MetLoadFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadFreqScreen(pRenderer, nPriority);
 }
@@ -153,7 +160,8 @@ void MetLoadFreqScreen::EnterAndShow() {
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
-// 0x00298510
+#ifndef VIDEO_STANDARD_PAL
+// NTSC-U/C: 0x00298510
 void MetLoadFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     if (!(name == kFreqLimitMessage)) {
         return;
@@ -167,8 +175,9 @@ void MetLoadFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     mFreqLimitPending = 0;
     ActivateNamedPanel(HxStr(kLoadFreqScreen));
 }
+#endif
 
-// 0x0029bdc8
+// NTSC-U/C: 0x0029bdc8, PAL: 0x002b9580
 void MetLoadFreqScreen::OnEnterFinished() {
     PlaySoundByName(kSelectFreqSound);
 }
@@ -189,7 +198,7 @@ void MetLoadFreqScreen::UpdateNameLabel() {
     mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
-// 0x002978d0
+// NTSC-U/C: 0x002978d0, PAL: 0x002b5a68
 void MetLoadFreqScreen::OnNameButton() {
     MetPersonaData *pPersona = (*mIdentityList)[mSelectedIdentity];
 
@@ -207,7 +216,7 @@ void MetLoadFreqScreen::OnNameButton() {
     }
 }
 
-// 0x00297528
+// NTSC-U/C: 0x00297528, PAL: 0x002b5648
 void MetLoadFreqScreen::PrepareFreqMakerForSelection() {
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
@@ -222,7 +231,7 @@ void MetLoadFreqScreen::PrepareFreqMakerForSelection() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadFreqScreen);
 }
 
-// 0x0029bda0
+// NTSC-U/C: 0x0029bda0, PAL: 0x002b9558
 void MetLoadFreqScreen::AcquireIdentityList() {
     mIdentityList = MetPersonaData::loadList();
 }

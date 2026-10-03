@@ -15,24 +15,24 @@
  *
  * `13MetSaveRemix` in the RTTI descriptor at `0x008ef660`, with three public non-virtual bases at
  * fixed offsets, MetScreen at `+0x00`, MemcardUser at `+140`, and MetKBUser at `+144`. The object
- * is 0xe8 bytes, which both children fix independently. MetSaveRemixScreen starts its own members
+ * is 0xe8 bytes. Both children fix the size independently. MetSaveRemixScreen starts its members
  * at `+0xe8` and MetRemixDelScreen places its ListDataProvider base at `+232`.
  *
  * Two classes derive from the class, MetRemixDelScreen and MetSaveRemixScreen.
  *
  * Three vtables belong to the class. The primary table at `0x00809c00` has 43 entries, four more
- * than the MetScreen table, so the class declares four virtuals of its own at slots 39 through 42
- * at `0x00372488`, `0x0037a618`, `0x0037a620`, and `0x0037a628`. Slots 40 and 41 are
- * two-instruction `jr ra` stubs. Slot 42 is not. Its body dispatches back through slot 40 of the
- * primary table with no argument. Slot 42 is therefore a public alias for the empty slot 40. The
+ * than the MetScreen table. The class declares four new virtuals at slots 39 through 42 at
+ * `0x00372488`, `0x0037a618`, `0x0037a620`, and `0x0037a628`. Slots 40 and 41 are two-instruction
+ * `jr ra` stubs. Slot 42 is not. Its body dispatches back through slot 40 of the primary table with
+ * no argument. Slot 42 is therefore a public alias for the empty slot 40. The
  * 21-entry MemcardUser table at `0x00809b50` adjusts `this` by `-140` and overrides its slots 2, 5,
  * 8, and 11 at `0x00372c10`, `0x00373808`, `0x00374b58`, and `0x00374208`. The three-entry
  * MetKBUser table at `0x00809b30` adjusts `this` by `-144` and overrides its slot 2 at
  * `0x0037a650`.
  *
  * All four slots the class declares are declared below. Slot 39 takes six arguments in a1 through
- * t2, and two of their types come from other classes:
- * MemcardConnectState is the 0x18-byte record whose five fields mirror this class's own `+0x94`
+ * t2, and two of their types come from other classes. MemcardConnectState is the 0x18-byte record
+ * whose five fields mirror this class's `+0x94`
  * through `+0xa8`, and FreqAppearance is the 0x14-byte element of the vector at `+0xac`, a name the
  * RTTI records. The 0x38-byte element of the vector at `+0xcc` is MetRemixRecord, whose name is
  * inferred.
@@ -44,12 +44,12 @@
  * words at `+0xa0` and `+0xa4` start at -1 and its word at `+0xa8` at zero. Both vectors and the
  * two strings at `+0xb8` and `+0xc0` start empty, mOwnerPad, mRefreshFirstCardSlot, mCopying, and
  * mAlbumNumber start at zero, and mKeyboardPending is never written. The three words at `+0xa0`,
- * `+0xa4`, and `+0xa8` are reached through a register set to `this + 0x94`, and all three receive
+ * `+0xa4`, and `+0xa8` are accessed through a register set to `this + 0x94`, and all three receive
  * literals.
  *
  * Every one of those stores is a member initialiser, and the MemcardConnectState default
- * constructor produces the -1, empty-string, -1, -1, zero run at `+0x94` exactly, which is
- * independent confirmation of that record's layout.
+ * constructor produces the -1, empty-string, -1, -1, zero run at `+0x94` exactly. The match
+ * independently confirms the layout of MemcardConnectState.
  *
  * The destructor at `0x00372248` destroys the 0x38-byte elements of mCardRemixes and deallocates
  * its buffer, frees the two strings at `+0xc0` and `+0xb8`, destroys the 0x14-byte elements of
@@ -61,7 +61,7 @@
  *
  * One inherited slot differs from the MetScreen table, slot 15 at `0x00375590`. That override
  * compares an `HxStr` argument in a1 against a literal and then tests a second argument in a2
- * against one, so slot 15 takes two parameters rather than the one MetScreen records for it.
+ * against one. Slot 15 therefore takes two parameters rather than the one MetScreen records for it.
  */
 class MetSaveRemix : public MetScreen, public MemcardUser, public MetKBUser {
 public:
@@ -89,16 +89,16 @@ public:
     /**
      * Record the remix a save is about to write and enquire about the target card. Slot 39.
      *
-     * The six parameters are what the register reads prove: a1 is a MemcardConnectState whose
+     * The register reads prove six parameters. a1 is a MemcardConnectState whose
      * five fields are copied into mTargetSlot through the compiler-generated assignment, a2 becomes
      * mOwnerPad, a3 and t0 are assigned to mRemixName and mLevelName, t1 is assigned to
      * mAppearances, and t2 becomes mAlbumNumber. It also clears mRefreshFirstCardSlot, stores
      * itself in MemcardManager::mUser, and queues a connect-state enquiry for the selection's port
      * and slot, with OnConnectState() receiving the result.
      *
-     * a3, t0, and t1 are by value rather than by reference, which the tail of the routine proves:
-     * it frees the string buffer of each of the first two and destroys every element of the third
-     * before returning. a1 is not destroyed there, so it is a reference. OnMsgScreenDismissed() is
+     * a3, t0, and t1 are by value rather than by reference. The tail of the routine frees the
+     * string buffer of each of the first two and destroys every element of the third before
+     * returning. a1 is not destroyed there and is therefore a reference. OnMsgScreenDismissed() is
      * the one recovered caller, and the title is inferred.
      *
      * @param selection The remix being saved.
@@ -187,7 +187,7 @@ public:
      * CONTINUE button and made the active panel. Any other status raises `mem_check` with RETRY
      * and BACK. The port and slot are not read.
      *
-     * @param nPortSlot The packed port and slot, which is not read.
+     * @param nPortSlot The packed port and slot. The body does not read it.
      * @param nStatus The format status.
      * @ghidraAddress NTSC-U/C: 0x00373808
      * @ghidraAddress PAL: 0x003a2b28
@@ -202,14 +202,20 @@ public:
      * European release does this only while GlobalSettings::mCardSlots has an entry.
      * Success anywhere else exits MetMsgScreen. A full card raises `save_fail_no_space`, or
      * `copy_fail_no_space` for a copy with the space GlobalSettings::mMinimumFreeClusters requires,
-     * and any other status raises `save_fail_no_space` with the `save_fail_general` text.
+     * and any other status raises `save_fail_no_space` with the `save_fail_general` text. In the
+     * European release the `save_fail_no_space` text for a full card receives nKilobytes.
      *
-     * @param nPortSlot The packed port and slot, which is not read.
+     * @param nPortSlot The packed port and slot. The body does not read it.
      * @param nStatus The save status.
+     * @param nKilobytes The kilobytes the card lacked. European release only.
      * @ghidraAddress NTSC-U/C: 0x00374b58
      * @ghidraAddress PAL: 0x003a4158
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnRemixSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnRemixSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Check the listing of the target card before saving. MemcardUser slot 11.
@@ -218,8 +224,8 @@ public:
      * Fifty or more remixes raise `mem_remix_2many` with RETRY and CONTINUE. Otherwise the remix is
      * saved through MemcardManager::CreateSaveRemixTask(). Neither argument is read.
      *
-     * @param nPortSlot The packed port and slot, which is not read.
-     * @param nStatus The listing status, which is not read.
+     * @param nPortSlot The packed port and slot. The body does not read it.
+     * @param nStatus The listing status. The body does not read it.
      * @ghidraAddress NTSC-U/C: 0x00374208
      * @ghidraAddress PAL: 0x003a36b8
      */
@@ -246,20 +252,20 @@ public:
 
 private:
     // NTSC-U/C: 0x00372760, PAL: 0x003a12e8
-    // Raises the `save_remix` dialogue, headed `save_title` with the `mem_save` text
-    // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.
+    // Raises the `save_remix` dialogue, headed `save_title` with the `mem_save` text for a save, or
+    // `copy_title` with the `mem_copy12` text identifying the next card slot for a copy.
     void BeginSave();
 
 protected:
-    // The card location to save to. MetSaveRemixScreen::Open() assigns it directly, which is why
-    // it is protected. +0x94
+    // The card location to save to. Protected because MetSaveRemixScreen::Open() assigns it
+    // directly. +0x94
     MemcardConnectState mTargetSlot;
-    // The players' appearances. MetSaveRemixScreen::SetAppearances() assigns it, which is why it
-    // is protected. +0xac
+    // The players' appearances. Protected because MetSaveRemixScreen::SetAppearances() assigns
+    // it. +0xac
     std::vector<FreqAppearance> mAppearances;
 
-    // The remix name. MetSaveRemixScreen's slot 42 hands it to the keyboard, which is why it is
-    // protected. +0xb8
+    // The remix name. Protected because slot 42 of MetSaveRemixScreen hands it to the keyboard.
+    // +0xb8
     HxStr mRemixName;
 
 private:
@@ -280,8 +286,8 @@ private:
     int mRefreshFirstCardSlot;
 
 protected:
-    // Non-zero for a copy rather than a save. MetSaveRemixScreen::EnterAndShow() clears it, which
-    // is why it is protected. +0xdc
+    // Non-zero for a copy rather than a save. Protected because
+    // MetSaveRemixScreen::EnterAndShow() clears it. +0xdc
     int mCopying;
 
     // Set while a keyboard request from slot 42 is outstanding. Protected because the

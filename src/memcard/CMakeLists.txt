@@ -40,6 +40,9 @@ set(RESONANCE_MEMCARD_SRCS
     shiftjis.cpp
     unformatop.cpp
     writeop.cpp)
+if(VIDEO_STANDARD STREQUAL "PAL")
+  list(APPEND RESONANCE_MEMCARD_SRCS savespacecheckermct.cpp)
+endif()
 
 add_library(resonance_memcard STATIC ${RESONANCE_MEMCARD_SRCS})
 target_link_libraries(resonance_memcard PRIVATE resonance_common)

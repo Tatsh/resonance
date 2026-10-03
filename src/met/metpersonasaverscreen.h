@@ -12,11 +12,11 @@
 /**
  * Dialogue that writes a persona to a memory card, copies it to another card, or deletes it.
  *
- * Its RTTI descriptor is at `0x008f0060`. It has three public non-virtual bases at fixed offsets,
+ * Its RTTI descriptor is at `0x008f0060`. It has three public non-virtual bases at fixed offsets:
  * MetScreen at `+0x00`, MemcardUser at `+140`, and MetKBUser at `+144`. New() allocates 0xd8 bytes.
  *
- * The 39-entry primary vtable is at `0x00805600`, the same length as the MetScreen table, so the
- * class declares no virtual of its own. The twenty-one-entry MemcardUser table at `0x00805550`
+ * The 39-entry primary vtable at `0x00805600` is the same length as the MetScreen table, and the
+ * class declares no new virtual. The twenty-one-entry MemcardUser table at `0x00805550`
  * adjusts `this` by `-140` in every entry, and the three-entry MetKBUser table at `0x00805530` by
  * `-144`.
  *
@@ -116,7 +116,7 @@ public:
     virtual void OnPanelActivated();
 
     /**
-     * Leave for the screens the request named. Slot 9.
+     * Exit to the screens the request listed. Slot 9.
      *
      * The screen is removed from the renderer, each screen in mReturnScreens is pushed, and the
      * first is made the active panel.
@@ -128,12 +128,18 @@ public:
     /**
      * Act on a dismissed dialogue. Slot 15.
      *
-     * `mem_check` leaves on its second button and retries otherwise. `mem_format_check` formats
+     * `mem_check` exits on its second button and retries otherwise. `mem_format_check` formats
      * the card on its second button and retries otherwise. `mem_format_done` retries.
      * `format_fail` retries on its first button and raises `no_save_warn` otherwise. The two
-     * no-space dialogues retry on their first button and leave otherwise. `freq_replace` saves
+     * no-space dialogues retry on their first button and exit otherwise. `freq_replace` saves
      * over the old persona on its second button, and both it and `new_name_required` otherwise
-     * open the keyboard for a new FreQ name. `freq_limit` and any other dialogue leave.
+     * open the keyboard for a new FreQ name. `freq_limit` and any other dialogue exit.
+     *
+     * In the European release the second button of `mem_check` and of the no-space dialogues runs
+     * LeaveWithoutSaving(), as does `no_save_warn`. Declining `mem_format_check` raises
+     * `save_fail_no_format` with the `Save aborted.` text. That dialogue acts like the no-space
+     * dialogues. The second button of `freq_replace_catastrophe` copies the persona over the
+     * load-list entry with the same name and runs BeginExit(), and the first opens the keyboard.
      *
      * @param name The dialogue that was dismissed.
      * @param nChoice The button chosen.
@@ -177,7 +183,7 @@ public:
      * Success and status 13 both raise `mem_format_done` as the active panel, with the
      * `format_success` or `format_already` text. Any other status raises `format_fail`.
      *
-     * @param nPortSlot The packed port and slot, which is not read.
+     * @param nPortSlot The packed port and slot. The body does not read it.
      * @param nStatus The format status.
      * @ghidraAddress NTSC-U/C: 0x00331358
      * @ghidraAddress PAL: 0x00359ed0
@@ -190,14 +196,20 @@ public:
      * Success on the settings card copies the roster into MetPersonaData::loadList(), sets
      * mRefreshingSettingsCard, and requests the card's state again. Success elsewhere exits
      * MetMsgScreen. A full card raises a no-space dialogue, status 15 the no-card dialogue, and any
-     * other status `save_fail_no_space` with the `save_fail_general` text.
+     * other status `save_fail_no_space` with the `save_fail_general` text. In the European release
+     * both no-space texts receive nKilobytes.
      *
      * @param nPortSlot The packed port and slot the roster went to.
      * @param nStatus The save status.
+     * @param nKilobytes The kilobytes the card lacked. European release only.
      * @ghidraAddress NTSC-U/C: 0x00333210
      * @ghidraAddress PAL: 0x0035c120
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnPersonasSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnPersonasSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Merge the persona into the loaded roster and save it. MemcardUser slot 13.
@@ -205,12 +217,12 @@ public:
      * A persona without a name raises `new_name_required`. The roster is searched by the name
      * the persona was last loaded under and by its present name. A delete removes the old entry,
      * or raises `mem_check` when there is none. A renamed persona whose new name is taken raises
-     * `new_name_required`. A persona whose name is taken replaces that entry, after asking when
+     * `new_name_required`. A persona whose name is taken replaces that entry, after prompting when
      * mConfirmReplace is set. Any other persona is appended, unless CheckPersonaLimit() refuses.
      * Neither argument is read.
      *
-     * @param nPortSlot The packed port and slot, which is not read.
-     * @param nStatus The load status, which is not read.
+     * @param nPortSlot The packed port and slot.
+     * @param nStatus The load status.
      * @ghidraAddress NTSC-U/C: 0x00332428
      * @ghidraAddress PAL: 0x0035b1a8
      */
@@ -230,7 +242,7 @@ public:
     /**
      * Silence the cycle-left sound.
      *
-     * Both overrides are two-instruction stubs, so each was written inline with an empty body.
+     * Both overrides are two-instruction stubs, written inline with an empty body.
      *
      * @ghidraAddress 0x00338f88
      */
@@ -247,12 +259,12 @@ public:
 
 private:
     /**
-     * Send the request to the card, or keep the persona in memory.
+     * Send the request to the card, or retain the persona in memory.
      *
      * A copy, a non-zero mTargetSlot.mPortSlot, a non-zero MetFrontEndState::mUsingMemcard, or a
-     * missing persona asks MemcardManager for the target's state. Otherwise the persona replaces
+     * missing persona queries MemcardManager for the target's state. Otherwise the persona replaces
      * the pre-fab identity or the saved persona of the same name, or is appended to
-     * MetPersonaData::savedList() as a copy, and the screen leaves. The name is inferred.
+     * MetPersonaData::savedList() as a copy, and the screen exits. The name is inferred.
      *
      * @ghidraAddress 0x0032f1e0
      */
@@ -261,8 +273,8 @@ private:
     /**
      * Delete every persona the screen built and empty mPersonas.
      *
-     * Each element is released through slot 1 of its own table at `+0x168`, which is where
-     * MetPersonaData places its vptr, with the deleting `__in_chrg` value. The title is inferred.
+     * Each element is released through slot 1 of the table its vptr at `+0x168` addresses, with
+     * the deleting `__in_chrg` value. The title is inferred.
      *
      * @ghidraAddress 0x0032f4d0
      */
@@ -289,14 +301,41 @@ private:
     void SyncActivePersona();
 
     /**
-     * Ask whether to save over a persona of the same name with `freq_replace`.
+     * Request confirmation through `freq_replace` before saving over a persona of the same name.
      *
-     * The name is inferred.
+     * The European release takes a flag that raises the dialogue as `freq_replace_catastrophe`
+     * instead, with the same text and buttons. The name is inferred.
      *
+     * @param bInLoadList Non-zero when the persona of the same name is in
+     *                    MetPersonaData::loadList() rather than on the card. European release only.
      * @ghidraAddress NTSC-U/C: 0x003350f8
      * @ghidraAddress PAL: 0x0035ee80
      */
+#ifdef VIDEO_STANDARD_PAL
+    void AskToReplace(int bInLoadList);
+
+    /**
+     * Retain the persona in MetPersonaData::loadList() without saving it, and exit.
+     *
+     * A persona of the same name already in the list raises AskToReplace() with the flag set
+     * instead. Otherwise a copy of the persona is appended and BeginExit() runs. The European
+     * release added the routine. The name is inferred.
+     *
+     * @ghidraAddress PAL: 0x0035da70
+     */
+    void KeepInLoadList();
+
+    /**
+     * Exit without saving.
+     *
+     * KeepInLoadList() runs when mConfirmReplace is set for a save that is not a copy, and
+     * BeginExit() otherwise. OnMsgScreenDismissed() expands this test at three sites, and no
+     * address of the routine remains.
+     */
+    void LeaveWithoutSaving();
+#else
     void AskToReplace();
+#endif
 
     /**
      * Take the screens to return to, the persona to save, and the card location.
@@ -325,7 +364,7 @@ private:
     std::vector<MetPersonaData *> mPersonas;
     // The registry keys of the screens to return to after the request. +0xac
     std::vector<HxStr> mReturnScreens;
-    // The persona to save, which SetSaveRequest() records. Not written by the constructor. +0xb8
+    // The persona to save, recorded by SetSaveRequest(). Not written by the constructor. +0xb8
     MetPersonaData *mPersona;
     // Set while the settings card's state is being read again after a save. +0xbc
     int mRefreshingSettingsCard;

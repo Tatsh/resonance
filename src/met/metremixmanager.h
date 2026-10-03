@@ -14,53 +14,53 @@ class MetRenderer;
 struct MemcardConnectState;
 
 /**
- * Manager of the remix catalogue, which also presents itself as a dialogue screen.
+ * Manager of the remix catalogue. It also presents itself as a dialogue screen.
  *
  * Its RTTI descriptor is at `0x008efc50`. It has three public non-virtual bases at fixed offsets,
  * MetScreen at `+0x00`, MemcardUser at `+140`, and AsyncCallback at `+144`. Its asserts
  * record its file, `MetRemixManager.cpp`, at `0x00807bb0`. It is one of only two classes in the
  * subsystem whose file name remains in the image.
  *
- * The object is 0x14c bytes, which the factory at `0x00361020` pins by requesting exactly that
- * many with the tag `MsgSink`. The figure agrees with the recovered member map below, whose last
+ * The object is 0x14c bytes. The factory at `0x00361020` requests exactly that many with the tag
+ * `MsgSink`. The figure agrees with the recovered member map below, whose last
  * member ends at `+0x14b`. The tag is MsgSink's rather than this class's, because MsgSink is the
  * base that declares `operator new`.
  *
- * The rest of the game resolves the one instance through shared(), which resolves it lazily by
+ * The rest of the game resolves the one instance through shared(). shared() resolves it lazily by
  * handing the registry key `MetRemixManager` to MetScreen::FindScreenByName(). The manager is a
  * registered screen rather than a separately constructed singleton.
  *
  * Three vtables belong to the class, the 39-entry primary at `0x00807de0`, the 21-entry
  * MemcardUser table at `0x00807d30` that adjusts `this` by `-140`, and the three-entry
  * AsyncCallback table at `0x00807d10` that adjusts it by `-144`. The primary is the same length as
- * the MetScreen table, so the class declares no virtual of its own.
+ * the MetScreen table. The class declares no new virtual.
  *
- * Five entries of the primary table differ from the MetScreen table, which a diff of the two
- * tables settles rather than the title each routine carries. They are 0 `0x00360788`, the
+ * Five entries of the primary table differ from the MetScreen table. A comparison of the two
+ * tables establishes them, not the title of each routine. They are 0 `0x00360788`, the
  * compiler-generated GetTypeInfo, 1 `0x00355070` the destructor, 5 `0x00361518`, 15 `0x003555c0`,
  * and 36 `0x00361550`. Slot 36 is a two-instruction bare return at an address the base table does
- * not hold. The base's empty stubs are out-of-line definitions that every derived table shares, so
- * a separate address is this class's own empty override, which is declared below.
+ * not include. The base's empty stubs are out-of-line definitions that every derived table shares.
+ * A separate address is therefore an empty override in this class, declared below.
  *
  * The MemcardUser table overrides five slots at `0x003569d0`, `0x003573e8`, `0x003553e8`,
  * `0x00355ff0`, and `0x003563e0`, and the AsyncCallback table overrides its one slot at
  * `0x00358310`. All six are declared below with the spelling their base gives them.
  *
  * One of those spellings is now contradicted by the image. The MemcardUser slot 12 override opens
- * with a LogPrintf() of the literal at `0x00807a88`, which reads
- * ` in MetRemixManager::LoadRemixCB(). Return code `. The method is therefore named `LoadRemixCB`
- * and MemcardUser spells slot 12 `OnRemixLoaded`, a title that header records as inferred from the
- * task that reports through the slot rather than from any string. The declaration below retains
- * the base spelling, because an override that differs from its base by one letter is a new virtual,
- * and correcting the base is a change to MemcardUser and to every other class that overrides the
- * slot.
+ * with a LogPrintf() of the literal at `0x00807a88`. The literal reads
+ * ` in MetRemixManager::LoadRemixCB(). Return code `. The method is therefore named `LoadRemixCB`,
+ * and MemcardUser declares slot 12 as `OnRemixLoaded`, a title that header records as inferred
+ * from the task that reports through the slot rather than from any string. The declaration below
+ * retains the base spelling, because an override that differs from its base by one letter is a new
+ * virtual, and correcting the base is a change to MemcardUser and to every other class that
+ * overrides the slot.
  *
  * The constructor at `0x00352b80` is member initialisation after the three vptr writes, and the
- * destructor at `0x00355070` is compiler-generated member destruction in reverse order, so the
- * member list below reproduces both. The vector at `+0xf8` is the g++ 2.x `bit_vector`, whose two
- * iterators each carry an empty base word, which is why it spans 0x1c bytes. The first tree's
- * teardown at `0x0035ef90` releases a vector of MetRemixRecord in each node, and the second's at
- * `0x003619a0` releases nothing, which fixes their value types.
+ * destructor at `0x00355070` is compiler-generated member destruction in reverse order. The member
+ * list below reproduces both. The vector at `+0xf8` is the g++ 2.x `bit_vector`, whose two
+ * iterators each include an empty base word. The vector therefore spans 0x1c bytes. The first
+ * tree's teardown at `0x0035ef90` releases a vector of MetRemixRecord in each node, and the
+ * second's at `0x003619a0` releases nothing. The two teardowns fix the value types of the trees.
  */
 class MetRemixManager : public MetScreen, public MemcardUser, public AsyncCallback {
 public:
@@ -224,7 +224,7 @@ public:
     /**
      * Raise the load warning and start loading one remix.
      *
-     * The warning text names the factory set or the first memory-card slot, and its wording
+     * The warning text identifies the factory set or the first memory-card slot, and its wording
      * follows the play mode. mAfterLoadAction is set to exit the dialogue once the load completes,
      * both screen lists are replaced, and the load runs through LoadRemix().
      * MetRemixLoadScreen::OnExitFinished() is the caller. The title is inferred.
@@ -244,7 +244,7 @@ public:
     /**
      * Rebuild the catalogue from the factory set and the given memory-card slots.
      *
-     * Raises the `mem_load` warning naming the sources, empties both trees, starts the factory
+     * Raises the `mem_load` warning identifying the sources, empties both trees, starts the factory
      * index read for the factory entry and a ListRemixesMCT for every card slot, empties the
      * playlist without releasing its entries, and optionally queues a playlist load. The two
      * remix screens, MetMemCardTypeScreen, and MetRemixDelScreen call it. The title is inferred.
@@ -274,8 +274,7 @@ public:
      * The whole body is one call. It dispatches Rnd::Drawable::SetShowing() with a zero argument on
      * the Drawable subobject of MetScreen::mView, at `+0x18` within the view, the
      * same subobject MetScreen::Draw() forwards to. The view is dereferenced with no null check,
-     * and nothing is shown, which suits a manager that registers as a screen only to receive
-     * messages.
+     * and nothing is shown. The manager registers as a screen only to receive messages.
      *
      * @ghidraAddress 0x00361518
      */
@@ -298,7 +297,7 @@ public:
      * the format check raises `save_fail_no_format` instead, whose choices act as those of
      * `format_fail` do.
      *
-     * @param name The dialogue the screen requested, which the message screen reports back.
+     * @param name The dialogue the screen requested, as the message screen reports it back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
      * @ghidraAddress NTSC-U/C: 0x003555c0
      * @ghidraAddress PAL: 0x00381b20
@@ -313,7 +312,7 @@ public:
      * other status raises `format_fail` with retry and continue buttons. The port and slot argument
      * is not read.
      *
-     * @param nPortSlot Which card port and slot reported, which the body does not read.
+     * @param nPortSlot Which card port and slot reported. The body does not read it.
      * @param nStatus Zero on success, and 13 for the one failure the second path covers.
      * @ghidraAddress NTSC-U/C: 0x003569d0
      * @ghidraAddress PAL: 0x00383638
@@ -326,20 +325,25 @@ public:
      * A zero status exits `MetMsgScreen`. An unformatted card raises `mem_format_check`, a missing
      * card or a full one raises `playlist_save_failed_tryagain`, and any other status raises
      * `playlist_save_failed`. The port and slot argument is not read. The European release calls
-     * the card `1` in the missing-card text.
+     * the card `1` in the missing-card text, and gives the full-card text nKilobytes.
      *
-     * @param nPortSlot Which card port and slot reported, which the body does not read.
+     * @param nPortSlot Which card port and slot reported. The body does not read it.
      * @param nStatus Zero on success.
+     * @param nKilobytes The kilobytes the card lacked. European release only.
      * @ghidraAddress NTSC-U/C: 0x003573e8
      * @ghidraAddress PAL: 0x003841e0
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnJukeboxPlayListSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnJukeboxPlayListSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Record the remixes one card slot reported. MemcardUser slot 11.
      *
      * Records the status under the port and slot in mListStatus and counts one more listing in
-     * mListingsDone. Once that count reaches mListingsExpected while mPlayListReady is set, the
+     * mListingsDone. Once mListingsDone equals mListingsExpected while mPlayListReady is set, the
      * `MetMsgScreen` dialogue is exited. The status branches against 0 and 3 lead to the same code.
      *
      * @param nPortSlot Which card port and slot reported.
@@ -351,8 +355,8 @@ public:
     /**
      * Act on the remix load the card reported. MemcardUser slot 12.
      *
-     * The image names this method `LoadRemixCB`, and the class documentation records why the
-     * declaration retains the base spelling.
+     * The image identifies this method as `LoadRemixCB`, and the class documentation records why
+     * the declaration retains the base spelling.
      *
      * It opens by writing the status to the log through the literal at `0x00807a88`. A zero status
      * starts the remix or exits `MetMsgScreen`, as mAfterLoadAction selects. A non-zero status logs
@@ -361,7 +365,7 @@ public:
      * European release shows `load_fail_jukebox` instead of `load_fail` when mAfterLoadAction
      * selects starting the remix.
      *
-     * @param nPortSlot Which card port and slot reported, which the failure message formats.
+     * @param nPortSlot Which card port and slot reported. Only the failure message formats it.
      * @param nStatus Zero on success.
      * @ghidraAddress NTSC-U/C: 0x00355ff0
      * @ghidraAddress PAL: 0x00382920
@@ -375,7 +379,7 @@ public:
      * mListingsDone and mListingsExpected agree. The zero and non-zero status branches lead to the
      * same code. The port and slot argument is not read.
      *
-     * @param nPortSlot Which card port and slot reported, which the body does not read.
+     * @param nPortSlot Which card port and slot reported. The body does not read it.
      * @param nStatus Zero on success.
      * @ghidraAddress 0x003563e0
      */
@@ -399,7 +403,7 @@ public:
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 
     /**
-     * The key of the factory remixes in mRemixes. Card slots use their own port-and-slot keys.
+     * The key of the factory remixes in mRemixes. Card slots use port-and-slot keys.
      *
      * Public because MetRemixLoadScreen indexes mRemixes with it when the factory catalogue is
      * chosen.
@@ -432,7 +436,7 @@ private:
     // OnMsgScreenDismissed() expands it at each retry.
     inline void RetrySavePlayList();
     // 0x003613d8
-    // Clamps into zero through the track count, which admits one past the end.
+    // Clamps into zero through the track count. The range admits one past the end.
     void SetCurrentTrack(int nTrack);
     // 0x003610d0
     // Pushes every screen listed in mRestoreScreens and activates the first.

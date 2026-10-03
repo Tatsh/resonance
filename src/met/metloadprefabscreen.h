@@ -14,7 +14,7 @@ class MetPersonaData;
  * the same length as the MetLoadFreqBaseScreen table, and the class declares no new virtual.
  *
  * The constructor at `0x002a8a58` takes only the renderer and the load priority, runs the
- * MetLoadFreqBaseScreen constructor at `0x00291e00`, writes its own vptr, and empties the one
+ * MetLoadFreqBaseScreen constructor at `0x00291e00`, writes its vptr, and empties the one
  * vector below. The destructor at `0x002ad450` restores the vptr, returns the vector buffer to the
  * pool, runs the MetLoadFreqBaseScreen destructor, and releases the object with the tag `MsgSink`.
  *
@@ -88,7 +88,7 @@ public:
      * Play as the selected identity.
      *
      * Slot 40. The identity becomes the game manager's only persona, and the left gizmo and mode
-     * select screens are pushed. Reaching the screen in net mode is a fatal error.
+     * select screens are pushed. Arriving at the screen in net mode is a fatal error.
      *
      * @ghidraAddress 0x002a94f0
      */
@@ -113,7 +113,9 @@ public:
      *
      * Slot 43. With eight saved personas the help screen departs and the `freq_limit` dialogue
      * shows `nomem_freq_limit`. Otherwise `MetLoadPreFabScreen` is recorded in
-     * MetFrontEndState::mReturnScreen and MetLoadFreqBaseScreen::OnCreateButton() runs.
+     * MetFrontEndState::mReturnScreen and MetLoadFreqBaseScreen::OnCreateButton() runs. The
+     * European release is slot 49, and it runs MetLoadFreqBaseScreen::OpenFreqMakerForCreate()
+     * through the vtable instead.
      *
      * @ghidraAddress NTSC-U/C: 0x002a9710
      * @ghidraAddress PAL: 0x002c7d88
@@ -141,6 +143,6 @@ public:
     virtual void BuildButtonList();
 
 private:
-    // The saved personas followed by the pre-fab identities, which AcquireIdentityList() offers.
+    // The saved personas followed by the pre-fab identities that AcquireIdentityList() offers.
     std::vector<MetPersonaData *> mIdentities; // +0xa4
 };

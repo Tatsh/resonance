@@ -8,10 +8,19 @@
 #include "met/metfreqmakercanvasscreen.h"
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
 #include "rnd/text.h"
+
+#ifdef VIDEO_STANDARD_PAL
+#include "game/globalsettings.h"
+#include "met/metfrontendstate.h"
+#include "met/metmsgscreen.h"
+#include "met/metscreentitlescreen.h"
+#include "os/formatstring.h"
+#endif
 
 namespace {
 
@@ -65,8 +74,8 @@ constexpr unsigned kMinimumCyclableEntries = 2;
 // MetButtonList::mSelected while the identity carousel rather than a button is selected.
 constexpr int kCarouselSelected = 0;
 
-// Index of the first button in the ring, which BuildButtonList() selects and UpdateNameLabel()
-// writes the identity username into.
+// Index of the first button in the ring. BuildButtonList() selects the button and
+// UpdateNameLabel() writes the identity username into it.
 constexpr int kNameButtonIndex = 0;
 constexpr int kEditButtonIndex = 1;
 constexpr int kCreateButtonIndex = 2;
@@ -84,17 +93,64 @@ constexpr int kNoRandomize = 0;
 // Button state the two cycle arrows take while they are shown.
 constexpr int kArrowShownState = 1;
 
-// Cycles and interval the two arrows alternate over while a cycle command is held.
+// Cycles and interval the two arrows alternate over while a cycle button stays pressed.
 constexpr int kArrowAlternateCycles = 2;
 constexpr float kArrowAlternateInterval = 30.0f;
 
+#ifdef VIDEO_STANDARD_PAL
+// MetFrontEndState::mUsingMemcard while a memory card is in use.
+constexpr int kUsingMemcard = 1;
+
+// Screens OnCreateButton() and OnMsgScreenDismissed() push or compare by registry key.
+static const char *const kLoadFreqScreen = "MetLoadFreqScreen";
+static const char *const kHelpScreen = "MetHelpScreen";
+static const char *const kFreqCreateScreen = "MetFreqCreateScreen";
+
+// The dialogues the class raises and OnMsgScreenDismissed() matches.
+static const char *const kFreqLimitMessage = "freq_limit";
+static const char *const kNoCardsMessage = "mem_no_cards";
+static const char *const kDetectMessage = "mem_load";
+
+// Identities MetLoadFreqScreen allows before OnCreateButton() refuses another.
+constexpr unsigned kMaxIdentities = 8;
+
+// Button counts MetMsgScreen receives, and the RETRY button both dialogues put first.
+constexpr int kNoButtons = 0;
+constexpr int kTwoButtons = 2;
+constexpr int kChoiceRetry = 0;
+
+inline const char *TextOrEmpty(const HxStr &text) {
+    return text.mStr != nullptr ? text.mStr : g_szEmptyString;
+}
+
+// Raise `freq_limit` with RETRY and CONTINUE and the given text.
+inline void ShowFreqLimit(MetScreen *pOwner, const HxStr &text) {
+    std::vector<HxStr> buttons;
+    buttons.push_back(GetMetString(kMetStrMsgRETRY));
+    buttons.push_back(GetMetString(kMetStrMsgCONTINUE));
+    MetMsgScreen::Show(HxStr(kFreqLimitMessage),
+                       GetMetString(kMetStrMsgERROR),
+                       text,
+                       kTwoButtons,
+                       buttons,
+                       pOwner);
+}
+#endif
+
 } // namespace
 
-// 0x00291e00
+// NTSC-U/C: 0x00291e00, PAL: 0x002add68
 MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriority)
+#ifdef VIDEO_STANDARD_PAL
+    : MetMemDetectScreen(
+#else
     : MetScreen(
+#endif
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
     mSelectedIdentity = 0;
+#ifdef VIDEO_STANDARD_PAL
+    mUsingMemcardOnEnter = kUsingMemcard;
+#endif
     mButtonList = new MetButtonList;
     MetFreqMakerAssetManager::shared()->WaitForLoad();
     // Yes, the binary polls once more after the wait has already run the load to completion, and
@@ -103,18 +159,21 @@ MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriori
     mBurnTexture = FreqAppearance::FindPersonaBurnTexture(kBurnTextureIndex);
 }
 
-// 0x00296ae0
+// NTSC-U/C: 0x00296ae0, PAL: 0x002b4a40
 MetLoadFreqBaseScreen::~MetLoadFreqBaseScreen() {
     delete mButtonList;
 }
 
-// 0x00296a58
+// NTSC-U/C: 0x00296a58, PAL: 0x002b49b8
 MetScreen *MetLoadFreqBaseScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadFreqBaseScreen(pRenderer, nPriority);
 }
 
-// 0x002926d8
+// NTSC-U/C: 0x002926d8, PAL: 0x002ae7d8
 void MetLoadFreqBaseScreen::EnterAndShow() {
+#ifdef VIDEO_STANDARD_PAL
+    mUsingMemcardOnEnter = MetFrontEndState::shared()->mUsingMemcard;
+#endif
     AcquireIdentityList();
     BuildButtonList();
     UpdateCycleArrows();
@@ -129,7 +188,7 @@ void MetLoadFreqBaseScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00292178
+// NTSC-U/C: 0x00292178, PAL: 0x002ae1a0
 void MetLoadFreqBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -184,7 +243,7 @@ void MetLoadFreqBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x00296b60
+// NTSC-U/C: 0x00296b60, PAL: 0x002b4ac8
 void MetLoadFreqBaseScreen::PlayCycleLeftSound(int nSelector) {
     if (mButtonList->mSelected == kCarouselSelected &&
         mIdentityList->size() >= kMinimumCyclableEntries) {
@@ -192,7 +251,7 @@ void MetLoadFreqBaseScreen::PlayCycleLeftSound(int nSelector) {
     }
 }
 
-// 0x00296bb0
+// NTSC-U/C: 0x00296bb0, PAL: 0x002b4b18
 void MetLoadFreqBaseScreen::PlayCycleRightSound(int nSelector) {
     if (mButtonList->mSelected == kCarouselSelected &&
         mIdentityList->size() >= kMinimumCyclableEntries) {
@@ -200,7 +259,7 @@ void MetLoadFreqBaseScreen::PlayCycleRightSound(int nSelector) {
     }
 }
 
-// 0x00292c60
+// NTSC-U/C: 0x00292c60, PAL: 0x002aee98
 void MetLoadFreqBaseScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if (pButton == mLeftArrow || pButton == mRightArrow) {
         return;
@@ -212,7 +271,7 @@ void MetLoadFreqBaseScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     BeginExit();
 }
 
-// 0x00292da8
+// NTSC-U/C: 0x00292da8, PAL: 0x002af020
 void MetLoadFreqBaseScreen::OnExitFinished() {
     if (mExitChoice == kExitToMainMenu) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
@@ -238,7 +297,7 @@ void MetLoadFreqBaseScreen::OnExitFinished() {
     mButtonList->SetSelected(-1);
 }
 
-// 0x00292000
+// NTSC-U/C: 0x00292000, PAL: 0x002adfe0
 void MetLoadFreqBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -249,17 +308,17 @@ void MetLoadFreqBaseScreen::ResolveContainerViews() {
     mRightArrow = pRight != nullptr ? dynamic_cast<Rnd::Button *>(pRight) : nullptr;
 }
 
-// 0x00292620
+// NTSC-U/C: 0x00292620, PAL: 0x002ae700
 void MetLoadFreqBaseScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
     mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 }
 
-// 0x00296a50
+// NTSC-U/C: 0x00296a50, PAL: 0x002b49b0
 void MetLoadFreqBaseScreen::OnNameButton() {
 }
 
-// 0x00293148
+// NTSC-U/C: 0x00293148, PAL: 0x002af488
 void MetLoadFreqBaseScreen::OnEditButton() {
     PrepareFreqMakerForSelection();
     PushNamedScreen(HxStr(kFreqMakerButtonsScreen));
@@ -269,7 +328,7 @@ void MetLoadFreqBaseScreen::OnEditButton() {
     ActivateNamedPanel(HxStr(kFreqMakerButtonsScreen));
 }
 
-// 0x00293028
+// NTSC-U/C: 0x00293028, PAL: 0x002af320
 void MetLoadFreqBaseScreen::PrepareFreqMakerForSelection() {
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
@@ -280,8 +339,43 @@ void MetLoadFreqBaseScreen::PrepareFreqMakerForSelection() {
     pButtons->mNewPersona = 0;
 }
 
-// 0x002933b8
+#ifdef VIDEO_STANDARD_PAL
+// NTSC-U/C: 0x002933b8, PAL: 0x002af798
 void MetLoadFreqBaseScreen::OnCreateButton() {
+    if (MetFrontEndState::shared()->mReturnScreen == kLoadFreqScreen &&
+        mIdentityList->size() >= kMaxIdentities) {
+        ExitScreenByName(HxStr(kHelpScreen));
+        const HxStr format(GetMetString(kMetStrFreqLimit));
+        const HxStr text(
+            FormatString(TextOrEmpty(format),
+                         kMaxIdentities,
+                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName)));
+        ShowFreqLimit(this, text);
+        return;
+    }
+    if (!GlobalSettings::shared()->mCardSlots.empty() &&
+        GlobalSettings::shared()->mCardSlots[0].mFree <
+            GlobalSettings::shared()->mPersonaMinimumFreeClusters) {
+        ExitScreenByName(HxStr(kHelpScreen));
+        const HxStr format(GetMetString(kMetStrFreqNoSpace));
+        const HxStr text(
+            FormatString(TextOrEmpty(format),
+                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
+                         GlobalSettings::shared()->mPersonaMinimumFreeClusters));
+        ShowFreqLimit(this, text);
+        return;
+    }
+    PushNamedScreen(HxStr(kHelpScreen));
+    PushNamedScreen(HxStr(kFreqCreateScreen));
+    ActivateNamedPanel(HxStr(kFreqCreateScreen));
+}
+
+// PAL: 0x002b0418
+void MetLoadFreqBaseScreen::OpenFreqMakerForCreate() {
+#else
+// NTSC-U/C: 0x002933b8
+void MetLoadFreqBaseScreen::OnCreateButton() {
+#endif
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
     MetFreqMakerButtonsScreen *pButtons =
@@ -297,11 +391,11 @@ void MetLoadFreqBaseScreen::OnCreateButton() {
     ActivateNamedPanel(HxStr(kFreqMakerButtonsScreen));
 }
 
-// 0x00296d08
+// NTSC-U/C: 0x00296d08, PAL: 0x002b4c70
 void MetLoadFreqBaseScreen::AcquireIdentityList() {
 }
 
-// 0x00292810
+// NTSC-U/C: 0x00292810, PAL: 0x002ae940
 void MetLoadFreqBaseScreen::BuildButtonList() {
     mButtonList->Clear();
     mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoName));
@@ -309,14 +403,14 @@ void MetLoadFreqBaseScreen::BuildButtonList() {
     mButtonList->Add(HxStr(kCreateButtonObject), HxStr(kNoName));
 
     mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
-    mHelpKeys.push_back(HxStr(kNamePrompt));
-    mHelpKeys.push_back(HxStr(kEditPrompt));
-    mHelpKeys.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdName, kNamePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHCidEdit, kEditPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdCreate, kCreatePrompt));
 
     mButtonList->SetSelected(kNameButtonIndex);
 }
 
-// 0x00296c88
+// NTSC-U/C: 0x00296c88, PAL: 0x002b4bf0
 void MetLoadFreqBaseScreen::UpdateCycleArrows() {
     const int nShowing = mIdentityList->size() >= kMinimumCyclableEntries ? 1 : 0;
 
@@ -329,7 +423,7 @@ void MetLoadFreqBaseScreen::UpdateCycleArrows() {
     }
 }
 
-// 0x00292508
+// NTSC-U/C: 0x00292508, PAL: 0x002ae5c8
 void MetLoadFreqBaseScreen::RefreshSelection() {
     Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kPreviewMaterial)));
     (*mIdentityList)[mSelectedIdentity]->AttachToBurnSlot(kPreviewBurnSlot);
@@ -337,7 +431,7 @@ void MetLoadFreqBaseScreen::RefreshSelection() {
     UpdateNameLabel();
 }
 
-// 0x00296c00
+// NTSC-U/C: 0x00296c00, PAL: 0x002b4b68
 void MetLoadFreqBaseScreen::StepSelection(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandLeft) {
         int nIndex = mSelectedIdentity - 1;
@@ -355,3 +449,70 @@ void MetLoadFreqBaseScreen::StepSelection(const MetScreenCommand *pCommand) {
 
     RefreshSelection();
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x002b0840
+void MetLoadFreqBaseScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
+    if (name == kFreqLimitMessage) {
+        if (nChoice == kChoiceRetry) {
+            StartDetect();
+            return;
+        }
+        HxStr title = GetMetString(kMetStrTLoadChar);
+        MetScreenTitleScreen::SetTitle(title);
+        PushNamedScreen(HxStr(kLoadFreqScreen));
+        PushNamedScreen(HxStr(kHelpScreen));
+        ActivateNamedPanel(HxStr(kLoadFreqScreen));
+    } else if (name == kNoCardsMessage) {
+        if (nChoice == kChoiceRetry) {
+            StartDetect();
+            return;
+        }
+        mRenderer->RemoveScreen(this);
+        PushNamedScreen(HxStr(kLeftGizmoSmallScreen));
+        PushNamedScreen(HxStr(kTopLogoScreen));
+        PushNamedScreen(HxStr(kHelpScreen));
+        PushNamedScreen(HxStr(kMainScreen));
+        ActivateNamedPanel(HxStr(kMainScreen));
+    } else {
+        MetMemDetectScreen::OnMsgScreenDismissed(name, nChoice);
+    }
+}
+
+// PAL: 0x002b0d98
+void MetLoadFreqBaseScreen::OnNoCard() {
+    std::vector<HxStr> buttons;
+    buttons.push_back(GetMetString(kMetStrMsgRETRY));
+    buttons.push_back(GetMetString(kMetStrMsgCANCEL));
+    MetMsgScreen::Show(HxStr(kNoCardsMessage),
+                       GetMetString(kMetStrMsgWARNING),
+                       GetMetString(kMetStrMemCheck),
+                       kTwoButtons,
+                       buttons,
+                       this);
+}
+
+// PAL: 0x002b11e0
+void MetLoadFreqBaseScreen::StartDetect() {
+    std::vector<HxStr> buttons;
+    MetMsgScreen::Show(HxStr(kDetectMessage),
+                       GetMetString(kMetStrMsgWARNING),
+                       GetMetString(kMetStrMemDetect),
+                       kNoButtons,
+                       buttons,
+                       this);
+    mRenderer->AddScreen(this);
+    MetMemDetectScreen::StartDetect();
+}
+
+// PAL: 0x002b4c78
+void MetLoadFreqBaseScreen::OnDetectFinished() {
+    mRenderer->RemoveScreen(this);
+    if (mUsingMemcardOnEnter == kUsingMemcard) {
+        MetFrontEndState::shared()->mUsingMemcard = mUsingMemcardOnEnter;
+    }
+    if (MetFrontEndState::shared()->mUsingMemcard != 0) {
+        OnCreateButton();
+    }
+}
+#endif

@@ -18,15 +18,15 @@
  *
  * The three buttons play the playlist in random order, play it in order, and save it. Slot 30
  * records the choice once the button has finished flashing, and slot 36 acts on it once the
- * screen has left.
+ * screen has exited.
  *
  * The destructor at `0x00237210` restores the vptr, runs the MetScreen destructor, and releases
- * the object with the tag `MsgSink`. It releases nothing of its own. Nothing else frees the
- * button list at `+0x8c` either, so the list is never freed.
+ * the object with the tag `MsgSink`. It does not release its members, and the button list at
+ * `+0x8c` is never freed.
  *
  * Fourteen slots differ from the MetScreen table. Slots 20 through 24 sit eight bytes apart at
- * `0x00237160` through `0x00237180` and are two-instruction `jr ra` stubs, so this screen plays
- * none of those five sounds. The others are 5 `0x00237330`, 17 `0x002373e0`, 19 `0x00237268`,
+ * `0x00237160` through `0x00237180` and are two-instruction `jr ra` stubs. The screen does not
+ * play those five sounds. The others are 5 `0x00237330`, 17 `0x002373e0`, 19 `0x00237268`,
  * 30 `0x002321f8`, 33 `0x002373a8`, 36 `0x00231b50`, and 38 `0x00231908`.
  */
 class MetJukeboxEditPlaylistScreenDone : public MetScreen {
@@ -61,8 +61,8 @@ public:
      * Select the first button and enable the save button only when MetFrontEndState::mUsingMemcard
      * is set.
      *
-     * Slot 5. The MetScreen body runs first. A clear flag puts the save button in state 3, which
-     * MetButtonList passes over.
+     * Slot 5. The MetScreen body runs first. A clear flag puts the save button in
+     * state 3. MetButtonList passes over a button in state 3.
      *
      * @ghidraAddress 0x00237330
      */
@@ -90,31 +90,31 @@ public:
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * @param nSelector The value the override compares against its recorded selector.
      * @ghidraAddress 0x00237160
      */
     virtual void PlaySlideSound(int nSelector);
 
     /**
-     * @param nSelector The pad index of the command, which the body does not read.
+     * @param nSelector The pad index of the command. The body does not read it.
      * @ghidraAddress 0x00237168
      */
     virtual void PlayLeaveSound(int nSelector);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * @param nSelector The value the override compares against its recorded selector.
      * @ghidraAddress 0x00237170
      */
     virtual void PlayHighSound(int nSelector);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * @param nSelector The value the override compares against its recorded selector.
      * @ghidraAddress 0x00237178
      */
     virtual void PlayCycleLeftSound(int nSelector);
 
     /**
-     * @param nSelector The value the override compares against its own recorded selector.
+     * @param nSelector The value the override compares against its recorded selector.
      * @ghidraAddress 0x00237180
      */
     virtual void PlayCycleRightSound(int nSelector);
@@ -126,7 +126,7 @@ public:
      * the shuffle choice, and exits the top buttons, help, and title screens. The save button
      * records the save request and exits the top buttons screen.
      *
-     * @param pButton The button that finished alternating, which the body does not read.
+     * @param pButton The button that finished alternating. The body does not read it.
      * @ghidraAddress 0x002321f8
      */
     virtual void OnRepeatingSoundFinished(Rnd::Button *pButton);
@@ -141,7 +141,7 @@ public:
     virtual void OnEnterFinished();
 
     /**
-     * Act on the recorded choice once the screen has left.
+     * Act on the recorded choice once the screen has exited.
      *
      * Slot 36. A save exits the title and help screens and saves the playlist through
      * MetRemixManager, returning to the top buttons, title, and help screens. A play clears the
@@ -163,9 +163,10 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // 0x00232598
+    // NTSC-U/C: 0x00232598, PAL: 0x00246400
     // Posts the help text for the selected button. Either play button selects the play text and
-    // the save button the save text. Any other selection posts two empty strings.
+    // the save button the save text. Any other selection posts two empty strings. The European
+    // release posts the texts of the current language instead of their keys.
     void UpdateHelpText();
 
     MetButtonList *mButtons; // +0x8c

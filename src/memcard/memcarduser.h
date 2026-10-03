@@ -10,16 +10,16 @@
  *
  * The interface declares one method per `MemcardTask` subclass, and every body is a single
  * `jr ra`. An implementation overrides only the tasks it starts. Each method is pinned to its
- * task by the task's own reporting virtual, which reads one fixed vtable slot of the user it was
- * constructed with.
+ * task by the task's reporting virtual. The reporting virtual reads one fixed vtable slot of the
+ * user the task was constructed with.
  *
  * Ten front-end screens derive from this interface alongside `MetScreen`, at offset 140 or 164,
- * and four of the remix tasks derive from it as well, at offset 28, because each of those runs a
- * `LoadFileMCT` or a `SaveFileMCT` of its own and receives that inner task's report here.
+ * and four of the remix tasks derive from it as well, at offset 28. Each of those four runs an
+ * inner `LoadFileMCT` or `SaveFileMCT` and receives the inner task's report here.
  *
  * Every method title is inferred from the task that reports through the slot. No string in the
- * image identifies any of them. Two slots are reported to by nothing and are recorded below as
- * unrecovered.
+ * image identifies any of them. No task reports through two of the slots, and both are recorded
+ * below as unrecovered.
  */
 class MemcardUser {
 public:
@@ -35,7 +35,7 @@ public:
     /**
      * Report the state of one slot. Slot 2, from `GetConnectStateMCT`.
      *
-     * The state arrives by value, which is why the slot's compiled body destroys the argument's
+     * The state arrives by value. The slot's compiled body therefore destroys the argument's
      * string rather than being empty like the rest.
      *
      * @param state What the slot reported.
@@ -58,17 +58,28 @@ public:
      * Report the space a save would need against the space a card has. Slot 4, from
      * `MinimumSaveSpaceMCT`.
      *
-     * The second argument is the task's own measurement rather than its status, which makes this
-     * the one slot that does not receive a MemcardStatus.
+     * The second argument is the task's measurement rather than its status. This slot is the only
+     * one that does not receive a MemcardStatus.
+     *
+     * The European release adds nSkipWarning and nCampaign. `MinimumSaveSpaceMCT` passes two
+     * members that only its constructor writes, with zero. Their titles are inferred from
+     * MetMemDetectScreen::OnMinimumSaveSpace(), the one override that reads them.
      *
      * @param nPortSlot The packed port and slot.
      * @param nSpace The measurement.
-     * @ghidraAddress 0x001844a8
+     * @param nSkipWarning Non-zero to show no space warning at all. European release only.
+     * @param nCampaign 1 to warn against the smaller campaign requirement. European release only.
+     * @ghidraAddress NTSC-U/C: 0x001844a8
+     * @ghidraAddress PAL: 0x001897a0
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnMinimumSaveSpace(int nPortSlot, int nSpace, int nSkipWarning, int nCampaign);
+#else
     virtual void OnMinimumSaveSpace(int nPortSlot, int nSpace);
+#endif
 
     /**
-     * Report a finished format. Slot 5, from `FormatCardMCT` when it was asked to format.
+     * Report a finished format. Slot 5, from `FormatCardMCT` when it was requested to format.
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
@@ -77,7 +88,7 @@ public:
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
     /**
-     * Report a finished unformat. Slot 6, from `FormatCardMCT` when it was asked to unformat.
+     * Report a finished unformat. Slot 6, from `FormatCardMCT` when it was requested to unformat.
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
@@ -90,36 +101,64 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844c0
+     * @param nKilobytes SaveFileMCT::mKilobytes, the kilobytes the card lacked when nStatus is
+     *                   kMemcardStatusCardFull. European release only.
+     * @ghidraAddress NTSC-U/C: 0x001844c0
+     * @ghidraAddress PAL: 0x001897b8
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnPersonasSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnPersonasSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Report a finished save of one remix. Slot 8, from `SaveRemixMCT`.
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844c8
+     * @param nKilobytes SaveFileMCT::mKilobytes, the kilobytes the card lacked when nStatus is
+     *                   kMemcardStatusCardFull. European release only.
+     * @ghidraAddress NTSC-U/C: 0x001844c8
+     * @ghidraAddress PAL: 0x001897c0
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnRemixSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnRemixSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Report a finished save of the global settings. Slot 9, from `SaveGlobalSettingsMCT`.
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844d0
+     * @param nKilobytes SaveFileMCT::mKilobytes, the kilobytes the card lacked when nStatus is
+     *                   kMemcardStatusCardFull. European release only.
+     * @ghidraAddress NTSC-U/C: 0x001844d0
+     * @ghidraAddress PAL: 0x001897c8
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnGlobalSettingsSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnGlobalSettingsSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Report a finished save of a jukebox playlist. Slot 10, from `SaveJukeboxPlayListMCT`.
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844d8
+     * @param nKilobytes SaveFileMCT::mKilobytes, the kilobytes the card lacked when nStatus is
+     *                   kMemcardStatusCardFull. European release only.
+     * @ghidraAddress NTSC-U/C: 0x001844d8
+     * @ghidraAddress PAL: 0x001897d0
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnJukeboxPlayListSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnJukeboxPlayListSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Report a finished listing of the saved remixes. Slot 11, from `ListRemixesMCT`.
@@ -202,8 +241,8 @@ public:
     /**
      * Report a finished load of one file. Slot 19, from `LoadFileMCT`.
      *
-     * The slot receives the status alone, without a port and slot, which is what separates the two
-     * inner file tasks from every other task.
+     * The slot receives the status alone, without a port and slot. Only the two inner file tasks
+     * report this way.
      *
      * @param nStatus One of MemcardStatus.
      * @ghidraAddress 0x00184520

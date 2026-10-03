@@ -21,13 +21,13 @@ public:
      * Construct an idle load.
      *
      * The constructor is inlined into MemcardManager::CreateLoadPersonasTask() at `0x001f37f8`,
-     * its one site, and no address of its own survives.
+     * its one site, and the image has no out-of-line copy.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
-     * @param pRoster Where the loaded personas are appended. Borrowed, not owned.
+     * @param pRoster Where the loaded personas are appended. Borrowed. The task does not free it.
      */
     LoadPersonasMCT(MemcardUser *pUser,
                     Memcard *pCard,
@@ -52,11 +52,14 @@ public:
     /**
      * Aim the load at the roster file and g_abRemixStagingBuffer, and enquire about the card.
      *
-     * @ghidraAddress 0x00179178
+     * The European release puts a `/` between the directory and the file name.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00179178
+     * @ghidraAddress PAL: 0x0017ce28
      */
     virtual void Execute();
 
 private:
-    // Where the loaded personas are appended. Borrowed, not owned. +0x38
+    // Where the loaded personas are appended. Borrowed. The task does not free it. +0x38
     std::vector<MetPersonaData *> *mRoster;
 };

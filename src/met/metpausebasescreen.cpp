@@ -6,6 +6,7 @@
 #include "game/grooveworld.h"
 #include "met/metfrontendstate.h"
 #include "met/metmsgscreen.h"
+#include "met/metstrings.h"
 #include "msg/unpausegamesystemmsg.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
@@ -30,7 +31,7 @@ enum ConfirmChoice {
     kChoiceYes = 1,
 };
 
-// A command code past MetScreenCommandCode's range, which a pause screen treats as a resume.
+// A command code past MetScreenCommandCode's range that a pause screen treats as a resume.
 constexpr int kCommandResume = 10;
 
 // The MetFrontEndState phase in which a select may restart, and the phase a quit records.
@@ -43,14 +44,13 @@ inline void QueueUnpause() {
 }
 
 inline void ShowConfirmation(const char *pszDialogue,
-                             const char *pszTitle,
-                             const char *pszText,
+                             const HxStr &title,
+                             const HxStr &text,
                              MetScreen *pOwner) {
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kNoButton));
-    buttons.push_back(HxStr(kYesButton));
-    MetMsgScreen::Show(
-        HxStr(pszDialogue), HxStr(pszTitle), HxStr(pszText), kConfirmButtonCount, buttons, pOwner);
+    buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+    buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
+    MetMsgScreen::Show(HxStr(pszDialogue), title, text, kConfirmButtonCount, buttons, pOwner);
 }
 
 } // namespace
@@ -111,12 +111,18 @@ void MetPauseBaseScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x00318418
+// NTSC-U/C: 0x00318418, PAL: 0x0033e3f0
 void MetPauseBaseScreen::OnExitFinished() {
     if (mExitAction == kExitQuit) {
-        ShowConfirmation(kQuitDialogue, kQuitTitle, kQuitText, this);
+        ShowConfirmation(kQuitDialogue,
+                         MetText(kMetStrPauseQuit, kQuitTitle),
+                         MetText(kMetStrPauseConfirm, kQuitText),
+                         this);
     } else if (mExitAction == kExitRestart) {
-        ShowConfirmation(kRestartDialogue, kRestartTitle, kRestartText, this);
+        ShowConfirmation(kRestartDialogue,
+                         MetText(kMetStrPauseRestart, kRestartTitle),
+                         MetText(kMetStrRestartConfirm, kRestartText),
+                         this);
     } else {
         QueueUnpause();
     }

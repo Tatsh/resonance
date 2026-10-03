@@ -77,7 +77,7 @@ constexpr int kSaveReturnHelp = 2;
 constexpr int kSaveConfirmReplace = 1;
 constexpr int kSaveIsCopy = 0;
 
-// The dialogue OnMsgScreenDismissed() answers, which reports a rejected name.
+// The rejected-name dialogue OnMsgScreenDismissed() handles.
 static const char *const kNameRejectedDialogue = "namenogood";
 
 } // namespace
@@ -109,9 +109,12 @@ void MetLoadNewFreqScreen::OnNameButton() {
     MetKeyboardScreen::Open(request);
 }
 
-// 0x002a4910
-void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
+// NTSC-U/C: 0x002a4910, PAL: 0x002c2bc8
+void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, [[maybe_unused]] int nChoice) {
     if (!(name == kNameRejectedDialogue)) {
+#ifdef VIDEO_STANDARD_PAL
+        MetLoadFreqBaseScreen::OnMsgScreenDismissed(name, nChoice);
+#endif
         return;
     }
     PushNamedScreen(HxStr(kHelpScreen));
@@ -215,10 +218,14 @@ void MetLoadNewFreqScreen::PrepareFreqMakerForSelection() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadNewFreqScreen);
 }
 
-// 0x002a8670
+// NTSC-U/C: 0x002a8670, PAL: 0x002c6aa0
 void MetLoadNewFreqScreen::OnCreateButton() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadNewFreqScreen);
+#ifdef VIDEO_STANDARD_PAL
+    OpenFreqMakerForCreate();
+#else
     MetLoadFreqBaseScreen::OnCreateButton();
+#endif
 }
 
 // 0x002a8590

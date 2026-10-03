@@ -17,14 +17,14 @@
  * `0x007da698` and the 21-entry `MemcardUser` table at `0x007da5e8`, whose first two entries and
  * whose slots 19 and 20 adjust `this` back by 28. Slot 20 needs a thunk here and not in
  * LoadRemixMCT, because this class overrides it. An instance is 0x7c bytes, from the constructor's
- * highest store at `+0x78`. Nothing derives from the class. The size 0x7c is therefore a lower
+ * highest store at `+0x78`. No class derives from it. The size 0x7c is therefore a lower
  * bound.
  *
  * The task enquires about the card, lists `/BASCUS-97125r*`, reads each index to find the remix,
- * deletes the payload file, and then saves the shortened index. It owns two inner tasks, a
+ * deletes the payload file, and then saves the shortened index. It has two inner tasks, a
  * `LoadFileMCT` at `+0x50` and a `SaveFileMCT` at `+0x54`, and receives both reports as a
- * `MemcardUser`, which is why it derives from both interfaces and is the only one of the four
- * remix tasks that overrides OnFileSaved().
+ * `MemcardUser`. It therefore derives from both interfaces and is the only one of the four remix
+ * tasks that overrides OnFileSaved().
  *
  * mStep is 1 while indexes are read, 2 once the remix is found, 3 once the shortened index is
  * saved, and 4 once the payload file is deleted.
@@ -37,8 +37,8 @@ public:
     /**
      * Construct an idle deletion.
      *
-     * mStatus and mStep are not written, so a task that is read before it reports exposes whatever
-     * those two words stored when the block was allocated.
+     * mStatus and mStep are not written. A task that is read before it reports therefore exposes
+     * whatever those two words stored when the block was allocated.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
@@ -69,9 +69,11 @@ public:
      * FileName matches mFileName is erased (a missing one reports kMemcardStatusNoFile), the
      * shortened index is written back into mStream, and a fresh SaveFileMCT saves it as
      * `<dir>/index` under g_remixIconTitle plus the directory number, moving to step 3. In step 3
-     * the payload `<dir>/<mFileName>` is deleted, moving to step 4. Step 4 reports.
+     * the payload `<dir>/<mFileName>` is deleted, moving to step 4. Step 4 reports. The European
+     * release gives the save the file name `index`, because its SaveFileMCT supplies the `/`.
      *
-     * @ghidraAddress 0x0017dc68
+     * @ghidraAddress NTSC-U/C: 0x0017dc68
+     * @ghidraAddress PAL: 0x00182568
      */
     void DeleteNextFile();
 
@@ -121,7 +123,7 @@ public:
     /**
      * Search one index for the remix.
      *
-     * A failed read abandons the task, and the body then carries on all the same. mStep becomes 1
+     * A failed read abandons the task, and the body then continues all the same. mStep becomes 1
      * and the index is parsed from mStream. The first element whose RemixName matches mRemixName
      * records its FileName in mFileName, rewinds mStream for DeleteNextFile(), and moves to step 2.
      * With no match the next directory's index is read, and with none left the task reports

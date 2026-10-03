@@ -15,8 +15,8 @@
  * virtual. The 21-entry MemcardUser table at `0x007f4a58` adjusts `this` by `-140` in every entry
  * it overrides.
  *
- * Entering the screen asks the memory card manager for the state of the card GlobalSettings
- * records. The card replies through the three MemcardUser overrides. Each raises a MetMsgScreen
+ * Entering the screen requests the state of the card GlobalSettings records from the memory card
+ * manager. The card replies through the three MemcardUser overrides. Each raises a MetMsgScreen
  * dialogue that this screen receives the choice of, and OnMsgScreenDismissed() retries, formats,
  * or exits. Exiting brings back the screens StartSave() recorded.
  *
@@ -64,7 +64,7 @@ public:
     static MetGlobalSettingsSaverScreen *New(MetRenderer *pRenderer, int nPriority);
 
     /**
-     * Ask for the state of the recorded card. The base routine does not run.
+     * Request the state of the recorded card. The base routine does not run.
      *
      * Slot 5.
      *
@@ -150,7 +150,7 @@ public:
      * MetMsgScreen::ShowActive() with CONTINUE. Every other result raises `format_fail` with RETRY
      * and CONTINUE.
      *
-     * @param nPortSlot The packed port and slot, which the body does not read.
+     * @param nPortSlot The packed port and slot. The body does not read it.
      * @param nStatus The format task's MemcardStatus.
      * @ghidraAddress NTSC-U/C: 0x0027d258
      * @ghidraAddress PAL: 0x00296800
@@ -161,14 +161,20 @@ public:
      * Report the save result.
      *
      * MemcardUser slot 9. Success exits the dialogue screen. A full card, an unknown failure, and
-     * every other result raise `mem_check` with RETRY and CONTINUE and a matching text.
+     * every other result raise `mem_check` with RETRY and CONTINUE and a matching text. In the
+     * European release the full-card text receives nKilobytes.
      *
-     * @param nPortSlot The packed port and slot, which the body does not read.
+     * @param nPortSlot The packed port and slot. The body does not read it.
      * @param nStatus The save task's MemcardStatus.
+     * @param nKilobytes The kilobytes the card lacked. European release only.
      * @ghidraAddress NTSC-U/C: 0x0027e080
      * @ghidraAddress PAL: 0x00297bc8
      */
+#ifdef VIDEO_STANDARD_PAL
+    virtual void OnGlobalSettingsSaved(int nPortSlot, int nStatus, int nKilobytes);
+#else
     virtual void OnGlobalSettingsSaved(int nPortSlot, int nStatus);
+#endif
 
     /**
      * Hand the return screens to the registered saver and show it, or the screens themselves.
@@ -190,13 +196,13 @@ private:
     void SetReturnScreens(const std::vector<HxStr> &screens);
 
     // NTSC-U/C: 0x002820a8, PAL: 0x00295540
-    // Become the memory card manager's user and ask for the state of the card
+    // Become the memory card manager's user and request the state of the card
     // GlobalSettings records. The North American OnMsgScreenDismissed() expands it. The European
     // release enquires about port 1 whatever card GlobalSettings records.
     void RequestConnectState();
 
-    // Raise `mem_format_check` with NO and YES for the card in a state. OnConnectState() expands
-    // it.
+    // Raise `mem_format_check` with NO and YES for the card the state describes. OnConnectState()
+    // expands the routine.
     void ShowFormatCheck(const MemcardConnectState &state);
 
     // The registry keys of the screens to return to after the save. +0x90

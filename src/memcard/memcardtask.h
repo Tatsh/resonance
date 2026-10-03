@@ -28,11 +28,13 @@ constexpr int kMemcardTaskFinished = 2;
  * report. The task finally reports to the `MemcardUser` it was constructed with.
  *
  * Sixteen concrete subclasses exist. `SaveFileMCT` and `LoadFileMCT` perform the file transfer,
- * and the fourteen others either drive the card directly or wrap one of those two.
+ * and the fourteen others either drive the card directly or wrap one of those two. The European
+ * release adds a seventeenth, `SaveSpaceCheckerMCT`.
  *
  * The method titles Execute() and Finish() are inferred. The diagnostic `MemcardTask::Execute()`
  * at `0x007da088` attests the class and the method together, but the routine that prints it has
- * not been located and no string identifies Finish().
+ * not been located and no string identifies Finish(). In the European release,
+ * SaveSpaceCheckerMCT::Execute() prints the same text.
  */
 class MemcardTask : public MemcardCBHandler {
 public:
@@ -41,7 +43,7 @@ public:
      *
      * mStatus is not written. A task that is read before it reports therefore exposes whatever
      * that word stored when the block was allocated. The compiler inlined this body into every
-     * subclass constructor, and no address of its own survives.
+     * subclass constructor, and the image has no out-of-line copy.
      * `GetConnectStateMCT::GetConnectStateMCT()` at `0x001848f8` is the clearest copy.
      *
      * @param pUser The receiver Finish() reports to.
@@ -52,11 +54,11 @@ public:
     MemcardTask(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
     /**
-     * Construct an idle task that addresses no one card slot.
+     * Construct an idle task that does not address a single card slot.
      *
      * mPortSlot and mStatus are not written. The only copy is inlined into
      * MemcardManager::CreateGetAllConnectStatesTask() at `0x001f2c70`, whose task enquires about
-     * every slot from its own tables.
+     * every slot from its tables.
      *
      * @param pUser The receiver Finish() reports to.
      * @param pCard The queue the task submits operations to.
@@ -69,7 +71,7 @@ public:
     /**
      * Report the finished task to its user and record that it is done.
      *
-     * Occupies vtable slot 16. Every subclass writes 2 to mState, or its own state member, and
+     * Occupies vtable slot 16. Every subclass writes 2 to mState, or its state member, and
      * then calls the one MemcardUser method that matches the task.
      */
     virtual void Finish() = 0;
@@ -77,20 +79,23 @@ public:
     /**
      * Start the task.
      *
-     * Occupies vtable slot 17. Every subclass writes 1 to mState, or its own state member, and
+     * Occupies vtable slot 17. Every subclass writes 1 to mState, or its state member, and
      * then queues its first operation on mCard.
      */
     virtual void Execute() = 0;
 
+#ifndef VIDEO_STANDARD_PAL
     /**
      * Do nothing.
      *
      * Slot 18. The body is empty, every subclass in the image inherits it, and the image never
-     * calls it. It is declared without arguments because no call site exists to prove any.
+     * calls it. It is declared without arguments because no call site exists to prove any. The
+     * European release has no slot 18.
      *
-     * @ghidraAddress 0x00184530
+     * @ghidraAddress NTSC-U/C: 0x00184530
      */
     virtual void UnusedHook();
+#endif
 
     // MemcardManager::Update() reads mState to start an idle task and retire a finished one.
     friend class MemcardManager;
@@ -100,9 +105,8 @@ protected:
      * Abandon the task when the last operation reported a failure.
      *
      * An mStatus other than kMemcardStatusOk abandons every operation still queued under mCookie
-     * and then reports through Finish(). kMemcardStatusOk does nothing at all. Nothing in the
-     * image calls the out-of-line copy, every report handler across the sixteen subclasses having
-     * inlined the body instead.
+     * and then reports through Finish(). kMemcardStatusOk does nothing. The out-of-line copy is
+     * never called. Every report handler across the sixteen subclasses inlined the body instead.
      *
      * @ghidraAddress 0x00185998
      */
@@ -115,16 +119,16 @@ protected:
     Memcard *mCard;
 
     // The ticket number every queued operation records, drawn by MemcardManager's task factories
-    // from MemcardManager::mTicket. Memcard::Cancel() therefore abandons this task's work and
-    // nothing else. +0x0c
+    // from MemcardManager::mTicket. Memcard::Cancel() therefore abandons only this task's work.
+    // +0x0c
     int mCookie;
 
     // The packed port and slot. +0x10
     int mPortSlot;
 
     // Zero while idle, 1 once Execute() has run, and 2 once Finish() has run. SaveFileMCT and
-    // LoadFileMCT never write it, because each of those two maintains a state member of its own
-    // instead. +0x14
+    // LoadFileMCT never write it. Each of those two maintains a separate state member instead.
+    // +0x14
     int mState;
 
     // One of MemcardStatus, copied from the operation that last reported. +0x18

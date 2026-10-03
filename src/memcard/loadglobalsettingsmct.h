@@ -44,7 +44,10 @@ public:
     /**
      * Aim the load at the settings file and mStream's buffer, and enquire about the card.
      *
-     * @ghidraAddress 0x00179600
+     * The European release puts a `/` between the directory and the file name.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00179600
+     * @ghidraAddress PAL: 0x0017d418
      */
     virtual void Execute();
 

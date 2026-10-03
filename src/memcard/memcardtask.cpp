@@ -7,9 +7,11 @@ MemcardTask::MemcardTask(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int 
     : mUser(pUser), mCard(pCard), mCookie(nCookie), mPortSlot(nPortSlot), mState(kMemcardTaskIdle) {
 }
 
-// 0x00184530
+#ifndef VIDEO_STANDARD_PAL
+// NTSC-U/C: 0x00184530
 void MemcardTask::UnusedHook() {
 }
+#endif
 
 // 0x00185998
 void MemcardTask::AbortOnError() {

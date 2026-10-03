@@ -166,7 +166,7 @@ void MetGlobalSettingsSaverScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// The binary expands this in place in OnConnectState().
+// The binary expands the routine in place in OnConnectState().
 inline void MetGlobalSettingsSaverScreen::ShowFormatCheck(const MemcardConnectState &state) {
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
@@ -332,8 +332,14 @@ void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int n
 }
 
 // NTSC-U/C: 0x0027e080, PAL: 0x00297bc8
+#ifdef VIDEO_STANDARD_PAL
+void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nPortSlot,
+                                                         int nStatus,
+                                                         int nKilobytes) {
+#else
 void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nPortSlot,
                                                          int nStatus) {
+#endif
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
     buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
@@ -359,7 +365,11 @@ void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nP
     case kMemcardStatusCardFull:
         format = MetConfigText(kMetStrSaveFailNospace, kDialogueConfigCode, kSaveFailNoSpaceText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
+#ifdef VIDEO_STANDARD_PAL
+        text = FormatString(TextOrEmpty(format), RecordedCardName(), nKilobytes);
+#else
         text = FormatString(TextOrEmpty(format), RecordedCardName());
+#endif
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                            MetText(kMetStrMsgSETTINGS, kSettingsTitle),
                            text,

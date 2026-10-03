@@ -13,9 +13,17 @@ void MemcardUser::OnConnectState([[maybe_unused]] MemcardConnectState state,
 void MemcardUser::OnAllConnectStates() {
 }
 
-// 0x001844a8
+// NTSC-U/C: 0x001844a8, PAL: 0x001897a0
+#ifdef VIDEO_STANDARD_PAL
+void MemcardUser::OnMinimumSaveSpace([[maybe_unused]] int nPortSlot,
+                                     [[maybe_unused]] int nSpace,
+                                     [[maybe_unused]] int nSkipWarning,
+                                     [[maybe_unused]] int nCampaign) {
+}
+#else
 void MemcardUser::OnMinimumSaveSpace([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nSpace) {
 }
+#endif
 
 // 0x001844b0
 void MemcardUser::OnCardFormatted([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
@@ -25,23 +33,51 @@ void MemcardUser::OnCardFormatted([[maybe_unused]] int nPortSlot, [[maybe_unused
 void MemcardUser::OnCardUnformatted([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
 }
 
-// 0x001844c0
+// NTSC-U/C: 0x001844c0, PAL: 0x001897b8
+#ifdef VIDEO_STANDARD_PAL
+void MemcardUser::OnPersonasSaved([[maybe_unused]] int nPortSlot,
+                                  [[maybe_unused]] int nStatus,
+                                  [[maybe_unused]] int nKilobytes) {
+}
+#else
 void MemcardUser::OnPersonasSaved([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
 }
+#endif
 
-// 0x001844c8
+// NTSC-U/C: 0x001844c8, PAL: 0x001897c0
+#ifdef VIDEO_STANDARD_PAL
+void MemcardUser::OnRemixSaved([[maybe_unused]] int nPortSlot,
+                               [[maybe_unused]] int nStatus,
+                               [[maybe_unused]] int nKilobytes) {
+}
+#else
 void MemcardUser::OnRemixSaved([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
 }
+#endif
 
-// 0x001844d0
+// NTSC-U/C: 0x001844d0, PAL: 0x001897c8
+#ifdef VIDEO_STANDARD_PAL
+void MemcardUser::OnGlobalSettingsSaved([[maybe_unused]] int nPortSlot,
+                                        [[maybe_unused]] int nStatus,
+                                        [[maybe_unused]] int nKilobytes) {
+}
+#else
 void MemcardUser::OnGlobalSettingsSaved([[maybe_unused]] int nPortSlot,
                                         [[maybe_unused]] int nStatus) {
 }
+#endif
 
-// 0x001844d8
+// NTSC-U/C: 0x001844d8, PAL: 0x001897d0
+#ifdef VIDEO_STANDARD_PAL
+void MemcardUser::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot,
+                                         [[maybe_unused]] int nStatus,
+                                         [[maybe_unused]] int nKilobytes) {
+}
+#else
 void MemcardUser::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot,
                                          [[maybe_unused]] int nStatus) {
 }
+#endif
 
 // 0x001844e0
 void MemcardUser::OnRemixesListed([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {

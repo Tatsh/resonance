@@ -131,20 +131,20 @@ void MetJukeboxEditPlaylistScreenDone::OnRepeatingSoundFinished(
     }
 }
 
-// 0x00232598
+// NTSC-U/C: 0x00232598, PAL: 0x00246400
 void MetJukeboxEditPlaylistScreenDone::UpdateHelpText() {
     HxStr layout;
     HxStr text;
     switch (mButtons->mSelected) {
     case kButtonRandom:
     case kButtonOrder:
-        layout = kPlayLayout;
-        text = kPlayText;
+        layout = MetText(kMetStrHMetJukeboxDoneScreenTabPlay, kPlayLayout);
+        text = MetText(kMetStrHMetJukeboxDoneScreenTickerPlay, kPlayText);
         break;
 
     case kButtonSave:
-        layout = kSaveLayout;
-        text = kSaveText;
+        layout = MetText(kMetStrHMetJukeboxDoneScreenTabSave, kSaveLayout);
+        text = MetText(kMetStrHMetJukeboxDoneScreenTickerSave, kSaveText);
         break;
 
     default:

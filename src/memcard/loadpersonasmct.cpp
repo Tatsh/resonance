@@ -36,10 +36,14 @@ void LoadPersonasMCT::Finish() {
     mUser->OnPersonasLoaded(mPortSlot, mStatus);
 }
 
-// 0x00179178
+// NTSC-U/C: 0x00179178, PAL: 0x0017ce28
 void LoadPersonasMCT::Execute() {
     MemcardTask::mState = kMemcardTaskRunning;
+#ifdef VIDEO_STANDARD_PAL
+    mPath = g_saveDirBase + g_personasDirSuffix + "/" + g_personasFileName;
+#else
     mPath = g_saveDirBase + g_personasDirSuffix + g_personasFileName;
+#endif
     mLength = kRemixStagingBufferSize;
     mBuffer = g_abRemixStagingBuffer;
     SetState(kLoadFileStateOpen);
